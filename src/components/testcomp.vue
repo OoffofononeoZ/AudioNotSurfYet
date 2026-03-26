@@ -267,8 +267,9 @@ watch(
 
 <style scoped>
 .chart-container {
-    width: calc(100% - 200px);
+    width: calc(100% - 40px);
     height: 300px;
     overflow: hidden;
+    margin: 0 20px;
 }
 </style>
