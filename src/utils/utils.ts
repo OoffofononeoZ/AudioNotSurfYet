@@ -19,3 +19,11 @@ export function getRoundedMinMax(arr: Array<number>): [number | null, number | n
     }
     return [Math.floor(min), Math.ceil(max)];
 }
+
+/**
+ * 判断当前浏览器是否为edge
+ * @returns boolean
+ */
+export function isEdge() {
+    return navigator.userAgent.includes('Edge') || navigator.userAgent.includes('Edg');
+}

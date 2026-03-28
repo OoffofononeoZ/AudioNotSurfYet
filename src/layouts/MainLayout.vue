@@ -1,10 +1,12 @@
 <template>
     <main class="w-full h-dvh bg-black">
-        <Header />
+        <HeaderBar />
         <router-view />
+        <MusicBar />
     </main>
 </template>
 
 <script setup lang="ts">
-import Header from '../components/Header.vue';
+import HeaderBar from '../components/HeaderBar.vue';
+import MusicBar from '../components/MusicBar.vue';
 </script>
