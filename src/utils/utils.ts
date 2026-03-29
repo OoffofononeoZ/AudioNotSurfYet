@@ -20,10 +20,14 @@ export function getRoundedMinMax(arr: Array<number>): [number | null, number | n
     return [Math.floor(min), Math.ceil(max)];
 }
 
-/**
- * 判断当前浏览器是否为edge
- * @returns boolean
- */
-export function isEdge() {
-    return navigator.userAgent.includes('Edge') || navigator.userAgent.includes('Edg');
+export function mapEnergyToDeg(energy: number): number {
+    if (energy > 100) return 360;
+    else if (energy < 0) return 0;
+    else return Math.sqrt(energy / 100) * 360;
 }
+
+// export function mapEnergyToDegLinear(energy: number): number {
+//     if (energy >= 100) return 360;
+//     else if (energy <= 0) return 0;
+//     else return energy * 3.6;
+// }

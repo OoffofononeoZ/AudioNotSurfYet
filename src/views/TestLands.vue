@@ -2,7 +2,7 @@
     <main class="w-full h-full">
         <TwoDTable />
         <div v-if="!loading">
-            <TestComp :data="zcrData" name="zcr" :range="[0, 100]" :progress="0" />
+            <TestComp :data="loudnessData" name="loudness" :range="[0, 100]" :progress="0" />
             <TestComp :data="energyData" name="energy" :range="[0, 100]" :progress="0" />
         </div>
     </main>
@@ -12,22 +12,22 @@ import TwoDTable from '../components/twoDTable.vue';
 import TestComp from '../components/testcomp.vue';
 import { AudioLoader } from '../audio/AudioLoader';
 import Meyda from 'meyda';
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
 
 const loading = ref(true);
 const audioLoader = new AudioLoader();
-const zcrData: number[] = [];
+const loudnessData: number[] = [];
 const energyData: number[] = [];
-audioLoader.loadAudio('/audios/night is long(148).mp3').then(
+audioLoader.loadAudio('/audios/KARAKURI - Winning Day (SprightS Remix) (1).mp3').then(
     () => {
-        audioLoader.processFrames(1024, 512, (frame) => {
+        audioLoader.processFrames(1024, 512, (frame, index) => {
             const features = Meyda.extract([
-                'zcr',
+                'loudness',
                 'energy',
             ], frame);
-            console.log(features);
-            if (features && features.zcr && features.energy) {
-                zcrData.push(features.zcr);
+            console.log(index, features);
+            if (features && features.loudness && features.energy) {
+                loudnessData.push(features.loudness.total);
                 energyData.push(features.energy);
             }
             // 其他处理...
@@ -36,4 +36,9 @@ audioLoader.loadAudio('/audios/night is long(148).mp3').then(
 ).finally(() => {
     loading.value = false;
 });
+watch(loading, (newVal) => {
+    if (!newVal) {
+        console.log(loudnessData.length, energyData.length);
+    }
+})
 </script>

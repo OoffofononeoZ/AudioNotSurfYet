@@ -1,6 +1,6 @@
 export class AudioLoader {
-    private audioContext: AudioContext;
-    private buffer: AudioBuffer | null = null;
+    public audioContext: AudioContext;
+    public buffer: AudioBuffer | null = null;
     private source: AudioBufferSourceNode | null = null;
     private analyser: AnalyserNode | null = null;
 
@@ -21,7 +21,7 @@ export class AudioLoader {
     }
 
     /**
-     * 处理音频帧,分帧处理
+     * 处理音频帧,分帧处理（全音频文件处理）
      * @param frameSize 帧大小
      * @param hopSize 步长
      * @param callback 回调函数，参数为帧数据和帧索引
@@ -41,9 +41,24 @@ export class AudioLoader {
 
         for (let i = 0; i < total - frameSize; i += hopSize) {
             const frame = channelData.slice(i, i + frameSize);
+            console.log(i / (total - frameSize), total, i);
             callback(frame, frameIndex++);
         }
     }
+
+    // /**
+    //  * 实时处理音频帧
+    //  * @param frameSize 帧大小
+    //  * @param callback 回调函数，参数为帧数据和帧索引
+    //  */
+    // processRealTimeFrames(
+    //     frameSize = 1024,
+    //     callback: (frame: Float32Array, index: number) => void,
+    // ): void {
+    //     if (!this.buffer) {
+    //         throw new Error("Audio not loaded");
+    //     }
+    // }
 
     private ensureAnalyser() {
         if (!this.buffer) {
@@ -55,7 +70,7 @@ export class AudioLoader {
         }
     }
 
-    /** 创建新的 BufferSource 并接到 Analyser（同一节点只能 start 一次，需反复重建） */
+    /** 创建新的 BufferSource */
     private attachNewSource() {
         this.ensureAnalyser();
         if (this.source) {
@@ -69,11 +84,6 @@ export class AudioLoader {
         this.source = this.audioContext.createBufferSource();
         this.source.buffer = this.buffer;
         this.source.connect(this.analyser!);
-    }
-
-    // 创建音频节点（兼容旧用法：首次建立图）
-    createNodes() {
-        this.attachNewSource();
     }
 
     /** 从当前 playbackOffsetSec 开始播放到结束 */
@@ -159,6 +169,17 @@ export class AudioLoader {
         const dataArray = new Uint8Array(bufferLength);
 
         this.analyser.getByteTimeDomainData(dataArray);
+
+        return dataArray;
+    }
+
+    getTimeDomainFloatData(): Float32Array | null {
+        if (!this.analyser) return null;
+
+        const bufferLength = this.analyser.fftSize;
+        const dataArray = new Float32Array(bufferLength);
+
+        this.analyser.getFloatTimeDomainData(dataArray);
 
         return dataArray;
     }

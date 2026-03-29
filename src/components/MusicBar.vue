@@ -5,6 +5,7 @@
             <button @click="togglePlay">停止/重播</button>
             <button @click="togglePause">暂停/继续</button>
             <button @click="toggleSelectFile">选择文件</button>
+            <button @click="toggleRealTime">实时处理</button>
         </div>
     </div>
 </template>
@@ -13,9 +14,11 @@
 import gsap from 'gsap';
 import { ref, onMounted, onBeforeUnmount } from 'vue';
 import { AudioLoader } from '../audio/AudioLoader';
-
+import Meyda from 'meyda';
+import { mapEnergyToDeg } from '../utils/utils';
 const audioLoader = new AudioLoader();
 const tl1 = gsap.timeline();
+// const tl2 = gsap.timeline();
 
 onMounted(() => {
     tl1.to('#music-bar-container', {
@@ -70,13 +73,41 @@ const toggleSelectFile = () => {
     };
     file.click();
 };
+// const interval = setInterval(() => {
+//     console.log(audioLoader.audioContext.currentTime / (audioLoader.buffer?.duration || 0));
+// }, 1000);
+// onBeforeUnmount(() => {
+//     clearInterval(interval);
+// })
+
+const toggleRealTime = () => {
+    let rafId: number | null = null;
+    if (audioLoader.getTimeDomainFloatData()) {
+        rafId = requestAnimationFrame(() => {
+            const features = Meyda.extract(
+                ['energy'],
+                audioLoader.getTimeDomainFloatData() as Float32Array
+            );
+            // console.log(features);
+            const processElement = document.getElementById('music-bar-container');
+            processElement?.setAttribute(
+                'style',
+                `--coinc-process: ${mapEnergyToDeg(features?.energy || 0)}deg;`);
+            toggleRealTime();
+        });
+    } else {
+        rafId ? cancelAnimationFrame(rafId) : null;
+        rafId = null;
+    }
+}
+
 </script>
 
 <style scoped>
 #music-bar-container {
     --offset: 2rem;
     --border-width: 3px;
-    --coinc-process: 270deg;
+    --coinc-process: 0deg;
     --coinc-remain: calc(360deg - var(--coinc-process));
     position: fixed;
     width: calc(100% - var(--offset) * 2 + var(--border-width) * 2);
