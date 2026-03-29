@@ -1,50 +1,114 @@
 <template>
-    <div class="h-16" id="music-bar">
-        <button @click="togglePlay">test button</button>
+    <div id="music-bar-container">
+        <div class="h-16" id="music-bar">
+            <button @click="toggleChangeStyle">切换样式</button>
+            <button @click="togglePlay">停止/重播</button>
+            <button @click="togglePause">暂停/继续</button>
+            <button @click="toggleSelectFile">选择文件</button>
+        </div>
     </div>
 </template>
 
 <script setup lang="ts">
 import gsap from 'gsap';
 import { ref, onMounted, onBeforeUnmount } from 'vue';
+import { AudioLoader } from '../audio/AudioLoader';
 
-const tl = gsap.timeline();
+const audioLoader = new AudioLoader();
+const tl1 = gsap.timeline();
 
 onMounted(() => {
-    tl.to('#music-bar', {
-        width: '99.8%',
+    tl1.to('#music-bar-container', {
+        '--offset': '0',
         duration: 0.3,
-        borderRadius: '0',
-        margin: '0',
-        bottom: '0',
         ease: 'linear'
     }).pause();
 });
 
 onBeforeUnmount(() => {
-    tl.kill();
+    tl1.kill();
 });
 
-const isPlaying = ref(false);
+const styleMode = ref(false);
+const toggleChangeStyle = () => {
+    styleMode.value = !styleMode.value;
+    styleMode.value ? tl1.play() : tl1.reverse();
+};
 
+const isPlaying = ref(false);
 const togglePlay = () => {
-    isPlaying.value = !isPlaying.value;
-    isPlaying.value ? tl.play() : tl.reverse();
+    try {
+        console.log(musicFile.value?.name);
+        isPlaying.value ? audioLoader.stop() : audioLoader.play();
+        isPlaying.value = !isPlaying.value;
+    } catch (error) {
+        if (musicFile.value) loadAudio(musicFile.value);
+    }
+};
+const togglePause = () => {
+    try {
+        console.log(musicFile.value?.name);
+        isPlaying.value ? audioLoader.pause() : audioLoader.resume();
+        isPlaying.value = !isPlaying.value;
+    } catch (error) {
+        if (musicFile.value) loadAudio(musicFile.value);
+    }
+};
+
+
+const musicFile = ref<File | null>(null);
+const loadAudio = (file: File) => {
+    audioLoader.loadAudio(URL.createObjectURL(file)).then(() => togglePlay());
+}
+const toggleSelectFile = () => {
+    const file = document.createElement('input');
+    file.type = 'file';
+    file.accept = 'audio/*';
+    file.onchange = (e) => {
+        musicFile.value = (e.target as HTMLInputElement).files?.[0] || null;
+        if (musicFile.value) loadAudio(musicFile.value);
+    };
+    file.click();
 };
 </script>
 
 <style scoped>
-    #music-bar {
-        --margin-horizontal: 2rem;
-        width: calc(100% - 4rem);
-        margin: 0 var(--margin-horizontal);
-        padding: 0 var(--margin-horizontal);
-        position: fixed;
-        bottom: 5px;
-        left: 0;
-        z-index: 1000;
-        border: 1px solid var(--main-color);
-        border-radius: 50px;
-        background: #111111;
-    }
+#music-bar-container {
+    --offset: 2rem;
+    --border-width: 3px;
+    --coinc-process: 270deg;
+    --coinc-remain: calc(360deg - var(--coinc-process));
+    position: fixed;
+    width: calc(100% - var(--offset) * 2 + var(--border-width) * 2);
+    height: calc(4rem + var(--border-width) * 2);
+    left: calc(var(--offset) - var(--border-width));
+    bottom: calc(var(--offset) / 4 - var(--border-width));
+    border-radius: calc(var(--offset) * 2);
+    background:
+        conic-gradient(white 0deg var(--coinc-remain),
+            transparent var(--coinc-remain) var(--coinc-process),
+            white var(--coinc-process) 300deg),
+        conic-gradient(from 180deg,
+            #27ff64,
+            #80ff00,
+            #fe2912,
+            #ff0000,
+            #fe2912,
+            #80ff00,
+            #27ff64);
+}
+
+#music-bar {
+    width: calc(100% - var(--offset) * 2);
+    margin: 0 var(--offset);
+    padding: 0 2rem;
+    position: fixed;
+    bottom: calc(var(--offset) / 4);
+    left: 0;
+    z-index: 2;
+    border-radius: calc(var(--offset) * 2);
+    background-color: rgb(250, 250, 250);
+    display: flex;
+    justify-content: space-between;
+}
 </style>

@@ -1,8 +1,8 @@
 <template>
-    <main class="w-full h-dvh bg-black">
+    <main class="w-dvw h-dvh bg-black" id="main-layout">
         <HeaderBar />
         <router-view />
-        <MusicBar />
+        <MusicBar :progress="0" />
     </main>
 </template>
 
@@ -10,3 +10,7 @@
 import HeaderBar from '../components/HeaderBar.vue';
 import MusicBar from '../components/MusicBar.vue';
 </script>
+
+<style scoped>
+
+</style>
