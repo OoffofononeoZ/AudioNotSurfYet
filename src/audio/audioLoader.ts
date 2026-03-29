@@ -4,6 +4,9 @@ export class AudioLoader {
     private source: AudioBufferSourceNode | null = null;
     private analyser: AnalyserNode | null = null;
 
+    private playbackOffsetSec = 0;
+    private playbackStartContextTime: number | null = null;
+
     constructor() {
         this.audioContext = new AudioContext();
     }
@@ -42,33 +45,98 @@ export class AudioLoader {
         }
     }
 
-    // 创建音频节点
-    createNodes() {
+    private ensureAnalyser() {
         if (!this.buffer) {
             throw new Error("Audio not loaded");
         }
+        if (!this.analyser) {
+            this.analyser = this.audioContext.createAnalyser();
+            this.analyser.connect(this.audioContext.destination);
+        }
+    }
 
+    /** 创建新的 BufferSource 并接到 Analyser（同一节点只能 start 一次，需反复重建） */
+    private attachNewSource() {
+        this.ensureAnalyser();
+        if (this.source) {
+            try {
+                this.source.stop();
+            } catch {
+                /* 已停止 */
+            }
+            this.source.disconnect();
+        }
         this.source = this.audioContext.createBufferSource();
         this.source.buffer = this.buffer;
-
-        this.analyser = this.audioContext.createAnalyser();
-
-        // 连接节点
-        this.source.connect(this.analyser);
-        this.analyser.connect(this.audioContext.destination);
+        this.source.connect(this.analyser!);
     }
 
-    // 播放
-    play() {
-        if (!this.source) {
-            this.createNodes();
+    // 创建音频节点（兼容旧用法：首次建立图）
+    createNodes() {
+        this.attachNewSource();
+    }
+
+    /** 从当前 playbackOffsetSec 开始播放到结束 */
+    private startFromCurrentOffset() {
+        if (!this.buffer) {
+            throw new Error("Audio not loaded");
         }
-        this.source?.start(0);
+        if (this.playbackOffsetSec >= this.buffer.duration) {
+            return;
+        }
+        void this.audioContext.resume();
+        this.attachNewSource();
+        const when = this.audioContext.currentTime;
+        this.source!.start(when, this.playbackOffsetSec);
+        this.playbackStartContextTime = when;
     }
 
-    // 停止
+    /** 重播 */
+    play() {
+        this.playbackOffsetSec = 0;
+        this.startFromCurrentOffset();
+    }
+
+    /** 暂停 */
+    pause() {
+        if (!this.source || this.playbackStartContextTime === null || !this.buffer) {
+            return;
+        }
+        const elapsed = this.audioContext.currentTime - this.playbackStartContextTime;
+        this.playbackOffsetSec = Math.min(
+            this.playbackOffsetSec + elapsed,
+            this.buffer.duration,
+        );
+        try {
+            this.source.stop();
+        } catch {
+            /* 已停止 */
+            console.error('AudioLoader: pause failed, already paused');
+        }
+        this.source.disconnect();
+        this.source = null;
+        this.playbackStartContextTime = null;
+    }
+
+    /** 续播 */
+    resume() {
+        this.startFromCurrentOffset();
+    }
+
+    /** 停止 */
     stop() {
-        this.source?.stop();
+        if (this.source) {
+            try {
+                this.source.stop();
+            } catch {
+                /* 已停止 */
+                console.error('AudioLoader: stop failed, already stopped');
+            }
+            this.source.disconnect();
+            this.source = null;
+        }
+        this.playbackOffsetSec = 0;
+        this.playbackStartContextTime = null;
     }
 
     // 获取频谱数据（用于FFT或3D可视化）
