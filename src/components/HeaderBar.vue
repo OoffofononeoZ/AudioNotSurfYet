@@ -9,14 +9,20 @@
             <router-link to="/comingsoon" class="text-white">Editor</router-link>
             <router-link to="/testlands" class="text-white">TestLands</router-link>
         </section>
-        <section class="min-w-32">
-
+        <section class="min-w-32 flex justify-end">
+            <button @click="toggleSettings" class="text-white">Settings</button>
         </section>
     </header>
 </template>
 
 <script setup lang="ts">
-
+import { emitter } from '../utils/emitter';
+import { ref } from 'vue';
+const settingsOpen = ref(false);
+const toggleSettings = () => {
+    emitter.emit('settings-open', settingsOpen.value);
+    settingsOpen.value = !settingsOpen.value;
+}
 </script>
 <style scoped>
 #main-header {

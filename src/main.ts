@@ -1,9 +1,6 @@
-import { createApp } from 'vue'
-import './style.css'
-import App from './App.vue'
-import router from './router'
-if (router && router.options.history) {
-    const originalListener = router;
-    console.log(originalListener);
-}
-createApp(App).use(router).mount('#app')
+import { createApp } from 'vue';
+import './style.css';
+import App from './App.vue';
+import router from './router';
+const app = createApp(App);
+app.use(router).mount('#app');
