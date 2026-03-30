@@ -20,14 +20,14 @@ export function getRoundedMinMax(arr: Array<number>): [number | null, number | n
     return [Math.floor(min), Math.ceil(max)];
 }
 
-export function mapEnergyToDeg(energy: number): number {
+/**
+ * 将能量值映射为角度
+ * @param energy - 能量值，范围为 0-100
+ * @param power - 幂，仅正数
+ * @returns 角度，范围为 0-360
+ */
+export function mapEnergyToDeg(energy: number, power: number = 2): number {
     if (energy > 100) return 360;
     else if (energy < 0) return 0;
-    else return Math.sqrt(energy / 100) * 360;
+    else return Math.pow(energy / 100, 1 / power) * 360;
 }
-
-// export function mapEnergyToDegLinear(energy: number): number {
-//     if (energy >= 100) return 360;
-//     else if (energy <= 0) return 0;
-//     else return energy * 3.6;
-// }

@@ -5,14 +5,13 @@
             <button @click="togglePlay">停止/重播</button>
             <button @click="togglePause">暂停/继续</button>
             <button @click="toggleSelectFile">选择文件</button>
-            <button @click="toggleRealTime">实时处理</button>
         </div>
     </div>
 </template>
 
 <script setup lang="ts">
 import gsap from 'gsap';
-import { ref, onMounted, onBeforeUnmount } from 'vue';
+import { ref, onMounted, onBeforeUnmount, watch } from 'vue';
 import { AudioLoader } from '../audio/AudioLoader';
 import Meyda from 'meyda';
 import { mapEnergyToDeg } from '../utils/utils';
@@ -73,13 +72,10 @@ const toggleSelectFile = () => {
     };
     file.click();
 };
-// const interval = setInterval(() => {
-//     console.log(audioLoader.audioContext.currentTime / (audioLoader.buffer?.duration || 0));
-// }, 1000);
-// onBeforeUnmount(() => {
-//     clearInterval(interval);
-// })
 
+let raiseSpeed = 0.5;
+let fallSpeed = 0.05;
+let previousEnergy = 0;
 const toggleRealTime = () => {
     let rafId: number | null = null;
     if (audioLoader.getTimeDomainFloatData()) {
@@ -88,11 +84,19 @@ const toggleRealTime = () => {
                 ['energy'],
                 audioLoader.getTimeDomainFloatData() as Float32Array
             );
+            let currentEnergy = features?.energy || 0;
+            let prev = previousEnergy;
+            if (currentEnergy > prev) {
+                previousEnergy = currentEnergy * raiseSpeed + prev * (1 - raiseSpeed);
+            } else {
+                previousEnergy = currentEnergy * fallSpeed + prev * (1 - fallSpeed);
+            }
+
             // console.log(features);
             const processElement = document.getElementById('music-bar-container');
             processElement?.setAttribute(
                 'style',
-                `--coinc-process: ${mapEnergyToDeg(features?.energy || 0)}deg;`);
+                `--coinc-process: ${mapEnergyToDeg(previousEnergy)}deg;`);
             toggleRealTime();
         });
     } else {
@@ -101,6 +105,11 @@ const toggleRealTime = () => {
     }
 }
 
+watch(isPlaying, (newVal) => {
+    if (newVal) {
+        toggleRealTime();
+    }
+});
 </script>
 
 <style scoped>
@@ -116,9 +125,9 @@ const toggleRealTime = () => {
     bottom: calc(var(--offset) / 4 - var(--border-width));
     border-radius: calc(var(--offset) * 2);
     background:
-        conic-gradient(white 0deg var(--coinc-remain),
+        conic-gradient(rgb(145, 145, 145) 0deg var(--coinc-remain),
             transparent var(--coinc-remain) var(--coinc-process),
-            white var(--coinc-process) 300deg),
+            rgb(145, 145, 145) var(--coinc-process) 300deg),
         conic-gradient(from 180deg,
             #27ff64,
             #80ff00,
@@ -138,8 +147,9 @@ const toggleRealTime = () => {
     left: 0;
     z-index: 2;
     border-radius: calc(var(--offset) * 2);
-    background-color: rgb(250, 250, 250);
+    background-color: rgb(40, 40, 40);
     display: flex;
     justify-content: space-between;
+    color: white;
 }
 </style>
