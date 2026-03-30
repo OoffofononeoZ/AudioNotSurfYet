@@ -1,24 +1,45 @@
 <template>
     <div id="music-bar-container">
         <div class="h-16" id="music-bar">
-            <button @click="toggleChangeStyle">切换样式</button>
-            <button @click="togglePlay">停止/重播</button>
-            <button @click="togglePause">暂停/继续</button>
-            <button @click="toggleSelectFile">选择文件</button>
+            <section class="max-h-15 m-1 flex items-center gap-4">
+                <div id="albumCoverContainer">
+                    <img :src="albumCover" alt="album cover" class="w-14 aspect-square object-cover min-w-14">
+                </div>
+                <div class="flex flex-col text-sm max-w-60 info-container" id="music-info-container">
+                    <div v-for="(text, idx) in infoLines" :key="idx" class="info-line-wrap">
+                        <div class="info-marquee-track">
+                            <span class="info-text">{{ text }}</span>
+                            <template v-if="shouldMarquee[idx]">
+                                <span class="info-text">{{ text }}</span>
+                            </template>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <section>
+                <button @click="toggleChangeStyle">切换样式</button>
+                <button @click="togglePlay">停止/重播</button>
+                <button @click="togglePause">暂停/继续</button>
+                <button @click="toggleSelectFile">选择文件</button>
+            </section>
         </div>
     </div>
 </template>
 
 <script setup lang="ts">
 import gsap from 'gsap';
-import { ref, onMounted, onBeforeUnmount, watch } from 'vue';
-import { AudioLoader } from '../audio/AudioLoader';
 import Meyda from 'meyda';
+import { ref, computed, onMounted, onBeforeUnmount, watch, nextTick } from 'vue';
+import { AudioLoader } from '../audio/AudioLoader';
+import { parseBlob } from 'music-metadata';
 import { mapEnergyToDeg } from '../utils/utils';
+
+//初始化音频加载器
 const audioLoader = new AudioLoader();
+
+//初始化动画
 const tl1 = gsap.timeline();
 // const tl2 = gsap.timeline();
-
 onMounted(() => {
     tl1.to('#music-bar-container', {
         '--offset': '0',
@@ -27,40 +48,52 @@ onMounted(() => {
     }).pause();
 });
 
+//滚动动画
+let resizeObserver: ResizeObserver | null = null;
+const marqueeTweens: gsap.core.Tween[] = [];
+
+//销毁动画
 onBeforeUnmount(() => {
     tl1.kill();
+    resizeObserver?.disconnect();
+    marqueeTweens.forEach((t) => t.kill());
+    marqueeTweens.length = 0;
 });
 
+//切换样式
 const styleMode = ref(false);
 const toggleChangeStyle = () => {
     styleMode.value = !styleMode.value;
     styleMode.value ? tl1.play() : tl1.reverse();
 };
 
+//播放/停止/续播/暂停
 const isPlaying = ref(false);
 const togglePlay = () => {
     try {
-        console.log(musicFile.value?.name);
+        console.log(musicFileUrl.value);
         isPlaying.value ? audioLoader.stop() : audioLoader.play();
         isPlaying.value = !isPlaying.value;
     } catch (error) {
-        if (musicFile.value) loadAudio(musicFile.value);
+        if (musicFileUrl.value) loadAudio(musicFileUrl.value);
     }
 };
 const togglePause = () => {
     try {
-        console.log(musicFile.value?.name);
+        console.log(musicFileUrl.value);
         isPlaying.value ? audioLoader.pause() : audioLoader.resume();
         isPlaying.value = !isPlaying.value;
     } catch (error) {
-        if (musicFile.value) loadAudio(musicFile.value);
+        if (musicFileUrl.value) loadAudio(musicFileUrl.value);
     }
 };
 
 
+//加载音频文件
 const musicFile = ref<File | null>(null);
-const loadAudio = (file: File) => {
-    audioLoader.loadAudio(URL.createObjectURL(file)).then(() => togglePlay());
+const musicFileUrl = ref<string | null>(null);
+const loadAudio = (url: string) => {
+    audioLoader.loadAudio(url).then(() => togglePlay());
 }
 const toggleSelectFile = () => {
     const file = document.createElement('input');
@@ -68,11 +101,45 @@ const toggleSelectFile = () => {
     file.accept = 'audio/*';
     file.onchange = (e) => {
         musicFile.value = (e.target as HTMLInputElement).files?.[0] || null;
-        if (musicFile.value) loadAudio(musicFile.value);
+        if (musicFile.value) musicFileUrl.value = URL.createObjectURL(musicFile.value);
+        if (musicFileUrl.value) loadAudio(musicFileUrl.value);
+        getAudioInfo();
     };
     file.click();
 };
 
+const albumCover = ref<string>('/default_cover.png');
+const albumInfo = ref<{
+    fileName: string;
+    title: string;
+    artist: string;
+    duration: number;
+}>({
+    fileName: 'unknown',
+    title: 'unknown',
+    artist: 'unknown',
+    duration: 0,
+});
+//获取音频信息
+const getAudioInfo = async () => {
+    if (musicFile.value) {
+        await parseBlob(musicFile.value).then(metadata => {
+            albumInfo.value = {
+                fileName: musicFile.value?.name || 'unknown',
+                title: metadata.common.title || 'unknown',
+                artist: metadata.common.artist || 'unknown',
+                duration: metadata.format.duration || 0,
+            };
+            const cover = metadata.common.picture?.[0] || null;
+            if (cover) {
+                const blob = new Blob([cover.data as BlobPart], { type: 'image/png' });
+                albumCover.value = URL.createObjectURL(blob);
+            }
+        });
+    }
+}
+
+//实时音频响应
 let raiseSpeed = 0.5;
 let fallSpeed = 0.05;
 let previousEnergy = 0;
@@ -104,10 +171,77 @@ const toggleRealTime = () => {
         rafId = null;
     }
 }
-
 watch(isPlaying, (newVal) => {
     if (newVal) {
         toggleRealTime();
+    }
+});
+
+const infoLines = computed(() => [
+    albumInfo.value.fileName,
+    albumInfo.value.title,
+    albumInfo.value.artist,
+]);
+
+/** 仅当单行文字宽度大于可视区域时为 true，用于拼接第二段以实现无缝循环 */
+const shouldMarquee = ref<boolean[]>([false, false, false]);
+
+const MARQUEE_PX_PER_SEC = 40;
+
+/**
+ * 设置信息滚动动画
+ * 当单行文字宽度大于可视区域时，启用滚动动画
+ */
+function setupInfoMarquee() {
+    const container = document.getElementById('music-info-container');
+    if (!container) return;
+
+    marqueeTweens.forEach((t) => t.kill());
+    marqueeTweens.length = 0;
+
+    shouldMarquee.value = [false, false, false];
+
+    nextTick(() => {
+        const wraps = container.querySelectorAll('.info-line-wrap');
+        const next: boolean[] = [];
+        wraps.forEach((wrap) => {
+            const textEl = wrap.querySelector('.info-text') as HTMLElement | null;
+            if (!textEl) {
+                next.push(false);
+                return;
+            }
+            next.push(textEl.scrollWidth > wrap.clientWidth);
+        });
+        shouldMarquee.value = next;
+
+        nextTick(() => {
+            wraps.forEach((wrap, idx) => {
+                if (!shouldMarquee.value[idx]) return;
+                const track = wrap.querySelector('.info-marquee-track') as HTMLElement | null;
+                if (!track) return;
+                gsap.set(track, { x: 0 });
+                const half = track.scrollWidth / 2;
+                if (half <= 0) return;
+                const tween = gsap.to(track, {
+                    x: -half,
+                    duration: Math.max(0.001, half / MARQUEE_PX_PER_SEC),
+                    ease: 'none',
+                    repeat: -1,
+                });
+                marqueeTweens.push(tween);
+            });
+        });
+    });
+}
+
+watch(albumInfo, () => setupInfoMarquee(), { deep: true });
+
+onMounted(() => {
+    setupInfoMarquee();
+    const el = document.getElementById('music-info-container');
+    if (el) {
+        resizeObserver = new ResizeObserver(() => setupInfoMarquee());
+        resizeObserver.observe(el);
     }
 });
 </script>
@@ -151,5 +285,30 @@ watch(isPlaying, (newVal) => {
     display: flex;
     justify-content: space-between;
     color: white;
+}
+
+.info-container {
+    overflow: hidden;
+    min-width: 0;
+    position: relative;
+}
+
+.info-line-wrap {
+    overflow: hidden;
+    min-width: 0;
+    max-width: 100%;
+}
+
+.info-marquee-track {
+    display: inline-flex;
+    flex-wrap: nowrap;
+    white-space: nowrap;
+    will-change: transform;
+}
+
+.info-text {
+    padding-right: 20px;
+    display: inline-block;
+    white-space: nowrap;
 }
 </style>
