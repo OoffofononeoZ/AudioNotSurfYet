@@ -31,3 +31,18 @@ export function mapEnergyToDeg(energy: number, power: number = 2): number {
     else if (energy < 0) return 0;
     else return Math.pow(energy / 100, 1 / power) * 360;
 }
+
+/** 将时间秒数转换为时分秒格式(00:00:00) */
+export function formatSecToTime(seconds: number): string {
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    const secs = Math.floor(seconds % 60);
+    const res = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    if (hours > 0) return res;
+    else return `${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+}
+
+/** 限定输入值在[min, max]范围内 */
+export function clamp(value: number, min: number, max: number): number {
+    return Math.min(max, Math.max(min, value));
+}

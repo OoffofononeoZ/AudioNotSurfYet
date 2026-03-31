@@ -5,7 +5,7 @@
                 <div id="albumCoverContainer">
                     <img :src="albumCover" alt="album cover" class="w-14 aspect-square object-cover min-w-14">
                 </div>
-                <div class="flex flex-col text-sm max-w-60 info-container" id="music-info-container">
+                <div class="flex flex-col text-sm max-w-60" id="music-info-container">
                     <div v-for="(text, idx) in infoLines" :key="idx" class="info-line-wrap">
                         <div class="info-marquee-track">
                             <span class="info-text">{{ text }}</span>
@@ -16,10 +16,30 @@
                     </div>
                 </div>
             </section>
-            <section>
+            <section class="flex-col flex w-1/2 mt-4 gap-1.5">
+                <div id="progress-bar-container" @mousedown="handleDragStart">
+                    <div id="progress-button"></div>
+                    <div class="mt-2" style="pointer-events: none;">{{ "00:00/" + albumInfo.duration }}</div>
+                </div>
+                <div class="w-full flex justify-center">
+                    <div class="flex gap-2 items-center">
+                        <svg class="w-8 h-8 cursor-pointer">
+                            <use href="/icons.svg#prev-song"></use>
+                        </svg>
+                        <svg class="w-8 h-8 cursor-pointer rotate-180" @click="togglePause">
+                            <use href="/icons.svg#play-music" v-if="!isPlaying"></use>
+                            <use href="/icons.svg#pause-music" v-else ></use>
+                        </svg>
+                        <svg class="w-8 h-8 cursor-pointer">
+                            <use href="/icons.svg#next-song"></use>
+                        </svg>
+                    </div>
+                </div>
+            </section>
+            <section class="flex gap-2 items-center justify-end" style="width: 312px;">
                 <button @click="toggleChangeStyle">切换样式</button>
-                <button @click="togglePlay">停止/重播</button>
-                <button @click="togglePause">暂停/继续</button>
+                <!-- <button @click="togglePlay">停止/重播</button> -->
+                <button>文件列表</button>
                 <button @click="toggleSelectFile">选择文件</button>
             </section>
         </div>
@@ -29,35 +49,44 @@
 <script setup lang="ts">
 import gsap from 'gsap';
 import Meyda from 'meyda';
-import { ref, computed, onMounted, onBeforeUnmount, watch, nextTick } from 'vue';
+import { ref, computed, onMounted, watch, nextTick, onUnmounted } from 'vue';
 import { AudioLoader } from '../audio/AudioLoader';
 import { parseBlob } from 'music-metadata';
-import { mapEnergyToDeg } from '../utils/utils';
+import { mapEnergyToDeg, formatSecToTime, clamp } from '../utils/utils';
 
 //初始化音频加载器
 const audioLoader = new AudioLoader();
 
-//初始化动画
 const tl1 = gsap.timeline();
 // const tl2 = gsap.timeline();
 onMounted(() => {
+    /** 初始化动画 */
     tl1.to('#music-bar-container', {
         '--offset': '0',
         duration: 0.3,
         ease: 'linear'
     }).pause();
+    /** 初始化信息滚动动画 */
+    setupInfoMarquee();
+    const el = document.getElementById('music-info-container');
+    if (el) {
+        resizeObserver = new ResizeObserver(() => setupInfoMarquee());
+        resizeObserver.observe(el);
+    }
 });
 
 //滚动动画
 let resizeObserver: ResizeObserver | null = null;
 const marqueeTweens: gsap.core.Tween[] = [];
 
-//销毁动画
-onBeforeUnmount(() => {
+//销毁动画/监听器
+onUnmounted(() => {
     tl1.kill();
     resizeObserver?.disconnect();
     marqueeTweens.forEach((t) => t.kill());
     marqueeTweens.length = 0;
+    window.removeEventListener('mousemove', handleDragMove);
+    window.removeEventListener('mouseup', handleDragEnd);
 });
 
 //切换样式
@@ -69,15 +98,6 @@ const toggleChangeStyle = () => {
 
 //播放/停止/续播/暂停
 const isPlaying = ref(false);
-const togglePlay = () => {
-    try {
-        console.log(musicFileUrl.value);
-        isPlaying.value ? audioLoader.stop() : audioLoader.play();
-        isPlaying.value = !isPlaying.value;
-    } catch (error) {
-        if (musicFileUrl.value) loadAudio(musicFileUrl.value);
-    }
-};
 const togglePause = () => {
     try {
         console.log(musicFileUrl.value);
@@ -93,7 +113,7 @@ const togglePause = () => {
 const musicFile = ref<File | null>(null);
 const musicFileUrl = ref<string | null>(null);
 const loadAudio = (url: string) => {
-    audioLoader.loadAudio(url).then(() => togglePlay());
+    audioLoader.loadAudio(url).then(() => togglePause());
 }
 const toggleSelectFile = () => {
     const file = document.createElement('input');
@@ -113,12 +133,12 @@ const albumInfo = ref<{
     fileName: string;
     title: string;
     artist: string;
-    duration: number;
+    duration: string;
 }>({
-    fileName: 'unknown',
-    title: 'unknown',
-    artist: 'unknown',
-    duration: 0,
+    fileName: 'unknown file',
+    title: 'unknown title',
+    artist: 'unknown artist',
+    duration: '00:00',
 });
 //获取音频信息
 const getAudioInfo = async () => {
@@ -128,7 +148,7 @@ const getAudioInfo = async () => {
                 fileName: musicFile.value?.name || 'unknown',
                 title: metadata.common.title || 'unknown',
                 artist: metadata.common.artist || 'unknown',
-                duration: metadata.format.duration || 0,
+                duration: formatSecToTime(metadata.format.duration || 0),
             };
             const cover = metadata.common.picture?.[0] || null;
             if (cover) {
@@ -145,7 +165,7 @@ let fallSpeed = 0.05;
 let previousEnergy = 0;
 const toggleRealTime = () => {
     let rafId: number | null = null;
-    if (audioLoader.getTimeDomainFloatData()) {
+    if (audioLoader.getTimeDomainFloatData() && isPlaying.value) {
         rafId = requestAnimationFrame(() => {
             const features = Meyda.extract(
                 ['energy'],
@@ -185,7 +205,6 @@ const infoLines = computed(() => [
 
 /** 仅当单行文字宽度大于可视区域时为 true，用于拼接第二段以实现无缝循环 */
 const shouldMarquee = ref<boolean[]>([false, false, false]);
-
 const MARQUEE_PX_PER_SEC = 40;
 
 /**
@@ -198,9 +217,7 @@ function setupInfoMarquee() {
 
     marqueeTweens.forEach((t) => t.kill());
     marqueeTweens.length = 0;
-
     shouldMarquee.value = [false, false, false];
-
     nextTick(() => {
         const wraps = container.querySelectorAll('.info-line-wrap');
         const next: boolean[] = [];
@@ -213,7 +230,6 @@ function setupInfoMarquee() {
             next.push(textEl.scrollWidth > wrap.clientWidth);
         });
         shouldMarquee.value = next;
-
         nextTick(() => {
             wraps.forEach((wrap, idx) => {
                 if (!shouldMarquee.value[idx]) return;
@@ -236,18 +252,49 @@ function setupInfoMarquee() {
 
 watch(albumInfo, () => setupInfoMarquee(), { deep: true });
 
-onMounted(() => {
-    setupInfoMarquee();
-    const el = document.getElementById('music-info-container');
-    if (el) {
-        resizeObserver = new ResizeObserver(() => setupInfoMarquee());
-        resizeObserver.observe(el);
+/** 拖动进度条 */
+let progressWidthPercent = 0;
+const updateProgressWidthPercent = (e: MouseEvent) => {
+    const progressBar = document.getElementById('progress-bar-container');
+    if (progressBar) {
+        const progressBarWidth = progressBar.clientWidth;
+        let temp = (e.clientX - progressBar.getBoundingClientRect().left) / progressBarWidth;
+        progressWidthPercent = clamp(temp, 0, 1);
+        console.log('progressWidthPercent', progressWidthPercent);
     }
-});
+}
+const setProgressButton = (percent: number) => {
+    const el = document.getElementById('progress-bar-container');
+    el?.setAttribute('style', `--progress-width: ${percent * 100}%`);
+}
+const setProgressTime = (percent: number) => {
+    if (!audioLoader) return;
+    audioLoader.setPlaybackOffsetPercent(percent);
+}
+const handleDragStart = (e: MouseEvent) => {
+    window.addEventListener('mousemove', handleDragMove);
+    window.addEventListener('mouseup', handleDragEnd);
+    togglePause();
+    updateProgressWidthPercent(e);
+    setProgressButton(progressWidthPercent);
+    console.log('拖动开始', e);
+}
+const handleDragMove = (e: MouseEvent) => {
+    updateProgressWidthPercent(e);
+    setProgressButton(progressWidthPercent);
+}
+const handleDragEnd = (e: MouseEvent) => {
+    console.log('拖动结束', e);
+    window.removeEventListener('mousemove', handleDragMove);
+    window.removeEventListener('mouseup', handleDragEnd);
+    setProgressTime(progressWidthPercent);
+    togglePause();
+}
 </script>
 
 <style scoped>
 #music-bar-container {
+    user-select: none;
     --offset: 2rem;
     --border-width: 3px;
     --coinc-process: 0deg;
@@ -287,12 +334,7 @@ onMounted(() => {
     color: white;
 }
 
-.info-container {
-    overflow: hidden;
-    min-width: 0;
-    position: relative;
-}
-
+/* 音乐信息 */
 .info-line-wrap {
     overflow: hidden;
     min-width: 0;
@@ -302,7 +344,6 @@ onMounted(() => {
 .info-marquee-track {
     display: inline-flex;
     flex-wrap: nowrap;
-    white-space: nowrap;
     will-change: transform;
 }
 
@@ -310,5 +351,42 @@ onMounted(() => {
     padding-right: 20px;
     display: inline-block;
     white-space: nowrap;
+}
+
+/* 进度条 */
+#progress-bar-container {
+    --progress-width: 0%;
+    width: 100%;
+    height: 5px;
+    background-color: #444;
+    border-radius: 100px;
+    position: relative;
+}
+
+#progress-bar-container::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: var(--progress-width);
+    background-color: #eaeaea;
+    border-radius: 100px;
+}
+
+#progress-button {
+    width: 10px;
+    height: 10px;
+    background-color: #fff;
+    border-radius: 100px;
+    position: absolute;
+    top: -50%;
+    left: calc(var(--progress-width) - 5px);
+    cursor: pointer;
+    transition: scale 0.2s ease-in-out;
+}
+
+#progress-button:hover {
+    scale: 1.3;
 }
 </style>

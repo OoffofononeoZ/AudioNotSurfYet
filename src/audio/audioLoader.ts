@@ -1,6 +1,6 @@
 export class AudioLoader {
-    public audioContext: AudioContext;
-    public buffer: AudioBuffer | null = null;
+    private audioContext: AudioContext;
+    private buffer: AudioBuffer | null = null;
     private source: AudioBufferSourceNode | null = null;
     private analyser: AnalyserNode | null = null;
 
@@ -45,20 +45,6 @@ export class AudioLoader {
             callback(frame, frameIndex++);
         }
     }
-
-    // /**
-    //  * 实时处理音频帧
-    //  * @param frameSize 帧大小
-    //  * @param callback 回调函数，参数为帧数据和帧索引
-    //  */
-    // processRealTimeFrames(
-    //     frameSize = 1024,
-    //     callback: (frame: Float32Array, index: number) => void,
-    // ): void {
-    //     if (!this.buffer) {
-    //         throw new Error("Audio not loaded");
-    //     }
-    // }
 
     private ensureAnalyser() {
         if (!this.buffer) {
@@ -147,6 +133,18 @@ export class AudioLoader {
         }
         this.playbackOffsetSec = 0;
         this.playbackStartContextTime = null;
+    }
+
+    /** 设置播放偏移时间
+     * @param offset 偏移时间百分比.[0, 1]
+     */
+    setPlaybackOffsetPercent(offset: number) {
+        this.playbackOffsetSec = offset * this.buffer!.duration;
+    }
+
+    /** 获取当前播放进度百分比.[0, 1] */
+    getCurrentProgressPercent(): number {
+        return this.playbackOffsetSec / this.buffer!.duration;
     }
 
     // 获取频谱数据（用于FFT或3D可视化）
