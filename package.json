@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@types/meyda": "^4.3.8",
+    "element-plus": "^2.13.6",
     "gsap": "^3.14.2",
     "meyda": "^5.6.3",
     "mitt": "^3.0.1",
