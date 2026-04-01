@@ -6,6 +6,7 @@ export class AudioLoader {
 
     private playbackOffsetSec = 0;
     private playbackStartContextTime: number | null = null;
+    private onEndedCallback: () => void = () => {};
 
     constructor() {
         this.audioContext = new AudioContext();
@@ -70,6 +71,13 @@ export class AudioLoader {
         this.source = this.audioContext.createBufferSource();
         this.source.buffer = this.buffer;
         this.source.connect(this.analyser!);
+
+        this.source.onended = () => {
+            this.playbackOffsetSec = this.buffer!.duration;
+            this.playbackStartContextTime = null;
+            this.source = null;
+            this.onEndedCallback();
+        }
     }
 
     /** 从当前 playbackOffsetSec 开始播放到结束 */
@@ -85,12 +93,6 @@ export class AudioLoader {
         const when = this.audioContext.currentTime;
         this.source!.start(when, this.playbackOffsetSec);
         this.playbackStartContextTime = when;
-    }
-
-    /** 重播 */
-    play() {
-        this.playbackOffsetSec = 0;
-        this.startFromCurrentOffset();
     }
 
     /** 暂停 */
@@ -133,6 +135,14 @@ export class AudioLoader {
         }
         this.playbackOffsetSec = 0;
         this.playbackStartContextTime = null;
+    }
+
+    hasLoaded(): boolean {
+        return this.buffer !== null;
+    }
+
+    setOnEndedCallback(callback: () => void) {
+        this.onEndedCallback = callback;
     }
 
     /** 设置播放偏移时间

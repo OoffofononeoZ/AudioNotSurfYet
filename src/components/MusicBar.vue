@@ -1,9 +1,10 @@
 <template>
     <div id="music-bar-container">
         <div class="h-16" id="music-bar">
-            <section class="max-h-15 m-1 flex items-center gap-4">
+            <section class="max-h-15 m-1 flex items-center gap-4 w-80">
                 <div id="albumCoverContainer">
-                    <img :src="albumCover" alt="album cover" class="w-14 aspect-square object-cover min-w-14">
+                    <img :src="albumInfo[playingTarget]?.albumCover || '/default_cover.png'" alt="album cover"
+                        class="w-14 aspect-square object-cover min-w-14">
                 </div>
                 <div class="flex flex-col text-sm max-w-60" id="music-info-container">
                     <div v-for="(text, idx) in infoLines" :key="idx" class="info-line-wrap">
@@ -19,28 +20,41 @@
             <section class="flex-col flex w-1/2 mt-4 gap-1.5">
                 <div id="progress-bar-container" @mousedown="handleDragStart">
                     <div id="progress-button"></div>
-                    <div class="mt-2" style="pointer-events: none;">{{ "00:00/" + albumInfo.duration }}</div>
+                    <div class="mt-2" style="pointer-events: none;">{{ "00:00/" + (albumInfo[playingTarget]?.duration ||
+                        '00:00') }}
+                    </div>
                 </div>
                 <div class="w-full flex justify-center">
                     <div class="flex gap-2 items-center">
-                        <svg class="w-8 h-8 cursor-pointer">
+                        <svg class="w-8 h-8 cursor-pointer" @click="togglePrev">
                             <use href="/icons.svg#prev-song"></use>
                         </svg>
                         <svg class="w-8 h-8 cursor-pointer rotate-180" @click="togglePause">
                             <use href="/icons.svg#play-music" v-if="!isPlaying"></use>
-                            <use href="/icons.svg#pause-music" v-else ></use>
+                            <use href="/icons.svg#pause-music" v-else></use>
                         </svg>
-                        <svg class="w-8 h-8 cursor-pointer">
+                        <svg class="w-8 h-8 cursor-pointer" @click="toggleNext">
                             <use href="/icons.svg#next-song"></use>
                         </svg>
                     </div>
                 </div>
             </section>
-            <section class="flex gap-2 items-center justify-end" style="width: 312px;">
-                <button @click="toggleChangeStyle">切换样式</button>
-                <!-- <button @click="togglePlay">停止/重播</button> -->
-                <button>文件列表</button>
-                <button @click="toggleSelectFile">选择文件</button>
+            <section class="flex gap-4 items-center justify-end w-80 m-1">
+                <svg class="w-7 h-7 cursor-pointer">
+                    <use href="/icons.svg#volume-control"></use>
+                </svg>
+                <svg class="w-7 h-7 cursor-pointer" @click="toggleMusicList">
+                    <use href="/icons.svg#music-list"></use>
+                </svg>
+                <svg class="w-7 h-7 cursor-pointer" @click="toggleSelectFile">
+                    <use href="/icons.svg#add-music"></use>
+                </svg>
+                <svg class="w-7 h-7 cursor-pointer" @click="toggleChangeStyle">
+                    <use href="/icons.svg#change-style"></use>
+                </svg>
+                <svg class="w-7 h-7 cursor-pointer">
+                    <use href="/icons.svg#more-menu"></use>
+                </svg>
             </section>
         </div>
     </div>
@@ -96,67 +110,98 @@ const toggleChangeStyle = () => {
     styleMode.value ? tl1.play() : tl1.reverse();
 };
 
-//播放/停止/续播/暂停
+//暂停/续播
 const isPlaying = ref(false);
 const togglePause = () => {
-    try {
-        console.log(musicFileUrl.value);
-        isPlaying.value ? audioLoader.pause() : audioLoader.resume();
-        isPlaying.value = !isPlaying.value;
-    } catch (error) {
-        if (musicFileUrl.value) loadAudio(musicFileUrl.value);
+    if (isPlaying.value) {
+        audioLoader.pause();
+        isPlaying.value = false;
+    } else {
+        const cur = musicFileUrl.value[playingTarget.value];
+        if (cur) {
+            if (audioLoader.hasLoaded()) {
+                audioLoader.resume();
+                isPlaying.value = true;
+            } else {
+                loadAudio(cur);
+            }
+        };
     }
 };
+const toggleNext = () => {
+    playingTarget.value++;
+    if (playingTarget.value >= musicFileUrl.value.length) {
+        playingTarget.value = 0;
+    }
+    loadAudio(musicFileUrl.value[playingTarget.value] as string);
+}
+const togglePrev = () => {
+    playingTarget.value--;
+    if (playingTarget.value < 0) {
+        playingTarget.value = musicFileUrl.value.length - 1;
+    }
+    loadAudio(musicFileUrl.value[playingTarget.value] as string);
+}
 
+const toggleMusicList = () => {
+    console.log('toggleMusicList', musicFileUrl.value, albumInfo.value, infoLines.value);
+}
 
 //加载音频文件
-const musicFile = ref<File | null>(null);
-const musicFileUrl = ref<string | null>(null);
+const musicFileUrl = ref<string[]>([]);
+const playingTarget = ref<number>(0);
+const albumInfo = ref<{
+    albumCover: string;
+    fileName: string;
+    title: string;
+    artist: string;
+    duration: string;
+}[]>([]);
 const loadAudio = (url: string) => {
-    audioLoader.loadAudio(url).then(() => togglePause());
+    audioLoader.loadAudio(url).then(() => {
+        audioLoader.setOnEndedCallback(() => {
+            isPlaying.value = false;
+            toggleNext();
+        });
+        togglePause();
+    });
 }
 const toggleSelectFile = () => {
     const file = document.createElement('input');
     file.type = 'file';
     file.accept = 'audio/*';
-    file.onchange = (e) => {
-        musicFile.value = (e.target as HTMLInputElement).files?.[0] || null;
-        if (musicFile.value) musicFileUrl.value = URL.createObjectURL(musicFile.value);
-        if (musicFileUrl.value) loadAudio(musicFileUrl.value);
-        getAudioInfo();
+    file.multiple = true;
+    file.onchange = async (e) => {
+        const files = (e.target as HTMLInputElement).files;
+        if (files) {
+            for (const file of files) {
+                await getAudioInfo(file);
+                musicFileUrl.value.push(URL.createObjectURL(file));
+            }
+            loadAudio(musicFileUrl.value[0] as string);
+        }
     };
     file.click();
 };
 
-const albumCover = ref<string>('/default_cover.png');
-const albumInfo = ref<{
-    fileName: string;
-    title: string;
-    artist: string;
-    duration: string;
-}>({
-    fileName: 'unknown file',
-    title: 'unknown title',
-    artist: 'unknown artist',
-    duration: '00:00',
-});
 //获取音频信息
-const getAudioInfo = async () => {
-    if (musicFile.value) {
-        await parseBlob(musicFile.value).then(metadata => {
-            albumInfo.value = {
-                fileName: musicFile.value?.name || 'unknown',
-                title: metadata.common.title || 'unknown',
-                artist: metadata.common.artist || 'unknown',
-                duration: formatSecToTime(metadata.format.duration || 0),
-            };
-            const cover = metadata.common.picture?.[0] || null;
-            if (cover) {
-                const blob = new Blob([cover.data as BlobPart], { type: 'image/png' });
-                albumCover.value = URL.createObjectURL(blob);
-            }
+const getAudioInfo = async (file: File) => {
+    await parseBlob(file).then(metadata => {
+        const cover = metadata.common.picture?.[0] || null;
+        let url: string = '/default_cover.png';
+        if (cover) {
+            let blob = new Blob([cover.data as BlobPart], { type: 'image/png' });
+            url = URL.createObjectURL(blob);
+        }
+        albumInfo.value.push({
+            albumCover: url,
+            fileName: file.name || 'unknown',
+            title: metadata.common.title || 'unknown',
+            artist: metadata.common.artist || 'unknown',
+            duration: formatSecToTime(metadata.format.duration || 0),
         });
-    }
+
+    });
 }
 
 //实时音频响应
@@ -179,7 +224,6 @@ const toggleRealTime = () => {
                 previousEnergy = currentEnergy * fallSpeed + prev * (1 - fallSpeed);
             }
 
-            // console.log(features);
             const processElement = document.getElementById('music-bar-container');
             processElement?.setAttribute(
                 'style',
@@ -198,9 +242,9 @@ watch(isPlaying, (newVal) => {
 });
 
 const infoLines = computed(() => [
-    albumInfo.value.fileName,
-    albumInfo.value.title,
-    albumInfo.value.artist,
+    albumInfo.value[playingTarget.value]?.fileName || 'unknown file',
+    albumInfo.value[playingTarget.value]?.title || 'unknown title',
+    albumInfo.value[playingTarget.value]?.artist || 'unknown artist',
 ]);
 
 /** 仅当单行文字宽度大于可视区域时为 true，用于拼接第二段以实现无缝循环 */
@@ -260,7 +304,6 @@ const updateProgressWidthPercent = (e: MouseEvent) => {
         const progressBarWidth = progressBar.clientWidth;
         let temp = (e.clientX - progressBar.getBoundingClientRect().left) / progressBarWidth;
         progressWidthPercent = clamp(temp, 0, 1);
-        console.log('progressWidthPercent', progressWidthPercent);
     }
 }
 const setProgressButton = (percent: number) => {
@@ -277,19 +320,20 @@ const handleDragStart = (e: MouseEvent) => {
     togglePause();
     updateProgressWidthPercent(e);
     setProgressButton(progressWidthPercent);
-    console.log('拖动开始', e);
+    console.log('handleDragStart', progressWidthPercent);
 }
 const handleDragMove = (e: MouseEvent) => {
     updateProgressWidthPercent(e);
     setProgressButton(progressWidthPercent);
 }
-const handleDragEnd = (e: MouseEvent) => {
-    console.log('拖动结束', e);
+const handleDragEnd = () => {
     window.removeEventListener('mousemove', handleDragMove);
     window.removeEventListener('mouseup', handleDragEnd);
     setProgressTime(progressWidthPercent);
     togglePause();
+    console.log('handleDragEnd', progressWidthPercent);
 }
+
 </script>
 
 <style scoped>
