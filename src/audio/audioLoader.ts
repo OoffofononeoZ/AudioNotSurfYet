@@ -152,6 +152,26 @@ export class AudioLoader {
         this.playbackStartContextTime = null;
     }
 
+    destroy() {
+        this.stop();
+        if (this.source) {
+            this.source.onended = null;
+            this.source.disconnect();
+            this.source = null;
+        }
+        if (this.analyser) {
+            this.analyser.disconnect();
+            this.analyser = null;
+        }
+        this.buffer = null;
+        this.onEndedCallback = () => {};
+        this.suppressEndedCallback = true;
+        if (this.audioContext) {
+            this.audioContext.close();
+        }
+        this.audioContext = new AudioContext();
+    }
+
     hasLoaded(): boolean {
         return this.buffer !== null;
     }

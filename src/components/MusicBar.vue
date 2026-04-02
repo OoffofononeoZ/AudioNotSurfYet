@@ -58,7 +58,8 @@
             </section>
         </div>
         <aside class="music-list-container">
-            <MusicList :info="albumInfo" @SelectIndex="handleSelectIndex"/>
+            <MusicList :info="albumInfo" @SelectIndex="handleSelectIndex" @AddToAnalysis="handleAddToAnalysis"
+                @Delete="(index) => toggleDelete(index)" @Clear="toggleClear" @CloseList="toggleMusicList" />
         </aside>
     </div>
 </template>
@@ -76,11 +77,16 @@ import MusicList from './MusicList.vue';
 const audioLoader = new AudioLoader();
 
 const tl1 = gsap.timeline();
-// const tl2 = gsap.timeline();
+const tl2 = gsap.timeline();
 onMounted(() => {
     /** 初始化动画 */
     tl1.to('#music-bar-container', {
         '--offset': '0',
+        duration: 0.3,
+        ease: 'linear'
+    }).pause();
+    tl2.to('.music-list-container', {
+        transform: 'translateX(0%)',
         duration: 0.3,
         ease: 'linear'
     }).pause();
@@ -100,6 +106,7 @@ const marqueeTweens: gsap.core.Tween[] = [];
 //销毁动画/监听器
 onUnmounted(() => {
     tl1.kill();
+    tl2.kill();
     resizeObserver?.disconnect();
     marqueeTweens.forEach((t) => t.kill());
     marqueeTweens.length = 0;
@@ -169,7 +176,11 @@ const getNormalizedIndex = (index: number) => {
     if (len === 0) return -1;
     return (index + len) % len;
 };
+
+let isLoading = false;
 const playAt = async (index: number) => {
+    if (isLoading) return;
+    isLoading = true;
     const nextIndex = getNormalizedIndex(index);
     if (nextIndex < 0) return;
     playingTarget.value = nextIndex;
@@ -177,6 +188,7 @@ const playAt = async (index: number) => {
     if (!url) return;
     await audioLoader.loadAudio(url);
     audioLoader.setOnEndedCallback(() => {
+        if (isLoading) return;
         void playAt(playingTarget.value + 1);
     });
     audioLoader.resume();
@@ -184,6 +196,7 @@ const playAt = async (index: number) => {
     currentTimeText.value = '00:00';
     updateProgressUI();
     startProgressLoop();
+    isLoading = false;
 };
 
 const togglePause = () => {
@@ -199,13 +212,53 @@ const togglePause = () => {
 };
 const toggleNext = () => {
     void playAt(playingTarget.value + 1);
-}
+};
 const togglePrev = () => {
     void playAt(playingTarget.value - 1);
-}
+};
+const toggleDelete = (index: number) => {
+    if (index < 0 || index >= musicFileUrl.value.length) return;
+    const url = musicFileUrl.value[index];
+    if (url) URL.revokeObjectURL(url);
+    musicFileUrl.value.splice(index, 1);
+    albumInfo.value.splice(index, 1);
+    const isCur = index === playingTarget.value;
+    if (musicFileUrl.value.length === 0) {
+        pauseCurrent();
+        playingTarget.value = 0;
+        audioLoader.destroy();
+        updateProgressUI();
+        toggleRealTime();
+        return;
+    }
+    if (isCur) {
+        pauseCurrent();
+        const nextIndex = index >= musicFileUrl.value.length ? musicFileUrl.value.length - 1 : index;
+        void playAt(nextIndex);
+        return;
+    }
+    if (index < playingTarget.value) {
+        playingTarget.value--;
+    }
+};
+const toggleClear = () => {
+    pauseCurrent();
+    musicFileUrl.value.forEach(url => URL.revokeObjectURL(url));
+    musicFileUrl.value = [];
+    albumInfo.value = [];
+    playingTarget.value = 0;
+    progressPercent.value = 0;
+    currentTimeText.value = '00:00';
+    audioLoader.destroy();
+    updateProgressUI();
+    toggleRealTime();
+};
 
+let musicListVisible = false;
 const toggleMusicList = () => {
-}
+    musicListVisible = !musicListVisible;
+    musicListVisible ? tl2.play() : tl2.reverse();
+};
 
 //加载音频文件
 const musicFileUrl = ref<string[]>([]);
@@ -263,6 +316,7 @@ let fallSpeed = 0.05;
 let previousEnergy = 0;
 const toggleRealTime = () => {
     let rafId: number | null = null;
+    const processElement = document.getElementById('music-bar-container');
     if (audioLoader.getTimeDomainFloatData() && isPlaying.value) {
         rafId = requestAnimationFrame(() => {
             const features = Meyda.extract(
@@ -277,13 +331,13 @@ const toggleRealTime = () => {
                 previousEnergy = currentEnergy * fallSpeed + prev * (1 - fallSpeed);
             }
 
-            const processElement = document.getElementById('music-bar-container');
             processElement?.setAttribute(
                 'style',
                 `--coinc-process: ${mapEnergyToDeg(previousEnergy)}deg;`);
             toggleRealTime();
         });
     } else {
+        processElement?.setAttribute('style', '--coinc-process: 0deg;');
         rafId ? cancelAnimationFrame(rafId) : null;
         rafId = null;
     }
@@ -351,7 +405,8 @@ function setupInfoMarquee() {
 
 watch(() => albumInfo.value[playingTarget.value], () => {
     console.log('albumInfo changed', albumInfo.value[playingTarget.value]);
-    setupInfoMarquee()}, { deep: true });
+    setupInfoMarquee()
+}, { deep: true });
 
 /** 拖动进度条 */
 let progressWidthPercent = 0;
@@ -401,7 +456,10 @@ const handleDragEnd = () => {
 }
 /** 选择音乐 */
 const handleSelectIndex = (index: number) => {
-    console.log('handleSelectIndex', index);
+    playAt(index);
+}
+const handleAddToAnalysis = (index: number) => {
+    console.log('handleAddToAnalysis', index);
 }
 </script>
 
@@ -509,5 +567,6 @@ const handleSelectIndex = (index: number) => {
     top: 96px;
     right: 0;
     max-height: calc(100% - 192px);
+    transform: translateX(100%);
 }
 </style>

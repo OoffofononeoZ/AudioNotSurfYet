@@ -1,16 +1,21 @@
 <template>
-    <div class="list-container p-2">
+    <div class="list-container p-2 w-[516px]">
         <div style="color: white;" class="flex pl-4 pr-4 justify-between items-center mt-2">
             <div>
                 <span class="text-xl mr-2">播放列表</span>
                 <span>{{ info.length }}</span>
             </div>
-            <svg class="w-4 h-4 cursor-pointer">
-                <use href="/icons.svg#trashbin-delete"></use>
-            </svg>
+            <div class="flex items-center gap-2 mr-2">
+                <svg class="w-4 h-4 cursor-pointer" @click="emit('Clear')">
+                    <use href="/icons.svg#trashbin-delete"></use>
+                </svg>
+                <svg class="w-4 h-4 cursor-pointer" @click="emit('CloseList')">
+                    <use href="/icons.svg#xmark-delete"></use>
+                </svg>
+            </div>
         </div>
         <AnimatedList :items="key" :slot-data="info" @item-selected="(_, index) => emit('SelectIndex', index)"
-            class-name="max-h-full h-full">
+            class-name="max-h-full h-full" v-if="info.length > 0">
             <template v-for="value in key" :key="value" #[value]="{ index, data }">
                 <div class="flex items-center justify-between item-container" style="color: white;"
                     @mouseenter="mouseEnteredIndex = index" @mouseleave="mouseEnteredIndex = null">
@@ -24,15 +29,15 @@
                             <p class="truncate">{{ data?.artist }}</p>
                         </div>
                     </div>
-                    <div>
+                    <div @click.stop>
                         <div class="text-sm mr-2" v-show="mouseEnteredIndex !== index">
                             <p>{{ data?.duration }}</p>
                         </div>
                         <div class="flex items-center gap-4 mr-2" v-show="mouseEnteredIndex === index">
-                            <svg class="w-6 h-6">
+                            <svg class="w-6 h-6 cursor-pointer" @click="emit('AddToAnalysis', index)">
                                 <use href="/icons.svg#add-music"></use>
                             </svg>
-                            <svg class="w-6 h-6">
+                            <svg class="w-6 h-6 cursor-pointer" @click="emit('Delete', index)">
                                 <use href="/icons.svg#xmark-delete"></use>
                             </svg>
                         </div>
@@ -57,6 +62,10 @@ const props = defineProps<{
 }>();
 const emit = defineEmits<{
     SelectIndex: [index: number];
+    AddToAnalysis: [index: number];
+    Delete: [index: number];
+    Clear: [];
+    CloseList: [];
 }>();
 const key = computed(() => props.info.map(item => item.fileName));
 const mouseEnteredIndex = ref<number | null>(null);

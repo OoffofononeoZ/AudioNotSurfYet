@@ -181,6 +181,12 @@ watch([selectedIndex, keyboardNav], () => {
     keyboardNav.value = false;
 });
 
+watch(() => [props.items, props.slotData], () => {
+    nextTick(() => {
+        updateItemsInView();
+    })
+}, { deep: true });
+
 // 生命周期
 onMounted(() => {
     if (props.enableArrowNavigation) {
