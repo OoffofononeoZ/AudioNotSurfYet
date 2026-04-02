@@ -20,8 +20,8 @@
             <section class="flex-col flex w-1/2 mt-4 gap-1.5">
                 <div id="progress-bar-container" @mousedown="handleDragStart">
                     <div id="progress-button"></div>
-                    <div class="mt-2" style="pointer-events: none;">{{ "00:00/" + (albumInfo[playingTarget]?.duration ||
-                        '00:00') }}
+                    <div class="mt-2" style="pointer-events: none;">
+                        {{ currentTimeText + "/" + (albumInfo[playingTarget]?.duration || '00:00') }}
                     </div>
                 </div>
                 <div class="w-full flex justify-center">
@@ -57,6 +57,9 @@
                 </svg>
             </section>
         </div>
+        <aside class="music-list-container">
+            <MusicList :info="albumInfo" @SelectIndex="handleSelectIndex"/>
+        </aside>
     </div>
 </template>
 
@@ -67,6 +70,7 @@ import { ref, computed, onMounted, watch, nextTick, onUnmounted } from 'vue';
 import { AudioLoader } from '../audio/AudioLoader';
 import { parseBlob } from 'music-metadata';
 import { mapEnergyToDeg, formatSecToTime, clamp } from '../utils/utils';
+import MusicList from './MusicList.vue';
 
 //初始化音频加载器
 const audioLoader = new AudioLoader();
@@ -101,6 +105,7 @@ onUnmounted(() => {
     marqueeTweens.length = 0;
     window.removeEventListener('mousemove', handleDragMove);
     window.removeEventListener('mouseup', handleDragEnd);
+    stopProgressLoop();
 });
 
 //切换样式
@@ -112,39 +117,94 @@ const toggleChangeStyle = () => {
 
 //暂停/续播
 const isPlaying = ref(false);
-const togglePause = () => {
-    if (isPlaying.value) {
-        audioLoader.pause();
-        isPlaying.value = false;
-    } else {
-        const cur = musicFileUrl.value[playingTarget.value];
-        if (cur) {
-            if (audioLoader.hasLoaded()) {
-                audioLoader.resume();
-                isPlaying.value = true;
-            } else {
-                loadAudio(cur);
-            }
-        };
+const progressPercent = ref(0);
+const currentTimeText = ref('00:00');
+let progressRafId: number | null = null;
+
+/** 更新进度条UI */
+const updateProgressUI = () => {
+    progressPercent.value = audioLoader.getCurrentProgressPercent();
+    progressWidthPercent = progressPercent.value;
+    setProgressButton(progressPercent.value);
+    currentTimeText.value = formatSecToTime(audioLoader.getCurrentTimeSec());
+};
+const stopProgressLoop = () => {
+    if (progressRafId !== null) {
+        cancelAnimationFrame(progressRafId);
+        progressRafId = null;
     }
 };
-const toggleNext = () => {
-    playingTarget.value++;
-    if (playingTarget.value >= musicFileUrl.value.length) {
-        playingTarget.value = 0;
+const startProgressLoop = () => {
+    stopProgressLoop();
+    const tick = () => {
+        updateProgressUI();
+        if (isPlaying.value) {
+            progressRafId = requestAnimationFrame(tick);
+        } else {
+            progressRafId = null;
+        }
+    };
+    progressRafId = requestAnimationFrame(tick);
+};
+
+/** 音频播放控制 */
+const pauseCurrent = () => {
+    audioLoader.pause();
+    isPlaying.value = false;
+    stopProgressLoop();
+    updateProgressUI();
+};
+const playCurrent = () => {
+    if (!audioLoader.hasLoaded()) return;
+    if (audioLoader.getCurrentProgressPercent() >= 1) {
+        audioLoader.setPlaybackOffsetPercent(0);
     }
-    loadAudio(musicFileUrl.value[playingTarget.value] as string);
+    audioLoader.resume();
+    isPlaying.value = true;
+    updateProgressUI();
+    startProgressLoop();
+};
+const getNormalizedIndex = (index: number) => {
+    const len = musicFileUrl.value.length;
+    if (len === 0) return -1;
+    return (index + len) % len;
+};
+const playAt = async (index: number) => {
+    const nextIndex = getNormalizedIndex(index);
+    if (nextIndex < 0) return;
+    playingTarget.value = nextIndex;
+    const url = musicFileUrl.value[nextIndex];
+    if (!url) return;
+    await audioLoader.loadAudio(url);
+    audioLoader.setOnEndedCallback(() => {
+        void playAt(playingTarget.value + 1);
+    });
+    audioLoader.resume();
+    isPlaying.value = true;
+    currentTimeText.value = '00:00';
+    updateProgressUI();
+    startProgressLoop();
+};
+
+const togglePause = () => {
+    if (isPlaying.value) {
+        pauseCurrent();
+        return;
+    }
+    if (audioLoader.hasLoaded()) {
+        playCurrent();
+        return;
+    }
+    void playAt(playingTarget.value);
+};
+const toggleNext = () => {
+    void playAt(playingTarget.value + 1);
 }
 const togglePrev = () => {
-    playingTarget.value--;
-    if (playingTarget.value < 0) {
-        playingTarget.value = musicFileUrl.value.length - 1;
-    }
-    loadAudio(musicFileUrl.value[playingTarget.value] as string);
+    void playAt(playingTarget.value - 1);
 }
 
 const toggleMusicList = () => {
-    console.log('toggleMusicList', musicFileUrl.value, albumInfo.value, infoLines.value);
 }
 
 //加载音频文件
@@ -157,15 +217,6 @@ const albumInfo = ref<{
     artist: string;
     duration: string;
 }[]>([]);
-const loadAudio = (url: string) => {
-    audioLoader.loadAudio(url).then(() => {
-        audioLoader.setOnEndedCallback(() => {
-            isPlaying.value = false;
-            toggleNext();
-        });
-        togglePause();
-    });
-}
 const toggleSelectFile = () => {
     const file = document.createElement('input');
     file.type = 'file';
@@ -178,7 +229,9 @@ const toggleSelectFile = () => {
                 await getAudioInfo(file);
                 musicFileUrl.value.push(URL.createObjectURL(file));
             }
-            loadAudio(musicFileUrl.value[0] as string);
+            if (musicFileUrl.value.length > 0) {
+                void playAt(playingTarget.value);
+            }
         }
     };
     file.click();
@@ -267,6 +320,7 @@ function setupInfoMarquee() {
         const next: boolean[] = [];
         wraps.forEach((wrap) => {
             const textEl = wrap.querySelector('.info-text') as HTMLElement | null;
+            console.log('textEl', textEl?.scrollWidth, wrap.clientWidth);
             if (!textEl) {
                 next.push(false);
                 return;
@@ -276,9 +330,10 @@ function setupInfoMarquee() {
         shouldMarquee.value = next;
         nextTick(() => {
             wraps.forEach((wrap, idx) => {
-                if (!shouldMarquee.value[idx]) return;
                 const track = wrap.querySelector('.info-marquee-track') as HTMLElement | null;
-                if (!track) return;
+                track?.style.setProperty('transform', 'translate3d(0, 0, 0)');
+                if (!track || !shouldMarquee.value[idx]) return;
+                // if (!shouldMarquee.value[idx]) return;
                 gsap.set(track, { x: 0 });
                 const half = track.scrollWidth / 2;
                 if (half <= 0) return;
@@ -294,10 +349,13 @@ function setupInfoMarquee() {
     });
 }
 
-watch(albumInfo, () => setupInfoMarquee(), { deep: true });
+watch(() => albumInfo.value[playingTarget.value], () => {
+    console.log('albumInfo changed', albumInfo.value[playingTarget.value]);
+    setupInfoMarquee()}, { deep: true });
 
 /** 拖动进度条 */
 let progressWidthPercent = 0;
+let wasPlayingBeforeDrag = false;
 const updateProgressWidthPercent = (e: MouseEvent) => {
     const progressBar = document.getElementById('progress-bar-container');
     if (progressBar) {
@@ -313,27 +371,38 @@ const setProgressButton = (percent: number) => {
 const setProgressTime = (percent: number) => {
     if (!audioLoader) return;
     audioLoader.setPlaybackOffsetPercent(percent);
+    currentTimeText.value = formatSecToTime(audioLoader.getCurrentTimeSec());
 }
 const handleDragStart = (e: MouseEvent) => {
     window.addEventListener('mousemove', handleDragMove);
     window.addEventListener('mouseup', handleDragEnd);
-    togglePause();
+    wasPlayingBeforeDrag = isPlaying.value;
+    if (wasPlayingBeforeDrag) {
+        pauseCurrent();
+    }
     updateProgressWidthPercent(e);
     setProgressButton(progressWidthPercent);
-    console.log('handleDragStart', progressWidthPercent);
+    currentTimeText.value = formatSecToTime(audioLoader.getDurationSec() * progressWidthPercent);
 }
 const handleDragMove = (e: MouseEvent) => {
     updateProgressWidthPercent(e);
     setProgressButton(progressWidthPercent);
+    currentTimeText.value = formatSecToTime(audioLoader.getDurationSec() * progressWidthPercent);
 }
 const handleDragEnd = () => {
     window.removeEventListener('mousemove', handleDragMove);
     window.removeEventListener('mouseup', handleDragEnd);
     setProgressTime(progressWidthPercent);
-    togglePause();
-    console.log('handleDragEnd', progressWidthPercent);
+    updateProgressUI();
+    if (wasPlayingBeforeDrag) {
+        playCurrent();
+    }
+    wasPlayingBeforeDrag = false;
 }
-
+/** 选择音乐 */
+const handleSelectIndex = (index: number) => {
+    console.log('handleSelectIndex', index);
+}
 </script>
 
 <style scoped>
@@ -432,5 +501,13 @@ const handleDragEnd = () => {
 
 #progress-button:hover {
     scale: 1.3;
+}
+
+.music-list-container {
+    position: fixed;
+    height: calc(100% - 192px);
+    top: 96px;
+    right: 0;
+    max-height: calc(100% - 192px);
 }
 </style>

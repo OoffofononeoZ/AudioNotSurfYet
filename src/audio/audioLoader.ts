@@ -7,6 +7,7 @@ export class AudioLoader {
     private playbackOffsetSec = 0;
     private playbackStartContextTime: number | null = null;
     private onEndedCallback: () => void = () => {};
+    private suppressEndedCallback = false;
 
     constructor() {
         this.audioContext = new AudioContext();
@@ -14,10 +15,14 @@ export class AudioLoader {
 
     // 加载音频文件
     async loadAudio(url: string): Promise<AudioBuffer> {
+        this.stop();
         const response = await fetch(url);
         const arrayBuffer = await response.arrayBuffer();
 
         this.buffer = await this.audioContext.decodeAudioData(arrayBuffer);
+        this.playbackOffsetSec = 0;
+        this.playbackStartContextTime = null;
+        this.suppressEndedCallback = false;
         return this.buffer;
     }
 
@@ -61,6 +66,7 @@ export class AudioLoader {
     private attachNewSource() {
         this.ensureAnalyser();
         if (this.source) {
+            this.suppressEndedCallback = true;
             try {
                 this.source.stop();
             } catch {
@@ -71,12 +77,19 @@ export class AudioLoader {
         this.source = this.audioContext.createBufferSource();
         this.source.buffer = this.buffer;
         this.source.connect(this.analyser!);
+        this.suppressEndedCallback = false;
 
         this.source.onended = () => {
-            this.playbackOffsetSec = this.buffer!.duration;
+            const shouldCallEnded = !this.suppressEndedCallback;
+            if (shouldCallEnded) {
+                this.playbackOffsetSec = this.buffer!.duration;
+            }
             this.playbackStartContextTime = null;
             this.source = null;
-            this.onEndedCallback();
+            this.suppressEndedCallback = false;
+            if (shouldCallEnded) {
+                this.onEndedCallback();
+            }
         }
     }
 
@@ -106,6 +119,7 @@ export class AudioLoader {
             this.buffer.duration,
         );
         try {
+            this.suppressEndedCallback = true;
             this.source.stop();
         } catch {
             /* 已停止 */
@@ -125,6 +139,7 @@ export class AudioLoader {
     stop() {
         if (this.source) {
             try {
+                this.suppressEndedCallback = true;
                 this.source.stop();
             } catch {
                 /* 已停止 */
@@ -149,12 +164,31 @@ export class AudioLoader {
      * @param offset 偏移时间百分比.[0, 1]
      */
     setPlaybackOffsetPercent(offset: number) {
+        if (!this.buffer) return;
         this.playbackOffsetSec = offset * this.buffer!.duration;
     }
 
     /** 获取当前播放进度百分比.[0, 1] */
     getCurrentProgressPercent(): number {
-        return this.playbackOffsetSec / this.buffer!.duration;
+        if (!this.buffer || this.buffer.duration <= 0) return 0;
+        return this.getCurrentTimeSec() / this.buffer.duration;
+    }
+
+    getCurrentTimeSec(): number {
+        if (!this.buffer) return 0;
+        if (!this.source || this.playbackStartContextTime === null) {
+            return this.playbackOffsetSec;
+        }
+        const elapsed = this.audioContext.currentTime - this.playbackStartContextTime;
+        return Math.min(this.playbackOffsetSec + elapsed, this.buffer.duration);
+    }
+
+    getDurationSec(): number {
+        return this.buffer?.duration || 0;
+    }
+
+    getIsPlaying(): boolean {
+        return this.source !== null && this.playbackStartContextTime !== null;
     }
 
     // 获取频谱数据（用于FFT或3D可视化）
