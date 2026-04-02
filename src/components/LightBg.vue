@@ -13,7 +13,8 @@
     - className<string>: 类名
 -->
 <template>
-    <div ref="containerRef" :class="['w-full h-full relative pointer-events-none z-[3] overflow-hidden', className]">
+    <div ref="containerRef" :class="['w-full h-full relative z-[3] pointer-events-none overflow-hidden', className]">
+        <slot></slot>
     </div>
 </template>
 
