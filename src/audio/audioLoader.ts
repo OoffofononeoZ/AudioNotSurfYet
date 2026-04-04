@@ -3,6 +3,7 @@ export class AudioLoader {
     private buffer: AudioBuffer | null = null;
     private source: AudioBufferSourceNode | null = null;
     private analyser: AnalyserNode | null = null;
+    private gainNode: GainNode;
 
     private playbackOffsetSec = 0;
     private playbackStartContextTime: number | null = null;
@@ -11,6 +12,9 @@ export class AudioLoader {
 
     constructor() {
         this.audioContext = new AudioContext();
+        this.gainNode = this.audioContext.createGain();
+        this.gainNode.gain.value = 1;
+        this.gainNode.connect(this.audioContext.destination);
     }
 
     // 加载音频文件
@@ -58,7 +62,7 @@ export class AudioLoader {
         }
         if (!this.analyser) {
             this.analyser = this.audioContext.createAnalyser();
-            this.analyser.connect(this.audioContext.destination);
+            this.analyser.connect(this.gainNode);
         }
     }
 
@@ -163,6 +167,7 @@ export class AudioLoader {
             this.analyser.disconnect();
             this.analyser = null;
         }
+        this.gainNode.disconnect();
         this.buffer = null;
         this.onEndedCallback = () => {};
         this.suppressEndedCallback = true;
@@ -170,6 +175,9 @@ export class AudioLoader {
             this.audioContext.close();
         }
         this.audioContext = new AudioContext();
+        this.gainNode = this.audioContext.createGain();
+        this.gainNode.gain.value = 1;
+        this.gainNode.connect(this.audioContext.destination);
     }
 
     hasLoaded(): boolean {
@@ -178,6 +186,13 @@ export class AudioLoader {
 
     setOnEndedCallback(callback: () => void) {
         this.onEndedCallback = callback;
+    }
+
+    setVolume(volume: number) {
+        this.gainNode.gain.value = Math.max(0, Math.min(1, volume));
+    }
+    getVolume(): number {
+        return this.gainNode.gain.value;
     }
 
     /** 设置播放偏移时间
