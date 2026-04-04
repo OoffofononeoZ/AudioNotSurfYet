@@ -40,9 +40,18 @@
                 </div>
             </section>
             <section class="flex gap-4 items-center justify-end w-80 m-1">
-                <svg class="w-7 h-7 cursor-pointer">
-                    <use href="/icons.svg#volume-control"></use>
-                </svg>
+                <el-tooltip placement="top" trigger="click">
+                    <svg class="w-7 h-7 cursor-pointer">
+                        <use href="/icons.svg#volume-control"></use>
+                    </svg>
+                    <template #content>
+                        <div class="pt-2 pb-4 flex flex-col items-center" style="margin: -5px;">
+                            <span class="pb-2">{{ volume }}%</span>
+                            <el-slider vertical height="100px" :showTooltip="false" :max="100" :min="0"
+                                :step="1" v-model="volume" @change="setVolume(volume)" ></el-slider>
+                        </div>
+                    </template>
+                </el-tooltip>
                 <svg class="w-7 h-7 cursor-pointer" @click="toggleMusicList">
                     <use href="/icons.svg#music-list"></use>
                 </svg>
@@ -72,6 +81,7 @@ import { AudioLoader } from '../audio/AudioLoader';
 import { parseBlob } from 'music-metadata';
 import { mapEnergyToDeg, formatSecToTime, clamp } from '../utils/utils';
 import MusicList from './MusicList.vue';
+import { ElTooltip, ElSlider } from 'element-plus';
 
 //初始化音频加载器
 const audioLoader = new AudioLoader();
@@ -187,6 +197,7 @@ const playAt = async (index: number) => {
     const url = musicFileUrl.value[nextIndex];
     if (!url) return;
     await audioLoader.loadAudio(url);
+    setVolume(volume.value);
     audioLoader.setOnEndedCallback(() => {
         if (isLoading) return;
         void playAt(playingTarget.value + 1);
@@ -253,6 +264,12 @@ const toggleClear = () => {
     updateProgressUI();
     toggleRealTime();
 };
+
+// 音量控制
+const volume = ref(100);
+const setVolume = (value: number) => {
+    audioLoader.setVolume(value / 100);
+}
 
 let musicListVisible = false;
 const toggleMusicList = () => {
@@ -568,5 +585,12 @@ const handleAddToAnalysis = (index: number) => {
     right: 0;
     max-height: calc(100% - 192px);
     transform: translateX(100%);
+}
+
+:deep(.el-slider__button) {
+    border: solid 2px #40ffda75;
+}
+:deep(.el-slider__bar) {
+    background-color: var(--main-color);
 }
 </style>
