@@ -1,5 +1,5 @@
 <template>
-    <div id="music-bar-container">
+    <div id="music-bar-container" :class="'bg-style-' + styleMode">
         <div class="h-16" id="music-bar">
             <section class="max-h-15 m-1 flex items-center gap-4 w-80">
                 <div id="albumCoverContainer">
@@ -40,15 +40,15 @@
                 </div>
             </section>
             <section class="flex gap-4 items-center justify-end w-80 m-1">
-                <el-tooltip placement="top" trigger="click">
+                <el-tooltip placement="top">
                     <svg class="w-7 h-7 cursor-pointer">
                         <use href="/icons.svg#volume-control"></use>
                     </svg>
                     <template #content>
                         <div class="pt-2 pb-4 flex flex-col items-center" style="margin: -5px;">
                             <span class="pb-2">{{ volume }}%</span>
-                            <el-slider vertical height="100px" :showTooltip="false" :max="100" :min="0"
-                                :step="1" v-model="volume" @change="setVolume(volume)" ></el-slider>
+                            <el-slider vertical height="100px" :showTooltip="false" :max="100" :min="0" :step="1"
+                                v-model="volume" @change="setVolume(volume)"></el-slider>
                         </div>
                     </template>
                 </el-tooltip>
@@ -74,20 +74,24 @@
 </template>
 
 <script setup lang="ts">
+import { ref, computed, onMounted, watch, nextTick, onUnmounted } from 'vue';
 import gsap from 'gsap';
 import Meyda from 'meyda';
-import { ref, computed, onMounted, watch, nextTick, onUnmounted } from 'vue';
-import { AudioLoader } from '../audio/AudioLoader';
 import { parseBlob } from 'music-metadata';
+import { ElTooltip, ElSlider } from 'element-plus';
+import { AudioLoader } from '../audio/AudioLoader';
+import { useConfigstore } from '../stores/configStore';
 import { mapEnergyToDeg, formatSecToTime, clamp } from '../utils/utils';
 import MusicList from './MusicList.vue';
-import { ElTooltip, ElSlider } from 'element-plus';
+
+const configStore = useConfigstore();
 
 //初始化音频加载器
 const audioLoader = new AudioLoader();
 
 const tl1 = gsap.timeline();
 const tl2 = gsap.timeline();
+const tl3 = gsap.timeline();
 onMounted(() => {
     /** 初始化动画 */
     tl1.to('#music-bar-container', {
@@ -100,6 +104,13 @@ onMounted(() => {
         duration: 0.3,
         ease: 'linear'
     }).pause();
+    tl3.to('#music-bar-container', {
+        '--coinc-process': '360deg',
+        duration: 10,
+        ease: 'linear',
+        repeat: -1,
+    }).pause();
+    if (styleMode.value === 1) tl3.play();
     /** 初始化信息滚动动画 */
     setupInfoMarquee();
     const el = document.getElementById('music-info-container');
@@ -117,6 +128,7 @@ const marqueeTweens: gsap.core.Tween[] = [];
 onUnmounted(() => {
     tl1.kill();
     tl2.kill();
+    tl3.kill();
     resizeObserver?.disconnect();
     marqueeTweens.forEach((t) => t.kill());
     marqueeTweens.length = 0;
@@ -126,10 +138,29 @@ onUnmounted(() => {
 });
 
 //切换样式
-const styleMode = ref(false);
+const styleMode = computed(() => configStore.musicBarSettings.style);
+const showRealTime = ref(true);
+
 const toggleChangeStyle = () => {
-    styleMode.value = !styleMode.value;
-    styleMode.value ? tl1.play() : tl1.reverse();
+    switch (styleMode.value) {
+        case 0:
+            configStore.musicBarSettings.style = 1;
+            showRealTime.value = false;
+            nextTick(() => tl3.play());
+            break;
+        case 1:
+            configStore.musicBarSettings.style = 2;
+            tl3.pause();
+            break;
+        case 2:
+            configStore.musicBarSettings.style = 3;
+            break;
+        case 3:
+            configStore.musicBarSettings.style = 0;
+            showRealTime.value = true;
+            nextTick(() => toggleRealTime());
+            break;
+    }
 };
 
 //暂停/续播
@@ -266,7 +297,14 @@ const toggleClear = () => {
 };
 
 // 音量控制
-const volume = ref(100);
+const volume = computed({
+    get() {
+        return configStore.volume;
+    },
+    set(value: number) {
+        configStore.volume = value;
+    }
+});
 const setVolume = (value: number) => {
     audioLoader.setVolume(value / 100);
 }
@@ -332,9 +370,10 @@ let raiseSpeed = 0.5;
 let fallSpeed = 0.05;
 let previousEnergy = 0;
 const toggleRealTime = () => {
+    
     let rafId: number | null = null;
     const processElement = document.getElementById('music-bar-container');
-    if (audioLoader.getTimeDomainFloatData() && isPlaying.value) {
+    if (audioLoader.getTimeDomainFloatData() && isPlaying.value && showRealTime.value) {
         rafId = requestAnimationFrame(() => {
             const features = Meyda.extract(
                 ['energy'],
@@ -347,23 +386,26 @@ const toggleRealTime = () => {
             } else {
                 previousEnergy = currentEnergy * fallSpeed + prev * (1 - fallSpeed);
             }
+            const width = processElement?.clientWidth || 500;
 
             processElement?.setAttribute(
                 'style',
-                `--coinc-process: ${mapEnergyToDeg(previousEnergy)}deg;`);
+                `--coinc-process: ${mapEnergyToDeg(previousEnergy, width, 70, 5, 120)}deg;`);
             toggleRealTime();
         });
     } else {
+        console.log('toggleRealTime');
         processElement?.setAttribute('style', '--coinc-process: 0deg;');
         rafId ? cancelAnimationFrame(rafId) : null;
         rafId = null;
     }
 }
-watch(isPlaying, (newVal) => {
-    if (newVal) {
+watch(() => [isPlaying.value, showRealTime.value], (newVal) => {
+    console.log('watch', newVal);
+    if (newVal[0] && newVal[1]) {
         toggleRealTime();
     }
-});
+}, { deep: true });
 
 const infoLines = computed(() => [
     albumInfo.value[playingTarget.value]?.fileName || 'unknown file',
@@ -485,14 +527,17 @@ const handleAddToAnalysis = (index: number) => {
     user-select: none;
     --offset: 2rem;
     --border-width: 3px;
-    --coinc-process: 0deg;
-    --coinc-remain: calc(360deg - var(--coinc-process));
     position: fixed;
     width: calc(100% - var(--offset) * 2 + var(--border-width) * 2);
     height: calc(4rem + var(--border-width) * 2);
     left: calc(var(--offset) - var(--border-width));
     bottom: calc(var(--offset) / 4 - var(--border-width));
     border-radius: calc(var(--offset) * 2);
+}
+
+.bg-style-0 {
+    --coinc-process: 0deg;
+    --coinc-remain: calc(360deg - var(--coinc-process));
     background:
         conic-gradient(rgb(145, 145, 145) 0deg var(--coinc-remain),
             transparent var(--coinc-remain) var(--coinc-process),
@@ -505,6 +550,11 @@ const handleAddToAnalysis = (index: number) => {
             #fe2912,
             #80ff00,
             #27ff64);
+}
+
+.bg-style-1 {
+    --coinc-process: 0deg;
+    background: conic-gradient(from var(--coinc-process), red, var(--main-color), rgb(0, 255, 255), violet, red);
 }
 
 #music-bar {
@@ -590,6 +640,7 @@ const handleAddToAnalysis = (index: number) => {
 :deep(.el-slider__button) {
     border: solid 2px #40ffda75;
 }
+
 :deep(.el-slider__bar) {
     background-color: var(--main-color);
 }
