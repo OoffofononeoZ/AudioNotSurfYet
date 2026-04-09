@@ -25,8 +25,8 @@ export function getRoundedMinMax(arr: Array<number>): [number | null, number | n
  * @param energy - 能量值，范围为 0-max
  * @param width - 宽度
  * @param height - 高度
- * @param max - 最大能量值
  * @param power - 幂，仅正数
+ * @param max - 最大能量值
  * @returns 角度，范围为 180-360
  */
 export function mapEnergyToDeg(energy: number, width: number, height: number = 70, power: number = 2, max: number = 100): number {

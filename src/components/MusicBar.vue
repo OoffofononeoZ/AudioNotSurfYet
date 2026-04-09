@@ -20,7 +20,7 @@
             <section class="flex-col flex w-1/2 mt-4 gap-1.5">
                 <div id="progress-bar-container" @mousedown="handleDragStart">
                     <div id="progress-button"></div>
-                    <div class="mt-2" style="pointer-events: none;">
+                    <div class="mt-2" style="pointer-events: none;" v-if="styleMode !== 2">
                         {{ currentTimeText + "/" + (albumInfo[playingTarget]?.duration || '00:00') }}
                     </div>
                 </div>
@@ -61,7 +61,7 @@
                 <svg class="w-7 h-7 cursor-pointer" @click="toggleChangeStyle">
                     <use href="/icons.svg#change-style"></use>
                 </svg>
-                <svg class="w-7 h-7 cursor-pointer">
+                <svg class="w-7 h-7 cursor-pointer" @click="setProgessBar">
                     <use href="/icons.svg#more-menu"></use>
                 </svg>
             </section>
@@ -104,13 +104,19 @@ onMounted(() => {
         duration: 0.3,
         ease: 'linear'
     }).pause();
-    tl3.to('#music-bar-container', {
+    tl3.fromTo('#music-bar-container', {
+        '--coinc-process': '0deg',
+    }, {
         '--coinc-process': '360deg',
         duration: 10,
         ease: 'linear',
         repeat: -1,
     }).pause();
-    if (styleMode.value === 1) tl3.play();
+    if (styleMode.value === 1) {
+        tl3.play();
+    } else if (styleMode.value === 2) {
+        tl1.play(0.3);
+    }
     /** 初始化信息滚动动画 */
     setupInfoMarquee();
     const el = document.getElementById('music-info-container');
@@ -151,14 +157,14 @@ const toggleChangeStyle = () => {
         case 1:
             configStore.musicBarSettings.style = 2;
             tl3.pause();
+            nextTick(() => tl1.play());
             break;
         case 2:
-            configStore.musicBarSettings.style = 3;
-            break;
-        case 3:
             configStore.musicBarSettings.style = 0;
-            showRealTime.value = true;
-            nextTick(() => toggleRealTime());
+            nextTick(() => tl1.reverse()).then(() => {
+                showRealTime.value = true;
+                toggleRealTime()
+            });
             break;
     }
 };
@@ -370,7 +376,6 @@ let raiseSpeed = 0.5;
 let fallSpeed = 0.05;
 let previousEnergy = 0;
 const toggleRealTime = () => {
-    
     let rafId: number | null = null;
     const processElement = document.getElementById('music-bar-container');
     if (audioLoader.getTimeDomainFloatData() && isPlaying.value && showRealTime.value) {
@@ -388,20 +393,19 @@ const toggleRealTime = () => {
             }
             const width = processElement?.clientWidth || 500;
 
-            processElement?.setAttribute(
-                'style',
-                `--coinc-process: ${mapEnergyToDeg(previousEnergy, width, 70, 5, 120)}deg;`);
+            processElement?.style.setProperty(
+                '--coinc-process',
+                `${mapEnergyToDeg(previousEnergy, width, 70, 3, 120)}deg`
+            );
             toggleRealTime();
         });
     } else {
-        console.log('toggleRealTime');
-        processElement?.setAttribute('style', '--coinc-process: 0deg;');
+        processElement?.style.setProperty('--coinc-process', '0deg');
         rafId ? cancelAnimationFrame(rafId) : null;
         rafId = null;
     }
 }
 watch(() => [isPlaying.value, showRealTime.value], (newVal) => {
-    console.log('watch', newVal);
     if (newVal[0] && newVal[1]) {
         toggleRealTime();
     }
@@ -480,7 +484,7 @@ const updateProgressWidthPercent = (e: MouseEvent) => {
 }
 const setProgressButton = (percent: number) => {
     const el = document.getElementById('progress-bar-container');
-    el?.setAttribute('style', `--progress-width: ${percent * 100}%`);
+    el?.style.setProperty('--progress-width', `${percent * 100}%`);
 }
 const setProgressTime = (percent: number) => {
     if (!audioLoader) return;
@@ -512,6 +516,15 @@ const handleDragEnd = () => {
         playCurrent();
     }
     wasPlayingBeforeDrag = false;
+}
+
+const setProgessBar = () => {
+    const el = document.getElementById('progress-bar-container');
+    if (el && styleMode.value === 2) {
+        const left = -el.offsetLeft;
+        const top = -el.offsetTop - el.offsetHeight;
+        el.setAttribute('style', `transform: translate(${left}px, ${top}px); width: 100dvw;`);
+    }
 }
 /** 选择音乐 */
 const handleSelectIndex = (index: number) => {
@@ -555,6 +568,10 @@ const handleAddToAnalysis = (index: number) => {
 .bg-style-1 {
     --coinc-process: 0deg;
     background: conic-gradient(from var(--coinc-process), red, var(--main-color), rgb(0, 255, 255), violet, red);
+}
+
+.bg-style-2 {
+    background: rgb(145, 145, 145);
 }
 
 #music-bar {
@@ -608,7 +625,7 @@ const handleAddToAnalysis = (index: number) => {
     left: 0;
     height: 100%;
     width: var(--progress-width);
-    background-color: #eaeaea;
+    background: linear-gradient(to right, var(--main-color-tsp), var(--main-color));
     border-radius: 100px;
 }
 
