@@ -76,7 +76,7 @@ type LightRaysShaderMaterial = THREE.ShaderMaterial & { uniforms: LightRaysUnifo
 const props = withDefaults(defineProps<LightRaysProps>(), {
     raysOrigin: 'top-center',
     raysColor: '#ffffff',
-    raysSpeed: 1,
+    raysSpeed: 0.3,
     lightSpread: 1,
     rayLength: 2,
     fadeDistance: 1.0,
