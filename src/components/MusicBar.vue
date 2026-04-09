@@ -18,13 +18,19 @@
                 </div>
             </section>
             <section class="flex-col flex w-1/2 mt-4 gap-1.5">
-                <div id="progress-bar-container" @mousedown="handleDragStart">
-                    <div id="progress-button"></div>
+                <div id="progress-bar-container" @mousedown="handleDragStart" @mouseenter="hovering = true"
+                    @mouseleave="hovering = false">
+                    <div id="progress-button" v-show="hovering" ref="progressBarRef"></div>
                     <div class="mt-2" style="pointer-events: none;" v-if="styleMode !== 2">
                         {{ currentTimeText + "/" + (albumInfo[playingTarget]?.duration || '00:00') }}
                     </div>
+                    <el-tooltip v-if="hovering && styleMode === 2" :visible="hovering" virtualTriggering
+                        :virtualRef="progressBarRef"
+                        :content="currentTimeText + '/' + (albumInfo[playingTarget]?.duration || '00:00')"
+                        :showArrow="false" placement="top" />
                 </div>
-                <div class="w-full flex justify-center">
+                <div class="w-full flex justify-center"
+                    :style="styleMode === 2 ? { transform: 'translateY(-11px)' } : {}">
                     <div class="flex gap-2 items-center">
                         <svg class="w-8 h-8 cursor-pointer" @click="togglePrev">
                             <use href="/icons.svg#prev-song"></use>
@@ -82,6 +88,7 @@ import { ElTooltip, ElSlider } from 'element-plus';
 import { AudioLoader } from '../audio/AudioLoader';
 import { useConfigstore } from '../stores/configStore';
 import { mapEnergyToDeg, formatSecToTime, clamp } from '../utils/utils';
+import { updateEnergy } from '../stores/audioStore';
 import MusicList from './MusicList.vue';
 
 const configStore = useConfigstore();
@@ -116,6 +123,7 @@ onMounted(() => {
         tl3.play();
     } else if (styleMode.value === 2) {
         tl1.play(0.3);
+        setProgessBar();
     }
     /** 初始化信息滚动动画 */
     setupInfoMarquee();
@@ -124,6 +132,8 @@ onMounted(() => {
         resizeObserver = new ResizeObserver(() => setupInfoMarquee());
         resizeObserver.observe(el);
     }
+
+    window.addEventListener('resize', checkProgessBar);
 });
 
 //滚动动画
@@ -141,30 +151,30 @@ onUnmounted(() => {
     window.removeEventListener('mousemove', handleDragMove);
     window.removeEventListener('mouseup', handleDragEnd);
     stopProgressLoop();
+    window.removeEventListener('resize', checkProgessBar);
 });
 
 //切换样式
 const styleMode = computed(() => configStore.musicBarSettings.style);
-const showRealTime = ref(true);
+const showRealTime = computed(() => styleMode.value !== 1);
 
 const toggleChangeStyle = () => {
     switch (styleMode.value) {
         case 0:
             configStore.musicBarSettings.style = 1;
-            showRealTime.value = false;
             nextTick(() => tl3.play());
             break;
         case 1:
             configStore.musicBarSettings.style = 2;
             tl3.pause();
-            nextTick(() => tl1.play());
+            nextTick(() => tl1.play()).then(
+                () => setProgessBar()
+            );
             break;
         case 2:
             configStore.musicBarSettings.style = 0;
-            nextTick(() => tl1.reverse()).then(() => {
-                showRealTime.value = true;
-                toggleRealTime()
-            });
+            resetProgessBar();
+            nextTick(() => tl1.reverse());
             break;
     }
 };
@@ -378,25 +388,28 @@ let previousEnergy = 0;
 const toggleRealTime = () => {
     let rafId: number | null = null;
     const processElement = document.getElementById('music-bar-container');
-    if (audioLoader.getTimeDomainFloatData() && isPlaying.value && showRealTime.value) {
+    if (audioLoader.getTimeDomainFloatData() && isPlaying.value) {
         rafId = requestAnimationFrame(() => {
             const features = Meyda.extract(
                 ['energy'],
                 audioLoader.getTimeDomainFloatData() as Float32Array
             );
             let currentEnergy = features?.energy || 0;
-            let prev = previousEnergy;
-            if (currentEnergy > prev) {
-                previousEnergy = currentEnergy * raiseSpeed + prev * (1 - raiseSpeed);
-            } else {
-                previousEnergy = currentEnergy * fallSpeed + prev * (1 - fallSpeed);
-            }
-            const width = processElement?.clientWidth || 500;
+            updateEnergy(currentEnergy);
+            if (showRealTime) {
+                let prev = previousEnergy;
+                if (currentEnergy > prev) {
+                    previousEnergy = currentEnergy * raiseSpeed + prev * (1 - raiseSpeed);
+                } else {
+                    previousEnergy = currentEnergy * fallSpeed + prev * (1 - fallSpeed);
+                }
+                const width = processElement?.clientWidth || 500;
 
-            processElement?.style.setProperty(
-                '--coinc-process',
-                `${mapEnergyToDeg(previousEnergy, width, 70, 3, 120)}deg`
-            );
+                processElement?.style.setProperty(
+                    '--coinc-process',
+                    `${mapEnergyToDeg(previousEnergy, width, 70, 3, 120)}deg`
+                );
+            }
             toggleRealTime();
         });
     } else {
@@ -405,8 +418,8 @@ const toggleRealTime = () => {
         rafId = null;
     }
 }
-watch(() => [isPlaying.value, showRealTime.value], (newVal) => {
-    if (newVal[0] && newVal[1]) {
+watch(() => isPlaying.value, (newVal) => {
+    if (newVal) {
         toggleRealTime();
     }
 }, { deep: true });
@@ -518,12 +531,28 @@ const handleDragEnd = () => {
     wasPlayingBeforeDrag = false;
 }
 
+const hovering = ref(false);
+const progressBarRef = ref();
 const setProgessBar = () => {
     const el = document.getElementById('progress-bar-container');
     if (el && styleMode.value === 2) {
         const left = -el.offsetLeft;
         const top = -el.offsetTop - el.offsetHeight;
         el.setAttribute('style', `transform: translate(${left}px, ${top}px); width: 100dvw;`);
+    }
+}
+const resetProgessBar = () => {
+    const el = document.getElementById('progress-bar-container');
+    if (el) {
+        el.removeAttribute('style');
+    }
+}
+
+const checkProgessBar = () => {
+    if (styleMode.value === 2) {
+        setProgessBar();
+    } else {
+        resetProgessBar();
     }
 }
 /** 选择音乐 */
