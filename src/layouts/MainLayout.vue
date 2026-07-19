@@ -1,5 +1,5 @@
 <template>
-    <main class="w-dvw h-dvh bg-black" id="main-layout">
+    <main class="min-w-full h-dvh bg-black" id="main-layout">
         <HeaderBar />
         <router-view />
         <MusicBar :progress="0" />

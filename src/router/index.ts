@@ -3,6 +3,7 @@ import MainLayout from '../layouts/MainLayout.vue';
 import Home from '../views/Home.vue';
 import TestLands from '../views/TestLands.vue';
 import ComingSoon from '../views/ComingSoon.vue';
+import Analyzer from '../views/Analyzer.vue';
 
 const router = createRouter({
     history: createWebHistory(),
@@ -18,6 +19,10 @@ const router = createRouter({
                 {
                     path: 'comingsoon',
                     component: ComingSoon,
+                },
+                {
+                    path: 'analyzer',
+                    component: Analyzer,
                 },
                 {
                     path: 'testlands',
