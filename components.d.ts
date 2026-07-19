@@ -12,16 +12,18 @@ export {}
 declare module 'vue' {
   export interface GlobalComponents {
     AnimatedList: typeof import('./src/components/AnimatedList.vue')['default']
+    DotGridBg: typeof import('./src/components/DotGridBg.vue')['default']
     ElSlider: typeof import('element-plus/es')['ElSlider']
     ElTooltip: typeof import('element-plus/es')['ElTooltip']
     HeaderBar: typeof import('./src/components/HeaderBar.vue')['default']
     LightBg: typeof import('./src/components/LightBg.vue')['default']
+    MeydaCard: typeof import('./src/components/MeydaCard.vue')['default']
     MusicBar: typeof import('./src/components/MusicBar.vue')['default']
     MusicList: typeof import('./src/components/MusicList.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
     Testcomp: typeof import('./src/components/testcomp.vue')['default']
-    ThreeDTable: typeof import('./src/components/threeDTable.vue')['default']
-    TwoDTable: typeof import('./src/components/twoDTable.vue')['default']
+    ThreeDTable: typeof import('./src/components/ThreeDTable.vue')['default']
+    TwoDTable: typeof import('./src/components/TwoDTable.vue')['default']
   }
 }

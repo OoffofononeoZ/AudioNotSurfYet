@@ -5,7 +5,7 @@
         </section>
         <section class="flex gap-4">
             <router-link to="/comingsoon" class="text-white">Visualizer</router-link>
-            <router-link to="/comingsoon" class="text-white">Analyzer</router-link>
+            <router-link to="/analyzer" class="text-white">Analyzer</router-link>
             <router-link to="/comingsoon" class="text-white">Editor</router-link>
             <router-link to="/testlands" class="text-white">TestLands</router-link>
         </section>
