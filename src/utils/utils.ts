@@ -36,7 +36,7 @@ export function mapEnergyToDeg(energy: number, width: number, height: number = 7
     if (prog < width / 2) return Math.atan(2 * prog / height) * (180 / Math.PI) + 180;
     else if (prog < (width + height) / 2) return Math.atan(width / (height + width - prog * 2)) * (180 / Math.PI) + 180;
     else if (prog < (width / 2 + height)) return 360 - Math.atan(width / (2 * prog - width - height)) * (180 / Math.PI);
-    else return 360 - Math.atan((width + height - prog) / (width / 2)) * (180 / Math.PI);
+    else return 360 - Math.atan((width + height - prog) / (height / 2)) * (180 / Math.PI);
 }
 
 /** 将时间秒数转换为时分秒格式(00:00:00) */
