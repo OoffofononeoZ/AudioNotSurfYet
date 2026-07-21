@@ -18,16 +18,22 @@
                 </div>
             </section>
             <section class="flex-col flex w-1/2 mt-4 gap-1.5">
-                <div id="progress-bar-container" @mousedown="handleDragStart" @mouseenter="hovering = true"
-                    @mouseleave="hovering = false">
-                    <div id="progress-button" v-show="hovering" ref="progressBarRef"></div>
-                    <div class="mt-2" style="pointer-events: none;" v-if="styleMode !== 2">
-                        {{ currentTimeText + "/" + (albumInfo[playingTarget]?.duration || '00:00') }}
+                <div class="progress-bar-slot">
+                    <div id="progress-bar-container" :class="{
+                        'progress-bar-hidden': isStyleTransitioning,
+                        'progress-bar-disabled': !canSeek,
+                    }" :aria-disabled="!canSeek" @mousedown="handleDragStart"
+                        @mouseenter="hovering = canSeek && !isStyleTransitioning" @mouseleave="hovering = false">
+                        <div id="progress-button" v-show="hovering && canSeek && !isStyleTransitioning"
+                            ref="progressBarRef"></div>
+                        <div class="pt-1" style="pointer-events: none;" v-if="styleMode !== 2">
+                            {{ currentTimeText + "/" + (albumInfo[playingTarget]?.duration || '00:00') }}
+                        </div>
+                        <el-tooltip v-if="hovering && canSeek && styleMode === 2 && !isStyleTransitioning"
+                            :visible="hovering" virtualTriggering :virtualRef="progressBarRef"
+                            :content="currentTimeText + '/' + (albumInfo[playingTarget]?.duration || '00:00')"
+                            :showArrow="false" placement="top" />
                     </div>
-                    <el-tooltip v-if="hovering && styleMode === 2" :visible="hovering" virtualTriggering
-                        :virtualRef="progressBarRef"
-                        :content="currentTimeText + '/' + (albumInfo[playingTarget]?.duration || '00:00')"
-                        :showArrow="false" placement="top" />
                 </div>
                 <div class="w-full flex justify-center"
                     :style="styleMode === 2 ? { transform: 'translateY(-11px)' } : {}">
@@ -67,14 +73,14 @@
                 <svg class="w-7 h-7 cursor-pointer" @click="toggleChangeStyle">
                     <use href="/icons.svg#change-style"></use>
                 </svg>
-                <svg class="w-7 h-7 cursor-pointer" @click="setProgessBar">
+                <svg class="w-7 h-7 cursor-pointer">
                     <use href="/icons.svg#more-menu"></use>
                 </svg>
             </section>
         </div>
         <aside class="music-list-container">
-            <MusicList :info="albumInfo" @SelectIndex="handleSelectIndex" @AddToAnalysis="handleAddToAnalysis"
-                @Delete="(index) => toggleDelete(index)" @Clear="toggleClear" @CloseList="toggleMusicList" />
+            <MusicList :info="albumInfo" @select-index="handleSelectIndex" @add-to-analysis="handleAddToAnalysis"
+                @delete="(index) => toggleDelete(index)" @clear="toggleClear" @close-list="toggleMusicList" />
         </aside>
     </div>
 </template>
@@ -96,6 +102,9 @@ const configStore = useConfigstore();
 //初始化音频加载器
 const audioLoader = new AudioLoader();
 
+const styleMode = computed(() => configStore.musicBarSettings.style);
+const isStyleTransitioning = ref(false);
+
 const tl1 = gsap.timeline();
 const tl2 = gsap.timeline();
 const tl3 = gsap.timeline();
@@ -106,6 +115,12 @@ onMounted(() => {
         duration: 0.3,
         ease: 'linear'
     }).pause();
+    tl1.eventCallback('onComplete', () => {
+        isStyleTransitioning.value = false;
+    });
+    tl1.eventCallback('onReverseComplete', () => {
+        isStyleTransitioning.value = false;
+    });
     tl2.to('.music-list-container', {
         transform: 'translateX(0%)',
         duration: 0.3,
@@ -122,8 +137,8 @@ onMounted(() => {
     if (styleMode.value === 1) {
         tl3.play();
     } else if (styleMode.value === 2) {
-        tl1.play(0.3);
-        setProgessBar();
+        tl1.progress(1).pause();
+        resetEnergyProgress(true);
     }
     /** 初始化信息滚动动画 */
     setupInfoMarquee();
@@ -132,8 +147,6 @@ onMounted(() => {
         resizeObserver = new ResizeObserver(() => setupInfoMarquee());
         resizeObserver.observe(el);
     }
-
-    window.addEventListener('resize', checkProgessBar);
 });
 
 //滚动动画
@@ -151,29 +164,31 @@ onUnmounted(() => {
     window.removeEventListener('mousemove', handleDragMove);
     window.removeEventListener('mouseup', handleDragEnd);
     stopProgressLoop();
-    window.removeEventListener('resize', checkProgessBar);
+    stopEnergyLoop();
 });
 
 //切换样式
-const styleMode = computed(() => configStore.musicBarSettings.style);
-const showRealTime = computed(() => styleMode.value !== 1);
-
 const toggleChangeStyle = () => {
+    if (isStyleTransitioning.value) return;
+
     switch (styleMode.value) {
         case 0:
             configStore.musicBarSettings.style = 1;
             nextTick(() => tl3.play());
             break;
         case 1:
+            isStyleTransitioning.value = true;
+            hovering.value = false;
             configStore.musicBarSettings.style = 2;
             tl3.pause();
-            nextTick(() => tl1.play()).then(
-                () => setProgessBar()
-            );
+            resetEnergyProgress(true);
+            nextTick(() => tl1.play(0));
             break;
         case 2:
+            isStyleTransitioning.value = true;
+            hovering.value = false;
             configStore.musicBarSettings.style = 0;
-            resetProgessBar();
+            resetEnergyProgress(true);
             nextTick(() => tl1.reverse());
             break;
     }
@@ -183,6 +198,8 @@ const toggleChangeStyle = () => {
 const isPlaying = ref(false);
 const progressPercent = ref(0);
 const currentTimeText = ref('00:00');
+const audioReady = ref(false);
+const isLoading = ref(false);
 let progressRafId: number | null = null;
 
 /** 更新进度条UI */
@@ -219,7 +236,7 @@ const pauseCurrent = () => {
     updateProgressUI();
 };
 const playCurrent = () => {
-    if (!audioLoader.hasLoaded()) return;
+    if (!audioReady.value || !audioLoader.hasLoaded()) return;
     if (audioLoader.getCurrentProgressPercent() >= 1) {
         audioLoader.setPlaybackOffsetPercent(0);
     }
@@ -234,27 +251,46 @@ const getNormalizedIndex = (index: number) => {
     return (index + len) % len;
 };
 
-let isLoading = false;
 const playAt = async (index: number) => {
-    if (isLoading) return;
-    isLoading = true;
+    if (isLoading.value) return;
     const nextIndex = getNormalizedIndex(index);
     if (nextIndex < 0) return;
-    playingTarget.value = nextIndex;
     const url = musicFileUrl.value[nextIndex];
     if (!url) return;
-    await audioLoader.loadAudio(url);
-    setVolume(volume.value);
-    audioLoader.setOnEndedCallback(() => {
-        if (isLoading) return;
-        void playAt(playingTarget.value + 1);
-    });
-    audioLoader.resume();
-    isPlaying.value = true;
+
+    isLoading.value = true;
+    audioReady.value = false;
+    isPlaying.value = false;
+    stopProgressLoop();
+    stopEnergyLoop();
+    resetEnergyProgress();
+    playingTarget.value = nextIndex;
+    progressPercent.value = 0;
+    progressWidthPercent = 0;
+    setProgressButton(0);
     currentTimeText.value = '00:00';
-    updateProgressUI();
-    startProgressLoop();
-    isLoading = false;
+
+    try {
+        await audioLoader.loadAudio(url);
+        audioReady.value = true;
+        setVolume(volume.value);
+        audioLoader.setOnEndedCallback(() => {
+            if (isLoading.value) return;
+            void playAt(playingTarget.value + 1);
+        });
+        audioLoader.resume();
+        isPlaying.value = true;
+        updateProgressUI();
+        startProgressLoop();
+    } catch (error) {
+        console.error('音频加载失败', error);
+        audioReady.value = false;
+        isPlaying.value = false;
+        stopProgressLoop();
+        resetEnergyProgress();
+    } finally {
+        isLoading.value = false;
+    }
 };
 
 const togglePause = () => {
@@ -262,7 +298,7 @@ const togglePause = () => {
         pauseCurrent();
         return;
     }
-    if (audioLoader.hasLoaded()) {
+    if (audioReady.value && audioLoader.hasLoaded()) {
         playCurrent();
         return;
     }
@@ -285,8 +321,9 @@ const toggleDelete = (index: number) => {
         pauseCurrent();
         playingTarget.value = 0;
         audioLoader.destroy();
+        audioReady.value = false;
         updateProgressUI();
-        toggleRealTime();
+        resetEnergyProgress(true);
         return;
     }
     if (isCur) {
@@ -308,8 +345,9 @@ const toggleClear = () => {
     progressPercent.value = 0;
     currentTimeText.value = '00:00';
     audioLoader.destroy();
+    audioReady.value = false;
     updateProgressUI();
-    toggleRealTime();
+    resetEnergyProgress(true);
 };
 
 // 音量控制
@@ -333,6 +371,7 @@ const toggleMusicList = () => {
 
 //加载音频文件
 const musicFileUrl = ref<string[]>([]);
+const canSeek = computed(() => musicFileUrl.value.length > 0 && audioReady.value && !isLoading.value);
 const playingTarget = ref<number>(0);
 const albumInfo = ref<{
     albumCover: string;
@@ -385,44 +424,74 @@ const getAudioInfo = async (file: File) => {
 let raiseSpeed = 0.5;
 let fallSpeed = 0.05;
 let previousEnergy = 0;
-const toggleRealTime = () => {
-    let rafId: number | null = null;
-    const processElement = document.getElementById('music-bar-container');
-    if (audioLoader.getTimeDomainFloatData() && isPlaying.value) {
-        rafId = requestAnimationFrame(() => {
-            const features = Meyda.extract(
-                ['energy'],
-                audioLoader.getTimeDomainFloatData() as Float32Array
-            );
-            let currentEnergy = features?.energy || 0;
-            updateEnergy(currentEnergy);
-            if (showRealTime) {
-                let prev = previousEnergy;
-                if (currentEnergy > prev) {
-                    previousEnergy = currentEnergy * raiseSpeed + prev * (1 - raiseSpeed);
-                } else {
-                    previousEnergy = currentEnergy * fallSpeed + prev * (1 - fallSpeed);
-                }
-                const width = processElement?.clientWidth || 500;
+let energyRafId: number | null = null;
 
-                processElement?.style.setProperty(
-                    '--coinc-process',
-                    `${mapEnergyToDeg(previousEnergy, width, 70, 3, 120)}deg`
-                );
-            }
-            toggleRealTime();
-        });
+const stopEnergyLoop = () => {
+    if (energyRafId !== null) {
+        cancelAnimationFrame(energyRafId);
+        energyRafId = null;
+    }
+};
+
+const resetEnergyProgress = (forceCssReset = false) => {
+    previousEnergy = 0;
+    updateEnergy(0);
+    if (styleMode.value !== 1 || forceCssReset) {
+        document.getElementById('music-bar-container')?.style.setProperty('--coinc-process', '0deg');
+    }
+};
+
+const updateEnergyFrame = () => {
+    energyRafId = null;
+    if (!isPlaying.value) {
+        resetEnergyProgress();
+        return;
+    }
+
+    const processElement = document.getElementById('music-bar-container');
+    const timeDomainData = audioLoader.getTimeDomainFloatData();
+    if (!processElement || !timeDomainData) {
+        resetEnergyProgress();
+        return;
+    }
+
+    const features = Meyda.extract(['energy'], timeDomainData);
+    const currentEnergy = features?.energy || 0;
+    updateEnergy(currentEnergy);
+
+    if (currentEnergy > previousEnergy) {
+        previousEnergy = currentEnergy * raiseSpeed + previousEnergy * (1 - raiseSpeed);
     } else {
-        processElement?.style.setProperty('--coinc-process', '0deg');
-        rafId ? cancelAnimationFrame(rafId) : null;
-        rafId = null;
+        previousEnergy = currentEnergy * fallSpeed + previousEnergy * (1 - fallSpeed);
     }
-}
-watch(() => isPlaying.value, (newVal) => {
-    if (newVal) {
-        toggleRealTime();
+
+    if (styleMode.value === 0) {
+        processElement.style.setProperty(
+            '--coinc-process',
+            `${mapEnergyToDeg(previousEnergy, processElement.clientWidth || 500, 70, 3, 120)}deg`
+        );
     }
-}, { deep: true });
+
+    energyRafId = requestAnimationFrame(updateEnergyFrame);
+};
+
+const startEnergyLoop = () => {
+    stopEnergyLoop();
+    if (!isPlaying.value) {
+        resetEnergyProgress();
+        return;
+    }
+    energyRafId = requestAnimationFrame(updateEnergyFrame);
+};
+
+watch(isPlaying, (newValue) => {
+    if (newValue) {
+        startEnergyLoop();
+    } else {
+        stopEnergyLoop();
+        resetEnergyProgress();
+    }
+});
 
 const infoLines = computed(() => [
     albumInfo.value[playingTarget.value]?.fileName || 'unknown file',
@@ -487,6 +556,7 @@ watch(() => albumInfo.value[playingTarget.value], () => {
 /** 拖动进度条 */
 let progressWidthPercent = 0;
 let wasPlayingBeforeDrag = false;
+let isDraggingProgress = false;
 const updateProgressWidthPercent = (e: MouseEvent) => {
     const progressBar = document.getElementById('progress-bar-container');
     if (progressBar) {
@@ -500,11 +570,14 @@ const setProgressButton = (percent: number) => {
     el?.style.setProperty('--progress-width', `${percent * 100}%`);
 }
 const setProgressTime = (percent: number) => {
-    if (!audioLoader) return;
+    if (!canSeek.value) return;
     audioLoader.setPlaybackOffsetPercent(percent);
     currentTimeText.value = formatSecToTime(audioLoader.getCurrentTimeSec());
 }
 const handleDragStart = (e: MouseEvent) => {
+    if (e.button !== 0 || !canSeek.value || isStyleTransitioning.value) return;
+
+    isDraggingProgress = true;
     window.addEventListener('mousemove', handleDragMove);
     window.addEventListener('mouseup', handleDragEnd);
     wasPlayingBeforeDrag = isPlaying.value;
@@ -516,6 +589,7 @@ const handleDragStart = (e: MouseEvent) => {
     currentTimeText.value = formatSecToTime(audioLoader.getDurationSec() * progressWidthPercent);
 }
 const handleDragMove = (e: MouseEvent) => {
+    if (!isDraggingProgress || !canSeek.value) return;
     updateProgressWidthPercent(e);
     setProgressButton(progressWidthPercent);
     currentTimeText.value = formatSecToTime(audioLoader.getDurationSec() * progressWidthPercent);
@@ -523,6 +597,9 @@ const handleDragMove = (e: MouseEvent) => {
 const handleDragEnd = () => {
     window.removeEventListener('mousemove', handleDragMove);
     window.removeEventListener('mouseup', handleDragEnd);
+    if (!isDraggingProgress) return;
+
+    isDraggingProgress = false;
     setProgressTime(progressWidthPercent);
     updateProgressUI();
     if (wasPlayingBeforeDrag) {
@@ -532,29 +609,7 @@ const handleDragEnd = () => {
 }
 
 const hovering = ref(false);
-const progressBarRef = ref();
-const setProgessBar = () => {
-    const el = document.getElementById('progress-bar-container');
-    if (el && styleMode.value === 2) {
-        const left = -el.offsetLeft;
-        const top = -el.offsetTop - el.offsetHeight;
-        el.setAttribute('style', `transform: translate(${left}px, ${top}px); width: 100dvw;`);
-    }
-}
-const resetProgessBar = () => {
-    const el = document.getElementById('progress-bar-container');
-    if (el) {
-        el.removeAttribute('style');
-    }
-}
-
-const checkProgessBar = () => {
-    if (styleMode.value === 2) {
-        setProgessBar();
-    } else {
-        resetProgessBar();
-    }
-}
+const progressBarRef = ref<HTMLElement>();
 /** 选择音乐 */
 const handleSelectIndex = (index: number) => {
     playAt(index);
@@ -638,6 +693,11 @@ const handleAddToAnalysis = (index: number) => {
 }
 
 /* 进度条 */
+.progress-bar-slot {
+    width: 100%;
+    height: 5px;
+}
+
 #progress-bar-container {
     --progress-width: 0%;
     width: 100%;
@@ -645,6 +705,28 @@ const handleAddToAnalysis = (index: number) => {
     background-color: #444;
     border-radius: 100px;
     position: relative;
+}
+
+.bg-style-2 #progress-bar-container {
+    position: fixed;
+    left: 0;
+    bottom: 4rem;
+    width: 100%;
+    z-index: 3;
+    border-radius: 0;
+}
+
+#progress-bar-container.progress-bar-hidden {
+    visibility: hidden;
+    pointer-events: none;
+}
+
+#progress-bar-container.progress-bar-disabled {
+    cursor: not-allowed;
+}
+
+#progress-bar-container:not(.progress-bar-disabled) {
+    cursor: pointer;
 }
 
 #progress-bar-container::before {
