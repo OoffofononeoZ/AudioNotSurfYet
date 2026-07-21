@@ -8,14 +8,10 @@
     </main>
 </template>
 <script setup lang="ts">
-import TwoDTable from '../components/TwoDTable.vue';
 import TestComp from '../components/testcomp.vue';
-import { AudioLoader } from '../audio/AudioLoader';
-import Meyda from 'meyda';
 import { ref, watch } from 'vue';
 
 const loading = ref(true);
-const audioLoader = new AudioLoader();
 const loudnessData: number[] = [];
 const energyData: number[] = [];
 // audioLoader.loadAudio('/audios/KARAKURI - Winning Day (SprightS Remix) (1).mp3').then(
