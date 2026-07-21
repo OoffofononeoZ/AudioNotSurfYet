@@ -85,7 +85,7 @@ import gsap from 'gsap';
 import Meyda from 'meyda';
 import { parseBlob } from 'music-metadata';
 import { ElTooltip, ElSlider } from 'element-plus';
-import { AudioLoader } from '../audio/AudioLoader';
+import { AudioLoader } from '../audio/audioLoader';
 import { useConfigstore } from '../stores/configStore';
 import { mapEnergyToDeg, formatSecToTime, clamp } from '../utils/utils';
 import { updateEnergy } from '../stores/audioStore';
