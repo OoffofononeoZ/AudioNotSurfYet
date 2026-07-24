@@ -1,5 +1,5 @@
 ---
-status: approved
+status: in-review
 owner: "project-owner"
 last_reviewed: 2026-07-24
 upstream_docs:
@@ -9,7 +9,7 @@ upstream_docs:
   - "docs/architecture/system-design.md"
   - "docs/architecture/interface-contracts.md"
   - "docs/architecture/risk-register.md"
-next_action: "执行 M3：建立测试基线、Worker 测试和可追溯音频 fixture；不跳过门禁直接实现分析 UI"
+next_action: "由 project-owner 审阅 Q0 质量设计与本计划修订；Q0 批准前不得开始 M3"
 ---
 
 # Execution Plan
@@ -18,14 +18,15 @@ next_action: "执行 M3：建立测试基线、Worker 测试和可追溯音频 f
 
 按纵向切片把已批准的本地音频学习体验从当前播放器基础推进到 21 项 Meyda 特征全覆盖。本计划以门禁证据而不是日历日期排序；任一里程碑未通过时，不进入下一批特征。
 
-本文件批准的是实施顺序和验收方式，不代表 M3–M11 已实现。当前只完成 M1 产品意图门禁和 M2 系统设计门禁。
+本文件定义实施顺序和验收方式，不代表 M3–M11 已实现。当前只完成 M1 产品意图门禁和 M2 系统设计门禁；新增的 Q0 质量设计正在 review，M3 尚未开放。
 
 ## 2. Stage Gates
 
 ```mermaid
 flowchart LR
     M1["M1 Product intent"] --> M2["M2 System design"]
-    M2 --> M3["M3 Test foundation"]
+    M2 --> Q0["Q0 Quality design"]
+    Q0 --> M3["M3 Test foundation"]
     M3 --> M4["M4 AudioEngine"]
     M4 --> M5["M5 Session recovery"]
     M5 --> M6["M6 Analysis platform"]
@@ -41,6 +42,7 @@ flowchart LR
 - 对应代码、文档和测试 diff 可审阅；
 - [acceptance criteria](acceptance-criteria.md) 中适用项有证据；
 - [test strategy](test-strategy.md) 指定的自动化和手工路径已执行；
+- [eval plan](../quality/eval-plan.md) 指定的评估与 [failure taxonomy](../quality/failure-taxonomy.md) 分类已用于记录证据；
 - [risk register](../architecture/risk-register.md) 相关风险已复核；
 - `npm run build`、相关测试、Markdown frontmatter/链接检查和 `git diff --check` 通过；
 - 已知缺口、残余风险和未验证浏览器明确记录。
@@ -80,6 +82,29 @@ Gate:
 - `system-design.md` 为 `approved`；
 - 单一 AudioEngine、Worker 隔离、混合恢复和 renderer family 已有明确 ADR；
 - 失败边界、缓存身份、权限语义和资源所有权可测试。
+
+### Q0 — Quality evaluation design
+
+Status：In Review.
+
+Goal：在建立测试工具前锁定评估分组、黄金样例、失败分类和证据缺口，避免 M3–M11 生成不可追溯或只覆盖成功路径的证据。
+
+Deliverables:
+
+- `docs/quality/eval-plan.md`
+- `docs/quality/golden-examples.md`
+- `docs/quality/failure-taxonomy.md`
+
+Gate:
+
+- 三份文档 owner 均为 `project-owner`，并由其明确批准；
+- 七组 eval 覆盖 success、failure、boundary 和 exception；
+- 42 个 acceptance criteria 均映射到 eval；
+- 19 个 architecture risk 均映射到 eval 或显式 evidence gap；
+- 所有尚未执行的项目保持 `planned`，不伪造 fixture、浏览器或测试结果；
+- `release-readiness.md` 不在 Q0 创建，必须等待 M11 执行证据。
+
+Q0 批准前 M3 保持 blocked。Q0 批准只表示证据设计可用于实施，不表示任何产品行为已经通过。
 
 ### M3 — Test foundation and fixtures
 
@@ -279,7 +304,7 @@ Implementation and verification:
 Gate:
 
 - [acceptance criteria](acceptance-criteria.md) 适用项全部有证据；
-- release-readiness 尚不在本计划创建，只有后续 quality 阶段可以生成；
+- M11 证据完成后才创建 `docs/quality/release-readiness.md`，并据实际覆盖判断 ready/not ready；
 - 未通过的格式、浏览器或关键路径不得以“已知问题”形式绕过批准范围。
 
 ## 4. Cross-Cutting Ownership
@@ -295,4 +320,6 @@ Gate:
 
 ## 6. Plan Approval
 
-`project-owner` 于 2026-07-24 明确要求实现包含上述里程碑和测试要求的计划，因此 execution planning 文档记为 `approved`。下一步是 M3，不自动开始源码实现。
+`project-owner` 于 2026-07-24 批准了原 M1–M11 实施顺序。其后又明确要求在 M3 前增加 Q0 质量设计，并将 readiness 延后到 M11 证据完成后。
+
+本次修订和三份 Q0 文档当前为 `in-review`。只有 `project-owner` 单独审阅并将它们批准后，本文才能恢复为 `approved` 并开放 M3；不得把“要求实施计划”自动解释为 Q0 内容审阅通过。

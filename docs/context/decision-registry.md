@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/product/scope.md"
   - "docs/architecture/system-design.md"
   - "docs/delivery/execution-plan.md"
-next_action: "M3 开始时记录测试工具和 fixture provenance 决策；任何核心决策变化先复核下游文档"
+next_action: "由 project-owner 审阅 Q0 质量设计；批准后再开放 M3 并记录测试工具与 fixture provenance"
 ---
 
 # Decision Registry
@@ -28,11 +28,14 @@ next_action: "M3 开始时记录测试工具和 fixture provenance 决策；任�
 | ADR-0003 | 2026-07-24 | IndexedDB 保存全部句柄，但只保存当前 Blob/分析缓存；权限恢复必须显式可见并由用户触发 request | project-owner | approved | [ADR-0003](../architecture/adrs/0003-hybrid-indexeddb-session-recovery.md) | 会话寿命、数据量、权限或存储边界改变 |
 | ADR-0004 | 2026-07-24 | 使用 21 项穷尽 FeatureRegistry 和 Canvas 2D renderer family；DOM 承担说明、值、焦点和语义；Analyzer 不新增 Three.js | project-owner | approved | [ADR-0004](../architecture/adrs/0004-typed-feature-registry-and-canvas-renderers.md) | 特征 shape、renderer 或无障碍边界改变 |
 | DEC-008 | 2026-07-24 | 实施采用 M1–M11 相对门禁，不承诺日期；M3 从测试基础开始，M7 未通过不得扩展后续特征 | project-owner | approved | [Execution plan](../delivery/execution-plan.md) | 依赖、里程碑、验收门禁或交付优先级改变 |
-| DEC-009 | 2026-07-24 | 当前只批准 execution planning；不预建 quality/release/retrospective，也不自动开始代码实现 | project-owner | active | [Milestone plan](../delivery/milestone-plan.md) | M11 证据完成或 owner 明确启动下一阶段 |
+| DEC-009 | 2026-07-24 | 当前只批准 execution planning；不预建 quality/release/retrospective，也不自动开始代码实现 | project-owner | superseded by DEC-010 | [Milestone plan](../delivery/milestone-plan.md) | 已由 owner 决定前置三份 quality design |
+| DEC-010 | 2026-07-24 | 在 M3 前增加 Q0：前置 eval plan、golden examples、failure taxonomy；三份文档单独批准后开放 M3，release-readiness 仍等待 M11 证据 | project-owner | approved schedule decision；Q0 content in-review | [Eval plan](../quality/eval-plan.md) | 验收/测试纪律变化，或 owner 改变 Q0/readiness 时序 |
 
 ## Approval Evidence
 
 `project-owner` 于 2026-07-24 通过“PLEASE IMPLEMENT THIS PLAN”明确要求将随请求给出的产品、架构、里程碑和测试决定落入仓库。本注册表记录的是批准的决策；M3–M11 的实现状态仍以 [milestone plan](../delivery/milestone-plan.md) 和可复现证据为准。
+
+同日，`project-owner` 明确要求实施 Q0 质量设计计划，批准了 Q0 前置、四级严重度和 readiness 后置的阶段安排；同时要求三份质量文档先保持 `in-review`，经单独审阅后才生效。因此 DEC-010 的时序决定已批准，但 Q0 内容尚未批准。
 
 ## Historical Evidence Gap
 

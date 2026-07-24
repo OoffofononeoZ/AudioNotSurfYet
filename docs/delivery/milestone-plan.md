@@ -1,12 +1,12 @@
 ---
-status: approved
+status: in-review
 owner: "project-owner"
 last_reviewed: 2026-07-24
 upstream_docs:
   - "docs/delivery/execution-plan.md"
   - "docs/delivery/acceptance-criteria.md"
   - "docs/delivery/test-strategy.md"
-next_action: "从 M3 开始；每个里程碑只有证据齐全并由 project-owner 接受后才能改为 Complete"
+next_action: "完成 Q0 三份质量设计文档的 project-owner 审阅；Q0 批准前 M3 保持 Blocked"
 ---
 
 # Milestone Plan
@@ -15,7 +15,7 @@ next_action: "从 M3 开始；每个里程碑只有证据齐全并由 project-ow
 
 - Target 使用相对门禁，不表示日历承诺。
 - `Complete` 只用于文档门禁已经具备当前仓库证据的 M1/M2。
-- M3–M11 为 `Planned`，不能从本计划存在推断为实现完成。
+- Q0 为 `In Review`；M3 因 Q0 未批准而为 `Blocked`，M4–M11 为 `Planned`。
 - 一个里程碑未通过时，后续里程碑保持 Planned/Blocked，不并行扩大特征范围。
 
 ## Milestones
@@ -24,7 +24,8 @@ next_action: "从 M3 开始；每个里程碑只有证据齐全并由 project-ow
 | --- | --- | --- | --- | --- | --- | --- |
 | M1 | Product intent approved | Complete | Gate P | Repository context | problem/scope approved；metrics 固定；无阻断产品问题 | project-owner |
 | M2 | System design and ADRs approved | Complete | Gate A | M1 | system design、contracts、risk、4 ADR approved | project-owner |
-| M3 | Test foundation and fixtures | Planned | First implementation gate | M2 | Vitest/Playwright/Worker harness、fixture manifest、golden helper、有效 npm scripts | project-owner |
+| Q0 | Quality evaluation design | In Review | Pre-implementation quality gate | M2 | eval plan、golden examples、failure taxonomy approved；42 AC 和 19 risk 可追溯 | project-owner |
+| M3 | Test foundation and fixtures | Blocked | First implementation gate | Q0 | Vitest/Playwright/Worker harness、fixture manifest、golden helper、有效 npm scripts | project-owner |
 | M4 | Single AudioEngine and shared store | Planned | After M3 | M3 | 播放/MusicBar 回归、单一上下文、生命周期证据 | project-owner |
 | M5 | IndexedDB hybrid recovery | Planned | After M4 | M4 | current Blob/cache、handle permission、refresh/quota/schema 证据 | project-owner |
 | M6 | Worker platform and feature registry | Planned | After M5 | M4, M5 | mono/frame/cancel/stale/cache/21-key registry、性能基线 | project-owner |
@@ -35,6 +36,15 @@ next_action: "从 M3 开始；每个里程碑只有证据齐全并由 project-ow
 | M11 | Cross-cutting hardening | Planned | Delivery exit gate | M10 | 格式、恢复、权限、性能、无障碍、视口和 Chrome/Edge 全证据 | project-owner |
 
 ## Gate Checklist by Milestone
+
+### Q0
+
+- [ ] 七组 eval 均覆盖 success、failure、boundary、exception。
+- [ ] 42 个 AC 映射到 eval，19 个 risk 映射到 eval 或 evidence gap。
+- [ ] 黄金样例包含三项学习样例、成功、失败、边界和异常场景。
+- [ ] failure type 与 S0–S3 severity 分离，硬性 AC 失败不允许被低严重度绕过。
+- [ ] 三份质量文档和本 delivery 修订由 `project-owner` 明确批准。
+- [ ] 没有创建 `release-readiness.md` 或伪造执行证据。
 
 ### M3
 
@@ -109,7 +119,7 @@ next_action: "从 M3 开始；每个里程碑只有证据齐全并由 project-ow
 
 ## Current Gate State
 
-- Current stage：Execution planning approved；implementation 尚未开始。
-- Next gate：M3 Test foundation and fixtures。
-- Blocking unknowns：没有阻断 M3 的产品或架构问题。
-- Known future blockers：没有真实 Edge 证据时不能完成 M11；托管平台未定会阻断未来 release，但不阻断当前 delivery。
+- Current stage：Q0 Quality evaluation design `in-review`；implementation 尚未开始。
+- Next gate：`project-owner` 审阅并批准 Q0 三份文档及 delivery 修订。
+- M3 state：Blocked by Q0；不是产品或架构缺口。
+- Known future blockers：没有真实 Edge 证据时不能完成 M11 或未来 readiness；托管平台未定会阻断 release，但不阻断 Q0/M3。
