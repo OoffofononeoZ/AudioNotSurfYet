@@ -1,33 +1,52 @@
 ---
-status: draft
-owner: "unknown"
+status: approved
+owner: "project-owner"
 last_reviewed: 2026-07-24
 upstream_docs:
   - "docs/product/problem-brief.md"
   - "docs/product/scope.md"
-next_action: "确认每项指标是否代表目标用户价值，并给出目标、样本和评审周期"
+next_action: "在 delivery 验收标准和测试策略中把阈值转成可复现证据"
 ---
 
 # Success Metrics
 
-当前没有分析埋点、用户基线或正式质量预算。下表是**候选指标**，目标值全部待人工确认。
+## Product and Learning Outcomes
 
-| Metric | Type | Target | Observation method | Review date |
-| --- | --- | --- | --- | --- |
-| 本地音频选择到可播放的完成率 | leading | 待人工确认 | 在批准的浏览器/格式矩阵中执行 fixture 场景并记录成功/失败 | 待人工确认 |
-| 核心播放任务完成率 | leading | 待人工确认 | 覆盖播放、暂停、上一首、下一首、跳转、删除、清空的任务测试 | 待人工确认 |
-| 音频响应状态正确率 | leading | 待人工确认 | 播放时观察能量响应；暂停、错误、空队列和切换后验证归零 | 待人工确认 |
-| 多视口关键控件可用率 | leading | 待人工确认 | 在批准的窄屏、桌面和宽屏矩阵核对实际几何与交互 | 待人工确认 |
-| 目标用户认为视觉/分析体验有帮助的比例 | lagging | 待人工确认 | 对确认后的目标用户进行任务后问卷或访谈 | 待人工确认 |
+| Metric | Target | Observation method | Review point |
+| --- | --- | --- | --- |
+| Owner 核心任务完成 | `project-owner` 完成加载、选卡、换卡、比较、跳转、刷新恢复的全部脚本任务 | 在批准的浏览器、fixture 和视口矩阵执行任务脚本，逐项记录通过/失败与证据 | 首个三特征切片验收及后续回归 |
+| 首批特征解释正确率 | owner 对 3/3 个预设音频片段正确解释 RMS、Amplitude Spectrum、Chroma 数值与听感/音色关系 | 使用预先写定答案要点的黄金片段，先完成任务再对照评分 | 首个三特征切片验收 |
+| 完整特征覆盖 | `src/data/analyzerData.ts` 的 21/21 个特征均有类型定义、renderer、黄金测试和可用卡片 | feature registry 覆盖检查、自动化测试与 owner 验收 | 最终特征里程碑 |
 
-## Guardrail Metrics
+owner-only 学习验证是当前批准方式，不推断为广泛用户研究结果。若未来需要对外声称普遍学习效果，必须补充新的样本和研究设计。
 
-| Metric | Why it matters | Threshold |
+## Correctness and Synchronization
+
+| Metric | Target | Observation method | Review point |
+| --- | --- | --- | --- |
+| Meyda 结果一致性 | 与同版本、同参数、同 PCM 输入的直接 Meyda 提取黄金结果在约定浮点容差内一致 | 对 silence、正弦、双音、impulse 和同源格式 fixture 逐帧/逐元素比较 | 每个特征切片 |
+| 播放游标同步 | 播放、暂停、跳转和恢复后的分析游标相对 AudioContext 基准偏差不超过 100ms | 记录引擎时间、期望跳转时间和显示游标时间；覆盖正常与边界路径 | 首个切片及回归 |
+| 缓存身份隔离 | track、config 或 feature 任一变化都不复用不匹配结果；取消 job 的迟到消息不进入 UI | cache-key 单元测试、Worker 集成测试和快速换歌/换卡场景 | Worker 里程碑 |
+
+浮点容差由交付验收标准固定；如果某一特征需要不同容差，必须给出可复现原因，不能临时放宽。
+
+## Responsiveness and Reliability Guardrails
+
+| Metric | Threshold | Observation method |
 | --- | --- | --- |
-| 音频文件离开本地环境的次数 | 当前代码以本地处理为事实边界，改变会引入隐私风险 | 待隐私政策确认；未批准前不应新增上传 |
-| 运行时 error/warn 与未处理拒绝 | 播放、WebGL 和对象生命周期错误会破坏可信度 | 待质量阶段设定 |
-| 长会话资源增长 | 对象 URL、AudioContext、RAF 和 WebGL 资源可能累积 | 待性能预算与测量方法确认 |
-| Production chunk size | 当前 Vite 有约 1 MB 大 chunk 提示 | 待性能预算确认 |
-| 无障碍关键任务完成率 | fixed 控件、SVG 按钮和拖动操作可能排除键盘/辅助技术用户 | 待可访问性目标确认 |
+| 主线程输入反馈 | 分析期间用户输入的可见反馈保持在 100ms 内 | 浏览器性能 trace 与 Playwright 交互计时 |
+| 分析归因长任务 | 不产生可归因于分析计算的主线程长任务（单任务超过 50ms） | 对最大支持时长运行 PerformanceObserver/DevTools trace |
+| 分析完成时长 | 不设 wall-clock SLA；必须有进度、取消和过期结果隔离 | Worker 消息与取消场景测试 |
+| 恢复韧性 | 权限 prompt/denied、文件移动、quota 失败或缓存缺失不会破坏当前页面内可用会话 | IndexedDB 与浏览器恢复矩阵 |
+| 运行时信号 | 批准场景中无未处理异常、控制台 error/warn 或泄漏的 Worker/Audio/Object URL | 自动化监听、资源生命周期测试和手工控制台检查 |
 
-目标、样本和观测环境未确认前，这些指标不能用于 release readiness。
+## Compatibility and Accessibility Guardrails
+
+- MP3、WAV、FLAC 的同源 fixture 在最新稳定版 Chrome 和 Edge 桌面端完成加载、播放和首批分析。
+- 在 1024、1280、1920 CSS px 验证真实几何、Canvas 像素尺寸与核心控件可用性。
+- 播放、切歌、跳转、选卡和换卡均可用键盘完成，焦点可见，图表结论不只依靠颜色，reduced motion 下无非必要动画。
+- 当前环境没有真实 Edge 证据时，状态必须写为“Chrome 已验证、Edge 待验证”，不得宣称浏览器矩阵全部完成。
+
+## Approval Record
+
+上述目标和阈值由 `project-owner` 于 2026-07-24 随产品计划一并批准。delivery 文档负责定义样本、步骤、容差和证据位置；quality 阶段只有在这些证据存在后才能判断 release readiness。
