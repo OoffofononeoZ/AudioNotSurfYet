@@ -13,8 +13,6 @@ declare module 'vue' {
   export interface GlobalComponents {
     AnimatedList: typeof import('./src/components/AnimatedList.vue')['default']
     DotGridBg: typeof import('./src/components/DotGridBg.vue')['default']
-    ElSlider: typeof import('element-plus/es')['ElSlider']
-    ElTooltip: typeof import('element-plus/es')['ElTooltip']
     HeaderBar: typeof import('./src/components/HeaderBar.vue')['default']
     LightBg: typeof import('./src/components/LightBg.vue')['default']
     MeydaCard: typeof import('./src/components/MeydaCard.vue')['default']
