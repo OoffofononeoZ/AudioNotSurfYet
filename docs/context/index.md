@@ -1,65 +1,88 @@
 ---
-status: draft
-owner: "unknown"
+status: approved
+owner: "project-owner"
 last_reviewed: 2026-07-24
 upstream_docs:
   - "AGENTS.md"
-next_action: "由项目负责人确认仓库 owner、文档 review cadence 和当前产品阶段"
+next_action: "按已批准 delivery plan 执行 M3 测试基础；实现前继续核对当前代码事实和用户已有修改"
 ---
 
 # Repository Context Index
 
 ## Purpose
 
-AudioNotSurfYet 当前是一个单仓库浏览器前端：用户选择本地音频后，应用提供播放队列、元数据、进度与音量控制，并把实时能量用于音乐条和背景可视化。该描述来自当前代码，不代表已获批准的产品定位。
+AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端：用户选择本地音频后，应用提供播放队列、元数据、进度与音量控制，并把实时能量用于 MusicBar 和背景可视化。已批准的产品方向是在这些基础上建设面向音频分析学习者的 Analyzer，把 Meyda 结果对应到歌曲具体时刻、听感和音色变化。
 
-本目录只维护仓库本地事实、边界和工作记忆；生命周期路由与通用方法由 [AGENTS.md](../../AGENTS.md) 负责。
+本目录维护仓库事实、边界和工作记忆；生命周期路由与通用方法由 [AGENTS.md](../../AGENTS.md) 负责。当前代码事实与目标架构必须区分：现状见 [system map](system-map.md)，批准的目标见 [system design](../architecture/system-design.md)。
 
 ## Current Stage
 
-- 阶段一仓库上下文：本目录文档均为 `draft`，owner 与 review cadence 待确认。
-- 阶段二产品意图：`docs/product/` 已建立草稿，但 problem brief 与 scope 尚未批准。
-- 阶段三及以后：门禁未满足，未创建实质文档。
+- Repository context：入口与决策注册表已更新；详细 system map、glossary 和 working agreements 仍是基于当前代码的 `draft`，实现中需持续校正。
+- Product intent：problem brief、scope 和 success metrics 已由 `project-owner` 批准；开放问题只保留未来上传、未定义 Tab、托管和扩展研究等非当前门禁事项。
+- System design：system design、接口契约、风险和四个 ADR 已批准。
+- Execution planning：execution plan、acceptance criteria、test strategy 和 milestone plan 已批准。
+- Implementation：尚未开始；下一门禁为 M3 test foundation and fixtures。
+- Quality、release、retrospective：门禁未到，不创建相应文档。
 
 ## Key Documents
 
-| Path | Purpose | Owner | Review cadence |
+| Path | Purpose | Owner / status | Review trigger |
 | --- | --- | --- | --- |
-| [AGENTS.md](../../AGENTS.md) | 根工作指南和 Harness 入口 | unknown | 待人工确认 |
-| [glossary.md](glossary.md) | 项目词汇与代码含义 | unknown | 术语或状态含义变化时 |
-| [system-map.md](system-map.md) | 子系统、接口和外部依赖 | unknown | 架构边界变化时 |
-| [decision-registry.md](decision-registry.md) | 已确认工程决策及复查触发器 | unknown | 形成或撤销重要决策时 |
-| [working-agreements.md](working-agreements.md) | 本仓库开发、验证和 Git 约定 | unknown | 工具链或验证能力变化时 |
-| [problem-brief.md](../product/problem-brief.md) | 产品问题草稿 | unknown | 产品评审时 |
-| [scope.md](../product/scope.md) | 范围与非目标草稿 | unknown | 范围评审时 |
-| [success-metrics.md](../product/success-metrics.md) | 候选成功信号 | unknown | 指标评审时 |
-| [open-questions.md](../product/open-questions.md) | 需人工决定的产品问题 | unknown | 每次阶段评审前 |
+| [AGENTS.md](../../AGENTS.md) | 根工作指南和 Harness 门禁 | project-owner / active | 工作流、门禁、文档位置或跨阶段测试纪律变化 |
+| [system-map.md](system-map.md) | 当前子系统、接口和外部依赖 | unknown / draft | 当前代码边界变化 |
+| [glossary.md](glossary.md) | 当前项目词汇与代码含义 | unknown / draft | 术语、状态或类型含义变化 |
+| [decision-registry.md](decision-registry.md) | 产品、架构和交付决策入口 | project-owner / approved | 形成、撤销或替代重要决策 |
+| [working-agreements.md](working-agreements.md) | 本地开发、验证和 Git 约定 | unknown / draft | 工具链或验证能力变化 |
+| [problem-brief.md](../product/problem-brief.md) | 目标用户、问题和期望结果 | project-owner / approved | 目标用户或核心问题变化 |
+| [scope.md](../product/scope.md) | 当前范围、纵向切片和非目标 | project-owner / approved | 能力、数据或兼容范围变化 |
+| [success-metrics.md](../product/success-metrics.md) | 正确性、同步、响应和学习指标 | project-owner / approved | 阈值、样本或观测方法变化 |
+| [open-questions.md](../product/open-questions.md) | 非当前门禁问题与已关闭决策 | project-owner / in-review | 新能力进入范围或 release 开始 |
+| [system-design.md](../architecture/system-design.md) | 目标组件、数据流、失败和恢复 | project-owner / approved | 产品意图或核心系统边界变化 |
+| [interface-contracts.md](../architecture/interface-contracts.md) | 内部 TypeScript 和 Worker/存储契约 | project-owner / approved | 消息、schema、身份或失败语义变化 |
+| [risk-register.md](../architecture/risk-register.md) | 技术风险、触发器和缓解证据 | project-owner / approved | 每个里程碑及新高影响风险 |
+| [execution-plan.md](../delivery/execution-plan.md) | M1–M11 实施顺序和门禁 | project-owner / approved | 范围、架构或任务依赖变化 |
+| [acceptance-criteria.md](../delivery/acceptance-criteria.md) | 可测量验收与阈值 | project-owner / approved | 成功指标、容差或支持矩阵变化 |
+| [test-strategy.md](../delivery/test-strategy.md) | 测试层级、fixture 和证据策略 | project-owner / approved | 工具、fixture 或验证能力变化 |
+| [milestone-plan.md](../delivery/milestone-plan.md) | 相对目标、状态和退出证据 | project-owner / approved | 里程碑关闭或阻塞状态变化 |
+
+## Architecture Decisions
+
+- [ADR-0001](../architecture/adrs/0001-single-audio-engine-and-session-state.md)：单一 AudioEngine 与共享 session state。
+- [ADR-0002](../architecture/adrs/0002-worker-analysis-and-stale-result-isolation.md)：Worker 全曲分析、取消与 stale 隔离。
+- [ADR-0003](../architecture/adrs/0003-hybrid-indexeddb-session-recovery.md)：IndexedDB 文件句柄和当前 Blob 混合恢复。
+- [ADR-0004](../architecture/adrs/0004-typed-feature-registry-and-canvas-renderers.md)：类型化特征注册表和 Canvas 2D renderer family。
 
 ## Repository Areas
 
-| Area | What lives here | Primary owner | Supporting docs |
-| --- | --- | --- | --- |
-| `src/views/` | 路由页面和试验入口 | unknown | [system map](system-map.md) |
-| `src/layouts/` | Header、页面内容与 MusicBar 的共享外壳 | unknown | [system map](system-map.md) |
-| `src/components/` | 播放 UI、列表、动画及 Canvas/WebGL 可视化 | unknown | [glossary](glossary.md) |
-| `src/audio/` | Web Audio 播放、时域/频域数据接口 | unknown | [system map](system-map.md) |
-| `src/stores/` | 持久化配置与共享音频能量 | unknown | [system map](system-map.md) |
-| `src/utils/` | 事件总线与纯工具函数 | unknown | [glossary](glossary.md) |
-| `src/data/` | Analyzer 使用的静态 Meyda 说明 | unknown | [system map](system-map.md) |
-| `skills/audio-visualizer-dev/` | 本项目专属开发 Skill 源码 | unknown | [SKILL.md](../../skills/audio-visualizer-dev/SKILL.md) |
+| Area | Current role | Target/change source |
+| --- | --- | --- |
+| `src/views/` | 路由页面；Analyzer 当前主要是静态特征目录 | system design + M7 |
+| `src/layouts/` | Header、页面内容与 MusicBar 的共享外壳 | M4/M7 回归 |
+| `src/components/` | 播放 UI、列表、动画及 Canvas/WebGL 可视化 | ADR-0001/0004 |
+| `src/audio/` | 当前 Web Audio 播放、时域/频域接口 | M4 单一 AudioEngine |
+| `src/stores/` | 当前配置与共享音频能量 | M4 audioSessionStore |
+| `src/utils/` | 事件总线与纯工具函数 | 实现时按实际边界维护 |
+| `src/data/` | `analyzerData.ts` 的 21 项 Meyda 说明 | M6 FeatureRegistry |
+| `skills/audio-visualizer-dev/` | 本项目开发、验证和文档路由 Skill | [SKILL.md](../../skills/audio-visualizer-dev/SKILL.md) |
 
 ## Lifecycle Entry Points
 
-- Product intent：[problem-brief.md](../product/problem-brief.md)
-- System design：`docs/architecture/system-design.md`，门禁满足后再创建
-- Delivery planning：`docs/delivery/execution-plan.md`，门禁满足后再创建
-- Quality gates：`docs/quality/release-readiness.md`，门禁满足后再创建
-- Release operations：`docs/release/launch-plan.md`，门禁满足后再创建
-- Retrospectives：`docs/retrospectives/post-release-review.md`，有证据后再创建
+- Product intent：[problem brief](../product/problem-brief.md)
+- System design：[system design](../architecture/system-design.md)
+- Delivery planning：[execution plan](../delivery/execution-plan.md)
+- Quality gates：`docs/quality/` 尚未创建；M11 后由 quality/evals 阶段生成
+- Release operations：`docs/release/` 尚未创建；release readiness 证据存在后生成
+- Retrospectives：`docs/retrospectives/` 尚未创建；有发布、事故或重复摩擦证据后生成
 
-## Open Documentation Gaps
+## Current Known Gaps
 
-- 项目、产品、子系统和文档均没有已证实 owner。
-- 没有正式 CI、测试目录、部署说明、浏览器支持矩阵或性能预算。
-- Analyzer、Visualizer、Editor 与试验页的产品边界未批准。
-- 具体产品决策集中在 [产品开放问题](../product/open-questions.md)；工程事实缺口集中在 [Skill 项目差异](../../skills/audio-visualizer-dev/references/99-open-questions-and-project-deltas.md)。
+- 尚无 Vitest/Playwright/Worker 测试基线；`npm run test:spectrogram` 仍指向缺失的 `test.ts`，由 M3 修复或重定向。
+- 当前实现尚未完成 AudioEngine/store 分离、IndexedDB 恢复、Worker 全曲分析或共享四卡时间轴。
+- 当前机器尚未发现 Edge；没有真实 Edge 证据时不能完成 M11 双浏览器门禁。
+- 正式托管平台和生产 URL 尚未决定；它们只阻断未来 release，不阻断 M3。
+- 详细 context 文档的长期 owner/review cadence 尚未全部统一；代码改动时必须同步修正事实。
+- 工程事实差异继续记录在 [Skill 项目差异](../../skills/audio-visualizer-dev/references/99-open-questions-and-project-deltas.md)，产品开放项见 [open questions](../product/open-questions.md)。
+
+## Approval Record
+
+`project-owner` 于 2026-07-24 明确批准所附产品、架构和执行计划，并要求在仓库中实现该文档计划。本索引反映该阶段状态；它不代表代码实现或质量门禁已经完成。
