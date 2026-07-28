@@ -8,7 +8,7 @@ upstream_docs:
   - "docs/delivery/execution-plan.md"
   - "docs/delivery/acceptance-criteria.md"
   - "docs/delivery/test-strategy.md"
-next_action: "由 project-owner 审阅 M3 canonical evidence；批准后关闭 M3 并开放 M4"
+next_action: "在 M4 执行 AudioEngine/store、播放生命周期、MusicBar 回归和资源所有权证据"
 ---
 
 # Eval Plan
@@ -180,4 +180,4 @@ Q0 只有在以下条件满足后才能改为 `approved`：
 
 ## 9. Approval Record
 
-`project-owner` 于 2026-07-28 明确批准本文、[golden examples](golden-examples.md)、[failure taxonomy](failure-taxonomy.md) 及对应 delivery 修订。M3 canonical run 已产生第一条真实执行记录，但 evidence index 与 M3 关闭仍等待 owner 审批。
+`project-owner` 于 2026-07-28 明确批准本文、[golden examples](golden-examples.md)、[failure taxonomy](failure-taxonomy.md) 及对应 delivery 修订。同日，owner 又批准 M3 [evidence index](evidence-index.md) 与 working agreements；M3 已关闭并开放 M4。

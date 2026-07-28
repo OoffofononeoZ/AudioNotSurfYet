@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/product/scope.md"
   - "docs/architecture/system-design.md"
   - "docs/delivery/execution-plan.md"
-next_action: "由 project-owner 审阅 M3 canonical evidence；批准后记录 M3 关闭"
+next_action: "在 M4 实现与证据中复核 ADR-0001、播放生命周期和 MusicBar 回归"
 ---
 
 # Decision Registry
@@ -44,7 +44,7 @@ next_action: "由 project-owner 审阅 M3 canonical evidence；批准后记录 M
 
 ## Execution Evidence
 
-2026-07-28，DEC-011–DEC-013 约束下的首个 [M3 canonical run](../quality/evidence-index.md) 在 clean commit `17d16f0da37289c1f67f75203502beef999572ea` 上通过。该记录证明本地 M3 测试基础可复现，但仍等待 `project-owner` evidence review；它不是新的产品或架构决定，也不构成 Edge、M4–M11 或 readiness 通过。
+2026-07-28，DEC-011–DEC-013 约束下的首个 [M3 canonical run](../quality/evidence-index.md) 在 clean commit `17d16f0da37289c1f67f75203502beef999572ea` 上通过。`project-owner` 随后明确批准该 evidence 与 working agreements，M3 据此关闭并开放 M4。该批准不是新的产品或架构决定，也不构成 Edge、M4–M11 或 readiness 通过。
 
 ## Historical Evidence Gap
 

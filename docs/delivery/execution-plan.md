@@ -9,7 +9,7 @@ upstream_docs:
   - "docs/architecture/system-design.md"
   - "docs/architecture/interface-contracts.md"
   - "docs/architecture/risk-register.md"
-next_action: "由 project-owner 审阅 M3 canonical evidence；批准后关闭 M3 并开放 M4"
+next_action: "进入 M4：实现单一 AudioEngine 与 audioSessionStore，并以现有 MusicBar 行为作为回归基线"
 ---
 
 # Execution Plan
@@ -18,7 +18,7 @@ next_action: "由 project-owner 审阅 M3 canonical evidence；批准后关闭 M
 
 按纵向切片把已批准的本地音频学习体验从当前播放器基础推进到 21 项 Meyda 特征全覆盖。本计划以门禁证据而不是日历日期排序；任一里程碑未通过时，不进入下一批特征。
 
-本文件定义实施顺序和验收方式，不代表 M4–M11 已实现。当前已完成 M1、M2 和 Q0 门禁；M3 测试基础已有 canonical pass，正在等待 evidence review。
+本文件定义实施顺序和验收方式，不代表 M4–M11 已实现。当前已完成 M1、M2、Q0 和 M3 门禁；M4 已开放，尚未开始产品源码实施。
 
 ## 2. Stage Gates
 
@@ -108,7 +108,7 @@ Q0 已由 `project-owner` 于 2026-07-28 批准。该批准只表示证据设计
 
 ### M3 — Test foundation and fixtures
 
-Status：In Review.
+Status：Complete.
 
 Goal：在重构播放和分析前建立可重复的质量基线。
 
@@ -138,9 +138,11 @@ Evidence state:
 
 - 2026-07-28 provisional run 已通过 fixture、unit、Worker、analysis、docs、deliberate failure、typecheck、Chrome E2E、build 和 diff check；
 - `npm run eval:m3` 已在 clean commit `17d16f0da37289c1f67f75203502beef999572ea` 上通过，正式摘要见 [evidence index](../quality/evidence-index.md)；
-- M3 保持 `In Review`，等待 `project-owner` 审阅 evidence index 和 working agreements。
+- `project-owner` 已于 2026-07-28 批准 evidence index 和 working agreements；M3 已关闭。
 
 ### M4 — AudioEngine and audioSessionStore
+
+Status：Planned（Open）。
 
 Goal：建立单一播放引擎，同时保持现有 MusicBar 行为。
 
@@ -331,3 +333,5 @@ Gate:
 `project-owner` 于 2026-07-24 批准了原 M1–M11 实施顺序。其后又明确要求在 M3 前增加 Q0 质量设计，并将 readiness 延后到 M11 证据完成后。
 
 `project-owner` 于 2026-07-28 明确批准 Q0 三份质量设计及本次 delivery 修订。本文恢复为 `approved` 并开放 M3；全部尚未执行的 eval 仍保持 `planned`，该批准不构成测试或 readiness 证据。
+
+`project-owner` 于 2026-07-28 明确批准 M3 evidence 与 working agreements。M3 改为 `Complete`，M4 开放；该批准不构成 M4–M11 产品行为或 release readiness 证据。
