@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/product/scope.md"
   - "docs/architecture/system-design.md"
   - "docs/delivery/execution-plan.md"
-next_action: "记录 M3 实际测试工具、fixture provenance 和 provisional run；提交后再登记正式 evidence"
+next_action: "由 project-owner 审阅 M3 canonical evidence；批准后记录 M3 关闭"
 ---
 
 # Decision Registry
@@ -41,6 +41,10 @@ next_action: "记录 M3 实际测试工具、fixture provenance 和 provisional 
 同日，`project-owner` 明确要求实施 Q0 质量设计计划，批准了 Q0 前置、四级严重度和 readiness 后置的阶段安排；同时要求三份质量文档先保持 `in-review`，经单独审阅后才生效。因此 DEC-010 的时序决定已批准，但 Q0 内容尚未批准。
 
 `project-owner` 于 2026-07-28 明确批准 Q0 三份质量文档和两份 delivery 修订，DEC-010 的内容门禁随之生效并开放 M3。该批准不构成任何测试、浏览器或 readiness 通过证据。
+
+## Execution Evidence
+
+2026-07-28，DEC-011–DEC-013 约束下的首个 [M3 canonical run](../quality/evidence-index.md) 在 clean commit `17d16f0da37289c1f67f75203502beef999572ea` 上通过。该记录证明本地 M3 测试基础可复现，但仍等待 `project-owner` evidence review；它不是新的产品或架构决定，也不构成 Edge、M4–M11 或 readiness 通过。
 
 ## Historical Evidence Gap
 

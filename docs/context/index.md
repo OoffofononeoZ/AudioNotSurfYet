@@ -4,7 +4,7 @@ owner: "project-owner"
 last_reviewed: 2026-07-28
 upstream_docs:
   - "AGENTS.md"
-next_action: "由用户提交 M3 状态；随后对干净 commit 复跑并创建正式 evidence index"
+next_action: "由 project-owner 审阅 M3 evidence index 与 working agreements；批准后关闭 M3 并开放 M4"
 ---
 
 # Repository Context Index
@@ -21,8 +21,8 @@ AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端：用户选择
 - Product intent：problem brief、scope 和 success metrics 已由 `project-owner` 批准；开放问题只保留未来上传、未定义 Tab、托管和扩展研究等非当前门禁事项。
 - System design：system design、接口契约、风险和四个 ADR 已批准。
 - Execution planning：execution plan、acceptance criteria、test strategy 和 milestone plan 均为 approved。
-- Quality and evals：eval plan、golden examples、failure taxonomy 已由 `project-owner` 批准；它们只定义证据设计，全部 eval 尚未执行。
-- Implementation：M3 测试基础、fixture 和 provisional run 已完成，当前为 `in-review`；尚无包含本次改动的 canonical commit run 或正式 evidence index。
+- Quality and evals：eval plan、golden examples、failure taxonomy 已由 `project-owner` 批准；首条 M3 canonical evidence 已生成并处于 `in-review`，完整 eval 仍未完成。
+- Implementation：M3 测试基础和 fixture 已在 clean commit 上通过 canonical run，当前等待 evidence review；M4 尚未开放。
 - Readiness、release、retrospective：`release-readiness.md` 等待 M11 执行证据，不创建 release 或 retrospective 文档。
 
 ## Key Documents
@@ -48,6 +48,7 @@ AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端：用户选择
 | [eval-plan.md](../quality/eval-plan.md) | 七组评估、阈值、AC/risk 映射和证据缺口 | project-owner / approved | 验收、测试覆盖或风险变化 |
 | [golden-examples.md](../quality/golden-examples.md) | 成功、失败、边界和异常黄金样例 | project-owner / approved | fixture、Meyda、参数或用户任务变化 |
 | [failure-taxonomy.md](../quality/failure-taxonomy.md) | 稳定失败类型、S0–S3 和门禁响应 | project-owner / approved | 失败分类或风险接受规则变化 |
+| [evidence-index.md](../quality/evidence-index.md) | M3–M11 canonical run 摘要、环境、hash 和 reviewer | project-owner / in-review | 新 run、artifact retention 或里程碑审批 |
 
 ## Architecture Decisions
 
@@ -76,13 +77,14 @@ AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端：用户选择
 - System design：[system design](../architecture/system-design.md)
 - Delivery planning：[execution plan](../delivery/execution-plan.md)
 - Quality design：[eval plan](../quality/eval-plan.md)，Q0 批准后用于 M3–M11 证据
+- Quality evidence：[evidence index](../quality/evidence-index.md)，首条 M3 canonical run 等待 owner 审阅
 - Quality readiness：`docs/quality/release-readiness.md` 尚未创建；M11 证据完成后生成
 - Release operations：`docs/release/` 尚未创建；release readiness 证据存在后生成
 - Retrospectives：`docs/retrospectives/` 尚未创建；有发布、事故或重复摩擦证据后生成
 
 ## Current Known Gaps
 
-- M3 provisional run 已通过，但当前 worktree 未提交；EG-001/EG-002 仍等待 clean-commit canonical run。
+- M3 canonical run 已通过并关闭 EG-001/EG-002，但 evidence index 和 working agreements 尚待 `project-owner` 审批；M3 仍为 `In Review`。
 - 当前实现尚未完成 AudioEngine/store 分离、IndexedDB 恢复、Worker 全曲分析或共享四卡时间轴。
 - 当前机器尚未发现 Edge；没有真实 Edge 证据时不能完成 M11 双浏览器门禁。
 - 正式托管平台和生产 URL 尚未决定；它们只阻断未来 release，不阻断 M3。
@@ -92,3 +94,5 @@ AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端：用户选择
 ## Approval Record
 
 `project-owner` 于 2026-07-24 批准了产品、架构和原执行计划，并随后要求增加 Q0 质量设计；又于 2026-07-28 明确批准三份 Q0 质量文档及两份 delivery 修订。Q0 批准只开放 M3，不代表代码实现、质量执行或 readiness 已经完成。
+
+2026-07-28，M3 canonical run 在 clean commit `17d16f0da37289c1f67f75203502beef999572ea` 上通过并产生正式 evidence index。该事实不等同于 M3 已获批准；当前仍等待 `project-owner` review。

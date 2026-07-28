@@ -9,7 +9,7 @@ upstream_docs:
   - "docs/architecture/system-design.md"
   - "docs/architecture/interface-contracts.md"
   - "docs/architecture/risk-register.md"
-next_action: "由用户提交 M3 状态；随后对干净 commit 运行 canonical eval 并创建 in-review evidence index"
+next_action: "由 project-owner 审阅 M3 canonical evidence；批准后关闭 M3 并开放 M4"
 ---
 
 # Execution Plan
@@ -18,7 +18,7 @@ next_action: "由用户提交 M3 状态；随后对干净 commit 运行 canonica
 
 按纵向切片把已批准的本地音频学习体验从当前播放器基础推进到 21 项 Meyda 特征全覆盖。本计划以门禁证据而不是日历日期排序；任一里程碑未通过时，不进入下一批特征。
 
-本文件定义实施顺序和验收方式，不代表 M3–M11 已实现。当前已完成 M1、M2 和 Q0 门禁；M3 测试基础正在实施。
+本文件定义实施顺序和验收方式，不代表 M4–M11 已实现。当前已完成 M1、M2 和 Q0 门禁；M3 测试基础已有 canonical pass，正在等待 evidence review。
 
 ## 2. Stage Gates
 
@@ -137,8 +137,8 @@ Rollback:
 Evidence state:
 
 - 2026-07-28 provisional run 已通过 fixture、unit、Worker、analysis、docs、deliberate failure、typecheck、Chrome E2E、build 和 diff check；
-- provisional run 基于 dirty worktree，只证明当前本地实现可执行，不是 canonical milestone evidence；
-- M3 保持 `In Review`，等待用户提交后对干净 commit 复跑。
+- `npm run eval:m3` 已在 clean commit `17d16f0da37289c1f67f75203502beef999572ea` 上通过，正式摘要见 [evidence index](../quality/evidence-index.md)；
+- M3 保持 `In Review`，等待 `project-owner` 审阅 evidence index 和 working agreements。
 
 ### M4 — AudioEngine and audioSessionStore
 

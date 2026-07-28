@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/context/index.md"
   - "docs/delivery/test-strategy.md"
   - "docs/quality/eval-plan.md"
-next_action: "用户提交 M3 状态后复跑 canonical eval，并由 project-owner 审阅本约定和 evidence index"
+next_action: "由 project-owner 审阅本约定和 M3 evidence index；批准后将两者标为 approved"
 ---
 
 # Working Agreements
@@ -37,7 +37,7 @@ next_action: "用户提交 M3 状态后复跑 canonical eval，并由 project-ow
 
 - `test-results/`、`playwright-report/` 和 `artifacts/evals/<run-id>/` 为 Git 忽略的本地产物。
 - 未提交工作树只能产生 provisional run；正式 M3 evidence 必须引用用户提交后的干净 commit。
-- 首个 canonical run 存在前不创建 `docs/quality/evidence-index.md`。本地产物保留和删除规则以 [eval plan](../quality/eval-plan.md) 为准。
+- 首个 canonical run 已记录在 [evidence index](../quality/evidence-index.md)；本地产物保留和删除规则以 [eval plan](../quality/eval-plan.md) 为准。
 - fixture、manifest 和 golden 是受版本控制的规范输入；更新必须可重建、显示 diff，并重新执行对应测试。
 
 ## Resource Ownership
