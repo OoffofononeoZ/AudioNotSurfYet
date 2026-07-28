@@ -8,14 +8,14 @@ upstream_docs:
   - "docs/delivery/execution-plan.md"
   - "docs/delivery/acceptance-criteria.md"
   - "docs/delivery/test-strategy.md"
-next_action: "用户提交 M3 状态后运行 canonical eval；成功后创建 in-review evidence index"
+next_action: "由 project-owner 审阅 M3 canonical evidence；批准后关闭 M3 并开放 M4"
 ---
 
 # Eval Plan
 
 ## 1. Purpose and Current State
 
-本文件在实现前定义 AudioNotSurfYet 的质量证据契约。所有评估当前均为 `planned`：仓库尚未建立 Vitest、Playwright、Worker harness 或受控音频 fixture，因此本文不声称任何行为已经通过。
+本文件定义 AudioNotSurfYet 的质量证据契约。Vitest、Playwright、Worker harness、受控 fixture 和 direct-Meyda golden 已在 M3 建立，并已有一条干净 commit 的 [canonical run](evidence-index.md)。该 run 只使 M3 适用子集具有 `pass` 证据；完整 EV-A–EV-R 和 M4–M11 产品行为仍为 `planned`。
 
 Q0 只批准“如何判断质量”，不批准 release readiness。`docs/quality/release-readiness.md` 只能在 M11 已产生完整成功、失败、边界和异常证据后创建。
 
@@ -142,7 +142,7 @@ Q0 只批准“如何判断质量”，不批准 release readiness。`docs/quali
 
 ### Evidence index and local artifacts
 
-- 首个真实 eval run 产生时才创建 `docs/quality/evidence-index.md`；不得预建空索引或占位 run。
+- 首个真实 eval run 已产生并记录在 [evidence index](evidence-index.md)；后续不得添加占位 run。
 - evidence index 是受版本控制的长期摘要，至少保存上表字段、关键测量值、复现命令和 reviewer；eval plan 继续只维护评估设计。
 - Playwright report、trace、截图和性能 dump 使用 `test-results/`、`playwright-report/`、`artifacts/evals/<run-id>/`，只在本地保留；M3 建立这些路径时再同步加入 `.gitignore`。
 - 本地产物至少保留到对应里程碑批准；与 S0/S1 有关的产物保留到缺陷关闭及回归获批。删除后把 evidence index 的 `retention_state` 改为 `local-deleted`，不得删除摘要、hash 或复现命令。
@@ -153,12 +153,17 @@ Q0 只批准“如何判断质量”，不批准 release readiness。`docs/quali
 
 | Gap ID | Missing evidence | Reason | Residual risk / affected gate | Owner | Compensating or next verification |
 | --- | --- | --- | --- | --- | --- |
-| EG-001 | 干净 commit 上的 canonical harness run | Vitest、Playwright、Worker、IndexedDB 和 deliberate-failure harness 已实现且 provisional pass，但当前 worktree 未提交 | 不能用 provisional run 关闭 M3 或写正式 evidence index | project-owner | 用户提交后运行 `npm run eval:m3`，记录真实 commit、环境和 artifact hash |
-| EG-002 | 干净 commit 上的 fixture/golden 重建证据 | PCM、三格式 fixture、manifest 和 direct-Meyda golden 已生成且 provisional pass，但尚未绑定包含这些文件的 commit | 当前 hash 可复核，但不足以关闭 M3 canonical evidence | project-owner | 对用户提交的 commit 重新执行 fixture/hash/golden 测试并登记 run |
 | EG-003 | 真实 Edge 运行 | 当前机器未发现 Edge | 不能关闭 EV-B、M11 或未来 readiness | project-owner | 安装/提供最新稳定 Edge 后执行同一浏览器矩阵 |
 | EG-004 | 广泛用户学习结果 | 当前范围只批准 owner 自测 | 只能证明 owner 对 3/3 样例达标，不能泛化学习效果 | project-owner | 保留 owner-only 表述；扩大声明前另开产品研究决策 |
 | EG-005 | 目标基线硬件 | 产品未指定设备型号 | 性能结论跨设备可比性有限 | project-owner | 每次记录实际硬件，阈值不变；若结果不稳定，在 quality/readiness 前批准目标设备 |
 | EG-006 | 文件权限真实提示的全自动化 | OS picker 和权限气泡受浏览器/系统控制 | adapter 证据不能单独证明真实权限体验 | project-owner | adapter 自动化加 Chrome/Edge 手工 granted/prompt/denied 记录 |
+
+### Resolved evidence gaps
+
+| Gap ID | Resolution evidence | Resolved on |
+| --- | --- | --- |
+| EG-001 | `npm run eval:m3` 在 clean commit `17d16f0da37289c1f67f75203502beef999572ea` 上通过；run、环境和本地产物 hash 见 [evidence index](evidence-index.md) | 2026-07-28 |
+| EG-002 | 同一 canonical run 的 fixture、manifest、golden 与 hash checks 通过，并绑定上述 commit | 2026-07-28 |
 
 ## 8. Q0 Approval Gate
 
@@ -175,4 +180,4 @@ Q0 只有在以下条件满足后才能改为 `approved`：
 
 ## 9. Approval Record
 
-`project-owner` 于 2026-07-28 明确批准本文、[golden examples](golden-examples.md)、[failure taxonomy](failure-taxonomy.md) 及对应 delivery 修订。所有 eval 继续保持 `planned`，直到存在真实执行记录。
+`project-owner` 于 2026-07-28 明确批准本文、[golden examples](golden-examples.md)、[failure taxonomy](failure-taxonomy.md) 及对应 delivery 修订。M3 canonical run 已产生第一条真实执行记录，但 evidence index 与 M3 关闭仍等待 owner 审批。

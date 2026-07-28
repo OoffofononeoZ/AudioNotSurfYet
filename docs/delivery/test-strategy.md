@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/architecture/interface-contracts.md"
   - "docs/delivery/acceptance-criteria.md"
   - "docs/delivery/execution-plan.md"
-next_action: "完成 M3 provisional run；用户提交后对干净 commit 复跑并创建 evidence index"
+next_action: "由 project-owner 审阅 M3 canonical evidence；批准后关闭 M3"
 ---
 
 # Test Strategy
@@ -210,8 +210,8 @@ M3 已选择删除指向不存在 `test.ts` 的 `test:spectrogram`，不保留�
 - 单元/JUnit、Playwright HTML、trace、截图、fixture manifest 和手工任务记录使用稳定目录和 run ID。
 - 不把用户私有音频、路径或内容写入证据。
 - 大型 trace 不永久进入 Git 时，记录生成命令、环境和受控存放位置。
-- 已批准的 eval plan 从 M3 开始约束证据；首个 canonical run 存在后才创建 evidence index，release-readiness 仍等待 M11 完整证据。
+- 已批准的 eval plan 从 M3 开始约束证据；首个 canonical run 已记录在 [evidence index](../quality/evidence-index.md)，release-readiness 仍等待 M11 完整证据。
 
 ## 12. Exit Criteria
 
-M3 的测试基础只有在公开命令可执行、fixture 可追溯、黄金比较可信、失败能正确阻止门禁时才算完成。后续里程碑按 [acceptance criteria](acceptance-criteria.md) 的适用 AC 退出。
+M3 的公开命令、fixture、黄金比较和失败检测已有 clean-commit canonical pass；在 `project-owner` 审批 evidence index 与 working agreements 前仍保持 `In Review`。后续里程碑按 [acceptance criteria](acceptance-criteria.md) 的适用 AC 退出。

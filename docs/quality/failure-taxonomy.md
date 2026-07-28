@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/quality/golden-examples.md"
   - "docs/delivery/acceptance-criteria.md"
   - "docs/architecture/risk-register.md"
-next_action: "从 M3 首次 provisional run 开始使用本 taxonomy 分类真实失败与 evidence gap"
+next_action: "在后续 canonical run 和里程碑审阅中持续使用本 taxonomy 分类真实失败；evidence gap 保持独立"
 ---
 
 # Failure Taxonomy

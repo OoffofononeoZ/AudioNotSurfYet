@@ -13,6 +13,7 @@
 | `npm run test:e2e:edge` | 检测并运行稳定 Edge | Edge 缺失时以退出码 2 明确 blocked |
 | `npm run test:docs` | 检查生命周期 frontmatter、链接和 21 项特征 | 文档门禁 |
 | `npm run eval:m3:provisional` | 未提交工作树的本地 M3 run | 不创建正式 evidence index |
+| `npm run eval:m3` | 只在干净 commit 上运行 M3 canonical suite | 生成可登记到 evidence index 的正式本地证据 |
 
 ## 已知测试缺口
 
@@ -20,7 +21,7 @@
 - fixture/golden 生成改用 Node 24 原生 type stripping；不依赖在受限环境会产生 IPC `EPERM` 的 `tsx` CLI。
 - 当前没有正式 CI，自动化结论必须限定为本地环境。
 - 当前机器没有 Edge。Chrome 通过不能表述为双浏览器矩阵完成。
-- 正式 M3 evidence 必须等待用户提交后，对干净 commit 复跑；provisional run 不能关闭里程碑。
+- 正式 M3 canonical run 已在 clean commit `17d16f0da37289c1f67f75203502beef999572ea` 上通过并登记；里程碑仍等待 `project-owner` evidence review。
 
 ## 构建风险
 

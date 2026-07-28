@@ -1,0 +1,119 @@
+---
+status: in-review
+owner: "project-owner"
+last_reviewed: 2026-07-28
+upstream_docs:
+  - "docs/quality/eval-plan.md"
+  - "docs/quality/golden-examples.md"
+  - "docs/quality/failure-taxonomy.md"
+  - "docs/delivery/milestone-plan.md"
+  - "tests/fixtures/fixture-manifest.json"
+next_action: "由 project-owner 审阅 M3 canonical evidence；批准后将本文件和 working agreements 标为 approved，并关闭 M3、开放 M4"
+---
+
+# Evidence Index
+
+## 1. Purpose and Gate State
+
+本文件保存受版本控制的长期证据摘要；原始日志保存在 Git 忽略的本地 artifact 目录。当前只有 M3 测试基础切片的 canonical run，M3 仍为 `In Review`，等待 `project-owner` 审批。
+
+M3 的 `pass` 只证明测试工具、受控 fixture、direct-Meyda golden、失败检测、Chrome smoke、类型检查和构建门禁在被记录的 commit 上可复现。它不表示完整 EV-A–EV-R、M4–M11 产品行为、Edge 矩阵或 release readiness 已通过。
+
+## 2. Canonical Run Record
+
+| Field | Value |
+| --- | --- |
+| Run ID | `M3-2026-07-28T06-39-59-221Z-17d16f0d` |
+| Milestone | M3 — Test foundation and fixtures |
+| State | `pass`（仅 M3 test-foundation scope） |
+| Eval IDs | EV-A、EV-J、EV-D、EV-B、EV-R 的 M3 适用子集 |
+| Commit | `17d16f0da37289c1f67f75203502beef999572ea` |
+| Dirty at start | `false` |
+| Started at | 2026-07-28 06:39:59.221 UTC |
+| Method | `npm run eval:m3` |
+| Reviewer | `project-owner` — pending |
+| Retention | `local-present` |
+| Artifact root | `artifacts/evals/M3-2026-07-28T06-39-59-221Z-17d16f0d/` |
+| Summary SHA-256 | `edef2dde7f580ddea60ff76b9735f150d287bec77c314214f7a462b9cf71a0a6` |
+| Failure | 无；Edge 缺失是 EG-003 evidence gap，不是 failure instance |
+
+### Environment
+
+| Item | Recorded value |
+| --- | --- |
+| OS | macOS 26.5.2 (`25F84`), Darwin arm64 |
+| Hardware | MacBook Pro `MacBookPro17,1`；Apple M1 8-core；16 GB memory |
+| Node / npm | Node `v24.18.0`；npm `11.16.0` |
+| Vitest | `4.1.10` |
+| Playwright Test | `1.62.0` |
+| Chrome | Google Chrome `150.0.7871.187` |
+| Edge | `not-installed` |
+| FFmpeg | `8.1.2` |
+| Meyda | `5.6.3` |
+
+### Fixture and Golden Identity
+
+所有音频均由 `m3-audio-fixtures-v1` 确定性生成，采样率 48kHz、单声道，许可为 CC0-1.0；完整 provenance 和编码参数见 [fixture manifest](../../tests/fixtures/fixture-manifest.json)。
+
+| Fixture ID | Format / purpose | SHA-256 |
+| --- | --- | --- |
+| `format-master-pcm-v1` | Float32LE PCM master | `fb49bd0318a6d6e4cb5b4247bee9a8381e1fd083239dc260a8d2e0f26097e1cb` |
+| `format-master-wav-v1` | WAV compatibility | `13ece6c2c1f5c441ef3e6376dc765eea65fe57ece5f2c6dcdcbea1cd2fcacb84` |
+| `format-master-mp3-v1` | MP3 compatibility | `8f83304411c6d19de6db279f361a2568087c339d3eaf8312fa6f6a59da3b8771` |
+| `format-master-flac-v1` | FLAC compatibility | `720fd727757f758c3b89b0ab3c59227c97255763a89c6882e49e290612380a25` |
+| `first-slice.v1` | RMS、Amplitude Spectrum、Chroma direct-Meyda golden | `5e1e6724fc696414893d2b69145881f1e5141f1b1bb81753c435b70af6137209` |
+
+## 3. Results and Traceability
+
+| Step | Result | M3 measurement | Eval / risk trace |
+| --- | --- | --- | --- |
+| Fixture hashes | pass | 5/5 manifest、hash、字节与 ffprobe checks | EV-A、EV-B；R-008、R-009、R-016 |
+| Unit | pass | 12/12；PCM、tolerance、isolated IndexedDB | EV-A、EV-D；R-005、R-006、R-007、R-008、R-010 |
+| Worker harness | pass | 3/3；transfer、cancel、error | EV-J；R-002、R-003 |
+| Analysis golden | pass | 2/2；committed golden identity 与批准容差 | EV-A；R-008、R-009、R-010、R-011 |
+| Docs | pass | lifecycle frontmatter/links；feature source count 21 | EV-A、EV-R；R-019 |
+| Deliberate failure | pass | harness 正确检测 child exit 1 | EV-R；R-019 |
+| Typecheck | pass | `vue-tsc -b` exit 0 | EV-A、EV-J、EV-D |
+| Chrome E2E | pass | 5/5；app smoke、真实 IndexedDB/Worker、WAV/MP3/FLAC | EV-J、EV-D、EV-B；R-003、R-008、R-009、R-016 |
+| Build | pass with warning | 1803 modules；最大 JS chunk 1,012.69 kB | EV-R；R-017 |
+| Diff check | pass | `git diff --check` exit 0 | EV-R；R-019 |
+
+以上风险关联只表示 M3 证据覆盖到相应风险的一部分，不关闭 architecture risk。M3 使用测试专用 Worker 和 IndexedDB harness，不代表 M5/M6 产品实现已经存在。
+
+## 4. Local Artifact Hashes
+
+| Artifact | SHA-256 |
+| --- | --- |
+| `summary.json` | `edef2dde7f580ddea60ff76b9735f150d287bec77c314214f7a462b9cf71a0a6` |
+| `01-fixture-hashes.log` | `bcea186388adbdea9b698d62eeeabfe364c108495e93441009693a970dda96b8` |
+| `02-unit.log` | `92d3ad100fb6bf7c5480a149f0f07b6d6a34c7cbd9dc913d3e0a92a7bb474e15` |
+| `03-worker.log` | `1edad73e239504b18fd49e773b63177c65e05a067d31a4d957ac6d085a1b1aa1` |
+| `04-analysis.log` | `3d5f6d57906317ce7c302116fcc901b6c9b333ba65757a5826388bca2fb03b01` |
+| `05-docs.log` | `bb005ed0074179a47b895a5c66e79917e37ebf18976e21fe9d27b1dd63c8f151` |
+| `06-deliberate-failure.log` | `69bf5c3fa50230a4957ad0c60c8323dba68e494d92761fea0039cf5d580d70aa` |
+| `07-typecheck.log` | `fadc7f66199c28d2f7cca439bb300ebeb0320158f32a0f9b52ec77031538af4d` |
+| `08-chrome-e2e.log` | `981f49b203ba6af903d472099d4b2bd102a38060d560d298d11712f2aded7d0f` |
+| `09-build.log` | `3b8dc65e27b3651fe2e0d20c0e87555fe43e6d2bcd1e0427a42782351c352191` |
+| `10-diff-check.log` | `e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855` |
+
+`summary.json.sha256` 已独立核对并与 `summary.json` 一致。本地产物至少保留到 M3 获批；删除后必须把本记录的 retention 改为 `local-deleted`。
+
+## 5. Open Evidence Gaps and Warnings
+
+- EG-003：本机没有 Edge；EV-B 浏览器矩阵、M11 和未来 readiness 继续 blocked。
+- EG-004：尚无 owner 3/3 学习验证；不声明广泛用户学习效果。
+- EG-005：本 run 记录了实际设备，但产品尚未批准统一基线设备。
+- EG-006：OS 文件选择器和权限提示仍需要后续真实浏览器手工证据。
+- EV-S、EV-U 及 M4–M11 产品行为没有被本 run 验证，保持 `planned`。
+- 当前没有正式 CI；本记录只支持上述本地环境。
+- `npm audit` 已知仍有一个与 Windows 开发服务器相关的 low esbuild 项；本 run 未将其声称为已修复。
+- 构建通过但保留 1,012.69 kB chunk warning；它不是 M3 失败，也不是性能 readiness 通过证据。
+
+## 6. Review Gate
+
+`project-owner` 审阅前，本文件保持 `in-review`，M3 保持 `In Review`。批准时应同时：
+
+1. 将本文件和 [working agreements](../context/working-agreements.md) 标为 `approved`；
+2. 在 delivery 文档中把 M3 标为 `Complete` 并开放 M4；
+3. 保留 EG-003–EG-006 和全部 M4–M11 未执行范围；
+4. 不创建 `release-readiness.md`。

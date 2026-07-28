@@ -6,7 +6,7 @@ upstream_docs:
   - "docs/delivery/execution-plan.md"
   - "docs/delivery/acceptance-criteria.md"
   - "docs/delivery/test-strategy.md"
-next_action: "由用户提交 M3 状态；随后对干净 commit 复跑并创建 in-review evidence index"
+next_action: "由 project-owner 审阅 M3 canonical evidence；批准后将 M3 改为 Complete 并开放 M4"
 ---
 
 # Milestone Plan
@@ -53,7 +53,8 @@ next_action: "由用户提交 M3 状态；随后对干净 commit 复跑并创建
 - [x] 合成 PCM 可确定性生成，连续重建 hash 一致。
 - [x] MP3/WAV/FLAC manifest 包含 provenance/license/hash。
 - [x] 直接 Meyda golden 和容差 helper 有自测。
-- [ ] 用户提交后完成 clean-commit canonical run 和 evidence review。
+- [x] 用户提交后完成 clean-commit canonical run，并创建 `in-review` evidence index。
+- [ ] `project-owner` 审阅并批准 evidence index 与 working agreements。
 
 ### M4
 
@@ -122,9 +123,9 @@ next_action: "由用户提交 M3 状态；随后对干净 commit 复跑并创建
 
 - Current stage：M3 Test foundation and fixtures `in-review`。
 - Previous gate：Q0 已由 `project-owner` 于 2026-07-28 批准。
-- Provisional run：2026-07-28 本地全量步骤通过，但 worktree 为 dirty，不是 canonical evidence。
-- Next gate：由用户提交 M3 状态后对真实 commit 复跑并创建 evidence index。
-- M3 state：In Review；正式 commit run 和 evidence review 前不得标记 Complete。
+- Canonical run：`npm run eval:m3` 已在 clean commit `17d16f0da37289c1f67f75203502beef999572ea` 上通过；摘要见 [evidence index](../quality/evidence-index.md)。
+- Next gate：由 `project-owner` 审阅 M3 evidence index 和 working agreements。
+- M3 state：In Review；evidence review 明确批准前不得标记 Complete。
 - Known future blockers：没有真实 Edge 证据时不能完成 M11 或未来 readiness；托管平台未定会阻断 release，但不阻断 Q0/M3。
 
 ## Approval Record

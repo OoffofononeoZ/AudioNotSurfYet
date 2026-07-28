@@ -15,7 +15,7 @@
 
 ## 已关闭工程缺口
 
-- ENG-001：2026-07-28 已删除失效的 `test:spectrogram`，建立 Vitest、Playwright、Worker、IndexedDB、fixture、golden、docs 和 deliberate-failure harness。正式 M3 evidence 仍等待用户提交后的 clean-commit run。
+- ENG-001：2026-07-28 已删除失效的 `test:spectrogram`，建立 Vitest、Playwright、Worker、IndexedDB、fixture、golden、docs 和 deliberate-failure harness；clean-commit canonical run 已通过并登记，M3 关闭仍等待 owner evidence review。
 
 ## 当前仓库漂移
 
