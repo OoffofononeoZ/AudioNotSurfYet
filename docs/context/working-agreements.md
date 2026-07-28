@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: approved
 owner: "project-owner"
 last_reviewed: 2026-07-28
 upstream_docs:
@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/context/index.md"
   - "docs/delivery/test-strategy.md"
   - "docs/quality/eval-plan.md"
-next_action: "由 project-owner 审阅本约定和 M3 evidence index；批准后将两者标为 approved"
+next_action: "在 M4 AudioEngine/store 实施与验证中遵循本约定，并按真实工具变化复核"
 ---
 
 # Working Agreements
@@ -52,3 +52,7 @@ next_action: "由 project-owner 审阅本约定和 M3 evidence index；批准后
 - 未经明确请求，不 commit、不 push、不切换分支、不重写历史。
 - 证据不完整时，不使用“测试全部通过”“无问题”或“可发布”等绝对表述。
 - 通用阶段门禁、过期传播和升级规则以 [AGENTS.md](../../AGENTS.md) 为准。
+
+## Approval Record
+
+`project-owner` 于 2026-07-28 明确批准本约定及 M3 [evidence index](../quality/evidence-index.md)。本批准关闭 M3 并开放 M4，不改变 Edge、CI、审计或后续产品 eval 缺口。

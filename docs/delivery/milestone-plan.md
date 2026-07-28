@@ -6,7 +6,7 @@ upstream_docs:
   - "docs/delivery/execution-plan.md"
   - "docs/delivery/acceptance-criteria.md"
   - "docs/delivery/test-strategy.md"
-next_action: "由 project-owner 审阅 M3 canonical evidence；批准后将 M3 改为 Complete 并开放 M4"
+next_action: "进入 M4：建立单一 AudioEngine 与 shared store，并保持 MusicBar 行为不回归"
 ---
 
 # Milestone Plan
@@ -14,8 +14,8 @@ next_action: "由 project-owner 审阅 M3 canonical evidence；批准后将 M3 �
 ## Planning Convention
 
 - Target 使用相对门禁，不表示日历承诺。
-- `Complete` 只用于文档门禁已经具备当前仓库证据的 M1/M2。
-- Q0 为 `Complete`；M3 为 `In Review`，M4–M11 为 `Planned`。
+- `Complete` 只用于文档门禁、真实证据和所需人工批准均已满足的里程碑。
+- Q0 和 M3 为 `Complete`；M4 已开放但尚未开始，M5–M11 为 `Planned`。
 - 一个里程碑未通过时，后续里程碑保持 Planned/Blocked，不并行扩大特征范围。
 
 ## Milestones
@@ -25,7 +25,7 @@ next_action: "由 project-owner 审阅 M3 canonical evidence；批准后将 M3 �
 | M1 | Product intent approved | Complete | Gate P | Repository context | problem/scope approved；metrics 固定；无阻断产品问题 | project-owner |
 | M2 | System design and ADRs approved | Complete | Gate A | M1 | system design、contracts、risk、4 ADR approved | project-owner |
 | Q0 | Quality evaluation design | Complete | Pre-implementation quality gate | M2 | eval plan、golden examples、failure taxonomy approved；42 AC 和 19 risk 可追溯 | project-owner |
-| M3 | Test foundation and fixtures | In Review | First implementation gate | Q0 | Vitest/Playwright/Worker harness、fixture manifest、golden helper、有效 npm scripts | project-owner |
+| M3 | Test foundation and fixtures | Complete | First implementation gate | Q0 | Vitest/Playwright/Worker harness、fixture manifest、golden helper、有效 npm scripts | project-owner |
 | M4 | Single AudioEngine and shared store | Planned | After M3 | M3 | 播放/MusicBar 回归、单一上下文、生命周期证据 | project-owner |
 | M5 | IndexedDB hybrid recovery | Planned | After M4 | M4 | current Blob/cache、handle permission、refresh/quota/schema 证据 | project-owner |
 | M6 | Worker platform and feature registry | Planned | After M5 | M4, M5 | mono/frame/cancel/stale/cache/21-key registry、性能基线 | project-owner |
@@ -54,7 +54,7 @@ next_action: "由 project-owner 审阅 M3 canonical evidence；批准后将 M3 �
 - [x] MP3/WAV/FLAC manifest 包含 provenance/license/hash。
 - [x] 直接 Meyda golden 和容差 helper 有自测。
 - [x] 用户提交后完成 clean-commit canonical run，并创建 `in-review` evidence index。
-- [ ] `project-owner` 审阅并批准 evidence index 与 working agreements。
+- [x] `project-owner` 审阅并批准 evidence index 与 working agreements。
 
 ### M4
 
@@ -121,13 +121,15 @@ next_action: "由 project-owner 审阅 M3 canonical evidence；批准后将 M3 �
 
 ## Current Gate State
 
-- Current stage：M3 Test foundation and fixtures `in-review`。
-- Previous gate：Q0 已由 `project-owner` 于 2026-07-28 批准。
+- Current stage：M4 Single AudioEngine and shared store，已开放、尚未开始实施。
+- Previous gate：M3 已由 `project-owner` 于 2026-07-28 批准并标记 `Complete`。
 - Canonical run：`npm run eval:m3` 已在 clean commit `17d16f0da37289c1f67f75203502beef999572ea` 上通过；摘要见 [evidence index](../quality/evidence-index.md)。
-- Next gate：由 `project-owner` 审阅 M3 evidence index 和 working agreements。
-- M3 state：In Review；evidence review 明确批准前不得标记 Complete。
+- Next gate：完成 M4 AudioEngine/store 实现、MusicBar 回归和单一 AudioContext 生命周期证据。
+- M3 state：Complete；M3 evidence 只证明测试基础，不代表 M4 产品行为通过。
 - Known future blockers：没有真实 Edge 证据时不能完成 M11 或未来 readiness；托管平台未定会阻断 release，但不阻断 Q0/M3。
 
 ## Approval Record
 
 `project-owner` 于 2026-07-28 明确批准 Q0 三份质量设计和两份 delivery 修订。该批准开放 M3，但不代表任何测试、产品行为或 release readiness 已通过。
+
+`project-owner` 于 2026-07-28 明确批准 M3 evidence index 与 working agreements。M3 据此改为 `Complete` 并开放 M4；Edge 和 M4–M11 未执行范围保持不变。

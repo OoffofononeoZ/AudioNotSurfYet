@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: approved
 owner: "project-owner"
 last_reviewed: 2026-07-28
 upstream_docs:
@@ -8,14 +8,14 @@ upstream_docs:
   - "docs/quality/failure-taxonomy.md"
   - "docs/delivery/milestone-plan.md"
   - "tests/fixtures/fixture-manifest.json"
-next_action: "由 project-owner 审阅 M3 canonical evidence；批准后将本文件和 working agreements 标为 approved，并关闭 M3、开放 M4"
+next_action: "在 M4 实施期间追加 AudioEngine/store 回归证据，保留未覆盖 eval 与 evidence gaps"
 ---
 
 # Evidence Index
 
 ## 1. Purpose and Gate State
 
-本文件保存受版本控制的长期证据摘要；原始日志保存在 Git 忽略的本地 artifact 目录。当前只有 M3 测试基础切片的 canonical run，M3 仍为 `In Review`，等待 `project-owner` 审批。
+本文件保存受版本控制的长期证据摘要；原始日志保存在 Git 忽略的本地 artifact 目录。当前只有 M3 测试基础切片的 canonical run；该证据已由 `project-owner` 批准，M3 已关闭并开放 M4。
 
 M3 的 `pass` 只证明测试工具、受控 fixture、direct-Meyda golden、失败检测、Chrome smoke、类型检查和构建门禁在被记录的 commit 上可复现。它不表示完整 EV-A–EV-R、M4–M11 产品行为、Edge 矩阵或 release readiness 已通过。
 
@@ -31,7 +31,7 @@ M3 的 `pass` 只证明测试工具、受控 fixture、direct-Meyda golden、失
 | Dirty at start | `false` |
 | Started at | 2026-07-28 06:39:59.221 UTC |
 | Method | `npm run eval:m3` |
-| Reviewer | `project-owner` — pending |
+| Reviewer | `project-owner` — approved 2026-07-28 |
 | Retention | `local-present` |
 | Artifact root | `artifacts/evals/M3-2026-07-28T06-39-59-221Z-17d16f0d/` |
 | Summary SHA-256 | `edef2dde7f580ddea60ff76b9735f150d287bec77c314214f7a462b9cf71a0a6` |
@@ -109,11 +109,6 @@ M3 的 `pass` 只证明测试工具、受控 fixture、direct-Meyda golden、失
 - `npm audit` 已知仍有一个与 Windows 开发服务器相关的 low esbuild 项；本 run 未将其声称为已修复。
 - 构建通过但保留 1,012.69 kB chunk warning；它不是 M3 失败，也不是性能 readiness 通过证据。
 
-## 6. Review Gate
+## 6. Approval Record
 
-`project-owner` 审阅前，本文件保持 `in-review`，M3 保持 `In Review`。批准时应同时：
-
-1. 将本文件和 [working agreements](../context/working-agreements.md) 标为 `approved`；
-2. 在 delivery 文档中把 M3 标为 `Complete` 并开放 M4；
-3. 保留 EG-003–EG-006 和全部 M4–M11 未执行范围；
-4. 不创建 `release-readiness.md`。
+`project-owner` 于 2026-07-28 明确批准本 M3 evidence 与 [working agreements](../context/working-agreements.md)。本文件改为 `approved`，M3 改为 `Complete` 并开放 M4；EG-003–EG-006、M4–M11 未执行范围及 `release-readiness.md` 后置规则保持不变。
