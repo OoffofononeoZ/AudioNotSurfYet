@@ -1,13 +1,13 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-07-24
+last_reviewed: 2026-07-28
 upstream_docs:
   - "docs/context/index.md"
   - "docs/product/scope.md"
   - "docs/architecture/system-design.md"
   - "docs/delivery/execution-plan.md"
-next_action: "由 project-owner 审阅 Q0 质量设计；批准后再开放 M3 并记录测试工具与 fixture provenance"
+next_action: "记录 M3 实际测试工具、fixture provenance 和 provisional run；提交后再登记正式 evidence"
 ---
 
 # Decision Registry
@@ -29,13 +29,18 @@ next_action: "由 project-owner 审阅 Q0 质量设计；批准后再开放 M3 �
 | ADR-0004 | 2026-07-24 | 使用 21 项穷尽 FeatureRegistry 和 Canvas 2D renderer family；DOM 承担说明、值、焦点和语义；Analyzer 不新增 Three.js | project-owner | approved | [ADR-0004](../architecture/adrs/0004-typed-feature-registry-and-canvas-renderers.md) | 特征 shape、renderer 或无障碍边界改变 |
 | DEC-008 | 2026-07-24 | 实施采用 M1–M11 相对门禁，不承诺日期；M3 从测试基础开始，M7 未通过不得扩展后续特征 | project-owner | approved | [Execution plan](../delivery/execution-plan.md) | 依赖、里程碑、验收门禁或交付优先级改变 |
 | DEC-009 | 2026-07-24 | 当前只批准 execution planning；不预建 quality/release/retrospective，也不自动开始代码实现 | project-owner | superseded by DEC-010 | [Milestone plan](../delivery/milestone-plan.md) | 已由 owner 决定前置三份 quality design |
-| DEC-010 | 2026-07-24 | 在 M3 前增加 Q0：前置 eval plan、golden examples、failure taxonomy；三份文档单独批准后开放 M3，release-readiness 仍等待 M11 证据 | project-owner | approved schedule decision；Q0 content in-review | [Eval plan](../quality/eval-plan.md) | 验收/测试纪律变化，或 owner 改变 Q0/readiness 时序 |
+| DEC-010 | 2026-07-24 | 在 M3 前增加 Q0：前置 eval plan、golden examples、failure taxonomy；三份文档单独批准后开放 M3，release-readiness 仍等待 M11 证据 | project-owner | approved | [Eval plan](../quality/eval-plan.md) | 验收/测试纪律变化，或 owner 改变 Q0/readiness 时序 |
+| DEC-011 | 2026-07-28 | M3 只建设本地门禁；使用 Vitest、fake-indexeddb 和正式 Chrome channel，Edge 缺失保持 evidence gap，不以 Chromium 代替 | project-owner | approved | [Tests README](../../tests/README.md) | CI 范围、浏览器矩阵或测试工具改变 |
+| DEC-012 | 2026-07-28 | canonical 短 fixture 由确定性 PCM 经系统 FFmpeg 生成并使用 CC0-1.0；用户音频默认仅本地使用 | project-owner | approved | [Fixture manifest](../../tests/fixtures/fixture-manifest.json) | 编码器、fixture 来源、许可或入库政策改变 |
+| DEC-013 | 2026-07-28 | 未提交状态只产生 provisional run；用户自行提交后对干净 commit 复跑，才创建正式 evidence index | project-owner | approved | [Working agreements](working-agreements.md) | Git 授权或 evidence identity 政策改变 |
 
 ## Approval Evidence
 
 `project-owner` 于 2026-07-24 通过“PLEASE IMPLEMENT THIS PLAN”明确要求将随请求给出的产品、架构、里程碑和测试决定落入仓库。本注册表记录的是批准的决策；M3–M11 的实现状态仍以 [milestone plan](../delivery/milestone-plan.md) 和可复现证据为准。
 
 同日，`project-owner` 明确要求实施 Q0 质量设计计划，批准了 Q0 前置、四级严重度和 readiness 后置的阶段安排；同时要求三份质量文档先保持 `in-review`，经单独审阅后才生效。因此 DEC-010 的时序决定已批准，但 Q0 内容尚未批准。
+
+`project-owner` 于 2026-07-28 明确批准 Q0 三份质量文档和两份 delivery 修订，DEC-010 的内容门禁随之生效并开放 M3。该批准不构成任何测试、浏览器或 readiness 通过证据。
 
 ## Historical Evidence Gap
 

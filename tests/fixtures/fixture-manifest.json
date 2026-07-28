@@ -1,0 +1,129 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-07-28",
+  "generator": {
+    "id": "m3-audio-fixtures-v1",
+    "path": "tests/fixtures/generate-fixtures.ts",
+    "nodeVersion": "v24.18.0",
+    "ffmpegVersion": "ffmpeg version 8.1.2 Copyright (c) 2000-2026 the FFmpeg developers"
+  },
+  "license": {
+    "spdx": "CC0-1.0",
+    "noticePath": "tests/fixtures/CC0-1.0.txt"
+  },
+  "fixtures": [
+    {
+      "id": "format-master-pcm-v1",
+      "path": "tests/fixtures/audio/format-master.f32le",
+      "purpose": "Canonical deterministic PCM source for encoded format fixtures",
+      "format": "f32le",
+      "sha256": "fb49bd0318a6d6e4cb5b4247bee9a8381e1fd083239dc260a8d2e0f26097e1cb",
+      "bytes": 768000,
+      "sampleRate": 48000,
+      "channels": 1,
+      "durationSeconds": 4,
+      "sourceId": "format-master-pcm-v1",
+      "generationCommand": "npm run fixtures:generate",
+      "generatorVersion": "m3-audio-fixtures-v1",
+      "encoder": {
+        "name": "Node.js Float32LE writer",
+        "version": "v24.18.0",
+        "parameters": [
+          "little-endian",
+          "float32",
+          "sample-rate=48000",
+          "channels=1"
+        ]
+      },
+      "license": "CC0-1.0",
+      "provenance": "Deterministically synthesized by tests/fixtures/generate-fixtures.ts"
+    },
+    {
+      "id": "format-master-wav-v1",
+      "path": "tests/fixtures/audio/format-master.wav",
+      "purpose": "WAV load/decode compatibility",
+      "format": "wav",
+      "sha256": "13ece6c2c1f5c441ef3e6376dc765eea65fe57ece5f2c6dcdcbea1cd2fcacb84",
+      "bytes": 384044,
+      "sampleRate": 48000,
+      "channels": 1,
+      "durationSeconds": 4,
+      "sourceId": "format-master-pcm-v1",
+      "generationCommand": "npm run fixtures:generate",
+      "generatorVersion": "m3-audio-fixtures-v1",
+      "encoder": {
+        "name": "pcm_s16le",
+        "version": "ffmpeg version 8.1.2 Copyright (c) 2000-2026 the FFmpeg developers",
+        "parameters": [
+          "-flags:a",
+          "+bitexact",
+          "-c:a",
+          "pcm_s16le"
+        ],
+        "commandTemplate": "ffmpeg -hide_banner -loglevel error -y -f f32le -ar 48000 -ac 1 -i <temp>/format-master.f32le -map_metadata -1 -fflags +bitexact -flags:a +bitexact -c:a pcm_s16le <temp>/format-master.wav"
+      },
+      "license": "CC0-1.0",
+      "provenance": "Deterministically synthesized by tests/fixtures/generate-fixtures.ts"
+    },
+    {
+      "id": "format-master-mp3-v1",
+      "path": "tests/fixtures/audio/format-master.mp3",
+      "purpose": "MP3 load/decode compatibility",
+      "format": "mp3",
+      "sha256": "8f83304411c6d19de6db279f361a2568087c339d3eaf8312fa6f6a59da3b8771",
+      "bytes": 96768,
+      "sampleRate": 48000,
+      "channels": 1,
+      "durationSeconds": 4.032,
+      "sourceId": "format-master-pcm-v1",
+      "generationCommand": "npm run fixtures:generate",
+      "generatorVersion": "m3-audio-fixtures-v1",
+      "encoder": {
+        "name": "mp3",
+        "version": "ffmpeg version 8.1.2 Copyright (c) 2000-2026 the FFmpeg developers",
+        "parameters": [
+          "-c:a",
+          "libmp3lame",
+          "-b:a",
+          "192k",
+          "-write_xing",
+          "0",
+          "-id3v2_version",
+          "0"
+        ],
+        "commandTemplate": "ffmpeg -hide_banner -loglevel error -y -f f32le -ar 48000 -ac 1 -i <temp>/format-master.f32le -map_metadata -1 -fflags +bitexact -c:a libmp3lame -b:a 192k -write_xing 0 -id3v2_version 0 <temp>/format-master.mp3"
+      },
+      "license": "CC0-1.0",
+      "provenance": "Deterministically synthesized by tests/fixtures/generate-fixtures.ts"
+    },
+    {
+      "id": "format-master-flac-v1",
+      "path": "tests/fixtures/audio/format-master.flac",
+      "purpose": "FLAC load/decode compatibility",
+      "format": "flac",
+      "sha256": "720fd727757f758c3b89b0ab3c59227c97255763a89c6882e49e290612380a25",
+      "bytes": 190716,
+      "sampleRate": 48000,
+      "channels": 1,
+      "durationSeconds": 4,
+      "sourceId": "format-master-pcm-v1",
+      "generationCommand": "npm run fixtures:generate",
+      "generatorVersion": "m3-audio-fixtures-v1",
+      "encoder": {
+        "name": "flac",
+        "version": "ffmpeg version 8.1.2 Copyright (c) 2000-2026 the FFmpeg developers",
+        "parameters": [
+          "-flags:a",
+          "+bitexact",
+          "-c:a",
+          "flac",
+          "-compression_level",
+          "5"
+        ],
+        "commandTemplate": "ffmpeg -hide_banner -loglevel error -y -f f32le -ar 48000 -ac 1 -i <temp>/format-master.f32le -map_metadata -1 -fflags +bitexact -flags:a +bitexact -c:a flac -compression_level 5 <temp>/format-master.flac"
+      },
+      "license": "CC0-1.0",
+      "provenance": "Deterministically synthesized by tests/fixtures/generate-fixtures.ts"
+    }
+  ]
+}

@@ -7,14 +7,20 @@
 | `npm run dev` | 启动 Vite 开发服务器 | 用于浏览器交互，不代表构建通过 |
 | `npm run build` | 先运行 `vue-tsc -b`，再运行 `vite build` | 当前最基本静态与生产构建门禁 |
 | `npm run preview` | 预览构建产物 | 适合核对生产资源路径 |
-| `npm run test:spectrogram` | 执行 `tsx test.ts` | 当前不可作为通过门禁 |
+| `npm run typecheck` | 运行 `vue-tsc -b` | 测试配置、测试 TypeScript 与产品源码的静态门禁 |
+| `npm test` | 执行全部非 E2E Vitest 测试 | 不代表真实浏览器或 Edge 通过 |
+| `npm run test:e2e` | 使用本机稳定 Chrome 运行 Playwright | 当前 Chrome 浏览器门禁 |
+| `npm run test:e2e:edge` | 检测并运行稳定 Edge | Edge 缺失时以退出码 2 明确 blocked |
+| `npm run test:docs` | 检查生命周期 frontmatter、链接和 21 项特征 | 文档门禁 |
+| `npm run eval:m3:provisional` | 未提交工作树的本地 M3 run | 不创建正式 evidence index |
 
 ## 已知测试缺口
 
-- 仓库根目录当前没有 `test.ts`，因此 `test:spectrogram` 的目标文件缺失。
-- 计划来源还记录过受限环境中的 `tsx` IPC 权限错误；当测试文件补齐后，需要在实际执行环境重新确认，不能只沿用历史结论。
-- 未发现 Vitest/Jest/Playwright 配置、单元测试目录或正式 CI 配置。
-- 因此“测试通过”目前最多能表示构建和明确执行的浏览器场景通过，不能表述为完整自动化测试通过。
+- 已建立 Vitest、Playwright、Worker、IndexedDB、fixture、golden、docs 和 deliberate-failure harness。
+- fixture/golden 生成改用 Node 24 原生 type stripping；不依赖在受限环境会产生 IPC `EPERM` 的 `tsx` CLI。
+- 当前没有正式 CI，自动化结论必须限定为本地环境。
+- 当前机器没有 Edge。Chrome 通过不能表述为双浏览器矩阵完成。
+- 正式 M3 evidence 必须等待用户提交后，对干净 commit 复跑；provisional run 不能关闭里程碑。
 
 ## 构建风险
 

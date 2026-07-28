@@ -6,12 +6,16 @@
 
 | ID | 分类 | 已证实证据 | 影响 | 下一步 |
 | --- | --- | --- | --- | --- |
-| ENG-001 | 自动化测试 | `test:spectrogram` 指向不存在的根 `test.ts` | 不能把该脚本作为通过门禁 | 决定 spectrogram 测试契约、fixture 和运行环境后补齐 |
-| ENG-002 | CI | 未发现 `.github/workflows` 或其他正式 CI 配置 | 构建/测试依赖本地手工执行 | 产品与交付阶段确认 CI 范围 |
+| ENG-002 | CI | M3 明确只建立本地门禁，未创建 `.github/workflows` 或其他正式 CI | 构建/测试依赖本地执行 | CI 作为独立后续决策，不阻断 M3 |
 | ENG-003 | 资源释放 | 封面对象 URL 未见 revoke；MusicBar 卸载未见 AudioLoader/队列 URL 全量释放 | 长会话或反复路由可能累积资源 | 在相关代码任务中用浏览器和资源计数复核 |
 | ENG-004 | WebGL 释放 | `LightBg` cleanup 未见 geometry/material 显式 dispose | 可见性反复切换可能累积 GPU 资源 | 在可视化生命周期任务中测量并修复 |
 | ENG-005 | 未完成表面 | ComingSoon、threeDTable、MeydaCard 为空或近空，TestLands/testcomp 为试验内容 | 不能推断公开功能或稳定接口 | 由产品 scope 决定保留、实现或删除 |
 | ENG-006 | 包体积 | 当前构建存在约 1 MB chunk 警告 | 首屏和缓存风险未知 | 先确定性能预算，再决定分包策略 |
+| ENG-007 | 开发依赖审计 | 安全补丁后 `npm audit` 剩余 esbuild 0.27.3 的 1 项 low，影响 Windows 开发服务器任意文件读取 | 当前 macOS 本地门禁不受直接影响，但不能宣称零漏洞 | 不向不受信网络暴露 dev server；上游提供兼容修复后升级并复核 |
+
+## 已关闭工程缺口
+
+- ENG-001：2026-07-28 已删除失效的 `test:spectrogram`，建立 Vitest、Playwright、Worker、IndexedDB、fixture、golden、docs 和 deliberate-failure harness。正式 M3 evidence 仍等待用户提交后的 clean-commit run。
 
 ## 当前仓库漂移
 

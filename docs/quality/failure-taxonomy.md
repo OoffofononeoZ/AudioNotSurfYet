@@ -1,13 +1,13 @@
 ---
-status: in-review
+status: approved
 owner: "project-owner"
-last_reviewed: 2026-07-24
+last_reviewed: 2026-07-28
 upstream_docs:
   - "docs/quality/eval-plan.md"
   - "docs/quality/golden-examples.md"
   - "docs/delivery/acceptance-criteria.md"
   - "docs/architecture/risk-register.md"
-next_action: "由 project-owner 审阅稳定失败类型、S0–S3 严重度和门禁响应；批准前 M3 保持 blocked"
+next_action: "从 M3 首次 provisional run 开始使用本 taxonomy 分类真实失败与 evidence gap"
 ---
 
 # Failure Taxonomy
@@ -56,6 +56,9 @@ failure_type + severity
 - 接受 S2/S3 必须记录失败实例、影响、替代路径、approver `project-owner`、失效日期或复查触发器。
 - 缺失证据默认是 `blocked`，不是 pass。若缺失证据本身导致错误质量声明，分类为 FT-EVIDENCE。
 - `release-readiness.md` 创建后必须分别列出 blockers 和已接受风险，不能用“known issue”合并。
+- 大型报告、trace、截图和性能 dump 只在本地保留是已批准的存储政策，本身不是失败；evidence index 必须保存摘要、关键数值、复现命令、artifact hash 和 retention state。
+- 本地产物标为 `local-deleted` 后，摘要不能单独证明 readiness。需要原始证据的决策必须重新执行 eval；拒绝重跑却声称 ready 分类为 FT-EVIDENCE/S1。
+- S0/S1 相关本地产物若在缺陷关闭和回归获批前被删除，分类为 FT-EVIDENCE/S1；如果删除行为同时掩盖仍可能存在的 S0 影响，继续按 S0 阻断处理。
 
 ## 5. Classification Procedure
 
@@ -84,6 +87,8 @@ FAIL-<run-id>-<sequence>: <failure_type>/<severity>
 | 播放游标偏差 130ms | FT-TIME | S1 | 超过硬阈值 |
 | 当前环境未安装 Edge且状态保持 blocked | 不是失败实例 | — | 是 EG-003 证据缺口；只有错误宣称 Edge 通过时才是 FT-EVIDENCE/S1 |
 | quota 失败后显示 not-persisted 且当前页面继续可用 | 不是失败实例 | — | 是批准的 expected-failure 行为 |
+| 本地产物按政策在里程碑批准后删除，index 保留摘要/hash/命令 | 不是失败实例 | — | 是允许的 retention 状态；未来 readiness 需要时重新执行 |
+| 原始 trace 已删除且拒绝重跑，却宣称性能 readiness 通过 | FT-EVIDENCE | S1 | 缺少支持硬性性能声明的可复现证据 |
 | 非关键辅助说明有错别字且不改变含义 | FT-VISUAL | S3 | 不影响任务或数据语义 |
 
 ## 7. Q0 Approval Gate
@@ -94,4 +99,9 @@ FAIL-<run-id>-<sequence>: <failure_type>/<severity>
 - S0–S3 的定义与硬性 AC 门禁一致；
 - S0/S1 不允许带入下一门禁；
 - S2/S3 的接受条件、approver 和复查触发器明确；
+- local-only artifact 的保留、删除和 readiness 重跑规则明确；
 - expected failure 与真正失败实例被清楚区分。
+
+## 8. Approval Record
+
+`project-owner` 于 2026-07-28 明确批准本文的十类 failure type、S0–S3、门禁响应和本地产物复现规则。

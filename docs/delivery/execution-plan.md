@@ -1,7 +1,7 @@
 ---
-status: in-review
+status: approved
 owner: "project-owner"
-last_reviewed: 2026-07-24
+last_reviewed: 2026-07-28
 upstream_docs:
   - "docs/product/problem-brief.md"
   - "docs/product/scope.md"
@@ -9,7 +9,7 @@ upstream_docs:
   - "docs/architecture/system-design.md"
   - "docs/architecture/interface-contracts.md"
   - "docs/architecture/risk-register.md"
-next_action: "由 project-owner 审阅 Q0 质量设计与本计划修订；Q0 批准前不得开始 M3"
+next_action: "由用户提交 M3 状态；随后对干净 commit 运行 canonical eval 并创建 in-review evidence index"
 ---
 
 # Execution Plan
@@ -18,7 +18,7 @@ next_action: "由 project-owner 审阅 Q0 质量设计与本计划修订；Q0 �
 
 按纵向切片把已批准的本地音频学习体验从当前播放器基础推进到 21 项 Meyda 特征全覆盖。本计划以门禁证据而不是日历日期排序；任一里程碑未通过时，不进入下一批特征。
 
-本文件定义实施顺序和验收方式，不代表 M3–M11 已实现。当前只完成 M1 产品意图门禁和 M2 系统设计门禁；新增的 Q0 质量设计正在 review，M3 尚未开放。
+本文件定义实施顺序和验收方式，不代表 M3–M11 已实现。当前已完成 M1、M2 和 Q0 门禁；M3 测试基础正在实施。
 
 ## 2. Stage Gates
 
@@ -85,7 +85,7 @@ Gate:
 
 ### Q0 — Quality evaluation design
 
-Status：In Review.
+Status：Complete.
 
 Goal：在建立测试工具前锁定评估分组、黄金样例、失败分类和证据缺口，避免 M3–M11 生成不可追溯或只覆盖成功路径的证据。
 
@@ -104,21 +104,23 @@ Gate:
 - 所有尚未执行的项目保持 `planned`，不伪造 fixture、浏览器或测试结果；
 - `release-readiness.md` 不在 Q0 创建，必须等待 M11 执行证据。
 
-Q0 批准前 M3 保持 blocked。Q0 批准只表示证据设计可用于实施，不表示任何产品行为已经通过。
+Q0 已由 `project-owner` 于 2026-07-28 批准。该批准只表示证据设计可用于实施，不表示任何产品行为已经通过。
 
 ### M3 — Test foundation and fixtures
+
+Status：In Review.
 
 Goal：在重构播放和分析前建立可重复的质量基线。
 
 Implementation:
 
 - 引入 Vitest，并分别建立纯函数、store、Worker 和浏览器 API adapter 测试环境。
-- 引入 Playwright，以 Chromium 为默认自动化浏览器；检测本机 Edge channel，有安装时运行 Edge 项目。
+- 引入 Playwright，以本机稳定 Chrome channel 为必需自动化浏览器；检测本机 Edge channel，有安装时运行 Edge 项目，缺失时明确 blocked。
 - 为 IndexedDB 测试使用隔离数据库与可控 adapter；单元层可使用 `fake-indexeddb`，浏览器层使用真实 IndexedDB。
 - 生成 silence、正弦、双音、impulse PCM fixture；所有生成参数由脚本固定。
 - 由同一源 PCM 生成短 MP3/WAV/FLAC，并记录来源、生成命令、编码器版本、许可和 SHA-256。
 - 建立直接 Meyda 黄金提取器和浮点比较 helper。
-- 修复或重定向当前指向缺失 `test.ts` 的 `npm run test:spectrogram`，使所有公开测试脚本可执行。
+- 删除当前指向缺失 `test.ts` 的 `npm run test:spectrogram`，不保留兼容别名，并使所有公开测试脚本可执行。
 - 增加 Markdown frontmatter、内部链接和 feature count 检查。
 
 Verification:
@@ -131,6 +133,12 @@ Verification:
 Rollback:
 
 - 测试工具若与 Vite/Vue 版本不兼容，先回退工具配置，不修改产品代码规避测试。
+
+Evidence state:
+
+- 2026-07-28 provisional run 已通过 fixture、unit、Worker、analysis、docs、deliberate failure、typecheck、Chrome E2E、build 和 diff check；
+- provisional run 基于 dirty worktree，只证明当前本地实现可执行，不是 canonical milestone evidence；
+- M3 保持 `In Review`，等待用户提交后对干净 commit 复跑。
 
 ### M4 — AudioEngine and audioSessionStore
 
@@ -322,4 +330,4 @@ Gate:
 
 `project-owner` 于 2026-07-24 批准了原 M1–M11 实施顺序。其后又明确要求在 M3 前增加 Q0 质量设计，并将 readiness 延后到 M11 证据完成后。
 
-本次修订和三份 Q0 文档当前为 `in-review`。只有 `project-owner` 单独审阅并将它们批准后，本文才能恢复为 `approved` 并开放 M3；不得把“要求实施计划”自动解释为 Q0 内容审阅通过。
+`project-owner` 于 2026-07-28 明确批准 Q0 三份质量设计及本次 delivery 修订。本文恢复为 `approved` 并开放 M3；全部尚未执行的 eval 仍保持 `planned`，该批准不构成测试或 readiness 证据。

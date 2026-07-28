@@ -2,7 +2,7 @@
 
 ## 证据基线
 
-- 最后核对日期：2026-07-24。
+- 最后核对日期：2026-07-28。
 - 首要来源：当前仓库的 `package.json`、配置、`src/`、Git 状态与 Git 历史。
 - 补充来源：Codex 任务 `019f82bc-0838-7ab3-baba-1a7571992901`；只保留其中能由当前仓库或可复现验证支持的长期事实。
 - 历史任务结论不得覆盖当前代码；差异记录在 [开放问题与项目差异](99-open-questions-and-project-deltas.md)。
@@ -34,6 +34,7 @@
 | `src/utils/` | mitt 单例、能量角度映射、时间格式化和 clamp | `emitter.ts`、`utils.ts` |
 | `src/data/` | Analyzer 页面使用的静态 Meyda 特征说明 | `analyzerData.ts` |
 | `public/` | 默认封面、SVG 图标和静态资源；本地测试音频目录被 `.gitignore` 排除 | `public/`、`.gitignore` |
+| `tests/` | Vitest、Playwright、Worker/IndexedDB harness、确定性 fixture、golden 和本地 eval runner | `tests/README.md`、测试配置 |
 
 ## 边界
 

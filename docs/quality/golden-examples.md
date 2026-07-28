@@ -1,13 +1,13 @@
 ---
-status: in-review
+status: approved
 owner: "project-owner"
-last_reviewed: 2026-07-24
+last_reviewed: 2026-07-28
 upstream_docs:
   - "docs/quality/eval-plan.md"
   - "docs/delivery/acceptance-criteria.md"
   - "docs/delivery/test-strategy.md"
   - "docs/architecture/risk-register.md"
-next_action: "由 project-owner 审阅样例输入、预期和追溯关系；M3 再生成 fixture 与实际 golden 数据"
+next_action: "在 M3 生成实际短格式 fixture、manifest 和首批 direct-Meyda golden"
 ---
 
 # Golden Examples
@@ -24,6 +24,15 @@ next_action: "由 project-owner 审阅样例输入、预期和追溯关系；M3 
 不得使用或提交用户私有音频、文件路径或不可追溯二进制。
 
 固定分析参数：frame 1024、hop 512、Hanning、MFCC 13、average-mono 和实际分析 PCM sample rate。
+
+### Fixture packaging policy
+
+- M3 提交一个短小、确定性的 PCM master，以及由它生成的 WAV、MP3、FLAC 格式 fixture、生成脚本和 `tests/fixtures/fixture-manifest.json`。
+- manifest 只能在真实文件存在时创建；每条记录必须包含 ID、路径、用途、格式、SHA-256、字节数、采样率、声道、时长、source ID、生成命令、生成器/编码器版本与参数、license 和 provenance。
+- silence、正弦、双音、impulse 和三个学习样例的 PCM 可以由测试运行时确定性生成，不要求提交重复二进制。
+- 15 分钟容量样本必须在运行时生成或缓存于被忽略的本地产物目录，不得提交 Git。
+- fixture、生成器、编码器参数或 manifest 任一项缺失时，相关 GE/EV 保持 planned 或 blocked，不能生成黄金通过声明。
+- M3 已建立生成器并提交短 PCM/WAV/MP3/FLAC、manifest 与首批 golden；2026-07-28 provisional run 通过。它们尚未绑定包含本次改动的干净 commit，因此不能据此关闭 M3 或声明相关产品 eval 通过。
 
 ## 2. Success Examples
 
@@ -82,4 +91,9 @@ next_action: "由 project-owner 审阅样例输入、预期和追溯关系；M3 
 - golden 数据必须绑定 fixture hash、生成器版本、Meyda 版本和 AnalysisConfig。
 - 更新 golden 时显示旧值、新值、数值 diff 和原因；测试失败不得自动覆盖。
 - fixture 编码器或浏览器解码路径改变时，相关 golden 标记待复核。
+- 提交的短格式 fixture 必须可由 manifest 中的命令重建并重新计算出相同 SHA-256；无法重建时分类为证据缺口或 FT-EVIDENCE。
 - 任何容差变更必须先更新并重新批准 acceptance criteria，随后使本文件和 eval plan 待复核。
+
+## 8. Approval Record
+
+`project-owner` 于 2026-07-28 明确批准本文的样例、fixture 入库政策和追溯规则。批准不表示任何样例已经执行或通过。

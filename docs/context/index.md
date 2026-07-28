@@ -1,10 +1,10 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-07-24
+last_reviewed: 2026-07-28
 upstream_docs:
   - "AGENTS.md"
-next_action: "由 project-owner 审阅 Q0 质量设计和 delivery 修订；批准前不得开始 M3"
+next_action: "由用户提交 M3 状态；随后对干净 commit 复跑并创建正式 evidence index"
 ---
 
 # Repository Context Index
@@ -17,12 +17,12 @@ AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端：用户选择
 
 ## Current Stage
 
-- Repository context：入口与决策注册表已更新；详细 system map、glossary 和 working agreements 仍是基于当前代码的 `draft`，实现中需持续校正。
+- Repository context：入口与决策注册表已更新；working agreements 因写入 M3 真实工具事实处于 `in-review`，system map 和 glossary 仍为 `draft`。
 - Product intent：problem brief、scope 和 success metrics 已由 `project-owner` 批准；开放问题只保留未来上传、未定义 Tab、托管和扩展研究等非当前门禁事项。
 - System design：system design、接口契约、风险和四个 ADR 已批准。
-- Execution planning：acceptance criteria 和 test strategy 保持 approved；execution plan 与 milestone plan 因新增 Q0 门禁处于 `in-review`。
-- Quality and evals：eval plan、golden examples、failure taxonomy 已前置创建并处于 `in-review`；它们只定义证据设计。
-- Implementation：尚未开始；M3 被 Q0 批准门禁阻塞。
+- Execution planning：execution plan、acceptance criteria、test strategy 和 milestone plan 均为 approved。
+- Quality and evals：eval plan、golden examples、failure taxonomy 已由 `project-owner` 批准；它们只定义证据设计，全部 eval 尚未执行。
+- Implementation：M3 测试基础、fixture 和 provisional run 已完成，当前为 `in-review`；尚无包含本次改动的 canonical commit run 或正式 evidence index。
 - Readiness、release、retrospective：`release-readiness.md` 等待 M11 执行证据，不创建 release 或 retrospective 文档。
 
 ## Key Documents
@@ -33,7 +33,7 @@ AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端：用户选择
 | [system-map.md](system-map.md) | 当前子系统、接口和外部依赖 | unknown / draft | 当前代码边界变化 |
 | [glossary.md](glossary.md) | 当前项目词汇与代码含义 | unknown / draft | 术语、状态或类型含义变化 |
 | [decision-registry.md](decision-registry.md) | 产品、架构和交付决策入口 | project-owner / approved | 形成、撤销或替代重要决策 |
-| [working-agreements.md](working-agreements.md) | 本地开发、验证和 Git 约定 | unknown / draft | 工具链或验证能力变化 |
+| [working-agreements.md](working-agreements.md) | 本地开发、验证和 Git 约定 | project-owner / in-review | 工具链或验证能力变化 |
 | [problem-brief.md](../product/problem-brief.md) | 目标用户、问题和期望结果 | project-owner / approved | 目标用户或核心问题变化 |
 | [scope.md](../product/scope.md) | 当前范围、纵向切片和非目标 | project-owner / approved | 能力、数据或兼容范围变化 |
 | [success-metrics.md](../product/success-metrics.md) | 正确性、同步、响应和学习指标 | project-owner / approved | 阈值、样本或观测方法变化 |
@@ -41,13 +41,13 @@ AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端：用户选择
 | [system-design.md](../architecture/system-design.md) | 目标组件、数据流、失败和恢复 | project-owner / approved | 产品意图或核心系统边界变化 |
 | [interface-contracts.md](../architecture/interface-contracts.md) | 内部 TypeScript 和 Worker/存储契约 | project-owner / approved | 消息、schema、身份或失败语义变化 |
 | [risk-register.md](../architecture/risk-register.md) | 技术风险、触发器和缓解证据 | project-owner / approved | 每个里程碑及新高影响风险 |
-| [execution-plan.md](../delivery/execution-plan.md) | Q0 与 M1–M11 实施顺序和门禁 | project-owner / in-review | 范围、架构或任务依赖变化 |
+| [execution-plan.md](../delivery/execution-plan.md) | Q0 与 M1–M11 实施顺序和门禁 | project-owner / approved | 范围、架构或任务依赖变化 |
 | [acceptance-criteria.md](../delivery/acceptance-criteria.md) | 可测量验收与阈值 | project-owner / approved | 成功指标、容差或支持矩阵变化 |
 | [test-strategy.md](../delivery/test-strategy.md) | 测试层级、fixture 和证据策略 | project-owner / approved | 工具、fixture 或验证能力变化 |
-| [milestone-plan.md](../delivery/milestone-plan.md) | 相对目标、状态和退出证据 | project-owner / in-review | 里程碑关闭或阻塞状态变化 |
-| [eval-plan.md](../quality/eval-plan.md) | 七组评估、阈值、AC/risk 映射和证据缺口 | project-owner / in-review | 验收、测试覆盖或风险变化 |
-| [golden-examples.md](../quality/golden-examples.md) | 成功、失败、边界和异常黄金样例 | project-owner / in-review | fixture、Meyda、参数或用户任务变化 |
-| [failure-taxonomy.md](../quality/failure-taxonomy.md) | 稳定失败类型、S0–S3 和门禁响应 | project-owner / in-review | 失败分类或风险接受规则变化 |
+| [milestone-plan.md](../delivery/milestone-plan.md) | 相对目标、状态和退出证据 | project-owner / approved | 里程碑关闭或阻塞状态变化 |
+| [eval-plan.md](../quality/eval-plan.md) | 七组评估、阈值、AC/risk 映射和证据缺口 | project-owner / approved | 验收、测试覆盖或风险变化 |
+| [golden-examples.md](../quality/golden-examples.md) | 成功、失败、边界和异常黄金样例 | project-owner / approved | fixture、Meyda、参数或用户任务变化 |
+| [failure-taxonomy.md](../quality/failure-taxonomy.md) | 稳定失败类型、S0–S3 和门禁响应 | project-owner / approved | 失败分类或风险接受规则变化 |
 
 ## Architecture Decisions
 
@@ -67,6 +67,7 @@ AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端：用户选择
 | `src/stores/` | 当前配置与共享音频能量 | M4 audioSessionStore |
 | `src/utils/` | 事件总线与纯工具函数 | 实现时按实际边界维护 |
 | `src/data/` | `analyzerData.ts` 的 21 项 Meyda 说明 | M6 FeatureRegistry |
+| `tests/` | M3 本地测试、fixture、golden、浏览器 harness 和 eval runner | [tests README](../../tests/README.md) |
 | `skills/audio-visualizer-dev/` | 本项目开发、验证和文档路由 Skill | [SKILL.md](../../skills/audio-visualizer-dev/SKILL.md) |
 
 ## Lifecycle Entry Points
@@ -81,8 +82,7 @@ AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端：用户选择
 
 ## Current Known Gaps
 
-- 尚无 Vitest/Playwright/Worker 测试基线；`npm run test:spectrogram` 仍指向缺失的 `test.ts`，由 M3 修复或重定向。
-- Q0 三份质量设计和 delivery 修订尚未由 `project-owner` 单独批准，因此 M3 当前 blocked。
+- M3 provisional run 已通过，但当前 worktree 未提交；EG-001/EG-002 仍等待 clean-commit canonical run。
 - 当前实现尚未完成 AudioEngine/store 分离、IndexedDB 恢复、Worker 全曲分析或共享四卡时间轴。
 - 当前机器尚未发现 Edge；没有真实 Edge 证据时不能完成 M11 双浏览器门禁。
 - 正式托管平台和生产 URL 尚未决定；它们只阻断未来 release，不阻断 M3。
@@ -91,4 +91,4 @@ AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端：用户选择
 
 ## Approval Record
 
-`project-owner` 于 2026-07-24 批准了产品、架构和原执行计划，并随后要求增加 Q0 质量设计。当前索引准确反映 Q0 为 `in-review`；它不代表代码实现、质量执行或 readiness 已经完成。
+`project-owner` 于 2026-07-24 批准了产品、架构和原执行计划，并随后要求增加 Q0 质量设计；又于 2026-07-28 明确批准三份 Q0 质量文档及两份 delivery 修订。Q0 批准只开放 M3，不代表代码实现、质量执行或 readiness 已经完成。
