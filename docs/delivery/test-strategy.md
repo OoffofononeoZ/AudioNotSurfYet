@@ -1,13 +1,13 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-07-24
+last_reviewed: 2026-07-28
 upstream_docs:
   - "docs/product/success-metrics.md"
   - "docs/architecture/interface-contracts.md"
   - "docs/delivery/acceptance-criteria.md"
   - "docs/delivery/execution-plan.md"
-next_action: "在 M3 建立 Vitest、Playwright、Worker harness 与 fixture manifest，并让公开测试脚本可执行"
+next_action: "完成 M3 provisional run；用户提交后对干净 commit 复跑并创建 evidence index"
 ---
 
 # Test Strategy
@@ -201,7 +201,7 @@ npm run test:docs
 npm run build
 ```
 
-当前 `test:spectrogram` 指向不存在的 `test.ts`。M3 必须删除这个失效入口或把它重定向到正式 `test:analysis`，并在 README/working agreements 中只列真实可执行命令。
+M3 已选择删除指向不存在 `test.ts` 的 `test:spectrogram`，不保留兼容别名。README/working agreements 只列真实执行成功的命令。
 
 每一里程碑执行与其相关的最快测试；门禁关闭前再运行完整相关矩阵、build、文档检查和 `git diff --check`。
 
@@ -210,7 +210,7 @@ npm run build
 - 单元/JUnit、Playwright HTML、trace、截图、fixture manifest 和手工任务记录使用稳定目录和 run ID。
 - 不把用户私有音频、路径或内容写入证据。
 - 大型 trace 不永久进入 Git 时，记录生成命令、环境和受控存放位置。
-- quality 阶段将引用这些证据创建 eval plan 和 release-readiness；本阶段不预建对应文件。
+- 已批准的 eval plan 从 M3 开始约束证据；首个 canonical run 存在后才创建 evidence index，release-readiness 仍等待 M11 完整证据。
 
 ## 12. Exit Criteria
 
