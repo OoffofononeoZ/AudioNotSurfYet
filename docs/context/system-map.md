@@ -4,7 +4,7 @@ owner: "project-owner"
 last_reviewed: 2026-07-29
 upstream_docs:
   - "docs/context/index.md"
-next_action: "用 M5 canonical evidence 核对持久化、权限与恢复边界"
+next_action: "用 M5 原生权限人工检查与 owner review 核对恢复边界"
 ---
 
 # System Map

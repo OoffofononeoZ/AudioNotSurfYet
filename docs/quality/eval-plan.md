@@ -8,14 +8,14 @@ upstream_docs:
   - "docs/delivery/execution-plan.md"
   - "docs/delivery/acceptance-criteria.md"
   - "docs/delivery/test-strategy.md"
-next_action: "完成 M5 EV-D 适用子集的 provisional、原生权限人工检查和 canonical evidence"
+next_action: "完成 M5 EG-006 原生权限人工检查，并审阅 EV-D canonical evidence"
 ---
 
 # Eval Plan
 
 ## 1. Purpose and Current State
 
-本文件定义 AudioNotSurfYet 的质量证据契约。Vitest、Playwright、Worker harness、受控 fixture 和 direct-Meyda golden 已在 M3 建立。M3 canonical evidence 已获批，M4 clean-commit [canonical run](evidence-index.md) 对 EV-S、EV-B、EV-R 的适用子集也已获批。M5 正在为 EV-D 的适用子集生成实现与 provisional 反馈；在 clean-commit canonical run、原生权限人工检查和 owner 审批前，M5 EV-D 不标记为通过。完整 EV-A–EV-R、Edge 矩阵和 M6–M11 产品行为仍为 `planned`。
+本文件定义 AudioNotSurfYet 的质量证据契约。Vitest、Playwright、Worker harness、受控 fixture 和 direct-Meyda golden 已在 M3 建立。M3 canonical evidence 已获批，M4 clean-commit [canonical run](evidence-index.md) 对 EV-S、EV-B、EV-R 的适用子集也已获批。M5 clean-commit canonical 自动化已为 EV-D 的适用子集产生 `in-review` 证据；在原生权限人工检查和 owner 审批前，M5 EV-D 不标记为完整通过。完整 EV-A–EV-R、Edge 矩阵和 M6–M11 产品行为仍为 `planned`。
 
 Q0 只批准“如何判断质量”，不批准 release readiness。`docs/quality/release-readiness.md` 只能在 M11 已产生完整成功、失败、边界和异常证据后创建。
 
@@ -126,7 +126,7 @@ Q0 只批准“如何判断质量”，不批准 release readiness。`docs/quali
 | Field | Requirement |
 | --- | --- |
 | `eval_id` | 上述稳定 EV ID |
-| `state` | planned、pass、fail、blocked 或 waived；当前全部为 planned |
+| `state` | planned、pass、fail、blocked 或 waived；已执行子集以 evidence index 为准 |
 | `run_id` | 可追溯且不含用户私有文件信息 |
 | `commit` | 被验证源码状态 |
 | `environment` | OS、浏览器/版本、Node、Meyda、硬件说明 |
@@ -147,7 +147,7 @@ Q0 只批准“如何判断质量”，不批准 release readiness。`docs/quali
 - Playwright report、trace、截图和性能 dump 使用 `test-results/`、`playwright-report/`、`artifacts/evals/<run-id>/`，只在本地保留；M3 建立这些路径时再同步加入 `.gitignore`。
 - 本地产物至少保留到对应里程碑批准；与 S0/S1 有关的产物保留到缺陷关闭及回归获批。删除后把 evidence index 的 `retention_state` 改为 `local-deleted`，不得删除摘要、hash 或复现命令。
 - `local-deleted` 摘要不能单独支持未来 release readiness。若 readiness 需要检查原始报告、trace 或截图，必须重新运行相应 eval 并产生新的 run record。
-- M4 canonical artifact 已在 Git 忽略目录生成并追加到 evidence index；该 run 绑定干净 commit，仍需 owner 审批后才可关闭 M4。更早的 dirty-worktree provisional artifact 只保留为实现反馈。
+- M3/M4 已批准 canonical artifact 与 M5 `in-review` canonical artifact 均在 Git 忽略目录保留；M5 原生权限人工记录与 owner 审批前不得关闭 M5。dirty-worktree provisional artifact 只保留为实现反馈。
 
 ## 7. Evidence Gaps
 
