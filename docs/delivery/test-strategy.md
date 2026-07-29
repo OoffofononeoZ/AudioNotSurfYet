@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/architecture/interface-contracts.md"
   - "docs/delivery/acceptance-criteria.md"
   - "docs/delivery/execution-plan.md"
-next_action: "完成 M5 repository/recovery/Chrome provisional 与原生权限人工矩阵"
+next_action: "完成 M5 原生权限人工矩阵并审阅 canonical evidence"
 ---
 
 # Test Strategy
@@ -214,4 +214,4 @@ M3 已选择删除指向不存在 `test.ts` 的 `test:spectrogram`，不保留�
 
 ## 12. Exit Criteria
 
-M3 的公开命令、fixture、黄金比较和失败检测已有 clean-commit canonical pass，并已由 `project-owner` 批准。M4 的 AudioEngine/session/Chrome 适用测试也已在 clean commit 上 canonical pass、记录在 [evidence index](../quality/evidence-index.md) 并获 owner 批准。M5 已建立 repository、recovery integration 与 Chrome IndexedDB/OPFS 测试；在 provisional、原生权限人工检查、clean-commit canonical 和 owner 审批完成前不关闭 M5。
+M3 的公开命令、fixture、黄金比较和失败检测已有 clean-commit canonical pass，并已由 `project-owner` 批准。M4 的 AudioEngine/session/Chrome 适用测试也已在 clean commit 上 canonical pass、记录在 [evidence index](../quality/evidence-index.md) 并获 owner 批准。M5 repository、recovery integration 与 Chrome IndexedDB/OPFS 已在 clean commit canonical 通过并登记为 `in-review`；在原生权限人工检查和 owner 审批完成前不关闭 M5。

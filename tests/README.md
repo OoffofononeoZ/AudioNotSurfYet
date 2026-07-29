@@ -8,7 +8,7 @@
 - FFmpeg：8.1.2；只用于生成和检查受控 WAV/MP3/FLAC fixture。
 - Microsoft Edge 当前未安装。`npm run test:e2e:edge` 会以退出码 2 报告 `blocked`，不会伪装成 pass。
 
-M3–M5 不建设 CI。下列命令当前均为本地门禁；正式证据要求在用户提交后的干净 commit 上复跑。M3/M4 canonical run 已登记到 [evidence index](../docs/quality/evidence-index.md) 并由 owner 批准；M5 当前只允许 dirty-worktree provisional。
+M3–M5 不建设 CI。下列命令当前均为本地门禁；正式证据要求在用户提交后的干净 commit 上复跑。M3/M4 canonical run 已登记到 [evidence index](../docs/quality/evidence-index.md) 并由 owner 批准；M5 canonical 已登记并处于 `in-review`。
 
 当前 `npm audit` 在安全补丁更新后剩余 1 项 low：Vite 依赖的 esbuild 0.27.3 在 Windows 开发服务器场景存在本地任意文件读取风险。仓库目标验证机为 macOS，开发服务器不得暴露到不受信网络；依赖升级提供修复版本后复核。该缺口不被描述为已修复或生产 readiness。
 
@@ -97,4 +97,6 @@ M5 浏览器测试把受控 fixture 写入浏览器 OPFS，再由注入的 `show
 
 2026-07-29 的 M5 provisional run 为 `M5-2026-07-29T07-03-16-207Z-2eb98381-provisional`，summary SHA-256 为 `7b0acaf128ac4a7ceffce1449d2421127d20c8b25dcdc1ebd07b889072228530`。16/16 步骤通过；M5 Chrome 为 3/3，M4 回归 60 秒漂移 5ms、三次 seek 最大误差 66.827ms。它绑定 dirty worktree，只作实现反馈，不进入正式 evidence index。
 
-本 README 只记录已存在且至少成功执行过一次的命令。M4 canonical evidence 已于 2026-07-29 获批并开放 M5；M5 provisional 不等同于 canonical evidence、M5 owner approval、Edge 矩阵或 release readiness。
+同日 M5 canonical run `M5-2026-07-29T07-08-25-199Z-c90a3c57` 在 clean commit `c90a3c5738de5b7a4efb7eb24cddc49da3713b44` 上 16/16 通过，summary SHA-256 为 `6257426baa601289d89c10e97d76d866a637227fd042080deb947af17c982d2a`。M5 Chrome 为 3/3，M4 回归 60 秒漂移 4ms、三次 seek 最大误差 66.827ms；正式摘要见 [evidence index](../docs/quality/evidence-index.md)。
+
+本 README 只记录已存在且至少成功执行过一次的命令。M5 canonical 自动化通过不等同于 EG-006 原生权限人工检查、M5 owner approval、Edge 矩阵或 release readiness。

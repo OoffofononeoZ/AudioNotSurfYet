@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/context/index.md"
   - "docs/delivery/test-strategy.md"
   - "docs/quality/eval-plan.md"
-next_action: "审阅 M5 IndexedDB、File System Access 和恢复验证约定；提交后运行 canonical suite"
+next_action: "完成原生权限人工检查，并随 M5 canonical evidence 由 project-owner 审批"
 ---
 
 # Working Agreements
@@ -42,8 +42,9 @@ next_action: "审阅 M5 IndexedDB、File System Access 和恢复验证约定；�
 - `test-results/`、`playwright-report/` 和 `artifacts/evals/<run-id>/` 为 Git 忽略的本地产物。
 - 未提交工作树只能产生 provisional run；正式 milestone evidence 必须引用用户提交后的干净 commit。
 - M4 provisional run 只作为实现反馈；`eval:m4` 已在 clean commit `e5cfe9e8ab62301f3c5b0ddcdd37847a2e131a0f` 上通过、追加 evidence index 并由 `project-owner` 批准。
-- M5 dirty worktree 只运行 `eval:m5:provisional`；用户提交后才运行要求 clean HEAD 的 `eval:m5` 并追加正式 evidence。原生权限人工检查与自动化结果必须分开记录。
+- M5 dirty worktree 只运行 `eval:m5:provisional`；要求 clean HEAD 的 `eval:m5` 已对提交 `c90a3c5738de5b7a4efb7eb24cddc49da3713b44` 运行并追加正式 evidence。原生权限人工检查与自动化结果必须分开记录。
 - 2026-07-29 的 M5 provisional run 16/16 通过；它绑定 dirty worktree，只证明当前实现值得提交和 canonical 复跑，不关闭 M5。
+- 同日 M5 canonical run 16/16 通过，起止工作树均干净且 commit 身份一致；它不替代 EG-006 原生权限人工检查，owner 审批前不关闭 M5。
 - 首个 canonical run 已记录在 [evidence index](../quality/evidence-index.md)；本地产物保留和删除规则以 [eval plan](../quality/eval-plan.md) 为准。
 - fixture、manifest 和 golden 是受版本控制的规范输入；更新必须可重建、显示 diff，并重新执行对应测试。
 

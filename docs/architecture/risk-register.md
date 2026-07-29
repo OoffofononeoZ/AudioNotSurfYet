@@ -5,7 +5,7 @@ last_reviewed: 2026-07-29
 upstream_docs:
   - "docs/architecture/system-design.md"
   - "docs/architecture/interface-contracts.md"
-next_action: "用 M5 canonical 与原生权限人工证据复核 R-003、R-005、R-006、R-007"
+next_action: "用 M5 原生权限人工证据与 owner 审批复核 R-003、R-005、R-006、R-007"
 ---
 
 # Risk Register
@@ -18,9 +18,9 @@ next_action: "用 M5 canonical 与原生权限人工证据复核 R-003、R-005�
 | R-002 | Worker 迟到结果覆盖新歌曲或新卡片 | Medium | High | 快速换歌/换卡时图表身份不一致 | job generation + track/config/feature 身份；stale 丢弃单元/集成测试 | 即使取消不及时，身份检查仍是正确性边界 | project-owner | Open |
 | R-003 | 15 分钟频谱造成内存、IPC 或 IndexedDB 膨胀 | High | High | typed array、postMessage、cache 大小持续增长；quota 失败 | 最多 30Hz 聚合、向量量化、只缓存活动特征和当前歌曲、精确值按需提取；最大输入 profile | 缓存失败时不保存，刷新后重算 | project-owner | Open |
 | R-004 | 分析或 Canvas 重绘阻塞主线程 | Medium | High | 输入反馈超过 100ms或分析归因长任务超过 50ms | Meyda/聚合/量化放 Worker；静态/游标分层；PerformanceObserver 与 trace | 降低显示采样或可视层细节，不降低精确游标值 | project-owner | Open |
-| R-005 | File System Access 权限跨会话丢失 | High | Medium | `queryPermission()` 返回 prompt/denied | M5 已实现保存当前 Blob、启动只查询、用户点击后 request 和可见三态；自动化 OPFS 与原生权限人工检查分开 | 未授权歌曲显示恢复访问，不阻断当前 Blob；canonical/人工证据待补 | project-owner | Accepted |
-| R-006 | 文件移动、替换或内容变化导致错误缓存 | Medium | High | 句柄 `getFile()` 失败或 hash 变化 | M5 以 SHA-256 为最终身份并对 missing/changed 建立状态和重选路径；单元/集成覆盖，原生移动人工检查待补 | track 保留在队列并显示明确恢复状态 | project-owner | Open |
-| R-007 | IndexedDB quota 或事务失败破坏当前会话 | Medium | Medium | Blob/cache put 抛 quota/abort | M5 current Blob/cache 同事务替换；abort 保留旧记录，保存失败保持内存播放并显示 not-persisted；canonical 待补 | 刷新后需重新授权或重新分析 | project-owner | Open |
+| R-005 | File System Access 权限跨会话丢失 | High | Medium | `queryPermission()` 返回 prompt/denied | M5 clean-commit canonical 已验证保存当前 Blob、启动只查询、用户点击后 request 和可见三态的 adapter/OPFS 子集；原生权限人工检查保持分开 | 未授权歌曲显示恢复访问，不阻断当前 Blob；EG-006 与 owner review 待补 | project-owner | Accepted |
+| R-006 | 文件移动、替换或内容变化导致错误缓存 | Medium | High | 句柄 `getFile()` 失败或 hash 变化 | M5 canonical 已验证 SHA-256 最终身份、tampered current Blob、missing/changed 和重选 adapter；原生文件移动人工检查待补 | track 保留在队列并显示明确恢复状态 | project-owner | Open |
+| R-007 | IndexedDB quota 或事务失败破坏当前会话 | Medium | Medium | Blob/cache put 抛 quota/abort | M5 canonical 已验证 current Blob/cache 同事务替换、abort 保留旧记录、保存失败保持内存播放并显示 not-persisted | 刷新后需重新授权或重新分析；owner review 待补 | project-owner | Open |
 | R-008 | MP3/WAV/FLAC 解码或采样率在浏览器间不同 | Medium | High | golden fixture 帧数、sample rate 或结果偏差 | 同源短 fixture 记录 provenance/hash；Chrome/Edge 实测；AnalysisConfig 记录实际 PCM sample rate | 格式不支持时明确报错；不声明未验证浏览器完成 | project-owner | Open |
 | R-009 | 浏览器解码把编码源重采样到输出设备采样率 | Medium | Medium | `AudioBuffer.sampleRate` 与元数据不同 | fixture 验证；必要时用指定采样率 OfflineAudioContext 生成分析 PCM；缓存身份包含实际采样率 | UI 显示传入分析的真实 PCM 采样率 | project-owner | Open |
 | R-010 | 量化让显示数据误导学习者 | Medium | High | 热图与精确结果不一致或小信号消失 | 明确 scale/offset、饱和测试、视觉 golden；游标显示未量化按需结果 | 对不适合量化的 feature 使用 Float32 payload | project-owner | Open |

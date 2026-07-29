@@ -4,7 +4,7 @@ owner: "project-owner"
 last_reviewed: 2026-07-29
 upstream_docs:
   - "docs/context/index.md"
-next_action: "在 M5 canonical evidence 后复核持久化术语"
+next_action: "随 M5 evidence 与 working agreements 一并复核持久化术语"
 ---
 
 # Glossary

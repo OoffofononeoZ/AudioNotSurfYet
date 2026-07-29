@@ -9,7 +9,7 @@ upstream_docs:
   - "docs/architecture/system-design.md"
   - "docs/architecture/interface-contracts.md"
   - "docs/architecture/risk-register.md"
-next_action: "实施并验证 M5 IndexedDB hybrid recovery；不进入 M6"
+next_action: "完成 M5 原生权限人工检查与 owner evidence 审批；不进入 M6"
 ---
 
 # Execution Plan
@@ -18,7 +18,7 @@ next_action: "实施并验证 M5 IndexedDB hybrid recovery；不进入 M6"
 
 按纵向切片把已批准的本地音频学习体验从当前播放器基础推进到 21 项 Meyda 特征全覆盖。本计划以门禁证据而不是日历日期排序；任一里程碑未通过时，不进入下一批特征。
 
-本文件定义实施顺序和验收方式，不代表未关闭里程碑已通过。当前已完成 M1、M2、Q0、M3 和 M4 门禁；M5 IndexedDB hybrid recovery 已开放并进入实施。
+本文件定义实施顺序和验收方式，不代表未关闭里程碑已通过。当前已完成 M1、M2、Q0、M3 和 M4 门禁；M5 IndexedDB hybrid recovery 已完成实现与 canonical 自动化，状态为 `In Review`。
 
 ## 2. Stage Gates
 
@@ -175,7 +175,7 @@ Rollback:
 
 ### M5 — IndexedDB session recovery
 
-Status：In Progress。
+Status：In Review。
 
 Goal：实现最近一次会话和权限可见的混合恢复。
 
@@ -202,8 +202,10 @@ Evidence state:
 - M4 60 秒时钟回归在本次运行中漂移 5ms，三次 seek 最大误差 66.827ms；
 - run ID 为 `M5-2026-07-29T07-03-16-207Z-2eb98381-provisional`，summary SHA-256 为 `7b0acaf128ac4a7ceffce1449d2421127d20c8b25dcdc1ebd07b889072228530`；
 - 该 run 的 dirty-at-start 为 true，只作实现反馈，不追加正式 evidence index；
-- 原生 OS picker 的 granted/prompt/denied 与文件移动仍需使用本地样本人工检查；
-- 用户提交后必须重新运行 clean-commit `eval:m5`，才可登记正式 evidence 并请求 owner 审批。
+- `eval:m5` 已在 clean commit `c90a3c5738de5b7a4efb7eb24cddc49da3713b44` 上通过 16/16；run ID 为 `M5-2026-07-29T07-08-25-199Z-c90a3c57`，summary SHA-256 为 `6257426baa601289d89c10e97d76d866a637227fd042080deb947af17c982d2a`；
+- canonical 的 M4 回归记录 60 秒时钟漂移 4ms，三次 seek 最大误差 66.827ms；
+- 正式记录已追加到 [evidence index](../quality/evidence-index.md)，状态为 `in-review`；
+- 原生 OS picker 的 granted/prompt/denied 与文件移动仍需使用本地样本人工检查；完成后由 owner 审批 evidence 与 working agreements，才可关闭 M5。
 
 Rollback:
 

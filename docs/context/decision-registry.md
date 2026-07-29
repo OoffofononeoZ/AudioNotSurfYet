@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/product/scope.md"
   - "docs/architecture/system-design.md"
   - "docs/delivery/execution-plan.md"
-next_action: "实施 M5 hybrid recovery 并以 clean-commit evidence 关闭门禁"
+next_action: "完成 M5 原生权限人工检查与 owner evidence 审批"
 ---
 
 # Decision Registry
@@ -55,6 +55,8 @@ M4 dirty-worktree provisional suite 随后通过，证明当前实现值得进�
 2026-07-29，`npm run eval:m4` 在 clean commit `e5cfe9e8ab62301f3c5b0ddcdd37847a2e131a0f` 上 13/13 步骤通过，正式记录已追加到 [evidence index](../quality/evidence-index.md)。`project-owner` 随后明确批准 M4 evidence 与 working agreements，M4 据此关闭，ADR-0003 对应的 M5 hybrid recovery 开始实施；M5 仍需自己的 provisional、clean-commit canonical 和 owner 审批。
 
 同日，M5 dirty-worktree provisional suite 16/16 通过。依据 DEC-013，它只作为实现反馈；原生权限人工检查、用户提交、clean-commit canonical、正式 evidence 和 owner 审批仍是 M5 的关闭条件。
+
+随后 `npm run eval:m5` 在 clean commit `c90a3c5738de5b7a4efb7eb24cddc49da3713b44` 上 16/16 通过，正式记录已追加到 [evidence index](../quality/evidence-index.md)。DEC-013 的 canonical 身份要求已满足；EG-006 原生权限人工检查和 owner 审批仍未完成，因此 M5 保持 `In Review`。
 
 ## Historical Evidence Gap
 

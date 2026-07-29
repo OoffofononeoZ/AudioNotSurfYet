@@ -6,7 +6,7 @@ upstream_docs:
   - "docs/product/scope.md"
   - "docs/architecture/system-design.md"
   - "docs/architecture/interface-contracts.md"
-next_action: "用 M5 canonical evidence 与原生权限人工检查验证本决定"
+next_action: "完成 M5 原生权限人工检查与 owner evidence 审批"
 ---
 
 # ADR-0003: Hybrid IndexedDB File-Handle and Current-Blob Recovery
