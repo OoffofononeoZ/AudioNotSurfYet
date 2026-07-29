@@ -2,14 +2,15 @@
 
 ## 当前播放链路
 
-M4 后的已证实链路：
+M5 实现后的已证实链路：
 
-1. MusicBar 创建 `<input type="file">`，把本地 MP3/WAV/FLAC 交给 MainLayout 提供的 `AudioSessionService`。
-2. service 用 `music-metadata.parseBlob()` 生成可序列化 `TrackRecord`，在 runtime registry 保存 File 与可选封面对象 URL。
+1. MusicBar 调用 `selectAndImportFiles()`；service 使用 `showOpenFilePicker()` 获取本地 MP3/WAV/FLAC 句柄，不使用隐藏 input fallback。
+2. service 顺序计算 SHA-256，并用 `music-metadata.parseBlob()` 生成可序列化 `TrackRecord`；runtime registry 保存 File、handle 与可选封面对象 URL。
 3. 空队列导入自动播放首项；非空队列导入只追加，不打断当前歌曲。
-4. `playTrack()` 读取 File ArrayBuffer，使用 command generation 保证快速切歌最后操作生效，再调用唯一 `AudioEngine` 解码和播放。
-5. AudioEngine 发布 `PlaybackSnapshot`；service 的单一 RAF 从 AudioContext 基准刷新时间，并从 Analyser 时域数据提取 Meyda energy。
-6. `audioSessionStore` 把快照与能量提供给 MusicBar 和 Home；MusicBar 不再拥有播放事实或播放 RAF。
+4. `SessionRepository` 把最近队列、全部句柄和唯一 current Blob 写入原生 IndexedDB；切歌在同一事务替换 current Blob/cache。
+5. `playTrack()` 读取 File ArrayBuffer，使用 command generation 保证快速切歌最后操作生效，再调用唯一 `AudioEngine` 解码和播放。
+6. AudioEngine 发布 `PlaybackSnapshot`；service 的单一 RAF 从 AudioContext 基准刷新时间，并从 Analyser 时域数据提取 Meyda energy。
+7. `audioSessionStore` 把播放、恢复快照与能量提供给 MusicBar 和 Home；MusicBar 不拥有播放事实、浏览器资源或播放 RAF。
 
 ## AudioEngine 状态模型
 
@@ -38,6 +39,14 @@ AudioBufferSourceNode → AnalyserNode → GainNode → audioContext.destination
 - decode/unsupported 由 MusicBar 监听 snapshot error 并显示 Element Plus 非阻塞消息；队列、下一首和重试仍可用。
 - 音频解码不创建对象 URL；对象 URL 只用于内嵌封面。
 
+## 最近会话恢复
+
+- `initialize()` 先恢复序列化队列；current Blob 优先解码并固定为 0 秒 paused，不自动播放。
+- 其他曲目按下一、上一、下二、上二的扩展顺序调用 `queryPermission()`；初始化绝不调用 `requestPermission()`。
+- prompt/denied 由列表显示“恢复访问”，missing/changed 显示“重新选择”；重新选择只接受与原记录 SHA-256 相同的内容。
+- IndexedDB quota/事务失败不停止当前内存播放，并发布 `not-persisted`；未知 schema 发布 `unsupported-schema`，只在用户点击后清除旧会话。
+- 当前 analysis payload 尚未存在；M5 只实现 current analysis-cache envelope 的保存、替换和清除，M6/M7 再接入真实结果。
+
 ## MusicBar 交互边界
 
 - `canSeek` 要求队列非空、状态为 paused/playing/ended 且 duration 大于 0。
@@ -60,4 +69,5 @@ AudioBufferSourceNode → AnalyserNode → GainNode → audioContext.destination
 - 单元测试使用可注入 AudioContext factory 与 fake clock，覆盖 load/play/pause/seek/ended/stale/error/unload/dispose。
 - service 测试覆盖追加、最后操作、ended、删除、清空、metadata fallback、序列化和 URL/RAF 生命周期。
 - Chrome E2E 覆盖三格式、错误恢复、队列操作、20 次切歌、route 变化、能量和 60 秒时钟。
+- M5 Vitest 覆盖 validator、hash、事务替换/abort、权限状态和恢复顺序；Chrome E2E 用 OPFS 真句柄覆盖 IndexedDB 刷新与 current Blob。原生 OS picker 的权限提示仍需人工检查。
 - 当前 Edge 未安装；Chrome 结果不能表述为双浏览器完成。

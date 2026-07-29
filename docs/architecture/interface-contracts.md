@@ -1,10 +1,10 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-07-28
+last_reviewed: 2026-07-29
 upstream_docs:
   - "docs/architecture/system-design.md"
-next_action: "用 M4 canonical evidence 固化播放契约；M5 为 PersistedSessionV1 增加 runtime validation"
+next_action: "用 M5 canonical evidence 核对 SessionRepository、恢复状态和权限契约"
 ---
 
 # Interface Contracts
@@ -124,16 +124,26 @@ Invariants:
 ## AudioSessionService
 
 ```ts
+interface LocalAudioInput {
+  file: File
+  handle?: FileSystemFileHandle
+}
+
 interface AudioSessionService {
-  importFiles(files: File[]): Promise<void>
+  initialize(): Promise<void>
+  selectAndImportFiles(): Promise<'imported' | 'cancelled'>
+  importFiles(inputs: LocalAudioInput[]): Promise<void>
   playTrack(trackId: TrackId): Promise<void>
   togglePlayback(): Promise<void>
   next(): Promise<void>
   previous(): Promise<void>
   seek(seconds: number): Promise<void>
   setVolume(percent: number): void
+  restoreAccess(trackId: TrackId): Promise<void>
+  reselectTrack(trackId: TrackId): Promise<void>
   deleteTrack(trackId: TrackId): Promise<void>
   clear(): Promise<void>
+  clearPersistedSession(): Promise<void>
   dispose(): Promise<void>
 }
 ```
@@ -145,6 +155,8 @@ Invariants:
 - service 只有一个可取消 RAF，同时刷新 PlaybackSnapshot 和 Meyda energy；暂停、错误、清空和 dispose 时 energy 为 0。
 - 空队列导入自动播放首项；非空队列导入只追加。快速切歌以最后 command generation 为准。
 - 音量命令输入为 0–100 配置值，PlaybackSnapshot 保存 0–1 Gain 值。
+- UI 只调用 `selectAndImportFiles()`；缺少 File System Access API 时显示非阻塞错误，不回退到隐藏 input。
+- `initialize()` 只查询权限，不触发 `requestPermission()`；后者只允许由 `restoreAccess()` 的用户手势触发。
 
 ## AnalysisConfig
 
@@ -384,3 +396,35 @@ type RestoreResult<T> =
 ```
 
 程序错误、数据库损坏和事务失败可以抛出 typed error；`prompt`、`denied`、用户取消和缺失文件必须返回显式状态供 UI 表达。
+
+## SessionRepository
+
+```ts
+interface SessionPersistenceSnapshot {
+  state:
+    | 'idle'
+    | 'restoring'
+    | 'ready'
+    | 'saving'
+    | 'not-persisted'
+    | 'unsupported-schema'
+    | 'restore-error'
+  message?: string
+}
+
+interface SessionRepositoryPort {
+  restore(): Promise<RestoredSessionBundle | null>
+  saveQueue(input: PersistedQueueInput): Promise<void>
+  replaceCurrent(input: PersistedCurrentInput): Promise<void>
+  removeTrack(trackId: TrackId): Promise<void>
+  clear(): Promise<void>
+}
+```
+
+Invariants:
+
+- 原生 IndexedDB V1 使用 `session`、`handles`、`current-blob` 和 `current-analysis-cache` 四个 object store。
+- current Blob 与 current analysis cache 使用固定键；`replaceCurrent()` 在单一事务中写新 session/handles 并替换或清除旧 current 记录。
+- `removeTrack()` 在仓储事务内同步移除 session queue entry、handle descriptor 和 handle record。
+- `clear()` 只有在四个 store 全部清空后才算成功；失败时调用方保持内存队列。
+- `restore()` 必须先通过 `PersistedSessionV1` runtime validation；未知 schema 抛 `UnsupportedSessionSchemaError`，不得猜测迁移。

@@ -13,12 +13,17 @@
 | `npm run test:m4:unit` | 运行 AudioEngine fake-clock 单元测试 | M4 engine 契约验证 |
 | `npm run test:m4:integration` | 运行 session/store/controller 集成测试 | M4 队列、竞态和资源验证 |
 | `npm run test:e2e:m4` | 运行 M4 Chrome 播放回归和 60 秒计时 | M4 浏览器切片 |
+| `npm run test:m5:unit` | 运行 V1 SessionRepository、validator 与事务故障测试 | M5 持久化单元切片 |
+| `npm run test:m5:integration` | 运行 Blob/handle/权限/恢复 service 测试 | M5 恢复集成切片 |
+| `npm run test:e2e:m5` | 运行真实 Chrome IndexedDB/OPFS 刷新恢复 | M5 浏览器切片；不等于原生权限 prompt |
 | `npm run test:e2e:edge` | 检测并运行稳定 Edge | Edge 缺失时以退出码 2 明确 blocked |
 | `npm run test:docs` | 检查生命周期 frontmatter、链接和 21 项特征 | 文档门禁 |
 | `npm run eval:m3:provisional` | 未提交工作树的本地 M3 run | 不创建正式 evidence index |
 | `npm run eval:m3` | 只在干净 commit 上运行 M3 canonical suite | 生成可登记到 evidence index 的正式本地证据 |
 | `npm run eval:m4:provisional` | 未提交工作树的本地 M4 run | 不追加正式 evidence |
 | `npm run eval:m4` | 只在干净 commit 上运行 M3 回归与 M4 suite | 生成可登记的 M4 正式证据 |
+| `npm run eval:m5:provisional` | 未提交工作树运行 M3–M5 suite | 不追加正式 evidence |
+| `npm run eval:m5` | 只在干净 commit 上运行 M3–M5 suite | 生成可登记的 M5 正式证据 |
 
 ## 已知测试缺口
 
@@ -27,7 +32,9 @@
 - 当前没有正式 CI，自动化结论必须限定为本地环境。
 - 当前机器没有 Edge。Chrome 通过不能表述为双浏览器矩阵完成。
 - 正式 M3 canonical run 已在 clean commit `17d16f0da37289c1f67f75203502beef999572ea` 上通过并登记，且已由 `project-owner` 批准。
-- 正式 M4 canonical run 已在 clean commit `e5cfe9e8ab62301f3c5b0ddcdd37847a2e131a0f` 上通过并登记；evidence 与 working agreements 仍待 `project-owner` 批准。
+- 正式 M4 canonical run 已在 clean commit `e5cfe9e8ab62301f3c5b0ddcdd37847a2e131a0f` 上通过并登记，evidence 与 working agreements 已由 `project-owner` 批准。
+- M5 自动化 picker 使用浏览器 OPFS 返回真实 `FileSystemFileHandle`，不替代原生 OS picker 的 granted/prompt/denied 与文件移动人工路径。
+- M5 dirty-worktree provisional 已于 2026-07-29 通过 16/16；仍需原生权限人工检查和用户提交后的 clean-commit canonical run。
 
 ## 构建风险
 
@@ -46,7 +53,7 @@
 5. 检查 console error/warn。
 6. 结束浏览器会话并关闭开发服务器。
 
-音频场景应使用允许的本地 fixture，检查队列、进度、能量、暂停、清空和错误恢复。没有 fixture 时，明确记录未验证项。
+音频场景应使用允许的本地 fixture，检查队列、进度、能量、暂停、清空和错误恢复。M5 原生权限人工场景可使用 Git 忽略的本地音频，但不得把文件名、路径或 hash 写进版本化证据。没有 fixture 时，明确记录未验证项。
 
 ## 调试顺序
 

@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia';
 import type {
     PlaybackSnapshot,
+    SessionPersistenceSnapshot,
     TrackRecord,
 } from '../types/audio';
 
@@ -17,6 +18,7 @@ interface AudioSessionState {
     currentTrackId: string | null;
     playback: PlaybackSnapshot;
     currentEnergy: number;
+    persistence: SessionPersistenceSnapshot;
 }
 
 export const useAudioSessionStore = defineStore('audio-session', {
@@ -25,8 +27,33 @@ export const useAudioSessionStore = defineStore('audio-session', {
         currentTrackId: null,
         playback: createEmptyPlayback(),
         currentEnergy: 0,
+        persistence: {
+            state: 'idle',
+        },
     }),
     actions: {
+        hydrateSession(
+            queue: TrackRecord[],
+            currentTrackId: string | null,
+            volume: number,
+        ) {
+            this.queue = queue.map((track) => ({
+                ...track,
+                metadata: { ...track.metadata },
+            }));
+            this.currentTrackId = currentTrackId;
+            this.playback = {
+                trackId: currentTrackId,
+                state: currentTrackId ? 'loading' : 'empty',
+                currentTimeSeconds: 0,
+                durationSeconds:
+                    this.queue.find(
+                        (track) => track.id === currentTrackId,
+                    )?.durationSeconds ?? 0,
+                volume,
+            };
+            this.currentEnergy = 0;
+        },
         appendTracks(tracks: TrackRecord[]) {
             this.queue.push(...tracks);
         },
@@ -62,6 +89,11 @@ export const useAudioSessionStore = defineStore('audio-session', {
                 ? Math.max(0, energy)
                 : 0;
         },
+        setPersistence(snapshot: SessionPersistenceSnapshot) {
+            this.persistence = {
+                ...snapshot,
+            };
+        },
         clearSession(volume?: number) {
             const nextVolume = volume ?? this.playback.volume;
             this.queue = [];
@@ -71,6 +103,9 @@ export const useAudioSessionStore = defineStore('audio-session', {
                 volume: nextVolume,
             };
             this.currentEnergy = 0;
+            this.persistence = {
+                state: 'ready',
+            };
         },
     },
 });

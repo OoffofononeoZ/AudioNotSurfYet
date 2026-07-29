@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/product/scope.md"
   - "docs/architecture/system-design.md"
   - "docs/delivery/execution-plan.md"
-next_action: "由 project-owner 审批 M4 canonical evidence 与 working agreements；审批前不开放 M5"
+next_action: "实施 M5 hybrid recovery 并以 clean-commit evidence 关闭门禁"
 ---
 
 # Decision Registry
@@ -34,6 +34,7 @@ next_action: "由 project-owner 审批 M4 canonical evidence 与 working agreeme
 | DEC-012 | 2026-07-28 | canonical 短 fixture 由确定性 PCM 经系统 FFmpeg 生成并使用 CC0-1.0；用户音频默认仅本地使用 | project-owner | approved | [Fixture manifest](../../tests/fixtures/fixture-manifest.json) | 编码器、fixture 来源、许可或入库政策改变 |
 | DEC-013 | 2026-07-28 | 未提交状态只产生 provisional run；用户自行提交后对干净 commit 复跑，才创建正式 evidence index | project-owner | approved | [Working agreements](working-agreements.md) | Git 授权或 evidence identity 政策改变 |
 | DEC-014 | 2026-07-28 | M4 快速切歌最后操作生效，非空追加不中断当前播放，metadata 失败继续解码，decode/unsupported 使用非阻塞消息 | project-owner | approved | [ADR-0001](../architecture/adrs/0001-single-audio-engine-and-session-state.md) | 队列、竞态或错误交互语义改变 |
+| DEC-015 | 2026-07-29 | M5 原生文件选择不提供隐藏 input fallback；本地音频保持 Git 忽略，超出约 15 分钟的样本只作 best-effort 压力观察且不扩大范围 | project-owner | approved | [Working agreements](working-agreements.md) | 文件选择兼容策略、本地样本政策或支持时长改变 |
 
 ## Approval Evidence
 
@@ -51,7 +52,9 @@ next_action: "由 project-owner 审批 M4 canonical evidence 与 working agreeme
 
 M4 dirty-worktree provisional suite 随后通过，证明当前实现值得进入提交与 canonical 复跑步骤；由于它不绑定干净 commit，DEC-013 要求下不作为正式 evidence。
 
-2026-07-29，`npm run eval:m4` 在 clean commit `e5cfe9e8ab62301f3c5b0ddcdd37847a2e131a0f` 上 13/13 步骤通过，正式记录已追加到 [evidence index](../quality/evidence-index.md)。该运行满足 DEC-013 的证据身份要求，但仍待 `project-owner` 审批；M4 和 M5 状态尚未改变。
+2026-07-29，`npm run eval:m4` 在 clean commit `e5cfe9e8ab62301f3c5b0ddcdd37847a2e131a0f` 上 13/13 步骤通过，正式记录已追加到 [evidence index](../quality/evidence-index.md)。`project-owner` 随后明确批准 M4 evidence 与 working agreements，M4 据此关闭，ADR-0003 对应的 M5 hybrid recovery 开始实施；M5 仍需自己的 provisional、clean-commit canonical 和 owner 审批。
+
+同日，M5 dirty-worktree provisional suite 16/16 通过。依据 DEC-013，它只作为实现反馈；原生权限人工检查、用户提交、clean-commit canonical、正式 evidence 和 owner 审批仍是 M5 的关闭条件。
 
 ## Historical Evidence Gap
 

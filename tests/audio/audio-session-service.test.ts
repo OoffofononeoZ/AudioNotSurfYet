@@ -10,6 +10,7 @@ import {
     AudioSessionService,
     type AudioEnginePort,
 } from '../../src/audio/audioSessionService';
+import type { SessionRepositoryPort } from '../../src/persistence/sessionRepository';
 import { useAudioSessionStore } from '../../src/stores/audioSessionStore';
 import type { PlaybackSnapshot } from '../../src/types/audio';
 
@@ -156,6 +157,8 @@ function createFile(
     } as unknown as ControlledFile;
 }
 
+const inputs = (...files: File[]) => files.map((file) => ({ file }));
+
 function createHarness(
     options: {
         parseMetadata?: () => Promise<{
@@ -174,8 +177,16 @@ function createHarness(
     let nextFrame = 0;
     const frames = new Map<number, FrameRequestCallback>();
     const revoked: string[] = [];
+    const repository: SessionRepositoryPort = {
+        restore: async () => null,
+        saveQueue: async () => undefined,
+        replaceCurrent: async () => undefined,
+        removeTrack: async () => undefined,
+        clear: async () => undefined,
+    };
     const service = new AudioSessionService(store, {
         engine,
+        repository,
         parseMetadata:
             options.parseMetadata
             ?? (async () => ({
@@ -183,6 +194,7 @@ function createHarness(
                 format: { duration: 4, sampleRate: 48_000 },
             })),
         createTrackId: () => `track-${++id}`,
+        hashFile: async (file) => (file as File).name,
         createObjectURL: () => `blob:artwork-${id}`,
         revokeObjectURL: (url) => revoked.push(url),
         requestFrame: (callback) => {
@@ -211,13 +223,13 @@ describe('AudioSessionService', () => {
     test('autoplays the first empty-queue import and appends later files without interruption', async () => {
         const { engine, service, store } = createHarness();
 
-        await service.importFiles([createFile('first.wav')]);
+        await service.importFiles(inputs(createFile('first.wav')));
         expect(store.queue).toHaveLength(1);
         expect(store.currentTrackId).toBe('track-1');
         expect(engine.loadIds).toEqual(['track-1']);
         expect(engine.playCount).toBe(1);
 
-        await service.importFiles([createFile('second.wav')]);
+        await service.importFiles(inputs(createFile('second.wav')));
         expect(store.queue).toHaveLength(2);
         expect(store.currentTrackId).toBe('track-1');
         expect(engine.loadIds).toEqual(['track-1']);
@@ -226,9 +238,9 @@ describe('AudioSessionService', () => {
 
     test('lets only the latest rapid track selection reach decode and play', async () => {
         const { engine, service, store } = createHarness();
-        await service.importFiles([
+        await service.importFiles(inputs(
             createFile('seed.wav'),
-        ]);
+        ));
 
         const first = createFile(
             'first-controlled.wav',
@@ -238,7 +250,7 @@ describe('AudioSessionService', () => {
             'second-controlled.wav',
             { controlled: true },
         ) as ControlledFile;
-        await service.importFiles([first, second]);
+        await service.importFiles(inputs(first, second));
         engine.loadIds.length = 0;
         engine.playCount = 0;
 
@@ -256,11 +268,11 @@ describe('AudioSessionService', () => {
 
     test('loops on ended and preserves deletion semantics', async () => {
         const { engine, service, store } = createHarness();
-        await service.importFiles([
+        await service.importFiles(inputs(
             createFile('first.wav'),
             createFile('second.wav'),
             createFile('third.wav'),
-        ]);
+        ));
 
         engine.finish();
         await vi.waitFor(() => {
@@ -300,11 +312,11 @@ describe('AudioSessionService', () => {
             store,
         } = createHarness({ parseMetadata });
 
-        await service.importFiles([createFile('fallback.wav')]);
+        await service.importFiles(inputs(createFile('fallback.wav')));
         expect(store.queue[0]?.metadata.title).toBe('fallback.wav');
         expect(service.getArtworkUrl('track-1')).toBeUndefined();
 
-        await service.importFiles([createFile('artwork.wav')]);
+        await service.importFiles(inputs(createFile('artwork.wav')));
         expect(service.getArtworkUrl('track-2')).toBe('blob:artwork-2');
         await service.clear();
         expect(revoked).toEqual(['blob:artwork-2']);
@@ -320,7 +332,7 @@ describe('AudioSessionService', () => {
             service,
             store,
         } = createHarness();
-        await service.importFiles([createFile('first.wav')]);
+        await service.importFiles(inputs(createFile('first.wav')));
 
         expect(frames.size).toBe(1);
         await service.togglePlayback();

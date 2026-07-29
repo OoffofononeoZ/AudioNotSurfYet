@@ -2,7 +2,7 @@
 
 ## 证据基线
 
-- 最后核对日期：2026-07-28。
+- 最后核对日期：2026-07-29。
 - 首要来源：当前仓库的 `package.json`、配置、`src/`、Git 状态与 Git 历史。
 - 补充来源：Codex 任务 `019f82bc-0838-7ab3-baba-1a7571992901`；只保留其中能由当前仓库或可复现验证支持的长期事实。
 - 历史任务结论不得覆盖当前代码；差异记录在 [开放问题与项目差异](99-open-questions-and-project-deltas.md)。
@@ -30,7 +30,8 @@
 | `src/layouts/` | 应用共享外壳；`MainLayout` 组合 Header、路由内容和 MusicBar | `src/layouts/MainLayout.vue` |
 | `src/components/` | 播放条、列表、动画列表、Canvas/WebGL 背景和试验性图表 | 各 Vue SFC |
 | `src/audio/` | `AudioEngine` 独占 Web Audio 节点；`AudioSessionService` 编排 File、队列命令、能量和资源释放 | `audioEngine.ts`、`audioSessionService.ts` |
-| `src/stores/` | 持久化 UI/音量配置及可序列化播放 session | `configStore.ts`、`audioSessionStore.ts` |
+| `src/persistence/` | 原生 IndexedDB V1 最近会话、句柄、current Blob/cache 和 runtime validator | `sessionRepository.ts` |
+| `src/stores/` | 持久化 UI/音量配置及可序列化播放/恢复状态 | `configStore.ts`、`audioSessionStore.ts` |
 | `src/utils/` | mitt 单例、能量角度映射、时间格式化和 clamp | `emitter.ts`、`utils.ts` |
 | `src/data/` | Analyzer 页面使用的静态 Meyda 特征说明 | `analyzerData.ts` |
 | `public/` | 默认封面、SVG 图标和静态资源；本地测试音频目录被 `.gitignore` 排除 | `public/`、`.gitignore` |
@@ -39,8 +40,8 @@
 ## 边界
 
 - 当前是单一前端仓库；未发现后端、数据库、认证、云端媒体库或部署配置。
-- 音频文件由用户在浏览器中选择，当前播放队列保存在非持久化 Pinia store，runtime File 保存在 session service 内存。
-- `configStore` 的 `volume` 和 `musicBarSettings.style` 是当前唯一已证实的持久化状态；`audioSessionStore` 在 M5 前不持久化。
+- 音频文件由用户通过 `showOpenFilePicker()` 选择；runtime File 保存在 session service，最近队列、文件句柄和唯一 current Blob 由 SessionRepository 保存，Pinia `$state` 不持有浏览器资源。
+- `configStore` 继续把 `volume` 和 `musicBarSettings.style` 保存到 localStorage；M5 最近会话使用独立 IndexedDB V1，不改变 config schema。
 - Analyzer、Editor 和 Visualizer 的完整产品边界未由仓库证实；不要从空页面或导航文案推断承诺。
 - `testcomp.vue`、`TestLands.vue`、`threeDTable.vue` 和 `MeydaCard.vue` 含试验或占位内容，不应默认视为稳定公共接口。
 

@@ -3,11 +3,25 @@ import { inject, shallowReactive } from 'vue';
 import Meyda from 'meyda';
 import { parseBlob } from 'music-metadata';
 import { AudioEngine } from './audioEngine';
+import {
+    InvalidPersistedSessionError,
+    SessionRepository,
+    UnsupportedSessionSchemaError,
+    type PersistedCurrentInput,
+    type PersistedQueueInput,
+    type SessionRepositoryPort,
+} from '../persistence/sessionRepository';
 import type { useAudioSessionStore } from '../stores/audioSessionStore';
 import type {
+    LocalAudioInput,
     PlaybackSnapshot,
     TrackRecord,
 } from '../types/audio';
+import {
+    DEFAULT_PERSISTED_ANALYSIS_CONFIG,
+    type PersistedSessionV1,
+    type StoredHandle,
+} from '../types/session';
 
 type AudioSessionStore = ReturnType<typeof useAudioSessionStore>;
 type AnimationFrameCallback = (timestamp: number) => void;
@@ -30,16 +44,35 @@ interface ParsedMetadata {
     };
 }
 
-type MetadataParser = (file: File) => Promise<ParsedMetadata>;
+type MetadataParser = (file: Blob) => Promise<ParsedMetadata>;
+type FilePicker = (
+    options: {
+        multiple: boolean;
+    },
+) => Promise<FileSystemFileHandle[]>;
+type FileHasher = (file: Blob) => Promise<string>;
+
+interface PermissionedFileHandle extends FileSystemFileHandle {
+    queryPermission?: (
+        descriptor?: { mode?: 'read' | 'readwrite' },
+    ) => Promise<PermissionState>;
+    requestPermission?: (
+        descriptor?: { mode?: 'read' | 'readwrite' },
+    ) => Promise<PermissionState>;
+}
 
 interface RuntimeTrack {
-    file: File;
+    file?: File;
+    handle?: PermissionedFileHandle;
     artworkUrl?: string;
 }
 
 export interface AudioSessionServiceOptions {
     engine?: AudioEnginePort;
+    repository?: SessionRepositoryPort;
     parseMetadata?: MetadataParser;
+    pickFiles?: FilePicker;
+    hashFile?: FileHasher;
     createObjectURL?: (blob: Blob) => string;
     revokeObjectURL?: (url: string) => void;
     requestFrame?: RequestFrame;
@@ -70,10 +103,53 @@ const defaultRequestFrame: RequestFrame = (callback) =>
 const defaultCancelFrame: CancelFrame = (handle) =>
     cancelAnimationFrame(handle);
 
+const defaultPickFiles: FilePicker = async ({ multiple }) => {
+    const picker = (
+        window as unknown as {
+            showOpenFilePicker?: (
+                options: Record<string, unknown>,
+            ) => Promise<FileSystemFileHandle[]>;
+        }
+    ).showOpenFilePicker;
+    if (!picker) {
+        throw new Error(
+            '当前浏览器或页面环境不支持本地文件句柄，请使用最新版 Chrome/Edge 并通过 HTTPS 或 localhost 访问。',
+        );
+    }
+    return picker({
+        multiple,
+        excludeAcceptAllOption: true,
+        types: [{
+            description: 'Audio files',
+            accept: {
+                'audio/*': ['.mp3', '.wav', '.flac'],
+            },
+        }],
+    });
+};
+
+export const sha256Blob: FileHasher = async (file) => {
+    const content = await file.arrayBuffer();
+    const digest = await crypto.subtle.digest('SHA-256', content);
+    return [...new Uint8Array(digest)]
+        .map((value) => value.toString(16).padStart(2, '0'))
+        .join('');
+};
+
+const isAbortError = (error: unknown) =>
+    error instanceof DOMException && error.name === 'AbortError';
+
+const isMissingFileError = (error: unknown) =>
+    error instanceof DOMException
+    && ['NotFoundError', 'NotReadableError'].includes(error.name);
+
 export class AudioSessionService {
     private readonly store: AudioSessionStore;
     private readonly engine: AudioEnginePort;
+    private readonly repository: SessionRepositoryPort;
     private readonly parseMetadata: MetadataParser;
+    private readonly pickFiles: FilePicker;
+    private readonly hashFile: FileHasher;
     private readonly createObjectURL: (blob: Blob) => string;
     private readonly revokeObjectURL: (url: string) => void;
     private readonly requestFrame: RequestFrame;
@@ -94,9 +170,12 @@ export class AudioSessionService {
     ) {
         this.store = store;
         this.engine = options.engine ?? new AudioEngine();
+        this.repository = options.repository ?? new SessionRepository();
         this.parseMetadata =
             options.parseMetadata
             ?? ((file) => parseBlob(file) as Promise<ParsedMetadata>);
+        this.pickFiles = options.pickFiles ?? defaultPickFiles;
+        this.hashFile = options.hashFile ?? sha256Blob;
         this.createObjectURL =
             options.createObjectURL ?? ((blob) => URL.createObjectURL(blob));
         this.revokeObjectURL =
@@ -110,15 +189,187 @@ export class AudioSessionService {
         });
     }
 
-    async importFiles(files: File[]): Promise<void> {
-        if (this.disposed || files.length === 0) return;
+    async initialize(): Promise<void> {
+        if (this.disposed) return;
+        const generation = ++this.importGeneration;
+        ++this.commandGeneration;
+        this.store.setPersistence({ state: 'restoring' });
 
-        const importGeneration = this.importGeneration;
+        let restored;
+        try {
+            restored = await this.repository.restore();
+        } catch (error) {
+            if (generation !== this.importGeneration || this.disposed) return;
+            if (error instanceof UnsupportedSessionSchemaError) {
+                this.store.setPersistence({
+                    state: 'unsupported-schema',
+                    message: '检测到无法识别的会话版本，请清除旧会话后重试。',
+                });
+            } else {
+                this.store.setPersistence({
+                    state: 'restore-error',
+                    message: error instanceof InvalidPersistedSessionError
+                        ? '已保存的会话数据无效，请清除旧会话。'
+                        : '无法读取已保存的会话，当前仍可使用内存播放。',
+                });
+            }
+            return;
+        }
+
+        if (
+            generation !== this.importGeneration
+            || this.disposed
+        ) {
+            return;
+        }
+        if (!restored) {
+            this.store.setPersistence({ state: 'ready' });
+            return;
+        }
+
+        for (const trackId of [...this.runtimeTracks.keys()]) {
+            this.releaseRuntimeTrack(trackId);
+        }
+        const handles = new Map(
+            restored.handles.map((entry) => [
+                entry.trackId,
+                entry.handle as PermissionedFileHandle,
+            ]),
+        );
+        for (const track of restored.session.queue) {
+            this.runtimeTracks.set(track.id, {
+                handle: handles.get(track.id),
+            });
+        }
+
+        this.store.hydrateSession(
+            restored.session.queue,
+            restored.session.currentTrackId,
+            this.engine.getSnapshot().volume,
+        );
+
+        const currentTrackId = restored.session.currentTrackId;
+        let currentAvailable = false;
+        let currentBlobChanged = false;
+        if (
+            currentTrackId
+            && restored.currentBlob
+            && restored.currentBlob.trackId === currentTrackId
+        ) {
+            const record = this.getTrack(currentTrackId);
+            if (record) {
+                const currentBlobHash = await this.hashFile(
+                    restored.currentBlob.blob,
+                );
+                if (currentBlobHash === record.trackHash) {
+                    const file = new File(
+                        [restored.currentBlob.blob],
+                        record.name,
+                        {
+                            type: record.mimeType,
+                            lastModified: record.lastModified,
+                        },
+                    );
+                    await this.registerRuntimeFile(
+                        currentTrackId,
+                        file,
+                        handles.get(currentTrackId),
+                    );
+                    this.store.updateTrack(currentTrackId, {
+                        restoreState: 'available',
+                    });
+                    await this.loadRuntimeTrack(currentTrackId, false);
+                    currentAvailable = true;
+                } else {
+                    currentBlobChanged = true;
+                    this.store.updateTrack(currentTrackId, {
+                        restoreState: 'content-changed',
+                    });
+                }
+            }
+        }
+        if (currentTrackId && !currentAvailable) {
+            const currentHandle =
+                this.runtimeTracks.get(currentTrackId)?.handle;
+            const available = currentHandle
+                ? await this.hydrateFromHandle(currentTrackId, false)
+                : false;
+            if (available) {
+                await this.loadRuntimeTrack(currentTrackId, false);
+            } else {
+                if (!currentHandle && !currentBlobChanged) {
+                    this.store.updateTrack(currentTrackId, {
+                        restoreState: 'file-missing',
+                    });
+                }
+                const currentTrack = this.getTrack(currentTrackId);
+                this.store.setPlayback({
+                    trackId: currentTrackId,
+                    state: 'empty',
+                    currentTimeSeconds: 0,
+                    durationSeconds: currentTrack?.durationSeconds ?? 0,
+                    volume: this.engine.getSnapshot().volume,
+                });
+            }
+        }
+
+        if (
+            generation !== this.importGeneration
+            || this.disposed
+        ) {
+            return;
+        }
+
+        for (const trackId of this.permissionQueryOrder(currentTrackId)) {
+            if (
+                generation !== this.importGeneration
+                || this.disposed
+            ) {
+                return;
+            }
+            await this.hydrateFromHandle(trackId, false);
+        }
+
+        try {
+            await this.persistQueue();
+            this.store.setPersistence({ state: 'ready' });
+        } catch {
+            this.markPersistenceFailure();
+        }
+    }
+
+    async selectAndImportFiles(): Promise<'imported' | 'cancelled'> {
+        if (this.disposed) return 'cancelled';
+        let handles: FileSystemFileHandle[];
+        try {
+            handles = await this.pickFiles({ multiple: true });
+        } catch (error) {
+            if (isAbortError(error)) return 'cancelled';
+            throw error;
+        }
+        if (handles.length === 0) return 'cancelled';
+        const inputs: LocalAudioInput[] = [];
+        for (const handle of handles) {
+            inputs.push({
+                file: await handle.getFile(),
+                handle,
+            });
+        }
+        await this.importFiles(inputs);
+        return 'imported';
+    }
+
+    async importFiles(inputs: LocalAudioInput[]): Promise<void> {
+        if (this.disposed || inputs.length === 0) return;
+
+        const importGeneration = ++this.importGeneration;
         const shouldAutoplay = this.store.queue.length === 0;
         const records: TrackRecord[] = [];
 
-        for (const file of files) {
+        for (const input of inputs) {
+            const { file } = input;
             const trackId = this.createTrackId();
+            const trackHash = await this.hashFile(file);
             let metadata: ParsedMetadata | null = null;
             try {
                 metadata = await this.parseMetadata(file);
@@ -130,20 +381,6 @@ export class AudioSessionService {
                 || importGeneration !== this.importGeneration
             ) {
                 return;
-            }
-
-            let artworkUrl: string | undefined;
-            const picture = metadata?.common.picture?.[0];
-            if (picture) {
-                try {
-                    const artwork = new Blob(
-                        [picture.data as unknown as BlobPart],
-                        { type: picture.format || 'image/png' },
-                    );
-                    artworkUrl = this.createObjectURL(artwork);
-                } catch {
-                    artworkUrl = undefined;
-                }
             }
 
             const record: TrackRecord = {
@@ -158,91 +395,52 @@ export class AudioSessionService {
                     title: metadata?.common.title || file.name || 'unknown',
                     artist: metadata?.common.artist,
                     album: metadata?.common.album,
-                    artworkMimeType: picture?.format,
+                    artworkMimeType:
+                        metadata?.common.picture?.[0]?.format,
                 },
-                restoreState: 'available',
+                trackHash,
+                handleKey: input.handle
+                    ? `handle:${trackId}`
+                    : undefined,
+                restoreState: input.handle
+                    ? 'available'
+                    : 'not-persisted',
             };
             records.push(record);
             this.runtimeTracks.set(trackId, {
                 file,
-                artworkUrl,
+                handle: input.handle as PermissionedFileHandle | undefined,
+                artworkUrl: this.createArtwork(metadata),
             });
         }
 
         this.store.appendTracks(records);
+        try {
+            await this.persistQueue();
+            if (records.some((record) => !record.handleKey)) {
+                this.store.setPersistence({
+                    state: 'not-persisted',
+                    message: '部分歌曲没有文件句柄，刷新后可能无法恢复。',
+                });
+            } else {
+                this.store.setPersistence({ state: 'ready' });
+            }
+        } catch {
+            for (const record of records) {
+                this.store.updateTrack(record.id, {
+                    restoreState: 'not-persisted',
+                });
+            }
+            this.markPersistenceFailure();
+        }
+
         if (shouldAutoplay && records[0]) {
             await this.playTrack(records[0].id);
         }
     }
 
     async playTrack(trackId: string): Promise<void> {
-        if (this.disposed) return;
-        const runtimeTrack = this.runtimeTracks.get(trackId);
-        const record = this.store.queue.find((track) => track.id === trackId);
-        if (!runtimeTrack || !record) return;
-
-        const generation = ++this.commandGeneration;
-        this.engine.unload();
-        this.store.setCurrentTrack(trackId);
-        this.store.setEnergy(0);
-        this.store.setPlayback({
-            trackId,
-            state: 'loading',
-            currentTimeSeconds: 0,
-            durationSeconds: record.durationSeconds ?? 0,
-            volume: this.engine.getSnapshot().volume,
-        });
-
-        try {
-            const encodedAudio = await runtimeTrack.file.arrayBuffer();
-            if (
-                generation !== this.commandGeneration
-                || this.disposed
-                || !this.runtimeTracks.has(trackId)
-            ) {
-                return;
-            }
-
-            const result = await this.engine.load({
-                trackId,
-                encodedAudio,
-            });
-            if (
-                result === 'stale'
-                || generation !== this.commandGeneration
-                || this.disposed
-            ) {
-                return;
-            }
-
-            const snapshot = this.engine.getSnapshot();
-            this.store.updateTrack(trackId, {
-                durationSeconds: snapshot.durationSeconds,
-            });
-            await this.engine.play();
-        } catch (error) {
-            if (generation !== this.commandGeneration || this.disposed) return;
-            this.store.updateTrack(trackId, {
-                restoreState: 'decode-error',
-            });
-            if (this.engine.getSnapshot().state !== 'error') {
-                this.store.setPlayback({
-                    trackId,
-                    state: 'error',
-                    currentTimeSeconds: 0,
-                    durationSeconds: record.durationSeconds ?? 0,
-                    volume: this.engine.getSnapshot().volume,
-                    error: {
-                        code: 'decode',
-                        message:
-                            error instanceof Error
-                                ? error.message
-                                : 'Unable to read this audio file.',
-                    },
-                });
-            }
-            this.store.setEnergy(0);
-        }
+        await this.loadRuntimeTrack(trackId, true);
     }
 
     async togglePlayback(): Promise<void> {
@@ -297,6 +495,80 @@ export class AudioSessionService {
         this.engine.setVolume(normalized);
     }
 
+    async restoreAccess(trackId: string): Promise<void> {
+        if (this.disposed) return;
+        const runtime = this.runtimeTracks.get(trackId);
+        const handle = runtime?.handle;
+        if (!handle) {
+            this.store.updateTrack(trackId, {
+                restoreState: 'file-missing',
+            });
+            return;
+        }
+
+        let permission: PermissionState = 'granted';
+        try {
+            permission = handle.requestPermission
+                ? await handle.requestPermission({ mode: 'read' })
+                : 'granted';
+        } catch {
+            permission = 'denied';
+        }
+        if (permission !== 'granted') {
+            this.store.updateTrack(trackId, {
+                restoreState: 'permission-denied',
+            });
+            return;
+        }
+
+        const available = await this.hydrateFromHandle(trackId, true);
+        if (!available) return;
+        if (this.store.currentTrackId === trackId) {
+            await this.loadRuntimeTrack(trackId, false);
+        } else {
+            await this.persistQueueSafely();
+        }
+    }
+
+    async reselectTrack(trackId: string): Promise<void> {
+        if (this.disposed) return;
+        const record = this.getTrack(trackId);
+        if (!record?.trackHash) return;
+
+        let handles: FileSystemFileHandle[];
+        try {
+            handles = await this.pickFiles({ multiple: false });
+        } catch (error) {
+            if (isAbortError(error)) return;
+            throw error;
+        }
+        const handle = handles[0] as PermissionedFileHandle | undefined;
+        if (!handle) return;
+        const file = await handle.getFile();
+        const trackHash = await this.hashFile(file);
+        if (trackHash !== record.trackHash) {
+            this.store.updateTrack(trackId, {
+                restoreState: 'content-changed',
+            });
+            return;
+        }
+
+        await this.registerRuntimeFile(trackId, file, handle);
+        this.store.updateTrack(trackId, {
+            name: file.name || record.name,
+            mimeType: file.type || record.mimeType,
+            byteSize: file.size,
+            lastModified: file.lastModified,
+            handleKey: `handle:${trackId}`,
+            restoreState: 'available',
+        });
+        if (this.store.currentTrackId === trackId) {
+            await this.loadRuntimeTrack(trackId, false);
+        } else {
+            await this.persistQueueSafely();
+        }
+    }
+
     async deleteTrack(trackId: string): Promise<void> {
         if (this.disposed) return;
         const index = this.store.queue.findIndex(
@@ -308,11 +580,19 @@ export class AudioSessionService {
         this.releaseRuntimeTrack(trackId);
         this.store.removeTrack(trackId);
 
-        if (!wasCurrent) return;
+        if (!wasCurrent) {
+            try {
+                await this.repository.removeTrack(trackId);
+                this.store.setPersistence({ state: 'ready' });
+            } catch {
+                this.markPersistenceFailure(
+                    '删除已生效，但无法保存；刷新后该歌曲可能重新出现。',
+                );
+            }
+            return;
+        }
         if (this.store.queue.length === 0) {
-            ++this.commandGeneration;
-            this.engine.unload();
-            this.store.clearSession(this.engine.getSnapshot().volume);
+            await this.clear();
             return;
         }
 
@@ -323,14 +603,31 @@ export class AudioSessionService {
 
     async clear(): Promise<void> {
         if (this.disposed) return;
-        ++this.commandGeneration;
-        ++this.importGeneration;
-        this.stopFrameLoop();
-        for (const trackId of [...this.runtimeTracks.keys()]) {
-            this.releaseRuntimeTrack(trackId);
+        try {
+            await this.repository.clear();
+        } catch {
+            this.store.setPersistence({
+                state: 'not-persisted',
+                message: '无法清除已保存会话；当前队列保持不变。',
+            });
+            return;
         }
-        this.engine.unload();
-        this.store.clearSession(this.engine.getSnapshot().volume);
+        this.clearRuntimeSession();
+        this.store.setPersistence({ state: 'ready' });
+    }
+
+    async clearPersistedSession(): Promise<void> {
+        if (this.disposed) return;
+        try {
+            await this.repository.clear();
+            this.clearRuntimeSession();
+            this.store.setPersistence({ state: 'ready' });
+        } catch {
+            this.store.setPersistence({
+                state: 'restore-error',
+                message: '无法清除旧会话，请在浏览器站点设置中清除本地数据。',
+            });
+        }
     }
 
     async dispose(): Promise<void> {
@@ -354,6 +651,340 @@ export class AudioSessionService {
 
     getArtworkUrl(trackId: string): string | undefined {
         return this.runtimeTracks.get(trackId)?.artworkUrl;
+    }
+
+    private async loadRuntimeTrack(
+        trackId: string,
+        shouldPlay: boolean,
+    ): Promise<void> {
+        if (this.disposed) return;
+        const runtimeTrack = this.runtimeTracks.get(trackId);
+        const record = this.getTrack(trackId);
+        if (!record) return;
+        if (!runtimeTrack?.file) {
+            this.store.setCurrentTrack(trackId);
+            this.store.setPlayback({
+                trackId,
+                state: 'empty',
+                currentTimeSeconds: 0,
+                durationSeconds: record.durationSeconds ?? 0,
+                volume: this.engine.getSnapshot().volume,
+            });
+            return;
+        }
+
+        const generation = ++this.commandGeneration;
+        this.engine.unload();
+        this.store.setCurrentTrack(trackId);
+        this.store.setEnergy(0);
+        this.store.setPlayback({
+            trackId,
+            state: 'loading',
+            currentTimeSeconds: 0,
+            durationSeconds: record.durationSeconds ?? 0,
+            volume: this.engine.getSnapshot().volume,
+        });
+
+        try {
+            const encodedAudio = await runtimeTrack.file.arrayBuffer();
+            if (
+                generation !== this.commandGeneration
+                || this.disposed
+                || !this.runtimeTracks.has(trackId)
+            ) {
+                return;
+            }
+            const result = await this.engine.load({
+                trackId,
+                encodedAudio,
+            });
+            if (
+                result === 'stale'
+                || generation !== this.commandGeneration
+                || this.disposed
+            ) {
+                return;
+            }
+
+            const snapshot = this.engine.getSnapshot();
+            this.store.updateTrack(trackId, {
+                durationSeconds: snapshot.durationSeconds,
+                restoreState: 'available',
+            });
+            if (shouldPlay) {
+                await this.engine.play();
+            }
+            await this.persistCurrent(trackId, runtimeTrack.file);
+        } catch (error) {
+            if (generation !== this.commandGeneration || this.disposed) return;
+            this.store.updateTrack(trackId, {
+                restoreState: 'decode-error',
+            });
+            if (this.engine.getSnapshot().state !== 'error') {
+                this.store.setPlayback({
+                    trackId,
+                    state: 'error',
+                    currentTimeSeconds: 0,
+                    durationSeconds: record.durationSeconds ?? 0,
+                    volume: this.engine.getSnapshot().volume,
+                    error: {
+                        code: 'decode',
+                        message:
+                            error instanceof Error
+                                ? error.message
+                                : 'Unable to read this audio file.',
+                    },
+                });
+            }
+            this.store.setEnergy(0);
+        }
+    }
+
+    private async hydrateFromHandle(
+        trackId: string,
+        permissionAlreadyGranted: boolean,
+    ): Promise<boolean> {
+        const runtime = this.runtimeTracks.get(trackId);
+        const record = this.getTrack(trackId);
+        const handle = runtime?.handle;
+        if (!runtime || !record || !handle) {
+            this.store.updateTrack(trackId, {
+                restoreState: 'file-missing',
+            });
+            return false;
+        }
+
+        if (!permissionAlreadyGranted) {
+            let permission: PermissionState;
+            try {
+                permission = handle.queryPermission
+                    ? await handle.queryPermission({ mode: 'read' })
+                    : 'granted';
+            } catch {
+                permission = 'denied';
+            }
+            if (permission === 'prompt') {
+                this.store.updateTrack(trackId, {
+                    restoreState: 'permission-required',
+                });
+                return false;
+            }
+            if (permission !== 'granted') {
+                this.store.updateTrack(trackId, {
+                    restoreState: 'permission-denied',
+                });
+                return false;
+            }
+        }
+
+        let file: File;
+        try {
+            file = await handle.getFile();
+        } catch (error) {
+            this.store.updateTrack(trackId, {
+                restoreState: isMissingFileError(error)
+                    ? 'file-missing'
+                    : 'permission-denied',
+            });
+            return false;
+        }
+
+        const hash = await this.hashFile(file);
+        if (record.trackHash && hash !== record.trackHash) {
+            this.store.updateTrack(trackId, {
+                restoreState: 'content-changed',
+            });
+            return false;
+        }
+
+        await this.registerRuntimeFile(trackId, file, handle);
+        this.store.updateTrack(trackId, {
+            mimeType: file.type || record.mimeType,
+            byteSize: file.size,
+            lastModified: file.lastModified,
+            trackHash: hash,
+            handleKey: `handle:${trackId}`,
+            restoreState: 'available',
+        });
+        return true;
+    }
+
+    private async registerRuntimeFile(
+        trackId: string,
+        file: File,
+        handle?: PermissionedFileHandle,
+    ) {
+        let metadata: ParsedMetadata | null = null;
+        try {
+            metadata = await this.parseMetadata(file);
+        } catch {
+            // Existing persisted metadata remains usable.
+        }
+        const previous = this.runtimeTracks.get(trackId);
+        if (previous?.artworkUrl) {
+            this.revokeObjectURL(previous.artworkUrl);
+        }
+        this.runtimeTracks.set(trackId, {
+            file,
+            handle: handle ?? previous?.handle,
+            artworkUrl: this.createArtwork(metadata),
+        });
+    }
+
+    private createArtwork(
+        metadata: ParsedMetadata | null,
+    ): string | undefined {
+        const picture = metadata?.common.picture?.[0];
+        if (!picture) return undefined;
+        try {
+            const artwork = new Blob(
+                [picture.data as unknown as BlobPart],
+                { type: picture.format || 'image/png' },
+            );
+            return this.createObjectURL(artwork);
+        } catch {
+            return undefined;
+        }
+    }
+
+    private async persistCurrent(trackId: string, file: File) {
+        const record = this.getTrack(trackId);
+        if (!record?.trackHash) return;
+        this.store.setPersistence({ state: 'saving' });
+        const input: PersistedCurrentInput = {
+            ...this.persistedQueueInput(),
+            currentBlob: {
+                trackId,
+                blobKey: 'current',
+                trackHash: record.trackHash,
+                blob: file,
+            },
+        };
+        input.session.currentBlob = {
+            trackId,
+            blobKey: 'current',
+            trackHash: record.trackHash,
+        };
+        delete input.session.currentAnalysisCache;
+        try {
+            await this.repository.replaceCurrent(input);
+            this.store.updateTrack(trackId, {
+                restoreState: 'available',
+            });
+            this.store.setPersistence({ state: 'ready' });
+        } catch {
+            this.store.updateTrack(trackId, {
+                restoreState: 'not-persisted',
+            });
+            this.markPersistenceFailure();
+        }
+    }
+
+    private persistedQueueInput(): PersistedQueueInput {
+        return {
+            session: this.buildPersistedSession(),
+            handles: this.storedHandles(),
+        };
+    }
+
+    private buildPersistedSession(): PersistedSessionV1 {
+        const current = this.getTrack(this.store.currentTrackId);
+        const currentBlob = current?.trackHash
+            ? {
+                trackId: current.id,
+                blobKey: 'current',
+                trackHash: current.trackHash,
+            }
+            : undefined;
+        return {
+            schemaVersion: 1,
+            savedAt: new Date().toISOString(),
+            queue: this.store.queue.map((track) => ({
+                ...track,
+                metadata: { ...track.metadata },
+            })),
+            currentTrackId: this.store.currentTrackId,
+            activeCards: [],
+            analysisConfig: {
+                ...DEFAULT_PERSISTED_ANALYSIS_CONFIG,
+            },
+            viewport: null,
+            handles: this.storedHandles().map((entry) => ({
+                trackId: entry.trackId,
+                handleKey: entry.handleKey,
+            })),
+            currentBlob,
+        };
+    }
+
+    private storedHandles(): StoredHandle[] {
+        const handles: StoredHandle[] = [];
+        for (const track of this.store.queue) {
+            const handle = this.runtimeTracks.get(track.id)?.handle;
+            if (!handle) continue;
+            handles.push({
+                trackId: track.id,
+                handleKey: track.handleKey ?? `handle:${track.id}`,
+                handle,
+            });
+        }
+        return handles;
+    }
+
+    private async persistQueue() {
+        this.store.setPersistence({ state: 'saving' });
+        await this.repository.saveQueue(this.persistedQueueInput());
+    }
+
+    private async persistQueueSafely() {
+        try {
+            await this.persistQueue();
+            this.store.setPersistence({ state: 'ready' });
+        } catch {
+            this.markPersistenceFailure();
+        }
+    }
+
+    private markPersistenceFailure(
+        message = '当前页面仍可使用，但本次会话无法跨刷新保存。',
+    ) {
+        this.store.setPersistence({
+            state: 'not-persisted',
+            message,
+        });
+    }
+
+    private permissionQueryOrder(
+        currentTrackId: string | null,
+    ): string[] {
+        const queue = this.store.queue;
+        if (queue.length <= 1) return [];
+        const currentIndex = Math.max(
+            0,
+            queue.findIndex((track) => track.id === currentTrackId),
+        );
+        const result: string[] = [];
+        const seen = new Set<string>([queue[currentIndex]?.id ?? '']);
+        for (let distance = 1; result.length < queue.length - 1; distance += 1) {
+            for (const rawIndex of [
+                currentIndex + distance,
+                currentIndex - distance,
+            ]) {
+                const index =
+                    (rawIndex + queue.length) % queue.length;
+                const trackId = queue[index]?.id;
+                if (trackId && !seen.has(trackId)) {
+                    seen.add(trackId);
+                    result.push(trackId);
+                }
+            }
+        }
+        return result;
+    }
+
+    private getTrack(trackId: string | null): TrackRecord | undefined {
+        if (!trackId) return undefined;
+        return this.store.queue.find((track) => track.id === trackId);
     }
 
     private handleEngineSnapshot(snapshot: PlaybackSnapshot): void {
@@ -423,6 +1054,17 @@ export class AudioSessionService {
         const targetIndex =
             (baseIndex + delta + queue.length) % queue.length;
         return queue[targetIndex] ?? null;
+    }
+
+    private clearRuntimeSession() {
+        ++this.commandGeneration;
+        ++this.importGeneration;
+        this.stopFrameLoop();
+        for (const trackId of [...this.runtimeTracks.keys()]) {
+            this.releaseRuntimeTrack(trackId);
+        }
+        this.engine.unload();
+        this.store.clearSession(this.engine.getSnapshot().volume);
     }
 
     private releaseRuntimeTrack(trackId: string): void {

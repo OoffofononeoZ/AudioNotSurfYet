@@ -8,14 +8,14 @@ upstream_docs:
   - "docs/delivery/execution-plan.md"
   - "docs/delivery/acceptance-criteria.md"
   - "docs/delivery/test-strategy.md"
-next_action: "审阅 M4 对 EV-S、EV-B、EV-R 适用子集的 canonical evidence；批准前不开放 M5"
+next_action: "完成 M5 EV-D 适用子集的 provisional、原生权限人工检查和 canonical evidence"
 ---
 
 # Eval Plan
 
 ## 1. Purpose and Current State
 
-本文件定义 AudioNotSurfYet 的质量证据契约。Vitest、Playwright、Worker harness、受控 fixture 和 direct-Meyda golden 已在 M3 建立。M3 canonical evidence 已获批，M4 clean-commit [canonical run](evidence-index.md) 已使 EV-S、EV-B、EV-R 的 M4 适用子集具有待审批的 `pass` 证据；完整 EV-A–EV-R、Edge 矩阵和 M5–M11 产品行为仍为 `planned`。
+本文件定义 AudioNotSurfYet 的质量证据契约。Vitest、Playwright、Worker harness、受控 fixture 和 direct-Meyda golden 已在 M3 建立。M3 canonical evidence 已获批，M4 clean-commit [canonical run](evidence-index.md) 对 EV-S、EV-B、EV-R 的适用子集也已获批。M5 正在为 EV-D 的适用子集生成实现与 provisional 反馈；在 clean-commit canonical run、原生权限人工检查和 owner 审批前，M5 EV-D 不标记为通过。完整 EV-A–EV-R、Edge 矩阵和 M6–M11 产品行为仍为 `planned`。
 
 Q0 只批准“如何判断质量”，不批准 release readiness。`docs/quality/release-readiness.md` 只能在 M11 已产生完整成功、失败、边界和异常证据后创建。
 
@@ -74,7 +74,7 @@ Q0 只批准“如何判断质量”，不批准 release readiness。`docs/quali
 - Success：当前 Blob、当前分析缓存、队列句柄和 UI snapshot 完整恢复，时间为 0 且 paused。
 - Failure：permission denied、quota/transaction abort、文件缺失/变化、cache 损坏均进入明确状态。
 - Boundary：只保存一个 current Blob/cache；下一、上一、下二、上二权限查询顺序；current track 原子替换与清除会话。
-- Exception：未知 schema 不猜测迁移；`requestPermission()` 只由“恢复访问”用户操作触发。
+- Exception：未知 schema 不猜测迁移；`requestPermission()` 只由“恢复访问”用户操作触发。自动化 OPFS handle 证据与原生 OS picker 权限证据分开记录，前者不得代替后者。
 
 ### EV-U — Learning, accessibility, and scope
 
@@ -182,4 +182,4 @@ Q0 只有在以下条件满足后才能改为 `approved`：
 
 `project-owner` 于 2026-07-28 明确批准本文、[golden examples](golden-examples.md)、[failure taxonomy](failure-taxonomy.md) 及对应 delivery 修订。同日，owner 又批准 M3 [evidence index](evidence-index.md) 与 working agreements；M3 已关闭并开放 M4。
 
-2026-07-29，M4 clean-commit canonical run 已追加到 [evidence index](evidence-index.md)，但尚未获得 `project-owner` 批准；因此 EV-S、EV-B、EV-R 只记录 M4 适用子集的待审批证据，M4 仍为 `In Review`。
+2026-07-29，M4 clean-commit canonical run 已追加到 [evidence index](evidence-index.md)，并由 `project-owner` 明确批准；EV-S、EV-B、EV-R 的 M4 适用子集据此生效，M4 关闭并开放 M5。该批准不覆盖 M5 EV-D 或 EG-006。

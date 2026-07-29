@@ -20,6 +20,7 @@ import { useConfigstore } from '../stores/configStore';
 const audioSession = new AudioSessionService(useAudioSessionStore());
 audioSession.setVolume(useConfigstore().volume);
 provide(audioSessionServiceKey, audioSession);
+void audioSession.initialize();
 
 onUnmounted(() => {
     void audioSession.dispose();
