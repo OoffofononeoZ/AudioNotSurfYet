@@ -1,13 +1,13 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-07-28
+last_reviewed: 2026-07-29
 upstream_docs:
   - "docs/product/success-metrics.md"
   - "docs/architecture/interface-contracts.md"
   - "docs/delivery/acceptance-criteria.md"
   - "docs/delivery/execution-plan.md"
-next_action: "为 M4 建立 AudioEngine/store 单元集成测试与 MusicBar 浏览器回归证据"
+next_action: "在最终干净 M4 commit 上执行 canonical suite，并登记 AudioEngine/store 与 MusicBar 证据"
 ---
 
 # Test Strategy
