@@ -68,6 +68,14 @@ class RecoveryEngine implements AudioEnginePort {
         return null;
     }
 
+    getDecodedAudioDescriptor() {
+        return null;
+    }
+
+    copyDecodedChannelRange() {
+        return null;
+    }
+
     subscribe(listener: (snapshot: PlaybackSnapshot) => void) {
         this.listeners.add(listener);
         listener(this.getSnapshot());
@@ -111,6 +119,10 @@ class MemoryRepository implements SessionRepositoryPort {
     async replaceCurrent(input: PersistedCurrentInput) {
         if (this.replaceError) throw this.replaceError;
         this.replaceInputs.push(input);
+    }
+
+    async replaceCurrentAnalysisCache() {
+        return 'stored' as const;
     }
 
     async removeTrack() {}

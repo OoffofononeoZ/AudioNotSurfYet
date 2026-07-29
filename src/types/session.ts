@@ -3,32 +3,15 @@ import type {
     TrackId,
     TrackRecord,
 } from './audio';
+import {
+    FEATURE_IDS,
+    type ConfigHash,
+    type FeatureId,
+} from '../analysis/types';
 
 export type TrackHash = string;
-export type ConfigHash = string;
-
-export type FeatureId =
-    | 'rms'
-    | 'zcr'
-    | 'energy'
-    | 'amplitudeSpectrum'
-    | 'powerSpectrum'
-    | 'spectralCentroid'
-    | 'spectralFlatness'
-    | 'spectralFlux'
-    | 'spectralSlope'
-    | 'spectralRolloff'
-    | 'spectralSpread'
-    | 'spectralSkewness'
-    | 'spectralKurtosis'
-    | 'spectralCrest'
-    | 'chroma'
-    | 'loudness'
-    | 'perceptualSpread'
-    | 'perceptualSharpness'
-    | 'mfcc'
-    | 'complexSpectrum'
-    | 'buffer';
+export type { ConfigHash, FeatureId };
+export { FEATURE_IDS };
 
 export interface ActiveAnalysisCard {
     slot: 0 | 1 | 2 | 3;

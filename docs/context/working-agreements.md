@@ -1,5 +1,5 @@
 ---
-status: approved
+status: in-review
 owner: "project-owner"
 last_reviewed: 2026-07-29
 upstream_docs:
@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/context/index.md"
   - "docs/delivery/test-strategy.md"
   - "docs/quality/eval-plan.md"
-next_action: "为 M6 Worker、registry、性能基线与 canonical evidence 补充真实测试约定"
+next_action: "用户提交 M6 工作树后运行 canonical，再由 owner 审批本修订与 evidence"
 ---
 
 # Working Agreements
@@ -28,6 +28,9 @@ next_action: "为 M6 Worker、registry、性能基线与 canonical evidence 补�
 - M4 使用 `test:m4:unit`、`test:m4:integration` 和 `test:e2e:m4`；65 秒 WAV 与损坏文件只在 Git 忽略目录运行时生成。
 - M5 使用 `test:m5:unit`、`test:m5:integration` 和 `test:e2e:m5`；测试分别覆盖 V1 repository、恢复/权限状态机和真实 Chrome IndexedDB 刷新。
 - M5 自动化通过测试注入的 `showOpenFilePicker()` 返回真实 OPFS `FileSystemFileHandle`，用于可重复验证 handle 存储、Blob 优先和刷新；它不替代 Chrome 原生文件选择器的人工权限验证。
+- M6 使用 `test:m6:unit`、`test:m6:worker`、`test:m6:integration` 和 `test:e2e:m6`；`eval:m6:provisional` 运行 M3–M6 回归但不写正式 evidence，`eval:m6` 要求起止均为同一 clean commit。
+- M6 的 15 分钟 WAV 在浏览器 OPFS 中分块确定性生成，不进入 Git；性能断言包括反馈 ≤100ms、分析归因主线程长任务为 0、进度单调、取消可见与 20 次资源循环不单调累积。
+- M6 DEV bridge 只用于浏览器黑盒触发活动特征、取消、重试、读取可序列化 snapshot 和 exact cursor；测试不得通过它读取 File、PCM、AudioBuffer 或 Worker 内部对象。
 - M3 仅建立本地门禁，不存在正式 CI；这项缺口不阻断 M3，但自动化声明必须限定为本地执行。
 - 交互改动要在本地浏览器执行成功、失败和边界场景，并检查 console error/warn。
 - 布局和可视化至少检查窄屏、常见桌面和宽屏，使用真实 DOM/canvas 几何。
@@ -46,12 +49,15 @@ next_action: "为 M6 Worker、registry、性能基线与 canonical evidence 补�
 - M5 dirty worktree 只运行 `eval:m5:provisional`；要求 clean HEAD 的 `eval:m5` 已对提交 `c90a3c5738de5b7a4efb7eb24cddc49da3713b44` 运行并追加正式 evidence。原生权限人工检查已由 `project-owner` 执行并与自动化结果分开记录。
 - 2026-07-29 的 M5 provisional run 16/16 通过；它绑定 dirty worktree，只证明当前实现值得提交和 canonical 复跑，不关闭 M5。
 - 同日 M5 canonical run 16/16 通过，起止工作树均干净且 commit 身份一致；随后 Chrome 原生权限人工检查通过并由 owner 批准，M5 已关闭。
+- M6 dirty-worktree provisional `M6-2026-07-29T10-59-23-767Z-b7fa91ed-provisional` 已 20/20 通过，summary SHA-256 为 `6fd67f9a8b0184a2861a7182a1276572375e947880cf3688afe7511ca97ed3fa`；它只作实现反馈。在用户提交且 `eval:m6` 通过前不追加 evidence index。
 - 首个 canonical run 已记录在 [evidence index](../quality/evidence-index.md)；本地产物保留和删除规则以 [eval plan](../quality/eval-plan.md) 为准。
 - fixture、manifest 和 golden 是受版本控制的规范输入；更新必须可重建、显示 diff，并重新执行对应测试。
 
 ## Resource Ownership
 
 - AudioEngine 独占实时 AudioContext、AudioBuffer、source、Analyser 与 Gain；AudioSessionService 独占 runtime File、封面 URL、engine 订阅和单播放 RAF。
+- AnalysisCoordinator 独占产品 analysis Worker、generation、pending request、exact cursor 和 cache 合并；AudioEngine 只通过 descriptor 与分块 copy 暴露当前解码 PCM，revision 变化使 copy 和旧 Worker 结果失效。
+- Worker 保留的 mono PCM、message listener 和 transferable 必须在 track/revision 变化、取消或 dispose 路径中释放；每个 MainLayout 同时最多一个 live 产品 Worker。
 - 音频解码直接使用 File ArrayBuffer，不创建音频对象 URL；封面 URL 在删除、清空和 dispose 时释放。
 - AudioBufferSourceNode、AudioContext、对象 URL、RAF、Observer、事件监听、GSAP tween、Three.js geometry/material/renderer 的创建与释放应成对检查。
 - 用户本地音频默认只在浏览器内处理；仓库没有上传或远端处理证据。
@@ -73,3 +79,5 @@ next_action: "为 M6 Worker、registry、性能基线与 canonical evidence 补�
 `project-owner` 于 2026-07-29 明确批准 M4 evidence 与本修订。M4 据此关闭并开放 M5；后续 M5 新增约定需要独立复核，不由本次批准预先覆盖。
 
 `project-owner` 于 2026-07-29 确认 M5 Chrome 原生权限人工检查通过，并明确批准 M5 evidence 与本修订。M5 据此关闭并开放 M6；本批准不覆盖 M6、Edge 或 release readiness。超范围长音频未开始播放只记录为非门禁压力观察，不改变约 15 分钟产品边界。
+
+同日，owner 要求按 M6 详细计划实施；以上 M6 命令、DEV bridge 与资源所有权是随实现形成的待复核约定。它们当前为 `in-review`，不得从本次实现请求推断 canonical evidence 或 M6 关闭已获批准。

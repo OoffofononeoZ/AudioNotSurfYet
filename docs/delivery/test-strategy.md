@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/architecture/interface-contracts.md"
   - "docs/delivery/acceptance-criteria.md"
   - "docs/delivery/execution-plan.md"
-next_action: "为 M6 Worker、FeatureRegistry、取消/身份与最大输入性能建立验证切片"
+next_action: "用户提交后运行 M6 canonical，复核 Worker、FeatureRegistry、cache 与最大输入正式证据"
 ---
 
 # Test Strategy
@@ -120,6 +120,7 @@ next_action: "为 M6 Worker、FeatureRegistry、取消/身份与最大输入性�
 
 | Slice | Features | Required shapes/tests |
 | --- | --- | --- |
+| M6 platform | RMS、Energy、Amplitude Spectrum、Chroma | Worker core、直接 Meyda 5.6.3 platform golden、scalar/frequency/category payload、exact cursor；Energy 只证明平台通路，不计作 M8 产品完成 |
 | M7 | RMS | scalar, silence/amplitude, exact cursor |
 | M7 | Amplitude Spectrum | frequency vector, sine peaks, heatmap, quantization |
 | M7 | Chroma | 12 category vector, pitch classes, heatmap/bars |
@@ -131,6 +132,8 @@ next_action: "为 M6 Worker、FeatureRegistry、取消/身份与最大输入性�
 | M10 | Complex Spectrum | real/imag dimensions, magnitude/phase derivation |
 
 每项至少需要 registry coverage、直接 Meyda golden、renderer contract、cursor exact value 和一个失败/边界场景。
+
+M6 的 21/21 只验证 registry 双向穷尽、milestone/shape/renderer/维度和 Worker support 集合；M7–M10 未实现项不因登记而获得产品 golden/renderer/card pass。Meyda 5.6.3 `spectralFlux` 的固定异常测试映射 R-020，M8 前必须先解决依赖处置，不能删除异常测试或伪造 feature pass。
 
 ## 6. IndexedDB and Permission Matrix
 
@@ -203,6 +206,19 @@ npm run build
 
 M3 已选择删除指向不存在 `test.ts` 的 `test:spectrogram`，不保留兼容别名。README/working agreements 只列真实执行成功的命令。
 
+M6 新增并已单项执行：
+
+```text
+npm run test:m6:unit
+npm run test:m6:worker
+npm run test:m6:integration
+npm run test:e2e:m6
+npm run eval:m6:provisional
+npm run eval:m6
+```
+
+`eval:m6` 要求 clean HEAD，顺序执行 fixture、M3–M5 回归、M6 三层 Vitest、Chrome E2E、docs、deliberate failure、typecheck、build 和 diff check；provisional 允许 dirty worktree，但不得追加正式 evidence。
+
 每一里程碑执行与其相关的最快测试；门禁关闭前再运行完整相关矩阵、build、文档检查和 `git diff --check`。
 
 ## 11. Evidence Retention
@@ -214,4 +230,4 @@ M3 已选择删除指向不存在 `test.ts` 的 `test:spectrogram`，不保留�
 
 ## 12. Exit Criteria
 
-M3 的公开命令、fixture、黄金比较和失败检测已有 clean-commit canonical pass，并已由 `project-owner` 批准。M4 的 AudioEngine/session/Chrome 适用测试也已在 clean commit 上 canonical pass、记录在 [evidence index](../quality/evidence-index.md) 并获 owner 批准。M5 repository、recovery integration 与 Chrome IndexedDB/OPFS 已在 clean commit canonical 通过；Chrome 原生权限人工检查也已由 `project-owner` 确认通过，M5 evidence 与 working agreements 已获批准。M6 必须建立独立 Worker/registry/performance evidence 后才能关闭。
+M3 的公开命令、fixture、黄金比较和失败检测已有 clean-commit canonical pass，并已由 `project-owner` 批准。M4 的 AudioEngine/session/Chrome 适用测试也已在 clean commit 上 canonical pass、记录在 [evidence index](../quality/evidence-index.md) 并获 owner 批准。M5 repository、recovery integration 与 Chrome IndexedDB/OPFS 已在 clean commit canonical 通过；Chrome 原生权限人工检查也已由 `project-owner` 确认通过，M5 evidence 与 working agreements 已获批准。M6 单项 Worker/registry/cache/15 分钟 Chrome 场景已通过，但必须完成 provisional、clean-commit canonical、evidence 登记和 owner 审批后才能关闭。

@@ -13,6 +13,7 @@ import {
 } from '../persistence/sessionRepository';
 import type { useAudioSessionStore } from '../stores/audioSessionStore';
 import type {
+    DecodedAudioDescriptor,
     LocalAudioInput,
     PlaybackSnapshot,
     TrackRecord,
@@ -20,6 +21,7 @@ import type {
 import {
     DEFAULT_PERSISTED_ANALYSIS_CONFIG,
     type PersistedSessionV1,
+    type StoredAnalysisCache,
     type StoredHandle,
 } from '../types/session';
 
@@ -91,6 +93,13 @@ export interface AudioEnginePort {
     setVolume(volume: number): void;
     getSnapshot(): PlaybackSnapshot;
     getTimeDomainFloatData(): Float32Array | null;
+    getDecodedAudioDescriptor(): DecodedAudioDescriptor | null;
+    copyDecodedChannelRange(input: {
+        revision: number;
+        channel: number;
+        start: number;
+        length: number;
+    }): Float32Array | null;
     subscribe(
         listener: (snapshot: PlaybackSnapshot) => void,
     ): () => void;
@@ -189,8 +198,8 @@ export class AudioSessionService {
         });
     }
 
-    async initialize(): Promise<void> {
-        if (this.disposed) return;
+    async initialize(): Promise<StoredAnalysisCache | undefined> {
+        if (this.disposed) return undefined;
         const generation = ++this.importGeneration;
         ++this.commandGeneration;
         this.store.setPersistence({ state: 'restoring' });
@@ -213,18 +222,18 @@ export class AudioSessionService {
                         : '无法读取已保存的会话，当前仍可使用内存播放。',
                 });
             }
-            return;
+            return undefined;
         }
 
         if (
             generation !== this.importGeneration
             || this.disposed
         ) {
-            return;
+            return undefined;
         }
         if (!restored) {
             this.store.setPersistence({ state: 'ready' });
-            return;
+            return undefined;
         }
 
         for (const trackId of [...this.runtimeTracks.keys()]) {
@@ -246,6 +255,9 @@ export class AudioSessionService {
             restored.session.queue,
             restored.session.currentTrackId,
             this.engine.getSnapshot().volume,
+        );
+        this.store.setAnalysisCacheManifest(
+            restored.session.currentAnalysisCache ?? null,
         );
 
         const currentTrackId = restored.session.currentTrackId;
@@ -325,7 +337,7 @@ export class AudioSessionService {
                 generation !== this.importGeneration
                 || this.disposed
             ) {
-                return;
+                return undefined;
             }
             await this.hydrateFromHandle(trackId, false);
         }
@@ -336,6 +348,7 @@ export class AudioSessionService {
         } catch {
             this.markPersistenceFailure();
         }
+        return restored.currentAnalysisCache;
     }
 
     async selectAndImportFiles(): Promise<'imported' | 'cancelled'> {
@@ -865,7 +878,6 @@ export class AudioSessionService {
             blobKey: 'current',
             trackHash: record.trackHash,
         };
-        delete input.session.currentAnalysisCache;
         try {
             await this.repository.replaceCurrent(input);
             this.store.updateTrack(trackId, {
@@ -896,6 +908,17 @@ export class AudioSessionService {
                 trackHash: current.trackHash,
             }
             : undefined;
+        const analysisCache = this.store.analysisCacheManifest;
+        const currentAnalysisCache =
+            current?.trackHash
+            && analysisCache?.trackId === current.id
+            && analysisCache.trackHash === current.trackHash
+                ? {
+                    ...analysisCache,
+                    featureIds: [...analysisCache.featureIds],
+                    cacheKeys: [...analysisCache.cacheKeys],
+                }
+                : undefined;
         return {
             schemaVersion: 1,
             savedAt: new Date().toISOString(),
@@ -914,6 +937,7 @@ export class AudioSessionService {
                 handleKey: entry.handleKey,
             })),
             currentBlob,
+            currentAnalysisCache,
         };
     }
 

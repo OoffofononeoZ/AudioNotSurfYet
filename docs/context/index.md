@@ -4,7 +4,7 @@ owner: "project-owner"
 last_reviewed: 2026-07-29
 upstream_docs:
   - "AGENTS.md"
-next_action: "制定 M6 Worker platform 与 feature registry 实施切片；M6 证据获批前不进入 M7"
+next_action: "用户提交 M6 工作树后运行 canonical 并等待 owner 审批，获批前不进入 M7"
 ---
 
 # Repository Context Index
@@ -17,12 +17,12 @@ AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端：用户选择
 
 ## Current Stage
 
-- Repository context：入口、决策注册表和 working agreements 已批准；M5 更新后的 system map 与 glossary 仍为 `in-review`。
+- Repository context：入口和决策注册表已批准；M6 更新后的 system map、glossary 与 working agreements 为 `in-review`。
 - Product intent：problem brief、scope 和 success metrics 已由 `project-owner` 批准；开放问题只保留未来上传、未定义 Tab、托管和扩展研究等非当前门禁事项。
 - System design：system design、接口契约、风险和四个 ADR 已批准。
 - Execution planning：execution plan、acceptance criteria、test strategy 和 milestone plan 均为 approved。
-- Quality and evals：eval plan、golden examples、failure taxonomy，以及 M3、M4、M5 的适用 canonical evidence 已由 `project-owner` 批准；完整 eval 仍未完成。
-- Implementation：M3、M4、M5 已 `Complete`；M6 门禁已开放且状态为 `Planned`，尚未开始 M6 产品源码实现。
+- Quality and evals：eval plan、golden examples、failure taxonomy，以及 M3、M4、M5 的适用 canonical evidence 已由 `project-owner` 批准；M6 专项测试已实现但 provisional/canonical 尚未完成，完整 eval 仍未完成。
+- Implementation：M3、M4、M5 已 `Complete`；M6 Worker platform、registry、codec、coordinator 与 current cache 已实现并处于 `In Progress`，M7 UI 未开始。
 - Readiness、release、retrospective：`release-readiness.md` 等待 M11 执行证据，不创建 release 或 retrospective 文档。
 
 ## Key Documents
@@ -33,7 +33,7 @@ AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端：用户选择
 | [system-map.md](system-map.md) | 当前子系统、接口和外部依赖 | project-owner / in-review | 当前代码边界变化 |
 | [glossary.md](glossary.md) | 当前项目词汇与代码含义 | project-owner / in-review | 术语、状态或类型含义变化 |
 | [decision-registry.md](decision-registry.md) | 产品、架构和交付决策入口 | project-owner / approved | 形成、撤销或替代重要决策 |
-| [working-agreements.md](working-agreements.md) | 本地开发、验证和 Git 约定 | project-owner / approved | 工具链或验证能力变化 |
+| [working-agreements.md](working-agreements.md) | 本地开发、验证和 Git 约定 | project-owner / in-review | 工具链或验证能力变化 |
 | [problem-brief.md](../product/problem-brief.md) | 目标用户、问题和期望结果 | project-owner / approved | 目标用户或核心问题变化 |
 | [scope.md](../product/scope.md) | 当前范围、纵向切片和非目标 | project-owner / approved | 能力、数据或兼容范围变化 |
 | [success-metrics.md](../product/success-metrics.md) | 正确性、同步、响应和学习指标 | project-owner / approved | 阈值、样本或观测方法变化 |
@@ -65,11 +65,12 @@ AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端：用户选择
 | `src/layouts/` | Header、页面内容与 MusicBar 的共享外壳 | M4/M7 回归 |
 | `src/components/` | 播放 UI、列表、动画及 Canvas/WebGL 可视化 | ADR-0001/0004 |
 | `src/audio/` | 单一 AudioEngine 与 MainLayout-owned AudioSessionService；文件句柄导入与恢复编排 | ADR-0001/0003 |
+| `src/analysis/` | M6 FeatureRegistry、config identity、PCM/frame 工具、compact codec、Worker core 与 AnalysisCoordinator | ADR-0002/0004；M6 |
 | `src/persistence/` | 原生 IndexedDB V1 SessionRepository 与 runtime validator | ADR-0003；M5 |
-| `src/stores/` | 持久化 config 与可序列化 audioSessionStore/恢复状态 | ADR-0001/0003 |
+| `src/stores/` | 持久化 config 与可序列化 audioSessionStore/恢复/analysis 状态 | ADR-0001/0002/0003 |
 | `src/utils/` | 事件总线与纯工具函数 | 实现时按实际边界维护 |
-| `src/data/` | `analyzerData.ts` 的 21 项 Meyda 说明 | M6 FeatureRegistry |
-| `tests/` | M3 本地测试、fixture、golden、浏览器 harness 和 eval runner | [tests README](../../tests/README.md) |
+| `src/data/` | `analyzerData.ts` 的 21 项 Meyda 说明，由 M6 registry 穷尽映射 | M6 FeatureRegistry |
+| `tests/` | M3–M6 本地测试、fixture、golden、浏览器 harness 和 eval runner | [tests README](../../tests/README.md) |
 | `skills/audio-visualizer-dev/` | 本项目开发、验证和文档路由 Skill | [SKILL.md](../../skills/audio-visualizer-dev/SKILL.md) |
 
 ## Lifecycle Entry Points
@@ -85,7 +86,8 @@ AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端：用户选择
 
 ## Current Known Gaps
 
-- M5 IndexedDB/handle/current Blob 实现已通过 16/16 clean-commit canonical、Chrome 原生权限人工检查和 owner 审批；Worker 全曲分析与共享四卡时间轴未开始。
+- M6 四项 Worker 全曲分析、六类 codec、cache 和 exact cursor 已实现；共享四卡可视化、renderer 和学习交互属于 M7，尚未开始。
+- 当前 Meyda `spectralFlux` 对有效输入抛出 `x is not defined`；M6 以 R-020 和预期失败测试记录，不声明支持、不增加 fallback，后续依赖修复或明确适配决策后再开放。
 - 超出约 15 分钟支持边界的长音频未开始播放只作为非门禁压力观察；它不表示长音频被规定为必须失败，也不改变当前产品范围。
 - 当前机器尚未发现 Edge；没有真实 Edge 证据时不能完成 M11 双浏览器门禁。
 - 正式托管平台和生产 URL 尚未决定；它们只阻断未来 release，不阻断 M3。
@@ -107,3 +109,5 @@ AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端：用户选择
 同日，M5 dirty-worktree provisional suite 16/16 通过。该结果不绑定 M5 提交，不追加正式 evidence；原生权限人工检查、clean-commit canonical 和 owner 审批仍未完成。
 
 随后 M5 canonical suite 在 clean commit `c90a3c5738de5b7a4efb7eb24cddc49da3713b44` 上 16/16 通过并追加到 evidence index。`project-owner` 于 2026-07-29 确认 Chrome 原生权限人工检查通过，并明确批准 M5 evidence 与 working agreements。M5 改为 `Complete`，M6 门禁开放但尚未开始实现；超范围长音频未开始播放作为非门禁观察保留。
+
+同日，owner 要求按详细计划执行 M6。产品源码、专项 Vitest/Playwright 和 eval runner 已进入工作树；dirty-worktree provisional 20/20 通过，但用户提交后的 clean-commit canonical、正式 evidence index 与 owner 审批仍是关闭条件，里程碑继续为 `In Progress`。

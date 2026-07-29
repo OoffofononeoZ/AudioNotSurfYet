@@ -8,14 +8,14 @@ upstream_docs:
   - "docs/delivery/execution-plan.md"
   - "docs/delivery/acceptance-criteria.md"
   - "docs/delivery/test-strategy.md"
-next_action: "为 M6 EV-A、EV-J、EV-R 适用子集建立 Worker/registry/performance 证据"
+next_action: "用户提交 M6 工作树后在 clean commit 运行 canonical 并等待 owner 审批"
 ---
 
 # Eval Plan
 
 ## 1. Purpose and Current State
 
-本文件定义 AudioNotSurfYet 的质量证据契约。Vitest、Playwright、Worker harness、受控 fixture 和 direct-Meyda golden 已在 M3 建立。M3 canonical evidence 已获批，M4 clean-commit [canonical run](evidence-index.md) 对 EV-S、EV-B、EV-R 的适用子集也已获批。M5 clean-commit canonical 自动化与 Chrome 原生权限人工检查已为 EV-D 的 M5 适用子集提供获批证据。完整 EV-A–EV-R、Edge 矩阵和 M6–M11 产品行为仍为 `planned`。
+本文件定义 AudioNotSurfYet 的质量证据契约。Vitest、Playwright、Worker harness、受控 fixture 和 direct-Meyda golden 已在 M3 建立。M3 canonical evidence 已获批，M4 clean-commit [canonical run](evidence-index.md) 对 EV-S、EV-B、EV-R 的适用子集也已获批。M5 clean-commit canonical 自动化与 Chrome 原生权限人工检查已为 EV-D 的 M5 适用子集提供获批证据。M6 Worker platform 已进入 `In Progress`，dirty-worktree provisional 20/20 通过，但 clean-commit canonical 与 owner 审批尚未完成。完整 EV-A–EV-R、Edge 矩阵和 M7–M11 产品行为仍为 `planned`。
 
 Q0 只批准“如何判断质量”，不批准 release readiness。`docs/quality/release-readiness.md` 只能在 M11 已产生完整成功、失败、边界和异常证据后创建。
 
@@ -29,14 +29,14 @@ Q0 只批准“如何判断质量”，不批准 release readiness。`docs/quali
 - 分析期间用户输入到可见反馈不超过 100ms。
 - 不得产生可归因于分析计算的主线程任务超过 50ms。
 - display series 不超过 30 samples/second；每个 job 最多四个唯一活动特征。
-- `src/data/analyzerData.ts` 的 21/21 项必须具备 registry、renderer、黄金测试和可用卡片。
+- M6 要求 `src/data/analyzerData.ts` 的 21/21 项进入穷尽 registry；只有 RMS、Energy、Amplitude Spectrum、Chroma 四项在 M6 声明 Worker 支持。21 项 renderer、黄金测试和可用卡片是 M10 累计产品门禁，不得提前写成 M6 已完成。
 - Chrome 与 Edge、MP3/WAV/FLAC、1024/1280/1920 CSS px 均需真实证据；缺少 Edge 时不得宣称矩阵完成。
 
 ## 3. Evaluation Groups
 
 | Eval ID | Behavior | Required coverage | Acceptance criteria | Architecture risks | Planned methods | Pass threshold | Owner |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| EV-A | 分析正确性与特征语义 | success、failure、boundary、exception | AC-A01–AC-A07、AC-A10 | R-008、R-009、R-010、R-011、R-016 | Vitest direct-Meyda golden、Worker contract、量化 round-trip、fixture manifest review | 所有适用值满足固定容差；维度、尾帧和有限值规则通过；21/21 覆盖 | project-owner |
+| EV-A | 分析正确性与特征语义 | success、failure、boundary、exception | AC-A01–AC-A07、AC-A10 | R-008、R-009、R-010、R-011、R-016、R-020 | Vitest direct-Meyda golden、Worker contract、量化 round-trip、fixture manifest review | 所有适用值满足固定容差；维度、尾帧和有限值规则通过；M6 为 21/21 registry + 4/4 Worker 支持，M10 才要求 21/21 产品覆盖 | project-owner |
 | EV-S | 播放、seek 与时间同步 | success、failure、boundary、exception | AC-P03、AC-S01–AC-S05 | R-001、R-012 | AudioEngine/store 集成、Playwright 真实 AudioContext、长播放与重复 seek 计时 | 所有计时场景偏差 ≤100ms；单一实时 AudioContext；MusicBar 基线无回归 | project-owner |
 | EV-J | Worker、活动卡、缓存身份和竞态 | success、failure、boundary、exception | AC-P02、AC-A08–AC-A10、AC-R03、AC-R04、AC-F06 | R-002、R-003 | Worker message contract、generation/cache-key 单元测试、快速换歌/换卡 E2E、故障注入 | 0–4 个唯一 feature；旧 generation 不改变 store/cache/Canvas；Worker 失败不停止播放 | project-owner |
 | EV-D | IndexedDB、文件权限和会话恢复 | success、failure、boundary、exception | AC-P04、AC-F01–AC-F05、AC-F08、AC-F09、AC-R05、AC-S03 | R-003、R-005、R-006、R-007 | isolated IndexedDB、真实浏览器刷新、handle adapter、权限/事务/quota 注入 | 只保留 current Blob/cache；刷新为 0 秒 paused；失败状态可见且当前页面继续可用 | project-owner |
@@ -50,10 +50,10 @@ Q0 只批准“如何判断质量”，不批准 release readiness。`docs/quali
 
 ### EV-A — Analysis correctness
 
-- Success：mono/stereo 平均、固定 frame/hop/window/MFCC、RMS/Amplitude Spectrum/Chroma 以及后续 21 项结果与同版本直接 Meyda 一致。
+- Success：mono/stereo 平均、固定 frame/hop/window/MFCC、M6 的 RMS/Energy/Amplitude Spectrum/Chroma 以及后续获准特征结果与同版本直接 Meyda 一致。
 - Failure：空或声道长度不一致、NaN/Infinity、错误 payload 维度、量化饱和、缺少 provenance 的 fixture 必须显式失败。
 - Boundary：silence、单 impulse、frame/hop 边界、尾帧零填充、负值/无上界标量、24-band Loudness、Complex real/imag。
-- Exception：浏览器重采样时记录实际分析 PCM sample rate；不能通过改容差掩盖 sample-rate/config 身份错误。
+- Exception：浏览器重采样时记录实际分析 PCM sample rate；不能通过改容差掩盖 sample-rate/config 身份错误。M6 已把 `spectralFlux` 在当前 Meyda 版本抛出 `x is not defined` 固化为 R-020 和预期失败断言，不把它误报为支持或 silently fallback。
 
 ### EV-S — Playback synchronization
 
@@ -171,7 +171,7 @@ Q0 只有在以下条件满足后才能改为 `approved`：
 
 - `project-owner` 审阅本文、[golden examples](golden-examples.md) 和 [failure taxonomy](failure-taxonomy.md)；
 - 七组评估均包含成功、失败、边界和异常路径；
-- 42 个 AC 均有映射，19 个风险均映射到 eval 或显式 gap；
+- 42 个 AC 均有映射；Q0 批准时的 19 个风险均已映射，M6 新发现的 R-020 也已加入 EV-A 与明确缓解路径；
 - 没有把 planned 写成 pass，也没有伪造 Edge、fixture 或自动化证据；
 - evidence index 与本地产物政策已由 owner 接受，并且没有预建空索引；
 - execution/milestone 文档已把 Q0 设为 M3 的前置门禁。

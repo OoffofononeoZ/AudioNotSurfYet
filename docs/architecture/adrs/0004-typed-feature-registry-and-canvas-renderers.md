@@ -23,6 +23,8 @@ next_action: "先定义 21 项穷尽注册表和 renderer 契约，再实现首�
 - Canvas 2D 绘制高频数据、热图、波形、游标和网格；DOM 提供标题、说明、固定参数、精确值、按钮、焦点和替代信息。
 - 所有 renderer 接收相同 `TimelineViewport`，不得维护私有时间轴或 AudioContext。
 - Analyzer 不新增 Three.js。
+- 每项同时登记 `deliveryMilestone` 与 Worker 支持状态；M6 只支持 RMS、Energy、Amplitude Spectrum、Chroma，21/21 registry coverage 不等同于 21 项产品完成。
+- Meyda 5.6.3 的 Complex Spectrum real/imag 各为 1024，不沿用 amplitude/power spectrum 的 512 维；其余固定维度由 registry contract 统一提供。
 
 ## Consequences
 

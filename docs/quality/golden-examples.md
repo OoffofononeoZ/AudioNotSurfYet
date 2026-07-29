@@ -1,20 +1,20 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-07-28
+last_reviewed: 2026-07-29
 upstream_docs:
   - "docs/quality/eval-plan.md"
   - "docs/delivery/acceptance-criteria.md"
   - "docs/delivery/test-strategy.md"
   - "docs/architecture/risk-register.md"
-next_action: "在 M4–M11 按里程碑执行对应产品、学习、失败与边界样例"
+next_action: "用 M6 canonical 固化四项 Worker golden；M7 再进入首批 Analyzer UI 样例"
 ---
 
 # Golden Examples
 
 ## 1. Evidence Boundary
 
-以下产品、学习、失败和边界样例仍是待 M4–M11 实现和执行的规范。M3 已生成受控 fixture、manifest 和首批 direct-Meyda golden，并在 clean commit canonical run 中通过 identity/容差检查；这不表示下表 UI 或产品行为已经通过。
+以下产品、学习、失败和边界样例仍是待各里程碑实现和执行的规范。M3 已生成受控 fixture、manifest 和首批 direct-Meyda golden，并在 clean commit canonical run 中通过 identity/容差检查。M6 新增的产品 Worker 测试会对 silence、sine、dual-tone 和 impulse 比较 RMS、Energy、Amplitude Spectrum、Chroma，但在 canonical 与 owner 审批前只属于实现反馈；它也不表示 M7 UI 或后续 21 项产品行为已经通过。
 
 音频仅允许：
 
@@ -33,6 +33,8 @@ next_action: "在 M4–M11 按里程碑执行对应产品、学习、失败与�
 - 15 分钟容量样本必须在运行时生成或缓存于被忽略的本地产物目录，不得提交 Git。
 - fixture、生成器、编码器参数或 manifest 任一项缺失时，相关 GE/EV 保持 planned 或 blocked，不能生成黄金通过声明。
 - M3 已建立生成器并提交短 PCM/WAV/MP3/FLAC、manifest 与首批 golden；2026-07-28 clean-commit canonical run 通过并记录在 [evidence index](evidence-index.md)。该证据只覆盖 M3 fixture/golden harness，不声明相关产品 eval 完成。
+- M6 运行时 golden 使用确定性 PCM，直接调用同版本 Meyda 与产品 Worker/compact codec 对比；Energy 是平台验证项，不改变 M7 首批卡片仍为 RMS、Amplitude Spectrum、Chroma 的批准范围。
+- 当前 Meyda `5.6.3` 的 `spectralFlux` 对有效输入抛出 `x is not defined`。M6 把它作为预期缺陷和 R-020 固化，不为追求 21 项表面通过而增加 legacy fallback。
 
 ## 2. Success Examples
 

@@ -5,7 +5,7 @@ last_reviewed: 2026-07-29
 upstream_docs:
   - "docs/architecture/system-design.md"
   - "docs/architecture/interface-contracts.md"
-next_action: "在 M6 复核 R-002、R-003、R-004、R-006、R-007、R-010、R-011"
+next_action: "以 M6 canonical 复核 R-002、R-003、R-004、R-006、R-007、R-010、R-011、R-020"
 ---
 
 # Risk Register
@@ -33,6 +33,7 @@ next_action: "在 M6 复核 R-002、R-003、R-004、R-006、R-007、R-010、R-01
 | R-017 | 现有 `test:spectrogram` 指向缺失 `test.ts` | High | Medium | 命令无法运行 | 测试基线里程碑修复或重定向脚本，并在 CI/本地运行 | 修复前不能把该命令作为质量证据 | project-owner | Open |
 | R-018 | 未定义 Tab 或未来上传需求侵入当前交付 | Medium | Medium | PR 添加空白页实现、网络数据路径或服务端依赖 | scope review、Feature/ADR 门禁；未来能力另开产品决策 | 产品意图变化会使所有下游待复核 | project-owner | Open |
 | R-019 | bundle 已有约 1MB 警告继续增长 | Medium | Medium | `npm run build` chunk warning 增大 | Worker/renderer 按路由或 feature family 拆分，记录构建体积；避免 Analyzer Three.js | 具体发布预算在 quality/release 前批准 | project-owner | Open |
+| R-020 | Meyda 5.6.3 `spectralFlux` 提取器引用未声明变量 `x` | High | High | 固定 previous/current frame 调用抛 `ReferenceError: x is not defined` | M6 固定回归只登记风险；不 fork、升级、monkey-patch、启用或伪造 golden pass；M8 前由 owner 批准依赖处置方案并补 direct-Meyda/异常回归 | 未解决时 `spectralFlux` 保持不可选，M8 与累计 scalar coverage 被阻断，但不影响 M6/M7 | project-owner | Open |
 
 ## Review Rule
 

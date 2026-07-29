@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/product/scope.md"
   - "docs/architecture/system-design.md"
   - "docs/delivery/execution-plan.md"
-next_action: "按已批准架构制定并执行 M6 Worker platform 与 feature registry 切片"
+next_action: "完成 DEC-016 的 canonical evidence；owner 批准前保持 M6 In Progress"
 ---
 
 # Decision Registry
@@ -35,6 +35,7 @@ next_action: "按已批准架构制定并执行 M6 Worker platform 与 feature r
 | DEC-013 | 2026-07-28 | 未提交状态只产生 provisional run；用户自行提交后对干净 commit 复跑，才创建正式 evidence index | project-owner | approved | [Working agreements](working-agreements.md) | Git 授权或 evidence identity 政策改变 |
 | DEC-014 | 2026-07-28 | M4 快速切歌最后操作生效，非空追加不中断当前播放，metadata 失败继续解码，decode/unsupported 使用非阻塞消息 | project-owner | approved | [ADR-0001](../architecture/adrs/0001-single-audio-engine-and-session-state.md) | 队列、竞态或错误交互语义改变 |
 | DEC-015 | 2026-07-29 | M5 原生文件选择不提供隐藏 input fallback；本地音频保持 Git 忽略，超出约 15 分钟的样本只作 best-effort 压力观察且不扩大范围 | project-owner | approved | [Working agreements](working-agreements.md) | 文件选择兼容策略、本地样本政策或支持时长改变 |
+| DEC-016 | 2026-07-29 | M6 建立 21 项穷尽 registry、四项 Worker 支持、六类 compact codec、空默认活动集、完整 cache identity、generation 隔离和 Worker exact cursor；不实现 M7 UI，不升级 Meyda 或增加 spectralFlux fallback | project-owner | approved | [Interface contracts](../architecture/interface-contracts.md) | M6 feature 支持、frame/config、codec、缓存、精确值或 fallback 策略改变 |
 
 ## Approval Evidence
 
@@ -59,6 +60,8 @@ M4 dirty-worktree provisional suite 随后通过，证明当前实现值得进�
 随后 `npm run eval:m5` 在 clean commit `c90a3c5738de5b7a4efb7eb24cddc49da3713b44` 上 16/16 通过，正式记录已追加到 [evidence index](../quality/evidence-index.md)。`project-owner` 于 2026-07-29 确认 Chrome 原生权限人工检查通过，并明确批准 M5 evidence 与 working agreements；M5 据此关闭并开放 M6。
 
 同次人工检查中，一段超出 DEC-006“约 15 分钟”支持边界的本地压力输入未开始播放。依据 DEC-015，该观察不计入 M5 pass/fail，不表示长音频必须失败，也不扩大支持范围；若支持范围内的有效格式复现，或失败破坏当前会话与其他歌曲可用性，则重新进入缺陷调查。
+
+同日，`project-owner` 以“按计划执行”批准并要求实施 M6 详细计划，DEC-016 据此生效。实现源码和专项测试存在只表示进入 `In Progress`；依据 DEC-013，仍需 dirty-worktree provisional、用户提交、clean-commit canonical、正式 evidence index 与 owner 审批后才能关闭 M6。
 
 ## Historical Evidence Gap
 

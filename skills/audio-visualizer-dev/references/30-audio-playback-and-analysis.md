@@ -1,6 +1,6 @@
 # 音频播放与分析
 
-## 当前播放链路
+## 当前播放与离线分析链路
 
 M5 实现后的已证实链路：
 
@@ -45,7 +45,17 @@ AudioBufferSourceNode → AnalyserNode → GainNode → audioContext.destination
 - 其他曲目按下一、上一、下二、上二的扩展顺序调用 `queryPermission()`；初始化绝不调用 `requestPermission()`。
 - prompt/denied 由列表显示“恢复访问”，missing/changed 显示“重新选择”；重新选择只接受与原记录 SHA-256 相同的内容。
 - IndexedDB quota/事务失败不停止当前内存播放，并发布 `not-persisted`；未知 schema 发布 `unsupported-schema`，只在用户点击后清除旧会话。
-- 当前 analysis payload 尚未存在；M5 只实现 current analysis-cache envelope 的保存、替换和清除，M6/M7 再接入真实结果。
+- M6 已接入真实 current analysis payload：初始化恢复完整身份匹配的 cache，partial hit 只把缺失 feature 送入 Worker；持久化失败显示 `not-persisted` 但不停止播放或丢弃内存结果。
+
+## M6 全曲分析
+
+- `FeatureRegistry` 穷尽映射 21 项；M6 Worker 仅声明 RMS、Energy、Amplitude Spectrum、Chroma 支持，默认活动集为空且每个 job 最多四个唯一特征。
+- AudioEngine 通过 descriptor 与 16,384 sample 分块 copy 输出 average-mono PCM；copy 期间 decoded revision 改变时立即视为 stale。
+- module Worker 使用 frame 1024、hop 512、Hanning 和实际 sample rate；同一 frame 的活动项一次 Meyda batch，最多每 32 frame 或约 8ms 发布进度并 yield/cancel。
+- display series 限制为 ≤30 samples/s，通过六类 binary compact payload 存储；decoder 校验 schema、完整身份、维度、量化范围、对齐和尾随字节。
+- AnalysisCoordinator 以 generation + track/content/config/feature 完整身份隔离 stale 结果，拥有取消、重试、partial cache 合并与 exact cursor。exact cursor 由 Worker 对原始 frame 现场提取，不能使用反量化 display 值。
+- 全 cache hit 使用 0-feature job 只把当前 mono PCM 保留到 Worker，不重复 Meyda 提取；因此刷新命中后 exact cursor 仍可用。默认活动集为空时不复制 PCM、不创建 Worker。
+- 当前 Meyda `spectralFlux` 会抛出 `x is not defined`；M6 明确不支持并以 R-020/预期失败测试记录，不升级依赖、不增加 fallback。
 
 ## MusicBar 交互边界
 
@@ -71,3 +81,4 @@ AudioBufferSourceNode → AnalyserNode → GainNode → audioContext.destination
 - Chrome E2E 覆盖三格式、错误恢复、队列操作、20 次切歌、route 变化、能量和 60 秒时钟。
 - M5 Vitest 覆盖 validator、hash、事务替换/abort、权限状态和恢复顺序；Chrome E2E 用 OPFS 真句柄覆盖 IndexedDB 刷新与 current Blob。原生 OS picker 的权限、恢复访问和文件移动已由 `project-owner` 于 2026-07-29 人工检查通过；Edge 权限矩阵仍未完成。
 - 当前 Edge 未安装；Chrome 结果不能表述为双浏览器完成。
+- M6 专项测试覆盖 registry/config/PCM/frame/codec、Worker 0/1/4 和异常、coordinator/cache/stale/quota、真实 Chrome Worker/刷新/exact cursor、20 次资源循环与 15 分钟 OPFS 性能/取消。

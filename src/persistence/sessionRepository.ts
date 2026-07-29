@@ -1,10 +1,16 @@
 import type {
+    FeatureId,
     PersistedSessionV1,
     RestoredSessionBundle,
     StoredAnalysisCache,
     StoredCurrentBlob,
     StoredHandle,
 } from '../types/session';
+import {
+    FEATURE_IDS,
+    isFeatureId,
+} from '../analysis/types';
+import { createAnalysisCacheKey } from '../analysis/config';
 
 const DATABASE_NAME = 'audionotsurfyet-session';
 const DATABASE_VERSION = 1;
@@ -18,29 +24,7 @@ const STORES = {
     currentCache: 'current-analysis-cache',
 } as const;
 
-const FEATURE_IDS = new Set([
-    'rms',
-    'zcr',
-    'energy',
-    'amplitudeSpectrum',
-    'powerSpectrum',
-    'spectralCentroid',
-    'spectralFlatness',
-    'spectralFlux',
-    'spectralSlope',
-    'spectralRolloff',
-    'spectralSpread',
-    'spectralSkewness',
-    'spectralKurtosis',
-    'spectralCrest',
-    'chroma',
-    'loudness',
-    'perceptualSpread',
-    'perceptualSharpness',
-    'mfcc',
-    'complexSpectrum',
-    'buffer',
-]);
+const FEATURE_ID_SET = new Set<string>(FEATURE_IDS);
 
 const RESTORE_STATES = new Set([
     'available',
@@ -123,7 +107,7 @@ export const validatePersistedSessionV1 = (
             isRecord(card)
             && [0, 1, 2, 3].includes(card.slot as number)
             && typeof card.featureId === 'string'
-            && FEATURE_IDS.has(card.featureId))
+            && FEATURE_ID_SET.has(card.featureId))
         || !isAnalysisConfig(value.analysisConfig)
         || (value.viewport !== null
             && (!isRecord(value.viewport)
@@ -156,12 +140,34 @@ export const validatePersistedSessionV1 = (
             || typeof value.currentAnalysisCache.trackHash !== 'string'
             || typeof value.currentAnalysisCache.configHash !== 'string'
             || !Array.isArray(value.currentAnalysisCache.featureIds)
+            || value.currentAnalysisCache.featureIds.length > 4
+            || new Set(value.currentAnalysisCache.featureIds).size
+                !== value.currentAnalysisCache.featureIds.length
             || !value.currentAnalysisCache.featureIds.every((featureId) =>
                 typeof featureId === 'string'
-                && FEATURE_IDS.has(featureId))
+                && FEATURE_ID_SET.has(featureId))
             || !Array.isArray(value.currentAnalysisCache.cacheKeys)
+            || value.currentAnalysisCache.cacheKeys.length
+                !== value.currentAnalysisCache.featureIds.length
+            || new Set(value.currentAnalysisCache.cacheKeys).size
+                !== value.currentAnalysisCache.cacheKeys.length
             || !value.currentAnalysisCache.cacheKeys.every(
                 (cacheKey) => typeof cacheKey === 'string',
+            )
+            || !value.currentAnalysisCache.featureIds.every(
+                (featureId, index) =>
+                    value.currentAnalysisCache
+                    && isRecord(value.currentAnalysisCache)
+                    && typeof value.currentAnalysisCache.trackHash === 'string'
+                    && typeof value.currentAnalysisCache.configHash === 'string'
+                    && (
+                        value.currentAnalysisCache.cacheKeys as unknown[]
+                    )[index]
+                        === createAnalysisCacheKey(
+                            value.currentAnalysisCache.trackHash,
+                            value.currentAnalysisCache.configHash,
+                            featureId as FeatureId,
+                        ),
             ))
     ) {
         throw new InvalidPersistedSessionError(
@@ -181,10 +187,24 @@ export interface PersistedCurrentInput extends PersistedQueueInput {
     currentAnalysisCache?: StoredAnalysisCache;
 }
 
+export interface ReplaceCurrentAnalysisCacheInput {
+    trackId: string;
+    trackHash: string;
+    configHash: string;
+    payloads: Array<{
+        featureId: FeatureId;
+        cacheKey: string;
+        payload: ArrayBuffer;
+    }>;
+}
+
 export interface SessionRepositoryPort {
     restore(): Promise<RestoredSessionBundle | null>;
     saveQueue(input: PersistedQueueInput): Promise<void>;
     replaceCurrent(input: PersistedCurrentInput): Promise<void>;
+    replaceCurrentAnalysisCache(
+        input: ReplaceCurrentAnalysisCacheInput,
+    ): Promise<'stored' | 'stale'>;
     removeTrack(trackId: string): Promise<void>;
     clear(): Promise<void>;
 }
@@ -212,7 +232,12 @@ export class SessionRepository implements SessionRepositoryPort {
     private readonly indexedDb: IDBFactory | undefined;
     private readonly databaseName: string;
     private readonly faultInjector?: (
-        operation: 'saveQueue' | 'replaceCurrent' | 'removeTrack' | 'clear',
+        operation:
+            | 'saveQueue'
+            | 'replaceCurrent'
+            | 'replaceCurrentAnalysisCache'
+            | 'removeTrack'
+            | 'clear',
         transaction: IDBTransaction,
     ) => void;
 
@@ -220,7 +245,12 @@ export class SessionRepository implements SessionRepositoryPort {
         indexedDb?: IDBFactory,
         databaseName = DATABASE_NAME,
         faultInjector?: (
-            operation: 'saveQueue' | 'replaceCurrent' | 'removeTrack' | 'clear',
+            operation:
+                | 'saveQueue'
+                | 'replaceCurrent'
+                | 'replaceCurrentAnalysisCache'
+                | 'removeTrack'
+                | 'clear',
             transaction: IDBTransaction,
         ) => void,
     ) {
@@ -271,6 +301,31 @@ export class SessionRepository implements SessionRepositoryPort {
                 return null;
             }
             const session = validatePersistedSessionV1(rawSession);
+            const cacheManifest = session.currentAnalysisCache;
+            const validCurrentAnalysisCache =
+                currentAnalysisCache
+                && cacheManifest
+                && currentAnalysisCache.manifest.trackId
+                    === cacheManifest.trackId
+                && currentAnalysisCache.manifest.trackHash
+                    === cacheManifest.trackHash
+                && currentAnalysisCache.manifest.configHash
+                    === cacheManifest.configHash
+                && currentAnalysisCache.manifest.featureIds.length
+                    === cacheManifest.featureIds.length
+                && currentAnalysisCache.manifest.featureIds.every(
+                    (featureId, index) =>
+                        featureId === cacheManifest.featureIds[index]
+                        && currentAnalysisCache.manifest.cacheKeys[index]
+                            === cacheManifest.cacheKeys[index],
+                )
+                && currentAnalysisCache.payloads.length
+                    === cacheManifest.cacheKeys.length
+                && currentAnalysisCache.payloads.every(
+                    (payload, index) =>
+                        payload.cacheKey === cacheManifest.cacheKeys[index]
+                        && payload.payload instanceof ArrayBuffer,
+                );
 
             return {
                 session,
@@ -283,14 +338,7 @@ export class SessionRepository implements SessionRepositoryPort {
                         ? currentBlob
                         : undefined,
                 currentAnalysisCache:
-                    currentAnalysisCache
-                    && session.currentAnalysisCache
-                    && currentAnalysisCache.manifest.trackId
-                        === session.currentAnalysisCache.trackId
-                    && currentAnalysisCache.manifest.trackHash
-                        === session.currentAnalysisCache.trackHash
-                    && currentAnalysisCache.manifest.configHash
-                        === session.currentAnalysisCache.configHash
+                    validCurrentAnalysisCache
                         ? currentAnalysisCache
                         : undefined,
             };
@@ -333,11 +381,108 @@ export class SessionRepository implements SessionRepositoryPort {
             }
             if (input.currentAnalysisCache) {
                 cacheStore.put(input.currentAnalysisCache, CURRENT_KEY);
+            } else if (input.session.currentAnalysisCache) {
+                // The manifest still identifies the current track/config, so a
+                // queue/blob refresh must keep the atomically stored payload.
             } else {
                 cacheStore.delete(CURRENT_KEY);
             }
             this.injectFault('replaceCurrent', transaction);
             await done;
+        } finally {
+            database.close();
+        }
+    }
+
+    async replaceCurrentAnalysisCache(
+        input: ReplaceCurrentAnalysisCacheInput,
+    ): Promise<'stored' | 'stale'> {
+        const featureIds = input.payloads.map((entry) => entry.featureId);
+        if (
+            !input.trackId
+            || !input.trackHash
+            || !input.configHash
+            || new Set(featureIds).size !== featureIds.length
+            || featureIds.length > 4
+            || input.payloads.some((entry) =>
+                !isFeatureId(entry.featureId)
+                || entry.cacheKey !== createAnalysisCacheKey(
+                    input.trackHash,
+                    input.configHash,
+                    entry.featureId,
+                )
+                || !(entry.payload instanceof ArrayBuffer))
+        ) {
+            throw new TypeError('Analysis cache replacement input is invalid.');
+        }
+
+        const database = await this.open();
+        try {
+            const transaction = database.transaction(
+                [STORES.session, STORES.currentCache],
+                'readwrite',
+            );
+            const done = transactionDone(transaction);
+            const sessionStore = transaction.objectStore(STORES.session);
+            const cacheStore = transaction.objectStore(STORES.currentCache);
+            const sessionRequest = sessionStore.get(SESSION_KEY);
+            let outcome: 'stored' | 'stale' = 'stale';
+            sessionRequest.onsuccess = () => {
+                try {
+                    const session = validatePersistedSessionV1(
+                        sessionRequest.result,
+                    );
+                    const currentTrack = session.queue.find(
+                        (track) => track.id === session.currentTrackId,
+                    );
+                    if (
+                        session.currentTrackId !== input.trackId
+                        || currentTrack?.trackHash !== input.trackHash
+                    ) {
+                        outcome = 'stale';
+                        return;
+                    }
+
+                    if (input.payloads.length === 0) {
+                        const next = { ...session };
+                        delete next.currentAnalysisCache;
+                        sessionStore.put(next, SESSION_KEY);
+                        cacheStore.delete(CURRENT_KEY);
+                    } else {
+                        const manifest = {
+                            trackId: input.trackId,
+                            trackHash: input.trackHash,
+                            configHash: input.configHash,
+                            featureIds,
+                            cacheKeys: input.payloads.map(
+                                (entry) => entry.cacheKey,
+                            ),
+                        };
+                        sessionStore.put({
+                            ...session,
+                            savedAt: new Date().toISOString(),
+                            currentAnalysisCache: manifest,
+                        }, SESSION_KEY);
+                        cacheStore.put({
+                            manifest,
+                            payloads: input.payloads.map((entry) => ({
+                                cacheKey: entry.cacheKey,
+                                payload: entry.payload,
+                            })),
+                        } satisfies StoredAnalysisCache, CURRENT_KEY);
+                    }
+                    outcome = 'stored';
+                    this.injectFault(
+                        'replaceCurrentAnalysisCache',
+                        transaction,
+                    );
+                } catch {
+                    transaction.abort();
+                }
+            };
+            sessionRequest.onerror = () => transaction.abort();
+            await done;
+            return outcome;
         } finally {
             database.close();
         }
@@ -411,7 +556,12 @@ export class SessionRepository implements SessionRepositoryPort {
     }
 
     private injectFault(
-        operation: 'saveQueue' | 'replaceCurrent' | 'removeTrack' | 'clear',
+        operation:
+            | 'saveQueue'
+            | 'replaceCurrent'
+            | 'replaceCurrentAnalysisCache'
+            | 'removeTrack'
+            | 'clear',
         transaction: IDBTransaction,
     ) {
         if (!this.faultInjector) return;

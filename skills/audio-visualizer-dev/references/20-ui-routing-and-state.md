@@ -11,14 +11,14 @@
 | `/analyzer` | `Analyzer.vue` | Canvas 点阵背景和静态 Meyda 数据入口 |
 | `/testlands` | `TestLands.vue` | 试验页面，不应当作生产契约 |
 
-`MainLayout.vue` 固定组合 `HeaderBar`、当前 `router-view` 和 `MusicBar`。修改页面高度、z-index、固定定位或底部空间时，要同时检查 Header 与 MusicBar。
+`MainLayout.vue` 固定组合 `HeaderBar`、当前 `router-view` 和 `MusicBar`，并创建/提供唯一 `AudioSessionService` 与 `AnalysisCoordinator`。修改页面高度、z-index、固定定位或底部空间时，要同时检查 Header 与 MusicBar。
 
 ## 组件通信
 
-- `MainLayout` 创建并 provide 唯一 `AudioSessionService`，在布局卸载时 dispose。
+- `MainLayout` 创建并 provide 唯一 `AudioSessionService` 与 `AnalysisCoordinator`，在布局卸载时先 dispose coordinator 再释放 session service。
 - `MusicBar` 读取 `audioSessionStore` 并调用 session commands；只拥有拖动预览、列表开合、跑马灯和 GSAP 样式时间线。
 - `MusicList` 通过 `select-index`、`add-to-analysis`、`delete`、`clear`、`restore-access`、`reselect-track`、`clear-persisted` 和 `close-list` 事件回传操作；事件名已统一为 kebab-case。
-- `audioSessionStore` 是 Pinia store，保存 `TrackRecord[]`、current track ID、`PlaybackSnapshot`、persistence snapshot 和当前 energy；Home 与 MusicBar 读取同一能量。
+- `audioSessionStore` 是 Pinia store，保存 `TrackRecord[]`、current track ID、`PlaybackSnapshot`、persistence snapshot、analysis snapshot 和当前 energy；Home 与 MusicBar 读取同一能量。
 - runtime File、封面对象 URL、AudioContext、AudioBuffer 和 AudioNode 均不得进入 store。
 - `emitter.ts` 暴露 mitt 单例，事件类型位于 `src/types/events.ts`。当前已证实 Header 发出 `settings-open`；未发现订阅方，也未发现 `music-bar-settings` 的实际发送或订阅。
 - 修改 mitt 事件时必须同时检查类型定义、发送方和订阅方；没有订阅方时不要假设事件已形成可用功能。
@@ -30,7 +30,7 @@
 - `volume`: UI 百分比值，AudioSessionService 转为 0–1 Gain 值。
 - `musicBarSettings.style`: 当前音乐条样式模式，代码使用 0、1、2。
 
-播放位置和能量不持久化。M5 的原生 IndexedDB V1 保存最近队列、元数据、文件句柄和唯一 current Blob；刷新固定回到 0 秒 paused。未知 schema 不猜测迁移，UI 显示可清除的错误。恢复失败状态进入 TrackRecord，File、Blob 和 handle 仍不进入 Pinia。
+播放位置和能量不持久化。原生 IndexedDB V1 保存最近队列、元数据、文件句柄、唯一 current Blob 与匹配 analysis cache；刷新固定回到 0 秒 paused。未知 schema 不猜测迁移，UI 显示可清除的错误。恢复失败状态进入 TrackRecord，File、Blob、handle、PCM 和 compact payload 仍不进入 Pinia。
 
 ## 响应式 UI 边界
 

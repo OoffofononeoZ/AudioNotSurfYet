@@ -6,7 +6,7 @@ upstream_docs:
   - "docs/product/scope.md"
   - "docs/architecture/system-design.md"
   - "docs/architecture/interface-contracts.md"
-next_action: "在 M6/M7 接入真实 current analysis-cache payload 并保持 M5 恢复不变量"
+next_action: "用 M6 canonical 复核真实 current analysis-cache payload 与 M5 恢复不变量"
 ---
 
 # ADR-0003: Hybrid IndexedDB File-Handle and Current-Blob Recovery

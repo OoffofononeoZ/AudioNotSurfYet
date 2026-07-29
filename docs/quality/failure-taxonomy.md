@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/quality/golden-examples.md"
   - "docs/delivery/acceptance-criteria.md"
   - "docs/architecture/risk-register.md"
-next_action: "在后续 canonical run 和里程碑审阅中持续使用本 taxonomy 分类真实失败；evidence gap 保持独立"
+next_action: "在 M6 canonical 与后续里程碑中持续分类真实失败；evidence gap 保持独立"
 ---
 
 # Failure Taxonomy
@@ -95,7 +95,7 @@ FAIL-<run-id>-<sequence>: <failure_type>/<severity>
 
 本 taxonomy 只有在 `project-owner` 确认以下内容后才能改为 `approved`：
 
-- 十个 failure type 足以覆盖已知 19 个风险和七组 eval；
+- 十个 failure type 足以覆盖 Q0 时的 19 个风险、M6 新增的 R-020 和七组 eval；
 - S0–S3 的定义与硬性 AC 门禁一致；
 - S0/S1 不允许带入下一门禁；
 - S2/S3 的接受条件、approver 和复查触发器明确；

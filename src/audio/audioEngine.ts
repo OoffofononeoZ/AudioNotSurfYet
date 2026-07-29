@@ -1,4 +1,5 @@
 import type {
+    DecodedAudioDescriptor,
     PlaybackError,
     PlaybackErrorCode,
     PlaybackSnapshot,
@@ -35,6 +36,7 @@ export class AudioEngine {
     private playbackStartContextTime: number | null = null;
     private volume = 1;
     private loadGeneration = 0;
+    private decodedRevision = 0;
     private snapshot: PlaybackSnapshot = emptySnapshot(this.volume);
 
     constructor(options: AudioEngineOptions = {}) {
@@ -47,6 +49,7 @@ export class AudioEngine {
         encodedAudio: ArrayBuffer;
     }): Promise<'loaded' | 'stale'> {
         const generation = ++this.loadGeneration;
+        ++this.decodedRevision;
         this.stopSource();
         this.buffer = null;
         this.playbackOffsetSeconds = 0;
@@ -221,6 +224,44 @@ export class AudioEngine {
         return this.timeDomainData;
     }
 
+    getDecodedAudioDescriptor(): DecodedAudioDescriptor | null {
+        if (!this.buffer || !this.snapshot.trackId) return null;
+        return {
+            trackId: this.snapshot.trackId,
+            revision: this.decodedRevision,
+            sampleRate: this.buffer.sampleRate,
+            length: this.buffer.length,
+            channelCount: this.buffer.numberOfChannels,
+            durationSeconds: this.buffer.duration,
+        };
+    }
+
+    copyDecodedChannelRange(input: {
+        revision: number;
+        channel: number;
+        start: number;
+        length: number;
+    }): Float32Array | null {
+        const buffer = this.buffer;
+        if (
+            !buffer
+            || input.revision !== this.decodedRevision
+            || !Number.isInteger(input.channel)
+            || input.channel < 0
+            || input.channel >= buffer.numberOfChannels
+            || !Number.isInteger(input.start)
+            || input.start < 0
+            || !Number.isInteger(input.length)
+            || input.length < 0
+            || input.start + input.length > buffer.length
+        ) {
+            return null;
+        }
+        const copy = new Float32Array(input.length);
+        buffer.copyFromChannel(copy, input.channel, input.start);
+        return input.revision === this.decodedRevision ? copy : null;
+    }
+
     subscribe(listener: SnapshotListener): () => void {
         this.listeners.add(listener);
         listener(this.getSnapshot());
@@ -231,6 +272,7 @@ export class AudioEngine {
 
     unload(): void {
         ++this.loadGeneration;
+        ++this.decodedRevision;
         this.stopSource();
         this.buffer = null;
         this.playbackOffsetSeconds = 0;
@@ -240,6 +282,7 @@ export class AudioEngine {
 
     async dispose(): Promise<void> {
         ++this.loadGeneration;
+        ++this.decodedRevision;
         this.stopSource();
         this.buffer = null;
         this.playbackOffsetSeconds = 0;
