@@ -1,7 +1,7 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-07-28
+last_reviewed: 2026-07-29
 upstream_docs:
   - "docs/delivery/execution-plan.md"
   - "docs/delivery/acceptance-criteria.md"
@@ -15,7 +15,7 @@ next_action: "完成 M4 provisional/canonical run，登记并审批 evidence 后
 
 - Target 使用相对门禁，不表示日历承诺。
 - `Complete` 只用于文档门禁、真实证据和所需人工批准均已满足的里程碑。
-- Q0 和 M3 为 `Complete`；M4 已开放但尚未开始，M5–M11 为 `Planned`。
+- Q0 和 M3 为 `Complete`；M4 为 `In Review` 且已有 provisional pass，M5–M11 为 `Planned`。
 - 一个里程碑未通过时，后续里程碑保持 Planned/Blocked，不并行扩大特征范围。
 
 ## Milestones

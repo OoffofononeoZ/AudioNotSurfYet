@@ -26,7 +26,8 @@
 - fixture/golden 生成改用 Node 24 原生 type stripping；不依赖在受限环境会产生 IPC `EPERM` 的 `tsx` CLI。
 - 当前没有正式 CI，自动化结论必须限定为本地环境。
 - 当前机器没有 Edge。Chrome 通过不能表述为双浏览器矩阵完成。
-- 正式 M3 canonical run 已在 clean commit `17d16f0da37289c1f67f75203502beef999572ea` 上通过并登记，且已由 `project-owner` 批准；M4 已开放。
+- 正式 M3 canonical run 已在 clean commit `17d16f0da37289c1f67f75203502beef999572ea` 上通过并登记，且已由 `project-owner` 批准。
+- M4 dirty-worktree provisional suite 已通过；正式 canonical run、evidence 登记和 owner 批准尚未完成。
 
 ## 构建风险
 

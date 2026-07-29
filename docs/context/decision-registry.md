@@ -1,13 +1,13 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-07-28
+last_reviewed: 2026-07-29
 upstream_docs:
   - "docs/context/index.md"
   - "docs/product/scope.md"
   - "docs/architecture/system-design.md"
   - "docs/delivery/execution-plan.md"
-next_action: "在 M4 实现与证据中复核 ADR-0001、播放生命周期和 MusicBar 回归"
+next_action: "完成 M4 clean-commit canonical run、evidence 登记和 owner 审批"
 ---
 
 # Decision Registry
