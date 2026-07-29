@@ -1,7 +1,7 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-07-24
+last_reviewed: 2026-07-28
 upstream_docs:
   - "docs/product/problem-brief.md"
   - "docs/product/scope.md"
@@ -22,6 +22,9 @@ next_action: "先用回归测试保护 MusicBar，再抽离 AudioEngine 和 audi
 - UI 通过命令调用 engine；engine 发布事实快照。播放时间始终从 AudioContext 基准计算。
 - AnalysisCoordinator 从 engine 获取 PCM 副本，不共享或修改播放中的 AudioBuffer。
 - 换歌、清空和销毁具有显式 dispose，旧 source、node、RAF 和对象 URL 必须释放。
+- M4 的 runtime File 与封面对象 URL 由 MainLayout-owned `AudioSessionService` 在 store 外管理；音频解码直接读取 ArrayBuffer，不创建音频对象 URL。
+- 快速切歌使用 generation 使最后命令生效；非空队列追加文件不得中断当前播放。
+- metadata 失败使用文件名和默认封面继续解码；decode/unsupported 失败写入 typed snapshot error，由 UI 显示非阻塞消息。
 
 ## Consequences
 
@@ -51,3 +54,5 @@ next_action: "先用回归测试保护 MusicBar，再抽离 AudioEngine 和 audi
 ## Approval
 
 由 `project-owner` 于 2026-07-24 随系统计划批准。
+
+`project-owner` 于 2026-07-28 通过批准 M4 实施计划，明确批准最后操作生效、非空追加不中断、metadata fallback 和非阻塞解码错误等运行策略。

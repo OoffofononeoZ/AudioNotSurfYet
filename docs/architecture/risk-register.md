@@ -14,7 +14,7 @@ next_action: "在每个 delivery 里程碑评审风险触发器、缓解证据�
 
 | ID | Risk | Likelihood | Impact | Trigger / Signal | Mitigation and required evidence | Residual / fallback | Owner | Status |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| R-001 | 抽离 AudioEngine 导致 MusicBar 播放、切歌或能量响应回归 | Medium | High | 现有任务失败、重复 AudioContext、暂停后仍有能量 | 先建立引擎/store 集成测试和 MusicBar 浏览器回归；检查 source/node/RAF 清理 | 未自动化的音频设备差异由手工 Chrome/Edge 验证 | project-owner | Open |
+| R-001 | 抽离 AudioEngine 导致 MusicBar 播放、切歌或能量响应回归 | Medium | High | 现有任务失败、重复 AudioContext、暂停后仍有能量 | 已建立 engine/store 测试和 Chrome MusicBar 回归；M4 provisional 通过，仍待 canonical/owner review | 未自动化的音频设备差异由手工 Chrome/Edge 验证 | project-owner | Open |
 | R-002 | Worker 迟到结果覆盖新歌曲或新卡片 | Medium | High | 快速换歌/换卡时图表身份不一致 | job generation + track/config/feature 身份；stale 丢弃单元/集成测试 | 即使取消不及时，身份检查仍是正确性边界 | project-owner | Open |
 | R-003 | 15 分钟频谱造成内存、IPC 或 IndexedDB 膨胀 | High | High | typed array、postMessage、cache 大小持续增长；quota 失败 | 最多 30Hz 聚合、向量量化、只缓存活动特征和当前歌曲、精确值按需提取；最大输入 profile | 缓存失败时不保存，刷新后重算 | project-owner | Open |
 | R-004 | 分析或 Canvas 重绘阻塞主线程 | Medium | High | 输入反馈超过 100ms或分析归因长任务超过 50ms | Meyda/聚合/量化放 Worker；静态/游标分层；PerformanceObserver 与 trace | 降低显示采样或可视层细节，不降低精确游标值 | project-owner | Open |
@@ -25,8 +25,8 @@ next_action: "在每个 delivery 里程碑评审风险触发器、缓解证据�
 | R-009 | 浏览器解码把编码源重采样到输出设备采样率 | Medium | Medium | `AudioBuffer.sampleRate` 与元数据不同 | fixture 验证；必要时用指定采样率 OfflineAudioContext 生成分析 PCM；缓存身份包含实际采样率 | UI 显示传入分析的真实 PCM 采样率 | project-owner | Open |
 | R-010 | 量化让显示数据误导学习者 | Medium | High | 热图与精确结果不一致或小信号消失 | 明确 scale/offset、饱和测试、视觉 golden；游标显示未量化按需结果 | 对不适合量化的 feature 使用 Float32 payload | project-owner | Open |
 | R-011 | 21 项输出形态差异导致错误 renderer 或维度 | Medium | High | 新特征展示空白、数组错位或 runtime cast | 穷尽 FeatureId 注册表、shape 类型、Meyda 黄金测试和 renderer 契约测试 | 单卡错误边界，不影响其他卡和播放 | project-owner | Open |
-| R-012 | 游标漂移超过 100ms | Medium | High | 长播放、暂停/seek/切歌后误差增大 | AudioContext 基准时钟；不累计 RAF delta；边界与长播放计时测试 | 暂停时使用快照 offset，页面恢复强制归零 | project-owner | Open |
-| R-013 | 文件/Worker/Audio/Canvas 资源泄漏 | Medium | High | 多次换歌后内存、线程、节点或 URL 增长 | 明确 dispose；生命周期单元/浏览器测试；最大场景 heap 与线程观察 | release readiness 前保留人工 DevTools 检查 | project-owner | Open |
+| R-012 | 游标漂移超过 100ms | Medium | High | 长播放、暂停/seek/切歌后误差增大 | AudioContext 基准时钟；provisional 60 秒漂移约 13.3ms，三次 seek 均 <100ms；待 canonical | 暂停时使用快照 offset，页面恢复强制归零 | project-owner | Open |
+| R-013 | 文件/Worker/Audio/Canvas 资源泄漏 | Medium | High | 多次换歌后内存、线程、节点或 URL 增长 | M4 已显式 dispose；单元和 Chrome 20 次切歌检查单 context/RAF/URL，provisional 通过 | canonical 后仍在 readiness 前保留人工 DevTools heap/线程检查 | project-owner | Open |
 | R-014 | 图表只靠颜色或 Canvas 导致键盘/辅助技术不可用 | Medium | High | 键盘任务失败、无焦点或无数据替代 | DOM 控件/说明/精确值，焦点样式、非颜色图例、reduced motion；axe + 手工任务 | 完整屏幕阅读器矩阵若未完成需公开残余风险 | project-owner | Open |
 | R-015 | 当前机器缺少 Edge，双浏览器状态被误报 | High | Medium | 只有 Chrome 自动化证据 | readiness 明确列证据浏览器；安装/提供 Edge 后执行同一 E2E | Edge 未验证时不能关闭最终兼容门禁 | project-owner | Open |
 | R-016 | fixture 来源或许可不可追溯 | Medium | Medium | 二进制无来源/hash | 合成 PCM 由脚本生成；格式 fixture 记录生成命令、编码器版本、许可和 SHA-256 | 无合规 provenance 的 fixture 不入库 | project-owner | Open |

@@ -15,9 +15,11 @@
 
 ## 组件通信
 
-- `MusicBar` 拥有播放列表、当前索引、加载/播放状态、进度、元数据和 GSAP 时间线。
+- `MainLayout` 创建并 provide 唯一 `AudioSessionService`，在布局卸载时 dispose。
+- `MusicBar` 读取 `audioSessionStore` 并调用 session commands；只拥有拖动预览、列表开合、跑马灯和 GSAP 样式时间线。
 - `MusicList` 通过 `select-index`、`add-to-analysis`、`delete`、`clear`、`close-list` 事件回传操作；事件名已统一为 kebab-case。
-- `audioStore.ts` 不是 Pinia store，而是模块级 `ref`：`useAudioEnergy()` 暴露只读值，`updateEnergy()` 由 MusicBar 更新，Home 消费。
+- `audioSessionStore` 是 Pinia store，保存 `TrackRecord[]`、current track ID、`PlaybackSnapshot` 和当前 energy；Home 与 MusicBar 读取同一能量。
+- runtime File、封面对象 URL、AudioContext、AudioBuffer 和 AudioNode 均不得进入 store。
 - `emitter.ts` 暴露 mitt 单例，事件类型位于 `src/types/events.ts`。当前已证实 Header 发出 `settings-open`；未发现订阅方，也未发现 `music-bar-settings` 的实际发送或订阅。
 - 修改 mitt 事件时必须同时检查类型定义、发送方和订阅方；没有订阅方时不要假设事件已形成可用功能。
 
@@ -25,10 +27,10 @@
 
 `configStore.ts` 使用 key `config` 写入 `localStorage`：
 
-- `volume`: UI 百分比值，调用 AudioLoader 时除以 100。
+- `volume`: UI 百分比值，AudioSessionService 转为 0–1 Gain 值。
 - `musicBarSettings.style`: 当前音乐条样式模式，代码使用 0、1、2。
 
-播放队列、播放位置、音频元数据和能量值均未持久化。改变持久化 schema 前，先决定是否需要迁移旧数据；额外兼容逻辑需要人类确认。
+播放队列、播放位置、音频元数据和能量值仍未持久化。改变持久化 schema 前，先决定是否需要迁移旧数据；M5 才建设最近一次 session 恢复。
 
 ## 响应式 UI 边界
 

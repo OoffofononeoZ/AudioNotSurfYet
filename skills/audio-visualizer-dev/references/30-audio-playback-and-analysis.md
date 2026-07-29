@@ -2,62 +2,62 @@
 
 ## 当前播放链路
 
-`MusicBar.vue` 的已证实链路：
+M4 后的已证实链路：
 
-1. 创建 `<input type="file" accept="audio/*" multiple>` 获取本地文件。
-2. 用 `music-metadata.parseBlob()` 读取标题、艺术家、时长和内嵌封面。
-3. 为音频文件创建对象 URL，保存到组件内 `musicFileUrl`；元数据保存在 `albumInfo`。
-4. `playAt()` 让 `AudioLoader.loadAudio()` fetch 对象 URL、解码 AudioBuffer、设置音量与 ended callback，然后播放。
-5. 独立 RAF 更新播放进度；另一个 RAF 从 Analyser 读取时域浮点数据并用 Meyda 提取 `energy`。
-6. 平滑后的能量在样式 0 中经 `mapEnergyToDeg()` 写入 CSS 变量，同时原始能量通过 `audioStore` 驱动 Home 光线长度。
+1. MusicBar 创建 `<input type="file">`，把本地 MP3/WAV/FLAC 交给 MainLayout 提供的 `AudioSessionService`。
+2. service 用 `music-metadata.parseBlob()` 生成可序列化 `TrackRecord`，在 runtime registry 保存 File 与可选封面对象 URL。
+3. 空队列导入自动播放首项；非空队列导入只追加，不打断当前歌曲。
+4. `playTrack()` 读取 File ArrayBuffer，使用 command generation 保证快速切歌最后操作生效，再调用唯一 `AudioEngine` 解码和播放。
+5. AudioEngine 发布 `PlaybackSnapshot`；service 的单一 RAF 从 AudioContext 基准刷新时间，并从 Analyser 时域数据提取 Meyda energy。
+6. `audioSessionStore` 把快照与能量提供给 MusicBar 和 Home；MusicBar 不再拥有播放事实或播放 RAF。
 
-## AudioLoader 状态模型
+## AudioEngine 状态模型
 
-`src/audio/audioLoader.ts` 当前节点链路为：
+`src/audio/audioEngine.ts` 的节点链路为：
 
 ```text
 AudioBufferSourceNode → AnalyserNode → GainNode → audioContext.destination
 ```
 
-- AudioBufferSourceNode 是一次性的；每次恢复或跳转后需要创建新 source。
-- `playbackOffsetSec` 保存暂停/跳转位置，`playbackStartContextTime` 用 AudioContext 时钟计算当前进度。
-- 主动停止 source 时用 `suppressEndedCallback` 阻止误触发自动下一首。
-- `pause()` 累加经过时间并停止 source；`resume()` 从当前 offset 创建新 source。
-- `setPlaybackOffsetPercent()` 只改变 offset。调用方要负责在播放中先暂停、设置，再恢复。
-- `destroy()` 停止、断开 Analyser/Gain、关闭旧 AudioContext，并重新创建 AudioContext/Gain 供后续使用。
+- AudioContext、Gain、Analyser 和 AudioBuffer 延迟创建；一次 app session 只有一个实时 AudioContext。
+- AudioBufferSourceNode 是一次性的；每次恢复或播放中 seek 都创建新 source。
+- `playbackOffsetSeconds` 保存暂停/跳转位置，`playbackStartContextTime` 配合 AudioContext `currentTime` 计算进度。
+- 主动停止先清空 source 的 `onended`，不会触发自动下一首；自然 ended 只发布一次。
+- `load()` 与 session command 都使用 generation；旧读取或旧解码不得覆盖最新歌曲。
+- decode/context/source/unsupported 失败写入 typed snapshot error；状态不得卡在 loading。
+- `dispose()` 停止 source、断开节点并关闭上下文，不立即创建替代上下文。
 
-不要把 HTMLMediaElement 语义套到此实现；这里播放核心是已解码的 AudioBuffer。
+## AudioSessionService 与队列
 
-## MusicBar 状态边界
+- service 是 runtime File、封面对象 URL、AudioEngine 订阅、单播放 RAF 和 ended 循环的唯一所有者。
+- store 只保存 TrackRecord、current ID、PlaybackSnapshot 和 energy；`$state` 必须可 JSON 序列化。
+- next/previous 使用循环索引；自然 ended 自动播放下一项。
+- 删除非当前项不影响播放。删除当前项后播放同位置的下一项；没有下一项则使用上一项。
+- 清空进入 `empty`，停止播放、取消 RAF、归零能量并释放全部封面 URL。
+- metadata 失败使用文件名与默认封面继续解码。
+- decode/unsupported 由 MusicBar 监听 snapshot error 并显示 Element Plus 非阻塞消息；队列、下一首和重试仍可用。
+- 音频解码不创建对象 URL；对象 URL 只用于内嵌封面。
 
-- `audioReady` 表示当前 buffer 已成功解码，`isLoading` 防止并发加载，`isPlaying` 驱动进度与能量 RAF。
-- `canSeek` 只有在队列非空、音频就绪且未加载时为真。
-- 拖动开始时暂停，拖动结束后写入 offset，并仅在拖动前正在播放时恢复。
-- 删除当前项会选择可用的相邻项；清空队列会停止、销毁、归零进度和能量。
-- ended callback 调用下一索引，索引归一化使队列循环播放。
+## MusicBar 交互边界
+
+- `canSeek` 要求队列非空、状态为 paused/playing/ended 且 duration 大于 0。
+- 拖动开始时若正在播放则暂停；拖动结束后按秒 seek，并仅在拖动前播放时恢复。
+- UI 进度来自共享 snapshot；不得创建第二个进度 RAF 或累计 RAF delta。
+- `configStore.volume` 仍保存 0–100；service 转成 0–1 Gain 并在 snapshot 中发布实际值。
+- 三种视觉样式、CSS 几何、GSAP 跑马灯和列表开合仍由 MusicBar 拥有。
 
 ## 能量处理
 
-- Meyda 输入来自 `AnalyserNode.getFloatTimeDomainData()`。
-- 上升和下降使用不同平滑系数；当前值分别为 0.5 与 0.05。
+- Meyda 输入来自唯一 AudioEngine 的 `AnalyserNode.getFloatTimeDomainData()`。
+- service RAF 发布原始 energy；MusicBar watch 使用上升 0.5、下降 0.05 的系数平滑灯带。
 - `mapEnergyToDeg()` 将能量非线性映射到矩形半周对应的 180–360 度。
-- 不播放、无时域数据、切换样式或清空列表时必须停止 RAF 并将共享能量/CSS 进度归零。
-- 样式 1 的循环渐变由 GSAP 时间线独立驱动，不是音频能量；切出该模式时必须显式清理内联 CSS 值。
-
-## 对象和资源生命周期
-
-已证实：
-
-- 删除或清空列表会 revoke 音频文件对象 URL。
-- 内嵌封面也可能创建对象 URL，但当前删除/清空路径未显式 revoke 它。
-- MusicBar 卸载会停止 RAF、监听和 GSAP，但当前未显式调用 `audioLoader.destroy()`，也未遍历释放仍在队列中的对象 URL。
-
-后两项是资源生命周期风险，不是本 Skill 自动授权的功能修改。涉及修复时要覆盖重复加载、删除、清空、路由卸载和再次播放。
+- 暂停、错误、清空和 dispose 时 service 停止 RAF 并把共享能量归零。
+- style 1 的循环渐变由 GSAP 时间线独立驱动，不是音频能量。
 
 ## 测试数据与失败路径
 
-- 优先使用用户提供或仓库允许的本地短音频 fixture；不要擅自上传或联网获取用户音频。
-- 覆盖无文件、无效/损坏音频、无元数据、无封面、零时长或解码失败。
-- 覆盖浏览器尚未允许 AudioContext、`resume()` 异步、快速切歌和加载中删除。
-- 校验暂停/续播/跳转/ended 的 offset 连续性，而不只观察图标。
-- 检查错误后 `isLoading`、`audioReady`、`isPlaying`、进度和能量是否回到一致状态。
+- 优先使用仓库 CC0 短 fixture；损坏音频和 65 秒计时 WAV 在忽略目录运行时生成。
+- 单元测试使用可注入 AudioContext factory 与 fake clock，覆盖 load/play/pause/seek/ended/stale/error/unload/dispose。
+- service 测试覆盖追加、最后操作、ended、删除、清空、metadata fallback、序列化和 URL/RAF 生命周期。
+- Chrome E2E 覆盖三格式、错误恢复、队列操作、20 次切歌、route 变化、能量和 60 秒时钟。
+- 当前 Edge 未安装；Chrome 结果不能表述为双浏览器完成。

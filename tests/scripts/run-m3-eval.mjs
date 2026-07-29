@@ -44,7 +44,7 @@ const steps = [
     ['docs', 'npm', ['run', 'test:docs']],
     ['deliberate failure', 'npm', ['run', 'test:harness']],
     ['typecheck', 'npm', ['run', 'typecheck']],
-    ['chrome e2e', 'npm', ['run', 'test:e2e']],
+    ['chrome e2e', 'npm', ['run', 'test:e2e:m3']],
     ['build', 'npm', ['run', 'build']],
     ['diff check', 'git', ['diff', '--check']],
 ];

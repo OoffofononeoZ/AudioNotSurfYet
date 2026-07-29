@@ -3,10 +3,10 @@
         <div style="color: white;" class="flex pl-4 pr-4 justify-between items-center mt-2">
             <div>
                 <span class="text-xl mr-2">播放列表</span>
-                <span>{{ info.length }}</span>
+                <span data-testid="queue-count">{{ info.length }}</span>
             </div>
             <div class="flex items-center gap-2 mr-2">
-                <svg class="w-4 h-4 cursor-pointer" @click="emit('clear')">
+                <svg class="w-4 h-4 cursor-pointer" data-testid="clear-queue" @click="emit('clear')">
                     <use href="/icons.svg#trashbin-delete"></use>
                 </svg>
                 <svg class="w-4 h-4 cursor-pointer" @click="emit('close-list')">
@@ -17,7 +17,9 @@
         <AnimatedList :items="key" :slot-data="info" @item-selected="(_, index) => emit('select-index', index)"
             class-name="max-h-full h-full" v-if="info.length > 0">
             <template v-for="value in key" :key="value" #[value]="{ index, data }">
-                <div class="flex items-center justify-between item-container" style="color: white;"
+                <div class="flex items-center justify-between item-container" data-testid="queue-item"
+                    style="color: white;"
+                    :data-track-id="data?.id"
                     @mouseenter="mouseEnteredIndex = index" @mouseleave="mouseEnteredIndex = null">
                     <div class="flex items-center gap-2">
                         <div class="w-16 h-16 rounded-md overflow-hidden">
@@ -37,7 +39,8 @@
                             <svg class="w-6 h-6 cursor-pointer" @click="emit('add-to-analysis', index)">
                                 <use href="/icons.svg#add-music"></use>
                             </svg>
-                            <svg class="w-6 h-6 cursor-pointer" @click="emit('delete', index)">
+                            <svg class="w-6 h-6 cursor-pointer" data-testid="delete-track"
+                                @click="emit('delete', index)">
                                 <use href="/icons.svg#xmark-delete"></use>
                             </svg>
                         </div>
@@ -53,6 +56,7 @@ import AnimatedList from './AnimatedList.vue';
 import { computed, ref } from 'vue';
 const props = defineProps<{
     info: {
+        id: string;
         albumCover: string;
         fileName: string;
         title: string;
@@ -67,7 +71,7 @@ const emit = defineEmits<{
     clear: [];
     'close-list': [];
 }>();
-const key = computed(() => props.info.map(item => item.fileName));
+const key = computed(() => props.info.map(item => item.id));
 const mouseEnteredIndex = ref<number | null>(null);
 </script>
 
