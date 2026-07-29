@@ -33,8 +33,9 @@
 - 当前机器没有 Edge。Chrome 通过不能表述为双浏览器矩阵完成。
 - 正式 M3 canonical run 已在 clean commit `17d16f0da37289c1f67f75203502beef999572ea` 上通过并登记，且已由 `project-owner` 批准。
 - 正式 M4 canonical run 已在 clean commit `e5cfe9e8ab62301f3c5b0ddcdd37847a2e131a0f` 上通过并登记，evidence 与 working agreements 已由 `project-owner` 批准。
-- M5 自动化 picker 使用浏览器 OPFS 返回真实 `FileSystemFileHandle`，不替代原生 OS picker 的 granted/prompt/denied 与文件移动人工路径。
-- M5 clean-commit canonical 已于 2026-07-29 在 `c90a3c5738de5b7a4efb7eb24cddc49da3713b44` 上通过 16/16 并登记；仍需原生权限人工检查和 owner evidence 审批。
+- M5 自动化 picker 使用浏览器 OPFS 返回真实 `FileSystemFileHandle`；原生 OS picker 的 granted/prompt/denied 与文件移动路径已由 `project-owner` 于 2026-07-29 人工检查通过。
+- M5 clean-commit canonical 已于 2026-07-29 在 `c90a3c5738de5b7a4efb7eb24cddc49da3713b44` 上通过 16/16 并登记；evidence 与 working agreements 已获 owner 批准，M5 已关闭。
+- 超出约 15 分钟支持边界的长音频未开始播放只作为非门禁压力观察；它不是规定的预期失败，也不能替代范围内性能或格式验证。
 
 ## 构建风险
 

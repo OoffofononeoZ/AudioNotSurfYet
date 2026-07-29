@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/product/scope.md"
   - "docs/product/success-metrics.md"
   - "docs/product/open-questions.md"
-next_action: "完成 M5 原生权限人工检查与 owner evidence 审批"
+next_action: "按已批准设计实施 M6 AnalysisCoordinator、Worker 与 FeatureRegistry"
 ---
 
 # System Design

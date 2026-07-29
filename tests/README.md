@@ -8,7 +8,7 @@
 - FFmpeg：8.1.2；只用于生成和检查受控 WAV/MP3/FLAC fixture。
 - Microsoft Edge 当前未安装。`npm run test:e2e:edge` 会以退出码 2 报告 `blocked`，不会伪装成 pass。
 
-M3–M5 不建设 CI。下列命令当前均为本地门禁；正式证据要求在用户提交后的干净 commit 上复跑。M3/M4 canonical run 已登记到 [evidence index](../docs/quality/evidence-index.md) 并由 owner 批准；M5 canonical 已登记并处于 `in-review`。
+M3–M5 不建设 CI。下列命令当前均为本地门禁；正式证据要求在用户提交后的干净 commit 上复跑。M3/M4/M5 canonical run 已登记到 [evidence index](../docs/quality/evidence-index.md) 并由 owner 批准；M5 Chrome 原生权限人工检查也已单独签字通过。
 
 当前 `npm audit` 在安全补丁更新后剩余 1 项 low：Vite 依赖的 esbuild 0.27.3 在 Windows 开发服务器场景存在本地任意文件读取风险。仓库目标验证机为 macOS，开发服务器不得暴露到不受信网络；依赖升级提供修复版本后复核。该缺口不被描述为已修复或生产 readiness。
 
@@ -58,6 +58,8 @@ M4 浏览器测试中的损坏 WAV 与 65 秒、48kHz、单声道计时 WAV 都�
 
 M5 浏览器测试把受控 fixture 写入浏览器 OPFS，再由注入的 `showOpenFilePicker()` 返回真实 `FileSystemFileHandle`。它覆盖真实 IndexedDB structured clone、刷新和 current Blob，但不会制造或宣称原生权限提示通过；Chrome OS picker 的 granted/prompt/denied、恢复访问和文件临时移动必须另做人工检查。
 
+2026-07-29，`project-owner` 按下列清单完成最新版稳定 Chrome 原生权限人工检查并确认通过。该签字不保存本地音频的文件名、路径、内容或 hash，也不替代 Edge 验证。
+
 ## M5 原生权限人工检查
 
 1. 启动 `npm run dev`，用最新版稳定 Chrome 打开 localhost。
@@ -65,7 +67,7 @@ M5 浏览器测试把受控 fixture 写入浏览器 OPFS，再由注入的 `show
 3. 刷新页面；检查当前歌曲从 0 秒 paused 恢复，其他歌曲分别显示浏览器实际返回的 granted/prompt/denied 状态，且启动过程没有主动弹权限。
 4. 只通过“恢复访问”触发权限请求；拒绝后队列和当前 Blob 仍可用，允许后对应歌曲恢复。
 5. 临时移动一段非当前音频并刷新，检查 `file-missing` 和“重新选择”；选择内容不同时检查 `content-changed`，再选择原内容恢复。
-6. 可选导入超范围长音频观察大 Blob/quota 行为；只记录 best-effort 结果，不作为门禁通过或时长承诺。
+6. 可选导入超范围长音频观察大 Blob/quota 行为；只记录 best-effort 结果，不作为门禁通过或时长承诺。无法开始播放不是规定的预期结果；只有支持范围内音频复现或失败破坏其他会话能力时才作为缺陷调查。
 7. 检查页面 console error/warn；记录浏览器版本、实际状态和手工 reviewer，不记录本地文件名、路径或 hash。
 
 ## Fixture 重建
@@ -99,4 +101,4 @@ M5 浏览器测试把受控 fixture 写入浏览器 OPFS，再由注入的 `show
 
 同日 M5 canonical run `M5-2026-07-29T07-08-25-199Z-c90a3c57` 在 clean commit `c90a3c5738de5b7a4efb7eb24cddc49da3713b44` 上 16/16 通过，summary SHA-256 为 `6257426baa601289d89c10e97d76d866a637227fd042080deb947af17c982d2a`。M5 Chrome 为 3/3，M4 回归 60 秒漂移 4ms、三次 seek 最大误差 66.827ms；正式摘要见 [evidence index](../docs/quality/evidence-index.md)。
 
-本 README 只记录已存在且至少成功执行过一次的命令。M5 canonical 自动化通过不等同于 EG-006 原生权限人工检查、M5 owner approval、Edge 矩阵或 release readiness。
+本 README 只记录已存在且至少成功执行过一次的命令。M5 canonical 自动化、Chrome 原生权限人工检查及 owner approval 均已完成；它们不等同于 Edge 矩阵、M6 产品行为或 release readiness。

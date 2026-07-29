@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: approved
 owner: "project-owner"
 last_reviewed: 2026-07-29
 upstream_docs:
@@ -8,14 +8,14 @@ upstream_docs:
   - "docs/quality/failure-taxonomy.md"
   - "docs/delivery/milestone-plan.md"
   - "tests/fixtures/fixture-manifest.json"
-next_action: "完成 EG-006 原生权限人工检查，并由 project-owner 审阅 M5 evidence 与 working agreements"
+next_action: "为 M6 Worker platform 与 feature registry 建立实施和 canonical evidence；不提前声明 M6 通过"
 ---
 
 # Evidence Index
 
 ## 1. Purpose and Gate State
 
-本文件保存受版本控制的长期证据摘要；原始日志保存在 Git 忽略的本地 artifact 目录。M3 测试基础切片和 M4 AudioEngine 切片的 canonical run 均已由 `project-owner` 批准。M5 clean-commit canonical 自动化已通过并进入 `in-review`；原生权限人工检查和 M5 owner 审批尚未完成。
+本文件保存受版本控制的长期证据摘要；原始日志保存在 Git 忽略的本地 artifact 目录。M3 测试基础切片、M4 AudioEngine 切片和 M5 hybrid recovery 切片均已由 `project-owner` 批准。M5 的 clean-commit canonical 自动化与 Chrome 原生权限人工检查均已通过，M5 已关闭并开放 M6。
 
 每条 `pass` 只证明对应里程碑的适用子集在被记录的 commit 和环境上可复现。它不表示完整 EV-A–EV-R、未执行里程碑、Edge 矩阵或 release readiness 已通过。
 
@@ -197,18 +197,18 @@ next_action: "完成 EG-006 原生权限人工检查，并由 project-owner 审�
 | --- | --- |
 | Run ID | `M5-2026-07-29T07-08-25-199Z-c90a3c57` |
 | Milestone | M5 — IndexedDB hybrid recovery |
-| State | `pass`（M5 自动化适用子集；`in-review`） |
+| State | `pass`（M5 适用子集；已批准） |
 | Eval IDs | EV-D 的 M5 自动化子集；EV-S、EV-B、EV-R 的 M4 回归子集；EV-A、EV-J、EV-D、EV-R 的 M3 回归子集 |
 | Commit | `c90a3c5738de5b7a4efb7eb24cddc49da3713b44` |
 | Dirty at start / end | `false` / `false` |
 | Commit at end | `c90a3c5738de5b7a4efb7eb24cddc49da3713b44` |
 | Started at | 2026-07-29 07:08:25.199 UTC |
 | Method | `npm run eval:m5` |
-| Reviewer | `project-owner` — pending |
+| Reviewer | `project-owner` — approved 2026-07-29 |
 | Retention | `local-present` |
 | Artifact root | `artifacts/evals/M5-2026-07-29T07-08-25-199Z-c90a3c57/` |
 | Summary SHA-256 | `6257426baa601289d89c10e97d76d866a637227fd042080deb947af17c982d2a` |
-| Failure | 自动化无 failure instance；原生 OS picker 权限矩阵保持 EG-006，Edge 缺失保持 EG-003 |
+| Failure | M5 门禁内无 failure instance；Edge 缺失保持 EG-003 |
 
 ### Environment
 
@@ -249,7 +249,7 @@ M5 canonical 自动化只使用仓库内 CC0-1.0 受控 fixture；完整 provena
 | Build | pass with warning | 1806 modules；最大 JS chunk 1,054.73 kB | EV-R；R-019 |
 | Diff check | pass | `git diff --check` exit 0 | EV-R；R-019 |
 
-M5 自动化覆盖 success、failure、boundary 与 exception 的可重复子集：V1/未知 schema、单 current Blob/cache、事务 abort/quota、内容 hash、权限 adapter、取消、刷新和用户清除。OPFS handle 证明 Chrome structured clone 与真实 IndexedDB 刷新链路，但不能制造原生 picker 的 prompt/denied 气泡或文件移动，因此 AC-F02、AC-F03、AC-F05 的真实权限体验仍关联 EG-006，不能只凭本 run 宣称完整通过。
+M5 自动化覆盖 success、failure、boundary 与 exception 的可重复子集：V1/未知 schema、单 current Blob/cache、事务 abort/quota、内容 hash、权限 adapter、取消、刷新和用户清除。OPFS handle 证明 Chrome structured clone 与真实 IndexedDB 刷新链路，但不能制造原生 picker 的 prompt/denied 气泡或文件移动；这些路径由下方独立人工记录补偿，不能只凭 canonical run 宣称通过。
 
 ### Local Artifact Hashes
 
@@ -275,6 +275,25 @@ M5 自动化覆盖 success、failure、boundary 与 exception 的可重复子集
 
 `summary.json.sha256` 已独立核对并与 `summary.json` 一致。本地产物至少保留到 M5 获批；删除后必须把 retention 改为 `local-deleted`。
 
-### M5 Review Gate
+### Chrome Native Permission Manual Record
 
-本记录来自干净 commit，16/16 自动化步骤通过且没有 failure instance。M5 仍为 `In Review`：先按 [tests README](../../tests/README.md) 完成不记录私有文件身份的 Chrome 原生 picker/权限/文件移动人工检查，再由 `project-owner` 明确审批本 evidence 与 [working agreements](../context/working-agreements.md)。在两项完成前不得把 M5 标为 `Complete` 或开放 M6。
+| Field | Value |
+| --- | --- |
+| Date | 2026-07-29 |
+| Method | 按 [tests README](../../tests/README.md) 执行 Chrome 原生 picker、刷新、权限与文件移动检查 |
+| Browser | 最新稳定版 Chrome；本次人工签字未单独记录精确版本 |
+| Result | `pass`（M5 Chrome 原生权限适用子集） |
+| Covered | 原生选择、刷新为 0 秒 paused、启动不主动请求权限、用户触发恢复访问、granted/prompt/denied、文件移动、重新选择与内容变化 |
+| Reviewer | `project-owner` |
+| Artifact | `not-produced`；以本次明确人工签字为记录，不保存私有音频身份 |
+| Trace | EV-D；AC-P04、AC-S03、AC-F01–AC-F05；R-005、R-006 |
+
+本人工记录补足 M5 在 Chrome 上的 EG-006 补偿验证；它不等于文件权限提示已全自动化，也不补足 Edge 的 EG-003。
+
+### Out-of-scope Stress Observation
+
+`project-owner` 观察到一段超出“约 15 分钟”支持边界的本地压力输入未开始播放。当前 import/load 源码没有显式时长拒绝，因此这不是产品规定或实现设计的预期失败；该输入按既有 DEC-006/DEC-015 只作 best-effort 观察，不计入 M5 pass/fail，本轮也不对超范围样本继续诊断。版本化证据不记录其文件名、路径、内容或 hash。若约 15 分钟范围内的有效 MP3/WAV/FLAC 复现，或失败使队列、当前会话及其他歌曲不可继续使用，则重新打开格式/播放缺陷调查。
+
+### M5 Approval Record
+
+本记录来自干净 commit，16/16 自动化步骤通过且没有 M5 门禁内 failure instance。`project-owner` 于 2026-07-29 确认原生权限人工检查通过，并明确批准本 evidence 与 [working agreements](../context/working-agreements.md)。M5 据此改为 `Complete` 并开放 M6；该批准不构成 M6、Edge、完整 EV-A–EV-R 或 release readiness 通过。

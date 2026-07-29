@@ -69,5 +69,5 @@ AudioBufferSourceNode → AnalyserNode → GainNode → audioContext.destination
 - 单元测试使用可注入 AudioContext factory 与 fake clock，覆盖 load/play/pause/seek/ended/stale/error/unload/dispose。
 - service 测试覆盖追加、最后操作、ended、删除、清空、metadata fallback、序列化和 URL/RAF 生命周期。
 - Chrome E2E 覆盖三格式、错误恢复、队列操作、20 次切歌、route 变化、能量和 60 秒时钟。
-- M5 Vitest 覆盖 validator、hash、事务替换/abort、权限状态和恢复顺序；Chrome E2E 用 OPFS 真句柄覆盖 IndexedDB 刷新与 current Blob。原生 OS picker 的权限提示仍需人工检查。
+- M5 Vitest 覆盖 validator、hash、事务替换/abort、权限状态和恢复顺序；Chrome E2E 用 OPFS 真句柄覆盖 IndexedDB 刷新与 current Blob。原生 OS picker 的权限、恢复访问和文件移动已由 `project-owner` 于 2026-07-29 人工检查通过；Edge 权限矩阵仍未完成。
 - 当前 Edge 未安装；Chrome 结果不能表述为双浏览器完成。
