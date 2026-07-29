@@ -1,10 +1,10 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-07-28
+last_reviewed: 2026-07-29
 upstream_docs:
   - "AGENTS.md"
-next_action: "完成 M4 provisional/canonical run 与 evidence 审批；审批前不进入 M5"
+next_action: "由 project-owner 审批 M4 evidence 与 working agreements；批准前不进入 M5"
 ---
 
 # Repository Context Index
@@ -21,8 +21,8 @@ AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端：用户选择
 - Product intent：problem brief、scope 和 success metrics 已由 `project-owner` 批准；开放问题只保留未来上传、未定义 Tab、托管和扩展研究等非当前门禁事项。
 - System design：system design、接口契约、风险和四个 ADR 已批准。
 - Execution planning：execution plan、acceptance criteria、test strategy 和 milestone plan 均为 approved。
-- Quality and evals：eval plan、golden examples、failure taxonomy 和首条 M3 canonical evidence 已由 `project-owner` 批准；完整 eval 仍未完成。
-- Implementation：M3 已 `Complete`；M4 的 AudioEngine、audioSessionStore、AudioSessionService、MusicBar 迁移和测试已有 provisional pass，仍需用户提交、canonical evidence 与 owner 批准。
+- Quality and evals：eval plan、golden examples、failure taxonomy 和 M3 canonical evidence 已由 `project-owner` 批准；M4 canonical evidence 已追加为 `in-review`，完整 eval 仍未完成。
+- Implementation：M3 已 `Complete`；M4 的 AudioEngine、audioSessionStore、AudioSessionService、MusicBar 迁移和测试已在 clean commit canonical pass，当前只等待 owner 审批，尚未开放 M5。
 - Readiness、release、retrospective：`release-readiness.md` 等待 M11 执行证据，不创建 release 或 retrospective 文档。
 
 ## Key Documents
@@ -48,7 +48,7 @@ AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端：用户选择
 | [eval-plan.md](../quality/eval-plan.md) | 七组评估、阈值、AC/risk 映射和证据缺口 | project-owner / approved | 验收、测试覆盖或风险变化 |
 | [golden-examples.md](../quality/golden-examples.md) | 成功、失败、边界和异常黄金样例 | project-owner / approved | fixture、Meyda、参数或用户任务变化 |
 | [failure-taxonomy.md](../quality/failure-taxonomy.md) | 稳定失败类型、S0–S3 和门禁响应 | project-owner / approved | 失败分类或风险接受规则变化 |
-| [evidence-index.md](../quality/evidence-index.md) | M3–M11 canonical run 摘要、环境、hash 和 reviewer | project-owner / approved | 新 run、artifact retention 或里程碑审批 |
+| [evidence-index.md](../quality/evidence-index.md) | M3–M11 canonical run 摘要、环境、hash 和 reviewer | project-owner / in-review | 新 run、artifact retention 或里程碑审批 |
 
 ## Architecture Decisions
 
@@ -84,7 +84,7 @@ AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端：用户选择
 
 ## Current Known Gaps
 
-- M4 provisional 已通过，但尚缺 clean-commit canonical evidence 和 owner 批准；IndexedDB 恢复、Worker 全曲分析和共享四卡时间轴仍未开始。
+- M4 clean-commit canonical evidence 已通过并登记，但尚缺 owner 批准；IndexedDB 恢复、Worker 全曲分析和共享四卡时间轴仍未开始。
 - 当前机器尚未发现 Edge；没有真实 Edge 证据时不能完成 M11 双浏览器门禁。
 - 正式托管平台和生产 URL 尚未决定；它们只阻断未来 release，不阻断 M3。
 - 详细 context 文档的长期 owner/review cadence 尚未全部统一；代码改动时必须同步修正事实。
@@ -99,3 +99,5 @@ AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端：用户选择
 `project-owner` 于 2026-07-28 明确批准 M3 evidence index 与 working agreements。M3 改为 `Complete`，当前阶段切换为已开放的 M4。
 
 同日，M4 dirty-worktree provisional suite 通过；该结果只用于实现反馈，未追加正式 evidence index，也未关闭 M4。
+
+2026-07-29，M4 canonical suite 在 clean commit `e5cfe9e8ab62301f3c5b0ddcdd37847a2e131a0f` 上通过并追加到 evidence index。该事实尚待 `project-owner` 审批，因此 M4 仍为 `In Review`，M5 未开始。

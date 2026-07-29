@@ -7,7 +7,7 @@
 | ID | 分类 | 已证实证据 | 影响 | 下一步 |
 | --- | --- | --- | --- | --- |
 | ENG-002 | CI | M3 明确只建立本地门禁，未创建 `.github/workflows` 或其他正式 CI | 构建/测试依赖本地执行 | CI 作为独立后续决策，不阻断 M3 |
-| ENG-003 | 资源释放 | M4 已把封面 URL 交给 session service 并在删除、清空、dispose 释放；AudioEngine/source/RAF 也有显式 cleanup | canonical evidence 批准前仍不能关闭长期资源风险 | 完成 M4 canonical run，并在 M11 保留 DevTools 资源复核 |
+| ENG-003 | 资源释放 | M4 已把封面 URL 交给 session service 并在删除、清空、dispose 释放；AudioEngine/source/RAF 的 clean-commit canonical 自动化已通过 | owner 批准前不能关闭 M4，自动化也不替代长期 heap/线程观察 | 审批 M4 evidence，并在 M11 保留 DevTools 资源复核 |
 | ENG-004 | WebGL 释放 | `LightBg` cleanup 未见 geometry/material 显式 dispose | 可见性反复切换可能累积 GPU 资源 | 在可视化生命周期任务中测量并修复 |
 | ENG-005 | 未完成表面 | ComingSoon、threeDTable、MeydaCard 为空或近空，TestLands/testcomp 为试验内容 | 不能推断公开功能或稳定接口 | 由产品 scope 决定保留、实现或删除 |
 | ENG-006 | 包体积 | 当前构建存在约 1 MB chunk 警告 | 首屏和缓存风险未知 | 先确定性能预算，再决定分包策略 |

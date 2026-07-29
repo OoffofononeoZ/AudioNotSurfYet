@@ -1,21 +1,21 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-07-28
+last_reviewed: 2026-07-29
 upstream_docs:
   - "docs/product/success-metrics.md"
   - "docs/architecture/risk-register.md"
   - "docs/delivery/execution-plan.md"
   - "docs/delivery/acceptance-criteria.md"
   - "docs/delivery/test-strategy.md"
-next_action: "在 M4 执行 AudioEngine/store、播放生命周期、MusicBar 回归和资源所有权证据"
+next_action: "审阅 M4 对 EV-S、EV-B、EV-R 适用子集的 canonical evidence；批准前不开放 M5"
 ---
 
 # Eval Plan
 
 ## 1. Purpose and Current State
 
-本文件定义 AudioNotSurfYet 的质量证据契约。Vitest、Playwright、Worker harness、受控 fixture 和 direct-Meyda golden 已在 M3 建立，并已有一条干净 commit 的 [canonical run](evidence-index.md)。该 run 只使 M3 适用子集具有 `pass` 证据；完整 EV-A–EV-R 和 M4–M11 产品行为仍为 `planned`。
+本文件定义 AudioNotSurfYet 的质量证据契约。Vitest、Playwright、Worker harness、受控 fixture 和 direct-Meyda golden 已在 M3 建立。M3 canonical evidence 已获批，M4 clean-commit [canonical run](evidence-index.md) 已使 EV-S、EV-B、EV-R 的 M4 适用子集具有待审批的 `pass` 证据；完整 EV-A–EV-R、Edge 矩阵和 M5–M11 产品行为仍为 `planned`。
 
 Q0 只批准“如何判断质量”，不批准 release readiness。`docs/quality/release-readiness.md` 只能在 M11 已产生完整成功、失败、边界和异常证据后创建。
 
@@ -147,7 +147,7 @@ Q0 只批准“如何判断质量”，不批准 release readiness。`docs/quali
 - Playwright report、trace、截图和性能 dump 使用 `test-results/`、`playwright-report/`、`artifacts/evals/<run-id>/`，只在本地保留；M3 建立这些路径时再同步加入 `.gitignore`。
 - 本地产物至少保留到对应里程碑批准；与 S0/S1 有关的产物保留到缺陷关闭及回归获批。删除后把 evidence index 的 `retention_state` 改为 `local-deleted`，不得删除摘要、hash 或复现命令。
 - `local-deleted` 摘要不能单独支持未来 release readiness。若 readiness 需要检查原始报告、trace 或截图，必须重新运行相应 eval 并产生新的 run record。
-- 当前已有 Git 忽略目录中的 provisional artifact，且 `.gitignore` 已落实本地产物路径；由于运行基于 dirty worktree，仍不创建 evidence index，也不把它当作 canonical milestone evidence。
+- M4 canonical artifact 已在 Git 忽略目录生成并追加到 evidence index；该 run 绑定干净 commit，仍需 owner 审批后才可关闭 M4。更早的 dirty-worktree provisional artifact 只保留为实现反馈。
 
 ## 7. Evidence Gaps
 
@@ -181,3 +181,5 @@ Q0 只有在以下条件满足后才能改为 `approved`：
 ## 9. Approval Record
 
 `project-owner` 于 2026-07-28 明确批准本文、[golden examples](golden-examples.md)、[failure taxonomy](failure-taxonomy.md) 及对应 delivery 修订。同日，owner 又批准 M3 [evidence index](evidence-index.md) 与 working agreements；M3 已关闭并开放 M4。
+
+2026-07-29，M4 clean-commit canonical run 已追加到 [evidence index](evidence-index.md)，但尚未获得 `project-owner` 批准；因此 EV-S、EV-B、EV-R 只记录 M4 适用子集的待审批证据，M4 仍为 `In Review`。

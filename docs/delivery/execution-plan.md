@@ -1,7 +1,7 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-07-28
+last_reviewed: 2026-07-29
 upstream_docs:
   - "docs/product/problem-brief.md"
   - "docs/product/scope.md"
@@ -9,7 +9,7 @@ upstream_docs:
   - "docs/architecture/system-design.md"
   - "docs/architecture/interface-contracts.md"
   - "docs/architecture/risk-register.md"
-next_action: "完成 M4 provisional/canonical run 与 evidence 审批；审批前不开放 M5"
+next_action: "由 project-owner 审批 M4 canonical evidence 与 working agreements；审批前不开放 M5"
 ---
 
 # Execution Plan
@@ -18,7 +18,7 @@ next_action: "完成 M4 provisional/canonical run 与 evidence 审批；审批�
 
 按纵向切片把已批准的本地音频学习体验从当前播放器基础推进到 21 项 Meyda 特征全覆盖。本计划以门禁证据而不是日历日期排序；任一里程碑未通过时，不进入下一批特征。
 
-本文件定义实施顺序和验收方式，不代表未关闭里程碑已通过。当前已完成 M1、M2、Q0 和 M3 门禁；M4 产品源码与自动化已进入审阅，仍等待 provisional、用户提交后的 canonical run 和 evidence 批准。
+本文件定义实施顺序和验收方式，不代表未关闭里程碑已通过。当前已完成 M1、M2、Q0 和 M3 门禁；M4 产品源码、自动化和 clean-commit canonical run 已进入证据审阅，仍等待 `project-owner` 批准。
 
 ## 2. Stage Gates
 
@@ -142,7 +142,7 @@ Evidence state:
 
 ### M4 — AudioEngine and audioSessionStore
 
-Status：In Review（implementation present；canonical evidence pending）。
+Status：In Review（implementation 与 canonical evidence present；owner approval pending）。
 
 Goal：建立单一播放引擎，同时保持现有 MusicBar 行为。
 
@@ -166,7 +166,8 @@ Evidence state:
 - 2026-07-28 `eval:m4:provisional` 通过 13 个步骤；M3 回归、M4 engine/session、Chrome 播放回归、typecheck、build、docs 和 diff check 均为 pass；
 - 60 秒 AudioContext 时钟漂移约 13.3ms；三次 seek 误差约 66.8ms、1.1ms、66.8ms；
 - 该 run 的 dirty-at-start 为 true，只是 provisional，不登记到正式 evidence index；
-- M4 仍等待用户提交后的 clean-commit `eval:m4`、evidence review 和 owner 批准。
+- 2026-07-29 `npm run eval:m4` 在 clean commit `e5cfe9e8ab62301f3c5b0ddcdd37847a2e131a0f` 上通过 13/13 步骤，60 秒时钟漂移 2.233ms，三次 seek 最大误差 66.827ms；
+- 正式 run 已登记到 [evidence index](../quality/evidence-index.md)，M4 只等待 owner 审批；审批前不关闭 M4 或开放 M5。
 
 Rollback:
 

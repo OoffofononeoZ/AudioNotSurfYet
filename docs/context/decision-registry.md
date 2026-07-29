@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/product/scope.md"
   - "docs/architecture/system-design.md"
   - "docs/delivery/execution-plan.md"
-next_action: "完成 M4 clean-commit canonical run、evidence 登记和 owner 审批"
+next_action: "由 project-owner 审批 M4 canonical evidence 与 working agreements；审批前不开放 M5"
 ---
 
 # Decision Registry
@@ -50,6 +50,8 @@ next_action: "完成 M4 clean-commit canonical run、evidence 登记和 owner �
 同日，`project-owner` 明确要求实施 M4 计划，DEC-014 与 ADR-0001 的 M4 运行策略据此生效。M4 源码存在不等同于里程碑通过；仍需干净 commit canonical run、evidence 登记和 owner 批准。
 
 M4 dirty-worktree provisional suite 随后通过，证明当前实现值得进入提交与 canonical 复跑步骤；由于它不绑定干净 commit，DEC-013 要求下不作为正式 evidence。
+
+2026-07-29，`npm run eval:m4` 在 clean commit `e5cfe9e8ab62301f3c5b0ddcdd37847a2e131a0f` 上 13/13 步骤通过，正式记录已追加到 [evidence index](../quality/evidence-index.md)。该运行满足 DEC-013 的证据身份要求，但仍待 `project-owner` 审批；M4 和 M5 状态尚未改变。
 
 ## Historical Evidence Gap
 

@@ -29,3 +29,4 @@ public/audios
 test-results/
 playwright-report/
 artifacts/evals/
+public/test_audio
