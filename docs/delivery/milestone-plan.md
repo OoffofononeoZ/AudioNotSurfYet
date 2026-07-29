@@ -6,7 +6,7 @@ upstream_docs:
   - "docs/delivery/execution-plan.md"
   - "docs/delivery/acceptance-criteria.md"
   - "docs/delivery/test-strategy.md"
-next_action: "由 project-owner 审批 M4 canonical evidence 与 working agreements；批准后才关闭 M4 并开放 M5"
+next_action: "用户提交 M5 改动；完成原生权限人工检查后运行 clean-commit canonical suite"
 ---
 
 # Milestone Plan
@@ -15,7 +15,7 @@ next_action: "由 project-owner 审批 M4 canonical evidence 与 working agreeme
 
 - Target 使用相对门禁，不表示日历承诺。
 - `Complete` 只用于文档门禁、真实证据和所需人工批准均已满足的里程碑。
-- Q0 和 M3 为 `Complete`；M4 为 `In Review` 且已有 clean-commit canonical pass，M5–M11 为 `Planned`。
+- Q0、M3 和 M4 为 `Complete`；M5 为 `In Progress`，M6–M11 为 `Planned`。
 - 一个里程碑未通过时，后续里程碑保持 Planned/Blocked，不并行扩大特征范围。
 
 ## Milestones
@@ -26,8 +26,8 @@ next_action: "由 project-owner 审批 M4 canonical evidence 与 working agreeme
 | M2 | System design and ADRs approved | Complete | Gate A | M1 | system design、contracts、risk、4 ADR approved | project-owner |
 | Q0 | Quality evaluation design | Complete | Pre-implementation quality gate | M2 | eval plan、golden examples、failure taxonomy approved；42 AC 和 19 risk 可追溯 | project-owner |
 | M3 | Test foundation and fixtures | Complete | First implementation gate | Q0 | Vitest/Playwright/Worker harness、fixture manifest、golden helper、有效 npm scripts | project-owner |
-| M4 | Single AudioEngine and shared store | In Review | After M3 | M3 | 播放/MusicBar 回归、单一上下文、生命周期证据 | project-owner |
-| M5 | IndexedDB hybrid recovery | Planned | After M4 | M4 | current Blob/cache、handle permission、refresh/quota/schema 证据 | project-owner |
+| M4 | Single AudioEngine and shared store | Complete | After M3 | M3 | 播放/MusicBar 回归、单一上下文、生命周期证据 | project-owner |
+| M5 | IndexedDB hybrid recovery | In Progress | After M4 | M4 | current Blob/cache、handle permission、refresh/quota/schema 证据 | project-owner |
 | M6 | Worker platform and feature registry | Planned | After M5 | M4, M5 | mono/frame/cancel/stale/cache/21-key registry、性能基线 | project-owner |
 | M7 | RMS + Amplitude Spectrum + Chroma | Planned | First feature gate | M6 | 三项黄金、四卡共享时间轴、100ms、owner 任务与 3/3 学习解释 | project-owner |
 | M8 | Remaining scalar features | Planned | After M7 | M7 | 13 项新增 scalar 全部 golden/renderer/edge，累计 16/21 | project-owner |
@@ -64,15 +64,19 @@ next_action: "由 project-owner 审批 M4 canonical evidence 与 working agreeme
 - [x] 单一实时 AudioContext、单 service RAF 和 URL 释放已有可执行检查。
 - [x] 用户提交干净 commit 后完成 `npm run eval:m4`。
 - [x] M4 canonical run 已追加到 evidence index。
-- [ ] M4 evidence index 与 working agreements 由 `project-owner` 批准。
+- [x] M4 evidence index 与 working agreements 由 `project-owner` 批准。
 
 ### M5
 
-- [ ] V1 schema 与 runtime validation。
-- [ ] 当前 Blob/cache 原子替换且只保留当前项。
-- [ ] 刷新后 0 秒 paused。
-- [ ] granted/prompt/denied/missing/changed/quota 都有 UI 和测试。
-- [ ] 权限请求只在用户手势后。
+- [x] V1 schema 与 runtime validation。
+- [x] 当前 Blob/cache 原子替换且只保留当前项。
+- [x] 刷新后 0 秒 paused。
+- [x] granted/prompt/denied/missing/changed/quota 都有 UI 和自动化测试。
+- [x] 权限请求只在用户手势后。
+- [x] dirty-worktree `npm run eval:m5:provisional` 16/16 通过。
+- [ ] 使用本地样本完成原生 picker/权限/文件移动人工检查。
+- [ ] 用户提交后运行 clean-commit `npm run eval:m5` 并登记 evidence。
+- [ ] `project-owner` 审批 M5 evidence 与 working agreements。
 
 ### M6
 
@@ -124,12 +128,13 @@ next_action: "由 project-owner 审批 M4 canonical evidence 与 working agreeme
 
 ## Current Gate State
 
-- Current stage：M4 Single AudioEngine and shared store；canonical suite 已通过，evidence 已登记并等待 owner 审批。
+- Current stage：M5 IndexedDB hybrid recovery，implementation/provisional complete，等待人工权限检查与 clean-commit evidence。
 - Previous gate：M3 已由 `project-owner` 于 2026-07-28 批准并标记 `Complete`。
 - Canonical run：`npm run eval:m3` 已在 clean commit `17d16f0da37289c1f67f75203502beef999572ea` 上通过；摘要见 [evidence index](../quality/evidence-index.md)。
-- Next gate：`project-owner` 审批 M4 evidence index 与 working agreements；批准后才把 M4 改为 `Complete` 并开放 M5。
+- Next gate：使用本地样本完成人工权限检查；用户提交后在 clean commit 运行 canonical suite 并审批 M5 evidence。
 - M3 state：Complete；M3 evidence 只证明测试基础，不代表 M4 产品行为通过。
-- M4 canonical：`npm run eval:m4` 在 clean commit `e5cfe9e8ab62301f3c5b0ddcdd37847a2e131a0f` 上 13/13 步骤通过；60 秒漂移 2.233ms，三次 seek 最大误差 66.827ms。证据见 [evidence index](../quality/evidence-index.md)，当前尚未获 owner 批准。
+- M4 canonical：`npm run eval:m4` 在 clean commit `e5cfe9e8ab62301f3c5b0ddcdd37847a2e131a0f` 上 13/13 步骤通过；60 秒漂移 2.233ms，三次 seek 最大误差 66.827ms。`project-owner` 已于 2026-07-29 批准该证据。
+- M5 provisional：`M5-2026-07-29T07-03-16-207Z-2eb98381-provisional` 在 dirty worktree 16/16 步骤通过；summary SHA-256 为 `7b0acaf128ac4a7ceffce1449d2421127d20c8b25dcdc1ebd07b889072228530`。它只作实现反馈，不是正式 evidence。
 - Known future blockers：没有真实 Edge 证据时不能完成 M11 或未来 readiness；托管平台未定会阻断 release，但不阻断 Q0/M3。
 
 ## Approval Record
@@ -137,3 +142,5 @@ next_action: "由 project-owner 审批 M4 canonical evidence 与 working agreeme
 `project-owner` 于 2026-07-28 明确批准 Q0 三份质量设计和两份 delivery 修订。该批准开放 M3，但不代表任何测试、产品行为或 release readiness 已通过。
 
 `project-owner` 于 2026-07-28 明确批准 M3 evidence index 与 working agreements。M3 据此改为 `Complete` 并开放 M4；Edge 和 M4–M11 未执行范围保持不变。
+
+`project-owner` 于 2026-07-29 明确批准 M4 evidence index 与 working agreements。M4 据此改为 `Complete` 并开放 M5；该批准不预先批准 M5 evidence。

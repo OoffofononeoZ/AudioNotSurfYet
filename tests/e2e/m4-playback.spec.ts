@@ -6,6 +6,10 @@ import {
 } from '@playwright/test';
 import { writeFile } from 'node:fs/promises';
 import path from 'node:path';
+import {
+    chooseFiles,
+    installFilePickerStub,
+} from '../support/file-picker';
 
 const REPOSITORY_ROOT = path.resolve(import.meta.dirname, '../..');
 const AUDIO_FIXTURES = path.join(
@@ -88,14 +92,6 @@ async function runtimeStats(page: Page): Promise<RuntimeStats> {
     ).__m4RuntimeStats());
 }
 
-async function chooseFiles(page: Page, files: string[]) {
-    const [chooser] = await Promise.all([
-        page.waitForEvent('filechooser'),
-        page.getByTestId('import-audio').click(),
-    ]);
-    await chooser.setFiles(files);
-}
-
 function writePcm16Wave(
     outputPath: string,
     durationSeconds: number,
@@ -130,6 +126,7 @@ function writePcm16Wave(
 test('preserves queue controls, append semantics, energy, and resource ownership', async ({ page }) => {
     const issues = captureBrowserIssues(page);
     await installResourceInstrumentation(page);
+    await installFilePickerStub(page);
     await page.goto('/');
 
     const musicBar = page.locator('#music-bar-container');
@@ -245,6 +242,7 @@ test('keeps a corrupt track recoverable and plays the next valid track', async (
     const issues = captureBrowserIssues(page);
     const corruptPath = testInfo.outputPath('corrupt.wav');
     await writeFile(corruptPath, new Uint8Array([0, 1, 2, 3, 4]));
+    await installFilePickerStub(page);
     await page.goto('/');
 
     const musicBar = page.locator('#music-bar-container');
@@ -277,6 +275,7 @@ test('keeps the AudioContext-based clock within 100ms for 60 seconds and repeate
     const issues = captureBrowserIssues(page);
     const longWavePath = testInfo.outputPath('controlled-65s.wav');
     await writePcm16Wave(longWavePath, 65);
+    await installFilePickerStub(page);
     await page.goto('/');
 
     const musicBar = page.locator('#music-bar-container');

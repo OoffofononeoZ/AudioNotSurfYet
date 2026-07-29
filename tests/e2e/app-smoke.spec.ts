@@ -1,5 +1,9 @@
 import { expect, test, type Page } from '@playwright/test';
 import path from 'node:path';
+import {
+    chooseFiles,
+    installFilePickerStub,
+} from '../support/file-picker';
 
 const REPOSITORY_ROOT = path.resolve(import.meta.dirname, '../..');
 
@@ -88,20 +92,14 @@ test('provides real IndexedDB and Web Worker transfer behavior', async ({ page }
 for (const extension of ['wav', 'mp3', 'flac']) {
     test(`loads and starts the committed ${extension.toUpperCase()} fixture`, async ({ page }) => {
         const issues = captureBrowserIssues(page);
+        await installFilePickerStub(page);
         await page.goto('/');
 
-        const addButton = page.locator('svg').filter({
-            has: page.locator('use[href="/icons.svg#add-music"]'),
-        }).first();
-        const [chooser] = await Promise.all([
-            page.waitForEvent('filechooser'),
-            addButton.click(),
-        ]);
         const fixturePath = path.join(
             REPOSITORY_ROOT,
             `tests/fixtures/audio/format-master.${extension}`,
         );
-        await chooser.setFiles(fixturePath);
+        await chooseFiles(page, [fixturePath]);
 
         await expect(page.locator('#music-info-container')).toContainText(
             `format-master.${extension}`,

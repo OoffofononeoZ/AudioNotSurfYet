@@ -9,7 +9,7 @@ upstream_docs:
   - "docs/architecture/system-design.md"
   - "docs/architecture/interface-contracts.md"
   - "docs/architecture/risk-register.md"
-next_action: "由 project-owner 审批 M4 canonical evidence 与 working agreements；审批前不开放 M5"
+next_action: "实施并验证 M5 IndexedDB hybrid recovery；不进入 M6"
 ---
 
 # Execution Plan
@@ -18,7 +18,7 @@ next_action: "由 project-owner 审批 M4 canonical evidence 与 working agreeme
 
 按纵向切片把已批准的本地音频学习体验从当前播放器基础推进到 21 项 Meyda 特征全覆盖。本计划以门禁证据而不是日历日期排序；任一里程碑未通过时，不进入下一批特征。
 
-本文件定义实施顺序和验收方式，不代表未关闭里程碑已通过。当前已完成 M1、M2、Q0 和 M3 门禁；M4 产品源码、自动化和 clean-commit canonical run 已进入证据审阅，仍等待 `project-owner` 批准。
+本文件定义实施顺序和验收方式，不代表未关闭里程碑已通过。当前已完成 M1、M2、Q0、M3 和 M4 门禁；M5 IndexedDB hybrid recovery 已开放并进入实施。
 
 ## 2. Stage Gates
 
@@ -142,7 +142,7 @@ Evidence state:
 
 ### M4 — AudioEngine and audioSessionStore
 
-Status：In Review（implementation 与 canonical evidence present；owner approval pending）。
+Status：Complete。
 
 Goal：建立单一播放引擎，同时保持现有 MusicBar 行为。
 
@@ -167,7 +167,7 @@ Evidence state:
 - 60 秒 AudioContext 时钟漂移约 13.3ms；三次 seek 误差约 66.8ms、1.1ms、66.8ms；
 - 该 run 的 dirty-at-start 为 true，只是 provisional，不登记到正式 evidence index；
 - 2026-07-29 `npm run eval:m4` 在 clean commit `e5cfe9e8ab62301f3c5b0ddcdd37847a2e131a0f` 上通过 13/13 步骤，60 秒时钟漂移 2.233ms，三次 seek 最大误差 66.827ms；
-- 正式 run 已登记到 [evidence index](../quality/evidence-index.md)，M4 只等待 owner 审批；审批前不关闭 M4 或开放 M5。
+- 正式 run 已登记到 [evidence index](../quality/evidence-index.md)，并由 `project-owner` 于 2026-07-29 批准；M4 已关闭。
 
 Rollback:
 
@@ -175,17 +175,19 @@ Rollback:
 
 ### M5 — IndexedDB session recovery
 
+Status：In Progress。
+
 Goal：实现最近一次会话和权限可见的混合恢复。
 
 Implementation:
 
-- 建立版本化 `SessionRepository` 和 runtime validation。
-- 接入 `showOpenFilePicker()`，保存队列全部 handle。
-- 只保存当前 Blob 和当前分析 cache manifest/payload。
-- 实现 current Blob/cache 原子替换、清除会话和 quota failure。
-- 恢复队列、当前歌曲、卡片和固定配置；时间归零 paused。
-- 按相邻距离查询其他歌曲权限，用户触发 `requestPermission()`。
-- 为 granted/prompt/denied/missing/changed/not-persisted 建立 UI 状态。
+- 已建立原生 IndexedDB V1 `SessionRepository`、四个 object store 和 `PersistedSessionV1` runtime validation。
+- 已接入 `showOpenFilePicker()`，保存队列全部 handle；取消静默结束，API 缺失不回退隐藏 input。
+- 只保存当前 Blob 和当前分析 cache envelope；分析 payload 接入留到 M6/M7。
+- 已实现 current Blob/cache 同事务原子替换、清除会话和 quota/abort failure。
+- 已恢复队列和当前歌曲；current Blob 优先，时间归零 paused。
+- 已按相邻距离查询其他歌曲权限，只有用户操作触发 `requestPermission()`。
+- 已为 granted/prompt/denied/missing/changed/not-persisted/decode-error 建立 UI 状态与恢复操作。
 
 Verification:
 
@@ -193,6 +195,15 @@ Verification:
 - 当前 Blob 可在句柄无权限时恢复；
 - 其他 track 不自动触发权限提示；
 - 权限/文件错误不破坏当前页面播放。
+
+Evidence state:
+
+- 2026-07-29 `eval:m5:provisional` 在 dirty worktree 通过 16/16 步骤；M3/M4 回归、M5 repository/recovery、Chrome IndexedDB/OPFS、typecheck、build、docs 和 diff check 均为 pass；
+- M4 60 秒时钟回归在本次运行中漂移 5ms，三次 seek 最大误差 66.827ms；
+- run ID 为 `M5-2026-07-29T07-03-16-207Z-2eb98381-provisional`，summary SHA-256 为 `7b0acaf128ac4a7ceffce1449d2421127d20c8b25dcdc1ebd07b889072228530`；
+- 该 run 的 dirty-at-start 为 true，只作实现反馈，不追加正式 evidence index；
+- 原生 OS picker 的 granted/prompt/denied 与文件移动仍需使用本地样本人工检查；
+- 用户提交后必须重新运行 clean-commit `eval:m5`，才可登记正式 evidence 并请求 owner 审批。
 
 Rollback:
 

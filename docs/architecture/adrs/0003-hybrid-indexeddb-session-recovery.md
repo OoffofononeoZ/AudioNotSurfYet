@@ -1,12 +1,12 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-07-24
+last_reviewed: 2026-07-29
 upstream_docs:
   - "docs/product/scope.md"
   - "docs/architecture/system-design.md"
   - "docs/architecture/interface-contracts.md"
-next_action: "实现版本化 SessionRepository、当前 Blob 原子替换和权限三态恢复"
+next_action: "用 M5 canonical evidence 与原生权限人工检查验证本决定"
 ---
 
 # ADR-0003: Hybrid IndexedDB File-Handle and Current-Blob Recovery

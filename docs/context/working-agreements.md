@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/context/index.md"
   - "docs/delivery/test-strategy.md"
   - "docs/quality/eval-plan.md"
-next_action: "由 project-owner 审批本修订与 M4 canonical evidence；批准前不关闭 M4"
+next_action: "审阅 M5 IndexedDB、File System Access 和恢复验证约定；提交后运行 canonical suite"
 ---
 
 # Working Agreements
@@ -26,11 +26,14 @@ next_action: "由 project-owner 审批本修订与 M4 canonical evidence；批�
 - 静态门禁包括 `npm run typecheck` 与 `npm run build`；非浏览器测试由 Vitest 执行。
 - `npm run test:e2e` 使用本机稳定 Chrome；Edge 缺失必须记录为 blocked，不能用 Chromium 或 skip 冒充 Edge 通过。
 - M4 使用 `test:m4:unit`、`test:m4:integration` 和 `test:e2e:m4`；65 秒 WAV 与损坏文件只在 Git 忽略目录运行时生成。
+- M5 使用 `test:m5:unit`、`test:m5:integration` 和 `test:e2e:m5`；测试分别覆盖 V1 repository、恢复/权限状态机和真实 Chrome IndexedDB 刷新。
+- M5 自动化通过测试注入的 `showOpenFilePicker()` 返回真实 OPFS `FileSystemFileHandle`，用于可重复验证 handle 存储、Blob 优先和刷新；它不替代 Chrome 原生文件选择器的人工权限验证。
 - M3 仅建立本地门禁，不存在正式 CI；这项缺口不阻断 M3，但自动化声明必须限定为本地执行。
 - 交互改动要在本地浏览器执行成功、失败和边界场景，并检查 console error/warn。
 - 布局和可视化至少检查窄屏、常见桌面和宽屏，使用真实 DOM/canvas 几何。
 - 仓库提交由同一确定性 PCM master 生成的短 WAV/MP3/FLAC、生成器、CC0 notice 和 manifest；manifest 保存 provenance、工具参数和 SHA-256。
 - 15 分钟样本和学习 PCM 在运行时生成。用户提供的音频默认仅本地使用，许可和 provenance 未确认时不得进入 Git 或正式 evidence。
+- `public/test_audio/` 中的本地音频保持 Git 忽略：约 15 分钟范围内的样本只用于原生文件选择、刷新与权限人工检查；超出范围的长音频只作 best-effort quota/大 Blob 压力观察，不扩大产品承诺，也不记录文件名、路径、内容或 hash。
 - 已知大 chunk 提示记录为风险，不冒充构建错误，也不在没有性能预算时自动分包。
 - 交付前运行 `git diff --check`，检查 Markdown frontmatter、相对链接和最终 Git 范围。
 
@@ -38,7 +41,9 @@ next_action: "由 project-owner 审批本修订与 M4 canonical evidence；批�
 
 - `test-results/`、`playwright-report/` 和 `artifacts/evals/<run-id>/` 为 Git 忽略的本地产物。
 - 未提交工作树只能产生 provisional run；正式 milestone evidence 必须引用用户提交后的干净 commit。
-- M4 provisional run 只作为实现反馈；`eval:m4` 已在 clean commit `e5cfe9e8ab62301f3c5b0ddcdd37847a2e131a0f` 上通过并追加 evidence index，当前等待 owner 审批。
+- M4 provisional run 只作为实现反馈；`eval:m4` 已在 clean commit `e5cfe9e8ab62301f3c5b0ddcdd37847a2e131a0f` 上通过、追加 evidence index 并由 `project-owner` 批准。
+- M5 dirty worktree 只运行 `eval:m5:provisional`；用户提交后才运行要求 clean HEAD 的 `eval:m5` 并追加正式 evidence。原生权限人工检查与自动化结果必须分开记录。
+- 2026-07-29 的 M5 provisional run 16/16 通过；它绑定 dirty worktree，只证明当前实现值得提交和 canonical 复跑，不关闭 M5。
 - 首个 canonical run 已记录在 [evidence index](../quality/evidence-index.md)；本地产物保留和删除规则以 [eval plan](../quality/eval-plan.md) 为准。
 - fixture、manifest 和 golden 是受版本控制的规范输入；更新必须可重建、显示 diff，并重新执行对应测试。
 
@@ -48,6 +53,8 @@ next_action: "由 project-owner 审批本修订与 M4 canonical evidence；批�
 - 音频解码直接使用 File ArrayBuffer，不创建音频对象 URL；封面 URL 在删除、清空和 dispose 时释放。
 - AudioBufferSourceNode、AudioContext、对象 URL、RAF、Observer、事件监听、GSAP tween、Three.js geometry/material/renderer 的创建与释放应成对检查。
 - 用户本地音频默认只在浏览器内处理；仓库没有上传或远端处理证据。
+- `SessionRepository` 独占原生 IndexedDB V1 的 `session`、`handles`、`current-blob` 和 `current-analysis-cache` 四个 object store；当前 Blob/cache 固定键替换必须在同一事务中完成。
+- `audioSessionStore` 只保存可序列化的恢复状态；`FileSystemFileHandle`、File、Blob、AudioBuffer 和 IndexedDB 连接不进入 Pinia `$state`。
 - 生成声明文件可能由构建插件更新；不要把这类变化与手写代码修改混为一谈。
 
 ## Review and Git
@@ -61,6 +68,6 @@ next_action: "由 project-owner 审批本修订与 M4 canonical evidence；批�
 
 `project-owner` 于 2026-07-28 明确批准本约定及 M3 [evidence index](../quality/evidence-index.md)。本批准关闭 M3 并开放 M4，不改变 Edge、CI、审计或后续产品 eval 缺口。
 
-M4 工具与资源所有权修订已在 dirty worktree provisional run 中验证，当前保持 `in-review`；旧 approval 不自动批准本轮修订。
+`project-owner` 于 2026-07-29 明确批准 M4 evidence 与本修订。M4 据此关闭并开放 M5；后续 M5 新增约定需要独立复核，不由本次批准预先覆盖。
 
-2026-07-29 的 M4 canonical run 已验证本修订对应的命令、资源所有权与证据政策；本文件继续保持 `in-review`，等待 `project-owner` 与 M4 evidence 一并批准。
+本轮新增的 IndexedDB store 所有权、OPFS 自动化边界、原生权限人工检查和本地压力音频政策尚未经过 M5 evidence 审批，因此本文重新进入 `in-review`。这不撤销上面的 M3/M4 approval。

@@ -5,7 +5,8 @@
         :data-duration="playback.durationSeconds"
         :data-volume="playback.volume"
         :data-current-track-id="currentTrackId || ''"
-        :data-energy="currentEnergy">
+        :data-energy="currentEnergy"
+        :data-persistence-state="persistence.state">
         <div class="h-16" id="music-bar">
             <section class="max-h-15 m-1 flex items-center gap-4 w-80">
                 <div id="albumCoverContainer">
@@ -77,7 +78,8 @@
                 <svg class="w-7 h-7 cursor-pointer" data-testid="toggle-queue" @click="toggleMusicList">
                     <use href="/icons.svg#music-list"></use>
                 </svg>
-                <svg class="w-7 h-7 cursor-pointer" data-testid="import-audio" @click="toggleSelectFile">
+                <svg class="w-7 h-7 cursor-pointer" data-testid="import-audio" role="button" tabindex="0"
+                    aria-label="导入本地音频" @click="toggleSelectFile" @keydown.enter="toggleSelectFile">
                     <use href="/icons.svg#add-music"></use>
                 </svg>
                 <svg class="w-7 h-7 cursor-pointer" data-testid="change-musicbar-style" @click="toggleChangeStyle">
@@ -89,8 +91,10 @@
             </section>
         </div>
         <aside class="music-list-container">
-            <MusicList :info="albumInfo" @select-index="handleSelectIndex" @add-to-analysis="handleAddToAnalysis"
-                @delete="toggleDelete" @clear="toggleClear" @close-list="toggleMusicList" />
+            <MusicList :info="albumInfo" :persistence="persistence" @select-index="handleSelectIndex"
+                @add-to-analysis="handleAddToAnalysis" @delete="toggleDelete" @clear="toggleClear"
+                @restore-access="handleRestoreAccess" @reselect-track="handleReselectTrack"
+                @clear-persisted="handleClearPersisted" @close-list="toggleMusicList" />
         </aside>
     </div>
 </template>
@@ -125,6 +129,7 @@ const {
     currentTrackId,
     playback,
     currentEnergy,
+    persistence,
 } = storeToRefs(audioSessionStore);
 
 const albumInfo = computed(() =>
@@ -136,6 +141,7 @@ const albumInfo = computed(() =>
         title: track.metadata.title || track.name || 'unknown',
         artist: track.metadata.artist || 'unknown',
         duration: formatSecToTime(track.durationSeconds || 0),
+        restoreState: track.restoreState,
     })),
 );
 const playingTarget = computed(() => {
@@ -287,25 +293,40 @@ const toggleMusicList = () => {
     musicListVisible ? tl2.play() : tl2.reverse();
 };
 
-const toggleSelectFile = () => {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = 'audio/mpeg,audio/wav,audio/flac,.mp3,.wav,.flac';
-    input.multiple = true;
-    input.onchange = async (event) => {
-        const files = (event.target as HTMLInputElement).files;
-        if (!files) return;
-        try {
-            await audioSession.importFiles([...files]);
-        } catch (error) {
-            ElMessage.error(
-                error instanceof Error
-                    ? error.message
-                    : '无法导入音频文件',
-            );
-        }
-    };
-    input.click();
+const toggleSelectFile = async () => {
+    try {
+        await audioSession.selectAndImportFiles();
+    } catch (error) {
+        ElMessage.error(
+            error instanceof Error
+                ? error.message
+                : '无法导入音频文件',
+        );
+    }
+};
+
+const handleRestoreAccess = async (index: number) => {
+    const trackId = queue.value[index]?.id;
+    if (!trackId) return;
+    await audioSession.restoreAccess(trackId);
+};
+
+const handleReselectTrack = async (index: number) => {
+    const trackId = queue.value[index]?.id;
+    if (!trackId) return;
+    try {
+        await audioSession.reselectTrack(trackId);
+    } catch (error) {
+        ElMessage.error(
+            error instanceof Error
+                ? error.message
+                : '无法重新选择文件',
+        );
+    }
+};
+
+const handleClearPersisted = () => {
+    void audioSession.clearPersistedSession();
 };
 
 const resetEnergyProgress = (forceCssReset = false) => {
@@ -363,6 +384,29 @@ watch(
         ElMessage.error(
             errorMessage || '当前音频无法解码，请选择其他文件或重试。',
         );
+    },
+);
+
+watch(
+    [
+        () => persistence.value.state,
+        () => persistence.value.message,
+    ],
+    ([state, message], [previousState, previousMessage]) => {
+        if (
+            !message
+            || (state === previousState && message === previousMessage)
+        ) {
+            return;
+        }
+        if (state === 'not-persisted') {
+            ElMessage.warning(message);
+        } else if (
+            state === 'unsupported-schema'
+            || state === 'restore-error'
+        ) {
+            ElMessage.error(message);
+        }
     },
 );
 

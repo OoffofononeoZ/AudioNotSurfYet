@@ -51,3 +51,22 @@ export interface PlaybackSnapshot {
     volume: number;
     error?: PlaybackError;
 }
+
+export type SessionPersistenceState =
+    | 'idle'
+    | 'restoring'
+    | 'ready'
+    | 'saving'
+    | 'not-persisted'
+    | 'unsupported-schema'
+    | 'restore-error';
+
+export interface SessionPersistenceSnapshot {
+    state: SessionPersistenceState;
+    message?: string;
+}
+
+export interface LocalAudioInput {
+    file: File;
+    handle?: FileSystemFileHandle;
+}

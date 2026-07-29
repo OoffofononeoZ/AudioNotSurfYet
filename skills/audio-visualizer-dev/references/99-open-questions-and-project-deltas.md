@@ -7,11 +7,12 @@
 | ID | 分类 | 已证实证据 | 影响 | 下一步 |
 | --- | --- | --- | --- | --- |
 | ENG-002 | CI | M3 明确只建立本地门禁，未创建 `.github/workflows` 或其他正式 CI | 构建/测试依赖本地执行 | CI 作为独立后续决策，不阻断 M3 |
-| ENG-003 | 资源释放 | M4 已把封面 URL 交给 session service 并在删除、清空、dispose 释放；AudioEngine/source/RAF 的 clean-commit canonical 自动化已通过 | owner 批准前不能关闭 M4，自动化也不替代长期 heap/线程观察 | 审批 M4 evidence，并在 M11 保留 DevTools 资源复核 |
+| ENG-003 | 资源释放 | M4 已把封面 URL 交给 session service 并在删除、清空、dispose 释放；AudioEngine/source/RAF 的 clean-commit canonical 自动化与 owner 审批已完成 | M4 缓解已生效，但自动化不替代长期 heap/线程观察 | 在 M11 保留 DevTools 资源复核 |
 | ENG-004 | WebGL 释放 | `LightBg` cleanup 未见 geometry/material 显式 dispose | 可见性反复切换可能累积 GPU 资源 | 在可视化生命周期任务中测量并修复 |
 | ENG-005 | 未完成表面 | ComingSoon、threeDTable、MeydaCard 为空或近空，TestLands/testcomp 为试验内容 | 不能推断公开功能或稳定接口 | 由产品 scope 决定保留、实现或删除 |
 | ENG-006 | 包体积 | 当前构建存在约 1 MB chunk 警告 | 首屏和缓存风险未知 | 先确定性能预算，再决定分包策略 |
 | ENG-007 | 开发依赖审计 | 安全补丁后 `npm audit` 剩余 esbuild 0.27.3 的 1 项 low，影响 Windows 开发服务器任意文件读取 | 当前 macOS 本地门禁不受直接影响，但不能宣称零漏洞 | 不向不受信网络暴露 dev server；上游提供兼容修复后升级并复核 |
+| ENG-008 | 原生文件权限 | M5 自动化使用 Chrome OPFS 真句柄验证 IndexedDB structured clone 与刷新，但不制造 OS picker 的 granted/prompt/denied 状态 | 自动化通过不能声明真实跨会话权限矩阵完成 | 使用 Git 忽略的本地音频人工执行选择、刷新、恢复访问和临时移动；与 canonical 结果分开记录 |
 
 ## 已关闭工程缺口
 

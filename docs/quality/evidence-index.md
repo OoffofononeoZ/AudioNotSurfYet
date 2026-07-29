@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: approved
 owner: "project-owner"
 last_reviewed: 2026-07-29
 upstream_docs:
@@ -8,14 +8,14 @@ upstream_docs:
   - "docs/quality/failure-taxonomy.md"
   - "docs/delivery/milestone-plan.md"
   - "tests/fixtures/fixture-manifest.json"
-next_action: "由 project-owner 审阅并批准 M4 canonical evidence 与 working agreements；批准前不关闭 M4 或开放 M5"
+next_action: "在 M5 clean-commit canonical run 后追加 IndexedDB、权限与恢复证据"
 ---
 
 # Evidence Index
 
 ## 1. Purpose and Gate State
 
-本文件保存受版本控制的长期证据摘要；原始日志保存在 Git 忽略的本地 artifact 目录。M3 测试基础切片的 canonical run 已由 `project-owner` 批准。M4 canonical run 已追加并保持 `in-review`；在 owner 批准前，M4 不关闭且 M5 不开放。
+本文件保存受版本控制的长期证据摘要；原始日志保存在 Git 忽略的本地 artifact 目录。M3 测试基础切片和 M4 AudioEngine 切片的 canonical run 均已由 `project-owner` 批准。M4 已关闭并开放 M5。
 
 每条 `pass` 只证明对应里程碑的适用子集在被记录的 commit 和环境上可复现。它不表示完整 EV-A–EV-R、未执行里程碑、Edge 矩阵或 release readiness 已通过。
 
@@ -119,14 +119,14 @@ next_action: "由 project-owner 审阅并批准 M4 canonical evidence 与 workin
 | --- | --- |
 | Run ID | `M4-2026-07-29T03-32-15-929Z-e5cfe9e8` |
 | Milestone | M4 — Single AudioEngine and shared store |
-| State | `pass`（M4 适用子集；等待 owner 审批） |
+| State | `pass`（M4 适用子集；已批准） |
 | Eval IDs | EV-S、EV-B、EV-R 的 M4 适用子集；EV-A、EV-J、EV-D、EV-R 的 M3 回归子集 |
 | Commit | `e5cfe9e8ab62301f3c5b0ddcdd37847a2e131a0f` |
 | Dirty at start / end | `false` / `false` |
 | Commit at end | `e5cfe9e8ab62301f3c5b0ddcdd37847a2e131a0f` |
 | Started at | 2026-07-29 03:32:15.929 UTC |
 | Method | `npm run eval:m4` |
-| Reviewer | `project-owner` — pending |
+| Reviewer | `project-owner` — approved 2026-07-29 |
 | Retention | `local-present` |
 | Artifact root | `artifacts/evals/M4-2026-07-29T03-32-15-929Z-e5cfe9e8/` |
 | Summary SHA-256 | `831158a07e1d08dab9dddd3e58b93047d287c6f9044badc02318cf49bd56aa25` |
@@ -187,6 +187,6 @@ next_action: "由 project-owner 审阅并批准 M4 canonical evidence 与 workin
 
 `summary.json.sha256` 已独立核对并与 `summary.json` 一致。本地产物至少保留到 M4 获批；删除后必须把本记录的 retention 改为 `local-deleted`。
 
-### Review State
+### M4 Approval Record
 
-本记录来自干净 commit，13/13 步骤通过且没有 failure instance。它使 M4 进入证据审阅，但在 `project-owner` 明确批准本文与 [working agreements](../context/working-agreements.md) 前，不把 M4 标为 `Complete`，也不开放 M5。
+本记录来自干净 commit，13/13 步骤通过且没有 failure instance。`project-owner` 于 2026-07-29 明确批准本 M4 evidence 与 [working agreements](../context/working-agreements.md)；M4 据此改为 `Complete` 并开放 M5。该批准不构成 M5、Edge、完整 EV-B 或 release readiness 通过。

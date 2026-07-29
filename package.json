@@ -20,11 +20,14 @@
     "test:fixtures": "vitest run tests/fixtures",
     "test:m4:unit": "vitest run tests/audio/audio-engine.test.ts",
     "test:m4:integration": "vitest run tests/audio/audio-session-service.test.ts",
+    "test:m5:unit": "vitest run tests/persistence/session-repository.test.ts",
+    "test:m5:integration": "vitest run tests/audio/audio-session-recovery.test.ts",
     "test:docs": "node tests/docs/validate-docs.mjs",
     "test:harness": "node tests/harness/verify-failure-detection.mjs",
     "test:e2e": "playwright test --project=chrome",
     "test:e2e:m3": "playwright test tests/e2e/app-smoke.spec.ts --project=chrome",
     "test:e2e:m4": "playwright test tests/e2e/m4-playback.spec.ts --project=chrome",
+    "test:e2e:m5": "playwright test tests/e2e/m5-recovery.spec.ts --project=chrome",
     "test:e2e:edge": "node tests/scripts/run-edge.mjs",
     "fixtures:generate": "node --experimental-strip-types tests/fixtures/generate-fixtures.ts",
     "fixtures:golden": "node --experimental-strip-types tests/analysis/generate-golden.ts",
@@ -32,7 +35,9 @@
     "eval:m3": "node tests/scripts/run-m3-eval.mjs",
     "eval:m3:provisional": "node tests/scripts/run-m3-eval.mjs --provisional",
     "eval:m4": "node tests/scripts/run-m4-eval.mjs",
-    "eval:m4:provisional": "node tests/scripts/run-m4-eval.mjs --provisional"
+    "eval:m4:provisional": "node tests/scripts/run-m4-eval.mjs --provisional",
+    "eval:m5": "node tests/scripts/run-m5-eval.mjs",
+    "eval:m5:provisional": "node tests/scripts/run-m5-eval.mjs --provisional"
   },
   "dependencies": {
     "@chenglou/pretext": "^0.0.6",

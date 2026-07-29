@@ -1,13 +1,13 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-07-28
+last_reviewed: 2026-07-29
 upstream_docs:
   - "docs/product/problem-brief.md"
   - "docs/product/scope.md"
   - "docs/product/success-metrics.md"
   - "docs/product/open-questions.md"
-next_action: "完成 M4 canonical evidence 后进入 M5 SessionRepository 与恢复接线"
+next_action: "完成 M5 原生权限人工检查与 clean-commit canonical evidence"
 ---
 
 # System Design

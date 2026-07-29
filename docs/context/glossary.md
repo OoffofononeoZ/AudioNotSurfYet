@@ -1,10 +1,10 @@
 ---
 status: in-review
 owner: "project-owner"
-last_reviewed: 2026-07-28
+last_reviewed: 2026-07-29
 upstream_docs:
   - "docs/context/index.md"
-next_action: "在 M5 增加恢复状态与 session repository 术语"
+next_action: "在 M5 canonical evidence 后复核持久化术语"
 ---
 
 # Glossary
@@ -24,5 +24,10 @@ next_action: "在 M5 增加恢复状态与 session repository 术语"
 | playback offset | AudioEngine 保存的缓冲区秒数位置 | 暂停和 seek 以此为基点，播放时间由 AudioContext `currentTime` 计算 | [system map](system-map.md) |
 | `PlaybackSnapshot` | track、状态、秒数、时长、0–1 音量和 typed error 的可序列化事实 | UI 不从 AudioNode 或 RAF delta 推断播放状态 | [interface contracts](../architecture/interface-contracts.md) |
 | object URL | 浏览器为内嵌封面 Blob 创建的临时 URL | 音频解码不依赖它；封面在删除、清空和 dispose 时成对释放 | [working agreements](working-agreements.md) |
+| `SessionRepository` | 使用原生 IndexedDB V1 保存最近会话、文件句柄、当前 Blob 和当前分析缓存 envelope 的仓储 | 把浏览器持久化资源与 Pinia/播放运行时隔离 | [ADR-0003](../architecture/adrs/0003-hybrid-indexeddb-session-recovery.md) |
+| `PersistedSessionV1` | 带 runtime validation 的最近会话 schema；包含队列、当前歌曲、分析 UI 快照和持久化对象身份 | 未知 schema 不猜测迁移，必须显示可清除错误 | [interface contracts](../architecture/interface-contracts.md) |
+| current Blob | IndexedDB 中固定键保存的唯一当前歌曲 Blob | 保证刷新时当前歌曲无需再次授权即可回到 0 秒 paused；切歌时原子替换旧值 | [system map](system-map.md) |
+| restore state | 每个 TrackRecord 的 `available`、权限、缺失、内容变化、不可持久化或解码失败状态 | 使恢复失败可见且提供恢复访问/重新选择动作 | [interface contracts](../architecture/interface-contracts.md) |
+| content hash | 导入时对编码文件内容顺序计算的 SHA-256 | 恢复/重新选择时作为内容变化的最终身份判断；大小与 lastModified 只作快速信号 | [ADR-0003](../architecture/adrs/0003-hybrid-indexeddb-session-recovery.md) |
 | TestLands | `/testlands` 下的试验页面 | 当前不属于已批准产品表面或稳定接口 | [index](index.md) |
 | lifecycle document | 带标准状态 frontmatter 的产品、设计、交付、质量、发布或复盘文档 | 下游工作依赖其批准与新鲜度 | [AGENTS.md](../../AGENTS.md) |
