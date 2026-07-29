@@ -4,7 +4,7 @@ owner: "project-owner"
 last_reviewed: 2026-07-29
 upstream_docs:
   - "docs/context/index.md"
-next_action: "随 M6 实现复核 Worker job、FeatureRegistry、AnalysisSeries 与 cache identity 术语"
+next_action: "由 owner 复核 M6 新增分析术语；M7 UI 命名形成后再次更新"
 ---
 
 # Glossary
@@ -14,7 +14,7 @@ next_action: "随 M6 实现复核 Worker job、FeatureRegistry、AnalysisSeries 
 | AudioNotSurfYet | 本仓库与计划使用的项目名；`package.json` 当前包名仍为 `audiosurf` | 名称尚未形成单一代码级来源 | [index](index.md) |
 | `AudioEngine` | 独占实时 AudioContext、AudioBuffer、source、Analyser 和 Gain 的播放服务 | 所有页面共享同一播放时钟和资源生命周期 | [ADR-0001](../architecture/adrs/0001-single-audio-engine-and-session-state.md) |
 | `AudioSessionService` | 在 store 外拥有 File、封面 URL、播放命令、ended 循环、generation 和单 RAF 的应用服务 | 把运行时浏览器资源与可序列化事实分开 | [system map](system-map.md) |
-| `audioSessionStore` | 保存 TrackRecord 队列、当前歌曲、PlaybackSnapshot 和当前能量的 Pinia store | 后续持久化与 Analyzer 只能依赖序列化状态 | [interface contracts](../architecture/interface-contracts.md) |
+| `audioSessionStore` | 保存 TrackRecord 队列、当前歌曲、PlaybackSnapshot、当前能量和 AnalysisSnapshot 的 Pinia store | 持久化与 UI 只能依赖序列化状态；PCM、Worker 和 compact payload 不进入 `$state` | [interface contracts](../architecture/interface-contracts.md) |
 | MusicBar | 固定在共享布局底部的播放、队列、元数据、进度和能量灯带 UI | 只读取共享状态并发送 session 命令 | [system map](system-map.md) |
 | style 0 | 音频能量驱动 `--coinc-process` 的悬浮灯带样式 | 只在实际播放/分析数据存在时应有能量进度 | [working agreements](working-agreements.md) |
 | style 1 | GSAP 独立循环旋转渐变的悬浮样式 | 动画值不是音频能量，切换时需显式复位 | [working agreements](working-agreements.md) |
@@ -29,5 +29,12 @@ next_action: "随 M6 实现复核 Worker job、FeatureRegistry、AnalysisSeries 
 | current Blob | IndexedDB 中固定键保存的唯一当前歌曲 Blob | 保证刷新时当前歌曲无需再次授权即可回到 0 秒 paused；切歌时原子替换旧值 | [system map](system-map.md) |
 | restore state | 每个 TrackRecord 的 `available`、权限、缺失、内容变化、不可持久化或解码失败状态 | 使恢复失败可见且提供恢复访问/重新选择动作 | [interface contracts](../architecture/interface-contracts.md) |
 | content hash | 导入时对编码文件内容顺序计算的 SHA-256 | 恢复/重新选择时作为内容变化的最终身份判断；大小与 lastModified 只作快速信号 | [ADR-0003](../architecture/adrs/0003-hybrid-indexeddb-session-recovery.md) |
+| `FeatureRegistry` | 对 `analyzerData.ts` 21 个 FeatureId 穷尽映射的类型化静态契约，包含 shape、renderer、里程碑、维度和 Worker 支持状态 | 防止特征说明、计算、payload 与渲染器各自维护漂移列表 | [ADR-0004](../architecture/adrs/0004-typed-feature-registry-and-canvas-renderers.md) |
+| `AnalysisConfig` | frame size、hop size、window、MFCC 数、实际 sample rate、mono policy 与 display rate 的不可变配置 | 其规范字符串 SHA-256 是 cache identity 的一部分 | [interface contracts](../architecture/interface-contracts.md) |
+| `AnalysisSeries` | 单一 feature 在完整 track/config identity 下的紧凑 display payload、frame 数和时间步长 | UI 不得把不同歌曲、配置或 feature 的结果混用 | [ADR-0002](../architecture/adrs/0002-worker-analysis-and-stale-result-isolation.md) |
+| generation | AnalysisCoordinator 每次活动特征、歌曲或解码 revision 变化时推进的运行时世代号 | Worker 即使无法立即取消，旧响应也不能改变 store、cache 或后续 UI | [interface contracts](../architecture/interface-contracts.md) |
+| exact cursor | 针对当前秒数所在原始 frame 由 Worker 现场提取的非量化值 | 展示精确值不得以 compact display series 的反量化结果替代 | [eval plan](../quality/eval-plan.md) |
+| cache identity | `schemaVersion + trackId + contentHash + configHash + featureId` 的完整组合 | 只有全部字段匹配才允许 cache hit；partial hit 只计算 misses | [ADR-0002](../architecture/adrs/0002-worker-analysis-and-stale-result-isolation.md) |
+| compact payload | M6 定义的 scalar、frequency vector、category vector、waveform envelope、loudness、complex-derived 六类二进制显示数据 | 限制 postMessage/IndexedDB 体积，并由严格 decoder 拒绝损坏或错身份数据 | [interface contracts](../architecture/interface-contracts.md) |
 | TestLands | `/testlands` 下的试验页面 | 当前不属于已批准产品表面或稳定接口 | [index](index.md) |
 | lifecycle document | 带标准状态 frontmatter 的产品、设计、交付、质量、发布或复盘文档 | 下游工作依赖其批准与新鲜度 | [AGENTS.md](../../AGENTS.md) |

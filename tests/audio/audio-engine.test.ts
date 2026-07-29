@@ -24,9 +24,28 @@ function deferred<T>(): Deferred<T> {
 
 class FakeAudioBuffer {
     readonly duration: number;
+    readonly sampleRate = 10;
+    readonly numberOfChannels = 1;
+    readonly length: number;
+    readonly values: Float32Array;
 
     constructor(duration = 10) {
         this.duration = duration;
+        this.length = duration * this.sampleRate;
+        this.values = Float32Array.from(
+            { length: this.length },
+            (_, index) => index / this.length,
+        );
+    }
+
+    copyFromChannel(
+        destination: Float32Array,
+        _channel: number,
+        start: number,
+    ) {
+        destination.set(
+            this.values.subarray(start, start + destination.length),
+        );
     }
 }
 
@@ -102,6 +121,40 @@ class FakeAudioContext {
 const bytes = () => new Uint8Array([1, 2, 3]).buffer;
 
 describe('AudioEngine', () => {
+    test('copies decoded PCM by revision without exposing AudioBuffer', async () => {
+        const context = new FakeAudioContext();
+        const engine = new AudioEngine({
+            audioContextFactory: () =>
+                context as unknown as AudioContext,
+        });
+        await engine.load({
+            trackId: 'track-pcm',
+            encodedAudio: bytes(),
+        });
+        const descriptor = engine.getDecodedAudioDescriptor();
+        expect(descriptor).toMatchObject({
+            trackId: 'track-pcm',
+            sampleRate: 10,
+            length: 100,
+            channelCount: 1,
+            durationSeconds: 10,
+        });
+        const copied = engine.copyDecodedChannelRange({
+            revision: descriptor!.revision,
+            channel: 0,
+            start: 3,
+            length: 2,
+        });
+        expect(copied).toEqual(new Float32Array([0.03, 0.04]));
+        engine.unload();
+        expect(engine.copyDecodedChannelRange({
+            revision: descriptor!.revision,
+            channel: 0,
+            start: 0,
+            length: 1,
+        })).toBeNull();
+    });
+
     test('creates one lazy graph and uses the AudioContext clock', async () => {
         const context = new FakeAudioContext();
         const factory = vi.fn(

@@ -52,6 +52,15 @@ export interface PlaybackSnapshot {
     error?: PlaybackError;
 }
 
+export interface DecodedAudioDescriptor {
+    trackId: TrackId;
+    revision: number;
+    sampleRate: number;
+    length: number;
+    channelCount: number;
+    durationSeconds: number;
+}
+
 export type SessionPersistenceState =
     | 'idle'
     | 'restoring'

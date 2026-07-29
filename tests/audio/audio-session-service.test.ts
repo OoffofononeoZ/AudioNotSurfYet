@@ -90,6 +90,14 @@ class FakeEngine implements AudioEnginePort {
         return new Float32Array(1024);
     }
 
+    getDecodedAudioDescriptor() {
+        return null;
+    }
+
+    copyDecodedChannelRange() {
+        return null;
+    }
+
     subscribe(listener: (snapshot: PlaybackSnapshot) => void) {
         this.listeners.add(listener);
         listener(this.getSnapshot());
@@ -181,6 +189,7 @@ function createHarness(
         restore: async () => null,
         saveQueue: async () => undefined,
         replaceCurrent: async () => undefined,
+        replaceCurrentAnalysisCache: async () => 'stored',
         removeTrack: async () => undefined,
         clear: async () => undefined,
     };

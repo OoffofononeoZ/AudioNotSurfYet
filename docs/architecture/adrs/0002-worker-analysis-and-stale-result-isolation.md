@@ -24,6 +24,9 @@ next_action: "建立 Worker 契约测试、合成 PCM 黄金测试和 job genera
 - 精确游标值针对原始 frame 按需重新提取，不依赖量化展示值。
 - 结果身份为 `trackHash + configHash + featureId`。
 - coordinator 用递增 generation 和完整身份匹配隔离迟到 progress/result/error。取消是资源优化，身份检查才是正确性边界。
+- AudioEngine 只通过 revision 保护的 16,384-sample 分块复制提供 PCM；不暴露 AudioBuffer，也不建立第二个实时 AudioContext。
+- M6 每 32 frames 或连续运行 8ms 后报告进度、检查取消并让出 Worker 事件循环；display 聚合因子固定为 `max(1, ceil(sampleRate / (hopSize * 30)))`。
+- current cache 按 feature 独立解码与复用；只把 miss 发送给 Worker，损坏项重算，原子 cache 写入失败不删除旧记录或内存结果。
 
 ## Consequences
 

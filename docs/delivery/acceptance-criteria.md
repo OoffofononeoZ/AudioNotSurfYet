@@ -51,7 +51,7 @@ next_action: "在每个里程碑 PR/变更记录中引用适用 AC 编号并附�
 | AC-A07 | 精确游标值不使用量化显示值 | 与游标原始 frame 的直接 Meyda 结果满足 AC-A03 |
 | AC-A08 | 缓存身份正确 | trackHash/configHash/featureId 任一变化均 miss；完全一致才 hit |
 | AC-A09 | stale job 被隔离 | 已取消或旧 generation 的 progress/result/error 不改变当前 store、cache 或 Canvas |
-| AC-A10 | 特征覆盖完整 | registry 对 `analyzerData.ts` 21/21 abbreviation 穷尽；每项有 shape、renderer、range、黄金测试 |
+| AC-A10 | 特征登记与累计产品覆盖完整 | M6 registry 对 `analyzerData.ts` 21/21 abbreviation 穷尽，每项有 shape、renderer、range、实际 dimensions、delivery milestone 与 Worker support 状态；各项黄金、renderer 和可用卡片按 M7–M10 累计，只有 M10 可声明 21 项产品覆盖完成 |
 
 若某特征因 Meyda 本身的数值稳定性需要更宽容差，必须提供固定 fixture、误差分布、原因和独立批准，并以 feature-specific exception 写入本文。
 

@@ -6,7 +6,7 @@ upstream_docs:
   - "docs/product/problem-brief.md"
   - "docs/product/scope.md"
   - "docs/architecture/system-design.md"
-next_action: "在 M6 复用唯一 AudioEngine 的 PCM 与时钟边界，不引入第二套播放状态"
+next_action: "用 M6 canonical 复核 PCM copy/revision 与唯一 AudioEngine 时钟边界"
 ---
 
 # ADR-0001: Single AudioEngine and Shared Session State

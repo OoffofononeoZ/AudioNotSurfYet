@@ -30,6 +30,7 @@
 | `src/layouts/` | 应用共享外壳；`MainLayout` 组合 Header、路由内容和 MusicBar | `src/layouts/MainLayout.vue` |
 | `src/components/` | 播放条、列表、动画列表、Canvas/WebGL 背景和试验性图表 | 各 Vue SFC |
 | `src/audio/` | `AudioEngine` 独占 Web Audio 节点；`AudioSessionService` 编排 File、队列命令、能量和资源释放 | `audioEngine.ts`、`audioSessionService.ts` |
+| `src/analysis/` | M6 的 21 项 FeatureRegistry、AnalysisConfig、PCM/frame 工具、六类 compact codec、module Worker 与 AnalysisCoordinator | `featureRegistry.ts`、`compactCodec.ts`、`analysis.worker.ts`、`analysisCoordinator.ts` |
 | `src/persistence/` | 原生 IndexedDB V1 最近会话、句柄、current Blob/cache 和 runtime validator | `sessionRepository.ts` |
 | `src/stores/` | 持久化 UI/音量配置及可序列化播放/恢复状态 | `configStore.ts`、`audioSessionStore.ts` |
 | `src/utils/` | mitt 单例、能量角度映射、时间格式化和 clamp | `emitter.ts`、`utils.ts` |
@@ -40,7 +41,7 @@
 ## 边界
 
 - 当前是单一前端仓库；未发现后端、数据库、认证、云端媒体库或部署配置。
-- 音频文件由用户通过 `showOpenFilePicker()` 选择；runtime File 保存在 session service，最近队列、文件句柄和唯一 current Blob 由 SessionRepository 保存，Pinia `$state` 不持有浏览器资源。
+- 音频文件由用户通过 `showOpenFilePicker()` 选择；runtime File 保存在 session service，最近队列、文件句柄、唯一 current Blob 与匹配的分析 cache 由 SessionRepository 保存，Pinia `$state` 不持有浏览器资源、PCM 或 typed payload。
 - `configStore` 继续把 `volume` 和 `musicBarSettings.style` 保存到 localStorage；M5 最近会话使用独立 IndexedDB V1，不改变 config schema。
 - Analyzer、Editor 和 Visualizer 的完整产品边界未由仓库证实；不要从空页面或导航文案推断承诺。
 - `testcomp.vue`、`TestLands.vue`、`threeDTable.vue` 和 `MeydaCard.vue` 含试验或占位内容，不应默认视为稳定公共接口。

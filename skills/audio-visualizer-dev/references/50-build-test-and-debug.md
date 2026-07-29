@@ -16,6 +16,10 @@
 | `npm run test:m5:unit` | 运行 V1 SessionRepository、validator 与事务故障测试 | M5 持久化单元切片 |
 | `npm run test:m5:integration` | 运行 Blob/handle/权限/恢复 service 测试 | M5 恢复集成切片 |
 | `npm run test:e2e:m5` | 运行真实 Chrome IndexedDB/OPFS 刷新恢复 | M5 浏览器切片；不等于原生权限 prompt |
+| `npm run test:m6:unit` | 运行 registry/config/PCM/frame/codec 单元测试 | M6 分析平台纯逻辑 |
+| `npm run test:m6:worker` | 运行产品 Worker 合约与 direct golden | M6 提取、进度、取消与精确值 |
+| `npm run test:m6:integration` | 运行 coordinator/cache/persistence 集成测试 | M6 identity、stale、partial hit 与 quota |
+| `npm run test:e2e:m6` | 运行 Chrome module Worker、刷新、资源和 15 分钟性能场景 | M6 浏览器切片 |
 | `npm run test:e2e:edge` | 检测并运行稳定 Edge | Edge 缺失时以退出码 2 明确 blocked |
 | `npm run test:docs` | 检查生命周期 frontmatter、链接和 21 项特征 | 文档门禁 |
 | `npm run eval:m3:provisional` | 未提交工作树的本地 M3 run | 不创建正式 evidence index |
@@ -24,6 +28,8 @@
 | `npm run eval:m4` | 只在干净 commit 上运行 M3 回归与 M4 suite | 生成可登记的 M4 正式证据 |
 | `npm run eval:m5:provisional` | 未提交工作树运行 M3–M5 suite | 不追加正式 evidence |
 | `npm run eval:m5` | 只在干净 commit 上运行 M3–M5 suite | 生成可登记的 M5 正式证据 |
+| `npm run eval:m6:provisional` | 未提交工作树运行 M3–M6 suite | 只生成实现反馈，不追加正式 evidence |
+| `npm run eval:m6` | 只在干净 commit 上运行 M3–M6 suite | 生成可登记的 M6 canonical 证据 |
 
 ## 已知测试缺口
 
@@ -36,6 +42,8 @@
 - M5 自动化 picker 使用浏览器 OPFS 返回真实 `FileSystemFileHandle`；原生 OS picker 的 granted/prompt/denied 与文件移动路径已由 `project-owner` 于 2026-07-29 人工检查通过。
 - M5 clean-commit canonical 已于 2026-07-29 在 `c90a3c5738de5b7a4efb7eb24cddc49da3713b44` 上通过 16/16 并登记；evidence 与 working agreements 已获 owner 批准，M5 已关闭。
 - 超出约 15 分钟支持边界的长音频未开始播放只作为非门禁压力观察；它不是规定的预期失败，也不能替代范围内性能或格式验证。
+- M6 当前 Meyda 的 `spectralFlux` 对有效输入抛出 `x is not defined`；已用预期失败测试和 R-020 固定，不能把 21 项 registry 误述为 21 项均可计算。
+- M6 dirty-worktree provisional 已 20/20 通过；正式 evidence 仍必须等用户提交后运行 clean-commit `eval:m6` 并由 owner 审批。
 
 ## 构建风险
 

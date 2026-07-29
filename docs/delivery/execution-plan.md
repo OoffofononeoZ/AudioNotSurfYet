@@ -9,7 +9,7 @@ upstream_docs:
   - "docs/architecture/system-design.md"
   - "docs/architecture/interface-contracts.md"
   - "docs/architecture/risk-register.md"
-next_action: "制定并启动 M6 Worker analysis platform 与 FeatureRegistry 实施切片"
+next_action: "由用户提交 M6 工作树；随后运行 clean-commit canonical 并等待 owner evidence/working-agreements 审批"
 ---
 
 # Execution Plan
@@ -18,7 +18,7 @@ next_action: "制定并启动 M6 Worker analysis platform 与 FeatureRegistry �
 
 按纵向切片把已批准的本地音频学习体验从当前播放器基础推进到 21 项 Meyda 特征全覆盖。本计划以门禁证据而不是日历日期排序；任一里程碑未通过时，不进入下一批特征。
 
-本文件定义实施顺序和验收方式，不代表未关闭里程碑已通过。当前已完成 M1、M2、Q0、M3、M4 和 M5 门禁；M6 Worker analysis platform 与 FeatureRegistry 已开放但尚未开始实现。
+本文件定义实施顺序和验收方式，不代表未关闭里程碑已通过。当前已完成 M1、M2、Q0、M3、M4 和 M5 门禁；M6 Worker analysis platform 与 FeatureRegistry 为 `In Progress`，实现与单项验证已开始，但 provisional、canonical、正式 evidence 和 owner 审批尚未完成。
 
 ## 2. Stage Gates
 
@@ -215,15 +215,19 @@ Rollback:
 
 ### M6 — Worker analysis platform and feature registry
 
+Status：In Progress。
+
 Goal：完成可扩展且不阻塞主线程的分析基础设施。
 
 Implementation:
 
-- 建立 21 项穷尽 `FeatureRegistry` 和 output-shape/renderer 类型。
-- 实现平均 mono 混合、frame 生成、固定 `AnalysisConfig` 和 canonical config hash。
-- 实现 AnalysisCoordinator/Worker 消息、progress、cooperative cancel 和 generation 隔离。
-- 实现依赖复用、最多 30Hz 聚合、紧凑 payload、精确游标请求。
-- 建立 `trackHash + configHash + featureId` 内存/IndexedDB cache identity。
+- 已建立 21 项穷尽 `FeatureRegistry`、六类 output shape/payload、renderer、实际维度、delivery milestone 和 Worker support 类型。
+- 已实现 AudioEngine revision descriptor、16,384-sample 分块平均 mono、frame/尾帧、固定 `AnalysisConfig` 和 SHA-256 canonical hash。
+- 已实现 AnalysisCoordinator、Vite module Worker、progress、32-frame/8ms yield、cooperative cancel、generation/身份隔离和 latest cursor request。
+- 已实现 ≤30Hz 聚合、六类 compact codec、U16 实际范围量化、未量化精确游标和损坏 payload 拒绝。
+- 已实现 `trackHash + configHash + featureId` 部分 cache hit、原子 `replaceCurrentAnalysisCache()`、quota/abort/stale 语义。
+- MainLayout 显式创建同一个 engine/repository/session/coordinator，默认 `setActiveFeatures([])`；仅 DEV 暴露无 UI 测试 bridge，生产构建无该 bridge。
+- Meyda 5.6.3 `spectralFlux` 的 `ReferenceError` 已登记为 R-020；M6 不 patch 或启用。
 
 Verification:
 
@@ -232,6 +236,15 @@ Verification:
 - 四个不重复 feature 限制；
 - 最大支持输入期间输入反馈和长任务 guardrail；
 - Worker 失败不停止播放。
+- 独立命令为 `test:m6:unit`、`test:m6:worker`、`test:m6:integration`、`test:e2e:m6`、`eval:m6:provisional` 和 clean-HEAD `eval:m6`。
+- Chrome E2E 使用短 fixture 验证真实 Worker/cursor/cache/刷新命中、20 次资源循环，并在 OPFS 分块生成 48kHz 单声道 15 分钟 WAV；最大样本在加载完成后开始 Long Tasks 观察，完成交互/进度测量后主动取消。
+
+Evidence state:
+
+- M6 unit/Worker/golden/coordinator/cache、M3–M5 回归、typecheck、build 和 Chrome E2E 已由 dirty-worktree `eval:m6:provisional` 在 2026-07-29 完整运行。
+- 最终 provisional run `M6-2026-07-29T10-59-23-767Z-b7fa91ed-provisional` 20/20 通过，summary SHA-256 为 `6fd67f9a8b0184a2861a7182a1276572375e947880cf3688afe7511ca97ed3fa`；15 分钟输入最大反馈 16.7ms、分析归因 >50ms 长任务 0 个，20 次资源循环保持单 Worker/AudioContext，刷新 cache hit 后 exact cursor 仍可用。
+- 该 run 起止均为 dirty worktree，只作实现反馈，不追加 evidence index；下一步由用户提交。
+- clean-commit `eval:m6`、evidence index 追加和 `project-owner` 审批尚未执行；M6 因此不能标记 `Complete`，M7 仍关闭。
 
 Rollback:
 

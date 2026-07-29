@@ -4,6 +4,11 @@ import type {
     SessionPersistenceSnapshot,
     TrackRecord,
 } from '../types/audio';
+import type {
+    AnalysisCoordinatorSnapshot,
+    FeatureId,
+} from '../analysis/types';
+import type { PersistedSessionV1 } from '../types/session';
 
 const createEmptyPlayback = (): PlaybackSnapshot => ({
     trackId: null,
@@ -19,6 +24,9 @@ interface AudioSessionState {
     playback: PlaybackSnapshot;
     currentEnergy: number;
     persistence: SessionPersistenceSnapshot;
+    analysis: AnalysisCoordinatorSnapshot;
+    analysisCacheManifest:
+        NonNullable<PersistedSessionV1['currentAnalysisCache']> | null;
 }
 
 export const useAudioSessionStore = defineStore('audio-session', {
@@ -30,6 +38,21 @@ export const useAudioSessionStore = defineStore('audio-session', {
         persistence: {
             state: 'idle',
         },
+        analysis: {
+            state: 'idle',
+            generation: 0,
+            trackId: null,
+            trackHash: null,
+            configHash: null,
+            activeFeatureIds: [],
+            readyFeatureIds: [],
+            completedFrames: 0,
+            totalFrames: 0,
+            progress: 0,
+            cacheState: 'idle',
+            staleMessageCount: 0,
+        },
+        analysisCacheManifest: null,
     }),
     actions: {
         hydrateSession(
@@ -94,6 +117,27 @@ export const useAudioSessionStore = defineStore('audio-session', {
                 ...snapshot,
             };
         },
+        setAnalysis(snapshot: AnalysisCoordinatorSnapshot) {
+            this.analysis = {
+                ...snapshot,
+                activeFeatureIds: [...snapshot.activeFeatureIds],
+                readyFeatureIds: [...snapshot.readyFeatureIds],
+                error: snapshot.error ? { ...snapshot.error } : undefined,
+            };
+        },
+        setAnalysisCacheManifest(
+            manifest:
+                NonNullable<PersistedSessionV1['currentAnalysisCache']>
+                | null,
+        ) {
+            this.analysisCacheManifest = manifest
+                ? {
+                    ...manifest,
+                    featureIds: [...manifest.featureIds] as FeatureId[],
+                    cacheKeys: [...manifest.cacheKeys],
+                }
+                : null;
+        },
         clearSession(volume?: number) {
             const nextVolume = volume ?? this.playback.volume;
             this.queue = [];
@@ -106,6 +150,21 @@ export const useAudioSessionStore = defineStore('audio-session', {
             this.persistence = {
                 state: 'ready',
             };
+            this.analysis = {
+                state: 'idle',
+                generation: this.analysis.generation + 1,
+                trackId: null,
+                trackHash: null,
+                configHash: null,
+                activeFeatureIds: [],
+                readyFeatureIds: [],
+                completedFrames: 0,
+                totalFrames: 0,
+                progress: 0,
+                cacheState: 'idle',
+                staleMessageCount: this.analysis.staleMessageCount,
+            };
+            this.analysisCacheManifest = null;
         },
     },
 });

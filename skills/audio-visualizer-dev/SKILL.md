@@ -57,6 +57,7 @@ description: AudioNotSurfYet 项目专属的开发、诊断、代码评审、验
 - 运行与改动直接相关的静态检查和 `npm run build`。
 - 交互改动使用真实浏览器验证目标路由，并检查控制台 error/warn。
 - 音频改动覆盖加载成功、加载失败或无数据、播放/暂停/跳转、列表清空与资源释放。
+- 离线分析改动覆盖 0/1/4 个活动特征、Worker progress/cancel/error、完整 cache identity、stale generation、exact cursor、持久化失败不影响播放，以及约 15 分钟输入的主线程响应与资源释放。
 - 可视化和布局改动覆盖至少一个窄视口、一个常见桌面视口和一个较宽视口；核对真实几何，不只看截图。
 - RAF、Observer、事件监听、Three.js 资源和对象 URL 必须检查创建与释放是否成对。
 - 明确记录无法自动化的路径、原因、残余风险和补偿验证。

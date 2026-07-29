@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/product/scope.md"
   - "docs/product/success-metrics.md"
   - "docs/product/open-questions.md"
-next_action: "按已批准设计实施 M6 AnalysisCoordinator、Worker 与 FeatureRegistry"
+next_action: "用户提交后完成 M6 canonical 与 evidence 审批；M6 关闭前不进入 M7"
 ---
 
 # System Design
@@ -50,7 +50,7 @@ AudioNotSurfYet 采用一个实时 `AudioEngine`、一个 MainLayout-owned `Audi
 
 | Component | Responsibility | Owns | Must not own |
 | --- | --- | --- | --- |
-| `AudioEngine` | 加载/解码当前音频，播放、暂停、seek、音量和快照发布 | 唯一实时 AudioContext、当前 AudioBuffer、BufferSource、AnalyserNode、GainNode | File/Blob、对象 URL、UI 卡片、队列持久化、分析缓存 |
+| `AudioEngine` | 加载/解码当前音频，播放、暂停、seek、音量、快照和 generation 保护的 PCM 分块复制 | 唯一实时 AudioContext、当前 AudioBuffer、BufferSource、AnalyserNode、GainNode | File/Blob、对象 URL、UI 卡片、队列持久化、分析缓存 |
 | `AudioSessionService` | 把 UI 命令编排为文件读取、engine 命令、队列变化、ended 循环和能量快照 | runtime File、封面对象 URL、command generation、单播放 RAF | 可持久化事实、第二个 AudioContext、分析 Worker |
 | `audioSessionStore` | 队列、当前 track ID、播放快照、活动卡、视窗和恢复状态 | 可序列化 UI/session 状态 | AudioBuffer、AudioNode、Worker、File/Blob 实例 |
 | `SessionRepository` | IndexedDB schema、事务、句柄、当前 Blob/缓存的保存与恢复 | `PersistedSessionV1`、FileSystemFileHandle、当前 Blob、当前缓存 | 播放和 UI 决策 |
@@ -60,7 +60,7 @@ AudioNotSurfYet 采用一个实时 `AudioEngine`、一个 MainLayout-owned `Audi
 | Analyzer UI | 选卡、换卡、共享时间轴、说明、精确值和可访问交互 | `ActiveAnalysisCard[]`、`TimelineViewport` 的用户意图 | 音频计算、数据库访问 |
 | Canvas renderer family | 把已归一化/解码的 series 绘到给定 viewport | Canvas 2D 绘制状态 | 焦点、按钮、说明文本 |
 
-`AudioEngine` 独占的是唯一的实时 `AudioContext`。如果格式 fixture 证明浏览器实时解码会改变编码源采样率，分析解码可以由 `AnalysisCoordinator` 使用短生命周期、指定源采样率的 `OfflineAudioContext`；该上下文不得参与播放，也不得成为第二套播放状态。
+`AudioEngine` 独占唯一实时 `AudioContext` 与 `AudioBuffer`。M6 不创建 OfflineAudioContext；coordinator 只通过 descriptor + revision 接口按 16,384 samples 分块复制各声道并平均，每块后让出主线程。若未来格式 fixture 证明必须使用指定源采样率的离线解码，需先复核本设计与缓存身份，不能把它当作隐式 fallback。
 
 ## 5. Runtime Topology
 
@@ -106,16 +106,16 @@ flowchart LR
 
 ### Job construction
 
-1. 当前音频解码完成后，从各声道复制 PCM。
-2. 多声道按每个 sample 的算术平均值混合为 mono；结果不修改 AudioEngine 的 AudioBuffer。
+1. 当前音频解码完成后，读取 `DecodedAudioDescriptor`，并以 descriptor revision 分块复制各声道。
+2. 多声道按每个 sample 的算术平均值混合为 mono；每块后让出主线程，任一 revision 变化立即返回 stale，结果不修改或暴露 AudioEngine 的 AudioBuffer。
 3. 计算内容 `trackHash`，并以固定参数生成 `configHash`。
 4. `AnalysisCoordinator` 创建递增 generation 的 job，把 mono `ArrayBuffer` 转移给 Worker。
 5. Worker 只提取当前活动且不重复的 feature ID。
 
 ### Frame extraction and compact output
 
-- frame 起点为 `0, hop, 2*hop...`；末尾不足 frame 的行为由黄金测试固定，首选零填充以覆盖尾部。
-- 每批 frame 后 Worker 让出事件循环并检查 cancel 标记，以便长音频可以协作式取消。
+- frame count 固定为 `max(1, 1 + ceil((length - 1024) / 512))`；frame 起点为 `index * 512 / sampleRate`，末尾不足 1024 时零填充。
+- Worker 每处理最多 32 frames 或连续运行 8ms 后报告进度、让出事件循环并检查 cancel 标记。
 - 标量特征聚合为最多 30Hz 的时间序列。
 - 频率/类别向量先按显示时间桶聚合，再使用带 scale/offset 的紧凑 typed array；不得把 15 分钟的逐 hop 原始频谱保存在 UI 或 IndexedDB。
 - 游标精确值由 Worker 针对游标所在原始 frame 按需重新提取，并返回未量化结果。
@@ -140,6 +140,10 @@ flowchart LR
 | Loudness structure | Loudness | total 时间线、24 Bark band 热图与游标结构 |
 | Complex spectrum | Complex Spectrum | 幅度/相位派生视图与游标实部/虚部详情 |
 
+Meyda 5.6.3 的固定维度是：Amplitude/Power Spectrum 512、Chroma 12、MFCC 13、Buffer 1024、Loudness 24 specific bands + total、Complex Spectrum 的 real/imag 各 1024。注册表另记录 `deliveryMilestone` 与 `workerSupported`；M6 只支持 RMS、Energy、Amplitude Spectrum、Chroma，21/21 登记不表示 21 项产品能力完成。
+
+`spectralFlux` 在锁定版本上已复现依赖内部未声明变量 `x` 的 `ReferenceError`。M6 不 fork、monkey-patch 或启用该特征；它在 M8 前保持阻断风险。
+
 特征依赖（如 amplitude/power spectrum、loudness）在 Worker 内复用同一 frame 的中间值。注册表必须使用 feature ID 的穷尽联合类型；`analyzerData.ts` 新增或移除 key 时，类型检查或覆盖测试必须失败。
 
 首个切片：
@@ -161,7 +165,11 @@ IndexedDB 使用版本化 schema，分别保存：
 - 仅当前 track 的 Blob。
 - 仅当前 track、当前配置和活动特征的分析缓存。
 
+每项 cache payload 使用 4-byte little-endian header length、UTF-8 JSON header 和连续 typed-array bytes。decoder 必须核对 schema、track/config/feature 身份、payload kind、dimensions、scale/offset 与 byte ranges；错位、缺失、尾随或损坏项只作为 miss 重算。
+
 切换当前歌曲的持久化操作必须在同一逻辑事务中删除旧 current Blob/cache 并写入新记录；失败时保留内存会话并暴露 `not-persisted` 状态。
+
+分析结果使用独立 `replaceCurrentAnalysisCache()` 事务：写入前核对 persisted current track/hash，在同一事务更新 session manifest 与固定 current cache，保持 current Blob 不变。身份变化返回 `stale`；quota/abort 保留旧记录，内存 series 继续可用。
 
 ### File selection
 
@@ -223,6 +231,8 @@ IndexedDB 使用版本化 schema，分别保存：
 - cache hit/miss/identity mismatch；
 - restore granted/prompt/denied/missing/quota；
 - Canvas 尺寸、活动 renderer 和长任务观测。
+
+M6 只在 `import.meta.env.DEV` 安装无 UI bridge，提供活动特征、cancel、retry、可序列化状态和精确游标读取；它不暴露 File、PCM 或 AudioBuffer，生产构建中不存在。
 
 生产日志策略属于 release 阶段；当前不得为可观测性引入上传。
 
