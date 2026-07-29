@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: approved
 owner: "project-owner"
 last_reviewed: 2026-07-29
 upstream_docs:
@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/context/index.md"
   - "docs/delivery/test-strategy.md"
   - "docs/quality/eval-plan.md"
-next_action: "完成原生权限人工检查，并随 M5 canonical evidence 由 project-owner 审批"
+next_action: "为 M6 Worker、registry、性能基线与 canonical evidence 补充真实测试约定"
 ---
 
 # Working Agreements
@@ -34,6 +34,7 @@ next_action: "完成原生权限人工检查，并随 M5 canonical evidence 由 
 - 仓库提交由同一确定性 PCM master 生成的短 WAV/MP3/FLAC、生成器、CC0 notice 和 manifest；manifest 保存 provenance、工具参数和 SHA-256。
 - 15 分钟样本和学习 PCM 在运行时生成。用户提供的音频默认仅本地使用，许可和 provenance 未确认时不得进入 Git 或正式 evidence。
 - `public/test_audio/` 中的本地音频保持 Git 忽略：约 15 分钟范围内的样本只用于原生文件选择、刷新与权限人工检查；超出范围的长音频只作 best-effort quota/大 Blob 压力观察，不扩大产品承诺，也不记录文件名、路径、内容或 hash。
+- 当前 import/load 路径没有显式时长拒绝；超范围长音频无法开始播放不是规定的预期结果，也不单独构成 M5 门禁失败。若约 15 分钟范围内的有效格式复现，或失败破坏队列、当前会话与其他歌曲的可用性，应重新打开缺陷调查。
 - 已知大 chunk 提示记录为风险，不冒充构建错误，也不在没有性能预算时自动分包。
 - 交付前运行 `git diff --check`，检查 Markdown frontmatter、相对链接和最终 Git 范围。
 
@@ -42,9 +43,9 @@ next_action: "完成原生权限人工检查，并随 M5 canonical evidence 由 
 - `test-results/`、`playwright-report/` 和 `artifacts/evals/<run-id>/` 为 Git 忽略的本地产物。
 - 未提交工作树只能产生 provisional run；正式 milestone evidence 必须引用用户提交后的干净 commit。
 - M4 provisional run 只作为实现反馈；`eval:m4` 已在 clean commit `e5cfe9e8ab62301f3c5b0ddcdd37847a2e131a0f` 上通过、追加 evidence index 并由 `project-owner` 批准。
-- M5 dirty worktree 只运行 `eval:m5:provisional`；要求 clean HEAD 的 `eval:m5` 已对提交 `c90a3c5738de5b7a4efb7eb24cddc49da3713b44` 运行并追加正式 evidence。原生权限人工检查与自动化结果必须分开记录。
+- M5 dirty worktree 只运行 `eval:m5:provisional`；要求 clean HEAD 的 `eval:m5` 已对提交 `c90a3c5738de5b7a4efb7eb24cddc49da3713b44` 运行并追加正式 evidence。原生权限人工检查已由 `project-owner` 执行并与自动化结果分开记录。
 - 2026-07-29 的 M5 provisional run 16/16 通过；它绑定 dirty worktree，只证明当前实现值得提交和 canonical 复跑，不关闭 M5。
-- 同日 M5 canonical run 16/16 通过，起止工作树均干净且 commit 身份一致；它不替代 EG-006 原生权限人工检查，owner 审批前不关闭 M5。
+- 同日 M5 canonical run 16/16 通过，起止工作树均干净且 commit 身份一致；随后 Chrome 原生权限人工检查通过并由 owner 批准，M5 已关闭。
 - 首个 canonical run 已记录在 [evidence index](../quality/evidence-index.md)；本地产物保留和删除规则以 [eval plan](../quality/eval-plan.md) 为准。
 - fixture、manifest 和 golden 是受版本控制的规范输入；更新必须可重建、显示 diff，并重新执行对应测试。
 
@@ -71,4 +72,4 @@ next_action: "完成原生权限人工检查，并随 M5 canonical evidence 由 
 
 `project-owner` 于 2026-07-29 明确批准 M4 evidence 与本修订。M4 据此关闭并开放 M5；后续 M5 新增约定需要独立复核，不由本次批准预先覆盖。
 
-本轮新增的 IndexedDB store 所有权、OPFS 自动化边界、原生权限人工检查和本地压力音频政策尚未经过 M5 evidence 审批，因此本文重新进入 `in-review`。这不撤销上面的 M3/M4 approval。
+`project-owner` 于 2026-07-29 确认 M5 Chrome 原生权限人工检查通过，并明确批准 M5 evidence 与本修订。M5 据此关闭并开放 M6；本批准不覆盖 M6、Edge 或 release readiness。超范围长音频未开始播放只记录为非门禁压力观察，不改变约 15 分钟产品边界。

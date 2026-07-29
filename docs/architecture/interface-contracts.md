@@ -4,7 +4,7 @@ owner: "project-owner"
 last_reviewed: 2026-07-29
 upstream_docs:
   - "docs/architecture/system-design.md"
-next_action: "用 M5 原生权限人工检查与 owner review 核对权限契约"
+next_action: "在 M6 实现并验证 AnalysisConfig、FeatureDefinition 与 Worker 消息契约"
 ---
 
 # Interface Contracts

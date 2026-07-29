@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/product/scope.md"
   - "docs/architecture/system-design.md"
   - "docs/delivery/execution-plan.md"
-next_action: "完成 M5 原生权限人工检查与 owner evidence 审批"
+next_action: "按已批准架构制定并执行 M6 Worker platform 与 feature registry 切片"
 ---
 
 # Decision Registry
@@ -56,7 +56,9 @@ M4 dirty-worktree provisional suite 随后通过，证明当前实现值得进�
 
 同日，M5 dirty-worktree provisional suite 16/16 通过。依据 DEC-013，它只作为实现反馈；原生权限人工检查、用户提交、clean-commit canonical、正式 evidence 和 owner 审批仍是 M5 的关闭条件。
 
-随后 `npm run eval:m5` 在 clean commit `c90a3c5738de5b7a4efb7eb24cddc49da3713b44` 上 16/16 通过，正式记录已追加到 [evidence index](../quality/evidence-index.md)。DEC-013 的 canonical 身份要求已满足；EG-006 原生权限人工检查和 owner 审批仍未完成，因此 M5 保持 `In Review`。
+随后 `npm run eval:m5` 在 clean commit `c90a3c5738de5b7a4efb7eb24cddc49da3713b44` 上 16/16 通过，正式记录已追加到 [evidence index](../quality/evidence-index.md)。`project-owner` 于 2026-07-29 确认 Chrome 原生权限人工检查通过，并明确批准 M5 evidence 与 working agreements；M5 据此关闭并开放 M6。
+
+同次人工检查中，一段超出 DEC-006“约 15 分钟”支持边界的本地压力输入未开始播放。依据 DEC-015，该观察不计入 M5 pass/fail，不表示长音频必须失败，也不扩大支持范围；若支持范围内的有效格式复现，或失败破坏当前会话与其他歌曲可用性，则重新进入缺陷调查。
 
 ## Historical Evidence Gap
 
