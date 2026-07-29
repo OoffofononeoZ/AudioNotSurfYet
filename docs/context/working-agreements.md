@@ -1,13 +1,13 @@
 ---
 status: in-review
 owner: "project-owner"
-last_reviewed: 2026-07-28
+last_reviewed: 2026-07-29
 upstream_docs:
   - "AGENTS.md"
   - "docs/context/index.md"
   - "docs/delivery/test-strategy.md"
   - "docs/quality/eval-plan.md"
-next_action: "用户提交 M4 后运行 canonical suite；登记 evidence 并由 project-owner 审批本修订"
+next_action: "由 project-owner 审批本修订与 M4 canonical evidence；批准前不关闭 M4"
 ---
 
 # Working Agreements
@@ -37,8 +37,8 @@ next_action: "用户提交 M4 后运行 canonical suite；登记 evidence 并由
 ## Evidence and Generated Files
 
 - `test-results/`、`playwright-report/` 和 `artifacts/evals/<run-id>/` 为 Git 忽略的本地产物。
-- 未提交工作树只能产生 provisional run；正式 M3 evidence 必须引用用户提交后的干净 commit。
-- M4 provisional run 已通过，但只能作为实现反馈；`eval:m4` 必须在用户提交后的干净 commit 上重新执行，才可追加 evidence index。
+- 未提交工作树只能产生 provisional run；正式 milestone evidence 必须引用用户提交后的干净 commit。
+- M4 provisional run 只作为实现反馈；`eval:m4` 已在 clean commit `e5cfe9e8ab62301f3c5b0ddcdd37847a2e131a0f` 上通过并追加 evidence index，当前等待 owner 审批。
 - 首个 canonical run 已记录在 [evidence index](../quality/evidence-index.md)；本地产物保留和删除规则以 [eval plan](../quality/eval-plan.md) 为准。
 - fixture、manifest 和 golden 是受版本控制的规范输入；更新必须可重建、显示 diff，并重新执行对应测试。
 
@@ -62,3 +62,5 @@ next_action: "用户提交 M4 后运行 canonical suite；登记 evidence 并由
 `project-owner` 于 2026-07-28 明确批准本约定及 M3 [evidence index](../quality/evidence-index.md)。本批准关闭 M3 并开放 M4，不改变 Edge、CI、审计或后续产品 eval 缺口。
 
 M4 工具与资源所有权修订已在 dirty worktree provisional run 中验证，当前保持 `in-review`；旧 approval 不自动批准本轮修订。
+
+2026-07-29 的 M4 canonical run 已验证本修订对应的命令、资源所有权与证据政策；本文件继续保持 `in-review`，等待 `project-owner` 与 M4 evidence 一并批准。

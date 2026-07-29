@@ -8,7 +8,7 @@
 - FFmpeg：8.1.2；只用于生成和检查受控 WAV/MP3/FLAC fixture。
 - Microsoft Edge 当前未安装。`npm run test:e2e:edge` 会以退出码 2 报告 `blocked`，不会伪装成 pass。
 
-M3/M4 不建设 CI。下列命令当前均为本地门禁；正式证据要求在用户提交后的干净 commit 上复跑。M3 canonical run 已登记到 [evidence index](../docs/quality/evidence-index.md) 并由 owner 批准；M4 当前只有 dirty-worktree provisional pass。
+M3/M4 不建设 CI。下列命令当前均为本地门禁；正式证据要求在用户提交后的干净 commit 上复跑。M3 canonical run 已登记到 [evidence index](../docs/quality/evidence-index.md) 并由 owner 批准；M4 canonical run 也已登记，当前等待 owner 审批。
 
 当前 `npm audit` 在安全补丁更新后剩余 1 项 low：Vite 依赖的 esbuild 0.27.3 在 Windows 开发服务器场景存在本地任意文件读取风险。仓库目标验证机为 macOS，开发服务器不得暴露到不受信网络；依赖升级提供修复版本后复核。该缺口不被描述为已修复或生产 readiness。
 
@@ -34,6 +34,7 @@ M3/M4 不建设 CI。下列命令当前均为本地门禁；正式证据要求�
 | `npm run eval:m3:provisional` | 在未提交工作树生成本地 provisional run |
 | `npm run eval:m3` | 只允许在干净 commit 上生成 canonical M3 run |
 | `npm run eval:m4:provisional` | M3 回归 + M4 suite 的 dirty-worktree provisional run |
+| `npm run eval:m4` | 只允许在干净 commit 上执行 M3 回归 + M4 suite 并生成 canonical run |
 
 ## 目录职责
 
@@ -70,6 +71,8 @@ M4 浏览器测试中的损坏 WAV 与 65 秒、48kHz、单声道计时 WAV 都�
 
 `test-results/`、`playwright-report/` 和 `artifacts/evals/<run-id>/` 只在本地保存并由 Git 忽略。未提交工作树只能产生 provisional run；只有对干净 commit 运行对应 canonical 命令的真实结果才能进入正式 evidence index。
 
-2026-07-28 的最终 M4 provisional run 为 `M4-2026-07-28T10-15-08-817Z-20f52390-provisional`，summary SHA-256 为 `124819e3a3c7ca4e6404b126cdcc66f95cf48557fa7229494ca10d2642beb3d5`。它记录 60 秒漂移约 13.3ms，三次 seek 误差均低于 100ms，但不绑定当前 dirty worktree 的完整内容身份。
+2026-07-28 的最终 M4 provisional run 为 `M4-2026-07-28T10-15-08-817Z-20f52390-provisional`，summary SHA-256 为 `124819e3a3c7ca4e6404b126cdcc66f95cf48557fa7229494ca10d2642beb3d5`。它只作为实现反馈，不构成正式门禁证据。
 
-本 README 只记录已存在且至少成功执行过一次的命令。M4 provisional 结果不等同于 canonical evidence、Edge 矩阵、M4 Complete 或 release readiness；`npm run eval:m4` 要等用户提交干净 commit 后才可作为已执行命令登记。
+2026-07-29 的 M4 canonical run 为 `M4-2026-07-29T03-32-15-929Z-e5cfe9e8`，绑定 clean commit `e5cfe9e8ab62301f3c5b0ddcdd37847a2e131a0f`，summary SHA-256 为 `831158a07e1d08dab9dddd3e58b93047d287c6f9044badc02318cf49bd56aa25`。13/13 步骤通过；60 秒漂移 2.233ms，三次 seek 最大误差 66.827ms。完整结果与 artifact hash 见 [evidence index](../docs/quality/evidence-index.md)。
+
+本 README 只记录已存在且至少成功执行过一次的命令。M4 canonical pass 不等同于 owner approval、Edge 矩阵、M4 Complete 或 release readiness；证据获批前不进入 M5。

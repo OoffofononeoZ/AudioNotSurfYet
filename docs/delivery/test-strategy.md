@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/architecture/interface-contracts.md"
   - "docs/delivery/acceptance-criteria.md"
   - "docs/delivery/execution-plan.md"
-next_action: "在最终干净 M4 commit 上执行 canonical suite，并登记 AudioEngine/store 与 MusicBar 证据"
+next_action: "由 project-owner 审阅 M4 canonical evidence；获批后按 M5 恢复矩阵扩展测试"
 ---
 
 # Test Strategy
@@ -214,4 +214,4 @@ M3 已选择删除指向不存在 `test.ts` 的 `test:spectrogram`，不保留�
 
 ## 12. Exit Criteria
 
-M3 的公开命令、fixture、黄金比较和失败检测已有 clean-commit canonical pass，并已由 `project-owner` 批准。M4 起按 [acceptance criteria](acceptance-criteria.md) 的适用 AC 退出。
+M3 的公开命令、fixture、黄金比较和失败检测已有 clean-commit canonical pass，并已由 `project-owner` 批准。M4 的 AudioEngine/session/Chrome 适用测试已在 clean commit 上 canonical pass，记录在 [evidence index](../quality/evidence-index.md)，当前等待 owner 审批；审批前不进入 M5。

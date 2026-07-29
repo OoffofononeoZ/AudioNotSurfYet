@@ -6,7 +6,7 @@ upstream_docs:
   - "docs/delivery/execution-plan.md"
   - "docs/delivery/acceptance-criteria.md"
   - "docs/delivery/test-strategy.md"
-next_action: "完成 M4 provisional/canonical run，登记并审批 evidence 后再开放 M5"
+next_action: "由 project-owner 审批 M4 canonical evidence 与 working agreements；批准后才关闭 M4 并开放 M5"
 ---
 
 # Milestone Plan
@@ -15,7 +15,7 @@ next_action: "完成 M4 provisional/canonical run，登记并审批 evidence 后
 
 - Target 使用相对门禁，不表示日历承诺。
 - `Complete` 只用于文档门禁、真实证据和所需人工批准均已满足的里程碑。
-- Q0 和 M3 为 `Complete`；M4 为 `In Review` 且已有 provisional pass，M5–M11 为 `Planned`。
+- Q0 和 M3 为 `Complete`；M4 为 `In Review` 且已有 clean-commit canonical pass，M5–M11 为 `Planned`。
 - 一个里程碑未通过时，后续里程碑保持 Planned/Blocked，不并行扩大特征范围。
 
 ## Milestones
@@ -62,8 +62,9 @@ next_action: "完成 M4 provisional/canonical run，登记并审批 evidence 后
 - [x] MusicBar 已接入共享状态，视觉结构、队列和能量行为保留。
 - [x] play/pause/seek/ended/switch/dispose 的自动化已建立。
 - [x] 单一实时 AudioContext、单 service RAF 和 URL 释放已有可执行检查。
-- [ ] 用户提交干净 commit 后完成 `npm run eval:m4`。
-- [ ] M4 evidence index 追加记录并由 `project-owner` 批准。
+- [x] 用户提交干净 commit 后完成 `npm run eval:m4`。
+- [x] M4 canonical run 已追加到 evidence index。
+- [ ] M4 evidence index 与 working agreements 由 `project-owner` 批准。
 
 ### M5
 
@@ -123,12 +124,12 @@ next_action: "完成 M4 provisional/canonical run，登记并审批 evidence 后
 
 ## Current Gate State
 
-- Current stage：M4 Single AudioEngine and shared store，provisional suite 已通过，canonical evidence 尚未生成。
+- Current stage：M4 Single AudioEngine and shared store；canonical suite 已通过，evidence 已登记并等待 owner 审批。
 - Previous gate：M3 已由 `project-owner` 于 2026-07-28 批准并标记 `Complete`。
 - Canonical run：`npm run eval:m3` 已在 clean commit `17d16f0da37289c1f67f75203502beef999572ea` 上通过；摘要见 [evidence index](../quality/evidence-index.md)。
-- Next gate：provisional pass 后由用户提交；对干净 commit 运行 canonical suite 并审批 M4 evidence。
+- Next gate：`project-owner` 审批 M4 evidence index 与 working agreements；批准后才把 M4 改为 `Complete` 并开放 M5。
 - M3 state：Complete；M3 evidence 只证明测试基础，不代表 M4 产品行为通过。
-- M4 provisional：13/13 步骤通过；60 秒漂移约 13.3ms，三次 seek 均 <100ms。由于工作树不干净，该结果不构成 canonical evidence。
+- M4 canonical：`npm run eval:m4` 在 clean commit `e5cfe9e8ab62301f3c5b0ddcdd37847a2e131a0f` 上 13/13 步骤通过；60 秒漂移 2.233ms，三次 seek 最大误差 66.827ms。证据见 [evidence index](../quality/evidence-index.md)，当前尚未获 owner 批准。
 - Known future blockers：没有真实 Edge 证据时不能完成 M11 或未来 readiness；托管平台未定会阻断 release，但不阻断 Q0/M3。
 
 ## Approval Record

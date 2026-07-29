@@ -1,25 +1,25 @@
 ---
-status: approved
+status: in-review
 owner: "project-owner"
-last_reviewed: 2026-07-28
+last_reviewed: 2026-07-29
 upstream_docs:
   - "docs/quality/eval-plan.md"
   - "docs/quality/golden-examples.md"
   - "docs/quality/failure-taxonomy.md"
   - "docs/delivery/milestone-plan.md"
   - "tests/fixtures/fixture-manifest.json"
-next_action: "在 M4 实施期间追加 AudioEngine/store 回归证据，保留未覆盖 eval 与 evidence gaps"
+next_action: "由 project-owner 审阅并批准 M4 canonical evidence 与 working agreements；批准前不关闭 M4 或开放 M5"
 ---
 
 # Evidence Index
 
 ## 1. Purpose and Gate State
 
-本文件保存受版本控制的长期证据摘要；原始日志保存在 Git 忽略的本地 artifact 目录。当前只有 M3 测试基础切片的 canonical run；该证据已由 `project-owner` 批准，M3 已关闭并开放 M4。
+本文件保存受版本控制的长期证据摘要；原始日志保存在 Git 忽略的本地 artifact 目录。M3 测试基础切片的 canonical run 已由 `project-owner` 批准。M4 canonical run 已追加并保持 `in-review`；在 owner 批准前，M4 不关闭且 M5 不开放。
 
-M3 的 `pass` 只证明测试工具、受控 fixture、direct-Meyda golden、失败检测、Chrome smoke、类型检查和构建门禁在被记录的 commit 上可复现。它不表示完整 EV-A–EV-R、M4–M11 产品行为、Edge 矩阵或 release readiness 已通过。
+每条 `pass` 只证明对应里程碑的适用子集在被记录的 commit 和环境上可复现。它不表示完整 EV-A–EV-R、未执行里程碑、Edge 矩阵或 release readiness 已通过。
 
-## 2. Canonical Run Record
+## 2. M3 Canonical Run Record
 
 | Field | Value |
 | --- | --- |
@@ -112,3 +112,81 @@ M3 的 `pass` 只证明测试工具、受控 fixture、direct-Meyda golden、失
 ## 6. Approval Record
 
 `project-owner` 于 2026-07-28 明确批准本 M3 evidence 与 [working agreements](../context/working-agreements.md)。本文件改为 `approved`，M3 改为 `Complete` 并开放 M4；EG-003–EG-006、M4–M11 未执行范围及 `release-readiness.md` 后置规则保持不变。
+
+## 7. M4 Canonical Run Record
+
+| Field | Value |
+| --- | --- |
+| Run ID | `M4-2026-07-29T03-32-15-929Z-e5cfe9e8` |
+| Milestone | M4 — Single AudioEngine and shared store |
+| State | `pass`（M4 适用子集；等待 owner 审批） |
+| Eval IDs | EV-S、EV-B、EV-R 的 M4 适用子集；EV-A、EV-J、EV-D、EV-R 的 M3 回归子集 |
+| Commit | `e5cfe9e8ab62301f3c5b0ddcdd37847a2e131a0f` |
+| Dirty at start / end | `false` / `false` |
+| Commit at end | `e5cfe9e8ab62301f3c5b0ddcdd37847a2e131a0f` |
+| Started at | 2026-07-29 03:32:15.929 UTC |
+| Method | `npm run eval:m4` |
+| Reviewer | `project-owner` — pending |
+| Retention | `local-present` |
+| Artifact root | `artifacts/evals/M4-2026-07-29T03-32-15-929Z-e5cfe9e8/` |
+| Summary SHA-256 | `831158a07e1d08dab9dddd3e58b93047d287c6f9044badc02318cf49bd56aa25` |
+| Failure | 无；Edge 缺失继续作为 EG-003，构建 chunk warning 继续作为风险信号 |
+
+### Environment
+
+| Item | Recorded value |
+| --- | --- |
+| OS | macOS 26.5.2 (`25F84`), Darwin arm64 |
+| Hardware | MacBook Pro `MacBookPro17,1`；Apple M1 8-core；16 GB memory |
+| Node / npm | Node `v24.18.0`；npm `11.16.0` |
+| Vitest | `4.1.10` |
+| Playwright Test | `1.62.0` |
+| Chrome | Google Chrome `150.0.7871.187` |
+| Edge | `not-installed` |
+| FFmpeg | `8.1.2` |
+| Meyda | `5.6.3` |
+
+### Results and Traceability
+
+| Step | Result | M4 measurement | Eval / AC / risk trace |
+| --- | --- | --- | --- |
+| Fixture hashes | pass | 5/5 | M3 regression；EV-A、EV-B |
+| M3 unit regression | pass | 12/12 | M3 regression；EV-A、EV-D |
+| M3 Worker regression | pass | 3/3 | M3 regression；EV-J |
+| M3 analysis regression | pass | 2/2 | M3 regression；EV-A |
+| AudioEngine unit | pass | 5/5；load/play/pause/seek/ended/stale/error/unload/dispose | EV-S、EV-R；AC-S01、AC-S02、AC-S04、AC-R06；R-001、R-012、R-013 |
+| Session integration | pass | 5/5；队列、竞态、ended、删除、清空、metadata、单 RAF 与 URL 释放 | EV-S、EV-R；AC-S04、AC-S05、AC-R06；R-001、R-013 |
+| Docs | pass | lifecycle frontmatter/links；feature source count 21 | EV-R；R-019 |
+| Deliberate failure | pass | harness 正确检测 child exit 1 | EV-R；R-019 |
+| Typecheck | pass | `vue-tsc -b` exit 0 | EV-S、EV-R |
+| M3 Chrome regression | pass | 5/5；应用、真实 IndexedDB/Worker、三格式加载播放 | M3 regression；EV-B |
+| M4 Chrome E2E | pass | 3/3；队列/追加/错误恢复/资源所有权；60 秒漂移 2.233ms；三次 seek 最大误差 66.827ms | EV-S、EV-B、EV-R；AC-S01、AC-S02、AC-S04、AC-S05、AC-F07、AC-R06；R-001、R-012、R-013 |
+| Build | pass with warning | 1804 modules；最大 JS chunk 1,036.44 kB | EV-R；R-019 |
+| Diff check | pass | `git diff --check` exit 0 | EV-R；R-019 |
+
+时钟与 seek 测量均满足 ≤100ms 的批准阈值。M4 的资源检查覆盖单一实时 AudioContext、单 service RAF、对象 URL 释放和重复切歌路径；它不替代 M11 的 DevTools heap/线程长会话检查。三格式记录是 M3 smoke 回归，不代表 Edge 或完整格式矩阵已通过。
+
+### Local Artifact Hashes
+
+| Artifact | SHA-256 |
+| --- | --- |
+| `summary.json` | `831158a07e1d08dab9dddd3e58b93047d287c6f9044badc02318cf49bd56aa25` |
+| `01-fixture-hashes.log` | `bd18f96775203686bfbecc5ac20136180a12a4876188c879475690c54a424b60` |
+| `02-M3-unit-regression.log` | `d8d3371b4835078983f67b05c74870a7d1d4737d78d7a43fb4b769fcd4ab27bd` |
+| `03-M3-worker-regression.log` | `7fc07331ccb37e8e8f980fbe3482ae2775b73ec5a193f2677ab5f541fdece228` |
+| `04-M3-analysis-regression.log` | `fd52fa82a61702ceccfc99eba6a7c2909c467302e162ded00db5bcc6f017718e` |
+| `05-M4-AudioEngine-unit.log` | `399430c8dff3c73ac4fc2c72054e1a33d6b011f615eaecc1e7c365366c99373a` |
+| `06-M4-session-integration.log` | `c1c39a067bf7f1c7cf0c0a730456c1da937a880332eb55a1c8a4e0a471f1824e` |
+| `07-docs.log` | `bb005ed0074179a47b895a5c66e79917e37ebf18976e21fe9d27b1dd63c8f151` |
+| `08-deliberate-failure.log` | `69bf5c3fa50230a4957ad0c60c8323dba68e494d92761fea0039cf5d580d70aa` |
+| `09-typecheck.log` | `fadc7f66199c28d2f7cca439bb300ebeb0320158f32a0f9b52ec77031538af4d` |
+| `10-M3-Chrome-regression.log` | `acea7e85c1e916cf75c383b106de752b684aa01258542097897f6e25bc668dfb` |
+| `11-M4-Chrome-e2e.log` | `41774fa85a9169728b6ba0f7e49048d689fd5da6218a7e4485efed285e6318f7` |
+| `12-build.log` | `509e4e2f57f20045f928a8344b36f94536e2f8f272b3052629540d8b4303c9c5` |
+| `13-diff-check.log` | `e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855` |
+
+`summary.json.sha256` 已独立核对并与 `summary.json` 一致。本地产物至少保留到 M4 获批；删除后必须把本记录的 retention 改为 `local-deleted`。
+
+### Review State
+
+本记录来自干净 commit，13/13 步骤通过且没有 failure instance。它使 M4 进入证据审阅，但在 `project-owner` 明确批准本文与 [working agreements](../context/working-agreements.md) 前，不把 M4 标为 `Complete`，也不开放 M5。
