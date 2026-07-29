@@ -29,8 +29,8 @@
 | `src/views/` | 路由页面；Home 展示光线背景，Analyzer 展示分析数据入口，TestLands 是试验页，ComingSoon 是空占位 | `src/router/index.ts`、各 view |
 | `src/layouts/` | 应用共享外壳；`MainLayout` 组合 Header、路由内容和 MusicBar | `src/layouts/MainLayout.vue` |
 | `src/components/` | 播放条、列表、动画列表、Canvas/WebGL 背景和试验性图表 | 各 Vue SFC |
-| `src/audio/` | `AudioLoader` 封装 AudioContext、AudioBuffer、Source、Analyser 和 Gain | `src/audio/audioLoader.ts` |
-| `src/stores/` | 持久化 UI/音量配置及只读的当前能量共享值 | `configStore.ts`、`audioStore.ts` |
+| `src/audio/` | `AudioEngine` 独占 Web Audio 节点；`AudioSessionService` 编排 File、队列命令、能量和资源释放 | `audioEngine.ts`、`audioSessionService.ts` |
+| `src/stores/` | 持久化 UI/音量配置及可序列化播放 session | `configStore.ts`、`audioSessionStore.ts` |
 | `src/utils/` | mitt 单例、能量角度映射、时间格式化和 clamp | `emitter.ts`、`utils.ts` |
 | `src/data/` | Analyzer 页面使用的静态 Meyda 特征说明 | `analyzerData.ts` |
 | `public/` | 默认封面、SVG 图标和静态资源；本地测试音频目录被 `.gitignore` 排除 | `public/`、`.gitignore` |
@@ -39,8 +39,8 @@
 ## 边界
 
 - 当前是单一前端仓库；未发现后端、数据库、认证、云端媒体库或部署配置。
-- 音频文件由用户在浏览器中选择，当前播放队列保存在组件内存，不是持久化业务数据。
-- `configStore` 的 `volume` 和 `musicBarSettings.style` 是当前唯一已证实的持久化状态。
+- 音频文件由用户在浏览器中选择，当前播放队列保存在非持久化 Pinia store，runtime File 保存在 session service 内存。
+- `configStore` 的 `volume` 和 `musicBarSettings.style` 是当前唯一已证实的持久化状态；`audioSessionStore` 在 M5 前不持久化。
 - Analyzer、Editor 和 Visualizer 的完整产品边界未由仓库证实；不要从空页面或导航文案推断承诺。
 - `testcomp.vue`、`TestLands.vue`、`threeDTable.vue` 和 `MeydaCard.vue` 含试验或占位内容，不应默认视为稳定公共接口。
 

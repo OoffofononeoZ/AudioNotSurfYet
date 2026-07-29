@@ -1,20 +1,20 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-07-24
+last_reviewed: 2026-07-28
 upstream_docs:
   - "docs/product/problem-brief.md"
   - "docs/product/scope.md"
   - "docs/product/success-metrics.md"
   - "docs/product/open-questions.md"
-next_action: "按 docs/delivery/execution-plan.md 从测试基线和 AudioEngine 抽离开始实现"
+next_action: "完成 M4 canonical evidence 后进入 M5 SessionRepository 与恢复接线"
 ---
 
 # System Design
 
 ## 1. Decision Summary
 
-AudioNotSurfYet 采用一个实时 `AudioEngine`、一个可序列化 `audioSessionStore`、一个 `AnalysisCoordinator` 和一个全曲分析 Worker。Analyzer 通过类型化特征注册表选择最多四个不重复特征，在共享时间视窗中用 Canvas 2D renderer 绘制数据，并用 DOM 承担文本、交互和无障碍语义。
+AudioNotSurfYet 采用一个实时 `AudioEngine`、一个 MainLayout-owned `AudioSessionService`、一个可序列化 `audioSessionStore`、一个 `AnalysisCoordinator` 和一个全曲分析 Worker。Analyzer 通过类型化特征注册表选择最多四个不重复特征，在共享时间视窗中用 Canvas 2D renderer 绘制数据，并用 DOM 承担文本、交互和无障碍语义。
 
 当前设计只覆盖已批准的本地音频学习场景。远端上传、Editor、Visualizer、移动端和非 Chromium 兼容均不进入本架构。
 
@@ -50,7 +50,8 @@ AudioNotSurfYet 采用一个实时 `AudioEngine`、一个可序列化 `audioSess
 
 | Component | Responsibility | Owns | Must not own |
 | --- | --- | --- | --- |
-| `AudioEngine` | 加载/解码当前音频，播放、暂停、seek、音量和快照发布 | 唯一实时 AudioContext、当前 AudioBuffer、BufferSource、AnalyserNode、GainNode、对象 URL 生命周期 | UI 卡片、队列持久化、分析缓存 |
+| `AudioEngine` | 加载/解码当前音频，播放、暂停、seek、音量和快照发布 | 唯一实时 AudioContext、当前 AudioBuffer、BufferSource、AnalyserNode、GainNode | File/Blob、对象 URL、UI 卡片、队列持久化、分析缓存 |
+| `AudioSessionService` | 把 UI 命令编排为文件读取、engine 命令、队列变化、ended 循环和能量快照 | runtime File、封面对象 URL、command generation、单播放 RAF | 可持久化事实、第二个 AudioContext、分析 Worker |
 | `audioSessionStore` | 队列、当前 track ID、播放快照、活动卡、视窗和恢复状态 | 可序列化 UI/session 状态 | AudioBuffer、AudioNode、Worker、File/Blob 实例 |
 | `SessionRepository` | IndexedDB schema、事务、句柄、当前 Blob/缓存的保存与恢复 | `PersistedSessionV1`、FileSystemFileHandle、当前 Blob、当前缓存 | 播放和 UI 决策 |
 | `AnalysisCoordinator` | 构造 mono PCM、启动/取消 job、隔离迟到结果、缓存匹配、精确值请求 | 活动 job generation、Worker 生命周期、内存结果索引 | 实时播放时钟、DOM |
@@ -66,7 +67,9 @@ AudioNotSurfYet 采用一个实时 `AudioEngine`、一个可序列化 `audioSess
 ```mermaid
 flowchart LR
     UI["Analyzer / MusicBar UI"] --> Store["audioSessionStore"]
-    UI --> Engine["AudioEngine"]
+    UI --> Session["AudioSessionService"]
+    Session --> Engine["AudioEngine"]
+    Session --> Store
     Store <--> Repo["SessionRepository / IndexedDB"]
     Engine -->|"PlaybackSnapshot + clock"| Store
     Engine -->|"PCM copy + sample rate"| Coordinator["AnalysisCoordinator"]
@@ -76,10 +79,10 @@ flowchart LR
     Worker -->|"compact AnalysisSeries"| Coordinator
     Coordinator --> Store
     Store --> UI
-    UI -->|"seek(time)"| Engine
+    UI -->|"seek(time)"| Session
 ```
 
-状态流是单向的：组件发布事实快照，store 保存序列化状态，UI 发出命令。store 不包装或代理 AudioNode。
+状态流是单向的：AudioEngine 发布事实快照，AudioSessionService 编排 runtime 资源并更新 store，store 保存序列化状态，UI 只发出命令。store 不包装或代理 AudioNode。
 
 ## 6. Playback and Timeline
 
@@ -89,7 +92,7 @@ flowchart LR
 2. `play()` 每次创建新的 BufferSource，并记录 `startedAtContextTime` 与 `startedAtOffset`.
 3. 播放位置为 `startedAtOffset + (audioContext.currentTime - startedAtContextTime)`；暂停时保存 offset。
 4. `seek(seconds)` 截断到 `[0, duration]`；播放中安全停止旧 source 并从新 offset 重建。
-5. 换歌、清空或销毁时停止 source、断开节点、释放对象 URL，并使旧订阅失效。
+5. 换歌、清空或销毁时停止 source、断开节点并使旧订阅失效；封面对象 URL 由 AudioSessionService 在删除、清空和 dispose 时释放。
 
 ### Shared timeline
 

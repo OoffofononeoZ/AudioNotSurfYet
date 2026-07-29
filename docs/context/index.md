@@ -4,7 +4,7 @@ owner: "project-owner"
 last_reviewed: 2026-07-28
 upstream_docs:
   - "AGENTS.md"
-next_action: "进入 M4：检查当前播放边界并实施单一 AudioEngine 与 shared store"
+next_action: "完成 M4 provisional/canonical run 与 evidence 审批；审批前不进入 M5"
 ---
 
 # Repository Context Index
@@ -17,12 +17,12 @@ AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端：用户选择
 
 ## Current Stage
 
-- Repository context：入口、决策注册表与 working agreements 已更新并批准；system map 和 glossary 仍为 `draft`。
+- Repository context：入口与决策注册表已批准；M4 更新后的 system map、glossary 和 working agreements 为 `in-review`。
 - Product intent：problem brief、scope 和 success metrics 已由 `project-owner` 批准；开放问题只保留未来上传、未定义 Tab、托管和扩展研究等非当前门禁事项。
 - System design：system design、接口契约、风险和四个 ADR 已批准。
 - Execution planning：execution plan、acceptance criteria、test strategy 和 milestone plan 均为 approved。
 - Quality and evals：eval plan、golden examples、failure taxonomy 和首条 M3 canonical evidence 已由 `project-owner` 批准；完整 eval 仍未完成。
-- Implementation：M3 已 `Complete`；当前阶段为 M4 Single AudioEngine and shared store，已开放但尚未开始产品源码实施。
+- Implementation：M3 已 `Complete`；M4 的 AudioEngine、audioSessionStore、AudioSessionService、MusicBar 迁移和测试已有 provisional pass，仍需用户提交、canonical evidence 与 owner 批准。
 - Readiness、release、retrospective：`release-readiness.md` 等待 M11 执行证据，不创建 release 或 retrospective 文档。
 
 ## Key Documents
@@ -30,10 +30,10 @@ AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端：用户选择
 | Path | Purpose | Owner / status | Review trigger |
 | --- | --- | --- | --- |
 | [AGENTS.md](../../AGENTS.md) | 根工作指南和 Harness 门禁 | project-owner / active | 工作流、门禁、文档位置或跨阶段测试纪律变化 |
-| [system-map.md](system-map.md) | 当前子系统、接口和外部依赖 | unknown / draft | 当前代码边界变化 |
-| [glossary.md](glossary.md) | 当前项目词汇与代码含义 | unknown / draft | 术语、状态或类型含义变化 |
+| [system-map.md](system-map.md) | 当前子系统、接口和外部依赖 | project-owner / in-review | 当前代码边界变化 |
+| [glossary.md](glossary.md) | 当前项目词汇与代码含义 | project-owner / in-review | 术语、状态或类型含义变化 |
 | [decision-registry.md](decision-registry.md) | 产品、架构和交付决策入口 | project-owner / approved | 形成、撤销或替代重要决策 |
-| [working-agreements.md](working-agreements.md) | 本地开发、验证和 Git 约定 | project-owner / approved | 工具链或验证能力变化 |
+| [working-agreements.md](working-agreements.md) | 本地开发、验证和 Git 约定 | project-owner / in-review | 工具链或验证能力变化 |
 | [problem-brief.md](../product/problem-brief.md) | 目标用户、问题和期望结果 | project-owner / approved | 目标用户或核心问题变化 |
 | [scope.md](../product/scope.md) | 当前范围、纵向切片和非目标 | project-owner / approved | 能力、数据或兼容范围变化 |
 | [success-metrics.md](../product/success-metrics.md) | 正确性、同步、响应和学习指标 | project-owner / approved | 阈值、样本或观测方法变化 |
@@ -64,8 +64,8 @@ AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端：用户选择
 | `src/views/` | 路由页面；Analyzer 当前主要是静态特征目录 | system design + M7 |
 | `src/layouts/` | Header、页面内容与 MusicBar 的共享外壳 | M4/M7 回归 |
 | `src/components/` | 播放 UI、列表、动画及 Canvas/WebGL 可视化 | ADR-0001/0004 |
-| `src/audio/` | 当前 Web Audio 播放、时域/频域接口 | M4 单一 AudioEngine |
-| `src/stores/` | 当前配置与共享音频能量 | M4 audioSessionStore |
+| `src/audio/` | 单一 AudioEngine 与 MainLayout-owned AudioSessionService | ADR-0001；M5 增加恢复接线 |
+| `src/stores/` | 持久化 config 与可序列化 audioSessionStore | M5 增加恢复状态 |
 | `src/utils/` | 事件总线与纯工具函数 | 实现时按实际边界维护 |
 | `src/data/` | `analyzerData.ts` 的 21 项 Meyda 说明 | M6 FeatureRegistry |
 | `tests/` | M3 本地测试、fixture、golden、浏览器 harness 和 eval runner | [tests README](../../tests/README.md) |
@@ -84,7 +84,7 @@ AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端：用户选择
 
 ## Current Known Gaps
 
-- M4 尚未实现 AudioEngine/store 分离；后续 IndexedDB 恢复、Worker 全曲分析和共享四卡时间轴也尚未开始。
+- M4 provisional 已通过，但尚缺 clean-commit canonical evidence 和 owner 批准；IndexedDB 恢复、Worker 全曲分析和共享四卡时间轴仍未开始。
 - 当前机器尚未发现 Edge；没有真实 Edge 证据时不能完成 M11 双浏览器门禁。
 - 正式托管平台和生产 URL 尚未决定；它们只阻断未来 release，不阻断 M3。
 - 详细 context 文档的长期 owner/review cadence 尚未全部统一；代码改动时必须同步修正事实。
@@ -97,3 +97,5 @@ AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端：用户选择
 2026-07-28，M3 canonical run 在 clean commit `17d16f0da37289c1f67f75203502beef999572ea` 上通过并产生正式 evidence index；该事实本身不等同于批准，批准记录如下。
 
 `project-owner` 于 2026-07-28 明确批准 M3 evidence index 与 working agreements。M3 改为 `Complete`，当前阶段切换为已开放的 M4。
+
+同日，M4 dirty-worktree provisional suite 通过；该结果只用于实现反馈，未追加正式 evidence index，也未关闭 M4。

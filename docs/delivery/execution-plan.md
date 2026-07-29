@@ -9,7 +9,7 @@ upstream_docs:
   - "docs/architecture/system-design.md"
   - "docs/architecture/interface-contracts.md"
   - "docs/architecture/risk-register.md"
-next_action: "进入 M4：实现单一 AudioEngine 与 audioSessionStore，并以现有 MusicBar 行为作为回归基线"
+next_action: "完成 M4 provisional/canonical run 与 evidence 审批；审批前不开放 M5"
 ---
 
 # Execution Plan
@@ -18,7 +18,7 @@ next_action: "进入 M4：实现单一 AudioEngine 与 audioSessionStore，并�
 
 按纵向切片把已批准的本地音频学习体验从当前播放器基础推进到 21 项 Meyda 特征全覆盖。本计划以门禁证据而不是日历日期排序；任一里程碑未通过时，不进入下一批特征。
 
-本文件定义实施顺序和验收方式，不代表 M4–M11 已实现。当前已完成 M1、M2、Q0 和 M3 门禁；M4 已开放，尚未开始产品源码实施。
+本文件定义实施顺序和验收方式，不代表未关闭里程碑已通过。当前已完成 M1、M2、Q0 和 M3 门禁；M4 产品源码与自动化已进入审阅，仍等待 provisional、用户提交后的 canonical run 和 evidence 批准。
 
 ## 2. Stage Gates
 
@@ -142,17 +142,17 @@ Evidence state:
 
 ### M4 — AudioEngine and audioSessionStore
 
-Status：Planned（Open）。
+Status：In Review（implementation present；canonical evidence pending）。
 
 Goal：建立单一播放引擎，同时保持现有 MusicBar 行为。
 
 Implementation:
 
-- 把 `audioLoader.ts` 和 MusicBar 中的播放/能量职责收敛到 `AudioEngine`。
-- 建立 `PlaybackSnapshot` 和 `audioSessionStore`，store 不持有 AudioBuffer/AudioNode。
-- 实现 load/play/pause/seek/volume/ended/dispose。
-- 迁移 MusicBar 到 engine 快照和 Analyser 数据源。
-- 处理快速换歌、重复 play、AudioContext suspended、decode error 和销毁。
+- 已删除 `audioLoader.ts` 旧路径，将播放资源收敛到 `AudioEngine`。
+- 已建立 `PlaybackSnapshot`、`audioSessionStore` 与 MainLayout-owned `AudioSessionService`；store 不持有 File/Blob/ArrayBuffer/AudioBuffer/AudioNode。
+- 已实现 load/play/pause/seek/volume/ended/unload/dispose、typed error 和 generation 隔离。
+- MusicBar 已迁移到共享快照和服务命令；单一 service RAF 同时更新时间与 Meyda energy。
+- 已实现快速换歌最后操作生效、非空追加不中断、metadata fallback、非阻塞错误和对象 URL 释放。
 
 Verification:
 
@@ -160,6 +160,13 @@ Verification:
 - 现有队列、播放、暂停、上下首、seek、音量和 MusicBar 能量回归；
 - 一次会话仅一个实时 AudioContext；
 - 资源生命周期测试无遗留 source、RAF 或对象 URL。
+
+Evidence state:
+
+- 2026-07-28 `eval:m4:provisional` 通过 13 个步骤；M3 回归、M4 engine/session、Chrome 播放回归、typecheck、build、docs 和 diff check 均为 pass；
+- 60 秒 AudioContext 时钟漂移约 13.3ms；三次 seek 误差约 66.8ms、1.1ms、66.8ms；
+- 该 run 的 dirty-at-start 为 true，只是 provisional，不登记到正式 evidence index；
+- M4 仍等待用户提交后的 clean-commit `eval:m4`、evidence review 和 owner 批准。
 
 Rollback:
 

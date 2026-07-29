@@ -1,5 +1,5 @@
 ---
-status: approved
+status: in-review
 owner: "project-owner"
 last_reviewed: 2026-07-28
 upstream_docs:
@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/context/index.md"
   - "docs/delivery/test-strategy.md"
   - "docs/quality/eval-plan.md"
-next_action: "在 M4 AudioEngine/store 实施与验证中遵循本约定，并按真实工具变化复核"
+next_action: "用户提交 M4 后运行 canonical suite；登记 evidence 并由 project-owner 审批本修订"
 ---
 
 # Working Agreements
@@ -25,6 +25,7 @@ next_action: "在 M4 AudioEngine/store 实施与验证中遵循本约定，并�
 - Node/npm 基线为 24.18.0/11.x；依赖使用 npm 和 lockfile，测试命令以 [tests README](../../tests/README.md) 为准。
 - 静态门禁包括 `npm run typecheck` 与 `npm run build`；非浏览器测试由 Vitest 执行。
 - `npm run test:e2e` 使用本机稳定 Chrome；Edge 缺失必须记录为 blocked，不能用 Chromium 或 skip 冒充 Edge 通过。
+- M4 使用 `test:m4:unit`、`test:m4:integration` 和 `test:e2e:m4`；65 秒 WAV 与损坏文件只在 Git 忽略目录运行时生成。
 - M3 仅建立本地门禁，不存在正式 CI；这项缺口不阻断 M3，但自动化声明必须限定为本地执行。
 - 交互改动要在本地浏览器执行成功、失败和边界场景，并检查 console error/warn。
 - 布局和可视化至少检查窄屏、常见桌面和宽屏，使用真实 DOM/canvas 几何。
@@ -37,11 +38,14 @@ next_action: "在 M4 AudioEngine/store 实施与验证中遵循本约定，并�
 
 - `test-results/`、`playwright-report/` 和 `artifacts/evals/<run-id>/` 为 Git 忽略的本地产物。
 - 未提交工作树只能产生 provisional run；正式 M3 evidence 必须引用用户提交后的干净 commit。
+- M4 provisional run 已通过，但只能作为实现反馈；`eval:m4` 必须在用户提交后的干净 commit 上重新执行，才可追加 evidence index。
 - 首个 canonical run 已记录在 [evidence index](../quality/evidence-index.md)；本地产物保留和删除规则以 [eval plan](../quality/eval-plan.md) 为准。
 - fixture、manifest 和 golden 是受版本控制的规范输入；更新必须可重建、显示 diff，并重新执行对应测试。
 
 ## Resource Ownership
 
+- AudioEngine 独占实时 AudioContext、AudioBuffer、source、Analyser 与 Gain；AudioSessionService 独占 runtime File、封面 URL、engine 订阅和单播放 RAF。
+- 音频解码直接使用 File ArrayBuffer，不创建音频对象 URL；封面 URL 在删除、清空和 dispose 时释放。
 - AudioBufferSourceNode、AudioContext、对象 URL、RAF、Observer、事件监听、GSAP tween、Three.js geometry/material/renderer 的创建与释放应成对检查。
 - 用户本地音频默认只在浏览器内处理；仓库没有上传或远端处理证据。
 - 生成声明文件可能由构建插件更新；不要把这类变化与手写代码修改混为一谈。
@@ -56,3 +60,5 @@ next_action: "在 M4 AudioEngine/store 实施与验证中遵循本约定，并�
 ## Approval Record
 
 `project-owner` 于 2026-07-28 明确批准本约定及 M3 [evidence index](../quality/evidence-index.md)。本批准关闭 M3 并开放 M4，不改变 Edge、CI、审计或后续产品 eval 缺口。
+
+M4 工具与资源所有权修订已在 dirty worktree provisional run 中验证，当前保持 `in-review`；旧 approval 不自动批准本轮修订。

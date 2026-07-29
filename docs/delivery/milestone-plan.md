@@ -6,7 +6,7 @@ upstream_docs:
   - "docs/delivery/execution-plan.md"
   - "docs/delivery/acceptance-criteria.md"
   - "docs/delivery/test-strategy.md"
-next_action: "进入 M4：建立单一 AudioEngine 与 shared store，并保持 MusicBar 行为不回归"
+next_action: "完成 M4 provisional/canonical run，登记并审批 evidence 后再开放 M5"
 ---
 
 # Milestone Plan
@@ -26,7 +26,7 @@ next_action: "进入 M4：建立单一 AudioEngine 与 shared store，并保持 
 | M2 | System design and ADRs approved | Complete | Gate A | M1 | system design、contracts、risk、4 ADR approved | project-owner |
 | Q0 | Quality evaluation design | Complete | Pre-implementation quality gate | M2 | eval plan、golden examples、failure taxonomy approved；42 AC 和 19 risk 可追溯 | project-owner |
 | M3 | Test foundation and fixtures | Complete | First implementation gate | Q0 | Vitest/Playwright/Worker harness、fixture manifest、golden helper、有效 npm scripts | project-owner |
-| M4 | Single AudioEngine and shared store | Planned | After M3 | M3 | 播放/MusicBar 回归、单一上下文、生命周期证据 | project-owner |
+| M4 | Single AudioEngine and shared store | In Review | After M3 | M3 | 播放/MusicBar 回归、单一上下文、生命周期证据 | project-owner |
 | M5 | IndexedDB hybrid recovery | Planned | After M4 | M4 | current Blob/cache、handle permission、refresh/quota/schema 证据 | project-owner |
 | M6 | Worker platform and feature registry | Planned | After M5 | M4, M5 | mono/frame/cancel/stale/cache/21-key registry、性能基线 | project-owner |
 | M7 | RMS + Amplitude Spectrum + Chroma | Planned | First feature gate | M6 | 三项黄金、四卡共享时间轴、100ms、owner 任务与 3/3 学习解释 | project-owner |
@@ -58,10 +58,12 @@ next_action: "进入 M4：建立单一 AudioEngine 与 shared store，并保持 
 
 ### M4
 
-- [ ] AudioEngine/store 契约实现且不持有错误资源。
-- [ ] MusicBar 核心行为通过基线。
-- [ ] play/pause/seek/ended/switch/dispose 成功和异常路径通过。
-- [ ] 单一实时 AudioContext 有可检查证据。
+- [x] AudioEngine/store 契约已实现，旧 AudioLoader 路径已删除。
+- [x] MusicBar 已接入共享状态，视觉结构、队列和能量行为保留。
+- [x] play/pause/seek/ended/switch/dispose 的自动化已建立。
+- [x] 单一实时 AudioContext、单 service RAF 和 URL 释放已有可执行检查。
+- [ ] 用户提交干净 commit 后完成 `npm run eval:m4`。
+- [ ] M4 evidence index 追加记录并由 `project-owner` 批准。
 
 ### M5
 
@@ -121,11 +123,12 @@ next_action: "进入 M4：建立单一 AudioEngine 与 shared store，并保持 
 
 ## Current Gate State
 
-- Current stage：M4 Single AudioEngine and shared store，已开放、尚未开始实施。
+- Current stage：M4 Single AudioEngine and shared store，provisional suite 已通过，canonical evidence 尚未生成。
 - Previous gate：M3 已由 `project-owner` 于 2026-07-28 批准并标记 `Complete`。
 - Canonical run：`npm run eval:m3` 已在 clean commit `17d16f0da37289c1f67f75203502beef999572ea` 上通过；摘要见 [evidence index](../quality/evidence-index.md)。
-- Next gate：完成 M4 AudioEngine/store 实现、MusicBar 回归和单一 AudioContext 生命周期证据。
+- Next gate：provisional pass 后由用户提交；对干净 commit 运行 canonical suite 并审批 M4 evidence。
 - M3 state：Complete；M3 evidence 只证明测试基础，不代表 M4 产品行为通过。
+- M4 provisional：13/13 步骤通过；60 秒漂移约 13.3ms，三次 seek 均 <100ms。由于工作树不干净，该结果不构成 canonical evidence。
 - Known future blockers：没有真实 Edge 证据时不能完成 M11 或未来 readiness；托管平台未定会阻断 release，但不阻断 Q0/M3。
 
 ## Approval Record

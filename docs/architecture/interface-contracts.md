@@ -1,10 +1,10 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-07-24
+last_reviewed: 2026-07-28
 upstream_docs:
   - "docs/architecture/system-design.md"
-next_action: "实现时用 TypeScript 类型、runtime validation 和契约测试固化这些边界"
+next_action: "用 M4 canonical evidence 固化播放契约；M5 为 PersistedSessionV1 增加 runtime validation"
 ---
 
 # Interface Contracts
@@ -92,6 +92,59 @@ Invariants:
 - `currentTimeSeconds` 始终被裁剪到 `[0, durationSeconds]`。
 - store 只保存快照；真实 AudioNode 保留在 AudioEngine。
 - 刷新恢复后的首个快照必须为 `paused`、时间 0。
+
+## AudioEngine
+
+```ts
+interface AudioEngine {
+  load(input: {
+    trackId: TrackId
+    encodedAudio: ArrayBuffer
+  }): Promise<'loaded' | 'stale'>
+  play(): Promise<void>
+  pause(): void
+  seek(seconds: number): Promise<void>
+  setVolume(volume: number): void
+  getSnapshot(): PlaybackSnapshot
+  getTimeDomainFloatData(): Float32Array | null
+  subscribe(listener: (snapshot: PlaybackSnapshot) => void): () => void
+  unload(): void
+  dispose(): Promise<void>
+}
+```
+
+Invariants:
+
+- AudioContext、Gain、Analyser 和当前 AudioBuffer 延迟创建；设置初始音量不得提前创建上下文。
+- `load()` 使用 generation；旧解码只能返回 `stale`，不得覆盖当前 track、buffer 或 snapshot。
+- `play()` 幂等；自然 ended 只发布一次，主动 stop/unload 不发布 ended。
+- 播放时间由 AudioContext `currentTime` 和起始 offset 计算，不累计 RAF delta。
+- `dispose()` 关闭现有上下文、断开节点且不立即创建替代上下文。
+
+## AudioSessionService
+
+```ts
+interface AudioSessionService {
+  importFiles(files: File[]): Promise<void>
+  playTrack(trackId: TrackId): Promise<void>
+  togglePlayback(): Promise<void>
+  next(): Promise<void>
+  previous(): Promise<void>
+  seek(seconds: number): Promise<void>
+  setVolume(percent: number): void
+  deleteTrack(trackId: TrackId): Promise<void>
+  clear(): Promise<void>
+  dispose(): Promise<void>
+}
+```
+
+Invariants:
+
+- MainLayout 创建、provide 并 dispose 唯一 service；MusicBar 与后续 Analyzer 不自行创建 engine。
+- runtime File 与封面对象 URL 留在 store 外；`audioSessionStore.$state` 必须可 JSON 序列化。
+- service 只有一个可取消 RAF，同时刷新 PlaybackSnapshot 和 Meyda energy；暂停、错误、清空和 dispose 时 energy 为 0。
+- 空队列导入自动播放首项；非空队列导入只追加。快速切歌以最后 command generation 为准。
+- 音量命令输入为 0–100 配置值，PlaybackSnapshot 保存 0–1 Gain 值。
 
 ## AnalysisConfig
 

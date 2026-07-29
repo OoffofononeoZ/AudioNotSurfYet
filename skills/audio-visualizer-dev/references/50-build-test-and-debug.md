@@ -10,10 +10,15 @@
 | `npm run typecheck` | 运行 `vue-tsc -b` | 测试配置、测试 TypeScript 与产品源码的静态门禁 |
 | `npm test` | 执行全部非 E2E Vitest 测试 | 不代表真实浏览器或 Edge 通过 |
 | `npm run test:e2e` | 使用本机稳定 Chrome 运行 Playwright | 当前 Chrome 浏览器门禁 |
+| `npm run test:m4:unit` | 运行 AudioEngine fake-clock 单元测试 | M4 engine 契约验证 |
+| `npm run test:m4:integration` | 运行 session/store/controller 集成测试 | M4 队列、竞态和资源验证 |
+| `npm run test:e2e:m4` | 运行 M4 Chrome 播放回归和 60 秒计时 | M4 浏览器切片 |
 | `npm run test:e2e:edge` | 检测并运行稳定 Edge | Edge 缺失时以退出码 2 明确 blocked |
 | `npm run test:docs` | 检查生命周期 frontmatter、链接和 21 项特征 | 文档门禁 |
 | `npm run eval:m3:provisional` | 未提交工作树的本地 M3 run | 不创建正式 evidence index |
 | `npm run eval:m3` | 只在干净 commit 上运行 M3 canonical suite | 生成可登记到 evidence index 的正式本地证据 |
+| `npm run eval:m4:provisional` | 未提交工作树的本地 M4 run | 不追加正式 evidence |
+| `npm run eval:m4` | 只在干净 commit 上运行 M3 回归与 M4 suite | 生成可登记的 M4 正式证据 |
 
 ## 已知测试缺口
 
@@ -46,7 +51,7 @@
 
 - 先复现，再缩小到状态、DOM、音频节点或渲染循环。
 - 优先读取现有响应式值、CSS 变量、RAF 句柄和对象所有权，不先加兼容分支。
-- 对定位问题读取 `getBoundingClientRect()`；对播放问题读取 AudioLoader 的 loaded/playing/time/duration；对渲染问题检查 canvas 数量、尺寸和控制台。
+- 对定位问题读取 `getBoundingClientRect()`；对播放问题读取 `audioSessionStore.playback`、AudioEngine source/offset 和 service generation；对渲染问题检查 canvas 数量、尺寸和控制台。
 - 修复后复跑原始场景，并增加至少一个相邻失败或边界场景。
 
 ## 交付前检查

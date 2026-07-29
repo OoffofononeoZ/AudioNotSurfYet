@@ -8,7 +8,7 @@
 - FFmpeg：8.1.2；只用于生成和检查受控 WAV/MP3/FLAC fixture。
 - Microsoft Edge 当前未安装。`npm run test:e2e:edge` 会以退出码 2 报告 `blocked`，不会伪装成 pass。
 
-M3 不建设 CI。下列命令当前均为本地门禁；正式证据要求在用户提交后的干净 commit 上复跑。首条 canonical run 已登记到 [evidence index](../docs/quality/evidence-index.md) 并由 owner 批准。
+M3/M4 不建设 CI。下列命令当前均为本地门禁；正式证据要求在用户提交后的干净 commit 上复跑。M3 canonical run 已登记到 [evidence index](../docs/quality/evidence-index.md) 并由 owner 批准；M4 当前只有 dirty-worktree provisional pass。
 
 当前 `npm audit` 在安全补丁更新后剩余 1 项 low：Vite 依赖的 esbuild 0.27.3 在 Windows 开发服务器场景存在本地任意文件读取风险。仓库目标验证机为 macOS，开发服务器不得暴露到不受信网络；依赖升级提供修复版本后复核。该缺口不被描述为已修复或生产 readiness。
 
@@ -22,24 +22,32 @@ M3 不建设 CI。下列命令当前均为本地门禁；正式证据要求在�
 | `npm run test:worker` | Worker transfer、cancel 和 error harness |
 | `npm run test:analysis` | direct-Meyda 首批 golden |
 | `npm run test:fixtures` | manifest、SHA-256、字节数和 ffprobe |
+| `npm run test:m4:unit` | AudioEngine 的 load/play/pause/seek/ended/stale/error/unload/dispose |
+| `npm run test:m4:integration` | session/store 的队列、竞态、ended、删除、清空、metadata、RAF 与 URL |
 | `npm run test:docs` | 生命周期 frontmatter、内部链接和 21 项特征计数 |
 | `npm run test:harness` | 证明 deliberate failure 会非零退出 |
-| `npm run test:e2e` | 稳定 Chrome 的应用、Worker、IndexedDB 和三格式 smoke |
+| `npm run test:e2e` | 稳定 Chrome 的全部当前 E2E |
+| `npm run test:e2e:m3` | M3 应用、Worker、IndexedDB 和三格式 smoke |
+| `npm run test:e2e:m4` | M4 播放/队列/错误/资源回归及 60 秒计时 |
 | `npm run test:e2e:edge` | Edge 存在时执行同一项目；缺失时明确 blocked |
 | `npm run build` | TypeScript project build 和 Vite production build |
 | `npm run eval:m3:provisional` | 在未提交工作树生成本地 provisional run |
 | `npm run eval:m3` | 只允许在干净 commit 上生成 canonical M3 run |
+| `npm run eval:m4:provisional` | M3 回归 + M4 suite 的 dirty-worktree provisional run |
 
 ## 目录职责
 
 - `tests/unit/`：纯函数与可控浏览器 API adapter。
+- `tests/audio/`：M4 AudioEngine fake clock 与 AudioSessionService/store 集成。
 - `tests/worker/`：测试专用 Worker，不是 M6 产品 Worker。
 - `tests/analysis/`：direct-Meyda extractor、committed golden 和更新脚本。
 - `tests/fixtures/`：确定性生成器、短格式文件、许可、manifest 与重建校验。
 - `tests/e2e/`：真实 Chrome 场景；当前不声明 Edge 已通过。
 - `tests/docs/`：生命周期文档和特征计数检查。
 - `tests/harness/`：被正常 Vitest 配置排除的 deliberate failure 及其自检。
-- `tests/scripts/`：浏览器检测和 M3 run orchestration。
+- `tests/scripts/`：浏览器检测和 M3/M4 run orchestration。
+
+M4 浏览器测试中的损坏 WAV 与 65 秒、48kHz、单声道计时 WAV 都写入 `test-results/`，不提交二进制。长时钟测试用同一 DOM 采样同时读取 `performance.now()` 与 AudioContext 驱动快照；三次 seek 使用进度条真实几何。
 
 ## Fixture 重建
 
@@ -60,6 +68,8 @@ M3 不建设 CI。下列命令当前均为本地门禁；正式证据要求在�
 
 ## Evidence 与本地产物
 
-`test-results/`、`playwright-report/` 和 `artifacts/evals/<run-id>/` 只在本地保存并由 Git 忽略。未提交工作树只能产生 provisional run；只有对干净 commit 运行 `npm run eval:m3` 的真实结果才能进入正式 evidence index。
+`test-results/`、`playwright-report/` 和 `artifacts/evals/<run-id>/` 只在本地保存并由 Git 忽略。未提交工作树只能产生 provisional run；只有对干净 commit 运行对应 canonical 命令的真实结果才能进入正式 evidence index。
 
-本 README 只记录已存在且至少成功执行过一次的命令。M3 provisional 结果不等同于产品功能、Edge 矩阵或 release readiness。
+2026-07-28 的最终 M4 provisional run 为 `M4-2026-07-28T10-15-08-817Z-20f52390-provisional`，summary SHA-256 为 `124819e3a3c7ca4e6404b126cdcc66f95cf48557fa7229494ca10d2642beb3d5`。它记录 60 秒漂移约 13.3ms，三次 seek 误差均低于 100ms，但不绑定当前 dirty worktree 的完整内容身份。
+
+本 README 只记录已存在且至少成功执行过一次的命令。M4 provisional 结果不等同于 canonical evidence、Edge 矩阵、M4 Complete 或 release readiness；`npm run eval:m4` 要等用户提交干净 commit 后才可作为已执行命令登记。
