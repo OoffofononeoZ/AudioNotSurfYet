@@ -1,12 +1,12 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-07-24
+last_reviewed: 2026-07-30
 upstream_docs:
   - "docs/product/success-metrics.md"
   - "docs/architecture/system-design.md"
   - "docs/architecture/interface-contracts.md"
-next_action: "建立 Worker 契约测试、合成 PCM 黄金测试和 job generation 隔离"
+next_action: "由 owner 结合 M6 canonical evidence 复核 Worker、golden、generation 与资源边界；获批后进入 M7"
 ---
 
 # ADR-0002: Worker Full-Track Analysis and Stale Result Isolation

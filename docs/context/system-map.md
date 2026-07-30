@@ -1,10 +1,10 @@
 ---
 status: in-review
 owner: "project-owner"
-last_reviewed: 2026-07-29
+last_reviewed: 2026-07-30
 upstream_docs:
   - "docs/context/index.md"
-next_action: "复核 M6 canonical 资源与缓存证据；M7 接入 Analyzer UI 时重新审阅"
+next_action: "由 owner 结合 M6 canonical 资源与缓存证据复核本图；M7 接入 Analyzer UI 时再次更新"
 ---
 
 # System Map

@@ -1,21 +1,21 @@
 ---
-status: approved
+status: in-review
 owner: "project-owner"
-last_reviewed: 2026-07-29
+last_reviewed: 2026-07-30
 upstream_docs:
   - "docs/quality/eval-plan.md"
   - "docs/quality/golden-examples.md"
   - "docs/quality/failure-taxonomy.md"
   - "docs/delivery/milestone-plan.md"
   - "tests/fixtures/fixture-manifest.json"
-next_action: "为 M6 Worker platform 与 feature registry 建立实施和 canonical evidence；不提前声明 M6 通过"
+next_action: "由 project-owner 复核 M6 canonical evidence、working agreements、system map 与 glossary；批准前 M6 保持 In Progress"
 ---
 
 # Evidence Index
 
 ## 1. Purpose and Gate State
 
-本文件保存受版本控制的长期证据摘要；原始日志保存在 Git 忽略的本地 artifact 目录。M3 测试基础切片、M4 AudioEngine 切片和 M5 hybrid recovery 切片均已由 `project-owner` 批准。M5 的 clean-commit canonical 自动化与 Chrome 原生权限人工检查均已通过，M5 已关闭并开放 M6。
+本文件保存受版本控制的长期证据摘要；原始日志保存在 Git 忽略的本地 artifact 目录。M3 测试基础切片、M4 AudioEngine 切片和 M5 hybrid recovery 切片均已由 `project-owner` 批准。M6 clean-commit canonical 自动化已通过并登记为待复核证据；在 owner 明确批准前，M6 仍为 `In Progress`，M7 仍为 `Planned`。
 
 每条 `pass` 只证明对应里程碑的适用子集在被记录的 commit 和环境上可复现。它不表示完整 EV-A–EV-R、未执行里程碑、Edge 矩阵或 release readiness 已通过。
 
@@ -297,3 +297,112 @@ M5 自动化覆盖 success、failure、boundary 与 exception 的可重复子集
 ### M5 Approval Record
 
 本记录来自干净 commit，16/16 自动化步骤通过且没有 M5 门禁内 failure instance。`project-owner` 于 2026-07-29 确认原生权限人工检查通过，并明确批准本 evidence 与 [working agreements](../context/working-agreements.md)。M5 据此改为 `Complete` 并开放 M6；该批准不构成 M6、Edge、完整 EV-A–EV-R 或 release readiness 通过。
+
+## 9. M6 Canonical Run Record
+
+| Field | Value |
+| --- | --- |
+| Run ID | `M6-2026-07-30T02-19-07-149Z-a39256ff` |
+| Milestone | M6 — Worker platform and feature registry |
+| State | `pass`（M6 适用子集；待 `project-owner` 审批） |
+| Eval IDs | EV-A、EV-J、EV-R 的 M6 适用子集；EV-S、EV-B、EV-D 与 M3–M5 的回归子集 |
+| Commit | `a39256ff7afdd4167bfdebdd693bcc8b3ba20e94` |
+| Dirty at start / end | `false` / `false` |
+| Commit at end | `a39256ff7afdd4167bfdebdd693bcc8b3ba20e94` |
+| Started at | 2026-07-30 02:19:07.149 UTC |
+| Method | `npm run eval:m6` |
+| Reviewer | `project-owner` — pending |
+| Retention | `local-present` |
+| Artifact root | `artifacts/evals/M6-2026-07-30T02-19-07-149Z-a39256ff/` |
+| Summary SHA-256 | `2d955ddb994e8e2066ce3c79655d44402e297ffdc03ec63b3a7bf5a2088f08ae` |
+| Failure | M6 门禁内无 failure instance；Edge 缺失、构建 chunk warning 与 R-020 继续作为未关闭缺口/风险 |
+
+### Environment
+
+| Item | Recorded value |
+| --- | --- |
+| OS | macOS 26.5.2 (`25F84`), Darwin arm64 |
+| Hardware | MacBook Pro `MacBookPro17,1`；Apple M1 8-core；16 GB memory |
+| Node / npm | Node `v24.18.0`；npm `11.16.0` |
+| Vitest | `4.1.10` |
+| Playwright Test | `1.62.0` |
+| Chrome | Google Chrome `151.0.7922.71` |
+| Edge | `not-installed` |
+| FFmpeg | `8.1.2` |
+| Meyda | `5.6.3` |
+
+本记录只保留验证所需的机型、芯片、核心数和内存；本地 summary 中的设备序列号、UUID、UDID 等标识不进入版本控制证据。
+
+### Fixture and Runtime Input Identity
+
+短格式回归只使用仓库内 CC0-1.0 受控 fixture，完整 provenance 与 SHA-256 见 [fixture manifest](../../tests/fixtures/fixture-manifest.json)。15 分钟容量输入由 Chrome E2E 在 OPFS 中确定性分块生成 48kHz、单声道 silence WAV，测试结束后不进入 Git；本 run 未读取、复制或记录用户私有音频的文件名、路径、内容或 hash。
+
+### Results and Traceability
+
+| Step | Result | M6 measurement | Eval / AC / risk trace |
+| --- | --- | --- | --- |
+| Fixture hashes | pass | 5/5 | M3 regression；EV-A、EV-B |
+| M3 unit regression | pass | 12/12 | M3 regression；EV-A、EV-D |
+| M3 Worker regression | pass | 11/11 | M3/M6 Worker regression；EV-J |
+| M3 analysis regression | pass | 28/28 | M3/M6 analysis regression；EV-A、EV-J |
+| M4 AudioEngine unit | pass | 6/6 | M4 regression；EV-S、EV-R |
+| M4 session integration | pass | 5/5 | M4 regression；EV-S、EV-R |
+| M5 repository unit | pass | 5/5 | M5 regression；EV-D |
+| M5 recovery integration | pass | 6/6 | M5 regression；EV-D |
+| M6 platform unit | pass | 18/18；21/21 registry、config/cache identity、PCM/frame、六类 codec、损坏数据拒绝 | EV-A、EV-J；AC-A01、AC-A02、AC-A06、AC-A08、AC-A10；R-003、R-010、R-011 |
+| M6 Worker and golden | pass | 13/13；0/1/4、invalid/unsupported、progress/cancel、silence/sine/dual-tone/impulse、exact cursor、R-020 expected defect | EV-A、EV-J、EV-R；AC-A02、AC-A03、AC-A07、AC-A09；R-002、R-003、R-004、R-010、R-011、R-020 |
+| M6 coordinator integration | pass | 6/6；默认零特征、四项、partial cache、stale、quota、非法活动集 | EV-J、EV-D；AC-A08、AC-A09、AC-R03、AC-R04、AC-F06；R-002、R-003、R-007 |
+| Docs | pass | lifecycle frontmatter/links；feature source count 21 | EV-R；R-019 |
+| Deliberate failure | pass | harness 正确检测 child exit 1 | EV-R；R-019 |
+| Typecheck | pass | `vue-tsc -b` exit 0 | EV-A、EV-J、EV-D |
+| M3 Chrome regression | pass | 5/5；应用、真实 IndexedDB/Worker、三格式 smoke | M3 regression；EV-B |
+| M4 Chrome regression | pass | 3/3；60 秒漂移 10.233ms；三次 seek 最大误差 61.494ms | M4 regression；EV-S、EV-R |
+| M5 Chrome regression | pass | 3/3；真实 IndexedDB/OPFS handle 与刷新恢复 | M5 regression；EV-D |
+| M6 Chrome E2E | pass | 3/3；四项真实 Worker、100,941-byte cache、刷新 hit + exact cursor、20 次资源循环、15 分钟响应/取消 | EV-A、EV-J、EV-R；AC-A03、AC-A07–AC-A09、AC-R01–AC-R04、AC-R06；R-002、R-003、R-004、R-013 |
+| Build | pass with warning | 1811 modules；Worker 40.36 kB；最大 JS chunk 1,077.72 kB | EV-R；R-019 |
+| Diff check | pass | `git diff --check` exit 0；起止 commit 相同且工作树干净 | EV-R；R-019 |
+
+M6 Chrome 测量记录：四项短 fixture 产生 4 个 payload、合计 100,941 bytes；首次与刷新后的 RMS exact cursor frame start 均为 0.992 秒。20 次 start/cancel/换歌/route 循环只创建并保留 1 个 Worker 和 1 个 AudioContext，RAF live 范围为 2–3。15 分钟输入三次反馈为 10.7ms、17ms、0.3ms，最大 17ms；进度单调、取消成功，分析观察窗内超过 50ms 的 long task 为 0。
+
+本 run 覆盖 M6 的 success、failure、boundary 与 exception 子集：四项成功分析和完整 cache；非法/不支持 feature、extract/cache failure；0/1/4、silence、impulse、尾帧与 15 分钟边界；stale generation、取消、损坏 cache、partial/full hit 和刷新异常路径。它不证明 M7 Canvas/UI、owner 3/3 学习任务、Edge 矩阵或 release readiness。
+
+### Local Artifact Hashes
+
+| Artifact | SHA-256 |
+| --- | --- |
+| `summary.json` | `2d955ddb994e8e2066ce3c79655d44402e297ffdc03ec63b3a7bf5a2088f08ae` |
+| `01-fixture-hashes.log` | `de86de65e5aa0d70a54d329c5a4926716e548472482bf23db1682838223c6a1d` |
+| `02-M3-unit-regression.log` | `4c7d4f6e7b2b7377af0d30bd06fc7a324f7642c8d6f3a682fdbe5e154ed0692c` |
+| `03-M3-worker-regression.log` | `086206d5a71f4ba66ef7c28301fd4dcadeb6b2b491c2f675cd445b98fea58f5a` |
+| `04-M3-analysis-regression.log` | `77f2f3e51dbceb7678992cc721e5f7b4292a9abd1d9bcc0306864bf258ee5e8e` |
+| `05-M4-AudioEngine-unit.log` | `e5d9ded54b368ca08ee4a959907373cc88e75798c9ee6c5dcc22bf6cce09b3e9` |
+| `06-M4-session-integration.log` | `95e551492e2d1c42f047273b7b33c264396b363d2fe4b4a2e1e3497d52a82123` |
+| `07-M5-repository-unit.log` | `91f6446f26876036fef98be43475af7c20f8091c210674cfbc1f04466f711050` |
+| `08-M5-recovery-integration.log` | `ad1faf485ed3d98eb708838dbaa103f503fc94f37925e298c91ebed0b836b861` |
+| `09-M6-platform-unit.log` | `e0f92e2130e027b72566feb35afdea71002b93f9a718e7e0d0c74637acdcaa64` |
+| `10-M6-Worker-and-golden.log` | `f74a02096ee72c7b87afc68b7015a9221c38ba5ca200175f302be2185bd6dbc8` |
+| `11-M6-coordinator-integration.log` | `997dd6193d5c91210dddee63d089cac61e01b7d128d72c72478c6affb7cce6fe` |
+| `12-docs.log` | `bb005ed0074179a47b895a5c66e79917e37ebf18976e21fe9d27b1dd63c8f151` |
+| `13-deliberate-failure.log` | `69bf5c3fa50230a4957ad0c60c8323dba68e494d92761fea0039cf5d580d70aa` |
+| `14-typecheck.log` | `fadc7f66199c28d2f7cca439bb300ebeb0320158f32a0f9b52ec77031538af4d` |
+| `15-M3-Chrome-regression.log` | `00e9185fd00a32fbf25e77b62545f10d56b581b850cecaf2010443cbc3cb9bc3` |
+| `16-M4-Chrome-regression.log` | `98852338593cfb7b58a3ff9eaad9af5b6a91d1cf1fe5446045f79e280fdf8871` |
+| `17-M5-Chrome-regression.log` | `5834c854826784384cc9c57efd8cd89090da2d66acf4b319bdd0bfa2be734bef` |
+| `18-M6-Chrome-e2e.log` | `b26c293ea7a3e38aad34fdc5c7d046e50b0fa98db5a084449170e3da5c215b88` |
+| `19-build.log` | `25cb55002484d9fbac767bd5a171cddc28489f4599d6574a8cc9a0d53a4fb023` |
+| `20-diff-check.log` | `e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855` |
+
+`summary.json.sha256` 已独立核对并与 `summary.json` 一致。本地产物至少保留到 M6 获批；删除后必须把 retention 改为 `local-deleted`，且不能仅凭删除后的摘要支持未来 release readiness。
+
+### Open Gaps and Warnings
+
+- EG-003：本机仍未安装 Edge；M6 不要求关闭双浏览器矩阵，但 M11 和未来 readiness 继续 blocked。
+- EG-004：M7 owner 3/3 学习解释尚未执行；本 run 不证明学习目标。
+- EG-005：记录了本机实际硬件，尚未批准跨设备性能基线；17ms 结论只绑定上述环境。
+- R-020：Meyda 5.6.3 `spectralFlux` 仍抛 `ReferenceError: x is not defined`；它保持不可选并阻断未来 M8 对应 scalar coverage，不阻断 M6/M7。
+- 构建保留 1,077.72 kB 主 chunk warning；它是 R-019 风险信号，不是本次 build failure，也不是性能 readiness 通过。
+- 当前仍无正式 CI；本记录只支持上述本地 clean-commit 环境。
+
+### M6 Approval Record
+
+本记录来自干净 commit，20/20 自动化步骤通过且没有 M6 门禁内 failure instance。当前 reviewer 为 pending，证据及 [working agreements](../context/working-agreements.md)、[system map](../context/system-map.md)、[glossary](../context/glossary.md) 均等待 `project-owner` 明确复核；批准前 M6 保持 `In Progress`，M7 保持 `Planned`，本记录不构成 Edge、M7 UI、完整 EV-A–EV-R 或 release readiness 通过。

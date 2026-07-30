@@ -1,20 +1,20 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-07-29
+last_reviewed: 2026-07-30
 upstream_docs:
   - "docs/quality/eval-plan.md"
   - "docs/delivery/acceptance-criteria.md"
   - "docs/delivery/test-strategy.md"
   - "docs/architecture/risk-register.md"
-next_action: "用 M6 canonical 固化四项 Worker golden；M7 再进入首批 Analyzer UI 样例"
+next_action: "由 owner 复核 M6 四项 Worker golden canonical evidence；获批后 M7 再进入首批 Analyzer UI 样例"
 ---
 
 # Golden Examples
 
 ## 1. Evidence Boundary
 
-以下产品、学习、失败和边界样例仍是待各里程碑实现和执行的规范。M3 已生成受控 fixture、manifest 和首批 direct-Meyda golden，并在 clean commit canonical run 中通过 identity/容差检查。M6 新增的产品 Worker 测试会对 silence、sine、dual-tone 和 impulse 比较 RMS、Energy、Amplitude Spectrum、Chroma，但在 canonical 与 owner 审批前只属于实现反馈；它也不表示 M7 UI 或后续 21 项产品行为已经通过。
+以下产品、学习、失败和边界样例仍是待各里程碑实现和执行的规范。M3 已生成受控 fixture、manifest 和首批 direct-Meyda golden，并在 clean commit canonical run 中通过 identity/容差检查。M6 新增的产品 Worker 测试已在 clean commit canonical 中对 silence、sine、dual-tone 和 impulse 比较 RMS、Energy、Amplitude Spectrum、Chroma，并登记为 `in-review` evidence；owner 批准前不能关闭 M6，也不表示 M7 UI 或后续 21 项产品行为已经通过。
 
 音频仅允许：
 

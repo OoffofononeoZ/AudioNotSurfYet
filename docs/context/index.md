@@ -1,10 +1,10 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-07-29
+last_reviewed: 2026-07-30
 upstream_docs:
   - "AGENTS.md"
-next_action: "用户提交 M6 工作树后运行 canonical 并等待 owner 审批，获批前不进入 M7"
+next_action: "由 owner 复核 M6 canonical evidence、working agreements、system map 与 glossary；获批前不进入 M7"
 ---
 
 # Repository Context Index
@@ -21,8 +21,8 @@ AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端：用户选择
 - Product intent：problem brief、scope 和 success metrics 已由 `project-owner` 批准；开放问题只保留未来上传、未定义 Tab、托管和扩展研究等非当前门禁事项。
 - System design：system design、接口契约、风险和四个 ADR 已批准。
 - Execution planning：execution plan、acceptance criteria、test strategy 和 milestone plan 均为 approved。
-- Quality and evals：eval plan、golden examples、failure taxonomy，以及 M3、M4、M5 的适用 canonical evidence 已由 `project-owner` 批准；M6 专项测试已实现但 provisional/canonical 尚未完成，完整 eval 仍未完成。
-- Implementation：M3、M4、M5 已 `Complete`；M6 Worker platform、registry、codec、coordinator 与 current cache 已实现并处于 `In Progress`，M7 UI 未开始。
+- Quality and evals：eval plan、golden examples、failure taxonomy，以及 M3、M4、M5 的适用 canonical evidence 已由 `project-owner` 批准；M6 canonical 已 20/20 通过并登记为 `in-review`，仍待 owner 批准，完整 eval 仍未完成。
+- Implementation：M3、M4、M5 已 `Complete`；M6 Worker platform、registry、codec、coordinator 与 current cache 已实现并处于 `In Progress`，M7 保持 `Planned` 且 UI 未开始。
 - Readiness、release、retrospective：`release-readiness.md` 等待 M11 执行证据，不创建 release 或 retrospective 文档。
 
 ## Key Documents
@@ -48,7 +48,7 @@ AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端：用户选择
 | [eval-plan.md](../quality/eval-plan.md) | 七组评估、阈值、AC/risk 映射和证据缺口 | project-owner / approved | 验收、测试覆盖或风险变化 |
 | [golden-examples.md](../quality/golden-examples.md) | 成功、失败、边界和异常黄金样例 | project-owner / approved | fixture、Meyda、参数或用户任务变化 |
 | [failure-taxonomy.md](../quality/failure-taxonomy.md) | 稳定失败类型、S0–S3 和门禁响应 | project-owner / approved | 失败分类或风险接受规则变化 |
-| [evidence-index.md](../quality/evidence-index.md) | M3–M11 canonical run 摘要、环境、hash 和 reviewer | project-owner / approved | 新 run、artifact retention 或里程碑审批 |
+| [evidence-index.md](../quality/evidence-index.md) | M3–M11 canonical run 摘要、环境、hash 和 reviewer | project-owner / in-review | 新 run、artifact retention 或里程碑审批 |
 
 ## Architecture Decisions
 
@@ -79,7 +79,7 @@ AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端：用户选择
 - System design：[system design](../architecture/system-design.md)
 - Delivery planning：[execution plan](../delivery/execution-plan.md)
 - Quality design：[eval plan](../quality/eval-plan.md)，Q0 批准后用于 M3–M11 证据
-- Quality evidence：[evidence index](../quality/evidence-index.md)，首条 M3 canonical run 已批准
+- Quality evidence：[evidence index](../quality/evidence-index.md)，M3–M5 canonical 已批准，M6 canonical 为 `in-review`
 - Quality readiness：`docs/quality/release-readiness.md` 尚未创建；M11 证据完成后生成
 - Release operations：`docs/release/` 尚未创建；release readiness 证据存在后生成
 - Retrospectives：`docs/retrospectives/` 尚未创建；有发布、事故或重复摩擦证据后生成
@@ -110,4 +110,6 @@ AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端：用户选择
 
 随后 M5 canonical suite 在 clean commit `c90a3c5738de5b7a4efb7eb24cddc49da3713b44` 上 16/16 通过并追加到 evidence index。`project-owner` 于 2026-07-29 确认 Chrome 原生权限人工检查通过，并明确批准 M5 evidence 与 working agreements。M5 改为 `Complete`，M6 门禁开放但尚未开始实现；超范围长音频未开始播放作为非门禁观察保留。
 
-同日，owner 要求按详细计划执行 M6。产品源码、专项 Vitest/Playwright 和 eval runner 已进入工作树；dirty-worktree provisional 20/20 通过，但用户提交后的 clean-commit canonical、正式 evidence index 与 owner 审批仍是关闭条件，里程碑继续为 `In Progress`。
+同日，owner 要求按详细计划执行 M6。产品源码、专项 Vitest/Playwright 和 eval runner 已进入工作树；dirty-worktree provisional 20/20 通过，但当时仍需用户提交后的 clean-commit canonical、正式 evidence index 与 owner 审批。
+
+2026-07-30，M6 canonical run `M6-2026-07-30T02-19-07-149Z-a39256ff` 在 clean commit `a39256ff7afdd4167bfdebdd693bcc8b3ba20e94` 上 20/20 通过，summary SHA-256 为 `2d955ddb994e8e2066ce3c79655d44402e297ffdc03ec63b3a7bf5a2088f08ae`，并登记为 `in-review` evidence。该事实不构成 owner 批准；M6 继续为 `In Progress`，M7 继续为 `Planned`。

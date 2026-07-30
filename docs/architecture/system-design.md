@@ -1,13 +1,13 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-07-29
+last_reviewed: 2026-07-30
 upstream_docs:
   - "docs/product/problem-brief.md"
   - "docs/product/scope.md"
   - "docs/product/success-metrics.md"
   - "docs/product/open-questions.md"
-next_action: "用户提交后完成 M6 canonical 与 evidence 审批；M6 关闭前不进入 M7"
+next_action: "由 owner 复核 M6 canonical evidence；M6 获批关闭前不进入 M7"
 ---
 
 # System Design
