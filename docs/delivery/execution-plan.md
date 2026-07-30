@@ -1,7 +1,7 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-07-29
+last_reviewed: 2026-07-30
 upstream_docs:
   - "docs/product/problem-brief.md"
   - "docs/product/scope.md"
@@ -9,7 +9,7 @@ upstream_docs:
   - "docs/architecture/system-design.md"
   - "docs/architecture/interface-contracts.md"
   - "docs/architecture/risk-register.md"
-next_action: "由用户提交 M6 工作树；随后运行 clean-commit canonical 并等待 owner evidence/working-agreements 审批"
+next_action: "由 owner 复核并批准 M6 canonical evidence 与 working agreements；获批前不关闭 M6、不进入 M7"
 ---
 
 # Execution Plan
@@ -18,7 +18,7 @@ next_action: "由用户提交 M6 工作树；随后运行 clean-commit canonical
 
 按纵向切片把已批准的本地音频学习体验从当前播放器基础推进到 21 项 Meyda 特征全覆盖。本计划以门禁证据而不是日历日期排序；任一里程碑未通过时，不进入下一批特征。
 
-本文件定义实施顺序和验收方式，不代表未关闭里程碑已通过。当前已完成 M1、M2、Q0、M3、M4 和 M5 门禁；M6 Worker analysis platform 与 FeatureRegistry 为 `In Progress`，实现与单项验证已开始，但 provisional、canonical、正式 evidence 和 owner 审批尚未完成。
+本文件定义实施顺序和验收方式，不代表未关闭里程碑已通过。当前已完成 M1、M2、Q0、M3、M4 和 M5 门禁；M6 Worker analysis platform 与 FeatureRegistry 为 `In Progress`，provisional 与 clean-commit canonical 已通过，正式 evidence 已登记为 `in-review`，仍待 owner 审批。
 
 ## 2. Stage Gates
 
@@ -243,8 +243,11 @@ Evidence state:
 
 - M6 unit/Worker/golden/coordinator/cache、M3–M5 回归、typecheck、build 和 Chrome E2E 已由 dirty-worktree `eval:m6:provisional` 在 2026-07-29 完整运行。
 - 最终 provisional run `M6-2026-07-29T10-59-23-767Z-b7fa91ed-provisional` 20/20 通过，summary SHA-256 为 `6fd67f9a8b0184a2861a7182a1276572375e947880cf3688afe7511ca97ed3fa`；15 分钟输入最大反馈 16.7ms、分析归因 >50ms 长任务 0 个，20 次资源循环保持单 Worker/AudioContext，刷新 cache hit 后 exact cursor 仍可用。
-- 该 run 起止均为 dirty worktree，只作实现反馈，不追加 evidence index；下一步由用户提交。
-- clean-commit `eval:m6`、evidence index 追加和 `project-owner` 审批尚未执行；M6 因此不能标记 `Complete`，M7 仍关闭。
+- 该 provisional run 起止均为 dirty worktree，只作实现反馈。
+- clean-commit canonical run `M6-2026-07-30T02-19-07-149Z-a39256ff` 已在 commit `a39256ff7afdd4167bfdebdd693bcc8b3ba20e94` 上 20/20 通过，起止身份一致且工作树干净；summary SHA-256 为 `2d955ddb994e8e2066ce3c79655d44402e297ffdc03ec63b3a7bf5a2088f08ae`。
+- canonical 记录包括 M6 unit 18/18、Worker/golden 13/13、coordinator 6/6、Chrome 3/3；四项 cache payload 为 100,941 bytes，刷新 hit 后 exact cursor 一致，20 次循环保持单 Worker/AudioContext，15 分钟输入最大反馈 17ms、分析归因 >50ms 长任务 0 个。
+- 正式记录已以 `in-review` 追加到 [evidence index](../quality/evidence-index.md)；Edge 矩阵缺失、约 1.08MB chunk warning 和 R-020 `spectralFlux` 缺陷仍保留。
+- `project-owner` 审批尚未发生；M6 因此不能标记 `Complete`，M7 保持 `Planned`。
 
 Rollback:
 

@@ -8,7 +8,7 @@
 - FFmpeg：8.1.2；只用于生成和检查受控 WAV/MP3/FLAC fixture。
 - Microsoft Edge 当前未安装。`npm run test:e2e:edge` 会以退出码 2 报告 `blocked`，不会伪装成 pass。
 
-M3–M6 不建设 CI。下列命令当前均为本地门禁；正式证据要求在用户提交后的干净 commit 上复跑。M3/M4/M5 canonical run 已登记到 [evidence index](../docs/quality/evidence-index.md) 并由 owner 批准；M6 仍处于 dirty-worktree 实现阶段，不得提前登记。M5 Chrome 原生权限人工检查也已单独签字通过。
+M3–M6 不建设 CI。下列命令当前均为本地门禁；正式证据要求在用户提交后的干净 commit 上复跑。M3/M4/M5 canonical run 已登记到 [evidence index](../docs/quality/evidence-index.md) 并由 owner 批准；M6 canonical 已登记为 `in-review`，仍待 owner 批准。M5 Chrome 原生权限人工检查也已单独签字通过。
 
 当前 `npm audit` 在安全补丁更新后剩余 1 项 low：Vite 依赖的 esbuild 0.27.3 在 Windows 开发服务器场景存在本地任意文件读取风险。仓库目标验证机为 macOS，开发服务器不得暴露到不受信网络；依赖升级提供修复版本后复核。该缺口不被描述为已修复或生产 readiness。
 
@@ -111,4 +111,6 @@ M6 浏览器测试通过 DEV-only bridge 选择四项支持特征、读取可序
 
 同日最终 M6 provisional run `M6-2026-07-29T10-59-23-767Z-b7fa91ed-provisional` 在 dirty worktree 20/20 通过，summary SHA-256 为 `6fd67f9a8b0184a2861a7182a1276572375e947880cf3688afe7511ca97ed3fa`。M6 Chrome 为 3/3；四项 cache payload 为 100,941 bytes、刷新为 hit 且 exact cursor 可用，20 次循环保持一个 live Worker/AudioContext，15 分钟输入最大反馈 16.7ms 且分析归因 >50ms 长任务为 0。该 run 只作实现反馈，不进入 evidence index。
 
-本 README 只记录真实执行结果。M5 canonical 自动化、Chrome 原生权限人工检查及 owner approval 均已完成；它们不等同于 Edge 矩阵、M6 canonical evidence 或 release readiness。
+2026-07-30 的 M6 canonical run `M6-2026-07-30T02-19-07-149Z-a39256ff` 在 clean commit `a39256ff7afdd4167bfdebdd693bcc8b3ba20e94` 上 20/20 通过，起止工作树均干净，summary SHA-256 为 `2d955ddb994e8e2066ce3c79655d44402e297ffdc03ec63b3a7bf5a2088f08ae`。M6 unit 为 18/18、Worker/golden 为 13/13、coordinator 为 6/6、Chrome 为 3/3；四项 cache payload 为 100,941 bytes，刷新命中后 exact cursor 保持一致，20 次循环保持单一 live Worker/AudioContext，15 分钟输入最大反馈 17ms，分析归因 >50ms 长任务为 0。完整环境、步骤和日志 hash 已登记到 [evidence index](../docs/quality/evidence-index.md)。
+
+本 README 只记录真实执行结果。M6 canonical evidence 当前为 `in-review`，不等于 owner approval、M6 Complete、Edge 矩阵或 release readiness；约 1.08MB chunk warning 与 Meyda 5.6.3 `spectralFlux` 的 R-020 缺陷仍未解决。

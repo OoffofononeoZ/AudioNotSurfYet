@@ -1,12 +1,12 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-07-28
+last_reviewed: 2026-07-30
 upstream_docs:
   - "docs/product/problem-brief.md"
   - "docs/product/scope.md"
   - "docs/architecture/system-design.md"
-next_action: "用 M6 canonical 复核 PCM copy/revision 与唯一 AudioEngine 时钟边界"
+next_action: "由 owner 结合 M6 canonical 复核 PCM copy/revision 与唯一 AudioEngine 时钟边界"
 ---
 
 # ADR-0001: Single AudioEngine and Shared Session State

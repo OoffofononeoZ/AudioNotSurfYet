@@ -1,13 +1,13 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-07-29
+last_reviewed: 2026-07-30
 upstream_docs:
   - "docs/context/index.md"
   - "docs/product/scope.md"
   - "docs/architecture/system-design.md"
   - "docs/delivery/execution-plan.md"
-next_action: "完成 DEC-016 的 canonical evidence；owner 批准前保持 M6 In Progress"
+next_action: "由 owner 复核 DEC-016 的 M6 canonical evidence；批准前保持 M6 In Progress、M7 Planned"
 ---
 
 # Decision Registry
@@ -62,6 +62,8 @@ M4 dirty-worktree provisional suite 随后通过，证明当前实现值得进�
 同次人工检查中，一段超出 DEC-006“约 15 分钟”支持边界的本地压力输入未开始播放。依据 DEC-015，该观察不计入 M5 pass/fail，不表示长音频必须失败，也不扩大支持范围；若支持范围内的有效格式复现，或失败破坏当前会话与其他歌曲可用性，则重新进入缺陷调查。
 
 同日，`project-owner` 以“按计划执行”批准并要求实施 M6 详细计划，DEC-016 据此生效。实现源码和专项测试存在只表示进入 `In Progress`；依据 DEC-013，仍需 dirty-worktree provisional、用户提交、clean-commit canonical、正式 evidence index 与 owner 审批后才能关闭 M6。
+
+2026-07-30，DEC-013 约束下的 M6 clean-commit canonical run 已 20/20 通过并登记为 `in-review` [evidence](../quality/evidence-index.md)。该执行事实不等同于 owner 批准；DEC-016 的实现门禁仍保持 M6 `In Progress`、M7 `Planned`。
 
 ## Historical Evidence Gap
 

@@ -1,13 +1,13 @@
 ---
 status: in-review
 owner: "project-owner"
-last_reviewed: 2026-07-29
+last_reviewed: 2026-07-30
 upstream_docs:
   - "AGENTS.md"
   - "docs/context/index.md"
   - "docs/delivery/test-strategy.md"
   - "docs/quality/eval-plan.md"
-next_action: "用户提交 M6 工作树后运行 canonical，再由 owner 审批本修订与 evidence"
+next_action: "由 owner 复核 M6 canonical evidence 与本修订；获批前 M6 保持 In Progress、M7 保持 Planned"
 ---
 
 # Working Agreements
@@ -49,8 +49,10 @@ next_action: "用户提交 M6 工作树后运行 canonical，再由 owner 审批
 - M5 dirty worktree 只运行 `eval:m5:provisional`；要求 clean HEAD 的 `eval:m5` 已对提交 `c90a3c5738de5b7a4efb7eb24cddc49da3713b44` 运行并追加正式 evidence。原生权限人工检查已由 `project-owner` 执行并与自动化结果分开记录。
 - 2026-07-29 的 M5 provisional run 16/16 通过；它绑定 dirty worktree，只证明当前实现值得提交和 canonical 复跑，不关闭 M5。
 - 同日 M5 canonical run 16/16 通过，起止工作树均干净且 commit 身份一致；随后 Chrome 原生权限人工检查通过并由 owner 批准，M5 已关闭。
-- M6 dirty-worktree provisional `M6-2026-07-29T10-59-23-767Z-b7fa91ed-provisional` 已 20/20 通过，summary SHA-256 为 `6fd67f9a8b0184a2861a7182a1276572375e947880cf3688afe7511ca97ed3fa`；它只作实现反馈。在用户提交且 `eval:m6` 通过前不追加 evidence index。
-- 首个 canonical run 已记录在 [evidence index](../quality/evidence-index.md)；本地产物保留和删除规则以 [eval plan](../quality/eval-plan.md) 为准。
+- M6 dirty-worktree provisional `M6-2026-07-29T10-59-23-767Z-b7fa91ed-provisional` 已 20/20 通过，summary SHA-256 为 `6fd67f9a8b0184a2861a7182a1276572375e947880cf3688afe7511ca97ed3fa`；它只作实现反馈。
+- M6 canonical run `M6-2026-07-30T02-19-07-149Z-a39256ff` 已在 clean commit `a39256ff7afdd4167bfdebdd693bcc8b3ba20e94` 上 20/20 通过，起止身份一致且工作树干净；summary SHA-256 为 `2d955ddb994e8e2066ce3c79655d44402e297ffdc03ec63b3a7bf5a2088f08ae`，正式记录已以 `in-review` 追加到 [evidence index](../quality/evidence-index.md)。
+- M6 canonical artifact 在 owner 审批完成前保留于 Git 忽略的本地目录；commit 或 artifact 身份变化时必须重新运行，不能沿用旧证据。
+- M3–M6 canonical run 已记录在 [evidence index](../quality/evidence-index.md)；本地产物保留和删除规则以 [eval plan](../quality/eval-plan.md) 为准。
 - fixture、manifest 和 golden 是受版本控制的规范输入；更新必须可重建、显示 diff，并重新执行对应测试。
 
 ## Resource Ownership
@@ -80,4 +82,6 @@ next_action: "用户提交 M6 工作树后运行 canonical，再由 owner 审批
 
 `project-owner` 于 2026-07-29 确认 M5 Chrome 原生权限人工检查通过，并明确批准 M5 evidence 与本修订。M5 据此关闭并开放 M6；本批准不覆盖 M6、Edge 或 release readiness。超范围长音频未开始播放只记录为非门禁压力观察，不改变约 15 分钟产品边界。
 
-同日，owner 要求按 M6 详细计划实施；以上 M6 命令、DEV bridge 与资源所有权是随实现形成的待复核约定。它们当前为 `in-review`，不得从本次实现请求推断 canonical evidence 或 M6 关闭已获批准。
+同日，owner 要求按 M6 详细计划实施；以上 M6 命令、DEV bridge 与资源所有权是随实现形成的待复核约定。
+
+2026-07-30，M6 canonical run 已在 clean commit 上 20/20 通过并登记为 `in-review` evidence。该执行事实不等同于 owner 批准；本修订仍为 `in-review`，M6 保持 `In Progress`，M7 保持 `Planned`。

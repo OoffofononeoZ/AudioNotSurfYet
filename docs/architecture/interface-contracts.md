@@ -1,10 +1,10 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-07-29
+last_reviewed: 2026-07-30
 upstream_docs:
   - "docs/architecture/system-design.md"
-next_action: "用户提交后完成 M6 canonical，复核 AnalysisCoordinator、Worker、codec 与 cache transaction 契约"
+next_action: "由 owner 结合 M6 canonical evidence 复核 AnalysisCoordinator、Worker、codec 与 cache transaction 契约"
 ---
 
 # Interface Contracts

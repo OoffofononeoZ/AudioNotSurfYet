@@ -1,12 +1,12 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-07-24
+last_reviewed: 2026-07-30
 upstream_docs:
   - "docs/product/scope.md"
   - "docs/architecture/system-design.md"
   - "docs/architecture/interface-contracts.md"
-next_action: "先定义 21 项穷尽注册表和 renderer 契约，再实现首批三项"
+next_action: "由 owner 复核 M6 registry/codec canonical evidence；获批后按 M7 实施首批三项 renderer"
 ---
 
 # ADR-0004: Typed Feature Registry and Canvas 2D Renderer Families

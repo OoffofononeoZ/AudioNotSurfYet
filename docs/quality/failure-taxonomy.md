@@ -1,13 +1,13 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-07-28
+last_reviewed: 2026-07-30
 upstream_docs:
   - "docs/quality/eval-plan.md"
   - "docs/quality/golden-examples.md"
   - "docs/delivery/acceptance-criteria.md"
   - "docs/architecture/risk-register.md"
-next_action: "在 M6 canonical 与后续里程碑中持续分类真实失败；evidence gap 保持独立"
+next_action: "由 owner 复核 M6 canonical 中的预期失败与 evidence gap；后续里程碑继续沿用分类"
 ---
 
 # Failure Taxonomy

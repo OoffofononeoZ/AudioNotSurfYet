@@ -1,21 +1,21 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-07-29
+last_reviewed: 2026-07-30
 upstream_docs:
   - "docs/product/success-metrics.md"
   - "docs/architecture/risk-register.md"
   - "docs/delivery/execution-plan.md"
   - "docs/delivery/acceptance-criteria.md"
   - "docs/delivery/test-strategy.md"
-next_action: "用户提交 M6 工作树后在 clean commit 运行 canonical 并等待 owner 审批"
+next_action: "由 owner 复核 M6 canonical evidence；获批前 M6 保持 In Progress、M7 保持 Planned"
 ---
 
 # Eval Plan
 
 ## 1. Purpose and Current State
 
-本文件定义 AudioNotSurfYet 的质量证据契约。Vitest、Playwright、Worker harness、受控 fixture 和 direct-Meyda golden 已在 M3 建立。M3 canonical evidence 已获批，M4 clean-commit [canonical run](evidence-index.md) 对 EV-S、EV-B、EV-R 的适用子集也已获批。M5 clean-commit canonical 自动化与 Chrome 原生权限人工检查已为 EV-D 的 M5 适用子集提供获批证据。M6 Worker platform 已进入 `In Progress`，dirty-worktree provisional 20/20 通过，但 clean-commit canonical 与 owner 审批尚未完成。完整 EV-A–EV-R、Edge 矩阵和 M7–M11 产品行为仍为 `planned`。
+本文件定义 AudioNotSurfYet 的质量证据契约。Vitest、Playwright、Worker harness、受控 fixture 和 direct-Meyda golden 已在 M3 建立。M3 canonical evidence 已获批，M4 clean-commit [canonical run](evidence-index.md) 对 EV-S、EV-B、EV-R 的适用子集也已获批。M5 clean-commit canonical 自动化与 Chrome 原生权限人工检查已为 EV-D 的 M5 适用子集提供获批证据。M6 Worker platform 已进入 `In Progress`，clean-commit canonical 20/20 通过并登记为 `in-review`，但 owner 审批尚未完成。完整 EV-A–EV-R、Edge 矩阵和 M7–M11 产品行为仍为 `planned`。
 
 Q0 只批准“如何判断质量”，不批准 release readiness。`docs/quality/release-readiness.md` 只能在 M11 已产生完整成功、失败、边界和异常证据后创建。
 

@@ -1,10 +1,10 @@
 ---
 status: in-review
 owner: "project-owner"
-last_reviewed: 2026-07-29
+last_reviewed: 2026-07-30
 upstream_docs:
   - "docs/context/index.md"
-next_action: "由 owner 复核 M6 新增分析术语；M7 UI 命名形成后再次更新"
+next_action: "由 owner 结合 M6 canonical evidence 复核新增分析术语；M7 UI 命名形成后再次更新"
 ---
 
 # Glossary
