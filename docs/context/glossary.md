@@ -1,10 +1,10 @@
 ---
-status: in-review
+status: approved
 owner: "project-owner"
 last_reviewed: 2026-07-30
 upstream_docs:
   - "docs/context/index.md"
-next_action: "由 owner 结合 M6 canonical evidence 复核新增分析术语；M7 UI 命名形成后再次更新"
+next_action: "M6 分析术语已批准；M7 工作区、视口与卡片命名形成后再次更新"
 ---
 
 # Glossary
@@ -38,3 +38,7 @@ next_action: "由 owner 结合 M6 canonical evidence 复核新增分析术语；
 | compact payload | M6 定义的 scalar、frequency vector、category vector、waveform envelope、loudness、complex-derived 六类二进制显示数据 | 限制 postMessage/IndexedDB 体积，并由严格 decoder 拒绝损坏或错身份数据 | [interface contracts](../architecture/interface-contracts.md) |
 | TestLands | `/testlands` 下的试验页面 | 当前不属于已批准产品表面或稳定接口 | [index](index.md) |
 | lifecycle document | 带标准状态 frontmatter 的产品、设计、交付、质量、发布或复盘文档 | 下游工作依赖其批准与新鲜度 | [AGENTS.md](../../AGENTS.md) |
+
+## Approval Record
+
+`project-owner` 于 2026-07-30 明确回复：“我批准 M6 canonical evidence、working agreements、system map 与 glossary；同意将 M6 标记为 Complete 并开放 M7。”本词汇表据此改为 `approved`；M7 新增运行时术语仍需在实现时追加。

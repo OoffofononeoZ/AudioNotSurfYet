@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: approved
 owner: "project-owner"
 last_reviewed: 2026-07-30
 upstream_docs:
@@ -8,14 +8,14 @@ upstream_docs:
   - "docs/quality/failure-taxonomy.md"
   - "docs/delivery/milestone-plan.md"
   - "tests/fixtures/fixture-manifest.json"
-next_action: "由 project-owner 复核 M6 canonical evidence、working agreements、system map 与 glossary；批准前 M6 保持 In Progress"
+next_action: "M6 已关闭；M7 门禁开放但保持 Planned，下一步制定并执行 M7 三卡学习切片"
 ---
 
 # Evidence Index
 
 ## 1. Purpose and Gate State
 
-本文件保存受版本控制的长期证据摘要；原始日志保存在 Git 忽略的本地 artifact 目录。M3 测试基础切片、M4 AudioEngine 切片和 M5 hybrid recovery 切片均已由 `project-owner` 批准。M6 clean-commit canonical 自动化已通过并登记为待复核证据；在 owner 明确批准前，M6 仍为 `In Progress`，M7 仍为 `Planned`。
+本文件保存受版本控制的长期证据摘要；原始日志保存在 Git 忽略的本地 artifact 目录。M3 测试基础切片、M4 AudioEngine 切片、M5 hybrid recovery 切片和 M6 analysis platform 切片均已由 `project-owner` 批准。M6 已为 `Complete`；M7 门禁开放但仍为 `Planned`，直到明确开始实现。
 
 每条 `pass` 只证明对应里程碑的适用子集在被记录的 commit 和环境上可复现。它不表示完整 EV-A–EV-R、未执行里程碑、Edge 矩阵或 release readiness 已通过。
 
@@ -304,14 +304,14 @@ M5 自动化覆盖 success、failure、boundary 与 exception 的可重复子集
 | --- | --- |
 | Run ID | `M6-2026-07-30T02-19-07-149Z-a39256ff` |
 | Milestone | M6 — Worker platform and feature registry |
-| State | `pass`（M6 适用子集；待 `project-owner` 审批） |
+| State | `pass`（M6 适用子集；已批准） |
 | Eval IDs | EV-A、EV-J、EV-R 的 M6 适用子集；EV-S、EV-B、EV-D 与 M3–M5 的回归子集 |
 | Commit | `a39256ff7afdd4167bfdebdd693bcc8b3ba20e94` |
 | Dirty at start / end | `false` / `false` |
 | Commit at end | `a39256ff7afdd4167bfdebdd693bcc8b3ba20e94` |
 | Started at | 2026-07-30 02:19:07.149 UTC |
 | Method | `npm run eval:m6` |
-| Reviewer | `project-owner` — pending |
+| Reviewer | `project-owner` — approved 2026-07-30 |
 | Retention | `local-present` |
 | Artifact root | `artifacts/evals/M6-2026-07-30T02-19-07-149Z-a39256ff/` |
 | Summary SHA-256 | `2d955ddb994e8e2066ce3c79655d44402e297ffdc03ec63b3a7bf5a2088f08ae` |
@@ -405,4 +405,4 @@ M6 Chrome 测量记录：四项短 fixture 产生 4 个 payload、合计 100,941
 
 ### M6 Approval Record
 
-本记录来自干净 commit，20/20 自动化步骤通过且没有 M6 门禁内 failure instance。当前 reviewer 为 pending，证据及 [working agreements](../context/working-agreements.md)、[system map](../context/system-map.md)、[glossary](../context/glossary.md) 均等待 `project-owner` 明确复核；批准前 M6 保持 `In Progress`，M7 保持 `Planned`，本记录不构成 Edge、M7 UI、完整 EV-A–EV-R 或 release readiness 通过。
+本记录来自干净 commit，20/20 自动化步骤通过且没有 M6 门禁内 failure instance。`project-owner` 于 2026-07-30 明确回复：“我批准 M6 canonical evidence、working agreements、system map 与 glossary；同意将 M6 标记为 Complete 并开放 M7。”据此本 evidence、[working agreements](../context/working-agreements.md)、[system map](../context/system-map.md) 与 [glossary](../context/glossary.md) 改为 `approved`，M6 改为 `Complete`，M7 门禁开放但仍保持 `Planned`，直到明确开始实现。本批准不构成 Edge、M7 UI、完整 EV-A–EV-R 或 release readiness 通过。

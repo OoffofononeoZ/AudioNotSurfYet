@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: approved
 owner: "project-owner"
 last_reviewed: 2026-07-30
 upstream_docs:
@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/context/index.md"
   - "docs/delivery/test-strategy.md"
   - "docs/quality/eval-plan.md"
-next_action: "由 owner 复核 M6 canonical evidence 与本修订；获批前 M6 保持 In Progress、M7 保持 Planned"
+next_action: "M6 已关闭；M7 门禁开放但保持 Planned，开始实现时补充 M7 本地验证约定"
 ---
 
 # Working Agreements
@@ -50,8 +50,8 @@ next_action: "由 owner 复核 M6 canonical evidence 与本修订；获批前 M6
 - 2026-07-29 的 M5 provisional run 16/16 通过；它绑定 dirty worktree，只证明当前实现值得提交和 canonical 复跑，不关闭 M5。
 - 同日 M5 canonical run 16/16 通过，起止工作树均干净且 commit 身份一致；随后 Chrome 原生权限人工检查通过并由 owner 批准，M5 已关闭。
 - M6 dirty-worktree provisional `M6-2026-07-29T10-59-23-767Z-b7fa91ed-provisional` 已 20/20 通过，summary SHA-256 为 `6fd67f9a8b0184a2861a7182a1276572375e947880cf3688afe7511ca97ed3fa`；它只作实现反馈。
-- M6 canonical run `M6-2026-07-30T02-19-07-149Z-a39256ff` 已在 clean commit `a39256ff7afdd4167bfdebdd693bcc8b3ba20e94` 上 20/20 通过，起止身份一致且工作树干净；summary SHA-256 为 `2d955ddb994e8e2066ce3c79655d44402e297ffdc03ec63b3a7bf5a2088f08ae`，正式记录已以 `in-review` 追加到 [evidence index](../quality/evidence-index.md)。
-- M6 canonical artifact 在 owner 审批完成前保留于 Git 忽略的本地目录；commit 或 artifact 身份变化时必须重新运行，不能沿用旧证据。
+- M6 canonical run `M6-2026-07-30T02-19-07-149Z-a39256ff` 已在 clean commit `a39256ff7afdd4167bfdebdd693bcc8b3ba20e94` 上 20/20 通过，起止身份一致且工作树干净；summary SHA-256 为 `2d955ddb994e8e2066ce3c79655d44402e297ffdc03ec63b3a7bf5a2088f08ae`，正式记录已追加到 [evidence index](../quality/evidence-index.md) 并由 owner 批准。
+- M6 canonical artifact 已完成审批；commit 或 artifact 身份变化时必须重新运行，不能沿用旧证据。
 - M3–M6 canonical run 已记录在 [evidence index](../quality/evidence-index.md)；本地产物保留和删除规则以 [eval plan](../quality/eval-plan.md) 为准。
 - fixture、manifest 和 golden 是受版本控制的规范输入；更新必须可重建、显示 diff，并重新执行对应测试。
 
@@ -82,6 +82,6 @@ next_action: "由 owner 复核 M6 canonical evidence 与本修订；获批前 M6
 
 `project-owner` 于 2026-07-29 确认 M5 Chrome 原生权限人工检查通过，并明确批准 M5 evidence 与本修订。M5 据此关闭并开放 M6；本批准不覆盖 M6、Edge 或 release readiness。超范围长音频未开始播放只记录为非门禁压力观察，不改变约 15 分钟产品边界。
 
-同日，owner 要求按 M6 详细计划实施；以上 M6 命令、DEV bridge 与资源所有权是随实现形成的待复核约定。
+同日，owner 要求按 M6 详细计划实施；以上 M6 命令、DEV bridge 与资源所有权随实现形成，并在 M6 审批中完成复核。
 
-2026-07-30，M6 canonical run 已在 clean commit 上 20/20 通过并登记为 `in-review` evidence。该执行事实不等同于 owner 批准；本修订仍为 `in-review`，M6 保持 `In Progress`，M7 保持 `Planned`。
+2026-07-30，M6 canonical run 已在 clean commit 上 20/20 通过。`project-owner` 随后明确回复：“我批准 M6 canonical evidence、working agreements、system map 与 glossary；同意将 M6 标记为 Complete 并开放 M7。”本修订据此改为 `approved`，M6 改为 `Complete`，M7 门禁开放但仍保持 `Planned`。
