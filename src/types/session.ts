@@ -5,6 +5,7 @@ import type {
 } from './audio';
 import {
     FEATURE_IDS,
+    isFeatureId,
     type ConfigHash,
     type FeatureId,
 } from '../analysis/types';
@@ -31,6 +32,21 @@ export interface PersistedTimelineViewport {
     startSeconds: number;
     endSeconds: number;
     zoom: number;
+}
+
+export interface TimelineViewport extends PersistedTimelineViewport {
+    cursorSeconds: number;
+}
+
+export interface AnalysisWorkspaceSnapshot {
+    initialized: boolean;
+    activeCards: ActiveAnalysisCard[];
+    viewport: PersistedTimelineViewport | null;
+}
+
+export interface AnalysisWorkspaceUpdate {
+    activeCards: ActiveAnalysisCard[];
+    viewport: PersistedTimelineViewport | null;
 }
 
 export interface PersistedSessionV1 {
@@ -98,4 +114,50 @@ PersistedAnalysisConfig = {
     windowingFunction: 'hanning',
     numberOfMFCCCoefficients: 13,
     channelMode: 'average-mono',
+};
+
+export const cloneActiveAnalysisCards = (
+    cards: readonly ActiveAnalysisCard[],
+): ActiveAnalysisCard[] => cards.map((card) => ({ ...card }));
+
+export const clonePersistedTimelineViewport = (
+    viewport: PersistedTimelineViewport | null,
+): PersistedTimelineViewport | null =>
+    viewport ? { ...viewport } : null;
+
+export const assertValidAnalysisWorkspace = (
+    workspace: AnalysisWorkspaceUpdate,
+): void => {
+    if (
+        !Array.isArray(workspace.activeCards)
+        || workspace.activeCards.length > 4
+        || workspace.activeCards.some((card) =>
+            !card
+            || ![0, 1, 2, 3].includes(card.slot)
+            || !isFeatureId(card.featureId))
+        || new Set(workspace.activeCards.map((card) => card.slot)).size
+            !== workspace.activeCards.length
+        || new Set(workspace.activeCards.map((card) => card.featureId)).size
+            !== workspace.activeCards.length
+    ) {
+        throw new TypeError(
+            'Analysis workspace requires 0–4 cards with unique slots and features.',
+        );
+    }
+    const viewport = workspace.viewport;
+    if (
+        viewport !== null
+        && (
+            !Number.isFinite(viewport.startSeconds)
+            || !Number.isFinite(viewport.endSeconds)
+            || !Number.isFinite(viewport.zoom)
+            || viewport.startSeconds < 0
+            || viewport.endSeconds <= viewport.startSeconds
+            || viewport.zoom <= 0
+        )
+    ) {
+        throw new TypeError(
+            'Analysis workspace viewport must be finite, ordered, non-negative, and positively zoomed.',
+        );
+    }
 };

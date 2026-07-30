@@ -4,7 +4,7 @@ owner: "project-owner"
 last_reviewed: 2026-07-30
 upstream_docs:
   - "docs/context/index.md"
-next_action: "M6 分析术语已批准；M7 工作区、视口与卡片命名形成后再次更新"
+next_action: "M7 工作区术语已登记；canonical 前按最终代码事实复核"
 ---
 
 # Glossary
@@ -36,6 +36,9 @@ next_action: "M6 分析术语已批准；M7 工作区、视口与卡片命名形
 | exact cursor | 针对当前秒数所在原始 frame 由 Worker 现场提取的非量化值 | 展示精确值不得以 compact display series 的反量化结果替代 | [eval plan](../quality/eval-plan.md) |
 | cache identity | `schemaVersion + trackId + contentHash + configHash + featureId` 的完整组合 | 只有全部字段匹配才允许 cache hit；partial hit 只计算 misses | [ADR-0002](../architecture/adrs/0002-worker-analysis-and-stale-result-isolation.md) |
 | compact payload | M6 定义的 scalar、frequency vector、category vector、waveform envelope、loudness、complex-derived 六类二进制显示数据 | 限制 postMessage/IndexedDB 体积，并由严格 decoder 拒绝损坏或错身份数据 | [interface contracts](../architecture/interface-contracts.md) |
+| analysis workspace | 四个固定 slot、0–3 张 M7 活动卡和一个持久化 viewport 的共享 Analyzer 状态 | 区分首次无保存状态与用户明确保存的空工作区，避免刷新后擅自补回默认卡 | [interface contracts](../architecture/interface-contracts.md) |
+| `M7_FEATURE_IDS` | M7 唯一允许选择的 `rms`、`amplitudeSpectrum`、`chroma` 常量集合 | 防止提前暴露 Energy、`spectralFlux` 或其他 M8 特征 | [decision registry](decision-registry.md) |
+| shared viewport | 所有活动卡共同读取的 start/end/zoom；cursor 由播放快照实时派生且不持久化 | zoom、pan、click seek 和键盘 seek 在所有卡保持同一时间身份 | [system design](../architecture/system-design.md) |
 | TestLands | `/testlands` 下的试验页面 | 当前不属于已批准产品表面或稳定接口 | [index](index.md) |
 | lifecycle document | 带标准状态 frontmatter 的产品、设计、交付、质量、发布或复盘文档 | 下游工作依赖其批准与新鲜度 | [AGENTS.md](../../AGENTS.md) |
 

@@ -19,7 +19,11 @@ import type {
     TrackRecord,
 } from '../types/audio';
 import {
+    assertValidAnalysisWorkspace,
+    cloneActiveAnalysisCards,
+    clonePersistedTimelineViewport,
     DEFAULT_PERSISTED_ANALYSIS_CONFIG,
+    type AnalysisWorkspaceUpdate,
     type PersistedSessionV1,
     type StoredAnalysisCache,
     type StoredHandle,
@@ -255,6 +259,10 @@ export class AudioSessionService {
             restored.session.queue,
             restored.session.currentTrackId,
             this.engine.getSnapshot().volume,
+            {
+                activeCards: restored.session.activeCards,
+                viewport: restored.session.viewport,
+            },
         );
         this.store.setAnalysisCacheManifest(
             restored.session.currentAnalysisCache ?? null,
@@ -497,6 +505,26 @@ export class AudioSessionService {
             await this.engine.seek(seconds);
         } catch {
             // The engine snapshot carries the typed error for the UI.
+        }
+    }
+
+    async updateAnalysisWorkspace(
+        workspace: AnalysisWorkspaceUpdate,
+    ): Promise<void> {
+        if (this.disposed) return;
+        assertValidAnalysisWorkspace(workspace);
+        this.store.setAnalysisWorkspace({
+            initialized: true,
+            activeCards: cloneActiveAnalysisCards(workspace.activeCards),
+            viewport: clonePersistedTimelineViewport(workspace.viewport),
+        });
+        try {
+            await this.persistQueue();
+            this.store.setPersistence({ state: 'ready' });
+        } catch {
+            this.markPersistenceFailure(
+                '分析工作区已在当前页面生效，但无法跨刷新保存。',
+            );
         }
     }
 
@@ -927,11 +955,15 @@ export class AudioSessionService {
                 metadata: { ...track.metadata },
             })),
             currentTrackId: this.store.currentTrackId,
-            activeCards: [],
+            activeCards: cloneActiveAnalysisCards(
+                this.store.analysisWorkspace.activeCards,
+            ),
             analysisConfig: {
                 ...DEFAULT_PERSISTED_ANALYSIS_CONFIG,
             },
-            viewport: null,
+            viewport: clonePersistedTimelineViewport(
+                this.store.analysisWorkspace.viewport,
+            ),
             handles: this.storedHandles().map((entry) => ({
                 trackId: entry.trackId,
                 handleKey: entry.handleKey,

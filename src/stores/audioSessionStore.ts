@@ -8,7 +8,12 @@ import type {
     AnalysisCoordinatorSnapshot,
     FeatureId,
 } from '../analysis/types';
-import type { PersistedSessionV1 } from '../types/session';
+import {
+    cloneActiveAnalysisCards,
+    clonePersistedTimelineViewport,
+    type AnalysisWorkspaceSnapshot,
+    type PersistedSessionV1,
+} from '../types/session';
 
 const createEmptyPlayback = (): PlaybackSnapshot => ({
     trackId: null,
@@ -25,6 +30,7 @@ interface AudioSessionState {
     currentEnergy: number;
     persistence: SessionPersistenceSnapshot;
     analysis: AnalysisCoordinatorSnapshot;
+    analysisWorkspace: AnalysisWorkspaceSnapshot;
     analysisCacheManifest:
         NonNullable<PersistedSessionV1['currentAnalysisCache']> | null;
 }
@@ -44,6 +50,7 @@ export const useAudioSessionStore = defineStore('audio-session', {
             trackId: null,
             trackHash: null,
             configHash: null,
+            sampleRate: null,
             activeFeatureIds: [],
             readyFeatureIds: [],
             completedFrames: 0,
@@ -52,6 +59,11 @@ export const useAudioSessionStore = defineStore('audio-session', {
             cacheState: 'idle',
             staleMessageCount: 0,
         },
+        analysisWorkspace: {
+            initialized: false,
+            activeCards: [],
+            viewport: null,
+        },
         analysisCacheManifest: null,
     }),
     actions: {
@@ -59,6 +71,7 @@ export const useAudioSessionStore = defineStore('audio-session', {
             queue: TrackRecord[],
             currentTrackId: string | null,
             volume: number,
+            workspace?: Omit<AnalysisWorkspaceSnapshot, 'initialized'>,
         ) {
             this.queue = queue.map((track) => ({
                 ...track,
@@ -76,6 +89,17 @@ export const useAudioSessionStore = defineStore('audio-session', {
                 volume,
             };
             this.currentEnergy = 0;
+            if (workspace) {
+                this.analysisWorkspace = {
+                    initialized: true,
+                    activeCards: cloneActiveAnalysisCards(
+                        workspace.activeCards,
+                    ),
+                    viewport: clonePersistedTimelineViewport(
+                        workspace.viewport,
+                    ),
+                };
+            }
         },
         appendTracks(tracks: TrackRecord[]) {
             this.queue.push(...tracks);
@@ -125,6 +149,13 @@ export const useAudioSessionStore = defineStore('audio-session', {
                 error: snapshot.error ? { ...snapshot.error } : undefined,
             };
         },
+        setAnalysisWorkspace(snapshot: AnalysisWorkspaceSnapshot) {
+            this.analysisWorkspace = {
+                initialized: snapshot.initialized,
+                activeCards: cloneActiveAnalysisCards(snapshot.activeCards),
+                viewport: clonePersistedTimelineViewport(snapshot.viewport),
+            };
+        },
         setAnalysisCacheManifest(
             manifest:
                 NonNullable<PersistedSessionV1['currentAnalysisCache']>
@@ -156,6 +187,7 @@ export const useAudioSessionStore = defineStore('audio-session', {
                 trackId: null,
                 trackHash: null,
                 configHash: null,
+                sampleRate: null,
                 activeFeatureIds: [],
                 readyFeatureIds: [],
                 completedFrames: 0,
@@ -163,6 +195,11 @@ export const useAudioSessionStore = defineStore('audio-session', {
                 progress: 0,
                 cacheState: 'idle',
                 staleMessageCount: this.analysis.staleMessageCount,
+            };
+            this.analysisWorkspace = {
+                initialized: false,
+                activeCards: [],
+                viewport: null,
             };
             this.analysisCacheManifest = null;
         },

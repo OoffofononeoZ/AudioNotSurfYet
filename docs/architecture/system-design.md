@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/product/scope.md"
   - "docs/product/success-metrics.md"
   - "docs/product/open-questions.md"
-next_action: "由 owner 复核 M6 canonical evidence；M6 获批关闭前不进入 M7"
+next_action: "M6 已关闭；M7 正按已批准边界实现四槽三卡 Analyzer，不改变核心架构"
 ---
 
 # System Design

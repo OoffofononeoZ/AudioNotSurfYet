@@ -30,6 +30,8 @@ next_action: "在每个里程碑 PR/变更记录中引用适用 AC 编号并附�
 | AC-P05 | owner 完成加载、选卡、换卡、比较、跳转、刷新恢复脚本中的每一步 | 签字的任务脚本与证据链接 |
 | AC-P06 | owner 对 3/3 黄金片段正确解释 RMS、Amplitude Spectrum、Chroma 与听感/音色关系 | 预写答案要点、owner 回答和评分 |
 
+M7 适用解释：AC-P02/P03 在本里程碑验证固定四槽与 0–3 张唯一活动卡，活动 ID 仅为 `rms`、`amplitudeSpectrum`、`chroma`；第四槽在三卡活动时显示 M8 后续提示。四张唯一活动特征的完整场景从 M8 首个新增特征后开始执行。无保存工作区默认三卡，已保存空工作区必须恢复为空。
+
 ### Learning golden segments
 
 1. **L1 — Same pitch, rising level**：440Hz 正弦从低幅度变高。期望解释：RMS 增大；主频仍在约 440Hz；Chroma 的 A 类保持主导。
