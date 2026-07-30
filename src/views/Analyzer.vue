@@ -179,6 +179,7 @@ const seriesRevision = ref(0);
 const exactValues = reactive<
     Partial<Record<M7FeatureId, AnalysisCursorValueResult>>
 >({});
+const CURSOR_REQUEST_INTERVAL_MS = 40;
 let unsubscribeCoordinator: (() => void) | null = null;
 let cursorTimer: ReturnType<typeof setTimeout> | null = null;
 let lastCursorRequestAt = 0;
@@ -360,14 +361,14 @@ const requestExactValues = (immediate = false) => {
         cursorTimer = null;
     }
     const elapsed = performance.now() - lastCursorRequestAt;
-    if (immediate || elapsed >= 34) {
+    if (immediate || elapsed >= CURSOR_REQUEST_INTERVAL_MS) {
         void performExactRequests();
         return;
     }
     cursorTimer = setTimeout(() => {
         cursorTimer = null;
         void performExactRequests();
-    }, 34 - elapsed);
+    }, CURSOR_REQUEST_INTERVAL_MS - elapsed);
 };
 
 const initializeWorkspace = async () => {

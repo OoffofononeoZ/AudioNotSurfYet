@@ -109,25 +109,40 @@ test('defaults to three unique cards in four slots and shares seek/zoom', async 
     await expect(page.locator('[data-feature-id="rms"] .plot-message'))
         .toHaveCount(0, { timeout: 30_000 });
 
-    await page.evaluate(() => {
+    const cursorWindowStartedAt = await page.evaluate(() => {
         const target = window as typeof window & {
             __m7CursorRequests?: Record<string, number>;
         };
         target.__m7CursorRequests = {};
+        return performance.now();
     });
     await page.waitForTimeout(550);
-    const cursorCounts = await page.evaluate(() => (
-        window as typeof window & {
-            __m7CursorRequests?: Record<string, number>;
-        }
-    ).__m7CursorRequests ?? {});
+    const cursorWindow = await page.evaluate((startedAt) => ({
+        counts: (
+            window as typeof window & {
+                __m7CursorRequests?: Record<string, number>;
+            }
+        ).__m7CursorRequests ?? {},
+        elapsedMs: performance.now() - startedAt,
+    }), cursorWindowStartedAt);
+    const cursorCounts = cursorWindow.counts;
+    const maximumCursorRequests = Math.ceil(
+        cursorWindow.elapsedMs * 30 / 1_000,
+    ) + 1;
     expect(Object.keys(cursorCounts).sort()).toEqual([
         'amplitudeSpectrum',
         'chroma',
         'rms',
     ]);
-    expect(Object.values(cursorCounts).every((count) =>
-        count > 0 && count <= 18)).toBe(true);
+    for (const [featureId, count] of Object.entries(cursorCounts)) {
+        expect(count, `${featureId} exact cursor requests`)
+            .toBeGreaterThan(0);
+        expect(
+            count,
+            `${featureId} exact cursor requests in `
+                + `${cursorWindow.elapsedMs.toFixed(1)}ms`,
+        ).toBeLessThanOrEqual(maximumCursorRequests);
+    }
 
     const canvases = page.locator('[data-feature-id] .plot canvas');
     await expect(canvases).toHaveCount(6);
@@ -227,6 +242,8 @@ test('defaults to three unique cards in four slots and shares seek/zoom', async 
         activeCards: 3,
         slots: 4,
         cursorRequestsIn550ms: cursorCounts,
+        cursorWindowElapsedMs: cursorWindow.elapsedMs,
+        maximumCursorRequests,
         seekFeedbackMs,
         canvasLayers: canvasRatios.length,
         columns1280,
