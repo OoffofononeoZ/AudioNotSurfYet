@@ -14,7 +14,7 @@ next_action: "由 owner 复核 M6 四项 Worker golden canonical evidence；获�
 
 ## 1. Evidence Boundary
 
-以下产品、学习、失败和边界样例仍是待各里程碑实现和执行的规范。M3 已生成受控 fixture、manifest 和首批 direct-Meyda golden，并在 clean commit canonical run 中通过 identity/容差检查。M6 新增的产品 Worker 测试已在 clean commit canonical 中对 silence、sine、dual-tone 和 impulse 比较 RMS、Energy、Amplitude Spectrum、Chroma，并登记为 `in-review` evidence；owner 批准前不能关闭 M6，也不表示 M7 UI 或后续 21 项产品行为已经通过。
+以下产品、学习、失败和边界样例仍是待各里程碑实现和执行的规范。M3 已生成受控 fixture、manifest 和首批 direct-Meyda golden，并在 clean commit canonical run 中通过 identity/容差检查。M6 新增的产品 Worker 测试已在 clean commit canonical 中对 silence、sine、dual-tone 和 impulse 比较 RMS、Energy、Amplitude Spectrum、Chroma，并获 owner 批准；这只关闭 M6，不表示 M7 UI 或后续 21 项产品行为已经通过。
 
 音频仅允许：
 

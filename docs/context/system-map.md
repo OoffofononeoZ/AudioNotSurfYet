@@ -1,10 +1,10 @@
 ---
-status: in-review
+status: approved
 owner: "project-owner"
 last_reviewed: 2026-07-30
 upstream_docs:
   - "docs/context/index.md"
-next_action: "由 owner 结合 M6 canonical 资源与缓存证据复核本图；M7 接入 Analyzer UI 时再次更新"
+next_action: "M6 资源与缓存边界已批准；M7 接入 Analyzer UI 与工作区状态时再次更新"
 ---
 
 # System Map
@@ -77,3 +77,7 @@ showOpenFilePicker → FileSystemFileHandle → File
 - AudioContext、source、单播放 RAF、产品 Worker、pending analysis request 和封面 URL 由 MainLayout-owned service/coordinator 生命周期统一释放；Observer、GSAP 和 Three.js 仍由各组件释放。
 - Header 的 settings 事件没有已发现消费者，导航中的 Visualizer/Editor 共享占位页。
 - `components.d.ts` 和 `auto-imports.d.ts` 是构建插件生成文件，构建可能造成工作树变化。
+
+## Approval Record
+
+`project-owner` 于 2026-07-30 明确回复：“我批准 M6 canonical evidence、working agreements、system map 与 glossary；同意将 M6 标记为 Complete 并开放 M7。”本图据此改为 `approved`；该批准只覆盖 M6 已实现边界，M7 Analyzer 工作区接入后仍需按代码事实更新。

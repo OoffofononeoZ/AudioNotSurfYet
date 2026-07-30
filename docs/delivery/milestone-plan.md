@@ -6,7 +6,7 @@ upstream_docs:
   - "docs/delivery/execution-plan.md"
   - "docs/delivery/acceptance-criteria.md"
   - "docs/delivery/test-strategy.md"
-next_action: "由 owner 复核并批准 M6 canonical evidence 与 working agreements；获批前 M7 保持 Planned"
+next_action: "M6 已关闭；M7 门禁开放但保持 Planned，明确开始实现时改为 In Progress"
 ---
 
 # Milestone Plan
@@ -15,7 +15,7 @@ next_action: "由 owner 复核并批准 M6 canonical evidence 与 working agreem
 
 - Target 使用相对门禁，不表示日历承诺。
 - `Complete` 只用于文档门禁、真实证据和所需人工批准均已满足的里程碑。
-- Q0、M3、M4 和 M5 为 `Complete`；M6 为 `In Progress`；M7–M11 为 `Planned`。
+- Q0、M3、M4、M5 和 M6 为 `Complete`；M7–M11 为 `Planned`。
 - 一个里程碑未通过时，后续里程碑保持 Planned/Blocked，不并行扩大特征范围。
 
 ## Milestones
@@ -28,7 +28,7 @@ next_action: "由 owner 复核并批准 M6 canonical evidence 与 working agreem
 | M3 | Test foundation and fixtures | Complete | First implementation gate | Q0 | Vitest/Playwright/Worker harness、fixture manifest、golden helper、有效 npm scripts | project-owner |
 | M4 | Single AudioEngine and shared store | Complete | After M3 | M3 | 播放/MusicBar 回归、单一上下文、生命周期证据 | project-owner |
 | M5 | IndexedDB hybrid recovery | Complete | After M4 | M4 | current Blob/cache、handle permission、refresh/quota/schema 证据 | project-owner |
-| M6 | Worker platform and feature registry | In Progress | After M5 | M4, M5 | mono/frame/cancel/stale/cache/21-key registry、性能基线、canonical evidence 与 owner approval | project-owner |
+| M6 | Worker platform and feature registry | Complete | After M5 | M4, M5 | mono/frame/cancel/stale/cache/21-key registry、性能基线、canonical evidence 与 owner approval | project-owner |
 | M7 | RMS + Amplitude Spectrum + Chroma | Planned | First feature gate | M6 | 三项黄金、四卡共享时间轴、100ms、owner 任务与 3/3 学习解释 | project-owner |
 | M8 | Remaining scalar features | Planned | After M7 | M7 | 13 项新增 scalar 全部 golden/renderer/edge，累计 16/21 | project-owner |
 | M9 | Power Spectrum + MFCC + Buffer | Planned | After M8 | M8 | vector/waveform 维度、精确值、累计 19/21 | project-owner |
@@ -88,7 +88,7 @@ next_action: "由 owner 复核并批准 M6 canonical evidence 与 working agreem
 - [x] 确定性 15 分钟 OPFS 样本单项 Chrome 场景满足输入/long-task/progress/cancel guardrail。
 - [x] dirty-worktree `eval:m6:provisional` 20/20 通过，只作实现反馈。
 - [x] 用户提交后 clean-HEAD `eval:m6` 通过并追加 `in-review` evidence index。
-- [ ] `project-owner` 批准 M6 evidence 与 working agreements。
+- [x] `project-owner` 批准 M6 evidence、working agreements、system map 与 glossary。
 
 ### M7
 
@@ -131,16 +131,16 @@ next_action: "由 owner 复核并批准 M6 canonical evidence 与 working agreem
 
 ## Current Gate State
 
-- Current stage：M6 Worker platform and feature registry，状态为 `In Progress`；canonical evidence 已登记为 `in-review`，但里程碑证据尚未获批关闭。
+- Current stage：M6 Worker platform and feature registry 已为 `Complete`；M7 门禁已开放，但在明确开始实现前保持 `Planned`。
 - Previous gate：M3 已由 `project-owner` 于 2026-07-28 批准并标记 `Complete`。
 - Canonical run：`npm run eval:m3` 已在 clean commit `17d16f0da37289c1f67f75203502beef999572ea` 上通过；摘要见 [evidence index](../quality/evidence-index.md)。
-- Next gate：由 `project-owner` 复核并批准 M6 canonical evidence、working agreements、system map 与 glossary。获批前 M6 不标记 `Complete`，M7 保持 `Planned`。
+- Next gate：明确开始 M7 时把 M7 改为 `In Progress`，并按已批准的架构、验收和测试策略交付三卡学习切片。
 - M3 state：Complete；M3 evidence 只证明测试基础，不代表 M4 产品行为通过。
 - M4 canonical：`npm run eval:m4` 在 clean commit `e5cfe9e8ab62301f3c5b0ddcdd37847a2e131a0f` 上 13/13 步骤通过；60 秒漂移 2.233ms，三次 seek 最大误差 66.827ms。`project-owner` 已于 2026-07-29 批准该证据。
 - M5 provisional：`M5-2026-07-29T07-03-16-207Z-2eb98381-provisional` 在 dirty worktree 16/16 步骤通过；summary SHA-256 为 `7b0acaf128ac4a7ceffce1449d2421127d20c8b25dcdc1ebd07b889072228530`。它只作实现反馈，不是正式 evidence。
 - M5 canonical：`M5-2026-07-29T07-08-25-199Z-c90a3c57` 在 clean commit `c90a3c5738de5b7a4efb7eb24cddc49da3713b44` 上 16/16 通过；summary SHA-256 为 `6257426baa601289d89c10e97d76d866a637227fd042080deb947af17c982d2a`。Chrome 原生权限人工检查随后通过，`project-owner` 已批准 M5 evidence 与 working agreements。
 - M6 provisional：`M6-2026-07-29T10-59-23-767Z-b7fa91ed-provisional` 在 dirty worktree 20/20 通过；summary SHA-256 为 `6fd67f9a8b0184a2861a7182a1276572375e947880cf3688afe7511ca97ed3fa`。刷新 cache hit 后 exact cursor 可用；15 分钟最大反馈 16.7ms、分析归因 >50ms 长任务 0 个。它不构成正式 evidence。
-- M6 canonical：`M6-2026-07-30T02-19-07-149Z-a39256ff` 在 clean commit `a39256ff7afdd4167bfdebdd693bcc8b3ba20e94` 上 20/20 通过；summary SHA-256 为 `2d955ddb994e8e2066ce3c79655d44402e297ffdc03ec63b3a7bf5a2088f08ae`。四项 cache payload 为 100,941 bytes，刷新 hit 后 exact cursor 一致，20 次资源循环保持单 Worker/AudioContext，15 分钟最大反馈 17ms、分析归因 >50ms 长任务 0 个。记录已追加为 `in-review`，仍待 owner 批准。
+- M6 canonical：`M6-2026-07-30T02-19-07-149Z-a39256ff` 在 clean commit `a39256ff7afdd4167bfdebdd693bcc8b3ba20e94` 上 20/20 通过；summary SHA-256 为 `2d955ddb994e8e2066ce3c79655d44402e297ffdc03ec63b3a7bf5a2088f08ae`。四项 cache payload 为 100,941 bytes，刷新 hit 后 exact cursor 一致，20 次资源循环保持单 Worker/AudioContext，15 分钟最大反馈 17ms、分析归因 >50ms 长任务 0 个；`project-owner` 已于 2026-07-30 批准该记录。
 - Known future blockers：没有真实 Edge 证据时不能完成 M11 或未来 readiness；托管平台未定会阻断 release，但不阻断 Q0/M3。
 
 ## Approval Record
@@ -153,4 +153,4 @@ next_action: "由 owner 复核并批准 M6 canonical evidence 与 working agreem
 
 `project-owner` 于 2026-07-29 确认 M5 Chrome 原生权限人工检查通过，并明确批准 M5 evidence index 与 working agreements。M5 据此改为 `Complete` 并开放 M6；超范围压力输入未开始播放不计入门禁，也不扩展约 15 分钟支持承诺。
 
-2026-07-30，M6 canonical 已在 clean commit 上 20/20 通过并登记为 `in-review` evidence。该执行事实不等同于 owner 批准；M6 继续为 `In Progress`，M7 继续为 `Planned`。
+2026-07-30，M6 canonical 已在 clean commit 上 20/20 通过。`project-owner` 随后明确回复：“我批准 M6 canonical evidence、working agreements、system map 与 glossary；同意将 M6 标记为 Complete 并开放 M7。”M6 据此改为 `Complete`；M7 门禁开放但仍为 `Planned`，直到明确开始实现。
