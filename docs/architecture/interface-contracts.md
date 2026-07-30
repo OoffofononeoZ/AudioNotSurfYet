@@ -399,6 +399,24 @@ Invariants:
 - `slot` 和 `featureId` 各自唯一。
 - 数组最多四项；顺序由 slot 决定。
 - 换卡保留共享 viewport，不创建新的播放或分析 session。
+- M7 使用 `M7_FEATURE_IDS = ['rms', 'amplitudeSpectrum', 'chroma']`，最多三张活动卡；四个 slot 始终存在，第四空槽不提前暴露 Energy。
+
+## AnalysisWorkspaceSnapshot
+
+```ts
+interface AnalysisWorkspaceSnapshot {
+  initialized: boolean
+  activeCards: ActiveAnalysisCard[]
+  viewport: Pick<TimelineViewport, 'startSeconds' | 'endSeconds' | 'zoom'> | null
+}
+```
+
+Invariants:
+
+- `initialized: false` 表示从未保存过工作区，Analyzer 首次进入时建立 M7 默认三卡。
+- `initialized: true` 且 `activeCards: []` 是有效的已保存空工作区，刷新后必须保持为空。
+- `AudioSessionService.updateAnalysisWorkspace(...)` 先更新内存 snapshot，再保存 cards/viewport；写入失败发布 `not-persisted`，当前页面能力保持可用。
+- runtime validation 接受 0–4 个唯一 slot/feature；viewport 所有值有限、`0 <= start < end`、`zoom > 0`。M7 UI 在此通用持久化上限内进一步限制为三个获准 feature。
 
 ## TimelineViewport
 
@@ -416,6 +434,8 @@ Invariants:
 - `0 <= start < end <= track.duration`.
 - `cursorSeconds` 裁剪到 track duration，但可以在当前 viewport 之外。
 - 所有卡读取同一对象；renderer 不保存私有 zoom。
+- zoom 交互范围为 1–64；平移步长为当前窗口 25%，换歌时 viewport 裁剪到新 duration。
+- `cursorSeconds` 始终来自播放快照，不进入 `PersistedSessionV1`。
 
 ## PersistedSessionV1
 

@@ -89,6 +89,7 @@ const initialSnapshot = (): AnalysisCoordinatorSnapshot => ({
     trackId: null,
     trackHash: null,
     configHash: null,
+    sampleRate: null,
     activeFeatureIds: [],
     readyFeatureIds: [],
     completedFrames: 0,
@@ -180,6 +181,7 @@ export class AnalysisCoordinator {
             generation,
             activeFeatureIds: [...ids],
             readyFeatureIds: [],
+            sampleRate: null,
             completedFrames: 0,
             totalFrames: 0,
             progress: 0,
@@ -384,6 +386,7 @@ export class AnalysisCoordinator {
             trackId: descriptor.trackId,
             trackHash: identity.trackHash,
             configHash: config.configHash,
+            sampleRate: descriptor.sampleRate,
             readyFeatureIds: [...hits],
             cacheState: hits.length === 0
                 ? 'miss'
@@ -701,6 +704,7 @@ export class AnalysisCoordinator {
                 trackId: playback.trackId,
                 trackHash: null,
                 configHash: null,
+                sampleRate: null,
                 readyFeatureIds: [],
                 completedFrames: 0,
                 totalFrames: 0,

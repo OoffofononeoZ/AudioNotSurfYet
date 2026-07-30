@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/context/index.md"
   - "docs/delivery/test-strategy.md"
   - "docs/quality/eval-plan.md"
-next_action: "M6 已关闭；M7 门禁开放但保持 Planned，开始实现时补充 M7 本地验证约定"
+next_action: "M7 provisional 已通过；提交实现、完成 clean canonical 与 owner 任务后再申请关闭"
 ---
 
 # Working Agreements
@@ -31,6 +31,8 @@ next_action: "M6 已关闭；M7 门禁开放但保持 Planned，开始实现时�
 - M6 使用 `test:m6:unit`、`test:m6:worker`、`test:m6:integration` 和 `test:e2e:m6`；`eval:m6:provisional` 运行 M3–M6 回归但不写正式 evidence，`eval:m6` 要求起止均为同一 clean commit。
 - M6 的 15 分钟 WAV 在浏览器 OPFS 中分块确定性生成，不进入 Git；性能断言包括反馈 ≤100ms、分析归因主线程长任务为 0、进度单调、取消可见与 20 次资源循环不单调累积。
 - M6 DEV bridge 只用于浏览器黑盒触发活动特征、取消、重试、读取可序列化 snapshot 和 exact cursor；测试不得通过它读取 File、PCM、AudioBuffer 或 Worker 内部对象。
+- M7 使用 `test:m7:unit`、`test:m7:integration` 和 `test:e2e:m7`；`eval:m7:provisional` 运行 M3–M7 回归但不写正式 evidence，`eval:m7` 要求起止均为同一 clean commit。
+- M7 学习 WAV 在 `artifacts/fixtures/` 运行时确定性生成并保持 Git 忽略；版本化 `m7-learning.v1.json` 固定 L1/L2/L3 的 PCM hash 与直接 Meyda 数值。
 - M3 仅建立本地门禁，不存在正式 CI；这项缺口不阻断 M3，但自动化声明必须限定为本地执行。
 - 交互改动要在本地浏览器执行成功、失败和边界场景，并检查 console error/warn。
 - 布局和可视化至少检查窄屏、常见桌面和宽屏，使用真实 DOM/canvas 几何。
@@ -43,7 +45,7 @@ next_action: "M6 已关闭；M7 门禁开放但保持 Planned，开始实现时�
 
 ## Evidence and Generated Files
 
-- `test-results/`、`playwright-report/` 和 `artifacts/evals/<run-id>/` 为 Git 忽略的本地产物。
+- `test-results/`、`playwright-report/`、`artifacts/fixtures/` 和 `artifacts/evals/<run-id>/` 为 Git 忽略的本地产物。
 - 未提交工作树只能产生 provisional run；正式 milestone evidence 必须引用用户提交后的干净 commit。
 - M4 provisional run 只作为实现反馈；`eval:m4` 已在 clean commit `e5cfe9e8ab62301f3c5b0ddcdd37847a2e131a0f` 上通过、追加 evidence index 并由 `project-owner` 批准。
 - M5 dirty worktree 只运行 `eval:m5:provisional`；要求 clean HEAD 的 `eval:m5` 已对提交 `c90a3c5738de5b7a4efb7eb24cddc49da3713b44` 运行并追加正式 evidence。原生权限人工检查已由 `project-owner` 执行并与自动化结果分开记录。
@@ -52,6 +54,7 @@ next_action: "M6 已关闭；M7 门禁开放但保持 Planned，开始实现时�
 - M6 dirty-worktree provisional `M6-2026-07-29T10-59-23-767Z-b7fa91ed-provisional` 已 20/20 通过，summary SHA-256 为 `6fd67f9a8b0184a2861a7182a1276572375e947880cf3688afe7511ca97ed3fa`；它只作实现反馈。
 - M6 canonical run `M6-2026-07-30T02-19-07-149Z-a39256ff` 已在 clean commit `a39256ff7afdd4167bfdebdd693bcc8b3ba20e94` 上 20/20 通过，起止身份一致且工作树干净；summary SHA-256 为 `2d955ddb994e8e2066ce3c79655d44402e297ffdc03ec63b3a7bf5a2088f08ae`，正式记录已追加到 [evidence index](../quality/evidence-index.md) 并由 owner 批准。
 - M6 canonical artifact 已完成审批；commit 或 artifact 身份变化时必须重新运行，不能沿用旧证据。
+- M7 dirty-worktree provisional `M7-2026-07-30T03-13-53-844Z-5b33575f-provisional` 已 24/24 通过，summary SHA-256 为 `5f49ad1d18c1c5f8096beef53a6122f242bae361b76dcbe2f9d718698e663504`；M7 Chrome 为 4/4、M6 Chrome 回归为 3/3，15 分钟场景最大反馈 16.7ms、分析归因 >50ms 长任务 0 个。它只作实现反馈，不进入正式 evidence index。
 - M3–M6 canonical run 已记录在 [evidence index](../quality/evidence-index.md)；本地产物保留和删除规则以 [eval plan](../quality/eval-plan.md) 为准。
 - fixture、manifest 和 golden 是受版本控制的规范输入；更新必须可重建、显示 diff，并重新执行对应测试。
 
@@ -85,3 +88,5 @@ next_action: "M6 已关闭；M7 门禁开放但保持 Planned，开始实现时�
 同日，owner 要求按 M6 详细计划实施；以上 M6 命令、DEV bridge 与资源所有权随实现形成，并在 M6 审批中完成复核。
 
 2026-07-30，M6 canonical run 已在 clean commit 上 20/20 通过。`project-owner` 随后明确回复：“我批准 M6 canonical evidence、working agreements、system map 与 glossary；同意将 M6 标记为 Complete 并开放 M7。”本修订据此改为 `approved`，M6 改为 `Complete`，M7 门禁开放但仍保持 `Planned`。
+
+同日，`project-owner` 明确要求实施 M7 三卡学习切片。本约定新增 M7 unit/integration/Chrome/eval 命令及运行时学习 fixture 规则；M7 改为 `In Progress`，canonical 和 owner 学习任务获批前不关闭、不开放 M8。

@@ -8,7 +8,7 @@
 - FFmpeg：8.1.2；只用于生成和检查受控 WAV/MP3/FLAC fixture。
 - Microsoft Edge 当前未安装。`npm run test:e2e:edge` 会以退出码 2 报告 `blocked`，不会伪装成 pass。
 
-M3–M6 不建设 CI。下列命令当前均为本地门禁；正式证据要求在用户提交后的干净 commit 上复跑。M3–M6 canonical run 已登记到 [evidence index](../docs/quality/evidence-index.md) 并由 owner 批准。M5 Chrome 原生权限人工检查也已单独签字通过。
+M3–M7 不建设 CI。下列命令当前均为本地门禁；正式证据要求在用户提交后的干净 commit 上复跑。M3–M6 canonical run 已登记到 [evidence index](../docs/quality/evidence-index.md) 并由 owner 批准；M7 当前为 `In Progress`。M5 Chrome 原生权限人工检查也已单独签字通过。
 
 当前 `npm audit` 在安全补丁更新后剩余 1 项 low：Vite 依赖的 esbuild 0.27.3 在 Windows 开发服务器场景存在本地任意文件读取风险。仓库目标验证机为 macOS，开发服务器不得暴露到不受信网络；依赖升级提供修复版本后复核。该缺口不被描述为已修复或生产 readiness。
 
@@ -29,6 +29,8 @@ M3–M6 不建设 CI。下列命令当前均为本地门禁；正式证据要求
 | `npm run test:m6:unit` | 21 项 registry、config hash、PCM/frame、聚合/量化、六类 compact codec 与损坏数据拒绝 |
 | `npm run test:m6:worker` | 产品 workerCore 的 0/1/4 项、非法请求、yield/progress/cancel、错误与 exact cursor |
 | `npm run test:m6:integration` | AnalysisCoordinator、partial cache、stale generation、quota 与 current Blob 原子持久化 |
+| `npm run test:m7:unit` | viewport/zoom anchor/x↔time、renderer 数据变换、工作区不变量和 L1/L2/L3 版本化 golden |
+| `npm run test:m7:integration` | 默认/已保存空工作区、卡片/viewport 持久化和 quota 后内存继续可用 |
 | `npm run test:docs` | 生命周期 frontmatter、内部链接和 21 项特征计数 |
 | `npm run test:harness` | 证明 deliberate failure 会非零退出 |
 | `npm run test:e2e` | 稳定 Chrome 的全部当前 E2E |
@@ -36,6 +38,7 @@ M3–M6 不建设 CI。下列命令当前均为本地门禁；正式证据要求
 | `npm run test:e2e:m4` | M4 播放/队列/错误/资源回归及 60 秒计时 |
 | `npm run test:e2e:m5` | Chrome 真实 IndexedDB/OPFS handle 的导入、刷新、current Blob、未知 schema 与清空 |
 | `npm run test:e2e:m6` | Chrome 真实 module Worker、cache refresh、exact cursor、20 次资源循环和 15 分钟性能/取消 |
+| `npm run test:e2e:m7` | Chrome 四槽三卡、共享 zoom/cursor、点击/键盘 seek、30Hz 合并、刷新恢复、DPR/视口与单卡错误隔离 |
 | `npm run test:e2e:edge` | Edge 存在时执行同一项目；缺失时明确 blocked |
 | `npm run build` | TypeScript project build 和 Vite production build |
 | `npm run eval:m3:provisional` | 在未提交工作树生成本地 provisional run |
@@ -46,6 +49,8 @@ M3–M6 不建设 CI。下列命令当前均为本地门禁；正式证据要求
 | `npm run eval:m5` | 只允许在干净 commit 上执行 M3–M5 suite 并生成 canonical run |
 | `npm run eval:m6:provisional` | 在 dirty worktree 执行 M3–M6 回归并生成本地实现反馈 |
 | `npm run eval:m6` | 只允许在干净 commit 上执行 M3–M6 suite 并生成可登记的 canonical run |
+| `npm run eval:m7:provisional` | 在 dirty worktree 执行 M3–M7 回归并生成本地实现反馈 |
+| `npm run eval:m7` | 只允许在干净 commit 上执行 M3–M7 suite 并生成可登记的 canonical run |
 
 ## 目录职责
 
@@ -53,18 +58,20 @@ M3–M6 不建设 CI。下列命令当前均为本地门禁；正式证据要求
 - `tests/audio/`：M4 AudioEngine fake clock 与 AudioSessionService/store 集成。
 - `tests/persistence/`：M5 原生 IndexedDB adapter、schema 和事务故障注入。
 - `tests/worker/`：M3 harness 与 M6 产品 workerCore 合约测试。
-- `tests/analysis/`：direct-Meyda extractor、committed golden、M6 platform golden、codec/registry 单元与 coordinator 集成。
+- `tests/analysis/`：direct-Meyda extractor、committed golden、M6 platform golden、M7 viewport/renderer 数据变换与学习 golden。
 - `tests/fixtures/`：确定性生成器、短格式文件、许可、manifest 与重建校验。
 - `tests/e2e/`：真实 Chrome 场景；当前不声明 Edge 已通过。
 - `tests/docs/`：生命周期文档和特征计数检查。
 - `tests/harness/`：被正常 Vitest 配置排除的 deliberate failure 及其自检。
-- `tests/scripts/`：浏览器检测和 M3/M4/M5/M6 run orchestration。
+- `tests/scripts/`：浏览器检测和 M3/M4/M5/M6/M7 run orchestration。
 
 M4 浏览器测试中的损坏 WAV 与 65 秒、48kHz、单声道计时 WAV 都写入 `test-results/`，不提交二进制。长时钟测试用同一 DOM 采样同时读取 `performance.now()` 与 AudioContext 驱动快照；三次 seek 使用进度条真实几何。
 
 M5 浏览器测试把受控 fixture 写入浏览器 OPFS，再由注入的 `showOpenFilePicker()` 返回真实 `FileSystemFileHandle`。它覆盖真实 IndexedDB structured clone、刷新和 current Blob，但不会制造或宣称原生权限提示通过；Chrome OS picker 的 granted/prompt/denied、恢复访问和文件临时移动必须另做人工检查。
 
 M6 浏览器测试通过 DEV-only bridge 选择四项支持特征、读取可序列化状态并请求 exact cursor；bridge 不暴露 File、PCM、AudioBuffer 或 Worker。15 分钟确定性 silence WAV 在 OPFS 分块生成，覆盖单调进度、取消、输入反馈 ≤100ms、无分析归因 >50ms 主线程任务和资源生命周期。`spectralFlux` 的当前 Meyda 异常以预期失败断言固定，不计为支持项。
+
+M7 浏览器测试运行时生成 Git 忽略的 `m7-learning-v1.wav`，版本化数值输入保存在 `m7-learning.v1.json`。Chrome 场景覆盖首次默认三卡、已保存空/单卡恢复、重复禁用、共享 zoom/seek、每特征最多 30Hz exact cursor 请求、≤100ms seek 可见反馈、1024/1280/1920、DPR、reduced motion 和单卡 Canvas context 错误隔离。
 
 2026-07-29，`project-owner` 按下列清单完成最新版稳定 Chrome 原生权限人工检查并确认通过。该签字不保存本地音频的文件名、路径、内容或 hash，也不替代 Edge 验证。
 
@@ -95,11 +102,12 @@ M6 浏览器测试通过 DEV-only bridge 选择四项支持特征、读取可序
 
 - `npm run fixtures:golden` 只比较，不写文件。
 - `npm run fixtures:golden:update` 会重写 committed golden，必须先确认 Meyda、配置或生成器确有受批准的变化。
+- `npm run fixtures:m7:golden` 只验证 L1/L2/L3 学习 golden identity；`fixtures:m7:golden:update` 才写入版本化 JSON。
 - 更新后必须审阅数值 diff，并重新运行 `test:analysis`；测试失败不得自动覆盖 golden。
 
 ## Evidence 与本地产物
 
-`test-results/`、`playwright-report/` 和 `artifacts/evals/<run-id>/` 只在本地保存并由 Git 忽略。未提交工作树只能产生 provisional run；只有对干净 commit 运行对应 canonical 命令的真实结果才能进入正式 evidence index。
+`test-results/`、`playwright-report/`、`artifacts/fixtures/` 和 `artifacts/evals/<run-id>/` 只在本地保存并由 Git 忽略。未提交工作树只能产生 provisional run；只有对干净 commit 运行对应 canonical 命令的真实结果才能进入正式 evidence index。
 
 2026-07-28 的最终 M4 provisional run 为 `M4-2026-07-28T10-15-08-817Z-20f52390-provisional`，summary SHA-256 为 `124819e3a3c7ca4e6404b126cdcc66f95cf48557fa7229494ca10d2642beb3d5`。它只作为实现反馈，不构成正式门禁证据。
 
@@ -113,4 +121,6 @@ M6 浏览器测试通过 DEV-only bridge 选择四项支持特征、读取可序
 
 2026-07-30 的 M6 canonical run `M6-2026-07-30T02-19-07-149Z-a39256ff` 在 clean commit `a39256ff7afdd4167bfdebdd693bcc8b3ba20e94` 上 20/20 通过，起止工作树均干净，summary SHA-256 为 `2d955ddb994e8e2066ce3c79655d44402e297ffdc03ec63b3a7bf5a2088f08ae`。M6 unit 为 18/18、Worker/golden 为 13/13、coordinator 为 6/6、Chrome 为 3/3；四项 cache payload 为 100,941 bytes，刷新命中后 exact cursor 保持一致，20 次循环保持单一 live Worker/AudioContext，15 分钟输入最大反馈 17ms，分析归因 >50ms 长任务为 0。完整环境、步骤和日志 hash 已登记到 [evidence index](../docs/quality/evidence-index.md)。
 
-本 README 只记录真实执行结果。M6 canonical evidence 已由 owner 批准并关闭 M6；该批准不等于 Edge 矩阵或 release readiness 通过，约 1.08MB chunk warning 与 Meyda 5.6.3 `spectralFlux` 的 R-020 缺陷仍未解决。
+同日 M7 provisional run `M7-2026-07-30T03-13-53-844Z-5b33575f-provisional` 在 dirty worktree 24/24 通过，summary SHA-256 为 `5f49ad1d18c1c5f8096beef53a6122f242bae361b76dcbe2f9d718698e663504`。M7 Chrome 为 4/4、M6 Chrome 回归为 3/3；首次三卡/四槽、保存空/单卡恢复、共享 zoom/cursor/seek、三视口/DPR/reduced motion、30Hz 合并与单卡错误隔离通过。seek 可见反馈为 2.7ms；15 分钟场景反馈最大 16.7ms，20 个进度样本单调，分析归因 >50ms 长任务为 0。该 run 只作实现反馈，不进入正式 evidence index。
+
+本 README 只记录真实执行结果。M6 canonical evidence 已由 owner 批准并关闭 M6；M7 仍需 clean canonical 与 owner 学习任务。现有证据不等于 Edge 矩阵或 release readiness 通过，约 1.10MB chunk warning 与 Meyda 5.6.3 `spectralFlux` 的 R-020 缺陷仍未解决。

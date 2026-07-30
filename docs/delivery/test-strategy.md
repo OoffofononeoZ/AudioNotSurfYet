@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/architecture/interface-contracts.md"
   - "docs/delivery/acceptance-criteria.md"
   - "docs/delivery/execution-plan.md"
-next_action: "由 owner 复核 M6 Worker、FeatureRegistry、cache 与最大输入 canonical evidence"
+next_action: "执行 M7 unit/integration/Chrome/provisional，提交后运行 clean canonical 并登记 in-review evidence"
 ---
 
 # Test Strategy
@@ -46,6 +46,7 @@ next_action: "由 owner 复核 M6 Worker、FeatureRegistry、cache 与最大输�
 - FeatureRegistry：21 项穷尽、唯一、shape/renderer/dependency/维度。
 - float tolerance、NaN/Infinity、量化/反量化、饱和、紧凑 payload 长度。
 - timeline clamp、zoom anchor、Canvas x ↔ time mapping。
+- M7 工作区：四槽、0–3 张活动卡、slot/feature 唯一、首次默认三卡与已保存空工作区恢复为空。
 - restore priority、permission state mapping、current Blob/cache invariant。
 - generation/request ID 和 stale job 丢弃。
 
@@ -71,7 +72,7 @@ next_action: "由 owner 复核 M6 Worker、FeatureRegistry、cache 与最大输�
 ### Browser end-to-end
 
 - 选择多文件、队列、上下首、播放、暂停、seek、音量。
-- 最多四卡、拒绝重复、换卡、共享 zoom/cursor、图表点击 seek。
+- M7 固定四槽、0–3 张获准活动卡、拒绝重复、换卡、共享 zoom/cursor、图表点击 seek；四个唯一活动特征场景顺延 M8。
 - 刷新恢复队列/当前 track/cards/config，时间 0 paused。
 - current Blob 与其他 handle 的不同恢复路径。
 - permission granted/prompt/denied 和恢复访问按钮。

@@ -7,14 +7,14 @@ upstream_docs:
   - "docs/delivery/acceptance-criteria.md"
   - "docs/delivery/test-strategy.md"
   - "docs/architecture/risk-register.md"
-next_action: "由 owner 复核 M6 四项 Worker golden canonical evidence；获批后 M7 再进入首批 Analyzer UI 样例"
+next_action: "M7 学习 golden 与 provisional 已通过；运行 clean canonical 并由 owner 完成 3/3 学习解释"
 ---
 
 # Golden Examples
 
 ## 1. Evidence Boundary
 
-以下产品、学习、失败和边界样例仍是待各里程碑实现和执行的规范。M3 已生成受控 fixture、manifest 和首批 direct-Meyda golden，并在 clean commit canonical run 中通过 identity/容差检查。M6 新增的产品 Worker 测试已在 clean commit canonical 中对 silence、sine、dual-tone 和 impulse 比较 RMS、Energy、Amplitude Spectrum、Chroma，并获 owner 批准；这只关闭 M6，不表示 M7 UI 或后续 21 项产品行为已经通过。
+以下产品、学习、失败和边界样例仍是待各里程碑实现和执行的规范。M3 已生成受控 fixture、manifest 和首批 direct-Meyda golden，并在 clean commit canonical run 中通过 identity/容差检查。M6 新增的产品 Worker 测试已在 clean commit canonical 中对 silence、sine、dual-tone 和 impulse 比较 RMS、Energy、Amplitude Spectrum、Chroma，并获 owner 批准。M7 新增 `m7-learning-fixtures-v1` 与版本化 `m7-learning.v1.json`，固定 L1/L2/L3 六个 frame 的 PCM hash 和直接 Meyda 数值；dirty-worktree provisional 已通过 identity、定性关系与浏览器交互，仍需 M7 clean canonical 与 owner 3/3 学习任务证据。
 
 音频仅允许：
 

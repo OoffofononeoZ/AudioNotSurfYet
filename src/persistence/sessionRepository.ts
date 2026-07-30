@@ -6,6 +6,7 @@ import type {
     StoredCurrentBlob,
     StoredHandle,
 } from '../types/session';
+import { assertValidAnalysisWorkspace } from '../types/session';
 import {
     FEATURE_IDS,
     isFeatureId,
@@ -121,6 +122,16 @@ export const validatePersistedSessionV1 = (
             && typeof entry.handleKey === 'string')
     ) {
         throw new InvalidPersistedSessionError();
+    }
+    try {
+        assertValidAnalysisWorkspace({
+            activeCards: value.activeCards as PersistedSessionV1['activeCards'],
+            viewport: value.viewport as PersistedSessionV1['viewport'],
+        });
+    } catch {
+        throw new InvalidPersistedSessionError(
+            'Persisted analysis workspace is invalid.',
+        );
     }
     if (
         value.currentBlob !== undefined

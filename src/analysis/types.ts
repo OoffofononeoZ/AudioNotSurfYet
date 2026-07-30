@@ -37,6 +37,14 @@ export const M6_SUPPORTED_FEATURE_IDS = [
 export type M6SupportedFeatureId =
     typeof M6_SUPPORTED_FEATURE_IDS[number];
 
+export const M7_FEATURE_IDS = [
+    'rms',
+    'amplitudeSpectrum',
+    'chroma',
+] as const satisfies readonly FeatureId[];
+
+export type M7FeatureId = typeof M7_FEATURE_IDS[number];
+
 export interface AnalysisConfig {
     schemaVersion: 1;
     frameSize: 1024;
@@ -264,6 +272,7 @@ export interface AnalysisCoordinatorSnapshot {
     trackId: string | null;
     trackHash: TrackHash | null;
     configHash: ConfigHash | null;
+    sampleRate: number | null;
     activeFeatureIds: FeatureId[];
     readyFeatureIds: FeatureId[];
     completedFrames: number;

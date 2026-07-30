@@ -9,7 +9,7 @@ upstream_docs:
   - "docs/architecture/system-design.md"
   - "docs/architecture/interface-contracts.md"
   - "docs/architecture/risk-register.md"
-next_action: "M6 已关闭；M7 门禁开放但保持 Planned，下一步细化并执行 M7 UI 切片"
+next_action: "M7 provisional 已通过；提交实现并在 clean HEAD 上运行 canonical、登记 in-review evidence"
 ---
 
 # Execution Plan
@@ -18,7 +18,7 @@ next_action: "M6 已关闭；M7 门禁开放但保持 Planned，下一步细化�
 
 按纵向切片把已批准的本地音频学习体验从当前播放器基础推进到 21 项 Meyda 特征全覆盖。本计划以门禁证据而不是日历日期排序；任一里程碑未通过时，不进入下一批特征。
 
-本文件定义实施顺序和验收方式，不代表未关闭里程碑已通过。当前已完成 M1、M2、Q0、M3、M4、M5 和 M6 门禁；M7 门禁已开放，但在明确开始实现前仍为 `Planned`。
+本文件定义实施顺序和验收方式，不代表未关闭里程碑已通过。当前已完成 M1、M2、Q0、M3、M4、M5 和 M6 门禁；`project-owner` 已明确要求实施 M7，M7 为 `In Progress`，M8 仍为 `Planned`。
 
 ## 2. Stage Gates
 
@@ -255,11 +255,14 @@ Rollback:
 
 ### M7 — RMS, Amplitude Spectrum, Chroma vertical slice
 
+Status：In Progress。
+
 Goal：交付第一条完整学习体验。
 
 Implementation:
 
-- 建立最多四张卡的选择、换卡和唯一 feature 约束。
+- 固定四个 UI 槽位；M7 只允许 `rms`、`amplitudeSpectrum`、`chroma`，最多三张唯一活动卡，第四空槽说明 M8 后续范围。
+- 无保存工作区时默认三卡；已保存空工作区恢复为空，不再次自动填充。
 - 建立共享 `TimelineViewport`、缩放、AudioContext 游标和图表点击 seek。
 - RMS：时间序列折线和精确标量。
 - Amplitude Spectrum：时频热图和游标频谱。
@@ -270,10 +273,17 @@ Implementation:
 Verification:
 
 - 首批三项黄金结果；
-- 四卡选择/替换、共享 zoom/cursor 和 click-to-seek E2E；
+- 0–3 张唯一活动卡、四槽基础设施、选择/替换、共享 zoom/cursor 和 click-to-seek E2E；四个唯一活动特征的完整场景从 M8 首个新增特征开始执行；
 - 游标偏差不超过 100ms；
 - owner 完成全部任务脚本并正确解释 3/3 黄金片段；
 - 1024/1280/1920 几何、Canvas 和控制台检查。
+
+Evidence state:
+
+- 2026-07-30 dirty-worktree provisional run `M7-2026-07-30T03-13-53-844Z-5b33575f-provisional` 24/24 通过，summary SHA-256 为 `5f49ad1d18c1c5f8096beef53a6122f242bae361b76dcbe2f9d718698e663504`；它只作实现反馈，不登记正式 evidence index。
+- M7 Chrome 为 4/4：默认三卡/四槽、已保存空/单卡恢复、共享 zoom/cursor/点击与键盘 seek、DPR/reduced-motion/三视口、30Hz exact cursor 合并和单卡 renderer 隔离均通过；seek 可见反馈为 2.7ms。
+- 确定性 15 分钟 M7 场景反馈为 10ms、16.7ms、16.7ms，20 个进度样本单调，分析归因超过 50ms 的主线程长任务为 0；同一 run 中 M6 Chrome 回归 3/3。
+- production build 通过但约 1.10MB chunk warning 继续保留；Edge 未安装和 R-020 `spectralFlux` 缺陷均未解决。下一步必须提交实现后在 clean HEAD 上运行 `eval:m7`。
 
 Rollback:
 

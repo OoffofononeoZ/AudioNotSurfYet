@@ -29,4 +29,5 @@ public/audios
 test-results/
 playwright-report/
 artifacts/evals/
+artifacts/fixtures/
 public/test_audio
