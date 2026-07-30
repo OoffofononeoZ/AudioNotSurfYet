@@ -4,7 +4,7 @@ owner: "project-owner"
 last_reviewed: 2026-07-30
 upstream_docs:
   - "docs/context/index.md"
-next_action: "M7 工作区术语已登记；canonical 前按最终代码事实复核"
+next_action: "M7 工作区术语已按 canonical 实现复核；等待 owner evidence 审批"
 ---
 
 # Glossary
@@ -44,4 +44,4 @@ next_action: "M7 工作区术语已登记；canonical 前按最终代码事实�
 
 ## Approval Record
 
-`project-owner` 于 2026-07-30 明确回复：“我批准 M6 canonical evidence、working agreements、system map 与 glossary；同意将 M6 标记为 Complete 并开放 M7。”本词汇表据此改为 `approved`；M7 新增运行时术语仍需在实现时追加。
+`project-owner` 于 2026-07-30 明确回复：“我批准 M6 canonical evidence、working agreements、system map 与 glossary；同意将 M6 标记为 Complete 并开放 M7。”本词汇表据此改为 `approved`。M7 新增运行时术语已按实现追加，canonical 自动化记录为 `in-review`；本词汇表不预先批准该 evidence。

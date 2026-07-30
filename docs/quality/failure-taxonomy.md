@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/quality/golden-examples.md"
   - "docs/delivery/acceptance-criteria.md"
   - "docs/architecture/risk-register.md"
-next_action: "由 owner 复核 M6 canonical 中的预期失败与 evidence gap；后续里程碑继续沿用分类"
+next_action: "复核 M7 首次 canonical 计时误判修复与通过 evidence；继续保留 Edge、R-019、R-020"
 ---
 
 # Failure Taxonomy
@@ -91,7 +91,15 @@ FAIL-<run-id>-<sequence>: <failure_type>/<severity>
 | 原始 trace 已删除且拒绝重跑，却宣称性能 readiness 通过 | FT-EVIDENCE | S1 | 缺少支持硬性性能声明的可复现证据 |
 | 非关键辅助说明有错别字且不改变含义 | FT-VISUAL | S3 | 不影响任务或数据语义 |
 
-## 7. Q0 Approval Gate
+## 7. M7 Closed Failure Instance
+
+| Failure instance | Type | Severity | Evidence and disposition |
+| --- | --- | --- | --- |
+| `FAIL-M7-2026-07-30T03-21-14-150Z-28fc4699-01` | FT-EVIDENCE | S1 | 首次 clean canonical 的 30Hz 断言用 Node 等待 550ms 代替页面内实际时间；浏览器任务繁忙时读取发生在更晚时间，却仍使用固定 18 次上限。该 run 保持 `fail`，阻断 M7。`f022b86` 把 cadence 调整为 40ms，并用同一页面的 `performance.now()` 计算实际窗口与 30Hz 上限；单 worker 连续 8 次、完整 M7 Chrome 4/4 和第二次 clean canonical 24/24 通过。实例已由回归关闭，但原失败 artifact 保留。 |
+
+该实例没有证明产品曾超过 30Hz；它证明原 evidence clock 无法支持该声明。关闭只恢复自动化证据可信度，不替代 owner 学习任务，也不改变 Edge、R-019 或 R-020 状态。
+
+## 8. Q0 Approval Gate
 
 本 taxonomy 只有在 `project-owner` 确认以下内容后才能改为 `approved`：
 
@@ -102,6 +110,6 @@ FAIL-<run-id>-<sequence>: <failure_type>/<severity>
 - local-only artifact 的保留、删除和 readiness 重跑规则明确；
 - expected failure 与真正失败实例被清楚区分。
 
-## 8. Approval Record
+## 9. Approval Record
 
 `project-owner` 于 2026-07-28 明确批准本文的十类 failure type、S0–S3、门禁响应和本地产物复现规则。

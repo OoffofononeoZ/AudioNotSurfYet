@@ -4,7 +4,7 @@ owner: "project-owner"
 last_reviewed: 2026-07-30
 upstream_docs:
   - "docs/architecture/system-design.md"
-next_action: "由 owner 结合 M6 canonical evidence 复核 AnalysisCoordinator、Worker、codec 与 cache transaction 契约"
+next_action: "M7 workspace/viewport/coordinator 契约已由 canonical 覆盖；等待 owner evidence 审批"
 ---
 
 # Interface Contracts

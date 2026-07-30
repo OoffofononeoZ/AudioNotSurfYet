@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/context/index.md"
   - "docs/delivery/test-strategy.md"
   - "docs/quality/eval-plan.md"
-next_action: "M7 provisional 已通过；提交实现、完成 clean canonical 与 owner 任务后再申请关闭"
+next_action: "M7 clean canonical 已登记为 in-review；完成 owner 操作与 3/3 学习解释后再申请关闭"
 ---
 
 # Working Agreements
@@ -55,7 +55,8 @@ next_action: "M7 provisional 已通过；提交实现、完成 clean canonical �
 - M6 canonical run `M6-2026-07-30T02-19-07-149Z-a39256ff` 已在 clean commit `a39256ff7afdd4167bfdebdd693bcc8b3ba20e94` 上 20/20 通过，起止身份一致且工作树干净；summary SHA-256 为 `2d955ddb994e8e2066ce3c79655d44402e297ffdc03ec63b3a7bf5a2088f08ae`，正式记录已追加到 [evidence index](../quality/evidence-index.md) 并由 owner 批准。
 - M6 canonical artifact 已完成审批；commit 或 artifact 身份变化时必须重新运行，不能沿用旧证据。
 - M7 dirty-worktree provisional `M7-2026-07-30T03-13-53-844Z-5b33575f-provisional` 已 24/24 通过，summary SHA-256 为 `5f49ad1d18c1c5f8096beef53a6122f242bae361b76dcbe2f9d718698e663504`；M7 Chrome 为 4/4、M6 Chrome 回归为 3/3，15 分钟场景最大反馈 16.7ms、分析归因 >50ms 长任务 0 个。它只作实现反馈，不进入正式 evidence index。
-- M3–M6 canonical run 已记录在 [evidence index](../quality/evidence-index.md)；本地产物保留和删除规则以 [eval plan](../quality/eval-plan.md) 为准。
+- 首次 M7 clean run `M7-2026-07-30T03-21-14-150Z-28fc4699` 因跨进程固定 550ms exact-cursor 计时误判为 fail；修复后的 `M7-2026-07-30T03-30-43-095Z-f022b86e` 在 clean commit `f022b86e2333ad612ecb12701b0ca05e49f2b256` 上 24/24 通过，summary SHA-256 为 `458ffb4a0c7fc8c64397092c1324d88c3c369f7fde3fc069f47861bbbc76ed32`，正式记录为 `in-review`。
+- M3–M7 canonical run 已记录在 [evidence index](../quality/evidence-index.md)；M3–M6 已批准，M7 待 owner 学习任务与审批。本地产物保留和删除规则以 [eval plan](../quality/eval-plan.md) 为准。
 - fixture、manifest 和 golden 是受版本控制的规范输入；更新必须可重建、显示 diff，并重新执行对应测试。
 
 ## Resource Ownership

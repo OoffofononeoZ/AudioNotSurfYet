@@ -6,7 +6,7 @@ upstream_docs:
   - "docs/product/problem-brief.md"
   - "docs/product/scope.md"
   - "docs/architecture/system-design.md"
-next_action: "由 owner 结合 M6 canonical 复核 PCM copy/revision 与唯一 AudioEngine 时钟边界"
+next_action: "M7 canonical 已回归唯一 AudioEngine/时钟边界；等待 owner 学习任务与 evidence 审批"
 ---
 
 # ADR-0001: Single AudioEngine and Shared Session State

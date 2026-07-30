@@ -8,7 +8,7 @@
 - FFmpeg：8.1.2；只用于生成和检查受控 WAV/MP3/FLAC fixture。
 - Microsoft Edge 当前未安装。`npm run test:e2e:edge` 会以退出码 2 报告 `blocked`，不会伪装成 pass。
 
-M3–M7 不建设 CI。下列命令当前均为本地门禁；正式证据要求在用户提交后的干净 commit 上复跑。M3–M6 canonical run 已登记到 [evidence index](../docs/quality/evidence-index.md) 并由 owner 批准；M7 当前为 `In Progress`。M5 Chrome 原生权限人工检查也已单独签字通过。
+M3–M7 不建设 CI。下列命令当前均为本地门禁；正式证据要求在用户提交后的干净 commit 上复跑。M3–M6 canonical run 已登记到 [evidence index](../docs/quality/evidence-index.md) 并由 owner 批准；M7 canonical 已登记为 `in-review`，当前仍为 `In Progress`。M5 Chrome 原生权限人工检查也已单独签字通过。
 
 当前 `npm audit` 在安全补丁更新后剩余 1 项 low：Vite 依赖的 esbuild 0.27.3 在 Windows 开发服务器场景存在本地任意文件读取风险。仓库目标验证机为 macOS，开发服务器不得暴露到不受信网络；依赖升级提供修复版本后复核。该缺口不被描述为已修复或生产 readiness。
 
@@ -123,4 +123,8 @@ M7 浏览器测试运行时生成 Git 忽略的 `m7-learning-v1.wav`，版本化
 
 同日 M7 provisional run `M7-2026-07-30T03-13-53-844Z-5b33575f-provisional` 在 dirty worktree 24/24 通过，summary SHA-256 为 `5f49ad1d18c1c5f8096beef53a6122f242bae361b76dcbe2f9d718698e663504`。M7 Chrome 为 4/4、M6 Chrome 回归为 3/3；首次三卡/四槽、保存空/单卡恢复、共享 zoom/cursor/seek、三视口/DPR/reduced motion、30Hz 合并与单卡错误隔离通过。seek 可见反馈为 2.7ms；15 分钟场景反馈最大 16.7ms，20 个进度样本单调，分析归因 >50ms 长任务为 0。该 run 只作实现反馈，不进入正式 evidence index。
 
-本 README 只记录真实执行结果。M6 canonical evidence 已由 owner 批准并关闭 M6；M7 仍需 clean canonical 与 owner 学习任务。现有证据不等于 Edge 矩阵或 release readiness 通过，约 1.10MB chunk warning 与 Meyda 5.6.3 `spectralFlux` 的 R-020 缺陷仍未解决。
+首次 M7 clean run `M7-2026-07-30T03-21-14-150Z-28fc4699` 23/24，通过步骤之外的 M7 Chrome 为 3/4；固定 550ms 跨进程计时在浏览器繁忙时低估实际窗口，导致 exact-cursor 上限误判。修复为页面内 `performance.now()` 真实窗口并采用 40ms cadence 后，canonical run `M7-2026-07-30T03-30-43-095Z-f022b86e` 在 clean commit `f022b86e2333ad612ecb12701b0ca05e49f2b256` 上 24/24 通过，起止工作树干净，summary SHA-256 为 `458ffb4a0c7fc8c64397092c1324d88c3c369f7fde3fc069f47861bbbc76ed32`。
+
+最终 canonical 的 M7 unit 为 8/8、integration 为 3/3、Chrome 为 4/4；页面内 624.4ms 窗口三项 exact-cursor 各 16 次、上限 20，seek 可见反馈 1.7ms。15 分钟场景最大反馈 16.8ms、20 个进度样本单调、分析归因 >50ms 长任务为 0；M3–M6 回归均通过。完整环境、24 步骤和日志 hash 见 [evidence index](../docs/quality/evidence-index.md)。
+
+本 README 只记录真实执行结果。M6 canonical evidence 已由 owner 批准并关闭 M6；M7 canonical 为 `in-review`，仍需 owner 操作与 3/3 学习解释。现有证据不等于 Edge 矩阵或 release readiness 通过，1,100.70 kB chunk warning 与 Meyda 5.6.3 `spectralFlux` 的 R-020 缺陷仍未解决。

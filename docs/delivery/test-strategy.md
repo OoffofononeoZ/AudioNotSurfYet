@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/architecture/interface-contracts.md"
   - "docs/delivery/acceptance-criteria.md"
   - "docs/delivery/execution-plan.md"
-next_action: "执行 M7 unit/integration/Chrome/provisional，提交后运行 clean canonical 并登记 in-review evidence"
+next_action: "M7 clean canonical 已登记为 in-review；完成 owner 操作与 3/3 学习解释"
 ---
 
 # Test Strategy
@@ -231,4 +231,4 @@ npm run eval:m6
 
 ## 12. Exit Criteria
 
-M3 的公开命令、fixture、黄金比较和失败检测已有 clean-commit canonical pass，并已由 `project-owner` 批准。M4 的 AudioEngine/session/Chrome 适用测试也已在 clean commit 上 canonical pass、记录在 [evidence index](../quality/evidence-index.md) 并获 owner 批准。M5 repository、recovery integration 与 Chrome IndexedDB/OPFS 已在 clean commit canonical 通过；Chrome 原生权限人工检查也已由 `project-owner` 确认通过，M5 evidence 与 working agreements 已获批准。M6 Worker/registry/cache/15 分钟 Chrome 场景已在 clean commit canonical 20/20 通过并获 owner 批准，M6 已关闭。
+M3 的公开命令、fixture、黄金比较和失败检测已有 clean-commit canonical pass，并已由 `project-owner` 批准。M4 的 AudioEngine/session/Chrome 适用测试也已在 clean commit 上 canonical pass、记录在 [evidence index](../quality/evidence-index.md) 并获 owner 批准。M5 repository、recovery integration 与 Chrome IndexedDB/OPFS 已在 clean commit canonical 通过；Chrome 原生权限人工检查也已由 `project-owner` 确认通过，M5 evidence 与 working agreements 已获批准。M6 Worker/registry/cache/15 分钟 Chrome 场景已在 clean commit canonical 20/20 通过并获 owner 批准，M6 已关闭。M7 unit/integration/golden/Chrome 与 M3–M6 回归已在 clean commit `f022b86e2333ad612ecb12701b0ca05e49f2b256` 上 24/24 通过并登记为 `in-review`；owner 操作与 3/3 学习解释尚未执行。

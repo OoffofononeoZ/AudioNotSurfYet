@@ -6,7 +6,7 @@ upstream_docs:
   - "docs/product/scope.md"
   - "docs/architecture/system-design.md"
   - "docs/architecture/interface-contracts.md"
-next_action: "由 owner 复核 M6 registry/codec canonical evidence；获批后按 M7 实施首批三项 renderer"
+next_action: "M7 三项 renderer canonical 已 in-review；等待 owner 学习任务与 evidence 审批"
 ---
 
 # ADR-0004: Typed Feature Registry and Canvas 2D Renderer Families

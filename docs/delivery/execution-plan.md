@@ -9,7 +9,7 @@ upstream_docs:
   - "docs/architecture/system-design.md"
   - "docs/architecture/interface-contracts.md"
   - "docs/architecture/risk-register.md"
-next_action: "M7 provisional 已通过；提交实现并在 clean HEAD 上运行 canonical、登记 in-review evidence"
+next_action: "M7 canonical 已登记为 in-review；完成 owner 操作与 3/3 学习解释后申请关闭"
 ---
 
 # Execution Plan
@@ -283,7 +283,11 @@ Evidence state:
 - 2026-07-30 dirty-worktree provisional run `M7-2026-07-30T03-13-53-844Z-5b33575f-provisional` 24/24 通过，summary SHA-256 为 `5f49ad1d18c1c5f8096beef53a6122f242bae361b76dcbe2f9d718698e663504`；它只作实现反馈，不登记正式 evidence index。
 - M7 Chrome 为 4/4：默认三卡/四槽、已保存空/单卡恢复、共享 zoom/cursor/点击与键盘 seek、DPR/reduced-motion/三视口、30Hz exact cursor 合并和单卡 renderer 隔离均通过；seek 可见反馈为 2.7ms。
 - 确定性 15 分钟 M7 场景反馈为 10ms、16.7ms、16.7ms，20 个进度样本单调，分析归因超过 50ms 的主线程长任务为 0；同一 run 中 M6 Chrome 回归 3/3。
-- production build 通过但约 1.10MB chunk warning 继续保留；Edge 未安装和 R-020 `spectralFlux` 缺陷均未解决。下一步必须提交实现后在 clean HEAD 上运行 `eval:m7`。
+- production build 通过但约 1.10MB chunk warning 继续保留；Edge 未安装和 R-020 `spectralFlux` 缺陷均未解决。
+- 首次 clean run `M7-2026-07-30T03-21-14-150Z-28fc4699` 因固定 550ms 跨进程计时误判 exact-cursor 上限而失败；失败 artifact 保留，不作为通过证据。
+- 修复后的 canonical `M7-2026-07-30T03-30-43-095Z-f022b86e` 在 clean commit `f022b86e2333ad612ecb12701b0ca05e49f2b256` 上 24/24 通过，summary SHA-256 为 `458ffb4a0c7fc8c64397092c1324d88c3c369f7fde3fc069f47861bbbc76ed32`，正式 evidence 为 `in-review`。
+- canonical M7 Chrome 4/4；页面内 624.4ms 窗口三项 exact-cursor 各 16 次、上限 20，seek 反馈 1.7ms。15 分钟最大反馈 16.8ms，20 个进度样本单调，分析归因 >50ms 长任务 0 个；M3–M6 回归均通过。
+- owner 操作与 3/3 学习解释未执行，因此 M7 仍为 `In Progress`、M8 仍为 `Planned`。
 
 Rollback:
 
