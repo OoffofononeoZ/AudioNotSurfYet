@@ -5,7 +5,7 @@ last_reviewed: 2026-07-30
 upstream_docs:
   - "docs/architecture/system-design.md"
   - "docs/architecture/interface-contracts.md"
-next_action: "由 owner 结合 M6 canonical evidence 复核相关风险；Edge、R-019 与 R-020 保持开放"
+next_action: "复核 M7 in-review evidence；Edge、R-019 与 R-020 保持开放"
 ---
 
 # Risk Register

@@ -6,7 +6,7 @@ upstream_docs:
   - "docs/product/success-metrics.md"
   - "docs/architecture/system-design.md"
   - "docs/architecture/interface-contracts.md"
-next_action: "由 owner 结合 M6 canonical evidence 复核 Worker、golden、generation 与资源边界；获批后进入 M7"
+next_action: "M7 canonical 已回归 Worker/generation/资源边界；等待 owner 学习任务与 evidence 审批"
 ---
 
 # ADR-0002: Worker Full-Track Analysis and Stale Result Isolation

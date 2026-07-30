@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/product/scope.md"
   - "docs/architecture/system-design.md"
   - "docs/delivery/execution-plan.md"
-next_action: "M7 已进入 In Progress；按 DEC-017 完成三卡学习切片、provisional、clean canonical 与 owner 学习任务"
+next_action: "DEC-017 的三卡实现与 canonical 已完成；等待 owner 操作、3/3 学习解释与 evidence 审批"
 ---
 
 # Decision Registry

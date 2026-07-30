@@ -4,7 +4,7 @@ owner: "project-owner"
 last_reviewed: 2026-07-30
 upstream_docs:
   - "AGENTS.md"
-next_action: "M7 已进入 In Progress；完成三卡实现、专项评估与 in-review evidence，owner 批准前不开放 M8"
+next_action: "复核 M7 in-review canonical evidence，完成 owner 操作与 3/3 学习解释；批准前不开放 M8"
 ---
 
 # Repository Context Index
@@ -21,7 +21,7 @@ AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端：用户选择
 - Product intent：problem brief、scope 和 success metrics 已由 `project-owner` 批准；开放问题只保留未来上传、未定义 Tab、托管和扩展研究等非当前门禁事项。
 - System design：system design、接口契约、风险和四个 ADR 已批准。
 - Execution planning：execution plan、acceptance criteria、test strategy 和 milestone plan 均为 approved。
-- Quality and evals：eval plan、golden examples、failure taxonomy，以及 M3–M6 的适用 canonical evidence 已由 `project-owner` 批准；完整 eval 仍未完成。
+- Quality and evals：eval plan、golden examples、failure taxonomy，以及 M3–M6 的适用 canonical evidence 已由 `project-owner` 批准；M7 canonical 为 `in-review`，完整 eval 仍未完成。
 - Implementation：M3–M6 已 `Complete`；M7 三卡学习切片为 `In Progress`，M8 保持 `Planned`。
 - Readiness、release、retrospective：`release-readiness.md` 等待 M11 执行证据，不创建 release 或 retrospective 文档。
 
@@ -48,7 +48,7 @@ AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端：用户选择
 | [eval-plan.md](../quality/eval-plan.md) | 七组评估、阈值、AC/risk 映射和证据缺口 | project-owner / approved | 验收、测试覆盖或风险变化 |
 | [golden-examples.md](../quality/golden-examples.md) | 成功、失败、边界和异常黄金样例 | project-owner / approved | fixture、Meyda、参数或用户任务变化 |
 | [failure-taxonomy.md](../quality/failure-taxonomy.md) | 稳定失败类型、S0–S3 和门禁响应 | project-owner / approved | 失败分类或风险接受规则变化 |
-| [evidence-index.md](../quality/evidence-index.md) | M3–M11 canonical run 摘要、环境、hash 和 reviewer | project-owner / approved | 新 run、artifact retention 或里程碑审批 |
+| [evidence-index.md](../quality/evidence-index.md) | M3–M11 canonical run 摘要、环境、hash 和 reviewer | project-owner / in-review | 新 run、artifact retention 或里程碑审批 |
 
 ## Architecture Decisions
 
@@ -79,7 +79,7 @@ AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端：用户选择
 - System design：[system design](../architecture/system-design.md)
 - Delivery planning：[execution plan](../delivery/execution-plan.md)
 - Quality design：[eval plan](../quality/eval-plan.md)，Q0 批准后用于 M3–M11 证据
-- Quality evidence：[evidence index](../quality/evidence-index.md)，M3–M6 canonical 已批准
+- Quality evidence：[evidence index](../quality/evidence-index.md)，M3–M6 canonical 已批准，M7 canonical `in-review`
 - Quality readiness：`docs/quality/release-readiness.md` 尚未创建；M11 证据完成后生成
 - Release operations：`docs/release/` 尚未创建；release readiness 证据存在后生成
 - Retrospectives：`docs/retrospectives/` 尚未创建；有发布、事故或重复摩擦证据后生成
@@ -117,3 +117,5 @@ AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端：用户选择
 同日，`project-owner` 明确要求实施 M7 三卡学习切片。M7 据此进入 `In Progress`，固定四槽但最多三张获准活动卡；M8 仍为 `Planned`。
 
 随后 M7 dirty-worktree provisional run `M7-2026-07-30T03-13-53-844Z-5b33575f-provisional` 24/24 通过，summary SHA-256 为 `5f49ad1d18c1c5f8096beef53a6122f242bae361b76dcbe2f9d718698e663504`。该结果只作实现反馈；M7 仍需 clean-commit canonical、正式 `in-review` evidence 与 owner 学习任务。
+
+首次 clean run `M7-2026-07-30T03-21-14-150Z-28fc4699` 因跨进程固定 550ms exact-cursor 计时断言误判而失败；修复页面内真实时间窗断言并把 cadence 调整为 40ms 后，canonical run `M7-2026-07-30T03-30-43-095Z-f022b86e` 在 clean commit `f022b86e2333ad612ecb12701b0ca05e49f2b256` 上 24/24 通过，summary SHA-256 为 `458ffb4a0c7fc8c64397092c1324d88c3c369f7fde3fc069f47861bbbc76ed32`。正式记录为 `in-review`；M7 仍等待 owner 操作与 3/3 学习解释，M8 保持 `Planned`。

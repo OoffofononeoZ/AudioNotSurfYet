@@ -6,7 +6,7 @@ upstream_docs:
   - "docs/delivery/execution-plan.md"
   - "docs/delivery/acceptance-criteria.md"
   - "docs/delivery/test-strategy.md"
-next_action: "M7 provisional 已通过；提交实现、运行 clean canonical 并登记 in-review evidence，owner 批准前不开放 M8"
+next_action: "M7 canonical 已登记为 in-review；完成 owner 操作与 3/3 学习解释，批准前不开放 M8"
 ---
 
 # Milestone Plan
@@ -99,7 +99,7 @@ next_action: "M7 provisional 已通过；提交实现、运行 clean canonical �
 - [ ] owner 脚本任务全部完成，学习解释 3/3。
 - [x] Chrome 自动化覆盖三视口、键盘、reduced motion、console。
 - [x] dirty-worktree provisional 24/24 通过，只作实现反馈。
-- [ ] clean-HEAD canonical 与 `in-review` evidence。
+- [x] clean-HEAD canonical 24/24 通过并登记 `in-review` evidence。
 
 ### M8
 
@@ -136,7 +136,7 @@ next_action: "M7 provisional 已通过；提交实现、运行 clean canonical �
 - Current stage：M7 RMS、Amplitude Spectrum、Chroma 三卡学习切片，状态为 `In Progress`；M8 保持 `Planned`。
 - Previous gate：M3 已由 `project-owner` 于 2026-07-28 批准并标记 `Complete`。
 - Canonical run：`npm run eval:m3` 已在 clean commit `17d16f0da37289c1f67f75203502beef999572ea` 上通过；摘要见 [evidence index](../quality/evidence-index.md)。
-- Next gate：M7 provisional 已通过；提交实现，在 clean commit 上运行 canonical；登记 `in-review` evidence 并完成 owner 任务与 3/3 学习解释后，才能关闭 M7。
+- Next gate：M7 clean-commit canonical 已登记为 `in-review`；完成 owner 任务与 3/3 学习解释并明确批准后，才能关闭 M7。
 - M3 state：Complete；M3 evidence 只证明测试基础，不代表 M4 产品行为通过。
 - M4 canonical：`npm run eval:m4` 在 clean commit `e5cfe9e8ab62301f3c5b0ddcdd37847a2e131a0f` 上 13/13 步骤通过；60 秒漂移 2.233ms，三次 seek 最大误差 66.827ms。`project-owner` 已于 2026-07-29 批准该证据。
 - M5 provisional：`M5-2026-07-29T07-03-16-207Z-2eb98381-provisional` 在 dirty worktree 16/16 步骤通过；summary SHA-256 为 `7b0acaf128ac4a7ceffce1449d2421127d20c8b25dcdc1ebd07b889072228530`。它只作实现反馈，不是正式 evidence。
@@ -144,6 +144,7 @@ next_action: "M7 provisional 已通过；提交实现、运行 clean canonical �
 - M6 provisional：`M6-2026-07-29T10-59-23-767Z-b7fa91ed-provisional` 在 dirty worktree 20/20 通过；summary SHA-256 为 `6fd67f9a8b0184a2861a7182a1276572375e947880cf3688afe7511ca97ed3fa`。刷新 cache hit 后 exact cursor 可用；15 分钟最大反馈 16.7ms、分析归因 >50ms 长任务 0 个。它不构成正式 evidence。
 - M6 canonical：`M6-2026-07-30T02-19-07-149Z-a39256ff` 在 clean commit `a39256ff7afdd4167bfdebdd693bcc8b3ba20e94` 上 20/20 通过；summary SHA-256 为 `2d955ddb994e8e2066ce3c79655d44402e297ffdc03ec63b3a7bf5a2088f08ae`。四项 cache payload 为 100,941 bytes，刷新 hit 后 exact cursor 一致，20 次资源循环保持单 Worker/AudioContext，15 分钟最大反馈 17ms、分析归因 >50ms 长任务 0 个；`project-owner` 已于 2026-07-30 批准该记录。
 - M7 provisional：`M7-2026-07-30T03-13-53-844Z-5b33575f-provisional` 在 dirty worktree 24/24 通过，summary SHA-256 为 `5f49ad1d18c1c5f8096beef53a6122f242bae361b76dcbe2f9d718698e663504`。M7 Chrome 4/4、M6 Chrome 回归 3/3；三卡/四槽、共享交互、恢复与隔离场景通过，15 分钟反馈最大 16.7ms、分析归因 >50ms 长任务 0 个。它不构成正式 evidence。
+- M7 canonical：首次 clean run 因固定 550ms 跨进程计时误判 exact-cursor 上限而失败；修复后 `M7-2026-07-30T03-30-43-095Z-f022b86e` 在 clean commit `f022b86e2333ad612ecb12701b0ca05e49f2b256` 上 24/24 通过，summary SHA-256 为 `458ffb4a0c7fc8c64397092c1324d88c3c369f7fde3fc069f47861bbbc76ed32`。M7 Chrome 4/4，seek 反馈 1.7ms，15 分钟最大反馈 16.8ms、分析归因 >50ms 长任务 0 个；evidence 为 `in-review`。
 - Known future blockers：没有真实 Edge 证据时不能完成 M11 或未来 readiness；托管平台未定会阻断 release，但不阻断 Q0/M3。
 
 ## Approval Record

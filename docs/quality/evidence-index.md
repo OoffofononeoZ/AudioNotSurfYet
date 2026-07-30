@@ -1,5 +1,5 @@
 ---
-status: approved
+status: in-review
 owner: "project-owner"
 last_reviewed: 2026-07-30
 upstream_docs:
@@ -8,14 +8,14 @@ upstream_docs:
   - "docs/quality/failure-taxonomy.md"
   - "docs/delivery/milestone-plan.md"
   - "tests/fixtures/fixture-manifest.json"
-next_action: "M6 已关闭；M7 门禁开放但保持 Planned，下一步制定并执行 M7 三卡学习切片"
+next_action: "复核 M7 canonical、完成 owner 操作与 3/3 学习解释；批准前 M7 保持 In Progress、M8 保持 Planned"
 ---
 
 # Evidence Index
 
 ## 1. Purpose and Gate State
 
-本文件保存受版本控制的长期证据摘要；原始日志保存在 Git 忽略的本地 artifact 目录。M3 测试基础切片、M4 AudioEngine 切片、M5 hybrid recovery 切片和 M6 analysis platform 切片均已由 `project-owner` 批准。M6 已为 `Complete`；M7 门禁开放但仍为 `Planned`，直到明确开始实现。
+本文件保存受版本控制的长期证据摘要；原始日志保存在 Git 忽略的本地 artifact 目录。M3 测试基础切片、M4 AudioEngine 切片、M5 hybrid recovery 切片和 M6 analysis platform 切片均已由 `project-owner` 批准。M6 已为 `Complete`；M7 已进入 `In Progress`，clean-commit canonical 自动化通过并登记为 `in-review`，仍需 owner 操作与 3/3 学习解释。M8 保持 `Planned`。
 
 每条 `pass` 只证明对应里程碑的适用子集在被记录的 commit 和环境上可复现。它不表示完整 EV-A–EV-R、未执行里程碑、Edge 矩阵或 release readiness 已通过。
 
@@ -406,3 +406,121 @@ M6 Chrome 测量记录：四项短 fixture 产生 4 个 payload、合计 100,941
 ### M6 Approval Record
 
 本记录来自干净 commit，20/20 自动化步骤通过且没有 M6 门禁内 failure instance。`project-owner` 于 2026-07-30 明确回复：“我批准 M6 canonical evidence、working agreements、system map 与 glossary；同意将 M6 标记为 Complete 并开放 M7。”据此本 evidence、[working agreements](../context/working-agreements.md)、[system map](../context/system-map.md) 与 [glossary](../context/glossary.md) 改为 `approved`，M6 改为 `Complete`，M7 门禁开放但仍保持 `Planned`，直到明确开始实现。本批准不构成 Edge、M7 UI、完整 EV-A–EV-R 或 release readiness 通过。
+
+## 10. M7 Canonical Run Record
+
+| Field | Value |
+| --- | --- |
+| Run ID | `M7-2026-07-30T03-30-43-095Z-f022b86e` |
+| Milestone | M7 — RMS, Amplitude Spectrum, Chroma vertical slice |
+| State | `pass`（M7 适用自动化子集；`in-review`） |
+| Eval IDs | EV-A、EV-S、EV-U、EV-J、EV-D、EV-R 的 M7 适用子集；M3–M6 回归子集 |
+| Commit | `f022b86e2333ad612ecb12701b0ca05e49f2b256` |
+| Dirty at start / end | `false` / `false` |
+| Commit at end | `f022b86e2333ad612ecb12701b0ca05e49f2b256` |
+| Started at | 2026-07-30 03:30:43.095 UTC |
+| Method | `npm run eval:m7` |
+| Reviewer | `project-owner` — pending |
+| Retention | `local-present` |
+| Artifact root | `artifacts/evals/M7-2026-07-30T03-30-43-095Z-f022b86e/` |
+| Summary SHA-256 | `458ffb4a0c7fc8c64397092c1324d88c3c369f7fde3fc069f47861bbbc76ed32` |
+| Prior failed run | `M7-2026-07-30T03-21-14-150Z-28fc4699`，summary `1906d9661f32018125b8a093695daaa817e189be43006d41c1aa69edd9fc4189`；M7 Chrome 3/4，固定 550ms 跨进程计时误判 exact-cursor 上限，已由 `f022b86` 的页面内真实时间窗断言与 40ms cadence 修复取代 |
+| Failure | 本 run 的 M7 门禁内无 failure instance；Edge 缺失、构建 chunk warning、owner 学习任务和 R-020 继续为未关闭缺口/风险 |
+
+### Environment
+
+| Item | Recorded value |
+| --- | --- |
+| OS | macOS 26.5.2 (`25F84`), Darwin arm64 |
+| Hardware | MacBook Pro `MacBookPro17,1`；Apple M1 8-core；16 GB memory |
+| Node / npm | Node `v24.18.0`；npm `11.16.0` |
+| Vitest | `4.1.10` |
+| Playwright Test | `1.62.0` |
+| Chrome | Google Chrome `151.0.7922.71` |
+| Edge | `not-installed` |
+| FFmpeg | `8.1.2` |
+| Meyda | `5.6.3` |
+
+本记录只保留验证所需的机型、芯片、核心数和内存；本地 summary 中的设备序列号、UUID、UDID 等标识不进入版本控制证据。
+
+### Fixture and Golden Identity
+
+M7 使用 `m7-learning-fixtures-v1` 确定性生成 L1/L2/L3 六个 48kHz、单声道 frame；版本化 golden 为 `tests/analysis/golden/m7-learning.v1.json`，SHA-256 `232c8fed88bd729b18196057321d3aae4a992af026505269d6a3374a21774f45`。运行时学习 WAV 与 15 分钟容量 WAV 位于 Git 忽略目录，不进入版本控制。本 run 未读取、复制或记录用户私有音频的文件名、路径、内容或 hash。
+
+### Results and Traceability
+
+| Step | Result | M7 measurement | Eval / AC / risk trace |
+| --- | --- | --- | --- |
+| Fixture hashes | pass | 5/5 | M3 regression；EV-A、EV-B |
+| M3 unit regression | pass | 12/12 | M3 regression；EV-A、EV-D |
+| M3 Worker regression | pass | 11/11 | M3/M6 Worker regression；EV-J |
+| M3 analysis regression | pass | 36/36，含 M7 learning golden | EV-A、EV-U；AC-P06、AC-A03、AC-A07 |
+| M4 AudioEngine unit | pass | 6/6 | M4 regression；EV-S、EV-R |
+| M4 session integration | pass | 5/5 | M4 regression；EV-S、EV-R |
+| M5 repository unit | pass | 5/5 | M5 regression；EV-D |
+| M5 recovery integration | pass | 6/6 | M5 regression；EV-D |
+| M6 platform unit | pass | 18/18 | M6 regression；EV-A、EV-J |
+| M6 Worker and golden | pass | 13/13 | M6 regression；EV-A、EV-J |
+| M6 coordinator integration | pass | 6/6 | M6 regression；EV-J、EV-D |
+| M7 workspace and learning unit | pass | 8/8；viewport、zoom anchor、x↔time、renderer 变换、workspace 不变量、L1/L2/L3 | EV-A、EV-S、EV-U；AC-P03、AC-P06、AC-A03 |
+| M7 workspace integration | pass | 3/3；内存先更新、quota 后当前页可用、已保存空工作区保持为空 | EV-D、EV-J；AC-F04、AC-P04 |
+| M7 golden identity | pass | generator、PCM hash 与 direct-Meyda 数值 identity 一致 | EV-A、EV-U；R-010 |
+| Docs | pass | lifecycle frontmatter/links；feature source count 21 | EV-R；R-019 |
+| Deliberate failure | pass | harness 正确检测 child exit 1 | EV-R；R-019 |
+| Typecheck | pass | `vue-tsc -b` exit 0 | EV-A、EV-J、EV-D |
+| M3 Chrome regression | pass | 5/5；应用、真实 IndexedDB/Worker、三格式 smoke | M3 regression；EV-B |
+| M4 Chrome regression | pass | 3/3；60 秒漂移 3.6ms；三次 seek 最大误差 66.827ms | M4 regression；EV-S、EV-R |
+| M5 Chrome regression | pass | 3/3；真实 IndexedDB/OPFS handle 与刷新恢复 | M5 regression；EV-D |
+| M6 Chrome regression | pass | 3/3；100,941-byte cache、刷新 hit、20 次资源循环、15 分钟最大反馈 14ms、分析长任务 0 | M6 regression；EV-A、EV-J、EV-R |
+| M7 Chrome E2E | pass | 4/4；默认三卡/四槽、保存空/单卡、共享 zoom/cursor/seek、三视口、DPR、reduced motion、单卡错误隔离 | EV-S、EV-U、EV-J、EV-D、EV-R；AC-P03、AC-P04、AC-P06、AC-A09、AC-U03、AC-R01–AC-R04 |
+| Build | pass with warning | 1818 modules；Worker 40.36 kB；最大 JS chunk 1,100.70 kB | EV-R；R-019 |
+| Diff check | pass | `git diff --check` exit 0；起止 commit 相同且工作树干净 | EV-R；R-019 |
+
+M7 三卡场景记录 4 个固定 slot、3 张唯一活动卡和 6 个 Canvas layer。页面内 exact-cursor 测量窗为 624.4ms，`rms`、`amplitudeSpectrum`、`chroma` 各 16 次，低于按真实窗口计算的上限 20 次；点击 seek 可见反馈为 1.7ms。1280px 与 1920px 均为双列，1024px 单列场景通过。15 分钟输入的三次反馈为 8.7ms、16.8ms、16.6ms，最大 16.8ms；20 个进度样本单调，分析归因超过 50ms 的主线程 long task 为 0，取消成功。
+
+本 run 覆盖 M7 的 success、failure、boundary 与 exception 自动化子集：首次默认三卡、0/1/3 卡恢复、四槽与重复禁用、共享 viewport/zoom/cursor/click/keyboard seek、卡片/viewport 持久化与 quota、单卡 Canvas context failure、换歌/刷新/reduced motion/三视口/DPR、确定性 15 分钟输入和 M3–M6 回归。它不证明 owner 加载/选卡/换卡/比较/seek/刷新任务、3/3 学习解释、四个唯一活动特征、Edge 矩阵或 release readiness。
+
+### Local Artifact Hashes
+
+| Artifact | SHA-256 |
+| --- | --- |
+| `summary.json` | `458ffb4a0c7fc8c64397092c1324d88c3c369f7fde3fc069f47861bbbc76ed32` |
+| `01-fixture-hashes.log` | `0b2c45a833b59827cbe51d0008c6cf31be389c42594de86eea55e47364119df6` |
+| `02-M3-unit-regression.log` | `a03dd86fc8189ea743bff5fe919dba995838b896943d114664592f140cdee202` |
+| `03-M3-worker-regression.log` | `80e024ed64a583d76ddadbeb04d504edfccea86fb5c11a6077925dbfbdff4ccc` |
+| `04-M3-analysis-regression.log` | `cab36bc8eb7384d06fda42c61b42ba92653015bfe0b372b4131b6ef284a60935` |
+| `05-M4-AudioEngine-unit.log` | `32069584a60e7ec8455edc99b7651f35c0865624bd4cfdd6060375e008bb153f` |
+| `06-M4-session-integration.log` | `eebac7a5e5753bd7c1d4e81b1d34652b6414a44e0cea92086c1e879c172b590b` |
+| `07-M5-repository-unit.log` | `fdd09f8e820456a8da64dabbaf9f16a942a877a9f1e2cbb1c296b2a39d91abc8` |
+| `08-M5-recovery-integration.log` | `7ca768a191f636fd8c110be95ced536fa33a525d14eed0e7831df994ea079ad2` |
+| `09-M6-platform-unit.log` | `cabd73ee10f1608631811a00bcc8e267012db15d86e040e90242be386ad4daeb` |
+| `10-M6-Worker-and-golden.log` | `fa3288f932650a652a94b09ec496853a49a27f482816c1dc7f74766fa8a27441` |
+| `11-M6-coordinator-integration.log` | `fbe7a34a9280153e2fcce2c776671c210147cc71d63f15d43b1e06d4b0f34937` |
+| `12-M7-workspace-and-learning-unit.log` | `2c674a4b984f7611e340fcb70f0df48ea724b37061a9d76fecce7d2986284434` |
+| `13-M7-workspace-integration.log` | `a40cee946aa20f28ff7599516be827a26a83bec0787b6232753619b4057e4bc4` |
+| `14-M7-golden-identity.log` | `e9c86c8566c4fa8dfe27f6033376965f08fff7eec487d4801cfb69077165d8a6` |
+| `15-docs.log` | `bb005ed0074179a47b895a5c66e79917e37ebf18976e21fe9d27b1dd63c8f151` |
+| `16-deliberate-failure.log` | `69bf5c3fa50230a4957ad0c60c8323dba68e494d92761fea0039cf5d580d70aa` |
+| `17-typecheck.log` | `fadc7f66199c28d2f7cca439bb300ebeb0320158f32a0f9b52ec77031538af4d` |
+| `18-M3-Chrome-regression.log` | `7984962d9b5b573cadfdc9fc0303b7cf4567f73ee54a9802fe3ba89d65ce1157` |
+| `19-M4-Chrome-regression.log` | `894e4f95fe5983355238e5df3a27eef6e6881792dba933e4520b65af8e1a5a93` |
+| `20-M5-Chrome-regression.log` | `0c945cd5e44f11b2b562d2f75ffa4dd3db75d2053a16323fd5098ab716a342a1` |
+| `21-M6-Chrome-regression.log` | `4c82f55ba68bae57a8fbd965c0132a1767faa61c8f0052593f47680aae68cd63` |
+| `22-M7-Chrome-e2e.log` | `3af02026e99599af52c0109315a7d34f0027eed89acdb7cd8df893d3ff3fa229` |
+| `23-build.log` | `9bb859d8c96be87008b0fec6f169cbd48059410d3f517310aad3eeb70b09e767` |
+| `24-diff-check.log` | `e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855` |
+
+`summary.json.sha256` 已独立核对并与 `summary.json` 一致。本地产物至少保留到 M7 审批完成；删除后必须把 retention 改为 `local-deleted`。失败 run 与通过 run 均保留，以便复核修复链路。
+
+### Open Gaps and Warnings
+
+- EG-003：本机仍未安装 Edge；M7 不要求关闭双浏览器矩阵，但 M11 和未来 readiness 继续 blocked。
+- EG-004：owner 尚未完成加载、选卡、换卡、比较、seek、刷新恢复任务和 3/3 学习解释；因此 M7 不关闭，M8 不开放。
+- GE-S04 的四个唯一活动特征场景按 DEC-017 顺延到 M8 首个新增特征；M7 只证明 0–3 张获准卡和四槽基础设施。
+- R-020：Meyda 5.6.3 `spectralFlux` 仍抛 `ReferenceError: x is not defined`；它保持不可选并阻断未来 M8 对应 scalar coverage，不阻断本次 M7 三卡范围。
+- 构建保留 1,100.70 kB 主 chunk warning；它是 R-019 风险信号，不是本次 build failure，也不是性能 readiness 通过。
+- 当前仍无正式 CI；本记录只支持上述本地 clean-commit 环境。
+
+### M7 Review State
+
+本 canonical 自动化记录为 `in-review`。`project-owner` 完成手工任务与 3/3 学习解释并明确批准前，M7 保持 `In Progress`、M8 保持 `Planned`，且不创建 `release-readiness.md`。

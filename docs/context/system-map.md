@@ -4,7 +4,7 @@ owner: "project-owner"
 last_reviewed: 2026-07-30
 upstream_docs:
   - "docs/context/index.md"
-next_action: "M7 Analyzer 工作区已开始接入；provisional 前复核 Canvas、持久化与资源事实"
+next_action: "M7 Analyzer 自动化证据已 in-review；owner 操作与 3/3 学习解释后复核关闭"
 ---
 
 # System Map
@@ -80,4 +80,4 @@ showOpenFilePicker → FileSystemFileHandle → File
 
 ## Approval Record
 
-`project-owner` 于 2026-07-30 明确回复：“我批准 M6 canonical evidence、working agreements、system map 与 glossary；同意将 M6 标记为 Complete 并开放 M7。”本图据此改为 `approved`；该批准只覆盖 M6 已实现边界，M7 Analyzer 工作区接入后仍需按代码事实更新。
+`project-owner` 于 2026-07-30 明确回复：“我批准 M6 canonical evidence、working agreements、system map 与 glossary；同意将 M6 标记为 Complete 并开放 M7。”本图据此改为 `approved`。同日 owner 要求实施的 M7 Analyzer 工作区已按代码事实更新，canonical 自动化记录为 `in-review`；本图不预先批准该 evidence。
