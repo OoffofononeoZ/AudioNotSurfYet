@@ -21,7 +21,7 @@ declare module 'vue' {
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
     Testcomp: typeof import('./src/components/testcomp.vue')['default']
-    ThreeDTable: typeof import('./src/components/ThreeDTable.vue')['default']
-    TwoDTable: typeof import('./src/components/TwoDTable.vue')['default']
+    ThreeDTable: typeof import('./src/components/threeDTable.vue')['default']
+    TwoDTable: typeof import('./src/components/twoDTable.vue')['default']
   }
 }
