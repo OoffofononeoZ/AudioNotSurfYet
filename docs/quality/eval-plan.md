@@ -1,21 +1,21 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-07-30
+last_reviewed: 2026-08-21
 upstream_docs:
   - "docs/product/success-metrics.md"
   - "docs/architecture/risk-register.md"
   - "docs/delivery/execution-plan.md"
   - "docs/delivery/acceptance-criteria.md"
   - "docs/delivery/test-strategy.md"
-next_action: "M7 canonical 已登记为 in-review；完成 owner 操作、3/3 学习解释与 evidence 审批"
+next_action: "M7 已批准；执行 M8 标量、UI hardening、provisional 与 clean canonical evidence"
 ---
 
 # Eval Plan
 
 ## 1. Purpose and Current State
 
-本文件定义 AudioNotSurfYet 的质量证据契约。Vitest、Playwright、Worker harness、受控 fixture 和 direct-Meyda golden 已在 M3 建立。M3 canonical evidence 已获批，M4 clean-commit [canonical run](evidence-index.md) 对 EV-S、EV-B、EV-R 的适用子集也已获批。M5 clean-commit canonical 自动化与 Chrome 原生权限人工检查已为 EV-D 的 M5 适用子集提供获批证据。M6 Worker platform clean-commit canonical 20/20 通过并获 owner 批准，M6 已关闭。M7 clean-commit canonical 24/24 通过并登记为 `in-review`，owner 操作与 3/3 学习解释仍待完成。完整 EV-A–EV-R、Edge 矩阵和 M8–M11 产品行为仍为 `planned`。
+本文件定义 AudioNotSurfYet 的质量证据契约。Vitest、Playwright、Worker harness、受控 fixture 和 direct-Meyda golden 已在 M3 建立。M3–M6 的适用 canonical evidence 均已获批。M7 clean-commit canonical 24/24 通过，owner 于 2026-08-21 完成人工操作与 3/3 学习解释并批准 evidence，M7 已关闭。完整 EV-A–EV-R、Edge 矩阵和 M8–M11 产品行为仍未完成；M8 为 `In Progress`。
 
 Q0 只批准“如何判断质量”，不批准 release readiness。`docs/quality/release-readiness.md` 只能在 M11 已产生完整成功、失败、边界和异常证据后创建。
 
@@ -53,7 +53,7 @@ Q0 只批准“如何判断质量”，不批准 release readiness。`docs/quali
 - Success：mono/stereo 平均、固定 frame/hop/window/MFCC、M6 的 RMS/Energy/Amplitude Spectrum/Chroma 以及后续获准特征结果与同版本直接 Meyda 一致。
 - Failure：空或声道长度不一致、NaN/Infinity、错误 payload 维度、量化饱和、缺少 provenance 的 fixture 必须显式失败。
 - Boundary：silence、单 impulse、frame/hop 边界、尾帧零填充、负值/无上界标量、24-band Loudness、Complex real/imag。
-- Exception：浏览器重采样时记录实际分析 PCM sample rate；不能通过改容差掩盖 sample-rate/config 身份错误。M6 已把 `spectralFlux` 在当前 Meyda 版本抛出 `x is not defined` 固化为 R-020 和预期失败断言，不把它误报为支持或 silently fallback。
+- Exception：浏览器重采样时记录实际分析 PCM sample rate；不能通过改容差掩盖 sample-rate/config 身份错误。Meyda `spectralFlux` 的上游异常继续映射 R-020；M8 产品结果改按 ADR-0005 的项目公式验证，零能量标量为 0，其他非有限值显式失败。
 
 ### EV-S — Playback synchronization
 
@@ -87,7 +87,7 @@ Q0 只批准“如何判断质量”，不批准 release readiness。`docs/quali
 
 - Success：同源短 fixture 的 MP3/WAV/FLAC 在最新 Chrome/Edge 完成加载、播放和适用分析。
 - Failure：损坏/不支持文件显示可理解错误，队列和 store 不锁死。
-- Boundary：1024、1280、1920 CSS px 的几何、Canvas backing store 和控制台。
+- Boundary：390、1024、1280、1920 CSS px 的几何、sticky/overlay 层级、Canvas backing store 和控制台。
 - Exception：MP3 有损结果与各自解码后的直接 Meyda golden 比较，不要求三格式逐值相同；缺少真实 Edge 时保持 `planned/blocked`。
 
 ### EV-R — Performance and resources

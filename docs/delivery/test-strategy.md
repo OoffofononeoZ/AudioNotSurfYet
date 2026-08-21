@@ -1,13 +1,13 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-07-30
+last_reviewed: 2026-08-21
 upstream_docs:
   - "docs/product/success-metrics.md"
   - "docs/architecture/interface-contracts.md"
   - "docs/delivery/acceptance-criteria.md"
   - "docs/delivery/execution-plan.md"
-next_action: "M7 clean canonical 已登记为 in-review；完成 owner 操作与 3/3 学习解释"
+next_action: "M7 已批准；建立 M8 unit/integration/Chrome/eval，Windows Chrome pressed 状态由 owner 补偿验证"
 ---
 
 # Test Strategy
@@ -134,7 +134,9 @@ next_action: "M7 clean canonical 已登记为 in-review；完成 owner 操作与
 
 每项至少需要 registry coverage、直接 Meyda golden、renderer contract、cursor exact value 和一个失败/边界场景。
 
-M6 的 21/21 只验证 registry 双向穷尽、milestone/shape/renderer/维度和 Worker support 集合；M7–M10 未实现项不因登记而获得产品 golden/renderer/card pass。Meyda 5.6.3 `spectralFlux` 的固定异常测试映射 R-020，M8 前必须先解决依赖处置，不能删除异常测试或伪造 feature pass。
+M6 的 21/21 只验证 registry 双向穷尽、milestone/shape/renderer/维度和 Worker support 集合；M8–M10 未实现项不因登记而获得产品 golden/renderer/card pass。Meyda 5.6.3 `spectralFlux` 的固定异常测试继续证明上游缺陷；M8 另以 ADR-0005 项目公式、首帧/静音和 exact cursor golden 证明产品支持，不能删除上游异常测试或伪称 Meyda 已修复。
+
+M8 新增 `test:m8:unit`、`test:m8:integration`、`test:e2e:m8`、`eval:m8:provisional` 和 clean-HEAD `eval:m8`。Chrome 自动化覆盖 390/1024/1280/1920、sticky 几何、MusicBar/歌曲列表层级、pointerup/pointercancel/focus、主题滚动条、0/1/3/4 卡和 16 项选择；Windows Chrome 偶发 pressed 状态无法由 macOS 自动化替代，由 `project-owner` 按同一脚本人工复核。
 
 ## 6. IndexedDB and Permission Matrix
 
@@ -231,4 +233,4 @@ npm run eval:m6
 
 ## 12. Exit Criteria
 
-M3 的公开命令、fixture、黄金比较和失败检测已有 clean-commit canonical pass，并已由 `project-owner` 批准。M4 的 AudioEngine/session/Chrome 适用测试也已在 clean commit 上 canonical pass、记录在 [evidence index](../quality/evidence-index.md) 并获 owner 批准。M5 repository、recovery integration 与 Chrome IndexedDB/OPFS 已在 clean commit canonical 通过；Chrome 原生权限人工检查也已由 `project-owner` 确认通过，M5 evidence 与 working agreements 已获批准。M6 Worker/registry/cache/15 分钟 Chrome 场景已在 clean commit canonical 20/20 通过并获 owner 批准，M6 已关闭。M7 unit/integration/golden/Chrome 与 M3–M6 回归已在 clean commit `f022b86e2333ad612ecb12701b0ca05e49f2b256` 上 24/24 通过并登记为 `in-review`；owner 操作与 3/3 学习解释尚未执行。
+M3 的公开命令、fixture、黄金比较和失败检测已有 clean-commit canonical pass，并已由 `project-owner` 批准。M4 的 AudioEngine/session/Chrome 适用测试也已在 clean commit 上 canonical pass、记录在 [evidence index](../quality/evidence-index.md) 并获 owner 批准。M5 repository、recovery integration 与 Chrome IndexedDB/OPFS 已在 clean commit canonical 通过；Chrome 原生权限人工检查也已由 `project-owner` 确认通过，M5 evidence 与 working agreements 已获批准。M6 Worker/registry/cache/15 分钟 Chrome 场景已在 clean commit canonical 20/20 通过并获 owner 批准，M6 已关闭。M7 unit/integration/golden/Chrome 与 M3–M6 回归已在 clean commit `f022b86e2333ad612ecb12701b0ca05e49f2b256` 上 24/24 通过；owner 于 2026-08-21 完成人工操作与 3/3 学习解释并批准 evidence，M7 已关闭。

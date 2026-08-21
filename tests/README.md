@@ -8,7 +8,7 @@
 - FFmpeg：8.1.2；只用于生成和检查受控 WAV/MP3/FLAC fixture。
 - Microsoft Edge 当前未安装。`npm run test:e2e:edge` 会以退出码 2 报告 `blocked`，不会伪装成 pass。
 
-M3–M7 不建设 CI。下列命令当前均为本地门禁；正式证据要求在用户提交后的干净 commit 上复跑。M3–M6 canonical run 已登记到 [evidence index](../docs/quality/evidence-index.md) 并由 owner 批准；M7 canonical 已登记为 `in-review`，当前仍为 `In Progress`。M5 Chrome 原生权限人工检查也已单独签字通过。
+M3–M8 不建设 CI。下列命令当前均为本地门禁；正式证据要求在干净 commit 上复跑。M3–M7 canonical run 已登记到 [evidence index](../docs/quality/evidence-index.md) 并由 owner 批准；M8 为 `In Progress`。M5 Chrome 原生权限与 M7 学习任务均已单独签字通过。
 
 当前 `npm audit` 在安全补丁更新后剩余 1 项 low：Vite 依赖的 esbuild 0.27.3 在 Windows 开发服务器场景存在本地任意文件读取风险。仓库目标验证机为 macOS，开发服务器不得暴露到不受信网络；依赖升级提供修复版本后复核。该缺口不被描述为已修复或生产 readiness。
 
@@ -127,4 +127,4 @@ M7 浏览器测试运行时生成 Git 忽略的 `m7-learning-v1.wav`，版本化
 
 最终 canonical 的 M7 unit 为 8/8、integration 为 3/3、Chrome 为 4/4；页面内 624.4ms 窗口三项 exact-cursor 各 16 次、上限 20，seek 可见反馈 1.7ms。15 分钟场景最大反馈 16.8ms、20 个进度样本单调、分析归因 >50ms 长任务为 0；M3–M6 回归均通过。完整环境、24 步骤和日志 hash 见 [evidence index](../docs/quality/evidence-index.md)。
 
-本 README 只记录真实执行结果。M6 canonical evidence 已由 owner 批准并关闭 M6；M7 canonical 为 `in-review`，仍需 owner 操作与 3/3 学习解释。现有证据不等于 Edge 矩阵或 release readiness 通过，1,100.70 kB chunk warning 与 Meyda 5.6.3 `spectralFlux` 的 R-020 缺陷仍未解决。
+本 README 只记录真实执行结果。M7 canonical evidence、人工操作与 3/3 学习解释已由 owner 于 2026-08-21 批准并关闭 M7；M8 已开始实施。现有证据不等于 Edge 矩阵或 release readiness 通过，1,100.70 kB chunk warning 与 Meyda 5.6.3 `spectralFlux` 的上游缺陷仍保留；产品侧处置以 ADR-0005 和未来 M8 evidence 为准。

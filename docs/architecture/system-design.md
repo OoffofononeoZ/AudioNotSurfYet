@@ -1,13 +1,13 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-07-30
+last_reviewed: 2026-08-21
 upstream_docs:
   - "docs/product/problem-brief.md"
   - "docs/product/scope.md"
   - "docs/product/success-metrics.md"
   - "docs/product/open-questions.md"
-next_action: "M7 四槽三卡 Analyzer 已实现并通过 canonical；等待 owner evidence 审批"
+next_action: "M7 已批准；按 ADR-0005 实施 M8 标量与 Analyzer shell hardening"
 ---
 
 # System Design
@@ -142,7 +142,9 @@ flowchart LR
 
 Meyda 5.6.3 的固定维度是：Amplitude/Power Spectrum 512、Chroma 12、MFCC 13、Buffer 1024、Loudness 24 specific bands + total、Complex Spectrum 的 real/imag 各 1024。注册表另记录 `deliveryMilestone` 与 `workerSupported`；M6 只支持 RMS、Energy、Amplitude Spectrum、Chroma，21/21 登记不表示 21 项产品能力完成。
 
-`spectralFlux` 在锁定版本上已复现依赖内部未声明变量 `x` 的 `ReferenceError`。M6 不 fork、monkey-patch 或启用该特征；它在 M8 前保持阻断风险。
+`spectralFlux` 在锁定版本上已复现依赖内部未声明变量 `x` 的 `ReferenceError`。M6 不 fork、monkey-patch 或启用该特征；M8 按 [ADR-0005](adrs/0005-project-spectral-flux-and-silence-semantics.md) 使用项目内相邻幅度频谱正向 L1 差。Meyda 缺陷仍作为依赖事实保留，产品侧缓解只有在 M8 golden/cursor/canonical 通过后才可关闭 R-020。
+
+M8 标量以同一 Hanning frame 的 energy 判断零能量：零能量时全部 M8 标量为 0；非零能量时任何非有限值均显式失败。该规则不改变 scalar payload 或缓存 schema。
 
 特征依赖（如 amplitude/power spectrum、loudness）在 Worker 内复用同一 frame 的中间值。注册表必须使用 feature ID 的穷尽联合类型；`analyzerData.ts` 新增或移除 key 时，类型检查或覆盖测试必须失败。
 
@@ -152,7 +154,7 @@ Meyda 5.6.3 的固定维度是：Amplitude/Power Spectrum 512、Chroma 12、MFCC
 - Amplitude Spectrum：时频热图和游标频谱。
 - Chroma：12 类热图和游标柱图。
 
-Canvas 只画数据、网格、游标和选择态；标题、解释、参数、数值、按钮、状态与可访问替代信息由 DOM 提供。
+Canvas 只画数据、网格、游标和选择态；标题、解释、参数、数值、按钮、状态与可访问替代信息由 DOM 提供。App shell 使用统一 layer contract：Analyzer sticky 位于 Header 下 8px，MusicBar 与直属弹层高于 Header/Analyzer；pressed 只表示瞬时按压，精确值表格使用可见的主题滚动条。
 
 ## 9. Persistence and Recovery
 
