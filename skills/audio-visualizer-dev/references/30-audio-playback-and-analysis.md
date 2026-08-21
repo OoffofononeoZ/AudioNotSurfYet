@@ -55,7 +55,7 @@ AudioBufferSourceNode → AnalyserNode → GainNode → audioContext.destination
 - display series 限制为 ≤30 samples/s，通过六类 binary compact payload 存储；decoder 校验 schema、完整身份、维度、量化范围、对齐和尾随字节。
 - AnalysisCoordinator 以 generation + track/content/config/feature 完整身份隔离 stale 结果，拥有取消、重试、partial cache 合并与 exact cursor。exact cursor 由 Worker 对原始 frame 现场提取，不能使用反量化 display 值。
 - 全 cache hit 使用 0-feature job 只把当前 mono PCM 保留到 Worker，不重复 Meyda 提取；因此刷新命中后 exact cursor 仍可用。默认活动集为空时不复制 PCM、不创建 Worker。
-- 当前 Meyda `spectralFlux` 会抛出 `x is not defined`；M6 以 R-020/预期失败测试记录。M8 已获 owner 批准按 ADR-0005 使用项目内相邻幅度频谱正向 L1 差，不 patch Meyda；clean canonical 前仍不得声明支持完成。
+- 当前 Meyda `spectralFlux` 仍会抛出 `x is not defined`；M6 以 R-020/预期失败测试记录。M8 已按 ADR-0005 使用项目内相邻幅度频谱正向 L1 差，不 patch Meyda；clean canonical 28/28 已缓解产品阻断，但上游缺陷不得表述为已修复。
 
 ## MusicBar 交互边界
 

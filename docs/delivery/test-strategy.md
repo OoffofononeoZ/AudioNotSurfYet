@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/architecture/interface-contracts.md"
   - "docs/delivery/acceptance-criteria.md"
   - "docs/delivery/execution-plan.md"
-next_action: "M7 已批准；建立 M8 unit/integration/Chrome/eval，Windows Chrome pressed 状态由 owner 补偿验证"
+next_action: "M8 自动化与 clean canonical 已通过；等待 owner Windows Chrome pressed 补偿验证"
 ---
 
 # Test Strategy
@@ -134,9 +134,11 @@ next_action: "M7 已批准；建立 M8 unit/integration/Chrome/eval，Windows Ch
 
 每项至少需要 registry coverage、直接 Meyda golden、renderer contract、cursor exact value 和一个失败/边界场景。
 
-M6 的 21/21 只验证 registry 双向穷尽、milestone/shape/renderer/维度和 Worker support 集合；M8–M10 未实现项不因登记而获得产品 golden/renderer/card pass。Meyda 5.6.3 `spectralFlux` 的固定异常测试继续证明上游缺陷；M8 另以 ADR-0005 项目公式、首帧/静音和 exact cursor golden 证明产品支持，不能删除上游异常测试或伪称 Meyda 已修复。
+M6 的 21/21 只验证 registry 双向穷尽、milestone/shape/renderer/维度和当时的 Worker support 集合；M8 已以独立 golden/renderer/card/canonical 证明累计 16 项，M9–M10 未实现项仍不能因登记而获得产品通过。Meyda 5.6.3 `spectralFlux` 的固定异常继续证明上游缺陷；M8 另以 ADR-0005 项目公式、首帧/静音和 exact cursor golden 证明产品支持，不能删除上游异常测试或伪称 Meyda 已修复。
 
 M8 新增 `test:m8:unit`、`test:m8:integration`、`test:e2e:m8`、`eval:m8:provisional` 和 clean-HEAD `eval:m8`。Chrome 自动化覆盖 390/1024/1280/1920、sticky 几何、MusicBar/歌曲列表层级、pointerup/pointercancel/focus、主题滚动条、0/1/3/4 卡和 16 项选择；Windows Chrome 偶发 pressed 状态无法由 macOS 自动化替代，由 `project-owner` 按同一脚本人工复核。
+
+2026-08-21，M8 provisional 与 clean-HEAD canonical 均 28/28 通过；canonical run `M8-2026-08-21T03-23-18-552Z-d6dcf715` 的 M8 unit 为 7/7、integration 为 6/6、Chrome 为 2/2。该自动化结果不替代 Windows Chrome pressed 人工签字。
 
 ## 6. IndexedDB and Permission Matrix
 

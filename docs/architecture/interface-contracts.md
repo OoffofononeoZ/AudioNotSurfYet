@@ -4,7 +4,7 @@ owner: "project-owner"
 last_reviewed: 2026-08-21
 upstream_docs:
   - "docs/architecture/system-design.md"
-next_action: "M7 已批准；实现 M8 feature sets、项目 Flux、静音语义与四卡选择"
+next_action: "M8 feature sets、项目 Flux、静音与四卡契约已通过 canonical；等待 owner 审批"
 ---
 
 # Interface Contracts
@@ -239,7 +239,7 @@ Invariants:
 - 注册表对全部 `FeatureId` 穷尽且 key 唯一。
 - `meydaKey` 对 `extractionSource: 'meyda'` 必须与当前 Meyda 版本支持的提取器匹配；项目 Flux 保留稳定 FeatureId，但不得调用有缺陷的 Meyda extractor。
 - renderer 与 payload shape 的映射通过编译期类型和 runtime assertion 验证。
-- M6 历史支持集为 `rms`、`energy`、`amplitudeSpectrum`、`chroma`；M8 完成后 Worker 支持累计 16 项，活动 job 仍最多四项。登记 21/21 不等于 21 项产品功能可用。
+- M6 历史支持集为 `rms`、`energy`、`amplitudeSpectrum`、`chroma`；M8 当前 Worker 支持累计 16 项，活动 job 仍最多四项。登记 21/21 不等于 21 项产品功能可用。
 - Meyda 5.6.3 实际维度固定为：Amplitude/Power Spectrum 512、Chroma 12、MFCC 13、Buffer 1024、Loudness 24 specific + total、Complex Spectrum real/imag 各 1024。`@types/meyda` 缺少 `spectralCrest`，实现使用项目内窄 adapter，不升级依赖。
 
 ## AnalysisSeries

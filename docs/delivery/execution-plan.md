@@ -9,7 +9,7 @@ upstream_docs:
   - "docs/architecture/system-design.md"
   - "docs/architecture/interface-contracts.md"
   - "docs/architecture/risk-register.md"
-next_action: "M7 已批准关闭；执行 M8 UI hardening、13 个标量、provisional 与 clean canonical"
+next_action: "M8 实现与 clean canonical 已完成；等待 Windows Chrome/owner 审批，批准前不开放 M9"
 ---
 
 # Execution Plan
@@ -317,6 +317,8 @@ Verification:
 - 第一个 frame、silence、负值、NaN/Infinity 防护；
 - 390/1024/1280/1920 的 sticky/层级/按钮/滚动条与四卡交互；
 - 完成后累计覆盖 16/21。
+
+Execution evidence：Slice 0、13 个新增标量、`m8-scalars-v1`、通用 scalar renderer、四卡选择与累计 16/21 已实现；dirty-worktree provisional 与 clean-HEAD canonical 均 28/28 通过。canonical run `M8-2026-08-21T03-23-18-552Z-d6dcf715` 绑定 commit `d6dcf715be2e6675224f079b954e2b1b544bbebd`，summary SHA-256 为 `bc624121e9479d62c2519ab7d2cf60a2bd8d7f7affd44a2128f645ce642f34ef`。证据为 `in-review`；Windows Chrome pressed 复核与 owner 批准前不关闭 M8。
 
 Rollback:
 

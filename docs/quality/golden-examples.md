@@ -7,14 +7,14 @@ upstream_docs:
   - "docs/delivery/acceptance-criteria.md"
   - "docs/delivery/test-strategy.md"
   - "docs/architecture/risk-register.md"
-next_action: "M7 学习 golden 已获 owner 3/3 批准；生成并验证 M8 scalars v1 golden"
+next_action: "M8 scalars v1 已通过 clean canonical；等待 owner 人工学习/UI 复核"
 ---
 
 # Golden Examples
 
 ## 1. Evidence Boundary
 
-以下产品、学习、失败和边界样例仍是待各里程碑实现和执行的规范。M3 已生成受控 fixture、manifest 和首批 direct-Meyda golden，并在 clean commit canonical run 中通过 identity/容差检查。M6 新增的产品 Worker 测试已在 clean commit canonical 中对 silence、sine、dual-tone 和 impulse 比较 RMS、Energy、Amplitude Spectrum、Chroma，并获 owner 批准。M7 的 `m7-learning-fixtures-v1` 与版本化 `m7-learning.v1.json` 已通过 clean canonical；owner 于 2026-08-21 完成 3/3 学习解释并批准 M7。M8 将新增 `m8-scalars-v1`，用于静音、纯音、同 RMS 丰富谐波和确定性噪声/瞬态关系。
+以下产品、学习、失败和边界样例仍是各里程碑的规范。M3 已生成受控 fixture、manifest 和首批 direct-Meyda golden。M6 的产品 Worker golden 已获批准；M7 的 `m7-learning-fixtures-v1` 与版本化 `m7-learning.v1.json` 已通过 clean canonical 并完成 owner 3/3 学习解释。M8 的 `m8-scalars-fixtures-v1`、`m8-scalars.v1.json` 和运行时 `m8-scalars-v1.wav` 已在 clean canonical 中验证静音、纯音、同 RMS 丰富谐波和确定性噪声/瞬态关系，当前等待 owner 人工复核。
 
 音频仅允许：
 

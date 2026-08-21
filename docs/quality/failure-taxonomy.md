@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/quality/golden-examples.md"
   - "docs/delivery/acceptance-criteria.md"
   - "docs/architecture/risk-register.md"
-next_action: "M7 evidence 已批准；M8 继续覆盖 R-020、R-021 与 Windows Chrome 人工缺口"
+next_action: "M8 canonical 已缓解 R-020；等待 Windows Chrome 人工复核 R-021"
 ---
 
 # Failure Taxonomy

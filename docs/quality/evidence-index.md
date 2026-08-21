@@ -1,5 +1,5 @@
 ---
-status: approved
+status: in-review
 owner: "project-owner"
 last_reviewed: 2026-08-21
 upstream_docs:
@@ -8,14 +8,14 @@ upstream_docs:
   - "docs/quality/failure-taxonomy.md"
   - "docs/delivery/milestone-plan.md"
   - "tests/fixtures/fixture-manifest.json"
-next_action: "M7 canonical 与 owner 任务已批准；执行 M8 并在 clean commit 登记新的 in-review evidence"
+next_action: "复核 M8 canonical 与 Windows Chrome 界面结果；批准前 M8 保持 In Progress、M9 保持 Planned"
 ---
 
 # Evidence Index
 
 ## 1. Purpose and Gate State
 
-本文件保存受版本控制的长期证据摘要；原始日志保存在 Git 忽略的本地 artifact 目录。M3–M7 的适用 canonical evidence 均已由 `project-owner` 批准，M7 已为 `Complete`。M8 门禁已开放并进入 `In Progress`；其实现与新 canonical 证据尚未在本记录中登记。
+本文件保存受版本控制的长期证据摘要；原始日志保存在 Git 忽略的本地 artifact 目录。M3–M7 的适用 canonical evidence 均已由 `project-owner` 批准，M7 已为 `Complete`。M8 实现已在 clean commit 上完成 canonical 并登记为 `in-review`；Windows Chrome 人工复核和 owner 批准前，M8 保持 `In Progress`、M9 保持 `Planned`。
 
 每条 `pass` 只证明对应里程碑的适用子集在被记录的 commit 和环境上可复现。它不表示完整 EV-A–EV-R、未执行里程碑、Edge 矩阵或 release readiness 已通过。
 
@@ -531,3 +531,97 @@ M7 三卡场景记录 4 个固定 slot、3 张唯一活动卡和 6 个 Canvas la
 - L3：RMS 和主音级基本不变，但后段频谱峰更多，说明谐波更丰富、音色更亮。
 
 owner 随后明确回复：“我批准 M7 canonical evidence，同意将 M7 标记为 Complete 并开放 M8。”据此本记录改为 `approved`，M7 改为 `Complete`，M8 门禁开放。该批准不构成 Edge、M8、M9、release readiness 或四项新 UI 问题已通过。
+
+## 11. M8 Canonical Run Record
+
+| Field | Value |
+| --- | --- |
+| Run ID | `M8-2026-08-21T03-23-18-552Z-d6dcf715` |
+| Milestone | M8 — UI hardening and remaining scalar features |
+| Evidence state | `in-review` |
+| Eval result | `pass`（28/28 steps） |
+| Commit | `d6dcf715be2e6675224f079b954e2b1b544bbebd` |
+| Commit at end | `d6dcf715be2e6675224f079b954e2b1b544bbebd` |
+| Dirty at start / end | `false` / `false` |
+| Started at | 2026-08-21 03:23:18.552 UTC |
+| Method | `npm run eval:m8` |
+| Reviewer | `project-owner` — pending |
+| Retention | `local-present` |
+| Artifact root | `artifacts/evals/M8-2026-08-21T03-23-18-552Z-d6dcf715/` |
+| Summary SHA-256 | `bc624121e9479d62c2519ab7d2cf60a2bd8d7f7affd44a2128f645ce642f34ef` |
+| Provisional precursor | `M8-2026-08-21T03-19-06-614Z-486e313a-provisional`，28/28 pass，summary `f12da7cad228a12d5089dbb88a1de2e04302dc5f895aa117e08ec583368ada58`；只作 dirty-worktree 实现反馈 |
+
+### Environment
+
+| Item | Recorded value |
+| --- | --- |
+| OS | macOS 26.5.2 (`25F84`), Darwin arm64 |
+| Hardware | MacBook Pro `MacBookPro17,1`；Apple M1 8-core；16 GB memory |
+| Node / npm | Node `v24.18.0`；npm `11.16.0` |
+| Vitest | `4.1.10` |
+| Playwright Test | `1.62.0` |
+| Chrome | Google Chrome `151.0.7922.170` |
+| Edge | `not-installed` |
+| FFmpeg | `8.1.2` |
+| Meyda | `5.6.3` |
+
+版本化 golden `tests/analysis/golden/m8-scalars.v1.json` 的 SHA-256 为 `ad3e41985da2f07b977539401e5f26aa98e8ece79b29502dc46d8b69ab6eb1ad`。它绑定 `m8-scalars-fixtures-v1`、Meyda 5.6.3、静音、纯音、同 RMS 丰富谐波、确定性噪声/瞬态和项目 Flux v1。运行时学习音频为 Git 忽略的 `artifacts/fixtures/m8-scalars-v1.wav`，不包含用户私有音频。本记录只写机型、芯片、核心数与内存，不写本地 artifact 中的序列号、UUID、UDID 或其他设备标识。
+
+### Results and Traceability
+
+| Step | Result | Measurement |
+| --- | --- | --- |
+| Fixture / M3–M7 regression | pass | fixture 5/5；unit 12/12；Worker 14/14；analysis 43/43；M4 6/6 + 5/5；M5 5/5 + 6/6；M6 18/18 + 13/13 + 6/6；M7 8/8 + 3/3 |
+| M8 scalar unit and golden | pass | 7/7；13 项 registry、12 项 direct Meyda、Flux 公式/首帧、静音 0、非有限值失败、scalar axis domain、golden identity |
+| M8 Worker/workspace integration | pass | 6/6；四项唯一 scalar job、Flux exact cursor、13 项逐项有限、M9 拒绝、四卡保存、quota/空工作区恢复 |
+| Docs / harness / typecheck | pass | 生命周期与链接通过；deliberate failure 被检测；`vue-tsc -b` exit 0 |
+| M3 / M4 / M5 Chrome | pass | 5/5、3/3、3/3；M4 60 秒漂移 8.833ms，三次 seek 最大误差 61.494ms |
+| M6 Chrome regression | pass | 3/3；100,941-byte cache、刷新 hit/exact cursor、20 次循环保持 1 Worker/1 AudioContext；15 分钟最大反馈 16.2ms、分析长任务 0 |
+| M7 Chrome regression | pass | 5/5；三卡/四槽、0/1/3 恢复、共享交互、UI hardening 自动化；seek 1.8ms；15 分钟最大反馈 17.8ms、分析长任务 0 |
+| M8 Chrome E2E | pass | 2/2；390/1024/1280/1920、四卡、16 项选择、重复禁用、M9 隔离、刷新恢复、13 项 scalar renderer/exact cursor；静音 Energy 0、瞬态 Flux 283.038 |
+| Build | pass with warning | 1818 modules；Worker 41.88 kB；最大 JS chunk 1,102.00 kB，R-019 warning 保留 |
+| Diff / identity | pass | `git diff --check` exit 0；起止 commit 相同且工作树干净 |
+
+M8 自动化证明 Slice 0 的 sticky 距 Header 8px、播放器/歌曲列表高于 Analyzer、macOS Chrome 的瞬时 pressed 恢复和主题滚动条；390px 下 MusicBar 导入控件也保持可达。它不能替代 Windows Chrome 对偶发 pressed 状态的人工复核。R-020 的产品阻断已由项目 Flux/golden/cursor/canonical 缓解，但 Meyda 5.6.3 上游 extractor 缺陷仍存在；不得写成依赖缺陷已修复。
+
+### Local Artifact Hashes
+
+| Artifact | SHA-256 |
+| --- | --- |
+| `summary.json` | `bc624121e9479d62c2519ab7d2cf60a2bd8d7f7affd44a2128f645ce642f34ef` |
+| `01-fixture-hashes.log` | `5a57638c31148968d25b0ab278bc71160f457a2f0eb6776bc409ac9d1fbc21f1` |
+| `02-M3-unit-regression.log` | `0fa5fdbd9b4c58b493c6a11b30e3396508f434622d36a59daceb7b9bb4b3f6c9` |
+| `03-M3-worker-regression.log` | `d7a71ea8a06cc3a5ca7040ac74610cf2058852ac3b2b02973af35aef5cecb291` |
+| `04-M3-analysis-regression.log` | `c5069ff2bb69982ca3d019683690d9a9f6d3c7af43fdc3176daf881185aa8edd` |
+| `05-M4-AudioEngine-unit.log` | `7959d66e82d593aa46aa3f5119a8e26d4693832340b4f5f3a8740138d78d23d4` |
+| `06-M4-session-integration.log` | `cb8dcc6309d2e00b618c931e2e105943d51d51ac7414cd27872a200bba9e8304` |
+| `07-M5-repository-unit.log` | `2061b9268c80bf1be56d7aa016d0556786e76d0749a74aa4ee1f657bbf76b0ad` |
+| `08-M5-recovery-integration.log` | `2d9272660c2d2d7028a951d83eceeb0ac9742a76b717c1dfddae78ee584bd735` |
+| `09-M6-platform-unit.log` | `a19318b2fa18a06ff5c2acfc87bc6eb2b4a94e1a53b62bf0b376686fc8501393` |
+| `10-M6-Worker-and-golden.log` | `8aa9f5b0c37218ba74fdb2c38188d4bc370fe4dee51af6ac91b396582dafabaa` |
+| `11-M6-coordinator-integration.log` | `05d5d938a166af9798a5e1c4f9c8ea9a1e29db11cd8e903390def4ff3cbe2021` |
+| `12-M7-workspace-and-learning-unit.log` | `6701097e784a1f5fdcabc8eb38739719b189f8f7fab5339603d0ca345db09d2d` |
+| `13-M7-workspace-integration.log` | `43f1d6271f257e89c80d8977f4e2a63182440ec1dc73817057bddb8a9a0e7a4b` |
+| `14-M7-golden-identity.log` | `e9c86c8566c4fa8dfe27f6033376965f08fff7eec487d4801cfb69077165d8a6` |
+| `15-M8-scalar-unit-and-golden.log` | `c40659fc352b8b3629031737628c07387a8091d3d32e97be47593faad312f255` |
+| `16-M8-Worker-and-workspace-integration.log` | `3dadf7dd8aada0eca0c00c55ad34bc378ccbcf060524d1b2747e86e2110a0855` |
+| `17-M8-golden-identity.log` | `b6914a1c2caa84836ded55c4b6daccbdd85296043980fac59fe4767541d86406` |
+| `18-docs.log` | `bb005ed0074179a47b895a5c66e79917e37ebf18976e21fe9d27b1dd63c8f151` |
+| `19-deliberate-failure.log` | `69bf5c3fa50230a4957ad0c60c8323dba68e494d92761fea0039cf5d580d70aa` |
+| `20-typecheck.log` | `fadc7f66199c28d2f7cca439bb300ebeb0320158f32a0f9b52ec77031538af4d` |
+| `21-M3-Chrome-regression.log` | `ed5f70d579cf18550387b5360fb9d8596fd5db9a5f56e47bbc90760d0c2f415e` |
+| `22-M4-Chrome-regression.log` | `c1098af3b9cc2d03c1815ffd681fa8f62cb001d354166bc9c835f477d5bf81b6` |
+| `23-M5-Chrome-regression.log` | `0e1fe1cad060931703f9c8112bd5066242e51d470bfe9a6656b9114719ce4660` |
+| `24-M6-Chrome-regression.log` | `339b1387e5ac3c4379e382cbb8a084ea50767c653c3f6f9d6c50dfa4ec069f24` |
+| `25-M7-Chrome-regression.log` | `108b2a2c8148219de59f388e73e0a29b3ecb8eec7e7e965820768d2126a34e95` |
+| `26-M8-Chrome-e2e.log` | `c06aafaa4598a81fb916d0d65224ea0e9b887d465a39d26aa8c17bb53be0bc09` |
+| `27-build.log` | `5bd4ad773ed1b1fc31ac7a3be1cf80635607e9f92a548945ee00f929559f2fde` |
+| `28-diff-check.log` | `e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855` |
+
+### Open Gaps and Approval Gate
+
+- Windows Chrome 仍需 owner 人工检查 sticky、歌曲列表层级、连续按钮操作后的 pressed 恢复和两类精确值滚动条；这是 R-021 的剩余门禁。
+- Edge 未安装；M11 与未来 readiness 的双浏览器矩阵仍不完整。
+- 主 chunk 1,102.00 kB warning 与 R-019 保留。
+- Meyda 5.6.3 的 `spectralFlux` 上游缺陷仍存在；产品改用 ADR-0005 项目实现，R-020 只能标记产品侧 `Mitigated`。
+- 本记录不创建或证明 release readiness。M8 owner 批准前保持 `in-review`，M9 不开放。

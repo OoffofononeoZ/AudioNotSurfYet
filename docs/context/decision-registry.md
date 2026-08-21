@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/product/scope.md"
   - "docs/architecture/system-design.md"
   - "docs/delivery/execution-plan.md"
-next_action: "M7 已批准；执行 DEC-018 的 M8 Flux/静音/UI hardening 并生成 clean canonical"
+next_action: "DEC-018 已实现并通过 M8 canonical；等待 Windows Chrome 与 owner 审批"
 ---
 
 # Decision Registry
@@ -71,6 +71,8 @@ M4 dirty-worktree provisional suite 随后通过，证明当前实现值得进�
 同日，`project-owner` 以“PLEASE IMPLEMENT THIS PLAN”明确要求实施 M7 三卡学习切片，并批准四槽三活动特征、首次默认三卡、已保存空工作区恢复为空及完整四特征场景顺延 M8 的决定。DEC-017 据此生效，M7 改为 `In Progress`；该授权不构成 M7 evidence 批准，也不开放 M8。
 
 2026-08-21，`project-owner` 确认卡片选择/替换、zoom/pan、鼠标与键盘 seek、刷新恢复均通过，并提交 L1/L2/L3 三条正确解释；随后明确批准 M7 canonical evidence、关闭 M7并开放 M8。owner 又选择项目内 Flux 与零能量统一为 0，并要求执行 M8 完整计划。DEC-018 据此生效，M8 改为 `In Progress`；M8 evidence 在 clean canonical 与后续 owner 审批前不得标记 approved。
+
+同日，DEC-018 的实现、golden 与 clean canonical 28/28 已完成，R-020 产品阻断标记为 `Mitigated`。M8 evidence 仍为 `in-review`，等待 Windows Chrome 补偿验证与 owner 批准；该执行事实不开放 M9。
 
 ## Historical Evidence Gap
 
