@@ -5,6 +5,13 @@
 :root {
     --main-color: #27ff64;
     --main-color-tsp: #27ff6433;
+    --app-header-height: 64px;
+    --app-sticky-gap: 8px;
+    --layer-content: 0;
+    --layer-sticky: 20;
+    --layer-header: 40;
+    --layer-player: 60;
+    --layer-player-popover: 70;
 }
 
 .scrollbar-hide {
