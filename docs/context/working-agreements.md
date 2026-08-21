@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/context/index.md"
   - "docs/delivery/test-strategy.md"
   - "docs/quality/eval-plan.md"
-next_action: "M8 canonical 已登记 in-review；由 owner 完成 Windows Chrome 补偿验证并决定是否批准关闭"
+next_action: "M8 canonical 与 Windows Chrome 补偿验证已获批准；M9 门禁开放但尚未开始实现"
 ---
 
 # Working Agreements
@@ -35,7 +35,7 @@ next_action: "M8 canonical 已登记 in-review；由 owner 完成 Windows Chrome
 - M7 学习 WAV 在 `artifacts/fixtures/` 运行时确定性生成并保持 Git 忽略；版本化 `m7-learning.v1.json` 固定 L1/L2/L3 的 PCM hash 与直接 Meyda 数值。
 - M8 使用 `test:m8:unit`、`test:m8:integration` 和 `test:e2e:m8`；`eval:m8:provisional` 运行 M3–M8 回归但不写正式 evidence，`eval:m8` 要求起止均为同一 clean commit。
 - M8 学习 WAV 在 `artifacts/fixtures/` 运行时确定性生成；版本化 golden 固定静音、纯音、同 RMS 丰富谐波与确定性噪声/瞬态关系。Flux 按 ADR-0005 项目公式验证，不删除 Meyda 上游异常回归。
-- M8 Chrome 自动化覆盖 390/1024/1280/1920 的 sticky/overlay/control/scrollbar 与四卡；Windows Chrome pressed 偶发问题必须由 owner 人工复核并单独签字。
+- M8 Chrome 自动化覆盖 390/1024/1280/1920 的 sticky/overlay/control/scrollbar 与四卡；Windows Chrome pressed 偶发问题已由 owner 人工复核并单独签字。相关交互或样式再变化时必须重新验证。
 - M3 仅建立本地门禁，不存在正式 CI；这项缺口不阻断 M3，但自动化声明必须限定为本地执行。
 - 交互改动要在本地浏览器执行成功、失败和边界场景，并检查 console error/warn。
 - 布局和可视化至少检查窄屏、常见桌面和宽屏，使用真实 DOM/canvas 几何。
@@ -60,7 +60,7 @@ next_action: "M8 canonical 已登记 in-review；由 owner 完成 Windows Chrome
 - M7 dirty-worktree provisional `M7-2026-07-30T03-13-53-844Z-5b33575f-provisional` 已 24/24 通过，summary SHA-256 为 `5f49ad1d18c1c5f8096beef53a6122f242bae361b76dcbe2f9d718698e663504`；M7 Chrome 为 4/4、M6 Chrome 回归为 3/3，15 分钟场景最大反馈 16.7ms、分析归因 >50ms 长任务 0 个。它只作实现反馈，不进入正式 evidence index。
 - 首次 M7 clean run `M7-2026-07-30T03-21-14-150Z-28fc4699` 因跨进程固定 550ms exact-cursor 计时误判为 fail；修复后的 `M7-2026-07-30T03-30-43-095Z-f022b86e` 在 clean commit `f022b86e2333ad612ecb12701b0ca05e49f2b256` 上 24/24 通过，summary SHA-256 为 `458ffb4a0c7fc8c64397092c1324d88c3c369f7fde3fc069f47861bbbc76ed32`，正式记录为 `in-review`。
 - M8 provisional `M8-2026-08-21T03-19-06-614Z-486e313a-provisional` 已 28/28 通过，只作实现反馈。clean canonical `M8-2026-08-21T03-23-18-552Z-d6dcf715` 在 commit `d6dcf715be2e6675224f079b954e2b1b544bbebd` 上 28/28 通过，起止工作树干净，summary SHA-256 为 `bc624121e9479d62c2519ab7d2cf60a2bd8d7f7affd44a2128f645ce642f34ef`。
-- M3–M7 canonical run 已记录在 [evidence index](../quality/evidence-index.md) 并获 owner 批准；M8 canonical 已登记为 `in-review`，仍需 Windows Chrome 补偿验证与 owner 审批。本地产物保留和删除规则以 [eval plan](../quality/eval-plan.md) 为准。
+- M3–M8 canonical run 已记录在 [evidence index](../quality/evidence-index.md) 并获 owner 批准。本地产物保留和删除规则以 [eval plan](../quality/eval-plan.md) 为准。
 - fixture、manifest 和 golden 是受版本控制的规范输入；更新必须可重建、显示 diff，并重新执行对应测试。
 
 ## Resource Ownership
@@ -99,3 +99,5 @@ next_action: "M8 canonical 已登记 in-review；由 owner 完成 Windows Chrome
 2026-08-21，owner 完成 M7 人工任务与 3/3 学习解释并批准 canonical evidence，M7 据此关闭。owner 同时要求实施 M8、批准 ADR-0005，并授权按独立 commit 提交、远端无分叉时推送 `AI-Auto`；M8 canonical 与 Windows Chrome pressed 复核通过前不关闭 M8。
 
 同日，M8 provisional 与 clean canonical 均 28/28 通过；正式记录进入 `in-review`。macOS Chrome 已自动验证四项 UI hardening、390/1024/1280/1920、四卡、累计 16 项、静音 0 与项目 Flux；Windows Chrome pressed 偶发状态仍由 owner 补偿复核，M9 尚未开放。
+
+随后 `project-owner` 明确回复：“我批准 M8 canonical evidence 与界面稳定化结果；同意将 M8 标记为 Complete 并开放 M9。”本约定据此确认 Windows Chrome 补偿门禁完成、M8 `Complete`，并开放仍为 `Planned` 的 M9；Edge、chunk warning 与 Meyda 上游 Flux 缺陷不因本批准关闭。

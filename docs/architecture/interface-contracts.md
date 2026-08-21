@@ -4,7 +4,7 @@ owner: "project-owner"
 last_reviewed: 2026-08-21
 upstream_docs:
   - "docs/architecture/system-design.md"
-next_action: "M8 feature sets、项目 Flux、静音与四卡契约已通过 canonical；等待 owner 审批"
+next_action: "M8 feature sets、项目 Flux、静音与四卡契约已获批准；M9 开始实现时扩展可用集合"
 ---
 
 # Interface Contracts

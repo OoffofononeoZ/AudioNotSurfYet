@@ -7,14 +7,14 @@ upstream_docs:
   - "docs/delivery/acceptance-criteria.md"
   - "docs/delivery/test-strategy.md"
   - "docs/architecture/risk-register.md"
-next_action: "M8 scalars v1 已通过 clean canonical；等待 owner 人工学习/UI 复核"
+next_action: "M8 scalars v1 已获 owner 批准；M9 开始时增加 vectors/waveform 版本化 golden"
 ---
 
 # Golden Examples
 
 ## 1. Evidence Boundary
 
-以下产品、学习、失败和边界样例仍是各里程碑的规范。M3 已生成受控 fixture、manifest 和首批 direct-Meyda golden。M6 的产品 Worker golden 已获批准；M7 的 `m7-learning-fixtures-v1` 与版本化 `m7-learning.v1.json` 已通过 clean canonical 并完成 owner 3/3 学习解释。M8 的 `m8-scalars-fixtures-v1`、`m8-scalars.v1.json` 和运行时 `m8-scalars-v1.wav` 已在 clean canonical 中验证静音、纯音、同 RMS 丰富谐波和确定性噪声/瞬态关系，当前等待 owner 人工复核。
+以下产品、学习、失败和边界样例仍是各里程碑的规范。M3 已生成受控 fixture、manifest 和首批 direct-Meyda golden。M6 的产品 Worker golden 已获批准；M7 的 `m7-learning-fixtures-v1` 与版本化 `m7-learning.v1.json` 已通过 clean canonical 并完成 owner 3/3 学习解释。M8 的 `m8-scalars-fixtures-v1`、`m8-scalars.v1.json` 和运行时 `m8-scalars-v1.wav` 已在 clean canonical 中验证静音、纯音、同 RMS 丰富谐波和确定性噪声/瞬态关系，并已获 owner 批准。
 
 音频仅允许：
 

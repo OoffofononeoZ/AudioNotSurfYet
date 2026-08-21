@@ -4,7 +4,7 @@ owner: "project-owner"
 last_reviewed: 2026-08-21
 upstream_docs:
   - "AGENTS.md"
-next_action: "M8 canonical 已登记 in-review；等待 Windows Chrome/owner 复核，批准前不开放 M9"
+next_action: "M8 已获 owner 批准并关闭；M9 门禁开放，在明确开始实现前保持 Planned"
 ---
 
 # Repository Context Index
@@ -21,8 +21,8 @@ AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端：用户选择
 - Product intent：problem brief、scope 和 success metrics 已由 `project-owner` 批准；开放问题只保留未来上传、未定义 Tab、托管和扩展研究等非当前门禁事项。
 - System design：system design、接口契约、风险和五个 ADR 已批准。
 - Execution planning：execution plan、acceptance criteria、test strategy 和 milestone plan 均为 approved。
-- Quality and evals：M3–M7 的适用 canonical/人工证据已获批准；M8 clean canonical 28/28 已登记 `in-review`，等待 Windows Chrome 与 owner 批准。
-- Implementation：M3–M7 已 `Complete`；M8 UI hardening 与 13 个剩余标量为 `In Progress`，M9 保持 `Planned`。
+- Quality and evals：M3–M8 的适用 canonical/人工证据已获批准；M8 clean canonical 28/28 与 Windows Chrome 界面稳定化结果已由 owner 签字。
+- Implementation：M3–M8 已 `Complete`；M9 门禁开放但在明确开始实现前保持 `Planned`。
 - Readiness、release、retrospective：`release-readiness.md` 等待 M11 执行证据，不创建 release 或 retrospective 文档。
 
 ## Key Documents
@@ -80,14 +80,14 @@ AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端：用户选择
 - System design：[system design](../architecture/system-design.md)
 - Delivery planning：[execution plan](../delivery/execution-plan.md)
 - Quality design：[eval plan](../quality/eval-plan.md)，Q0 批准后用于 M3–M11 证据
-- Quality evidence：[evidence index](../quality/evidence-index.md)，M3–M7 已批准；M8 canonical 28/28 为 `in-review`
+- Quality evidence：[evidence index](../quality/evidence-index.md)，M3–M8 已批准
 - Quality readiness：`docs/quality/release-readiness.md` 尚未创建；M11 证据完成后生成
 - Release operations：`docs/release/` 尚未创建；release readiness 证据存在后生成
 - Retrospectives：`docs/retrospectives/` 尚未创建；有发布、事故或重复摩擦证据后生成
 
 ## Current Known Gaps
 
-- M8 已实现四槽最多四张、累计 16 项、通用 scalar renderer、项目 Flux、零能量 0 与 UI hardening；clean canonical 已通过，Windows Chrome/owner 审批仍待完成。
+- M8 已实现四槽最多四张、累计 16 项、通用 scalar renderer、项目 Flux、零能量 0 与 UI hardening；clean canonical 与 Windows Chrome/owner 审批均已完成。
 - 当前 Meyda `spectralFlux` 对有效输入仍抛出 `x is not defined`；产品已按 ADR-0005 实现并由 canonical 缓解 R-020，不得声称上游缺陷已修复。
 - 超出约 15 分钟支持边界的长音频未开始播放只作为非门禁压力观察；它不表示长音频被规定为必须失败，也不改变当前产品范围。
 - 当前机器尚未发现 Edge；没有真实 Edge 证据时不能完成 M11 双浏览器门禁。
@@ -124,3 +124,5 @@ AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端：用户选择
 2026-08-21，owner 确认 M7 卡片选择/替换、zoom/pan、鼠标与键盘 seek、刷新恢复均通过，提交 3/3 正确学习解释并明确批准 M7 canonical evidence。M7 据此改为 `Complete`，M8 门禁开放；owner 同时批准 ADR-0005 和 M8 完整实施计划，M8 改为 `In Progress`。
 
 同日，M8 provisional 与 clean canonical 均 28/28 通过；clean run `M8-2026-08-21T03-23-18-552Z-d6dcf715` 绑定 commit `d6dcf715be2e6675224f079b954e2b1b544bbebd`，summary SHA-256 为 `bc624121e9479d62c2519ab7d2cf60a2bd8d7f7affd44a2128f645ce642f34ef`。正式 evidence 为 `in-review`；Windows Chrome pressed 补偿验证和 owner 批准前 M8 保持 `In Progress`、M9 保持 `Planned`。
+
+随后 `project-owner` 明确批准 M8 canonical evidence 与界面稳定化结果，同意将 M8 标记为 `Complete` 并开放 M9。本批准作为 Windows Chrome 补偿门禁的 owner 签字，不增加新的自动化测量；M9 在明确开始实现前保持 `Planned`。

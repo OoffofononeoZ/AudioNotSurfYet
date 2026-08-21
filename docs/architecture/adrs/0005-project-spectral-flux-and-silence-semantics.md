@@ -6,7 +6,7 @@ upstream_docs:
   - "docs/architecture/system-design.md"
   - "docs/architecture/interface-contracts.md"
   - "docs/product/scope.md"
-next_action: "M8 Worker/golden/renderer/clean canonical 已验证；等待 owner 审批并持续保留上游缺陷事实"
+next_action: "M8 Worker/golden/renderer/clean canonical 已获批准；后续里程碑持续回归项目 Flux 并保留上游缺陷事实"
 ---
 
 # ADR-0005: Project Spectral Flux and Zero-Energy Scalar Semantics
