@@ -1,13 +1,13 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-07-30
+last_reviewed: 2026-08-21
 upstream_docs:
   - "docs/context/index.md"
   - "docs/product/scope.md"
   - "docs/architecture/system-design.md"
   - "docs/delivery/execution-plan.md"
-next_action: "DEC-017 的三卡实现与 canonical 已完成；等待 owner 操作、3/3 学习解释与 evidence 审批"
+next_action: "M7 已批准；执行 DEC-018 的 M8 Flux/静音/UI hardening 并生成 clean canonical"
 ---
 
 # Decision Registry
@@ -27,6 +27,7 @@ next_action: "DEC-017 的三卡实现与 canonical 已完成；等待 owner 操�
 | ADR-0002 | 2026-07-24 | Worker 只分析最多四个活动特征，聚合/量化展示数据；generation 和完整身份隔离 stale result | project-owner | approved | [ADR-0002](../architecture/adrs/0002-worker-analysis-and-stale-result-isolation.md) | 分析线程、缓存身份、取消或数据分辨率改变 |
 | ADR-0003 | 2026-07-24 | IndexedDB 保存全部句柄，但只保存当前 Blob/分析缓存；权限恢复必须显式可见并由用户触发 request | project-owner | approved | [ADR-0003](../architecture/adrs/0003-hybrid-indexeddb-session-recovery.md) | 会话寿命、数据量、权限或存储边界改变 |
 | ADR-0004 | 2026-07-24 | 使用 21 项穷尽 FeatureRegistry 和 Canvas 2D renderer family；DOM 承担说明、值、焦点和语义；Analyzer 不新增 Three.js | project-owner | approved | [ADR-0004](../architecture/adrs/0004-typed-feature-registry-and-canvas-renderers.md) | 特征 shape、renderer 或无障碍边界改变 |
+| ADR-0005 | 2026-08-21 | `spectralFlux` 使用项目 v1 正向 L1 公式；零能量 M8 标量为 0，非零能量非有限值失败；不 patch Meyda 或改变 cache schema | project-owner | approved | [ADR-0005](../architecture/adrs/0005-project-spectral-flux-and-silence-semantics.md) | Flux 公式、静音语义、提取来源或缓存语义改变 |
 | DEC-008 | 2026-07-24 | 实施采用 M1–M11 相对门禁，不承诺日期；M3 从测试基础开始，M7 未通过不得扩展后续特征 | project-owner | approved | [Execution plan](../delivery/execution-plan.md) | 依赖、里程碑、验收门禁或交付优先级改变 |
 | DEC-009 | 2026-07-24 | 当前只批准 execution planning；不预建 quality/release/retrospective，也不自动开始代码实现 | project-owner | superseded by DEC-010 | [Milestone plan](../delivery/milestone-plan.md) | 已由 owner 决定前置三份 quality design |
 | DEC-010 | 2026-07-24 | 在 M3 前增加 Q0：前置 eval plan、golden examples、failure taxonomy；三份文档单独批准后开放 M3，release-readiness 仍等待 M11 证据 | project-owner | approved | [Eval plan](../quality/eval-plan.md) | 验收/测试纪律变化，或 owner 改变 Q0/readiness 时序 |
@@ -37,6 +38,7 @@ next_action: "DEC-017 的三卡实现与 canonical 已完成；等待 owner 操�
 | DEC-015 | 2026-07-29 | M5 原生文件选择不提供隐藏 input fallback；本地音频保持 Git 忽略，超出约 15 分钟的样本只作 best-effort 压力观察且不扩大范围 | project-owner | approved | [Working agreements](working-agreements.md) | 文件选择兼容策略、本地样本政策或支持时长改变 |
 | DEC-016 | 2026-07-29 | M6 建立 21 项穷尽 registry、四项 Worker 支持、六类 compact codec、空默认活动集、完整 cache identity、generation 隔离和 Worker exact cursor；不实现 M7 UI，不升级 Meyda 或增加 spectralFlux fallback | project-owner | approved | [Interface contracts](../architecture/interface-contracts.md) | M6 feature 支持、frame/config、codec、缓存、精确值或 fallback 策略改变 |
 | DEC-017 | 2026-07-30 | M7 固定四个 UI 槽位，但只允许 RMS、Amplitude Spectrum、Chroma 三个唯一活动特征；无保存工作区默认三卡，已保存空工作区恢复为空；第四槽与完整四特征场景顺延 M8 | project-owner | approved | [Execution plan](../delivery/execution-plan.md) | M7 活动上限、默认/恢复语义、槽位或 M8 开门规则改变 |
+| DEC-018 | 2026-08-21 | M8 先修复 Analyzer shell 四项 UI 问题，再开放 13 个标量；Flux 使用项目 v1 公式，零能量 M8 标量为 0，非零能量非有限值失败；累计最多四张唯一卡 | project-owner | approved | [ADR-0005](../architecture/adrs/0005-project-spectral-flux-and-silence-semantics.md) | Flux 公式、静音语义、M8 feature set、shell layer 或按钮状态契约改变 |
 
 ## Approval Evidence
 
@@ -67,6 +69,8 @@ M4 dirty-worktree provisional suite 随后通过，证明当前实现值得进�
 2026-07-30，DEC-013 约束下的 M6 clean-commit canonical run 已 20/20 通过并登记到 [evidence](../quality/evidence-index.md)。`project-owner` 随后明确批准 M6 canonical evidence、working agreements、system map 与 glossary，并同意将 M6 标记为 `Complete`、开放 M7；M7 在明确开始实现前保持 `Planned`。
 
 同日，`project-owner` 以“PLEASE IMPLEMENT THIS PLAN”明确要求实施 M7 三卡学习切片，并批准四槽三活动特征、首次默认三卡、已保存空工作区恢复为空及完整四特征场景顺延 M8 的决定。DEC-017 据此生效，M7 改为 `In Progress`；该授权不构成 M7 evidence 批准，也不开放 M8。
+
+2026-08-21，`project-owner` 确认卡片选择/替换、zoom/pan、鼠标与键盘 seek、刷新恢复均通过，并提交 L1/L2/L3 三条正确解释；随后明确批准 M7 canonical evidence、关闭 M7并开放 M8。owner 又选择项目内 Flux 与零能量统一为 0，并要求执行 M8 完整计划。DEC-018 据此生效，M8 改为 `In Progress`；M8 evidence 在 clean canonical 与后续 owner 审批前不得标记 approved。
 
 ## Historical Evidence Gap
 

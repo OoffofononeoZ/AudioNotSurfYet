@@ -1,10 +1,10 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-07-30
+last_reviewed: 2026-08-21
 upstream_docs:
   - "docs/architecture/system-design.md"
-next_action: "M7 workspace/viewport/coordinator 契约已由 canonical 覆盖；等待 owner evidence 审批"
+next_action: "M7 已批准；实现 M8 feature sets、项目 Flux、静音语义与四卡选择"
 ---
 
 # Interface Contracts
@@ -229,15 +229,17 @@ interface FeatureDefinition<T extends FeatureId = FeatureId> {
   dimensions(config: AnalysisConfig): readonly number[]
   deliveryMilestone: 'M7' | 'M8' | 'M9' | 'M10'
   workerSupported: boolean
+  extractionSource: 'meyda' | 'project-spectral-flux-v1'
+  zeroEnergyValue?: 0
 }
 ```
 
 Invariants:
 
 - 注册表对全部 `FeatureId` 穷尽且 key 唯一。
-- `meydaKey` 必须与当前 Meyda 版本支持的提取器匹配。
+- `meydaKey` 对 `extractionSource: 'meyda'` 必须与当前 Meyda 版本支持的提取器匹配；项目 Flux 保留稳定 FeatureId，但不得调用有缺陷的 Meyda extractor。
 - renderer 与 payload shape 的映射通过编译期类型和 runtime assertion 验证。
-- M6 只把 `rms`、`energy`、`amplitudeSpectrum`、`chroma` 标为 Worker supported；登记 21/21 不等于 21 项产品功能可用。
+- M6 历史支持集为 `rms`、`energy`、`amplitudeSpectrum`、`chroma`；M8 完成后 Worker 支持累计 16 项，活动 job 仍最多四项。登记 21/21 不等于 21 项产品功能可用。
 - Meyda 5.6.3 实际维度固定为：Amplitude/Power Spectrum 512、Chroma 12、MFCC 13、Buffer 1024、Loudness 24 specific + total、Complex Spectrum real/imag 各 1024。`@types/meyda` 缺少 `spectralCrest`，实现使用项目内窄 adapter，不升级依赖。
 
 ## AnalysisSeries
@@ -330,6 +332,8 @@ M6 runtime rules:
 - 同一 frame 一次调用 Meyda；聚合因子为 `max(1, ceil(sampleRate / (hopSize * 30)))`。
 - Worker 最多处理 32 frames 或连续运行 8ms 就报告 progress、检查取消并让出事件循环。
 - Meyda 5.6.3 的 `spectralFlux` 已在固定测试中复现 `ReferenceError: x is not defined`；M6 不 patch、启用或伪造通过，它是 M8 阻断风险。
+- M8 使用 ADR-0005 的项目 `spectralFlux`：第一帧 0，后续为相邻幅度频谱正向 L1 差；exact cursor 对非首帧同时提取 previous/current frame。
+- 零能量 frame 的 M8 标量统一为 0；非零能量的非有限值返回 `extract-failed`，不得写入 series/cache。
 
 ### Exact cursor value
 

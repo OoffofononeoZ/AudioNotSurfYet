@@ -1,20 +1,20 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-07-30
+last_reviewed: 2026-08-21
 upstream_docs:
   - "docs/quality/eval-plan.md"
   - "docs/delivery/acceptance-criteria.md"
   - "docs/delivery/test-strategy.md"
   - "docs/architecture/risk-register.md"
-next_action: "M7 学习 golden 与 clean canonical 已通过；由 owner 完成 3/3 学习解释"
+next_action: "M7 学习 golden 已获 owner 3/3 批准；生成并验证 M8 scalars v1 golden"
 ---
 
 # Golden Examples
 
 ## 1. Evidence Boundary
 
-以下产品、学习、失败和边界样例仍是待各里程碑实现和执行的规范。M3 已生成受控 fixture、manifest 和首批 direct-Meyda golden，并在 clean commit canonical run 中通过 identity/容差检查。M6 新增的产品 Worker 测试已在 clean commit canonical 中对 silence、sine、dual-tone 和 impulse 比较 RMS、Energy、Amplitude Spectrum、Chroma，并获 owner 批准。M7 新增 `m7-learning-fixtures-v1` 与版本化 `m7-learning.v1.json`，固定 L1/L2/L3 六个 frame 的 PCM hash 和直接 Meyda 数值；clean-commit canonical 已通过 identity、定性关系与浏览器交互，仍需 owner 3/3 学习任务证据。
+以下产品、学习、失败和边界样例仍是待各里程碑实现和执行的规范。M3 已生成受控 fixture、manifest 和首批 direct-Meyda golden，并在 clean commit canonical run 中通过 identity/容差检查。M6 新增的产品 Worker 测试已在 clean commit canonical 中对 silence、sine、dual-tone 和 impulse 比较 RMS、Energy、Amplitude Spectrum、Chroma，并获 owner 批准。M7 的 `m7-learning-fixtures-v1` 与版本化 `m7-learning.v1.json` 已通过 clean canonical；owner 于 2026-08-21 完成 3/3 学习解释并批准 M7。M8 将新增 `m8-scalars-v1`，用于静音、纯音、同 RMS 丰富谐波和确定性噪声/瞬态关系。
 
 音频仅允许：
 
@@ -34,7 +34,7 @@ next_action: "M7 学习 golden 与 clean canonical 已通过；由 owner 完成 
 - fixture、生成器、编码器参数或 manifest 任一项缺失时，相关 GE/EV 保持 planned 或 blocked，不能生成黄金通过声明。
 - M3 已建立生成器并提交短 PCM/WAV/MP3/FLAC、manifest 与首批 golden；2026-07-28 clean-commit canonical run 通过并记录在 [evidence index](evidence-index.md)。该证据只覆盖 M3 fixture/golden harness，不声明相关产品 eval 完成。
 - M6 运行时 golden 使用确定性 PCM，直接调用同版本 Meyda 与产品 Worker/compact codec 对比；Energy 是平台验证项，不改变 M7 首批卡片仍为 RMS、Amplitude Spectrum、Chroma 的批准范围。
-- 当前 Meyda `5.6.3` 的 `spectralFlux` 对有效输入抛出 `x is not defined`。M6 把它作为预期缺陷和 R-020 固化，不为追求 21 项表面通过而增加 legacy fallback。
+- 当前 Meyda `5.6.3` 的 `spectralFlux` 对有效输入抛出 `x is not defined`。该上游异常继续固定为 R-020；M8 按 ADR-0005 使用项目 Flux v1 golden，不 patch 或伪称直接 Meyda 通过。
 
 ## 2. Success Examples
 
@@ -61,7 +61,7 @@ next_action: "M7 学习 golden 与 clean canonical 已通过；由 owner 完成 
 
 | ID | Boundary input | Action | Expected numeric/result behavior | Expected UI/resource behavior | Trace |
 | --- | --- | --- | --- | --- | --- |
-| GE-E01 | 全零 silence，覆盖完整 frame 和尾帧 | 提取首批及适用后续特征 | 所有输出必须有限并与 direct golden 一致；RMS/energy/频谱按 Meyda golden 为零或定义值，不允许 NaN/Infinity | 图表显示安静状态而不是缺失数据，精确值和说明可读取 | EV-A、EV-U；AC-A03、AC-U03；R-010、R-011 |
+| GE-E01 | 全零 silence，覆盖完整 frame 和尾帧 | 提取首批及适用后续特征 | 所有输出必须有限；M8 标量按 ADR-0005 统一为 0，其余结果按批准 golden；不允许 NaN/Infinity | 图表显示安静状态而不是缺失数据，精确值和说明可读取 | EV-A、EV-U；AC-A03、AC-U03；R-010、R-011、R-020 |
 | GE-E02 | impulse 分别位于 frame 起点、hop 边界和 frame 末端 | 逐 frame 提取并检查时间 | frame start 为 `index * hop / sampleRate`；impulse 只影响 golden 规定的 frame | 游标点击定位到相应时间，边界无一帧偏移 | EV-A、EV-S；AC-A02、AC-S01；R-012 |
 | GE-E03 | 长度小于 frame、等于 frame、非 hop 整倍数的 PCM | 生成 frame 并提取尾部 | 尾帧按批准规则零填充并与 direct golden 一致，sample count 正确 | 时间轴覆盖真实 duration，不绘制超出歌曲的可点击区域 | EV-A、EV-S；AC-A02、AC-S02；R-011 |
 | GE-E04 | 可播放 fixture | 分别 seek 到负值、0、duration 和超过 duration | 时间裁剪至 `[0,duration]`；游标偏差 ≤100ms | 播放中重建 source 后继续，暂停中保持 paused，无异常 | EV-S；AC-S01、AC-S02；R-001、R-012 |

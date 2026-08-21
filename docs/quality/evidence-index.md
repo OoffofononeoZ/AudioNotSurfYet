@@ -1,21 +1,21 @@
 ---
-status: in-review
+status: approved
 owner: "project-owner"
-last_reviewed: 2026-07-30
+last_reviewed: 2026-08-21
 upstream_docs:
   - "docs/quality/eval-plan.md"
   - "docs/quality/golden-examples.md"
   - "docs/quality/failure-taxonomy.md"
   - "docs/delivery/milestone-plan.md"
   - "tests/fixtures/fixture-manifest.json"
-next_action: "复核 M7 canonical、完成 owner 操作与 3/3 学习解释；批准前 M7 保持 In Progress、M8 保持 Planned"
+next_action: "M7 canonical 与 owner 任务已批准；执行 M8 并在 clean commit 登记新的 in-review evidence"
 ---
 
 # Evidence Index
 
 ## 1. Purpose and Gate State
 
-本文件保存受版本控制的长期证据摘要；原始日志保存在 Git 忽略的本地 artifact 目录。M3 测试基础切片、M4 AudioEngine 切片、M5 hybrid recovery 切片和 M6 analysis platform 切片均已由 `project-owner` 批准。M6 已为 `Complete`；M7 已进入 `In Progress`，clean-commit canonical 自动化通过并登记为 `in-review`，仍需 owner 操作与 3/3 学习解释。M8 保持 `Planned`。
+本文件保存受版本控制的长期证据摘要；原始日志保存在 Git 忽略的本地 artifact 目录。M3–M7 的适用 canonical evidence 均已由 `project-owner` 批准，M7 已为 `Complete`。M8 门禁已开放并进入 `In Progress`；其实现与新 canonical 证据尚未在本记录中登记。
 
 每条 `pass` 只证明对应里程碑的适用子集在被记录的 commit 和环境上可复现。它不表示完整 EV-A–EV-R、未执行里程碑、Edge 矩阵或 release readiness 已通过。
 
@@ -413,19 +413,19 @@ M6 Chrome 测量记录：四项短 fixture 产生 4 个 payload、合计 100,941
 | --- | --- |
 | Run ID | `M7-2026-07-30T03-30-43-095Z-f022b86e` |
 | Milestone | M7 — RMS, Amplitude Spectrum, Chroma vertical slice |
-| State | `pass`（M7 适用自动化子集；`in-review`） |
+| State | `pass`（M7 适用自动化与 owner 学习任务；`approved`） |
 | Eval IDs | EV-A、EV-S、EV-U、EV-J、EV-D、EV-R 的 M7 适用子集；M3–M6 回归子集 |
 | Commit | `f022b86e2333ad612ecb12701b0ca05e49f2b256` |
 | Dirty at start / end | `false` / `false` |
 | Commit at end | `f022b86e2333ad612ecb12701b0ca05e49f2b256` |
 | Started at | 2026-07-30 03:30:43.095 UTC |
 | Method | `npm run eval:m7` |
-| Reviewer | `project-owner` — pending |
+| Reviewer | `project-owner` — approved 2026-08-21 |
 | Retention | `local-present` |
 | Artifact root | `artifacts/evals/M7-2026-07-30T03-30-43-095Z-f022b86e/` |
 | Summary SHA-256 | `458ffb4a0c7fc8c64397092c1324d88c3c369f7fde3fc069f47861bbbc76ed32` |
 | Prior failed run | `M7-2026-07-30T03-21-14-150Z-28fc4699`，summary `1906d9661f32018125b8a093695daaa817e189be43006d41c1aa69edd9fc4189`；M7 Chrome 3/4，固定 550ms 跨进程计时误判 exact-cursor 上限，已由 `f022b86` 的页面内真实时间窗断言与 40ms cadence 修复取代 |
-| Failure | 本 run 的 M7 门禁内无 failure instance；Edge 缺失、构建 chunk warning、owner 学习任务和 R-020 继续为未关闭缺口/风险 |
+| Failure | 本 run 的 M7 门禁内无 failure instance；Edge 缺失、构建 chunk warning、四项 M8 UI hardening 和 R-020 继续为未关闭缺口/风险 |
 
 ### Environment
 
@@ -478,7 +478,7 @@ M7 使用 `m7-learning-fixtures-v1` 确定性生成 L1/L2/L3 六个 48kHz、单�
 
 M7 三卡场景记录 4 个固定 slot、3 张唯一活动卡和 6 个 Canvas layer。页面内 exact-cursor 测量窗为 624.4ms，`rms`、`amplitudeSpectrum`、`chroma` 各 16 次，低于按真实窗口计算的上限 20 次；点击 seek 可见反馈为 1.7ms。1280px 与 1920px 均为双列，1024px 单列场景通过。15 分钟输入的三次反馈为 8.7ms、16.8ms、16.6ms，最大 16.8ms；20 个进度样本单调，分析归因超过 50ms 的主线程 long task 为 0，取消成功。
 
-本 run 覆盖 M7 的 success、failure、boundary 与 exception 自动化子集：首次默认三卡、0/1/3 卡恢复、四槽与重复禁用、共享 viewport/zoom/cursor/click/keyboard seek、卡片/viewport 持久化与 quota、单卡 Canvas context failure、换歌/刷新/reduced motion/三视口/DPR、确定性 15 分钟输入和 M3–M6 回归。它不证明 owner 加载/选卡/换卡/比较/seek/刷新任务、3/3 学习解释、四个唯一活动特征、Edge 矩阵或 release readiness。
+本 run 覆盖 M7 的 success、failure、boundary 与 exception 自动化子集：首次默认三卡、0/1/3 卡恢复、四槽与重复禁用、共享 viewport/zoom/cursor/click/keyboard seek、卡片/viewport 持久化与 quota、单卡 Canvas context failure、换歌/刷新/reduced motion/三视口/DPR、确定性 15 分钟输入和 M3–M6 回归。2026-08-21 的 owner 任务又覆盖加载、选卡、换卡、zoom/pan、鼠标与键盘 seek、刷新恢复和 3/3 学习解释。M7 仍不证明四个唯一活动特征、Edge 矩阵、M8 标量或 release readiness。
 
 ### Local Artifact Hashes
 
@@ -515,12 +515,19 @@ M7 三卡场景记录 4 个固定 slot、3 张唯一活动卡和 6 个 Canvas la
 ### Open Gaps and Warnings
 
 - EG-003：本机仍未安装 Edge；M7 不要求关闭双浏览器矩阵，但 M11 和未来 readiness 继续 blocked。
-- EG-004：owner 尚未完成加载、选卡、换卡、比较、seek、刷新恢复任务和 3/3 学习解释；因此 M7 不关闭，M8 不开放。
+- EG-004：已关闭。owner 于 2026-08-21 完成加载、选卡、换卡、zoom/pan、鼠标与键盘 seek、刷新恢复和 3/3 学习解释。
 - GE-S04 的四个唯一活动特征场景按 DEC-017 顺延到 M8 首个新增特征；M7 只证明 0–3 张获准卡和四槽基础设施。
-- R-020：Meyda 5.6.3 `spectralFlux` 仍抛 `ReferenceError: x is not defined`；它保持不可选并阻断未来 M8 对应 scalar coverage，不阻断本次 M7 三卡范围。
+- R-020：Meyda 5.6.3 缺陷仍存在；owner 已批准 ADR-0005 的项目内 Flux 处置，但在 M8 实现与 canonical 通过前保持 Open。
+- R-021：owner 发现 sticky 间距、播放器层级、Windows Chrome pressed 状态和表格滚动条四项界面问题；它们不推翻 M7 学习结果，作为 M8 Slice 0 修复并验证。
 - 构建保留 1,100.70 kB 主 chunk warning；它是 R-019 风险信号，不是本次 build failure，也不是性能 readiness 通过。
 - 当前仍无正式 CI；本记录只支持上述本地 clean-commit 环境。
 
-### M7 Review State
+### M7 Approval Record
 
-本 canonical 自动化记录为 `in-review`。`project-owner` 完成手工任务与 3/3 学习解释并明确批准前，M7 保持 `In Progress`、M8 保持 `Planned`，且不创建 `release-readiness.md`。
+`project-owner` 于 2026-08-21 确认卡片选择/替换、缩放、平移、鼠标与键盘跳转、刷新恢复均符合预期，并提交以下 3/3 学习解释：
+
+- L1：音高不变，RMS 增大，说明只是音量变大。
+- L2：RMS 接近，但频谱和 Chroma 从 C+E 变为 G+B，说明音级组合改变。
+- L3：RMS 和主音级基本不变，但后段频谱峰更多，说明谐波更丰富、音色更亮。
+
+owner 随后明确回复：“我批准 M7 canonical evidence，同意将 M7 标记为 Complete 并开放 M8。”据此本记录改为 `approved`，M7 改为 `Complete`，M8 门禁开放。该批准不构成 Edge、M8、M9、release readiness 或四项新 UI 问题已通过。

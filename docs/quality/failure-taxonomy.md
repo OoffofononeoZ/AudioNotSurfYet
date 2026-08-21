@@ -1,13 +1,13 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-07-30
+last_reviewed: 2026-08-21
 upstream_docs:
   - "docs/quality/eval-plan.md"
   - "docs/quality/golden-examples.md"
   - "docs/delivery/acceptance-criteria.md"
   - "docs/architecture/risk-register.md"
-next_action: "复核 M7 首次 canonical 计时误判修复与通过 evidence；继续保留 Edge、R-019、R-020"
+next_action: "M7 evidence 已批准；M8 继续覆盖 R-020、R-021 与 Windows Chrome 人工缺口"
 ---
 
 # Failure Taxonomy
@@ -97,13 +97,13 @@ FAIL-<run-id>-<sequence>: <failure_type>/<severity>
 | --- | --- | --- | --- |
 | `FAIL-M7-2026-07-30T03-21-14-150Z-28fc4699-01` | FT-EVIDENCE | S1 | 首次 clean canonical 的 30Hz 断言用 Node 等待 550ms 代替页面内实际时间；浏览器任务繁忙时读取发生在更晚时间，却仍使用固定 18 次上限。该 run 保持 `fail`，阻断 M7。`f022b86` 把 cadence 调整为 40ms，并用同一页面的 `performance.now()` 计算实际窗口与 30Hz 上限；单 worker 连续 8 次、完整 M7 Chrome 4/4 和第二次 clean canonical 24/24 通过。实例已由回归关闭，但原失败 artifact 保留。 |
 
-该实例没有证明产品曾超过 30Hz；它证明原 evidence clock 无法支持该声明。关闭只恢复自动化证据可信度，不替代 owner 学习任务，也不改变 Edge、R-019 或 R-020 状态。
+该实例没有证明产品曾超过 30Hz；它证明原 evidence clock 无法支持该声明。关闭恢复自动化证据可信度；owner 已于 2026-08-21 另行完成学习任务并批准 M7，但 Edge、R-019、R-020 与新登记的 R-021 仍独立保留。
 
 ## 8. Q0 Approval Gate
 
 本 taxonomy 只有在 `project-owner` 确认以下内容后才能改为 `approved`：
 
-- 十个 failure type 足以覆盖 Q0 时的 19 个风险、M6 新增的 R-020 和七组 eval；
+- 十个 failure type 足以覆盖 Q0 时的 19 个风险、M6 新增的 R-020、M8 新增的 R-021 和七组 eval；
 - S0–S3 的定义与硬性 AC 门禁一致；
 - S0/S1 不允许带入下一门禁；
 - S2/S3 的接受条件、approver 和复查触发器明确；

@@ -1,17 +1,17 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-07-30
+last_reviewed: 2026-08-21
 upstream_docs:
   - "docs/context/index.md"
-next_action: "M7 Analyzer 自动化证据已 in-review；owner 操作与 3/3 学习解释后复核关闭"
+next_action: "M7 已批准；M8 扩展 Worker 到 16 项并修复 Analyzer shell 层级/交互"
 ---
 
 # System Map
 
 ## System Summary
 
-当前系统是 Vue 3 单页应用。MainLayout 创建并提供唯一的 `AudioSessionService` 与 `AnalysisCoordinator`；服务通过 `AudioEngine` 解码、播放本地文件，并通过 `SessionRepository` 保存最近队列、文件句柄、当前 Blob、当前分析缓存和 Analyzer 工作区。协调器只在存在活动特征时复制当前解码 PCM、启动 module Worker，并把可序列化进度、series identity、实际 sample rate 与 cache 状态写入 `audioSessionStore`。File、Blob、handle、PCM、Worker 与音频节点均留在 store 外。MusicBar 和 Analyzer 读取同一播放快照；Analyzer 固定四槽、最多三张 M7 活动卡，并用共享 viewport/cursor 驱动分层 Canvas。
+当前系统是 Vue 3 单页应用。MainLayout 创建并提供唯一的 `AudioSessionService` 与 `AnalysisCoordinator`；服务通过 `AudioEngine` 解码、播放本地文件，并通过 `SessionRepository` 保存最近队列、文件句柄、当前 Blob、当前分析缓存和 Analyzer 工作区。协调器只在存在活动特征时复制当前解码 PCM、启动 module Worker，并把可序列化进度、series identity、实际 sample rate 与 cache 状态写入 `audioSessionStore`。File、Blob、handle、PCM、Worker 与音频节点均留在 store 外。MusicBar 和 Analyzer 读取同一播放快照；M7 三卡学习体验已批准，M8 正把四槽开放到累计 16 项并复用共享 viewport/cursor。
 
 ## Runtime Flow
 
@@ -47,7 +47,7 @@ showOpenFilePicker → FileSystemFileHandle → File
 | Session persistence | 保存/恢复 V1 最近会话、全部句柄和唯一 current Blob/cache | 原生 IndexedDB `SessionRepository` | project-owner | `replaceCurrentAnalysisCache()` 校验 track/hash 并原子替换；unknown schema 不猜测迁移 |
 | Config persistence | 保存 volume 与 MusicBar style | Pinia、localStorage key `config` | project-owner | schema 保持不变；volume 为 0–100 |
 | Home visualization | 全屏 Three.js 光线 shader | `rayLength` prop、IntersectionObserver | unknown | 使用 WebGL renderer 与 RAF |
-| Analyzer surface | 四槽/最多三张 M7 卡、共享 viewport/zoom/cursor/seek、DOM 精确值与分层 Canvas | store、AudioSessionService、AnalysisCoordinator、Canvas 2D | project-owner | 首次默认三卡；已保存空工作区保持为空；Energy 不进入 M7 |
+| Analyzer surface | 四槽/最多四张累计 M8 可用卡、共享 viewport/zoom/cursor/seek、DOM 精确值与分层 Canvas | store、AudioSessionService、AnalysisCoordinator、Canvas 2D | project-owner | 首次仍默认 M7 三卡；已保存空工作区保持为空；M9/M10 不提前暴露 |
 | Experimental charts | 试验性的 Three.js 2D 图和瀑布流 | Vue props、TestLands | unknown | 不视为稳定接口 |
 | Event bus | 跨组件事件类型与发送 | mitt singleton | unknown | `settings-open` 无已发现订阅者 |
 
@@ -62,7 +62,7 @@ showOpenFilePicker → FileSystemFileHandle → File
 | IndexedDB | 最近会话、句柄、当前 Blob/cache 的本地持久化 | 刷新后无法自动恢复 | 当前页面继续使用并显示 not-persisted/restore-error |
 | File System Access API | 用户选择文件与显式恢复权限 | 无法导入或恢复非当前文件 | 支持范围内不回退到隐藏 input；提示使用最新版 Chrome/Edge |
 | `music-metadata` | 解析本地音频标签与封面 | 元数据和封面缺失；播放能否继续需验证 | 当前有 unknown/default cover 显示 |
-| Meyda | 从实时时域数据提取 energy，并在 Worker 提取批准的离线特征 | 音频响应可视化或分析不可用 | Worker 错误可重试且不停止播放；`spectralFlux` 当前缺陷见 R-020 |
+| Meyda | 从实时时域数据提取 energy，并在 Worker 提取批准的离线特征 | 音频响应可视化或分析不可用 | Worker 错误可重试且不停止播放；`spectralFlux` 由 ADR-0005 项目实现，上游缺陷仍见 R-020 |
 
 ## Known Seams
 
@@ -80,4 +80,4 @@ showOpenFilePicker → FileSystemFileHandle → File
 
 ## Approval Record
 
-`project-owner` 于 2026-07-30 明确回复：“我批准 M6 canonical evidence、working agreements、system map 与 glossary；同意将 M6 标记为 Complete 并开放 M7。”本图据此改为 `approved`。同日 owner 要求实施的 M7 Analyzer 工作区已按代码事实更新，canonical 自动化记录为 `in-review`；本图不预先批准该 evidence。
+`project-owner` 于 2026-08-21 确认 M7 卡片、共享视口、跳转、刷新恢复和 3/3 学习解释通过，并批准 M7 canonical、关闭 M7、开放 M8。本图同步阶段事实；M8 代码与 evidence 仍需独立验证。

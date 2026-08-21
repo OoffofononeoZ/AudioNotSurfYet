@@ -1,13 +1,13 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-07-30
+last_reviewed: 2026-08-21
 upstream_docs:
   - "AGENTS.md"
   - "docs/context/index.md"
   - "docs/delivery/test-strategy.md"
   - "docs/quality/eval-plan.md"
-next_action: "M7 clean canonical 已登记为 in-review；完成 owner 操作与 3/3 学习解释后再申请关闭"
+next_action: "M7 已批准；执行 M8 本地门禁、clean canonical 和 Windows Chrome 补偿验证"
 ---
 
 # Working Agreements
@@ -33,6 +33,9 @@ next_action: "M7 clean canonical 已登记为 in-review；完成 owner 操作与
 - M6 DEV bridge 只用于浏览器黑盒触发活动特征、取消、重试、读取可序列化 snapshot 和 exact cursor；测试不得通过它读取 File、PCM、AudioBuffer 或 Worker 内部对象。
 - M7 使用 `test:m7:unit`、`test:m7:integration` 和 `test:e2e:m7`；`eval:m7:provisional` 运行 M3–M7 回归但不写正式 evidence，`eval:m7` 要求起止均为同一 clean commit。
 - M7 学习 WAV 在 `artifacts/fixtures/` 运行时确定性生成并保持 Git 忽略；版本化 `m7-learning.v1.json` 固定 L1/L2/L3 的 PCM hash 与直接 Meyda 数值。
+- M8 使用 `test:m8:unit`、`test:m8:integration` 和 `test:e2e:m8`；`eval:m8:provisional` 运行 M3–M8 回归但不写正式 evidence，`eval:m8` 要求起止均为同一 clean commit。
+- M8 学习 WAV 在 `artifacts/fixtures/` 运行时确定性生成；版本化 golden 固定静音、纯音、同 RMS 丰富谐波与确定性噪声/瞬态关系。Flux 按 ADR-0005 项目公式验证，不删除 Meyda 上游异常回归。
+- M8 Chrome 自动化覆盖 390/1024/1280/1920 的 sticky/overlay/control/scrollbar 与四卡；Windows Chrome pressed 偶发问题必须由 owner 人工复核并单独签字。
 - M3 仅建立本地门禁，不存在正式 CI；这项缺口不阻断 M3，但自动化声明必须限定为本地执行。
 - 交互改动要在本地浏览器执行成功、失败和边界场景，并检查 console error/warn。
 - 布局和可视化至少检查窄屏、常见桌面和宽屏，使用真实 DOM/canvas 几何。
@@ -56,7 +59,7 @@ next_action: "M7 clean canonical 已登记为 in-review；完成 owner 操作与
 - M6 canonical artifact 已完成审批；commit 或 artifact 身份变化时必须重新运行，不能沿用旧证据。
 - M7 dirty-worktree provisional `M7-2026-07-30T03-13-53-844Z-5b33575f-provisional` 已 24/24 通过，summary SHA-256 为 `5f49ad1d18c1c5f8096beef53a6122f242bae361b76dcbe2f9d718698e663504`；M7 Chrome 为 4/4、M6 Chrome 回归为 3/3，15 分钟场景最大反馈 16.7ms、分析归因 >50ms 长任务 0 个。它只作实现反馈，不进入正式 evidence index。
 - 首次 M7 clean run `M7-2026-07-30T03-21-14-150Z-28fc4699` 因跨进程固定 550ms exact-cursor 计时误判为 fail；修复后的 `M7-2026-07-30T03-30-43-095Z-f022b86e` 在 clean commit `f022b86e2333ad612ecb12701b0ca05e49f2b256` 上 24/24 通过，summary SHA-256 为 `458ffb4a0c7fc8c64397092c1324d88c3c369f7fde3fc069f47861bbbc76ed32`，正式记录为 `in-review`。
-- M3–M7 canonical run 已记录在 [evidence index](../quality/evidence-index.md)；M3–M6 已批准，M7 待 owner 学习任务与审批。本地产物保留和删除规则以 [eval plan](../quality/eval-plan.md) 为准。
+- M3–M7 canonical run 已记录在 [evidence index](../quality/evidence-index.md) 并获 owner 批准；M8 尚需 provisional、clean canonical 与 owner 审批。本地产物保留和删除规则以 [eval plan](../quality/eval-plan.md) 为准。
 - fixture、manifest 和 golden 是受版本控制的规范输入；更新必须可重建、显示 diff，并重新执行对应测试。
 
 ## Resource Ownership
@@ -91,3 +94,5 @@ next_action: "M7 clean canonical 已登记为 in-review；完成 owner 操作与
 2026-07-30，M6 canonical run 已在 clean commit 上 20/20 通过。`project-owner` 随后明确回复：“我批准 M6 canonical evidence、working agreements、system map 与 glossary；同意将 M6 标记为 Complete 并开放 M7。”本修订据此改为 `approved`，M6 改为 `Complete`，M7 门禁开放但仍保持 `Planned`。
 
 同日，`project-owner` 明确要求实施 M7 三卡学习切片。本约定新增 M7 unit/integration/Chrome/eval 命令及运行时学习 fixture 规则；M7 改为 `In Progress`，canonical 和 owner 学习任务获批前不关闭、不开放 M8。
+
+2026-08-21，owner 完成 M7 人工任务与 3/3 学习解释并批准 canonical evidence，M7 据此关闭。owner 同时要求实施 M8、批准 ADR-0005，并授权按独立 commit 提交、远端无分叉时推送 `AI-Auto`；M8 canonical 与 Windows Chrome pressed 复核通过前不关闭 M8。

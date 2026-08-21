@@ -1,11 +1,11 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-07-30
+last_reviewed: 2026-08-21
 upstream_docs:
   - "docs/architecture/system-design.md"
   - "docs/architecture/interface-contracts.md"
-next_action: "复核 M7 in-review evidence；Edge、R-019 与 R-020 保持开放"
+next_action: "M7 已批准；以 M8 golden/canonical 缓解 R-020，并以 UI 自动化与 Windows Chrome 人工复核关闭 R-021"
 ---
 
 # Risk Register
@@ -33,7 +33,8 @@ next_action: "复核 M7 in-review evidence；Edge、R-019 与 R-020 保持开放
 | R-017 | 现有 `test:spectrogram` 指向缺失 `test.ts` | High | Medium | 命令无法运行 | 测试基线里程碑修复或重定向脚本，并在 CI/本地运行 | 修复前不能把该命令作为质量证据 | project-owner | Open |
 | R-018 | 未定义 Tab 或未来上传需求侵入当前交付 | Medium | Medium | PR 添加空白页实现、网络数据路径或服务端依赖 | scope review、Feature/ADR 门禁；未来能力另开产品决策 | 产品意图变化会使所有下游待复核 | project-owner | Open |
 | R-019 | bundle 已有约 1MB 警告继续增长 | Medium | Medium | `npm run build` chunk warning 增大 | Worker/renderer 按路由或 feature family 拆分，记录构建体积；避免 Analyzer Three.js | 具体发布预算在 quality/release 前批准 | project-owner | Open |
-| R-020 | Meyda 5.6.3 `spectralFlux` 提取器引用未声明变量 `x` | High | High | 固定 previous/current frame 调用抛 `ReferenceError: x is not defined` | M6 固定回归只登记风险；不 fork、升级、monkey-patch、启用或伪造 golden pass；M8 前由 owner 批准依赖处置方案并补 direct-Meyda/异常回归 | 未解决时 `spectralFlux` 保持不可选，M8 与累计 scalar coverage 被阻断，但不影响 M6/M7 | project-owner | Open |
+| R-020 | Meyda 5.6.3 `spectralFlux` 提取器引用未声明变量 `x` | High | High | 固定 previous/current frame 调用抛 `ReferenceError: x is not defined` | owner 已批准 ADR-0005 的项目 Flux；保留上游异常回归，并补公式/首帧/静音/exact cursor golden 与 M8 canonical | canonical 前保持不可选；通过后只关闭产品阻断，不声称 Meyda 已修复 | project-owner | Open |
+| R-021 | Analyzer sticky、播放器层级、pressed 状态或内层滚动条破坏可用性与视觉一致性 | Medium | Medium | sticky 与 Header 间距过大；歌曲列表被遮挡；Windows Chrome 按钮保持按压外观；表格显示系统默认滚动条 | M8 Slice 0 建立统一几何/layer/control/scrollbar contract；Chrome 多视口自动化，加 owner Windows Chrome 人工复核 | 自动化不能证明 Windows 原生 Chrome 偶发状态，未签字前 M8 不关闭 | project-owner | Open |
 
 ## Review Rule
 

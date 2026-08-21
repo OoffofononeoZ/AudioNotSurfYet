@@ -1,10 +1,10 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-07-30
+last_reviewed: 2026-08-21
 upstream_docs:
   - "AGENTS.md"
-next_action: "复核 M7 in-review canonical evidence，完成 owner 操作与 3/3 学习解释；批准前不开放 M8"
+next_action: "M7 已批准；执行 M8 UI hardening、13 个标量与 clean canonical，批准前不开放 M9"
 ---
 
 # Repository Context Index
@@ -21,8 +21,8 @@ AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端：用户选择
 - Product intent：problem brief、scope 和 success metrics 已由 `project-owner` 批准；开放问题只保留未来上传、未定义 Tab、托管和扩展研究等非当前门禁事项。
 - System design：system design、接口契约、风险和四个 ADR 已批准。
 - Execution planning：execution plan、acceptance criteria、test strategy 和 milestone plan 均为 approved。
-- Quality and evals：eval plan、golden examples、failure taxonomy，以及 M3–M6 的适用 canonical evidence 已由 `project-owner` 批准；M7 canonical 为 `in-review`，完整 eval 仍未完成。
-- Implementation：M3–M6 已 `Complete`；M7 三卡学习切片为 `In Progress`，M8 保持 `Planned`。
+- Quality and evals：eval plan、golden examples、failure taxonomy，以及 M3–M7 的适用 canonical/人工证据已由 `project-owner` 批准；M8 evidence 尚未生成。
+- Implementation：M3–M7 已 `Complete`；M8 UI hardening 与 13 个剩余标量为 `In Progress`，M9 保持 `Planned`。
 - Readiness、release、retrospective：`release-readiness.md` 等待 M11 执行证据，不创建 release 或 retrospective 文档。
 
 ## Key Documents
@@ -56,12 +56,13 @@ AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端：用户选择
 - [ADR-0002](../architecture/adrs/0002-worker-analysis-and-stale-result-isolation.md)：Worker 全曲分析、取消与 stale 隔离。
 - [ADR-0003](../architecture/adrs/0003-hybrid-indexeddb-session-recovery.md)：IndexedDB 文件句柄和当前 Blob 混合恢复。
 - [ADR-0004](../architecture/adrs/0004-typed-feature-registry-and-canvas-renderers.md)：类型化特征注册表和 Canvas 2D renderer family。
+- [ADR-0005](../architecture/adrs/0005-project-spectral-flux-and-silence-semantics.md)：项目 Flux v1 与零能量标量语义。
 
 ## Repository Areas
 
 | Area | Current role | Target/change source |
 | --- | --- | --- |
-| `src/views/` | 路由页面；Analyzer 正接入四槽三卡共享时间轴工作区 | system design + M7 |
+| `src/views/` | 路由页面；Analyzer 以四槽共享时间轴承载 M7 三卡，并进入 M8 四卡/标量扩展 | system design + M7/M8 |
 | `src/layouts/` | Header、页面内容与 MusicBar 的共享外壳 | M4/M7 回归 |
 | `src/components/` | 播放 UI、列表、动画及 Canvas/WebGL 可视化 | ADR-0001/0004 |
 | `src/audio/` | 单一 AudioEngine 与 MainLayout-owned AudioSessionService；文件句柄导入与恢复编排 | ADR-0001/0003 |
@@ -79,7 +80,7 @@ AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端：用户选择
 - System design：[system design](../architecture/system-design.md)
 - Delivery planning：[execution plan](../delivery/execution-plan.md)
 - Quality design：[eval plan](../quality/eval-plan.md)，Q0 批准后用于 M3–M11 证据
-- Quality evidence：[evidence index](../quality/evidence-index.md)，M3–M6 canonical 已批准，M7 canonical `in-review`
+- Quality evidence：[evidence index](../quality/evidence-index.md)，M3–M7 canonical 与所需人工证据已批准，M8 尚待执行
 - Quality readiness：`docs/quality/release-readiness.md` 尚未创建；M11 证据完成后生成
 - Release operations：`docs/release/` 尚未创建；release readiness 证据存在后生成
 - Retrospectives：`docs/retrospectives/` 尚未创建；有发布、事故或重复摩擦证据后生成
@@ -87,7 +88,7 @@ AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端：用户选择
 ## Current Known Gaps
 
 - M6 四项 Worker 全曲分析、六类 codec、cache 和 exact cursor 已实现；M7 正实现四槽、最多三张获准活动卡、共享 viewport/cursor/seek、分层 Canvas 与 DOM 精确值。
-- 当前 Meyda `spectralFlux` 对有效输入抛出 `x is not defined`；M6 以 R-020 和预期失败测试记录，不声明支持、不增加 fallback，后续依赖修复或明确适配决策后再开放。
+- 当前 Meyda `spectralFlux` 对有效输入抛出 `x is not defined`；M8 已获批按 ADR-0005 实现项目 Flux，canonical 前 R-020 仍保持 Open。
 - 超出约 15 分钟支持边界的长音频未开始播放只作为非门禁压力观察；它不表示长音频被规定为必须失败，也不改变当前产品范围。
 - 当前机器尚未发现 Edge；没有真实 Edge 证据时不能完成 M11 双浏览器门禁。
 - 正式托管平台和生产 URL 尚未决定；它们只阻断未来 release，不阻断 M3。
@@ -119,3 +120,5 @@ AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端：用户选择
 随后 M7 dirty-worktree provisional run `M7-2026-07-30T03-13-53-844Z-5b33575f-provisional` 24/24 通过，summary SHA-256 为 `5f49ad1d18c1c5f8096beef53a6122f242bae361b76dcbe2f9d718698e663504`。该结果只作实现反馈；M7 仍需 clean-commit canonical、正式 `in-review` evidence 与 owner 学习任务。
 
 首次 clean run `M7-2026-07-30T03-21-14-150Z-28fc4699` 因跨进程固定 550ms exact-cursor 计时断言误判而失败；修复页面内真实时间窗断言并把 cadence 调整为 40ms 后，canonical run `M7-2026-07-30T03-30-43-095Z-f022b86e` 在 clean commit `f022b86e2333ad612ecb12701b0ca05e49f2b256` 上 24/24 通过，summary SHA-256 为 `458ffb4a0c7fc8c64397092c1324d88c3c369f7fde3fc069f47861bbbc76ed32`。正式记录为 `in-review`；M7 仍等待 owner 操作与 3/3 学习解释，M8 保持 `Planned`。
+
+2026-08-21，owner 确认 M7 卡片选择/替换、zoom/pan、鼠标与键盘 seek、刷新恢复均通过，提交 3/3 正确学习解释并明确批准 M7 canonical evidence。M7 据此改为 `Complete`，M8 门禁开放；owner 同时批准 ADR-0005 和 M8 完整实施计划，M8 改为 `In Progress`。

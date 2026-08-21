@@ -1,12 +1,12 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-07-30
+last_reviewed: 2026-08-21
 upstream_docs:
   - "docs/product/scope.md"
   - "docs/architecture/system-design.md"
   - "docs/architecture/interface-contracts.md"
-next_action: "M7 三项 renderer canonical 已 in-review；等待 owner 学习任务与 evidence 审批"
+next_action: "M7 renderer 已批准；M8 泛化 scalar-line 并验证累计 16 项"
 ---
 
 # ADR-0004: Typed Feature Registry and Canvas 2D Renderer Families

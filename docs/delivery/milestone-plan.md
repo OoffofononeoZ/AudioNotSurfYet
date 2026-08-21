@@ -1,12 +1,12 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-07-30
+last_reviewed: 2026-08-21
 upstream_docs:
   - "docs/delivery/execution-plan.md"
   - "docs/delivery/acceptance-criteria.md"
   - "docs/delivery/test-strategy.md"
-next_action: "M7 canonical 已登记为 in-review；完成 owner 操作与 3/3 学习解释，批准前不开放 M8"
+next_action: "M7 已批准关闭；实施 M8 Slice 0 与 13 个新增标量，完成 provisional、clean canonical 和 owner 审批"
 ---
 
 # Milestone Plan
@@ -15,7 +15,7 @@ next_action: "M7 canonical 已登记为 in-review；完成 owner 操作与 3/3 �
 
 - Target 使用相对门禁，不表示日历承诺。
 - `Complete` 只用于文档门禁、真实证据和所需人工批准均已满足的里程碑。
-- Q0、M3、M4、M5 和 M6 为 `Complete`；M7 为 `In Progress`；M8–M11 为 `Planned`。
+- Q0、M3、M4、M5、M6 和 M7 为 `Complete`；M8 为 `In Progress`；M9–M11 为 `Planned`。
 - 一个里程碑未通过时，后续里程碑保持 Planned/Blocked，不并行扩大特征范围。
 
 ## Milestones
@@ -23,14 +23,14 @@ next_action: "M7 canonical 已登记为 in-review；完成 owner 操作与 3/3 �
 | ID | Milestone | Status | Relative target | Depends on | Exit evidence | Owner |
 | --- | --- | --- | --- | --- | --- | --- |
 | M1 | Product intent approved | Complete | Gate P | Repository context | problem/scope approved；metrics 固定；无阻断产品问题 | project-owner |
-| M2 | System design and ADRs approved | Complete | Gate A | M1 | system design、contracts、risk、4 ADR approved | project-owner |
+| M2 | System design and ADRs approved | Complete | Gate A | M1 | system design、contracts、risk、ADR-0001–0005 approved | project-owner |
 | Q0 | Quality evaluation design | Complete | Pre-implementation quality gate | M2 | eval plan、golden examples、failure taxonomy approved；42 AC 和 19 risk 可追溯 | project-owner |
 | M3 | Test foundation and fixtures | Complete | First implementation gate | Q0 | Vitest/Playwright/Worker harness、fixture manifest、golden helper、有效 npm scripts | project-owner |
 | M4 | Single AudioEngine and shared store | Complete | After M3 | M3 | 播放/MusicBar 回归、单一上下文、生命周期证据 | project-owner |
 | M5 | IndexedDB hybrid recovery | Complete | After M4 | M4 | current Blob/cache、handle permission、refresh/quota/schema 证据 | project-owner |
 | M6 | Worker platform and feature registry | Complete | After M5 | M4, M5 | mono/frame/cancel/stale/cache/21-key registry、性能基线、canonical evidence 与 owner approval | project-owner |
-| M7 | RMS + Amplitude Spectrum + Chroma | In Progress | First feature gate | M6 | 三项黄金、四槽/最多三张活动卡共享时间轴、100ms、owner 任务与 3/3 学习解释 | project-owner |
-| M8 | Remaining scalar features | Planned | After M7 | M7 | 13 项新增 scalar 全部 golden/renderer/edge，累计 16/21 | project-owner |
+| M7 | RMS + Amplitude Spectrum + Chroma | Complete | First feature gate | M6 | 三项黄金、四槽/最多三张活动卡共享时间轴、100ms、owner 任务与 3/3 学习解释 | project-owner |
+| M8 | Remaining scalar features | In Progress | After M7 | M7 | UI hardening、13 项新增 scalar 全部 golden/renderer/edge，累计 16/21 | project-owner |
 | M9 | Power Spectrum + MFCC + Buffer | Planned | After M8 | M8 | vector/waveform 维度、精确值、累计 19/21 | project-owner |
 | M10 | Loudness + Complex Spectrum | Planned | Full feature gate | M9 | 结构 payload/renderer、21/21 coverage | project-owner |
 | M11 | Cross-cutting hardening | Planned | Delivery exit gate | M10 | 格式、恢复、权限、性能、无障碍、视口和 Chrome/Edge 全证据 | project-owner |
@@ -96,16 +96,17 @@ next_action: "M7 canonical 已登记为 in-review；完成 owner 操作与 3/3 �
 - [x] 固定四槽、0–3 张唯一 M7 活动卡共享 viewport/zoom/cursor/click seek；四张唯一活动特征顺延 M8。
 - [x] 自动化结果黄金容差和游标 ≤100ms。
 - [x] session/cards/cache 恢复。
-- [ ] owner 脚本任务全部完成，学习解释 3/3。
+- [x] owner 脚本任务全部完成，学习解释 3/3，并于 2026-08-21 批准 canonical evidence。
 - [x] Chrome 自动化覆盖三视口、键盘、reduced motion、console。
 - [x] dirty-worktree provisional 24/24 通过，只作实现反馈。
 - [x] clean-HEAD canonical 24/24 通过并登记 `in-review` evidence。
 
 ### M8
 
+- [ ] Slice 0 修复 sticky 间距、MusicBar 层级、pressed 状态与精确值表滚动条。
 - [ ] ZCR/Energy 和 9 个 spectral scalar。
 - [ ] Perceptual Spread/Sharpness。
-- [ ] flux previous-frame、signed/unbounded、silence 等边界。
+- [ ] ADR-0005 项目 Flux previous-frame、首帧 0、零能量 0、signed/unbounded 和非有限值失败边界。
 - [ ] 累计 16/21 可选择且有黄金证据。
 
 ### M9
@@ -133,10 +134,10 @@ next_action: "M7 canonical 已登记为 in-review；完成 owner 操作与 3/3 �
 
 ## Current Gate State
 
-- Current stage：M7 RMS、Amplitude Spectrum、Chroma 三卡学习切片，状态为 `In Progress`；M8 保持 `Planned`。
+- Current stage：M7 已获 owner 批准并为 `Complete`；M8 UI hardening 与剩余标量切片为 `In Progress`。
 - Previous gate：M3 已由 `project-owner` 于 2026-07-28 批准并标记 `Complete`。
 - Canonical run：`npm run eval:m3` 已在 clean commit `17d16f0da37289c1f67f75203502beef999572ea` 上通过；摘要见 [evidence index](../quality/evidence-index.md)。
-- Next gate：M7 clean-commit canonical 已登记为 `in-review`；完成 owner 任务与 3/3 学习解释并明确批准后，才能关闭 M7。
+- Next gate：M8 provisional 通过后提交实现，在 clean HEAD 运行 canonical 并登记 `in-review` evidence；owner 批准前不开放 M9。
 - M3 state：Complete；M3 evidence 只证明测试基础，不代表 M4 产品行为通过。
 - M4 canonical：`npm run eval:m4` 在 clean commit `e5cfe9e8ab62301f3c5b0ddcdd37847a2e131a0f` 上 13/13 步骤通过；60 秒漂移 2.233ms，三次 seek 最大误差 66.827ms。`project-owner` 已于 2026-07-29 批准该证据。
 - M5 provisional：`M5-2026-07-29T07-03-16-207Z-2eb98381-provisional` 在 dirty worktree 16/16 步骤通过；summary SHA-256 为 `7b0acaf128ac4a7ceffce1449d2421127d20c8b25dcdc1ebd07b889072228530`。它只作实现反馈，不是正式 evidence。
@@ -144,7 +145,7 @@ next_action: "M7 canonical 已登记为 in-review；完成 owner 操作与 3/3 �
 - M6 provisional：`M6-2026-07-29T10-59-23-767Z-b7fa91ed-provisional` 在 dirty worktree 20/20 通过；summary SHA-256 为 `6fd67f9a8b0184a2861a7182a1276572375e947880cf3688afe7511ca97ed3fa`。刷新 cache hit 后 exact cursor 可用；15 分钟最大反馈 16.7ms、分析归因 >50ms 长任务 0 个。它不构成正式 evidence。
 - M6 canonical：`M6-2026-07-30T02-19-07-149Z-a39256ff` 在 clean commit `a39256ff7afdd4167bfdebdd693bcc8b3ba20e94` 上 20/20 通过；summary SHA-256 为 `2d955ddb994e8e2066ce3c79655d44402e297ffdc03ec63b3a7bf5a2088f08ae`。四项 cache payload 为 100,941 bytes，刷新 hit 后 exact cursor 一致，20 次资源循环保持单 Worker/AudioContext，15 分钟最大反馈 17ms、分析归因 >50ms 长任务 0 个；`project-owner` 已于 2026-07-30 批准该记录。
 - M7 provisional：`M7-2026-07-30T03-13-53-844Z-5b33575f-provisional` 在 dirty worktree 24/24 通过，summary SHA-256 为 `5f49ad1d18c1c5f8096beef53a6122f242bae361b76dcbe2f9d718698e663504`。M7 Chrome 4/4、M6 Chrome 回归 3/3；三卡/四槽、共享交互、恢复与隔离场景通过，15 分钟反馈最大 16.7ms、分析归因 >50ms 长任务 0 个。它不构成正式 evidence。
-- M7 canonical：首次 clean run 因固定 550ms 跨进程计时误判 exact-cursor 上限而失败；修复后 `M7-2026-07-30T03-30-43-095Z-f022b86e` 在 clean commit `f022b86e2333ad612ecb12701b0ca05e49f2b256` 上 24/24 通过，summary SHA-256 为 `458ffb4a0c7fc8c64397092c1324d88c3c369f7fde3fc069f47861bbbc76ed32`。M7 Chrome 4/4，seek 反馈 1.7ms，15 分钟最大反馈 16.8ms、分析归因 >50ms 长任务 0 个；evidence 为 `in-review`。
+- M7 canonical：首次 clean run 因固定 550ms 跨进程计时误判 exact-cursor 上限而失败；修复后 `M7-2026-07-30T03-30-43-095Z-f022b86e` 在 clean commit `f022b86e2333ad612ecb12701b0ca05e49f2b256` 上 24/24 通过，summary SHA-256 为 `458ffb4a0c7fc8c64397092c1324d88c3c369f7fde3fc069f47861bbbc76ed32`。M7 Chrome 4/4，seek 反馈 1.7ms，15 分钟最大反馈 16.8ms、分析归因 >50ms 长任务 0 个；owner 于 2026-08-21 完成人工任务和 3/3 学习解释并批准该 evidence。
 - Known future blockers：没有真实 Edge 证据时不能完成 M11 或未来 readiness；托管平台未定会阻断 release，但不阻断 Q0/M3。
 
 ## Approval Record

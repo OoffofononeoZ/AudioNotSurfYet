@@ -1,7 +1,7 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-07-24
+last_reviewed: 2026-08-21
 upstream_docs:
   - "docs/product/success-metrics.md"
   - "docs/architecture/system-design.md"
@@ -32,6 +32,8 @@ next_action: "在每个里程碑 PR/变更记录中引用适用 AC 编号并附�
 
 M7 适用解释：AC-P02/P03 在本里程碑验证固定四槽与 0–3 张唯一活动卡，活动 ID 仅为 `rms`、`amplitudeSpectrum`、`chroma`；第四槽在三卡活动时显示 M8 后续提示。四张唯一活动特征的完整场景从 M8 首个新增特征后开始执行。无保存工作区默认三卡，已保存空工作区必须恢复为空。
 
+M8 适用解释：四槽允许从累计 16 项中选择 0–4 张唯一活动卡；首次默认仍是 M7 三卡，已保存空工作区保持为空。M8 Slice 0 要求 sticky 距 Header 8px、MusicBar 及直属弹层高于 Analyzer、pressed 状态在 pointerup/pointercancel/blur 后恢复，并让精确值表格滚动条与主题一致。
+
 ### Learning golden segments
 
 1. **L1 — Same pitch, rising level**：440Hz 正弦从低幅度变高。期望解释：RMS 增大；主频仍在约 440Hz；Chroma 的 A 类保持主导。
@@ -46,7 +48,7 @@ M7 适用解释：AC-P02/P03 在本里程碑验证固定四槽与 0–3 张唯�
 | --- | --- | --- |
 | AC-A01 | mono 混合正确 | 每 sample 等于所有输入声道算术平均；单声道不变；空/长度不一致输入返回 typed error |
 | AC-A02 | frame 时间正确 | frame start 为 `index * hopSize / sampleRate`；尾帧零填充规则与直接提取一致 |
-| AC-A03 | Worker 结果与直接 Meyda 一致 | 标量及向量逐元素满足 `abs(actual-expected) <= max(1e-6, abs(expected)*1e-5)`；NaN/Infinity 必须显式失败 |
+| AC-A03 | Worker 结果与批准的提取契约一致 | 非零能量输入的 12 项 M8 非 Flux 标量及 Meyda 向量逐元素满足 `abs(actual-expected) <= max(1e-6, abs(expected)*1e-5)`；Flux 对齐 ADR-0005 项目 golden；零能量 M8 标量为 0；其他 NaN/Infinity 必须显式失败 |
 | AC-A04 | Complex Spectrum 一致 | real、imag 分别使用 AC-A03 容差；维度和 bin 顺序一致 |
 | AC-A05 | Loudness 一致 | `total` 和 24 个 `specific` 值逐项使用 AC-A03 容差 |
 | AC-A06 | 展示量化误差可界定 | 反量化误差不超过半个量化步长加 AC-A03 容差；饱和必须被测试并禁止静默裁剪有效范围 |
@@ -104,7 +106,7 @@ M7 适用解释：AC-P02/P03 在本里程碑验证固定四槽与 0–3 张唯�
 | AC-U02 | 焦点和名称 | 所有交互控件有可访问名称和可见焦点；换卡/错误后焦点位置可预测 |
 | AC-U03 | 非颜色表达 | 图例有文字/刻度/图形或数值；DOM 提供游标精确值与摘要 |
 | AC-U04 | Reduced motion | `prefers-reduced-motion` 下关闭非必要过渡，游标仍准确 |
-| AC-U05 | Viewport geometry | 1024、1280、1920 CSS px 无关键控件遮挡/越界；Canvas CSS 与 backing store 尺寸正确 |
+| AC-U05 | Viewport geometry | 390、1024、1280、1920 CSS px 无关键控件遮挡/越界；sticky 与 overlay 层级正确；Canvas CSS 与 backing store 尺寸正确 |
 | AC-U06 | Runtime cleanliness | 三视口和核心流程无 console error/warn、pageerror 或未处理 rejection |
 
 ## 8. Browser and Format Matrix
