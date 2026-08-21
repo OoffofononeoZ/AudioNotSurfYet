@@ -316,6 +316,90 @@ test('isolates a single-card Canvas context failure', async ({ page }) => {
     expect(issues).toEqual([]);
 });
 
+test('keeps the shared toolbar below the header and player overlays above it', async ({ page }) => {
+    const issues = captureBrowserIssues(page);
+    await page.setViewportSize({ width: 1280, height: 720 });
+    await page.goto('/analyzer');
+
+    await page.locator('.analyzer-content').evaluate((element) => {
+        element.scrollTop = 360;
+    });
+    await expect.poll(async () => page.evaluate(() => {
+        const header = document.querySelector<HTMLElement>('#main-header');
+        const toolbar = document.querySelector<HTMLElement>(
+            '.timeline-toolbar',
+        );
+        if (!header || !toolbar) return Number.POSITIVE_INFINITY;
+        return Math.abs(
+            toolbar.getBoundingClientRect().top
+            - header.getBoundingClientRect().bottom
+            - 8,
+        );
+    })).toBeLessThanOrEqual(1);
+
+    const layers = await page.evaluate(() => ({
+        toolbar: Number(getComputedStyle(
+            document.querySelector<HTMLElement>('.timeline-toolbar')!,
+        ).zIndex),
+        header: Number(getComputedStyle(
+            document.querySelector<HTMLElement>('#main-header')!,
+        ).zIndex),
+        player: Number(getComputedStyle(
+            document.querySelector<HTMLElement>('#music-bar-container')!,
+        ).zIndex),
+    }));
+    expect(layers.toolbar).toBeLessThan(layers.header);
+    expect(layers.header).toBeLessThan(layers.player);
+
+    await page.getByTestId('toggle-queue').click();
+    await page.waitForTimeout(400);
+    const overlayHit = await page.evaluate(() => {
+        const list = document.querySelector<HTMLElement>(
+            '.music-list-container',
+        );
+        if (!list) return false;
+        const rect = list.getBoundingClientRect();
+        const hit = document.elementFromPoint(
+            rect.left + Math.min(24, rect.width / 2),
+            rect.top + Math.min(24, rect.height / 2),
+        );
+        return Boolean(hit?.closest('.music-list-container'));
+    });
+    expect(overlayHit).toBe(true);
+    await page.getByTestId('toggle-queue').click();
+    await page.waitForTimeout(400);
+
+    const zoomButton = page.getByRole('button', { name: '放大时间轴' });
+    await zoomButton.hover();
+    const box = await zoomButton.boundingBox();
+    if (!box) throw new Error('Zoom button geometry missing.');
+    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+    await page.mouse.down();
+    await expect.poll(() => zoomButton.evaluate((element) =>
+        element.matches(':active'))).toBe(true);
+    await page.mouse.up();
+    await page.mouse.move(0, 0);
+    await zoomButton.evaluate((element) => element.blur());
+    await expect.poll(() => zoomButton.evaluate((element) => ({
+        active: element.matches(':active'),
+        transform: getComputedStyle(element).transform,
+    }))).toEqual({ active: false, transform: 'none' });
+
+    const scrollbar = await page.locator(
+        '[data-feature-id="amplitudeSpectrum"] .table-scroll',
+    ).evaluate((element) => ({
+        color: getComputedStyle(element).scrollbarColor,
+        width: getComputedStyle(element).scrollbarWidth,
+        webkitWidth: getComputedStyle(
+            element,
+            '::-webkit-scrollbar',
+        ).width,
+    }));
+    expect(scrollbar.color).not.toBe('auto');
+    expect(scrollbar.webkitWidth).toBe('10px');
+    expect(issues).toEqual([]);
+});
+
 test('keeps the 15-minute M7 workspace responsive and cancellable', async ({ page }) => {
     test.setTimeout(180_000);
     const issues = captureBrowserIssues(page);

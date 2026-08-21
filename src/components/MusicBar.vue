@@ -579,6 +579,8 @@ const handleAddToAnalysis = (_index: number) => {
     left: calc(var(--offset) - var(--border-width));
     bottom: calc(var(--offset) / 4 - var(--border-width));
     border-radius: calc(var(--offset) * 2);
+    isolation: isolate;
+    z-index: var(--layer-player);
 }
 
 .bg-style-0 {
@@ -710,6 +712,7 @@ const handleAddToAnalysis = (_index: number) => {
     right: 0;
     max-height: calc(100% - 192px);
     transform: translateX(100%);
+    z-index: var(--layer-player-popover);
 }
 
 :deep(.el-slider__button) {

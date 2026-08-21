@@ -636,15 +636,31 @@ button {
     font-size: 0.78rem;
     min-height: 34px;
     padding: 6px 9px;
+    transition:
+        background-color 120ms ease,
+        border-color 120ms ease,
+        box-shadow 120ms ease,
+        color 120ms ease,
+        transform 80ms ease;
 }
 
 button {
     cursor: pointer;
 }
 
-button:hover,
-select:hover {
-    border-color: #7dffb3;
+@media (hover: hover) and (pointer: fine) {
+    button:hover,
+    select:hover {
+        background: #10261a;
+        border-color: #7dffb3;
+    }
+}
+
+button:active:not(:disabled) {
+    background: #173624;
+    border-color: #b5ffd2;
+    box-shadow: inset 0 0 0 1px rgba(181, 255, 210, 0.3);
+    transform: translateY(1px);
 }
 
 button:focus-visible,
@@ -652,6 +668,11 @@ select:focus-visible,
 .plot:focus-visible {
     outline: 3px solid #f8ff87;
     outline-offset: 3px;
+}
+
+button:focus:not(:focus-visible),
+select:focus:not(:focus-visible) {
+    outline: none;
 }
 
 .description {
@@ -748,6 +769,31 @@ select:focus-visible,
 .table-scroll {
     max-height: 220px;
     overflow: auto;
+    scrollbar-color: rgba(125, 255, 179, 0.65) rgba(5, 17, 11, 0.9);
+    scrollbar-gutter: stable;
+    scrollbar-width: thin;
+}
+
+.table-scroll::-webkit-scrollbar {
+    height: 10px;
+    width: 10px;
+}
+
+.table-scroll::-webkit-scrollbar-track {
+    background: rgba(5, 17, 11, 0.9);
+    border-radius: 999px;
+}
+
+.table-scroll::-webkit-scrollbar-thumb {
+    background: rgba(125, 255, 179, 0.58);
+    background-clip: padding-box;
+    border: 2px solid transparent;
+    border-radius: 999px;
+}
+
+.table-scroll::-webkit-scrollbar-thumb:hover {
+    background: rgba(181, 255, 210, 0.82);
+    background-clip: padding-box;
 }
 
 .table-scroll.compact {

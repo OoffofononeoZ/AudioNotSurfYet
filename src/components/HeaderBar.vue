@@ -1,5 +1,5 @@
 <template>
-    <header class="w-full h-16 bg-transparent fixed top-0 left-0 z-50" id="main-header">
+    <header class="w-full h-16 bg-transparent fixed top-0 left-0" id="main-header">
         <section class="min-w-32">
             <router-link to="/" class="text-white font-bold text-2xl">AUDIOSURF</router-link>
         </section>
@@ -30,6 +30,7 @@ const toggleSettings = () => {
     justify-content: space-between;
     align-items: center;
     padding: 0 20px;
+    z-index: var(--layer-header);
 }
 #main-header::before {
     content: "";

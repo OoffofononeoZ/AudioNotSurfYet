@@ -471,12 +471,13 @@ onBeforeUnmount(() => {
     min-height: 100dvh;
     overflow: hidden;
     position: relative;
+    z-index: var(--layer-content);
 }
 
 .analyzer-content {
     height: 100dvh;
     overflow-y: auto;
-    padding: 104px max(24px, calc((100vw - 1760px) / 2)) 150px;
+    padding: 0 max(24px, calc((100vw - 1760px) / 2)) 150px;
     position: relative;
     scrollbar-width: thin;
 }
@@ -487,6 +488,7 @@ onBeforeUnmount(() => {
     gap: 32px;
     justify-content: space-between;
     margin-bottom: 24px;
+    padding-top: 104px;
 }
 
 .page-header h1 {
@@ -545,8 +547,8 @@ onBeforeUnmount(() => {
     margin-bottom: 18px;
     padding: 13px 15px;
     position: sticky;
-    top: 86px;
-    z-index: 5;
+    top: calc(var(--app-header-height) + var(--app-sticky-gap));
+    z-index: var(--layer-sticky);
 }
 
 .timeline-toolbar > div:first-child {
@@ -579,10 +581,26 @@ button {
     font-size: 0.78rem;
     min-height: 36px;
     padding: 7px 11px;
+    transition:
+        background-color 120ms ease,
+        border-color 120ms ease,
+        box-shadow 120ms ease,
+        color 120ms ease,
+        transform 80ms ease;
 }
 
-button:hover:not(:disabled) {
-    border-color: #7dffb3;
+@media (hover: hover) and (pointer: fine) {
+    button:hover:not(:disabled) {
+        background: #10261a;
+        border-color: #7dffb3;
+    }
+}
+
+button:active:not(:disabled) {
+    background: #173624;
+    border-color: #b5ffd2;
+    box-shadow: inset 0 0 0 1px rgba(181, 255, 210, 0.3);
+    transform: translateY(1px);
 }
 
 button:disabled {
@@ -593,6 +611,10 @@ button:disabled {
 button:focus-visible {
     outline: 3px solid #f8ff87;
     outline-offset: 3px;
+}
+
+button:focus:not(:focus-visible) {
+    outline: none;
 }
 
 .analysis-error {
