@@ -25,7 +25,7 @@ import {
 } from './pcm';
 import {
     isFeatureId,
-    isM6SupportedFeatureId,
+    isM8FeatureId,
     type AnalysisCoordinatorSnapshot,
     type AnalysisErrorCode,
     type AnalysisCursorValueResult,
@@ -330,7 +330,7 @@ export class AnalysisCoordinator {
                 'Analysis requires 0–4 unique feature IDs.',
             );
         }
-        const unsupported = ids.find((id) => !isM6SupportedFeatureId(id));
+        const unsupported = ids.find((id) => !isM8FeatureId(id));
         if (unsupported) {
             throw new AnalysisCoordinatorError(
                 'unsupported-feature',

@@ -75,7 +75,7 @@
                 0 – {{ formatFrequency(nyquist) }}
             </span>
             <span v-else-if="featureId === 'chroma'">C – B</span>
-            <span v-else>RMS amplitude</span>
+            <span v-else>{{ scalarAxisLabel }}</span>
             <span>{{ formatTime(viewport.endSeconds) }}</span>
         </div>
 
@@ -88,8 +88,8 @@
                 <dt>参数</dt>
                 <dd>1024 frame / 512 hop / Hanning</dd>
             </div>
-            <div v-if="featureId === 'rms'">
-                <dt>精确 RMS</dt>
+            <div v-if="definition.outputShape === 'scalar'">
+                <dt>精确值</dt>
                 <dd>{{ scalarExactLabel }}</dd>
             </div>
             <div v-else-if="featureId === 'amplitudeSpectrum'">
@@ -159,6 +159,7 @@ import { FEATURE_REGISTRY } from '../analysis/featureRegistry';
 import {
     cursorSampleIndex,
     peakBin,
+    scalarPlotDomain,
     vectorAt,
     visibleSampleRange,
 } from '../analysis/rendererData';
@@ -167,11 +168,11 @@ import {
     timeToCanvasX,
 } from '../analysis/timelineViewport';
 import {
-    M7_FEATURE_IDS,
+    M8_AVAILABLE_FEATURE_IDS,
     type AnalysisCoordinatorState,
     type AnalysisCursorValueResult,
     type AnalysisSeries,
-    type M7FeatureId,
+    type M8FeatureId,
 } from '../analysis/types';
 import type { PersistedTimelineViewport } from '../types/session';
 
@@ -182,8 +183,8 @@ const CHROMA_LABELS = [
 
 const props = defineProps<{
     slot: 0 | 1 | 2 | 3;
-    featureId: M7FeatureId;
-    disabledFeatureIds: readonly M7FeatureId[];
+    featureId: M8FeatureId;
+    disabledFeatureIds: readonly M8FeatureId[];
     series: AnalysisSeries | null;
     viewport: PersistedTimelineViewport;
     cursorSeconds: number;
@@ -194,7 +195,7 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-    change: [featureId: M7FeatureId];
+    change: [featureId: M8FeatureId];
     remove: [];
     seek: [seconds: number];
 }>();
@@ -208,7 +209,7 @@ let resizeObserver: ResizeObserver | null = null;
 
 const cardId = computed(() => `analysis-card-${props.slot}`);
 const definition = computed(() => FEATURE_REGISTRY[props.featureId]);
-const featureOptions = M7_FEATURE_IDS.map((id) => ({
+const featureOptions = M8_AVAILABLE_FEATURE_IDS.map((id) => ({
     id,
     label: FEATURE_REGISTRY[id].label,
 }));
@@ -223,8 +224,23 @@ const frameTimeLabel = computed(() =>
         : '等待精确帧');
 const scalarExactLabel = computed(() =>
     typeof props.exactValue?.value === 'number'
-        ? formatValue(props.exactValue.value)
+        ? `${formatValue(props.exactValue.value)}${
+            definition.value.range.unit
+                ? ` ${definition.value.range.unit}`
+                : ''
+        }`
         : '—');
+const scalarAxisLabel = computed(() => {
+    const range = definition.value.range;
+    const bounds = range.min !== undefined && range.max !== undefined
+        ? `${range.min} – ${range.max}`
+        : range.signed
+            ? 'signed · zero line'
+            : 'zero baseline';
+    return `${definition.value.label} · ${bounds}${
+        range.unit ? ` ${range.unit}` : ''
+    }`;
+});
 const amplitudePeak = computed(() => peakBin(exactVector.value));
 const amplitudePeakLabel = computed(() => {
     if (exactVector.value.length === 0) return '—';
@@ -259,8 +275,8 @@ const binFrequency = (index: number): number =>
 
 const handleFeatureChange = (event: Event) => {
     const value = (event.target as HTMLSelectElement).value;
-    if ((M7_FEATURE_IDS as readonly string[]).includes(value)) {
-        emit('change', value as M7FeatureId);
+    if ((M8_AVAILABLE_FEATURE_IDS as readonly string[]).includes(value)) {
+        emit('change', value as M8FeatureId);
     }
 };
 
@@ -344,21 +360,32 @@ const drawGrid = (
     }
 };
 
-const drawRms = (
+const drawScalar = (
     context: CanvasRenderingContext2D,
     width: number,
     height: number,
     series: AnalysisSeries,
 ) => {
     if (series.payload.kind !== 'scalar-f32') {
-        throw new Error('RMS 数据形态与 renderer 不匹配。');
+        throw new Error('标量数据形态与 renderer 不匹配。');
     }
     const range = visibleSampleRange(series, props.viewport);
     const values = series.payload.values.subarray(
         range.startIndex,
         range.endIndex,
     );
-    const maximum = Math.max(0.000001, ...values);
+    const domain = scalarPlotDomain(values, definition.value.range);
+    const toY = (value: number) => height - 6
+        - (value - domain.min) / (domain.max - domain.min) * (height - 12);
+    if (definition.value.range.signed) {
+        const zeroY = toY(0);
+        context.strokeStyle = 'rgba(248, 255, 135, 0.45)';
+        context.lineWidth = 1;
+        context.beginPath();
+        context.moveTo(0, zeroY + 0.5);
+        context.lineTo(width, zeroY + 0.5);
+        context.stroke();
+    }
     context.strokeStyle = '#7dffb3';
     context.lineWidth = 2;
     context.beginPath();
@@ -369,7 +396,7 @@ const drawRms = (
             props.viewport,
             width,
         );
-        const y = height - (value / maximum) * (height - 12) - 6;
+        const y = toY(value);
         if (localIndex === 0) context.moveTo(x, y);
         else context.lineTo(x, y);
     });
@@ -469,8 +496,8 @@ const drawStatic = () => {
     const { width, height } = canvasSize();
     drawGrid(context, width, height);
     if (!props.series) return;
-    if (props.featureId === 'rms') {
-        drawRms(context, width, height, props.series);
+    if (definition.value.outputShape === 'scalar') {
+        drawScalar(context, width, height, props.series);
     } else {
         drawHeatmap(context, width, height, props.series);
     }
@@ -492,7 +519,7 @@ const drawCursor = () => {
     context.moveTo(x + 0.5, 0);
     context.lineTo(x + 0.5, height);
     context.stroke();
-    if (props.featureId === 'rms') return;
+    if (definition.value.outputShape === 'scalar') return;
     const values = cursorVector();
     if (values.length === 0) return;
     const baseline = Math.floor(height * 0.72);

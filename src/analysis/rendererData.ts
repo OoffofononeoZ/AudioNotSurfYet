@@ -10,6 +10,31 @@ export interface VisibleSampleRange {
     endIndex: number;
 }
 
+export interface ScalarPlotDomain {
+    min: number;
+    max: number;
+}
+
+export const scalarPlotDomain = (
+    values: ArrayLike<number>,
+    range: { min?: number; max?: number; signed?: boolean },
+): ScalarPlotDomain => {
+    const finite = Array.from(values).filter(Number.isFinite);
+    const visibleMin = finite.length > 0 ? Math.min(...finite) : 0;
+    const visibleMax = finite.length > 0 ? Math.max(...finite) : 0;
+    let min = range.min ?? (range.signed ? Math.min(0, visibleMin) : 0);
+    let max = range.max ?? Math.max(range.signed ? 0 : min, visibleMax);
+    if (range.signed) {
+        min = Math.min(min, 0, visibleMin);
+        max = Math.max(max, 0, visibleMax);
+    }
+    if (max <= min) {
+        const padding = Math.max(0.000001, Math.abs(min) * 0.05);
+        max = min + padding;
+    }
+    return { min, max };
+};
+
 export const visibleSampleRange = (
     series: AnalysisSeries,
     viewport: PersistedTimelineViewport,

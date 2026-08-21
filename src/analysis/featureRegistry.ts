@@ -8,7 +8,10 @@ import {
 
 type DefinitionInput = Omit<
     FeatureDefinition,
-    'id' | 'meydaKey' | 'label' | 'description'
+    'id' | 'meydaKey' | 'label' | 'description' | 'extractionSource'
+> & Pick<
+    Partial<FeatureDefinition>,
+    'extractionSource'
 >;
 
 const details = new Map(
@@ -28,6 +31,7 @@ const defineFeature = <T extends FeatureId>(
         meydaKey: id,
         label: detail.title,
         description: detail.detail.description,
+        extractionSource: 'meyda',
         ...input,
     };
 };
@@ -56,13 +60,15 @@ export const FEATURE_REGISTRY = {
         range: { min: 0 },
         dependencies: [],
         deliveryMilestone: 'M8',
-        workerSupported: false,
+        workerSupported: true,
+        zeroEnergyValue: 0,
     }),
     energy: scalar('energy', {
         range: { min: 0 },
         dependencies: [],
         deliveryMilestone: 'M8',
         workerSupported: true,
+        zeroEnergyValue: 0,
     }),
     amplitudeSpectrum: defineFeature('amplitudeSpectrum', {
         outputShape: 'frequency-vector',
@@ -86,55 +92,65 @@ export const FEATURE_REGISTRY = {
         range: { min: 0, unit: 'bin' },
         dependencies: ['amplitudeSpectrum'],
         deliveryMilestone: 'M8',
-        workerSupported: false,
+        workerSupported: true,
+        zeroEnergyValue: 0,
     }),
     spectralFlatness: scalar('spectralFlatness', {
         range: { min: 0, max: 1 },
         dependencies: ['amplitudeSpectrum'],
         deliveryMilestone: 'M8',
-        workerSupported: false,
+        workerSupported: true,
+        zeroEnergyValue: 0,
     }),
     spectralFlux: scalar('spectralFlux', {
         range: { min: 0 },
         dependencies: ['amplitudeSpectrum'],
         deliveryMilestone: 'M8',
-        workerSupported: false,
+        workerSupported: true,
+        extractionSource: 'project-spectral-flux-v1',
+        zeroEnergyValue: 0,
     }),
     spectralSlope: scalar('spectralSlope', {
         range: { signed: true },
         dependencies: ['amplitudeSpectrum'],
         deliveryMilestone: 'M8',
-        workerSupported: false,
+        workerSupported: true,
+        zeroEnergyValue: 0,
     }),
     spectralRolloff: scalar('spectralRolloff', {
         range: { min: 0, unit: 'Hz' },
         dependencies: ['amplitudeSpectrum'],
         deliveryMilestone: 'M8',
-        workerSupported: false,
+        workerSupported: true,
+        zeroEnergyValue: 0,
     }),
     spectralSpread: scalar('spectralSpread', {
         range: { min: 0, unit: 'bin' },
         dependencies: ['amplitudeSpectrum', 'spectralCentroid'],
         deliveryMilestone: 'M8',
-        workerSupported: false,
+        workerSupported: true,
+        zeroEnergyValue: 0,
     }),
     spectralSkewness: scalar('spectralSkewness', {
         range: { signed: true },
         dependencies: ['amplitudeSpectrum', 'spectralCentroid'],
         deliveryMilestone: 'M8',
-        workerSupported: false,
+        workerSupported: true,
+        zeroEnergyValue: 0,
     }),
     spectralKurtosis: scalar('spectralKurtosis', {
         range: { min: 0 },
         dependencies: ['amplitudeSpectrum', 'spectralCentroid'],
         deliveryMilestone: 'M8',
-        workerSupported: false,
+        workerSupported: true,
+        zeroEnergyValue: 0,
     }),
     spectralCrest: scalar('spectralCrest', {
         range: { min: 0 },
         dependencies: ['amplitudeSpectrum'],
         deliveryMilestone: 'M8',
-        workerSupported: false,
+        workerSupported: true,
+        zeroEnergyValue: 0,
     }),
     chroma: defineFeature('chroma', {
         outputShape: 'category-vector',
@@ -158,13 +174,15 @@ export const FEATURE_REGISTRY = {
         range: { min: 0, max: 1 },
         dependencies: ['loudness'],
         deliveryMilestone: 'M8',
-        workerSupported: false,
+        workerSupported: true,
+        zeroEnergyValue: 0,
     }),
     perceptualSharpness: scalar('perceptualSharpness', {
         range: { min: 0 },
         dependencies: ['loudness'],
         deliveryMilestone: 'M8',
-        workerSupported: false,
+        workerSupported: true,
+        zeroEnergyValue: 0,
     }),
     mfcc: defineFeature('mfcc', {
         outputShape: 'frequency-vector',

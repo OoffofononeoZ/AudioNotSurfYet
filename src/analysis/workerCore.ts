@@ -12,14 +12,14 @@ import {
 } from './frames';
 import { getFeatureDefinition } from './featureRegistry';
 import {
-    exactValueFromMeyda,
-    extractM6Features,
+    exactM8Value,
+    extractM8Frame,
     scalarMeydaValue,
     vectorMeydaValue,
 } from './meydaAdapter';
 import {
     isFeatureId,
-    isM6SupportedFeatureId,
+    isM8FeatureId,
     type AnalysisCursorValueRequest,
     type AnalysisCursorValueResult,
     type AnalysisJobRequest,
@@ -27,7 +27,7 @@ import {
     type AnalysisSeries,
     type AnalysisWorkerResponse,
     type FeatureId,
-    type M6SupportedFeatureId,
+    type M8FeatureId,
 } from './types';
 
 export class AnalysisWorkerCoreError extends Error {
@@ -116,11 +116,11 @@ export const validateAnalysisJobRequest = async (
         invalid('Analysis feature IDs must be unique.');
     }
     const unsupported = request.cursorFeatureIds.find((featureId) =>
-        !isM6SupportedFeatureId(featureId));
+        !isM8FeatureId(featureId));
     if (unsupported) {
         throw new AnalysisWorkerCoreError(
             'unsupported-feature',
-            `${unsupported} is registered but not supported by the M6 Worker.`,
+            `${unsupported} is registered but not supported by the M8 Worker.`,
             false,
         );
     }
@@ -145,7 +145,7 @@ export const analysisAggregationFactor = (
 
 const buildSeries = (
     request: AnalysisJobRequest,
-    featureIds: readonly M6SupportedFeatureId[],
+    featureIds: readonly M8FeatureId[],
     scalarFrames: Map<FeatureId, number[]>,
     vectorFrames: Map<FeatureId, number[][]>,
 ): AnalysisSeries[] => {
@@ -158,7 +158,7 @@ const buildSeries = (
     return featureIds.map((featureId) => {
         const definition = getFeatureDefinition(featureId);
         const dimensions = definition.dimensions(request.config);
-        if (featureId === 'rms' || featureId === 'energy') {
+        if (definition.outputShape === 'scalar') {
             const values = aggregateScalars(
                 scalarFrames.get(featureId) ?? [],
                 factor,
@@ -216,7 +216,7 @@ export const runAnalysisJob = async (
 }> => {
     await validateAnalysisJobRequest(request);
     const featureIds =
-        request.featureIds as readonly M6SupportedFeatureId[];
+        request.featureIds as readonly M8FeatureId[];
     const pcm = new Float32Array(request.pcm);
     const totalFrames = analysisFrameCount(
         pcm.length,
@@ -226,7 +226,7 @@ export const runAnalysisJob = async (
     const scalarFrames = new Map<FeatureId, number[]>();
     const vectorFrames = new Map<FeatureId, number[][]>();
     for (const featureId of featureIds) {
-        if (featureId === 'rms' || featureId === 'energy') {
+        if (getFeatureDefinition(featureId).outputShape === 'scalar') {
             scalarFrames.set(featureId, []);
         } else {
             vectorFrames.set(featureId, []);
@@ -237,6 +237,7 @@ export const runAnalysisJob = async (
         ?? (() => new Promise<void>((resolve) => setTimeout(resolve, 0)));
     let batchStartedAt = now();
     let batchFrames = 0;
+    let previousAmplitudeSpectrum: number[] | undefined;
 
     try {
         if (featureIds.length === 0) {
@@ -256,13 +257,15 @@ export const runAnalysisJob = async (
                     frameIndex,
                     request.config,
                 );
-                const extracted = extractM6Features(
+                const extraction = extractM8Frame(
                     featureIds,
                     frame,
                     request.config,
+                    previousAmplitudeSpectrum,
                 );
+                const extracted = extraction.values;
                 for (const featureId of featureIds) {
-                    if (featureId === 'rms' || featureId === 'energy') {
+                    if (getFeatureDefinition(featureId).outputShape === 'scalar') {
                         scalarFrames.get(featureId)?.push(
                             scalarMeydaValue(extracted, featureId),
                         );
@@ -273,11 +276,14 @@ export const runAnalysisJob = async (
                         vectorFrames.get(featureId)?.push(
                             vectorMeydaValue(
                                 extracted,
-                                featureId,
+                                featureId as 'amplitudeSpectrum' | 'chroma',
                                 width,
                             ),
                         );
                     }
+                }
+                if (extraction.amplitudeSpectrum) {
+                    previousAmplitudeSpectrum = extraction.amplitudeSpectrum;
                 }
             }
             batchFrames += 1;
@@ -340,7 +346,7 @@ export const extractCursorValue = (
         || request.trackHash !== retained.trackHash
         || request.config.configHash !== retained.config.configHash
         || !retained.featureIds.includes(request.featureId)
-        || !isM6SupportedFeatureId(request.featureId)
+        || !isM8FeatureId(request.featureId)
     ) {
         return null;
     }
@@ -360,6 +366,14 @@ export const extractCursorValue = (
         frameIndex,
         retained.config,
     );
+    const previousFrame = request.featureId === 'spectralFlux'
+        && frameIndex > 0
+        ? createAnalysisFrame(
+            retained.pcm,
+            frameIndex - 1,
+            retained.config,
+        )
+        : undefined;
     return {
         kind: 'cursor-value-result',
         requestId: request.requestId,
@@ -371,10 +385,11 @@ export const extractCursorValue = (
             frameIndex,
             retained.config,
         ),
-        value: exactValueFromMeyda(
+        value: exactM8Value(
             request.featureId,
             frame,
             retained.config,
+            previousFrame,
         ),
     };
 };

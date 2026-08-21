@@ -8,7 +8,7 @@
         :data-energy="currentEnergy"
         :data-persistence-state="persistence.state">
         <div class="h-16" id="music-bar">
-            <section class="max-h-15 m-1 flex items-center gap-4 w-80">
+            <section class="music-info-section max-h-15 m-1 flex items-center gap-4 w-80">
                 <div id="albumCoverContainer">
                     <img :src="albumInfo[playingTarget]?.albumCover || '/default_cover.png'" alt="album cover"
                         class="w-14 aspect-square object-cover min-w-14">
@@ -24,7 +24,7 @@
                     </div>
                 </div>
             </section>
-            <section class="flex-col flex w-1/2 mt-4 gap-1.5">
+            <section class="transport-section flex-col flex w-1/2 mt-4 gap-1.5">
                 <div class="progress-bar-slot">
                     <div id="progress-bar-container" data-testid="playback-progress" :class="{
                         'progress-bar-hidden': isStyleTransitioning,
@@ -62,7 +62,7 @@
                     </div>
                 </div>
             </section>
-            <section class="flex gap-4 items-center justify-end w-80 m-1">
+            <section class="actions-section flex gap-4 items-center justify-end w-80 m-1">
                 <el-tooltip placement="top">
                     <svg class="w-7 h-7 cursor-pointer" data-testid="volume-control">
                         <use href="/icons.svg#volume-control"></use>
@@ -721,5 +721,42 @@ const handleAddToAnalysis = (_index: number) => {
 
 :deep(.el-slider__bar) {
     background-color: var(--main-color);
+}
+
+@media (max-width: 640px) {
+    #music-bar-container {
+        --offset: 0.5rem;
+    }
+
+    #music-bar {
+        padding: 0 0.75rem;
+    }
+
+    .music-info-section {
+        display: none;
+    }
+
+    .transport-section {
+        flex: 1 1 auto;
+        margin-top: 0.5rem;
+        min-width: 110px;
+        width: auto;
+    }
+
+    .transport-section :deep(svg) {
+        height: 1.75rem;
+        width: 1.75rem;
+    }
+
+    .actions-section {
+        flex: 0 0 auto;
+        gap: 0.5rem;
+        width: auto;
+    }
+
+    .actions-section :deep(svg) {
+        height: 1.5rem;
+        width: 1.5rem;
+    }
 }
 </style>

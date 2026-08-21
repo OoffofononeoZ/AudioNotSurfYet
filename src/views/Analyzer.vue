@@ -4,18 +4,19 @@
         <div class="analyzer-content">
             <header class="page-header">
                 <div>
-                    <p class="kicker">Analyzer learning workspace · M7</p>
-                    <h1>把声音看成三种互相联动的证据</h1>
+                    <p class="kicker">Analyzer learning workspace · M8</p>
+                    <h1>用四张联动卡读懂声音特征</h1>
                     <p>
                         RMS 看响度变化，Amplitude Spectrum 看频率分布，
-                        Chroma 看十二音级。四个槽位共享同一视口和播放游标。
+                        Chroma 看十二音级；13 个标量继续解释能量、频谱形状与瞬态。
+                        四个槽位共享同一视口和播放游标。
                     </p>
                 </div>
                 <div class="status-stack" aria-live="polite">
                     <span :data-state="analysis.state">
                         {{ analysisStateLabel }}
                     </span>
-                    <span>{{ activeCards.length }}/3 张 M7 活动卡</span>
+                    <span>{{ activeCards.length }}/4 张 M8 活动卡</span>
                     <span v-if="sessionStore.persistence.state === 'not-persisted'">
                         当前工作区未持久化
                     </span>
@@ -100,20 +101,13 @@
                     <article v-else class="empty-slot" :data-slot="slot">
                         <div>
                             <p class="slot-number">SLOT {{ slot + 1 }}</p>
-                            <h2 v-if="activeCards.length >= 3">
-                                为后续特征保留
-                            </h2>
-                            <h2 v-else>添加一张学习卡</h2>
-                            <p v-if="activeCards.length >= 3">
-                                M7 最多三张唯一活动卡。Energy 与其他特征将在
-                                M8 后续里程碑开放。
-                            </p>
-                            <p v-else>
-                                从尚未使用的 M7 特征中选择；重复特征不会出现。
+                            <h2>添加一张学习卡</h2>
+                            <p>
+                                从尚未使用的 M8 特征中选择；最多四张且不会重复。
                             </p>
                         </div>
                         <div
-                            v-if="activeCards.length < 3"
+                            v-if="activeCards.length < 4"
                             class="feature-choices"
                         >
                             <button
@@ -154,9 +148,10 @@ import {
 } from '../analysis/timelineViewport';
 import {
     M7_FEATURE_IDS,
+    M8_AVAILABLE_FEATURE_IDS,
     type AnalysisCursorValueResult,
     type AnalysisSeries,
-    type M7FeatureId,
+    type M8FeatureId,
 } from '../analysis/types';
 import { useAudioSessionStore } from '../stores/audioSessionStore';
 import type {
@@ -177,7 +172,7 @@ const audioSession = useAudioSessionService();
 const analysisCoordinator = useAnalysisCoordinator();
 const seriesRevision = ref(0);
 const exactValues = reactive<
-    Partial<Record<M7FeatureId, AnalysisCursorValueResult>>
+    Partial<Record<M8FeatureId, AnalysisCursorValueResult>>
 >({});
 const CURSOR_REQUEST_INTERVAL_MS = 40;
 let unsubscribeCoordinator: (() => void) | null = null;
@@ -190,11 +185,13 @@ const analysis = computed(() => sessionStore.analysis);
 const activeCards = computed(() =>
     [...sessionStore.analysisWorkspace.activeCards]
         .filter((card): card is ActiveAnalysisCard & {
-            featureId: M7FeatureId;
+            featureId: M8FeatureId;
         } =>
-            (M7_FEATURE_IDS as readonly string[]).includes(card.featureId))
+            (M8_AVAILABLE_FEATURE_IDS as readonly string[]).includes(
+                card.featureId,
+            ))
         .sort((left, right) => left.slot - right.slot));
-const activeFeatureIds = computed<M7FeatureId[]>(() =>
+const activeFeatureIds = computed<M8FeatureId[]>(() =>
     activeCards.value.map((card) => card.featureId));
 const durationSeconds = computed(() =>
     Math.max(0, sessionStore.playback.durationSeconds || 0));
@@ -212,7 +209,7 @@ const viewport = computed<PersistedTimelineViewport>(() =>
         durationSeconds.value,
     ));
 const availableFeatures = computed(() =>
-    M7_FEATURE_IDS
+    M8_AVAILABLE_FEATURE_IDS
         .filter((id) => !activeFeatureIds.value.includes(id))
         .map((id) => ({ id, label: FEATURE_REGISTRY[id].label })));
 const analysisStateLabel = computed(() => {
@@ -233,7 +230,7 @@ const analysisStateLabel = computed(() => {
 const cardAt = (slot: 0 | 1 | 2 | 3) =>
     activeCards.value.find((card) => card.slot === slot);
 
-const seriesFor = (featureId: M7FeatureId): AnalysisSeries | null => {
+const seriesFor = (featureId: M8FeatureId): AnalysisSeries | null => {
     void seriesRevision.value;
     return analysisCoordinator.getSeries(featureId);
 };
@@ -262,7 +259,7 @@ const applyCards = async (cards: ActiveAnalysisCard[]) => {
         sorted.map((card) => card.featureId),
     );
     await persist;
-    for (const key of Object.keys(exactValues) as M7FeatureId[]) {
+    for (const key of Object.keys(exactValues) as M8FeatureId[]) {
         if (!sorted.some((card) => card.featureId === key)) {
             delete exactValues[key];
         }
@@ -272,10 +269,10 @@ const applyCards = async (cards: ActiveAnalysisCard[]) => {
 
 const addCard = (
     slot: 0 | 1 | 2 | 3,
-    featureId: M7FeatureId,
+    featureId: M8FeatureId,
 ) => {
     if (
-        activeCards.value.length >= 3
+        activeCards.value.length >= 4
         || activeFeatureIds.value.includes(featureId)
     ) return;
     void applyCards([...activeCards.value, { slot, featureId }]);
@@ -283,7 +280,7 @@ const addCard = (
 
 const replaceCard = (
     slot: 0 | 1 | 2 | 3,
-    featureId: M7FeatureId,
+    featureId: M8FeatureId,
 ) => {
     if (
         activeFeatureIds.value.includes(featureId)
@@ -385,8 +382,18 @@ const initializeWorkspace = async () => {
             await analysisCoordinator.setActiveFeatures(M7_FEATURE_IDS);
             await persist;
         } else {
+            const restoredCards = activeCards.value;
+            if (
+                restoredCards.length
+                !== sessionStore.analysisWorkspace.activeCards.length
+            ) {
+                await persistWorkspace(
+                    restoredCards,
+                    sessionStore.analysisWorkspace.viewport,
+                );
+            }
             await analysisCoordinator.setActiveFeatures(
-                activeFeatureIds.value,
+                restoredCards.map((card) => card.featureId),
             );
         }
         requestExactValues(true);

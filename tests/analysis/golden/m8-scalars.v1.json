@@ -1,0 +1,89 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-08-21",
+  "generatorVersion": "m8-scalars-fixtures-v1",
+  "meydaVersion": "5.6.3",
+  "fluxFormula": "sum(max(0,currentAmplitude[k]-previousAmplitude[k]))",
+  "cases": [
+    {
+      "id": "silence",
+      "label": "Silence",
+      "fixtureHash": "ad7facb2586fc6e966c004d7d1d16b024f5805ff7cb47c7a85dabd8b48892ca7",
+      "expected": {
+        "zcr": 0,
+        "energy": 0,
+        "spectralCentroid": 0,
+        "spectralFlatness": 0,
+        "spectralFlux": 0,
+        "spectralSlope": 0,
+        "spectralRolloff": 0,
+        "spectralSpread": 0,
+        "spectralSkewness": 0,
+        "spectralKurtosis": 0,
+        "spectralCrest": 0,
+        "perceptualSpread": 0,
+        "perceptualSharpness": 0
+      }
+    },
+    {
+      "id": "pure-tone",
+      "label": "A4 pure tone",
+      "fixtureHash": "1bcc391c9ae79ca4ae05936ec1bb0cf288798b753f3e85aafac949bdc2c671ba",
+      "expected": {
+        "zcr": 18,
+        "energy": 23.497037692576797,
+        "spectralCentroid": 9.381808000227409,
+        "spectralFlatness": 0.000009930336532427152,
+        "spectralFlux": 189.55137917232537,
+        "spectralSlope": 1.5750132994649558e-7,
+        "spectralRolloff": 563.600782778865,
+        "spectralSpread": 1.2355539518452616,
+        "spectralSkewness": 26.54076632394021,
+        "spectralKurtosis": -13004.347183629732,
+        "spectralCrest": 16.755571966614212,
+        "perceptualSpread": 0.6383432871536721,
+        "perceptualSharpness": 0.6506817006262082
+      }
+    },
+    {
+      "id": "harmonic-rich",
+      "label": "A4 harmonic rich at matched RMS",
+      "fixtureHash": "908b3e82b62092dd12b8136bfca9dc9eb0afd1a00fd732b495a3d91a2478a43a",
+      "expected": {
+        "zcr": 18,
+        "energy": 23.423647012496016,
+        "spectralCentroid": 20.43668592225408,
+        "spectralFlatness": 0.000008928213308481304,
+        "spectralFlux": 196.01229813181538,
+        "spectralSlope": 1.5042685096967552e-7,
+        "spectralRolloff": 2254.40313111546,
+        "spectralSpread": 12.5186671663199,
+        "spectralSkewness": 0.8270886140997077,
+        "spectralKurtosis": -53.09247183065678,
+        "spectralCrest": 13.848969878981357,
+        "perceptualSpread": 0.7962615003583434,
+        "perceptualSharpness": 0.855167004166416
+      }
+    },
+    {
+      "id": "noise-transient",
+      "label": "Deterministic noise with transient",
+      "fixtureHash": "ac875f3ba8d4dfdafaa7e170deba0287067ae9523ab5ffa0c1ab753598a43411",
+      "expected": {
+        "zcr": 508,
+        "energy": 8.726874442744782,
+        "spectralCentroid": 257.4245777184697,
+        "spectralFlatness": 0.8415191622112718,
+        "spectralFlux": 1297.7470423565314,
+        "spectralSlope": -1.2316178165515353e-9,
+        "spectralRolloff": 23765.166340508807,
+        "spectralSpread": 147.51934501102951,
+        "spectralSkewness": -0.024873286243054564,
+        "spectralKurtosis": -71.82532358544702,
+        "spectralCrest": 2.234060904951241,
+        "perceptualSpread": 0.8397863896168101,
+        "perceptualSharpness": 0.5173186636129661
+      }
+    }
+  ]
+}

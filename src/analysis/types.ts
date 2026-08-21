@@ -45,6 +45,31 @@ export const M7_FEATURE_IDS = [
 
 export type M7FeatureId = typeof M7_FEATURE_IDS[number];
 
+export const M8_SCALAR_FEATURE_IDS = [
+    'zcr',
+    'energy',
+    'spectralCentroid',
+    'spectralFlatness',
+    'spectralFlux',
+    'spectralSlope',
+    'spectralRolloff',
+    'spectralSpread',
+    'spectralSkewness',
+    'spectralKurtosis',
+    'spectralCrest',
+    'perceptualSpread',
+    'perceptualSharpness',
+] as const satisfies readonly FeatureId[];
+
+export type M8ScalarFeatureId = typeof M8_SCALAR_FEATURE_IDS[number];
+
+export const M8_AVAILABLE_FEATURE_IDS = [
+    ...M7_FEATURE_IDS,
+    ...M8_SCALAR_FEATURE_IDS,
+] as const satisfies readonly FeatureId[];
+
+export type M8FeatureId = typeof M8_AVAILABLE_FEATURE_IDS[number];
+
 export interface AnalysisConfig {
     schemaVersion: 1;
     frameSize: 1024;
@@ -91,6 +116,8 @@ export interface FeatureDefinition<T extends FeatureId = FeatureId> {
     dimensions(config: AnalysisConfig): readonly number[];
     deliveryMilestone: DeliveryMilestone;
     workerSupported: boolean;
+    extractionSource: 'meyda' | 'project-spectral-flux-v1';
+    zeroEnergyValue?: 0;
 }
 
 export interface ScalarPayload {
@@ -298,3 +325,8 @@ export const isM6SupportedFeatureId = (
     value: FeatureId,
 ): value is M6SupportedFeatureId =>
     (M6_SUPPORTED_FEATURE_IDS as readonly FeatureId[]).includes(value);
+
+export const isM8FeatureId = (
+    value: FeatureId,
+): value is M8FeatureId =>
+    (M8_AVAILABLE_FEATURE_IDS as readonly FeatureId[]).includes(value);
