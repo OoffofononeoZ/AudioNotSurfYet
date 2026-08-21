@@ -4,7 +4,7 @@ owner: "project-owner"
 last_reviewed: 2026-08-21
 upstream_docs:
   - "docs/context/index.md"
-next_action: "M9 新术语已同步；clean canonical 后登记 evidence 身份"
+next_action: "M9 新术语与 canonical 已同步；等待 owner 验证与审批"
 ---
 
 # Glossary

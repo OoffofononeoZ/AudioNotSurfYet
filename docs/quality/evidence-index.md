@@ -8,14 +8,14 @@ upstream_docs:
   - "docs/quality/failure-taxonomy.md"
   - "docs/delivery/milestone-plan.md"
   - "tests/fixtures/fixture-manifest.json"
-next_action: "M9 已进入 In Progress；专项测试通过，等待 provisional、clean canonical 与正式 evidence"
+next_action: "M9 clean canonical 32/32 已登记为 in-review；等待 owner 完成 Windows Chrome 学习任务并审批"
 ---
 
 # Evidence Index
 
 ## 1. Purpose and Gate State
 
-本文件保存受版本控制的长期证据摘要；原始日志保存在 Git 忽略的本地 artifact 目录。M3–M8 的适用 canonical evidence 均已由 `project-owner` 批准，M8 已为 `Complete`。M9 已进入 `In Progress`；当前专项测试结果只作实现反馈，clean canonical 运行前不追加正式 M9 run record。
+本文件保存受版本控制的长期证据摘要；原始日志保存在 Git 忽略的本地 artifact 目录。M3–M8 的适用 canonical evidence 均已由 `project-owner` 批准，M8 已为 `Complete`。M9 clean canonical 已登记为 `in-review`，owner 审批前 M9 仍为 `In Progress`，M10 保持 `Planned`。
 
 每条 `pass` 只证明对应里程碑的适用子集在被记录的 commit 和环境上可复现。它不表示完整 EV-A–EV-R、未执行里程碑、Edge 矩阵或 release readiness 已通过。
 
@@ -626,3 +626,104 @@ M8 自动化证明 Slice 0 的 sticky 距 Header 8px、播放器/歌曲列表高
 - Meyda 5.6.3 的 `spectralFlux` 上游缺陷仍存在；产品改用 ADR-0005 项目实现，R-020 只能标记产品侧 `Mitigated`。
 - `project-owner` 于 2026-08-21 明确回复：“我批准 M8 canonical evidence 与界面稳定化结果；同意将 M8 标记为 Complete 并开放 M9。”据此本记录改为 `approved`，M8 改为 `Complete`，M9 门禁开放但在实现开始前保持 `Planned`。
 - 本记录不创建或证明 release readiness，也不构成 Edge、M9、M10 或完整 21/21 产品覆盖通过。
+
+## 12. M9 Canonical Run Record
+
+| Field | Value |
+| --- | --- |
+| Run ID | `M9-2026-08-21T09-14-14-110Z-f88ca331` |
+| Milestone | M9 — non-home Header blur, Power Spectrum, MFCC and Buffer |
+| Evidence state | `in-review` |
+| Eval result | `pass`（32/32 steps） |
+| Commit | `f88ca33149619b1a71eb30d74a1b8e266fb41a65` |
+| Commit at end | `f88ca33149619b1a71eb30d74a1b8e266fb41a65` |
+| Dirty at start / end | `false` / `false` |
+| Started at | 2026-08-21 09:14:14.110 UTC |
+| Method | `npm run eval:m9` |
+| Reviewer | `project-owner` — pending |
+| Retention | `local-present` |
+| Artifact root | `artifacts/evals/M9-2026-08-21T09-14-14-110Z-f88ca331/` |
+| Summary SHA-256 | `acb9ced1b448671955704efe33d846cd06059f6a8fd1343fb50f7a847672220e` |
+| Provisional precursor | `M9-2026-08-21T09-08-40-958Z-896dbbb9-provisional`，32/32 pass，summary `9285bef21c715a2f36746ae7647255f00c06c40e70bc4af377baf03df7a4e9bf`；只作 dirty-worktree 实现反馈 |
+
+### Environment
+
+| Item | Recorded value |
+| --- | --- |
+| OS | macOS 26.5.2 (`25F84`), Darwin arm64 |
+| Hardware | MacBook Pro `MacBookPro17,1`；Apple M1 8-core；16 GB memory |
+| Node / npm | Node `v24.18.0`；npm `11.16.0` |
+| Vitest | `4.1.10` |
+| Playwright Test | `1.62.0` |
+| Chrome | Google Chrome `151.0.7922.170` |
+| Edge | `not-installed` |
+| FFmpeg | `8.1.2` |
+| Meyda | `5.6.3` |
+
+版本化 golden `tests/analysis/golden/m9-vectors.v1.json` 为 225,903 bytes，SHA-256 为 `2f6c57cd89be3c852fc9af921b67d12c4679f8947ad284557c06110a39e40849`。它绑定 `m9-vectors-fixtures-v1`、Meyda 5.6.3、固定 AnalysisConfig、silence、440Hz 纯音、近似同 RMS 丰富谐波、确定性噪声/正负 impulse 和 333-sample 非整 frame 尾段。运行时学习音频 `artifacts/fixtures/m9-vectors-v1.wav` 为 768,710 bytes，SHA-256 为 `a74d04836b60a3250988a7f2a72af381136c01018ececfa3c7ba0f7cdc445934`，保持 Git 忽略且不包含用户私有音频。本记录只写机型、芯片、核心数与内存，不写本地 artifact 中的序列号、UUID、UDID 或其他设备标识。
+
+### Results and Traceability
+
+| Step | Result | Measurement |
+| --- | --- | --- |
+| Fixture / M3–M7 regression | pass | fixture 5/5；unit 12/12；Worker 17/17；analysis 48/48；M4 6/6 + 5/5；M5 5/5 + 6/6；M6 18/18 + 13/13 + 6/6；M7 8/8 + 4/4 |
+| M8 scalar / Worker regression | pass | unit 7/7；integration 7/7；项目 Flux、静音 0、四卡与累计 M8 能力无回归 |
+| M9 vector/waveform unit | pass | 5/5；三项 registry/direct Meyda、Power=Amplitude²、MFCC signed 量化、Buffer envelope/尾帧、非有限值失败与 golden identity |
+| M9 Worker/workspace integration | pass | 7/7；四种混合 shape、cache codec round-trip、512/13/1024 exact cursor、stale、cancel、quota、四卡持久化与 M10 拒绝 |
+| Docs / harness / typecheck | pass | 生命周期与链接通过；deliberate failure 被检测；`vue-tsc -b` exit 0 |
+| M3 / M4 / M5 Chrome | pass | 6/6、3/3、3/3；Header route regression 在 M3 通过；M4 60 秒漂移 6ms，三次 seek 最大误差 66.827ms |
+| M6 Chrome regression | pass | 3/3；100,941-byte cache、刷新 hit/exact cursor、20 次循环保持 1 Worker/1 AudioContext；15 分钟最大反馈 15.6ms、分析长任务 0 |
+| M7 Chrome regression | pass | 5/5；三卡/四槽、共享交互、UI hardening；seek 2.2ms；15 分钟最大反馈 17.3ms、分析长任务 0 |
+| M8 Chrome regression | pass | 2/2；四卡、13 项 scalar、390/1024/1280/1920 与刷新恢复无回归 |
+| M9 Chrome E2E | pass | 2/2；首页透明，Analyzer/ComingSoon/TestLands 18px blur；19 项选择、M10 隔离、Power 512、MFCC 13、Buffer 1024、双 Canvas、鼠标/键盘 seek、四卡/2.0×视口恢复；390/1024 单列、1280/1920 双列 |
+| Build | pass with warning | 1818 modules；Worker 42.97 kB；最大 JS chunk 1,106.55 kB，R-019 warning 保留 |
+| Diff / identity | pass | `git diff --check` exit 0；起止 commit 相同且工作树干净 |
+
+自动化证明 Header 根据 `route.path` 在首页与非首页间切换，背景/blur/64px 几何正确；它不能替代 Windows Chrome 对闪烁、文字清晰度和实际视觉效果的人工判断。三类新卡以双 Canvas + DOM 精确值共享时间轴；Power Spectrum 与 direct Meyda/Amplitude² golden 对齐，MFCC 使用 C0–C12 signed 系数轴而非频率轴，Buffer 显示全曲 envelope、当前 1024-sample frame 与尾帧补 0 信息。IndexedDB V1、AnalysisConfig 与缓存二进制 schema 未改变。
+
+### Local Artifact Hashes
+
+| Artifact | SHA-256 |
+| --- | --- |
+| `summary.json` | `acb9ced1b448671955704efe33d846cd06059f6a8fd1343fb50f7a847672220e` |
+| `01-fixture-hashes.log` | `b2a75a0f9c62b6d7dc62f70fa1cf125855d66d54d0ed111b90891b379f4c1879` |
+| `02-M3-unit-regression.log` | `301edbaa183447ac9a26a216a2d5d1f5c026e87ba87894fbdb5dbf430a52b963` |
+| `03-M3-worker-regression.log` | `50c6d7f87bf79eda27b99c335f3ca6a0f0eb9e458d4b8846becbc07c82047830` |
+| `04-M3-analysis-regression.log` | `e034aa2db0a342c0e1506df6dc1dc7b6742cefe413905233bddc6e5c1fa0c175` |
+| `05-M4-AudioEngine-unit.log` | `be6616b6b067e4bd2915cf0c41497f3e7835e4aa1984a0081f74366c566bfc8b` |
+| `06-M4-session-integration.log` | `b4bbd67c8cc406a084c2a4ef4bcead693f8f46c8df7116a2c4dc8a0ff7547a4b` |
+| `07-M5-repository-unit.log` | `630957d667d46546eeeaef8e3d56df26621aa1daf32189a2b26e577f43a323db` |
+| `08-M5-recovery-integration.log` | `5a3fabcd1807b4242805b1944715d0bdcba7baebf4a105df13aa47f9ca76ebb7` |
+| `09-M6-platform-unit.log` | `fdb771aaefae5657039292c1320acaa3b4a39245d78c71345d10795a3b40ec19` |
+| `10-M6-Worker-and-golden.log` | `a91e0c84b944c6f80655aade1aae131340e48bab74623d3b0124fe1ec9037967` |
+| `11-M6-coordinator-integration.log` | `0aa14d8d2d9c811a35d6fc81a989e839d708476e4c508810942f8c166d682aa8` |
+| `12-M7-workspace-and-learning-unit.log` | `15bd9dcb84ff9fde03d8f3527f9eb3f31ebde5eb70baee4abab48c086f190cae` |
+| `13-M7-workspace-integration.log` | `0469cf9c82866688be87d02ed514692ac1c10e8b1d434fe3dc41696146302598` |
+| `14-M7-golden-identity.log` | `e9c86c8566c4fa8dfe27f6033376965f08fff7eec487d4801cfb69077165d8a6` |
+| `15-M8-scalar-unit-and-golden.log` | `a082600baee0888e2bf705e479f9c19a1c2e554a0c4572fa57800814382ebf41` |
+| `16-M8-Worker-and-workspace-integration.log` | `c7aa3e88eff4a0ca7122cd30941f46f79d1e850041a45fb7491b79a6598517ac` |
+| `17-M8-golden-identity.log` | `b6914a1c2caa84836ded55c4b6daccbdd85296043980fac59fe4767541d86406` |
+| `18-M9-vector-and-waveform-unit.log` | `84e4b08ade330c54a7385b33c424a0fce56ed80daed36741d29c6a435f147df9` |
+| `19-M9-Worker-and-workspace-integration.log` | `cd87a7b0810ad4e5fa0bbb31a2de8e29d1701b7f7a2467cf44639f4f46872389` |
+| `20-M9-golden-identity.log` | `7b1d4aaf3705a92c84922ac818e5ed620974784fb3c49fcd5891f5043870a253` |
+| `21-docs.log` | `bb005ed0074179a47b895a5c66e79917e37ebf18976e21fe9d27b1dd63c8f151` |
+| `22-deliberate-failure.log` | `69bf5c3fa50230a4957ad0c60c8323dba68e494d92761fea0039cf5d580d70aa` |
+| `23-typecheck.log` | `fadc7f66199c28d2f7cca439bb300ebeb0320158f32a0f9b52ec77031538af4d` |
+| `24-M3-Chrome-regression.log` | `63f6147c5afae716126292ddada43d2b3d43efd9d7c7e85781ac42ab636cd4d9` |
+| `25-M4-Chrome-regression.log` | `ea0613168e52091651fe39baeb4a932ffd787bf9c55b08ec81e3c1390384a199` |
+| `26-M5-Chrome-regression.log` | `d6298f57aa61761690fe96ecc3bd6fe885173e16329dba3deed9a33794df526e` |
+| `27-M6-Chrome-regression.log` | `1cdd6497703ed8824a66fd410aea393ce581ab59ed42d90b5ca48646cb297a1e` |
+| `28-M7-Chrome-regression.log` | `107f1d022e516e32dcf61b24d3f7d9564830e760695e2b73a869ca3afdac0cf6` |
+| `29-M8-Chrome-regression.log` | `f618fad2122fafb948e0fba20ea2703052281f94910d1ffb5381230eb61bcf47` |
+| `30-M9-Chrome-e2e.log` | `a978e1e279f8c6e6b88852d58691f537970acd1756cd07310e59c0892973a7fd` |
+| `31-build.log` | `05baca53c93cc9187ed679dd5a2d355ad8fa525bfccb3912dc18b51cbf57c95c` |
+| `32-diff-check.log` | `e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855` |
+
+### Open Gaps and Approval Gate
+
+- Owner 仍需在 Windows Chrome 检查首页透明、三个非首页路由 blur、无闪烁且文字清晰，并完成 Power Spectrum、MFCC、Buffer 学习任务与四卡/视口刷新恢复。
+- Edge 未安装；M11 与未来 readiness 的双浏览器矩阵仍不完整。
+- 主 chunk 1,106.55 kB warning 与 R-019 保留。
+- Meyda 5.6.3 的 `spectralFlux` 上游缺陷仍存在；产品改用 ADR-0005 项目实现，R-020 只能标记产品侧 `Mitigated`。
+- M9 evidence 保持 `in-review`，M9 保持 `In Progress`，M10 保持 `Planned`；owner 明确批准前不得关闭或开放下一里程碑。
+- 本记录不创建或证明 release readiness，也不构成 Edge、M10 或完整 21/21 产品覆盖通过。

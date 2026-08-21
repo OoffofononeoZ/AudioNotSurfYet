@@ -4,7 +4,7 @@ owner: "project-owner"
 last_reviewed: 2026-08-21
 upstream_docs:
   - "docs/context/index.md"
-next_action: "M9 累计 19 项运行时已实现；执行 provisional 与 clean canonical 后登记 evidence"
+next_action: "M9 累计 19 项 canonical 已登记；等待 owner 验证与审批"
 ---
 
 # System Map

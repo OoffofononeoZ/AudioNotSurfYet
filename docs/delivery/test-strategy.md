@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/architecture/interface-contracts.md"
   - "docs/delivery/acceptance-criteria.md"
   - "docs/delivery/execution-plan.md"
-next_action: "M9 专项命令与 32 步 runner 已建立；执行 provisional 和 clean canonical"
+next_action: "M9 clean canonical 32/32 已通过；等待 owner Windows Chrome 补充验证"
 ---
 
 # Test Strategy
@@ -141,6 +141,8 @@ M8 新增 `test:m8:unit`、`test:m8:integration`、`test:e2e:m8`、`eval:m8:prov
 2026-08-21，M8 provisional 与 clean-HEAD canonical 均 28/28 通过；canonical run `M8-2026-08-21T03-23-18-552Z-d6dcf715` 的 M8 unit 为 7/7、integration 为 6/6、Chrome 为 2/2。owner 随后完成 Windows Chrome 补偿签字并批准 M8 evidence；相关 UI 改动后仍需重新验证。
 
 M9 新增 `test:m9:unit`、`test:m9:integration`、`test:e2e:m9`、`fixtures:m9:golden`、`eval:m9:provisional` 与 clean-HEAD `eval:m9`。专项层覆盖 Power=Amplitude²、MFCC signed 13 维、Buffer envelope/exact/tail、四卡恢复、M10 拒绝、Header 路由样式和 390/1024/1280/1920。
+
+2026-08-21，M9 provisional 与 clean-HEAD canonical 均 32/32 通过；canonical run `M9-2026-08-21T09-14-14-110Z-f88ca331` 的 M9 unit 为 5/5、integration 为 7/7、Chrome 为 2/2。Windows Chrome 的实际模糊观感、文字清晰和学习任务仍待 owner 补充验证。
 
 ## 6. IndexedDB and Permission Matrix
 

@@ -145,6 +145,6 @@ M9 浏览器测试运行时生成 Git 忽略的 `m9-vectors-v1.wav`，版本化�
 
 M8 provisional `M8-2026-08-21T03-19-06-614Z-486e313a-provisional` 已 28/28 通过，只作 dirty-worktree 实现反馈。clean canonical `M8-2026-08-21T03-23-18-552Z-d6dcf715` 在 commit `d6dcf715be2e6675224f079b954e2b1b544bbebd` 上 28/28 通过，起止工作树干净，summary SHA-256 为 `bc624121e9479d62c2519ab7d2cf60a2bd8d7f7affd44a2128f645ce642f34ef`。M8 unit 7/7、integration 6/6、Chrome 2/2；15 分钟回归最大反馈 17.8ms、分析归因长任务 0。完整日志 hash 见 [evidence index](../docs/quality/evidence-index.md)。
 
-M9 provisional `M9-2026-08-21T09-08-40-958Z-896dbbb9-provisional` 已 32/32 通过，summary SHA-256 为 `9285bef21c715a2f36746ae7647255f00c06c40e70bc4af377baf03df7a4e9bf`。M9 unit 5/5、integration 7/7、Chrome 2/2；15 分钟回归最大反馈 16.8ms、分析归因长任务 0，20 次资源循环保持单 Worker/AudioContext。该 run 绑定 dirty worktree，只作实现反馈。
+M9 provisional `M9-2026-08-21T09-08-40-958Z-896dbbb9-provisional` 已 32/32 通过，summary SHA-256 为 `9285bef21c715a2f36746ae7647255f00c06c40e70bc4af377baf03df7a4e9bf`。clean canonical `M9-2026-08-21T09-14-14-110Z-f88ca331` 在 commit `f88ca33149619b1a71eb30d74a1b8e266fb41a65` 上 32/32 通过，起止工作树干净，summary SHA-256 为 `acb9ced1b448671955704efe33d846cd06059f6a8fd1343fb50f7a847672220e`。M9 unit 5/5、integration 7/7、Chrome 2/2；canonical 15 分钟回归最大反馈 17.3ms、分析归因长任务 0，20 次资源循环保持单 Worker/AudioContext。
 
-本 README 只记录真实执行结果。M8 evidence 已获 owner 批准；M9 clean canonical 尚未完成，仍为 `In Progress`。现有证据不等于 Edge 矩阵或 release readiness 通过，当前 1,106.55 kB chunk warning 与 Meyda 5.6.3 `spectralFlux` 的上游缺陷仍保留；产品侧由 ADR-0005 项目实现缓解。
+本 README 只记录真实执行结果。M8 evidence 已获 owner 批准；M9 clean canonical 已登记为 `in-review`，owner 审批前仍为 `In Progress`。现有证据不等于 Edge 矩阵或 release readiness 通过，当前 1,106.55 kB chunk warning 与 Meyda 5.6.3 `spectralFlux` 的上游缺陷仍保留；产品侧由 ADR-0005 项目实现缓解。
