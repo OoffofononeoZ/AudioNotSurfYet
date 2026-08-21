@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/product/scope.md"
   - "docs/product/success-metrics.md"
   - "docs/product/open-questions.md"
-next_action: "M8 标量与 Analyzer shell 已实现并通过 canonical；等待 owner 审批"
+next_action: "M8 标量与 Analyzer shell 已获批准；M9 门禁开放并等待实现 Power Spectrum、MFCC 与 Buffer"
 ---
 
 # System Design

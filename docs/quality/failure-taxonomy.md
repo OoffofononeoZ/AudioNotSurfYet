@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/quality/golden-examples.md"
   - "docs/delivery/acceptance-criteria.md"
   - "docs/architecture/risk-register.md"
-next_action: "M8 canonical 已缓解 R-020；等待 Windows Chrome 人工复核 R-021"
+next_action: "M8 canonical 已缓解 R-020，Windows Chrome owner 签字已关闭 R-021；M9 继续沿用既有分类"
 ---
 
 # Failure Taxonomy

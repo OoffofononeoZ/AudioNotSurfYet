@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: approved
 owner: "project-owner"
 last_reviewed: 2026-08-21
 upstream_docs:
@@ -8,14 +8,14 @@ upstream_docs:
   - "docs/quality/failure-taxonomy.md"
   - "docs/delivery/milestone-plan.md"
   - "tests/fixtures/fixture-manifest.json"
-next_action: "复核 M8 canonical 与 Windows Chrome 界面结果；批准前 M8 保持 In Progress、M9 保持 Planned"
+next_action: "M8 canonical 与 Windows Chrome 界面结果已获 owner 批准；M9 门禁开放但在实现开始前保持 Planned"
 ---
 
 # Evidence Index
 
 ## 1. Purpose and Gate State
 
-本文件保存受版本控制的长期证据摘要；原始日志保存在 Git 忽略的本地 artifact 目录。M3–M7 的适用 canonical evidence 均已由 `project-owner` 批准，M7 已为 `Complete`。M8 实现已在 clean commit 上完成 canonical 并登记为 `in-review`；Windows Chrome 人工复核和 owner 批准前，M8 保持 `In Progress`、M9 保持 `Planned`。
+本文件保存受版本控制的长期证据摘要；原始日志保存在 Git 忽略的本地 artifact 目录。M3–M8 的适用 canonical evidence 均已由 `project-owner` 批准，M8 已为 `Complete`。M9 门禁已开放，但在实现开始前保持 `Planned`。
 
 每条 `pass` 只证明对应里程碑的适用子集在被记录的 commit 和环境上可复现。它不表示完整 EV-A–EV-R、未执行里程碑、Edge 矩阵或 release readiness 已通过。
 
@@ -538,14 +538,14 @@ owner 随后明确回复：“我批准 M7 canonical evidence，同意将 M7 标
 | --- | --- |
 | Run ID | `M8-2026-08-21T03-23-18-552Z-d6dcf715` |
 | Milestone | M8 — UI hardening and remaining scalar features |
-| Evidence state | `in-review` |
+| Evidence state | `approved` |
 | Eval result | `pass`（28/28 steps） |
 | Commit | `d6dcf715be2e6675224f079b954e2b1b544bbebd` |
 | Commit at end | `d6dcf715be2e6675224f079b954e2b1b544bbebd` |
 | Dirty at start / end | `false` / `false` |
 | Started at | 2026-08-21 03:23:18.552 UTC |
 | Method | `npm run eval:m8` |
-| Reviewer | `project-owner` — pending |
+| Reviewer | `project-owner` — approved 2026-08-21 |
 | Retention | `local-present` |
 | Artifact root | `artifacts/evals/M8-2026-08-21T03-23-18-552Z-d6dcf715/` |
 | Summary SHA-256 | `bc624121e9479d62c2519ab7d2cf60a2bd8d7f7affd44a2128f645ce642f34ef` |
@@ -582,7 +582,7 @@ owner 随后明确回复：“我批准 M7 canonical evidence，同意将 M7 标
 | Build | pass with warning | 1818 modules；Worker 41.88 kB；最大 JS chunk 1,102.00 kB，R-019 warning 保留 |
 | Diff / identity | pass | `git diff --check` exit 0；起止 commit 相同且工作树干净 |
 
-M8 自动化证明 Slice 0 的 sticky 距 Header 8px、播放器/歌曲列表高于 Analyzer、macOS Chrome 的瞬时 pressed 恢复和主题滚动条；390px 下 MusicBar 导入控件也保持可达。它不能替代 Windows Chrome 对偶发 pressed 状态的人工复核。R-020 的产品阻断已由项目 Flux/golden/cursor/canonical 缓解，但 Meyda 5.6.3 上游 extractor 缺陷仍存在；不得写成依赖缺陷已修复。
+M8 自动化证明 Slice 0 的 sticky 距 Header 8px、播放器/歌曲列表高于 Analyzer、macOS Chrome 的瞬时 pressed 恢复和主题滚动条；390px 下 MusicBar 导入控件也保持可达。`project-owner` 随后以本记录要求的批准语句确认 Windows Chrome 界面稳定化补偿门禁和 canonical evidence；该签字不增加新的自动化测量。R-020 的产品阻断已由项目 Flux/golden/cursor/canonical 缓解，但 Meyda 5.6.3 上游 extractor 缺陷仍存在；不得写成依赖缺陷已修复。
 
 ### Local Artifact Hashes
 
@@ -620,8 +620,9 @@ M8 自动化证明 Slice 0 的 sticky 距 Header 8px、播放器/歌曲列表高
 
 ### Open Gaps and Approval Gate
 
-- Windows Chrome 仍需 owner 人工检查 sticky、歌曲列表层级、连续按钮操作后的 pressed 恢复和两类精确值滚动条；这是 R-021 的剩余门禁。
+- Windows Chrome 的 sticky、歌曲列表层级、连续按钮 pressed 恢复和两类精确值滚动条已由 owner 人工批准；R-021 关闭。该签字不替代未来相关改动后的回归。
 - Edge 未安装；M11 与未来 readiness 的双浏览器矩阵仍不完整。
 - 主 chunk 1,102.00 kB warning 与 R-019 保留。
 - Meyda 5.6.3 的 `spectralFlux` 上游缺陷仍存在；产品改用 ADR-0005 项目实现，R-020 只能标记产品侧 `Mitigated`。
-- 本记录不创建或证明 release readiness。M8 owner 批准前保持 `in-review`，M9 不开放。
+- `project-owner` 于 2026-08-21 明确回复：“我批准 M8 canonical evidence 与界面稳定化结果；同意将 M8 标记为 Complete 并开放 M9。”据此本记录改为 `approved`，M8 改为 `Complete`，M9 门禁开放但在实现开始前保持 `Planned`。
+- 本记录不创建或证明 release readiness，也不构成 Edge、M9、M10 或完整 21/21 产品覆盖通过。

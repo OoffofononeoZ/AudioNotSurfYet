@@ -8,7 +8,7 @@
 - FFmpeg：8.1.2；只用于生成和检查受控 WAV/MP3/FLAC fixture。
 - Microsoft Edge 当前未安装。`npm run test:e2e:edge` 会以退出码 2 报告 `blocked`，不会伪装成 pass。
 
-M3–M8 不建设 CI。下列命令当前均为本地门禁；正式证据要求在干净 commit 上复跑。M3–M7 canonical run 已获批准；M8 clean canonical 28/28 已登记到 [evidence index](../docs/quality/evidence-index.md) 并处于 `in-review`。M5 Chrome 原生权限与 M7 学习任务均已单独签字通过，M8 Windows Chrome 补偿验证仍待 owner 完成。
+M3–M8 不建设 CI。下列命令当前均为本地门禁；正式证据要求在干净 commit 上复跑。M3–M8 canonical run 已获批准。M5 Chrome 原生权限、M7 学习任务与 M8 Windows Chrome 界面稳定化补偿验证均已单独签字通过。
 
 当前 `npm audit` 在安全补丁更新后剩余 1 项 low：Vite 依赖的 esbuild 0.27.3 在 Windows 开发服务器场景存在本地任意文件读取风险。仓库目标验证机为 macOS，开发服务器不得暴露到不受信网络；依赖升级提供修复版本后复核。该缺口不被描述为已修复或生产 readiness。
 
@@ -78,7 +78,7 @@ M6 浏览器测试通过 DEV-only bridge 选择四项支持特征、读取可序
 
 M7 浏览器测试运行时生成 Git 忽略的 `m7-learning-v1.wav`，版本化数值输入保存在 `m7-learning.v1.json`。Chrome 场景覆盖首次默认三卡、已保存空/单卡恢复、重复禁用、共享 zoom/seek、每特征最多 30Hz exact cursor 请求、≤100ms seek 可见反馈、1024/1280/1920、DPR、reduced motion 和单卡 Canvas context 错误隔离。
 
-M8 浏览器测试运行时生成 Git 忽略的 `m8-scalars-v1.wav`，版本化数值输入保存在 `m8-scalars.v1.json`。Chrome 场景覆盖 390/1024/1280/1920、第四卡、累计 16 项、重复/M9 禁用、静音 Energy 0、瞬态 Flux、所有 13 项 scalar renderer/exact cursor 和刷新恢复；M7 Chrome 回归覆盖 sticky、播放器/歌曲列表层级、pressed 与主题滚动条。Windows Chrome pressed 状态仍需人工复核。
+M8 浏览器测试运行时生成 Git 忽略的 `m8-scalars-v1.wav`，版本化数值输入保存在 `m8-scalars.v1.json`。Chrome 场景覆盖 390/1024/1280/1920、第四卡、累计 16 项、重复/M9 禁用、静音 Energy 0、瞬态 Flux、所有 13 项 scalar renderer/exact cursor 和刷新恢复；M7 Chrome 回归覆盖 sticky、播放器/歌曲列表层级、pressed 与主题滚动条。Windows Chrome pressed 状态已由 owner 补偿复核并批准。
 
 2026-07-29，`project-owner` 按下列清单完成最新版稳定 Chrome 原生权限人工检查并确认通过。该签字不保存本地音频的文件名、路径、内容或 hash，也不替代 Edge 验证。
 
@@ -137,4 +137,4 @@ M8 浏览器测试运行时生成 Git 忽略的 `m8-scalars-v1.wav`，版本化�
 
 M8 provisional `M8-2026-08-21T03-19-06-614Z-486e313a-provisional` 已 28/28 通过，只作 dirty-worktree 实现反馈。clean canonical `M8-2026-08-21T03-23-18-552Z-d6dcf715` 在 commit `d6dcf715be2e6675224f079b954e2b1b544bbebd` 上 28/28 通过，起止工作树干净，summary SHA-256 为 `bc624121e9479d62c2519ab7d2cf60a2bd8d7f7affd44a2128f645ce642f34ef`。M8 unit 7/7、integration 6/6、Chrome 2/2；15 分钟回归最大反馈 17.8ms、分析归因长任务 0。完整日志 hash 见 [evidence index](../docs/quality/evidence-index.md)。
 
-本 README 只记录真实执行结果。M8 evidence 当前为 `in-review`；Windows Chrome 与 owner 批准前不关闭 M8、不开放 M9。现有证据不等于 Edge 矩阵或 release readiness 通过，1,102.00 kB chunk warning 与 Meyda 5.6.3 `spectralFlux` 的上游缺陷仍保留；产品侧由 ADR-0005 项目实现缓解。
+本 README 只记录真实执行结果。M8 evidence 已获 owner 批准，M8 为 `Complete`，M9 门禁开放但尚未开始实现。现有证据不等于 Edge 矩阵或 release readiness 通过，1,102.00 kB chunk warning 与 Meyda 5.6.3 `spectralFlux` 的上游缺陷仍保留；产品侧由 ADR-0005 项目实现缓解。

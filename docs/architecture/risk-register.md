@@ -5,7 +5,7 @@ last_reviewed: 2026-08-21
 upstream_docs:
   - "docs/architecture/system-design.md"
   - "docs/architecture/interface-contracts.md"
-next_action: "M8 canonical 已缓解 R-020；以 Windows Chrome 人工复核完成 R-021 剩余门禁"
+next_action: "M8 已获批准，R-020 保持产品侧 Mitigated、R-021 已由 Windows Chrome owner 签字关闭；M9 复核向量与波形风险"
 ---
 
 # Risk Register
@@ -34,7 +34,7 @@ next_action: "M8 canonical 已缓解 R-020；以 Windows Chrome 人工复核完�
 | R-018 | 未定义 Tab 或未来上传需求侵入当前交付 | Medium | Medium | PR 添加空白页实现、网络数据路径或服务端依赖 | scope review、Feature/ADR 门禁；未来能力另开产品决策 | 产品意图变化会使所有下游待复核 | project-owner | Open |
 | R-019 | bundle 已有约 1MB 警告继续增长 | Medium | Medium | `npm run build` chunk warning 增大 | Worker/renderer 按路由或 feature family 拆分，记录构建体积；避免 Analyzer Three.js | 具体发布预算在 quality/release 前批准 | project-owner | Open |
 | R-020 | Meyda 5.6.3 `spectralFlux` 提取器引用未声明变量 `x` | High | High | 固定 previous/current frame 调用抛 `ReferenceError: x is not defined` | ADR-0005 项目 Flux 已实现；公式/首帧/静音/exact cursor golden 与 M8 clean canonical 28/28 通过，保留上游异常事实 | 产品阻断已缓解；Meyda 缺陷未修复，依赖升级时必须重新对照 | project-owner | Mitigated |
-| R-021 | Analyzer sticky、播放器层级、pressed 状态或内层滚动条破坏可用性与视觉一致性 | Medium | Medium | sticky 与 Header 间距过大；歌曲列表被遮挡；Windows Chrome 按钮保持按压外观；表格显示系统默认滚动条 | M8 Slice 0 与 macOS Chrome 多视口 canonical 已通过 sticky/layer/control/scrollbar；等待 owner Windows Chrome 人工复核 | 自动化不能证明 Windows 原生 Chrome 偶发状态，未签字前 M8 不关闭 | project-owner | Open |
+| R-021 | Analyzer sticky、播放器层级、pressed 状态或内层滚动条破坏可用性与视觉一致性 | Medium | Medium | sticky 与 Header 间距过大；歌曲列表被遮挡；Windows Chrome 按钮保持按压外观；表格显示系统默认滚动条 | M8 Slice 0、macOS Chrome 多视口 canonical 与 owner Windows Chrome 人工签字均通过 | 相关交互或样式变化后重新执行多视口自动化与 Windows Chrome 补偿复核 | project-owner | Closed |
 
 ## Review Rule
 

@@ -4,7 +4,7 @@ owner: "project-owner"
 last_reviewed: 2026-08-21
 upstream_docs:
   - "docs/context/index.md"
-next_action: "M8 运行时与 canonical 已完成；等待 Windows Chrome/owner 复核，批准前不开放 M9"
+next_action: "M8 运行时、canonical 与 owner 审批已完成；M9 门禁开放但尚未开始实现"
 ---
 
 # System Map
@@ -80,4 +80,4 @@ showOpenFilePicker → FileSystemFileHandle → File
 
 ## Approval Record
 
-`project-owner` 于 2026-08-21 确认 M7 卡片、共享视口、跳转、刷新恢复和 3/3 学习解释通过，并批准 M7 canonical、关闭 M7、开放 M8。随后 M8 运行时与 clean canonical 已完成，本图同步累计 16 项事实；M8 evidence 仍待 Windows Chrome 与 owner 批准。
+`project-owner` 于 2026-08-21 确认 M7 卡片、共享视口、跳转、刷新恢复和 3/3 学习解释通过，并批准 M7 canonical、关闭 M7、开放 M8。随后 M8 运行时与 clean canonical 已完成，本图同步累计 16 项事实；owner 又批准 M8 canonical 与 Windows Chrome 界面稳定化结果，M8 据此关闭并开放仍为 `Planned` 的 M9。

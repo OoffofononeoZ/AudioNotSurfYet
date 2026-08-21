@@ -9,7 +9,7 @@ upstream_docs:
   - "docs/architecture/system-design.md"
   - "docs/architecture/interface-contracts.md"
   - "docs/architecture/risk-register.md"
-next_action: "M8 实现与 clean canonical 已完成；等待 Windows Chrome/owner 审批，批准前不开放 M9"
+next_action: "M8 已获 owner 批准并关闭；M9 门禁开放但在明确开始实现前保持 Planned"
 ---
 
 # Execution Plan
@@ -18,7 +18,7 @@ next_action: "M8 实现与 clean canonical 已完成；等待 Windows Chrome/own
 
 按纵向切片把已批准的本地音频学习体验从当前播放器基础推进到 21 项 Meyda 特征全覆盖。本计划以门禁证据而不是日历日期排序；任一里程碑未通过时，不进入下一批特征。
 
-本文件定义实施顺序和验收方式，不代表未关闭里程碑已通过。当前已完成 M1、M2、Q0、M3–M7 门禁；`project-owner` 已批准 M7 canonical、人工任务和 3/3 学习解释，并明确要求实施 M8。M8 为 `In Progress`，M9 仍为 `Planned`。
+本文件定义实施顺序和验收方式，不代表未关闭里程碑已通过。当前已完成 M1、M2、Q0、M3–M8 门禁；`project-owner` 已批准 M8 canonical 与 Windows Chrome 界面稳定化结果。M8 为 `Complete`，M9 门禁开放但在明确开始实现前仍为 `Planned`。
 
 ## 2. Stage Gates
 
@@ -318,7 +318,7 @@ Verification:
 - 390/1024/1280/1920 的 sticky/层级/按钮/滚动条与四卡交互；
 - 完成后累计覆盖 16/21。
 
-Execution evidence：Slice 0、13 个新增标量、`m8-scalars-v1`、通用 scalar renderer、四卡选择与累计 16/21 已实现；dirty-worktree provisional 与 clean-HEAD canonical 均 28/28 通过。canonical run `M8-2026-08-21T03-23-18-552Z-d6dcf715` 绑定 commit `d6dcf715be2e6675224f079b954e2b1b544bbebd`，summary SHA-256 为 `bc624121e9479d62c2519ab7d2cf60a2bd8d7f7affd44a2128f645ce642f34ef`。证据为 `in-review`；Windows Chrome pressed 复核与 owner 批准前不关闭 M8。
+Execution evidence：Slice 0、13 个新增标量、`m8-scalars-v1`、通用 scalar renderer、四卡选择与累计 16/21 已实现；dirty-worktree provisional 与 clean-HEAD canonical 均 28/28 通过。canonical run `M8-2026-08-21T03-23-18-552Z-d6dcf715` 绑定 commit `d6dcf715be2e6675224f079b954e2b1b544bbebd`，summary SHA-256 为 `bc624121e9479d62c2519ab7d2cf60a2bd8d7f7affd44a2128f645ce642f34ef`。Windows Chrome 补偿复核与 evidence 已由 owner 批准，M8 为 `Complete`。
 
 Rollback:
 
