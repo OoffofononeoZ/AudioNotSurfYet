@@ -4,7 +4,7 @@ owner: "project-owner"
 last_reviewed: 2026-08-21
 upstream_docs:
   - "AGENTS.md"
-next_action: "M8 已获 owner 批准并关闭；M9 门禁开放，在明确开始实现前保持 Planned"
+next_action: "M9 已进入 In Progress；先完成非首页 Header blur，再交付 Power Spectrum、MFCC 与 Buffer"
 ---
 
 # Repository Context Index
@@ -22,7 +22,7 @@ AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端：用户选择
 - System design：system design、接口契约、风险和五个 ADR 已批准。
 - Execution planning：execution plan、acceptance criteria、test strategy 和 milestone plan 均为 approved。
 - Quality and evals：M3–M8 的适用 canonical/人工证据已获批准；M8 clean canonical 28/28 与 Windows Chrome 界面稳定化结果已由 owner 签字。
-- Implementation：M3–M8 已 `Complete`；M9 门禁开放但在明确开始实现前保持 `Planned`。
+- Implementation：M3–M8 已 `Complete`；M9 已按 owner 实施请求进入 `In Progress`，先执行非首页 Header blur，再交付三类 vector/waveform。
 - Readiness、release、retrospective：`release-readiness.md` 等待 M11 执行证据，不创建 release 或 retrospective 文档。
 
 ## Key Documents
@@ -126,3 +126,5 @@ AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端：用户选择
 同日，M8 provisional 与 clean canonical 均 28/28 通过；clean run `M8-2026-08-21T03-23-18-552Z-d6dcf715` 绑定 commit `d6dcf715be2e6675224f079b954e2b1b544bbebd`，summary SHA-256 为 `bc624121e9479d62c2519ab7d2cf60a2bd8d7f7affd44a2128f645ce642f34ef`。正式 evidence 为 `in-review`；Windows Chrome pressed 补偿验证和 owner 批准前 M8 保持 `In Progress`、M9 保持 `Planned`。
 
 随后 `project-owner` 明确批准 M8 canonical evidence 与界面稳定化结果，同意将 M8 标记为 `Complete` 并开放 M9。本批准作为 Windows Chrome 补偿门禁的 owner 签字，不增加新的自动化测量；M9 在明确开始实现前保持 `Planned`。
+
+同次请求中，owner 明确要求实施 M9 完整计划，并新增“首页 Header 透明、其余路由使用 18px backdrop blur”的 Slice 0。M9 据此进入 `In Progress`；该样式变更不修改 M8 canonical 身份。
