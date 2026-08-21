@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/context/index.md"
   - "docs/delivery/test-strategy.md"
   - "docs/quality/eval-plan.md"
-next_action: "M8 canonical 与 Windows Chrome 补偿验证已获批准；M9 门禁开放但尚未开始实现"
+next_action: "M9 已进入 In Progress；新增 Header blur、vector/waveform 与 clean canonical 门禁"
 ---
 
 # Working Agreements

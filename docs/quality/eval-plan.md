@@ -8,14 +8,14 @@ upstream_docs:
   - "docs/delivery/execution-plan.md"
   - "docs/delivery/acceptance-criteria.md"
   - "docs/delivery/test-strategy.md"
-next_action: "M8 clean canonical 与 Windows Chrome 补偿结果已获批准；M9 门禁开放但尚未开始实现"
+next_action: "M9 已进入 In Progress；建立 Header blur、Power Spectrum、MFCC 与 Buffer 的专项 eval"
 ---
 
 # Eval Plan
 
 ## 1. Purpose and Current State
 
-本文件定义 AudioNotSurfYet 的质量证据契约。Vitest、Playwright、Worker harness、受控 fixture 和 direct-Meyda golden 已在 M3 建立。M3–M8 的适用 canonical evidence 均已获批。M8 clean-commit canonical 28/28 覆盖累计 16 项、项目 Flux、UI hardening 与 M3–M7 回归，Windows Chrome 补偿结果已由 owner 签字。完整 EV-A–EV-R、Edge 矩阵和 M9–M11 产品行为仍未完成。
+本文件定义 AudioNotSurfYet 的质量证据契约。Vitest、Playwright、Worker harness、受控 fixture 和 direct-Meyda golden 已在 M3 建立。M3–M8 的适用 canonical evidence 均已获批。M9 已进入 `In Progress`，将覆盖非首页 Header blur、Power Spectrum、MFCC、Buffer 与 M3–M8 回归；完整 EV-A–EV-R、Edge 矩阵和 M9–M11 产品行为仍未完成。
 
 Q0 只批准“如何判断质量”，不批准 release readiness。`docs/quality/release-readiness.md` 只能在 M11 已产生完整成功、失败、边界和异常证据后创建。
 

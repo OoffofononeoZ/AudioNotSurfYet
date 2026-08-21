@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/product/scope.md"
   - "docs/architecture/system-design.md"
   - "docs/delivery/execution-plan.md"
-next_action: "DEC-018 已实现并获批准；M9 门禁开放，开始实现时登记其执行状态"
+next_action: "DEC-019 已生效，M9 以非首页 Header blur 开始并继续交付三类 vector/waveform"
 ---
 
 # Decision Registry
@@ -39,6 +39,7 @@ next_action: "DEC-018 已实现并获批准；M9 门禁开放，开始实现时�
 | DEC-016 | 2026-07-29 | M6 建立 21 项穷尽 registry、四项 Worker 支持、六类 compact codec、空默认活动集、完整 cache identity、generation 隔离和 Worker exact cursor；不实现 M7 UI，不升级 Meyda 或增加 spectralFlux fallback | project-owner | approved | [Interface contracts](../architecture/interface-contracts.md) | M6 feature 支持、frame/config、codec、缓存、精确值或 fallback 策略改变 |
 | DEC-017 | 2026-07-30 | M7 固定四个 UI 槽位，但只允许 RMS、Amplitude Spectrum、Chroma 三个唯一活动特征；无保存工作区默认三卡，已保存空工作区恢复为空；第四槽与完整四特征场景顺延 M8 | project-owner | approved | [Execution plan](../delivery/execution-plan.md) | M7 活动上限、默认/恢复语义、槽位或 M8 开门规则改变 |
 | DEC-018 | 2026-08-21 | M8 先修复 Analyzer shell 四项 UI 问题，再开放 13 个标量；Flux 使用项目 v1 公式，零能量 M8 标量为 0，非零能量非有限值失败；累计最多四张唯一卡 | project-owner | approved | [ADR-0005](../architecture/adrs/0005-project-spectral-flux-and-silence-semantics.md) | Flux 公式、静音语义、M8 feature set、shell layer 或按钮状态契约改变 |
+| DEC-019 | 2026-08-21 | M9 Slice 0 让首页 Header 保持透明、所有非首页使用 18px backdrop blur；随后开放 Power Spectrum、MFCC、Buffer，累计最多四张、19/21 可用卡 | project-owner | approved | [Execution plan](../delivery/execution-plan.md) | Header 路由样式、M9 feature set、向量/波形 renderer 或累计覆盖改变 |
 
 ## Approval Evidence
 
@@ -75,6 +76,8 @@ M4 dirty-worktree provisional suite 随后通过，证明当前实现值得进�
 同日，DEC-018 的实现、golden 与 clean canonical 28/28 已完成，R-020 产品阻断标记为 `Mitigated`。M8 evidence 仍为 `in-review`，等待 Windows Chrome 补偿验证与 owner 批准；该执行事实不开放 M9。
 
 随后 `project-owner` 批准 M8 canonical evidence 与界面稳定化结果，同意将 M8 标记为 `Complete` 并开放 M9。DEC-018 据此完成审批；R-021 由 Windows Chrome owner 签字关闭，M9 在明确开始实现前保持 `Planned`。
+
+同次请求中，`project-owner` 明确要求实施 M9 计划，并把非首页导航栏背景模糊列为 M9 Slice 0。DEC-019 据此生效，M9 改为 `In Progress`；M8 canonical 身份不重新打开，M9 仍需自己的 provisional、clean canonical、in-review evidence 与 owner 审批。
 
 ## Historical Evidence Gap
 

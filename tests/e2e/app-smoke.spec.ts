@@ -37,6 +37,73 @@ test('loads the current shell and keeps empty playback controls stable', async (
     expect(issues).toEqual([]);
 });
 
+test('keeps the home header transparent and blurs every non-home route', async ({ page }) => {
+    const issues = captureBrowserIssues(page);
+    const header = page.locator('#main-header');
+
+    await page.goto('/');
+    for (const width of [390, 1024, 1280, 1920]) {
+        await page.setViewportSize({ width, height: 900 });
+        await expect(header).not.toHaveClass(/main-header--contextual/);
+        const homeGeometry = await header.evaluate((element) => {
+            const rect = element.getBoundingClientRect();
+            const style = getComputedStyle(element);
+            return {
+                backdropFilter: style.backdropFilter,
+                backgroundColor: style.backgroundColor,
+                height: rect.height,
+                left: rect.left,
+                top: rect.top,
+                width: rect.width,
+                zIndex: style.zIndex,
+            };
+        });
+        expect(homeGeometry).toEqual({
+            backdropFilter: 'none',
+            backgroundColor: 'rgba(0, 0, 0, 0)',
+            height: 64,
+            left: 0,
+            top: 0,
+            width,
+            zIndex: '40',
+        });
+    }
+
+    await page.getByRole('link', { name: 'Analyzer' }).click();
+    await expect(page).toHaveURL(/\/analyzer$/);
+    await expect(header).toHaveClass(/main-header--contextual/);
+
+    for (const pathName of ['/analyzer', '/comingsoon', '/testlands']) {
+        await page.goto(pathName);
+        const contextualStyle = await header.evaluate((element) => {
+            const style = getComputedStyle(element);
+            const rect = element.getBoundingClientRect();
+            return {
+                backdropFilter: style.backdropFilter,
+                backgroundColor: style.backgroundColor,
+                height: rect.height,
+                top: rect.top,
+                zIndex: style.zIndex,
+            };
+        });
+        expect(contextualStyle).toEqual({
+            backdropFilter: 'blur(18px)',
+            backgroundColor: 'rgba(2, 4, 3, 0.72)',
+            height: 64,
+            top: 0,
+            zIndex: '40',
+        });
+    }
+
+    await page.getByRole('link', { name: 'AUDIOSURF' }).click();
+    await expect(page).toHaveURL(/\/$/);
+    await expect(header).not.toHaveClass(/main-header--contextual/);
+    await expect.poll(() => header.evaluate(
+        (element) => getComputedStyle(element).backdropFilter,
+    )).toBe('none');
+    expect(issues).toEqual([]);
+});
+
 test('provides real IndexedDB and Web Worker transfer behavior', async ({ page }) => {
     const issues = captureBrowserIssues(page);
     await page.goto('/');

@@ -1,5 +1,9 @@
 <template>
-    <header class="w-full h-16 bg-transparent fixed top-0 left-0" id="main-header">
+    <header
+        class="w-full h-16 fixed top-0 left-0"
+        :class="{ 'main-header--contextual': !isHome }"
+        id="main-header"
+    >
         <section class="min-w-32">
             <router-link to="/" class="text-white font-bold text-2xl">AUDIOSURF</router-link>
         </section>
@@ -17,7 +21,11 @@
 
 <script setup lang="ts">
 import { emitter } from '../utils/emitter';
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
+import { useRoute } from 'vue-router';
+
+const route = useRoute();
+const isHome = computed(() => route.path === '/');
 const settingsOpen = ref(false);
 const toggleSettings = () => {
     emitter.emit('settings-open', settingsOpen.value);
@@ -26,11 +34,19 @@ const toggleSettings = () => {
 </script>
 <style scoped>
 #main-header {
+    backdrop-filter: none;
+    background: transparent;
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding: 0 20px;
     z-index: var(--layer-header);
+}
+
+#main-header.main-header--contextual {
+    -webkit-backdrop-filter: blur(18px);
+    backdrop-filter: blur(18px);
+    background: rgba(2, 4, 3, 0.72);
 }
 #main-header::before {
     content: "";

@@ -9,7 +9,7 @@ upstream_docs:
   - "docs/architecture/system-design.md"
   - "docs/architecture/interface-contracts.md"
   - "docs/architecture/risk-register.md"
-next_action: "M8 已获 owner 批准并关闭；M9 门禁开放但在明确开始实现前保持 Planned"
+next_action: "M9 已进入 In Progress；完成 Header blur、Power Spectrum、MFCC、Buffer 与专项证据"
 ---
 
 # Execution Plan
@@ -18,7 +18,7 @@ next_action: "M8 已获 owner 批准并关闭；M9 门禁开放但在明确开�
 
 按纵向切片把已批准的本地音频学习体验从当前播放器基础推进到 21 项 Meyda 特征全覆盖。本计划以门禁证据而不是日历日期排序；任一里程碑未通过时，不进入下一批特征。
 
-本文件定义实施顺序和验收方式，不代表未关闭里程碑已通过。当前已完成 M1、M2、Q0、M3–M8 门禁；`project-owner` 已批准 M8 canonical 与 Windows Chrome 界面稳定化结果。M8 为 `Complete`，M9 门禁开放但在明确开始实现前仍为 `Planned`。
+本文件定义实施顺序和验收方式，不代表未关闭里程碑已通过。当前已完成 M1、M2、Q0、M3–M8 门禁；`project-owner` 已批准 M8 canonical 与 Windows Chrome 界面稳定化结果，并明确要求实施 M9。M8 为 `Complete`，M9 为 `In Progress`。
 
 ## 2. Stage Gates
 
@@ -328,6 +328,7 @@ Rollback:
 
 Implementation:
 
+- Slice 0 保持首页 Header 透明，所有非首页路由使用 18px backdrop blur 与半透明深色背景；保留现有 Header/MusicBar 层级。
 - Power Spectrum 复用 frequency heatmap 并验证与 amplitude² 的关系。
 - MFCC 使用 13 系数热图/游标向量，参数保持可见。
 - Buffer 使用波形 envelope 和游标 frame，不保存逐帧原始 buffer 集合。
