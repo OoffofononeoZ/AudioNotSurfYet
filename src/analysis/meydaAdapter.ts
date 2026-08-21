@@ -7,6 +7,7 @@ import {
     type FeatureId,
     type M6SupportedFeatureId,
     type M8FeatureId,
+    type M9FeatureId,
 } from './types';
 
 interface MeydaComplexValue {
@@ -99,7 +100,12 @@ export const scalarMeydaValue = (
 
 export const vectorMeydaValue = (
     result: MeydaBatchResult,
-    featureId: 'amplitudeSpectrum' | 'chroma',
+    featureId:
+        | 'amplitudeSpectrum'
+        | 'chroma'
+        | 'powerSpectrum'
+        | 'mfcc'
+        | 'buffer',
     width: number,
 ): number[] => {
     const value = result[featureId];
@@ -121,12 +127,14 @@ export interface M8FrameExtraction {
     amplitudeSpectrum?: number[];
 }
 
-export const extractM8Frame = (
-    featureIds: readonly M8FeatureId[],
+export type M9FrameExtraction = M8FrameExtraction;
+
+const extractSupportedFrame = (
+    featureIds: readonly M9FeatureId[],
     frame: Float32Array,
     config: AnalysisConfig,
     previousAmplitudeSpectrum?: readonly number[],
-): M8FrameExtraction => {
+): M9FrameExtraction => {
     const requested = new Set<FeatureId>(featureIds);
     const needsFlux = requested.delete('spectralFlux');
     const needsZeroEnergyPolicy = featureIds.some((featureId) =>
@@ -149,22 +157,62 @@ export const extractM8Frame = (
 
     for (const featureId of featureIds) {
         const definition = getFeatureDefinition(featureId);
-        if (definition.outputShape !== 'scalar') continue;
-        if (zeroEnergy && definition.zeroEnergyValue === 0) {
-            result[featureId] = 0;
-            continue;
-        }
-        if (featureId === 'spectralFlux') {
-            result[featureId] = spectralFluxV1(
-                amplitudeSpectrum ?? [],
-                previousAmplitudeSpectrum,
+        if (definition.outputShape === 'scalar') {
+            if (zeroEnergy && definition.zeroEnergyValue === 0) {
+                result[featureId] = 0;
+                continue;
+            }
+            if (featureId === 'spectralFlux') {
+                result[featureId] = spectralFluxV1(
+                    amplitudeSpectrum ?? [],
+                    previousAmplitudeSpectrum,
+                );
+            }
+            scalarMeydaValue(result, featureId);
+        } else if (
+            definition.outputShape === 'frequency-vector'
+            || definition.outputShape === 'category-vector'
+            || definition.outputShape === 'waveform'
+        ) {
+            vectorMeydaValue(
+                result,
+                featureId as
+                    | 'amplitudeSpectrum'
+                    | 'chroma'
+                    | 'powerSpectrum'
+                    | 'mfcc'
+                    | 'buffer',
+                definition.dimensions(config)[0] ?? 0,
             );
         }
-        scalarMeydaValue(result, featureId);
     }
 
     return { values: result, amplitudeSpectrum };
 };
+
+export const extractM8Frame = (
+    featureIds: readonly M8FeatureId[],
+    frame: Float32Array,
+    config: AnalysisConfig,
+    previousAmplitudeSpectrum?: readonly number[],
+): M8FrameExtraction => extractSupportedFrame(
+    featureIds,
+    frame,
+    config,
+    previousAmplitudeSpectrum,
+);
+
+export const extractM9Frame = (
+    featureIds: readonly M9FeatureId[],
+    frame: Float32Array,
+    config: AnalysisConfig,
+    previousAmplitudeSpectrum?: readonly number[],
+): M9FrameExtraction => extractSupportedFrame(
+    featureIds,
+    frame,
+    config,
+    previousAmplitudeSpectrum,
+);
 
 export const exactValueFromMeyda = (
     featureId: M6SupportedFeatureId,
@@ -224,6 +272,50 @@ export const exactM8Value = (
             throw new Error(`${featureId} returned a non-finite vector.`);
         }
         return output;
+    }
+    throw new Error(`${featureId} returned an unexpected value.`);
+};
+
+export const exactM9Value = (
+    featureId: M9FeatureId,
+    frame: Float32Array,
+    config: AnalysisConfig,
+    previousFrame?: Float32Array,
+): ExactFeatureValue => {
+    let previousAmplitudeSpectrum: number[] | undefined;
+    if (featureId === 'spectralFlux' && previousFrame) {
+        const previous = extractM6Features(
+            ['amplitudeSpectrum'],
+            previousFrame,
+            config,
+        );
+        previousAmplitudeSpectrum = vectorMeydaValue(
+            previous,
+            'amplitudeSpectrum',
+            config.frameSize / 2,
+        );
+    }
+    const extracted = extractM9Frame(
+        [featureId],
+        frame,
+        config,
+        previousAmplitudeSpectrum,
+    ).values;
+    const value = extracted[featureId];
+    if (typeof value === 'number') {
+        return scalarMeydaValue(extracted, featureId);
+    }
+    if (value instanceof Float32Array || Array.isArray(value)) {
+        return vectorMeydaValue(
+            extracted,
+            featureId as
+                | 'amplitudeSpectrum'
+                | 'chroma'
+                | 'powerSpectrum'
+                | 'mfcc'
+                | 'buffer',
+            getFeatureDefinition(featureId).dimensions(config)[0] ?? 0,
+        );
     }
     throw new Error(`${featureId} returned an unexpected value.`);
 };

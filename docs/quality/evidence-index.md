@@ -8,14 +8,14 @@ upstream_docs:
   - "docs/quality/failure-taxonomy.md"
   - "docs/delivery/milestone-plan.md"
   - "tests/fixtures/fixture-manifest.json"
-next_action: "M8 canonical 与 Windows Chrome 界面结果已获 owner 批准；M9 门禁开放但在实现开始前保持 Planned"
+next_action: "M9 已进入 In Progress；专项测试通过，等待 provisional、clean canonical 与正式 evidence"
 ---
 
 # Evidence Index
 
 ## 1. Purpose and Gate State
 
-本文件保存受版本控制的长期证据摘要；原始日志保存在 Git 忽略的本地 artifact 目录。M3–M8 的适用 canonical evidence 均已由 `project-owner` 批准，M8 已为 `Complete`。M9 门禁已开放，但在实现开始前保持 `Planned`。
+本文件保存受版本控制的长期证据摘要；原始日志保存在 Git 忽略的本地 artifact 目录。M3–M8 的适用 canonical evidence 均已由 `project-owner` 批准，M8 已为 `Complete`。M9 已进入 `In Progress`；当前专项测试结果只作实现反馈，clean canonical 运行前不追加正式 M9 run record。
 
 每条 `pass` 只证明对应里程碑的适用子集在被记录的 commit 和环境上可复现。它不表示完整 EV-A–EV-R、未执行里程碑、Edge 矩阵或 release readiness 已通过。
 

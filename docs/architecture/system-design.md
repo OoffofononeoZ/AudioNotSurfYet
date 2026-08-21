@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/product/scope.md"
   - "docs/product/success-metrics.md"
   - "docs/product/open-questions.md"
-next_action: "M8 标量与 Analyzer shell 已获批准；M9 门禁开放并等待实现 Power Spectrum、MFCC 与 Buffer"
+next_action: "M9 三类 shape 已实现；以 provisional/canonical 验证契约后等待 owner 审批"
 ---
 
 # System Design
@@ -134,13 +134,15 @@ flowchart LR
 | Family | Features | Renderer |
 | --- | --- | --- |
 | Scalar time series | RMS、ZCR、Energy、Spectral Centroid/Flatness/Flux/Slope/Rolloff/Spread/Skewness/Kurtosis/Crest、Perceptual Spread、Perceptual Sharpness | 折线/面积时间序列与游标值 |
-| Frequency vector | Amplitude Spectrum、Power Spectrum、MFCC | 时频热图与游标向量；MFCC 使用系数轴 |
-| Category vector | Chroma | 12 类热图与游标柱图 |
+| Frequency vector | Amplitude Spectrum、Power Spectrum | 时频热图、0–Nyquist 轴与游标频谱 |
+| Category vector | Chroma、MFCC | 类别/系数热图与游标柱图；MFCC 使用 C0–C12 signed 系数轴 |
 | Waveform | Buffer | 波形包络与游标 frame |
 | Loudness structure | Loudness | total 时间线、24 Bark band 热图与游标结构 |
 | Complex spectrum | Complex Spectrum | 幅度/相位派生视图与游标实部/虚部详情 |
 
 Meyda 5.6.3 的固定维度是：Amplitude/Power Spectrum 512、Chroma 12、MFCC 13、Buffer 1024、Loudness 24 specific bands + total、Complex Spectrum 的 real/imag 各 1024。注册表另记录 `deliveryMilestone` 与 `workerSupported`；M6 只支持 RMS、Energy、Amplitude Spectrum、Chroma，21/21 登记不表示 21 项产品能力完成。
+
+M9 不改变 AnalysisConfig、IndexedDB V1 或缓存二进制 schema。Power Spectrum 与 Amplitude Spectrum 在同一 Meyda batch 中提取并由 golden 固定平方关系；MFCC 以 `category-u16` 保留 signed scale/offset；Buffer 全曲显示只保存 `waveform-envelope`，exact cursor 返回当前 1024-sample Meyda buffer 并显示尾帧补 0 数量。
 
 `spectralFlux` 在锁定版本上已复现依赖内部未声明变量 `x` 的 `ReferenceError`。M6 不 fork、monkey-patch 或启用该特征；M8 按 [ADR-0005](adrs/0005-project-spectral-flux-and-silence-semantics.md) 使用项目内相邻幅度频谱正向 L1 差。M8 golden/cursor/canonical 已通过并缓解产品阻断；Meyda 缺陷仍作为依赖事实保留，不得声称上游已修复。
 

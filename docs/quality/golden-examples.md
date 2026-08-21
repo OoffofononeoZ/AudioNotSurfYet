@@ -7,14 +7,14 @@ upstream_docs:
   - "docs/delivery/acceptance-criteria.md"
   - "docs/delivery/test-strategy.md"
   - "docs/architecture/risk-register.md"
-next_action: "M8 scalars v1 已获 owner 批准；M9 开始时增加 vectors/waveform 版本化 golden"
+next_action: "m9-vectors v1 已生成并通过专项测试；以 clean canonical 锁定正式 evidence"
 ---
 
 # Golden Examples
 
 ## 1. Evidence Boundary
 
-以下产品、学习、失败和边界样例仍是各里程碑的规范。M3 已生成受控 fixture、manifest 和首批 direct-Meyda golden。M6 的产品 Worker golden 已获批准；M7 的 `m7-learning-fixtures-v1` 与版本化 `m7-learning.v1.json` 已通过 clean canonical 并完成 owner 3/3 学习解释。M8 的 `m8-scalars-fixtures-v1`、`m8-scalars.v1.json` 和运行时 `m8-scalars-v1.wav` 已在 clean canonical 中验证静音、纯音、同 RMS 丰富谐波和确定性噪声/瞬态关系，并已获 owner 批准。
+以下产品、学习、失败和边界样例仍是各里程碑的规范。M3 已生成受控 fixture、manifest 和首批 direct-Meyda golden。M6 的产品 Worker golden 已获批准；M7 的 `m7-learning-fixtures-v1` 与版本化 `m7-learning.v1.json` 已通过 clean canonical 并完成 owner 3/3 学习解释。M8 的 `m8-scalars-fixtures-v1`、`m8-scalars.v1.json` 和运行时 `m8-scalars-v1.wav` 已在 clean canonical 中验证并获 owner 批准。M9 的 `m9-vectors-fixtures-v1`、版本化 `m9-vectors.v1.json` 与运行时 `m9-vectors-v1.wav` 已生成并通过专项测试，正式身份仍等待 clean canonical。
 
 音频仅允许：
 
@@ -35,6 +35,7 @@ next_action: "M8 scalars v1 已获 owner 批准；M9 开始时增加 vectors/wav
 - M3 已建立生成器并提交短 PCM/WAV/MP3/FLAC、manifest 与首批 golden；2026-07-28 clean-commit canonical run 通过并记录在 [evidence index](evidence-index.md)。该证据只覆盖 M3 fixture/golden harness，不声明相关产品 eval 完成。
 - M6 运行时 golden 使用确定性 PCM，直接调用同版本 Meyda 与产品 Worker/compact codec 对比；Energy 是平台验证项，不改变 M7 首批卡片仍为 RMS、Amplitude Spectrum、Chroma 的批准范围。
 - 当前 Meyda `5.6.3` 的 `spectralFlux` 对有效输入抛出 `x is not defined`。该上游异常继续固定为 R-020；M8 按 ADR-0005 使用项目 Flux v1 golden，不 patch 或伪称直接 Meyda 通过。
+- M9 golden 包含 silence、440Hz 纯音、近似同 RMS 丰富谐波、确定性噪声/正负 impulse 与 333-sample 非整 frame 尾段；固定 Power Spectrum 平方关系、MFCC 13 维/顺序、Buffer 1024 维和尾帧补 0。
 
 ## 2. Success Examples
 

@@ -6,7 +6,7 @@ upstream_docs:
   - "docs/delivery/execution-plan.md"
   - "docs/delivery/acceptance-criteria.md"
   - "docs/delivery/test-strategy.md"
-next_action: "M9 已进入 In Progress；执行 Header blur 与三类 vector/waveform 切片"
+next_action: "M9 实现已完成；执行 provisional、clean canonical 与 owner 验收"
 ---
 
 # Milestone Plan
@@ -111,10 +111,11 @@ next_action: "M9 已进入 In Progress；执行 Header blur 与三类 vector/wav
 
 ### M9
 
-- [ ] 首页 Header 保持透明，非首页使用 18px backdrop blur；四视口与路由切换通过。
-- [ ] Power Spectrum、MFCC 13、Buffer waveform。
-- [ ] 维度/轴/量化/exact cursor。
-- [ ] 累计 19/21 可选择且有黄金证据。
+- [x] 首页 Header 保持透明，非首页使用 18px backdrop blur；四视口与路由切换专项 Chrome 已通过。
+- [x] Power Spectrum、MFCC 13、Buffer waveform 已实现。
+- [x] 维度/轴/量化/exact cursor 专项 unit/integration 已通过。
+- [x] 累计 19/21 的 dirty-worktree provisional 32/32 通过。
+- [ ] clean canonical、正式 `in-review` evidence 与 owner 审批。
 
 ### M10
 

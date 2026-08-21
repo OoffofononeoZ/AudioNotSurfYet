@@ -71,10 +71,12 @@
 
         <div class="axis-summary" aria-hidden="true">
             <span>{{ formatTime(viewport.startSeconds) }}</span>
-            <span v-if="featureId === 'amplitudeSpectrum'">
+            <span v-if="isSpectrumFeature">
                 0 – {{ formatFrequency(nyquist) }}
             </span>
             <span v-else-if="featureId === 'chroma'">C – B</span>
+            <span v-else-if="featureId === 'mfcc'">C0 – C12 · signed</span>
+            <span v-else-if="featureId === 'buffer'">−1 – 1 · zero line</span>
             <span v-else>{{ scalarAxisLabel }}</span>
             <span>{{ formatTime(viewport.endSeconds) }}</span>
         </div>
@@ -86,37 +88,93 @@
             </div>
             <div>
                 <dt>参数</dt>
-                <dd>1024 frame / 512 hop / Hanning</dd>
+                <dd>{{ parameterLabel }}</dd>
             </div>
             <div v-if="definition.outputShape === 'scalar'">
                 <dt>精确值</dt>
                 <dd>{{ scalarExactLabel }}</dd>
             </div>
-            <div v-else-if="featureId === 'amplitudeSpectrum'">
+            <div v-else-if="isSpectrumFeature">
                 <dt>峰值</dt>
-                <dd>{{ amplitudePeakLabel }}</dd>
+                <dd>{{ spectrumPeakLabel }}</dd>
             </div>
-            <div v-else>
+            <div v-else-if="featureId === 'chroma'">
                 <dt>主音级</dt>
                 <dd>{{ chromaPeakLabel }}</dd>
             </div>
+            <div v-else-if="featureId === 'mfcc'">
+                <dt>最强系数</dt>
+                <dd>{{ mfccPeakLabel }}</dd>
+            </div>
+            <div v-else-if="featureId === 'buffer'">
+                <dt>帧范围</dt>
+                <dd>{{ bufferRangeLabel }}</dd>
+            </div>
+            <div v-if="featureId === 'buffer'">
+                <dt>尾帧</dt>
+                <dd>{{ bufferPaddingLabel }}</dd>
+            </div>
         </dl>
 
-        <details v-if="featureId === 'amplitudeSpectrum'" class="value-table">
-            <summary>查看完整频率 bin 精确值（{{ exactVector.length }}）</summary>
+        <details v-if="isSpectrumFeature" class="value-table">
+            <summary>
+                查看完整频率 bin 精确值（{{ exactVector.length }}）
+            </summary>
             <div class="table-scroll">
                 <table>
                     <thead>
                         <tr>
                             <th scope="col">Bin</th>
                             <th scope="col">Hz</th>
-                            <th scope="col">Amplitude</th>
+                            <th scope="col">{{ spectrumValueHeading }}</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr v-for="(value, index) in exactVector" :key="index">
                             <th scope="row">{{ index }}</th>
                             <td>{{ formatFrequency(binFrequency(index)) }}</td>
+                            <td>{{ formatValue(value) }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </details>
+
+        <details v-if="featureId === 'mfcc'" class="value-table">
+            <summary>查看 13 项 MFCC 精确值（{{ exactVector.length }}）</summary>
+            <div class="table-scroll compact">
+                <table>
+                    <thead>
+                        <tr>
+                            <th scope="col">系数</th>
+                            <th scope="col">精确值</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="(value, index) in exactVector" :key="index">
+                            <th scope="row">C{{ index }}</th>
+                            <td>{{ formatValue(value) }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </details>
+
+        <details v-if="featureId === 'buffer'" class="value-table">
+            <summary>
+                查看当前 Buffer frame 精确值（{{ exactVector.length }}）
+            </summary>
+            <div class="table-scroll">
+                <table>
+                    <thead>
+                        <tr>
+                            <th scope="col">Sample</th>
+                            <th scope="col">Amplitude</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="(value, index) in exactVector" :key="index">
+                            <th scope="row">{{ index }}</th>
                             <td>{{ formatValue(value) }}</td>
                         </tr>
                     </tbody>
@@ -160,19 +218,21 @@ import {
     cursorSampleIndex,
     peakBin,
     scalarPlotDomain,
+    signedVectorMaximum,
     vectorAt,
     visibleSampleRange,
+    waveformEnvelopeAt,
 } from '../analysis/rendererData';
 import {
     canvasXToTime,
     timeToCanvasX,
 } from '../analysis/timelineViewport';
 import {
-    M8_AVAILABLE_FEATURE_IDS,
+    M9_AVAILABLE_FEATURE_IDS,
     type AnalysisCoordinatorState,
     type AnalysisCursorValueResult,
     type AnalysisSeries,
-    type M8FeatureId,
+    type M9FeatureId,
 } from '../analysis/types';
 import type { PersistedTimelineViewport } from '../types/session';
 
@@ -183,8 +243,8 @@ const CHROMA_LABELS = [
 
 const props = defineProps<{
     slot: 0 | 1 | 2 | 3;
-    featureId: M8FeatureId;
-    disabledFeatureIds: readonly M8FeatureId[];
+    featureId: M9FeatureId;
+    disabledFeatureIds: readonly M9FeatureId[];
     series: AnalysisSeries | null;
     viewport: PersistedTimelineViewport;
     cursorSeconds: number;
@@ -195,7 +255,7 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-    change: [featureId: M8FeatureId];
+    change: [featureId: M9FeatureId];
     remove: [];
     seek: [seconds: number];
 }>();
@@ -209,11 +269,19 @@ let resizeObserver: ResizeObserver | null = null;
 
 const cardId = computed(() => `analysis-card-${props.slot}`);
 const definition = computed(() => FEATURE_REGISTRY[props.featureId]);
-const featureOptions = M8_AVAILABLE_FEATURE_IDS.map((id) => ({
+const featureOptions = M9_AVAILABLE_FEATURE_IDS.map((id) => ({
     id,
     label: FEATURE_REGISTRY[id].label,
 }));
 const nyquist = computed(() => (props.sampleRate ?? 0) / 2);
+const isSpectrumFeature = computed(() =>
+    props.featureId === 'amplitudeSpectrum'
+    || props.featureId === 'powerSpectrum');
+const spectrumValueHeading = computed(() =>
+    props.featureId === 'powerSpectrum' ? 'Power' : 'Amplitude');
+const parameterLabel = computed(() => props.featureId === 'mfcc'
+    ? '1024 frame / 512 hop / Hanning / 13 MFCC'
+    : '1024 frame / 512 hop / Hanning');
 const exactVector = computed<number[]>(() =>
     Array.isArray(props.exactValue?.value)
         ? props.exactValue.value
@@ -241,11 +309,45 @@ const scalarAxisLabel = computed(() => {
         range.unit ? ` ${range.unit}` : ''
     }`;
 });
-const amplitudePeak = computed(() => peakBin(exactVector.value));
-const amplitudePeakLabel = computed(() => {
+const spectrumPeak = computed(() => peakBin(exactVector.value));
+const spectrumPeakLabel = computed(() => {
     if (exactVector.value.length === 0) return '—';
-    return `${formatFrequency(binFrequency(amplitudePeak.value.index))}
-        / ${formatValue(amplitudePeak.value.value)}`;
+    return `${formatFrequency(binFrequency(spectrumPeak.value.index))}
+        / ${formatValue(spectrumPeak.value.value)}`;
+});
+const mfccPeakLabel = computed(() => {
+    if (exactVector.value.length === 0) return '—';
+    let index = 0;
+    let magnitude = 0;
+    exactVector.value.forEach((value, candidateIndex) => {
+        if (Math.abs(value) > magnitude) {
+            index = candidateIndex;
+            magnitude = Math.abs(value);
+        }
+    });
+    return `C${index} / ${formatValue(exactVector.value[index])}`;
+});
+const bufferRangeLabel = computed(() => {
+    if (exactVector.value.length === 0) return '—';
+    return `${formatValue(Math.min(...exactVector.value))}
+        – ${formatValue(Math.max(...exactVector.value))}`;
+});
+const bufferPaddingLabel = computed(() => {
+    if (
+        !props.exactValue
+        || !props.sampleRate
+        || props.sampleRate <= 0
+        || props.durationSeconds <= 0
+    ) return '—';
+    const frameEnd = props.exactValue.frameStartSeconds + 1024 / props.sampleRate;
+    const padded = Math.max(
+        0,
+        Math.min(
+            1024,
+            Math.round((frameEnd - props.durationSeconds) * props.sampleRate),
+        ),
+    );
+    return padded > 0 ? `${padded} samples 补 0` : '无补 0';
 });
 const chromaPeakLabel = computed(() => {
     if (exactVector.value.length === 0) return '—';
@@ -275,8 +377,8 @@ const binFrequency = (index: number): number =>
 
 const handleFeatureChange = (event: Event) => {
     const value = (event.target as HTMLSelectElement).value;
-    if ((M8_AVAILABLE_FEATURE_IDS as readonly string[]).includes(value)) {
-        emit('change', value as M8FeatureId);
+    if ((M9_AVAILABLE_FEATURE_IDS as readonly string[]).includes(value)) {
+        emit('change', value as M9FeatureId);
     }
 };
 
@@ -412,6 +514,14 @@ const heatColor = (value: number, maximum: number): string => {
     return `hsl(${hue} 90% ${lightness}%)`;
 };
 
+const signedHeatColor = (value: number, maximum: number): string => {
+    const intensity = Math.sqrt(Math.min(1, Math.abs(value) / maximum));
+    if (value < 0) {
+        return `hsl(265 82% ${8 + intensity * 58}%)`;
+    }
+    return `hsl(145 88% ${8 + intensity * 60}%)`;
+};
+
 const drawHeatmap = (
     context: CanvasRenderingContext2D,
     width: number,
@@ -432,13 +542,14 @@ const drawHeatmap = (
     const rows = payload.kind === 'category-u16'
         ? payload.width
         : Math.min(128, payload.width);
+    const signed = props.featureId === 'mfcc';
     let maximum = 0;
     for (let index = 0; index < payload.values.length; index += 1) {
-        maximum = Math.max(
-            maximum,
-            (payload.values[index] ?? 0) * payload.scale + payload.offset,
-        );
+        const value = (payload.values[index] ?? 0) * payload.scale
+            + payload.offset;
+        maximum = Math.max(maximum, signed ? Math.abs(value) : value);
     }
+    maximum = Math.max(maximum, 0.000001);
     for (let column = 0; column < columns; column += 1) {
         const sampleIndex = Math.min(
             range.endIndex - 1,
@@ -454,7 +565,10 @@ const drawHeatmap = (
                     payload.width - 1,
                     Math.floor(row * payload.width / rows),
                 );
-            context.fillStyle = heatColor(values[bin] ?? 0, maximum);
+            const value = values[bin] ?? 0;
+            context.fillStyle = signed
+                ? signedHeatColor(value, maximum)
+                : heatColor(value, maximum);
             const y = topHeight - Math.ceil((row + 1) * topHeight / rows);
             context.fillRect(
                 x0,
@@ -469,6 +583,40 @@ const drawHeatmap = (
     context.moveTo(0, topHeight + 0.5);
     context.lineTo(width, topHeight + 0.5);
     context.stroke();
+};
+
+const drawWaveform = (
+    context: CanvasRenderingContext2D,
+    width: number,
+    height: number,
+    series: AnalysisSeries,
+) => {
+    if (series.payload.kind !== 'waveform-envelope') {
+        throw new Error('波形数据形态与 renderer 不匹配。');
+    }
+    const range = visibleSampleRange(series, props.viewport);
+    const sampleCount = Math.max(1, range.endIndex - range.startIndex);
+    const columns = Math.max(1, Math.min(width, sampleCount));
+    const toY = (value: number) => height / 2 - value * (height / 2 - 7);
+    context.strokeStyle = 'rgba(248, 255, 135, 0.45)';
+    context.beginPath();
+    context.moveTo(0, Math.round(height / 2) + 0.5);
+    context.lineTo(width, Math.round(height / 2) + 0.5);
+    context.stroke();
+    context.strokeStyle = '#7dffb3';
+    context.lineWidth = 1.5;
+    for (let column = 0; column < columns; column += 1) {
+        const sampleIndex = Math.min(
+            range.endIndex - 1,
+            range.startIndex + Math.floor(column * sampleCount / columns),
+        );
+        const envelope = waveformEnvelopeAt(series.payload, sampleIndex);
+        const x = column / Math.max(1, columns - 1) * width;
+        context.beginPath();
+        context.moveTo(x, toY(envelope.max));
+        context.lineTo(x, toY(envelope.min));
+        context.stroke();
+    }
 };
 
 const cursorVector = (): number[] => {
@@ -498,9 +646,68 @@ const drawStatic = () => {
     if (!props.series) return;
     if (definition.value.outputShape === 'scalar') {
         drawScalar(context, width, height, props.series);
+    } else if (definition.value.outputShape === 'waveform') {
+        drawWaveform(context, width, height, props.series);
     } else {
         drawHeatmap(context, width, height, props.series);
     }
+};
+
+const drawBufferCursorFrame = (
+    context: CanvasRenderingContext2D,
+    width: number,
+    height: number,
+    values: readonly number[],
+) => {
+    const top = Math.floor(height * 0.7);
+    const bottom = height - 4;
+    const baseline = (top + bottom) / 2;
+    const amplitude = (bottom - top) / 2 - 2;
+    context.fillStyle = 'rgba(2, 8, 5, 0.86)';
+    context.fillRect(0, top, width, bottom - top + 1);
+    context.strokeStyle = 'rgba(248, 255, 135, 0.45)';
+    context.beginPath();
+    context.moveTo(0, baseline + 0.5);
+    context.lineTo(width, baseline + 0.5);
+    context.stroke();
+    context.strokeStyle = '#7dffb3';
+    context.lineWidth = 1;
+    context.beginPath();
+    values.forEach((value, index) => {
+        const px = index / Math.max(1, values.length - 1) * width;
+        const py = baseline - Math.max(-1, Math.min(1, value)) * amplitude;
+        if (index === 0) context.moveTo(px, py);
+        else context.lineTo(px, py);
+    });
+    context.stroke();
+};
+
+const drawMfccCursor = (
+    context: CanvasRenderingContext2D,
+    width: number,
+    height: number,
+    values: readonly number[],
+) => {
+    const top = Math.floor(height * 0.72);
+    const bottom = height - 4;
+    const baseline = (top + bottom) / 2;
+    const maximum = signedVectorMaximum(values);
+    context.strokeStyle = 'rgba(248, 255, 135, 0.55)';
+    context.beginPath();
+    context.moveTo(0, baseline + 0.5);
+    context.lineTo(width, baseline + 0.5);
+    context.stroke();
+    const barWidth = width / values.length;
+    values.forEach((value, index) => {
+        const barHeight = Math.abs(value) / maximum * (bottom - top) / 2;
+        context.fillStyle = value < 0 ? '#b58cff' : '#7dffb3';
+        context.fillRect(
+            index * barWidth + 1,
+            value < 0 ? baseline : baseline - barHeight,
+            Math.max(1, barWidth - 2),
+            barHeight,
+        );
+    });
 };
 
 const drawCursor = () => {
@@ -522,6 +729,14 @@ const drawCursor = () => {
     if (definition.value.outputShape === 'scalar') return;
     const values = cursorVector();
     if (values.length === 0) return;
+    if (props.featureId === 'buffer') {
+        drawBufferCursorFrame(context, width, height, values);
+        return;
+    }
+    if (props.featureId === 'mfcc') {
+        drawMfccCursor(context, width, height, values);
+        return;
+    }
     const baseline = Math.floor(height * 0.72);
     const chartHeight = height - baseline - 6;
     const maximum = Math.max(0.000001, ...values);

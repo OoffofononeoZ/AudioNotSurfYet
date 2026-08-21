@@ -47,7 +47,7 @@ const exactScalar = async (page: Page, featureId: string): Promise<number> => {
     return value;
 };
 
-test('adds a fourth scalar card, restores it, and keeps M9 IDs closed', async ({ page }) => {
+test('adds a fourth scalar card and restores it under the cumulative feature set', async ({ page }) => {
     test.setTimeout(60_000);
     const issues = captureBrowserIssues(page);
     await installFilePickerStub(page);
@@ -66,8 +66,10 @@ test('adds a fourth scalar card, restores it, and keeps M9 IDs closed', async ({
     const energySelect = page.locator('[data-feature-id="energy"] select');
     await expect(energySelect.locator('option[value="rms"]')).toBeDisabled();
     await expect(energySelect.locator('option[value="powerSpectrum"]'))
+        .toHaveCount(1);
+    await expect(energySelect.locator('option[value="loudness"]'))
         .toHaveCount(0);
-    await expect(energySelect.locator('option')).toHaveCount(16);
+    await expect(energySelect.locator('option')).toHaveCount(19);
 
     await chooseFiles(page, [M8_WAV_FIXTURE]);
     await expect(page.locator('[data-feature-id="energy"] .plot-message'))

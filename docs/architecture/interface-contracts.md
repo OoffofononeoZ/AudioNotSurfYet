@@ -4,7 +4,7 @@ owner: "project-owner"
 last_reviewed: 2026-08-21
 upstream_docs:
   - "docs/architecture/system-design.md"
-next_action: "M8 feature sets、项目 Flux、静音与四卡契约已获批准；M9 开始实现时扩展可用集合"
+next_action: "M9 累计 feature set 与三类 payload 已实现；canonical 后登记正式 evidence"
 ---
 
 # Interface Contracts
@@ -239,8 +239,9 @@ Invariants:
 - 注册表对全部 `FeatureId` 穷尽且 key 唯一。
 - `meydaKey` 对 `extractionSource: 'meyda'` 必须与当前 Meyda 版本支持的提取器匹配；项目 Flux 保留稳定 FeatureId，但不得调用有缺陷的 Meyda extractor。
 - renderer 与 payload shape 的映射通过编译期类型和 runtime assertion 验证。
-- M6 历史支持集为 `rms`、`energy`、`amplitudeSpectrum`、`chroma`；M8 当前 Worker 支持累计 16 项，活动 job 仍最多四项。登记 21/21 不等于 21 项产品功能可用。
+- M6 历史支持集为 `rms`、`energy`、`amplitudeSpectrum`、`chroma`；M9 当前 Worker 支持累计 19 项，活动 job 仍最多四项。M10 的 Loudness/Complex Spectrum 继续返回 `unsupported-feature`；登记 21/21 不等于 21 项产品功能可用。
 - Meyda 5.6.3 实际维度固定为：Amplitude/Power Spectrum 512、Chroma 12、MFCC 13、Buffer 1024、Loudness 24 specific + total、Complex Spectrum real/imag 各 1024。`@types/meyda` 缺少 `spectralCrest`，实现使用项目内窄 adapter，不升级依赖。
+- `M9_FEATURE_IDS` 固定为 Power Spectrum、MFCC、Buffer；`M9_AVAILABLE_FEATURE_IDS` 是累计 19 项。Power Spectrum 使用 `frequency-u16`，MFCC 使用 signed `category-u16`，Buffer 使用 `waveform-envelope`，exact cursor 分别返回 512、13、1024 个有限值。
 
 ## AnalysisSeries
 

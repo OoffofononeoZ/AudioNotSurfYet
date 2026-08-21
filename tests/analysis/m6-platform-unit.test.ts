@@ -36,7 +36,7 @@ import {
 } from '../../src/analysis/pcm';
 import {
     FEATURE_IDS,
-    M8_AVAILABLE_FEATURE_IDS,
+    M9_AVAILABLE_FEATURE_IDS,
     type AnalysisSeries,
     type CompactPayload,
     type FeatureId,
@@ -54,7 +54,7 @@ describe('M6 feature registry and identity', () => {
         expect(new Set(
             FEATURE_IDS.filter((id) =>
                 FEATURE_REGISTRY[id].workerSupported),
-        )).toEqual(new Set(M8_AVAILABLE_FEATURE_IDS));
+        )).toEqual(new Set(M9_AVAILABLE_FEATURE_IDS));
 
         for (const featureId of FEATURE_IDS) {
             const definition = FEATURE_REGISTRY[featureId];

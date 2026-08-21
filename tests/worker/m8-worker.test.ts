@@ -83,13 +83,13 @@ describe('M8 Worker integration', () => {
         expect(transition?.value as number).toBeGreaterThan(0);
     });
 
-    test('accepts all 13 scalars individually and rejects M9 vectors', async () => {
+    test('accepts all 13 scalars individually and rejects M10 structures', async () => {
         for (const featureId of M8_SCALAR_FEATURE_IDS) {
             await expect(runAnalysisJob(await request([featureId]), {
                 yieldControl: async () => undefined,
             })).resolves.toBeDefined();
         }
-        await expect(runAnalysisJob(await request(['powerSpectrum'])))
+        await expect(runAnalysisJob(await request(['loudness'])))
             .rejects.toMatchObject({ code: 'unsupported-feature' });
     }, 30_000);
 });

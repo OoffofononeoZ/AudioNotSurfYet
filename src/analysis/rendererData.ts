@@ -2,6 +2,7 @@ import type {
     AnalysisSeries,
     CategoryPayload,
     FrequencyPayload,
+    WaveformPayload,
 } from './types';
 import type { PersistedTimelineViewport } from '../types/session';
 
@@ -90,6 +91,34 @@ export const vectorAt = (
             payload.offset,
         ),
     );
+};
+
+export const waveformEnvelopeAt = (
+    payload: WaveformPayload,
+    sampleIndex: number,
+): { min: number; max: number } => {
+    const safeIndex = Math.min(
+        Math.max(0, sampleIndex),
+        Math.max(0, payload.min.length - 1),
+    );
+    return {
+        min: (payload.min[safeIndex] ?? 0) * payload.scale,
+        max: (payload.max[safeIndex] ?? 0) * payload.scale,
+    };
+};
+
+export const signedVectorMaximum = (
+    values: ArrayLike<number>,
+): number => {
+    let maximum = 0;
+    for (let index = 0; index < values.length; index += 1) {
+        const value = values[index] ?? 0;
+        if (!Number.isFinite(value)) {
+            throw new RangeError('Signed vector values must be finite.');
+        }
+        maximum = Math.max(maximum, Math.abs(value));
+    }
+    return Math.max(maximum, 0.000001);
 };
 
 export const peakBin = (

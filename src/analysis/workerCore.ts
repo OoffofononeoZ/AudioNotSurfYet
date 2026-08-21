@@ -1,4 +1,5 @@
 import {
+    aggregateWaveform,
     aggregateScalars,
     aggregateVectors,
     quantizeToUint16,
@@ -12,14 +13,14 @@ import {
 } from './frames';
 import { getFeatureDefinition } from './featureRegistry';
 import {
-    exactM8Value,
-    extractM8Frame,
+    exactM9Value,
+    extractM9Frame,
     scalarMeydaValue,
     vectorMeydaValue,
 } from './meydaAdapter';
 import {
     isFeatureId,
-    isM8FeatureId,
+    isM9FeatureId,
     type AnalysisCursorValueRequest,
     type AnalysisCursorValueResult,
     type AnalysisJobRequest,
@@ -27,7 +28,7 @@ import {
     type AnalysisSeries,
     type AnalysisWorkerResponse,
     type FeatureId,
-    type M8FeatureId,
+    type M9FeatureId,
 } from './types';
 
 export class AnalysisWorkerCoreError extends Error {
@@ -116,11 +117,11 @@ export const validateAnalysisJobRequest = async (
         invalid('Analysis feature IDs must be unique.');
     }
     const unsupported = request.cursorFeatureIds.find((featureId) =>
-        !isM8FeatureId(featureId));
+        !isM9FeatureId(featureId));
     if (unsupported) {
         throw new AnalysisWorkerCoreError(
             'unsupported-feature',
-            `${unsupported} is registered but not supported by the M8 Worker.`,
+            `${unsupported} is registered but not supported by the M9 Worker.`,
             false,
         );
     }
@@ -145,7 +146,7 @@ export const analysisAggregationFactor = (
 
 const buildSeries = (
     request: AnalysisJobRequest,
-    featureIds: readonly M8FeatureId[],
+    featureIds: readonly M9FeatureId[],
     scalarFrames: Map<FeatureId, number[]>,
     vectorFrames: Map<FeatureId, number[][]>,
 ): AnalysisSeries[] => {
@@ -178,6 +179,28 @@ const buildSeries = (
                 },
             };
         }
+        if (definition.outputShape === 'waveform') {
+            const values = aggregateWaveform(
+                vectorFrames.get(featureId) ?? [],
+                factor,
+            );
+            return {
+                schemaVersion: 1,
+                trackHash: request.trackHash,
+                configHash: request.config.configHash,
+                featureId,
+                startTimeSeconds: 0,
+                sampleStepSeconds,
+                sampleCount: values.min.length,
+                dimensions,
+                payload: {
+                    kind: 'waveform-envelope',
+                    min: values.min,
+                    max: values.max,
+                    scale: values.scale,
+                },
+            };
+        }
         const width = dimensions[0] ?? 0;
         const values = aggregateVectors(
             vectorFrames.get(featureId) ?? [],
@@ -195,7 +218,7 @@ const buildSeries = (
             sampleCount: values.length / width,
             dimensions,
             payload: {
-                kind: featureId === 'chroma'
+                kind: featureId === 'chroma' || featureId === 'mfcc'
                     ? 'category-u16'
                     : 'frequency-u16',
                 values: quantized.values,
@@ -216,7 +239,7 @@ export const runAnalysisJob = async (
 }> => {
     await validateAnalysisJobRequest(request);
     const featureIds =
-        request.featureIds as readonly M8FeatureId[];
+        request.featureIds as readonly M9FeatureId[];
     const pcm = new Float32Array(request.pcm);
     const totalFrames = analysisFrameCount(
         pcm.length,
@@ -257,7 +280,7 @@ export const runAnalysisJob = async (
                     frameIndex,
                     request.config,
                 );
-                const extraction = extractM8Frame(
+                const extraction = extractM9Frame(
                     featureIds,
                     frame,
                     request.config,
@@ -276,7 +299,12 @@ export const runAnalysisJob = async (
                         vectorFrames.get(featureId)?.push(
                             vectorMeydaValue(
                                 extracted,
-                                featureId as 'amplitudeSpectrum' | 'chroma',
+                                featureId as
+                                    | 'amplitudeSpectrum'
+                                    | 'chroma'
+                                    | 'powerSpectrum'
+                                    | 'mfcc'
+                                    | 'buffer',
                                 width,
                             ),
                         );
@@ -346,7 +374,7 @@ export const extractCursorValue = (
         || request.trackHash !== retained.trackHash
         || request.config.configHash !== retained.config.configHash
         || !retained.featureIds.includes(request.featureId)
-        || !isM8FeatureId(request.featureId)
+        || !isM9FeatureId(request.featureId)
     ) {
         return null;
     }
@@ -385,7 +413,7 @@ export const extractCursorValue = (
             frameIndex,
             retained.config,
         ),
-        value: exactM8Value(
+        value: exactM9Value(
             request.featureId,
             frame,
             retained.config,

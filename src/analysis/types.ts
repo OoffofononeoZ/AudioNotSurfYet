@@ -70,6 +70,21 @@ export const M8_AVAILABLE_FEATURE_IDS = [
 
 export type M8FeatureId = typeof M8_AVAILABLE_FEATURE_IDS[number];
 
+export const M9_FEATURE_IDS = [
+    'powerSpectrum',
+    'mfcc',
+    'buffer',
+] as const satisfies readonly FeatureId[];
+
+export type M9AddedFeatureId = typeof M9_FEATURE_IDS[number];
+
+export const M9_AVAILABLE_FEATURE_IDS = [
+    ...M8_AVAILABLE_FEATURE_IDS,
+    ...M9_FEATURE_IDS,
+] as const satisfies readonly FeatureId[];
+
+export type M9FeatureId = typeof M9_AVAILABLE_FEATURE_IDS[number];
+
 export interface AnalysisConfig {
     schemaVersion: 1;
     frameSize: 1024;
@@ -330,3 +345,8 @@ export const isM8FeatureId = (
     value: FeatureId,
 ): value is M8FeatureId =>
     (M8_AVAILABLE_FEATURE_IDS as readonly FeatureId[]).includes(value);
+
+export const isM9FeatureId = (
+    value: FeatureId,
+): value is M9FeatureId =>
+    (M9_AVAILABLE_FEATURE_IDS as readonly FeatureId[]).includes(value);
