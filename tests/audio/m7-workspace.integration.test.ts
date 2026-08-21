@@ -103,6 +103,7 @@ describe('M7 analysis workspace integration', () => {
                 { slot: 0, featureId: 'rms' },
                 { slot: 1, featureId: 'amplitudeSpectrum' },
                 { slot: 2, featureId: 'chroma' },
+                { slot: 3, featureId: 'spectralFlux' },
             ],
             viewport: {
                 startSeconds: 2,
@@ -117,6 +118,7 @@ describe('M7 analysis workspace integration', () => {
                 { slot: 0, featureId: 'rms' },
                 { slot: 1, featureId: 'amplitudeSpectrum' },
                 { slot: 2, featureId: 'chroma' },
+                { slot: 3, featureId: 'spectralFlux' },
             ],
             viewport: {
                 startSeconds: 2,
@@ -126,7 +128,7 @@ describe('M7 analysis workspace integration', () => {
         });
         await promise;
         expect(harness.repository.saves[0]?.session.activeCards)
-            .toHaveLength(3);
+            .toHaveLength(4);
         expect(harness.repository.saves[0]?.session.viewport).toEqual({
             startSeconds: 2,
             endSeconds: 6,

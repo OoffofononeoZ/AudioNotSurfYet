@@ -94,7 +94,7 @@ test('defaults to three unique cards in four slots and shares seek/zoom', async 
     await expect(page.locator('[data-feature-id="chroma"]')).toHaveCount(1);
     await expect(page.locator('.empty-slot')).toHaveCount(1);
     await expect(page.locator('.empty-slot')).toContainText(
-        'M8 后续里程碑开放',
+        '最多四张且不会重复',
     );
 
     const selects = cards.locator('select');

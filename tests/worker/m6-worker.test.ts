@@ -88,11 +88,11 @@ describe('M6 Worker request contract', () => {
                 'energy',
                 'amplitudeSpectrum',
                 'chroma',
-                'zcr',
+                'powerSpectrum',
             ]),
         )).rejects.toMatchObject({ code: 'invalid-request' });
         await expect(validateAnalysisJobRequest(
-            await request(['zcr']),
+            await request(['powerSpectrum']),
         )).rejects.toMatchObject({ code: 'unsupported-feature' });
         const missingCursorFeature = await request(['rms']);
         missingCursorFeature.cursorFeatureIds = [];

@@ -253,10 +253,10 @@ describe('AnalysisCoordinator integration', () => {
     test('runs four unique features, persists them, and keeps Pinia serializable', async () => {
         const harness = setup();
         await harness.coordinator.setActiveFeatures([
-            'rms',
             'energy',
-            'amplitudeSpectrum',
-            'chroma',
+            'zcr',
+            'spectralFlux',
+            'spectralFlatness',
         ]);
         await vi.waitFor(() => {
             expect(harness.coordinator.getSnapshot().state).toBe('ready');
@@ -264,10 +264,10 @@ describe('AnalysisCoordinator integration', () => {
                 .toBe('persisted');
         });
         expect(harness.worker.analyzeRequests[0]?.featureIds).toEqual([
-            'rms',
             'energy',
-            'amplitudeSpectrum',
-            'chroma',
+            'zcr',
+            'spectralFlux',
+            'spectralFlatness',
         ]);
         expect(harness.repository.cacheInputs[0]?.payloads)
             .toHaveLength(4);
@@ -390,11 +390,11 @@ describe('AnalysisCoordinator integration', () => {
             'energy',
             'amplitudeSpectrum',
             'chroma',
-            'zcr',
+            'powerSpectrum',
         ])).rejects.toMatchObject({
             code: 'invalid-active-features',
         });
-        await expect(harness.coordinator.setActiveFeatures(['zcr']))
+        await expect(harness.coordinator.setActiveFeatures(['powerSpectrum']))
             .rejects.toMatchObject({ code: 'unsupported-feature' });
         await harness.coordinator.dispose();
     });
