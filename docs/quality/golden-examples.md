@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/delivery/acceptance-criteria.md"
   - "docs/delivery/test-strategy.md"
   - "docs/architecture/risk-register.md"
-next_action: "m9-vectors v1 已生成并通过专项测试；以 clean canonical 锁定正式 evidence"
+next_action: "m9-vectors v1 已由 clean canonical 锁定；等待 owner 完成三类学习解释"
 ---
 
 # Golden Examples

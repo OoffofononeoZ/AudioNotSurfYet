@@ -49,7 +49,7 @@
 - 超出约 15 分钟支持边界的长音频未开始播放只作为非门禁压力观察；它不是规定的预期失败，也不能替代范围内性能或格式验证。
 - M6 当前 Meyda 的 `spectralFlux` 对有效输入抛出 `x is not defined`；已用预期失败测试和 R-020 固定，不能把 21 项 registry 误述为 21 项均可计算。
 - M6 dirty-worktree provisional 与 clean-commit canonical 均已 20/20 通过；正式 evidence 已登记，并由 `project-owner` 于 2026-07-30 批准，M6 已关闭。
-- M7、M8 已获批准并关闭。M8 provisional 与 clean-commit canonical 已分别 28/28 通过，Windows Chrome 界面稳定化补偿结果也已由 owner 签字；M9 Header blur 与三类 vector/waveform 已实现，dirty-worktree provisional 32/32 通过，等待 clean canonical 和 owner 审批。
+- M7、M8 已获批准并关闭。M8 provisional 与 clean-commit canonical 已分别 28/28 通过，Windows Chrome 界面稳定化补偿结果也已由 owner 签字；M9 Header blur 与三类 vector/waveform 已实现，provisional 与 clean canonical 均 32/32 通过，evidence 为 `in-review`，等待 owner 审批。
 
 ## 构建风险
 
