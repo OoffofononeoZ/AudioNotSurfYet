@@ -29,6 +29,8 @@
     "test:m7:integration": "vitest run tests/audio/m7-workspace.integration.test.ts",
     "test:m8:unit": "vitest run tests/analysis/m8-scalar-unit.test.ts",
     "test:m8:integration": "vitest run tests/worker/m8-worker.test.ts tests/audio/m7-workspace.integration.test.ts",
+    "test:m9:unit": "vitest run tests/analysis/m9-vector-unit.test.ts",
+    "test:m9:integration": "vitest run tests/worker/m9-worker.test.ts tests/audio/m7-workspace.integration.test.ts",
     "test:docs": "node tests/docs/validate-docs.mjs",
     "test:harness": "node tests/harness/verify-failure-detection.mjs",
     "test:e2e": "playwright test --project=chrome",
@@ -38,6 +40,7 @@
     "test:e2e:m6": "playwright test tests/e2e/m6-analysis.spec.ts --project=chrome",
     "test:e2e:m7": "playwright test tests/e2e/m7-analyzer.spec.ts --project=chrome",
     "test:e2e:m8": "playwright test tests/e2e/m8-analyzer.spec.ts --project=chrome",
+    "test:e2e:m9": "playwright test tests/e2e/m9-analyzer.spec.ts --project=chrome",
     "test:e2e:edge": "node tests/scripts/run-edge.mjs",
     "fixtures:generate": "node --experimental-strip-types tests/fixtures/generate-fixtures.ts",
     "fixtures:golden": "node --experimental-strip-types tests/analysis/generate-golden.ts",
@@ -46,6 +49,8 @@
     "fixtures:m7:golden:update": "node --experimental-strip-types tests/analysis/generate-m7-learning-golden.ts --write",
     "fixtures:m8:golden": "node --experimental-strip-types tests/analysis/generate-m8-scalar-golden.ts",
     "fixtures:m8:golden:update": "node --experimental-strip-types tests/analysis/generate-m8-scalar-golden.ts --write",
+    "fixtures:m9:golden": "node --experimental-strip-types tests/analysis/generate-m9-vector-golden.ts",
+    "fixtures:m9:golden:update": "node --experimental-strip-types tests/analysis/generate-m9-vector-golden.ts --write",
     "eval:m3": "node tests/scripts/run-m3-eval.mjs",
     "eval:m3:provisional": "node tests/scripts/run-m3-eval.mjs --provisional",
     "eval:m4": "node tests/scripts/run-m4-eval.mjs",
@@ -57,7 +62,9 @@
     "eval:m7": "node tests/scripts/run-m7-eval.mjs",
     "eval:m7:provisional": "node tests/scripts/run-m7-eval.mjs --provisional",
     "eval:m8": "node tests/scripts/run-m8-eval.mjs",
-    "eval:m8:provisional": "node tests/scripts/run-m8-eval.mjs --provisional"
+    "eval:m8:provisional": "node tests/scripts/run-m8-eval.mjs --provisional",
+    "eval:m9": "node tests/scripts/run-m9-eval.mjs",
+    "eval:m9:provisional": "node tests/scripts/run-m9-eval.mjs --provisional"
   },
   "dependencies": {
     "@chenglou/pretext": "^0.0.6",

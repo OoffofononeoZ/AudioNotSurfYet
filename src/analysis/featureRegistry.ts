@@ -86,7 +86,7 @@ export const FEATURE_REGISTRY = {
         dependencies: ['amplitudeSpectrum'],
         dimensions: (config) => [config.frameSize / 2],
         deliveryMilestone: 'M9',
-        workerSupported: false,
+        workerSupported: true,
     }),
     spectralCentroid: scalar('spectralCentroid', {
         range: { min: 0, unit: 'bin' },
@@ -185,13 +185,13 @@ export const FEATURE_REGISTRY = {
         zeroEnergyValue: 0,
     }),
     mfcc: defineFeature('mfcc', {
-        outputShape: 'frequency-vector',
+        outputShape: 'category-vector',
         renderer: 'frequency-heatmap',
         range: { signed: true },
         dependencies: ['amplitudeSpectrum', 'powerSpectrum'],
         dimensions: (config) => [config.numberOfMFCCCoefficients],
         deliveryMilestone: 'M9',
-        workerSupported: false,
+        workerSupported: true,
     }),
     complexSpectrum: defineFeature('complexSpectrum', {
         outputShape: 'complex-spectrum',
@@ -209,7 +209,7 @@ export const FEATURE_REGISTRY = {
         dependencies: [],
         dimensions: (config) => [config.frameSize],
         deliveryMilestone: 'M9',
-        workerSupported: false,
+        workerSupported: true,
     }),
 } as const satisfies Record<FeatureId, FeatureDefinition>;
 

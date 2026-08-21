@@ -34,6 +34,8 @@ M7 适用解释：AC-P02/P03 在本里程碑验证固定四槽与 0–3 张唯�
 
 M8 适用解释：四槽允许从累计 16 项中选择 0–4 张唯一活动卡；首次默认仍是 M7 三卡，已保存空工作区保持为空。M8 Slice 0 要求 sticky 距 Header 8px、MusicBar 及直属弹层高于 Analyzer、pressed 状态在 pointerup/pointercancel/blur 后恢复，并让精确值表格滚动条与主题一致。
 
+M9 适用解释：可选集合累计 19 项且仍最多四张唯一卡；Power Spectrum 为 512-bin 频率向量，MFCC 为 13 个 signed 系数而非频率轴，Buffer exact frame 为 1024 samples、尾帧零填充可见。首页 Header 保持透明，所有非首页路由统一为 18px backdrop blur。
+
 ### Learning golden segments
 
 1. **L1 — Same pitch, rising level**：440Hz 正弦从低幅度变高。期望解释：RMS 增大；主频仍在约 440Hz；Chroma 的 A 类保持主导。

@@ -184,4 +184,26 @@ describe('M7 analysis workspace integration', () => {
             viewport: null,
         });
     });
+
+    test('persists and restores four unique cumulative M9 cards without a schema bump', async () => {
+        const repository = new WorkspaceRepository();
+        const harness = createHarness(repository);
+        const activeCards = [
+            { slot: 0 as const, featureId: 'powerSpectrum' as const },
+            { slot: 1 as const, featureId: 'mfcc' as const },
+            { slot: 2 as const, featureId: 'buffer' as const },
+            { slot: 3 as const, featureId: 'spectralFlux' as const },
+        ];
+
+        await harness.service.updateAnalysisWorkspace({
+            activeCards,
+            viewport: { startSeconds: 1, endSeconds: 3, zoom: 2 },
+        });
+
+        expect(harness.repository.saves.at(-1)?.session).toMatchObject({
+            schemaVersion: 1,
+            activeCards,
+            viewport: { startSeconds: 1, endSeconds: 3, zoom: 2 },
+        });
+    });
 });

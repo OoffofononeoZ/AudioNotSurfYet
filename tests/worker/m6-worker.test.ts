@@ -92,7 +92,7 @@ describe('M6 Worker request contract', () => {
             ]),
         )).rejects.toMatchObject({ code: 'invalid-request' });
         await expect(validateAnalysisJobRequest(
-            await request(['powerSpectrum']),
+            await request(['loudness']),
         )).rejects.toMatchObject({ code: 'unsupported-feature' });
         const missingCursorFeature = await request(['rms']);
         missingCursorFeature.cursorFeatureIds = [];

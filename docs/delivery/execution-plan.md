@@ -9,7 +9,7 @@ upstream_docs:
   - "docs/architecture/system-design.md"
   - "docs/architecture/interface-contracts.md"
   - "docs/architecture/risk-register.md"
-next_action: "M9 已进入 In Progress；完成 Header blur、Power Spectrum、MFCC、Buffer 与专项证据"
+next_action: "M9 实现已完成；运行 provisional、提交后执行 clean canonical 并登记 in-review evidence"
 ---
 
 # Execution Plan
@@ -338,6 +338,8 @@ Verification:
 - 维度、频率/系数轴、量化和 cursor exact-value 测试；
 - 波形正负峰、尾帧和多视口 Canvas 测试；
 - 完成后累计覆盖 19/21。
+
+Implementation state：Header route style、累计 19 项 feature set、Power Spectrum/MFCC/Buffer Worker 与双 Canvas renderer、DOM 精确值、`m9-vectors.v1.json`、专项 Vitest/Chrome 和 32 步 eval runner 已实现。dirty-worktree provisional `M9-2026-08-21T09-08-40-958Z-896dbbb9-provisional` 32/32 通过，仅作实现反馈；clean canonical 尚未完成，不能据此关闭 M9。
 
 Rollback:
 

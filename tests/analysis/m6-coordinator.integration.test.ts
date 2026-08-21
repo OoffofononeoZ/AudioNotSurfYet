@@ -394,7 +394,7 @@ describe('AnalysisCoordinator integration', () => {
         ])).rejects.toMatchObject({
             code: 'invalid-active-features',
         });
-        await expect(harness.coordinator.setActiveFeatures(['powerSpectrum']))
+        await expect(harness.coordinator.setActiveFeatures(['loudness']))
             .rejects.toMatchObject({ code: 'unsupported-feature' });
         await harness.coordinator.dispose();
     });

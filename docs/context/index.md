@@ -4,7 +4,7 @@ owner: "project-owner"
 last_reviewed: 2026-08-21
 upstream_docs:
   - "AGENTS.md"
-next_action: "M9 已进入 In Progress；先完成非首页 Header blur，再交付 Power Spectrum、MFCC 与 Buffer"
+next_action: "M9 Header blur 与三类新卡已实现；运行 provisional、提交实现并执行 clean canonical"
 ---
 
 # Repository Context Index
@@ -62,16 +62,16 @@ AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端：用户选择
 
 | Area | Current role | Target/change source |
 | --- | --- | --- |
-| `src/views/` | 路由页面；Analyzer 以四槽共享时间轴承载 M7 三卡，并进入 M8 四卡/标量扩展 | system design + M7/M8 |
+| `src/views/` | 路由页面；Analyzer 以四槽共享时间轴承载默认三卡，并可从 M9 累计 19 项选择最多四张 | system design + M7–M9 |
 | `src/layouts/` | Header、页面内容与 MusicBar 的共享外壳 | M4/M7 回归 |
 | `src/components/` | 播放 UI、列表、动画及 Canvas/WebGL 可视化 | ADR-0001/0004 |
 | `src/audio/` | 单一 AudioEngine 与 MainLayout-owned AudioSessionService；文件句柄导入与恢复编排 | ADR-0001/0003 |
-| `src/analysis/` | FeatureRegistry、config identity、PCM/frame、codec、Worker/coordinator、共享时间轴，以及 M8 累计 16 项/项目 Flux/通用 scalar renderer | ADR-0002/0004/0005；M6–M8 |
+| `src/analysis/` | FeatureRegistry、config identity、PCM/frame、codec、Worker/coordinator、共享时间轴，以及 M9 累计 19 项/项目 Flux/scalar/vector/waveform renderer 数据 | ADR-0002/0004/0005；M6–M9 |
 | `src/persistence/` | 原生 IndexedDB V1 SessionRepository 与 runtime validator | ADR-0003；M5 |
 | `src/stores/` | 持久化 config 与可序列化 audioSessionStore/恢复/analysis 状态 | ADR-0001/0002/0003 |
 | `src/utils/` | 事件总线与纯工具函数 | 实现时按实际边界维护 |
 | `src/data/` | `analyzerData.ts` 的 21 项 Meyda 说明，由 M6 registry 穷尽映射 | M6 FeatureRegistry |
-| `tests/` | M3–M8 本地测试、fixture、golden、浏览器 harness 和 eval runner | [tests README](../../tests/README.md) |
+| `tests/` | M3–M9 本地测试、fixture、golden、浏览器 harness 和 eval runner | [tests README](../../tests/README.md) |
 | `skills/audio-visualizer-dev/` | 本项目开发、验证和文档路由 Skill | [SKILL.md](../../skills/audio-visualizer-dev/SKILL.md) |
 
 ## Lifecycle Entry Points
@@ -88,6 +88,7 @@ AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端：用户选择
 ## Current Known Gaps
 
 - M8 已实现四槽最多四张、累计 16 项、通用 scalar renderer、项目 Flux、零能量 0 与 UI hardening；clean canonical 与 Windows Chrome/owner 审批均已完成。
+- M9 已实现首页透明/非首页 Header blur、Power Spectrum、MFCC 与 Buffer，使 UI/Worker 累计开放 19 项；provisional 与 clean canonical 尚未执行，因此 M9 仍为 `In Progress`。
 - 当前 Meyda `spectralFlux` 对有效输入仍抛出 `x is not defined`；产品已按 ADR-0005 实现并由 canonical 缓解 R-020，不得声称上游缺陷已修复。
 - 超出约 15 分钟支持边界的长音频未开始播放只作为非门禁压力观察；它不表示长音频被规定为必须失败，也不改变当前产品范围。
 - 当前机器尚未发现 Edge；没有真实 Edge 证据时不能完成 M11 双浏览器门禁。
