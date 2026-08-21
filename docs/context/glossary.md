@@ -4,7 +4,7 @@ owner: "project-owner"
 last_reviewed: 2026-08-21
 upstream_docs:
   - "docs/context/index.md"
-next_action: "M7 已批准；随 M8 实现复核累计 feature set、Flux v1 与 shell layer 术语"
+next_action: "M8 术语已随实现/canonical 复核；等待 owner 批准，M9 术语暂不扩展"
 ---
 
 # Glossary
@@ -47,4 +47,4 @@ next_action: "M7 已批准；随 M8 实现复核累计 feature set、Flux v1 与
 
 ## Approval Record
 
-`project-owner` 于 2026-08-21 批准 M7 canonical evidence 并开放 M8。本词汇表同步 M7 完成事实和已批准的 M8 契约；M8 实现与 evidence 不由该批准预先通过。
+`project-owner` 于 2026-08-21 批准 M7 canonical evidence 并开放 M8。本词汇表随后已按 M8 累计 16 项、项目 Flux 与四槽实现复核；M8 canonical evidence 当前仍为 `in-review`，不表示 M8 或 M9 已获批准。

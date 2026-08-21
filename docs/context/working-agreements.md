@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/context/index.md"
   - "docs/delivery/test-strategy.md"
   - "docs/quality/eval-plan.md"
-next_action: "M7 已批准；执行 M8 本地门禁、clean canonical 和 Windows Chrome 补偿验证"
+next_action: "M8 canonical 已登记 in-review；由 owner 完成 Windows Chrome 补偿验证并决定是否批准关闭"
 ---
 
 # Working Agreements
@@ -59,7 +59,8 @@ next_action: "M7 已批准；执行 M8 本地门禁、clean canonical 和 Window
 - M6 canonical artifact 已完成审批；commit 或 artifact 身份变化时必须重新运行，不能沿用旧证据。
 - M7 dirty-worktree provisional `M7-2026-07-30T03-13-53-844Z-5b33575f-provisional` 已 24/24 通过，summary SHA-256 为 `5f49ad1d18c1c5f8096beef53a6122f242bae361b76dcbe2f9d718698e663504`；M7 Chrome 为 4/4、M6 Chrome 回归为 3/3，15 分钟场景最大反馈 16.7ms、分析归因 >50ms 长任务 0 个。它只作实现反馈，不进入正式 evidence index。
 - 首次 M7 clean run `M7-2026-07-30T03-21-14-150Z-28fc4699` 因跨进程固定 550ms exact-cursor 计时误判为 fail；修复后的 `M7-2026-07-30T03-30-43-095Z-f022b86e` 在 clean commit `f022b86e2333ad612ecb12701b0ca05e49f2b256` 上 24/24 通过，summary SHA-256 为 `458ffb4a0c7fc8c64397092c1324d88c3c369f7fde3fc069f47861bbbc76ed32`，正式记录为 `in-review`。
-- M3–M7 canonical run 已记录在 [evidence index](../quality/evidence-index.md) 并获 owner 批准；M8 尚需 provisional、clean canonical 与 owner 审批。本地产物保留和删除规则以 [eval plan](../quality/eval-plan.md) 为准。
+- M8 provisional `M8-2026-08-21T03-19-06-614Z-486e313a-provisional` 已 28/28 通过，只作实现反馈。clean canonical `M8-2026-08-21T03-23-18-552Z-d6dcf715` 在 commit `d6dcf715be2e6675224f079b954e2b1b544bbebd` 上 28/28 通过，起止工作树干净，summary SHA-256 为 `bc624121e9479d62c2519ab7d2cf60a2bd8d7f7affd44a2128f645ce642f34ef`。
+- M3–M7 canonical run 已记录在 [evidence index](../quality/evidence-index.md) 并获 owner 批准；M8 canonical 已登记为 `in-review`，仍需 Windows Chrome 补偿验证与 owner 审批。本地产物保留和删除规则以 [eval plan](../quality/eval-plan.md) 为准。
 - fixture、manifest 和 golden 是受版本控制的规范输入；更新必须可重建、显示 diff，并重新执行对应测试。
 
 ## Resource Ownership
@@ -96,3 +97,5 @@ next_action: "M7 已批准；执行 M8 本地门禁、clean canonical 和 Window
 同日，`project-owner` 明确要求实施 M7 三卡学习切片。本约定新增 M7 unit/integration/Chrome/eval 命令及运行时学习 fixture 规则；M7 改为 `In Progress`，canonical 和 owner 学习任务获批前不关闭、不开放 M8。
 
 2026-08-21，owner 完成 M7 人工任务与 3/3 学习解释并批准 canonical evidence，M7 据此关闭。owner 同时要求实施 M8、批准 ADR-0005，并授权按独立 commit 提交、远端无分叉时推送 `AI-Auto`；M8 canonical 与 Windows Chrome pressed 复核通过前不关闭 M8。
+
+同日，M8 provisional 与 clean canonical 均 28/28 通过；正式记录进入 `in-review`。macOS Chrome 已自动验证四项 UI hardening、390/1024/1280/1920、四卡、累计 16 项、静音 0 与项目 Flux；Windows Chrome pressed 偶发状态仍由 owner 补偿复核，M9 尚未开放。
