@@ -1,7 +1,9 @@
 import type {
     AnalysisSeries,
     CategoryPayload,
+    ComplexPayload,
     FrequencyPayload,
+    LoudnessPayload,
     WaveformPayload,
 } from './types';
 import type { PersistedTimelineViewport } from '../types/session';
@@ -105,6 +107,69 @@ export const waveformEnvelopeAt = (
         min: (payload.min[safeIndex] ?? 0) * payload.scale,
         max: (payload.max[safeIndex] ?? 0) * payload.scale,
     };
+};
+
+const clampSampleIndex = (
+    sampleIndex: number,
+    sampleCount: number,
+): number => Math.min(
+    Math.max(0, sampleIndex),
+    Math.max(0, sampleCount - 1),
+);
+
+export const loudnessAt = (
+    payload: LoudnessPayload,
+    sampleIndex: number,
+): { total: number; specific: number[] } => {
+    const safeIndex = clampSampleIndex(sampleIndex, payload.total.length);
+    const offset = safeIndex * payload.bands;
+    return {
+        total: payload.total[safeIndex] ?? 0,
+        specific: Array.from(
+            payload.specific.subarray(offset, offset + payload.bands),
+            (value) => decodeQuantizedValue(
+                value,
+                payload.scale,
+                payload.offset,
+            ),
+        ),
+    };
+};
+
+export const complexAt = (
+    payload: ComplexPayload,
+    sampleIndex: number,
+): { magnitude: number[]; phase: number[] } => {
+    const sampleCount = Math.floor(payload.magnitude.length / payload.bins);
+    const safeIndex = clampSampleIndex(sampleIndex, sampleCount);
+    const offset = safeIndex * payload.bins;
+    return {
+        magnitude: Array.from(
+            payload.magnitude.subarray(offset, offset + payload.bins),
+            (value) => value * payload.magnitudeScale,
+        ),
+        phase: Array.from(
+            payload.phase.subarray(offset, offset + payload.bins),
+            (value) => Math.max(-1, Math.min(1, value / 32_767)) * Math.PI,
+        ),
+    };
+};
+
+export const signedFftBinFrequency = (
+    index: number,
+    frameSize: number,
+    sampleRate: number,
+): number => {
+    if (
+        !Number.isInteger(index)
+        || !Number.isInteger(frameSize)
+        || frameSize <= 0
+        || !Number.isFinite(sampleRate)
+        || sampleRate <= 0
+    ) return 0;
+    return index <= frameSize / 2
+        ? index * sampleRate / frameSize
+        : (index - frameSize) * sampleRate / frameSize;
 };
 
 export const signedVectorMaximum = (

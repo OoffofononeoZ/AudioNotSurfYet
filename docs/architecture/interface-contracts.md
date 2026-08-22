@@ -4,7 +4,7 @@ owner: "project-owner"
 last_reviewed: 2026-08-21
 upstream_docs:
   - "docs/architecture/system-design.md"
-next_action: "M9 累计 feature set 与三类 payload 已实现；canonical 后登记正式 evidence"
+next_action: "M10 21 项 feature set 与两类 structured payload 已实现；canonical 后登记正式 evidence"
 ---
 
 # Interface Contracts
@@ -239,9 +239,10 @@ Invariants:
 - 注册表对全部 `FeatureId` 穷尽且 key 唯一。
 - `meydaKey` 对 `extractionSource: 'meyda'` 必须与当前 Meyda 版本支持的提取器匹配；项目 Flux 保留稳定 FeatureId，但不得调用有缺陷的 Meyda extractor。
 - renderer 与 payload shape 的映射通过编译期类型和 runtime assertion 验证。
-- M6 历史支持集为 `rms`、`energy`、`amplitudeSpectrum`、`chroma`；M9 当前 Worker 支持累计 19 项，活动 job 仍最多四项。M10 的 Loudness/Complex Spectrum 继续返回 `unsupported-feature`；登记 21/21 不等于 21 项产品功能可用。
+- M6 历史支持集为 `rms`、`energy`、`amplitudeSpectrum`、`chroma`；M10 当前 Worker 支持累计 21 项，活动 job 仍最多四项且唯一。历史里程碑常量保持不变，当前入口使用 `M10_AVAILABLE_FEATURE_IDS`。
 - Meyda 5.6.3 实际维度固定为：Amplitude/Power Spectrum 512、Chroma 12、MFCC 13、Buffer 1024、Loudness 24 specific + total、Complex Spectrum real/imag 各 1024。`@types/meyda` 缺少 `spectralCrest`，实现使用项目内窄 adapter，不升级依赖。
 - `M9_FEATURE_IDS` 固定为 Power Spectrum、MFCC、Buffer；`M9_AVAILABLE_FEATURE_IDS` 是累计 19 项。Power Spectrum 使用 `frequency-u16`，MFCC 使用 signed `category-u16`，Buffer 使用 `waveform-envelope`，exact cursor 分别返回 512、13、1024 个有限值。
+- `M10_FEATURE_IDS` 固定为 Loudness、Complex Spectrum；`M10_AVAILABLE_FEATURE_IDS` 是累计 21 项。Loudness 使用 `loudness` payload，exact cursor 返回 total 与 24 个 specific bands；Complex Spectrum 使用 `complex-derived` payload，exact cursor 返回 real/imag 各 1024。结构字段、维度和值必须全部有限；零能量帧返回项目零值语义。
 
 ## AnalysisSeries
 
@@ -275,6 +276,7 @@ Invariants:
 - 缓存 key 为 `${trackHash}:${configHash}:${featureId}`。
 - 缓存二进制为 `4-byte little-endian header length + UTF-8 JSON header + contiguous typed-array bytes`。header 必须记录 schema、完整身份、payload kind、dimensions、scale/offset 和 byte ranges；decoder 拒绝 schema/身份不符、错位、长度错误、缺失及尾随数据。
 - U16 使用 series 实际 min/max；常量 series 的 `scale` 为 0。调用方提供显式 bounds 时，越界必须失败，不能静默裁剪。
+- Loudness `total.length === sampleCount`，`specific.length === sampleCount * 24`；Complex `magnitude.length === phase.length === sampleCount * 1024`。phase 使用 Int16 映射 `[-π, π]`，跨 ±π 聚合使用圆周平均。
 
 ## Worker Messages
 

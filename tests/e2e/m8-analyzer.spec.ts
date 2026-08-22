@@ -68,8 +68,8 @@ test('adds a fourth scalar card and restores it under the cumulative feature set
     await expect(energySelect.locator('option[value="powerSpectrum"]'))
         .toHaveCount(1);
     await expect(energySelect.locator('option[value="loudness"]'))
-        .toHaveCount(0);
-    await expect(energySelect.locator('option')).toHaveCount(19);
+        .toHaveCount(1);
+    await expect(energySelect.locator('option')).toHaveCount(21);
 
     await chooseFiles(page, [M8_WAV_FIXTURE]);
     await expect(page.locator('[data-feature-id="energy"] .plot-message'))
@@ -111,7 +111,7 @@ test('adds a fourth scalar card and restores it under the cumulative feature set
     console.log(JSON.stringify({
         metric: 'm8-four-card-learning',
         activeCards: 4,
-        availableFeatures: 16,
+        availableFeatures: 21,
         silenceEnergy,
         transientFlux,
         viewportRestored: '2.0x',

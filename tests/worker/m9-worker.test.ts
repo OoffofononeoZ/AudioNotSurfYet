@@ -92,13 +92,9 @@ describe('M9 Worker and compact payload integration', () => {
         })).toBeNull();
     });
 
-    test('keeps cancellation recoverable and M10 features closed', async () => {
+    test('keeps cancellation recoverable', async () => {
         await expect(runAnalysisJob(await request(['buffer']), {
             isCancelled: () => true,
         })).rejects.toMatchObject({ code: 'cancelled', recoverable: true });
-        await expect(runAnalysisJob(await request(['loudness'])))
-            .rejects.toMatchObject({ code: 'unsupported-feature' });
-        await expect(runAnalysisJob(await request(['complexSpectrum'])))
-            .rejects.toMatchObject({ code: 'unsupported-feature' });
     });
 });

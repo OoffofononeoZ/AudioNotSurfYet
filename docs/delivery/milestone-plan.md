@@ -6,7 +6,7 @@ upstream_docs:
   - "docs/delivery/execution-plan.md"
   - "docs/delivery/acceptance-criteria.md"
   - "docs/delivery/test-strategy.md"
-next_action: "M9 已获批准并关闭；M10 门禁开放，编码前保持 Planned"
+next_action: "M10 provisional 已通过；提交实现、运行 clean canonical 并等待 owner 审批"
 ---
 
 # Milestone Plan
@@ -15,7 +15,7 @@ next_action: "M9 已获批准并关闭；M10 门禁开放，编码前保持 Plan
 
 - Target 使用相对门禁，不表示日历承诺。
 - `Complete` 只用于文档门禁、真实证据和所需人工批准均已满足的里程碑。
-- Q0、M3、M4、M5、M6、M7、M8 和 M9 为 `Complete`；M10–M11 为 `Planned`。
+- Q0、M3、M4、M5、M6、M7、M8 和 M9 为 `Complete`；M10 为 `In Progress`，M11 为 `Planned`。
 - 一个里程碑未通过时，后续里程碑保持 Planned/Blocked，不并行扩大特征范围。
 
 ## Milestones
@@ -32,7 +32,7 @@ next_action: "M9 已获批准并关闭；M10 门禁开放，编码前保持 Plan
 | M7 | RMS + Amplitude Spectrum + Chroma | Complete | First feature gate | M6 | 三项黄金、四槽/最多三张活动卡共享时间轴、100ms、owner 任务与 3/3 学习解释 | project-owner |
 | M8 | Remaining scalar features | Complete | After M7 | M7 | UI hardening、13 项新增 scalar 全部 golden/renderer/edge，累计 16/21 | project-owner |
 | M9 | Power Spectrum + MFCC + Buffer | Complete | After M8 | M8 | Header blur、vector/waveform 维度、精确值、累计 19/21 | project-owner |
-| M10 | Loudness + Complex Spectrum | Planned | Full feature gate | M9 | 结构 payload/renderer、21/21 coverage | project-owner |
+| M10 | Loudness + Complex Spectrum | In Progress | Full feature gate | M9 | 结构 payload/renderer、21/21 coverage | project-owner |
 | M11 | Cross-cutting hardening | Planned | Delivery exit gate | M10 | 格式、恢复、权限、性能、无障碍、视口和 Chrome/Edge 全证据 | project-owner |
 
 ## Gate Checklist by Milestone
@@ -120,10 +120,13 @@ next_action: "M9 已获批准并关闭；M10 门禁开放，编码前保持 Plan
 
 ### M10
 
-- [ ] Loudness total + 24 bands。
-- [ ] Complex Spectrum real/imag 和 magnitude/phase。
-- [ ] 错误隔离和 DOM 替代信息。
-- [ ] 21/21 registry、UI、golden、renderer coverage。
+- [x] Loudness total + 24 bands Worker、payload、双 Canvas 与 DOM 精确值。
+- [x] Complex Spectrum real/imag 各 1024 与完整 magnitude/phase 主图。
+- [x] 沿用单卡错误隔离、双 Canvas、主题滚动条和 DOM 替代信息。
+- [x] 21/21 registry、UI、golden、renderer 代码与专项测试覆盖。
+- [x] dirty-worktree 36 步 provisional 通过。
+- [ ] clean-HEAD 36 步 canonical 通过并登记 `in-review` evidence。
+- [ ] owner 完成人工任务并批准 M10 evidence；批准前 M11 不开放。
 
 ### M11
 
@@ -137,10 +140,10 @@ next_action: "M9 已获批准并关闭；M10 门禁开放，编码前保持 Plan
 
 ## Current Gate State
 
-- Current stage：M9 canonical 与非首页导航栏模糊效果已由 owner 批准，M9 为 `Complete`；M10 门禁开放但仍为 `Planned`。
+- Current stage：M9 canonical 与非首页导航栏模糊效果已由 owner 批准，M9 为 `Complete`；owner 已明确要求实施 M10，当前为 `In Progress`。
 - Previous gate：M3 已由 `project-owner` 于 2026-07-28 批准并标记 `Complete`。
 - Canonical run：`npm run eval:m3` 已在 clean commit `17d16f0da37289c1f67f75203502beef999572ea` 上通过；摘要见 [evidence index](../quality/evidence-index.md)。
-- Next gate：明确开始 M10 实现时改为 `In Progress`；完成 Loudness、Complex Spectrum 和 21/21 coverage 后运行 provisional/canonical。
+- Next gate：完成 Loudness、Complex Spectrum 和 21/21 coverage 的 provisional；实现提交后在 clean HEAD 运行 canonical 并登记 evidence。
 - M3 state：Complete；M3 evidence 只证明测试基础，不代表 M4 产品行为通过。
 - M4 canonical：`npm run eval:m4` 在 clean commit `e5cfe9e8ab62301f3c5b0ddcdd37847a2e131a0f` 上 13/13 步骤通过；60 秒漂移 2.233ms，三次 seek 最大误差 66.827ms。`project-owner` 已于 2026-07-29 批准该证据。
 - M5 provisional：`M5-2026-07-29T07-03-16-207Z-2eb98381-provisional` 在 dirty worktree 16/16 步骤通过；summary SHA-256 为 `7b0acaf128ac4a7ceffce1449d2421127d20c8b25dcdc1ebd07b889072228530`。它只作实现反馈，不是正式 evidence。
@@ -151,6 +154,7 @@ next_action: "M9 已获批准并关闭；M10 门禁开放，编码前保持 Plan
 - M7 canonical：首次 clean run 因固定 550ms 跨进程计时误判 exact-cursor 上限而失败；修复后 `M7-2026-07-30T03-30-43-095Z-f022b86e` 在 clean commit `f022b86e2333ad612ecb12701b0ca05e49f2b256` 上 24/24 通过，summary SHA-256 为 `458ffb4a0c7fc8c64397092c1324d88c3c369f7fde3fc069f47861bbbc76ed32`。M7 Chrome 4/4，seek 反馈 1.7ms，15 分钟最大反馈 16.8ms、分析归因 >50ms 长任务 0 个；owner 于 2026-08-21 完成人工任务和 3/3 学习解释并批准该 evidence。
 - M8 canonical：`M8-2026-08-21T03-23-18-552Z-d6dcf715` 在 clean commit `d6dcf715be2e6675224f079b954e2b1b544bbebd` 上 28/28 通过，summary SHA-256 为 `bc624121e9479d62c2519ab7d2cf60a2bd8d7f7affd44a2128f645ce642f34ef`。M8 unit 7/7、integration 6/6、Chrome 2/2；15 分钟最大反馈 17.8ms、分析归因长任务 0。canonical 与 Windows Chrome 补偿结果已由 owner 批准。
 - M9 canonical：`M9-2026-08-21T09-14-14-110Z-f88ca331` 在 clean commit `f88ca33149619b1a71eb30d74a1b8e266fb41a65` 上 32/32 通过，summary SHA-256 为 `acb9ced1b448671955704efe33d846cd06059f6a8fd1343fb50f7a847672220e`。M9 unit 5/5、integration 7/7、Chrome 2/2；15 分钟最大反馈 17.3ms、分析归因长任务 0。owner 于 2026-08-23 批准正式 evidence。
+- M10 provisional：`M10-2026-08-22T18-17-36-129Z-2df604b9-provisional` 在 dirty worktree 36/36 通过，summary SHA-256 为 `e9696c843256bff07cfa77b29ee9a529e9d80c6fc842c6f7437fab39a5c77166`。M10 unit 7/7、integration 13/13、Chrome 3/3；四重卡 15 分钟反馈最大 16.2ms、分析归因长任务 0。它不是正式 evidence。
 - Known future blockers：没有真实 Edge 证据时不能完成 M11 或未来 readiness；托管平台未定会阻断 release，但不阻断 Q0/M3。
 
 ## Approval Record

@@ -9,7 +9,7 @@ upstream_docs:
   - "docs/architecture/system-design.md"
   - "docs/architecture/interface-contracts.md"
   - "docs/architecture/risk-register.md"
-next_action: "M9 已获 owner 批准并关闭；M10 门禁开放，编码前保持 Planned"
+next_action: "M10 provisional 36/36 已通过；提交实现并运行 clean canonical"
 ---
 
 # Execution Plan
@@ -18,7 +18,7 @@ next_action: "M9 已获 owner 批准并关闭；M10 门禁开放，编码前保�
 
 按纵向切片把已批准的本地音频学习体验从当前播放器基础推进到 21 项 Meyda 特征全覆盖。本计划以门禁证据而不是日历日期排序；任一里程碑未通过时，不进入下一批特征。
 
-本文件定义实施顺序和验收方式，不代表未关闭里程碑已通过。当前已完成 M1、M2、Q0、M3–M9 门禁；`project-owner` 已于 2026-08-23 批准 M9 canonical 与非首页导航栏模糊效果。M9 为 `Complete`，M10 门禁开放但编码前保持 `Planned`。
+本文件定义实施顺序和验收方式，不代表未关闭里程碑已通过。当前已完成 M1、M2、Q0、M3–M9 门禁；`project-owner` 已于 2026-08-23 批准 M9 canonical 与非首页导航栏模糊效果，并明确要求实施 M10。M9 为 `Complete`，M10 为 `In Progress`。
 
 ## 2. Stage Gates
 
@@ -350,14 +350,17 @@ Rollback:
 Implementation:
 
 - Loudness 展示 total 时间线、24 Bark band 热图和游标结构。
-- Complex Spectrum 展示派生 magnitude/phase，并提供游标实部/虚部值。
-- 完成结构化 payload、依赖复用和缓存 schema。
+- Complex Spectrum 用两个堆叠视图完整展示 1024 bins 的 magnitude/phase，并提供 signed Hz 与游标 real/imag 值。
+- 完成结构化 payload、同 frame 单次 Meyda batch 依赖复用；不改变缓存 schema、AnalysisConfig 或 IndexedDB V1。
 
 Verification:
 
 - 对象字段、24 band、real/imag 维度、相位范围和黄金结果；
 - renderer 错误隔离和无障碍替代；
 - feature registry、UI 和测试达到 21/21。
+- 15 分钟 Loudness/Complex/Power/Buffer 四重卡继续满足输入 ≤100ms、分析归因长任务为 0，并回归 20 次资源循环。
+
+Execution state：`M10_FEATURE_IDS`、累计 21 项 Worker/UI、两类 structured payload/renderer、`m10-structures.v1.json`、专项 Vitest/Chrome 和 36 步 eval runner 已进入工作树。dirty-worktree provisional `M10-2026-08-22T18-17-36-129Z-2df604b9-provisional` 已 36/36 通过；正式结论仍等待实现提交、clean-HEAD canonical 与 owner 审批。
 
 Rollback:
 

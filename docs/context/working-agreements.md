@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/context/index.md"
   - "docs/delivery/test-strategy.md"
   - "docs/quality/eval-plan.md"
-next_action: "M9 已获批准并关闭；M10 门禁开放，等待明确实施"
+next_action: "M10 provisional 36/36 已通过；提交实现后运行 clean canonical"
 ---
 
 # Working Agreements
@@ -38,6 +38,8 @@ next_action: "M9 已获批准并关闭；M10 门禁开放，等待明确实施"
 - M8 Chrome 自动化覆盖 390/1024/1280/1920 的 sticky/overlay/control/scrollbar 与四卡；Windows Chrome pressed 偶发问题已由 owner 人工复核并单独签字。相关交互或样式再变化时必须重新验证。
 - M9 使用 `test:m9:unit`、`test:m9:integration` 和 `test:e2e:m9`；`eval:m9:provisional` 运行 32 步 M3–M9 回归，clean-HEAD `eval:m9` 要求起止为同一干净 commit。
 - M9 的 `m9-vectors-v1.wav` 在 `artifacts/fixtures/` 运行时生成；版本化 `m9-vectors.v1.json` 固定 Power Spectrum 平方关系、MFCC 13 维/顺序、Buffer 1024 维、正负 impulse 与尾帧语义。
+- M10 使用 `test:m10:unit`、`test:m10:integration` 和 `test:e2e:m10`；`eval:m10:provisional` 运行 36 步 M3–M10 回归，clean-HEAD `eval:m10` 要求起止为同一干净 commit。
+- M10 的 `m10-structures-v1.wav` 在 `artifacts/fixtures/` 运行时生成；版本化 `m10-structures.v1.json` 固定 total/24 Bark bands、real/imag 各 1024、相位差、静音和正负 impulse 语义。
 - M3 仅建立本地门禁，不存在正式 CI；这项缺口不阻断 M3，但自动化声明必须限定为本地执行。
 - 交互改动要在本地浏览器执行成功、失败和边界场景，并检查 console error/warn。
 - 布局和可视化至少检查窄屏、常见桌面和宽屏，使用真实 DOM/canvas 几何。
@@ -64,7 +66,8 @@ next_action: "M9 已获批准并关闭；M10 门禁开放，等待明确实施"
 - M8 provisional `M8-2026-08-21T03-19-06-614Z-486e313a-provisional` 已 28/28 通过，只作实现反馈。clean canonical `M8-2026-08-21T03-23-18-552Z-d6dcf715` 在 commit `d6dcf715be2e6675224f079b954e2b1b544bbebd` 上 28/28 通过，起止工作树干净，summary SHA-256 为 `bc624121e9479d62c2519ab7d2cf60a2bd8d7f7affd44a2128f645ce642f34ef`。
 - M9 dirty-worktree provisional `M9-2026-08-21T09-08-40-958Z-896dbbb9-provisional` 已 32/32 通过，summary SHA-256 为 `9285bef21c715a2f36746ae7647255f00c06c40e70bc4af377baf03df7a4e9bf`；它只作实现反馈，不绑定 M9 实现 commit，也不进入正式 evidence index。
 - M9 clean canonical `M9-2026-08-21T09-14-14-110Z-f88ca331` 已在 commit `f88ca33149619b1a71eb30d74a1b8e266fb41a65` 上 32/32 通过，起止工作树干净，summary SHA-256 为 `acb9ced1b448671955704efe33d846cd06059f6a8fd1343fb50f7a847672220e`；正式记录已由 owner 批准。
-- M3–M9 canonical run 已记录并获 owner 批准。本地产物保留和删除规则以 [eval plan](../quality/eval-plan.md) 为准。
+- M10 dirty-worktree provisional `M10-2026-08-22T18-17-36-129Z-2df604b9-provisional` 已 36/36 通过，summary SHA-256 为 `e9696c843256bff07cfa77b29ee9a529e9d80c6fc842c6f7437fab39a5c77166`；它只作实现反馈，不绑定最终实现 commit，也不进入正式 evidence index。
+- M3–M9 canonical run 已记录并获 owner 批准。M10 只能在实现提交后的干净 HEAD 运行 canonical；本地产物保留和删除规则以 [eval plan](../quality/eval-plan.md) 为准。
 - fixture、manifest 和 golden 是受版本控制的规范输入；更新必须可重建、显示 diff，并重新执行对应测试。
 
 ## Resource Ownership
@@ -107,3 +110,5 @@ next_action: "M9 已获批准并关闭；M10 门禁开放，等待明确实施"
 随后 `project-owner` 明确回复：“我批准 M8 canonical evidence 与界面稳定化结果；同意将 M8 标记为 Complete 并开放 M9。”本约定据此确认 Windows Chrome 补偿门禁完成、M8 `Complete`，并开放仍为 `Planned` 的 M9；Edge、chunk warning 与 Meyda 上游 Flux 缺陷不因本批准关闭。
 
 2026-08-23，`project-owner` 明确回复：“我批准 M9 canonical evidence 与非首页导航栏模糊效果；同意将 M9 标记为 Complete 并开放 M10。”本约定据此前述 Windows Chrome 视觉/学习清单已签字，M9 改为 `Complete`，M10 门禁开放但编码前保持 `Planned`；未提供的逐项数值或解释不作补写。
+
+同日，`project-owner` 明确要求实施 M10 21/21 计划并授权按既定 Git 步骤提交与安全推送。本约定据此增加 M10 命令、fixture 和 clean-identity 规则，M10 改为 `In Progress`；该授权不提前批准 M10 evidence 或 release readiness。

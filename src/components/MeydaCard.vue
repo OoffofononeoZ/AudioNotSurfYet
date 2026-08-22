@@ -42,6 +42,7 @@
         <div
             ref="plotElement"
             class="plot"
+            :class="{ 'plot-structured': isStructuredFeature }"
             role="application"
             tabindex="0"
             :aria-label="`${definition.label} 共享时间轴图表。点击或使用方向键定位播放游标。`"
@@ -73,6 +74,12 @@
             <span>{{ formatTime(viewport.startSeconds) }}</span>
             <span v-if="isSpectrumFeature">
                 0 – {{ formatFrequency(nyquist) }}
+            </span>
+            <span v-else-if="featureId === 'loudness'">
+                B0 – B23 · total zero baseline
+            </span>
+            <span v-else-if="featureId === 'complexSpectrum'">
+                bins 0–1023 · +Hz / −Hz mirror · phase −π…π
             </span>
             <span v-else-if="featureId === 'chroma'">C – B</span>
             <span v-else-if="featureId === 'mfcc'">C0 – C12 · signed</span>
@@ -110,9 +117,25 @@
                 <dt>帧范围</dt>
                 <dd>{{ bufferRangeLabel }}</dd>
             </div>
+            <div v-else-if="featureId === 'loudness'">
+                <dt>总响度</dt>
+                <dd>{{ loudnessTotalLabel }}</dd>
+            </div>
+            <div v-else-if="featureId === 'complexSpectrum'">
+                <dt>最强 bin</dt>
+                <dd>{{ complexPeakLabel }}</dd>
+            </div>
             <div v-if="featureId === 'buffer'">
                 <dt>尾帧</dt>
                 <dd>{{ bufferPaddingLabel }}</dd>
+            </div>
+            <div v-if="featureId === 'loudness'">
+                <dt>最强 Bark band</dt>
+                <dd>{{ loudnessBandLabel }}</dd>
+            </div>
+            <div v-if="featureId === 'complexSpectrum'">
+                <dt>峰值相位</dt>
+                <dd>{{ complexPeakPhaseLabel }}</dd>
             </div>
         </dl>
 
@@ -182,6 +205,61 @@
             </div>
         </details>
 
+        <details v-if="featureId === 'loudness'" class="value-table">
+            <summary>
+                查看 24 个 Bark band 精确值（{{ exactLoudness.specific.length }}）
+            </summary>
+            <div class="table-scroll compact">
+                <table>
+                    <thead>
+                        <tr>
+                            <th scope="col">Band</th>
+                            <th scope="col">Specific loudness</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr
+                            v-for="(value, index) in exactLoudness.specific"
+                            :key="index"
+                        >
+                            <th scope="row">B{{ index }}</th>
+                            <td>{{ formatValue(value) }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </details>
+
+        <details v-if="featureId === 'complexSpectrum'" class="value-table">
+            <summary>
+                查看完整 Complex Spectrum 精确值（{{ complexRows.length }}）
+            </summary>
+            <div class="table-scroll complex-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th scope="col">Bin</th>
+                            <th scope="col">Signed Hz</th>
+                            <th scope="col">Real</th>
+                            <th scope="col">Imag</th>
+                            <th scope="col">Magnitude</th>
+                            <th scope="col">Phase</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="entry in complexRows" :key="entry.index">
+                            <th scope="row">{{ entry.index }}</th>
+                            <td>{{ formatSignedFrequency(entry.frequency) }}</td>
+                            <td>{{ formatValue(entry.real) }}</td>
+                            <td>{{ formatValue(entry.imag) }}</td>
+                            <td>{{ formatValue(entry.magnitude) }}</td>
+                            <td>{{ entry.phaseLabel }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </details>
+
         <div v-if="featureId === 'chroma'" class="value-table">
             <p class="table-title">12 音级精确值</p>
             <div class="table-scroll compact">
@@ -216,9 +294,11 @@ import {
 import { FEATURE_REGISTRY } from '../analysis/featureRegistry';
 import {
     cursorSampleIndex,
+    loudnessAt,
     peakBin,
     scalarPlotDomain,
     signedVectorMaximum,
+    signedFftBinFrequency,
     vectorAt,
     visibleSampleRange,
     waveformEnvelopeAt,
@@ -228,11 +308,11 @@ import {
     timeToCanvasX,
 } from '../analysis/timelineViewport';
 import {
-    M9_AVAILABLE_FEATURE_IDS,
+    M10_AVAILABLE_FEATURE_IDS,
     type AnalysisCoordinatorState,
     type AnalysisCursorValueResult,
     type AnalysisSeries,
-    type M9FeatureId,
+    type M10FeatureId,
 } from '../analysis/types';
 import type { PersistedTimelineViewport } from '../types/session';
 
@@ -243,8 +323,8 @@ const CHROMA_LABELS = [
 
 const props = defineProps<{
     slot: 0 | 1 | 2 | 3;
-    featureId: M9FeatureId;
-    disabledFeatureIds: readonly M9FeatureId[];
+    featureId: M10FeatureId;
+    disabledFeatureIds: readonly M10FeatureId[];
     series: AnalysisSeries | null;
     viewport: PersistedTimelineViewport;
     cursorSeconds: number;
@@ -255,7 +335,7 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-    change: [featureId: M9FeatureId];
+    change: [featureId: M10FeatureId];
     remove: [];
     seek: [seconds: number];
 }>();
@@ -269,7 +349,7 @@ let resizeObserver: ResizeObserver | null = null;
 
 const cardId = computed(() => `analysis-card-${props.slot}`);
 const definition = computed(() => FEATURE_REGISTRY[props.featureId]);
-const featureOptions = M9_AVAILABLE_FEATURE_IDS.map((id) => ({
+const featureOptions = M10_AVAILABLE_FEATURE_IDS.map((id) => ({
     id,
     label: FEATURE_REGISTRY[id].label,
 }));
@@ -277,15 +357,57 @@ const nyquist = computed(() => (props.sampleRate ?? 0) / 2);
 const isSpectrumFeature = computed(() =>
     props.featureId === 'amplitudeSpectrum'
     || props.featureId === 'powerSpectrum');
+const isStructuredFeature = computed(() =>
+    props.featureId === 'loudness'
+    || props.featureId === 'complexSpectrum');
 const spectrumValueHeading = computed(() =>
     props.featureId === 'powerSpectrum' ? 'Power' : 'Amplitude');
-const parameterLabel = computed(() => props.featureId === 'mfcc'
-    ? '1024 frame / 512 hop / Hanning / 13 MFCC'
-    : '1024 frame / 512 hop / Hanning');
+const parameterLabel = computed(() => {
+    if (props.featureId === 'mfcc') {
+        return '1024 frame / 512 hop / Hanning / 13 MFCC';
+    }
+    if (props.featureId === 'loudness') {
+        return '1024 frame / 512 hop / Hanning / 24 Bark bands';
+    }
+    if (props.featureId === 'complexSpectrum') {
+        return '1024 frame / 512 hop / Hanning / full FFT';
+    }
+    return '1024 frame / 512 hop / Hanning';
+});
 const exactVector = computed<number[]>(() =>
     Array.isArray(props.exactValue?.value)
         ? props.exactValue.value
         : []);
+const exactLoudness = computed<{ total: number; specific: number[] }>(() => {
+    const value = props.exactValue?.value;
+    if (
+        value
+        && typeof value === 'object'
+        && !Array.isArray(value)
+        && 'total' in value
+        && 'specific' in value
+        && typeof value.total === 'number'
+        && Array.isArray(value.specific)
+    ) {
+        return { total: value.total, specific: value.specific };
+    }
+    return { total: 0, specific: [] };
+});
+const exactComplex = computed<{ real: number[]; imag: number[] }>(() => {
+    const value = props.exactValue?.value;
+    if (
+        value
+        && typeof value === 'object'
+        && !Array.isArray(value)
+        && 'real' in value
+        && 'imag' in value
+        && Array.isArray(value.real)
+        && Array.isArray(value.imag)
+    ) {
+        return { real: value.real, imag: value.imag };
+    }
+    return { real: [], imag: [] };
+});
 const frameTimeLabel = computed(() =>
     props.exactValue
         ? formatTime(props.exactValue.frameStartSeconds)
@@ -354,6 +476,56 @@ const chromaPeakLabel = computed(() => {
     const peak = peakBin(exactVector.value);
     return `${CHROMA_LABELS[peak.index] ?? '—'} / ${formatValue(peak.value)}`;
 });
+const loudnessTotalLabel = computed(() =>
+    exactLoudness.value.specific.length === 24
+        ? formatValue(exactLoudness.value.total)
+        : '—');
+const loudnessPeak = computed(() => peakBin(exactLoudness.value.specific));
+const loudnessBandLabel = computed(() =>
+    exactLoudness.value.specific.length === 24
+        ? `B${loudnessPeak.value.index} / ${formatValue(loudnessPeak.value.value)}`
+        : '—');
+const complexRows = computed(() => {
+    const sampleRate = props.sampleRate ?? 0;
+    return exactComplex.value.real.map((real, index) => {
+        const imaginary = exactComplex.value.imag[index] ?? 0;
+        const magnitude = Math.hypot(real, imaginary);
+        const phase = magnitude === 0
+            ? null
+            : Math.atan2(imaginary, real);
+        return {
+            index,
+            frequency: signedFftBinFrequency(index, 1024, sampleRate),
+            real,
+            imag: imaginary,
+            magnitude,
+            phase,
+            phaseLabel: phase === null ? '未定义' : `${formatValue(phase)} rad`,
+        };
+    });
+});
+const complexPeak = computed(() => {
+    let index = 0;
+    let magnitude = 0;
+    complexRows.value.forEach((entry) => {
+        if (entry.magnitude > magnitude) {
+            index = entry.index;
+            magnitude = entry.magnitude;
+        }
+    });
+    return { index, magnitude, row: complexRows.value[index] };
+});
+const complexPeakLabel = computed(() =>
+    complexRows.value.length > 0
+        ? `bin ${complexPeak.value.index} / ${formatSignedFrequency(
+            complexPeak.value.row?.frequency ?? 0,
+        )} / ${formatValue(complexPeak.value.magnitude)}`
+        : '—');
+const complexPeakPhaseLabel = computed(() =>
+    complexPeak.value.row?.phase === null
+        || complexPeak.value.row?.phase === undefined
+        ? '未定义'
+        : `${formatValue(complexPeak.value.row.phase)} rad`);
 
 const formatTime = (seconds: number): string => {
     if (!Number.isFinite(seconds)) return '0:00.000';
@@ -370,6 +542,14 @@ const formatFrequency = (hertz: number): string =>
         ? `${(hertz / 1000).toFixed(2)} kHz`
         : `${Math.max(0, hertz).toFixed(1)} Hz`;
 
+const formatSignedFrequency = (hertz: number): string => {
+    const sign = hertz < 0 ? '−' : hertz > 0 ? '+' : '';
+    const absolute = Math.abs(hertz);
+    return absolute >= 1000
+        ? `${sign}${(absolute / 1000).toFixed(2)} kHz`
+        : `${sign}${absolute.toFixed(1)} Hz`;
+};
+
 const binFrequency = (index: number): number =>
     props.sampleRate
         ? index * props.sampleRate / 1024
@@ -377,8 +557,8 @@ const binFrequency = (index: number): number =>
 
 const handleFeatureChange = (event: Event) => {
     const value = (event.target as HTMLSelectElement).value;
-    if ((M9_AVAILABLE_FEATURE_IDS as readonly string[]).includes(value)) {
-        emit('change', value as M9FeatureId);
+    if ((M10_AVAILABLE_FEATURE_IDS as readonly string[]).includes(value)) {
+        emit('change', value as M10FeatureId);
     }
 };
 
@@ -619,6 +799,179 @@ const drawWaveform = (
     }
 };
 
+const drawLoudness = (
+    context: CanvasRenderingContext2D,
+    width: number,
+    height: number,
+    series: AnalysisSeries,
+) => {
+    if (series.payload.kind !== 'loudness') {
+        throw new Error('响度数据形态与 renderer 不匹配。');
+    }
+    const payload = series.payload;
+    const range = visibleSampleRange(series, props.viewport);
+    const heatmapHeight = Math.floor(height * 0.68);
+    const sampleCount = Math.max(1, range.endIndex - range.startIndex);
+    const columns = Math.max(1, Math.min(width, sampleCount));
+    let maximumSpecific = 0;
+    for (const value of payload.specific) {
+        maximumSpecific = Math.max(
+            maximumSpecific,
+            value * payload.scale + payload.offset,
+        );
+    }
+    maximumSpecific = Math.max(maximumSpecific, 0.000001);
+    for (let column = 0; column < columns; column += 1) {
+        const sampleIndex = Math.min(
+            range.endIndex - 1,
+            range.startIndex + Math.floor(column * sampleCount / columns),
+        );
+        const current = loudnessAt(payload, sampleIndex);
+        const x0 = Math.floor(column * width / columns);
+        const x1 = Math.ceil((column + 1) * width / columns);
+        current.specific.forEach((value, band) => {
+            context.fillStyle = heatColor(value, maximumSpecific);
+            const y = heatmapHeight
+                - Math.ceil((band + 1) * heatmapHeight / payload.bands);
+            context.fillRect(
+                x0,
+                y,
+                Math.max(1, x1 - x0),
+                Math.ceil(heatmapHeight / payload.bands) + 1,
+            );
+        });
+    }
+    const totals = payload.total.subarray(range.startIndex, range.endIndex);
+    const domain = scalarPlotDomain(totals, { min: 0 });
+    const chartTop = heatmapHeight + 8;
+    const chartBottom = height - 7;
+    const toY = (value: number) => chartBottom
+        - (value - domain.min) / (domain.max - domain.min)
+        * (chartBottom - chartTop);
+    context.strokeStyle = 'rgba(132, 255, 185, 0.35)';
+    context.beginPath();
+    context.moveTo(0, heatmapHeight + 0.5);
+    context.lineTo(width, heatmapHeight + 0.5);
+    context.stroke();
+    context.strokeStyle = '#7dffb3';
+    context.lineWidth = 2;
+    context.beginPath();
+    totals.forEach((value, localIndex) => {
+        const sampleIndex = range.startIndex + localIndex;
+        const x = timeToCanvasX(
+            sampleIndex * series.sampleStepSeconds,
+            props.viewport,
+            width,
+        );
+        const y = toY(value);
+        if (localIndex === 0) context.moveTo(x, y);
+        else context.lineTo(x, y);
+    });
+    context.stroke();
+    context.fillStyle = '#d5ffe5';
+    context.font = '11px ui-monospace, monospace';
+    context.fillText('24 Bark bands', 8, 15);
+    context.fillText('Total loudness', 8, heatmapHeight + 16);
+};
+
+const phaseRgb = (phase: number): [number, number, number] => {
+    const hue = ((phase / (Math.PI * 2)) + 1) % 1 * 6;
+    const sector = Math.floor(hue);
+    const fraction = hue - sector;
+    const high = 232;
+    const low = 48;
+    const rising = Math.round(low + (high - low) * fraction);
+    const falling = Math.round(high - (high - low) * fraction);
+    switch (sector) {
+        case 0: return [high, rising, low];
+        case 1: return [falling, high, low];
+        case 2: return [low, high, rising];
+        case 3: return [low, falling, high];
+        case 4: return [rising, low, high];
+        default: return [high, low, falling];
+    }
+};
+
+const drawComplex = (
+    context: CanvasRenderingContext2D,
+    width: number,
+    height: number,
+    series: AnalysisSeries,
+) => {
+    if (series.payload.kind !== 'complex-derived') {
+        throw new Error('复频谱数据形态与 renderer 不匹配。');
+    }
+    const payload = series.payload;
+    const range = visibleSampleRange(series, props.viewport);
+    const sampleCount = Math.max(1, range.endIndex - range.startIndex);
+    const columns = Math.max(1, Math.min(width, sampleCount));
+    const bins = payload.bins;
+    const magnitudeImage = new ImageData(columns, bins);
+    const phaseImage = new ImageData(columns, bins);
+    let maximumMagnitude = 0;
+    for (const value of payload.magnitude) {
+        maximumMagnitude = Math.max(
+            maximumMagnitude,
+            value * payload.magnitudeScale,
+        );
+    }
+    maximumMagnitude = Math.max(maximumMagnitude, 0.000001);
+    for (let column = 0; column < columns; column += 1) {
+        const sampleIndex = Math.min(
+            range.endIndex - 1,
+            range.startIndex + Math.floor(column * sampleCount / columns),
+        );
+        const sourceOffset = sampleIndex * bins;
+        for (let bin = 0; bin < bins; bin += 1) {
+            const sourceIndex = sourceOffset + bin;
+            const row = bins - 1 - bin;
+            const target = (row * columns + column) * 4;
+            const magnitude = (payload.magnitude[sourceIndex] ?? 0)
+                * payload.magnitudeScale;
+            const intensity = Math.sqrt(magnitude / maximumMagnitude);
+            magnitudeImage.data[target] = Math.round(7 + intensity * 118);
+            magnitudeImage.data[target + 1] = Math.round(16 + intensity * 239);
+            magnitudeImage.data[target + 2] = Math.round(12 + intensity * 167);
+            magnitudeImage.data[target + 3] = 255;
+            if (magnitude === 0) {
+                phaseImage.data[target] = 12;
+                phaseImage.data[target + 1] = 20;
+                phaseImage.data[target + 2] = 16;
+            } else {
+                const phase = Math.max(
+                    -1,
+                    Math.min(1, (payload.phase[sourceIndex] ?? 0) / 32_767),
+                ) * Math.PI;
+                const [red, green, blue] = phaseRgb(phase);
+                phaseImage.data[target] = red;
+                phaseImage.data[target + 1] = green;
+                phaseImage.data[target + 2] = blue;
+            }
+            phaseImage.data[target + 3] = 255;
+        }
+    }
+    const source = document.createElement('canvas');
+    source.width = columns;
+    source.height = bins;
+    const sourceContext = source.getContext('2d');
+    if (!sourceContext) throw new Error('复频谱离屏 Canvas 不可用。');
+    const divider = Math.floor(height / 2);
+    context.imageSmoothingEnabled = false;
+    sourceContext.putImageData(magnitudeImage, 0, 0);
+    context.drawImage(source, 0, 0, width, divider - 2);
+    sourceContext.putImageData(phaseImage, 0, 0);
+    context.drawImage(source, 0, divider + 2, width, height - divider - 2);
+    context.strokeStyle = 'rgba(132, 255, 185, 0.45)';
+    context.beginPath();
+    context.moveTo(0, divider + 0.5);
+    context.lineTo(width, divider + 0.5);
+    context.stroke();
+    context.fillStyle = '#f2fff7';
+    context.font = '11px ui-monospace, monospace';
+    context.fillText('Magnitude · bins 0–1023', 8, 15);
+    context.fillText('Phase · −π…π', 8, divider + 17);
+};
+
 const cursorVector = (): number[] => {
     if (exactVector.value.length > 0) return exactVector.value;
     const series = props.series;
@@ -648,9 +1001,40 @@ const drawStatic = () => {
         drawScalar(context, width, height, props.series);
     } else if (definition.value.outputShape === 'waveform') {
         drawWaveform(context, width, height, props.series);
+    } else if (definition.value.outputShape === 'loudness-structure') {
+        drawLoudness(context, width, height, props.series);
+    } else if (definition.value.outputShape === 'complex-spectrum') {
+        drawComplex(context, width, height, props.series);
     } else {
         drawHeatmap(context, width, height, props.series);
     }
+};
+
+const drawLoudnessCursor = (
+    context: CanvasRenderingContext2D,
+    width: number,
+    height: number,
+) => {
+    const values = exactLoudness.value.specific;
+    if (values.length !== 24) return;
+    const panelWidth = Math.min(190, Math.max(120, width * 0.28));
+    const left = width - panelWidth;
+    const panelHeight = Math.floor(height * 0.68);
+    const maximum = Math.max(0.000001, ...values);
+    context.fillStyle = 'rgba(2, 8, 5, 0.88)';
+    context.fillRect(left, 0, panelWidth, panelHeight);
+    const rowHeight = panelHeight / values.length;
+    values.forEach((value, index) => {
+        const barWidth = Math.max(1, value / maximum * (panelWidth - 34));
+        const y = panelHeight - (index + 1) * rowHeight;
+        context.fillStyle = '#7dffb3';
+        context.fillRect(left + 30, y + 1, barWidth, Math.max(1, rowHeight - 2));
+        if (index % 4 === 0) {
+            context.fillStyle = '#d5ffe5';
+            context.font = '9px ui-monospace, monospace';
+            context.fillText(`B${index}`, left + 4, y + rowHeight - 2);
+        }
+    });
 };
 
 const drawBufferCursorFrame = (
@@ -727,6 +1111,11 @@ const drawCursor = () => {
     context.lineTo(x + 0.5, height);
     context.stroke();
     if (definition.value.outputShape === 'scalar') return;
+    if (props.featureId === 'loudness') {
+        drawLoudnessCursor(context, width, height);
+        return;
+    }
+    if (props.featureId === 'complexSpectrum') return;
     const values = cursorVector();
     if (values.length === 0) return;
     if (props.featureId === 'buffer') {
@@ -934,6 +1323,10 @@ select:focus:not(:focus-visible) {
     position: relative;
 }
 
+.plot.plot-structured {
+    height: 320px;
+}
+
 .plot canvas {
     inset: 0;
     position: absolute;
@@ -1040,6 +1433,10 @@ select:focus:not(:focus-visible) {
 
 .table-scroll.compact {
     max-height: 170px;
+}
+
+.table-scroll.complex-table {
+    max-height: 320px;
 }
 
 table {

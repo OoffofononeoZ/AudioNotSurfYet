@@ -36,6 +36,8 @@ M8 适用解释：四槽允许从累计 16 项中选择 0–4 张唯一活动卡
 
 M9 适用解释：可选集合累计 19 项且仍最多四张唯一卡；Power Spectrum 为 512-bin 频率向量，MFCC 为 13 个 signed 系数而非频率轴，Buffer exact frame 为 1024 samples、尾帧零填充可见。首页 Header 保持透明，所有非首页路由统一为 18px backdrop blur。
 
+M10 适用解释：可选集合累计 21 项且仍最多四张唯一卡；Loudness exact value 为 total 加 24 个 Bark bands；Complex Spectrum exact value 为 real/imag 各 1024，主图和精确表完整展示 bin 0–1023，并明确后半 signed negative-frequency mirror。零幅度 bin 的 phase 显示“未定义”。
+
 ### Learning golden segments
 
 1. **L1 — Same pitch, rising level**：440Hz 正弦从低幅度变高。期望解释：RMS 增大；主频仍在约 440Hz；Chroma 的 A 类保持主导。
