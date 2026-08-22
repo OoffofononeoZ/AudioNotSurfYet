@@ -1,10 +1,10 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-08-21
+last_reviewed: 2026-08-23
 upstream_docs:
   - "docs/context/index.md"
-next_action: "M9 累计 19 项 canonical 已登记；等待 owner 验证与审批"
+next_action: "M9 累计 19 项已获批准；M10 门禁开放但尚未实现"
 ---
 
 # System Map
@@ -80,4 +80,4 @@ showOpenFilePicker → FileSystemFileHandle → File
 
 ## Approval Record
 
-`project-owner` 于 2026-08-21 确认 M7 卡片、共享视口、跳转、刷新恢复和 3/3 学习解释通过，并批准 M7 canonical、关闭 M7、开放 M8。随后 M8 运行时与 clean canonical 已完成，本图同步累计 16 项事实；owner 又批准 M8 canonical 与 Windows Chrome 界面稳定化结果并明确要求实施 M9。本图现同步 M9 已实现但尚待 canonical 的累计 19 项事实。
+`project-owner` 于 2026-08-21 确认 M7 卡片、共享视口、跳转、刷新恢复和 3/3 学习解释通过，并批准 M7 canonical、关闭 M7、开放 M8。随后 M8 运行时与 clean canonical 已完成，本图同步累计 16 项事实；owner 又批准 M8 canonical 与 Windows Chrome 界面稳定化结果并明确要求实施 M9。2026-08-23，owner 批准 M9 canonical 与非首页导航栏模糊效果；本图现同步 M9 已批准的累计 19 项事实，M10 两项结构输出仍未实现。

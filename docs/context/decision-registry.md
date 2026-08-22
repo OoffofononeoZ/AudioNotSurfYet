@@ -1,13 +1,13 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-08-21
+last_reviewed: 2026-08-23
 upstream_docs:
   - "docs/context/index.md"
   - "docs/product/scope.md"
   - "docs/architecture/system-design.md"
   - "docs/delivery/execution-plan.md"
-next_action: "DEC-019 已生效，M9 以非首页 Header blur 开始并继续交付三类 vector/waveform"
+next_action: "M9 已获 owner 批准并关闭；M10 门禁开放"
 ---
 
 # Decision Registry
@@ -78,6 +78,8 @@ M4 dirty-worktree provisional suite 随后通过，证明当前实现值得进�
 随后 `project-owner` 批准 M8 canonical evidence 与界面稳定化结果，同意将 M8 标记为 `Complete` 并开放 M9。DEC-018 据此完成审批；R-021 由 Windows Chrome owner 签字关闭，M9 在明确开始实现前保持 `Planned`。
 
 同次请求中，`project-owner` 明确要求实施 M9 计划，并把非首页导航栏背景模糊列为 M9 Slice 0。DEC-019 据此生效，M9 改为 `In Progress`；M8 canonical 身份不重新打开，M9 仍需自己的 provisional、clean canonical、in-review evidence 与 owner 审批。
+
+2026-08-23，`project-owner` 明确批准 M9 canonical evidence 与非首页导航栏模糊效果，同意将 M9 标记为 `Complete` 并开放 M10。该批准关闭 DEC-019 的执行门禁，不重写 M9 canonical 身份，也不构成 M10 或 release readiness 通过。
 
 ## Historical Evidence Gap
 

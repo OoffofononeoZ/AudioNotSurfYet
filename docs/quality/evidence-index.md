@@ -1,21 +1,21 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-08-21
+last_reviewed: 2026-08-23
 upstream_docs:
   - "docs/quality/eval-plan.md"
   - "docs/quality/golden-examples.md"
   - "docs/quality/failure-taxonomy.md"
   - "docs/delivery/milestone-plan.md"
   - "tests/fixtures/fixture-manifest.json"
-next_action: "M9 clean canonical 32/32 已登记为 in-review；等待 owner 完成 Windows Chrome 学习任务并审批"
+next_action: "M9 evidence 已获 owner 批准；M10 门禁开放，编码前保持 Planned"
 ---
 
 # Evidence Index
 
 ## 1. Purpose and Gate State
 
-本文件保存受版本控制的长期证据摘要；原始日志保存在 Git 忽略的本地 artifact 目录。M3–M8 的适用 canonical evidence 均已由 `project-owner` 批准，M8 已为 `Complete`。M9 clean canonical 已登记为 `in-review`，owner 审批前 M9 仍为 `In Progress`，M10 保持 `Planned`。
+本文件保存受版本控制的长期证据摘要；原始日志保存在 Git 忽略的本地 artifact 目录。M3–M9 的适用 canonical evidence 均已由 `project-owner` 批准，M9 已为 `Complete`。M10 门禁已开放，但编码前保持 `Planned`。
 
 每条 `pass` 只证明对应里程碑的适用子集在被记录的 commit 和环境上可复现。它不表示完整 EV-A–EV-R、未执行里程碑、Edge 矩阵或 release readiness 已通过。
 
@@ -633,14 +633,14 @@ M8 自动化证明 Slice 0 的 sticky 距 Header 8px、播放器/歌曲列表高
 | --- | --- |
 | Run ID | `M9-2026-08-21T09-14-14-110Z-f88ca331` |
 | Milestone | M9 — non-home Header blur, Power Spectrum, MFCC and Buffer |
-| Evidence state | `in-review` |
+| Evidence state | `approved` |
 | Eval result | `pass`（32/32 steps） |
 | Commit | `f88ca33149619b1a71eb30d74a1b8e266fb41a65` |
 | Commit at end | `f88ca33149619b1a71eb30d74a1b8e266fb41a65` |
 | Dirty at start / end | `false` / `false` |
 | Started at | 2026-08-21 09:14:14.110 UTC |
 | Method | `npm run eval:m9` |
-| Reviewer | `project-owner` — pending |
+| Reviewer | `project-owner` — approved 2026-08-23 |
 | Retention | `local-present` |
 | Artifact root | `artifacts/evals/M9-2026-08-21T09-14-14-110Z-f88ca331/` |
 | Summary SHA-256 | `acb9ced1b448671955704efe33d846cd06059f6a8fd1343fb50f7a847672220e` |
@@ -721,9 +721,9 @@ M8 自动化证明 Slice 0 的 sticky 距 Header 8px、播放器/歌曲列表高
 
 ### Open Gaps and Approval Gate
 
-- Owner 仍需在 Windows Chrome 检查首页透明、三个非首页路由 blur、无闪烁且文字清晰，并完成 Power Spectrum、MFCC、Buffer 学习任务与四卡/视口刷新恢复。
+- `project-owner` 已签字确认前述 Windows Chrome 导航栏视觉、学习任务与四卡/视口清单通过；本记录不补写用户未提供的逐项数值或解释原文。
 - Edge 未安装；M11 与未来 readiness 的双浏览器矩阵仍不完整。
 - 主 chunk 1,106.55 kB warning 与 R-019 保留。
 - Meyda 5.6.3 的 `spectralFlux` 上游缺陷仍存在；产品改用 ADR-0005 项目实现，R-020 只能标记产品侧 `Mitigated`。
-- M9 evidence 保持 `in-review`，M9 保持 `In Progress`，M10 保持 `Planned`；owner 明确批准前不得关闭或开放下一里程碑。
+- `project-owner` 于 2026-08-23 明确回复：“我批准 M9 canonical evidence 与非首页导航栏模糊效果；同意将 M9 标记为 Complete 并开放 M10。”M9 evidence 据此为 `approved`，M9 为 `Complete`，M10 门禁开放但编码前保持 `Planned`。
 - 本记录不创建或证明 release readiness，也不构成 Edge、M10 或完整 21/21 产品覆盖通过。

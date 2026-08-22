@@ -1,13 +1,13 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-08-21
+last_reviewed: 2026-08-23
 upstream_docs:
   - "docs/product/success-metrics.md"
   - "docs/architecture/interface-contracts.md"
   - "docs/delivery/acceptance-criteria.md"
   - "docs/delivery/execution-plan.md"
-next_action: "M9 clean canonical 32/32 已通过；等待 owner Windows Chrome 补充验证"
+next_action: "M9 canonical 与人工补充验证已获批准；下一步建立 M10 专项门禁"
 ---
 
 # Test Strategy
@@ -134,7 +134,7 @@ next_action: "M9 clean canonical 32/32 已通过；等待 owner Windows Chrome �
 
 每项至少需要 registry coverage、直接 Meyda golden、renderer contract、cursor exact value 和一个失败/边界场景。
 
-M6 的 21/21 只验证 registry 双向穷尽、milestone/shape/renderer/维度和当时的 Worker support 集合；M8 已以独立 golden/renderer/card/canonical 证明累计 16 项，M9 已实现累计 19 项但必须通过 clean canonical/owner 门禁后才可声明完成。M10 未实现项仍不能因登记而获得产品通过。Meyda 5.6.3 `spectralFlux` 的固定异常继续证明上游缺陷；M8 另以 ADR-0005 项目公式、首帧/静音和 exact cursor golden 证明产品支持，不能删除上游异常测试或伪称 Meyda 已修复。
+M6 的 21/21 只验证 registry 双向穷尽、milestone/shape/renderer/维度和当时的 Worker support 集合；M8 已以独立 golden/renderer/card/canonical 证明累计 16 项，M9 的累计 19 项已通过 clean canonical 与 owner 门禁。M10 未实现项仍不能因登记而获得产品通过。Meyda 5.6.3 `spectralFlux` 的固定异常继续证明上游缺陷；M8 另以 ADR-0005 项目公式、首帧/静音和 exact cursor golden 证明产品支持，不能删除上游异常测试或伪称 Meyda 已修复。
 
 M8 新增 `test:m8:unit`、`test:m8:integration`、`test:e2e:m8`、`eval:m8:provisional` 和 clean-HEAD `eval:m8`。Chrome 自动化覆盖 390/1024/1280/1920、sticky 几何、MusicBar/歌曲列表层级、pointerup/pointercancel/focus、主题滚动条、0/1/3/4 卡和 16 项选择；Windows Chrome 偶发 pressed 状态无法由 macOS 自动化替代，由 `project-owner` 按同一脚本人工复核。
 
@@ -142,7 +142,7 @@ M8 新增 `test:m8:unit`、`test:m8:integration`、`test:e2e:m8`、`eval:m8:prov
 
 M9 新增 `test:m9:unit`、`test:m9:integration`、`test:e2e:m9`、`fixtures:m9:golden`、`eval:m9:provisional` 与 clean-HEAD `eval:m9`。专项层覆盖 Power=Amplitude²、MFCC signed 13 维、Buffer envelope/exact/tail、四卡恢复、M10 拒绝、Header 路由样式和 390/1024/1280/1920。
 
-2026-08-21，M9 provisional 与 clean-HEAD canonical 均 32/32 通过；canonical run `M9-2026-08-21T09-14-14-110Z-f88ca331` 的 M9 unit 为 5/5、integration 为 7/7、Chrome 为 2/2。Windows Chrome 的实际模糊观感、文字清晰和学习任务仍待 owner 补充验证。
+2026-08-21，M9 provisional 与 clean-HEAD canonical 均 32/32 通过；canonical run `M9-2026-08-21T09-14-14-110Z-f88ca331` 的 M9 unit 为 5/5、integration 为 7/7、Chrome 为 2/2。`project-owner` 于 2026-08-23 批准 canonical evidence 与非首页导航栏模糊效果，前述 Windows Chrome 视觉/学习清单据此完成签字；未提供的逐项数值或解释不作补写。
 
 ## 6. IndexedDB and Permission Matrix
 

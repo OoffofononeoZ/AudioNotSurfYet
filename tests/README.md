@@ -8,7 +8,7 @@
 - FFmpeg：8.1.2；只用于生成和检查受控 WAV/MP3/FLAC fixture。
 - Microsoft Edge 当前未安装。`npm run test:e2e:edge` 会以退出码 2 报告 `blocked`，不会伪装成 pass。
 
-M3–M9 不建设 CI。下列命令当前均为本地门禁；正式证据要求在干净 commit 上复跑。M3–M8 canonical run 已获批准，M9 为 `In Progress`。M5 Chrome 原生权限、M7 学习任务与 M8 Windows Chrome 界面稳定化补偿验证均已单独签字通过。
+M3–M10 不建设 CI。下列命令当前均为本地门禁；正式证据要求在干净 commit 上复跑。M3–M9 canonical run 已获批准，M10 门禁开放但尚未开始实现。M5 Chrome 原生权限、M7 学习任务、M8 Windows Chrome 界面稳定化与 M9 导航栏视觉/学习清单均已单独签字通过。
 
 当前 `npm audit` 在安全补丁更新后剩余 1 项 low：Vite 依赖的 esbuild 0.27.3 在 Windows 开发服务器场景存在本地任意文件读取风险。仓库目标验证机为 macOS，开发服务器不得暴露到不受信网络；依赖升级提供修复版本后复核。该缺口不被描述为已修复或生产 readiness。
 
@@ -147,4 +147,4 @@ M8 provisional `M8-2026-08-21T03-19-06-614Z-486e313a-provisional` 已 28/28 通�
 
 M9 provisional `M9-2026-08-21T09-08-40-958Z-896dbbb9-provisional` 已 32/32 通过，summary SHA-256 为 `9285bef21c715a2f36746ae7647255f00c06c40e70bc4af377baf03df7a4e9bf`。clean canonical `M9-2026-08-21T09-14-14-110Z-f88ca331` 在 commit `f88ca33149619b1a71eb30d74a1b8e266fb41a65` 上 32/32 通过，起止工作树干净，summary SHA-256 为 `acb9ced1b448671955704efe33d846cd06059f6a8fd1343fb50f7a847672220e`。M9 unit 5/5、integration 7/7、Chrome 2/2；canonical 15 分钟回归最大反馈 17.3ms、分析归因长任务 0，20 次资源循环保持单 Worker/AudioContext。
 
-本 README 只记录真实执行结果。M8 evidence 已获 owner 批准；M9 clean canonical 已登记为 `in-review`，owner 审批前仍为 `In Progress`。现有证据不等于 Edge 矩阵或 release readiness 通过，当前 1,106.55 kB chunk warning 与 Meyda 5.6.3 `spectralFlux` 的上游缺陷仍保留；产品侧由 ADR-0005 项目实现缓解。
+本 README 只记录真实执行结果。M9 clean canonical 与非首页导航栏模糊效果已于 2026-08-23 获 owner 批准，M9 为 `Complete`，M10 门禁开放。现有证据不等于 Edge 矩阵、M10 或 release readiness 通过；当前 1,106.55 kB chunk warning 与 Meyda 5.6.3 `spectralFlux` 上游缺陷仍保留，产品侧仅由 ADR-0005 项目实现缓解。

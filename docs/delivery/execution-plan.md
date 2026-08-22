@@ -1,7 +1,7 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-08-21
+last_reviewed: 2026-08-23
 upstream_docs:
   - "docs/product/problem-brief.md"
   - "docs/product/scope.md"
@@ -9,7 +9,7 @@ upstream_docs:
   - "docs/architecture/system-design.md"
   - "docs/architecture/interface-contracts.md"
   - "docs/architecture/risk-register.md"
-next_action: "M9 clean canonical 32/32 已登记；等待 owner Windows Chrome 验证、学习解释与审批"
+next_action: "M9 已获 owner 批准并关闭；M10 门禁开放，编码前保持 Planned"
 ---
 
 # Execution Plan
@@ -18,7 +18,7 @@ next_action: "M9 clean canonical 32/32 已登记；等待 owner Windows Chrome �
 
 按纵向切片把已批准的本地音频学习体验从当前播放器基础推进到 21 项 Meyda 特征全覆盖。本计划以门禁证据而不是日历日期排序；任一里程碑未通过时，不进入下一批特征。
 
-本文件定义实施顺序和验收方式，不代表未关闭里程碑已通过。当前已完成 M1、M2、Q0、M3–M8 门禁；`project-owner` 已批准 M8 canonical 与 Windows Chrome 界面稳定化结果，并明确要求实施 M9。M8 为 `Complete`，M9 为 `In Progress`。
+本文件定义实施顺序和验收方式，不代表未关闭里程碑已通过。当前已完成 M1、M2、Q0、M3–M9 门禁；`project-owner` 已于 2026-08-23 批准 M9 canonical 与非首页导航栏模糊效果。M9 为 `Complete`，M10 门禁开放但编码前保持 `Planned`。
 
 ## 2. Stage Gates
 
@@ -339,7 +339,7 @@ Verification:
 - 波形正负峰、尾帧和多视口 Canvas 测试；
 - 完成后累计覆盖 19/21。
 
-Execution evidence：Header route style、累计 19 项 feature set、Power Spectrum/MFCC/Buffer Worker 与双 Canvas renderer、DOM 精确值、`m9-vectors.v1.json`、专项 Vitest/Chrome 和 32 步 eval runner 已实现。dirty-worktree provisional 与 clean-HEAD canonical 均 32/32 通过；canonical run `M9-2026-08-21T09-14-14-110Z-f88ca331` 绑定 commit `f88ca33149619b1a71eb30d74a1b8e266fb41a65`，summary SHA-256 为 `acb9ced1b448671955704efe33d846cd06059f6a8fd1343fb50f7a847672220e`。evidence 为 `in-review`，owner 审批前不能关闭 M9。
+Execution evidence：Header route style、累计 19 项 feature set、Power Spectrum/MFCC/Buffer Worker 与双 Canvas renderer、DOM 精确值、`m9-vectors.v1.json`、专项 Vitest/Chrome 和 32 步 eval runner 已实现。dirty-worktree provisional 与 clean-HEAD canonical 均 32/32 通过；canonical run `M9-2026-08-21T09-14-14-110Z-f88ca331` 绑定 commit `f88ca33149619b1a71eb30d74a1b8e266fb41a65`，summary SHA-256 为 `acb9ced1b448671955704efe33d846cd06059f6a8fd1343fb50f7a847672220e`。owner 于 2026-08-23 批准 evidence 与非首页导航栏模糊效果，M9 已关闭。
 
 Rollback:
 

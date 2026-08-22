@@ -1,7 +1,7 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-08-21
+last_reviewed: 2026-08-23
 upstream_docs:
   - "docs/quality/eval-plan.md"
   - "docs/delivery/acceptance-criteria.md"
@@ -14,7 +14,7 @@ next_action: "m9-vectors v1 已由 clean canonical 锁定；等待 owner 完成�
 
 ## 1. Evidence Boundary
 
-以下产品、学习、失败和边界样例仍是各里程碑的规范。M3 已生成受控 fixture、manifest 和首批 direct-Meyda golden。M6 的产品 Worker golden 已获批准；M7 的 `m7-learning-fixtures-v1` 与版本化 `m7-learning.v1.json` 已通过 clean canonical 并完成 owner 3/3 学习解释。M8 的 `m8-scalars-fixtures-v1`、`m8-scalars.v1.json` 和运行时 `m8-scalars-v1.wav` 已在 clean canonical 中验证并获 owner 批准。M9 的 `m9-vectors-fixtures-v1`、版本化 `m9-vectors.v1.json` 与运行时 `m9-vectors-v1.wav` 已生成并通过专项测试，正式身份仍等待 clean canonical。
+以下产品、学习、失败和边界样例仍是各里程碑的规范。M3 已生成受控 fixture、manifest 和首批 direct-Meyda golden。M6 的产品 Worker golden 已获批准；M7 的 `m7-learning-fixtures-v1` 与版本化 `m7-learning.v1.json` 已通过 clean canonical 并完成 owner 3/3 学习解释。M8 的 `m8-scalars-fixtures-v1`、`m8-scalars.v1.json` 和运行时 `m8-scalars-v1.wav` 已在 clean canonical 中验证并获 owner 批准。M9 的 `m9-vectors-fixtures-v1`、版本化 `m9-vectors.v1.json` 与运行时 `m9-vectors-v1.wav` 已通过 clean canonical 并于 2026-08-23 获 owner 批准。
 
 音频仅允许：
 

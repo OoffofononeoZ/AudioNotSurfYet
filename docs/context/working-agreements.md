@@ -1,13 +1,13 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-08-21
+last_reviewed: 2026-08-23
 upstream_docs:
   - "AGENTS.md"
   - "docs/context/index.md"
   - "docs/delivery/test-strategy.md"
   - "docs/quality/eval-plan.md"
-next_action: "M9 已进入 In Progress；新增 Header blur、vector/waveform 与 clean canonical 门禁"
+next_action: "M9 已获批准并关闭；M10 门禁开放，等待明确实施"
 ---
 
 # Working Agreements
@@ -63,8 +63,8 @@ next_action: "M9 已进入 In Progress；新增 Header blur、vector/waveform �
 - 首次 M7 clean run `M7-2026-07-30T03-21-14-150Z-28fc4699` 因跨进程固定 550ms exact-cursor 计时误判为 fail；修复后的 `M7-2026-07-30T03-30-43-095Z-f022b86e` 在 clean commit `f022b86e2333ad612ecb12701b0ca05e49f2b256` 上 24/24 通过，summary SHA-256 为 `458ffb4a0c7fc8c64397092c1324d88c3c369f7fde3fc069f47861bbbc76ed32`，正式记录为 `in-review`。
 - M8 provisional `M8-2026-08-21T03-19-06-614Z-486e313a-provisional` 已 28/28 通过，只作实现反馈。clean canonical `M8-2026-08-21T03-23-18-552Z-d6dcf715` 在 commit `d6dcf715be2e6675224f079b954e2b1b544bbebd` 上 28/28 通过，起止工作树干净，summary SHA-256 为 `bc624121e9479d62c2519ab7d2cf60a2bd8d7f7affd44a2128f645ce642f34ef`。
 - M9 dirty-worktree provisional `M9-2026-08-21T09-08-40-958Z-896dbbb9-provisional` 已 32/32 通过，summary SHA-256 为 `9285bef21c715a2f36746ae7647255f00c06c40e70bc4af377baf03df7a4e9bf`；它只作实现反馈，不绑定 M9 实现 commit，也不进入正式 evidence index。
-- M9 clean canonical `M9-2026-08-21T09-14-14-110Z-f88ca331` 已在 commit `f88ca33149619b1a71eb30d74a1b8e266fb41a65` 上 32/32 通过，起止工作树干净，summary SHA-256 为 `acb9ced1b448671955704efe33d846cd06059f6a8fd1343fb50f7a847672220e`；正式记录为 `in-review`。
-- M3–M8 canonical run 已记录并获 owner 批准；M9 canonical 已记录但等待 owner 审批。本地产物保留和删除规则以 [eval plan](../quality/eval-plan.md) 为准。
+- M9 clean canonical `M9-2026-08-21T09-14-14-110Z-f88ca331` 已在 commit `f88ca33149619b1a71eb30d74a1b8e266fb41a65` 上 32/32 通过，起止工作树干净，summary SHA-256 为 `acb9ced1b448671955704efe33d846cd06059f6a8fd1343fb50f7a847672220e`；正式记录已由 owner 批准。
+- M3–M9 canonical run 已记录并获 owner 批准。本地产物保留和删除规则以 [eval plan](../quality/eval-plan.md) 为准。
 - fixture、manifest 和 golden 是受版本控制的规范输入；更新必须可重建、显示 diff，并重新执行对应测试。
 
 ## Resource Ownership
@@ -105,3 +105,5 @@ next_action: "M9 已进入 In Progress；新增 Header blur、vector/waveform �
 同日，M8 provisional 与 clean canonical 均 28/28 通过；正式记录进入 `in-review`。macOS Chrome 已自动验证四项 UI hardening、390/1024/1280/1920、四卡、累计 16 项、静音 0 与项目 Flux；Windows Chrome pressed 偶发状态仍由 owner 补偿复核，M9 尚未开放。
 
 随后 `project-owner` 明确回复：“我批准 M8 canonical evidence 与界面稳定化结果；同意将 M8 标记为 Complete 并开放 M9。”本约定据此确认 Windows Chrome 补偿门禁完成、M8 `Complete`，并开放仍为 `Planned` 的 M9；Edge、chunk warning 与 Meyda 上游 Flux 缺陷不因本批准关闭。
+
+2026-08-23，`project-owner` 明确回复：“我批准 M9 canonical evidence 与非首页导航栏模糊效果；同意将 M9 标记为 Complete 并开放 M10。”本约定据此前述 Windows Chrome 视觉/学习清单已签字，M9 改为 `Complete`，M10 门禁开放但编码前保持 `Planned`；未提供的逐项数值或解释不作补写。

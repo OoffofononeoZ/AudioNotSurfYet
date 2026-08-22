@@ -1,13 +1,13 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-08-21
+last_reviewed: 2026-08-23
 upstream_docs:
   - "docs/product/problem-brief.md"
   - "docs/product/scope.md"
   - "docs/product/success-metrics.md"
   - "docs/product/open-questions.md"
-next_action: "M9 三类 shape 已实现；以 provisional/canonical 验证契约后等待 owner 审批"
+next_action: "M9 三类 shape 已获批准；M10 门禁开放，结构化 renderer 尚未实现"
 ---
 
 # System Design
