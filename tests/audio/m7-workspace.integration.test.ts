@@ -185,12 +185,12 @@ describe('M7 analysis workspace integration', () => {
         });
     });
 
-    test('persists and restores four unique cumulative M9 cards without a schema bump', async () => {
+    test('persists four unique cumulative M10 cards without a schema bump', async () => {
         const repository = new WorkspaceRepository();
         const harness = createHarness(repository);
         const activeCards = [
-            { slot: 0 as const, featureId: 'powerSpectrum' as const },
-            { slot: 1 as const, featureId: 'mfcc' as const },
+            { slot: 0 as const, featureId: 'loudness' as const },
+            { slot: 1 as const, featureId: 'complexSpectrum' as const },
             { slot: 2 as const, featureId: 'buffer' as const },
             { slot: 3 as const, featureId: 'spectralFlux' as const },
         ];

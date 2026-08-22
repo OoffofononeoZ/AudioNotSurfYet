@@ -105,10 +105,10 @@ test('renders Power Spectrum, MFCC and Buffer as four persistent unique cards', 
     await expect(page.locator('[data-feature-id]')).toHaveCount(4);
 
     const select = page.locator('[data-feature-id="powerSpectrum"] select');
-    await expect(select.locator('option')).toHaveCount(19);
-    await expect(select.locator('option[value="loudness"]')).toHaveCount(0);
+    await expect(select.locator('option')).toHaveCount(21);
+    await expect(select.locator('option[value="loudness"]')).toHaveCount(1);
     await expect(select.locator('option[value="complexSpectrum"]'))
-        .toHaveCount(0);
+        .toHaveCount(1);
     await expect(select.locator('option[value="mfcc"]')).toBeDisabled();
     await expect(select.locator('option[value="buffer"]')).toBeDisabled();
 
@@ -171,7 +171,7 @@ test('renders Power Spectrum, MFCC and Buffer as four persistent unique cards', 
     console.log(JSON.stringify({
         metric: 'm9-vector-learning',
         activeCards: 4,
-        availableFeatures: 19,
+        availableFeatures: 21,
         exactDimensions: { powerSpectrum: 512, mfcc: 13, buffer: 1024 },
         viewportRestored: '2.0x',
         geometries,

@@ -78,7 +78,7 @@ describe('M6 Worker request contract', () => {
         },
     );
 
-    test('rejects duplicate, five-item, unsupported and identity-invalid jobs', async () => {
+    test('rejects duplicate, five-item, unknown and identity-invalid jobs', async () => {
         await expect(validateAnalysisJobRequest(
             await request(['rms', 'rms']),
         )).rejects.toMatchObject({ code: 'invalid-request' });
@@ -92,8 +92,8 @@ describe('M6 Worker request contract', () => {
             ]),
         )).rejects.toMatchObject({ code: 'invalid-request' });
         await expect(validateAnalysisJobRequest(
-            await request(['loudness']),
-        )).rejects.toMatchObject({ code: 'unsupported-feature' });
+            await request(['unknown-feature' as FeatureId]),
+        )).rejects.toMatchObject({ code: 'invalid-request' });
         const missingCursorFeature = await request(['rms']);
         missingCursorFeature.cursorFeatureIds = [];
         await expect(validateAnalysisJobRequest(missingCursorFeature))

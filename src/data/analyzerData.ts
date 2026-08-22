@@ -207,7 +207,7 @@ export const analyzerData: AnalyzerData[] = [
         detail: {
             description: '一个包含 FFT 实部和虚部的复数值数组 (ComplexArray)。',
             usedfor: '用于创建 amplitudeSpectrum。也用于进一步的信号处理，因为它包含频率和信号相位的信息。',
-            range: '一个大小为 FFT 一半的数组，包含关于 0 到一半采样率之间频率的信息及其对应的相位值。在 Meyda 中，默认采样率 (sampleRate) 为 44100Hz，FFT 大小等于缓冲区大小 (bufferSize)，默认为 512。'
+            range: '在本项目锁定的 Meyda 5.6.3 与 1024 bufferSize 下，real 和 imag 各返回完整 1024 个 FFT bin。前半段表示非负频率，后半段表示实数音频的负频率镜像；界面保留完整 bin 顺序，并从 real/imag 派生 magnitude 与 -π 到 π 的 phase。'
         }
     },
     {

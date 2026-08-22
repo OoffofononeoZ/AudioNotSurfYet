@@ -168,7 +168,7 @@ export const FEATURE_REGISTRY = {
         dependencies: ['amplitudeSpectrum'],
         dimensions: () => [24, 1],
         deliveryMilestone: 'M10',
-        workerSupported: false,
+        workerSupported: true,
     }),
     perceptualSpread: scalar('perceptualSpread', {
         range: { min: 0, max: 1 },
@@ -200,7 +200,7 @@ export const FEATURE_REGISTRY = {
         dependencies: [],
         dimensions: (config) => [config.frameSize, 2],
         deliveryMilestone: 'M10',
-        workerSupported: false,
+        workerSupported: true,
     }),
     buffer: defineFeature('buffer', {
         outputShape: 'waveform',

@@ -23,6 +23,9 @@
 | `npm run test:m7:unit` | 运行 viewport、renderer 数据变换、workspace 与学习 golden | M7 纯逻辑和规范输入 |
 | `npm run test:m7:integration` | 运行 workspace 状态、恢复和 quota 集成测试 | M7 cards/viewport 持久化 |
 | `npm run test:e2e:m7` | 运行 Chrome 四槽三卡、共享 seek/zoom、DPR/视口和错误隔离 | M7 浏览器学习切片 |
+| `npm run test:m10:unit` | 运行 Loudness/Complex direct Meyda、维度、结构 codec 与 golden | M10 结构单元切片 |
+| `npm run test:m10:integration` | 运行两类结构 Worker、exact cursor、stale/cancel/quota 与四卡恢复 | M10 集成切片 |
+| `npm run test:e2e:m10` | 运行 Chrome 21 项、两类结构卡和 15 分钟四重卡性能 | M10 浏览器切片 |
 | `npm run test:e2e:edge` | 检测并运行稳定 Edge | Edge 缺失时以退出码 2 明确 blocked |
 | `npm run test:docs` | 检查生命周期 frontmatter、链接和 21 项特征 | 文档门禁 |
 | `npm run eval:m3:provisional` | 未提交工作树的本地 M3 run | 不创建正式 evidence index |
@@ -35,6 +38,8 @@
 | `npm run eval:m6` | 只在干净 commit 上运行 M3–M6 suite | 生成可登记的 M6 canonical 证据 |
 | `npm run eval:m7:provisional` | 未提交工作树运行 M3–M7 suite | 只生成实现反馈，不追加正式 evidence |
 | `npm run eval:m7` | 只在干净 commit 上运行 M3–M7 suite | 生成可登记的 M7 canonical 证据 |
+| `npm run eval:m10:provisional` | 在 dirty worktree 运行 M3–M10 的 36 步 suite | 只生成实现反馈 |
+| `npm run eval:m10` | 只在干净 commit 上运行 M3–M10 的 36 步 suite | 生成可登记的 M10 canonical 证据 |
 
 ## 已知测试缺口
 
@@ -49,7 +54,7 @@
 - 超出约 15 分钟支持边界的长音频未开始播放只作为非门禁压力观察；它不是规定的预期失败，也不能替代范围内性能或格式验证。
 - M6 当前 Meyda 的 `spectralFlux` 对有效输入抛出 `x is not defined`；已用预期失败测试和 R-020 固定，不能把 21 项 registry 误述为 21 项均可计算。
 - M6 dirty-worktree provisional 与 clean-commit canonical 均已 20/20 通过；正式 evidence 已登记，并由 `project-owner` 于 2026-07-30 批准，M6 已关闭。
-- M7、M8、M9 已获批准并关闭。M9 Header blur 与三类 vector/waveform 的 provisional 与 clean canonical 均 32/32 通过，owner 于 2026-08-23 批准 evidence 与非首页导航栏模糊效果；M10 门禁开放但尚未实现。
+- M7、M8、M9 已获批准并关闭。M9 Header blur 与三类 vector/waveform 的 provisional 与 clean canonical 均 32/32 通过，owner 于 2026-08-23 批准 evidence 与非首页导航栏模糊效果；M10 已进入 `In Progress`，36/36 provisional 已通过但 canonical 尚未执行。
 
 ## 构建风险
 

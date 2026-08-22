@@ -1,4 +1,5 @@
 import {
+    aggregateComplex,
     aggregateWaveform,
     aggregateScalars,
     aggregateVectors,
@@ -13,14 +14,16 @@ import {
 } from './frames';
 import { getFeatureDefinition } from './featureRegistry';
 import {
-    exactM9Value,
-    extractM9Frame,
+    complexMeydaValue,
+    exactM10Value,
+    extractM10Frame,
+    loudnessMeydaValue,
     scalarMeydaValue,
     vectorMeydaValue,
 } from './meydaAdapter';
 import {
     isFeatureId,
-    isM9FeatureId,
+    isM10FeatureId,
     type AnalysisCursorValueRequest,
     type AnalysisCursorValueResult,
     type AnalysisJobRequest,
@@ -28,7 +31,7 @@ import {
     type AnalysisSeries,
     type AnalysisWorkerResponse,
     type FeatureId,
-    type M9FeatureId,
+    type M10FeatureId,
 } from './types';
 
 export class AnalysisWorkerCoreError extends Error {
@@ -117,11 +120,11 @@ export const validateAnalysisJobRequest = async (
         invalid('Analysis feature IDs must be unique.');
     }
     const unsupported = request.cursorFeatureIds.find((featureId) =>
-        !isM9FeatureId(featureId));
+        !isM10FeatureId(featureId));
     if (unsupported) {
         throw new AnalysisWorkerCoreError(
             'unsupported-feature',
-            `${unsupported} is registered but not supported by the M9 Worker.`,
+            `${unsupported} is registered but not supported by the M10 Worker.`,
             false,
         );
     }
@@ -146,9 +149,11 @@ export const analysisAggregationFactor = (
 
 const buildSeries = (
     request: AnalysisJobRequest,
-    featureIds: readonly M9FeatureId[],
+    featureIds: readonly M10FeatureId[],
     scalarFrames: Map<FeatureId, number[]>,
     vectorFrames: Map<FeatureId, number[][]>,
+    loudnessFrames: Array<{ total: number; specific: number[] }>,
+    complexFrames: Array<{ real: number[]; imag: number[] }>,
 ): AnalysisSeries[] => {
     const factor = analysisAggregationFactor(
         request.config.sampleRate,
@@ -201,6 +206,64 @@ const buildSeries = (
                 },
             };
         }
+        if (definition.outputShape === 'loudness-structure') {
+            const total = aggregateScalars(
+                loudnessFrames.map((frame) => frame.total),
+                factor,
+            );
+            const specificValues = aggregateVectors(
+                loudnessFrames.map((frame) => frame.specific),
+                factor,
+                24,
+            );
+            let maximumSpecific = 0;
+            for (const value of specificValues) {
+                maximumSpecific = Math.max(maximumSpecific, value);
+            }
+            const specific = quantizeToUint16(specificValues, {
+                min: 0,
+                max: maximumSpecific,
+            });
+            return {
+                schemaVersion: 1,
+                trackHash: request.trackHash,
+                configHash: request.config.configHash,
+                featureId,
+                startTimeSeconds: 0,
+                sampleStepSeconds,
+                sampleCount: total.length,
+                dimensions,
+                payload: {
+                    kind: 'loudness',
+                    total,
+                    specific: specific.values,
+                    bands: 24,
+                    scale: specific.scale,
+                    offset: specific.offset,
+                },
+            };
+        }
+        if (definition.outputShape === 'complex-spectrum') {
+            const bins = dimensions[0] ?? 0;
+            const values = aggregateComplex(complexFrames, factor, bins);
+            return {
+                schemaVersion: 1,
+                trackHash: request.trackHash,
+                configHash: request.config.configHash,
+                featureId,
+                startTimeSeconds: 0,
+                sampleStepSeconds,
+                sampleCount: values.magnitude.length / bins,
+                dimensions,
+                payload: {
+                    kind: 'complex-derived',
+                    magnitude: values.magnitude,
+                    phase: values.phase,
+                    bins,
+                    magnitudeScale: values.magnitudeScale,
+                },
+            };
+        }
         const width = dimensions[0] ?? 0;
         const values = aggregateVectors(
             vectorFrames.get(featureId) ?? [],
@@ -239,7 +302,7 @@ export const runAnalysisJob = async (
 }> => {
     await validateAnalysisJobRequest(request);
     const featureIds =
-        request.featureIds as readonly M9FeatureId[];
+        request.featureIds as readonly M10FeatureId[];
     const pcm = new Float32Array(request.pcm);
     const totalFrames = analysisFrameCount(
         pcm.length,
@@ -248,10 +311,17 @@ export const runAnalysisJob = async (
     );
     const scalarFrames = new Map<FeatureId, number[]>();
     const vectorFrames = new Map<FeatureId, number[][]>();
+    const loudnessFrames: Array<{ total: number; specific: number[] }> = [];
+    const complexFrames: Array<{ real: number[]; imag: number[] }> = [];
     for (const featureId of featureIds) {
-        if (getFeatureDefinition(featureId).outputShape === 'scalar') {
+        const shape = getFeatureDefinition(featureId).outputShape;
+        if (shape === 'scalar') {
             scalarFrames.set(featureId, []);
-        } else {
+        } else if (
+            shape === 'frequency-vector'
+            || shape === 'category-vector'
+            || shape === 'waveform'
+        ) {
             vectorFrames.set(featureId, []);
         }
     }
@@ -280,7 +350,7 @@ export const runAnalysisJob = async (
                     frameIndex,
                     request.config,
                 );
-                const extraction = extractM9Frame(
+                const extraction = extractM10Frame(
                     featureIds,
                     frame,
                     request.config,
@@ -288,11 +358,16 @@ export const runAnalysisJob = async (
                 );
                 const extracted = extraction.values;
                 for (const featureId of featureIds) {
-                    if (getFeatureDefinition(featureId).outputShape === 'scalar') {
+                    const shape = getFeatureDefinition(featureId).outputShape;
+                    if (shape === 'scalar') {
                         scalarFrames.get(featureId)?.push(
                             scalarMeydaValue(extracted, featureId),
                         );
-                    } else {
+                    } else if (
+                        shape === 'frequency-vector'
+                        || shape === 'category-vector'
+                        || shape === 'waveform'
+                    ) {
                         const width =
                             getFeatureDefinition(featureId)
                                 .dimensions(request.config)[0] ?? 0;
@@ -308,6 +383,13 @@ export const runAnalysisJob = async (
                                 width,
                             ),
                         );
+                    } else if (shape === 'loudness-structure') {
+                        loudnessFrames.push(loudnessMeydaValue(extracted));
+                    } else if (shape === 'complex-spectrum') {
+                        complexFrames.push(complexMeydaValue(
+                            extracted,
+                            request.config.frameSize,
+                        ));
                     }
                 }
                 if (extraction.amplitudeSpectrum) {
@@ -344,6 +426,8 @@ export const runAnalysisJob = async (
         featureIds,
         scalarFrames,
         vectorFrames,
+        loudnessFrames,
+        complexFrames,
     );
     return {
         result: {
@@ -374,7 +458,7 @@ export const extractCursorValue = (
         || request.trackHash !== retained.trackHash
         || request.config.configHash !== retained.config.configHash
         || !retained.featureIds.includes(request.featureId)
-        || !isM9FeatureId(request.featureId)
+        || !isM10FeatureId(request.featureId)
     ) {
         return null;
     }
@@ -413,7 +497,7 @@ export const extractCursorValue = (
             frameIndex,
             retained.config,
         ),
-        value: exactM9Value(
+        value: exactM10Value(
             request.featureId,
             frame,
             retained.config,

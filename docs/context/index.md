@@ -4,7 +4,7 @@ owner: "project-owner"
 last_reviewed: 2026-08-23
 upstream_docs:
   - "AGENTS.md"
-next_action: "M9 已获 owner 批准并关闭；M10 门禁开放，编码前保持 Planned"
+next_action: "M10 provisional 已通过；提交实现并在 clean HEAD 运行 canonical"
 ---
 
 # Repository Context Index
@@ -22,7 +22,7 @@ AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端：用户选择
 - System design：system design、接口契约、风险和五个 ADR 已批准。
 - Execution planning：execution plan、acceptance criteria、test strategy 和 milestone plan 均为 approved。
 - Quality and evals：M3–M9 的适用 canonical/人工证据均已获批准。
-- Implementation：M3–M9 已 `Complete`；M10 门禁已开放但编码前保持 `Planned`。
+- Implementation：M3–M9 已 `Complete`；M10 经 owner 明确要求实施，当前为 `In Progress`。
 - Readiness、release、retrospective：`release-readiness.md` 等待 M11 执行证据，不创建 release 或 retrospective 文档。
 
 ## Key Documents
@@ -62,16 +62,16 @@ AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端：用户选择
 
 | Area | Current role | Target/change source |
 | --- | --- | --- |
-| `src/views/` | 路由页面；Analyzer 以四槽共享时间轴承载默认三卡，并可从 M9 累计 19 项选择最多四张 | system design + M7–M9 |
+| `src/views/` | 路由页面；Analyzer 以四槽共享时间轴承载默认三卡，并可从累计 21 项选择最多四张 | system design + M7–M10 |
 | `src/layouts/` | Header、页面内容与 MusicBar 的共享外壳 | M4/M7 回归 |
 | `src/components/` | 播放 UI、列表、动画及 Canvas/WebGL 可视化 | ADR-0001/0004 |
 | `src/audio/` | 单一 AudioEngine 与 MainLayout-owned AudioSessionService；文件句柄导入与恢复编排 | ADR-0001/0003 |
-| `src/analysis/` | FeatureRegistry、config identity、PCM/frame、codec、Worker/coordinator、共享时间轴，以及 M9 累计 19 项/项目 Flux/scalar/vector/waveform renderer 数据 | ADR-0002/0004/0005；M6–M9 |
+| `src/analysis/` | FeatureRegistry、config identity、PCM/frame、codec、Worker/coordinator、共享时间轴，以及累计 21 项与 scalar/vector/waveform/structured renderer 数据 | ADR-0002/0004/0005；M6–M10 |
 | `src/persistence/` | 原生 IndexedDB V1 SessionRepository 与 runtime validator | ADR-0003；M5 |
 | `src/stores/` | 持久化 config 与可序列化 audioSessionStore/恢复/analysis 状态 | ADR-0001/0002/0003 |
 | `src/utils/` | 事件总线与纯工具函数 | 实现时按实际边界维护 |
 | `src/data/` | `analyzerData.ts` 的 21 项 Meyda 说明，由 M6 registry 穷尽映射 | M6 FeatureRegistry |
-| `tests/` | M3–M9 本地测试、fixture、golden、浏览器 harness 和 eval runner | [tests README](../../tests/README.md) |
+| `tests/` | M3–M10 本地测试、fixture、golden、浏览器 harness 和 eval runner | [tests README](../../tests/README.md) |
 | `skills/audio-visualizer-dev/` | 本项目开发、验证和文档路由 Skill | [SKILL.md](../../skills/audio-visualizer-dev/SKILL.md) |
 
 ## Lifecycle Entry Points
@@ -89,6 +89,7 @@ AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端：用户选择
 
 - M8 已实现四槽最多四张、累计 16 项、通用 scalar renderer、项目 Flux、零能量 0 与 UI hardening；clean canonical 与 Windows Chrome/owner 审批均已完成。
 - M9 已实现首页透明/非首页 Header blur、Power Spectrum、MFCC 与 Buffer，使 UI/Worker 累计开放 19 项；provisional 与 clean canonical 均 32/32 通过并获 owner 批准，M9 已为 `Complete`。
+- M10 正在交付 Loudness 与 Complex Spectrum：Worker/UI 已累计开放 21 项，结构 exact cursor 分别固定 total+24 bands 与 real/imag 各 1024；dirty-worktree provisional 已 36/36 通过，clean canonical 与 owner 审批尚未完成。
 - 当前 Meyda `spectralFlux` 对有效输入仍抛出 `x is not defined`；产品已按 ADR-0005 实现并由 canonical 缓解 R-020，不得声称上游缺陷已修复。
 - 超出约 15 分钟支持边界的长音频未开始播放只作为非门禁压力观察；它不表示长音频被规定为必须失败，也不改变当前产品范围。
 - 当前机器尚未发现 Edge；没有真实 Edge 证据时不能完成 M11 双浏览器门禁。
@@ -131,3 +132,5 @@ AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端：用户选择
 同次请求中，owner 明确要求实施 M9 完整计划，并新增“首页 Header 透明、其余路由使用 18px backdrop blur”的 Slice 0。M9 据此进入 `In Progress`；该样式变更不修改 M8 canonical 身份。
 
 随后 M9 provisional 与 clean canonical 均 32/32 通过；clean run `M9-2026-08-21T09-14-14-110Z-f88ca331` 绑定 commit `f88ca33149619b1a71eb30d74a1b8e266fb41a65`，summary SHA-256 为 `acb9ced1b448671955704efe33d846cd06059f6a8fd1343fb50f7a847672220e`。`project-owner` 于 2026-08-23 明确批准 M9 canonical evidence 与非首页导航栏模糊效果；该签字确认前述 Windows Chrome 视觉/学习清单通过，但不补写用户未提供的逐项数值或解释原文。M9 据此改为 `Complete`，M10 门禁开放但编码前保持 `Planned`。
+
+同日，`project-owner` 以“PLEASE IMPLEMENT THIS PLAN”明确要求实施 M10 21/21 特征计划，并选择 Complex Spectrum 主图完整展示 1024 bins。M10 据此进入 `In Progress`；该授权不构成 M10 canonical 或 release readiness 通过。

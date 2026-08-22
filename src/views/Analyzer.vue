@@ -4,12 +4,12 @@
         <div class="analyzer-content">
             <header class="page-header">
                 <div>
-                    <p class="kicker">Analyzer learning workspace · M9</p>
+                    <p class="kicker">Analyzer learning workspace · M10</p>
                     <h1>用四张联动卡读懂声音特征</h1>
                     <p>
                         RMS 看响度变化，Amplitude Spectrum 看频率分布，
-                        Chroma 看十二音级；Power Spectrum、MFCC 与 Buffer
-                        继续解释功率、音色系数和原始波形。
+                        Chroma 看十二音级；Loudness 与 Complex Spectrum
+                        继续解释感知频带、幅度和相位结构。
                         四个槽位共享同一视口和播放游标。
                     </p>
                 </div>
@@ -17,7 +17,7 @@
                     <span :data-state="analysis.state">
                         {{ analysisStateLabel }}
                     </span>
-                    <span>{{ activeCards.length }}/4 张 M9 活动卡</span>
+                    <span>{{ activeCards.length }}/4 张 M10 活动卡</span>
                     <span v-if="sessionStore.persistence.state === 'not-persisted'">
                         当前工作区未持久化
                     </span>
@@ -104,7 +104,7 @@
                             <p class="slot-number">SLOT {{ slot + 1 }}</p>
                             <h2>添加一张学习卡</h2>
                             <p>
-                                从累计 19 项 M9 特征中选择；最多四张且不会重复。
+                                21 项 Analyzer 特征均可选择；最多四张且不会重复。
                             </p>
                         </div>
                         <div
@@ -149,10 +149,10 @@ import {
 } from '../analysis/timelineViewport';
 import {
     M7_FEATURE_IDS,
-    M9_AVAILABLE_FEATURE_IDS,
+    M10_AVAILABLE_FEATURE_IDS,
     type AnalysisCursorValueResult,
     type AnalysisSeries,
-    type M9FeatureId,
+    type M10FeatureId,
 } from '../analysis/types';
 import { useAudioSessionStore } from '../stores/audioSessionStore';
 import type {
@@ -173,7 +173,7 @@ const audioSession = useAudioSessionService();
 const analysisCoordinator = useAnalysisCoordinator();
 const seriesRevision = ref(0);
 const exactValues = reactive<
-    Partial<Record<M9FeatureId, AnalysisCursorValueResult>>
+    Partial<Record<M10FeatureId, AnalysisCursorValueResult>>
 >({});
 const CURSOR_REQUEST_INTERVAL_MS = 40;
 let unsubscribeCoordinator: (() => void) | null = null;
@@ -186,13 +186,13 @@ const analysis = computed(() => sessionStore.analysis);
 const activeCards = computed(() =>
     [...sessionStore.analysisWorkspace.activeCards]
         .filter((card): card is ActiveAnalysisCard & {
-            featureId: M9FeatureId;
+            featureId: M10FeatureId;
         } =>
-            (M9_AVAILABLE_FEATURE_IDS as readonly string[]).includes(
+            (M10_AVAILABLE_FEATURE_IDS as readonly string[]).includes(
                 card.featureId,
             ))
         .sort((left, right) => left.slot - right.slot));
-const activeFeatureIds = computed<M9FeatureId[]>(() =>
+const activeFeatureIds = computed<M10FeatureId[]>(() =>
     activeCards.value.map((card) => card.featureId));
 const durationSeconds = computed(() =>
     Math.max(0, sessionStore.playback.durationSeconds || 0));
@@ -210,7 +210,7 @@ const viewport = computed<PersistedTimelineViewport>(() =>
         durationSeconds.value,
     ));
 const availableFeatures = computed(() =>
-    M9_AVAILABLE_FEATURE_IDS
+    M10_AVAILABLE_FEATURE_IDS
         .filter((id) => !activeFeatureIds.value.includes(id))
         .map((id) => ({ id, label: FEATURE_REGISTRY[id].label })));
 const analysisStateLabel = computed(() => {
@@ -231,7 +231,7 @@ const analysisStateLabel = computed(() => {
 const cardAt = (slot: 0 | 1 | 2 | 3) =>
     activeCards.value.find((card) => card.slot === slot);
 
-const seriesFor = (featureId: M9FeatureId): AnalysisSeries | null => {
+const seriesFor = (featureId: M10FeatureId): AnalysisSeries | null => {
     void seriesRevision.value;
     return analysisCoordinator.getSeries(featureId);
 };
@@ -260,7 +260,7 @@ const applyCards = async (cards: ActiveAnalysisCard[]) => {
         sorted.map((card) => card.featureId),
     );
     await persist;
-    for (const key of Object.keys(exactValues) as M9FeatureId[]) {
+    for (const key of Object.keys(exactValues) as M10FeatureId[]) {
         if (!sorted.some((card) => card.featureId === key)) {
             delete exactValues[key];
         }
@@ -270,7 +270,7 @@ const applyCards = async (cards: ActiveAnalysisCard[]) => {
 
 const addCard = (
     slot: 0 | 1 | 2 | 3,
-    featureId: M9FeatureId,
+    featureId: M10FeatureId,
 ) => {
     if (
         activeCards.value.length >= 4
@@ -281,7 +281,7 @@ const addCard = (
 
 const replaceCard = (
     slot: 0 | 1 | 2 | 3,
-    featureId: M9FeatureId,
+    featureId: M10FeatureId,
 ) => {
     if (
         activeFeatureIds.value.includes(featureId)

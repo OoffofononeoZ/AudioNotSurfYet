@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/product/scope.md"
   - "docs/architecture/system-design.md"
   - "docs/delivery/execution-plan.md"
-next_action: "M9 已获 owner 批准并关闭；M10 门禁开放"
+next_action: "M10 DEC-020 已实现且 provisional 通过；完成 clean canonical 后复核"
 ---
 
 # Decision Registry
@@ -40,6 +40,7 @@ next_action: "M9 已获 owner 批准并关闭；M10 门禁开放"
 | DEC-017 | 2026-07-30 | M7 固定四个 UI 槽位，但只允许 RMS、Amplitude Spectrum、Chroma 三个唯一活动特征；无保存工作区默认三卡，已保存空工作区恢复为空；第四槽与完整四特征场景顺延 M8 | project-owner | approved | [Execution plan](../delivery/execution-plan.md) | M7 活动上限、默认/恢复语义、槽位或 M8 开门规则改变 |
 | DEC-018 | 2026-08-21 | M8 先修复 Analyzer shell 四项 UI 问题，再开放 13 个标量；Flux 使用项目 v1 公式，零能量 M8 标量为 0，非零能量非有限值失败；累计最多四张唯一卡 | project-owner | approved | [ADR-0005](../architecture/adrs/0005-project-spectral-flux-and-silence-semantics.md) | Flux 公式、静音语义、M8 feature set、shell layer 或按钮状态契约改变 |
 | DEC-019 | 2026-08-21 | M9 Slice 0 让首页 Header 保持透明、所有非首页使用 18px backdrop blur；随后开放 Power Spectrum、MFCC、Buffer，累计最多四张、19/21 可用卡 | project-owner | approved | [Execution plan](../delivery/execution-plan.md) | Header 路由样式、M9 feature set、向量/波形 renderer 或累计覆盖改变 |
+| DEC-020 | 2026-08-23 | M10 开放 Loudness 与 Complex Spectrum 达到 21/21；Complex Spectrum 主图与精确表完整保留 1024 bins，并以 signed Hz 解释后半负频率镜像 | project-owner | approved | [Execution plan](../delivery/execution-plan.md) | 结构 payload、FFT bin 范围、renderer 或最终 feature set 改变 |
 
 ## Approval Evidence
 
@@ -80,6 +81,8 @@ M4 dirty-worktree provisional suite 随后通过，证明当前实现值得进�
 同次请求中，`project-owner` 明确要求实施 M9 计划，并把非首页导航栏背景模糊列为 M9 Slice 0。DEC-019 据此生效，M9 改为 `In Progress`；M8 canonical 身份不重新打开，M9 仍需自己的 provisional、clean canonical、in-review evidence 与 owner 审批。
 
 2026-08-23，`project-owner` 明确批准 M9 canonical evidence 与非首页导航栏模糊效果，同意将 M9 标记为 `Complete` 并开放 M10。该批准关闭 DEC-019 的执行门禁，不重写 M9 canonical 身份，也不构成 M10 或 release readiness 通过。
+
+同日，`project-owner` 以“PLEASE IMPLEMENT THIS PLAN”明确要求实施 M10，并确认 Complex Spectrum 完整展示 1024 bins。DEC-020 据此生效，M10 改为 `In Progress`；M10 provisional、clean canonical、`in-review` evidence 与 owner 审批仍分别必需。
 
 ## Historical Evidence Gap
 

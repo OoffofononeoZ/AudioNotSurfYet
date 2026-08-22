@@ -280,7 +280,7 @@ describe('AnalysisCoordinator integration', () => {
         expect(harness.worker.terminated).toBe(true);
     });
 
-    test('reuses a valid partial cache and sends only misses to the Worker', async () => {
+    test('reuses a valid structured cache and sends only structured misses to the Worker', async () => {
         const config = await createAnalysisConfig(SAMPLE_RATE);
         const pcm = createSine(440, 4_096);
         const direct = await runAnalysisJob({
@@ -289,8 +289,8 @@ describe('AnalysisCoordinator integration', () => {
             generation: 1,
             trackHash: 'track-hash',
             config,
-            featureIds: ['rms'],
-            cursorFeatureIds: ['rms'],
+            featureIds: ['loudness'],
+            cursorFeatureIds: ['loudness'],
             pcm: pcm.buffer.slice(0) as ArrayBuffer,
             durationSeconds: pcm.length / SAMPLE_RATE,
         });
@@ -298,7 +298,7 @@ describe('AnalysisCoordinator integration', () => {
         const cacheKey = createAnalysisCacheKey(
             'track-hash',
             config.configHash,
-            'rms',
+            'loudness',
         );
         const harness = setup({ pcm });
         harness.coordinator.setRestoredCache({
@@ -306,7 +306,7 @@ describe('AnalysisCoordinator integration', () => {
                 trackId: 'track-1',
                 trackHash: 'track-hash',
                 configHash: config.configHash,
-                featureIds: ['rms'],
+                featureIds: ['loudness'],
                 cacheKeys: [cacheKey],
             },
             payloads: [{
@@ -315,15 +315,19 @@ describe('AnalysisCoordinator integration', () => {
             }],
         });
 
-        await harness.coordinator.setActiveFeatures(['rms', 'energy']);
+        await harness.coordinator.setActiveFeatures([
+            'loudness',
+            'complexSpectrum',
+        ]);
         await vi.waitFor(() => {
             expect(harness.coordinator.getSnapshot().state).toBe('ready');
         });
         expect(harness.worker.analyzeRequests[0]?.featureIds)
-            .toEqual(['energy']);
-        expect(harness.coordinator.getSeries('rms')).toEqual(cachedSeries);
+            .toEqual(['complexSpectrum']);
+        expect(harness.coordinator.getSeries('loudness'))
+            .toEqual(cachedSeries);
         expect(harness.coordinator.getSnapshot().readyFeatureIds)
-            .toEqual(['rms', 'energy']);
+            .toEqual(['loudness', 'complexSpectrum']);
         await harness.coordinator.dispose();
     });
 
@@ -377,7 +381,7 @@ describe('AnalysisCoordinator integration', () => {
         await harness.coordinator.dispose();
     });
 
-    test('rejects duplicate, five-item and later-milestone feature intent', async () => {
+    test('rejects duplicate, five-item and unknown feature intent', async () => {
         const harness = setup();
         await expect(harness.coordinator.setActiveFeatures([
             'rms',
@@ -394,8 +398,10 @@ describe('AnalysisCoordinator integration', () => {
         ])).rejects.toMatchObject({
             code: 'invalid-active-features',
         });
-        await expect(harness.coordinator.setActiveFeatures(['loudness']))
-            .rejects.toMatchObject({ code: 'unsupported-feature' });
+        await expect(harness.coordinator.setActiveFeatures([
+            'unknown-feature' as never,
+        ]))
+            .rejects.toMatchObject({ code: 'invalid-active-features' });
         await harness.coordinator.dispose();
     });
 });

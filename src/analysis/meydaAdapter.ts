@@ -8,16 +8,17 @@ import {
     type M6SupportedFeatureId,
     type M8FeatureId,
     type M9FeatureId,
+    type M10FeatureId,
 } from './types';
 
-interface MeydaComplexValue {
-    real: number[];
-    imag: number[];
+export interface MeydaComplexValue {
+    real: number[] | Float32Array;
+    imag: number[] | Float32Array;
 }
 
-interface MeydaLoudnessValue {
+export interface MeydaLoudnessValue {
     total: number;
-    specific: Float32Array;
+    specific: number[] | Float32Array;
 }
 
 export type MeydaValue =
@@ -122,23 +123,80 @@ export const vectorMeydaValue = (
     return output;
 };
 
+export const loudnessMeydaValue = (
+    result: MeydaBatchResult,
+): { total: number; specific: number[] } => {
+    const value = result.loudness;
+    if (
+        !value
+        || typeof value !== 'object'
+        || !('total' in value)
+        || !('specific' in value)
+        || typeof value.total !== 'number'
+        || !Number.isFinite(value.total)
+        || (!(value.specific instanceof Float32Array)
+            && !Array.isArray(value.specific))
+    ) {
+        throw new Error('loudness returned an invalid structure.');
+    }
+    const specific = Array.from(value.specific);
+    if (
+        specific.length !== 24
+        || specific.some((entry) => !Number.isFinite(entry))
+    ) {
+        throw new Error('loudness returned invalid dimensions.');
+    }
+    return { total: value.total, specific };
+};
+
+export const complexMeydaValue = (
+    result: MeydaBatchResult,
+    bins: number,
+): { real: number[]; imag: number[] } => {
+    const value = result.complexSpectrum;
+    if (
+        !value
+        || typeof value !== 'object'
+        || !('real' in value)
+        || !('imag' in value)
+        || (!(value.real instanceof Float32Array) && !Array.isArray(value.real))
+        || (!(value.imag instanceof Float32Array) && !Array.isArray(value.imag))
+    ) {
+        throw new Error('complexSpectrum returned an invalid structure.');
+    }
+    const real = Array.from(value.real);
+    const imag = Array.from(value.imag);
+    if (
+        real.length !== bins
+        || imag.length !== bins
+        || real.some((entry) => !Number.isFinite(entry))
+        || imag.some((entry) => !Number.isFinite(entry))
+    ) {
+        throw new Error('complexSpectrum returned invalid dimensions.');
+    }
+    return { real, imag };
+};
+
 export interface M8FrameExtraction {
     values: MeydaBatchResult;
     amplitudeSpectrum?: number[];
 }
 
 export type M9FrameExtraction = M8FrameExtraction;
+export type M10FrameExtraction = M8FrameExtraction;
 
 const extractSupportedFrame = (
-    featureIds: readonly M9FeatureId[],
+    featureIds: readonly M10FeatureId[],
     frame: Float32Array,
     config: AnalysisConfig,
     previousAmplitudeSpectrum?: readonly number[],
-): M9FrameExtraction => {
+): M10FrameExtraction => {
     const requested = new Set<FeatureId>(featureIds);
     const needsFlux = requested.delete('spectralFlux');
     const needsZeroEnergyPolicy = featureIds.some((featureId) =>
-        (M8_SCALAR_FEATURE_IDS as readonly FeatureId[]).includes(featureId));
+        (M8_SCALAR_FEATURE_IDS as readonly FeatureId[]).includes(featureId)
+        || featureId === 'loudness'
+        || featureId === 'complexSpectrum');
     if (needsZeroEnergyPolicy) requested.add('energy');
     if (needsFlux) requested.add('amplitudeSpectrum');
 
@@ -184,6 +242,22 @@ const extractSupportedFrame = (
                     | 'buffer',
                 definition.dimensions(config)[0] ?? 0,
             );
+        } else if (definition.outputShape === 'loudness-structure') {
+            if (zeroEnergy) {
+                result.loudness = {
+                    total: 0,
+                    specific: new Float32Array(24),
+                };
+            }
+            loudnessMeydaValue(result);
+        } else if (definition.outputShape === 'complex-spectrum') {
+            if (zeroEnergy) {
+                result.complexSpectrum = {
+                    real: new Float32Array(config.frameSize),
+                    imag: new Float32Array(config.frameSize),
+                };
+            }
+            complexMeydaValue(result, config.frameSize);
         }
     }
 
@@ -208,6 +282,18 @@ export const extractM9Frame = (
     config: AnalysisConfig,
     previousAmplitudeSpectrum?: readonly number[],
 ): M9FrameExtraction => extractSupportedFrame(
+    featureIds,
+    frame,
+    config,
+    previousAmplitudeSpectrum,
+);
+
+export const extractM10Frame = (
+    featureIds: readonly M10FeatureId[],
+    frame: Float32Array,
+    config: AnalysisConfig,
+    previousAmplitudeSpectrum?: readonly number[],
+): M10FrameExtraction => extractSupportedFrame(
     featureIds,
     frame,
     config,
@@ -301,6 +387,54 @@ export const exactM9Value = (
         config,
         previousAmplitudeSpectrum,
     ).values;
+    const value = extracted[featureId];
+    if (typeof value === 'number') {
+        return scalarMeydaValue(extracted, featureId);
+    }
+    if (value instanceof Float32Array || Array.isArray(value)) {
+        return vectorMeydaValue(
+            extracted,
+            featureId as
+                | 'amplitudeSpectrum'
+                | 'chroma'
+                | 'powerSpectrum'
+                | 'mfcc'
+                | 'buffer',
+            getFeatureDefinition(featureId).dimensions(config)[0] ?? 0,
+        );
+    }
+    throw new Error(`${featureId} returned an unexpected value.`);
+};
+
+export const exactM10Value = (
+    featureId: M10FeatureId,
+    frame: Float32Array,
+    config: AnalysisConfig,
+    previousFrame?: Float32Array,
+): ExactFeatureValue => {
+    let previousAmplitudeSpectrum: number[] | undefined;
+    if (featureId === 'spectralFlux' && previousFrame) {
+        const previous = extractM6Features(
+            ['amplitudeSpectrum'],
+            previousFrame,
+            config,
+        );
+        previousAmplitudeSpectrum = vectorMeydaValue(
+            previous,
+            'amplitudeSpectrum',
+            config.frameSize / 2,
+        );
+    }
+    const extracted = extractM10Frame(
+        [featureId],
+        frame,
+        config,
+        previousAmplitudeSpectrum,
+    ).values;
+    if (featureId === 'loudness') return loudnessMeydaValue(extracted);
+    if (featureId === 'complexSpectrum') {
+        return complexMeydaValue(extracted, config.frameSize);
+    }
     const value = extracted[featureId];
     if (typeof value === 'number') {
         return scalarMeydaValue(extracted, featureId);

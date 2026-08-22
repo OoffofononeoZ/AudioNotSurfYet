@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/product/scope.md"
   - "docs/product/success-metrics.md"
   - "docs/product/open-questions.md"
-next_action: "M9 三类 shape 已获批准；M10 门禁开放，结构化 renderer 尚未实现"
+next_action: "M10 provisional 已通过；在干净实现提交上完成 canonical 并登记 owner evidence 门禁"
 ---
 
 # System Design
@@ -143,6 +143,8 @@ flowchart LR
 Meyda 5.6.3 的固定维度是：Amplitude/Power Spectrum 512、Chroma 12、MFCC 13、Buffer 1024、Loudness 24 specific bands + total、Complex Spectrum 的 real/imag 各 1024。注册表另记录 `deliveryMilestone` 与 `workerSupported`；M6 只支持 RMS、Energy、Amplitude Spectrum、Chroma，21/21 登记不表示 21 项产品能力完成。
 
 M9 不改变 AnalysisConfig、IndexedDB V1 或缓存二进制 schema。Power Spectrum 与 Amplitude Spectrum 在同一 Meyda batch 中提取并由 golden 固定平方关系；MFCC 以 `category-u16` 保留 signed scale/offset；Buffer 全曲显示只保存 `waveform-envelope`，exact cursor 返回当前 1024-sample Meyda buffer 并显示尾帧补 0 数量。
+
+M10 同样不改变 AnalysisConfig、IndexedDB V1 或缓存二进制 schema。Loudness 的全曲 payload 以 Float32 保存 total、以 U16 保存 24 个 specific Bark bands；exact cursor 返回未量化 `{ total, specific }`。Complex Spectrum 的全曲 payload 保存平均 magnitude 与圆周平均 phase，exact cursor 返回未量化 real/imag 各 1024；主图和精确值表按 DEC-020 完整展示 1024 bins，bin 0–512 为非负频率、513–1023 为负频率镜像。零能量帧的两类结构统一返回零；非静音非有限值显式 `extract-failed`。
 
 `spectralFlux` 在锁定版本上已复现依赖内部未声明变量 `x` 的 `ReferenceError`。M6 不 fork、monkey-patch 或启用该特征；M8 按 [ADR-0005](adrs/0005-project-spectral-flux-and-silence-semantics.md) 使用项目内相邻幅度频谱正向 L1 差。M8 golden/cursor/canonical 已通过并缓解产品阻断；Meyda 缺陷仍作为依赖事实保留，不得声称上游已修复。
 

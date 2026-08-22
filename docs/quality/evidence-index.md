@@ -8,14 +8,14 @@ upstream_docs:
   - "docs/quality/failure-taxonomy.md"
   - "docs/delivery/milestone-plan.md"
   - "tests/fixtures/fixture-manifest.json"
-next_action: "M9 evidence 已获 owner 批准；M10 门禁开放，编码前保持 Planned"
+next_action: "M10 provisional 已通过；仅在 clean canonical 后追加 in-review record"
 ---
 
 # Evidence Index
 
 ## 1. Purpose and Gate State
 
-本文件保存受版本控制的长期证据摘要；原始日志保存在 Git 忽略的本地 artifact 目录。M3–M9 的适用 canonical evidence 均已由 `project-owner` 批准，M9 已为 `Complete`。M10 门禁已开放，但编码前保持 `Planned`。
+本文件保存受版本控制的长期证据摘要；原始日志保存在 Git 忽略的本地 artifact 目录。M3–M9 的适用 canonical evidence 均已由 `project-owner` 批准，M9 已为 `Complete`。M10 已进入 `In Progress`，但尚无可登记的 clean canonical evidence。
 
 每条 `pass` 只证明对应里程碑的适用子集在被记录的 commit 和环境上可复现。它不表示完整 EV-A–EV-R、未执行里程碑、Edge 矩阵或 release readiness 已通过。
 
