@@ -9,7 +9,7 @@ upstream_docs:
   - "docs/architecture/system-design.md"
   - "docs/architecture/interface-contracts.md"
   - "docs/architecture/risk-register.md"
-next_action: "M10 provisional 36/36 已通过；提交实现并运行 clean canonical"
+next_action: "M10 clean canonical 36/36 已登记；等待 owner 人工任务与 evidence 审批"
 ---
 
 # Execution Plan
@@ -360,7 +360,7 @@ Verification:
 - feature registry、UI 和测试达到 21/21。
 - 15 分钟 Loudness/Complex/Power/Buffer 四重卡继续满足输入 ≤100ms、分析归因长任务为 0，并回归 20 次资源循环。
 
-Execution state：`M10_FEATURE_IDS`、累计 21 项 Worker/UI、两类 structured payload/renderer、`m10-structures.v1.json`、专项 Vitest/Chrome 和 36 步 eval runner 已进入工作树。dirty-worktree provisional `M10-2026-08-22T18-17-36-129Z-2df604b9-provisional` 已 36/36 通过；正式结论仍等待实现提交、clean-HEAD canonical 与 owner 审批。
+Execution state：`M10_FEATURE_IDS`、累计 21 项 Worker/UI、两类 structured payload/renderer、`m10-structures.v1.json`、专项 Vitest/Chrome 和 36 步 eval runner 已完成。dirty-worktree provisional 与 clean-HEAD canonical 均 36/36 通过；正式 evidence 已登记为 `in-review`，M10 仍等待 owner 人工任务与审批。
 
 Rollback:
 

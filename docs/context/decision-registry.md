@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/product/scope.md"
   - "docs/architecture/system-design.md"
   - "docs/delivery/execution-plan.md"
-next_action: "M10 DEC-020 已实现且 provisional 通过；完成 clean canonical 后复核"
+next_action: "M10 DEC-020 已由 clean canonical 复核；等待 owner evidence 审批"
 ---
 
 # Decision Registry
@@ -83,6 +83,8 @@ M4 dirty-worktree provisional suite 随后通过，证明当前实现值得进�
 2026-08-23，`project-owner` 明确批准 M9 canonical evidence 与非首页导航栏模糊效果，同意将 M9 标记为 `Complete` 并开放 M10。该批准关闭 DEC-019 的执行门禁，不重写 M9 canonical 身份，也不构成 M10 或 release readiness 通过。
 
 同日，`project-owner` 以“PLEASE IMPLEMENT THIS PLAN”明确要求实施 M10，并确认 Complex Spectrum 完整展示 1024 bins。DEC-020 据此生效，M10 改为 `In Progress`；M10 provisional、clean canonical、`in-review` evidence 与 owner 审批仍分别必需。
+
+随后 M10 provisional 与 clean canonical 均 36/36 通过，DEC-020 的完整 1024-bin 决策已由浏览器自动化复核，正式 evidence 为 `in-review`。owner 人工任务与审批仍未完成，因此 M10 保持 `In Progress`，M11 保持 `Planned`。
 
 ## Historical Evidence Gap
 
