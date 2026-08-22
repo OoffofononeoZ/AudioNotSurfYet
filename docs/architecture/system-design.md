@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/product/scope.md"
   - "docs/product/success-metrics.md"
   - "docs/product/open-questions.md"
-next_action: "M10 provisional 已通过；在干净实现提交上完成 canonical 并登记 owner evidence 门禁"
+next_action: "M10 clean canonical 已通过；等待 owner 复核结构化卡片与 21/21 evidence"
 ---
 
 # System Design

@@ -4,7 +4,7 @@ owner: "project-owner"
 last_reviewed: 2026-08-23
 upstream_docs:
   - "docs/context/index.md"
-next_action: "复核 M10 结构化 payload、完整 1024-bin 术语与 canonical evidence"
+next_action: "M10 结构化术语已由 clean canonical 复核；等待 owner evidence 审批"
 ---
 
 # Glossary
@@ -53,4 +53,4 @@ next_action: "复核 M10 结构化 payload、完整 1024-bin 术语与 canonical
 
 ## Approval Record
 
-`project-owner` 于 2026-08-21 批准 M7 canonical evidence 并开放 M8。本词汇表随后已按 M8 累计 16 项、项目 Flux 与四槽实现复核；owner 又批准 M8 canonical evidence 与界面稳定化结果，M8 据此为 `Complete`。2026-08-23，owner 批准 M9 canonical 与非首页导航栏模糊效果；M9 据此为 `Complete`。同日 owner 要求实施 M10 并选择 Complex Spectrum 完整 1024-bin 主图，M10 进入 `In Progress`。
+`project-owner` 于 2026-08-21 批准 M7 canonical evidence 并开放 M8。本词汇表随后已按 M8 累计 16 项、项目 Flux 与四槽实现复核；owner 又批准 M8 canonical evidence 与界面稳定化结果，M8 据此为 `Complete`。2026-08-23，owner 批准 M9 canonical 与非首页导航栏模糊效果；M9 据此为 `Complete`。同日 owner 要求实施 M10 并选择 Complex Spectrum 完整 1024-bin 主图，M10 进入 `In Progress`。M10 clean canonical 已 36/36 通过并把本页 21 项、Bark bands、signed FFT bins 与 structured payload 术语锁入 `in-review` evidence；owner 审批前 M11 不开放。

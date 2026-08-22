@@ -8,14 +8,14 @@ upstream_docs:
   - "docs/quality/failure-taxonomy.md"
   - "docs/delivery/milestone-plan.md"
   - "tests/fixtures/fixture-manifest.json"
-next_action: "M10 provisional 已通过；仅在 clean canonical 后追加 in-review record"
+next_action: "请 project-owner 复核 M10 canonical、21/21 特征与学习任务；批准前 M10 保持 In Progress"
 ---
 
 # Evidence Index
 
 ## 1. Purpose and Gate State
 
-本文件保存受版本控制的长期证据摘要；原始日志保存在 Git 忽略的本地 artifact 目录。M3–M9 的适用 canonical evidence 均已由 `project-owner` 批准，M9 已为 `Complete`。M10 已进入 `In Progress`，但尚无可登记的 clean canonical evidence。
+本文件保存受版本控制的长期证据摘要；原始日志保存在 Git 忽略的本地 artifact 目录。M3–M9 的适用 canonical evidence 均已由 `project-owner` 批准，M9 已为 `Complete`。M10 clean canonical 已登记为 `in-review`；owner 批准前 M10 保持 `In Progress`，M11 保持 `Planned`。
 
 每条 `pass` 只证明对应里程碑的适用子集在被记录的 commit 和环境上可复现。它不表示完整 EV-A–EV-R、未执行里程碑、Edge 矩阵或 release readiness 已通过。
 
@@ -727,3 +727,112 @@ M8 自动化证明 Slice 0 的 sticky 距 Header 8px、播放器/歌曲列表高
 - Meyda 5.6.3 的 `spectralFlux` 上游缺陷仍存在；产品改用 ADR-0005 项目实现，R-020 只能标记产品侧 `Mitigated`。
 - `project-owner` 于 2026-08-23 明确回复：“我批准 M9 canonical evidence 与非首页导航栏模糊效果；同意将 M9 标记为 Complete 并开放 M10。”M9 evidence 据此为 `approved`，M9 为 `Complete`，M10 门禁开放但编码前保持 `Planned`。
 - 本记录不创建或证明 release readiness，也不构成 Edge、M10 或完整 21/21 产品覆盖通过。
+
+## 13. M10 Canonical Run Record
+
+| Field | Value |
+| --- | --- |
+| Run ID | `M10-2026-08-22T18-25-01-873Z-8830e2a2` |
+| Milestone | M10 — Loudness, Complex Spectrum and 21/21 Analyzer coverage |
+| Evidence state | `in-review` |
+| Eval result | `pass`（36/36 steps） |
+| Commit | `8830e2a2edddd9a5db4796ec6f5d5da8ee3c5f72` |
+| Commit at end | `8830e2a2edddd9a5db4796ec6f5d5da8ee3c5f72` |
+| Dirty at start / end | `false` / `false` |
+| Started at | 2026-08-22 18:25:01.873 UTC |
+| Method | `npm run eval:m10` |
+| Reviewer | `project-owner` — pending |
+| Retention | `local-present` |
+| Artifact root | `artifacts/evals/M10-2026-08-22T18-25-01-873Z-8830e2a2/` |
+| Summary SHA-256 | `30eb11b9985adc8c6d84e01b84f31a75785a4d8e39bdef22e85dd153f2637ea1` |
+| Provisional precursor | `M10-2026-08-22T18-17-36-129Z-2df604b9-provisional`，36/36 pass，summary `e9696c843256bff07cfa77b29ee9a529e9d80c6fc842c6f7437fab39a5c77166`；只作 dirty-worktree 实现反馈 |
+
+### Environment
+
+| Item | Recorded value |
+| --- | --- |
+| OS | macOS 26.5.2 (`25F84`), Darwin arm64 |
+| Hardware | MacBook Pro `MacBookPro17,1`；Apple M1 8-core；16 GB memory |
+| Node / npm | Node `v24.18.0`；npm `11.16.0` |
+| Vitest | `4.1.10` |
+| Playwright Test | `1.62.0` |
+| Chrome | Google Chrome `151.0.7922.170` |
+| Edge | `not-installed` |
+| FFmpeg | `8.1.2` |
+| Meyda | `5.6.3` |
+
+版本化 golden `tests/analysis/golden/m10-structures.v1.json` 为 451,968 bytes，SHA-256 为 `6ae234c078923ae261b32688aa72757f9c167e0cdad49737a1b610ff29bbaf9d`。它绑定 `m10-structures-fixtures-v1`、Meyda 5.6.3、固定 AnalysisConfig、静音、同幅 220Hz/4kHz、相位相差 π/2 的 440Hz 纯音和正负 impulse。运行时学习音频 `artifacts/fixtures/m10-structures-v1.wav` 为 672,044 bytes，SHA-256 为 `bf0abda5a6c8964b2d6b07eb7272073415cf74f02c1c562c80cf3cb316dc4e33`，保持 Git 忽略且不包含用户私有音频。本记录只写机型、芯片、核心数与内存，不写本地 artifact 中的序列号、UUID、UDID 或其他设备标识。
+
+### Results and Traceability
+
+| Step | Result | Measurement |
+| --- | --- | --- |
+| Fixture / M3–M7 regression | pass | fixture 5/5；unit 12/12；Worker 20/20；analysis 55/55；M4 6/6 + 5/5；M5 5/5 + 6/6；M6 18/18 + 13/13 + 6/6；M7 8/8 + 4/4 |
+| M8 scalar / Worker regression | pass | unit 7/7；integration 7/7；项目 Flux、静音 0、四卡与累计 M8 能力无回归 |
+| M9 vector/waveform regression | pass | unit 5/5；integration 7/7；Power 512、MFCC 13、Buffer 1024 与结构 cache/exact cursor 无回归 |
+| M10 structure unit and golden | pass | 7/7；21 项集合、direct Meyda、Loudness total/24 bands、Complex real/imag 各 1024、magnitude/phase、相位环绕、静音/非有限值、codec 与 signed Hz |
+| M10 Worker/workspace integration | pass | 13/13；四种混合 shape、两类 codec、cache hit、exact cursor、stale/cancel/quota 与四卡保存恢复 |
+| Docs / harness / typecheck | pass | 生命周期与链接通过；deliberate failure 被检测；`vue-tsc -b` exit 0 |
+| M3 / M4 / M5 Chrome | pass | 6/6、3/3、3/3；三格式与 Header 路由回归通过；M4 60 秒漂移 13.333ms，三次 seek 最大误差 66.827ms |
+| M6 Chrome regression | pass | 3/3；100,941-byte cache、刷新 hit/exact cursor、20 次循环保持 1 Worker/1 AudioContext，RAF 2–3；15 分钟最大反馈 15.8ms、分析长任务 0 |
+| M7 Chrome regression | pass | 5/5；三卡/四槽、共享交互、UI hardening；seek 2.2ms；15 分钟最大反馈 16.6ms、分析长任务 0 |
+| M8 / M9 Chrome regression | pass | 2/2 + 2/2；累计能力、Header blur、四卡、四视口与刷新恢复无回归 |
+| M10 Chrome E2E | pass | 3/3；累计 21 项、Loudness 24 bands、Complex 完整 1024 bins、双 Canvas、单卡错误隔离、鼠标/键盘 seek、2.0× 视口恢复及 390/1024/1280/1920 几何 |
+| M10 heavy capacity | pass | Loudness/Complex/Power/Buffer 四重卡；15 分钟输入反馈 9.5/15.8/17ms，最大 17ms；20 个进度样本单调；分析归因超过 50ms 的 long task 为 0；取消成功 |
+| Build | pass with warning | 1818 modules；Worker 46.50 kB；最大 JS chunk 1,114.74 kB，R-019 warning 保留 |
+| Diff / identity | pass | `git diff --check` exit 0；起止 commit 相同且工作树干净 |
+
+自动化证明当前 registry、Worker、UI、golden 与 renderer 累计开放 21/21 项，同时仍限制最多四张唯一活动卡。Loudness 展示 total 和 B0–B23；Complex Spectrum 主图与精确表完整覆盖 bin 0–1023，并标注正频率与负频率镜像，零幅度 bin 的 phase 显示“未定义”。IndexedDB V1、AnalysisConfig、Meyda 版本和缓存二进制 schema 均未改变。
+
+### Local Artifact Hashes
+
+| Artifact | SHA-256 |
+| --- | --- |
+| `summary.json` | `30eb11b9985adc8c6d84e01b84f31a75785a4d8e39bdef22e85dd153f2637ea1` |
+| `01-fixture-hashes.log` | `07fff3b02a4031676121aa5f9e3db039328d32269bf9d260af5ccd67d624f29c` |
+| `02-M3-unit-regression.log` | `2180665cf3499626fb4d165d3e5e7b1ae67ce050505ef3a5d09fc8feae13be2e` |
+| `03-M3-worker-regression.log` | `46a947d02fab0a27a03a2b52d21dc48c9b6ec9ea192177a9019ba8540b3537c0` |
+| `04-M3-analysis-regression.log` | `8b9b240a6538cc6d573ff5acbcba8587556b617df642771208fb5b2debb1f775` |
+| `05-M4-AudioEngine-unit.log` | `4efb6d7ed16762188ff5c01d493637631f7bc7e9141d4772ae0bcbdc0978bdce` |
+| `06-M4-session-integration.log` | `c3335d6674acaa0da44871cbe87e30ab00f65ba124e6ccb4a49dc62d95dd6379` |
+| `07-M5-repository-unit.log` | `e490bf7b10a37798865d027f29d59133f716a8be388f19aebff2b6787b7724a3` |
+| `08-M5-recovery-integration.log` | `93b3e97c38f1c398cb5bdae398d808909bdf97e5821a219fe259a028358caa54` |
+| `09-M6-platform-unit.log` | `9ccfedd2a8341743547b5680d984832e38d9fe51a60e2348e4b5230526e088d7` |
+| `10-M6-Worker-and-golden.log` | `7997b5fe20e1879d1a30e173d859bb9c42fca3839385797d59d568db2128ff6c` |
+| `11-M6-coordinator-integration.log` | `8ccfbce03496034e7f1f9f475cd491b64df26bd8d6c1e9c189a4ad48339f19db` |
+| `12-M7-workspace-and-learning-unit.log` | `c514112cbe889e990bd4869b7d87fb268ad4e5bb446ea7376f71fc42ab7108f2` |
+| `13-M7-workspace-integration.log` | `7031dacedc18dd1887cf36d15bdd10d18c26a9c0f25384eea7e1eb587ca6f7f2` |
+| `14-M7-golden-identity.log` | `e9c86c8566c4fa8dfe27f6033376965f08fff7eec487d4801cfb69077165d8a6` |
+| `15-M8-scalar-unit-and-golden.log` | `09bdf47c3c2ab6258813c467699b9b1d70fe184ffd4743bbb4fe8de6ce8e935b` |
+| `16-M8-Worker-and-workspace-integration.log` | `5b6453c70f8a1310df62b0d5caee004fe0cd42def1f9eda4393580bc5c540fa2` |
+| `17-M8-golden-identity.log` | `b6914a1c2caa84836ded55c4b6daccbdd85296043980fac59fe4767541d86406` |
+| `18-M9-vector-and-waveform-unit.log` | `2f566c1cf2b1d0de3ef74378b6ea79205f778f38d99edae695fed52853324c92` |
+| `19-M9-Worker-and-workspace-integration.log` | `ca8cdb7de6e922c627ca5959c27b40d2ca1d916311d1262954df6797a1295034` |
+| `20-M9-golden-identity.log` | `7b1d4aaf3705a92c84922ac818e5ed620974784fb3c49fcd5891f5043870a253` |
+| `21-M10-structure-unit-and-golden.log` | `2580811b547bc0f67e70ddc8c4865489e0d690171b72e693cfc5e5b45df36b1c` |
+| `22-M10-Worker-and-workspace-integration.log` | `fda67d847d864af613e02723c9a4a265bd4823cb3012e19da3c4dc0df9edcb20` |
+| `23-M10-golden-identity.log` | `49e32bacc75d372acf4587d95d28a5eac7e3fa51c8aaf1fc51620d03c883f0db` |
+| `24-docs.log` | `bb005ed0074179a47b895a5c66e79917e37ebf18976e21fe9d27b1dd63c8f151` |
+| `25-deliberate-failure.log` | `69bf5c3fa50230a4957ad0c60c8323dba68e494d92761fea0039cf5d580d70aa` |
+| `26-typecheck.log` | `fadc7f66199c28d2f7cca439bb300ebeb0320158f32a0f9b52ec77031538af4d` |
+| `27-M3-Chrome-regression.log` | `a3fcc06c7a77f1ba44a2fe4712a2941207952b9e823a3302fbd60faad0ee4075` |
+| `28-M4-Chrome-regression.log` | `d46920c844dd524edfa3180ff6d2e8c3407c253d3b45deca654b6e8428f5eeb3` |
+| `29-M5-Chrome-regression.log` | `e2db1c63334d16b5988eb91a4c7f22a2f44c4064c8654117d7e727bda137c556` |
+| `30-M6-Chrome-regression.log` | `6cf95b169ac6277a601d33e2dd1872b2307fc914e24c1367b612fbed70075dc8` |
+| `31-M7-Chrome-regression.log` | `36ccbf12c5d7fb7d739afc956ccd63b16be5dd887869d8358c5e3fbbd245789c` |
+| `32-M8-Chrome-regression.log` | `5d140cf9ca85ab4a27583a2d43aafe92a10d1d1beb679d032a3592d6df7d1f14` |
+| `33-M9-Chrome-regression.log` | `946822519d96b10d6695fe829ed160d255381602ca7132c61e1ba3e54bf15ac2` |
+| `34-M10-Chrome-e2e.log` | `db0710b95454789a75e034cf27c63fbcb4ed75fc930fdf1ba35722cb963463de` |
+| `35-build.log` | `b20f1294c51812e217cea60f6abc48935853e7c6ed7171d446dd2faba4b93458` |
+| `36-diff-check.log` | `e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855` |
+
+`summary.json.sha256` 已独立核对并与 `summary.json` 一致。本地产物至少保留到 M10 审批完成；commit、summary 或 artifact 身份变化时必须重跑 canonical。
+
+### Open Gaps and Approval Gate
+
+- owner 尚未完成 M10 人工任务与学习解释；M10 evidence 保持 `in-review`，M10 保持 `In Progress`，M11 不开放。
+- Edge 未安装；M11 与未来 readiness 的双浏览器矩阵仍不完整，不能用 Chrome 或 Chromium 替代。
+- 主 chunk 1,114.74 kB warning 与 R-019 保留；本 run 不构成 bundle readiness 通过。
+- Meyda 5.6.3 的 `spectralFlux` 上游缺陷仍存在；产品改用 ADR-0005 项目实现，R-020 仅为产品侧 `Mitigated`。
+- M10 四重卡 15 分钟场景证明渐进、反馈、long-task 与取消门禁；完整计算完成后的内存/缓存压力仍由 M11 继续验证。
+- 本记录不创建或证明 release readiness，也不构成 Edge、M11 或发布通过。

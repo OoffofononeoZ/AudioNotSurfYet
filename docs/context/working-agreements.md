@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/context/index.md"
   - "docs/delivery/test-strategy.md"
   - "docs/quality/eval-plan.md"
-next_action: "M10 provisional 36/36 已通过；提交实现后运行 clean canonical"
+next_action: "M10 clean canonical 36/36 已通过；保留 artifact 并等待 owner 审批"
 ---
 
 # Working Agreements
@@ -67,7 +67,8 @@ next_action: "M10 provisional 36/36 已通过；提交实现后运行 clean cano
 - M9 dirty-worktree provisional `M9-2026-08-21T09-08-40-958Z-896dbbb9-provisional` 已 32/32 通过，summary SHA-256 为 `9285bef21c715a2f36746ae7647255f00c06c40e70bc4af377baf03df7a4e9bf`；它只作实现反馈，不绑定 M9 实现 commit，也不进入正式 evidence index。
 - M9 clean canonical `M9-2026-08-21T09-14-14-110Z-f88ca331` 已在 commit `f88ca33149619b1a71eb30d74a1b8e266fb41a65` 上 32/32 通过，起止工作树干净，summary SHA-256 为 `acb9ced1b448671955704efe33d846cd06059f6a8fd1343fb50f7a847672220e`；正式记录已由 owner 批准。
 - M10 dirty-worktree provisional `M10-2026-08-22T18-17-36-129Z-2df604b9-provisional` 已 36/36 通过，summary SHA-256 为 `e9696c843256bff07cfa77b29ee9a529e9d80c6fc842c6f7437fab39a5c77166`；它只作实现反馈，不绑定最终实现 commit，也不进入正式 evidence index。
-- M3–M9 canonical run 已记录并获 owner 批准。M10 只能在实现提交后的干净 HEAD 运行 canonical；本地产物保留和删除规则以 [eval plan](../quality/eval-plan.md) 为准。
+- M10 clean canonical `M10-2026-08-22T18-25-01-873Z-8830e2a2` 已在 commit `8830e2a2edddd9a5db4796ec6f5d5da8ee3c5f72` 上 36/36 通过，起止工作树干净，summary SHA-256 为 `30eb11b9985adc8c6d84e01b84f31a75785a4d8e39bdef22e85dd153f2637ea1`；正式记录保持 `in-review`。
+- M3–M9 canonical run 已记录并获 owner 批准；M10 canonical 已记录但尚未获批。本地产物保留和删除规则以 [eval plan](../quality/eval-plan.md) 为准。
 - fixture、manifest 和 golden 是受版本控制的规范输入；更新必须可重建、显示 diff，并重新执行对应测试。
 
 ## Resource Ownership
@@ -112,3 +113,5 @@ next_action: "M10 provisional 36/36 已通过；提交实现后运行 clean cano
 2026-08-23，`project-owner` 明确回复：“我批准 M9 canonical evidence 与非首页导航栏模糊效果；同意将 M9 标记为 Complete 并开放 M10。”本约定据此前述 Windows Chrome 视觉/学习清单已签字，M9 改为 `Complete`，M10 门禁开放但编码前保持 `Planned`；未提供的逐项数值或解释不作补写。
 
 同日，`project-owner` 明确要求实施 M10 21/21 计划并授权按既定 Git 步骤提交与安全推送。本约定据此增加 M10 命令、fixture 和 clean-identity 规则，M10 改为 `In Progress`；该授权不提前批准 M10 evidence 或 release readiness。
+
+随后 M10 clean canonical 36/36 通过并登记 `in-review` evidence。artifact 必须保留到 owner 审批完成；M10 人工任务与批准前，M10 保持 `In Progress`，M11 保持 `Planned`，不创建 release-readiness。

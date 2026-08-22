@@ -8,14 +8,14 @@ upstream_docs:
   - "docs/delivery/execution-plan.md"
   - "docs/delivery/acceptance-criteria.md"
   - "docs/delivery/test-strategy.md"
-next_action: "M10 provisional 已通过；在 clean 实现 commit 上运行 canonical 并登记 evidence"
+next_action: "M10 clean canonical 已登记为 in-review；等待 owner 人工任务与 evidence 审批"
 ---
 
 # Eval Plan
 
 ## 1. Purpose and Current State
 
-本文件定义 AudioNotSurfYet 的质量证据契约。Vitest、Playwright、Worker harness、受控 fixture 和 direct-Meyda golden 已在 M3 建立。M3–M9 的适用 canonical evidence 均已获批。M10 已进入 `In Progress`，Loudness/Complex Spectrum 专项与 36 步 dirty-worktree provisional 已通过；完整 EV-A–EV-R、Edge 矩阵、M10 canonical/owner 审批和 M11 产品行为仍未完成。
+本文件定义 AudioNotSurfYet 的质量证据契约。Vitest、Playwright、Worker harness、受控 fixture 和 direct-Meyda golden 已在 M3 建立。M3–M9 的适用 canonical evidence 均已获批。M10 仍为 `In Progress`，Loudness/Complex Spectrum 专项、36 步 provisional 与 clean canonical 均已通过，正式 evidence 为 `in-review`；完整 EV-A–EV-R、Edge 矩阵、M10 owner 审批和 M11 产品行为仍未完成。
 
 Q0 只批准“如何判断质量”，不批准 release readiness。`docs/quality/release-readiness.md` 只能在 M11 已产生完整成功、失败、边界和异常证据后创建。
 

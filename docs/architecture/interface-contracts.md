@@ -4,7 +4,7 @@ owner: "project-owner"
 last_reviewed: 2026-08-21
 upstream_docs:
   - "docs/architecture/system-design.md"
-next_action: "M10 21 项 feature set 与两类 structured payload 已实现；canonical 后登记正式 evidence"
+next_action: "M10 21 项与两类 structured payload 已通过 clean canonical；等待 owner evidence 审批"
 ---
 
 # Interface Contracts
