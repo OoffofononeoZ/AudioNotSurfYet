@@ -1,10 +1,10 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-08-21
+last_reviewed: 2026-08-23
 upstream_docs:
   - "docs/context/index.md"
-next_action: "M9 新术语与 canonical 已同步；等待 owner 验证与审批"
+next_action: "M9 术语与 evidence 已获批准；M10 门禁开放"
 ---
 
 # Glossary
@@ -50,4 +50,4 @@ next_action: "M9 新术语与 canonical 已同步；等待 owner 验证与审批
 
 ## Approval Record
 
-`project-owner` 于 2026-08-21 批准 M7 canonical evidence 并开放 M8。本词汇表随后已按 M8 累计 16 项、项目 Flux 与四槽实现复核；owner 又批准 M8 canonical evidence 与界面稳定化结果，M8 据此为 `Complete`，M9 门禁开放但尚未开始实现。
+`project-owner` 于 2026-08-21 批准 M7 canonical evidence 并开放 M8。本词汇表随后已按 M8 累计 16 项、项目 Flux 与四槽实现复核；owner 又批准 M8 canonical evidence 与界面稳定化结果，M8 据此为 `Complete`。2026-08-23，owner 批准 M9 canonical 与非首页导航栏模糊效果；M9 据此为 `Complete`，M10 门禁开放。
