@@ -29,7 +29,11 @@
                     <div id="progress-bar-container" data-testid="playback-progress" :class="{
                         'progress-bar-hidden': isStyleTransitioning,
                         'progress-bar-disabled': !canSeek,
-                    }" :aria-disabled="!canSeek" @mousedown="handleDragStart"
+                    }" role="slider" :tabindex="canSeek ? 0 : -1" aria-label="播放进度"
+                        aria-valuemin="0" :aria-valuemax="playback.durationSeconds"
+                        :aria-valuenow="dragTimeSeconds ?? playback.currentTimeSeconds"
+                        :aria-valuetext="currentTimeText + '/' + (albumInfo[playingTarget]?.duration || '00:00')"
+                        :aria-disabled="!canSeek" @mousedown="handleDragStart" @keydown="handleProgressKeydown"
                         @mouseenter="hovering = canSeek && !isStyleTransitioning" @mouseleave="hovering = false">
                         <div id="progress-button" v-show="hovering && canSeek && !isStyleTransitioning"
                             ref="progressBarRef"></div>
@@ -46,17 +50,19 @@
                     :style="styleMode === 2 ? { transform: 'translateY(-11px)' } : {}">
                     <div class="flex gap-2 items-center">
                         <svg class="w-8 h-8 cursor-pointer" data-testid="previous-track" role="button" tabindex="0"
-                            aria-label="上一首" @click="togglePrev" @keydown.enter="togglePrev">
+                            aria-label="上一首" @click="togglePrev" @keydown.enter.prevent="togglePrev"
+                            @keydown.space.prevent="togglePrev">
                             <use href="/icons.svg#prev-song"></use>
                         </svg>
                         <svg class="w-8 h-8 cursor-pointer rotate-180" data-testid="toggle-playback" role="button"
                             tabindex="0" :aria-label="isPlaying ? '暂停' : '播放'" @click="togglePause"
-                            @keydown.enter="togglePause">
+                            @keydown.enter.prevent="togglePause" @keydown.space.prevent="togglePause">
                             <use href="/icons.svg#play-music" v-if="!isPlaying"></use>
                             <use href="/icons.svg#pause-music" v-else></use>
                         </svg>
                         <svg class="w-8 h-8 cursor-pointer" data-testid="next-track" role="button" tabindex="0"
-                            aria-label="下一首" @click="toggleNext" @keydown.enter="toggleNext">
+                            aria-label="下一首" @click="toggleNext" @keydown.enter.prevent="toggleNext"
+                            @keydown.space.prevent="toggleNext">
                             <use href="/icons.svg#next-song"></use>
                         </svg>
                     </div>
@@ -64,7 +70,9 @@
             </section>
             <section class="actions-section flex gap-4 items-center justify-end w-80 m-1">
                 <el-tooltip placement="top">
-                    <svg class="w-7 h-7 cursor-pointer" data-testid="volume-control">
+                    <svg class="w-7 h-7 cursor-pointer" data-testid="volume-control" role="slider" tabindex="0"
+                        aria-label="音量" aria-valuemin="0" aria-valuemax="100" :aria-valuenow="volume"
+                        :aria-valuetext="`${volume}%`" @keydown="handleVolumeKeydown">
                         <use href="/icons.svg#volume-control"></use>
                     </svg>
                     <template #content>
@@ -75,17 +83,22 @@
                         </div>
                     </template>
                 </el-tooltip>
-                <svg class="w-7 h-7 cursor-pointer" data-testid="toggle-queue" @click="toggleMusicList">
+                <svg class="w-7 h-7 cursor-pointer" data-testid="toggle-queue" role="button" tabindex="0"
+                    aria-label="播放列表" @click="toggleMusicList" @keydown.enter.prevent="toggleMusicList"
+                    @keydown.space.prevent="toggleMusicList">
                     <use href="/icons.svg#music-list"></use>
                 </svg>
                 <svg class="w-7 h-7 cursor-pointer" data-testid="import-audio" role="button" tabindex="0"
-                    aria-label="导入本地音频" @click="toggleSelectFile" @keydown.enter="toggleSelectFile">
+                    aria-label="导入本地音频" @click="toggleSelectFile" @keydown.enter.prevent="toggleSelectFile"
+                    @keydown.space.prevent="toggleSelectFile">
                     <use href="/icons.svg#add-music"></use>
                 </svg>
-                <svg class="w-7 h-7 cursor-pointer" data-testid="change-musicbar-style" @click="toggleChangeStyle">
+                <svg class="w-7 h-7 cursor-pointer" data-testid="change-musicbar-style" role="button" tabindex="0"
+                    aria-label="切换播放器样式" @click="toggleChangeStyle"
+                    @keydown.enter.prevent="toggleChangeStyle" @keydown.space.prevent="toggleChangeStyle">
                     <use href="/icons.svg#change-style"></use>
                 </svg>
-                <svg class="w-7 h-7 cursor-pointer">
+                <svg class="w-7 h-7" aria-label="更多功能尚未开放" aria-disabled="true">
                     <use href="/icons.svg#more-menu"></use>
                 </svg>
             </section>
@@ -187,11 +200,17 @@ let resizeObserver: ResizeObserver | null = null;
 const marqueeTweens: gsap.core.Tween[] = [];
 let musicListVisible = false;
 let previousEnergy = 0;
+const prefersReducedMotion = () =>
+    window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 onMounted(() => {
+    // A zero-duration paused GSAP tween renders its end state immediately.
+    // Keep a near-instant non-zero duration so closed/collapsed initial state
+    // remains authoritative while still honoring reduced motion.
+    const motionDuration = prefersReducedMotion() ? 0.001 : 0.3;
     tl1.to('#music-bar-container', {
         '--offset': '0',
-        duration: 0.3,
+        duration: motionDuration,
         ease: 'linear',
     }).pause();
     tl1.eventCallback('onComplete', () => {
@@ -202,7 +221,7 @@ onMounted(() => {
     });
     tl2.to('.music-list-container', {
         transform: 'translateX(0%)',
-        duration: 0.3,
+        duration: motionDuration,
         ease: 'linear',
     }).pause();
     tl3.fromTo('#music-bar-container', {
@@ -214,7 +233,7 @@ onMounted(() => {
         repeat: -1,
     }).pause();
 
-    if (styleMode.value === 1) {
+    if (styleMode.value === 1 && !prefersReducedMotion()) {
         tl3.play();
     } else if (styleMode.value === 2) {
         tl1.progress(1).pause();
@@ -247,7 +266,9 @@ const toggleChangeStyle = () => {
     switch (styleMode.value) {
         case 0:
             configStore.musicBarSettings.style = 1;
-            nextTick(() => tl3.play());
+            if (!prefersReducedMotion()) {
+                nextTick(() => tl3.play());
+            }
             break;
         case 1:
             isStyleTransitioning.value = true;
@@ -286,6 +307,29 @@ const toggleClear = () => {
 const setVolume = (value: number | number[]) => {
     const nextVolume = Array.isArray(value) ? (value[0] ?? 0) : value;
     audioSession.setVolume(nextVolume);
+};
+
+const handleVolumeKeydown = (event: KeyboardEvent) => {
+    let nextVolume: number | null = null;
+    switch (event.key) {
+        case 'ArrowDown':
+        case 'ArrowLeft':
+            nextVolume = volume.value - 5;
+            break;
+        case 'ArrowUp':
+        case 'ArrowRight':
+            nextVolume = volume.value + 5;
+            break;
+        case 'Home':
+            nextVolume = 0;
+            break;
+        case 'End':
+            nextVolume = 100;
+            break;
+    }
+    if (nextVolume === null) return;
+    event.preventDefault();
+    setVolume(clamp(nextVolume, 0, 100));
 };
 
 const toggleMusicList = () => {
@@ -426,6 +470,7 @@ function setupInfoMarquee() {
     marqueeTweens.forEach((tween) => tween.kill());
     marqueeTweens.length = 0;
     shouldMarquee.value = [false, false, false];
+    if (prefersReducedMotion()) return;
     nextTick(() => {
         const wraps = container.querySelectorAll('.info-line-wrap');
         const next: boolean[] = [];
@@ -506,6 +551,33 @@ const updateProgressWidthPercent = (event: MouseEvent) => {
         (event.clientX - progressBar.getBoundingClientRect().left)
         / progressBar.clientWidth;
     progressWidthPercent = clamp(offset, 0, 1);
+};
+
+const handleProgressKeydown = (event: KeyboardEvent) => {
+    if (!canSeek.value || isStyleTransitioning.value) return;
+
+    const current = playback.value.currentTimeSeconds;
+    const duration = playback.value.durationSeconds;
+    let target: number | null = null;
+    switch (event.key) {
+        case 'ArrowLeft':
+        case 'ArrowDown':
+            target = current - 5;
+            break;
+        case 'ArrowRight':
+        case 'ArrowUp':
+            target = current + 5;
+            break;
+        case 'Home':
+            target = 0;
+            break;
+        case 'End':
+            target = duration;
+            break;
+    }
+    if (target === null) return;
+    event.preventDefault();
+    void audioSession.seek(clamp(target, 0, duration));
 };
 
 const handleDragStart = (event: MouseEvent) => {
@@ -705,6 +777,20 @@ const handleAddToAnalysis = (_index: number) => {
     scale: 1.3;
 }
 
+svg[role="button"]:focus-visible,
+svg[role="slider"]:focus-visible,
+#progress-bar-container:focus-visible {
+    border-radius: 4px;
+    outline: 2px solid var(--main-color);
+    outline-offset: 3px;
+}
+
+svg[role="button"]:focus:not(:focus-visible),
+svg[role="slider"]:focus:not(:focus-visible),
+#progress-bar-container:focus:not(:focus-visible) {
+    outline: none;
+}
+
 .music-list-container {
     position: fixed;
     height: calc(100% - 192px);
@@ -757,6 +843,14 @@ const handleAddToAnalysis = (_index: number) => {
     .actions-section :deep(svg) {
         height: 1.5rem;
         width: 1.5rem;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    #progress-button,
+    .info-marquee-track,
+    .music-list-container {
+        transition-duration: 0.001ms !important;
     }
 }
 </style>

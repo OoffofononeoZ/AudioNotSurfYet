@@ -8,7 +8,7 @@ upstream_docs:
   - "docs/delivery/execution-plan.md"
   - "docs/delivery/acceptance-criteria.md"
   - "docs/delivery/test-strategy.md"
-next_action: "M10 evidence 已获批准；M11 门禁开放，完成真实 Edge 与最终加固证据后再创建 readiness"
+next_action: "M11 provisional 双浏览器矩阵已通过；完成 clean canonical 与人工补偿验证后再创建 readiness"
 ---
 
 # Eval Plan
@@ -153,7 +153,7 @@ Q0 只批准“如何判断质量”，不批准 release readiness。`docs/quali
 
 | Gap ID | Missing evidence | Reason | Residual risk / affected gate | Owner | Compensating or next verification |
 | --- | --- | --- | --- | --- | --- |
-| EG-003 | 真实 Edge 运行 | 当前机器未发现 Edge | 不能关闭 EV-B、M11 或未来 readiness | project-owner | 安装/提供最新稳定 Edge 后执行同一浏览器矩阵 |
+| EG-003 | 真实 Edge 运行 | M11 dirty-worktree provisional 已在 Edge 全量 31/31 通过，但 clean canonical 与原生权限人工矩阵尚未完成 | 不能关闭 EV-B、M11 或未来 readiness | project-owner | 在 clean HEAD 使用真实 `msedge` channel 复跑，并单独完成原生权限人工签字 |
 | EG-004 | 广泛用户学习结果 | 当前范围只批准 owner 自测 | 只能证明 owner 对 3/3 样例达标，不能泛化学习效果 | project-owner | 保留 owner-only 表述；扩大声明前另开产品研究决策 |
 | EG-005 | 目标基线硬件 | 产品未指定设备型号 | 性能结论跨设备可比性有限 | project-owner | 每次记录实际硬件，阈值不变；若结果不稳定，在 quality/readiness 前批准目标设备 |
 | EG-006 | 文件权限真实提示的全自动化 | OS picker 和权限气泡受浏览器/系统控制 | M5 Chrome 已由 owner 手工补偿；Edge 与未来完整矩阵仍不能只靠 adapter 证明 | project-owner | M5 Chrome 记录见 evidence index；Edge/M11 继续执行真实 granted/prompt/denied |

@@ -4,11 +4,11 @@
 
 - Node.js：24.18.0；npm：11.x。仓库使用 `.nvmrc`、`engines` 和 `package-lock.json` 锁定基线。
 - Vitest：4.1.10。官方已发布但当前 npm 镜像尚未提供 Vitest 5，因此使用镜像可获得且仍受支持的 4.1 版本。
-- Playwright Test：1.62.0；必需浏览器为本机稳定版 Google Chrome。
+- Playwright Test：1.62.0；必需浏览器为本机稳定版 Google Chrome 与 Microsoft Edge。
 - FFmpeg：8.1.2；只用于生成和检查受控 WAV/MP3/FLAC fixture。
-- Microsoft Edge 当前未安装。`npm run test:e2e:edge` 会以退出码 2 报告 `blocked`，不会伪装成 pass。
+- 当前检测到 Google Chrome 151.0.7922.174 与 Microsoft Edge 151.0.4129.107；`npm run test:e2e:edge` 使用真实 `msedge` channel，浏览器缺失时仍以退出码 2 报告 `blocked`。
 
-M3–M10 不建设 CI。下列命令当前均为本地门禁；正式证据要求在干净 commit 上复跑。M3–M10 canonical run 已获批准，M10 已为 `Complete`，M11 门禁开放但开始实施前保持 `Planned`。M5 Chrome 原生权限、M7 学习任务、M8 Windows Chrome 界面稳定化与 M9 导航栏视觉/学习清单均已单独签字通过。
+M3–M11 不建设 CI。下列命令当前均为本地门禁；正式证据要求在干净 commit 上复跑。M3–M10 canonical run 已获批准，M10 已为 `Complete`；owner 已明确要求开始 M11，当前为 `In Progress`。M5 Chrome 原生权限、M7 学习任务、M8 Windows Chrome 界面稳定化与 M9 导航栏视觉/学习清单均已单独签字通过；Edge 原生权限仍等待 M11 人工签字。
 
 当前 `npm audit` 在安全补丁更新后剩余 1 项 low：Vite 依赖的 esbuild 0.27.3 在 Windows 开发服务器场景存在本地任意文件读取风险。仓库目标验证机为 macOS，开发服务器不得暴露到不受信网络；依赖升级提供修复版本后复核。该缺口不被描述为已修复或生产 readiness。
 
@@ -48,7 +48,10 @@ M3–M10 不建设 CI。下列命令当前均为本地门禁；正式证据要�
 | `npm run test:e2e:m8` | Chrome 390/1024/1280/1920、四卡/16 项、UI hardening、13 项 scalar renderer 与刷新恢复 |
 | `npm run test:e2e:m9` | Chrome Header 路由样式、四卡/19 项、Power/MFCC/Buffer renderer 与刷新恢复 |
 | `npm run test:e2e:m10` | Chrome 四卡/21 项、Loudness/Complex renderer、完整 1024 bins、刷新恢复与 15 分钟四重卡性能 |
-| `npm run test:e2e:edge` | Edge 存在时执行同一项目；缺失时明确 blocked |
+| `npm run test:e2e:m11:chrome` | Chrome 三格式/分析/恢复、键盘/焦点/reduced motion、多视口、quota 和 20 次 WebGL/RAF 生命周期 |
+| `npm run test:e2e:m11:edge` | 使用真实 Edge 执行 M11 专项 hardening 场景 |
+| `npm run test:e2e:m11` | 顺序执行真实 Chrome 与 Edge 的 M11 专项场景 |
+| `npm run test:e2e:edge` | 使用真实 Edge 执行全部 M3–M11 E2E；缺失时明确 blocked |
 | `npm run build` | TypeScript project build 和 Vite production build |
 | `npm run eval:m3:provisional` | 在未提交工作树生成本地 provisional run |
 | `npm run eval:m3` | 只允许在干净 commit 上生成 canonical M3 run |
@@ -66,6 +69,8 @@ M3–M10 不建设 CI。下列命令当前均为本地门禁；正式证据要�
 | `npm run eval:m9` | 只允许在干净 commit 上执行 M3–M9 32 步 suite 并生成 canonical run |
 | `npm run eval:m10:provisional` | 在 dirty worktree 执行 M3–M10 的 36 步回归并生成实现反馈 |
 | `npm run eval:m10` | 只允许在干净 commit 上执行 M3–M10 36 步 suite 并生成 canonical run |
+| `npm run eval:m11:provisional` | 在 dirty worktree 执行 M3–M11 的 38 步双浏览器回归并生成实现反馈 |
+| `npm run eval:m11` | 只允许在干净 commit 上执行 M3–M11 38 步双浏览器 suite 并生成 canonical run |
 
 ## 目录职责
 
@@ -75,10 +80,10 @@ M3–M10 不建设 CI。下列命令当前均为本地门禁；正式证据要�
 - `tests/worker/`：M3 harness、M6 基线、M8 scalar/Flux、M9 vector/waveform 与 M10 structured 产品 workerCore 合约测试。
 - `tests/analysis/`：direct-Meyda extractor、committed golden、M6 platform、M7 viewport/学习、M8 scalar/Flux、M9 vector/waveform 与 M10 structured golden。
 - `tests/fixtures/`：确定性生成器、短格式文件、许可、manifest 与重建校验。
-- `tests/e2e/`：真实 Chrome 场景；当前不声明 Edge 已通过。
+- `tests/e2e/`：由 Playwright 对真实 Chrome/Edge channel 执行的浏览器场景；只有实际命令通过后才声明对应浏览器证据。
 - `tests/docs/`：生命周期文档和特征计数检查。
 - `tests/harness/`：被正常 Vitest 配置排除的 deliberate failure 及其自检。
-- `tests/scripts/`：浏览器检测和 M3–M10 run orchestration。
+- `tests/scripts/`：浏览器检测和 M3–M11 run orchestration。
 
 M4 浏览器测试中的损坏 WAV 与 65 秒、48kHz、单声道计时 WAV 都写入 `test-results/`，不提交二进制。长时钟测试用同一 DOM 采样同时读取 `performance.now()` 与 AudioContext 驱动快照；三次 seek 使用进度条真实几何。
 
@@ -93,6 +98,8 @@ M8 浏览器测试运行时生成 Git 忽略的 `m8-scalars-v1.wav`，版本化�
 M9 浏览器测试运行时生成 Git 忽略的 `m9-vectors-v1.wav`，版本化数值输入保存在 `m9-vectors.v1.json`。Chrome 场景覆盖首页透明/非首页 18px blur、当前累计 feature set、Power Spectrum 512、MFCC 13、Buffer 1024、双 Canvas、鼠标/键盘 seek、四卡/视口刷新恢复和 390/1024/1280/1920。
 
 M10 浏览器测试运行时生成 Git 忽略的 `m10-structures-v1.wav`，版本化数值输入保存在 `m10-structures.v1.json`。Chrome 场景覆盖累计 21 项、Loudness total/24 Bark bands、Complex Spectrum 完整 1024 bins 与 signed Hz、两类 320px 双 Canvas、鼠标/键盘 seek、刷新恢复、多视口/reduced motion，以及 15 分钟 Loudness/Complex/Power/Buffer 四重卡反馈与长任务门禁。
+
+M11 专项浏览器测试在同一文件上分别运行真实 Chrome/Edge，覆盖三格式队列切换、Analyzer 结果与刷新恢复，键盘播放/进度/Analyzer seek、可见焦点、reduced motion、390/1024/1280/1920 几何、quota 后内存播放，以及 20 次 Home/Analyzer 生命周期中的 WebGL context 与 RAF 上界。`test:e2e:edge` 还会在 Edge 上执行 M3–M10 全部回归。OPFS handle 自动化与原生 OS picker 权限提示继续分开，后者必须由 owner 人工签字。
 
 2026-07-29，`project-owner` 按下列清单完成最新版稳定 Chrome 原生权限人工检查并确认通过。该签字不保存本地音频的文件名、路径、内容或 hash，也不替代 Edge 验证。
 
@@ -159,4 +166,6 @@ M10 provisional `M10-2026-08-22T18-17-36-129Z-2df604b9-provisional` 已 36/36 �
 
 M10 clean canonical `M10-2026-08-22T18-25-01-873Z-8830e2a2` 已在 commit `8830e2a2edddd9a5db4796ec6f5d5da8ee3c5f72` 上 36/36 通过，summary SHA-256 为 `30eb11b9985adc8c6d84e01b84f31a75785a4d8e39bdef22e85dd153f2637ea1`。M10 unit 7/7、integration 13/13、Chrome 3/3；15 分钟四重卡最大反馈 17ms、分析归因长任务 0；M6 回归 20 次资源循环保持单 Worker/AudioContext。build 仍为 1,114.74 kB warning。正式 evidence 已于 2026-08-25 获 owner 批准。
 
-本 README 只记录真实执行结果。M10 clean canonical 与 21/21 Analyzer 特征覆盖已于 2026-08-25 获 owner 批准，M10 为 `Complete`；M11 门禁开放但开始实施前保持 `Planned`。该结果不等于 Edge 矩阵或 release readiness 通过；当前 1,114.74 kB chunk warning 与 Meyda 5.6.3 `spectralFlux` 上游缺陷仍保留，产品侧仅由 ADR-0005 项目实现缓解。
+M11 最终 provisional run `M11-2026-08-25T09-47-44-125Z-1b3691f9-provisional` 已在 dirty worktree 38/38 通过，summary SHA-256 为 `e84e695f8cb328390e1843b03d7af5c6f619bd2d96442fd7d97799bef5287ad5`。真实 Edge 全量 M3–M11 为 31/31；Chrome/Edge 三格式、刷新恢复、键盘、reduced motion、quota 和四视口专项各 4/4。Chrome/Edge 15 分钟四重卡最大反馈分别为 17.6ms/16.7ms，分析归因长任务均为 0；两端 20 次 Home/Analyzer 循环均为 WebGL 21 created/20 lost、2 live RAF。build 最大 JS chunk 为 1,117.54 kB，warning 保留。该 run 绑定 dirty worktree，只作实现反馈。
+
+本 README 只记录真实执行结果。M10 clean canonical 与 21/21 Analyzer 特征覆盖已于 2026-08-25 获 owner 批准，M10 为 `Complete`；M11 当前为 `In Progress`，仍需 clean canonical、Edge 原生权限和辅助技术人工签字。Meyda 5.6.3 `spectralFlux` 上游缺陷仍保留，产品侧仅由 ADR-0005 项目实现缓解；当前不得创建或宣称 release readiness。

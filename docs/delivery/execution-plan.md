@@ -9,7 +9,7 @@ upstream_docs:
   - "docs/architecture/system-design.md"
   - "docs/architecture/interface-contracts.md"
   - "docs/architecture/risk-register.md"
-next_action: "M10 已获 owner 批准并关闭；M11 门禁开放但开始实施前保持 Planned"
+next_action: "M11 已进入 In Progress；执行双浏览器、格式、恢复、性能、资源和无障碍最终加固"
 ---
 
 # Execution Plan
@@ -18,7 +18,7 @@ next_action: "M10 已获 owner 批准并关闭；M11 门禁开放但开始实施
 
 按纵向切片把已批准的本地音频学习体验从当前播放器基础推进到 21 项 Meyda 特征全覆盖。本计划以门禁证据而不是日历日期排序；任一里程碑未通过时，不进入下一批特征。
 
-本文件定义实施顺序和验收方式，不代表未关闭里程碑已通过。当前已完成 M1、M2、Q0、M3–M10 门禁；`project-owner` 已于 2026-08-25 批准 M10 canonical evidence 与 21/21 Analyzer 特征覆盖。M10 为 `Complete`，M11 门禁开放但开始实施前保持 `Planned`。
+本文件定义实施顺序和验收方式，不代表未关闭里程碑已通过。当前已完成 M1、M2、Q0、M3–M10 门禁；`project-owner` 已于 2026-08-25 批准 M10 canonical evidence 与 21/21 Analyzer 特征覆盖，并在确认 Edge 已安装后明确要求开始 M11。M10 为 `Complete`，M11 为 `In Progress`。
 
 ## 2. Stage Gates
 
@@ -368,6 +368,8 @@ Rollback:
 
 ### M11 — Format, recovery, performance and accessibility hardening
 
+Status：In Progress。
+
 Implementation and verification:
 
 - MP3/WAV/FLAC 同源 fixture 全矩阵。
@@ -377,6 +379,13 @@ Implementation and verification:
 - 键盘、焦点、非颜色表达、reduced motion 与必要的辅助技术手工检查。
 - 1024/1280/1920 CSS px 的真实几何与 Canvas backing store。
 - 最新 Chrome 自动化；最新 Edge 真实执行。没有 Edge 证据时里程碑保持未完成。
+
+Execution note:
+
+- 2026-08-25 已检测到 Microsoft Edge 151.0.4129.107 和 Chrome 151.0.7922.174；安装/版本检测只解除 runner 阻塞，不构成通过证据。
+- 自动化使用同一 Playwright 用例分别运行真实 `chrome` 与 `msedge` channel；原生 OS picker 的 granted/prompt/denied 和文件移动仍与 OPFS 自动化分开，由 owner 人工签字。
+- dirty-worktree 只运行 `eval:m11:provisional`；实现提交后的 clean HEAD 才运行 `eval:m11` 并登记 canonical evidence。
+- 最终 provisional 已 38/38 通过，真实 Edge 全量回归 31/31；三格式、四视口、键盘/reduced motion、quota、20 次 WebGL/RAF 生命周期和最重 15 分钟路径均通过。该结果只允许进入实现提交与 clean canonical，不关闭 M11。
 
 Gate:
 

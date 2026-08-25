@@ -13,7 +13,8 @@
     - className<string>: 类名
 -->
 <template>
-    <div ref="containerRef" :class="['w-full h-full relative z-[3] pointer-events-none overflow-hidden', className]">
+    <div ref="containerRef" :class="['w-full h-full relative z-[3] pointer-events-none overflow-hidden', className]"
+        :data-motion-mode="prefersReducedMotion ? 'reduced' : 'animated'">
         <slot></slot>
     </div>
 </template>
@@ -99,8 +100,10 @@ const smoothMouseRef = ref<MousePosition>({ x: 0.5, y: 0.5 });
 const animationIdRef = ref<number | null>(null);
 const cleanupFunctionRef = ref<(() => void) | null>(null);
 const isVisible = ref<boolean>(false);
+const prefersReducedMotion = ref<boolean>(false);
 const observerRef = ref<IntersectionObserver | null>(null);
 const resizeTimeoutRef = ref<number | null>(null);
+let motionMediaQuery: MediaQueryList | null = null;
 
 const rgbColor = computed<[number, number, number]>(() => hexToRgb(props.raysColor));
 const devicePixelRatio = computed<number>(() => Math.min(window.devicePixelRatio || 1, 2));
@@ -131,18 +134,6 @@ const getAnchorAndDir = (origin: RaysOrigin, w: number, h: number): AnchorAndDir
             return { anchor: [0.5 * w, -outside * h], dir: [0, 1] };
     }
 };
-
-const debouncedUpdatePlacement = (() => {
-    let timeoutId: number | null = null;
-
-    return (updateFn: () => void): void => {
-        if (timeoutId !== null) clearTimeout(timeoutId);
-        timeoutId = window.setTimeout(() => {
-            updateFn();
-            timeoutId = null;
-        }, 16);
-    };
-})();
 
 const vertexShader: string = `
   varying vec2 vUv;
@@ -329,31 +320,47 @@ const initializeWebGL = async (): Promise<void> => {
         };
 
         const handleResize = (): void => {
-            debouncedUpdatePlacement(updatePlacement);
+            if (resizeTimeoutRef.value !== null) {
+                window.clearTimeout(resizeTimeoutRef.value);
+            }
+            resizeTimeoutRef.value = window.setTimeout(() => {
+                updatePlacement();
+                if (prefersReducedMotion.value) {
+                    renderer.render(scene, camera);
+                }
+                resizeTimeoutRef.value = null;
+            }, 16);
         };
 
         window.addEventListener('resize', handleResize, { passive: true });
         updatePlacement();
-        animationIdRef.value = requestAnimationFrame(loop);
+        if (prefersReducedMotion.value) {
+            renderer.render(scene, camera);
+        } else {
+            animationIdRef.value = requestAnimationFrame(loop);
+        }
 
         cleanupFunctionRef.value = (): void => {
-            if (animationIdRef.value) {
+            if (animationIdRef.value !== null) {
                 cancelAnimationFrame(animationIdRef.value);
                 animationIdRef.value = null;
             }
 
             window.removeEventListener('resize', handleResize);
 
-            if (resizeTimeoutRef.value) {
+            if (resizeTimeoutRef.value !== null) {
                 clearTimeout(resizeTimeoutRef.value);
                 resizeTimeoutRef.value = null;
             }
 
-            if (renderer) {
-                renderer.dispose();
-                if (renderer.domElement.parentNode) {
-                    renderer.domElement.parentNode.removeChild(renderer.domElement);
-                }
+            scene.remove(mesh);
+            geometry.dispose();
+            material.dispose();
+            renderer.renderLists.dispose();
+            renderer.dispose();
+            renderer.forceContextLoss();
+            if (renderer.domElement.parentNode) {
+                renderer.domElement.parentNode.removeChild(renderer.domElement);
             }
 
             sceneRef.value = null;
@@ -387,6 +394,10 @@ const handleMouseMove = (e: MouseEvent): void => {
 onMounted((): void => {
     if (!containerRef.value) return;
 
+    motionMediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+    prefersReducedMotion.value = motionMediaQuery.matches;
+    motionMediaQuery.addEventListener('change', handleMotionPreferenceChange);
+
     observerRef.value = new IntersectionObserver(
         (entries: IntersectionObserverEntry[]): void => {
             const entry = entries[0];
@@ -409,11 +420,22 @@ watch(isVisible, (newVisible: boolean): void => {
         }
         initializeWebGL();
     } else if (!newVisible && cleanupFunctionRef.value) {
-        if (animationIdRef.value) {
+        if (animationIdRef.value !== null) {
             cancelAnimationFrame(animationIdRef.value);
             animationIdRef.value = null;
         }
     }
+});
+
+const handleMotionPreferenceChange = (event: MediaQueryListEvent): void => {
+    prefersReducedMotion.value = event.matches;
+};
+
+watch(prefersReducedMotion, (): void => {
+    if (!isVisible.value || !cleanupFunctionRef.value) return;
+    cleanupFunctionRef.value();
+    cleanupFunctionRef.value = null;
+    void initializeWebGL();
 });
 
 watch(
@@ -450,13 +472,13 @@ watch(
 );
 
 watch(
-    () => props.followMouse,
-    (newFollowMouse: boolean): void => {
-        if (newFollowMouse) {
+    [() => props.followMouse, prefersReducedMotion],
+    ([newFollowMouse, reducedMotion]): void => {
+        if (newFollowMouse && !reducedMotion) {
             window.addEventListener('mousemove', handleMouseMove, { passive: true });
         } else {
             window.removeEventListener('mousemove', handleMouseMove);
-            if (mouseThrottleId) {
+            if (mouseThrottleId !== null) {
                 cancelAnimationFrame(mouseThrottleId);
                 mouseThrottleId = null;
             }
@@ -476,11 +498,16 @@ onUnmounted((): void => {
         cleanupFunctionRef.value = null;
     }
 
-    if (mouseThrottleId) {
+    if (mouseThrottleId !== null) {
         cancelAnimationFrame(mouseThrottleId);
         mouseThrottleId = null;
     }
 
+    motionMediaQuery?.removeEventListener(
+        'change',
+        handleMotionPreferenceChange,
+    );
+    motionMediaQuery = null;
     window.removeEventListener('mousemove', handleMouseMove);
 });
 </script>

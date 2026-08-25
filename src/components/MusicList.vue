@@ -15,21 +15,29 @@
                 </p>
             </div>
             <div class="flex items-center gap-2 mr-2">
-                <svg class="w-4 h-4 cursor-pointer" data-testid="clear-queue" @click="emit('clear')">
-                    <use href="/icons.svg#trashbin-delete"></use>
-                </svg>
-                <svg class="w-4 h-4 cursor-pointer" @click="emit('close-list')">
-                    <use href="/icons.svg#xmark-delete"></use>
-                </svg>
+                <button type="button" class="icon-button" data-testid="clear-queue" aria-label="清空播放列表"
+                    @click="emit('clear')">
+                    <svg class="w-4 h-4" aria-hidden="true">
+                        <use href="/icons.svg#trashbin-delete"></use>
+                    </svg>
+                </button>
+                <button type="button" class="icon-button" aria-label="关闭播放列表" @click="emit('close-list')">
+                    <svg class="w-4 h-4" aria-hidden="true">
+                        <use href="/icons.svg#xmark-delete"></use>
+                    </svg>
+                </button>
             </div>
         </div>
         <AnimatedList :items="key" :slot-data="info" @item-selected="(_, index) => emit('select-index', index)"
             class-name="max-h-full h-full" v-if="info.length > 0">
             <template v-for="value in key" :key="value" #[value]="{ index, data }">
                 <div class="flex items-center justify-between item-container" data-testid="queue-item"
-                    style="color: white;"
+                    style="color: white;" role="button" tabindex="0" :aria-label="`播放 ${data?.title}`"
                     :data-track-id="data?.id"
-                    @mouseenter="mouseEnteredIndex = index" @mouseleave="mouseEnteredIndex = null">
+                    @mouseenter="mouseEnteredIndex = index" @mouseleave="mouseEnteredIndex = null"
+                    @focusin="mouseEnteredIndex = index"
+                    @keydown.enter.prevent="emit('select-index', index)"
+                    @keydown.space.prevent="emit('select-index', index)">
                     <div class="flex items-center gap-2">
                         <div class="w-16 h-16 rounded-md overflow-hidden">
                             <img :src="data?.albumCover" alt="cover">
@@ -66,10 +74,12 @@
                             <svg class="w-6 h-6 cursor-pointer" @click="emit('add-to-analysis', index)">
                                 <use href="/icons.svg#add-music"></use>
                             </svg>
-                            <svg class="w-6 h-6 cursor-pointer" data-testid="delete-track"
-                                @click="emit('delete', index)">
-                                <use href="/icons.svg#xmark-delete"></use>
-                            </svg>
+                            <button type="button" class="icon-button" data-testid="delete-track"
+                                :aria-label="`从播放列表删除 ${data?.title}`" @click="emit('delete', index)">
+                                <svg class="w-6 h-6" aria-hidden="true">
+                                    <use href="/icons.svg#xmark-delete"></use>
+                                </svg>
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -142,5 +152,23 @@ const needsRecovery = (state?: RestoreState) =>
     overflow-y: hidden;
     background-color: #181818;
     border-radius: 10px 0 0 10px;
+}
+
+.item-container:focus-visible,
+.icon-button:focus-visible {
+    border-radius: 6px;
+    outline: 2px solid var(--main-color);
+    outline-offset: 2px;
+}
+
+.icon-button {
+    align-items: center;
+    background: transparent;
+    border: 0;
+    color: inherit;
+    cursor: pointer;
+    display: inline-flex;
+    justify-content: center;
+    padding: 2px;
 }
 </style>

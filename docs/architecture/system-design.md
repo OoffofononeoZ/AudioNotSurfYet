@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/product/scope.md"
   - "docs/product/success-metrics.md"
   - "docs/product/open-questions.md"
-next_action: "M10 21/21 契约与 evidence 已获批准；M11 门禁开放但开始实施前保持 Planned"
+next_action: "M11 已进入 In Progress；完成 clean 双浏览器 canonical 与人工权限/辅助技术验证"
 ---
 
 # System Design

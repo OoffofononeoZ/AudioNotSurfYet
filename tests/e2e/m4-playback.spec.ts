@@ -158,7 +158,9 @@ test('preserves queue controls, append semantics, energy, and resource ownership
     await page.getByTestId('toggle-playback').click();
     await expect(musicBar).toHaveAttribute('data-playback-state', 'playing');
     await page.getByTestId('volume-control').hover();
-    const volumeSlider = page.getByRole('slider');
+    const volumeSlider = page.getByRole('slider', {
+        name: 'slider between 0 and 100',
+    });
     await expect(volumeSlider).toBeVisible();
     await volumeSlider.press('Home');
     await expect(musicBar).toHaveAttribute('data-volume', '0');

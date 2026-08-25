@@ -80,5 +80,5 @@ AudioBufferSourceNode → AnalyserNode → GainNode → audioContext.destination
 - service 测试覆盖追加、最后操作、ended、删除、清空、metadata fallback、序列化和 URL/RAF 生命周期。
 - Chrome E2E 覆盖三格式、错误恢复、队列操作、20 次切歌、route 变化、能量和 60 秒时钟。
 - M5 Vitest 覆盖 validator、hash、事务替换/abort、权限状态和恢复顺序；Chrome E2E 用 OPFS 真句柄覆盖 IndexedDB 刷新与 current Blob。原生 OS picker 的权限、恢复访问和文件移动已由 `project-owner` 于 2026-07-29 人工检查通过；Edge 权限矩阵仍未完成。
-- 当前 Edge 未安装；Chrome 结果不能表述为双浏览器完成。
+- 2026-08-25 已检测到 Microsoft Edge 151.0.4129.107；只有真实 `msedge` channel 自动化和 Edge 原生权限人工签字完成后，才能表述为双浏览器完成，安装检测本身不构成证据。
 - M6 专项测试覆盖 registry/config/PCM/frame/codec、Worker 0/1/4 和异常、coordinator/cache/stale/quota、真实 Chrome Worker/刷新/exact cursor、20 次资源循环与 15 分钟 OPFS 性能/取消。
