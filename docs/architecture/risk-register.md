@@ -1,11 +1,11 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-08-23
+last_reviewed: 2026-08-25
 upstream_docs:
   - "docs/architecture/system-design.md"
   - "docs/architecture/interface-contracts.md"
-next_action: "M10 clean canonical 已复核专项风险；owner 审批与 M11 加固前保持适用风险 Open"
+next_action: "M10 已获 owner 批准；M11 开工前保持适用风险 Open，并以真实 Edge 与最终加固证据收口"
 ---
 
 # Risk Register
@@ -23,8 +23,8 @@ next_action: "M10 clean canonical 已复核专项风险；owner 审批与 M11 �
 | R-007 | IndexedDB quota 或事务失败破坏当前会话 | Medium | Medium | Blob/cache put 抛 quota/abort | M5 canonical 已验证 current Blob/cache 同事务替换、abort 保留旧记录、保存失败保持内存播放并显示 not-persisted；获批的 M6 canonical 已验证真实 payload、quota 与原子 cache 路径 | 刷新后需重新授权或重新分析；M7 卡片/cache 恢复仍需验证 | project-owner | Open |
 | R-008 | MP3/WAV/FLAC 解码或采样率在浏览器间不同 | Medium | High | golden fixture 帧数、sample rate 或结果偏差 | 同源短 fixture 记录 provenance/hash；Chrome/Edge 实测；AnalysisConfig 记录实际 PCM sample rate | 格式不支持时明确报错；不声明未验证浏览器完成 | project-owner | Open |
 | R-009 | 浏览器解码把编码源重采样到输出设备采样率 | Medium | Medium | `AudioBuffer.sampleRate` 与元数据不同 | fixture 验证；必要时用指定采样率 OfflineAudioContext 生成分析 PCM；缓存身份包含实际采样率 | UI 显示传入分析的真实 PCM 采样率 | project-owner | Open |
-| R-010 | 量化让显示数据误导学习者 | Medium | High | 热图与精确结果不一致或小信号消失 | 明确 scale/offset、饱和测试、Worker golden；M6 exact cursor、M7/M8 golden、M9 Power/MFCC signed 与 M10 Loudness/Complex codec/exact cursor clean canonical 已通过 | M10 owner 学习签字前保持 Open；不适合量化的 total 使用 Float32 payload | project-owner | Open |
-| R-011 | 21 项输出形态差异导致错误 renderer 或维度 | Medium | High | 新特征展示空白、数组错位或 runtime cast | 穷尽 FeatureId 注册表、shape 类型、golden 与单卡错误隔离；M10 clean canonical 已覆盖累计 21/21、24/1024 维度和结构卡 | owner 人工检查前保持 Open；单卡错误边界不影响其他卡和播放 | project-owner | Open |
+| R-010 | 量化让显示数据误导学习者 | Medium | High | 热图与精确结果不一致或小信号消失 | 明确 scale/offset、饱和测试、Worker golden；M6 exact cursor、M7/M8 golden、M9 Power/MFCC signed 与 M10 Loudness/Complex codec/exact cursor clean canonical/owner 签字已通过 | M11 继续复核双浏览器与最重矩阵；不适合量化的 total 使用 Float32 payload | project-owner | Open |
+| R-011 | 21 项输出形态差异导致错误 renderer 或维度 | Medium | High | 新特征展示空白、数组错位或 runtime cast | 穷尽 FeatureId 注册表、shape 类型、golden 与单卡错误隔离；M10 clean canonical/owner 已覆盖累计 21/21、24/1024 维度和结构卡 | M11 继续验证 Edge、无障碍和资源边界；单卡错误边界不影响其他卡和播放 | project-owner | Open |
 | R-012 | 游标漂移超过 100ms | Medium | High | 长播放、暂停/seek/切歌后误差增大 | AudioContext 基准时钟；M8 canonical 的 M4 60 秒漂移 8.833ms、seek 最大误差 61.494ms，M7 Analyzer 点击 seek 反馈 1.8ms | Edge/M11 仍需复核；暂停时使用快照 offset，页面恢复强制归零 | project-owner | Open |
 | R-013 | 文件/Worker/Audio/Canvas 资源泄漏 | Medium | High | 多次换歌后内存、线程、节点或 URL 增长 | 显式 dispose；M8 canonical 的 20 次循环保持 1 live Worker/AudioContext，RAF 区间 2–3；Canvas 分层随卡生命周期释放 | readiness 前仍需人工 DevTools heap/线程长会话检查 | project-owner | Open |
 | R-014 | 图表只靠颜色或 Canvas 导致键盘/辅助技术不可用 | Medium | High | 键盘任务失败、无焦点或无数据替代 | DOM 控件/说明/精确值，焦点样式、非颜色图例、reduced motion；axe + 手工任务 | 完整屏幕阅读器矩阵若未完成需公开残余风险 | project-owner | Open |

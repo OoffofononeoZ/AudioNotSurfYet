@@ -1,21 +1,21 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-08-23
+last_reviewed: 2026-08-25
 upstream_docs:
   - "docs/quality/eval-plan.md"
   - "docs/quality/golden-examples.md"
   - "docs/quality/failure-taxonomy.md"
   - "docs/delivery/milestone-plan.md"
   - "tests/fixtures/fixture-manifest.json"
-next_action: "请 project-owner 复核 M10 canonical、21/21 特征与学习任务；批准前 M10 保持 In Progress"
+next_action: "M10 evidence 已获 owner 批准并关闭；M11 门禁开放但开始实施前保持 Planned"
 ---
 
 # Evidence Index
 
 ## 1. Purpose and Gate State
 
-本文件保存受版本控制的长期证据摘要；原始日志保存在 Git 忽略的本地 artifact 目录。M3–M9 的适用 canonical evidence 均已由 `project-owner` 批准，M9 已为 `Complete`。M10 clean canonical 已登记为 `in-review`；owner 批准前 M10 保持 `In Progress`，M11 保持 `Planned`。
+本文件保存受版本控制的长期证据摘要；原始日志保存在 Git 忽略的本地 artifact 目录。M3–M10 的适用 canonical evidence 均已由 `project-owner` 批准，M10 已为 `Complete`。M11 门禁已开放，但开始实施前保持 `Planned`。
 
 每条 `pass` 只证明对应里程碑的适用子集在被记录的 commit 和环境上可复现。它不表示完整 EV-A–EV-R、未执行里程碑、Edge 矩阵或 release readiness 已通过。
 
@@ -734,14 +734,14 @@ M8 自动化证明 Slice 0 的 sticky 距 Header 8px、播放器/歌曲列表高
 | --- | --- |
 | Run ID | `M10-2026-08-22T18-25-01-873Z-8830e2a2` |
 | Milestone | M10 — Loudness, Complex Spectrum and 21/21 Analyzer coverage |
-| Evidence state | `in-review` |
+| Evidence state | `approved` |
 | Eval result | `pass`（36/36 steps） |
 | Commit | `8830e2a2edddd9a5db4796ec6f5d5da8ee3c5f72` |
 | Commit at end | `8830e2a2edddd9a5db4796ec6f5d5da8ee3c5f72` |
 | Dirty at start / end | `false` / `false` |
 | Started at | 2026-08-22 18:25:01.873 UTC |
 | Method | `npm run eval:m10` |
-| Reviewer | `project-owner` — pending |
+| Reviewer | `project-owner` — approved 2026-08-25 |
 | Retention | `local-present` |
 | Artifact root | `artifacts/evals/M10-2026-08-22T18-25-01-873Z-8830e2a2/` |
 | Summary SHA-256 | `30eb11b9985adc8c6d84e01b84f31a75785a4d8e39bdef22e85dd153f2637ea1` |
@@ -826,11 +826,11 @@ M8 自动化证明 Slice 0 的 sticky 距 Header 8px、播放器/歌曲列表高
 | `35-build.log` | `b20f1294c51812e217cea60f6abc48935853e7c6ed7171d446dd2faba4b93458` |
 | `36-diff-check.log` | `e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855` |
 
-`summary.json.sha256` 已独立核对并与 `summary.json` 一致。本地产物至少保留到 M10 审批完成；commit、summary 或 artifact 身份变化时必须重跑 canonical。
+`summary.json.sha256` 已独立核对并与 `summary.json` 一致。M10 审批已完成；本地产物继续按 [eval plan](eval-plan.md) 的 retention 规则管理，commit、summary 或 artifact 身份变化时必须重跑 canonical。
 
 ### Open Gaps and Approval Gate
 
-- owner 尚未完成 M10 人工任务与学习解释；M10 evidence 保持 `in-review`，M10 保持 `In Progress`，M11 不开放。
+- `project-owner` 于 2026-08-25 明确回复：“我批准 M10 canonical evidence 与 21/21 Analyzer 特征覆盖；同意将 M10 标记为 Complete 并开放 M11。”M10 evidence 据此为 `approved`，M10 为 `Complete`，M11 门禁开放但开始实施前保持 `Planned`；本记录不补写 owner 未提供的逐项数值或学习解释。
 - Edge 未安装；M11 与未来 readiness 的双浏览器矩阵仍不完整，不能用 Chrome 或 Chromium 替代。
 - 主 chunk 1,114.74 kB warning 与 R-019 保留；本 run 不构成 bundle readiness 通过。
 - Meyda 5.6.3 的 `spectralFlux` 上游缺陷仍存在；产品改用 ADR-0005 项目实现，R-020 仅为产品侧 `Mitigated`。

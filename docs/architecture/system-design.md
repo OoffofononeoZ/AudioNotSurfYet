@@ -1,13 +1,13 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-08-23
+last_reviewed: 2026-08-25
 upstream_docs:
   - "docs/product/problem-brief.md"
   - "docs/product/scope.md"
   - "docs/product/success-metrics.md"
   - "docs/product/open-questions.md"
-next_action: "M10 clean canonical 已通过；等待 owner 复核结构化卡片与 21/21 evidence"
+next_action: "M10 21/21 契约与 evidence 已获批准；M11 门禁开放但开始实施前保持 Planned"
 ---
 
 # System Design

@@ -8,7 +8,7 @@
 - FFmpeg：8.1.2；只用于生成和检查受控 WAV/MP3/FLAC fixture。
 - Microsoft Edge 当前未安装。`npm run test:e2e:edge` 会以退出码 2 报告 `blocked`，不会伪装成 pass。
 
-M3–M10 不建设 CI。下列命令当前均为本地门禁；正式证据要求在干净 commit 上复跑。M3–M9 canonical run 已获批准；M10 clean canonical 已登记为 `in-review`，M10 仍为 `In Progress`。M5 Chrome 原生权限、M7 学习任务、M8 Windows Chrome 界面稳定化与 M9 导航栏视觉/学习清单均已单独签字通过。
+M3–M10 不建设 CI。下列命令当前均为本地门禁；正式证据要求在干净 commit 上复跑。M3–M10 canonical run 已获批准，M10 已为 `Complete`，M11 门禁开放但开始实施前保持 `Planned`。M5 Chrome 原生权限、M7 学习任务、M8 Windows Chrome 界面稳定化与 M9 导航栏视觉/学习清单均已单独签字通过。
 
 当前 `npm audit` 在安全补丁更新后剩余 1 项 low：Vite 依赖的 esbuild 0.27.3 在 Windows 开发服务器场景存在本地任意文件读取风险。仓库目标验证机为 macOS，开发服务器不得暴露到不受信网络；依赖升级提供修复版本后复核。该缺口不被描述为已修复或生产 readiness。
 
@@ -157,6 +157,6 @@ M9 provisional `M9-2026-08-21T09-08-40-958Z-896dbbb9-provisional` 已 32/32 通�
 
 M10 provisional `M10-2026-08-22T18-17-36-129Z-2df604b9-provisional` 已 36/36 通过，summary SHA-256 为 `e9696c843256bff07cfa77b29ee9a529e9d80c6fc842c6f7437fab39a5c77166`。M10 unit 7/7、integration 13/13、Chrome 3/3；15 分钟 Loudness/Complex/Power/Buffer 四重卡最大反馈 16.2ms、分析归因长任务 0；M6 回归的 20 次资源循环保持单 Worker/AudioContext。build 最大 JS chunk 为 1,114.74 kB，warning 继续保留。该 run 只作实现反馈。
 
-M10 clean canonical `M10-2026-08-22T18-25-01-873Z-8830e2a2` 已在 commit `8830e2a2edddd9a5db4796ec6f5d5da8ee3c5f72` 上 36/36 通过，summary SHA-256 为 `30eb11b9985adc8c6d84e01b84f31a75785a4d8e39bdef22e85dd153f2637ea1`。M10 unit 7/7、integration 13/13、Chrome 3/3；15 分钟四重卡最大反馈 17ms、分析归因长任务 0；M6 回归 20 次资源循环保持单 Worker/AudioContext。build 仍为 1,114.74 kB warning。正式 evidence 保持 `in-review`。
+M10 clean canonical `M10-2026-08-22T18-25-01-873Z-8830e2a2` 已在 commit `8830e2a2edddd9a5db4796ec6f5d5da8ee3c5f72` 上 36/36 通过，summary SHA-256 为 `30eb11b9985adc8c6d84e01b84f31a75785a4d8e39bdef22e85dd153f2637ea1`。M10 unit 7/7、integration 13/13、Chrome 3/3；15 分钟四重卡最大反馈 17ms、分析归因长任务 0；M6 回归 20 次资源循环保持单 Worker/AudioContext。build 仍为 1,114.74 kB warning。正式 evidence 已于 2026-08-25 获 owner 批准。
 
-本 README 只记录真实执行结果。M9 clean canonical 与非首页导航栏模糊效果已于 2026-08-23 获 owner 批准，M9 为 `Complete`；M10 clean canonical 已通过但仍等待 owner 审批，因此 M10 为 `In Progress`、M11 为 `Planned`。该结果不等于 Edge 矩阵或 release readiness 通过；当前 1,114.74 kB chunk warning 与 Meyda 5.6.3 `spectralFlux` 上游缺陷仍保留，产品侧仅由 ADR-0005 项目实现缓解。
+本 README 只记录真实执行结果。M10 clean canonical 与 21/21 Analyzer 特征覆盖已于 2026-08-25 获 owner 批准，M10 为 `Complete`；M11 门禁开放但开始实施前保持 `Planned`。该结果不等于 Edge 矩阵或 release readiness 通过；当前 1,114.74 kB chunk warning 与 Meyda 5.6.3 `spectralFlux` 上游缺陷仍保留，产品侧仅由 ADR-0005 项目实现缓解。

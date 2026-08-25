@@ -1,7 +1,7 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-08-23
+last_reviewed: 2026-08-25
 upstream_docs:
   - "docs/product/problem-brief.md"
   - "docs/product/scope.md"
@@ -9,7 +9,7 @@ upstream_docs:
   - "docs/architecture/system-design.md"
   - "docs/architecture/interface-contracts.md"
   - "docs/architecture/risk-register.md"
-next_action: "M10 clean canonical 36/36 已登记；等待 owner 人工任务与 evidence 审批"
+next_action: "M10 已获 owner 批准并关闭；M11 门禁开放但开始实施前保持 Planned"
 ---
 
 # Execution Plan
@@ -18,7 +18,7 @@ next_action: "M10 clean canonical 36/36 已登记；等待 owner 人工任务与
 
 按纵向切片把已批准的本地音频学习体验从当前播放器基础推进到 21 项 Meyda 特征全覆盖。本计划以门禁证据而不是日历日期排序；任一里程碑未通过时，不进入下一批特征。
 
-本文件定义实施顺序和验收方式，不代表未关闭里程碑已通过。当前已完成 M1、M2、Q0、M3–M9 门禁；`project-owner` 已于 2026-08-23 批准 M9 canonical 与非首页导航栏模糊效果，并明确要求实施 M10。M9 为 `Complete`，M10 为 `In Progress`。
+本文件定义实施顺序和验收方式，不代表未关闭里程碑已通过。当前已完成 M1、M2、Q0、M3–M10 门禁；`project-owner` 已于 2026-08-25 批准 M10 canonical evidence 与 21/21 Analyzer 特征覆盖。M10 为 `Complete`，M11 门禁开放但开始实施前保持 `Planned`。
 
 ## 2. Stage Gates
 
@@ -360,7 +360,7 @@ Verification:
 - feature registry、UI 和测试达到 21/21。
 - 15 分钟 Loudness/Complex/Power/Buffer 四重卡继续满足输入 ≤100ms、分析归因长任务为 0，并回归 20 次资源循环。
 
-Execution state：`M10_FEATURE_IDS`、累计 21 项 Worker/UI、两类 structured payload/renderer、`m10-structures.v1.json`、专项 Vitest/Chrome 和 36 步 eval runner 已完成。dirty-worktree provisional 与 clean-HEAD canonical 均 36/36 通过；正式 evidence 已登记为 `in-review`，M10 仍等待 owner 人工任务与审批。
+Execution state：`M10_FEATURE_IDS`、累计 21 项 Worker/UI、两类 structured payload/renderer、`m10-structures.v1.json`、专项 Vitest/Chrome 和 36 步 eval runner 已完成。dirty-worktree provisional 与 clean-HEAD canonical 均 36/36 通过；正式 evidence 已于 2026-08-25 获 owner 批准，M10 为 `Complete`。
 
 Rollback:
 
@@ -402,3 +402,5 @@ Gate:
 `project-owner` 于 2026-07-28 明确批准 Q0 三份质量设计及本次 delivery 修订。本文恢复为 `approved` 并开放 M3；全部尚未执行的 eval 仍保持 `planned`，该批准不构成测试或 readiness 证据。
 
 `project-owner` 于 2026-07-28 明确批准 M3 evidence 与 working agreements。M3 改为 `Complete`，M4 开放；该批准不构成 M4–M11 产品行为或 release readiness 证据。
+
+`project-owner` 于 2026-08-25 明确批准 M10 canonical evidence 与 21/21 Analyzer 特征覆盖。M10 改为 `Complete`，M11 门禁开放但开始实施前保持 `Planned`；该批准不构成 Edge、M11 或 release readiness 通过。
