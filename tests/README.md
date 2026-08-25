@@ -168,4 +168,6 @@ M10 clean canonical `M10-2026-08-22T18-25-01-873Z-8830e2a2` 已在 commit `8830e
 
 M11 最终 provisional run `M11-2026-08-25T09-47-44-125Z-1b3691f9-provisional` 已在 dirty worktree 38/38 通过，summary SHA-256 为 `e84e695f8cb328390e1843b03d7af5c6f619bd2d96442fd7d97799bef5287ad5`。真实 Edge 全量 M3–M11 为 31/31；Chrome/Edge 三格式、刷新恢复、键盘、reduced motion、quota 和四视口专项各 4/4。Chrome/Edge 15 分钟四重卡最大反馈分别为 17.6ms/16.7ms，分析归因长任务均为 0；两端 20 次 Home/Analyzer 循环均为 WebGL 21 created/20 lost、2 live RAF。build 最大 JS chunk 为 1,117.54 kB，warning 保留。该 run 绑定 dirty worktree，只作实现反馈。
 
-本 README 只记录真实执行结果。M10 clean canonical 与 21/21 Analyzer 特征覆盖已于 2026-08-25 获 owner 批准，M10 为 `Complete`；M11 当前为 `In Progress`，仍需 clean canonical、Edge 原生权限和辅助技术人工签字。Meyda 5.6.3 `spectralFlux` 上游缺陷仍保留，产品侧仅由 ADR-0005 项目实现缓解；当前不得创建或宣称 release readiness。
+M11 clean canonical run `M11-2026-08-25T10-05-12-783Z-99c67792` 已在 commit `99c67792509d07456bcb431b90468252f8b0fdc3` 上 38/38 通过，summary SHA-256 为 `7d637525b5c9e6aa6fb45dc0818ac1fb59bbef90b90abf3ed2d6e6119ac631b5`。Chrome 专项 4/4、Edge 全量 31/31；Chrome/Edge 60 秒漂移 3.5ms/4.133ms，seek 最大误差 66.827ms/61.494ms；四重卡最大反馈 17.9ms/17.2ms，分析归因长任务均为 0；两端 20 次路由循环均为 WebGL 21 created/20 lost、2 live RAF。build 最大 JS chunk 为 1,117.94 kB，warning 保留。
+
+本 README 只记录真实执行结果。M10 已为 `Complete`；M11 canonical evidence 当前为 `in-review`，M11 仍为 `In Progress`，还需 Edge 原生权限和辅助技术人工签字。Meyda 5.6.3 `spectralFlux` 上游缺陷仍保留，产品侧仅由 ADR-0005 项目实现缓解；当前不得创建或宣称 release readiness。

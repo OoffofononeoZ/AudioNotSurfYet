@@ -6,7 +6,7 @@ upstream_docs:
   - "docs/product/scope.md"
   - "docs/architecture/system-design.md"
   - "docs/architecture/interface-contracts.md"
-next_action: "M7 canonical 已覆盖 workspace/cache 恢复不变量；等待 owner 刷新恢复任务与 evidence 审批"
+next_action: "M11 clean canonical 已覆盖双浏览器恢复不变量；等待 Edge 原生权限人工验收"
 ---
 
 # ADR-0003: Hybrid IndexedDB File-Handle and Current-Blob Recovery
@@ -19,7 +19,7 @@ next_action: "M7 canonical 已覆盖 workspace/cache 恢复不变量；等待 ow
 
 - 使用 `showOpenFilePicker()` 获取文件与句柄，并把队列全部句柄保存在 IndexedDB。
 - 只保存当前歌曲 Blob 和当前歌曲、当前配置、活动特征的分析缓存。
-- 切歌时以版本化事务替换旧 current Blob/cache；失败不影响内存会话，并显示 `not-persisted`。
+- 切歌时同步发布新 current ID 与 `saving`，再以版本化事务替换旧 current Blob/cache；只有当前 command generation 可以完成状态，失败不影响内存会话并显示 `not-persisted`。
 - 刷新恢复队列、当前歌曲、卡片、参数和视窗；播放时间重置为 0 且 paused。
 - 当前歌曲优先使用保存 Blob。其他歌曲按下一首、上一首、下二首、上二首的距离顺序查询权限。
 - `granted` 自动恢复；`prompt`/`denied` 只显示状态，`requestPermission()` 必须由“恢复访问”用户操作触发。

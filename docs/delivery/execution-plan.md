@@ -9,7 +9,7 @@ upstream_docs:
   - "docs/architecture/system-design.md"
   - "docs/architecture/interface-contracts.md"
   - "docs/architecture/risk-register.md"
-next_action: "M11 已进入 In Progress；执行双浏览器、格式、恢复、性能、资源和无障碍最终加固"
+next_action: "M11 clean canonical 已通过；完成 Edge 原生权限与辅助技术人工验收"
 ---
 
 # Execution Plan
@@ -386,6 +386,7 @@ Execution note:
 - 自动化使用同一 Playwright 用例分别运行真实 `chrome` 与 `msedge` channel；原生 OS picker 的 granted/prompt/denied 和文件移动仍与 OPFS 自动化分开，由 owner 人工签字。
 - dirty-worktree 只运行 `eval:m11:provisional`；实现提交后的 clean HEAD 才运行 `eval:m11` 并登记 canonical evidence。
 - 最终 provisional 已 38/38 通过，真实 Edge 全量回归 31/31；三格式、四视口、键盘/reduced motion、quota、20 次 WebGL/RAF 生命周期和最重 15 分钟路径均通过。该结果只允许进入实现提交与 clean canonical，不关闭 M11。
+- clean canonical `M11-2026-08-25T10-05-12-783Z-99c67792` 已在 commit `99c67792509d07456bcb431b90468252f8b0fdc3` 上 38/38 通过；正式 evidence 为 `in-review`，原生 Edge 权限与辅助技术人工验收仍待 owner。
 
 Gate:
 

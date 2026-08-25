@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/product/scope.md"
   - "docs/product/success-metrics.md"
   - "docs/product/open-questions.md"
-next_action: "M11 已进入 In Progress；完成 clean 双浏览器 canonical 与人工权限/辅助技术验证"
+next_action: "M11 clean 双浏览器 canonical 已通过；完成人工权限与辅助技术验证"
 ---
 
 # System Design
@@ -173,7 +173,7 @@ IndexedDB 使用版本化 schema，分别保存：
 
 每项 cache payload 使用 4-byte little-endian header length、UTF-8 JSON header 和连续 typed-array bytes。decoder 必须核对 schema、track/config/feature 身份、payload kind、dimensions、scale/offset 与 byte ranges；错位、缺失、尾随或损坏项只作为 miss 重算。
 
-切换当前歌曲的持久化操作必须在同一逻辑事务中删除旧 current Blob/cache 并写入新记录；失败时保留内存会话并暴露 `not-persisted` 状态。
+切换当前歌曲时，UI current ID 与 persistence `saving` 必须同步发布，避免用户在新 Blob 尚未 durable 时刷新；持久化操作在同一逻辑事务中删除旧 current Blob/cache 并写入新记录，只有当前 command generation 可以把状态推进为 `ready`/`not-persisted`。失败时保留内存会话并暴露 `not-persisted` 状态。
 
 分析结果使用独立 `replaceCurrentAnalysisCache()` 事务：写入前核对 persisted current track/hash，在同一事务更新 session manifest 与固定 current cache，保持 current Blob 不变。身份变化返回 `stale`；quota/abort 保留旧记录，内存 series 继续可用。
 

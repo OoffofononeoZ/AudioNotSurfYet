@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/delivery/acceptance-criteria.md"
   - "docs/delivery/test-strategy.md"
   - "docs/architecture/risk-register.md"
-next_action: "m10-structures v1 与 21/21 coverage 已获批准；M11 继续复用既有 golden 完成最终矩阵"
+next_action: "M11 clean canonical 已回归全部既有 golden；等待 owner 最终人工验收"
 ---
 
 # Golden Examples

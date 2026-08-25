@@ -5,7 +5,7 @@ last_reviewed: 2026-08-25
 upstream_docs:
   - "docs/architecture/system-design.md"
   - "docs/architecture/interface-contracts.md"
-next_action: "M11 provisional 双浏览器矩阵已通过；以 clean canonical 和 Edge 原生权限人工签字收口"
+next_action: "M11 clean canonical 已通过；以 Edge 原生权限、辅助技术与人工长会话签字收口"
 ---
 
 # Risk Register
@@ -15,24 +15,24 @@ next_action: "M11 provisional 双浏览器矩阵已通过；以 clean canonical 
 | ID | Risk | Likelihood | Impact | Trigger / Signal | Mitigation and required evidence | Residual / fallback | Owner | Status |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | R-001 | 抽离 AudioEngine 导致 MusicBar 播放、切歌或能量响应回归 | Medium | High | 现有任务失败、重复 AudioContext、暂停后仍有能量 | engine/store 与 Chrome MusicBar 回归已在 M4 clean commit canonical pass，并由 owner 批准 | 未自动化的音频设备差异继续由手工 Chrome/Edge 验证 | project-owner | Mitigated |
-| R-002 | Worker 迟到结果覆盖新歌曲或新卡片 | Medium | High | 快速换歌/换卡时图表身份不一致 | job generation + track/config/feature 身份；stale 丢弃单元/集成测试 | 即使取消不及时，身份检查仍是正确性边界 | project-owner | Open |
-| R-003 | 15 分钟频谱造成内存、IPC 或 IndexedDB 膨胀 | High | High | typed array、postMessage、cache 大小持续增长；quota 失败 | 最多 30Hz 聚合、向量量化、只缓存活动特征和当前歌曲、精确值按需提取；获批的 M6 canonical 已记录 100,941-byte 四项 cache、刷新 hit 与 20 次资源循环；M11 provisional 在 Chrome/Edge 重跑 15 分钟四重卡、quota 与 20 次资源循环 | 缓存失败时不保存，刷新后重算；clean canonical 和人工长会话检查前继续保持 Open | project-owner | Open |
-| R-004 | 分析或 Canvas 重绘阻塞主线程 | Medium | High | 输入反馈超过 100ms或分析归因长任务超过 50ms | Meyda/聚合/量化放 Worker；静态/游标分层；M11 provisional 的 Chrome/Edge 15 分钟四重卡反馈最大分别为 17.6ms/16.7ms，分析归因长任务均为 0 | clean canonical 前继续保持 Open；必要时降低显示采样或可视层细节，不降低精确游标值 | project-owner | Open |
-| R-005 | File System Access 权限跨会话丢失 | High | Medium | `queryPermission()` 返回 prompt/denied | M5 clean-commit canonical 已验证保存当前 Blob、启动只查询、用户点击后 request 和可见三态；Chrome 原生权限人工检查通过；M11 provisional 的 Edge OPFS/IndexedDB 恢复回归通过 | 未授权歌曲显示恢复访问，不阻断当前 Blob；Edge 原生 picker 的 granted/prompt/denied 仍待 owner 人工签字 | project-owner | Accepted |
-| R-006 | 文件移动、替换或内容变化导致错误缓存 | Medium | High | 句柄 `getFile()` 失败或 hash 变化 | M5 canonical 已验证 SHA-256 最终身份、tampered current Blob、missing/changed 和重选 adapter；获批的 M6 canonical 已验证真实 analysis cache 身份与刷新 hit | track 保留在队列并显示明确恢复状态；M7 UI 恢复仍需验证 | project-owner | Open |
-| R-007 | IndexedDB quota 或事务失败破坏当前会话 | Medium | Medium | Blob/cache put 抛 quota/abort | M5 canonical 已验证 current Blob/cache 同事务替换、abort 保留旧记录、保存失败保持内存播放并显示 not-persisted；获批的 M6 canonical 已验证真实 payload、quota 与原子 cache 路径 | 刷新后需重新授权或重新分析；M7 卡片/cache 恢复仍需验证 | project-owner | Open |
-| R-008 | MP3/WAV/FLAC 解码或采样率在浏览器间不同 | Medium | High | golden fixture 帧数、sample rate 或结果偏差 | 同源短 fixture 记录 provenance/hash；M11 provisional 已在真实 Chrome/Edge 加载三格式、切换、分析并刷新恢复；AnalysisConfig 记录实际 PCM sample rate | clean canonical 前不关闭；格式不支持时明确报错 | project-owner | Open |
-| R-009 | 浏览器解码把编码源重采样到输出设备采样率 | Medium | Medium | `AudioBuffer.sampleRate` 与元数据不同 | fixture 验证；必要时用指定采样率 OfflineAudioContext 生成分析 PCM；缓存身份包含实际采样率 | UI 显示传入分析的真实 PCM 采样率 | project-owner | Open |
-| R-010 | 量化让显示数据误导学习者 | Medium | High | 热图与精确结果不一致或小信号消失 | 明确 scale/offset、饱和测试、Worker golden；M6 exact cursor、M7/M8 golden、M9 Power/MFCC signed 与 M10 Loudness/Complex codec/exact cursor clean canonical/owner 签字已通过 | M11 继续复核双浏览器与最重矩阵；不适合量化的 total 使用 Float32 payload | project-owner | Open |
-| R-011 | 21 项输出形态差异导致错误 renderer 或维度 | Medium | High | 新特征展示空白、数组错位或 runtime cast | 穷尽 FeatureId 注册表、shape 类型、golden 与单卡错误隔离；M10 clean canonical/owner 已覆盖累计 21/21、24/1024 维度和结构卡 | M11 继续验证 Edge、无障碍和资源边界；单卡错误边界不影响其他卡和播放 | project-owner | Open |
-| R-012 | 游标漂移超过 100ms | Medium | High | 长播放、暂停/seek/切歌后误差增大 | AudioContext 基准时钟；M11 provisional 的 Chrome/Edge 60 秒漂移分别为 3.3ms/6.533ms，seek 最大误差分别为 61.494ms/66.827ms | clean canonical 前继续保持 Open；暂停时使用快照 offset，页面恢复强制归零 | project-owner | Open |
-| R-013 | 文件/Worker/Audio/Canvas 资源泄漏 | Medium | High | 多次换歌后内存、线程、节点或 URL 增长 | 显式 dispose；LightBg 释放 mesh/geometry/material/renderer/context；M11 provisional 在 Chrome/Edge 各 20 次 Home/Analyzer 循环均为 WebGL 21 created/20 lost、2 live RAF，M6 回归保持单 Worker/AudioContext | readiness 前仍需人工 DevTools heap/线程长会话检查 | project-owner | Open |
-| R-014 | 图表只靠颜色或 Canvas 导致键盘/辅助技术不可用 | Medium | High | 键盘任务失败、无焦点或无数据替代 | DOM 控件/说明/精确值、可见焦点、非颜色图例；M11 provisional 在 Chrome/Edge 验证键盘进度 seek、核心控制、reduced motion 和四视口 | 屏幕阅读器与辅助技术人工检查仍待 owner；无 axe 扫描证据时不得声称已执行 | project-owner | Open |
-| R-015 | 双浏览器状态被误报 | High | Medium | 只执行 Chromium 或安装检测，没有真实 Edge channel 证据 | M11 runner 固定使用真实 `chrome`/`msedge` channel；provisional 的 Edge 全量 M3–M11 为 31/31，并记录产品版本 | clean canonical 与 Edge 原生权限人工签字前不关闭最终兼容门禁 | project-owner | Open |
-| R-016 | fixture 来源或许可不可追溯 | Medium | Medium | 二进制无来源/hash | 合成 PCM 由脚本生成；格式 fixture 记录生成命令、编码器版本、许可和 SHA-256 | 无合规 provenance 的 fixture 不入库 | project-owner | Open |
-| R-017 | 现有 `test:spectrogram` 指向缺失 `test.ts` | High | Medium | 命令无法运行 | 测试基线里程碑修复或重定向脚本，并在 CI/本地运行 | 修复前不能把该命令作为质量证据 | project-owner | Open |
+| R-002 | Worker 迟到结果覆盖新歌曲或新卡片 | Medium | High | 快速换歌/换卡时图表身份不一致 | job generation + track/config/feature 身份；stale/cancel 单元、集成与 M11 双浏览器 canonical 通过 | 即使取消不及时，身份检查仍是正确性边界；身份契约变化时复跑 | project-owner | Mitigated |
+| R-003 | 15 分钟频谱造成内存、IPC 或 IndexedDB 膨胀 | High | High | typed array、postMessage、cache 大小持续增长；quota 失败 | 最多 30Hz 聚合、向量量化、只缓存活动特征和当前歌曲、精确值按需提取；M11 canonical 在 Chrome/Edge 重跑 15 分钟四重卡、quota 与 20 次资源循环，M6 cache 仍为 100,941 bytes | 缓存失败时不保存，刷新后重算；人工长会话 heap 检查前继续保持 Open | project-owner | Open |
+| R-004 | 分析或 Canvas 重绘阻塞主线程 | Medium | High | 输入反馈超过 100ms或分析归因长任务超过 50ms | Meyda/聚合/量化放 Worker；静态/游标分层；M11 canonical 的 Chrome/Edge 15 分钟四重卡反馈最大分别为 17.9ms/17.2ms，分析归因长任务均为 0 | 目标设备范围仍受 EG-005 限制；必要时降低显示采样或可视层细节，不降低精确游标值 | project-owner | Mitigated |
+| R-005 | File System Access 权限跨会话丢失 | High | Medium | `queryPermission()` 返回 prompt/denied | M5 clean-commit canonical 已验证保存当前 Blob、启动只查询、用户点击后 request 和可见三态；Chrome 原生权限人工检查通过；M11 canonical 的 Edge OPFS/IndexedDB 恢复回归通过 | 未授权歌曲显示恢复访问，不阻断当前 Blob；Edge 原生 picker 的 granted/prompt/denied 仍待 owner 人工签字 | project-owner | Accepted |
+| R-006 | 文件移动、替换或内容变化导致错误缓存 | Medium | High | 句柄 `getFile()` 失败或 hash 变化 | M5 canonical 已验证 SHA-256 最终身份、tampered current Blob、missing/changed 和重选 adapter；M6–M11 已验证 cache identity 与刷新恢复 | track 保留在队列并显示明确恢复状态；Edge 原生文件移动/重选仍待 owner 人工签字 | project-owner | Open |
+| R-007 | IndexedDB quota 或事务失败破坏当前会话 | Medium | Medium | Blob/cache put 抛 quota/abort | M5/M6 canonical 已验证原子替换、abort、payload/cache quota；M11 修复切歌持久化竞态，并在 Chrome/Edge 验证 quota 后当前播放与 `not-persisted` | 刷新后需重新授权或重新分析；repository/schema 变化时复跑 | project-owner | Mitigated |
+| R-008 | MP3/WAV/FLAC 解码或采样率在浏览器间不同 | Medium | High | golden fixture 帧数、sample rate 或结果偏差 | 同源短 fixture 记录 provenance/hash；M11 canonical 已在真实 Chrome/Edge 加载三格式、切换、分析并刷新恢复；AnalysisConfig 记录实际 PCM sample rate | 平台新增或浏览器解码器变化时复跑；格式不支持时明确报错 | project-owner | Mitigated |
+| R-009 | 浏览器解码把编码源重采样到输出设备采样率 | Medium | Medium | `AudioBuffer.sampleRate` 与元数据不同 | fixture 验证、缓存身份包含实际 PCM sample rate；M11 Chrome/Edge 三格式分析与恢复通过 | UI 显示传入分析的真实 PCM 采样率；新增平台/格式时复跑 | project-owner | Mitigated |
+| R-010 | 量化让显示数据误导学习者 | Medium | High | 热图与精确结果不一致或小信号消失 | 明确 scale/offset、饱和测试、Worker golden；M6 exact cursor、M7–M10 golden/codec 与 M11 双浏览器 canonical 均通过 | 不适合量化的 total 使用 Float32 payload；codec 变化时复跑 golden | project-owner | Mitigated |
+| R-011 | 21 项输出形态差异导致错误 renderer 或维度 | Medium | High | 新特征展示空白、数组错位或 runtime cast | 穷尽 FeatureId 注册表、shape 类型、golden 与单卡错误隔离；M10 owner 批准 21/21，M11 Chrome/Edge 全矩阵无回归 | 单卡错误边界不影响其他卡和播放；registry/renderer 变化时复跑 | project-owner | Mitigated |
+| R-012 | 游标漂移超过 100ms | Medium | High | 长播放、暂停/seek/切歌后误差增大 | AudioContext 基准时钟；M11 canonical 的 Chrome/Edge 60 秒漂移分别为 3.5ms/4.133ms，seek 最大误差分别为 66.827ms/61.494ms | 暂停时使用快照 offset，页面恢复强制归零；浏览器时钟行为变化时复跑 | project-owner | Mitigated |
+| R-013 | 文件/Worker/Audio/Canvas 资源泄漏 | Medium | High | 多次换歌后内存、线程、节点或 URL 增长 | 显式 dispose；LightBg 释放 mesh/geometry/material/renderer/context；M11 canonical 在 Chrome/Edge 各 20 次 Home/Analyzer 循环均为 WebGL 21 created/20 lost、2 live RAF，M6 回归保持单 Worker/AudioContext | readiness 前仍需人工 DevTools heap/线程长会话检查 | project-owner | Open |
+| R-014 | 图表只靠颜色或 Canvas 导致键盘/辅助技术不可用 | Medium | High | 键盘任务失败、无焦点或无数据替代 | DOM 控件/说明/精确值、可见焦点、非颜色图例；M11 canonical 在 Chrome/Edge 验证键盘进度/音量/Analyzer seek、核心控制、reduced motion 和四视口 | 屏幕阅读器与辅助技术人工检查仍待 owner；无 axe 扫描证据时不得声称已执行 | project-owner | Open |
+| R-015 | 双浏览器状态被误报 | High | Medium | 只执行 Chromium 或安装检测，没有真实 Edge channel 证据 | M11 runner 固定使用真实 `chrome`/`msedge` channel；clean canonical 的 Edge 全量 M3–M11 为 31/31，并记录产品版本 | 原生权限体验仍由 R-005/EG-006 跟踪；浏览器升级时复跑 | project-owner | Mitigated |
+| R-016 | fixture 来源或许可不可追溯 | Medium | Medium | 二进制无来源/hash | 合成 PCM 由脚本生成；格式 fixture 记录生成命令、编码器版本、许可和 SHA-256；M11 canonical fixture hash 5/5 通过 | 无合规 provenance 的 fixture 不入库 | project-owner | Mitigated |
+| R-017 | 现有 `test:spectrogram` 指向缺失 `test.ts` | High | Medium | 命令无法运行 | M3 已删除失效命令并建立正式 test/eval scripts；M3–M11 canonical 持续执行公开命令 | package scripts 变化时由 docs/harness 回归检测 | project-owner | Mitigated |
 | R-018 | 未定义 Tab 或未来上传需求侵入当前交付 | Medium | Medium | PR 添加空白页实现、网络数据路径或服务端依赖 | scope review、Feature/ADR 门禁；未来能力另开产品决策 | 产品意图变化会使所有下游待复核 | project-owner | Open |
-| R-019 | bundle 已有约 1MB 警告继续增长 | Medium | Medium | `npm run build` chunk warning 增大 | Worker/renderer 按路由或 feature family 拆分，记录构建体积；M11 provisional 最大 JS chunk 为 1,117.54 kB；避免 Analyzer Three.js | 具体发布预算在 quality/release 前批准，warning 继续保留 | project-owner | Open |
+| R-019 | bundle 已有约 1MB 警告继续增长 | Medium | Medium | `npm run build` chunk warning 增大 | Worker/renderer 按路由或 feature family 拆分，记录构建体积；M11 canonical 最大 JS chunk 为 1,117.94 kB；避免 Analyzer Three.js | 具体发布预算在 quality/release 前批准，warning 继续保留 | project-owner | Open |
 | R-020 | Meyda 5.6.3 `spectralFlux` 提取器引用未声明变量 `x` | High | High | 固定 previous/current frame 调用抛 `ReferenceError: x is not defined` | ADR-0005 项目 Flux 已实现；公式/首帧/静音/exact cursor golden 与 M8 clean canonical 28/28 通过，保留上游异常事实 | 产品阻断已缓解；Meyda 缺陷未修复，依赖升级时必须重新对照 | project-owner | Mitigated |
 | R-021 | Analyzer sticky、播放器层级、pressed 状态或内层滚动条破坏可用性与视觉一致性 | Medium | Medium | sticky 与 Header 间距过大；歌曲列表被遮挡；Windows Chrome 按钮保持按压外观；表格显示系统默认滚动条 | M8 Slice 0、macOS Chrome 多视口 canonical 与 owner Windows Chrome 人工签字均通过 | 相关交互或样式变化后重新执行多视口自动化与 Windows Chrome 补偿复核 | project-owner | Closed |
 

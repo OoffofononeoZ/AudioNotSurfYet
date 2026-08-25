@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/architecture/interface-contracts.md"
   - "docs/delivery/acceptance-criteria.md"
   - "docs/delivery/execution-plan.md"
-next_action: "M10 36 步 canonical 与 21/21 evidence 已获批准；下一步执行 M11 最终矩阵"
+next_action: "M11 38 步 clean canonical 已通过；执行原生 Edge 权限与辅助技术人工门禁"
 ---
 
 # Test Strategy

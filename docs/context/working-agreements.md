@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/context/index.md"
   - "docs/delivery/test-strategy.md"
   - "docs/quality/eval-plan.md"
-next_action: "M11 已进入 In Progress；使用真实 Chrome/Edge channel 完成最终加固与 clean evidence"
+next_action: "M11 clean canonical 已通过；等待 Edge 原生权限、辅助技术人工签字与 owner 批准"
 ---
 
 # Working Agreements
@@ -123,3 +123,5 @@ next_action: "M11 已进入 In Progress；使用真实 Chrome/Edge channel 完�
 同日，owner 确认已安装 Edge 并明确要求开始 M11 最终加固。本机检测到 Microsoft Edge 151.0.4129.107；M11 改为 `In Progress`。只有真实 Edge runner、双浏览器格式/恢复/交互矩阵、性能资源证据和原生权限人工签字完成后，才允许关闭 M11 或创建 release-readiness。
 
 M11 实施期间先发现并修复 current track UI 已切换但持久化状态尚未进入 `saving` 的刷新竞态；随后 dirty-worktree provisional run `M11-2026-08-25T09-47-44-125Z-1b3691f9-provisional` 38/38 通过，summary SHA-256 为 `e84e695f8cb328390e1843b03d7af5c6f619bd2d96442fd7d97799bef5287ad5`。真实 Edge 全量回归固定 `workers=1`，避免多份长场景并行造成非产品态 CPU 争用；该 provisional 不构成 canonical evidence 或 owner 签字。
+
+随后 clean-HEAD canonical run `M11-2026-08-25T10-05-12-783Z-99c67792` 在 commit `99c67792509d07456bcb431b90468252f8b0fdc3` 上 38/38 通过，summary SHA-256 为 `7d637525b5c9e6aa6fb45dc0818ac1fb59bbef90b90abf3ed2d6e6119ac631b5`；Chrome M11 专项 4/4，Edge 全量 31/31。正式 evidence 保持 `in-review`；原生 Edge 权限、辅助技术人工签字和 owner 批准前不关闭 M11、不创建 release-readiness。
