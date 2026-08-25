@@ -177,6 +177,7 @@ function createHarness(
             };
             format: { duration?: number; sampleRate?: number };
         }>;
+        repository?: SessionRepositoryPort;
     } = {},
 ) {
     const store = useAudioSessionStore();
@@ -185,7 +186,7 @@ function createHarness(
     let nextFrame = 0;
     const frames = new Map<number, FrameRequestCallback>();
     const revoked: string[] = [];
-    const repository: SessionRepositoryPort = {
+    const repository: SessionRepositoryPort = options.repository ?? {
         restore: async () => null,
         saveQueue: async () => undefined,
         replaceCurrent: async () => undefined,
@@ -273,6 +274,42 @@ describe('AudioSessionService', () => {
         expect(engine.loadIds).toEqual(['track-3']);
         expect(store.currentTrackId).toBe('track-3');
         expect(engine.playCount).toBe(1);
+    });
+
+    test('publishes saving until the selected current track is durable', async () => {
+        let blockCurrentWrite = false;
+        let releaseCurrentWrite: () => void = () => {
+            throw new Error('Current-track write was not blocked.');
+        };
+        const repository: SessionRepositoryPort = {
+            restore: async () => null,
+            saveQueue: async () => undefined,
+            replaceCurrent: async () => {
+                if (!blockCurrentWrite) return;
+                await new Promise<void>((resolve) => {
+                    releaseCurrentWrite = resolve;
+                });
+            },
+            replaceCurrentAnalysisCache: async () => 'stored',
+            removeTrack: async () => undefined,
+            clear: async () => undefined,
+        };
+        const { service, store } = createHarness({ repository });
+        await service.importFiles(inputs(
+            createFile('first.wav'),
+            createFile('second.wav'),
+        ));
+
+        blockCurrentWrite = true;
+        const switchCommand = service.next();
+        await vi.waitFor(() => {
+            expect(store.currentTrackId).toBe('track-2');
+            expect(store.playback.state).toBe('playing');
+            expect(store.persistence.state).toBe('saving');
+        });
+        releaseCurrentWrite();
+        await switchCommand;
+        expect(store.persistence.state).toBe('ready');
     });
 
     test('loops on ended and preserves deletion semantics', async () => {

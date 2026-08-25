@@ -718,6 +718,7 @@ export class AudioSessionService {
         this.engine.unload();
         this.store.setCurrentTrack(trackId);
         this.store.setEnergy(0);
+        this.store.setPersistence({ state: 'saving' });
         this.store.setPlayback({
             trackId,
             state: 'loading',
@@ -755,7 +756,11 @@ export class AudioSessionService {
             if (shouldPlay) {
                 await this.engine.play();
             }
-            await this.persistCurrent(trackId, runtimeTrack.file);
+            await this.persistCurrent(
+                trackId,
+                runtimeTrack.file,
+                generation,
+            );
         } catch (error) {
             if (generation !== this.commandGeneration || this.disposed) return;
             this.store.updateTrack(trackId, {
@@ -778,6 +783,9 @@ export class AudioSessionService {
                 });
             }
             this.store.setEnergy(0);
+            this.markPersistenceFailure(
+                '当前歌曲未能完成加载；已保存会话保持不变。',
+            );
         }
     }
 
@@ -888,10 +896,14 @@ export class AudioSessionService {
         }
     }
 
-    private async persistCurrent(trackId: string, file: File) {
+    private async persistCurrent(
+        trackId: string,
+        file: File,
+        generation: number,
+    ) {
+        if (generation !== this.commandGeneration || this.disposed) return;
         const record = this.getTrack(trackId);
         if (!record?.trackHash) return;
-        this.store.setPersistence({ state: 'saving' });
         const input: PersistedCurrentInput = {
             ...this.persistedQueueInput(),
             currentBlob: {
@@ -908,11 +920,17 @@ export class AudioSessionService {
         };
         try {
             await this.repository.replaceCurrent(input);
+            if (generation !== this.commandGeneration || this.disposed) {
+                return;
+            }
             this.store.updateTrack(trackId, {
                 restoreState: 'available',
             });
             this.store.setPersistence({ state: 'ready' });
         } catch {
+            if (generation !== this.commandGeneration || this.disposed) {
+                return;
+            }
             this.store.updateTrack(trackId, {
                 restoreState: 'not-persisted',
             });

@@ -4,7 +4,7 @@ owner: "project-owner"
 last_reviewed: 2026-08-25
 upstream_docs:
   - "docs/context/index.md"
-next_action: "M10 累计 21 项事实与 evidence 已获批准；M11 门禁开放但开始实施前保持 Planned"
+next_action: "M11 已进入 In Progress；复核双浏览器资源、恢复、无障碍和视口事实"
 ---
 
 # System Map
@@ -46,7 +46,7 @@ showOpenFilePicker → FileSystemFileHandle → File
 | Audio session state | 保存队列、当前 track、播放快照、能量、analysis 与 workspace snapshot | Pinia `audioSessionStore` | project-owner | `$state` 可 JSON 序列化，不含浏览器资源实例或 typed-array payload |
 | Session persistence | 保存/恢复 V1 最近会话、全部句柄和唯一 current Blob/cache | 原生 IndexedDB `SessionRepository` | project-owner | `replaceCurrentAnalysisCache()` 校验 track/hash 并原子替换；unknown schema 不猜测迁移 |
 | Config persistence | 保存 volume 与 MusicBar style | Pinia、localStorage key `config` | project-owner | schema 保持不变；volume 为 0–100 |
-| Home visualization | 全屏 Three.js 光线 shader | `rayLength` prop、IntersectionObserver | unknown | 使用 WebGL renderer 与 RAF |
+| Home visualization | 全屏 Three.js 光线 shader | `rayLength` prop、IntersectionObserver、reduced-motion media query | unknown | 常规模式使用 WebGL RAF；reduced motion 只静态渲染；卸载释放 mesh、geometry、material、render list、renderer 与 WebGL context |
 | Analyzer surface | 四槽/最多四张累计 21 项可用卡、共享 viewport/zoom/cursor/seek、DOM 精确值与分层 Canvas | store、AudioSessionService、AnalysisCoordinator、Canvas 2D | project-owner | 首次仍默认 M7 三卡；已保存空工作区保持为空；Loudness 与 Complex 使用结构化双 Canvas |
 | Experimental charts | 试验性的 Three.js 2D 图和瀑布流 | Vue props、TestLands | unknown | 不视为稳定接口 |
 | Event bus | 跨组件事件类型与发送 | mitt singleton | unknown | `settings-open` 无已发现订阅者 |
@@ -74,10 +74,10 @@ showOpenFilePicker → FileSystemFileHandle → File
 - M6 DEV bridge `window.__AUDIO_NOT_SURF_YET_M6__` 只公开可序列化命令/状态和 exact cursor 返回值，不暴露 File、PCM、AudioBuffer 或 Worker。
 - 刷新时 current Blob 优先并恢复为 0 秒 paused；其他曲目只在 `queryPermission()` 为 granted 时自动取回，`requestPermission()` 只由可见用户操作触发。
 - `--coinc-process` 既可能由 GSAP 写入，也可能由能量 RAF 写入，模式切换需明确所有权。
-- AudioContext、source、单播放 RAF、产品 Worker、pending analysis request 和封面 URL 由 MainLayout-owned service/coordinator 生命周期统一释放；Observer、GSAP 和 Three.js 仍由各组件释放。
+- AudioContext、source、单播放 RAF、产品 Worker、pending analysis request 和封面 URL 由 MainLayout-owned service/coordinator 生命周期统一释放；Observer、GSAP 和 Three.js 由各组件释放，LightBg 在 reduced motion 下不保留连续 RAF。
 - Header 的 settings 事件没有已发现消费者，导航中的 Visualizer/Editor 共享占位页。
 - `components.d.ts` 和 `auto-imports.d.ts` 是构建插件生成文件，构建可能造成工作树变化。
 
 ## Approval Record
 
-`project-owner` 于 2026-08-21 确认 M7 卡片、共享视口、跳转、刷新恢复和 3/3 学习解释通过，并批准 M7 canonical、关闭 M7、开放 M8。随后 M8 运行时与 clean canonical 已完成，本图同步累计 16 项事实；owner 又批准 M8 canonical 与 Windows Chrome 界面稳定化结果并明确要求实施 M9。2026-08-23，owner 批准 M9 canonical 与非首页导航栏模糊效果，并明确要求实施 M10；本图随后同步 M10 累计 21 项代码事实及 36/36 clean canonical。2026-08-25，owner 批准 M10 canonical evidence 与 21/21 Analyzer 特征覆盖；M10 改为 `Complete`，M11 门禁开放但开始实施前保持 `Planned`。
+`project-owner` 于 2026-08-21 确认 M7 卡片、共享视口、跳转、刷新恢复和 3/3 学习解释通过，并批准 M7 canonical、关闭 M7、开放 M8。随后 M8 运行时与 clean canonical 已完成，本图同步累计 16 项事实；owner 又批准 M8 canonical 与 Windows Chrome 界面稳定化结果并明确要求实施 M9。2026-08-23，owner 批准 M9 canonical 与非首页导航栏模糊效果，并明确要求实施 M10；本图随后同步 M10 累计 21 项代码事实及 36/36 clean canonical。2026-08-25，owner 批准 M10 canonical evidence 与 21/21 Analyzer 特征覆盖；M10 改为 `Complete`。同日 owner 确认 Edge 已安装并要求开始最终加固，M11 改为 `In Progress`；安装检测本身不代表 Edge 或 M11 已通过。

@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/context/index.md"
   - "docs/delivery/test-strategy.md"
   - "docs/quality/eval-plan.md"
-next_action: "M10 canonical 已获批准并关闭；M11 门禁开放，真实 Edge 仍为完成前置条件"
+next_action: "M11 已进入 In Progress；使用真实 Chrome/Edge channel 完成最终加固与 clean evidence"
 ---
 
 # Working Agreements
@@ -24,7 +24,7 @@ next_action: "M10 canonical 已获批准并关闭；M11 门禁开放，真实 Ed
 
 - Node/npm 基线为 24.18.0/11.x；依赖使用 npm 和 lockfile，测试命令以 [tests README](../../tests/README.md) 为准。
 - 静态门禁包括 `npm run typecheck` 与 `npm run build`；非浏览器测试由 Vitest 执行。
-- `npm run test:e2e` 使用本机稳定 Chrome；Edge 缺失必须记录为 blocked，不能用 Chromium 或 skip 冒充 Edge 通过。
+- `npm run test:e2e` 使用本机稳定 Chrome；`npm run test:e2e:edge` 使用已安装的真实 Microsoft Edge channel。浏览器缺失或 runner 失败必须记录为 blocked/failure，不能用 Chromium、skip 或安装检测冒充 Edge 通过。
 - M4 使用 `test:m4:unit`、`test:m4:integration` 和 `test:e2e:m4`；65 秒 WAV 与损坏文件只在 Git 忽略目录运行时生成。
 - M5 使用 `test:m5:unit`、`test:m5:integration` 和 `test:e2e:m5`；测试分别覆盖 V1 repository、恢复/权限状态机和真实 Chrome IndexedDB 刷新。
 - M5 自动化通过测试注入的 `showOpenFilePicker()` 返回真实 OPFS `FileSystemFileHandle`，用于可重复验证 handle 存储、Blob 优先和刷新；它不替代 Chrome 原生文件选择器的人工权限验证。
@@ -40,6 +40,8 @@ next_action: "M10 canonical 已获批准并关闭；M11 门禁开放，真实 Ed
 - M9 的 `m9-vectors-v1.wav` 在 `artifacts/fixtures/` 运行时生成；版本化 `m9-vectors.v1.json` 固定 Power Spectrum 平方关系、MFCC 13 维/顺序、Buffer 1024 维、正负 impulse 与尾帧语义。
 - M10 使用 `test:m10:unit`、`test:m10:integration` 和 `test:e2e:m10`；`eval:m10:provisional` 运行 36 步 M3–M10 回归，clean-HEAD `eval:m10` 要求起止为同一干净 commit。
 - M10 的 `m10-structures-v1.wav` 在 `artifacts/fixtures/` 运行时生成；版本化 `m10-structures.v1.json` 固定 total/24 Bark bands、real/imag 各 1024、相位差、静音和正负 impulse 语义。
+- M11 使用 `test:e2e:m11:chrome`、`test:e2e:m11:edge`、`eval:m11:provisional` 和 clean-HEAD `eval:m11`；两条浏览器命令必须使用真实 Chrome/Edge channel，并把浏览器产品名与版本写入 artifact。
+- M11 OPFS 自动化覆盖真实 IndexedDB/FileSystemFileHandle 的可重复路径；原生 OS picker 的 granted/prompt/denied、恢复访问和文件移动由 owner 在 Chrome 与 Edge 分别人工签字，自动化不得冒充该权限提示证据。
 - M3 仅建立本地门禁，不存在正式 CI；这项缺口不阻断 M3，但自动化声明必须限定为本地执行。
 - 交互改动要在本地浏览器执行成功、失败和边界场景，并检查 console error/warn。
 - 布局和可视化至少检查窄屏、常见桌面和宽屏，使用真实 DOM/canvas 几何。
@@ -117,3 +119,7 @@ next_action: "M10 canonical 已获批准并关闭；M11 门禁开放，真实 Ed
 随后 M10 clean canonical 36/36 通过并登记 `in-review` evidence。artifact 必须保留到 owner 审批完成；M10 人工任务与批准前，M10 保持 `In Progress`，M11 保持 `Planned`，不创建 release-readiness。
 
 2026-08-25，`project-owner` 明确回复：“我批准 M10 canonical evidence 与 21/21 Analyzer 特征覆盖；同意将 M10 标记为 Complete 并开放 M11。”本约定据此确认 M10 evidence 为 `approved`、M10 为 `Complete`，M11 门禁开放但开始实施前保持 `Planned`。Edge、1,114.74 kB chunk warning 与 Meyda 5.6.3 上游 Flux 缺陷不因本批准关闭，也不创建 release-readiness。
+
+同日，owner 确认已安装 Edge 并明确要求开始 M11 最终加固。本机检测到 Microsoft Edge 151.0.4129.107；M11 改为 `In Progress`。只有真实 Edge runner、双浏览器格式/恢复/交互矩阵、性能资源证据和原生权限人工签字完成后，才允许关闭 M11 或创建 release-readiness。
+
+M11 实施期间先发现并修复 current track UI 已切换但持久化状态尚未进入 `saving` 的刷新竞态；随后 dirty-worktree provisional run `M11-2026-08-25T09-47-44-125Z-1b3691f9-provisional` 38/38 通过，summary SHA-256 为 `e84e695f8cb328390e1843b03d7af5c6f619bd2d96442fd7d97799bef5287ad5`。真实 Edge 全量回归固定 `workers=1`，避免多份长场景并行造成非产品态 CPU 争用；该 provisional 不构成 canonical evidence 或 owner 签字。

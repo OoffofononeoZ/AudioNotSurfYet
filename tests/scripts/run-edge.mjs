@@ -2,19 +2,34 @@ import { spawnSync } from 'node:child_process';
 import { existsSync } from 'node:fs';
 
 const edgePaths = {
-    darwin: '/Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge',
-    win32: 'C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe',
+    darwin: [
+        '/Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge',
+    ],
+    win32: [
+        'C:\\Program Files\\Microsoft\\Edge\\Application\\msedge.exe',
+        'C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe',
+    ],
 };
-const edgePath = edgePaths[process.platform];
+const edgePath = edgePaths[process.platform]?.find((candidate) =>
+    existsSync(candidate));
 
 if (!edgePath || !existsSync(edgePath)) {
     console.error('BLOCKED: Microsoft Edge is not installed; Edge evidence remains open.');
     process.exit(2);
 }
 
+const forwardedArgs = process.argv.slice(2);
+const hasWorkerOverride = forwardedArgs.some((argument) =>
+    argument === '--workers' || argument.startsWith('--workers='));
 const result = spawnSync(
     process.execPath,
-    ['./node_modules/@playwright/test/cli.js', 'test', '--project=edge'],
+    [
+        './node_modules/@playwright/test/cli.js',
+        'test',
+        ...forwardedArgs,
+        ...(hasWorkerOverride ? [] : ['--workers=1']),
+        '--project=edge',
+    ],
     {
         cwd: process.cwd(),
         stdio: 'inherit',

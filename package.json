@@ -44,6 +44,9 @@
     "test:e2e:m8": "playwright test tests/e2e/m8-analyzer.spec.ts --project=chrome",
     "test:e2e:m9": "playwright test tests/e2e/m9-analyzer.spec.ts --project=chrome",
     "test:e2e:m10": "playwright test tests/e2e/m10-analyzer.spec.ts --project=chrome",
+    "test:e2e:m11:chrome": "playwright test tests/e2e/m11-hardening.spec.ts --project=chrome",
+    "test:e2e:m11:edge": "node tests/scripts/run-edge.mjs tests/e2e/m11-hardening.spec.ts",
+    "test:e2e:m11": "npm run test:e2e:m11:chrome && npm run test:e2e:m11:edge",
     "test:e2e:edge": "node tests/scripts/run-edge.mjs",
     "fixtures:generate": "node --experimental-strip-types tests/fixtures/generate-fixtures.ts",
     "fixtures:golden": "node --experimental-strip-types tests/analysis/generate-golden.ts",
@@ -71,7 +74,9 @@
     "eval:m9": "node tests/scripts/run-m9-eval.mjs",
     "eval:m9:provisional": "node tests/scripts/run-m9-eval.mjs --provisional",
     "eval:m10": "node tests/scripts/run-m10-eval.mjs",
-    "eval:m10:provisional": "node tests/scripts/run-m10-eval.mjs --provisional"
+    "eval:m10:provisional": "node tests/scripts/run-m10-eval.mjs --provisional",
+    "eval:m11": "node tests/scripts/run-m11-eval.mjs",
+    "eval:m11:provisional": "node tests/scripts/run-m11-eval.mjs --provisional"
   },
   "dependencies": {
     "@chenglou/pretext": "^0.0.6",

@@ -14,7 +14,8 @@
             <router-link to="/testlands" class="text-white">TestLands</router-link>
         </section>
         <section class="min-w-32 flex justify-end">
-            <button @click="toggleSettings" class="text-white">Settings</button>
+            <button @click="toggleSettings" class="text-white" :aria-expanded="settingsOpen"
+                aria-label="打开或关闭设置">Settings</button>
         </section>
     </header>
 </template>
@@ -28,8 +29,8 @@ const route = useRoute();
 const isHome = computed(() => route.path === '/');
 const settingsOpen = ref(false);
 const toggleSettings = () => {
-    emitter.emit('settings-open', settingsOpen.value);
     settingsOpen.value = !settingsOpen.value;
+    emitter.emit('settings-open', settingsOpen.value);
 }
 </script>
 <style scoped>
@@ -58,5 +59,12 @@ const toggleSettings = () => {
     background: linear-gradient(90deg, #0000, var(--main-color), #0000);
     pointer-events: none;
     z-index: 1;
+}
+
+#main-header a:focus-visible,
+#main-header button:focus-visible {
+    border-radius: 4px;
+    outline: 2px solid var(--main-color);
+    outline-offset: 4px;
 }
 </style>

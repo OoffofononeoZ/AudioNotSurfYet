@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/product/scope.md"
   - "docs/architecture/system-design.md"
   - "docs/delivery/execution-plan.md"
-next_action: "M10 evidence 已获 owner 批准并关闭；M11 门禁开放但开始实施前保持 Planned"
+next_action: "M11 已进入 In Progress；完成双浏览器最终加固证据"
 ---
 
 # Decision Registry
@@ -87,6 +87,8 @@ M4 dirty-worktree provisional suite 随后通过，证明当前实现值得进�
 随后 M10 provisional 与 clean canonical 均 36/36 通过，DEC-020 的完整 1024-bin 决策已由浏览器自动化复核，正式 evidence 为 `in-review`。owner 人工任务与审批仍未完成，因此 M10 保持 `In Progress`，M11 保持 `Planned`。
 
 2026-08-25，`project-owner` 明确回复：“我批准 M10 canonical evidence 与 21/21 Analyzer 特征覆盖；同意将 M10 标记为 Complete 并开放 M11。”该批准关闭 DEC-020 的执行门禁，不改变 M10 canonical 身份，也不构成 Edge、M11 或 release readiness 通过；M11 在明确开始实施前保持 `Planned`。
+
+同日，owner 确认 Edge 已安装并明确要求开始 M11 最终加固。该执行授权把 M11 改为 `In Progress`；真实 Edge 自动化、原生权限人工矩阵和 clean canonical 完成前，不形成新的 readiness 决策。
 
 ## Historical Evidence Gap
 

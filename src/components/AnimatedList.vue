@@ -89,6 +89,8 @@ const keyboardNav = ref(false);
 const topGradientOpacity = ref(0);
 const bottomGradientOpacity = ref(1);
 const itemsInView = ref<boolean[]>(new Array(props.items.length).fill(false));
+const prefersReducedMotion = () =>
+    window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 // methods
 const setSelectedIndex = (index: number) => {
@@ -129,11 +131,15 @@ const updateItemsInView = () => {
         if (inView && !itemsInView.value[index]) {
             const el = itemRefs.value[index];
             if (el) {
-                gsap.fromTo(
-                    el,
-                    { scale: 0.7, opacity: 0 },
-                    { scale: 1, opacity: 1, duration: 0.2, delay: 0.1, ease: 'power2.out' }
-                );
+                if (prefersReducedMotion()) {
+                    gsap.set(el, { scale: 1, opacity: 1 });
+                } else {
+                    gsap.fromTo(
+                        el,
+                        { scale: 0.7, opacity: 0 },
+                        { scale: 1, opacity: 1, duration: 0.2, delay: 0.1, ease: 'power2.out' }
+                    );
+                }
             }
         }
     });
@@ -170,11 +176,14 @@ watch([selectedIndex, keyboardNav], () => {
         const itemTop = selectedItem.offsetTop;
         const itemBottom = itemTop + selectedItem.offsetHeight;
         if (itemTop < containerScrollTop + extraMargin) {
-            container.scrollTo({ top: itemTop - extraMargin, behavior: 'smooth' });
+            container.scrollTo({
+                top: itemTop - extraMargin,
+                behavior: prefersReducedMotion() ? 'auto' : 'smooth',
+            });
         } else if (itemBottom > containerScrollTop + containerHeight - extraMargin) {
             container.scrollTo({
                 top: itemBottom - containerHeight + extraMargin,
-                behavior: 'smooth'
+                behavior: prefersReducedMotion() ? 'auto' : 'smooth',
             });
         }
     }

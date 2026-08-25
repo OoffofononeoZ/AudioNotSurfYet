@@ -12,7 +12,7 @@
 | ENG-005 | 未完成表面 | ComingSoon、threeDTable、MeydaCard 为空或近空，TestLands/testcomp 为试验内容 | 不能推断公开功能或稳定接口 | 由产品 scope 决定保留、实现或删除 |
 | ENG-006 | 包体积 | 当前构建存在约 1 MB chunk 警告 | 首屏和缓存风险未知 | 先确定性能预算，再决定分包策略 |
 | ENG-007 | 开发依赖审计 | 安全补丁后 `npm audit` 剩余 esbuild 0.27.3 的 1 项 low，影响 Windows 开发服务器任意文件读取 | 当前 macOS 本地门禁不受直接影响，但不能宣称零漏洞 | 不向不受信网络暴露 dev server；上游提供兼容修复后升级并复核 |
-| ENG-008 | 原生文件权限 | M5 clean-commit canonical 已使用 Chrome OPFS 真句柄验证 IndexedDB structured clone 与刷新；`project-owner` 又于 2026-07-29 完成 Chrome 原生 picker、权限和文件移动人工检查 | M5 Chrome 补偿验证已完成，但全自动化与 Edge 真实权限矩阵仍缺失 | M11 在真实 Edge 重复权限矩阵；不得把 Chrome 签字泛化为双浏览器完成 |
+| ENG-008 | 原生文件权限 | M5 clean-commit canonical 已使用 Chrome OPFS 真句柄验证 IndexedDB structured clone 与刷新；`project-owner` 又于 2026-07-29 完成 Chrome 原生 picker、权限和文件移动人工检查；2026-08-25 已检测到 Edge 151 | M5 Chrome 补偿验证已完成，但 Edge 原生权限矩阵仍缺失 | M11 在真实 Edge 重复权限矩阵；不得把安装检测或 Chrome 签字泛化为双浏览器完成 |
 | ENG-009 | Meyda feature 缺陷 | 当前 Meyda 5.6.3 对有效输入提取 `spectralFlux` 时抛出 `x is not defined`，M6 golden 已固定该复现 | 上游 extractor 不可用；产品必须使用独立、可审计的语义 | ADR-0005 项目 Flux 的公式/首帧/静音/exact cursor golden 与 M8 canonical 已通过，产品阻断缓解；上游异常事实继续保留 |
 
 ## 已关闭工程缺口
