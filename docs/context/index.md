@@ -4,7 +4,7 @@ owner: "project-owner"
 last_reviewed: 2026-08-25
 upstream_docs:
   - "AGENTS.md"
-next_action: "M11 已获 owner 明确授权并进入 In Progress；完成真实 Chrome/Edge 最终加固证据"
+next_action: "M11 clean Chrome/Edge canonical 已登记 in-review；完成 owner 人工验收"
 ---
 
 # Repository Context Index
@@ -21,9 +21,9 @@ AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端：用户选择
 - Product intent：problem brief、scope 和 success metrics 已由 `project-owner` 批准；开放问题只保留未来上传、未定义 Tab、托管和扩展研究等非当前门禁事项。
 - System design：system design、接口契约、风险和五个 ADR 已批准。
 - Execution planning：execution plan、acceptance criteria、test strategy 和 milestone plan 均为 approved。
-- Quality and evals：M3–M10 的适用 canonical/人工证据均已获批准。
+- Quality and evals：M3–M10 的适用 canonical/人工证据均已获批准；M11 clean canonical 已登记为 `in-review`。
 - Implementation：M3–M10 已 `Complete`；owner 于 2026-08-25 明确要求开始 M11 最终加固，M11 为 `In Progress`。
-- Readiness、release、retrospective：`release-readiness.md` 等待 M11 执行证据，不创建 release 或 retrospective 文档。
+- Readiness、release、retrospective：`release-readiness.md` 等待 M11 原生权限/辅助技术人工签字与 owner 批准，不创建 release 或 retrospective 文档。
 
 ## Key Documents
 
@@ -92,7 +92,7 @@ AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端：用户选择
 - M10 已交付 Loudness 与 Complex Spectrum：Worker/UI 累计开放 21 项，结构 exact cursor 分别固定 total+24 bands 与 real/imag 各 1024；provisional 与 clean canonical 均 36/36 通过，并于 2026-08-25 获 owner 批准，M10 已为 `Complete`。
 - 当前 Meyda `spectralFlux` 对有效输入仍抛出 `x is not defined`；产品已按 ADR-0005 实现并由 canonical 缓解 R-020，不得声称上游缺陷已修复。
 - 超出约 15 分钟支持边界的长音频未开始播放只作为非门禁压力观察；它不表示长音频被规定为必须失败，也不改变当前产品范围。
-- 当前机器已发现 Microsoft Edge 151.0.4129.107；M11 dirty-worktree provisional 已在真实 Edge 全量 31/31 通过，但 clean canonical 与原生权限人工证据完成前仍不能关闭 M11 双浏览器门禁。
+- M11 clean canonical 已在 Chrome/Edge 上 38/38 通过，其中 Edge 全量为 31/31；原生 Edge 权限与辅助技术人工证据完成前仍不能关闭 M11。
 - 正式托管平台和生产 URL 尚未决定；它们只阻断未来 release，不阻断 M3。
 - 详细 context 文档的长期 owner/review cadence 尚未全部统一；代码改动时必须同步修正事实。
 - 工程事实差异继续记录在 [Skill 项目差异](../../skills/audio-visualizer-dev/references/99-open-questions-and-project-deltas.md)，产品开放项见 [open questions](../product/open-questions.md)。
@@ -142,3 +142,5 @@ AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端：用户选择
 同日，owner 确认已安装 Edge 并明确要求“按 M11 最终加固计划开始实施”。本机检测到 Microsoft Edge 151.0.4129.107，M11 据此改为 `In Progress`；该检测不等于 Edge 矩阵、原生权限或 M11 canonical 已通过。
 
 随后 M11 dirty-worktree provisional run `M11-2026-08-25T09-47-44-125Z-1b3691f9-provisional` 38/38 通过，真实 Edge 全量 M3–M11 为 31/31；该结果只作实现反馈，M11 仍需 clean-commit canonical、正式 `in-review` evidence、Edge 原生权限与辅助技术人工签字。
+
+M11 canonical run `M11-2026-08-25T10-05-12-783Z-99c67792` 随后在 clean commit `99c67792509d07456bcb431b90468252f8b0fdc3` 上 38/38 通过，summary SHA-256 为 `7d637525b5c9e6aa6fb45dc0818ac1fb59bbef90b90abf3ed2d6e6119ac631b5`；正式 evidence 为 `in-review`，M11 仍等待原生 Edge 权限、辅助技术人工签字和 owner 批准。

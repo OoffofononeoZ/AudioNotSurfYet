@@ -4,7 +4,7 @@ owner: "project-owner"
 last_reviewed: 2026-08-25
 upstream_docs:
   - "docs/architecture/system-design.md"
-next_action: "M10 21 项与两类 structured payload 已获批准；M11 复用现有契约完成最终加固"
+next_action: "M11 clean canonical 已回归现有契约；等待人工恢复与辅助技术验收"
 ---
 
 # Interface Contracts
@@ -473,6 +473,8 @@ Persistence rules:
 - `currentBlob.trackId` 与 `currentTrackId` 不一致时忽略 Blob。
 - 只允许一个 current Blob 和一个 current cache manifest。
 - 写入 current track 时先建立新记录，再在同一事务删除旧记录；事务失败不得删除仍有效的旧持久化状态。
+- `playTrack()` 一旦发布新的 `currentTrackId`，必须同步把 persistence state 置为 `saving`；调用方只有在同一 command generation 进入 `ready` 或 `not-persisted` 后，才能把刷新视为已持久化。
+- 旧 generation、已取消命令或 disposed service 的 repository completion 不得更新当前 track 的 persistence state。
 - schema version 未识别时进入可恢复错误，不能尝试猜测字段。
 
 ## Session Repository Results

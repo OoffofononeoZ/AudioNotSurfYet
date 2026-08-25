@@ -6,7 +6,7 @@ upstream_docs:
   - "docs/delivery/execution-plan.md"
   - "docs/delivery/acceptance-criteria.md"
   - "docs/delivery/test-strategy.md"
-next_action: "M11 已进入 In Progress；完成最终加固、clean canonical 和 owner 双浏览器/权限签字"
+next_action: "M11 clean canonical 已通过；完成 owner Edge 原生权限与辅助技术签字"
 ---
 
 # Milestone Plan
@@ -130,20 +130,20 @@ next_action: "M11 已进入 In Progress；完成最终加固、clean canonical �
 
 ### M11
 
-- [x] provisional：三格式 × Chrome/Edge 自动化。
-- [x] provisional：15 分钟和 20 次反复生命周期压力。
-- [ ] 权限/恢复/quota/schema 完整矩阵（自动化 provisional 已过；Edge 原生 picker 人工检查待签字）。
-- [x] provisional：输入 ≤100ms、无分析归因 >50ms 主线程任务。
-- [ ] 键盘/焦点/非颜色/reduced motion（自动化 provisional 已过；辅助技术人工检查待签字）。
-- [x] provisional：390/1024/1280/1920 实际几何与 Canvas。
+- [x] canonical：三格式 × Chrome/Edge 自动化。
+- [x] canonical：15 分钟和 20 次反复生命周期压力。
+- [ ] 权限/恢复/quota/schema 完整矩阵（自动化 canonical 已过；Edge 原生 picker 人工检查待签字）。
+- [x] canonical：输入 ≤100ms、无分析归因 >50ms 主线程任务。
+- [ ] 键盘/焦点/非颜色/reduced motion（自动化 canonical 已过；辅助技术人工检查待签字）。
+- [x] canonical：390/1024/1280/1920 实际几何与 Canvas。
 - [ ] 所有适用 AC 有证据，相关风险已关闭、缓解或明确接受。
 
 ## Current Gate State
 
-- Current stage：M10 canonical evidence 与 21/21 Analyzer 特征覆盖已由 owner 批准，M10 为 `Complete`；owner 已确认 Edge 安装并要求开始，M11 为 `In Progress`。
+- Current stage：M10 为 `Complete`；M11 clean Chrome/Edge canonical 已 38/38 通过并登记 `in-review`，M11 仍为 `In Progress`。
 - Previous gate：M3 已由 `project-owner` 于 2026-07-28 批准并标记 `Complete`。
 - Canonical run：`npm run eval:m3` 已在 clean commit `17d16f0da37289c1f67f75203502beef999572ea` 上通过；摘要见 [evidence index](../quality/evidence-index.md)。
-- Next gate：真实 Edge、三格式、权限恢复、最重性能、资源、无障碍与多视口证据齐全并获 owner 签字后，才可把 M11 改为 `Complete`。
+- Next gate：owner 完成 Edge 原生权限、辅助技术与人工长会话复核并批准 M11 evidence 后，才可把 M11 改为 `Complete`。
 - M3 state：Complete；M3 evidence 只证明测试基础，不代表 M4 产品行为通过。
 - M4 canonical：`npm run eval:m4` 在 clean commit `e5cfe9e8ab62301f3c5b0ddcdd37847a2e131a0f` 上 13/13 步骤通过；60 秒漂移 2.233ms，三次 seek 最大误差 66.827ms。`project-owner` 已于 2026-07-29 批准该证据。
 - M5 provisional：`M5-2026-07-29T07-03-16-207Z-2eb98381-provisional` 在 dirty worktree 16/16 步骤通过；summary SHA-256 为 `7b0acaf128ac4a7ceffce1449d2421127d20c8b25dcdc1ebd07b889072228530`。它只作实现反馈，不是正式 evidence。
@@ -157,7 +157,8 @@ next_action: "M11 已进入 In Progress；完成最终加固、clean canonical �
 - M10 provisional：`M10-2026-08-22T18-17-36-129Z-2df604b9-provisional` 在 dirty worktree 36/36 通过，summary SHA-256 为 `e9696c843256bff07cfa77b29ee9a529e9d80c6fc842c6f7437fab39a5c77166`。M10 unit 7/7、integration 13/13、Chrome 3/3；四重卡 15 分钟反馈最大 16.2ms、分析归因长任务 0。它不是正式 evidence。
 - M10 canonical：`M10-2026-08-22T18-25-01-873Z-8830e2a2` 在 clean commit `8830e2a2edddd9a5db4796ec6f5d5da8ee3c5f72` 上 36/36 通过，summary SHA-256 为 `30eb11b9985adc8c6d84e01b84f31a75785a4d8e39bdef22e85dd153f2637ea1`。M10 unit 7/7、integration 13/13、Chrome 3/3；四重卡 15 分钟最大反馈 17ms、分析归因长任务 0；正式 evidence 于 2026-08-25 获 owner 批准。
 - M11 provisional：`M11-2026-08-25T09-47-44-125Z-1b3691f9-provisional` 在 dirty worktree 38/38 通过，summary SHA-256 为 `e84e695f8cb328390e1843b03d7af5c6f619bd2d96442fd7d97799bef5287ad5`。Edge 全量 31/31；Chrome/Edge 四重卡最大反馈 17.6ms/16.7ms、分析归因长任务均为 0；两端 20 次路由循环均为 21 created/20 lost WebGL context 和 2 live RAF。它不是正式 evidence。
-- Known future blockers：Edge 151 已安装但真实自动化和原生权限人工证据尚未完成，因此仍不能完成 M11 或未来 readiness；托管平台未定会阻断 release，但不阻断 M11 加固执行。
+- M11 canonical：`M11-2026-08-25T10-05-12-783Z-99c67792` 在 clean commit `99c67792509d07456bcb431b90468252f8b0fdc3` 上 38/38 通过，summary SHA-256 为 `7d637525b5c9e6aa6fb45dc0818ac1fb59bbef90b90abf3ed2d6e6119ac631b5`。Chrome 专项 4/4、Edge 全量 31/31；Chrome/Edge 四重卡最大反馈 17.9ms/17.2ms、分析归因长任务均为 0；正式 evidence 为 `in-review`。
+- Known future blockers：Edge 151 clean 自动化已通过，但原生权限与辅助技术人工证据尚未完成，因此仍不能完成 M11 或未来 readiness；托管平台未定会阻断 release，但不阻断 M11 验收。
 
 ## Approval Record
 

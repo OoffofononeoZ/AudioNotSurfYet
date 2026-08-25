@@ -6,7 +6,7 @@ upstream_docs:
   - "docs/product/success-metrics.md"
   - "docs/architecture/system-design.md"
   - "docs/architecture/interface-contracts.md"
-next_action: "M7 canonical 已回归 Worker/generation/资源边界；等待 owner 学习任务与 evidence 审批"
+next_action: "M11 clean Chrome/Edge canonical 已回归 Worker/generation/资源边界；等待 owner 最终验收"
 ---
 
 # ADR-0002: Worker Full-Track Analysis and Stale Result Isolation

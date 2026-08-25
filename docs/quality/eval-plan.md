@@ -8,14 +8,14 @@ upstream_docs:
   - "docs/delivery/execution-plan.md"
   - "docs/delivery/acceptance-criteria.md"
   - "docs/delivery/test-strategy.md"
-next_action: "M11 provisional 双浏览器矩阵已通过；完成 clean canonical 与人工补偿验证后再创建 readiness"
+next_action: "M11 clean 双浏览器 canonical 已通过；完成人工权限与辅助技术补偿验证后再创建 readiness"
 ---
 
 # Eval Plan
 
 ## 1. Purpose and Current State
 
-本文件定义 AudioNotSurfYet 的质量证据契约。Vitest、Playwright、Worker harness、受控 fixture 和 direct-Meyda golden 已在 M3 建立。M3–M10 的适用 canonical evidence 均已获批，M10 已为 `Complete`；完整 EV-A–EV-R、Edge 矩阵和 M11 产品行为仍未完成。
+本文件定义 AudioNotSurfYet 的质量证据契约。Vitest、Playwright、Worker harness、受控 fixture 和 direct-Meyda golden 已在 M3 建立。M3–M10 的适用 canonical evidence 均已获批，M10 已为 `Complete`；M11 clean Chrome/Edge 自动化 evidence 已为 `in-review`，但原生权限与辅助技术人工补偿、owner 批准和完整 EV-A–EV-R 收口仍未完成。
 
 Q0 只批准“如何判断质量”，不批准 release readiness。`docs/quality/release-readiness.md` 只能在 M11 已产生完整成功、失败、边界和异常证据后创建。
 
@@ -153,7 +153,6 @@ Q0 只批准“如何判断质量”，不批准 release readiness。`docs/quali
 
 | Gap ID | Missing evidence | Reason | Residual risk / affected gate | Owner | Compensating or next verification |
 | --- | --- | --- | --- | --- | --- |
-| EG-003 | 真实 Edge 运行 | M11 dirty-worktree provisional 已在 Edge 全量 31/31 通过，但 clean canonical 与原生权限人工矩阵尚未完成 | 不能关闭 EV-B、M11 或未来 readiness | project-owner | 在 clean HEAD 使用真实 `msedge` channel 复跑，并单独完成原生权限人工签字 |
 | EG-004 | 广泛用户学习结果 | 当前范围只批准 owner 自测 | 只能证明 owner 对 3/3 样例达标，不能泛化学习效果 | project-owner | 保留 owner-only 表述；扩大声明前另开产品研究决策 |
 | EG-005 | 目标基线硬件 | 产品未指定设备型号 | 性能结论跨设备可比性有限 | project-owner | 每次记录实际硬件，阈值不变；若结果不稳定，在 quality/readiness 前批准目标设备 |
 | EG-006 | 文件权限真实提示的全自动化 | OS picker 和权限气泡受浏览器/系统控制 | M5 Chrome 已由 owner 手工补偿；Edge 与未来完整矩阵仍不能只靠 adapter 证明 | project-owner | M5 Chrome 记录见 evidence index；Edge/M11 继续执行真实 granted/prompt/denied |
@@ -164,6 +163,7 @@ Q0 只批准“如何判断质量”，不批准 release readiness。`docs/quali
 | --- | --- | --- |
 | EG-001 | `npm run eval:m3` 在 clean commit `17d16f0da37289c1f67f75203502beef999572ea` 上通过；run、环境和本地产物 hash 见 [evidence index](evidence-index.md) | 2026-07-28 |
 | EG-002 | 同一 canonical run 的 fixture、manifest、golden 与 hash checks 通过，并绑定上述 commit | 2026-07-28 |
+| EG-003 | M11 canonical `M11-2026-08-25T10-05-12-783Z-99c67792` 在真实 Edge 全量 31/31 通过；原生权限自动化缺口继续由 EG-006 单独跟踪 | 2026-08-25 |
 
 ## 8. Q0 Approval Gate
 

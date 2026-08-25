@@ -4,7 +4,7 @@ owner: "project-owner"
 last_reviewed: 2026-08-25
 upstream_docs:
   - "docs/context/index.md"
-next_action: "M11 已进入 In Progress；复核双浏览器资源、恢复、无障碍和视口事实"
+next_action: "M11 clean canonical 已复核双浏览器事实；等待人工权限与辅助技术验收"
 ---
 
 # System Map
@@ -80,4 +80,4 @@ showOpenFilePicker → FileSystemFileHandle → File
 
 ## Approval Record
 
-`project-owner` 于 2026-08-21 确认 M7 卡片、共享视口、跳转、刷新恢复和 3/3 学习解释通过，并批准 M7 canonical、关闭 M7、开放 M8。随后 M8 运行时与 clean canonical 已完成，本图同步累计 16 项事实；owner 又批准 M8 canonical 与 Windows Chrome 界面稳定化结果并明确要求实施 M9。2026-08-23，owner 批准 M9 canonical 与非首页导航栏模糊效果，并明确要求实施 M10；本图随后同步 M10 累计 21 项代码事实及 36/36 clean canonical。2026-08-25，owner 批准 M10 canonical evidence 与 21/21 Analyzer 特征覆盖；M10 改为 `Complete`。同日 owner 确认 Edge 已安装并要求开始最终加固，M11 改为 `In Progress`；安装检测本身不代表 Edge 或 M11 已通过。
+`project-owner` 于 2026-08-21 确认 M7 卡片、共享视口、跳转、刷新恢复和 3/3 学习解释通过，并批准 M7 canonical、关闭 M7、开放 M8。随后 M8 运行时与 clean canonical 已完成，本图同步累计 16 项事实；owner 又批准 M8 canonical 与 Windows Chrome 界面稳定化结果并明确要求实施 M9。2026-08-23，owner 批准 M9 canonical 与非首页导航栏模糊效果，并明确要求实施 M10；本图随后同步 M10 累计 21 项代码事实及 36/36 clean canonical。2026-08-25，owner 批准 M10 canonical evidence 与 21/21 Analyzer 特征覆盖；M10 改为 `Complete`。同日 owner 确认 Edge 已安装并要求开始最终加固，M11 改为 `In Progress`。M11 clean Chrome/Edge canonical 随后 38/38 通过并登记 `in-review`；人工权限与辅助技术验收前 M11 不关闭。

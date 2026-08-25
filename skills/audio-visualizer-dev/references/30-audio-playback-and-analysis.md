@@ -8,7 +8,7 @@ M5 实现后的已证实链路：
 2. service 顺序计算 SHA-256，并用 `music-metadata.parseBlob()` 生成可序列化 `TrackRecord`；runtime registry 保存 File、handle 与可选封面对象 URL。
 3. 空队列导入自动播放首项；非空队列导入只追加，不打断当前歌曲。
 4. `SessionRepository` 把最近队列、全部句柄和唯一 current Blob 写入原生 IndexedDB；切歌在同一事务替换 current Blob/cache。
-5. `playTrack()` 读取 File ArrayBuffer，使用 command generation 保证快速切歌最后操作生效，再调用唯一 `AudioEngine` 解码和播放。
+5. `playTrack()` 先把 current track 与 persistence 状态发布为 `saving`，再读取 File ArrayBuffer；command generation 保证快速切歌最后操作生效，只有当前 generation 的持久化完成/失败可以更新 store。
 6. AudioEngine 发布 `PlaybackSnapshot`；service 的单一 RAF 从 AudioContext 基准刷新时间，并从 Analyser 时域数据提取 Meyda energy。
 7. `audioSessionStore` 把播放、恢复快照与能量提供给 MusicBar 和 Home；MusicBar 不拥有播放事实、浏览器资源或播放 RAF。
 

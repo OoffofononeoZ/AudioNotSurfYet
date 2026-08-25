@@ -6,7 +6,7 @@ upstream_docs:
   - "docs/product/scope.md"
   - "docs/architecture/system-design.md"
   - "docs/architecture/interface-contracts.md"
-next_action: "M7 renderer 已批准；M8 泛化 scalar-line 并验证累计 16 项"
+next_action: "M11 clean Chrome/Edge canonical 已回归 21/21 renderer；等待 owner 最终验收"
 ---
 
 # ADR-0004: Typed Feature Registry and Canvas 2D Renderer Families

@@ -26,7 +26,8 @@
 | `npm run test:m10:unit` | 运行 Loudness/Complex direct Meyda、维度、结构 codec 与 golden | M10 结构单元切片 |
 | `npm run test:m10:integration` | 运行两类结构 Worker、exact cursor、stale/cancel/quota 与四卡恢复 | M10 集成切片 |
 | `npm run test:e2e:m10` | 运行 Chrome 21 项、两类结构卡和 15 分钟四重卡性能 | M10 浏览器切片 |
-| `npm run test:e2e:edge` | 检测并运行稳定 Edge | Edge 缺失时以退出码 2 明确 blocked |
+| `npm run test:e2e:m11` | 顺序运行真实 Chrome/Edge 的 M11 专项四场景 | 三格式、键盘/reduced motion、多视口、quota、WebGL/RAF |
+| `npm run test:e2e:edge` | 使用稳定 Edge 串行运行 M3–M11 全量 E2E | Edge 缺失时以退出码 2 明确 blocked；不得用 Chromium 替代 |
 | `npm run test:docs` | 检查生命周期 frontmatter、链接和 21 项特征 | 文档门禁 |
 | `npm run eval:m3:provisional` | 未提交工作树的本地 M3 run | 不创建正式 evidence index |
 | `npm run eval:m3` | 只在干净 commit 上运行 M3 canonical suite | 生成可登记到 evidence index 的正式本地证据 |
@@ -40,13 +41,15 @@
 | `npm run eval:m7` | 只在干净 commit 上运行 M3–M7 suite | 生成可登记的 M7 canonical 证据 |
 | `npm run eval:m10:provisional` | 在 dirty worktree 运行 M3–M10 的 36 步 suite | 只生成实现反馈 |
 | `npm run eval:m10` | 只在干净 commit 上运行 M3–M10 的 36 步 suite | 生成可登记的 M10 canonical 证据 |
+| `npm run eval:m11:provisional` | 在 dirty worktree 运行 M3–M11 的 38 步双浏览器 suite | 只生成实现反馈 |
+| `npm run eval:m11` | 只在干净 commit 上运行 M3–M11 的 38 步双浏览器 suite | 生成可登记的 M11 canonical 证据 |
 
 ## 已知测试缺口
 
 - 已建立 Vitest、Playwright、Worker、IndexedDB、fixture、golden、docs 和 deliberate-failure harness。
 - fixture/golden 生成改用 Node 24 原生 type stripping；不依赖在受限环境会产生 IPC `EPERM` 的 `tsx` CLI。
 - 当前没有正式 CI，自动化结论必须限定为本地环境。
-- 当前机器没有 Edge。Chrome 通过不能表述为双浏览器矩阵完成。
+- 当前机器已安装 Edge 151；M11 clean canonical 已使用真实 `msedge` channel 全量 31/31 通过。原生权限 prompt 仍需人工检查，不能由 OPFS 自动化替代。
 - 正式 M3 canonical run 已在 clean commit `17d16f0da37289c1f67f75203502beef999572ea` 上通过并登记，且已由 `project-owner` 批准。
 - 正式 M4 canonical run 已在 clean commit `e5cfe9e8ab62301f3c5b0ddcdd37847a2e131a0f` 上通过并登记，evidence 与 working agreements 已由 `project-owner` 批准。
 - M5 自动化 picker 使用浏览器 OPFS 返回真实 `FileSystemFileHandle`；原生 OS picker 的 granted/prompt/denied 与文件移动路径已由 `project-owner` 于 2026-07-29 人工检查通过。
@@ -54,7 +57,7 @@
 - 超出约 15 分钟支持边界的长音频未开始播放只作为非门禁压力观察；它不是规定的预期失败，也不能替代范围内性能或格式验证。
 - M6 当前 Meyda 的 `spectralFlux` 对有效输入抛出 `x is not defined`；已用预期失败测试和 R-020 固定，不能把 21 项 registry 误述为 21 项均可计算。
 - M6 dirty-worktree provisional 与 clean-commit canonical 均已 20/20 通过；正式 evidence 已登记，并由 `project-owner` 于 2026-07-30 批准，M6 已关闭。
-- M7、M8、M9、M10 已获批准并关闭。M10 Loudness/Complex Spectrum 与累计 21/21 的 provisional、clean canonical 均 36/36 通过，owner 于 2026-08-25 批准正式 evidence；同日 owner 确认 Edge 已安装并要求开始最终加固，M11 为 `In Progress`。Edge 151 安装事实不替代真实 runner 和原生权限人工证据。
+- M7、M8、M9、M10 已获批准并关闭。M11 clean canonical `M11-2026-08-25T10-05-12-783Z-99c67792` 已在 commit `99c67792509d07456bcb431b90468252f8b0fdc3` 上 38/38 通过并登记 `in-review`；原生 Edge 权限与辅助技术人工验收前，M11 仍为 `In Progress`。
 
 ## 构建风险
 
