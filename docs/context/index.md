@@ -1,10 +1,10 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-08-23
+last_reviewed: 2026-08-25
 upstream_docs:
   - "AGENTS.md"
-next_action: "复核 M10 clean canonical 与 21/21 人工任务；owner 批准前不开放 M11"
+next_action: "M10 已获 owner 批准并关闭；M11 门禁开放但开始实施前保持 Planned"
 ---
 
 # Repository Context Index
@@ -21,8 +21,8 @@ AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端：用户选择
 - Product intent：problem brief、scope 和 success metrics 已由 `project-owner` 批准；开放问题只保留未来上传、未定义 Tab、托管和扩展研究等非当前门禁事项。
 - System design：system design、接口契约、风险和五个 ADR 已批准。
 - Execution planning：execution plan、acceptance criteria、test strategy 和 milestone plan 均为 approved。
-- Quality and evals：M3–M9 的适用 canonical/人工证据均已获批准；M10 clean canonical 已登记为 `in-review`。
-- Implementation：M3–M9 已 `Complete`；M10 经 owner 明确要求实施，当前为 `In Progress`。
+- Quality and evals：M3–M10 的适用 canonical/人工证据均已获批准。
+- Implementation：M3–M10 已 `Complete`；M11 门禁已开放，但开始实施前保持 `Planned`。
 - Readiness、release、retrospective：`release-readiness.md` 等待 M11 执行证据，不创建 release 或 retrospective 文档。
 
 ## Key Documents
@@ -48,7 +48,7 @@ AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端：用户选择
 | [eval-plan.md](../quality/eval-plan.md) | 七组评估、阈值、AC/risk 映射和证据缺口 | project-owner / approved | 验收、测试覆盖或风险变化 |
 | [golden-examples.md](../quality/golden-examples.md) | 成功、失败、边界和异常黄金样例 | project-owner / approved | fixture、Meyda、参数或用户任务变化 |
 | [failure-taxonomy.md](../quality/failure-taxonomy.md) | 稳定失败类型、S0–S3 和门禁响应 | project-owner / approved | 失败分类或风险接受规则变化 |
-| [evidence-index.md](../quality/evidence-index.md) | M3–M11 canonical run 摘要、环境、hash 和 reviewer | project-owner / in-review | 新 run、artifact retention 或里程碑审批 |
+| [evidence-index.md](../quality/evidence-index.md) | M3–M11 canonical run 摘要、环境、hash 和 reviewer | project-owner / approved | 新 run、artifact retention 或里程碑审批 |
 
 ## Architecture Decisions
 
@@ -80,7 +80,7 @@ AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端：用户选择
 - System design：[system design](../architecture/system-design.md)
 - Delivery planning：[execution plan](../delivery/execution-plan.md)
 - Quality design：[eval plan](../quality/eval-plan.md)，Q0 批准后用于 M3–M11 证据
-- Quality evidence：[evidence index](../quality/evidence-index.md)，M3–M9 已批准，M10 为 `in-review`
+- Quality evidence：[evidence index](../quality/evidence-index.md)，M3–M10 已批准
 - Quality readiness：`docs/quality/release-readiness.md` 尚未创建；M11 证据完成后生成
 - Release operations：`docs/release/` 尚未创建；release readiness 证据存在后生成
 - Retrospectives：`docs/retrospectives/` 尚未创建；有发布、事故或重复摩擦证据后生成
@@ -89,7 +89,7 @@ AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端：用户选择
 
 - M8 已实现四槽最多四张、累计 16 项、通用 scalar renderer、项目 Flux、零能量 0 与 UI hardening；clean canonical 与 Windows Chrome/owner 审批均已完成。
 - M9 已实现首页透明/非首页 Header blur、Power Spectrum、MFCC 与 Buffer，使 UI/Worker 累计开放 19 项；provisional 与 clean canonical 均 32/32 通过并获 owner 批准，M9 已为 `Complete`。
-- M10 已交付 Loudness 与 Complex Spectrum：Worker/UI 累计开放 21 项，结构 exact cursor 分别固定 total+24 bands 与 real/imag 各 1024；provisional 与 clean canonical 均 36/36 通过，正式 evidence 为 `in-review`，owner 审批前 M10 保持 `In Progress`。
+- M10 已交付 Loudness 与 Complex Spectrum：Worker/UI 累计开放 21 项，结构 exact cursor 分别固定 total+24 bands 与 real/imag 各 1024；provisional 与 clean canonical 均 36/36 通过，并于 2026-08-25 获 owner 批准，M10 已为 `Complete`。
 - 当前 Meyda `spectralFlux` 对有效输入仍抛出 `x is not defined`；产品已按 ADR-0005 实现并由 canonical 缓解 R-020，不得声称上游缺陷已修复。
 - 超出约 15 分钟支持边界的长音频未开始播放只作为非门禁压力观察；它不表示长音频被规定为必须失败，也不改变当前产品范围。
 - 当前机器尚未发现 Edge；没有真实 Edge 证据时不能完成 M11 双浏览器门禁。
@@ -136,3 +136,5 @@ AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端：用户选择
 同日，`project-owner` 以“PLEASE IMPLEMENT THIS PLAN”明确要求实施 M10 21/21 特征计划，并选择 Complex Spectrum 主图完整展示 1024 bins。M10 据此进入 `In Progress`；该授权不构成 M10 canonical 或 release readiness 通过。
 
 随后 M10 clean canonical run `M10-2026-08-22T18-25-01-873Z-8830e2a2` 在 clean commit `8830e2a2edddd9a5db4796ec6f5d5da8ee3c5f72` 上 36/36 通过，summary SHA-256 为 `30eb11b9985adc8c6d84e01b84f31a75785a4d8e39bdef22e85dd153f2637ea1`。正式 evidence 已登记为 `in-review`；M10 人工任务和 owner 审批完成前，M10 保持 `In Progress`，M11 保持 `Planned`。
+
+2026-08-25，`project-owner` 明确回复：“我批准 M10 canonical evidence 与 21/21 Analyzer 特征覆盖；同意将 M10 标记为 Complete 并开放 M11。”M10 evidence 据此改为 `approved`，M10 改为 `Complete`，M11 门禁开放但开始实施前保持 `Planned`。该批准不增加新的自动化测量，也不构成 Edge、M11 或 release readiness 通过。

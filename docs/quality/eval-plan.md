@@ -1,21 +1,21 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-08-23
+last_reviewed: 2026-08-25
 upstream_docs:
   - "docs/product/success-metrics.md"
   - "docs/architecture/risk-register.md"
   - "docs/delivery/execution-plan.md"
   - "docs/delivery/acceptance-criteria.md"
   - "docs/delivery/test-strategy.md"
-next_action: "M10 clean canonical 已登记为 in-review；等待 owner 人工任务与 evidence 审批"
+next_action: "M10 evidence 已获批准；M11 门禁开放，完成真实 Edge 与最终加固证据后再创建 readiness"
 ---
 
 # Eval Plan
 
 ## 1. Purpose and Current State
 
-本文件定义 AudioNotSurfYet 的质量证据契约。Vitest、Playwright、Worker harness、受控 fixture 和 direct-Meyda golden 已在 M3 建立。M3–M9 的适用 canonical evidence 均已获批。M10 仍为 `In Progress`，Loudness/Complex Spectrum 专项、36 步 provisional 与 clean canonical 均已通过，正式 evidence 为 `in-review`；完整 EV-A–EV-R、Edge 矩阵、M10 owner 审批和 M11 产品行为仍未完成。
+本文件定义 AudioNotSurfYet 的质量证据契约。Vitest、Playwright、Worker harness、受控 fixture 和 direct-Meyda golden 已在 M3 建立。M3–M10 的适用 canonical evidence 均已获批，M10 已为 `Complete`；完整 EV-A–EV-R、Edge 矩阵和 M11 产品行为仍未完成。
 
 Q0 只批准“如何判断质量”，不批准 release readiness。`docs/quality/release-readiness.md` 只能在 M11 已产生完整成功、失败、边界和异常证据后创建。
 
