@@ -5,7 +5,7 @@ last_reviewed: 2026-08-26
 upstream_docs:
   - "docs/product/problem-brief.md"
   - "docs/product/scope.md"
-next_action: "在 Editor E1–E6 delivery planning 中固定 fixture、步骤、容差和 evidence 门禁"
+next_action: "project-owner 审阅 Editor E1–E6 fixture、步骤、容差和 evidence 门禁"
 ---
 
 # Success Metrics

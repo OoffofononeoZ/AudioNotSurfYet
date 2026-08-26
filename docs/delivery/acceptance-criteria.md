@@ -7,10 +7,14 @@ upstream_docs:
   - "docs/architecture/system-design.md"
   - "docs/architecture/interface-contracts.md"
   - "docs/delivery/execution-plan.md"
-next_action: "在每个里程碑 PR/变更记录中引用适用 AC 编号并附可复现证据"
+next_action: "保留 Analyzer 历史 AC；审阅独立 Editor E1–E6 acceptance criteria"
 ---
 
 # Acceptance Criteria
+
+## Scope Routing
+
+本文保留 Analyzer M1–M11 的已批准验收历史。Editor 使用独立的 [E1–E6 acceptance criteria](editor/acceptance-criteria.md)，并由 [Editor execution plan](editor/execution-plan.md)、[test strategy](editor/test-strategy.md) 和 [milestone plan](editor/milestone-plan.md) 约束；这些子文档当前为 `in-review`，不构成 E1 通过或实现授权。
 
 ## 1. Evidence Rules
 
@@ -120,7 +124,7 @@ M10 适用解释：可选集合累计 21 项且仍最多四张唯一卡；Loudne
 | Latest stable Chrome desktop | Required | Required | Required | Required | granted/prompt/denied | 自动化 + 手工证据 |
 | Latest stable Edge desktop | Required | Required | Required | Required | granted/prompt/denied | 必须有真实 Edge 证据 |
 
-当前未发现 Edge 安装时，Chrome 可单独通过，但 AC 浏览器矩阵整体不能标记完成。
+Analyzer M11 已在真实 Edge 形成历史证据；Editor 改变路由、播放、工程和交互后必须重新建立自己的真实 Edge 证据，不得直接继承该通过状态。
 
 ## 9. Milestone Exit Rule
 

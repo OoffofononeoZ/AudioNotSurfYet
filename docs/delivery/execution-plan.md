@@ -9,16 +9,20 @@ upstream_docs:
   - "docs/architecture/system-design.md"
   - "docs/architecture/interface-contracts.md"
   - "docs/architecture/risk-register.md"
-next_action: "审阅 Analyzer release-readiness；批准前不扩大产品范围"
+next_action: "保留 Analyzer 历史交付状态；Editor 实施顺序由 in-review 专属 execution plan 管理"
 ---
 
 # Execution Plan
+
+## Scope Routing
+
+本文保留 Analyzer M1–M11 的已批准历史交付记录。Editor 不修改这些里程碑；其 E1–E6 实施顺序由 [Editor execution plan](editor/execution-plan.md) 管理，并与专属 [acceptance criteria](editor/acceptance-criteria.md)、[test strategy](editor/test-strategy.md) 和 [milestone plan](editor/milestone-plan.md) 共同保持 `in-review`。四份 Editor 文档获批前不开放 E1。
 
 ## 1. Delivery Outcome
 
 按纵向切片把已批准的本地音频学习体验从当前播放器基础推进到 21 项 Meyda 特征全覆盖。本计划以门禁证据而不是日历日期排序；任一里程碑未通过时，不进入下一批特征。
 
-本文件定义实施顺序和验收方式，不代表未关闭里程碑已通过。当前 M1、M2、Q0 与 M3–M11 均已完成；`project-owner` 于 2026-08-26 批准 M11 canonical、Edge 原生权限与最终加固结果。Analyzer delivery 已关闭，下一阶段为独立的 release-readiness review。
+本文件定义 Analyzer 历史实施顺序和验收方式。当前 M1、M2、Q0 与 M3–M11 均已完成；`project-owner` 于 2026-08-26 批准 M11 canonical、Edge 原生权限与最终加固结果，随后批准 Analyzer-only `Ready with waivers`。Editor 的新增 delivery planning 使用上方专属文档，不反向改写 Analyzer 历史。
 
 ## 2. Stage Gates
 

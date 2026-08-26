@@ -6,16 +6,20 @@ upstream_docs:
   - "docs/delivery/execution-plan.md"
   - "docs/delivery/acceptance-criteria.md"
   - "docs/delivery/test-strategy.md"
-next_action: "审阅 in-review Analyzer release-readiness 与七项拟议豁免"
+next_action: "保留 Analyzer 历史里程碑；审阅独立 Editor E1–E6 milestone plan"
 ---
 
 # Milestone Plan
+
+## Scope Routing
+
+本文保留 Analyzer M1–M11 的已批准历史状态；Analyzer readiness 已另行获批为 `Ready with waivers`。Editor 的 E0-D 与 E1–E6 状态由独立 [Editor milestone plan](editor/milestone-plan.md) 管理，并链接专属 [execution plan](editor/execution-plan.md)、[acceptance criteria](editor/acceptance-criteria.md) 和 [test strategy](editor/test-strategy.md)。Editor planning 当前为 `in-review`，E1 尚未开放。
 
 ## Planning Convention
 
 - Target 使用相对门禁，不表示日历承诺。
 - `Complete` 只用于文档门禁、真实证据和所需人工批准均已满足的里程碑。
-- Q0 与 M1–M11 均为 `Complete`；Analyzer delivery 已关闭，当前进入 release-readiness review。
+- Q0 与 M1–M11 均为 `Complete`；Analyzer delivery 已关闭，Analyzer-only readiness 已获批准。
 - 一个里程碑未通过时，后续里程碑保持 Planned/Blocked，不并行扩大特征范围。
 
 ## Milestones
@@ -140,10 +144,10 @@ next_action: "审阅 in-review Analyzer release-readiness 与七项拟议豁免"
 
 ## Current Gate State
 
-- Current stage：M11 clean Chrome/Edge canonical 已 38/38 通过并获 owner 批准，M11 为 `Complete`；当前进入 Analyzer release-readiness review。
+- Current stage：M11 clean Chrome/Edge canonical 已 38/38 通过并获 owner 批准，M11 为 `Complete`；Analyzer readiness 已获批准。当前新增工作只进入 Editor E1–E6 delivery planning，E1 仍关闭。
 - Previous gate：M3 已由 `project-owner` 于 2026-07-28 批准并标记 `Complete`。
 - Canonical run：`npm run eval:m3` 已在 clean commit `17d16f0da37289c1f67f75203502beef999572ea` 上通过；摘要见 [evidence index](../quality/evidence-index.md)。
-- Next gate：创建 `docs/quality/release-readiness.md`，以 `in-review` 的 `Ready with waivers` 结论列明阻断、豁免和部署前置条件，等待 owner 单独批准。
+- Next gate：审阅四份 `docs/delivery/editor/` 子文档；批准后只开放 E1。Analyzer 正式上线仍等待 PROD-015。
 - M3 state：Complete；M3 evidence 只证明测试基础，不代表 M4 产品行为通过。
 - M4 canonical：`npm run eval:m4` 在 clean commit `e5cfe9e8ab62301f3c5b0ddcdd37847a2e131a0f` 上 13/13 步骤通过；60 秒漂移 2.233ms，三次 seek 最大误差 66.827ms。`project-owner` 已于 2026-07-29 批准该证据。
 - M5 provisional：`M5-2026-07-29T07-03-16-207Z-2eb98381-provisional` 在 dirty worktree 16/16 步骤通过；summary SHA-256 为 `7b0acaf128ac4a7ceffce1449d2421127d20c8b25dcdc1ebd07b889072228530`。它只作实现反馈，不是正式 evidence。
