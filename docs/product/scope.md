@@ -1,18 +1,18 @@
 ---
-status: in-review
+status: approved
 owner: "project-owner"
 last_reviewed: 2026-08-26
 upstream_docs:
   - "docs/product/problem-brief.md"
   - "docs/quality/release-readiness.md"
-next_action: "project-owner 审阅 Editor E0 首期范围、非目标与 E1–E6 顺序"
+next_action: "进入 Editor E0 system design；E1–E6 继续等待 architecture 与 delivery 门禁"
 ---
 
 # Scope
 
 ## Scope Boundary
 
-下列 Analyzer 范围已于 2026-07-24 获批，并由 M3–M11 与 Analyzer-only readiness 收口。Editor E0 是新增且独立待审阅的产品范围；它不能反向扩大 Analyzer 候选的证据，也不能在本文件重新获批前进入系统设计或实现。
+下列 Analyzer 范围已于 2026-07-24 获批，并由 M3–M11 与 Analyzer-only readiness 收口。Editor E0 是 2026-08-26 独立批准的新增产品范围；它不能反向扩大 Analyzer 候选的证据，并且仍须从 system design 开始建立自己的下游门禁。
 
 ## Analyzer Scope（approved）
 
@@ -74,7 +74,7 @@ next_action: "project-owner 审阅 Editor E0 首期范围、非目标与 E1–E6
 - Analyzer 中新增 Three.js 依赖。
 - 在 release 阶段前决定正式托管商、生产 URL、发布监控或回滚方案。
 
-## Editor E0 Scope（in review）
+## Editor E0 Scope（approved）
 
 ### Product capability
 
@@ -127,7 +127,7 @@ next_action: "project-owner 审阅 Editor E0 首期范围、非目标与 E1–E6
 - 首发验证最新稳定版 Chrome、Edge 桌面端及 1024、1280、1920 CSS px；Editor 不继承 Analyzer 的浏览器通过结论，必须形成自己的证据。
 - 播放、seek、zoom/pan、tempo 边界、点/范围事件、inner class、导入导出、右键菜单替代动作和叠加层调整必须具备键盘路径、可见焦点和 reduced-motion 语义。
 
-## Editor Delivery Slices（proposed）
+## Editor Delivery Slices（approved product sequence）
 
 1. **E0 — Product intent**：批准 Editor 用户、问题、范围、指标、非目标和开放问题；本阶段不编码。
 2. **E1 — Entry, playback and project foundation**：路由、指定/当前歌曲、单曲循环、草稿，以及同时容纳点/范围事件的版本化 JSON 基础。
@@ -164,7 +164,7 @@ E5 现为 `Planned`，不再因缺少核心交互而阻塞。若未来要求新�
 
 - Decision-maker：`project-owner`
 - Analyzer approved on：2026-07-24；M3–M11 与 Analyzer-only readiness 已完成。
-- Editor E0 status：`in-review`；2026-08-26 只获准进入产品意图并将需求转写入版本化文档，尚未获得范围批准。
-- Change rule：Editor E0 获批后，现有 architecture、delivery、quality 与 readiness 仍只对 Analyzer 历史范围有效；Editor 必须从 system design 开始建立并审批自己的下游覆盖。
+- Editor E0 status：`approved`；`project-owner` 于 2026-08-26 明确回复：“我批准 Editor E0 产品意图、点事件与范围事件规则、成功指标和开放问题；同意进入 Editor E0 架构设计。”
+- Change rule：现有 architecture、delivery、quality 与 readiness 仍只对 Analyzer 历史范围有效；Editor 必须从 system design 开始建立并审批自己的下游覆盖，E1–E6 不能因产品批准而直接开始实现。
 
 File System Access 行为依据：[Chrome File System Access 文档](https://developer.chrome.com/docs/capabilities/web-apis/file-system-access) 与 [持久权限说明](https://developer.chrome.com/blog/persistent-permissions-for-the-file-system-access-api)。

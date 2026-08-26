@@ -4,7 +4,7 @@ owner: "project-owner"
 last_reviewed: 2026-08-26
 upstream_docs:
   - "docs/context/index.md"
-next_action: "审阅 Editor E0 的逆向制曲、lane、inner class 与事件术语"
+next_action: "用已批准 Editor 产品术语审阅 in-review 架构类型和状态机"
 ---
 
 # Glossary
@@ -53,7 +53,7 @@ next_action: "审阅 Editor E0 的逆向制曲、lane、inner class 与事件术
 | Analyzer candidate | 由固定实现 commit、canonical run、环境和 artifact hash 共同标识的 Analyzer-only 候选 | 后续文档或 Editor 变化不能反向扩大该候选的证据范围 | [release readiness](../quality/release-readiness.md) |
 | Ready with waivers | 候选没有当前范围内的代码 blocker，但只有在 reviewer 接受列明风险后才可进入发布规划 | 不等于风险已解决，也不等于生产上线授权 | [release readiness](../quality/release-readiness.md) |
 | production launch authorization | 对托管、域名、SPA fallback、回滚和监控均有决定后才形成的上线许可 | 当前 readiness 明确不提供该授权 | [open questions](../product/open-questions.md) |
-| Editor E0 | Editor 的产品意图阶段；只定义用户、问题、范围、指标、非目标和开放问题 | `in-review` 期间不允许开始系统设计、代码或依赖安装 | [scope](../product/scope.md) |
+| Editor E0 | Editor 的产品意图阶段；其用户、问题、范围、指标、非目标和开放问题已于 2026-08-26 获批 | 只开放 system design；代码、依赖和 E1–E6 仍等待下游门禁 | [scope](../product/scope.md) |
 | 逆向制曲 | 对已有歌曲反向记录音符、音色和效果出现时间的标注过程 | 产物是数据工程，不修改 PCM、混音或生成伴奏 | [problem brief](../product/problem-brief.md) |
 | lane | Editor 中一个具名标注轨道，承载全部展开的 inner class 及其事件 | 名称不是 JSON 对象 identity；稳定 ID 和 schema 等待接口契约 | [scope](../product/scope.md) |
 | inner class | lane 内用户可见的细分类，例如音高或效果走向；新 lane 默认含 `default` | 点/范围唯一性与重叠规则以 lane 和 inner class 为作用域 | [scope](../product/scope.md) |
@@ -64,4 +64,4 @@ next_action: "审阅 Editor E0 的逆向制曲、lane、inner class 与事件术
 
 ## Approval Record
 
-`project-owner` 于 2026-08-21 批准 M7 canonical evidence 并开放 M8。本词汇表随后已按 M8 累计 16 项、项目 Flux 与四槽实现复核；owner 又批准 M8 canonical evidence 与界面稳定化结果，M8 据此为 `Complete`。2026-08-23，owner 批准 M9 canonical 与非首页导航栏模糊效果；M9 据此为 `Complete`。同日 owner 要求实施 M10 并选择 Complex Spectrum 完整 1024-bin 主图，M10 进入 `In Progress`。M10 clean canonical 已 36/36 通过并把本页 21 项、Bark bands、signed FFT bins 与 structured payload 术语锁入 evidence。2026-08-25，owner 批准 M10 canonical evidence 与 21/21 Analyzer 特征覆盖，M10 据此为 `Complete`；同日确认 Edge 已安装并要求开始最终加固。M11 clean canonical 随后 38/38 通过；2026-08-26，owner 批准 canonical、Edge 原生权限与最终加固结果，M11 据此为 `Complete`。同日 owner 接受 Analyzer readiness 豁免并开放 Editor E0；Editor 术语按待审产品草案登记，不表示代码类型已经存在。
+`project-owner` 于 2026-08-21 批准 M7 canonical evidence 并开放 M8。本词汇表随后已按 M8 累计 16 项、项目 Flux 与四槽实现复核；owner 又批准 M8 canonical evidence 与界面稳定化结果，M8 据此为 `Complete`。2026-08-23，owner 批准 M9 canonical 与非首页导航栏模糊效果；M9 据此为 `Complete`。同日 owner 要求实施 M10 并选择 Complex Spectrum 完整 1024-bin 主图，M10 进入 `In Progress`。M10 clean canonical 已 36/36 通过并把本页 21 项、Bark bands、signed FFT bins 与 structured payload 术语锁入 evidence。2026-08-25，owner 批准 M10 canonical evidence 与 21/21 Analyzer 特征覆盖，M10 据此为 `Complete`；同日确认 Edge 已安装并要求开始最终加固。M11 clean canonical 随后 38/38 通过；2026-08-26，owner 批准 canonical、Edge 原生权限与最终加固结果，M11 据此为 `Complete`。同日 owner 接受 Analyzer readiness 豁免并开放 Editor E0，随后批准 Editor E0 产品意图、点/范围事件规则、成功指标和开放问题。Editor 产品术语据此生效，但计划中的架构类型仍须单独审批，代码类型尚不存在。

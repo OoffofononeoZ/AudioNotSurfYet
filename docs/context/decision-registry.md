@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/product/scope.md"
   - "docs/architecture/system-design.md"
   - "docs/delivery/execution-plan.md"
-next_action: "project-owner 审阅 DEC-023 的 Editor E0 产品草案；Analyzer 上线等待 PROD-015"
+next_action: "以 DEC-023 已批准范围进入 Editor system design；Analyzer 上线等待 PROD-015"
 ---
 
 # Decision Registry
@@ -43,7 +43,7 @@ next_action: "project-owner 审阅 DEC-023 的 Editor E0 产品草案；Analyzer
 | DEC-020 | 2026-08-23 | M10 开放 Loudness 与 Complex Spectrum 达到 21/21；Complex Spectrum 主图与精确表完整保留 1024 bins，并以 signed Hz 解释后半负频率镜像 | project-owner | approved | [Execution plan](../delivery/execution-plan.md) | 结构 payload、FFT bin 范围、renderer 或最终 feature set 改变 |
 | DEC-021 | 2026-08-26 | 批准 M11 canonical、Edge 原生权限与最终加固结果，关闭 M11 并创建 Analyzer release-readiness；readiness 豁免与生产上线仍需单独批准 | project-owner | approved | [Evidence index](../quality/evidence-index.md) | M11 evidence 身份、readiness 时序或上线授权改变 |
 | DEC-022 | 2026-08-26 | 批准 Analyzer `Ready with waivers`，接受 W-001–W-007 并进入 Editor E0 产品意图；Analyzer 正式上线继续等待 PROD-015 | project-owner | approved | [Release readiness](../quality/release-readiness.md) | 候选身份、豁免条件、托管方案或 Editor 范围改变 |
-| DEC-023 | 2026-08-26 | Editor E0 提议为单曲“逆向制曲”标注：首版本地 JSON、点事件和范围事件、tempo map、单特征叠加及 E1–E6；同 lane/inner class 范围不重叠 | project-owner | in-review | [Scope](../product/scope.md) | owner 批准/拒绝 E0，或事件语义、数据边界、格式、依赖与里程碑改变 |
+| DEC-023 | 2026-08-26 | Editor E0 是单曲“逆向制曲”标注：首版本地 JSON、点事件和范围事件、tempo map、单特征叠加及 E1–E6；同 lane/inner class 范围不重叠 | project-owner | approved | [Scope](../product/scope.md) | 事件语义、数据边界、格式、依赖或里程碑改变 |
 
 ## Approval Evidence
 
@@ -99,7 +99,9 @@ M11 clean canonical `M11-2026-08-25T10-05-12-783Z-99c67792` 随后在真实 Chro
 
 同日，`project-owner` 明确回复：“我批准 Analyzer release-readiness 的有条件就绪结论及所列豁免；同意进入 Editor E0，Analyzer 正式上线继续等待托管方案。”DEC-022 据此生效，W-001–W-007 获接受，R-019 只针对当前 Analyzer 候选改为 `Accepted`。该决定允许开始 Editor 产品意图，不授权生产部署，也不授权 Editor 架构或代码。
 
-随后 owner 要求按 Editor E0 范围事件修订计划更新产品意图。DEC-023 记录该待审草案：点事件与长音色/效果范围事件进入首期路线，范围创建使用严格向后的两次点击、`Esc`/空白右键取消、自适应网格端点和同类不重叠。其状态保持 `in-review`；该实施请求只授权文档转写，不等于产品范围已批准。
+随后 owner 要求按 Editor E0 范围事件修订计划更新产品意图。DEC-023 记录该草案：点事件与长音色/效果范围事件进入首期路线，范围创建使用严格向后的两次点击、`Esc`/空白右键取消、自适应网格端点和同类不重叠。
+
+同日，`project-owner` 明确回复：“我批准 Editor E0 产品意图、点事件与范围事件规则、成功指标和开放问题；同意进入 Editor E0 架构设计。”DEC-023、PROD-014E 与 PROD-020 据此获批并开放 system design；该批准不构成架构、delivery、实现、质量或 Editor readiness 通过。
 
 ## Historical Evidence Gap
 
