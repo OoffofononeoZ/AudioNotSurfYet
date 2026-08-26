@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/context/index.md"
   - "docs/delivery/test-strategy.md"
   - "docs/quality/eval-plan.md"
-next_action: "审阅 in-review Analyzer release-readiness；批准前不进入 release 或 Editor 实现"
+next_action: "起草并审阅 Editor E0 产品意图；Analyzer 正式上线继续等待 PROD-015"
 ---
 
 # Working Agreements
@@ -127,3 +127,5 @@ M11 实施期间先发现并修复 current track UI 已切换但持久化状态�
 随后 clean-HEAD canonical run `M11-2026-08-25T10-05-12-783Z-99c67792` 在 commit `99c67792509d07456bcb431b90468252f8b0fdc3` 上 38/38 通过，summary SHA-256 为 `7d637525b5c9e6aa6fb45dc0818ac1fb59bbef90b90abf3ed2d6e6119ac631b5`；Chrome M11 专项 4/4，Edge 全量 31/31。正式 evidence 保持 `in-review`；原生 Edge 权限、辅助技术人工签字和 owner 批准前不关闭 M11、不创建 release-readiness。
 
 2026-08-26，`project-owner` 明确批准 M11 canonical evidence、Edge 原生权限与最终加固结果，同意将 M11 标记为 `Complete` 并创建 release-readiness。该签字只登记补偿门禁通过，不补写未提供的人工测量；M11 artifact 继续保留到 readiness review 完成，release-readiness 在单独批准前保持 `in-review`。
+
+同日，`project-owner` 明确批准 Analyzer release-readiness 的 `Ready with waivers` 结论及 W-001–W-007，并同意进入 Editor E0。该批准只覆盖 Analyzer 候选，不构成生产上线授权；PROD-015 解决前不创建托管或上线声明。Editor 当前只允许更新产品意图文档，产品范围获批前不得开始架构、实现或安装新依赖。

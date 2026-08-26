@@ -4,7 +4,7 @@ owner: "project-owner"
 last_reviewed: 2026-08-26
 upstream_docs:
   - "AGENTS.md"
-next_action: "审阅 Analyzer release-readiness 的候选身份、豁免与部署边界"
+next_action: "进入 Editor E0 产品意图评审；Analyzer 正式上线等待 PROD-015"
 ---
 
 # Repository Context Index
@@ -18,12 +18,12 @@ AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端：用户选择
 ## Current Stage
 
 - Repository context：入口、决策注册表、system map、glossary 与 working agreements 均已批准。
-- Product intent：problem brief、scope 和 success metrics 已由 `project-owner` 批准；开放问题只保留未来上传、未定义 Tab、托管和扩展研究等非当前门禁事项。
+- Product intent：现有 problem brief、scope 和 success metrics 只批准 Analyzer 范围；owner 已允许进入 Editor E0，但扩展后的产品意图尚未起草和批准。
 - System design：system design、接口契约、风险和五个 ADR 已批准。
 - Execution planning：execution plan、acceptance criteria、test strategy 和 milestone plan 均为 approved。
 - Quality and evals：M3–M11 的适用 canonical/人工证据均已获批准；M11 已于 2026-08-26 关闭。
 - Implementation：M1–M11 均为 `Complete`，Analyzer 21/21 delivery 已关闭。
-- Readiness、release、retrospective：Analyzer `release-readiness.md` 已创建并保持 `in-review`；单独获批前不创建 release 或 retrospective 文档。
+- Readiness、release、retrospective：Analyzer `release-readiness.md` 已获 `Ready with waivers` 批准；PROD-015 尚未解决，因此不创建上线声明或生产托管，Editor 也不继承该 readiness。
 
 ## Key Documents
 
@@ -49,7 +49,7 @@ AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端：用户选择
 | [golden-examples.md](../quality/golden-examples.md) | 成功、失败、边界和异常黄金样例 | project-owner / approved | fixture、Meyda、参数或用户任务变化 |
 | [failure-taxonomy.md](../quality/failure-taxonomy.md) | 稳定失败类型、S0–S3 和门禁响应 | project-owner / approved | 失败分类或风险接受规则变化 |
 | [evidence-index.md](../quality/evidence-index.md) | M3–M11 canonical run 摘要、环境、hash 和 reviewer | project-owner / approved | 新 run、artifact retention 或里程碑审批 |
-| [release-readiness.md](../quality/release-readiness.md) | Analyzer 候选身份、blocker、waiver 与有条件就绪结论 | project-owner / in-review | 候选代码、证据、风险接受或部署边界变化 |
+| [release-readiness.md](../quality/release-readiness.md) | Analyzer 候选身份、blocker、waiver 与有条件就绪结论 | project-owner / approved | 候选代码、证据、风险接受或部署边界变化 |
 
 ## Architecture Decisions
 
@@ -82,8 +82,8 @@ AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端：用户选择
 - Delivery planning：[execution plan](../delivery/execution-plan.md)
 - Quality design：[eval plan](../quality/eval-plan.md)，Q0 批准后用于 M3–M11 证据
 - Quality evidence：[evidence index](../quality/evidence-index.md)，M3–M11 已批准
-- Quality readiness：[Analyzer release readiness](../quality/release-readiness.md) 已创建并为 `in-review`
-- Release operations：`docs/release/` 尚未创建；readiness 获 owner 单独批准后才允许生成
+- Quality readiness：[Analyzer release readiness](../quality/release-readiness.md) 已由 owner 批准为 `Ready with waivers`，且只覆盖 Analyzer 候选
+- Release operations：`docs/release/` 尚未创建；PROD-015 的托管平台、域名和 SPA fallback 解决前不进入正式上线
 - Retrospectives：`docs/retrospectives/` 尚未创建；有发布、事故或重复摩擦证据后生成
 
 ## Current Known Gaps
@@ -94,7 +94,7 @@ AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端：用户选择
 - 当前 Meyda `spectralFlux` 对有效输入仍抛出 `x is not defined`；产品已按 ADR-0005 实现并由 canonical 缓解 R-020，不得声称上游缺陷已修复。
 - 超出约 15 分钟支持边界的长音频未开始播放只作为非门禁压力观察；它不表示长音频被规定为必须失败，也不改变当前产品范围。
 - M11 clean canonical 已在 Chrome/Edge 上 38/38 通过，其中 Edge 全量为 31/31；原生 Edge 权限、辅助技术与人工长会话补偿门禁已于 2026-08-26 获 owner 签字，M11 为 `Complete`。
-- 正式托管平台和生产 URL 尚未决定；它们只阻断未来 release，不阻断 M3。
+- Analyzer readiness 已于 2026-08-26 获 owner 有条件批准；正式托管平台、域名、SPA fallback 和生产 URL 尚未决定，继续阻断正式上线。
 - 详细 context 文档的长期 owner/review cadence 尚未全部统一；代码改动时必须同步修正事实。
 - 工程事实差异继续记录在 [Skill 项目差异](../../skills/audio-visualizer-dev/references/99-open-questions-and-project-deltas.md)，产品开放项见 [open questions](../product/open-questions.md)。
 
@@ -147,3 +147,5 @@ AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端：用户选择
 M11 canonical run `M11-2026-08-25T10-05-12-783Z-99c67792` 随后在 clean commit `99c67792509d07456bcb431b90468252f8b0fdc3` 上 38/38 通过，summary SHA-256 为 `7d637525b5c9e6aa6fb45dc0818ac1fb59bbef90b90abf3ed2d6e6119ac631b5`。
 
 2026-08-26，`project-owner` 明确回复：“我批准 M11 canonical evidence、Edge 原生权限与最终加固结果；同意将 M11 标记为 Complete 并创建 release-readiness。”M11 evidence 据此改为 `approved`，M11 改为 `Complete`。本批准只开放 Analyzer readiness review，不预先接受其豁免，也不构成生产上线授权。
+
+同日，`project-owner` 明确回复：“我批准 Analyzer release-readiness 的有条件就绪结论及所列豁免；同意进入 Editor E0，Analyzer 正式上线继续等待托管方案。”Analyzer readiness 据此改为 `approved`，W-001–W-007 获接受。该批准只覆盖既有 Analyzer 候选；PROD-015 继续阻断上线，Editor 只进入产品意图阶段。

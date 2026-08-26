@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/product/scope.md"
   - "docs/architecture/system-design.md"
   - "docs/delivery/execution-plan.md"
-next_action: "审阅 DEC-021 产出的 Analyzer readiness；豁免尚未批准"
+next_action: "按 DEC-022 进入 Editor E0 产品意图评审；Analyzer 上线等待 PROD-015"
 ---
 
 # Decision Registry
@@ -42,6 +42,7 @@ next_action: "审阅 DEC-021 产出的 Analyzer readiness；豁免尚未批准"
 | DEC-019 | 2026-08-21 | M9 Slice 0 让首页 Header 保持透明、所有非首页使用 18px backdrop blur；随后开放 Power Spectrum、MFCC、Buffer，累计最多四张、19/21 可用卡 | project-owner | approved | [Execution plan](../delivery/execution-plan.md) | Header 路由样式、M9 feature set、向量/波形 renderer 或累计覆盖改变 |
 | DEC-020 | 2026-08-23 | M10 开放 Loudness 与 Complex Spectrum 达到 21/21；Complex Spectrum 主图与精确表完整保留 1024 bins，并以 signed Hz 解释后半负频率镜像 | project-owner | approved | [Execution plan](../delivery/execution-plan.md) | 结构 payload、FFT bin 范围、renderer 或最终 feature set 改变 |
 | DEC-021 | 2026-08-26 | 批准 M11 canonical、Edge 原生权限与最终加固结果，关闭 M11 并创建 Analyzer release-readiness；readiness 豁免与生产上线仍需单独批准 | project-owner | approved | [Evidence index](../quality/evidence-index.md) | M11 evidence 身份、readiness 时序或上线授权改变 |
+| DEC-022 | 2026-08-26 | 批准 Analyzer `Ready with waivers`，接受 W-001–W-007 并进入 Editor E0 产品意图；Analyzer 正式上线继续等待 PROD-015 | project-owner | approved | [Release readiness](../quality/release-readiness.md) | 候选身份、豁免条件、托管方案或 Editor 范围改变 |
 
 ## Approval Evidence
 
@@ -94,6 +95,8 @@ M4 dirty-worktree provisional suite 随后通过，证明当前实现值得进�
 M11 clean canonical `M11-2026-08-25T10-05-12-783Z-99c67792` 随后在真实 Chrome/Edge 上 38/38 通过并登记为 `in-review`。该执行证据关闭“缺少真实 Edge 自动化”的缺口，但不构成 M11 owner 批准或 readiness 决策；原生 Edge 权限与辅助技术人工验收仍是下一门禁。
 
 2026-08-26，`project-owner` 明确回复：“我批准 M11 canonical evidence、Edge 原生权限与最终加固结果；同意将 M11 标记为 Complete 并创建 release-readiness。”DEC-021 据此生效；M11 关闭。该决定只授权创建 readiness review，不表示其拟议豁免已经批准，也不构成生产发布决定。
+
+同日，`project-owner` 明确回复：“我批准 Analyzer release-readiness 的有条件就绪结论及所列豁免；同意进入 Editor E0，Analyzer 正式上线继续等待托管方案。”DEC-022 据此生效，W-001–W-007 获接受，R-019 只针对当前 Analyzer 候选改为 `Accepted`。该决定允许开始 Editor 产品意图，不授权生产部署，也不授权 Editor 架构或代码。
 
 ## Historical Evidence Gap
 

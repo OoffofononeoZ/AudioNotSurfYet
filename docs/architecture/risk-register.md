@@ -5,7 +5,7 @@ last_reviewed: 2026-08-26
 upstream_docs:
   - "docs/architecture/system-design.md"
   - "docs/architecture/interface-contracts.md"
-next_action: "审阅 Analyzer readiness 中 R-019 与其余拟议豁免"
+next_action: "以 Analyzer-only 豁免边界进入 Editor E0 产品意图评审"
 ---
 
 # Risk Register
@@ -32,7 +32,7 @@ next_action: "审阅 Analyzer readiness 中 R-019 与其余拟议豁免"
 | R-016 | fixture 来源或许可不可追溯 | Medium | Medium | 二进制无来源/hash | 合成 PCM 由脚本生成；格式 fixture 记录生成命令、编码器版本、许可和 SHA-256；M11 canonical fixture hash 5/5 通过 | 无合规 provenance 的 fixture 不入库 | project-owner | Mitigated |
 | R-017 | 现有 `test:spectrogram` 指向缺失 `test.ts` | High | Medium | 命令无法运行 | M3 已删除失效命令并建立正式 test/eval scripts；M3–M11 canonical 持续执行公开命令 | package scripts 变化时由 docs/harness 回归检测 | project-owner | Mitigated |
 | R-018 | 未定义 Tab 或未来上传需求侵入当前交付 | Medium | Medium | PR 添加空白页实现、网络数据路径或服务端依赖 | scope review、Feature/ADR 门禁；未来能力另开产品决策 | 产品意图变化会使所有下游待复核 | project-owner | Open |
-| R-019 | bundle 已有约 1MB 警告继续增长 | Medium | Medium | `npm run build` chunk warning 增大 | Worker/renderer 按路由或 feature family 拆分，记录构建体积；M11 canonical 最大 JS chunk 为 1,117.94 kB；避免 Analyzer Three.js | 具体发布预算在 quality/release 前批准，warning 继续保留 | project-owner | Open |
+| R-019 | bundle 已有约 1MB 警告继续增长 | Medium | Medium | `npm run build` chunk warning 增大 | Worker/renderer 按路由或 feature family 拆分，记录构建体积；M11 canonical 最大 JS chunk 为 1,117.94 kB；避免 Analyzer Three.js；owner 于 2026-08-26 以 W-001 接受当前候选 warning | 仅当前 Analyzer 候选为 Accepted；托管方案或正式包体预算确定、chunk 增长或首屏问题复现时重新评审 | project-owner | Accepted |
 | R-020 | Meyda 5.6.3 `spectralFlux` 提取器引用未声明变量 `x` | High | High | 固定 previous/current frame 调用抛 `ReferenceError: x is not defined` | ADR-0005 项目 Flux 已实现；公式/首帧/静音/exact cursor golden 与 M8 clean canonical 28/28 通过，保留上游异常事实 | 产品阻断已缓解；Meyda 缺陷未修复，依赖升级时必须重新对照 | project-owner | Mitigated |
 | R-021 | Analyzer sticky、播放器层级、pressed 状态或内层滚动条破坏可用性与视觉一致性 | Medium | Medium | sticky 与 Header 间距过大；歌曲列表被遮挡；Windows Chrome 按钮保持按压外观；表格显示系统默认滚动条 | M8 Slice 0、macOS Chrome 多视口 canonical 与 owner Windows Chrome 人工签字均通过 | 相关交互或样式变化后重新执行多视口自动化与 Windows Chrome 补偿复核 | project-owner | Closed |
 
