@@ -8,7 +8,7 @@ upstream_docs:
   - "docs/delivery/execution-plan.md"
   - "docs/delivery/acceptance-criteria.md"
   - "docs/delivery/test-strategy.md"
-next_action: "M11 证据已获批准；创建并审阅 Analyzer release-readiness"
+next_action: "审阅 Analyzer release-readiness 的覆盖、缺口与拟议豁免"
 ---
 
 # Eval Plan

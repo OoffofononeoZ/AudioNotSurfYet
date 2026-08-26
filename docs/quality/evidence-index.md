@@ -8,7 +8,7 @@ upstream_docs:
   - "docs/quality/failure-taxonomy.md"
   - "docs/delivery/milestone-plan.md"
   - "tests/fixtures/fixture-manifest.json"
-next_action: "M11 canonical 与人工门禁已获批准；创建 Analyzer release-readiness review"
+next_action: "以已批准 M11 身份支持 in-review Analyzer release-readiness"
 ---
 
 # Evidence Index

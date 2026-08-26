@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/product/scope.md"
   - "docs/architecture/system-design.md"
   - "docs/delivery/execution-plan.md"
-next_action: "执行 DEC-021：创建 in-review Analyzer release-readiness"
+next_action: "审阅 DEC-021 产出的 Analyzer readiness；豁免尚未批准"
 ---
 
 # Decision Registry

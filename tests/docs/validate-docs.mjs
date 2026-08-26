@@ -94,11 +94,40 @@ if (featureCount !== 21) {
     errors.push(`src/data/analyzerData.ts: expected 21 feature entries, found ${featureCount}`);
 }
 
+const readinessPath = path.join(DOCS_ROOT, 'quality/release-readiness.md');
+let readinessExists = true;
 try {
-    await stat(path.join(DOCS_ROOT, 'quality/release-readiness.md'));
-    errors.push('docs/quality/release-readiness.md exists before M11 evidence');
-} catch {
-    // Expected until M11.
+    await stat(readinessPath);
+} catch (error) {
+    if (error?.code === 'ENOENT') {
+        readinessExists = false;
+    } else {
+        errors.push(`docs/quality/release-readiness.md: unable to inspect (${error.message})`);
+    }
+}
+
+if (readinessExists) {
+    const [evidenceIndex, milestonePlan, readiness] = await Promise.all([
+        readFile(path.join(DOCS_ROOT, 'quality/evidence-index.md'), 'utf8'),
+        readFile(path.join(DOCS_ROOT, 'delivery/milestone-plan.md'), 'utf8'),
+        readFile(readinessPath, 'utf8'),
+    ]);
+    if (!/## 14\. M11 Canonical Run Record[\s\S]*?\| Evidence state \| `approved` \|/.test(evidenceIndex)) {
+        errors.push('docs/quality/release-readiness.md exists before approved M11 evidence');
+    }
+    if (!/^\| M11 \| Cross-cutting hardening \| Complete \|/m.test(milestonePlan)) {
+        errors.push('docs/quality/release-readiness.md exists before M11 is Complete');
+    }
+    for (const requiredSection of [
+        '## Summary Decision',
+        '## Coverage Summary',
+        '## Blockers',
+        '## Proposed Waivers',
+    ]) {
+        if (!readiness.includes(requiredSection)) {
+            errors.push(`docs/quality/release-readiness.md: missing ${requiredSection}`);
+        }
+    }
 }
 
 if (errors.length > 0) {

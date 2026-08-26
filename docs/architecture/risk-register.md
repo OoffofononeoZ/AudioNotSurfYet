@@ -5,7 +5,7 @@ last_reviewed: 2026-08-26
 upstream_docs:
   - "docs/architecture/system-design.md"
   - "docs/architecture/interface-contracts.md"
-next_action: "M11 风险门禁已收口；在 Analyzer readiness 中审阅 R-019 与剩余豁免"
+next_action: "审阅 Analyzer readiness 中 R-019 与其余拟议豁免"
 ---
 
 # Risk Register

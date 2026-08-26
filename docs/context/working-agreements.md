@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/context/index.md"
   - "docs/delivery/test-strategy.md"
   - "docs/quality/eval-plan.md"
-next_action: "M11 已完成；创建 in-review Analyzer release-readiness"
+next_action: "审阅 in-review Analyzer release-readiness；批准前不进入 release 或 Editor 实现"
 ---
 
 # Working Agreements
