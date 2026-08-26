@@ -1,11 +1,11 @@
 ---
-status: approved
+status: in-review
 owner: "project-owner"
 last_reviewed: 2026-08-26
 upstream_docs:
   - "docs/architecture/system-design.md"
   - "docs/architecture/interface-contracts.md"
-next_action: "以 Analyzer-only 豁免边界进入 Editor E0 产品意图评审"
+next_action: "project-owner 审阅 R-022–R-027 与 Editor E1–E6 验证信号；批准前不进入 delivery"
 ---
 
 # Risk Register
@@ -31,10 +31,16 @@ next_action: "以 Analyzer-only 豁免边界进入 Editor E0 产品意图评审"
 | R-015 | 双浏览器状态被误报 | High | Medium | 只执行 Chromium 或安装检测，没有真实 Edge channel 证据 | M11 runner 固定使用真实 `chrome`/`msedge` channel；clean canonical 的 Edge 全量 M3–M11 为 31/31，并记录产品版本 | 原生权限体验仍由 R-005/EG-006 跟踪；浏览器升级时复跑 | project-owner | Mitigated |
 | R-016 | fixture 来源或许可不可追溯 | Medium | Medium | 二进制无来源/hash | 合成 PCM 由脚本生成；格式 fixture 记录生成命令、编码器版本、许可和 SHA-256；M11 canonical fixture hash 5/5 通过 | 无合规 provenance 的 fixture 不入库 | project-owner | Mitigated |
 | R-017 | 现有 `test:spectrogram` 指向缺失 `test.ts` | High | Medium | 命令无法运行 | M3 已删除失效命令并建立正式 test/eval scripts；M3–M11 canonical 持续执行公开命令 | package scripts 变化时由 docs/harness 回归检测 | project-owner | Mitigated |
-| R-018 | 未定义 Tab 或未来上传需求侵入当前交付 | Medium | Medium | PR 添加空白页实现、网络数据路径或服务端依赖 | scope review、Feature/ADR 门禁；Editor E0 产品草案保持 `in-review` 且禁止越级实现，Visualizer/上传继续为开放问题 | Editor 产品意图获批后必须建立独立 system design 并复核其下游；其余未定义能力仍不得进入 | project-owner | Open |
+| R-018 | 未定义 Tab 或未来上传需求侵入当前交付 | Medium | Medium | PR 添加未批准 Visualizer/空白页实现、网络数据路径或服务端依赖 | Editor E0 产品意图已批准并进入独立 `in-review` system design；Visualizer/上传继续由 PROD-013/014 门禁 | Editor 仍不得越过 architecture/delivery；其余未定义能力不得进入 | project-owner | Open |
 | R-019 | bundle 已有约 1MB 警告继续增长 | Medium | Medium | `npm run build` chunk warning 增大 | Worker/renderer 按路由或 feature family 拆分，记录构建体积；M11 canonical 最大 JS chunk 为 1,117.94 kB；避免 Analyzer Three.js；owner 于 2026-08-26 以 W-001 接受当前候选 warning | 仅当前 Analyzer 候选为 Accepted；托管方案或正式包体预算确定、chunk 增长或首屏问题复现时重新评审 | project-owner | Accepted |
 | R-020 | Meyda 5.6.3 `spectralFlux` 提取器引用未声明变量 `x` | High | High | 固定 previous/current frame 调用抛 `ReferenceError: x is not defined` | ADR-0005 项目 Flux 已实现；公式/首帧/静音/exact cursor golden 与 M8 clean canonical 28/28 通过，保留上游异常事实 | 产品阻断已缓解；Meyda 缺陷未修复，依赖升级时必须重新对照 | project-owner | Mitigated |
 | R-021 | Analyzer sticky、播放器层级、pressed 状态或内层滚动条破坏可用性与视觉一致性 | Medium | Medium | sticky 与 Header 间距过大；歌曲列表被遮挡；Windows Chrome 按钮保持按压外观；表格显示系统默认滚动条 | M8 Slice 0、macOS Chrome 多视口 canonical 与 owner Windows Chrome 人工签字均通过 | 相关交互或样式变化后重新执行多视口自动化与 Windows Chrome 补偿复核 | project-owner | Closed |
+| R-022 | Editor 循环策略或旧 route cleanup 泄漏到其他页面/歌曲 | Medium | High | 离开后仍 repeat-one、快速换歌被旧 release 改写、出现第二 AudioContext/时钟 | ADR-0006 tokenized playback lease；E1 覆盖 acquire/release/ended/invalid target，E6 在 Chrome/Edge 做 20 次 Editor/Analyzer/Home 与换歌资源循环 | lease 失效时强制回到 queue-next；任何双 engine/clock 为阻断 | project-owner | Open |
+| R-023 | 草稿覆盖、损坏导入或错误歌曲身份破坏当前工程 | Medium | High | 异歌静默覆盖、未知 schema 被接受、hash/时长不匹配仍应用、quota 后旧草稿丢失 | ADR-0007 strict codec + content hash + 独立原子 draft；E1 覆盖 round-trip、unknown/invalid/hash/quota/abort/跨歌三选项，E5 回归 range | 失败始终保留内存工程与旧 durable draft；无法证明原子性则阻断 E1 | project-owner | Open |
+| R-024 | 波形、tempo、事件与 overlay 在 zoom/DPR/resize 下错位 | Medium | High | 同一时间各层 x 差超过 1 CSS px、seek/marker 命中偏移 | ADR-0008/0009 共享 geometry；E2/E4 对 1024/1280/1920、DPR、zoom/pan 读取真实几何，E6 双浏览器回归 | 单层不得私有化 viewport；超过 1px 时停止后续 annotation evidence | project-owner | Open |
+| R-025 | 大量事件 DOM、右键状态或键盘路径造成性能/可访问性回归 | Medium | High | 输入反馈 >100ms、Editor 归因长任务 >50ms、遗留 pressed/capture/menu、键盘无法完成核心任务 | Canvas 背景 + viewport-visible event DOM、4px pointer 状态机、统一 cleanup；E3/E5 覆盖 point/range/右键/keyboard，E6 覆盖大数据、reduced motion 与辅助技术 | 降低可见 DOM/绘制细节但不降低秒数事实；核心键盘缺失阻断 E6 | project-owner | Open |
+| R-026 | BPM 误识别或低置信度被写成用户事实 | Medium | Medium | silence/歧义输入自动填入错误 BPM、用户编辑值被异步结果覆盖 | 同 Worker retained PCM、typed reliable/low-confidence、仅唯一空且未编辑 segment 可写；E2 golden 覆盖 silence、歧义、60/100/128/小数与 stale | 低置信度保持空并提示手动输入；第三方依赖仍需 owner 单独批准 | project-owner | Open |
+| R-027 | Analyzer/Editor 争用 active features、Worker retained PCM 或 current cache | Medium | High | Editor 结果显示到 Analyzer、旧 generation 覆盖、返回 Analyzer 卡片丢失、出现第二 Worker | ADR-0006 consumer lease + existing generation/identity；Editor 不写 Analyzer workspace；E1/E4 覆盖快速路由、cache partial hit、stale/cancel，E6 验证单 Worker 与资源释放 | 允许返回 Analyzer 后部分重算，不允许错误 identity 或 workspace 改写 | project-owner | Open |
 
 ## Review Rule
 
@@ -42,3 +48,4 @@ next_action: "以 Analyzer-only 豁免边界进入 Editor E0 产品意图评审"
 - 风险只有在缓解措施有可复现证据时才能标记 Mitigated。
 - `Accepted` 表示已知平台事实被接受，不表示无需实现降级路径。
 - 新的高影响风险或剩余风险超过已批准范围时，停止进入下一里程碑并由 `project-owner` 决策。
+- Analyzer R-001–R-021 的历史状态继续由 M3–M11/readiness 证据支持。Editor R-022–R-027 与本文件整体保持 `in-review`，必须在 E1–E6 execution/quality 中映射到成功、失败、边界或异常证据。

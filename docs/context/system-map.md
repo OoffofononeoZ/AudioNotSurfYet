@@ -4,7 +4,7 @@ owner: "project-owner"
 last_reviewed: 2026-08-26
 upstream_docs:
   - "docs/context/index.md"
-next_action: "M11 系统事实已批准；供 Analyzer release-readiness 复核"
+next_action: "保持当前代码事实；对照 in-review Editor target architecture 审阅实现前边界"
 ---
 
 # System Map
@@ -78,6 +78,15 @@ showOpenFilePicker → FileSystemFileHandle → File
 - Header 的 settings 事件没有已发现消费者，导航中的 Visualizer/Editor 共享占位页。
 - `components.d.ts` 和 `auto-imports.d.ts` 是构建插件生成文件，构建可能造成工作树变化。
 
+## Editor Target Seams（not implemented）
+
+以下内容来自 `in-review` 架构，不是当前源码事实：
+
+- `/editor/:trackId?` 将由 route-scoped `EditorSessionController` 使用现有 AudioSessionService/AnalysisCoordinator；当前 `/comingsoon` 路由与播放列表加号尚未改变。
+- tokenized playback/analysis lease 将隔离 repeat-one 与活动 feature；当前 service/coordinator 尚未提供这些接口。
+- `EditorProjectV1`、`EditorFormatCodecRegistry` 和独立 `audionotsurfyet-editor` IndexedDB V1 尚未实现，不得写成当前持久化能力。
+- EditorTimelineModel、point/range 状态机、tempo estimate 和 pointer-through renderer adapter 尚未实现；Analyzer 的现有 MeydaCard/viewport 只是可复用基础。
+
 ## Approval Record
 
-`project-owner` 于 2026-08-21 确认 M7 卡片、共享视口、跳转、刷新恢复和 3/3 学习解释通过，并批准 M7 canonical、关闭 M7、开放 M8。随后 M8 运行时与 clean canonical 已完成，本图同步累计 16 项事实；owner 又批准 M8 canonical 与 Windows Chrome 界面稳定化结果并明确要求实施 M9。2026-08-23，owner 批准 M9 canonical 与非首页导航栏模糊效果，并明确要求实施 M10；本图随后同步 M10 累计 21 项代码事实及 36/36 clean canonical。2026-08-25，owner 批准 M10 canonical evidence 与 21/21 Analyzer 特征覆盖；M10 改为 `Complete`。同日 owner 确认 Edge 已安装并要求开始最终加固。M11 clean Chrome/Edge canonical 随后 38/38 通过；2026-08-26，owner 又批准该 canonical、Edge 原生权限与最终加固结果，M11 据此为 `Complete`。本图只覆盖 Analyzer 候选，未来 Editor 范围需另行更新。
+`project-owner` 于 2026-08-21 确认 M7 卡片、共享视口、跳转、刷新恢复和 3/3 学习解释通过，并批准 M7 canonical、关闭 M7、开放 M8。随后 M8 运行时与 clean canonical 已完成，本图同步累计 16 项事实；owner 又批准 M8 canonical 与 Windows Chrome 界面稳定化结果并明确要求实施 M9。2026-08-23，owner 批准 M9 canonical 与非首页导航栏模糊效果，并明确要求实施 M10；本图随后同步 M10 累计 21 项代码事实及 36/36 clean canonical。2026-08-25，owner 批准 M10 canonical evidence 与 21/21 Analyzer 特征覆盖；M10 改为 `Complete`。同日 owner 确认 Edge 已安装并要求开始最终加固。M11 clean Chrome/Edge canonical 随后 38/38 通过；2026-08-26，owner 又批准该 canonical、Edge 原生权限与最终加固结果，M11 据此为 `Complete`。同日 owner 批准 Editor E0 产品意图并开放 system design；本图仅新增明确标注的 target seams，当前运行时仍是 Analyzer 候选，Editor 架构尚未批准或实现。

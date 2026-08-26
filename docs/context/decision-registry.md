@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/product/scope.md"
   - "docs/architecture/system-design.md"
   - "docs/delivery/execution-plan.md"
-next_action: "以 DEC-023 已批准范围进入 Editor system design；Analyzer 上线等待 PROD-015"
+next_action: "project-owner 审阅 ADR-0006–0009；Editor execution planning 继续关闭"
 ---
 
 # Decision Registry
@@ -28,6 +28,10 @@ next_action: "以 DEC-023 已批准范围进入 Editor system design；Analyzer 
 | ADR-0003 | 2026-07-24 | IndexedDB 保存全部句柄，但只保存当前 Blob/分析缓存；权限恢复必须显式可见并由用户触发 request | project-owner | approved | [ADR-0003](../architecture/adrs/0003-hybrid-indexeddb-session-recovery.md) | 会话寿命、数据量、权限或存储边界改变 |
 | ADR-0004 | 2026-07-24 | 使用 21 项穷尽 FeatureRegistry 和 Canvas 2D renderer family；DOM 承担说明、值、焦点和语义；Analyzer 不新增 Three.js | project-owner | approved | [ADR-0004](../architecture/adrs/0004-typed-feature-registry-and-canvas-renderers.md) | 特征 shape、renderer 或无障碍边界改变 |
 | ADR-0005 | 2026-08-21 | `spectralFlux` 使用项目 v1 正向 L1 公式；零能量 M8 标量为 0，非零能量非有限值失败；不 patch Meyda 或改变 cache schema | project-owner | approved | [ADR-0005](../architecture/adrs/0005-project-spectral-flux-and-silence-semantics.md) | Flux 公式、静音语义、提取来源或缓存语义改变 |
+| ADR-0006 | 2026-08-26 | Editor 通过 route-scoped playback/analysis lease 复用唯一 AudioEngine、时钟、Coordinator 和 Worker | project-owner | in-review | [ADR-0006](../architecture/adrs/0006-editor-runtime-leases.md) | runtime 所有权、结束策略、consumer 并发或 Worker 数量改变 |
+| ADR-0007 | 2026-08-26 | Editor 使用版本化 JSON、内容 hash 绑定和独立 `audionotsurfyet-editor` V1 单草稿 | project-owner | in-review | [ADR-0007](../architecture/adrs/0007-editor-project-and-draft-boundary.md) | 工程格式、identity、草稿数量、数据库或迁移策略改变 |
+| ADR-0008 | 2026-08-26 | Editor 以秒数为事件事实、tempo 只派生网格，并使用 point/range 判别模型和固定右键状态机 | project-owner | in-review | [ADR-0008](../architecture/adrs/0008-editor-time-and-event-model.md) | 时间 identity、吸附、重叠、range 或 pointer 语义改变 |
+| ADR-0009 | 2026-08-26 | Editor 抽取纯 Canvas renderer adapter，共享 geometry，并让 overlay 除 selector/手柄外 pointer-through | project-owner | in-review | [ADR-0009](../architecture/adrs/0009-editor-overlay-renderer-boundary.md) | renderer family、geometry、overlay pointer 或 Canvas/DOM 边界改变 |
 | DEC-008 | 2026-07-24 | 实施采用 M1–M11 相对门禁，不承诺日期；M3 从测试基础开始，M7 未通过不得扩展后续特征 | project-owner | approved | [Execution plan](../delivery/execution-plan.md) | 依赖、里程碑、验收门禁或交付优先级改变 |
 | DEC-009 | 2026-07-24 | 当前只批准 execution planning；不预建 quality/release/retrospective，也不自动开始代码实现 | project-owner | superseded by DEC-010 | [Milestone plan](../delivery/milestone-plan.md) | 已由 owner 决定前置三份 quality design |
 | DEC-010 | 2026-07-24 | 在 M3 前增加 Q0：前置 eval plan、golden examples、failure taxonomy；三份文档单独批准后开放 M3，release-readiness 仍等待 M11 证据 | project-owner | approved | [Eval plan](../quality/eval-plan.md) | 验收/测试纪律变化，或 owner 改变 Q0/readiness 时序 |
@@ -102,6 +106,8 @@ M11 clean canonical `M11-2026-08-25T10-05-12-783Z-99c67792` 随后在真实 Chro
 随后 owner 要求按 Editor E0 范围事件修订计划更新产品意图。DEC-023 记录该草案：点事件与长音色/效果范围事件进入首期路线，范围创建使用严格向后的两次点击、`Esc`/空白右键取消、自适应网格端点和同类不重叠。
 
 同日，`project-owner` 明确回复：“我批准 Editor E0 产品意图、点事件与范围事件规则、成功指标和开放问题；同意进入 Editor E0 架构设计。”DEC-023、PROD-014E 与 PROD-020 据此获批并开放 system design；该批准不构成架构、delivery、实现、质量或 Editor readiness 通过。
+
+随后 ADR-0006–0009 与 Editor project/interaction 子契约按已批准产品范围进入 `in-review`：它们分别固定 runtime lease、JSON/草稿、秒数/tempo/event 和 overlay renderer 边界。记录这些建议决定不等于 owner 已接受；Editor execution planning 和代码仍保持关闭。
 
 ## Historical Evidence Gap
 
