@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: approved
 owner: "project-owner"
 last_reviewed: 2026-08-26
 upstream_docs:
@@ -11,16 +11,16 @@ upstream_docs:
   - "docs/quality/eval-plan.md"
   - "docs/quality/failure-taxonomy.md"
   - "docs/quality/evidence-index.md"
-next_action: "project-owner 审阅候选身份、拟议豁免与生产部署边界"
+next_action: "保持 Analyzer 正式上线等待 PROD-015；进入 Editor E0 产品意图评审"
 ---
 
 # Analyzer Release Readiness
 
 ## Summary Decision
 
-- Status：`Ready with waivers`（proposed；等待 owner 单独批准）。
-- Decision date：2026-08-26（review draft）。
-- Reviewer：`project-owner` — waiver approval pending。
+- Status：`Ready with waivers`（approved）。
+- Decision date：2026-08-26。
+- Reviewer：`project-owner` — approved with W-001–W-007。
 - Scope：只覆盖当前本地音频 Analyzer 候选；不覆盖 Editor、Visualizer、远端上传、移动端、非 Chromium 或生产托管。
 - Decision boundary：**Analyzer candidate is ready for release planning with waivers; this is not production launch authorization.**
 
@@ -79,28 +79,29 @@ M11 canonical、Edge 原生权限与最终加固已获 owner 批准，因此当�
 
 ## Proposed Waivers
 
+下列 waiver 已由 `project-owner` 于 2026-08-26 全部接受；保留本节稳定标题以便历史 readiness 与文档校验继续可比较。
+
 | ID | Risk or evidence gap | Proposed condition | Approver | Expiration or revisit trigger |
 | --- | --- | --- | --- | --- |
-| W-001 | R-019：最大 JS chunk 1,117.94 kB，尚无正式包体预算 | 接受当前候选 warning；不表述为包体优化完成 | `project-owner` — pending | 托管方案或预算确定、chunk 增长、首屏问题复现 |
-| W-002 | ENG-002：canonical 是本地流程，没有正式 CI | 只引用绑定 commit 的 clean local artifact；不宣称持续集成保障 | `project-owner` — pending | 新增协作者、准备生产发布或测试脚本变化 |
-| W-003 | EG-005：性能只在已登记 M1 设备上执行 | 保留实际硬件与浏览器版本，不向其他设备泛化阈值结论 | `project-owner` — pending | 对外性能声明、目标设备扩大或结果不稳定 |
-| W-004 | EG-004：学习结果只有 owner 3/3 | 只声称 owner 按 golden 解释通过，不声称普遍学习效果 | `project-owner` — pending | 扩大用户或营销/产品学习效果声明 |
-| W-005 | EG-006：OS picker 与权限气泡无法全自动化 | 接受 Chrome/Edge owner 人工签字作为当前候选补偿 | `project-owner` — pending | 权限实现、浏览器或 OS 变化 |
-| W-006 | R-020：Meyda 5.6.3 `spectralFlux` 上游缺陷仍存在 | 仅依赖 ADR-0005 项目 Flux v1 与 golden；不得表述为 Meyda 已修复 | `project-owner` — pending | Meyda 升级、Flux 公式或 cache/exact cursor 语义变化 |
-| W-007 | ENG-007：esbuild 0.27.3 尚有 1 项 low 开发服务器 advisory | dev server 仅绑定可信本地环境，不作为生产服务或暴露到不受信网络 | `project-owner` — pending | 上游兼容修复可用、部署方式变化或需要远程开发访问 |
+| W-001 | R-019：最大 JS chunk 1,117.94 kB，尚无正式包体预算 | 接受当前候选 warning；不表述为包体优化完成 | `project-owner` — accepted 2026-08-26 | 托管方案或预算确定、chunk 增长、首屏问题复现 |
+| W-002 | ENG-002：canonical 是本地流程，没有正式 CI | 只引用绑定 commit 的 clean local artifact；不宣称持续集成保障 | `project-owner` — accepted 2026-08-26 | 新增协作者、准备生产发布或测试脚本变化 |
+| W-003 | EG-005：性能只在已登记 M1 设备上执行 | 保留实际硬件与浏览器版本，不向其他设备泛化阈值结论 | `project-owner` — accepted 2026-08-26 | 对外性能声明、目标设备扩大或结果不稳定 |
+| W-004 | EG-004：学习结果只有 owner 3/3 | 只声称 owner 按 golden 解释通过，不声称普遍学习效果 | `project-owner` — accepted 2026-08-26 | 扩大用户或营销/产品学习效果声明 |
+| W-005 | EG-006：OS picker 与权限气泡无法全自动化 | 接受 Chrome/Edge owner 人工签字作为当前候选补偿 | `project-owner` — accepted 2026-08-26 | 权限实现、浏览器或 OS 变化 |
+| W-006 | R-020：Meyda 5.6.3 `spectralFlux` 上游缺陷仍存在 | 仅依赖 ADR-0005 项目 Flux v1 与 golden；不得表述为 Meyda 已修复 | `project-owner` — accepted 2026-08-26 | Meyda 升级、Flux 公式或 cache/exact cursor 语义变化 |
+| W-007 | ENG-007：esbuild 0.27.3 尚有 1 项 low 开发服务器 advisory | dev server 仅绑定可信本地环境，不作为生产服务或暴露到不受信网络 | `project-owner` — accepted 2026-08-26 | 上游兼容修复可用、部署方式变化或需要远程开发访问 |
 
-R-005 的权限跨会话不持久已在架构风险中由 owner 接受；当前 Blob、显式恢复访问和可见三态是产品恢复边界。R-018 的未来 Tab/Editor 范围漂移继续为 Open，它不属于当前 Analyzer 候选功能。
+R-005 的权限跨会话不持久已在架构风险中由 owner 接受；当前 Blob、显式恢复访问和可见三态是产品恢复边界。R-018 的范围漂移风险继续为 Open：Editor 只能先进入 E0 产品意图，Visualizer 与其他未定义 Tab 仍不属于当前批准范围。
 
-## Approval Gate and Follow-Up
+## Approval Record and Follow-Up
 
-Readiness 只有在 owner 审阅候选身份、blocker 与 W-001–W-007 后才能改为 `approved`。批准前：
-
-- 保留 M11 canonical artifact，不重新运行 canonical，除非候选 commit、artifact identity 或受覆盖行为发生变化；
-- 不创建 `docs/release/`，不选择或配置托管，不发布生产 URL；
-- 不开始 Editor 代码或安装新依赖。
-
-建议批准原文：
+`project-owner` 于 2026-08-26 明确回复：
 
 `我批准 Analyzer release-readiness 的有条件就绪结论及所列豁免；同意进入 Editor E0，Analyzer 正式上线继续等待托管方案。`
 
-获批后，本文改为 `approved`，W-001–W-007 记录批准人和日期；随后优先进入 Editor E0 产品意图。该范围变化后，本 readiness 继续作为 Analyzer-only 历史候选记录，不代表包含 Editor 的整体产品就绪。
+本批准接受 W-001–W-007 并将本文改为 `approved`。后续继续遵守以下边界：
+
+- 保留 M11 canonical artifact；仅在候选 commit、artifact identity 或受覆盖行为发生变化时重跑。
+- PROD-015 解决前不创建上线声明、不选择或配置生产托管、不发布生产 URL。
+- Editor 只进入 E0 产品意图；产品范围单独获批前不开始架构或代码，也不安装新依赖。
+- 本 readiness 继续作为 Analyzer-only 历史候选记录，不代表包含 Editor 的整体产品就绪。
