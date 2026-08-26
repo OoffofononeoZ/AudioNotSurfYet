@@ -1,12 +1,12 @@
 ---
-status: in-review
+status: approved
 owner: "project-owner"
 last_reviewed: 2026-08-26
 upstream_docs:
   - "docs/product/scope.md"
   - "docs/architecture/system-design.md"
   - "docs/architecture/interface-contracts.md"
-next_action: "project-owner 审阅 Editor JSON V1、严格校验、歌曲身份和独立草稿事务"
+next_action: "在 E1/E5 delivery 中映射 JSON V1、严格校验、歌曲身份与草稿验收"
 ---
 
 # Editor Project Format V1
@@ -198,4 +198,4 @@ interface EditorDraftEnvelopeV1 {
 
 ## Approval
 
-本契约于 2026-08-26 随 Editor system design 创建并保持 `in-review`。只有 owner 批准后，E1 才能把它实现为 TypeScript 类型、validator、codec 和 repository；源码存在本身不能替代 schema round-trip、failure 和 boundary evidence。
+本契约于 2026-08-26 随 Editor system design 创建，并由 `project-owner` 随后批准进入 E1–E6 execution planning。E1 只能在 delivery 获批后把它实现为 TypeScript 类型、validator、codec 和 repository；源码存在本身不能替代 schema round-trip、failure 和 boundary evidence。

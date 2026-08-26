@@ -5,12 +5,12 @@ last_reviewed: 2026-08-26
 upstream_docs:
   - "docs/product/problem-brief.md"
   - "docs/product/scope.md"
-next_action: "用已批准 Editor 指标驱动 system design；delivery 阶段再固定 fixture、步骤和容差"
+next_action: "在 Editor E1–E6 delivery planning 中固定 fixture、步骤、容差和 evidence 门禁"
 ---
 
 # Success Metrics
 
-Analyzer 指标已由 M3–M11 和 Analyzer-only readiness 形成历史证据。下列新增 Editor 指标已于 2026-08-26 获批，用于驱动后续 Editor 架构、验收和 eval；不得反向表述为现有代码已经达到。
+Analyzer 指标已由 M3–M11 和 Analyzer-only readiness 形成历史证据。下列新增 Editor 指标已于 2026-08-26 获批，Editor 架构也已获批准；这些指标现在用于驱动独立 delivery planning、验收和 eval，不得反向表述为现有代码已经达到。
 
 ## Product and Learning Outcomes
 
@@ -83,4 +83,4 @@ owner-only 学习验证是当前批准方式，不推断为广泛用户研究结
 
 ## Approval Record
 
-Analyzer 目标和阈值由 `project-owner` 于 2026-07-24 批准，并已由 Analyzer-only readiness 收口。`project-owner` 于 2026-08-26 明确回复：“我批准 Editor E0 产品意图、点事件与范围事件规则、成功指标和开放问题；同意进入 Editor E0 架构设计。”Editor 指标据此生效并可驱动 system design；delivery 文档仍须另行定义 fixture、步骤和容差，quality 阶段只在成功、失败、边界与异常证据齐全后判断 Editor readiness。
+Analyzer 目标和阈值由 `project-owner` 于 2026-07-24 批准，并已由 Analyzer-only readiness 收口。`project-owner` 于 2026-08-26 先批准 Editor E0 产品意图，随后明确回复：“我批准 Editor E0 系统设计、接口契约、风险与 ADR；同意进入 Editor E1–E6 execution planning。”Editor 指标与架构据此生效；delivery 文档仍须另行定义 fixture、步骤和容差，quality 阶段只在成功、失败、边界与异常证据齐全后判断 Editor readiness。

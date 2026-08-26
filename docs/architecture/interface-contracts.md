@@ -1,10 +1,10 @@
 ---
-status: in-review
+status: approved
 owner: "project-owner"
 last_reviewed: 2026-08-26
 upstream_docs:
   - "docs/architecture/system-design.md"
-next_action: "project-owner 审阅 Editor playback/analysis lease、project V1、draft、tempo 与 interaction contracts"
+next_action: "在 Editor E1–E6 delivery planning 中把已批准契约映射到实施和验证门禁"
 ---
 
 # Interface Contracts
@@ -534,7 +534,7 @@ Invariants:
 
 ## Editor Contract Status
 
-本文件前述 Analyzer 契约是 2026-07-24 已批准并由 M3–M11 验证的历史基线。以下 Editor 扩展于 2026-08-26 进入 `in-review`；类型名用于锁定后续实现边界，但当前源码中尚不存在。
+本文件前述 Analyzer 契约是 2026-07-24 已批准并由 M3–M11 验证的历史基线。以下 Editor 扩展于 2026-08-26 获批；类型名用于锁定后续实现边界，但当前源码中尚不存在。
 
 ## Editor Route and Playback Lease
 
@@ -704,4 +704,4 @@ Invariants:
 
 ## Editor Architecture Approval
 
-`project-owner` 于 2026-08-26 只批准 Editor 产品意图并开放系统设计。上述 Editor 接口保持 `in-review`；Analyzer 历史契约继续有效，但不能作为 Editor 接口已批准或代码已实现的证据。
+`project-owner` 于 2026-08-26 明确批准 Editor E0 系统设计、接口契约、风险与 ADR，并同意进入 E1–E6 execution planning。上述 Editor 接口据此获批；Analyzer 历史契约继续有效，但设计批准不能作为 Editor 代码已实现或验证的证据。

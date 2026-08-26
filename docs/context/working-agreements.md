@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/context/index.md"
   - "docs/delivery/test-strategy.md"
   - "docs/quality/eval-plan.md"
-next_action: "project-owner 审阅 Editor E0 system design、contracts、R-022–R-027 和 ADR-0006–0009"
+next_action: "编制并审阅 Editor E1–E6 delivery 文档；获批前不编码或安装新依赖"
 ---
 
 # Working Agreements
@@ -134,4 +134,4 @@ M11 实施期间先发现并修复 current track UI 已切换但持久化状态�
 
 随后 owner 要求实施 Editor E0 产品意图计划，并补充长音色/效果范围事件；本约定据此固定 `docs/require` 仅作输入、首版无新增依赖以及产品批准前不越级的边界。
 
-2026-08-26，`project-owner` 明确批准 Editor E0 产品意图、点/范围事件规则、成功指标和开放问题，并同意进入 Editor E0 架构设计。产品文档已为 `approved`；Editor system design、interface contracts、R-022–R-027 和 ADR-0006–0009 保持 `in-review`。架构未获批前不创建 E1–E6 delivery/quality 文档，delivery 未获批前不编码或安装新依赖。
+2026-08-26，`project-owner` 明确批准 Editor E0 产品意图、点/范围事件规则、成功指标和开放问题，并同意进入 Editor E0 架构设计。随后 owner 明确回复：“我批准 Editor E0 系统设计、接口契约、风险与 ADR；同意进入 Editor E1–E6 execution planning。”Editor system design、interface contracts、project/interaction 子契约和 ADR-0006–0009 据此为 `approved`，R-022–R-027 仍为 `Open`。当前只允许创建 Editor delivery planning；该批文档获批前不编码、不安装新依赖、不创建 Editor quality evidence。

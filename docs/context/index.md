@@ -4,14 +4,14 @@ owner: "project-owner"
 last_reviewed: 2026-08-26
 upstream_docs:
   - "AGENTS.md"
-next_action: "project-owner 审阅 in-review Editor E0 system design、contracts、R-022–R-027 与 ADR-0006–0009"
+next_action: "编制并审阅 Editor E1–E6 execution planning；获批前 E1 保持关闭"
 ---
 
 # Repository Context Index
 
 ## Purpose
 
-AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端：用户选择本地音频后，应用提供播放队列、元数据、进度与音量控制，并把实时能量用于 MusicBar 和背景可视化。Analyzer 已完成 21/21 能力和有条件 readiness；Editor E0 已批准把同一播放、时间轴和分析基础用于音符、音色与效果的“逆向制曲”标注，当前进入 system design。
+AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端：用户选择本地音频后，应用提供播放队列、元数据、进度与音量控制，并把实时能量用于 MusicBar 和背景可视化。Analyzer 已完成 21/21 能力和有条件 readiness；Editor E0 已批准把同一播放、时间轴和分析基础用于音符、音色与效果的“逆向制曲”标注，system design 已获批准，当前进入 execution planning。
 
 本目录维护仓库事实、边界和工作记忆；生命周期路由与通用方法由 [AGENTS.md](../../AGENTS.md) 负责。当前代码事实与目标架构必须区分：现状见 [system map](system-map.md)，批准的目标见 [system design](../architecture/system-design.md)。
 
@@ -19,8 +19,8 @@ AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端：用户选择
 
 - Repository context：入口、决策注册表、system map、glossary 与 working agreements 均已批准。
 - Product intent：problem brief、scope、success metrics 和 open questions 中的 Editor E0 点/范围事件范围已于 2026-08-26 获 owner 批准。
-- System design：Analyzer 基线保持历史批准；Editor system design、接口契约、R-022–R-027、四个 ADR 和两个详细子契约均为 `in-review`。
-- Execution planning：现有 execution plan、acceptance criteria、test strategy 和 milestone plan 只覆盖已完成的 Analyzer M1–M11；Editor E1–E6 尚未进入 execution planning。
+- System design：Analyzer 基线保持历史批准；Editor system design、接口契约、R-022–R-027、ADR-0006–0009 和两个详细子契约均于 2026-08-26 获 owner 批准。R-022–R-027 仍为 `Open`，表示尚无实现缓解证据。
+- Execution planning：现有根级文档只覆盖已完成的 Analyzer M1–M11；Editor E1–E6 execution planning 已开放，规划文档获批前 E1 不得开始。
 - Quality and evals：M3–M11 的适用 canonical/人工证据均已获批准；M11 已于 2026-08-26 关闭。
 - Implementation：M1–M11 均为 `Complete`，Analyzer 21/21 delivery 已关闭。
 - Readiness、release、retrospective：Analyzer `release-readiness.md` 已获 `Ready with waivers` 批准；PROD-015 尚未解决，因此不创建上线声明或生产托管，Editor 也不继承该 readiness。
@@ -38,11 +38,11 @@ AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端：用户选择
 | [scope.md](../product/scope.md) | Analyzer 历史边界与已批准 Editor E0 点/范围事件、E1–E6 和非目标 | project-owner / approved | 能力、数据或兼容范围变化 |
 | [success-metrics.md](../product/success-metrics.md) | Analyzer 历史指标与已批准 Editor E0 任务、正确性、响应和恢复指标 | project-owner / approved | 阈值、样本或观测方法变化 |
 | [open-questions.md](../product/open-questions.md) | 非当前门禁问题与已关闭产品决策 | project-owner / approved | 新能力进入范围或 release 开始 |
-| [system-design.md](../architecture/system-design.md) | Analyzer 历史基线与 Editor runtime/project/timeline/overlay 目标设计 | project-owner / in-review | 产品意图或核心系统边界变化 |
-| [interface-contracts.md](../architecture/interface-contracts.md) | Analyzer 历史契约与 Editor lease、Worker、codec、draft、geometry 接口 | project-owner / in-review | 消息、schema、身份或失败语义变化 |
-| [Editor Project V1](../architecture/editor/project-format-v1.md) | JSON schema、validator、歌曲 identity、codec 与独立 draft DB | project-owner / in-review | 工程字段、时间、格式、身份或草稿策略变化 |
-| [Editor interactions](../architecture/editor/interaction-contracts.md) | tempo/grid、pointer/keyboard、point/range 和 overlay 状态机 | project-owner / in-review | 手势、吸附、重叠、DOM/Canvas 或键盘规则变化 |
-| [risk-register.md](../architecture/risk-register.md) | Analyzer 历史风险与 Editor R-022–R-027 | project-owner / in-review | 每个里程碑及新高影响风险 |
+| [system-design.md](../architecture/system-design.md) | Analyzer 历史基线与 Editor runtime/project/timeline/overlay 目标设计 | project-owner / approved | 产品意图或核心系统边界变化 |
+| [interface-contracts.md](../architecture/interface-contracts.md) | Analyzer 历史契约与 Editor lease、Worker、codec、draft、geometry 接口 | project-owner / approved | 消息、schema、身份或失败语义变化 |
+| [Editor Project V1](../architecture/editor/project-format-v1.md) | JSON schema、validator、歌曲 identity、codec 与独立 draft DB | project-owner / approved | 工程字段、时间、格式、身份或草稿策略变化 |
+| [Editor interactions](../architecture/editor/interaction-contracts.md) | tempo/grid、pointer/keyboard、point/range 和 overlay 状态机 | project-owner / approved | 手势、吸附、重叠、DOM/Canvas 或键盘规则变化 |
+| [risk-register.md](../architecture/risk-register.md) | Analyzer 历史风险与 Editor R-022–R-027 | project-owner / approved | 每个里程碑及新高影响风险 |
 | [execution-plan.md](../delivery/execution-plan.md) | Q0 与 M1–M11 实施顺序和门禁 | project-owner / approved | 范围、架构或任务依赖变化 |
 | [acceptance-criteria.md](../delivery/acceptance-criteria.md) | 可测量验收与阈值 | project-owner / approved | 成功指标、容差或支持矩阵变化 |
 | [test-strategy.md](../delivery/test-strategy.md) | 测试层级、fixture 和证据策略 | project-owner / approved | 工具、fixture 或验证能力变化 |
@@ -84,8 +84,8 @@ AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端：用户选择
 ## Lifecycle Entry Points
 
 - Product intent：[problem brief](../product/problem-brief.md)、[scope](../product/scope.md)、[success metrics](../product/success-metrics.md) 均已批准 Editor E0
-- System design：[system design](../architecture/system-design.md) 与 Editor 子契约现为 `in-review`；owner 批准前不得进入 execution planning
-- Delivery planning：[execution plan](../delivery/execution-plan.md)
+- System design：[system design](../architecture/system-design.md) 与 Editor 子契约已获批准
+- Delivery planning：Editor E1–E6 规划已开放；专属 execution plan、acceptance criteria、test strategy 和 milestone plan 获批前 E1 保持关闭
 - Quality design：[eval plan](../quality/eval-plan.md)，Q0 批准后用于 M3–M11 证据
 - Quality evidence：[evidence index](../quality/evidence-index.md)，M3–M11 已批准
 - Quality readiness：[Analyzer release readiness](../quality/release-readiness.md) 已由 owner 批准为 `Ready with waivers`，且只覆盖 Analyzer 候选
@@ -101,8 +101,8 @@ AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端：用户选择
 - 超出约 15 分钟支持边界的长音频未开始播放只作为非门禁压力观察；它不表示长音频被规定为必须失败，也不改变当前产品范围。
 - M11 clean canonical 已在 Chrome/Edge 上 38/38 通过，其中 Edge 全量为 31/31；原生 Edge 权限、辅助技术与人工长会话补偿门禁已于 2026-08-26 获 owner 签字，M11 为 `Complete`。
 - Analyzer readiness 已于 2026-08-26 获 owner 有条件批准；正式托管平台、域名、SPA fallback 和生产 URL 尚未决定，继续阻断正式上线。
-- 当前代码中的 Header Editor 和播放列表加号仍指向占位/Analyzer 旧行为；Editor target architecture 已写入 `in-review` 文档，但尚无 Editor 路由、lease、工程、草稿、点/范围事件或叠加层实现。
-- Editor E5 已因 owner 补充并批准范围事件创建、取消、吸附与不重叠规则而成为产品序列中的 `Planned`；E1–E6 仍须等待架构和 delivery 门禁。
+- 当前代码中的 Header Editor 和播放列表加号仍指向占位/Analyzer 旧行为；Editor target architecture 已获批准，但尚无 Editor 路由、lease、工程、草稿、点/范围事件或叠加层实现。
+- Editor E5 已因 owner 补充并批准范围事件创建、取消、吸附与不重叠规则而成为产品序列中的 `Planned`；E1–E6 仍须等待 delivery planning 批准。
 - 详细 context 文档的长期 owner/review cadence 尚未全部统一；代码改动时必须同步修正事实。
 - 工程事实差异继续记录在 [Skill 项目差异](../../skills/audio-visualizer-dev/references/99-open-questions-and-project-deltas.md)，产品开放项见 [open questions](../product/open-questions.md)。
 
@@ -160,4 +160,4 @@ M11 canonical run `M11-2026-08-25T10-05-12-783Z-99c67792` 随后在 clean commit
 
 随后 owner 要求把 Editor 定义为对已有歌曲进行点/范围时间标注的“逆向制曲”工具，并补充长音色/效果的两次点击创建、端点手柄和右键删除；owner 又确认同类不重叠、`Esc`/空白右键取消及端点沿用自适应网格。`project-owner` 于 2026-08-26 进一步明确回复：“我批准 Editor E0 产品意图、点事件与范围事件规则、成功指标和开放问题；同意进入 Editor E0 架构设计。”Editor 产品文档据此获批并开放 system design；当前代码事实不变，E1–E6 仍未开放。
 
-同日，Editor target architecture 已按批准范围写入 system design、interface contracts、R-022–R-027、ADR-0006–0009 与两个详细子契约，并保持 `in-review`。该文档事实不等于架构批准或代码实现；下一门禁是 owner 审阅全部 Editor 设计边界。
+同日，Editor target architecture 已按批准范围写入 system design、interface contracts、R-022–R-027、ADR-0006–0009 与两个详细子契约。`project-owner` 随后明确回复：“我批准 Editor E0 系统设计、接口契约、风险与 ADR；同意进入 Editor E1–E6 execution planning。”架构据此改为 `approved`，R-022–R-027 仍为 `Open`；该批准只开放 delivery planning，不构成 E1 实现、质量证据或 Editor readiness。
