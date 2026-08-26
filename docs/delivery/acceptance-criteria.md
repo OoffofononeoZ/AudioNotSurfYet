@@ -7,14 +7,14 @@ upstream_docs:
   - "docs/architecture/system-design.md"
   - "docs/architecture/interface-contracts.md"
   - "docs/delivery/execution-plan.md"
-next_action: "保留 Analyzer 历史 AC；审阅独立 Editor E1–E6 acceptance criteria"
+next_action: "保留 Analyzer 历史 AC；以已批准 AC-E101–AC-E108 约束 E1"
 ---
 
 # Acceptance Criteria
 
 ## Scope Routing
 
-本文保留 Analyzer M1–M11 的已批准验收历史。Editor 使用独立的 [E1–E6 acceptance criteria](editor/acceptance-criteria.md)，并由 [Editor execution plan](editor/execution-plan.md)、[test strategy](editor/test-strategy.md) 和 [milestone plan](editor/milestone-plan.md) 约束；这些子文档当前为 `in-review`，不构成 E1 通过或实现授权。
+本文保留 Analyzer M1–M11 的已批准验收历史。Editor 使用已批准的 [E1–E6 acceptance criteria](editor/acceptance-criteria.md)，并由 [Editor execution plan](editor/execution-plan.md)、[test strategy](editor/test-strategy.md) 和 [milestone plan](editor/milestone-plan.md) 约束；E1 已开放实施，但尚无通过证据。
 
 ## 1. Evidence Rules
 

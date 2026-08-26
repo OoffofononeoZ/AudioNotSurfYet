@@ -4,7 +4,7 @@ owner: "project-owner"
 last_reviewed: 2026-08-26
 upstream_docs:
   - "docs/context/index.md"
-next_action: "保持当前代码事实；按已批准 Editor target architecture 编制 E1–E6 delivery planning"
+next_action: "保持当前代码事实；按已批准 delivery 实施 E1 runtime 与工程基础"
 ---
 
 # System Map

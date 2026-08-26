@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: approved
 owner: "project-owner"
 last_reviewed: 2026-08-26
 upstream_docs:
@@ -9,7 +9,7 @@ upstream_docs:
   - "docs/architecture/editor/project-format-v1.md"
   - "docs/architecture/editor/interaction-contracts.md"
   - "docs/delivery/editor/execution-plan.md"
-next_action: "project-owner 审阅 AC-E101–AC-E606 的阈值、证据方法和风险映射；批准前不得用于声称 E1 通过"
+next_action: "以 AC-E101–AC-E108 约束 E1 实现、provisional、clean canonical 与人工复核"
 ---
 
 # Editor E1–E6 Acceptance Criteria
@@ -90,4 +90,4 @@ next_action: "project-owner 审阅 AC-E101–AC-E606 的阈值、证据方法和
 
 ## 8. Milestone Exit Rule
 
-每个里程碑只能在其全部适用 AC、有明确成功/失败/边界/异常证据、相关风险复核、clean canonical 和 owner 批准后关闭。当前 AC 为 `in-review`，不能用于声称任何 Editor 功能已经通过。
+每个里程碑只能在其全部适用 AC、有明确成功/失败/边界/异常证据、相关风险复核、clean canonical 和 owner 批准后关闭。本 AC 于 2026-08-26 获 `project-owner` 批准；E1 开放实施不构成 AC-E101–AC-E108 已通过。

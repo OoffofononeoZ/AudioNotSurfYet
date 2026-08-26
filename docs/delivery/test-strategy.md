@@ -7,14 +7,14 @@ upstream_docs:
   - "docs/architecture/interface-contracts.md"
   - "docs/delivery/acceptance-criteria.md"
   - "docs/delivery/execution-plan.md"
-next_action: "保留 Analyzer 历史测试策略；审阅独立 Editor E1–E6 test strategy"
+next_action: "保留 Analyzer 历史测试策略；按已批准 Editor test strategy 建立 E1 测试与 eval"
 ---
 
 # Test Strategy
 
 ## Scope Routing
 
-本文保留 Analyzer M1–M11 的已批准测试与证据历史。Editor 使用独立的 [E1–E6 test strategy](editor/test-strategy.md)，并与专属 [execution plan](editor/execution-plan.md)、[acceptance criteria](editor/acceptance-criteria.md) 和 [milestone plan](editor/milestone-plan.md) 配套；子文档获批前不创建 Editor 测试命令、fixture 或 quality evidence。
+本文保留 Analyzer M1–M11 的已批准测试与证据历史。Editor 使用已批准的 [E1–E6 test strategy](editor/test-strategy.md)，并与专属 [execution plan](editor/execution-plan.md)、[acceptance criteria](editor/acceptance-criteria.md) 和 [milestone plan](editor/milestone-plan.md) 配套；当前只建立 E1 测试命令、fixture 和 quality evidence。
 
 ## 1. Objectives
 

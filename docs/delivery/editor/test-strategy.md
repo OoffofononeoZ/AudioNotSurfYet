@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: approved
 owner: "project-owner"
 last_reviewed: 2026-08-26
 upstream_docs:
@@ -8,7 +8,7 @@ upstream_docs:
   - "docs/architecture/risk-register.md"
   - "docs/delivery/editor/execution-plan.md"
   - "docs/delivery/editor/acceptance-criteria.md"
-next_action: "project-owner 审阅 E1–E6 test pyramid、fixture、双浏览器与 evidence cadence；批准前不创建测试命令"
+next_action: "建立 E1 专属测试命令、quality eval 契约与 Chrome evidence；E2 测试仍不创建"
 ---
 
 # Editor E1–E6 Test Strategy
@@ -136,4 +136,4 @@ npm run eval:eN
 
 ## 9. Current Planning Gate
 
-当前只运行 `npm run test:docs` 与 `git diff --check`。本文获批前不创建 Editor 测试源码、fixture、npm 命令或 quality evidence，也不把 Analyzer 历史通过泛化成 Editor 通过。
+`project-owner` 于 2026-08-26 批准本文并开放 E1。现在只创建 E1 测试源码、fixture、npm 命令和 quality evidence；不得提前创建 E2–E6 实现或把 Analyzer 历史通过泛化成 Editor 通过。

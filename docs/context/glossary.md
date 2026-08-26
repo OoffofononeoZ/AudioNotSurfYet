@@ -4,7 +4,7 @@ owner: "project-owner"
 last_reviewed: 2026-08-26
 upstream_docs:
   - "docs/context/index.md"
-next_action: "project-owner 审阅 Editor E1–E6 delivery 术语、验收和证据映射"
+next_action: "使用已批准 Editor delivery 术语实施 E1；以代码和 canonical 更新事实定义"
 ---
 
 # Glossary
@@ -53,8 +53,8 @@ next_action: "project-owner 审阅 Editor E1–E6 delivery 术语、验收和证
 | Analyzer candidate | 由固定实现 commit、canonical run、环境和 artifact hash 共同标识的 Analyzer-only 候选 | 后续文档或 Editor 变化不能反向扩大该候选的证据范围 | [release readiness](../quality/release-readiness.md) |
 | Ready with waivers | 候选没有当前范围内的代码 blocker，但只有在 reviewer 接受列明风险后才可进入发布规划 | 不等于风险已解决，也不等于生产上线授权 | [release readiness](../quality/release-readiness.md) |
 | production launch authorization | 对托管、域名、SPA fallback、回滚和监控均有决定后才形成的上线许可 | 当前 readiness 明确不提供该授权 | [open questions](../product/open-questions.md) |
-| Editor E0 | Editor 的产品意图与架构设计阶段；产品范围、系统设计、接口、风险和 ADR 已于 2026-08-26 获批 | 只开放 E1–E6 execution planning；代码、依赖和 E1 仍等待 delivery 门禁 | [scope](../product/scope.md) |
-| Editor E0-D | Editor execution planning 门禁；四份专属 delivery 文档为 `in-review`，E1–E6 均未开放实现 | 把“已写计划”与“已授权编码”分开 | [milestone plan](../delivery/editor/milestone-plan.md) |
+| Editor E0 | Editor 的产品意图与架构设计阶段；产品范围、系统设计、接口、风险和 ADR 已于 2026-08-26 获批 | 上游阶段已关闭，当前由已批准 delivery plan 管理 E1–E6 | [scope](../product/scope.md) |
+| Editor E0-D | 已完成的 Editor execution planning 门禁；四份专属 delivery 文档均为 `approved` | E1 已授权编码，但通过仍需自己的 canonical 与 owner evidence | [milestone plan](../delivery/editor/milestone-plan.md) |
 | 逆向制曲 | 对已有歌曲反向记录音符、音色和效果出现时间的标注过程 | 产物是数据工程，不修改 PCM、混音或生成伴奏 | [problem brief](../product/problem-brief.md) |
 | Editor playback lease | 已批准的 route-scoped runtime token；临时把当前 track ended 策略切为 repeat-one，只有当前 token 可恢复 queue-next | 防止旧 Editor cleanup 影响新 route，同时保持唯一 AudioEngine | [ADR-0006](../architecture/adrs/0006-editor-runtime-leases.md) |
 | analysis consumer lease | 已批准的 Analyzer/Editor 活动意图 token；只有最新 route consumer 可设置 feature、请求 tempo/cursor 或释放 | 在单 Coordinator/Worker 内隔离快速路由与 stale 结果 | [interface contracts](../architecture/interface-contracts.md) |
@@ -73,4 +73,4 @@ next_action: "project-owner 审阅 Editor E1–E6 delivery 术语、验收和证
 
 ## Approval Record
 
-`project-owner` 于 2026-08-21 批准 M7 canonical evidence 并开放 M8。本词汇表随后已按 M8 累计 16 项、项目 Flux 与四槽实现复核；owner 又批准 M8 canonical evidence 与界面稳定化结果，M8 据此为 `Complete`。2026-08-23，owner 批准 M9 canonical 与非首页导航栏模糊效果；M9 据此为 `Complete`。同日 owner 要求实施 M10 并选择 Complex Spectrum 完整 1024-bin 主图，M10 进入 `In Progress`。M10 clean canonical 已 36/36 通过并把本页 21 项、Bark bands、signed FFT bins 与 structured payload 术语锁入 evidence。2026-08-25，owner 批准 M10 canonical evidence 与 21/21 Analyzer 特征覆盖，M10 据此为 `Complete`；同日确认 Edge 已安装并要求开始最终加固。M11 clean canonical 随后 38/38 通过；2026-08-26，owner 批准 canonical、Edge 原生权限与最终加固结果，M11 据此为 `Complete`。同日 owner 接受 Analyzer readiness 豁免并开放 Editor E0，随后批准 Editor 产品和架构，并开放 E1–E6 execution planning。Editor 产品和架构术语据此生效；四份 delivery 文档已进入 `in-review` 并新增 E0-D、viewport-visible event DOM 与 Editor canonical 术语，代码类型和测试命令仍不存在，E1 继续等待规划批准。
+`project-owner` 于 2026-08-21 批准 M7 canonical evidence 并开放 M8。本词汇表随后已按 M8 累计 16 项、项目 Flux 与四槽实现复核；owner 又批准 M8 canonical evidence 与界面稳定化结果，M8 据此为 `Complete`。2026-08-23，owner 批准 M9 canonical 与非首页导航栏模糊效果；M9 据此为 `Complete`。同日 owner 要求实施 M10 并选择 Complex Spectrum 完整 1024-bin 主图，M10 进入 `In Progress`。M10 clean canonical 已 36/36 通过并把本页 21 项、Bark bands、signed FFT bins 与 structured payload 术语锁入 evidence。2026-08-25，owner 批准 M10 canonical evidence 与 21/21 Analyzer 特征覆盖，M10 据此为 `Complete`；同日确认 Edge 已安装并要求开始最终加固。M11 clean canonical 随后 38/38 通过；2026-08-26，owner 批准 canonical、Edge 原生权限与最终加固结果，M11 据此为 `Complete`。同日 owner 接受 Analyzer readiness 豁免并开放 Editor E0，随后批准 Editor 产品、架构与 E1–E6 delivery planning。Editor 产品、架构和交付术语据此生效；E0-D 已完成，E1 进入 `In Progress`，代码事实与测试证据仍以本轮实现和 canonical 为准。
