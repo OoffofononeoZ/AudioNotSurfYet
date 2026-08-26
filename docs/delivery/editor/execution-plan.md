@@ -40,7 +40,9 @@ next_action: "执行 E2 时间轴、tempo map、BPM estimator 与独立 quality/
 | Draft keys | `draft/latest`、`preferences/leave-warning` | 首版只保存一个 Editor 草稿 |
 | Autosave debounce | 250ms | pointerup、输入确认、导入成功和路由离开立即 flush |
 | Metered BPM | `20–300`，允许小数 | 配置集中定义；负数、非有限数、非数字、超上限拒绝 |
+| Beat semantics | 一个 beat 为 `60/BPM` 秒；numerator 决定小节拍数，denominator 只表达音符单位 | 改变语义需复核 DEC-026、grid golden 与既有工程 |
 | Single-beat | `0 <= BPM < 20` 规范化为单拍区间 | 不显示或允许修改拍号，不画 beat/measure 分隔 |
+| Boundary without grid | BPM 为空或 single-beat 时使用微秒规范化原始时间 | 有合法 metered BPM 时才按可见 subdivision 吸附 |
 | Subdivision | `[1/16, 1/8, 1/4, 1/2, 1 beat]`；最小可靠宽度 12 CSS px | 只影响新建/拖动吸附，不改写旧秒数 |
 | Context pan | 右键移动超过 4 CSS px 才形成 pan | 未形成拖动的空白右键打开快速菜单 |
 | Viewport | zoom `1–64`；按钮 pan 为当前窗口 25% | seek、波形、网格、事件和 overlay 共用 geometry |

@@ -6,7 +6,7 @@ upstream_docs:
   - "docs/product/scope.md"
   - "docs/architecture/system-design.md"
   - "docs/architecture/interface-contracts.md"
-next_action: "在 E2–E6 delivery 中映射 geometry、pointer/keyboard 状态机和 overlay 穿透验收"
+next_action: "按 DEC-026 实施 E2 geometry、tempo、BPM 与 pointer/keyboard 验收"
 ---
 
 # Editor Interaction Contracts
@@ -82,6 +82,8 @@ idle + drag start/end handle
 ## Tempo Interaction
 
 - 初始 project 有歌曲开始/结束固定边界；结束前显示 add handle。单击 add handle 时优先使用播放 cursor，否则使用 viewport 中点；拖动后在 snapped 时间插入内部 boundary。
+- `BPM` 表示当前拍号单位的一拍每分钟次数：相邻 beat 固定为 `60 / BPM` 秒；numerator 决定每小节的 beat 数，denominator 只表达该 beat 的音符单位，不再按四分音符二次缩放。
+- 前一 segment 有合法 metered BPM 时，新增或移动 boundary 按当前可见 subdivision 吸附；BPM 为空或 segment 为 single-beat 时，没有 beat 网格，使用 `xToTime()` 后的微秒规范化原始时间。
 - 新 segment 继承前一 segment 的 metered/single-beat 值。首版内部 boundary 可水平拖动但不可跨越相邻 boundary，且不提供删除。
 - 初始 metered segment 为 4/4、`bpm: null`、source unset；输入框显示 `bpm: 100` placeholder。只有一个 segment、仍为空且未被用户编辑时，才允许可靠 tempo estimate 填值。
 - 输入 20–300 进入/保持 metered；输入 `0 <= value < 20` 规范为 single-beat并隐藏 meter；无效输入不提交。切回 metered 需要显式选择 metered 并输入合法 BPM，不从旧 single-beat 数值猜测。
@@ -126,3 +128,5 @@ idle + drag start/end handle
 ## Approval
 
 本交互契约于 2026-08-26 随 Editor system design 创建，并由 `project-owner` 随后批准进入 E1–E6 execution planning。Delivery 必须把上述成功、失败、边界和异常路径映射到可执行验收；delivery 获批前不得实现。
+
+同日，owner 在开放 E2 时进一步确认：一个 beat 固定为 `60/BPM` 秒，拍号分母只表达音符单位；无合法 metered BPM 时 tempo boundary 按微秒规范化原始时间定位。该澄清登记为 DEC-026，不改变 JSON V1 或 ADR-0008 的秒数事实。
