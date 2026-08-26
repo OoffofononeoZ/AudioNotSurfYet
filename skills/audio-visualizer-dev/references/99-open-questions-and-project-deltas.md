@@ -8,7 +8,7 @@
 | --- | --- | --- | --- | --- |
 | ENG-002 | CI | M3 明确只建立本地门禁，未创建 `.github/workflows` 或其他正式 CI | 构建/测试依赖本地执行 | CI 作为独立后续决策，不阻断 M3 |
 | ENG-003 | 资源释放 | M11 clean canonical 在 Chrome/Edge 各 20 次分析/播放循环保持单 Worker/AudioContext，并在 20 次 Home/Analyzer 路由循环保持 1 个有效 WebGL context 与 2 live RAF；2026-08-26 owner 已为最终人工长会话签字 | 自动化和一次人工签字不能永久替代后续版本的 heap/线程观察 | 资源所有权或浏览器变化时重复自动化与 DevTools 长会话复核 |
-| ENG-005 | 未完成表面 | 当前 Editor 导航仍进入 ComingSoon，播放列表加号未接入 Editor；threeDTable/TestLands/testcomp 仍为试验内容 | Editor 产品意图、target architecture 与四份 delivery 文档已批准，E1 已开放，但当前代码仍不具备 Editor 路由、lease、工程或标注能力；Visualizer 也仍未定义 | 按门禁实现 E1 并形成 canonical；不得从占位代码、规划或设计类型推断现有能力 |
+| ENG-005 | 未完成表面 | Editor E1 路由、入口、lease、JSON V1 与单草稿已实现并获批准；E2 时间轴/tempo、E3–E5 标注/overlay 尚未交付，threeDTable/TestLands/testcomp 仍为试验内容 | Editor 基础可用但完整逆向标注流程尚未完成；Visualizer 仍未定义 | 按逐里程碑门禁实施 E2–E6；不得从 schema 或规划推断标注交互已经存在 |
 | ENG-006 | 包体积 | 当前构建存在约 1 MB chunk 警告 | 首屏和缓存风险未知 | 先确定性能预算，再决定分包策略 |
 | ENG-007 | 开发依赖审计 | 安全补丁后 `npm audit` 剩余 esbuild 0.27.3 的 1 项 low，影响 Windows 开发服务器任意文件读取 | 当前 macOS 本地门禁不受直接影响，但不能宣称零漏洞 | 不向不受信网络暴露 dev server；上游提供兼容修复后升级并复核 |
 | ENG-008 | 原生文件权限 | M11 clean canonical 已在真实 Edge 通过 OPFS/IndexedDB 恢复、quota 与全量 E2E；M5 Chrome 与 2026-08-26 M11 Edge 原生 picker 签字均已完成 | 原生 granted/prompt/denied 与文件移动仍不能自动化 | 权限实现或浏览器变化时重复原生矩阵；不得把 OPFS 自动化泛化为原生提示完成 |

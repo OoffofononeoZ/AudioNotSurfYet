@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/context/index.md"
   - "docs/delivery/test-strategy.md"
   - "docs/quality/eval-plan.md"
-next_action: "owner 复核 E1 canonical 与原生 picker/离页人工清单；批准前 E2 保持 Planned"
+next_action: "执行 E2 专项、provisional、clean canonical 与 owner 审批；E3 保持 Planned"
 ---
 
 # Working Agreements
@@ -141,3 +141,5 @@ Editor delivery planning 现固定每个 E1–E6 都按专项测试、dirty prov
 同日，`project-owner` 明确批准 Editor E1–E6 execution plan、acceptance criteria、test strategy 与 milestone plan，并同意开始 E1。当前只允许创建 E1 路由、runtime lease、JSON V1、独立草稿、E1 测试与 quality evidence；E2–E6 保持 `Planned`，不安装新依赖。E1 仍必须完成 dirty provisional、clean canonical、人工任务与 owner evidence 批准后才能关闭。
 
 E1 实现随后在不新增依赖、不修改 Analyzer session/cache schema 的前提下完成。最终 provisional `E1-2026-08-26T15-20-11-120Z-3ef4ec33-provisional` 为 18/18；clean canonical `E1-2026-08-26T15-24-21-043Z-792b424f` 在 commit `792b424fbab8e3621ad24d8c9add47d1c9bffcb4` 上 18/18 通过，起止工作树干净，summary SHA-256 为 `db51ba98b757ccd524d298243c6118eb24fad60101a74f20a5ff98478a5d5bc6`。原生 OS 工程 picker、浏览器离页提示和 owner 任务尚未签字，因此 E1 保持 `In Progress`、E2 保持 `Planned`。
+
+2026-08-26，`project-owner` 明确批准 E1 canonical evidence、路由与播放 lease、JSON V1 和草稿恢复结果，并同意关闭 E1、开放 E2。该签字完成 E1 人工补偿门禁，E2 改为 `In Progress`；E3–E6 继续等待逐里程碑证据。

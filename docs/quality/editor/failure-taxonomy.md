@@ -1,15 +1,17 @@
 ---
-status: in-review
+status: approved
 owner: "project-owner"
 last_reviewed: 2026-08-26
 upstream_docs:
   - "docs/quality/editor/eval-plan.md"
   - "docs/quality/editor/golden-examples.md"
   - "docs/architecture/risk-register.md"
-next_action: "owner 复核已登记的 EFT-REGRESSION provisional 失败及当前人工缺口"
+next_action: "E1 failure taxonomy 已批准并冻结；E2 使用独立扩展分类"
 ---
 
 # Editor E1 Failure Taxonomy
+
+`project-owner` 于 2026-08-26 随 E1 canonical evidence 批准本文及已登记的 provisional 失败实例。
 
 失败实例同时记录 `failure_type` 与 `severity`；类型描述行为域，严重度描述当前影响。
 

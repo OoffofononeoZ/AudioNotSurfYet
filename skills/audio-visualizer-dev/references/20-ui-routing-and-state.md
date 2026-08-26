@@ -7,11 +7,12 @@
 | 路径 | 页面 | 当前状态 |
 | --- | --- | --- |
 | `/` | `Home.vue` | 使用共享音频能量驱动 `LightBg` 的 `rayLength` |
-| `/comingsoon` | `ComingSoon.vue` | 空占位；Header 的 Visualizer 和 Editor 都指向此路径 |
+| `/comingsoon` | `ComingSoon.vue` | Visualizer 空占位 |
 | `/analyzer` | `Analyzer.vue` | Canvas 点阵背景和静态 Meyda 数据入口 |
+| `/editor/:trackId?` | `Editor.vue` | E1 路由/工程基础已获批准；E2 时间轴/tempo 正在实施 |
 | `/testlands` | `TestLands.vue` | 试验页面，不应当作生产契约 |
 
-Editor 的批准目标路由为 `/editor/:trackId?`，但当前源码尚未实现。E1–E6 delivery planning 已于 2026-08-26 获批并只开放 E1；实现与 canonical 完成前不得把该目标路由写成已验证事实。
+Editor `/editor/:trackId?`、Header 当前歌曲入口、播放列表“去编辑”和 MusicBar 条件隐藏已由 E1 实现并获批准。当前只开放 E2 时间轴/tempo；E3 point、E4 overlay、E5 range 和 E6 加固仍不得写成已实现事实。
 
 `MainLayout.vue` 固定组合 `HeaderBar`、当前 `router-view` 和 `MusicBar`，并创建/提供唯一 `AudioSessionService` 与 `AnalysisCoordinator`。修改页面高度、z-index、固定定位或底部空间时，要同时检查 Header 与 MusicBar。
 
@@ -20,6 +21,7 @@ Editor 的批准目标路由为 `/editor/:trackId?`，但当前源码尚未实�
 - `MainLayout` 创建并 provide 唯一 `AudioSessionService` 与 `AnalysisCoordinator`，在布局卸载时先 dispose coordinator 再释放 session service。
 - `MusicBar` 读取 `audioSessionStore` 并调用 session commands；只拥有拖动预览、列表开合、跑马灯和 GSAP 样式时间线。
 - `MusicList` 通过 `select-index`、`add-to-analysis`、`delete`、`clear`、`restore-access`、`reselect-track`、`clear-persisted` 和 `close-list` 事件回传操作；事件名已统一为 kebab-case。
+- `MusicList` 的 `edit-track` 入口先显式播放目标歌曲，再导航到带 track ID 的 Editor；Header Editor 入口只使用当前歌曲且不隐式改变播放状态。
 - `audioSessionStore` 是 Pinia store，保存 `TrackRecord[]`、current track ID、`PlaybackSnapshot`、persistence snapshot、analysis snapshot 和当前 energy；Home 与 MusicBar 读取同一能量。
 - runtime File、封面对象 URL、AudioContext、AudioBuffer 和 AudioNode 均不得进入 store。
 - `emitter.ts` 暴露 mitt 单例，事件类型位于 `src/types/events.ts`。当前已证实 Header 发出 `settings-open`；未发现订阅方，也未发现 `music-bar-settings` 的实际发送或订阅。

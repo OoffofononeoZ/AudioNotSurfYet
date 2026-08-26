@@ -1,14 +1,16 @@
 ---
-status: in-review
+status: approved
 owner: "project-owner"
 last_reviewed: 2026-08-26
 upstream_docs:
   - "docs/quality/editor/eval-plan.md"
   - "docs/architecture/editor/project-format-v1.md"
-next_action: "owner 复核已转成 E1 deterministic tests 的规范样例；批准前保持 in-review"
+next_action: "E1 golden 已批准并冻结；E2 使用独立 golden 文档"
 ---
 
 # Editor E1 Golden Examples
+
+`project-owner` 于 2026-08-26 随 E1 canonical evidence 批准本组 E1 规范样例。后续 E2 tempo 样例不回写本文。
 
 | ID | Category | Input | Expected outcome | Why it matters |
 | --- | --- | --- | --- | --- |

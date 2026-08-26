@@ -10,7 +10,7 @@ upstream_docs:
   - "docs/architecture/risk-register.md"
   - "docs/architecture/editor/project-format-v1.md"
   - "docs/architecture/editor/interaction-contracts.md"
-next_action: "复核 E1 canonical 与人工流程；owner 批准前 E1 保持 In Progress，E2 保持 Planned"
+next_action: "执行 E2 时间轴、tempo map、BPM estimator 与独立 quality/canonical 门禁"
 ---
 
 # Editor E1–E6 Execution Plan
@@ -147,7 +147,7 @@ Exit gate:
 
 ## 5. Test and Eval Commands
 
-E1 已实现并通过以下真实命令：
+E1 已实现、通过并获 owner 批准；以下为真实命令：
 
 ```text
 npm run test:e1:unit
@@ -167,7 +167,7 @@ npm run eval:eN:provisional
 npm run eval:eN
 ```
 
-其中 `N` 为 2–6；当前仍是计划命令。canonical 必须拒绝 dirty worktree，并记录 run ID、commit、环境、步骤结果、日志和 summary SHA-256。E1 clean canonical 已在 commit `792b424fbab8e3621ad24d8c9add47d1c9bffcb4` 上 18/18 通过，但 evidence 与人工任务获批前不关闭 E1。
+其中 `N` 为 2–6；E2 命令在本里程碑实现，E3–E6 仍为计划命令。canonical 必须拒绝 dirty worktree，并记录 run ID、commit、环境、步骤结果、日志和 summary SHA-256。E1 clean canonical 已在 commit `792b424fbab8e3621ad24d8c9add47d1c9bffcb4` 上 18/18 通过并获批准。
 
 ## 6. Change Control and Exclusions
 
@@ -188,4 +188,4 @@ npm run eval:eN
 
 `我批准 Editor E1–E6 execution plan、acceptance criteria、test strategy 与 milestone plan；同意开始 E1。`
 
-该批准只开放 E1；E1 canonical 和 owner evidence 批准前，E2–E6 保持 `Planned`。
+2026-08-26，`project-owner` 进一步批准 E1 canonical evidence 与人工结果，E1 据此关闭并只开放 E2；E3–E6 保持 `Planned`。
