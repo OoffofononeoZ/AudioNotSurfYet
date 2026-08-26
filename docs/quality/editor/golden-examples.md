@@ -5,7 +5,7 @@ last_reviewed: 2026-08-26
 upstream_docs:
   - "docs/quality/editor/eval-plan.md"
   - "docs/architecture/editor/project-format-v1.md"
-next_action: "把 E1 JSON golden 固定为测试 fixture，并在 canonical 中登记结果"
+next_action: "owner 复核已转成 E1 deterministic tests 的规范样例；批准前保持 in-review"
 ---
 
 # Editor E1 Golden Examples

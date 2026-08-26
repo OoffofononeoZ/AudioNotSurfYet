@@ -6,7 +6,7 @@ upstream_docs:
   - "docs/quality/editor/eval-plan.md"
   - "docs/quality/editor/golden-examples.md"
   - "docs/architecture/risk-register.md"
-next_action: "使用本分类标记 E1 provisional/canonical 失败和人工缺口"
+next_action: "owner 复核已登记的 EFT-REGRESSION provisional 失败及当前人工缺口"
 ---
 
 # Editor E1 Failure Taxonomy

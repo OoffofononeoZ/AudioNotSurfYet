@@ -4,14 +4,14 @@ owner: "project-owner"
 last_reviewed: 2026-08-26
 upstream_docs:
   - "docs/context/index.md"
-next_action: "保持当前代码事实；按已批准 delivery 实施 E1 runtime 与工程基础"
+next_action: "保持 E1 当前代码事实；owner 审批 canonical 前不实现 E2 时间轴与 BPM"
 ---
 
 # System Map
 
 ## System Summary
 
-当前系统是 Vue 3 单页应用。MainLayout 创建并提供唯一的 `AudioSessionService` 与 `AnalysisCoordinator`；服务通过 `AudioEngine` 解码、播放本地文件，并通过 `SessionRepository` 保存最近队列、文件句柄、当前 Blob、当前分析缓存和 Analyzer 工作区。协调器只在存在活动特征时复制当前解码 PCM、启动 module Worker，并把可序列化进度、series identity、实际 sample rate 与 cache 状态写入 `audioSessionStore`。File、Blob、handle、PCM、Worker 与音频节点均留在 store 外。MusicBar 和 Analyzer 读取同一播放快照；Analyzer 固定四槽、首次默认 M7 三卡，可从累计 21 项中选择最多四张唯一卡并复用共享 viewport/cursor。
+当前系统是 Vue 3 单页应用。MainLayout 创建并提供唯一的 `AudioSessionService`、`AnalysisCoordinator` 与 E1 `EditorSessionController`；服务通过 `AudioEngine` 解码、播放本地文件，并通过两个独立 IndexedDB repository 保存 Analyzer session 与 Editor 单草稿。Analyzer 和 Editor 通过互斥 consumer lease 复用同一 coordinator；Editor E1 只占有 consumer，不启动分析 job。File、Blob、handle、PCM、Worker 与音频节点均留在 store 外。MusicBar 和 Analyzer 读取同一播放快照；有效 Editor track 隐藏 MusicBar，并由 tokenized playback lease 把 ended 策略改为 repeat-one。
 
 ## Runtime Flow
 
@@ -48,6 +48,8 @@ showOpenFilePicker → FileSystemFileHandle → File
 | Config persistence | 保存 volume 与 MusicBar style | Pinia、localStorage key `config` | project-owner | schema 保持不变；volume 为 0–100 |
 | Home visualization | 全屏 Three.js 光线 shader | `rayLength` prop、IntersectionObserver、reduced-motion media query | unknown | 常规模式使用 WebGL RAF；reduced motion 只静态渲染；卸载释放 mesh、geometry、material、render list、renderer 与 WebGL context |
 | Analyzer surface | 四槽/最多四张累计 21 项可用卡、共享 viewport/zoom/cursor/seek、DOM 精确值与分层 Canvas | store、AudioSessionService、AnalysisCoordinator、Canvas 2D | project-owner | 首次仍默认 M7 三卡；已保存空工作区保持为空；Loudness 与 Complex 使用结构化双 Canvas |
+| Editor E1 surface | `/editor/:trackId?` 的空/加载/ready/conflict/unavailable 状态、精简 transport 与 JSON import/export | EditorSessionController、AudioSessionService、Vue Router | project-owner | 时间轴、BPM、point/range UI 和 overlay 尚未开放 |
+| Editor project and draft | strict JSON V1、歌曲 hash/时长绑定、原生 file gateway、单草稿 autosave 与恢复冲突 | `EditorFormatCodecRegistry`、`EditorDraftRepository`、`audionotsurfyet-editor` V1 | project-owner | 首版只注册 JSON；session database 不变 |
 | Experimental charts | 试验性的 Three.js 2D 图和瀑布流 | Vue props、TestLands | unknown | 不视为稳定接口 |
 | Event bus | 跨组件事件类型与发送 | mitt singleton | unknown | `settings-open` 无已发现订阅者 |
 
@@ -71,22 +73,23 @@ showOpenFilePicker → FileSystemFileHandle → File
 - AudioEngine 是当前解码 AudioBuffer 的唯一所有者；只通过 descriptor 和分块 copy 接口向协调器提供平均单声道 PCM。copy 期间 decoded revision 改变时立即丢弃旧结果。
 - AnalysisCoordinator 拥有产品 Worker、generation、pending request、精确游标和 cache 合并；Worker 的 mono PCM 只保留到 track/revision/generation 失效或 dispose。
 - 全 cache hit 仍以 0-feature job 把当前 PCM 交给 Worker，只为 exact cursor 保留，不重复执行 Meyda 特征提取；默认活动集为空时仍不创建 Worker。
-- M6 DEV bridge `window.__AUDIO_NOT_SURF_YET_M6__` 只公开可序列化命令/状态和 exact cursor 返回值，不暴露 File、PCM、AudioBuffer 或 Worker。
+- M6 DEV bridge `window.__AUDIO_NOT_SURF_YET_M6__` 只代理当前有效 Analyzer lease，并公开可序列化命令/状态和 exact cursor；在 Home 或 Editor 不取得/覆盖 consumer，也不暴露 File、PCM、AudioBuffer 或 Worker。
 - 刷新时 current Blob 优先并恢复为 0 秒 paused；其他曲目只在 `queryPermission()` 为 granted 时自动取回，`requestPermission()` 只由可见用户操作触发。
 - `--coinc-process` 既可能由 GSAP 写入，也可能由能量 RAF 写入，模式切换需明确所有权。
 - AudioContext、source、单播放 RAF、产品 Worker、pending analysis request 和封面 URL 由 MainLayout-owned service/coordinator 生命周期统一释放；Observer、GSAP 和 Three.js 由各组件释放，LightBg 在 reduced motion 下不保留连续 RAF。
-- Header 的 settings 事件没有已发现消费者，导航中的 Visualizer/Editor 共享占位页。
+- Header 的 settings 事件没有已发现消费者；Visualizer 仍为占位页，Editor 已进入 E1 基础页面。
 - `components.d.ts` 和 `auto-imports.d.ts` 是构建插件生成文件，构建可能造成工作树变化。
 
-## Editor Target Seams（not implemented）
+## Editor Boundary After E1
 
-以下内容来自已批准架构，不是当前源码事实：
+已实现事实：
 
-- `/editor/:trackId?` 将由 route-scoped `EditorSessionController` 使用现有 AudioSessionService/AnalysisCoordinator；当前 `/comingsoon` 路由与播放列表加号尚未改变。
-- tokenized playback/analysis lease 将隔离 repeat-one 与活动 feature；当前 service/coordinator 尚未提供这些接口。
-- `EditorProjectV1`、`EditorFormatCodecRegistry` 和独立 `audionotsurfyet-editor` IndexedDB V1 尚未实现，不得写成当前持久化能力。
-- EditorTimelineModel、point/range 状态机、tempo estimate 和 pointer-through renderer adapter 尚未实现；Analyzer 的现有 MeydaCard/viewport 只是可复用基础。
+- `/editor/:trackId?` 由 route-generation `EditorSessionController` 编排；Header 使用当前歌曲，播放列表“去编辑”先播放指定歌曲。
+- tokenized playback lease 隔离 repeat-one；analysis consumer lease 只允许 Analyzer/Editor 最新 token 生效，E1 Editor 不创建 Worker job。
+- `EditorProjectV1`、strict JSON codec、原生 picker gateway 和独立 `audionotsurfyet-editor` V1 单草稿已实现；内存工程优先，quota 发布 `not-persisted`。
+
+尚未实现：EditorTimelineModel、波形、tempo/BPM、point/range 交互、分析 overlay 与 E6 双浏览器/容量加固。schema 能 round-trip point/range 数据不代表对应编辑交互已经开放。
 
 ## Approval Record
 
-`project-owner` 于 2026-08-21 确认 M7 卡片、共享视口、跳转、刷新恢复和 3/3 学习解释通过，并批准 M7 canonical、关闭 M7、开放 M8。随后 M8 运行时与 clean canonical 已完成，本图同步累计 16 项事实；owner 又批准 M8 canonical 与 Windows Chrome 界面稳定化结果并明确要求实施 M9。2026-08-23，owner 批准 M9 canonical 与非首页导航栏模糊效果，并明确要求实施 M10；本图随后同步 M10 累计 21 项代码事实及 36/36 clean canonical。2026-08-25，owner 批准 M10 canonical evidence 与 21/21 Analyzer 特征覆盖；M10 改为 `Complete`。同日 owner 确认 Edge 已安装并要求开始最终加固。M11 clean Chrome/Edge canonical 随后 38/38 通过；2026-08-26，owner 又批准该 canonical、Edge 原生权限与最终加固结果，M11 据此为 `Complete`。同日 owner 批准 Editor E0 产品意图并开放 system design，随后明确批准 Editor E0 系统设计、接口契约、风险与 ADR，并开放 E1–E6 execution planning；本图仅新增明确标注的 target seams，当前运行时仍是 Analyzer 候选，Editor 尚未实现。
+`project-owner` 于 2026-08-21 确认 M7 卡片、共享视口、跳转、刷新恢复和 3/3 学习解释通过，并批准 M7 canonical、关闭 M7、开放 M8。随后 M8 运行时与 clean canonical 已完成，本图同步累计 16 项事实；owner 又批准 M8 canonical 与 Windows Chrome 界面稳定化结果并明确要求实施 M9。2026-08-23，owner 批准 M9 canonical 与非首页导航栏模糊效果，并明确要求实施 M10；本图随后同步 M10 累计 21 项代码事实及 36/36 clean canonical。2026-08-25，owner 批准 M10 canonical evidence 与 21/21 Analyzer 特征覆盖；M10 改为 `Complete`。同日 owner 确认 Edge 已安装并要求开始最终加固。M11 clean Chrome/Edge canonical 随后 38/38 通过；2026-08-26，owner 又批准该 canonical、Edge 原生权限与最终加固结果，M11 据此为 `Complete`。同日 owner 依次批准 Editor 产品、架构与 delivery 并开放 E1；E1 runtime/工程基础现已实现，clean canonical 18/18 通过，但仍等待 owner 人工审批，不开放 E2。

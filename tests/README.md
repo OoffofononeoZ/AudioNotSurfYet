@@ -178,4 +178,6 @@ M11 最终 provisional run `M11-2026-08-25T09-47-44-125Z-1b3691f9-provisional` �
 
 M11 clean canonical run `M11-2026-08-25T10-05-12-783Z-99c67792` 已在 commit `99c67792509d07456bcb431b90468252f8b0fdc3` 上 38/38 通过，summary SHA-256 为 `7d637525b5c9e6aa6fb45dc0818ac1fb59bbef90b90abf3ed2d6e6119ac631b5`。Chrome 专项 4/4、Edge 全量 31/31；Chrome/Edge 60 秒漂移 3.5ms/4.133ms，seek 最大误差 66.827ms/61.494ms；四重卡最大反馈 17.9ms/17.2ms，分析归因长任务均为 0；两端 20 次路由循环均为 WebGL 21 created/20 lost、2 live RAF。build 最大 JS chunk 为 1,117.94 kB，warning 保留。
 
-本 README 只记录真实执行结果。`project-owner` 于 2026-08-26 明确批准 M11 canonical evidence、Edge 原生权限与最终加固结果；M11 evidence 为 `approved`，M11 为 `Complete`。Meyda 5.6.3 `spectralFlux` 上游缺陷仍保留，产品侧仅由 ADR-0005 项目实现缓解；Analyzer release-readiness 当前为 `in-review`，不得在其单独批准前宣称正式上线。
+本 README 只记录真实执行结果。`project-owner` 于 2026-08-26 明确批准 M11 canonical evidence、Edge 原生权限与最终加固结果；M11 evidence 为 `approved`，M11 为 `Complete`。Meyda 5.6.3 `spectralFlux` 上游缺陷仍保留，产品侧仅由 ADR-0005 项目实现缓解；Analyzer release-readiness 已获 `Ready with waivers` 批准，但 PROD-015 仍阻断正式上线。
+
+E1 最终 provisional `E1-2026-08-26T15-20-11-120Z-3ef4ec33-provisional` 已 18/18 通过。clean canonical `E1-2026-08-26T15-24-21-043Z-792b424f` 在 commit `792b424fbab8e3621ad24d8c9add47d1c9bffcb4` 上 18/18 通过，summary SHA-256 为 `db51ba98b757ccd524d298243c6118eb24fad60101a74f20a5ff98478a5d5bc6`；E1 unit 9/9、integration 7/7、Chrome 4/4。M4 60 秒漂移 0.8ms、seek 最大误差 66.827ms；M6 15 分钟最大反馈 18.1ms、分析归因长任务 0、20 次资源循环保持单 Worker/AudioContext。build 最大 JS chunk 为 1,204.24 kB，warning 保留。E1 evidence 仍为 `in-review`，等待 owner 原生 picker、离页提示与人工任务签字。
