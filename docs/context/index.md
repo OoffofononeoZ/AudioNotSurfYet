@@ -4,14 +4,14 @@ owner: "project-owner"
 last_reviewed: 2026-08-26
 upstream_docs:
   - "AGENTS.md"
-next_action: "实施 Editor E1 路由、runtime lease、JSON V1 与独立草稿；完成专项 canonical 后请求 owner 审批"
+next_action: "owner 复核 Editor E1 canonical 与人工任务；批准前 E2 保持 Planned"
 ---
 
 # Repository Context Index
 
 ## Purpose
 
-AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端：用户选择本地音频后，应用提供播放队列、元数据、进度与音量控制，并把实时能量用于 MusicBar 和背景可视化。Analyzer 已完成 21/21 能力和有条件 readiness；Editor 的产品、架构与 E1–E6 delivery planning 均已获批准，当前只开放 E1 的入口、runtime lease、JSON V1 与独立草稿实现。
+AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端：用户选择本地音频后，应用提供播放队列、元数据、进度与音量控制，并把实时能量用于 MusicBar 和背景可视化。Analyzer 已完成 21/21 能力和有条件 readiness；Editor E1 已实现入口、runtime lease、JSON V1 与独立草稿并完成 clean canonical，当前等待 owner 人工审批。
 
 本目录维护仓库事实、边界和工作记忆；生命周期路由与通用方法由 [AGENTS.md](../../AGENTS.md) 负责。当前代码事实与目标架构必须区分：现状见 [system map](system-map.md)，批准的目标见 [system design](../architecture/system-design.md)。
 
@@ -21,8 +21,8 @@ AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端：用户选择
 - Product intent：problem brief、scope、success metrics 和 open questions 中的 Editor E0 点/范围事件范围已于 2026-08-26 获 owner 批准。
 - System design：Analyzer 基线保持历史批准；Editor system design、接口契约、R-022–R-027、ADR-0006–0009 和两个详细子契约均于 2026-08-26 获 owner 批准。R-022–R-027 仍为 `Open`，表示尚无实现缓解证据。
 - Execution planning：现有根级文档保留 Analyzer M1–M11 历史；`docs/delivery/editor/` 四份 E1–E6 规划于 2026-08-26 获 owner 批准，E0-D `Complete`、E1 `In Progress`、E2–E6 `Planned`。
-- Quality and evals：M3–M11 的适用 canonical/人工证据均已获批准；Editor E1 专属 eval、golden、failure taxonomy 与 evidence index 已建立并保持 `in-review`，当前尚无 canonical record。
-- Implementation：M1–M11 均为 `Complete`，Analyzer 21/21 delivery 已关闭；Editor E1 已开放但尚无实现或 evidence 通过事实。
+- Quality and evals：M3–M11 的适用 canonical/人工证据均已获批准；Editor E1 专属 eval、golden、failure taxonomy 与 evidence index 保持 `in-review`，clean canonical 已 18/18 通过并等待 owner。
+- Implementation：M1–M11 均为 `Complete`，Analyzer 21/21 delivery 已关闭；Editor E1 已实现并通过自动化，仍为 `In Progress`，E2–E6 为 `Planned`。
 - Readiness、release、retrospective：Analyzer `release-readiness.md` 已获 `Ready with waivers` 批准；PROD-015 尚未解决，因此不创建上线声明或生产托管，Editor 也不继承该 readiness。
 
 ## Key Documents
@@ -77,11 +77,12 @@ AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端：用户选择
 
 | Area | Current role | Target/change source |
 | --- | --- | --- |
-| `src/views/` | 路由页面；Analyzer 以四槽共享时间轴承载默认三卡，并可从累计 21 项选择最多四张 | system design + M7–M10 |
-| `src/layouts/` | Header、页面内容与 MusicBar 的共享外壳 | M4/M7 回归 |
-| `src/components/` | 播放 UI、列表、动画及 Canvas/WebGL 可视化 | ADR-0001/0004 |
-| `src/audio/` | 单一 AudioEngine 与 MainLayout-owned AudioSessionService；文件句柄导入与恢复编排 | ADR-0001/0003 |
-| `src/analysis/` | FeatureRegistry、config identity、PCM/frame、codec、Worker/coordinator、共享时间轴，以及累计 21 项与 scalar/vector/waveform/structured renderer 数据 | ADR-0002/0004/0005；M6–M10 |
+| `src/views/` | Analyzer 四槽 21 项，以及 E1 Editor 空/加载/冲突/不可用/ready 页面与工程操作 | system design + M7–M10 + E1 |
+| `src/layouts/` | Header、页面内容与按有效 Editor playback lease 条件隐藏的 MusicBar 共享外壳 | ADR-0001/0006；E1 |
+| `src/components/` | 播放 UI、列表、“去编辑”入口、动画及 Canvas/WebGL 可视化 | ADR-0001/0004/0006 |
+| `src/audio/` | 单一 AudioEngine 与 MainLayout-owned AudioSessionService；文件恢复及 E1 tokenized repeat-one lease | ADR-0001/0003/0006；E1 |
+| `src/analysis/` | 21 项分析平台及 Analyzer/Editor 单一 active consumer lease；E1 Editor 不启动分析 job | ADR-0002/0004/0005/0006；E1 |
+| `src/editor/` | JSON V1 strict codec、原生文件 gateway、独立单草稿 IndexedDB 与 route-generation session controller | ADR-0007；E1 |
 | `src/persistence/` | 原生 IndexedDB V1 SessionRepository 与 runtime validator | ADR-0003；M5 |
 | `src/stores/` | 持久化 config 与可序列化 audioSessionStore/恢复/analysis 状态 | ADR-0001/0002/0003 |
 | `src/utils/` | 事件总线与纯工具函数 | 实现时按实际边界维护 |
@@ -110,9 +111,10 @@ AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端：用户选择
 - 超出约 15 分钟支持边界的长音频未开始播放只作为非门禁压力观察；它不表示长音频被规定为必须失败，也不改变当前产品范围。
 - M11 clean canonical 已在 Chrome/Edge 上 38/38 通过，其中 Edge 全量为 31/31；原生 Edge 权限、辅助技术与人工长会话补偿门禁已于 2026-08-26 获 owner 签字，M11 为 `Complete`。
 - Analyzer readiness 已于 2026-08-26 获 owner 有条件批准；正式托管平台、域名、SPA fallback 和生产 URL 尚未决定，继续阻断正式上线。
-- 当前代码中的 Header Editor 和播放列表加号仍指向占位/Analyzer 旧行为；Editor target architecture 已获批准，但尚无 Editor 路由、lease、工程、草稿、点/范围事件或叠加层实现。
+- Editor E1 已实现 `/editor/:trackId?`、Header/播放列表入口、repeat/consumer lease、JSON V1、单草稿、导入导出与恢复保护；E2 时间轴/BPM、E3 point UI、E4 overlay、E5 range UI 和 E6 加固尚未实现。
 - Editor E5 已因 owner 补充并批准范围事件创建、取消、吸附与不重叠规则而成为产品序列中的 `Planned`；当前只开放 E1，E2–E6 仍须等待前序里程碑批准。
 - Editor E1–E6 专属 delivery 文档已经获批；固定 10,000 事件容量门禁、overlay 35%/12% 和逐里程碑 provisional/canonical/owner 审批。该批准只开放 E1，不是实现或通过证据。
+- E1 clean canonical `E1-2026-08-26T15-24-21-043Z-792b424f` 已在 clean commit `792b424fbab8e3621ad24d8c9add47d1c9bffcb4` 上 18/18 通过；summary SHA-256 为 `db51ba98b757ccd524d298243c6118eb24fad60101a74f20a5ff98478a5d5bc6`。这是待审批证据，不开放 E2。
 - 详细 context 文档的长期 owner/review cadence 尚未全部统一；代码改动时必须同步修正事实。
 - 工程事实差异继续记录在 [Skill 项目差异](../../skills/audio-visualizer-dev/references/99-open-questions-and-project-deltas.md)，产品开放项见 [open questions](../product/open-questions.md)。
 
@@ -173,3 +175,5 @@ M11 canonical run `M11-2026-08-25T10-05-12-783Z-99c67792` 随后在 clean commit
 同日，Editor target architecture 已按批准范围写入 system design、interface contracts、R-022–R-027、ADR-0006–0009 与两个详细子契约。`project-owner` 随后明确回复：“我批准 Editor E0 系统设计、接口契约、风险与 ADR；同意进入 Editor E1–E6 execution planning。”架构据此改为 `approved`，R-022–R-027 仍为 `Open`；该批准只开放 delivery planning，不构成 E1 实现、质量证据或 Editor readiness。
 
 随后建立 `docs/delivery/editor/` 四份专属规划，按 owner 固定选择记录 10,000 事件 E6 压力门禁、overlay 默认 35%/最小 12% 和 E1–E6 各自 provisional、clean canonical、owner 审批。`project-owner` 于 2026-08-26 明确回复：“我批准 Editor E1–E6 execution plan、acceptance criteria、test strategy 与 milestone plan；同意开始 E1。”四份文档据此获批，E1 改为 `In Progress`，E2–E6 保持 `Planned`。
+
+随后 E1 runtime、工程和测试完成；clean canonical `E1-2026-08-26T15-24-21-043Z-792b424f` 在 commit `792b424fbab8e3621ad24d8c9add47d1c9bffcb4` 上 18/18 通过，summary SHA-256 为 `db51ba98b757ccd524d298243c6118eb24fad60101a74f20a5ff98478a5d5bc6`。该事实已登记为 `in-review` evidence；原生 picker、离页提示和 owner 人工任务获批前，E1 仍为 `In Progress`、E2 仍为 `Planned`。

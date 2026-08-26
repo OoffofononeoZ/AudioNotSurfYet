@@ -10,7 +10,7 @@ upstream_docs:
   - "docs/architecture/risk-register.md"
   - "docs/architecture/editor/project-format-v1.md"
   - "docs/architecture/editor/interaction-contracts.md"
-next_action: "实施 E1 路由、runtime lease、JSON V1 与独立草稿；E2 保持 Planned"
+next_action: "复核 E1 canonical 与人工流程；owner 批准前 E1 保持 In Progress，E2 保持 Planned"
 ---
 
 # Editor E1–E6 Execution Plan
@@ -145,9 +145,19 @@ Exit gate:
 - 三格式、双浏览器、恢复、错误隔离、可访问性和容量门禁均有成功、失败、边界、异常证据。
 - clean canonical、evidence 和 owner 完整逆向标注任务获批后，才允许进入 Editor release-readiness review。
 
-## 5. Planned Test and Eval Commands
+## 5. Test and Eval Commands
 
-每个里程碑实现时新增并在 `package.json`、测试 README 与项目 Skill 中同步真实命令：
+E1 已实现并通过以下真实命令：
+
+```text
+npm run test:e1:unit
+npm run test:e1:integration
+npm run test:e2e:e1
+npm run eval:e1:provisional
+npm run eval:e1
+```
+
+E2–E6 在各自里程碑实现时新增并同步：
 
 ```text
 npm run test:eN:unit
@@ -157,7 +167,7 @@ npm run eval:eN:provisional
 npm run eval:eN
 ```
 
-其中 `N` 为 1–6。这些命令当前尚不存在；规划批准不等于测试基础已实现。canonical 必须拒绝 dirty worktree，并记录 run ID、commit、环境、步骤结果、日志和 summary SHA-256。
+其中 `N` 为 2–6；当前仍是计划命令。canonical 必须拒绝 dirty worktree，并记录 run ID、commit、环境、步骤结果、日志和 summary SHA-256。E1 clean canonical 已在 commit `792b424fbab8e3621ad24d8c9add47d1c9bffcb4` 上 18/18 通过，但 evidence 与人工任务获批前不关闭 E1。
 
 ## 6. Change Control and Exclusions
 

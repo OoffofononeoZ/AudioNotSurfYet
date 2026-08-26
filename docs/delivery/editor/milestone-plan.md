@@ -6,7 +6,7 @@ upstream_docs:
   - "docs/delivery/editor/execution-plan.md"
   - "docs/delivery/editor/acceptance-criteria.md"
   - "docs/delivery/editor/test-strategy.md"
-next_action: "完成 E1 实现、provisional、clean canonical 和 owner evidence 审批；E2 保持 Planned"
+next_action: "owner 复核 E1 canonical 与人工任务；批准后关闭 E1 并只开放 E2"
 ---
 
 # Editor E1–E6 Milestone Plan
@@ -45,10 +45,10 @@ next_action: "完成 E1 实现、provisional、clean canonical 和 owner evidenc
 
 ### E1
 
-- [ ] AC-E101–AC-E108 有 unit/integration/Chrome 证据。
-- [ ] 单 engine/Worker、repeat release 和快速 route/track 序列通过。
-- [ ] JSON strict round-trip、atomic import、single draft、quota/abort 与异歌三选项通过。
-- [ ] E1 provisional 与 clean canonical 完成并登记 identity/hash/environment。
+- [x] AC-E101–AC-E108 已有 unit/integration/Chrome 自动化证据候选。
+- [x] 单 engine/Worker、repeat release 和 route/track 序列自动化通过。
+- [x] JSON strict round-trip、atomic import、single draft、quota 与异歌三选项自动化通过；原生 picker/离页提示仍待人工复核。
+- [x] E1 provisional 与 clean canonical 已完成并登记 identity/hash/environment。
 - [ ] owner 批准 E1 evidence；只开放 E2。
 
 ### E2
@@ -104,7 +104,7 @@ next_action: "完成 E1 实现、provisional、clean canonical 和 owner evidenc
 - E0-D：`Complete`。
 - E1：`In Progress`。
 - E2–E6：`Planned`。
-- 当前唯一下一门禁：E1 专项测试、provisional、clean canonical、人工任务与 owner evidence 批准。
+- 当前唯一下一门禁：E1 人工任务与 owner evidence 批准；E2 仍未开放。
 
 ## 6. Delivery Approval
 

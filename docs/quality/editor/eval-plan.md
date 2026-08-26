@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/delivery/editor/acceptance-criteria.md"
   - "docs/delivery/editor/test-strategy.md"
   - "docs/architecture/risk-register.md"
-next_action: "在已提交契约上完成 E1 provisional 与 clean canonical；登记 evidence 后请求 owner 审批"
+next_action: "owner 复核已登记的 E1 18/18 canonical 与人工缺口；批准前保持 in-review"
 ---
 
 # Editor E1 Eval Plan

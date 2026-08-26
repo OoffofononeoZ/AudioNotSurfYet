@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/product/scope.md"
   - "docs/architecture/system-design.md"
   - "docs/delivery/execution-plan.md"
-next_action: "按已批准 Editor delivery 实施 E1；clean canonical 与 owner evidence 批准前不开放 E2"
+next_action: "owner 复核 E1 canonical 与人工门禁；批准前不关闭 E1 或开放 E2"
 ---
 
 # Decision Registry
@@ -114,6 +114,8 @@ M11 clean canonical `M11-2026-08-25T10-05-12-783Z-99c67792` 随后在真实 Chro
 同次 delivery planning 请求中，owner 固定 E6 10,000 事件容量门禁、overlay 默认 35%/最小 12%，并要求 E1–E6 各自运行 provisional、clean canonical 与 owner 审批；DEC-024 据此生效。四份 Editor delivery 文档仍为 `in-review`，DEC-024 不构成 E1 开工授权。
 
 随后 `project-owner` 明确回复：“我批准 Editor E1–E6 execution plan、acceptance criteria、test strategy 与 milestone plan；同意开始 E1。”DEC-025 据此生效，四份 Editor delivery 文档改为 `approved`，E0-D 改为 `Complete`、E1 改为 `In Progress`。该决定不构成 E1 功能、canonical 或风险缓解证据，也不开放 E2。
+
+DEC-025 约束下的 E1 实现已提交，clean canonical `E1-2026-08-26T15-24-21-043Z-792b424f` 在 commit `792b424fbab8e3621ad24d8c9add47d1c9bffcb4` 上 18/18 通过并登记到 Editor evidence index。该执行事实不是新产品/架构决策；owner 尚未批准人工门禁，因此 R-022/R-023/R-027 和 E1 状态不提前改变，E2 仍未开放。
 
 ## Historical Evidence Gap
 
