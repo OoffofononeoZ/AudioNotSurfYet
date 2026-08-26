@@ -6,7 +6,7 @@ upstream_docs:
   - "docs/delivery/editor/execution-plan.md"
   - "docs/delivery/editor/acceptance-criteria.md"
   - "docs/delivery/editor/test-strategy.md"
-next_action: "owner 复核 E1 canonical 与人工任务；批准后关闭 E1 并只开放 E2"
+next_action: "执行 E2 时间轴、tempo map、BPM estimator、canonical 与 owner 门禁"
 ---
 
 # Editor E1–E6 Milestone Plan
@@ -26,8 +26,8 @@ next_action: "owner 复核 E1 canonical 与人工任务；批准后关闭 E1 并
 | E0-P | Product intent | Complete | Analyzer readiness approval | 用户、逆向制曲问题、点/范围事件、指标、非目标和开放问题 | product docs approved；DEC-023/PROD-014E/PROD-020 生效 | project-owner |
 | E0-A | System design | Complete | E0-P | runtime lease、JSON/draft、time/event、overlay、风险与 ADR | system design/contracts/R-022–R-027/ADR-0006–0009 approved | project-owner |
 | E0-D | Execution planning | Complete | E0-A | Editor 专属 execution plan、AC、test strategy、milestone plan | 四份文档于 2026-08-26 获批；E1 明确开放 | project-owner |
-| E1 | Entry, playback and project foundation | In Progress | E0-D | 路由、当前/指定歌曲、repeat lease、JSON V1、单草稿、导入导出和恢复保护 | E1 tests + provisional + clean canonical + owner approval | project-owner |
-| E2 | Timeline and tempo | Planned | E1 | 波形、共享 viewport、tempo map、grid 与 BPM estimator | geometry/BPM/Chrome evidence + canonical + owner approval | project-owner |
+| E1 | Entry, playback and project foundation | Complete | E0-D | 路由、当前/指定歌曲、repeat lease、JSON V1、单草稿、导入导出和恢复保护 | E1 18/18 clean canonical + owner approval | project-owner |
+| E2 | Timeline and tempo | In Progress | E1 | 波形、共享 viewport、tempo map、grid 与 BPM estimator | geometry/BPM/Chrome evidence + canonical + owner approval | project-owner |
 | E3 | Point annotation | Planned | E2 | point lane、inner class、自适应网格、鼠标/右键/键盘 | point task + performance/accessibility + canonical + owner approval | project-owner |
 | E4 | Analysis overlay | Planned | E3 | 21 项单选纯 renderer overlay、三手柄和 pointer-through | renderer/geometry/isolation + canonical + owner approval | project-owner |
 | E5 | Range annotation | Planned | E4 | range 创建、取消、调整、重叠、删除和 round-trip | range matrix + import/draft + canonical + owner approval | project-owner |
@@ -49,7 +49,7 @@ next_action: "owner 复核 E1 canonical 与人工任务；批准后关闭 E1 并
 - [x] 单 engine/Worker、repeat release 和 route/track 序列自动化通过。
 - [x] JSON strict round-trip、atomic import、single draft、quota 与异歌三选项自动化通过；原生 picker/离页提示仍待人工复核。
 - [x] E1 provisional 与 clean canonical 已完成并登记 identity/hash/environment。
-- [ ] owner 批准 E1 evidence；只开放 E2。
+- [x] owner 批准 E1 evidence；只开放 E2。
 
 ### E2
 
@@ -102,9 +102,10 @@ next_action: "owner 复核 E1 canonical 与人工任务；批准后关闭 E1 并
 - E0-P：`Complete`。
 - E0-A：`Complete`。
 - E0-D：`Complete`。
-- E1：`In Progress`。
-- E2–E6：`Planned`。
-- 当前唯一下一门禁：E1 人工任务与 owner evidence 批准；E2 仍未开放。
+- E1：`Complete`。
+- E2：`In Progress`。
+- E3–E6：`Planned`。
+- 当前唯一下一门禁：E2 专项、clean canonical、人工任务与 owner evidence 批准。
 
 ## 6. Delivery Approval
 
@@ -112,4 +113,4 @@ next_action: "owner 复核 E1 canonical 与人工任务；批准后关闭 E1 并
 
 `我批准 Editor E1–E6 execution plan、acceptance criteria、test strategy 与 milestone plan；同意开始 E1。`
 
-该批准使 E0-D `Complete`、E1 `In Progress`；不构成 E1 evidence 通过，也不开放 E2。
+该批准使 E0-D `Complete`、E1 `In Progress`。2026-08-26，owner 又批准 E1 canonical evidence、路由与播放 lease、JSON V1 和草稿恢复结果；E1 据此改为 `Complete`，E2 改为 `In Progress`，不开放 E3。

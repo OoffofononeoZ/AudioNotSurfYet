@@ -5,7 +5,7 @@ last_reviewed: 2026-08-26
 upstream_docs:
   - "docs/architecture/system-design.md"
   - "docs/architecture/interface-contracts.md"
-next_action: "在 Editor E1–E6 delivery 中映射 R-022–R-027；只在有可复现证据后改变风险状态"
+next_action: "以 E2 geometry/BPM/consumer 证据缓解 R-024、R-026、R-027；E6 复核 R-022/R-023"
 ---
 
 # Risk Register
@@ -35,8 +35,8 @@ next_action: "在 Editor E1–E6 delivery 中映射 R-022–R-027；只在有可
 | R-019 | bundle 已有约 1MB 警告继续增长 | Medium | Medium | `npm run build` chunk warning 增大 | Worker/renderer 按路由或 feature family 拆分，记录构建体积；M11 canonical 最大 JS chunk 为 1,117.94 kB；避免 Analyzer Three.js；owner 于 2026-08-26 以 W-001 接受当前候选 warning | 仅当前 Analyzer 候选为 Accepted；托管方案或正式包体预算确定、chunk 增长或首屏问题复现时重新评审 | project-owner | Accepted |
 | R-020 | Meyda 5.6.3 `spectralFlux` 提取器引用未声明变量 `x` | High | High | 固定 previous/current frame 调用抛 `ReferenceError: x is not defined` | ADR-0005 项目 Flux 已实现；公式/首帧/静音/exact cursor golden 与 M8 clean canonical 28/28 通过，保留上游异常事实 | 产品阻断已缓解；Meyda 缺陷未修复，依赖升级时必须重新对照 | project-owner | Mitigated |
 | R-021 | Analyzer sticky、播放器层级、pressed 状态或内层滚动条破坏可用性与视觉一致性 | Medium | Medium | sticky 与 Header 间距过大；歌曲列表被遮挡；Windows Chrome 按钮保持按压外观；表格显示系统默认滚动条 | M8 Slice 0、macOS Chrome 多视口 canonical 与 owner Windows Chrome 人工签字均通过 | 相关交互或样式变化后重新执行多视口自动化与 Windows Chrome 补偿复核 | project-owner | Closed |
-| R-022 | Editor 循环策略或旧 route cleanup 泄漏到其他页面/歌曲 | Medium | High | 离开后仍 repeat-one、快速换歌被旧 release 改写、出现第二 AudioContext/时钟 | ADR-0006 tokenized playback lease；E1 覆盖 acquire/release/ended/invalid target，E6 在 Chrome/Edge 做 20 次 Editor/Analyzer/Home 与换歌资源循环 | lease 失效时强制回到 queue-next；任何双 engine/clock 为阻断 | project-owner | Open |
-| R-023 | 草稿覆盖、损坏导入或错误歌曲身份破坏当前工程 | Medium | High | 异歌静默覆盖、未知 schema 被接受、hash/时长不匹配仍应用、quota 后旧草稿丢失 | ADR-0007 strict codec + content hash + 独立原子 draft；E1 覆盖 round-trip、unknown/invalid/hash/quota/abort/跨歌三选项，E5 回归 range | 失败始终保留内存工程与旧 durable draft；无法证明原子性则阻断 E1 | project-owner | Open |
+| R-022 | Editor 循环策略或旧 route cleanup 泄漏到其他页面/歌曲 | Medium | High | 离开后仍 repeat-one、快速换歌被旧 release 改写、出现第二 AudioContext/时钟 | ADR-0006 tokenized playback lease；E1 18/18 canonical 覆盖 acquire/release/ended/invalid target 并获 2026-08-26 owner 签字；E6 仍在 Chrome/Edge 做 20 次资源循环 | lease 失效时强制回到 queue-next；任何双 engine/clock 为阻断，资源实现变化时重开 | project-owner | Mitigated |
+| R-023 | 草稿覆盖、损坏导入或错误歌曲身份破坏当前工程 | Medium | High | 异歌静默覆盖、未知 schema 被接受、hash/时长不匹配仍应用、quota 后旧草稿丢失 | ADR-0007 strict codec + content hash + 独立原子 draft；E1 18/18 canonical 与 owner 签字覆盖 round-trip、unknown/invalid/hash/quota/abort/跨歌三选项；E5 回归 range | 失败始终保留内存工程与旧 durable draft；schema/import/draft 变化时重开 | project-owner | Mitigated |
 | R-024 | 波形、tempo、事件与 overlay 在 zoom/DPR/resize 下错位 | Medium | High | 同一时间各层 x 差超过 1 CSS px、seek/marker 命中偏移 | ADR-0008/0009 共享 geometry；E2/E4 对 1024/1280/1920、DPR、zoom/pan 读取真实几何，E6 双浏览器回归 | 单层不得私有化 viewport；超过 1px 时停止后续 annotation evidence | project-owner | Open |
 | R-025 | 大量事件 DOM、右键状态或键盘路径造成性能/可访问性回归 | Medium | High | 输入反馈 >100ms、Editor 归因长任务 >50ms、遗留 pressed/capture/menu、键盘无法完成核心任务 | Canvas 背景 + viewport-visible event DOM、4px pointer 状态机、统一 cleanup；E3/E5 覆盖 point/range/右键/keyboard，E6 覆盖大数据、reduced motion 与辅助技术 | 降低可见 DOM/绘制细节但不降低秒数事实；核心键盘缺失阻断 E6 | project-owner | Open |
 | R-026 | BPM 误识别或低置信度被写成用户事实 | Medium | Medium | silence/歧义输入自动填入错误 BPM、用户编辑值被异步结果覆盖 | 同 Worker retained PCM、typed reliable/low-confidence、仅唯一空且未编辑 segment 可写；E2 golden 覆盖 silence、歧义、60/100/128/小数与 stale | 低置信度保持空并提示手动输入；第三方依赖仍需 owner 单独批准 | project-owner | Open |

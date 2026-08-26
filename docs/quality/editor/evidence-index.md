@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: approved
 owner: "project-owner"
 last_reviewed: 2026-08-26
 upstream_docs:
@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/quality/editor/golden-examples.md"
   - "docs/quality/editor/failure-taxonomy.md"
   - "docs/delivery/editor/milestone-plan.md"
-next_action: "owner 复核 E1 canonical 与人工缺口；批准前 E1 保持 In Progress，E2 保持 Planned"
+next_action: "E1 已批准并关闭；E2 开放实施，形成 canonical 后追加 in-review record"
 ---
 
 # Editor Evidence Index
@@ -15,9 +15,10 @@ next_action: "owner 复核 E1 canonical 与人工缺口；批准前 E1 保持 In
 ## 1. Current Gate
 
 - E0-D：`Complete`。
-- E1：`In Progress`。
-- E2–E6：`Planned`。
-- E1 clean canonical 已通过并登记，但 reviewer 状态仍为 `in-review`；Analyzer M3–M11 evidence 不能替代 Editor 人工审批。
+- E1：`Complete`。
+- E2：`In Progress`。
+- E3–E6：`Planned`。
+- E1 clean canonical 与 owner 人工门禁均已批准；Analyzer M3–M11 evidence 仍不能替代未来 Editor 里程碑证据。
 
 ## 2. Record Contract
 
@@ -29,14 +30,14 @@ next_action: "owner 复核 E1 canonical 与人工缺口；批准前 E1 保持 In
 | --- | --- |
 | Run ID | `E1-2026-08-26T15-24-21-043Z-792b424f` |
 | Milestone | E1 — Entry, playback and project foundation |
-| State | `pass`（18/18 自动化；owner review pending） |
+| State | `approved`（18/18 自动化及 owner 人工门禁） |
 | Implementation commit | `792b424fbab8e3621ad24d8c9add47d1c9bffcb4` |
 | Evidence commit | 本记录所在的 `docs: register Editor E1 canonical evidence` 提交 |
 | Dirty at start / end | `false` / `false` |
 | Commit at end | `792b424fbab8e3621ad24d8c9add47d1c9bffcb4` |
 | Started at | 2026-08-26 15:24:21.043 UTC |
 | Method | `npm run eval:e1` |
-| Reviewer | `project-owner` — pending |
+| Reviewer | `project-owner` — approved 2026-08-26 |
 | Retention | `local-present`，至少保留到 E1 审批完成 |
 | Artifact root | `artifacts/evals/E1-2026-08-26T15-24-21-043Z-792b424f/` |
 | Summary SHA-256 | `db51ba98b757ccd524d298243c6118eb24fad60101a74f20a5ff98478a5d5bc6` |
@@ -105,4 +106,5 @@ next_action: "owner 复核 E1 canonical 与人工缺口；批准前 E1 保持 In
 - Playwright 注入的 OPFS picker 验证 native handle 接口与原子读写，但不能代替真实 OS 打开、保存、取消和覆盖对话框。
 - 浏览器原生 `beforeunload` 文案不可自动化；owner 需检查只在写入 pending/in-flight 时出现。
 - E1–E5 只要求 Chrome 专项；真实 Edge Editor 全量仍按批准计划留到 E6。
-- owner 尚未完成本轮人工任务，因此 E1、E1 quality 文档和本 evidence 均保持 `in-review`，R-022/R-023/R-027 不因自动化通过而提前关闭，E2 保持 `Planned`。
+- `project-owner` 于 2026-08-26 明确回复：“我批准 Editor E1 canonical evidence、路由与播放 lease、JSON V1 和草稿恢复结果；同意将 E1 标记为 Complete 并开放 E2。”本签字完成 E1 人工门禁；原生 picker 与离页提示仍属于浏览器无法完全自动化的补偿事实，相关实现变化或 E6 双浏览器加固时需重新复核。
+- R-022、R-023 据 E1 canonical 与本次 owner 签字改为 `Mitigated`；R-027 仍等待 E2/E4 对真实 Editor analysis consumer 的进一步证据。

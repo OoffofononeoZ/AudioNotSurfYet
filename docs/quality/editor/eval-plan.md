@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: approved
 owner: "project-owner"
 last_reviewed: 2026-08-26
 upstream_docs:
@@ -7,10 +7,12 @@ upstream_docs:
   - "docs/delivery/editor/acceptance-criteria.md"
   - "docs/delivery/editor/test-strategy.md"
   - "docs/architecture/risk-register.md"
-next_action: "owner 复核已登记的 E1 18/18 canonical 与人工缺口；批准前保持 in-review"
+next_action: "E1 已批准并关闭；以独立 E2 eval 契约约束时间轴与 tempo 实施"
 ---
 
 # Editor E1 Eval Plan
+
+`project-owner` 于 2026-08-26 批准 E1 canonical evidence、路由与播放 lease、JSON V1 和草稿恢复结果；本文据此改为 `approved`。本批准不覆盖 E2 质量证据。
 
 ## 1. Boundary
 

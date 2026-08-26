@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/product/scope.md"
   - "docs/architecture/system-design.md"
   - "docs/delivery/execution-plan.md"
-next_action: "owner 复核 E1 canonical 与人工门禁；批准前不关闭 E1 或开放 E2"
+next_action: "执行 DEC-026 约束下的 E2 时间轴、tempo 与 BPM evidence；E3 保持关闭"
 ---
 
 # Decision Registry
@@ -50,6 +50,7 @@ next_action: "owner 复核 E1 canonical 与人工门禁；批准前不关闭 E1 
 | DEC-023 | 2026-08-26 | Editor E0 是单曲“逆向制曲”标注：首版本地 JSON、点事件和范围事件、tempo map、单特征叠加及 E1–E6；同 lane/inner class 范围不重叠 | project-owner | approved | [Scope](../product/scope.md) | 事件语义、数据边界、格式、依赖或里程碑改变 |
 | DEC-024 | 2026-08-26 | Editor E6 固定验证 10,000 个事件；overlay 默认高度 35%、最小 12%；E1–E6 每个里程碑都必须独立 provisional、clean canonical 和 owner 审批 | project-owner | approved | [Editor execution plan](../delivery/editor/execution-plan.md) | 容量门禁、overlay 默认值、证据节奏或逐里程碑审批改变 |
 | DEC-025 | 2026-08-26 | 批准 Editor E1–E6 delivery planning 并只开放 E1；E2–E6 继续逐里程碑等待 canonical 与 owner evidence 审批 | project-owner | approved | [Editor milestone plan](../delivery/editor/milestone-plan.md) | E1 范围、里程碑顺序或 evidence 门禁改变 |
+| DEC-026 | 2026-08-26 | E1 canonical/人工结果获批准并开放 E2；一个 beat 固定为 `60/BPM` 秒，拍号分母只表达 beat 音符单位；tempo boundary 有合法 metered BPM 时按网格吸附，否则按微秒规范化原始时间 | project-owner | approved | [Editor interactions](../architecture/editor/interaction-contracts.md) | BPM/拍号含义、boundary 吸附、E2 范围或门禁改变 |
 
 ## Approval Evidence
 
@@ -116,6 +117,8 @@ M11 clean canonical `M11-2026-08-25T10-05-12-783Z-99c67792` 随后在真实 Chro
 随后 `project-owner` 明确回复：“我批准 Editor E1–E6 execution plan、acceptance criteria、test strategy 与 milestone plan；同意开始 E1。”DEC-025 据此生效，四份 Editor delivery 文档改为 `approved`，E0-D 改为 `Complete`、E1 改为 `In Progress`。该决定不构成 E1 功能、canonical 或风险缓解证据，也不开放 E2。
 
 DEC-025 约束下的 E1 实现已提交，clean canonical `E1-2026-08-26T15-24-21-043Z-792b424f` 在 commit `792b424fbab8e3621ad24d8c9add47d1c9bffcb4` 上 18/18 通过并登记到 Editor evidence index。该执行事实不是新产品/架构决策；owner 尚未批准人工门禁，因此 R-022/R-023/R-027 和 E1 状态不提前改变，E2 仍未开放。
+
+同日，`project-owner` 明确回复：“我批准 Editor E1 canonical evidence、路由与播放 lease、JSON V1 和草稿恢复结果；同意将 E1 标记为 Complete 并开放 E2。”E1 据此关闭，R-022/R-023 改为 `Mitigated`，E2 改为 `In Progress`。owner 同时选择 DEC-026 的 BPM/拍号与无网格 boundary 语义；R-024/R-026/R-027 和 E3 门禁不因此提前关闭。
 
 ## Historical Evidence Gap
 
