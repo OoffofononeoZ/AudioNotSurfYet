@@ -8,7 +8,7 @@ upstream_docs:
   - "docs/architecture/risk-register.md"
   - "docs/delivery/editor/execution-plan.md"
   - "docs/delivery/editor/acceptance-criteria.md"
-next_action: "建立 E1 专属测试命令、quality eval 契约与 Chrome evidence；E2 测试仍不创建"
+next_action: "按 E2 独立 quality 契约建立 geometry/tempo/BPM/Chrome 测试与 canonical"
 ---
 
 # Editor E1–E6 Test Strategy
@@ -121,7 +121,7 @@ npm run eval:eN:provisional
 npm run eval:eN
 ```
 
-当前命令尚不存在。实现时必须让脚本名称、测试 README、本项目 Skill 与实际 runner 一致；不得保留指向不存在文件的兼容别名。
+E1 命令已经存在并获批准。E2 命令在当前里程碑实现；E3–E6 仍不存在。新增脚本必须让 package、测试 README、本项目 Skill 与实际 runner 一致，不保留指向不存在文件的兼容别名。
 
 固定流程：
 
@@ -136,4 +136,4 @@ npm run eval:eN
 
 ## 9. Current Planning Gate
 
-`project-owner` 于 2026-08-26 批准本文并开放 E1。现在只创建 E1 测试源码、fixture、npm 命令和 quality evidence；不得提前创建 E2–E6 实现或把 Analyzer 历史通过泛化成 Editor 通过。
+`project-owner` 于 2026-08-26 批准本文并开放 E1，随后批准 E1 canonical/人工结果并开放 E2。现在只创建 E2 测试源码、fixture、npm 命令和 quality evidence；不得提前创建 E3–E6 实现或把 E1/Analyzer 历史通过泛化成 E2 通过。
