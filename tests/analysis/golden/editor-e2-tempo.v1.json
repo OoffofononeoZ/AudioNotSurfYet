@@ -1,0 +1,49 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-08-27",
+  "generatorVersion": "editor-e2-tempo-v1",
+  "sampleRate": 48000,
+  "frameSize": 1024,
+  "hopSize": 512,
+  "cases": [
+    {
+      "id": "tempo-60",
+      "fixtureHash": "2745f6adc21e7d581033dcad334fa66d1e326da44f167bfefbcffb788263b962",
+      "expectedState": "reliable",
+      "expectedBpm": 60
+    },
+    {
+      "id": "tempo-100",
+      "fixtureHash": "a14992be233b72b8686ed82f81b489d6f4478f685068b3b7ecee65b8644777ce",
+      "expectedState": "reliable",
+      "expectedBpm": 100
+    },
+    {
+      "id": "tempo-128",
+      "fixtureHash": "856f83b60558ad8636cbd6f23a13d4571778b9599776ac19c3725aa48defc929",
+      "expectedState": "reliable",
+      "expectedBpm": 128
+    },
+    {
+      "id": "tempo-127-5",
+      "fixtureHash": "47805c3ff8ff4226534be0ab209f801fde87b0c97c55fd506ad4a385605837d0",
+      "expectedState": "reliable",
+      "expectedBpm": 127.5
+    },
+    {
+      "id": "silence",
+      "fixtureHash": "351a8054b23144894668c6a51d5dbba82f56523ef43cc45b6f4d7060a969c31a",
+      "expectedState": "low-confidence"
+    },
+    {
+      "id": "seeded-noise",
+      "fixtureHash": "df59c92b7f9444119f4155b68c55ded265b67d4ab2793487d56df45fe33e51d4",
+      "expectedState": "low-confidence"
+    },
+    {
+      "id": "ambiguous",
+      "fixtureHash": "6fa54ce5f0665b637ebc805fedf2f3b32ff8b868d91bb27fa4fd5905308f2c59",
+      "expectedState": "low-confidence"
+    }
+  ]
+}

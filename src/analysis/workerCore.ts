@@ -21,6 +21,7 @@ import {
     scalarMeydaValue,
     vectorMeydaValue,
 } from './meydaAdapter';
+import { estimateTempo } from './tempoEstimator';
 import {
     isFeatureId,
     isM10FeatureId,
@@ -32,6 +33,8 @@ import {
     type AnalysisWorkerResponse,
     type FeatureId,
     type M10FeatureId,
+    type TempoEstimateRequest,
+    type TempoEstimateResult,
 } from './types';
 
 export class AnalysisWorkerCoreError extends Error {
@@ -504,6 +507,32 @@ export const extractCursorValue = (
             previousFrame,
         ),
     };
+};
+
+export const extractTempoEstimate = (
+    retained: RetainedAnalysisPcm,
+    request: TempoEstimateRequest,
+    hooks: Pick<AnalysisWorkerHooks, 'isCancelled'> = {},
+): TempoEstimateResult | null => {
+    if (
+        request.generation !== retained.generation
+        || request.trackHash !== retained.trackHash
+        || request.configHash !== retained.config.configHash
+    ) {
+        return null;
+    }
+    const estimate = estimateTempo(retained.pcm, retained.config, hooks);
+    const base = {
+        kind: 'tempo-estimate-result' as const,
+        requestId: request.requestId,
+        generation: request.generation,
+        trackHash: request.trackHash,
+        configHash: request.configHash,
+        confidence: estimate.confidence,
+    };
+    return estimate.state === 'reliable' && estimate.bpm !== undefined
+        ? { ...base, state: 'reliable', bpm: estimate.bpm }
+        : { ...base, state: 'low-confidence' };
 };
 
 export const responseTransferables = (

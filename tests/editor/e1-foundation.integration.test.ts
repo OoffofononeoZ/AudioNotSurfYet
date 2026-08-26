@@ -11,6 +11,7 @@ import {
     AnalysisCoordinator,
     type AnalysisConsumerLease,
 } from '../../src/analysis/analysisCoordinator';
+import type { TempoEstimateResult } from '../../src/analysis/types';
 import {
     AudioSessionService,
     type AudioEnginePort,
@@ -101,7 +102,10 @@ class MemoryDraftRepository implements EditorDraftRepositoryPort {
     close() {}
 }
 
-const createControllerHarness = (draft: EditorDraftEnvelopeV1 | null = null) => {
+const createControllerHarness = (
+    draft: EditorDraftEnvelopeV1 | null = null,
+    tempoRequest?: Promise<TempoEstimateResult | null>,
+) => {
     const store = useAudioSessionStore();
     const trackA = track('track-a', HASH_A);
     const trackB = track('track-b', HASH_B);
@@ -124,14 +128,48 @@ const createControllerHarness = (draft: EditorDraftEnvelopeV1 | null = null) => 
         }),
     };
     const analysisCoordinator = {
+        getSnapshot: () => ({
+            state: 'idle',
+            generation: 0,
+            trackId: null,
+            trackHash: null,
+            configHash: null,
+            sampleRate: null,
+            activeFeatureIds: [],
+            readyFeatureIds: [],
+            completedFrames: 0,
+            totalFrames: 0,
+            progress: 0,
+            cacheState: 'idle',
+            staleMessageCount: 0,
+        }),
         acquireConsumer: (consumer: 'editor'): AnalysisConsumerLease => ({
             token: `analysis-${consumer}`,
             consumer,
             setActiveFeatures: async () => undefined,
             requestCursorValue: async () => null,
-            requestTempoEstimate: async () => null,
+            requestTempoEstimate: () => tempoRequest ?? Promise.resolve(null),
             getSeries: () => null,
-            subscribe: () => () => undefined,
+            subscribe: (listener) => {
+                if (tempoRequest) {
+                    listener({
+                        state: 'ready',
+                        generation: 1,
+                        trackId: 'track-a',
+                        trackHash: HASH_A,
+                        configHash: 'e2-config',
+                        sampleRate: 48_000,
+                        activeFeatureIds: ['buffer'],
+                        readyFeatureIds: ['buffer'],
+                        completedFrames: 1,
+                        totalFrames: 1,
+                        progress: 1,
+                        cacheState: 'miss',
+                        staleMessageCount: 0,
+                    });
+                }
+                return () => undefined;
+            },
             release: () => analysisReleases.push(consumer),
         }),
     };
@@ -325,6 +363,44 @@ describe('Editor E1 foundation integration', () => {
             persistence: 'not-persisted',
             project: { track: { contentHash: HASH_A } },
         });
+        await harness.controller.dispose();
+    });
+
+    test('does not let a late tempo estimate overwrite a user tempo edit', async () => {
+        let resolveTempo!: (value: TempoEstimateResult | null) => void;
+        const tempoRequest = new Promise<TempoEstimateResult | null>((resolve) => {
+            resolveTempo = resolve;
+        });
+        const harness = createControllerHarness(null, tempoRequest);
+        await harness.controller.enter(harness.trackA.id);
+        await vi.waitFor(() => expect(harness.controller.getSnapshot())
+            .toMatchObject({ tempoEstimateState: 'estimating' }));
+        const project = harness.controller.getSnapshot().project!;
+        project.tempoMap[0] = {
+            id: project.tempoMap[0]!.id,
+            startSeconds: 0,
+            mode: 'metered',
+            bpm: 127.5,
+            bpmSource: 'user',
+            meter: { numerator: 4, denominator: 4 },
+        };
+        harness.controller.updateProject(project, true);
+        resolveTempo({
+            kind: 'tempo-estimate-result',
+            requestId: 'late-e2',
+            generation: 1,
+            trackHash: HASH_A,
+            configHash: 'e2-config',
+            confidence: 0.95,
+            state: 'reliable',
+            bpm: 100,
+        });
+        await tempoRequest;
+        await vi.waitFor(() => expect(harness.controller.getSnapshot().project)
+            .toMatchObject({
+                tempoMap: [{ bpm: 127.5, bpmSource: 'user' }],
+            }));
+        expect(harness.controller.getSnapshot().tempoEstimateState).toBe('idle');
         await harness.controller.dispose();
     });
 

@@ -5,6 +5,12 @@ import type {
     AnalysisCoordinator,
 } from '../analysis/analysisCoordinator';
 import type {
+    AnalysisCoordinatorSnapshot,
+    AnalysisListener,
+    AnalysisSeries,
+    TempoEstimateResult,
+} from '../analysis/types';
+import type {
     AudioSessionService,
     EditorPlaybackLease,
 } from '../audio/audioSessionService';
@@ -28,6 +34,7 @@ import type {
     EditorSessionSnapshot,
     EditorTrackValidationContext,
 } from './types';
+import { useEstimatedBpm } from './tempoMap';
 
 type AudioSessionStore = ReturnType<typeof useAudioSessionStore>;
 type EditorSessionListener = (snapshot: EditorSessionSnapshot) => void;
@@ -40,6 +47,7 @@ const initialSnapshot = (): EditorSessionSnapshot => ({
     conflictingDraft: null,
     persistence: 'clean',
     restoredFromDraft: false,
+    tempoEstimateState: 'idle',
 });
 
 const cloneProject = (project: EditorProjectV1): EditorProjectV1 =>
@@ -70,8 +78,11 @@ export interface EditorSessionControllerOptions {
     codecs?: EditorFormatCodecRegistry;
     now?: () => Date;
     createId?: () => string;
-    setTimer?: typeof setTimeout;
-    clearTimer?: typeof clearTimeout;
+    setTimer?: (
+        handler: () => void,
+        timeout: number,
+    ) => ReturnType<typeof setTimeout>;
+    clearTimer?: (handle: ReturnType<typeof setTimeout>) => void;
     windowTarget?: Pick<Window, 'addEventListener' | 'removeEventListener'>;
 }
 
@@ -88,16 +99,26 @@ export class EditorSessionController {
     private readonly codecs: EditorFormatCodecRegistry;
     private readonly now: () => Date;
     private readonly createId: () => string;
-    private readonly setTimer: typeof setTimeout;
-    private readonly clearTimer: typeof clearTimeout;
+    private readonly setTimer: (
+        handler: () => void,
+        timeout: number,
+    ) => ReturnType<typeof setTimeout>;
+    private readonly clearTimer: (
+        handle: ReturnType<typeof setTimeout>,
+    ) => void;
     private readonly windowTarget?: Pick<
         Window,
         'addEventListener' | 'removeEventListener'
     >;
     private readonly listeners = new Set<EditorSessionListener>();
+    private readonly analysisListeners = new Set<AnalysisListener>();
     private snapshot = initialSnapshot();
+    private analysisSnapshot: AnalysisCoordinatorSnapshot;
     private playbackLease: EditorPlaybackLease | null = null;
     private analysisLease: AnalysisConsumerLease | null = null;
+    private unsubscribeAnalysis: (() => void) | null = null;
+    private tempoRequestRevision = 0;
+    private autoTempoStartedForGeneration: number | null = null;
     private routeGeneration = 0;
     private saveTimer: ReturnType<typeof setTimeout> | null = null;
     private pendingProject: EditorProjectV1 | null = null;
@@ -116,10 +137,13 @@ export class EditorSessionController {
         this.codecs = options.codecs ?? new EditorFormatCodecRegistry();
         this.now = options.now ?? (() => new Date());
         this.createId = options.createId ?? (() => crypto.randomUUID());
-        this.setTimer = options.setTimer ?? setTimeout;
-        this.clearTimer = options.clearTimer ?? clearTimeout;
+        this.setTimer = options.setTimer
+            ?? ((handler, timeout) => setTimeout(handler, timeout));
+        this.clearTimer = options.clearTimer
+            ?? ((handle) => clearTimeout(handle));
         this.windowTarget = options.windowTarget
             ?? (typeof window === 'undefined' ? undefined : window);
+        this.analysisSnapshot = this.analysisCoordinator.getSnapshot();
         void this.repository.getLeaveWarningEnabled().then((enabled) => {
             if (!this.disposed) this.leaveWarningEnabled = enabled;
         }).catch(() => {
@@ -135,6 +159,25 @@ export class EditorSessionController {
         this.listeners.add(listener);
         listener(this.getSnapshot());
         return () => this.listeners.delete(listener);
+    }
+
+    subscribeAnalysis(listener: AnalysisListener): () => void {
+        this.analysisListeners.add(listener);
+        listener(structuredClone(this.analysisSnapshot));
+        return () => this.analysisListeners.delete(listener);
+    }
+
+    getAnalysisSnapshot(): AnalysisCoordinatorSnapshot {
+        return structuredClone(this.analysisSnapshot);
+    }
+
+    getAnalysisSeries(featureId: 'buffer'): AnalysisSeries | null {
+        return this.analysisLease?.getSeries(featureId) ?? null;
+    }
+
+    requestTempoEstimate(): Promise<TempoEstimateResult | null> {
+        return this.analysisLease?.requestTempoEstimate()
+            ?? Promise.resolve(null);
     }
 
     hasActivePlaybackLease(): boolean {
@@ -223,12 +266,14 @@ export class EditorSessionController {
                 const project = validateEditorProjectV1(draft.project, context);
                 this.hasUnexportedChanges = true;
                 this.publishReady(trackId, project, true, 'saved');
+                this.startEditorAnalysis(generation);
                 return;
             }
             const project = this.createProject(trackId);
             this.hasUnexportedChanges = false;
             this.publishReady(trackId, project, false, 'clean');
             this.queueSave(project, true);
+            this.startEditorAnalysis(generation);
         } catch (error) {
             if (generation !== this.routeGeneration || this.disposed) return;
             this.releaseLeases();
@@ -289,6 +334,7 @@ export class EditorSessionController {
             const project = validateEditorProjectV1(draft.project, context);
             this.hasUnexportedChanges = true;
             this.publishReady(previous.id, project, true, 'saved');
+            this.startEditorAnalysis(generation);
             return { kind: 'restored-old', trackId: previous.id };
         } catch {
             this.releaseLeases();
@@ -317,6 +363,7 @@ export class EditorSessionController {
         this.hasUnexportedChanges = false;
         this.publishReady(trackId, project, false, 'clean');
         this.queueSave(project, true);
+        this.startEditorAnalysis(this.routeGeneration);
     }
 
     async importProject(codecId = 'json-v1'): Promise<'imported' | 'cancelled'> {
@@ -354,6 +401,12 @@ export class EditorSessionController {
             ? this.trackContext(this.snapshot.activeTrackId)
             : null;
         if (!context || this.snapshot.state !== 'ready') return;
+        const tempoChanged = JSON.stringify(project.tempoMap)
+            !== JSON.stringify(this.snapshot.project?.tempoMap ?? []);
+        if (tempoChanged) {
+            this.tempoRequestRevision += 1;
+            this.autoTempoStartedForGeneration = null;
+        }
         const candidate = validateEditorProjectV1({
             ...project,
             updatedAt: this.now().toISOString(),
@@ -364,6 +417,10 @@ export class EditorSessionController {
             project: candidate,
             persistence: 'saving',
             message: undefined,
+            ...(tempoChanged ? {
+                tempoEstimateState: 'idle' as const,
+                tempoEstimateConfidence: undefined,
+            } : {}),
         });
         this.queueSave(candidate, immediate);
     }
@@ -420,6 +477,7 @@ export class EditorSessionController {
         this.repository.close();
         this.removeBeforeUnload();
         this.listeners.clear();
+        this.analysisListeners.clear();
     }
 
     private createProject(trackId: string): EditorProjectV1 {
@@ -509,10 +567,90 @@ export class EditorSessionController {
     }
 
     private releaseLeases(): void {
+        this.tempoRequestRevision += 1;
+        this.autoTempoStartedForGeneration = null;
+        this.unsubscribeAnalysis?.();
+        this.unsubscribeAnalysis = null;
         this.analysisLease?.release();
         this.analysisLease = null;
         this.playbackLease?.release();
         this.playbackLease = null;
+    }
+
+    private startEditorAnalysis(routeGeneration: number): void {
+        const lease = this.analysisLease;
+        if (!lease) return;
+        this.unsubscribeAnalysis?.();
+        this.unsubscribeAnalysis = lease.subscribe((snapshot) => {
+            this.analysisSnapshot = snapshot;
+            const next = structuredClone(snapshot);
+            for (const listener of this.analysisListeners) listener(next);
+            if (
+                snapshot.state === 'ready'
+                && snapshot.readyFeatureIds.includes('buffer')
+                && this.autoTempoStartedForGeneration !== snapshot.generation
+            ) {
+                this.autoTempoStartedForGeneration = snapshot.generation;
+                void this.runAutomaticTempoEstimate(routeGeneration);
+            }
+        });
+        void lease.setActiveFeatures(['buffer']);
+    }
+
+    private async runAutomaticTempoEstimate(
+        routeGeneration: number,
+    ): Promise<void> {
+        const project = this.snapshot.project;
+        const segment = project?.tempoMap[0];
+        if (
+            !project
+            || project.tempoMap.length !== 1
+            || segment?.mode !== 'metered'
+            || segment.bpm !== null
+            || segment.bpmSource !== 'unset'
+        ) return;
+        const requestRevision = ++this.tempoRequestRevision;
+        this.publish({
+            ...this.snapshot,
+            tempoEstimateState: 'estimating',
+            tempoEstimateConfidence: undefined,
+        });
+        const result = await this.requestTempoEstimate();
+        if (
+            this.disposed
+            || routeGeneration !== this.routeGeneration
+            || requestRevision !== this.tempoRequestRevision
+        ) return;
+        if (!result) {
+            this.publish({ ...this.snapshot, tempoEstimateState: 'unavailable' });
+            return;
+        }
+        if (result.state === 'low-confidence') {
+            this.publish({
+                ...this.snapshot,
+                tempoEstimateState: 'low-confidence',
+                tempoEstimateConfidence: result.confidence,
+            });
+            return;
+        }
+        const current = this.snapshot.project;
+        const currentSegment = current?.tempoMap[0];
+        if (!current || !currentSegment || current.tempoMap.length !== 1) return;
+        const estimated = useEstimatedBpm(currentSegment, result.bpm);
+        if (!estimated) return;
+        const candidate = validateEditorProjectV1({
+            ...current,
+            updatedAt: this.now().toISOString(),
+            tempoMap: [estimated],
+        }, this.trackContext(this.snapshot.activeTrackId ?? '') ?? undefined);
+        this.publish({
+            ...this.snapshot,
+            project: candidate,
+            persistence: 'saving',
+            tempoEstimateState: 'reliable',
+            tempoEstimateConfidence: result.confidence,
+        });
+        this.queueSave(candidate, true);
     }
 
     private publish(snapshot: EditorSessionSnapshot): void {

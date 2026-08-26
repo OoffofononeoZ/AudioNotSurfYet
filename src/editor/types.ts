@@ -131,5 +131,12 @@ export interface EditorSessionSnapshot {
     conflictingDraft: EditorDraftEnvelopeV1 | null;
     persistence: EditorPersistenceState;
     restoredFromDraft: boolean;
+    tempoEstimateState?:
+        | 'idle'
+        | 'estimating'
+        | 'reliable'
+        | 'low-confidence'
+        | 'unavailable';
+    tempoEstimateConfidence?: number;
     message?: string;
 }
