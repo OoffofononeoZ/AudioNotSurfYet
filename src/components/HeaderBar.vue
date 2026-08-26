@@ -10,7 +10,7 @@
         <section class="flex gap-4">
             <router-link to="/comingsoon" class="text-white">Visualizer</router-link>
             <router-link to="/analyzer" class="text-white">Analyzer</router-link>
-            <router-link to="/comingsoon" class="text-white">Editor</router-link>
+            <router-link :to="editorTarget" class="text-white" data-testid="header-editor-link">Editor</router-link>
             <router-link to="/testlands" class="text-white">TestLands</router-link>
         </section>
         <section class="min-w-32 flex justify-end">
@@ -24,9 +24,14 @@
 import { emitter } from '../utils/emitter';
 import { computed, ref } from 'vue';
 import { useRoute } from 'vue-router';
+import { useAudioSessionStore } from '../stores/audioSessionStore';
 
 const route = useRoute();
+const audioSessionStore = useAudioSessionStore();
 const isHome = computed(() => route.path === '/');
+const editorTarget = computed(() => audioSessionStore.currentTrackId
+    ? { name: 'editor', params: { trackId: audioSessionStore.currentTrackId } }
+    : { name: 'editor' });
 const settingsOpen = ref(false);
 const toggleSettings = () => {
     settingsOpen.value = !settingsOpen.value;

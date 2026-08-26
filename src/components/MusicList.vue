@@ -71,9 +71,14 @@
                         </div>
                         <div class="flex items-center gap-4 mr-2"
                             v-show="mouseEnteredIndex === index && !needsRecovery(data?.restoreState)">
-                            <svg class="w-6 h-6 cursor-pointer" @click="emit('add-to-analysis', index)">
-                                <use href="/icons.svg#add-music"></use>
-                            </svg>
+                            <el-tooltip content="去编辑" placement="top">
+                                <button type="button" class="icon-button" data-testid="edit-track"
+                                    :aria-label="`去编辑 ${data?.title}`" @click="emit('edit-track', index)">
+                                    <svg class="w-6 h-6" aria-hidden="true">
+                                        <use href="/icons.svg#add-music"></use>
+                                    </svg>
+                                </button>
+                            </el-tooltip>
                             <button type="button" class="icon-button" data-testid="delete-track"
                                 :aria-label="`从播放列表删除 ${data?.title}`" @click="emit('delete', index)">
                                 <svg class="w-6 h-6" aria-hidden="true">
@@ -91,6 +96,7 @@
 <script setup lang="ts">
 import AnimatedList from './AnimatedList.vue';
 import { computed, ref } from 'vue';
+import { ElTooltip } from 'element-plus';
 import type {
     RestoreState,
     SessionPersistenceSnapshot,
@@ -109,7 +115,7 @@ const props = defineProps<{
 }>();
 const emit = defineEmits<{
     'select-index': [index: number];
-    'add-to-analysis': [index: number];
+    'edit-track': [index: number];
     delete: [index: number];
     clear: [];
     'restore-access': [index: number];

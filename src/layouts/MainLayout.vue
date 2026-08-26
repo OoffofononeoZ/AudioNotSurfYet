@@ -2,12 +2,12 @@
     <main class="min-w-full h-dvh bg-black" id="main-layout">
         <HeaderBar />
         <router-view />
-        <MusicBar :progress="0" />
+        <MusicBar v-if="!editorPlaybackActive" :progress="0" />
     </main>
 </template>
 
 <script setup lang="ts">
-import { onUnmounted, provide } from 'vue';
+import { computed, onUnmounted, provide, shallowRef } from 'vue';
 import HeaderBar from '../components/HeaderBar.vue';
 import MusicBar from '../components/MusicBar.vue';
 import {
@@ -26,6 +26,12 @@ import {
 import { SessionRepository } from '../persistence/sessionRepository';
 import { useAudioSessionStore } from '../stores/audioSessionStore';
 import { useConfigstore } from '../stores/configStore';
+import {
+    EditorSessionController,
+    editorSessionControllerKey,
+} from '../editor/editorSessionController';
+import { EditorDraftRepository } from '../editor/editorDraftRepository';
+import { NativeEditorFileGateway } from '../editor/fileIO';
 
 const audioSessionStore = useAudioSessionStore();
 const audioEngine = new AudioEngine();
@@ -42,7 +48,23 @@ const analysisCoordinator = new AnalysisCoordinator(
 audioSession.setVolume(useConfigstore().volume);
 provide(audioSessionServiceKey, audioSession);
 provide(analysisCoordinatorKey, analysisCoordinator);
-void analysisCoordinator.setActiveFeatures([]);
+const editorController = new EditorSessionController({
+    audioSession,
+    analysisCoordinator,
+    store: audioSessionStore,
+    repository: new EditorDraftRepository(),
+    fileGateway: new NativeEditorFileGateway(),
+});
+provide(editorSessionControllerKey, editorController);
+const editorSnapshot = shallowRef(editorController.getSnapshot());
+const unsubscribeEditor = editorController.subscribe((snapshot) => {
+    editorSnapshot.value = snapshot;
+});
+const editorPlaybackActive = computed(() =>
+    editorSnapshot.value.activeTrackId !== null
+    && ['ready', 'draft-conflict', 'draft-error'].includes(
+        editorSnapshot.value.state,
+    ));
 void audioSession.initialize().then((cache) => {
     analysisCoordinator.setRestoredCache(cache);
 });
@@ -73,20 +95,35 @@ if (import.meta.env.DEV) {
             if (!ids.every(isFeatureId)) {
                 throw new TypeError('Unknown analysis feature ID.');
             }
-            await analysisCoordinator.setActiveFeatures(ids);
+            const proxy = analysisCoordinator.getDevelopmentConsumerProxy(
+                'analyzer',
+            );
+            if (!proxy) throw new Error('Analyzer consumer is not active.');
+            await proxy.setActiveFeatures(ids);
         },
         cancel() {
-            analysisCoordinator.cancel();
+            if (analysisCoordinator.getDevelopmentConsumerProxy('analyzer')) {
+                analysisCoordinator.cancel();
+            }
         },
         retry() {
-            return analysisCoordinator.retry();
+            const proxy = analysisCoordinator.getDevelopmentConsumerProxy(
+                'analyzer',
+            );
+            return proxy
+                ? proxy.setActiveFeatures(
+                    analysisCoordinator.getSnapshot().activeFeatureIds,
+                )
+                : Promise.resolve();
         },
         getState() {
             const snapshot = analysisCoordinator.getSnapshot();
             return {
                 ...snapshot,
                 series: snapshot.readyFeatureIds.flatMap((featureId) => {
-                    const series = analysisCoordinator.getSeries(featureId);
+                    const series = analysisCoordinator
+                        .getDevelopmentConsumerProxy('analyzer')
+                        ?.getSeries(featureId) ?? null;
                     return series
                         ? [{
                             featureId,
@@ -101,10 +138,10 @@ if (import.meta.env.DEV) {
         },
         getCursorValue(featureId, timeSeconds) {
             if (!isFeatureId(featureId)) return Promise.resolve(null);
-            return analysisCoordinator.requestCursorValue(
-                featureId,
-                timeSeconds,
-            );
+            return analysisCoordinator
+                .getDevelopmentConsumerProxy('analyzer')
+                ?.requestCursorValue(featureId, timeSeconds)
+                ?? Promise.resolve(null);
         },
     };
     (
@@ -115,6 +152,7 @@ if (import.meta.env.DEV) {
 }
 
 onUnmounted(() => {
+    unsubscribeEditor();
     if (developmentBridge) {
         delete (
             window as typeof window & {
@@ -123,6 +161,7 @@ onUnmounted(() => {
         ).__AUDIO_NOT_SURF_YET_M6__;
     }
     void (async () => {
+        await editorController.dispose();
         await analysisCoordinator.dispose();
         await audioSession.dispose();
     })();

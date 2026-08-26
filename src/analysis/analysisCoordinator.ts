@@ -57,6 +57,22 @@ interface AnalysisWorkerPort {
 
 type WorkerFactory = () => AnalysisWorkerPort;
 
+export type AnalysisConsumer = 'analyzer' | 'editor';
+
+export interface AnalysisConsumerLease {
+    token: string;
+    consumer: AnalysisConsumer;
+    setActiveFeatures(ids: readonly FeatureId[]): Promise<void>;
+    requestCursorValue(
+        featureId: FeatureId,
+        timeSeconds: number,
+    ): Promise<AnalysisCursorValueResult | null>;
+    requestTempoEstimate(): Promise<null>;
+    getSeries(featureId: FeatureId): AnalysisSeries | null;
+    subscribe(listener: AnalysisListener): () => void;
+    release(): void;
+}
+
 export interface AnalysisCoordinatorOptions {
     workerFactory?: WorkerFactory;
     createJobId?: () => string;
@@ -138,6 +154,10 @@ export class AnalysisCoordinator {
         cachedFeatureIds: FeatureId[];
     } | null = null;
     private lastDescriptorRevision: number | null = null;
+    private activeConsumer: {
+        token: string;
+        consumer: AnalysisConsumer;
+    } | null = null;
     private snapshot = initialSnapshot();
     private disposed = false;
 
@@ -168,6 +188,25 @@ export class AnalysisCoordinator {
     setRestoredCache(cache: StoredAnalysisCache | undefined): void {
         if (this.disposed) return;
         this.restoredCache = cache ?? null;
+    }
+
+    acquireConsumer(consumer: AnalysisConsumer): AnalysisConsumerLease {
+        if (this.disposed) {
+            throw new Error('AnalysisCoordinator has been disposed.');
+        }
+        this.deactivateConsumer();
+        const active = { token: crypto.randomUUID(), consumer };
+        this.activeConsumer = active;
+        return this.createConsumerLease(active, true);
+    }
+
+    getDevelopmentConsumerProxy(
+        consumer: AnalysisConsumer,
+    ): AnalysisConsumerLease | null {
+        const active = this.activeConsumer;
+        return active?.consumer === consumer
+            ? this.createConsumerLease(active, false)
+            : null;
     }
 
     async setActiveFeatures(ids: readonly FeatureId[]): Promise<void> {
@@ -303,6 +342,7 @@ export class AnalysisCoordinator {
     async dispose(): Promise<void> {
         if (this.disposed) return;
         this.disposed = true;
+        this.activeConsumer = null;
         this.cancelActiveJob('cancelled');
         this.unsubscribeEngine();
         this.worker?.terminate();
@@ -316,6 +356,63 @@ export class AnalysisCoordinator {
             readyFeatureIds: [],
         });
         this.listeners.clear();
+    }
+
+    private createConsumerLease(
+        identity: { token: string; consumer: AnalysisConsumer },
+        canRelease: boolean,
+    ): AnalysisConsumerLease {
+        let released = false;
+        const isCurrent = () =>
+            !released
+            && !this.disposed
+            && this.activeConsumer?.token === identity.token
+            && this.activeConsumer.consumer === identity.consumer;
+        return {
+            token: identity.token,
+            consumer: identity.consumer,
+            setActiveFeatures: (ids) =>
+                isCurrent()
+                    ? this.setActiveFeatures(ids)
+                    : Promise.resolve(),
+            requestCursorValue: (featureId, timeSeconds) =>
+                isCurrent()
+                    ? this.requestCursorValue(featureId, timeSeconds)
+                    : Promise.resolve(null),
+            requestTempoEstimate: () => Promise.resolve(null),
+            getSeries: (featureId) =>
+                isCurrent() ? this.getSeries(featureId) : null,
+            subscribe: (listener) => this.subscribe((snapshot) => {
+                if (isCurrent()) listener(snapshot);
+            }),
+            release: () => {
+                if (!canRelease || released) return;
+                released = true;
+                if (this.activeConsumer?.token === identity.token) {
+                    this.activeConsumer = null;
+                    this.deactivateConsumer();
+                }
+            },
+        };
+    }
+
+    private deactivateConsumer(): void {
+        this.cancelActiveJob('cancelled');
+        this.series.clear();
+        const generation = this.snapshot.generation + 1;
+        this.publish({
+            ...this.snapshot,
+            state: 'idle',
+            generation,
+            activeFeatureIds: [],
+            readyFeatureIds: [],
+            sampleRate: null,
+            completedFrames: 0,
+            totalFrames: 0,
+            progress: 0,
+            cacheState: 'idle',
+            error: undefined,
+        });
     }
 
     private assertActiveFeatures(ids: readonly FeatureId[]): void {

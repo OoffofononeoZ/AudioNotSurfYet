@@ -105,7 +105,7 @@
         </div>
         <aside class="music-list-container">
             <MusicList :info="albumInfo" :persistence="persistence" @select-index="handleSelectIndex"
-                @add-to-analysis="handleAddToAnalysis" @delete="toggleDelete" @clear="toggleClear"
+                @edit-track="handleEditTrack" @delete="toggleDelete" @clear="toggleClear"
                 @restore-access="handleRestoreAccess" @reselect-track="handleReselectTrack"
                 @clear-persisted="handleClearPersisted" @close-list="toggleMusicList" />
         </aside>
@@ -122,6 +122,7 @@ import {
     watch,
 } from 'vue';
 import { storeToRefs } from 'pinia';
+import { useRouter } from 'vue-router';
 import gsap from 'gsap';
 import {
     ElMessage,
@@ -137,6 +138,7 @@ import MusicList from './MusicList.vue';
 const configStore = useConfigstore();
 const audioSessionStore = useAudioSessionStore();
 const audioSession = useAudioSessionService();
+const router = useRouter();
 const {
     queue,
     currentTrackId,
@@ -635,8 +637,27 @@ const handleSelectIndex = (index: number) => {
     const trackId = queue.value[index]?.id;
     if (trackId) void audioSession.playTrack(trackId);
 };
-const handleAddToAnalysis = (_index: number) => {
-    // Analyzer integration starts in M7.
+const handleEditTrack = async (index: number) => {
+    const trackId = queue.value[index]?.id;
+    if (!trackId) return;
+    try {
+        await audioSession.playTrack(trackId);
+        if (
+            audioSessionStore.currentTrackId !== trackId
+            || audioSessionStore.playback.trackId !== trackId
+            || ['empty', 'loading', 'error'].includes(
+                audioSessionStore.playback.state,
+            )
+        ) {
+            ElMessage.error('歌曲当前不可编辑，请先恢复文件访问。');
+            return;
+        }
+        await router.push({ name: 'editor', params: { trackId } });
+    } catch (error) {
+        ElMessage.error(
+            error instanceof Error ? error.message : '无法进入 Editor。',
+        );
+    }
 };
 </script>
 

@@ -4,6 +4,7 @@ import Home from '../views/Home.vue';
 import TestLands from '../views/TestLands.vue';
 import ComingSoon from '../views/ComingSoon.vue';
 import Analyzer from '../views/Analyzer.vue';
+import Editor from '../views/Editor.vue';
 
 const router = createRouter({
     history: createWebHistory(),
@@ -23,6 +24,11 @@ const router = createRouter({
                 {
                     path: 'analyzer',
                     component: Analyzer,
+                },
+                {
+                    path: 'editor/:trackId?',
+                    name: 'editor',
+                    component: Editor,
                 },
                 {
                     path: 'testlands',
