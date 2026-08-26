@@ -97,16 +97,20 @@
                     <p v-if="snapshot.message" role="alert" class="error-message">{{ snapshot.message }}</p>
                 </section>
 
+                <EditorTimeline
+                    :project="snapshot.project"
+                    :playback="playback"
+                    :analysis="analysisSnapshot"
+                    :buffer-series="bufferSeries"
+                    :tempo-estimate-state="snapshot.tempoEstimateState"
+                    @update-project="updateProject"
+                />
+
                 <section class="future-panel" aria-label="Editor 后续工作区">
-                    <div>
-                        <p class="kicker">E2</p>
-                        <h2>波形与 Tempo Map</h2>
-                        <p>时间轴、BPM 和网格将在 E2 canonical 后开放。</p>
-                    </div>
                     <div>
                         <p class="kicker">E3–E5</p>
                         <h2>点、范围与分析叠加</h2>
-                        <p>当前 E1 只保证工程格式和恢复边界，不提前暴露不可用编辑控件。</p>
+                        <p>当前 E2 只开放时间轴和 Tempo，不提前暴露不可用标记控件。</p>
                     </div>
                 </section>
             </template>
@@ -130,6 +134,8 @@ import { useAudioSessionService } from '../audio/audioSessionService';
 import { EditorFormatCodecRegistry } from '../editor/projectCodec';
 import { useEditorSessionController } from '../editor/editorSessionController';
 import { useAudioSessionStore } from '../stores/audioSessionStore';
+import EditorTimeline from '../components/EditorTimeline.vue';
+import type { EditorProjectV1 } from '../editor/types';
 
 const route = useRoute();
 const router = useRouter();
@@ -139,6 +145,15 @@ const controller = useEditorSessionController();
 const snapshot = ref(controller.getSnapshot());
 const unsubscribe = controller.subscribe((next) => {
     snapshot.value = next;
+});
+const analysisSnapshot = ref(controller.getAnalysisSnapshot());
+const unsubscribeAnalysis = controller.subscribeAnalysis((next) => {
+    analysisSnapshot.value = next;
+});
+const bufferSeries = computed(() => {
+    void analysisSnapshot.value.generation;
+    void analysisSnapshot.value.readyFeatureIds;
+    return controller.getAnalysisSeries('buffer');
 });
 const codecRegistry = new EditorFormatCodecRegistry();
 const codecs = codecRegistry.list();
@@ -241,6 +256,10 @@ const cancelConflict = async () => {
 };
 
 const clearInvalidDraft = () => void controller.clearInvalidDraftAndCreate();
+const updateProject = (
+    project: EditorProjectV1,
+    immediate: boolean,
+) => controller.updateProject(project, immediate);
 
 onBeforeRouteLeave(async () => {
     if (controller.shouldWarnOnLeave()) {
@@ -274,6 +293,7 @@ onBeforeRouteLeave(async () => {
 
 onBeforeUnmount(() => {
     unsubscribe();
+    unsubscribeAnalysis();
 });
 </script>
 

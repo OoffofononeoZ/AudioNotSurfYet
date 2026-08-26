@@ -17,7 +17,9 @@ import {
 } from '../../src/analysis/config';
 import {
     AnalysisWorkerCoreError,
+    extractTempoEstimate,
     runAnalysisJob,
+    type RetainedAnalysisPcm,
 } from '../../src/analysis/workerCore';
 import type {
     AnalysisWorkerRequest,
@@ -133,6 +135,7 @@ class CoreWorker {
     >[] = [];
     readonly cancelled = new Set<string>();
     terminated = false;
+    retained: RetainedAnalysisPcm | null = null;
 
     postMessage(request: AnalysisWorkerRequest) {
         if (request.kind === 'cancel') {
@@ -140,6 +143,15 @@ class CoreWorker {
             return;
         }
         if (request.kind === 'cursor-value') {
+            return;
+        }
+        if (request.kind === 'tempo-estimate') {
+            const result = this.retained
+                ? extractTempoEstimate(this.retained, request)
+                : null;
+            if (result) {
+                this.onmessage?.({ data: result } as MessageEvent<AnalysisWorkerResponse>);
+            }
             return;
         }
         this.analyzeRequests.push(request);
@@ -157,7 +169,8 @@ class CoreWorker {
                 } as MessageEvent<AnalysisWorkerResponse>);
             },
             yieldControl: async () => undefined,
-        }).then(({ result }) => {
+        }).then(({ result, retained }) => {
+            this.retained = retained;
             this.onmessage?.({
                 data: result,
             } as MessageEvent<AnalysisWorkerResponse>);
@@ -402,6 +415,29 @@ describe('AnalysisCoordinator integration', () => {
             'unknown-feature' as never,
         ]))
             .rejects.toMatchObject({ code: 'invalid-active-features' });
+        await harness.coordinator.dispose();
+    });
+
+    test('serves tempo only to the current Editor consumer and drops stale leases', async () => {
+        const pcm = createSine(440, SAMPLE_RATE * 2);
+        const harness = setup({ pcm });
+        const analyzer = harness.coordinator.acquireConsumer('analyzer');
+        const editor = harness.coordinator.acquireConsumer('editor');
+        await analyzer.setActiveFeatures(['rms']);
+        expect(harness.coordinator.getSnapshot().activeFeatureIds).toEqual([]);
+        await editor.setActiveFeatures(['buffer']);
+        await vi.waitFor(() => {
+            expect(harness.coordinator.getSnapshot().state).toBe('ready');
+        });
+        const result = await editor.requestTempoEstimate();
+        expect(result).toMatchObject({
+            kind: 'tempo-estimate-result',
+            state: 'low-confidence',
+            trackHash: 'track-hash',
+        });
+        const replacement = harness.coordinator.acquireConsumer('analyzer');
+        expect(await editor.requestTempoEstimate()).toBeNull();
+        replacement.release();
         await harness.coordinator.dispose();
     });
 });

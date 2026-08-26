@@ -39,6 +39,8 @@ M3–M11 不建设 CI。下列命令当前均为本地门禁；正式证据要�
 | `npm run test:m10:integration` | Loudness/Complex 混合 shape、cache round-trip、exact cursor、stale/cancel/quota 与四卡持久化 |
 | `npm run test:e1:unit` | Editor JSON V1 初始工程、canonical round-trip、微秒规范化与 strict validator |
 | `npm run test:e1:integration` | playback/analysis lease、独立 IndexedDB、同/异歌草稿、原子导入和 quota 后内存保留 |
+| `npm run test:e2:unit` | Editor viewport/geometry、Tempo map、拍号/single-beat、BPM onset/autocorrelation 与 golden |
+| `npm run test:e2:integration` | Buffer retained PCM、tempo identity/stale、JSON viewport/tempo round-trip 与 coordinator 回归 |
 | `npm run test:docs` | 生命周期 frontmatter、内部链接和 21 项特征计数 |
 | `npm run test:harness` | 证明 deliberate failure 会非零退出 |
 | `npm run test:e2e` | 稳定 Chrome 的全部当前 E2E |
@@ -54,6 +56,7 @@ M3–M11 不建设 CI。下列命令当前均为本地门禁；正式证据要�
 | `npm run test:e2e:m11:edge` | 使用真实 Edge 执行 M11 专项 hardening 场景 |
 | `npm run test:e2e:m11` | 顺序执行真实 Chrome 与 Edge 的 M11 专项场景 |
 | `npm run test:e2e:e1` | Chrome Header/播放列表入口、“去编辑”、MusicBar 显隐、JSON picker、草稿冲突和刷新恢复 |
+| `npm run test:e2e:e2` | Chrome 波形、seek、wheel/right-pan/menu、tempo boundary、输入边界、恢复与多视口 geometry |
 | `npm run test:e2e:edge` | 使用真实 Edge 执行全部 M3–M11 E2E；缺失时明确 blocked |
 | `npm run build` | TypeScript project build 和 Vite production build |
 | `npm run eval:m3:provisional` | 在未提交工作树生成本地 provisional run |
@@ -76,6 +79,8 @@ M3–M11 不建设 CI。下列命令当前均为本地门禁；正式证据要�
 | `npm run eval:m11` | 只允许在干净 commit 上执行 M3–M11 38 步双浏览器 suite 并生成 canonical run |
 | `npm run eval:e1:provisional` | 在 dirty worktree 执行 E1 与 M3/M4/M6/M11 相邻回归并生成实现反馈 |
 | `npm run eval:e1` | 只允许在干净 commit 上执行 18 步 E1 canonical suite 并生成可登记证据 |
+| `npm run eval:e2:provisional` | 在 dirty worktree 执行 E2 与 E1/M3/M4/M6/M11 相邻回归并生成反馈 |
+| `npm run eval:e2` | 只允许在干净 commit 上执行 E2 canonical suite 并生成可登记证据 |
 
 ## 目录职责
 
@@ -108,6 +113,8 @@ M10 浏览器测试运行时生成 Git 忽略的 `m10-structures-v1.wav`，版�
 M11 专项浏览器测试在同一文件上分别运行真实 Chrome/Edge，覆盖三格式队列切换、Analyzer 结果与刷新恢复，键盘播放/进度/Analyzer seek、可见焦点、reduced motion、390/1024/1280/1920 几何、quota 后内存播放，以及 20 次 Home/Analyzer 生命周期中的 WebGL context 与 RAF 上界。`test:e2e:edge` 还会在 Edge 上执行 M3–M10 全部回归。OPFS handle 自动化与原生 OS picker 权限提示继续分开；当前候选的 Edge 原生权限与最终人工加固已由 owner 于 2026-08-26 签字，相关实现或浏览器变化后仍须重做人工矩阵。
 
 E1 Chrome 测试使用注入 picker 返回浏览器 OPFS `FileSystemFileHandle`，覆盖 Header 当前歌曲、播放列表指定歌曲、“去编辑”Tooltip、MusicBar 条件隐藏、repeat-one 控件、JSON 导出、刷新暂停恢复、异歌草稿冲突、无效导入隔离和空/无效路由。它不替代原生 OS picker、浏览器离页提示或 Edge；这些缺口按 Editor eval plan 留给 owner/E6 补偿门禁。
+
+E2 使用版本化 `editor-e2-tempo.v1.json` 锁定 60、100、128、127.5 BPM 与 silence/noise/ambiguous 低置信度输入；`fixtures:e2:golden` 同时生成 Git 忽略的 `artifacts/fixtures/editor-e2-tempo-100-v1.wav`。Chrome 场景覆盖波形、网格、游标三层 Canvas、共享 viewport、右键状态机、Tempo 边界与输入、自动估计竞态、刷新恢复和 1024/1280/1920 geometry；E3 标记仍未开放。
 
 2026-07-29，`project-owner` 按下列清单完成最新版稳定 Chrome 原生权限人工检查并确认通过。该签字不保存本地音频的文件名、路径、内容或 hash，也不替代 Edge 验证。
 

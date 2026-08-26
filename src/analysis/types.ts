@@ -294,16 +294,44 @@ export interface AnalysisCursorValueResult {
     value: ExactFeatureValue;
 }
 
+export interface TempoEstimateRequest {
+    kind: 'tempo-estimate';
+    requestId: string;
+    generation: number;
+    trackHash: TrackHash;
+    configHash: ConfigHash;
+}
+
+interface TempoEstimateResultBase {
+    kind: 'tempo-estimate-result';
+    requestId: string;
+    generation: number;
+    trackHash: TrackHash;
+    configHash: ConfigHash;
+    confidence: number;
+}
+
+export type TempoEstimateResult =
+    | (TempoEstimateResultBase & {
+        state: 'reliable';
+        bpm: number;
+    })
+    | (TempoEstimateResultBase & {
+        state: 'low-confidence';
+    });
+
 export type AnalysisWorkerRequest =
     | AnalysisJobRequest
     | AnalysisJobCancel
-    | AnalysisCursorValueRequest;
+    | AnalysisCursorValueRequest
+    | TempoEstimateRequest;
 
 export type AnalysisWorkerResponse =
     | AnalysisJobProgress
     | AnalysisJobResult
     | AnalysisJobError
-    | AnalysisCursorValueResult;
+    | AnalysisCursorValueResult
+    | TempoEstimateResult;
 
 export type AnalysisCacheState =
     | 'idle'

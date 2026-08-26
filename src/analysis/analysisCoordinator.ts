@@ -35,6 +35,7 @@ import {
     type AnalysisWorkerRequest,
     type AnalysisWorkerResponse,
     type FeatureId,
+    type TempoEstimateResult,
 } from './types';
 
 type AudioSessionStore = ReturnType<typeof useAudioSessionStore>;
@@ -67,7 +68,7 @@ export interface AnalysisConsumerLease {
         featureId: FeatureId,
         timeSeconds: number,
     ): Promise<AnalysisCursorValueResult | null>;
-    requestTempoEstimate(): Promise<null>;
+    requestTempoEstimate(): Promise<TempoEstimateResult | null>;
     getSeries(featureId: FeatureId): AnalysisSeries | null;
     subscribe(listener: AnalysisListener): () => void;
     release(): void;
@@ -78,6 +79,7 @@ export interface AnalysisCoordinatorOptions {
     createJobId?: () => string;
     copyYieldControl?: () => Promise<void>;
     cursorTimeoutMs?: number;
+    tempoTimeoutMs?: number;
 }
 
 export class AnalysisCoordinatorError extends Error {
@@ -132,6 +134,7 @@ export class AnalysisCoordinator {
     private readonly createJobId: () => string;
     private readonly copyYieldControl?: () => Promise<void>;
     private readonly cursorTimeoutMs: number;
+    private readonly tempoTimeoutMs: number;
     private readonly listeners = new Set<AnalysisListener>();
     private readonly series = new Map<FeatureId, AnalysisSeries>();
     private readonly cursorRequests = new Map<
@@ -143,6 +146,11 @@ export class AnalysisCoordinator {
         }
     >();
     private readonly unsubscribeEngine: () => void;
+    private tempoRequest: {
+        requestId: string;
+        resolve: (value: TempoEstimateResult | null) => void;
+        timeout: ReturnType<typeof setTimeout>;
+    } | null = null;
     private worker: AnalysisWorkerPort | null = null;
     private restoredCache: StoredAnalysisCache | null = null;
     private activeJob: {
@@ -179,6 +187,7 @@ export class AnalysisCoordinator {
             options.createJobId ?? (() => crypto.randomUUID());
         this.copyYieldControl = options.copyYieldControl;
         this.cursorTimeoutMs = options.cursorTimeoutMs ?? 5_000;
+        this.tempoTimeoutMs = options.tempoTimeoutMs ?? 15_000;
         this.store.setAnalysis(this.snapshot);
         this.unsubscribeEngine = this.engine.subscribe((playback) => {
             this.handlePlayback(playback);
@@ -325,6 +334,38 @@ export class AnalysisCoordinator {
         });
     }
 
+    requestTempoEstimate(): Promise<TempoEstimateResult | null> {
+        if (
+            this.disposed
+            || this.activeConsumer?.consumer !== 'editor'
+            || !this.activeJob
+            || !this.worker
+            || this.snapshot.state !== 'ready'
+            || !this.snapshot.trackHash
+            || !this.snapshot.configHash
+        ) {
+            return Promise.resolve(null);
+        }
+        this.resolveTempoRequest();
+        const requestId = this.createJobId();
+        return new Promise((resolve) => {
+            const timeout = setTimeout(() => {
+                if (this.tempoRequest?.requestId === requestId) {
+                    this.tempoRequest = null;
+                    resolve(null);
+                }
+            }, this.tempoTimeoutMs);
+            this.tempoRequest = { requestId, resolve, timeout };
+            this.worker?.postMessage({
+                kind: 'tempo-estimate',
+                requestId,
+                generation: this.snapshot.generation,
+                trackHash: this.snapshot.trackHash ?? '',
+                configHash: this.snapshot.configHash ?? '',
+            });
+        });
+    }
+
     getSeries(featureId: FeatureId): AnalysisSeries | null {
         return this.series.get(featureId) ?? null;
     }
@@ -348,6 +389,7 @@ export class AnalysisCoordinator {
         this.worker?.terminate();
         this.worker = null;
         this.resolveAllCursorRequests();
+        this.resolveTempoRequest();
         this.series.clear();
         this.publish({
             ...this.snapshot,
@@ -379,7 +421,9 @@ export class AnalysisCoordinator {
                 isCurrent()
                     ? this.requestCursorValue(featureId, timeSeconds)
                     : Promise.resolve(null),
-            requestTempoEstimate: () => Promise.resolve(null),
+            requestTempoEstimate: () => isCurrent()
+                ? this.requestTempoEstimate()
+                : Promise.resolve(null),
             getSeries: (featureId) =>
                 isCurrent() ? this.getSeries(featureId) : null,
             subscribe: (listener) => this.subscribe((snapshot) => {
@@ -615,6 +659,10 @@ export class AnalysisCoordinator {
             this.handleCursorResult(message);
             return;
         }
+        if (message.kind === 'tempo-estimate-result') {
+            this.handleTempoResult(message);
+            return;
+        }
         const active = this.activeJob;
         if (
             !active
@@ -704,6 +752,23 @@ export class AnalysisCoordinator {
         }
         clearTimeout(pending.timeout);
         this.cursorRequests.delete(result.featureId);
+        pending.resolve(result);
+    }
+
+    private handleTempoResult(result: TempoEstimateResult): void {
+        const pending = this.tempoRequest;
+        if (
+            !pending
+            || pending.requestId !== result.requestId
+            || result.generation !== this.snapshot.generation
+            || result.trackHash !== this.snapshot.trackHash
+            || result.configHash !== this.snapshot.configHash
+            || this.activeConsumer?.consumer !== 'editor'
+        ) {
+            return;
+        }
+        clearTimeout(pending.timeout);
+        this.tempoRequest = null;
         pending.resolve(result);
     }
 
@@ -847,6 +912,7 @@ export class AnalysisCoordinator {
         }
         this.activeJob = null;
         this.resolveAllCursorRequests();
+        this.resolveTempoRequest();
         if (this.snapshot.state === 'analyzing') {
             this.publish({
                 ...this.snapshot,
@@ -861,6 +927,13 @@ export class AnalysisCoordinator {
             pending.resolve(null);
         }
         this.cursorRequests.clear();
+    }
+
+    private resolveTempoRequest(): void {
+        if (!this.tempoRequest) return;
+        clearTimeout(this.tempoRequest.timeout);
+        this.tempoRequest.resolve(null);
+        this.tempoRequest = null;
     }
 
     private publishError(

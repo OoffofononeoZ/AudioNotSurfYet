@@ -1,6 +1,7 @@
 import {
     AnalysisWorkerCoreError,
     extractCursorValue,
+    extractTempoEstimate,
     responseTransferables,
     runAnalysisJob,
     type RetainedAnalysisPcm,
@@ -10,6 +11,7 @@ import type {
     AnalysisJobRequest,
     AnalysisWorkerRequest,
     AnalysisWorkerResponse,
+    TempoEstimateRequest,
 } from './types';
 
 interface WorkerScope {
@@ -23,6 +25,7 @@ let activeJob: { jobId: string; generation: number } | null = null;
 let retained: RetainedAnalysisPcm | null = null;
 let queue = Promise.resolve();
 const latestCursorRequest = new Map<string, string>();
+let latestTempoRequestId: string | null = null;
 
 const postError = (
     request: Pick<AnalysisJobRequest, 'jobId' | 'generation'>,
@@ -102,6 +105,21 @@ const cursorValue = (request: AnalysisCursorValueRequest) => {
     }
 };
 
+const tempoEstimate = (request: TempoEstimateRequest) => {
+    if (latestTempoRequestId !== request.requestId || !retained) return;
+    try {
+        const result = extractTempoEstimate(retained, request, {
+            isCancelled: () => latestTempoRequestId !== request.requestId,
+        });
+        if (result && latestTempoRequestId === request.requestId) {
+            workerScope.postMessage(result);
+        }
+    } catch {
+        // Tempo estimation is optional. Coordinator timeout/stale handling
+        // resolves failures to null without affecting analysis or playback.
+    }
+};
+
 workerScope.onmessage = (event) => {
     const request = event.data;
     if (!request || typeof request !== 'object') return;
@@ -122,9 +140,15 @@ workerScope.onmessage = (event) => {
         queue = queue.then(() => cursorValue(request));
         return;
     }
+    if (request.kind === 'tempo-estimate') {
+        latestTempoRequestId = request.requestId;
+        queue = queue.then(() => tempoEstimate(request));
+        return;
+    }
     if (request.kind === 'analyze') {
         const token = ++activeToken;
         retained = null;
+        latestTempoRequestId = null;
         queue = queue.then(() => analyze(request, token));
     }
 };
