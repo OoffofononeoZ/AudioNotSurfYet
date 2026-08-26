@@ -1,15 +1,20 @@
 ---
-status: approved
+status: in-review
 owner: "project-owner"
-last_reviewed: 2026-07-24
+last_reviewed: 2026-08-26
 upstream_docs:
   - "docs/product/problem-brief.md"
-next_action: "以批准范围为边界创建并评审 system design、接口契约、风险和 ADR"
+  - "docs/quality/release-readiness.md"
+next_action: "project-owner 审阅 Editor E0 首期范围、非目标与 E1–E6 顺序"
 ---
 
 # Scope
 
-## In Scope
+## Scope Boundary
+
+下列 Analyzer 范围已于 2026-07-24 获批，并由 M3–M11 与 Analyzer-only readiness 收口。Editor E0 是新增且独立待审阅的产品范围；它不能反向扩大 Analyzer 候选的证据，也不能在本文件重新获批前进入系统设计或实现。
+
+## Analyzer Scope（approved）
 
 ### Product capability
 
@@ -45,7 +50,7 @@ next_action: "以批准范围为边界创建并评审 system design、接口契�
 - 播放、切歌、跳转、选卡和换卡可用键盘完成；焦点可见，数据不只依靠颜色表达，并尊重 reduced motion。
 - 静态 SPA 运行于 HTTPS 或 localhost。
 
-## Delivery Slices
+## Analyzer Delivery Slices（complete）
 
 1. 产品意图和系统设计获批。
 2. 建立测试与合成音频 fixture。
@@ -57,17 +62,90 @@ next_action: "以批准范围为边界创建并评审 system design、接口契�
 
 每一切片必须通过其验收门禁后才能进入下一批特征；不使用未经估算的日历日期代替证据。
 
-## Out of Scope
+## Analyzer Out of Scope（historical boundary）
 
 - 麦克风或实时输入。
 - 远端 URL、云端音频、账户、上传、同步或服务端分析。
 - 长期本地曲库、多会话历史或跨设备恢复。
 - 可编辑的分析参数；首版只展示固定参数。
-- 音频编辑、导出、分享、协作或插件系统。
-- Editor、Visualizer 及其他尚未定义的空白 Tab。
+- 音频编辑、音频导出、分享、协作或插件系统。
+- Editor、Visualizer 及其他尚未定义的空白 Tab；Editor 后续只能按下述 E0 独立范围推进。
 - 移动端、非 Chromium 浏览器和非 Chromium 兼容层。
 - Analyzer 中新增 Three.js 依赖。
 - 在 release 阶段前决定正式托管商、生产 URL、发布监控或回滚方案。
+
+## Editor E0 Scope（in review）
+
+### Product capability
+
+- Editor 是对已有歌曲进行音符、音色和效果时间标注的“逆向制曲”工具；产物是单首歌曲的数据工程，不修改原始音频。
+- Header 的 Editor 入口打开当前歌曲；播放列表中每首可用歌曲提供语义化“去编辑”按钮和同名 Tooltip，并打开该指定歌曲。没有当前歌曲时进入可选择歌曲的空状态并保留 MusicBar，用于继续导入或选择歌曲。
+- 有有效歌曲时隐藏 MusicBar，Editor 顶部提供精简播放/暂停、时间和单曲循环；仍复用唯一 AudioEngine、播放时钟和当前歌曲资源。刷新恢复受自动播放限制时保持暂停但准备好循环；离开 Editor 后取消循环策略并恢复普通队列结束行为。
+- 页面底层承载歌曲信息、波形、tempo map、lane、inner class、点事件和范围事件；叠加层一次只显示一个现有 Meyda 特征，并与底层标记区域共享时间坐标。
+
+### Project file and draft
+
+- 首版使用带格式标识和 schema version 的本地 JSON 工程；导入、导出选择器展示全部已注册格式，因此首版只显示 JSON。
+- 工程绑定歌曲身份，并保存歌曲元数据、tempo map、lane、inner class、点/范围事件及必要工作区状态。文件名、字段和严格校验由后续接口契约确定，不沿用需求示例中的拼写错误。
+- 首版只保存一份 Editor 草稿。同一歌曲重新进入或刷新时恢复本地草稿；进入不同歌曲时必须先明确选择导出旧工程、覆盖旧草稿或取消，不能静默覆盖。
+- 普通页内离开提示允许“之后不再显示”，但不同歌曲的覆盖确认不可永久关闭。保存失败保留当前内存编辑并明确显示未持久化。
+- 无效 schema、歌曲不匹配、越界事件或导入失败不得覆盖当前草稿。
+
+### Timeline and tempo map
+
+- 顶部波形支持左键 seek、以指针为锚点的滚轮缩放和右键按住水平拖动；未形成拖动的空白右键打开自定义快速跳转菜单。
+- 只在 Editor 时间轴交互区域禁用原生 context menu、文本选择和原生拖拽，不全局破坏链接、表单、滚轮、键盘或辅助技术默认行为。
+- tempo map 初始包含歌曲开始和结束边界，并提供插入内部边界的加号手柄；每两个边界之间显示拍号与 BPM，默认提示为 `4/4 bpm: 100`。
+- 正常 BPM 支持 20–300 的整数和小数；最大值集中配置为 300。负数、非数字、非有限数和大于 300 均为输入错误。
+- `0 <= BPM < 20` 表示单拍区间：隐藏并禁用拍号，区间内不画 beat/measure 分隔线，并把整个区间作为一个可标记单元。
+- 正常区间以贯穿全部 lane 的细白线表示小节，以半透明细线表示 beat；与小节线重合的 beat 线不重复绘制。
+- 只有一个 tempo segment、BPM 仍为空且未被用户编辑时，允许内部 BPM 估计填入可靠结果；低置信度保持为空。首版不安装 BPM 包，未来引入依赖前必须单独获得 owner 批准。
+
+### Lanes and point events
+
+- 每个 lane 具有名称、点或范围行为类别和全部展开的 inner class；新 lane 默认只有一个 `default` inner class，inner class 区域不使用内部滚动条。
+- 点事件用于音符或短音色。基础精度为相邻 beat 的 1/16，并根据当前像素密度在 `1/16`、`1/8`、`1/4`、`1/2` 和 `1 beat` 中选择仍可可靠点击的最细网格。
+- 左键在候选格创建点事件，已有同 lane、同 inner class、同一吸附时间的点事件不重复创建；右键已有点事件删除。
+- 空格平时不创建大量 DOM；当前候选格在 hover/focus 时显示符合黑绿界面的边框和轻微放大反馈。标记本身必须可聚焦，并提供键盘创建、删除和移动候选位置。
+
+### Range events
+
+- 长音色和效果使用具有起点、终点的范围事件。第一次左键选择起点并进入待选中模式，只能向时间更晚的格子延伸；起点至鼠标位置显示待选中样式，第二次点击有效终点完成创建。
+- `Esc` 或待选模式下空白位置右键取消创建；非待选状态的空白右键打开快速跳转菜单；右键已有范围事件直接删除。
+- 起点和终点下方分别显示可水平拖动的箭头。创建和调整都沿用点事件的自适应网格；终点必须晚于起点，最短持续时间为一个当前网格单位，两个手柄不能互相穿越。
+- 同一 lane、同一 inner class 的范围事件不得重叠；不同 lane 或 inner class 可以重叠，点事件也可以位于范围事件内部。首版不自动合并、裁剪或自由时间拖动。
+
+### Analysis overlay
+
+- 左侧选择器一次只能选择累计 21 项中的一个特征；选择后收起，再次点击可更换。
+- 叠加图按相同 viewport 映射到标记区域，并以半透明方式显示。Canvas、说明和空白部分不接收指针，底层标记交互可穿透。
+- 仅特征选择器和调整上边界、整体垂直位置、下边界的三个手柄接收指针与键盘操作；工作区保存特征选择、位置和高度。
+
+### Support and accessibility
+
+- 输入继续限制为用户本地选择的 MP3、WAV、FLAC，目标单首时长约 15 分钟；不新增网络数据路径。
+- 首发验证最新稳定版 Chrome、Edge 桌面端及 1024、1280、1920 CSS px；Editor 不继承 Analyzer 的浏览器通过结论，必须形成自己的证据。
+- 播放、seek、zoom/pan、tempo 边界、点/范围事件、inner class、导入导出、右键菜单替代动作和叠加层调整必须具备键盘路径、可见焦点和 reduced-motion 语义。
+
+## Editor Delivery Slices（proposed）
+
+1. **E0 — Product intent**：批准 Editor 用户、问题、范围、指标、非目标和开放问题；本阶段不编码。
+2. **E1 — Entry, playback and project foundation**：路由、指定/当前歌曲、单曲循环、草稿，以及同时容纳点/范围事件的版本化 JSON 基础。
+3. **E2 — Timeline and tempo**：波形、共享视口、tempo map、网格与内部 BPM 估计。
+4. **E3 — Point annotation**：note 点事件、inner class、自适应精度、右键与键盘操作。
+5. **E4 — Analysis overlay**：单 Meyda 特征半透明叠加、垂直调整与时间坐标对齐。
+6. **E5 — Range annotation**：长音色/效果的创建、取消、端点调整、不重叠校验、删除和导入导出。
+7. **E6 — Final hardening**：Chrome/Edge、性能、资源、无障碍、错误恢复、多视口与 canonical evidence。
+
+E5 现为 `Planned`，不再因缺少核心交互而阻塞。若未来要求新的事件类别语义、自动合并、裁剪、同类重叠或自由时间精度，必须先重新评审产品与接口契约。
+
+## Editor Non-goals
+
+- 修改 PCM、剪切或拼接音频、混音、母带、生成伴奏、实时录音或导出重新编码的歌曲。
+- 多轨编曲、乐器演奏、插件宿主、自动生成完整标注或替代专业 DAW。
+- 远端上传、账户、云同步、协作、分享链接或跨设备工程库。
+- 首版 JSON 之外的工程格式；后续格式通过注册机制增量评审。
+- 移动端、非 Chromium 浏览器、生产托管和 Visualizer。
 
 ## Assumptions and Dependencies
 
@@ -77,12 +155,16 @@ next_action: "以批准范围为边界创建并评审 system design、接口契�
 - 需要保留 `queryPermission()` 和由用户手势触发的 `requestPermission()` 恢复路径。
 - 当前歌曲分析缓存若因大小或 quota 无法保存，刷新后允许重新计算，不要求降级成长期数据库。
 - 21 项特征的具体分组由交付计划管理，但不能改变“最终全部覆盖”和“首批三项”的批准范围。
+- Analyzer readiness 继续只覆盖现有 Analyzer 候选，不能证明 Editor 已设计、实现或可发布。
+- Editor E0 使用 owner 给出的聊天需求和 Git 忽略的 `docs/require/editor.txt` 作为输入；只有版本化产品文档是后续规范来源。
+- 点/范围事件的 JSON 字段、歌曲 identity、草稿数据库、右键状态机、BPM 算法和 renderer 数据流由产品意图获批后的架构阶段决定。
+- 任何新增依赖必须先说明用途、体积、许可与替代方案并获得 owner 明确批准。
 
 ## Approval Notes
 
 - Decision-maker：`project-owner`
-- Approved on：2026-07-24
-- Approval evidence：用户明确要求实现随请求给出的完整计划。
-- Change rule：目标用户、21 项覆盖、首批特征、浏览器/格式矩阵、本地数据边界或四卡共享时间轴发生实质变化时，本文件必须重新评审，并将 architecture、delivery、quality、release 标记为待复核。
+- Analyzer approved on：2026-07-24；M3–M11 与 Analyzer-only readiness 已完成。
+- Editor E0 status：`in-review`；2026-08-26 只获准进入产品意图并将需求转写入版本化文档，尚未获得范围批准。
+- Change rule：Editor E0 获批后，现有 architecture、delivery、quality 与 readiness 仍只对 Analyzer 历史范围有效；Editor 必须从 system design 开始建立并审批自己的下游覆盖。
 
 File System Access 行为依据：[Chrome File System Access 文档](https://developer.chrome.com/docs/capabilities/web-apis/file-system-access) 与 [持久权限说明](https://developer.chrome.com/blog/persistent-permissions-for-the-file-system-access-api)。

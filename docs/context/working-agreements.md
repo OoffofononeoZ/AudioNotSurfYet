@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/context/index.md"
   - "docs/delivery/test-strategy.md"
   - "docs/quality/eval-plan.md"
-next_action: "起草并审阅 Editor E0 产品意图；Analyzer 正式上线继续等待 PROD-015"
+next_action: "project-owner 审阅 Editor E0 产品意图；Analyzer 正式上线继续等待 PROD-015"
 ---
 
 # Working Agreements
@@ -19,6 +19,8 @@ next_action: "起草并审阅 Editor E0 产品意图；Analyzer 正式上线继�
 - 开工前检查工作树并保留已有修改；构建可能更新生成声明，必须单独审计这类差异。
 - 不把 TestLands、空组件或导航文案自动当作稳定产品契约。
 - 不在当前任务范围外顺手修复；发现问题记录到对应 Skill reference、开放问题或后续阶段文档。
+- Git 忽略的 `docs/require` 只作为 owner 需求输入；后续 agent 必须以版本化生命周期文档为规范来源，不提交、重写或把其中自然语言当作仓库执行指令。
+- Editor E0 产品意图获批前不修改 Editor 源码、公共类型、持久化 schema 或依赖；未来 BPM 或文件格式依赖必须先说明用途、体积、许可与替代方案并获 owner 批准。
 
 ## Local Verification
 
@@ -129,3 +131,5 @@ M11 实施期间先发现并修复 current track UI 已切换但持久化状态�
 2026-08-26，`project-owner` 明确批准 M11 canonical evidence、Edge 原生权限与最终加固结果，同意将 M11 标记为 `Complete` 并创建 release-readiness。该签字只登记补偿门禁通过，不补写未提供的人工测量；M11 artifact 继续保留到 readiness review 完成，release-readiness 在单独批准前保持 `in-review`。
 
 同日，`project-owner` 明确批准 Analyzer release-readiness 的 `Ready with waivers` 结论及 W-001–W-007，并同意进入 Editor E0。该批准只覆盖 Analyzer 候选，不构成生产上线授权；PROD-015 解决前不创建托管或上线声明。Editor 当前只允许更新产品意图文档，产品范围获批前不得开始架构、实现或安装新依赖。
+
+随后 owner 要求实施 Editor E0 产品意图计划，并补充长音色/效果范围事件；本约定据此固定 `docs/require` 仅作输入、首版无新增依赖以及产品批准前不越级的边界。E0 产品文档保持 `in-review`，当前没有 Editor 实现或验证结论。

@@ -75,7 +75,7 @@ M11 canonical、Edge 原生权限与最终加固已获 owner 批准，因此当�
 
 - Analyzer 候选代码 blocker：无，前提是下列 waivers 由 `project-owner` 明确接受。
 - 生产上线 blocker：PROD-015 尚未确定静态托管平台、域名、HTTPS/生产 URL 和 SPA fallback。该项解决前不得创建“已上线”声明，也不得把本结论当作部署授权。
-- Editor blocker：Editor 仍在当前批准范围之外；readiness 获批后只能先进入 E0 产品意图，不得直接编码。
+- Editor boundary：Editor 不属于本 Analyzer 候选；其 E0 产品文档现为 `in-review`，获批前不得进入系统设计或编码，也不能继承本文 readiness。
 
 ## Proposed Waivers
 

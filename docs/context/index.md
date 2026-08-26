@@ -4,23 +4,23 @@ owner: "project-owner"
 last_reviewed: 2026-08-26
 upstream_docs:
   - "AGENTS.md"
-next_action: "进入 Editor E0 产品意图评审；Analyzer 正式上线等待 PROD-015"
+next_action: "project-owner 审阅 in-review Editor E0 产品意图；Analyzer 上线等待 PROD-015"
 ---
 
 # Repository Context Index
 
 ## Purpose
 
-AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端：用户选择本地音频后，应用提供播放队列、元数据、进度与音量控制，并把实时能量用于 MusicBar 和背景可视化。已批准的产品方向是在这些基础上建设面向音频分析学习者的 Analyzer，把 Meyda 结果对应到歌曲具体时刻、听感和音色变化。
+AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端：用户选择本地音频后，应用提供播放队列、元数据、进度与音量控制，并把实时能量用于 MusicBar 和背景可视化。Analyzer 已完成 21/21 能力和有条件 readiness；Editor E0 正在提出把同一播放、时间轴和分析基础用于音符、音色与效果的“逆向制曲”标注。
 
 本目录维护仓库事实、边界和工作记忆；生命周期路由与通用方法由 [AGENTS.md](../../AGENTS.md) 负责。当前代码事实与目标架构必须区分：现状见 [system map](system-map.md)，批准的目标见 [system design](../architecture/system-design.md)。
 
 ## Current Stage
 
 - Repository context：入口、决策注册表、system map、glossary 与 working agreements 均已批准。
-- Product intent：现有 problem brief、scope 和 success metrics 只批准 Analyzer 范围；owner 已允许进入 Editor E0，但扩展后的产品意图尚未起草和批准。
-- System design：system design、接口契约、风险和五个 ADR 已批准。
-- Execution planning：execution plan、acceptance criteria、test strategy 和 milestone plan 均为 approved。
+- Product intent：problem brief、scope、success metrics 和 open questions 已加入 Editor E0 点/范围事件草案并保持 `in-review`，等待 owner 单独批准。
+- System design：现有 system design、接口契约、风险和五个 ADR 只批准 Analyzer 历史范围；Editor 产品意图获批前不复核或扩展。
+- Execution planning：现有 execution plan、acceptance criteria、test strategy 和 milestone plan 只覆盖已完成的 Analyzer M1–M11；Editor E1–E6 尚未进入 execution planning。
 - Quality and evals：M3–M11 的适用 canonical/人工证据均已获批准；M11 已于 2026-08-26 关闭。
 - Implementation：M1–M11 均为 `Complete`，Analyzer 21/21 delivery 已关闭。
 - Readiness、release、retrospective：Analyzer `release-readiness.md` 已获 `Ready with waivers` 批准；PROD-015 尚未解决，因此不创建上线声明或生产托管，Editor 也不继承该 readiness。
@@ -34,9 +34,9 @@ AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端：用户选择
 | [glossary.md](glossary.md) | 当前项目词汇与代码含义 | project-owner / approved | 术语、状态或类型含义变化 |
 | [decision-registry.md](decision-registry.md) | 产品、架构和交付决策入口 | project-owner / approved | 形成、撤销或替代重要决策 |
 | [working-agreements.md](working-agreements.md) | 本地开发、验证和 Git 约定 | project-owner / approved | 工具链或验证能力变化 |
-| [problem-brief.md](../product/problem-brief.md) | 目标用户、问题和期望结果 | project-owner / approved | 目标用户或核心问题变化 |
-| [scope.md](../product/scope.md) | 当前范围、纵向切片和非目标 | project-owner / approved | 能力、数据或兼容范围变化 |
-| [success-metrics.md](../product/success-metrics.md) | 正确性、同步、响应和学习指标 | project-owner / approved | 阈值、样本或观测方法变化 |
+| [problem-brief.md](../product/problem-brief.md) | Analyzer 历史意图与 Editor E0 用户、问题和结果草案 | project-owner / in-review | 目标用户或核心问题变化 |
+| [scope.md](../product/scope.md) | Analyzer 历史边界与 Editor E0 点/范围事件、E1–E6 和非目标 | project-owner / in-review | 能力、数据或兼容范围变化 |
+| [success-metrics.md](../product/success-metrics.md) | Analyzer 历史指标与 Editor E0 任务、正确性、响应和恢复指标 | project-owner / in-review | 阈值、样本或观测方法变化 |
 | [open-questions.md](../product/open-questions.md) | 非当前门禁问题与已关闭决策 | project-owner / in-review | 新能力进入范围或 release 开始 |
 | [system-design.md](../architecture/system-design.md) | 目标组件、数据流、失败和恢复 | project-owner / approved | 产品意图或核心系统边界变化 |
 | [interface-contracts.md](../architecture/interface-contracts.md) | 内部 TypeScript 和 Worker/存储契约 | project-owner / approved | 消息、schema、身份或失败语义变化 |
@@ -77,8 +77,8 @@ AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端：用户选择
 
 ## Lifecycle Entry Points
 
-- Product intent：[problem brief](../product/problem-brief.md)
-- System design：[system design](../architecture/system-design.md)
+- Product intent：[problem brief](../product/problem-brief.md)、[scope](../product/scope.md)、[success metrics](../product/success-metrics.md) 均为 Editor E0 `in-review`
+- System design：[system design](../architecture/system-design.md) 当前只覆盖 Analyzer；Editor E0 产品意图获批前不得扩展
 - Delivery planning：[execution plan](../delivery/execution-plan.md)
 - Quality design：[eval plan](../quality/eval-plan.md)，Q0 批准后用于 M3–M11 证据
 - Quality evidence：[evidence index](../quality/evidence-index.md)，M3–M11 已批准
@@ -95,6 +95,8 @@ AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端：用户选择
 - 超出约 15 分钟支持边界的长音频未开始播放只作为非门禁压力观察；它不表示长音频被规定为必须失败，也不改变当前产品范围。
 - M11 clean canonical 已在 Chrome/Edge 上 38/38 通过，其中 Edge 全量为 31/31；原生 Edge 权限、辅助技术与人工长会话补偿门禁已于 2026-08-26 获 owner 签字，M11 为 `Complete`。
 - Analyzer readiness 已于 2026-08-26 获 owner 有条件批准；正式托管平台、域名、SPA fallback 和生产 URL 尚未决定，继续阻断正式上线。
+- 当前代码中的 Header Editor 和播放列表加号仍指向占位/Analyzer 旧行为；E0 仅定义意图，尚无 Editor 路由、工程、草稿、点/范围事件或叠加层实现。
+- Editor E5 已因 owner 补充范围事件创建、取消、吸附与不重叠规则而从 blocked 变为 proposed `Planned`，但 E1–E6 均须等待产品、架构和 delivery 门禁。
 - 详细 context 文档的长期 owner/review cadence 尚未全部统一；代码改动时必须同步修正事实。
 - 工程事实差异继续记录在 [Skill 项目差异](../../skills/audio-visualizer-dev/references/99-open-questions-and-project-deltas.md)，产品开放项见 [open questions](../product/open-questions.md)。
 
@@ -149,3 +151,5 @@ M11 canonical run `M11-2026-08-25T10-05-12-783Z-99c67792` 随后在 clean commit
 2026-08-26，`project-owner` 明确回复：“我批准 M11 canonical evidence、Edge 原生权限与最终加固结果；同意将 M11 标记为 Complete 并创建 release-readiness。”M11 evidence 据此改为 `approved`，M11 改为 `Complete`。本批准只开放 Analyzer readiness review，不预先接受其豁免，也不构成生产上线授权。
 
 同日，`project-owner` 明确回复：“我批准 Analyzer release-readiness 的有条件就绪结论及所列豁免；同意进入 Editor E0，Analyzer 正式上线继续等待托管方案。”Analyzer readiness 据此改为 `approved`，W-001–W-007 获接受。该批准只覆盖既有 Analyzer 候选；PROD-015 继续阻断上线，Editor 只进入产品意图阶段。
+
+随后 owner 要求把 Editor 定义为对已有歌曲进行点/范围时间标注的“逆向制曲”工具，并补充长音色/效果的两次点击创建、端点手柄和右键删除；owner 又确认同类不重叠、`Esc`/空白右键取消及端点沿用自适应网格。本轮只把这些内容写入 `in-review` 产品文档，不改变当前代码事实，也不开放 Editor system design。

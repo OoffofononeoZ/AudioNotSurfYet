@@ -1,14 +1,16 @@
 ---
-status: approved
+status: in-review
 owner: "project-owner"
 last_reviewed: 2026-08-26
 upstream_docs:
   - "docs/product/problem-brief.md"
   - "docs/product/scope.md"
-next_action: "M11 已形成阈值证据；在 Analyzer release-readiness 中审阅外推限制"
+next_action: "project-owner 审阅 Editor E0 任务、正确性、响应和恢复指标"
 ---
 
 # Success Metrics
+
+Analyzer 指标已由 M3–M11 和 Analyzer-only readiness 形成历史证据。下列新增 Editor 指标保持 `in-review`，只能驱动后续 Editor 架构、验收和 eval，不得反向表述为现有代码已经达到。
 
 ## Product and Learning Outcomes
 
@@ -45,8 +47,40 @@ owner-only 学习验证是当前批准方式，不推断为广泛用户研究结
 - MP3、WAV、FLAC 的同源 fixture 在最新稳定版 Chrome 和 Edge 桌面端完成加载、播放和首批分析。
 - 在 1024、1280、1920 CSS px 验证真实几何、Canvas 像素尺寸与核心控件可用性。
 - 播放、切歌、跳转、选卡和换卡均可用键盘完成，焦点可见，图表结论不只依靠颜色，reduced motion 下无非必要动画。
-- 当前环境没有真实 Edge 证据时，状态必须写为“Chrome 已验证、Edge 待验证”，不得宣称浏览器矩阵全部完成。
+- Analyzer 已在真实 Chrome/Edge 形成 M11 证据；Editor 的路由、草稿、标记和右键交互变化后必须重新执行自己的双浏览器矩阵，不得继承 Analyzer 通过状态。
+
+## Editor E0 Product Outcomes（in review）
+
+| Metric | Target | Observation method | Review point |
+| --- | --- | --- | --- |
+| 正确歌曲进入 | Header 进入当前歌曲；播放列表“去编辑”进入指定歌曲；无歌曲显示明确空状态 | Chrome/Edge 路由任务记录目标 track identity、页面状态和是否误切歌曲 | E1 |
+| 点标记任务 | owner 能建立 lane/inner class，并完成点事件创建、重复阻止、删除和自适应网格定位 | 使用固定 tempo fixture，在多种 zoom 下逐项执行鼠标与键盘脚本 | E3、E6 |
+| 范围标记任务 | owner 能完成创建、取消、调整、删除；同 lane/inner class 重叠被阻止，其他分类允许并存 | 使用包含相邻、重叠、最短单位和边界区间的任务脚本 | E5、E6 |
+| 工程 round-trip | JSON 导出再导入后，歌曲身份、tempo、分类、点/范围事件和工作区语义一致 | codec golden、严格 validator 与浏览器导入导出任务 | E1、E5、E6 |
+| 草稿保护 | 同歌刷新/重进恢复；异歌进入不会静默覆盖；保存失败不丢当前内存编辑 | IndexedDB 集成测试、quota/transaction 故障和浏览器离开/覆盖任务 | E1、E6 |
+| 分析辅助可用 | owner 能选择一个特征，并用对齐图表辅助定位至少一个点事件和一个范围事件 | 预写音频片段、标记答案窗口和 owner 任务记录 | E4、E6 |
+
+首版只验证 owner 能否完成逆向标注任务，不声称 Editor 能自动识别全部音符、效果或替代专业制曲流程。
+
+## Editor Correctness and Interaction Guardrails
+
+| Metric | Target | Observation method |
+| --- | --- | --- |
+| 时间几何对齐 | 波形、tempo 网格、点/范围事件与 Meyda 叠加层使用同一时间映射，目标误差不超过 1 CSS px | 对固定时间点读取各层真实 DOM/Canvas 几何，覆盖 zoom、pan、DPR 和多视口 |
+| 播放与 seek 同步 | 页内播放、循环、波形/标记跳转后的可见游标相对 AudioContext 基准不超过 100ms | 真实 Chrome/Edge 计时，覆盖暂停、区间尾、刷新和离页恢复 |
+| 点事件唯一性 | 同 lane、inner class 和吸附时间只存在一个点事件 | 纯函数、导入校验和交互重复创建测试 |
+| 范围有效性 | `end > start`，最短一个当前网格单位；同 lane/inner class 范围不重叠，手柄不穿越 | 创建、拖动、导入及 viewport 精度变化的边界测试 |
+| 导入安全 | 未知 schema、歌曲不匹配、重复 ID、越界/重叠事件或无效 tempo 不覆盖当前工程 | validator、repository 事务故障和浏览器错误提示测试 |
+| BPM 输入边界 | `20–300` 支持整数/小数；`0 <= BPM < 20` 进入单拍模式；负数、非数字、非有限数和大于 300 被拒绝 | tempo 纯函数与表单边界测试；自动估计覆盖可靠和低置信度输入 |
+
+## Editor Responsiveness, Reliability and Accessibility
+
+- 分析或大规模标记期间，核心输入的可见反馈保持在 100ms 内；不产生可归因于 Editor/分析计算、单任务超过 50ms 的主线程长任务。
+- 同时保持一个实时 AudioContext、一个播放时钟和按需的单个产品分析 Worker；20 次进入/离开、换歌和 overlay 切换不出现资源单调累积。
+- 在 1024、1280、1920 CSS px、DPR 和 reduced motion 下验证波形、tempo、全部 inner class、点/范围事件与叠加手柄的可用性。
+- 播放、seek、zoom/pan、tempo、点/范围事件、导入导出、自定义右键菜单替代动作和 overlay 调整均提供键盘路径、可见焦点与非纯颜色状态。
+- Chrome/Edge 均覆盖成功、失败、边界和异常路径；原生文件选择或浏览器离页提示不能完全自动化时，必须登记残余风险与 owner 补偿检查。
 
 ## Approval Record
 
-上述目标和阈值由 `project-owner` 于 2026-07-24 随产品计划一并批准。delivery 文档负责定义样本、步骤、容差和证据位置；quality 阶段只有在这些证据存在后才能判断 release readiness。
+Analyzer 目标和阈值由 `project-owner` 于 2026-07-24 批准，并已由 Analyzer-only readiness 收口。Editor 指标于 2026-08-26 随 E0 需求转写进入 `in-review`；owner 单独批准前不生效，也不允许创建 Editor system design。获批后，delivery 文档再定义 fixture、步骤和容差，quality 阶段只在成功、失败、边界与异常证据齐全后判断 Editor readiness。

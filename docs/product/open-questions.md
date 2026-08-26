@@ -6,7 +6,7 @@ upstream_docs:
   - "docs/product/problem-brief.md"
   - "docs/product/scope.md"
   - "docs/product/success-metrics.md"
-next_action: "审阅 readiness 中的 PROD-015 部署 blocker；获批后进入 Editor E0 处理 PROD-014"
+next_action: "project-owner 审阅 Editor E0 产品意图；PROD-015 继续阻断 Analyzer 正式上线"
 ---
 
 # Open Questions
@@ -16,11 +16,14 @@ next_action: "审阅 readiness 中的 PROD-015 部署 blocker；获批后进入 
 | ID | Question | Why it remains open | Impact | Blocks current next stage? | Owner | Revisit trigger |
 | --- | --- | --- | --- | --- | --- | --- |
 | PROD-013 | 未来是否提供上传、云端处理、账户或跨设备同步？ | 当前只批准浏览器本地处理；未来能力尚无目标用户、隐私或服务设计 | 若进入范围，将改变产品数据边界、架构、合规和发布要求 | 否 | project-owner | 提议任何远端音频或账户能力时 |
-| PROD-014 | Visualizer、Editor 和其他空白 Tab 分别解决什么用户问题？ | 当前没有已批准用例，继续推断会造成范围漂移 | 未来产品范围、导航和架构 | 否 | project-owner | 任一 Tab 被提议进入交付时 |
-| PROD-015 | 正式发布使用哪个静态托管平台、域名和 SPA fallback 配置？ | 当前只要求 HTTPS 或 localhost，托管选择属于 release 准备 | 部署、监控、回滚和运行配置 | 不阻断 Analyzer readiness review；会阻断正式上线 | project-owner | readiness 获批后若开始 release and feedback |
+| PROD-014 | Visualizer 和其他未定义空白 Tab 分别解决什么用户问题？ | Editor 问题已进入 E0；其余 Tab 仍没有已批准用例，继续推断会造成范围漂移 | 未来产品范围、导航和架构 | 否 | project-owner | 任一未定义 Tab 被提议进入交付时 |
+| PROD-015 | 正式发布使用哪个静态托管平台、域名和 SPA fallback 配置？ | Analyzer readiness 已获有条件批准，但当前只要求 HTTPS 或 localhost，尚无生产托管决策 | 部署、监控、回滚和运行配置 | 不阻断 Editor E0；继续阻断 Analyzer 正式上线 | project-owner | owner 决定开始 release and feedback 时 |
 | PROD-016 | 是否需要在 owner-only 验证之外证明普遍学习效果？ | 当前成功标准只由 owner 对 3/3 黄金片段验证 | 用户研究样本、测量设计和对外表述 | 否 | project-owner | 需要对外声称学习效果或扩大目标人群时 |
+| PROD-017 | Editor 何时需要 JSON 之外的工程格式？ | 首版选择器只展示已注册的 JSON；当前没有第二种格式的用户任务或交换对象 | codec 注册、导入导出 UI、兼容与测试矩阵 | 否 | project-owner | 出现明确的外部工具交换格式或用户任务时 |
+| PROD-018 | 内部 BPM 估计不足时是否引入第三方依赖？ | owner 要求安装前先审批；目前尚无内部算法及准确性证据 | 包体、许可、精度、Worker 和 fixture | 否；E2 先实现并评估内部估计 | project-owner | E2 golden 证明内部估计达不到批准阈值时 |
+| PROD-019 | 是否增加同类范围重叠、自动合并、裁剪或自由时间精度？ | 首版已选择同类不重叠、自适应网格和无自动合并；更复杂语义尚无任务证据 | RangeEvent 数据语义、编辑状态机和兼容性 | 否 | project-owner | 用户提出具体复合效果或非节拍事件任务时 |
 
-## Closed in This Review
+## Closed in Prior Reviews
 
 | ID | Decision | Resolution |
 | --- | --- | --- |
@@ -37,6 +40,13 @@ next_action: "审阅 readiness 中的 PROD-015 部署 blocker；获批后进入 
 | PROD-011 | 当前运行环境 | 静态 SPA 运行在 HTTPS 或 localhost；正式托管延后到 release 阶段 |
 | PROD-012 | Analyzer 核心任务 | 学习和比较；最终覆盖 21 项，首批 RMS、Amplitude Spectrum、Chroma |
 
+## Editor E0 Decisions Pending Approval
+
+| ID | Proposed decision | Status |
+| --- | --- | --- |
+| PROD-014E | Editor 定义为对已有歌曲进行点/范围时间标注的“逆向制曲”工具，不修改音频 | `in-review` |
+| PROD-020 | 范围事件以两次左键选择严格向后的起止位置；`Esc`/空白右键取消；端点沿自适应网格；同 lane/inner class 不重叠，不自动合并 | `in-review` |
+
 ## Gate State
 
-本轮没有阻断 system design 的开放产品问题。任何开放问题被提议进入当前范围时，必须先更新并重新批准 [problem brief](problem-brief.md)、[scope](scope.md) 或 [success metrics](success-metrics.md)，然后复核下游文档。
+Analyzer-only readiness 已获批准，但 PROD-015 继续阻断正式上线。Editor E0 的 [problem brief](problem-brief.md)、[scope](scope.md) 和 [success metrics](success-metrics.md) 均为 `in-review`，因此 Editor system design、实现、依赖安装与 release 均未开放。E0 获批后，现有 Analyzer architecture、delivery、quality 与 readiness 继续作为历史范围证据；Editor 必须从 system design 开始建立自己的下游文档和审批。
