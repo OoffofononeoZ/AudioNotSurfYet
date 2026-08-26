@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/product/scope.md"
   - "docs/architecture/system-design.md"
   - "docs/delivery/execution-plan.md"
-next_action: "project-owner 审阅 Editor E1–E6 四份 delivery 文档；获批前不开始 E1"
+next_action: "按已批准 Editor delivery 实施 E1；clean canonical 与 owner evidence 批准前不开放 E2"
 ---
 
 # Decision Registry
@@ -49,6 +49,7 @@ next_action: "project-owner 审阅 Editor E1–E6 四份 delivery 文档；获�
 | DEC-022 | 2026-08-26 | 批准 Analyzer `Ready with waivers`，接受 W-001–W-007 并进入 Editor E0 产品意图；Analyzer 正式上线继续等待 PROD-015 | project-owner | approved | [Release readiness](../quality/release-readiness.md) | 候选身份、豁免条件、托管方案或 Editor 范围改变 |
 | DEC-023 | 2026-08-26 | Editor E0 是单曲“逆向制曲”标注：首版本地 JSON、点事件和范围事件、tempo map、单特征叠加及 E1–E6；同 lane/inner class 范围不重叠 | project-owner | approved | [Scope](../product/scope.md) | 事件语义、数据边界、格式、依赖或里程碑改变 |
 | DEC-024 | 2026-08-26 | Editor E6 固定验证 10,000 个事件；overlay 默认高度 35%、最小 12%；E1–E6 每个里程碑都必须独立 provisional、clean canonical 和 owner 审批 | project-owner | approved | [Editor execution plan](../delivery/editor/execution-plan.md) | 容量门禁、overlay 默认值、证据节奏或逐里程碑审批改变 |
+| DEC-025 | 2026-08-26 | 批准 Editor E1–E6 delivery planning 并只开放 E1；E2–E6 继续逐里程碑等待 canonical 与 owner evidence 审批 | project-owner | approved | [Editor milestone plan](../delivery/editor/milestone-plan.md) | E1 范围、里程碑顺序或 evidence 门禁改变 |
 
 ## Approval Evidence
 
@@ -111,6 +112,8 @@ M11 clean canonical `M11-2026-08-25T10-05-12-783Z-99c67792` 随后在真实 Chro
 随后 ADR-0006–0009 与 Editor project/interaction 子契约按已批准产品范围进入评审：它们分别固定 runtime lease、JSON/草稿、秒数/tempo/event 和 overlay renderer 边界。`project-owner` 于 2026-08-26 明确回复：“我批准 Editor E0 系统设计、接口契约、风险与 ADR；同意进入 Editor E1–E6 execution planning。”上述 ADR 与架构契约据此获批；R-022–R-027 继续为 `Open`，execution planning 已开放，但 E1 代码仍保持关闭。
 
 同次 delivery planning 请求中，owner 固定 E6 10,000 事件容量门禁、overlay 默认 35%/最小 12%，并要求 E1–E6 各自运行 provisional、clean canonical 与 owner 审批；DEC-024 据此生效。四份 Editor delivery 文档仍为 `in-review`，DEC-024 不构成 E1 开工授权。
+
+随后 `project-owner` 明确回复：“我批准 Editor E1–E6 execution plan、acceptance criteria、test strategy 与 milestone plan；同意开始 E1。”DEC-025 据此生效，四份 Editor delivery 文档改为 `approved`，E0-D 改为 `Complete`、E1 改为 `In Progress`。该决定不构成 E1 功能、canonical 或风险缓解证据，也不开放 E2。
 
 ## Historical Evidence Gap
 

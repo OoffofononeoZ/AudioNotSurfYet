@@ -10,7 +10,7 @@
 | `MusicBar.vue` | CSS conic-gradient + GSAP | 三种外形/灯带样式、进度和信息跑马灯 |
 | `AnimatedList.vue` | GSAP | 列表进入、选择和滚动可见性动画 |
 
-`threeDTable.vue` 仍是试验表面；`MeydaCard.vue` 已是 Analyzer 21 项 Canvas/DOM renderer 容器。Editor 的已批准 ADR-0009 计划抽取纯 renderer/data 能力，四份 delivery 文档现为 `in-review`；不得推断 overlay adapter 已存在或 E4 已开放。
+`threeDTable.vue` 仍是试验表面；`MeydaCard.vue` 已是 Analyzer 21 项 Canvas/DOM renderer 容器。Editor ADR-0009 与 delivery 已批准，但 overlay adapter 属于仍为 `Planned` 的 E4；不得从 E1 开放推断它已经存在。
 
 ## RAF 与 Observer
 

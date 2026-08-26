@@ -1,12 +1,12 @@
 ---
-status: in-review
+status: approved
 owner: "project-owner"
 last_reviewed: 2026-08-26
 upstream_docs:
   - "docs/delivery/editor/execution-plan.md"
   - "docs/delivery/editor/acceptance-criteria.md"
   - "docs/delivery/editor/test-strategy.md"
-next_action: "project-owner 审阅 E1–E6 顺序和退出门禁；批准后只开放 E1"
+next_action: "完成 E1 实现、provisional、clean canonical 和 owner evidence 审批；E2 保持 Planned"
 ---
 
 # Editor E1–E6 Milestone Plan
@@ -25,8 +25,8 @@ next_action: "project-owner 审阅 E1–E6 顺序和退出门禁；批准后只�
 | --- | --- | --- | --- | --- | --- | --- |
 | E0-P | Product intent | Complete | Analyzer readiness approval | 用户、逆向制曲问题、点/范围事件、指标、非目标和开放问题 | product docs approved；DEC-023/PROD-014E/PROD-020 生效 | project-owner |
 | E0-A | System design | Complete | E0-P | runtime lease、JSON/draft、time/event、overlay、风险与 ADR | system design/contracts/R-022–R-027/ADR-0006–0009 approved | project-owner |
-| E0-D | Execution planning | In Review | E0-A | Editor 专属 execution plan、AC、test strategy、milestone plan | 四份文档批准；E1 明确开放 | project-owner |
-| E1 | Entry, playback and project foundation | Planned | E0-D | 路由、当前/指定歌曲、repeat lease、JSON V1、单草稿、导入导出和恢复保护 | E1 tests + provisional + clean canonical + owner approval | project-owner |
+| E0-D | Execution planning | Complete | E0-A | Editor 专属 execution plan、AC、test strategy、milestone plan | 四份文档于 2026-08-26 获批；E1 明确开放 | project-owner |
+| E1 | Entry, playback and project foundation | In Progress | E0-D | 路由、当前/指定歌曲、repeat lease、JSON V1、单草稿、导入导出和恢复保护 | E1 tests + provisional + clean canonical + owner approval | project-owner |
 | E2 | Timeline and tempo | Planned | E1 | 波形、共享 viewport、tempo map、grid 与 BPM estimator | geometry/BPM/Chrome evidence + canonical + owner approval | project-owner |
 | E3 | Point annotation | Planned | E2 | point lane、inner class、自适应网格、鼠标/右键/键盘 | point task + performance/accessibility + canonical + owner approval | project-owner |
 | E4 | Analysis overlay | Planned | E3 | 21 项单选纯 renderer overlay、三手柄和 pointer-through | renderer/geometry/isolation + canonical + owner approval | project-owner |
@@ -37,11 +37,11 @@ next_action: "project-owner 审阅 E1–E6 顺序和退出门禁；批准后只�
 
 ### E0-D — Current Gate
 
-- [ ] 四份 Editor delivery 文档均为 `approved`。
-- [ ] E1–E6 的 AC、risk、test 和 evidence cadence 可追溯。
-- [ ] 10,000 事件、overlay 35%/12% 与每里程碑独立 canonical/owner approval 已固定。
-- [ ] 明确当前命令和 Editor 代码尚不存在。
-- [ ] owner 只开放 E1，E2–E6 保持 `Planned`。
+- [x] 四份 Editor delivery 文档均为 `approved`。
+- [x] E1–E6 的 AC、risk、test 和 evidence cadence 可追溯。
+- [x] 10,000 事件、overlay 35%/12% 与每里程碑独立 canonical/owner approval 已固定。
+- [x] 批准时 Editor 命令和代码尚不存在。
+- [x] owner 只开放 E1，E2–E6 保持 `Planned`。
 
 ### E1
 
@@ -101,10 +101,15 @@ next_action: "project-owner 审阅 E1–E6 顺序和退出门禁；批准后只�
 
 - E0-P：`Complete`。
 - E0-A：`Complete`。
-- E0-D：`In Review`。
-- E1–E6：`Planned`，尚未开放代码实现。
-- 当前唯一下一门禁：owner 批准四份 Editor delivery 文档并明确同意开始 E1。
+- E0-D：`Complete`。
+- E1：`In Progress`。
+- E2–E6：`Planned`。
+- 当前唯一下一门禁：E1 专项测试、provisional、clean canonical、人工任务与 owner evidence 批准。
 
-建议批准语句：
+## 6. Delivery Approval
+
+`project-owner` 于 2026-08-26 明确回复：
 
 `我批准 Editor E1–E6 execution plan、acceptance criteria、test strategy 与 milestone plan；同意开始 E1。`
+
+该批准使 E0-D `Complete`、E1 `In Progress`；不构成 E1 evidence 通过，也不开放 E2。

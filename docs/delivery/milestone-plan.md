@@ -6,14 +6,14 @@ upstream_docs:
   - "docs/delivery/execution-plan.md"
   - "docs/delivery/acceptance-criteria.md"
   - "docs/delivery/test-strategy.md"
-next_action: "保留 Analyzer 历史里程碑；审阅独立 Editor E1–E6 milestone plan"
+next_action: "保留 Analyzer 历史里程碑；E1 由已批准 Editor milestone plan 管理"
 ---
 
 # Milestone Plan
 
 ## Scope Routing
 
-本文保留 Analyzer M1–M11 的已批准历史状态；Analyzer readiness 已另行获批为 `Ready with waivers`。Editor 的 E0-D 与 E1–E6 状态由独立 [Editor milestone plan](editor/milestone-plan.md) 管理，并链接专属 [execution plan](editor/execution-plan.md)、[acceptance criteria](editor/acceptance-criteria.md) 和 [test strategy](editor/test-strategy.md)。Editor planning 当前为 `in-review`，E1 尚未开放。
+本文保留 Analyzer M1–M11 的已批准历史状态；Analyzer readiness 已另行获批为 `Ready with waivers`。Editor 的 E0-D 与 E1–E6 状态由已批准的 [Editor milestone plan](editor/milestone-plan.md) 管理，并链接专属 [execution plan](editor/execution-plan.md)、[acceptance criteria](editor/acceptance-criteria.md) 和 [test strategy](editor/test-strategy.md)。E0-D 已完成，E1 正在实施。
 
 ## Planning Convention
 

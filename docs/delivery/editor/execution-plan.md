@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: approved
 owner: "project-owner"
 last_reviewed: 2026-08-26
 upstream_docs:
@@ -10,7 +10,7 @@ upstream_docs:
   - "docs/architecture/risk-register.md"
   - "docs/architecture/editor/project-format-v1.md"
   - "docs/architecture/editor/interaction-contracts.md"
-next_action: "project-owner 审阅 E1–E6 切片、固定参数与逐里程碑证据节奏；批准前不开始 E1"
+next_action: "实施 E1 路由、runtime lease、JSON V1 与独立草稿；E2 保持 Planned"
 ---
 
 # Editor E1–E6 Execution Plan
@@ -19,7 +19,7 @@ next_action: "project-owner 审阅 E1–E6 切片、固定参数与逐里程碑�
 
 把已批准的 Editor“逆向制曲”架构按 E1–E6 纵向切片交付：先建立正确歌曲入口、单引擎循环和安全工程基础，再增加时间轴、点标注、分析叠加、范围标注，最后完成双浏览器与大规模事件加固。
 
-本计划只覆盖 Editor，不重新打开已完成的 Analyzer M1–M11、canonical evidence 或 Analyzer-only readiness。本文仍为 `in-review`；获批前不得开始 E1、修改源码、安装依赖或创建 Editor quality evidence。
+本计划只覆盖 Editor，不重新打开已完成的 Analyzer M1–M11、canonical evidence 或 Analyzer-only readiness。`project-owner` 于 2026-08-26 明确批准本计划、acceptance criteria、test strategy 与 milestone plan，并同意开始 E1；该批准只开放 E1，E2–E6 仍须逐里程碑门禁。
 
 ## 2. Delivery Principles
 
@@ -169,13 +169,13 @@ npm run eval:eN
 
 ## 7. Plan Approval
 
-本文件为 `in-review`。`project-owner` 批准下列四份 Editor delivery 文档前，E1 保持关闭：
+下列四份 Editor delivery 文档已于 2026-08-26 获 `project-owner` 批准：
 
 - [execution plan](execution-plan.md)
 - [acceptance criteria](acceptance-criteria.md)
 - [test strategy](test-strategy.md)
 - [milestone plan](milestone-plan.md)
 
-建议批准语句：
-
 `我批准 Editor E1–E6 execution plan、acceptance criteria、test strategy 与 milestone plan；同意开始 E1。`
+
+该批准只开放 E1；E1 canonical 和 owner evidence 批准前，E2–E6 保持 `Planned`。

@@ -9,14 +9,14 @@ upstream_docs:
   - "docs/architecture/system-design.md"
   - "docs/architecture/interface-contracts.md"
   - "docs/architecture/risk-register.md"
-next_action: "保留 Analyzer 历史交付状态；Editor 实施顺序由 in-review 专属 execution plan 管理"
+next_action: "保留 Analyzer 历史交付状态；按已批准 Editor 专属计划实施 E1"
 ---
 
 # Execution Plan
 
 ## Scope Routing
 
-本文保留 Analyzer M1–M11 的已批准历史交付记录。Editor 不修改这些里程碑；其 E1–E6 实施顺序由 [Editor execution plan](editor/execution-plan.md) 管理，并与专属 [acceptance criteria](editor/acceptance-criteria.md)、[test strategy](editor/test-strategy.md) 和 [milestone plan](editor/milestone-plan.md) 共同保持 `in-review`。四份 Editor 文档获批前不开放 E1。
+本文保留 Analyzer M1–M11 的已批准历史交付记录。Editor 不修改这些里程碑；其 E1–E6 实施顺序由已批准的 [Editor execution plan](editor/execution-plan.md) 管理，并与专属 [acceptance criteria](editor/acceptance-criteria.md)、[test strategy](editor/test-strategy.md) 和 [milestone plan](editor/milestone-plan.md) 配套。E1 已开放，E2–E6 保持 `Planned`。
 
 ## 1. Delivery Outcome
 

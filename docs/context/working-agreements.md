@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/context/index.md"
   - "docs/delivery/test-strategy.md"
   - "docs/quality/eval-plan.md"
-next_action: "project-owner 审阅 Editor E1–E6 四份 delivery 文档；获批前不编码或安装新依赖"
+next_action: "实施并验证 Editor E1；不安装新依赖，E2 保持 Planned"
 ---
 
 # Working Agreements
@@ -137,3 +137,5 @@ M11 实施期间先发现并修复 current track UI 已切换但持久化状态�
 2026-08-26，`project-owner` 明确批准 Editor E0 产品意图、点/范围事件规则、成功指标和开放问题，并同意进入 Editor E0 架构设计。随后 owner 明确回复：“我批准 Editor E0 系统设计、接口契约、风险与 ADR；同意进入 Editor E1–E6 execution planning。”Editor system design、interface contracts、project/interaction 子契约和 ADR-0006–0009 据此为 `approved`，R-022–R-027 仍为 `Open`。当前只允许创建 Editor delivery planning；该批文档获批前不编码、不安装新依赖、不创建 Editor quality evidence。
 
 Editor delivery planning 现固定每个 E1–E6 都按专项测试、dirty provisional、实现提交、clean canonical、evidence 登记和 owner 审批依次关闭；前一里程碑未批准时不得开放下一里程碑。E6 使用运行时生成的 10,000 事件压力工程，不能把该数值写成 schema 硬上限。Editor 测试命令、fixture 和 quality evidence 只在 planning 获批并进入对应实现里程碑后创建。
+
+同日，`project-owner` 明确批准 Editor E1–E6 execution plan、acceptance criteria、test strategy 与 milestone plan，并同意开始 E1。当前只允许创建 E1 路由、runtime lease、JSON V1、独立草稿、E1 测试与 quality evidence；E2–E6 保持 `Planned`，不安装新依赖。E1 仍必须完成 dirty provisional、clean canonical、人工任务与 owner evidence 批准后才能关闭。
