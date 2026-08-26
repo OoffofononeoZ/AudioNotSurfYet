@@ -1,10 +1,10 @@
 ---
-status: approved
+status: in-review
 owner: "project-owner"
 last_reviewed: 2026-08-26
 upstream_docs:
   - "docs/architecture/system-design.md"
-next_action: "M11 契约回归与人工门禁已批准；作为 Analyzer readiness 输入"
+next_action: "project-owner 审阅 Editor playback/analysis lease、project V1、draft、tempo 与 interaction contracts"
 ---
 
 # Interface Contracts
@@ -531,3 +531,177 @@ Invariants:
 - `removeTrack()` 在仓储事务内同步移除 session queue entry、handle descriptor 和 handle record。
 - `clear()` 只有在四个 store 全部清空后才算成功；失败时调用方保持内存队列。
 - `restore()` 必须先通过 `PersistedSessionV1` runtime validation；未知 schema 抛 `UnsupportedSessionSchemaError`，不得猜测迁移。
+
+## Editor Contract Status
+
+本文件前述 Analyzer 契约是 2026-07-24 已批准并由 M3–M11 验证的历史基线。以下 Editor 扩展于 2026-08-26 进入 `in-review`；类型名用于锁定后续实现边界，但当前源码中尚不存在。
+
+## Editor Route and Playback Lease
+
+```ts
+type EditorRouteTarget =
+  | { kind: 'empty' }
+  | { kind: 'track'; trackId: TrackId }
+
+interface EditorPlaybackLease {
+  token: string
+  trackId: TrackId
+  release(): void
+}
+
+interface AudioSessionServiceEditorExtension {
+  acquireEditorPlayback(trackId: TrackId): Promise<EditorPlaybackLease>
+}
+```
+
+Invariants:
+
+- `/editor/:trackId?` 只以 `trackId` 查找当前 session；工程匹配使用 `trackHash`，不能把两种身份互换。
+- Header 入口用当前 track ID 导航且不隐式改变播放/暂停；播放列表“去编辑”必须先在同一用户手势中调用现有 `playTrack(trackId)`，成功后再导航。
+- 直接打开或刷新带 ID 路由时，可以用现有 session/handle/blob 恢复目标 track，但保持 0 秒 paused；未知、不可恢复或身份无效时返回显式不可用状态。
+- acquire 只有在 track 存在、内容 hash 已知且可解码/恢复时成功；失败不得切换到其他歌曲。
+- 当前 lease 将 ended policy 改为 repeat-one；同一个已解码 buffer 从 0 再次 `play()`，不调用 `next()`、不重新解码。
+- 只有当前 token 的 `release()` 生效；重复 release 幂等，旧 token 不改变当前策略。
+- lease 是 runtime 状态，不进入 `PersistedSessionV1`。刷新依照现有规则恢复 0 秒 paused，再由 Editor route 获取新 lease。
+- 只有有效 track 的 lease 存在时隐藏 MusicBar；`empty`/不可用状态保留 MusicBar，Editor 页内控件不创建隐藏媒体元素。
+
+## Analysis Consumer Lease and Tempo Messages
+
+```ts
+type AnalysisConsumer = 'analyzer' | 'editor'
+
+interface AnalysisConsumerLease {
+  token: string
+  consumer: AnalysisConsumer
+  setActiveFeatures(ids: readonly FeatureId[]): Promise<void>
+  requestCursorValue(
+    featureId: FeatureId,
+    timeSeconds: number,
+  ): Promise<AnalysisCursorValueResult | null>
+  requestTempoEstimate(): Promise<TempoEstimateResult | null>
+  getSeries(featureId: FeatureId): AnalysisSeries | null
+  subscribe(listener: AnalysisListener): () => void
+  release(): void
+}
+
+interface AnalysisCoordinatorConsumerExtension {
+  acquireConsumer(consumer: AnalysisConsumer): AnalysisConsumerLease
+}
+
+interface TempoEstimateRequest {
+  kind: 'tempo-estimate'
+  requestId: string
+  generation: number
+  trackHash: TrackHash
+  configHash: ConfigHash
+}
+
+type TempoEstimateResult =
+  | {
+      kind: 'tempo-estimate-result'
+      requestId: string
+      generation: number
+      trackHash: TrackHash
+      configHash: ConfigHash
+      state: 'reliable'
+      bpm: number
+      confidence: number
+    }
+  | {
+      kind: 'tempo-estimate-result'
+      requestId: string
+      generation: number
+      trackHash: TrackHash
+      configHash: ConfigHash
+      state: 'low-confidence'
+      confidence: number
+    }
+```
+
+Invariants:
+
+- 一个时刻只有最新 route 的 consumer lease 可以发出有效请求；旧 token 的 set/request/release 返回 stale/no-op，不改变快照或 cache。
+- Analyzer 仍接受 0–4 个唯一特征。Editor 只接受 `unique(['buffer', overlayFeatureId])`，因此为 1–2 项。
+- Editor lease 不写 `analysisWorkspace.activeCards`；Analysis cache 仍可按当前 0–2 项原子替换，返回 Analyzer 后由 Analyzer workspace 重新激活。
+- tempo 请求只读取当前 Worker retained PCM；没有匹配 PCM、身份过期、取消或 Worker error 时返回 `null`/typed error，不启动第二个 Worker。
+- reliable BPM 必须有限且在 20–300；confidence 必须有限且在 0–1。阈值由 E2 配置/golden 决定，不持久化。
+
+## Editor Project and Codec
+
+```ts
+interface EditorFormatCodec<TProject = EditorProjectV1> {
+  id: 'json-v1'
+  label: 'JSON'
+  extension: '.audiosurf-editor.json'
+  mimeType: 'application/json'
+  encode(project: TProject): Uint8Array
+  decode(input: Uint8Array): TProject
+}
+
+interface EditorFormatCodecRegistry {
+  list(): readonly EditorFormatCodec[]
+  get(id: string): EditorFormatCodec | null
+}
+
+interface EditorDraftRepository {
+  restore(): Promise<EditorDraftEnvelopeV1 | null>
+  replace(input: EditorDraftEnvelopeV1): Promise<void>
+  clear(): Promise<void>
+  getLeaveWarningSuppressed(): Promise<boolean>
+  setLeaveWarningSuppressed(value: boolean): Promise<void>
+}
+```
+
+`EditorProjectV1`、tempo/point/range 判别联合、canonical seconds、strict validator、JSON 编码顺序和独立 IndexedDB V1 详见 [Editor Project Format V1](editor/project-format-v1.md)。
+
+Invariants:
+
+- codec decode 是纯验证边界；调用方只有在完整 decode 和当前 track hash 匹配后才能替换内存工程。
+- registry 首版恰好包含 `json-v1`，不因 UI 存在选择器而伪造其他格式。
+- draft repository 使用 `audionotsurfyet-editor`，不得读取或升级 `audionotsurfyet-session`。
+- replace 使用单一事务；abort/quota 保留旧 durable draft。内存工程由 controller 持有，不因写入失败回滚。
+
+## Editor Timeline and Renderer Contracts
+
+```ts
+type EditorSubdivision = 1 | 2 | 4 | 8 | 16
+
+interface EditorTimelineGeometry {
+  viewport: PersistedTimelineViewport
+  widthCssPixels: number
+  devicePixelRatio: number
+  timeToX(timeSeconds: number): number
+  xToTime(xCssPixels: number): number
+}
+
+interface EditorRenderRequest {
+  feature: FeatureDefinition
+  series: AnalysisSeries
+  viewport: PersistedTimelineViewport
+  widthCssPixels: number
+  heightCssPixels: number
+  devicePixelRatio: number
+}
+
+interface EditorRendererAdapter {
+  drawStatic(request: EditorRenderRequest, target: CanvasRenderingContext2D): void
+  drawCursor(
+    request: EditorRenderRequest,
+    cursorSeconds: number,
+    exactValue: AnalysisCursorValueResult | null,
+    target: CanvasRenderingContext2D,
+  ): void
+}
+```
+
+Invariants:
+
+- waveform、tempo grid、point/range 与 overlay 必须共享同一个 geometry 实例/纯函数，CSS x 差异目标不超过 1 px。
+- Canvas backing store 为 CSS 尺寸乘 DPR；renderer 只接收绘制输入，不读 route、store、DOM 或 pointer 状态。
+- overlay 的数据 Canvas、说明和空白不接收 pointer；selector 与三个垂直手柄是唯一交互层。
+- Canvas failure 只使 overlay 进入可重试错误；底层工程、事件、播放和导出继续。
+- pointer/keyboard 状态机、右键优先级、12px 自适应网格和 cleanup 详见 [Editor Interaction Contracts](editor/interaction-contracts.md)。
+
+## Editor Architecture Approval
+
+`project-owner` 于 2026-08-26 只批准 Editor 产品意图并开放系统设计。上述 Editor 接口保持 `in-review`；Analyzer 历史契约继续有效，但不能作为 Editor 接口已批准或代码已实现的证据。

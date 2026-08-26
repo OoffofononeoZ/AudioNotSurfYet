@@ -1,5 +1,5 @@
 ---
-status: approved
+status: in-review
 owner: "project-owner"
 last_reviewed: 2026-08-26
 upstream_docs:
@@ -7,16 +7,16 @@ upstream_docs:
   - "docs/product/scope.md"
   - "docs/product/success-metrics.md"
   - "docs/product/open-questions.md"
-next_action: "M11 设计实现已批准；作为 Analyzer release-readiness 输入"
+next_action: "project-owner 审阅 Editor E0 runtime、project、timeline、overlay 与失败边界；批准前不进入 delivery"
 ---
 
 # System Design
 
 ## 1. Decision Summary
 
-AudioNotSurfYet 采用一个实时 `AudioEngine`、一个 MainLayout-owned `AudioSessionService`、一个可序列化 `audioSessionStore`、一个 `AnalysisCoordinator` 和一个全曲分析 Worker。Analyzer 通过类型化特征注册表选择最多四个不重复特征，在共享时间视窗中用 Canvas 2D renderer 绘制数据，并用 DOM 承担文本、交互和无障碍语义。
+AudioNotSurfYet 采用一个实时 `AudioEngine`、一个 MainLayout-owned `AudioSessionService`、一个可序列化 `audioSessionStore`、一个 `AnalysisCoordinator` 和一个全曲分析 Worker。Analyzer 通过类型化特征注册表选择最多四个不重复特征，在共享时间视窗中用 Canvas 2D renderer 绘制数据，并用 DOM 承担文本、交互和无障碍语义；这部分是已批准且完成验证的历史基线。
 
-当前设计只覆盖已批准的本地音频学习场景。远端上传、Editor、Visualizer、移动端和非 Chromium 兼容均不进入本架构。
+本次 `in-review` 扩展把已批准的 Editor E0 产品意图接入同一运行时：Editor 使用 route-scoped playback/analysis lease、版本化本地 JSON、独立单草稿 IndexedDB、tempo 派生网格、点/范围事件和单特征半透明叠加层。它不创建第二个 AudioContext、播放时钟、Worker 或网络数据路径。
 
 ## 2. Goals and Non-Goals
 
@@ -28,14 +28,17 @@ AudioNotSurfYet 采用一个实时 `AudioEngine`、一个 MainLayout-owned `Audi
 - 用稳定的类型契约支持 `src/data/analyzerData.ts` 全部 21 个特征。
 - 在刷新后恢复最近一次队列、当前歌曲、分析卡和可用缓存，同时正确处理文件权限。
 - 让黄金正确性、100ms 游标偏差、主线程响应和资源清理可以自动验证。
+- 让 Editor 在同一播放和分析事实源上完成单曲循环、tempo、点/范围标注、工程 round-trip 与草稿保护。
+- 让波形、tempo 网格、事件和分析叠加层共享一个时间几何，目标误差不超过 1 CSS px。
 
 ### Non-Goals
 
-- 不提供麦克风、远端音频、编辑、导出、账户或长期曲库。
+- 不提供麦克风、远端音频、PCM 编辑、音频导出、账户或长期曲库；Editor 只导入导出数据工程。
 - 不并行建设多个播放引擎，也不为旧状态模型增加长期兼容层。
 - 不一次性计算或持久化全部 21 项特征。
 - 不在 Analyzer 中新增 Three.js。
 - 不在本阶段决定发布平台、监控和回滚。
+- 不在 E0 架构阶段实现 Editor、安装 BPM/文件格式依赖或创建 delivery/quality 证据。
 
 ## 3. Constraints and Inputs
 
@@ -59,6 +62,11 @@ AudioNotSurfYet 采用一个实时 `AudioEngine`、一个 MainLayout-owned `Audi
 | `FeatureRegistry` | 21 个特征的 key、形状、renderer、范围、标签和依赖 | 编译期穷尽映射 | 运行时图表实例 |
 | Analyzer UI | 选卡、换卡、共享时间轴、说明、精确值和可访问交互 | `ActiveAnalysisCard[]`、`TimelineViewport` 的用户意图 | 音频计算、数据库访问 |
 | Canvas renderer family | 把已归一化/解码的 series 绘到给定 viewport | Canvas 2D 绘制状态 | 焦点、按钮、说明文本 |
+| `EditorSessionController` | 解析 Editor 路由目标、获取/释放播放与分析 lease、管理内存工程、autosave 和离页/异歌保护 | 当前 Editor route generation、内存 `EditorProjectV1`、pending interaction/save 状态 | AudioContext、Worker、IndexedDB 连接、Analyzer workspace |
+| `EditorFormatCodecRegistry` | 注册工程格式、执行 encode/decode 和严格 validator | 首版 JSON codec 与 schema version 路由 | 文件选择 UI、草稿、音频内容 |
+| `EditorDraftRepository` | 保存唯一 Editor 草稿与普通离页提示偏好 | 独立 `audionotsurfyet-editor` IndexedDB V1 | session 队列、当前 Blob/cache、运行时工程决策 |
+| `EditorTimelineModel` | 维护 viewport、tempo segment、网格生成、秒数吸附、点/范围不变量和交互状态机 | 纯数据变换与规范化时间 | DOM、Canvas context、播放时钟 |
+| Editor renderer adapter | 复用 FeatureRegistry/renderer family 的纯绘制能力，并与标记区共享几何 | Editor Canvas 图层、viewport-local 绘制状态 | 分析 Worker、焦点、底层 pointer 事件 |
 
 `AudioEngine` 独占唯一实时 `AudioContext` 与 `AudioBuffer`。M6 不创建 OfflineAudioContext；coordinator 只通过 descriptor + revision 接口按 16,384 samples 分块复制各声道并平均，每块后让出主线程。若未来格式 fixture 证明必须使用指定源采样率的离线解码，需先复核本设计与缓存身份，不能把它当作隐式 fallback。
 
@@ -68,6 +76,11 @@ AudioNotSurfYet 采用一个实时 `AudioEngine`、一个 MainLayout-owned `Audi
 flowchart LR
     UI["Analyzer / MusicBar UI"] --> Store["audioSessionStore"]
     UI --> Session["AudioSessionService"]
+    Editor["EditorSessionController"] -->|"playback lease"| Session
+    Editor -->|"analysis consumer lease"| Coordinator
+    Editor --> Geometry["EditorTimelineModel / shared geometry"]
+    Editor --> Codec["EditorFormatCodecRegistry / JSON V1"]
+    Editor <--> Draft["EditorDraftRepository / separate IndexedDB"]
     Session --> Engine["AudioEngine"]
     Session --> Store
     Store <--> Repo["SessionRepository / IndexedDB"]
@@ -83,6 +96,8 @@ flowchart LR
 ```
 
 状态流是单向的：AudioEngine 发布事实快照，AudioSessionService 编排 runtime 资源并更新 store，store 保存序列化状态，UI 只发出命令。store 不包装或代理 AudioNode。
+
+Editor 不改变该拓扑。`EditorSessionController` 通过 tokenized lease 使用 Session/Coordinator，通过独立 repository 保存工程草稿；Analyzer 与 Editor 不能同时成为当前 analysis consumer。详细决定见 [ADR-0006](adrs/0006-editor-runtime-leases.md)。
 
 ## 6. Playback and Timeline
 
@@ -101,6 +116,15 @@ flowchart LR
 - 播放、暂停、跳转和 track 切换都通过 `PlaybackSnapshot` 收敛。
 - 图表点击先把 Canvas x 坐标映射到 viewport 时间，再调用 `AudioEngine.seek(time)`。
 - 缩放以指针/键盘锚点为中心，并裁剪到 `[0, duration]`；所有 renderer 接收同一 viewport。
+
+### Editor playback lease
+
+- `/editor/:trackId?` 是目标路由。Header 使用当前 track；没有当前 track 时进入 `/editor` 空状态并保留 MusicBar。播放列表“去编辑”先显式播放所选 track，再进入带 ID 路由。
+- 路由中的 track ID 只用于定位当前 session 记录；工程身份始终使用内容 SHA-256。未知、不可恢复或无内容 hash 的路由目标进入明确不可用状态，不静默切到其他歌曲。
+- `AudioSessionService.acquireEditorPlayback(trackId)` 返回带唯一 token 的 lease。lease 激活时，当前 track 自然 ended 由 service 对同一已解码 buffer 调用 `play()`，不执行 `next()` 或重新解码。
+- 只有当前 token 的 `release()` 可以恢复普通 queue-next 策略。旧组件、旧路由或迟到清理不得覆盖新 lease。
+- Header 进入当前歌曲时保留当时播放/暂停状态；播放列表入口由用户手势显式播放目标；刷新或直接打开依照现有 session 恢复规则保持 0 秒 paused，但 repeat-one 策略已准备好。
+- 只有 lease 已绑定有效 track 时隐藏 MusicBar。Editor 内的精简播放控件只调用现有 service；空状态、无效目标或恢复失败时保留 MusicBar。
 
 ## 7. Analysis Pipeline
 
@@ -126,6 +150,15 @@ flowchart LR
 - 换歌、活动特征变化、分析参数变化或 coordinator 销毁时，发送 cancel 并递增 generation。
 - Worker 取消是资源优化，不作为正确性边界；主线程只接受与当前 `jobId + generation + trackHash + configHash` 全部匹配的消息。
 - 迟到的 progress/result/error 被静默丢弃并记录可诊断计数，不能覆盖新 track 的 UI。
+
+### Editor analysis lease and tempo estimation
+
+- `AnalysisCoordinator.acquireConsumer('analyzer' | 'editor')` 返回 generation-bound consumer lease。只有当前 lease 可以设置 active features、请求精确值/tempo 和释放当前意图；路由切换使旧 lease 全部 stale。
+- Editor 固定请求 `buffer`，并添加至多一个 overlay feature；选择 Buffer 时去重，因此活动集合始终为 1–2 个唯一 `FeatureId`。Analyzer 的持久化卡片不被改写。
+- Editor 分析可能原子替换当前 0–2 项 cache；返回 Analyzer 后以其 workspace 卡片重新激活并按 partial hit/miss 恢复。该取舍只影响重算成本，不允许混用错误身份。
+- Buffer 分析即使全 cache hit 也沿用现有 0-feature retained-PCM job。tempo 请求在同一 Worker、同一 retained mono PCM 上运行 onset envelope + autocorrelation，不复制第二份全曲 PCM，也不创建第二个 Worker。
+- tempo response 是 `reliable` 或 `low-confidence` 判别联合，包含 track/config/generation/request 身份。只有 reliable 且落在 20–300 BPM 的结果可写入未被用户编辑的唯一 metered segment；低置信度保持 `bpm: null`。
+- 数值置信度阈值是 E2 golden 校准的集中配置，不进入 JSON schema；算法/阈值变化使 E2 golden 与架构风险待复核。协议见 [interface contracts](interface-contracts.md)。
 
 ## 8. Feature Registry and Renderers
 
@@ -177,6 +210,15 @@ IndexedDB 使用版本化 schema，分别保存：
 
 分析结果使用独立 `replaceCurrentAnalysisCache()` 事务：写入前核对 persisted current track/hash，在同一事务更新 session manifest 与固定 current cache，保持 current Blob 不变。身份变化返回 `stale`；quota/abort 保留旧记录，内存 series 继续可用。
 
+### Editor project and draft storage
+
+- `EditorProjectV1` 使用 `format: 'audiosurf-editor'` 与 `schemaVersion: 1`，保存内容 hash、tempo map、point/range lane 和工作区；编码文件建议为 `<歌曲名>.audiosurf-editor.json`。
+- `EditorFormatCodecRegistry` 首版只注册 JSON。decode 必须完成 schema、歌曲 identity 与所有跨引用/时间不变量验证后，才能以一次内存替换应用；失败时保留原工程和草稿。
+- Editor 使用独立 `audionotsurfyet-editor` IndexedDB V1：`draft/latest` 保存唯一草稿，`preferences/leave-warning` 保存普通离页提示偏好。不升级或写入 `audionotsurfyet-session` V1。
+- 内存工程先于存储更新。autosave 使用单写入队列与短 debounce；pointerup、表单确认、导入成功和 route leave 触发立即 flush。`beforeunload` 只在仍有未完成写入时启用，不依赖其中的异步 IndexedDB。
+- 同内容 hash 自动恢复；不同歌曲必须先选择导出旧工程、确认覆盖或取消。普通离页提示可永久关闭，跨歌曲覆盖确认不可关闭。
+- 完整 schema、canonical seconds、codec 与事务语义见 [Editor Project Format V1](editor/project-format-v1.md) 和 [ADR-0007](adrs/0007-editor-project-and-draft-boundary.md)。
+
 ### File selection
 
 - 在支持的安全上下文用 `showOpenFilePicker({ multiple: true, types })` 获取文件和句柄。
@@ -208,6 +250,13 @@ IndexedDB 使用版本化 schema，分别保存：
 | hash/config 不匹配 | 缓存失效并重算 | cache identity 单元测试 |
 | AudioContext suspended | 首次用户手势恢复；UI 反映 paused/suspended | 引擎集成测试 |
 | renderer 异常 | 单卡错误边界；其他卡和播放继续 | renderer failure 注入 |
+| Editor route target 无效 | 显示不可用/恢复状态并保留 MusicBar；不静默切歌或创建工程 | 直接路由、删除 track、权限/内容 hash 场景 |
+| 旧 playback/analysis lease 迟到释放 | token/generation 丢弃；当前 route 策略与结果不变 | 快速 Editor/Analyzer/Home 与换歌循环 |
+| JSON/schema/hash/事件不合法 | decode 拒绝且当前内存工程/草稿不变 | codec/validator success、failure、boundary golden |
+| Editor draft quota/abort | 当前内存编辑继续，显示 `not-persisted`；旧 durable 草稿保持 | 独立 IndexedDB fault injection |
+| BPM 低置信度或失败 | BPM 保持空，允许手动输入；波形、播放和标注继续 | silence、歧义节奏、Worker error |
+| overlay renderer/analysis 失败 | 仅 overlay 可重试/隐藏；标记、播放、工程和导出继续 | feature/Canvas failure injection |
+| timeline pointercancel/blur/离页 | 清除 pending range、drag、capture 和 menu，不创建半成品事件 | Chrome/Edge pointer/keyboard 路由矩阵 |
 
 ## 11. Security and Privacy
 
@@ -216,6 +265,8 @@ IndexedDB 使用版本化 schema，分别保存：
 - IndexedDB 数据只服务最近一次本地会话，并提供清除会话入口。
 - FileSystemFileHandle 的保存不代表永久授权；任何权限请求必须由明确用户操作触发。
 - 内容 hash 用于本地身份与缓存，不作为用户身份，也不上传。
+- Editor JSON、草稿、事件和 tempo 同样只在本地处理；工程文件由用户显式选择导入或导出。
+- 工程只保存可见歌曲元数据和内容 hash，不保存绝对本地路径、FileSystemFileHandle、Blob、PCM 或分析 cache。
 
 ## 12. Performance and Capacity
 
@@ -226,6 +277,8 @@ IndexedDB 使用版本化 schema，分别保存：
 - 游标层可与静态数据层分离，避免每帧重画整张热图。
 - 大输入期间用户反馈必须在 100ms 内，且无分析归因的主线程任务超过 50ms。
 - 不设置全曲分析完成时间 SLA；UI 必须提供进度、取消和明确的 pending/ready/error 状态。
+- Editor 只为当前 viewport 实例化可聚焦事件/端点 DOM；空网格、beat/measure 线、波形和 overlay 使用 Canvas，全部 inner class 展开不等于全部时间 cell 进入 DOM。
+- point/range 创建、拖动和右键状态必须在 100ms 内产生可见反馈；Editor/分析归因的单个主线程任务不得超过 50ms。
 
 ## 13. Observability
 
@@ -245,6 +298,7 @@ M6 只在 `import.meta.env.DEV` 安装无 UI bridge，提供活动特征、cance
 ## 14. Rollout and Compatibility
 
 - 按 delivery 纵向切片接入，先保持 MusicBar 播放行为，再启用持久化/Worker，最后交付分析卡。
+- Editor 按 E1–E6 接入：先路由/lease/JSON/草稿，再时间轴/tempo、point、overlay、range，最后双浏览器与资源加固。system design 获批前不得创建 Editor delivery 计划，delivery 获批前不得编码。
 - 新状态模型直接替代当前分散职责；不保留两套长期 AudioEngine 或隐藏 legacy fallback。
 - 数据库使用 schema version；开发期间允许显式迁移或清除，但 release 前必须固定升级/失败行为。
 - 自动化以本机 Chrome 为主；真实 Edge 验证缺失时保留为阻断最终双浏览器声明的证据缺口。
@@ -260,7 +314,24 @@ M6 只在 `import.meta.env.DEV` 安装无 UI bridge，提供活动特征、cance
 | 保存队列全部 Blob 和缓存 | Reject | 15 分钟多文件会放大 quota 与清理风险 |
 | 所有图表使用 DOM/SVG | Reject | 高频热图和多卡重绘成本高 |
 | Analyzer 使用 Three.js | Reject | 对 2D 数据图没有必要，会增加 bundle、无障碍和资源生命周期负担 |
+| Editor 创建独立 AudioEngine 或隐藏 audio element | Reject | 会产生第二套时钟、解码、音量和资源生命周期 |
+| Editor 创建独立 analysis Worker/coordinator | Reject | 会复制 PCM、争用 cache 并破坏单 Worker 门禁；route-scoped consumer lease 足以隔离意图 |
+| 把 Editor 草稿加入 session IndexedDB V1 | Reject | 会扩大已验证 Analyzer schema 和事务爆炸半径；独立 V1 可独立清除和演进 |
+| 以 beat/bar 作为事件持久化事实 | Reject | tempo 修改会移动音频中的真实标注位置；秒数必须保持事实，节拍只用于派生网格和交互吸附 |
+| 复用整张 `MeydaCard` DOM 作为 overlay | Reject | 卡片布局、焦点与 pointer 事件不能满足半透明穿透；只复用纯 renderer/data contracts |
+| 为每个空网格 cell 创建 DOM | Reject | 15 分钟、多 lane 和 1/16 beat 会造成不可控节点量；Canvas 背景加 viewport-visible DOM 事件更符合容量边界 |
 
 ## 16. Approval Record
 
-`project-owner` 于 2026-07-24 明确要求实现包含本架构决策的计划，因此本系统设计记为 `approved`。该批准使 delivery planning 门禁成立；任何产品意图实质变化或本文核心边界变化都会使下游 delivery、quality 和 release 文档待复核。
+`project-owner` 于 2026-07-24 明确要求实现 Analyzer 架构，因此原有单引擎、Worker、持久化和 renderer 基线已经批准，并由 M3–M11 与 Analyzer-only readiness 收口。
+
+2026-08-26，`project-owner` 批准 Editor E0 产品意图并同意进入架构设计。本次新增的 Editor runtime、project、timeline、range、overlay 与风险内容保持 `in-review`；它不撤销 Analyzer 历史证据，也不能代表 E1–E6 或 Editor readiness 已通过。只有 owner 单独批准本设计、接口、风险和 ADR 后，才能进入 Editor execution planning。
+
+## 17. Editor Timeline and Interaction Architecture
+
+- `EditorTimelineModel` 以规范化秒数为持久化事实；tempo 只派生 measure/beat/grid。tempo、zoom 或 viewport 变化不得自动移动已保存事件。
+- `timeToX()`/`xToTime()` 是波形、tempo、point/range 和 overlay 的唯一横向映射；所有 Canvas 使用同一 CSS rect 与 DPR backing-store 规则，目标误差不超过 1 CSS px。
+- tempo segment 从 0 秒开始且按 start 排序；metered 支持空 BPM 或 20–300，single-beat 把整个 segment 视为一个单元。新边界继承前段设置，首版只增加/拖动内部边界，不提供删除。
+- 自适应网格从 `1/16`、`1/8`、`1/4`、`1/2`、`1 beat` 中选择当前至少 12 CSS px 的最细单元；没有候选时使用 1 beat。该网格只约束创建/拖动时的吸附和最短 range，不进入 schema identity。
+- Canvas 绘制波形、tempo 网格和高密度背景；DOM 只渲染当前 viewport 可见事件、端点、表单与焦点语义。交互状态、右键优先级和键盘替代见 [Editor Interaction Contracts](editor/interaction-contracts.md) 与 [ADR-0008](adrs/0008-editor-time-and-event-model.md)。
+- overlay 由纯 renderer adapter 绘制；Canvas/说明/空白 `pointer-events: none`，只有 feature selector 与 top/move/bottom 三个手柄接收输入。三个手柄都有键盘等价操作，位置以 `topRatio + heightRatio <= 1` 持久化。详见 [ADR-0009](adrs/0009-editor-overlay-renderer-boundary.md)。
