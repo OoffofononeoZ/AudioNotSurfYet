@@ -33,6 +33,8 @@
     "test:m9:integration": "vitest run tests/worker/m9-worker.test.ts tests/audio/m7-workspace.integration.test.ts",
     "test:m10:unit": "vitest run tests/analysis/m10-structure-unit.test.ts",
     "test:m10:integration": "vitest run tests/worker/m10-worker.test.ts tests/analysis/m6-coordinator.integration.test.ts tests/audio/m7-workspace.integration.test.ts",
+    "test:e1:unit": "vitest run tests/editor/e1-project-unit.test.ts",
+    "test:e1:integration": "vitest run tests/editor/e1-foundation.integration.test.ts",
     "test:docs": "node tests/docs/validate-docs.mjs",
     "test:harness": "node tests/harness/verify-failure-detection.mjs",
     "test:e2e": "playwright test --project=chrome",
@@ -47,6 +49,7 @@
     "test:e2e:m11:chrome": "playwright test tests/e2e/m11-hardening.spec.ts --project=chrome",
     "test:e2e:m11:edge": "node tests/scripts/run-edge.mjs tests/e2e/m11-hardening.spec.ts",
     "test:e2e:m11": "npm run test:e2e:m11:chrome && npm run test:e2e:m11:edge",
+    "test:e2e:e1": "playwright test tests/e2e/e1-editor.spec.ts --project=chrome",
     "test:e2e:edge": "node tests/scripts/run-edge.mjs",
     "fixtures:generate": "node --experimental-strip-types tests/fixtures/generate-fixtures.ts",
     "fixtures:golden": "node --experimental-strip-types tests/analysis/generate-golden.ts",
@@ -76,7 +79,9 @@
     "eval:m10": "node tests/scripts/run-m10-eval.mjs",
     "eval:m10:provisional": "node tests/scripts/run-m10-eval.mjs --provisional",
     "eval:m11": "node tests/scripts/run-m11-eval.mjs",
-    "eval:m11:provisional": "node tests/scripts/run-m11-eval.mjs --provisional"
+    "eval:m11:provisional": "node tests/scripts/run-m11-eval.mjs --provisional",
+    "eval:e1": "node tests/scripts/run-e1-eval.mjs",
+    "eval:e1:provisional": "node tests/scripts/run-e1-eval.mjs --provisional"
   },
   "dependencies": {
     "@chenglou/pretext": "^0.0.6",

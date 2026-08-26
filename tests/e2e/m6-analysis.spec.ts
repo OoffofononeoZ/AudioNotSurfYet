@@ -176,6 +176,7 @@ test('runs the real M6 Worker, exact cursor, cache write and refresh hit', async
         'playing',
         { timeout: 20_000 },
     );
+    await page.getByRole('link', { name: 'Analyzer' }).click();
 
     await page.evaluate(async (ids) => {
         await (
@@ -330,6 +331,7 @@ test('does not accumulate Worker, AudioContext or RAF resources over 20 lifecycl
 
     const rafSamples: number[] = [];
     for (let index = 0; index < 20; index += 1) {
+        await page.getByRole('link', { name: 'Analyzer' }).click();
         await page.evaluate(async () => {
             const api = (
                 window as typeof window & {
@@ -345,7 +347,6 @@ test('does not accumulate Worker, AudioContext or RAF resources over 20 lifecycl
             'playing',
             { timeout: 20_000 },
         );
-        await page.getByRole('link', { name: 'Analyzer' }).click();
         await page.getByRole('link', { name: 'AUDIOSURF' }).click();
         rafSamples.push(await page.evaluate(() =>
             (
@@ -445,6 +446,7 @@ test('keeps 15-minute analysis responsive, progressive and cancellable', async (
         'playing',
         { timeout: 90_000 },
     );
+    await page.getByRole('link', { name: 'Analyzer' }).click();
 
     await page.evaluate(() => {
         const performanceWindow = window as typeof window & {

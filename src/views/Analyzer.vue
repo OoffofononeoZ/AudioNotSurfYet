@@ -171,6 +171,7 @@ const DEFAULT_CARDS: ActiveAnalysisCard[] = M7_FEATURE_IDS.map(
 const sessionStore = useAudioSessionStore();
 const audioSession = useAudioSessionService();
 const analysisCoordinator = useAnalysisCoordinator();
+const analysisLease = analysisCoordinator.acquireConsumer('analyzer');
 const seriesRevision = ref(0);
 const exactValues = reactive<
     Partial<Record<M10FeatureId, AnalysisCursorValueResult>>
@@ -233,7 +234,7 @@ const cardAt = (slot: 0 | 1 | 2 | 3) =>
 
 const seriesFor = (featureId: M10FeatureId): AnalysisSeries | null => {
     void seriesRevision.value;
-    return analysisCoordinator.getSeries(featureId);
+    return analysisLease.getSeries(featureId);
 };
 
 const formatTime = (seconds: number): string => {
@@ -256,7 +257,7 @@ const applyCards = async (cards: ActiveAnalysisCard[]) => {
         sorted,
         durationSeconds.value > 0 ? viewport.value : null,
     );
-    await analysisCoordinator.setActiveFeatures(
+    await analysisLease.setActiveFeatures(
         sorted.map((card) => card.featureId),
     );
     await persist;
@@ -330,7 +331,7 @@ const seek = async (seconds: number) => {
 };
 
 const retryAnalysis = async () => {
-    await analysisCoordinator.retry();
+    await analysisLease.setActiveFeatures(activeFeatureIds.value);
     requestExactValues(true);
 };
 
@@ -339,7 +340,7 @@ const performExactRequests = async () => {
     lastCursorRequestAt = performance.now();
     const generation = analysis.value.generation;
     await Promise.all(activeFeatureIds.value.map(async (featureId) => {
-        const result = await analysisCoordinator.requestCursorValue(
+        const result = await analysisLease.requestCursorValue(
             featureId,
             cursorSeconds.value,
         );
@@ -380,7 +381,7 @@ const initializeWorkspace = async () => {
                 ? resetTimelineViewport(durationSeconds.value)
                 : null;
             const persist = persistWorkspace(DEFAULT_CARDS, initialViewport);
-            await analysisCoordinator.setActiveFeatures(M7_FEATURE_IDS);
+            await analysisLease.setActiveFeatures(M7_FEATURE_IDS);
             await persist;
         } else {
             const restoredCards = activeCards.value;
@@ -393,7 +394,7 @@ const initializeWorkspace = async () => {
                     sessionStore.analysisWorkspace.viewport,
                 );
             }
-            await analysisCoordinator.setActiveFeatures(
+            await analysisLease.setActiveFeatures(
                 restoredCards.map((card) => card.featureId),
             );
         }
@@ -457,7 +458,7 @@ watch(
 );
 
 onMounted(() => {
-    unsubscribeCoordinator = analysisCoordinator.subscribe(() => {
+    unsubscribeCoordinator = analysisLease.subscribe(() => {
         seriesRevision.value += 1;
         requestExactValues(false);
     });
@@ -467,6 +468,7 @@ onBeforeUnmount(() => {
     unsubscribeCoordinator?.();
     unsubscribeCoordinator = null;
     if (cursorTimer) clearTimeout(cursorTimer);
+    analysisLease.release();
 });
 </script>
 

@@ -86,6 +86,25 @@ export interface AudioSessionServiceOptions {
     createTrackId?: () => string;
 }
 
+export interface EditorPlaybackLease {
+    token: string;
+    trackId: string;
+    release(): void;
+}
+
+export class EditorPlaybackUnavailableError extends Error {
+    readonly trackId: string;
+
+    constructor(
+        trackId: string,
+        message = 'The requested Editor track is unavailable.',
+    ) {
+        super(message);
+        this.name = 'EditorPlaybackUnavailableError';
+        this.trackId = trackId;
+    }
+}
+
 export interface AudioEnginePort {
     load(input: {
         trackId: string;
@@ -175,6 +194,8 @@ export class AudioSessionService {
     private commandGeneration = 0;
     private importGeneration = 0;
     private frameHandle: number | null = null;
+    private activeEditorPlayback: { token: string; trackId: string } | null = null;
+    private editorRepeatInFlight = false;
     private disposed = false;
 
     constructor(
@@ -464,6 +485,53 @@ export class AudioSessionService {
         await this.loadRuntimeTrack(trackId, true);
     }
 
+    async acquireEditorPlayback(trackId: string): Promise<EditorPlaybackLease> {
+        if (this.disposed) {
+            throw new EditorPlaybackUnavailableError(trackId);
+        }
+        const record = this.getTrack(trackId);
+        if (!record?.trackHash) {
+            throw new EditorPlaybackUnavailableError(
+                trackId,
+                '找不到可编辑歌曲或歌曲内容身份尚未就绪。',
+            );
+        }
+        const descriptor = this.engine.getDecodedAudioDescriptor();
+        if (descriptor?.trackId !== trackId) {
+            await this.loadRuntimeTrack(trackId, false);
+        }
+        const currentDescriptor = this.engine.getDecodedAudioDescriptor();
+        if (
+            currentDescriptor?.trackId !== trackId
+            || this.store.playback.trackId !== trackId
+            || ['empty', 'loading', 'error'].includes(this.store.playback.state)
+        ) {
+            throw new EditorPlaybackUnavailableError(
+                trackId,
+                '歌曲文件当前不可恢复，请先在播放器中恢复访问或重新选择。',
+            );
+        }
+        const token = crypto.randomUUID();
+        this.activeEditorPlayback = { token, trackId };
+        let released = false;
+        return {
+            token,
+            trackId,
+            release: () => {
+                if (released) return;
+                released = true;
+                if (this.activeEditorPlayback?.token === token) {
+                    this.activeEditorPlayback = null;
+                }
+            },
+        };
+    }
+
+    getDecodedTrackDescriptor(trackId: string): DecodedAudioDescriptor | null {
+        const descriptor = this.engine.getDecodedAudioDescriptor();
+        return descriptor?.trackId === trackId ? { ...descriptor } : null;
+    }
+
     async togglePlayback(): Promise<void> {
         if (this.disposed || this.store.queue.length === 0) return;
 
@@ -674,6 +742,7 @@ export class AudioSessionService {
     async dispose(): Promise<void> {
         if (this.disposed) return;
         this.disposed = true;
+        this.activeEditorPlayback = null;
         ++this.commandGeneration;
         ++this.importGeneration;
         this.stopFrameLoop();
@@ -1076,7 +1145,37 @@ export class AudioSessionService {
         this.stopFrameLoop();
         this.store.setEnergy(0);
         if (snapshot.state === 'ended' && this.store.queue.length > 0) {
-            void this.next();
+            const lease = this.activeEditorPlayback;
+            if (lease && snapshot.trackId === lease.trackId) {
+                void this.repeatEditorTrack(lease.token, lease.trackId);
+            } else {
+                void this.next();
+            }
+        }
+    }
+
+    private async repeatEditorTrack(token: string, trackId: string): Promise<void> {
+        if (this.editorRepeatInFlight) return;
+        this.editorRepeatInFlight = true;
+        try {
+            if (
+                this.disposed
+                || this.activeEditorPlayback?.token !== token
+                || this.activeEditorPlayback.trackId !== trackId
+                || this.engine.getDecodedAudioDescriptor()?.trackId !== trackId
+            ) return;
+            await this.engine.seek(0);
+            if (
+                this.disposed
+                || this.activeEditorPlayback?.token !== token
+                || this.activeEditorPlayback.trackId !== trackId
+            ) return;
+            await this.engine.play();
+        } catch {
+            // AudioEngine publishes the typed failure; the lease remains active
+            // so the user can retry with the Editor transport.
+        } finally {
+            this.editorRepeatInFlight = false;
         }
     }
 

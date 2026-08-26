@@ -27,6 +27,9 @@
 | `npm run test:m10:integration` | 运行两类结构 Worker、exact cursor、stale/cancel/quota 与四卡恢复 | M10 集成切片 |
 | `npm run test:e2e:m10` | 运行 Chrome 21 项、两类结构卡和 15 分钟四重卡性能 | M10 浏览器切片 |
 | `npm run test:e2e:m11` | 顺序运行真实 Chrome/Edge 的 M11 专项四场景 | 三格式、键盘/reduced motion、多视口、quota、WebGL/RAF |
+| `npm run test:e1:unit` | 运行 Editor JSON V1、初始工程和 strict validator 测试 | E1 codec 与边界契约 |
+| `npm run test:e1:integration` | 运行 Editor lease、草稿、原子导入与 quota 测试 | E1 service/repository/controller 契约 |
+| `npm run test:e2e:e1` | 运行 Chrome Editor 入口、picker、冲突和恢复场景 | E1 浏览器切片；不等于原生 OS picker 或 Edge |
 | `npm run test:e2e:edge` | 使用稳定 Edge 串行运行 M3–M11 全量 E2E | Edge 缺失时以退出码 2 明确 blocked；不得用 Chromium 替代 |
 | `npm run test:docs` | 检查生命周期 frontmatter、链接和 21 项特征 | 文档门禁 |
 | `npm run eval:m3:provisional` | 未提交工作树的本地 M3 run | 不创建正式 evidence index |
@@ -43,6 +46,8 @@
 | `npm run eval:m10` | 只在干净 commit 上运行 M3–M10 的 36 步 suite | 生成可登记的 M10 canonical 证据 |
 | `npm run eval:m11:provisional` | 在 dirty worktree 运行 M3–M11 的 38 步双浏览器 suite | 只生成实现反馈 |
 | `npm run eval:m11` | 只在干净 commit 上运行 M3–M11 的 38 步双浏览器 suite | 生成可登记的 M11 canonical 证据 |
+| `npm run eval:e1:provisional` | 在 dirty worktree 运行 E1 与适用 Analyzer 相邻回归 | 只生成实现反馈 |
+| `npm run eval:e1` | 只在干净 commit 上运行 18 步 E1 suite | 生成可登记的 E1 canonical 证据 |
 
 ## 已知测试缺口
 
@@ -57,9 +62,9 @@
 - 超出约 15 分钟支持边界的长音频未开始播放只作为非门禁压力观察；它不是规定的预期失败，也不能替代范围内性能或格式验证。
 - M6 当前 Meyda 的 `spectralFlux` 对有效输入抛出 `x is not defined`；已用预期失败测试和 R-020 固定，不能把 21 项 registry 误述为 21 项均可计算。
 - M6 dirty-worktree provisional 与 clean-commit canonical 均已 20/20 通过；正式 evidence 已登记，并由 `project-owner` 于 2026-07-30 批准，M6 已关闭。
-- M7–M11 已获批准并关闭。M11 clean canonical `M11-2026-08-25T10-05-12-783Z-99c67792` 在 commit `99c67792509d07456bcb431b90468252f8b0fdc3` 上 38/38 通过；Edge 原生权限、辅助技术与最终加固于 2026-08-26 获 owner 签字。Analyzer readiness 已获 `Ready with waivers` 批准；Editor system design 与 E1–E6 delivery 已获批准，E1 已开放，Editor runtime 测试与 eval 命令将在本里程碑建立。
+- M7–M11 已获批准并关闭。M11 clean canonical `M11-2026-08-25T10-05-12-783Z-99c67792` 在 commit `99c67792509d07456bcb431b90468252f8b0fdc3` 上 38/38 通过；Edge 原生权限、辅助技术与最终加固于 2026-08-26 获 owner 签字。Analyzer readiness 已获 `Ready with waivers` 批准；Editor system design 与 E1–E6 delivery 已获批准，E1 已开放并已建立 unit/integration/Chrome/provisional/canonical 命令。
 
-- 规划中的 `test:eN:unit`、`test:eN:integration`、`test:e2e:eN`、`eval:eN:provisional` 和 `eval:eN` 不是当前可运行命令；只在对应里程碑实现时新增并同步 package scripts、测试 README 与本 reference。
+- E2–E6 规划中的 `test:eN:unit`、`test:eN:integration`、`test:e2e:eN`、`eval:eN:provisional` 和 `eval:eN` 不是当前可运行命令；只在对应里程碑实现时新增并同步 package scripts、测试 README 与本 reference。
 
 ## 构建风险
 

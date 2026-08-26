@@ -8,12 +8,20 @@ interface PickerEntry {
     base64: string;
 }
 
+interface SavedPickerEntry {
+    name: string;
+    mimeType: string;
+    base64: string;
+}
+
 const mimeTypeFor = (filePath: string) => {
     switch (path.extname(filePath).toLowerCase()) {
         case '.mp3':
             return 'audio/mpeg';
         case '.flac':
             return 'audio/flac';
+        case '.json':
+            return 'application/json';
         default:
             return 'audio/wav';
     }
@@ -23,15 +31,48 @@ export async function installFilePickerStub(page: Page) {
     const installer = () => {
         const pickerWindow = window as unknown as {
             __audioNotSurfYetPickerQueue?: FileSystemFileHandle[][];
+            __audioNotSurfYetSavedPickerEntries?: SavedPickerEntry[];
             showOpenFilePicker?: () => Promise<FileSystemFileHandle[]>;
+            showSaveFilePicker?: (
+                options?: { suggestedName?: string },
+            ) => Promise<FileSystemFileHandle>;
         };
         pickerWindow.__audioNotSurfYetPickerQueue ??= [];
+        pickerWindow.__audioNotSurfYetSavedPickerEntries ??= [];
         pickerWindow.showOpenFilePicker = async () => {
             const next = pickerWindow.__audioNotSurfYetPickerQueue?.shift();
             if (!next) {
                 throw new DOMException('Picker cancelled.', 'AbortError');
             }
             return next;
+        };
+        pickerWindow.showSaveFilePicker = async (options) => {
+            const root = await navigator.storage.getDirectory();
+            const directory = await root.getDirectoryHandle(
+                'editor-save-picker',
+                { create: true },
+            );
+            const name = options?.suggestedName ?? 'editor-project.json';
+            const handle = await directory.getFileHandle(name, { create: true });
+            const nativeCreateWritable = handle.createWritable.bind(handle);
+            handle.createWritable = async () => {
+                const writable = await nativeCreateWritable();
+                const nativeClose = writable.close.bind(writable);
+                writable.close = async () => {
+                    await nativeClose();
+                    const file = await handle.getFile();
+                    const bytes = new Uint8Array(await file.arrayBuffer());
+                    let binary = '';
+                    for (const byte of bytes) binary += String.fromCharCode(byte);
+                    pickerWindow.__audioNotSurfYetSavedPickerEntries?.push({
+                        name,
+                        mimeType: file.type,
+                        base64: btoa(binary),
+                    });
+                };
+                return writable;
+            };
+            return handle;
         };
     };
     await page.addInitScript(installer);
@@ -87,4 +128,17 @@ export async function chooseFiles(
 ) {
     await queuePickerFiles(page, filePaths);
     await page.getByTestId('import-audio').click();
+}
+
+export async function savedPickerEntries(
+    page: Page,
+): Promise<SavedPickerEntry[]> {
+    return page.evaluate(() => {
+        const pickerWindow = window as unknown as {
+            __audioNotSurfYetSavedPickerEntries?: SavedPickerEntry[];
+        };
+        return structuredClone(
+            pickerWindow.__audioNotSurfYetSavedPickerEntries ?? [],
+        );
+    });
 }
