@@ -7,10 +7,14 @@ upstream_docs:
   - "docs/delivery/acceptance-criteria.md"
   - "docs/delivery/test-strategy.md"
   - "docs/architecture/risk-register.md"
-next_action: "M11 golden 回归与人工门禁已批准；供 release-readiness 复核"
+next_action: "保留 Analyzer golden；使用独立 Editor E1 golden 固定工程与失败边界"
 ---
 
 # Golden Examples
+
+## Scope Routing
+
+本文保留 Analyzer M3–M11 golden 历史。Editor E1 的 JSON、identity、lease、草稿和异常样例见 [Editor golden examples](editor/golden-examples.md)。
 
 ## 1. Evidence Boundary
 

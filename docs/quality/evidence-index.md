@@ -8,10 +8,14 @@ upstream_docs:
   - "docs/quality/failure-taxonomy.md"
   - "docs/delivery/milestone-plan.md"
   - "tests/fixtures/fixture-manifest.json"
-next_action: "以已批准 M11 身份支持 in-review Analyzer release-readiness"
+next_action: "保留 Analyzer M3–M11 历史；E1 evidence 写入独立 Editor evidence index"
 ---
 
 # Evidence Index
+
+## Scope Routing
+
+本文保留 Analyzer M3–M11 已批准 evidence。Editor 从 E1 开始使用独立 [Editor evidence index](editor/evidence-index.md)，不得改变历史 Analyzer run identity。
 
 ## 1. Purpose and Gate State
 

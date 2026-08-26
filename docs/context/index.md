@@ -21,7 +21,7 @@ AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端：用户选择
 - Product intent：problem brief、scope、success metrics 和 open questions 中的 Editor E0 点/范围事件范围已于 2026-08-26 获 owner 批准。
 - System design：Analyzer 基线保持历史批准；Editor system design、接口契约、R-022–R-027、ADR-0006–0009 和两个详细子契约均于 2026-08-26 获 owner 批准。R-022–R-027 仍为 `Open`，表示尚无实现缓解证据。
 - Execution planning：现有根级文档保留 Analyzer M1–M11 历史；`docs/delivery/editor/` 四份 E1–E6 规划于 2026-08-26 获 owner 批准，E0-D `Complete`、E1 `In Progress`、E2–E6 `Planned`。
-- Quality and evals：M3–M11 的适用 canonical/人工证据均已获批准；M11 已于 2026-08-26 关闭。
+- Quality and evals：M3–M11 的适用 canonical/人工证据均已获批准；Editor E1 专属 eval、golden、failure taxonomy 与 evidence index 已建立并保持 `in-review`，当前尚无 canonical record。
 - Implementation：M1–M11 均为 `Complete`，Analyzer 21/21 delivery 已关闭；Editor E1 已开放但尚无实现或 evidence 通过事实。
 - Readiness、release、retrospective：Analyzer `release-readiness.md` 已获 `Ready with waivers` 批准；PROD-015 尚未解决，因此不创建上线声明或生产托管，Editor 也不继承该 readiness。
 
@@ -56,6 +56,10 @@ AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端：用户选择
 | [failure-taxonomy.md](../quality/failure-taxonomy.md) | 稳定失败类型、S0–S3 和门禁响应 | project-owner / approved | 失败分类或风险接受规则变化 |
 | [evidence-index.md](../quality/evidence-index.md) | M3–M11 canonical run 摘要、环境、hash 和 reviewer | project-owner / approved | 新 run、artifact retention 或里程碑审批 |
 | [release-readiness.md](../quality/release-readiness.md) | Analyzer 候选身份、blocker、waiver 与有条件就绪结论 | project-owner / approved | 候选代码、证据、风险接受或部署边界变化 |
+| [Editor E1 eval plan](../quality/editor/eval-plan.md) | AC-E101–AC-E108 的成功、失败、边界、异常与 canonical 契约 | project-owner / in-review | E1 行为、阈值、浏览器或证据能力变化 |
+| [Editor E1 golden examples](../quality/editor/golden-examples.md) | JSON、identity、lease、草稿和文件异常规范样例 | project-owner / in-review | E1 schema、identity 或恢复语义变化 |
+| [Editor E1 failure taxonomy](../quality/editor/failure-taxonomy.md) | Editor 路由、lease、schema、草稿、文件和生命周期失败分类 | project-owner / in-review | Editor 失败域或严重度响应变化 |
+| [Editor evidence index](../quality/editor/evidence-index.md) | E1–E6 canonical 身份、hash、环境与 reviewer 记录 | project-owner / in-review | 新 Editor run、artifact 或审批状态变化 |
 
 ## Architecture Decisions
 
@@ -92,6 +96,7 @@ AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端：用户选择
 - Delivery planning：[Editor execution plan](../delivery/editor/execution-plan.md)、[acceptance criteria](../delivery/editor/acceptance-criteria.md)、[test strategy](../delivery/editor/test-strategy.md) 与 [milestone plan](../delivery/editor/milestone-plan.md) 已获批准；当前 E1 `In Progress`
 - Quality design：[eval plan](../quality/eval-plan.md)，Q0 批准后用于 M3–M11 证据
 - Quality evidence：[evidence index](../quality/evidence-index.md)，M3–M11 已批准
+- Editor E1 quality：[eval plan](../quality/editor/eval-plan.md)、[golden](../quality/editor/golden-examples.md)、[failure taxonomy](../quality/editor/failure-taxonomy.md) 与 [evidence](../quality/editor/evidence-index.md) 为 `in-review`
 - Quality readiness：[Analyzer release readiness](../quality/release-readiness.md) 已由 owner 批准为 `Ready with waivers`，且只覆盖 Analyzer 候选
 - Release operations：`docs/release/` 尚未创建；PROD-015 的托管平台、域名和 SPA fallback 解决前不进入正式上线
 - Retrospectives：`docs/retrospectives/` 尚未创建；有发布、事故或重复摩擦证据后生成

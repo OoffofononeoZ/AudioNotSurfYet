@@ -8,10 +8,14 @@ upstream_docs:
   - "docs/delivery/execution-plan.md"
   - "docs/delivery/acceptance-criteria.md"
   - "docs/delivery/test-strategy.md"
-next_action: "审阅 Analyzer release-readiness 的覆盖、缺口与拟议豁免"
+next_action: "保留 Analyzer 历史 eval；按 Editor E1 专属 eval plan 形成新 evidence"
 ---
 
 # Eval Plan
+
+## Scope Routing
+
+本文保留 Analyzer M3–M11 已批准的质量契约与历史。Editor 使用独立的 [E1 eval plan](editor/eval-plan.md)、[golden examples](editor/golden-examples.md)、[failure taxonomy](editor/failure-taxonomy.md) 与 [evidence index](editor/evidence-index.md)；这些 Editor 文档在 E1 owner evidence 审批前保持 `in-review`。
 
 ## 1. Purpose and Current State
 

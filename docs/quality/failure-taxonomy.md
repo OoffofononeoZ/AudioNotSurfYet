@@ -7,10 +7,14 @@ upstream_docs:
   - "docs/quality/golden-examples.md"
   - "docs/delivery/acceptance-criteria.md"
   - "docs/architecture/risk-register.md"
-next_action: "M11 未新增失败类型；在 readiness 中分列 blocker、waiver 与覆盖缺口"
+next_action: "保留 Analyzer 分类；使用独立 Editor E1 taxonomy 标记新失败"
 ---
 
 # Failure Taxonomy
+
+## Scope Routing
+
+本文保留 Analyzer 稳定失败分类。Editor E1 的路由、lease、schema、草稿、文件和生命周期失败见 [Editor E1 failure taxonomy](editor/failure-taxonomy.md)。
 
 ## 1. Classification Model
 
