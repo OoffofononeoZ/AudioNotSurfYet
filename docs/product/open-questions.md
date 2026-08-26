@@ -1,12 +1,12 @@
 ---
-status: in-review
+status: approved
 owner: "project-owner"
 last_reviewed: 2026-08-26
 upstream_docs:
   - "docs/product/problem-brief.md"
   - "docs/product/scope.md"
   - "docs/product/success-metrics.md"
-next_action: "project-owner 审阅 Editor E0 产品意图；PROD-015 继续阻断 Analyzer 正式上线"
+next_action: "以已关闭的 Editor E0 产品决策进入 system design；PROD-015 继续阻断 Analyzer 正式上线"
 ---
 
 # Open Questions
@@ -40,13 +40,13 @@ next_action: "project-owner 审阅 Editor E0 产品意图；PROD-015 继续阻�
 | PROD-011 | 当前运行环境 | 静态 SPA 运行在 HTTPS 或 localhost；正式托管延后到 release 阶段 |
 | PROD-012 | Analyzer 核心任务 | 学习和比较；最终覆盖 21 项，首批 RMS、Amplitude Spectrum、Chroma |
 
-## Editor E0 Decisions Pending Approval
+## Closed in Editor E0 Review
 
-| ID | Proposed decision | Status |
+| ID | Decision | Resolution |
 | --- | --- | --- |
-| PROD-014E | Editor 定义为对已有歌曲进行点/范围时间标注的“逆向制曲”工具，不修改音频 | `in-review` |
-| PROD-020 | 范围事件以两次左键选择严格向后的起止位置；`Esc`/空白右键取消；端点沿自适应网格；同 lane/inner class 不重叠，不自动合并 | `in-review` |
+| PROD-014E | Editor 定义为对已有歌曲进行点/范围时间标注的“逆向制曲”工具，不修改音频 | 2026-08-26 由 `project-owner` 批准；开放 system design，不开放实现 |
+| PROD-020 | 范围事件以两次左键选择严格向后的起止位置；`Esc`/空白右键取消；端点沿自适应网格；同 lane/inner class 不重叠，不自动合并 | 2026-08-26 由 `project-owner` 批准；更复杂范围语义继续由 PROD-019 跟踪 |
 
 ## Gate State
 
-Analyzer-only readiness 已获批准，但 PROD-015 继续阻断正式上线。Editor E0 的 [problem brief](problem-brief.md)、[scope](scope.md) 和 [success metrics](success-metrics.md) 均为 `in-review`，因此 Editor system design、实现、依赖安装与 release 均未开放。E0 获批后，现有 Analyzer architecture、delivery、quality 与 readiness 继续作为历史范围证据；Editor 必须从 system design 开始建立自己的下游文档和审批。
+Analyzer-only readiness 已获批准，但 PROD-015 继续阻断正式上线。`project-owner` 于 2026-08-26 明确回复：“我批准 Editor E0 产品意图、点事件与范围事件规则、成功指标和开放问题；同意进入 Editor E0 架构设计。”Editor E0 的 [problem brief](problem-brief.md)、[scope](scope.md) 和 [success metrics](success-metrics.md) 据此为 `approved`，system design 门禁已开放；实现、依赖安装、delivery、quality 与 release 仍未开放。现有 Analyzer architecture、delivery、quality 与 readiness 继续作为历史范围证据，不能代表 Editor。

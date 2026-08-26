@@ -1,16 +1,16 @@
 ---
-status: in-review
+status: approved
 owner: "project-owner"
 last_reviewed: 2026-08-26
 upstream_docs:
   - "docs/product/problem-brief.md"
   - "docs/product/scope.md"
-next_action: "project-owner 审阅 Editor E0 任务、正确性、响应和恢复指标"
+next_action: "用已批准 Editor 指标驱动 system design；delivery 阶段再固定 fixture、步骤和容差"
 ---
 
 # Success Metrics
 
-Analyzer 指标已由 M3–M11 和 Analyzer-only readiness 形成历史证据。下列新增 Editor 指标保持 `in-review`，只能驱动后续 Editor 架构、验收和 eval，不得反向表述为现有代码已经达到。
+Analyzer 指标已由 M3–M11 和 Analyzer-only readiness 形成历史证据。下列新增 Editor 指标已于 2026-08-26 获批，用于驱动后续 Editor 架构、验收和 eval；不得反向表述为现有代码已经达到。
 
 ## Product and Learning Outcomes
 
@@ -49,7 +49,7 @@ owner-only 学习验证是当前批准方式，不推断为广泛用户研究结
 - 播放、切歌、跳转、选卡和换卡均可用键盘完成，焦点可见，图表结论不只依靠颜色，reduced motion 下无非必要动画。
 - Analyzer 已在真实 Chrome/Edge 形成 M11 证据；Editor 的路由、草稿、标记和右键交互变化后必须重新执行自己的双浏览器矩阵，不得继承 Analyzer 通过状态。
 
-## Editor E0 Product Outcomes（in review）
+## Editor E0 Product Outcomes（approved）
 
 | Metric | Target | Observation method | Review point |
 | --- | --- | --- | --- |
@@ -83,4 +83,4 @@ owner-only 学习验证是当前批准方式，不推断为广泛用户研究结
 
 ## Approval Record
 
-Analyzer 目标和阈值由 `project-owner` 于 2026-07-24 批准，并已由 Analyzer-only readiness 收口。Editor 指标于 2026-08-26 随 E0 需求转写进入 `in-review`；owner 单独批准前不生效，也不允许创建 Editor system design。获批后，delivery 文档再定义 fixture、步骤和容差，quality 阶段只在成功、失败、边界与异常证据齐全后判断 Editor readiness。
+Analyzer 目标和阈值由 `project-owner` 于 2026-07-24 批准，并已由 Analyzer-only readiness 收口。`project-owner` 于 2026-08-26 明确回复：“我批准 Editor E0 产品意图、点事件与范围事件规则、成功指标和开放问题；同意进入 Editor E0 架构设计。”Editor 指标据此生效并可驱动 system design；delivery 文档仍须另行定义 fixture、步骤和容差，quality 阶段只在成功、失败、边界与异常证据齐全后判断 Editor readiness。

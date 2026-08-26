@@ -1,12 +1,12 @@
 ---
-status: in-review
+status: approved
 owner: "project-owner"
 last_reviewed: 2026-08-26
 upstream_docs:
   - "docs/context/index.md"
   - "docs/context/glossary.md"
   - "docs/quality/release-readiness.md"
-next_action: "project-owner 审阅 Editor E0 用户、问题、范围事件与非目标"
+next_action: "进入 Editor E0 system design；实现继续等待 architecture 与 delivery 门禁"
 ---
 
 # Problem Brief
@@ -15,7 +15,7 @@ next_action: "project-owner 审阅 Editor E0 用户、问题、范围事件与�
 
 AudioNotSurfYet 已完成面向音频分析学习者的 Analyzer 候选，并以 `Ready with waivers` 进入有条件就绪。Analyzer 解决的核心问题不是“拿不到 Meyda 结果”，而是已有文档、示例和控制台工作方式通常只呈现数值或数组，学习者难以把结果对应到歌曲中的具体时刻、当时的听感，以及音色为何发生变化。
 
-Editor E0 提议解决下一层问题：用户能够听出歌曲中存在音符、音色或效果，却缺少一个与歌曲时间轴、节拍和分析特征对齐的工具，把这些观察反向整理成可保存的数据。Editor 因此定位为“逆向制曲”标注工具，而不是修改声音的音频编辑器。
+Editor E0 解决下一层问题：用户能够听出歌曲中存在音符、音色或效果，却缺少一个与歌曲时间轴、节拍和分析特征对齐的工具，把这些观察反向整理成可保存的数据。Editor 因此定位为“逆向制曲”标注工具，而不是修改声音的音频编辑器。
 
 ## Target User
 
@@ -51,7 +51,7 @@ Editor E0 提议解决下一层问题：用户能够听出歌曲中存在音符�
 
 长期结果是以纵向切片覆盖 `src/data/analyzerData.ts` 中全部 21 个特征，而不是一次性展示一个不可验证的全功能仪表盘。
 
-### Editor E0 outcome（in review）
+### Editor E0 outcome（approved）
 
 用户能够在同一首歌曲的循环播放中：
 
@@ -91,10 +91,12 @@ Editor 的输出是绑定单首歌曲的时间数据集；它不会修改、重�
 - 不同格式解码、采样率和浮点实现可能让黄金结果出现可接受但非零的误差。
 - Editor 新路由、草稿、右键交互、范围事件和叠加层会扩大资源、持久化、键盘与双浏览器验证面；Analyzer 的 readiness 不能替代 Editor 自身证据。
 - 仅由 owner 验证学习结果能够快速形成证据，但不能代表更广泛用户群体。
-- 同一分类的范围事件若允许无约束重叠会产生难以解释的数据；E0 提议同一 lane、同一 inner class 禁止范围重叠，不同分类仍可同时存在。
+- 同一分类的范围事件若允许无约束重叠会产生难以解释的数据；E0 已确定同一 lane、同一 inner class 禁止范围重叠，不同分类仍可同时存在。
 
 ## Approval Record
 
 `project-owner` 于 2026-07-24 批准了 Analyzer 的目标用户、问题、约束、成功标准和阶段门禁；该范围已由 M3–M11 和 Analyzer-only readiness 收口。
 
-2026-08-26，owner 批准 Analyzer `Ready with waivers` 并同意进入 Editor E0；随后要求把长音色和效果的范围事件纳入首期路线，并确认同类不重叠、`Esc`/空白右键取消、端点沿用自适应网格。本次更新把这些输入转写为待审阅的产品意图，不构成 Editor 架构或实现批准。Editor E0 获批后，必须单独复核其 architecture、delivery、quality 与未来整体 readiness。
+2026-08-26，owner 批准 Analyzer `Ready with waivers` 并同意进入 Editor E0；随后要求把长音色和效果的范围事件纳入首期路线，并确认同类不重叠、`Esc`/空白右键取消、端点沿用自适应网格。
+
+同日，`project-owner` 明确回复：“我批准 Editor E0 产品意图、点事件与范围事件规则、成功指标和开放问题；同意进入 Editor E0 架构设计。”本批准使上述 Editor 产品意图生效并开放 system design；它不构成 Editor 架构、delivery、实现、质量或整体 readiness 批准。
