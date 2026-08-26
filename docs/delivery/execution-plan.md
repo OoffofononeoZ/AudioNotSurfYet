@@ -9,7 +9,7 @@ upstream_docs:
   - "docs/architecture/system-design.md"
   - "docs/architecture/interface-contracts.md"
   - "docs/architecture/risk-register.md"
-next_action: "M11 已完成；创建并审阅 Analyzer release-readiness"
+next_action: "审阅 Analyzer release-readiness；批准前不扩大产品范围"
 ---
 
 # Execution Plan

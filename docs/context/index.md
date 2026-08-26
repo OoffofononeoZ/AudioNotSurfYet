@@ -4,7 +4,7 @@ owner: "project-owner"
 last_reviewed: 2026-08-26
 upstream_docs:
   - "AGENTS.md"
-next_action: "M11 已完成；创建并审阅 Analyzer release-readiness"
+next_action: "审阅 Analyzer release-readiness 的候选身份、豁免与部署边界"
 ---
 
 # Repository Context Index
@@ -23,7 +23,7 @@ AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端：用户选择
 - Execution planning：execution plan、acceptance criteria、test strategy 和 milestone plan 均为 approved。
 - Quality and evals：M3–M11 的适用 canonical/人工证据均已获批准；M11 已于 2026-08-26 关闭。
 - Implementation：M1–M11 均为 `Complete`，Analyzer 21/21 delivery 已关闭。
-- Readiness、release、retrospective：下一步创建 `release-readiness.md` 并保持 `in-review`；readiness 单独获批前不创建 release 或 retrospective 文档。
+- Readiness、release、retrospective：Analyzer `release-readiness.md` 已创建并保持 `in-review`；单独获批前不创建 release 或 retrospective 文档。
 
 ## Key Documents
 
@@ -49,6 +49,7 @@ AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端：用户选择
 | [golden-examples.md](../quality/golden-examples.md) | 成功、失败、边界和异常黄金样例 | project-owner / approved | fixture、Meyda、参数或用户任务变化 |
 | [failure-taxonomy.md](../quality/failure-taxonomy.md) | 稳定失败类型、S0–S3 和门禁响应 | project-owner / approved | 失败分类或风险接受规则变化 |
 | [evidence-index.md](../quality/evidence-index.md) | M3–M11 canonical run 摘要、环境、hash 和 reviewer | project-owner / approved | 新 run、artifact retention 或里程碑审批 |
+| [release-readiness.md](../quality/release-readiness.md) | Analyzer 候选身份、blocker、waiver 与有条件就绪结论 | project-owner / in-review | 候选代码、证据、风险接受或部署边界变化 |
 
 ## Architecture Decisions
 
@@ -81,8 +82,8 @@ AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端：用户选择
 - Delivery planning：[execution plan](../delivery/execution-plan.md)
 - Quality design：[eval plan](../quality/eval-plan.md)，Q0 批准后用于 M3–M11 证据
 - Quality evidence：[evidence index](../quality/evidence-index.md)，M3–M11 已批准
-- Quality readiness：`docs/quality/release-readiness.md` 尚未创建；M11 已批准并授权生成 review
-- Release operations：`docs/release/` 尚未创建；release readiness 证据存在后生成
+- Quality readiness：[Analyzer release readiness](../quality/release-readiness.md) 已创建并为 `in-review`
+- Release operations：`docs/release/` 尚未创建；readiness 获 owner 单独批准后才允许生成
 - Retrospectives：`docs/retrospectives/` 尚未创建；有发布、事故或重复摩擦证据后生成
 
 ## Current Known Gaps

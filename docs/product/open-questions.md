@@ -6,7 +6,7 @@ upstream_docs:
   - "docs/product/problem-brief.md"
   - "docs/product/scope.md"
   - "docs/product/success-metrics.md"
-next_action: "在 Analyzer readiness 中披露 PROD-015；readiness 获批后进入 Editor E0 处理 PROD-014"
+next_action: "审阅 readiness 中的 PROD-015 部署 blocker；获批后进入 Editor E0 处理 PROD-014"
 ---
 
 # Open Questions
