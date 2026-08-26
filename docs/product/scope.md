@@ -5,7 +5,7 @@ last_reviewed: 2026-08-26
 upstream_docs:
   - "docs/product/problem-brief.md"
   - "docs/quality/release-readiness.md"
-next_action: "按已批准 Editor system design 编制 E1–E6 delivery planning；获批前不开始 E1"
+next_action: "project-owner 审阅 in-review Editor E1–E6 delivery planning；获批前不开始 E1"
 ---
 
 # Scope

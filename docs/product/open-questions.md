@@ -6,7 +6,7 @@ upstream_docs:
   - "docs/product/problem-brief.md"
   - "docs/product/scope.md"
   - "docs/product/success-metrics.md"
-next_action: "以已批准 Editor 架构进入 E1–E6 execution planning；PROD-015 继续阻断 Analyzer 正式上线"
+next_action: "审阅 in-review Editor E1–E6 delivery planning；PROD-015 继续阻断 Analyzer 正式上线"
 ---
 
 # Open Questions
@@ -49,4 +49,4 @@ next_action: "以已批准 Editor 架构进入 E1–E6 execution planning；PROD
 
 ## Gate State
 
-Analyzer-only readiness 已获批准，但 PROD-015 继续阻断正式上线。`project-owner` 于 2026-08-26 先批准 Editor E0 产品意图，随后明确回复：“我批准 Editor E0 系统设计、接口契约、风险与 ADR；同意进入 Editor E1–E6 execution planning。”Editor 产品和 architecture 门禁据此关闭，delivery planning 已开放；planning 获批前 E1、依赖安装、Editor quality 与 release 仍未开放。现有 Analyzer architecture、delivery、quality 与 readiness 继续作为历史范围证据，不能代表 Editor。
+Analyzer-only readiness 已获批准，但 PROD-015 继续阻断正式上线。`project-owner` 于 2026-08-26 先后批准 Editor 产品和架构。Editor E1–E6 四份 delivery planning 文档现为 `in-review`；owner 批准前 E1、依赖安装、Editor quality 与 release 仍未开放。现有 Analyzer architecture、delivery、quality 与 readiness 继续作为历史范围证据，不能代表 Editor。

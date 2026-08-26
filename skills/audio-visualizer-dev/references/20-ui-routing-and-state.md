@@ -11,6 +11,8 @@
 | `/analyzer` | `Analyzer.vue` | Canvas 点阵背景和静态 Meyda 数据入口 |
 | `/testlands` | `TestLands.vue` | 试验页面，不应当作生产契约 |
 
+Editor 的批准目标路由为 `/editor/:trackId?`，但当前源码尚未实现。E1–E6 delivery planning 现为 `in-review`；获得 E1 明确开门前，不得把该目标路由写成当前代码事实。
+
 `MainLayout.vue` 固定组合 `HeaderBar`、当前 `router-view` 和 `MusicBar`，并创建/提供唯一 `AudioSessionService` 与 `AnalysisCoordinator`。修改页面高度、z-index、固定定位或底部空间时，要同时检查 Header 与 MusicBar。
 
 ## 组件通信

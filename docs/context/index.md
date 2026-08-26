@@ -20,7 +20,7 @@ AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端：用户选择
 - Repository context：入口、决策注册表、system map、glossary 与 working agreements 均已批准。
 - Product intent：problem brief、scope、success metrics 和 open questions 中的 Editor E0 点/范围事件范围已于 2026-08-26 获 owner 批准。
 - System design：Analyzer 基线保持历史批准；Editor system design、接口契约、R-022–R-027、ADR-0006–0009 和两个详细子契约均于 2026-08-26 获 owner 批准。R-022–R-027 仍为 `Open`，表示尚无实现缓解证据。
-- Execution planning：现有根级文档只覆盖已完成的 Analyzer M1–M11；Editor E1–E6 execution planning 已开放，规划文档获批前 E1 不得开始。
+- Execution planning：现有根级文档只覆盖已完成的 Analyzer M1–M11；`docs/delivery/editor/` 四份 E1–E6 规划已建立并保持 `in-review`，获批前 E1 不得开始。
 - Quality and evals：M3–M11 的适用 canonical/人工证据均已获批准；M11 已于 2026-08-26 关闭。
 - Implementation：M1–M11 均为 `Complete`，Analyzer 21/21 delivery 已关闭。
 - Readiness、release、retrospective：Analyzer `release-readiness.md` 已获 `Ready with waivers` 批准；PROD-015 尚未解决，因此不创建上线声明或生产托管，Editor 也不继承该 readiness。
@@ -47,6 +47,10 @@ AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端：用户选择
 | [acceptance-criteria.md](../delivery/acceptance-criteria.md) | 可测量验收与阈值 | project-owner / approved | 成功指标、容差或支持矩阵变化 |
 | [test-strategy.md](../delivery/test-strategy.md) | 测试层级、fixture 和证据策略 | project-owner / approved | 工具、fixture 或验证能力变化 |
 | [milestone-plan.md](../delivery/milestone-plan.md) | 相对目标、状态和退出证据 | project-owner / approved | 里程碑关闭或阻塞状态变化 |
+| [Editor execution plan](../delivery/editor/execution-plan.md) | E1–E6 实施顺序、固定参数和逐里程碑证据节奏 | project-owner / in-review | Editor 范围、架构、切片或依赖变化 |
+| [Editor acceptance criteria](../delivery/editor/acceptance-criteria.md) | AC-E101–AC-E606、阈值、证据方法和风险映射 | project-owner / in-review | Editor 指标、容差、容量或支持矩阵变化 |
+| [Editor test strategy](../delivery/editor/test-strategy.md) | E1–E6 测试层级、fixture、浏览器、性能与 evidence cadence | project-owner / in-review | 测试工具、fixture、浏览器或证据能力变化 |
+| [Editor milestone plan](../delivery/editor/milestone-plan.md) | E0-D 与 E1–E6 状态、依赖和退出清单 | project-owner / in-review | 里程碑关闭、阻塞或开放状态变化 |
 | [eval-plan.md](../quality/eval-plan.md) | 七组评估、阈值、AC/risk 映射和证据缺口 | project-owner / approved | 验收、测试覆盖或风险变化 |
 | [golden-examples.md](../quality/golden-examples.md) | 成功、失败、边界和异常黄金样例 | project-owner / approved | fixture、Meyda、参数或用户任务变化 |
 | [failure-taxonomy.md](../quality/failure-taxonomy.md) | 稳定失败类型、S0–S3 和门禁响应 | project-owner / approved | 失败分类或风险接受规则变化 |
@@ -85,7 +89,7 @@ AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端：用户选择
 
 - Product intent：[problem brief](../product/problem-brief.md)、[scope](../product/scope.md)、[success metrics](../product/success-metrics.md) 均已批准 Editor E0
 - System design：[system design](../architecture/system-design.md) 与 Editor 子契约已获批准
-- Delivery planning：Editor E1–E6 规划已开放；专属 execution plan、acceptance criteria、test strategy 和 milestone plan 获批前 E1 保持关闭
+- Delivery planning：[Editor execution plan](../delivery/editor/execution-plan.md)、[acceptance criteria](../delivery/editor/acceptance-criteria.md)、[test strategy](../delivery/editor/test-strategy.md) 与 [milestone plan](../delivery/editor/milestone-plan.md) 为 `in-review`；owner 批准前 E1 保持关闭
 - Quality design：[eval plan](../quality/eval-plan.md)，Q0 批准后用于 M3–M11 证据
 - Quality evidence：[evidence index](../quality/evidence-index.md)，M3–M11 已批准
 - Quality readiness：[Analyzer release readiness](../quality/release-readiness.md) 已由 owner 批准为 `Ready with waivers`，且只覆盖 Analyzer 候选
@@ -103,6 +107,7 @@ AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端：用户选择
 - Analyzer readiness 已于 2026-08-26 获 owner 有条件批准；正式托管平台、域名、SPA fallback 和生产 URL 尚未决定，继续阻断正式上线。
 - 当前代码中的 Header Editor 和播放列表加号仍指向占位/Analyzer 旧行为；Editor target architecture 已获批准，但尚无 Editor 路由、lease、工程、草稿、点/范围事件或叠加层实现。
 - Editor E5 已因 owner 补充并批准范围事件创建、取消、吸附与不重叠规则而成为产品序列中的 `Planned`；E1–E6 仍须等待 delivery planning 批准。
+- Editor E1–E6 专属 delivery 文档已经建立；固定 10,000 事件容量门禁、overlay 35%/12% 和逐里程碑 provisional/canonical/owner 审批，但这些规划仍为 `in-review`，不是实现或通过证据。
 - 详细 context 文档的长期 owner/review cadence 尚未全部统一；代码改动时必须同步修正事实。
 - 工程事实差异继续记录在 [Skill 项目差异](../../skills/audio-visualizer-dev/references/99-open-questions-and-project-deltas.md)，产品开放项见 [open questions](../product/open-questions.md)。
 
@@ -161,3 +166,5 @@ M11 canonical run `M11-2026-08-25T10-05-12-783Z-99c67792` 随后在 clean commit
 随后 owner 要求把 Editor 定义为对已有歌曲进行点/范围时间标注的“逆向制曲”工具，并补充长音色/效果的两次点击创建、端点手柄和右键删除；owner 又确认同类不重叠、`Esc`/空白右键取消及端点沿用自适应网格。`project-owner` 于 2026-08-26 进一步明确回复：“我批准 Editor E0 产品意图、点事件与范围事件规则、成功指标和开放问题；同意进入 Editor E0 架构设计。”Editor 产品文档据此获批并开放 system design；当前代码事实不变，E1–E6 仍未开放。
 
 同日，Editor target architecture 已按批准范围写入 system design、interface contracts、R-022–R-027、ADR-0006–0009 与两个详细子契约。`project-owner` 随后明确回复：“我批准 Editor E0 系统设计、接口契约、风险与 ADR；同意进入 Editor E1–E6 execution planning。”架构据此改为 `approved`，R-022–R-027 仍为 `Open`；该批准只开放 delivery planning，不构成 E1 实现、质量证据或 Editor readiness。
+
+随后建立 `docs/delivery/editor/` 四份专属规划，按 owner 固定选择记录 10,000 事件 E6 压力门禁、overlay 默认 35%/最小 12% 和 E1–E6 各自 provisional、clean canonical、owner 审批。文档保持 `in-review`；下一门禁是 owner 审阅并明确开放 E1。

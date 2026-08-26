@@ -39,6 +39,8 @@ AudioBufferSourceNode → AnalyserNode → GainNode → audioContext.destination
 - decode/unsupported 由 MusicBar 监听 snapshot error 并显示 Element Plus 非阻塞消息；队列、下一首和重试仍可用。
 - 音频解码不创建对象 URL；对象 URL 只用于内嵌封面。
 
+Editor 架构已批准通过 tokenized playback/analysis lease 临时使用 repeat-one 并复用现有 service/coordinator/Worker；该 lease 仍未进入源码。Editor delivery planning 当前为 `in-review`，实现前必须保持本节已证实的单 engine、单 RAF、queue-next 事实不变。
+
 ## 最近会话恢复
 
 - `initialize()` 先恢复序列化队列；current Blob 优先解码并固定为 0 秒 paused，不自动播放。
