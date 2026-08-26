@@ -1,12 +1,12 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-08-21
+last_reviewed: 2026-08-26
 upstream_docs:
   - "docs/product/scope.md"
   - "docs/architecture/system-design.md"
   - "docs/architecture/interface-contracts.md"
-next_action: "M11 clean Chrome/Edge canonical 已回归 21/21 renderer；等待 owner 最终验收"
+next_action: "M11 21/21 renderer 回归已批准；作为 Analyzer readiness 输入"
 ---
 
 # ADR-0004: Typed Feature Registry and Canvas 2D Renderer Families

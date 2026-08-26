@@ -1,10 +1,10 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-08-25
+last_reviewed: 2026-08-26
 upstream_docs:
   - "docs/architecture/system-design.md"
-next_action: "M11 clean canonical 已回归现有契约；等待人工恢复与辅助技术验收"
+next_action: "M11 契约回归与人工门禁已批准；作为 Analyzer readiness 输入"
 ---
 
 # Interface Contracts

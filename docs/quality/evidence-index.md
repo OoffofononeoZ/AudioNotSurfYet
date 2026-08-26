@@ -1,21 +1,21 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-08-25
+last_reviewed: 2026-08-26
 upstream_docs:
   - "docs/quality/eval-plan.md"
   - "docs/quality/golden-examples.md"
   - "docs/quality/failure-taxonomy.md"
   - "docs/delivery/milestone-plan.md"
   - "tests/fixtures/fixture-manifest.json"
-next_action: "M11 clean canonical 已登记为 in-review；等待 Edge 原生权限、辅助技术人工签字与 owner 批准"
+next_action: "M11 canonical 与人工门禁已获批准；创建 Analyzer release-readiness review"
 ---
 
 # Evidence Index
 
 ## 1. Purpose and Gate State
 
-本文件保存受版本控制的长期证据摘要；原始日志保存在 Git 忽略的本地 artifact 目录。M3–M10 的适用 canonical evidence 均已由 `project-owner` 批准，M10 已为 `Complete`。M11 clean canonical 已在真实 Chrome/Edge 上通过并登记为 `in-review`；原生权限与辅助技术人工签字完成前，M11 仍为 `In Progress`。
+本文件保存受版本控制的长期证据摘要；原始日志保存在 Git 忽略的本地 artifact 目录。M3–M11 的适用 canonical evidence 与所需人工补偿门禁均已由 `project-owner` 批准，M11 已为 `Complete`。下一质量阶段是创建并单独审阅 Analyzer release-readiness；当前批准不等于正式上线授权。
 
 每条 `pass` 只证明对应里程碑的适用子集在被记录的 commit 和环境上可复现。它不表示完整 EV-A–EV-R、未执行里程碑、Edge 矩阵或 release readiness 已通过。
 
@@ -843,14 +843,14 @@ M8 自动化证明 Slice 0 的 sticky 距 Header 8px、播放器/歌曲列表高
 | --- | --- |
 | Run ID | `M11-2026-08-25T10-05-12-783Z-99c67792` |
 | Milestone | M11 — format, recovery, performance, resource and accessibility hardening |
-| Evidence state | `in-review` |
+| Evidence state | `approved` |
 | Eval result | `pass`（38/38 steps） |
 | Commit | `99c67792509d07456bcb431b90468252f8b0fdc3` |
 | Commit at end | `99c67792509d07456bcb431b90468252f8b0fdc3` |
 | Dirty at start / end | `false` / `false` |
 | Started at | 2026-08-25 10:05:12.783 UTC |
 | Method | `npm run eval:m11` |
-| Reviewer | `project-owner` — pending native Edge permission and assistive-technology checks |
+| Reviewer | `project-owner` — approved 2026-08-26 |
 | Retention | `local-present` |
 | Artifact root | `artifacts/evals/M11-2026-08-25T10-05-12-783Z-99c67792/` |
 | Summary SHA-256 | `7d637525b5c9e6aa6fb45dc0818ac1fb59bbef90b90abf3ed2d6e6119ac631b5` |
@@ -889,7 +889,7 @@ M8 自动化证明 Slice 0 的 sticky 距 Header 8px、播放器/歌曲列表高
 | Build | pass with warning | 1818 modules；Worker 46.50 kB；最大 JS chunk 1,117.94 kB，R-019 warning 保留 |
 | Diff / identity | pass | `git diff --check` exit 0；起止 commit 相同且工作树干净 |
 
-自动化覆盖真实 Chrome/Edge、三格式、恢复、quota、unknown schema、21/21 Analyzer、最重性能、资源、键盘、焦点、reduced motion 和多视口。它没有自动操纵原生 OS 文件选择器或权限气泡，也没有替代 VoiceOver/Narrator 等辅助技术人工体验；这两项仍是 owner 批准前的补偿门禁。
+自动化覆盖真实 Chrome/Edge、三格式、恢复、quota、unknown schema、21/21 Analyzer、最重性能、资源、键盘、焦点、reduced motion 和多视口。它没有自动操纵原生 OS 文件选择器或权限气泡，也没有替代 VoiceOver/Narrator 等辅助技术人工体验；`project-owner` 于 2026-08-26 以最终批准为这两项补偿门禁签字。本记录只登记人工检查通过，不补写用户未提供的逐项测量、浏览器提示文本或辅助技术输出。
 
 ### Local Artifact Hashes
 
@@ -937,10 +937,9 @@ M8 自动化证明 Slice 0 的 sticky 距 Header 8px、播放器/歌曲列表高
 
 `summary.json.sha256` 已独立核对并与 `summary.json` 一致；artifact 必须至少保留到 M11 审批与 release-readiness review 完成。
 
-### Open Gaps and Approval Gate
+### Approval and Remaining Readiness Inputs
 
 - 真实 Chrome/Edge 自动化矩阵已在 clean commit 上通过；EG-003 据此关闭。
-- 原生 Edge 文件选择器的 granted/prompt/denied、恢复访问、文件移动与内容变化仍需 owner 人工签字；OPFS 自动化不得替代该项。
-- 键盘、焦点、DOM 替代信息、reduced motion 与几何自动化已通过；VoiceOver/Narrator 等辅助技术体验仍需 owner 人工复核。
+- `project-owner` 于 2026-08-26 明确回复：“我批准 M11 canonical evidence、Edge 原生权限与最终加固结果；同意将 M11 标记为 Complete 并创建 release-readiness。”该签字补足 Edge 原生文件选择器/权限、文件移动与恢复访问，以及辅助技术和人工长会话的 M11 补偿门禁；未产生独立 artifact，也不把这些路径表述为自动化覆盖。
 - 主 chunk 1,117.94 kB warning 与 R-019 保留；Meyda 5.6.3 `spectralFlux` 上游缺陷仍存在，产品侧继续由 ADR-0005 缓解。
-- M11 仍为 `In Progress`，本 evidence 保持 `in-review`；owner 批准前不创建 `release-readiness.md`，也不得表述为可发布。
+- M11 为 `Complete`，本 evidence 为 `approved`。现在允许创建 `release-readiness.md`，但 readiness 在 owner 单独审阅豁免前必须保持 `in-review`，不得表述为正式上线授权。

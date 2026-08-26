@@ -1,12 +1,12 @@
 ---
 status: in-review
 owner: "project-owner"
-last_reviewed: 2026-07-24
+last_reviewed: 2026-08-26
 upstream_docs:
   - "docs/product/problem-brief.md"
   - "docs/product/scope.md"
   - "docs/product/success-metrics.md"
-next_action: "在相关能力进入范围或 release 阶段开始时回答非阻断问题；当前无 Product intent 门禁问题"
+next_action: "在 Analyzer readiness 中披露 PROD-015；readiness 获批后进入 Editor E0 处理 PROD-014"
 ---
 
 # Open Questions
@@ -17,7 +17,7 @@ next_action: "在相关能力进入范围或 release 阶段开始时回答非阻
 | --- | --- | --- | --- | --- | --- | --- |
 | PROD-013 | 未来是否提供上传、云端处理、账户或跨设备同步？ | 当前只批准浏览器本地处理；未来能力尚无目标用户、隐私或服务设计 | 若进入范围，将改变产品数据边界、架构、合规和发布要求 | 否 | project-owner | 提议任何远端音频或账户能力时 |
 | PROD-014 | Visualizer、Editor 和其他空白 Tab 分别解决什么用户问题？ | 当前没有已批准用例，继续推断会造成范围漂移 | 未来产品范围、导航和架构 | 否 | project-owner | 任一 Tab 被提议进入交付时 |
-| PROD-015 | 正式发布使用哪个静态托管平台、域名和 SPA fallback 配置？ | 当前只要求 HTTPS 或 localhost，托管选择属于 release 准备 | 部署、监控、回滚和运行配置 | 否；会阻断 release | project-owner | 进入 release and feedback 阶段时 |
+| PROD-015 | 正式发布使用哪个静态托管平台、域名和 SPA fallback 配置？ | 当前只要求 HTTPS 或 localhost，托管选择属于 release 准备 | 部署、监控、回滚和运行配置 | 不阻断 Analyzer readiness review；会阻断正式上线 | project-owner | readiness 获批后若开始 release and feedback |
 | PROD-016 | 是否需要在 owner-only 验证之外证明普遍学习效果？ | 当前成功标准只由 owner 对 3/3 黄金片段验证 | 用户研究样本、测量设计和对外表述 | 否 | project-owner | 需要对外声称学习效果或扩大目标人群时 |
 
 ## Closed in This Review

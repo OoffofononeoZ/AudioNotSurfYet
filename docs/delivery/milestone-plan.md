@@ -1,12 +1,12 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-08-25
+last_reviewed: 2026-08-26
 upstream_docs:
   - "docs/delivery/execution-plan.md"
   - "docs/delivery/acceptance-criteria.md"
   - "docs/delivery/test-strategy.md"
-next_action: "M11 clean canonical 已通过；完成 owner Edge 原生权限与辅助技术签字"
+next_action: "M11 已完成；创建并审阅 Analyzer release-readiness"
 ---
 
 # Milestone Plan
@@ -15,7 +15,7 @@ next_action: "M11 clean canonical 已通过；完成 owner Edge 原生权限与�
 
 - Target 使用相对门禁，不表示日历承诺。
 - `Complete` 只用于文档门禁、真实证据和所需人工批准均已满足的里程碑。
-- Q0、M3、M4、M5、M6、M7、M8、M9 和 M10 为 `Complete`；owner 已明确要求开始最终加固，M11 当前为 `In Progress`。
+- Q0 与 M1–M11 均为 `Complete`；Analyzer delivery 已关闭，当前进入 release-readiness review。
 - 一个里程碑未通过时，后续里程碑保持 Planned/Blocked，不并行扩大特征范围。
 
 ## Milestones
@@ -33,7 +33,7 @@ next_action: "M11 clean canonical 已通过；完成 owner Edge 原生权限与�
 | M8 | Remaining scalar features | Complete | After M7 | M7 | UI hardening、13 项新增 scalar 全部 golden/renderer/edge，累计 16/21 | project-owner |
 | M9 | Power Spectrum + MFCC + Buffer | Complete | After M8 | M8 | Header blur、vector/waveform 维度、精确值、累计 19/21 | project-owner |
 | M10 | Loudness + Complex Spectrum | Complete | Full feature gate | M9 | 结构 payload/renderer、21/21 coverage | project-owner |
-| M11 | Cross-cutting hardening | In Progress | Delivery exit gate | M10 | 格式、恢复、权限、性能、无障碍、视口和 Chrome/Edge 全证据 | project-owner |
+| M11 | Cross-cutting hardening | Complete | Delivery exit gate | M10 | 格式、恢复、权限、性能、无障碍、视口和 Chrome/Edge 全证据 | project-owner |
 
 ## Gate Checklist by Milestone
 
@@ -132,18 +132,18 @@ next_action: "M11 clean canonical 已通过；完成 owner Edge 原生权限与�
 
 - [x] canonical：三格式 × Chrome/Edge 自动化。
 - [x] canonical：15 分钟和 20 次反复生命周期压力。
-- [ ] 权限/恢复/quota/schema 完整矩阵（自动化 canonical 已过；Edge 原生 picker 人工检查待签字）。
+- [x] 权限/恢复/quota/schema 完整矩阵（自动化 canonical 与 Edge 原生 picker 人工补偿签字均完成）。
 - [x] canonical：输入 ≤100ms、无分析归因 >50ms 主线程任务。
-- [ ] 键盘/焦点/非颜色/reduced motion（自动化 canonical 已过；辅助技术人工检查待签字）。
+- [x] 键盘/焦点/非颜色/reduced motion（自动化 canonical 与辅助技术人工补偿签字均完成）。
 - [x] canonical：390/1024/1280/1920 实际几何与 Canvas。
-- [ ] 所有适用 AC 有证据，相关风险已关闭、缓解或明确接受。
+- [x] 所有适用 AC 有证据，相关风险已关闭、缓解或明确接受；R-019 等剩余项进入 readiness 豁免审阅。
 
 ## Current Gate State
 
-- Current stage：M10 为 `Complete`；M11 clean Chrome/Edge canonical 已 38/38 通过并登记 `in-review`，M11 仍为 `In Progress`。
+- Current stage：M11 clean Chrome/Edge canonical 已 38/38 通过并获 owner 批准，M11 为 `Complete`；当前进入 Analyzer release-readiness review。
 - Previous gate：M3 已由 `project-owner` 于 2026-07-28 批准并标记 `Complete`。
 - Canonical run：`npm run eval:m3` 已在 clean commit `17d16f0da37289c1f67f75203502beef999572ea` 上通过；摘要见 [evidence index](../quality/evidence-index.md)。
-- Next gate：owner 完成 Edge 原生权限、辅助技术与人工长会话复核并批准 M11 evidence 后，才可把 M11 改为 `Complete`。
+- Next gate：创建 `docs/quality/release-readiness.md`，以 `in-review` 的 `Ready with waivers` 结论列明阻断、豁免和部署前置条件，等待 owner 单独批准。
 - M3 state：Complete；M3 evidence 只证明测试基础，不代表 M4 产品行为通过。
 - M4 canonical：`npm run eval:m4` 在 clean commit `e5cfe9e8ab62301f3c5b0ddcdd37847a2e131a0f` 上 13/13 步骤通过；60 秒漂移 2.233ms，三次 seek 最大误差 66.827ms。`project-owner` 已于 2026-07-29 批准该证据。
 - M5 provisional：`M5-2026-07-29T07-03-16-207Z-2eb98381-provisional` 在 dirty worktree 16/16 步骤通过；summary SHA-256 为 `7b0acaf128ac4a7ceffce1449d2421127d20c8b25dcdc1ebd07b889072228530`。它只作实现反馈，不是正式 evidence。
@@ -157,8 +157,8 @@ next_action: "M11 clean canonical 已通过；完成 owner Edge 原生权限与�
 - M10 provisional：`M10-2026-08-22T18-17-36-129Z-2df604b9-provisional` 在 dirty worktree 36/36 通过，summary SHA-256 为 `e9696c843256bff07cfa77b29ee9a529e9d80c6fc842c6f7437fab39a5c77166`。M10 unit 7/7、integration 13/13、Chrome 3/3；四重卡 15 分钟反馈最大 16.2ms、分析归因长任务 0。它不是正式 evidence。
 - M10 canonical：`M10-2026-08-22T18-25-01-873Z-8830e2a2` 在 clean commit `8830e2a2edddd9a5db4796ec6f5d5da8ee3c5f72` 上 36/36 通过，summary SHA-256 为 `30eb11b9985adc8c6d84e01b84f31a75785a4d8e39bdef22e85dd153f2637ea1`。M10 unit 7/7、integration 13/13、Chrome 3/3；四重卡 15 分钟最大反馈 17ms、分析归因长任务 0；正式 evidence 于 2026-08-25 获 owner 批准。
 - M11 provisional：`M11-2026-08-25T09-47-44-125Z-1b3691f9-provisional` 在 dirty worktree 38/38 通过，summary SHA-256 为 `e84e695f8cb328390e1843b03d7af5c6f619bd2d96442fd7d97799bef5287ad5`。Edge 全量 31/31；Chrome/Edge 四重卡最大反馈 17.6ms/16.7ms、分析归因长任务均为 0；两端 20 次路由循环均为 21 created/20 lost WebGL context 和 2 live RAF。它不是正式 evidence。
-- M11 canonical：`M11-2026-08-25T10-05-12-783Z-99c67792` 在 clean commit `99c67792509d07456bcb431b90468252f8b0fdc3` 上 38/38 通过，summary SHA-256 为 `7d637525b5c9e6aa6fb45dc0818ac1fb59bbef90b90abf3ed2d6e6119ac631b5`。Chrome 专项 4/4、Edge 全量 31/31；Chrome/Edge 四重卡最大反馈 17.9ms/17.2ms、分析归因长任务均为 0；正式 evidence 为 `in-review`。
-- Known future blockers：Edge 151 clean 自动化已通过，但原生权限与辅助技术人工证据尚未完成，因此仍不能完成 M11 或未来 readiness；托管平台未定会阻断 release，但不阻断 M11 验收。
+- M11 canonical：`M11-2026-08-25T10-05-12-783Z-99c67792` 在 clean commit `99c67792509d07456bcb431b90468252f8b0fdc3` 上 38/38 通过，summary SHA-256 为 `7d637525b5c9e6aa6fb45dc0818ac1fb59bbef90b90abf3ed2d6e6119ac631b5`。Chrome 专项 4/4、Edge 全量 31/31；Chrome/Edge 四重卡最大反馈 17.9ms/17.2ms、分析归因长任务均为 0；正式 evidence 于 2026-08-26 获 owner 批准。
+- Known future blockers：托管平台、域名和 SPA fallback 未定会阻断正式 release；R-019、local-only/no-CI、单机性能基线与开发服务器 advisory 必须在 readiness 中显式审阅，不重新打开 M11。
 
 ## Approval Record
 
@@ -169,6 +169,8 @@ next_action: "M11 clean canonical 已通过；完成 owner Edge 原生权限与�
 `project-owner` 于 2026-07-29 明确批准 M4 evidence index 与 working agreements。M4 据此改为 `Complete` 并开放 M5；该批准不预先批准 M5 evidence。
 
 `project-owner` 于 2026-07-29 确认 M5 Chrome 原生权限人工检查通过，并明确批准 M5 evidence index 与 working agreements。M5 据此改为 `Complete` 并开放 M6；超范围压力输入未开始播放不计入门禁，也不扩展约 15 分钟支持承诺。
+
+2026-08-26，`project-owner` 明确回复：“我批准 M11 canonical evidence、Edge 原生权限与最终加固结果；同意将 M11 标记为 Complete 并创建 release-readiness。”M11 evidence 据此改为 `approved`，M11 改为 `Complete`；该批准允许创建 readiness review，但不预先接受 readiness 中尚待审阅的豁免，也不构成正式上线授权。
 
 2026-07-30，M6 canonical 已在 clean commit 上 20/20 通过。`project-owner` 随后明确回复：“我批准 M6 canonical evidence、working agreements、system map 与 glossary；同意将 M6 标记为 Complete 并开放 M7。”M6 据此改为 `Complete`；M7 门禁开放但仍为 `Planned`，直到明确开始实现。
 

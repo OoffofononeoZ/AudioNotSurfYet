@@ -49,7 +49,7 @@
 - 已建立 Vitest、Playwright、Worker、IndexedDB、fixture、golden、docs 和 deliberate-failure harness。
 - fixture/golden 生成改用 Node 24 原生 type stripping；不依赖在受限环境会产生 IPC `EPERM` 的 `tsx` CLI。
 - 当前没有正式 CI，自动化结论必须限定为本地环境。
-- 当前机器已安装 Edge 151；M11 clean canonical 已使用真实 `msedge` channel 全量 31/31 通过。原生权限 prompt 仍需人工检查，不能由 OPFS 自动化替代。
+- 当前机器已安装 Edge 151；M11 clean canonical 已使用真实 `msedge` channel 全量 31/31 通过。原生权限 prompt 不能由 OPFS 自动化替代；当前候选已由 `project-owner` 于 2026-08-26 完成人工补偿签字，相关实现或浏览器变化后须重做。
 - 正式 M3 canonical run 已在 clean commit `17d16f0da37289c1f67f75203502beef999572ea` 上通过并登记，且已由 `project-owner` 批准。
 - 正式 M4 canonical run 已在 clean commit `e5cfe9e8ab62301f3c5b0ddcdd37847a2e131a0f` 上通过并登记，evidence 与 working agreements 已由 `project-owner` 批准。
 - M5 自动化 picker 使用浏览器 OPFS 返回真实 `FileSystemFileHandle`；原生 OS picker 的 granted/prompt/denied 与文件移动路径已由 `project-owner` 于 2026-07-29 人工检查通过。
@@ -57,7 +57,7 @@
 - 超出约 15 分钟支持边界的长音频未开始播放只作为非门禁压力观察；它不是规定的预期失败，也不能替代范围内性能或格式验证。
 - M6 当前 Meyda 的 `spectralFlux` 对有效输入抛出 `x is not defined`；已用预期失败测试和 R-020 固定，不能把 21 项 registry 误述为 21 项均可计算。
 - M6 dirty-worktree provisional 与 clean-commit canonical 均已 20/20 通过；正式 evidence 已登记，并由 `project-owner` 于 2026-07-30 批准，M6 已关闭。
-- M7、M8、M9、M10 已获批准并关闭。M11 clean canonical `M11-2026-08-25T10-05-12-783Z-99c67792` 已在 commit `99c67792509d07456bcb431b90468252f8b0fdc3` 上 38/38 通过并登记 `in-review`；原生 Edge 权限与辅助技术人工验收前，M11 仍为 `In Progress`。
+- M7–M11 已获批准并关闭。M11 clean canonical `M11-2026-08-25T10-05-12-783Z-99c67792` 在 commit `99c67792509d07456bcb431b90468252f8b0fdc3` 上 38/38 通过；Edge 原生权限、辅助技术与最终加固于 2026-08-26 获 owner 签字。下一质量门禁是 `in-review` Analyzer release-readiness。
 
 ## 构建风险
 

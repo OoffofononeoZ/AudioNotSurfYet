@@ -1,13 +1,13 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-08-25
+last_reviewed: 2026-08-26
 upstream_docs:
   - "docs/quality/eval-plan.md"
   - "docs/delivery/acceptance-criteria.md"
   - "docs/delivery/test-strategy.md"
   - "docs/architecture/risk-register.md"
-next_action: "M11 clean canonical 已回归全部既有 golden；等待 owner 最终人工验收"
+next_action: "M11 golden 回归与人工门禁已批准；供 release-readiness 复核"
 ---
 
 # Golden Examples

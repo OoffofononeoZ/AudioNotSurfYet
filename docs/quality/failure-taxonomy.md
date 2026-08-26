@@ -1,13 +1,13 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-08-21
+last_reviewed: 2026-08-26
 upstream_docs:
   - "docs/quality/eval-plan.md"
   - "docs/quality/golden-examples.md"
   - "docs/delivery/acceptance-criteria.md"
   - "docs/architecture/risk-register.md"
-next_action: "M11 clean canonical 未发现新失败类型；人工权限与辅助技术缺口继续按既有分类处理"
+next_action: "M11 未新增失败类型；在 readiness 中分列 blocker、waiver 与覆盖缺口"
 ---
 
 # Failure Taxonomy

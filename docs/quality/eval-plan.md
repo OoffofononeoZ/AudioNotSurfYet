@@ -1,21 +1,21 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-08-25
+last_reviewed: 2026-08-26
 upstream_docs:
   - "docs/product/success-metrics.md"
   - "docs/architecture/risk-register.md"
   - "docs/delivery/execution-plan.md"
   - "docs/delivery/acceptance-criteria.md"
   - "docs/delivery/test-strategy.md"
-next_action: "M11 clean 双浏览器 canonical 已通过；完成人工权限与辅助技术补偿验证后再创建 readiness"
+next_action: "M11 证据已获批准；创建并审阅 Analyzer release-readiness"
 ---
 
 # Eval Plan
 
 ## 1. Purpose and Current State
 
-本文件定义 AudioNotSurfYet 的质量证据契约。Vitest、Playwright、Worker harness、受控 fixture 和 direct-Meyda golden 已在 M3 建立。M3–M10 的适用 canonical evidence 均已获批，M10 已为 `Complete`；M11 clean Chrome/Edge 自动化 evidence 已为 `in-review`，但原生权限与辅助技术人工补偿、owner 批准和完整 EV-A–EV-R 收口仍未完成。
+本文件定义 AudioNotSurfYet 的质量证据契约。Vitest、Playwright、Worker harness、受控 fixture 和 direct-Meyda golden 已在 M3 建立。M3–M11 的适用 canonical evidence 均已获批；M11 的原生 Edge 权限、辅助技术和人工长会话补偿门禁也已由 owner 于 2026-08-26 签字。完整 EV-A–EV-R 已完成里程碑收口，现在进入 Analyzer release-readiness review。
 
 Q0 只批准“如何判断质量”，不批准 release readiness。`docs/quality/release-readiness.md` 只能在 M11 已产生完整成功、失败、边界和异常证据后创建。
 
@@ -147,7 +147,7 @@ Q0 只批准“如何判断质量”，不批准 release readiness。`docs/quali
 - Playwright report、trace、截图和性能 dump 使用 `test-results/`、`playwright-report/`、`artifacts/evals/<run-id>/`，只在本地保留；M3 建立这些路径时再同步加入 `.gitignore`。
 - 本地产物至少保留到对应里程碑批准；与 S0/S1 有关的产物保留到缺陷关闭及回归获批。删除后把 evidence index 的 `retention_state` 改为 `local-deleted`，不得删除摘要、hash 或复现命令。
 - `local-deleted` 摘要不能单独支持未来 release readiness。若 readiness 需要检查原始报告、trace 或截图，必须重新运行相应 eval 并产生新的 run record。
-- M3/M4/M5 已批准 canonical artifact 均在 Git 忽略目录保留；M5 Chrome 原生权限人工记录以 owner 明确签字补偿且未生成私有 artifact。dirty-worktree provisional artifact 只保留为实现反馈。
+- M3–M11 已批准 canonical artifact 均按各自 evidence record 的 retention 状态管理；M5 Chrome 与 M11 Edge 原生权限/辅助技术人工记录以 owner 明确签字补偿且未生成私有 artifact。dirty-worktree provisional artifact 只保留为实现反馈。
 
 ## 7. Evidence Gaps
 
@@ -155,7 +155,7 @@ Q0 只批准“如何判断质量”，不批准 release readiness。`docs/quali
 | --- | --- | --- | --- | --- | --- |
 | EG-004 | 广泛用户学习结果 | 当前范围只批准 owner 自测 | 只能证明 owner 对 3/3 样例达标，不能泛化学习效果 | project-owner | 保留 owner-only 表述；扩大声明前另开产品研究决策 |
 | EG-005 | 目标基线硬件 | 产品未指定设备型号 | 性能结论跨设备可比性有限 | project-owner | 每次记录实际硬件，阈值不变；若结果不稳定，在 quality/readiness 前批准目标设备 |
-| EG-006 | 文件权限真实提示的全自动化 | OS picker 和权限气泡受浏览器/系统控制 | M5 Chrome 已由 owner 手工补偿；Edge 与未来完整矩阵仍不能只靠 adapter 证明 | project-owner | M5 Chrome 记录见 evidence index；Edge/M11 继续执行真实 granted/prompt/denied |
+| EG-006 | 文件权限真实提示的全自动化 | OS picker 和权限气泡受浏览器/系统控制 | Chrome/Edge 当前候选均有 owner 手工补偿，但未来回归仍不能只靠 adapter 证明 | project-owner | M5 Chrome 与 M11 Edge 签字见 evidence index；权限相关实现或浏览器变化时重复人工矩阵 |
 
 ### Resolved evidence gaps
 
@@ -185,3 +185,5 @@ Q0 只有在以下条件满足后才能改为 `approved`：
 2026-07-29，M4 clean-commit canonical run 已追加到 [evidence index](evidence-index.md)，并由 `project-owner` 明确批准；EV-S、EV-B、EV-R 的 M4 适用子集据此生效，M4 关闭并开放 M5。该批准不覆盖 M5 EV-D 或 EG-006。
 
 同日，M5 clean-commit canonical run 与 Chrome 原生权限人工检查均通过，`project-owner` 明确批准 M5 evidence 与 working agreements；EV-D 的 M5 适用子集据此生效，M5 关闭并开放 M6。EG-006 的全自动化缺口和 Edge 真实矩阵仍保留。
+
+2026-08-26，`project-owner` 明确批准 M11 canonical evidence、Edge 原生权限与最终加固结果，同意关闭 M11 并创建 release-readiness。EG-006 仍作为“不可全自动化”的结构性缺口保留，但当前候选的 Chrome/Edge 人工补偿均已签字；readiness 必须继续披露该边界，不得改写为自动化通过。
