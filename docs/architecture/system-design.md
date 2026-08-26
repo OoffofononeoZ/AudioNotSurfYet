@@ -1,13 +1,13 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-08-25
+last_reviewed: 2026-08-26
 upstream_docs:
   - "docs/product/problem-brief.md"
   - "docs/product/scope.md"
   - "docs/product/success-metrics.md"
   - "docs/product/open-questions.md"
-next_action: "M11 clean 双浏览器 canonical 已通过；完成人工权限与辅助技术验证"
+next_action: "M11 设计实现已批准；作为 Analyzer release-readiness 输入"
 ---
 
 # System Design

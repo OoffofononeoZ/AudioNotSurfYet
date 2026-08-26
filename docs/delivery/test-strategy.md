@@ -1,13 +1,13 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-08-25
+last_reviewed: 2026-08-26
 upstream_docs:
   - "docs/product/success-metrics.md"
   - "docs/architecture/interface-contracts.md"
   - "docs/delivery/acceptance-criteria.md"
   - "docs/delivery/execution-plan.md"
-next_action: "M11 38 步 clean canonical 已通过；执行原生 Edge 权限与辅助技术人工门禁"
+next_action: "M11 自动化与人工门禁已批准；在 readiness 中审阅剩余证据边界"
 ---
 
 # Test Strategy
@@ -82,10 +82,10 @@ next_action: "M11 38 步 clean canonical 已通过；执行原生 Edge 权限与
 
 ### Manual
 
-- `project-owner` 执行核心任务和 3/3 学习解释。
-- 最新稳定 Edge 的格式、权限和 Canvas 路径（除非已经有真实 Edge 自动化）。
-- 浏览器权限气泡、文件移动以及 OS file picker 行为。
-- DevTools 中的长会话内存、Worker、Audio graph 和 Canvas 观察。
+- `project-owner` 执行核心任务和 3/3 学习解释；M7 已签字完成。
+- 最新稳定 Edge 的格式、权限和 Canvas 路径；M11 真实 Edge 自动化与 2026-08-26 原生权限补偿签字均已完成。
+- 浏览器权限气泡、文件移动以及 OS file picker 行为；这类路径保持人工覆盖，不冒充自动化。
+- DevTools 中的长会话内存、Worker、Audio graph 和 Canvas 观察；M11 owner 最终加固签字已完成，相关实现变化后须重做。
 
 ## 4. Audio Fixtures
 
@@ -239,8 +239,10 @@ npm run eval:m6
 - 单元/JUnit、Playwright HTML、trace、截图、fixture manifest 和手工任务记录使用稳定目录和 run ID。
 - 不把用户私有音频、路径或内容写入证据。
 - 大型 trace 不永久进入 Git 时，记录生成命令、环境和受控存放位置。
-- 已批准的 eval plan 从 M3 开始约束证据；首个 canonical run 已记录在 [evidence index](../quality/evidence-index.md)，release-readiness 仍等待 M11 完整证据。
+- 已批准的 eval plan 从 M3 开始约束证据；M3–M11 canonical 与人工补偿记录均已进入 [evidence index](../quality/evidence-index.md)，现在允许创建 release-readiness review。
 
 ## 12. Exit Criteria
 
 M3 的公开命令、fixture、黄金比较和失败检测已有 clean-commit canonical pass，并已由 `project-owner` 批准。M4 的 AudioEngine/session/Chrome 适用测试也已在 clean commit 上 canonical pass、记录在 [evidence index](../quality/evidence-index.md) 并获 owner 批准。M5 repository、recovery integration 与 Chrome IndexedDB/OPFS 已在 clean commit canonical 通过；Chrome 原生权限人工检查也已由 `project-owner` 确认通过，M5 evidence 与 working agreements 已获批准。M6 Worker/registry/cache/15 分钟 Chrome 场景已在 clean commit canonical 20/20 通过并获 owner 批准，M6 已关闭。M7 unit/integration/golden/Chrome 与 M3–M6 回归已在 clean commit `f022b86e2333ad612ecb12701b0ca05e49f2b256` 上 24/24 通过；owner 于 2026-08-21 完成人工操作与 3/3 学习解释并批准 evidence，M7 已关闭。
+
+M8–M10 的 UI、scalar、vector/waveform 和 structured 特征证据均已获批准；M10 达到 21/21。M11 clean canonical 在 commit `99c67792509d07456bcb431b90468252f8b0fdc3` 上 38/38 通过，真实 Edge 全量为 31/31；`project-owner` 于 2026-08-26 批准 canonical、Edge 原生权限和最终人工加固结果。M11 据此关闭，剩余 bundle、CI、硬件外推、自动化缺口和部署前置条件转入 release-readiness 明示审阅。

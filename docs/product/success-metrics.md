@@ -1,11 +1,11 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-07-24
+last_reviewed: 2026-08-26
 upstream_docs:
   - "docs/product/problem-brief.md"
   - "docs/product/scope.md"
-next_action: "在 delivery 验收标准和测试策略中把阈值转成可复现证据"
+next_action: "M11 已形成阈值证据；在 Analyzer release-readiness 中审阅外推限制"
 ---
 
 # Success Metrics

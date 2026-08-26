@@ -8,7 +8,7 @@
 - FFmpeg：8.1.2；只用于生成和检查受控 WAV/MP3/FLAC fixture。
 - 当前检测到 Google Chrome 151.0.7922.174 与 Microsoft Edge 151.0.4129.107；`npm run test:e2e:edge` 使用真实 `msedge` channel，浏览器缺失时仍以退出码 2 报告 `blocked`。
 
-M3–M11 不建设 CI。下列命令当前均为本地门禁；正式证据要求在干净 commit 上复跑。M3–M10 canonical run 已获批准，M10 已为 `Complete`；owner 已明确要求开始 M11，当前为 `In Progress`。M5 Chrome 原生权限、M7 学习任务、M8 Windows Chrome 界面稳定化与 M9 导航栏视觉/学习清单均已单独签字通过；Edge 原生权限仍等待 M11 人工签字。
+M3–M11 不建设 CI。下列命令当前均为本地门禁；正式证据要求在干净 commit 上复跑。M3–M11 canonical run 均已获批准，M11 为 `Complete`。M5 Chrome 原生权限、M7 学习任务、M8 Windows Chrome 界面稳定化、M9 导航栏视觉/学习清单，以及 M11 Edge 原生权限与最终加固均已由 owner 单独签字；不可自动化路径的事实仍需在 readiness 中披露。
 
 当前 `npm audit` 在安全补丁更新后剩余 1 项 low：Vite 依赖的 esbuild 0.27.3 在 Windows 开发服务器场景存在本地任意文件读取风险。仓库目标验证机为 macOS，开发服务器不得暴露到不受信网络；依赖升级提供修复版本后复核。该缺口不被描述为已修复或生产 readiness。
 
@@ -99,7 +99,7 @@ M9 浏览器测试运行时生成 Git 忽略的 `m9-vectors-v1.wav`，版本化�
 
 M10 浏览器测试运行时生成 Git 忽略的 `m10-structures-v1.wav`，版本化数值输入保存在 `m10-structures.v1.json`。Chrome 场景覆盖累计 21 项、Loudness total/24 Bark bands、Complex Spectrum 完整 1024 bins 与 signed Hz、两类 320px 双 Canvas、鼠标/键盘 seek、刷新恢复、多视口/reduced motion，以及 15 分钟 Loudness/Complex/Power/Buffer 四重卡反馈与长任务门禁。
 
-M11 专项浏览器测试在同一文件上分别运行真实 Chrome/Edge，覆盖三格式队列切换、Analyzer 结果与刷新恢复，键盘播放/进度/Analyzer seek、可见焦点、reduced motion、390/1024/1280/1920 几何、quota 后内存播放，以及 20 次 Home/Analyzer 生命周期中的 WebGL context 与 RAF 上界。`test:e2e:edge` 还会在 Edge 上执行 M3–M10 全部回归。OPFS handle 自动化与原生 OS picker 权限提示继续分开，后者必须由 owner 人工签字。
+M11 专项浏览器测试在同一文件上分别运行真实 Chrome/Edge，覆盖三格式队列切换、Analyzer 结果与刷新恢复，键盘播放/进度/Analyzer seek、可见焦点、reduced motion、390/1024/1280/1920 几何、quota 后内存播放，以及 20 次 Home/Analyzer 生命周期中的 WebGL context 与 RAF 上界。`test:e2e:edge` 还会在 Edge 上执行 M3–M10 全部回归。OPFS handle 自动化与原生 OS picker 权限提示继续分开；当前候选的 Edge 原生权限与最终人工加固已由 owner 于 2026-08-26 签字，相关实现或浏览器变化后仍须重做人工矩阵。
 
 2026-07-29，`project-owner` 按下列清单完成最新版稳定 Chrome 原生权限人工检查并确认通过。该签字不保存本地音频的文件名、路径、内容或 hash，也不替代 Edge 验证。
 
@@ -170,4 +170,4 @@ M11 最终 provisional run `M11-2026-08-25T09-47-44-125Z-1b3691f9-provisional` �
 
 M11 clean canonical run `M11-2026-08-25T10-05-12-783Z-99c67792` 已在 commit `99c67792509d07456bcb431b90468252f8b0fdc3` 上 38/38 通过，summary SHA-256 为 `7d637525b5c9e6aa6fb45dc0818ac1fb59bbef90b90abf3ed2d6e6119ac631b5`。Chrome 专项 4/4、Edge 全量 31/31；Chrome/Edge 60 秒漂移 3.5ms/4.133ms，seek 最大误差 66.827ms/61.494ms；四重卡最大反馈 17.9ms/17.2ms，分析归因长任务均为 0；两端 20 次路由循环均为 WebGL 21 created/20 lost、2 live RAF。build 最大 JS chunk 为 1,117.94 kB，warning 保留。
 
-本 README 只记录真实执行结果。M10 已为 `Complete`；M11 canonical evidence 当前为 `in-review`，M11 仍为 `In Progress`，还需 Edge 原生权限和辅助技术人工签字。Meyda 5.6.3 `spectralFlux` 上游缺陷仍保留，产品侧仅由 ADR-0005 项目实现缓解；当前不得创建或宣称 release readiness。
+本 README 只记录真实执行结果。`project-owner` 于 2026-08-26 明确批准 M11 canonical evidence、Edge 原生权限与最终加固结果；M11 evidence 为 `approved`，M11 为 `Complete`。Meyda 5.6.3 `spectralFlux` 上游缺陷仍保留，产品侧仅由 ADR-0005 项目实现缓解；现在允许创建 `in-review` release-readiness，但不得在其单独批准前宣称正式上线。

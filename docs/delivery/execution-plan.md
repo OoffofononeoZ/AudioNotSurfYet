@@ -1,7 +1,7 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-08-25
+last_reviewed: 2026-08-26
 upstream_docs:
   - "docs/product/problem-brief.md"
   - "docs/product/scope.md"
@@ -9,7 +9,7 @@ upstream_docs:
   - "docs/architecture/system-design.md"
   - "docs/architecture/interface-contracts.md"
   - "docs/architecture/risk-register.md"
-next_action: "M11 clean canonical 已通过；完成 Edge 原生权限与辅助技术人工验收"
+next_action: "M11 已完成；创建并审阅 Analyzer release-readiness"
 ---
 
 # Execution Plan
@@ -18,7 +18,7 @@ next_action: "M11 clean canonical 已通过；完成 Edge 原生权限与辅助�
 
 按纵向切片把已批准的本地音频学习体验从当前播放器基础推进到 21 项 Meyda 特征全覆盖。本计划以门禁证据而不是日历日期排序；任一里程碑未通过时，不进入下一批特征。
 
-本文件定义实施顺序和验收方式，不代表未关闭里程碑已通过。当前已完成 M1、M2、Q0、M3–M10 门禁；`project-owner` 已于 2026-08-25 批准 M10 canonical evidence 与 21/21 Analyzer 特征覆盖，并在确认 Edge 已安装后明确要求开始 M11。M10 为 `Complete`，M11 为 `In Progress`。
+本文件定义实施顺序和验收方式，不代表未关闭里程碑已通过。当前 M1、M2、Q0 与 M3–M11 均已完成；`project-owner` 于 2026-08-26 批准 M11 canonical、Edge 原生权限与最终加固结果。Analyzer delivery 已关闭，下一阶段为独立的 release-readiness review。
 
 ## 2. Stage Gates
 
@@ -295,7 +295,7 @@ Rollback:
 
 ### M8 — Remaining scalar features
 
-Status：In Progress。
+Status：Complete。
 
 Features:
 
@@ -386,12 +386,12 @@ Execution note:
 - 自动化使用同一 Playwright 用例分别运行真实 `chrome` 与 `msedge` channel；原生 OS picker 的 granted/prompt/denied 和文件移动仍与 OPFS 自动化分开，由 owner 人工签字。
 - dirty-worktree 只运行 `eval:m11:provisional`；实现提交后的 clean HEAD 才运行 `eval:m11` 并登记 canonical evidence。
 - 最终 provisional 已 38/38 通过，真实 Edge 全量回归 31/31；三格式、四视口、键盘/reduced motion、quota、20 次 WebGL/RAF 生命周期和最重 15 分钟路径均通过。该结果只允许进入实现提交与 clean canonical，不关闭 M11。
-- clean canonical `M11-2026-08-25T10-05-12-783Z-99c67792` 已在 commit `99c67792509d07456bcb431b90468252f8b0fdc3` 上 38/38 通过；正式 evidence 为 `in-review`，原生 Edge 权限与辅助技术人工验收仍待 owner。
+- clean canonical `M11-2026-08-25T10-05-12-783Z-99c67792` 已在 commit `99c67792509d07456bcb431b90468252f8b0fdc3` 上 38/38 通过；正式 evidence、原生 Edge 权限、辅助技术与人工长会话门禁于 2026-08-26 获 owner 批准，未提供的逐项人工数值不作补写。
 
 Gate:
 
 - [acceptance criteria](acceptance-criteria.md) 适用项全部有证据；
-- M11 证据完成后才创建 `docs/quality/release-readiness.md`，并据实际覆盖判断 ready/not ready；
+- M11 证据已完成，现在创建 `docs/quality/release-readiness.md`，并据实际覆盖以 `Ready with waivers` 进入单独审阅；
 - 未通过的格式、浏览器或关键路径不得以“已知问题”形式绕过批准范围。
 
 ## 4. Cross-Cutting Ownership
@@ -414,3 +414,5 @@ Gate:
 `project-owner` 于 2026-07-28 明确批准 M3 evidence 与 working agreements。M3 改为 `Complete`，M4 开放；该批准不构成 M4–M11 产品行为或 release readiness 证据。
 
 `project-owner` 于 2026-08-25 明确批准 M10 canonical evidence 与 21/21 Analyzer 特征覆盖。M10 改为 `Complete`，M11 门禁开放但开始实施前保持 `Planned`；该批准不构成 Edge、M11 或 release readiness 通过。
+
+`project-owner` 于 2026-08-26 明确批准 M11 canonical evidence、Edge 原生权限与最终加固结果，同意将 M11 标记为 `Complete` 并创建 release-readiness。该批准关闭 Analyzer delivery，但不预先批准 readiness 豁免或生产上线。

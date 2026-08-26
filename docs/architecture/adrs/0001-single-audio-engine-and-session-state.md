@@ -1,12 +1,12 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-07-30
+last_reviewed: 2026-08-26
 upstream_docs:
   - "docs/product/problem-brief.md"
   - "docs/product/scope.md"
   - "docs/architecture/system-design.md"
-next_action: "M11 clean Chrome/Edge canonical 已回归唯一 AudioEngine/时钟边界；等待 owner 最终验收"
+next_action: "M11 AudioEngine/时钟边界已批准；在 readiness 中保留环境边界"
 ---
 
 # ADR-0001: Single AudioEngine and Shared Session State

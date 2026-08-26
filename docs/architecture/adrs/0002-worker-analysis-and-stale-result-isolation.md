@@ -1,12 +1,12 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-07-30
+last_reviewed: 2026-08-26
 upstream_docs:
   - "docs/product/success-metrics.md"
   - "docs/architecture/system-design.md"
   - "docs/architecture/interface-contracts.md"
-next_action: "M11 clean Chrome/Edge canonical 已回归 Worker/generation/资源边界；等待 owner 最终验收"
+next_action: "M11 Worker/generation/资源边界已批准；在 readiness 中保留证据限制"
 ---
 
 # ADR-0002: Worker Full-Track Analysis and Stale Result Isolation
