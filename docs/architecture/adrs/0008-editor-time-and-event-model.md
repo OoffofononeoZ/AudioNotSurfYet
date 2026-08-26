@@ -1,12 +1,12 @@
 ---
-status: in-review
+status: approved
 owner: "project-owner"
 last_reviewed: 2026-08-26
 upstream_docs:
   - "docs/product/scope.md"
   - "docs/architecture/system-design.md"
   - "docs/architecture/editor/interaction-contracts.md"
-next_action: "project-owner 批准或拒绝秒数事实、tempo 派生网格和 point/range 状态机"
+next_action: "在 E2/E3/E5/E6 delivery 中验证秒数事实、tempo 网格和 point/range 状态机"
 ---
 
 # ADR-0008: Seconds-Based Editor Time and Event Model
@@ -39,4 +39,4 @@ Editor 的标注对象是原歌曲中的真实位置，但 UI 需要 BPM、拍�
 
 ## Approval
 
-本 ADR 保持 `in-review`；产品已批准用户可见规则，但这里的秒数 identity、半开区间、12px 选择和 DOM/Canvas 边界仍需架构审批。
+`project-owner` 于 2026-08-26 批准本 ADR 的秒数 identity、半开区间、12px 选择和 DOM/Canvas 边界，并开放 E1–E6 execution planning。

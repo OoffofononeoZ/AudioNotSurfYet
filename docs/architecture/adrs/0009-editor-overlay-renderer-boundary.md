@@ -1,12 +1,12 @@
 ---
-status: in-review
+status: approved
 owner: "project-owner"
 last_reviewed: 2026-08-26
 upstream_docs:
   - "docs/product/scope.md"
   - "docs/architecture/system-design.md"
   - "docs/architecture/editor/interaction-contracts.md"
-next_action: "project-owner 批准或拒绝纯 renderer adapter、共享 geometry 和 pointer-through overlay"
+next_action: "在 E4/E6 delivery 中验证纯 renderer adapter、共享 geometry 和 pointer-through overlay"
 ---
 
 # ADR-0009: Shared Renderer Adapter and Pointer-Through Editor Overlay
@@ -37,4 +37,4 @@ Editor 要把任一现有 21 项分析结果对齐到标记区域，同时让 ov
 
 ## Approval
 
-本 ADR 保持 `in-review`；ADR-0004 的 Analyzer renderer family 历史决定继续有效，本 ADR 只定义 Editor 的复用边界。
+`project-owner` 于 2026-08-26 批准本 ADR 并开放 E1–E6 execution planning；ADR-0004 的 Analyzer renderer family 历史决定继续有效，本 ADR 只定义 Editor 的复用边界。

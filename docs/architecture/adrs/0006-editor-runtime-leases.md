@@ -1,11 +1,11 @@
 ---
-status: in-review
+status: approved
 owner: "project-owner"
 last_reviewed: 2026-08-26
 upstream_docs:
   - "docs/product/scope.md"
   - "docs/architecture/system-design.md"
-next_action: "project-owner 批准或拒绝 Editor playback/analysis lease 与单 engine/Worker 边界"
+next_action: "在 E1/E4/E6 delivery 中验证 playback/analysis lease 与单 engine/Worker 边界"
 ---
 
 # ADR-0006: Editor Route-Scoped Runtime Leases
@@ -36,4 +36,4 @@ Editor 需要隐藏 MusicBar、循环指定歌曲、请求 Buffer 与一个 over
 
 ## Approval
 
-本 ADR 保持 `in-review`；产品批准只开放该决定的评审，不代表实现授权。
+`project-owner` 于 2026-08-26 批准本 ADR 并开放 E1–E6 execution planning；实现仍需等待 delivery 批准。

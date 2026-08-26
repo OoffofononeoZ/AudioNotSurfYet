@@ -5,14 +5,14 @@ last_reviewed: 2026-08-26
 upstream_docs:
   - "docs/product/problem-brief.md"
   - "docs/quality/release-readiness.md"
-next_action: "进入 Editor E0 system design；E1–E6 继续等待 architecture 与 delivery 门禁"
+next_action: "按已批准 Editor system design 编制 E1–E6 delivery planning；获批前不开始 E1"
 ---
 
 # Scope
 
 ## Scope Boundary
 
-下列 Analyzer 范围已于 2026-07-24 获批，并由 M3–M11 与 Analyzer-only readiness 收口。Editor E0 是 2026-08-26 独立批准的新增产品范围；它不能反向扩大 Analyzer 候选的证据，并且仍须从 system design 开始建立自己的下游门禁。
+下列 Analyzer 范围已于 2026-07-24 获批，并由 M3–M11 与 Analyzer-only readiness 收口。Editor E0 是 2026-08-26 独立批准的新增产品范围；它不能反向扩大 Analyzer 候选的证据，其 system design 已获批准，当前须建立并审批独立 delivery planning。
 
 ## Analyzer Scope（approved）
 
@@ -157,7 +157,7 @@ E5 现为 `Planned`，不再因缺少核心交互而阻塞。若未来要求新�
 - 21 项特征的具体分组由交付计划管理，但不能改变“最终全部覆盖”和“首批三项”的批准范围。
 - Analyzer readiness 继续只覆盖现有 Analyzer 候选，不能证明 Editor 已设计、实现或可发布。
 - Editor E0 使用 owner 给出的聊天需求和 Git 忽略的 `docs/require/editor.txt` 作为输入；只有版本化产品文档是后续规范来源。
-- 点/范围事件的 JSON 字段、歌曲 identity、草稿数据库、右键状态机、BPM 算法和 renderer 数据流由产品意图获批后的架构阶段决定。
+- 点/范围事件的 JSON 字段、歌曲 identity、草稿数据库、右键状态机、BPM 算法和 renderer 数据流已由获批 Editor 架构固定；delivery planning 负责把它们映射到切片、验收和测试。
 - 任何新增依赖必须先说明用途、体积、许可与替代方案并获得 owner 明确批准。
 
 ## Approval Notes
@@ -165,6 +165,7 @@ E5 现为 `Planned`，不再因缺少核心交互而阻塞。若未来要求新�
 - Decision-maker：`project-owner`
 - Analyzer approved on：2026-07-24；M3–M11 与 Analyzer-only readiness 已完成。
 - Editor E0 status：`approved`；`project-owner` 于 2026-08-26 明确回复：“我批准 Editor E0 产品意图、点事件与范围事件规则、成功指标和开放问题；同意进入 Editor E0 架构设计。”
-- Change rule：现有 architecture、delivery、quality 与 readiness 仍只对 Analyzer 历史范围有效；Editor 必须从 system design 开始建立并审批自己的下游覆盖，E1–E6 不能因产品批准而直接开始实现。
+- Architecture approval：`project-owner` 于 2026-08-26 明确回复：“我批准 Editor E0 系统设计、接口契约、风险与 ADR；同意进入 Editor E1–E6 execution planning。”
+- Change rule：现有 Analyzer delivery、quality 与 readiness 仍只对 Analyzer 历史范围有效；Editor 必须建立并审批自己的 delivery 覆盖，E1–E6 不能因产品或架构批准而直接开始实现。
 
 File System Access 行为依据：[Chrome File System Access 文档](https://developer.chrome.com/docs/capabilities/web-apis/file-system-access) 与 [持久权限说明](https://developer.chrome.com/blog/persistent-permissions-for-the-file-system-access-api)。

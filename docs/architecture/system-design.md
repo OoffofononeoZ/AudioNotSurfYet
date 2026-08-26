@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: approved
 owner: "project-owner"
 last_reviewed: 2026-08-26
 upstream_docs:
@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/product/scope.md"
   - "docs/product/success-metrics.md"
   - "docs/product/open-questions.md"
-next_action: "project-owner 审阅 Editor E0 runtime、project、timeline、overlay 与失败边界；批准前不进入 delivery"
+next_action: "将已批准 Editor 架构转为 E1–E6 execution planning；delivery 获批前不实现"
 ---
 
 # System Design
@@ -16,7 +16,7 @@ next_action: "project-owner 审阅 Editor E0 runtime、project、timeline、over
 
 AudioNotSurfYet 采用一个实时 `AudioEngine`、一个 MainLayout-owned `AudioSessionService`、一个可序列化 `audioSessionStore`、一个 `AnalysisCoordinator` 和一个全曲分析 Worker。Analyzer 通过类型化特征注册表选择最多四个不重复特征，在共享时间视窗中用 Canvas 2D renderer 绘制数据，并用 DOM 承担文本、交互和无障碍语义；这部分是已批准且完成验证的历史基线。
 
-本次 `in-review` 扩展把已批准的 Editor E0 产品意图接入同一运行时：Editor 使用 route-scoped playback/analysis lease、版本化本地 JSON、独立单草稿 IndexedDB、tempo 派生网格、点/范围事件和单特征半透明叠加层。它不创建第二个 AudioContext、播放时钟、Worker 或网络数据路径。
+已批准的 Editor 扩展把 E0 产品意图接入同一运行时：Editor 使用 route-scoped playback/analysis lease、版本化本地 JSON、独立单草稿 IndexedDB、tempo 派生网格、点/范围事件和单特征半透明叠加层。它不创建第二个 AudioContext、播放时钟、Worker 或网络数据路径。
 
 ## 2. Goals and Non-Goals
 
@@ -298,7 +298,7 @@ M6 只在 `import.meta.env.DEV` 安装无 UI bridge，提供活动特征、cance
 ## 14. Rollout and Compatibility
 
 - 按 delivery 纵向切片接入，先保持 MusicBar 播放行为，再启用持久化/Worker，最后交付分析卡。
-- Editor 按 E1–E6 接入：先路由/lease/JSON/草稿，再时间轴/tempo、point、overlay、range，最后双浏览器与资源加固。system design 获批前不得创建 Editor delivery 计划，delivery 获批前不得编码。
+- Editor 按 E1–E6 接入：先路由/lease/JSON/草稿，再时间轴/tempo、point、overlay、range，最后双浏览器与资源加固。system design 已获批并开放 Editor delivery planning；delivery 获批前不得编码。
 - 新状态模型直接替代当前分散职责；不保留两套长期 AudioEngine 或隐藏 legacy fallback。
 - 数据库使用 schema version；开发期间允许显式迁移或清除，但 release 前必须固定升级/失败行为。
 - 自动化以本机 Chrome 为主；真实 Edge 验证缺失时保留为阻断最终双浏览器声明的证据缺口。
@@ -325,7 +325,7 @@ M6 只在 `import.meta.env.DEV` 安装无 UI bridge，提供活动特征、cance
 
 `project-owner` 于 2026-07-24 明确要求实现 Analyzer 架构，因此原有单引擎、Worker、持久化和 renderer 基线已经批准，并由 M3–M11 与 Analyzer-only readiness 收口。
 
-2026-08-26，`project-owner` 批准 Editor E0 产品意图并同意进入架构设计。本次新增的 Editor runtime、project、timeline、range、overlay 与风险内容保持 `in-review`；它不撤销 Analyzer 历史证据，也不能代表 E1–E6 或 Editor readiness 已通过。只有 owner 单独批准本设计、接口、风险和 ADR 后，才能进入 Editor execution planning。
+2026-08-26，`project-owner` 批准 Editor E0 产品意图并同意进入架构设计。随后明确回复：“我批准 Editor E0 系统设计、接口契约、风险与 ADR；同意进入 Editor E1–E6 execution planning。”Editor runtime、project、timeline、range、overlay、R-022–R-027 与 ADR-0006–0009 据此获批并开放 delivery planning。该批准不撤销 Analyzer 历史证据，也不构成 E1–E6 实现、质量证据或 Editor readiness 通过。
 
 ## 17. Editor Timeline and Interaction Architecture
 

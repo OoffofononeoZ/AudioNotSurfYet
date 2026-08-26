@@ -1,12 +1,12 @@
 ---
-status: in-review
+status: approved
 owner: "project-owner"
 last_reviewed: 2026-08-26
 upstream_docs:
   - "docs/product/scope.md"
   - "docs/architecture/system-design.md"
   - "docs/architecture/editor/project-format-v1.md"
-next_action: "project-owner 批准或拒绝 JSON V1、hash 绑定和独立单草稿 IndexedDB"
+next_action: "在 E1/E5/E6 delivery 中验证 JSON V1、hash 绑定和独立单草稿 IndexedDB"
 ---
 
 # ADR-0007: Versioned Editor Project and Independent Draft Boundary
@@ -39,4 +39,4 @@ Editor 需要导入导出单曲标注并在刷新后恢复，但现有 `audionot
 
 ## Approval
 
-本 ADR 保持 `in-review`；详细 schema 以 [Editor Project Format V1](../editor/project-format-v1.md) 为准。
+`project-owner` 于 2026-08-26 批准本 ADR 并开放 E1–E6 execution planning；详细 schema 以 [Editor Project Format V1](../editor/project-format-v1.md) 为准。

@@ -1,12 +1,12 @@
 ---
-status: in-review
+status: approved
 owner: "project-owner"
 last_reviewed: 2026-08-26
 upstream_docs:
   - "docs/product/scope.md"
   - "docs/architecture/system-design.md"
   - "docs/architecture/interface-contracts.md"
-next_action: "project-owner 审阅 Editor timeline geometry、pointer/keyboard 状态机和 overlay 穿透边界"
+next_action: "在 E2–E6 delivery 中映射 geometry、pointer/keyboard 状态机和 overlay 穿透验收"
 ---
 
 # Editor Interaction Contracts
@@ -125,4 +125,4 @@ idle + drag start/end handle
 
 ## Approval
 
-本交互契约于 2026-08-26 随 Editor system design 创建并保持 `in-review`。E1–E6 delivery 必须把上述成功、失败、边界和异常路径映射到可执行验收；owner 批准架构前不得实现。
+本交互契约于 2026-08-26 随 Editor system design 创建，并由 `project-owner` 随后批准进入 E1–E6 execution planning。Delivery 必须把上述成功、失败、边界和异常路径映射到可执行验收；delivery 获批前不得实现。
