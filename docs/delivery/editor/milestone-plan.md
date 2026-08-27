@@ -6,7 +6,7 @@ upstream_docs:
   - "docs/delivery/editor/execution-plan.md"
   - "docs/delivery/editor/acceptance-criteria.md"
   - "docs/delivery/editor/test-strategy.md"
-next_action: "完成 E3 point annotation、clean canonical 与 owner 复核；批准前 E4 保持 Planned"
+next_action: "owner 完成 E3 point task 并批准 canonical evidence；批准前 E4 保持 Planned"
 ---
 
 # Editor E1–E6 Milestone Plan
@@ -61,9 +61,9 @@ next_action: "完成 E3 point annotation、clean canonical 与 owner 复核；�
 
 ### E3
 
-- [ ] AC-E301–AC-E306 有 point、inner class、snapping 和 cleanup 证据。
-- [ ] 鼠标/右键/键盘创建删除均可完成，焦点和非颜色状态明确。
-- [ ] 只实例化 viewport 可见事件 DOM。
+- [x] AC-E301–AC-E306 已有 point、inner class、snapping 和 cleanup 自动化证据。
+- [x] 鼠标/右键/键盘创建删除均可完成，焦点和非颜色状态明确。
+- [x] 只实例化 viewport 可见事件 DOM；clean canonical 26/26 通过。
 - [ ] owner 批准 E3 evidence；只开放 E4。
 
 ### E4
@@ -106,7 +106,7 @@ next_action: "完成 E3 point annotation、clean canonical 与 owner 复核；�
 - E2：`Complete`。
 - E3：`In Progress`。
 - E4–E6：`Planned`。
-- 当前唯一下一门禁：E3 专项、clean canonical、人工任务与 owner evidence 批准。
+- 当前唯一下一门禁：E3 人工任务与 owner evidence 批准；专项与 clean canonical 已完成。
 
 ## 6. Delivery Approval
 
@@ -117,3 +117,5 @@ next_action: "完成 E3 point annotation、clean canonical 与 owner 复核；�
 该批准使 E0-D `Complete`、E1 `In Progress`。2026-08-26，owner 又批准 E1 canonical evidence、路由与播放 lease、JSON V1 和草稿恢复结果；E1 据此改为 `Complete`，E2 改为 `In Progress`，不开放 E3。
 
 2026-08-27，owner 批准 E2 结果并开放 E3；E2 据此改为 `Complete`，E3 改为 `In Progress`，E4–E6 保持 `Planned`。
+
+同日，E3 clean canonical 26/26 通过并登记为 `in-review`。自动化退出清单前三项已满足；owner evidence 批准仍未完成，因此 E3 保持 `In Progress`，E4 保持 `Planned`。

@@ -6,7 +6,7 @@ upstream_docs:
   - "docs/quality/editor/e3-eval-plan.md"
   - "docs/quality/editor/failure-taxonomy.md"
   - "docs/architecture/risk-register.md"
-next_action: "在 E3 provisional/canonical 中按 EFT-POINT–EFT-VISIBLE-DOM 分类失败"
+next_action: "owner 人工复核若发现失败，按 EFT-POINT–EFT-VISIBLE-DOM 分类并保持 E3 In Progress"
 ---
 
 # Editor E3 Failure Taxonomy

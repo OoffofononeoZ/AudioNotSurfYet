@@ -8,7 +8,7 @@ upstream_docs:
   - "docs/quality/editor/failure-taxonomy.md"
   - "docs/quality/editor/e3-eval-plan.md"
   - "docs/delivery/editor/milestone-plan.md"
-next_action: "定义并执行 E3 point annotation eval；批准前 E4 保持 Planned"
+next_action: "owner 使用 E3 fixture 完成 point annotation 人工任务并批准 evidence；批准前 E4 保持 Planned"
 ---
 
 # Editor Evidence Index
@@ -21,7 +21,8 @@ next_action: "定义并执行 E3 point annotation eval；批准前 E4 保持 Pla
 - E3：`In Progress`。
 - E4–E6：`Planned`。
 - E1 clean canonical 与 owner 人工门禁均已批准；Analyzer M3–M11 evidence 仍不能替代未来 Editor 里程碑证据。
-- E2 clean canonical 与 owner 门禁已于 2026-08-27 获批；E3 已开放，但其证据仍须独立建立。
+- E2 clean canonical 与 owner 门禁已于 2026-08-27 获批。
+- E3 clean canonical 已 26/26 通过并登记为 `in-review`；owner 人工任务与批准前 E3 不关闭、E4 不开放。
 
 ## 2. Record Contract
 
@@ -201,3 +202,97 @@ next_action: "定义并执行 E3 point annotation eval；批准前 E4 保持 Pla
 - BPM golden 证明固定合成输入和低置信度边界，不代表任意真实歌曲都能可靠识别；低置信度时继续要求手动输入。
 - 2026-08-27，owner 原文“我已经提交了，批准此次结果并且开放下一步”批准 E2 并开放 E3；不从该原文补写未提供的逐项人工测量值。
 - R-026 根据 BPM golden、竞态证据与本次签字改为 `Mitigated`。R-024、R-025、R-027 继续等待 E3/E4/E6 的 geometry、交互、consumer 与双浏览器门禁。
+
+## 5. E3 Canonical Record
+
+| Field | Value |
+| --- | --- |
+| Run ID | `E3-2026-08-27T02-53-58-176Z-c670ddf5` |
+| Milestone | E3 — Point annotation |
+| State | `in-review`（26/26 自动化通过；等待 owner 人工任务与批准） |
+| Implementation commit | `c670ddf5494269f5a56abd20c3c5653ee5b27cef` |
+| Evidence commit | 本记录所在的 `docs: register Editor E3 canonical evidence` 提交 |
+| Dirty at start / end | `false` / `false` |
+| Commit at end | `c670ddf5494269f5a56abd20c3c5653ee5b27cef` |
+| Started at | 2026-08-27 02:53:58.176 UTC |
+| Method | `npm run eval:e3` |
+| Reviewer | `project-owner` — pending |
+| Retention | `local-present`；至少保留到 E3 审批完成 |
+| Artifact root | `artifacts/evals/E3-2026-08-27T02-53-58-176Z-c670ddf5/` |
+| Summary SHA-256 | `2a0a46b9a0e9b459ee17b11919451f074205fda58801d84a1274dbd12f5cfe4c` |
+
+### Environment
+
+| Item | Recorded value |
+| --- | --- |
+| OS | macOS 26.5.2 (`25F84`), Darwin arm64 |
+| Hardware | MacBook Pro `MacBookPro17,1`；Apple M1 8-core；16 GB memory |
+| Node / npm | Node `v24.18.0`；npm `11.16.0` |
+| Vitest / Playwright | `4.1.10` / `1.62.0` |
+| Chrome binary | Google Chrome `152.0.7977.64` |
+| Chrome test user agent | Chrome `151.0.7922.34` |
+| Meyda | `5.6.3` |
+
+本记录只保存机型、芯片、核心数和内存，不复制 artifact 中的序列号、UUID、UDID 或设备标识。E3 使用仓库生成的确定性 100 BPM WAV、虚构 point/range 工程与浏览器临时状态，不记录用户私有音频身份。
+
+### Results and Traceability
+
+| Step group | Result | Evidence |
+| --- | --- | --- |
+| E3 point golden | pass | 100 BPM、4/4、歌曲首尾、full/zoomed viewport 与 1/4/1/16 beat 吸附事实匹配；运行时 WAV 与 range 兼容工程生成成功 |
+| E3 unit | 6/6 pass | lane/class 新增重命名、最少一个分类、迁移/删除/冲突、微秒唯一性、0/duration、single-beat、1/16–1 beat、自适应移动与 visible filter |
+| E3 integration | 4/4 pass | point/range JSON round-trip、独立草稿与 viewport 恢复、迁移后 tempo 修改不改秒数、viewport-visible 模型 |
+| E3 Chrome | 7/7 pass | 鼠标/键盘/右键创建删除与重复提示、分类迁移/删除/取消、4px pan 与 quick menu、range 只读、1024/1280/1920、reduced motion、刷新恢复与 console/pageerror |
+| E3 Chrome metrics | pass | 输入到可见反馈 `28.5ms`（门禁 `<=100ms`）；波形与 point 时间列几何误差 `0 CSS px`（门禁 `<=1 CSS px`）；viewport 外 marker 不实例化 |
+| E1/E2 regression | pass | E1 unit 9/9、integration 8/8、Chrome 4/4；E2 golden、unit 5/5、integration 17/17、Chrome 5/5；E2 反馈 `4ms`、几何误差 `0.2047 CSS px` |
+| M3/M4/M6 unit/integration | pass | M3 12/12 + Worker 20/20；M4 6/6 + 6/6；M6 Worker 13/13 + coordinator 7/7 |
+| M3/M4 Chrome | pass | M3 6/6；M4 3/3，60 秒漂移 `1.533ms`，三次 seek 最大误差 `66.827ms` |
+| M6 Chrome | 3/3 pass | cache `100,941` bytes、refresh hit/exact cursor；20 次循环单 Worker/AudioContext；15 分钟最大反馈 `17.7ms`、分析归因长任务 `0` |
+| M11 Chrome | 4/4 pass | 三格式/刷新、键盘/reduced motion、多视口、quota 与 20 次 WebGL/RAF 生命周期回归 |
+| Docs / harness / typecheck | pass | lifecycle links、deliberate failure detection、`vue-tsc -b` |
+| Build | pass with warning | 1,835 modules；最大 JS chunk `1,246.31 kB`，warning 如实保留并等待 Editor E6/readiness 复核 |
+| Diff check | pass | canonical 起止工作树干净；`git diff --check` exit 0 |
+
+### Provisional History and Pre-canonical Corrections
+
+- 最终 dirty-worktree provisional：`E3-2026-08-27T02-49-45-436Z-3b561f0b-provisional`，26/26 pass，summary SHA-256 `df76da941044843cdff9e06d23cd897a3219b9b4934dab213203c6640a7e55bd`。
+- provisional 前的专项 Chrome 迭代曾检出 `EFT-POINTER / S1` 与 `EFT-GEOMETRY / S1`：正常 `lostpointercapture` 清除了 quick menu、测试在滚动后使用了失效页面坐标、lane 外框造成 2 CSS px 宽度差；同时受控重命名输入会被旧 prop 回写。实现改为区分正常释放/取消、使用 draft-on-input/blur commit，并让两个时间列共享同一网格外框；最终专项 7/7、provisional 与 canonical 均通过。未覆盖或改写 canonical 失败 artifact，本轮没有 canonical failure。
+
+### Local Artifact Hashes
+
+| Artifact | SHA-256 |
+| --- | --- |
+| `summary.json` | `2a0a46b9a0e9b459ee17b11919451f074205fda58801d84a1274dbd12f5cfe4c` |
+| `01-E3-point-golden.log` | `f31f700d278cf3e4cf7ae1e43893e6bc0535de6c0ebf672b1d76aa3efc943fc6` |
+| `02-E3-point-unit.log` | `7019d3c251a9840ba9565dc69c5f8bbd3a0e8ce5f20fb13e614e0f1872ab37ef` |
+| `03-E3-point-integration.log` | `5366ba4760189681d080890d0dcc65f3c3aa29b590fc154c4bf1a7715168c333` |
+| `04-E2-tempo-golden-regression.log` | `2aa9988e158f22c4f25da1fc726f46aebc40cdb50002e02a4968896a28263cb2` |
+| `05-E2-timeline-unit-regression.log` | `e67eec67be6ea4d6e2507943b75c944ad5ada2c9b80029050709e0715e8429bd` |
+| `06-E2-timeline-integration-regression.log` | `edc2687a5eec909289c1ef137e5201102860ace3af944492a634247eba877d22` |
+| `07-E1-project-unit-regression.log` | `ba82abbe8b2bb2aabcd6b21c31ec160d24b78ec685018102154ab9dedca5e7d4` |
+| `08-E1-foundation-integration-regression.log` | `81438611cc6d178d3e8aee511534b4194bfcf46580a392dfac21961813696736` |
+| `09-M3-unit-regression.log` | `48ab6c5ff2cf913117a16c25ca32ce3034bd785d1e491a5ecbcbdee62464018a` |
+| `10-M3-Worker-regression.log` | `de182137b09b062ba8983e5d96b2440a0841ad97878e1e51dac67aac755b35fb` |
+| `11-M4-AudioEngine-regression.log` | `0f3d54c2107536f59d77c0279cca6f322b3cb4a393613227ea20f973dff610a9` |
+| `12-M4-session-regression.log` | `6791517ce7b3f271367b07fa614d6e26773239e6a16f2c9ab67e481329918670` |
+| `13-M6-Worker-regression.log` | `513dec39d7830ef0459e10623e48d7ea2fac52f332fd5665504a87666ef1874a` |
+| `14-M6-coordinator-regression.log` | `a3ed5db4965a36f0b8a96d829c5fdfdc454837c1e28fa9c127a26dc600e6c5ef` |
+| `15-docs.log` | `bb005ed0074179a47b895a5c66e79917e37ebf18976e21fe9d27b1dd63c8f151` |
+| `16-deliberate-failure.log` | `69bf5c3fa50230a4957ad0c60c8323dba68e494d92761fea0039cf5d580d70aa` |
+| `17-typecheck.log` | `fadc7f66199c28d2f7cca439bb300ebeb0320158f32a0f9b52ec77031538af4d` |
+| `18-E3-Chrome.log` | `a594f8e06e15f056e6bb9c2b8167fcf1d02c2154c887f160cfa23e8d8f584d3e` |
+| `19-E2-Chrome-regression.log` | `9d938b922842fbd5ca88d66f618349e884edb04e6e74cdd89a7b7f0e87a6954c` |
+| `20-E1-Chrome-regression.log` | `86e888acdb334bca0212065e277d99e4d6094c1d7bb01212678db1263e4c174d` |
+| `21-M3-Chrome-regression.log` | `889fcf0b4b81838d2712d26a38ee6e700faae1c19b11c4daa66d4d5aa714b1e8` |
+| `22-M4-Chrome-regression.log` | `46db58a29ac6babc34e7db16d28ee155db30a162547b683593bb94632b16317b` |
+| `23-M6-Chrome-regression.log` | `a08c5c3c4e070bb44d6a84350aebdcc2666d1368f1295ccc8df737ea1828ff27` |
+| `24-M11-Chrome-resource-regression.log` | `b35c1117e3f9ac6fdf031960695e731baf1a280eaedd13477f06cb12d1425dda` |
+| `25-build.log` | `f39d7379449ea3b0ce7a04e961da5476f8ce96af678950dac93cbcfe3ade28ec` |
+| `26-diff-check.log` | `e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855` |
+
+### Manual Gaps and Approval Gate
+
+- E3 专项按批准计划只在稳定 Chrome 自动化；真实 Edge、10,000 事件、原生 picker 和辅助技术长会话仍留到 E6，不能从本轮结果外推。
+- 自动化验证了 pointer/keyboard/focus-visible、reduced motion 和 aria-live 的可操作契约，但不能替代 owner 对标记密度、样式清晰度和真实连续听辨任务的判断。
+- owner 需使用 `artifacts/fixtures/editor-e3-points-v1.wav` 完成 lane/class、不同 zoom 点标记、右键/键盘、分类迁移/删除、tempo 修改和刷新恢复清单。批准前本记录保持 `in-review`，E3 保持 `In Progress`，E4 保持 `Planned`。
+- R-024、R-025 已获得 E3 point 层的 Chrome geometry/pointer/visible-DOM 证据，但在 E4 overlay 与 E6 双浏览器/10,000 事件复核前继续保持 `Open`；R-027 继续等待 E4 consumer/overlay 证据。

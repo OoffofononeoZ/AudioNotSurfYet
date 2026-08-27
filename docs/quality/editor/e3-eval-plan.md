@@ -8,7 +8,7 @@ upstream_docs:
   - "docs/delivery/editor/test-strategy.md"
   - "docs/architecture/editor/interaction-contracts.md"
   - "docs/architecture/risk-register.md"
-next_action: "实现 E3 point annotation、运行 provisional/canonical 并登记 evidence"
+next_action: "owner 按 E3 fixture 完成人工任务并批准 canonical evidence"
 ---
 
 # Editor E3 Eval Plan

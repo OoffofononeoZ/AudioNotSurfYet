@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/product/scope.md"
   - "docs/architecture/system-design.md"
   - "docs/delivery/execution-plan.md"
-next_action: "按 DEC-027 执行 E3 point annotation；E4 等待独立 canonical 与 owner 审批"
+next_action: "按 DEC-027 复核 E3 canonical evidence；E4 等待 owner 审批"
 ---
 
 # Decision Registry
@@ -124,6 +124,8 @@ DEC-025 约束下的 E1 实现已提交，clean canonical `E1-2026-08-26T15-24-2
 DEC-026 约束下的 E2 实现已提交，clean canonical `E2-2026-08-26T16-42-47-634Z-9fc5c0a8` 在 commit `9fc5c0a81fcf90abfbc665412277147cd958200f` 上 22/22 通过并登记到 Editor evidence index。该执行事实不是新产品或架构决策；owner 尚未批准人工门禁，因此 R-024/R-026/R-027、E2 状态和 E3 门禁不提前改变。
 
 2026-08-27，`project-owner` 原文“我已经提交了，批准此次结果并且开放下一步”批准 E2 结果并开放 E3；DEC-027 据此生效。E2 改为 `Complete`，R-026 改为 `Mitigated`，E3 改为 `In Progress`；该决定不构成 E3 实现或 evidence，也不开放 E4。
+
+同日，E3 implementation commit `c670ddf5494269f5a56abd20c3c5653ee5b27cef` 与 clean canonical `E3-2026-08-27T02-53-58-176Z-c670ddf5` 已形成，26/26 通过，summary SHA-256 为 `2a0a46b9a0e9b459ee17b11919451f074205fda58801d84a1274dbd12f5cfe4c`。该执行事实不新增决策；DEC-027 的 owner approval 门禁仍未满足，E3 不关闭、E4 不开放。
 
 ## Historical Evidence Gap
 

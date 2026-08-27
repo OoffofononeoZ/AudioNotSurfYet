@@ -10,7 +10,7 @@ upstream_docs:
   - "docs/architecture/risk-register.md"
   - "docs/architecture/editor/project-format-v1.md"
   - "docs/architecture/editor/interaction-contracts.md"
-next_action: "按 AC-E301–AC-E306 实施 E3 point annotation；E4 保持 Planned"
+next_action: "复核并批准 E3 canonical evidence；批准前 E4 保持 Planned"
 ---
 
 # Editor E1–E6 Execution Plan
@@ -159,7 +159,7 @@ npm run eval:e1:provisional
 npm run eval:e1
 ```
 
-E2 命令已经实现并产生 clean canonical；E3–E6 在各自里程碑实现时新增并同步：
+E2/E3 命令已经实现并产生 clean canonical；E4–E6 在各自里程碑实现时新增并同步：
 
 ```text
 npm run test:eN:unit
@@ -169,7 +169,7 @@ npm run eval:eN:provisional
 npm run eval:eN
 ```
 
-其中 `N` 为 3–6；E3 当前开放，E4–E6 仍为计划命令。canonical 必须拒绝 dirty worktree，并记录 run ID、commit、环境、步骤结果、日志和 summary SHA-256。E1/E2 clean canonical 均已通过并获 owner 批准；E3 必须独立完成同一证据节奏。
+其中 `N` 为 4–6；E4–E6 仍为计划命令。canonical 必须拒绝 dirty worktree，并记录 run ID、commit、环境、步骤结果、日志和 summary SHA-256。E1/E2 clean canonical 均已通过并获 owner 批准；E3 已 26/26 通过并进入 owner review，批准前不开放 E4。
 
 ## 6. Change Control and Exclusions
 
@@ -193,3 +193,5 @@ npm run eval:eN
 2026-08-26，`project-owner` 进一步批准 E1 canonical evidence 与人工结果，E1 据此关闭并只开放 E2；E3–E6 保持 `Planned`。
 
 2026-08-27，`project-owner` 批准 E2 结果并开放 E3。E2 据此为 `Complete`、E3 为 `In Progress`，E4–E6 保持 `Planned`。
+
+同日，E3 clean canonical `E3-2026-08-27T02-53-58-176Z-c670ddf5` 在实现 commit `c670ddf5494269f5a56abd20c3c5653ee5b27cef` 上 26/26 通过。该执行事实进入 owner review，不改变逐里程碑批准规则。
