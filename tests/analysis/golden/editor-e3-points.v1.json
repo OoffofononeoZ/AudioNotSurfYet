@@ -1,0 +1,77 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-08-27",
+  "generatorVersion": "editor-e3-points-v1",
+  "durationSeconds": 12,
+  "bpm": 100,
+  "meter": "4/4",
+  "wavSha256": "e7718aeedeb222e0254317398c85f6230fbc1b57c606699a058d48e3d76f9334",
+  "snappingCases": [
+    {
+      "id": "full-viewport",
+      "viewport": {
+        "startSeconds": 0,
+        "endSeconds": 12,
+        "zoom": 1
+      },
+      "widthCssPx": 960,
+      "expectedSubdivision": 4,
+      "rawSeconds": 1.28,
+      "expectedSeconds": 1.35
+    },
+    {
+      "id": "zoomed-viewport",
+      "viewport": {
+        "startSeconds": 0,
+        "endSeconds": 3,
+        "zoom": 4
+      },
+      "widthCssPx": 960,
+      "expectedSubdivision": 16,
+      "rawSeconds": 1.28,
+      "expectedSeconds": 1.275
+    },
+    {
+      "id": "track-start",
+      "viewport": {
+        "startSeconds": 0,
+        "endSeconds": 12,
+        "zoom": 1
+      },
+      "widthCssPx": 960,
+      "expectedSubdivision": 4,
+      "rawSeconds": 0,
+      "expectedSeconds": 0
+    },
+    {
+      "id": "track-end",
+      "viewport": {
+        "startSeconds": 0,
+        "endSeconds": 12,
+        "zoom": 1
+      },
+      "widthCssPx": 960,
+      "expectedSubdivision": 4,
+      "rawSeconds": 12,
+      "expectedSeconds": 12
+    }
+  ],
+  "pointEvents": [
+    {
+      "innerClass": "default",
+      "atSeconds": 0
+    },
+    {
+      "innerClass": "default",
+      "atSeconds": 1.35
+    },
+    {
+      "innerClass": "accent",
+      "atSeconds": 6
+    },
+    {
+      "innerClass": "accent",
+      "atSeconds": 12
+    }
+  ]
+}

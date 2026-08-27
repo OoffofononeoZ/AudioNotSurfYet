@@ -3,7 +3,7 @@
         <section class="editor-shell">
             <header class="editor-heading">
                 <div>
-                    <p class="kicker">Editor · E1 foundation</p>
+                    <p class="kicker">Editor · E3 point annotation</p>
                     <h1>逆向制曲工程</h1>
                     <p>在不修改原音频的前提下，为歌曲建立可恢复、可导出的时间标注工程。</p>
                 </div>
@@ -106,11 +106,17 @@
                     @update-project="updateProject"
                 />
 
+                <EditorPointWorkspace
+                    :project="snapshot.project"
+                    :playback="playback"
+                    @update-project="updateProject"
+                />
+
                 <section class="future-panel" aria-label="Editor 后续工作区">
                     <div>
-                        <p class="kicker">E3–E5</p>
-                        <h2>点、范围与分析叠加</h2>
-                        <p>当前 E2 只开放时间轴和 Tempo，不提前暴露不可用标记控件。</p>
+                        <p class="kicker">E4–E5</p>
+                        <h2>分析叠加与范围事件</h2>
+                        <p>当前 E3 只开放点标记；范围事件数据保持只读，叠加层与范围编辑仍等待后续门禁。</p>
                     </div>
                 </section>
             </template>
@@ -135,6 +141,7 @@ import { EditorFormatCodecRegistry } from '../editor/projectCodec';
 import { useEditorSessionController } from '../editor/editorSessionController';
 import { useAudioSessionStore } from '../stores/audioSessionStore';
 import EditorTimeline from '../components/EditorTimeline.vue';
+import EditorPointWorkspace from '../components/EditorPointWorkspace.vue';
 import type { EditorProjectV1 } from '../editor/types';
 
 const route = useRoute();
