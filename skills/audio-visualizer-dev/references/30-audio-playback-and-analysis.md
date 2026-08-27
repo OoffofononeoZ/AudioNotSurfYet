@@ -39,7 +39,7 @@ AudioBufferSourceNode → AnalyserNode → GainNode → audioContext.destination
 - decode/unsupported 由 MusicBar 监听 snapshot error 并显示 Element Plus 非阻塞消息；队列、下一首和重试仍可用。
 - 音频解码不创建对象 URL；对象 URL 只用于内嵌封面。
 
-Editor E1 已通过 tokenized playback/analysis lease 临时使用 repeat-one并复用现有 service/coordinator；18/18 canonical 与 owner 签字已批准。E2 首次通过 Editor consumer 请求 Buffer/tempo，仍必须保持本节已证实的单 engine、单 RAF、queue-next 与单 Worker 事实不变。
+Editor E1 已通过 tokenized playback/analysis lease 临时使用 repeat-one并复用现有 service/coordinator；18/18 canonical 与 owner 签字已批准。E2 已通过 Editor consumer 请求唯一 Buffer 与 retained-PCM tempo estimate，并以 generation/hash/config 和用户 revision 丢弃 stale 结果；22/22 clean canonical 为 `in-review`。单 engine、单播放 RAF、离页恢复 queue-next 与单 Worker 事实保持不变。
 
 ## 最近会话恢复
 

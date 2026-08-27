@@ -1,10 +1,10 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-08-26
+last_reviewed: 2026-08-27
 upstream_docs:
   - "docs/context/index.md"
-next_action: "E1 术语已批准；E2 实现后补充共享 geometry 与 tempo estimator 代码事实"
+next_action: "复核 E2 canonical 与时间轴/tempo 术语；批准前 E3 保持 Planned"
 ---
 
 # Glossary
@@ -57,7 +57,7 @@ next_action: "E1 术语已批准；E2 实现后补充共享 geometry 与 tempo e
 | Editor E0-D | 已完成的 Editor execution planning 门禁；四份专属 delivery 文档均为 `approved` | E1 已授权编码，但通过仍需自己的 canonical 与 owner evidence | [milestone plan](../delivery/editor/milestone-plan.md) |
 | 逆向制曲 | 对已有歌曲反向记录音符、音色和效果出现时间的标注过程 | 产物是数据工程，不修改 PCM、混音或生成伴奏 | [problem brief](../product/problem-brief.md) |
 | Editor playback lease | E1 已实现的 route-scoped runtime token；临时把当前 track ended 策略切为 repeat-one，只有当前 token 可恢复 queue-next | 防止旧 Editor cleanup 影响新 route，同时保持唯一 AudioEngine | [ADR-0006](../architecture/adrs/0006-editor-runtime-leases.md) |
-| analysis consumer lease | E1 已实现并获批准的 Analyzer/Editor 活动意图 token；只有最新 consumer 可设置 feature、请求 tempo/cursor 或释放 | 在单 Coordinator/Worker 内隔离快速路由与 stale 结果；E2 首次以 Editor consumer 请求 Buffer/tempo | [interface contracts](../architecture/interface-contracts.md) |
+| analysis consumer lease | E1 已实现并获批准的 Analyzer/Editor 活动意图 token；只有最新 consumer 可设置 feature、请求 tempo/cursor 或释放 | E2 已通过该 lease 请求唯一 Buffer 与 identity-bound tempo，在单 Coordinator/Worker 内丢弃 stale 结果 | [interface contracts](../architecture/interface-contracts.md) |
 | `EditorProjectV1` | E1 已实现的单曲 JSON 工程 envelope，使用内容 hash、tempo map、有序 lane 和 point/range event | 工程不保存 File/PCM/cache，未知 schema 或歌曲不匹配时拒绝导入 | [project format](../architecture/editor/project-format-v1.md) |
 | Editor draft | E1 已实现的独立 IndexedDB V1 唯一 `draft/latest`；内存先更新，quota/abort 不替换内存工程 | 与 Analyzer session V1 隔离，并实现同歌恢复与异歌覆盖确认 | [ADR-0007](../architecture/adrs/0007-editor-project-and-draft-boundary.md) |
 | lane | Editor 中一个具名 point/range 判别轨道，承载全部展开的 inner class 及其事件 | 名称不是 JSON identity；稳定 ID 与有序数组由 `EditorProjectV1` 固定 | [project format](../architecture/editor/project-format-v1.md) |
@@ -65,6 +65,8 @@ next_action: "E1 术语已批准；E2 实现后补充共享 geometry 与 tempo e
 | point event | 表示音符或短音色在某一吸附时间出现的单点标记 | 同 lane、inner class 和吸附时间不得重复 | [success metrics](../product/success-metrics.md) |
 | range event | 表示长音色或效果从严格较早起点持续到较晚终点的区间标记 | 同 lane、inner class 不得重叠；不同分类和内部点事件可并存 | [scope](../product/scope.md) |
 | tempo map | 由有序时间边界划分的节拍/拍号区间；一个 beat 固定为 `60/BPM` 秒，numerator 决定小节拍数，denominator 表达 beat 音符单位 | 驱动 measure/beat 线、单拍模式和点/范围事件吸附 | [Editor interactions](../architecture/editor/interaction-contracts.md) |
+| Editor timeline viewport | E2 已实现并保存于工程的 `startSeconds/endSeconds/zoom`；波形、网格、游标和 boundary 共用同一 CSS 时间映射 | 固定 1–64 zoom、指针锚点、pixel/25% pan 与 `<=1 CSS px` 对齐；播放 cursor 不持久化 | [system map](system-map.md) |
+| tempo estimate | E2 Worker 在 retained mono PCM 上以正向频谱差 onset envelope 和归一化 autocorrelation 产生的 reliable/low-confidence 结果 | 只在单一 unset metered segment 且 identity/用户 revision 仍匹配时自动写入；不使用第三方 BPM 包 | [E2 eval plan](../quality/editor/e2-eval-plan.md) |
 | adaptive grid | 根据 viewport 像素密度在 1/16、1/8、1/4、1/2 和 1 beat 中选择的可点击精度 | 防止长歌曲缩小时产生视觉上无法精确命中的标记位置 | [scope](../product/scope.md) |
 | single-beat segment | `0 <= BPM < 20` 输入规范化后的 tempo segment；无内部 beat/measure 和可编辑 meter，整段是一个候选单元 | 区分“整段只有一拍”与普通小数 BPM，不把无意义 BPM 写入工程 | [project format](../architecture/editor/project-format-v1.md) |
 | pointer-through overlay | 除 feature selector 与三个垂直手柄外不接收 pointer 的半透明分析层 | 让 overlay 与底层标记共享视觉坐标而不夺取 point/range 命中 | [ADR-0009](../architecture/adrs/0009-editor-overlay-renderer-boundary.md) |
@@ -73,4 +75,4 @@ next_action: "E1 术语已批准；E2 实现后补充共享 geometry 与 tempo e
 
 ## Approval Record
 
-`project-owner` 于 2026-08-21 批准 M7 canonical evidence 并开放 M8。本词汇表随后已按 M8 累计 16 项、项目 Flux 与四槽实现复核；owner 又批准 M8 canonical evidence 与界面稳定化结果，M8 据此为 `Complete`。2026-08-23，owner 批准 M9 canonical 与非首页导航栏模糊效果；M9 据此为 `Complete`。同日 owner 要求实施 M10 并选择 Complex Spectrum 完整 1024-bin 主图，M10 进入 `In Progress`。M10 clean canonical 已 36/36 通过并把本页 21 项、Bark bands、signed FFT bins 与 structured payload 术语锁入 evidence。2026-08-25，owner 批准 M10 canonical evidence 与 21/21 Analyzer 特征覆盖，M10 据此为 `Complete`；同日确认 Edge 已安装并要求开始最终加固。M11 clean canonical 随后 38/38 通过；2026-08-26，owner 批准 canonical、Edge 原生权限与最终加固结果，M11 据此为 `Complete`。同日 owner 接受 Analyzer readiness 豁免并依次批准 Editor 产品、架构、delivery 与 E1 evidence。E1 为 `Complete`；E2 已开放，新增术语在实现/canonical 后才改为代码事实。
+`project-owner` 于 2026-08-21 批准 M7 canonical evidence 并开放 M8。本词汇表随后已按 M8 累计 16 项、项目 Flux 与四槽实现复核；owner 又批准 M8 canonical evidence 与界面稳定化结果，M8 据此为 `Complete`。2026-08-23，owner 批准 M9 canonical 与非首页导航栏模糊效果；M9 据此为 `Complete`。同日 owner 要求实施 M10 并选择 Complex Spectrum 完整 1024-bin 主图，M10 进入 `In Progress`。M10 clean canonical 已 36/36 通过并把本页 21 项、Bark bands、signed FFT bins 与 structured payload 术语锁入 evidence。2026-08-25，owner 批准 M10 canonical evidence 与 21/21 Analyzer 特征覆盖，M10 据此为 `Complete`；同日确认 Edge 已安装并要求开始最终加固。M11 clean canonical 随后 38/38 通过；2026-08-26，owner 批准 canonical、Edge 原生权限与最终加固结果，M11 据此为 `Complete`。同日 owner 接受 Analyzer readiness 豁免并依次批准 Editor 产品、架构、delivery 与 E1 evidence。E1 为 `Complete`；E2 实现与 22/22 clean canonical 已形成代码事实，但 owner 批准前仍为 `In Progress`。

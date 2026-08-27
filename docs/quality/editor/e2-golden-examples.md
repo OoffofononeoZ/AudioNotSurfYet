@@ -1,11 +1,11 @@
 ---
 status: in-review
 owner: "project-owner"
-last_reviewed: 2026-08-26
+last_reviewed: 2026-08-27
 upstream_docs:
   - "docs/quality/editor/e2-eval-plan.md"
   - "docs/architecture/editor/interaction-contracts.md"
-next_action: "把 E2-G01–G12 转为版本化 golden、Vitest 与 Chrome 场景"
+next_action: "复核 E2-G01–G12 的 canonical 实例；批准前保持 in-review"
 ---
 
 # Editor E2 Golden Examples
@@ -26,3 +26,5 @@ next_action: "把 E2-G01–G12 转为版本化 golden、Vitest 与 Chrome 场景
 | E2-G12 | race | reliable 结果返回前用户输入 BPM、插入 boundary 或换歌 | 结果被丢弃，用户值/新工程不变 | 固定 stale 与用户优先级 |
 
 Golden 只使用确定性合成 PCM 与虚构工程数据，不记录用户音频、路径或设备标识。运行时 WAV 写入 Git 忽略的 `artifacts/fixtures/`。
+
+E2-G01–G12 已由版本化 `editor-e2-tempo.v1.json`、Vitest 与 Chrome 场景实现，并在 2026-08-27 clean canonical 22/22 中通过；该事实仍等待 owner 审批。

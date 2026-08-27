@@ -1,13 +1,13 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-08-26
+last_reviewed: 2026-08-27
 upstream_docs:
   - "docs/context/index.md"
   - "docs/product/scope.md"
   - "docs/architecture/system-design.md"
   - "docs/delivery/execution-plan.md"
-next_action: "执行 DEC-026 约束下的 E2 时间轴、tempo 与 BPM evidence；E3 保持关闭"
+next_action: "复核 DEC-026 下的 E2 canonical 与人工任务；批准前 E3 保持关闭"
 ---
 
 # Decision Registry
@@ -119,6 +119,8 @@ M11 clean canonical `M11-2026-08-25T10-05-12-783Z-99c67792` 随后在真实 Chro
 DEC-025 约束下的 E1 实现已提交，clean canonical `E1-2026-08-26T15-24-21-043Z-792b424f` 在 commit `792b424fbab8e3621ad24d8c9add47d1c9bffcb4` 上 18/18 通过并登记到 Editor evidence index。该执行事实不是新产品/架构决策；owner 尚未批准人工门禁，因此 R-022/R-023/R-027 和 E1 状态不提前改变，E2 仍未开放。
 
 同日，`project-owner` 明确回复：“我批准 Editor E1 canonical evidence、路由与播放 lease、JSON V1 和草稿恢复结果；同意将 E1 标记为 Complete 并开放 E2。”E1 据此关闭，R-022/R-023 改为 `Mitigated`，E2 改为 `In Progress`。owner 同时选择 DEC-026 的 BPM/拍号与无网格 boundary 语义；R-024/R-026/R-027 和 E3 门禁不因此提前关闭。
+
+DEC-026 约束下的 E2 实现已提交，clean canonical `E2-2026-08-26T16-42-47-634Z-9fc5c0a8` 在 commit `9fc5c0a81fcf90abfbc665412277147cd958200f` 上 22/22 通过并登记到 Editor evidence index。该执行事实不是新产品或架构决策；owner 尚未批准人工门禁，因此 R-024/R-026/R-027、E2 状态和 E3 门禁不提前改变。
 
 ## Historical Evidence Gap
 

@@ -116,6 +116,8 @@ E1 Chrome 测试使用注入 picker 返回浏览器 OPFS `FileSystemFileHandle`�
 
 E2 使用版本化 `editor-e2-tempo.v1.json` 锁定 60、100、128、127.5 BPM 与 silence/noise/ambiguous 低置信度输入；`fixtures:e2:golden` 同时生成 Git 忽略的 `artifacts/fixtures/editor-e2-tempo-100-v1.wav`。Chrome 场景覆盖波形、网格、游标三层 Canvas、共享 viewport、右键状态机、Tempo 边界与输入、自动估计竞态、刷新恢复和 1024/1280/1920 geometry；E3 标记仍未开放。
 
+E2 clean canonical `E2-2026-08-26T16-42-47-634Z-9fc5c0a8` 已在 commit `9fc5c0a81fcf90abfbc665412277147cd958200f` 上 22/22 通过，summary SHA-256 为 `4465c20343af9092601296b86a229200579f648ffa90641411b88f9861ba8660`；该记录仍为 `in-review`，不能据此开放 E3。
+
 2026-07-29，`project-owner` 按下列清单完成最新版稳定 Chrome 原生权限人工检查并确认通过。该签字不保存本地音频的文件名、路径、内容或 hash，也不替代 Edge 验证。
 
 ## M5 原生权限人工检查
