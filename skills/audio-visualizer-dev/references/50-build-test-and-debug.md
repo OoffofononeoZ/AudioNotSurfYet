@@ -36,6 +36,9 @@
 | `npm run test:e3:unit` | 运行 point lane/class、迁移冲突、唯一性、吸附与 visible filter | E3 pure domain 契约 |
 | `npm run test:e3:integration` | 运行 point/range round-trip、独立草稿、tempo 秒数稳定与 viewport 模型 | E3 persistence/compatibility 契约 |
 | `npm run test:e2e:e3` | 运行 Chrome point 鼠标/键盘/右键、迁移、可见 DOM、range 只读与多视口 | E3 Chrome 切片；Edge 留到 E6 |
+| `npm run test:e4:unit` | 运行 overlay bounds、21 项 registry、六类 shared renderer 与 exact summary | E4 pure renderer 契约 |
+| `npm run test:e4:integration` | 运行 Buffer-first、快速切换、重试、草稿和 Analyzer 隔离 | E4 consumer/controller 契约 |
+| `npm run test:e2e:e4` | 运行 Chrome 21 项 overlay、三手柄、pointer-through、故障隔离和多视口 | E4 Chrome 切片；Edge 留到 E6 |
 | `npm run test:e2e:edge` | 使用稳定 Edge 串行运行 M3–M11 全量 E2E | Edge 缺失时以退出码 2 明确 blocked；不得用 Chromium 替代 |
 | `npm run test:docs` | 检查生命周期 frontmatter、链接和 21 项特征 | 文档门禁 |
 | `npm run eval:m3:provisional` | 未提交工作树的本地 M3 run | 不创建正式 evidence index |
@@ -58,6 +61,8 @@
 | `npm run eval:e2` | 只在干净 commit 上运行 22 步 E2 suite | 生成可登记的 E2 canonical 证据 |
 | `npm run eval:e3:provisional` | 在 dirty worktree 运行 E3 与 E1/E2/M3/M4/M6/M11 相邻回归 | 只生成实现反馈 |
 | `npm run eval:e3` | 只在干净 commit 上运行 26 步 E3 suite | 生成可登记的 E3 canonical 证据 |
+| `npm run eval:e4:provisional` | 在 dirty worktree 运行 E4 与 E1–E3/Analyzer renderer 相邻回归 | 只生成实现反馈 |
+| `npm run eval:e4` | 只在干净 commit 上运行 31 步 E4 suite | 生成可登记的 E4 canonical 证据 |
 
 ## 已知测试缺口
 
@@ -72,9 +77,9 @@
 - 超出约 15 分钟支持边界的长音频未开始播放只作为非门禁压力观察；它不是规定的预期失败，也不能替代范围内性能或格式验证。
 - M6 当前 Meyda 的 `spectralFlux` 对有效输入抛出 `x is not defined`；已用预期失败测试和 R-020 固定，不能把 21 项 registry 误述为 21 项均可计算。
 - M6 dirty-worktree provisional 与 clean-commit canonical 均已 20/20 通过；正式 evidence 已登记，并由 `project-owner` 于 2026-07-30 批准，M6 已关闭。
-- M7–M11 已获批准并关闭。M11 clean canonical `M11-2026-08-25T10-05-12-783Z-99c67792` 在 commit `99c67792509d07456bcb431b90468252f8b0fdc3` 上 38/38 通过；Edge 原生权限、辅助技术与最终加固于 2026-08-26 获 owner 签字。Analyzer readiness 已获 `Ready with waivers` 批准。Editor E1/E2 clean canonical 均已通过并获 owner 批准；E3 clean run `E3-2026-08-27T02-53-58-176Z-c670ddf5` 26/26 通过并等待 owner 批准。
+- M7–M11 已获批准并关闭。M11 clean canonical `M11-2026-08-25T10-05-12-783Z-99c67792` 在 commit `99c67792509d07456bcb431b90468252f8b0fdc3` 上 38/38 通过；Edge 原生权限、辅助技术与最终加固于 2026-08-26 获 owner 签字。Analyzer readiness 已获 `Ready with waivers` 批准。Editor E1–E3 clean canonical 均已通过并获 owner 批准；E4 当前开放实施。
 
-- E3 命令已随当前开放里程碑建立；E4–E6 对应命令仍不存在，只在各自门禁开放时新增。
+- E4 命令已随当前开放里程碑建立；E5–E6 对应命令仍不存在，只在各自门禁开放时新增。
 
 ## 构建风险
 

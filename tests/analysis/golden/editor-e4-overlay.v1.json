@@ -1,0 +1,131 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-08-27",
+  "generatorVersion": "editor-e4-overlay-v1",
+  "durationSeconds": 12,
+  "bpm": 100,
+  "wavSha256": "e7718aeedeb222e0254317398c85f6230fbc1b57c606699a058d48e3d76f9334",
+  "overlay": {
+    "featureId": "rms",
+    "topRatio": 0.1,
+    "heightRatio": 0.35,
+    "minHeightRatio": 0.12,
+    "keyboardStep": 0.01,
+    "keyboardCoarseStep": 0.05
+  },
+  "geometryAnchorsSeconds": [
+    0,
+    1.2,
+    3,
+    6,
+    9,
+    12
+  ],
+  "features": [
+    {
+      "featureId": "rms",
+      "outputShape": "scalar",
+      "renderer": "scalar-line"
+    },
+    {
+      "featureId": "zcr",
+      "outputShape": "scalar",
+      "renderer": "scalar-line"
+    },
+    {
+      "featureId": "energy",
+      "outputShape": "scalar",
+      "renderer": "scalar-line"
+    },
+    {
+      "featureId": "amplitudeSpectrum",
+      "outputShape": "frequency-vector",
+      "renderer": "frequency-heatmap"
+    },
+    {
+      "featureId": "powerSpectrum",
+      "outputShape": "frequency-vector",
+      "renderer": "frequency-heatmap"
+    },
+    {
+      "featureId": "spectralCentroid",
+      "outputShape": "scalar",
+      "renderer": "scalar-line"
+    },
+    {
+      "featureId": "spectralFlatness",
+      "outputShape": "scalar",
+      "renderer": "scalar-line"
+    },
+    {
+      "featureId": "spectralFlux",
+      "outputShape": "scalar",
+      "renderer": "scalar-line"
+    },
+    {
+      "featureId": "spectralSlope",
+      "outputShape": "scalar",
+      "renderer": "scalar-line"
+    },
+    {
+      "featureId": "spectralRolloff",
+      "outputShape": "scalar",
+      "renderer": "scalar-line"
+    },
+    {
+      "featureId": "spectralSpread",
+      "outputShape": "scalar",
+      "renderer": "scalar-line"
+    },
+    {
+      "featureId": "spectralSkewness",
+      "outputShape": "scalar",
+      "renderer": "scalar-line"
+    },
+    {
+      "featureId": "spectralKurtosis",
+      "outputShape": "scalar",
+      "renderer": "scalar-line"
+    },
+    {
+      "featureId": "spectralCrest",
+      "outputShape": "scalar",
+      "renderer": "scalar-line"
+    },
+    {
+      "featureId": "chroma",
+      "outputShape": "category-vector",
+      "renderer": "chroma-heatmap"
+    },
+    {
+      "featureId": "loudness",
+      "outputShape": "loudness-structure",
+      "renderer": "loudness"
+    },
+    {
+      "featureId": "perceptualSpread",
+      "outputShape": "scalar",
+      "renderer": "scalar-line"
+    },
+    {
+      "featureId": "perceptualSharpness",
+      "outputShape": "scalar",
+      "renderer": "scalar-line"
+    },
+    {
+      "featureId": "mfcc",
+      "outputShape": "category-vector",
+      "renderer": "frequency-heatmap"
+    },
+    {
+      "featureId": "complexSpectrum",
+      "outputShape": "complex-spectrum",
+      "renderer": "complex-spectrum"
+    },
+    {
+      "featureId": "buffer",
+      "outputShape": "waveform",
+      "renderer": "waveform"
+    }
+  ]
+}
