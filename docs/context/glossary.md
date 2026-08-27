@@ -4,7 +4,7 @@ owner: "project-owner"
 last_reviewed: 2026-08-27
 upstream_docs:
   - "docs/context/index.md"
-next_action: "以 E3 point annotation 实现复核 point、inner class 与 adaptive grid 术语"
+next_action: "以 E3 owner task 复核 point、inner class、adaptive grid 与 viewport-visible DOM 术语"
 ---
 
 # Glossary
@@ -62,12 +62,12 @@ next_action: "以 E3 point annotation 实现复核 point、inner class 与 adapt
 | Editor draft | E1 已实现的独立 IndexedDB V1 唯一 `draft/latest`；内存先更新，quota/abort 不替换内存工程 | 与 Analyzer session V1 隔离，并实现同歌恢复与异歌覆盖确认 | [ADR-0007](../architecture/adrs/0007-editor-project-and-draft-boundary.md) |
 | lane | Editor 中一个具名 point/range 判别轨道，承载全部展开的 inner class 及其事件 | 名称不是 JSON identity；稳定 ID 与有序数组由 `EditorProjectV1` 固定 | [project format](../architecture/editor/project-format-v1.md) |
 | inner class | lane 内用户可见的细分类，例如音高或效果走向；新 lane 默认含 `default` | 点/范围唯一性与重叠规则以 lane 和 inner class 为作用域 | [scope](../product/scope.md) |
-| point event | 表示音符或短音色在某一吸附时间出现的单点标记 | 同 lane、inner class 和吸附时间不得重复 | [success metrics](../product/success-metrics.md) |
+| point event | E3 已实现的音符/短音色单点标记；秒数以微秒规范化持久化，显示与新建位置按当前网格吸附 | 同 lane、inner class 和规范化时间不得重复；zoom/tempo 变化不改写既有秒数 | [E3 eval plan](../quality/editor/e3-eval-plan.md) |
 | range event | 表示长音色或效果从严格较早起点持续到较晚终点的区间标记 | 同 lane、inner class 不得重叠；不同分类和内部点事件可并存 | [scope](../product/scope.md) |
 | tempo map | 由有序时间边界划分的节拍/拍号区间；一个 beat 固定为 `60/BPM` 秒，numerator 决定小节拍数，denominator 表达 beat 音符单位 | 驱动 measure/beat 线、单拍模式和点/范围事件吸附 | [Editor interactions](../architecture/editor/interaction-contracts.md) |
 | Editor timeline viewport | E2 已实现并保存于工程的 `startSeconds/endSeconds/zoom`；波形、网格、游标和 boundary 共用同一 CSS 时间映射 | 固定 1–64 zoom、指针锚点、pixel/25% pan 与 `<=1 CSS px` 对齐；播放 cursor 不持久化 | [system map](system-map.md) |
 | tempo estimate | E2 Worker 在 retained mono PCM 上以正向频谱差 onset envelope 和归一化 autocorrelation 产生的 reliable/low-confidence 结果 | 只在单一 unset metered segment 且 identity/用户 revision 仍匹配时自动写入；不使用第三方 BPM 包 | [E2 eval plan](../quality/editor/e2-eval-plan.md) |
-| adaptive grid | 根据 viewport 像素密度在 1/16、1/8、1/4、1/2 和 1 beat 中选择的可点击精度 | 防止长歌曲缩小时产生视觉上无法精确命中的标记位置 | [scope](../product/scope.md) |
+| adaptive grid | E3 已实现的 point 候选精度选择：按 12 CSS px 门槛在 1/16、1/8、1/4、1/2 和 1 beat 中取最细可靠单位 | 防止长歌曲缩小时产生视觉上无法精确命中的标记位置；只影响新操作，不重写既有秒数 | [E3 golden examples](../quality/editor/e3-golden-examples.md) |
 | single-beat segment | `0 <= BPM < 20` 输入规范化后的 tempo segment；无内部 beat/measure 和可编辑 meter，整段是一个候选单元 | 区分“整段只有一拍”与普通小数 BPM，不把无意义 BPM 写入工程 | [project format](../architecture/editor/project-format-v1.md) |
 | pointer-through overlay | 除 feature selector 与三个垂直手柄外不接收 pointer 的半透明分析层 | 让 overlay 与底层标记共享视觉坐标而不夺取 point/range 命中 | [ADR-0009](../architecture/adrs/0009-editor-overlay-renderer-boundary.md) |
 | viewport-visible event DOM | 只为当前时间视口内可见 point/range 创建交互 DOM，全部空格与高密度网格由 Canvas 表达 | 允许 E6 验证 10,000 事件而不把容量门禁变成 schema 硬上限 | [Editor test strategy](../delivery/editor/test-strategy.md) |
@@ -75,4 +75,4 @@ next_action: "以 E3 point annotation 实现复核 point、inner class 与 adapt
 
 ## Approval Record
 
-`project-owner` 于 2026-08-21 至 2026-08-26 依次批准 Analyzer M7–M11 与 Analyzer readiness，并批准 Editor 产品、架构、delivery 与 E1 evidence。2026-08-27，E2 实现与 22/22 clean canonical 已登记，owner 随后批准此次结果并开放 E3；E2 据此为 `Complete`，point、inner class 与 adaptive grid 进入 E3 实施。
+`project-owner` 于 2026-08-21 至 2026-08-26 依次批准 Analyzer M7–M11 与 Analyzer readiness，并批准 Editor 产品、架构、delivery 与 E1 evidence。2026-08-27，E2 实现与 22/22 clean canonical 已登记，owner 随后批准此次结果并开放 E3；E2 据此为 `Complete`。E3 point、inner class、adaptive grid 与 viewport-visible DOM 随后完成 26/26 clean canonical 并登记为 `in-review`，owner 批准前 E3 仍为 `In Progress`。

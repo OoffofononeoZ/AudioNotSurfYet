@@ -9,10 +9,10 @@
 | `/` | `Home.vue` | 使用共享音频能量驱动 `LightBg` 的 `rayLength` |
 | `/comingsoon` | `ComingSoon.vue` | Visualizer 空占位 |
 | `/analyzer` | `Analyzer.vue` | Canvas 点阵背景和静态 Meyda 数据入口 |
-| `/editor/:trackId?` | `Editor.vue` | E1 路由/工程基础与 E2 时间轴/tempo/BPM 已获批准；E3 point annotation 开放实施 |
+| `/editor/:trackId?` | `Editor.vue` | E1/E2 已获批准；E3 point annotation clean canonical 已通过、等待 owner 批准 |
 | `/testlands` | `TestLands.vue` | 试验页面，不应当作生产契约 |
 
-Editor `/editor/:trackId?`、Header 当前歌曲入口、播放列表“去编辑”和 MusicBar 条件隐藏已由 E1 实现并获批准。E2 波形/网格/游标 Canvas、共享 viewport、seek/zoom/pan、tempo boundary、BPM/拍号/single-beat 和刷新恢复也已由 22/22 canonical 与 owner 批准。E3 point 当前开放但尚未形成实现证据；E4 overlay、E5 range 和 E6 加固仍不得写成已实现事实。
+Editor `/editor/:trackId?`、Header 当前歌曲入口、播放列表“去编辑”和 MusicBar 条件隐藏已由 E1 实现并获批准。E2 波形/网格/游标 Canvas、共享 viewport、seek/zoom/pan、tempo boundary、BPM/拍号/single-beat 和刷新恢复也已由 22/22 canonical 与 owner 批准。E3 已实现 point lane/class、自适应网格、鼠标/右键/键盘 marker 与 viewport-visible DOM，26/26 clean canonical evidence 为 `in-review`；E4 overlay、E5 range 编辑和 E6 加固仍不得写成已实现事实。
 
 `MainLayout.vue` 固定组合 `HeaderBar`、当前 `router-view` 和 `MusicBar`，并创建/提供唯一 `AudioSessionService` 与 `AnalysisCoordinator`。修改页面高度、z-index、固定定位或底部空间时，要同时检查 Header 与 MusicBar。
 

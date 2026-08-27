@@ -5,7 +5,7 @@ last_reviewed: 2026-08-27
 upstream_docs:
   - "docs/quality/editor/e3-eval-plan.md"
   - "docs/architecture/editor/interaction-contracts.md"
-next_action: "用版本化 point golden、Vitest 与 Chrome 场景实现 E3-G01–G14"
+next_action: "owner 复核 E3-G01–G14 对应的实际 point task 与视觉结果"
 ---
 
 # Editor E3 Golden Examples
