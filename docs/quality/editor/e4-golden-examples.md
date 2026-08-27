@@ -1,11 +1,11 @@
 ---
-status: in-review
+status: approved
 owner: "project-owner"
 last_reviewed: 2026-08-27
 upstream_docs:
   - "docs/quality/editor/e4-eval-plan.md"
   - "docs/architecture/adrs/0009-editor-overlay-renderer-boundary.md"
-next_action: "生成并核对 E4 fixture、renderer family 与 overlay 交互 golden"
+next_action: "E5 与 E6 回归 E4 fixture、renderer family 与 overlay 交互 golden"
 ---
 
 # Editor E4 Golden Examples
@@ -28,3 +28,5 @@ next_action: "生成并核对 E4 fixture、renderer family 与 overlay 交互 go
 | E4-G14 | route | Editor → Analyzer → Editor | Analyzer 卡片未被改写，Editor 保存 overlay 恢复 | 固定 consumer 所有权 |
 
 版本化 fixture `editor-e4-overlay.v1.json` 固定歌曲内容、point 工程、共享时间锚点和 renderer family 覆盖；运行时生成 `artifacts/fixtures/editor-e4-overlay-v1.wav` 与匹配的 JSON 工程，不提交大型二进制。
+
+2026-08-27，`project-owner` 批准 E4 canonical evidence 与对应人工结果；本 golden 随 E4 改为 `approved`，后续 E5/E6 只回归其身份，不改写历史结果。

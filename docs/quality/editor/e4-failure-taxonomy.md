@@ -1,12 +1,12 @@
 ---
-status: in-review
+status: approved
 owner: "project-owner"
 last_reviewed: 2026-08-27
 upstream_docs:
   - "docs/quality/editor/e4-eval-plan.md"
   - "docs/quality/editor/e3-failure-taxonomy.md"
   - "docs/architecture/risk-register.md"
-next_action: "E4 provisional/canonical 失败按 renderer、consumer、bounds、hit、cursor 或 isolation 分类"
+next_action: "E5/E6 回归失败继续复用 renderer、consumer、bounds、hit、cursor 与 isolation 分类"
 ---
 
 # Editor E4 Failure Taxonomy
@@ -22,4 +22,4 @@ E4 继续沿用 E1–E3 的 `EFT-DRAFT`、`EFT-GEOMETRY`、`EFT-POINTER`、`EFT-
 | EFT-OVERLAY-CURSOR | exact cursor | cadence 超限、暂停/seek 不刷新、旧 feature/exact 覆盖当前显示 | fake clock、rapid-switch E2E | 清理 timer/value并增加 generation/request guard |
 | EFT-OVERLAY-ISOLATION | failure isolation | overlay 失败导致 Buffer、point、播放、草稿或导出失效 | fault injection、browser continuation task | 保留 last-ready Buffer，收窄 error boundary |
 
-严重度继续使用：数据损坏、错误歌曲/identity、第二 AudioContext/Worker 或底层编辑被阻断为 Blocker；几何超过 1px、键盘不可达、错误未隔离为 Major；不影响任务的视觉偏差为 Minor。任何 Blocker/Major 使 E4 canonical 或 owner 门禁失败，E5 保持 `Planned`。
+严重度继续使用：数据损坏、错误歌曲/identity、第二 AudioContext/Worker 或底层编辑被阻断为 Blocker；几何超过 1px、键盘不可达、错误未隔离为 Major；不影响任务的视觉偏差为 Minor。2026-08-27，`project-owner` 批准 E4 canonical 与人工结果；后续回归出现 Blocker/Major 时仍须阻断对应里程碑。

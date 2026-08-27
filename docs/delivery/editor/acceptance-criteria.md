@@ -9,7 +9,7 @@ upstream_docs:
   - "docs/architecture/editor/project-format-v1.md"
   - "docs/architecture/editor/interaction-contracts.md"
   - "docs/delivery/editor/execution-plan.md"
-next_action: "owner 按 AC-E401–AC-E405 复核 E4 人工任务；批准前不开放 E5"
+next_action: "按 AC-E501–AC-E505 实施并验证 E5；批准前不开放 E6"
 ---
 
 # Editor E1–E6 Acceptance Criteria

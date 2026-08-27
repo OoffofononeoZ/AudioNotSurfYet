@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/product/scope.md"
   - "docs/architecture/system-design.md"
   - "docs/delivery/execution-plan.md"
-next_action: "按已批准 ADR-0009 实施 E4 shared renderer 与 pointer-through overlay"
+next_action: "按已批准范围事件契约实施 E5，并保持 ADR-0008/0009 时间与 pointer-through 边界"
 ---
 
 # Decision Registry

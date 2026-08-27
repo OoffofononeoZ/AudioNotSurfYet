@@ -6,7 +6,7 @@ upstream_docs:
   - "docs/delivery/editor/execution-plan.md"
   - "docs/delivery/editor/acceptance-criteria.md"
   - "docs/delivery/editor/test-strategy.md"
-next_action: "owner 复核 E4 canonical 与 overlay 人工任务；批准前 E5 保持 Planned"
+next_action: "实施 E5 range annotation；canonical 与 owner 批准前 E6 保持 Planned"
 ---
 
 # Editor E1–E6 Milestone Plan
@@ -29,8 +29,8 @@ next_action: "owner 复核 E4 canonical 与 overlay 人工任务；批准前 E5 
 | E1 | Entry, playback and project foundation | Complete | E0-D | 路由、当前/指定歌曲、repeat lease、JSON V1、单草稿、导入导出和恢复保护 | E1 18/18 clean canonical + owner approval | project-owner |
 | E2 | Timeline and tempo | Complete | E1 | 波形、共享 viewport、tempo map、grid 与 BPM estimator | 22/22 clean canonical + owner approval | project-owner |
 | E3 | Point annotation | Complete | E2 | point lane、inner class、自适应网格、鼠标/右键/键盘 | 26/26 clean canonical + owner approval | project-owner |
-| E4 | Analysis overlay | In Progress | E3 | 21 项单选纯 renderer overlay、三手柄和 pointer-through | renderer/geometry/isolation + canonical + owner approval | project-owner |
-| E5 | Range annotation | Planned | E4 | range 创建、取消、调整、重叠、删除和 round-trip | range matrix + import/draft + canonical + owner approval | project-owner |
+| E4 | Analysis overlay | Complete | E3 | 21 项单选纯 renderer overlay、三手柄和 pointer-through | 31/31 clean canonical + owner approval | project-owner |
+| E5 | Range annotation | In Progress | E4 | range 创建、取消、调整、重叠、删除和 round-trip | range matrix + import/draft + canonical + owner approval | project-owner |
 | E6 | Final hardening | Planned | E5 | Chrome/Edge、三格式、native flows、10,000 事件、资源与无障碍 | 双浏览器 canonical + owner complete task + evidence approval | project-owner |
 
 ## 3. Exit Checklist by Milestone
@@ -71,7 +71,7 @@ next_action: "owner 复核 E4 canonical 与 overlay 人工任务；批准前 E5 
 - [x] AC-E401–AC-E405 覆盖 21 项与所有 renderer family；clean canonical 31/31 通过。
 - [x] Buffer 去重、stale/cache identity、快速换特征与 Analyzer workspace 隔离通过。
 - [x] 三手柄、pointer-through、`1 CSS px` 和 overlay 故障隔离通过。
-- [ ] owner 批准 E4 evidence；只开放 E5。
+- [x] owner 批准 E4 evidence；只开放 E5。
 
 ### E5
 
@@ -105,9 +105,10 @@ next_action: "owner 复核 E4 canonical 与 overlay 人工任务；批准前 E5 
 - E1：`Complete`。
 - E2：`Complete`。
 - E3：`Complete`。
-- E4：`In Progress`。
-- E5–E6：`Planned`。
-- 当前唯一下一门禁：E4 人工任务与 owner evidence 批准。
+- E4：`Complete`。
+- E5：`In Progress`。
+- E6：`Planned`。
+- 当前唯一下一门禁：E5 实现、clean canonical 与 owner evidence 批准。
 
 ## 6. Delivery Approval
 
@@ -124,3 +125,5 @@ next_action: "owner 复核 E4 canonical 与 overlay 人工任务；批准前 E5 
 同日，owner 明确批准 E3 canonical evidence 与 point task。E3 据此改为 `Complete`，E4 改为 `In Progress`，E5–E6 保持 `Planned`。
 
 随后 E4 clean canonical `E4-2026-08-27T07-21-59-209Z-c9e03ab9` 在实现 commit `c9e03ab9554aa5bac5649fa84e1d822f056ad0e2` 上 31/31 通过；overlay 几何误差 `1 CSS px`、穿透点击反馈 `5.1ms`。自动化退出清单前三项已满足；owner evidence 批准仍未完成，因此 E4 保持 `In Progress`、E5 保持 `Planned`。
+
+同日，owner 明确批准 E4 canonical evidence、21 项分析叠加、三手柄、pointer-through 与错误隔离结果。E4 据此改为 `Complete`，E5 改为 `In Progress`，E6 保持 `Planned`。

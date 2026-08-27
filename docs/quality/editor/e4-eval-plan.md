@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: approved
 owner: "project-owner"
 last_reviewed: 2026-08-27
 upstream_docs:
@@ -8,7 +8,7 @@ upstream_docs:
   - "docs/delivery/editor/test-strategy.md"
   - "docs/architecture/adrs/0009-editor-overlay-renderer-boundary.md"
   - "docs/architecture/risk-register.md"
-next_action: "实现 E4 专项、provisional 与 clean canonical；owner 批准前 E5 保持 Planned"
+next_action: "E5 回归 E4 renderer、consumer、geometry、pointer-through 与错误隔离契约"
 ---
 
 # Editor E4 Eval Plan
@@ -34,4 +34,4 @@ next_action: "实现 E4 专项、provisional 与 clean canonical；owner 批准�
 - dirty worktree 只运行 `eval:e4:provisional`；正式 evidence 只接受 clean implementation commit 上的 `eval:e4`。
 - canonical 记录 run ID、实现 commit、浏览器/Node/npm/Meyda、非敏感硬件摘要、步骤结果、geometry/feedback/cache/stale 数据、日志和 summary SHA-256。
 - E4 专项使用真实 Chrome；Edge、原生 picker、辅助技术长会话、10,000 事件与完整资源循环留到 E6，并在 evidence 中明确为未自动化范围。
-- owner 需人工复核视觉透明度、21 项切换、三手柄、穿透标记、刷新恢复与 Analyzer 往返；批准前 E4 保持 `In Progress`。
+- `project-owner` 于 2026-08-27 明确批准 E4 canonical evidence、21 项分析叠加、三手柄、pointer-through 与错误隔离结果；E4 据此关闭并开放 E5。真实 Edge、10,000 事件、原生 picker 与辅助技术长会话仍留到 E6。
