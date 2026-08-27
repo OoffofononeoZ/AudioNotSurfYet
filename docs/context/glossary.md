@@ -4,7 +4,7 @@ owner: "project-owner"
 last_reviewed: 2026-08-27
 upstream_docs:
   - "docs/context/index.md"
-next_action: "随 E4 实现登记 overlay、renderer adapter 与 pointer-through 代码事实"
+next_action: "owner 复核 E4 overlay/renderer canonical；批准后再开放 E5 range 术语实现状态"
 ---
 
 # Glossary
@@ -57,7 +57,7 @@ next_action: "随 E4 实现登记 overlay、renderer adapter 与 pointer-through
 | Editor E0-D | 已完成的 Editor execution planning 门禁；四份专属 delivery 文档均为 `approved` | E1 已授权编码，但通过仍需自己的 canonical 与 owner evidence | [milestone plan](../delivery/editor/milestone-plan.md) |
 | 逆向制曲 | 对已有歌曲反向记录音符、音色和效果出现时间的标注过程 | 产物是数据工程，不修改 PCM、混音或生成伴奏 | [problem brief](../product/problem-brief.md) |
 | Editor playback lease | E1 已实现的 route-scoped runtime token；临时把当前 track ended 策略切为 repeat-one，只有当前 token 可恢复 queue-next | 防止旧 Editor cleanup 影响新 route，同时保持唯一 AudioEngine | [ADR-0006](../architecture/adrs/0006-editor-runtime-leases.md) |
-| analysis consumer lease | E1 已实现并获批准的 Analyzer/Editor 活动意图 token；只有最新 consumer 可设置 feature、请求 tempo/cursor 或释放 | E2 已通过该 lease 请求唯一 Buffer 与 identity-bound tempo，在单 Coordinator/Worker 内丢弃 stale 结果 | [interface contracts](../architecture/interface-contracts.md) |
+| analysis consumer lease | E1 已实现并获批准的 Analyzer/Editor 活动意图 token；只有最新 consumer 可设置 feature、请求 tempo/cursor 或释放 | E4 在单 Coordinator/Worker 内先请求 Buffer，再请求 Buffer + 一个 overlay；快速切换与 stale 结果不能污染 Analyzer workspace | [interface contracts](../architecture/interface-contracts.md) |
 | `EditorProjectV1` | E1 已实现的单曲 JSON 工程 envelope，使用内容 hash、tempo map、有序 lane 和 point/range event | 工程不保存 File/PCM/cache，未知 schema 或歌曲不匹配时拒绝导入 | [project format](../architecture/editor/project-format-v1.md) |
 | Editor draft | E1 已实现的独立 IndexedDB V1 唯一 `draft/latest`；内存先更新，quota/abort 不替换内存工程 | 与 Analyzer session V1 隔离，并实现同歌恢复与异歌覆盖确认 | [ADR-0007](../architecture/adrs/0007-editor-project-and-draft-boundary.md) |
 | lane | Editor 中一个具名 point/range 判别轨道，承载全部展开的 inner class 及其事件 | 名称不是 JSON identity；稳定 ID 与有序数组由 `EditorProjectV1` 固定 | [project format](../architecture/editor/project-format-v1.md) |
@@ -69,10 +69,11 @@ next_action: "随 E4 实现登记 overlay、renderer adapter 与 pointer-through
 | tempo estimate | E2 Worker 在 retained mono PCM 上以正向频谱差 onset envelope 和归一化 autocorrelation 产生的 reliable/low-confidence 结果 | 只在单一 unset metered segment 且 identity/用户 revision 仍匹配时自动写入；不使用第三方 BPM 包 | [E2 eval plan](../quality/editor/e2-eval-plan.md) |
 | adaptive grid | E3 已实现的 point 候选精度选择：按 12 CSS px 门槛在 1/16、1/8、1/4、1/2 和 1 beat 中取最细可靠单位 | 防止长歌曲缩小时产生视觉上无法精确命中的标记位置；只影响新操作，不重写既有秒数 | [E3 golden examples](../quality/editor/e3-golden-examples.md) |
 | single-beat segment | `0 <= BPM < 20` 输入规范化后的 tempo segment；无内部 beat/measure 和可编辑 meter，整段是一个候选单元 | 区分“整段只有一拍”与普通小数 BPM，不把无意义 BPM 写入工程 | [project format](../architecture/editor/project-format-v1.md) |
-| pointer-through overlay | 除 feature selector 与三个垂直手柄外不接收 pointer 的半透明分析层 | 让 overlay 与底层标记共享视觉坐标而不夺取 point/range 命中 | [ADR-0009](../architecture/adrs/0009-editor-overlay-renderer-boundary.md) |
+| shared analysis canvas renderer | E4 抽取的纯 Canvas adapter；Analyzer card 与 Editor overlay 使用同一 feature definition、compact series、viewport 和 cursor 绘制契约 | 防止六类 renderer 在两个页面分叉，并允许单层 context/shape 错误隔离 | [ADR-0009](../architecture/adrs/0009-editor-overlay-renderer-boundary.md) |
+| pointer-through overlay | E4 已实现的半透明分析层；除 feature selector、重试和三个垂直手柄外不接收 pointer | 让 overlay 与底层标记共享视觉坐标而不夺取 point/range 命中 | [E4 eval plan](../quality/editor/e4-eval-plan.md) |
 | viewport-visible event DOM | 只为当前时间视口内可见 point/range 创建交互 DOM，全部空格与高密度网格由 Canvas 表达 | 允许 E6 验证 10,000 事件而不把容量门禁变成 schema 硬上限 | [Editor test strategy](../delivery/editor/test-strategy.md) |
 | Editor canonical | 某个 E 里程碑在 clean HEAD 上执行的正式 eval run，绑定 commit、环境、日志和 summary hash | provisional 不能替代 canonical；owner 批准后才开放下一个 E 里程碑 | [Editor execution plan](../delivery/editor/execution-plan.md) |
 
 ## Approval Record
 
-`project-owner` 于 2026-08-21 至 2026-08-26 依次批准 Analyzer M7–M11 与 Analyzer readiness，并批准 Editor 产品、架构、delivery 与 E1 evidence。2026-08-27，E2 实现与 22/22 clean canonical 已登记，owner 随后批准此次结果并开放 E3；E2 据此为 `Complete`。E3 point、inner class、adaptive grid 与 viewport-visible DOM 随后完成 26/26 clean canonical 并登记为 `in-review`，owner 批准前 E3 仍为 `In Progress`。
+`project-owner` 于 2026-08-21 至 2026-08-26 依次批准 Analyzer M7–M11 与 Analyzer readiness，并批准 Editor 产品、架构、delivery 与 E1 evidence。2026-08-27，E2 与 E3 clean canonical 依次完成并获 owner 批准。E4 overlay、shared renderer、consumer 与 pointer-through 随后完成 31/31 clean canonical 并登记为 `in-review`；owner 批准前 E4 仍为 `In Progress`、E5 仍为 `Planned`。

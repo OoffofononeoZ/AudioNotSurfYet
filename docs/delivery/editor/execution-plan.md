@@ -10,7 +10,7 @@ upstream_docs:
   - "docs/architecture/risk-register.md"
   - "docs/architecture/editor/project-format-v1.md"
   - "docs/architecture/editor/interaction-contracts.md"
-next_action: "实施 E4 analysis overlay、clean canonical 与 owner 复核；批准前 E5 保持 Planned"
+next_action: "owner 复核 E4 canonical 与 overlay 人工任务；批准前 E5 保持 Planned"
 ---
 
 # Editor E1–E6 Execution Plan
@@ -169,7 +169,7 @@ npm run eval:eN:provisional
 npm run eval:eN
 ```
 
-其中 `N` 为 4–6。canonical 必须拒绝 dirty worktree，并记录 run ID、commit、环境、步骤结果、日志和 summary SHA-256。E1–E3 clean canonical 均已通过并获 owner 批准；E4 为 `In Progress`，E5–E6 保持 `Planned`。
+其中 `N` 为 4–6。canonical 必须拒绝 dirty worktree，并记录 run ID、commit、环境、步骤结果、日志和 summary SHA-256。E1–E3 clean canonical 均已通过并获 owner 批准；E4 clean canonical 31/31 已登记为 `in-review`，E5–E6 保持 `Planned`。
 
 ## 6. Change Control and Exclusions
 
@@ -197,3 +197,5 @@ npm run eval:eN
 同日，E3 clean canonical `E3-2026-08-27T02-53-58-176Z-c670ddf5` 在实现 commit `c670ddf5494269f5a56abd20c3c5653ee5b27cef` 上 26/26 通过。该执行事实进入 owner review，不改变逐里程碑批准规则。
 
 同日，`project-owner` 明确批准 E3 canonical evidence、point lane、inner class、自适应网格与点标记结果，同意关闭 E3 并开放 E4。E4 据此为 `In Progress`，E5–E6 保持 `Planned`。
+
+随后 E4 实现和 31/31 clean canonical 完成；run `E4-2026-08-27T07-21-59-209Z-c9e03ab9` 绑定 commit `c9e03ab9554aa5bac5649fa84e1d822f056ad0e2` 与 summary SHA-256 `790f7f76f113fad6f005992f8fd10d94b0b77451acd58717c8c221edd54628ff`。该事实只进入 `in-review` evidence，不关闭 E4、不开放 E5。
