@@ -1,14 +1,14 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-08-27
+last_reviewed: 2026-08-28
 upstream_docs:
   - "docs/product/success-metrics.md"
   - "docs/architecture/interface-contracts.md"
   - "docs/architecture/risk-register.md"
   - "docs/delivery/editor/execution-plan.md"
   - "docs/delivery/editor/acceptance-criteria.md"
-next_action: "建立并执行 E6 双浏览器/10,000 事件质量契约与 40 步 canonical"
+next_action: "复核 E6 40 步 canonical，并完成不能自动化的 owner 补偿矩阵"
 ---
 
 # Editor E1–E6 Test Strategy
@@ -121,7 +121,7 @@ npm run eval:eN:provisional
 npm run eval:eN
 ```
 
-E1–E4 命令已经存在、通过 clean canonical 并获批准。E5 命令与 35 步 runner 已存在并通过 clean canonical；E6 仍不存在。新增脚本必须让 package、测试 README、本项目 Skill 与实际 runner 一致，不保留指向不存在文件的兼容别名。
+E1–E5 命令已经存在、通过 clean canonical 并获批准。E6 命令与 40 步 runner 已存在，clean canonical 已通过并等待 owner 人工补偿审批。新增脚本必须让 package、测试 README、本项目 Skill 与实际 runner 一致，不保留指向不存在文件的兼容别名。
 
 固定流程：
 

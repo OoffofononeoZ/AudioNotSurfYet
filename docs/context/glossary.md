@@ -1,10 +1,10 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-08-27
+last_reviewed: 2026-08-28
 upstream_docs:
   - "docs/context/index.md"
-next_action: "在 E6 双浏览器和 10,000 事件证据中复核 Editor 术语边界"
+next_action: "owner 按 E6 canonical 的术语与人工补偿边界完成审批"
 ---
 
 # Glossary
@@ -76,4 +76,4 @@ next_action: "在 E6 双浏览器和 10,000 事件证据中复核 Editor 术语�
 
 ## Approval Record
 
-`project-owner` 于 2026-08-21 至 2026-08-26 依次批准 Analyzer M7–M11 与 Analyzer readiness，并批准 Editor 产品、架构、delivery 与 E1 evidence。2026-08-27，E2–E5 clean canonical 与人工门禁依次获 owner 批准；E5 range annotation 为 `Complete`，E6 final hardening 为 `In Progress`。
+`project-owner` 于 2026-08-21 至 2026-08-26 依次批准 Analyzer M7–M11 与 Analyzer readiness，并批准 Editor 产品、架构、delivery 与 E1 evidence。2026-08-27，E2–E5 clean canonical 与人工门禁依次获 owner 批准；E6 final hardening clean canonical 已于 2026-08-28 登记，人工补偿审批前仍为 `In Progress`。

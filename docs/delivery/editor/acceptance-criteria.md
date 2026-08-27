@@ -1,7 +1,7 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-08-27
+last_reviewed: 2026-08-28
 upstream_docs:
   - "docs/product/success-metrics.md"
   - "docs/architecture/interface-contracts.md"
@@ -9,7 +9,7 @@ upstream_docs:
   - "docs/architecture/editor/project-format-v1.md"
   - "docs/architecture/editor/interaction-contracts.md"
   - "docs/delivery/editor/execution-plan.md"
-next_action: "按 AC-E601–AC-E606 执行真实双浏览器、容量、资源与人工补偿门禁"
+next_action: "owner 完成 AC-E601–AC-E606 中不能自动化的原生文件、辅助技术与完整任务门禁"
 ---
 
 # Editor E1–E6 Acceptance Criteria

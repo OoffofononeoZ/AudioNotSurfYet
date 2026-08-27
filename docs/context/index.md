@@ -1,17 +1,17 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-08-27
+last_reviewed: 2026-08-28
 upstream_docs:
   - "AGENTS.md"
-next_action: "执行 Editor E6 双浏览器、三格式、10,000 事件、资源与无障碍最终加固"
+next_action: "owner 复核 E6 canonical 并完成原生文件、辅助技术与长会话补偿验证"
 ---
 
 # Repository Context Index
 
 ## Purpose
 
-AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端：用户选择本地音频后，应用提供播放队列、元数据、进度与音量控制，并把实时能量用于 MusicBar 和背景可视化。Analyzer 已完成 21/21 能力和有条件 readiness；Editor E1–E5 已获批准并关闭，E6 最终加固当前为 `In Progress`。
+AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端：用户选择本地音频后，应用提供播放队列、元数据、进度与音量控制，并把实时能量用于 MusicBar 和背景可视化。Analyzer 已完成 21/21 能力和有条件 readiness；Editor E1–E5 已获批准并关闭，E6 clean canonical 已通过、人工补偿审批仍为 `In Progress`。
 
 本目录维护仓库事实、边界和工作记忆；生命周期路由与通用方法由 [AGENTS.md](../../AGENTS.md) 负责。当前代码事实与目标架构必须区分：现状见 [system map](system-map.md)，批准的目标见 [system design](../architecture/system-design.md)。
 
@@ -21,8 +21,8 @@ AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端：用户选择
 - Product intent：problem brief、scope、success metrics 和 open questions 中的 Editor E0 点/范围事件范围已于 2026-08-26 获 owner 批准。
 - System design：Analyzer 基线保持历史批准；Editor system design、接口契约、ADR-0006–0009 和两个详细子契约已获批准。R-022/R-023 已由 E1 缓解；R-024–R-027 按后续里程碑继续验证。
 - Execution planning：根级文档保留 Analyzer M1–M11 历史；`docs/delivery/editor/` 四份规划已获批准，E0-D/E1–E5 `Complete`、E6 `In Progress`。
-- Quality and evals：M3–M11 与 Editor E1–E5 的适用 canonical/owner 证据均已获批准；E6 quality 契约与 evidence 尚待建立。
-- Implementation：M1–M11 与 Editor E1–E5 均为 `Complete`；Editor E6 当前 `In Progress`。
+- Quality and evals：M3–M11 与 Editor E1–E5 的适用 canonical/owner 证据均已获批准；E6 40/40 clean canonical 已登记为 `in-review`，等待 owner 人工补偿与审批。
+- Implementation：M1–M11 与 Editor E1–E5 均为 `Complete`；Editor E6 自动化已完成，但在 owner 人工补偿签字前仍为 `In Progress`。
 - Readiness、release、retrospective：Analyzer `release-readiness.md` 已获 `Ready with waivers` 批准；PROD-015 尚未解决，因此不创建上线声明或生产托管，Editor 也不继承该 readiness。
 
 ## Key Documents
@@ -131,8 +131,8 @@ AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端：用户选择
 - 超出约 15 分钟支持边界的长音频未开始播放只作为非门禁压力观察；它不表示长音频被规定为必须失败，也不改变当前产品范围。
 - M11 clean canonical 已在 Chrome/Edge 上 38/38 通过，其中 Edge 全量为 31/31；原生 Edge 权限、辅助技术与人工长会话补偿门禁已于 2026-08-26 获 owner 签字，M11 为 `Complete`。
 - Analyzer readiness 已于 2026-08-26 获 owner 有条件批准；正式托管平台、域名、SPA fallback 和生产 URL 尚未决定，继续阻断正式上线。
-- Editor E1–E5 已实现并获批准；E6 双浏览器、三格式、10,000 事件、资源与无障碍加固已开放。
-- Editor E5 clean canonical 35/35 与人工范围任务已获批准，状态为 `Complete`；E6 为 `In Progress`。
+- Editor E1–E5 已实现并获批准；E6 双浏览器、三格式、10,000 事件、资源与无障碍 clean canonical 已 40/40 通过。
+- Editor E5 为 `Complete`；E6 canonical evidence 为 `in-review`，原生 picker、`beforeunload`、辅助技术与长会话签字前继续为 `In Progress`。
 - Editor delivery 固定 10,000 事件容量门禁、overlay 35%/12% 和逐里程碑 provisional/canonical/owner 审批；当前只开放 E6。
 - E1 clean canonical `E1-2026-08-26T15-24-21-043Z-792b424f` 在 clean commit `792b424fbab8e3621ad24d8c9add47d1c9bffcb4` 上 18/18 通过，summary SHA-256 为 `db51ba98b757ccd524d298243c6118eb24fad60101a74f20a5ff98478a5d5bc6`，并于 2026-08-26 获 owner 批准。
 - E2 clean canonical `E2-2026-08-26T16-42-47-634Z-9fc5c0a8` 在 clean commit `9fc5c0a81fcf90abfbc665412277147cd958200f` 上 22/22 通过，summary SHA-256 为 `4465c20343af9092601296b86a229200579f648ffa90641411b88f9861ba8660`；2026-08-27 owner 批准后 E2 为 `Complete`，E3 已开放。
@@ -219,3 +219,5 @@ M11 canonical run `M11-2026-08-25T10-05-12-783Z-99c67792` 随后在 clean commit
 随后 E5 实现 commit `781241772e05186e2fe0d006ed6ddd8bceded7af` 交付 range lane/class、两阶段创建、preview/取消、端点调整/回滚、半开重叠、键盘和持久化。clean canonical run `E5-2026-08-27T11-03-22-177Z-78124177` 35/35 通过，summary SHA-256 为 `6928f75cbdeb6d77e54c81b3547f7caee0b39d4c6881884b1d1d7065f3dde1b0`。该事实只登记 `in-review` evidence；owner 人工任务与批准前 E5 不关闭、E6 不开放。
 
 同日，`project-owner` 明确批准 E5 canonical evidence、范围事件创建/调整、重叠校验、键盘与持久化结果，并同意将 E5 标记为 `Complete`、开放 E6。E6 据此进入 `In Progress`；本批准不提前形成 Editor release-readiness。
+
+2026-08-28，E6 clean canonical `E6-2026-08-27T15-52-33-466Z-17d7fe10` 在 commit `17d7fe1046ed02a3fb5137ccfe7cbf5590093aff` 上 40/40 通过，summary SHA-256 为 `8f81b877dc5993bcdd4d04064e85c96156c946f2c62066c2b8571dfbc8473b6e`。自动化覆盖真实 Chrome/Edge、WAV/MP3/FLAC、10,000 事件、性能、资源和键盘/reduced-motion；原生 OS picker、`beforeunload`、辅助技术与长会话仍等待 owner 补偿签字，因此 E6 不提前关闭。

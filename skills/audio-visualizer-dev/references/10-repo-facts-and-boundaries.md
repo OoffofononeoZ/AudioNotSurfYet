@@ -2,7 +2,7 @@
 
 ## 证据基线
 
-- 最后核对日期：2026-08-27。
+- 最后核对日期：2026-08-28。
 - 首要来源：当前仓库的 `package.json`、配置、`src/`、Git 状态与 Git 历史。
 - 补充来源：Codex 任务 `019f82bc-0838-7ab3-baba-1a7571992901`；只保留其中能由当前仓库或可复现验证支持的长期事实。
 - 历史任务结论不得覆盖当前代码；差异记录在 [开放问题与项目差异](99-open-questions-and-project-deltas.md)。
@@ -43,7 +43,7 @@
 - 当前是单一前端仓库；未发现后端、数据库、认证、云端媒体库或部署配置。
 - 音频文件由用户通过 `showOpenFilePicker()` 选择；runtime File 保存在 session service，最近队列、文件句柄、唯一 current Blob 与匹配的分析 cache 由 SessionRepository 保存，Pinia `$state` 不持有浏览器资源、PCM 或 typed payload。
 - `configStore` 继续把 `volume` 和 `musicBarSettings.style` 保存到 localStorage；M5 最近会话使用独立 IndexedDB V1，不改变 config schema。
-- Analyzer 21/21 与 Analyzer-only readiness 已由版本化文档和证据确认；Editor E1–E5 已由 clean canonical 和 owner 批准，E6 双浏览器/三格式/10,000 事件最终加固为 `In Progress`；Visualizer 仍未定义。E6 evidence 获批前不要推断 Editor 已 readiness。
+- Analyzer 21/21 与 Analyzer-only readiness 已由版本化文档和证据确认；Editor E1–E5 已由 clean canonical 和 owner 批准，E6 双浏览器/三格式/10,000 事件 clean canonical 已 40/40 通过但人工补偿审批仍为 `In Progress`；Visualizer 仍未定义。E6 evidence 获批前不要推断 Editor 已 readiness。
 - `testcomp.vue`、`TestLands.vue`、`threeDTable.vue` 和 `MeydaCard.vue` 含试验或占位内容，不应默认视为稳定公共接口。
 
 ## 证据优先级

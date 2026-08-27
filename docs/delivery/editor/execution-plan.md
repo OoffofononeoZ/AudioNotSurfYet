@@ -1,7 +1,7 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-08-27
+last_reviewed: 2026-08-28
 upstream_docs:
   - "docs/product/scope.md"
   - "docs/product/success-metrics.md"
@@ -10,7 +10,7 @@ upstream_docs:
   - "docs/architecture/risk-register.md"
   - "docs/architecture/editor/project-format-v1.md"
   - "docs/architecture/editor/interaction-contracts.md"
-next_action: "实施 E6 双浏览器、三格式、10,000 事件、资源与无障碍最终加固"
+next_action: "owner 完成 E6 原生文件、辅助技术与长会话补偿验证并审批 canonical"
 ---
 
 # Editor E1–E6 Execution Plan
@@ -169,7 +169,7 @@ npm run eval:eN:provisional
 npm run eval:eN
 ```
 
-其中 `N` 为 5–6。canonical 必须拒绝 dirty worktree，并记录 run ID、commit、环境、步骤结果、日志和 summary SHA-256。E1–E5 clean canonical 均已通过并获 owner 批准；E6 为 `In Progress`。
+其中 `N` 为 5–6。canonical 必须拒绝 dirty worktree，并记录 run ID、commit、环境、步骤结果、日志和 summary SHA-256。E1–E5 clean canonical 均已通过并获 owner 批准；E6 clean canonical 已 40/40 通过并处于 `in-review`，owner 补偿审批前仍为 `In Progress`。
 
 ## 6. Change Control and Exclusions
 
@@ -205,3 +205,5 @@ npm run eval:eN
 随后 E5 实现 commit `781241772e05186e2fe0d006ed6ddd8bceded7af` 与 clean canonical `E5-2026-08-27T11-03-22-177Z-78124177` 完成，35/35 通过，summary SHA-256 为 `6928f75cbdeb6d77e54c81b3547f7caee0b39d4c6881884b1d1d7065f3dde1b0`。该事实只进入 `in-review` evidence；owner 人工任务和批准前 E5 不关闭、E6 不开放。
 
 同日，`project-owner` 明确批准 E5 canonical evidence 与人工范围任务，同意关闭 E5 并开放 E6。E6 据此进入 `In Progress`；本批准不构成 E6 或 Editor release-readiness 通过。
+
+2026-08-28，E6 clean canonical 在 commit `17d7fe1046ed02a3fb5137ccfe7cbf5590093aff` 上 40/40 通过。自动化实现阶段已完成；E6 的剩余交付门禁是 owner 对原生 OS picker、`beforeunload`、辅助技术与长会话的补偿验证和 evidence 审批，完成前不进入 Editor readiness。

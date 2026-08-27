@@ -1,13 +1,13 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-08-27
+last_reviewed: 2026-08-28
 upstream_docs:
   - "docs/context/index.md"
   - "docs/product/scope.md"
   - "docs/architecture/system-design.md"
   - "docs/delivery/execution-plan.md"
-next_action: "按 DEC-030 执行 E6 双浏览器、10,000 事件、资源与无障碍最终加固"
+next_action: "按 DEC-024/030 复核 E6 canonical，并等待 owner 人工补偿审批"
 ---
 
 # Decision Registry

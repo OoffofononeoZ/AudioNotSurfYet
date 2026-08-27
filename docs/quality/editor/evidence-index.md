@@ -1,7 +1,7 @@
 ---
 status: in-review
 owner: "project-owner"
-last_reviewed: 2026-08-27
+last_reviewed: 2026-08-28
 upstream_docs:
   - "docs/quality/editor/eval-plan.md"
   - "docs/quality/editor/golden-examples.md"
@@ -11,7 +11,7 @@ upstream_docs:
   - "docs/quality/editor/e5-eval-plan.md"
   - "docs/quality/editor/e6-eval-plan.md"
   - "docs/delivery/editor/milestone-plan.md"
-next_action: "执行并登记 E6 40 步双浏览器 canonical；人工补偿获批前 E6 保持 In Progress"
+next_action: "owner 在 Chrome/Edge 完成 E6 原生文件、辅助技术与长会话补偿验证并审批 canonical"
 ---
 
 # Editor Evidence Index
@@ -30,6 +30,7 @@ next_action: "执行并登记 E6 40 步双浏览器 canonical；人工补偿获�
 - E3 clean canonical 与 owner 人工门禁已于 2026-08-27 获批；E4 clean canonical 与 owner 人工门禁随后获批。
 - E4 clean canonical 31/31 与 owner 人工门禁已于 2026-08-27 获批；E5 已开放。
 - E5 clean canonical 35/35 与 owner 人工范围任务已于 2026-08-27 获批；E6 已开放。
+- E6 clean canonical 40/40 已通过并登记为 `in-review`；原生 OS picker、`beforeunload`、辅助技术与长会话补偿签字前，E6 继续为 `In Progress`。
 
 ## 2. Record Contract
 
@@ -505,3 +506,85 @@ next_action: "执行并登记 E6 40 步双浏览器 canonical；人工补偿获�
 - 自动化验证了 pointer/keyboard、重叠矩阵、pointercancel 回滚、overlay 穿透、reduced motion、刷新和多视口几何，但不能替代 owner 对连续长音色/效果标注、视觉清晰度和真实 JSON 导入导出的判断。
 - `project-owner` 已于 2026-08-27 完成人工范围任务并批准 E5；真实 Edge、三格式 native flow、10,000 事件、资源与辅助技术仍由 E6 独立验证。
 - R-024、R-025 获得 E5 Chrome range geometry/state/keyboard 证据，R-023 获得 range import/draft 回归；按已批准风险策略，R-024/R-025/R-027 仍保持 `Open`，E6 再执行双浏览器、10,000 事件、资源与辅助技术门禁。
+
+## 8. E6 Canonical Record
+
+| Field | Value |
+| --- | --- |
+| Run ID | `E6-2026-08-27T15-52-33-466Z-17d7fe10` |
+| Milestone | E6 — Final hardening |
+| State | `in-review`（40/40 自动化通过；owner 人工补偿门禁待完成） |
+| Implementation commit | `17d7fe1046ed02a3fb5137ccfe7cbf5590093aff` |
+| Evidence commit | 本记录所在的 `docs: register Editor E6 canonical evidence` 提交 |
+| Dirty at start / end | `false` / `false` |
+| Commit at end | `17d7fe1046ed02a3fb5137ccfe7cbf5590093aff` |
+| Started at | 2026-08-27 15:52:33.466 UTC |
+| Method | `npm run eval:e6` |
+| Reviewer | `project-owner` — pending |
+| Retention | `local-present`；至少保留到 E6 审批完成 |
+| Artifact root | `artifacts/evals/E6-2026-08-27T15-52-33-466Z-17d7fe10/` |
+| Summary SHA-256 | `8f81b877dc5993bcdd4d04064e85c96156c946f2c62066c2b8571dfbc8473b6e` |
+
+### Environment
+
+| Item | Recorded value |
+| --- | --- |
+| OS | macOS 26.5.2 (`25F84`), Darwin arm64 |
+| Hardware | MacBook Pro `MacBookPro17,1`；Apple M1 8-core；16 GB memory |
+| Node / npm | Node `v24.18.0`；npm `11.16.0` |
+| Vitest / Playwright | `4.1.10` / `1.62.0` |
+| Chrome binary / test user agent | Google Chrome `152.0.7977.64` / Chrome `151.0.7922.34` |
+| Edge binary / test user agent | Microsoft Edge `151.0.4129.107` / Edge `151.0.7922.34` |
+| Meyda | `5.6.3` |
+
+本记录只保存机型、芯片、核心数和内存，不复制 artifact 中的序列号、UUID、UDID 或设备标识。E6 使用仓库受控音频、运行时生成的 15 分钟 WAV、虚构工程与浏览器临时状态，不读取或登记用户私有音频身份。
+
+### Results and Traceability
+
+| Step group | Result | Evidence |
+| --- | --- | --- |
+| E6 unit / integration | 3/3 + 3/3 pass | 固定 seed 的 20 lanes、160 classes、5,000 point + 5,000 range；ID、半开相邻、跨分类重叠、尾部边界、JSON/IndexedDB round-trip 与 invalid import 原子隔离 |
+| E6 Chrome / Edge | 3/3 + 3/3 pass | WAV/MP3/FLAC、当前 track、repeat-one、mismatch 隔离、刷新暂停恢复、10,000 事件、reduced motion、键盘焦点和 20 次 lifecycle |
+| Stress identity | pass | seed `3858767910`；15 分钟；10,000 events；运行时工程 SHA-256 `1ee69629a2ea40342b503653ac31ac2c7eabad361d570c3b3d5a5be625bce5f0`；10,182/10,182 ID 唯一 |
+| Visible DOM / Canvas | pass | 90 秒 viewport 的时间过滤上限为 500 point + 560 range；采样时实际 DOM 为 378 point + 0 range，只实例化垂直可见 surface；165 Canvas 中可见 backing store 异常为 0 |
+| Feedback / long tasks | pass | Chrome 最大 `4.5ms`，Edge 最大 `4.2ms`，均低于 `100ms`；两浏览器 Editor/分析归因 `>50ms` 长任务为 `0` |
+| Geometry | pass | Chrome/Edge 在 1024/1280/1920 的 timeline/event/overlay 最大差均为 `1 CSS px` |
+| Resource lifecycle | pass | 两浏览器各 20 次 Editor/Analyzer/Home、换歌与 overlay 循环后为 1 Worker、1 AudioContext、1–2 RAF、0 Object URL、1 ResizeObserver、1 Home Canvas，无单调累积 |
+| Edge Analyzer regression | 4/4 pass | 三格式队列/分析恢复、键盘/reduced motion/390–1920、quota 和 20 次 WebGL/RAF 生命周期 |
+| E1–E5 / M6–M11 regressions | pass | E1–E5 unit/integration/Chrome、M6 Worker/coordinator、M7–M10 renderer unit/Chrome、M11 Chrome 全部通过 |
+| Build | pass with warning | 1,844 modules；最大 JS chunk `1,282.91 kB`，既有 warning 如实保留到 Editor readiness review |
+| Docs / harness / typecheck / diff | pass | lifecycle links、deliberate failure detection、`vue-tsc -b`、canonical 起止 clean 与 `git diff --check` |
+
+### Provisional and Failed-attempt History
+
+- 最终 dirty-worktree provisional：`E6-2026-08-27T15-37-05-240Z-5448a9d9-provisional`，40/40 pass，summary SHA-256 `07128cc377f0d2d2134ba76acd8bcf3c3c08bedbf539182e09444a3a3d2910e7`。
+- 较早 provisional `E6-2026-08-27T14-41-27-498Z-5448a9d9-provisional` 为 38/40 fail，summary SHA-256 `10d1e26b5faa0ad731c6241ef51f3b7313ee54f01d7a0bf3b4011b5467998f79`。失败属于 `EFT-REGRESSION / S1`：E3/E5 刷新断言未先滚动到新的纵向可见 surface；测试按 viewport-visible DOM 契约修正后通过。
+- clean commit `e27e0c00…` 的第一次 canonical 尝试在 Chrome 20 次生命周期中暴露测试竞态：异歌 conflict 异步出现前测试只检查一次，导致等待 `ready` 超时。该次运行被明确终止，没有生成 summary，也不作为 canonical。测试改为等待 `ready | conflict` 后，专项 20 次循环通过，并以独立提交 `17d7fe1` 固定；最终 clean canonical 40/40 通过。
+- E6 反馈计时从浏览器内实际 `pointerdown` / `keydown` / `input` 开始，不包含 Playwright 发出输入前的驱动等待；`100ms` 产品门禁未放宽。
+
+### Local Artifact Hashes
+
+| Artifact | SHA-256 |
+| --- | --- |
+| `summary.json` | `8f81b877dc5993bcdd4d04064e85c96156c946f2c62066c2b8571dfbc8473b6e` |
+| 40 个排序后 `*.log` SHA-256 清单的 SHA-256 | `da3216dd6d8f099bff97e895cb70d83ed0de76887e5922eb4394906dd5bf4495` |
+| `01-E6-hardening-unit.log` | `9af204e8632249eca31197a6b1f59b2fff07d0470ae8776340e980cfc9d24093` |
+| `02-E6-hardening-integration.log` | `c68f95cc09f0a0e38e8d93c9be32a465903690da1959d86b61cc44c0643b14ec` |
+| `03-E6-Chrome.log` | `1b5b72571ebebb28ae72cd19ea8cbe9e06e7d8f1f8b9c32299becb5c09d51d67` |
+| `04-E6-Edge.log` | `ddf1281a2de03fe1d549e0a8fa7aa99a9db8c5d334fa87a19eabf46ae3eb5cb0` |
+| `05-M3-M11-Edge-critical-regression.log` | `baa197f5422e1e7a6dcbb599e80dfb75cdb1e3d32ccd2507c3285f67780828bb` |
+| `09-E5-Chrome-regression.log` | `101f85b3385670119dfce45cafac107a4ec4500173fd0657020ce60e81c5da0f` |
+| `30-E4-Chrome-regression.log` | `0a9f613bcc30ddab77bfc6cc7c54969e4d381aab7d5a607413d1fcf4b3b68f05` |
+| `31-E3-Chrome-regression.log` | `e366436cec57030d753190b336991b5c6738560a29593769d1d6b858243b257d` |
+| `32-E2-Chrome-regression.log` | `dbabebeec222ca60dfb95a42b196282bbcaeb751c03d1eedf1b9828f406b28ac` |
+| `33-E1-Chrome-regression.log` | `9d8f7c4acf5061d312b215226f20a2f7c49ec7ae6786b35b05791b78f00e51c9` |
+| `38-M11-Chrome-resource-regression.log` | `a07ba4e826db4b04d5e3acf49f905d761ecbf37333fee30f968913b08421c6b1` |
+| `39-build.log` | `941dd2c92102119c45522ffed70310478999d0fb77cfb985282a03d0f5c14a2e` |
+| `40-diff-check.log` | `e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855` |
+
+### Manual Gaps and Approval Gate
+
+- 自动化中的工程 picker 使用浏览器 OPFS/stub 验证原子读写、取消与错误隔离，不能替代 Chrome/Edge 的真实 OS 打开、保存和覆盖对话框。
+- 原生 `beforeunload` 提示、辅助技术朗读和真实长会话操作体感不能由 Playwright 结果替代；这些项目必须由 owner 补偿验证。
+- 自动化已验证键盘语义、可见焦点、reduced motion 和非纯颜色结构，但仍需 owner 使用真实辅助技术完成核心任务。
+- E6 evidence 在 owner 明确签字前保持 `in-review`，E6 保持 `In Progress`，R-024、R-025、R-027 继续为 `Open`，不得创建 Editor release-readiness。

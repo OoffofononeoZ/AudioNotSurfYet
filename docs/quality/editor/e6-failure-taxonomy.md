@@ -1,12 +1,12 @@
 ---
 status: in-review
 owner: "project-owner"
-last_reviewed: 2026-08-27
+last_reviewed: 2026-08-28
 upstream_docs:
   - "docs/quality/editor/e6-eval-plan.md"
   - "docs/quality/editor/e5-failure-taxonomy.md"
   - "docs/architecture/risk-register.md"
-next_action: "E6 专项、provisional 与 canonical 失败按浏览器/格式、容量、性能、资源、无障碍或证据身份分类"
+next_action: "保留 E6 失败历史；owner 人工补偿失败继续按本 taxonomy 阻断审批"
 ---
 
 # Editor E6 Failure Taxonomy
