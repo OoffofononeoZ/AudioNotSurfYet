@@ -9,7 +9,7 @@ upstream_docs:
   - "docs/architecture/editor/project-format-v1.md"
   - "docs/architecture/editor/interaction-contracts.md"
   - "docs/delivery/editor/execution-plan.md"
-next_action: "owner 复核 AC-E501–AC-E505 canonical 与人工范围任务；批准前不开放 E6"
+next_action: "按 AC-E601–AC-E606 执行真实双浏览器、容量、资源与人工补偿门禁"
 ---
 
 # Editor E1–E6 Acceptance Criteria

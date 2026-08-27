@@ -4,7 +4,7 @@ owner: "project-owner"
 last_reviewed: 2026-08-27
 upstream_docs:
   - "docs/context/index.md"
-next_action: "owner 复核 E5 range event canonical；批准前 E6 保持 Planned"
+next_action: "在 E6 双浏览器和 10,000 事件证据中复核 Editor 术语边界"
 ---
 
 # Glossary
@@ -76,4 +76,4 @@ next_action: "owner 复核 E5 range event canonical；批准前 E6 保持 Planne
 
 ## Approval Record
 
-`project-owner` 于 2026-08-21 至 2026-08-26 依次批准 Analyzer M7–M11 与 Analyzer readiness，并批准 Editor 产品、架构、delivery 与 E1 evidence。2026-08-27，E2–E4 clean canonical 依次完成并获 owner 批准；E5 clean canonical 随后 35/35 通过并保持 `in-review`。E4 为 `Complete`，E5 range annotation 为 `In Progress`，E6 仍为 `Planned`。
+`project-owner` 于 2026-08-21 至 2026-08-26 依次批准 Analyzer M7–M11 与 Analyzer readiness，并批准 Editor 产品、架构、delivery 与 E1 evidence。2026-08-27，E2–E5 clean canonical 与人工门禁依次获 owner 批准；E5 range annotation 为 `Complete`，E6 final hardening 为 `In Progress`。

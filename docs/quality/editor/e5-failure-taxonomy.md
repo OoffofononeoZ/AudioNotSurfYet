@@ -1,12 +1,12 @@
 ---
-status: in-review
+status: approved
 owner: "project-owner"
 last_reviewed: 2026-08-27
 upstream_docs:
   - "docs/quality/editor/e5-eval-plan.md"
   - "docs/quality/editor/e4-failure-taxonomy.md"
   - "docs/architecture/risk-register.md"
-next_action: "owner 复核 canonical 与人工任务；新增失败继续按 range state、interval、overlap、handle、persistence 或 regression 分类"
+next_action: "E6 沿用稳定 E5 分类，并新增双浏览器、规模、资源和辅助技术失败域"
 ---
 
 # Editor E5 Failure Taxonomy
@@ -30,3 +30,7 @@ E5 继续沿用 `EFT-DRAFT`、`EFT-GEOMETRY`、`EFT-POINTER`、`EFT-FOCUS`、`EF
 | S3 | 不影响事实和任务的轻微视觉/文案差异 | 登记并交 owner 判断人工门禁 |
 
 canonical 失败保留 run identity、日志和分类；修复后形成新实现 commit 与新 clean canonical。E5 不把未执行的 Edge、三格式 native flow、10,000 事件或 E6 资源/辅助技术门禁归为通过。
+
+## Approval Record
+
+`project-owner` 于 2026-08-27 随 E5 canonical evidence 一并批准本分类与严重度响应；E6 仍须独立分类其最终加固失败。

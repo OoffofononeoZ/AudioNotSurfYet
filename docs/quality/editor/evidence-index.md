@@ -10,7 +10,7 @@ upstream_docs:
   - "docs/quality/editor/e4-eval-plan.md"
   - "docs/quality/editor/e5-eval-plan.md"
   - "docs/delivery/editor/milestone-plan.md"
-next_action: "owner 复核 E5 canonical 与人工范围任务；批准前 E5 保持 In Progress、E6 保持 Planned"
+next_action: "执行并登记 E6 40 步双浏览器 canonical；人工补偿获批前 E6 保持 In Progress"
 ---
 
 # Editor Evidence Index
@@ -22,13 +22,13 @@ next_action: "owner 复核 E5 canonical 与人工范围任务；批准前 E5 保
 - E2：`Complete`。
 - E3：`Complete`。
 - E4：`Complete`。
-- E5：`In Progress`。
-- E6：`Planned`。
+- E5：`Complete`。
+- E6：`In Progress`。
 - E1 clean canonical 与 owner 人工门禁均已批准；Analyzer M3–M11 evidence 仍不能替代未来 Editor 里程碑证据。
 - E2 clean canonical 与 owner 门禁已于 2026-08-27 获批。
 - E3 clean canonical 与 owner 人工门禁已于 2026-08-27 获批；E4 clean canonical 与 owner 人工门禁随后获批。
 - E4 clean canonical 31/31 与 owner 人工门禁已于 2026-08-27 获批；E5 已开放。
-- E5 clean canonical 35/35 已登记为 `in-review`；owner 人工门禁与批准前不关闭 E5、不开放 E6。
+- E5 clean canonical 35/35 与 owner 人工范围任务已于 2026-08-27 获批；E6 已开放。
 
 ## 2. Record Contract
 
@@ -406,14 +406,14 @@ next_action: "owner 复核 E5 canonical 与人工范围任务；批准前 E5 保
 | --- | --- |
 | Run ID | `E5-2026-08-27T11-03-22-177Z-78124177` |
 | Milestone | E5 — Range annotation |
-| State | `in-review`（35/35 自动化通过；等待 owner 人工范围任务与批准） |
+| State | `approved`（35/35 自动化与 owner 人工范围任务均已批准） |
 | Implementation commit | `781241772e05186e2fe0d006ed6ddd8bceded7af` |
 | Evidence commit | 本记录所在的 `docs: register Editor E5 canonical evidence` 提交 |
 | Dirty at start / end | `false` / `false` |
 | Commit at end | `781241772e05186e2fe0d006ed6ddd8bceded7af` |
 | Started at | 2026-08-27 11:03:22.177 UTC |
 | Method | `npm run eval:e5` |
-| Reviewer | `project-owner` — pending |
+| Reviewer | `project-owner` — approved 2026-08-27 |
 | Retention | `local-present`；至少保留到 E5 审批完成 |
 | Artifact root | `artifacts/evals/E5-2026-08-27T11-03-22-177Z-78124177/` |
 | Summary SHA-256 | `6928f75cbdeb6d77e54c81b3547f7caee0b39d4c6881884b1d1d7065f3dde1b0` |
@@ -452,6 +452,10 @@ next_action: "owner 复核 E5 canonical 与人工范围任务；批准前 E5 保
 
 - 最终 dirty-worktree provisional：`E5-2026-08-27T10-58-47-206Z-56a0250d-provisional`，35/35 pass，summary SHA-256 `f821166e699b2866876e10269b41875b843cda9eb8eb2c8365dabd624c361e83`。
 - provisional 前的专项 Chrome 首次发现 `EFT-RANGE-STATE / S1`：正常释放 pointer capture 后触发的 `lostpointercapture` 会再次执行取消路径并清除刚打开的 quick menu。实现改为没有活动 pointer 时忽略迟到的 lost-capture；同时测试改为在滚动后重新读取可见坐标，并固定 pointercancel 端点回滚。最终 E5 Chrome 7/7、provisional 与 canonical 均通过，本轮没有 canonical failure。
+
+### Manual Approval
+
+`project-owner` 于 2026-08-27 明确回复：“我批准 Editor E5 canonical evidence、范围事件创建、调整、重叠校验、键盘与持久化结果；同意将 E5 标记为 Complete 并开放 E6。”该签字批准已登记的 E5 canonical 与人工范围任务，不补写 owner 未提供的逐项测量，也不提前批准 E6。
 
 ### Local Artifact Hashes
 
@@ -498,5 +502,5 @@ next_action: "owner 复核 E5 canonical 与人工范围任务；批准前 E5 保
 
 - E5 专项按批准计划只在稳定 Chrome 自动化；真实 Edge、MP3/WAV/FLAC Editor 全量、10,000 事件、原生 picker、资源与辅助技术长会话仍留到 E6，不能从本轮结果外推。
 - 自动化验证了 pointer/keyboard、重叠矩阵、pointercancel 回滚、overlay 穿透、reduced motion、刷新和多视口几何，但不能替代 owner 对连续长音色/效果标注、视觉清晰度和真实 JSON 导入导出的判断。
-- owner 需使用 `artifacts/fixtures/editor-e5-ranges-v1.wav` 完成创建、取消、端点调整、同/跨分类重叠、右键/键盘、overlay 穿透及刷新/JSON round-trip；批准前 E5 保持 `In Progress`，E6 保持 `Planned`。
+- `project-owner` 已于 2026-08-27 完成人工范围任务并批准 E5；真实 Edge、三格式 native flow、10,000 事件、资源与辅助技术仍由 E6 独立验证。
 - R-024、R-025 获得 E5 Chrome range geometry/state/keyboard 证据，R-023 获得 range import/draft 回归；按已批准风险策略，R-024/R-025/R-027 仍保持 `Open`，E6 再执行双浏览器、10,000 事件、资源与辅助技术门禁。

@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: approved
 owner: "project-owner"
 last_reviewed: 2026-08-27
 upstream_docs:
@@ -9,7 +9,7 @@ upstream_docs:
   - "docs/architecture/editor/project-format-v1.md"
   - "docs/architecture/editor/interaction-contracts.md"
   - "docs/architecture/risk-register.md"
-next_action: "owner 复核已登记的 35/35 canonical 与人工范围任务；批准前 E6 保持 Planned"
+next_action: "保留 E5 canonical artifact；E6 按独立质量契约执行双浏览器与 10,000 事件加固"
 ---
 
 # Editor E5 Eval Plan
@@ -37,4 +37,8 @@ next_action: "owner 复核已登记的 35/35 canonical 与人工范围任务；�
 - `eval:e5:provisional` 允许 dirty worktree，只提供实现反馈；正式 evidence 只接受 clean implementation commit 上的 `eval:e5`。
 - canonical 固定为 E4 31 步基线加 E5 golden/unit/integration/Chrome，共 35 步；记录 run ID、commit、环境、geometry、feedback、DOM、日志与 summary SHA-256。
 - E5 专项使用真实 Chrome，覆盖 1024/1280/1920、代表性 DPR、reduced motion、pointer、keyboard、console/pageerror。
-- owner 需人工完成长音色/效果创建、取消、调整、重叠矩阵、overlay 穿透、刷新和 JSON round-trip；批准前 E5 保持 `In Progress`、E6 保持 `Planned`。
+- owner 人工完成长音色/效果创建、取消、调整、重叠矩阵、overlay 穿透、刷新和 JSON round-trip 的门禁已于 2026-08-27 签字；真实 Edge、容量与资源结论仍不得从 E5 外推。
+
+## Approval Record
+
+`project-owner` 于 2026-08-27 明确回复：“我批准 Editor E5 canonical evidence、范围事件创建、调整、重叠校验、键盘与持久化结果；同意将 E5 标记为 Complete 并开放 E6。”本批准关闭 E5 人工门禁；canonical identity 与自动化数值保持不变。

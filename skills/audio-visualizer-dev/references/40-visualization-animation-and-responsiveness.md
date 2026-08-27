@@ -10,7 +10,7 @@
 | `MusicBar.vue` | CSS conic-gradient + GSAP | 三种外形/灯带样式、进度和信息跑马灯 |
 | `AnimatedList.vue` | GSAP | 列表进入、选择和滚动可见性动画 |
 
-`threeDTable.vue` 仍是试验表面；`MeydaCard.vue` 已是 Analyzer 21 项 Canvas/DOM renderer 容器。E4 已抽取 `analysisCanvasRenderer` 供 Analyzer card 与 Editor overlay 共用，并完成获 owner 批准的 31/31 clean canonical；E5 range 操作保持 overlay pointer-through，并由 35/35 `in-review` clean canonical 验证。
+`threeDTable.vue` 仍是试验表面；`MeydaCard.vue` 已是 Analyzer 21 项 Canvas/DOM renderer 容器。E4 已抽取 `analysisCanvasRenderer` 供 Analyzer card 与 Editor overlay 共用，并完成获 owner 批准的 31/31 clean canonical；E5 range 操作保持 overlay pointer-through，并由获 owner 批准的 35/35 clean canonical 验证。E6 将在真实 Chrome/Edge 和 10,000 事件压力下复核该边界。
 
 ## RAF 与 Observer
 

@@ -5,7 +5,7 @@ last_reviewed: 2026-08-27
 upstream_docs:
   - "docs/architecture/system-design.md"
   - "docs/architecture/interface-contracts.md"
-next_action: "owner 复核 E5 range evidence；E6 继续以双浏览器/10,000 事件复核 R-022–R-025、R-027"
+next_action: "以 E6 双浏览器、10,000 事件、资源与辅助技术证据复核 R-022–R-025、R-027"
 ---
 
 # Risk Register

@@ -8,7 +8,7 @@
 - FFmpeg：8.1.2；只用于生成和检查受控 WAV/MP3/FLAC fixture。
 - 当前检测到 Google Chrome 151.0.7922.174 与 Microsoft Edge 151.0.4129.107；`npm run test:e2e:edge` 使用真实 `msedge` channel，浏览器缺失时仍以退出码 2 报告 `blocked`。
 
-M3–M11 不建设 CI。下列命令当前均为本地门禁；正式证据要求在干净 commit 上复跑。M3–M11 与 Editor E1–E4 canonical 均已获批准；E5 clean canonical 35/35 已登记为 `in-review`。M5 Chrome 原生权限、M7 学习任务、M8 Windows Chrome 界面稳定化、M9 导航栏视觉/学习清单、M11 Edge 最终加固和 E1 原生工程流程均由 owner 单独签字；不可自动化路径的事实仍需在后续 readiness 中披露。
+M3–M11 不建设 CI。下列命令当前均为本地门禁；正式证据要求在干净 commit 上复跑。M3–M11 与 Editor E1–E5 canonical 均已获批准；E6 为 `In Progress`。M5 Chrome 原生权限、M7 学习任务、M8 Windows Chrome 界面稳定化、M9 导航栏视觉/学习清单、M11 Edge 最终加固和 E1 原生工程流程均由 owner 单独签字；不可自动化路径的事实仍需在后续 readiness 中披露。
 
 当前 `npm audit` 在安全补丁更新后剩余 1 项 low：Vite 依赖的 esbuild 0.27.3 在 Windows 开发服务器场景存在本地任意文件读取风险。仓库目标验证机为 macOS，开发服务器不得暴露到不受信网络；依赖升级提供修复版本后复核。该缺口不被描述为已修复或生产 readiness。
 
@@ -137,7 +137,7 @@ E4 使用版本化 `editor-e4-overlay.v1.json` 固定 21 项 feature/renderer �
 
 E5 使用版本化 `editor-e5-ranges.v1.json` 固定半开区间、相邻允许、同分类防重叠、跨分类重叠、最短自适应网格和 point-in-range 语义；`fixtures:e5:golden` 同时生成 Git 忽略的 `artifacts/fixtures/editor-e5-ranges-v1.wav` 与 JSON 工程。Chrome 场景覆盖两阶段创建、取消、端点调整与回滚、迁移冲突、右键优先级、键盘、overlay 穿透和 1024/1280/1920 geometry。
 
-E5 clean canonical `E5-2026-08-27T11-03-22-177Z-78124177` 在 commit `781241772e05186e2fe0d006ed6ddd8bceded7af` 上 35/35 通过，summary SHA-256 为 `6928f75cbdeb6d77e54c81b3547f7caee0b39d4c6881884b1d1d7065f3dde1b0`；owner 批准前 E5 保持 `In Progress`、E6 保持 `Planned`。
+E5 clean canonical `E5-2026-08-27T11-03-22-177Z-78124177` 在 commit `781241772e05186e2fe0d006ed6ddd8bceded7af` 上 35/35 通过，summary SHA-256 为 `6928f75cbdeb6d77e54c81b3547f7caee0b39d4c6881884b1d1d7065f3dde1b0`；`project-owner` 于 2026-08-27 批准 E5 canonical 与人工范围任务，E5 为 `Complete`、E6 为 `In Progress`。
 
 E2 clean canonical `E2-2026-08-26T16-42-47-634Z-9fc5c0a8` 已在 commit `9fc5c0a81fcf90abfbc665412277147cd958200f` 上 22/22 通过，summary SHA-256 为 `4465c20343af9092601296b86a229200579f648ffa90641411b88f9861ba8660`；2026-08-27 owner 批准该结果并开放 E3。
 
