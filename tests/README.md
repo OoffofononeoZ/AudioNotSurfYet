@@ -139,6 +139,8 @@ E5 使用版本化 `editor-e5-ranges.v1.json` 固定半开区间、相邻允许�
 
 E5 clean canonical `E5-2026-08-27T11-03-22-177Z-78124177` 在 commit `781241772e05186e2fe0d006ed6ddd8bceded7af` 上 35/35 通过，summary SHA-256 为 `6928f75cbdeb6d77e54c81b3547f7caee0b39d4c6881884b1d1d7065f3dde1b0`；`project-owner` 于 2026-08-27 批准 E5 canonical 与人工范围任务，E5 为 `Complete`、E6 为 `In Progress`。
 
+E6 quality contract 固定真实 Chrome/Edge、WAV/MP3/FLAC、15 分钟 20 lanes/160 classes/10,000 events、`<=100ms` 反馈、无归因任务 `>50ms`、viewport-visible DOM、20 次资源循环与人工 native/辅助技术补偿。E6 命令与 40 步 runner 在实现提交前仍不存在，不得把计划描述为已验证。
+
 E2 clean canonical `E2-2026-08-26T16-42-47-634Z-9fc5c0a8` 已在 commit `9fc5c0a81fcf90abfbc665412277147cd958200f` 上 22/22 通过，summary SHA-256 为 `4465c20343af9092601296b86a229200579f648ffa90641411b88f9861ba8660`；2026-08-27 owner 批准该结果并开放 E3。
 
 E3 clean canonical `E3-2026-08-27T02-53-58-176Z-c670ddf5` 已在 commit `c670ddf5494269f5a56abd20c3c5653ee5b27cef` 上 26/26 通过，summary SHA-256 为 `2a0a46b9a0e9b459ee17b11919451f074205fda58801d84a1274dbd12f5cfe4c`；point 反馈 `28.5ms`、几何误差 `0 CSS px`，并已获 owner 批准。

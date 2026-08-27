@@ -84,7 +84,7 @@
 - M6 dirty-worktree provisional 与 clean-commit canonical 均已 20/20 通过；正式 evidence 已登记，并由 `project-owner` 于 2026-07-30 批准，M6 已关闭。
 - M7–M11 已获批准并关闭。M11 clean canonical `M11-2026-08-25T10-05-12-783Z-99c67792` 在 commit `99c67792509d07456bcb431b90468252f8b0fdc3` 上 38/38 通过；Edge 原生权限、辅助技术与最终加固于 2026-08-26 获 owner 签字。Analyzer readiness 已获 `Ready with waivers` 批准。Editor E1–E5 clean canonical 均已通过并获 owner 批准；E6 对应命令与证据待建立。
 
-- E4/E5 命令与 clean canonical 已获批准；E6 对应命令仍不存在，将在当前里程碑建立。
+- E4/E5 命令与 clean canonical 已获批准；E6 quality contract 已建立，命令与 40 步 runner 仍不存在，将在当前里程碑实现。
 
 ## 构建风险
 
