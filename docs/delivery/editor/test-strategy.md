@@ -8,7 +8,7 @@ upstream_docs:
   - "docs/architecture/risk-register.md"
   - "docs/delivery/editor/execution-plan.md"
   - "docs/delivery/editor/acceptance-criteria.md"
-next_action: "建立 E4 renderer/overlay/consumer 专项与 clean canonical；E5 保持 Planned"
+next_action: "owner 复核 E4 renderer/overlay/consumer canonical；批准前 E5 保持 Planned"
 ---
 
 # Editor E1–E6 Test Strategy
@@ -121,7 +121,7 @@ npm run eval:eN:provisional
 npm run eval:eN
 ```
 
-E1–E3 命令已经存在、通过 clean canonical 并获批准。E4 当前开放，E5–E6 仍不存在。新增脚本必须让 package、测试 README、本项目 Skill 与实际 runner 一致，不保留指向不存在文件的兼容别名。
+E1–E3 命令已经存在、通过 clean canonical 并获批准。E4 命令与 31 步 runner 已存在并通过 clean canonical，evidence 等待 owner 批准；E5–E6 仍不存在。新增脚本必须让 package、测试 README、本项目 Skill 与实际 runner 一致，不保留指向不存在文件的兼容别名。
 
 固定流程：
 
@@ -136,4 +136,4 @@ E1–E3 命令已经存在、通过 clean canonical 并获批准。E4 当前开�
 
 ## 9. Current Planning Gate
 
-`project-owner` 于 2026-08-26 批准本文并开放 E1，随后批准 E1 canonical/人工结果并开放 E2；2026-08-27 又依次批准 E2 与 E3 结果。E4 当前开放实施；E5–E6 仍须等待前序 owner 门禁，不得把自动化通过泛化成人工门禁通过。
+`project-owner` 于 2026-08-26 批准本文并开放 E1，随后批准 E1 canonical/人工结果并开放 E2；2026-08-27 又依次批准 E2 与 E3 结果。E4 clean canonical 已 31/31 通过但仍等待 owner 人工门禁；E5–E6 不开放，不得把自动化通过泛化成人工门禁通过。

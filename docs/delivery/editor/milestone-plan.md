@@ -6,7 +6,7 @@ upstream_docs:
   - "docs/delivery/editor/execution-plan.md"
   - "docs/delivery/editor/acceptance-criteria.md"
   - "docs/delivery/editor/test-strategy.md"
-next_action: "完成 E4 analysis overlay、clean canonical 与 owner 复核；批准前 E5 保持 Planned"
+next_action: "owner 复核 E4 canonical 与 overlay 人工任务；批准前 E5 保持 Planned"
 ---
 
 # Editor E1–E6 Milestone Plan
@@ -68,9 +68,9 @@ next_action: "完成 E4 analysis overlay、clean canonical 与 owner 复核；�
 
 ### E4
 
-- [ ] AC-E401–AC-E405 覆盖 21 项与所有 renderer family。
-- [ ] Buffer 去重、stale/cache identity、返回 Analyzer workspace 恢复通过。
-- [ ] 三手柄、pointer-through、1 CSS px 和 overlay 故障隔离通过。
+- [x] AC-E401–AC-E405 覆盖 21 项与所有 renderer family；clean canonical 31/31 通过。
+- [x] Buffer 去重、stale/cache identity、快速换特征与 Analyzer workspace 隔离通过。
+- [x] 三手柄、pointer-through、`1 CSS px` 和 overlay 故障隔离通过。
 - [ ] owner 批准 E4 evidence；只开放 E5。
 
 ### E5
@@ -107,7 +107,7 @@ next_action: "完成 E4 analysis overlay、clean canonical 与 owner 复核；�
 - E3：`Complete`。
 - E4：`In Progress`。
 - E5–E6：`Planned`。
-- 当前唯一下一门禁：E4 专项、clean canonical、人工任务与 owner evidence 批准。
+- 当前唯一下一门禁：E4 人工任务与 owner evidence 批准。
 
 ## 6. Delivery Approval
 
@@ -122,3 +122,5 @@ next_action: "完成 E4 analysis overlay、clean canonical 与 owner 复核；�
 同日，E3 clean canonical 26/26 通过并登记为 `in-review`。自动化退出清单前三项已满足；owner evidence 批准仍未完成，因此 E3 保持 `In Progress`，E4 保持 `Planned`。
 
 同日，owner 明确批准 E3 canonical evidence 与 point task。E3 据此改为 `Complete`，E4 改为 `In Progress`，E5–E6 保持 `Planned`。
+
+随后 E4 clean canonical `E4-2026-08-27T07-21-59-209Z-c9e03ab9` 在实现 commit `c9e03ab9554aa5bac5649fa84e1d822f056ad0e2` 上 31/31 通过；overlay 几何误差 `1 CSS px`、穿透点击反馈 `5.1ms`。自动化退出清单前三项已满足；owner evidence 批准仍未完成，因此 E4 保持 `In Progress`、E5 保持 `Planned`。

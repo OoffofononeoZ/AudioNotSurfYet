@@ -9,7 +9,7 @@ upstream_docs:
   - "docs/quality/editor/e3-eval-plan.md"
   - "docs/quality/editor/e4-eval-plan.md"
   - "docs/delivery/editor/milestone-plan.md"
-next_action: "定义并执行 E4 analysis overlay eval；E5 在 E4 evidence 获批前保持 Planned"
+next_action: "owner 复核 E4 canonical 与人工任务；批准前 E5 保持 Planned"
 ---
 
 # Editor Evidence Index
@@ -25,6 +25,7 @@ next_action: "定义并执行 E4 analysis overlay eval；E5 在 E4 evidence 获�
 - E1 clean canonical 与 owner 人工门禁均已批准；Analyzer M3–M11 evidence 仍不能替代未来 Editor 里程碑证据。
 - E2 clean canonical 与 owner 门禁已于 2026-08-27 获批。
 - E3 clean canonical 与 owner 人工门禁已于 2026-08-27 获批；E4 已开放，但其证据仍须独立建立。
+- E4 clean canonical 31/31 已登记为 `in-review`；owner 人工任务与 evidence 批准前，E4 不关闭、E5 不开放。
 
 ## 2. Record Contract
 
@@ -298,3 +299,100 @@ next_action: "定义并执行 E4 analysis overlay eval；E5 在 E4 evidence 获�
 - 自动化验证了 pointer/keyboard/focus-visible、reduced motion 和 aria-live 的可操作契约，但不能替代 owner 对标记密度、样式清晰度和真实连续听辨任务的判断。
 - 2026-08-27，owner 原文“我批准 Editor E3 canonical evidence、point lane、inner class、自适应网格与点标记结果；同意将 E3 标记为 Complete 并开放 E4。”完成 E3 人工门禁；不补写用户未提供的逐项测量。
 - R-024、R-025 已获得 E3 point 层的 Chrome geometry/pointer/visible-DOM 证据，但在 E4 overlay 与 E6 双浏览器/10,000 事件复核前继续保持 `Open`；R-027 继续等待 E4 consumer/overlay 证据。
+
+## 6. E4 Canonical Record
+
+| Field | Value |
+| --- | --- |
+| Run ID | `E4-2026-08-27T07-21-59-209Z-c9e03ab9` |
+| Milestone | E4 — Analysis overlay |
+| State | `in-review`（31/31 自动化通过；owner 人工任务待批准） |
+| Implementation commit | `c9e03ab9554aa5bac5649fa84e1d822f056ad0e2` |
+| Evidence commit | 本记录所在的 `docs: register Editor E4 canonical evidence` 提交 |
+| Dirty at start / end | `false` / `false` |
+| Commit at end | `c9e03ab9554aa5bac5649fa84e1d822f056ad0e2` |
+| Started at | 2026-08-27 07:21:59.209 UTC |
+| Method | `npm run eval:e4` |
+| Reviewer | `project-owner` — pending |
+| Retention | `local-present`；至少保留到 E4 审批完成 |
+| Artifact root | `artifacts/evals/E4-2026-08-27T07-21-59-209Z-c9e03ab9/` |
+| Summary SHA-256 | `790f7f76f113fad6f005992f8fd10d94b0b77451acd58717c8c221edd54628ff` |
+
+### Environment
+
+| Item | Recorded value |
+| --- | --- |
+| OS | macOS 26.5.2 (`25F84`), Darwin arm64 |
+| Hardware | MacBook Pro `MacBookPro17,1`；Apple M1 8-core；16 GB memory |
+| Node / npm | Node `v24.18.0`；npm `11.16.0` |
+| Vitest / Playwright | `4.1.10` / `1.62.0` |
+| Chrome binary | Google Chrome `152.0.7977.64` |
+| Chrome test user agent | Chrome `151.0.7922.34` |
+| Meyda | `5.6.3` |
+
+本记录只保存机型、芯片、核心数和内存，不复制 artifact 中的序列号、UUID、UDID 或设备标识。E4 使用仓库生成的确定性 WAV/JSON 工程和浏览器临时状态，不记录用户私有音频身份。
+
+### Results and Traceability
+
+| Step group | Result | Evidence |
+| --- | --- | --- |
+| E4 overlay golden | pass | 21 项 feature 与六类 renderer 映射、0.10/0.35/0.12 bounds、共享时间锚点和运行时 WAV/JSON 工程匹配 |
+| E4 unit | 4/4 pass | registry 穷尽、bounds clamp/1%/5%、Buffer 去重、exact summary、shared renderer success/shape failure |
+| E4 integration | 3/3 pass | Buffer-first、保存 overlay 激活、快速切换追上最终特征、error retry、last-ready waveform、草稿和 Analyzer workspace 隔离 |
+| E4 Chrome | 7/7 pass | 21 项选择与六类 renderer、三手柄 pointer/keyboard/reduced motion、pointer-through、Canvas 故障隔离、刷新恢复、1024/1280/1920 |
+| E4 Chrome metrics | pass | overlay/point 时间列几何误差 `1 CSS px`（门禁 `<=1 CSS px`）；穿透点击反馈 `5.1ms`（门禁 `<=100ms`） |
+| E1–E3 regression | pass | E1 unit/integration/Chrome、E2 golden/unit/integration/Chrome、E3 golden/unit/integration/Chrome 全部通过；E3 反馈 `44ms`、几何误差 `0 CSS px` |
+| M6–M10 regression | pass | M6 Worker/coordinator；M7–M10 renderer unit 与 Chrome 全部通过；M10 15 分钟四重卡最大反馈 `17.2ms`、分析归因长任务 `0` |
+| M11 Chrome | 4/4 pass | 三格式、键盘/reduced motion、多视口、quota 与 20 次 WebGL/RAF 生命周期回归 |
+| Docs / harness / typecheck | pass | lifecycle links、deliberate failure detection、`vue-tsc -b` |
+| Build | pass with warning | 1,840 modules；最大 JS chunk `1,256.62 kB`，warning 如实保留到 Editor E6/readiness 复核 |
+| Diff check | pass | canonical 起止工作树干净；`git diff --check` exit 0 |
+
+### Provisional History and Pre-canonical Corrections
+
+- 最终 dirty-worktree provisional：`E4-2026-08-27T07-18-13-982Z-67946ad6-provisional`，31/31 pass，summary SHA-256 `fbb3f08c8da9f5d74af6066a67c625821678c9638387df81b6e1e63c7d1f2198`。
+- provisional 前专项 Chrome 首次发现两个测试编排问题：lane locator 同时命中容器与名称控件，以及 Canvas 恢复时 retry 控件因 reactive 重绘而不稳定。测试改为定位实际 lane 容器并在同一浏览器任务中恢复 context 后触发重试；产品侧同时用 integration 固定快速换特征最终一致性与错误强制重试。最终专项、provisional 与 canonical 均通过，本轮没有被覆盖的 canonical failure。
+
+### Local Artifact Hashes
+
+| Artifact | SHA-256 |
+| --- | --- |
+| `summary.json` | `790f7f76f113fad6f005992f8fd10d94b0b77451acd58717c8c221edd54628ff` |
+| `01-E4-overlay-golden.log` | `eab36a9bc0292695c2ddab58761166cc40e5aec54d44612da96b251ee9600ba1` |
+| `02-E4-overlay-unit.log` | `b1236a85cc42ffb08e61e829ef667bdee6ef37496ae865f250b6ebebaea02608` |
+| `03-E4-overlay-integration.log` | `21bcb7b6743eaa98dabec1dd3f868057f95e418d6970ee429e5b22f8c25a5fd9` |
+| `04-E3-point-golden-regression.log` | `f31f700d278cf3e4cf7ae1e43893e6bc0535de6c0ebf672b1d76aa3efc943fc6` |
+| `05-E3-point-unit-regression.log` | `7c48cd33c0bb6932a6e04399db51b3226eab93ed82ff3e1e47ea070bfb3108b1` |
+| `06-E3-point-integration-regression.log` | `503f5dd4044ad37b90c169d5d75622b6514b3df392a2f4e5b15453225026683b` |
+| `07-E2-tempo-golden-regression.log` | `2aa9988e158f22c4f25da1fc726f46aebc40cdb50002e02a4968896a28263cb2` |
+| `08-E2-timeline-unit-regression.log` | `be834a2f90e4b66bd4e3ce0e242075f442eac26411a9e280dff4ac03614b435a` |
+| `09-E2-timeline-integration-regression.log` | `24324033db4885cce52811e934b19874db0218e857c7caa150ff648531e980cd` |
+| `10-E1-project-unit-regression.log` | `01e63df7c3468f6497533184fe6c6ab1a901a0cc443d5b0e650ef17d2925c689` |
+| `11-E1-foundation-integration-regression.log` | `14ea3ac9be7d31a9375db0c2d20f95418613f53d8d742435602da25f9ff16a01` |
+| `12-M6-Worker-regression.log` | `c44b4a14416325fbcc26b24cfc7b36bace706fba7d0f6c6b242d7403e7de7a27` |
+| `13-M6-coordinator-regression.log` | `2dc99161dc3d0c4ca05e0b4a5680084f66fa4423087d59de34f73e1bfa4a77d5` |
+| `14-M7-renderer-unit-regression.log` | `34e9beab741f658e9855e0d151761bc39b431ad5ed83186b8fa616942868fd2e` |
+| `15-M8-renderer-unit-regression.log` | `25f3ef4ca72e2a9cfef5e0726db90779ad3aa82ce7e465a353dc3f3e9ab3bd9c` |
+| `16-M9-renderer-unit-regression.log` | `9b57f4c10259f59bf9d83d77937c3a258c4e39ba0f24c0db53069a2ee08f8ac2` |
+| `17-M10-renderer-unit-regression.log` | `f43373897166faecea0e20a09ce8922e1c62bfc74c3c66a5b3dd8985d3dd6f7a` |
+| `18-docs.log` | `bb005ed0074179a47b895a5c66e79917e37ebf18976e21fe9d27b1dd63c8f151` |
+| `19-deliberate-failure.log` | `69bf5c3fa50230a4957ad0c60c8323dba68e494d92761fea0039cf5d580d70aa` |
+| `20-typecheck.log` | `fadc7f66199c28d2f7cca439bb300ebeb0320158f32a0f9b52ec77031538af4d` |
+| `21-E4-Chrome.log` | `ff771dff8a2d3923daa09afd15f11b3be157169ed568fd42dbfb82fadf13ea97` |
+| `22-E3-Chrome-regression.log` | `bfd0fc12d9e6fd921ffdd2cea56ae46aab20fb06e441b5cc4bd7437492eb2cad` |
+| `23-E2-Chrome-regression.log` | `e2b956fe82a803c79f55b8d2610463474b692858da000e545654899f17a1dd07` |
+| `24-E1-Chrome-regression.log` | `40ef4dc68c2366cf403be8da59b12ba05b6fa99b8a05ee765899bed7d4cb4353` |
+| `25-M7-Chrome-renderer-regression.log` | `b4b57744a6556ac22432962af3f83805a0a4777b312d2db21ebcef3af6320ca4` |
+| `26-M8-Chrome-renderer-regression.log` | `e147a6540c1e155a472dcacf4e944773d823b340cbd5b036e646c3cc15bcd74e` |
+| `27-M9-Chrome-renderer-regression.log` | `1ad916c28bac4c058f839bac5edc30a0c7c0705b841c8d48ffa6a7a761cf2659` |
+| `28-M10-Chrome-renderer-regression.log` | `7c5100fd65e9de4a6cb56c4d36c200b63e9d6a5fe8bb765902fed377edf54e1f` |
+| `29-M11-Chrome-resource-regression.log` | `bd2064ba719f1d493c21019810e933282d539724f7e43eebf12125e0a197d986` |
+| `30-build.log` | `848a3de73b520e8fbf21d981fb22b762df47f6f290003c6984d81526a491d023` |
+| `31-diff-check.log` | `e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855` |
+
+### Manual Gaps and Approval Gate
+
+- E4 专项按批准计划只在稳定 Chrome 自动化；真实 Edge、10,000 事件、原生 picker 和辅助技术长会话仍留到 E6，不能从本轮结果外推。
+- 自动化验证了 pointer-through、键盘手柄、reduced motion、错误隔离和多视口几何，但不能替代 owner 对半透明图形清晰度、连续换特征和真实标记任务的视觉判断。
+- E4 保持 `In Progress`，E5 保持 `Planned`。owner 需完成 21 项代表性切换、三手柄、底层点标记穿透、刷新恢复、Analyzer 往返及错误重试任务后明确批准。
+- R-024、R-027 已获得 E4 Chrome geometry/consumer/renderer isolation 证据，但在 owner 批准和 E6 双浏览器/资源复核前继续保持 `Open`；R-025 继续等待 E5 range 与 E6 10,000 事件/辅助技术门禁。
