@@ -8,7 +8,7 @@ upstream_docs:
   - "docs/architecture/risk-register.md"
   - "docs/delivery/editor/execution-plan.md"
   - "docs/delivery/editor/acceptance-criteria.md"
-next_action: "owner 复核 E5 35/35 canonical；批准后才建立 E6 双浏览器/10,000 事件质量契约"
+next_action: "建立并执行 E6 双浏览器/10,000 事件质量契约与 40 步 canonical"
 ---
 
 # Editor E1–E6 Test Strategy
@@ -136,4 +136,4 @@ E1–E4 命令已经存在、通过 clean canonical 并获批准。E5 命令与 
 
 ## 9. Current Planning Gate
 
-`project-owner` 于 2026-08-26 批准本文并开放 E1，随后批准 E1 canonical/人工结果并开放 E2；2026-08-27 又依次批准 E2–E4 结果。E5 clean canonical 已 35/35 通过并登记为 `in-review`，E6 仍不开放；不得把 E5 自动化通过泛化成人工门禁通过。
+`project-owner` 于 2026-08-26 批准本文并开放 E1，随后批准 E1 canonical/人工结果并开放 E2；2026-08-27 又依次批准 E2–E5 结果。E5 clean canonical 35/35 与人工范围任务已获批准，E6 据此开放；E6 自动化、人工补偿和 owner evidence 获批前不得进入 Editor release-readiness review。

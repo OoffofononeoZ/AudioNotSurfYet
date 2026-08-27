@@ -6,7 +6,7 @@ upstream_docs:
   - "docs/delivery/editor/execution-plan.md"
   - "docs/delivery/editor/acceptance-criteria.md"
   - "docs/delivery/editor/test-strategy.md"
-next_action: "owner 复核 E5 35/35 canonical 与人工范围任务；批准前 E6 保持 Planned"
+next_action: "执行 E6 双浏览器、三格式、10,000 事件、资源与无障碍最终加固"
 ---
 
 # Editor E1–E6 Milestone Plan
@@ -30,8 +30,8 @@ next_action: "owner 复核 E5 35/35 canonical 与人工范围任务；批准前 
 | E2 | Timeline and tempo | Complete | E1 | 波形、共享 viewport、tempo map、grid 与 BPM estimator | 22/22 clean canonical + owner approval | project-owner |
 | E3 | Point annotation | Complete | E2 | point lane、inner class、自适应网格、鼠标/右键/键盘 | 26/26 clean canonical + owner approval | project-owner |
 | E4 | Analysis overlay | Complete | E3 | 21 项单选纯 renderer overlay、三手柄和 pointer-through | 31/31 clean canonical + owner approval | project-owner |
-| E5 | Range annotation | In Progress | E4 | range 创建、取消、调整、重叠、删除和 round-trip | range matrix + import/draft + canonical + owner approval | project-owner |
-| E6 | Final hardening | Planned | E5 | Chrome/Edge、三格式、native flows、10,000 事件、资源与无障碍 | 双浏览器 canonical + owner complete task + evidence approval | project-owner |
+| E5 | Range annotation | Complete | E4 | range 创建、取消、调整、重叠、删除和 round-trip | range matrix + import/draft + canonical + owner approval | project-owner |
+| E6 | Final hardening | In Progress | E5 | Chrome/Edge、三格式、native flows、10,000 事件、资源与无障碍 | 双浏览器 canonical + owner complete task + evidence approval | project-owner |
 
 ## 3. Exit Checklist by Milestone
 
@@ -78,7 +78,7 @@ next_action: "owner 复核 E5 35/35 canonical 与人工范围任务；批准前 
 - [x] AC-E501–AC-E505 自动化覆盖创建、预览、取消、调整、删除和键盘；clean canonical 35/35 通过。
 - [x] 半开区间、最短单位、相邻允许和重叠矩阵通过。
 - [x] pointercancel/blur/route rollback 与 JSON/draft/import 安全通过。
-- [ ] owner 批准 E5 evidence；只开放 E6。
+- [x] owner 批准 E5 evidence；只开放 E6。
 
 ### E6
 
@@ -106,9 +106,9 @@ next_action: "owner 复核 E5 35/35 canonical 与人工范围任务；批准前 
 - E2：`Complete`。
 - E3：`Complete`。
 - E4：`Complete`。
-- E5：`In Progress`。
-- E6：`Planned`。
-- 当前唯一下一门禁：owner 完成 E5 人工范围任务并批准 evidence。
+- E5：`Complete`。
+- E6：`In Progress`。
+- 当前唯一下一门禁：完成 E6 双浏览器 canonical、人工补偿任务与 owner evidence 批准。
 
 ## 6. Delivery Approval
 
@@ -129,3 +129,5 @@ next_action: "owner 复核 E5 35/35 canonical 与人工范围任务；批准前 
 同日，owner 明确批准 E4 canonical evidence、21 项分析叠加、三手柄、pointer-through 与错误隔离结果。E4 据此改为 `Complete`，E5 改为 `In Progress`，E6 保持 `Planned`。
 
 随后 E5 实现 commit `781241772e05186e2fe0d006ed6ddd8bceded7af` 交付 range lane/class、两阶段创建、preview/取消、端点调整与回滚、半开重叠、键盘和持久化。clean canonical `E5-2026-08-27T11-03-22-177Z-78124177` 35/35 通过，summary SHA-256 为 `6928f75cbdeb6d77e54c81b3547f7caee0b39d4c6881884b1d1d7065f3dde1b0`。自动化退出项已满足；owner evidence 批准仍未完成，因此 E5 保持 `In Progress`、E6 保持 `Planned`。
+
+同日，`project-owner` 明确批准 E5 canonical evidence、范围事件创建/调整、重叠校验、键盘与持久化结果，并同意关闭 E5、开放 E6。E5 据此改为 `Complete`，E6 改为 `In Progress`；本批准不构成 E6 evidence 或 Editor release-readiness。

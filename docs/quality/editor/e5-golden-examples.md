@@ -1,12 +1,12 @@
 ---
-status: in-review
+status: approved
 owner: "project-owner"
 last_reviewed: 2026-08-27
 upstream_docs:
   - "docs/quality/editor/e5-eval-plan.md"
   - "docs/architecture/editor/project-format-v1.md"
   - "docs/architecture/editor/interaction-contracts.md"
-next_action: "owner 使用已生成 fixture 复核重叠矩阵、端点交互和 round-trip"
+next_action: "作为 E5 approved golden 保留；E6 全量回归不得改写既有样例语义"
 ---
 
 # Editor E5 Golden Examples
@@ -30,3 +30,7 @@ next_action: "owner 使用已生成 fixture 复核重叠矩阵、端点交互和
 | E5-G15 | overlay | overlay 开启时在 range surface 创建/拖动 | 命中与关闭 overlay 相同，层间误差 `<=1 CSS px` | 固定 E4 pointer-through 回归 |
 
 版本化 `editor-e5-ranges.v1.json` 固定 100 BPM、single-beat、point-in-range、相邻/跨分类范围、歌曲边界和 overlay 时间锚点。运行时生成 Git 忽略的 `artifacts/fixtures/editor-e5-ranges-v1.wav` 与匹配工程；不记录用户音频、路径或设备标识。
+
+## Approval Record
+
+`project-owner` 于 2026-08-27 随 E5 canonical evidence 一并批准本 golden 集；后续只有范围语义、fixture identity 或 validator 契约变化时才需要重新评审。

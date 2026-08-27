@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/product/scope.md"
   - "docs/architecture/system-design.md"
   - "docs/delivery/execution-plan.md"
-next_action: "按已批准范围事件契约实施 E5，并保持 ADR-0008/0009 时间与 pointer-through 边界"
+next_action: "按 DEC-030 执行 E6 双浏览器、10,000 事件、资源与无障碍最终加固"
 ---
 
 # Decision Registry
@@ -52,6 +52,9 @@ next_action: "按已批准范围事件契约实施 E5，并保持 ADR-0008/0009 
 | DEC-025 | 2026-08-26 | 批准 Editor E1–E6 delivery planning 并只开放 E1；E2–E6 继续逐里程碑等待 canonical 与 owner evidence 审批 | project-owner | approved | [Editor milestone plan](../delivery/editor/milestone-plan.md) | E1 范围、里程碑顺序或 evidence 门禁改变 |
 | DEC-026 | 2026-08-26 | E1 canonical/人工结果获批准并开放 E2；一个 beat 固定为 `60/BPM` 秒，拍号分母只表达 beat 音符单位；tempo boundary 有合法 metered BPM 时按网格吸附，否则按微秒规范化原始时间 | project-owner | approved | [Editor interactions](../architecture/editor/interaction-contracts.md) | BPM/拍号含义、boundary 吸附、E2 范围或门禁改变 |
 | DEC-027 | 2026-08-27 | 批准 E2 canonical 结果并开放 E3 point annotation；E4–E6 继续逐里程碑等待独立 canonical 与 owner 审批 | project-owner | approved | [Editor evidence](../quality/editor/evidence-index.md) | E3 范围、point 交互或逐里程碑门禁改变 |
+| DEC-028 | 2026-08-27 | 批准 E3 canonical、point lane、inner class、自适应网格与点标记结果，关闭 E3 并开放 E4 | project-owner | approved | [Editor evidence](../quality/editor/evidence-index.md) | point 语义、E4 overlay 范围或门禁改变 |
+| DEC-029 | 2026-08-27 | 批准 E4 canonical、21 项 overlay、三手柄、pointer-through 与错误隔离结果，关闭 E4 并开放 E5 | project-owner | approved | [Editor evidence](../quality/editor/evidence-index.md) | overlay renderer、pointer-through、E5 范围或门禁改变 |
+| DEC-030 | 2026-08-27 | 批准 E5 canonical、范围创建/调整、重叠校验、键盘与持久化结果，关闭 E5 并开放 E6 最终加固 | project-owner | approved | [Editor evidence](../quality/editor/evidence-index.md) | range 语义、E6 阈值、双浏览器或最终加固门禁改变 |
 
 ## Approval Evidence
 
@@ -126,6 +129,10 @@ DEC-026 约束下的 E2 实现已提交，clean canonical `E2-2026-08-26T16-42-4
 2026-08-27，`project-owner` 原文“我已经提交了，批准此次结果并且开放下一步”批准 E2 结果并开放 E3；DEC-027 据此生效。E2 改为 `Complete`，R-026 改为 `Mitigated`，E3 改为 `In Progress`；该决定不构成 E3 实现或 evidence，也不开放 E4。
 
 同日，E3 implementation commit `c670ddf5494269f5a56abd20c3c5653ee5b27cef` 与 clean canonical `E3-2026-08-27T02-53-58-176Z-c670ddf5` 已形成，26/26 通过，summary SHA-256 为 `2a0a46b9a0e9b459ee17b11919451f074205fda58801d84a1274dbd12f5cfe4c`。该执行事实不新增决策；DEC-027 的 owner approval 门禁仍未满足，E3 不关闭、E4 不开放。
+
+同日，`project-owner` 明确批准 E3 canonical evidence、point lane、inner class、自适应网格与点标记结果，DEC-028 据此关闭 E3 并开放 E4。随后 owner 明确批准 E4 canonical evidence、21 项 overlay、三手柄、pointer-through 与错误隔离结果，DEC-029 据此关闭 E4 并开放 E5。
+
+E5 clean canonical `E5-2026-08-27T11-03-22-177Z-78124177` 随后在 implementation commit `781241772e05186e2fe0d006ed6ddd8bceded7af` 上 35/35 通过。`project-owner` 明确批准 E5 canonical evidence、范围事件创建/调整、重叠校验、键盘与持久化结果；DEC-030 据此关闭 E5 并开放 E6。该决定不构成 E6 evidence 或 Editor release-readiness。
 
 ## Historical Evidence Gap
 
