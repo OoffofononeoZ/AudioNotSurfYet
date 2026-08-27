@@ -9,6 +9,7 @@ upstream_docs:
   - "docs/quality/editor/e3-eval-plan.md"
   - "docs/quality/editor/e4-eval-plan.md"
   - "docs/quality/editor/e5-eval-plan.md"
+  - "docs/quality/editor/e6-eval-plan.md"
   - "docs/delivery/editor/milestone-plan.md"
 next_action: "执行并登记 E6 40 步双浏览器 canonical；人工补偿获批前 E6 保持 In Progress"
 ---

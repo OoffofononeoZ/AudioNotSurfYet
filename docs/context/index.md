@@ -72,6 +72,9 @@ AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端：用户选择
 | [Editor E5 eval plan](../quality/editor/e5-eval-plan.md) | AC-E501–AC-E505 的 range state、interval、overlap、handle、persistence 与 regression 契约 | project-owner / approved | E5 交互、fixture、阈值或证据能力变化 |
 | [Editor E5 golden examples](../quality/editor/e5-golden-examples.md) | 两阶段创建、半开相邻、重叠矩阵、端点、迁移、round-trip 与 overlay 穿透样例 | project-owner / approved | E5 fixture、范围或交互语义变化 |
 | [Editor E5 failure taxonomy](../quality/editor/e5-failure-taxonomy.md) | E5 range lane/state/interval/overlap/handle/persistence 失败分类 | project-owner / approved | E5 失败域或严重度响应变化 |
+| [Editor E6 eval plan](../quality/editor/e6-eval-plan.md) | AC-E601–AC-E606 的双浏览器、三格式、10,000 事件、性能、资源、无障碍与 canonical 契约 | project-owner / in-review | E6 阈值、浏览器、容量或证据能力变化 |
+| [Editor E6 golden examples](../quality/editor/e6-golden-examples.md) | 三格式、native flow、压力、DOM、资源、geometry、键盘与证据身份样例 | project-owner / in-review | E6 fixture、生成参数或人工补偿边界变化 |
+| [Editor E6 failure taxonomy](../quality/editor/e6-failure-taxonomy.md) | E6 browser/format、native、stress、performance、resource、a11y 与 evidence 失败分类 | project-owner / in-review | E6 失败域或严重度响应变化 |
 
 ## Architecture Decisions
 
@@ -114,6 +117,7 @@ AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端：用户选择
 - Editor E3 quality：[eval plan](../quality/editor/e3-eval-plan.md)、[golden](../quality/editor/e3-golden-examples.md)、[failure taxonomy](../quality/editor/e3-failure-taxonomy.md) 与 26/26 canonical record 均已获批准
 - Editor E4 quality：[eval plan](../quality/editor/e4-eval-plan.md)、[golden](../quality/editor/e4-golden-examples.md)、[failure taxonomy](../quality/editor/e4-failure-taxonomy.md) 与 31/31 canonical record 均已获批准
 - Editor E5 quality：[eval plan](../quality/editor/e5-eval-plan.md)、[golden](../quality/editor/e5-golden-examples.md)、[failure taxonomy](../quality/editor/e5-failure-taxonomy.md) 与 35/35 canonical record 已获批准
+- Editor E6 quality：[eval plan](../quality/editor/e6-eval-plan.md)、[golden](../quality/editor/e6-golden-examples.md) 与 [failure taxonomy](../quality/editor/e6-failure-taxonomy.md) 为 `in-review`；实现与 evidence 尚未形成
 - Quality readiness：[Analyzer release readiness](../quality/release-readiness.md) 已由 owner 批准为 `Ready with waivers`，且只覆盖 Analyzer 候选
 - Release operations：`docs/release/` 尚未创建；PROD-015 的托管平台、域名和 SPA fallback 解决前不进入正式上线
 - Retrospectives：`docs/retrospectives/` 尚未创建；有发布、事故或重复摩擦证据后生成
