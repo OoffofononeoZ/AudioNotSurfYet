@@ -6,6 +6,7 @@ upstream_docs:
   - "docs/quality/editor/eval-plan.md"
   - "docs/quality/editor/golden-examples.md"
   - "docs/quality/editor/failure-taxonomy.md"
+  - "docs/quality/editor/e3-eval-plan.md"
   - "docs/delivery/editor/milestone-plan.md"
 next_action: "定义并执行 E3 point annotation eval；批准前 E4 保持 Planned"
 ---
