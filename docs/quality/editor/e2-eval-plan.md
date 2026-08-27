@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: approved
 owner: "project-owner"
 last_reviewed: 2026-08-27
 upstream_docs:
@@ -8,7 +8,7 @@ upstream_docs:
   - "docs/delivery/editor/test-strategy.md"
   - "docs/architecture/editor/interaction-contracts.md"
   - "docs/architecture/risk-register.md"
-next_action: "复核 E2 canonical 与 Chrome 人工任务；批准前 E3 保持 Planned"
+next_action: "以已批准 E2 基线约束 E3 point geometry 与相邻回归"
 ---
 
 # Editor E2 Eval Plan
@@ -34,10 +34,10 @@ next_action: "复核 E2 canonical 与 Chrome 人工任务；批准前 E3 保持 
 - `eval:e2:provisional` 允许 dirty worktree，只提供实现反馈。
 - `eval:e2` 必须拒绝 dirty worktree，并绑定实现 commit、run ID、环境、浏览器、步骤、BPM/geometry/反馈测量、日志和 summary SHA-256。
 - canonical 至少运行 E2 unit/integration/Chrome、E1 回归、M3/M4/M6/M11 相邻回归、docs、deliberate failure、typecheck、build 和 `git diff --check`。
-- 本地 artifact 保留到 owner 审批；E2 record 在审批前为 `in-review`，不能开放 E3。
+- 本地 artifact 至少保留到 owner 审批；E2 已于 2026-08-27 获批，后续只有 canonical 身份变化才重跑。
 
 ## Manual Review
 
 Owner 在最新版 Chrome 检查波形、seek、wheel/right-drag、快速菜单、键盘、tempo boundary、拍号/BPM/single-beat、自动估计与刷新恢复。E2 不要求 Edge；真实 Edge 全量留到 E6，并作为明确覆盖边界保留。
 
-2026-08-27，clean canonical `E2-2026-08-26T16-42-47-634Z-9fc5c0a8` 已在 commit `9fc5c0a81fcf90abfbc665412277147cd958200f` 上 22/22 通过；输入反馈 `3.9ms`、几何误差 `0.1484 CSS px`。正式 reviewer 状态仍为 `in-review`，详细 identity/hash 见 [evidence index](evidence-index.md)。
+2026-08-27，clean canonical `E2-2026-08-26T16-42-47-634Z-9fc5c0a8` 已在 commit `9fc5c0a81fcf90abfbc665412277147cd958200f` 上 22/22 通过；输入反馈 `3.9ms`、几何误差 `0.1484 CSS px`。同日 owner 原文“我已经提交了，批准此次结果并且开放下一步”完成 reviewer 门禁，本计划据此为 `approved`；详细 identity/hash 见 [evidence index](evidence-index.md)。

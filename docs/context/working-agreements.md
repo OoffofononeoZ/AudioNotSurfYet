@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/context/index.md"
   - "docs/delivery/test-strategy.md"
   - "docs/quality/eval-plan.md"
-next_action: "复核 E2 clean canonical 与人工任务；批准前 E3 保持 Planned"
+next_action: "按独立 quality 契约实施 E3 point annotation；批准前不开放 E4"
 ---
 
 # Working Agreements
@@ -145,3 +145,5 @@ E1 实现随后在不新增依赖、不修改 Analyzer session/cache schema 的�
 2026-08-26，`project-owner` 明确批准 E1 canonical evidence、路由与播放 lease、JSON V1 和草稿恢复结果，并同意关闭 E1、开放 E2。该签字完成 E1 人工补偿门禁，E2 改为 `In Progress`；E3–E6 继续等待逐里程碑证据。
 
 2026-08-27，E2 在不新增依赖、不修改 JSON V1、Analyzer database 或 cache schema 的前提下完成。dirty provisional 与 clean canonical 均为 22/22；clean run `E2-2026-08-26T16-42-47-634Z-9fc5c0a8` 绑定 commit `9fc5c0a81fcf90abfbc665412277147cd958200f`，起止工作树干净，summary SHA-256 为 `4465c20343af9092601296b86a229200579f648ffa90641411b88f9861ba8660`。Chrome 测得输入反馈 `3.9ms`、几何误差 `0.1484 CSS px`；owner 任务与批准前 E2 继续为 `In Progress`，E3 继续为 `Planned`。
+
+同日，`project-owner` 原文“我已经提交了，批准此次结果并且开放下一步”批准 E2 并开放 E3。E2 改为 `Complete`、E3 改为 `In Progress`、E4–E6 保持 `Planned`；R-026 由 BPM/cancel/stale 证据与本次签字改为 `Mitigated`。该原文不补写 owner 未提供的逐项人工数值。

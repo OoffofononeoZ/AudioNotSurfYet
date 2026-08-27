@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/product/scope.md"
   - "docs/architecture/system-design.md"
   - "docs/delivery/execution-plan.md"
-next_action: "复核 DEC-026 下的 E2 canonical 与人工任务；批准前 E3 保持关闭"
+next_action: "按 DEC-027 执行 E3 point annotation；E4 等待独立 canonical 与 owner 审批"
 ---
 
 # Decision Registry
@@ -51,6 +51,7 @@ next_action: "复核 DEC-026 下的 E2 canonical 与人工任务；批准前 E3 
 | DEC-024 | 2026-08-26 | Editor E6 固定验证 10,000 个事件；overlay 默认高度 35%、最小 12%；E1–E6 每个里程碑都必须独立 provisional、clean canonical 和 owner 审批 | project-owner | approved | [Editor execution plan](../delivery/editor/execution-plan.md) | 容量门禁、overlay 默认值、证据节奏或逐里程碑审批改变 |
 | DEC-025 | 2026-08-26 | 批准 Editor E1–E6 delivery planning 并只开放 E1；E2–E6 继续逐里程碑等待 canonical 与 owner evidence 审批 | project-owner | approved | [Editor milestone plan](../delivery/editor/milestone-plan.md) | E1 范围、里程碑顺序或 evidence 门禁改变 |
 | DEC-026 | 2026-08-26 | E1 canonical/人工结果获批准并开放 E2；一个 beat 固定为 `60/BPM` 秒，拍号分母只表达 beat 音符单位；tempo boundary 有合法 metered BPM 时按网格吸附，否则按微秒规范化原始时间 | project-owner | approved | [Editor interactions](../architecture/editor/interaction-contracts.md) | BPM/拍号含义、boundary 吸附、E2 范围或门禁改变 |
+| DEC-027 | 2026-08-27 | 批准 E2 canonical 结果并开放 E3 point annotation；E4–E6 继续逐里程碑等待独立 canonical 与 owner 审批 | project-owner | approved | [Editor evidence](../quality/editor/evidence-index.md) | E3 范围、point 交互或逐里程碑门禁改变 |
 
 ## Approval Evidence
 
@@ -121,6 +122,8 @@ DEC-025 约束下的 E1 实现已提交，clean canonical `E1-2026-08-26T15-24-2
 同日，`project-owner` 明确回复：“我批准 Editor E1 canonical evidence、路由与播放 lease、JSON V1 和草稿恢复结果；同意将 E1 标记为 Complete 并开放 E2。”E1 据此关闭，R-022/R-023 改为 `Mitigated`，E2 改为 `In Progress`。owner 同时选择 DEC-026 的 BPM/拍号与无网格 boundary 语义；R-024/R-026/R-027 和 E3 门禁不因此提前关闭。
 
 DEC-026 约束下的 E2 实现已提交，clean canonical `E2-2026-08-26T16-42-47-634Z-9fc5c0a8` 在 commit `9fc5c0a81fcf90abfbc665412277147cd958200f` 上 22/22 通过并登记到 Editor evidence index。该执行事实不是新产品或架构决策；owner 尚未批准人工门禁，因此 R-024/R-026/R-027、E2 状态和 E3 门禁不提前改变。
+
+2026-08-27，`project-owner` 原文“我已经提交了，批准此次结果并且开放下一步”批准 E2 结果并开放 E3；DEC-027 据此生效。E2 改为 `Complete`，R-026 改为 `Mitigated`，E3 改为 `In Progress`；该决定不构成 E3 实现或 evidence，也不开放 E4。
 
 ## Historical Evidence Gap
 
