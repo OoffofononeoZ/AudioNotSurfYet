@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/context/index.md"
   - "docs/delivery/test-strategy.md"
   - "docs/quality/eval-plan.md"
-next_action: "owner 复核 E4 canonical 与 overlay 人工任务；批准前 E5 保持 Planned"
+next_action: "按已批准 AC-E501–AC-E505 实施 E5；E6 保持 Planned"
 ---
 
 # Working Agreements
@@ -153,3 +153,5 @@ E1 实现随后在不新增依赖、不修改 Analyzer session/cache schema 的�
 同日，`project-owner` 明确批准 E3 canonical evidence、point lane、inner class、自适应网格与点标记结果，并同意关闭 E3、开放 E4。该签字不提前批准 E4 或开放 E5。
 
 随后 E4 交付累计 21 项单选半透明 overlay、六类 Analyzer/Editor shared Canvas renderer、Buffer-first/去重 consumer、40ms exact cursor、三手柄、pointer-through 和单层错误隔离。dirty provisional 与 clean canonical 均 31/31 通过；clean run `E4-2026-08-27T07-21-59-209Z-c9e03ab9` 绑定 commit `c9e03ab9554aa5bac5649fa84e1d822f056ad0e2`，起止工作树干净，summary SHA-256 为 `790f7f76f113fad6f005992f8fd10d94b0b77451acd58717c8c221edd54628ff`。Chrome 测得 overlay/point 几何误差 `1 CSS px`、穿透点击反馈 `5.1ms`；本事实只形成 `in-review` evidence，不关闭 E4、不开放 E5。1,256.62 kB chunk warning 与 E6 Edge/10,000 事件门禁继续保留。
+
+同日，`project-owner` 明确批准 E4 canonical evidence、21 项分析叠加、三手柄、pointer-through 与错误隔离结果，并同意关闭 E4、开放 E5。R-024、R-025、R-027 仍保持 `Open`，等待 E5 range 与 E6 双浏览器、资源、无障碍门禁；不从本次批准推断 E6 已开放。

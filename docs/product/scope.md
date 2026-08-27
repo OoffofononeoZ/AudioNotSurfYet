@@ -137,7 +137,7 @@ next_action: "project-owner 审阅 in-review Editor E1–E6 delivery planning；
 6. **E5 — Range annotation**：长音色/效果的创建、取消、端点调整、不重叠校验、删除和导入导出。
 7. **E6 — Final hardening**：Chrome/Edge、性能、资源、无障碍、错误恢复、多视口与 canonical evidence。
 
-E5 现为 `Planned`，不再因缺少核心交互而阻塞。若未来要求新的事件类别语义、自动合并、裁剪、同类重叠或自由时间精度，必须先重新评审产品与接口契约。
+E5 于 2026-08-27 在 E4 获批后改为 `In Progress`。若未来要求新的事件类别语义、自动合并、裁剪、同类重叠或自由时间精度，必须先重新评审产品与接口契约。
 
 ## Editor Non-goals
 

@@ -9,7 +9,7 @@ upstream_docs:
   - "docs/quality/editor/e3-eval-plan.md"
   - "docs/quality/editor/e4-eval-plan.md"
   - "docs/delivery/editor/milestone-plan.md"
-next_action: "owner 复核 E4 canonical 与人工任务；批准前 E5 保持 Planned"
+next_action: "按 AC-E501–AC-E505 实施 E5；canonical 登记后等待 owner 批准"
 ---
 
 # Editor Evidence Index
@@ -20,12 +20,13 @@ next_action: "owner 复核 E4 canonical 与人工任务；批准前 E5 保持 Pl
 - E1：`Complete`。
 - E2：`Complete`。
 - E3：`Complete`。
-- E4：`In Progress`。
-- E5–E6：`Planned`。
+- E4：`Complete`。
+- E5：`In Progress`。
+- E6：`Planned`。
 - E1 clean canonical 与 owner 人工门禁均已批准；Analyzer M3–M11 evidence 仍不能替代未来 Editor 里程碑证据。
 - E2 clean canonical 与 owner 门禁已于 2026-08-27 获批。
-- E3 clean canonical 与 owner 人工门禁已于 2026-08-27 获批；E4 已开放，但其证据仍须独立建立。
-- E4 clean canonical 31/31 已登记为 `in-review`；owner 人工任务与 evidence 批准前，E4 不关闭、E5 不开放。
+- E3 clean canonical 与 owner 人工门禁已于 2026-08-27 获批；E4 clean canonical 与 owner 人工门禁随后获批。
+- E4 clean canonical 31/31 与 owner 人工门禁已于 2026-08-27 获批；E5 已开放。
 
 ## 2. Record Contract
 
@@ -306,15 +307,15 @@ next_action: "owner 复核 E4 canonical 与人工任务；批准前 E5 保持 Pl
 | --- | --- |
 | Run ID | `E4-2026-08-27T07-21-59-209Z-c9e03ab9` |
 | Milestone | E4 — Analysis overlay |
-| State | `in-review`（31/31 自动化通过；owner 人工任务待批准） |
+| State | `approved`（31/31 自动化与 owner 人工门禁已批准） |
 | Implementation commit | `c9e03ab9554aa5bac5649fa84e1d822f056ad0e2` |
 | Evidence commit | 本记录所在的 `docs: register Editor E4 canonical evidence` 提交 |
 | Dirty at start / end | `false` / `false` |
 | Commit at end | `c9e03ab9554aa5bac5649fa84e1d822f056ad0e2` |
 | Started at | 2026-08-27 07:21:59.209 UTC |
 | Method | `npm run eval:e4` |
-| Reviewer | `project-owner` — pending |
-| Retention | `local-present`；至少保留到 E4 审批完成 |
+| Reviewer | `project-owner` — approved 2026-08-27 |
+| Retention | `local-present`；E4 身份变化时才重跑 |
 | Artifact root | `artifacts/evals/E4-2026-08-27T07-21-59-209Z-c9e03ab9/` |
 | Summary SHA-256 | `790f7f76f113fad6f005992f8fd10d94b0b77451acd58717c8c221edd54628ff` |
 
@@ -394,5 +395,5 @@ next_action: "owner 复核 E4 canonical 与人工任务；批准前 E5 保持 Pl
 
 - E4 专项按批准计划只在稳定 Chrome 自动化；真实 Edge、10,000 事件、原生 picker 和辅助技术长会话仍留到 E6，不能从本轮结果外推。
 - 自动化验证了 pointer-through、键盘手柄、reduced motion、错误隔离和多视口几何，但不能替代 owner 对半透明图形清晰度、连续换特征和真实标记任务的视觉判断。
-- E4 保持 `In Progress`，E5 保持 `Planned`。owner 需完成 21 项代表性切换、三手柄、底层点标记穿透、刷新恢复、Analyzer 往返及错误重试任务后明确批准。
-- R-024、R-027 已获得 E4 Chrome geometry/consumer/renderer isolation 证据，但在 owner 批准和 E6 双浏览器/资源复核前继续保持 `Open`；R-025 继续等待 E5 range 与 E6 10,000 事件/辅助技术门禁。
+- `project-owner` 于 2026-08-27 明确回复：“我批准 Editor E4 canonical evidence、21 项分析叠加、三手柄、pointer-through 与错误隔离结果；同意将 E4 标记为 Complete 并开放 E5。”本签字完成 E4 人工门禁，不补写 owner 未提供的逐项测量。
+- R-024、R-027 已获得 E4 Chrome geometry/consumer/renderer isolation 证据，但在 E6 双浏览器/资源复核前继续保持 `Open`；R-025 继续等待 E5 range 与 E6 10,000 事件/辅助技术门禁。
