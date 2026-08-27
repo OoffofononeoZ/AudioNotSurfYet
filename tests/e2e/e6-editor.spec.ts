@@ -553,6 +553,13 @@ test('keeps keyboard semantics, visible focus and stable resources over 20 cycle
     const samples: Array<Record<string, number>> = [];
     for (let index = 0; index < 20; index += 1) {
         await page.getByTestId('header-editor-link').click();
+        await expect.poll(async () => {
+            if (await page.getByTestId('editor-ready').isVisible()) return 'ready';
+            if (await page.getByTestId('editor-draft-conflict').isVisible()) {
+                return 'conflict';
+            }
+            return 'pending';
+        }, { timeout: 30_000 }).toMatch(/^(ready|conflict)$/);
         if (await page.getByTestId('editor-draft-conflict').isVisible()) {
             await page.getByTestId('overwrite-conflicting-draft').click();
         }
