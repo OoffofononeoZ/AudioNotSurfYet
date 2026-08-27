@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: approved
 owner: "project-owner"
 last_reviewed: 2026-08-27
 upstream_docs:
@@ -8,7 +8,7 @@ upstream_docs:
   - "docs/delivery/editor/test-strategy.md"
   - "docs/architecture/editor/interaction-contracts.md"
   - "docs/architecture/risk-register.md"
-next_action: "owner 按 E3 fixture 完成人工任务并批准 canonical evidence"
+next_action: "以已批准的 E3 基线回归 E4 overlay；行为变化时重新评审"
 ---
 
 # Editor E3 Eval Plan

@@ -1,11 +1,11 @@
 ---
-status: in-review
+status: approved
 owner: "project-owner"
 last_reviewed: 2026-08-27
 upstream_docs:
   - "docs/quality/editor/e3-eval-plan.md"
   - "docs/architecture/editor/interaction-contracts.md"
-next_action: "owner 复核 E3-G01–G14 对应的实际 point task 与视觉结果"
+next_action: "以已批准的 point golden 回归 E4 pointer-through 与 geometry"
 ---
 
 # Editor E3 Golden Examples

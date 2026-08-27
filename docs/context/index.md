@@ -4,14 +4,14 @@ owner: "project-owner"
 last_reviewed: 2026-08-27
 upstream_docs:
   - "AGENTS.md"
-next_action: "owner 复核 Editor E3 point task 与 canonical evidence；批准前 E4 保持 Planned"
+next_action: "实施 Editor E4 analysis overlay；E5 在 E4 canonical 获批前保持 Planned"
 ---
 
 # Repository Context Index
 
 ## Purpose
 
-AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端：用户选择本地音频后，应用提供播放队列、元数据、进度与音量控制，并把实时能量用于 MusicBar 和背景可视化。Analyzer 已完成 21/21 能力和有条件 readiness；Editor E1/E2 已获批准并关闭，E3 point annotation 已完成 clean canonical、正在等待 owner 审批。
+AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端：用户选择本地音频后，应用提供播放队列、元数据、进度与音量控制，并把实时能量用于 MusicBar 和背景可视化。Analyzer 已完成 21/21 能力和有条件 readiness；Editor E1–E3 已获批准并关闭，E4 analysis overlay 当前开放实施。
 
 本目录维护仓库事实、边界和工作记忆；生命周期路由与通用方法由 [AGENTS.md](../../AGENTS.md) 负责。当前代码事实与目标架构必须区分：现状见 [system map](system-map.md)，批准的目标见 [system design](../architecture/system-design.md)。
 
@@ -20,9 +20,9 @@ AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端：用户选择
 - Repository context：入口、决策注册表、system map、glossary 与 working agreements 均已批准。
 - Product intent：problem brief、scope、success metrics 和 open questions 中的 Editor E0 点/范围事件范围已于 2026-08-26 获 owner 批准。
 - System design：Analyzer 基线保持历史批准；Editor system design、接口契约、ADR-0006–0009 和两个详细子契约已获批准。R-022/R-023 已由 E1 缓解；R-024–R-027 按后续里程碑继续验证。
-- Execution planning：根级文档保留 Analyzer M1–M11 历史；`docs/delivery/editor/` 四份规划已获批准，E0-D/E1/E2 `Complete`、E3 `In Progress`、E4–E6 `Planned`。
-- Quality and evals：M3–M11 与 Editor E1/E2 的适用 canonical/owner 证据均已获批准；E3 独立 quality 契约与 26/26 canonical evidence 为 `in-review`。
-- Implementation：M1–M11 与 Editor E1/E2 均为 `Complete`；Editor E3 实现已提交且 canonical 通过，但 owner 批准前仍为 `In Progress`；E4–E6 为 `Planned`。
+- Execution planning：根级文档保留 Analyzer M1–M11 历史；`docs/delivery/editor/` 四份规划已获批准，E0-D/E1–E3 `Complete`、E4 `In Progress`、E5–E6 `Planned`。
+- Quality and evals：M3–M11 与 Editor E1–E3 的适用 canonical/owner 证据均已获批准；E4 独立 quality 契约待建立。
+- Implementation：M1–M11 与 Editor E1–E3 均为 `Complete`；Editor E4 当前 `In Progress`，E5–E6 为 `Planned`。
 - Readiness、release、retrospective：Analyzer `release-readiness.md` 已获 `Ready with waivers` 批准；PROD-015 尚未解决，因此不创建上线声明或生产托管，Editor 也不继承该 readiness。
 
 ## Key Documents
@@ -105,7 +105,7 @@ AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端：用户选择
 - Quality evidence：[evidence index](../quality/evidence-index.md)，M3–M11 已批准
 - Editor E1 quality：[eval plan](../quality/editor/eval-plan.md)、[golden](../quality/editor/golden-examples.md)、[failure taxonomy](../quality/editor/failure-taxonomy.md) 与 [evidence](../quality/editor/evidence-index.md) 已获批准
 - Editor E2 quality：[eval plan](../quality/editor/e2-eval-plan.md)、[golden](../quality/editor/e2-golden-examples.md)、[failure taxonomy](../quality/editor/e2-failure-taxonomy.md) 与 canonical record 已获批准；累计 [evidence index](../quality/editor/evidence-index.md) 因 E3 开工保持 `in-review`
-- Editor E3 quality：[eval plan](../quality/editor/e3-eval-plan.md)、[golden](../quality/editor/e3-golden-examples.md)、[failure taxonomy](../quality/editor/e3-failure-taxonomy.md) 与 26/26 canonical record 均为 `in-review`；等待 owner point task 与批准
+- Editor E3 quality：[eval plan](../quality/editor/e3-eval-plan.md)、[golden](../quality/editor/e3-golden-examples.md)、[failure taxonomy](../quality/editor/e3-failure-taxonomy.md) 与 26/26 canonical record 均已获批准
 - Quality readiness：[Analyzer release readiness](../quality/release-readiness.md) 已由 owner 批准为 `Ready with waivers`，且只覆盖 Analyzer 候选
 - Release operations：`docs/release/` 尚未创建；PROD-015 的托管平台、域名和 SPA fallback 解决前不进入正式上线
 - Retrospectives：`docs/retrospectives/` 尚未创建；有发布、事故或重复摩擦证据后生成
@@ -119,12 +119,12 @@ AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端：用户选择
 - 超出约 15 分钟支持边界的长音频未开始播放只作为非门禁压力观察；它不表示长音频被规定为必须失败，也不改变当前产品范围。
 - M11 clean canonical 已在 Chrome/Edge 上 38/38 通过，其中 Edge 全量为 31/31；原生 Edge 权限、辅助技术与人工长会话补偿门禁已于 2026-08-26 获 owner 签字，M11 为 `Complete`。
 - Analyzer readiness 已于 2026-08-26 获 owner 有条件批准；正式托管平台、域名、SPA fallback 和生产 URL 尚未决定，继续阻断正式上线。
-- Editor E1/E2 已实现并获批准；E3 point lane/class、自适应网格、鼠标/键盘/右键标记和可见 DOM 已实现并通过 clean canonical，但仍等待 owner 批准；E4 overlay、E5 range UI 和 E6 加固尚未实现。
+- Editor E1–E3 已实现并获批准；E4 overlay 当前开放，E5 range UI 和 E6 加固尚未实现。
 - Editor E5 已因 owner 补充并批准范围事件规则而成为 `Planned`；当前只开放到 E3，E4–E6 仍须等待前序里程碑批准。
-- Editor delivery 固定 10,000 事件容量门禁、overlay 35%/12% 和逐里程碑 provisional/canonical/owner 审批；当前 E3 自动化通过不代表 owner 审批或 E4 已开放。
+- Editor delivery 固定 10,000 事件容量门禁、overlay 35%/12% 和逐里程碑 provisional/canonical/owner 审批；当前只开放 E4。
 - E1 clean canonical `E1-2026-08-26T15-24-21-043Z-792b424f` 在 clean commit `792b424fbab8e3621ad24d8c9add47d1c9bffcb4` 上 18/18 通过，summary SHA-256 为 `db51ba98b757ccd524d298243c6118eb24fad60101a74f20a5ff98478a5d5bc6`，并于 2026-08-26 获 owner 批准。
 - E2 clean canonical `E2-2026-08-26T16-42-47-634Z-9fc5c0a8` 在 clean commit `9fc5c0a81fcf90abfbc665412277147cd958200f` 上 22/22 通过，summary SHA-256 为 `4465c20343af9092601296b86a229200579f648ffa90641411b88f9861ba8660`；2026-08-27 owner 批准后 E2 为 `Complete`，E3 已开放。
-- E3 clean canonical `E3-2026-08-27T02-53-58-176Z-c670ddf5` 在 clean commit `c670ddf5494269f5a56abd20c3c5653ee5b27cef` 上 26/26 通过，summary SHA-256 为 `2a0a46b9a0e9b459ee17b11919451f074205fda58801d84a1274dbd12f5cfe4c`；evidence 为 `in-review`，E4 未开放。
+- E3 clean canonical `E3-2026-08-27T02-53-58-176Z-c670ddf5` 在 clean commit `c670ddf5494269f5a56abd20c3c5653ee5b27cef` 上 26/26 通过，summary SHA-256 为 `2a0a46b9a0e9b459ee17b11919451f074205fda58801d84a1274dbd12f5cfe4c`；2026-08-27 owner 批准后 E3 为 `Complete`，E4 已开放。
 - 详细 context 文档的长期 owner/review cadence 尚未全部统一；代码改动时必须同步修正事实。
 - 工程事实差异继续记录在 [Skill 项目差异](../../skills/audio-visualizer-dev/references/99-open-questions-and-project-deltas.md)，产品开放项见 [open questions](../product/open-questions.md)。
 
@@ -195,3 +195,5 @@ M11 canonical run `M11-2026-08-25T10-05-12-783Z-99c67792` 随后在 clean commit
 同日，`project-owner` 原文“我已经提交了，批准此次结果并且开放下一步”批准 E2 结果并开放 E3。E2 据此为 `Complete`，R-026 改为 `Mitigated`；E3 为 `In Progress`，E4–E6 保持 `Planned`。该原文不被扩写为用户未提供的逐项人工测量。
 
 同日，E3 实现 commit `c670ddf5494269f5a56abd20c3c5653ee5b27cef` 完成 point lane/class、自适应 1/16–1 beat 网格、鼠标/右键/键盘标记、分类迁移与 viewport-visible DOM。clean canonical run `E3-2026-08-27T02-53-58-176Z-c670ddf5` 26/26 通过，summary SHA-256 为 `2a0a46b9a0e9b459ee17b11919451f074205fda58801d84a1274dbd12f5cfe4c`。该事实只登记 `in-review` evidence；owner 人工任务和批准前 E3 不关闭、E4 不开放。
+
+同日，`project-owner` 明确批准 E3 canonical evidence、point lane、inner class、自适应网格与点标记结果，同意关闭 E3 并开放 E4。E4 据此为 `In Progress`；该批准不构成 E4 evidence 或 E5 门禁通过。

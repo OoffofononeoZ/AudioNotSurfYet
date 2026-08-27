@@ -8,7 +8,7 @@ upstream_docs:
   - "docs/quality/editor/failure-taxonomy.md"
   - "docs/quality/editor/e3-eval-plan.md"
   - "docs/delivery/editor/milestone-plan.md"
-next_action: "owner 使用 E3 fixture 完成 point annotation 人工任务并批准 evidence；批准前 E4 保持 Planned"
+next_action: "定义并执行 E4 analysis overlay eval；E5 在 E4 evidence 获批前保持 Planned"
 ---
 
 # Editor Evidence Index
@@ -18,11 +18,12 @@ next_action: "owner 使用 E3 fixture 完成 point annotation 人工任务并批
 - E0-D：`Complete`。
 - E1：`Complete`。
 - E2：`Complete`。
-- E3：`In Progress`。
-- E4–E6：`Planned`。
+- E3：`Complete`。
+- E4：`In Progress`。
+- E5–E6：`Planned`。
 - E1 clean canonical 与 owner 人工门禁均已批准；Analyzer M3–M11 evidence 仍不能替代未来 Editor 里程碑证据。
 - E2 clean canonical 与 owner 门禁已于 2026-08-27 获批。
-- E3 clean canonical 已 26/26 通过并登记为 `in-review`；owner 人工任务与批准前 E3 不关闭、E4 不开放。
+- E3 clean canonical 与 owner 人工门禁已于 2026-08-27 获批；E4 已开放，但其证据仍须独立建立。
 
 ## 2. Record Contract
 
@@ -209,15 +210,15 @@ next_action: "owner 使用 E3 fixture 完成 point annotation 人工任务并批
 | --- | --- |
 | Run ID | `E3-2026-08-27T02-53-58-176Z-c670ddf5` |
 | Milestone | E3 — Point annotation |
-| State | `in-review`（26/26 自动化通过；等待 owner 人工任务与批准） |
+| State | `approved`（26/26 自动化与 owner point task 已批准） |
 | Implementation commit | `c670ddf5494269f5a56abd20c3c5653ee5b27cef` |
 | Evidence commit | 本记录所在的 `docs: register Editor E3 canonical evidence` 提交 |
 | Dirty at start / end | `false` / `false` |
 | Commit at end | `c670ddf5494269f5a56abd20c3c5653ee5b27cef` |
 | Started at | 2026-08-27 02:53:58.176 UTC |
 | Method | `npm run eval:e3` |
-| Reviewer | `project-owner` — pending |
-| Retention | `local-present`；至少保留到 E3 审批完成 |
+| Reviewer | `project-owner` — approved 2026-08-27 |
+| Retention | `local-present`；E3 身份变化时才重跑 |
 | Artifact root | `artifacts/evals/E3-2026-08-27T02-53-58-176Z-c670ddf5/` |
 | Summary SHA-256 | `2a0a46b9a0e9b459ee17b11919451f074205fda58801d84a1274dbd12f5cfe4c` |
 
@@ -290,9 +291,9 @@ next_action: "owner 使用 E3 fixture 完成 point annotation 人工任务并批
 | `25-build.log` | `f39d7379449ea3b0ce7a04e961da5476f8ce96af678950dac93cbcfe3ade28ec` |
 | `26-diff-check.log` | `e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855` |
 
-### Manual Gaps and Approval Gate
+### Manual Gaps and Approval
 
 - E3 专项按批准计划只在稳定 Chrome 自动化；真实 Edge、10,000 事件、原生 picker 和辅助技术长会话仍留到 E6，不能从本轮结果外推。
 - 自动化验证了 pointer/keyboard/focus-visible、reduced motion 和 aria-live 的可操作契约，但不能替代 owner 对标记密度、样式清晰度和真实连续听辨任务的判断。
-- owner 需使用 `artifacts/fixtures/editor-e3-points-v1.wav` 完成 lane/class、不同 zoom 点标记、右键/键盘、分类迁移/删除、tempo 修改和刷新恢复清单。批准前本记录保持 `in-review`，E3 保持 `In Progress`，E4 保持 `Planned`。
+- 2026-08-27，owner 原文“我批准 Editor E3 canonical evidence、point lane、inner class、自适应网格与点标记结果；同意将 E3 标记为 Complete 并开放 E4。”完成 E3 人工门禁；不补写用户未提供的逐项测量。
 - R-024、R-025 已获得 E3 point 层的 Chrome geometry/pointer/visible-DOM 证据，但在 E4 overlay 与 E6 双浏览器/10,000 事件复核前继续保持 `Open`；R-027 继续等待 E4 consumer/overlay 证据。

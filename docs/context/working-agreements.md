@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/context/index.md"
   - "docs/delivery/test-strategy.md"
   - "docs/quality/eval-plan.md"
-next_action: "按 E3 canonical 与 fixture 完成人工复核；批准前不开放 E4"
+next_action: "执行 E4 Chrome overlay 专项、clean canonical 与 owner 复核"
 ---
 
 # Working Agreements
