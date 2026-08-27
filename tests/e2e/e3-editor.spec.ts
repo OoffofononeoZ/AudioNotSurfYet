@@ -214,17 +214,19 @@ test('shares geometry, viewport pan/menu and visible marker DOM', async ({ page 
     expect(issues).toEqual([]);
 });
 
-test('preserves imported range lanes as read-only E5 data', async ({ page }) => {
+test('preserves imported range lane identities after E5 editing opens', async ({ page }) => {
     test.setTimeout(120_000);
     const issues = issuesFor(page);
     await openE3(page);
     await queuePickerFiles(page, [RANGE_PROJECT]);
     await page.getByTestId('import-editor-project').click();
-    await expect(page.getByTestId('range-lane-readonly-e3-compat-range-lane')).toBeVisible();
-    await expect(page.getByText('范围数据已完整保留；创建与编辑将在 E5 开放。')).toBeVisible();
+    await expect(page.getByTestId('range-lane-e3-compat-range-lane')).toBeVisible();
+    await expect(page.getByTestId('range-marker-e3-compat-range-event')).toBeVisible();
+    await expect(page.getByTestId('range-start-handle-e3-compat-range-event')).toBeVisible();
     await expect(page.getByTestId('add-point-lane')).toBeVisible();
     await page.reload();
-    await expect(page.getByTestId('range-lane-readonly-e3-compat-range-lane')).toBeVisible({ timeout: 20_000 });
+    await expect(page.getByTestId('range-lane-e3-compat-range-lane')).toBeVisible({ timeout: 20_000 });
+    await expect(page.getByTestId('range-marker-e3-compat-range-event')).toBeVisible();
     expect(issues).toEqual([]);
 });
 
