@@ -8,6 +8,12 @@ interface PickerEntry {
     base64: string;
 }
 
+export interface PickerDataEntry {
+    name: string;
+    mimeType: string;
+    text: string;
+}
+
 interface SavedPickerEntry {
     name: string;
     mimeType: string;
@@ -110,6 +116,37 @@ export async function queuePickerFiles(
             }
             await writable.write(new Blob(
                 [bytes],
+                { type: entry.mimeType },
+            ));
+            await writable.close();
+            handles.push(handle);
+        }
+        const pickerWindow = window as unknown as {
+            __audioNotSurfYetPickerQueue: FileSystemFileHandle[][];
+        };
+        pickerWindow.__audioNotSurfYetPickerQueue.push(handles);
+    }, entries);
+}
+
+export async function queuePickerData(
+    page: Page,
+    entries: PickerDataEntry[],
+) {
+    await page.evaluate(async (pickerEntries) => {
+        const root = await navigator.storage.getDirectory();
+        const directory = await root.getDirectoryHandle(
+            `picker-${crypto.randomUUID()}`,
+            { create: true },
+        );
+        const handles: FileSystemFileHandle[] = [];
+        for (const entry of pickerEntries) {
+            const handle = await directory.getFileHandle(
+                entry.name,
+                { create: true },
+            );
+            const writable = await handle.createWritable();
+            await writable.write(new Blob(
+                [entry.text],
                 { type: entry.mimeType },
             ));
             await writable.close();

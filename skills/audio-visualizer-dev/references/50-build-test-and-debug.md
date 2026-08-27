@@ -42,6 +42,9 @@
 | `npm run test:e5:unit` | 运行 range lane/class、半开重叠、最短网格、端点与迁移冲突 | E5 pure domain 契约 |
 | `npm run test:e5:integration` | 运行 point/range JSON、草稿、无效导入隔离与秒数稳定 | E5 persistence/compatibility 契约 |
 | `npm run test:e2e:e5` | 运行 Chrome range 两阶段创建、端点、回滚、重叠、右键、键盘、overlay 穿透和多视口 | E5 Chrome 切片；Edge 留到 E6 |
+| `npm run test:e6:unit` | 运行 10,000 事件确定性拓扑、范围边界、唯一 ID 与 visible filter | E6 压力工程纯契约 |
+| `npm run test:e6:integration` | 运行 10,000 事件 JSON/IndexedDB round-trip 与无效导入原子隔离 | E6 persistence 压力契约 |
+| `npm run test:e2e:e6` | 顺序运行真实 Chrome/Edge 的三格式、压力、无障碍和 20 次资源循环 | E6 双浏览器自动化；不替代原生 picker/辅助技术人工门禁 |
 | `npm run test:e2e:edge` | 使用稳定 Edge 串行运行 M3–M11 全量 E2E | Edge 缺失时以退出码 2 明确 blocked；不得用 Chromium 替代 |
 | `npm run test:docs` | 检查生命周期 frontmatter、链接和 21 项特征 | 文档门禁 |
 | `npm run eval:m3:provisional` | 未提交工作树的本地 M3 run | 不创建正式 evidence index |
@@ -68,6 +71,8 @@
 | `npm run eval:e4` | 只在干净 commit 上运行 31 步 E4 suite | 生成可登记的 E4 canonical 证据 |
 | `npm run eval:e5:provisional` | 在 dirty worktree 运行 E5 与 E1–E4/Analyzer 相邻回归 | 只生成实现反馈 |
 | `npm run eval:e5` | 只在干净 commit 上运行 35 步 E5 suite | 生成可登记的 E5 canonical 证据 |
+| `npm run eval:e6:provisional` | 在 dirty worktree 运行 40 步 E6 双浏览器 suite | 只生成实现反馈 |
+| `npm run eval:e6` | 只在干净 commit 上运行 40 步 E6 suite | 生成可登记的 E6 canonical 证据 |
 
 ## 已知测试缺口
 
@@ -82,9 +87,7 @@
 - 超出约 15 分钟支持边界的长音频未开始播放只作为非门禁压力观察；它不是规定的预期失败，也不能替代范围内性能或格式验证。
 - M6 当前 Meyda 的 `spectralFlux` 对有效输入抛出 `x is not defined`；已用预期失败测试和 R-020 固定，不能把 21 项 registry 误述为 21 项均可计算。
 - M6 dirty-worktree provisional 与 clean-commit canonical 均已 20/20 通过；正式 evidence 已登记，并由 `project-owner` 于 2026-07-30 批准，M6 已关闭。
-- M7–M11 已获批准并关闭。M11 clean canonical `M11-2026-08-25T10-05-12-783Z-99c67792` 在 commit `99c67792509d07456bcb431b90468252f8b0fdc3` 上 38/38 通过；Edge 原生权限、辅助技术与最终加固于 2026-08-26 获 owner 签字。Analyzer readiness 已获 `Ready with waivers` 批准。Editor E1–E5 clean canonical 均已通过并获 owner 批准；E6 对应命令与证据待建立。
-
-- E4/E5 命令与 clean canonical 已获批准；E6 quality contract 已建立，命令与 40 步 runner 仍不存在，将在当前里程碑实现。
+- M7–M11 已获批准并关闭。M11 clean canonical `M11-2026-08-25T10-05-12-783Z-99c67792` 在 commit `99c67792509d07456bcb431b90468252f8b0fdc3` 上 38/38 通过；Edge 原生权限、辅助技术与最终加固于 2026-08-26 获 owner 签字。Analyzer readiness 已获 `Ready with waivers` 批准。Editor E1–E5 clean canonical 均已通过并获 owner 批准；E6 quality contract、专项命令与 40 步 runner 已建立，canonical evidence 尚待执行。
 
 ## 构建风险
 

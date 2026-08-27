@@ -275,8 +275,10 @@ const viewport = computed(() => normalizeEditorViewport(
 const surfaceRefs = new Map<string, HTMLElement>();
 const gridCanvasRefs = new Map<string, HTMLCanvasElement>();
 const rangeRefs = new Map<string, HTMLButtonElement>();
+const visibleSurfaceKeys = ref(new Set<string>());
 const dialogElement = ref<HTMLElement | null>(null);
 let resizeObserver: ResizeObserver | null = null;
+let intersectionObserver: IntersectionObserver | null = null;
 
 const surfaceKey = (laneId: string, innerClassId: string) => `${laneId}\u0000${innerClassId}`;
 const elementValue = (
@@ -302,13 +304,21 @@ const setSurfaceRef = (
     const key = surfaceKey(laneId, innerClassId);
     const value = elementValue(element);
     const previous = surfaceRefs.get(key);
+    if (previous === value) return;
     if (previous) resizeObserver?.unobserve(previous);
+    if (previous) intersectionObserver?.unobserve(previous);
     if (!value) {
         surfaceRefs.delete(key);
+        if (visibleSurfaceKeys.value.has(key)) {
+            const next = new Set(visibleSurfaceKeys.value);
+            next.delete(key);
+            visibleSurfaceKeys.value = next;
+        }
         return;
     }
     surfaceRefs.set(key, value);
     resizeObserver?.observe(value);
+    intersectionObserver?.observe(value);
 };
 const setGridCanvasRef = (
     laneId: string,
@@ -546,7 +556,11 @@ const previewStyle = (laneId: string, innerClassId: string) => {
     };
 };
 const visibleEvents = (lane: RangeLaneV1, innerClassId: string) =>
-    visibleRangeEvents(lane, innerClassId, viewport.value);
+    visibleSurfaceKeys.value.has(surfaceKey(lane.id, innerClassId))
+        || focusedRange?.laneId === lane.id
+            && focusedRange.innerClassId === innerClassId
+        ? visibleRangeEvents(lane, innerClassId, viewport.value)
+        : [];
 type Endpoint = 'start' | 'end';
 interface HandleDragState {
     id: number;
@@ -1137,7 +1151,9 @@ const drawGrid = (canvas: HTMLCanvasElement) => {
     }
 };
 const drawAllGrids = () => {
-    for (const canvas of gridCanvasRefs.values()) drawGrid(canvas);
+    for (const [key, canvas] of gridCanvasRefs) {
+        if (visibleSurfaceKeys.value.has(key)) drawGrid(canvas);
+    }
 };
 const clearInteraction = () => {
     cancelSurfacePointer();
@@ -1151,7 +1167,6 @@ const clearInteraction = () => {
 watch(
     () => [props.project.tempoMap, props.project.workspace.viewport, rangeLanes.value.length],
     () => void nextTick(drawAllGrids),
-    { deep: true },
 );
 watch(
     () => [viewport.value.startSeconds, viewport.value.endSeconds],
@@ -1172,13 +1187,31 @@ watch(
 );
 onMounted(() => {
     resizeObserver = new ResizeObserver(() => drawAllGrids());
-    for (const surface of surfaceRefs.values()) resizeObserver.observe(surface);
+    intersectionObserver = new IntersectionObserver((entries) => {
+        const next = new Set(visibleSurfaceKeys.value);
+        for (const entry of entries) {
+            const surface = entry.target as HTMLElement;
+            const laneId = surface.dataset.laneId;
+            const innerClassId = surface.dataset.innerClassId;
+            if (!laneId || !innerClassId) continue;
+            const key = surfaceKey(laneId, innerClassId);
+            if (entry.isIntersecting) next.add(key);
+            else next.delete(key);
+        }
+        visibleSurfaceKeys.value = next;
+        void nextTick(drawAllGrids);
+    }, { rootMargin: '0px' });
+    for (const surface of surfaceRefs.values()) {
+        resizeObserver.observe(surface);
+        intersectionObserver.observe(surface);
+    }
     window.addEventListener('blur', clearInteraction);
     void nextTick(drawAllGrids);
 });
 onBeforeUnmount(() => {
     clearInteraction();
     resizeObserver?.disconnect();
+    intersectionObserver?.disconnect();
     window.removeEventListener('blur', clearInteraction);
 });
 </script>

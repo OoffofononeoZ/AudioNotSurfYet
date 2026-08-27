@@ -155,6 +155,7 @@ test('renames classes and requires migration, deletion or cancellation', async (
     await expect(page.getByTestId('editor-point-workspace')).toBeVisible({ timeout: 20_000 });
     await expect(page.locator('.lane-card[data-testid^="point-lane-"]')).toHaveCount(1);
     await expect(page.locator('[data-testid^="point-lane-name-"]')).toHaveValue('Notes');
+    await page.locator('[data-testid^="marker-surface-"]').first().scrollIntoViewIfNeeded();
     await expect(page.locator('.point-marker')).toHaveCount(2);
     expect(issues).toEqual([]);
 });
@@ -221,11 +222,13 @@ test('preserves imported range lane identities after E5 editing opens', async ({
     await queuePickerFiles(page, [RANGE_PROJECT]);
     await page.getByTestId('import-editor-project').click();
     await expect(page.getByTestId('range-lane-e3-compat-range-lane')).toBeVisible();
+    await page.locator('.range-surface').first().scrollIntoViewIfNeeded();
     await expect(page.getByTestId('range-marker-e3-compat-range-event')).toBeVisible();
     await expect(page.getByTestId('range-start-handle-e3-compat-range-event')).toBeVisible();
     await expect(page.getByTestId('add-point-lane')).toBeVisible();
     await page.reload();
     await expect(page.getByTestId('range-lane-e3-compat-range-lane')).toBeVisible({ timeout: 20_000 });
+    await page.locator('.range-surface').first().scrollIntoViewIfNeeded();
     await expect(page.getByTestId('range-marker-e3-compat-range-event')).toBeVisible();
     expect(issues).toEqual([]);
 });

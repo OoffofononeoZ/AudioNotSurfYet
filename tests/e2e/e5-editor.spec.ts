@@ -197,6 +197,7 @@ test('keeps overlay pointer-through and restores range state after refresh', asy
     await page.reload();
     await expect(page.getByTestId('editor-range-workspace')).toBeVisible({ timeout: 20_000 });
     await expect(page.locator('[data-testid^="range-lane-name-"]')).toHaveValue('Effects');
+    await page.locator('.range-surface').first().scrollIntoViewIfNeeded();
     await expect(page.locator('.range-marker')).toHaveCount(1);
     await expect(page.getByTestId('editor-overlay-feature')).toHaveValue('rms');
     expect(issues).toEqual([]);

@@ -47,6 +47,8 @@ M3–M11 不建设 CI。下列命令当前均为本地门禁；正式证据要�
 | `npm run test:e4:integration` | Buffer-first consumer、快速换特征、错误重试、Analyzer 隔离与 overlay 草稿恢复 |
 | `npm run test:e5:unit` | Editor range lane/class、半开重叠、最短网格、端点更新、迁移冲突与可见范围过滤 |
 | `npm run test:e5:integration` | point/range JSON 与草稿 round-trip、无效导入隔离、tempo 秒数稳定与稳定 ID |
+| `npm run test:e6:unit` | 确定性 15 分钟/20 lane/160 分类/10,000 事件拓扑、唯一 ID、范围边界和可见事件过滤 |
+| `npm run test:e6:integration` | 10,000 事件 JSON 与 IndexedDB round-trip、重叠工程原子拒绝和 durable draft 保留 |
 | `npm run test:docs` | 生命周期 frontmatter、内部链接和 21 项特征计数 |
 | `npm run test:harness` | 证明 deliberate failure 会非零退出 |
 | `npm run test:e2e` | 稳定 Chrome 的全部当前 E2E |
@@ -66,6 +68,9 @@ M3–M11 不建设 CI。下列命令当前均为本地门禁；正式证据要�
 | `npm run test:e2e:e3` | Chrome point lane/class、鼠标/键盘/右键标记、迁移对话框、可见 DOM、range 身份兼容与多视口 geometry |
 | `npm run test:e2e:e4` | Chrome 21 项单选 overlay、六类 renderer、三手柄、pointer-through、错误隔离与多视口 geometry |
 | `npm run test:e2e:e5` | Chrome range 创建/预览/取消/端点/重叠/迁移、右键、键盘、overlay 穿透、恢复与多视口 geometry |
+| `npm run test:e2e:e6:chrome` | Chrome 三格式、工程失败隔离、10,000 事件、反馈/长任务、虚拟化、无障碍与 20 次资源循环 |
+| `npm run test:e2e:e6:edge` | 使用真实 Edge 执行同一 E6 最终加固套件 |
+| `npm run test:e2e:e6` | 顺序执行真实 Chrome 与 Edge 的 E6 最终加固套件 |
 | `npm run test:e2e:edge` | 使用真实 Edge 执行全部 M3–M11 E2E；缺失时明确 blocked |
 | `npm run build` | TypeScript project build 和 Vite production build |
 | `npm run eval:m3:provisional` | 在未提交工作树生成本地 provisional run |
@@ -96,6 +101,8 @@ M3–M11 不建设 CI。下列命令当前均为本地门禁；正式证据要�
 | `npm run eval:e4` | 只允许在干净 commit 上执行 31 步 E4 canonical suite 并生成可登记证据 |
 | `npm run eval:e5:provisional` | 在 dirty worktree 执行 E5 与 E1–E4/Analyzer 相邻回归并生成反馈 |
 | `npm run eval:e5` | 只允许在干净 commit 上执行 35 步 E5 canonical suite 并生成可登记证据 |
+| `npm run eval:e6:provisional` | 在 dirty worktree 执行 40 步 E6 双浏览器最终回归并生成实现反馈 |
+| `npm run eval:e6` | 只允许在干净 commit 上执行 40 步 E6 canonical suite 并生成可登记证据 |
 
 ## 目录职责
 
