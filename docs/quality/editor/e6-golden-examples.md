@@ -1,12 +1,12 @@
 ---
 status: in-review
 owner: "project-owner"
-last_reviewed: 2026-08-27
+last_reviewed: 2026-08-28
 upstream_docs:
   - "docs/quality/editor/e6-eval-plan.md"
   - "docs/quality/editor/e5-golden-examples.md"
   - "docs/delivery/editor/acceptance-criteria.md"
-next_action: "建立版本化 E6 stress manifest，并由 unit/integration/Chrome/Edge 核对全部 golden"
+next_action: "owner 复核已通过的 E6 golden 与不能自动化的 native/辅助技术项目"
 ---
 
 # Editor E6 Golden Examples

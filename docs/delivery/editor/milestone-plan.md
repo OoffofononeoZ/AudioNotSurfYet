@@ -1,12 +1,12 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-08-27
+last_reviewed: 2026-08-28
 upstream_docs:
   - "docs/delivery/editor/execution-plan.md"
   - "docs/delivery/editor/acceptance-criteria.md"
   - "docs/delivery/editor/test-strategy.md"
-next_action: "执行 E6 双浏览器、三格式、10,000 事件、资源与无障碍最终加固"
+next_action: "owner 完成 E6 原生文件、辅助技术与长会话补偿验证并审批 evidence"
 ---
 
 # Editor E1–E6 Milestone Plan
@@ -82,11 +82,11 @@ next_action: "执行 E6 双浏览器、三格式、10,000 事件、资源与无�
 
 ### E6
 
-- [ ] AC-E601–AC-E606 在真实 Chrome/Edge 有完整证据。
+- [x] AC-E601–AC-E606 的可自动化部分在真实 Chrome/Edge canonical 有完整证据。
 - [ ] MP3/WAV/FLAC、native picker、离页/刷新恢复与辅助技术补偿检查完成。
-- [ ] 10,000 事件下输入 `<=100ms`、无归因任务 `>50ms`、DOM 可见化策略有效。
-- [ ] 20 次生命周期无 AudioContext/Worker/RAF/Canvas/listener 单调累积。
-- [ ] E1–E6 全量和 M3–M11 关键回归通过。
+- [x] 10,000 事件下输入 `<=100ms`、无归因任务 `>50ms`、DOM 可见化策略有效。
+- [x] 20 次生命周期无 AudioContext/Worker/RAF/Canvas/listener 单调累积。
+- [x] E1–E6 全量和 M3–M11 关键回归通过。
 - [ ] owner 完成完整逆向标注任务并批准 E6 canonical evidence。
 
 ## 4. Failure and Slip Rules
@@ -108,7 +108,7 @@ next_action: "执行 E6 双浏览器、三格式、10,000 事件、资源与无�
 - E4：`Complete`。
 - E5：`Complete`。
 - E6：`In Progress`。
-- 当前唯一下一门禁：完成 E6 双浏览器 canonical、人工补偿任务与 owner evidence 批准。
+- 当前唯一下一门禁：完成 E6 人工补偿任务与 owner evidence 批准；双浏览器 40 步 canonical 已通过。
 
 ## 6. Delivery Approval
 
@@ -131,3 +131,5 @@ next_action: "执行 E6 双浏览器、三格式、10,000 事件、资源与无�
 随后 E5 实现 commit `781241772e05186e2fe0d006ed6ddd8bceded7af` 交付 range lane/class、两阶段创建、preview/取消、端点调整与回滚、半开重叠、键盘和持久化。clean canonical `E5-2026-08-27T11-03-22-177Z-78124177` 35/35 通过，summary SHA-256 为 `6928f75cbdeb6d77e54c81b3547f7caee0b39d4c6881884b1d1d7065f3dde1b0`。自动化退出项已满足；owner evidence 批准仍未完成，因此 E5 保持 `In Progress`、E6 保持 `Planned`。
 
 同日，`project-owner` 明确批准 E5 canonical evidence、范围事件创建/调整、重叠校验、键盘与持久化结果，并同意关闭 E5、开放 E6。E5 据此改为 `Complete`，E6 改为 `In Progress`；本批准不构成 E6 evidence 或 Editor release-readiness。
+
+2026-08-28，E6 clean canonical `E6-2026-08-27T15-52-33-466Z-17d7fe10` 在 commit `17d7fe1046ed02a3fb5137ccfe7cbf5590093aff` 上 40/40 通过。E6 继续保持 `In Progress`，因为 owner 原生文件、`beforeunload`、辅助技术与长会话补偿签字尚未完成。

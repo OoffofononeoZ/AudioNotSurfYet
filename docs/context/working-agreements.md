@@ -1,13 +1,13 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-08-27
+last_reviewed: 2026-08-28
 upstream_docs:
   - "AGENTS.md"
   - "docs/context/index.md"
   - "docs/delivery/test-strategy.md"
   - "docs/quality/eval-plan.md"
-next_action: "执行 E6 双浏览器、三格式、10,000 事件、资源和无障碍最终加固"
+next_action: "保留 E6 canonical artifact，并由 owner 完成原生文件、辅助技术和长会话补偿验证"
 ---
 
 # Working Agreements
@@ -159,3 +159,5 @@ E1 实现随后在不新增依赖、不修改 Analyzer session/cache schema 的�
 随后 E5 range lane/class、两阶段创建、preview/取消、端点 pointer/keyboard 调整与 pointercancel 回滚、半开重叠、右键优先级和 point/range 持久化已提交。dirty provisional 与 clean canonical 均 35/35 通过；clean run `E5-2026-08-27T11-03-22-177Z-78124177` 绑定 commit `781241772e05186e2fe0d006ed6ddd8bceded7af`，起止工作树干净，summary SHA-256 为 `6928f75cbdeb6d77e54c81b3547f7caee0b39d4c6881884b1d1d7065f3dde1b0`。Chrome 测得 range 反馈 `35.5ms`，1024/1280/1920 的 range/timeline/overlay 几何误差均 `1 CSS px`；本事实只形成 `in-review` evidence，不关闭 E5、不开放 E6。1,281.63 kB chunk warning 与 E6 Edge/10,000 事件/资源/无障碍门禁继续保留。
 
 同日，`project-owner` 明确批准 E5 canonical evidence、范围事件创建/调整、重叠校验、键盘与持久化结果，同意关闭 E5 并开放 E6。E5 evidence 据此改为 `approved`，E6 为 `In Progress`；R-024、R-025、R-027 继续等待 E6 双浏览器、10,000 事件、资源与辅助技术证据。
+
+2026-08-28，E6 clean canonical 在 commit `17d7fe1046ed02a3fb5137ccfe7cbf5590093aff` 上 40/40 通过并登记为 `in-review`。自动化证明真实 Chrome/Edge、三格式、10,000 事件、`<=100ms` 反馈、0 个归因长任务和 20 次资源循环；真实 OS picker、`beforeunload`、辅助技术与长会话仍需 owner 补偿验证。人工签字前 E6 继续为 `In Progress`，R-024、R-025、R-027 继续为 `Open`，不得创建 Editor readiness。

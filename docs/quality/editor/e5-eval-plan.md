@@ -1,7 +1,7 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-08-27
+last_reviewed: 2026-08-28
 upstream_docs:
   - "docs/delivery/editor/execution-plan.md"
   - "docs/delivery/editor/acceptance-criteria.md"
@@ -9,7 +9,7 @@ upstream_docs:
   - "docs/architecture/editor/project-format-v1.md"
   - "docs/architecture/editor/interaction-contracts.md"
   - "docs/architecture/risk-register.md"
-next_action: "保留 E5 canonical artifact；E6 按独立质量契约执行双浏览器与 10,000 事件加固"
+next_action: "保留 E5 canonical artifact；E6 自动化已通过并等待独立 owner 审批"
 ---
 
 # Editor E5 Eval Plan

@@ -1,10 +1,10 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-08-27
+last_reviewed: 2026-08-28
 upstream_docs:
   - "docs/context/index.md"
-next_action: "执行 E6 双浏览器、三格式、10,000 事件、资源与无障碍最终加固"
+next_action: "owner 复核 E6 双浏览器 canonical 与人工补偿边界"
 ---
 
 # System Map
@@ -77,7 +77,7 @@ showOpenFilePicker → FileSystemFileHandle → File
 - 刷新时 current Blob 优先并恢复为 0 秒 paused；其他曲目只在 `queryPermission()` 为 granted 时自动取回，`requestPermission()` 只由可见用户操作触发。
 - `--coinc-process` 既可能由 GSAP 写入，也可能由能量 RAF 写入，模式切换需明确所有权。
 - AudioContext、source、单播放 RAF、产品 Worker、pending analysis request 和封面 URL 由 MainLayout-owned service/coordinator 生命周期统一释放；Observer、GSAP 和 Three.js 由各组件释放，LightBg 在 reduced motion 下不保留连续 RAF。
-- Header 的 settings 事件没有已发现消费者；Visualizer 仍为占位页。Editor E4 overlay 与 E5 range 已获批准；E6 最终加固当前为 `In Progress`。
+- Header 的 settings 事件没有已发现消费者；Visualizer 仍为占位页。Editor E4 overlay 与 E5 range 已获批准；E6 40/40 clean canonical 已通过，人工补偿审批当前为 `In Progress`。
 - `components.d.ts` 和 `auto-imports.d.ts` 是构建插件生成文件，构建可能造成工作树变化。
 
 ## Editor Boundary After E5
@@ -95,8 +95,8 @@ showOpenFilePicker → FileSystemFileHandle → File
 - `analysisCanvasRenderer` 是 Analyzer card 与 Editor overlay 共用的纯 Canvas adapter；E4 overlay 一次选择累计 21 项中的一个，使用同一 viewport/time geometry、DPR backing store、40ms exact cursor 合并和 last-ready Buffer fallback。
 - overlay 只让 selector、重试和 top/move/bottom 三个手柄接收 pointer；图形与说明区域穿透到底层 point surface。bounds 固定默认 0.10/0.35、最小 0.12，键盘步长 1%/Shift 5%，renderer/context 错误只降级 overlay。
 
-尚未完成：E6 双浏览器/三格式/native picker/10,000 事件/资源/无障碍最终加固。E5 clean canonical 与人工任务已获批准，E6 已开放但在自己的 evidence 获批前不得写成 `Complete`。
+尚未完成：E6 的原生 OS picker、`beforeunload`、辅助技术与长会话 owner 补偿审批。双浏览器/三格式/10,000 事件/资源自动化 clean canonical 已 40/40 通过，但 evidence 获批前不得写成 `Complete`。
 
 ## Approval Record
 
-`project-owner` 于 2026-08-21 确认 M7 卡片、共享视口、跳转、刷新恢复和 3/3 学习解释通过，并批准 M7 canonical、关闭 M7、开放 M8。随后 M8–M11 与 Analyzer readiness 依次完成并获批。2026-08-26，owner 又依次批准 Editor 产品、架构、delivery 与 E1 canonical/人工结果。2026-08-27，E2–E5 clean canonical 与人工门禁依次获 owner 批准；E5 为 `Complete`，E6 为 `In Progress`。
+`project-owner` 于 2026-08-21 确认 M7 卡片、共享视口、跳转、刷新恢复和 3/3 学习解释通过，并批准 M7 canonical、关闭 M7、开放 M8。随后 M8–M11 与 Analyzer readiness 依次完成并获批。2026-08-26，owner 又依次批准 Editor 产品、架构、delivery 与 E1 canonical/人工结果。2026-08-27，E2–E5 clean canonical 与人工门禁依次获 owner 批准；2026-08-28，E6 clean canonical 40/40 通过，人工补偿审批仍为 `In Progress`。
