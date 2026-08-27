@@ -15,23 +15,32 @@
             </div>
         </header>
 
-        <div
-            ref="stage"
-            class="timeline-stage"
-            data-testid="editor-timeline"
-            tabindex="0"
-            role="application"
-            aria-label="歌曲波形；点击跳转，滚轮缩放，右键拖动平移"
-            @contextmenu.prevent
-            @dragstart.prevent
-            @wheel="onWheel"
-            @pointerdown="onStagePointerDown"
-            @pointermove="onStagePointerMove"
-            @pointerup="onStagePointerUp"
-            @pointercancel="clearPointer"
-            @lostpointercapture="clearPointer"
-            @keydown="onStageKeydown"
-        >
+        <div class="timeline-layout-row">
+            <div class="timeline-track-rail">
+                <strong>歌曲总览</strong>
+                <span>波形 / 播放游标</span>
+            </div>
+            <div class="timeline-class-rail">
+                <strong>共享时间轴</strong>
+                <span>Tempo / 网格</span>
+            </div>
+            <div
+                ref="stage"
+                class="timeline-stage"
+                data-testid="editor-timeline"
+                tabindex="0"
+                role="application"
+                aria-label="歌曲波形；点击跳转，滚轮缩放，右键拖动平移"
+                @contextmenu.prevent
+                @dragstart.prevent
+                @wheel="onWheel"
+                @pointerdown="onStagePointerDown"
+                @pointermove="onStagePointerMove"
+                @pointerup="onStagePointerUp"
+                @pointercancel="clearPointer"
+                @lostpointercapture="clearPointer"
+                @keydown="onStageKeydown"
+            >
             <canvas ref="waveformCanvas" class="timeline-canvas" aria-hidden="true" />
             <canvas ref="gridCanvas" class="timeline-canvas grid-canvas" aria-hidden="true" />
             <canvas ref="cursorCanvas" class="timeline-canvas cursor-canvas" aria-hidden="true" />
@@ -74,6 +83,7 @@
                 <button type="button" role="menuitem" @click="menuSeek(false)">跳到此处</button>
                 <button type="button" role="menuitem" @click="menuSeek(true)">从此处播放</button>
                 <button type="button" role="menuitem" @click="menuCenter">将此处居中</button>
+            </div>
             </div>
         </div>
 
@@ -136,9 +146,6 @@
             </article>
         </div>
 
-        <div class="annotation-grid" data-testid="editor-e2-grid" aria-label="E2 节拍网格预览">
-            <p>标记 lane 将在 E3 接入；这里先验证贯穿式 Tempo 网格与共享时间坐标。</p>
-        </div>
     </section>
 </template>
 
@@ -656,6 +663,8 @@ onBeforeUnmount(() => {
     border-radius: 24px;
     padding: 24px;
     background: rgba(3, 12, 8, 0.88);
+    --editor-lane-name-width: 180px;
+    --editor-inner-class-width: 160px;
 }
 .timeline-heading,
 .timeline-controls,
@@ -682,13 +691,32 @@ button:focus-visible,
 input:focus-visible,
 select:focus-visible { outline: 2px solid #65ffa9; outline-offset: 2px; }
 button:disabled { opacity: .4; }
+.timeline-layout-row {
+    display: grid;
+    grid-template-columns: var(--editor-lane-name-width) var(--editor-inner-class-width) minmax(420px, 1fr);
+    min-width: 760px;
+    margin-top: 18px;
+}
+.timeline-track-rail,
+.timeline-class-rail {
+    display: grid;
+    align-content: center;
+    gap: 5px;
+    padding: 14px;
+    border: 1px solid rgba(101,255,169,.24);
+    border-right: 0;
+    color: #a9c7b6;
+    background: rgba(4,17,10,.82);
+}
+.timeline-track-rail { border-radius: 16px 0 0 16px; }
+.timeline-track-rail strong,
+.timeline-class-rail strong { color: #effff6; }
 .timeline-stage {
     position: relative;
     height: 320px;
-    margin-top: 18px;
     overflow: hidden;
     border: 1px solid rgba(101,255,169,.3);
-    border-radius: 16px;
+    border-radius: 0 16px 16px 0;
     background: linear-gradient(180deg, rgba(12,35,23,.9), rgba(2,8,5,.96));
     cursor: crosshair;
     touch-action: none;
@@ -725,18 +753,10 @@ button:disabled { opacity: .4; }
 .tempo-source,
 .single-beat { display: block; margin-top: 10px; color: #a9c7b6; }
 .tempo-error { margin-top: 8px; color: #ffb0a8; }
-.annotation-grid {
-    min-height: 180px;
-    margin-top: 18px;
-    border: 1px dashed rgba(101,255,169,.32);
-    border-radius: 14px;
-    padding: 18px;
-    color: #8aa797;
-    background: rgba(0,0,0,.18);
-}
 @media (max-width: 760px) {
     .timeline-heading { align-items: flex-start; flex-direction: column; }
     .timeline-stage { height: 280px; }
+    .editor-timeline-panel { overflow-x: auto; }
 }
 @media (prefers-reduced-motion: reduce) {
     * { scroll-behavior: auto !important; transition: none !important; }
