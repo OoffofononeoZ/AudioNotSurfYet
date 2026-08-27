@@ -8,6 +8,7 @@ upstream_docs:
   - "docs/quality/editor/failure-taxonomy.md"
   - "docs/quality/editor/e3-eval-plan.md"
   - "docs/quality/editor/e4-eval-plan.md"
+  - "docs/quality/editor/e5-eval-plan.md"
   - "docs/delivery/editor/milestone-plan.md"
 next_action: "按 AC-E501–AC-E505 实施 E5；canonical 登记后等待 owner 批准"
 ---

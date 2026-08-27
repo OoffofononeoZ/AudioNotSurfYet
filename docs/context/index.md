@@ -69,6 +69,9 @@ AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端：用户选择
 | [Editor E4 eval plan](../quality/editor/e4-eval-plan.md) | AC-E401–AC-E405 的 renderer、consumer、bounds、hit-test、cursor 与 isolation 契约 | project-owner / approved | E4 feature、renderer、交互或证据能力变化 |
 | [Editor E4 golden examples](../quality/editor/e4-golden-examples.md) | 21 项、Buffer 去重、三手柄、穿透、stale、错误隔离与恢复样例 | project-owner / approved | E4 fixture、geometry 或错误语义变化 |
 | [Editor E4 failure taxonomy](../quality/editor/e4-failure-taxonomy.md) | E4 renderer、consumer、bounds、hit、cursor 与 isolation 失败分类 | project-owner / approved | E4 失败域或严重度响应变化 |
+| [Editor E5 eval plan](../quality/editor/e5-eval-plan.md) | AC-E501–AC-E505 的 range state、interval、overlap、handle、persistence 与 regression 契约 | project-owner / in-review | E5 交互、fixture、阈值或证据能力变化 |
+| [Editor E5 golden examples](../quality/editor/e5-golden-examples.md) | 两阶段创建、半开相邻、重叠矩阵、端点、迁移、round-trip 与 overlay 穿透样例 | project-owner / in-review | E5 fixture、范围或交互语义变化 |
+| [Editor E5 failure taxonomy](../quality/editor/e5-failure-taxonomy.md) | E5 range lane/state/interval/overlap/handle/persistence 失败分类 | project-owner / in-review | E5 失败域或严重度响应变化 |
 
 ## Architecture Decisions
 
@@ -110,6 +113,7 @@ AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端：用户选择
 - Editor E2 quality：[eval plan](../quality/editor/e2-eval-plan.md)、[golden](../quality/editor/e2-golden-examples.md)、[failure taxonomy](../quality/editor/e2-failure-taxonomy.md) 与 canonical record 已获批准；累计 [evidence index](../quality/editor/evidence-index.md) 因 E5 正在实施保持 `in-review`
 - Editor E3 quality：[eval plan](../quality/editor/e3-eval-plan.md)、[golden](../quality/editor/e3-golden-examples.md)、[failure taxonomy](../quality/editor/e3-failure-taxonomy.md) 与 26/26 canonical record 均已获批准
 - Editor E4 quality：[eval plan](../quality/editor/e4-eval-plan.md)、[golden](../quality/editor/e4-golden-examples.md)、[failure taxonomy](../quality/editor/e4-failure-taxonomy.md) 与 31/31 canonical record 均已获批准
+- Editor E5 quality：[eval plan](../quality/editor/e5-eval-plan.md)、[golden](../quality/editor/e5-golden-examples.md) 与 [failure taxonomy](../quality/editor/e5-failure-taxonomy.md) 为 `in-review`；约束 E5 实现与 canonical
 - Quality readiness：[Analyzer release readiness](../quality/release-readiness.md) 已由 owner 批准为 `Ready with waivers`，且只覆盖 Analyzer 候选
 - Release operations：`docs/release/` 尚未创建；PROD-015 的托管平台、域名和 SPA fallback 解决前不进入正式上线
 - Retrospectives：`docs/retrospectives/` 尚未创建；有发布、事故或重复摩擦证据后生成
