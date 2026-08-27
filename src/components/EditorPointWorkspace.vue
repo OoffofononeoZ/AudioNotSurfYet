@@ -2,17 +2,22 @@
     <section ref="workspace" class="point-workspace" data-testid="editor-point-workspace" aria-labelledby="point-workspace-title">
         <header class="workspace-heading">
             <div>
-                <p class="workspace-kicker">E3 · Point Annotation</p>
-                <h2 id="point-workspace-title">点标记轨道</h2>
-                <p>选择分类后在共享节拍网格中标记短音色或音符出现的位置。</p>
+                <p class="workspace-kicker">E5 · Point & Range Annotation</p>
+                <h2 id="point-workspace-title">点与范围标记轨道</h2>
+                <p>在共享节拍网格中标记短音色、音符、长音色或效果所在位置。</p>
             </div>
-            <button type="button" data-testid="add-point-lane" @click="addLane">
-                ＋ 新增点标记轨道
-            </button>
+            <div class="workspace-actions">
+                <button type="button" data-testid="add-point-lane" @click="addLane">
+                    ＋ 新增点标记轨道
+                </button>
+                <button type="button" data-testid="add-range-lane" @click="addRangeLane">
+                    ＋ 新增范围标记轨道
+                </button>
+            </div>
         </header>
 
         <p class="workspace-status" aria-live="polite" data-testid="point-workspace-status">
-            {{ liveMessage || `当前 ${pointLanes.length} 条点轨道、${pointCount} 个标记` }}
+            {{ liveMessage || `当前 ${pointLanes.length} 条点轨道、${pointCount} 个点；${rangeLanes.length} 条范围轨道、${rangeCount} 个范围` }}
         </p>
 
         <EditorAnalysisOverlay
@@ -27,7 +32,7 @@
 
         <div v-if="pointLanes.length === 0 && rangeLanes.length === 0" class="empty-workspace">
             <strong>还没有标记轨道</strong>
-            <span>点击“新增点标记轨道”开始。每条新轨道会包含一个 default 分类。</span>
+            <span>选择新增点或范围轨道开始。每条新轨道会包含一个 default 分类。</span>
         </div>
 
         <article
@@ -151,18 +156,12 @@
             </div>
         </article>
 
-        <article
-            v-for="lane in rangeLanes"
-            :key="lane.id"
-            class="range-placeholder"
-            :data-testid="`range-lane-readonly-${lane.id}`"
-        >
-            <div>
-                <strong>{{ lane.name }}</strong>
-                <span>range · {{ lane.events.length }} 个范围事件</span>
-            </div>
-            <p>范围数据已完整保留；创建与编辑将在 E5 开放。</p>
-        </article>
+        <EditorRangeWorkspace
+            :project="project"
+            :playback="playback"
+            @update-project="applyProject"
+            @status="report"
+        />
 
         <div v-if="removalDialog" class="dialog-backdrop" @pointerdown.self="closeRemovalDialog">
             <section
@@ -222,6 +221,7 @@ import {
     type ComponentPublicInstance,
 } from 'vue';
 import EditorAnalysisOverlay from './EditorAnalysisOverlay.vue';
+import EditorRangeWorkspace from './EditorRangeWorkspace.vue';
 import { useAudioSessionService } from '../audio/audioSessionService';
 import type {
     AnalysisCoordinatorSnapshot,
@@ -244,6 +244,7 @@ import {
     visiblePointEvents,
     type PointCell,
 } from '../editor/pointAnnotations';
+import { createRangeLane } from '../editor/rangeAnnotations';
 import { EDITOR_CONTEXT_PAN_THRESHOLD_PX } from '../editor/editorConfig';
 import { generateTempoGrid } from '../editor/tempoMap';
 import {
@@ -257,6 +258,7 @@ import type {
     EditorProjectV1,
     InnerClassV1,
     PointLaneV1,
+    RangeLaneV1,
 } from '../editor/types';
 import type { PlaybackSnapshot } from '../types/audio';
 import type { PersistedTimelineViewport } from '../types/session';
@@ -281,9 +283,13 @@ const pointLanes = computed(() => props.project.lanes.filter(
     (lane): lane is PointLaneV1 => lane.eventKind === 'point',
 ));
 const rangeLanes = computed(() => props.project.lanes.filter(
-    (lane) => lane.eventKind === 'range',
+    (lane): lane is RangeLaneV1 => lane.eventKind === 'range',
 ));
 const pointCount = computed(() => pointLanes.value.reduce(
+    (total, lane) => total + lane.events.length,
+    0,
+));
+const rangeCount = computed(() => rangeLanes.value.reduce(
     (total, lane) => total + lane.events.length,
     0,
 ));
@@ -370,6 +376,13 @@ const addLane = () => {
     const lane = project.lanes[project.lanes.length - 1];
     applyProject(project);
     report(`已新增 ${lane?.name ?? '点标记轨道'}。`);
+};
+
+const addRangeLane = () => {
+    const project = createRangeLane(props.project);
+    const lane = project.lanes[project.lanes.length - 1];
+    applyProject(project);
+    report(`已新增 ${lane?.name ?? '范围标记轨道'}。`);
 };
 
 const restoreInput = (event: Event, value: string) => {
@@ -1077,6 +1090,7 @@ onBeforeUnmount(() => {
     align-items: center;
 }
 .workspace-heading { justify-content: space-between; gap: 20px; }
+.workspace-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
 .workspace-heading h2 { margin: 4px 0 6px; }
 .workspace-kicker { color: #65ffa9; letter-spacing: .12em; text-transform: uppercase; }
 .workspace-status { min-height: 24px; margin-top: 12px; color: #a9c7b6; }
@@ -1214,16 +1228,6 @@ button:disabled { opacity: .4; cursor: not-allowed; }
     box-shadow: 0 14px 40px rgba(0,0,0,.5);
 }
 .point-menu button { border: 0; text-align: left; }
-.range-placeholder {
-    justify-content: space-between;
-    gap: 16px;
-    margin-top: 14px;
-    border: 1px dashed rgba(101,255,169,.3);
-    border-radius: 14px;
-    padding: 16px;
-    color: #a9c7b6;
-}
-.range-placeholder > div { display: grid; gap: 4px; }
 .dialog-backdrop {
     position: fixed;
     z-index: 80;

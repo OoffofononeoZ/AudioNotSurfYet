@@ -3,7 +3,7 @@
         <section class="editor-shell">
             <header class="editor-heading">
                 <div>
-                    <p class="kicker">Editor · E3 point annotation</p>
+                    <p class="kicker">Editor · E5 range annotation</p>
                     <h1>逆向制曲工程</h1>
                     <p>在不修改原音频的前提下，为歌曲建立可恢复、可导出的时间标注工程。</p>
                 </div>
@@ -116,13 +116,6 @@
                     @retry-overlay="controller.retryOverlayAnalysis()"
                 />
 
-                <section class="future-panel" aria-label="Editor 后续工作区">
-                    <div>
-                        <p class="kicker">E5</p>
-                        <h2>范围事件</h2>
-                        <p>点标记与分析叠加已开放；范围事件数据保持只读，创建与调整将在 E5 开放。</p>
-                    </div>
-                </section>
             </template>
         </section>
     </main>

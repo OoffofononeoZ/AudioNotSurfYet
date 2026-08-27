@@ -15,6 +15,7 @@ declare module 'vue' {
     DotGridBg: typeof import('./src/components/DotGridBg.vue')['default']
     EditorAnalysisOverlay: typeof import('./src/components/EditorAnalysisOverlay.vue')['default']
     EditorPointWorkspace: typeof import('./src/components/EditorPointWorkspace.vue')['default']
+    EditorRangeWorkspace: typeof import('./src/components/EditorRangeWorkspace.vue')['default']
     EditorTimeline: typeof import('./src/components/EditorTimeline.vue')['default']
     HeaderBar: typeof import('./src/components/HeaderBar.vue')['default']
     LightBg: typeof import('./src/components/LightBg.vue')['default']

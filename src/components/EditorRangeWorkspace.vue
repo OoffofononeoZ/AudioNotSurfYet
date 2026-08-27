@@ -1,0 +1,1352 @@
+<template>
+    <div class="range-workspace" data-testid="editor-range-workspace">
+        <article
+            v-for="lane in rangeLanes"
+            :key="lane.id"
+            class="range-lane-card"
+            :data-testid="`range-lane-${lane.id}`"
+        >
+            <div class="range-lane-grid" :style="{ '--lane-rows': lane.innerClasses.length }">
+                <div class="range-lane-meta">
+                    <label :for="`range-lane-name-${lane.id}`">名称</label>
+                    <input
+                        :id="`range-lane-name-${lane.id}`"
+                        :value="laneNameDrafts[lane.id] ?? lane.name"
+                        :data-testid="`range-lane-name-${lane.id}`"
+                        @input="captureLaneNameDraft(lane.id, $event)"
+                        @blur="commitLaneName(lane.id, $event)"
+                        @keydown.enter.prevent="commitInputOnEnter"
+                    >
+                    <span class="range-lane-kind">range · {{ lane.events.length }} 个范围</span>
+                    <button
+                        type="button"
+                        :data-testid="`add-range-inner-class-${lane.id}`"
+                        @click="addInnerClass(lane.id)"
+                    >
+                        ＋ 分类
+                    </button>
+                </div>
+
+                <template v-for="(innerClass, innerIndex) in lane.innerClasses" :key="innerClass.id">
+                    <div class="range-inner-class-cell" :style="{ gridRow: innerIndex + 1 }">
+                        <label class="sr-only" :for="`range-inner-name-${innerClass.id}`">
+                            {{ lane.name }} 的内部分类
+                        </label>
+                        <input
+                            :id="`range-inner-name-${innerClass.id}`"
+                            :value="innerClassNameDrafts[innerClass.id] ?? innerClass.label"
+                            :data-testid="`range-inner-class-name-${innerClass.id}`"
+                            @input="captureInnerClassNameDraft(innerClass.id, $event)"
+                            @blur="commitInnerClassName(lane.id, innerClass.id, $event)"
+                            @keydown.enter.prevent="commitInputOnEnter"
+                        >
+                        <button
+                            type="button"
+                            class="range-delete-class"
+                            :disabled="lane.innerClasses.length <= 1"
+                            :aria-label="`删除范围分类 ${innerClass.label}`"
+                            :data-testid="`delete-range-inner-class-${innerClass.id}`"
+                            @click="requestInnerClassRemoval(lane, innerClass)"
+                        >
+                            删除
+                        </button>
+                    </div>
+
+                    <div
+                        :ref="(element) => setSurfaceRef(lane.id, innerClass.id, element)"
+                        class="marker-surface range-surface"
+                        :class="{
+                            'is-candidate': isActiveCandidate(lane.id, innerClass.id),
+                            'is-pending': isPendingSurface(lane.id, innerClass.id),
+                        }"
+                        :style="{ gridRow: innerIndex + 1 }"
+                        :data-testid="`range-surface-${lane.id}-${innerClass.id}`"
+                        :data-lane-id="lane.id"
+                        :data-inner-class-id="innerClass.id"
+                        tabindex="0"
+                        role="application"
+                        :aria-label="`${lane.name}，${innerClass.label} 范围区域。第一次点击选择起点，第二次点击更晚位置完成。`"
+                        @contextmenu.prevent
+                        @dragstart.prevent
+                        @pointerdown="onSurfacePointerDown($event, lane.id, innerClass.id)"
+                        @pointermove="onSurfacePointerMove"
+                        @pointerup="onSurfacePointerUp"
+                        @pointercancel="cancelSurfacePointer"
+                        @lostpointercapture="cancelSurfacePointer"
+                        @pointerleave="onSurfacePointerLeave(lane.id, innerClass.id)"
+                        @focus="activateInitialCandidate(lane.id, innerClass.id)"
+                        @keydown="onSurfaceKeydown($event, lane.id, innerClass.id)"
+                    >
+                        <canvas
+                            :ref="(element) => setGridCanvasRef(lane.id, innerClass.id, element)"
+                            class="range-grid-canvas"
+                            aria-hidden="true"
+                        />
+                        <span
+                            v-if="candidateFor(lane.id, innerClass.id)"
+                            class="range-candidate"
+                            :style="candidateStyle(lane.id, innerClass.id)"
+                            aria-hidden="true"
+                        />
+                        <span
+                            v-if="previewFor(lane.id, innerClass.id)"
+                            class="range-preview"
+                            :class="{ 'is-invalid': !previewFor(lane.id, innerClass.id)?.valid }"
+                            :style="previewStyle(lane.id, innerClass.id)"
+                            aria-hidden="true"
+                        />
+
+                        <template
+                            v-for="range in visibleEvents(lane, innerClass.id)"
+                            :key="range.id"
+                        >
+                            <button
+                                :ref="(element) => setRangeRef(range.id, element)"
+                                type="button"
+                                class="range-marker"
+                                :class="{ 'is-handle-preview': isHandlePreview(range) }"
+                                :style="rangeStyle(range)"
+                                :data-testid="`range-marker-${range.id}`"
+                                :data-range-id="range.id"
+                                :aria-label="`${innerClass.label} 范围，${formatTime(range.startSeconds)} 至 ${formatTime(range.endSeconds)}；右键或删除键移除`"
+                                @click.stop="focusRange(lane.id, innerClass.id, range)"
+                                @contextmenu.stop.prevent="removeRange(lane.id, innerClass.id, range)"
+                                @focus="focusRange(lane.id, innerClass.id, range)"
+                                @keydown="onRangeKeydown($event, lane.id, innerClass.id, range)"
+                            >
+                                <span aria-hidden="true">{{ formatDuration(range) }}</span>
+                            </button>
+                            <button
+                                v-if="endpointVisible(range.startSeconds)"
+                                type="button"
+                                class="range-handle start"
+                                :style="endpointStyle(range, 'start')"
+                                :data-testid="`range-start-handle-${range.id}`"
+                                :aria-label="`调整 ${innerClass.label} 范围起点 ${formatTime(range.startSeconds)}`"
+                                @pointerdown.stop.prevent="beginHandleDrag($event, lane.id, innerClass.id, range, 'start')"
+                                @pointermove.stop.prevent="moveHandleDrag"
+                                @pointerup.stop.prevent="finishHandleDrag"
+                                @pointercancel.stop.prevent="cancelHandleDrag"
+                                @lostpointercapture.stop.prevent="cancelHandleDrag"
+                                @contextmenu.stop.prevent="removeRange(lane.id, innerClass.id, range)"
+                                @keydown="onHandleKeydown($event, lane.id, innerClass.id, range, 'start')"
+                            >
+                                <span aria-hidden="true">◀</span>
+                            </button>
+                            <button
+                                v-if="endpointVisible(range.endSeconds)"
+                                type="button"
+                                class="range-handle end"
+                                :style="endpointStyle(range, 'end')"
+                                :data-testid="`range-end-handle-${range.id}`"
+                                :aria-label="`调整 ${innerClass.label} 范围终点 ${formatTime(range.endSeconds)}`"
+                                @pointerdown.stop.prevent="beginHandleDrag($event, lane.id, innerClass.id, range, 'end')"
+                                @pointermove.stop.prevent="moveHandleDrag"
+                                @pointerup.stop.prevent="finishHandleDrag"
+                                @pointercancel.stop.prevent="cancelHandleDrag"
+                                @lostpointercapture.stop.prevent="cancelHandleDrag"
+                                @contextmenu.stop.prevent="removeRange(lane.id, innerClass.id, range)"
+                                @keydown="onHandleKeydown($event, lane.id, innerClass.id, range, 'end')"
+                            >
+                                <span aria-hidden="true">▶</span>
+                            </button>
+                        </template>
+
+                        <div
+                            v-if="quickMenu?.surfaceKey === surfaceKey(lane.id, innerClass.id)"
+                            class="range-menu"
+                            role="menu"
+                            :style="{ left: `${quickMenu.x}px`, top: `${quickMenu.y}px` }"
+                            data-testid="editor-range-menu"
+                        >
+                            <button type="button" role="menuitem" @click.stop="menuSeek(false)">跳到此处</button>
+                            <button type="button" role="menuitem" @click.stop="menuSeek(true)">从此处播放</button>
+                            <button type="button" role="menuitem" @click.stop="menuCenter">将此处居中</button>
+                        </div>
+                    </div>
+                </template>
+            </div>
+        </article>
+
+        <div v-if="removalDialog" class="range-dialog-backdrop" @pointerdown.self="closeRemovalDialog">
+            <section
+                ref="dialogElement"
+                class="range-removal-dialog"
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="remove-range-class-title"
+                tabindex="-1"
+                @keydown.esc.prevent="closeRemovalDialog"
+            >
+                <h3 id="remove-range-class-title">处理分类中的范围</h3>
+                <p>
+                    “{{ removalDialog.label }}”中有 {{ removalDialog.eventCount }} 个范围。
+                    请选择迁移到其他分类，或明确删除这些范围。
+                </p>
+                <label>
+                    迁移目标
+                    <select v-model="removalDialog.targetInnerClassId" data-testid="range-migration-target">
+                        <option v-for="target in removalTargets" :key="target.id" :value="target.id">
+                            {{ target.label }}
+                        </option>
+                    </select>
+                </label>
+                <p v-if="removalDialog.error" class="range-dialog-error" role="alert">
+                    {{ removalDialog.error }}
+                </p>
+                <div class="range-dialog-actions">
+                    <button type="button" data-testid="confirm-range-migration" @click="confirmMigration">
+                        迁移并删除分类
+                    </button>
+                    <button type="button" class="danger" data-testid="confirm-range-event-deletion" @click="confirmEventDeletion">
+                        删除范围与分类
+                    </button>
+                    <button type="button" data-testid="cancel-range-removal" @click="closeRemovalDialog">
+                        取消
+                    </button>
+                </div>
+            </section>
+        </div>
+    </div>
+</template>
+
+<script setup lang="ts">
+import {
+    computed,
+    nextTick,
+    onBeforeUnmount,
+    onMounted,
+    reactive,
+    ref,
+    watch,
+    type ComponentPublicInstance,
+} from 'vue';
+import { useAudioSessionService } from '../audio/audioSessionService';
+import { EDITOR_CONTEXT_PAN_THRESHOLD_PX } from '../editor/editorConfig';
+import {
+    addRangeInnerClass,
+    createRangeEvent,
+    deleteRangeEvent,
+    nextRangeCell,
+    rangeCellAtTime,
+    rangeInnerClassEventCount,
+    rangeLaneInnerClasses,
+    removeRangeInnerClass,
+    renameRangeInnerClass,
+    renameRangeLane,
+    updateRangeEvent,
+    visibleRangeEvents,
+} from '../editor/rangeAnnotations';
+import { movePointCell, type PointCell } from '../editor/pointAnnotations';
+import { generateTempoGrid } from '../editor/tempoMap';
+import {
+    centerEditorViewport,
+    editorTimeToX,
+    editorXToTime,
+    normalizeEditorViewport,
+    panEditorViewportByPixels,
+} from '../editor/timeline';
+import type {
+    EditorProjectV1,
+    InnerClassV1,
+    RangeEventV1,
+    RangeLaneV1,
+} from '../editor/types';
+import type { PlaybackSnapshot } from '../types/audio';
+import type { PersistedTimelineViewport } from '../types/session';
+
+const props = defineProps<{
+    project: EditorProjectV1;
+    playback: PlaybackSnapshot;
+}>();
+const emit = defineEmits<{
+    updateProject: [project: EditorProjectV1, immediate: boolean];
+    status: [message: string];
+}>();
+
+const audioSession = useAudioSessionService();
+const rangeLanes = computed(() => props.project.lanes.filter(
+    (lane): lane is RangeLaneV1 => lane.eventKind === 'range',
+));
+const viewport = computed(() => normalizeEditorViewport(
+    props.project.workspace.viewport,
+    props.project.track.durationSeconds,
+));
+const surfaceRefs = new Map<string, HTMLElement>();
+const gridCanvasRefs = new Map<string, HTMLCanvasElement>();
+const rangeRefs = new Map<string, HTMLButtonElement>();
+const dialogElement = ref<HTMLElement | null>(null);
+let resizeObserver: ResizeObserver | null = null;
+
+const surfaceKey = (laneId: string, innerClassId: string) => `${laneId}\u0000${innerClassId}`;
+const elementValue = (
+    element: Element | ComponentPublicInstance | null,
+): HTMLElement | null => element instanceof HTMLElement ? element : null;
+
+const applyProject = (project: EditorProjectV1, immediate = true) => {
+    emit('updateProject', project, immediate);
+};
+const report = (message: string) => emit('status', message);
+const formatTime = (seconds: number) => {
+    const minutes = Math.floor(Math.max(0, seconds) / 60);
+    return `${minutes}:${(Math.max(0, seconds) % 60).toFixed(3).padStart(6, '0')}`;
+};
+const formatDuration = (range: RangeEventV1) =>
+    `${Math.max(0, range.endSeconds - range.startSeconds).toFixed(3)}s`;
+
+const setSurfaceRef = (
+    laneId: string,
+    innerClassId: string,
+    element: Element | ComponentPublicInstance | null,
+) => {
+    const key = surfaceKey(laneId, innerClassId);
+    const value = elementValue(element);
+    const previous = surfaceRefs.get(key);
+    if (previous) resizeObserver?.unobserve(previous);
+    if (!value) {
+        surfaceRefs.delete(key);
+        return;
+    }
+    surfaceRefs.set(key, value);
+    resizeObserver?.observe(value);
+};
+const setGridCanvasRef = (
+    laneId: string,
+    innerClassId: string,
+    element: Element | ComponentPublicInstance | null,
+) => {
+    const key = surfaceKey(laneId, innerClassId);
+    const value = elementValue(element);
+    if (value instanceof HTMLCanvasElement) gridCanvasRefs.set(key, value);
+    else gridCanvasRefs.delete(key);
+};
+const setRangeRef = (
+    eventId: string,
+    element: Element | ComponentPublicInstance | null,
+) => {
+    const value = elementValue(element);
+    if (value instanceof HTMLButtonElement) rangeRefs.set(eventId, value);
+    else rangeRefs.delete(eventId);
+};
+const surfaceWidth = (laneId: string, innerClassId: string) =>
+    Math.max(1, surfaceRefs.get(surfaceKey(laneId, innerClassId))
+        ?.getBoundingClientRect().width ?? 1);
+const focusSurface = (laneId: string, innerClassId: string) => {
+    void nextTick(() => surfaceRefs.get(surfaceKey(laneId, innerClassId))?.focus());
+};
+const focusRangeElement = (eventId: string) => {
+    void nextTick(() => rangeRefs.get(eventId)?.focus());
+};
+
+const laneNameDrafts = reactive<Record<string, string>>({});
+const innerClassNameDrafts = reactive<Record<string, string>>({});
+const captureLaneNameDraft = (laneId: string, event: Event) => {
+    laneNameDrafts[laneId] = (event.target as HTMLInputElement).value;
+};
+const captureInnerClassNameDraft = (innerClassId: string, event: Event) => {
+    innerClassNameDrafts[innerClassId] = (event.target as HTMLInputElement).value;
+};
+const commitInputOnEnter = (event: KeyboardEvent) => {
+    (event.currentTarget as HTMLInputElement).blur();
+};
+const restoreInput = (event: Event, value: string) => {
+    (event.target as HTMLInputElement).value = value;
+};
+const commitLaneName = (laneId: string, event: Event) => {
+    const lane = rangeLanes.value.find((entry) => entry.id === laneId);
+    if (!lane) return;
+    try {
+        applyProject(renameRangeLane(
+            props.project,
+            laneId,
+            laneNameDrafts[laneId] ?? (event.target as HTMLInputElement).value,
+        ));
+        delete laneNameDrafts[laneId];
+        report('范围轨道名称已保存。');
+    } catch (error) {
+        delete laneNameDrafts[laneId];
+        restoreInput(event, lane.name);
+        report(error instanceof Error ? error.message : '范围轨道名称无效。');
+    }
+};
+const addInnerClass = (laneId: string) => {
+    try {
+        applyProject(addRangeInnerClass(props.project, laneId));
+        report('已新增范围内部分类。');
+    } catch (error) {
+        report(error instanceof Error ? error.message : '无法新增范围分类。');
+    }
+};
+const commitInnerClassName = (
+    laneId: string,
+    innerClassId: string,
+    event: Event,
+) => {
+    const lane = rangeLanes.value.find((entry) => entry.id === laneId);
+    const innerClass = lane?.innerClasses.find((entry) => entry.id === innerClassId);
+    if (!innerClass) return;
+    try {
+        applyProject(renameRangeInnerClass(
+            props.project,
+            laneId,
+            innerClassId,
+            innerClassNameDrafts[innerClassId]
+                ?? (event.target as HTMLInputElement).value,
+        ));
+        delete innerClassNameDrafts[innerClassId];
+        report('范围分类名称已保存。');
+    } catch (error) {
+        delete innerClassNameDrafts[innerClassId];
+        restoreInput(event, innerClass.label);
+        report(error instanceof Error ? error.message : '范围分类名称无效。');
+    }
+};
+
+interface RemovalDialogState {
+    laneId: string;
+    innerClassId: string;
+    label: string;
+    eventCount: number;
+    targetInnerClassId: string;
+    error: string;
+}
+const removalDialog = ref<RemovalDialogState | null>(null);
+const removalTargets = computed(() => {
+    const state = removalDialog.value;
+    const lane = state ? rangeLanes.value.find((entry) => entry.id === state.laneId) : null;
+    return lane?.innerClasses.filter((entry) => entry.id !== state?.innerClassId) ?? [];
+});
+const requestInnerClassRemoval = (lane: RangeLaneV1, innerClass: InnerClassV1) => {
+    const eventCount = rangeInnerClassEventCount(props.project, lane.id, innerClass.id);
+    if (eventCount === 0) {
+        try {
+            applyProject(removeRangeInnerClass(props.project, lane.id, innerClass.id));
+            report(`已删除范围分类 ${innerClass.label}。`);
+        } catch (error) {
+            report(error instanceof Error ? error.message : '无法删除范围分类。');
+        }
+        return;
+    }
+    removalDialog.value = {
+        laneId: lane.id,
+        innerClassId: innerClass.id,
+        label: innerClass.label,
+        eventCount,
+        targetInnerClassId: lane.innerClasses.find((entry) => entry.id !== innerClass.id)?.id ?? '',
+        error: '',
+    };
+    void nextTick(() => dialogElement.value?.focus());
+};
+const closeRemovalDialog = () => { removalDialog.value = null; };
+const confirmMigration = () => {
+    const state = removalDialog.value;
+    if (!state) return;
+    try {
+        applyProject(removeRangeInnerClass(props.project, state.laneId, state.innerClassId, {
+            kind: 'migrate',
+            targetInnerClassId: state.targetInnerClassId,
+        }));
+        report(`已迁移 ${state.eventCount} 个范围并删除分类。`);
+        closeRemovalDialog();
+    } catch (error) {
+        state.error = error instanceof Error ? error.message : '范围迁移失败。';
+    }
+};
+const confirmEventDeletion = () => {
+    const state = removalDialog.value;
+    if (!state) return;
+    try {
+        applyProject(removeRangeInnerClass(props.project, state.laneId, state.innerClassId, {
+            kind: 'delete-events',
+        }));
+        report(`已删除 ${state.eventCount} 个范围和分类。`);
+        closeRemovalDialog();
+    } catch (error) {
+        state.error = error instanceof Error ? error.message : '范围删除失败。';
+    }
+};
+
+const candidate = ref<{
+    laneId: string;
+    innerClassId: string;
+    timeSeconds: number;
+} | null>(null);
+const pending = ref<{
+    laneId: string;
+    innerClassId: string;
+    startCell: PointCell;
+} | null>(null);
+const isActiveCandidate = (laneId: string, innerClassId: string) =>
+    candidate.value?.laneId === laneId && candidate.value.innerClassId === innerClassId;
+const isPendingSurface = (laneId: string, innerClassId: string) =>
+    pending.value?.laneId === laneId && pending.value.innerClassId === innerClassId;
+const cellFor = (laneId: string, innerClassId: string): PointCell | null => {
+    const active = candidate.value;
+    if (!active || active.laneId !== laneId || active.innerClassId !== innerClassId) return null;
+    return rangeCellAtTime(
+        active.timeSeconds,
+        props.project,
+        surfaceWidth(laneId, innerClassId),
+    );
+};
+const candidateFor = (laneId: string, innerClassId: string) => cellFor(laneId, innerClassId);
+const viewportPercent = (seconds: number) =>
+    (seconds - viewport.value.startSeconds)
+    / Math.max(1e-9, viewport.value.endSeconds - viewport.value.startSeconds) * 100;
+const candidateStyle = (laneId: string, innerClassId: string) => {
+    const cell = cellFor(laneId, innerClassId);
+    if (!cell) return {};
+    return {
+        left: `${viewportPercent(cell.startSeconds)}%`,
+        right: `${100 - viewportPercent(cell.endSeconds)}%`,
+    };
+};
+const minimumEnd = (
+    laneId: string,
+    innerClassId: string,
+    startSeconds: number,
+): PointCell | null => nextRangeCell(
+    startSeconds,
+    props.project,
+    surfaceWidth(laneId, innerClassId),
+);
+const previewFor = (laneId: string, innerClassId: string) => {
+    const state = pending.value;
+    const endCell = cellFor(laneId, innerClassId);
+    if (!state || !endCell || state.laneId !== laneId || state.innerClassId !== innerClassId) {
+        return null;
+    }
+    const minimum = minimumEnd(laneId, innerClassId, state.startCell.timeSeconds);
+    let valid = Boolean(minimum && endCell.timeSeconds >= minimum.timeSeconds);
+    if (valid && minimum) {
+        try {
+            createRangeEvent(
+                props.project,
+                laneId,
+                innerClassId,
+                state.startCell.timeSeconds,
+                endCell.timeSeconds,
+                () => '__preview__',
+                minimum.timeSeconds,
+            );
+        } catch {
+            valid = false;
+        }
+    }
+    return { start: state.startCell.timeSeconds, end: endCell.timeSeconds, valid };
+};
+const previewStyle = (laneId: string, innerClassId: string) => {
+    const preview = previewFor(laneId, innerClassId);
+    if (!preview) return {};
+    const left = viewportPercent(Math.min(preview.start, preview.end));
+    const right = viewportPercent(Math.max(preview.start, preview.end));
+    return {
+        left: `${Math.max(0, left)}%`,
+        right: `${Math.max(0, 100 - Math.min(100, right))}%`,
+    };
+};
+const visibleEvents = (lane: RangeLaneV1, innerClassId: string) =>
+    visibleRangeEvents(lane, innerClassId, viewport.value);
+type Endpoint = 'start' | 'end';
+interface HandleDragState {
+    id: number;
+    laneId: string;
+    innerClassId: string;
+    range: RangeEventV1;
+    endpoint: Endpoint;
+    element: HTMLButtonElement;
+    candidateCell: PointCell | null;
+}
+const handleDrag = ref<HandleDragState | null>(null);
+const previewRange = (range: RangeEventV1): RangeEventV1 => {
+    const active = handleDrag.value;
+    if (!active || active.range.id !== range.id || !active.candidateCell) return range;
+    return {
+        ...range,
+        ...(active.endpoint === 'start'
+            ? { startSeconds: active.candidateCell.timeSeconds }
+            : { endSeconds: active.candidateCell.timeSeconds }),
+    };
+};
+const isHandlePreview = (range: RangeEventV1) =>
+    handleDrag.value?.range.id === range.id && Boolean(handleDrag.value.candidateCell);
+const rangeStyle = (range: RangeEventV1) => {
+    const displayed = previewRange(range);
+    return {
+        left: `${Math.max(0, viewportPercent(displayed.startSeconds))}%`,
+        right: `${Math.max(0, 100 - Math.min(100, viewportPercent(displayed.endSeconds)))}%`,
+    };
+};
+const endpointVisible = (seconds: number) =>
+    seconds >= viewport.value.startSeconds && seconds <= viewport.value.endSeconds;
+const endpointStyle = (range: RangeEventV1, endpoint: Endpoint) => {
+    const displayed = previewRange(range);
+    const seconds = endpoint === 'start'
+        ? displayed.startSeconds
+        : displayed.endSeconds;
+    return { left: `${viewportPercent(seconds)}%` };
+};
+
+const activateCell = (
+    laneId: string,
+    innerClassId: string,
+    cell: PointCell | null,
+) => {
+    if (!cell) {
+        candidate.value = null;
+        report('当前 Tempo 区间还没有 BPM，请先输入 BPM。');
+        return;
+    }
+    candidate.value = { laneId, innerClassId, timeSeconds: cell.timeSeconds };
+};
+const activateInitialCandidate = (laneId: string, innerClassId: string) => {
+    if (isActiveCandidate(laneId, innerClassId)) return;
+    const cursor = props.playback.currentTimeSeconds;
+    const raw = cursor >= viewport.value.startSeconds && cursor <= viewport.value.endSeconds
+        ? cursor
+        : viewport.value.startSeconds;
+    activateCell(
+        laneId,
+        innerClassId,
+        rangeCellAtTime(raw, props.project, surfaceWidth(laneId, innerClassId)),
+    );
+};
+const pointFromSurface = (event: PointerEvent) => {
+    const element = event.currentTarget as HTMLElement;
+    const bounds = element.getBoundingClientRect();
+    const x = Math.max(0, Math.min(bounds.width, event.clientX - bounds.left));
+    const y = Math.max(0, Math.min(bounds.height, event.clientY - bounds.top));
+    return {
+        element,
+        x,
+        y,
+        cell: rangeCellAtTime(
+            editorXToTime(x, viewport.value, bounds.width),
+            props.project,
+            bounds.width,
+        ),
+    };
+};
+
+interface SurfacePointerState {
+    id: number;
+    laneId: string;
+    innerClassId: string;
+    surfaceKey: string;
+    element: HTMLElement;
+    button: number;
+    startX: number;
+    startViewport: PersistedTimelineViewport;
+    latestViewport: PersistedTimelineViewport;
+    moved: boolean;
+    pendingAtStart: boolean;
+}
+const surfacePointer = ref<SurfacePointerState | null>(null);
+const quickMenu = ref<{
+    surfaceKey: string;
+    x: number;
+    y: number;
+    timeSeconds: number;
+} | null>(null);
+const onSurfacePointerDown = (
+    event: PointerEvent,
+    laneId: string,
+    innerClassId: string,
+) => {
+    if (event.button !== 0 && event.button !== 2) return;
+    if ((event.target as HTMLElement).closest('button, input, select')) return;
+    quickMenu.value = null;
+    const point = pointFromSurface(event);
+    activateCell(laneId, innerClassId, point.cell);
+    surfacePointer.value = {
+        id: event.pointerId,
+        laneId,
+        innerClassId,
+        surfaceKey: surfaceKey(laneId, innerClassId),
+        element: point.element,
+        button: event.button,
+        startX: point.x,
+        startViewport: viewport.value,
+        latestViewport: viewport.value,
+        moved: false,
+        pendingAtStart: Boolean(pending.value),
+    };
+    point.element.setPointerCapture(event.pointerId);
+};
+const onSurfacePointerMove = (event: PointerEvent) => {
+    const active = surfacePointer.value;
+    if (!active) {
+        const element = event.currentTarget as HTMLElement;
+        const laneId = element.dataset.laneId;
+        const innerClassId = element.dataset.innerClassId;
+        if (laneId && innerClassId) activateCell(laneId, innerClassId, pointFromSurface(event).cell);
+        return;
+    }
+    if (active.id !== event.pointerId) return;
+    const point = pointFromSurface(event);
+    if (active.button === 2) {
+        if (active.pendingAtStart) return;
+        if (Math.abs(point.x - active.startX) >= EDITOR_CONTEXT_PAN_THRESHOLD_PX) {
+            active.moved = true;
+        }
+        if (active.moved) {
+            active.latestViewport = panEditorViewportByPixels(
+                active.startViewport,
+                props.project.track.durationSeconds,
+                point.x - active.startX,
+                point.element.getBoundingClientRect().width,
+            );
+            applyProject({
+                ...props.project,
+                workspace: { ...props.project.workspace, viewport: active.latestViewport },
+            }, false);
+        }
+        return;
+    }
+    activateCell(active.laneId, active.innerClassId, point.cell);
+};
+const clearSurfacePointer = () => {
+    const active = surfacePointer.value;
+    surfacePointer.value = null;
+    if (active?.element.hasPointerCapture(active.id)) {
+        active.element.releasePointerCapture(active.id);
+    }
+};
+const cancelPending = (message = '已取消待选范围。') => {
+    if (!pending.value) return;
+    pending.value = null;
+    report(message);
+};
+const cancelSurfacePointer = () => {
+    const active = surfacePointer.value;
+    if (!active) return;
+    if (active?.moved) {
+        applyProject({
+            ...props.project,
+            workspace: { ...props.project.workspace, viewport: active.startViewport },
+        });
+    }
+    if (active?.pendingAtStart) cancelPending();
+    clearSurfacePointer();
+    quickMenu.value = null;
+};
+const advanceRangeCreation = (laneId: string, innerClassId: string) => {
+    const cell = cellFor(laneId, innerClassId);
+    if (!cell) {
+        report('当前 Tempo 区间还没有可用网格。');
+        return;
+    }
+    const state = pending.value;
+    if (!state) {
+        const next = minimumEnd(laneId, innerClassId, cell.timeSeconds);
+        if (!next || next.timeSeconds <= cell.timeSeconds) {
+            report('此位置之后没有可用的范围终点。');
+            return;
+        }
+        pending.value = { laneId, innerClassId, startCell: cell };
+        report(`已选择起点 ${formatTime(cell.timeSeconds)}，请选择更晚的终点。`);
+        return;
+    }
+    if (state.laneId !== laneId || state.innerClassId !== innerClassId) {
+        report('请在同一范围分类中选择终点，或按 Esc 取消。');
+        return;
+    }
+    const minimum = minimumEnd(laneId, innerClassId, state.startCell.timeSeconds);
+    if (!minimum || cell.timeSeconds < minimum.timeSeconds) {
+        report('终点必须晚于起点至少一个当前网格单位。');
+        return;
+    }
+    try {
+        const result = createRangeEvent(
+            props.project,
+            laneId,
+            innerClassId,
+            state.startCell.timeSeconds,
+            cell.timeSeconds,
+            undefined,
+            minimum.timeSeconds,
+        );
+        pending.value = null;
+        applyProject(result.project);
+        report(`已创建 ${formatTime(result.event.startSeconds)} 至 ${formatTime(result.event.endSeconds)} 的范围。`);
+        focusRangeElement(result.event.id);
+    } catch (error) {
+        report(error instanceof Error ? error.message : '无法创建范围。');
+    }
+};
+const onSurfacePointerUp = (event: PointerEvent) => {
+    const active = surfacePointer.value;
+    if (!active || active.id !== event.pointerId) return;
+    const point = pointFromSurface(event);
+    if (active.button === 0) {
+        activateCell(active.laneId, active.innerClassId, point.cell);
+        advanceRangeCreation(active.laneId, active.innerClassId);
+    } else if (active.pendingAtStart) {
+        cancelPending();
+    } else if (active.moved) {
+        applyProject({
+            ...props.project,
+            workspace: { ...props.project.workspace, viewport: active.latestViewport },
+        });
+    } else {
+        quickMenu.value = {
+            surfaceKey: active.surfaceKey,
+            x: Math.min(point.x, Math.max(0, point.element.clientWidth - 170)),
+            y: Math.min(point.y, Math.max(0, point.element.clientHeight - 116)),
+            timeSeconds: editorXToTime(point.x, viewport.value, point.element.clientWidth),
+        };
+    }
+    clearSurfacePointer();
+};
+const onSurfacePointerLeave = (laneId: string, innerClassId: string) => {
+    if (surfacePointer.value || isPendingSurface(laneId, innerClassId)) return;
+    if (document.activeElement !== surfaceRefs.get(surfaceKey(laneId, innerClassId))) {
+        candidate.value = null;
+    }
+};
+
+const revealCandidate = (timeSeconds: number) => {
+    if (timeSeconds >= viewport.value.startSeconds && timeSeconds <= viewport.value.endSeconds) return;
+    applyProject({
+        ...props.project,
+        workspace: {
+            ...props.project.workspace,
+            viewport: centerEditorViewport(
+                viewport.value,
+                props.project.track.durationSeconds,
+                timeSeconds,
+            ),
+        },
+    });
+};
+const moveCandidate = (
+    laneId: string,
+    innerClassId: string,
+    direction: -1 | 1,
+) => {
+    activateInitialCandidate(laneId, innerClassId);
+    const current = candidate.value?.timeSeconds ?? viewport.value.startSeconds;
+    const cell = movePointCell(
+        current,
+        direction,
+        props.project,
+        surfaceWidth(laneId, innerClassId),
+    );
+    activateCell(laneId, innerClassId, cell);
+    if (cell) revealCandidate(cell.timeSeconds);
+};
+const switchCandidateRow = (
+    laneId: string,
+    innerClassId: string,
+    direction: -1 | 1,
+) => {
+    if (pending.value) {
+        report('请先完成或取消当前范围。');
+        return;
+    }
+    const rows = rangeLaneInnerClasses(props.project);
+    const index = rows.findIndex((entry) =>
+        entry.lane.id === laneId && entry.innerClass.id === innerClassId);
+    const target = rows[Math.max(0, Math.min(rows.length - 1, index + direction))];
+    if (!target) return;
+    const timeSeconds = candidate.value?.timeSeconds ?? viewport.value.startSeconds;
+    candidate.value = {
+        laneId: target.lane.id,
+        innerClassId: target.innerClass.id,
+        timeSeconds,
+    };
+    focusSurface(target.lane.id, target.innerClass.id);
+};
+const onSurfaceKeydown = (
+    event: KeyboardEvent,
+    laneId: string,
+    innerClassId: string,
+) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        activateInitialCandidate(laneId, innerClassId);
+        advanceRangeCreation(laneId, innerClassId);
+    } else if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
+        event.preventDefault();
+        moveCandidate(laneId, innerClassId, event.key === 'ArrowLeft' ? -1 : 1);
+    } else if (event.key === 'ArrowUp' || event.key === 'ArrowDown') {
+        event.preventDefault();
+        switchCandidateRow(laneId, innerClassId, event.key === 'ArrowUp' ? -1 : 1);
+    } else if (event.key === 'Home' || event.key === 'End') {
+        event.preventDefault();
+        const raw = event.key === 'Home' ? 0 : props.project.track.durationSeconds;
+        const cell = rangeCellAtTime(
+            raw,
+            props.project,
+            surfaceWidth(laneId, innerClassId),
+        );
+        activateCell(laneId, innerClassId, cell);
+        if (cell) revealCandidate(cell.timeSeconds);
+    } else if (event.key === 'ContextMenu' || (event.shiftKey && event.key === 'F10')) {
+        event.preventDefault();
+        if (pending.value) {
+            cancelPending();
+            return;
+        }
+        quickMenu.value = {
+            surfaceKey: surfaceKey(laneId, innerClassId),
+            x: surfaceWidth(laneId, innerClassId) / 2,
+            y: 20,
+            timeSeconds: candidate.value?.timeSeconds
+                ?? (viewport.value.startSeconds + viewport.value.endSeconds) / 2,
+        };
+    } else if (event.key === 'Escape') {
+        event.preventDefault();
+        cancelPending();
+        candidate.value = null;
+        quickMenu.value = null;
+        clearSurfacePointer();
+    }
+};
+
+let focusedRange: {
+    laneId: string;
+    innerClassId: string;
+    eventId: string;
+    startSeconds: number;
+    endSeconds: number;
+} | null = null;
+const focusRange = (
+    laneId: string,
+    innerClassId: string,
+    range: RangeEventV1,
+) => {
+    focusedRange = {
+        laneId,
+        innerClassId,
+        eventId: range.id,
+        startSeconds: range.startSeconds,
+        endSeconds: range.endSeconds,
+    };
+    candidate.value = { laneId, innerClassId, timeSeconds: range.startSeconds };
+    report(`已选择 ${formatTime(range.startSeconds)} 至 ${formatTime(range.endSeconds)} 的范围。`);
+};
+const removeRange = (
+    laneId: string,
+    innerClassId: string,
+    range: RangeEventV1,
+) => {
+    try {
+        candidate.value = { laneId, innerClassId, timeSeconds: range.startSeconds };
+        applyProject(deleteRangeEvent(props.project, laneId, range.id));
+        report(`已删除 ${formatTime(range.startSeconds)} 至 ${formatTime(range.endSeconds)} 的范围。`);
+        focusedRange = null;
+        focusSurface(laneId, innerClassId);
+    } catch (error) {
+        report(error instanceof Error ? error.message : '无法删除范围。');
+    }
+};
+const onRangeKeydown = (
+    event: KeyboardEvent,
+    laneId: string,
+    innerClassId: string,
+    range: RangeEventV1,
+) => {
+    if (event.key === 'Delete' || event.key === 'Backspace') {
+        event.preventDefault();
+        removeRange(laneId, innerClassId, range);
+    } else if (event.key === 'Escape') {
+        event.preventDefault();
+        focusSurface(laneId, innerClassId);
+    }
+};
+
+const beginHandleDrag = (
+    event: PointerEvent,
+    laneId: string,
+    innerClassId: string,
+    range: RangeEventV1,
+    endpoint: Endpoint,
+) => {
+    if (event.button !== 0) return;
+    const element = event.currentTarget as HTMLButtonElement;
+    handleDrag.value = {
+        id: event.pointerId,
+        laneId,
+        innerClassId,
+        range: { ...range },
+        endpoint,
+        element,
+        candidateCell: null,
+    };
+    element.setPointerCapture(event.pointerId);
+};
+const handleCellFromPointer = (event: PointerEvent, state: HandleDragState) => {
+    const surface = surfaceRefs.get(surfaceKey(state.laneId, state.innerClassId));
+    if (!surface) return null;
+    const bounds = surface.getBoundingClientRect();
+    const x = Math.max(0, Math.min(bounds.width, event.clientX - bounds.left));
+    return rangeCellAtTime(
+        editorXToTime(x, viewport.value, bounds.width),
+        props.project,
+        bounds.width,
+    );
+};
+const moveHandleDrag = (event: PointerEvent) => {
+    const state = handleDrag.value;
+    if (!state || state.id !== event.pointerId) return;
+    state.candidateCell = handleCellFromPointer(event, state);
+};
+const clearHandleDrag = () => {
+    const state = handleDrag.value;
+    handleDrag.value = null;
+    if (state?.element.hasPointerCapture(state.id)) {
+        state.element.releasePointerCapture(state.id);
+    }
+};
+const commitEndpoint = (
+    laneId: string,
+    innerClassId: string,
+    range: RangeEventV1,
+    endpoint: Endpoint,
+    cell: PointCell,
+) => {
+    const start = endpoint === 'start' ? cell.timeSeconds : range.startSeconds;
+    const end = endpoint === 'end' ? cell.timeSeconds : range.endSeconds;
+    const minimum = minimumEnd(laneId, innerClassId, start);
+    if (!minimum) {
+        report('此起点之后没有可用的范围终点。');
+        return false;
+    }
+    try {
+        applyProject(updateRangeEvent(
+            props.project,
+            laneId,
+            range.id,
+            start,
+            end,
+            minimum.timeSeconds,
+        ));
+        report(`范围${endpoint === 'start' ? '起点' : '终点'}已调整到 ${formatTime(cell.timeSeconds)}。`);
+        focusRangeElement(range.id);
+        return true;
+    } catch (error) {
+        report(error instanceof Error ? error.message : '无法调整范围端点。');
+        return false;
+    }
+};
+const finishHandleDrag = (event: PointerEvent) => {
+    const state = handleDrag.value;
+    if (!state || state.id !== event.pointerId) return;
+    const cell = state.candidateCell ?? handleCellFromPointer(event, state);
+    if (cell) commitEndpoint(
+        state.laneId,
+        state.innerClassId,
+        state.range,
+        state.endpoint,
+        cell,
+    );
+    clearHandleDrag();
+};
+const cancelHandleDrag = () => {
+    const state = handleDrag.value;
+    if (!state) return;
+    report('已取消端点调整，范围保持原值。');
+    clearHandleDrag();
+};
+const onHandleKeydown = (
+    event: KeyboardEvent,
+    laneId: string,
+    innerClassId: string,
+    range: RangeEventV1,
+    endpoint: Endpoint,
+) => {
+    if (event.key === 'Delete' || event.key === 'Backspace') {
+        event.preventDefault();
+        removeRange(laneId, innerClassId, range);
+        return;
+    }
+    if (event.key === 'Escape') {
+        event.preventDefault();
+        cancelHandleDrag();
+        focusRangeElement(range.id);
+        return;
+    }
+    if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
+    event.preventDefault();
+    const current = endpoint === 'start' ? range.startSeconds : range.endSeconds;
+    const cell = movePointCell(
+        current,
+        event.key === 'ArrowLeft' ? -1 : 1,
+        props.project,
+        surfaceWidth(laneId, innerClassId),
+    );
+    if (cell) commitEndpoint(laneId, innerClassId, range, endpoint, cell);
+};
+
+const menuSeek = (play: boolean) => {
+    const time = quickMenu.value?.timeSeconds;
+    quickMenu.value = null;
+    if (time === undefined) return;
+    void audioSession.seek(time).then(() => {
+        if (play && props.playback.state !== 'playing') return audioSession.togglePlayback();
+        return undefined;
+    });
+};
+const menuCenter = () => {
+    const time = quickMenu.value?.timeSeconds;
+    quickMenu.value = null;
+    if (time === undefined) return;
+    applyProject({
+        ...props.project,
+        workspace: {
+            ...props.project.workspace,
+            viewport: centerEditorViewport(
+                viewport.value,
+                props.project.track.durationSeconds,
+                time,
+            ),
+        },
+    });
+};
+
+const drawGrid = (canvas: HTMLCanvasElement) => {
+    const surface = canvas.parentElement;
+    if (!surface) return;
+    const bounds = surface.getBoundingClientRect();
+    const width = Math.max(1, bounds.width);
+    const height = Math.max(1, bounds.height);
+    const dpr = Math.max(1, window.devicePixelRatio || 1);
+    canvas.width = Math.max(1, Math.round(width * dpr));
+    canvas.height = Math.max(1, Math.round(height * dpr));
+    canvas.style.width = `${width}px`;
+    canvas.style.height = `${height}px`;
+    const context = canvas.getContext('2d');
+    if (!context) return;
+    context.setTransform(dpr, 0, 0, dpr, 0, 0);
+    context.clearRect(0, 0, width, height);
+    for (const line of generateTempoGrid(
+        props.project.tempoMap,
+        props.project.track.durationSeconds,
+        viewport.value,
+    )) {
+        const x = editorTimeToX(line.timeSeconds, viewport.value, width);
+        context.beginPath();
+        context.moveTo(Math.round(x) + 0.5, 0);
+        context.lineTo(Math.round(x) + 0.5, height);
+        context.strokeStyle = line.kind === 'measure'
+            ? 'rgba(255,255,255,.78)'
+            : 'rgba(255,255,255,.22)';
+        context.lineWidth = 1;
+        context.stroke();
+    }
+};
+const drawAllGrids = () => {
+    for (const canvas of gridCanvasRefs.values()) drawGrid(canvas);
+};
+const clearInteraction = () => {
+    cancelSurfacePointer();
+    cancelHandleDrag();
+    pending.value = null;
+    candidate.value = null;
+    quickMenu.value = null;
+    removalDialog.value = null;
+};
+
+watch(
+    () => [props.project.tempoMap, props.project.workspace.viewport, rangeLanes.value.length],
+    () => void nextTick(drawAllGrids),
+    { deep: true },
+);
+watch(
+    () => [viewport.value.startSeconds, viewport.value.endSeconds],
+    () => {
+        if (!focusedRange) return;
+        const visible = focusedRange.endSeconds >= viewport.value.startSeconds
+            && focusedRange.startSeconds <= viewport.value.endSeconds;
+        if (!visible) {
+            candidate.value = {
+                laneId: focusedRange.laneId,
+                innerClassId: focusedRange.innerClassId,
+                timeSeconds: focusedRange.startSeconds,
+            };
+            focusSurface(focusedRange.laneId, focusedRange.innerClassId);
+            focusedRange = null;
+        }
+    },
+);
+onMounted(() => {
+    resizeObserver = new ResizeObserver(() => drawAllGrids());
+    for (const surface of surfaceRefs.values()) resizeObserver.observe(surface);
+    window.addEventListener('blur', clearInteraction);
+    void nextTick(drawAllGrids);
+});
+onBeforeUnmount(() => {
+    clearInteraction();
+    resizeObserver?.disconnect();
+    window.removeEventListener('blur', clearInteraction);
+});
+</script>
+
+<style scoped>
+.range-workspace { position: relative; }
+.range-lane-card {
+    margin-top: 14px;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: inset 0 0 0 1px rgba(101,255,169,.28);
+}
+.range-lane-grid {
+    display: grid;
+    grid-template-columns: var(--editor-lane-name-width) var(--editor-inner-class-width) minmax(420px, 1fr);
+    grid-template-rows: repeat(var(--lane-rows), minmax(76px, auto));
+    min-width: 760px;
+}
+.range-lane-meta,
+.range-inner-class-cell,
+.range-dialog-actions { display: flex; align-items: center; }
+.range-lane-meta {
+    grid-column: 1;
+    grid-row: 1 / span var(--lane-rows);
+    align-items: stretch;
+    flex-direction: column;
+    gap: 8px;
+    padding: 12px;
+    border-right: 1px solid rgba(101,255,169,.18);
+    background: rgba(4,17,10,.82);
+}
+.range-lane-meta label { color: #8eaa9a; font-size: .78rem; }
+.range-lane-kind { color: #8fffc0; font-size: .78rem; letter-spacing: .06em; }
+.range-inner-class-cell {
+    grid-column: 2;
+    gap: 6px;
+    padding: 10px;
+    border-right: 1px solid rgba(101,255,169,.18);
+    border-bottom: 1px solid rgba(101,255,169,.12);
+    background: rgba(5,20,12,.78);
+}
+.range-inner-class-cell input { min-width: 0; width: 100%; }
+.range-delete-class { padding-inline: 7px; font-size: .76rem; }
+button,
+input,
+select {
+    border: 1px solid rgba(101,255,169,.48);
+    border-radius: 10px;
+    padding: 8px 11px;
+    color: #effff6;
+    background: rgba(7,24,15,.94);
+}
+button:hover:not(:disabled) { border-color: #65ffa9; background: rgba(19,69,42,.9); }
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+.range-surface:focus-visible { outline: 2px solid #65ffa9; outline-offset: 2px; }
+button:disabled { opacity: .4; cursor: not-allowed; }
+.range-surface {
+    position: relative;
+    grid-column: 3;
+    min-height: 76px;
+    overflow: hidden;
+    border-bottom: 1px solid rgba(101,255,169,.12);
+    background: rgba(0,0,0,.18);
+    cursor: crosshair;
+    touch-action: none;
+    user-select: none;
+}
+.range-grid-canvas { position: absolute; inset: 0; pointer-events: none; }
+.range-candidate {
+    position: absolute;
+    z-index: 2;
+    top: 8px;
+    bottom: 22px;
+    min-width: 5px;
+    border: 1px solid rgba(101,255,169,.78);
+    border-radius: 7px;
+    background: rgba(101,255,169,.09);
+    pointer-events: none;
+    transition: transform 120ms ease, background 120ms ease;
+}
+.range-preview {
+    position: absolute;
+    z-index: 3;
+    top: 15px;
+    bottom: 27px;
+    min-width: 4px;
+    border: 1px dashed #b8ffd6;
+    border-radius: 8px;
+    background: rgba(53,255,143,.2);
+    box-shadow: 0 0 16px rgba(53,255,143,.25);
+    pointer-events: none;
+}
+.range-preview.is-invalid { border-color: #ff9d90; background: rgba(255,100,90,.14); }
+.range-marker {
+    position: absolute;
+    z-index: 4;
+    top: 16px;
+    bottom: 29px;
+    min-width: 4px;
+    padding: 0 6px;
+    overflow: hidden;
+    border: 1px solid #b8ffd6;
+    border-radius: 8px;
+    color: #eafff2;
+    background: rgba(38,228,124,.42);
+    box-shadow: 0 0 14px rgba(53,255,143,.22);
+    font: .68rem ui-monospace, monospace;
+    white-space: nowrap;
+}
+.range-marker:hover,
+.range-marker:focus-visible { background: rgba(75,255,155,.62); box-shadow: 0 0 20px rgba(53,255,143,.5); }
+.range-marker.is-handle-preview {
+    border-style: dashed;
+    background: rgba(75,255,155,.3);
+}
+.range-handle {
+    position: absolute;
+    z-index: 6;
+    bottom: 2px;
+    width: 26px;
+    height: 24px;
+    padding: 0;
+    border-radius: 8px;
+    transform: translateX(-50%);
+    cursor: ew-resize;
+    touch-action: none;
+}
+.range-handle.start { color: #a8ffd0; }
+.range-handle.end { color: #eafff2; }
+.range-menu {
+    position: absolute;
+    z-index: 12;
+    display: grid;
+    min-width: 165px;
+    padding: 6px;
+    border: 1px solid rgba(101,255,169,.5);
+    border-radius: 12px;
+    background: rgba(2,10,6,.98);
+    box-shadow: 0 14px 40px rgba(0,0,0,.5);
+}
+.range-menu button { border: 0; text-align: left; }
+.range-dialog-backdrop {
+    position: fixed;
+    z-index: 80;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    padding: 20px;
+    background: rgba(0,0,0,.7);
+}
+.range-removal-dialog {
+    width: min(520px, 100%);
+    border: 1px solid rgba(101,255,169,.5);
+    border-radius: 18px;
+    padding: 24px;
+    color: #effff6;
+    background: #041009;
+    box-shadow: 0 20px 70px rgba(0,0,0,.65);
+}
+.range-removal-dialog h3 { margin: 0 0 10px; }
+.range-removal-dialog label { display: grid; gap: 6px; margin-top: 16px; }
+.range-dialog-actions { flex-wrap: wrap; gap: 8px; margin-top: 18px; }
+.range-dialog-error { color: #ffb0a8; }
+.danger { border-color: rgba(255,120,110,.7); color: #ffd4cf; }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+@media (prefers-reduced-motion: reduce) {
+    .range-candidate { transition: none; }
+}
+</style>
