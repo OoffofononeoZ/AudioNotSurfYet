@@ -9,7 +9,7 @@ upstream_docs:
   - "docs/architecture/editor/project-format-v1.md"
   - "docs/architecture/editor/interaction-contracts.md"
   - "docs/architecture/risk-register.md"
-next_action: "实现 E5 专项、dirty provisional 与 clean 35 步 canonical；owner 批准前 E6 保持 Planned"
+next_action: "owner 复核已登记的 35/35 canonical 与人工范围任务；批准前 E6 保持 Planned"
 ---
 
 # Editor E5 Eval Plan

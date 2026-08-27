@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/context/index.md"
   - "docs/delivery/test-strategy.md"
   - "docs/quality/eval-plan.md"
-next_action: "按已批准 AC-E501–AC-E505 实施 E5；E6 保持 Planned"
+next_action: "owner 复核 E5 35/35 canonical 与人工范围任务；批准前 E6 保持 Planned"
 ---
 
 # Working Agreements
@@ -155,3 +155,5 @@ E1 实现随后在不新增依赖、不修改 Analyzer session/cache schema 的�
 随后 E4 交付累计 21 项单选半透明 overlay、六类 Analyzer/Editor shared Canvas renderer、Buffer-first/去重 consumer、40ms exact cursor、三手柄、pointer-through 和单层错误隔离。dirty provisional 与 clean canonical 均 31/31 通过；clean run `E4-2026-08-27T07-21-59-209Z-c9e03ab9` 绑定 commit `c9e03ab9554aa5bac5649fa84e1d822f056ad0e2`，起止工作树干净，summary SHA-256 为 `790f7f76f113fad6f005992f8fd10d94b0b77451acd58717c8c221edd54628ff`。Chrome 测得 overlay/point 几何误差 `1 CSS px`、穿透点击反馈 `5.1ms`；本事实只形成 `in-review` evidence，不关闭 E4、不开放 E5。1,256.62 kB chunk warning 与 E6 Edge/10,000 事件门禁继续保留。
 
 同日，`project-owner` 明确批准 E4 canonical evidence、21 项分析叠加、三手柄、pointer-through 与错误隔离结果，并同意关闭 E4、开放 E5。R-024、R-025、R-027 仍保持 `Open`，等待 E5 range 与 E6 双浏览器、资源、无障碍门禁；不从本次批准推断 E6 已开放。
+
+随后 E5 range lane/class、两阶段创建、preview/取消、端点 pointer/keyboard 调整与 pointercancel 回滚、半开重叠、右键优先级和 point/range 持久化已提交。dirty provisional 与 clean canonical 均 35/35 通过；clean run `E5-2026-08-27T11-03-22-177Z-78124177` 绑定 commit `781241772e05186e2fe0d006ed6ddd8bceded7af`，起止工作树干净，summary SHA-256 为 `6928f75cbdeb6d77e54c81b3547f7caee0b39d4c6881884b1d1d7065f3dde1b0`。Chrome 测得 range 反馈 `35.5ms`，1024/1280/1920 的 range/timeline/overlay 几何误差均 `1 CSS px`；本事实只形成 `in-review` evidence，不关闭 E5、不开放 E6。1,281.63 kB chunk warning 与 E6 Edge/10,000 事件/资源/无障碍门禁继续保留。

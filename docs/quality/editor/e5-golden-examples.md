@@ -6,7 +6,7 @@ upstream_docs:
   - "docs/quality/editor/e5-eval-plan.md"
   - "docs/architecture/editor/project-format-v1.md"
   - "docs/architecture/editor/interaction-contracts.md"
-next_action: "生成并核对 editor-e5-ranges fixture、重叠矩阵和端点交互 golden"
+next_action: "owner 使用已生成 fixture 复核重叠矩阵、端点交互和 round-trip"
 ---
 
 # Editor E5 Golden Examples

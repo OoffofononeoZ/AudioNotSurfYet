@@ -5,7 +5,7 @@ last_reviewed: 2026-08-27
 upstream_docs:
   - "docs/architecture/system-design.md"
   - "docs/architecture/interface-contracts.md"
-next_action: "以 E4 overlay/consumer 与 E6 双浏览器/10,000 事件复核 R-024、R-025、R-027；E6 复核 R-022/R-023"
+next_action: "owner 复核 E5 range evidence；E6 继续以双浏览器/10,000 事件复核 R-022–R-025、R-027"
 ---
 
 # Risk Register
@@ -36,9 +36,9 @@ next_action: "以 E4 overlay/consumer 与 E6 双浏览器/10,000 事件复核 R-
 | R-020 | Meyda 5.6.3 `spectralFlux` 提取器引用未声明变量 `x` | High | High | 固定 previous/current frame 调用抛 `ReferenceError: x is not defined` | ADR-0005 项目 Flux 已实现；公式/首帧/静音/exact cursor golden 与 M8 clean canonical 28/28 通过，保留上游异常事实 | 产品阻断已缓解；Meyda 缺陷未修复，依赖升级时必须重新对照 | project-owner | Mitigated |
 | R-021 | Analyzer sticky、播放器层级、pressed 状态或内层滚动条破坏可用性与视觉一致性 | Medium | Medium | sticky 与 Header 间距过大；歌曲列表被遮挡；Windows Chrome 按钮保持按压外观；表格显示系统默认滚动条 | M8 Slice 0、macOS Chrome 多视口 canonical 与 owner Windows Chrome 人工签字均通过 | 相关交互或样式变化后重新执行多视口自动化与 Windows Chrome 补偿复核 | project-owner | Closed |
 | R-022 | Editor 循环策略或旧 route cleanup 泄漏到其他页面/歌曲 | Medium | High | 离开后仍 repeat-one、快速换歌被旧 release 改写、出现第二 AudioContext/时钟 | ADR-0006 tokenized playback lease；E1 18/18 canonical 覆盖 acquire/release/ended/invalid target 并获 2026-08-26 owner 签字；E6 仍在 Chrome/Edge 做 20 次资源循环 | lease 失效时强制回到 queue-next；任何双 engine/clock 为阻断，资源实现变化时重开 | project-owner | Mitigated |
-| R-023 | 草稿覆盖、损坏导入或错误歌曲身份破坏当前工程 | Medium | High | 异歌静默覆盖、未知 schema 被接受、hash/时长不匹配仍应用、quota 后旧草稿丢失 | ADR-0007 strict codec + content hash + 独立原子 draft；E1 18/18 canonical 与 owner 签字覆盖 round-trip、unknown/invalid/hash/quota/abort/跨歌三选项；E5 回归 range | 失败始终保留内存工程与旧 durable draft；schema/import/draft 变化时重开 | project-owner | Mitigated |
-| R-024 | 波形、tempo、事件与 overlay 在 zoom/DPR/resize 下错位 | Medium | High | 同一时间各层 x 差超过 1 CSS px、seek/marker 命中偏移 | ADR-0008/0009 共享 geometry；E3 waveform/point 误差 0 CSS px；E4 clean Chrome overlay/point 误差 1 CSS px并验证三视口；E6 双浏览器回归 | 单层不得私有化 viewport；超过 1px 时停止后续 annotation evidence | project-owner | Open |
-| R-025 | 大量事件 DOM、右键状态或键盘路径造成性能/可访问性回归 | Medium | High | 输入反馈 >100ms、Editor 归因长任务 >50ms、遗留 pressed/capture/menu、键盘无法完成核心任务 | Canvas 背景 + viewport-visible event DOM、4px pointer 状态机、统一 cleanup；E3 point Chrome 反馈 28.5ms并验证键盘/可见 DOM；E5 覆盖 range，E6 覆盖 10,000 事件与辅助技术 | 降低可见 DOM/绘制细节但不降低秒数事实；核心键盘缺失阻断 E6 | project-owner | Open |
+| R-023 | 草稿覆盖、损坏导入或错误歌曲身份破坏当前工程 | Medium | High | 异歌静默覆盖、未知 schema 被接受、hash/时长不匹配仍应用、quota 后旧草稿丢失 | ADR-0007 strict codec + content hash + 独立原子 draft；E1 18/18 canonical 与 owner 签字覆盖 round-trip、unknown/invalid/hash/quota/abort/跨歌三选项；E5 35/35 canonical 回归 point/range JSON、draft 和 invalid overlap 原子拒绝 | 失败始终保留内存工程与旧 durable draft；schema/import/draft 变化时重开 | project-owner | Mitigated |
+| R-024 | 波形、tempo、事件与 overlay 在 zoom/DPR/resize 下错位 | Medium | High | 同一时间各层 x 差超过 1 CSS px、seek/marker 命中偏移 | ADR-0008/0009 共享 geometry；E3 waveform/point 误差 0 CSS px；E4 overlay/point 与 E5 range/timeline/overlay clean Chrome 三视口误差均 1 CSS px；E6 双浏览器回归 | 单层不得私有化 viewport；超过 1px 时停止后续 annotation evidence | project-owner | Open |
+| R-025 | 大量事件 DOM、右键状态或键盘路径造成性能/可访问性回归 | Medium | High | 输入反馈 >100ms、Editor 归因长任务 >50ms、遗留 pressed/capture/menu、键盘无法完成核心任务 | Canvas 背景 + viewport-visible event DOM、4px pointer 状态机、统一 cleanup；E3 point Chrome 反馈 28.5ms；E5 range Chrome 反馈 35.5ms并验证两阶段创建、键盘、quick menu、lost capture 与 pointercancel 回滚；E6 覆盖 10,000 事件与辅助技术 | 降低可见 DOM/绘制细节但不降低秒数事实；核心键盘缺失阻断 E6 | project-owner | Open |
 | R-026 | BPM 误识别或低置信度被写成用户事实 | Medium | Medium | silence/歧义输入自动填入错误 BPM、用户编辑值被异步结果覆盖 | 同 Worker retained PCM、typed reliable/low-confidence、仅唯一空且未编辑 segment 可写；E2 golden 覆盖 silence、歧义、60/100/128/小数与 stale，22/22 canonical 与 2026-08-27 owner 批准通过 | 低置信度保持空并提示手动输入；算法、阈值或第三方依赖变化时重开 | project-owner | Mitigated |
 | R-027 | Analyzer/Editor 争用 active features、Worker retained PCM 或 current cache | Medium | High | Editor 结果显示到 Analyzer、旧 generation 覆盖、返回 Analyzer 卡片丢失、出现第二 Worker | ADR-0006 consumer lease + existing generation/identity；Editor 不写 Analyzer workspace；E4 clean canonical 覆盖 Buffer-first/去重、快速换特征最终一致、stale/error retry 和 Analyzer renderer 回归；E6 验证单 Worker 与资源释放 | 允许返回 Analyzer 后部分重算，不允许错误 identity 或 workspace 改写 | project-owner | Open |
 

@@ -6,7 +6,7 @@ upstream_docs:
   - "docs/delivery/editor/execution-plan.md"
   - "docs/delivery/editor/acceptance-criteria.md"
   - "docs/delivery/editor/test-strategy.md"
-next_action: "实施 E5 range annotation；canonical 与 owner 批准前 E6 保持 Planned"
+next_action: "owner 复核 E5 35/35 canonical 与人工范围任务；批准前 E6 保持 Planned"
 ---
 
 # Editor E1–E6 Milestone Plan
@@ -75,9 +75,9 @@ next_action: "实施 E5 range annotation；canonical 与 owner 批准前 E6 保�
 
 ### E5
 
-- [ ] AC-E501–AC-E505 覆盖创建、预览、取消、调整、删除和键盘。
-- [ ] 半开区间、最短单位、相邻允许和重叠矩阵通过。
-- [ ] pointercancel/blur/route rollback 与 JSON/draft/import 安全通过。
+- [x] AC-E501–AC-E505 自动化覆盖创建、预览、取消、调整、删除和键盘；clean canonical 35/35 通过。
+- [x] 半开区间、最短单位、相邻允许和重叠矩阵通过。
+- [x] pointercancel/blur/route rollback 与 JSON/draft/import 安全通过。
 - [ ] owner 批准 E5 evidence；只开放 E6。
 
 ### E6
@@ -108,7 +108,7 @@ next_action: "实施 E5 range annotation；canonical 与 owner 批准前 E6 保�
 - E4：`Complete`。
 - E5：`In Progress`。
 - E6：`Planned`。
-- 当前唯一下一门禁：E5 实现、clean canonical 与 owner evidence 批准。
+- 当前唯一下一门禁：owner 完成 E5 人工范围任务并批准 evidence。
 
 ## 6. Delivery Approval
 
@@ -127,3 +127,5 @@ next_action: "实施 E5 range annotation；canonical 与 owner 批准前 E6 保�
 随后 E4 clean canonical `E4-2026-08-27T07-21-59-209Z-c9e03ab9` 在实现 commit `c9e03ab9554aa5bac5649fa84e1d822f056ad0e2` 上 31/31 通过；overlay 几何误差 `1 CSS px`、穿透点击反馈 `5.1ms`。自动化退出清单前三项已满足；owner evidence 批准仍未完成，因此 E4 保持 `In Progress`、E5 保持 `Planned`。
 
 同日，owner 明确批准 E4 canonical evidence、21 项分析叠加、三手柄、pointer-through 与错误隔离结果。E4 据此改为 `Complete`，E5 改为 `In Progress`，E6 保持 `Planned`。
+
+随后 E5 实现 commit `781241772e05186e2fe0d006ed6ddd8bceded7af` 交付 range lane/class、两阶段创建、preview/取消、端点调整与回滚、半开重叠、键盘和持久化。clean canonical `E5-2026-08-27T11-03-22-177Z-78124177` 35/35 通过，summary SHA-256 为 `6928f75cbdeb6d77e54c81b3547f7caee0b39d4c6881884b1d1d7065f3dde1b0`。自动化退出项已满足；owner evidence 批准仍未完成，因此 E5 保持 `In Progress`、E6 保持 `Planned`。
