@@ -4,7 +4,7 @@ owner: "project-owner"
 last_reviewed: 2026-08-27
 upstream_docs:
   - "docs/context/index.md"
-next_action: "以 E3 owner task 复核 point、inner class、adaptive grid 与 viewport-visible DOM 术语"
+next_action: "随 E4 实现登记 overlay、renderer adapter 与 pointer-through 代码事实"
 ---
 
 # Glossary

@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/product/scope.md"
   - "docs/architecture/system-design.md"
   - "docs/delivery/execution-plan.md"
-next_action: "按 DEC-027 复核 E3 canonical evidence；E4 等待 owner 审批"
+next_action: "按已批准 ADR-0009 实施 E4 shared renderer 与 pointer-through overlay"
 ---
 
 # Decision Registry

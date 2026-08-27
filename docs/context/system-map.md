@@ -4,7 +4,7 @@ owner: "project-owner"
 last_reviewed: 2026-08-27
 upstream_docs:
   - "docs/context/index.md"
-next_action: "owner 复核 E3 point workspace；批准前不接入 E4 overlay"
+next_action: "实现并验证 E4 shared renderer、overlay consumer 与 pointer-through"
 ---
 
 # System Map

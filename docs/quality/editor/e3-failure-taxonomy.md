@@ -1,12 +1,12 @@
 ---
-status: in-review
+status: approved
 owner: "project-owner"
 last_reviewed: 2026-08-27
 upstream_docs:
   - "docs/quality/editor/e3-eval-plan.md"
   - "docs/quality/editor/failure-taxonomy.md"
   - "docs/architecture/risk-register.md"
-next_action: "owner 人工复核若发现失败，按 EFT-POINT–EFT-VISIBLE-DOM 分类并保持 E3 In Progress"
+next_action: "E4/E6 回归 point、pointer、focus 与 visible-DOM 失败分类"
 ---
 
 # Editor E3 Failure Taxonomy

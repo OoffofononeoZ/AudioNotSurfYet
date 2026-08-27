@@ -8,7 +8,7 @@
 - FFmpeg：8.1.2；只用于生成和检查受控 WAV/MP3/FLAC fixture。
 - 当前检测到 Google Chrome 151.0.7922.174 与 Microsoft Edge 151.0.4129.107；`npm run test:e2e:edge` 使用真实 `msedge` channel，浏览器缺失时仍以退出码 2 报告 `blocked`。
 
-M3–M11 不建设 CI。下列命令当前均为本地门禁；正式证据要求在干净 commit 上复跑。M3–M11 与 Editor E1/E2 canonical 均已获批准；E3 clean canonical 已通过但当前仍为 `In Progress / in-review`。M5 Chrome 原生权限、M7 学习任务、M8 Windows Chrome 界面稳定化、M9 导航栏视觉/学习清单、M11 Edge 最终加固和 E1 原生工程流程均由 owner 单独签字；不可自动化路径的事实仍需在后续 readiness 中披露。
+M3–M11 不建设 CI。下列命令当前均为本地门禁；正式证据要求在干净 commit 上复跑。M3–M11 与 Editor E1–E3 canonical 均已获批准；E4 当前开放实施。M5 Chrome 原生权限、M7 学习任务、M8 Windows Chrome 界面稳定化、M9 导航栏视觉/学习清单、M11 Edge 最终加固和 E1 原生工程流程均由 owner 单独签字；不可自动化路径的事实仍需在后续 readiness 中披露。
 
 当前 `npm audit` 在安全补丁更新后剩余 1 项 low：Vite 依赖的 esbuild 0.27.3 在 Windows 开发服务器场景存在本地任意文件读取风险。仓库目标验证机为 macOS，开发服务器不得暴露到不受信网络；依赖升级提供修复版本后复核。该缺口不被描述为已修复或生产 readiness。
 
