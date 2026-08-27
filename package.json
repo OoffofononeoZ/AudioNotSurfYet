@@ -39,6 +39,8 @@
     "test:e2:integration": "vitest run tests/editor/e2-timeline-tempo.integration.test.ts tests/editor/e1-foundation.integration.test.ts tests/analysis/m6-coordinator.integration.test.ts",
     "test:e3:unit": "vitest run tests/editor/e3-point-annotation-unit.test.ts",
     "test:e3:integration": "vitest run tests/editor/e3-point-annotation.integration.test.ts",
+    "test:e4:unit": "vitest run tests/editor/e4-overlay-unit.test.ts",
+    "test:e4:integration": "vitest run tests/editor/e4-overlay.integration.test.ts",
     "test:docs": "node tests/docs/validate-docs.mjs",
     "test:harness": "node tests/harness/verify-failure-detection.mjs",
     "test:e2e": "playwright test --project=chrome",
@@ -56,6 +58,7 @@
     "test:e2e:e1": "playwright test tests/e2e/e1-editor.spec.ts --project=chrome",
     "test:e2e:e2": "playwright test tests/e2e/e2-editor.spec.ts --project=chrome",
     "test:e2e:e3": "playwright test tests/e2e/e3-editor.spec.ts --project=chrome",
+    "test:e2e:e4": "playwright test tests/e2e/e4-editor.spec.ts --project=chrome",
     "test:e2e:edge": "node tests/scripts/run-edge.mjs",
     "fixtures:generate": "node --experimental-strip-types tests/fixtures/generate-fixtures.ts",
     "fixtures:golden": "node --experimental-strip-types tests/analysis/generate-golden.ts",
@@ -72,6 +75,8 @@
     "fixtures:e2:golden:update": "node --experimental-strip-types tests/analysis/generate-e2-tempo-golden.ts --write",
     "fixtures:e3:golden": "node --experimental-strip-types tests/analysis/generate-e3-point-golden.ts",
     "fixtures:e3:golden:update": "node --experimental-strip-types tests/analysis/generate-e3-point-golden.ts --write",
+    "fixtures:e4:golden": "node --experimental-strip-types tests/analysis/generate-e4-overlay-golden.ts",
+    "fixtures:e4:golden:update": "node --experimental-strip-types tests/analysis/generate-e4-overlay-golden.ts --write",
     "eval:m3": "node tests/scripts/run-m3-eval.mjs",
     "eval:m3:provisional": "node tests/scripts/run-m3-eval.mjs --provisional",
     "eval:m4": "node tests/scripts/run-m4-eval.mjs",
@@ -95,7 +100,9 @@
     "eval:e2": "node tests/scripts/run-e2-eval.mjs",
     "eval:e2:provisional": "node tests/scripts/run-e2-eval.mjs --provisional",
     "eval:e3": "node tests/scripts/run-e3-eval.mjs",
-    "eval:e3:provisional": "node tests/scripts/run-e3-eval.mjs --provisional"
+    "eval:e3:provisional": "node tests/scripts/run-e3-eval.mjs --provisional",
+    "eval:e4": "node tests/scripts/run-e4-eval.mjs",
+    "eval:e4:provisional": "node tests/scripts/run-e4-eval.mjs --provisional"
   },
   "dependencies": {
     "@chenglou/pretext": "^0.0.6",

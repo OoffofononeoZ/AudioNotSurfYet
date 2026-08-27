@@ -5,9 +5,11 @@ import type {
     AnalysisCoordinator,
 } from '../analysis/analysisCoordinator';
 import type {
+    AnalysisCursorValueResult,
     AnalysisCoordinatorSnapshot,
     AnalysisListener,
     AnalysisSeries,
+    FeatureId,
     TempoEstimateResult,
 } from '../analysis/types';
 import type {
@@ -35,6 +37,7 @@ import type {
     EditorTrackValidationContext,
 } from './types';
 import { useEstimatedBpm } from './tempoMap';
+import { editorOverlayFeatureIds } from './overlay';
 
 type AudioSessionStore = ReturnType<typeof useAudioSessionStore>;
 type EditorSessionListener = (snapshot: EditorSessionSnapshot) => void;
@@ -68,6 +71,12 @@ const cloneSnapshot = (snapshot: EditorSessionSnapshot): EditorSessionSnapshot =
         ? cloneEnvelope(snapshot.conflictingDraft)
         : null,
 });
+
+const sameFeatureIds = (
+    left: readonly FeatureId[],
+    right: readonly FeatureId[],
+): boolean => left.length === right.length
+    && left.every((featureId, index) => featureId === right[index]);
 
 export interface EditorSessionControllerOptions {
     audioSession: AudioSessionService;
@@ -118,7 +127,9 @@ export class EditorSessionController {
     private analysisLease: AnalysisConsumerLease | null = null;
     private unsubscribeAnalysis: (() => void) | null = null;
     private tempoRequestRevision = 0;
-    private autoTempoStartedForGeneration: number | null = null;
+    private baseAnalysisHandledForRoute = -1;
+    private overlayActivationReady = false;
+    private lastReadyBufferSeries: AnalysisSeries | null = null;
     private routeGeneration = 0;
     private saveTimer: ReturnType<typeof setTimeout> | null = null;
     private pendingProject: EditorProjectV1 | null = null;
@@ -171,8 +182,21 @@ export class EditorSessionController {
         return structuredClone(this.analysisSnapshot);
     }
 
-    getAnalysisSeries(featureId: 'buffer'): AnalysisSeries | null {
-        return this.analysisLease?.getSeries(featureId) ?? null;
+    getAnalysisSeries(featureId: FeatureId): AnalysisSeries | null {
+        return this.analysisLease?.getSeries(featureId)
+            ?? (featureId === 'buffer' ? this.lastReadyBufferSeries : null);
+    }
+
+    requestAnalysisCursorValue(
+        featureId: FeatureId,
+        timeSeconds: number,
+    ): Promise<AnalysisCursorValueResult | null> {
+        return this.analysisLease?.requestCursorValue(featureId, timeSeconds)
+            ?? Promise.resolve(null);
+    }
+
+    retryOverlayAnalysis(): void {
+        void this.syncOverlayAnalysis(true);
     }
 
     requestTempoEstimate(): Promise<TempoEstimateResult | null> {
@@ -385,6 +409,7 @@ export class EditorSessionController {
         });
         this.queueSave(candidate, true);
         await this.flush();
+        this.restartEditorAnalysis();
         return 'imported';
     }
 
@@ -403,9 +428,10 @@ export class EditorSessionController {
         if (!context || this.snapshot.state !== 'ready') return;
         const tempoChanged = JSON.stringify(project.tempoMap)
             !== JSON.stringify(this.snapshot.project?.tempoMap ?? []);
+        const overlayChanged = project.workspace.overlay.featureId
+            !== this.snapshot.project?.workspace.overlay.featureId;
         if (tempoChanged) {
             this.tempoRequestRevision += 1;
-            this.autoTempoStartedForGeneration = null;
         }
         const candidate = validateEditorProjectV1({
             ...project,
@@ -423,6 +449,7 @@ export class EditorSessionController {
             } : {}),
         });
         this.queueSave(candidate, immediate);
+        if (overlayChanged) void this.syncOverlayAnalysis();
     }
 
     async flush(): Promise<void> {
@@ -568,11 +595,13 @@ export class EditorSessionController {
 
     private releaseLeases(): void {
         this.tempoRequestRevision += 1;
-        this.autoTempoStartedForGeneration = null;
         this.unsubscribeAnalysis?.();
         this.unsubscribeAnalysis = null;
         this.analysisLease?.release();
         this.analysisLease = null;
+        this.lastReadyBufferSeries = null;
+        this.baseAnalysisHandledForRoute = -1;
+        this.overlayActivationReady = false;
         this.playbackLease?.release();
         this.playbackLease = null;
     }
@@ -583,18 +612,74 @@ export class EditorSessionController {
         this.unsubscribeAnalysis?.();
         this.unsubscribeAnalysis = lease.subscribe((snapshot) => {
             this.analysisSnapshot = snapshot;
+            if (snapshot.readyFeatureIds.includes('buffer')) {
+                this.lastReadyBufferSeries = lease.getSeries('buffer')
+                    ?? this.lastReadyBufferSeries;
+            }
             const next = structuredClone(snapshot);
             for (const listener of this.analysisListeners) listener(next);
             if (
                 snapshot.state === 'ready'
                 && snapshot.readyFeatureIds.includes('buffer')
-                && this.autoTempoStartedForGeneration !== snapshot.generation
+                && snapshot.activeFeatureIds.length === 1
+                && snapshot.activeFeatureIds[0] === 'buffer'
+                && this.baseAnalysisHandledForRoute !== routeGeneration
             ) {
-                this.autoTempoStartedForGeneration = snapshot.generation;
-                void this.runAutomaticTempoEstimate(routeGeneration);
+                this.baseAnalysisHandledForRoute = routeGeneration;
+                void this.finishBaseAnalysis(routeGeneration);
+                return;
+            }
+            if (
+                this.overlayActivationReady
+                && snapshot.state === 'ready'
+                && !sameFeatureIds(
+                    snapshot.activeFeatureIds,
+                    editorOverlayFeatureIds(
+                        this.snapshot.project?.workspace.overlay.featureId
+                            ?? null,
+                    ),
+                )
+            ) {
+                void this.syncOverlayAnalysis();
             }
         });
         void lease.setActiveFeatures(['buffer']);
+    }
+
+    private restartEditorAnalysis(): void {
+        this.baseAnalysisHandledForRoute = -1;
+        this.overlayActivationReady = false;
+        this.lastReadyBufferSeries = null;
+        this.startEditorAnalysis(this.routeGeneration);
+    }
+
+    private async finishBaseAnalysis(routeGeneration: number): Promise<void> {
+        await this.runAutomaticTempoEstimate(routeGeneration);
+        if (routeGeneration !== this.routeGeneration || this.disposed) return;
+        this.overlayActivationReady = true;
+        await this.syncOverlayAnalysis();
+    }
+
+    private async syncOverlayAnalysis(force = false): Promise<void> {
+        const lease = this.analysisLease;
+        const featureId = this.snapshot.project?.workspace.overlay.featureId ?? null;
+        if (
+            !lease
+            || this.snapshot.state !== 'ready'
+            || !this.overlayActivationReady
+        ) return;
+        if (featureId && featureId !== 'buffer' && !this.lastReadyBufferSeries) {
+            return;
+        }
+        const activeFeatureIds = editorOverlayFeatureIds(featureId);
+        if (
+            !force
+            && sameFeatureIds(
+                this.analysisSnapshot.activeFeatureIds,
+                activeFeatureIds,
+            )
+        ) return;
+        await lease.setActiveFeatures(activeFeatureIds);
     }
 
     private async runAutomaticTempoEstimate(

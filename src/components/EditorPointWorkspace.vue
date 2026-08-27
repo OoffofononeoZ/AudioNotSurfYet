@@ -15,6 +15,16 @@
             {{ liveMessage || `当前 ${pointLanes.length} 条点轨道、${pointCount} 个标记` }}
         </p>
 
+        <EditorAnalysisOverlay
+            :project="project"
+            :playback="playback"
+            :analysis="analysis"
+            :series="overlaySeries"
+            :exact-value="overlayExactValue"
+            @update-project="applyProject"
+            @retry="emit('retryOverlay')"
+        />
+
         <div v-if="pointLanes.length === 0 && rangeLanes.length === 0" class="empty-workspace">
             <strong>还没有标记轨道</strong>
             <span>点击“新增点标记轨道”开始。每条新轨道会包含一个 default 分类。</span>
@@ -211,7 +221,13 @@ import {
     watch,
     type ComponentPublicInstance,
 } from 'vue';
+import EditorAnalysisOverlay from './EditorAnalysisOverlay.vue';
 import { useAudioSessionService } from '../audio/audioSessionService';
+import type {
+    AnalysisCoordinatorSnapshot,
+    AnalysisCursorValueResult,
+    AnalysisSeries,
+} from '../analysis/types';
 import {
     addPointInnerClass,
     createPointEvent,
@@ -248,10 +264,14 @@ import type { PersistedTimelineViewport } from '../types/session';
 const props = defineProps<{
     project: EditorProjectV1;
     playback: PlaybackSnapshot;
+    analysis: AnalysisCoordinatorSnapshot;
+    overlaySeries: AnalysisSeries | null;
+    overlayExactValue: AnalysisCursorValueResult | null;
 }>();
 
 const emit = defineEmits<{
     updateProject: [project: EditorProjectV1, immediate: boolean];
+    retryOverlay: [];
 }>();
 
 const audioSession = useAudioSessionService();
@@ -1038,6 +1058,7 @@ onBeforeUnmount(() => {
 
 <style scoped>
 .point-workspace {
+    position: relative;
     margin-top: 20px;
     border: 1px solid rgba(72, 255, 151, .28);
     border-radius: 24px;

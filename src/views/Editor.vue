@@ -109,14 +109,18 @@
                 <EditorPointWorkspace
                     :project="snapshot.project"
                     :playback="playback"
+                    :analysis="analysisSnapshot"
+                    :overlay-series="overlaySeries"
+                    :overlay-exact-value="overlayExactValue"
                     @update-project="updateProject"
+                    @retry-overlay="controller.retryOverlayAnalysis()"
                 />
 
                 <section class="future-panel" aria-label="Editor 后续工作区">
                     <div>
-                        <p class="kicker">E4–E5</p>
-                        <h2>分析叠加与范围事件</h2>
-                        <p>当前 E3 只开放点标记；范围事件数据保持只读，叠加层与范围编辑仍等待后续门禁。</p>
+                        <p class="kicker">E5</p>
+                        <h2>范围事件</h2>
+                        <p>点标记与分析叠加已开放；范围事件数据保持只读，创建与调整将在 E5 开放。</p>
                     </div>
                 </section>
             </template>
@@ -142,6 +146,10 @@ import { useEditorSessionController } from '../editor/editorSessionController';
 import { useAudioSessionStore } from '../stores/audioSessionStore';
 import EditorTimeline from '../components/EditorTimeline.vue';
 import EditorPointWorkspace from '../components/EditorPointWorkspace.vue';
+import type {
+    AnalysisCursorValueResult,
+    FeatureId,
+} from '../analysis/types';
 import type { EditorProjectV1 } from '../editor/types';
 
 const route = useRoute();
@@ -162,6 +170,20 @@ const bufferSeries = computed(() => {
     void analysisSnapshot.value.readyFeatureIds;
     return controller.getAnalysisSeries('buffer');
 });
+const overlayFeatureId = computed<FeatureId | null>(() =>
+    snapshot.value.project?.workspace.overlay.featureId ?? null);
+const overlaySeries = computed(() => {
+    void analysisSnapshot.value.generation;
+    void analysisSnapshot.value.readyFeatureIds;
+    return overlayFeatureId.value
+        ? controller.getAnalysisSeries(overlayFeatureId.value)
+        : null;
+});
+const overlayExactValue = ref<AnalysisCursorValueResult | null>(null);
+const CURSOR_REQUEST_INTERVAL_MS = 40;
+let cursorTimer: ReturnType<typeof setTimeout> | null = null;
+let lastCursorRequestAt = 0;
+let cursorRequestRevision = 0;
 const codecRegistry = new EditorFormatCodecRegistry();
 const codecs = codecRegistry.list();
 const codecId = ref('json-v1');
@@ -173,6 +195,48 @@ const returnPath = typeof historyBack === 'string'
     : '/';
 
 const playback = computed(() => sessionStore.playback);
+
+const performOverlayCursorRequest = async () => {
+    const featureId = overlayFeatureId.value;
+    if (
+        !featureId
+        || analysisSnapshot.value.state !== 'ready'
+        || !analysisSnapshot.value.readyFeatureIds.includes(featureId)
+    ) {
+        overlayExactValue.value = null;
+        return;
+    }
+    lastCursorRequestAt = performance.now();
+    const revision = ++cursorRequestRevision;
+    const generation = analysisSnapshot.value.generation;
+    const result = await controller.requestAnalysisCursorValue(
+        featureId,
+        playback.value.currentTimeSeconds,
+    );
+    if (
+        revision === cursorRequestRevision
+        && featureId === overlayFeatureId.value
+        && generation === analysisSnapshot.value.generation
+    ) {
+        overlayExactValue.value = result;
+    }
+};
+
+const requestOverlayCursorValue = (immediate = false) => {
+    if (cursorTimer) {
+        clearTimeout(cursorTimer);
+        cursorTimer = null;
+    }
+    const elapsed = performance.now() - lastCursorRequestAt;
+    if (immediate || elapsed >= CURSOR_REQUEST_INTERVAL_MS) {
+        void performOverlayCursorRequest();
+        return;
+    }
+    cursorTimer = setTimeout(() => {
+        cursorTimer = null;
+        void performOverlayCursorRequest();
+    }, CURSOR_REQUEST_INTERVAL_MS - elapsed);
+};
 const routeTrackId = () => {
     const value = route.params.trackId;
     return typeof value === 'string' && value.length > 0 ? value : null;
@@ -218,6 +282,24 @@ watch(
             void controller.enter(routeTrackId());
         }
     },
+);
+
+watch(
+    () => [
+        overlayFeatureId.value,
+        analysisSnapshot.value.generation,
+        analysisSnapshot.value.state,
+    ],
+    () => {
+        cursorRequestRevision += 1;
+        overlayExactValue.value = null;
+        requestOverlayCursorValue(true);
+    },
+);
+
+watch(
+    () => playback.value.currentTimeSeconds,
+    () => requestOverlayCursorValue(playback.value.state !== 'playing'),
 );
 
 const togglePlayback = () => void audioSession.togglePlayback();
@@ -299,6 +381,8 @@ onBeforeRouteLeave(async () => {
 });
 
 onBeforeUnmount(() => {
+    cursorRequestRevision += 1;
+    if (cursorTimer) clearTimeout(cursorTimer);
     unsubscribe();
     unsubscribeAnalysis();
 });

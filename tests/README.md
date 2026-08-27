@@ -43,6 +43,8 @@ M3–M11 不建设 CI。下列命令当前均为本地门禁；正式证据要�
 | `npm run test:e2:integration` | Buffer retained PCM、tempo identity/stale、JSON viewport/tempo round-trip 与 coordinator 回归 |
 | `npm run test:e3:unit` | Editor point lane/class 命令、迁移冲突、微秒唯一性、自适应吸附与可见事件过滤 |
 | `npm run test:e3:integration` | point/range JSON 兼容、独立草稿恢复、tempo 秒数稳定与 viewport-visible 模型 |
+| `npm run test:e4:unit` | Editor 21 项 overlay registry、六类纯 Canvas renderer、bounds、Buffer 去重与 exact summary |
+| `npm run test:e4:integration` | Buffer-first consumer、快速换特征、错误重试、Analyzer 隔离与 overlay 草稿恢复 |
 | `npm run test:docs` | 生命周期 frontmatter、内部链接和 21 项特征计数 |
 | `npm run test:harness` | 证明 deliberate failure 会非零退出 |
 | `npm run test:e2e` | 稳定 Chrome 的全部当前 E2E |
@@ -60,6 +62,7 @@ M3–M11 不建设 CI。下列命令当前均为本地门禁；正式证据要�
 | `npm run test:e2e:e1` | Chrome Header/播放列表入口、“去编辑”、MusicBar 显隐、JSON picker、草稿冲突和刷新恢复 |
 | `npm run test:e2e:e2` | Chrome 波形、seek、wheel/right-pan/menu、tempo boundary、输入边界、恢复与多视口 geometry |
 | `npm run test:e2e:e3` | Chrome point lane/class、鼠标/键盘/右键标记、迁移对话框、可见 DOM、range 只读兼容与多视口 geometry |
+| `npm run test:e2e:e4` | Chrome 21 项单选 overlay、六类 renderer、三手柄、pointer-through、错误隔离与多视口 geometry |
 | `npm run test:e2e:edge` | 使用真实 Edge 执行全部 M3–M11 E2E；缺失时明确 blocked |
 | `npm run build` | TypeScript project build 和 Vite production build |
 | `npm run eval:m3:provisional` | 在未提交工作树生成本地 provisional run |
@@ -86,6 +89,8 @@ M3–M11 不建设 CI。下列命令当前均为本地门禁；正式证据要�
 | `npm run eval:e2` | 只允许在干净 commit 上执行 E2 canonical suite 并生成可登记证据 |
 | `npm run eval:e3:provisional` | 在 dirty worktree 执行 E3 与 E1/E2/M3/M4/M6/M11 相邻回归并生成反馈 |
 | `npm run eval:e3` | 只允许在干净 commit 上执行 E3 canonical suite 并生成可登记证据 |
+| `npm run eval:e4:provisional` | 在 dirty worktree 执行 E4 与 E1–E3/Analyzer renderer 相邻回归并生成反馈 |
+| `npm run eval:e4` | 只允许在干净 commit 上执行 31 步 E4 canonical suite 并生成可登记证据 |
 
 ## 目录职责
 
@@ -121,11 +126,13 @@ E1 Chrome 测试使用注入 picker 返回浏览器 OPFS `FileSystemFileHandle`�
 
 E2 使用版本化 `editor-e2-tempo.v1.json` 锁定 60、100、128、127.5 BPM 与 silence/noise/ambiguous 低置信度输入；`fixtures:e2:golden` 同时生成 Git 忽略的 `artifacts/fixtures/editor-e2-tempo-100-v1.wav`。Chrome 场景覆盖波形、网格、游标三层 Canvas、共享 viewport、右键状态机、Tempo 边界与输入、自动估计竞态、刷新恢复和 1024/1280/1920 geometry。
 
-E3 使用版本化 `editor-e3-points.v1.json` 固定 100 BPM、1/16–1 beat 自适应吸附、歌曲首尾和 point 事实；`fixtures:e3:golden` 同时生成 Git 忽略的 `artifacts/fixtures/editor-e3-points-v1.wav` 与 range 只读兼容工程。Chrome 场景覆盖 point lane/class、创建/删除/重复、分类迁移、右键 pan/menu、键盘、viewport-visible DOM、reduced motion 与三档视口 geometry；owner 批准前 E3 仍保持 `In Progress`。
+E3 使用版本化 `editor-e3-points.v1.json` 固定 100 BPM、1/16–1 beat 自适应吸附、歌曲首尾和 point 事实；`fixtures:e3:golden` 同时生成 Git 忽略的 `artifacts/fixtures/editor-e3-points-v1.wav` 与 range 只读兼容工程。Chrome 场景覆盖 point lane/class、创建/删除/重复、分类迁移、右键 pan/menu、键盘、viewport-visible DOM、reduced motion 与三档视口 geometry；E3 已获 owner 批准并关闭。
+
+E4 使用版本化 `editor-e4-overlay.v1.json` 固定 21 项 feature/renderer 映射、0.10/0.35/0.12 bounds 和共享时间锚点；`fixtures:e4:golden` 同时生成 Git 忽略的 `artifacts/fixtures/editor-e4-overlay-v1.wav` 与 JSON 工程。Chrome 场景覆盖 21 项选择、六类 renderer、三手柄、pointer-through、Canvas 故障隔离和 1024/1280/1920 geometry；owner 批准前 E4 保持 `In Progress`。
 
 E2 clean canonical `E2-2026-08-26T16-42-47-634Z-9fc5c0a8` 已在 commit `9fc5c0a81fcf90abfbc665412277147cd958200f` 上 22/22 通过，summary SHA-256 为 `4465c20343af9092601296b86a229200579f648ffa90641411b88f9861ba8660`；2026-08-27 owner 批准该结果并开放 E3。
 
-E3 clean canonical `E3-2026-08-27T02-53-58-176Z-c670ddf5` 已在 commit `c670ddf5494269f5a56abd20c3c5653ee5b27cef` 上 26/26 通过，summary SHA-256 为 `2a0a46b9a0e9b459ee17b11919451f074205fda58801d84a1274dbd12f5cfe4c`；point 反馈 `28.5ms`、几何误差 `0 CSS px`，evidence 等待 owner 批准。
+E3 clean canonical `E3-2026-08-27T02-53-58-176Z-c670ddf5` 已在 commit `c670ddf5494269f5a56abd20c3c5653ee5b27cef` 上 26/26 通过，summary SHA-256 为 `2a0a46b9a0e9b459ee17b11919451f074205fda58801d84a1274dbd12f5cfe4c`；point 反馈 `28.5ms`、几何误差 `0 CSS px`，并已获 owner 批准。
 
 2026-07-29，`project-owner` 按下列清单完成最新版稳定 Chrome 原生权限人工检查并确认通过。该签字不保存本地音频的文件名、路径、内容或 hash，也不替代 Edge 验证。
 
