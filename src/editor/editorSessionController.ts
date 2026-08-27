@@ -17,10 +17,7 @@ import type {
     EditorPlaybackLease,
 } from '../audio/audioSessionService';
 import type { useAudioSessionStore } from '../stores/audioSessionStore';
-import {
-    createEditorDraftEnvelope,
-    type EditorDraftRepositoryPort,
-} from './editorDraftRepository';
+import type { EditorDraftRepositoryPort } from './editorDraftRepository';
 import {
     EditorFormatCodecRegistry,
     createInitialEditorProject,
@@ -54,7 +51,15 @@ const initialSnapshot = (): EditorSessionSnapshot => ({
 });
 
 const cloneProject = (project: EditorProjectV1): EditorProjectV1 =>
-    validateEditorProjectV1(structuredClone(project));
+    structuredClone(project);
+
+const listenerSnapshot = (
+    snapshot: EditorSessionSnapshot,
+): EditorSessionSnapshot => ({
+    ...snapshot,
+    project: snapshot.project,
+    conflictingDraft: snapshot.conflictingDraft,
+});
 
 const cloneEnvelope = (
     envelope: EditorDraftEnvelopeV1,
@@ -168,7 +173,7 @@ export class EditorSessionController {
 
     subscribe(listener: EditorSessionListener): () => void {
         this.listeners.add(listener);
-        listener(this.getSnapshot());
+        listener(listenerSnapshot(this.snapshot));
         return () => this.listeners.delete(listener);
     }
 
@@ -433,10 +438,16 @@ export class EditorSessionController {
         if (tempoChanged) {
             this.tempoRequestRevision += 1;
         }
-        const candidate = validateEditorProjectV1({
+        const durationTolerance = Math.max(1e-6, 1 / context.sampleRate);
+        if (
+            project.track.contentHash !== context.contentHash
+            || Math.abs(project.track.durationSeconds - context.durationSeconds)
+                > durationTolerance
+        ) return;
+        const candidate: EditorProjectV1 = {
             ...project,
             updatedAt: this.now().toISOString(),
-        }, context);
+        };
         this.hasUnexportedChanges = true;
         this.publish({
             ...this.snapshot,
@@ -465,9 +476,11 @@ export class EditorSessionController {
         const project = this.pendingProject;
         this.pendingProject = null;
         this.publish({ ...this.snapshot, persistence: 'saving' });
-        this.saveInFlight = this.repository.replace(
-            createEditorDraftEnvelope(project, this.now),
-        ).then(() => {
+        this.saveInFlight = this.repository.replace({
+            schemaVersion: 1,
+            savedAt: this.now().toISOString(),
+            project,
+        }).then(() => {
             this.publish({
                 ...this.snapshot,
                 persistence: 'saved',
@@ -540,12 +553,15 @@ export class EditorSessionController {
     }
 
     private queueSave(project: EditorProjectV1, immediate: boolean): void {
-        this.pendingProject = cloneProject(project);
+        this.pendingProject = project;
         if (this.saveTimer) this.clearTimer(this.saveTimer);
         this.saveTimer = null;
         this.syncBeforeUnload();
         if (immediate) {
-            void this.flush();
+            this.saveTimer = this.setTimer(() => {
+                this.saveTimer = null;
+                void this.flush();
+            }, 0);
         } else {
             this.saveTimer = this.setTimer(() => {
                 this.saveTimer = null;
@@ -739,9 +755,10 @@ export class EditorSessionController {
     }
 
     private publish(snapshot: EditorSessionSnapshot): void {
-        this.snapshot = cloneSnapshot(snapshot);
-        const next = this.getSnapshot();
-        for (const listener of this.listeners) listener(next);
+        this.snapshot = snapshot;
+        for (const listener of this.listeners) {
+            listener(listenerSnapshot(snapshot));
+        }
     }
 
     private readonly handleBeforeUnload = (event: BeforeUnloadEvent): void => {

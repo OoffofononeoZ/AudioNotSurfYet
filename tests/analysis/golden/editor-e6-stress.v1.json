@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "seed": 3858767910,
+  "durationSeconds": 900,
+  "laneCount": 20,
+  "innerClassesPerLane": 8,
+  "pointCount": 5000,
+  "rangeCount": 5000,
+  "eventCount": 10000,
+  "viewport": {
+    "startSeconds": 0,
+    "endSeconds": 90,
+    "zoom": 10
+  },
+  "canonicalSha256": "b38b8104487d17f77f76e1afa8e5135df19492f195f08d8a0e16d809710bbd8b"
+}

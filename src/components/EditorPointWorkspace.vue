@@ -2,7 +2,7 @@
     <section ref="workspace" class="point-workspace" data-testid="editor-point-workspace" aria-labelledby="point-workspace-title">
         <header class="workspace-heading">
             <div>
-                <p class="workspace-kicker">E5 · Point & Range Annotation</p>
+                <p class="workspace-kicker">Point & Range Annotation</p>
                 <h2 id="point-workspace-title">点与范围标记轨道</h2>
                 <p>在共享节拍网格中标记短音色、音符、长音色或效果所在位置。</p>
             </div>
@@ -306,7 +306,9 @@ const candidate = ref<{
 const surfaceRefs = new Map<string, HTMLElement>();
 const markerRefs = new Map<string, HTMLButtonElement>();
 const gridCanvasRefs = new Map<string, HTMLCanvasElement>();
+const visibleSurfaceKeys = ref(new Set<string>());
 let resizeObserver: ResizeObserver | null = null;
+let intersectionObserver: IntersectionObserver | null = null;
 let focusedMarker: {
     laneId: string;
     innerClassId: string;
@@ -328,13 +330,21 @@ const setSurfaceRef = (
     const key = surfaceKey(laneId, innerClassId);
     const value = elementValue(element);
     const previous = surfaceRefs.get(key);
+    if (previous === value) return;
     if (previous) resizeObserver?.unobserve(previous);
+    if (previous) intersectionObserver?.unobserve(previous);
     if (!value) {
         surfaceRefs.delete(key);
+        if (visibleSurfaceKeys.value.has(key)) {
+            const next = new Set(visibleSurfaceKeys.value);
+            next.delete(key);
+            visibleSurfaceKeys.value = next;
+        }
         return;
     }
     surfaceRefs.set(key, value);
     resizeObserver?.observe(value);
+    intersectionObserver?.observe(value);
 };
 
 const setGridCanvasRef = (
@@ -573,7 +583,11 @@ const candidatePinStyle = (laneId: string, innerClassId: string) => {
     return { left: `${(cell.timeSeconds - cell.startSeconds) / span * 100}%` };
 };
 const visibleEvents = (lane: PointLaneV1, innerClassId: string) =>
-    visiblePointEvents(lane, innerClassId, viewport.value);
+    visibleSurfaceKeys.value.has(surfaceKey(lane.id, innerClassId))
+        || focusedMarker?.laneId === lane.id
+            && focusedMarker.innerClassId === innerClassId
+        ? visiblePointEvents(lane, innerClassId, viewport.value)
+        : [];
 
 const pointFromPointer = (
     event: PointerEvent,
@@ -1020,7 +1034,9 @@ const drawGrid = (canvas: HTMLCanvasElement) => {
 };
 
 const drawAllGrids = () => {
-    for (const canvas of gridCanvasRefs.values()) drawGrid(canvas);
+    for (const [key, canvas] of gridCanvasRefs) {
+        if (visibleSurfaceKeys.value.has(key)) drawGrid(canvas);
+    }
 };
 
 const clearInteraction = () => {
@@ -1033,7 +1049,6 @@ const clearInteraction = () => {
 watch(
     () => [props.project.tempoMap, props.project.workspace.viewport, pointLanes.value.length],
     () => void nextTick(drawAllGrids),
-    { deep: true },
 );
 
 watch(
@@ -1056,8 +1071,25 @@ watch(
 
 onMounted(() => {
     resizeObserver = new ResizeObserver(() => drawAllGrids());
+    intersectionObserver = new IntersectionObserver((entries) => {
+        const next = new Set(visibleSurfaceKeys.value);
+        for (const entry of entries) {
+            const surface = entry.target as HTMLElement;
+            const laneId = surface.dataset.laneId;
+            const innerClassId = surface.dataset.innerClassId;
+            if (!laneId || !innerClassId) continue;
+            const key = surfaceKey(laneId, innerClassId);
+            if (entry.isIntersecting) next.add(key);
+            else next.delete(key);
+        }
+        visibleSurfaceKeys.value = next;
+        void nextTick(drawAllGrids);
+    }, { rootMargin: '0px' });
     if (workspace.value) resizeObserver.observe(workspace.value);
-    for (const surface of surfaceRefs.values()) resizeObserver.observe(surface);
+    for (const surface of surfaceRefs.values()) {
+        resizeObserver.observe(surface);
+        intersectionObserver.observe(surface);
+    }
     window.addEventListener('blur', clearInteraction);
     void nextTick(drawAllGrids);
 });
@@ -1065,6 +1097,7 @@ onMounted(() => {
 onBeforeUnmount(() => {
     clearInteraction();
     resizeObserver?.disconnect();
+    intersectionObserver?.disconnect();
     window.removeEventListener('blur', clearInteraction);
 });
 </script>

@@ -3,7 +3,7 @@
         <section class="editor-shell">
             <header class="editor-heading">
                 <div>
-                    <p class="kicker">Editor · E5 range annotation</p>
+                    <p class="kicker">Editor · 逆向制曲</p>
                     <h1>逆向制曲工程</h1>
                     <p>在不修改原音频的前提下，为歌曲建立可恢复、可导出的时间标注工程。</p>
                 </div>
@@ -122,7 +122,14 @@
 </template>
 
 <script setup lang="ts">
-import { computed, h, onBeforeUnmount, ref, watch } from 'vue';
+import {
+    computed,
+    h,
+    onBeforeUnmount,
+    ref,
+    shallowRef,
+    watch,
+} from 'vue';
 import {
     onBeforeRouteLeave,
     useRoute,
@@ -150,11 +157,11 @@ const router = useRouter();
 const audioSession = useAudioSessionService();
 const sessionStore = useAudioSessionStore();
 const controller = useEditorSessionController();
-const snapshot = ref(controller.getSnapshot());
+const snapshot = shallowRef(controller.getSnapshot());
 const unsubscribe = controller.subscribe((next) => {
     snapshot.value = next;
 });
-const analysisSnapshot = ref(controller.getAnalysisSnapshot());
+const analysisSnapshot = shallowRef(controller.getAnalysisSnapshot());
 const unsubscribeAnalysis = controller.subscribeAnalysis((next) => {
     analysisSnapshot.value = next;
 });
