@@ -4,7 +4,7 @@ owner: "project-owner"
 last_reviewed: 2026-08-27
 upstream_docs:
   - "docs/context/index.md"
-next_action: "实施 E5 range annotation 并保持 E4 overlay pointer-through 回归"
+next_action: "owner 复核 E5 range canonical 与人工任务；E6 保持 Planned"
 ---
 
 # System Map
@@ -48,7 +48,7 @@ showOpenFilePicker → FileSystemFileHandle → File
 | Config persistence | 保存 volume 与 MusicBar style | Pinia、localStorage key `config` | project-owner | schema 保持不变；volume 为 0–100 |
 | Home visualization | 全屏 Three.js 光线 shader | `rayLength` prop、IntersectionObserver、reduced-motion media query | unknown | 常规模式使用 WebGL RAF；reduced motion 只静态渲染；卸载释放 mesh、geometry、material、render list、renderer 与 WebGL context |
 | Analyzer surface | 四槽/最多四张累计 21 项可用卡、共享 viewport/zoom/cursor/seek、DOM 精确值与分层 Canvas | store、AudioSessionService、AnalysisCoordinator、Canvas 2D | project-owner | 首次仍默认 M7 三卡；已保存空工作区保持为空；Loudness 与 Complex 使用结构化双 Canvas |
-| Editor E1–E5 surface | `/editor/:trackId?` 状态、精简 transport、JSON 工程、共享波形/tempo/point 时间列、21 项单选半透明 overlay 与 viewport-visible marker | EditorSessionController、AudioSessionService、AnalysisCoordinator、Vue Router、shared Canvas renderer、DOM controls | project-owner | E1–E4 已批准；E5 range UI 已开放实施 |
+| Editor E1–E5 surface | `/editor/:trackId?` 状态、精简 transport、JSON 工程、共享波形/tempo/point/range 时间列、21 项单选半透明 overlay 与 viewport-visible marker | EditorSessionController、AudioSessionService、AnalysisCoordinator、Vue Router、shared Canvas renderer、DOM controls | project-owner | E1–E4 已批准；E5 实现与 35/35 canonical 为 `in-review` |
 | Editor project and draft | strict JSON V1、歌曲 hash/时长绑定、原生 file gateway、单草稿 autosave 与恢复冲突 | `EditorFormatCodecRegistry`、`EditorDraftRepository`、`audionotsurfyet-editor` V1 | project-owner | 首版只注册 JSON；session database 不变 |
 | Experimental charts | 试验性的 Three.js 2D 图和瀑布流 | Vue props、TestLands | unknown | 不视为稳定接口 |
 | Event bus | 跨组件事件类型与发送 | mitt singleton | unknown | `settings-open` 无已发现订阅者 |
@@ -77,10 +77,10 @@ showOpenFilePicker → FileSystemFileHandle → File
 - 刷新时 current Blob 优先并恢复为 0 秒 paused；其他曲目只在 `queryPermission()` 为 granted 时自动取回，`requestPermission()` 只由可见用户操作触发。
 - `--coinc-process` 既可能由 GSAP 写入，也可能由能量 RAF 写入，模式切换需明确所有权。
 - AudioContext、source、单播放 RAF、产品 Worker、pending analysis request 和封面 URL 由 MainLayout-owned service/coordinator 生命周期统一释放；Observer、GSAP 和 Three.js 由各组件释放，LightBg 在 reduced motion 下不保留连续 RAF。
-- Header 的 settings 事件没有已发现消费者；Visualizer 仍为占位页。Editor E4 overlay 已获批准，E5 range 编辑已开放但尚未形成实现证据。
+- Header 的 settings 事件没有已发现消费者；Visualizer 仍为占位页。Editor E4 overlay 已获批准；E5 range 编辑已形成 35/35 clean canonical，owner 批准前仍为 `in-review`。
 - `components.d.ts` 和 `auto-imports.d.ts` 是构建插件生成文件，构建可能造成工作树变化。
 
-## Editor Boundary After E4
+## Editor Boundary After E5
 
 已实现事实：
 
@@ -90,12 +90,13 @@ showOpenFilePicker → FileSystemFileHandle → File
 - `EditorTimeline` 以同一 `timeToX/xToTime` 驱动 waveform、grid、cursor 与 boundary；viewport 支持 1–64 zoom、指针锚点、任意像素/25% pan、seek 和持久化。
 - tempo map 支持 metered/single-beat、20–300 小数 BPM、拍号、继承式 boundary 和内部 onset/autocorrelation 估计；低置信度或 stale 结果不写入工程。
 - `EditorPointWorkspace` 使用同一 viewport/time geometry 展开 point lane 与全部 inner class；Canvas 绘制背景网格，DOM 只实例化当前横向 viewport 内的稳定 ID marker。
-- point 命令固定微秒唯一性、1/16–1 beat 自适应吸附、single-beat 整段一格、分类迁移/明确删除与 range lane 只读保留；右键 marker 删除，空白 4px 以上 pan，否则打开 quick menu。
+- point 命令固定微秒唯一性、1/16–1 beat 自适应吸附、single-beat 整段一格与分类迁移/明确删除；右键 marker 删除，空白 4px 以上 pan，否则打开 quick menu。
+- range 命令使用微秒规范化半开 `[start,end)`；同 lane/inner class 真重叠拒绝、相邻允许，跨分类范围和内部 point 可并存。UI 支持两阶段创建、虚线 preview、Esc/空白右键取消、端点 pointer/keyboard 调整、pointercancel 回滚、分类迁移冲突与 viewport-visible 裁剪。
 - `analysisCanvasRenderer` 是 Analyzer card 与 Editor overlay 共用的纯 Canvas adapter；E4 overlay 一次选择累计 21 项中的一个，使用同一 viewport/time geometry、DPR backing store、40ms exact cursor 合并和 last-ready Buffer fallback。
 - overlay 只让 selector、重试和 top/move/bottom 三个手柄接收 pointer；图形与说明区域穿透到底层 point surface。bounds 固定默认 0.10/0.35、最小 0.12，键盘步长 1%/Shift 5%，renderer/context 错误只降级 overlay。
 
-尚未实现：range 编辑交互与 E6 双浏览器/10,000 事件加固。E4 clean canonical 与 owner 门禁已通过；schema 和既有只读 range 展示仍不代表 E5 交互已经存在。
+尚未实现：E6 双浏览器/三格式/native picker/10,000 事件/资源/无障碍最终加固。E5 clean canonical 35/35 已通过，但 owner 人工任务与批准前不能写成 E5 `Complete` 或开放 E6。
 
 ## Approval Record
 
-`project-owner` 于 2026-08-21 确认 M7 卡片、共享视口、跳转、刷新恢复和 3/3 学习解释通过，并批准 M7 canonical、关闭 M7、开放 M8。随后 M8–M11 与 Analyzer readiness 依次完成并获批。2026-08-26，owner 又依次批准 Editor 产品、架构、delivery 与 E1 canonical/人工结果。2026-08-27，E2–E4 clean canonical 依次通过并获 owner 批准；E4 为 `Complete`，E5 为 `In Progress`，E6 为 `Planned`。
+`project-owner` 于 2026-08-21 确认 M7 卡片、共享视口、跳转、刷新恢复和 3/3 学习解释通过，并批准 M7 canonical、关闭 M7、开放 M8。随后 M8–M11 与 Analyzer readiness 依次完成并获批。2026-08-26，owner 又依次批准 Editor 产品、架构、delivery 与 E1 canonical/人工结果。2026-08-27，E2–E4 clean canonical 依次通过并获 owner 批准；E5 clean canonical 随后 35/35 通过并进入 `in-review`。E4 为 `Complete`，E5 为 `In Progress`，E6 为 `Planned`。

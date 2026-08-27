@@ -10,7 +10,7 @@ upstream_docs:
   - "docs/architecture/risk-register.md"
   - "docs/architecture/editor/project-format-v1.md"
   - "docs/architecture/editor/interaction-contracts.md"
-next_action: "实施 E5 range annotation；clean canonical 与 owner 批准前 E6 保持 Planned"
+next_action: "owner 复核 E5 clean canonical 与人工范围任务；批准前 E6 保持 Planned"
 ---
 
 # Editor E1–E6 Execution Plan
@@ -159,7 +159,7 @@ npm run eval:e1:provisional
 npm run eval:e1
 ```
 
-E2–E4 命令已经实现并产生已批准的 clean canonical；E5 当前开放并在实现时新增，E6 在其里程碑实现时新增并同步：
+E2–E4 命令已经实现并产生已批准的 clean canonical；E5 命令和 35 步 runner 已实现并产生 `in-review` clean canonical，E6 在其里程碑实现时新增并同步：
 
 ```text
 npm run test:eN:unit
@@ -169,7 +169,7 @@ npm run eval:eN:provisional
 npm run eval:eN
 ```
 
-其中 `N` 为 5–6。canonical 必须拒绝 dirty worktree，并记录 run ID、commit、环境、步骤结果、日志和 summary SHA-256。E1–E4 clean canonical 均已通过并获 owner 批准；E5 为 `In Progress`，E6 保持 `Planned`。
+其中 `N` 为 5–6。canonical 必须拒绝 dirty worktree，并记录 run ID、commit、环境、步骤结果、日志和 summary SHA-256。E1–E4 clean canonical 均已通过并获 owner 批准；E5 clean canonical 35/35 已登记但仍为 `In Progress`，E6 保持 `Planned`。
 
 ## 6. Change Control and Exclusions
 
@@ -201,3 +201,5 @@ npm run eval:eN
 随后 E4 实现和 31/31 clean canonical 完成；run `E4-2026-08-27T07-21-59-209Z-c9e03ab9` 绑定 commit `c9e03ab9554aa5bac5649fa84e1d822f056ad0e2` 与 summary SHA-256 `790f7f76f113fad6f005992f8fd10d94b0b77451acd58717c8c221edd54628ff`。该事实只进入 `in-review` evidence，不关闭 E4、不开放 E5。
 
 同日，`project-owner` 批准 E4 canonical evidence、21 项分析叠加、三手柄、pointer-through 与错误隔离结果。E4 据此关闭，E5 开放实施，E6 继续为 `Planned`。
+
+随后 E5 实现 commit `781241772e05186e2fe0d006ed6ddd8bceded7af` 与 clean canonical `E5-2026-08-27T11-03-22-177Z-78124177` 完成，35/35 通过，summary SHA-256 为 `6928f75cbdeb6d77e54c81b3547f7caee0b39d4c6881884b1d1d7065f3dde1b0`。该事实只进入 `in-review` evidence；owner 人工任务和批准前 E5 不关闭、E6 不开放。

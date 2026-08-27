@@ -4,7 +4,7 @@ owner: "project-owner"
 last_reviewed: 2026-08-27
 upstream_docs:
   - "docs/context/index.md"
-next_action: "E5 实现后更新 range event 的领域与 UI 事实"
+next_action: "owner 复核 E5 range event canonical；批准前 E6 保持 Planned"
 ---
 
 # Glossary
@@ -63,7 +63,7 @@ next_action: "E5 实现后更新 range event 的领域与 UI 事实"
 | lane | Editor 中一个具名 point/range 判别轨道，承载全部展开的 inner class 及其事件 | 名称不是 JSON identity；稳定 ID 与有序数组由 `EditorProjectV1` 固定 | [project format](../architecture/editor/project-format-v1.md) |
 | inner class | lane 内用户可见的细分类，例如音高或效果走向；新 lane 默认含 `default` | 点/范围唯一性与重叠规则以 lane 和 inner class 为作用域 | [scope](../product/scope.md) |
 | point event | E3 已实现的音符/短音色单点标记；秒数以微秒规范化持久化，显示与新建位置按当前网格吸附 | 同 lane、inner class 和规范化时间不得重复；zoom/tempo 变化不改写既有秒数 | [E3 eval plan](../quality/editor/e3-eval-plan.md) |
-| range event | E5 已开放实施的长音色/效果区间标记；持久化为半开 `[start,end)`，当前 schema/validator 已存在但编辑 UI 尚未形成证据 | 同 lane、inner class 不得重叠；相邻允许，不同分类和内部 point 可并存 | [scope](../product/scope.md) |
+| range event | E5 已实现的长音色/效果区间标记；持久化为半开 `[start,end)`，支持两阶段创建、取消、端点调整/回滚、右键/键盘删除与草稿/JSON 恢复 | 同 lane、inner class 不得重叠；相邻允许，不同分类和内部 point 可并存 | [E5 eval plan](../quality/editor/e5-eval-plan.md) |
 | tempo map | 由有序时间边界划分的节拍/拍号区间；一个 beat 固定为 `60/BPM` 秒，numerator 决定小节拍数，denominator 表达 beat 音符单位 | 驱动 measure/beat 线、单拍模式和点/范围事件吸附 | [Editor interactions](../architecture/editor/interaction-contracts.md) |
 | Editor timeline viewport | E2 已实现并保存于工程的 `startSeconds/endSeconds/zoom`；波形、网格、游标和 boundary 共用同一 CSS 时间映射 | 固定 1–64 zoom、指针锚点、pixel/25% pan 与 `<=1 CSS px` 对齐；播放 cursor 不持久化 | [system map](system-map.md) |
 | tempo estimate | E2 Worker 在 retained mono PCM 上以正向频谱差 onset envelope 和归一化 autocorrelation 产生的 reliable/low-confidence 结果 | 只在单一 unset metered segment 且 identity/用户 revision 仍匹配时自动写入；不使用第三方 BPM 包 | [E2 eval plan](../quality/editor/e2-eval-plan.md) |
@@ -76,4 +76,4 @@ next_action: "E5 实现后更新 range event 的领域与 UI 事实"
 
 ## Approval Record
 
-`project-owner` 于 2026-08-21 至 2026-08-26 依次批准 Analyzer M7–M11 与 Analyzer readiness，并批准 Editor 产品、架构、delivery 与 E1 evidence。2026-08-27，E2–E4 clean canonical 依次完成并获 owner 批准；E4 为 `Complete`，E5 range annotation 为 `In Progress`，E6 仍为 `Planned`。
+`project-owner` 于 2026-08-21 至 2026-08-26 依次批准 Analyzer M7–M11 与 Analyzer readiness，并批准 Editor 产品、架构、delivery 与 E1 evidence。2026-08-27，E2–E4 clean canonical 依次完成并获 owner 批准；E5 clean canonical 随后 35/35 通过并保持 `in-review`。E4 为 `Complete`，E5 range annotation 为 `In Progress`，E6 仍为 `Planned`。

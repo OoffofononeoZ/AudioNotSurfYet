@@ -6,7 +6,7 @@ upstream_docs:
   - "docs/quality/editor/e5-eval-plan.md"
   - "docs/quality/editor/e4-failure-taxonomy.md"
   - "docs/architecture/risk-register.md"
-next_action: "E5 provisional/canonical 失败按 range state、interval、overlap、handle、persistence 或 regression 分类"
+next_action: "owner 复核 canonical 与人工任务；新增失败继续按 range state、interval、overlap、handle、persistence 或 regression 分类"
 ---
 
 # Editor E5 Failure Taxonomy

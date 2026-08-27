@@ -10,7 +10,7 @@ upstream_docs:
   - "docs/quality/editor/e4-eval-plan.md"
   - "docs/quality/editor/e5-eval-plan.md"
   - "docs/delivery/editor/milestone-plan.md"
-next_action: "按 AC-E501–AC-E505 实施 E5；canonical 登记后等待 owner 批准"
+next_action: "owner 复核 E5 canonical 与人工范围任务；批准前 E5 保持 In Progress、E6 保持 Planned"
 ---
 
 # Editor Evidence Index
@@ -28,6 +28,7 @@ next_action: "按 AC-E501–AC-E505 实施 E5；canonical 登记后等待 owner 
 - E2 clean canonical 与 owner 门禁已于 2026-08-27 获批。
 - E3 clean canonical 与 owner 人工门禁已于 2026-08-27 获批；E4 clean canonical 与 owner 人工门禁随后获批。
 - E4 clean canonical 31/31 与 owner 人工门禁已于 2026-08-27 获批；E5 已开放。
+- E5 clean canonical 35/35 已登记为 `in-review`；owner 人工门禁与批准前不关闭 E5、不开放 E6。
 
 ## 2. Record Contract
 
@@ -398,3 +399,104 @@ next_action: "按 AC-E501–AC-E505 实施 E5；canonical 登记后等待 owner 
 - 自动化验证了 pointer-through、键盘手柄、reduced motion、错误隔离和多视口几何，但不能替代 owner 对半透明图形清晰度、连续换特征和真实标记任务的视觉判断。
 - `project-owner` 于 2026-08-27 明确回复：“我批准 Editor E4 canonical evidence、21 项分析叠加、三手柄、pointer-through 与错误隔离结果；同意将 E4 标记为 Complete 并开放 E5。”本签字完成 E4 人工门禁，不补写 owner 未提供的逐项测量。
 - R-024、R-027 已获得 E4 Chrome geometry/consumer/renderer isolation 证据，但在 E6 双浏览器/资源复核前继续保持 `Open`；R-025 继续等待 E5 range 与 E6 10,000 事件/辅助技术门禁。
+
+## 7. E5 Canonical Record
+
+| Field | Value |
+| --- | --- |
+| Run ID | `E5-2026-08-27T11-03-22-177Z-78124177` |
+| Milestone | E5 — Range annotation |
+| State | `in-review`（35/35 自动化通过；等待 owner 人工范围任务与批准） |
+| Implementation commit | `781241772e05186e2fe0d006ed6ddd8bceded7af` |
+| Evidence commit | 本记录所在的 `docs: register Editor E5 canonical evidence` 提交 |
+| Dirty at start / end | `false` / `false` |
+| Commit at end | `781241772e05186e2fe0d006ed6ddd8bceded7af` |
+| Started at | 2026-08-27 11:03:22.177 UTC |
+| Method | `npm run eval:e5` |
+| Reviewer | `project-owner` — pending |
+| Retention | `local-present`；至少保留到 E5 审批完成 |
+| Artifact root | `artifacts/evals/E5-2026-08-27T11-03-22-177Z-78124177/` |
+| Summary SHA-256 | `6928f75cbdeb6d77e54c81b3547f7caee0b39d4c6881884b1d1d7065f3dde1b0` |
+
+### Environment
+
+| Item | Recorded value |
+| --- | --- |
+| OS | macOS 26.5.2 (`25F84`), Darwin arm64 |
+| Hardware | MacBook Pro `MacBookPro17,1`；Apple M1 8-core；16 GB memory |
+| Node / npm | Node `v24.18.0`；npm `11.16.0` |
+| Vitest / Playwright | `4.1.10` / `1.62.0` |
+| Chrome binary | Google Chrome `152.0.7977.64` |
+| Chrome test user agent | Chrome `151.0.7922.34` |
+| Meyda | `5.6.3` |
+
+本记录只保存机型、芯片、核心数和内存，不复制 artifact 中的序列号、UUID、UDID 或设备标识。E5 只使用仓库生成的确定性 100 BPM WAV、虚构 point/range 工程与浏览器临时状态，不记录用户私有音频身份。
+
+### Results and Traceability
+
+| Step group | Result | Evidence |
+| --- | --- | --- |
+| E5 range golden | pass | 100 BPM、半开 `[start,end)`、相邻允许、同分类防重叠、跨分类重叠、point-in-range、single-beat 和 full/zoomed 最短吸附匹配 |
+| E5 unit | 7/7 pass | range lane/class、命名、半开 overlap、歌曲边界、最短网格、single-beat、端点更新/回滚、迁移冲突、可见范围与稳定删除 |
+| E5 integration | 5/5 pass | point/range JSON V1、独立草稿、viewport/tempo/overlay 恢复、invalid overlap 原子拒绝、tempo/zoom 不改秒数、迁移后稳定 ID |
+| E5 Chrome | 7/7 pass | 两阶段创建、preview、Esc/右键取消、pointer/keyboard 删除、端点键盘/拖动与 pointercancel 回滚、重叠拒绝、跨分类允许、迁移冲突、quick menu、overlay 穿透、刷新与 1024/1280/1920 |
+| E5 Chrome metrics | pass | 输入到可见反馈 `35.5ms`（门禁 `<=100ms`）；range/timeline/overlay 三视口几何误差均 `1 CSS px`（门禁 `<=1 CSS px`） |
+| E1–E4 regression | pass | E1 unit/integration/Chrome、E2 golden/unit/integration/Chrome、E3 golden/unit/integration/Chrome、E4 golden/unit/integration/Chrome 全部通过；E3 导入 range 身份回归已随 E5 开放更新 |
+| M6–M10 regression | pass | M6 Worker/coordinator；M7–M10 renderer unit 与 Chrome 全部通过；M10 15 分钟四重卡最大反馈 `17.7ms`、分析归因长任务 `0` |
+| M11 Chrome | 4/4 pass | 三格式、键盘/reduced motion、多视口、quota 与 20 次 WebGL/RAF 生命周期回归 |
+| Docs / harness / typecheck | pass | lifecycle links、deliberate failure detection、`vue-tsc -b` |
+| Build | pass with warning | 1,844 modules；最大 JS chunk `1,281.63 kB`，warning 如实保留到 Editor E6/readiness 复核 |
+| Diff check | pass | canonical 起止工作树干净；`git diff --check` exit 0 |
+
+### Provisional History and Pre-canonical Corrections
+
+- 最终 dirty-worktree provisional：`E5-2026-08-27T10-58-47-206Z-56a0250d-provisional`，35/35 pass，summary SHA-256 `f821166e699b2866876e10269b41875b843cda9eb8eb2c8365dabd624c361e83`。
+- provisional 前的专项 Chrome 首次发现 `EFT-RANGE-STATE / S1`：正常释放 pointer capture 后触发的 `lostpointercapture` 会再次执行取消路径并清除刚打开的 quick menu。实现改为没有活动 pointer 时忽略迟到的 lost-capture；同时测试改为在滚动后重新读取可见坐标，并固定 pointercancel 端点回滚。最终 E5 Chrome 7/7、provisional 与 canonical 均通过，本轮没有 canonical failure。
+
+### Local Artifact Hashes
+
+| Artifact | SHA-256 |
+| --- | --- |
+| `summary.json` | `6928f75cbdeb6d77e54c81b3547f7caee0b39d4c6881884b1d1d7065f3dde1b0` |
+| `01-E5-range-golden.log` | `73079981621572050edb3675ef4755fe8638a3060aeea2ab5e0bd101774a1c20` |
+| `02-E5-range-unit.log` | `60125649cdb88faab3b0f7cce57b3d2b6690976fa1907d0dd37f03f22e9bec48` |
+| `03-E5-range-integration.log` | `20e821662d47bd9bcce8c9e1b7cda730478791195ff06d520fe8fe2a2cbca71e` |
+| `04-E5-Chrome.log` | `0101655fe91eee5a6550a390ab2fae3bb41582ee819b63ad5991524382ffb243` |
+| `05-E4-overlay-golden-regression.log` | `eab36a9bc0292695c2ddab58761166cc40e5aec54d44612da96b251ee9600ba1` |
+| `06-E4-overlay-unit-regression.log` | `1d8bc500fbe37bad4dc4407541f45c45c99bdb7c1d74674579d9b1361f60dae7` |
+| `07-E4-overlay-integration-regression.log` | `0edd9afc94fadbe66d767a4effc5db5ffa372a6a7ee954a240b0a0d2f5eb53ff` |
+| `08-E3-point-golden-regression.log` | `f31f700d278cf3e4cf7ae1e43893e6bc0535de6c0ebf672b1d76aa3efc943fc6` |
+| `09-E3-point-unit-regression.log` | `64195398e71dec64b43d5f322b1906e1c32e5dd725e9fea869dd3457e1bd1f25` |
+| `10-E3-point-integration-regression.log` | `da5231f2003e7392f83310d7dc9919e6bce5c7d8af7dd27a86f901614187fc0c` |
+| `11-E2-tempo-golden-regression.log` | `2aa9988e158f22c4f25da1fc726f46aebc40cdb50002e02a4968896a28263cb2` |
+| `12-E2-timeline-unit-regression.log` | `f648425017a43053bf59864c97c4d5a1cf005385bb4f9a4e00cf0fbd12fe47b9` |
+| `13-E2-timeline-integration-regression.log` | `68bde825ebf5614d14839bc981b31d30433dca4692140848a8d488a2f8083489` |
+| `14-E1-project-unit-regression.log` | `e6ab1b3e4a6521185e1fb25d1dad57af97073329148f13b00b88d88c5f263b2f` |
+| `15-E1-foundation-integration-regression.log` | `3fd6d78c4e01ee19d5cf48e2019c88bf3dd5ceb7141b30f4f34aeb7d5e4194dc` |
+| `16-M6-Worker-regression.log` | `3e4044d601a73fe7b3912d26b42cbb279ffcde0f9cf5e4a2704ba2567a8e97e0` |
+| `17-M6-coordinator-regression.log` | `81fc415f138a69910a00de76b6270948e6ce71a79b0aa873cde0081f55b852e1` |
+| `18-M7-renderer-unit-regression.log` | `c7f86536f76640adc39c5e3d88a4020ea67c41efc4c52a8f48ed30364b9f7bc1` |
+| `19-M8-renderer-unit-regression.log` | `88141a9aa19a91f9aed556d700a14cc08bc79355dec721f7bf9909b050017e56` |
+| `20-M9-renderer-unit-regression.log` | `4eb204b888726185119187f56b7d1e1c81002eede22388794225b08d5e71c69e` |
+| `21-M10-renderer-unit-regression.log` | `e57f9a83bb26ad7aea17d20b27a12bf826d1c0f62ad4086ac6754bb351422bd7` |
+| `22-docs.log` | `bb005ed0074179a47b895a5c66e79917e37ebf18976e21fe9d27b1dd63c8f151` |
+| `23-deliberate-failure.log` | `69bf5c3fa50230a4957ad0c60c8323dba68e494d92761fea0039cf5d580d70aa` |
+| `24-typecheck.log` | `fadc7f66199c28d2f7cca439bb300ebeb0320158f32a0f9b52ec77031538af4d` |
+| `25-E4-Chrome-regression.log` | `7f50e8a49bf0911858b3fab005acc336045daa4db45b5b81b4c7ade59e33b99e` |
+| `26-E3-Chrome-regression.log` | `6cac2e102e64c3a4e78f0e959028e8004baf4b70fbd8c8ada8214b37ce88826e` |
+| `27-E2-Chrome-regression.log` | `b111c5cc13d268db682b8e4f56213cb5a8e224381595978ff5d334dc5d783382` |
+| `28-E1-Chrome-regression.log` | `c9a69d30aa37b4a93533824ce0b98a2c1de65f2ab1d62f4aaadb9f74f54aa95a` |
+| `29-M7-Chrome-renderer-regression.log` | `ad9a312f9c4b9cbf92c65fa18ae50241c569034ed924994723bcb4080d7112ce` |
+| `30-M8-Chrome-renderer-regression.log` | `0b757b04f53385c80518a6c711b19f64859fa767148c02185e9cdc6c9769da9e` |
+| `31-M9-Chrome-renderer-regression.log` | `8e7480d5fde9124dd5b21b3f46680fe1ee718832e9830226706b1ad686b1e3aa` |
+| `32-M10-Chrome-renderer-regression.log` | `a6f9734b6b708a017a027f3580327f3cffe280d46fbad7da4e2f8f5f6ec26827` |
+| `33-M11-Chrome-resource-regression.log` | `462bcb813581595c7fef7595b57e291cb6b8fbe2929ddfc82ac084bc4448c899` |
+| `34-build.log` | `3762734e4d2aad296d56075df5c7200848d83774bfb40fa0c6877b5b807b97a1` |
+| `35-diff-check.log` | `e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855` |
+
+### Manual Gaps and Approval Gate
+
+- E5 专项按批准计划只在稳定 Chrome 自动化；真实 Edge、MP3/WAV/FLAC Editor 全量、10,000 事件、原生 picker、资源与辅助技术长会话仍留到 E6，不能从本轮结果外推。
+- 自动化验证了 pointer/keyboard、重叠矩阵、pointercancel 回滚、overlay 穿透、reduced motion、刷新和多视口几何，但不能替代 owner 对连续长音色/效果标注、视觉清晰度和真实 JSON 导入导出的判断。
+- owner 需使用 `artifacts/fixtures/editor-e5-ranges-v1.wav` 完成创建、取消、端点调整、同/跨分类重叠、右键/键盘、overlay 穿透及刷新/JSON round-trip；批准前 E5 保持 `In Progress`，E6 保持 `Planned`。
+- R-024、R-025 获得 E5 Chrome range geometry/state/keyboard 证据，R-023 获得 range import/draft 回归；按已批准风险策略，R-024/R-025/R-027 仍保持 `Open`，E6 再执行双浏览器、10,000 事件、资源与辅助技术门禁。

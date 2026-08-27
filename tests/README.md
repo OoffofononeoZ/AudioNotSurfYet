@@ -8,7 +8,7 @@
 - FFmpeg：8.1.2；只用于生成和检查受控 WAV/MP3/FLAC fixture。
 - 当前检测到 Google Chrome 151.0.7922.174 与 Microsoft Edge 151.0.4129.107；`npm run test:e2e:edge` 使用真实 `msedge` channel，浏览器缺失时仍以退出码 2 报告 `blocked`。
 
-M3–M11 不建设 CI。下列命令当前均为本地门禁；正式证据要求在干净 commit 上复跑。M3–M11 与 Editor E1–E4 canonical 均已获批准；E5 已开放。M5 Chrome 原生权限、M7 学习任务、M8 Windows Chrome 界面稳定化、M9 导航栏视觉/学习清单、M11 Edge 最终加固和 E1 原生工程流程均由 owner 单独签字；不可自动化路径的事实仍需在后续 readiness 中披露。
+M3–M11 不建设 CI。下列命令当前均为本地门禁；正式证据要求在干净 commit 上复跑。M3–M11 与 Editor E1–E4 canonical 均已获批准；E5 clean canonical 35/35 已登记为 `in-review`。M5 Chrome 原生权限、M7 学习任务、M8 Windows Chrome 界面稳定化、M9 导航栏视觉/学习清单、M11 Edge 最终加固和 E1 原生工程流程均由 owner 单独签字；不可自动化路径的事实仍需在后续 readiness 中披露。
 
 当前 `npm audit` 在安全补丁更新后剩余 1 项 low：Vite 依赖的 esbuild 0.27.3 在 Windows 开发服务器场景存在本地任意文件读取风险。仓库目标验证机为 macOS，开发服务器不得暴露到不受信网络；依赖升级提供修复版本后复核。该缺口不被描述为已修复或生产 readiness。
 
@@ -63,7 +63,7 @@ M3–M11 不建设 CI。下列命令当前均为本地门禁；正式证据要�
 | `npm run test:e2e:m11` | 顺序执行真实 Chrome 与 Edge 的 M11 专项场景 |
 | `npm run test:e2e:e1` | Chrome Header/播放列表入口、“去编辑”、MusicBar 显隐、JSON picker、草稿冲突和刷新恢复 |
 | `npm run test:e2e:e2` | Chrome 波形、seek、wheel/right-pan/menu、tempo boundary、输入边界、恢复与多视口 geometry |
-| `npm run test:e2e:e3` | Chrome point lane/class、鼠标/键盘/右键标记、迁移对话框、可见 DOM、range 只读兼容与多视口 geometry |
+| `npm run test:e2e:e3` | Chrome point lane/class、鼠标/键盘/右键标记、迁移对话框、可见 DOM、range 身份兼容与多视口 geometry |
 | `npm run test:e2e:e4` | Chrome 21 项单选 overlay、六类 renderer、三手柄、pointer-through、错误隔离与多视口 geometry |
 | `npm run test:e2e:e5` | Chrome range 创建/预览/取消/端点/重叠/迁移、右键、键盘、overlay 穿透、恢复与多视口 geometry |
 | `npm run test:e2e:edge` | 使用真实 Edge 执行全部 M3–M11 E2E；缺失时明确 blocked |
@@ -131,11 +131,13 @@ E1 Chrome 测试使用注入 picker 返回浏览器 OPFS `FileSystemFileHandle`�
 
 E2 使用版本化 `editor-e2-tempo.v1.json` 锁定 60、100、128、127.5 BPM 与 silence/noise/ambiguous 低置信度输入；`fixtures:e2:golden` 同时生成 Git 忽略的 `artifacts/fixtures/editor-e2-tempo-100-v1.wav`。Chrome 场景覆盖波形、网格、游标三层 Canvas、共享 viewport、右键状态机、Tempo 边界与输入、自动估计竞态、刷新恢复和 1024/1280/1920 geometry。
 
-E3 使用版本化 `editor-e3-points.v1.json` 固定 100 BPM、1/16–1 beat 自适应吸附、歌曲首尾和 point 事实；`fixtures:e3:golden` 同时生成 Git 忽略的 `artifacts/fixtures/editor-e3-points-v1.wav` 与 range 只读兼容工程。Chrome 场景覆盖 point lane/class、创建/删除/重复、分类迁移、右键 pan/menu、键盘、viewport-visible DOM、reduced motion 与三档视口 geometry；E3 已获 owner 批准并关闭。
+E3 使用版本化 `editor-e3-points.v1.json` 固定 100 BPM、1/16–1 beat 自适应吸附、歌曲首尾和 point 事实；`fixtures:e3:golden` 同时生成 Git 忽略的 `artifacts/fixtures/editor-e3-points-v1.wav` 与 range 身份兼容工程。Chrome 场景覆盖 point lane/class、创建/删除/重复、分类迁移、右键 pan/menu、键盘、viewport-visible DOM、reduced motion 与三档视口 geometry；E3 已获 owner 批准并关闭，E5 开放后相邻回归会确认同一 range ID 仍可见。
 
 E4 使用版本化 `editor-e4-overlay.v1.json` 固定 21 项 feature/renderer 映射、0.10/0.35/0.12 bounds 和共享时间锚点；`fixtures:e4:golden` 同时生成 Git 忽略的 `artifacts/fixtures/editor-e4-overlay-v1.wav` 与 JSON 工程。Chrome 场景覆盖 21 项选择、六类 renderer、三手柄、pointer-through、Canvas 故障隔离和 1024/1280/1920 geometry；E4 已获 owner 批准并关闭。
 
 E5 使用版本化 `editor-e5-ranges.v1.json` 固定半开区间、相邻允许、同分类防重叠、跨分类重叠、最短自适应网格和 point-in-range 语义；`fixtures:e5:golden` 同时生成 Git 忽略的 `artifacts/fixtures/editor-e5-ranges-v1.wav` 与 JSON 工程。Chrome 场景覆盖两阶段创建、取消、端点调整与回滚、迁移冲突、右键优先级、键盘、overlay 穿透和 1024/1280/1920 geometry。
+
+E5 clean canonical `E5-2026-08-27T11-03-22-177Z-78124177` 在 commit `781241772e05186e2fe0d006ed6ddd8bceded7af` 上 35/35 通过，summary SHA-256 为 `6928f75cbdeb6d77e54c81b3547f7caee0b39d4c6881884b1d1d7065f3dde1b0`；owner 批准前 E5 保持 `In Progress`、E6 保持 `Planned`。
 
 E2 clean canonical `E2-2026-08-26T16-42-47-634Z-9fc5c0a8` 已在 commit `9fc5c0a81fcf90abfbc665412277147cd958200f` 上 22/22 通过，summary SHA-256 为 `4465c20343af9092601296b86a229200579f648ffa90641411b88f9861ba8660`；2026-08-27 owner 批准该结果并开放 E3。
 
