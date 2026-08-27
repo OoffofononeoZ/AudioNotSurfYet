@@ -7,6 +7,7 @@ upstream_docs:
   - "docs/quality/editor/golden-examples.md"
   - "docs/quality/editor/failure-taxonomy.md"
   - "docs/quality/editor/e3-eval-plan.md"
+  - "docs/quality/editor/e4-eval-plan.md"
   - "docs/delivery/editor/milestone-plan.md"
 next_action: "定义并执行 E4 analysis overlay eval；E5 在 E4 evidence 获批前保持 Planned"
 ---

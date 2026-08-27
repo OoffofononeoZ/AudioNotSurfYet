@@ -63,9 +63,12 @@ AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端：用户选择
 | [Editor E2 eval plan](../quality/editor/e2-eval-plan.md) | AC-E201–AC-E206 的 geometry、tempo、BPM、竞态与回归契约 | project-owner / approved | E2 行为、阈值、算法或证据能力变化 |
 | [Editor E2 golden examples](../quality/editor/e2-golden-examples.md) | viewport、tempo map、BPM reliable/low-confidence 规范样例 | project-owner / approved | E2 fixture、拍号、阈值或边界语义变化 |
 | [Editor E2 failure taxonomy](../quality/editor/e2-failure-taxonomy.md) | E2 geometry、pointer、tempo、estimator 和 consumer 失败分类 | project-owner / approved | E2 失败域或严重度响应变化 |
-| [Editor E3 eval plan](../quality/editor/e3-eval-plan.md) | AC-E301–AC-E306 的 lane、snapping、point、pointer、DOM 与回归契约 | project-owner / in-review | E3 point 行为、阈值或证据能力变化 |
-| [Editor E3 golden examples](../quality/editor/e3-golden-examples.md) | point/class/migration、1/16–1 beat、键盘、可见 DOM 与 range 保留样例 | project-owner / in-review | E3 fixture、交互或边界语义变化 |
-| [Editor E3 failure taxonomy](../quality/editor/e3-failure-taxonomy.md) | E3 lane、migration、snap、point、focus 与 visible DOM 失败分类 | project-owner / in-review | E3 失败域或严重度响应变化 |
+| [Editor E3 eval plan](../quality/editor/e3-eval-plan.md) | AC-E301–AC-E306 的 lane、snapping、point、pointer、DOM 与回归契约 | project-owner / approved | E3 point 行为、阈值或证据能力变化 |
+| [Editor E3 golden examples](../quality/editor/e3-golden-examples.md) | point/class/migration、1/16–1 beat、键盘、可见 DOM 与 range 保留样例 | project-owner / approved | E3 fixture、交互或边界语义变化 |
+| [Editor E3 failure taxonomy](../quality/editor/e3-failure-taxonomy.md) | E3 lane、migration、snap、point、focus 与 visible DOM 失败分类 | project-owner / approved | E3 失败域或严重度响应变化 |
+| [Editor E4 eval plan](../quality/editor/e4-eval-plan.md) | AC-E401–AC-E405 的 renderer、consumer、bounds、hit-test、cursor 与 isolation 契约 | project-owner / in-review | E4 feature、renderer、交互或证据能力变化 |
+| [Editor E4 golden examples](../quality/editor/e4-golden-examples.md) | 21 项、Buffer 去重、三手柄、穿透、stale、错误隔离与恢复样例 | project-owner / in-review | E4 fixture、geometry 或错误语义变化 |
+| [Editor E4 failure taxonomy](../quality/editor/e4-failure-taxonomy.md) | E4 renderer、consumer、bounds、hit、cursor 与 isolation 失败分类 | project-owner / in-review | E4 失败域或严重度响应变化 |
 
 ## Architecture Decisions
 
@@ -106,6 +109,7 @@ AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端：用户选择
 - Editor E1 quality：[eval plan](../quality/editor/eval-plan.md)、[golden](../quality/editor/golden-examples.md)、[failure taxonomy](../quality/editor/failure-taxonomy.md) 与 [evidence](../quality/editor/evidence-index.md) 已获批准
 - Editor E2 quality：[eval plan](../quality/editor/e2-eval-plan.md)、[golden](../quality/editor/e2-golden-examples.md)、[failure taxonomy](../quality/editor/e2-failure-taxonomy.md) 与 canonical record 已获批准；累计 [evidence index](../quality/editor/evidence-index.md) 因 E3 开工保持 `in-review`
 - Editor E3 quality：[eval plan](../quality/editor/e3-eval-plan.md)、[golden](../quality/editor/e3-golden-examples.md)、[failure taxonomy](../quality/editor/e3-failure-taxonomy.md) 与 26/26 canonical record 均已获批准
+- Editor E4 quality：[eval plan](../quality/editor/e4-eval-plan.md)、[golden](../quality/editor/e4-golden-examples.md) 与 [failure taxonomy](../quality/editor/e4-failure-taxonomy.md) 为 `in-review`；约束 E4 实现与 canonical
 - Quality readiness：[Analyzer release readiness](../quality/release-readiness.md) 已由 owner 批准为 `Ready with waivers`，且只覆盖 Analyzer 候选
 - Release operations：`docs/release/` 尚未创建；PROD-015 的托管平台、域名和 SPA fallback 解决前不进入正式上线
 - Retrospectives：`docs/retrospectives/` 尚未创建；有发布、事故或重复摩擦证据后生成
