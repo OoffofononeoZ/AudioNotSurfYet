@@ -1,12 +1,12 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-08-26
+last_reviewed: 2026-08-27
 upstream_docs:
   - "docs/delivery/editor/execution-plan.md"
   - "docs/delivery/editor/acceptance-criteria.md"
   - "docs/delivery/editor/test-strategy.md"
-next_action: "执行 E2 时间轴、tempo map、BPM estimator、canonical 与 owner 门禁"
+next_action: "复核 E2 canonical 与人工任务；批准后关闭 E2 并只开放 E3"
 ---
 
 # Editor E1–E6 Milestone Plan
@@ -53,10 +53,10 @@ next_action: "执行 E2 时间轴、tempo map、BPM estimator、canonical 与 ow
 
 ### E2
 
-- [ ] AC-E201–AC-E206 有 pure/Worker/Chrome 证据。
-- [ ] 多视口/DPR/zoom 各层 geometry 差不超过 1 CSS px。
-- [ ] 60/100/128/127.5 BPM 容差及三类 low-confidence golden 通过。
-- [ ] tempo 输入、single-beat、stale/cancel 与 E1 回归通过。
+- [x] AC-E201–AC-E206 有 pure/Worker/Chrome 证据候选。
+- [x] 多视口/DPR/zoom 各层 geometry 差不超过 1 CSS px；clean Chrome 实测 `0.1484 CSS px`。
+- [x] 60/100/128/127.5 BPM 容差及三类 low-confidence golden 通过。
+- [x] tempo 输入、single-beat、stale/cancel 与 E1 回归通过；clean canonical 22/22。
 - [ ] owner 批准 E2 evidence；只开放 E3。
 
 ### E3

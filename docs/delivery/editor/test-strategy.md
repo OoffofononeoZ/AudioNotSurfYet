@@ -1,14 +1,14 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-08-26
+last_reviewed: 2026-08-27
 upstream_docs:
   - "docs/product/success-metrics.md"
   - "docs/architecture/interface-contracts.md"
   - "docs/architecture/risk-register.md"
   - "docs/delivery/editor/execution-plan.md"
   - "docs/delivery/editor/acceptance-criteria.md"
-next_action: "按 E2 独立 quality 契约建立 geometry/tempo/BPM/Chrome 测试与 canonical"
+next_action: "复核 E2 clean canonical；批准前不创建 E3 quality 命令"
 ---
 
 # Editor E1–E6 Test Strategy
@@ -121,7 +121,7 @@ npm run eval:eN:provisional
 npm run eval:eN
 ```
 
-E1 命令已经存在并获批准。E2 命令在当前里程碑实现；E3–E6 仍不存在。新增脚本必须让 package、测试 README、本项目 Skill 与实际 runner 一致，不保留指向不存在文件的兼容别名。
+E1 命令已经存在并获批准。E2 unit/integration/Chrome/provisional/canonical 命令已实现并由 clean canonical 验证；E3–E6 仍不存在。新增脚本必须让 package、测试 README、本项目 Skill 与实际 runner 一致，不保留指向不存在文件的兼容别名。
 
 固定流程：
 

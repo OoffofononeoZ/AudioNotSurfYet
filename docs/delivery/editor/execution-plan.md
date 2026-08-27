@@ -1,7 +1,7 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-08-26
+last_reviewed: 2026-08-27
 upstream_docs:
   - "docs/product/scope.md"
   - "docs/product/success-metrics.md"
@@ -10,7 +10,7 @@ upstream_docs:
   - "docs/architecture/risk-register.md"
   - "docs/architecture/editor/project-format-v1.md"
   - "docs/architecture/editor/interaction-contracts.md"
-next_action: "执行 E2 时间轴、tempo map、BPM estimator 与独立 quality/canonical 门禁"
+next_action: "复核 E2 canonical 与人工任务；批准前 E3 保持 Planned"
 ---
 
 # Editor E1–E6 Execution Plan
@@ -159,7 +159,7 @@ npm run eval:e1:provisional
 npm run eval:e1
 ```
 
-E2–E6 在各自里程碑实现时新增并同步：
+E2 命令已经实现并产生 clean canonical；E3–E6 在各自里程碑实现时新增并同步：
 
 ```text
 npm run test:eN:unit
@@ -169,7 +169,7 @@ npm run eval:eN:provisional
 npm run eval:eN
 ```
 
-其中 `N` 为 2–6；E2 命令在本里程碑实现，E3–E6 仍为计划命令。canonical 必须拒绝 dirty worktree，并记录 run ID、commit、环境、步骤结果、日志和 summary SHA-256。E1 clean canonical 已在 commit `792b424fbab8e3621ad24d8c9add47d1c9bffcb4` 上 18/18 通过并获批准。
+其中 `N` 为 3–6；E3–E6 仍为计划命令。canonical 必须拒绝 dirty worktree，并记录 run ID、commit、环境、步骤结果、日志和 summary SHA-256。E1 clean canonical 已在 commit `792b424fbab8e3621ad24d8c9add47d1c9bffcb4` 上 18/18 通过并获批准；E2 clean canonical 已在 commit `9fc5c0a81fcf90abfbc665412277147cd958200f` 上 22/22 通过并等待 owner 批准。
 
 ## 6. Change Control and Exclusions
 

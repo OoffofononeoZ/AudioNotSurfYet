@@ -1,14 +1,14 @@
 ---
 status: in-review
 owner: "project-owner"
-last_reviewed: 2026-08-26
+last_reviewed: 2026-08-27
 upstream_docs:
   - "docs/delivery/editor/execution-plan.md"
   - "docs/delivery/editor/acceptance-criteria.md"
   - "docs/delivery/editor/test-strategy.md"
   - "docs/architecture/editor/interaction-contracts.md"
   - "docs/architecture/risk-register.md"
-next_action: "实现 E2 专项、provisional 与 clean canonical；证据批准前 E3 保持 Planned"
+next_action: "复核 E2 canonical 与 Chrome 人工任务；批准前 E3 保持 Planned"
 ---
 
 # Editor E2 Eval Plan
@@ -39,3 +39,5 @@ next_action: "实现 E2 专项、provisional 与 clean canonical；证据批准�
 ## Manual Review
 
 Owner 在最新版 Chrome 检查波形、seek、wheel/right-drag、快速菜单、键盘、tempo boundary、拍号/BPM/single-beat、自动估计与刷新恢复。E2 不要求 Edge；真实 Edge 全量留到 E6，并作为明确覆盖边界保留。
+
+2026-08-27，clean canonical `E2-2026-08-26T16-42-47-634Z-9fc5c0a8` 已在 commit `9fc5c0a81fcf90abfbc665412277147cd958200f` 上 22/22 通过；输入反馈 `3.9ms`、几何误差 `0.1484 CSS px`。正式 reviewer 状态仍为 `in-review`，详细 identity/hash 见 [evidence index](evidence-index.md)。
