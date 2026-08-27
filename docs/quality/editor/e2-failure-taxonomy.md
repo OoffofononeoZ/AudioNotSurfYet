@@ -1,12 +1,12 @@
 ---
-status: in-review
+status: approved
 owner: "project-owner"
 last_reviewed: 2026-08-27
 upstream_docs:
   - "docs/quality/editor/e2-eval-plan.md"
   - "docs/quality/editor/failure-taxonomy.md"
   - "docs/architecture/risk-register.md"
-next_action: "复核 E2 canonical failure coverage；批准前保持 in-review"
+next_action: "在 E3 继续复用 geometry、viewport、draft 与 regression 分类"
 ---
 
 # Editor E2 Failure Taxonomy
@@ -29,3 +29,5 @@ E2 继续沿用 E1 的 `EFT-LIFECYCLE`、`EFT-CONSUMER`、`EFT-DRAFT` 和 `EFT-R
 | S3 | 不影响结果的低等级文案或诊断差异 | 记录并按 AC 判断，不掩盖更高严重度 |
 
 E2 provisional 前发现并修复 reactive proxy `structuredClone` 与 E1 fake coordinator 接口漂移；最终 provisional/canonical 均无失败步骤。两项均作为 `EFT-REGRESSION / S2` 的预门禁修复记录，不伪造为 canonical failure，也不覆盖原始本地开发日志。
+
+2026-08-27，owner 批准 E2 结果并开放 E3；本 taxonomy 据此为 `approved`。该批准不消除 E4/E6 仍需覆盖的 geometry、consumer 与双浏览器残余风险。

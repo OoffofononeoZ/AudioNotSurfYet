@@ -4,7 +4,7 @@ owner: "project-owner"
 last_reviewed: 2026-08-27
 upstream_docs:
   - "docs/context/index.md"
-next_action: "复核 E2 canonical 与人工任务；批准前 E3 保持 Planned"
+next_action: "接入 E3 point workspace，并以共享 geometry 验证 marker 对齐"
 ---
 
 # System Map
@@ -48,7 +48,7 @@ showOpenFilePicker → FileSystemFileHandle → File
 | Config persistence | 保存 volume 与 MusicBar style | Pinia、localStorage key `config` | project-owner | schema 保持不变；volume 为 0–100 |
 | Home visualization | 全屏 Three.js 光线 shader | `rayLength` prop、IntersectionObserver、reduced-motion media query | unknown | 常规模式使用 WebGL RAF；reduced motion 只静态渲染；卸载释放 mesh、geometry、material、render list、renderer 与 WebGL context |
 | Analyzer surface | 四槽/最多四张累计 21 项可用卡、共享 viewport/zoom/cursor/seek、DOM 精确值与分层 Canvas | store、AudioSessionService、AnalysisCoordinator、Canvas 2D | project-owner | 首次仍默认 M7 三卡；已保存空工作区保持为空；Loudness 与 Complex 使用结构化双 Canvas |
-| Editor E1/E2 surface | `/editor/:trackId?` 状态、精简 transport、JSON 工程、三层 Canvas 波形/网格/游标、共享 viewport 与 tempo 表单 | EditorSessionController、AudioSessionService、AnalysisCoordinator、Vue Router、Canvas 2D | project-owner | E1 已批准；E2 clean canonical 为 in-review，point/range UI 和 overlay 尚未开放 |
+| Editor E1/E2 surface | `/editor/:trackId?` 状态、精简 transport、JSON 工程、三层 Canvas 波形/网格/游标、共享 viewport 与 tempo 表单 | EditorSessionController、AudioSessionService、AnalysisCoordinator、Vue Router、Canvas 2D | project-owner | E1/E2 已批准；E3 point 开放实施，range UI 和 overlay 尚未开放 |
 | Editor project and draft | strict JSON V1、歌曲 hash/时长绑定、原生 file gateway、单草稿 autosave 与恢复冲突 | `EditorFormatCodecRegistry`、`EditorDraftRepository`、`audionotsurfyet-editor` V1 | project-owner | 首版只注册 JSON；session database 不变 |
 | Experimental charts | 试验性的 Three.js 2D 图和瀑布流 | Vue props、TestLands | unknown | 不视为稳定接口 |
 | Event bus | 跨组件事件类型与发送 | mitt singleton | unknown | `settings-open` 无已发现订阅者 |
@@ -77,7 +77,7 @@ showOpenFilePicker → FileSystemFileHandle → File
 - 刷新时 current Blob 优先并恢复为 0 秒 paused；其他曲目只在 `queryPermission()` 为 granted 时自动取回，`requestPermission()` 只由可见用户操作触发。
 - `--coinc-process` 既可能由 GSAP 写入，也可能由能量 RAF 写入，模式切换需明确所有权。
 - AudioContext、source、单播放 RAF、产品 Worker、pending analysis request 和封面 URL 由 MainLayout-owned service/coordinator 生命周期统一释放；Observer、GSAP 和 Three.js 由各组件释放，LightBg 在 reduced motion 下不保留连续 RAF。
-- Header 的 settings 事件没有已发现消费者；Visualizer 仍为占位页，Editor 已进入 E2 时间轴/tempo 页面。
+- Header 的 settings 事件没有已发现消费者；Visualizer 仍为占位页，Editor E2 时间轴/tempo 已获批准，E3 point workspace 当前开放实施。
 - `components.d.ts` 和 `auto-imports.d.ts` 是构建插件生成文件，构建可能造成工作树变化。
 
 ## Editor Boundary After E2
@@ -90,8 +90,8 @@ showOpenFilePicker → FileSystemFileHandle → File
 - `EditorTimeline` 以同一 `timeToX/xToTime` 驱动 waveform、grid、cursor 与 boundary；viewport 支持 1–64 zoom、指针锚点、任意像素/25% pan、seek 和持久化。
 - tempo map 支持 metered/single-beat、20–300 小数 BPM、拍号、继承式 boundary 和内部 onset/autocorrelation 估计；低置信度或 stale 结果不写入工程。
 
-尚未实现：point/range 编辑交互、分析 overlay 与 E6 双浏览器/容量加固。E2 canonical 已通过并进入 owner 复核；schema 能 round-trip point/range 数据不代表对应编辑交互已经开放，E3 仍为 `Planned`。
+尚未实现：point/range 编辑交互、分析 overlay 与 E6 双浏览器/容量加固。E2 canonical 已通过并获 owner 批准；schema 能 round-trip point/range 数据不代表对应编辑交互已存在，当前仅 E3 point 开放实施。
 
 ## Approval Record
 
-`project-owner` 于 2026-08-21 确认 M7 卡片、共享视口、跳转、刷新恢复和 3/3 学习解释通过，并批准 M7 canonical、关闭 M7、开放 M8。随后 M8 运行时与 clean canonical 已完成，本图同步累计 16 项事实；owner 又批准 M8 canonical 与 Windows Chrome 界面稳定化结果并明确要求实施 M9。2026-08-23，owner 批准 M9 canonical 与非首页导航栏模糊效果，并明确要求实施 M10；本图随后同步 M10 累计 21 项代码事实及 36/36 clean canonical。2026-08-25，owner 批准 M10 canonical evidence 与 21/21 Analyzer 特征覆盖；M10 改为 `Complete`。同日 owner 确认 Edge 已安装并要求开始最终加固。M11 clean Chrome/Edge canonical 随后 38/38 通过；2026-08-26，owner 又批准该 canonical、Edge 原生权限与最终加固结果，M11 据此为 `Complete`。同日 owner 依次批准 Editor 产品、架构、delivery 与 E1 canonical/人工结果；E1 为 `Complete`，E2 已开放。2026-08-27，E2 clean canonical 22/22 通过并登记为 `in-review`，尚未构成 E2 owner 批准或 E3 开放。
+`project-owner` 于 2026-08-21 确认 M7 卡片、共享视口、跳转、刷新恢复和 3/3 学习解释通过，并批准 M7 canonical、关闭 M7、开放 M8。随后 M8–M11 与 Analyzer readiness 依次完成并获批。2026-08-26，owner 又依次批准 Editor 产品、架构、delivery 与 E1 canonical/人工结果；E1 为 `Complete`，E2 随后开放。2026-08-27，E2 clean canonical 22/22 通过并登记，owner 同日批准此次结果并开放 E3；E2 据此为 `Complete`，E3 为 `In Progress`。

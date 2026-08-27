@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/quality/editor/golden-examples.md"
   - "docs/quality/editor/failure-taxonomy.md"
   - "docs/delivery/editor/milestone-plan.md"
-next_action: "复核 E2 clean canonical 与 Chrome 人工任务；批准前 E2 保持 In Progress、E3 保持 Planned"
+next_action: "定义并执行 E3 point annotation eval；批准前 E4 保持 Planned"
 ---
 
 # Editor Evidence Index
@@ -16,10 +16,11 @@ next_action: "复核 E2 clean canonical 与 Chrome 人工任务；批准前 E2 �
 
 - E0-D：`Complete`。
 - E1：`Complete`。
-- E2：`In Progress`。
-- E3–E6：`Planned`。
+- E2：`Complete`。
+- E3：`In Progress`。
+- E4–E6：`Planned`。
 - E1 clean canonical 与 owner 人工门禁均已批准；Analyzer M3–M11 evidence 仍不能替代未来 Editor 里程碑证据。
-- E2 clean canonical 已登记为 `in-review`；自动化通过不等同于 owner 人工任务或 E3 门禁获批。
+- E2 clean canonical 与 owner 门禁已于 2026-08-27 获批；E3 已开放，但其证据仍须独立建立。
 
 ## 2. Record Contract
 
@@ -116,15 +117,15 @@ next_action: "复核 E2 clean canonical 与 Chrome 人工任务；批准前 E2 �
 | --- | --- |
 | Run ID | `E2-2026-08-26T16-42-47-634Z-9fc5c0a8` |
 | Milestone | E2 — Timeline and tempo |
-| State | `in-review`（22/22 自动化通过，等待 owner Chrome 任务与批准） |
+| State | `approved`（22/22 自动化与 owner 门禁已批准） |
 | Implementation commit | `9fc5c0a81fcf90abfbc665412277147cd958200f` |
 | Evidence commit | 本记录所在的 `docs: register Editor E2 canonical evidence` 提交 |
 | Dirty at start / end | `false` / `false` |
 | Commit at end | `9fc5c0a81fcf90abfbc665412277147cd958200f` |
 | Started at | 2026-08-26 16:42:47.634 UTC |
 | Method | `npm run eval:e2` |
-| Reviewer | `project-owner` — pending |
-| Retention | `local-present`，至少保留到 E2 审批完成 |
+| Reviewer | `project-owner` — approved 2026-08-27 |
+| Retention | `local-present`；E2 身份变化时才重跑 |
 | Artifact root | `artifacts/evals/E2-2026-08-26T16-42-47-634Z-9fc5c0a8/` |
 | Summary SHA-256 | `4465c20343af9092601296b86a229200579f648ffa90641411b88f9861ba8660` |
 
@@ -193,9 +194,9 @@ next_action: "复核 E2 clean canonical 与 Chrome 人工任务；批准前 E2 �
 | `21-build.log` | `a75e62039425b9fb6d64578eacbfa7779bf6a98e41adfea3fe748e0eb0b75781` |
 | `22-diff-check.log` | `e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855` |
 
-### Manual Gaps and Approval Gate
+### Manual Gaps and Approval
 
 - E2 专项按批准计划只在稳定 Chrome 自动化；真实 Edge 的 Editor 全量、原生 picker、离页提示和辅助技术仍保留到 E6，不能从 Analyzer M11 或本轮 Chrome 结果外推。
 - BPM golden 证明固定合成输入和低置信度边界，不代表任意真实歌曲都能可靠识别；低置信度时继续要求手动输入。
-- owner 仍需检查波形、wheel/right-drag/菜单、键盘、tempo boundary、拍号/BPM/single-beat、估计竞态和刷新恢复。批准前 E2 保持 `In Progress`，E3 保持 `Planned`。
-- R-024、R-026、R-027 已获得 E2 自动化候选证据，但在 owner 审批及各风险剩余 E4/E6 门禁完成前保持 `Open`。
+- 2026-08-27，owner 原文“我已经提交了，批准此次结果并且开放下一步”批准 E2 并开放 E3；不从该原文补写未提供的逐项人工测量值。
+- R-026 根据 BPM golden、竞态证据与本次签字改为 `Mitigated`。R-024、R-025、R-027 继续等待 E3/E4/E6 的 geometry、交互、consumer 与双浏览器门禁。

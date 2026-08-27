@@ -1,7 +1,7 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-08-26
+last_reviewed: 2026-08-27
 upstream_docs:
   - "docs/product/success-metrics.md"
   - "docs/architecture/interface-contracts.md"
@@ -9,7 +9,7 @@ upstream_docs:
   - "docs/architecture/editor/project-format-v1.md"
   - "docs/architecture/editor/interaction-contracts.md"
   - "docs/delivery/editor/execution-plan.md"
-next_action: "以 AC-E101–AC-E108 约束 E1 实现、provisional、clean canonical 与人工复核"
+next_action: "以 AC-E301–AC-E306 约束 E3 实现、provisional、clean canonical 与人工复核"
 ---
 
 # Editor E1–E6 Acceptance Criteria
