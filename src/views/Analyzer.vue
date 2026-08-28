@@ -2,38 +2,27 @@
     <main class="analyzer-page">
         <DotGridBg />
         <div class="analyzer-content">
-            <header class="page-header">
-                <div>
-                    <p class="kicker">Analyzer learning workspace · M10</p>
-                    <h1>用四张联动卡读懂声音特征</h1>
-                    <p>
-                        RMS 看响度变化，Amplitude Spectrum 看频率分布，
-                        Chroma 看十二音级；Loudness 与 Complex Spectrum
-                        继续解释感知频带、幅度和相位结构。
-                        四个槽位共享同一视口和播放游标。
-                    </p>
-                </div>
-                <div class="status-stack" aria-live="polite">
-                    <span :data-state="analysis.state">
-                        {{ analysisStateLabel }}
-                    </span>
-                    <span>{{ activeCards.length }}/4 张 M10 活动卡</span>
-                    <span v-if="sessionStore.persistence.state === 'not-persisted'">
-                        当前工作区未持久化
-                    </span>
-                </div>
-            </header>
-
             <section class="timeline-toolbar" aria-label="共享时间轴控制">
-                <div>
-                    <strong>共享视口</strong>
-                    <span>
-                        {{ formatTime(viewport.startSeconds) }}
-                        –
-                        {{ formatTime(viewport.endSeconds) }}
-                    </span>
-                    <span>游标 {{ formatTime(cursorSeconds) }}</span>
-                    <span>{{ viewport.zoom.toFixed(1) }}×</span>
+                <div class="toolbar-summary">
+                    <div class="status-row" aria-live="polite">
+                        <span :data-state="analysis.state">
+                            {{ analysisStateLabel }}
+                        </span>
+                        <span>{{ activeCards.length }}/4 张活动卡</span>
+                        <span v-if="sessionStore.persistence.state === 'not-persisted'">
+                            当前工作区未持久化
+                        </span>
+                    </div>
+                    <div class="viewport-summary">
+                        <strong>共享视口</strong>
+                        <span>
+                            {{ formatTime(viewport.startSeconds) }}
+                            –
+                            {{ formatTime(viewport.endSeconds) }}
+                        </span>
+                        <span>游标 {{ formatTime(cursorSeconds) }}</span>
+                        <span>{{ viewport.zoom.toFixed(1) }}×</span>
+                    </div>
                 </div>
                 <div class="toolbar-actions">
                     <button
@@ -81,8 +70,22 @@
                 {{ analysis.error.message }}
             </p>
 
-            <section class="card-grid" aria-label="分析卡片工作区">
-                <template v-for="slot in CARD_SLOTS" :key="slot">
+            <section
+                ref="masonryRoot"
+                class="card-masonry"
+                :class="{ 'is-ready': masonryReady }"
+                :style="{ height: `${masonryHeight}px` }"
+                aria-label="分析卡片工作区"
+                data-testid="analyzer-masonry"
+            >
+                <div
+                    v-for="slot in CARD_SLOTS"
+                    :key="slot"
+                    :ref="masonryItemRef(slot)"
+                    class="masonry-item"
+                    :data-slot="slot"
+                    :style="masonryItemStyle(slot)"
+                >
                     <MeydaCard
                         v-if="cardAt(slot)"
                         :slot="slot"
@@ -121,7 +124,7 @@
                             </button>
                         </div>
                     </article>
-                </template>
+                </div>
             </section>
         </div>
     </main>
@@ -129,6 +132,7 @@
 
 <script setup lang="ts">
 import {
+    type ComponentPublicInstance,
     computed,
     onBeforeUnmount,
     onMounted,
@@ -155,12 +159,19 @@ import {
     type M10FeatureId,
 } from '../analysis/types';
 import { useAudioSessionStore } from '../stores/audioSessionStore';
+import {
+    calculateMasonryLayout,
+    type MasonryPlacement,
+} from '../utils/masonryLayout';
 import type {
     ActiveAnalysisCard,
     PersistedTimelineViewport,
 } from '../types/session';
 
 const CARD_SLOTS = [0, 1, 2, 3] as const;
+type CardSlot = (typeof CARD_SLOTS)[number];
+const MASONRY_GAP = 18;
+const MASONRY_WIDE_QUERY = '(min-width: 1280px)';
 const DEFAULT_CARDS: ActiveAnalysisCard[] = M7_FEATURE_IDS.map(
     (featureId, slot) => ({
         slot: slot as 0 | 1 | 2,
@@ -182,6 +193,18 @@ let cursorTimer: ReturnType<typeof setTimeout> | null = null;
 let lastCursorRequestAt = 0;
 let initializationPromise: Promise<void> | null = null;
 let workspaceBootstrapped = false;
+const masonryRoot = ref<HTMLElement | null>(null);
+const masonryHeight = ref(0);
+const masonryReady = ref(false);
+const masonryPlacements = reactive<
+    Partial<Record<CardSlot, MasonryPlacement<CardSlot>>>
+>({});
+const masonryItems = new Map<CardSlot, HTMLElement>();
+let masonryRootObserver: ResizeObserver | null = null;
+let masonryItemObserver: ResizeObserver | null = null;
+let masonryMediaQuery: MediaQueryList | null = null;
+let masonryFrame: number | null = null;
+let lastMasonryRootWidth = -1;
 
 const analysis = computed(() => sessionStore.analysis);
 const activeCards = computed(() =>
@@ -241,6 +264,111 @@ const formatTime = (seconds: number): string => {
     const safe = Math.max(0, Number.isFinite(seconds) ? seconds : 0);
     const minutes = Math.floor(safe / 60);
     return `${minutes}:${(safe % 60).toFixed(2).padStart(5, '0')}`;
+};
+
+const masonryItemStyle = (slot: CardSlot) => {
+    const placement = masonryPlacements[slot];
+    return {
+        width: placement ? `${placement.width}px` : '100%',
+        transform: placement
+            ? `translate3d(${placement.left}px, ${placement.top}px, 0)`
+            : 'translate3d(0, 0, 0)',
+    };
+};
+
+const performMasonryLayout = () => {
+    masonryFrame = null;
+    const root = masonryRoot.value;
+    const elements = CARD_SLOTS.map((slot) => masonryItems.get(slot));
+    if (!root || elements.some((element) => !element)) return;
+    const containerWidth = root.getBoundingClientRect().width;
+    const columnCount: 1 | 2 = masonryMediaQuery?.matches ? 2 : 1;
+    const columnWidth = Math.max(
+        0,
+        (containerWidth - MASONRY_GAP * (columnCount - 1)) / columnCount,
+    );
+    for (const element of elements) {
+        element!.style.width = `${columnWidth}px`;
+    }
+    const layout = calculateMasonryLayout({
+        containerWidth,
+        columnCount,
+        gap: MASONRY_GAP,
+        items: CARD_SLOTS.map((slot, index) => ({
+            id: slot,
+            height: elements[index]!.getBoundingClientRect().height,
+        })),
+    });
+    for (const placement of layout.placements) {
+        masonryPlacements[placement.id] = placement;
+    }
+    masonryHeight.value = layout.height;
+    masonryReady.value = true;
+    lastMasonryRootWidth = containerWidth;
+};
+
+const scheduleMasonryLayout = () => {
+    if (masonryFrame !== null) return;
+    masonryFrame = window.requestAnimationFrame(performMasonryLayout);
+};
+
+const registerMasonryItem = (
+    slot: CardSlot,
+    element: Element | ComponentPublicInstance | null,
+) => {
+    const previous = masonryItems.get(slot);
+    if (previous === element) return;
+    if (previous) masonryItemObserver?.unobserve(previous);
+    if (element instanceof HTMLElement) {
+        masonryItems.set(slot, element);
+        masonryItemObserver?.observe(element);
+    } else {
+        masonryItems.delete(slot);
+    }
+    if (typeof window !== 'undefined') scheduleMasonryLayout();
+};
+
+const masonryItemRefSetters = new Map<
+    CardSlot,
+    (element: Element | ComponentPublicInstance | null) => void
+>();
+const masonryItemRef = (slot: CardSlot) => {
+    let setter = masonryItemRefSetters.get(slot);
+    if (!setter) {
+        setter = (element) => registerMasonryItem(slot, element);
+        masonryItemRefSetters.set(slot, setter);
+    }
+    return setter;
+};
+
+const setupMasonryLayout = () => {
+    const root = masonryRoot.value;
+    if (!root) return;
+    masonryMediaQuery = window.matchMedia(MASONRY_WIDE_QUERY);
+    masonryRootObserver = new ResizeObserver(([entry]) => {
+        const width = entry?.contentRect.width ?? 0;
+        if (Math.abs(width - lastMasonryRootWidth) > 0.5) {
+            scheduleMasonryLayout();
+        }
+    });
+    masonryItemObserver = new ResizeObserver(() => scheduleMasonryLayout());
+    masonryRootObserver.observe(root);
+    for (const element of masonryItems.values()) {
+        masonryItemObserver.observe(element);
+    }
+    masonryMediaQuery.addEventListener('change', scheduleMasonryLayout);
+    scheduleMasonryLayout();
+};
+
+const disposeMasonryLayout = () => {
+    masonryRootObserver?.disconnect();
+    masonryItemObserver?.disconnect();
+    masonryMediaQuery?.removeEventListener('change', scheduleMasonryLayout);
+    masonryRootObserver = null;
+    masonryItemObserver = null;
+    masonryMediaQuery = null;
+    if (masonryFrame !== null) window.cancelAnimationFrame(masonryFrame);
+    masonryFrame = null;
 };
 
 const persistWorkspace = (
@@ -458,6 +586,7 @@ watch(
 );
 
 onMounted(() => {
+    setupMasonryLayout();
     unsubscribeCoordinator = analysisLease.subscribe(() => {
         seriesRevision.value += 1;
         requestExactValues(false);
@@ -465,6 +594,7 @@ onMounted(() => {
 });
 
 onBeforeUnmount(() => {
+    disposeMasonryLayout();
     unsubscribeCoordinator?.();
     unsubscribeCoordinator = null;
     if (cursorTimer) clearTimeout(cursorTimer);
@@ -485,54 +615,24 @@ onBeforeUnmount(() => {
 }
 
 .analyzer-content {
+    box-sizing: border-box;
     height: 100dvh;
     overflow-y: auto;
-    padding: 0 max(24px, calc((100vw - 1760px) / 2)) 150px;
+    padding:
+        0
+        max(24px, calc((100vw - 1760px) / 2))
+        150px;
     position: relative;
     scrollbar-width: thin;
 }
 
-.page-header {
-    align-items: end;
+.status-row {
     display: flex;
-    gap: 32px;
-    justify-content: space-between;
-    margin-bottom: 24px;
-    padding-top: 104px;
-}
-
-.page-header h1 {
-    font-size: clamp(1.8rem, 4vw, 3.6rem);
-    font-weight: 650;
-    letter-spacing: -0.05em;
-    line-height: 1;
-    margin: 8px 0 14px;
-    max-width: 900px;
-}
-
-.page-header p {
-    color: #9eb4a7;
-    line-height: 1.6;
-    margin: 0;
-    max-width: 780px;
-}
-
-.kicker {
-    color: #7dffb3 !important;
-    font-size: 0.75rem;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-}
-
-.status-stack {
-    align-items: flex-end;
-    display: flex;
-    flex-direction: column;
-    flex: 0 0 auto;
+    flex-wrap: wrap;
     gap: 6px;
 }
 
-.status-stack span {
+.status-row span {
     background: rgba(10, 24, 16, 0.82);
     border: 1px solid rgba(125, 255, 179, 0.22);
     border-radius: 999px;
@@ -541,7 +641,7 @@ onBeforeUnmount(() => {
     padding: 6px 10px;
 }
 
-.status-stack span[data-state="ready"] {
+.status-row span[data-state="ready"] {
     color: #7dffb3;
 }
 
@@ -554,14 +654,24 @@ onBeforeUnmount(() => {
     display: flex;
     gap: 18px;
     justify-content: space-between;
-    margin-bottom: 18px;
+    margin:
+        calc(var(--app-header-height) + 24px)
+        0
+        18px;
     padding: 13px 15px;
     position: sticky;
     top: calc(var(--app-header-height) + var(--app-sticky-gap));
     z-index: var(--layer-sticky);
 }
 
-.timeline-toolbar > div:first-child {
+.toolbar-summary {
+    align-items: flex-start;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.viewport-summary {
     align-items: center;
     display: flex;
     flex-wrap: wrap;
@@ -636,10 +746,24 @@ button:focus:not(:focus-visible) {
     padding: 12px 14px;
 }
 
-.card-grid {
-    display: grid;
-    gap: 18px;
-    grid-template-columns: 1fr;
+.card-masonry {
+    min-height: 220px;
+    position: relative;
+    width: 100%;
+}
+
+.masonry-item {
+    left: 0;
+    position: absolute;
+    top: 0;
+}
+
+.card-masonry:not(.is-ready) .masonry-item {
+    visibility: hidden;
+}
+
+.masonry-item > * {
+    width: 100%;
 }
 
 .empty-slot {
@@ -673,28 +797,18 @@ button:focus:not(:focus-visible) {
     letter-spacing: 0.16em;
 }
 
-@media (min-width: 1280px) {
-    .card-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-}
-
 @media (max-width: 820px) {
     .analyzer-content {
         padding-left: 14px;
         padding-right: 14px;
     }
 
-    .page-header,
     .timeline-toolbar,
     .empty-slot {
         align-items: stretch;
         flex-direction: column;
     }
 
-    .status-stack {
-        align-items: flex-start;
-    }
 }
 
 @media (prefers-reduced-motion: reduce) {

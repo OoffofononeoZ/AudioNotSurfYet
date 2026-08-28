@@ -5,7 +5,7 @@ last_reviewed: 2026-08-28
 upstream_docs:
   - "docs/architecture/system-design.md"
   - "docs/architecture/interface-contracts.md"
-next_action: "owner 以 E6 人工补偿矩阵复核 R-024、R-025、R-027；自动化证据已登记"
+next_action: "以 M12 双浏览器几何与生命周期证据复核 R-028；Editor E6 继续复核 R-024、R-025、R-027"
 ---
 
 # Risk Register
@@ -41,6 +41,7 @@ next_action: "owner 以 E6 人工补偿矩阵复核 R-024、R-025、R-027；自�
 | R-025 | 大量事件 DOM、右键状态或键盘路径造成性能/可访问性回归 | Medium | High | 输入反馈 >100ms、Editor 归因长任务 >50ms、遗留 pressed/capture/menu、键盘无法完成核心任务 | Canvas 背景 + 横向/纵向可见事件 DOM；E6 clean canonical 10,000 事件下 Chrome/Edge 最大反馈 `4.5/4.2ms`、长任务 0、20 次资源循环稳定；辅助技术与长会话 owner 门禁待签字 | 降低可见 DOM/绘制细节但不降低秒数事实；核心键盘缺失阻断 E6 | project-owner | Open |
 | R-026 | BPM 误识别或低置信度被写成用户事实 | Medium | Medium | silence/歧义输入自动填入错误 BPM、用户编辑值被异步结果覆盖 | 同 Worker retained PCM、typed reliable/low-confidence、仅唯一空且未编辑 segment 可写；E2 golden 覆盖 silence、歧义、60/100/128/小数与 stale，22/22 canonical 与 2026-08-27 owner 批准通过 | 低置信度保持空并提示手动输入；算法、阈值或第三方依赖变化时重开 | project-owner | Mitigated |
 | R-027 | Analyzer/Editor 争用 active features、Worker retained PCM 或 current cache | Medium | High | Editor 结果显示到 Analyzer、旧 generation 覆盖、返回 Analyzer 卡片丢失、出现第二 Worker | ADR-0006 consumer lease + existing generation/identity；E4 consumer/renderer 回归；E6 clean canonical 双浏览器各 20 次 Editor/Analyzer/Home 循环保持单 Worker/AudioContext并回归 M6–M11 | 允许返回 Analyzer 后部分重算，不允许错误 identity 或 workspace 改写 | project-owner | Open |
+| R-028 | Analyzer 动态瀑布流产生重叠、视觉/DOM 顺序偏离或 Observer/RAF 泄漏 | Medium | High | 卡片/空槽相交、容器高度不足、换卡或展开明细后焦点/`details` 状态丢失、路由循环资源单调增长、`ResizeObserver loop` 警告 | 稳定 slot DOM 包装层 + 纯最短列函数；实际 DOM 高度；一个 container Observer、一个 item Observer、单 RAF 合并；M12 unit 覆盖平局/重算，Chrome/Edge 覆盖四视口、动态明细、错误态、焦点和路由循环 | M12 canonical 与 owner 复核前保持 Open；任何重叠、关键焦点错序、控制台 Observer 警告或资源增长均阻断 M12/readiness | project-owner | Open |
 
 ## Review Rule
 
@@ -48,4 +49,4 @@ next_action: "owner 以 E6 人工补偿矩阵复核 R-024、R-025、R-027；自�
 - 风险只有在缓解措施有可复现证据时才能标记 Mitigated。
 - `Accepted` 表示已知平台事实被接受，不表示无需实现降级路径。
 - 新的高影响风险或剩余风险超过已批准范围时，停止进入下一里程碑并由 `project-owner` 决策。
-- Analyzer R-001–R-021 的历史状态继续由 M3–M11/readiness 证据支持。Editor R-022–R-027 已获批进入 delivery，但状态保持 `Open`；必须在 E1–E6 execution/quality 中映射到成功、失败、边界或异常证据，不得因架构批准提前标记缓解。
+- Analyzer R-001–R-021 的历史状态继续由 M3–M11/readiness 证据支持；M12 新增 R-028 并在新双浏览器 evidence 获批前保持 `Open`。Editor R-022–R-027 的状态与 E1–E6 证据独立管理，不得因 M12 改写。

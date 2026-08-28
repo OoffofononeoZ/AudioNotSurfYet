@@ -14,6 +14,7 @@ import {
 } from '../support/file-picker';
 import { encodeMonoWav } from '../support/m7-learning-fixture';
 import { createM9VectorPcm } from '../support/m9-vector-fixture';
+import { expectAnalyzerMasonry } from '../support/analyzer-masonry';
 
 const REPOSITORY_ROOT = path.resolve(import.meta.dirname, '../..');
 const M9_WAV_FIXTURE = path.join(
@@ -159,12 +160,8 @@ test('renders Power Spectrum, MFCC and Buffer as four persistent unique cards', 
         .toContain(viewportBeforeReload.match(/\d+:\d+\.\d+\s*–\s*\d+:\d+\.\d+/)?.[0]);
 
     const geometries: Record<number, number> = {};
-    for (const width of [390, 1024, 1280, 1920]) {
-        await page.setViewportSize({ width, height: 900 });
-        geometries[width] = await page.locator('.card-grid').evaluate(
-            (element) => getComputedStyle(element).gridTemplateColumns
-                .split(' ').length,
-        );
+    for (const width of [390, 1_024, 1_280, 1_920]) {
+        geometries[width] = (await expectAnalyzerMasonry(page, width)).columns;
     }
     expect(geometries).toEqual({ 390: 1, 1024: 1, 1280: 2, 1920: 2 });
 

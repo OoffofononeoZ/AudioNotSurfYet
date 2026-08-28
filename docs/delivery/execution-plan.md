@@ -1,7 +1,7 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-08-26
+last_reviewed: 2026-08-28
 upstream_docs:
   - "docs/product/problem-brief.md"
   - "docs/product/scope.md"
@@ -9,20 +9,20 @@ upstream_docs:
   - "docs/architecture/system-design.md"
   - "docs/architecture/interface-contracts.md"
   - "docs/architecture/risk-register.md"
-next_action: "保留 Analyzer 历史交付状态；按已批准 Editor 专属计划实施 E1"
+next_action: "实施 M12 瀑布流布局并形成 provisional/canonical 双浏览器证据；Editor E6 状态独立"
 ---
 
 # Execution Plan
 
 ## Scope Routing
 
-本文保留 Analyzer M1–M11 的已批准历史交付记录。Editor 不修改这些里程碑；其 E1–E6 实施顺序由已批准的 [Editor execution plan](editor/execution-plan.md) 管理，并与专属 [acceptance criteria](editor/acceptance-criteria.md)、[test strategy](editor/test-strategy.md) 和 [milestone plan](editor/milestone-plan.md) 配套。E1 已开放，E2–E6 保持 `Planned`。
+本文保留 Analyzer M1–M11 的已批准历史交付记录，并新增已获准实施的 M12 瀑布流布局切片。Editor E1–E6 继续由独立 [Editor execution plan](editor/execution-plan.md)、[acceptance criteria](editor/acceptance-criteria.md)、[test strategy](editor/test-strategy.md) 和 [milestone plan](editor/milestone-plan.md) 管理；M12 不改写 Editor E6 的证据或人工门禁。
 
 ## 1. Delivery Outcome
 
 按纵向切片把已批准的本地音频学习体验从当前播放器基础推进到 21 项 Meyda 特征全覆盖。本计划以门禁证据而不是日历日期排序；任一里程碑未通过时，不进入下一批特征。
 
-本文件定义 Analyzer 历史实施顺序和验收方式。当前 M1、M2、Q0 与 M3–M11 均已完成；`project-owner` 于 2026-08-26 批准 M11 canonical、Edge 原生权限与最终加固结果，随后批准 Analyzer-only `Ready with waivers`。Editor 的新增 delivery planning 使用上方专属文档，不反向改写 Analyzer 历史。
+本文件定义 Analyzer 实施顺序和验收方式。M1、M2、Q0 与 M3–M11 的批准历史保持不变；2026-08-28 获准的 M12 改变候选页面几何，因此 Analyzer-only `Ready with waivers` 暂停适用于新候选，等待 M12 canonical 与 owner 复核。Editor 的 delivery planning 使用独立文档，不反向继承或阻塞 M12。
 
 ## 2. Stage Gates
 
@@ -39,6 +39,7 @@ flowchart LR
     M8 --> M9["M9 Vectors / waveform"]
     M9 --> M10["M10 Structured features"]
     M10 --> M11["M11 Hardening"]
+    M11 --> M12["M12 Analyzer Masonry"]
 ```
 
 每个门禁都要求：
@@ -396,6 +397,29 @@ Gate:
 
 - [acceptance criteria](acceptance-criteria.md) 适用项全部有证据；
 - M11 证据已完成，现在创建 `docs/quality/release-readiness.md`，并据实际覆盖以 `Ready with waivers` 进入单独审阅；
+
+### M12 — Analyzer masonry layout and header simplification
+
+Goal：在不改变四槽、分析、播放和持久化接口的前提下，让不同高度的 Analyzer 卡片实时进入最短列，并删除开场文案、把稳定状态信息并入共享时间轴工具栏。
+
+Implementation:
+
+- Slice 0：固定 system design、R-028、AC-U05/U06 和双浏览器 M12 evidence 契约。
+- Slice 1：增加纯最短列函数；Analyzer 用稳定 slot 包装层、实际 DOM 高度、ResizeObserver 与单 RAF 完成动态 1/2 列布局。
+- Slice 2：删除独立 page header；状态 live region 并入 sticky 工具栏，保持 Header 下 8px、MusicBar/弹层层级和 150px 底部安全区。
+- 不修改 TestLands、`@chenglou/pretext`、路由、store/schema、analysis lease、Canvas renderer 或 Editor。
+
+Verification:
+
+- Unit：单列、双列、列高平局选择左列、不同高度、动态重算、容器高度和无相交。
+- Chrome/Edge：开场文案缺失、状态 live region、390/1024 一列、1280/1920 两列；0/1/4 卡、空槽、换卡、renderer error 和结构明细展开后仍按实际高度重排。
+- 动态重排不得重建卡片；`details open`、焦点/键盘顺序、Canvas 层数、seek/zoom、DPR、sticky/player 层级保持稳定。
+- resize 和 Home/Analyzer 路由循环不得累积 Observer、RAF、Canvas 或 console error/warn；旧 M7–M11 几何断言改为 DOMRect/最短列不变量。
+- dirty worktree 只运行 `eval:m12:provisional`；用户提供 clean commit 后才运行 `eval:m12` 并登记 canonical evidence。
+
+Exit：M12 unit/E2E、typecheck、docs、build、diff check 和 M7–M11 Analyzer 相邻回归均通过；R-028 有双浏览器证据；canonical/evidence/readiness 由 `project-owner` 审批后才将 M12 标记 Complete。
+
+Rollback：如果最短列在批准浏览器中无法无重叠或无资源增长运行，则回退 M12 候选实现并保留 M11 已批准候选；不增加运行时 legacy fallback 或浏览器特判。
 - 未通过的格式、浏览器或关键路径不得以“已知问题”形式绕过批准范围。
 
 ## 4. Cross-Cutting Ownership
@@ -420,3 +444,5 @@ Gate:
 `project-owner` 于 2026-08-25 明确批准 M10 canonical evidence 与 21/21 Analyzer 特征覆盖。M10 改为 `Complete`，M11 门禁开放但开始实施前保持 `Planned`；该批准不构成 Edge、M11 或 release readiness 通过。
 
 `project-owner` 于 2026-08-26 明确批准 M11 canonical evidence、Edge 原生权限与最终加固结果，同意将 M11 标记为 `Complete` 并创建 release-readiness。该批准关闭 Analyzer delivery，但不预先批准 readiness 豁免或生产上线。
+
+2026-08-28，`project-owner` 接受 M12 瀑布流与顶部精简计划并明确要求实施。该批准开放 M12 代码与 provisional evidence；M11 历史证据保持批准，但不自动覆盖新候选几何，canonical 与 readiness 恢复仍需单独审批。

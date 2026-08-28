@@ -1,25 +1,25 @@
 ---
-status: approved
+status: in-review
 owner: "project-owner"
-last_reviewed: 2026-08-26
+last_reviewed: 2026-08-28
 upstream_docs:
   - "docs/product/success-metrics.md"
   - "docs/architecture/risk-register.md"
   - "docs/delivery/execution-plan.md"
   - "docs/delivery/acceptance-criteria.md"
   - "docs/delivery/test-strategy.md"
-next_action: "保留 Analyzer 历史 eval；按 Editor E1 专属 eval plan 形成新 evidence"
+next_action: "在用户提供干净 commit 后执行 M12 canonical；登记 evidence 后复核 R-028 与 Analyzer readiness"
 ---
 
 # Eval Plan
 
 ## Scope Routing
 
-本文保留 Analyzer M3–M11 已批准的质量契约与历史。Editor 使用独立的 [E1 eval plan](editor/eval-plan.md)、[golden examples](editor/golden-examples.md)、[failure taxonomy](editor/failure-taxonomy.md) 与 [evidence index](editor/evidence-index.md)；这些 Editor 文档在 E1 owner evidence 审批前保持 `in-review`。
+本文保留 Analyzer M3–M11 已批准的质量契约与历史，并增加 M12 DOM/响应式/资源评估。Editor 使用独立质量文档；M12 不修改 Editor E6 evidence 或人工补偿状态。
 
 ## 1. Purpose and Current State
 
-本文件定义 AudioNotSurfYet 的质量证据契约。Vitest、Playwright、Worker harness、受控 fixture 和 direct-Meyda golden 已在 M3 建立。M3–M11 的适用 canonical evidence 均已获批；M11 的原生 Edge 权限、辅助技术和人工长会话补偿门禁也已由 owner 于 2026-08-26 签字。完整 EV-A–EV-R 已完成里程碑收口，现在进入 Analyzer release-readiness review。
+本文件定义 AudioNotSurfYet 的质量证据契约。M3–M11 的适用 canonical evidence 与 M11 人工补偿均保持已批准；M12 改变新候选的 DOM 几何和 Observer/RAF 生命周期，因此 EV-U、EV-B、EV-R 与 Analyzer readiness 重新进入 `in-review`，旧证据只作为回归基线。
 
 Q0 只批准“如何判断质量”，不批准 release readiness。`docs/quality/release-readiness.md` 只能在 M11 已产生完整成功、失败、边界和异常证据后创建。
 
@@ -84,6 +84,7 @@ Q0 只批准“如何判断质量”，不批准 release readiness。`docs/quali
 
 - Success：owner 完成加载、选卡、换卡、比较、跳转和刷新恢复，并正确解释三个学习样例。
 - Failure：不可见焦点、无可访问名称、纯颜色表达或 Canvas 无 DOM 值均失败。
+- M12：开场文案移除后状态仍有独立 live region；视觉最短列不得改变 slot 0–3 的 DOM/键盘/读屏顺序，动态重排不得关闭 `details` 或丢失焦点。
 - Boundary：0–4 张卡、键盘 seek 到两端、reduced motion、卡片错误后的可预测焦点。
 - Exception：不得新增麦克风、上传、远端 URL、账户或未定义 Tab 的实现；owner-only 结果不得表述为广泛用户研究。
 
@@ -91,6 +92,7 @@ Q0 只批准“如何判断质量”，不批准 release readiness。`docs/quali
 
 - Success：同源短 fixture 的 MP3/WAV/FLAC 在最新 Chrome/Edge 完成加载、播放和适用分析。
 - Failure：损坏/不支持文件显示可理解错误，队列和 store 不锁死。
+- M12 boundary：390/1024 为一列，1280/1920 为两列；实际 DOMRect 满足 18px gap、无 item 相交、无横向溢出且容器包围所有 item。Chrome 与 Edge 必须分别取证。
 - Boundary：390、1024、1280、1920 CSS px 的几何、sticky/overlay 层级、Canvas backing store 和控制台。
 - Exception：MP3 有损结果与各自解码后的直接 Meyda golden 比较，不要求三格式逐值相同；缺少真实 Edge 时保持 `planned/blocked`。
 
@@ -98,6 +100,7 @@ Q0 只批准“如何判断质量”，不批准 release readiness。`docs/quali
 
 - Success：正常和最大输入下交互、进度、取消和 Canvas 分层重绘满足阈值。
 - Failure：分析计算落到主线程、payload 超过 30Hz、公开测试脚本无效或资源未释放均失败。
+- M12：每个 Analyzer 实例最多一个待执行 masonry RAF；container/item Observer 与 RAF 在卸载时释放。`ResizeObserver loop` warning、路由循环资源增长或动态重排导致持续布局震荡均失败并映射 R-028。
 - Boundary：15 分钟、四个代表性最重 feature、20 次换歌/换卡/route dispose、cache/quota 压力。
 - Exception：不设置 wall-clock 完成 SLA；约 1MB chunk 警告作为风险信号记录，不伪装为构建失败或通过。
 
@@ -160,6 +163,8 @@ Q0 只批准“如何判断质量”，不批准 release readiness。`docs/quali
 | EG-004 | 广泛用户学习结果 | 当前范围只批准 owner 自测 | 只能证明 owner 对 3/3 样例达标，不能泛化学习效果 | project-owner | 保留 owner-only 表述；扩大声明前另开产品研究决策 |
 | EG-005 | 目标基线硬件 | 产品未指定设备型号 | 性能结论跨设备可比性有限 | project-owner | 每次记录实际硬件，阈值不变；若结果不稳定，在 quality/readiness 前批准目标设备 |
 | EG-006 | 文件权限真实提示的全自动化 | OS picker 和权限气泡受浏览器/系统控制 | Chrome/Edge 当前候选均有 owner 手工补偿，但未来回归仍不能只靠 adapter 证明 | project-owner | M5 Chrome 与 M11 Edge 签字见 evidence index；权限相关实现或浏览器变化时重复人工矩阵 |
+
+| EG-007 | M12 新候选尚无 clean canonical 与 owner 复核 | dirty-worktree provisional 已 12/12 通过，但尚无可登记 commit identity | 旧 M11 readiness 不能证明新瀑布流几何、动态明细或 Observer/RAF 生命周期 | project-owner | 用户提供 clean commit 后运行 `eval:m12`、登记 evidence 并复核 readiness |
 
 ### Resolved evidence gaps
 

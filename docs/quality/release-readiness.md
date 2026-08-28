@@ -1,7 +1,7 @@
 ---
-status: approved
+status: in-review
 owner: "project-owner"
-last_reviewed: 2026-08-26
+last_reviewed: 2026-08-28
 upstream_docs:
   - "docs/product/scope.md"
   - "docs/product/success-metrics.md"
@@ -11,22 +11,24 @@ upstream_docs:
   - "docs/quality/eval-plan.md"
   - "docs/quality/failure-taxonomy.md"
   - "docs/quality/evidence-index.md"
-next_action: "保持 Analyzer 正式上线等待 PROD-015；进入 Editor E0 产品意图评审"
+next_action: "M12 clean canonical 与 R-028/owner 复核前，不把 M11 readiness 应用于新候选"
 ---
 
 # Analyzer Release Readiness
 
 ## Summary Decision
 
-- Status：`Ready with waivers`（approved）。
+- Status：`In review`；2026-08-26 的 `Ready with waivers` 只保留为 M11 候选历史结论。
 - Decision date：2026-08-26。
 - Reviewer：`project-owner` — approved with W-001–W-007。
 - Scope：只覆盖当前本地音频 Analyzer 候选；不覆盖 Editor、Visualizer、远端上传、移动端、非 Chromium 或生产托管。
 - Decision boundary：**Analyzer candidate is ready for release planning with waivers; this is not production launch authorization.**
 
-M11 canonical、Edge 原生权限与最终加固已获 owner 批准，因此当前批准范围内没有产品代码 ship blocker。PROD-015 的托管平台、域名和 SPA fallback 尚未决定，正式上线仍被阻断；本文获批也只开放后续阶段选择，不表示应用已经发布。
+M11 canonical、Edge 原生权限与最终加固仍是有效历史证据。2026-08-28 获准实施的 M12 改变 Analyzer DOM、响应式几何和 Observer/RAF 生命周期；dirty-worktree provisional 已 12/12 通过，但新候选在 M12 clean canonical、R-028 与 owner 复核前仍不继承该 readiness。PROD-015 继续独立阻断正式上线。
 
 ## Candidate Identity
+
+下表身份只描述已批准的 M11 历史候选；M12 尚无 clean commit 或 canonical run，不能用 dirty-worktree 结果覆盖这些字段。
 
 | Field | Value |
 | --- | --- |
@@ -73,7 +75,7 @@ M11 canonical、Edge 原生权限与最终加固已获 owner 批准，因此当�
 
 ## Blockers
 
-- Analyzer 候选代码 blocker：无，前提是下列 waivers 由 `project-owner` 明确接受。
+- Analyzer M12 候选 blocker：缺少 clean canonical、R-028 关闭/接受和 owner readiness 复核；M11 历史候选不受此记录删除或改写。
 - 生产上线 blocker：PROD-015 尚未确定静态托管平台、域名、HTTPS/生产 URL 和 SPA fallback。该项解决前不得创建“已上线”声明，也不得把本结论当作部署授权。
 - Editor boundary：Editor 不属于本 Analyzer 候选；其 E0 产品文档现为 `in-review`，获批前不得进入系统设计或编码，也不能继承本文 readiness。
 

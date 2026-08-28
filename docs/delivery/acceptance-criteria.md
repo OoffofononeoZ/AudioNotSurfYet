@@ -1,20 +1,20 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-08-21
+last_reviewed: 2026-08-28
 upstream_docs:
   - "docs/product/success-metrics.md"
   - "docs/architecture/system-design.md"
   - "docs/architecture/interface-contracts.md"
   - "docs/delivery/execution-plan.md"
-next_action: "保留 Analyzer 历史 AC；以已批准 AC-E101–AC-E108 约束 E1"
+next_action: "以 AC-U05/U06 的 M12 解释验证实时瀑布流；Editor AC 独立保持"
 ---
 
 # Acceptance Criteria
 
 ## Scope Routing
 
-本文保留 Analyzer M1–M11 的已批准验收历史。Editor 使用已批准的 [E1–E6 acceptance criteria](editor/acceptance-criteria.md)，并由 [Editor execution plan](editor/execution-plan.md)、[test strategy](editor/test-strategy.md) 和 [milestone plan](editor/milestone-plan.md) 约束；E1 已开放实施，但尚无通过证据。
+本文保留 Analyzer M1–M11 的已批准验收历史，并以现有 AC-U05/U06 增加 M12 布局解释。Editor 使用独立 [E1–E6 acceptance criteria](editor/acceptance-criteria.md)，M12 不改变其状态或阈值。
 
 ## 1. Evidence Rules
 
@@ -116,6 +116,8 @@ M10 适用解释：可选集合累计 21 项且仍最多四张唯一卡；Loudne
 | AC-U04 | Reduced motion | `prefers-reduced-motion` 下关闭非必要过渡，游标仍准确 |
 | AC-U05 | Viewport geometry | 390、1024、1280、1920 CSS px 无关键控件遮挡/越界；sticky 与 overlay 层级正确；Canvas CSS 与 backing store 尺寸正确 |
 | AC-U06 | Runtime cleanliness | 三视口和核心流程无 console error/warn、pageerror 或未处理 rejection |
+
+M12 适用解释：四个 slot 按 0–3 保持 DOM/键盘/读屏顺序；390/1024 使用一列，1280/1920 使用两列，最多两列、gap 18px。每项按实际高度依次进入当前最短列，平局选择左列；活动卡和空槽不得相交，容器必须包围所有 item 且页面无横向溢出。换卡、错误态、数据到达和 `details` 展开后实时重算不得关闭明细、丢失焦点或重建 Canvas。Observer/RAF 路由卸载不成对、`ResizeObserver loop` warning 或资源增长均违反 AC-U06。
 
 ## 8. Browser and Format Matrix
 

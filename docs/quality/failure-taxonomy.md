@@ -1,20 +1,20 @@
 ---
-status: approved
+status: in-review
 owner: "project-owner"
-last_reviewed: 2026-08-26
+last_reviewed: 2026-08-28
 upstream_docs:
   - "docs/quality/eval-plan.md"
   - "docs/quality/golden-examples.md"
   - "docs/delivery/acceptance-criteria.md"
   - "docs/architecture/risk-register.md"
-next_action: "保留 Analyzer 分类；使用独立 Editor E1 taxonomy 标记新失败"
+next_action: "使用现有 FT-COMPAT/FT-PERFORMANCE/FT-ACCESSIBILITY/FT-VISUAL 分类 M12 失败并复核 R-028"
 ---
 
 # Failure Taxonomy
 
 ## Scope Routing
 
-本文保留 Analyzer 稳定失败分类。Editor E1 的路由、lease、schema、草稿、文件和生命周期失败见 [Editor E1 failure taxonomy](editor/failure-taxonomy.md)。
+本文保留 Analyzer 稳定失败分类并增加 M12 实例映射，不新增 failure type。Editor 的路由、lease、schema、草稿、文件和生命周期失败继续使用独立 taxonomy。
 
 ## 1. Classification Model
 
@@ -94,6 +94,10 @@ FAIL-<run-id>-<sequence>: <failure_type>/<severity>
 | 本地产物按政策在里程碑批准后删除，index 保留摘要/hash/命令 | 不是失败实例 | — | 是允许的 retention 状态；未来 readiness 需要时重新执行 |
 | 原始 trace 已删除且拒绝重跑，却宣称性能 readiness 通过 | FT-EVIDENCE | S1 | 缺少支持硬性性能声明的可复现证据 |
 | 非关键辅助说明有错别字且不改变含义 | FT-VISUAL | S3 | 不影响任务或数据语义 |
+| M12 卡片/空槽相交、容器截断或目标视口列数错误 | FT-COMPAT | S1 | 违反 AC-U05，核心卡片内容可能不可访问 |
+| M12 视觉重排改变 DOM/键盘顺序、关闭明细或丢失焦点 | FT-ACCESSIBILITY | S1 | 违反稳定 slot 与核心键盘路径 |
+| M12 Observer/RAF 路由循环单调增长或产生 loop warning | FT-PERFORMANCE | S1 | R-028 资源所有权或持续布局震荡未受控 |
+| M12 只产生不遮挡内容的轻微非关键间距偏差 | FT-VISUAL | S3 | 仅在不违反 18px/无重叠/无溢出硬性几何时适用 |
 
 ## 7. M7 Closed Failure Instance
 
