@@ -6,10 +6,10 @@ upstream_docs:
   - "docs/delivery/editor/execution-plan.md"
   - "docs/delivery/editor/acceptance-criteria.md"
   - "docs/delivery/editor/test-strategy.md"
-next_action: "owner 完成 E6 原生文件、辅助技术与长会话补偿验证并审批 evidence"
+next_action: "完成 E7 紧凑工作台实现、44 步 canonical 与 owner 审批"
 ---
 
-# Editor E1–E6 Milestone Plan
+# Editor E1–E7 Milestone Plan
 
 ## 1. Planning Convention
 
@@ -31,7 +31,8 @@ next_action: "owner 完成 E6 原生文件、辅助技术与长会话补偿验�
 | E3 | Point annotation | Complete | E2 | point lane、inner class、自适应网格、鼠标/右键/键盘 | 26/26 clean canonical + owner approval | project-owner |
 | E4 | Analysis overlay | Complete | E3 | 21 项单选纯 renderer overlay、三手柄和 pointer-through | 31/31 clean canonical + owner approval | project-owner |
 | E5 | Range annotation | Complete | E4 | range 创建、取消、调整、重叠、删除和 round-trip | range matrix + import/draft + canonical + owner approval | project-owner |
-| E6 | Final hardening | In Progress | E5 | Chrome/Edge、三格式、native flows、10,000 事件、资源与无障碍 | 双浏览器 canonical + owner complete task + evidence approval | project-owner |
+| E6 | Final hardening | Complete | E5 | Chrome/Edge、三格式、native flows、10,000 事件、资源与无障碍 | 双浏览器 canonical + owner complete task + evidence approval | project-owner |
+| E7 | Compact workbench | In Progress | E6 | 双层工具栏、平面分区、紧凑 tempo/point/range、双浏览器响应式 | 44 步 canonical + owner visual task + evidence approval | project-owner |
 
 ## 3. Exit Checklist by Milestone
 
@@ -87,7 +88,14 @@ next_action: "owner 完成 E6 原生文件、辅助技术与长会话补偿验�
 - [x] 10,000 事件下输入 `<=100ms`、无归因任务 `>50ms`、DOM 可见化策略有效。
 - [x] 20 次生命周期无 AudioContext/Worker/RAF/Canvas/listener 单调累积。
 - [x] E1–E6 全量和 M3–M11 关键回归通过。
-- [ ] owner 完成完整逆向标注任务并批准 E6 canonical evidence。
+- [x] owner 完成完整逆向标注任务并批准 E6 canonical evidence。
+
+### E7
+
+- [ ] AC-E701–AC-E704 的布局密度、分区、响应式和功能回归全部通过。
+- [ ] 390/1024/1280/1920 与 Chrome/Edge 无关键遮挡，geometry 继续 `<=1 CSS px`。
+- [ ] 10,000 事件反馈、长任务、可见 DOM 与资源门禁不回退。
+- [ ] owner 批准紧凑工作台视觉任务与 E7 canonical evidence。
 
 ## 4. Failure and Slip Rules
 
@@ -107,8 +115,9 @@ next_action: "owner 完成 E6 原生文件、辅助技术与长会话补偿验�
 - E3：`Complete`。
 - E4：`Complete`。
 - E5：`Complete`。
-- E6：`In Progress`。
-- 当前唯一下一门禁：完成 E6 人工补偿任务与 owner evidence 批准；双浏览器 40 步 canonical 已通过。
+- E6：`Complete`。
+- E7：`In Progress`。
+- 当前唯一下一门禁：完成 E7 紧凑工作台、44 步 canonical 与 owner evidence 批准。
 
 ## 6. Delivery Approval
 
@@ -132,4 +141,4 @@ next_action: "owner 完成 E6 原生文件、辅助技术与长会话补偿验�
 
 同日，`project-owner` 明确批准 E5 canonical evidence、范围事件创建/调整、重叠校验、键盘与持久化结果，并同意关闭 E5、开放 E6。E5 据此改为 `Complete`，E6 改为 `In Progress`；本批准不构成 E6 evidence 或 Editor release-readiness。
 
-2026-08-28，E6 clean canonical `E6-2026-08-27T15-52-33-466Z-17d7fe10` 在 commit `17d7fe1046ed02a3fb5137ccfe7cbf5590093aff` 上 40/40 通过。E6 继续保持 `In Progress`，因为 owner 原生文件、`beforeunload`、辅助技术与长会话补偿签字尚未完成。
+2026-08-28，E6 clean canonical `E6-2026-08-27T15-52-33-466Z-17d7fe10` 在 commit `17d7fe1046ed02a3fb5137ccfe7cbf5590093aff` 上 40/40 通过。owner 随后批准 canonical 与原生文件、`beforeunload`、辅助技术及长会话补偿，E6 据此关闭；紧凑工作台作为 E7 独立开放，Editor readiness 延后。

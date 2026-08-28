@@ -10,16 +10,16 @@ upstream_docs:
   - "docs/architecture/risk-register.md"
   - "docs/architecture/editor/project-format-v1.md"
   - "docs/architecture/editor/interaction-contracts.md"
-next_action: "owner 完成 E6 原生文件、辅助技术与长会话补偿验证并审批 canonical"
+next_action: "完成 E7 紧凑工作台实现、双浏览器 canonical 与 owner 审批"
 ---
 
-# Editor E1–E6 Execution Plan
+# Editor E1–E7 Execution Plan
 
 ## 1. Delivery Outcome
 
-把已批准的 Editor“逆向制曲”架构按 E1–E6 纵向切片交付：先建立正确歌曲入口、单引擎循环和安全工程基础，再增加时间轴、点标注、分析叠加、范围标注，最后完成双浏览器与大规模事件加固。
+把已批准的 Editor“逆向制曲”架构按 E1–E7 纵向切片交付：E1–E6 已完成入口、运行时、工程、时间轴、点/范围标注、分析叠加及最终加固；E7 在不改变这些行为契约的前提下，把页面收敛为紧凑工作台。
 
-本计划只覆盖 Editor，不重新打开已完成的 Analyzer M1–M11、canonical evidence 或 Analyzer-only readiness。`project-owner` 于 2026-08-26 明确批准本计划、acceptance criteria、test strategy 与 milestone plan，并同意开始 E1；该批准只开放 E1，E2–E6 仍须逐里程碑门禁。
+本计划只覆盖 Editor，不重新打开已完成的 Analyzer 历史 canonical。`project-owner` 于 2026-08-26 批准 E1–E6 delivery，并于 2026-08-28 批准 E6 后开放 E7。Editor release-readiness 延后至 E7 owner 审批。
 
 ## 2. Delivery Principles
 
@@ -49,6 +49,9 @@ next_action: "owner 完成 E6 原生文件、辅助技术与长会话补偿验�
 | BPM estimator | confidence `0.65`；候选优势 `0.08` | 低置信度保持空；不安装第三方包 |
 | Overlay | `topRatio=0.10`、`heightRatio=0.35`、最小高度 `0.12` | 键盘普通步长 1%，Shift 步长 5% |
 | Capacity gate | 约 15 分钟、20 lanes、每 lane 最多 8 inner classes、合计 10,000 point/range events | 这是 E6 性能门禁，不是 schema 硬上限 |
+| Compact toolbar | 两行总高度 `<=84px`；控件高度 `30px` | 只合并展示层，不改变项目、播放或文件操作语义 |
+| Compact lanes | 行高 `44px`；名称列 `152px`；分类列 `144px` | 时间列仍复用共享 geometry，窄屏使用单一横向滚动区 |
+| Compact waveform | 桌面 `176px`；`<900px` 为 `144px` | Canvas backing store 与 `<=1 CSS px` 门禁不变 |
 
 ## 4. Milestone Slices
 
@@ -147,6 +150,23 @@ Exit gate:
 - 三格式、双浏览器、恢复、错误隔离、可访问性和容量门禁均有成功、失败、边界、异常证据。
 - clean canonical、evidence 和 owner 完整逆向标注任务获批后，才允许进入 Editor release-readiness review。
 
+### E7 — Compact Workbench Layout
+
+Implementation:
+
+- 合并介绍与当前工程大卡片为两行工具栏，保留歌曲、草稿、播放、格式、导入与导出全部状态和操作。
+- 主时间轴、tempo、point/range 与 overlay 改用平面背景、低对比细分隔线和轻微深浅层次；主区域不再用大圆角卡片分区。
+- 应用 30px 控件、44px 标记行、152/144px 侧栏和 176/144px 波形令牌；临时菜单/对话框可保留最多 8px 圆角。
+- 1024/1280/1920 保持完整工作台；390 与小于 900px 使用紧凑换行和唯一横向时间轴滚动区。
+- FL Studio 只作为信息密度和分区方式参考；黑绿配色、可访问名称、焦点、状态与现有交互语义保持项目自身设计。
+
+Exit gate:
+
+- AC-E701–AC-E704、Chrome/Edge 专项、M12 回归及 E6 40 步基线全部通过；clean canonical 固定 44 步。
+- 1024×900 可见顶部工具栏、波形、tempo 和至少一条标记行；多视口无遮挡或不可达控件。
+- 10,000 事件反馈、长任务、可见 DOM、资源和共享 geometry 不回归。
+- owner 批准 E7 canonical 与紧凑布局后，才进入 Editor release-readiness review。
+
 ## 5. Test and Eval Commands
 
 E1 已实现、通过并获 owner 批准；以下为真实命令：
@@ -159,7 +179,7 @@ npm run eval:e1:provisional
 npm run eval:e1
 ```
 
-E2–E5 命令已经实现并产生已批准的 clean canonical；E6 在本里程碑新增并同步：
+E2–E6 命令已经实现并产生已批准的 clean canonical；E7 新增并同步：
 
 ```text
 npm run test:eN:unit
@@ -169,7 +189,7 @@ npm run eval:eN:provisional
 npm run eval:eN
 ```
 
-其中 `N` 为 5–6。canonical 必须拒绝 dirty worktree，并记录 run ID、commit、环境、步骤结果、日志和 summary SHA-256。E1–E5 clean canonical 均已通过并获 owner 批准；E6 clean canonical 已 40/40 通过并处于 `in-review`，owner 补偿审批前仍为 `In Progress`。
+其中 `N` 为 5–7。canonical 必须拒绝 dirty worktree，并记录 run ID、commit、环境、步骤结果、日志和 summary SHA-256。E1–E6 clean canonical 均已通过并获 owner 批准；E7 在 clean canonical 与 owner 审批前为 `In Progress`。
 
 ## 6. Change Control and Exclusions
 
@@ -207,3 +227,5 @@ npm run eval:eN
 同日，`project-owner` 明确批准 E5 canonical evidence 与人工范围任务，同意关闭 E5 并开放 E6。E6 据此进入 `In Progress`；本批准不构成 E6 或 Editor release-readiness 通过。
 
 2026-08-28，E6 clean canonical 在 commit `17d7fe1046ed02a3fb5137ccfe7cbf5590093aff` 上 40/40 通过。自动化实现阶段已完成；E6 的剩余交付门禁是 owner 对原生 OS picker、`beforeunload`、辅助技术与长会话的补偿验证和 evidence 审批，完成前不进入 Editor readiness。
+
+同日，owner 明确先批准 E6，再要求实施 E7 紧凑工作台。E6 据此关闭；E7 只改变布局密度和区域视觉，不改变 E1–E6 的公共契约。Editor readiness 延后到 E7 获批。

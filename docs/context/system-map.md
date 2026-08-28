@@ -4,7 +4,7 @@ owner: "project-owner"
 last_reviewed: 2026-08-28
 upstream_docs:
   - "docs/context/index.md"
-next_action: "保留 Analyzer M12 canonical 事实；owner 复核 E6 人工补偿边界"
+next_action: "保留 Analyzer M12 与 Editor E6 approved 事实；执行 E7 紧凑工作台"
 ---
 
 # System Map
@@ -48,7 +48,7 @@ showOpenFilePicker → FileSystemFileHandle → File
 | Config persistence | 保存 volume 与 MusicBar style | Pinia、localStorage key `config` | project-owner | schema 保持不变；volume 为 0–100 |
 | Home visualization | 全屏 Three.js 光线 shader | `rayLength` prop、IntersectionObserver、reduced-motion media query | unknown | 常规模式使用 WebGL RAF；reduced motion 只静态渲染；卸载释放 mesh、geometry、material、render list、renderer 与 WebGL context |
 | Analyzer surface | 四槽/最多四张累计 21 项可用卡、共享 viewport/zoom/cursor/seek、DOM 精确值与分层 Canvas | store、AudioSessionService、AnalysisCoordinator、Canvas 2D | project-owner | 稳定 slot 0–3 DOM；实际高度最短列布局，390/1024 一列、1280/1920 两列、gap 18px；ResizeObserver 以单 RAF 合并重排；首次仍默认 M7 三卡 |
-| Editor E1–E5 surface | `/editor/:trackId?` 状态、精简 transport、JSON 工程、共享波形/tempo/point/range 时间列、21 项单选半透明 overlay 与 viewport-visible marker | EditorSessionController、AudioSessionService、AnalysisCoordinator、Vue Router、shared Canvas renderer、DOM controls | project-owner | E1–E5 已实现、canonical 通过并获批准；E6 正在最终加固 |
+| Editor E1–E7 surface | `/editor/:trackId?` 状态、精简 transport、JSON 工程、共享波形/tempo/point/range 时间列、21 项单选半透明 overlay、viewport-visible marker 与紧凑工作台布局 | EditorSessionController、AudioSessionService、AnalysisCoordinator、Vue Router、shared Canvas renderer、DOM controls | project-owner | E1–E6 已实现并获批准；E7 正在实施 |
 | Editor project and draft | strict JSON V1、歌曲 hash/时长绑定、原生 file gateway、单草稿 autosave 与恢复冲突 | `EditorFormatCodecRegistry`、`EditorDraftRepository`、`audionotsurfyet-editor` V1 | project-owner | 首版只注册 JSON；session database 不变 |
 | Experimental charts | 试验性的 Three.js 2D 图和瀑布流 | Vue props、TestLands | unknown | 不视为稳定接口 |
 | Event bus | 跨组件事件类型与发送 | mitt singleton | unknown | `settings-open` 无已发现订阅者 |
@@ -77,7 +77,7 @@ showOpenFilePicker → FileSystemFileHandle → File
 - 刷新时 current Blob 优先并恢复为 0 秒 paused；其他曲目只在 `queryPermission()` 为 granted 时自动取回，`requestPermission()` 只由可见用户操作触发。
 - `--coinc-process` 既可能由 GSAP 写入，也可能由能量 RAF 写入，模式切换需明确所有权。
 - AudioContext、source、单播放 RAF、产品 Worker、pending analysis request 和封面 URL 由 MainLayout-owned service/coordinator 生命周期统一释放；Analyzer masonry 的容器/四 item ResizeObserver 与待执行 RAF 在卸载时成对释放，GSAP 和 Three.js 由各组件释放，LightBg 在 reduced motion 下不保留连续 RAF。
-- Header 的 settings 事件没有已发现消费者；Visualizer 仍为占位页。Editor E4 overlay 与 E5 range 已获批准；E6 40/40 clean canonical 已通过，人工补偿审批当前为 `In Progress`。
+- Header 的 settings 事件没有已发现消费者；Visualizer 仍为占位页。Editor E1–E6 已获批准；E7 只改变工作台密度与分区，不改变 runtime/data ownership。
 - `components.d.ts` 和 `auto-imports.d.ts` 是构建插件生成文件，构建可能造成工作树变化。
 
 ## Editor Boundary After E5
@@ -95,10 +95,10 @@ showOpenFilePicker → FileSystemFileHandle → File
 - `analysisCanvasRenderer` 是 Analyzer card 与 Editor overlay 共用的纯 Canvas adapter；E4 overlay 一次选择累计 21 项中的一个，使用同一 viewport/time geometry、DPR backing store、40ms exact cursor 合并和 last-ready Buffer fallback。
 - overlay 只让 selector、重试和 top/move/bottom 三个手柄接收 pointer；图形与说明区域穿透到底层 point surface。bounds 固定默认 0.10/0.35、最小 0.12，键盘步长 1%/Shift 5%，renderer/context 错误只降级 overlay。
 
-尚未完成：E6 的原生 OS picker、`beforeunload`、辅助技术与长会话 owner 补偿审批。双浏览器/三格式/10,000 事件/资源自动化 clean canonical 已 40/40 通过，但 evidence 获批前不得写成 `Complete`。
+尚未完成：E7 紧凑工作台的双浏览器布局、geometry、focus、10,000 事件与相邻 M12 回归。E6 双浏览器/三格式/10,000 事件/资源 clean canonical 与人工补偿已获批准并保持历史身份。
 
 ## Approval Record
 
-`project-owner` 于 2026-08-21 确认 M7 卡片、共享视口、跳转、刷新恢复和 3/3 学习解释通过，并批准 M7 canonical、关闭 M7、开放 M8。随后 M8–M11 与 Analyzer readiness 依次完成并获批。2026-08-26，owner 又依次批准 Editor 产品、架构、delivery 与 E1 canonical/人工结果。2026-08-27，E2–E5 clean canonical 与人工门禁依次获 owner 批准；2026-08-28，E6 clean canonical 40/40 通过，人工补偿审批仍为 `In Progress`。
+`project-owner` 于 2026-08-21 确认 M7 卡片、共享视口、跳转、刷新恢复和 3/3 学习解释通过，并批准 M7 canonical、关闭 M7、开放 M8。随后 M8–M11 与 Analyzer readiness 依次完成并获批。2026-08-26，owner 又依次批准 Editor 产品、架构、delivery 与 E1 canonical/人工结果。2026-08-27，E2–E5 clean canonical 与人工门禁依次获 owner 批准；2026-08-28，E6 clean canonical 40/40 与人工补偿获批准，随后开放 E7 紧凑工作台。
 
 同日，owner 要求自行提交并完成 M12 后续。M12 canonical `M12-2026-08-28T07-30-39-789Z-be655e67` 在 clean commit `be655e6765a63493fb1a3a4ee99992073b06e54e` 上 12/12 通过，稳定 DOM、实际高度最短列与 Observer/RAF 生命周期成为当前系统事实；M12 已关闭且 Analyzer readiness 恢复，PROD-015 与 Editor E6 不受该批准覆盖。
