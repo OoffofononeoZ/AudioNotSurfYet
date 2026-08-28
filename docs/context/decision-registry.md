@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/product/scope.md"
   - "docs/architecture/system-design.md"
   - "docs/delivery/execution-plan.md"
-next_action: "保留 DEC-031/M12 canonical；按 DEC-024/030 等待 E6 owner 人工补偿审批与 PROD-015"
+next_action: "按 DEC-032 交付 E7 紧凑工作台并保留 PROD-015 上线阻断"
 ---
 
 # Decision Registry
@@ -56,6 +56,7 @@ next_action: "保留 DEC-031/M12 canonical；按 DEC-024/030 等待 E6 owner 人
 | DEC-029 | 2026-08-27 | 批准 E4 canonical、21 项 overlay、三手柄、pointer-through 与错误隔离结果，关闭 E4 并开放 E5 | project-owner | approved | [Editor evidence](../quality/editor/evidence-index.md) | overlay renderer、pointer-through、E5 范围或门禁改变 |
 | DEC-030 | 2026-08-27 | 批准 E5 canonical、范围创建/调整、重叠校验、键盘与持久化结果，关闭 E5 并开放 E6 最终加固 | project-owner | approved | [Editor evidence](../quality/editor/evidence-index.md) | range 语义、E6 阈值、双浏览器或最终加固门禁改变 |
 | DEC-031 | 2026-08-28 | Analyzer 使用稳定 slot 0–3 DOM 和实际高度最短列；390/1024 一列、1280/1920 两列、gap 18px，ResizeObserver 以单 RAF 合并且卸载成对释放；不引入 pretext、不改变分析/持久化契约 | project-owner | approved | [System design](../architecture/system-design.md) | slot 顺序、列断点、动态高度、Observer/RAF 所有权或 Analyzer 契约改变 |
+| DEC-032 | 2026-08-28 | 先批准并关闭 Editor E6，再以 E7 把 Editor 改为紧凑双层工具栏和平面细线分区；桌面控件 30px、point/range 行 44px、侧栏 152/144px、波形 176px，窄屏波形 144px；FL Studio 仅作为密度参考，不复制配色、品牌资产或控件 | project-owner | approved | [ADR-0010](../architecture/adrs/0010-editor-compact-workbench.md) | Editor 密度令牌、区域层次、断点或既有功能契约改变 |
 
 ## Approval Evidence
 
@@ -136,6 +137,8 @@ DEC-026 约束下的 E2 实现已提交，clean canonical `E2-2026-08-26T16-42-4
 E5 clean canonical `E5-2026-08-27T11-03-22-177Z-78124177` 随后在 implementation commit `781241772e05186e2fe0d006ed6ddd8bceded7af` 上 35/35 通过。`project-owner` 明确批准 E5 canonical evidence、范围事件创建/调整、重叠校验、键盘与持久化结果；DEC-030 据此关闭 E5 并开放 E6。该决定不构成 E6 evidence 或 Editor release-readiness。
 
 同日，owner 通过 M12 实施计划批准 DEC-031，并要求 agent 自行提交及完成后续、无需推送远程。首次 clean run `M12-2026-08-28T07-25-22-951Z-b50c2c1e` 暴露 M7 短 fixture 未保证播放输入的测试前置条件；失败 artifact 保留。修复 commit `be655e6765a63493fb1a3a4ee99992073b06e54e` 先使目标用例连续 5/5 通过，再由 canonical `M12-2026-08-28T07-30-39-789Z-be655e67` 完成 12/12，summary SHA-256 为 `76ffab8e9fd5db6370c22aa78c7ee08a0708d7a5d97e1b749fca284d4c696441`。DEC-031 据此完成验证，M12 关闭、R-028 缓解、Analyzer readiness 恢复；PROD-015 与 Editor E6 不被本决策覆盖。
+
+2026-08-28，`project-owner` 明确要求“可以先批准之前的e6修改”，本次回复据此作为 E6 canonical、原生文件、辅助技术与长会话人工门禁的完整批准；E6 关闭，R-024、R-025、R-027 改为 `Mitigated`。同一轮需求要求 Editor 参考编曲工作台的密度与线性分区方式，DEC-032 据此开放 E7。该批准不改写 E6 canonical，也不授权生产上线；Editor release-readiness 延后到 E7 获批之后。
 
 ## Historical Evidence Gap
 

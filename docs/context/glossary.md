@@ -4,7 +4,7 @@ owner: "project-owner"
 last_reviewed: 2026-08-28
 upstream_docs:
   - "docs/context/index.md"
-next_action: "owner 按 E6 canonical 的术语与人工补偿边界完成审批"
+next_action: "补充 E7 compact workbench 术语并形成双浏览器证据"
 ---
 
 # Glossary
@@ -72,8 +72,9 @@ next_action: "owner 按 E6 canonical 的术语与人工补偿边界完成审批"
 | shared analysis canvas renderer | E4 抽取的纯 Canvas adapter；Analyzer card 与 Editor overlay 使用同一 feature definition、compact series、viewport 和 cursor 绘制契约 | 防止六类 renderer 在两个页面分叉，并允许单层 context/shape 错误隔离 | [ADR-0009](../architecture/adrs/0009-editor-overlay-renderer-boundary.md) |
 | pointer-through overlay | E4 已实现的半透明分析层；除 feature selector、重试和三个垂直手柄外不接收 pointer | 让 overlay 与底层标记共享视觉坐标而不夺取 point/range 命中 | [E4 eval plan](../quality/editor/e4-eval-plan.md) |
 | viewport-visible event DOM | 只为当前时间视口内可见 point/range 创建交互 DOM，全部空格与高密度网格由 Canvas 表达 | 允许 E6 验证 10,000 事件而不把容量门禁变成 schema 硬上限 | [Editor test strategy](../delivery/editor/test-strategy.md) |
+| compact workbench | Editor 以双层工具栏、平面内容区、细分隔线和 44px 轨道行组织的高密度桌面布局 | 只改变视觉层级与空间密度，不改变歌曲、工程、tempo、point/range、overlay 或 lease 语义 | [ADR-0010](../architecture/adrs/0010-editor-compact-workbench.md) |
 | Editor canonical | 某个 E 里程碑在 clean HEAD 上执行的正式 eval run，绑定 commit、环境、日志和 summary hash | provisional 不能替代 canonical；owner 批准后才开放下一个 E 里程碑 | [Editor execution plan](../delivery/editor/execution-plan.md) |
 
 ## Approval Record
 
-`project-owner` 于 2026-08-21 至 2026-08-26 依次批准 Analyzer M7–M11 与 Analyzer readiness，并批准 Editor 产品、架构、delivery 与 E1 evidence。2026-08-27，E2–E5 clean canonical 与人工门禁依次获 owner 批准；E6 final hardening clean canonical 已于 2026-08-28 登记，人工补偿审批前仍为 `In Progress`。
+`project-owner` 于 2026-08-21 至 2026-08-26 依次批准 Analyzer M7–M11 与 Analyzer readiness，并批准 Editor 产品、架构、delivery 与 E1 evidence。2026-08-27，E2–E5 clean canonical 与人工门禁依次获 owner 批准；E6 final hardening 于 2026-08-28 获批准并关闭，E7 compact workbench 随后开放。

@@ -9,10 +9,10 @@ upstream_docs:
   - "docs/architecture/editor/project-format-v1.md"
   - "docs/architecture/editor/interaction-contracts.md"
   - "docs/delivery/editor/execution-plan.md"
-next_action: "owner 完成 AC-E601–AC-E606 中不能自动化的原生文件、辅助技术与完整任务门禁"
+next_action: "验证 AC-E701–AC-E704 并完成 E7 clean canonical 与 owner 审批"
 ---
 
-# Editor E1–E6 Acceptance Criteria
+# Editor E1–E7 Acceptance Criteria
 
 ## 1. Evidence Rules
 
@@ -88,6 +88,15 @@ next_action: "owner 完成 AC-E601–AC-E606 中不能自动化的原生文件�
 | AC-E605 | 1024/1280/1920、DPR、reduced motion 下无关键遮挡；核心任务可用键盘完成、焦点可见、状态非纯颜色、辅助技术名称清晰 | Playwright accessibility + owner manual | R-024, R-025 |
 | AC-E606 | E1–E6 每个里程碑均有 provisional、clean canonical、run identity/hash/environment 和 owner approval；E6 owner 能完成包含 point/range/tempo/overlay/round-trip 的完整逆向标注任务 | evidence audit + signed owner task | R-022–R-027 |
 
-## 8. Milestone Exit Rule
+## 8. E7 — Compact Workbench Layout
+
+| ID | Criterion | Verification | Risk |
+| --- | --- | --- | --- |
+| AC-E701 | ready 状态顶部为两行紧凑工具栏，总高 `<=84px`、桌面控件高 `30px`；保留歌曲、草稿、播放、格式、导入和导出语义 | computed geometry + Chrome/Edge task regression | R-024, R-025 |
+| AC-E702 | Timeline、tempo、point/range 与 overlay 主区域使用平面背景和细分隔线；主区域圆角 `0–2px`、控件不超过 `4px`、菜单/对话框不超过 `8px`；point/range 行高 `44px` | computed style audit + golden screenshots | R-024, R-025 |
+| AC-E703 | 桌面波形为 `176px`、小于 900px 为 `144px`；390/1024/1280/1920 无遮挡或不可达控件，1024×900 可见工具栏、波形、tempo 和至少一条标记行 | dual-browser viewport matrix + geometry probes | R-024 |
+| AC-E704 | 共享时间映射仍 `<=1 CSS px`，E1–E6 功能/键盘/focus/pointer-through 不回归；10,000 事件反馈 `<=100ms`、无 Editor 归因任务 `>50ms` 且 DOM/资源不累积 | E6 baseline + E7 Chrome/Edge + M12 regression | R-024, R-025, R-027 |
+
+## 9. Milestone Exit Rule
 
 每个里程碑只能在其全部适用 AC、有明确成功/失败/边界/异常证据、相关风险复核、clean canonical 和 owner 批准后关闭。本 AC 于 2026-08-26 获 `project-owner` 批准；E1 开放实施不构成 AC-E101–AC-E108 已通过。

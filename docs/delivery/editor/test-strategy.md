@@ -8,10 +8,10 @@ upstream_docs:
   - "docs/architecture/risk-register.md"
   - "docs/delivery/editor/execution-plan.md"
   - "docs/delivery/editor/acceptance-criteria.md"
-next_action: "复核 E6 40 步 canonical，并完成不能自动化的 owner 补偿矩阵"
+next_action: "执行 E7 密度/响应式/回归矩阵与 44 步 clean canonical"
 ---
 
-# Editor E1–E6 Test Strategy
+# Editor E1–E7 Test Strategy
 
 ## 1. Objectives
 
@@ -51,7 +51,7 @@ Editor 测试体系必须回答：
 ### Browser E2E
 
 - E1–E5 使用本机稳定 Chrome channel 执行对应专项和适用 Analyzer 回归。
-- E6 使用同一用例分别运行真实 Chrome 与 `msedge` channel；不得以 Chromium 代替 Edge。
+- E6/E7 使用同一用例分别运行真实 Chrome 与 `msedge` channel；不得以 Chromium 代替 Edge。
 - 读取 DOM 状态、可访问名称、真实 geometry、Canvas CSS/backing store、console/pageerror 和资源计数；截图只作补充。
 - 覆盖 1024/1280/1920、代表性 DPR、reduced motion、键盘与 pointer；E6 执行本地 MP3/WAV/FLAC。
 
@@ -73,6 +73,7 @@ Editor 测试体系必须回答：
 | E4 | adapter/overlay bounds | consumer/cache/dedupe/error | 21 项、手柄、pointer-through | E6 全量 |
 | E5 | range/overlap/handles | JSON/draft/rollback | create/cancel/drag/delete/keyboard | E6 全量 |
 | E6 | full regression | stress/resource/recovery | full + native manual | full + native manual |
+| E7 | compact tokens/geometry | E1–E6 behavior unchanged | density/responsive/task regression | density/responsive/task regression |
 
 每个里程碑同时回归与其变更相邻的 Analyzer 播放、session、Worker、route、Canvas 和资源契约。E6 运行 E1–E6 全量及 M3–M11 关键回归，不必篡改历史 canonical 身份。
 
@@ -92,7 +93,7 @@ Editor 测试体系必须回答：
 
 ### Stress Data
 
-E6 运行时生成约 15 分钟工程：20 lanes、每 lane 最多 8 inner classes、合计 10,000 point/range events，包含 viewport 内外、相邻 range、不同分类重叠和尾部边界。不提交大型 WAV、工程 artifact 或 trace，只登记生成参数、seed、命令和 artifact hash。
+E6/E7 运行时复用约 15 分钟工程：20 lanes、每 lane 最多 8 inner classes、合计 10,000 point/range events，包含 viewport 内外、相邻 range、不同分类重叠和尾部边界。不提交大型 WAV、工程 artifact 或 trace，只登记生成参数、seed、命令和 artifact hash。E7 不新增音频或工程语义 fixture，只增加布局 golden 与双浏览器截图。
 
 ## 6. BPM Golden Method
 
@@ -111,7 +112,7 @@ E6 运行时生成约 15 分钟工程：20 lanes、每 lane 最多 8 inner class
 
 ## 8. Planned Commands and Evidence Cadence
 
-E1–E6 每个里程碑计划新增：
+E1–E7 每个里程碑计划新增：
 
 ```text
 npm run test:eN:unit
@@ -121,7 +122,7 @@ npm run eval:eN:provisional
 npm run eval:eN
 ```
 
-E1–E5 命令已经存在、通过 clean canonical 并获批准。E6 命令与 40 步 runner 已存在，clean canonical 已通过并等待 owner 人工补偿审批。新增脚本必须让 package、测试 README、本项目 Skill 与实际 runner 一致，不保留指向不存在文件的兼容别名。
+E1–E6 命令已经存在、通过 clean canonical 并获批准。E7 新增 Chrome、Edge、双浏览器与 44 步 runner；新增脚本必须让 package、测试 README、本项目 Skill 与实际 runner 一致，不保留指向不存在文件的兼容别名。
 
 固定流程：
 
@@ -136,4 +137,4 @@ E1–E5 命令已经存在、通过 clean canonical 并获批准。E6 命令与 
 
 ## 9. Current Planning Gate
 
-`project-owner` 于 2026-08-26 批准本文并开放 E1，随后批准 E1 canonical/人工结果并开放 E2；2026-08-27 又依次批准 E2–E5 结果。E5 clean canonical 35/35 与人工范围任务已获批准，E6 据此开放；E6 自动化、人工补偿和 owner evidence 获批前不得进入 Editor release-readiness review。
+`project-owner` 于 2026-08-26 批准本文并开放 E1，随后逐项批准 E1–E5；2026-08-28 又批准 E6 40/40 canonical 与人工补偿结果。E7 据此开放；E7 clean canonical 和 owner evidence 获批前不得进入 Editor release-readiness review。
