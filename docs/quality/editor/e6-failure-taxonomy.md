@@ -1,12 +1,12 @@
 ---
-status: in-review
+status: approved
 owner: "project-owner"
 last_reviewed: 2026-08-28
 upstream_docs:
   - "docs/quality/editor/e6-eval-plan.md"
   - "docs/quality/editor/e5-failure-taxonomy.md"
   - "docs/architecture/risk-register.md"
-next_action: "保留 E6 失败历史；owner 人工补偿失败继续按本 taxonomy 阻断审批"
+next_action: "保留 E6 失败历史；E7 布局失败使用独立 taxonomy"
 ---
 
 # Editor E6 Failure Taxonomy
@@ -32,3 +32,5 @@ E6 继续沿用 E1–E5 的 identity、draft、geometry、pointer、focus、over
 | S3 | 不影响事实、任务和可访问性的轻微视觉/文案差异 | 登记，由 owner 在人工门禁判断 |
 
 失败 run 必须保留 run ID、commit、环境、日志、summary 和分类。修复后创建新 implementation commit 并重新执行完整 clean canonical，不覆盖失败证据，不以 Chrome 代替 Edge，也不以模拟 picker 代替原生人工结果。
+
+2026-08-28，`project-owner` 批准 E6 canonical 与人工补偿门禁；本 taxonomy 据此改为 `approved`。后续紧凑工作台缺陷不追溯为 E6 失败。

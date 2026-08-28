@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: approved
 owner: "project-owner"
 last_reviewed: 2026-08-28
 upstream_docs:
@@ -8,7 +8,7 @@ upstream_docs:
   - "docs/delivery/editor/test-strategy.md"
   - "docs/architecture/risk-register.md"
   - "docs/quality/editor/e5-eval-plan.md"
-next_action: "owner 复核已登记的 E6 40 步 canonical，并完成原生文件与辅助技术补偿验证"
+next_action: "保留 E6 approved canonical；E7 独立验证紧凑工作台布局"
 ---
 
 # Editor E6 Eval Plan
@@ -45,4 +45,4 @@ E6 只加固已批准的 E1–E5 能力：双浏览器、MP3/WAV/FLAC、原生�
 - 记录 run ID、commit、Chrome/Edge/Node/npm/Meyda、脱敏硬件、格式、geometry、feedback、long task、DOM、resource、日志与 summary SHA-256。
 - 原生 OS picker、保存覆盖提示、浏览器离页提示和辅助技术无法完全自动化；必须记录浏览器版本、步骤、结果、owner 与残余风险，OPFS/stub 不得替代签字。
 - 自动化与人工证据获批前 E6 保持 `In Progress`，不得创建包含 Editor 的 release-readiness 结论。
-- clean canonical `E6-2026-08-27T15-52-33-466Z-17d7fe10` 已 40/40 通过；本计划保持 `in-review`，直至 owner 完成人工补偿并批准 evidence。
+- clean canonical `E6-2026-08-27T15-52-33-466Z-17d7fe10` 已 40/40 通过；`project-owner` 于 2026-08-28 批准 E6 canonical 与人工补偿门禁，本计划据此改为 `approved`。后续紧凑布局属于 E7，不改写本计划或本 run。
