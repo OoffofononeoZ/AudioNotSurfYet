@@ -10,7 +10,7 @@ upstream_docs:
   - "docs/architecture/risk-register.md"
   - "docs/architecture/editor/project-format-v1.md"
   - "docs/architecture/editor/interaction-contracts.md"
-next_action: "完成 E7 紧凑工作台实现、双浏览器 canonical 与 owner 审批"
+next_action: "E7 实现与双浏览器 canonical 已完成；等待 owner 审批"
 ---
 
 # Editor E1–E7 Execution Plan
@@ -189,7 +189,7 @@ npm run eval:eN:provisional
 npm run eval:eN
 ```
 
-其中 `N` 为 5–7。canonical 必须拒绝 dirty worktree，并记录 run ID、commit、环境、步骤结果、日志和 summary SHA-256。E1–E6 clean canonical 均已通过并获 owner 批准；E7 在 clean canonical 与 owner 审批前为 `In Progress`。
+其中 `N` 为 5–7。canonical 必须拒绝 dirty worktree，并记录 run ID、commit、环境、步骤结果、日志和 summary SHA-256。E1–E6 clean canonical 均已通过并获 owner 批准；E7 clean canonical 已通过，但在 owner 审批前仍为 `In Progress`。
 
 ## 6. Change Control and Exclusions
 

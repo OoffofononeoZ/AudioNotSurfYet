@@ -10,8 +10,9 @@ upstream_docs:
   - "docs/quality/editor/e4-eval-plan.md"
   - "docs/quality/editor/e5-eval-plan.md"
   - "docs/quality/editor/e6-eval-plan.md"
+  - "docs/quality/editor/e7-eval-plan.md"
   - "docs/delivery/editor/milestone-plan.md"
-next_action: "执行 E7 紧凑工作台布局，形成新的双浏览器 canonical 后由 owner 审批"
+next_action: "由 owner 复核 E7 双浏览器紧凑工作台与 44/44 canonical；批准前 E7 保持 In Progress"
 ---
 
 # Editor Evidence Index
@@ -32,6 +33,7 @@ next_action: "执行 E7 紧凑工作台布局，形成新的双浏览器 canonic
 - E4 clean canonical 31/31 与 owner 人工门禁已于 2026-08-27 获批；E5 已开放。
 - E5 clean canonical 35/35 与 owner 人工范围任务已于 2026-08-27 获批；E6 已开放。
 - E6 clean canonical 40/40、原生 OS picker、`beforeunload`、辅助技术与长会话补偿已于 2026-08-28 获 owner 批准；E7 紧凑工作台布局已开放，Editor readiness 延后至 E7 审批。
+- E7 clean canonical 已在实现 commit `78bc7f06311a09948e5efae941a14599305b81a5` 上 44/44 通过并登记为 `in-review`；owner 视觉任务与批准前不关闭 E7、不创建 Editor readiness。
 
 ## 2. Record Contract
 
@@ -590,3 +592,75 @@ next_action: "执行 E7 紧凑工作台布局，形成新的双浏览器 canonic
 - 自动化已验证键盘语义、可见焦点、reduced motion 和非纯颜色结构，但仍需 owner 使用真实辅助技术完成核心任务。
 - 2026-08-28，`project-owner` 在明确询问批准范围后回复“只批准e6，之后先修改我说的页面修改”，并随后要求实施 E6 关闭与 E7 紧凑工作台计划。本记录据此只登记 E6 原生文件、辅助技术与长会话补偿门禁已获批准，不补写 owner 未提供的逐项数值。
 - E6 据此改为 `Complete`，R-024、R-025、R-027 改为 `Mitigated`。紧凑布局作为新的 E7 候选独立验证，不反向改写本 run；Editor release-readiness 延后到 E7 evidence 获批。
+
+## 9. E7 Canonical Record
+
+| Field | Value |
+| --- | --- |
+| Run ID | `E7-2026-08-28T15-02-48-298Z-78bc7f06` |
+| Milestone | E7 — Compact workbench layout |
+| State | `in-review`（44/44 自动化通过；owner 双浏览器视觉任务待完成） |
+| Implementation commit | `78bc7f06311a09948e5efae941a14599305b81a5` |
+| Evidence commit | 本记录所在的 `docs: register Editor E7 canonical evidence` 提交 |
+| Dirty at start / end | `false` / `false` |
+| Commit at end | `78bc7f06311a09948e5efae941a14599305b81a5` |
+| Started at | 2026-08-28 15:02:48.298 UTC |
+| Method | `npm run eval:e7` |
+| Reviewer | `project-owner` — pending |
+| Retention | `local-present`；至少保留到 E7 审批完成 |
+| Artifact root | `artifacts/evals/E7-2026-08-28T15-02-48-298Z-78bc7f06/` |
+| Summary SHA-256 | `43f63963fafa774ea18a8ddda290d573fd7869a269fc71798c22ca3076b14a4a` |
+
+### Environment
+
+| Item | Recorded value |
+| --- | --- |
+| OS | macOS 26.5.2 (`25F84`), Darwin arm64 |
+| Hardware | MacBook Pro `MacBookPro17,1`；Apple M1 8-core；16 GB memory |
+| Node / npm | Node `v24.18.0`；npm `11.16.0` |
+| Vitest / Playwright | `4.1.10` / `1.62.0` |
+| Chrome binary / test user agent | Google Chrome `152.0.7977.64` / Chrome `151.0.7922.34` |
+| Edge binary / test user agent | Microsoft Edge `151.0.4129.107` / Edge `151.0.7922.34` |
+| Meyda | `5.6.3` |
+
+本记录只保存机型、芯片、核心数和内存，不复制 artifact 中的序列号、UUID、UDID 或设备标识。E7 使用仓库受控 fixture、运行时压力工程与浏览器临时状态，不读取或登记用户私有音频身份。
+
+### Results and Traceability
+
+| Step group | Result | Evidence |
+| --- | --- | --- |
+| E7 Chrome / Edge | pass / pass | 两端实测双层工具栏 `79px`、顶部控件 `30px`、point/range 行 `44px`、名称/分类列 `152/144px`、主区域圆角 `0px`、Header 后页面起点 `72px` |
+| Responsive density | pass | 两端覆盖 390×844、1024×900、1280×900、1920×1080；桌面波形 `176px`，窄屏波形 `144px`；1024×900 可见工具栏、波形、tempo 与标记行 |
+| Geometry / Canvas | pass | E2–E5 回归记录的最大多层时间映射误差为 `0.01 CSS px`；E6 压力 geometry 为 `0`；165 个 Canvas backing store 异常为 `0` |
+| 10,000-event feedback | pass | Chrome 最大 `6.7ms`，Edge 最大 `4.5ms`；均低于 `100ms`；Editor/分析归因 `>50ms` 长任务为 `0` |
+| Visible DOM / resources | pass | 固定 seed `3858767910`、10,000 events、工程 SHA-256 `1ee69629a2ea40342b503653ac31ac2c7eabad361d570c3b3d5a5be625bce5f0`；采样 DOM 为 315 point + 0 range；20 次循环后 1 Worker、1 AudioContext、1 RAF、0 Object URL、1 ResizeObserver、1 Canvas |
+| E1–E6 regression | pass | E1–E5 golden/unit/integration/Chrome、E6 unit/integration/Chrome/Edge、M6 Worker/coordinator、M7–M11 适用回归全部通过 |
+| M12 adjacent regression | pass | M12 unit 与真实 Chrome/Edge 动态 masonry 回归通过；稳定 DOM、最短列和资源清理契约未被 Editor 样式修改破坏 |
+| Build | pass with warning | 1,845 modules；最大 JS chunk `1,285.28 kB`，既有 warning 如实保留到整体 readiness review |
+| Docs / harness / typecheck / diff | pass | lifecycle links、deliberate failure detection、`vue-tsc -b`、canonical 起止 clean 与 `git diff --check` |
+
+### Provisional and Failed-attempt History
+
+- 最终 dirty-worktree provisional：`E7-2026-08-28T14-52-46-743Z-3fdb8ac6-provisional`，44/44 pass，summary SHA-256 `417e6ec636cdf6d6733128adf48d6df234406d6f981dc5274a9f2dfe2c3390c9`。
+- 较早 provisional `E7-2026-08-28T14-41-40-086Z-3fdb8ac6-provisional` 为 42/44 step groups pass，summary SHA-256 `c471705176c585d2cf8f04bd93ba00426d649fe91d2164d62fdd1dc26f91b824`。E1 的 exact persistence-state 文本因紧凑工具栏合并而失去稳定语义边界，另有同一长序列中的 route/IndexedDB timing 与 M7 empty-workspace 瞬态失败；状态文本拆回独立 DOM 后，E1 与 M7 专项均独立通过，随后完整 provisional 与 clean canonical 全绿。失败 run 保留，不覆盖。
+
+### Local Artifact Hashes
+
+| Artifact | SHA-256 |
+| --- | --- |
+| `summary.json` | `43f63963fafa774ea18a8ddda290d573fd7869a269fc71798c22ca3076b14a4a` |
+| 44 个排序后 `*.log` SHA-256 清单的 SHA-256 | `4c8852416e283b28f03d9f70015f1c71e92151f6a973730af43d244cc37ba176` |
+| `01-E7-Chrome-compact-workbench.log` | `6ecdbf9b5b868ae737dbce1553adf3bd29bc31c034d0f22adca146cff90f8531` |
+| `02-E7-Edge-compact-workbench.log` | `b9042e45330145af81b1dbf60dbec16f7fdb7dec941929953f42897c7f8f934f` |
+| `03-M12-masonry-unit-regression.log` | `e87632d51a4700d1447635541345ae374320a7f4b394bb033a3c8789cc710cf2` |
+| `04-M12-dual-browser-regression.log` | `05cdd6960b12cb071ad09b0ebe679235ee73f99555137ac8ef161c69b0c4204e` |
+| `07-E6-Chrome.log` | `0875de5f107bcf1e1c951e4a3d592c9d5f5308bede6af5629318e2d14dbc4d9a` |
+| `08-E6-Edge.log` | `775c77f56d4f47e0191b0b7469a06de078669e91c2473ea2b512a1dda335c53e` |
+| `43-build.log` | `d7dc193712a6aab1286989c6464e9dc13ade8c898adf5090e9e04cbedfda3202` |
+| `44-diff-check.log` | `e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855` |
+
+### Manual Gaps and Approval Gate
+
+- 自动化以 computed style、DOM/Canvas geometry、真实任务状态和本地 artifact 截图固定可复现事实；FL Studio 参考图未复制进仓库，也不是像素 golden。
+- 紧凑度、视觉层级、长会话可读性和真实辅助技术操作体感仍需 owner 在 Chrome 与 Edge 人工判断；自动化不能替代该视觉签字。
+- E7 在 owner 批准前保持 `In Progress`，本 evidence 保持 `in-review`。不得从 44/44 自动化结果推断 E7 已关闭或包含 Editor 的 release-readiness 已创建。

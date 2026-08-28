@@ -6,7 +6,7 @@ upstream_docs:
   - "docs/quality/editor/e7-eval-plan.md"
   - "docs/quality/editor/e6-failure-taxonomy.md"
   - "docs/architecture/risk-register.md"
-next_action: "按 E7 provisional/canonical 记录真实失败，不覆盖 E6 历史"
+next_action: "保留首次 provisional 失败历史；由 owner 复核 clean canonical 候选"
 ---
 
 # Editor E7 Failure Taxonomy
@@ -29,3 +29,8 @@ E7 沿用 E1–E6 的 geometry、pointer、focus、performance、resource、regr
 | S3 | 不影响任务、事实和可访问性的轻微视觉差异 | 登记，由 owner 判断 |
 
 失败 run 必须保留身份与日志。E7 修复后创建新实现 commit 并执行新的 clean canonical，不覆盖 E6 或失败历史。
+
+## Recorded E7 Failures
+
+- `E7-2026-08-28T14-41-40-086Z-3fdb8ac6-provisional` 暴露 `EFT-COMPACT-REGRESSION / S1`：合并工具栏后 persistence state 不再拥有独立、稳定的文本语义边界；另有长序列中的 route/IndexedDB 与 M7 empty-workspace 瞬态回归。状态拆分后 E1/M7 专项通过，完整 provisional 与 canonical 随后全绿。
+- 没有用放宽尺寸、时间、geometry、性能或资源阈值处理失败；E6 历史 canonical 未被改写。

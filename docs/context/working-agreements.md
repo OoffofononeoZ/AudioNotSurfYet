@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/context/index.md"
   - "docs/delivery/test-strategy.md"
   - "docs/quality/eval-plan.md"
-next_action: "保留 M12/E6 approved artifact；E7 只在本地提交并完成新 canonical"
+next_action: "保留 M12/E6 approved artifact 与 E7 canonical；等待 owner 视觉复核"
 ---
 
 # Working Agreements
@@ -168,5 +168,7 @@ E1 实现随后在不新增依赖、不修改 Analyzer session/cache schema 的�
 2026-08-28，E6 clean canonical 在 commit `17d7fe1046ed02a3fb5137ccfe7cbf5590093aff` 上 40/40 通过。自动化证明真实 Chrome/Edge、三格式、10,000 事件、`<=100ms` 反馈、0 个归因长任务和 20 次资源循环；`project-owner` 随后批准 E6 与原生 OS picker、`beforeunload`、辅助技术和长会话补偿门禁。E6 据此为 `Complete`，R-024、R-025、R-027 为 `Mitigated`。
 
 同日，owner 要求先关闭 E6，再实施 Editor 紧凑工作台。E7 只改变布局密度与表现层，必须独立执行 provisional、clean canonical、evidence 和 owner 审批；E6 历史身份不得改写，Editor readiness 延后至 E7。按本次计划默认只创建本地提交，不推送远端。
+
+同日，E7 最终 dirty provisional 44/44 通过；实现提交 `78bc7f06311a09948e5efae941a14599305b81a5` 后，clean canonical `E7-2026-08-28T15-02-48-298Z-78bc7f06` 44/44 通过，summary SHA-256 为 `43f63963fafa774ea18a8ddda290d573fd7869a269fc71798c22ca3076b14a4a`。Chrome/Edge 实测工具栏 79px、控件 30px、point/range 行 44px；10,000 事件最大反馈 6.7ms/4.5ms、归因长任务为 0。artifact 保留到 owner 审批，E7 仍为 `In Progress`，不创建 Editor readiness。
 
 同日，`project-owner` 明确要求 agent “自行提交并完成后续即可”，并说明“可以不上传远程仓库”。M12 clean canonical 在 commit `be655e6765a63493fb1a3a4ee99992073b06e54e` 上 12/12 通过后，本次授权用于本地提交、evidence 登记、R-028 缓解和 Analyzer readiness 复核；不构成远程推送、生产部署或 Editor E6 人工补偿完成的授权。
