@@ -9,7 +9,7 @@ upstream_docs:
   - "docs/architecture/editor/project-format-v1.md"
   - "docs/architecture/editor/interaction-contracts.md"
   - "docs/delivery/editor/execution-plan.md"
-next_action: "验证 AC-E701–AC-E704 并完成 E7 clean canonical 与 owner 审批"
+next_action: "AC-E701–AC-E704 自动化已通过；等待 owner 视觉任务与 E7 evidence 审批"
 ---
 
 # Editor E1–E7 Acceptance Criteria

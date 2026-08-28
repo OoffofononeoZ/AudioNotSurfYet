@@ -4,14 +4,14 @@ owner: "project-owner"
 last_reviewed: 2026-08-28
 upstream_docs:
   - "AGENTS.md"
-next_action: "保留 Analyzer M12 与 Editor E6 approved evidence；执行 Editor E7 紧凑工作台"
+next_action: "保留 Analyzer M12/Editor E6 approved evidence；由 owner 复核 Editor E7 44/44 canonical"
 ---
 
 # Repository Context Index
 
 ## Purpose
 
-AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端：用户选择本地音频后，应用提供播放队列、元数据、进度与音量控制，并把实时能量用于 MusicBar 和背景可视化。Analyzer 21/21 与 M12 实时最短列瀑布流已完成 clean canonical，Analyzer readiness 恢复为 `Ready with waivers`；Editor E1–E6 已获批准并关闭，E7 紧凑工作台布局正在实施。
+AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端：用户选择本地音频后，应用提供播放队列、元数据、进度与音量控制，并把实时能量用于 MusicBar 和背景可视化。Analyzer 21/21 与 M12 实时最短列瀑布流已完成 clean canonical，Analyzer readiness 恢复为 `Ready with waivers`；Editor E1–E6 已获批准并关闭，E7 紧凑工作台已完成 44/44 clean canonical，正等待 owner 视觉复核。
 
 本目录维护仓库事实、边界和工作记忆；生命周期路由与通用方法由 [AGENTS.md](../../AGENTS.md) 负责。当前代码事实与目标架构必须区分：现状见 [system map](system-map.md)，批准的目标见 [system design](../architecture/system-design.md)。
 
@@ -21,8 +21,8 @@ AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端：用户选择
 - Product intent：problem brief、scope、success metrics 和 open questions 中的 Editor E0 点/范围事件范围已于 2026-08-26 获 owner 批准。
 - System design：Analyzer M12 实时最短列已实现并以 canonical 缓解 R-028；Editor runtime/data/interaction 设计保持批准，E7 只新增紧凑工作台表现契约。
 - Execution planning：根级 M1–M12 均为 `Complete`；`docs/delivery/editor/` E0-D/E1–E6 `Complete`、E7 `In Progress`。
-- Quality and evals：M3–M12 与 Editor E1–E6 evidence 已批准；E7 双浏览器布局 evidence 尚待形成。
-- Implementation：Analyzer M12 与 Editor E1–E6 已完成；Editor E7 正在重构平面分区、双层工具栏和紧凑轨道行。
+- Quality and evals：M3–M12 与 Editor E1–E6 evidence 已批准；E7 双浏览器 44/44 canonical 已登记为 `in-review`。
+- Implementation：Analyzer M12 与 Editor E1–E6 已完成；Editor E7 的平面分区、双层工具栏和紧凑轨道行已实现并提交。
 - Readiness、release、retrospective：Analyzer 为 `Ready with waivers`，但 PROD-015 完成前不创建上线声明；Editor 不继承 Analyzer readiness。
 
 ## Key Documents
@@ -59,7 +59,7 @@ AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端：用户选择
 | [Editor E1 eval plan](../quality/editor/eval-plan.md) | AC-E101–AC-E108 的成功、失败、边界、异常与 canonical 契约 | project-owner / approved | E1 行为、阈值、浏览器或证据能力变化 |
 | [Editor E1 golden examples](../quality/editor/golden-examples.md) | JSON、identity、lease、草稿和文件异常规范样例 | project-owner / approved | E1 schema、identity 或恢复语义变化 |
 | [Editor E1 failure taxonomy](../quality/editor/failure-taxonomy.md) | Editor 路由、lease、schema、草稿、文件和生命周期失败分类 | project-owner / approved | Editor 失败域或严重度响应变化 |
-| [Editor evidence index](../quality/editor/evidence-index.md) | E1–E6 canonical 身份、hash、环境与 reviewer 记录 | project-owner / in-review | 新 Editor run、artifact 或审批状态变化 |
+| [Editor evidence index](../quality/editor/evidence-index.md) | E1–E7 canonical 身份、hash、环境与 reviewer 记录 | project-owner / in-review | 新 Editor run、artifact 或审批状态变化 |
 | [Editor E2 eval plan](../quality/editor/e2-eval-plan.md) | AC-E201–AC-E206 的 geometry、tempo、BPM、竞态与回归契约 | project-owner / approved | E2 行为、阈值、算法或证据能力变化 |
 | [Editor E2 golden examples](../quality/editor/e2-golden-examples.md) | viewport、tempo map、BPM reliable/low-confidence 规范样例 | project-owner / approved | E2 fixture、拍号、阈值或边界语义变化 |
 | [Editor E2 failure taxonomy](../quality/editor/e2-failure-taxonomy.md) | E2 geometry、pointer、tempo、estimator 和 consumer 失败分类 | project-owner / approved | E2 失败域或严重度响应变化 |
@@ -117,12 +117,12 @@ AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端：用户选择
 - Quality design：[eval plan](../quality/eval-plan.md)，M3–M12 均已批准
 - Quality evidence：[evidence index](../quality/evidence-index.md)，M3–M12 已批准
 - Editor E1 quality：[eval plan](../quality/editor/eval-plan.md)、[golden](../quality/editor/golden-examples.md)、[failure taxonomy](../quality/editor/failure-taxonomy.md) 与 [evidence](../quality/editor/evidence-index.md) 已获批准
-- Editor E2 quality：[eval plan](../quality/editor/e2-eval-plan.md)、[golden](../quality/editor/e2-golden-examples.md)、[failure taxonomy](../quality/editor/e2-failure-taxonomy.md) 与 canonical record 已获批准；累计 [evidence index](../quality/editor/evidence-index.md) 因 E7 正在实施保持 `in-review`
+- Editor E2 quality：[eval plan](../quality/editor/e2-eval-plan.md)、[golden](../quality/editor/e2-golden-examples.md)、[failure taxonomy](../quality/editor/e2-failure-taxonomy.md) 与 canonical record 已获批准；累计 [evidence index](../quality/editor/evidence-index.md) 因 E7 等待 owner 审批保持 `in-review`
 - Editor E3 quality：[eval plan](../quality/editor/e3-eval-plan.md)、[golden](../quality/editor/e3-golden-examples.md)、[failure taxonomy](../quality/editor/e3-failure-taxonomy.md) 与 26/26 canonical record 均已获批准
 - Editor E4 quality：[eval plan](../quality/editor/e4-eval-plan.md)、[golden](../quality/editor/e4-golden-examples.md)、[failure taxonomy](../quality/editor/e4-failure-taxonomy.md) 与 31/31 canonical record 均已获批准
 - Editor E5 quality：[eval plan](../quality/editor/e5-eval-plan.md)、[golden](../quality/editor/e5-golden-examples.md)、[failure taxonomy](../quality/editor/e5-failure-taxonomy.md) 与 35/35 canonical record 已获批准
 - Editor E6 quality：[eval plan](../quality/editor/e6-eval-plan.md)、[golden](../quality/editor/e6-golden-examples.md)、[failure taxonomy](../quality/editor/e6-failure-taxonomy.md) 与 40/40 canonical record 已获批准
-- Editor E7 quality：[eval plan](../quality/editor/e7-eval-plan.md)、[golden](../quality/editor/e7-golden-examples.md) 与 [failure taxonomy](../quality/editor/e7-failure-taxonomy.md) 为 `in-review`；evidence 尚待形成
+- Editor E7 quality：[eval plan](../quality/editor/e7-eval-plan.md)、[golden](../quality/editor/e7-golden-examples.md) 与 [failure taxonomy](../quality/editor/e7-failure-taxonomy.md) 为 `in-review`；44/44 clean canonical 已登记，等待 owner 复核
 - Quality readiness：[Analyzer release readiness](../quality/release-readiness.md) 已按 M12 clean canonical 恢复 `Ready with waivers`
 - Release operations：`docs/release/` 尚未创建；PROD-015 的托管平台、域名和 SPA fallback 解决前不进入正式上线
 - Retrospectives：`docs/retrospectives/` 尚未创建；有发布、事故或重复摩擦证据后生成
@@ -137,13 +137,14 @@ AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端：用户选择
 - M11 clean canonical 已在 Chrome/Edge 上 38/38 通过，其中 Edge 全量为 31/31；原生 Edge 权限、辅助技术与人工长会话补偿门禁已于 2026-08-26 获 owner 签字，M11 为 `Complete`。
 - Analyzer M12 clean canonical `M12-2026-08-28T07-30-39-789Z-be655e67` 在 commit `be655e6765a63493fb1a3a4ee99992073b06e54e` 上 12/12 通过，R-028 已缓解，readiness 恢复为 `Ready with waivers`；正式托管平台、域名、SPA fallback 和生产 URL 仍继续阻断上线。
 - Editor E1–E6 已实现并获批准；E6 双浏览器、三格式、10,000 事件、资源与无障碍 clean canonical 为 40/40。
-- Editor E6 为 `Complete`；E7 紧凑工作台为 `In Progress`，Editor readiness 延后至 E7 获批。
+- Editor E6 为 `Complete`；E7 紧凑工作台实现与 clean canonical 已完成但仍为 `In Progress`，Editor readiness 延后至 owner 批准。
 - Editor delivery 固定 10,000 事件容量门禁、overlay 35%/12% 和逐里程碑 provisional/canonical/owner 审批；当前只开放 E7。
 - E1 clean canonical `E1-2026-08-26T15-24-21-043Z-792b424f` 在 clean commit `792b424fbab8e3621ad24d8c9add47d1c9bffcb4` 上 18/18 通过，summary SHA-256 为 `db51ba98b757ccd524d298243c6118eb24fad60101a74f20a5ff98478a5d5bc6`，并于 2026-08-26 获 owner 批准。
 - E2 clean canonical `E2-2026-08-26T16-42-47-634Z-9fc5c0a8` 在 clean commit `9fc5c0a81fcf90abfbc665412277147cd958200f` 上 22/22 通过，summary SHA-256 为 `4465c20343af9092601296b86a229200579f648ffa90641411b88f9861ba8660`；2026-08-27 owner 批准后 E2 为 `Complete`，E3 已开放。
 - E3 clean canonical `E3-2026-08-27T02-53-58-176Z-c670ddf5` 在 clean commit `c670ddf5494269f5a56abd20c3c5653ee5b27cef` 上 26/26 通过，summary SHA-256 为 `2a0a46b9a0e9b459ee17b11919451f074205fda58801d84a1274dbd12f5cfe4c`；2026-08-27 owner 批准后 E3 为 `Complete`，E4 已开放。
 - E4 clean canonical `E4-2026-08-27T07-21-59-209Z-c9e03ab9` 在 clean commit `c9e03ab9554aa5bac5649fa84e1d822f056ad0e2` 上 31/31 通过，summary SHA-256 为 `790f7f76f113fad6f005992f8fd10d94b0b77451acd58717c8c221edd54628ff`；2026-08-27 owner 批准后 E4 为 `Complete`，E5 已开放。
 - E5 clean canonical `E5-2026-08-27T11-03-22-177Z-78124177` 在 clean commit `781241772e05186e2fe0d006ed6ddd8bceded7af` 上 35/35 通过，summary SHA-256 为 `6928f75cbdeb6d77e54c81b3547f7caee0b39d4c6881884b1d1d7065f3dde1b0`；2026-08-27 owner 批准后 E5 为 `Complete`，E6 已开放。
+- E7 clean canonical `E7-2026-08-28T15-02-48-298Z-78bc7f06` 在 clean commit `78bc7f06311a09948e5efae941a14599305b81a5` 上 44/44 通过，summary SHA-256 为 `43f63963fafa774ea18a8ddda290d573fd7869a269fc71798c22ca3076b14a4a`；owner 批准前 E7 仍为 `In Progress`。
 - 详细 context 文档的长期 owner/review cadence 尚未全部统一；代码改动时必须同步修正事实。
 - 工程事实差异继续记录在 [Skill 项目差异](../../skills/audio-visualizer-dev/references/99-open-questions-and-project-deltas.md)，产品开放项见 [open questions](../product/open-questions.md)。
 
@@ -228,6 +229,8 @@ M11 canonical run `M11-2026-08-25T10-05-12-783Z-99c67792` 随后在 clean commit
 2026-08-28，E6 clean canonical `E6-2026-08-27T15-52-33-466Z-17d7fe10` 在 commit `17d7fe1046ed02a3fb5137ccfe7cbf5590093aff` 上 40/40 通过，summary SHA-256 为 `8f81b877dc5993bcdd4d04064e85c96156c946f2c62066c2b8571dfbc8473b6e`。自动化覆盖真实 Chrome/Edge、WAV/MP3/FLAC、10,000 事件、性能、资源和键盘/reduced-motion；原生 OS picker、`beforeunload`、辅助技术与长会话仍等待 owner 补偿签字，因此 E6 不提前关闭。
 
 同日，`project-owner` 明确先批准 E6 修改与人工补偿，再要求按紧凑工作台计划实施 E7。E6 据此改为 `Complete`，R-024、R-025、R-027 改为 `Mitigated`；E7 改为 `In Progress`。该批准不改写 E6 canonical 身份，也不构成 Editor readiness 或生产上线授权。
+
+随后 E7 实现 commit `78bc7f06311a09948e5efae941a14599305b81a5` 将 Editor 收敛为紧凑双层工具栏、平面分区、44px point/range 行与受控窄屏滚动。clean canonical `E7-2026-08-28T15-02-48-298Z-78bc7f06` 44/44 通过，summary SHA-256 为 `43f63963fafa774ea18a8ddda290d573fd7869a269fc71798c22ca3076b14a4a`；该事实只形成 `in-review` evidence，不替代 owner 视觉判断，也不创建 Editor readiness。
 
 同日，`project-owner` 接受 Analyzer M12 布局计划并明确要求实施。代码随后删除开场文案，把状态并入 sticky 时间轴，使用稳定四槽 DOM、实际高度最短列和 ResizeObserver/RAF 合并重排。dirty-worktree provisional run `M12-2026-08-28T07-12-30-657Z-45f51908-provisional` 12/12 通过，summary SHA-256 为 `055951e16e9749bf89f189516f3975bb340721fe05e47922f5e34148ed47d9fd`；该结果只作实现反馈。
 

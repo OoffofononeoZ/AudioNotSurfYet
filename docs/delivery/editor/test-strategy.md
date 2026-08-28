@@ -8,7 +8,7 @@ upstream_docs:
   - "docs/architecture/risk-register.md"
   - "docs/delivery/editor/execution-plan.md"
   - "docs/delivery/editor/acceptance-criteria.md"
-next_action: "执行 E7 密度/响应式/回归矩阵与 44 步 clean canonical"
+next_action: "E7 密度/响应式/回归矩阵与 44 步 canonical 已通过；等待 owner 复核"
 ---
 
 # Editor E1–E7 Test Strategy

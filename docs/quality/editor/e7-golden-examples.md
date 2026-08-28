@@ -5,7 +5,7 @@ last_reviewed: 2026-08-28
 upstream_docs:
   - "docs/quality/editor/e7-eval-plan.md"
   - "docs/delivery/editor/acceptance-criteria.md"
-next_action: "用 E7 Chrome/Edge artifact 核对紧凑布局 golden"
+next_action: "由 owner 用 E7 Chrome/Edge artifact 完成视觉 golden 复核"
 ---
 
 # Editor E7 Golden Examples
@@ -23,3 +23,7 @@ next_action: "用 E7 Chrome/Edge artifact 核对紧凑布局 golden"
 | E7-G09 | adjacent | Analyzer M12 动态 masonry | M12 unit/Chrome/Edge 保持通过 | 保护当前未推送候选 |
 
 FL Studio 参考图不复制进仓库、不参与像素 diff；E7 的可复现事实来自 computed style、DOM/Canvas geometry、浏览器状态和本地 artifact 截图。
+
+## Canonical Observation
+
+`E7-2026-08-28T15-02-48-298Z-78bc7f06` 在真实 Chrome/Edge 上对 E7-G01、G03–G09 形成自动化候选证据：两端均测得 toolbar `79px`、control `30px`、point/range row `44px`、side columns `152/144px`、desktop/narrow waveform `176/144px`、major radius `0px`，且 E1–E6 与 M12 回归通过。E7-G02 的视觉截断可用性及整体现代工作台观感仍由 owner 人工复核。
