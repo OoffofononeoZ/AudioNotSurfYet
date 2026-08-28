@@ -6,9 +6,9 @@
 - Vitest：4.1.10。官方已发布但当前 npm 镜像尚未提供 Vitest 5，因此使用镜像可获得且仍受支持的 4.1 版本。
 - Playwright Test：1.62.0；必需浏览器为本机稳定版 Google Chrome 与 Microsoft Edge。
 - FFmpeg：8.1.2；只用于生成和检查受控 WAV/MP3/FLAC fixture。
-- 当前 M12 provisional 检测到 Google Chrome 152.0.7977.64 与 Microsoft Edge 151.0.4129.107；`npm run test:e2e:edge` 使用真实 `msedge` channel，浏览器缺失时仍以退出码 2 报告 `blocked`。
+- 当前 M12 canonical 检测到 Google Chrome 152.0.7977.64 与 Microsoft Edge 151.0.4129.107；`npm run test:e2e:edge` 使用真实 `msedge` channel，浏览器缺失时仍以退出码 2 报告 `blocked`。
 
-M3–M12 不建设 CI。下列命令当前均为本地门禁；正式证据要求在干净 commit 上复跑。M3–M11 与 Editor E1–E5 canonical 均已获批准；M12 dirty-worktree provisional 已通过但仍为 `in-review`，E6 clean canonical 已 40/40 通过并为 `in-review`。M5 Chrome 原生权限、M7 学习任务、M8 Windows Chrome 界面稳定化、M9 导航栏视觉/学习清单、M11 Edge 最终加固和 E1 原生工程流程均由 owner 单独签字；M12 canonical/readiness 与 E6 原生文件、辅助技术、长会话补偿仍待复核。
+M3–M12 不建设 CI。下列命令当前均为本地门禁；正式证据要求在干净 commit 上复跑。M3–M12 与 Editor E1–E5 canonical 均已获批准；E6 clean canonical 已 40/40 通过并为 `in-review`。M5 Chrome 原生权限、M7 学习任务、M8 Windows Chrome 界面稳定化、M9 导航栏视觉/学习清单、M11 Edge 最终加固、M12 readiness 和 E1 原生工程流程均由 owner 单独签字；E6 原生文件、辅助技术、长会话补偿仍待复核。
 
 当前 `npm audit` 在安全补丁更新后剩余 1 项 low：Vite 依赖的 esbuild 0.27.3 在 Windows 开发服务器场景存在本地任意文件读取风险。仓库目标验证机为 macOS，开发服务器不得暴露到不受信网络；依赖升级提供修复版本后复核。该缺口不被描述为已修复或生产 readiness。
 
@@ -231,8 +231,10 @@ M11 最终 provisional run `M11-2026-08-25T09-47-44-125Z-1b3691f9-provisional` �
 
 M11 clean canonical run `M11-2026-08-25T10-05-12-783Z-99c67792` 已在 commit `99c67792509d07456bcb431b90468252f8b0fdc3` 上 38/38 通过，summary SHA-256 为 `7d637525b5c9e6aa6fb45dc0818ac1fb59bbef90b90abf3ed2d6e6119ac631b5`。Chrome 专项 4/4、Edge 全量 31/31；Chrome/Edge 60 秒漂移 3.5ms/4.133ms，seek 最大误差 66.827ms/61.494ms；四重卡最大反馈 17.9ms/17.2ms，分析归因长任务均为 0；两端 20 次路由循环均为 WebGL 21 created/20 lost、2 live RAF。build 最大 JS chunk 为 1,117.94 kB，warning 保留。
 
-M12 provisional run `M12-2026-08-28T07-12-30-657Z-45f51908-provisional` 已在 dirty worktree 上 12/12 通过，summary SHA-256 为 `055951e16e9749bf89f189516f3975bb340721fe05e47922f5e34148ed47d9fd`。M12 unit 为 4/4，M7/M8/M9/M10/M11 Chrome 回归分别为 5/5、2/2、2/2、3/3、4/4，M12 Chrome/Edge 均为 3/3；15 分钟回归最大反馈 16.7ms、分析归因长任务 0，M11 资源回归保持 2 live RAF。build 最大 JS chunk 为 1,284.56 kB，既有大 chunk warning 保留。该 run 只作实现反馈；clean commit 前不执行 canonical、不登记正式 evidence。
+M12 provisional run `M12-2026-08-28T07-12-30-657Z-45f51908-provisional` 已在 dirty worktree 上 12/12 通过，summary SHA-256 为 `055951e16e9749bf89f189516f3975bb340721fe05e47922f5e34148ed47d9fd`。M12 unit 为 4/4，M7/M8/M9/M10/M11 Chrome 回归分别为 5/5、2/2、2/2、3/3、4/4，M12 Chrome/Edge 均为 3/3；15 分钟回归最大反馈 16.7ms、分析归因长任务 0，M11 资源回归保持 2 live RAF。build 最大 JS chunk 为 1,284.56 kB，既有大 chunk warning 保留。该 run 只作实现反馈。
 
-本 README 只记录真实执行结果。`project-owner` 于 2026-08-26 明确批准 M11 canonical evidence、Edge 原生权限与最终加固结果；M11 evidence 为 `approved`，M11 为 `Complete`。Meyda 5.6.3 `spectralFlux` 上游缺陷仍保留，产品侧仅由 ADR-0005 项目实现缓解；M11 Analyzer `Ready with waivers` 只保留为历史候选结论，M12 新候选等待 clean canonical 与 owner readiness 复核，PROD-015 仍阻断正式上线。
+首次 clean run `M12-2026-08-28T07-25-22-951Z-b50c2c1e` 因 M7 短 fixture 在观察前可能接近结束，exact-cursor 计数窗口没有播放输入而失败；失败 artifact 保留。测试在计数前把进度归零并确认 `playing`，目标用例连续 5/5 通过。修复后的 canonical `M12-2026-08-28T07-30-39-789Z-be655e67` 在 commit `be655e6765a63493fb1a3a4ee99992073b06e54e` 上 12/12 通过，summary SHA-256 为 `76ffab8e9fd5db6370c22aa78c7ee08a0708d7a5d97e1b749fca284d4c696441`。M12 unit 4/4，M7/M8/M9/M10/M11 Chrome 回归 5/5、2/2、2/2、3/3、4/4，M12 Chrome/Edge 各 3/3；M7 cursor 各 14 次/607.7ms，15 分钟最大反馈 18.8ms、归因长任务 0，build 最大 JS chunk 1,284.55 kB。
+
+本 README 只记录真实执行结果。`project-owner` 已批准 M11 与 M12 canonical evidence；M12 为 `Complete`，Analyzer readiness 已按新候选恢复为 `Ready with waivers`。Meyda 5.6.3 `spectralFlux` 上游缺陷仍保留，产品侧仅由 ADR-0005 项目实现缓解；PROD-015 仍阻断正式上线，Editor E6 人工补偿继续独立等待。
 
 E1 最终 provisional `E1-2026-08-26T15-20-11-120Z-3ef4ec33-provisional` 已 18/18 通过。clean canonical `E1-2026-08-26T15-24-21-043Z-792b424f` 在 commit `792b424fbab8e3621ad24d8c9add47d1c9bffcb4` 上 18/18 通过，summary SHA-256 为 `db51ba98b757ccd524d298243c6118eb24fad60101a74f20a5ff98478a5d5bc6`；E1 unit 9/9、integration 7/7、Chrome 4/4。M4 60 秒漂移 0.8ms、seek 最大误差 66.827ms；M6 15 分钟最大反馈 18.1ms、分析归因长任务 0、20 次资源循环保持单 Worker/AudioContext。build 最大 JS chunk 为 1,204.24 kB，warning 保留。`project-owner` 于 2026-08-26 批准 E1 canonical、原生流程与人工任务，E1 为 `Complete`，E2 已开放。

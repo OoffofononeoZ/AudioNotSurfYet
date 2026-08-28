@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: approved
 owner: "project-owner"
 last_reviewed: 2026-08-28
 upstream_docs:
@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/quality/golden-examples.md"
   - "docs/delivery/acceptance-criteria.md"
   - "docs/architecture/risk-register.md"
-next_action: "使用现有 FT-COMPAT/FT-PERFORMANCE/FT-ACCESSIBILITY/FT-VISUAL 分类 M12 失败并复核 R-028"
+next_action: "保留 M12 首轮 FT-EVIDENCE artifact；未来布局变化继续使用稳定分类"
 ---
 
 # Failure Taxonomy
@@ -107,7 +107,15 @@ FAIL-<run-id>-<sequence>: <failure_type>/<severity>
 
 该实例没有证明产品曾超过 30Hz；它证明原 evidence clock 无法支持该声明。关闭恢复自动化证据可信度；owner 已于 2026-08-21 另行完成学习任务并批准 M7，但 Edge、R-019、R-020 与新登记的 R-021 仍独立保留。
 
-## 8. Q0 Approval Gate
+## 8. M12 Closed Failure Instance
+
+| Failure instance | Type | Severity | Evidence and disposition |
+| --- | --- | --- | --- |
+| `FAIL-M12-2026-08-28T07-25-22-951Z-b50c2c1e-01` | FT-EVIDENCE | S1 | 首轮 clean canonical 的 M7 相邻回归在重置计数后的 550ms 内得到空 exact-cursor 计数。受控单独复跑证明产品 cadence 正常；根因是短学习 fixture 可能在分析完成后已接近 ended，使观察窗没有播放游标更新。`be655e6` 在取证前以键盘 Home seek 到 0 并确保 playing；目标场景连续 5/5、完整 M7 5/5、第二次 M12 canonical 12/12 通过。原 run/summary 保持 `fail` 并本地保留，实例已关闭。 |
+
+该实例不证明 Analyzer 曾停止或超过 30Hz；它证明原观察窗没有保证存在可测的播放游标输入。修正只改变测试前置状态，不放宽 30Hz 上限、不修改产品代码，也不删除首轮失败证据。
+
+## 9. Q0 Approval Gate
 
 本 taxonomy 只有在 `project-owner` 确认以下内容后才能改为 `approved`：
 
@@ -118,6 +126,8 @@ FAIL-<run-id>-<sequence>: <failure_type>/<severity>
 - local-only artifact 的保留、删除和 readiness 重跑规则明确；
 - expected failure 与真正失败实例被清楚区分。
 
-## 9. Approval Record
+## 10. Approval Record
 
 `project-owner` 于 2026-07-28 明确批准本文的十类 failure type、S0–S3、门禁响应和本地产物复现规则。
+
+2026-08-28，`project-owner` 要求 agent 自行提交并完成 M12 后续。首轮 FT-EVIDENCE/S1 按上述回归关闭，第二次 clean canonical 12/12 通过；本文的 M12 映射、失败处置和保留策略据此获批准。

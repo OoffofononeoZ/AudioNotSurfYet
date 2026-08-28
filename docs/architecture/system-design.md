@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/product/scope.md"
   - "docs/product/success-metrics.md"
   - "docs/product/open-questions.md"
-next_action: "实施并验证已批准的 Analyzer M12 瀑布流布局；Editor E6 人工补偿继续独立进行"
+next_action: "保留 Analyzer M12 canonical 设计证据；Editor E6 人工补偿继续独立进行"
 ---
 
 # System Design
@@ -339,6 +339,8 @@ M6 只在 `import.meta.env.DEV` 安装无 UI bridge，提供活动特征、cance
 2026-08-26，`project-owner` 批准 Editor E0 产品意图并同意进入架构设计。随后明确回复：“我批准 Editor E0 系统设计、接口契约、风险与 ADR；同意进入 Editor E1–E6 execution planning。”Editor runtime、project、timeline、range、overlay、R-022–R-027 与 ADR-0006–0009 据此获批并开放 delivery planning。该批准不撤销 Analyzer 历史证据，也不构成 E1–E6 实现、质量证据或 Editor readiness 通过。
 
 2026-08-28，`project-owner` 接受 Analyzer M12 瀑布流与顶部精简方案并明确要求实施。该批准只改变 Analyzer DOM 布局和响应式几何，不改变产品范围、音频/分析接口、持久化 schema 或 Editor E6 门禁；M12 新候选仍需双浏览器证据后才能恢复 Analyzer readiness。
+
+同日，M12 clean canonical 12/12 通过后，owner 的“自行提交并完成后续”授权用于批准设计实现证据、缓解 R-028 并恢复 Analyzer readiness。该批准不覆盖 PROD-015 或 Editor E6 人工补偿。
 
 ## 17. Editor Timeline and Interaction Architecture
 

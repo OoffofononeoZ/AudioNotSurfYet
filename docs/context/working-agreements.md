@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/context/index.md"
   - "docs/delivery/test-strategy.md"
   - "docs/quality/eval-plan.md"
-next_action: "保留 E6 canonical artifact，并由 owner 完成原生文件、辅助技术和长会话补偿验证"
+next_action: "保留 M12/E6 canonical artifact；等待 E6 原生文件、辅助技术和长会话补偿验证"
 ---
 
 # Working Agreements
@@ -44,6 +44,8 @@ next_action: "保留 E6 canonical artifact，并由 owner 完成原生文件、�
 - M10 的 `m10-structures-v1.wav` 在 `artifacts/fixtures/` 运行时生成；版本化 `m10-structures.v1.json` 固定 total/24 Bark bands、real/imag 各 1024、相位差、静音和正负 impulse 语义。
 - M11 使用 `test:e2e:m11:chrome`、`test:e2e:m11:edge`、`eval:m11:provisional` 和 clean-HEAD `eval:m11`；两条浏览器命令必须使用真实 Chrome/Edge channel，并把浏览器产品名与版本写入 artifact。
 - M11 OPFS 自动化覆盖真实 IndexedDB/FileSystemFileHandle 的可重复路径；原生 OS picker 的 granted/prompt/denied、恢复访问和文件移动由 owner 在 Chrome 与 Edge 分别人工签字，自动化不得冒充该权限提示证据。
+- M12 使用 `test:m12:unit`、`test:e2e:m12:chrome`、`test:e2e:m12:edge`、`eval:m12:provisional` 和 clean-HEAD `eval:m12`；旧 Grid 列数断言改为实际 `DOMRect`、唯一横坐标、容器包围、无重叠和最短列几何。
+- M12 布局断言固定 390/1024 一列、1280/1920 两列、18px gap 与平局选左，并验证稳定 slot DOM、`details`/焦点/Canvas 保持和 Observer/RAF 路由清理；测试观察播放游标前必须把短 fixture 归零并确认 `playing`。
 - M3 仅建立本地门禁，不存在正式 CI；这项缺口不阻断 M3，但自动化声明必须限定为本地执行。
 - 交互改动要在本地浏览器执行成功、失败和边界场景，并检查 console error/warn。
 - 布局和可视化至少检查窄屏、常见桌面和宽屏，使用真实 DOM/canvas 几何。
@@ -72,7 +74,10 @@ next_action: "保留 E6 canonical artifact，并由 owner 完成原生文件、�
 - M9 clean canonical `M9-2026-08-21T09-14-14-110Z-f88ca331` 已在 commit `f88ca33149619b1a71eb30d74a1b8e266fb41a65` 上 32/32 通过，起止工作树干净，summary SHA-256 为 `acb9ced1b448671955704efe33d846cd06059f6a8fd1343fb50f7a847672220e`；正式记录已由 owner 批准。
 - M10 dirty-worktree provisional `M10-2026-08-22T18-17-36-129Z-2df604b9-provisional` 已 36/36 通过，summary SHA-256 为 `e9696c843256bff07cfa77b29ee9a529e9d80c6fc842c6f7437fab39a5c77166`；它只作实现反馈，不绑定最终实现 commit，也不进入正式 evidence index。
 - M10 clean canonical `M10-2026-08-22T18-25-01-873Z-8830e2a2` 已在 commit `8830e2a2edddd9a5db4796ec6f5d5da8ee3c5f72` 上 36/36 通过，起止工作树干净，summary SHA-256 为 `30eb11b9985adc8c6d84e01b84f31a75785a4d8e39bdef22e85dd153f2637ea1`；正式记录已由 owner 批准。
-- M3–M10 canonical run 已记录并获 owner 批准。本地产物保留和删除规则以 [eval plan](../quality/eval-plan.md) 为准。
+- M11 clean canonical `M11-2026-08-25T10-05-12-783Z-99c67792` 已在 commit `99c67792509d07456bcb431b90468252f8b0fdc3` 上 38/38 通过并获 owner 批准。
+- M12 provisional `M12-2026-08-28T07-12-30-657Z-45f51908-provisional` 12/12 通过，只作实现反馈；首次 clean run `M12-2026-08-28T07-25-22-951Z-b50c2c1e` 因短 fixture 缺少播放前置条件失败并保留 artifact。
+- M12 修复 commit `be655e6765a63493fb1a3a4ee99992073b06e54e` 的目标用例连续 5/5 通过；clean canonical `M12-2026-08-28T07-30-39-789Z-be655e67` 随后 12/12 通过，summary SHA-256 为 `76ffab8e9fd5db6370c22aa78c7ee08a0708d7a5d97e1b749fca284d4c696441`，正式记录已获 owner 批准。
+- M3–M12 canonical run 已记录并获 owner 批准。本地产物保留和删除规则以 [eval plan](../quality/eval-plan.md) 为准。
 - fixture、manifest 和 golden 是受版本控制的规范输入；更新必须可重建、显示 diff，并重新执行对应测试。
 
 ## Resource Ownership
@@ -161,3 +166,5 @@ E1 实现随后在不新增依赖、不修改 Analyzer session/cache schema 的�
 同日，`project-owner` 明确批准 E5 canonical evidence、范围事件创建/调整、重叠校验、键盘与持久化结果，同意关闭 E5 并开放 E6。E5 evidence 据此改为 `approved`，E6 为 `In Progress`；R-024、R-025、R-027 继续等待 E6 双浏览器、10,000 事件、资源与辅助技术证据。
 
 2026-08-28，E6 clean canonical 在 commit `17d7fe1046ed02a3fb5137ccfe7cbf5590093aff` 上 40/40 通过并登记为 `in-review`。自动化证明真实 Chrome/Edge、三格式、10,000 事件、`<=100ms` 反馈、0 个归因长任务和 20 次资源循环；真实 OS picker、`beforeunload`、辅助技术与长会话仍需 owner 补偿验证。人工签字前 E6 继续为 `In Progress`，R-024、R-025、R-027 继续为 `Open`，不得创建 Editor readiness。
+
+同日，`project-owner` 明确要求 agent “自行提交并完成后续即可”，并说明“可以不上传远程仓库”。M12 clean canonical 在 commit `be655e6765a63493fb1a3a4ee99992073b06e54e` 上 12/12 通过后，本次授权用于本地提交、evidence 登记、R-028 缓解和 Analyzer readiness 复核；不构成远程推送、生产部署或 Editor E6 人工补偿完成的授权。
