@@ -11,7 +11,7 @@ upstream_docs:
   - "docs/quality/editor/e5-eval-plan.md"
   - "docs/quality/editor/e6-eval-plan.md"
   - "docs/delivery/editor/milestone-plan.md"
-next_action: "owner 在 Chrome/Edge 完成 E6 原生文件、辅助技术与长会话补偿验证并审批 canonical"
+next_action: "执行 E7 紧凑工作台布局，形成新的双浏览器 canonical 后由 owner 审批"
 ---
 
 # Editor Evidence Index
@@ -24,13 +24,14 @@ next_action: "owner 在 Chrome/Edge 完成 E6 原生文件、辅助技术与长�
 - E3：`Complete`。
 - E4：`Complete`。
 - E5：`Complete`。
-- E6：`In Progress`。
+- E6：`Complete`。
+- E7：`In Progress`。
 - E1 clean canonical 与 owner 人工门禁均已批准；Analyzer M3–M11 evidence 仍不能替代未来 Editor 里程碑证据。
 - E2 clean canonical 与 owner 门禁已于 2026-08-27 获批。
 - E3 clean canonical 与 owner 人工门禁已于 2026-08-27 获批；E4 clean canonical 与 owner 人工门禁随后获批。
 - E4 clean canonical 31/31 与 owner 人工门禁已于 2026-08-27 获批；E5 已开放。
 - E5 clean canonical 35/35 与 owner 人工范围任务已于 2026-08-27 获批；E6 已开放。
-- E6 clean canonical 40/40 已通过并登记为 `in-review`；原生 OS picker、`beforeunload`、辅助技术与长会话补偿签字前，E6 继续为 `In Progress`。
+- E6 clean canonical 40/40、原生 OS picker、`beforeunload`、辅助技术与长会话补偿已于 2026-08-28 获 owner 批准；E7 紧凑工作台布局已开放，Editor readiness 延后至 E7 审批。
 
 ## 2. Record Contract
 
@@ -513,15 +514,15 @@ next_action: "owner 在 Chrome/Edge 完成 E6 原生文件、辅助技术与长�
 | --- | --- |
 | Run ID | `E6-2026-08-27T15-52-33-466Z-17d7fe10` |
 | Milestone | E6 — Final hardening |
-| State | `in-review`（40/40 自动化通过；owner 人工补偿门禁待完成） |
+| State | `approved`（40/40 自动化与 owner 人工补偿门禁已批准） |
 | Implementation commit | `17d7fe1046ed02a3fb5137ccfe7cbf5590093aff` |
 | Evidence commit | 本记录所在的 `docs: register Editor E6 canonical evidence` 提交 |
 | Dirty at start / end | `false` / `false` |
 | Commit at end | `17d7fe1046ed02a3fb5137ccfe7cbf5590093aff` |
 | Started at | 2026-08-27 15:52:33.466 UTC |
 | Method | `npm run eval:e6` |
-| Reviewer | `project-owner` — pending |
-| Retention | `local-present`；至少保留到 E6 审批完成 |
+| Reviewer | `project-owner` — approved 2026-08-28 |
+| Retention | `local-present`；作为 E6 历史候选保留 |
 | Artifact root | `artifacts/evals/E6-2026-08-27T15-52-33-466Z-17d7fe10/` |
 | Summary SHA-256 | `8f81b877dc5993bcdd4d04064e85c96156c946f2c62066c2b8571dfbc8473b6e` |
 
@@ -587,4 +588,5 @@ next_action: "owner 在 Chrome/Edge 完成 E6 原生文件、辅助技术与长�
 - 自动化中的工程 picker 使用浏览器 OPFS/stub 验证原子读写、取消与错误隔离，不能替代 Chrome/Edge 的真实 OS 打开、保存和覆盖对话框。
 - 原生 `beforeunload` 提示、辅助技术朗读和真实长会话操作体感不能由 Playwright 结果替代；这些项目必须由 owner 补偿验证。
 - 自动化已验证键盘语义、可见焦点、reduced motion 和非纯颜色结构，但仍需 owner 使用真实辅助技术完成核心任务。
-- E6 evidence 在 owner 明确签字前保持 `in-review`，E6 保持 `In Progress`，R-024、R-025、R-027 继续为 `Open`，不得创建 Editor release-readiness。
+- 2026-08-28，`project-owner` 在明确询问批准范围后回复“只批准e6，之后先修改我说的页面修改”，并随后要求实施 E6 关闭与 E7 紧凑工作台计划。本记录据此只登记 E6 原生文件、辅助技术与长会话补偿门禁已获批准，不补写 owner 未提供的逐项数值。
+- E6 据此改为 `Complete`，R-024、R-025、R-027 改为 `Mitigated`。紧凑布局作为新的 E7 候选独立验证，不反向改写本 run；Editor release-readiness 延后到 E7 evidence 获批。

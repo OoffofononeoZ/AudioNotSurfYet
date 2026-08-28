@@ -1,12 +1,12 @@
 ---
-status: in-review
+status: approved
 owner: "project-owner"
 last_reviewed: 2026-08-28
 upstream_docs:
   - "docs/quality/editor/e6-eval-plan.md"
   - "docs/quality/editor/e5-golden-examples.md"
   - "docs/delivery/editor/acceptance-criteria.md"
-next_action: "owner 复核已通过的 E6 golden 与不能自动化的 native/辅助技术项目"
+next_action: "保留 E6 golden；E7 独立增加紧凑布局 golden"
 ---
 
 # Editor E6 Golden Examples
@@ -30,3 +30,5 @@ next_action: "owner 复核已通过的 E6 golden 与不能自动化的 native/�
 | E6-G15 | evidence | dirty 与 clean 两种 eval 启动 | provisional 可运行；canonical 对 dirty worktree 以退出码 2 拒绝 | 固定证据身份 |
 
 版本化 stress manifest 只保存 seed、duration、lane/class/event 计数、预期可见摘要和生成 artifact hash；不提交 15 分钟音频、大型工程、trace、设备标识或用户文件事实。
+
+2026-08-28，`project-owner` 批准 E6 canonical 与原生文件、辅助技术、长会话补偿门禁；本 golden 据此改为 `approved`。E7 视觉密度要求使用独立 golden，不覆盖本表。
