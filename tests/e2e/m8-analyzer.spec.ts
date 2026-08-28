@@ -14,6 +14,7 @@ import {
 } from '../support/file-picker';
 import { encodeMonoWav } from '../support/m7-learning-fixture';
 import { createM8ScalarPcm } from '../support/m8-scalar-fixture';
+import { expectAnalyzerMasonry } from '../support/analyzer-masonry';
 
 const REPOSITORY_ROOT = path.resolve(import.meta.dirname, '../..');
 const M8_WAV_FIXTURE = path.join(
@@ -100,13 +101,9 @@ test('adds a fourth scalar card and restores it under the cumulative feature set
         .toHaveCount(1);
     await expect(page.locator('.timeline-toolbar')).toContainText('2.0×');
 
-    for (const width of [1024, 1280, 1920]) {
-        await page.setViewportSize({ width, height: 900 });
-        const columnCount = await page.locator('.card-grid').evaluate(
-            (element) => getComputedStyle(element).gridTemplateColumns
-                .split(' ').length,
-        );
-        expect(columnCount).toBe(width === 1024 ? 1 : 2);
+    for (const width of [1_024, 1_280, 1_920]) {
+        const columnCount = (await expectAnalyzerMasonry(page, width)).columns;
+        expect(columnCount).toBe(width === 1_024 ? 1 : 2);
     }
     console.log(JSON.stringify({
         metric: 'm8-four-card-learning',

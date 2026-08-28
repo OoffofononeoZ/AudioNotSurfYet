@@ -8,6 +8,7 @@ import {
     chooseFiles,
     installFilePickerStub,
 } from '../support/file-picker';
+import { expectAnalyzerMasonry } from '../support/analyzer-masonry';
 
 const REPOSITORY_ROOT = path.resolve(import.meta.dirname, '../..');
 const AUDIO_FIXTURES = path.join(REPOSITORY_ROOT, 'tests/fixtures/audio');
@@ -174,20 +175,18 @@ test('keeps keyboard, focus, reduced motion and responsive geometry usable', asy
         headerHeight: number;
         musicBarInsideViewport: boolean;
     }> = {};
-    for (const width of [390, 1024, 1280, 1920]) {
-        await page.setViewportSize({ width, height: 900 });
-        geometries[width] = await page.evaluate(() => {
+    for (const width of [390, 1_024, 1_280, 1_920]) {
+        const masonry = await expectAnalyzerMasonry(page, width);
+        geometries[width] = await page.evaluate((columns) => {
             const header = document.querySelector<HTMLElement>(
                 '#main-header',
             )!;
-            const grid = document.querySelector<HTMLElement>('.card-grid')!;
             const music = document.querySelector<HTMLElement>(
                 '#music-bar-container',
             )!;
             const musicRect = music.getBoundingClientRect();
             return {
-                columns: getComputedStyle(grid).gridTemplateColumns
-                    .split(' ').length,
+                columns,
                 documentOverflow: Math.max(
                     0,
                     document.documentElement.scrollWidth - window.innerWidth,
@@ -197,7 +196,7 @@ test('keeps keyboard, focus, reduced motion and responsive geometry usable', asy
                     musicRect.left >= -1
                     && musicRect.right <= window.innerWidth + 1,
             };
-        });
+        }, masonry.columns);
     }
     expect(geometries).toEqual({
         390: {

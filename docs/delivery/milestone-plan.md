@@ -1,25 +1,25 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-08-26
+last_reviewed: 2026-08-28
 upstream_docs:
   - "docs/delivery/execution-plan.md"
   - "docs/delivery/acceptance-criteria.md"
   - "docs/delivery/test-strategy.md"
-next_action: "保留 Analyzer 历史里程碑；E1 由已批准 Editor milestone plan 管理"
+next_action: "在用户提供干净 commit 后执行 M12 canonical，登记 evidence 并请求 owner readiness 复核"
 ---
 
 # Milestone Plan
 
 ## Scope Routing
 
-本文保留 Analyzer M1–M11 的已批准历史状态；Analyzer readiness 已另行获批为 `Ready with waivers`。Editor 的 E0-D 与 E1–E6 状态由已批准的 [Editor milestone plan](editor/milestone-plan.md) 管理，并链接专属 [execution plan](editor/execution-plan.md)、[acceptance criteria](editor/acceptance-criteria.md) 和 [test strategy](editor/test-strategy.md)。E0-D 已完成，E1 正在实施。
+本文保留 Analyzer M1–M11 的已批准历史状态，并新增 M12 瀑布流布局。旧 Analyzer readiness 保留为 M11 候选的历史结论，但不覆盖 M12 新候选。Editor 的 E0-D 与 E1–E6 状态由独立 [Editor milestone plan](editor/milestone-plan.md) 管理。
 
 ## Planning Convention
 
 - Target 使用相对门禁，不表示日历承诺。
 - `Complete` 只用于文档门禁、真实证据和所需人工批准均已满足的里程碑。
-- Q0 与 M1–M11 均为 `Complete`；Analyzer delivery 已关闭，Analyzer-only readiness 已获批准。
+- Q0 与 M1–M11 均为 `Complete`；M12 为 `In Progress`，其 canonical/owner 审批前 Analyzer 新候选 readiness 为待复核。
 - 一个里程碑未通过时，后续里程碑保持 Planned/Blocked，不并行扩大特征范围。
 
 ## Milestones
@@ -38,6 +38,7 @@ next_action: "保留 Analyzer 历史里程碑；E1 由已批准 Editor milestone
 | M9 | Power Spectrum + MFCC + Buffer | Complete | After M8 | M8 | Header blur、vector/waveform 维度、精确值、累计 19/21 | project-owner |
 | M10 | Loudness + Complex Spectrum | Complete | Full feature gate | M9 | 结构 payload/renderer、21/21 coverage | project-owner |
 | M11 | Cross-cutting hardening | Complete | Delivery exit gate | M10 | 格式、恢复、权限、性能、无障碍、视口和 Chrome/Edge 全证据 | project-owner |
+| M12 | Analyzer masonry layout | In Progress | Post-readiness candidate change | M11 + approved M12 design | 纯布局、动态 DOM、四视口、Chrome/Edge、资源清理、canonical 与 owner approval | project-owner |
 
 ## Gate Checklist by Milestone
 
@@ -142,12 +143,22 @@ next_action: "保留 Analyzer 历史里程碑；E1 由已批准 Editor milestone
 - [x] canonical：390/1024/1280/1920 实际几何与 Canvas。
 - [x] 所有适用 AC 有证据，相关风险已关闭、缓解或明确接受；R-019 等剩余项进入 readiness 豁免审阅。
 
+### M12
+
+- [x] owner 接受实时最短列、1/2 列、顶部状态并入工具栏和无运行时 fallback 的设计。
+- [x] 纯布局函数与 unit 覆盖单/双列、平局、重算、容器高度和无重叠。
+- [x] Analyzer 保持四个稳定 slot DOM/组件实例；动态内容只更新包装层位置。
+- [x] 390/1024/1280/1920、空槽/四卡、换卡、error、details、focus、Canvas 和 sticky/player 几何在 Chrome/Edge 通过。
+- [x] ResizeObserver/RAF 创建与释放成对，路由循环无资源增长或 console warning。
+- [x] dirty-worktree `eval:m12:provisional` 通过，只作实现反馈。
+- [ ] clean-commit `eval:m12` 通过、evidence 登记并由 owner 批准；随后重新审阅 Analyzer readiness。
+
 ## Current Gate State
 
-- Current stage：M11 clean Chrome/Edge canonical 已 38/38 通过并获 owner 批准，M11 为 `Complete`；Analyzer readiness 已获批准。当前新增工作只进入 Editor E1–E6 delivery planning，E1 仍关闭。
+- Current stage：M12 `In Progress`；实现与 dirty provisional 已完成，M11 canonical/readiness 保留为旧候选历史，M12 新候选等待 clean canonical、evidence 登记与 owner 复核。Editor E6 继续独立等待人工补偿审批。
 - Previous gate：M3 已由 `project-owner` 于 2026-07-28 批准并标记 `Complete`。
 - Canonical run：`npm run eval:m3` 已在 clean commit `17d16f0da37289c1f67f75203502beef999572ea` 上通过；摘要见 [evidence index](../quality/evidence-index.md)。
-- Next gate：审阅四份 `docs/delivery/editor/` 子文档；批准后只开放 E1。Analyzer 正式上线仍等待 PROD-015。
+- Next gate：用户提供干净 commit 后运行 `npm run eval:m12`，登记 canonical evidence 并请求 owner 复核 Analyzer readiness。正式上线仍等待 PROD-015。
 - M3 state：Complete；M3 evidence 只证明测试基础，不代表 M4 产品行为通过。
 - M4 canonical：`npm run eval:m4` 在 clean commit `e5cfe9e8ab62301f3c5b0ddcdd37847a2e131a0f` 上 13/13 步骤通过；60 秒漂移 2.233ms，三次 seek 最大误差 66.827ms。`project-owner` 已于 2026-07-29 批准该证据。
 - M5 provisional：`M5-2026-07-29T07-03-16-207Z-2eb98381-provisional` 在 dirty worktree 16/16 步骤通过；summary SHA-256 为 `7b0acaf128ac4a7ceffce1449d2421127d20c8b25dcdc1ebd07b889072228530`。它只作实现反馈，不是正式 evidence。
@@ -162,6 +173,7 @@ next_action: "保留 Analyzer 历史里程碑；E1 由已批准 Editor milestone
 - M10 canonical：`M10-2026-08-22T18-25-01-873Z-8830e2a2` 在 clean commit `8830e2a2edddd9a5db4796ec6f5d5da8ee3c5f72` 上 36/36 通过，summary SHA-256 为 `30eb11b9985adc8c6d84e01b84f31a75785a4d8e39bdef22e85dd153f2637ea1`。M10 unit 7/7、integration 13/13、Chrome 3/3；四重卡 15 分钟最大反馈 17ms、分析归因长任务 0；正式 evidence 于 2026-08-25 获 owner 批准。
 - M11 provisional：`M11-2026-08-25T09-47-44-125Z-1b3691f9-provisional` 在 dirty worktree 38/38 通过，summary SHA-256 为 `e84e695f8cb328390e1843b03d7af5c6f619bd2d96442fd7d97799bef5287ad5`。Edge 全量 31/31；Chrome/Edge 四重卡最大反馈 17.6ms/16.7ms、分析归因长任务均为 0；两端 20 次路由循环均为 21 created/20 lost WebGL context 和 2 live RAF。它不是正式 evidence。
 - M11 canonical：`M11-2026-08-25T10-05-12-783Z-99c67792` 在 clean commit `99c67792509d07456bcb431b90468252f8b0fdc3` 上 38/38 通过，summary SHA-256 为 `7d637525b5c9e6aa6fb45dc0818ac1fb59bbef90b90abf3ed2d6e6119ac631b5`。Chrome 专项 4/4、Edge 全量 31/31；Chrome/Edge 四重卡最大反馈 17.9ms/17.2ms、分析归因长任务均为 0；正式 evidence 于 2026-08-26 获 owner 批准。
+- M12 provisional：`M12-2026-08-28T07-12-30-657Z-45f51908-provisional` 在 dirty worktree 12/12 通过，summary SHA-256 为 `055951e16e9749bf89f189516f3975bb340721fe05e47922f5e34148ed47d9fd`。unit 4/4，M7–M11 Chrome 相邻回归依次 5/5、2/2、2/2、3/3、4/4，M12 Chrome/Edge 均 3/3；15 分钟回归最大反馈 16.7ms、分析归因长任务 0，资源回归保持 2 live RAF。它不是正式 evidence。
 - Known future blockers：托管平台、域名和 SPA fallback 未定会阻断正式 release；R-019、local-only/no-CI、单机性能基线与开发服务器 advisory 必须在 readiness 中显式审阅，不重新打开 M11。
 
 ## Approval Record
@@ -175,6 +187,8 @@ next_action: "保留 Analyzer 历史里程碑；E1 由已批准 Editor milestone
 `project-owner` 于 2026-07-29 确认 M5 Chrome 原生权限人工检查通过，并明确批准 M5 evidence index 与 working agreements。M5 据此改为 `Complete` 并开放 M6；超范围压力输入未开始播放不计入门禁，也不扩展约 15 分钟支持承诺。
 
 2026-08-26，`project-owner` 明确回复：“我批准 M11 canonical evidence、Edge 原生权限与最终加固结果；同意将 M11 标记为 Complete 并创建 release-readiness。”M11 evidence 据此改为 `approved`，M11 改为 `Complete`；该批准允许创建 readiness review，但不预先接受 readiness 中尚待审阅的豁免，也不构成正式上线授权。
+
+2026-08-28，`project-owner` 接受 M12 布局计划并明确要求实施。M12 据此进入 `In Progress`；M11 历史通过不被删除，但 M12 候选不得继承旧几何与资源证据。
 
 2026-07-30，M6 canonical 已在 clean commit 上 20/20 通过。`project-owner` 随后明确回复：“我批准 M6 canonical evidence、working agreements、system map 与 glossary；同意将 M6 标记为 Complete 并开放 M7。”M6 据此改为 `Complete`；M7 门禁开放但仍为 `Planned`，直到明确开始实现。
 

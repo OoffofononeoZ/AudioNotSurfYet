@@ -16,6 +16,7 @@ import {
     createM7LearningPcm,
     encodeMonoWav,
 } from '../support/m7-learning-fixture';
+import { expectAnalyzerMasonry } from '../support/analyzer-masonry';
 
 const REPOSITORY_ROOT = path.resolve(import.meta.dirname, '../..');
 const LEARNING_WAV_FIXTURE = path.join(
@@ -219,23 +220,10 @@ test('defaults to three unique cards in four slots and shares seek/zoom', async 
         beforeKeyboard,
     );
 
-    await page.setViewportSize({ width: 1024, height: 900 });
-    await expect(page.locator('.card-grid')).toHaveCSS(
-        'grid-template-columns',
-        /[0-9.]+px/,
-    );
-    await page.setViewportSize({ width: 1280, height: 900 });
-    const columns1280 = await page.locator('.card-grid').evaluate(
-        (element) => getComputedStyle(element).gridTemplateColumns.split(' ')
-            .length,
-    );
-    expect(columns1280).toBe(2);
-    await page.setViewportSize({ width: 1920, height: 1080 });
-    const columns1920 = await page.locator('.card-grid').evaluate(
-        (element) => getComputedStyle(element).gridTemplateColumns.split(' ')
-            .length,
-    );
-    expect(columns1920).toBe(2);
+    await expectAnalyzerMasonry(page, 1_024);
+    const columns1280 = (await expectAnalyzerMasonry(page, 1_280)).columns;
+    const columns1920 = (await expectAnalyzerMasonry(page, 1_920, 1_080))
+        .columns;
 
     console.log(JSON.stringify({
         metric: 'm7-three-card-interaction',
