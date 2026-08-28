@@ -45,6 +45,7 @@
 | `npm run test:e6:unit` | 运行 10,000 事件确定性拓扑、范围边界、唯一 ID 与 visible filter | E6 压力工程纯契约 |
 | `npm run test:e6:integration` | 运行 10,000 事件 JSON/IndexedDB round-trip 与无效导入原子隔离 | E6 persistence 压力契约 |
 | `npm run test:e2e:e6` | 顺序运行真实 Chrome/Edge 的三格式、压力、无障碍和 20 次资源循环 | E6 双浏览器自动化；不替代原生 picker/辅助技术人工门禁 |
+| `npm run test:e2e:e7` | 顺序运行真实 Chrome/Edge 的紧凑工具栏、平面分区、固定密度与多视口回归 | E7 布局自动化；截图只作人工补充 |
 | `npm run test:e2e:edge` | 使用稳定 Edge 串行运行 M3–M11 全量 E2E | Edge 缺失时以退出码 2 明确 blocked；不得用 Chromium 替代 |
 | `npm run test:docs` | 检查生命周期 frontmatter、链接和 21 项特征 | 文档门禁 |
 | `npm run eval:m3:provisional` | 未提交工作树的本地 M3 run | 不创建正式 evidence index |
@@ -73,6 +74,8 @@
 | `npm run eval:e5` | 只在干净 commit 上运行 35 步 E5 suite | 生成可登记的 E5 canonical 证据 |
 | `npm run eval:e6:provisional` | 在 dirty worktree 运行 40 步 E6 双浏览器 suite | 只生成实现反馈 |
 | `npm run eval:e6` | 只在干净 commit 上运行 40 步 E6 suite | 生成可登记的 E6 canonical 证据 |
+| `npm run eval:e7:provisional` | 在 dirty worktree 运行 44 步 E7/E6/M12 双浏览器 suite | 只生成实现反馈 |
+| `npm run eval:e7` | 只在干净 commit 上运行 44 步 E7 suite | 生成可登记的 E7 canonical 证据 |
 
 ## 已知测试缺口
 

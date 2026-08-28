@@ -6,6 +6,25 @@
         data-testid="editor-analysis-overlay-host"
         aria-label="Editor 分析叠加层"
     >
+        <div class="overlay-controls">
+            <label>
+                <span>声音特征</span>
+                <select
+                    :value="featureId ?? ''"
+                    data-testid="editor-overlay-feature"
+                    @change="selectFeature"
+                >
+                    <option value="">关闭叠加</option>
+                    <option
+                        v-for="option in featureOptions"
+                        :key="option.id"
+                        :value="option.id"
+                    >
+                        {{ option.label }}
+                    </option>
+                </select>
+            </label>
+        </div>
         <section
             class="analysis-overlay-panel"
             :class="{ 'has-feature': featureId }"
@@ -15,26 +34,6 @@
             :data-renderer-error="overlayError ? 'true' : 'false'"
             data-testid="editor-analysis-overlay-panel"
         >
-            <div class="overlay-controls">
-                <label>
-                    <span>声音特征</span>
-                    <select
-                        :value="featureId ?? ''"
-                        data-testid="editor-overlay-feature"
-                        @change="selectFeature"
-                    >
-                        <option value="">关闭叠加</option>
-                        <option
-                            v-for="option in featureOptions"
-                            :key="option.id"
-                            :value="option.id"
-                        >
-                            {{ option.label }}
-                        </option>
-                    </select>
-                </label>
-            </div>
-
             <template v-if="featureId">
                 <canvas ref="staticCanvas" class="overlay-canvas static" aria-hidden="true" />
                 <canvas ref="cursorCanvas" class="overlay-canvas cursor" aria-hidden="true" />
@@ -433,8 +432,9 @@ onBeforeUnmount(() => {
     right: 0;
     min-height: 42px;
     overflow: visible;
-    border: 1px solid rgba(101, 255, 169, .42);
-    border-radius: 13px;
+    border-top: 1px solid rgba(101, 255, 169, .42);
+    border-bottom: 1px solid rgba(101, 255, 169, .42);
+    border-radius: 0;
     background: rgba(2, 8, 5, .28);
     box-shadow: 0 8px 28px rgba(0, 0, 0, .2);
     transition: top 120ms ease, height 120ms ease;
@@ -443,14 +443,14 @@ onBeforeUnmount(() => {
     position: absolute;
     z-index: 12;
     left: 8px;
-    top: 7px;
+    top: -30px;
     pointer-events: auto;
 }
-.overlay-controls label { display: grid; gap: 2px; color: #dffff0; font-size: .68rem; }
+.overlay-controls label { display: flex; align-items: center; gap: 6px; height: 30px; color: #dffff0; font-size: .68rem; white-space: nowrap; }
 .overlay-controls select {
     max-width: 170px;
     border: 1px solid rgba(101, 255, 169, .58);
-    border-radius: 8px;
+    border-radius: var(--editor-control-radius, 4px);
     padding: 5px 7px;
     color: #effff6;
     background: rgba(4, 20, 11, .96);
@@ -485,7 +485,7 @@ onBeforeUnmount(() => {
     color: #ffd3ce;
     pointer-events: none;
 }
-.overlay-error button { pointer-events: auto; border: 1px solid #ff9389; border-radius: 7px; color: #fff; background: #481713; }
+.overlay-error button { pointer-events: auto; border: 1px solid #ff9389; border-radius: var(--editor-control-radius, 4px); color: #fff; background: #481713; }
 .overlay-handle {
     position: absolute;
     z-index: 13;
@@ -494,7 +494,7 @@ onBeforeUnmount(() => {
     height: 26px;
     padding: 0;
     border: 1px solid rgba(101, 255, 169, .8);
-    border-radius: 10px;
+    border-radius: var(--editor-control-radius, 4px);
     color: #effff6;
     background: rgba(4, 20, 11, .96);
     cursor: ns-resize;

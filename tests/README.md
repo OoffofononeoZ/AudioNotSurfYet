@@ -75,6 +75,9 @@ M3–M12 不建设 CI。下列命令当前均为本地门禁；正式证据要�
 | `npm run test:e2e:e6:chrome` | Chrome 三格式、工程失败隔离、10,000 事件、反馈/长任务、虚拟化、无障碍与 20 次资源循环 |
 | `npm run test:e2e:e6:edge` | 使用真实 Edge 执行同一 E6 最终加固套件 |
 | `npm run test:e2e:e6` | 顺序执行真实 Chrome 与 Edge 的 E6 最终加固套件 |
+| `npm run test:e2e:e7:chrome` | Chrome 执行双层工具栏、平面分区、30/44/152/144/176px 密度与多视口功能回归 |
+| `npm run test:e2e:e7:edge` | 使用真实 Edge 执行同一 E7 紧凑工作台套件 |
+| `npm run test:e2e:e7` | 顺序执行真实 Chrome 与 Edge 的 E7 紧凑工作台套件 |
 | `npm run test:e2e:edge` | 使用真实 Edge 执行全部 M3–M11 E2E；缺失时明确 blocked |
 | `npm run build` | TypeScript project build 和 Vite production build |
 | `npm run eval:m3:provisional` | 在未提交工作树生成本地 provisional run |
@@ -109,6 +112,8 @@ M3–M12 不建设 CI。下列命令当前均为本地门禁；正式证据要�
 | `npm run eval:e5` | 只允许在干净 commit 上执行 35 步 E5 canonical suite 并生成可登记证据 |
 | `npm run eval:e6:provisional` | 在 dirty worktree 执行 40 步 E6 双浏览器最终回归并生成实现反馈 |
 | `npm run eval:e6` | 只允许在干净 commit 上执行 40 步 E6 canonical suite 并生成可登记证据 |
+| `npm run eval:e7:provisional` | 在 dirty worktree 执行 44 步 E7 密度、E6 基线和 M12 双浏览器回归 |
+| `npm run eval:e7` | 只允许在干净 commit 上执行 44 步 E7 canonical suite 并生成可登记证据 |
 
 ## 目录职责
 
@@ -155,6 +160,8 @@ E5 使用版本化 `editor-e5-ranges.v1.json` 固定半开区间、相邻允许�
 E5 clean canonical `E5-2026-08-27T11-03-22-177Z-78124177` 在 commit `781241772e05186e2fe0d006ed6ddd8bceded7af` 上 35/35 通过，summary SHA-256 为 `6928f75cbdeb6d77e54c81b3547f7caee0b39d4c6881884b1d1d7065f3dde1b0`；`project-owner` 于 2026-08-27 批准 E5 canonical 与人工范围任务，E5 为 `Complete`、E6 为 `In Progress`。
 
 E6 quality contract 固定真实 Chrome/Edge、WAV/MP3/FLAC、15 分钟 20 lanes/160 classes/10,000 events、`<=100ms` 反馈、无归因任务 `>50ms`、viewport-visible DOM、20 次资源循环与人工 native/辅助技术补偿。clean canonical `E6-2026-08-27T15-52-33-466Z-17d7fe10` 在 commit `17d7fe1046ed02a3fb5137ccfe7cbf5590093aff` 上 40/40 通过，summary SHA-256 为 `8f81b877dc5993bcdd4d04064e85c96156c946f2c62066c2b8571dfbc8473b6e`；owner 于 2026-08-28 批准 E6 与人工补偿，E6 为 `Complete`。
+
+E7 新增双浏览器紧凑工作台套件，固定验证 79px 实测双层工具栏、30px 顶部控件、44px point/range 行、152/144px 侧栏、176/144px 波形、0px 主区域圆角、390/1024/1280/1920 响应式与既有交互回归。44 步 canonical 继续完整复用 E6 基线与 M12 双浏览器回归。
 
 E2 clean canonical `E2-2026-08-26T16-42-47-634Z-9fc5c0a8` 已在 commit `9fc5c0a81fcf90abfbc665412277147cd958200f` 上 22/22 通过，summary SHA-256 为 `4465c20343af9092601296b86a229200579f648ffa90641411b88f9861ba8660`；2026-08-27 owner 批准该结果并开放 E3。
 

@@ -1,10 +1,10 @@
 <template>
-    <section ref="workspace" class="point-workspace" data-testid="editor-point-workspace" aria-labelledby="point-workspace-title">
+    <section ref="workspace" class="point-workspace" data-testid="editor-point-workspace" data-editor-major-region="true" aria-labelledby="point-workspace-title">
         <header class="workspace-heading">
-            <div>
-                <p class="workspace-kicker">Point & Range Annotation</p>
+            <div class="workspace-titleline">
+                <span class="workspace-kicker">Point & Range</span>
                 <h2 id="point-workspace-title">点与范围标记轨道</h2>
-                <p>在共享节拍网格中标记短音色、音符、长音色或效果所在位置。</p>
+                <span class="workspace-help">按共享节拍网格标记音符、音色和效果。</span>
             </div>
             <div class="workspace-actions">
                 <button type="button" data-testid="add-point-lane" @click="addLane">
@@ -1105,15 +1105,17 @@ onBeforeUnmount(() => {
 <style scoped>
 .point-workspace {
     position: relative;
-    margin-top: 20px;
-    border: 1px solid rgba(72, 255, 151, .28);
-    border-radius: 24px;
-    padding: 24px;
+    margin-top: 1px;
+    border-top: 1px solid var(--editor-divider-strong, rgba(72,255,151,.28));
+    border-bottom: 1px solid var(--editor-divider-strong, rgba(72,255,151,.28));
+    border-radius: 0;
+    padding: 0;
     background: rgba(3, 12, 8, .88);
-    --editor-lane-name-width: 180px;
-    --editor-inner-class-width: 160px;
+    --editor-lane-name-width: 152px;
+    --editor-inner-class-width: 144px;
 }
 .workspace-heading,
+.workspace-titleline,
 .workspace-status,
 .lane-meta,
 .inner-class-cell,
@@ -1122,17 +1124,26 @@ onBeforeUnmount(() => {
     display: flex;
     align-items: center;
 }
-.workspace-heading { justify-content: space-between; gap: 20px; }
+.workspace-heading {
+    justify-content: space-between;
+    gap: 12px;
+    min-height: 40px;
+    padding: 4px 8px;
+    border-bottom: 1px solid var(--editor-divider, rgba(159,196,175,.16));
+}
+.workspace-titleline { min-width: 0; gap: 10px; }
 .workspace-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
-.workspace-heading h2 { margin: 4px 0 6px; }
-.workspace-kicker { color: #65ffa9; letter-spacing: .12em; text-transform: uppercase; }
-.workspace-status { min-height: 24px; margin-top: 12px; color: #a9c7b6; }
+.workspace-heading h2 { margin: 0; font-size: .96rem; white-space: nowrap; }
+.workspace-kicker { color: #65ffa9; font-size: .68rem; letter-spacing: .1em; text-transform: uppercase; white-space: nowrap; }
+.workspace-help { overflow: hidden; color: #779184; font-size: .74rem; text-overflow: ellipsis; white-space: nowrap; }
+.workspace-status { min-height: 28px; margin: 0; padding: 4px 8px; border-bottom: 1px solid var(--editor-divider, rgba(159,196,175,.12)); color: #a9c7b6; font-size: .76rem; }
 button,
 input,
 select {
+    min-height: var(--editor-control-height, 30px);
     border: 1px solid rgba(101, 255, 169, .48);
-    border-radius: 10px;
-    padding: 8px 11px;
+    border-radius: var(--editor-control-radius, 4px);
+    padding: 4px 8px;
     color: #effff6;
     background: rgba(7, 24, 15, .94);
 }
@@ -1145,51 +1156,55 @@ button:disabled { opacity: .4; cursor: not-allowed; }
 .empty-workspace {
     display: grid;
     gap: 6px;
-    margin-top: 16px;
-    border: 1px dashed rgba(101,255,169,.3);
-    border-radius: 14px;
-    padding: 22px;
+    margin: 0;
+    border-bottom: 1px dashed rgba(101,255,169,.24);
+    border-radius: 0;
+    padding: 12px 8px;
     color: #a9c7b6;
 }
 .lane-card {
-    margin-top: 14px;
-    border: 0;
-    border-radius: 16px;
+    margin-top: 0;
+    border-bottom: 1px solid var(--editor-divider-strong, rgba(101,255,169,.22));
+    border-radius: 0;
     overflow: hidden;
-    box-shadow: inset 0 0 0 1px rgba(101,255,169,.22);
+    box-shadow: none;
 }
 .lane-grid {
     display: grid;
     grid-template-columns: var(--editor-lane-name-width) var(--editor-inner-class-width) minmax(420px, 1fr);
-    grid-template-rows: repeat(var(--lane-rows), minmax(68px, auto));
+    grid-template-rows: repeat(var(--lane-rows), var(--editor-row-height, 44px));
     min-width: 760px;
 }
 .lane-meta {
     grid-column: 1;
     grid-row: 1 / span var(--lane-rows);
-    align-items: stretch;
-    flex-direction: column;
-    gap: 8px;
-    padding: 12px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-rows: 26px 12px;
+    align-content: center;
+    gap: 2px 4px;
+    padding: 2px 5px;
     border-right: 1px solid rgba(101,255,169,.18);
     background: rgba(4,17,10,.82);
 }
-.lane-meta label { color: #8eaa9a; font-size: .78rem; }
-.lane-kind { color: #65ffa9; font-size: .78rem; letter-spacing: .06em; }
+.lane-meta label { display: none; }
+.lane-meta input { grid-column: 1; grid-row: 1; min-width: 0; min-height: 26px; height: 26px; }
+.lane-meta button { grid-column: 2; grid-row: 1; min-height: 26px; height: 26px; padding-inline: 5px; }
+.lane-kind { grid-column: 1 / -1; grid-row: 2; overflow: hidden; color: #65ffa9; font-size: .62rem; letter-spacing: .04em; text-overflow: ellipsis; white-space: nowrap; }
 .inner-class-cell {
     grid-column: 2;
     gap: 6px;
-    padding: 10px;
+    padding: 4px;
     border-right: 1px solid rgba(101,255,169,.18);
     border-bottom: 1px solid rgba(101,255,169,.12);
     background: rgba(5,20,12,.78);
 }
-.inner-class-cell input { min-width: 0; width: 100%; }
-.delete-class { padding-inline: 7px; font-size: .76rem; }
+.inner-class-cell input { flex: 1 1 auto; min-width: 0; width: auto; }
+.delete-class { padding-inline: 5px; font-size: .7rem; }
 .marker-surface {
     position: relative;
     grid-column: 3;
-    min-height: 68px;
+    min-height: var(--editor-row-height, 44px);
     overflow: hidden;
     border-bottom: 1px solid rgba(101,255,169,.12);
     background: rgba(0,0,0,.18);
@@ -1201,8 +1216,8 @@ button:disabled { opacity: .4; cursor: not-allowed; }
 .point-candidate {
     position: absolute;
     z-index: 2;
-    top: 7px;
-    bottom: 7px;
+    top: 5px;
+    bottom: 5px;
     min-width: 6px;
     border: 1px solid rgba(101,255,169,.92);
     border-radius: 8px;
@@ -1218,7 +1233,7 @@ button:disabled { opacity: .4; cursor: not-allowed; }
     z-index: 4;
     top: 50%;
     width: 24px;
-    height: 36px;
+    height: 34px;
     padding: 0;
     border: 0;
     background: transparent;
@@ -1256,7 +1271,7 @@ button:disabled { opacity: .4; cursor: not-allowed; }
     min-width: 165px;
     padding: 6px;
     border: 1px solid rgba(101,255,169,.5);
-    border-radius: 12px;
+    border-radius: var(--editor-flyout-radius, 8px);
     background: rgba(2,10,6,.98);
     box-shadow: 0 14px 40px rgba(0,0,0,.5);
 }
@@ -1273,8 +1288,8 @@ button:disabled { opacity: .4; cursor: not-allowed; }
 .removal-dialog {
     width: min(520px, 100%);
     border: 1px solid rgba(101,255,169,.5);
-    border-radius: 18px;
-    padding: 24px;
+    border-radius: var(--editor-flyout-radius, 8px);
+    padding: 18px;
     color: #effff6;
     background: #041009;
     box-shadow: 0 20px 70px rgba(0,0,0,.65);
@@ -1287,7 +1302,8 @@ button:disabled { opacity: .4; cursor: not-allowed; }
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
 @media (max-width: 900px) {
     .point-workspace { overflow-x: auto; }
-    .workspace-heading { min-width: 760px; align-items: flex-start; }
+    .workspace-heading { min-width: 760px; align-items: flex-start; flex-wrap: wrap; }
+    .workspace-help { display: none; }
 }
 @media (prefers-reduced-motion: reduce) {
     .point-candidate { transition: none; transform: none; }

@@ -1,8 +1,8 @@
 <template>
-    <section class="editor-timeline-panel" aria-label="Editor 时间轴">
+    <section class="editor-timeline-panel" aria-label="Editor 时间轴" data-editor-major-region="true">
         <header class="timeline-heading">
-            <div>
-                <p class="timeline-kicker">E2 · Timeline / Tempo</p>
+            <div class="timeline-titleline">
+                <span class="timeline-kicker">Timeline / Tempo</span>
                 <h2>波形与节拍地图</h2>
                 <p data-testid="editor-viewport-state">{{ formatTime(viewport.startSeconds) }} — {{ formatTime(viewport.endSeconds) }} · {{ viewport.zoom.toFixed(1) }}×</p>
             </div>
@@ -658,15 +658,17 @@ onBeforeUnmount(() => {
 
 <style scoped>
 .editor-timeline-panel {
-    margin-top: 20px;
-    border: 1px solid rgba(72, 255, 151, 0.28);
-    border-radius: 24px;
-    padding: 24px;
-    background: rgba(3, 12, 8, 0.88);
-    --editor-lane-name-width: 180px;
-    --editor-inner-class-width: 160px;
+    margin-top: 1px;
+    border-top: 1px solid var(--editor-divider-strong, rgba(72, 255, 151, .28));
+    border-bottom: 1px solid var(--editor-divider-strong, rgba(72, 255, 151, .28));
+    border-radius: 0;
+    padding: 0;
+    background: rgba(3, 12, 8, .88);
+    --editor-lane-name-width: 152px;
+    --editor-inner-class-width: 144px;
 }
 .timeline-heading,
+.timeline-titleline,
 .timeline-controls,
 .timeline-status,
 .tempo-segment header,
@@ -674,16 +676,25 @@ onBeforeUnmount(() => {
     display: flex;
     align-items: center;
 }
-.timeline-heading { justify-content: space-between; gap: 20px; }
-.timeline-heading h2 { margin: 4px 0 6px; }
-.timeline-kicker { color: #65ffa9; letter-spacing: .12em; text-transform: uppercase; }
+.timeline-heading {
+    justify-content: space-between;
+    gap: 12px;
+    min-height: 40px;
+    padding: 4px 8px;
+    border-bottom: 1px solid var(--editor-divider, rgba(159,196,175,.16));
+}
+.timeline-titleline { min-width: 0; gap: 10px; }
+.timeline-heading h2 { margin: 0; font-size: .96rem; white-space: nowrap; }
+.timeline-titleline p { margin: 0; color: #a9c7b6; font-size: .76rem; white-space: nowrap; }
+.timeline-kicker { color: #65ffa9; font-size: .68rem; letter-spacing: .1em; text-transform: uppercase; white-space: nowrap; }
 .timeline-controls { flex-wrap: wrap; gap: 8px; }
 button,
 input,
 select {
+    min-height: var(--editor-control-height, 30px);
     border: 1px solid rgba(101, 255, 169, .48);
-    border-radius: 10px;
-    padding: 8px 11px;
+    border-radius: var(--editor-control-radius, 4px);
+    padding: 4px 9px;
     color: #effff6;
     background: rgba(7, 24, 15, .94);
 }
@@ -695,28 +706,29 @@ button:disabled { opacity: .4; }
     display: grid;
     grid-template-columns: var(--editor-lane-name-width) var(--editor-inner-class-width) minmax(420px, 1fr);
     min-width: 760px;
-    margin-top: 18px;
+    margin-top: 0;
 }
 .timeline-track-rail,
 .timeline-class-rail {
     display: grid;
     align-content: center;
-    gap: 5px;
-    padding: 14px;
-    border: 1px solid rgba(101,255,169,.24);
+    gap: 3px;
+    padding: 8px;
+    border-right: 1px solid var(--editor-divider, rgba(101,255,169,.18));
     border-right: 0;
     color: #a9c7b6;
     background: rgba(4,17,10,.82);
 }
-.timeline-track-rail { border-radius: 16px 0 0 16px; }
+.timeline-track-rail { border-right: 1px solid var(--editor-divider, rgba(101,255,169,.18)); border-radius: 0; }
+.timeline-class-rail { border-right: 1px solid var(--editor-divider, rgba(101,255,169,.18)); }
 .timeline-track-rail strong,
 .timeline-class-rail strong { color: #effff6; }
 .timeline-stage {
     position: relative;
-    height: 320px;
+    height: 176px;
     overflow: hidden;
-    border: 1px solid rgba(101,255,169,.3);
-    border-radius: 0 16px 16px 0;
+    border: 0;
+    border-radius: 0;
     background: linear-gradient(180deg, rgba(12,35,23,.9), rgba(2,8,5,.96));
     cursor: crosshair;
     touch-action: none;
@@ -730,7 +742,7 @@ button:disabled { opacity: .4; }
 .boundary-start { left: 8px; }
 .boundary-end { right: 8px; }
 .tempo-boundary { transform: translateX(-50%); padding: 4px 7px; cursor: ew-resize; }
-.add-boundary { left: calc(100% - 78px); top: 36px; border-radius: 999px; cursor: pointer; }
+.add-boundary { left: calc(100% - 78px); top: 36px; border-radius: var(--editor-control-radius, 4px); cursor: pointer; }
 .timeline-menu {
     position: absolute;
     z-index: 10;
@@ -738,24 +750,26 @@ button:disabled { opacity: .4; }
     min-width: 165px;
     padding: 6px;
     border: 1px solid rgba(101,255,169,.5);
-    border-radius: 12px;
+    border-radius: var(--editor-flyout-radius, 8px);
     background: rgba(2, 10, 6, .98);
     box-shadow: 0 14px 40px rgba(0,0,0,.5);
 }
 .timeline-menu button { border: 0; text-align: left; }
-.timeline-status { flex-wrap: wrap; gap: 16px; padding: 12px 2px 0; color: #a9c7b6; }
-.tempo-segments { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; margin-top: 18px; }
-.tempo-segment { border: 1px solid rgba(101,255,169,.2); border-radius: 14px; padding: 14px; background: rgba(4,17,10,.78); }
-.tempo-segment header { justify-content: space-between; gap: 10px; margin-bottom: 12px; }
-.tempo-segment label { display: grid; grid-template-columns: 70px 1fr; align-items: center; gap: 8px; margin-top: 8px; }
+.timeline-status { flex-wrap: wrap; gap: 14px; min-height: 28px; padding: 4px 8px; border-top: 1px solid var(--editor-divider, rgba(101,255,169,.14)); color: #a9c7b6; font-size: .76rem; }
+.tempo-segments { display: flex; overflow-x: auto; margin-top: 0; border-top: 1px solid var(--editor-divider, rgba(101,255,169,.14)); background: rgba(4,17,10,.6); scrollbar-color: rgba(101,255,169,.5) rgba(2,8,5,.9); }
+.tempo-segment { display: flex; flex: 0 0 auto; align-items: center; gap: 10px; min-height: 40px; border-right: 1px solid var(--editor-divider, rgba(101,255,169,.18)); border-radius: 0; padding: 4px 8px; background: rgba(4,17,10,.5); }
+.tempo-segment header { justify-content: flex-start; gap: 6px; margin: 0; white-space: nowrap; }
+.tempo-segment label { display: flex; align-items: center; gap: 6px; margin: 0; white-space: nowrap; }
 .meter-inputs { gap: 6px; }
-.meter-inputs input { width: 70px; }
+.tempo-segment input { width: 68px; }
+.meter-inputs input { width: 48px; }
 .tempo-source,
-.single-beat { display: block; margin-top: 10px; color: #a9c7b6; }
-.tempo-error { margin-top: 8px; color: #ffb0a8; }
-@media (max-width: 760px) {
-    .timeline-heading { align-items: flex-start; flex-direction: column; }
-    .timeline-stage { height: 280px; }
+.single-beat { display: block; margin: 0; color: #a9c7b6; white-space: nowrap; }
+.tempo-error { margin: 0; color: #ffb0a8; white-space: nowrap; }
+@media (max-width: 900px) {
+    .timeline-heading { align-items: flex-start; flex-wrap: wrap; }
+    .timeline-titleline { flex-wrap: wrap; }
+    .timeline-stage { height: 144px; }
     .editor-timeline-panel { overflow-x: auto; }
 }
 @media (prefers-reduced-motion: reduce) {

@@ -1,7 +1,7 @@
 <template>
     <main class="editor-page" data-testid="editor-page">
         <section class="editor-shell">
-            <header class="editor-heading">
+            <header v-if="snapshot.state !== 'ready'" class="editor-heading">
                 <div>
                     <p class="kicker">Editor · 逆向制曲</p>
                     <h1>逆向制曲工程</h1>
@@ -56,44 +56,54 @@
             </section>
 
             <template v-else-if="snapshot.state === 'ready' && snapshot.project">
-                <section class="track-panel" data-testid="editor-ready">
-                    <div>
-                        <p class="kicker">当前工程</p>
-                        <h2>{{ snapshot.project.track.title || snapshot.project.track.fileName }}</h2>
-                        <p>
-                            {{ snapshot.project.track.artist || 'unknown' }} ·
-                            {{ formatTime(playback.durationSeconds) }} ·
-                            JSON V1
+                <section
+                    class="editor-workbench-toolbar"
+                    data-testid="editor-ready"
+                    data-editor-major-region="true"
+                >
+                    <div class="editor-toolbar-primary" data-testid="editor-workbench-toolbar-primary">
+                        <div class="toolbar-identity">
+                            <span class="kicker">逆向制曲工程</span>
+                            <h2>{{ snapshot.project.track.title || snapshot.project.track.fileName }}</h2>
+                            <span class="track-meta">
+                                {{ snapshot.project.track.artist || 'unknown' }} ·
+                                {{ formatTime(playback.durationSeconds) }} · JSON V1
+                            </span>
+                            <span class="toolbar-help">不修改原音频，只保存时间标注工程。</span>
+                        </div>
+                        <p class="persistence-state" :data-state="snapshot.persistence" aria-live="polite">
+                            <span class="toolbar-state">{{ stateLabel }}</span>
+                            <span aria-hidden="true">·</span>
+                            <span>{{ persistenceLabel }}</span>
                         </p>
                     </div>
-                    <div class="transport" aria-label="Editor 播放控制">
-                        <button type="button" data-testid="editor-playback-toggle" @click="togglePlayback">
-                            {{ playback.state === 'playing' ? '暂停' : '播放' }}
-                        </button>
-                        <span data-testid="editor-current-time">
-                            {{ formatTime(playback.currentTimeSeconds) }} / {{ formatTime(playback.durationSeconds) }}
-                        </span>
-                        <span class="repeat-badge" data-testid="editor-repeat-state">单曲循环</span>
+                    <div class="editor-toolbar-secondary" data-testid="editor-workbench-toolbar-secondary">
+                        <div class="transport" aria-label="Editor 播放控制">
+                            <button type="button" data-testid="editor-playback-toggle" @click="togglePlayback">
+                                {{ playback.state === 'playing' ? '暂停' : '播放' }}
+                            </button>
+                            <span class="time-readout" data-testid="editor-current-time">
+                                {{ formatTime(playback.currentTimeSeconds) }} / {{ formatTime(playback.durationSeconds) }}
+                            </span>
+                            <span class="repeat-badge" data-testid="editor-repeat-state">单曲循环</span>
+                        </div>
+                        <div class="project-actions">
+                            <label>
+                                <span>格式</span>
+                                <select v-model="codecId" aria-label="工程格式">
+                                    <option v-for="codec in codecs" :key="codec.id" :value="codec.id">
+                                        {{ codec.label }}
+                                    </option>
+                                </select>
+                            </label>
+                            <button type="button" data-testid="import-editor-project" @click="importProject">
+                                导入工程
+                            </button>
+                            <button type="button" data-testid="export-editor-project" @click="exportProject">
+                                导出工程
+                            </button>
+                        </div>
                     </div>
-                    <div class="project-actions">
-                        <label>
-                            工程格式
-                            <select v-model="codecId" aria-label="工程格式">
-                                <option v-for="codec in codecs" :key="codec.id" :value="codec.id">
-                                    {{ codec.label }}
-                                </option>
-                            </select>
-                        </label>
-                        <button type="button" data-testid="import-editor-project" @click="importProject">
-                            导入工程
-                        </button>
-                        <button type="button" data-testid="export-editor-project" @click="exportProject">
-                            导出工程
-                        </button>
-                    </div>
-                    <p class="persistence-state" :data-state="snapshot.persistence" aria-live="polite">
-                        {{ persistenceLabel }}
-                    </p>
                     <p v-if="snapshot.message" role="alert" class="error-message">{{ snapshot.message }}</p>
                 </section>
 
@@ -390,8 +400,16 @@ onBeforeUnmount(() => {
 
 <style scoped>
 .editor-page {
+    --editor-control-height: 30px;
+    --editor-row-height: 44px;
+    --editor-lane-name-width: 152px;
+    --editor-inner-class-width: 144px;
+    --editor-control-radius: 4px;
+    --editor-flyout-radius: 8px;
+    --editor-divider: rgba(159, 196, 175, .16);
+    --editor-divider-strong: rgba(101, 255, 169, .28);
     min-height: 100dvh;
-    padding: 88px 24px 40px;
+    padding: 72px 12px 24px;
     color: #eafff2;
     background:
         radial-gradient(circle at 20% 0%, rgba(51, 255, 153, 0.12), transparent 35%),
@@ -399,16 +417,15 @@ onBeforeUnmount(() => {
 }
 
 .editor-shell {
-    width: min(1440px, 100%);
-    margin: 0 auto;
+    width: 100%;
+    margin: 0;
 }
 
 .editor-heading,
-.track-panel,
 .editor-state,
 .future-panel > div {
-    border: 1px solid rgba(72, 255, 151, 0.28);
-    border-radius: 24px;
+    border: 1px solid var(--editor-divider-strong);
+    border-radius: 8px;
     background: rgba(3, 12, 8, 0.82);
     box-shadow: inset 0 0 32px rgba(23, 255, 128, 0.035);
 }
@@ -422,7 +439,6 @@ onBeforeUnmount(() => {
 }
 
 .editor-heading h1,
-.track-panel h2,
 .editor-state h2,
 .future-panel h2 {
     margin: 4px 0 8px;
@@ -439,16 +455,90 @@ onBeforeUnmount(() => {
 
 .state-badge,
 .repeat-badge {
-    border: 1px solid rgba(101, 255, 169, 0.45);
-    border-radius: 999px;
-    padding: 8px 12px;
+    border: 1px solid var(--editor-divider-strong);
+    border-radius: var(--editor-control-radius);
+    padding: 4px 8px;
     white-space: nowrap;
 }
 
-.editor-state,
-.track-panel {
+.editor-state {
     margin-top: 20px;
     padding: 28px;
+}
+
+.editor-workbench-toolbar {
+    border-top: 1px solid var(--editor-divider-strong);
+    border-bottom: 1px solid var(--editor-divider-strong);
+    border-radius: 0;
+    background: rgba(3, 12, 8, .94);
+}
+
+.editor-toolbar-primary,
+.editor-toolbar-secondary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    min-height: 36px;
+    padding: 3px 8px;
+}
+
+.editor-toolbar-secondary {
+    min-height: 40px;
+    border-top: 1px solid var(--editor-divider);
+    background: rgba(7, 20, 13, .72);
+}
+
+.toolbar-identity,
+.transport,
+.project-actions,
+.project-actions label {
+    display: flex;
+    align-items: center;
+    min-width: 0;
+    gap: 10px;
+}
+
+.toolbar-identity h2 {
+    flex: 0 1 auto;
+    overflow: hidden;
+    margin: 0;
+    color: #fff;
+    font-size: 1rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.toolbar-identity .kicker {
+    font-size: .72rem;
+    white-space: nowrap;
+}
+
+.track-meta,
+.toolbar-help,
+.time-readout,
+.persistence-state {
+    color: #a9c7b6;
+    font-size: .78rem;
+    white-space: nowrap;
+}
+
+.toolbar-help {
+    overflow: hidden;
+    color: #779184;
+    text-overflow: ellipsis;
+}
+
+.persistence-state {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin: 0;
+}
+
+.toolbar-state {
+    color: #65ffa9;
 }
 
 .button-row,
@@ -457,15 +547,19 @@ onBeforeUnmount(() => {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    gap: 12px;
-    margin-top: 18px;
+    gap: 8px;
+    margin-top: 0;
 }
 
 button,
 select {
+    box-sizing: border-box;
+    height: var(--editor-control-height);
+    min-height: var(--editor-control-height);
     border: 1px solid rgba(101, 255, 169, 0.48);
-    border-radius: 12px;
-    padding: 10px 14px;
+    border-radius: var(--editor-control-radius);
+    padding: 4px 10px;
+    line-height: 1;
     color: #effff6;
     background: rgba(7, 24, 15, 0.9);
 }
@@ -487,13 +581,15 @@ select:focus-visible {
     gap: 8px;
 }
 
-.persistence-state,
 .error-message,
 .success-message {
     margin-top: 14px;
 }
 
 .error-message {
+    margin: 0;
+    padding: 4px 8px;
+    border-top: 1px solid rgba(255, 176, 168, .22);
     color: #ffb0a8;
 }
 
@@ -516,13 +612,27 @@ select:focus-visible {
 
 @media (max-width: 800px) {
     .editor-page {
-        padding-inline: 12px;
+        padding: 72px 0 20px;
     }
 
     .editor-heading,
     .future-panel {
         grid-template-columns: 1fr;
         flex-direction: column;
+    }
+
+    .editor-toolbar-primary,
+    .editor-toolbar-secondary {
+        align-items: flex-start;
+        flex-wrap: wrap;
+    }
+
+    .toolbar-help {
+        display: none;
+    }
+
+    .persistence-state {
+        width: 100%;
     }
 }
 </style>
