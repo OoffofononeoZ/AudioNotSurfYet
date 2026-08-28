@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/architecture/system-design.md"
   - "docs/architecture/interface-contracts.md"
   - "docs/delivery/execution-plan.md"
-next_action: "以 AC-U05/U06 的 M12 解释验证实时瀑布流；Editor AC 独立保持"
+next_action: "保留 AC-U05/U06 的 M12 双浏览器 canonical 证据；Editor AC 独立保持"
 ---
 
 # Acceptance Criteria

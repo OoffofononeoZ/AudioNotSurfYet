@@ -1,25 +1,25 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-08-26
+last_reviewed: 2026-08-28
 upstream_docs:
   - "docs/quality/eval-plan.md"
   - "docs/quality/golden-examples.md"
   - "docs/quality/failure-taxonomy.md"
   - "docs/delivery/milestone-plan.md"
   - "tests/fixtures/fixture-manifest.json"
-next_action: "保留 Analyzer M3–M11 历史；E1 evidence 写入独立 Editor evidence index"
+next_action: "保留 M12 canonical 与首轮失败 artifact；Analyzer 正式上线继续等待 PROD-015"
 ---
 
 # Evidence Index
 
 ## Scope Routing
 
-本文保留 Analyzer M3–M11 已批准 evidence。Editor 从 E1 开始使用独立 [Editor evidence index](editor/evidence-index.md)，不得改变历史 Analyzer run identity。
+本文保留 Analyzer M3–M12 已批准 evidence。Editor 从 E1 开始使用独立 [Editor evidence index](editor/evidence-index.md)，不得改变历史 Analyzer run identity。
 
 ## 1. Purpose and Gate State
 
-本文件保存受版本控制的长期证据摘要；原始日志保存在 Git 忽略的本地 artifact 目录。M3–M11 的适用 canonical evidence 与所需人工补偿门禁均已由 `project-owner` 批准，M11 已为 `Complete`。下一质量阶段是创建并单独审阅 Analyzer release-readiness；当前批准不等于正式上线授权。
+本文件保存受版本控制的长期证据摘要；原始日志保存在 Git 忽略的本地 artifact 目录。M3–M12 的适用 canonical evidence 与所需人工补偿门禁均已由 `project-owner` 批准，M12 已为 `Complete`。Analyzer readiness 仍不等于生产上线授权，PROD-015 保持阻断。
 
 每条 `pass` 只证明对应里程碑的适用子集在被记录的 commit 和环境上可复现。它不表示完整 EV-A–EV-R、未执行里程碑、Edge 矩阵或 release readiness 已通过。
 
@@ -947,3 +947,75 @@ M8 自动化证明 Slice 0 的 sticky 距 Header 8px、播放器/歌曲列表高
 - `project-owner` 于 2026-08-26 明确回复：“我批准 M11 canonical evidence、Edge 原生权限与最终加固结果；同意将 M11 标记为 Complete 并创建 release-readiness。”该签字补足 Edge 原生文件选择器/权限、文件移动与恢复访问，以及辅助技术和人工长会话的 M11 补偿门禁；未产生独立 artifact，也不把这些路径表述为自动化覆盖。
 - 主 chunk 1,117.94 kB warning 与 R-019 保留；Meyda 5.6.3 `spectralFlux` 上游缺陷仍存在，产品侧继续由 ADR-0005 缓解。
 - M11 为 `Complete`，本 evidence 为 `approved`。现在允许创建 `release-readiness.md`，但 readiness 在 owner 单独审阅豁免前必须保持 `in-review`，不得表述为正式上线授权。
+
+## 15. M12 Canonical Run Record
+
+| Field | Value |
+| --- | --- |
+| Run ID | `M12-2026-08-28T07-30-39-789Z-be655e67` |
+| Milestone | M12 — Analyzer measured masonry layout and header simplification |
+| Evidence state | `approved` |
+| Eval result | `pass`（12/12 steps） |
+| Commit | `be655e6765a63493fb1a3a4ee99992073b06e54e` |
+| Commit at end | `be655e6765a63493fb1a3a4ee99992073b06e54e` |
+| Dirty at start / end | `false` / `false` |
+| Started at | 2026-08-28 07:30:39.789 UTC |
+| Method | `npm run eval:m12` |
+| Reviewer | `project-owner` — approved 2026-08-28 via “自行提交并完成后续即可” |
+| Retention | `local-present` |
+| Artifact root | `artifacts/evals/M12-2026-08-28T07-30-39-789Z-be655e67/` |
+| Summary SHA-256 | `76ffab8e9fd5db6370c22aa78c7ee08a0708d7a5d97e1b749fca284d4c696441` |
+| Provisional precursor | `M12-2026-08-28T07-12-30-657Z-45f51908-provisional`，12/12 pass，summary `055951e16e9749bf89f189516f3975bb340721fe05e47922f5e34148ed47d9fd`；只作 dirty-worktree 实现反馈 |
+| Failed canonical precursor | `M12-2026-08-28T07-25-22-951Z-b50c2c1e`，summary `dffbf4347450e5c5b9bbf233db831fdcd7ce1a9c098236a2876caa70669fa9d9`；M7 观察窗问题见 failure taxonomy，保持 `fail` |
+
+### Environment
+
+| Item | Recorded value |
+| --- | --- |
+| OS | macOS 26.5.2 (`25F84`), Darwin arm64 |
+| Node / npm | Node `v24.18.0`；npm `11.16.0` |
+| Playwright Test | `1.62.0` |
+| Chrome | Google Chrome `152.0.7977.64` |
+| Edge | Microsoft Edge `151.0.4129.107` |
+
+### Results and Traceability
+
+| Step | Result | Measurement / trace |
+| --- | --- | --- |
+| M12 masonry unit | pass | 4/4；单列、双列、平局左列、动态高度重算、容器高度和无重叠；EV-B/EV-U，AC-U05/U06，R-028 |
+| Docs / typecheck | pass | 生命周期 frontmatter/链接与 21 项计数通过；`vue-tsc -b` exit 0 |
+| M7 Chrome regression | pass | 5/5；三项 exact cursor 在页面内 607.7ms 窗口各 14 次、上限 20；seek 2.2ms；15 分钟最大反馈 16.9ms、归因长任务 0 |
+| M8/M9/M10 Chrome regression | pass | 2/2、2/2、3/3；累计 21 项、四卡、四视口、vector/structured/错误隔离无回归；15 分钟四重卡最大反馈 18.8ms、归因长任务 0 |
+| M11 Chrome hardening regression | pass | 4/4；三格式、恢复、键盘/reduced motion、quota 和 20 次路由资源回归；WebGL 21 created/20 lost、2 live RAF |
+| M12 Chrome masonry | pass | 3/3；开场文案不存在、状态 live region/sticky、四视口最短列、空槽/四卡/增删替换、details/focus/Canvas/seek/zoom、renderer failure 与 Observer/RAF 清理 |
+| M12 Edge masonry | pass | 3/3；与 Chrome 相同的 M12 success、failure、boundary、exception 契约在真实 `msedge` channel 通过 |
+| Build | pass with warning | 1845 modules；Worker 49.62 kB；最大 JS chunk 1,284.55 kB、gzip 392.06 kB；R-019/W-001 继续披露 |
+| Diff / identity | pass | `git diff --check` exit 0；起止 commit 相同且工作树干净 |
+
+M12 不改变路由、Pinia/IndexedDB schema、四槽持久化、分析/音频接口或 `MeydaCard` props。四个 slot 0–3 DOM 保持稳定，视觉只更新绝对定位包装层；TestLands 与 `@chenglou/pretext` 未修改。双浏览器场景证明实际 DOMRect 的 390/1024 单列、1280/1920 双列、18px gap、容器包围和无相交，并证明动态高度变化不关闭 `details`、不丢失焦点或 Canvas。
+
+### Local Artifact Hashes
+
+| Artifact | SHA-256 |
+| --- | --- |
+| `summary.json` | `76ffab8e9fd5db6370c22aa78c7ee08a0708d7a5d97e1b749fca284d4c696441` |
+| `01-M12-masonry-unit.log` | `51d6f96d1019a31815eb8e0f93a4aa7552c603725b6aff6cd2e029aa4303e43d` |
+| `02-docs.log` | `bb005ed0074179a47b895a5c66e79917e37ebf18976e21fe9d27b1dd63c8f151` |
+| `03-typecheck.log` | `fadc7f66199c28d2f7cca439bb300ebeb0320158f32a0f9b52ec77031538af4d` |
+| `04-M7-Analyzer-Chrome-regression.log` | `6d55f8c187b33058db6f0afde61de71c5c5404b1064312abfaaa0d9ac40a07a7` |
+| `05-M8-Analyzer-Chrome-regression.log` | `c98f943f6ba5713c7ca0dce742f2a2fbc5ac633908790257298224f00af9092e` |
+| `06-M9-Analyzer-Chrome-regression.log` | `f6fa4627c3e87e0ba1fcdd3f4e150191be868caa9faf17bb4be037a683030c73` |
+| `07-M10-Analyzer-Chrome-regression.log` | `12996d7edb4abf570a7bc2447459d870bfb8a8b9b192166677fa5e43200b0d7a` |
+| `08-M11-Chrome-hardening-regression.log` | `8bb534224849e15572dbbd991a2a6e675b3741229a32be1df5a2642d39bdafa9` |
+| `09-M12-Chrome-masonry.log` | `a6326aa0d51039444df922288daec65fd333f2697c93bcab7d28df251b1df2ec` |
+| `10-M12-Edge-masonry.log` | `65ce111f0a899d5a256a513af9db361a83aae04c72afc3e5388a45b9d43f50b1` |
+| `11-build.log` | `73c7e9121fd45ab77c8ac9de48b6a20ed711e419096f55f9fd230cc4f6772e37` |
+| `12-diff-check.log` | `e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855` |
+
+`summary.json.sha256` 已独立核对并与 `summary.json` 一致。通过 run 与首轮失败 run 的本地 artifact 均保留；后者用于证明 failure instance 的发现、修正和关闭过程。
+
+### Approval and Remaining Boundary
+
+- `project-owner` 于 2026-08-28 明确要求 agent 自行提交并完成后续；canonical 通过后，本 M12 evidence、R-028 缓解和 readiness 复核据此获批准，M12 改为 `Complete`。
+- 首轮 canonical 的 M7 空计数不是产品 cadence 失败，而是短 fixture 已接近 ended 时观察窗没有游标更新；`be655e6` 在计数前 seek 到 0 并确保 playing，目标场景连续 5/5、完整 M7 5/5 和第二次 canonical 12/12 通过。
+- 正式上线仍由 PROD-015 阻断；本 evidence 不选择托管平台、不发布 URL，也不扩大到 Editor readiness。

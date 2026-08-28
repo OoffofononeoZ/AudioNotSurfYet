@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/product/scope.md"
   - "docs/architecture/system-design.md"
   - "docs/delivery/execution-plan.md"
-next_action: "按 DEC-024/030 复核 E6 canonical，并等待 owner 人工补偿审批"
+next_action: "保留 DEC-031/M12 canonical；按 DEC-024/030 等待 E6 owner 人工补偿审批与 PROD-015"
 ---
 
 # Decision Registry
@@ -55,10 +55,11 @@ next_action: "按 DEC-024/030 复核 E6 canonical，并等待 owner 人工补偿
 | DEC-028 | 2026-08-27 | 批准 E3 canonical、point lane、inner class、自适应网格与点标记结果，关闭 E3 并开放 E4 | project-owner | approved | [Editor evidence](../quality/editor/evidence-index.md) | point 语义、E4 overlay 范围或门禁改变 |
 | DEC-029 | 2026-08-27 | 批准 E4 canonical、21 项 overlay、三手柄、pointer-through 与错误隔离结果，关闭 E4 并开放 E5 | project-owner | approved | [Editor evidence](../quality/editor/evidence-index.md) | overlay renderer、pointer-through、E5 范围或门禁改变 |
 | DEC-030 | 2026-08-27 | 批准 E5 canonical、范围创建/调整、重叠校验、键盘与持久化结果，关闭 E5 并开放 E6 最终加固 | project-owner | approved | [Editor evidence](../quality/editor/evidence-index.md) | range 语义、E6 阈值、双浏览器或最终加固门禁改变 |
+| DEC-031 | 2026-08-28 | Analyzer 使用稳定 slot 0–3 DOM 和实际高度最短列；390/1024 一列、1280/1920 两列、gap 18px，ResizeObserver 以单 RAF 合并且卸载成对释放；不引入 pretext、不改变分析/持久化契约 | project-owner | approved | [System design](../architecture/system-design.md) | slot 顺序、列断点、动态高度、Observer/RAF 所有权或 Analyzer 契约改变 |
 
 ## Approval Evidence
 
-`project-owner` 于 2026-07-24 通过“PLEASE IMPLEMENT THIS PLAN”明确要求将随请求给出的产品、架构、里程碑和测试决定落入仓库。本注册表记录的是批准的决策；M3–M11 的实现状态仍以 [milestone plan](../delivery/milestone-plan.md) 和可复现证据为准。
+`project-owner` 于 2026-07-24 通过“PLEASE IMPLEMENT THIS PLAN”明确要求将随请求给出的产品、架构、里程碑和测试决定落入仓库。本注册表记录的是批准的决策；M3–M12 的实现状态仍以 [milestone plan](../delivery/milestone-plan.md) 和可复现证据为准。
 
 同日，`project-owner` 明确要求实施 Q0 质量设计计划，批准了 Q0 前置、四级严重度和 readiness 后置的阶段安排；同时要求三份质量文档先保持 `in-review`，经单独审阅后才生效。因此 DEC-010 的时序决定已批准，但 Q0 内容尚未批准。
 
@@ -133,6 +134,8 @@ DEC-026 约束下的 E2 实现已提交，clean canonical `E2-2026-08-26T16-42-4
 同日，`project-owner` 明确批准 E3 canonical evidence、point lane、inner class、自适应网格与点标记结果，DEC-028 据此关闭 E3 并开放 E4。随后 owner 明确批准 E4 canonical evidence、21 项 overlay、三手柄、pointer-through 与错误隔离结果，DEC-029 据此关闭 E4 并开放 E5。
 
 E5 clean canonical `E5-2026-08-27T11-03-22-177Z-78124177` 随后在 implementation commit `781241772e05186e2fe0d006ed6ddd8bceded7af` 上 35/35 通过。`project-owner` 明确批准 E5 canonical evidence、范围事件创建/调整、重叠校验、键盘与持久化结果；DEC-030 据此关闭 E5 并开放 E6。该决定不构成 E6 evidence 或 Editor release-readiness。
+
+同日，owner 通过 M12 实施计划批准 DEC-031，并要求 agent 自行提交及完成后续、无需推送远程。首次 clean run `M12-2026-08-28T07-25-22-951Z-b50c2c1e` 暴露 M7 短 fixture 未保证播放输入的测试前置条件；失败 artifact 保留。修复 commit `be655e6765a63493fb1a3a4ee99992073b06e54e` 先使目标用例连续 5/5 通过，再由 canonical `M12-2026-08-28T07-30-39-789Z-be655e67` 完成 12/12，summary SHA-256 为 `76ffab8e9fd5db6370c22aa78c7ee08a0708d7a5d97e1b749fca284d4c696441`。DEC-031 据此完成验证，M12 关闭、R-028 缓解、Analyzer readiness 恢复；PROD-015 与 Editor E6 不被本决策覆盖。
 
 ## Historical Evidence Gap
 

@@ -9,20 +9,20 @@ upstream_docs:
   - "docs/architecture/system-design.md"
   - "docs/architecture/interface-contracts.md"
   - "docs/architecture/risk-register.md"
-next_action: "实施 M12 瀑布流布局并形成 provisional/canonical 双浏览器证据；Editor E6 状态独立"
+next_action: "M12 已完成并登记 canonical evidence；Editor E6 状态与人工补偿独立"
 ---
 
 # Execution Plan
 
 ## Scope Routing
 
-本文保留 Analyzer M1–M11 的已批准历史交付记录，并新增已获准实施的 M12 瀑布流布局切片。Editor E1–E6 继续由独立 [Editor execution plan](editor/execution-plan.md)、[acceptance criteria](editor/acceptance-criteria.md)、[test strategy](editor/test-strategy.md) 和 [milestone plan](editor/milestone-plan.md) 管理；M12 不改写 Editor E6 的证据或人工门禁。
+本文保留 Analyzer M1–M11 的已批准历史交付记录，并记录已完成的 M12 瀑布流布局切片。Editor E1–E6 继续由独立 [Editor execution plan](editor/execution-plan.md)、[acceptance criteria](editor/acceptance-criteria.md)、[test strategy](editor/test-strategy.md) 和 [milestone plan](editor/milestone-plan.md) 管理；M12 不改写 Editor E6 的证据或人工门禁。
 
 ## 1. Delivery Outcome
 
 按纵向切片把已批准的本地音频学习体验从当前播放器基础推进到 21 项 Meyda 特征全覆盖。本计划以门禁证据而不是日历日期排序；任一里程碑未通过时，不进入下一批特征。
 
-本文件定义 Analyzer 实施顺序和验收方式。M1、M2、Q0 与 M3–M11 的批准历史保持不变；2026-08-28 获准的 M12 改变候选页面几何，因此 Analyzer-only `Ready with waivers` 暂停适用于新候选，等待 M12 canonical 与 owner 复核。Editor 的 delivery planning 使用独立文档，不反向继承或阻塞 M12。
+本文件定义 Analyzer 实施顺序和验收方式。M1、M2、Q0 与 M3–M11 的批准历史保持不变；M12 已在 clean candidate 上完成 canonical 与 owner 复核，Analyzer-only `Ready with waivers` 已恢复。Editor 的 delivery planning 使用独立文档，不反向继承或阻塞 M12。
 
 ## 2. Stage Gates
 
@@ -446,3 +446,5 @@ Rollback：如果最短列在批准浏览器中无法无重叠或无资源增长
 `project-owner` 于 2026-08-26 明确批准 M11 canonical evidence、Edge 原生权限与最终加固结果，同意将 M11 标记为 `Complete` 并创建 release-readiness。该批准关闭 Analyzer delivery，但不预先批准 readiness 豁免或生产上线。
 
 2026-08-28，`project-owner` 接受 M12 瀑布流与顶部精简计划并明确要求实施。该批准开放 M12 代码与 provisional evidence；M11 历史证据保持批准，但不自动覆盖新候选几何，canonical 与 readiness 恢复仍需单独审批。
+
+同日，owner 要求 agent 自行提交并完成后续。M12 canonical `M12-2026-08-28T07-30-39-789Z-be655e67` 在 clean commit `be655e6765a63493fb1a3a4ee99992073b06e54e` 上 12/12 通过；evidence、R-028 与 Analyzer readiness 复核据此获批，M12 改为 `Complete`。
