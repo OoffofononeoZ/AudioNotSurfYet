@@ -957,6 +957,7 @@ M8 自动化证明 Slice 0 的 sticky 距 Header 8px、播放器/歌曲列表高
 | Evidence state | `approved` |
 | Eval result | `pass`（12/12 steps） |
 | Commit | `be655e6765a63493fb1a3a4ee99992073b06e54e` |
+| Evidence registration commit | `db604b3b79fdf04a3d7c3ec5fcc2d5f3e3c77cfa` |
 | Commit at end | `be655e6765a63493fb1a3a4ee99992073b06e54e` |
 | Dirty at start / end | `false` / `false` |
 | Started at | 2026-08-28 07:30:39.789 UTC |
