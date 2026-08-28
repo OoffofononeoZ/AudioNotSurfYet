@@ -110,6 +110,27 @@ test('defaults to three unique cards in four slots and shares seek/zoom', async 
     await expect(page.locator('[data-feature-id="rms"] .plot-message'))
         .toHaveCount(0, { timeout: 30_000 });
 
+    // Analysis can finish close to the end of the short learning fixture on a
+    // busy runner. Start a fresh playing window so the cadence assertion
+    // measures cursor updates instead of an already-ended track.
+    const playbackProgress = page.getByTestId('playback-progress');
+    await playbackProgress.focus();
+    await page.keyboard.press('Home');
+    await expect.poll(async () => Number(
+        await page.locator('#music-bar-container')
+            .getAttribute('data-current-time'),
+    )).toBeLessThanOrEqual(0.1);
+    if (
+        await page.locator('#music-bar-container')
+            .getAttribute('data-playback-state') !== 'playing'
+    ) {
+        await page.getByTestId('toggle-playback').click();
+    }
+    await expect(page.locator('#music-bar-container')).toHaveAttribute(
+        'data-playback-state',
+        'playing',
+    );
+
     const cursorWindowStartedAt = await page.evaluate(() => {
         const target = window as typeof window & {
             __m7CursorRequests?: Record<string, number>;
