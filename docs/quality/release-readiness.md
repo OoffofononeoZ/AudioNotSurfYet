@@ -33,6 +33,7 @@ M12 在 clean commit `be655e6765a63493fb1a3a4ee99992073b06e54e` 上完成 12/12 
 | Field | Value |
 | --- | --- |
 | Candidate implementation commit | `be655e6765a63493fb1a3a4ee99992073b06e54e` |
+| Canonical evidence registration commit | `db604b3b79fdf04a3d7c3ec5fcc2d5f3e3c77cfa` |
 | Canonical run | `M12-2026-08-28T07-30-39-789Z-be655e67`；12/12；clean start/end |
 | Summary SHA-256 | `76ffab8e9fd5db6370c22aa78c7ee08a0708d7a5d97e1b749fca284d4c696441` |
 | Chrome M12 log SHA-256 | `a6326aa0d51039444df922288daec65fd333f2697c93bcab7d28df251b1df2ec` |
