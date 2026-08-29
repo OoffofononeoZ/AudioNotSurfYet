@@ -8,6 +8,7 @@ export const EDITOR_DATABASE_NAME = 'audionotsurfyet-editor';
 export const EDITOR_DATABASE_VERSION = 1;
 export const EDITOR_DRAFT_KEY = 'latest';
 export const EDITOR_LEAVE_WARNING_KEY = 'leave-warning';
+export const EDITOR_OVERLAY_VISIBILITY_KEY = 'overlay-visibility';
 
 const STORES = {
     draft: 'draft',
@@ -19,9 +20,17 @@ interface StoredDraftRecord {
     envelope: EditorDraftEnvelopeV1;
 }
 
-interface StoredPreferenceRecord {
+interface StoredLeaveWarningPreferenceRecord {
     key: typeof EDITOR_LEAVE_WARNING_KEY;
     value: boolean;
+}
+
+interface StoredOverlayVisibilityPreferenceRecord {
+    key: typeof EDITOR_OVERLAY_VISIBILITY_KEY;
+    value: {
+        contentHash: string;
+        enabled: boolean;
+    };
 }
 
 export interface EditorDraftRepositoryPort {
@@ -30,6 +39,8 @@ export interface EditorDraftRepositoryPort {
     clear(): Promise<void>;
     getLeaveWarningEnabled(): Promise<boolean>;
     setLeaveWarningEnabled(enabled: boolean): Promise<void>;
+    getOverlayVisibility(contentHash: string): Promise<boolean | null>;
+    setOverlayVisibility(contentHash: string, enabled: boolean): Promise<void>;
     close(): void;
 }
 
@@ -137,7 +148,7 @@ export class EditorDraftRepository implements EditorDraftRepositoryPort {
             transaction.objectStore(STORES.preferences).get(
                 EDITOR_LEAVE_WARNING_KEY,
             ),
-        ) as StoredPreferenceRecord | undefined;
+        ) as StoredLeaveWarningPreferenceRecord | undefined;
         await transactionDone(transaction);
         return record?.value ?? true;
     }
@@ -148,7 +159,38 @@ export class EditorDraftRepository implements EditorDraftRepositoryPort {
         transaction.objectStore(STORES.preferences).put({
             key: EDITOR_LEAVE_WARNING_KEY,
             value: enabled,
-        } satisfies StoredPreferenceRecord);
+        } satisfies StoredLeaveWarningPreferenceRecord);
+        await transactionDone(transaction);
+    }
+
+    async getOverlayVisibility(contentHash: string): Promise<boolean | null> {
+        const database = await this.open();
+        const transaction = database.transaction(STORES.preferences, 'readonly');
+        const record = await requestResult(
+            transaction.objectStore(STORES.preferences).get(
+                EDITOR_OVERLAY_VISIBILITY_KEY,
+            ),
+        ) as StoredOverlayVisibilityPreferenceRecord | undefined;
+        await transactionDone(transaction);
+        if (
+            !record
+            || !record.value
+            || record.value.contentHash !== contentHash
+            || typeof record.value.enabled !== 'boolean'
+        ) return null;
+        return record.value.enabled;
+    }
+
+    async setOverlayVisibility(
+        contentHash: string,
+        enabled: boolean,
+    ): Promise<void> {
+        const database = await this.open();
+        const transaction = database.transaction(STORES.preferences, 'readwrite');
+        transaction.objectStore(STORES.preferences).put({
+            key: EDITOR_OVERLAY_VISIBILITY_KEY,
+            value: { contentHash, enabled },
+        } satisfies StoredOverlayVisibilityPreferenceRecord);
         await transactionDone(transaction);
     }
 

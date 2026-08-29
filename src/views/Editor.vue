@@ -122,7 +122,10 @@
                     :analysis="analysisSnapshot"
                     :overlay-series="overlaySeries"
                     :overlay-exact-value="overlayExactValue"
+                    :overlay-open="snapshot.overlayOpen"
                     @update-project="updateProject"
+                    @toggle-overlay="controller.setOverlayOpen($event)"
+                    @select-overlay-feature="controller.selectOverlayFeature($event)"
                     @retry-overlay="controller.retryOverlayAnalysis()"
                 />
 
@@ -185,7 +188,7 @@ const overlayFeatureId = computed<FeatureId | null>(() =>
 const overlaySeries = computed(() => {
     void analysisSnapshot.value.generation;
     void analysisSnapshot.value.readyFeatureIds;
-    return overlayFeatureId.value
+    return snapshot.value.overlayOpen && overlayFeatureId.value
         ? controller.getAnalysisSeries(overlayFeatureId.value)
         : null;
 });
@@ -209,7 +212,9 @@ const playback = computed(() => sessionStore.playback);
 const performOverlayCursorRequest = async () => {
     const featureId = overlayFeatureId.value;
     if (
-        !featureId
+        !snapshot.value.overlayOpen
+        || snapshot.value.state !== 'ready'
+        || !featureId
         || analysisSnapshot.value.state !== 'ready'
         || !analysisSnapshot.value.readyFeatureIds.includes(featureId)
     ) {
@@ -225,6 +230,7 @@ const performOverlayCursorRequest = async () => {
     );
     if (
         revision === cursorRequestRevision
+        && snapshot.value.overlayOpen
         && featureId === overlayFeatureId.value
         && generation === analysisSnapshot.value.generation
     ) {
@@ -236,6 +242,11 @@ const requestOverlayCursorValue = (immediate = false) => {
     if (cursorTimer) {
         clearTimeout(cursorTimer);
         cursorTimer = null;
+    }
+    if (!snapshot.value.overlayOpen) {
+        cursorRequestRevision += 1;
+        overlayExactValue.value = null;
+        return;
     }
     const elapsed = performance.now() - lastCursorRequestAt;
     if (immediate || elapsed >= CURSOR_REQUEST_INTERVAL_MS) {
@@ -297,6 +308,7 @@ watch(
 watch(
     () => [
         overlayFeatureId.value,
+        snapshot.value.overlayOpen,
         analysisSnapshot.value.generation,
         analysisSnapshot.value.state,
     ],

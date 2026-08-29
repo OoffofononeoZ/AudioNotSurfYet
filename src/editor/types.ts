@@ -131,6 +131,7 @@ export interface EditorSessionSnapshot {
     conflictingDraft: EditorDraftEnvelopeV1 | null;
     persistence: EditorPersistenceState;
     restoredFromDraft: boolean;
+    overlayOpen: boolean;
     tempoEstimateState?:
         | 'idle'
         | 'estimating'

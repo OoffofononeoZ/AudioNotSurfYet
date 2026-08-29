@@ -416,6 +416,10 @@ test('keeps a deterministic 10,000-event project virtualized and responsive', as
     await expect(page.getByTestId('editor-buffer-state')).toHaveText('波形已就绪', {
         timeout: 120_000,
     });
+    await page.getByTestId('editor-overlay-menu-toggle').click();
+    await page.getByTestId('editor-overlay-feature-menu')
+        .locator('[data-feature-id="rms"]')
+        .click();
     await expect(page.getByTestId('editor-analysis-overlay-panel'))
         .toHaveAttribute('data-analysis-state', 'ready', { timeout: 120_000 });
 
@@ -469,8 +473,11 @@ test('keeps a deterministic 10,000-event project virtualized and responsive', as
     await firstRangeHandle.press('ArrowRight');
     feedback.range = await readFeedback(page, 'range');
 
-    await observeInputToMutation(page, '[data-testid="editor-overlay-feature"]', '[data-testid="editor-analysis-overlay-panel"]', 'overlay');
-    await page.getByTestId('editor-overlay-feature').selectOption('chroma');
+    await page.getByTestId('editor-overlay-menu-toggle').click();
+    await observeInputToMutation(page, '[data-feature-id="chroma"]', '[data-testid="editor-analysis-overlay-panel"]', 'overlay');
+    await page.getByTestId('editor-overlay-feature-menu')
+        .locator('[data-feature-id="chroma"]')
+        .click();
     await expect(page.getByTestId('editor-analysis-overlay-panel'))
         .toHaveAttribute('data-feature-id', 'chroma');
     feedback.overlay = await readFeedback(page, 'overlay');
@@ -492,7 +499,7 @@ test('keeps a deterministic 10,000-event project virtualized and responsive', as
         const [surfaceBounds, timelineBox, overlayBox] = await Promise.all([
             firstPointSurface.boundingBox(),
             timeline.boundingBox(),
-            page.getByTestId('editor-analysis-overlay-host').boundingBox(),
+            page.getByTestId('editor-analysis-overlay-panel').boundingBox(),
         ]);
         expect(surfaceBounds).toBeTruthy();
         expect(timelineBox).toBeTruthy();

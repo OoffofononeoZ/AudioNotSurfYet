@@ -43,8 +43,10 @@ const artifactDirectory = path.join(repositoryRoot, 'artifacts/evals', runId);
 await mkdir(artifactDirectory, { recursive: true });
 
 const steps = [
-    ['E7 Chrome compact workbench', 'npm', ['run', 'test:e2e:e7:chrome']],
-    ['E7 Edge compact workbench', 'npm', ['run', 'test:e2e:e7:edge']],
+    ['E7 fullscreen overlay unit', 'npm', ['run', 'test:e7:unit']],
+    ['E7 fullscreen overlay integration', 'npm', ['run', 'test:e7:integration']],
+    ['E7 Chrome fullscreen workbench', 'npm', ['run', 'test:e2e:e7:chrome']],
+    ['E7 Edge fullscreen workbench', 'npm', ['run', 'test:e2e:e7:edge']],
     ['M12 masonry unit regression', 'npm', ['run', 'test:m12:unit']],
     ['M12 dual-browser regression', 'npm', ['run', 'test:e2e:m12']],
     ['E6 hardening unit', 'npm', ['run', 'test:e6:unit']],
@@ -89,7 +91,7 @@ const steps = [
     ['diff check', 'git', ['diff', '--check']],
 ];
 
-if (steps.length !== 44) throw new Error(`E7 canonical must have 44 steps, got ${steps.length}.`);
+if (steps.length !== 46) throw new Error(`E7 canonical must have 46 steps, got ${steps.length}.`);
 
 const results = [];
 const browserMetrics = [];

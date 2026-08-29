@@ -64,11 +64,20 @@ const bufferSeries: AnalysisSeries = {
 
 class MemoryRepository implements EditorDraftRepositoryPort {
     envelope: EditorDraftEnvelopeV1 | null = null;
+    overlayVisibility: { contentHash: string; enabled: boolean } | null = null;
     async restore() { return this.envelope; }
     async replace(value: EditorDraftEnvelopeV1) { this.envelope = structuredClone(value); }
     async clear() { this.envelope = null; }
     async getLeaveWarningEnabled() { return true; }
     async setLeaveWarningEnabled() {}
+    async getOverlayVisibility(contentHash: string) {
+        return this.overlayVisibility?.contentHash === contentHash
+            ? this.overlayVisibility.enabled
+            : null;
+    }
+    async setOverlayVisibility(contentHash: string, enabled: boolean) {
+        this.overlayVisibility = { contentHash, enabled };
+    }
     close() {}
 }
 
@@ -223,17 +232,11 @@ describe('Editor E4 overlay integration', () => {
             readyFeatureIds: ['buffer'],
         });
         await settle();
-        let next = harness.controller.getSnapshot().project!;
-        next.workspace.overlay.featureId = 'buffer';
-        harness.controller.updateProject(next, true);
+        harness.controller.selectOverlayFeature('buffer');
         await settle();
         expect(harness.analysis.featureSets.at(-1)).toEqual(['buffer']);
-        next = harness.controller.getSnapshot().project!;
-        next.workspace.overlay.featureId = 'rms';
-        harness.controller.updateProject(next, true);
-        next = harness.controller.getSnapshot().project!;
-        next.workspace.overlay.featureId = 'mfcc';
-        harness.controller.updateProject(next, true);
+        harness.controller.selectOverlayFeature('rms');
+        harness.controller.selectOverlayFeature('mfcc');
         await settle();
         expect(harness.analysis.featureSets.slice(-2)).toEqual([
             ['buffer', 'rms'],
@@ -264,9 +267,7 @@ describe('Editor E4 overlay integration', () => {
             activeFeatureIds: ['buffer', 'rms'],
             readyFeatureIds: ['buffer'],
         });
-        let next = harness.controller.getSnapshot().project!;
-        next.workspace.overlay.featureId = 'mfcc';
-        harness.controller.updateProject(next, true);
+        harness.controller.selectOverlayFeature('mfcc');
         await settle();
         expect(harness.analysis.featureSets.at(-1)).toEqual(['buffer', 'mfcc']);
         const switchCount = harness.analysis.featureSets.length;

@@ -76,6 +76,7 @@ class MemoryDraftRepository implements EditorDraftRepositoryPort {
     leaveWarning = true;
     failReplace = false;
     replaceCount = 0;
+    overlayVisibility: { contentHash: string; enabled: boolean } | null = null;
 
     async restore() {
         return this.envelope ? structuredClone(this.envelope) : null;
@@ -97,6 +98,16 @@ class MemoryDraftRepository implements EditorDraftRepositoryPort {
 
     async setLeaveWarningEnabled(enabled: boolean) {
         this.leaveWarning = enabled;
+    }
+
+    async getOverlayVisibility(contentHash: string) {
+        return this.overlayVisibility?.contentHash === contentHash
+            ? this.overlayVisibility.enabled
+            : null;
+    }
+
+    async setOverlayVisibility(contentHash: string, enabled: boolean) {
+        this.overlayVisibility = { contentHash, enabled };
     }
 
     close() {}
