@@ -42,7 +42,10 @@ const openE4 = async (page: Page) => {
 };
 
 const selectOverlay = async (page: Page, featureId: string) => {
-    await page.getByTestId('editor-overlay-feature').selectOption(featureId);
+    await page.getByTestId('editor-overlay-menu-toggle').click();
+    await page.getByTestId('editor-overlay-feature-menu')
+        .locator(`[data-feature-id="${featureId}"]`)
+        .click();
     const panel = page.getByTestId('editor-analysis-overlay-panel');
     await expect(panel).toHaveAttribute('data-feature-id', featureId);
     await expect(panel).toHaveAttribute('data-analysis-state', 'ready', {
@@ -57,11 +60,14 @@ test('offers all 21 features and renders every shared renderer family', async ({
     test.setTimeout(180_000);
     const issues = issuesFor(page);
     await openE4(page);
-    const options = page.getByTestId('editor-overlay-feature').locator('option');
-    await expect(options).toHaveCount(22);
-    expect(await options.evaluateAll((entries) =>
-        entries.slice(1).map((entry) => (entry as HTMLOptionElement).value)))
-        .toHaveLength(21);
+    await page.getByTestId('editor-overlay-menu-toggle').click();
+    const options = page.getByTestId('editor-overlay-feature-menu')
+        .locator('[role="menuitemradio"]');
+    await expect(options).toHaveCount(21);
+    expect(await options.evaluateAll((entries) => entries.map(
+        (entry) => entry.getAttribute('data-feature-id'),
+    ))).toHaveLength(21);
+    await page.keyboard.press('Escape');
 
     for (const featureId of [
         'rms',
@@ -84,17 +90,15 @@ test('keeps overlay geometry aligned and passes pointer input to point cells', a
     await selectOverlay(page, 'rms');
     const surface = page.locator('[data-testid^="marker-surface-"]').first();
     await surface.scrollIntoViewIfNeeded();
-    const [surfaceBounds, hostBounds, panelBounds] = await Promise.all([
+    const [surfaceBounds, panelBounds] = await Promise.all([
         surface.boundingBox(),
-        page.getByTestId('editor-analysis-overlay-host').boundingBox(),
         page.getByTestId('editor-analysis-overlay-panel').boundingBox(),
     ]);
     expect(surfaceBounds).toBeTruthy();
-    expect(hostBounds).toBeTruthy();
     expect(panelBounds).toBeTruthy();
     const geometryError = Math.max(
-        Math.abs(surfaceBounds!.x - hostBounds!.x),
-        Math.abs(surfaceBounds!.width - hostBounds!.width),
+        Math.abs(surfaceBounds!.x - panelBounds!.x),
+        Math.abs(surfaceBounds!.width - panelBounds!.width),
     );
     expect(geometryError).toBeLessThanOrEqual(1);
     console.log(JSON.stringify({ metric: 'e4-geometry-error-css-px', value: geometryError }));
@@ -111,8 +115,8 @@ test('keeps overlay geometry aligned and passes pointer input to point cells', a
         if (workspace) observer.observe(workspace, { childList: true, subtree: true });
     });
     await page.mouse.click(
-        panelBounds!.x + panelBounds!.width * 0.65,
-        panelBounds!.y + panelBounds!.height * 0.62,
+        surfaceBounds!.x + surfaceBounds!.width * 0.65,
+        surfaceBounds!.y + surfaceBounds!.height * 0.62,
     );
     await expect(page.locator('.point-marker')).toHaveCount(1);
     const feedbackMs = await page.evaluate(() =>
@@ -169,9 +173,10 @@ test('adjusts all handles with keyboard and pointer and restores persisted bound
     expect(pointer.height).toBeGreaterThan(keyboard.height);
 
     await page.reload();
-    await expect(page.getByTestId('editor-overlay-feature')).toHaveValue('chroma', {
-        timeout: 20_000,
-    });
+    await expect(page.getByTestId('editor-analysis-overlay-panel'))
+        .toHaveAttribute('data-feature-id', 'chroma', { timeout: 20_000 });
+    await expect(page.getByTestId('editor-overlay-toggle'))
+        .toHaveAttribute('aria-pressed', 'true');
     const restored = await readBounds();
     expect(restored.top).toBeCloseTo(pointer.top, 3);
     expect(restored.height).toBeCloseTo(pointer.height, 3);
@@ -196,7 +201,10 @@ test('isolates an overlay Canvas failure from Buffer and point editing', async (
             return original.apply(this, args) as ReturnType<typeof original>;
         } as typeof original;
     });
-    await page.getByTestId('editor-overlay-feature').selectOption('mfcc');
+    await page.getByTestId('editor-overlay-menu-toggle').click();
+    await page.getByTestId('editor-overlay-feature-menu')
+        .locator('[data-feature-id="mfcc"]')
+        .click();
     await expect(page.getByTestId('editor-overlay-retry')).toBeVisible({ timeout: 30_000 });
     await expect(page.getByTestId('editor-buffer-state')).toHaveText('波形已就绪');
     const surface = page.locator('[data-testid^="marker-surface-"]').first();
@@ -226,13 +234,13 @@ for (const width of [1_024, 1_280, 1_920]) {
         await selectOverlay(page, 'rms');
         const surface = page.locator('[data-testid^="marker-surface-"]').first();
         await surface.scrollIntoViewIfNeeded();
-        const [surfaceBounds, hostBounds] = await Promise.all([
+        const [surfaceBounds, panelBounds] = await Promise.all([
             surface.boundingBox(),
-            page.getByTestId('editor-analysis-overlay-host').boundingBox(),
+            page.getByTestId('editor-analysis-overlay-panel').boundingBox(),
         ]);
         expect(surfaceBounds).toBeTruthy();
-        expect(hostBounds).toBeTruthy();
-        expect(Math.abs(surfaceBounds!.x - hostBounds!.x)).toBeLessThanOrEqual(1);
-        expect(Math.abs(surfaceBounds!.width - hostBounds!.width)).toBeLessThanOrEqual(1);
+        expect(panelBounds).toBeTruthy();
+        expect(Math.abs(surfaceBounds!.x - panelBounds!.x)).toBeLessThanOrEqual(1);
+        expect(Math.abs(surfaceBounds!.width - panelBounds!.width)).toBeLessThanOrEqual(1);
     });
 }

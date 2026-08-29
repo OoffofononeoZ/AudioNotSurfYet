@@ -1,76 +1,108 @@
 <template>
-    <div
-        ref="host"
-        class="analysis-overlay-host"
-        :style="hostStyle"
-        data-testid="editor-analysis-overlay-host"
-        aria-label="Editor 分析叠加层"
-    >
-        <div class="overlay-controls">
-            <label>
-                <span>声音特征</span>
-                <select
-                    :value="featureId ?? ''"
-                    data-testid="editor-overlay-feature"
-                    @change="selectFeature"
-                >
-                    <option value="">关闭叠加</option>
-                    <option
-                        v-for="option in featureOptions"
-                        :key="option.id"
-                        :value="option.id"
-                    >
-                        {{ option.label }}
-                    </option>
-                </select>
-            </label>
-        </div>
-        <section
-            class="analysis-overlay-panel"
-            :class="{ 'has-feature': featureId }"
-            :style="panelStyle"
-            :data-feature-id="featureId ?? 'none'"
-            :data-analysis-state="analysis.state"
-            :data-renderer-error="overlayError ? 'true' : 'false'"
-            data-testid="editor-analysis-overlay-panel"
+    <Teleport to="body">
+        <div
+            class="analysis-overlay-host"
+            :data-open="overlayOpen && featureId ? 'true' : 'false'"
+            data-testid="editor-analysis-overlay-host"
+            aria-label="Editor 分析叠加层"
         >
-            <template v-if="featureId">
+            <template v-if="overlayOpen && featureId">
+                <div class="overlay-backdrop" data-testid="editor-overlay-backdrop" aria-hidden="true" />
                 <canvas ref="staticCanvas" class="overlay-canvas static" aria-hidden="true" />
                 <canvas ref="cursorCanvas" class="overlay-canvas cursor" aria-hidden="true" />
 
-                <div class="overlay-copy" aria-live="polite">
-                    <strong>{{ definition?.label }}</strong>
-                    <span data-testid="editor-overlay-exact-summary">{{ exactSummary }}</span>
-                    <span v-if="analysis.state !== 'ready'">{{ stateLabel }}</span>
-                </div>
+                <section
+                    class="analysis-overlay-panel"
+                    :style="panelStyle"
+                    :data-feature-id="featureId"
+                    :data-analysis-state="analysis.state"
+                    :data-renderer-error="overlayError ? 'true' : 'false'"
+                    data-testid="editor-analysis-overlay-panel"
+                >
+                    <div class="overlay-copy" aria-live="polite">
+                        <strong>{{ definition?.label }}</strong>
+                        <span data-testid="editor-overlay-exact-summary">{{ exactSummary }}</span>
+                        <span v-if="analysis.state !== 'ready'">{{ stateLabel }}</span>
+                    </div>
 
-                <div v-if="overlayError" class="overlay-error" role="alert">
-                    <span>{{ overlayError }}</span>
-                    <button type="button" data-testid="editor-overlay-retry" @click="retry">
-                        重试
+                    <div v-if="overlayError" class="overlay-error" role="alert">
+                        <span>{{ overlayError }}</span>
+                        <button type="button" data-testid="editor-overlay-retry" @click="retry">
+                            重试
+                        </button>
+                    </div>
+
+                    <button
+                        v-for="handle in handles"
+                        :key="handle.id"
+                        type="button"
+                        class="overlay-handle"
+                        :class="handle.id"
+                        :aria-label="handle.label"
+                        :data-testid="`editor-overlay-handle-${handle.id}`"
+                        @pointerdown="beginHandleDrag($event, handle.id)"
+                        @pointermove="moveHandleDrag"
+                        @pointerup="finishHandleDrag"
+                        @pointercancel="cancelHandleDrag"
+                        @lostpointercapture="cancelHandleDrag"
+                        @keydown="handleKeydown($event, handle.id)"
+                    >
+                        <span aria-hidden="true">↕</span>
+                    </button>
+                </section>
+            </template>
+
+            <div ref="controls" class="overlay-controls" data-testid="editor-overlay-controls">
+                <div class="overlay-toggle-group">
+                    <button
+                        ref="toggleButton"
+                        type="button"
+                        class="overlay-toggle"
+                        :aria-pressed="overlayOpen"
+                        data-testid="editor-overlay-toggle"
+                        @click="toggleOverlay"
+                    >
+                        叠加层 {{ overlayOpen ? '开' : '关' }}
+                    </button>
+                    <button
+                        type="button"
+                        class="overlay-menu-toggle"
+                        aria-label="选择叠加特征"
+                        aria-haspopup="menu"
+                        :aria-expanded="menuOpen"
+                        aria-controls="editor-overlay-feature-menu"
+                        data-testid="editor-overlay-menu-toggle"
+                        @click="toggleMenu"
+                    >
+                        <span aria-hidden="true">▾</span>
                     </button>
                 </div>
 
-                <button
-                    v-for="handle in handles"
-                    :key="handle.id"
-                    type="button"
-                    class="overlay-handle"
-                    :class="handle.id"
-                    :aria-label="handle.label"
-                    :data-testid="`editor-overlay-handle-${handle.id}`"
-                    @pointerdown="beginHandleDrag($event, handle.id)"
-                    @pointermove="moveHandleDrag"
-                    @pointerup="finishHandleDrag"
-                    @pointercancel="cancelHandleDrag"
-                    @lostpointercapture="cancelHandleDrag"
-                    @keydown="handleKeydown($event, handle.id)"
+                <div
+                    v-if="menuOpen"
+                    id="editor-overlay-feature-menu"
+                    class="overlay-feature-menu"
+                    role="menu"
+                    aria-label="选择声音特征"
+                    data-testid="editor-overlay-feature-menu"
                 >
-                    <span aria-hidden="true">↕</span>
-                </button>
-            </template>
-        </section>
-    </div>
+                    <button
+                        v-for="option in featureOptions"
+                        :key="option.id"
+                        type="button"
+                        role="menuitemradio"
+                        :aria-checked="featureId === option.id"
+                        :data-feature-id="option.id"
+                        @click="selectFeature(option.id)"
+                        @keydown="onMenuItemKeydown"
+                    >
+                        <span>{{ option.label }}</span>
+                        <span v-if="featureId === option.id" aria-hidden="true">●</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </Teleport>
 </template>
 
 <script setup lang="ts">
@@ -84,7 +116,6 @@ import {
 } from 'vue';
 import {
     analysisCanvasRenderer,
-    prepareCanvasSurface,
     type EditorRenderRequest,
 } from '../analysis/canvasRenderer';
 import { FEATURE_REGISTRY } from '../analysis/featureRegistry';
@@ -113,20 +144,31 @@ const props = defineProps<{
     analysis: AnalysisCoordinatorSnapshot;
     series: AnalysisSeries | null;
     exactValue: AnalysisCursorValueResult | null;
+    overlayOpen: boolean;
 }>();
 
 const emit = defineEmits<{
     updateProject: [project: EditorProjectV1, immediate: boolean];
+    toggle: [enabled: boolean];
+    selectFeature: [featureId: FeatureId];
     retry: [];
 }>();
 
-const host = ref<HTMLElement | null>(null);
+interface PlotRect {
+    left: number;
+    width: number;
+}
+
+const controls = ref<HTMLElement | null>(null);
+const toggleButton = ref<HTMLButtonElement | null>(null);
 const staticCanvas = ref<HTMLCanvasElement | null>(null);
 const cursorCanvas = ref<HTMLCanvasElement | null>(null);
 const rendererError = ref<string | null>(null);
 const renderRevision = ref(0);
-const hostRect = ref({ left: 340, top: 150, width: 420, height: 160 });
+const menuOpen = ref(false);
+const plotRect = ref<PlotRect>({ left: 340, width: 420 });
 let resizeObserver: ResizeObserver | null = null;
+let geometryFrame: number | null = null;
 
 const featureId = computed(() => props.project.workspace.overlay.featureId);
 const definition = computed(() => featureId.value
@@ -155,17 +197,20 @@ const overlayError = computed(() => rendererError.value
     ?? (props.analysis.state === 'error'
         ? props.analysis.error?.message ?? '叠加分析失败。'
         : null));
-
-const hostStyle = computed(() => ({
-    left: `${hostRect.value.left}px`,
-    top: `${hostRect.value.top}px`,
-    width: `${hostRect.value.width}px`,
-    height: `${hostRect.value.height}px`,
-}));
-const panelStyle = computed(() => ({
-    top: `${bounds.value.topRatio * 100}%`,
-    height: `${bounds.value.heightRatio * 100}%`,
-}));
+const panelStyle = computed(() => {
+    const viewportWidth = Math.max(1, window.innerWidth);
+    const left = Math.max(0, plotRect.value.left);
+    const right = Math.min(
+        viewportWidth,
+        plotRect.value.left + plotRect.value.width,
+    );
+    return {
+        left: `${left}px`,
+        top: `${bounds.value.topRatio * 100}vh`,
+        width: `${Math.max(1, right - left)}px`,
+        height: `${bounds.value.heightRatio * 100}vh`,
+    };
+});
 
 const handles: Array<{ id: EditorOverlayHandle; label: string }> = [
     { id: 'top', label: '调整叠加层顶部边界' },
@@ -173,90 +218,107 @@ const handles: Array<{ id: EditorOverlayHandle; label: string }> = [
     { id: 'bottom', label: '调整叠加层底部边界' },
 ];
 
-const measureHost = () => {
-    const element = host.value;
-    const workspace = element?.parentElement;
-    if (!element || !workspace) return;
-    const workspaceBounds = workspace.getBoundingClientRect();
-    const surfaces = Array.from(
-        workspace.querySelectorAll<HTMLElement>('.marker-surface'),
+const geometryTargets = () => {
+    const markers = Array.from(
+        document.querySelectorAll<HTMLElement>('.marker-surface'),
     );
-    if (surfaces.length === 0) {
-        hostRect.value = {
-            left: Math.min(340, Math.max(0, workspaceBounds.width - 240)),
-            top: 132,
-            width: Math.max(220, workspaceBounds.width - 364),
-            height: 160,
-        };
-        return;
-    }
-    const rects = surfaces.map((surface) => surface.getBoundingClientRect());
+    if (markers.length > 0) return markers;
+    const timeline = document.querySelector<HTMLElement>('.timeline-stage');
+    return timeline ? [timeline] : [];
+};
+
+const measurePlot = () => {
+    const targets = geometryTargets();
+    if (targets.length === 0) return;
+    const rects = targets.map((target) => target.getBoundingClientRect());
     const left = Math.min(...rects.map((rect) => rect.left));
     const right = Math.max(...rects.map((rect) => rect.right));
-    const top = Math.min(...rects.map((rect) => rect.top));
-    const bottom = Math.max(...rects.map((rect) => rect.bottom));
-    hostRect.value = {
-        left: left - workspaceBounds.left,
-        top: top - workspaceBounds.top,
+    plotRect.value = {
+        left,
         width: Math.max(1, right - left),
-        height: Math.max(1, bottom - top),
     };
 };
 
 const observeGeometryTargets = () => {
-    const workspace = host.value?.parentElement;
-    if (!workspace || !resizeObserver) return;
+    if (!resizeObserver) return;
     resizeObserver.disconnect();
-    resizeObserver.observe(workspace);
-    workspace.querySelectorAll<HTMLElement>('.marker-surface')
-        .forEach((surface) => resizeObserver?.observe(surface));
+    geometryTargets().forEach((target) => resizeObserver?.observe(target));
 };
 
-const canvasMetrics = () => ({
-    width: Math.max(1, Math.round(hostRect.value.width)),
-    height: Math.max(1, Math.round(
-        hostRect.value.height * bounds.value.heightRatio,
-    )),
+const metrics = () => ({
+    viewportWidth: Math.max(1, Math.round(window.innerWidth)),
+    viewportHeight: Math.max(1, Math.round(window.innerHeight)),
+    plotWidth: Math.max(1, Math.round(plotRect.value.width)),
+    panelTop: Math.round(bounds.value.topRatio * window.innerHeight),
+    panelHeight: Math.max(1, Math.round(bounds.value.heightRatio * window.innerHeight)),
     dpr: Math.max(1, window.devicePixelRatio || 1),
 });
 
 const renderRequest = (): EditorRenderRequest => {
     const feature = definition.value;
     if (!feature) throw new Error('尚未选择叠加特征。');
-    const metrics = canvasMetrics();
+    const size = metrics();
     return {
         feature,
         series: props.series,
         viewport: props.project.workspace.viewport,
-        widthCssPixels: metrics.width,
-        heightCssPixels: metrics.height,
-        devicePixelRatio: metrics.dpr,
+        widthCssPixels: size.plotWidth,
+        heightCssPixels: size.panelHeight,
+        devicePixelRatio: size.dpr,
     };
 };
 
-const prepare = (canvas: HTMLCanvasElement) => {
-    const metrics = canvasMetrics();
-    return prepareCanvasSurface(canvas, metrics.width, metrics.height, metrics.dpr);
+const drawLayer = (
+    canvas: HTMLCanvasElement,
+    draw: (target: CanvasRenderingContext2D) => void,
+) => {
+    const size = metrics();
+    const backingWidth = Math.max(1, Math.round(size.viewportWidth * size.dpr));
+    const backingHeight = Math.max(1, Math.round(size.viewportHeight * size.dpr));
+    if (canvas.width !== backingWidth) canvas.width = backingWidth;
+    if (canvas.height !== backingHeight) canvas.height = backingHeight;
+    const target = canvas.getContext('2d');
+    if (!target) throw new Error('浏览器未提供 Canvas 2D context。');
+    target.setTransform(size.dpr, 0, 0, size.dpr, 0, 0);
+    target.clearRect(0, 0, size.viewportWidth, size.viewportHeight);
+    target.save();
+    target.translate(plotRect.value.left, size.panelTop);
+    target.beginPath();
+    target.rect(0, 0, size.plotWidth, size.panelHeight);
+    target.clip();
+    try {
+        draw(target);
+    } finally {
+        target.restore();
+    }
 };
 
 const drawStatic = () => {
-    if (!featureId.value || !staticCanvas.value) return;
-    analysisCanvasRenderer.drawStatic(renderRequest(), prepare(staticCanvas.value));
+    if (!props.overlayOpen || !featureId.value || !staticCanvas.value) return;
+    const request = renderRequest();
+    drawLayer(staticCanvas.value, (target) => {
+        analysisCanvasRenderer.drawStatic(request, target);
+    });
 };
+
 const drawCursor = () => {
-    if (!featureId.value || !cursorCanvas.value) return;
-    analysisCanvasRenderer.drawCursor(
-        renderRequest(),
-        props.playback.currentTimeSeconds,
-        props.exactValue,
-        prepare(cursorCanvas.value),
-    );
+    if (!props.overlayOpen || !featureId.value || !cursorCanvas.value) return;
+    const request = renderRequest();
+    drawLayer(cursorCanvas.value, (target) => {
+        analysisCanvasRenderer.drawCursor(
+            request,
+            props.playback.currentTimeSeconds,
+            props.exactValue,
+            target,
+        );
+    });
 };
 
 const render = async () => {
+    if (!props.overlayOpen || !featureId.value) return;
     await nextTick();
     try {
-        measureHost();
+        measurePlot();
         drawStatic();
         drawCursor();
         rendererError.value = null;
@@ -265,6 +327,14 @@ const render = async () => {
             ? error.message
             : '叠加层 renderer 出错。';
     }
+};
+
+const scheduleGeometryRender = () => {
+    if (geometryFrame !== null) return;
+    geometryFrame = requestAnimationFrame(() => {
+        geometryFrame = null;
+        void render();
+    });
 };
 
 const applyBounds = (next: EditorOverlayBounds, immediate: boolean) => {
@@ -280,18 +350,57 @@ const applyBounds = (next: EditorOverlayBounds, immediate: boolean) => {
     }, immediate);
 };
 
-const selectFeature = (event: Event) => {
-    const value = (event.target as HTMLSelectElement).value;
-    emit('updateProject', {
-        ...props.project,
-        workspace: {
-            ...props.project.workspace,
-            overlay: {
-                ...props.project.workspace.overlay,
-                featureId: value === '' ? null : value as FeatureId,
-            },
-        },
-    }, true);
+const focusFirstMenuItem = () => void nextTick(() => {
+    controls.value?.querySelector<HTMLButtonElement>('[role="menuitemradio"]')
+        ?.focus();
+});
+
+const openMenu = () => {
+    menuOpen.value = true;
+    focusFirstMenuItem();
+};
+
+const toggleOverlay = () => {
+    if (props.overlayOpen) {
+        menuOpen.value = false;
+        emit('toggle', false);
+        return;
+    }
+    if (!featureId.value) {
+        openMenu();
+        return;
+    }
+    emit('toggle', true);
+};
+
+const toggleMenu = () => {
+    menuOpen.value = !menuOpen.value;
+    if (menuOpen.value) focusFirstMenuItem();
+};
+
+const selectFeature = (value: FeatureId) => {
+    emit('selectFeature', value);
+    menuOpen.value = false;
+    void nextTick(() => toggleButton.value?.focus());
+};
+
+const onMenuItemKeydown = (event: KeyboardEvent) => {
+    if (!['ArrowDown', 'ArrowUp', 'Home', 'End'].includes(event.key)) return;
+    event.preventDefault();
+    const items = Array.from(
+        controls.value?.querySelectorAll<HTMLButtonElement>(
+            '[role="menuitemradio"]',
+        ) ?? [],
+    );
+    if (items.length === 0) return;
+    const current = Math.max(0, items.indexOf(event.currentTarget as HTMLButtonElement));
+    const next = event.key === 'Home'
+        ? 0
+        : event.key === 'End'
+            ? items.length - 1
+            : (current + (event.key === 'ArrowDown' ? 1 : -1) + items.length)
+                % items.length;
+    items[next]?.focus();
 };
 
 interface DragState {
@@ -324,7 +433,7 @@ const moveHandleDrag = (event: PointerEvent) => {
     state.latestBounds = moveEditorOverlayHandle(
         state.startBounds,
         state.handle,
-        (event.clientY - state.startY) / Math.max(1, hostRect.value.height),
+        (event.clientY - state.startY) / Math.max(1, window.innerHeight),
     );
     applyBounds(state.latestBounds, false);
 };
@@ -376,8 +485,21 @@ const retry = () => {
     void render();
 };
 
+const onDocumentPointerDown = (event: PointerEvent) => {
+    if (!menuOpen.value || controls.value?.contains(event.target as Node)) return;
+    menuOpen.value = false;
+};
+
+const onWindowKeydown = (event: KeyboardEvent) => {
+    if (event.key !== 'Escape' || !menuOpen.value) return;
+    event.preventDefault();
+    menuOpen.value = false;
+    toggleButton.value?.focus();
+};
+
 watch(
     () => [
+        props.overlayOpen,
         featureId.value,
         props.series,
         props.project.workspace.viewport,
@@ -405,106 +527,94 @@ watch(
         }
     },
 );
+watch(() => props.overlayOpen, (open) => {
+    if (!open) rendererError.value = null;
+});
 
 onMounted(() => {
-    resizeObserver = new ResizeObserver(() => void render());
+    resizeObserver = new ResizeObserver(scheduleGeometryRender);
     observeGeometryTargets();
+    document.addEventListener('pointerdown', onDocumentPointerDown, true);
+    window.addEventListener('keydown', onWindowKeydown);
     window.addEventListener('blur', cancelHandleDrag);
+    window.addEventListener('resize', scheduleGeometryRender);
+    window.addEventListener('scroll', scheduleGeometryRender, true);
     void render();
 });
 onBeforeUnmount(() => {
+    menuOpen.value = false;
     cancelHandleDrag();
+    if (geometryFrame !== null) cancelAnimationFrame(geometryFrame);
+    geometryFrame = null;
     resizeObserver?.disconnect();
     resizeObserver = null;
+    document.removeEventListener('pointerdown', onDocumentPointerDown, true);
+    window.removeEventListener('keydown', onWindowKeydown);
     window.removeEventListener('blur', cancelHandleDrag);
+    window.removeEventListener('resize', scheduleGeometryRender);
+    window.removeEventListener('scroll', scheduleGeometryRender, true);
 });
 </script>
 
 <style scoped>
 .analysis-overlay-host {
-    position: absolute;
-    z-index: 8;
+    position: fixed;
+    z-index: 80;
+    inset: 0;
+    width: 100vw;
+    height: 100dvh;
     pointer-events: none;
 }
+.overlay-backdrop { position: absolute; inset: 0; background: rgba(132, 136, 135, .28); pointer-events: none; }
 .analysis-overlay-panel {
     position: absolute;
-    left: 0;
-    right: 0;
+    z-index: 82;
     min-height: 42px;
-    overflow: visible;
-    border-top: 1px solid rgba(101, 255, 169, .42);
-    border-bottom: 1px solid rgba(101, 255, 169, .42);
+    border-top: 1px solid rgba(230, 238, 234, .42);
+    border-bottom: 1px solid rgba(230, 238, 234, .42);
     border-radius: 0;
-    background: rgba(2, 8, 5, .28);
-    box-shadow: 0 8px 28px rgba(0, 0, 0, .2);
+    background: transparent;
     transition: top 120ms ease, height 120ms ease;
+    pointer-events: none;
 }
-.overlay-controls {
-    position: absolute;
-    z-index: 12;
-    left: 8px;
-    top: -30px;
-    pointer-events: auto;
+.overlay-controls { position: fixed; z-index: 86; top: 72px; left: 12px; pointer-events: auto; }
+.overlay-toggle-group { display: inline-flex; min-height: 30px; filter: drop-shadow(0 4px 12px rgba(0, 0, 0, .38)); }
+.overlay-toggle,
+.overlay-menu-toggle { min-height: 30px; border: 1px solid rgba(218, 231, 225, .64); color: #f4fff8; background: rgba(31, 37, 34, .94); }
+.overlay-toggle { min-width: 96px; border-radius: 4px 0 0 4px; padding: 4px 10px; }
+.overlay-menu-toggle { width: 32px; border-left: 0; border-radius: 0 4px 4px 0; padding: 0; }
+.overlay-toggle[aria-pressed="true"] { color: #07130c; background: #7dffb3; }
+.overlay-feature-menu {
+    display: grid;
+    width: min(272px, calc(100vw - 24px));
+    max-height: min(520px, calc(100dvh - 118px));
+    margin-top: 6px;
+    overflow-y: auto;
+    border: 1px solid rgba(218, 231, 225, .5);
+    border-radius: 8px;
+    padding: 4px;
+    background: rgba(20, 25, 23, .98);
+    box-shadow: 0 12px 36px rgba(0, 0, 0, .48);
+    scrollbar-color: rgba(125, 255, 179, .6) rgba(8, 12, 10, .9);
 }
-.overlay-controls label { display: flex; align-items: center; gap: 6px; height: 30px; color: #dffff0; font-size: .68rem; white-space: nowrap; }
-.overlay-controls select {
-    max-width: 170px;
-    border: 1px solid rgba(101, 255, 169, .58);
-    border-radius: var(--editor-control-radius, 4px);
-    padding: 5px 7px;
-    color: #effff6;
-    background: rgba(4, 20, 11, .96);
-}
-.overlay-controls select:focus-visible,
+.overlay-feature-menu button { display: flex; justify-content: space-between; min-height: 30px; border: 0; border-radius: 4px; padding: 5px 8px; color: #eafff2; background: transparent; text-align: left; }
+.overlay-feature-menu button:hover,
+.overlay-feature-menu button[aria-checked="true"] { background: rgba(125, 255, 179, .16); }
+.overlay-toggle:focus-visible,
+.overlay-menu-toggle:focus-visible,
+.overlay-feature-menu button:focus-visible,
 .overlay-handle:focus-visible,
 .overlay-error button:focus-visible { outline: 2px solid #f8ff87; outline-offset: 2px; }
-.overlay-canvas { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+.overlay-canvas { position: fixed; z-index: 81; inset: 0; width: 100vw; height: 100dvh; pointer-events: none; }
 .overlay-canvas.static { opacity: .72; }
 .overlay-canvas.cursor { opacity: .9; }
-.overlay-copy {
-    position: absolute;
-    z-index: 10;
-    right: 9px;
-    top: 7px;
-    display: grid;
-    justify-items: end;
-    max-width: 46%;
-    color: rgba(235, 255, 244, .9);
-    font: .68rem ui-monospace, monospace;
-    pointer-events: none;
-}
+.overlay-copy { position: absolute; z-index: 83; right: 9px; top: 7px; display: grid; justify-items: end; max-width: 46%; color: rgba(245, 249, 247, .94); font: .68rem ui-monospace, monospace; text-shadow: 0 1px 2px #000; pointer-events: none; }
 .overlay-copy strong { color: #fff; }
-.overlay-error {
-    position: absolute;
-    z-index: 14;
-    inset: 8px 8px auto 188px;
-    display: flex;
-    justify-content: flex-end;
-    align-items: center;
-    gap: 8px;
-    color: #ffd3ce;
-    pointer-events: none;
-}
-.overlay-error button { pointer-events: auto; border: 1px solid #ff9389; border-radius: var(--editor-control-radius, 4px); color: #fff; background: #481713; }
-.overlay-handle {
-    position: absolute;
-    z-index: 13;
-    left: -17px;
-    width: 34px;
-    height: 26px;
-    padding: 0;
-    border: 1px solid rgba(101, 255, 169, .8);
-    border-radius: var(--editor-control-radius, 4px);
-    color: #effff6;
-    background: rgba(4, 20, 11, .96);
-    cursor: ns-resize;
-    pointer-events: auto;
-    touch-action: none;
-}
+.overlay-error { position: absolute; z-index: 84; inset: 8px 8px auto 52px; display: flex; justify-content: flex-end; align-items: center; gap: 8px; color: #ffd3ce; pointer-events: none; }
+.overlay-error button { min-height: 30px; border: 1px solid #ff9389; border-radius: 4px; color: #fff; background: #481713; pointer-events: auto; }
+.overlay-handle { position: absolute; z-index: 85; left: 0; width: 34px; height: 26px; padding: 0; border: 1px solid rgba(224, 235, 230, .82); border-radius: 4px; color: #effff6; background: rgba(31, 37, 34, .96); cursor: ns-resize; pointer-events: auto; touch-action: none; }
 .overlay-handle.top { top: -13px; }
 .overlay-handle.move { top: 50%; transform: translateY(-50%); }
 .overlay-handle.bottom { bottom: -13px; }
-@media (prefers-reduced-motion: reduce) {
-    .analysis-overlay-panel { transition: none; }
-}
+@media (prefers-reduced-motion: reduce) { .analysis-overlay-panel { transition: none; } }
 </style>

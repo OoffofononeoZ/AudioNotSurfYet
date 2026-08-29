@@ -26,7 +26,10 @@
             :analysis="analysis"
             :series="overlaySeries"
             :exact-value="overlayExactValue"
+            :overlay-open="overlayOpen"
             @update-project="applyProject"
+            @toggle="emit('toggleOverlay', $event)"
+            @select-feature="emit('selectOverlayFeature', $event)"
             @retry="emit('retryOverlay')"
         />
 
@@ -227,6 +230,7 @@ import type {
     AnalysisCoordinatorSnapshot,
     AnalysisCursorValueResult,
     AnalysisSeries,
+    FeatureId,
 } from '../analysis/types';
 import {
     addPointInnerClass,
@@ -269,11 +273,14 @@ const props = defineProps<{
     analysis: AnalysisCoordinatorSnapshot;
     overlaySeries: AnalysisSeries | null;
     overlayExactValue: AnalysisCursorValueResult | null;
+    overlayOpen: boolean;
 }>();
 
 const emit = defineEmits<{
     updateProject: [project: EditorProjectV1, immediate: boolean];
     retryOverlay: [];
+    toggleOverlay: [enabled: boolean];
+    selectOverlayFeature: [featureId: FeatureId];
 }>();
 
 const audioSession = useAudioSessionService();

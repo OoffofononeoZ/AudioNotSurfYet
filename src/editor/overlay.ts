@@ -74,9 +74,15 @@ export const moveEditorOverlayHandle = (
 
 export const editorOverlayFeatureIds = (
     featureId: FeatureId | null,
-): FeatureId[] => featureId && featureId !== 'buffer'
+    overlayOpen = true,
+): FeatureId[] => overlayOpen && featureId && featureId !== 'buffer'
     ? ['buffer', featureId]
     : ['buffer'];
+
+export const resolveEditorOverlayOpen = (
+    featureId: FeatureId | null,
+    storedVisibility: boolean | null,
+): boolean => featureId !== null && (storedVisibility ?? true);
 
 const format = (value: number) => Number.isFinite(value)
     ? value.toFixed(5)

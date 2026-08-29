@@ -34,7 +34,10 @@ import type {
     EditorTrackValidationContext,
 } from './types';
 import { useEstimatedBpm } from './tempoMap';
-import { editorOverlayFeatureIds } from './overlay';
+import {
+    editorOverlayFeatureIds,
+    resolveEditorOverlayOpen,
+} from './overlay';
 
 type AudioSessionStore = ReturnType<typeof useAudioSessionStore>;
 type EditorSessionListener = (snapshot: EditorSessionSnapshot) => void;
@@ -47,6 +50,7 @@ const initialSnapshot = (): EditorSessionSnapshot => ({
     conflictingDraft: null,
     persistence: 'clean',
     restoredFromDraft: false,
+    overlayOpen: false,
     tempoEstimateState: 'idle',
 });
 
@@ -143,6 +147,8 @@ export class EditorSessionController {
     private disposed = false;
     private leaveWarningEnabled = true;
     private hasUnexportedChanges = false;
+    private overlayVisibilityPersistFailed = false;
+    private overlayVisibilityWriteRevision = 0;
 
     constructor(options: EditorSessionControllerOptions) {
         this.audioSession = options.audioSession;
@@ -196,12 +202,54 @@ export class EditorSessionController {
         featureId: FeatureId,
         timeSeconds: number,
     ): Promise<AnalysisCursorValueResult | null> {
+        if (!this.snapshot.overlayOpen) return Promise.resolve(null);
         return this.analysisLease?.requestCursorValue(featureId, timeSeconds)
             ?? Promise.resolve(null);
     }
 
     retryOverlayAnalysis(): void {
+        if (!this.snapshot.overlayOpen) return;
         void this.syncOverlayAnalysis(true);
+    }
+
+    setOverlayOpen(enabled: boolean): void {
+        const project = this.snapshot.project;
+        if (this.snapshot.state !== 'ready' || !project) return;
+        const overlayOpen = enabled
+            && project.workspace.overlay.featureId !== null;
+        if (overlayOpen === this.snapshot.overlayOpen) return;
+        this.publish({
+            ...this.snapshot,
+            overlayOpen,
+            message: undefined,
+        });
+        void this.syncOverlayAnalysis();
+        void this.persistOverlayVisibility(project.track.contentHash, overlayOpen);
+    }
+
+    selectOverlayFeature(featureId: FeatureId): void {
+        const project = this.snapshot.project;
+        if (this.snapshot.state !== 'ready' || !project) return;
+        const wasOpen = this.snapshot.overlayOpen;
+        this.updateProject({
+            ...project,
+            workspace: {
+                ...project.workspace,
+                overlay: {
+                    ...project.workspace.overlay,
+                    featureId,
+                },
+            },
+        }, true);
+        if (!wasOpen) {
+            this.publish({
+                ...this.snapshot,
+                overlayOpen: true,
+                message: undefined,
+            });
+            void this.syncOverlayAnalysis();
+        }
+        void this.persistOverlayVisibility(project.track.contentHash, true);
     }
 
     requestTempoEstimate(): Promise<TempoEstimateResult | null> {
@@ -240,6 +288,8 @@ export class EditorSessionController {
         await this.flush();
         if (generation !== this.routeGeneration || this.disposed) return;
         this.releaseLeases();
+        this.overlayVisibilityWriteRevision += 1;
+        this.overlayVisibilityPersistFailed = false;
         if (!trackId) {
             this.hasUnexportedChanges = false;
             this.publish(initialSnapshot());
@@ -293,14 +343,38 @@ export class EditorSessionController {
             }
             if (draft) {
                 const project = validateEditorProjectV1(draft.project, context);
+                const visibility = await this.loadOverlayVisibility(project);
+                if (generation !== this.routeGeneration || this.disposed) return;
+                this.overlayVisibilityPersistFailed = visibility.failed;
                 this.hasUnexportedChanges = true;
-                this.publishReady(trackId, project, true, 'saved');
+                this.publishReady(
+                    trackId,
+                    project,
+                    true,
+                    visibility.failed ? 'not-persisted' : 'saved',
+                    visibility.overlayOpen,
+                    visibility.failed
+                        ? '叠加层显示偏好无法读取；当前工程仍可继续使用。'
+                        : undefined,
+                );
                 this.startEditorAnalysis(generation);
                 return;
             }
             const project = this.createProject(trackId);
+            const visibility = await this.loadOverlayVisibility(project);
+            if (generation !== this.routeGeneration || this.disposed) return;
+            this.overlayVisibilityPersistFailed = visibility.failed;
             this.hasUnexportedChanges = false;
-            this.publishReady(trackId, project, false, 'clean');
+            this.publishReady(
+                trackId,
+                project,
+                false,
+                visibility.failed ? 'not-persisted' : 'clean',
+                visibility.overlayOpen,
+                visibility.failed
+                    ? '叠加层显示偏好无法读取；当前工程仍可继续使用。'
+                    : undefined,
+            );
             this.queueSave(project, true);
             this.startEditorAnalysis(generation);
         } catch (error) {
@@ -321,7 +395,8 @@ export class EditorSessionController {
         const trackId = this.snapshot.activeTrackId;
         const project = this.createProject(trackId);
         this.hasUnexportedChanges = false;
-        this.publishReady(trackId, project, false, 'saving');
+        this.publishReady(trackId, project, false, 'saving', false);
+        void this.persistOverlayVisibility(project.track.contentHash, false);
         this.queueSave(project, true);
         await this.flush();
     }
@@ -361,8 +436,23 @@ export class EditorSessionController {
             const context = this.trackContext(previous.id);
             if (!context) throw new Error('旧歌曲无法恢复解码信息。');
             const project = validateEditorProjectV1(draft.project, context);
+            const visibility = await this.loadOverlayVisibility(project);
+            if (generation !== this.routeGeneration || this.disposed) {
+                playbackLease.release();
+                return { kind: 'fallback' };
+            }
+            this.overlayVisibilityPersistFailed = visibility.failed;
             this.hasUnexportedChanges = true;
-            this.publishReady(previous.id, project, true, 'saved');
+            this.publishReady(
+                previous.id,
+                project,
+                true,
+                visibility.failed ? 'not-persisted' : 'saved',
+                visibility.overlayOpen,
+                visibility.failed
+                    ? '叠加层显示偏好无法读取；当前工程仍可继续使用。'
+                    : undefined,
+            );
             this.startEditorAnalysis(generation);
             return { kind: 'restored-old', trackId: previous.id };
         } catch {
@@ -390,7 +480,8 @@ export class EditorSessionController {
         }
         const project = this.createProject(trackId);
         this.hasUnexportedChanges = false;
-        this.publishReady(trackId, project, false, 'clean');
+        this.publishReady(trackId, project, false, 'clean', false);
+        void this.persistOverlayVisibility(project.track.contentHash, false);
         this.queueSave(project, true);
         this.startEditorAnalysis(this.routeGeneration);
     }
@@ -409,6 +500,8 @@ export class EditorSessionController {
         this.publish({
             ...this.snapshot,
             project: candidate,
+            overlayOpen: this.snapshot.overlayOpen
+                && candidate.workspace.overlay.featureId !== null,
             persistence: 'saving',
             message: undefined,
         });
@@ -452,6 +545,10 @@ export class EditorSessionController {
         this.publish({
             ...this.snapshot,
             project: candidate,
+            overlayOpen: overlayChanged
+                && candidate.workspace.overlay.featureId === null
+                ? false
+                : this.snapshot.overlayOpen,
             persistence: 'saving',
             message: undefined,
             ...(tempoChanged ? {
@@ -483,8 +580,12 @@ export class EditorSessionController {
         }).then(() => {
             this.publish({
                 ...this.snapshot,
-                persistence: 'saved',
-                message: undefined,
+                persistence: this.overlayVisibilityPersistFailed
+                    ? 'not-persisted'
+                    : 'saved',
+                message: this.overlayVisibilityPersistFailed
+                    ? '叠加层显示偏好无法保存；当前工程和页面状态仍可继续使用。'
+                    : undefined,
             });
         }).catch(() => {
             this.publish({
@@ -552,6 +653,58 @@ export class EditorSessionController {
             : null;
     }
 
+    private async loadOverlayVisibility(project: EditorProjectV1): Promise<{
+        overlayOpen: boolean;
+        failed: boolean;
+    }> {
+        try {
+            const stored = await this.repository.getOverlayVisibility(
+                project.track.contentHash,
+            );
+            return {
+                overlayOpen: resolveEditorOverlayOpen(
+                    project.workspace.overlay.featureId,
+                    stored,
+                ),
+                failed: false,
+            };
+        } catch {
+            return {
+                overlayOpen: resolveEditorOverlayOpen(
+                    project.workspace.overlay.featureId,
+                    null,
+                ),
+                failed: true,
+            };
+        }
+    }
+
+    private async persistOverlayVisibility(
+        contentHash: string,
+        enabled: boolean,
+    ): Promise<void> {
+        const revision = ++this.overlayVisibilityWriteRevision;
+        try {
+            await this.repository.setOverlayVisibility(contentHash, enabled);
+            if (
+                revision !== this.overlayVisibilityWriteRevision
+                || this.snapshot.project?.track.contentHash !== contentHash
+            ) return;
+            this.overlayVisibilityPersistFailed = false;
+        } catch {
+            if (
+                revision !== this.overlayVisibilityWriteRevision
+                || this.snapshot.project?.track.contentHash !== contentHash
+            ) return;
+            this.overlayVisibilityPersistFailed = true;
+            this.publish({
+                ...this.snapshot,
+                persistence: 'not-persisted',
+                message: '叠加层显示偏好无法保存；当前工程和页面状态仍可继续使用。',
+            });
+        }
+    }
+
     private queueSave(project: EditorProjectV1, immediate: boolean): void {
         this.pendingProject = project;
         if (this.saveTimer) this.clearTimer(this.saveTimer);
@@ -588,6 +741,8 @@ export class EditorSessionController {
         project: EditorProjectV1,
         restoredFromDraft: boolean,
         persistence: EditorSessionSnapshot['persistence'],
+        overlayOpen: boolean,
+        message?: string,
     ): void {
         this.publish({
             state: 'ready',
@@ -597,6 +752,8 @@ export class EditorSessionController {
             conflictingDraft: null,
             persistence,
             restoredFromDraft,
+            overlayOpen,
+            ...(message ? { message } : {}),
         });
     }
 
@@ -653,6 +810,7 @@ export class EditorSessionController {
                     editorOverlayFeatureIds(
                         this.snapshot.project?.workspace.overlay.featureId
                             ?? null,
+                        this.snapshot.overlayOpen,
                     ),
                 )
             ) {
@@ -687,7 +845,10 @@ export class EditorSessionController {
         if (featureId && featureId !== 'buffer' && !this.lastReadyBufferSeries) {
             return;
         }
-        const activeFeatureIds = editorOverlayFeatureIds(featureId);
+        const activeFeatureIds = editorOverlayFeatureIds(
+            featureId,
+            this.snapshot.overlayOpen,
+        );
         if (
             !force
             && sameFeatureIds(

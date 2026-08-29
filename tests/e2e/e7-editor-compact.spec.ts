@@ -39,6 +39,18 @@ const openEditor = async (page: Page) => {
     await expect(page.locator('#music-bar-container')).toHaveCount(0);
 };
 
+const selectOverlay = async (page: Page, featureId: string) => {
+    await page.getByTestId('editor-overlay-menu-toggle').click();
+    const menu = page.getByTestId('editor-overlay-feature-menu');
+    await expect(menu).toBeVisible();
+    await menu.locator(`[data-feature-id="${featureId}"]`).click();
+    const panel = page.getByTestId('editor-analysis-overlay-panel');
+    await expect(panel).toHaveAttribute('data-feature-id', featureId);
+    await expect(panel).toHaveAttribute('data-analysis-state', 'ready', {
+        timeout: 30_000,
+    });
+};
+
 test('keeps the Editor workbench compact and functional across viewports', async ({ page }, testInfo) => {
     test.setTimeout(120_000);
     const issues = captureIssues(page);
@@ -148,6 +160,145 @@ test('keeps the Editor workbench compact and functional across viewports', async
         identity,
         ...desktopMetrics,
         viewports: ['390x844', '1024x900', '1280x900', '1920x1080'],
+    }));
+    expect(issues).toEqual([]);
+});
+
+test('keeps the fullscreen overlay fixed, transient and pointer-through', async ({ page }) => {
+    test.setTimeout(180_000);
+    const issues = captureIssues(page);
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await openEditor(page);
+    await page.getByTestId('tempo-bpm-0').fill('100');
+    await page.getByTestId('tempo-bpm-0').press('Enter');
+    await page.getByTestId('add-point-lane').click();
+    for (let index = 0; index < 16; index += 1) {
+        await page.getByTestId('add-range-lane').click();
+    }
+
+    await expect(page.getByTestId('editor-overlay-toggle'))
+        .toHaveAttribute('aria-pressed', 'false');
+    await expect(page.getByTestId('editor-overlay-feature')).toHaveCount(0);
+    await page.getByTestId('editor-overlay-toggle').click();
+    const firstMenu = page.getByTestId('editor-overlay-feature-menu');
+    await expect(firstMenu.locator('[role="menuitemradio"]')).toHaveCount(21);
+    await expect(firstMenu.locator('[role="menuitemradio"]').first()).toBeFocused();
+    await page.keyboard.press('Escape');
+    await expect(firstMenu).toHaveCount(0);
+
+    await selectOverlay(page, 'rms');
+    const backdrop = page.getByTestId('editor-overlay-backdrop');
+    const panel = page.getByTestId('editor-analysis-overlay-panel');
+    const staticCanvas = page.locator('.overlay-canvas.static');
+    const markerSurface = page.locator('.marker-surface').first();
+    await markerSurface.scrollIntoViewIfNeeded();
+
+    const initial = await page.evaluate(() => {
+        const metrics = (selector: string) => {
+            const element = document.querySelector<HTMLElement>(selector);
+            if (!element) throw new Error(`Missing ${selector}`);
+            const rect = element.getBoundingClientRect();
+            const style = getComputedStyle(element);
+            return {
+                left: rect.left,
+                top: rect.top,
+                width: rect.width,
+                height: rect.height,
+                position: style.position,
+                pointerEvents: style.pointerEvents,
+                backgroundColor: style.backgroundColor,
+            };
+        };
+        return {
+            host: metrics('[data-testid="editor-analysis-overlay-host"]'),
+            backdrop: metrics('[data-testid="editor-overlay-backdrop"]'),
+            panel: metrics('[data-testid="editor-analysis-overlay-panel"]'),
+            controls: metrics('[data-testid="editor-overlay-controls"]'),
+            canvas: metrics('.overlay-canvas.static'),
+            marker: metrics('.marker-surface'),
+        };
+    });
+    expect(initial.host).toMatchObject({
+        left: 0,
+        top: 0,
+        width: 1280,
+        height: 900,
+        position: 'fixed',
+        pointerEvents: 'none',
+    });
+    expect(initial.backdrop.backgroundColor).toBe('rgba(132, 136, 135, 0.28)');
+    expect(initial.backdrop.pointerEvents).toBe('none');
+    expect(initial.canvas).toMatchObject({
+        left: 0,
+        top: 0,
+        width: 1280,
+        height: 900,
+        position: 'fixed',
+        pointerEvents: 'none',
+    });
+    expect(initial.controls.left).toBe(12);
+    expect(initial.controls.top).toBe(72);
+    expect(Math.abs(initial.panel.left - initial.marker.left)).toBeLessThanOrEqual(1);
+    expect(Math.abs(initial.panel.width - initial.marker.width)).toBeLessThanOrEqual(1);
+
+    await page.evaluate(() => window.scrollTo({ top: 420, behavior: 'instant' }));
+    await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(0);
+    const afterScroll = await page.evaluate(() => {
+        const rect = (selector: string) => {
+            const element = document.querySelector<HTMLElement>(selector);
+            if (!element) throw new Error(`Missing ${selector}`);
+            const value = element.getBoundingClientRect();
+            return { left: value.left, top: value.top, width: value.width, height: value.height };
+        };
+        return {
+            host: rect('[data-testid="editor-analysis-overlay-host"]'),
+            panel: rect('[data-testid="editor-analysis-overlay-panel"]'),
+            controls: rect('[data-testid="editor-overlay-controls"]'),
+            canvas: rect('.overlay-canvas.static'),
+        };
+    });
+    expect(afterScroll.host).toEqual({ left: 0, top: 0, width: 1280, height: 900 });
+    expect(afterScroll.controls).toEqual({
+        left: initial.controls.left,
+        top: initial.controls.top,
+        width: initial.controls.width,
+        height: initial.controls.height,
+    });
+    expect(afterScroll.canvas).toEqual({ left: 0, top: 0, width: 1280, height: 900 });
+    expect(afterScroll.panel.top).toBe(initial.panel.top);
+    expect(afterScroll.panel.height).toBe(initial.panel.height);
+
+    await page.getByTestId('header-editor-link').click();
+    await markerSurface.scrollIntoViewIfNeeded();
+    const markerCount = await page.locator('.point-marker').count();
+    await markerSurface.click({ position: { x: 460, y: 22 } });
+    await expect(page.locator('.point-marker')).toHaveCount(markerCount + 1);
+
+    await page.getByTestId('editor-overlay-toggle').click();
+    await expect(page.getByTestId('editor-overlay-toggle'))
+        .toHaveAttribute('aria-pressed', 'false');
+    await expect(panel).toHaveCount(0);
+    await expect(backdrop).toHaveCount(0);
+    await expect(staticCanvas).toHaveCount(0);
+    await expect(page.locator('.overlay-handle')).toHaveCount(0);
+
+    await page.getByTestId('editor-overlay-toggle').click();
+    await expect(panel).toHaveAttribute('data-feature-id', 'rms');
+    await page.reload();
+    await expect(page.getByTestId('editor-overlay-toggle'))
+        .toHaveAttribute('aria-pressed', 'true', { timeout: 30_000 });
+    await expect(page.getByTestId('editor-analysis-overlay-panel'))
+        .toHaveAttribute('data-feature-id', 'rms');
+
+    console.log(JSON.stringify({
+        metric: 'e7-fullscreen-overlay',
+        viewport: '1280x900',
+        geometryErrorCssPx: Math.max(
+            Math.abs(initial.panel.left - initial.marker.left),
+            Math.abs(initial.panel.width - initial.marker.width),
+        ),
+        fixedAfterScroll: true,
+        featureCount: 21,
     }));
     expect(issues).toEqual([]);
 });

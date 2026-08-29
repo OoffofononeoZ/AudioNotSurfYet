@@ -187,7 +187,10 @@ test('keeps overlay pointer-through and restores range state after refresh', asy
     const laneName = lane.locator('[data-testid^="range-lane-name-"]');
     await laneName.fill('Effects');
     await laneName.press('Enter');
-    await page.getByTestId('editor-overlay-feature').selectOption('rms');
+    await page.getByTestId('editor-overlay-menu-toggle').click();
+    await page.getByTestId('editor-overlay-feature-menu')
+        .locator('[data-feature-id="rms"]')
+        .click();
     await expect(page.getByTestId('editor-analysis-overlay-panel'))
         .toHaveAttribute('data-analysis-state', 'ready', { timeout: 30_000 });
     const surface = lane.locator('.range-surface').first();
@@ -199,7 +202,8 @@ test('keeps overlay pointer-through and restores range state after refresh', asy
     await expect(page.locator('[data-testid^="range-lane-name-"]')).toHaveValue('Effects');
     await page.locator('.range-surface').first().scrollIntoViewIfNeeded();
     await expect(page.locator('.range-marker')).toHaveCount(1);
-    await expect(page.getByTestId('editor-overlay-feature')).toHaveValue('rms');
+    await expect(page.getByTestId('editor-analysis-overlay-panel'))
+        .toHaveAttribute('data-feature-id', 'rms');
     expect(issues).toEqual([]);
 });
 
@@ -210,13 +214,16 @@ for (const width of [1_024, 1_280, 1_920]) {
         const lane = await addRangeLane(page);
         const surface = lane.locator('.range-surface').first();
         await surface.scrollIntoViewIfNeeded();
-        await page.getByTestId('editor-overlay-feature').selectOption('rms');
+        await page.getByTestId('editor-overlay-menu-toggle').click();
+        await page.getByTestId('editor-overlay-feature-menu')
+            .locator('[data-feature-id="rms"]')
+            .click();
         await expect(page.getByTestId('editor-analysis-overlay-panel'))
             .toHaveAttribute('data-analysis-state', 'ready', { timeout: 30_000 });
         const [surfaceBounds, timelineBounds, overlayBounds] = await Promise.all([
             surface.boundingBox(),
             page.getByTestId('editor-timeline').boundingBox(),
-            page.getByTestId('editor-analysis-overlay-host').boundingBox(),
+            page.getByTestId('editor-analysis-overlay-panel').boundingBox(),
         ]);
         expect(surfaceBounds).toBeTruthy();
         expect(timelineBounds).toBeTruthy();
