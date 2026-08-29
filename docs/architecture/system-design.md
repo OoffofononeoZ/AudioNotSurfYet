@@ -1,13 +1,13 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-08-28
+last_reviewed: 2026-08-29
 upstream_docs:
   - "docs/product/problem-brief.md"
   - "docs/product/scope.md"
   - "docs/product/success-metrics.md"
   - "docs/product/open-questions.md"
-next_action: "按 ADR-0010 交付 Editor E7 紧凑工作台；E7 获批后再进入 Editor release-readiness"
+next_action: "按 ADR-0011 修订 E7 为全屏悬浮分析层并重新执行 46 步 canonical"
 ---
 
 # System Design
@@ -361,3 +361,11 @@ M6 只在 `import.meta.env.DEV` 安装无 UI bridge，提供活动特征、cance
 - 桌面波形高度为 176px，小于 900px 为 144px；窄屏只允许一个显式横向时间轴滚动区，不能通过压缩时间列破坏点击精度。
 - 本变化只改变 DOM 布局与视觉令牌。歌曲、工程、viewport、tempo、point/range、overlay、JSON V1、IndexedDB、playback/analysis lease 与共享 `timeToX/xToTime` 均沿用现有契约。
 - 失败边界为：任何密度优化不得遮挡输入/事件、扩大时间映射误差、破坏 pointer-through、减少键盘语义或改变 10,000 事件的可见 DOM/资源门禁。
+
+## 19. Editor Fullscreen Analysis Overlay
+
+- [ADR-0011](adrs/0011-editor-fullscreen-overlay.md) 把分析叠加层通过 Vue `Teleport` 提升到窗口顶层，root 固定覆盖 viewport。背景为无模糊的灰色半透明层；背景、Canvas、说明和空白区域不接收 pointer，Header、时间轴和事件仍由浏览器直接命中。
+- 左上角只保留固定复合入口：主按钮开关叠加层，箭头临时展开 21 项单选菜单。关闭保留工程中的 `featureId`，但 consumer active set 收敛为 `buffer`，exact cursor 与 overlay renderer 停止。
+- `EditorSessionSnapshot.overlayOpen` 是当前内存事实；现有 Editor `preferences` store 按歌曲 content hash 保存 visibility。该偏好不进入 JSON V1，导入工程不覆盖它，数据库版本不变。
+- 全视口 Canvas 只在底层标记时间列的屏幕横向范围内绘制。纵向文档滚动不改变图形窗口坐标；窄屏时间列横向滚动只更新裁剪和横向几何，任意共享时间锚点误差仍不得超过 1 CSS px。
+- `topRatio`/`heightRatio` 改为 viewport-relative，三个手柄仍按 1%/Shift 5% 调整。visibility 持久化失败只发布 `not-persisted`，不得损坏工程、草稿、播放或标记。

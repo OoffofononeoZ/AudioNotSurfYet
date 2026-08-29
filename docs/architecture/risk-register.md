@@ -1,11 +1,11 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-08-28
+last_reviewed: 2026-08-29
 upstream_docs:
   - "docs/architecture/system-design.md"
   - "docs/architecture/interface-contracts.md"
-next_action: "保留 E6/M12 缓解证据；E7 复核紧凑布局下的 R-024、R-025"
+next_action: "保留 E6/M12 缓解证据；E7 复核全屏 Teleport 下的 R-023–R-025、R-027"
 ---
 
 # Risk Register
@@ -37,7 +37,7 @@ next_action: "保留 E6/M12 缓解证据；E7 复核紧凑布局下的 R-024、R
 | R-021 | Analyzer sticky、播放器层级、pressed 状态或内层滚动条破坏可用性与视觉一致性 | Medium | Medium | sticky 与 Header 间距过大；歌曲列表被遮挡；Windows Chrome 按钮保持按压外观；表格显示系统默认滚动条 | M8 Slice 0、macOS Chrome 多视口 canonical 与 owner Windows Chrome 人工签字均通过 | 相关交互或样式变化后重新执行多视口自动化与 Windows Chrome 补偿复核 | project-owner | Closed |
 | R-022 | Editor 循环策略或旧 route cleanup 泄漏到其他页面/歌曲 | Medium | High | 离开后仍 repeat-one、快速换歌被旧 release 改写、出现第二 AudioContext/时钟 | ADR-0006 tokenized playback lease；E1 18/18 canonical 覆盖 acquire/release/ended/invalid target 并获 2026-08-26 owner 签字；E6 仍在 Chrome/Edge 做 20 次资源循环 | lease 失效时强制回到 queue-next；任何双 engine/clock 为阻断，资源实现变化时重开 | project-owner | Mitigated |
 | R-023 | 草稿覆盖、损坏导入或错误歌曲身份破坏当前工程 | Medium | High | 异歌静默覆盖、未知 schema 被接受、hash/时长不匹配仍应用、quota 后旧草稿丢失 | ADR-0007 strict codec + content hash + 独立原子 draft；E1 18/18 canonical 与 owner 签字覆盖 round-trip、unknown/invalid/hash/quota/abort/跨歌三选项；E5 35/35 canonical 回归 point/range JSON、draft 和 invalid overlap 原子拒绝 | 失败始终保留内存工程与旧 durable draft；schema/import/draft 变化时重开 | project-owner | Mitigated |
-| R-024 | 波形、tempo、事件与 overlay 在 zoom/DPR/resize 下错位 | Medium | High | 同一时间各层 x 差超过 1 CSS px、seek/marker 命中偏移 | ADR-0008/0009 共享 geometry；E3–E5 Chrome 误差 `<=1px`；E6 clean canonical 在 Chrome/Edge 1024/1280/1920 均为 `1px`，并于 2026-08-28 获 owner 签字 | 单层不得私有化 viewport；E7 改列宽/行高后重新执行双浏览器 geometry，不改写 E6 历史状态 | project-owner | Mitigated |
+| R-024 | 波形、tempo、事件与 overlay 在 zoom/DPR/resize 下错位 | Medium | High | 同一时间各层 x 差超过 1 CSS px、seek/marker 命中偏移 | ADR-0008/0009/0011 共享 geometry；E3–E5 Chrome 误差 `<=1px`；E6 clean canonical 在 Chrome/Edge 1024/1280/1920 均为 `1px`，并于 2026-08-28 获 owner 签字 | 单层不得私有化 viewport；E7 全屏 Canvas、纵/横滚动后重新执行双浏览器 geometry，不改写 E6 历史状态 | project-owner | Mitigated |
 | R-025 | 大量事件 DOM、右键状态或键盘路径造成性能/可访问性回归 | Medium | High | 输入反馈 >100ms、Editor 归因长任务 >50ms、遗留 pressed/capture/menu、键盘无法完成核心任务 | Canvas 背景 + 横向/纵向可见事件 DOM；E6 clean canonical 10,000 事件下 Chrome/Edge 最大反馈 `4.5/4.2ms`、长任务 0、20 次资源循环稳定；辅助技术与长会话于 2026-08-28 获 owner 签字 | E7 紧凑控件仍须维持可见焦点和至少 24px 命中尺寸；回归时重新打开 | project-owner | Mitigated |
 | R-026 | BPM 误识别或低置信度被写成用户事实 | Medium | Medium | silence/歧义输入自动填入错误 BPM、用户编辑值被异步结果覆盖 | 同 Worker retained PCM、typed reliable/low-confidence、仅唯一空且未编辑 segment 可写；E2 golden 覆盖 silence、歧义、60/100/128/小数与 stale，22/22 canonical 与 2026-08-27 owner 批准通过 | 低置信度保持空并提示手动输入；算法、阈值或第三方依赖变化时重开 | project-owner | Mitigated |
 | R-027 | Analyzer/Editor 争用 active features、Worker retained PCM 或 current cache | Medium | High | Editor 结果显示到 Analyzer、旧 generation 覆盖、返回 Analyzer 卡片丢失、出现第二 Worker | ADR-0006 consumer lease + existing generation/identity；E4 consumer/renderer 回归；E6 clean canonical 双浏览器各 20 次 Editor/Analyzer/Home 循环保持单 Worker/AudioContext并回归 M6–M11；2026-08-28 owner 批准 | 允许返回 Analyzer 后部分重算，不允许错误 identity 或 workspace 改写；runtime ownership 改变时重开 | project-owner | Mitigated |
@@ -49,4 +49,4 @@ next_action: "保留 E6/M12 缓解证据；E7 复核紧凑布局下的 R-024、R
 - 风险只有在缓解措施有可复现证据时才能标记 Mitigated。
 - `Accepted` 表示已知平台事实被接受，不表示无需实现降级路径。
 - 新的高影响风险或剩余风险超过已批准范围时，停止进入下一里程碑并由 `project-owner` 决策。
-- Analyzer R-001–R-021 的历史状态继续由 M3–M11/readiness 证据支持；R-028 已由 M12 双浏览器 canonical 与 owner 复核改为 `Mitigated`。Editor R-022–R-027 已由 E1–E6 evidence 分阶段缓解；E7 只重新验证受布局密度影响的 geometry、focus 与 hit target，不改写 E6 历史证据。
+- Analyzer R-001–R-021 的历史状态继续由 M3–M11/readiness 证据支持；R-028 已由 M12 双浏览器 canonical 与 owner 复核改为 `Mitigated`。Editor R-022–R-027 已由 E1–E6 evidence 分阶段缓解；E7 重新验证布局密度及 ADR-0011 对草稿偏好、geometry、focus、hit target 和 analysis consumer 的影响，不改写 E6 历史证据。

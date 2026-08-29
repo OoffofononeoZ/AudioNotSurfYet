@@ -1,7 +1,7 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-08-28
+last_reviewed: 2026-08-29
 upstream_docs:
   - "docs/product/success-metrics.md"
   - "docs/architecture/interface-contracts.md"
@@ -9,7 +9,7 @@ upstream_docs:
   - "docs/architecture/editor/project-format-v1.md"
   - "docs/architecture/editor/interaction-contracts.md"
   - "docs/delivery/editor/execution-plan.md"
-next_action: "AC-E701–AC-E704 自动化已通过；等待 owner 视觉任务与 E7 evidence 审批"
+next_action: "按修订的 AC-E705–AC-E708 验证全屏浮层并产生新的 E7 canonical"
 ---
 
 # Editor E1–E7 Acceptance Criteria
@@ -96,6 +96,10 @@ next_action: "AC-E701–AC-E704 自动化已通过；等待 owner 视觉任务�
 | AC-E702 | Timeline、tempo、point/range 与 overlay 主区域使用平面背景和细分隔线；主区域圆角 `0–2px`、控件不超过 `4px`、菜单/对话框不超过 `8px`；point/range 行高 `44px` | computed style audit + golden screenshots | R-024, R-025 |
 | AC-E703 | 桌面波形为 `176px`、小于 900px 为 `144px`；390/1024/1280/1920 无遮挡或不可达控件，1024×900 可见工具栏、波形、tempo 和至少一条标记行 | dual-browser viewport matrix + geometry probes | R-024 |
 | AC-E704 | 共享时间映射仍 `<=1 CSS px`，E1–E6 功能/键盘/focus/pointer-through 不回归；10,000 事件反馈 `<=100ms`、无 Editor 归因任务 `>50ms` 且 DOM/资源不累积 | E6 baseline + E7 Chrome/Edge + M12 regression | R-024, R-025, R-027 |
+| AC-E705 | overlay root 与复合入口均为窗口级 fixed；开启时灰色背景覆盖 viewport，纵向滚动后 root、Canvas、图形、入口和手柄窗口坐标不变 | Chrome/Edge computed style + scroll geometry | R-024, R-025 |
+| AC-E706 | 主页面无常驻 feature select；主按钮、箭头菜单、21 项单选、首次聚焦、Escape/外部点击和键盘语义符合 ADR-0011 | unit + dual-browser interaction/a11y | R-025 |
+| AC-E707 | 关闭保留 featureId，但 active features 收敛为 Buffer、Canvas/手柄/exact cursor 卸载；同歌刷新恢复本地 visibility，导入 JSON 不覆盖开关，偏好失败保留内存状态 | unit + integration + Chrome/Edge | R-023, R-027 |
+| AC-E708 | 全视口 Canvas 只在时间列横向范围绘图；zoom、pan、resize、纵向滚动与窄屏横向滚动后共享时间锚点误差仍 `<=1 CSS px`，背景与图形保持 pointer-through | dual-browser geometry/hit-test | R-024, R-025 |
 
 ## 9. Milestone Exit Rule
 

@@ -1,13 +1,13 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-08-28
+last_reviewed: 2026-08-29
 upstream_docs:
   - "docs/context/index.md"
   - "docs/product/scope.md"
   - "docs/architecture/system-design.md"
   - "docs/delivery/execution-plan.md"
-next_action: "按 DEC-032 交付 E7 紧凑工作台并保留 PROD-015 上线阻断"
+next_action: "按 DEC-033/ADR-0011 完成 E7 全屏浮层修订与 46 步 canonical"
 ---
 
 # Decision Registry
@@ -32,6 +32,7 @@ next_action: "按 DEC-032 交付 E7 紧凑工作台并保留 PROD-015 上线阻�
 | ADR-0007 | 2026-08-26 | Editor 使用版本化 JSON、内容 hash 绑定和独立 `audionotsurfyet-editor` V1 单草稿 | project-owner | approved | [ADR-0007](../architecture/adrs/0007-editor-project-and-draft-boundary.md) | 工程格式、identity、草稿数量、数据库或迁移策略改变 |
 | ADR-0008 | 2026-08-26 | Editor 以秒数为事件事实、tempo 只派生网格，并使用 point/range 判别模型和固定右键状态机 | project-owner | approved | [ADR-0008](../architecture/adrs/0008-editor-time-and-event-model.md) | 时间 identity、吸附、重叠、range 或 pointer 语义改变 |
 | ADR-0009 | 2026-08-26 | Editor 抽取纯 Canvas renderer adapter，共享 geometry，并让 overlay 除 selector/手柄外 pointer-through | project-owner | approved | [ADR-0009](../architecture/adrs/0009-editor-overlay-renderer-boundary.md) | renderer family、geometry、overlay pointer 或 Canvas/DOM 边界改变 |
+| ADR-0011 | 2026-08-29 | Editor overlay Teleport 为全视口 fixed 灰色层；复合入口和 visibility 为本地按歌状态，关闭时 analysis 收敛为 Buffer | project-owner | approved | [ADR-0011](../architecture/adrs/0011-editor-fullscreen-overlay.md) | overlay 挂载、开关/菜单、坐标空间、本地偏好或 pointer 边界改变 |
 | DEC-008 | 2026-07-24 | 实施采用 M1–M11 相对门禁，不承诺日期；M3 从测试基础开始，M7 未通过不得扩展后续特征 | project-owner | approved | [Execution plan](../delivery/execution-plan.md) | 依赖、里程碑、验收门禁或交付优先级改变 |
 | DEC-009 | 2026-07-24 | 当前只批准 execution planning；不预建 quality/release/retrospective，也不自动开始代码实现 | project-owner | superseded by DEC-010 | [Milestone plan](../delivery/milestone-plan.md) | 已由 owner 决定前置三份 quality design |
 | DEC-010 | 2026-07-24 | 在 M3 前增加 Q0：前置 eval plan、golden examples、failure taxonomy；三份文档单独批准后开放 M3，release-readiness 仍等待 M11 证据 | project-owner | approved | [Eval plan](../quality/eval-plan.md) | 验收/测试纪律变化，或 owner 改变 Q0/readiness 时序 |
@@ -57,6 +58,7 @@ next_action: "按 DEC-032 交付 E7 紧凑工作台并保留 PROD-015 上线阻�
 | DEC-030 | 2026-08-27 | 批准 E5 canonical、范围创建/调整、重叠校验、键盘与持久化结果，关闭 E5 并开放 E6 最终加固 | project-owner | approved | [Editor evidence](../quality/editor/evidence-index.md) | range 语义、E6 阈值、双浏览器或最终加固门禁改变 |
 | DEC-031 | 2026-08-28 | Analyzer 使用稳定 slot 0–3 DOM 和实际高度最短列；390/1024 一列、1280/1920 两列、gap 18px，ResizeObserver 以单 RAF 合并且卸载成对释放；不引入 pretext、不改变分析/持久化契约 | project-owner | approved | [System design](../architecture/system-design.md) | slot 顺序、列断点、动态高度、Observer/RAF 所有权或 Analyzer 契约改变 |
 | DEC-032 | 2026-08-28 | 先批准并关闭 Editor E6，再以 E7 把 Editor 改为紧凑双层工具栏和平面细线分区；桌面控件 30px、point/range 行 44px、侧栏 152/144px、波形 176px，窄屏波形 144px；FL Studio 仅作为密度参考，不复制配色、品牌资产或控件 | project-owner | approved | [ADR-0010](../architecture/adrs/0010-editor-compact-workbench.md) | Editor 密度令牌、区域层次、断点或既有功能契约改变 |
+| DEC-033 | 2026-08-29 | E7 增补窗口级全屏悬浮分析层、左上复合开关/21 项菜单、按歌曲 visibility；旧 44/44 run 保留为 pre-revision，新候选为 46 步 | project-owner | approved | [ADR-0011](../architecture/adrs/0011-editor-fullscreen-overlay.md) | E7 浮层范围、记忆规则、canonical 步数或 owner 门禁改变 |
 
 ## Approval Evidence
 

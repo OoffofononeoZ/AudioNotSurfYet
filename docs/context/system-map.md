@@ -1,10 +1,10 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-08-28
+last_reviewed: 2026-08-29
 upstream_docs:
   - "docs/context/index.md"
-next_action: "保留 Analyzer M12/Editor E6 approved 事实；等待 owner 复核 E7 canonical"
+next_action: "按 ADR-0011 修订 E7 全屏 fixed overlay，并产生新的 46 步 canonical"
 ---
 
 # System Map
@@ -93,9 +93,9 @@ showOpenFilePicker → FileSystemFileHandle → File
 - point 命令固定微秒唯一性、1/16–1 beat 自适应吸附、single-beat 整段一格与分类迁移/明确删除；右键 marker 删除，空白 4px 以上 pan，否则打开 quick menu。
 - range 命令使用微秒规范化半开 `[start,end)`；同 lane/inner class 真重叠拒绝、相邻允许，跨分类范围和内部 point 可并存。UI 支持两阶段创建、虚线 preview、Esc/空白右键取消、端点 pointer/keyboard 调整、pointercancel 回滚、分类迁移冲突与 viewport-visible 裁剪。
 - `analysisCanvasRenderer` 是 Analyzer card 与 Editor overlay 共用的纯 Canvas adapter；E4 overlay 一次选择累计 21 项中的一个，使用同一 viewport/time geometry、DPR backing store、40ms exact cursor 合并和 last-ready Buffer fallback。
-- overlay 只让 selector、重试和 top/move/bottom 三个手柄接收 pointer；图形与说明区域穿透到底层 point surface。bounds 固定默认 0.10/0.35、最小 0.12，键盘步长 1%/Shift 5%，renderer/context 错误只降级 overlay。
+- overlay 通过 Teleport 固定覆盖窗口，灰色背景、全视口 Canvas 与说明穿透到 Header/底层标记；只有左上复合入口、临时 21 项菜单、重试和 top/move/bottom 手柄接收 pointer。bounds 仍为 0.10/0.35、最小 0.12，但相对 viewport；visibility 按歌曲 hash 本地保存，关闭时 active set 只保留 Buffer。
 
-尚未完成：owner 对 E7 紧凑工作台双浏览器视觉、长会话可读性和辅助技术体感的人工复核。E7 双浏览器布局、geometry、focus、10,000 事件与相邻 M12 自动化已在 44/44 clean canonical 中通过；E6 历史身份保持不变。
+尚未完成：E7 全屏浮层修订、46 步双浏览器 canonical，以及 owner 对紧凑工作台、窗口级浮层、长会话可读性和辅助技术体感的人工复核。原 44/44 run 只作 pre-revision；E6 历史身份保持不变。
 
 ## Approval Record
 

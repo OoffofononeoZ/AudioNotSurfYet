@@ -1,11 +1,11 @@
 ---
 status: in-review
 owner: "project-owner"
-last_reviewed: 2026-08-28
+last_reviewed: 2026-08-29
 upstream_docs:
   - "docs/quality/editor/e7-eval-plan.md"
   - "docs/delivery/editor/acceptance-criteria.md"
-next_action: "由 owner 用 E7 Chrome/Edge artifact 完成视觉 golden 复核"
+next_action: "用修订版 E7 Chrome/Edge artifact 复核全屏浮层、复合入口、滚动固定与时间列对齐"
 ---
 
 # Editor E7 Golden Examples
@@ -21,9 +21,13 @@ next_action: "由 owner 用 E7 Chrome/Edge artifact 完成视觉 golden 复核"
 | E7-G07 | interaction | pointer、keyboard、context menu、overlay | 所有 E1–E6 操作与焦点状态保持 | 防止 CSS 重排改变命中 |
 | E7-G08 | capacity | 10,000 events | 可见 DOM、反馈、长任务与资源保持 E6 门禁 | 防止密度优化牺牲性能 |
 | E7-G09 | adjacent | Analyzer M12 动态 masonry | M12 unit/Chrome/Edge 保持通过 | 保护当前未推送候选 |
+| E7-G10 | fullscreen | overlay 开启并纵向滚动 | fixed root、灰色全屏背景、Canvas/图形/入口/三手柄 viewport 坐标不变 | 固定窗口级语义 |
+| E7-G11 | control | 未选/已选/打开/关闭与键盘 | 只有复合入口常驻；主按钮开关；箭头临时显示 21 项；Escape/外部点击收起 | 固定选择与焦点语义 |
+| E7-G12 | persistence | 旧草稿、新工程、同歌刷新、JSON 导入、hash 变化和写失败 | visibility 与 featureId 按契约分离，关闭时 active set 只有 Buffer | 固定本地状态边界 |
+| E7-G13 | alignment | zoom/pan/resize/窄屏横向滚动 | 全屏 Canvas 只在时间列绘制，时间锚点误差 `<=1 CSS px`，底层可点击 | 固定 geometry/pointer-through |
 
 FL Studio 参考图不复制进仓库、不参与像素 diff；E7 的可复现事实来自 computed style、DOM/Canvas geometry、浏览器状态和本地 artifact 截图。
 
 ## Canonical Observation
 
-`E7-2026-08-28T15-02-48-298Z-78bc7f06` 在真实 Chrome/Edge 上对 E7-G01、G03–G09 形成自动化候选证据：两端均测得 toolbar `79px`、control `30px`、point/range row `44px`、side columns `152/144px`、desktop/narrow waveform `176/144px`、major radius `0px`，且 E1–E6 与 M12 回归通过。E7-G02 的视觉截断可用性及整体现代工作台观感仍由 owner 人工复核。
+`E7-2026-08-28T15-02-48-298Z-78bc7f06` 在真实 Chrome/Edge 上对 E7-G01、G03–G09 形成自动化历史证据；它不覆盖 G10–G13，现为 `pre-revision`。修订版 artifact 必须重新给出双浏览器 computed geometry、交互与截图。

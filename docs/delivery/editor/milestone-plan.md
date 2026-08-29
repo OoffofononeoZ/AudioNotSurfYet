@@ -1,12 +1,12 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-08-28
+last_reviewed: 2026-08-29
 upstream_docs:
   - "docs/delivery/editor/execution-plan.md"
   - "docs/delivery/editor/acceptance-criteria.md"
   - "docs/delivery/editor/test-strategy.md"
-next_action: "由 owner 复核 E7 紧凑工作台与 44/44 canonical；批准后进入 Editor release-readiness review"
+next_action: "完成 E7 全屏浮层修订、46/46 clean canonical 与 owner 复核"
 ---
 
 # Editor E1–E7 Milestone Plan
@@ -32,7 +32,7 @@ next_action: "由 owner 复核 E7 紧凑工作台与 44/44 canonical；批准后
 | E4 | Analysis overlay | Complete | E3 | 21 项单选纯 renderer overlay、三手柄和 pointer-through | 31/31 clean canonical + owner approval | project-owner |
 | E5 | Range annotation | Complete | E4 | range 创建、取消、调整、重叠、删除和 round-trip | range matrix + import/draft + canonical + owner approval | project-owner |
 | E6 | Final hardening | Complete | E5 | Chrome/Edge、三格式、native flows、10,000 事件、资源与无障碍 | 双浏览器 canonical + owner complete task + evidence approval | project-owner |
-| E7 | Compact workbench | In Progress | E6 | 双层工具栏、平面分区、紧凑 tempo/point/range、双浏览器响应式 | 44 步 canonical + owner visual task + evidence approval | project-owner |
+| E7 | Compact workbench + fullscreen overlay | In Progress | E6 | 紧凑工作台、窗口级灰色浮层、复合入口、按歌曲 visibility 与双浏览器响应式 | 46 步 canonical + owner visual task + evidence approval | project-owner |
 
 ## 3. Exit Checklist by Milestone
 
@@ -92,7 +92,8 @@ next_action: "由 owner 复核 E7 紧凑工作台与 44/44 canonical；批准后
 
 ### E7
 
-- [x] AC-E701–AC-E704 的布局密度、分区、响应式和功能回归自动化全部通过。
+- [x] AC-E701–AC-E704 的布局密度、分区、响应式和功能回归已由修订前候选通过。
+- [ ] AC-E705–AC-E708 的 fixed overlay、菜单/开关、visibility、analysis 收敛与滚动 geometry 通过。
 - [x] 390/1024/1280/1920 与 Chrome/Edge 无关键遮挡，geometry 继续 `<=1 CSS px`。
 - [x] 10,000 事件反馈、长任务、可见 DOM 与资源门禁不回退。
 - [ ] owner 批准紧凑工作台视觉任务与 E7 canonical evidence。
@@ -117,7 +118,7 @@ next_action: "由 owner 复核 E7 紧凑工作台与 44/44 canonical；批准后
 - E5：`Complete`。
 - E6：`Complete`。
 - E7：`In Progress`。
-- 当前唯一下一门禁：owner 复核 E7 紧凑工作台视觉任务并批准已登记的 44/44 canonical evidence。
+- 当前下一门禁：完成全屏浮层修订与新版 46/46 canonical，再由 owner 复核紧凑工作台及窗口级浮层。
 
 ## 6. Delivery Approval
 
@@ -144,3 +145,5 @@ next_action: "由 owner 复核 E7 紧凑工作台与 44/44 canonical；批准后
 2026-08-28，E6 clean canonical `E6-2026-08-27T15-52-33-466Z-17d7fe10` 在 commit `17d7fe1046ed02a3fb5137ccfe7cbf5590093aff` 上 40/40 通过。owner 随后批准 canonical 与原生文件、`beforeunload`、辅助技术及长会话补偿，E6 据此关闭；紧凑工作台作为 E7 独立开放，Editor readiness 延后。
 
 同日，E7 紧凑工作台实现 commit `78bc7f06311a09948e5efae941a14599305b81a5` 完成双层工具栏、平面分区、44px 标记行和响应式工作区。clean canonical `E7-2026-08-28T15-02-48-298Z-78bc7f06` 44/44 通过，summary SHA-256 为 `43f63963fafa774ea18a8ddda290d573fd7869a269fc71798c22ca3076b14a4a`；自动化退出项已满足，但 owner 视觉任务与 evidence 批准前 E7 继续为 `In Progress`。
+
+2026-08-29，owner 在审批前把 E7 overlay 修订为窗口级全屏 fixed 灰色层、复合开关/菜单与按歌曲本地 visibility。上述 44/44 run 因而只保留为 `pre-revision` 历史证据；E7 不关闭，正式候选改为 46 步。

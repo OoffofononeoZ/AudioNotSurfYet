@@ -1,7 +1,7 @@
 ---
 status: in-review
 owner: "project-owner"
-last_reviewed: 2026-08-28
+last_reviewed: 2026-08-29
 upstream_docs:
   - "docs/quality/editor/eval-plan.md"
   - "docs/quality/editor/golden-examples.md"
@@ -12,7 +12,7 @@ upstream_docs:
   - "docs/quality/editor/e6-eval-plan.md"
   - "docs/quality/editor/e7-eval-plan.md"
   - "docs/delivery/editor/milestone-plan.md"
-next_action: "由 owner 复核 E7 双浏览器紧凑工作台与 44/44 canonical；批准前 E7 保持 In Progress"
+next_action: "保留 44/44 pre-revision artifact；登记修订版 46/46 E7 canonical 后请求 owner 复核"
 ---
 
 # Editor Evidence Index
@@ -599,14 +599,14 @@ next_action: "由 owner 复核 E7 双浏览器紧凑工作台与 44/44 canonical
 | --- | --- |
 | Run ID | `E7-2026-08-28T15-02-48-298Z-78bc7f06` |
 | Milestone | E7 — Compact workbench layout |
-| State | `in-review`（44/44 自动化通过；owner 双浏览器视觉任务待完成） |
+| State | `pre-revision`（44/44 自动化通过，但 2026-08-29 全屏浮层修订后不再是正式候选） |
 | Implementation commit | `78bc7f06311a09948e5efae941a14599305b81a5` |
 | Evidence commit | 本记录所在的 `docs: register Editor E7 canonical evidence` 提交 |
 | Dirty at start / end | `false` / `false` |
 | Commit at end | `78bc7f06311a09948e5efae941a14599305b81a5` |
 | Started at | 2026-08-28 15:02:48.298 UTC |
 | Method | `npm run eval:e7` |
-| Reviewer | `project-owner` — pending |
+| Reviewer | 不适用；修订前历史记录 |
 | Retention | `local-present`；至少保留到 E7 审批完成 |
 | Artifact root | `artifacts/evals/E7-2026-08-28T15-02-48-298Z-78bc7f06/` |
 | Summary SHA-256 | `43f63963fafa774ea18a8ddda290d573fd7869a269fc71798c22ca3076b14a4a` |
@@ -624,6 +624,8 @@ next_action: "由 owner 复核 E7 双浏览器紧凑工作台与 44/44 canonical
 | Meyda | `5.6.3` |
 
 本记录只保存机型、芯片、核心数和内存，不复制 artifact 中的序列号、UUID、UDID 或设备标识。E7 使用仓库受控 fixture、运行时压力工程与浏览器临时状态，不读取或登记用户私有音频身份。
+
+2026-08-29，owner 在审批前要求把 overlay 改为全视口 fixed 灰色层、窗口级复合入口及按歌曲本地 visibility。该变化影响挂载、geometry、analysis active set 与持久化边界，因此本 44/44 run 保留为 `pre-revision`，不删除、不冒充修订版 evidence。正式候选须在新实现 commit 上执行 46 步 clean canonical。
 
 ### Results and Traceability
 
