@@ -1,7 +1,7 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-08-28
+last_reviewed: 2026-08-29
 upstream_docs:
   - "docs/context/index.md"
 next_action: "补充 E7 compact workbench 术语并形成双浏览器证据"
@@ -70,7 +70,8 @@ next_action: "补充 E7 compact workbench 术语并形成双浏览器证据"
 | adaptive grid | E3 已实现的 point 候选精度选择：按 12 CSS px 门槛在 1/16、1/8、1/4、1/2 和 1 beat 中取最细可靠单位 | 防止长歌曲缩小时产生视觉上无法精确命中的标记位置；只影响新操作，不重写既有秒数 | [E3 golden examples](../quality/editor/e3-golden-examples.md) |
 | single-beat segment | `0 <= BPM < 20` 输入规范化后的 tempo segment；无内部 beat/measure 和可编辑 meter，整段是一个候选单元 | 区分“整段只有一拍”与普通小数 BPM，不把无意义 BPM 写入工程 | [project format](../architecture/editor/project-format-v1.md) |
 | shared analysis canvas renderer | E4 抽取的纯 Canvas adapter；Analyzer card 与 Editor overlay 使用同一 feature definition、compact series、viewport 和 cursor 绘制契约 | 防止六类 renderer 在两个页面分叉，并允许单层 context/shape 错误隔离 | [ADR-0009](../architecture/adrs/0009-editor-overlay-renderer-boundary.md) |
-| pointer-through overlay | E4 已实现的半透明分析层；除 feature selector、重试和三个垂直手柄外不接收 pointer | 让 overlay 与底层标记共享视觉坐标而不夺取 point/range 命中 | [E4 eval plan](../quality/editor/e4-eval-plan.md) |
+| pointer-through overlay | E7 修订的窗口级灰色半透明分析层；背景、全视口 Canvas、说明和空白不接收 pointer，只有复合入口、菜单、重试和三个垂直手柄接收输入 | 让固定浮层覆盖 Header 与工作台而不夺取底层命中 | [ADR-0011](../architecture/adrs/0011-editor-fullscreen-overlay.md) |
+| overlay visibility | 按歌曲 content hash 保存于 Editor preferences 的本地开关；与 JSON V1 中保留的上次 `featureId` 分离 | 同歌刷新恢复打开/关闭；导入工程不携带开关；关闭时 analysis 只保留 Buffer | [ADR-0011](../architecture/adrs/0011-editor-fullscreen-overlay.md) |
 | viewport-visible event DOM | 只为当前时间视口内可见 point/range 创建交互 DOM，全部空格与高密度网格由 Canvas 表达 | 允许 E6 验证 10,000 事件而不把容量门禁变成 schema 硬上限 | [Editor test strategy](../delivery/editor/test-strategy.md) |
 | compact workbench | Editor 以双层工具栏、平面内容区、细分隔线和 44px 轨道行组织的高密度桌面布局 | 只改变视觉层级与空间密度，不改变歌曲、工程、tempo、point/range、overlay 或 lease 语义 | [ADR-0010](../architecture/adrs/0010-editor-compact-workbench.md) |
 | Editor canonical | 某个 E 里程碑在 clean HEAD 上执行的正式 eval run，绑定 commit、环境、日志和 summary hash | provisional 不能替代 canonical；owner 批准后才开放下一个 E 里程碑 | [Editor execution plan](../delivery/editor/execution-plan.md) |

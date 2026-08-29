@@ -1,12 +1,12 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-08-26
+last_reviewed: 2026-08-29
 upstream_docs:
   - "docs/product/scope.md"
   - "docs/architecture/system-design.md"
   - "docs/architecture/interface-contracts.md"
-next_action: "按 DEC-026 实施 E2 geometry、tempo、BPM 与 pointer/keyboard 验收"
+next_action: "按 ADR-0011 在修订版 E7 验证全屏 fixed overlay、复合入口、开关记忆与 pointer-through"
 ---
 
 # Editor Interaction Contracts
@@ -14,7 +14,7 @@ next_action: "按 DEC-026 实施 E2 geometry、tempo、BPM 与 pointer/keyboard 
 ## Page and Layer Topology
 
 - 页面保留共享 Header；有效 Editor track 时隐藏 MusicBar，并在 Editor 顶部提供精简播放/暂停、当前时间和 repeat-one 状态。空状态或无效 route target 保留 MusicBar。
-- Editor 内容分为基底编辑层和半透明 overlay 层。基底层从上到下是歌曲信息/波形/导入导出、tempo boundary 与输入、lane 列表；overlay 只覆盖 lane 的可标记时间区。
+- Editor 内容分为基底编辑层和窗口级半透明 overlay 层。基底层从上到下是歌曲信息/波形/导入导出、tempo boundary 与输入、lane 列表；overlay root 固定覆盖整个 viewport，图形仅在 lane 可标记时间列对应的屏幕横向范围内绘制。
 - 每个 lane 使用对齐的三段结构：名称/事件类型、全部展开的 inner class、与波形和 tempo 网格共享横向几何的标记区。左侧宽度是布局变量，所有横向时间层使用扣除该宽度后的同一 CSS rect。
 - 波形与 lane 不各自滚动横向时间；共享 viewport 是唯一横向状态。inner class 不设内层滚动条，长页使用页面级纵向滚动。
 
@@ -98,10 +98,13 @@ idle + drag start/end handle
 
 ## Overlay Interaction and Rendering
 
-- selector 一次选择 0 或 1 个 21 项 FeatureId；选择后收起。Editor analysis active set 为 `unique(['buffer', selectedFeature])`。
-- overlay `topRatio`/`heightRatio` 限制在 `[0,1]`，且 `top + height <= 1`。top handle 调整上边界，middle handle 移动整体，bottom handle 调整下边界；最小高度由 delivery 的可用性测试固定。
+- Vue `Teleport` 把 overlay root 挂到 `body`，root 使用 `position: fixed; inset: 0` 并以 `rgba(132, 136, 135, 0.28)` 覆盖整个视口。纵向页面滚动不得移动 root、Canvas、图形、入口或手柄。
+- 左上角 fixed 复合入口是唯一常驻 overlay 控制：主按钮用 `aria-pressed` 直接开关；箭头以 `aria-haspopup/aria-expanded` 临时展开 21 项单选菜单。首次没有 `featureId` 时主按钮打开菜单并聚焦第一项；选择后立即开启/切换并收起。
+- `Esc`、外部点击和 route leave 只关闭菜单。关闭 overlay 不清空工程的 `featureId`，但 exact cursor、renderer 和 feature analysis 停止，active set 只保留 `buffer`。
+- visibility 按歌曲 hash 保存在本地 preferences，JSON V1 不携带它；旧草稿有 feature 且无偏好时默认打开，新工程无 feature 时默认关闭，hash 不匹配记录忽略。
+- overlay `topRatio`/`heightRatio` 限制在 `[0,1]`，且 `top + height <= 1`，现在相对浏览器视口解释。top handle 调整上边界，middle handle 移动整体，bottom handle 调整下边界；最小高度由 delivery 的可用性测试固定。
 - 三个手柄支持 pointer capture 和键盘细调/粗调；focus visible。reduced motion 下关闭位置过渡，但不改变结果。
-- feature selector 和三个手柄使用 `pointer-events: auto`；Canvas、标题/说明、图例和空白使用 `pointer-events: none`，所以底层 point/range 命中保持原坐标。
+- 复合入口、菜单、错误重试和三个手柄使用 `pointer-events: auto`；全屏背景、Canvas、标题/说明、图例和空白使用 `pointer-events: none`，所以 Header 与底层 point/range 命中保持原坐标。
 - renderer adapter 只接收 FeatureDefinition、AnalysisSeries、viewport、CSS size、DPR 和 exact cursor；不能读取 DOM/store/route，也不能注册 pointer listener。
 - renderer/Canvas/feature 分析错误只隐藏或重试 overlay；waveform、标记、播放、草稿和导出保持可用。
 
@@ -122,6 +125,8 @@ idle + drag start/end handle
 | range handle pointercancel | 恢复原 start/end |
 | tempo change after markers | grid 变化，event seconds 不变 |
 | overlay pointer click | 事件命中底层 lane；selector/handle 除外 |
+| overlay closed | Canvas/说明/错误/手柄卸载，featureId 保留，active features 只剩 Buffer |
+| document vertical scroll | overlay root、图形、入口和手柄 viewport 坐标不变 |
 | Canvas/Worker failure | overlay error 隔离，标记/播放/导出继续 |
 | keyboard-only | 可完成播放、seek、zoom/pan、tempo、point/range、菜单替代和 overlay 调整 |
 

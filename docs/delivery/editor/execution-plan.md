@@ -1,7 +1,7 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-08-28
+last_reviewed: 2026-08-29
 upstream_docs:
   - "docs/product/scope.md"
   - "docs/product/success-metrics.md"
@@ -10,7 +10,7 @@ upstream_docs:
   - "docs/architecture/risk-register.md"
   - "docs/architecture/editor/project-format-v1.md"
   - "docs/architecture/editor/interaction-contracts.md"
-next_action: "E7 实现与双浏览器 canonical 已完成；等待 owner 审批"
+next_action: "修订 E7 为全屏浮层，运行 46 步 canonical 后重新请求 owner 审批"
 ---
 
 # Editor E1–E7 Execution Plan
@@ -162,10 +162,17 @@ Implementation:
 
 Exit gate:
 
-- AC-E701–AC-E704、Chrome/Edge 专项、M12 回归及 E6 40 步基线全部通过；clean canonical 固定 44 步。
+- AC-E701–AC-E708、E7 unit/integration、Chrome/Edge 专项、M12 回归及 E6 40 步基线全部通过；修订版 clean canonical 固定 46 步。
 - 1024×900 可见顶部工具栏、波形、tempo 和至少一条标记行；多视口无遮挡或不可达控件。
 - 10,000 事件反馈、长任务、可见 DOM、资源和共享 geometry 不回归。
 - owner 批准 E7 canonical 与紧凑布局后，才进入 Editor release-readiness review。
+
+Revision slice:
+
+- 把 overlay 与左上角复合入口 Teleport 到窗口顶层，使用 fixed 全视口灰色 pointer-through 背景；移除主页面常驻特征列表。
+- 为 controller 增加 `overlayOpen` 与开关/选择命令；按歌曲 hash 在现有 preferences store 保存 visibility，关闭时 active set 只保留 Buffer。
+- 全视口 Canvas 使用当前 marker time column 的屏幕横向 rect 进行裁剪/绘制，三个 bounds 手柄改为 viewport-relative。
+- 旧 44/44 canonical 只作为 `pre-revision` 历史记录；新增 E7 unit/integration 后运行 46 步候选。
 
 ## 5. Test and Eval Commands
 
@@ -189,7 +196,7 @@ npm run eval:eN:provisional
 npm run eval:eN
 ```
 
-其中 `N` 为 5–7。canonical 必须拒绝 dirty worktree，并记录 run ID、commit、环境、步骤结果、日志和 summary SHA-256。E1–E6 clean canonical 均已通过并获 owner 批准；E7 clean canonical 已通过，但在 owner 审批前仍为 `In Progress`。
+其中 `N` 为 5–7。canonical 必须拒绝 dirty worktree，并记录 run ID、commit、环境、步骤结果、日志和 summary SHA-256。E1–E6 clean canonical 均已通过并获 owner 批准；原 E7 44/44 run 已因全屏浮层修订标为 `pre-revision`，新版 46 步 canonical 与 owner 审批前 E7 仍为 `In Progress`。
 
 ## 6. Change Control and Exclusions
 

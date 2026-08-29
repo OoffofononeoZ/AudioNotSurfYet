@@ -1,14 +1,14 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-08-28
+last_reviewed: 2026-08-29
 upstream_docs:
   - "docs/product/success-metrics.md"
   - "docs/architecture/interface-contracts.md"
   - "docs/architecture/risk-register.md"
   - "docs/delivery/editor/execution-plan.md"
   - "docs/delivery/editor/acceptance-criteria.md"
-next_action: "E7 密度/响应式/回归矩阵与 44 步 canonical 已通过；等待 owner 复核"
+next_action: "补充 E7 visibility unit/integration 与全屏浮层双浏览器测试，执行 46 步 canonical"
 ---
 
 # Editor E1–E7 Test Strategy
@@ -73,7 +73,7 @@ Editor 测试体系必须回答：
 | E4 | adapter/overlay bounds | consumer/cache/dedupe/error | 21 项、手柄、pointer-through | E6 全量 |
 | E5 | range/overlap/handles | JSON/draft/rollback | create/cancel/drag/delete/keyboard | E6 全量 |
 | E6 | full regression | stress/resource/recovery | full + native manual | full + native manual |
-| E7 | compact tokens/geometry | E1–E6 behavior unchanged | density/responsive/task regression | density/responsive/task regression |
+| E7 | compact tokens、visibility/default/active set | preference/import/cache/cancel | density、fixed fullscreen、menu、scroll/geometry/pointer-through | 同 Chrome 矩阵 |
 
 每个里程碑同时回归与其变更相邻的 Analyzer 播放、session、Worker、route、Canvas 和资源契约。E6 运行 E1–E6 全量及 M3–M11 关键回归，不必篡改历史 canonical 身份。
 
@@ -122,7 +122,7 @@ npm run eval:eN:provisional
 npm run eval:eN
 ```
 
-E1–E6 命令已经存在、通过 clean canonical 并获批准。E7 新增 Chrome、Edge、双浏览器与 44 步 runner；新增脚本必须让 package、测试 README、本项目 Skill 与实际 runner 一致，不保留指向不存在文件的兼容别名。
+E1–E6 命令已经存在、通过 clean canonical 并获批准。修订版 E7 增加 unit、integration、Chrome、Edge、双浏览器与 46 步 runner；新增脚本必须让 package、测试 README、本项目 Skill 与实际 runner 一致，不保留指向不存在文件的兼容别名。
 
 固定流程：
 

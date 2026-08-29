@@ -1,12 +1,12 @@
 ---
 status: in-review
 owner: "project-owner"
-last_reviewed: 2026-08-28
+last_reviewed: 2026-08-29
 upstream_docs:
   - "docs/quality/editor/e7-eval-plan.md"
   - "docs/quality/editor/e6-failure-taxonomy.md"
   - "docs/architecture/risk-register.md"
-next_action: "保留首次 provisional 失败历史；由 owner 复核 clean canonical 候选"
+next_action: "用修订版 E7 46 步 canonical 验证 fullscreen、visibility、alignment 与 regression 分类"
 ---
 
 # Editor E7 Failure Taxonomy
@@ -20,6 +20,9 @@ E7 沿用 E1–E6 的 geometry、pointer、focus、performance、resource、regr
 | EFT-COMPACT-HIT | 命中与焦点退化 | 控件小于 24px、焦点不可见、pointer/keyboard 命中偏移 | E7-EV-TASK | S1；恢复命中尺寸和焦点，不放宽可访问性 |
 | EFT-COMPACT-CANVAS | Canvas 尺寸/geometry 漂移 | CSS 尺寸变化后 backing store 或共享 x 坐标超限 | E7-EV-RESPONSIVE/TASK | S1；修正 resize/共享列宽，保持 `<=1px` |
 | EFT-COMPACT-REGRESSION | E1–E6 或 M12 回归 | 既有功能、资源、性能或 Analyzer masonry 失败 | E7-EV-STRESS/ADJACENT | 按原 taxonomy 严重度阻断 E7 |
+| EFT-OVERLAY-VISIBILITY | 开关/记忆/analysis 收敛失败 | 关闭清空 feature、刷新错歌恢复、导入覆盖开关、关闭后仍请求 feature/exact cursor | E7-EV-VISIBILITY | S1；修正 controller/preference identity，不升级 JSON/DB |
+| EFT-FIXED-OVERLAY | 窗口级定位或穿透失败 | 滚动后图形移动、背景未覆盖 Header、root 拦截 Header/标记 | E7-EV-FULLSCREEN | S1；修正 Teleport/fixed/pointer ownership |
+| EFT-FULLSCREEN-ALIGN | 全视口 Canvas 对齐失败 | 时间列外绘制、zoom/pan/scroll 后 x 偏差超过 1px | E7-EV-ALIGNMENT | S1；修正 rect/clip/shared geometry，不私有化 viewport |
 
 | Severity | Meaning | Gate response |
 | --- | --- | --- |
