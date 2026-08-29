@@ -8,7 +8,7 @@ upstream_docs:
   - "docs/architecture/risk-register.md"
   - "docs/delivery/editor/execution-plan.md"
   - "docs/delivery/editor/acceptance-criteria.md"
-next_action: "补充 E7 visibility unit/integration 与全屏浮层双浏览器测试，执行 46 步 canonical"
+next_action: "保留 E7 46/46 artifact，等待 owner Chrome/Edge 人工复核"
 ---
 
 # Editor E1–E7 Test Strategy
@@ -122,7 +122,7 @@ npm run eval:eN:provisional
 npm run eval:eN
 ```
 
-E1–E6 命令已经存在、通过 clean canonical 并获批准。修订版 E7 增加 unit、integration、Chrome、Edge、双浏览器与 46 步 runner；新增脚本必须让 package、测试 README、本项目 Skill 与实际 runner 一致，不保留指向不存在文件的兼容别名。
+E1–E6 命令已经存在、通过 clean canonical 并获批准。修订版 E7 已增加 unit、integration、Chrome、Edge、双浏览器与 46 步 runner，并在 clean commit 上 46/46 通过；package、测试 README、本项目 Skill 与实际 runner 保持一致，不保留指向不存在文件的兼容别名。
 
 固定流程：
 

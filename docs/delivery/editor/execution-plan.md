@@ -10,7 +10,7 @@ upstream_docs:
   - "docs/architecture/risk-register.md"
   - "docs/architecture/editor/project-format-v1.md"
   - "docs/architecture/editor/interaction-contracts.md"
-next_action: "修订 E7 为全屏浮层，运行 46 步 canonical 后重新请求 owner 审批"
+next_action: "请 owner 复核 E7 修订版 46/46 canonical；批准后进入 Editor release-readiness review"
 ---
 
 # Editor E1–E7 Execution Plan
@@ -196,7 +196,7 @@ npm run eval:eN:provisional
 npm run eval:eN
 ```
 
-其中 `N` 为 5–7。canonical 必须拒绝 dirty worktree，并记录 run ID、commit、环境、步骤结果、日志和 summary SHA-256。E1–E6 clean canonical 均已通过并获 owner 批准；原 E7 44/44 run 已因全屏浮层修订标为 `pre-revision`，新版 46 步 canonical 与 owner 审批前 E7 仍为 `In Progress`。
+其中 `N` 为 5–7。canonical 必须拒绝 dirty worktree，并记录 run ID、commit、环境、步骤结果、日志和 summary SHA-256。E1–E6 clean canonical 均已通过并获 owner 批准；原 E7 44/44 run 已因全屏浮层修订标为 `pre-revision`。修订版 run `E7-2026-08-29T05-23-03-986Z-080f577f` 已在 commit `080f577fe20fcb22a20184dce0b15892c5299464` 上 46/46 通过；owner 审批前 E7 仍为 `In Progress`。
 
 ## 6. Change Control and Exclusions
 

@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/context/index.md"
   - "docs/delivery/test-strategy.md"
   - "docs/quality/eval-plan.md"
-next_action: "保留 E7 44/44 pre-revision artifact；完成全屏浮层修订与 46 步 canonical"
+next_action: "保留 E7 44/44 pre-revision artifact；请 owner 复核修订版 46/46 artifact"
 ---
 
 # Working Agreements
@@ -172,5 +172,7 @@ E1 实现随后在不新增依赖、不修改 Analyzer session/cache schema 的�
 同日，E7 最终 dirty provisional 44/44 通过；实现提交 `78bc7f06311a09948e5efae941a14599305b81a5` 后，clean canonical `E7-2026-08-28T15-02-48-298Z-78bc7f06` 44/44 通过，summary SHA-256 为 `43f63963fafa774ea18a8ddda290d573fd7869a269fc71798c22ca3076b14a4a`。Chrome/Edge 实测工具栏 79px、控件 30px、point/range 行 44px；10,000 事件最大反馈 6.7ms/4.5ms、归因长任务为 0。artifact 保留到 owner 审批，E7 仍为 `In Progress`，不创建 Editor readiness。
 
 2026-08-29，owner 在 E7 审批前批准 ADR-0011：overlay 与入口提升为窗口级 fixed，featureId 和本地 visibility 分离，关闭时 analysis 收敛为 Buffer。原 44/44 artifact 保留为 `pre-revision`；正式 evidence 改为 46 步，仍只创建本地提交、不推送。
+
+随后全屏浮层修订的 dirty provisional 46/46 通过；实现 commit `080f577fe20fcb22a20184dce0b15892c5299464` 上的 clean canonical `E7-2026-08-29T05-23-03-986Z-080f577f` 46/46 通过，summary SHA-256 为 `da7c5e7a931a1e8c6cb3a64c3eeac8f5cb7d5cc6d6b604de6e4ea7b009ec13f5`。Chrome/Edge 均验证 fixed 全屏层、21 项复合菜单、滚动固定、pointer-through 与 `0 CSS px` 横轴误差；owner 人工签字前 E7 仍为 `In Progress`。
 
 同日，`project-owner` 明确要求 agent “自行提交并完成后续即可”，并说明“可以不上传远程仓库”。M12 clean canonical 在 commit `be655e6765a63493fb1a3a4ee99992073b06e54e` 上 12/12 通过后，本次授权用于本地提交、evidence 登记、R-028 缓解和 Analyzer readiness 复核；不构成远程推送、生产部署或 Editor E6 人工补偿完成的授权。

@@ -6,7 +6,7 @@ upstream_docs:
   - "docs/quality/editor/e7-eval-plan.md"
   - "docs/quality/editor/e6-failure-taxonomy.md"
   - "docs/architecture/risk-register.md"
-next_action: "用修订版 E7 46 步 canonical 验证 fullscreen、visibility、alignment 与 regression 分类"
+next_action: "请 owner 复核修订版 E7；若人工门禁失败，按 fullscreen/visibility/alignment 分类修复并复跑"
 ---
 
 # Editor E7 Failure Taxonomy
@@ -37,3 +37,4 @@ E7 沿用 E1–E6 的 geometry、pointer、focus、performance、resource、regr
 
 - `E7-2026-08-28T14-41-40-086Z-3fdb8ac6-provisional` 暴露 `EFT-COMPACT-REGRESSION / S1`：合并工具栏后 persistence state 不再拥有独立、稳定的文本语义边界；另有长序列中的 route/IndexedDB 与 M7 empty-workspace 瞬态回归。状态拆分后 E1/M7 专项通过，完整 provisional 与 canonical 随后全绿。
 - 没有用放宽尺寸、时间、geometry、性能或资源阈值处理失败；E6 历史 canonical 未被改写。
+- 全屏浮层修订的 dirty provisional 与 clean canonical 均 46/46 通过，未观察到 `EFT-OVERLAY-VISIBILITY`、`EFT-FIXED-OVERLAY` 或 `EFT-FULLSCREEN-ALIGN` 失败；旧 44/44 run 保持 `pre-revision`，不用于关闭这些分类。

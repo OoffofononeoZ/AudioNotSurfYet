@@ -4,14 +4,14 @@ owner: "project-owner"
 last_reviewed: 2026-08-29
 upstream_docs:
   - "AGENTS.md"
-next_action: "完成 Editor E7 全屏浮层修订与 46 步 canonical；旧 44/44 只作 pre-revision"
+next_action: "请 owner 复核 Editor E7 修订版 46/46 canonical 与全屏浮层；批准前不创建 readiness"
 ---
 
 # Repository Context Index
 
 ## Purpose
 
-AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端：用户选择本地音频后，应用提供播放队列、元数据、进度与音量控制，并把实时能量用于 MusicBar 和背景可视化。Analyzer 21/21 与 M12 实时最短列瀑布流已完成 clean canonical，Analyzer readiness 恢复为 `Ready with waivers`；Editor E1–E6 已获批准并关闭，E7 紧凑工作台的 44/44 run 因窗口级全屏浮层修订成为 `pre-revision`，新版 46 步候选正在实施。
+AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端：用户选择本地音频后，应用提供播放队列、元数据、进度与音量控制，并把实时能量用于 MusicBar 和背景可视化。Analyzer 21/21 与 M12 实时最短列瀑布流已完成 clean canonical，Analyzer readiness 恢复为 `Ready with waivers`；Editor E1–E6 已获批准并关闭，E7 紧凑工作台的旧 44/44 run 保留为 `pre-revision`，窗口级全屏浮层修订已在新实现 commit 上完成 46/46 clean canonical，等待 owner 复核。
 
 本目录维护仓库事实、边界和工作记忆；生命周期路由与通用方法由 [AGENTS.md](../../AGENTS.md) 负责。当前代码事实与目标架构必须区分：现状见 [system map](system-map.md)，批准的目标见 [system design](../architecture/system-design.md)。
 
@@ -21,8 +21,8 @@ AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端：用户选择
 - Product intent：problem brief、scope、success metrics 和 open questions 中的 Editor E0 点/范围事件范围已于 2026-08-26 获 owner 批准。
 - System design：Analyzer M12 实时最短列已实现并以 canonical 缓解 R-028；Editor runtime/data/interaction 设计保持批准，E7 只新增紧凑工作台表现契约。
 - Execution planning：根级 M1–M12 均为 `Complete`；`docs/delivery/editor/` E0-D/E1–E6 `Complete`、E7 `In Progress`。
-- Quality and evals：M3–M12 与 Editor E1–E6 evidence 已批准；E7 44/44 canonical 保留为 `pre-revision`，正式候选改为 46 步。
-- Implementation：Analyzer M12 与 Editor E1–E6 已完成；Editor E7 紧凑布局已实现，全屏 Teleport overlay、复合入口与本地 visibility 正在修订。
+- Quality and evals：M3–M12 与 Editor E1–E6 evidence 已批准；E7 44/44 canonical 保留为 `pre-revision`，修订版 46/46 clean canonical 已登记为 `in-review`。
+- Implementation：Analyzer M12、Editor E1–E6 与 E7 全屏 Teleport overlay、复合入口及本地 visibility 均已实现；E7 等待 owner 人工门禁。
 - Readiness、release、retrospective：Analyzer 为 `Ready with waivers`，但 PROD-015 完成前不创建上线声明；Editor 不继承 Analyzer readiness。
 
 ## Key Documents
@@ -123,7 +123,7 @@ AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端：用户选择
 - Editor E4 quality：[eval plan](../quality/editor/e4-eval-plan.md)、[golden](../quality/editor/e4-golden-examples.md)、[failure taxonomy](../quality/editor/e4-failure-taxonomy.md) 与 31/31 canonical record 均已获批准
 - Editor E5 quality：[eval plan](../quality/editor/e5-eval-plan.md)、[golden](../quality/editor/e5-golden-examples.md)、[failure taxonomy](../quality/editor/e5-failure-taxonomy.md) 与 35/35 canonical record 已获批准
 - Editor E6 quality：[eval plan](../quality/editor/e6-eval-plan.md)、[golden](../quality/editor/e6-golden-examples.md)、[failure taxonomy](../quality/editor/e6-failure-taxonomy.md) 与 40/40 canonical record 已获批准
-- Editor E7 quality：[eval plan](../quality/editor/e7-eval-plan.md)、[golden](../quality/editor/e7-golden-examples.md) 与 [failure taxonomy](../quality/editor/e7-failure-taxonomy.md) 为 `in-review`；44/44 run 为 `pre-revision`，等待新版 46 步 canonical
+- Editor E7 quality：[eval plan](../quality/editor/e7-eval-plan.md)、[golden](../quality/editor/e7-golden-examples.md) 与 [failure taxonomy](../quality/editor/e7-failure-taxonomy.md) 为 `in-review`；44/44 run 为 `pre-revision`，修订版 46/46 canonical 已登记并等待 owner 复核
 - Quality readiness：[Analyzer release readiness](../quality/release-readiness.md) 已按 M12 clean canonical 恢复 `Ready with waivers`
 - Release operations：`docs/release/` 尚未创建；PROD-015 的托管平台、域名和 SPA fallback 解决前不进入正式上线
 - Retrospectives：`docs/retrospectives/` 尚未创建；有发布、事故或重复摩擦证据后生成

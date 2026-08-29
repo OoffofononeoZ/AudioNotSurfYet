@@ -12,7 +12,7 @@ upstream_docs:
   - "docs/quality/editor/e6-eval-plan.md"
   - "docs/quality/editor/e7-eval-plan.md"
   - "docs/delivery/editor/milestone-plan.md"
-next_action: "保留 44/44 pre-revision artifact；登记修订版 46/46 E7 canonical 后请求 owner 复核"
+next_action: "请 owner 在 Chrome/Edge 复核修订版 E7 全屏浮层；批准前 E7 保持 In Progress"
 ---
 
 # Editor Evidence Index
@@ -33,7 +33,7 @@ next_action: "保留 44/44 pre-revision artifact；登记修订版 46/46 E7 cano
 - E4 clean canonical 31/31 与 owner 人工门禁已于 2026-08-27 获批；E5 已开放。
 - E5 clean canonical 35/35 与 owner 人工范围任务已于 2026-08-27 获批；E6 已开放。
 - E6 clean canonical 40/40、原生 OS picker、`beforeunload`、辅助技术与长会话补偿已于 2026-08-28 获 owner 批准；E7 紧凑工作台布局已开放，Editor readiness 延后至 E7 审批。
-- E7 clean canonical 已在实现 commit `78bc7f06311a09948e5efae941a14599305b81a5` 上 44/44 通过并登记为 `in-review`；owner 视觉任务与批准前不关闭 E7、不创建 Editor readiness。
+- E7 修订版 clean canonical 已在实现 commit `080f577fe20fcb22a20184dce0b15892c5299464` 上 46/46 通过并登记为 `in-review`；原 44/44 run 保留为 `pre-revision`，owner 视觉任务与批准前不关闭 E7、不创建 Editor readiness。
 
 ## 2. Record Contract
 
@@ -625,7 +625,7 @@ next_action: "保留 44/44 pre-revision artifact；登记修订版 46/46 E7 cano
 
 本记录只保存机型、芯片、核心数和内存，不复制 artifact 中的序列号、UUID、UDID 或设备标识。E7 使用仓库受控 fixture、运行时压力工程与浏览器临时状态，不读取或登记用户私有音频身份。
 
-2026-08-29，owner 在审批前要求把 overlay 改为全视口 fixed 灰色层、窗口级复合入口及按歌曲本地 visibility。该变化影响挂载、geometry、analysis active set 与持久化边界，因此本 44/44 run 保留为 `pre-revision`，不删除、不冒充修订版 evidence。正式候选须在新实现 commit 上执行 46 步 clean canonical。
+2026-08-29，owner 在审批前要求把 overlay 改为全视口 fixed 灰色层、窗口级复合入口及按歌曲本地 visibility。该变化影响挂载、geometry、analysis active set 与持久化边界，因此本 44/44 run 保留为 `pre-revision`，不删除、不冒充修订版 evidence。修订版候选随后在新实现 commit 上执行 46 步 clean canonical，身份见第 10 节。
 
 ### Results and Traceability
 
@@ -666,3 +666,74 @@ next_action: "保留 44/44 pre-revision artifact；登记修订版 46/46 E7 cano
 - 自动化以 computed style、DOM/Canvas geometry、真实任务状态和本地 artifact 截图固定可复现事实；FL Studio 参考图未复制进仓库，也不是像素 golden。
 - 紧凑度、视觉层级、长会话可读性和真实辅助技术操作体感仍需 owner 在 Chrome 与 Edge 人工判断；自动化不能替代该视觉签字。
 - E7 在 owner 批准前保持 `In Progress`，本 evidence 保持 `in-review`。不得从 44/44 自动化结果推断 E7 已关闭或包含 Editor 的 release-readiness 已创建。
+
+## 10. Revised E7 Canonical Record
+
+| Field | Value |
+| --- | --- |
+| Run ID | `E7-2026-08-29T05-23-03-986Z-080f577f` |
+| Milestone | E7 — Compact workbench + fullscreen overlay revision |
+| State | `in-review`（46/46 自动化通过，等待 owner 人工门禁） |
+| Implementation commit | `080f577fe20fcb22a20184dce0b15892c5299464` |
+| Evidence commit | 本记录所在的 `docs: register revised Editor E7 canonical evidence` 提交 |
+| Dirty at start / end | `false` / `false` |
+| Commit at end | `080f577fe20fcb22a20184dce0b15892c5299464` |
+| Started at | 2026-08-29 05:23:03.986 UTC |
+| Method | `npm run eval:e7` |
+| Reviewer | `project-owner` — pending |
+| Retention | `local-present`；至少保留到 E7 审批完成 |
+| Artifact root | `artifacts/evals/E7-2026-08-29T05-23-03-986Z-080f577f/` |
+| Summary SHA-256 | `da7c5e7a931a1e8c6cb3a64c3eeac8f5cb7d5cc6d6b604de6e4ea7b009ec13f5` |
+
+### Environment
+
+| Item | Recorded value |
+| --- | --- |
+| OS | macOS 26.5.2 (`25F84`), Darwin arm64 |
+| Hardware | MacBook Pro `MacBookPro17,1`；Apple M1 8-core；16 GB memory |
+| Node / npm | Node `v24.18.0`；npm `11.16.0` |
+| Vitest / Playwright | `4.1.10` / `1.62.0` |
+| Chrome binary / test user agent | Google Chrome `152.0.7977.64` / Chrome `151.0.7922.34` |
+| Edge binary / test user agent | Microsoft Edge `151.0.4129.107` / Edge `151.0.7922.34` |
+| Meyda | `5.6.3` |
+
+本记录只保存机型、芯片、核心数和内存，不复制 artifact 中的序列号、UUID、UDID 或设备标识。修订版 E7 使用仓库受控 fixture、运行时压力工程与浏览器临时状态，不读取或登记用户私有音频身份。
+
+### Results and Traceability
+
+| Step group | Result | Evidence |
+| --- | --- | --- |
+| E7 unit / integration | pass / pass | 旧草稿默认、歌曲 hash 隔离、visibility round-trip、导入不覆盖开关、关闭保留 `featureId` 且 active set 收敛为 Buffer、写失败保留内存状态 |
+| E7 Chrome / Edge | pass / pass | 全视口 fixed root、`rgba(132, 136, 135, 0.28)` 灰色背景、窗口级复合入口、21 项临时菜单、Escape/焦点、pointer-through 与滚动固定均通过 |
+| Density / responsive | pass | 两端工具栏 `79px`、控件 `30px`、point/range 行 `44px`、名称/分类列 `152/144px`、主区域圆角 `0px`；覆盖 390/1024/1280/1920，桌面/窄屏波形 `176/144px` |
+| Fullscreen geometry | pass | 两浏览器在 1280×900 的 marker-column 横轴误差为 `0 CSS px`；纵向滚动后 root、Canvas、图形、入口和手柄 viewport 坐标不变 |
+| 10,000-event feedback | pass | 固定 seed `3858767910`；Chrome 最大 sampled feedback `12.4ms`，Edge `11.2ms`；均低于 `100ms`，Editor/分析归因 `>50ms` 长任务为 `0` |
+| Visible DOM / resources | pass | 10,000 events 工程 SHA-256 `1ee69629a2ea40342b503653ac31ac2c7eabad361d570c3b3d5a5be625bce5f0`；采样为 315 point + 0 range；20 次循环后保持 1 Worker、1 AudioContext、2 RAF、0 Object URL、1 ResizeObserver、1 Canvas，无单调累积 |
+| Regression | pass | E1–E6、M6–M11 适用回归与 M12 unit/Chrome/Edge 均通过；旧 44/44 artifact 未改写 |
+| Build | pass with warning | 1,845 modules；最大 JS chunk `1,292.23 kB`，既有 warning 如实保留到整体 readiness review |
+| Docs / harness / typecheck / diff | pass | lifecycle links、deliberate failure detection、`vue-tsc -b`、canonical 起止 clean 与 `git diff --check` |
+
+### Provisional History
+
+- Dirty-worktree provisional `E7-2026-08-29T05-12-55-339Z-7a763a94-provisional` 46/46 通过，summary SHA-256 `d59f2e903e813d761a786ba99cbbac5ae0183cbca80ba37a649c9b2da703c66d`。
+- Clean canonical 绑定独立实现 commit `080f577fe20fcb22a20184dce0b15892c5299464`；起止工作树均干净。旧 44/44 run 与其失败/provisional 历史继续保留，不覆盖。
+
+### Local Artifact Hashes
+
+| Artifact | SHA-256 |
+| --- | --- |
+| `summary.json` | `da7c5e7a931a1e8c6cb3a64c3eeac8f5cb7d5cc6d6b604de6e4ea7b009ec13f5` |
+| `01-E7-fullscreen-overlay-unit.log` | `390b7ad73dc3a86cd9fa0bec71b1d766394693e48be8bb098103c5cb919920e3` |
+| `02-E7-fullscreen-overlay-integration.log` | `13b13af5cf1196f6a3c6772c9afcc806fa3739d7bacfc293ca8ba6facdee6b84` |
+| `03-E7-Chrome-fullscreen-workbench.log` | `161953579809c6cd19a73d825d2a906610c9f8862889306161d03f67150bbb4e` |
+| `04-E7-Edge-fullscreen-workbench.log` | `720085922a53a57d68d1d6cdcb6d5e449ebb4c063b4b6b03f5e66f9fe540766a` |
+| `09-E6-Chrome.log` | `742c4ac67c10d4d7faa1f0314a1414d25abcd50e7e015565563736515626052c` |
+| `10-E6-Edge.log` | `6a8e0caf445bf74bdd8d63c264ee2ad8233f65af7f72226e8a390483698213b7` |
+| `45-build.log` | `ea0e5ebf2db68e00649528d541f9c9ac51f5b9918de8c203ebe1a974dc224431` |
+| `46-diff-check.log` | `e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855` |
+
+### Manual Gaps and Approval Gate
+
+- 自动化证明 fixed geometry、计算样式、21 项菜单、开关/刷新记忆、Buffer-only 收敛、pointer-through 和双浏览器回归；它不能替代 owner 对灰色覆盖强度、图形可读性、底层操作体感和真实辅助技术的判断。
+- owner 仍需在 Chrome 与 Edge 检查窗口级入口、纵向滚动固定、Header/标记穿透、关闭/恢复上次特征、zoom/pan/seek 与 JSON V1 草稿边界。
+- E7 在 owner 批准前保持 `In Progress`，本 evidence 保持 `in-review`，不得创建包含 Editor 的 release-readiness。
