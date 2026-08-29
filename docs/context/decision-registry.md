@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/product/scope.md"
   - "docs/architecture/system-design.md"
   - "docs/delivery/execution-plan.md"
-next_action: "按 DEC-033/ADR-0011 完成 E7 全屏浮层修订与 46 步 canonical"
+next_action: "请 owner 复核 DEC-033/ADR-0011 的 46/46 E7 候选；批准前不进入 readiness"
 ---
 
 # Decision Registry

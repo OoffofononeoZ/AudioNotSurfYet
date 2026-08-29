@@ -4,7 +4,7 @@ owner: "project-owner"
 last_reviewed: 2026-08-29
 upstream_docs:
   - "docs/context/index.md"
-next_action: "按 ADR-0011 修订 E7 全屏 fixed overlay，并产生新的 46 步 canonical"
+next_action: "请 owner 复核 E7 全屏 fixed overlay 的 46/46 clean canonical 与人工视觉门禁"
 ---
 
 # System Map
@@ -95,7 +95,7 @@ showOpenFilePicker → FileSystemFileHandle → File
 - `analysisCanvasRenderer` 是 Analyzer card 与 Editor overlay 共用的纯 Canvas adapter；E4 overlay 一次选择累计 21 项中的一个，使用同一 viewport/time geometry、DPR backing store、40ms exact cursor 合并和 last-ready Buffer fallback。
 - overlay 通过 Teleport 固定覆盖窗口，灰色背景、全视口 Canvas 与说明穿透到 Header/底层标记；只有左上复合入口、临时 21 项菜单、重试和 top/move/bottom 手柄接收 pointer。bounds 仍为 0.10/0.35、最小 0.12，但相对 viewport；visibility 按歌曲 hash 本地保存，关闭时 active set 只保留 Buffer。
 
-尚未完成：E7 全屏浮层修订、46 步双浏览器 canonical，以及 owner 对紧凑工作台、窗口级浮层、长会话可读性和辅助技术体感的人工复核。原 44/44 run 只作 pre-revision；E6 历史身份保持不变。
+尚未完成：owner 对 E7 紧凑工作台、窗口级浮层、长会话可读性和辅助技术体感的人工复核。全屏浮层修订与 46 步双浏览器 canonical 已完成；原 44/44 run 只作 pre-revision，E6 历史身份保持不变。
 
 ## Approval Record
 
@@ -104,3 +104,5 @@ showOpenFilePicker → FileSystemFileHandle → File
 同日，owner 要求自行提交并完成 M12 后续。M12 canonical `M12-2026-08-28T07-30-39-789Z-be655e67` 在 clean commit `be655e6765a63493fb1a3a4ee99992073b06e54e` 上 12/12 通过，稳定 DOM、实际高度最短列与 Observer/RAF 生命周期成为当前系统事实；M12 已关闭且 Analyzer readiness 恢复，PROD-015 与 Editor E6 不受该批准覆盖。
 
 随后 Editor E7 紧凑工作台实现已提交，并由 clean canonical `E7-2026-08-28T15-02-48-298Z-78bc7f06` 在 commit `78bc7f06311a09948e5efae941a14599305b81a5` 上 44/44 验证。双层工具栏、平面 section、44px 标记行、176/144px 波形及 390–1920 响应式现为当前系统事实；evidence 与里程碑仍等待 owner 批准。
+
+2026-08-29，全屏 fixed overlay、窗口级复合入口、21 项临时菜单、按歌曲 visibility 与关闭后的 Buffer-only active set 在 commit `080f577fe20fcb22a20184dce0b15892c5299464` 上完成。修订版 clean canonical `E7-2026-08-29T05-23-03-986Z-080f577f` 46/46 通过，summary SHA-256 为 `da7c5e7a931a1e8c6cb3a64c3eeac8f5cb7d5cc6d6b604de6e4ea7b009ec13f5`；当前系统事实已更新，但 owner 批准前 E7 仍为 `In Progress`。

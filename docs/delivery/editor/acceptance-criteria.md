@@ -9,7 +9,7 @@ upstream_docs:
   - "docs/architecture/editor/project-format-v1.md"
   - "docs/architecture/editor/interaction-contracts.md"
   - "docs/delivery/editor/execution-plan.md"
-next_action: "按修订的 AC-E705–AC-E708 验证全屏浮层并产生新的 E7 canonical"
+next_action: "请 owner 复核已通过 AC-E701–AC-E708 自动化的 E7 候选与人工视觉门禁"
 ---
 
 # Editor E1–E7 Acceptance Criteria

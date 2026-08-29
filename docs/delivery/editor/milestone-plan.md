@@ -6,7 +6,7 @@ upstream_docs:
   - "docs/delivery/editor/execution-plan.md"
   - "docs/delivery/editor/acceptance-criteria.md"
   - "docs/delivery/editor/test-strategy.md"
-next_action: "完成 E7 全屏浮层修订、46/46 clean canonical 与 owner 复核"
+next_action: "请 owner 复核 E7 46/46 clean canonical、紧凑工作台与全屏浮层"
 ---
 
 # Editor E1–E7 Milestone Plan
@@ -84,7 +84,7 @@ next_action: "完成 E7 全屏浮层修订、46/46 clean canonical 与 owner 复
 ### E6
 
 - [x] AC-E601–AC-E606 的可自动化部分在真实 Chrome/Edge canonical 有完整证据。
-- [ ] MP3/WAV/FLAC、native picker、离页/刷新恢复与辅助技术补偿检查完成。
+- [x] MP3/WAV/FLAC、native picker、离页/刷新恢复与辅助技术补偿检查完成。
 - [x] 10,000 事件下输入 `<=100ms`、无归因任务 `>50ms`、DOM 可见化策略有效。
 - [x] 20 次生命周期无 AudioContext/Worker/RAF/Canvas/listener 单调累积。
 - [x] E1–E6 全量和 M3–M11 关键回归通过。
@@ -93,7 +93,7 @@ next_action: "完成 E7 全屏浮层修订、46/46 clean canonical 与 owner 复
 ### E7
 
 - [x] AC-E701–AC-E704 的布局密度、分区、响应式和功能回归已由修订前候选通过。
-- [ ] AC-E705–AC-E708 的 fixed overlay、菜单/开关、visibility、analysis 收敛与滚动 geometry 通过。
+- [x] AC-E705–AC-E708 的 fixed overlay、菜单/开关、visibility、analysis 收敛与滚动 geometry 通过。
 - [x] 390/1024/1280/1920 与 Chrome/Edge 无关键遮挡，geometry 继续 `<=1 CSS px`。
 - [x] 10,000 事件反馈、长任务、可见 DOM 与资源门禁不回退。
 - [ ] owner 批准紧凑工作台视觉任务与 E7 canonical evidence。
@@ -118,7 +118,7 @@ next_action: "完成 E7 全屏浮层修订、46/46 clean canonical 与 owner 复
 - E5：`Complete`。
 - E6：`Complete`。
 - E7：`In Progress`。
-- 当前下一门禁：完成全屏浮层修订与新版 46/46 canonical，再由 owner 复核紧凑工作台及窗口级浮层。
+- 当前下一门禁：owner 复核紧凑工作台及窗口级浮层；批准前 E7 保持 `In Progress`，不创建 Editor readiness。
 
 ## 6. Delivery Approval
 
@@ -147,3 +147,5 @@ next_action: "完成 E7 全屏浮层修订、46/46 clean canonical 与 owner 复
 同日，E7 紧凑工作台实现 commit `78bc7f06311a09948e5efae941a14599305b81a5` 完成双层工具栏、平面分区、44px 标记行和响应式工作区。clean canonical `E7-2026-08-28T15-02-48-298Z-78bc7f06` 44/44 通过，summary SHA-256 为 `43f63963fafa774ea18a8ddda290d573fd7869a269fc71798c22ca3076b14a4a`；自动化退出项已满足，但 owner 视觉任务与 evidence 批准前 E7 继续为 `In Progress`。
 
 2026-08-29，owner 在审批前把 E7 overlay 修订为窗口级全屏 fixed 灰色层、复合开关/菜单与按歌曲本地 visibility。上述 44/44 run 因而只保留为 `pre-revision` 历史证据；E7 不关闭，正式候选改为 46 步。
+
+随后修订版实现 commit `080f577fe20fcb22a20184dce0b15892c5299464` 交付 Teleport 全屏层、复合入口、21 项临时菜单、按歌曲 visibility 与 Buffer-only 关闭状态。clean canonical `E7-2026-08-29T05-23-03-986Z-080f577f` 46/46 通过，summary SHA-256 为 `da7c5e7a931a1e8c6cb3a64c3eeac8f5cb7d5cc6d6b604de6e4ea7b009ec13f5`；自动化退出项已满足，owner 人工门禁仍未完成。

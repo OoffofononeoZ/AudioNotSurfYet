@@ -8,7 +8,7 @@
 - FFmpeg：8.1.2；只用于生成和检查受控 WAV/MP3/FLAC fixture。
 - 当前 M12 canonical 检测到 Google Chrome 152.0.7977.64 与 Microsoft Edge 151.0.4129.107；`npm run test:e2e:edge` 使用真实 `msedge` channel，浏览器缺失时仍以退出码 2 报告 `blocked`。
 
-M3–M12 不建设 CI。下列命令当前均为本地门禁；正式证据要求在干净 commit 上复跑。M3–M12 与 Editor E1–E6 canonical 均已获批准；E7 紧凑工作台 44/44 run 因全屏浮层修订成为 `pre-revision`，新版固定为 46 步。M5 Chrome 原生权限、M7 学习任务、M8 Windows Chrome 界面稳定化、M9 导航栏视觉/学习清单、M11 Edge 最终加固、M12 readiness、E1 原生工程流程与 E6 人工补偿均由 owner 单独签字。
+M3–M12 不建设 CI。下列命令当前均为本地门禁；正式证据要求在干净 commit 上复跑。M3–M12 与 Editor E1–E6 canonical 均已获批准；E7 紧凑工作台 44/44 run 因全屏浮层修订成为 `pre-revision`，修订版已在 clean commit 上 46/46 通过并等待 owner 审批。M5 Chrome 原生权限、M7 学习任务、M8 Windows Chrome 界面稳定化、M9 导航栏视觉/学习清单、M11 Edge 最终加固、M12 readiness、E1 原生工程流程与 E6 人工补偿均由 owner 单独签字。
 
 当前 `npm audit` 在安全补丁更新后剩余 1 项 low：Vite 依赖的 esbuild 0.27.3 在 Windows 开发服务器场景存在本地任意文件读取风险。仓库目标验证机为 macOS，开发服务器不得暴露到不受信网络；依赖升级提供修复版本后复核。该缺口不被描述为已修复或生产 readiness。
 
@@ -165,7 +165,7 @@ E6 quality contract 固定真实 Chrome/Edge、WAV/MP3/FLAC、15 分钟 20 lanes
 
 E7 双浏览器套件固定验证紧凑令牌、窗口级 fixed 灰色 overlay、复合入口与 21 项菜单、按歌曲 visibility、关闭后的 Buffer-only active set、纵向滚动固定、时间列横向对齐、390/1024/1280/1920 响应式与既有交互回归。46 步 canonical 继续完整复用 E6 基线与 M12 双浏览器回归。
 
-E7 clean run `E7-2026-08-28T15-02-48-298Z-78bc7f06` 在 commit `78bc7f06311a09948e5efae941a14599305b81a5` 上 44/44 通过，summary SHA-256 为 `43f63963fafa774ea18a8ddda290d573fd7869a269fc71798c22ca3076b14a4a`。全屏浮层修订后该 run 为 `pre-revision`；新版 46 步 canonical 前 E7 仍为 `In Progress`。
+E7 clean run `E7-2026-08-28T15-02-48-298Z-78bc7f06` 在 commit `78bc7f06311a09948e5efae941a14599305b81a5` 上 44/44 通过，summary SHA-256 为 `43f63963fafa774ea18a8ddda290d573fd7869a269fc71798c22ca3076b14a4a`；全屏浮层修订后该 run 为 `pre-revision`。修订版 clean run `E7-2026-08-29T05-23-03-986Z-080f577f` 在 commit `080f577fe20fcb22a20184dce0b15892c5299464` 上 46/46 通过，summary SHA-256 为 `da7c5e7a931a1e8c6cb3a64c3eeac8f5cb7d5cc6d6b604de6e4ea7b009ec13f5`；owner 审批前 E7 仍为 `In Progress`。
 
 E2 clean canonical `E2-2026-08-26T16-42-47-634Z-9fc5c0a8` 已在 commit `9fc5c0a81fcf90abfbc665412277147cd958200f` 上 22/22 通过，summary SHA-256 为 `4465c20343af9092601296b86a229200579f648ffa90641411b88f9861ba8660`；2026-08-27 owner 批准该结果并开放 E3。
 
@@ -246,6 +246,6 @@ M12 provisional run `M12-2026-08-28T07-12-30-657Z-45f51908-provisional` 已在 d
 
 首次 clean run `M12-2026-08-28T07-25-22-951Z-b50c2c1e` 因 M7 短 fixture 在观察前可能接近结束，exact-cursor 计数窗口没有播放输入而失败；失败 artifact 保留。测试在计数前把进度归零并确认 `playing`，目标用例连续 5/5 通过。修复后的 canonical `M12-2026-08-28T07-30-39-789Z-be655e67` 在 commit `be655e6765a63493fb1a3a4ee99992073b06e54e` 上 12/12 通过，summary SHA-256 为 `76ffab8e9fd5db6370c22aa78c7ee08a0708d7a5d97e1b749fca284d4c696441`。M12 unit 4/4，M7/M8/M9/M10/M11 Chrome 回归 5/5、2/2、2/2、3/3、4/4，M12 Chrome/Edge 各 3/3；M7 cursor 各 14 次/607.7ms，15 分钟最大反馈 18.8ms、归因长任务 0，build 最大 JS chunk 1,284.55 kB。
 
-本 README 只记录真实执行结果。`project-owner` 已批准 M11、M12 与 Editor E6 canonical evidence；Analyzer readiness 已按 M12 候选恢复为 `Ready with waivers`。E7 旧 run 为 `pre-revision`，等待新版 46 步 canonical 与 owner 批准。Meyda 5.6.3 `spectralFlux` 上游缺陷仍保留，产品侧仅由 ADR-0005 项目实现缓解；PROD-015 仍阻断正式上线，Editor readiness 等待 E7。
+本 README 只记录真实执行结果。`project-owner` 已批准 M11、M12 与 Editor E6 canonical evidence；Analyzer readiness 已按 M12 候选恢复为 `Ready with waivers`。E7 旧 run 为 `pre-revision`，修订版 46/46 canonical 已登记并等待 owner 批准。Meyda 5.6.3 `spectralFlux` 上游缺陷仍保留，产品侧仅由 ADR-0005 项目实现缓解；PROD-015 仍阻断正式上线，Editor readiness 等待 E7。
 
 E1 最终 provisional `E1-2026-08-26T15-20-11-120Z-3ef4ec33-provisional` 已 18/18 通过。clean canonical `E1-2026-08-26T15-24-21-043Z-792b424f` 在 commit `792b424fbab8e3621ad24d8c9add47d1c9bffcb4` 上 18/18 通过，summary SHA-256 为 `db51ba98b757ccd524d298243c6118eb24fad60101a74f20a5ff98478a5d5bc6`；E1 unit 9/9、integration 7/7、Chrome 4/4。M4 60 秒漂移 0.8ms、seek 最大误差 66.827ms；M6 15 分钟最大反馈 18.1ms、分析归因长任务 0、20 次资源循环保持单 Worker/AudioContext。build 最大 JS chunk 为 1,204.24 kB，warning 保留。`project-owner` 于 2026-08-26 批准 E1 canonical、原生流程与人工任务，E1 为 `Complete`，E2 已开放。

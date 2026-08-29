@@ -8,7 +8,7 @@ upstream_docs:
   - "docs/delivery/editor/acceptance-criteria.md"
   - "docs/delivery/editor/test-strategy.md"
   - "docs/quality/editor/e6-eval-plan.md"
-next_action: "实现并运行修订版 46 步 E7 canonical；旧 44/44 run 只作 pre-revision"
+next_action: "请 owner 复核修订版 46/46 E7 artifact；批准前保持 In Progress"
 ---
 
 # Editor E7 Eval Plan
@@ -46,4 +46,7 @@ E7 评价 Editor 紧凑工作台与其全屏悬浮分析层：双层工具栏、
 - 2026-08-29 的全屏浮层修订改变了 UI 挂载、analysis active set 与本地偏好边界，因此上述 run 现标记为 `pre-revision`，不再是正式候选；不得删除或改写其 artifact。
 - Chrome/Edge 的密度结果一致：toolbar `79px`、control `30px`、point/range row `44px`、desktop waveform `176px`、major radius `0px`，并覆盖 390/1024/1280/1920。
 - 10,000-event 基线最大反馈为 Chrome `6.7ms` / Edge `4.5ms`，归因长任务为 `0`；E1–E6 与 M12 相邻回归均通过。
-- 修订版 46 步 clean canonical、evidence 与 owner 任务通过前，E7 保持 `In Progress`。
+- 修订版 dirty provisional `E7-2026-08-29T05-12-55-339Z-7a763a94-provisional` 46/46 通过，summary SHA-256 为 `d59f2e903e813d761a786ba99cbbac5ae0183cbca80ba37a649c9b2da703c66d`。
+- 修订版 clean canonical `E7-2026-08-29T05-23-03-986Z-080f577f` 在 commit `080f577fe20fcb22a20184dce0b15892c5299464` 上 46/46 通过，起止工作树干净；summary SHA-256 为 `da7c5e7a931a1e8c6cb3a64c3eeac8f5cb7d5cc6d6b604de6e4ea7b009ec13f5`。
+- 双浏览器验证全视口 fixed root、灰色背景、复合入口、21 项菜单、滚动固定、底层穿透与 `0 CSS px` 时间列误差；10,000-event 最大 sampled feedback 为 Chrome `12.4ms` / Edge `11.2ms`，归因长任务为 `0`。
+- 自动化与 evidence 已完成；owner 视觉/辅助技术任务通过前，E7 仍保持 `In Progress`。
