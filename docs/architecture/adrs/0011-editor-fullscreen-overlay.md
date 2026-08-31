@@ -1,12 +1,12 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-08-29
+last_reviewed: 2026-09-01
 upstream_docs:
   - "docs/product/scope.md"
   - "docs/architecture/system-design.md"
   - "docs/architecture/editor/interaction-contracts.md"
-next_action: "在修订后的 E7 以 unit、integration、Chrome/Edge 和 46 步 canonical 验证窗口级浮层"
+next_action: "E7 修订版 46/46 已批准；窗口级浮层行为变化时重开"
 ---
 
 # ADR-0011: Editor Fullscreen Overlay

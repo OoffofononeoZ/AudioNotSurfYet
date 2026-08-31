@@ -1,7 +1,7 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-08-29
+last_reviewed: 2026-09-01
 upstream_docs:
   - "docs/product/scope.md"
   - "docs/product/success-metrics.md"
@@ -10,7 +10,7 @@ upstream_docs:
   - "docs/architecture/risk-register.md"
   - "docs/architecture/editor/project-format-v1.md"
   - "docs/architecture/editor/interaction-contracts.md"
-next_action: "请 owner 复核 E7 修订版 46/46 canonical；批准后进入 Editor release-readiness review"
+next_action: "E7 修订版 46/46 已批准并关闭；后续 readiness 独立推进"
 ---
 
 # Editor E1–E7 Execution Plan

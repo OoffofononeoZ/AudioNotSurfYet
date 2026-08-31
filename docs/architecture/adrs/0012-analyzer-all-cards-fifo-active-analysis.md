@@ -1,12 +1,12 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-08-31
+last_reviewed: 2026-09-01
 upstream_docs:
   - "docs/product/problem-brief.md"
   - "docs/product/scope.md"
   - "docs/architecture/system-design.md"
-next_action: "按 M13 delivery 与 eval 契约实现、验证并登记 clean canonical evidence"
+next_action: "M13 已实现并登记 canonical；M14 排序不得绕过新 ADR/schema 审批"
 ---
 
 # ADR-0012: Analyzer All Cards and FIFO Active Analysis

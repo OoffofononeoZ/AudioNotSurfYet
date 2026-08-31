@@ -1,11 +1,11 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-08-31
+last_reviewed: 2026-09-01
 upstream_docs:
   - "docs/product/problem-brief.md"
   - "docs/product/scope.md"
-next_action: "用 M13 unit/integration/双浏览器 canonical 重新验证 Analyzer 指标"
+next_action: "M13 指标已由 17/17 canonical 验证；候选变化时重测"
 ---
 
 # Success Metrics

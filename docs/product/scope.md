@@ -1,11 +1,11 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-08-31
+last_reviewed: 2026-09-01
 upstream_docs:
   - "docs/product/problem-brief.md"
   - "docs/quality/release-readiness.md"
-next_action: "按 M13 已批准范围实施 21 卡折叠与最多四项 FIFO 活动分析"
+next_action: "M13 范围已交付；M14 拖动排序保持范围外"
 ---
 
 # Scope

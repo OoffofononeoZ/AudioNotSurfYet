@@ -1,13 +1,13 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-08-31
+last_reviewed: 2026-09-01
 upstream_docs:
   - "docs/product/problem-brief.md"
   - "docs/product/scope.md"
   - "docs/product/success-metrics.md"
   - "docs/product/open-questions.md"
-next_action: "按 ADR-0012 实施 M13；clean canonical 前 Analyzer readiness 保持 in-review"
+next_action: "M13 设计已由 clean canonical 验证；M14 或系统边界变化时复核"
 ---
 
 # System Design

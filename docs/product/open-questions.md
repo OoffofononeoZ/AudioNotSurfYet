@@ -1,7 +1,7 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-08-31
+last_reviewed: 2026-09-01
 upstream_docs:
   - "docs/product/problem-brief.md"
   - "docs/product/scope.md"
@@ -51,4 +51,4 @@ next_action: "M13 已无阻断产品问题；PROD-015 继续阻断正式上线�
 
 ## Gate State
 
-M13 产品问题已关闭并获 owner 批准；PROD-021 只登记 M14 后续能力，不阻断 M13。M12 Analyzer readiness 保留为历史候选，M13 canonical 完成前不得复用为当前 readiness；PROD-015 继续阻断正式上线。
+M13 产品问题已关闭并获 owner 批准；PROD-021 只登记 M14 后续能力，不阻断 M13。M12 Analyzer readiness 保留为历史候选，当前 readiness 已由 M13 canonical 恢复；PROD-015 继续阻断正式上线。

@@ -1,25 +1,25 @@
 ---
-status: in-review
+status: approved
 owner: "project-owner"
-last_reviewed: 2026-08-31
+last_reviewed: 2026-09-01
 upstream_docs:
   - "docs/quality/eval-plan.md"
   - "docs/quality/golden-examples.md"
   - "docs/quality/failure-taxonomy.md"
   - "docs/delivery/milestone-plan.md"
   - "tests/fixtures/fixture-manifest.json"
-next_action: "M12 evidence 仅作历史；等待 M13 clean canonical 后追加新候选记录"
+next_action: "M13 canonical 已批准；保留 artifact，候选行为变化时重新评估"
 ---
 
 # Evidence Index
 
 ## Scope Routing
 
-本文保留 Analyzer M3–M12 已批准历史 evidence。M13 改变活动卡、持久化适配和资源挂载，旧 run 不代表当前候选；Editor 使用独立 [Editor evidence index](editor/evidence-index.md)。
+本文保留 Analyzer M3–M12 历史 evidence，并登记当前 M13 21 卡/FIFO 候选；Editor 使用独立 [Editor evidence index](editor/evidence-index.md)。
 
 ## 1. Purpose and Gate State
 
-本文件保存受版本控制的长期证据摘要；原始日志保存在 Git 忽略的本地 artifact 目录。M3–M12 的 canonical 与批准保持历史有效，M13 当前 `In Progress` 且尚无 canonical，因此本文为 `in-review`。PROD-015 继续阻断生产上线。
+本文件保存受版本控制的长期证据摘要；原始日志保存在 Git 忽略的本地 artifact 目录。M13 clean canonical 已在实现 commit 上 17/17 通过，并按 owner 的“自行提交并完成后续”授权登记为 `approved`。PROD-015 继续阻断生产上线。
 
 每条 `pass` 只证明对应里程碑的适用子集在被记录的 commit 和环境上可复现。它不表示完整 EV-A–EV-R、未执行里程碑、Edge 矩阵或 release readiness 已通过。
 
@@ -1020,3 +1020,74 @@ M12 不改变路由、Pinia/IndexedDB schema、四槽持久化、分析/音频�
 - `project-owner` 于 2026-08-28 明确要求 agent 自行提交并完成后续；canonical 通过后，本 M12 evidence、R-028 缓解和 readiness 复核据此获批准，M12 改为 `Complete`。
 - 首轮 canonical 的 M7 空计数不是产品 cadence 失败，而是短 fixture 已接近 ended 时观察窗没有游标更新；`be655e6` 在计数前 seek 到 0 并确保 playing，目标场景连续 5/5、完整 M7 5/5 和第二次 canonical 12/12 通过。
 - 正式上线仍由 PROD-015 阻断；本 evidence 不选择托管平台、不发布 URL，也不扩大到 Editor readiness。
+
+## 16. M13 Canonical Run Record
+
+| Field | Value |
+| --- | --- |
+| Run ID | `M13-2026-08-31T17-44-39-680Z-63c04005` |
+| Milestone | M13 — All cards collapsed with FIFO active analysis |
+| Evidence state | `approved` |
+| Eval result | `pass`（17/17 steps） |
+| Implementation commit | `63c04005670145d83ee181d474197bce921c5300` |
+| Evidence registration commit | 本记录所在的 `docs: register Analyzer M13 canonical evidence` 提交 |
+| Commit at end | `63c04005670145d83ee181d474197bce921c5300` |
+| Dirty at start / end | `false` / `false` |
+| Started at | 2026-08-31 17:44:39.680 UTC |
+| Method | `npm run eval:m13` |
+| Reviewer | `project-owner` — approved via M13 指令中的“自行提交并完成后续”授权 |
+| Retention | `local-present` |
+| Artifact root | `artifacts/evals/M13-2026-08-31T17-44-39-680Z-63c04005/` |
+| Summary SHA-256 | `25732179105b31b7bb05dfdb6626db1264567208a505a7cbf71434a4562e2afc` |
+| Provisional precursor | `M13-2026-08-31T17-40-46-300Z-e62140ee-provisional`，17/17 pass，summary `4225440e6782c2aca5a3b13803059b7aefbdad210d134aa64235175389be33e2`；只作 dirty-worktree 实现反馈 |
+| Harness failure precursor | `M13-2026-08-31T17-27-10-749Z-e62140ee-provisional`；前 13 步通过后日志文件名 `/` 未清理导致 runner 中止，目录保留且不冒充产品 failure |
+
+### Environment
+
+| Item | Recorded value |
+| --- | --- |
+| OS | macOS 26.5.2 (`25F84`), Darwin arm64 |
+| Hardware | MacBook Pro `MacBookPro17,1`；Apple M1 8-core；16 GB memory |
+| Node / npm | Node `v24.18.0`；npm `11.16.0` |
+| Playwright Test | `1.62.0` |
+| Chrome | Google Chrome `152.0.7977.64` |
+| Edge | Microsoft Edge `152.0.4191.53` |
+
+### Results and Traceability
+
+| Step group | Result | Measurement / trace |
+| --- | --- | --- |
+| M13 unit / integration | pass | 16/16 + 12/12；FIFO、唯一性、V1 adapter、串行 save/revision、quota 与 Coordinator generation/cache |
+| M7–M11 Chrome regression | pass | 5/5、2/2、2/2、3/3、4/4；三格式、21 项、共享 viewport/seek/exact、quota、20 次资源循环；15 分钟最大反馈 `17.5ms`、归因长任务 0 |
+| M12 Chrome / Edge | pass / pass | 各 3/3；21 wrapper 四视口最短列、动态高度、details/focus/Canvas、renderer failure、masonry/card Observer 和 RAF 清理 |
+| M13 Chrome / Edge | pass / pass | 各 2/2；21 张稳定卡、默认 0 Canvas、快速十连切换后四张/八 Canvas、第五项 FIFO、焦点、刷新前后单 Worker/精确值和 FIFO 年龄恢复 |
+| Editor E7 isolation | pass | unit 2/2、integration 4/4；Analyzer M13 未破坏已批准的 Editor lease/renderer 边界 |
+| Build | pass with warning | 1846 modules；Worker 49.62 kB；最大 JS chunk `1,292.10 kB`、gzip `393.75 kB`；R-019/W-001 继续披露 |
+| Docs / typecheck / diff / identity | pass | lifecycle links/21 feature count、`vue-tsc -b`、`git diff --check`；起止 commit 相同且工作树干净 |
+
+M13 固定渲染 `FEATURE_IDS` 顺序的 21 个 wrapper，新工作区活动队列为空；卡片收起态只有输出类型、标题、简介与展开按钮。展开时才挂载 Canvas、精确值、明细与卡片 Observer；最多四项，展开第五项以一次 reducer 提交淘汰 FIFO 队首。运行时使用 `activeFeatureQueue`，V1 `activeCards` 只作兼容 carrier，workspace 写入由不可变快照、串行队列和 revision guard 保证最新状态获胜。
+
+### Local Artifact Hashes
+
+| Artifact | SHA-256 |
+| --- | --- |
+| `summary.json` | `25732179105b31b7bb05dfdb6626db1264567208a505a7cbf71434a4562e2afc` |
+| `01-M13-queue-and-masonry-unit.log` | `068761f5fff5683762a88cf4cc754c6278554c5d58a27d17a73a0d5c98f79fbc` |
+| `02-M13-workspace-and-coordinator-integration.log` | `d7b6d9fdf631e80ccc67ae2019ff444b817029d99410e010c0005d5b00c6aef8` |
+| `05-M7-Analyzer-Chrome-regression.log` | `d7f1ec1da608846b75a46551c46a62447c600f4b6702281ae67f86574bf0a281` |
+| `08-M10-Analyzer-Chrome-regression.log` | `bf377fbc74fb014f5878e4b71ea3c09cf27bf931b046e667ce906f56baf3c00a` |
+| `09-M11-Chrome-hardening-regression.log` | `5c3934636db890f08b537894901fc7a6ca6eaa7f0ca8b5a83c418fd94757f2c0` |
+| `10-M12-Chrome-masonry-regression.log` | `3d0114d957fcabff7d9ac8a2584e98bde46d172780f7dcc9cb6d4d094fa8a078` |
+| `11-M12-Edge-masonry-regression.log` | `de8c8191119526783b72d8f7fbff58ed3ae5b168ccf58b9cc1a2595c303fec39` |
+| `12-M13-Chrome-FIFO.log` | `c6ee7b4f1d755c5e8ece799a5bd15924451e4387bb924c360db4ae82d0b16ed4` |
+| `13-M13-Edge-FIFO.log` | `d38983400f25830ca433d9d107da332ace5f84607eb28a730512c609861618f2` |
+| `14-E7-lease-renderer-unit-regression.log` | `f2384d7f0d09ea8ca7198b19f58cf3e015f8b7ebf894dec46553b0fa608d465a` |
+| `15-E7-lease-renderer-integration-regression.log` | `3573cc23235956b77cb6643726286e2eac2d898a05984d14845632f4e6b2a936` |
+| `16-build.log` | `103092a3de50497ff6531210ec64c12ffb2bc128393c4d04c338bd31f39e89eb` |
+| `17-diff-check.log` | `e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855` |
+
+### Approval and Remaining Boundary
+
+- `project-owner` 已批准 M13 计划并授权 agent 自行提交、完成 canonical 与后续 evidence/readiness；本 clean run 满足该门禁，因此 M13 为 `Complete`，R-028/R-029/R-030 为 `Mitigated`。
+- M14 只保留拖动排序后续项；本候选没有三横图标、拖动、顺序 schema 或提前持久化。
+- 正式上线仍由 PROD-015 阻断；本 evidence 不推送、不部署、不创建生产 URL，也不扩大到 Editor readiness。

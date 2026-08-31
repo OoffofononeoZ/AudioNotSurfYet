@@ -4,7 +4,7 @@ owner: "project-owner"
 last_reviewed: 2026-09-01
 upstream_docs:
   - "docs/context/index.md"
-next_action: "M13 canonical 后复核 FIFO、V1 carrier 与资源术语"
+next_action: "M13 FIFO/V1 carrier 术语已验证；M14 开放时再增加排序术语"
 ---
 
 # Glossary
@@ -80,4 +80,4 @@ next_action: "M13 canonical 后复核 FIFO、V1 carrier 与资源术语"
 
 ## Approval Record
 
-`project-owner` 于 2026-08-21 至 2026-08-28 依次批准 Analyzer M7–M12、Analyzer readiness 与 Editor E1–E6。E7 compact workbench 的旧 44/44 run 为 `pre-revision`；全屏浮层修订版 46/46 canonical 于 2026-08-31 获批准并关闭。M13 21 卡/FIFO 计划同日获批，clean canonical 前 Analyzer readiness 为 `in-review`。
+`project-owner` 于 2026-08-21 至 2026-08-28 依次批准 Analyzer M7–M12、Analyzer readiness 与 Editor E1–E6。E7 compact workbench 的旧 44/44 run 为 `pre-revision`；全屏浮层修订版 46/46 canonical 于 2026-08-31 获批准并关闭。M13 21 卡/FIFO 计划同日获批，clean canonical 17/17 通过后 Analyzer readiness 已恢复。

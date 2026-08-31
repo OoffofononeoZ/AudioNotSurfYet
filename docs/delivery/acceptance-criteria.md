@@ -1,13 +1,13 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-08-31
+last_reviewed: 2026-09-01
 upstream_docs:
   - "docs/product/success-metrics.md"
   - "docs/architecture/system-design.md"
   - "docs/architecture/interface-contracts.md"
   - "docs/delivery/execution-plan.md"
-next_action: "以 M13 双浏览器 canonical 验证 AC-M1301–AC-M1308"
+next_action: "AC-M1301–AC-M1308 已由 M13 canonical 验证；行为变化时重开"
 ---
 
 # Acceptance Criteria

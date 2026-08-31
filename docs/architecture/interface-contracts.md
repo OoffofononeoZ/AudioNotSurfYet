@@ -1,10 +1,10 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-08-31
+last_reviewed: 2026-09-01
 upstream_docs:
   - "docs/architecture/system-design.md"
-next_action: "按 ADR-0012 实现 activeFeatureQueue 与 PersistedSessionV1.activeCards 双向适配"
+next_action: "M13 adapter 已验证；schema 或 M14 顺序持久化变化时复核"
 ---
 
 # Interface Contracts

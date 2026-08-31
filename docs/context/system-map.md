@@ -4,7 +4,7 @@ owner: "project-owner"
 last_reviewed: 2026-09-01
 upstream_docs:
   - "docs/context/index.md"
-next_action: "完成 M13 clean canonical 后登记 21 卡/FIFO 当前实现证据"
+next_action: "M13 当前实现已登记；M14 或候选边界变化时更新系统地图"
 ---
 
 # System Map
@@ -107,4 +107,4 @@ E7 修订版 46/46 canonical 已由 owner 于 2026-08-31 批准并关闭；原 4
 
 2026-08-29，全屏 fixed overlay、窗口级复合入口、21 项临时菜单、按歌曲 visibility 与关闭后的 Buffer-only active set 在 commit `080f577fe20fcb22a20184dce0b15892c5299464` 上完成。修订版 clean canonical `E7-2026-08-29T05-23-03-986Z-080f577f` 46/46 通过，summary SHA-256 为 `da7c5e7a931a1e8c6cb3a64c3eeac8f5cb7d5cc6d6b604de6e4ea7b009ec13f5`；owner 于 2026-08-31 批准并关闭 E7，不补写未提供的人工测量。
 
-2026-08-31，owner 批准 M13 产品、ADR-0012、delivery 与 quality 计划并要求完整实施。当前工作树已把 Analyzer runtime 改为 `activeFeatureQueue`，按 `FEATURE_IDS` 固定渲染 21 张卡，展开时才挂载图表资源；V1 `activeCards` 仅作为兼容 carrier。正式当前实现身份仍等待 clean canonical 后登记。
+2026-08-31，owner 批准 M13 产品、ADR-0012、delivery 与 quality 计划并要求完整实施。Analyzer runtime 已改为 `activeFeatureQueue`，按 `FEATURE_IDS` 固定渲染 21 张卡，展开时才挂载图表资源；V1 `activeCards` 仅作为兼容 carrier。clean canonical `M13-2026-08-31T17-44-39-680Z-63c04005` 17/17 通过，当前实现身份为 commit `63c04005670145d83ee181d474197bce921c5300`。

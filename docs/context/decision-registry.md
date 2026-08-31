@@ -1,13 +1,13 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-08-31
+last_reviewed: 2026-09-01
 upstream_docs:
   - "docs/context/index.md"
   - "docs/product/scope.md"
   - "docs/architecture/system-design.md"
   - "docs/delivery/execution-plan.md"
-next_action: "E7 已关闭；执行 DEC-035/ADR-0012 的 M13，并以 clean canonical 复核 readiness"
+next_action: "DEC-035/M13 已完成；M14 或 PROD-015 需 owner 另行决策"
 ---
 
 # Decision Registry
@@ -146,6 +146,8 @@ E5 clean canonical `E5-2026-08-27T11-03-22-177Z-78124177` 随后在 implementati
 2026-08-28，`project-owner` 明确要求“可以先批准之前的e6修改”，本次回复据此作为 E6 canonical、原生文件、辅助技术与长会话人工门禁的完整批准；E6 关闭，R-024、R-025、R-027 改为 `Mitigated`。同一轮需求要求 Editor 参考编曲工作台的密度与线性分区方式，DEC-032 据此开放 E7。该批准不改写 E6 canonical，也不授权生产上线；Editor release-readiness 延后到 E7 获批之后。
 
 2026-08-31，owner 以完整 M13 实施指令先批准 E7 修订候选，DEC-034 据此关闭 E7；随后批准 DEC-035/ADR-0012 并授权 agent 完成实现、本地提交、clean canonical 与 evidence/readiness 复核，不推送远程。M12 evidence 保留为历史，M13 未通过前 readiness 保持 `in-review`。
+
+2026-09-01，DEC-035 的实现 commit `63c04005670145d83ee181d474197bce921c5300` 与 clean canonical `M13-2026-08-31T17-44-39-680Z-63c04005` 已形成，17/17 通过，summary SHA-256 为 `25732179105b31b7bb05dfdb6626db1264567208a505a7cbf71434a4562e2afc`。该执行事实关闭 M13、缓解 R-028–R-030 并恢复 Analyzer `Ready with waivers`；M14 和 PROD-015 均未因此开放。
 
 ## Historical Evidence Gap
 
