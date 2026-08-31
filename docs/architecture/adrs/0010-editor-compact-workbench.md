@@ -1,12 +1,12 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-08-28
+last_reviewed: 2026-09-01
 upstream_docs:
   - "docs/product/scope.md"
   - "docs/architecture/system-design.md"
   - "docs/architecture/editor/interaction-contracts.md"
-next_action: "在 E7 以双浏览器 geometry、density、focus 和回归证据验证紧凑工作台"
+next_action: "E7 已批准并关闭；布局或浮层行为变化时重开"
 ---
 
 # ADR-0010: Editor Compact Workbench

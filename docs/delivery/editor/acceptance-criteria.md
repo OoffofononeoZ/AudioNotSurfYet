@@ -1,7 +1,7 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-08-29
+last_reviewed: 2026-09-01
 upstream_docs:
   - "docs/product/success-metrics.md"
   - "docs/architecture/interface-contracts.md"
@@ -9,7 +9,7 @@ upstream_docs:
   - "docs/architecture/editor/project-format-v1.md"
   - "docs/architecture/editor/interaction-contracts.md"
   - "docs/delivery/editor/execution-plan.md"
-next_action: "请 owner 复核已通过 AC-E701–AC-E708 自动化的 E7 候选与人工视觉门禁"
+next_action: "AC-E701–AC-E708 已获批准；Editor 行为变化时重开"
 ---
 
 # Editor E1–E7 Acceptance Criteria

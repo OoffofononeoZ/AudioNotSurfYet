@@ -1,13 +1,13 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-08-31
+last_reviewed: 2026-09-01
 upstream_docs:
   - "docs/product/success-metrics.md"
   - "docs/architecture/interface-contracts.md"
   - "docs/delivery/acceptance-criteria.md"
   - "docs/delivery/execution-plan.md"
-next_action: "M13 provisional 已通过；创建本地实现提交并执行 clean canonical"
+next_action: "M13 clean canonical 已通过；候选、浏览器或 M14 行为变化时重跑"
 ---
 
 # Test Strategy
@@ -263,6 +263,8 @@ npm run eval:m13
 
 `eval:m13:provisional` 允许 dirty worktree；`eval:m13` 要求起止 clean，并回归 Analyzer M7–M12、Coordinator/cache、Editor E7 lease/renderer 隔离、M13 unit/integration/双浏览器、docs、typecheck、build 和 diff check。
 
+M13 最终 provisional `M13-2026-08-31T17-40-46-300Z-e62140ee-provisional` 与 clean canonical `M13-2026-08-31T17-44-39-680Z-63c04005` 均 17/17 通过；canonical 绑定实现 commit `63c04005670145d83ee181d474197bce921c5300`，summary SHA-256 为 `25732179105b31b7bb05dfdb6626db1264567208a505a7cbf71434a4562e2afc`。
+
 `eval:m12:provisional` 在 dirty worktree 执行 M7–M11 Analyzer 相邻回归、M12 unit/Chrome/Edge、docs、typecheck、build 和 diff check，只生成实现反馈。`eval:m12` 要求 clean committed worktree，生成可登记的 canonical artifact。
 
 2026-08-28 的 provisional run `M12-2026-08-28T07-12-30-657Z-45f51908-provisional` 已 12/12 通过，summary SHA-256 为 `055951e16e9749bf89f189516f3975bb340721fe05e47922f5e34148ed47d9fd`。M12 unit 4/4、Chrome/Edge 各 3/3，M7–M11 Chrome 相邻回归全部通过；15 分钟回归最大反馈 16.7ms、分析归因长任务 0，资源回归保持 2 live RAF。该结果绑定 dirty worktree，只作实现反馈，不追加 evidence index。
@@ -278,10 +280,10 @@ npm run eval:m13
 - 单元/JUnit、Playwright HTML、trace、截图、fixture manifest 和手工任务记录使用稳定目录和 run ID。
 - 不把用户私有音频、路径或内容写入证据。
 - 大型 trace 不永久进入 Git 时，记录生成命令、环境和受控存放位置。
-- 已批准的历史 eval plan 从 M3 开始约束证据；M3–M12 canonical 与人工补偿记录均已进入 [evidence index](../quality/evidence-index.md)。M12 首次失败 run、修复后的 clean canonical 与 owner 复核记录一并保留，Analyzer readiness 已恢复为 `Ready with waivers`。
+- 已批准的历史 eval plan 从 M3 开始约束证据；M3–M13 canonical 与人工补偿记录均已进入 [evidence index](../quality/evidence-index.md)。M13 runner 路径失败目录、最终 provisional、clean canonical 与 owner 授权一并保留，Analyzer readiness 已恢复为 `Ready with waivers`。
 
 ## 12. Exit Criteria
 
 M3 的公开命令、fixture、黄金比较和失败检测已有 clean-commit canonical pass，并已由 `project-owner` 批准。M4 的 AudioEngine/session/Chrome 适用测试也已在 clean commit 上 canonical pass、记录在 [evidence index](../quality/evidence-index.md) 并获 owner 批准。M5 repository、recovery integration 与 Chrome IndexedDB/OPFS 已在 clean commit canonical 通过；Chrome 原生权限人工检查也已由 `project-owner` 确认通过，M5 evidence 与 working agreements 已获批准。M6 Worker/registry/cache/15 分钟 Chrome 场景已在 clean commit canonical 20/20 通过并获 owner 批准，M6 已关闭。M7 unit/integration/golden/Chrome 与 M3–M6 回归已在 clean commit `f022b86e2333ad612ecb12701b0ca05e49f2b256` 上 24/24 通过；owner 于 2026-08-21 完成人工操作与 3/3 学习解释并批准 evidence，M7 已关闭。
 
-M8–M10 的 UI、scalar、vector/waveform 和 structured 特征证据均已获批准；M10 达到 21/21。M11 历史 canonical 保留；M12 在 clean commit 上完成 unit、Chrome/Edge、相邻回归、build 与文档 12/12，R-028 已缓解，Analyzer-only readiness 已恢复为 `Ready with waivers`。Editor 继续使用专属测试策略形成自己的证据。
+M8–M10 的 UI、scalar、vector/waveform 和 structured 特征证据均已获批准；M10 达到 21/21。M11/M12 历史 canonical 保留；M13 在 clean commit 上完成 unit/integration、Chrome/Edge、M7–M12 与 Editor E7 相邻回归、build 和文档 17/17，R-028–R-030 已缓解，Analyzer-only readiness 已恢复为 `Ready with waivers`。

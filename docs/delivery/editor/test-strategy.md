@@ -1,14 +1,14 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-08-29
+last_reviewed: 2026-09-01
 upstream_docs:
   - "docs/product/success-metrics.md"
   - "docs/architecture/interface-contracts.md"
   - "docs/architecture/risk-register.md"
   - "docs/delivery/editor/execution-plan.md"
   - "docs/delivery/editor/acceptance-criteria.md"
-next_action: "保留 E7 46/46 artifact，等待 owner Chrome/Edge 人工复核"
+next_action: "E7 46/46 已批准；保留 artifact，行为变化时重跑"
 ---
 
 # Editor E1–E7 Test Strategy

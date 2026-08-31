@@ -1,14 +1,14 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-08-31
+last_reviewed: 2026-09-01
 upstream_docs:
   - "docs/product/success-metrics.md"
   - "docs/architecture/risk-register.md"
   - "docs/delivery/execution-plan.md"
   - "docs/delivery/acceptance-criteria.md"
   - "docs/delivery/test-strategy.md"
-next_action: "M13 provisional 已通过；在本地实现提交上执行 clean canonical"
+next_action: "M13 canonical 已批准；候选、浏览器或 M14 行为变化时重开评估"
 ---
 
 # Eval Plan
@@ -19,7 +19,7 @@ next_action: "M13 provisional 已通过；在本地实现提交上执行 clean c
 
 ## 1. Purpose and Current State
 
-本文件定义 AudioNotSurfYet 的质量证据契约。M3–M12 的适用 canonical evidence 均已获批准但只代表历史候选；M13 重新打开活动卡、几何、持久化竞态和资源边界，当前 readiness 为 `in-review`。
+本文件定义 AudioNotSurfYet 的质量证据契约。M3–M12 的适用 canonical evidence 均已获批准但只代表历史候选；M13 已重新验证活动卡、几何、持久化竞态和资源边界，当前 readiness 为 `Ready with waivers`。
 
 Q0 只批准“如何判断质量”，不批准 release readiness。`docs/quality/release-readiness.md` 只能在 M11 已产生完整成功、失败、边界和异常证据后创建。
 
@@ -203,3 +203,5 @@ Q0 只有在以下条件满足后才能改为 `approved`：
 2026-08-28，`project-owner` 要求 agent 自行提交并完成 M12 后续。第二次 clean canonical 12/12 通过且首轮 FT-EVIDENCE 已关闭；M12 EV-U/EV-B/EV-R 适用子集、EG-007 关闭和 readiness 复核据此获批准。
 
 2026-09-01，M13 最终 dirty-worktree provisional `M13-2026-08-31T17-40-46-300Z-e62140ee-provisional` 17/17 通过，summary SHA-256 为 `4225440e6782c2aca5a3b13803059b7aefbdad210d134aa64235175389be33e2`。更早的 `M13-2026-08-31T17-27-10-749Z-e62140ee-provisional` 在前 13 步通过后因 runner 未清理步骤名中的 `/` 而无法创建第 14 步日志；该 harness 缺陷已修复，失败目录保留且不得充当产品 failure 或正式 evidence。
+
+同日，clean canonical `M13-2026-08-31T17-44-39-680Z-63c04005` 在实现 commit `63c04005670145d83ee181d474197bce921c5300` 上 17/17 通过，起止工作树干净，summary SHA-256 为 `25732179105b31b7bb05dfdb6626db1264567208a505a7cbf71434a4562e2afc`。本 run 完成 EV-J/EV-B/EV-R 的 M13 适用门禁，R-028–R-030 改为 `Mitigated`。

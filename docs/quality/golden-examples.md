@@ -1,13 +1,13 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-08-31
+last_reviewed: 2026-09-01
 upstream_docs:
   - "docs/quality/eval-plan.md"
   - "docs/delivery/acceptance-criteria.md"
   - "docs/delivery/test-strategy.md"
   - "docs/architecture/risk-register.md"
-next_action: "执行 M13-G01–G06 并保留 M3–M12 历史 golden"
+next_action: "M13-G01–G06 已执行；保留 M3–M12 历史 golden"
 ---
 
 # Golden Examples

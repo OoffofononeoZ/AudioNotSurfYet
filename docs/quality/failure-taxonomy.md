@@ -1,13 +1,13 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-08-31
+last_reviewed: 2026-09-01
 upstream_docs:
   - "docs/quality/eval-plan.md"
   - "docs/quality/golden-examples.md"
   - "docs/delivery/acceptance-criteria.md"
   - "docs/architecture/risk-register.md"
-next_action: "用稳定分类记录 M13 FIFO、异步保存与 21 卡资源失败"
+next_action: "M13 未发现未关闭产品 failure；候选变化时沿用本分类"
 ---
 
 # Failure Taxonomy

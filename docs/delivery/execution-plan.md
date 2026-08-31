@@ -1,7 +1,7 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-08-31
+last_reviewed: 2026-09-01
 upstream_docs:
   - "docs/product/problem-brief.md"
   - "docs/product/scope.md"
@@ -9,7 +9,7 @@ upstream_docs:
   - "docs/architecture/system-design.md"
   - "docs/architecture/interface-contracts.md"
   - "docs/architecture/risk-register.md"
-next_action: "M13 provisional 已通过；创建本地实现提交后执行 clean eval:m13"
+next_action: "M13 已完成；M14 排序或 PROD-015 发布准备需 owner 另行开放"
 ---
 
 # Execution Plan
@@ -22,7 +22,7 @@ next_action: "M13 provisional 已通过；创建本地实现提交后执行 clea
 
 按纵向切片把已批准的本地音频学习体验从当前播放器基础推进到 21 项 Meyda 特征全覆盖。本计划以门禁证据而不是日历日期排序；任一里程碑未通过时，不进入下一批特征。
 
-本文件定义 Analyzer 实施顺序和验收方式。M1、M2、Q0 与 M3–M11 的批准历史保持不变；M12 已在 clean candidate 上完成 canonical 与 owner 复核，Analyzer-only `Ready with waivers` 已恢复。Editor 的 delivery planning 使用独立文档，不反向继承或阻塞 M12。
+本文件定义 Analyzer 实施顺序和验收方式。M1、M2、Q0 与 M3–M12 的批准历史保持不变；M13 已在 clean candidate 上完成 canonical 与 owner 授权下的 evidence/readiness 复核，Analyzer-only `Ready with waivers` 已恢复。Editor 的 delivery planning 使用独立文档，不反向继承或阻塞 M13。
 
 ## 2. Stage Gates
 
@@ -473,3 +473,5 @@ Exit：专项、typecheck、build、docs、diff check 与完整 provisional/cano
 同日，owner 要求 agent 自行提交并完成后续。M12 canonical `M12-2026-08-28T07-30-39-789Z-be655e67` 在 clean commit `be655e6765a63493fb1a3a4ee99992073b06e54e` 上 12/12 通过；evidence、R-028 与 Analyzer readiness 复核据此获批，M12 改为 `Complete`。
 
 2026-08-31，owner 以“PLEASE IMPLEMENT THIS PLAN”批准 M13 完整产品、架构、delivery 与 test plan，并授权在 E7 关闭后直接实施、提交、执行 canonical 与后续 evidence 复核。本轮只使用本地 Git，不推送远程。
+
+2026-09-01，M13 实现 commit `63c04005670145d83ee181d474197bce921c5300` 完成 21 卡、FIFO、懒挂载、V1 adapter 和串行 workspace save；clean canonical `M13-2026-08-31T17-44-39-680Z-63c04005` 17/17 通过，summary SHA-256 为 `25732179105b31b7bb05dfdb6626db1264567208a505a7cbf71434a4562e2afc`。evidence/readiness 与 R-028–R-030 已复核，M13 关闭；M14 未开放，远程未推送。

@@ -1,12 +1,12 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-08-31
+last_reviewed: 2026-09-01
 upstream_docs:
   - "docs/context/index.md"
   - "docs/context/glossary.md"
   - "docs/quality/release-readiness.md"
-next_action: "按已批准 M13 设计实现 21 卡折叠与 FIFO 活动分析；readiness 等待新证据"
+next_action: "M13 已完成；PROD-015 仍阻断上线，M14 等待独立批准"
 ---
 
 # Problem Brief
@@ -103,3 +103,5 @@ Editor 的输出是绑定单首歌曲的时间数据集；它不会修改、重�
 同日，`project-owner` 明确回复：“我批准 Editor E0 产品意图、点事件与范围事件规则、成功指标和开放问题；同意进入 Editor E0 架构设计。”本批准使上述 Editor 产品意图生效并开放 system design；它不构成 Editor 架构、delivery、实现、质量或整体 readiness 批准。
 
 2026-08-31，`project-owner` 明确要求实施“Analyzer M13 全卡片折叠与 FIFO 活动分析计划”。本指令批准一页 21 卡、默认全收起、最多四项 FIFO 活动分析、V1 兼容和 M14 拖动延后的产品意图；M12 readiness 变为历史候选，M13 readiness 等待新 canonical。
+
+2026-09-01，M13 clean canonical 已在实现 commit `63c04005670145d83ee181d474197bce921c5300` 上 17/17 通过；批准的产品结果已交付，Analyzer readiness 恢复为 `Ready with waivers`。M14 与 PROD-015 仍按既有开放问题管理。

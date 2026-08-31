@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/context/index.md"
   - "docs/delivery/test-strategy.md"
   - "docs/quality/eval-plan.md"
-next_action: "M13 provisional 已通过；创建本地提交并运行 clean canonical，不推送远端"
+next_action: "M13 canonical 已批准；保留本地 artifact，不推送远端"
 ---
 
 # Working Agreements
@@ -81,6 +81,7 @@ next_action: "M13 provisional 已通过；创建本地提交并运行 clean cano
 - M12 修复 commit `be655e6765a63493fb1a3a4ee99992073b06e54e` 的目标用例连续 5/5 通过；clean canonical `M12-2026-08-28T07-30-39-789Z-be655e67` 随后 12/12 通过，summary SHA-256 为 `76ffab8e9fd5db6370c22aa78c7ee08a0708d7a5d97e1b749fca284d4c696441`，正式记录已获 owner 批准。
 - M3–M12 canonical run 已记录并获 owner 批准；M13 实现期间这些记录保留为历史，不代表当前候选。本地产物保留和删除规则以 [eval plan](../quality/eval-plan.md) 为准。
 - M13 最终 provisional `M13-2026-08-31T17-40-46-300Z-e62140ee-provisional` 17/17 通过，summary SHA-256 为 `4225440e6782c2aca5a3b13803059b7aefbdad210d134aa64235175389be33e2`；它绑定 dirty worktree，只作实现反馈。
+- M13 clean canonical `M13-2026-08-31T17-44-39-680Z-63c04005` 在实现 commit `63c04005670145d83ee181d474197bce921c5300` 上 17/17 通过，summary SHA-256 为 `25732179105b31b7bb05dfdb6626db1264567208a505a7cbf71434a4562e2afc`；M13 已关闭，R-028–R-030 缓解，readiness 恢复。
 - fixture、manifest 和 golden 是受版本控制的规范输入；更新必须可重建、显示 diff，并重新执行对应测试。
 
 ## Resource Ownership

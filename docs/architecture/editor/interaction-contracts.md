@@ -1,12 +1,12 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-08-29
+last_reviewed: 2026-09-01
 upstream_docs:
   - "docs/product/scope.md"
   - "docs/architecture/system-design.md"
   - "docs/architecture/interface-contracts.md"
-next_action: "按 ADR-0011 在修订版 E7 验证全屏 fixed overlay、复合入口、开关记忆与 pointer-through"
+next_action: "E7 全屏 overlay 契约已验证；交互边界变化时重开"
 ---
 
 # Editor Interaction Contracts
