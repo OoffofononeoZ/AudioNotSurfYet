@@ -1,10 +1,10 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-08-26
+last_reviewed: 2026-08-31
 upstream_docs:
   - "docs/architecture/system-design.md"
-next_action: "在 Editor E1–E6 delivery planning 中把已批准契约映射到实施和验证门禁"
+next_action: "按 ADR-0012 实现 activeFeatureQueue 与 PersistedSessionV1.activeCards 双向适配"
 ---
 
 # Interface Contracts
@@ -392,38 +392,40 @@ Invariants:
 - 切歌、loading、error、清空、活动特征变化和 dispose 都 cancel、递增 generation 并丢弃旧 progress/result/error/cursor。
 - MainLayout 创建同一个 AudioEngine、SessionRepository、AudioSessionService 和 AnalysisCoordinator；dispose 顺序为 coordinator 先于 engine/session。
 
-## ActiveAnalysisCard
+## Active feature queue and V1 carrier
 
 ```ts
 interface ActiveAnalysisCard {
   slot: 0 | 1 | 2 | 3
   featureId: FeatureId
 }
+
+type ActiveFeatureQueue = FeatureId[]
 ```
 
 Invariants:
 
-- `slot` 和 `featureId` 各自唯一。
-- 数组最多四项；顺序由 slot 决定。
-- 换卡保留共享 viewport，不创建新的播放或分析 session。
-- M7 使用 `M7_FEATURE_IDS = ['rms', 'amplitudeSpectrum', 'chroma']`，最多三张活动卡；四个 slot 始终存在，第四空槽不提前暴露 Energy。
+- runtime 只使用 `ActiveFeatureQueue`；数组最多四项、feature ID 唯一，顺序表示 FIFO 年龄。
+- `ActiveAnalysisCard` 只保留为 `PersistedSessionV1.activeCards` 的 V1 carrier。restore 按 slot 排序后提取 feature ID；save 按 queue index 生成 slot 0–3。
+- reducer 语义固定：已展开项点击后删除；未展开且少于四项追加；已满时移除队首再追加目标。一次提交不得短暂产生五项。
+- M7–M12 的 slot 交互是历史证据；M13 UI 不暴露 slot、换卡、移除或特征选择契约。
 
 ## AnalysisWorkspaceSnapshot
 
 ```ts
 interface AnalysisWorkspaceSnapshot {
   initialized: boolean
-  activeCards: ActiveAnalysisCard[]
+  activeFeatureQueue: FeatureId[]
   viewport: Pick<TimelineViewport, 'startSeconds' | 'endSeconds' | 'zoom'> | null
 }
 ```
 
 Invariants:
 
-- `initialized: false` 表示从未保存过工作区，Analyzer 首次进入时建立 M7 默认三卡。
-- `initialized: true` 且 `activeCards: []` 是有效的已保存空工作区，刷新后必须保持为空。
-- `AudioSessionService.updateAnalysisWorkspace(...)` 先更新内存 snapshot，再保存 cards/viewport；写入失败发布 `not-persisted`，当前页面能力保持可用。
-- runtime validation 接受 0–4 个唯一 slot/feature；viewport 所有值有限、`0 <= start < end`、`zoom > 0`。M7 UI 在此通用持久化上限内进一步限制为三个获准 feature。
+- `initialized: false` 表示从未保存过工作区，Analyzer 首次进入时建立空活动队列。
+- `initialized: true` 且 `activeFeatureQueue: []` 是有效的已保存空工作区，刷新后必须保持为空。
+- `AudioSessionService.updateAnalysisWorkspace(...)` 先用不可变快照更新内存，再把 queue 映射为 V1 cards 串行保存；只有最新 revision 可以发布 `ready`/`not-persisted`。
+- runtime validation 接受 0–4 个唯一 feature；viewport 所有值有限、`0 <= start < end`、`zoom > 0`。
 
 ## TimelineViewport
 
@@ -476,6 +478,7 @@ Persistence rules:
 - `playTrack()` 一旦发布新的 `currentTrackId`，必须同步把 persistence state 置为 `saving`；调用方只有在同一 command generation 进入 `ready` 或 `not-persisted` 后，才能把刷新视为已持久化。
 - 旧 generation、已取消命令或 disposed service 的 repository completion 不得更新当前 track 的 persistence state。
 - schema version 未识别时进入可恢复错误，不能尝试猜测字段。
+- `activeCards` schema 不变；其 slot 只承载 FIFO 索引。旧记录恢复时按 slot 排序，重复、未知或超过四项继续由严格 validator 拒绝。
 
 ## Session Repository Results
 

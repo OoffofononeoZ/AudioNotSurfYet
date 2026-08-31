@@ -1,20 +1,20 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-08-29
+last_reviewed: 2026-08-31
 upstream_docs:
   - "docs/product/problem-brief.md"
   - "docs/product/scope.md"
   - "docs/product/success-metrics.md"
   - "docs/product/open-questions.md"
-next_action: "按 ADR-0011 修订 E7 为全屏悬浮分析层并重新执行 46 步 canonical"
+next_action: "按 ADR-0012 实施 M13；clean canonical 前 Analyzer readiness 保持 in-review"
 ---
 
 # System Design
 
 ## 1. Decision Summary
 
-AudioNotSurfYet 采用一个实时 `AudioEngine`、一个 MainLayout-owned `AudioSessionService`、一个可序列化 `audioSessionStore`、一个 `AnalysisCoordinator` 和一个全曲分析 Worker。Analyzer 通过类型化特征注册表选择最多四个不重复特征，在共享时间视窗中用 Canvas 2D renderer 绘制数据，并用 DOM 承担文本、交互和无障碍语义；这部分是已批准且完成验证的历史基线。
+AudioNotSurfYet 采用一个实时 `AudioEngine`、一个 MainLayout-owned `AudioSessionService`、一个可序列化 `audioSessionStore`、一个 `AnalysisCoordinator` 和一个全曲分析 Worker。Analyzer 通过类型化特征注册表稳定展示 21 张折叠卡，并用最多四项 FIFO 活动队列驱动共享时间视窗中的 Canvas 2D renderer；DOM 承担文本、交互和无障碍语义。M7–M12 的四 slot 模型保留为历史基线，M13 由 ADR-0012 取代其运行时 UI 契约。
 
 已批准的 Editor 扩展把 E0 产品意图接入同一运行时：Editor 使用 route-scoped playback/analysis lease、版本化本地 JSON、独立单草稿 IndexedDB、tempo 派生网格、点/范围事件和单特征半透明叠加层。它不创建第二个 AudioContext、播放时钟、Worker 或网络数据路径。
 
@@ -24,9 +24,9 @@ AudioNotSurfYet 采用一个实时 `AudioEngine`、一个 MainLayout-owned `Audi
 
 - 保持一个实时 AudioContext 和一致的播放时钟。
 - 让全曲 Meyda 计算、聚合和紧凑编码离开主线程。
-- 让最多四张分析卡共享视窗、缩放、游标和点击跳转。
+- 让全部 21 张稳定卡可浏览，并让当前最多四张展开卡共享视窗、缩放、游标和点击跳转。
 - 用稳定的类型契约支持 `src/data/analyzerData.ts` 全部 21 个特征。
-- 在刷新后恢复最近一次队列、当前歌曲、分析卡和可用缓存，同时正确处理文件权限。
+- 在刷新后恢复最近一次队列、当前歌曲、FIFO 活动特征和可用缓存，同时正确处理文件权限。
 - 让黄金正确性、100ms 游标偏差、主线程响应和资源清理可以自动验证。
 - 让 Editor 在同一播放和分析事实源上完成单曲循环、tempo、点/范围标注、工程 round-trip 与草稿保护。
 - 让波形、tempo 网格、事件和分析叠加层共享一个时间几何，目标误差不超过 1 CSS px。
@@ -37,6 +37,7 @@ AudioNotSurfYet 采用一个实时 `AudioEngine`、一个 MainLayout-owned `Audi
 - 不并行建设多个播放引擎，也不为旧状态模型增加长期兼容层。
 - 不一次性计算或持久化全部 21 项特征。
 - 不在 Analyzer 中新增 Three.js。
+- 不在 M13 实现拖动排序、拖动图标或自定义顺序 schema；M14 另行评审。
 - 不在本阶段决定发布平台、监控和回滚。
 - 不在 E0 架构阶段实现 Editor、安装 BPM/文件格式依赖或创建 delivery/quality 证据。
 
@@ -55,12 +56,12 @@ AudioNotSurfYet 采用一个实时 `AudioEngine`、一个 MainLayout-owned `Audi
 | --- | --- | --- | --- |
 | `AudioEngine` | 加载/解码当前音频，播放、暂停、seek、音量、快照和 generation 保护的 PCM 分块复制 | 唯一实时 AudioContext、当前 AudioBuffer、BufferSource、AnalyserNode、GainNode | File/Blob、对象 URL、UI 卡片、队列持久化、分析缓存 |
 | `AudioSessionService` | 把 UI 命令编排为文件读取、engine 命令、队列变化、ended 循环和能量快照 | runtime File、封面对象 URL、command generation、单播放 RAF | 可持久化事实、第二个 AudioContext、分析 Worker |
-| `audioSessionStore` | 队列、当前 track ID、播放快照、活动卡、视窗和恢复状态 | 可序列化 UI/session 状态 | AudioBuffer、AudioNode、Worker、File/Blob 实例 |
+| `audioSessionStore` | 队列、当前 track ID、播放快照、活动特征 FIFO、视窗和恢复状态 | 可序列化 UI/session 状态 | AudioBuffer、AudioNode、Worker、File/Blob 实例 |
 | `SessionRepository` | IndexedDB schema、事务、句柄、当前 Blob/缓存的保存与恢复 | `PersistedSessionV1`、FileSystemFileHandle、当前 Blob、当前缓存 | 播放和 UI 决策 |
 | `AnalysisCoordinator` | 构造 mono PCM、启动/取消 job、隔离迟到结果、缓存匹配、精确值请求 | 活动 job generation、Worker 生命周期、内存结果索引 | 实时播放时钟、DOM |
 | `analysis.worker` | Meyda frame 提取、聚合、量化、进度和协作式取消 | 当前 Worker job 的 PCM 和临时帧 | IndexedDB、AudioContext、UI |
 | `FeatureRegistry` | 21 个特征的 key、形状、renderer、范围、标签和依赖 | 编译期穷尽映射 | 运行时图表实例 |
-| Analyzer UI | 选卡、换卡、共享时间轴、说明、精确值和可访问交互 | `ActiveAnalysisCard[]`、`TimelineViewport` 的用户意图 | 音频计算、数据库访问 |
+| Analyzer UI | 21 卡展开/收起、共享时间轴、说明、精确值和可访问交互 | `activeFeatureQueue`、`TimelineViewport` 的用户意图 | 音频计算、数据库访问 |
 | Canvas renderer family | 把已归一化/解码的 series 绘到给定 viewport | Canvas 2D 绘制状态 | 焦点、按钮、说明文本 |
 | `EditorSessionController` | 解析 Editor 路由目标、获取/释放播放与分析 lease、管理内存工程、autosave 和离页/异歌保护 | 当前 Editor route generation、内存 `EditorProjectV1`、pending interaction/save 状态 | AudioContext、Worker、IndexedDB 连接、Analyzer workspace |
 | `EditorFormatCodecRegistry` | 注册工程格式、执行 encode/decode 和严格 validator | 首版 JSON codec 与 schema version 路由 | 文件选择 UI、草稿、音频内容 |
@@ -201,6 +202,14 @@ Canvas 只画数据、网格、游标和选择态；标题、解释、参数、�
 - 纯布局函数只接收容器宽度、列数、间距和实际 DOM 高度并返回列宽、坐标与容器高度。`@chenglou/pretext` 继续只用于 TestLands 文本估算，不参与 Analyzer 的 Canvas、错误态或展开表格测量。
 - Analyzer 使用一个容器 `ResizeObserver`、一个共享的 item `ResizeObserver` 和至多一个待执行布局 RAF。换卡、数据/错误状态、`details` 展开和 resize 都重新测量；Observer 回调必须通过 RAF 合并，路由卸载时 disconnect 并取消 RAF。
 - item 只改变绝对定位包装层的宽度和 transform，不移动或重建 `MeydaCard`，因此 Canvas、焦点、`details open` 和键盘/读屏 DOM 顺序保持稳定。重排不使用位移动画。
+
+### Analyzer M13 all-card and FIFO activity model
+
+- Analyzer 按 `FEATURE_IDS` 渲染 21 个稳定 wrapper。M12 placement 输入由四个 slot 改为 21 个 feature ID，断点、gap、最短列、实测高度和单 RAF 规则不变。
+- 运行时 `activeFeatureQueue` 是唯一展开事实源，最多四项且唯一。纯 reducer 在一次响应式提交中完成收起、追加或“移除队首 + 追加目标”，因此 DOM 不出现短暂第五个展开 body。
+- 折叠卡只保留 header、简介和开关。展开 body 才挂载 Canvas、精确值、参数、结构明细及卡片内部 ResizeObserver；收起释放资源并让内部 `details` 下次恢复默认关闭。
+- Coordinator 仍以最多四项的单 job 分析，队列变更沿用 cancel/generation/cache hit/miss/exact cursor 隔离。工作区保存复制不可变 queue/viewport 快照，以串行 promise 链执行并用 revision guard 限制 persistence 状态更新。
+- `PersistedSessionV1.activeCards` 继续作为 V1 carrier：restore 按 slot 排序转 queue，save 按 queue index 转 slot。首次没有持久化工作区时建立空队列；旧会话原有最多四张卡仍按年龄顺序恢复。
 
 ## 9. Persistence and Recovery
 
@@ -343,6 +352,8 @@ M6 只在 `import.meta.env.DEV` 安装无 UI bridge，提供活动特征、cance
 同日，M12 clean canonical 12/12 通过后，owner 的“自行提交并完成后续”授权用于批准设计实现证据、缓解 R-028 并恢复 Analyzer readiness。该批准不覆盖 PROD-015 或 Editor E6 人工补偿。
 
 2026-08-28，owner 先批准 E6 canonical 与人工补偿结果，再批准以 E7 修改 Editor 页面密度。E6 历史证据保持不变；ADR-0010 与第 18 节只开放紧凑工作台实现，不提前形成 Editor readiness 或生产上线授权。
+
+2026-08-31，owner 先批准并关闭 E7 修订候选，随后以“PLEASE IMPLEMENT THIS PLAN”批准 ADR-0012、M13 系统设计及 delivery/eval 门禁。本设计据此保持 `approved`；M13 源码和 readiness 仍须由专项与 clean canonical 证据验证。
 
 ## 17. Editor Timeline and Interaction Architecture
 

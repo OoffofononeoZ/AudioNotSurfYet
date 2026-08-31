@@ -1,20 +1,20 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-08-28
+last_reviewed: 2026-08-31
 upstream_docs:
   - "docs/quality/eval-plan.md"
   - "docs/quality/golden-examples.md"
   - "docs/delivery/acceptance-criteria.md"
   - "docs/architecture/risk-register.md"
-next_action: "保留 M12 首轮 FT-EVIDENCE artifact；未来布局变化继续使用稳定分类"
+next_action: "用稳定分类记录 M13 FIFO、异步保存与 21 卡资源失败"
 ---
 
 # Failure Taxonomy
 
 ## Scope Routing
 
-本文保留 Analyzer 稳定失败分类并增加 M12 实例映射，不新增 failure type。Editor 的路由、lease、schema、草稿、文件和生命周期失败继续使用独立 taxonomy。
+本文保留 Analyzer 稳定失败分类；M13 的 FIFO/generation 属于 FT-IDENTITY，workspace revision 属于 FT-PERSISTENCE，21 卡资源属于 FT-PERFORMANCE，不新增类型。
 
 ## 1. Classification Model
 
@@ -98,6 +98,9 @@ FAIL-<run-id>-<sequence>: <failure_type>/<severity>
 | M12 视觉重排改变 DOM/键盘顺序、关闭明细或丢失焦点 | FT-ACCESSIBILITY | S1 | 违反稳定 slot 与核心键盘路径 |
 | M12 Observer/RAF 路由循环单调增长或产生 loop warning | FT-PERFORMANCE | S1 | R-028 资源所有权或持续布局震荡未受控 |
 | M12 只产生不遮挡内容的轻微非关键间距偏差 | FT-VISUAL | S3 | 仅在不违反 18px/无重叠/无溢出硬性几何时适用 |
+| M13 短暂出现第五个展开 body 或淘汰错误队首 | FT-IDENTITY | S1 | 违反 FIFO 与最多四项硬边界 |
+| M13 旧 Worker/exact/save completion 覆盖最新队列或状态 | FT-IDENTITY / FT-PERSISTENCE | S0 | 结果或 durable 状态身份错误 |
+| M13 折叠卡仍保留 Canvas/Observer，或 21 卡路由循环资源增长 | FT-PERFORMANCE | S1 | 违反按需挂载和 R-030 生命周期边界 |
 
 ## 7. M7 Closed Failure Instance
 

@@ -19,8 +19,10 @@ import type {
     TrackRecord,
 } from '../types/audio';
 import {
+    activeCardsToFeatureQueue,
+    activeFeatureQueueToCards,
     assertValidAnalysisWorkspace,
-    cloneActiveAnalysisCards,
+    cloneActiveFeatureQueue,
     clonePersistedTimelineViewport,
     DEFAULT_PERSISTED_ANALYSIS_CONFIG,
     type AnalysisWorkspaceUpdate,
@@ -196,6 +198,8 @@ export class AudioSessionService {
     private frameHandle: number | null = null;
     private activeEditorPlayback: { token: string; trackId: string } | null = null;
     private editorRepeatInFlight = false;
+    private workspaceSaveRevision = 0;
+    private workspaceSaveTail: Promise<void> = Promise.resolve();
     private disposed = false;
 
     constructor(
@@ -281,7 +285,9 @@ export class AudioSessionService {
             restored.session.currentTrackId,
             this.engine.getSnapshot().volume,
             {
-                activeCards: restored.session.activeCards,
+                activeFeatureQueue: activeCardsToFeatureQueue(
+                    restored.session.activeCards,
+                ),
                 viewport: restored.session.viewport,
             },
         );
@@ -581,18 +587,34 @@ export class AudioSessionService {
     ): Promise<void> {
         if (this.disposed) return;
         assertValidAnalysisWorkspace(workspace);
+        const snapshot = {
+            activeFeatureQueue: cloneActiveFeatureQueue(
+                workspace.activeFeatureQueue,
+            ),
+            viewport: clonePersistedTimelineViewport(workspace.viewport),
+        };
         this.store.setAnalysisWorkspace({
             initialized: true,
-            activeCards: cloneActiveAnalysisCards(workspace.activeCards),
-            viewport: clonePersistedTimelineViewport(workspace.viewport),
+            ...snapshot,
         });
+        const revision = ++this.workspaceSaveRevision;
+        const input = this.persistedQueueInput();
+        this.store.setPersistence({ state: 'saving' });
+        const save = this.workspaceSaveTail
+            .catch(() => undefined)
+            .then(() => this.repository.saveQueue(input));
+        this.workspaceSaveTail = save.catch(() => undefined);
         try {
-            await this.persistQueue();
-            this.store.setPersistence({ state: 'ready' });
+            await save;
+            if (revision === this.workspaceSaveRevision && !this.disposed) {
+                this.store.setPersistence({ state: 'ready' });
+            }
         } catch {
-            this.markPersistenceFailure(
-                '分析工作区已在当前页面生效，但无法跨刷新保存。',
-            );
+            if (revision === this.workspaceSaveRevision && !this.disposed) {
+                this.markPersistenceFailure(
+                    '分析工作区已在当前页面生效，但无法跨刷新保存。',
+                );
+            }
         }
     }
 
@@ -742,6 +764,7 @@ export class AudioSessionService {
     async dispose(): Promise<void> {
         if (this.disposed) return;
         this.disposed = true;
+        ++this.workspaceSaveRevision;
         this.activeEditorPlayback = null;
         ++this.commandGeneration;
         ++this.importGeneration;
@@ -1042,8 +1065,8 @@ export class AudioSessionService {
                 metadata: { ...track.metadata },
             })),
             currentTrackId: this.store.currentTrackId,
-            activeCards: cloneActiveAnalysisCards(
-                this.store.analysisWorkspace.activeCards,
+            activeCards: activeFeatureQueueToCards(
+                this.store.analysisWorkspace.activeFeatureQueue,
             ),
             analysisConfig: {
                 ...DEFAULT_PERSISTED_ANALYSIS_CONFIG,

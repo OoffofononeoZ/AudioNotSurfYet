@@ -1,9 +1,9 @@
-export interface MasonryItemSize<TId extends number = number> {
+export interface MasonryItemSize<TId extends PropertyKey = number> {
     id: TId;
     height: number;
 }
 
-export interface MasonryPlacement<TId extends number = number> {
+export interface MasonryPlacement<TId extends PropertyKey = number> {
     id: TId;
     column: number;
     left: number;
@@ -12,20 +12,20 @@ export interface MasonryPlacement<TId extends number = number> {
     height: number;
 }
 
-export interface MasonryLayout<TId extends number = number> {
+export interface MasonryLayout<TId extends PropertyKey = number> {
     columnWidth: number;
     height: number;
     placements: MasonryPlacement<TId>[];
 }
 
-export interface MasonryLayoutInput<TId extends number = number> {
+export interface MasonryLayoutInput<TId extends PropertyKey = number> {
     containerWidth: number;
     columnCount: 1 | 2;
     gap: number;
     items: readonly MasonryItemSize<TId>[];
 }
 
-export const calculateMasonryLayout = <TId extends number>({
+export const calculateMasonryLayout = <TId extends PropertyKey>({
     containerWidth,
     columnCount,
     gap,

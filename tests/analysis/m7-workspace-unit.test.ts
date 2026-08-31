@@ -111,14 +111,11 @@ describe('M7 renderer data transformations', () => {
 describe('M7 workspace invariants', () => {
     test('accepts empty and unique workspaces', () => {
         expect(() => assertValidAnalysisWorkspace({
-            activeCards: [],
+            activeFeatureQueue: [],
             viewport: null,
         })).not.toThrow();
         expect(() => assertValidAnalysisWorkspace({
-            activeCards: [
-                { slot: 0, featureId: 'rms' },
-                { slot: 2, featureId: 'chroma' },
-            ],
+            activeFeatureQueue: ['rms', 'chroma'],
             viewport: {
                 startSeconds: 0,
                 endSeconds: 5,
@@ -127,23 +124,19 @@ describe('M7 workspace invariants', () => {
         })).not.toThrow();
     });
 
-    test('rejects duplicate slots/features and invalid viewport values', () => {
+    test('rejects duplicate features and invalid viewport values', () => {
         expect(() => assertValidAnalysisWorkspace({
-            activeCards: [
-                { slot: 0, featureId: 'rms' },
-                { slot: 0, featureId: 'chroma' },
+            activeFeatureQueue: ['rms', 'rms'],
+            viewport: null,
+        })).toThrow(/unique active features/);
+        expect(() => assertValidAnalysisWorkspace({
+            activeFeatureQueue: [
+                'rms', 'chroma', 'energy', 'mfcc', 'buffer',
             ],
             viewport: null,
-        })).toThrow(/unique slots/);
+        })).toThrow(/unique active features/);
         expect(() => assertValidAnalysisWorkspace({
-            activeCards: [
-                { slot: 0, featureId: 'rms' },
-                { slot: 1, featureId: 'rms' },
-            ],
-            viewport: null,
-        })).toThrow(/unique slots/);
-        expect(() => assertValidAnalysisWorkspace({
-            activeCards: [],
+            activeFeatureQueue: [],
             viewport: {
                 startSeconds: 5,
                 endSeconds: 5,

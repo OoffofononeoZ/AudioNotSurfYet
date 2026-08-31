@@ -1,12 +1,12 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-08-26
+last_reviewed: 2026-08-31
 upstream_docs:
   - "docs/product/problem-brief.md"
   - "docs/product/scope.md"
   - "docs/product/success-metrics.md"
-next_action: "审阅 in-review Editor E1–E6 delivery planning；PROD-015 继续阻断 Analyzer 正式上线"
+next_action: "M13 已无阻断产品问题；PROD-015 继续阻断正式上线，M14 排序等待独立批准"
 ---
 
 # Open Questions
@@ -22,6 +22,7 @@ next_action: "审阅 in-review Editor E1–E6 delivery planning；PROD-015 继�
 | PROD-017 | Editor 何时需要 JSON 之外的工程格式？ | 首版选择器只展示已注册的 JSON；当前没有第二种格式的用户任务或交换对象 | codec 注册、导入导出 UI、兼容与测试矩阵 | 否 | project-owner | 出现明确的外部工具交换格式或用户任务时 |
 | PROD-018 | 内部 BPM 估计不足时是否引入第三方依赖？ | owner 要求安装前先审批；目前尚无内部算法及准确性证据 | 包体、许可、精度、Worker 和 fixture | 否；E2 先实现并评估内部估计 | project-owner | E2 golden 证明内部估计达不到批准阈值时 |
 | PROD-019 | 是否增加同类范围重叠、自动合并、裁剪或自由时间精度？ | 首版已选择同类不重叠、自适应网格和无自动合并；更复杂语义尚无任务证据 | RangeEvent 数据语义、编辑状态机和兼容性 | 否 | project-owner | 用户提出具体复合效果或非节拍事件任务时 |
+| PROD-021 | M14 是否实现卡片拖动排序及顺序持久化？ | M13 只要求固定 `FEATURE_IDS` 顺序；拖动需补充鼠标、触控、键盘与读屏语义 | DOM 顺序、持久化 schema、无障碍和瀑布流交互 | 否；M13 明确不实现 | project-owner | owner 明确开始 M14 时 |
 
 ## Closed in Prior Reviews
 
@@ -39,6 +40,7 @@ next_action: "审阅 in-review Editor E1–E6 delivery planning；PROD-015 继�
 | PROD-010 | 测试音频 | 合成 PCM 加有 provenance/hash 的同源 MP3/WAV/FLAC 短 fixture |
 | PROD-011 | 当前运行环境 | 静态 SPA 运行在 HTTPS 或 localhost；正式托管延后到 release 阶段 |
 | PROD-012 | Analyzer 核心任务 | 学习和比较；最终覆盖 21 项，首批 RMS、Amplitude Spectrum、Chroma |
+| PROD-012M13 | Analyzer 卡片与活动模型 | 21 张固定顺序折叠卡；最多四项 FIFO 活动分析；新工作区默认空队列；V1 carrier 兼容 |
 
 ## Closed in Editor E0 Review
 
@@ -49,4 +51,4 @@ next_action: "审阅 in-review Editor E1–E6 delivery planning；PROD-015 继�
 
 ## Gate State
 
-Analyzer-only readiness 已获批准，但 PROD-015 继续阻断正式上线。`project-owner` 于 2026-08-26 先后批准 Editor 产品和架构。Editor E1–E6 四份 delivery planning 文档现为 `in-review`；owner 批准前 E1、依赖安装、Editor quality 与 release 仍未开放。现有 Analyzer architecture、delivery、quality 与 readiness 继续作为历史范围证据，不能代表 Editor。
+M13 产品问题已关闭并获 owner 批准；PROD-021 只登记 M14 后续能力，不阻断 M13。M12 Analyzer readiness 保留为历史候选，M13 canonical 完成前不得复用为当前 readiness；PROD-015 继续阻断正式上线。

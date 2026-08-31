@@ -27,7 +27,7 @@ const captureBrowserIssues = (page: Page): string[] => {
     return issues;
 };
 
-test('removes the learning header and packs four stable slots at every viewport', async ({ page }) => {
+test('removes the learning header and packs 21 stable cards at every viewport', async ({ page }) => {
     const issues = captureBrowserIssues(page);
     await page.goto('/analyzer');
 
@@ -41,7 +41,8 @@ test('removes the learning header and packs four stable slots at every viewport'
     const toolbar = page.locator('.timeline-toolbar');
     const status = toolbar.locator('.status-row');
     await expect(status).toHaveAttribute('aria-live', 'polite');
-    await expect(status).toContainText('3/4 张活动卡');
+    await expect(status).toContainText('0/4 张展开卡');
+    await expect(status).toContainText('展开卡片开始分析');
     await expect(toolbar.locator('.viewport-summary')).toContainText('共享视口');
 
     const geometries: Record<number, number> = {};
@@ -55,15 +56,16 @@ test('removes the learning header and packs four stable slots at every viewport'
         1920: 2,
     });
 
-    await page.locator('[data-feature-id]').first()
-        .getByRole('button', { name: '移除' })
+    await expect(page.locator('[data-feature-id]')).toHaveCount(21);
+    await page.locator('[data-feature-id="rms"]')
+        .getByRole('button', { name: '展开分析' })
         .click();
-    await expect(page.locator('[data-feature-id]')).toHaveCount(2);
+    await expect(status).toContainText('1/4 张展开卡');
     await expectAnalyzerMasonry(page, 1_280);
-    await page.locator('.empty-slot').first()
-        .getByRole('button', { name: /RMS/ })
+    await page.locator('[data-feature-id="rms"]')
+        .getByRole('button', { name: '收起分析' })
         .click();
-    await expect(page.locator('[data-feature-id]')).toHaveCount(3);
+    await expect(status).toContainText('0/4 张展开卡');
     await expectAnalyzerMasonry(page, 1_280);
 
     await expectAnalyzerMasonry(page, 1_280, 720);
@@ -93,12 +95,14 @@ test('reflows measured structured cards without remounting details or canvases',
     await page.setViewportSize({ width: 1_280, height: 900 });
     await page.goto('/analyzer');
 
-    await page.locator('.empty-slot')
-        .getByRole('button', { name: /Loudness/ })
-        .click();
-    await page.locator('[data-feature-id="rms"] select')
-        .selectOption('complexSpectrum');
-    await expect(page.locator('[data-feature-id]')).toHaveCount(4);
+    for (const featureId of [
+        'rms', 'amplitudeSpectrum', 'loudness', 'complexSpectrum',
+    ]) {
+        await page.locator(`[data-feature-id="${featureId}"]`)
+            .getByRole('button', { name: '展开分析' })
+            .click();
+    }
+    await expect(page.locator('[data-feature-id]')).toHaveCount(21);
     await chooseFiles(page, [WAV_FIXTURE]);
     await expect(page.locator(
         '[data-feature-id="complexSpectrum"] .plot-message',
@@ -160,9 +164,11 @@ test('keeps renderer failures packed and releases masonry observers over route c
             .bind(window);
         const activeRafs = new Set<number>();
         let masonryObservers = 0;
+        let cardObservers = 0;
 
         window.ResizeObserver = class extends NativeResizeObserver {
             private tracksMasonry = false;
+            private tracksCard = false;
             private released = false;
 
             observe(target: Element, options?: ResizeObserverOptions) {
@@ -175,12 +181,17 @@ test('keeps renderer failures packed and releases masonry observers over route c
                     this.tracksMasonry = true;
                     masonryObservers += 1;
                 }
+                if (!this.tracksCard && target.matches('.plot')) {
+                    this.tracksCard = true;
+                    cardObservers += 1;
+                }
                 super.observe(target, options);
             }
 
             disconnect() {
-                if (this.tracksMasonry && !this.released) {
-                    masonryObservers -= 1;
+                if (!this.released) {
+                    if (this.tracksMasonry) masonryObservers -= 1;
+                    if (this.tracksCard) cardObservers -= 1;
                     this.released = true;
                 }
                 super.disconnect();
@@ -202,6 +213,7 @@ test('keeps renderer failures packed and releases masonry observers over route c
         Object.defineProperty(window, '__m12ResourceStats', {
             value: () => ({
                 masonryObservers,
+                cardObservers,
                 rafLive: activeRafs.size,
             }),
         });
@@ -227,8 +239,8 @@ test('keeps renderer failures packed and releases masonry observers over route c
     });
 
     await page.goto('/analyzer');
-    await page.locator('.empty-slot')
-        .getByRole('button', { name: /Complex Spectrum/ })
+    await page.locator('[data-feature-id="complexSpectrum"]')
+        .getByRole('button', { name: '展开分析' })
         .click();
     await expect(page.locator(
         '[data-feature-id="complexSpectrum"] .plot-error',
@@ -238,19 +250,31 @@ test('keeps renderer failures packed and releases masonry observers over route c
         window as typeof window & {
             __m12ResourceStats(): {
                 masonryObservers: number;
+                cardObservers: number;
                 rafLive: number;
             };
         }
     ).__m12ResourceStats().masonryObservers)).toBe(2);
+    await expect.poll(async () => page.evaluate(() => (
+        window as typeof window & {
+            __m12ResourceStats(): { cardObservers: number };
+        }
+    ).__m12ResourceStats().cardObservers)).toBe(1);
 
     for (let cycle = 0; cycle < 10; cycle += 1) {
         await page.getByRole('link', { name: 'AUDIOSURF' }).click();
         await expect(page).toHaveURL(/\/$/);
         await expect.poll(async () => page.evaluate(() => (
             window as typeof window & {
-                __m12ResourceStats(): { masonryObservers: number };
+                __m12ResourceStats(): {
+                    masonryObservers: number;
+                    cardObservers: number;
+                };
             }
-        ).__m12ResourceStats().masonryObservers)).toBe(0);
+        ).__m12ResourceStats())).toMatchObject({
+            masonryObservers: 0,
+            cardObservers: 0,
+        });
         await page.getByRole('link', { name: 'Analyzer' }).click();
         await expect(page).toHaveURL(/\/analyzer$/);
         await expect(page.getByTestId('analyzer-masonry')).toHaveClass(
@@ -262,11 +286,13 @@ test('keeps renderer failures packed and releases masonry observers over route c
         window as typeof window & {
             __m12ResourceStats(): {
                 masonryObservers: number;
+                cardObservers: number;
                 rafLive: number;
             };
         }
     ).__m12ResourceStats());
     expect(resources.masonryObservers).toBe(0);
+    expect(resources.cardObservers).toBe(0);
     expect(resources.rafLive).toBeLessThanOrEqual(4);
     expect(issues).toEqual([]);
 });

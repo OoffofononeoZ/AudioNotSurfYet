@@ -1,12 +1,12 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-08-28
+last_reviewed: 2026-08-31
 upstream_docs:
   - "docs/delivery/execution-plan.md"
   - "docs/delivery/acceptance-criteria.md"
   - "docs/delivery/test-strategy.md"
-next_action: "M12 已关闭；Analyzer 正式上线继续等待 PROD-015，Editor E6 状态独立"
+next_action: "M13 In Progress：实现、provisional、本地提交、clean canonical 与 readiness 复核"
 ---
 
 # Milestone Plan
@@ -19,7 +19,7 @@ next_action: "M12 已关闭；Analyzer 正式上线继续等待 PROD-015，Edito
 
 - Target 使用相对门禁，不表示日历承诺。
 - `Complete` 只用于文档门禁、真实证据和所需人工批准均已满足的里程碑。
-- Q0 与 M1–M12 均为 `Complete`；Analyzer readiness 已按 M12 候选复核，正式上线仍由 PROD-015 阻断。
+- Q0 与 M1–M12 均为 `Complete`；M13 为 `In Progress`，M12 readiness 只保留历史，正式上线仍由 PROD-015 阻断。
 - 一个里程碑未通过时，后续里程碑保持 Planned/Blocked，不并行扩大特征范围。
 
 ## Milestones
@@ -39,6 +39,8 @@ next_action: "M12 已关闭；Analyzer 正式上线继续等待 PROD-015，Edito
 | M10 | Loudness + Complex Spectrum | Complete | Full feature gate | M9 | 结构 payload/renderer、21/21 coverage | project-owner |
 | M11 | Cross-cutting hardening | Complete | Delivery exit gate | M10 | 格式、恢复、权限、性能、无障碍、视口和 Chrome/Edge 全证据 | project-owner |
 | M12 | Analyzer masonry layout | Complete | Post-readiness candidate change | M11 + approved M12 design | 纯布局、动态 DOM、四视口、Chrome/Edge、资源清理、canonical 与 owner approval | project-owner |
+| M13 | All cards + FIFO active analysis | In Progress | Current Analyzer candidate | M12 + approved ADR-0012 | 21 stable cards、0–4 FIFO、V1 adapter、双浏览器资源、clean canonical 与 readiness review | project-owner |
+| M14 | Card reordering | Planned | Future product gate | M13 + separate approval | drag handle、pointer/touch/keyboard、persistence、screen-reader announcement | project-owner |
 
 ## Gate Checklist by Milestone
 
@@ -153,12 +155,26 @@ next_action: "M12 已关闭；Analyzer 正式上线继续等待 PROD-015，Edito
 - [x] dirty-worktree `eval:m12:provisional` 通过，只作实现反馈。
 - [x] clean-commit `eval:m12` 通过、evidence 登记并由 owner 批准；Analyzer readiness 已重新审阅。
 
+### M13
+
+- [x] E7 修订候选已获 owner 批准并关闭。
+- [x] product、ADR-0012、R-029/R-030、execution、acceptance、test/eval 契约获 owner 批准。
+- [x] 21 张稳定折叠卡与按需 body 资源挂载完成。
+- [x] FIFO reducer、Coordinator generation/exact/cache 与 V1 adapter/revision save 完成。
+- [x] unit/integration、Chrome/Edge 四视口、快速序列、刷新和资源循环通过。
+- [x] dirty-worktree `eval:m13:provisional` 17/17 通过。
+- [ ] 本地实现 commit 后 clean `eval:m13` 通过并登记 evidence/readiness；不推送远程。
+
+### M14
+
+- [ ] 只保留为后续里程碑；M13 不显示拖动图标、不实现排序、不增加 schema。
+
 ## Current Gate State
 
-- Current stage：M12 `Complete`；M11 canonical/readiness 保留为历史，M12 新候选 canonical/evidence/R-028/readiness 已获 owner 复核。Editor E6 继续独立等待人工补偿审批。
+- Current stage：M13 `In Progress`；M12 canonical/readiness 保留为历史，R-028 因 21 wrapper/按需挂载重新打开。Editor E7 已关闭。
 - Previous gate：M3 已由 `project-owner` 于 2026-07-28 批准并标记 `Complete`。
 - Canonical run：`npm run eval:m3` 已在 clean commit `17d16f0da37289c1f67f75203502beef999572ea` 上通过；摘要见 [evidence index](../quality/evidence-index.md)。
-- Next gate：Analyzer 正式上线仍等待 PROD-015；Editor E6 人工补偿与审批继续按独立里程碑执行。
+- Next gate：M13 implementation/provisional/local commit/clean canonical/evidence/readiness；Analyzer 正式上线仍等待 PROD-015。
 - M3 state：Complete；M3 evidence 只证明测试基础，不代表 M4 产品行为通过。
 - M4 canonical：`npm run eval:m4` 在 clean commit `e5cfe9e8ab62301f3c5b0ddcdd37847a2e131a0f` 上 13/13 步骤通过；60 秒漂移 2.233ms，三次 seek 最大误差 66.827ms。`project-owner` 已于 2026-07-29 批准该证据。
 - M5 provisional：`M5-2026-07-29T07-03-16-207Z-2eb98381-provisional` 在 dirty worktree 16/16 步骤通过；summary SHA-256 为 `7b0acaf128ac4a7ceffce1449d2421127d20c8b25dcdc1ebd07b889072228530`。它只作实现反馈，不是正式 evidence。
@@ -193,6 +209,8 @@ next_action: "M12 已关闭；Analyzer 正式上线继续等待 PROD-015，Edito
 2026-08-28，`project-owner` 接受 M12 布局计划并明确要求实施。M12 据此进入 `In Progress`；M11 历史通过不被删除，但 M12 候选不得继承旧几何与资源证据。
 
 同日，`project-owner` 进一步要求 agent 自行提交并完成后续。第二次 clean canonical 12/12 通过、首轮 FT-EVIDENCE 已关闭并保留；M12 evidence、R-028 缓解和 Analyzer readiness 复核据此获批准，M12 改为 `Complete`。用户同时明确无需上传远程仓库，该约束只影响 Git 交付位置，不改变 canonical identity。
+
+2026-08-31，owner 批准 E7 修订候选后要求完整实施 M13，并授权本地提交、canonical 与后续 evidence 复核。M13 据此进入 `In Progress`；M14 只登记、不实施。
 
 2026-07-30，M6 canonical 已在 clean commit 上 20/20 通过。`project-owner` 随后明确回复：“我批准 M6 canonical evidence、working agreements、system map 与 glossary；同意将 M6 标记为 Complete 并开放 M7。”M6 据此改为 `Complete`；M7 门禁开放但仍为 `Planned`，直到明确开始实现。
 

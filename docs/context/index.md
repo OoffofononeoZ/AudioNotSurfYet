@@ -1,17 +1,17 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-08-29
+last_reviewed: 2026-09-01
 upstream_docs:
   - "AGENTS.md"
-next_action: "请 owner 复核 Editor E7 修订版 46/46 canonical 与全屏浮层；批准前不创建 readiness"
+next_action: "M13 provisional 已通过；创建本地实现提交并完成 clean canonical/readiness"
 ---
 
 # Repository Context Index
 
 ## Purpose
 
-AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端：用户选择本地音频后，应用提供播放队列、元数据、进度与音量控制，并把实时能量用于 MusicBar 和背景可视化。Analyzer 21/21 与 M12 实时最短列瀑布流已完成 clean canonical，Analyzer readiness 恢复为 `Ready with waivers`；Editor E1–E6 已获批准并关闭，E7 紧凑工作台的旧 44/44 run 保留为 `pre-revision`，窗口级全屏浮层修订已在新实现 commit 上完成 46/46 clean canonical，等待 owner 复核。
+AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端。Editor E1–E7 已获批准并关闭。Analyzer M3–M12 evidence 保留为历史；M13 正把四个可替换 slot 改为 21 张固定顺序折叠卡和最多四项 FIFO 活动分析，M13 clean canonical 前 Analyzer readiness 为 `in-review`。
 
 本目录维护仓库事实、边界和工作记忆；生命周期路由与通用方法由 [AGENTS.md](../../AGENTS.md) 负责。当前代码事实与目标架构必须区分：现状见 [system map](system-map.md)，批准的目标见 [system design](../architecture/system-design.md)。
 
@@ -19,11 +19,11 @@ AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端：用户选择
 
 - Repository context：入口、决策注册表、system map、glossary 与 working agreements 均已批准。
 - Product intent：problem brief、scope、success metrics 和 open questions 中的 Editor E0 点/范围事件范围已于 2026-08-26 获 owner 批准。
-- System design：Analyzer M12 实时最短列已实现并以 canonical 缓解 R-028；Editor runtime/data/interaction 设计保持批准，E7 只新增紧凑工作台表现契约。
-- Execution planning：根级 M1–M12 均为 `Complete`；`docs/delivery/editor/` E0-D/E1–E6 `Complete`、E7 `In Progress`。
-- Quality and evals：M3–M12 与 Editor E1–E6 evidence 已批准；E7 44/44 canonical 保留为 `pre-revision`，修订版 46/46 clean canonical 已登记为 `in-review`。
-- Implementation：Analyzer M12、Editor E1–E6 与 E7 全屏 Teleport overlay、复合入口及本地 visibility 均已实现；E7 等待 owner 人工门禁。
-- Readiness、release、retrospective：Analyzer 为 `Ready with waivers`，但 PROD-015 完成前不创建上线声明；Editor 不继承 Analyzer readiness。
+- System design：ADR-0012 已批准 21 稳定卡、FIFO 活动队列和 V1 carrier；R-028 重新打开，R-029/R-030 等待证据。
+- Execution planning：M1–M12 `Complete`，M13 `In Progress`，M14 只登记；Editor E0-D/E1–E7 `Complete`。
+- Quality and evals：M3–M12 与 Editor E1–E7 evidence 保留；M13 evidence 尚未生成。
+- Implementation：Editor E7 已完成；Analyzer M13 实现与 17/17 provisional 已完成，等待本地提交和 clean canonical。
+- Readiness、release、retrospective：Analyzer readiness 为 `in-review`；PROD-015 仍阻断上线，Editor readiness 独立。
 
 ## Key Documents
 
@@ -38,12 +38,12 @@ AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端：用户选择
 | [scope.md](../product/scope.md) | Analyzer 历史边界与已批准 Editor E0 点/范围事件、E1–E6 和非目标 | project-owner / approved | 能力、数据或兼容范围变化 |
 | [success-metrics.md](../product/success-metrics.md) | Analyzer 历史指标与已批准 Editor E0 任务、正确性、响应和恢复指标 | project-owner / approved | 阈值、样本或观测方法变化 |
 | [open-questions.md](../product/open-questions.md) | 非当前门禁问题与已关闭产品决策 | project-owner / approved | 新能力进入范围或 release 开始 |
-| [system-design.md](../architecture/system-design.md) | Analyzer M12 实时最短列与 Editor runtime/project/timeline/overlay 目标设计 | project-owner / approved | 产品意图或核心系统边界变化 |
+| [system-design.md](../architecture/system-design.md) | Analyzer M13 21 卡/FIFO/V1 adapter 与 Editor runtime/project/timeline/overlay 设计 | project-owner / approved | 产品意图或核心系统边界变化 |
 | [interface-contracts.md](../architecture/interface-contracts.md) | Analyzer 历史契约与 Editor lease、Worker、codec、draft、geometry 接口 | project-owner / approved | 消息、schema、身份或失败语义变化 |
 | [Editor Project V1](../architecture/editor/project-format-v1.md) | JSON schema、validator、歌曲 identity、codec 与独立 draft DB | project-owner / approved | 工程字段、时间、格式、身份或草稿策略变化 |
 | [Editor interactions](../architecture/editor/interaction-contracts.md) | tempo/grid、pointer/keyboard、point/range 和 overlay 状态机 | project-owner / approved | 手势、吸附、重叠、DOM/Canvas 或键盘规则变化 |
-| [risk-register.md](../architecture/risk-register.md) | Analyzer R-001–R-021/R-028 与 Editor R-022–R-027 | project-owner / approved | 每个里程碑及新高影响风险 |
-| [execution-plan.md](../delivery/execution-plan.md) | Q0、M1–M12 实施顺序和门禁 | project-owner / approved | 范围、架构或任务依赖变化 |
+| [risk-register.md](../architecture/risk-register.md) | Analyzer R-001–R-021/R-028–R-030 与 Editor R-022–R-027 | project-owner / approved | 每个里程碑及新高影响风险 |
+| [execution-plan.md](../delivery/execution-plan.md) | Q0、M1–M14 实施顺序和门禁 | project-owner / approved | 范围、架构或任务依赖变化 |
 | [acceptance-criteria.md](../delivery/acceptance-criteria.md) | 可测量验收与阈值 | project-owner / approved | 成功指标、容差或支持矩阵变化 |
 | [test-strategy.md](../delivery/test-strategy.md) | 测试层级、fixture 和证据策略 | project-owner / approved | 工具、fixture 或验证能力变化 |
 | [milestone-plan.md](../delivery/milestone-plan.md) | 相对目标、状态和退出证据 | project-owner / approved | 里程碑关闭或阻塞状态变化 |
@@ -51,15 +51,15 @@ AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端：用户选择
 | [Editor acceptance criteria](../delivery/editor/acceptance-criteria.md) | AC-E101–AC-E708、阈值、证据方法和风险映射 | project-owner / approved | Editor 指标、容差、容量或支持矩阵变化 |
 | [Editor test strategy](../delivery/editor/test-strategy.md) | E1–E7 测试层级、fixture、浏览器、性能与 evidence cadence | project-owner / approved | 测试工具、fixture、浏览器或证据能力变化 |
 | [Editor milestone plan](../delivery/editor/milestone-plan.md) | E0-D 与 E1–E7 状态、依赖和退出清单 | project-owner / approved | 里程碑关闭、阻塞或开放状态变化 |
-| [eval-plan.md](../quality/eval-plan.md) | M3–M12 评估、geometry/lifecycle 门禁与已关闭 evidence gap | project-owner / approved | 验收、测试覆盖或风险变化 |
+| [eval-plan.md](../quality/eval-plan.md) | M3–M13 评估、FIFO/geometry/lifecycle 门禁与 canonical 规则 | project-owner / approved | 验收、测试覆盖或风险变化 |
 | [golden-examples.md](../quality/golden-examples.md) | 成功、失败、边界和异常黄金样例 | project-owner / approved | fixture、Meyda、参数或用户任务变化 |
-| [failure-taxonomy.md](../quality/failure-taxonomy.md) | 稳定失败类型、S0–S3、M12 已关闭失败前例和门禁响应 | project-owner / approved | 失败分类或风险接受规则变化 |
-| [evidence-index.md](../quality/evidence-index.md) | M3–M12 canonical run 摘要、环境、hash 和 reviewer | project-owner / approved | 新 run、artifact retention 或里程碑审批 |
-| [release-readiness.md](../quality/release-readiness.md) | M12 Analyzer `Ready with waivers`、PROD-015 与 waiver 边界 | project-owner / approved | 候选代码、证据、风险接受或部署边界变化 |
+| [failure-taxonomy.md](../quality/failure-taxonomy.md) | 稳定失败类型、S0–S3、M13 FIFO/资源/持久化失败和门禁响应 | project-owner / approved | 失败分类或风险接受规则变化 |
+| [evidence-index.md](../quality/evidence-index.md) | M3–M12 历史 canonical；等待 M13 candidate record | project-owner / in-review | 新 run、artifact retention 或里程碑审批 |
+| [release-readiness.md](../quality/release-readiness.md) | M12 历史结论；M13 当前 readiness 与 PROD-015 | project-owner / in-review | 候选代码、证据、风险接受或部署边界变化 |
 | [Editor E1 eval plan](../quality/editor/eval-plan.md) | AC-E101–AC-E108 的成功、失败、边界、异常与 canonical 契约 | project-owner / approved | E1 行为、阈值、浏览器或证据能力变化 |
 | [Editor E1 golden examples](../quality/editor/golden-examples.md) | JSON、identity、lease、草稿和文件异常规范样例 | project-owner / approved | E1 schema、identity 或恢复语义变化 |
 | [Editor E1 failure taxonomy](../quality/editor/failure-taxonomy.md) | Editor 路由、lease、schema、草稿、文件和生命周期失败分类 | project-owner / approved | Editor 失败域或严重度响应变化 |
-| [Editor evidence index](../quality/editor/evidence-index.md) | E1–E7 canonical 身份、hash、环境与 reviewer 记录 | project-owner / in-review | 新 Editor run、artifact 或审批状态变化 |
+| [Editor evidence index](../quality/editor/evidence-index.md) | E1–E7 canonical 身份、hash、环境与 reviewer 记录 | project-owner / approved | 新 Editor run、artifact 或审批状态变化 |
 | [Editor E2 eval plan](../quality/editor/e2-eval-plan.md) | AC-E201–AC-E206 的 geometry、tempo、BPM、竞态与回归契约 | project-owner / approved | E2 行为、阈值、算法或证据能力变化 |
 | [Editor E2 golden examples](../quality/editor/e2-golden-examples.md) | viewport、tempo map、BPM reliable/low-confidence 规范样例 | project-owner / approved | E2 fixture、拍号、阈值或边界语义变化 |
 | [Editor E2 failure taxonomy](../quality/editor/e2-failure-taxonomy.md) | E2 geometry、pointer、tempo、estimator 和 consumer 失败分类 | project-owner / approved | E2 失败域或严重度响应变化 |
@@ -75,9 +75,9 @@ AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端：用户选择
 | [Editor E6 eval plan](../quality/editor/e6-eval-plan.md) | AC-E601–AC-E606 的双浏览器、三格式、10,000 事件、性能、资源、无障碍与 canonical 契约 | project-owner / approved | E6 历史身份或批准边界变化 |
 | [Editor E6 golden examples](../quality/editor/e6-golden-examples.md) | 三格式、native flow、压力、DOM、资源、geometry、键盘与证据身份样例 | project-owner / approved | E6 fixture 或批准边界变化 |
 | [Editor E6 failure taxonomy](../quality/editor/e6-failure-taxonomy.md) | E6 browser/format、native、stress、performance、resource、a11y 与 evidence 失败分类 | project-owner / approved | E6 失败域或严重度响应变化 |
-| [Editor E7 eval plan](../quality/editor/e7-eval-plan.md) | AC-E701–AC-E708 的紧凑密度、全屏浮层、visibility、响应式与 46 步 canonical 契约 | project-owner / in-review | E7 布局、浮层、阈值或证据能力变化 |
-| [Editor E7 golden examples](../quality/editor/e7-golden-examples.md) | 双层工具栏、平面分区、行高、波形、多视口与任务回归样例 | project-owner / in-review | E7 golden、断点或视觉令牌变化 |
-| [Editor E7 failure taxonomy](../quality/editor/e7-failure-taxonomy.md) | E7 density、overflow、geometry、interaction 与 resource 失败分类 | project-owner / in-review | E7 失败域或严重度响应变化 |
+| [Editor E7 eval plan](../quality/editor/e7-eval-plan.md) | AC-E701–AC-E708 的紧凑密度、全屏浮层、visibility、响应式与 46 步 canonical 契约 | project-owner / approved | E7 布局、浮层、阈值或证据能力变化 |
+| [Editor E7 golden examples](../quality/editor/e7-golden-examples.md) | 双层工具栏、平面分区、行高、波形、多视口与任务回归样例 | project-owner / approved | E7 golden、断点或视觉令牌变化 |
+| [Editor E7 failure taxonomy](../quality/editor/e7-failure-taxonomy.md) | E7 density、overflow、geometry、interaction 与 resource 失败分类 | project-owner / approved | E7 失败域或严重度响应变化 |
 
 ## Architecture Decisions
 
@@ -92,12 +92,13 @@ AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端：用户选择
 - [ADR-0009](../architecture/adrs/0009-editor-overlay-renderer-boundary.md)：共享 renderer adapter 与 pointer-through overlay。
 - [ADR-0010](../architecture/adrs/0010-editor-compact-workbench.md)：Editor 紧凑双层工具栏、平面细线分区与响应式密度令牌。
 - [ADR-0011](../architecture/adrs/0011-editor-fullscreen-overlay.md)：Editor 窗口级全屏灰色浮层、复合入口、按歌曲 visibility 与 Buffer-only 关闭状态。
+- [ADR-0012](../architecture/adrs/0012-analyzer-all-cards-fifo-active-analysis.md)：Analyzer 21 张稳定折叠卡、最多四项 FIFO 与 V1 carrier。
 
 ## Repository Areas
 
 | Area | Current role | Target/change source |
 | --- | --- | --- |
-| `src/views/` | Analyzer 四槽 21 项与 M12 实时瀑布流，以及 E1–E7 Editor 状态、工程操作、时间轴、point/range、analysis overlay 与紧凑工作台页面 | system design + M7–M12 + E1–E7 |
+| `src/views/` | Analyzer 21 卡折叠/FIFO 与 M12 masonry，以及 E1–E7 Editor 页面 | system design + M7–M13 + E1–E7 |
 | `src/layouts/` | Header、页面内容与按有效 Editor playback lease 条件隐藏的 MusicBar 共享外壳 | ADR-0001/0006；E1 |
 | `src/components/` | 播放 UI、列表、“去编辑”入口、Editor timeline/point workspace、动画及 Canvas/WebGL 可视化 | ADR-0001/0004/0006/0008 |
 | `src/audio/` | 单一 AudioEngine 与 MainLayout-owned AudioSessionService；文件恢复及 E1 tokenized repeat-one lease | ADR-0001/0003/0006；E1 |
@@ -107,24 +108,24 @@ AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端：用户选择
 | `src/stores/` | 持久化 config 与可序列化 audioSessionStore/恢复/analysis 状态 | ADR-0001/0002/0003 |
 | `src/utils/` | 事件总线、M12 masonry placement 与其他纯工具函数 | 实现时按实际边界维护 |
 | `src/data/` | `analyzerData.ts` 的 21 项 Meyda 说明，由 M6 registry 穷尽映射 | M6 FeatureRegistry |
-| `tests/` | M3–M12 本地测试、fixture、golden、Chrome/Edge 浏览器 harness 和 eval runner | [tests README](../../tests/README.md) |
+| `tests/` | M3–M13 本地测试、fixture、golden、Chrome/Edge 浏览器 harness 和 eval runner | [tests README](../../tests/README.md) |
 | `skills/audio-visualizer-dev/` | 本项目开发、验证和文档路由 Skill | [SKILL.md](../../skills/audio-visualizer-dev/SKILL.md) |
 
 ## Lifecycle Entry Points
 
 - Product intent：[problem brief](../product/problem-brief.md)、[scope](../product/scope.md)、[success metrics](../product/success-metrics.md) 均已批准 Editor E0
 - System design：[system design](../architecture/system-design.md) 与 Editor 子契约已获批准
-- Delivery planning：[Editor execution plan](../delivery/editor/execution-plan.md)、[acceptance criteria](../delivery/editor/acceptance-criteria.md)、[test strategy](../delivery/editor/test-strategy.md) 与 [milestone plan](../delivery/editor/milestone-plan.md) 已获批准；当前 E7 `In Progress`
-- Quality design：[eval plan](../quality/eval-plan.md)，M3–M12 均已批准
-- Quality evidence：[evidence index](../quality/evidence-index.md)，M3–M12 已批准
+- Delivery planning：Analyzer M13 与 Editor E1–E7 delivery 文档均已获批准；M13 `In Progress`，M14 只登记
+- Quality design：[eval plan](../quality/eval-plan.md) 已覆盖 M3–M13 并获批准
+- Quality evidence：[evidence index](../quality/evidence-index.md) 的 M3–M12 为历史批准记录，等待 M13 candidate
 - Editor E1 quality：[eval plan](../quality/editor/eval-plan.md)、[golden](../quality/editor/golden-examples.md)、[failure taxonomy](../quality/editor/failure-taxonomy.md) 与 [evidence](../quality/editor/evidence-index.md) 已获批准
-- Editor E2 quality：[eval plan](../quality/editor/e2-eval-plan.md)、[golden](../quality/editor/e2-golden-examples.md)、[failure taxonomy](../quality/editor/e2-failure-taxonomy.md) 与 canonical record 已获批准；累计 [evidence index](../quality/editor/evidence-index.md) 因 E7 等待 owner 审批保持 `in-review`
+- Editor E2 quality：[eval plan](../quality/editor/e2-eval-plan.md)、[golden](../quality/editor/e2-golden-examples.md)、[failure taxonomy](../quality/editor/e2-failure-taxonomy.md) 与 canonical record 已获批准
 - Editor E3 quality：[eval plan](../quality/editor/e3-eval-plan.md)、[golden](../quality/editor/e3-golden-examples.md)、[failure taxonomy](../quality/editor/e3-failure-taxonomy.md) 与 26/26 canonical record 均已获批准
 - Editor E4 quality：[eval plan](../quality/editor/e4-eval-plan.md)、[golden](../quality/editor/e4-golden-examples.md)、[failure taxonomy](../quality/editor/e4-failure-taxonomy.md) 与 31/31 canonical record 均已获批准
 - Editor E5 quality：[eval plan](../quality/editor/e5-eval-plan.md)、[golden](../quality/editor/e5-golden-examples.md)、[failure taxonomy](../quality/editor/e5-failure-taxonomy.md) 与 35/35 canonical record 已获批准
 - Editor E6 quality：[eval plan](../quality/editor/e6-eval-plan.md)、[golden](../quality/editor/e6-golden-examples.md)、[failure taxonomy](../quality/editor/e6-failure-taxonomy.md) 与 40/40 canonical record 已获批准
-- Editor E7 quality：[eval plan](../quality/editor/e7-eval-plan.md)、[golden](../quality/editor/e7-golden-examples.md) 与 [failure taxonomy](../quality/editor/e7-failure-taxonomy.md) 为 `in-review`；44/44 run 为 `pre-revision`，修订版 46/46 canonical 已登记并等待 owner 复核
-- Quality readiness：[Analyzer release readiness](../quality/release-readiness.md) 已按 M12 clean canonical 恢复 `Ready with waivers`
+- Editor E7 quality：[eval plan](../quality/editor/e7-eval-plan.md)、[golden](../quality/editor/e7-golden-examples.md)、[failure taxonomy](../quality/editor/e7-failure-taxonomy.md) 与修订版 46/46 canonical 已获批准；44/44 run 保留为 `pre-revision`
+- Quality readiness：[Analyzer release readiness](../quality/release-readiness.md) 因 M13 候选变更为 `in-review`；M12 `Ready with waivers` 只作历史
 - Release operations：`docs/release/` 尚未创建；PROD-015 的托管平台、域名和 SPA fallback 解决前不进入正式上线
 - Retrospectives：`docs/retrospectives/` 尚未创建；有发布、事故或重复摩擦证据后生成
 
@@ -136,16 +137,15 @@ AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端：用户选择
 - 当前 Meyda `spectralFlux` 对有效输入仍抛出 `x is not defined`；产品已按 ADR-0005 实现并由 canonical 缓解 R-020，不得声称上游缺陷已修复。
 - 超出约 15 分钟支持边界的长音频未开始播放只作为非门禁压力观察；它不表示长音频被规定为必须失败，也不改变当前产品范围。
 - M11 clean canonical 已在 Chrome/Edge 上 38/38 通过，其中 Edge 全量为 31/31；原生 Edge 权限、辅助技术与人工长会话补偿门禁已于 2026-08-26 获 owner 签字，M11 为 `Complete`。
-- Analyzer M12 clean canonical `M12-2026-08-28T07-30-39-789Z-be655e67` 在 commit `be655e6765a63493fb1a3a4ee99992073b06e54e` 上 12/12 通过，R-028 已缓解，readiness 恢复为 `Ready with waivers`；正式托管平台、域名、SPA fallback 和生产 URL 仍继续阻断上线。
+- Analyzer M12 clean canonical `M12-2026-08-28T07-30-39-789Z-be655e67` 保留为历史；M13 已把候选改为 21 张固定折叠卡和最多四项 FIFO 活动队列，clean canonical 前 R-028/R-029/R-030 与 readiness 保持待复核。
 - Editor E1–E6 已实现并获批准；E6 双浏览器、三格式、10,000 事件、资源与无障碍 clean canonical 为 40/40。
-- Editor E6 为 `Complete`；E7 紧凑工作台已实现，全屏浮层修订仍为 `In Progress`，Editor readiness 延后至新版 evidence 获批。
-- Editor delivery 固定 10,000 事件容量门禁、overlay 35%/12% 和逐里程碑 provisional/canonical/owner 审批；当前只开放 E7。
+- Editor E1–E7 均为 `Complete`；M13 不重开 Editor delivery 或改变 overlay/lease/runtime 边界。
 - E1 clean canonical `E1-2026-08-26T15-24-21-043Z-792b424f` 在 clean commit `792b424fbab8e3621ad24d8c9add47d1c9bffcb4` 上 18/18 通过，summary SHA-256 为 `db51ba98b757ccd524d298243c6118eb24fad60101a74f20a5ff98478a5d5bc6`，并于 2026-08-26 获 owner 批准。
 - E2 clean canonical `E2-2026-08-26T16-42-47-634Z-9fc5c0a8` 在 clean commit `9fc5c0a81fcf90abfbc665412277147cd958200f` 上 22/22 通过，summary SHA-256 为 `4465c20343af9092601296b86a229200579f648ffa90641411b88f9861ba8660`；2026-08-27 owner 批准后 E2 为 `Complete`，E3 已开放。
 - E3 clean canonical `E3-2026-08-27T02-53-58-176Z-c670ddf5` 在 clean commit `c670ddf5494269f5a56abd20c3c5653ee5b27cef` 上 26/26 通过，summary SHA-256 为 `2a0a46b9a0e9b459ee17b11919451f074205fda58801d84a1274dbd12f5cfe4c`；2026-08-27 owner 批准后 E3 为 `Complete`，E4 已开放。
 - E4 clean canonical `E4-2026-08-27T07-21-59-209Z-c9e03ab9` 在 clean commit `c9e03ab9554aa5bac5649fa84e1d822f056ad0e2` 上 31/31 通过，summary SHA-256 为 `790f7f76f113fad6f005992f8fd10d94b0b77451acd58717c8c221edd54628ff`；2026-08-27 owner 批准后 E4 为 `Complete`，E5 已开放。
 - E5 clean canonical `E5-2026-08-27T11-03-22-177Z-78124177` 在 clean commit `781241772e05186e2fe0d006ed6ddd8bceded7af` 上 35/35 通过，summary SHA-256 为 `6928f75cbdeb6d77e54c81b3547f7caee0b39d4c6881884b1d1d7065f3dde1b0`；2026-08-27 owner 批准后 E5 为 `Complete`，E6 已开放。
-- E7 clean run `E7-2026-08-28T15-02-48-298Z-78bc7f06` 在 clean commit `78bc7f06311a09948e5efae941a14599305b81a5` 上 44/44 通过，summary SHA-256 为 `43f63963fafa774ea18a8ddda290d573fd7869a269fc71798c22ca3076b14a4a`；因 ADR-0011 修订现为 `pre-revision`，E7 仍为 `In Progress`。
+- E7 旧 44/44 run 因 ADR-0011 修订为 `pre-revision`；修订版 `E7-2026-08-29T05-23-03-986Z-080f577f` 46/46 通过并于 2026-08-31 获 owner 批准，E7 为 `Complete`。
 - 详细 context 文档的长期 owner/review cadence 尚未全部统一；代码改动时必须同步修正事实。
 - 工程事实差异继续记录在 [Skill 项目差异](../../skills/audio-visualizer-dev/references/99-open-questions-and-project-deltas.md)，产品开放项见 [open questions](../product/open-questions.md)。
 

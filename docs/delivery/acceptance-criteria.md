@@ -1,13 +1,13 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-08-28
+last_reviewed: 2026-08-31
 upstream_docs:
   - "docs/product/success-metrics.md"
   - "docs/architecture/system-design.md"
   - "docs/architecture/interface-contracts.md"
   - "docs/delivery/execution-plan.md"
-next_action: "保留 AC-U05/U06 的 M12 双浏览器 canonical 证据；Editor AC 独立保持"
+next_action: "以 M13 双浏览器 canonical 验证 AC-M1301–AC-M1308"
 ---
 
 # Acceptance Criteria
@@ -128,6 +128,21 @@ M12 适用解释：四个 slot 按 0–3 保持 DOM/键盘/读屏顺序；390/10
 
 Analyzer M11 已在真实 Edge 形成历史证据；Editor 改变路由、播放、工程和交互后必须重新建立自己的真实 Edge 证据，不得直接继承该通过状态。
 
-## 9. Milestone Exit Rule
+## 9. M13 all-card and FIFO acceptance
+
+| ID | Acceptance criterion | Verification |
+| --- | --- | --- |
+| AC-M1301 | 页面按 `FEATURE_IDS` 顺序存在 21 张唯一卡；新工作区全部收起，收起态无 Canvas、参数、精确值、明细、select 或移除按钮 | unit + Chrome/Edge DOM/a11y |
+| AC-M1302 | FIFO 队列最多四项且唯一；第五项原子淘汰最早项，手动收起删除，重新展开进入队尾 | reducer unit + rapid E2E |
+| AC-M1303 | 只有展开卡挂载图表资源并启动分析；任意时刻展开 body 不超过四个，Canvas 不超过对应 renderer 上限 | integration + resource probe |
+| AC-M1304 | 队列变化取消旧 generation、清理 exact request、隔离迟到结果，并复用仍合法 cache hit | coordinator integration |
+| AC-M1305 | runtime 使用 `activeFeatureQueue`；V1 `activeCards` 无 schema 变更且旧会话/新保存 FIFO 双向一致 | codec/repository unit + refresh E2E |
+| AC-M1306 | workspace 快速保存只允许最新 immutable revision 更新 durable queue 与 persistence state；quota/abort 不破坏内存 | service integration failure matrix |
+| AC-M1307 | 390/1024 一列，1280/1920 两列，gap 18px；21 卡无相交、横向溢出，容器包围完整且 DOM/键盘/读屏顺序稳定 | Chrome/Edge geometry/a11y |
+| AC-M1308 | 反复展开/收起、resize、进入/离开不累积 Worker、Observer、RAF、Canvas 或 console error/warn；seek/zoom/Header/MusicBar/Editor lease 回归保持 | Chrome/Edge lifecycle + regression |
+
+M14 拖动图标、排序交互与顺序持久化明确不属于以上验收。
+
+## 10. Milestone Exit Rule
 
 里程碑只能在所有适用 AC 有证据、相关风险已复核、失败/边界路径已覆盖后关闭。不能自动验证的路径必须写出原因、手工步骤、结果和残余风险。

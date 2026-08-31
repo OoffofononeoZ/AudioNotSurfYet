@@ -1,14 +1,14 @@
 ---
-status: in-review
+status: approved
 owner: "project-owner"
-last_reviewed: 2026-08-29
+last_reviewed: 2026-09-01
 upstream_docs:
   - "docs/architecture/adrs/0010-editor-compact-workbench.md"
   - "docs/architecture/adrs/0011-editor-fullscreen-overlay.md"
   - "docs/delivery/editor/acceptance-criteria.md"
   - "docs/delivery/editor/test-strategy.md"
   - "docs/quality/editor/e6-eval-plan.md"
-next_action: "请 owner 复核修订版 46/46 E7 artifact；批准前保持 In Progress"
+next_action: "E7 已获 owner 批准并关闭；Editor 后续 readiness 与 Analyzer M13 独立推进"
 ---
 
 # Editor E7 Eval Plan
@@ -37,7 +37,7 @@ E7 评价 Editor 紧凑工作台与其全屏悬浮分析层：双层工具栏、
 - 修订版 canonical 固定 46 步：E7 unit、E7 integration、E7 Chrome、E7 Edge、M12 unit、M12 双浏览器与 E6 40 步基线。
 - 记录 run ID、commit、环境、双浏览器、toolbar/row/waveform/radius、geometry、Canvas、feedback、long task、DOM、resource、日志和 summary SHA-256。
 - 截图只写入 Git 忽略 artifact 供 owner 复核，不作为跨系统唯一判据。
-- E7 evidence 获 owner 批准前保持 `In Progress`，不得创建包含 Editor 的 release-readiness。
+- E7 evidence 已于 2026-08-31 获 owner 批准并关闭；后续 Analyzer 变更不得改写该历史身份。
 
 ## Execution Record
 
@@ -49,4 +49,4 @@ E7 评价 Editor 紧凑工作台与其全屏悬浮分析层：双层工具栏、
 - 修订版 dirty provisional `E7-2026-08-29T05-12-55-339Z-7a763a94-provisional` 46/46 通过，summary SHA-256 为 `d59f2e903e813d761a786ba99cbbac5ae0183cbca80ba37a649c9b2da703c66d`。
 - 修订版 clean canonical `E7-2026-08-29T05-23-03-986Z-080f577f` 在 commit `080f577fe20fcb22a20184dce0b15892c5299464` 上 46/46 通过，起止工作树干净；summary SHA-256 为 `da7c5e7a931a1e8c6cb3a64c3eeac8f5cb7d5cc6d6b604de6e4ea7b009ec13f5`。
 - 双浏览器验证全视口 fixed root、灰色背景、复合入口、21 项菜单、滚动固定、底层穿透与 `0 CSS px` 时间列误差；10,000-event 最大 sampled feedback 为 Chrome `12.4ms` / Edge `11.2ms`，归因长任务为 `0`。
-- 自动化与 evidence 已完成；owner 视觉/辅助技术任务通过前，E7 仍保持 `In Progress`。
+- 自动化与 evidence 已完成；2026-08-31，owner 以“PLEASE IMPLEMENT THIS PLAN”批准先关闭 E7 后实施 M13，本 run 据此成为 E7 正式候选。批准只接受已记录的 46/46 自动化、artifact 与既有人工补偿，不补写未提供的人工测量值。

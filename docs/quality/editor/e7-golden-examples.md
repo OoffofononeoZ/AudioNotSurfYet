@@ -1,11 +1,11 @@
 ---
-status: in-review
+status: approved
 owner: "project-owner"
 last_reviewed: 2026-08-29
 upstream_docs:
   - "docs/quality/editor/e7-eval-plan.md"
   - "docs/delivery/editor/acceptance-criteria.md"
-next_action: "请 owner 用修订版 E7 artifact 复核全屏浮层视觉、穿透与特征记忆"
+next_action: "E7 golden 已获 owner 批准；行为变化时复跑对应分类"
 ---
 
 # Editor E7 Golden Examples
@@ -30,4 +30,4 @@ FL Studio 参考图不复制进仓库、不参与像素 diff；E7 的可复现�
 
 ## Canonical Observation
 
-`E7-2026-08-28T15-02-48-298Z-78bc7f06` 在真实 Chrome/Edge 上对 E7-G01、G03–G09 形成自动化历史证据；它不覆盖 G10–G13，现为 `pre-revision`。修订版 clean canonical `E7-2026-08-29T05-23-03-986Z-080f577f` 46/46 通过，补齐 E7-G10–G13 的双浏览器 computed style、fixed scroll geometry、21 项复合菜单、visibility/Buffer-only 和 `0 CSS px` 时间列对齐证据。artifact 截图供 owner 人工比较；自动化不代替视觉与辅助技术签字。
+`E7-2026-08-28T15-02-48-298Z-78bc7f06` 在真实 Chrome/Edge 上对 E7-G01、G03–G09 形成自动化历史证据；它不覆盖 G10–G13，现为 `pre-revision`。修订版 clean canonical `E7-2026-08-29T05-23-03-986Z-080f577f` 46/46 通过，补齐 E7-G10–G13 的双浏览器 computed style、fixed scroll geometry、21 项复合菜单、visibility/Buffer-only 和 `0 CSS px` 时间列对齐证据。2026-08-31 owner 批准该候选；artifact 截图与既有人工补偿共同构成批准边界，不补写未提供的观察值。

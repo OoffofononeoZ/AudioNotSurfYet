@@ -1,10 +1,10 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-08-29
+last_reviewed: 2026-09-01
 upstream_docs:
   - "docs/context/index.md"
-next_action: "请 owner 复核 E7 全屏 fixed overlay 的 46/46 clean canonical 与人工视觉门禁"
+next_action: "完成 M13 clean canonical 后登记 21 卡/FIFO 当前实现证据"
 ---
 
 # System Map
@@ -47,8 +47,8 @@ showOpenFilePicker → FileSystemFileHandle → File
 | Session persistence | 保存/恢复 V1 最近会话、全部句柄和唯一 current Blob/cache | 原生 IndexedDB `SessionRepository` | project-owner | `replaceCurrentAnalysisCache()` 校验 track/hash 并原子替换；unknown schema 不猜测迁移 |
 | Config persistence | 保存 volume 与 MusicBar style | Pinia、localStorage key `config` | project-owner | schema 保持不变；volume 为 0–100 |
 | Home visualization | 全屏 Three.js 光线 shader | `rayLength` prop、IntersectionObserver、reduced-motion media query | unknown | 常规模式使用 WebGL RAF；reduced motion 只静态渲染；卸载释放 mesh、geometry、material、render list、renderer 与 WebGL context |
-| Analyzer surface | 四槽/最多四张累计 21 项可用卡、共享 viewport/zoom/cursor/seek、DOM 精确值与分层 Canvas | store、AudioSessionService、AnalysisCoordinator、Canvas 2D | project-owner | 稳定 slot 0–3 DOM；实际高度最短列布局，390/1024 一列、1280/1920 两列、gap 18px；ResizeObserver 以单 RAF 合并重排；首次仍默认 M7 三卡 |
-| Editor E1–E7 surface | `/editor/:trackId?` 状态、精简 transport、JSON 工程、共享波形/tempo/point/range 时间列、21 项单选半透明 overlay、viewport-visible marker 与紧凑工作台布局 | EditorSessionController、AudioSessionService、AnalysisCoordinator、Vue Router、shared Canvas renderer、DOM controls | project-owner | E1–E6 已实现并获批准；E7 已实现且 canonical in-review |
+| Analyzer surface | 固定展示 21 张折叠卡、最多四项 FIFO 活动分析、共享 viewport/zoom/cursor/seek、DOM 精确值与分层 Canvas | store、AudioSessionService、AnalysisCoordinator、Canvas 2D | project-owner | `FEATURE_IDS` 稳定 DOM 顺序；实际高度最短列布局，390/1024 一列、1280/1920 两列、gap 18px；展开才挂载图表资源，默认活动队列为空 |
+| Editor E1–E7 surface | `/editor/:trackId?` 状态、精简 transport、JSON 工程、共享波形/tempo/point/range 时间列、21 项单选半透明 overlay、viewport-visible marker 与紧凑工作台布局 | EditorSessionController、AudioSessionService、AnalysisCoordinator、Vue Router、shared Canvas renderer、DOM controls | project-owner | E1–E7 已实现、获批准并关闭 |
 | Editor project and draft | strict JSON V1、歌曲 hash/时长绑定、原生 file gateway、单草稿 autosave 与恢复冲突 | `EditorFormatCodecRegistry`、`EditorDraftRepository`、`audionotsurfyet-editor` V1 | project-owner | 首版只注册 JSON；session database 不变 |
 | Experimental charts | 试验性的 Three.js 2D 图和瀑布流 | Vue props、TestLands | unknown | 不视为稳定接口 |
 | Event bus | 跨组件事件类型与发送 | mitt singleton | unknown | `settings-open` 无已发现订阅者 |
@@ -76,8 +76,8 @@ showOpenFilePicker → FileSystemFileHandle → File
 - M6 DEV bridge `window.__AUDIO_NOT_SURF_YET_M6__` 只代理当前有效 Analyzer lease，并公开可序列化命令/状态和 exact cursor；在 Home 或 Editor 不取得/覆盖 consumer，也不暴露 File、PCM、AudioBuffer 或 Worker。
 - 刷新时 current Blob 优先并恢复为 0 秒 paused；其他曲目只在 `queryPermission()` 为 granted 时自动取回，`requestPermission()` 只由可见用户操作触发。
 - `--coinc-process` 既可能由 GSAP 写入，也可能由能量 RAF 写入，模式切换需明确所有权。
-- AudioContext、source、单播放 RAF、产品 Worker、pending analysis request 和封面 URL 由 MainLayout-owned service/coordinator 生命周期统一释放；Analyzer masonry 的容器/四 item ResizeObserver 与待执行 RAF 在卸载时成对释放，GSAP 和 Three.js 由各组件释放，LightBg 在 reduced motion 下不保留连续 RAF。
-- Header 的 settings 事件没有已发现消费者；Visualizer 仍为占位页。Editor E1–E6 已获批准；E7 已把工作台密度与分区实现为当前代码事实，但不改变 runtime/data ownership，owner 批准仍待完成。
+- AudioContext、source、单播放 RAF、产品 Worker、pending analysis request 和封面 URL 由 MainLayout-owned service/coordinator 生命周期统一释放；Analyzer masonry 的容器/21 item ResizeObserver 与待执行 RAF 在卸载时成对释放，展开卡的 Canvas/卡片 ResizeObserver 在收起时释放，GSAP 和 Three.js 由各组件释放。
+- Header 的 settings 事件没有已发现消费者；Visualizer 仍为占位页。Editor E1–E7 已获批准并关闭；M13 不改变 Editor runtime/data ownership。
 - `components.d.ts` 和 `auto-imports.d.ts` 是构建插件生成文件，构建可能造成工作树变化。
 
 ## Editor Boundary After E5
@@ -95,7 +95,7 @@ showOpenFilePicker → FileSystemFileHandle → File
 - `analysisCanvasRenderer` 是 Analyzer card 与 Editor overlay 共用的纯 Canvas adapter；E4 overlay 一次选择累计 21 项中的一个，使用同一 viewport/time geometry、DPR backing store、40ms exact cursor 合并和 last-ready Buffer fallback。
 - overlay 通过 Teleport 固定覆盖窗口，灰色背景、全视口 Canvas 与说明穿透到 Header/底层标记；只有左上复合入口、临时 21 项菜单、重试和 top/move/bottom 手柄接收 pointer。bounds 仍为 0.10/0.35、最小 0.12，但相对 viewport；visibility 按歌曲 hash 本地保存，关闭时 active set 只保留 Buffer。
 
-尚未完成：owner 对 E7 紧凑工作台、窗口级浮层、长会话可读性和辅助技术体感的人工复核。全屏浮层修订与 46 步双浏览器 canonical 已完成；原 44/44 run 只作 pre-revision，E6 历史身份保持不变。
+E7 修订版 46/46 canonical 已由 owner 于 2026-08-31 批准并关闭；原 44/44 run 只作 pre-revision，E6 历史身份保持不变。M13 不重开 Editor 里程碑。
 
 ## Approval Record
 
@@ -103,6 +103,8 @@ showOpenFilePicker → FileSystemFileHandle → File
 
 同日，owner 要求自行提交并完成 M12 后续。M12 canonical `M12-2026-08-28T07-30-39-789Z-be655e67` 在 clean commit `be655e6765a63493fb1a3a4ee99992073b06e54e` 上 12/12 通过，稳定 DOM、实际高度最短列与 Observer/RAF 生命周期成为当前系统事实；M12 已关闭且 Analyzer readiness 恢复，PROD-015 与 Editor E6 不受该批准覆盖。
 
-随后 Editor E7 紧凑工作台实现已提交，并由 clean canonical `E7-2026-08-28T15-02-48-298Z-78bc7f06` 在 commit `78bc7f06311a09948e5efae941a14599305b81a5` 上 44/44 验证。双层工具栏、平面 section、44px 标记行、176/144px 波形及 390–1920 响应式现为当前系统事实；evidence 与里程碑仍等待 owner 批准。
+随后 Editor E7 紧凑工作台实现已提交，并由 clean canonical `E7-2026-08-28T15-02-48-298Z-78bc7f06` 在 commit `78bc7f06311a09948e5efae941a14599305b81a5` 上 44/44 验证；ADR-0011 修订后该 run 保留为 `pre-revision`，不再代表正式候选。
 
-2026-08-29，全屏 fixed overlay、窗口级复合入口、21 项临时菜单、按歌曲 visibility 与关闭后的 Buffer-only active set 在 commit `080f577fe20fcb22a20184dce0b15892c5299464` 上完成。修订版 clean canonical `E7-2026-08-29T05-23-03-986Z-080f577f` 46/46 通过，summary SHA-256 为 `da7c5e7a931a1e8c6cb3a64c3eeac8f5cb7d5cc6d6b604de6e4ea7b009ec13f5`；当前系统事实已更新，但 owner 批准前 E7 仍为 `In Progress`。
+2026-08-29，全屏 fixed overlay、窗口级复合入口、21 项临时菜单、按歌曲 visibility 与关闭后的 Buffer-only active set 在 commit `080f577fe20fcb22a20184dce0b15892c5299464` 上完成。修订版 clean canonical `E7-2026-08-29T05-23-03-986Z-080f577f` 46/46 通过，summary SHA-256 为 `da7c5e7a931a1e8c6cb3a64c3eeac8f5cb7d5cc6d6b604de6e4ea7b009ec13f5`；owner 于 2026-08-31 批准并关闭 E7，不补写未提供的人工测量。
+
+2026-08-31，owner 批准 M13 产品、ADR-0012、delivery 与 quality 计划并要求完整实施。当前工作树已把 Analyzer runtime 改为 `activeFeatureQueue`，按 `FEATURE_IDS` 固定渲染 21 张卡，展开时才挂载图表资源；V1 `activeCards` 仅作为兼容 carrier。正式当前实现身份仍等待 clean canonical 后登记。

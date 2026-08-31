@@ -1,7 +1,7 @@
 ---
-status: approved
+status: in-review
 owner: "project-owner"
-last_reviewed: 2026-08-28
+last_reviewed: 2026-08-31
 upstream_docs:
   - "docs/product/scope.md"
   - "docs/product/success-metrics.md"
@@ -11,24 +11,24 @@ upstream_docs:
   - "docs/quality/eval-plan.md"
   - "docs/quality/failure-taxonomy.md"
   - "docs/quality/evidence-index.md"
-next_action: "保留 M12 canonical artifact；PROD-015 解决前不进入正式上线，Editor E6 人工补偿继续独立进行"
+next_action: "等待 M13 clean canonical、evidence 与 R-028–R-030 复核；PROD-015 仍阻断上线"
 ---
 
 # Analyzer Release Readiness
 
 ## Summary Decision
 
-- Status：`Ready with waivers`。
-- Decision date：2026-08-28。
-- Reviewer：`project-owner` — approved M12 canonical evidence and continued W-001–W-007。
+- Status：`In review`；M12 的 `Ready with waivers` 仅为历史候选结论。
+- Reopened date：2026-08-31。
+- Reviewer：`project-owner` — approved M13 implementation plan; readiness awaits M13 evidence。
 - Scope：只覆盖当前本地音频 Analyzer 候选；不覆盖 Editor、Visualizer、远端上传、移动端、非 Chromium 或生产托管。
 - Decision boundary：**Analyzer candidate is ready for release planning with waivers; this is not production launch authorization.**
 
-M12 在 clean commit `be655e6765a63493fb1a3a4ee99992073b06e54e` 上完成 12/12 canonical：开场文案删除、实时最短列几何、稳定 slot DOM、动态高度重排和 Observer/RAF 清理均通过真实 Chrome/Edge 证据，R-028 已缓解。Analyzer 因此恢复 `Ready with waivers`；PROD-015 继续独立阻断正式上线。
+M12 在 clean commit `be655e6765a63493fb1a3a4ee99992073b06e54e` 上完成 12/12 canonical，并继续作为历史证据。M13 把四 slot 改为 21 张稳定折叠卡、FIFO 活动队列和 V1 adapter，重新打开 R-028 并新增 R-029/R-030；在 M13 clean canonical 前不得沿用 M12 `Ready with waivers` 作为当前候选结论。PROD-015 继续独立阻断正式上线。
 
 ## Candidate Identity
 
-下表只绑定本次获批的 M12 clean candidate。dirty provisional 与首次失败 run 均保留为诊断前例，不替代 canonical 身份。
+下表绑定历史 M12 clean candidate；M13 当前没有 candidate identity。dirty provisional 与首次失败 run 均保留为诊断前例，不替代未来 M13 canonical。
 
 | Field | Value |
 | --- | --- |
@@ -107,3 +107,5 @@ R-005 的权限跨会话不持久已在架构风险中由 owner 接受；当前 
 - PROD-015 解决前不创建上线声明、不选择或配置生产托管、不发布生产 URL。
 - Editor E6 人工补偿与审批继续独立进行；本文不批准 Editor readiness。
 - 本 readiness 只覆盖 Analyzer，不代表包含 Editor 的整体产品就绪。
+
+2026-08-31，owner 明确要求先关闭 E7 再实施 M13。E7 已按既有 46/46 evidence 关闭；本文件因 Analyzer 产品和运行时边界变化转为 `in-review`。只有 M13 clean canonical、evidence index、R-028–R-030 与 waiver 复核完成后，才能恢复或改变 readiness 结论。

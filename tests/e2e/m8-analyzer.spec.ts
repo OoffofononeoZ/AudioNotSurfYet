@@ -48,7 +48,7 @@ const exactScalar = async (page: Page, featureId: string): Promise<number> => {
     return value;
 };
 
-test('adds a fourth scalar card and restores it under the cumulative feature set', async ({ page }) => {
+test('expands four scalar cards, applies FIFO, and restores the queue', async ({ page }) => {
     test.setTimeout(60_000);
     const issues = captureBrowserIssues(page);
     await installFilePickerStub(page);
@@ -56,21 +56,14 @@ test('adds a fourth scalar card and restores it under the cumulative feature set
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto('/analyzer');
 
-    await expect(page.locator('[data-feature-id]')).toHaveCount(3);
-    await page.locator('.empty-slot')
-        .getByRole('button', { name: /Energy/ })
-        .click();
-    await expect(page.locator('[data-feature-id="energy"]')).toHaveCount(1);
-    await expect(page.locator('[data-feature-id]')).toHaveCount(4);
-    await expect(page.locator('.empty-slot')).toHaveCount(0);
-
-    const energySelect = page.locator('[data-feature-id="energy"] select');
-    await expect(energySelect.locator('option[value="rms"]')).toBeDisabled();
-    await expect(energySelect.locator('option[value="powerSpectrum"]'))
-        .toHaveCount(1);
-    await expect(energySelect.locator('option[value="loudness"]'))
-        .toHaveCount(1);
-    await expect(energySelect.locator('option')).toHaveCount(21);
+    await expect(page.locator('[data-feature-id]')).toHaveCount(21);
+    for (const featureId of ['rms', 'amplitudeSpectrum', 'chroma', 'energy']) {
+        await page.locator(`[data-feature-id="${featureId}"]`)
+            .getByRole('button', { name: '展开分析' })
+            .click();
+    }
+    await expect(page.locator('.analysis-card [aria-expanded="true"]'))
+        .toHaveCount(4);
 
     await chooseFiles(page, [M8_WAV_FIXTURE]);
     await expect(page.locator('[data-feature-id="energy"] .plot-message'))
@@ -82,8 +75,10 @@ test('adds a fourth scalar card and restores it under the cumulative feature set
     await expect.poll(() => exactScalar(page, 'energy')).toBe(0);
     const silenceEnergy = await exactScalar(page, 'energy');
 
-    await energySelect.selectOption('spectralFlux');
-    await expect(page.locator('[data-feature-id="spectralFlux"]'))
+    await page.locator('[data-feature-id="spectralFlux"]')
+        .getByRole('button', { name: '展开分析' })
+        .click();
+    await expect(page.locator('[data-feature-id="rms"] [aria-expanded="false"]'))
         .toHaveCount(1);
     await expect(page.locator('[data-feature-id="spectralFlux"] .plot-message'))
         .toHaveCount(0, { timeout: 30_000 });
@@ -96,8 +91,10 @@ test('adds a fourth scalar card and restores it under the cumulative feature set
     await page.getByRole('button', { name: '放大时间轴' }).click();
     await expect(page.locator('.timeline-toolbar')).toContainText('2.0×');
     await page.reload();
-    await expect(page.locator('[data-feature-id]')).toHaveCount(4);
-    await expect(page.locator('[data-feature-id="spectralFlux"]'))
+    await expect(page.locator('[data-feature-id]')).toHaveCount(21);
+    await expect(page.locator('.analysis-card [aria-expanded="true"]'))
+        .toHaveCount(4);
+    await expect(page.locator('[data-feature-id="spectralFlux"] [aria-expanded="true"]'))
         .toHaveCount(1);
     await expect(page.locator('.timeline-toolbar')).toContainText('2.0×');
 
@@ -123,11 +120,6 @@ test('renders all M8 scalar cards with finite exact values', async ({ page }) =>
     await installFilePickerStub(page);
     await page.goto('/analyzer');
     await chooseFiles(page, [M8_WAV_FIXTURE]);
-    await expect(page.locator('[data-feature-id="rms"] .plot-message'))
-        .toHaveCount(0, { timeout: 30_000 });
-    await page.getByTestId('toggle-playback').click();
-
-    const replacement = page.locator('[data-feature-id="rms"] select');
     const featureIds = [
         'zcr',
         'spectralCentroid',
@@ -141,18 +133,17 @@ test('renders all M8 scalar cards with finite exact values', async ({ page }) =>
         'perceptualSpread',
         'perceptualSharpness',
     ];
-    let currentFeature = 'rms';
     for (const featureId of featureIds) {
-        await page.locator(`[data-feature-id="${currentFeature}"] select`)
-            .selectOption(featureId);
+        const card = page.locator(`[data-feature-id="${featureId}"]`);
+        await card.getByRole('button', { name: '展开分析' }).click();
         await expect(page.locator(`[data-feature-id="${featureId}"] .plot-message`))
             .toHaveCount(0, { timeout: 30_000 });
         await page.locator(`[data-feature-id="${featureId}"] .plot`).focus();
         await page.keyboard.press('End');
         await expect.poll(() => exactScalar(page, featureId))
             .toEqual(expect.any(Number));
-        currentFeature = featureId;
+        await card.getByRole('button', { name: '收起分析' }).click();
     }
-    await expect(replacement).toHaveCount(0);
+    await expect(page.locator('[data-feature-id] select')).toHaveCount(0);
     expect(issues).toEqual([]);
 });

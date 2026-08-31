@@ -1,10 +1,10 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-08-29
+last_reviewed: 2026-09-01
 upstream_docs:
   - "docs/context/index.md"
-next_action: "请 owner 复核 E7 全屏浮层与紧凑工作台；批准后再关闭 E7"
+next_action: "M13 canonical 后复核 FIFO、V1 carrier 与资源术语"
 ---
 
 # Glossary
@@ -36,14 +36,16 @@ next_action: "请 owner 复核 E7 全屏浮层与紧凑工作台；批准后再�
 | exact cursor | 针对当前秒数所在原始 frame 由 Worker 现场提取的非量化值 | 展示精确值不得以 compact display series 的反量化结果替代 | [eval plan](../quality/eval-plan.md) |
 | cache identity | `schemaVersion + trackId + contentHash + configHash + featureId` 的完整组合 | 只有全部字段匹配才允许 cache hit；partial hit 只计算 misses | [ADR-0002](../architecture/adrs/0002-worker-analysis-and-stale-result-isolation.md) |
 | compact payload | M6 定义的 scalar、frequency vector、category vector、waveform envelope、loudness、complex-derived 六类二进制显示数据 | 限制 postMessage/IndexedDB 体积，并由严格 decoder 拒绝损坏或错身份数据 | [interface contracts](../architecture/interface-contracts.md) |
-| analysis workspace | 四个固定 slot、0–4 张当前里程碑可用卡和一个持久化 viewport 的共享 Analyzer 状态 | 区分首次无保存状态与用户明确保存的空工作区，避免刷新后擅自补回默认卡 | [interface contracts](../architecture/interface-contracts.md) |
+| analysis workspace | 有序 `activeFeatureQueue`（0–4 个唯一 feature）和一个持久化 viewport 的共享 Analyzer 状态 | 新工作区默认空队列；数组顺序同时表达活动集合和 FIFO 年龄 | [interface contracts](../architecture/interface-contracts.md) |
+| active feature queue | Analyzer 当前展开的 0–4 个唯一 FeatureId；展开第五项时移除队首并把目标追加到队尾 | 同一次响应式提交保证永不出现五张展开卡；收起再展开才刷新年龄 | [ADR-0012](../architecture/adrs/0012-analyzer-all-cards-fifo-active-analysis.md) |
+| V1 active-cards carrier | `PersistedSessionV1.activeCards` 的兼容保存字段；恢复按旧 slot 排序转为 FIFO，保存按队列索引重建 slot | 不升级 IndexedDB schema 也能恢复旧四槽会话，同时让运行时不再暴露 slot 语义 | [interface contracts](../architecture/interface-contracts.md) |
 | `M7_FEATURE_IDS` | M7 唯一允许选择的 `rms`、`amplitudeSpectrum`、`chroma` 常量集合 | 防止提前暴露 Energy、`spectralFlux` 或其他 M8 特征 | [decision registry](decision-registry.md) |
 | `M8_SCALAR_FEATURE_IDS` | M8 新增的 ZCR、Energy、9 个 spectral scalar 与 2 个 perceptual scalar | 把里程碑新增项与累计可选集合分开验证 | [ADR-0005](../architecture/adrs/0005-project-spectral-flux-and-silence-semantics.md) |
 | `M8_AVAILABLE_FEATURE_IDS` | M7 三项加 M8 十三项的累计 16 项集合 | UI、Worker 和持久化只开放已完成里程碑的 FeatureId | [interface contracts](../architecture/interface-contracts.md) |
 | `M9_FEATURE_IDS` | M9 新增的 `powerSpectrum`、`mfcc`、`buffer` 集合 | 分开验证三种 vector/waveform shape 与累计范围 | [interface contracts](../architecture/interface-contracts.md) |
 | `M9_AVAILABLE_FEATURE_IDS` | M8 十六项加 M9 三项的累计 19 项集合 | 固定 M9 历史边界，不随 M10 开放而改变 | [interface contracts](../architecture/interface-contracts.md) |
 | `M10_FEATURE_IDS` | M10 新增的 `loudness`、`complexSpectrum` 集合 | 分开验证两种结构输出与最终里程碑范围 | [interface contracts](../architecture/interface-contracts.md) |
-| `M10_AVAILABLE_FEATURE_IDS` | M9 十九项加 M10 两项的累计 21 项集合 | UI 与 Worker 的当前完整可选集合；仍最多四张唯一卡 | [interface contracts](../architecture/interface-contracts.md) |
+| `FEATURE_IDS` | Analyzer 与 Worker 的累计 21 项稳定全集 | 决定全部卡片的 DOM、键盘和读屏顺序；活动队列仍最多四项 | [interface contracts](../architecture/interface-contracts.md) |
 | signed FFT frequency | 1024-bin Complex Spectrum 中 bin 0–512 映射非负频率，513–1023 映射负频率镜像 | 防止把完整复数 FFT 的后半错误标成 0–Nyquist 第二份正频率 | [system design](../architecture/system-design.md) |
 | waveform envelope | Buffer 全曲显示层按时间桶保存的正负 min/max Int16 包络 | 避免缓存全部逐帧 1024 sample，同时 exact cursor 仍返回当前原始 frame | [system design](../architecture/system-design.md) |
 | Spectral Flux v1 | 相邻幅度频谱逐 bin 正向差的 L1 和；第一帧与零能量帧为 0 | 替代 Meyda 5.6.3 有缺陷的 extractor，并由项目 golden 固定语义 | [ADR-0005](../architecture/adrs/0005-project-spectral-flux-and-silence-semantics.md) |
@@ -78,4 +80,4 @@ next_action: "请 owner 复核 E7 全屏浮层与紧凑工作台；批准后再�
 
 ## Approval Record
 
-`project-owner` 于 2026-08-21 至 2026-08-26 依次批准 Analyzer M7–M11 与 Analyzer readiness，并批准 Editor 产品、架构、delivery 与 E1 evidence。2026-08-27，E2–E5 clean canonical 与人工门禁依次获 owner 批准；E6 final hardening 于 2026-08-28 获批准并关闭。E7 compact workbench 的旧 44/44 run 为 `pre-revision`；全屏浮层修订版已完成 46/46 clean canonical，当前仍等待 owner 视觉复核。
+`project-owner` 于 2026-08-21 至 2026-08-28 依次批准 Analyzer M7–M12、Analyzer readiness 与 Editor E1–E6。E7 compact workbench 的旧 44/44 run 为 `pre-revision`；全屏浮层修订版 46/46 canonical 于 2026-08-31 获批准并关闭。M13 21 卡/FIFO 计划同日获批，clean canonical 前 Analyzer readiness 为 `in-review`。

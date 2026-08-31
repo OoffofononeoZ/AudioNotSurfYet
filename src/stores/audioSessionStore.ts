@@ -9,7 +9,7 @@ import type {
     FeatureId,
 } from '../analysis/types';
 import {
-    cloneActiveAnalysisCards,
+    cloneActiveFeatureQueue,
     clonePersistedTimelineViewport,
     type AnalysisWorkspaceSnapshot,
     type PersistedSessionV1,
@@ -61,7 +61,7 @@ export const useAudioSessionStore = defineStore('audio-session', {
         },
         analysisWorkspace: {
             initialized: false,
-            activeCards: [],
+            activeFeatureQueue: [],
             viewport: null,
         },
         analysisCacheManifest: null,
@@ -92,8 +92,8 @@ export const useAudioSessionStore = defineStore('audio-session', {
             if (workspace) {
                 this.analysisWorkspace = {
                     initialized: true,
-                    activeCards: cloneActiveAnalysisCards(
-                        workspace.activeCards,
+                    activeFeatureQueue: cloneActiveFeatureQueue(
+                        workspace.activeFeatureQueue,
                     ),
                     viewport: clonePersistedTimelineViewport(
                         workspace.viewport,
@@ -152,7 +152,9 @@ export const useAudioSessionStore = defineStore('audio-session', {
         setAnalysisWorkspace(snapshot: AnalysisWorkspaceSnapshot) {
             this.analysisWorkspace = {
                 initialized: snapshot.initialized,
-                activeCards: cloneActiveAnalysisCards(snapshot.activeCards),
+                activeFeatureQueue: cloneActiveFeatureQueue(
+                    snapshot.activeFeatureQueue,
+                ),
                 viewport: clonePersistedTimelineViewport(snapshot.viewport),
             };
         },
@@ -198,7 +200,7 @@ export const useAudioSessionStore = defineStore('audio-session', {
             };
             this.analysisWorkspace = {
                 initialized: false,
-                activeCards: [],
+                activeFeatureQueue: [],
                 viewport: null,
             };
             this.analysisCacheManifest = null;

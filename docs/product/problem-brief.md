@@ -1,12 +1,12 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-08-26
+last_reviewed: 2026-08-31
 upstream_docs:
   - "docs/context/index.md"
   - "docs/context/glossary.md"
   - "docs/quality/release-readiness.md"
-next_action: "进入 Editor E0 system design；实现继续等待 architecture 与 delivery 门禁"
+next_action: "按已批准 M13 设计实现 21 卡折叠与 FIFO 活动分析；readiness 等待新证据"
 ---
 
 # Problem Brief
@@ -43,13 +43,13 @@ Editor E0 解决下一层问题：用户能够听出歌曲中存在音符、音�
 学习者能够在同一 Analyzer 工作区中：
 
 1. 加载并播放本地音频；
-2. 最多选择四个不重复的 Meyda 特征；
+2. 在同一页面按固定顺序浏览全部 21 个 Meyda 特征，并展开最多四张卡进行分析；
 3. 在共享视窗、缩放和游标下观察同一时间段；
 4. 点击图表跳转到对应声音；
 5. 读取固定分析参数和游标处的精确值；
 6. 用首批 RMS、Amplitude Spectrum、Chroma 正确解释预设片段中的数值与听感关系。
 
-长期结果是以纵向切片覆盖 `src/data/analyzerData.ts` 中全部 21 个特征，而不是一次性展示一个不可验证的全功能仪表盘。
+21 项特征继续共享同一分析基础设施。新工作区默认全部收起；展开第五张时自动收起 FIFO 中最早展开的卡，使用户无需移除和替换卡片即可比较任意特征。
 
 ### Editor E0 outcome（approved）
 
@@ -92,6 +92,7 @@ Editor 的输出是绑定单首歌曲的时间数据集；它不会修改、重�
 - Editor 新路由、草稿、右键交互、范围事件和叠加层会扩大资源、持久化、键盘与双浏览器验证面；Analyzer 的 readiness 不能替代 Editor 自身证据。
 - 仅由 owner 验证学习结果能够快速形成证据，但不能代表更广泛用户群体。
 - 同一分类的范围事件若允许无约束重叠会产生难以解释的数据；E0 已确定同一 lane、同一 inner class 禁止范围重叠，不同分类仍可同时存在。
+- Analyzer 21 张稳定卡与快速展开/收起会增加布局和异步状态错序风险；M13 必须保持最多四项活动分析、最新 generation 和最新 workspace revision 生效。
 
 ## Approval Record
 
@@ -100,3 +101,5 @@ Editor 的输出是绑定单首歌曲的时间数据集；它不会修改、重�
 2026-08-26，owner 批准 Analyzer `Ready with waivers` 并同意进入 Editor E0；随后要求把长音色和效果的范围事件纳入首期路线，并确认同类不重叠、`Esc`/空白右键取消、端点沿用自适应网格。
 
 同日，`project-owner` 明确回复：“我批准 Editor E0 产品意图、点事件与范围事件规则、成功指标和开放问题；同意进入 Editor E0 架构设计。”本批准使上述 Editor 产品意图生效并开放 system design；它不构成 Editor 架构、delivery、实现、质量或整体 readiness 批准。
+
+2026-08-31，`project-owner` 明确要求实施“Analyzer M13 全卡片折叠与 FIFO 活动分析计划”。本指令批准一页 21 卡、默认全收起、最多四项 FIFO 活动分析、V1 兼容和 M14 拖动延后的产品意图；M12 readiness 变为历史候选，M13 readiness 等待新 canonical。

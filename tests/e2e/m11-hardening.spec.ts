@@ -40,6 +40,9 @@ test('loads, analyzes, switches and restores the same MP3/WAV/FLAC queue', async
     const issues = captureBrowserIssues(page);
     await installFilePickerStub(page);
     await page.goto('/analyzer');
+    await page.locator('[data-feature-id="rms"]')
+        .getByRole('button', { name: '展开分析' })
+        .click();
     await chooseFiles(page, FORMAT_FIXTURES);
 
     const musicBar = page.locator('#music-bar-container');
@@ -152,6 +155,9 @@ test('keeps keyboard, focus, reduced motion and responsive geometry usable', asy
     await expect(volumeControl).toHaveAttribute('aria-valuetext', '100%');
 
     await page.getByRole('link', { name: 'Analyzer' }).click();
+    await page.locator('[data-feature-id="rms"]')
+        .getByRole('button', { name: '展开分析' })
+        .click();
     await expect(page.locator('[data-feature-id="rms"] .plot-message'))
         .toHaveCount(0, { timeout: 45_000 });
     const rmsPlot = page.locator('[data-feature-id="rms"] .plot');

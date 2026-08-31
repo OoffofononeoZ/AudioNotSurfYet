@@ -1,13 +1,13 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-08-29
+last_reviewed: 2026-08-31
 upstream_docs:
   - "docs/context/index.md"
   - "docs/product/scope.md"
   - "docs/architecture/system-design.md"
   - "docs/delivery/execution-plan.md"
-next_action: "请 owner 复核 DEC-033/ADR-0011 的 46/46 E7 候选；批准前不进入 readiness"
+next_action: "E7 已关闭；执行 DEC-035/ADR-0012 的 M13，并以 clean canonical 复核 readiness"
 ---
 
 # Decision Registry
@@ -33,6 +33,7 @@ next_action: "请 owner 复核 DEC-033/ADR-0011 的 46/46 E7 候选；批准前�
 | ADR-0008 | 2026-08-26 | Editor 以秒数为事件事实、tempo 只派生网格，并使用 point/range 判别模型和固定右键状态机 | project-owner | approved | [ADR-0008](../architecture/adrs/0008-editor-time-and-event-model.md) | 时间 identity、吸附、重叠、range 或 pointer 语义改变 |
 | ADR-0009 | 2026-08-26 | Editor 抽取纯 Canvas renderer adapter，共享 geometry，并让 overlay 除 selector/手柄外 pointer-through | project-owner | approved | [ADR-0009](../architecture/adrs/0009-editor-overlay-renderer-boundary.md) | renderer family、geometry、overlay pointer 或 Canvas/DOM 边界改变 |
 | ADR-0011 | 2026-08-29 | Editor overlay Teleport 为全视口 fixed 灰色层；复合入口和 visibility 为本地按歌状态，关闭时 analysis 收敛为 Buffer | project-owner | approved | [ADR-0011](../architecture/adrs/0011-editor-fullscreen-overlay.md) | overlay 挂载、开关/菜单、坐标空间、本地偏好或 pointer 边界改变 |
+| ADR-0012 | 2026-08-31 | Analyzer 稳定展示 21 张折叠卡，以最多四项 FIFO 队列驱动分析，并用 V1 `activeCards` 兼容承载队列 | project-owner | approved | [ADR-0012](../architecture/adrs/0012-analyzer-all-cards-fifo-active-analysis.md) | 卡片全集、FIFO、按需资源、workspace runtime 或持久化 carrier 改变 |
 | DEC-008 | 2026-07-24 | 实施采用 M1–M11 相对门禁，不承诺日期；M3 从测试基础开始，M7 未通过不得扩展后续特征 | project-owner | approved | [Execution plan](../delivery/execution-plan.md) | 依赖、里程碑、验收门禁或交付优先级改变 |
 | DEC-009 | 2026-07-24 | 当前只批准 execution planning；不预建 quality/release/retrospective，也不自动开始代码实现 | project-owner | superseded by DEC-010 | [Milestone plan](../delivery/milestone-plan.md) | 已由 owner 决定前置三份 quality design |
 | DEC-010 | 2026-07-24 | 在 M3 前增加 Q0：前置 eval plan、golden examples、failure taxonomy；三份文档单独批准后开放 M3，release-readiness 仍等待 M11 证据 | project-owner | approved | [Eval plan](../quality/eval-plan.md) | 验收/测试纪律变化，或 owner 改变 Q0/readiness 时序 |
@@ -59,6 +60,8 @@ next_action: "请 owner 复核 DEC-033/ADR-0011 的 46/46 E7 候选；批准前�
 | DEC-031 | 2026-08-28 | Analyzer 使用稳定 slot 0–3 DOM 和实际高度最短列；390/1024 一列、1280/1920 两列、gap 18px，ResizeObserver 以单 RAF 合并且卸载成对释放；不引入 pretext、不改变分析/持久化契约 | project-owner | approved | [System design](../architecture/system-design.md) | slot 顺序、列断点、动态高度、Observer/RAF 所有权或 Analyzer 契约改变 |
 | DEC-032 | 2026-08-28 | 先批准并关闭 Editor E6，再以 E7 把 Editor 改为紧凑双层工具栏和平面细线分区；桌面控件 30px、point/range 行 44px、侧栏 152/144px、波形 176px，窄屏波形 144px；FL Studio 仅作为密度参考，不复制配色、品牌资产或控件 | project-owner | approved | [ADR-0010](../architecture/adrs/0010-editor-compact-workbench.md) | Editor 密度令牌、区域层次、断点或既有功能契约改变 |
 | DEC-033 | 2026-08-29 | E7 增补窗口级全屏悬浮分析层、左上复合开关/21 项菜单、按歌曲 visibility；旧 44/44 run 保留为 pre-revision，新候选为 46 步 | project-owner | approved | [ADR-0011](../architecture/adrs/0011-editor-fullscreen-overlay.md) | E7 浮层范围、记忆规则、canonical 步数或 owner 门禁改变 |
+| DEC-034 | 2026-08-31 | 批准 E7 修订版 46/46 clean canonical 并关闭 E7；只采用已记录 artifact/补偿事实，不补写未提供的人工测量 | project-owner | approved | [Editor evidence](../quality/editor/evidence-index.md) | E7 candidate identity、artifact 或批准边界改变 |
+| DEC-035 | 2026-08-31 | 实施 M13：21 卡固定顺序、默认全收起、最多四项 FIFO、V1 adapter 与最新 generation/revision；M14 拖动只登记，本轮仅本地提交 | project-owner | approved | [ADR-0012](../architecture/adrs/0012-analyzer-all-cards-fifo-active-analysis.md) | M13 行为、M14 边界、canonical 或 Git 交付授权改变 |
 
 ## Approval Evidence
 
@@ -141,6 +144,8 @@ E5 clean canonical `E5-2026-08-27T11-03-22-177Z-78124177` 随后在 implementati
 同日，owner 通过 M12 实施计划批准 DEC-031，并要求 agent 自行提交及完成后续、无需推送远程。首次 clean run `M12-2026-08-28T07-25-22-951Z-b50c2c1e` 暴露 M7 短 fixture 未保证播放输入的测试前置条件；失败 artifact 保留。修复 commit `be655e6765a63493fb1a3a4ee99992073b06e54e` 先使目标用例连续 5/5 通过，再由 canonical `M12-2026-08-28T07-30-39-789Z-be655e67` 完成 12/12，summary SHA-256 为 `76ffab8e9fd5db6370c22aa78c7ee08a0708d7a5d97e1b749fca284d4c696441`。DEC-031 据此完成验证，M12 关闭、R-028 缓解、Analyzer readiness 恢复；PROD-015 与 Editor E6 不被本决策覆盖。
 
 2026-08-28，`project-owner` 明确要求“可以先批准之前的e6修改”，本次回复据此作为 E6 canonical、原生文件、辅助技术与长会话人工门禁的完整批准；E6 关闭，R-024、R-025、R-027 改为 `Mitigated`。同一轮需求要求 Editor 参考编曲工作台的密度与线性分区方式，DEC-032 据此开放 E7。该批准不改写 E6 canonical，也不授权生产上线；Editor release-readiness 延后到 E7 获批之后。
+
+2026-08-31，owner 以完整 M13 实施指令先批准 E7 修订候选，DEC-034 据此关闭 E7；随后批准 DEC-035/ADR-0012 并授权 agent 完成实现、本地提交、clean canonical 与 evidence/readiness 复核，不推送远程。M12 evidence 保留为历史，M13 未通过前 readiness 保持 `in-review`。
 
 ## Historical Evidence Gap
 

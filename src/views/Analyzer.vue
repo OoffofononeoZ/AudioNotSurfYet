@@ -8,7 +8,10 @@
                         <span :data-state="analysis.state">
                             {{ analysisStateLabel }}
                         </span>
-                        <span>{{ activeCards.length }}/4 张活动卡</span>
+                        <span>{{ activeFeatureQueue.length }}/4 张展开卡</span>
+                        <span v-if="activeFeatureQueue.length === 0">
+                            展开卡片开始分析
+                        </span>
                         <span v-if="sessionStore.persistence.state === 'not-persisted'">
                             当前工作区未持久化
                         </span>
@@ -79,51 +82,26 @@
                 data-testid="analyzer-masonry"
             >
                 <div
-                    v-for="slot in CARD_SLOTS"
-                    :key="slot"
-                    :ref="masonryItemRef(slot)"
+                    v-for="featureId in FEATURE_IDS"
+                    :key="featureId"
+                    :ref="masonryItemRef(featureId)"
                     class="masonry-item"
-                    :data-slot="slot"
-                    :style="masonryItemStyle(slot)"
+                    :data-slot="featureId"
+                    :style="masonryItemStyle(featureId)"
                 >
                     <MeydaCard
-                        v-if="cardAt(slot)"
-                        :slot="slot"
-                        :feature-id="cardAt(slot)!.featureId"
-                        :disabled-feature-ids="activeFeatureIds"
-                        :series="seriesFor(cardAt(slot)!.featureId)"
+                        :feature-id="featureId"
+                        :expanded="isExpanded(featureId)"
+                        :series="seriesFor(featureId)"
                         :viewport="viewport"
                         :cursor-seconds="cursorSeconds"
                         :duration-seconds="durationSeconds"
                         :sample-rate="analysis.sampleRate"
-                        :exact-value="exactValues[cardAt(slot)!.featureId] ?? null"
+                        :exact-value="exactValues[featureId] ?? null"
                         :analysis-state="analysis.state"
-                        @change="replaceCard(slot, $event)"
-                        @remove="removeCard(slot)"
+                        @toggle="toggleCard(featureId)"
                         @seek="seek"
                     />
-                    <article v-else class="empty-slot" :data-slot="slot">
-                        <div>
-                            <p class="slot-number">SLOT {{ slot + 1 }}</p>
-                            <h2>添加一张学习卡</h2>
-                            <p>
-                                21 项 Analyzer 特征均可选择；最多四张且不会重复。
-                            </p>
-                        </div>
-                        <div
-                            v-if="activeCards.length < 4"
-                            class="feature-choices"
-                        >
-                            <button
-                                v-for="option in availableFeatures"
-                                :key="option.id"
-                                type="button"
-                                @click="addCard(slot, option.id)"
-                            >
-                                + {{ option.label }}
-                            </button>
-                        </div>
-                    </article>
                 </div>
             </section>
         </div>
@@ -143,8 +121,8 @@ import {
 import DotGridBg from '../components/DotGridBg.vue';
 import MeydaCard from '../components/MeydaCard.vue';
 import { useAudioSessionService } from '../audio/audioSessionService';
+import { toggleActiveFeature } from '../analysis/activeFeatureQueue';
 import { useAnalysisCoordinator } from '../analysis/analysisCoordinator';
-import { FEATURE_REGISTRY } from '../analysis/featureRegistry';
 import {
     panTimelineViewport,
     normalizeTimelineViewport,
@@ -152,10 +130,10 @@ import {
     zoomTimelineViewport,
 } from '../analysis/timelineViewport';
 import {
-    M7_FEATURE_IDS,
-    M10_AVAILABLE_FEATURE_IDS,
+    FEATURE_IDS,
     type AnalysisCursorValueResult,
     type AnalysisSeries,
+    type FeatureId,
     type M10FeatureId,
 } from '../analysis/types';
 import { useAudioSessionStore } from '../stores/audioSessionStore';
@@ -163,21 +141,10 @@ import {
     calculateMasonryLayout,
     type MasonryPlacement,
 } from '../utils/masonryLayout';
-import type {
-    ActiveAnalysisCard,
-    PersistedTimelineViewport,
-} from '../types/session';
+import type { PersistedTimelineViewport } from '../types/session';
 
-const CARD_SLOTS = [0, 1, 2, 3] as const;
-type CardSlot = (typeof CARD_SLOTS)[number];
 const MASONRY_GAP = 18;
 const MASONRY_WIDE_QUERY = '(min-width: 1280px)';
-const DEFAULT_CARDS: ActiveAnalysisCard[] = M7_FEATURE_IDS.map(
-    (featureId, slot) => ({
-        slot: slot as 0 | 1 | 2,
-        featureId,
-    }),
-);
 
 const sessionStore = useAudioSessionStore();
 const audioSession = useAudioSessionService();
@@ -197,9 +164,9 @@ const masonryRoot = ref<HTMLElement | null>(null);
 const masonryHeight = ref(0);
 const masonryReady = ref(false);
 const masonryPlacements = reactive<
-    Partial<Record<CardSlot, MasonryPlacement<CardSlot>>>
+    Partial<Record<FeatureId, MasonryPlacement<FeatureId>>>
 >({});
-const masonryItems = new Map<CardSlot, HTMLElement>();
+const masonryItems = new Map<FeatureId, HTMLElement>();
 let masonryRootObserver: ResizeObserver | null = null;
 let masonryItemObserver: ResizeObserver | null = null;
 let masonryMediaQuery: MediaQueryList | null = null;
@@ -207,17 +174,12 @@ let masonryFrame: number | null = null;
 let lastMasonryRootWidth = -1;
 
 const analysis = computed(() => sessionStore.analysis);
-const activeCards = computed(() =>
-    [...sessionStore.analysisWorkspace.activeCards]
-        .filter((card): card is ActiveAnalysisCard & {
-            featureId: M10FeatureId;
-        } =>
-            (M10_AVAILABLE_FEATURE_IDS as readonly string[]).includes(
-                card.featureId,
-            ))
-        .sort((left, right) => left.slot - right.slot));
-const activeFeatureIds = computed<M10FeatureId[]>(() =>
-    activeCards.value.map((card) => card.featureId));
+const activeFeatureQueue = computed<M10FeatureId[]>(() =>
+    sessionStore.analysisWorkspace.activeFeatureQueue.filter(
+        (featureId): featureId is M10FeatureId =>
+            (FEATURE_IDS as readonly string[]).includes(featureId),
+    ));
+const activeFeatureIds = activeFeatureQueue;
 const durationSeconds = computed(() =>
     Math.max(0, sessionStore.playback.durationSeconds || 0));
 const cursorSeconds = computed(() =>
@@ -233,10 +195,6 @@ const viewport = computed<PersistedTimelineViewport>(() =>
         sessionStore.analysisWorkspace.viewport,
         durationSeconds.value,
     ));
-const availableFeatures = computed(() =>
-    M10_AVAILABLE_FEATURE_IDS
-        .filter((id) => !activeFeatureIds.value.includes(id))
-        .map((id) => ({ id, label: FEATURE_REGISTRY[id].label })));
 const analysisStateLabel = computed(() => {
     const labels = {
         idle: '等待音频',
@@ -252,8 +210,8 @@ const analysisStateLabel = computed(() => {
     return labels[analysis.value.state];
 });
 
-const cardAt = (slot: 0 | 1 | 2 | 3) =>
-    activeCards.value.find((card) => card.slot === slot);
+const isExpanded = (featureId: FeatureId) =>
+    activeFeatureQueue.value.includes(featureId);
 
 const seriesFor = (featureId: M10FeatureId): AnalysisSeries | null => {
     void seriesRevision.value;
@@ -266,8 +224,8 @@ const formatTime = (seconds: number): string => {
     return `${minutes}:${(safe % 60).toFixed(2).padStart(5, '0')}`;
 };
 
-const masonryItemStyle = (slot: CardSlot) => {
-    const placement = masonryPlacements[slot];
+const masonryItemStyle = (featureId: FeatureId) => {
+    const placement = masonryPlacements[featureId];
     return {
         width: placement ? `${placement.width}px` : '100%',
         transform: placement
@@ -279,7 +237,8 @@ const masonryItemStyle = (slot: CardSlot) => {
 const performMasonryLayout = () => {
     masonryFrame = null;
     const root = masonryRoot.value;
-    const elements = CARD_SLOTS.map((slot) => masonryItems.get(slot));
+    const elements = FEATURE_IDS.map((featureId) =>
+        masonryItems.get(featureId));
     if (!root || elements.some((element) => !element)) return;
     const containerWidth = root.getBoundingClientRect().width;
     const columnCount: 1 | 2 = masonryMediaQuery?.matches ? 2 : 1;
@@ -294,8 +253,8 @@ const performMasonryLayout = () => {
         containerWidth,
         columnCount,
         gap: MASONRY_GAP,
-        items: CARD_SLOTS.map((slot, index) => ({
-            id: slot,
+        items: FEATURE_IDS.map((featureId, index) => ({
+            id: featureId,
             height: elements[index]!.getBoundingClientRect().height,
         })),
     });
@@ -313,30 +272,30 @@ const scheduleMasonryLayout = () => {
 };
 
 const registerMasonryItem = (
-    slot: CardSlot,
+    featureId: FeatureId,
     element: Element | ComponentPublicInstance | null,
 ) => {
-    const previous = masonryItems.get(slot);
+    const previous = masonryItems.get(featureId);
     if (previous === element) return;
     if (previous) masonryItemObserver?.unobserve(previous);
     if (element instanceof HTMLElement) {
-        masonryItems.set(slot, element);
+        masonryItems.set(featureId, element);
         masonryItemObserver?.observe(element);
     } else {
-        masonryItems.delete(slot);
+        masonryItems.delete(featureId);
     }
     if (typeof window !== 'undefined') scheduleMasonryLayout();
 };
 
 const masonryItemRefSetters = new Map<
-    CardSlot,
+    FeatureId,
     (element: Element | ComponentPublicInstance | null) => void
 >();
-const masonryItemRef = (slot: CardSlot) => {
-    let setter = masonryItemRefSetters.get(slot);
+const masonryItemRef = (featureId: FeatureId) => {
+    let setter = masonryItemRefSetters.get(featureId);
     if (!setter) {
-        setter = (element) => registerMasonryItem(slot, element);
-        masonryItemRefSetters.set(slot, setter);
+        setter = (element) => registerMasonryItem(featureId, element);
+        masonryItemRefSetters.set(featureId, setter);
     }
     return setter;
 };
@@ -372,64 +331,39 @@ const disposeMasonryLayout = () => {
 };
 
 const persistWorkspace = (
-    cards: ActiveAnalysisCard[],
+    featureQueue: FeatureId[],
     nextViewport: PersistedTimelineViewport | null,
 ) => audioSession.updateAnalysisWorkspace({
-    activeCards: cards,
+    activeFeatureQueue: [...featureQueue],
     viewport: nextViewport,
 });
 
-const applyCards = async (cards: ActiveAnalysisCard[]) => {
-    const sorted = [...cards].sort((left, right) => left.slot - right.slot);
+const applyFeatureQueue = async (featureQueue: FeatureId[]) => {
+    const nextQueue = [...featureQueue];
     const persist = persistWorkspace(
-        sorted,
+        nextQueue,
         durationSeconds.value > 0 ? viewport.value : null,
     );
-    await analysisLease.setActiveFeatures(
-        sorted.map((card) => card.featureId),
-    );
-    await persist;
     for (const key of Object.keys(exactValues) as M10FeatureId[]) {
-        if (!sorted.some((card) => card.featureId === key)) {
+        if (!nextQueue.includes(key)) {
             delete exactValues[key];
         }
     }
+    await analysisLease.setActiveFeatures(nextQueue);
+    await persist;
     requestExactValues(true);
 };
 
-const addCard = (
-    slot: 0 | 1 | 2 | 3,
-    featureId: M10FeatureId,
-) => {
-    if (
-        activeCards.value.length >= 4
-        || activeFeatureIds.value.includes(featureId)
-    ) return;
-    void applyCards([...activeCards.value, { slot, featureId }]);
-};
-
-const replaceCard = (
-    slot: 0 | 1 | 2 | 3,
-    featureId: M10FeatureId,
-) => {
-    if (
-        activeFeatureIds.value.includes(featureId)
-        && cardAt(slot)?.featureId !== featureId
-    ) return;
-    void applyCards(
-        activeCards.value.map((card) =>
-            card.slot === slot ? { slot, featureId } : card),
+const toggleCard = (featureId: FeatureId) => {
+    const transition = toggleActiveFeature(
+        activeFeatureQueue.value,
+        featureId,
     );
-};
-
-const removeCard = (slot: 0 | 1 | 2 | 3) => {
-    void applyCards(
-        activeCards.value.filter((card) => card.slot !== slot),
-    );
+    void applyFeatureQueue(transition.queue);
 };
 
 const setViewport = (nextViewport: PersistedTimelineViewport) => {
-    void persistWorkspace(activeCards.value, nextViewport);
+    void persistWorkspace(activeFeatureQueue.value, nextViewport);
 };
 
 const zoom = (factor: number) => {
@@ -508,23 +442,21 @@ const initializeWorkspace = async () => {
             const initialViewport = durationSeconds.value > 0
                 ? resetTimelineViewport(durationSeconds.value)
                 : null;
-            const persist = persistWorkspace(DEFAULT_CARDS, initialViewport);
-            await analysisLease.setActiveFeatures(M7_FEATURE_IDS);
+            const persist = persistWorkspace([], initialViewport);
+            await analysisLease.setActiveFeatures([]);
             await persist;
         } else {
-            const restoredCards = activeCards.value;
+            const restoredQueue = activeFeatureQueue.value;
             if (
-                restoredCards.length
-                !== sessionStore.analysisWorkspace.activeCards.length
+                restoredQueue.length
+                !== sessionStore.analysisWorkspace.activeFeatureQueue.length
             ) {
                 await persistWorkspace(
-                    restoredCards,
+                    restoredQueue,
                     sessionStore.analysisWorkspace.viewport,
                 );
             }
-            await analysisLease.setActiveFeatures(
-                restoredCards.map((card) => card.featureId),
-            );
+            await analysisLease.setActiveFeatures(restoredQueue);
         }
         requestExactValues(true);
     })().catch((error) => {
@@ -566,7 +498,7 @@ watch(
             || current.endSeconds !== repaired.endSeconds
             || current.zoom !== repaired.zoom
         ) {
-            void persistWorkspace(activeCards.value, repaired);
+            void persistWorkspace(activeFeatureQueue.value, repaired);
         }
     },
 );

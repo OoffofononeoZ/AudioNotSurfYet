@@ -50,19 +50,13 @@ const waitForBridge = (page: Page) => page.waitForFunction(() => Boolean((
     }
 ).__AUDIO_NOT_SURF_YET_M6__));
 
-test('renders Loudness and full Complex Spectrum as persistent unique cards', async ({ page }) => {
+test('renders Loudness and full Complex Spectrum as persistent expanded cards', async ({ page }) => {
     test.setTimeout(120_000);
     const issues = captureBrowserIssues(page);
     await installFilePickerStub(page);
     await page.emulateMedia({ reducedMotion: 'reduce' });
     await page.setViewportSize({ width: 1280, height: 900 });
     await page.goto('/analyzer');
-
-    await page.locator('.empty-slot')
-        .getByRole('button', { name: /Loudness/ })
-        .click();
-    await page.locator('[data-feature-id="rms"] select')
-        .selectOption('complexSpectrum');
 
     const expectedFeatures = [
         'amplitudeSpectrum',
@@ -71,17 +65,14 @@ test('renders Loudness and full Complex Spectrum as persistent unique cards', as
         'complexSpectrum',
     ];
     for (const featureId of expectedFeatures) {
-        await expect(page.locator(`[data-feature-id="${featureId}"]`))
-            .toHaveCount(1);
+        await page.locator(`[data-feature-id="${featureId}"]`)
+            .getByRole('button', { name: '展开分析' })
+            .click();
     }
-    await expect(page.locator('[data-feature-id]')).toHaveCount(4);
-
-    const select = page.locator('[data-feature-id="complexSpectrum"] select');
-    await expect(select.locator('option')).toHaveCount(21);
-    await expect(select.locator('option[value="loudness"]')).toBeDisabled();
-    await expect(select.locator('option[value="complexSpectrum"]')).toBeEnabled();
-    await expect(select.locator('option[value="amplitudeSpectrum"]'))
-        .toBeDisabled();
+    await expect(page.locator('[data-feature-id]')).toHaveCount(21);
+    await expect(page.locator('.analysis-card [aria-expanded="true"]'))
+        .toHaveCount(4);
+    await expect(page.locator('[data-feature-id] select')).toHaveCount(0);
 
     await chooseFiles(page, [M10_WAV_FIXTURE]);
     for (const featureId of expectedFeatures) {
@@ -133,9 +124,11 @@ test('renders Loudness and full Complex Spectrum as persistent unique cards', as
     await page.getByRole('button', { name: '向后平移四分之一视口' }).click();
     await expect(page.locator('.timeline-toolbar')).toContainText('2.0×');
     await page.reload();
-    await expect(page.locator('[data-feature-id]')).toHaveCount(4);
-    await expect(page.locator('[data-feature-id="loudness"]')).toHaveCount(1);
-    await expect(page.locator('[data-feature-id="complexSpectrum"]')).toHaveCount(1);
+    await expect(page.locator('[data-feature-id]')).toHaveCount(21);
+    await expect(page.locator('[data-feature-id="loudness"] [aria-expanded="true"]'))
+        .toHaveCount(1);
+    await expect(page.locator('[data-feature-id="complexSpectrum"] [aria-expanded="true"]'))
+        .toHaveCount(1);
     await expect(page.locator('.timeline-toolbar')).toContainText('2.0×');
 
     const geometries: Record<number, number> = {};
@@ -178,8 +171,8 @@ test('isolates a Complex Spectrum renderer failure to its own card', async ({ pa
         } as typeof HTMLCanvasElement.prototype.getContext;
     });
     await page.goto('/analyzer');
-    await page.locator('.empty-slot')
-        .getByRole('button', { name: /Complex Spectrum/ })
+    await page.locator('[data-feature-id="complexSpectrum"]')
+        .getByRole('button', { name: '展开分析' })
         .click();
 
     await expect(page.locator(

@@ -1,11 +1,11 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-08-26
+last_reviewed: 2026-08-31
 upstream_docs:
   - "docs/product/problem-brief.md"
   - "docs/product/scope.md"
-next_action: "project-owner 审阅 Editor E1–E6 fixture、步骤、容差和 evidence 门禁"
+next_action: "用 M13 unit/integration/双浏览器 canonical 重新验证 Analyzer 指标"
 ---
 
 # Success Metrics
@@ -19,6 +19,8 @@ Analyzer 指标已由 M3–M11 和 Analyzer-only readiness 形成历史证据。
 | Owner 核心任务完成 | `project-owner` 完成加载、选卡、换卡、比较、跳转、刷新恢复的全部脚本任务 | 在批准的浏览器、fixture 和视口矩阵执行任务脚本，逐项记录通过/失败与证据 | 首个三特征切片验收及后续回归 |
 | 首批特征解释正确率 | owner 对 3/3 个预设音频片段正确解释 RMS、Amplitude Spectrum、Chroma 数值与听感/音色关系 | 使用预先写定答案要点的黄金片段，先完成任务再对照评分 | 首个三特征切片验收 |
 | 完整特征覆盖 | `src/data/analyzerData.ts` 的 21/21 个特征均有类型定义、renderer、黄金测试和可用卡片 | feature registry 覆盖检查、自动化测试与 owner 验收 | 最终特征里程碑 |
+| 全卡片可发现性 | 页面始终存在 21 张唯一卡，DOM/键盘/读屏顺序等于 `FEATURE_IDS`；收起态不挂载图表资源 | Chrome/Edge DOM、可访问性与 Canvas 计数 | M13 |
+| 活动分析上限 | 任意快速序列中活动 FIFO 始终唯一且最多四项；第五项淘汰最早项 | reducer、coordinator 集成和双浏览器交互 | M13 |
 
 owner-only 学习验证是当前批准方式，不推断为广泛用户研究结果。若未来需要对外声称普遍学习效果，必须补充新的样本和研究设计。
 
@@ -46,7 +48,7 @@ owner-only 学习验证是当前批准方式，不推断为广泛用户研究结
 
 - MP3、WAV、FLAC 的同源 fixture 在最新稳定版 Chrome 和 Edge 桌面端完成加载、播放和首批分析。
 - 在 1024、1280、1920 CSS px 验证真实几何、Canvas 像素尺寸与核心控件可用性。
-- 播放、切歌、跳转、选卡和换卡均可用键盘完成，焦点可见，图表结论不只依靠颜色，reduced motion 下无非必要动画。
+- 播放、切歌、跳转和展开/收起卡片均可用键盘完成，焦点可见，图表结论不只依靠颜色，reduced motion 下无非必要动画。
 - Analyzer 已在真实 Chrome/Edge 形成 M11 证据；Editor 的路由、草稿、标记和右键交互变化后必须重新执行自己的双浏览器矩阵，不得继承 Analyzer 通过状态。
 
 ## Editor E0 Product Outcomes（approved）
@@ -84,3 +86,5 @@ owner-only 学习验证是当前批准方式，不推断为广泛用户研究结
 ## Approval Record
 
 Analyzer 目标和阈值由 `project-owner` 于 2026-07-24 批准，并已由 Analyzer-only readiness 收口。`project-owner` 于 2026-08-26 先批准 Editor E0 产品意图，随后明确回复：“我批准 Editor E0 系统设计、接口契约、风险与 ADR；同意进入 Editor E1–E6 execution planning。”Editor 指标与架构据此生效；delivery 文档仍须另行定义 fixture、步骤和容差，quality 阶段只在成功、失败、边界与异常证据齐全后判断 Editor readiness。
+
+2026-08-31，owner 批准 M13 的 21 卡可发现性、最多四项 FIFO、按需挂载和资源门禁；历史 M7–M12 指标保留，但涉及四 slot/默认活动卡的断言不再代表 M13 候选。
