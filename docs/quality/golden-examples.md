@@ -1,13 +1,13 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-08-26
+last_reviewed: 2026-08-31
 upstream_docs:
   - "docs/quality/eval-plan.md"
   - "docs/delivery/acceptance-criteria.md"
   - "docs/delivery/test-strategy.md"
   - "docs/architecture/risk-register.md"
-next_action: "保留 Analyzer golden；使用独立 Editor E1 golden 固定工程与失败边界"
+next_action: "执行 M13-G01–G06 并保留 M3–M12 历史 golden"
 ---
 
 # Golden Examples
@@ -52,6 +52,12 @@ next_action: "保留 Analyzer golden；使用独立 Editor E1 golden 固定工�
 | GE-S04 | 一首可分析 fixture，选择四个唯一 feature | 缩放、移动游标、替换任一卡并点击图表 seek | 四项 series 身份均匹配当前 track/config/feature；精确值对应游标 frame | 四卡共享 zoom、viewport、cursor；替换卡不创建新播放 session | EV-J、EV-S；AC-P02、AC-P03、AC-A08；R-002 |
 | GE-S05 | 当前 track 已保存 Blob、卡片、参数和匹配 cache；handle 权限为 prompt | 刷新页面 | cache 身份完全匹配才使用；无旧 playing/time 数据 | 队列、当前歌曲和卡片恢复；时间 0 且 paused；不自动弹权限 | EV-D；AC-P04、AC-F01、AC-S03；R-005 |
 | GE-S06 | 同一短 PCM master 编码为 MP3/WAV/FLAC，manifest 完整 | 在目标浏览器逐一加载、播放并分析适用特征 | 每个格式分别与其解码 PCM 的 direct Meyda golden 比较；不要求有损 MP3 与 WAV/FLAC 逐值相同 | 三格式均进入可播放/可分析状态，元数据和错误状态正确 | EV-A、EV-B；AC-P01、AC-A03；R-008、R-009、R-016 |
+| M13-G01 | 新工作区与 21 项 registry | 进入 Analyzer，不展开卡片 | 队列为空、无 Worker 分析 | 21 张卡按 `FEATURE_IDS`；无 Canvas/select/remove | EV-U、EV-R；AC-M1301/1303 |
+| M13-G02 | 任选四个折叠卡 | 依次展开，再展开第五张 | 队列最多四项且唯一；第五项替换队首 | 第五张焦点保留，最早卡 body 卸载 | EV-J、EV-U；AC-M1302 |
+| M13-G03 | 已展开 A/B/C/D | 收起 B，再展开 B | B 从队列删除后重新进入队尾 | 其他卡年龄不变，body/Canvas 计数正确 | EV-J；AC-M1302/1303 |
+| M13-G04 | 旧 V1 `activeCards` slot 顺序 | 刷新恢复并再次保存 | restore queue 与 save carrier 顺序一致 | 对应四张卡展开，新工作区仍默认空 | EV-D；AC-M1305/1306 |
+| M13-G05 | 快速展开/收起与迟到 Worker/save | 连续提交超过四项并注入旧 completion | 只有最新 generation/revision 生效 | 旧结果不回填、persistence 状态不倒退 | EV-J、EV-D；AC-M1304/1306 |
+| M13-G06 | 21 卡四视口与反复生命周期 | 展开结构明细、resize、路由循环 | 分析/几何阈值不变 | 无相交、溢出、资源增长或 console warning | EV-B、EV-R；AC-M1307/1308 |
 
 ## 3. Expected-Failure Examples
 
@@ -105,3 +111,5 @@ next_action: "保留 Analyzer golden；使用独立 Editor E1 golden 固定工�
 ## 8. Approval Record
 
 `project-owner` 于 2026-07-28 明确批准本文的样例、fixture 入库政策和追溯规则。批准不表示任何样例已经执行或通过。
+
+2026-08-31，owner 批准 M13-G01–G06 作为新候选规范；它们在 canonical 前保持 expected，不改写历史 golden 执行结果。

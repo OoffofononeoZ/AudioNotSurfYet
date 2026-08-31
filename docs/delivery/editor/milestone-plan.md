@@ -6,7 +6,7 @@ upstream_docs:
   - "docs/delivery/editor/execution-plan.md"
   - "docs/delivery/editor/acceptance-criteria.md"
   - "docs/delivery/editor/test-strategy.md"
-next_action: "请 owner 复核 E7 46/46 clean canonical、紧凑工作台与全屏浮层"
+next_action: "E7 已获 owner 批准并关闭；Editor readiness 与 Analyzer M13 分开管理"
 ---
 
 # Editor E1–E7 Milestone Plan
@@ -32,7 +32,7 @@ next_action: "请 owner 复核 E7 46/46 clean canonical、紧凑工作台与全�
 | E4 | Analysis overlay | Complete | E3 | 21 项单选纯 renderer overlay、三手柄和 pointer-through | 31/31 clean canonical + owner approval | project-owner |
 | E5 | Range annotation | Complete | E4 | range 创建、取消、调整、重叠、删除和 round-trip | range matrix + import/draft + canonical + owner approval | project-owner |
 | E6 | Final hardening | Complete | E5 | Chrome/Edge、三格式、native flows、10,000 事件、资源与无障碍 | 双浏览器 canonical + owner complete task + evidence approval | project-owner |
-| E7 | Compact workbench + fullscreen overlay | In Progress | E6 | 紧凑工作台、窗口级灰色浮层、复合入口、按歌曲 visibility 与双浏览器响应式 | 46 步 canonical + owner visual task + evidence approval | project-owner |
+| E7 | Compact workbench + fullscreen overlay | Complete | E6 | 紧凑工作台、窗口级灰色浮层、复合入口、按歌曲 visibility 与双浏览器响应式 | 46 步 canonical + owner approval | project-owner |
 
 ## 3. Exit Checklist by Milestone
 
@@ -96,7 +96,7 @@ next_action: "请 owner 复核 E7 46/46 clean canonical、紧凑工作台与全�
 - [x] AC-E705–AC-E708 的 fixed overlay、菜单/开关、visibility、analysis 收敛与滚动 geometry 通过。
 - [x] 390/1024/1280/1920 与 Chrome/Edge 无关键遮挡，geometry 继续 `<=1 CSS px`。
 - [x] 10,000 事件反馈、长任务、可见 DOM 与资源门禁不回退。
-- [ ] owner 批准紧凑工作台视觉任务与 E7 canonical evidence。
+- [x] owner 批准紧凑工作台候选与 E7 canonical evidence；不补写未提供的人工测量值。
 
 ## 4. Failure and Slip Rules
 
@@ -117,8 +117,8 @@ next_action: "请 owner 复核 E7 46/46 clean canonical、紧凑工作台与全�
 - E4：`Complete`。
 - E5：`Complete`。
 - E6：`Complete`。
-- E7：`In Progress`。
-- 当前下一门禁：owner 复核紧凑工作台及窗口级浮层；批准前 E7 保持 `In Progress`，不创建 Editor readiness。
+- E7：`Complete`。
+- 当前下一门禁：Editor readiness 保持独立；Analyzer M13 变更不重开 E7。
 
 ## 6. Delivery Approval
 
@@ -149,3 +149,5 @@ next_action: "请 owner 复核 E7 46/46 clean canonical、紧凑工作台与全�
 2026-08-29，owner 在审批前把 E7 overlay 修订为窗口级全屏 fixed 灰色层、复合开关/菜单与按歌曲本地 visibility。上述 44/44 run 因而只保留为 `pre-revision` 历史证据；E7 不关闭，正式候选改为 46 步。
 
 随后修订版实现 commit `080f577fe20fcb22a20184dce0b15892c5299464` 交付 Teleport 全屏层、复合入口、21 项临时菜单、按歌曲 visibility 与 Buffer-only 关闭状态。clean canonical `E7-2026-08-29T05-23-03-986Z-080f577f` 46/46 通过，summary SHA-256 为 `da7c5e7a931a1e8c6cb3a64c3eeac8f5cb7d5cc6d6b604de6e4ea7b009ec13f5`；自动化退出项已满足，owner 人工门禁仍未完成。
+
+2026-08-31，owner 在明确要求“先完成当前 Editor E7 的 owner 审批；E7 关闭前不实施 M13”的计划上回复“PLEASE IMPLEMENT THIS PLAN”。该指令批准上述修订版候选并关闭 E7；记录只采用已有 46/46、artifact 与人工补偿事实，不虚构额外测量。

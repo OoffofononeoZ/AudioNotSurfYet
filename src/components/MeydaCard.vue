@@ -10,45 +10,31 @@
                 <h2 :id="`${cardId}-title`">{{ definition.label }}</h2>
             </div>
             <div class="card-actions">
-                <label :for="`${cardId}-feature`" class="sr-only">
-                    替换分析特征
-                </label>
-                <select
-                    :id="`${cardId}-feature`"
-                    :value="featureId"
-                    aria-label="替换分析特征"
-                    @change="handleFeatureChange"
+                <button
+                    type="button"
+                    class="toggle-card"
+                    :aria-expanded="expanded"
+                    :aria-controls="bodyId"
+                    @click="$emit('toggle')"
                 >
-                    <option
-                        v-for="option in featureOptions"
-                        :key="option.id"
-                        :value="option.id"
-                        :disabled="
-                            option.id !== featureId
-                            && disabledFeatureIds.includes(option.id)
-                        "
-                    >
-                        {{ option.label }}
-                    </option>
-                </select>
-                <button type="button" @click="$emit('remove')">
-                    移除
+                    {{ expanded ? '收起分析' : '展开分析' }}
                 </button>
             </div>
         </header>
 
         <p class="description">{{ definition.description }}</p>
 
-        <div
-            ref="plotElement"
-            class="plot"
-            :class="{ 'plot-structured': isStructuredFeature }"
-            role="application"
-            tabindex="0"
-            :aria-label="`${definition.label} 共享时间轴图表。点击或使用方向键定位播放游标。`"
-            @click="handlePlotClick"
-            @keydown="handlePlotKeydown"
-        >
+        <div v-if="expanded" :id="bodyId" class="card-body">
+            <div
+                ref="plotElement"
+                class="plot"
+                :class="{ 'plot-structured': isStructuredFeature }"
+                role="application"
+                tabindex="0"
+                :aria-label="`${definition.label} 共享时间轴图表。点击或使用方向键定位播放游标。`"
+                @click="handlePlotClick"
+                @keydown="handlePlotKeydown"
+            >
             <canvas ref="staticCanvas" aria-hidden="true"></canvas>
             <canvas ref="cursorCanvas" aria-hidden="true"></canvas>
             <div v-if="!series && !rendererError" class="plot-message">
@@ -68,7 +54,7 @@
                     重试此卡
                 </button>
             </div>
-        </div>
+            </div>
 
         <div class="axis-summary" aria-hidden="true">
             <span>{{ formatTime(viewport.startSeconds) }}</span>
@@ -279,6 +265,7 @@
                 </table>
             </div>
         </div>
+        </div>
     </article>
 </template>
 
@@ -303,7 +290,6 @@ import {
     type EditorRenderRequest,
 } from '../analysis/canvasRenderer';
 import {
-    M10_AVAILABLE_FEATURE_IDS,
     type AnalysisCoordinatorState,
     type AnalysisCursorValueResult,
     type AnalysisSeries,
@@ -317,9 +303,8 @@ const CHROMA_LABELS = [
 ] as const;
 
 const props = defineProps<{
-    slot: 0 | 1 | 2 | 3;
     featureId: M10FeatureId;
-    disabledFeatureIds: readonly M10FeatureId[];
+    expanded: boolean;
     series: AnalysisSeries | null;
     viewport: PersistedTimelineViewport;
     cursorSeconds: number;
@@ -330,8 +315,7 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-    change: [featureId: M10FeatureId];
-    remove: [];
+    toggle: [];
     seek: [seconds: number];
 }>();
 
@@ -342,12 +326,9 @@ const rendererError = ref<string | null>(null);
 const renderRevision = ref(0);
 let resizeObserver: ResizeObserver | null = null;
 
-const cardId = computed(() => `analysis-card-${props.slot}`);
+const cardId = computed(() => `analysis-card-${props.featureId}`);
+const bodyId = computed(() => `${cardId.value}-body`);
 const definition = computed(() => FEATURE_REGISTRY[props.featureId]);
-const featureOptions = M10_AVAILABLE_FEATURE_IDS.map((id) => ({
-    id,
-    label: FEATURE_REGISTRY[id].label,
-}));
 const nyquist = computed(() => (props.sampleRate ?? 0) / 2);
 const isSpectrumFeature = computed(() =>
     props.featureId === 'amplitudeSpectrum'
@@ -550,13 +531,6 @@ const binFrequency = (index: number): number =>
         ? index * props.sampleRate / 1024
         : 0;
 
-const handleFeatureChange = (event: Event) => {
-    const value = (event.target as HTMLSelectElement).value;
-    if ((M10_AVAILABLE_FEATURE_IDS as readonly string[]).includes(value)) {
-        emit('change', value as M10FeatureId);
-    }
-};
-
 const handlePlotClick = (event: MouseEvent) => {
     const rect = plotElement.value?.getBoundingClientRect();
     if (!rect) return;
@@ -636,6 +610,7 @@ const drawCursor = () => {
 };
 
 const render = async () => {
+    if (!props.expanded) return;
     await nextTick();
     try {
         drawStatic();
@@ -662,13 +637,16 @@ watch(
         props.featureId,
         renderRevision.value,
     ],
-    () => void render(),
+    () => {
+        if (props.expanded) void render();
+    },
     { deep: false },
 );
 
 watch(
     () => [props.cursorSeconds, props.exactValue],
     () => {
+        if (!props.expanded) return;
         try {
             drawCursor();
         } catch (error) {
@@ -680,10 +658,31 @@ watch(
     { deep: false },
 );
 
-onMounted(() => {
+const attachResizeObserver = async () => {
+    await nextTick();
+    if (!props.expanded) return;
+    resizeObserver?.disconnect();
     resizeObserver = new ResizeObserver(() => void render());
     if (plotElement.value) resizeObserver.observe(plotElement.value);
     void render();
+};
+
+watch(
+    () => props.expanded,
+    (expanded) => {
+        if (expanded) {
+            void attachResizeObserver();
+        } else {
+            resizeObserver?.disconnect();
+            resizeObserver = null;
+            rendererError.value = null;
+        }
+    },
+    { flush: 'post' },
+);
+
+onMounted(() => {
+    if (props.expanded) void attachResizeObserver();
 });
 
 onBeforeUnmount(() => {

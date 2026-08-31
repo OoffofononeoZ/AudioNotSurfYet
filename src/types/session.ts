@@ -19,6 +19,8 @@ export interface ActiveAnalysisCard {
     featureId: FeatureId;
 }
 
+export type ActiveFeatureQueue = FeatureId[];
+
 export interface PersistedAnalysisConfig {
     schemaVersion: 1;
     frameSize: 1024;
@@ -40,12 +42,12 @@ export interface TimelineViewport extends PersistedTimelineViewport {
 
 export interface AnalysisWorkspaceSnapshot {
     initialized: boolean;
-    activeCards: ActiveAnalysisCard[];
+    activeFeatureQueue: ActiveFeatureQueue;
     viewport: PersistedTimelineViewport | null;
 }
 
 export interface AnalysisWorkspaceUpdate {
-    activeCards: ActiveAnalysisCard[];
+    activeFeatureQueue: ActiveFeatureQueue;
     viewport: PersistedTimelineViewport | null;
 }
 
@@ -120,6 +122,23 @@ export const cloneActiveAnalysisCards = (
     cards: readonly ActiveAnalysisCard[],
 ): ActiveAnalysisCard[] => cards.map((card) => ({ ...card }));
 
+export const cloneActiveFeatureQueue = (
+    featureIds: readonly FeatureId[],
+): ActiveFeatureQueue => [...featureIds];
+
+export const activeCardsToFeatureQueue = (
+    cards: readonly ActiveAnalysisCard[],
+): ActiveFeatureQueue => [...cards]
+    .sort((left, right) => left.slot - right.slot)
+    .map((card) => card.featureId);
+
+export const activeFeatureQueueToCards = (
+    featureIds: readonly FeatureId[],
+): ActiveAnalysisCard[] => featureIds.map((featureId, slot) => ({
+    slot: slot as ActiveAnalysisCard['slot'],
+    featureId,
+}));
+
 export const clonePersistedTimelineViewport = (
     viewport: PersistedTimelineViewport | null,
 ): PersistedTimelineViewport | null =>
@@ -129,19 +148,15 @@ export const assertValidAnalysisWorkspace = (
     workspace: AnalysisWorkspaceUpdate,
 ): void => {
     if (
-        !Array.isArray(workspace.activeCards)
-        || workspace.activeCards.length > 4
-        || workspace.activeCards.some((card) =>
-            !card
-            || ![0, 1, 2, 3].includes(card.slot)
-            || !isFeatureId(card.featureId))
-        || new Set(workspace.activeCards.map((card) => card.slot)).size
-            !== workspace.activeCards.length
-        || new Set(workspace.activeCards.map((card) => card.featureId)).size
-            !== workspace.activeCards.length
+        !Array.isArray(workspace.activeFeatureQueue)
+        || workspace.activeFeatureQueue.length > 4
+        || workspace.activeFeatureQueue.some((featureId) =>
+            !isFeatureId(featureId))
+        || new Set(workspace.activeFeatureQueue).size
+            !== workspace.activeFeatureQueue.length
     ) {
         throw new TypeError(
-            'Analysis workspace requires 0–4 cards with unique slots and features.',
+            'Analysis workspace requires 0–4 unique active features.',
         );
     }
     const viewport = workspace.viewport;
@@ -158,6 +173,24 @@ export const assertValidAnalysisWorkspace = (
     ) {
         throw new TypeError(
             'Analysis workspace viewport must be finite, ordered, non-negative, and positively zoomed.',
+        );
+    }
+};
+
+export const assertValidPersistedActiveCards = (
+    cards: readonly ActiveAnalysisCard[],
+): void => {
+    if (
+        cards.length > 4
+        || cards.some((card) =>
+            !card
+            || ![0, 1, 2, 3].includes(card.slot)
+            || !isFeatureId(card.featureId))
+        || new Set(cards.map((card) => card.slot)).size !== cards.length
+        || new Set(cards.map((card) => card.featureId)).size !== cards.length
+    ) {
+        throw new TypeError(
+            'Persisted analysis cards require 0–4 unique slots and features.',
         );
     }
 };

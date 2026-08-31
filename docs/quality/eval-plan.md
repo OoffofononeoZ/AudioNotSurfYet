@@ -1,25 +1,25 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-08-28
+last_reviewed: 2026-08-31
 upstream_docs:
   - "docs/product/success-metrics.md"
   - "docs/architecture/risk-register.md"
   - "docs/delivery/execution-plan.md"
   - "docs/delivery/acceptance-criteria.md"
   - "docs/delivery/test-strategy.md"
-next_action: "保留 M12 canonical artifact；相关布局或资源所有权变化时重新评估"
+next_action: "M13 provisional 已通过；在本地实现提交上执行 clean canonical"
 ---
 
 # Eval Plan
 
 ## Scope Routing
 
-本文保留 Analyzer M3–M11 已批准的质量契约与历史，并增加 M12 DOM/响应式/资源评估。Editor 使用独立质量文档；M12 不修改 Editor E6 evidence 或人工补偿状态。
+本文保留 Analyzer M3–M12 已批准的质量契约与历史，并增加 M13 全卡片、FIFO、V1 adapter、异步保存与资源评估。Editor 使用独立质量文档；E7 已关闭且只作为相邻 lease/renderer 回归。
 
 ## 1. Purpose and Current State
 
-本文件定义 AudioNotSurfYet 的质量证据契约。M3–M12 的适用 canonical evidence 均已获批准；M12 以真实 DOM 几何、双浏览器动态重排和 Observer/RAF 生命周期补足 EV-U、EV-B、EV-R，新候选 readiness 已完成复核。Editor 质量状态继续独立。
+本文件定义 AudioNotSurfYet 的质量证据契约。M3–M12 的适用 canonical evidence 均已获批准但只代表历史候选；M13 重新打开活动卡、几何、持久化竞态和资源边界，当前 readiness 为 `in-review`。
 
 Q0 只批准“如何判断质量”，不批准 release readiness。`docs/quality/release-readiness.md` 只能在 M11 已产生完整成功、失败、边界和异常证据后创建。
 
@@ -42,7 +42,7 @@ Q0 只批准“如何判断质量”，不批准 release readiness。`docs/quali
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | EV-A | 分析正确性与特征语义 | success、failure、boundary、exception | AC-A01–AC-A07、AC-A10 | R-008、R-009、R-010、R-011、R-016、R-020 | Vitest direct-Meyda golden、Worker contract、量化 round-trip、fixture manifest review | 所有适用值满足固定容差；维度、尾帧和有限值规则通过；M6 为 21/21 registry + 4/4 Worker 支持，M10 才要求 21/21 产品覆盖 | project-owner |
 | EV-S | 播放、seek 与时间同步 | success、failure、boundary、exception | AC-P03、AC-S01–AC-S05 | R-001、R-012 | AudioEngine/store 集成、Playwright 真实 AudioContext、长播放与重复 seek 计时 | 所有计时场景偏差 ≤100ms；单一实时 AudioContext；MusicBar 基线无回归 | project-owner |
-| EV-J | Worker、活动卡、缓存身份和竞态 | success、failure、boundary、exception | AC-P02、AC-A08–AC-A10、AC-R03、AC-R04、AC-F06 | R-002、R-003 | Worker message contract、generation/cache-key 单元测试、快速换歌/换卡 E2E、故障注入 | 0–4 个唯一 feature；旧 generation 不改变 store/cache/Canvas；Worker 失败不停止播放 | project-owner |
+| EV-J | Worker、FIFO 活动队列、缓存身份和竞态 | success、failure、boundary、exception | AC-P02、AC-A08–AC-A10、AC-R03、AC-R04、AC-F06、AC-M1302–AC-M1304 | R-002、R-003、R-029 | reducer、Worker message、generation/cache-key、快速展开/换歌、故障注入 | 0–4 个唯一 feature；第五项 FIFO；旧 generation 不改变 queue/cache/Canvas；Worker 失败不停止播放 | project-owner |
 | EV-D | IndexedDB、文件权限和会话恢复 | success、failure、boundary、exception | AC-P04、AC-F01–AC-F05、AC-F08、AC-F09、AC-R05、AC-S03 | R-003、R-005、R-006、R-007 | isolated IndexedDB、真实浏览器刷新、handle adapter、权限/事务/quota 注入 | 只保留 current Blob/cache；刷新为 0 秒 paused；失败状态可见且当前页面继续可用 | project-owner |
 | EV-U | Owner 学习任务、可访问性和范围边界 | success、failure、boundary、exception | AC-P05、AC-P06、AC-U01–AC-U04 | R-014、R-018 | owner 脚本、预写答案评分、键盘/焦点检查、axe-compatible scan、网络/路由范围审计 | owner 任务全部完成且解释 3/3；核心键盘路径、焦点、非颜色表达、reduced motion 通过；无范围外网络能力 | project-owner |
 | EV-B | 格式、浏览器、视口和运行时兼容 | success、failure、boundary、exception | AC-P01、AC-F07、AC-U05、AC-U06 | R-008、R-009、R-015、R-016 | 同源格式 fixture、Chrome/Edge Playwright 或真实手工执行、DOMRect/Canvas/console 检查 | 三格式和三视口通过；无 console error/warn；只有真实 Edge 证据才能关闭浏览器矩阵 | project-owner |
@@ -72,6 +72,7 @@ Q0 只批准“如何判断质量”，不批准 release readiness。`docs/quali
 - Failure：Worker constructor/message/extract error 和 cancelled job 显示可重试错误，不停止播放或覆盖其他卡。
 - Boundary：0、1、4、重复和超过 4 个 feature；快速换歌、换卡、销毁和游标快速移动。
 - Exception：即使 cooperative cancel 不能立即停止，旧 generation/result/request ID 仍必须被丢弃。
+- M13：队列 reducer 在一次提交中完成淘汰与追加；快速序列后只有最终队列可驱动 Worker、exact cursor 与 Canvas。
 
 ### EV-D — Recovery and persistence
 
@@ -85,6 +86,7 @@ Q0 只批准“如何判断质量”，不批准 release readiness。`docs/quali
 - Success：owner 完成加载、选卡、换卡、比较、跳转和刷新恢复，并正确解释三个学习样例。
 - Failure：不可见焦点、无可访问名称、纯颜色表达或 Canvas 无 DOM 值均失败。
 - M12：开场文案移除后状态仍有独立 live region；视觉最短列不得改变 slot 0–3 的 DOM/键盘/读屏顺序，动态重排不得关闭 `details` 或丢失焦点。
+- M13：21 张卡 DOM/键盘/读屏顺序固定为 `FEATURE_IDS`；折叠按钮名称、`aria-expanded`/`aria-controls` 正确，第五张保持焦点，淘汰卡 body 直接卸载。
 - Boundary：0–4 张卡、键盘 seek 到两端、reduced motion、卡片错误后的可预测焦点。
 - Exception：不得新增麦克风、上传、远端 URL、账户或未定义 Tab 的实现；owner-only 结果不得表述为广泛用户研究。
 
@@ -93,6 +95,7 @@ Q0 只批准“如何判断质量”，不批准 release readiness。`docs/quali
 - Success：同源短 fixture 的 MP3/WAV/FLAC 在最新 Chrome/Edge 完成加载、播放和适用分析。
 - Failure：损坏/不支持文件显示可理解错误，队列和 store 不锁死。
 - M12 boundary：390/1024 为一列，1280/1920 为两列；实际 DOMRect 满足 18px gap、无 item 相交、无横向溢出且容器包围所有 item。Chrome 与 Edge 必须分别取证。
+- M13 boundary：上述几何扩展到 21 个 feature wrapper；初始、1–4 展开、第五项、错误态和结构明细变化都满足最短列，DOM 顺序不随坐标改变。
 - Boundary：390、1024、1280、1920 CSS px 的几何、sticky/overlay 层级、Canvas backing store 和控制台。
 - Exception：MP3 有损结果与各自解码后的直接 Meyda golden 比较，不要求三格式逐值相同；缺少真实 Edge 时保持 `planned/blocked`。
 
@@ -101,6 +104,7 @@ Q0 只批准“如何判断质量”，不批准 release readiness。`docs/quali
 - Success：正常和最大输入下交互、进度、取消和 Canvas 分层重绘满足阈值。
 - Failure：分析计算落到主线程、payload 超过 30Hz、公开测试脚本无效或资源未释放均失败。
 - M12：每个 Analyzer 实例最多一个待执行 masonry RAF；container/item Observer 与 RAF 在卸载时释放。`ResizeObserver loop` warning、路由循环资源增长或动态重排导致持续布局震荡均失败并映射 R-028。
+- M13：折叠卡不得保留 Canvas 或卡片内部 Observer；20 次展开/收起、resize 和路由循环中 Worker、Observer、RAF、Canvas 不单调增长，映射 R-028/R-030。
 - Boundary：15 分钟、四个代表性最重 feature、20 次换歌/换卡/route dispose、cache/quota 压力。
 - Exception：不设置 wall-clock 完成 SLA；约 1MB chunk 警告作为风险信号记录，不伪装为构建失败或通过。
 
@@ -197,3 +201,5 @@ Q0 只有在以下条件满足后才能改为 `approved`：
 2026-08-26，`project-owner` 明确批准 M11 canonical evidence、Edge 原生权限与最终加固结果，同意关闭 M11 并创建 release-readiness。EG-006 仍作为“不可全自动化”的结构性缺口保留，但当前候选的 Chrome/Edge 人工补偿均已签字；readiness 必须继续披露该边界，不得改写为自动化通过。
 
 2026-08-28，`project-owner` 要求 agent 自行提交并完成 M12 后续。第二次 clean canonical 12/12 通过且首轮 FT-EVIDENCE 已关闭；M12 EV-U/EV-B/EV-R 适用子集、EG-007 关闭和 readiness 复核据此获批准。
+
+2026-09-01，M13 最终 dirty-worktree provisional `M13-2026-08-31T17-40-46-300Z-e62140ee-provisional` 17/17 通过，summary SHA-256 为 `4225440e6782c2aca5a3b13803059b7aefbdad210d134aa64235175389be33e2`。更早的 `M13-2026-08-31T17-27-10-749Z-e62140ee-provisional` 在前 13 步通过后因 runner 未清理步骤名中的 `/` 而无法创建第 14 步日志；该 harness 缺陷已修复，失败目录保留且不得充当产品 failure 或正式 evidence。

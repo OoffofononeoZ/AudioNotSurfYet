@@ -6,7 +6,11 @@ import type {
     StoredCurrentBlob,
     StoredHandle,
 } from '../types/session';
-import { assertValidAnalysisWorkspace } from '../types/session';
+import {
+    activeCardsToFeatureQueue,
+    assertValidAnalysisWorkspace,
+    assertValidPersistedActiveCards,
+} from '../types/session';
 import {
     FEATURE_IDS,
     isFeatureId,
@@ -124,8 +128,13 @@ export const validatePersistedSessionV1 = (
         throw new InvalidPersistedSessionError();
     }
     try {
+        assertValidPersistedActiveCards(
+            value.activeCards as PersistedSessionV1['activeCards'],
+        );
         assertValidAnalysisWorkspace({
-            activeCards: value.activeCards as PersistedSessionV1['activeCards'],
+            activeFeatureQueue: activeCardsToFeatureQueue(
+                value.activeCards as PersistedSessionV1['activeCards'],
+            ),
             viewport: value.viewport as PersistedSessionV1['viewport'],
         });
     } catch {

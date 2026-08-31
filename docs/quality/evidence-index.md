@@ -1,25 +1,25 @@
 ---
-status: approved
+status: in-review
 owner: "project-owner"
-last_reviewed: 2026-08-28
+last_reviewed: 2026-08-31
 upstream_docs:
   - "docs/quality/eval-plan.md"
   - "docs/quality/golden-examples.md"
   - "docs/quality/failure-taxonomy.md"
   - "docs/delivery/milestone-plan.md"
   - "tests/fixtures/fixture-manifest.json"
-next_action: "保留 M12 canonical 与首轮失败 artifact；Analyzer 正式上线继续等待 PROD-015"
+next_action: "M12 evidence 仅作历史；等待 M13 clean canonical 后追加新候选记录"
 ---
 
 # Evidence Index
 
 ## Scope Routing
 
-本文保留 Analyzer M3–M12 已批准 evidence。Editor 从 E1 开始使用独立 [Editor evidence index](editor/evidence-index.md)，不得改变历史 Analyzer run identity。
+本文保留 Analyzer M3–M12 已批准历史 evidence。M13 改变活动卡、持久化适配和资源挂载，旧 run 不代表当前候选；Editor 使用独立 [Editor evidence index](editor/evidence-index.md)。
 
 ## 1. Purpose and Gate State
 
-本文件保存受版本控制的长期证据摘要；原始日志保存在 Git 忽略的本地 artifact 目录。M3–M12 的适用 canonical evidence 与所需人工补偿门禁均已由 `project-owner` 批准，M12 已为 `Complete`。Analyzer readiness 仍不等于生产上线授权，PROD-015 保持阻断。
+本文件保存受版本控制的长期证据摘要；原始日志保存在 Git 忽略的本地 artifact 目录。M3–M12 的 canonical 与批准保持历史有效，M13 当前 `In Progress` 且尚无 canonical，因此本文为 `in-review`。PROD-015 继续阻断生产上线。
 
 每条 `pass` 只证明对应里程碑的适用子集在被记录的 commit 和环境上可复现。它不表示完整 EV-A–EV-R、未执行里程碑、Edge 矩阵或 release readiness 已通过。
 

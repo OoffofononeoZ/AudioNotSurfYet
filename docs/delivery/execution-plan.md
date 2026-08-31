@@ -1,7 +1,7 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-08-28
+last_reviewed: 2026-08-31
 upstream_docs:
   - "docs/product/problem-brief.md"
   - "docs/product/scope.md"
@@ -9,7 +9,7 @@ upstream_docs:
   - "docs/architecture/system-design.md"
   - "docs/architecture/interface-contracts.md"
   - "docs/architecture/risk-register.md"
-next_action: "M12 已完成并登记 canonical evidence；Editor E6 状态与人工补偿独立"
+next_action: "M13 provisional 已通过；创建本地实现提交后执行 clean eval:m13"
 ---
 
 # Execution Plan
@@ -422,6 +422,29 @@ Exit：M12 unit/E2E、typecheck、docs、build、diff check 和 M7–M11 Analyze
 Rollback：如果最短列在批准浏览器中无法无重叠或无资源增长运行，则回退 M12 候选实现并保留 M11 已批准候选；不增加运行时 legacy fallback 或浏览器特判。
 - 未通过的格式、浏览器或关键路径不得以“已知问题”形式绕过批准范围。
 
+### M13 — All cards collapsed with FIFO active analysis
+
+Goal：一页稳定展示全部 21 张卡，新工作区默认收起；最多四张展开并分析，第五张按 FIFO 淘汰最早项，不再提供移除或特征替换。
+
+Implementation:
+
+- Slice 0：关闭 E7 owner 门禁；批准 ADR-0012、R-029/R-030、M13 acceptance/eval，并把 M12 readiness 标为历史候选。
+- Slice 1：增加纯 FIFO reducer、`activeFeatureQueue` runtime 契约和 `PersistedSessionV1.activeCards` 双向 adapter；workspace 保存使用不可变快照、串行写入与 revision guard。
+- Slice 2：Analyzer 按 `FEATURE_IDS` 渲染 21 个稳定 masonry wrapper；`MeydaCard` 改为 header/简介常驻、body 按 `expanded` 挂载，删除 slot/select/remove 契约。
+- Slice 3：Coordinator 继续处理 0–4 项唯一队列；快速切换 cancel 旧 generation、清理 exact request、复用合法 cache hit 并只计算 miss。
+- Slice 4：更新 M7–M12 受影响断言与 M13 unit/integration/Chrome/Edge runner。
+- M14 只登记拖动手柄、鼠标/触控/键盘排序、持久化和读屏播报；M13 不显示图标、不实现排序、不增加 schema。
+
+Verification:
+
+- Unit：空、1–4 项、第五项 FIFO、手动收起、重新展开入队尾、重复/快速序列、唯一性、V1 双向适配、masonry 21 项无相交。
+- Integration：零活动项无 Worker、1–4 项 cache hit/miss、第五项 generation 取消、迟到结果隔离、串行保存最新 revision、quota/not-persisted 与刷新 FIFO 恢复。
+- Chrome/Edge：21 张唯一卡始终存在；初始无 Canvas/select/remove；展开 1–4 才分析；第五张淘汰最早项，Canvas 上限、seek/zoom/exact/error/retry/refresh 正常。
+- 390/1024 一列、1280/1920 两列、18px gap，无重叠/横向溢出；DOM/键盘/读屏顺序保持 `FEATURE_IDS`。20 次展开/收起、resize、路由循环不累积 Worker、Observer、RAF、Canvas 或 console error/warn。
+- dirty worktree 运行 `eval:m13:provisional`；本地实现 commit 后在 clean HEAD 运行 `eval:m13`。canonical 同时回归 Analyzer M7–M12、Coordinator/cache 与已批准 Editor E7 lease/renderer 隔离路径。
+
+Exit：专项、typecheck、build、docs、diff check 与完整 provisional/canonical 通过；evidence/readiness 复核后 M13 才能 Complete。默认只创建本地提交，不推送。
+
 ## 4. Cross-Cutting Ownership
 
 当前 `project-owner` 同时承担产品批准、技术决策、里程碑验收和学习任务验证。若后续分配工程/QA/release owner，更新各文档 frontmatter 和 milestone owner，但不改变已有门禁。
@@ -448,3 +471,5 @@ Rollback：如果最短列在批准浏览器中无法无重叠或无资源增长
 2026-08-28，`project-owner` 接受 M12 瀑布流与顶部精简计划并明确要求实施。该批准开放 M12 代码与 provisional evidence；M11 历史证据保持批准，但不自动覆盖新候选几何，canonical 与 readiness 恢复仍需单独审批。
 
 同日，owner 要求 agent 自行提交并完成后续。M12 canonical `M12-2026-08-28T07-30-39-789Z-be655e67` 在 clean commit `be655e6765a63493fb1a3a4ee99992073b06e54e` 上 12/12 通过；evidence、R-028 与 Analyzer readiness 复核据此获批，M12 改为 `Complete`。
+
+2026-08-31，owner 以“PLEASE IMPLEMENT THIS PLAN”批准 M13 完整产品、架构、delivery 与 test plan，并授权在 E7 关闭后直接实施、提交、执行 canonical 与后续 evidence 复核。本轮只使用本地 Git，不推送远程。

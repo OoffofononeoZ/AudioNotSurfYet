@@ -1,7 +1,7 @@
 ---
-status: in-review
+status: approved
 owner: "project-owner"
-last_reviewed: 2026-08-29
+last_reviewed: 2026-09-01
 upstream_docs:
   - "docs/quality/editor/eval-plan.md"
   - "docs/quality/editor/golden-examples.md"
@@ -12,7 +12,7 @@ upstream_docs:
   - "docs/quality/editor/e6-eval-plan.md"
   - "docs/quality/editor/e7-eval-plan.md"
   - "docs/delivery/editor/milestone-plan.md"
-next_action: "请 owner 在 Chrome/Edge 复核修订版 E7 全屏浮层；批准前 E7 保持 In Progress"
+next_action: "E7 已获 owner 批准并关闭；保留 44/44 pre-revision 与 46/46 canonical artifact"
 ---
 
 # Editor Evidence Index
@@ -26,14 +26,14 @@ next_action: "请 owner 在 Chrome/Edge 复核修订版 E7 全屏浮层；批准
 - E4：`Complete`。
 - E5：`Complete`。
 - E6：`Complete`。
-- E7：`In Progress`。
+- E7：`Complete`。
 - E1 clean canonical 与 owner 人工门禁均已批准；Analyzer M3–M11 evidence 仍不能替代未来 Editor 里程碑证据。
 - E2 clean canonical 与 owner 门禁已于 2026-08-27 获批。
 - E3 clean canonical 与 owner 人工门禁已于 2026-08-27 获批；E4 clean canonical 与 owner 人工门禁随后获批。
 - E4 clean canonical 31/31 与 owner 人工门禁已于 2026-08-27 获批；E5 已开放。
 - E5 clean canonical 35/35 与 owner 人工范围任务已于 2026-08-27 获批；E6 已开放。
 - E6 clean canonical 40/40、原生 OS picker、`beforeunload`、辅助技术与长会话补偿已于 2026-08-28 获 owner 批准；E7 紧凑工作台布局已开放，Editor readiness 延后至 E7 审批。
-- E7 修订版 clean canonical 已在实现 commit `080f577fe20fcb22a20184dce0b15892c5299464` 上 46/46 通过并登记为 `in-review`；原 44/44 run 保留为 `pre-revision`，owner 视觉任务与批准前不关闭 E7、不创建 Editor readiness。
+- E7 修订版 clean canonical 已在实现 commit `080f577fe20fcb22a20184dce0b15892c5299464` 上 46/46 通过；原 44/44 run 保留为 `pre-revision`。2026-08-31 owner 批准修订版候选并关闭 E7，未提供的人工测量不补写。
 
 ## 2. Record Contract
 
@@ -673,15 +673,15 @@ next_action: "请 owner 在 Chrome/Edge 复核修订版 E7 全屏浮层；批准
 | --- | --- |
 | Run ID | `E7-2026-08-29T05-23-03-986Z-080f577f` |
 | Milestone | E7 — Compact workbench + fullscreen overlay revision |
-| State | `in-review`（46/46 自动化通过，等待 owner 人工门禁） |
+| State | `approved`（46/46 自动化与既有人工补偿由 owner 接受） |
 | Implementation commit | `080f577fe20fcb22a20184dce0b15892c5299464` |
 | Evidence commit | 本记录所在的 `docs: register revised Editor E7 canonical evidence` 提交 |
 | Dirty at start / end | `false` / `false` |
 | Commit at end | `080f577fe20fcb22a20184dce0b15892c5299464` |
 | Started at | 2026-08-29 05:23:03.986 UTC |
 | Method | `npm run eval:e7` |
-| Reviewer | `project-owner` — pending |
-| Retention | `local-present`；至少保留到 E7 审批完成 |
+| Reviewer | `project-owner` — approved 2026-08-31 |
+| Retention | `local-present`；作为 E7 正式 canonical 保留 |
 | Artifact root | `artifacts/evals/E7-2026-08-29T05-23-03-986Z-080f577f/` |
 | Summary SHA-256 | `da7c5e7a931a1e8c6cb3a64c3eeac8f5cb7d5cc6d6b604de6e4ea7b009ec13f5` |
 
@@ -732,8 +732,8 @@ next_action: "请 owner 在 Chrome/Edge 复核修订版 E7 全屏浮层；批准
 | `45-build.log` | `ea0e5ebf2db68e00649528d541f9c9ac51f5b9918de8c203ebe1a974dc224431` |
 | `46-diff-check.log` | `e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855` |
 
-### Manual Gaps and Approval Gate
+### Manual Boundary and Approval
 
 - 自动化证明 fixed geometry、计算样式、21 项菜单、开关/刷新记忆、Buffer-only 收敛、pointer-through 和双浏览器回归；它不能替代 owner 对灰色覆盖强度、图形可读性、底层操作体感和真实辅助技术的判断。
-- owner 仍需在 Chrome 与 Edge 检查窗口级入口、纵向滚动固定、Header/标记穿透、关闭/恢复上次特征、zoom/pan/seek 与 JSON V1 草稿边界。
-- E7 在 owner 批准前保持 `In Progress`，本 evidence 保持 `in-review`，不得创建包含 Editor 的 release-readiness。
+- 2026-08-31，owner 在明确要求先关闭 E7 再实施 M13 的计划上回复“PLEASE IMPLEMENT THIS PLAN”，接受本记录已有的 46/46、artifact 与人工补偿并关闭 E7；该批准不补写 owner 未提供的逐项人工数值。
+- E7 为 `Complete`，本 evidence 为 `approved`；M13 仅改变 Analyzer，不重开 Editor 候选。

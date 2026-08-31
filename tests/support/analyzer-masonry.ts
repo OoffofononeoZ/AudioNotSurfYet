@@ -1,4 +1,5 @@
 import { expect, type Page } from '@playwright/test';
+import { FEATURE_IDS } from '../../src/analysis/types';
 
 export interface AnalyzerMasonryGeometry {
     columns: number;
@@ -8,7 +9,7 @@ export interface AnalyzerMasonryGeometry {
     itemCount: number;
     noOverlap: boolean;
     shortestColumnOrder: boolean;
-    slots: number[];
+    slots: string[];
 }
 
 const readGeometry = (page: Page) => page.evaluate(() => {
@@ -23,7 +24,7 @@ const readGeometry = (page: Page) => page.evaluate(() => {
     const rects = items.map((item) => {
         const rect = item.getBoundingClientRect();
         return {
-            slot: Number(item.dataset.slot),
+            slot: item.dataset.slot ?? '',
             left: rect.left - rootRect.left,
             top: rect.top - rootRect.top,
             right: rect.right - rootRect.left,
@@ -112,10 +113,10 @@ export const expectAnalyzerMasonry = async (
         columns: expectedColumns,
         contained: true,
         documentOverflow: 0,
-        itemCount: 4,
+        itemCount: FEATURE_IDS.length,
         noOverlap: true,
         shortestColumnOrder: true,
-        slots: [0, 1, 2, 3],
+        slots: [...FEATURE_IDS],
     });
     const geometry = await readGeometry(page);
     if (!geometry) throw new Error('Analyzer masonry geometry is not ready.');

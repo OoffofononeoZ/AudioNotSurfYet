@@ -1,11 +1,11 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-08-29
+last_reviewed: 2026-08-31
 upstream_docs:
   - "docs/architecture/system-design.md"
   - "docs/architecture/interface-contracts.md"
-next_action: "保留 E6/M12 缓解证据；E7 复核全屏 Teleport 下的 R-023–R-025、R-027"
+next_action: "以 M13 快速队列、21 卡几何和资源 canonical 重新验证 R-002/R-013/R-028–R-030"
 ---
 
 # Risk Register
@@ -41,7 +41,9 @@ next_action: "保留 E6/M12 缓解证据；E7 复核全屏 Teleport 下的 R-023
 | R-025 | 大量事件 DOM、右键状态或键盘路径造成性能/可访问性回归 | Medium | High | 输入反馈 >100ms、Editor 归因长任务 >50ms、遗留 pressed/capture/menu、键盘无法完成核心任务 | Canvas 背景 + 横向/纵向可见事件 DOM；E6 clean canonical 10,000 事件下 Chrome/Edge 最大反馈 `4.5/4.2ms`、长任务 0、20 次资源循环稳定；辅助技术与长会话于 2026-08-28 获 owner 签字 | E7 紧凑控件仍须维持可见焦点和至少 24px 命中尺寸；回归时重新打开 | project-owner | Mitigated |
 | R-026 | BPM 误识别或低置信度被写成用户事实 | Medium | Medium | silence/歧义输入自动填入错误 BPM、用户编辑值被异步结果覆盖 | 同 Worker retained PCM、typed reliable/low-confidence、仅唯一空且未编辑 segment 可写；E2 golden 覆盖 silence、歧义、60/100/128/小数与 stale，22/22 canonical 与 2026-08-27 owner 批准通过 | 低置信度保持空并提示手动输入；算法、阈值或第三方依赖变化时重开 | project-owner | Mitigated |
 | R-027 | Analyzer/Editor 争用 active features、Worker retained PCM 或 current cache | Medium | High | Editor 结果显示到 Analyzer、旧 generation 覆盖、返回 Analyzer 卡片丢失、出现第二 Worker | ADR-0006 consumer lease + existing generation/identity；E4 consumer/renderer 回归；E6 clean canonical 双浏览器各 20 次 Editor/Analyzer/Home 循环保持单 Worker/AudioContext并回归 M6–M11；2026-08-28 owner 批准 | 允许返回 Analyzer 后部分重算，不允许错误 identity 或 workspace 改写；runtime ownership 改变时重开 | project-owner | Mitigated |
-| R-028 | Analyzer 动态瀑布流产生重叠、视觉/DOM 顺序偏离或 Observer/RAF 泄漏 | Medium | High | 卡片/空槽相交、容器高度不足、换卡或展开明细后焦点/`details` 状态丢失、路由循环资源单调增长、`ResizeObserver loop` 警告 | 稳定 slot DOM 包装层 + 纯最短列函数；实际 DOM 高度；一个 container Observer、一个 item Observer、单 RAF 合并；M12 canonical 12/12 通过，unit 4/4、Chrome/Edge 各 3/3，覆盖四视口、动态明细、错误态、焦点和路由循环 | 当前候选已缓解；任何布局实现、breakpoint、DOM 顺序或 Observer/RAF 所有权变化都重新打开并阻断 readiness 复用 | project-owner | Mitigated |
+| R-028 | Analyzer 动态瀑布流产生重叠、视觉/DOM 顺序偏离或 Observer/RAF 泄漏 | Medium | High | 21 卡相交、容器高度不足、展开/收起后焦点或 DOM 顺序偏离、路由循环资源单调增长、`ResizeObserver loop` 警告 | M12 的纯最短列、实测高度、container/item Observer 与单 RAF 继续使用；M13 必须以 21 feature wrapper、按需 body、四视口和反复生命周期重新验证 | M12 12/12 只保留为历史缓解证据；M13 identity/挂载边界改变，当前重新打开 | project-owner | Open |
+| R-029 | 快速展开/收起导致 FIFO、Worker generation、exact request 或持久化状态错序 | Medium | High | 短暂出现第五张展开卡、旧结果回填已收起卡、刷新恢复旧队列、旧 save 把新状态标为 ready | 纯原子 reducer；Coordinator cancel/generation/identity；exact 清理；不可变 snapshot、串行 save 与 revision guard；unit/integration/双浏览器快速序列 | 取消本身不是正确性边界，迟到 completion 必须由 identity/revision 丢弃 | project-owner | Open |
+| R-030 | 21 张稳定卡增加 DOM、布局、Canvas 与 Observer 资源压力 | Medium | High | 首屏过慢、收起卡仍有 Canvas/Observer、Canvas 超过活动 renderer 上限、反复展开或路由后计数增长 | 折叠态只保留语义 DOM；展开才挂载 body/Canvas/内部 Observer；最多四项；资源计数、输入反馈、长任务和 20 次生命周期回归 | 21 个 header/description 是接受的固定 DOM 成本；若目标设备超预算则重新评审虚拟化，而非静默减少可发现性 | project-owner | Open |
 
 ## Review Rule
 
@@ -49,4 +51,4 @@ next_action: "保留 E6/M12 缓解证据；E7 复核全屏 Teleport 下的 R-023
 - 风险只有在缓解措施有可复现证据时才能标记 Mitigated。
 - `Accepted` 表示已知平台事实被接受，不表示无需实现降级路径。
 - 新的高影响风险或剩余风险超过已批准范围时，停止进入下一里程碑并由 `project-owner` 决策。
-- Analyzer R-001–R-021 的历史状态继续由 M3–M11/readiness 证据支持；R-028 已由 M12 双浏览器 canonical 与 owner 复核改为 `Mitigated`。Editor R-022–R-027 已由 E1–E6 evidence 分阶段缓解；E7 重新验证布局密度及 ADR-0011 对草稿偏好、geometry、focus、hit target 和 analysis consumer 的影响，不改写 E6 历史证据。
+- Analyzer R-001–R-021 的历史状态继续由 M3–M11 evidence 支持；R-028 的 M12 缓解证据保留，但因 M13 改为 21 wrapper 与按需挂载而重新打开，R-029/R-030 等待 M13 canonical。Editor R-022–R-027 与 E7 已关闭，不被 M13 重开。

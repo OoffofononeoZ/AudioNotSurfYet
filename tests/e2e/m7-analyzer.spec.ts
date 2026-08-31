@@ -80,7 +80,7 @@ const installCursorRequestCounters = async (page: Page) => {
     });
 };
 
-test('defaults to three unique cards in four slots and shares seek/zoom', async ({ page }) => {
+test('starts with 21 collapsed cards and shares seek/zoom across three expanded cards', async ({ page }) => {
     const issues = captureBrowserIssues(page);
     await installFilePickerStub(page);
     await installCursorRequestCounters(page);
@@ -88,18 +88,22 @@ test('defaults to three unique cards in four slots and shares seek/zoom', async 
     await page.goto('/analyzer');
 
     const cards = page.locator('[data-feature-id]');
-    await expect(cards).toHaveCount(3);
+    await expect(cards).toHaveCount(21);
     await expect(page.locator('[data-feature-id="rms"]')).toHaveCount(1);
     await expect(page.locator('[data-feature-id="amplitudeSpectrum"]'))
         .toHaveCount(1);
     await expect(page.locator('[data-feature-id="chroma"]')).toHaveCount(1);
-    await expect(page.locator('.empty-slot')).toHaveCount(1);
-    await expect(page.locator('.empty-slot')).toContainText(
-        '最多四张且不会重复',
+    await expect(cards.locator('select')).toHaveCount(0);
+    await expect(cards.getByRole('button', { name: '移除' })).toHaveCount(0);
+    await expect(page.locator('[data-feature-id] canvas')).toHaveCount(0);
+    for (const featureId of ['rms', 'amplitudeSpectrum', 'chroma']) {
+        await page.locator(`[data-feature-id="${featureId}"]`)
+            .getByRole('button', { name: '展开分析' })
+            .click();
+    }
+    await expect(page.locator('.timeline-toolbar')).toContainText(
+        '3/4 张展开卡',
     );
-
-    const selects = cards.locator('select');
-    await expect(selects.first().locator('option:disabled')).toHaveCount(2);
 
     await chooseFiles(page, [LEARNING_WAV_FIXTURE]);
     await expect(page.locator('#music-bar-container')).toHaveAttribute(
@@ -247,9 +251,9 @@ test('defaults to three unique cards in four slots and shares seek/zoom', async 
         .columns;
 
     console.log(JSON.stringify({
-        metric: 'm7-three-card-interaction',
+        metric: 'm13-three-expanded-card-interaction',
         activeCards: 3,
-        slots: 4,
+        cards: 21,
         cursorRequestsIn550ms: cursorCounts,
         cursorWindowElapsedMs: cursorWindow.elapsedMs,
         maximumCursorRequests,
@@ -261,31 +265,27 @@ test('defaults to three unique cards in four slots and shares seek/zoom', async 
     expect(issues).toEqual([]);
 });
 
-test('persists an intentionally empty workspace without restoring defaults', async ({ page }) => {
+test('persists the empty FIFO and a subsequently expanded feature', async ({ page }) => {
     const issues = captureBrowserIssues(page);
     await page.goto('/analyzer');
-    await expect(page.locator('[data-feature-id]')).toHaveCount(3);
-
-    for (let remaining = 3; remaining > 0; remaining -= 1) {
-        await page.locator('[data-feature-id]').first()
-            .getByRole('button', { name: '移除' })
-            .click();
-        await expect(page.locator('[data-feature-id]'))
-            .toHaveCount(remaining - 1);
-    }
-    await expect(page.locator('.empty-slot')).toHaveCount(4);
+    await expect(page.locator('[data-feature-id]')).toHaveCount(21);
+    await expect(page.locator('.analysis-card [aria-expanded="true"]'))
+        .toHaveCount(0);
 
     await page.reload();
-    await expect(page.locator('[data-feature-id]')).toHaveCount(0);
-    await expect(page.locator('.empty-slot')).toHaveCount(4);
+    await expect(page.locator('[data-feature-id]')).toHaveCount(21);
+    await expect(page.locator('.analysis-card [aria-expanded="true"]'))
+        .toHaveCount(0);
 
-    await page.locator('.empty-slot').first()
-        .getByRole('button', { name: /RMS/ })
+    await page.locator('[data-feature-id="rms"]')
+        .getByRole('button', { name: '展开分析' })
         .click();
-    await expect(page.locator('[data-feature-id="rms"]')).toHaveCount(1);
+    await expect(page.locator('[data-feature-id="rms"] [aria-expanded="true"]'))
+        .toHaveCount(1);
     await page.reload();
-    await expect(page.locator('[data-feature-id="rms"]')).toHaveCount(1);
-    await expect(page.locator('[data-feature-id]')).toHaveCount(1);
+    await expect(page.locator('[data-feature-id]')).toHaveCount(21);
+    await expect(page.locator('[data-feature-id="rms"] [aria-expanded="true"]'))
+        .toHaveCount(1);
     expect(issues).toEqual([]);
 });
 
@@ -313,6 +313,12 @@ test('isolates a single-card Canvas context failure', async ({ page }) => {
     });
     await page.goto('/analyzer');
 
+    for (const featureId of ['rms', 'amplitudeSpectrum', 'chroma']) {
+        await page.locator(`[data-feature-id="${featureId}"]`)
+            .getByRole('button', { name: '展开分析' })
+            .click();
+    }
+
     await expect(page.locator('[data-feature-id="rms"] .plot-error'))
         .toBeVisible();
     await expect(page.locator('[data-feature-id="amplitudeSpectrum"] .plot-error'))
@@ -329,6 +335,9 @@ test('keeps the shared toolbar below the header and player overlays above it', a
     const issues = captureBrowserIssues(page);
     await page.setViewportSize({ width: 1280, height: 720 });
     await page.goto('/analyzer');
+    await page.locator('[data-feature-id="amplitudeSpectrum"]')
+        .getByRole('button', { name: '展开分析' })
+        .click();
 
     await page.locator('.analyzer-content').evaluate((element) => {
         element.scrollTop = 360;

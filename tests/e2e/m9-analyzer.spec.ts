@@ -77,21 +77,13 @@ test('keeps home transparent and blurs every non-home header across routes', asy
     expect(issues).toEqual([]);
 });
 
-test('renders Power Spectrum, MFCC and Buffer as four persistent unique cards', async ({ page }) => {
+test('renders Power Spectrum, MFCC and Buffer as four persistent expanded cards', async ({ page }) => {
     test.setTimeout(90_000);
     const issues = captureBrowserIssues(page);
     await installFilePickerStub(page);
     await page.emulateMedia({ reducedMotion: 'reduce' });
     await page.setViewportSize({ width: 1280, height: 900 });
     await page.goto('/analyzer');
-
-    await page.locator('.empty-slot')
-        .getByRole('button', { name: /Power Spectrum/ })
-        .click();
-    await page.locator('[data-feature-id="rms"] select')
-        .selectOption('mfcc');
-    await page.locator('[data-feature-id="chroma"] select')
-        .selectOption('buffer');
 
     const expectedFeatures = [
         'amplitudeSpectrum',
@@ -100,18 +92,14 @@ test('renders Power Spectrum, MFCC and Buffer as four persistent unique cards', 
         'buffer',
     ];
     for (const featureId of expectedFeatures) {
-        await expect(page.locator(`[data-feature-id="${featureId}"]`))
-            .toHaveCount(1);
+        await page.locator(`[data-feature-id="${featureId}"]`)
+            .getByRole('button', { name: '展开分析' })
+            .click();
     }
-    await expect(page.locator('[data-feature-id]')).toHaveCount(4);
-
-    const select = page.locator('[data-feature-id="powerSpectrum"] select');
-    await expect(select.locator('option')).toHaveCount(21);
-    await expect(select.locator('option[value="loudness"]')).toHaveCount(1);
-    await expect(select.locator('option[value="complexSpectrum"]'))
-        .toHaveCount(1);
-    await expect(select.locator('option[value="mfcc"]')).toBeDisabled();
-    await expect(select.locator('option[value="buffer"]')).toBeDisabled();
+    await expect(page.locator('[data-feature-id]')).toHaveCount(21);
+    await expect(page.locator('.analysis-card [aria-expanded="true"]'))
+        .toHaveCount(4);
+    await expect(page.locator('[data-feature-id] select')).toHaveCount(0);
 
     await chooseFiles(page, [M9_WAV_FIXTURE]);
     for (const featureId of expectedFeatures) {
@@ -150,9 +138,11 @@ test('renders Power Spectrum, MFCC and Buffer as four persistent unique cards', 
     const viewportBeforeReload = await page.locator('.timeline-toolbar')
         .innerText();
     await page.reload();
-    await expect(page.locator('[data-feature-id]')).toHaveCount(4);
+    await expect(page.locator('[data-feature-id]')).toHaveCount(21);
     for (const featureId of expectedFeatures) {
-        await expect(page.locator(`[data-feature-id="${featureId}"]`))
+        await expect(page.locator(
+            `[data-feature-id="${featureId}"] [aria-expanded="true"]`,
+        ))
             .toHaveCount(1);
     }
     await expect(page.locator('.timeline-toolbar')).toContainText('2.0×');

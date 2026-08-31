@@ -1,13 +1,13 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-08-28
+last_reviewed: 2026-08-31
 upstream_docs:
   - "docs/product/success-metrics.md"
   - "docs/architecture/interface-contracts.md"
   - "docs/delivery/acceptance-criteria.md"
   - "docs/delivery/execution-plan.md"
-next_action: "保留 M12 clean canonical 与首次失败 artifact；受覆盖行为变化时重跑"
+next_action: "M13 provisional 已通过；创建本地实现提交并执行 clean canonical"
 ---
 
 # Test Strategy
@@ -52,6 +52,7 @@ next_action: "保留 M12 clean canonical 与首次失败 artifact；受覆盖行
 - timeline clamp、zoom anchor、Canvas x ↔ time mapping。
 - M7 工作区：四槽、0–3 张活动卡、slot/feature 唯一、首次默认三卡与已保存空工作区恢复为空。
 - M12 纯布局：1/2 列、平局左列、不同高度、动态高度重算、容器高度和 pairwise 无重叠。
+- M13 FIFO reducer：空、1–4 项、第五项淘汰、手动收起、重新展开、重复/快速序列和唯一性；V1 adapter 覆盖 cards/queue 双向顺序与无效输入。
 - restore priority、permission state mapping、current Blob/cache invariant。
 - generation/request ID 和 stale job 丢弃。
 
@@ -73,6 +74,7 @@ next_action: "保留 M12 clean canonical 与首次失败 artifact；受覆盖行
 - current track 持久化事务和刷新 bootstrap。
 - FileSystemFileHandle adapter 的 query/request/getFile 三态。
 - 单卡 renderer error boundary。
+- M13 零活动项无 Worker、1–4 项 cache hit/miss、第五项 cancel generation、迟到结果隔离，以及 workspace 串行 save/revision/quota/not-persisted。
 
 ### Browser end-to-end
 
@@ -85,6 +87,7 @@ next_action: "保留 M12 clean canonical 与首次失败 artifact；受覆盖行
 - 键盘、焦点、reduced motion。
 - 390、1024、1280、1920 CSS px 的真实 item DOMRect、最短列不变量、Canvas CSS/backing-store、截图和 console；不再从 `grid-template-columns` 推断布局。
 - M12 在四卡/空槽、换卡、renderer error 和结构明细展开后重算；验证 slot DOM 顺序、`details open`、焦点、Canvas 数量和容器包围关系。
+- M13 始终断言 21 卡与 `FEATURE_IDS` DOM 顺序；初始无 Canvas/select/remove；展开 1–4、第五项 FIFO、快速切换、刷新恢复、错误/重试、seek/zoom/exact 与 20 次资源循环在真实 Chrome/Edge 运行。
 
 ### Manual
 
@@ -246,6 +249,19 @@ npm run test:e2e:m12:edge
 npm run eval:m12:provisional
 npm run eval:m12
 ```
+
+M13 新增：
+
+```text
+npm run test:m13:unit
+npm run test:m13:integration
+npm run test:e2e:m13:chrome
+npm run test:e2e:m13:edge
+npm run eval:m13:provisional
+npm run eval:m13
+```
+
+`eval:m13:provisional` 允许 dirty worktree；`eval:m13` 要求起止 clean，并回归 Analyzer M7–M12、Coordinator/cache、Editor E7 lease/renderer 隔离、M13 unit/integration/双浏览器、docs、typecheck、build 和 diff check。
 
 `eval:m12:provisional` 在 dirty worktree 执行 M7–M11 Analyzer 相邻回归、M12 unit/Chrome/Edge、docs、typecheck、build 和 diff check，只生成实现反馈。`eval:m12` 要求 clean committed worktree，生成可登记的 canonical artifact。
 

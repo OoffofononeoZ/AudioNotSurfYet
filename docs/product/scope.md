@@ -1,11 +1,11 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-08-26
+last_reviewed: 2026-08-31
 upstream_docs:
   - "docs/product/problem-brief.md"
   - "docs/quality/release-readiness.md"
-next_action: "project-owner 审阅 in-review Editor E1–E6 delivery planning；获批前不开始 E1"
+next_action: "按 M13 已批准范围实施 21 卡折叠与最多四项 FIFO 活动分析"
 ---
 
 # Scope
@@ -20,7 +20,9 @@ next_action: "project-owner 审阅 in-review Editor E1–E6 delivery planning；
 
 - 以纵向切片最终覆盖 `src/data/analyzerData.ts` 中定义的全部 21 个 Meyda 特征。
 - 首个可交付切片包含 RMS、Amplitude Spectrum、Chroma。
-- Analyzer 同时显示 0–4 张卡片；卡片可替换，活动特征不得重复。
+- Analyzer 始终按 `FEATURE_IDS` 顺序显示全部 21 张卡片；新工作区全部收起，最多展开四张且活动特征不得重复。
+- 展开第五张时原子收起当前 FIFO 中最早展开的卡并展开目标；点击已展开卡会收起，只有重新展开才进入队尾。
+- 收起态只显示输出类型、标题、简介和展开按钮；不显示图表、参数、精确值、明细、特征选择列表或移除按钮。
 - 所有卡片共享时间视窗、缩放状态和播放游标；点击图表可跳转到对应播放时间。
 - Canvas 负责数据图表，DOM 负责说明、固定参数、精确值、焦点与无障碍语义。
 - RMS 采用时间序列折线；Amplitude Spectrum 采用时频热图和游标频谱；Chroma 采用 12 类热图和游标柱图。
@@ -30,7 +32,7 @@ next_action: "project-owner 审阅 in-review Editor E1–E6 delivery planning；
 
 - 支持用户本地选择 MP3、WAV、FLAC；单首目标时长不超过约 15 分钟。
 - 立体声或多声道输入按声道平均混合为 mono PCM 后进入离线分析。
-- 全曲预计算在 Worker 中执行；仅计算当前最多四个活动特征。
+- 全曲预计算在 Worker 中执行；仅计算 FIFO 队列中当前最多四个活动特征，零活动项不创建 Worker。
 - 播放时共享游标由 AudioContext 时钟驱动，不依赖动画帧累计时间。
 - 首版分析参数固定但对用户可见：frame/buffer 1024、hop 512、Hanning window、MFCC 13、源文件采样率。
 - 高频帧在 Worker 内聚合为最多 30Hz 的显示数据；向量数据可紧凑量化，游标处精确值按需提取。
@@ -39,7 +41,7 @@ next_action: "project-owner 审阅 in-review Editor E1–E6 delivery planning；
 
 - 通过 `showOpenFilePicker()` 选择文件并把队列中的文件句柄保存在 IndexedDB。
 - 只持久化最近一次会话，并且只保存当前歌曲 Blob 与当前歌曲分析缓存；切歌时替换旧 Blob/缓存。
-- 刷新后恢复队列、当前歌曲、卡片和分析配置；播放时间归零并保持暂停。
+- 刷新后恢复队列、当前歌曲、活动特征 FIFO 和分析配置；播放时间归零并保持暂停。旧 V1 `activeCards` 按 slot 顺序恢复为活动队列。
 - 其他歌曲按“下一首、上一首、下二首、上二首……”顺序查询权限；已授权文件自动恢复，未授权文件显示恢复状态并等待用户触发。
 - 权限拒绝、文件移动、容量不足或缓存保存失败不得破坏当前页面内的播放；界面必须说明不能跨刷新恢复或需要重新计算。
 
@@ -60,6 +62,8 @@ next_action: "project-owner 审阅 in-review Editor E1–E6 delivery planning；
 6. 扩展剩余标量、向量/波形和结构化特征，直至 21 项覆盖。
 7. 完成格式、恢复、权限、性能、无障碍和多视口硬化。
 
+M13 是上述完成切片后的候选变更：以 21 张稳定折叠卡替代四个可替换 slot，但不扩大最多四项 Worker、缓存、音频或浏览器边界。
+
 每一切片必须通过其验收门禁后才能进入下一批特征；不使用未经估算的日历日期代替证据。
 
 ## Analyzer Out of Scope（historical boundary）
@@ -72,6 +76,7 @@ next_action: "project-owner 审阅 in-review Editor E1–E6 delivery planning；
 - Editor、Visualizer 及其他尚未定义的空白 Tab；Editor 后续只能按下述 E0 独立范围推进。
 - 移动端、非 Chromium 浏览器和非 Chromium 兼容层。
 - Analyzer 中新增 Three.js 依赖。
+- M13 不实现卡片拖动排序、不显示三横拖动图标、不持久化自定义顺序；这些能力只登记为 M14 后续范围。
 - 在 release 阶段前决定正式托管商、生产 URL、发布监控或回滚方案。
 
 ## Editor E0 Scope（approved）
@@ -167,5 +172,6 @@ E5 于 2026-08-27 在 E4 获批后改为 `In Progress`。若未来要求新的�
 - Editor E0 status：`approved`；`project-owner` 于 2026-08-26 明确回复：“我批准 Editor E0 产品意图、点事件与范围事件规则、成功指标和开放问题；同意进入 Editor E0 架构设计。”
 - Architecture approval：`project-owner` 于 2026-08-26 明确回复：“我批准 Editor E0 系统设计、接口契约、风险与 ADR；同意进入 Editor E1–E6 execution planning。”
 - Change rule：现有 Analyzer delivery、quality 与 readiness 仍只对 Analyzer 历史范围有效；Editor 必须建立并审批自己的 delivery 覆盖，E1–E6 不能因产品或架构批准而直接开始实现。
+- M13 approval：`project-owner` 于 2026-08-31 以完整实施指令批准 M13 范围及 M14 非目标；M13 保持 IndexedDB V1、本地音频和最多四项分析边界，本轮不推送远程仓库。
 
 File System Access 行为依据：[Chrome File System Access 文档](https://developer.chrome.com/docs/capabilities/web-apis/file-system-access) 与 [持久权限说明](https://developer.chrome.com/blog/persistent-permissions-for-the-file-system-access-api)。
