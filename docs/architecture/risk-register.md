@@ -1,11 +1,11 @@
 ---
-status: approved
+status: in-review
 owner: "project-owner"
-last_reviewed: 2026-09-01
+last_reviewed: 2026-09-02
 upstream_docs:
   - "docs/architecture/system-design.md"
   - "docs/architecture/interface-contracts.md"
-next_action: "M14 canonical 已缓解 R-031–R-033；候选交互、workspace 或 persistence 变化时重开"
+next_action: "复核 Visualizer R-034–R-041 与验证信号；批准前不进入 delivery"
 ---
 
 # Risk Register
@@ -31,7 +31,7 @@ next_action: "M14 canonical 已缓解 R-031–R-033；候选交互、workspace �
 | R-015 | 双浏览器状态被误报 | High | Medium | 只执行 Chromium 或安装检测，没有真实 Edge channel 证据 | M11 runner 固定使用真实 `chrome`/`msedge` channel；clean canonical 的 Edge 全量 M3–M11 为 31/31，并记录产品版本 | 原生权限体验仍由 R-005/EG-006 跟踪；浏览器升级时复跑 | project-owner | Mitigated |
 | R-016 | fixture 来源或许可不可追溯 | Medium | Medium | 二进制无来源/hash | 合成 PCM 由脚本生成；格式 fixture 记录生成命令、编码器版本、许可和 SHA-256；M11 canonical fixture hash 5/5 通过 | 无合规 provenance 的 fixture 不入库 | project-owner | Mitigated |
 | R-017 | 现有 `test:spectrogram` 指向缺失 `test.ts` | High | Medium | 命令无法运行 | M3 已删除失效命令并建立正式 test/eval scripts；M3–M11 canonical 持续执行公开命令 | package scripts 变化时由 docs/harness 回归检测 | project-owner | Mitigated |
-| R-018 | 未定义 Tab 或未来上传需求侵入当前交付 | Medium | Medium | PR 添加未批准 Visualizer/空白页实现、网络数据路径或服务端依赖 | Editor E0 产品意图与 system design 已批准；Visualizer/上传继续由 PROD-013/014 门禁 | Editor 仍不得越过 delivery；其余未定义能力不得进入 | project-owner | Open |
+| R-018 | 未定义 Tab 或未来上传需求侵入当前交付 | Medium | Medium | PR 添加未批准空白页、网络数据路径或服务端依赖 | Editor 已交付；Visualizer V0 产品已定义且架构正在评审；上传和其他页面继续由 PROD-013/014 门禁 | Visualizer 不得越过架构门禁；其余未定义能力不得进入 | project-owner | Open |
 | R-019 | bundle 已有约 1MB 警告继续增长 | Medium | Medium | `npm run build` chunk warning 增大 | Worker/renderer 按路由或 feature family 拆分，记录构建体积；M12 canonical 最大 JS chunk 为 1,284.55 kB；避免 Analyzer Three.js；owner 于 2026-08-28 重新审阅并以 W-001 接受当前候选 warning | 仅当前 Analyzer 候选为 Accepted；托管方案或正式包体预算确定、chunk 再增长或首屏问题复现时重新评审 | project-owner | Accepted |
 | R-020 | Meyda 5.6.3 `spectralFlux` 提取器引用未声明变量 `x` | High | High | 固定 previous/current frame 调用抛 `ReferenceError: x is not defined` | ADR-0005 项目 Flux 已实现；公式/首帧/静音/exact cursor golden 与 M8 clean canonical 28/28 通过，保留上游异常事实 | 产品阻断已缓解；Meyda 缺陷未修复，依赖升级时必须重新对照 | project-owner | Mitigated |
 | R-021 | Analyzer sticky、播放器层级、pressed 状态或内层滚动条破坏可用性与视觉一致性 | Medium | Medium | sticky 与 Header 间距过大；歌曲列表被遮挡；Windows Chrome 按钮保持按压外观；表格显示系统默认滚动条 | M8 Slice 0、macOS Chrome 多视口 canonical 与 owner Windows Chrome 人工签字均通过 | 相关交互或样式变化后重新执行多视口自动化与 Windows Chrome 补偿复核 | project-owner | Closed |
@@ -47,6 +47,14 @@ next_action: "M14 canonical 已缓解 R-031–R-033；候选交互、workspace �
 | R-031 | 自定义顺序与 DOM/masonry/focus/Canvas 身份错位 | Medium | High | order index、DOM 和视觉输入不同；排序关闭 details、丢焦点或重建 Canvas | 完整 permutation、feature keyed wrapper、drop 时一次提交、无位移动画；M14 unit 24/24 与 Chrome/Edge 各 3/3 验证 DOM/data/masonry 顺序、焦点、details/Canvas identity、reload/切歌/reset 和 FIFO 独立 | 交互、key 或 masonry 输入契约变化时重跑 M14 | project-owner | Mitigated |
 | R-032 | Pointer capture、auto-scroll、popup 或 drag RAF 未清理 | Medium | High | 取消后仍滚动、遗留 capture/ghost/marker、路由循环 RAF 增长、touch 无法恢复滚动 | 单 pointer state、单 drag RAF；pointercancel/lostcapture/Escape/blur/unmount 对称 cleanup；句柄局部 touch-action；M14 双浏览器 threshold/auto-scroll/工作区外/Escape 取消无 console issue，M12/M11 路由资源回归继续通过 | 原生触控设备与未自动制造的 blur/lostcapture 由等价 cleanup 契约和后续人工回归补偿；实现变化时重开 | project-owner | Mitigated |
 | R-033 | featureOrder 损坏或与 queue/viewport 保存交错覆盖最新状态 | Medium | High | 非完整/重复 order 被恢复；旧 save 覆盖新顺序或 FIFO；刷新顺序倒退 | V1 可选字段严格 permutation；缺失只映射默认；全 workspace immutable snapshot、串行写入和 revision guard；M14 integration 19/19 与双浏览器 reload/切歌通过，排序 Worker analyze request 保持 `1 → 1` | schema、repository 或 workspace snapshot 变化时重跑 validator/revision/quota | project-owner | Mitigated |
+| R-034 | Visualizer ended policy 或旧 route lease 泄漏，导致播完切歌、Editor 不循环或离页后策略错误 | Medium | High | Visualizer ended 调用 next、旧 token release 覆盖新 route、出现第二播放时钟 | ADR-0014 通用 token lease；V1/V6 覆盖 Editor repeat-one、Visualizer pause-at-end、快速路由、刷新与 20 次生命周期 | 无法证明 token/资源唯一性时阻断 V1/V6；释放失败时回到 queue-next 并报告 | project-owner | Open |
+| R-035 | 第五个特征、重复绑定或 stale 分析扩大 Worker/cache 或污染新模板 | Medium | High | active set >4、同 FeatureId 重算、旧 generation 更新场景 | 绑定 planner 去重并在 Coordinator 前拒绝第五项；generation + template/binding revision；V2 unit/integration/双浏览器验证 | 超限保持原绑定并解释；不能静默丢弃既有特征或创建第二 Worker | project-owner | Open |
+| R-036 | Visualizer 工程、单草稿或 Editor 快照损坏/错歌，导致配置被部分覆盖 | Medium | High | 未知字段/模板被接受、hash/时长不匹配、quota/abort 丢旧草稿 | ADR-0015 strict codec、同歌快照、原子导入与独立 `draft/latest`；V1/V2 fault injection 和原生文件任务 | 失败保留内存工程与旧 durable draft；要求用户显式重新载入/导入 Editor 数据 | project-owner | Open |
+| R-037 | 绑定平滑或场景运动依赖 RAF delta，seek/刷新/录制产生不同画面 | High | High | 同一绝对时间状态 hash 不同、seek 后粒子跳变、录制与预览不一致 | ADR-0016 绝对时间、seed 与可重放 smoothing；逐帧 scene-state golden 覆盖从头播放/直接 seek/刷新/录制 | 确定性未通过时阻断 V3/V4/V5，不以视觉近似豁免 | project-owner | Open |
+| R-038 | Three.js scene/RAF/geometry/material 在切模板或路由时泄漏 | Medium | High | Canvas/WebGL/RAF 计数单调增长、旧场景仍更新 | 单 RendererHost、单 RAF、scene dispose；V3/V4/V6 20 次模板/路由/context 生命周期资源计数 | 无法释放的模板不得进入 registry；必要时停用故障模板并保留工程 | project-owner | Open |
+| R-039 | WebGL context lost 让预览空白或录制生成不完整文件 | Medium | High | `webglcontextlost`、恢复后参数/时间错位、录制仍显示成功 | context loss 保留工程/播放并重建；录制期间 loss 必须 abort/discard；Chrome/Edge 故障注入 | 实时预览可重试；未完成录制绝不进入 ready/save | project-owner | Open |
+| R-040 | MediaRecorder/MIME、origin-clean 或时钟差异导致无音轨、不可回放或音画漂移 | Medium | High | `isTypeSupported` 失败、captureStream SecurityError、ffprobe 缺轨、漂移 >100ms | ADR-0017 capability preflight、VP9→VP8、同一 AudioContext/canvas 时钟、origin-clean 资产；V5/V6 ffprobe + 双浏览器回放 | 不支持时明确失败并保留工程/预览；不输出伪成功文件 | project-owner | Open |
+| R-041 | 1080p60 实时录制造成掉帧、内存峰值或 Blob 过大 | High | High | selected preset 达不到 fps、长任务 >50ms、内存/Blob 持续增长、finalize 失败 | 固定 bitrate、15 分钟最重四特征预检/压力、录制期间锁定、单 Blob 生命周期；V5/V6 分预设记录设备与能力 | 不静默降级预设；设备不满足时该预设明确 unavailable，720p/30 等其他预设独立判定 | project-owner | Open |
 
 ## Review Rule
 
@@ -54,4 +62,5 @@ next_action: "M14 canonical 已缓解 R-031–R-033；候选交互、workspace �
 - 风险只有在缓解措施有可复现证据时才能标记 Mitigated。
 - `Accepted` 表示已知平台事实被接受，不表示无需实现降级路径。
 - 新的高影响风险或剩余风险超过已批准范围时，停止进入下一里程碑并由 `project-owner` 决策。
-- Analyzer R-001–R-021 的历史状态继续由 M3–M11 evidence 支持；R-028–R-030 由 M13、R-031–R-033 由 M14 clean canonical 缓解。Editor R-022–R-027 与 E7 不被 M14 改写。
+- Analyzer R-001–R-021 的历史状态继续由 M3–M11 evidence 支持；R-028–R-030 由 M13、R-031–R-033 由 M14 clean canonical 缓解。Editor R-022–R-027 与 E7 不被 Visualizer 草案改写。
+- Visualizer R-034–R-041 当前均为 `Open`。只有后续 V1–V6 的可复现证据和 owner 审批才能缓解；架构批准只接受其进入规划，不等于风险已缓解。

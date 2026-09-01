@@ -1,10 +1,10 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-09-01
+last_reviewed: 2026-09-02
 upstream_docs:
   - "docs/context/index.md"
-next_action: "M14 当前事实已登记；候选边界变化时更新 system map"
+next_action: "Visualizer 当前仍为占位；目标拓扑已登记为 in-review，架构批准/实现后再更新当前事实"
 ---
 
 # System Map
@@ -12,6 +12,8 @@ next_action: "M14 当前事实已登记；候选边界变化时更新 system map
 ## System Summary
 
 当前系统是 Vue 3 单页应用。MainLayout 创建并提供唯一的 `AudioSessionService`、`AnalysisCoordinator` 与 `EditorSessionController`；服务通过 `AudioEngine` 解码、播放本地文件，并通过两个独立 IndexedDB repository 保存 Analyzer session 与 Editor 单草稿。Analyzer 和 Editor 通过互斥 consumer lease 复用同一 coordinator；Editor consumer 先激活 Buffer，再按 E4 选择激活最多一个 overlay feature，仍不创建第二个 Worker 或 PCM 副本。File、Blob、handle、PCM、Worker 与音频节点均留在 store 外。MusicBar 和 Editor 读取同一播放快照；有效 Editor track 隐藏 MusicBar，并由 tokenized playback lease 把 ended 策略改为 repeat-one。
+
+Visualizer 当前代码仍由 `/comingsoon` 占位。已批准产品意图和 `in-review` 架构目标要求未来通过通用 route lease 接入同一 AudioSessionService/Coordinator，增加独立 Visualizer single-draft repository、单 Canvas/WebGL renderer 与 pre-Gain recording tap；下列目标不应被误读为当前实现事实。
 
 ## Runtime Flow
 
@@ -31,6 +33,22 @@ showOpenFilePicker → FileSystemFileHandle → File
                     → compact binary payload / exact cursor
                     → SessionRepository + audioSessionStore
 ```
+
+## Visualizer Target Flow（in-review, not implemented）
+
+```text
+/visualizer/:trackId? → VisualizerSessionController
+  ├→ RoutePlaybackLease(pause-at-end) → AudioSessionService → AudioEngine
+  ├→ AnalysisConsumerLease(visualizer, deduped 0–4) → AnalysisCoordinator/Worker/cache
+  ├→ validated EditorProjectV1 snapshot → BindingResolver
+  ├→ VisualizerProjectV1 ↔ audionotsurfyet-visualizer/draft/latest
+  └→ BindingResolver(absolute time + seed)
+       → SceneRegistry(orthogonal-lines | cube-swarm)
+       → one Canvas + one WebGLRenderer + one RAF
+       └→ captureStream + AudioEngine pre-Gain tap → MediaRecorder → WebM Blob
+```
+
+目标边界：Editor 数据只在进入/显式 reload 时快照；analysis 第五项在 Coordinator 前拒绝；页面音量不影响录制；不支持的 resolution/fps 明确失败而非静默降级。
 
 ## Subsystems
 

@@ -1,10 +1,10 @@
 ---
-status: approved
+status: in-review
 owner: "project-owner"
-last_reviewed: 2026-09-01
+last_reviewed: 2026-09-02
 upstream_docs:
   - "docs/architecture/system-design.md"
-next_action: "M14 接口已由 canonical 验证；schema、workspace 或交互契约变化时复核"
+next_action: "复核 Visualizer route lease、project/binding、scene 与 recording 接口；批准前不进入 delivery"
 ---
 
 # Interface Contracts
@@ -724,3 +724,52 @@ Invariants:
 ## Editor Architecture Approval
 
 `project-owner` 于 2026-08-26 明确批准 Editor E0 系统设计、接口契约、风险与 ADR，并同意进入 E1–E6 execution planning。上述 Editor 接口据此获批；Analyzer 历史契约继续有效，但设计批准不能作为 Editor 代码已实现或验证的证据。
+
+## Visualizer Contract Status（in-review）
+
+下列 Visualizer 接口是基于已批准 V0 产品意图的目标契约；Analyzer/Editor 上述接口仍是历史批准基线。当前 `/comingsoon` 不实现这些接口，架构批准前不得开始 delivery 或代码实现。
+
+### Route playback and analysis leases
+
+```ts
+type RoutePlaybackConsumer = 'editor' | 'visualizer'
+type RouteEndedPolicy = 'repeat-one' | 'pause-at-end'
+
+interface RoutePlaybackLease {
+  readonly token: string
+  readonly consumer: RoutePlaybackConsumer
+  readonly trackId: string
+  readonly endedPolicy: RouteEndedPolicy
+  release(): void
+}
+
+type AnalysisConsumer = 'analyzer' | 'editor' | 'visualizer'
+```
+
+- `AudioSessionService.acquireRoutePlayback(...)` 校验当前 track 后才返回 lease；只有当前 token 的 release 生效。Visualizer ended 保留 current track 并发布 `ended`，再次 play 从 0 秒开始；不得调用 `next()`。
+- V1 原子迁移 Editor 调用方到通用 lease，不提供长期 Editor compatibility adapter。
+- Visualizer analysis lease 只提交去重后的 0–4 个 `FeatureId`。第五项在 Coordinator 前返回 typed validation error；多个参数共享一个 feature 不增加活动数。
+- Visualizer 只按绝对播放时间采样 compact series，不建立 30Hz exact cursor polling。换歌、route、template 或 binding revision 变化使旧响应 stale。
+
+### Project, binding and scene contracts
+
+- `VisualizerProjectV1`、strict codec、歌曲 identity、单草稿和原子导入见 [Visualizer Project Format V1](visualizer/project-format-v1.md)。
+- constant/analysis/editor-event 联合、向量投影、确定性变换、四特征 planner、两个 scene descriptor 与 renderer host 见 [Binding and Scene Contracts](visualizer/binding-and-scene-contracts.md)。
+- 模板 registry 必须穷尽参数。renderer 只能接收已经解析的逐帧值、绝对时间和 seed，不能访问 store、Worker、Editor DB 或任意脚本。
+
+### Recording contracts
+
+```ts
+type VisualizerRecordingState =
+  | { status: 'idle' }
+  | { status: 'preparing' }
+  | { status: 'recording'; startedAtContextTime: number }
+  | { status: 'finalizing' }
+  | { status: 'ready'; mimeType: string; byteLength: number }
+  | { status: 'error'; code: string; message: string }
+```
+
+- `AudioEngine.acquireRecordingTap()` 返回唯一 pre-Gain audio stream lease；第二持有者必须失败，release 对称停止/断开录制节点而不影响 destination 播放。
+- recorder 只进行 VP9+Opus 到 VP8+Opus codec fallback，不改变用户选择的分辨率/fps。preflight、状态机、锁定动作、比特率和 Blob 生命周期见 [Recording Contract](visualizer/recording-contract.md)。
+
+Visualizer contracts 在 `project-owner` 明确批准前保持 `in-review`；本节不是实现或 quality evidence。

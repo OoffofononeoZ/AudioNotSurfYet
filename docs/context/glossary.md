@@ -4,7 +4,7 @@ owner: "project-owner"
 last_reviewed: 2026-09-02
 upstream_docs:
   - "docs/context/index.md"
-next_action: "Visualizer V0 产品术语已登记；架构草案获批后补充实现级契约术语"
+next_action: "Visualizer V0 架构术语已登记并等待审批；批准后在 delivery 中固定验证用语"
 ---
 
 # Glossary
@@ -57,6 +57,11 @@ next_action: "Visualizer V0 产品术语已登记；架构草案获批后补充�
 | Visualizer V0 | 围绕当前本地歌曲，把固定值、最多四个 Analyzer 特征和同歌 Editor 事件映射到单一场景模板的音频可视化制作台 | 产品意图已批准，但当前 `/comingsoon` 与试验 renderer 不能被当作已实现 Visualizer | [scope](../product/scope.md) |
 | unique analysis feature budget | 一个 Visualizer 场景中所有参数去重后的 Analyzer `FeatureId` 集合，首版上限为四 | 固定值和 Editor 事件不计数；多个参数共享同一特征只占一个名额，第五项必须在 Worker 前拒绝 | [open questions](../product/open-questions.md) |
 | scene template | Visualizer 中一次独占输出画布的受控完整场景；首版只有 Orthogonal Lines 与 Cube Swarm | 不是可执行 Vue/JavaScript/shader 插件，也不允许多模板叠加 | [scope](../product/scope.md) |
+| `VisualizerProjectV1` | 绑定单首歌曲的 strict JSON 工程，保存输出预设、单模板/version/seed、完整 bindings 和可选 Editor 快照 | 不保存 Analyzer 数组、PCM、cache、renderer 或录制 Blob；未知字段和错歌原子拒绝 | [project format](../architecture/visualizer/project-format-v1.md) |
+| Visualizer binding | 模板 parameter 到 constant、analysis 或 editor-event source 的受控映射，可带有限 projection 与 numeric transform | 禁止任意代码；同一 FeatureId 去重后受四项上限约束 | [binding contracts](../architecture/visualizer/binding-and-scene-contracts.md) |
+| deterministic scene time | 由 project seed、绝对歌曲秒数和版本化算法决定的场景状态，不依赖前一 RAF delta | 保证从头播放、直接 seek、刷新和录制在同一时间得到相同画面 | [ADR-0016](../architecture/adrs/0016-deterministic-scene-registry.md) |
+| route playback lease | Editor/Visualizer 对唯一 AudioSessionService 的 tokenized 临时 ended policy；分别为 repeat-one 与 pause-at-end | 旧 route 无权改变新页面，离页恢复普通 queue-next | [ADR-0014](../architecture/adrs/0014-visualizer-runtime-leases.md) |
+| recording tap | AudioEngine 从 Analyser 到页面 Gain 之前分支出的唯一 MediaStream 音频 lease | 导出保留原歌曲音量，页面 mute/volume 不改变 WebM | [recording contract](../architecture/visualizer/recording-contract.md) |
 | lifecycle document | 带标准状态 frontmatter 的产品、设计、交付、质量、发布或复盘文档 | 下游工作依赖其批准与新鲜度 | [AGENTS.md](../../AGENTS.md) |
 | Analyzer candidate | 由固定实现 commit、canonical run、环境和 artifact hash 共同标识的 Analyzer-only 候选 | 后续文档或 Editor 变化不能反向扩大该候选的证据范围 | [release readiness](../quality/release-readiness.md) |
 | Ready with waivers | 候选没有当前范围内的代码 blocker，但只有在 reviewer 接受列明风险后才可进入发布规划 | 不等于风险已解决，也不等于生产上线授权 | [release readiness](../quality/release-readiness.md) |
