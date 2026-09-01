@@ -1,13 +1,13 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-09-01
+last_reviewed: 2026-09-02
 upstream_docs:
   - "docs/context/index.md"
   - "docs/product/scope.md"
   - "docs/architecture/system-design.md"
   - "docs/delivery/execution-plan.md"
-next_action: "DEC-036/M14 已执行并恢复 Analyzer readiness；PROD-015 仍开放"
+next_action: "DEC-037 已开放 Visualizer system design；delivery/实现等待架构批准，PROD-015 仍开放"
 ---
 
 # Decision Registry
@@ -63,10 +63,13 @@ next_action: "DEC-036/M14 已执行并恢复 Analyzer readiness；PROD-015 仍�
 | DEC-034 | 2026-08-31 | 批准 E7 修订版 46/46 clean canonical 并关闭 E7；只采用已记录 artifact/补偿事实，不补写未提供的人工测量 | project-owner | approved | [Editor evidence](../quality/editor/evidence-index.md) | E7 candidate identity、artifact 或批准边界改变 |
 | DEC-035 | 2026-08-31 | 实施 M13：21 卡固定顺序、默认全收起、最多四项 FIFO、V1 adapter 与最新 generation/revision；M14 拖动只登记，本轮仅本地提交 | project-owner | approved | [ADR-0012](../architecture/adrs/0012-analyzer-all-cards-fifo-active-analysis.md) | M13 行为、M14 边界、canonical 或 Git 交付授权改变 |
 | DEC-036 | 2026-09-01 | 实施 M14：21 卡前后插入、全局 featureOrder、pointer/touch/click/keyboard、独立 live、V1 optional field；排序与 FIFO/Worker 隔离，只本地提交 | project-owner | approved | [ADR-0013](../architecture/adrs/0013-analyzer-accessible-card-reordering.md) | 顺序范围、输入语义、schema、canonical 或 Git 授权改变 |
+| DEC-037 | 2026-09-02 | 批准 Visualizer V0：当前本地歌曲、单场景、固定 16:9、最多四个唯一 Analyzer 特征、两个内置模板，先实时预览/JSON 后实时 WebM；开放 system design | project-owner | approved | [Scope](../product/scope.md) | 场景数量、特征上限、数据来源、输出格式、录制路线或产品边界改变 |
 
 ## Approval Evidence
 
 `project-owner` 于 2026-07-24 通过“PLEASE IMPLEMENT THIS PLAN”明确要求将随请求给出的产品、架构、里程碑和测试决定落入仓库。本注册表记录的是批准的决策；M3–M12 的实现状态仍以 [milestone plan](../delivery/milestone-plan.md) 和可复现证据为准。
+
+2026-09-02，`project-owner` 明确回复：“我批准 Visualizer V0 产品意图、单场景模板模型、最多四项分析特征、两个内置场景与 WebM 路线；同意进入 Visualizer 架构设计。”DEC-037 与 PROD-014V 据此获批并开放 system design；该批准不构成架构、delivery、实现、quality、readiness 或上线通过。
 
 同日，`project-owner` 明确要求实施 Q0 质量设计计划，批准了 Q0 前置、四级严重度和 readiness 后置的阶段安排；同时要求三份质量文档先保持 `in-review`，经单独审阅后才生效。因此 DEC-010 的时序决定已批准，但 Q0 内容尚未批准。
 
