@@ -5,7 +5,7 @@ last_reviewed: 2026-09-01
 upstream_docs:
   - "docs/product/problem-brief.md"
   - "docs/quality/release-readiness.md"
-next_action: "实施已批准的 M14 全局卡片排序；不扩大 FIFO、音频或浏览器范围"
+next_action: "M14 已关闭；保持 FIFO、音频与浏览器范围不变"
 ---
 
 # Scope
@@ -177,5 +177,6 @@ E5 于 2026-08-27 在 E4 获批后改为 `In Progress`。若未来要求新的�
 - Change rule：现有 Analyzer delivery、quality 与 readiness 仍只对 Analyzer 历史范围有效；Editor 必须建立并审批自己的 delivery 覆盖，E1–E6 不能因产品或架构批准而直接开始实现。
 - M13 approval：`project-owner` 于 2026-08-31 以完整实施指令批准 M13 范围及 M14 非目标；M13 保持 IndexedDB V1、本地音频和最多四项分析边界，本轮不推送远程仓库。
 - M14 approval：`project-owner` 于 2026-09-01 明确批准并要求实施插入排序、工作区全局持久化、点击动作面板、恢复默认、键盘/读屏和本地 canonical；M14 不推送远程仓库。
+- M14 closure：implementation commit `0e991307d9045a1ec84ddaae0515612240894a92` 与 19/19 clean canonical 完成，范围内能力和非目标均保持；PROD-015 仍阻断上线。
 
 File System Access 行为依据：[Chrome File System Access 文档](https://developer.chrome.com/docs/capabilities/web-apis/file-system-access) 与 [持久权限说明](https://developer.chrome.com/blog/persistent-permissions-for-the-file-system-access-api)。

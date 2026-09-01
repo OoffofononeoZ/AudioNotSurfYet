@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/product/scope.md"
   - "docs/architecture/system-design.md"
   - "docs/delivery/execution-plan.md"
-next_action: "执行 DEC-036/M14 并以 clean canonical 复核 Analyzer readiness；PROD-015 仍开放"
+next_action: "DEC-036/M14 已执行并恢复 Analyzer readiness；PROD-015 仍开放"
 ---
 
 # Decision Registry
@@ -151,6 +151,8 @@ E5 clean canonical `E5-2026-08-27T11-03-22-177Z-78124177` 随后在 implementati
 2026-09-01，DEC-035 的实现 commit `63c04005670145d83ee181d474197bce921c5300` 与 clean canonical `M13-2026-08-31T17-44-39-680Z-63c04005` 已形成，17/17 通过，summary SHA-256 为 `25732179105b31b7bb05dfdb6626db1264567208a505a7cbf71434a4562e2afc`。该执行事实关闭 M13、缓解 R-028–R-030 并恢复 Analyzer `Ready with waivers`；M14 和 PROD-015 均未因此开放。
 
 同日，owner 先确认插入排序、工作区全局保存和“动作面板 + 恢复默认”，随后明确要求完整实施 M14。DEC-036/ADR-0013、产品/架构/delivery/eval、本地提交、clean canonical 与 evidence/readiness 复核据此获批；M13 readiness 转为历史，远程不推送。
+
+同日，DEC-036 implementation commit `0e991307d9045a1ec84ddaae0515612240894a92` 与 clean canonical `M14-2026-09-01T02-36-49-995Z-0e991307` 已形成，19/19 通过，summary SHA-256 为 `b169d6ff082746fc3cbe5ac6064151233c4f2869cba6e41f9dcdd7d052916fcc`。该执行事实关闭 M14、缓解 R-031–R-033 并恢复 Analyzer `Ready with waivers`；PROD-015 仍开放。
 
 ## Historical Evidence Gap
 

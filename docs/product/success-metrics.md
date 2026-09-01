@@ -5,7 +5,7 @@ last_reviewed: 2026-09-01
 upstream_docs:
   - "docs/product/problem-brief.md"
   - "docs/product/scope.md"
-next_action: "以 M14 unit/integration、双浏览器交互与 clean canonical 验证排序指标"
+next_action: "M14 排序指标已由 clean canonical 验证；候选行为变化时重测"
 ---
 
 # Success Metrics
@@ -92,4 +92,4 @@ Analyzer 目标和阈值由 `project-owner` 于 2026-07-24 批准，并已由 An
 
 2026-08-31，owner 批准 M13 的 21 卡可发现性、最多四项 FIFO、按需挂载和资源门禁；历史 M7–M12 指标保留，但涉及四 slot/默认活动卡的断言不再代表 M13 候选。
 
-2026-09-01，owner 批准 M14 的完整顺序、输入等价、全局恢复、FIFO 隔离和资源指标。M13 canonical 保留为历史；M14 指标只在 clean canonical 与 owner evidence 复核后视为达到。
+2026-09-01，owner 批准 M14 的完整顺序、输入等价、全局恢复、FIFO 隔离和资源指标。M14 clean canonical 19/19 通过，unit 24/24、integration 19/19、Chrome/Edge 各 3/3 且排序 Worker analyze request 保持 `1 → 1`；指标据 owner 完成后续授权复核为达到，M13 canonical 保留为历史。

@@ -4,7 +4,7 @@ owner: "project-owner"
 last_reviewed: 2026-09-01
 upstream_docs:
   - "docs/context/index.md"
-next_action: "M14 实施后登记 featureOrder、pointer interaction 与 V1 optional field 当前事实"
+next_action: "M14 当前事实已登记；候选边界变化时更新 system map"
 ---
 
 # System Map
@@ -109,4 +109,4 @@ E7 修订版 46/46 canonical 已由 owner 于 2026-08-31 批准并关闭；原 4
 
 2026-08-31，owner 批准 M13 产品、ADR-0012、delivery 与 quality 计划并要求完整实施。Analyzer runtime 已改为 `activeFeatureQueue`，按 `FEATURE_IDS` 固定渲染 21 张卡，展开时才挂载图表资源；V1 `activeCards` 仅作为兼容 carrier。clean canonical `M13-2026-08-31T17-44-39-680Z-63c04005` 17/17 通过，当前实现身份为 commit `63c04005670145d83ee181d474197bce921c5300`。
 
-2026-09-01，owner 批准 M14 目标：runtime 增加独立 `featureOrder`，Analyzer 以 pointer/click/keyboard 改变 keyed DOM 与 masonry 输入，V1 增加可选顺序字段；排序不得触发 Coordinator 或改变 FIFO。此段在实现/canonical 前是批准目标，不是已证实代码事实。
+2026-09-01，owner 批准并完成 M14：runtime 增加独立 `featureOrder`，Analyzer 以 pointer/click/keyboard 改变 feature-keyed DOM 与 masonry 输入，V1 增加可选顺序字段；排序不触发 Coordinator 或改变 FIFO。clean canonical `M14-2026-09-01T02-36-49-995Z-0e991307` 19/19 通过，以上为当前代码与证据事实。

@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/delivery/acceptance-criteria.md"
   - "docs/delivery/test-strategy.md"
   - "docs/architecture/risk-register.md"
-next_action: "执行 M14-G01–G07；M3–M13 golden 保留为历史"
+next_action: "M14-G01–G07 已由 clean canonical 覆盖；候选行为变化时重跑"
 ---
 
 # Golden Examples
@@ -121,4 +121,4 @@ next_action: "执行 M14-G01–G07；M3–M13 golden 保留为历史"
 
 2026-08-31，owner 批准 M13-G01–G06 作为新候选规范；它们在 canonical 前保持 expected，不改写历史 golden 执行结果。
 
-2026-09-01，owner 批准 M14-G01–G07 作为排序候选规范；在 M14 canonical 登记前均为 expected。
+2026-09-01，owner 批准 M14-G01–G07 作为排序候选规范；同日 clean canonical 19/19 通过，七组 golden 由 unit/integration、Chrome/Edge M14 与相邻 M11–M13 资源/FIFO 回归共同覆盖并登记为 pass。

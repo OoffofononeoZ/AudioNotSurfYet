@@ -4,7 +4,7 @@ owner: "project-owner"
 last_reviewed: 2026-09-01
 upstream_docs:
   - "docs/context/index.md"
-next_action: "以 M14 实现/canonical 验证 feature order、drop edge 与 reorder action 术语"
+next_action: "M14 排序术语已由实现/canonical 验证；语义变化时复核"
 ---
 
 # Glossary

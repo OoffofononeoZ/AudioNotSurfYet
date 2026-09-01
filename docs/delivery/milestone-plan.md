@@ -6,7 +6,7 @@ upstream_docs:
   - "docs/delivery/execution-plan.md"
   - "docs/delivery/acceptance-criteria.md"
   - "docs/delivery/test-strategy.md"
-next_action: "完成 M14 实现、双浏览器、clean canonical 与 evidence/readiness 复核"
+next_action: "M14 已关闭；保留 canonical artifact，PROD-015 解决前不进入生产上线"
 ---
 
 # Milestone Plan
@@ -19,7 +19,7 @@ next_action: "完成 M14 实现、双浏览器、clean canonical 与 evidence/re
 
 - Target 使用相对门禁，不表示日历承诺。
 - `Complete` 只用于文档门禁、真实证据和所需人工批准均已满足的里程碑。
-- Q0 与 M1–M13 均为 `Complete`；M14 为 `In Progress`，正式上线仍由 PROD-015 阻断。
+- Q0 与 M1–M14 均为 `Complete`；正式上线仍由 PROD-015 阻断。
 - 一个里程碑未通过时，后续里程碑保持 Planned/Blocked，不并行扩大特征范围。
 
 ## Milestones
@@ -40,7 +40,7 @@ next_action: "完成 M14 实现、双浏览器、clean canonical 与 evidence/re
 | M11 | Cross-cutting hardening | Complete | Delivery exit gate | M10 | 格式、恢复、权限、性能、无障碍、视口和 Chrome/Edge 全证据 | project-owner |
 | M12 | Analyzer masonry layout | Complete | Post-readiness candidate change | M11 + approved M12 design | 纯布局、动态 DOM、四视口、Chrome/Edge、资源清理、canonical 与 owner approval | project-owner |
 | M13 | All cards + FIFO active analysis | Complete | Current Analyzer candidate | M12 + approved ADR-0012 | 21 stable cards、0–4 FIFO、V1 adapter、双浏览器资源、clean canonical 与 readiness review | project-owner |
-| M14 | Card reordering | In Progress | Current implementation gate | M13 + approved ADR-0013 | insert order、pointer/touch/click/keyboard、V1 persistence、screen-reader announcement、canonical | project-owner |
+| M14 | Card reordering | Complete | Closed | M13 + approved ADR-0013 | insert order、pointer/touch/click/keyboard、V1 persistence、screen-reader announcement、canonical | project-owner |
 
 ## Gate Checklist by Milestone
 
@@ -175,10 +175,10 @@ next_action: "完成 M14 实现、双浏览器、clean canonical 与 evidence/re
 
 ## Current Gate State
 
-- Current stage：M13 `Complete`；M14 `In Progress`。M13 canonical 保留为历史候选，Editor E7 保持关闭。
+- Current stage：M14 `Complete`。M13 canonical 保留为历史候选，Editor E7 保持关闭。
 - Previous gate：M3 已由 `project-owner` 于 2026-07-28 批准并标记 `Complete`。
 - Canonical run：`npm run eval:m3` 已在 clean commit `17d16f0da37289c1f67f75203502beef999572ea` 上通过；摘要见 [evidence index](../quality/evidence-index.md)。
-- Next gate：M14 专项、dirty provisional、本地实现 commit、clean canonical 和 evidence/readiness；Analyzer 正式上线仍等待 PROD-015。
+- Next gate：Analyzer 正式上线仍等待 PROD-015；候选行为变化前不新开实现里程碑。
 - M3 state：Complete；M3 evidence 只证明测试基础，不代表 M4 产品行为通过。
 - M4 canonical：`npm run eval:m4` 在 clean commit `e5cfe9e8ab62301f3c5b0ddcdd37847a2e131a0f` 上 13/13 步骤通过；60 秒漂移 2.233ms，三次 seek 最大误差 66.827ms。`project-owner` 已于 2026-07-29 批准该证据。
 - M5 provisional：`M5-2026-07-29T07-03-16-207Z-2eb98381-provisional` 在 dirty worktree 16/16 步骤通过；summary SHA-256 为 `7b0acaf128ac4a7ceffce1449d2421127d20c8b25dcdc1ebd07b889072228530`。它只作实现反馈，不是正式 evidence。
@@ -219,6 +219,8 @@ next_action: "完成 M14 实现、双浏览器、clean canonical 与 evidence/re
 2026-09-01，M13 implementation commit `63c04005670145d83ee181d474197bce921c5300` 与 clean canonical `M13-2026-08-31T17-44-39-680Z-63c04005` 完成，17/17 通过，summary SHA-256 为 `25732179105b31b7bb05dfdb6626db1264567208a505a7cbf71434a4562e2afc`。evidence/readiness 已复核，M13 改为 `Complete`；M14 保持 `Planned`，未推送远端。
 
 同日，owner 明确要求实施完整 M14 计划，并批准插入排序、工作区全局保存、动作面板 + reset、pointer/keyboard/live、V1 可选字段、本地提交与 canonical/evidence。M14 改为 `In Progress`，远程仍不推送。
+
+同日，M14 implementation commit `0e991307d9045a1ec84ddaae0515612240894a92` 与 clean canonical `M14-2026-09-01T02-36-49-995Z-0e991307` 完成，19/19 通过，summary SHA-256 为 `b169d6ff082746fc3cbe5ac6064151233c4f2869cba6e41f9dcdd7d052916fcc`。evidence/readiness 与 R-031–R-033 已复核，M14 改为 `Complete`；未推送远端。
 
 2026-07-30，M6 canonical 已在 clean commit 上 20/20 通过。`project-owner` 随后明确回复：“我批准 M6 canonical evidence、working agreements、system map 与 glossary；同意将 M6 标记为 Complete 并开放 M7。”M6 据此改为 `Complete`；M7 门禁开放但仍为 `Planned`，直到明确开始实现。
 

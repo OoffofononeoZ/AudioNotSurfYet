@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/quality/golden-examples.md"
   - "docs/delivery/acceptance-criteria.md"
   - "docs/architecture/risk-register.md"
-next_action: "M14 沿用稳定类型并重点检测顺序、持久化、a11y 与 pointer lifecycle failure"
+next_action: "M14 未产生开放 failure instance；候选行为变化时沿用现有分类回归"
 ---
 
 # Failure Taxonomy

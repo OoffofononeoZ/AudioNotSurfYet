@@ -6,7 +6,7 @@ upstream_docs:
   - "docs/context/index.md"
   - "docs/context/glossary.md"
   - "docs/quality/release-readiness.md"
-next_action: "M14 已获批准并进入实现；readiness 等待新 canonical，PROD-015 仍阻断上线"
+next_action: "M14 已关闭并恢复 readiness；PROD-015 继续阻断上线"
 ---
 
 # Problem Brief
@@ -110,3 +110,5 @@ Editor 的输出是绑定单首歌曲的时间数据集；它不会修改、重�
 2026-09-01，M13 clean canonical 已在实现 commit `63c04005670145d83ee181d474197bce921c5300` 上 17/17 通过；批准的产品结果已交付，Analyzer readiness 恢复为 `Ready with waivers`。M14 与 PROD-015 仍按既有开放问题管理。
 
 同日，`project-owner` 选择插入排序、Analyzer 工作区全局保存以及“点击动作面板 + 恢复默认”，并明确要求实施完整 M14 计划。该指令关闭 PROD-021，批准卡片自定义顺序、鼠标/触控/键盘与读屏路径；M13 evidence 转为历史候选，M14 canonical 前 Analyzer readiness 为 `in-review`。
+
+同日，M14 clean canonical 在 implementation commit `0e991307d9045a1ec84ddaae0515612240894a92` 上 19/19 通过，产品结果按批准范围实现并恢复 Analyzer `Ready with waivers`；PROD-015 继续阻断生产上线。
