@@ -9,7 +9,7 @@ upstream_docs:
   - "docs/architecture/system-design.md"
   - "docs/architecture/interface-contracts.md"
   - "docs/architecture/risk-register.md"
-next_action: "执行已批准的 M14 顺序模型、可访问交互、V1 持久化与双浏览器证据"
+next_action: "M14 已关闭；候选行为变化时按现有 M14 runner 回归"
 ---
 
 # Execution Plan
@@ -498,3 +498,5 @@ Exit：M14 专项、M7–M13/E7 相邻回归、docs、typecheck、build、diff c
 2026-09-01，M13 实现 commit `63c04005670145d83ee181d474197bce921c5300` 完成 21 卡、FIFO、懒挂载、V1 adapter 和串行 workspace save；clean canonical `M13-2026-08-31T17-44-39-680Z-63c04005` 17/17 通过，summary SHA-256 为 `25732179105b31b7bb05dfdb6626db1264567208a505a7cbf71434a4562e2afc`。evidence/readiness 与 R-028–R-030 已复核，M13 关闭；M14 未开放，远程未推送。
 
 同日，owner 以完整“PLEASE IMPLEMENT THIS PLAN”批准 M14 产品、ADR-0013、delivery、test/eval 与本地 Git/canonical/evidence 流程。M14 据此进入 `In Progress`；M13 canonical 保留为历史，PROD-015 继续独立阻断上线。
+
+同日，M14 implementation commit `0e991307d9045a1ec84ddaae0515612240894a92` 完成顺序模型、三种等价交互、V1 可选字段、masonry/DOM 同序和 FIFO/Coordinator 隔离；dirty provisional 与 clean canonical 均 19/19 通过。evidence/readiness 和 R-031–R-033 复核完成，M14 关闭；PROD-015 仍独立阻断上线。

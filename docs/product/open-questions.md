@@ -6,7 +6,7 @@ upstream_docs:
   - "docs/product/problem-brief.md"
   - "docs/product/scope.md"
   - "docs/product/success-metrics.md"
-next_action: "PROD-021 已关闭并开放 M14；PROD-015 继续阻断正式上线"
+next_action: "PROD-021/M14 已关闭；PROD-015 继续阻断正式上线"
 ---
 
 # Open Questions
@@ -51,4 +51,4 @@ next_action: "PROD-021 已关闭并开放 M14；PROD-015 继续阻断正式上�
 
 ## Gate State
 
-PROD-021 已由 owner 的完整实施指令关闭，M14 进入实现与 evidence 阶段。M13 readiness 保留为历史候选，M14 canonical 前当前 readiness 为 `in-review`；PROD-015 继续阻断正式上线。
+PROD-021 已由 owner 的完整实施指令关闭，M14 clean canonical 19/19 通过并恢复 Analyzer `Ready with waivers`。M13 readiness 保留为历史候选；PROD-015 继续阻断正式上线。

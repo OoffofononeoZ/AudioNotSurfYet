@@ -4,7 +4,7 @@ owner: "project-owner"
 last_reviewed: 2026-09-01
 upstream_docs:
   - "docs/architecture/system-design.md"
-next_action: "实现并验证 M14 featureOrder、可访问排序与 V1 可选字段"
+next_action: "M14 接口已由 canonical 验证；schema、workspace 或交互契约变化时复核"
 ---
 
 # Interface Contracts

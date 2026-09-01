@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/architecture/interface-contracts.md"
   - "docs/delivery/acceptance-criteria.md"
   - "docs/delivery/execution-plan.md"
-next_action: "实现并执行 M14 unit/integration、Chrome/Edge、provisional 与 clean canonical"
+next_action: "M14 provisional/canonical 已通过；候选或 runner 变化时回归"
 ---
 
 # Test Strategy
@@ -302,4 +302,4 @@ M13 最终 provisional `M13-2026-08-31T17-40-46-300Z-e62140ee-provisional` 与 c
 
 M3 的公开命令、fixture、黄金比较和失败检测已有 clean-commit canonical pass，并已由 `project-owner` 批准。M4 的 AudioEngine/session/Chrome 适用测试也已在 clean commit 上 canonical pass、记录在 [evidence index](../quality/evidence-index.md) 并获 owner 批准。M5 repository、recovery integration 与 Chrome IndexedDB/OPFS 已在 clean commit canonical 通过；Chrome 原生权限人工检查也已由 `project-owner` 确认通过，M5 evidence 与 working agreements 已获批准。M6 Worker/registry/cache/15 分钟 Chrome 场景已在 clean commit canonical 20/20 通过并获 owner 批准，M6 已关闭。M7 unit/integration/golden/Chrome 与 M3–M6 回归已在 clean commit `f022b86e2333ad612ecb12701b0ca05e49f2b256` 上 24/24 通过；owner 于 2026-08-21 完成人工操作与 3/3 学习解释并批准 evidence，M7 已关闭。
 
-M8–M10 的 UI、scalar、vector/waveform 和 structured 特征证据均已获批准；M10 达到 21/21。M11/M12/M13 canonical 保留为历史；M14 只有在上述 success、failure、boundary、exception 与 clean identity 完整通过后才能恢复 Analyzer readiness。
+M8–M10 的 UI、scalar、vector/waveform 和 structured 特征证据均已获批准；M10 达到 21/21。M11/M12/M13 canonical 保留为历史；M14 已以 19/19 clean canonical 完整通过 success、failure、boundary、exception 与 clean identity 并恢复 Analyzer readiness。

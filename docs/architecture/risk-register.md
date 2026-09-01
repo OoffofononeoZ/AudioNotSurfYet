@@ -5,7 +5,7 @@ last_reviewed: 2026-09-01
 upstream_docs:
   - "docs/architecture/system-design.md"
   - "docs/architecture/interface-contracts.md"
-next_action: "以 M14 unit/integration、双浏览器与 canonical 验证 R-031–R-033"
+next_action: "M14 canonical 已缓解 R-031–R-033；候选交互、workspace 或 persistence 变化时重开"
 ---
 
 # Risk Register
@@ -44,9 +44,9 @@ next_action: "以 M14 unit/integration、双浏览器与 canonical 验证 R-031�
 | R-028 | Analyzer 动态瀑布流产生重叠、视觉/DOM 顺序偏离或 Observer/RAF 泄漏 | Medium | High | 21 卡相交、容器高度不足、展开/收起后焦点或 DOM 顺序偏离、路由循环资源单调增长、`ResizeObserver loop` 警告 | M12 的纯最短列、实测高度、container/item Observer 与单 RAF 继续使用；M13 以 21 feature wrapper、按需 body、四视口和反复生命周期重新验证 | M13 canonical 17/17；Chrome/Edge M12 各 3/3，21 wrapper 四视口无重叠，masonry/card Observer 与 RAF 路由后归零 | project-owner | Mitigated |
 | R-029 | 快速展开/收起导致 FIFO、Worker generation、exact request 或持久化状态错序 | Medium | High | 短暂出现第五张展开卡、旧结果回填已收起卡、刷新恢复旧队列、旧 save 把新状态标为 ready | 纯原子 reducer；Coordinator cancel/generation/identity；exact 清理；不可变 snapshot、串行 save 与 revision guard；unit/integration/双浏览器快速序列 | M13 unit 16/16、integration 12/12；双浏览器快速十连切换、刷新前后单 Worker/精确值和 FIFO 年龄恢复通过 | project-owner | Mitigated |
 | R-030 | 21 张稳定卡增加 DOM、布局、Canvas 与 Observer 资源压力 | Medium | High | 首屏过慢、收起卡仍有 Canvas/Observer、Canvas 超过活动 renderer 上限、反复展开或路由后计数增长 | 折叠态只保留语义 DOM；展开才挂载 body/Canvas/内部 Observer；最多四项；资源计数、输入反馈、长任务和 20 次生命周期回归 | M13 双浏览器默认 0 Canvas、活动上限 4/八 Canvas；15 分钟最大反馈 17.5ms、归因长任务 0，资源回归无单调增长 | project-owner | Mitigated |
-| R-031 | 自定义顺序与 DOM/masonry/focus/Canvas 身份错位 | Medium | High | order index、DOM 和视觉输入不同；排序关闭 details、丢焦点或重建 Canvas | 完整 permutation、feature keyed wrapper、drop 时一次提交、无位移动画；检查 DOMRect/焦点/details/Canvas identity | M14 unit + Chrome/Edge 四视口、展开卡排序与刷新恢复 | project-owner | Open |
-| R-032 | Pointer capture、auto-scroll、popup 或 drag RAF 未清理 | Medium | High | 取消后仍滚动、遗留 capture/ghost/marker、路由循环 RAF 增长、touch 无法恢复滚动 | 单 pointer state、单 drag RAF；pointercancel/lostcapture/Escape/blur/unmount 对称 cleanup；touch-action 只作用句柄 | M14 cancel matrix、20 次排序/resize/route lifecycle 与 console probe | project-owner | Open |
-| R-033 | featureOrder 损坏或与 queue/viewport 保存交错覆盖最新状态 | Medium | High | 非完整/重复 order 被恢复；旧 save 覆盖新顺序或 FIFO；刷新顺序倒退 | V1 可选字段严格 permutation；缺失只映射默认；全 workspace immutable snapshot、串行写入和 revision guard | validator/repository/service integration、quota/abort 与双浏览器 reload | project-owner | Open |
+| R-031 | 自定义顺序与 DOM/masonry/focus/Canvas 身份错位 | Medium | High | order index、DOM 和视觉输入不同；排序关闭 details、丢焦点或重建 Canvas | 完整 permutation、feature keyed wrapper、drop 时一次提交、无位移动画；M14 unit 24/24 与 Chrome/Edge 各 3/3 验证 DOM/data/masonry 顺序、焦点、details/Canvas identity、reload/切歌/reset 和 FIFO 独立 | 交互、key 或 masonry 输入契约变化时重跑 M14 | project-owner | Mitigated |
+| R-032 | Pointer capture、auto-scroll、popup 或 drag RAF 未清理 | Medium | High | 取消后仍滚动、遗留 capture/ghost/marker、路由循环 RAF 增长、touch 无法恢复滚动 | 单 pointer state、单 drag RAF；pointercancel/lostcapture/Escape/blur/unmount 对称 cleanup；句柄局部 touch-action；M14 双浏览器 threshold/auto-scroll/工作区外/Escape 取消无 console issue，M12/M11 路由资源回归继续通过 | 原生触控设备与未自动制造的 blur/lostcapture 由等价 cleanup 契约和后续人工回归补偿；实现变化时重开 | project-owner | Mitigated |
+| R-033 | featureOrder 损坏或与 queue/viewport 保存交错覆盖最新状态 | Medium | High | 非完整/重复 order 被恢复；旧 save 覆盖新顺序或 FIFO；刷新顺序倒退 | V1 可选字段严格 permutation；缺失只映射默认；全 workspace immutable snapshot、串行写入和 revision guard；M14 integration 19/19 与双浏览器 reload/切歌通过，排序 Worker analyze request 保持 `1 → 1` | schema、repository 或 workspace snapshot 变化时重跑 validator/revision/quota | project-owner | Mitigated |
 
 ## Review Rule
 
@@ -54,4 +54,4 @@ next_action: "以 M14 unit/integration、双浏览器与 canonical 验证 R-031�
 - 风险只有在缓解措施有可复现证据时才能标记 Mitigated。
 - `Accepted` 表示已知平台事实被接受，不表示无需实现降级路径。
 - 新的高影响风险或剩余风险超过已批准范围时，停止进入下一里程碑并由 `project-owner` 决策。
-- Analyzer R-001–R-021 的历史状态继续由 M3–M11 evidence 支持；R-028–R-030 已由 M13 clean canonical 缓解。M14 重开 R-028 的顺序子集并新增 R-031–R-033；Editor R-022–R-027 与 E7 不被 M14 重开。
+- Analyzer R-001–R-021 的历史状态继续由 M3–M11 evidence 支持；R-028–R-030 由 M13、R-031–R-033 由 M14 clean canonical 缓解。Editor R-022–R-027 与 E7 不被 M14 改写。

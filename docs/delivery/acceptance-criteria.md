@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/architecture/system-design.md"
   - "docs/architecture/interface-contracts.md"
   - "docs/delivery/execution-plan.md"
-next_action: "以 M14 专项、双浏览器和 clean canonical 验证 AC-M1401–AC-M1408"
+next_action: "AC-M1401–AC-M1408 已由 M14 canonical 覆盖；候选变化时重验"
 ---
 
 # Acceptance Criteria
@@ -155,6 +155,8 @@ M13 记录只证明默认 `FEATURE_IDS` 顺序；M14 自定义顺序由下一节
 | AC-M1406 | 排序/queue/viewport 快速交错仅让最新完整 revision durable；quota/abort 不破坏内存顺序 | integration failure matrix |
 | AC-M1407 | 排序不改变 active FIFO 年龄、Worker generation、cache/exact request、最多四项、Canvas 上限或播放/seek/zoom | integration + Chrome/Edge FIFO regression |
 | AC-M1408 | 四视口无重叠/溢出；cancel/blur/lost capture 与 20 次排序/resize/route 不遗留 popup/ghost/marker/capture/RAF/Observer/Canvas/Worker 或 console error/warn | Chrome/Edge lifecycle + regression |
+
+2026-09-01，M14 unit 24/24、integration 19/19、Chrome/Edge 各 3/3 及 M7–M13/E7 相邻回归在 clean canonical 19/19 中通过；AC-M1401–AC-M1408 据 owner 完成后续授权关闭。原生 touch/blur/lostcapture 的残余补偿边界记录于 R-032，不扩大移动端支持范围。
 
 ## 11. Milestone Exit Rule
 

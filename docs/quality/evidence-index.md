@@ -8,18 +8,18 @@ upstream_docs:
   - "docs/quality/failure-taxonomy.md"
   - "docs/delivery/milestone-plan.md"
   - "tests/fixtures/fixture-manifest.json"
-next_action: "M13 canonical 已批准；保留 artifact，候选行为变化时重新评估"
+next_action: "M14 canonical 已批准；保留 artifact，候选行为变化时重新评估"
 ---
 
 # Evidence Index
 
 ## Scope Routing
 
-本文保留 Analyzer M3–M12 历史 evidence，并登记当前 M13 21 卡/FIFO 候选；Editor 使用独立 [Editor evidence index](editor/evidence-index.md)。
+本文保留 Analyzer M3–M13 历史 evidence，并登记当前 M14 可访问卡片排序候选；Editor 使用独立 [Editor evidence index](editor/evidence-index.md)。
 
 ## 1. Purpose and Gate State
 
-本文件保存受版本控制的长期证据摘要；原始日志保存在 Git 忽略的本地 artifact 目录。M13 clean canonical 已在实现 commit 上 17/17 通过，并按 owner 的“自行提交并完成后续”授权登记为 `approved`。PROD-015 继续阻断生产上线。
+本文件保存受版本控制的长期证据摘要；原始日志保存在 Git 忽略的本地 artifact 目录。M14 clean canonical 已在实现 commit 上 19/19 通过，并按 owner 对完整 M14 计划及“自行提交并完成后续”的授权登记为 `approved`。PROD-015 继续阻断生产上线。
 
 每条 `pass` 只证明对应里程碑的适用子集在被记录的 commit 和环境上可复现。它不表示完整 EV-A–EV-R、未执行里程碑、Edge 矩阵或 release readiness 已通过。
 
@@ -1090,4 +1090,73 @@ M13 固定渲染 `FEATURE_IDS` 顺序的 21 个 wrapper，新工作区活动队�
 
 - `project-owner` 已批准 M13 计划并授权 agent 自行提交、完成 canonical 与后续 evidence/readiness；本 clean run 满足该门禁，因此 M13 为 `Complete`，R-028/R-029/R-030 为 `Mitigated`。
 - M14 只保留拖动排序后续项；本候选没有三横图标、拖动、顺序 schema 或提前持久化。
+- 正式上线仍由 PROD-015 阻断；本 evidence 不推送、不部署、不创建生产 URL，也不扩大到 Editor readiness。
+
+## 17. M14 Canonical Run Record
+
+| Field | Value |
+| --- | --- |
+| Run ID | `M14-2026-09-01T02-36-49-995Z-0e991307` |
+| Milestone | M14 — Accessible card reordering and persistence |
+| Evidence state | `approved` |
+| Eval result | `pass`（19/19 steps） |
+| Implementation commit | `0e991307d9045a1ec84ddaae0515612240894a92` |
+| Evidence registration commit | 本记录所在的 `docs: register Analyzer M14 canonical evidence` 提交 |
+| Commit at end | `0e991307d9045a1ec84ddaae0515612240894a92` |
+| Dirty at start / end | `false` / `false` |
+| Started at | 2026-09-01 02:36:49.995 UTC |
+| Method | `npm run eval:m14` |
+| Reviewer | `project-owner` — approved via 完整 M14 实施指令与“自行提交并完成后续”授权 |
+| Retention | `local-present` |
+| Artifact root | `artifacts/evals/M14-2026-09-01T02-36-49-995Z-0e991307/` |
+| Summary SHA-256 | `b169d6ff082746fc3cbe5ac6064151233c4f2869cba6e41f9dcdd7d052916fcc` |
+| Provisional precursor | `M14-2026-09-01T02-32-49-777Z-6a46ae57-provisional`，19/19 pass，summary `cf773f9bbbb58b52d3deab9ba85b13bef0d5148438143351bc55ef89c7e3d373`；只作 dirty-worktree 实现反馈 |
+
+### Environment
+
+| Item | Recorded value |
+| --- | --- |
+| OS | macOS 26.5.2 (`25F84`), Darwin arm64 |
+| Hardware | MacBook Pro `MacBookPro17,1`；Apple M1 8-core；16 GB memory |
+| Node / npm | Node `v24.18.0`；npm `11.16.0` |
+| Playwright Test | `1.62.0` |
+| Chrome | Google Chrome `152.0.7977.65` |
+| Edge | Microsoft Edge `152.0.4191.53` |
+
+### Results and Traceability
+
+| Step group | Result | Measurement / trace |
+| --- | --- | --- |
+| M14 unit / integration | pass | 24/24 + 19/19；完整 permutation、before/after、菜单动作、首尾/no-op、单/双列输入、间隙/容器外命中、V1 缺字段/round-trip/非法拒绝、queue/order/viewport revision 与 Coordinator 隔离 |
+| M7–M11 Chrome regression | pass | 5/5、2/2、2/2、3/3、4/4；三格式、共享 viewport/seek/exact、quota、reduced motion、20 次资源循环；15 分钟最大反馈 `17.8ms`、归因长任务 0 |
+| M12 Chrome / Edge | pass / pass | 各 3/3；四视口最短列、动态高度、details/focus/Canvas 身份、renderer failure 与 Observer/RAF cleanup |
+| M13 Chrome / Edge | pass / pass | 各 2/2；21 卡、四项/八 Canvas、快速 FIFO、刷新恢复、单 Worker 与精确值 |
+| M14 Chrome / Edge | pass / pass | 各 3/3；21 handle、click/menu/keyboard/live/reset、6px threshold、跨列 before/after、长距离 auto-scroll、工作区外与 Escape 取消、自定义顺序 reload/切歌，以及排序后 Worker analyze request `1 → 1`、八 Canvas/details identity 和真实 FIFO 队首 |
+| Editor E7 isolation | pass | unit 2/2、integration 4/4；排序未破坏已批准的 Editor lease/renderer 边界 |
+| Build | pass with warning | 1847 modules；Worker 49.62 kB；最大 JS chunk `1,300.63 kB`、gzip `396.56 kB`；R-019/W-001 继续披露 |
+| Docs / typecheck / diff / identity | pass | lifecycle links/21 feature count、`vue-tsc -b`、`git diff --check`；起止 commit 相同且工作树干净 |
+
+M14 为 21 个 feature-keyed wrapper 增加三横排序句柄；逻辑顺序同时驱动 DOM、键盘/读屏和 M12 masonry 输入。Pointer drop 只在松手时提交，动作面板和 `Alt+Arrow/Home/End` 提供非拖动替代。`featureOrder` 与 `activeFeatureQueue` 独立，排序不调用 Coordinator；V1 只增加 optional `featureOrder`，缺失映射默认，存在但非法则拒绝整个 session。
+
+### Local Artifact Hashes
+
+| Artifact | SHA-256 |
+| --- | --- |
+| `summary.json` | `b169d6ff082746fc3cbe5ac6064151233c4f2869cba6e41f9dcdd7d052916fcc` |
+| `01-M14-order-and-regression-unit.log` | `00e6cdd906c5a0b8637262c313092affc803165c1601cfc5404c47eb19331e08` |
+| `02-M14-workspace-and-persistence-integration.log` | `78be307f95cb6eb5b3f1ddbf4e2f7a5b0f36893e41a2492787b93c356ecf2292` |
+| `09-M11-Chrome-hardening-regression.log` | `67c8863505a37d4c70ff4c5f71eedcb89c59a34003a9f1bfffbfb6f2b5b2ad36` |
+| `10-M12-Chrome-masonry-regression.log` | `79e6f8f919c2d032fd6b9c2b63c2b1d0e19114f88fc0a0e9cefbcdf5c8d4feda` |
+| `11-M12-Edge-masonry-regression.log` | `0a94383d77b6b23c6a5cb473666305a4c05469abca0066b880e96fd0f5d2cb2f` |
+| `12-M13-Chrome-FIFO-regression.log` | `e8dc5053397363ad5e5b166e1abd6a18e7e4f8898d92cc093f00dbec29ef610d` |
+| `13-M13-Edge-FIFO-regression.log` | `2ee9821df71e3b5b173c7a1363967a3db7dc4bee43462eab7ee4b70a15779dd6` |
+| `14-M14-Chrome-reordering.log` | `6790bac929147e64ca79e3e2f8d3ce3c8c8ae323465a41676015270f66ba1ab5` |
+| `15-M14-Edge-reordering.log` | `953906d828951ddcb73e87c0a2f8b7820834d5f4153fc2c010099d800e3c4bcd` |
+| `18-build.log` | `c9993890c9974f95ff2515cd7acd868f5d8a028a4ccbf58da184f40a7721577d` |
+| `19-diff-check.log` | `e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855` |
+
+### Approval and Remaining Boundary
+
+- `project-owner` 批准完整 M14 计划，并已授权 agent 自行提交、执行 canonical 与完成后续；本 clean run 满足该门禁，因此 M14 为 `Complete`，R-031/R-032/R-033 为 `Mitigated`。
+- W-001 因最大 JS chunk 从 M13 `1,292.10 kB` 增至 `1,300.63 kB` 重新复核并继续接受；W-002 因新增 M14 runner 重新复核并继续接受。其余既有 waiver 不变。
 - 正式上线仍由 PROD-015 阻断；本 evidence 不推送、不部署、不创建生产 URL，也不扩大到 Editor readiness。

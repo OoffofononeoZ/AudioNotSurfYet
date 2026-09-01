@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/product/scope.md"
   - "docs/product/success-metrics.md"
   - "docs/product/open-questions.md"
-next_action: "实施 ADR-0013 的 M14 顺序、Pointer Events、可访问替代与 V1 持久化"
+next_action: "ADR-0013 已由 M14 canonical 验证；架构或交互边界变化时复核"
 ---
 
 # System Design
@@ -366,6 +366,8 @@ M6 只在 `import.meta.env.DEV` 安装无 UI bridge，提供活动特征、cance
 2026-08-31，owner 先批准并关闭 E7 修订候选，随后以“PLEASE IMPLEMENT THIS PLAN”批准 ADR-0012、M13 系统设计及 delivery/eval 门禁。本设计据此保持 `approved`；M13 源码和 readiness 仍须由专项与 clean canonical 证据验证。
 
 2026-09-01，owner 以完整 M14 实施指令批准 ADR-0013、自定义 DOM 顺序、全局 V1 可选字段、pointer/点击/键盘/读屏契约和不改变 FIFO/Worker 的隔离边界；系统设计继续为 `approved`，M14 readiness 在 canonical 前保持 `in-review`。
+
+同日，M14 implementation commit `0e991307d9045a1ec84ddaae0515612240894a92` 与 clean canonical 19/19 验证上述设计；R-031–R-033 已缓解，Analyzer readiness 恢复为 `Ready with waivers`。
 
 ## 17. Editor Timeline and Interaction Architecture
 

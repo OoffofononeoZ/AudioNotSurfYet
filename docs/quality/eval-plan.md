@@ -8,7 +8,7 @@ upstream_docs:
   - "docs/delivery/execution-plan.md"
   - "docs/delivery/acceptance-criteria.md"
   - "docs/delivery/test-strategy.md"
-next_action: "执行 M14 order/pointer/a11y/persistence/FIFO-isolation 的 provisional 与 clean canonical"
+next_action: "M14 canonical 已通过；候选行为变化时复跑 19-step runner"
 ---
 
 # Eval Plan
@@ -19,7 +19,7 @@ next_action: "执行 M14 order/pointer/a11y/persistence/FIFO-isolation 的 provi
 
 ## 1. Purpose and Current State
 
-本文件定义 AudioNotSurfYet 的质量证据契约。M3–M13 canonical 均保留但只代表历史候选；M14 改变 DOM 顺序、workspace schema 扩展和交互生命周期，当前 Analyzer readiness 为 `in-review`。
+本文件定义 AudioNotSurfYet 的质量证据契约。M3–M13 canonical 均保留但只代表历史候选；M14 已以 19/19 clean canonical 验证 DOM 顺序、workspace schema 扩展和交互生命周期，当前 Analyzer readiness 为 `Ready with waivers`。
 
 Q0 只批准“如何判断质量”，不批准 release readiness。`docs/quality/release-readiness.md` 只能在 M11 已产生完整成功、失败、边界和异常证据后创建。
 
@@ -210,3 +210,5 @@ Q0 只有在以下条件满足后才能改为 `approved`：
 同日，clean canonical `M13-2026-08-31T17-44-39-680Z-63c04005` 在实现 commit `63c04005670145d83ee181d474197bce921c5300` 上 17/17 通过，起止工作树干净，summary SHA-256 为 `25732179105b31b7bb05dfdb6626db1264567208a505a7cbf71434a4562e2afc`。本 run 完成 EV-J/EV-B/EV-R 的 M13 适用门禁，R-028–R-030 改为 `Mitigated`。
 
 2026-09-01，owner 批准 AC-M1401–AC-M1408 与 M14 quality contract，并授权在本地实现、提交、执行 clean canonical 与 evidence/readiness 复核。M14 evidence 形成前所有新 golden 保持 expected，不能用 M13 pass 推断排序已通过。
+
+同日，M14 clean canonical `M14-2026-09-01T02-36-49-995Z-0e991307` 在 implementation commit `0e991307d9045a1ec84ddaae0515612240894a92` 上 19/19 通过；M14-G01–G07、R-031–R-033 和 Analyzer readiness 已复核。后续只在候选行为、workspace/pointer 契约或 evaluator 变化时重跑。
