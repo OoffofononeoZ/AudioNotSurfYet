@@ -19,6 +19,10 @@ import type {
     SessionRepositoryPort,
 } from '../../src/persistence/sessionRepository';
 import { useAudioSessionStore } from '../../src/stores/audioSessionStore';
+import {
+    defaultFeatureOrder,
+    moveFeatureOrder,
+} from '../../src/analysis/featureOrder';
 import type { PlaybackSnapshot } from '../../src/types/audio';
 import {
     DEFAULT_PERSISTED_ANALYSIS_CONFIG,
@@ -122,6 +126,7 @@ describe('M7 analysis workspace integration', () => {
             activeFeatureQueue: [
                 'rms', 'amplitudeSpectrum', 'chroma', 'spectralFlux',
             ],
+            featureOrder: defaultFeatureOrder(),
             viewport: {
                 startSeconds: 2,
                 endSeconds: 6,
@@ -160,6 +165,7 @@ describe('M7 analysis workspace integration', () => {
 
         await harness.service.updateAnalysisWorkspace({
             activeFeatureQueue: ['chroma'],
+            featureOrder: defaultFeatureOrder(),
             viewport: null,
         });
 
@@ -194,8 +200,50 @@ describe('M7 analysis workspace integration', () => {
         expect(harness.store.analysisWorkspace).toEqual({
             initialized: true,
             activeFeatureQueue: [],
+            featureOrder: defaultFeatureOrder(),
             viewport: null,
         });
+    });
+
+    test('defaults legacy V1 order and round-trips a custom global order', async () => {
+        const repository = new WorkspaceRepository();
+        repository.restored = {
+            session: {
+                schemaVersion: 1,
+                savedAt: '2026-09-01T00:00:00.000Z',
+                queue: [],
+                currentTrackId: null,
+                activeCards: [],
+                analysisConfig: {
+                    ...DEFAULT_PERSISTED_ANALYSIS_CONFIG,
+                },
+                viewport: null,
+                handles: [],
+            },
+            handles: [],
+        };
+        const harness = createHarness(repository);
+        await harness.service.initialize();
+        expect(harness.store.analysisWorkspace.featureOrder)
+            .toEqual(defaultFeatureOrder());
+
+        const customOrder = moveFeatureOrder(
+            defaultFeatureOrder(),
+            'buffer',
+            'first',
+        );
+        await harness.service.updateAnalysisWorkspace({
+            activeFeatureQueue: ['rms', 'chroma'],
+            featureOrder: customOrder,
+            viewport: { startSeconds: 0, endSeconds: 4, zoom: 2 },
+        });
+        const saved = harness.repository.saves.at(-1)?.session;
+        expect(saved?.schemaVersion).toBe(1);
+        expect(saved?.featureOrder).toEqual(customOrder);
+        expect(saved?.activeCards).toEqual([
+            { slot: 0, featureId: 'rms' },
+            { slot: 1, featureId: 'chroma' },
+        ]);
     });
 
     test('persists four unique cumulative M10 cards without a schema bump', async () => {
@@ -207,6 +255,7 @@ describe('M7 analysis workspace integration', () => {
 
         await harness.service.updateAnalysisWorkspace({
             activeFeatureQueue: [...activeFeatureQueue],
+            featureOrder: defaultFeatureOrder(),
             viewport: { startSeconds: 1, endSeconds: 3, zoom: 2 },
         });
 
@@ -225,11 +274,17 @@ describe('M7 analysis workspace integration', () => {
         const harness = createHarness(repository);
         const first = harness.service.updateAnalysisWorkspace({
             activeFeatureQueue: ['rms'],
+            featureOrder: defaultFeatureOrder(),
             viewport: null,
         });
         const second = harness.service.updateAnalysisWorkspace({
             activeFeatureQueue: ['chroma', 'buffer'],
-            viewport: null,
+            featureOrder: moveFeatureOrder(
+                defaultFeatureOrder(),
+                'buffer',
+                'first',
+            ),
+            viewport: { startSeconds: 1, endSeconds: 3, zoom: 2 },
         });
 
         await vi.waitFor(() => {
@@ -249,6 +304,13 @@ describe('M7 analysis workspace integration', () => {
             { slot: 0, featureId: 'chroma' },
             { slot: 1, featureId: 'buffer' },
         ]);
+        expect(repository.pending[1]?.input.session.featureOrder?.[0])
+            .toBe('buffer');
+        expect(repository.pending[1]?.input.session.viewport).toEqual({
+            startSeconds: 1,
+            endSeconds: 3,
+            zoom: 2,
+        });
         repository.pending[1]?.resolve();
 
         await Promise.all([first, second]);

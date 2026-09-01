@@ -8,18 +8,18 @@ upstream_docs:
   - "docs/delivery/execution-plan.md"
   - "docs/delivery/acceptance-criteria.md"
   - "docs/delivery/test-strategy.md"
-next_action: "M13 canonical 已批准；候选、浏览器或 M14 行为变化时重开评估"
+next_action: "执行 M14 order/pointer/a11y/persistence/FIFO-isolation 的 provisional 与 clean canonical"
 ---
 
 # Eval Plan
 
 ## Scope Routing
 
-本文保留 Analyzer M3–M12 已批准的质量契约与历史，并增加 M13 全卡片、FIFO、V1 adapter、异步保存与资源评估。Editor 使用独立质量文档；E7 已关闭且只作为相邻 lease/renderer 回归。
+本文保留 Analyzer M3–M13 已批准的质量契约与历史，并增加 M14 自定义顺序、pointer/非拖动替代、V1 optional field、FIFO 隔离与资源评估。Editor 使用独立质量文档；E7 已关闭且只作为相邻 lease/renderer 回归。
 
 ## 1. Purpose and Current State
 
-本文件定义 AudioNotSurfYet 的质量证据契约。M3–M12 的适用 canonical evidence 均已获批准但只代表历史候选；M13 已重新验证活动卡、几何、持久化竞态和资源边界，当前 readiness 为 `Ready with waivers`。
+本文件定义 AudioNotSurfYet 的质量证据契约。M3–M13 canonical 均保留但只代表历史候选；M14 改变 DOM 顺序、workspace schema 扩展和交互生命周期，当前 Analyzer readiness 为 `in-review`。
 
 Q0 只批准“如何判断质量”，不批准 release readiness。`docs/quality/release-readiness.md` 只能在 M11 已产生完整成功、失败、边界和异常证据后创建。
 
@@ -87,6 +87,7 @@ Q0 只批准“如何判断质量”，不批准 release readiness。`docs/quali
 - Failure：不可见焦点、无可访问名称、纯颜色表达或 Canvas 无 DOM 值均失败。
 - M12：开场文案移除后状态仍有独立 live region；视觉最短列不得改变 slot 0–3 的 DOM/键盘/读屏顺序，动态重排不得关闭 `details` 或丢失焦点。
 - M13：21 张卡 DOM/键盘/读屏顺序固定为 `FEATURE_IDS`；折叠按钮名称、`aria-expanded`/`aria-controls` 正确，第五张保持焦点，淘汰卡 body 直接卸载。
+- M14：默认顺序仍为 `FEATURE_IDS`；排序后 DOM、键盘、读屏、data-order-index 和 masonry 输入等于自定义顺序。拖动之外必须有 click/tap action 和键盘路径，动作后焦点保留并由独立 live region 播报。
 - Boundary：0–4 张卡、键盘 seek 到两端、reduced motion、卡片错误后的可预测焦点。
 - Exception：不得新增麦克风、上传、远端 URL、账户或未定义 Tab 的实现；owner-only 结果不得表述为广泛用户研究。
 
@@ -96,6 +97,7 @@ Q0 只批准“如何判断质量”，不批准 release readiness。`docs/quali
 - Failure：损坏/不支持文件显示可理解错误，队列和 store 不锁死。
 - M12 boundary：390/1024 为一列，1280/1920 为两列；实际 DOMRect 满足 18px gap、无 item 相交、无横向溢出且容器包围所有 item。Chrome 与 Edge 必须分别取证。
 - M13 boundary：上述几何扩展到 21 个 feature wrapper；初始、1–4 展开、第五项、错误态和结构明细变化都满足最短列，DOM 顺序不随坐标改变。
+- M14 boundary：同列/跨列、首尾、间隙最近目标、容器外取消、长距离 auto-scroll、reset/reload/切歌后都满足保存顺序与最短列不变量。
 - Boundary：390、1024、1280、1920 CSS px 的几何、sticky/overlay 层级、Canvas backing store 和控制台。
 - Exception：MP3 有损结果与各自解码后的直接 Meyda golden 比较，不要求三格式逐值相同；缺少真实 Edge 时保持 `planned/blocked`。
 
@@ -105,6 +107,7 @@ Q0 只批准“如何判断质量”，不批准 release readiness。`docs/quali
 - Failure：分析计算落到主线程、payload 超过 30Hz、公开测试脚本无效或资源未释放均失败。
 - M12：每个 Analyzer 实例最多一个待执行 masonry RAF；container/item Observer 与 RAF 在卸载时释放。`ResizeObserver loop` warning、路由循环资源增长或动态重排导致持续布局震荡均失败并映射 R-028。
 - M13：折叠卡不得保留 Canvas 或卡片内部 Observer；20 次展开/收起、resize 和路由循环中 Worker、Observer、RAF、Canvas 不单调增长，映射 R-028/R-030。
+- M14：一次最多一个 drag RAF；pointercancel/lostcapture/Escape/blur/unmount 后无 capture/ghost/marker/popup/RAF。20 次排序/resize/route 中 Worker、Observer、RAF、Canvas 不单调增长，映射 R-031/R-032。
 - Boundary：15 分钟、四个代表性最重 feature、20 次换歌/换卡/route dispose、cache/quota 压力。
 - Exception：不设置 wall-clock 完成 SLA；约 1MB chunk 警告作为风险信号记录，不伪装为构建失败或通过。
 
@@ -205,3 +208,5 @@ Q0 只有在以下条件满足后才能改为 `approved`：
 2026-09-01，M13 最终 dirty-worktree provisional `M13-2026-08-31T17-40-46-300Z-e62140ee-provisional` 17/17 通过，summary SHA-256 为 `4225440e6782c2aca5a3b13803059b7aefbdad210d134aa64235175389be33e2`。更早的 `M13-2026-08-31T17-27-10-749Z-e62140ee-provisional` 在前 13 步通过后因 runner 未清理步骤名中的 `/` 而无法创建第 14 步日志；该 harness 缺陷已修复，失败目录保留且不得充当产品 failure 或正式 evidence。
 
 同日，clean canonical `M13-2026-08-31T17-44-39-680Z-63c04005` 在实现 commit `63c04005670145d83ee181d474197bce921c5300` 上 17/17 通过，起止工作树干净，summary SHA-256 为 `25732179105b31b7bb05dfdb6626db1264567208a505a7cbf71434a4562e2afc`。本 run 完成 EV-J/EV-B/EV-R 的 M13 适用门禁，R-028–R-030 改为 `Mitigated`。
+
+2026-09-01，owner 批准 AC-M1401–AC-M1408 与 M14 quality contract，并授权在本地实现、提交、执行 clean canonical 与 evidence/readiness 复核。M14 evidence 形成前所有新 golden 保持 expected，不能用 M13 pass 推断排序已通过。

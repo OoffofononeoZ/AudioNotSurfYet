@@ -1,5 +1,5 @@
 ---
-status: approved
+status: in-review
 owner: "project-owner"
 last_reviewed: 2026-09-01
 upstream_docs:
@@ -11,20 +11,20 @@ upstream_docs:
   - "docs/quality/eval-plan.md"
   - "docs/quality/failure-taxonomy.md"
   - "docs/quality/evidence-index.md"
-next_action: "维持 M13 Ready with waivers；PROD-015 仍阻断正式上线"
+next_action: "M13 保留历史；等待 M14 clean canonical、R-031–R-033 和 owner evidence 复核"
 ---
 
 # Analyzer Release Readiness
 
 ## Summary Decision
 
-- Status：`Ready with waivers`；M12 结论保留为历史，当前身份为 M13。
+- Status：`In review`；M13 `Ready with waivers` 保留为历史候选，当前 M14 尚无 canonical。
 - Reviewed date：2026-09-01。
 - Reviewer：`project-owner` — approved M13 plan and authorized evidence/readiness completion。
 - Scope：只覆盖当前本地音频 Analyzer 候选；不覆盖 Editor、Visualizer、远端上传、移动端、非 Chromium 或生产托管。
 - Decision boundary：**Analyzer candidate is ready for release planning with waivers; this is not production launch authorization.**
 
-M13 在 clean commit `63c04005670145d83ee181d474197bce921c5300` 上完成 17/17 canonical，交付 21 张稳定折叠卡、FIFO 活动队列、按需资源挂载和 V1 adapter。R-028/R-029/R-030 已缓解；Analyzer 候选恢复 `Ready with waivers`。PROD-015 继续独立阻断正式上线。
+M13 在 clean commit `63c04005670145d83ee181d474197bce921c5300` 上完成 17/17 canonical，其结论继续有效但不覆盖 M14 的 DOM 顺序、Pointer Events、可访问替代或 `featureOrder` 持久化。M14 实施期间 readiness 不作 ready 声明；PROD-015 继续独立阻断正式上线。
 
 ## Candidate Identity
 

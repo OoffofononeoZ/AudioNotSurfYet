@@ -95,6 +95,7 @@ export const expectAnalyzerMasonry = async (
     page: Page,
     width: number,
     height = 900,
+    expectedSlots: readonly string[] = FEATURE_IDS,
 ): Promise<AnalyzerMasonryGeometry> => {
     await page.setViewportSize({ width, height });
     const expectedColumns = width >= 1_280 ? 2 : 1;
@@ -116,7 +117,7 @@ export const expectAnalyzerMasonry = async (
         itemCount: FEATURE_IDS.length,
         noOverlap: true,
         shortestColumnOrder: true,
-        slots: [...FEATURE_IDS],
+        slots: [...expectedSlots],
     });
     const geometry = await readGeometry(page);
     if (!geometry) throw new Error('Analyzer masonry geometry is not ready.');

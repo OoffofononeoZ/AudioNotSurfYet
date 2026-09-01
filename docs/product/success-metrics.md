@@ -5,7 +5,7 @@ last_reviewed: 2026-09-01
 upstream_docs:
   - "docs/product/problem-brief.md"
   - "docs/product/scope.md"
-next_action: "M13 指标已由 17/17 canonical 验证；候选变化时重测"
+next_action: "以 M14 unit/integration、双浏览器交互与 clean canonical 验证排序指标"
 ---
 
 # Success Metrics
@@ -21,6 +21,9 @@ Analyzer 指标已由 M3–M11 和 Analyzer-only readiness 形成历史证据。
 | 完整特征覆盖 | `src/data/analyzerData.ts` 的 21/21 个特征均有类型定义、renderer、黄金测试和可用卡片 | feature registry 覆盖检查、自动化测试与 owner 验收 | 最终特征里程碑 |
 | 全卡片可发现性 | 页面始终存在 21 张唯一卡，DOM/键盘/读屏顺序等于 `FEATURE_IDS`；收起态不挂载图表资源 | Chrome/Edge DOM、可访问性与 Canvas 计数 | M13 |
 | 活动分析上限 | 任意快速序列中活动 FIFO 始终唯一且最多四项；第五项淘汰最早项 | reducer、coordinator 集成和双浏览器交互 | M13 |
+| 自定义顺序正确性 | 鼠标、touch、点击动作和键盘得到相同的 21 项完整插入顺序；DOM/键盘/读屏与该顺序一致 | pure reducer + Chrome/Edge DOM/focus/live-region | M14 |
+| 顺序恢复与隔离 | 自定义顺序跨刷新/切歌恢复；排序不改变 FIFO 年龄、Worker generation、cache、exact value 或 Canvas 身份 | repository/service integration + 双浏览器刷新/FIFO 回归 | M14 |
+| 排序生命周期 | pointer cancel/blur/route leave 不提交旧顺序；反复排序无 RAF/Observer/Canvas/Worker 增长，反馈保持 100ms 内 | Chrome/Edge cancellation、resource loop 和 PerformanceObserver | M14 |
 
 owner-only 学习验证是当前批准方式，不推断为广泛用户研究结果。若未来需要对外声称普遍学习效果，必须补充新的样本和研究设计。
 
@@ -88,3 +91,5 @@ owner-only 学习验证是当前批准方式，不推断为广泛用户研究结
 Analyzer 目标和阈值由 `project-owner` 于 2026-07-24 批准，并已由 Analyzer-only readiness 收口。`project-owner` 于 2026-08-26 先批准 Editor E0 产品意图，随后明确回复：“我批准 Editor E0 系统设计、接口契约、风险与 ADR；同意进入 Editor E1–E6 execution planning。”Editor 指标与架构据此生效；delivery 文档仍须另行定义 fixture、步骤和容差，quality 阶段只在成功、失败、边界与异常证据齐全后判断 Editor readiness。
 
 2026-08-31，owner 批准 M13 的 21 卡可发现性、最多四项 FIFO、按需挂载和资源门禁；历史 M7–M12 指标保留，但涉及四 slot/默认活动卡的断言不再代表 M13 候选。
+
+2026-09-01，owner 批准 M14 的完整顺序、输入等价、全局恢复、FIFO 隔离和资源指标。M13 canonical 保留为历史；M14 指标只在 clean canonical 与 owner evidence 复核后视为达到。

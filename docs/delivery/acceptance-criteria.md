@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/architecture/system-design.md"
   - "docs/architecture/interface-contracts.md"
   - "docs/delivery/execution-plan.md"
-next_action: "AC-M1301–AC-M1308 已由 M13 canonical 验证；行为变化时重开"
+next_action: "以 M14 专项、双浏览器和 clean canonical 验证 AC-M1401–AC-M1408"
 ---
 
 # Acceptance Criteria
@@ -141,8 +141,21 @@ Analyzer M11 已在真实 Edge 形成历史证据；Editor 改变路由、播放
 | AC-M1307 | 390/1024 一列，1280/1920 两列，gap 18px；21 卡无相交、横向溢出，容器包围完整且 DOM/键盘/读屏顺序稳定 | Chrome/Edge geometry/a11y |
 | AC-M1308 | 反复展开/收起、resize、进入/离开不累积 Worker、Observer、RAF、Canvas 或 console error/warn；seek/zoom/Header/MusicBar/Editor lease 回归保持 | Chrome/Edge lifecycle + regression |
 
-M14 拖动图标、排序交互与顺序持久化明确不属于以上验收。
+M13 记录只证明默认 `FEATURE_IDS` 顺序；M14 自定义顺序由下一节独立验收。
 
-## 10. Milestone Exit Rule
+## 10. M14 accessible card-order acceptance
+
+| ID | Acceptance criterion | Verification |
+| --- | --- | --- |
+| AC-M1401 | `featureOrder` 始终是完整 21 项 permutation；default/reset 为 `FEATURE_IDS`，insert/action/no-op 结果确定 | reducer/validator unit |
+| AC-M1402 | 自定义顺序同时驱动 keyed DOM、键盘/读屏和 shortest-column 输入；排序不重建卡片、Canvas 或关闭 details | unit + Chrome/Edge DOM/geometry/state |
+| AC-M1403 | 句柄 6px 阈值、capture、ghost、before/after、间隙最近目标、容器外取消与边缘 auto-scroll 符合契约 | pointer unit + Chrome/Edge mouse/touch |
+| AC-M1404 | 点击/触控动作面板、Enter/Space、Alt 快捷键、reset、焦点和独立 live region 均可完成排序 | Chrome/Edge keyboard/a11y |
+| AC-M1405 | `PersistedSessionV1.featureOrder?` 不升级 DB；旧字段缺失恢复默认，合法顺序 round-trip，非法存在字段拒绝 | repository/service unit + reload E2E |
+| AC-M1406 | 排序/queue/viewport 快速交错仅让最新完整 revision durable；quota/abort 不破坏内存顺序 | integration failure matrix |
+| AC-M1407 | 排序不改变 active FIFO 年龄、Worker generation、cache/exact request、最多四项、Canvas 上限或播放/seek/zoom | integration + Chrome/Edge FIFO regression |
+| AC-M1408 | 四视口无重叠/溢出；cancel/blur/lost capture 与 20 次排序/resize/route 不遗留 popup/ghost/marker/capture/RAF/Observer/Canvas/Worker 或 console error/warn | Chrome/Edge lifecycle + regression |
+
+## 11. Milestone Exit Rule
 
 里程碑只能在所有适用 AC 有证据、相关风险已复核、失败/边界路径已覆盖后关闭。不能自动验证的路径必须写出原因、手工步骤、结果和残余风险。

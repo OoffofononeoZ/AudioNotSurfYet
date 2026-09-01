@@ -23,6 +23,7 @@ import {
     activeFeatureQueueToCards,
     assertValidAnalysisWorkspace,
     cloneActiveFeatureQueue,
+    cloneFeatureOrder,
     clonePersistedTimelineViewport,
     DEFAULT_PERSISTED_ANALYSIS_CONFIG,
     type AnalysisWorkspaceUpdate,
@@ -30,6 +31,7 @@ import {
     type StoredAnalysisCache,
     type StoredHandle,
 } from '../types/session';
+import { restoredFeatureOrder } from '../analysis/featureOrder';
 
 type AudioSessionStore = ReturnType<typeof useAudioSessionStore>;
 type AnimationFrameCallback = (timestamp: number) => void;
@@ -287,6 +289,9 @@ export class AudioSessionService {
             {
                 activeFeatureQueue: activeCardsToFeatureQueue(
                     restored.session.activeCards,
+                ),
+                featureOrder: restoredFeatureOrder(
+                    restored.session.featureOrder,
                 ),
                 viewport: restored.session.viewport,
             },
@@ -591,6 +596,7 @@ export class AudioSessionService {
             activeFeatureQueue: cloneActiveFeatureQueue(
                 workspace.activeFeatureQueue,
             ),
+            featureOrder: cloneFeatureOrder(workspace.featureOrder),
             viewport: clonePersistedTimelineViewport(workspace.viewport),
         };
         this.store.setAnalysisWorkspace({
@@ -1067,6 +1073,9 @@ export class AudioSessionService {
             currentTrackId: this.store.currentTrackId,
             activeCards: activeFeatureQueueToCards(
                 this.store.analysisWorkspace.activeFeatureQueue,
+            ),
+            featureOrder: cloneFeatureOrder(
+                this.store.analysisWorkspace.featureOrder,
             ),
             analysisConfig: {
                 ...DEFAULT_PERSISTED_ANALYSIS_CONFIG,

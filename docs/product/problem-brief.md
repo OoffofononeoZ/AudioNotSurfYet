@@ -6,7 +6,7 @@ upstream_docs:
   - "docs/context/index.md"
   - "docs/context/glossary.md"
   - "docs/quality/release-readiness.md"
-next_action: "M13 已完成；PROD-015 仍阻断上线，M14 等待独立批准"
+next_action: "M14 已获批准并进入实现；readiness 等待新 canonical，PROD-015 仍阻断上线"
 ---
 
 # Problem Brief
@@ -51,6 +51,8 @@ Editor E0 解决下一层问题：用户能够听出歌曲中存在音符、音�
 
 21 项特征继续共享同一分析基础设施。新工作区默认全部收起；展开第五张时自动收起 FIFO 中最早展开的卡，使用户无需移除和替换卡片即可比较任意特征。
 
+M14 允许学习者把 21 张卡按自己的比较习惯重新排序：鼠标/触控使用三横句柄插入，不能拖动时使用点击动作面板，键盘用户使用同一动作或快捷键。自定义顺序在 Analyzer 最近工作区中跨歌曲和刷新恢复，但不改变 FIFO 活动分析年龄。
+
 ### Editor E0 outcome（approved）
 
 用户能够在同一首歌曲的循环播放中：
@@ -93,6 +95,7 @@ Editor 的输出是绑定单首歌曲的时间数据集；它不会修改、重�
 - 仅由 owner 验证学习结果能够快速形成证据，但不能代表更广泛用户群体。
 - 同一分类的范围事件若允许无约束重叠会产生难以解释的数据；E0 已确定同一 lane、同一 inner class 禁止范围重叠，不同分类仍可同时存在。
 - Analyzer 21 张稳定卡与快速展开/收起会增加布局和异步状态错序风险；M13 必须保持最多四项活动分析、最新 generation 和最新 workspace revision 生效。
+- M14 自定义 DOM 顺序、pointer capture、auto-scroll 和持久化交错可能造成卡片错位、焦点丢失或旧顺序覆盖；必须以 keyed DOM、严格 permutation、取消清理和最新 workspace revision 控制。
 
 ## Approval Record
 
@@ -105,3 +108,5 @@ Editor 的输出是绑定单首歌曲的时间数据集；它不会修改、重�
 2026-08-31，`project-owner` 明确要求实施“Analyzer M13 全卡片折叠与 FIFO 活动分析计划”。本指令批准一页 21 卡、默认全收起、最多四项 FIFO 活动分析、V1 兼容和 M14 拖动延后的产品意图；M12 readiness 变为历史候选，M13 readiness 等待新 canonical。
 
 2026-09-01，M13 clean canonical 已在实现 commit `63c04005670145d83ee181d474197bce921c5300` 上 17/17 通过；批准的产品结果已交付，Analyzer readiness 恢复为 `Ready with waivers`。M14 与 PROD-015 仍按既有开放问题管理。
+
+同日，`project-owner` 选择插入排序、Analyzer 工作区全局保存以及“点击动作面板 + 恢复默认”，并明确要求实施完整 M14 计划。该指令关闭 PROD-021，批准卡片自定义顺序、鼠标/触控/键盘与读屏路径；M13 evidence 转为历史候选，M14 canonical 前 Analyzer readiness 为 `in-review`。

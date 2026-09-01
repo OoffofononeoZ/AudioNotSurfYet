@@ -10,6 +10,7 @@
                 <h2 :id="`${cardId}-title`">{{ definition.label }}</h2>
             </div>
             <div class="card-actions">
+                <slot name="header-action"></slot>
                 <button
                     type="button"
                     class="toggle-card"

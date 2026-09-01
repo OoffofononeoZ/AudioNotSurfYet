@@ -12,6 +12,10 @@ import {
     validatePersistedSessionV1,
 } from '../../src/persistence/sessionRepository';
 import { sha256Blob } from '../../src/audio/audioSessionService';
+import {
+    defaultFeatureOrder,
+    moveFeatureOrder,
+} from '../../src/analysis/featureOrder';
 import type {
     PersistedSessionV1,
     StoredHandle,
@@ -95,6 +99,30 @@ describe('PersistedSessionV1 validation', () => {
             ...session('track-1'),
             queue: [{ id: 'broken' }],
         })).toThrow(InvalidPersistedSessionError);
+    });
+
+    test('accepts legacy absence and rejects every malformed M14 order', () => {
+        const customOrder = moveFeatureOrder(
+            defaultFeatureOrder(),
+            'buffer',
+            'first',
+        );
+        expect(validatePersistedSessionV1({
+            ...session('track-1'),
+            featureOrder: customOrder,
+        }).featureOrder).toEqual(customOrder);
+        expect(validatePersistedSessionV1(session('track-1')).featureOrder)
+            .toBeUndefined();
+        for (const featureOrder of [
+            customOrder.slice(0, -1),
+            [...customOrder.slice(0, -1), customOrder[0]],
+            [...customOrder.slice(0, -1), 'unknown'],
+        ]) {
+            expect(() => validatePersistedSessionV1({
+                ...session('track-1'),
+                featureOrder,
+            })).toThrow(InvalidPersistedSessionError);
+        }
     });
 
     test('computes deterministic SHA-256 content identity', async () => {

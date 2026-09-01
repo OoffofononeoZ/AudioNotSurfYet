@@ -7,14 +7,14 @@ upstream_docs:
   - "docs/quality/golden-examples.md"
   - "docs/delivery/acceptance-criteria.md"
   - "docs/architecture/risk-register.md"
-next_action: "M13 未发现未关闭产品 failure；候选变化时沿用本分类"
+next_action: "M14 沿用稳定类型并重点检测顺序、持久化、a11y 与 pointer lifecycle failure"
 ---
 
 # Failure Taxonomy
 
 ## Scope Routing
 
-本文保留 Analyzer 稳定失败分类；M13 的 FIFO/generation 属于 FT-IDENTITY，workspace revision 属于 FT-PERSISTENCE，21 卡资源属于 FT-PERFORMANCE，不新增类型。
+本文保留 Analyzer 稳定失败分类；M14 的顺序/DOM 身份属于 FT-IDENTITY，V1/revision 属于 FT-PERSISTENCE，pointer/RAF 属于 FT-PERFORMANCE，非拖动替代/焦点/live 属于 FT-ACCESSIBILITY，不新增类型。
 
 ## 1. Classification Model
 
@@ -101,6 +101,10 @@ FAIL-<run-id>-<sequence>: <failure_type>/<severity>
 | M13 短暂出现第五个展开 body 或淘汰错误队首 | FT-IDENTITY | S1 | 违反 FIFO 与最多四项硬边界 |
 | M13 旧 Worker/exact/save completion 覆盖最新队列或状态 | FT-IDENTITY / FT-PERSISTENCE | S0 | 结果或 durable 状态身份错误 |
 | M13 折叠卡仍保留 Canvas/Observer，或 21 卡路由循环资源增长 | FT-PERFORMANCE | S1 | 违反按需挂载和 R-030 生命周期边界 |
+| M14 DOM/masonry/data index 不等于保存顺序，或排序改变 FIFO 队首 | FT-IDENTITY | S1 | 用户顺序或分析身份错误 |
+| M14 非法 featureOrder 被接受，或旧 save 覆盖最新 order/queue/viewport | FT-PERSISTENCE | S0 | durable workspace 身份损坏 |
+| M14 只有拖动路径、焦点丢失或 live 播报错误位置 | FT-ACCESSIBILITY | S1 | 核心排序任务不能等价完成 |
+| M14 cancel/route leave 后遗留 capture、auto-scroll、ghost 或 RAF | FT-PERFORMANCE | S1 | 交互与资源生命周期失控 |
 
 ## 7. M7 Closed Failure Instance
 

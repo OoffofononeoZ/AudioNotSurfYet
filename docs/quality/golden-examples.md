@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/delivery/acceptance-criteria.md"
   - "docs/delivery/test-strategy.md"
   - "docs/architecture/risk-register.md"
-next_action: "M13-G01–G06 已执行；保留 M3–M12 历史 golden"
+next_action: "执行 M14-G01–G07；M3–M13 golden 保留为历史"
 ---
 
 # Golden Examples
@@ -58,6 +58,13 @@ next_action: "M13-G01–G06 已执行；保留 M3–M12 历史 golden"
 | M13-G04 | 旧 V1 `activeCards` slot 顺序 | 刷新恢复并再次保存 | restore queue 与 save carrier 顺序一致 | 对应四张卡展开，新工作区仍默认空 | EV-D；AC-M1305/1306 |
 | M13-G05 | 快速展开/收起与迟到 Worker/save | 连续提交超过四项并注入旧 completion | 只有最新 generation/revision 生效 | 旧结果不回填、persistence 状态不倒退 | EV-J、EV-D；AC-M1304/1306 |
 | M13-G06 | 21 卡四视口与反复生命周期 | 展开结构明细、resize、路由循环 | 分析/几何阈值不变 | 无相交、溢出、资源增长或 console warning | EV-B、EV-R；AC-M1307/1308 |
+| M14-G01 | 默认 21 卡 | 进入 Analyzer 并检查所有 handle | order=`FEATURE_IDS` | DOM/masonry/data index/读屏顺序一致；reset disabled | EV-U；AC-M1401/1402/1404 |
+| M14-G02 | source/target 不等高且跨列 | 拖 source 到 target 上/下半区 | before/after 插入一次提交 | ghost/marker 正确，Canvas/details/focus 不重建 | EV-U、EV-B；AC-M1402/1403 |
+| M14-G03 | 不能持续拖动 | 点击/轻触 handle 后连续上移/置底，并用键盘快捷键 | 与纯 reducer 相同 | panel、disabled、focus 和 live position 正确 | EV-U；AC-M1401/1404 |
+| M14-G04 | 合法 custom order + 旧 V1 无字段 | reload/切歌/再次保存 | custom 恢复；旧记录默认 | FIFO activeCards 顺序保持独立 | EV-D；AC-M1405/1407 |
+| M14-G05 | order/queue/viewport 快速交错与 quota | 连续提交并延迟旧 save | 只有最新完整 revision 生效 | 内存可用，旧 completion 不倒退状态 | EV-D、EV-J；AC-M1406/1407 |
+| M14-G06 | pointercancel/lostcapture/Escape/blur/route | drag 中触发异常退出 | 不提交顺序 | 无 ghost/marker/capture/RAF/console issue | EV-R；AC-M1403/1408 |
+| M14-G07 | 已展开四卡并排序 | 排序后展开第五卡 | 淘汰真实 FIFO 队首 | visual first 不影响年龄；Canvas 仍不超过 8 | EV-J；AC-M1407 |
 
 ## 3. Expected-Failure Examples
 
@@ -113,3 +120,5 @@ next_action: "M13-G01–G06 已执行；保留 M3–M12 历史 golden"
 `project-owner` 于 2026-07-28 明确批准本文的样例、fixture 入库政策和追溯规则。批准不表示任何样例已经执行或通过。
 
 2026-08-31，owner 批准 M13-G01–G06 作为新候选规范；它们在 canonical 前保持 expected，不改写历史 golden 执行结果。
+
+2026-09-01，owner 批准 M14-G01–G07 作为排序候选规范；在 M14 canonical 登记前均为 expected。

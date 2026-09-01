@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/architecture/interface-contracts.md"
   - "docs/delivery/acceptance-criteria.md"
   - "docs/delivery/execution-plan.md"
-next_action: "M13 clean canonical 已通过；候选、浏览器或 M14 行为变化时重跑"
+next_action: "实现并执行 M14 unit/integration、Chrome/Edge、provisional 与 clean canonical"
 ---
 
 # Test Strategy
@@ -53,6 +53,8 @@ next_action: "M13 clean canonical 已通过；候选、浏览器或 M14 行为�
 - M7 工作区：四槽、0–3 张活动卡、slot/feature 唯一、首次默认三卡与已保存空工作区恢复为空。
 - M12 纯布局：1/2 列、平局左列、不同高度、动态高度重算、容器高度和 pairwise 无重叠。
 - M13 FIFO reducer：空、1–4 项、第五项淘汰、手动收起、重新展开、重复/快速序列和唯一性；V1 adapter 覆盖 cards/queue 双向顺序与无效输入。
+- M14 顺序 reducer/validator：完整 permutation、before/after、up/down/first/last/reset、source 位于 target 前后、首尾/no-op、未知/重复/缺失。
+- M14 pointer geometry：单/双列 DOMRect、上下半区、间隙最近目标、平局按逻辑顺序、容器外无 target。
 - restore priority、permission state mapping、current Blob/cache invariant。
 - generation/request ID 和 stale job 丢弃。
 
@@ -75,6 +77,7 @@ next_action: "M13 clean canonical 已通过；候选、浏览器或 M14 行为�
 - FileSystemFileHandle adapter 的 query/request/getFile 三态。
 - 单卡 renderer error boundary。
 - M13 零活动项无 Worker、1–4 项 cache hit/miss、第五项 cancel generation、迟到结果隔离，以及 workspace 串行 save/revision/quota/not-persisted。
+- M14 旧 V1 default、新 order round-trip、非法字段拒绝；order/queue/viewport 交错保存及 quota/abort 只允许最新 revision 发布。记录 Coordinator generation/cache/exact 在纯排序前后不变。
 
 ### Browser end-to-end
 
@@ -88,6 +91,7 @@ next_action: "M13 clean canonical 已通过；候选、浏览器或 M14 行为�
 - 390、1024、1280、1920 CSS px 的真实 item DOMRect、最短列不变量、Canvas CSS/backing-store、截图和 console；不再从 `grid-template-columns` 推断布局。
 - M12 在四卡/空槽、换卡、renderer error 和结构明细展开后重算；验证 slot DOM 顺序、`details open`、焦点、Canvas 数量和容器包围关系。
 - M13 始终断言 21 卡与 `FEATURE_IDS` DOM 顺序；初始无 Canvas/select/remove；展开 1–4、第五项 FIFO、快速切换、刷新恢复、错误/重试、seek/zoom/exact 与 20 次资源循环在真实 Chrome/Edge 运行。
+- M14 默认仍断言 `FEATURE_IDS`；自定义后断言 DOM/data-order-index/masonry/键盘/读屏顺序等于保存顺序。真实 Chrome/Edge 覆盖 mouse、touch Pointer Events、click actions、keyboard/live、auto-scroll、reset/reload/切歌和 cancel matrix。
 
 ### Manual
 
@@ -263,6 +267,18 @@ npm run eval:m13
 
 `eval:m13:provisional` 允许 dirty worktree；`eval:m13` 要求起止 clean，并回归 Analyzer M7–M12、Coordinator/cache、Editor E7 lease/renderer 隔离、M13 unit/integration/双浏览器、docs、typecheck、build 和 diff check。
 
+M14 新增：
+
+- `npm run test:m14:unit`
+- `npm run test:m14:integration`
+- `npm run test:e2e:m14:chrome`
+- `npm run test:e2e:m14:edge`
+- `npm run test:e2e:m14`
+- `npm run eval:m14:provisional`
+- `npm run eval:m14`
+
+`eval:m14` 要求 clean committed worktree，并回归 M7–M13、M14 双浏览器、Coordinator/cache、Editor E7 lease/renderer、docs、typecheck、build 与 diff check；provisional 只生成 dirty implementation feedback。
+
 M13 最终 provisional `M13-2026-08-31T17-40-46-300Z-e62140ee-provisional` 与 clean canonical `M13-2026-08-31T17-44-39-680Z-63c04005` 均 17/17 通过；canonical 绑定实现 commit `63c04005670145d83ee181d474197bce921c5300`，summary SHA-256 为 `25732179105b31b7bb05dfdb6626db1264567208a505a7cbf71434a4562e2afc`。
 
 `eval:m12:provisional` 在 dirty worktree 执行 M7–M11 Analyzer 相邻回归、M12 unit/Chrome/Edge、docs、typecheck、build 和 diff check，只生成实现反馈。`eval:m12` 要求 clean committed worktree，生成可登记的 canonical artifact。
@@ -286,4 +302,4 @@ M13 最终 provisional `M13-2026-08-31T17-40-46-300Z-e62140ee-provisional` 与 c
 
 M3 的公开命令、fixture、黄金比较和失败检测已有 clean-commit canonical pass，并已由 `project-owner` 批准。M4 的 AudioEngine/session/Chrome 适用测试也已在 clean commit 上 canonical pass、记录在 [evidence index](../quality/evidence-index.md) 并获 owner 批准。M5 repository、recovery integration 与 Chrome IndexedDB/OPFS 已在 clean commit canonical 通过；Chrome 原生权限人工检查也已由 `project-owner` 确认通过，M5 evidence 与 working agreements 已获批准。M6 Worker/registry/cache/15 分钟 Chrome 场景已在 clean commit canonical 20/20 通过并获 owner 批准，M6 已关闭。M7 unit/integration/golden/Chrome 与 M3–M6 回归已在 clean commit `f022b86e2333ad612ecb12701b0ca05e49f2b256` 上 24/24 通过；owner 于 2026-08-21 完成人工操作与 3/3 学习解释并批准 evidence，M7 已关闭。
 
-M8–M10 的 UI、scalar、vector/waveform 和 structured 特征证据均已获批准；M10 达到 21/21。M11/M12 历史 canonical 保留；M13 在 clean commit 上完成 unit/integration、Chrome/Edge、M7–M12 与 Editor E7 相邻回归、build 和文档 17/17，R-028–R-030 已缓解，Analyzer-only readiness 已恢复为 `Ready with waivers`。
+M8–M10 的 UI、scalar、vector/waveform 和 structured 特征证据均已获批准；M10 达到 21/21。M11/M12/M13 canonical 保留为历史；M14 只有在上述 success、failure、boundary、exception 与 clean identity 完整通过后才能恢复 Analyzer readiness。

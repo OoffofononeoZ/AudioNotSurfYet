@@ -7,14 +7,14 @@ upstream_docs:
   - "docs/product/scope.md"
   - "docs/product/success-metrics.md"
   - "docs/product/open-questions.md"
-next_action: "M13 设计已由 clean canonical 验证；M14 或系统边界变化时复核"
+next_action: "实施 ADR-0013 的 M14 顺序、Pointer Events、可访问替代与 V1 持久化"
 ---
 
 # System Design
 
 ## 1. Decision Summary
 
-AudioNotSurfYet 采用一个实时 `AudioEngine`、一个 MainLayout-owned `AudioSessionService`、一个可序列化 `audioSessionStore`、一个 `AnalysisCoordinator` 和一个全曲分析 Worker。Analyzer 通过类型化特征注册表稳定展示 21 张折叠卡，并用最多四项 FIFO 活动队列驱动共享时间视窗中的 Canvas 2D renderer；DOM 承担文本、交互和无障碍语义。M7–M12 的四 slot 模型保留为历史基线，M13 由 ADR-0012 取代其运行时 UI 契约。
+AudioNotSurfYet 采用一个实时 `AudioEngine`、一个 MainLayout-owned `AudioSessionService`、一个可序列化 `audioSessionStore`、一个 `AnalysisCoordinator` 和一个全曲分析 Worker。Analyzer 通过类型化特征注册表稳定展示 21 张折叠卡，并用最多四项 FIFO 活动队列驱动共享时间视窗中的 Canvas 2D renderer；DOM 承担文本、交互和无障碍语义。M7–M12 的四 slot 模型保留为历史基线，M13 由 ADR-0012 固定全卡/FIFO，M14 由 ADR-0013 增加独立的全局 feature 顺序。
 
 已批准的 Editor 扩展把 E0 产品意图接入同一运行时：Editor 使用 route-scoped playback/analysis lease、版本化本地 JSON、独立单草稿 IndexedDB、tempo 派生网格、点/范围事件和单特征半透明叠加层。它不创建第二个 AudioContext、播放时钟、Worker 或网络数据路径。
 
@@ -37,7 +37,7 @@ AudioNotSurfYet 采用一个实时 `AudioEngine`、一个 MainLayout-owned `Audi
 - 不并行建设多个播放引擎，也不为旧状态模型增加长期兼容层。
 - 不一次性计算或持久化全部 21 项特征。
 - 不在 Analyzer 中新增 Three.js。
-- 不在 M13 实现拖动排序、拖动图标或自定义顺序 schema；M14 另行评审。
+- 不实现按歌曲顺序、多选、两卡交换、实时位移动画、第三方拖动依赖或移动端产品支持。
 - 不在本阶段决定发布平台、监控和回滚。
 - 不在 E0 架构阶段实现 Editor、安装 BPM/文件格式依赖或创建 delivery/quality 证据。
 
@@ -211,6 +211,14 @@ Canvas 只画数据、网格、游标和选择态；标题、解释、参数、�
 - Coordinator 仍以最多四项的单 job 分析，队列变更沿用 cancel/generation/cache hit/miss/exact cursor 隔离。工作区保存复制不可变 queue/viewport 快照，以串行 promise 链执行并用 revision guard 限制 persistence 状态更新。
 - `PersistedSessionV1.activeCards` 继续作为 V1 carrier：restore 按 slot 排序转 queue，save 按 queue index 转 slot。首次没有持久化工作区时建立空队列；旧会话原有最多四张卡仍按年龄顺序恢复。
 
+### Analyzer M14 accessible card order
+
+- `featureOrder` 是 21 项完整唯一 permutation，独立于 `activeFeatureQueue`。Analyzer 的 keyed `v-for`、DOM/键盘/读屏顺序和 M12 最短列 placement 都读取它；重排由 Vue 移动现有 wrapper，不改变 component、Canvas、焦点或 `<details>` 身份。
+- pointerdown 只在三横句柄建立候选；移动至少 6 CSS px 后进入 drag。capture 保证离开句柄仍收到 move/up；真实卡保留占位，ghost 与前/后 marker 只作视觉反馈，合法 drop 才一次提交。
+- 目标从 masonry item DOMRect 中选择；容器内空隙使用最近矩形，目标上/下半区分别代表 before/after。滚动容器边缘 48 CSS px 使用唯一 drag RAF，速度上限 16 CSS px/frame；pointercancel、lost capture、Escape、blur 与卸载全部取消。
+- 点击/轻触句柄打开单一动作面板，提供 up/down/first/last；Enter/Space 和 `Alt+ArrowUp/Down`、`Alt+Home/End` 提供键盘等价。动作后焦点跟随 keyed handle，独立 polite live region 播报“特征 + 新位置”。工具栏 reset 恢复 `FEATURE_IDS`。
+- 排序只提交 workspace snapshot，不调用 AnalysisCoordinator；FIFO 年龄、Worker generation、cache/exact request、展开状态和播放保持原值。交错 queue/viewport/order 保存继续由串行 promise 与 revision guard 保护。
+
 ## 9. Persistence and Recovery
 
 ### Storage model
@@ -223,6 +231,8 @@ IndexedDB 使用版本化 schema，分别保存：
 - 仅当前 track、当前配置和活动特征的分析缓存。
 
 每项 cache payload 使用 4-byte little-endian header length、UTF-8 JSON header 和连续 typed-array bytes。decoder 必须核对 schema、track/config/feature 身份、payload kind、dimensions、scale/offset 与 byte ranges；错位、缺失、尾随或损坏项只作为 miss 重算。
+
+M14 不升级数据库 version：`PersistedSessionV1.featureOrder?` 缺失时映射为默认 `FEATURE_IDS`，存在时必须恰好是完整 permutation；新保存始终写入。无效顺序使 session validator 明确失败，不对损坏字段做猜测修复。
 
 切换当前歌曲时，UI current ID 与 persistence `saving` 必须同步发布，避免用户在新 Blob 尚未 durable 时刷新；持久化操作在同一逻辑事务中删除旧 current Blob/cache 并写入新记录，只有当前 command generation 可以把状态推进为 `ready`/`not-persisted`。失败时保留内存会话并暴露 `not-persisted` 状态。
 
@@ -354,6 +364,8 @@ M6 只在 `import.meta.env.DEV` 安装无 UI bridge，提供活动特征、cance
 2026-08-28，owner 先批准 E6 canonical 与人工补偿结果，再批准以 E7 修改 Editor 页面密度。E6 历史证据保持不变；ADR-0010 与第 18 节只开放紧凑工作台实现，不提前形成 Editor readiness 或生产上线授权。
 
 2026-08-31，owner 先批准并关闭 E7 修订候选，随后以“PLEASE IMPLEMENT THIS PLAN”批准 ADR-0012、M13 系统设计及 delivery/eval 门禁。本设计据此保持 `approved`；M13 源码和 readiness 仍须由专项与 clean canonical 证据验证。
+
+2026-09-01，owner 以完整 M14 实施指令批准 ADR-0013、自定义 DOM 顺序、全局 V1 可选字段、pointer/点击/键盘/读屏契约和不改变 FIFO/Worker 的隔离边界；系统设计继续为 `approved`，M14 readiness 在 canonical 前保持 `in-review`。
 
 ## 17. Editor Timeline and Interaction Architecture
 
