@@ -1,12 +1,12 @@
 ---
-status: in-review
+status: approved
 owner: "project-owner"
 last_reviewed: 2026-09-02
 upstream_docs:
   - "docs/product/problem-brief.md"
   - "docs/product/scope.md"
   - "docs/product/success-metrics.md"
-next_action: "审批 PROD-014V；批准后保留 PROD-022 为未来非阻断问题并进入 Visualizer system design"
+next_action: "PROD-014V 已关闭；保留 PROD-022 为未来非阻断问题，并进入 Visualizer system design"
 ---
 
 # Open Questions
@@ -16,7 +16,7 @@ next_action: "审批 PROD-014V；批准后保留 PROD-022 为未来非阻断问�
 | ID | Question | Why it remains open | Impact | Blocks current next stage? | Owner | Revisit trigger |
 | --- | --- | --- | --- | --- | --- | --- |
 | PROD-013 | 未来是否提供上传、云端处理、账户或跨设备同步？ | 当前只批准浏览器本地处理；未来能力尚无目标用户、隐私或服务设计 | 若进入范围，将改变产品数据边界、架构、合规和发布要求 | 否 | project-owner | 提议任何远端音频或账户能力时 |
-| PROD-014 | 除 Analyzer、Editor 和本轮已定义的 Visualizer 外，其他未定义空白 Tab 分别解决什么用户问题？ | Visualizer 已拆到 PROD-014V 评审；其他空白入口仍没有已批准用例 | 未来产品范围、导航和架构 | 否 | project-owner | 其他未定义 Tab 被提议进入交付时 |
+| PROD-014 | 除 Analyzer、Editor 和已定义的 Visualizer 外，其他未定义空白 Tab 分别解决什么用户问题？ | Visualizer 已由 PROD-014V 关闭；其他空白入口仍没有已批准用例 | 未来产品范围、导航和架构 | 否 | project-owner | 其他未定义 Tab 被提议进入交付时 |
 | PROD-015 | 正式发布使用哪个静态托管平台、域名和 SPA fallback 配置？ | Analyzer readiness 已获有条件批准，但当前只要求 HTTPS 或 localhost，尚无生产托管决策 | 部署、监控、回滚和运行配置 | 不阻断 Editor E0；继续阻断 Analyzer 正式上线 | project-owner | owner 决定开始 release and feedback 时 |
 | PROD-016 | 是否需要在 owner-only 验证之外证明普遍学习效果？ | 当前成功标准只由 owner 对 3/3 黄金片段验证 | 用户研究样本、测量设计和对外表述 | 否 | project-owner | 需要对外声称学习效果或扩大目标人群时 |
 | PROD-017 | Editor 何时需要 JSON 之外的工程格式？ | 首版选择器只展示已注册的 JSON；当前没有第二种格式的用户任务或交换对象 | codec 注册、导入导出 UI、兼容与测试矩阵 | 否 | project-owner | 出现明确的外部工具交换格式或用户任务时 |
@@ -24,11 +24,11 @@ next_action: "审批 PROD-014V；批准后保留 PROD-022 为未来非阻断问�
 | PROD-019 | 是否增加同类范围重叠、自动合并、裁剪或自由时间精度？ | 首版已选择同类不重叠、自适应网格和无自动合并；更复杂语义尚无任务证据 | RangeEvent 数据语义、编辑状态机和兼容性 | 否 | project-owner | 用户提出具体复合效果或非节拍事件任务时 |
 | PROD-022 | Visualizer 后续是否取消每个场景最多四个唯一 Analyzer 特征的上限？ | 首版继承现有四项 Worker/cache 边界；目前两个内置场景不需要第五项 | Worker/cache 调度、内存、渲染帧预算、工程兼容和质量矩阵 | 否；首版明确保持四项 | project-owner | 出现必须同时使用第五个唯一特征的批准场景时 |
 
-## In Review
+## Closed in Visualizer V0 Review
 
-| ID | Proposed decision | Current proposal | Approval needed to proceed |
-| --- | --- | --- | --- |
-| PROD-014V | Visualizer 的用户问题、产品边界和首版路线 | 本地歌曲音频可视化制作台；单场景、固定 16:9、两个内置模板、固定值/最多四项 Analyzer/Editor 事件绑定，先实时预览与工程 JSON，后实时 WebM | `project-owner` 明确批准 Visualizer V0 产品意图后才开放 system design |
+| ID | Decision | Resolution |
+| --- | --- | --- |
+| PROD-014V | Visualizer 是本地歌曲音频可视化制作台；单场景、固定 16:9、两个内置模板、固定值/最多四项 Analyzer/Editor 事件绑定，先实时预览与工程 JSON，后实时 WebM | 2026-09-02 由 `project-owner` 明确批准并开放 system design；delivery、实现、quality 和上线仍需各自门禁 |
 
 ## Closed in Prior Reviews
 
@@ -58,4 +58,4 @@ next_action: "审批 PROD-014V；批准后保留 PROD-022 为未来非阻断问�
 
 ## Gate State
 
-PROD-014V 当前为 `in-review`，Visualizer system design、delivery、代码和 quality 均未开放。PROD-021 已关闭，M14 clean canonical 19/19 通过并恢复 Analyzer `Ready with waivers`；PROD-015 继续阻断正式上线。批准 PROD-014V 后，PROD-022 仍作为不阻断首版的未来复核项保留。
+PROD-014V 已关闭并开放 Visualizer system design；delivery、代码和 quality 仍未开放。PROD-022 作为不阻断首版的未来复核项保留。PROD-021 已关闭，M14 clean canonical 19/19 通过并恢复 Analyzer `Ready with waivers`；PROD-015 继续阻断正式上线。

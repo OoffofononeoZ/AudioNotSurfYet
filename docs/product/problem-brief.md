@@ -1,12 +1,12 @@
 ---
-status: in-review
+status: approved
 owner: "project-owner"
 last_reviewed: 2026-09-02
 upstream_docs:
   - "docs/context/index.md"
   - "docs/context/glossary.md"
   - "docs/quality/release-readiness.md"
-next_action: "由 project-owner 审批 Visualizer V0 产品意图；批准前不进入 Visualizer system design"
+next_action: "Visualizer V0 产品意图已获批准；进入 system design，delivery 与实现仍未开放"
 ---
 
 # Problem Brief
@@ -73,7 +73,7 @@ M14 允许学习者把 21 张卡按自己的比较习惯重新排序：鼠标/�
 
 Editor 的输出是绑定单首歌曲的时间数据集；它不会修改、重新编码或导出新的音频。
 
-### Visualizer V0 outcome（in-review）
+### Visualizer V0 outcome（approved）
 
 用户能够围绕当前本地歌曲完成一条可复现的可视化制作流程：
 
@@ -111,7 +111,7 @@ Visualizer 不把 Analyzer 数组复制进工程，也不允许导入可执行�
 - Visualizer 一次只启用一个内置场景模板，输出画布固定为 16:9；首版只提供“正交线条”和“立方体群”。
 - 一个场景最多使用四个唯一 Analyzer 特征；固定值与 Editor lane/inner class 不计入上限，多个参数共享同一 FeatureId 时只计算一次。
 - Visualizer 先交付实时预览和工程 JSON，再交付实时 WebM 录制；首版不承诺 MP4、离线快速渲染或后台标签页导出。
-- Visualizer 产品意图获批前不进入系统设计、实现或依赖安装；Analyzer/Editor 已批准文档和 readiness 继续只覆盖其历史候选。
+- Visualizer 产品意图已获批准并开放系统设计；架构获批前不进入 delivery、实现或依赖安装，Analyzer/Editor 已批准文档和 readiness 继续只覆盖其历史候选。
 
 ## Risks
 
@@ -144,4 +144,6 @@ Visualizer 不把 Analyzer 数组复制进工程，也不允许导入可执行�
 
 同日，M14 clean canonical 在 implementation commit `0e991307d9045a1ec84ddaae0515612240894a92` 上 19/19 通过，产品结果按批准范围实现并恢复 Analyzer `Ready with waivers`；PROD-015 继续阻断生产上线。
 
-2026-09-02，`project-owner` 要求把 Visualizer 定义为使用 Analyzer 与 Editor 数据制作本地歌曲实时可视化和 WebM 视频的工作台，并选择单场景模板、两个内置场景、固定 16:9、当前本地歌曲、最多四个唯一 Analyzer 特征以及实时录制路线。本轮只把该意图整理为 `in-review` 草案；它不构成 Visualizer system design、delivery、实现、quality、readiness 或上线批准。
+2026-09-02，`project-owner` 要求把 Visualizer 定义为使用 Analyzer 与 Editor 数据制作本地歌曲实时可视化和 WebM 视频的工作台，并选择单场景模板、两个内置场景、固定 16:9、当前本地歌曲、最多四个唯一 Analyzer 特征以及实时录制路线。
+
+同日，`project-owner` 明确回复：“我批准 Visualizer V0 产品意图、单场景模板模型、最多四项分析特征、两个内置场景与 WebM 路线；同意进入 Visualizer 架构设计。”本批准使 Visualizer V0 产品意图生效并开放 system design；它不构成架构、delivery、实现、quality、readiness 或上线批准。

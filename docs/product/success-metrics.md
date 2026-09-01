@@ -1,16 +1,16 @@
 ---
-status: in-review
+status: approved
 owner: "project-owner"
 last_reviewed: 2026-09-02
 upstream_docs:
   - "docs/product/problem-brief.md"
   - "docs/product/scope.md"
-next_action: "审批 Visualizer V0 结果与门禁；批准后再把阈值转成架构和 delivery 契约"
+next_action: "Visualizer V0 结果与门禁已获批准；在 system design 中固定可验证接口与失败边界"
 ---
 
 # Success Metrics
 
-Analyzer 指标已由 M3–M14 和 Analyzer-only readiness 形成历史证据，Editor 指标也已由 E1–E7 收口。下列 Visualizer V0 指标仍为 `in-review` 产品目标；它们不得反向表述为当前 `/comingsoon`、试验组件或既有 readiness 已经达到。
+Analyzer 指标已由 M3–M14 和 Analyzer-only readiness 形成历史证据，Editor 指标也已由 E1–E7 收口。下列 Visualizer V0 指标已获产品批准，但仍只是未来交付目标；它们不得反向表述为当前 `/comingsoon`、试验组件或既有 readiness 已经达到。
 
 ## Product and Learning Outcomes
 
@@ -86,7 +86,7 @@ owner-only 学习验证是当前批准方式，不推断为广泛用户研究结
 - 播放、seek、zoom/pan、tempo、点/范围事件、导入导出、自定义右键菜单替代动作和 overlay 调整均提供键盘路径、可见焦点与非纯颜色状态。
 - Chrome/Edge 均覆盖成功、失败、边界和异常路径；原生文件选择或浏览器离页提示不能完全自动化时，必须登记残余风险与 owner 补偿检查。
 
-## Visualizer V0 Product Outcomes（in-review）
+## Visualizer V0 Product Outcomes（approved）
 
 | Metric | Target | Observation method | Review point |
 | --- | --- | --- | --- |
@@ -127,4 +127,4 @@ Analyzer 目标和阈值由 `project-owner` 于 2026-07-24 批准，并已由 An
 
 2026-09-01，owner 批准 M14 的完整顺序、输入等价、全局恢复、FIFO 隔离和资源指标。M14 clean canonical 19/19 通过，unit 24/24、integration 19/19、Chrome/Edge 各 3/3 且排序 Worker analyze request 保持 `1 → 1`；指标据 owner 完成后续授权复核为达到，M13 canonical 保留为历史。
 
-2026-09-02，owner 要求把 Visualizer 的实时预览、两个内置场景、0–4 分析特征绑定、Editor 事件绑定、工程 round-trip 和实时 WebM 路线写入产品指标。本节仍为 `in-review`，只有 owner 明确批准后才能用于开放 system design；这里列出的观测方法不是已执行证据。
+2026-09-02，owner 要求把 Visualizer 的实时预览、两个内置场景、0–4 分析特征绑定、Editor 事件绑定、工程 round-trip 和实时 WebM 路线写入产品指标，并明确回复：“我批准 Visualizer V0 产品意图、单场景模板模型、最多四项分析特征、两个内置场景与 WebM 路线；同意进入 Visualizer 架构设计。”上述指标据此获批并开放 system design；这里列出的观测方法仍不是已执行证据，也不开放 delivery、实现或 readiness。

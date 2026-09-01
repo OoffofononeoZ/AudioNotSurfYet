@@ -1,10 +1,10 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-09-01
+last_reviewed: 2026-09-02
 upstream_docs:
   - "docs/context/index.md"
-next_action: "M14 排序术语已由实现/canonical 验证；语义变化时复核"
+next_action: "Visualizer V0 产品术语已登记；架构草案获批后补充实现级契约术语"
 ---
 
 # Glossary
@@ -54,6 +54,9 @@ next_action: "M14 排序术语已由实现/canonical 验证；语义变化时复
 | Spectral Flux v1 | 相邻幅度频谱逐 bin 正向差的 L1 和；第一帧与零能量帧为 0 | 替代 Meyda 5.6.3 有缺陷的 extractor，并由项目 golden 固定语义 | [ADR-0005](../architecture/adrs/0005-project-spectral-flux-and-silence-semantics.md) |
 | shared viewport | 所有活动卡共同读取的 start/end/zoom；cursor 由播放快照实时派生且不持久化 | zoom、pan、click seek 和键盘 seek 在所有卡保持同一时间身份 | [system design](../architecture/system-design.md) |
 | TestLands | `/testlands` 下的试验页面 | 当前不属于已批准产品表面或稳定接口 | [index](index.md) |
+| Visualizer V0 | 围绕当前本地歌曲，把固定值、最多四个 Analyzer 特征和同歌 Editor 事件映射到单一场景模板的音频可视化制作台 | 产品意图已批准，但当前 `/comingsoon` 与试验 renderer 不能被当作已实现 Visualizer | [scope](../product/scope.md) |
+| unique analysis feature budget | 一个 Visualizer 场景中所有参数去重后的 Analyzer `FeatureId` 集合，首版上限为四 | 固定值和 Editor 事件不计数；多个参数共享同一特征只占一个名额，第五项必须在 Worker 前拒绝 | [open questions](../product/open-questions.md) |
+| scene template | Visualizer 中一次独占输出画布的受控完整场景；首版只有 Orthogonal Lines 与 Cube Swarm | 不是可执行 Vue/JavaScript/shader 插件，也不允许多模板叠加 | [scope](../product/scope.md) |
 | lifecycle document | 带标准状态 frontmatter 的产品、设计、交付、质量、发布或复盘文档 | 下游工作依赖其批准与新鲜度 | [AGENTS.md](../../AGENTS.md) |
 | Analyzer candidate | 由固定实现 commit、canonical run、环境和 artifact hash 共同标识的 Analyzer-only 候选 | 后续文档或 Editor 变化不能反向扩大该候选的证据范围 | [release readiness](../quality/release-readiness.md) |
 | Ready with waivers | 候选没有当前范围内的代码 blocker，但只有在 reviewer 接受列明风险后才可进入发布规划 | 不等于风险已解决，也不等于生产上线授权 | [release readiness](../quality/release-readiness.md) |

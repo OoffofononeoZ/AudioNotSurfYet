@@ -1,18 +1,18 @@
 ---
-status: in-review
+status: approved
 owner: "project-owner"
 last_reviewed: 2026-09-02
 upstream_docs:
   - "docs/product/problem-brief.md"
   - "docs/quality/release-readiness.md"
-next_action: "审批 Visualizer V0 范围与非目标；批准前不得开始 Visualizer system design"
+next_action: "Visualizer V0 范围已获批准；进入 system design，获批前不得开始 delivery 或实现"
 ---
 
 # Scope
 
 ## Scope Boundary
 
-下列 Analyzer 范围已于 2026-07-24 获批，并由后续里程碑与 Analyzer-only readiness 收口。Editor E0 是 2026-08-26 独立批准并已交付的产品范围。Visualizer V0 是 2026-09-02 新增的 `in-review` 产品草案；它不能反向扩大 Analyzer 或 Editor 候选证据，也不会在批准前开放 system design 或代码实现。
+下列 Analyzer 范围已于 2026-07-24 获批，并由后续里程碑与 Analyzer-only readiness 收口。Editor E0 是 2026-08-26 独立批准并已交付的产品范围。Visualizer V0 于 2026-09-02 获批并开放 system design；它不能反向扩大 Analyzer 或 Editor 候选证据，架构获批前也不会开放 delivery 或代码实现。
 
 ## Analyzer Scope（approved）
 
@@ -154,7 +154,7 @@ E5 于 2026-08-27 在 E4 获批后改为 `In Progress`。若未来要求新的�
 - 首版 JSON 之外的工程格式；后续格式通过注册机制增量评审。
 - 移动端、非 Chromium 浏览器、生产托管和 Visualizer。
 
-## Visualizer V0 Scope（in-review）
+## Visualizer V0 Scope（approved）
 
 ### Product capability
 
@@ -246,6 +246,6 @@ V1–V6 每个里程碑均须独立完成 provisional、实现提交、clean can
 - M13 approval：`project-owner` 于 2026-08-31 以完整实施指令批准 M13 范围及 M14 非目标；M13 保持 IndexedDB V1、本地音频和最多四项分析边界，本轮不推送远程仓库。
 - M14 approval：`project-owner` 于 2026-09-01 明确批准并要求实施插入排序、工作区全局持久化、点击动作面板、恢复默认、键盘/读屏和本地 canonical；M14 不推送远程仓库。
 - M14 closure：implementation commit `0e991307d9045a1ec84ddaae0515612240894a92` 与 19/19 clean canonical 完成，范围内能力和非目标均保持；PROD-015 仍阻断上线。
-- Visualizer V0 status：`in-review`；2026-09-02 owner 要求形成单场景、最多四项 Analyzer 特征、两个内置模板和 WebM 路线的产品意图，但须在明确批准语句后才开放 system design。
+- Visualizer V0 status：`approved`；2026-09-02 owner 明确批准单场景、最多四项 Analyzer 特征、两个内置模板和 WebM 路线，并开放 system design。该批准不开放 delivery、实现、quality 或上线。
 
 File System Access 行为依据：[Chrome File System Access 文档](https://developer.chrome.com/docs/capabilities/web-apis/file-system-access) 与 [持久权限说明](https://developer.chrome.com/blog/persistent-permissions-for-the-file-system-access-api)。
