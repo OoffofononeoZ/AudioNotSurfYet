@@ -1,18 +1,18 @@
 ---
-status: approved
+status: in-review
 owner: "project-owner"
-last_reviewed: 2026-09-01
+last_reviewed: 2026-09-02
 upstream_docs:
   - "docs/product/problem-brief.md"
   - "docs/quality/release-readiness.md"
-next_action: "M14 已关闭；保持 FIFO、音频与浏览器范围不变"
+next_action: "审批 Visualizer V0 范围与非目标；批准前不得开始 Visualizer system design"
 ---
 
 # Scope
 
 ## Scope Boundary
 
-下列 Analyzer 范围已于 2026-07-24 获批，并由 M3–M11 与 Analyzer-only readiness 收口。Editor E0 是 2026-08-26 独立批准的新增产品范围；它不能反向扩大 Analyzer 候选的证据，其 system design 已获批准，当前须建立并审批独立 delivery planning。
+下列 Analyzer 范围已于 2026-07-24 获批，并由后续里程碑与 Analyzer-only readiness 收口。Editor E0 是 2026-08-26 独立批准并已交付的产品范围。Visualizer V0 是 2026-09-02 新增的 `in-review` 产品草案；它不能反向扩大 Analyzer 或 Editor 候选证据，也不会在批准前开放 system design 或代码实现。
 
 ## Analyzer Scope（approved）
 
@@ -75,7 +75,7 @@ M13 是上述完成切片后的候选变更：以 21 张稳定折叠卡替代四
 - 长期本地曲库、多会话历史或跨设备恢复。
 - 可编辑的分析参数；首版只展示固定参数。
 - 音频编辑、音频导出、分享、协作或插件系统。
-- Editor、Visualizer 及其他尚未定义的空白 Tab；Editor 后续只能按下述 E0 独立范围推进。
+- 该 Analyzer 历史候选不包含 Editor、Visualizer 或其他 Tab；后续产品线必须以自己的范围和证据推进，不能反向扩大 Analyzer readiness。
 - 移动端、非 Chromium 浏览器和非 Chromium 兼容层。
 - Analyzer 中新增 Three.js 依赖。
 - 不实现两卡交换、实时重排动画、多卡选择、按歌曲独立顺序、第三方拖动依赖或移动端产品支持；桌面 Chrome/Edge 的 touch Pointer Events 仍需验证。
@@ -154,6 +154,71 @@ E5 于 2026-08-27 在 E4 获批后改为 `In Progress`。若未来要求新的�
 - 首版 JSON 之外的工程格式；后续格式通过注册机制增量评审。
 - 移动端、非 Chromium 浏览器、生产托管和 Visualizer。
 
+## Visualizer V0 Scope（in-review）
+
+### Product capability
+
+- Visualizer 是当前本地歌曲的音频可视化制作台，不是自由代码画布。工作台采用左侧场景列表、中间固定 16:9 实时预览、右侧参数与绑定检查器、底部播放进度的三栏布局。
+- 一次只启用一个完整场景模板。切换模板会切换整套视觉结构和参数面板，不支持把多个模板作为图层叠加。
+- 有有效歌曲时工作台锁定当前歌曲并隐藏 MusicBar，页面内提供播放、暂停、时间与 seek；不允许切换到其他歌曲，不循环播放，自然结束后暂停。
+- 无歌曲或歌曲不可恢复时显示明确空状态并保留 MusicBar，使用户能够导入或恢复歌曲；不得静默改用队列中的其他歌曲。
+- 首版内置“正交线条”和“立方体群”两个模板。模板是项目内受控 renderer，不是可执行 Vue/JavaScript/shader 插件。
+
+### Data binding
+
+- 参数数据源包括固定值、Analyzer 特征、同歌 Editor 草稿和导入后通过歌曲身份校验的 Editor JSON。
+- 每个场景最多激活四个不同的 Analyzer `FeatureId`。第五个唯一特征必须在分析请求前被拒绝并解释原因；固定值和 Editor lane/inner class 不计入该上限。
+- 多个参数引用相同 FeatureId 时只占一个名额并共享结果；删除或替换最后一个引用后，不再使用的特征应从活动集合释放。
+- 标量可以直接映射；向量可选择完整向量、单个 bin、频带、mean、max 或 peak。具体投影、范围映射、clamp、invert 与 attack/release smoothing 等接口语义须在 system design 中固定。
+- Editor main lane 表示该 lane 的事件集合，inner class 表示单一分类；point 产生短促 pulse，range 在半开区间 `[start,end)` 内产生 gate。导入失败、歌曲不匹配或无效引用不得污染当前工程。
+- Visualizer 工程不嵌入 Analyzer 数组；重新打开时针对当前歌曲复用现有 cache 或重新分析。经过校验的 Editor 数据可作为工程快照保存。
+
+### Built-in scenes
+
+- **Orthogonal Lines**：横线与竖线分别提供来源、颜色、粗细、亮度和衰减；推荐把横线绑定主要音色 lane，把竖线绑定 drum lane 或 inner class。range 持续显示，point 产生短促脉冲；未绑定时可使用固定值或关闭。
+- **Cube Swarm**：中心立方体簇默认由 Amplitude Spectrum 驱动，`coreScale` 推荐绑定 Editor drum main lane，周边立方体 `riseSpeed` 默认绑定 Energy，三个卫星立方体的 `orbitSpeed` 默认使用固定值但允许改绑。数量、颜色、基础尺寸、相机距离和背景是普通参数。
+- Cube Swarm 的默认设置只使用 Amplitude Spectrum 和 Energy 两个 Analyzer 特征；其他默认绑定优先使用 Editor 事件或固定值，为用户保留两个分析特征名额。
+- 两个模板必须在同一播放时间上实时响应；模板之间的 renderer、Canvas、RAF 与资源所有权由后续架构统一，产品范围不批准第二套播放时钟或音频引擎。
+
+### Project and recording
+
+- 首版提供本地版本化 Visualizer JSON 工程，建议文件名为 `<歌曲名>.audiosurf-visualizer.json`；保存歌曲身份、输出预设、模板 ID/version、参数、绑定和可选 Editor 快照。
+- 未知模板、未知字段、歌曲不匹配、无效 FeatureId/lane/class 或超过四个唯一分析特征的工程必须原子拒绝，不能部分套用。
+- V1–V4 先形成可实时预览和恢复的工程；V5 再从歌曲 0 秒开始按歌曲原速录制同一视觉画布与音频。
+- WebM 预设为 1280×720 或 1920×1080，30 或 60fps；优先 VP9 + Opus，不支持时允许 VP8 + Opus。录制前必须做能力检测，失败时保留工程与实时预览。
+- 实时录制期间不支持 seek、切歌、切模板或修改会改变输出身份的设置；后台标签页、离线倍速和 MP4 不在首版范围。
+
+### Support and accessibility
+
+- 首版输入继续限制为用户本地 MP3、WAV、FLAC，目标单首时长约 15 分钟；不新增远端或麦克风输入。
+- 首发支持最新稳定版 Chrome 与 Edge 桌面端，工作台验证 1024、1280、1920 CSS px 及代表性 DPR；输出画面固定 16:9。
+- 模板、参数、绑定、播放、seek、工程导入导出和录制必须有键盘路径、可见焦点与非纯颜色状态。
+- reduced motion 只关闭工作台装饰动画，不关闭用户主动播放、预览或录制的场景运动。
+
+## Visualizer Proposed Delivery Slices
+
+1. **V0-P — Product intent**：批准用户、问题、范围、成功指标、非目标和开放问题；当前只执行此阶段。
+2. **V0-A — Architecture**：定义工程、绑定、场景注册表、播放/分析所有权和录制边界。
+3. **V0-D — Delivery/quality planning**：定义 execution、acceptance、test、eval、golden 与 failure 文档。
+4. **V1 — Workspace foundation**：路由、三栏布局、transport、16:9 画布、工程 JSON、草稿和模板注册表。
+5. **V2 — Data binding**：Analyzer 0–4 特征、Editor 直连/导入、绑定检查、去重与第五项阻止。
+6. **V3 — Orthogonal Lines**：完成线条场景及 Editor point/range 事件绑定。
+7. **V4 — Cube Swarm**：完成频谱中心结构、鼓点缩放、Energy 速度和卫星旋转。
+8. **V5 — WebM export**：完成带音频的实时 WebM 录制、预设、能力检测和文件验证。
+9. **V6 — Final hardening**：完成 Chrome/Edge、性能、资源、WebGL 恢复、无障碍与完整 canonical；获批后才复核整体 readiness。
+
+V1–V6 每个里程碑均须独立完成 provisional、实现提交、clean canonical、evidence 登记和 owner 审批；产品意图批准不等于任何实现或质量门禁通过。
+
+## Visualizer Non-goals
+
+- 麦克风、直播流、远端音频、账户、上传、云同步或分享链接。
+- 多模板叠加、自由图层合成、任意节点图或完整视频剪辑时间线。
+- 导入外部 Vue、JavaScript、shader、Three.js 代码或其他可执行插件。
+- MP4、离线快速渲染、后台标签页导出或服务端渲染。
+- 独立 Analyzer 数据包；首版通过当前歌曲 cache/Worker 直接取得分析结果。
+- 一个场景使用超过四个唯一 Analyzer 特征；若出现明确场景需求，必须重新评审 Worker、缓存和性能边界。
+- 移动端、非 Chromium 浏览器、正式托管、发布监控和生产上线。
+
 ## Assumptions and Dependencies
 
 - `project-owner` 是产品、技术和阶段批准人。
@@ -167,6 +232,9 @@ E5 于 2026-08-27 在 E4 获批后改为 `In Progress`。若未来要求新的�
 - 点/范围事件的 JSON 字段、歌曲 identity、草稿数据库、右键状态机、BPM 算法和 renderer 数据流已由获批 Editor 架构固定；delivery planning 负责把它们映射到切片、验收和测试。
 - 任何新增依赖必须先说明用途、体积、许可与替代方案并获得 owner 明确批准。
 - Analyzer 顺序属于最近工作区而非歌曲；旧 V1 缺少顺序字段时使用 `FEATURE_IDS`，存在但非法的顺序不静默修复。
+- Visualizer 工程、Editor 工程与 Analyzer session 是不同持久化边界；是否复用数据库、草稿数量和文件 schema 由批准后的架构决定，不能从产品文档推断实现。
+- Visualizer 只复用当前歌曲的 Analyzer/Editor 数据语义，不改变现有 Analyzer 四项上限、Editor JSON V1 或二者 readiness 身份。
+- WebM 路线依赖浏览器 Canvas capture、Web Audio stream destination 与 MediaRecorder 能力；正式接口与失败策略在架构阶段确认，不新增运行时依赖。
 
 ## Approval Notes
 
@@ -178,5 +246,6 @@ E5 于 2026-08-27 在 E4 获批后改为 `In Progress`。若未来要求新的�
 - M13 approval：`project-owner` 于 2026-08-31 以完整实施指令批准 M13 范围及 M14 非目标；M13 保持 IndexedDB V1、本地音频和最多四项分析边界，本轮不推送远程仓库。
 - M14 approval：`project-owner` 于 2026-09-01 明确批准并要求实施插入排序、工作区全局持久化、点击动作面板、恢复默认、键盘/读屏和本地 canonical；M14 不推送远程仓库。
 - M14 closure：implementation commit `0e991307d9045a1ec84ddaae0515612240894a92` 与 19/19 clean canonical 完成，范围内能力和非目标均保持；PROD-015 仍阻断上线。
+- Visualizer V0 status：`in-review`；2026-09-02 owner 要求形成单场景、最多四项 Analyzer 特征、两个内置模板和 WebM 路线的产品意图，但须在明确批准语句后才开放 system design。
 
 File System Access 行为依据：[Chrome File System Access 文档](https://developer.chrome.com/docs/capabilities/web-apis/file-system-access) 与 [持久权限说明](https://developer.chrome.com/blog/persistent-permissions-for-the-file-system-access-api)。

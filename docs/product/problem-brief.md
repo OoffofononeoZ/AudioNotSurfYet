@@ -1,12 +1,12 @@
 ---
-status: approved
+status: in-review
 owner: "project-owner"
-last_reviewed: 2026-09-01
+last_reviewed: 2026-09-02
 upstream_docs:
   - "docs/context/index.md"
   - "docs/context/glossary.md"
   - "docs/quality/release-readiness.md"
-next_action: "M14 已关闭并恢复 readiness；PROD-015 继续阻断上线"
+next_action: "由 project-owner 审批 Visualizer V0 产品意图；批准前不进入 Visualizer system design"
 ---
 
 # Problem Brief
@@ -17,11 +17,15 @@ AudioNotSurfYet 已完成面向音频分析学习者的 Analyzer 候选，并以
 
 Editor E0 解决下一层问题：用户能够听出歌曲中存在音符、音色或效果，却缺少一个与歌曲时间轴、节拍和分析特征对齐的工具，把这些观察反向整理成可保存的数据。Editor 因此定位为“逆向制曲”标注工具，而不是修改声音的音频编辑器。
 
+Visualizer V0 拟解决第三层问题：Analyzer 能提供声音特征，Editor 能提供人工时间标记，但用户仍缺少一个本地制作台，把这些数据映射到可调的视觉参数，并在歌曲播放过程中即时预览或录制为视频。Visualizer 因此定位为“音频可视化制作台”，而不是自由编程环境、完整视频编辑器或实时演出平台。
+
 ## Target User
 
 - Analyzer 用户：正在学习音频分析、Meyda 或音频可视化，希望建立“数值—声音—时间”联系的学习者。
 - Editor E0 目标用户：希望拆解已有歌曲的学习者或制作者，需要反向记录音符、短音色、长音色或效果出现的时间，而不是创作或修改原始音频。
 - Editor 核心任务：选择一首本地歌曲，在循环试听中建立节拍时间轴，按内部分类创建点事件和范围事件，用一个分析特征辅助判断，并把工程保存后恢复或交换。
+- Visualizer V0 目标用户：希望把本地歌曲的分析特征与人工标记转成同步视觉场景的学习者或创作者，不要求编写 Vue、JavaScript、shader 或 Three.js 代码。
+- Visualizer 核心任务：为当前歌曲选择一个完整场景模板，把模板参数绑定到固定值、最多四个 Analyzer 特征或同歌 Editor 数据，在固定 16:9 画布中实时预览并保存工程，后续再以歌曲原速录制 WebM。
 - 当前 owner：`project-owner`，负责产品、技术和阶段批准，并亲自执行学习结果验证。
 
 首版不以专业母带工程师、实时演出操作者或需要完整 DAW、多轨制作、录音、混音或云协作的用户为主要用户。
@@ -35,6 +39,9 @@ Editor E0 解决下一层问题：用户能够听出歌曲中存在音符、音�
 - 通用文本或表格不能让用户在节拍网格上快速记录大量音符、音色和效果事件，也不能随缩放自动调整可点击精度。
 - 普通音频播放器不能保存“某个分类在何时出现、持续多久”的结构化工程；手工记秒数难以复核、调整或与分析图对齐。
 - 完整编曲软件的目标是生成或修改音乐，功能和交互远超当前逆向听辨任务，不能直接替代轻量标注工作区。
+- Analyzer 图表和 Editor 标记本身不是最终视觉作品；用户仍需在代码、3D 软件和视频工具之间手工搬运数值、时间与播放位置。
+- 当前试验性 Three.js/Canvas 表面没有稳定的场景、参数或数据绑定模型，用户无法可靠保存、交换或重新打开一套可视化配置。
+- 不受约束的任意脚本或任意数量分析特征会把首版变成插件宿主，并放大 Worker、缓存、渲染与安全风险，无法形成清晰可测的产品边界。
 
 ## Desired Outcome
 
@@ -66,6 +73,20 @@ M14 允许学习者把 21 张卡按自己的比较习惯重新排序：鼠标/�
 
 Editor 的输出是绑定单首歌曲的时间数据集；它不会修改、重新编码或导出新的音频。
 
+### Visualizer V0 outcome（in-review）
+
+用户能够围绕当前本地歌曲完成一条可复现的可视化制作流程：
+
+1. 在三栏工作台左侧选择一个完整场景模板，中间查看固定 16:9 实时预览，右侧配置参数与数据来源；
+2. 使用页面底部的播放、暂停、时间与 seek 进度控制同一首歌曲，播放自然结束后停住而不循环或切歌；
+3. 把场景参数绑定到固定值、Analyzer 特征、Editor main lane 或 inner class；
+4. 在一个场景中最多激活四个不同的 Analyzer 特征，多个参数可以共享同一特征且只占一个名额；
+5. 使用“正交线条”表达主要音色与鼓点事件，或使用“立方体群”表达频谱、鼓点缩放、Energy 速度和固定卫星旋转；
+6. 把歌曲身份、模板、参数、绑定和已验证 Editor 快照保存为本地版本化工程，并能安全恢复；
+7. 在实时预览与工程 JSON 稳定后，从歌曲 0 秒开始以 720p/1080p、30/60fps 预设录制带音轨的 WebM。
+
+Visualizer 不把 Analyzer 数组复制进工程，也不允许导入可执行渲染代码。独立 Analyzer 数据包、额外场景、超过四个唯一分析特征和更多视频格式都需要后续重新评审。
+
 ## Why Now
 
 - 仓库已具备本地文件选择、队列、Web Audio 播放和可视化基础，可以复用为分析时间轴的输入与时钟。
@@ -73,6 +94,8 @@ Editor 的输出是绑定单首歌曲的时间数据集；它不会修改、重�
 - 如果继续让播放器、状态和分析各自演进，后续会出现多个 AudioContext、不同步游标、重复缓存和无法验证的特征实现。
 - Analyzer 已提供单 AudioEngine、共享时间轴、21 项分析能力和双浏览器证据，Editor 可以在不复制播放与分析基础设施的前提下建立逆向标注体验。
 - 在开始 Editor 代码前先批准产品意图，可以避免从现有 `/comingsoon` 占位、音乐列表加号或聊天示例反推未经确认的工程格式和交互。
+- Analyzer 已形成 21 项类型化特征、缓存与最多四项活动分析边界，Editor 已形成同歌点/范围事件工程；现在可以先定义二者如何服务可视场景，而不是继续让 `/comingsoon` 或试验组件替代产品意图。
+- Three.js 已存在于仓库，但依赖存在不等于 Visualizer 已经可用；先固定场景、绑定、数据与录制边界，才能避免把实验 renderer 当作稳定插件接口。
 
 ## Constraints
 
@@ -84,7 +107,11 @@ Editor 的输出是绑定单首歌曲的时间数据集；它不会修改、重�
 - 当前交付使用阶段门禁，不承诺未经估算的日历日期。
 - Editor 首版继续使用浏览器本地数据边界，首个工程格式只提供版本化 JSON；新增文件格式或第三方 BPM 依赖必须另获 owner 批准。
 - 点事件和范围事件都以节拍网格为主要定位方式；范围事件必须具有严格晚于起点的终点。
-- Editor 产品意图获批前不进入系统设计、实现或依赖安装。
+- Visualizer 首版只处理当前本地 MP3/WAV/FLAC；有效工作台内不允许切换歌曲，不循环播放，播放结束后暂停。
+- Visualizer 一次只启用一个内置场景模板，输出画布固定为 16:9；首版只提供“正交线条”和“立方体群”。
+- 一个场景最多使用四个唯一 Analyzer 特征；固定值与 Editor lane/inner class 不计入上限，多个参数共享同一 FeatureId 时只计算一次。
+- Visualizer 先交付实时预览和工程 JSON，再交付实时 WebM 录制；首版不承诺 MP4、离线快速渲染或后台标签页导出。
+- Visualizer 产品意图获批前不进入系统设计、实现或依赖安装；Analyzer/Editor 已批准文档和 readiness 继续只覆盖其历史候选。
 
 ## Risks
 
@@ -96,6 +123,10 @@ Editor 的输出是绑定单首歌曲的时间数据集；它不会修改、重�
 - 同一分类的范围事件若允许无约束重叠会产生难以解释的数据；E0 已确定同一 lane、同一 inner class 禁止范围重叠，不同分类仍可同时存在。
 - Analyzer 21 张稳定卡与快速展开/收起会增加布局和异步状态错序风险；M13 必须保持最多四项活动分析、最新 generation 和最新 workspace revision 生效。
 - M14 自定义 DOM 顺序、pointer capture、auto-scroll 和持久化交错可能造成卡片错位、焦点丢失或旧顺序覆盖；必须以 keyed DOM、严格 permutation、取消清理和最新 workspace revision 控制。
+- 场景参数可能把标量、向量与离散 Editor 事件混为一谈；若投影、归一化和 attack/release 语义不明确，相同工程无法稳定复现。
+- 四特征上限能继承现有分析资源边界，但复杂模板可能提出第五个唯一特征；首版应明确拒绝，不能静默超限或偷偷增加 Worker。
+- Three.js 场景、Canvas capture、音频录制和路由切换若缺少单一生命周期所有权，可能积累 RAF、WebGL、AudioNode、MediaStreamTrack 或 Blob URL。
+- 实时 WebM 的 MIME、编码性能和音画同步受浏览器能力与机器负载影响；首版需要能力检测和明确失败，不把“按钮可点击”当作可用录制证据。
 
 ## Approval Record
 
@@ -112,3 +143,5 @@ Editor 的输出是绑定单首歌曲的时间数据集；它不会修改、重�
 同日，`project-owner` 选择插入排序、Analyzer 工作区全局保存以及“点击动作面板 + 恢复默认”，并明确要求实施完整 M14 计划。该指令关闭 PROD-021，批准卡片自定义顺序、鼠标/触控/键盘与读屏路径；M13 evidence 转为历史候选，M14 canonical 前 Analyzer readiness 为 `in-review`。
 
 同日，M14 clean canonical 在 implementation commit `0e991307d9045a1ec84ddaae0515612240894a92` 上 19/19 通过，产品结果按批准范围实现并恢复 Analyzer `Ready with waivers`；PROD-015 继续阻断生产上线。
+
+2026-09-02，`project-owner` 要求把 Visualizer 定义为使用 Analyzer 与 Editor 数据制作本地歌曲实时可视化和 WebM 视频的工作台，并选择单场景模板、两个内置场景、固定 16:9、当前本地歌曲、最多四个唯一 Analyzer 特征以及实时录制路线。本轮只把该意图整理为 `in-review` 草案；它不构成 Visualizer system design、delivery、实现、quality、readiness 或上线批准。
