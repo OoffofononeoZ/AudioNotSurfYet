@@ -1,16 +1,16 @@
 ---
-status: approved
+status: in-review
 owner: "project-owner"
-last_reviewed: 2026-09-01
+last_reviewed: 2026-09-02
 upstream_docs:
   - "docs/product/problem-brief.md"
   - "docs/product/scope.md"
-next_action: "M14 排序指标已由 clean canonical 验证；候选行为变化时重测"
+next_action: "审批 Visualizer V0 结果与门禁；批准后再把阈值转成架构和 delivery 契约"
 ---
 
 # Success Metrics
 
-Analyzer 指标已由 M3–M11 和 Analyzer-only readiness 形成历史证据。下列新增 Editor 指标已于 2026-08-26 获批，Editor 架构也已获批准；这些指标现在用于驱动独立 delivery planning、验收和 eval，不得反向表述为现有代码已经达到。
+Analyzer 指标已由 M3–M14 和 Analyzer-only readiness 形成历史证据，Editor 指标也已由 E1–E7 收口。下列 Visualizer V0 指标仍为 `in-review` 产品目标；它们不得反向表述为当前 `/comingsoon`、试验组件或既有 readiness 已经达到。
 
 ## Product and Learning Outcomes
 
@@ -86,6 +86,39 @@ owner-only 学习验证是当前批准方式，不推断为广泛用户研究结
 - 播放、seek、zoom/pan、tempo、点/范围事件、导入导出、自定义右键菜单替代动作和 overlay 调整均提供键盘路径、可见焦点与非纯颜色状态。
 - Chrome/Edge 均覆盖成功、失败、边界和异常路径；原生文件选择或浏览器离页提示不能完全自动化时，必须登记残余风险与 owner 补偿检查。
 
+## Visualizer V0 Product Outcomes（in-review）
+
+| Metric | Target | Observation method | Review point |
+| --- | --- | --- | --- |
+| 工作台核心任务 | owner 能为当前歌曲选择模板、配置绑定、播放/seek、实时预览、保存并恢复工程 | 使用固定歌曲、Analyzer cache 和同歌 Editor 工程，在 Chrome/Edge 逐项执行脚本 | V1–V4、V6 |
+| 单场景边界 | 任一时刻只存在一个活动模板和一个输出画布；切换模板后旧场景不再更新或占用资源 | registry/controller 集成测试、Canvas/RAF/WebGL 资源计数 | V1、V3、V4、V6 |
+| 分析特征上限 | 0–4 个唯一 FeatureId 合法；第五项在进入 Worker 前被拒绝并说明原因；同一 FeatureId 的多个绑定只占一项 | binding planner 单元测试、Coordinator 集成与双浏览器参数操作 | V2、V6 |
+| 绑定释放与隔离 | 替换或删除最后一个引用后释放不用的特征；迟到分析结果不覆盖新模板、歌曲或绑定 | active-set、generation、cache hit/miss、stale/cancel 集成测试 | V2、V6 |
+| Editor 数据一致性 | 同歌 draft 或导入 JSON 的 lane/inner class 可绑定；歌曲不匹配、无效引用或导入失败不改变当前工程 | point/range golden、严格校验和浏览器原子导入任务 | V2、V3、V4、V6 |
+| 工程 round-trip | 导出再导入后，歌曲身份、16:9 预设、模板版本、参数、绑定和 Editor 快照语义一致 | canonical codec、严格 validator 与 Chrome/Edge 原生文件任务 | V1、V2、V6 |
+| 正交线条表达 | 主要音色事件只驱动横线的批准参数，鼓点事件只驱动竖线的批准参数；point 为 pulse，range 为 gate | 版本化 Editor event fixture 与逐帧场景状态 golden | V3、V6 |
+| 立方体群表达 | 默认 Amplitude Spectrum 驱动中心结构、drum 驱动 `coreScale`、Energy 驱动 `riseSpeed`，固定 `orbitSpeed` 不随音频变化 | 版本化分析/Editor fixture、renderer state golden 与浏览器观察 | V4、V6 |
+| 实时 WebM 输出 | 720p/1080p、30/60fps 预设在支持的浏览器产生可回放的 WebM 音视频文件 | FFmpeg/ffprobe 检查容器、音轨、尺寸、fps、时长，并在 Chrome/Edge 回放 | V5、V6 |
+
+## Visualizer Correctness and Synchronization Guardrails
+
+| Metric | Target | Observation method |
+| --- | --- | --- |
+| 播放与视觉同步 | 当前播放时间到场景可见反应的偏差不超过 50ms | 对固定 point、range 和分析峰记录 AudioContext 基准与 renderer frame 时间 |
+| 交互反馈 | 模板、参数、绑定、播放、seek 和录制控制的可见反馈不超过 100ms | Playwright 交互计时与浏览器性能 trace |
+| 录制音画同步 | 完成文件的音画漂移不超过 100ms | 在确定性 impulse/flash fixture 上比较音轨与视频帧时间 |
+| 工程原子性 | 未知模板/字段、歌曲不匹配、无效引用或超过四项分析特征时，当前内存工程和 durable draft 都不被部分替换 | validator、repository 故障注入和浏览器导入失败任务 |
+| 播放结束策略 | Visualizer 中自然结束后保持当前歌曲并暂停，不循环、不调用下一首；离页恢复普通队列策略 | fake clock/service 集成与 Chrome/Edge ended/route 测试 |
+
+## Visualizer Responsiveness, Reliability and Accessibility
+
+- 约 15 分钟输入和最重四特征场景下，不产生可归因于 Visualizer/分析、单任务超过 50ms 的主线程长任务。
+- 20 次路由、模板、歌曲恢复和录制生命周期后，AudioContext、Worker、RAF、Canvas/WebGL、MediaStreamTrack、Observer、listener 和 Blob URL 不单调累积。
+- 1024、1280、1920 CSS px 与代表性 DPR 下保持三栏工具、固定 16:9 预览、底部 transport 和可达控件；具体断点在 delivery 阶段固定。
+- 模板、参数、绑定、播放、seek、工程导入导出和录制均提供键盘路径、可见焦点、文字标签与非纯颜色状态。
+- reduced motion 只关闭工作台非必要过渡；用户主动播放或录制的场景仍按工程参数运行。
+- WebM MIME 或编码资源不满足时，必须在录制开始前或失败点明确说明并保留工程/预览；不能生成看似成功但无音轨、尺寸错误或无法回放的文件。
+
 ## Approval Record
 
 Analyzer 目标和阈值由 `project-owner` 于 2026-07-24 批准，并已由 Analyzer-only readiness 收口。`project-owner` 于 2026-08-26 先批准 Editor E0 产品意图，随后明确回复：“我批准 Editor E0 系统设计、接口契约、风险与 ADR；同意进入 Editor E1–E6 execution planning。”Editor 指标与架构据此生效；delivery 文档仍须另行定义 fixture、步骤和容差，quality 阶段只在成功、失败、边界与异常证据齐全后判断 Editor readiness。
@@ -93,3 +126,5 @@ Analyzer 目标和阈值由 `project-owner` 于 2026-07-24 批准，并已由 An
 2026-08-31，owner 批准 M13 的 21 卡可发现性、最多四项 FIFO、按需挂载和资源门禁；历史 M7–M12 指标保留，但涉及四 slot/默认活动卡的断言不再代表 M13 候选。
 
 2026-09-01，owner 批准 M14 的完整顺序、输入等价、全局恢复、FIFO 隔离和资源指标。M14 clean canonical 19/19 通过，unit 24/24、integration 19/19、Chrome/Edge 各 3/3 且排序 Worker analyze request 保持 `1 → 1`；指标据 owner 完成后续授权复核为达到，M13 canonical 保留为历史。
+
+2026-09-02，owner 要求把 Visualizer 的实时预览、两个内置场景、0–4 分析特征绑定、Editor 事件绑定、工程 round-trip 和实时 WebM 路线写入产品指标。本节仍为 `in-review`，只有 owner 明确批准后才能用于开放 system design；这里列出的观测方法不是已执行证据。

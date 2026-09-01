@@ -1,28 +1,28 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-09-01
+last_reviewed: 2026-09-02
 upstream_docs:
   - "AGENTS.md"
-next_action: "M14 已关闭并恢复 Analyzer readiness；PROD-015 解决前不进入生产上线"
+next_action: "复核 Visualizer V0 in-review 产品意图；批准前不进入其 system design，PROD-015 继续阻断上线"
 ---
 
 # Repository Context Index
 
 ## Purpose
 
-AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端。Editor E1–E7 已获批准并关闭。Analyzer M14 已交付 21 张折叠卡的全局自定义顺序、可访问排序和 V1 顺序持久化，最多四项 FIFO 保持独立。M13 17/17 canonical 保留为历史，M14 19/19 canonical 是当前 Analyzer 候选。
+AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端。Editor E1–E7 已获批准并关闭。Analyzer M14 已交付 21 张折叠卡的全局自定义顺序、可访问排序和 V1 顺序持久化，最多四项 FIFO 保持独立。M13 17/17 canonical 保留为历史，M14 19/19 canonical 是当前 Analyzer 候选。Visualizer V0 已进入产品意图评审，当前仍无获批架构或实现。
 
 本目录维护仓库事实、边界和工作记忆；生命周期路由与通用方法由 [AGENTS.md](../../AGENTS.md) 负责。当前代码事实与目标架构必须区分：现状见 [system map](system-map.md)，批准的目标见 [system design](../architecture/system-design.md)。
 
 ## Current Stage
 
 - Repository context：入口、决策注册表、system map、glossary 与 working agreements 均已批准。
-- Product intent：problem brief、scope、success metrics 和 open questions 中的 Editor E0 点/范围事件范围已于 2026-08-26 获 owner 批准。
-- System design：ADR-0012/0013 已批准并实现；R-028–R-033 已由 M13/M14 canonical 缓解。
+- Product intent：Analyzer/Editor 历史范围已批准；四份共享产品文档新增 Visualizer V0 草案后为 `in-review`，PROD-014V 等待 owner 审批。
+- System design：Analyzer/Editor 历史设计仍已批准并实现；Visualizer system design 尚未开放。
 - Execution planning：M1–M14 与 Editor E0-D/E1–E7 均为 `Complete`。
 - Quality and evals：M3–M13 与 Editor E1–E7 evidence 保留；M14 19/19 evidence 已批准。
-- Implementation：Editor E7 与 Analyzer M14 已完成。
+- Implementation：Editor E7 与 Analyzer M14 已完成；Visualizer 仍只有 `/comingsoon` 入口，不得从试验组件推断已实现能力。
 - Readiness、release、retrospective：Analyzer M14 为 `Ready with waivers`；PROD-015 仍阻断上线，Editor readiness 独立。
 
 ## Key Documents
@@ -34,10 +34,10 @@ AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端。Editor E1–
 | [glossary.md](glossary.md) | 当前项目词汇与代码含义 | project-owner / approved | 术语、状态或类型含义变化 |
 | [decision-registry.md](decision-registry.md) | 产品、架构和交付决策入口 | project-owner / approved | 形成、撤销或替代重要决策 |
 | [working-agreements.md](working-agreements.md) | 本地开发、验证和 Git 约定 | project-owner / approved | 工具链或验证能力变化 |
-| [problem-brief.md](../product/problem-brief.md) | Analyzer 历史意图与已批准 Editor E0 用户、问题和结果 | project-owner / approved | 目标用户或核心问题变化 |
-| [scope.md](../product/scope.md) | Analyzer 历史边界与已批准 Editor E0 点/范围事件、E1–E6 和非目标 | project-owner / approved | 能力、数据或兼容范围变化 |
-| [success-metrics.md](../product/success-metrics.md) | Analyzer 历史指标与已批准 Editor E0 任务、正确性、响应和恢复指标 | project-owner / approved | 阈值、样本或观测方法变化 |
-| [open-questions.md](../product/open-questions.md) | 非当前门禁问题与已关闭产品决策 | project-owner / approved | 新能力进入范围或 release 开始 |
+| [problem-brief.md](../product/problem-brief.md) | Analyzer/Editor 历史意图与 Visualizer V0 用户、问题和结果草案 | project-owner / in-review | Visualizer 目标用户或核心问题审批/变化 |
+| [scope.md](../product/scope.md) | Analyzer/Editor 历史边界与 Visualizer 单场景、0–4 特征、两个模板和 WebM 草案 | project-owner / in-review | Visualizer 能力、数据或兼容范围审批/变化 |
+| [success-metrics.md](../product/success-metrics.md) | 历史指标与 Visualizer 绑定、场景、同步、录制和资源目标草案 | project-owner / in-review | Visualizer 阈值、样本或观测方法审批/变化 |
+| [open-questions.md](../product/open-questions.md) | PROD-014V 评审、PROD-022 四特征未来复核及其他开放问题 | project-owner / in-review | PROD-014V 审批、新能力进入范围或 release 开始 |
 | [system-design.md](../architecture/system-design.md) | Analyzer M14 全卡/FIFO/排序/V1 adapter 与 Editor runtime/project/timeline/overlay 设计 | project-owner / approved | 产品意图或核心系统边界变化 |
 | [interface-contracts.md](../architecture/interface-contracts.md) | Analyzer 历史契约与 Editor lease、Worker、codec、draft、geometry 接口 | project-owner / approved | 消息、schema、身份或失败语义变化 |
 | [Editor Project V1](../architecture/editor/project-format-v1.md) | JSON schema、validator、歌曲 identity、codec 与独立 draft DB | project-owner / approved | 工程字段、时间、格式、身份或草稿策略变化 |
@@ -114,7 +114,7 @@ AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端。Editor E1–
 
 ## Lifecycle Entry Points
 
-- Product intent：[problem brief](../product/problem-brief.md)、[scope](../product/scope.md)、[success metrics](../product/success-metrics.md) 均已批准 Editor E0
+- Product intent：[problem brief](../product/problem-brief.md)、[scope](../product/scope.md)、[success metrics](../product/success-metrics.md) 保留 Analyzer/Editor 已批准历史，并新增 `in-review` Visualizer V0；当前最早门禁是 PROD-014V 审批
 - System design：[system design](../architecture/system-design.md) 与 Editor 子契约已获批准
 - Delivery planning：Analyzer M14 与 Editor E1–E7 delivery 均已完成
 - Quality design：[eval plan](../quality/eval-plan.md) 已覆盖 M3–M14 并获批准
@@ -132,6 +132,8 @@ AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端。Editor E1–
 
 2026-09-01，M14 implementation commit `0e991307d9045a1ec84ddaae0515612240894a92` 与 clean canonical `M14-2026-09-01T02-36-49-995Z-0e991307` 19/19 通过；evidence/readiness 和 R-031–R-033 已复核，M14 关闭且未推送远端。
 
+2026-09-02，owner 要求把 Visualizer 的单场景制作台、两个内置模板、最多四个唯一 Analyzer 特征、Editor 事件绑定和实时 WebM 路线转写为产品意图。本次只形成 `in-review` 的 PROD-014V 草案；Analyzer/Editor 历史文档与 readiness 身份不变，Visualizer system design 等待单独批准。
+
 ## Current Known Gaps
 
 - M8 已实现四槽最多四张、累计 16 项、通用 scalar renderer、项目 Flux、零能量 0 与 UI hardening；clean canonical 与 Windows Chrome/owner 审批均已完成。
@@ -143,6 +145,7 @@ AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端。Editor E1–
 - Analyzer M12/M13 clean canonical 保留为历史；M14 clean canonical `M14-2026-09-01T02-36-49-995Z-0e991307` 在 commit `0e991307d9045a1ec84ddaae0515612240894a92` 上 19/19 通过，R-031/R-032/R-033 已缓解，readiness 恢复。
 - Editor E1–E6 已实现并获批准；E6 双浏览器、三格式、10,000 事件、资源与无障碍 clean canonical 为 40/40。
 - Editor E1–E7 均为 `Complete`；M14 不重开 Editor delivery 或改变 overlay/lease/runtime 边界。
+- Visualizer 当前仍由 `/comingsoon` 占位；V0 产品草案选择当前本地歌曲、单场景、固定 16:9、两个内置模板、最多四个唯一 Analyzer 特征和后置实时 WebM。批准前没有 Visualizer architecture、delivery、quality 或实现授权。
 - E1 clean canonical `E1-2026-08-26T15-24-21-043Z-792b424f` 在 clean commit `792b424fbab8e3621ad24d8c9add47d1c9bffcb4` 上 18/18 通过，summary SHA-256 为 `db51ba98b757ccd524d298243c6118eb24fad60101a74f20a5ff98478a5d5bc6`，并于 2026-08-26 获 owner 批准。
 - E2 clean canonical `E2-2026-08-26T16-42-47-634Z-9fc5c0a8` 在 clean commit `9fc5c0a81fcf90abfbc665412277147cd958200f` 上 22/22 通过，summary SHA-256 为 `4465c20343af9092601296b86a229200579f648ffa90641411b88f9861ba8660`；2026-08-27 owner 批准后 E2 为 `Complete`，E3 已开放。
 - E3 clean canonical `E3-2026-08-27T02-53-58-176Z-c670ddf5` 在 clean commit `c670ddf5494269f5a56abd20c3c5653ee5b27cef` 上 26/26 通过，summary SHA-256 为 `2a0a46b9a0e9b459ee17b11919451f074205fda58801d84a1274dbd12f5cfe4c`；2026-08-27 owner 批准后 E3 为 `Complete`，E4 已开放。
