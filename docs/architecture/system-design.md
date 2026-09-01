@@ -1,13 +1,13 @@
 ---
-status: approved
+status: in-review
 owner: "project-owner"
-last_reviewed: 2026-09-01
+last_reviewed: 2026-09-02
 upstream_docs:
   - "docs/product/problem-brief.md"
   - "docs/product/scope.md"
   - "docs/product/success-metrics.md"
   - "docs/product/open-questions.md"
-next_action: "ADR-0013 已由 M14 canonical 验证；架构或交互边界变化时复核"
+next_action: "复核 Visualizer V0 runtime、工程/绑定、确定性场景与 WebM 录制设计；批准前不进入 delivery"
 ---
 
 # System Design
@@ -17,6 +17,8 @@ next_action: "ADR-0013 已由 M14 canonical 验证；架构或交互边界变化
 AudioNotSurfYet 采用一个实时 `AudioEngine`、一个 MainLayout-owned `AudioSessionService`、一个可序列化 `audioSessionStore`、一个 `AnalysisCoordinator` 和一个全曲分析 Worker。Analyzer 通过类型化特征注册表稳定展示 21 张折叠卡，并用最多四项 FIFO 活动队列驱动共享时间视窗中的 Canvas 2D renderer；DOM 承担文本、交互和无障碍语义。M7–M12 的四 slot 模型保留为历史基线，M13 由 ADR-0012 固定全卡/FIFO，M14 由 ADR-0013 增加独立的全局 feature 顺序。
 
 已批准的 Editor 扩展把 E0 产品意图接入同一运行时：Editor 使用 route-scoped playback/analysis lease、版本化本地 JSON、独立单草稿 IndexedDB、tempo 派生网格、点/范围事件和单特征半透明叠加层。它不创建第二个 AudioContext、播放时钟、Worker 或网络数据路径。
+
+Visualizer V0 架构草案在该历史基线上增加第三个 route consumer：使用 `pause-at-end` 播放 lease、0–4 项去重分析 lease、版本化单草稿工程、两个确定性场景和单一 WebGL renderer，并从既有 AudioEngine 的 pre-Gain 音频分支实时录制 WebM。该段设计仍为 `in-review`，不得被表述为当前 `/comingsoon` 已实现。
 
 ## 2. Goals and Non-Goals
 
@@ -30,6 +32,8 @@ AudioNotSurfYet 采用一个实时 `AudioEngine`、一个 MainLayout-owned `Audi
 - 让黄金正确性、100ms 游标偏差、主线程响应和资源清理可以自动验证。
 - 让 Editor 在同一播放和分析事实源上完成单曲循环、tempo、点/范围标注、工程 round-trip 与草稿保护。
 - 让波形、tempo 网格、事件和分析叠加层共享一个时间几何，目标误差不超过 1 CSS px。
+- 让 Visualizer 以同一 AudioContext 时钟把最多四项分析特征和同歌 Editor 快照解析成可重复 seek 的单场景画面，并保存严格本地工程。
+- 让支持能力满足预设时，以同一画布和原歌曲音量实时录制 720p/1080p、30/60fps WebM，而不复制播放引擎。
 
 ### Non-Goals
 
@@ -40,6 +44,7 @@ AudioNotSurfYet 采用一个实时 `AudioEngine`、一个 MainLayout-owned `Audi
 - 不实现按歌曲顺序、多选、两卡交换、实时位移动画、第三方拖动依赖或移动端产品支持。
 - 不在本阶段决定发布平台、监控和回滚。
 - 不在 E0 架构阶段实现 Editor、安装 BPM/文件格式依赖或创建 delivery/quality 证据。
+- 不允许 Visualizer 导入可执行模板、叠加多个场景、使用第五个唯一分析特征、创建第二个 AudioEngine/Worker，或静默降低录制分辨率与帧率。
 
 ## 3. Constraints and Inputs
 
@@ -49,6 +54,7 @@ AudioNotSurfYet 采用一个实时 `AudioEngine`、一个 MainLayout-owned `Audi
 - 活动特征：0–4 个，feature ID 唯一。
 - 展示帧率：Worker 输出最多 30Hz 的显示序列；精确游标值按需提取。
 - 持久化：只保留最近一次会话、全部队列句柄、当前 Blob 和当前分析缓存。
+- Visualizer：当前本地歌曲、单场景、固定 16:9、一个最新草稿；分析绑定去重后 0–4 项，Editor 直连数据在进入或显式重新载入时形成快照。
 
 ## 4. Target Components
 
@@ -394,3 +400,42 @@ M6 只在 `import.meta.env.DEV` 安装无 UI bridge，提供活动特征、cance
 - `EditorSessionSnapshot.overlayOpen` 是当前内存事实；现有 Editor `preferences` store 按歌曲 content hash 保存 visibility。该偏好不进入 JSON V1，导入工程不覆盖它，数据库版本不变。
 - 全视口 Canvas 只在底层标记时间列的屏幕横向范围内绘制。纵向文档滚动不改变图形窗口坐标；窄屏时间列横向滚动只更新裁剪和横向几何，任意共享时间锚点误差仍不得超过 1 CSS px。
 - `topRatio`/`heightRatio` 改为 viewport-relative，三个手柄仍按 1%/Shift 5% 调整。visibility 持久化失败只发布 `not-persisted`，不得损坏工程、草稿、播放或标记。
+
+## 20. Visualizer V0 Target Architecture（in-review）
+
+### Route and runtime ownership
+
+- 目标路由为 `/visualizer/:trackId?`。Header 使用当前歌曲进入；未知、不可恢复或内容身份不匹配的目标进入明确空状态，不静默选择队列中的其他歌曲。
+- `AudioSessionService` 把 Editor 专用 lease 泛化为 `RoutePlaybackLease`：Editor 使用 `repeat-one`，Visualizer 使用 `pause-at-end`。只有当前 token 能释放 ended policy；有效 route lease 隐藏 MusicBar，空状态保留 MusicBar。
+- `AnalysisCoordinator` 的 consumer 联合扩展为 `analyzer | editor | visualizer`。Visualizer 先对所有绑定 FeatureId 去重，只有 0–4 项合法；第五项在调用 Coordinator 前拒绝。分析值从 compact `AnalysisSeries` 按 AudioContext 绝对时间采样，不增加 exact-cursor 轮询或第二个 Worker。
+- V1 实现必须原子迁移 Editor 到通用 lease，不保留长期 `acquireEditorPlayback()` 兼容 adapter。迁移不得改变 Editor repeat-one、刷新暂停或离页恢复 queue-next 的已批准行为。
+
+### Project, draft and Editor snapshot
+
+- `VisualizerProjectV1` 使用独立 strict JSON envelope，绑定歌曲 SHA-256、16:9 输出预设、单一模板 ID/version、确定性 seed、完整参数绑定和可选同歌 `EditorProjectV1` 快照。工程不保存 File、PCM、Analyzer 数组、cache、renderer 或录制 Blob。
+- 独立 `audionotsurfyet-visualizer` IndexedDB V1 只保存 `draft/latest`。同歌恢复；异歌进入必须导出旧工程、覆盖或取消。内存先更新，quota/abort 只发布 `not-persisted`。
+- 直接 Editor 数据只在进入 Visualizer 或用户显式“重新载入 Editor 数据”时复制并校验，不监听 Editor 数据库。导入的 Editor JSON 也必须与当前歌曲 hash/时长一致。工程导出保存已验证快照，因此后续 Editor 编辑不会静默改变 Visualizer 结果。
+- strict validator 在原子替换前拒绝未知字段/模板/参数、重复参数、歌曲不匹配、无效 FeatureId/lane/class 和超过四个唯一分析特征。详见 [Visualizer Project Format V1](visualizer/project-format-v1.md)。
+
+### Binding and deterministic scenes
+
+- 数据源固定为 constant、analysis 和 editor-event。Analysis 向量投影只允许 schema 声明的 full/bin/band/mean/max/peak；Editor whole-lane 采用布尔 OR/max 聚合，point 形成脉冲，range 在半开 `[start,end)` 内形成 gate。
+- 数值变换顺序固定为输入规范化、clamp、invert、确定性 attack/release、输出映射。平滑不能依赖上一 RAF；resolver 以歌曲 0 秒为起点建立可重放状态，使同一工程在 seek、刷新、从头播放和录制时对同一绝对时间输出一致。full-vector V1 不允许非零平滑。
+- `SceneRegistry` 只注册 `orthogonal-lines@1` 与 `cube-swarm@1`，并穷尽声明参数类型、默认值、范围、可绑定来源和 renderer factory。推荐 Editor lane 绑定保持未绑定并提示用户选择，不按名称或顺序猜测“主要音色”或“drum”。
+- `VisualizerRendererHost` 独占一个 16:9 Canvas、一个 Three.js `WebGLRenderer` 和一个可取消 RAF；暂停时按需绘制，播放/录制时只启用同一个 RAF。scene 只拥有 scene/camera/geometry/material 并必须对称 dispose。
+- 工程 seed 与绝对时间共同决定粒子初始位置、上升和轨道相位；不得累计 RAF delta。WebGL context lost 时保留工程/播放并重建 renderer；若发生在录制中则终止并丢弃未完成文件。详见 [Binding and Scene Contracts](visualizer/binding-and-scene-contracts.md)。
+
+### Real-time WebM recording
+
+- AudioEngine 提供单一 recording tap：从 `AnalyserNode` 到页面 `GainNode` 之前分支到 `MediaStreamAudioDestinationNode`。因此导出使用原歌曲音量，页面 mute/volume 不改变文件；任意时刻最多一个 tap holder。
+- recorder 合并 `canvas.captureStream(selectedFps)` 和 audio tap，MIME 只按 VP9+Opus → VP8+Opus 回退。选定的 720p/1080p 与 30/60fps 不支持时明确失败，不静默降低预设。
+- 录制状态为 `idle → preparing → recording → finalizing → ready/error`。preflight 要求所有活动分析、Editor 快照和 renderer 已就绪；随后暂停、seek 0、绘制 0 秒、启动 MediaRecorder 再播放，歌曲自然结束自动停止。
+- 录制期间锁定 seek、模板、绑定、Editor reload 与输出预设。完成 Blob 只保存在内存并通过原生保存选择器写出；取消/离页丢弃未完成录制，保存取消可重试。详见 [Recording Contract](visualizer/recording-contract.md)。
+
+### Failure boundaries and rejected alternatives
+
+- 单个 analysis binding 未就绪时以中性 0 显示进度，失败只隔离到该绑定并可重试；录制 preflight 不允许以中性值伪装完整结果。
+- 旧 generation、旧 route token、旧 template 或旧 binding result 一律不得更新当前项目或场景。任何工程/草稿/Editor 快照导入失败都保留原内存和 durable draft。
+- 拒绝第二 AudioEngine/Worker、实时监听 Editor draft、可执行模板、多草稿工程库、依赖 RAF delta 的运动、静默录制预设降级。主要权衡见 [ADR-0014](adrs/0014-visualizer-runtime-leases.md) 至 [ADR-0017](adrs/0017-realtime-webm-recording.md)。
+
+Visualizer 架构尚待 `project-owner` 审批。批准后只开放 V0-D execution/acceptance/test/eval planning，不直接开放 V1 实现。

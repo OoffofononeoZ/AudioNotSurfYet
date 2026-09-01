@@ -4,7 +4,7 @@ owner: "project-owner"
 last_reviewed: 2026-09-02
 upstream_docs:
   - "AGENTS.md"
-next_action: "Visualizer V0 产品意图已批准；当前进入 system design，delivery/实现仍未开放，PROD-015 继续阻断上线"
+next_action: "复核 Visualizer V0 system design、接口、R-034–R-041 与 ADR-0014–0017；批准前不进入 delivery"
 ---
 
 # Repository Context Index
@@ -19,7 +19,7 @@ AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端。Editor E1–
 
 - Repository context：入口、决策注册表、system map、glossary 与 working agreements 均已批准。
 - Product intent：Analyzer/Editor 历史范围与 Visualizer V0 均已批准；PROD-014V 已关闭，PROD-022 保留为非阻断未来问题。
-- System design：Analyzer/Editor 历史设计仍已批准并实现；Visualizer system design 已开放，正在形成架构草案。
+- System design：Analyzer/Editor 历史设计仍是已批准/实现基线；Visualizer system design、接口、风险和 ADR-0014–0017 已形成 `in-review` 草案。
 - Execution planning：M1–M14 与 Editor E0-D/E1–E7 均为 `Complete`。
 - Quality and evals：M3–M13 与 Editor E1–E7 evidence 保留；M14 19/19 evidence 已批准。
 - Implementation：Editor E7 与 Analyzer M14 已完成；Visualizer 仍只有 `/comingsoon` 入口，不得从试验组件推断已实现能力。
@@ -38,11 +38,14 @@ AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端。Editor E1–
 | [scope.md](../product/scope.md) | Analyzer/Editor 历史边界与获批 Visualizer 单场景、0–4 特征、两个模板和 WebM 路线 | project-owner / approved | Visualizer 能力、数据或兼容范围变化 |
 | [success-metrics.md](../product/success-metrics.md) | 历史指标与获批 Visualizer 绑定、场景、同步、录制和资源目标 | project-owner / approved | Visualizer 阈值、样本或观测方法变化 |
 | [open-questions.md](../product/open-questions.md) | PROD-014V 已关闭、PROD-022 四特征未来复核及其他开放问题 | project-owner / approved | 新能力进入范围或 release 开始 |
-| [system-design.md](../architecture/system-design.md) | Analyzer M14 全卡/FIFO/排序/V1 adapter 与 Editor runtime/project/timeline/overlay 设计 | project-owner / approved | 产品意图或核心系统边界变化 |
-| [interface-contracts.md](../architecture/interface-contracts.md) | Analyzer 历史契约与 Editor lease、Worker、codec、draft、geometry 接口 | project-owner / approved | 消息、schema、身份或失败语义变化 |
+| [system-design.md](../architecture/system-design.md) | Analyzer/Editor 历史基线与 Visualizer runtime/project/scene/recording 目标架构 | project-owner / in-review | Visualizer 架构审批或核心系统边界变化 |
+| [interface-contracts.md](../architecture/interface-contracts.md) | Analyzer/Editor 历史契约与 Visualizer route lease、project/binding、scene、recording 接口 | project-owner / in-review | Visualizer 消息、schema、身份或失败语义变化 |
+| [Visualizer Project V1](../architecture/visualizer/project-format-v1.md) | strict JSON、歌曲 identity、Editor snapshot、单草稿与原子导入 | project-owner / in-review | Visualizer schema、草稿数量、快照或兼容策略变化 |
+| [Visualizer binding and scenes](../architecture/visualizer/binding-and-scene-contracts.md) | 受控 binding、四特征 planner、绝对时间确定性、双模板与单 RendererHost | project-owner / in-review | source/projection、特征上限、模板或 renderer ownership 变化 |
+| [Visualizer recording](../architecture/visualizer/recording-contract.md) | pre-Gain audio tap、严格预设、MediaRecorder 状态机与 WebM 生命周期 | project-owner / in-review | 录制音量、codec、preset、状态机或保存边界变化 |
 | [Editor Project V1](../architecture/editor/project-format-v1.md) | JSON schema、validator、歌曲 identity、codec 与独立 draft DB | project-owner / approved | 工程字段、时间、格式、身份或草稿策略变化 |
 | [Editor interactions](../architecture/editor/interaction-contracts.md) | tempo/grid、pointer/keyboard、point/range 和 overlay 状态机 | project-owner / approved | 手势、吸附、重叠、DOM/Canvas 或键盘规则变化 |
-| [risk-register.md](../architecture/risk-register.md) | Analyzer R-001–R-021/R-028–R-033 与 Editor R-022–R-027 | project-owner / approved | 每个里程碑及新高影响风险 |
+| [risk-register.md](../architecture/risk-register.md) | Analyzer/Editor 历史风险与 Visualizer R-034–R-041 | project-owner / in-review | Visualizer 架构审批、每个里程碑及新高影响风险 |
 | [execution-plan.md](../delivery/execution-plan.md) | Q0、M1–M14 实施顺序和门禁 | project-owner / approved | 范围、架构或任务依赖变化 |
 | [acceptance-criteria.md](../delivery/acceptance-criteria.md) | 可测量验收与阈值 | project-owner / approved | 成功指标、容差或支持矩阵变化 |
 | [test-strategy.md](../delivery/test-strategy.md) | 测试层级、fixture 和证据策略 | project-owner / approved | 工具、fixture 或验证能力变化 |
@@ -94,6 +97,10 @@ AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端。Editor E1–
 - [ADR-0011](../architecture/adrs/0011-editor-fullscreen-overlay.md)：Editor 窗口级全屏灰色浮层、复合入口、按歌曲 visibility 与 Buffer-only 关闭状态。
 - [ADR-0012](../architecture/adrs/0012-analyzer-all-cards-fifo-active-analysis.md)：Analyzer 21 张稳定折叠卡、最多四项 FIFO 与 V1 carrier。
 - [ADR-0013](../architecture/adrs/0013-analyzer-accessible-card-reordering.md)：Analyzer 自定义顺序、可访问排序与 V1 optional field。
+- [ADR-0014](../architecture/adrs/0014-visualizer-runtime-leases.md)：Visualizer route playback/analysis lease 与单 engine/Worker。
+- [ADR-0015](../architecture/adrs/0015-visualizer-project-and-binding-boundary.md)：strict JSON、同歌 Editor 快照、单草稿与非可执行 binding。
+- [ADR-0016](../architecture/adrs/0016-deterministic-scene-registry.md)：双模板 registry、单 RendererHost 与绝对时间确定性。
+- [ADR-0017](../architecture/adrs/0017-realtime-webm-recording.md)：pre-Gain 原音量、codec-only fallback 与严格 WebM preset。
 
 ## Repository Areas
 
@@ -105,6 +112,7 @@ AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端。Editor E1–
 | `src/audio/` | 单一 AudioEngine 与 MainLayout-owned AudioSessionService；文件恢复及 E1 tokenized repeat-one lease | ADR-0001/0003/0006；E1 |
 | `src/analysis/` | 21 项分析平台、M14 feature-order 纯模型及 Analyzer/Editor 单一 active consumer lease；Editor 复用 Buffer retained PCM 与 tempo request | ADR-0002/0004/0005/0006/0013；M14/E1/E2 |
 | `src/editor/` | JSON V1 strict codec、原生文件 gateway、独立单草稿、route controller、timeline/tempo、point 命令与 overlay bounds/feature 契约 | ADR-0007–0009；E1–E4 |
+| `src/visualizer/`（planned） | 目标 route controller、strict project/draft、binding resolver、scene registry/host 与 recorder；当前目录尚不存在 | ADR-0014–0017；Visualizer delivery 待批准 |
 | `src/persistence/` | 原生 IndexedDB V1 SessionRepository 与 runtime validator | ADR-0003；M5 |
 | `src/stores/` | 持久化 config 与可序列化 audioSessionStore/恢复/analysis 状态 | ADR-0001/0002/0003 |
 | `src/utils/` | 事件总线、M12 masonry placement 与其他纯工具函数 | 实现时按实际边界维护 |
@@ -115,7 +123,7 @@ AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端。Editor E1–
 ## Lifecycle Entry Points
 
 - Product intent：[problem brief](../product/problem-brief.md)、[scope](../product/scope.md)、[success metrics](../product/success-metrics.md) 中的 Visualizer V0 已于 2026-09-02 获批
-- System design：[system design](../architecture/system-design.md) 与 Editor 子契约是历史批准基线；Visualizer 架构设计为当前阶段
+- System design：[system design](../architecture/system-design.md)、[interface contracts](../architecture/interface-contracts.md)、Visualizer 三份子契约与 ADR-0014–0017 当前为 `in-review`
 - Delivery planning：Analyzer M14 与 Editor E1–E7 delivery 均已完成
 - Quality design：[eval plan](../quality/eval-plan.md) 已覆盖 M3–M14 并获批准
 - Quality evidence：[evidence index](../quality/evidence-index.md) 的 M3–M13 为历史，M14 当前 record 已批准
@@ -145,7 +153,7 @@ AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端。Editor E1–
 - Analyzer M12/M13 clean canonical 保留为历史；M14 clean canonical `M14-2026-09-01T02-36-49-995Z-0e991307` 在 commit `0e991307d9045a1ec84ddaae0515612240894a92` 上 19/19 通过，R-031/R-032/R-033 已缓解，readiness 恢复。
 - Editor E1–E6 已实现并获批准；E6 双浏览器、三格式、10,000 事件、资源与无障碍 clean canonical 为 40/40。
 - Editor E1–E7 均为 `Complete`；M14 不重开 Editor delivery 或改变 overlay/lease/runtime 边界。
-- Visualizer 当前仍由 `/comingsoon` 占位；V0 产品意图已批准当前本地歌曲、单场景、固定 16:9、两个内置模板、最多四个唯一 Analyzer 特征和后置实时 WebM。当前只有 system design 授权，没有 delivery、quality 或实现授权。
+- Visualizer 当前仍由 `/comingsoon` 占位；V0 产品意图已批准，system design 已形成 `in-review` 草案：通用 route lease、strict JSON/单草稿、同歌 Editor 快照、绝对时间双模板与 pre-Gain WebM。当前没有 delivery、quality 或实现授权。
 - E1 clean canonical `E1-2026-08-26T15-24-21-043Z-792b424f` 在 clean commit `792b424fbab8e3621ad24d8c9add47d1c9bffcb4` 上 18/18 通过，summary SHA-256 为 `db51ba98b757ccd524d298243c6118eb24fad60101a74f20a5ff98478a5d5bc6`，并于 2026-08-26 获 owner 批准。
 - E2 clean canonical `E2-2026-08-26T16-42-47-634Z-9fc5c0a8` 在 clean commit `9fc5c0a81fcf90abfbc665412277147cd958200f` 上 22/22 通过，summary SHA-256 为 `4465c20343af9092601296b86a229200579f648ffa90641411b88f9861ba8660`；2026-08-27 owner 批准后 E2 为 `Complete`，E3 已开放。
 - E3 clean canonical `E3-2026-08-27T02-53-58-176Z-c670ddf5` 在 clean commit `c670ddf5494269f5a56abd20c3c5653ee5b27cef` 上 26/26 通过，summary SHA-256 为 `2a0a46b9a0e9b459ee17b11919451f074205fda58801d84a1274dbd12f5cfe4c`；2026-08-27 owner 批准后 E3 为 `Complete`，E4 已开放。
