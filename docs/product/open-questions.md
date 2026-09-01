@@ -6,7 +6,7 @@ upstream_docs:
   - "docs/product/problem-brief.md"
   - "docs/product/scope.md"
   - "docs/product/success-metrics.md"
-next_action: "M13 已无阻断产品问题；PROD-015 继续阻断正式上线，M14 排序等待独立批准"
+next_action: "PROD-021 已关闭并开放 M14；PROD-015 继续阻断正式上线"
 ---
 
 # Open Questions
@@ -22,7 +22,6 @@ next_action: "M13 已无阻断产品问题；PROD-015 继续阻断正式上线�
 | PROD-017 | Editor 何时需要 JSON 之外的工程格式？ | 首版选择器只展示已注册的 JSON；当前没有第二种格式的用户任务或交换对象 | codec 注册、导入导出 UI、兼容与测试矩阵 | 否 | project-owner | 出现明确的外部工具交换格式或用户任务时 |
 | PROD-018 | 内部 BPM 估计不足时是否引入第三方依赖？ | owner 要求安装前先审批；目前尚无内部算法及准确性证据 | 包体、许可、精度、Worker 和 fixture | 否；E2 先实现并评估内部估计 | project-owner | E2 golden 证明内部估计达不到批准阈值时 |
 | PROD-019 | 是否增加同类范围重叠、自动合并、裁剪或自由时间精度？ | 首版已选择同类不重叠、自适应网格和无自动合并；更复杂语义尚无任务证据 | RangeEvent 数据语义、编辑状态机和兼容性 | 否 | project-owner | 用户提出具体复合效果或非节拍事件任务时 |
-| PROD-021 | M14 是否实现卡片拖动排序及顺序持久化？ | M13 只要求固定 `FEATURE_IDS` 顺序；拖动需补充鼠标、触控、键盘与读屏语义 | DOM 顺序、持久化 schema、无障碍和瀑布流交互 | 否；M13 明确不实现 | project-owner | owner 明确开始 M14 时 |
 
 ## Closed in Prior Reviews
 
@@ -41,6 +40,7 @@ next_action: "M13 已无阻断产品问题；PROD-015 继续阻断正式上线�
 | PROD-011 | 当前运行环境 | 静态 SPA 运行在 HTTPS 或 localhost；正式托管延后到 release 阶段 |
 | PROD-012 | Analyzer 核心任务 | 学习和比较；最终覆盖 21 项，首批 RMS、Amplitude Spectrum、Chroma |
 | PROD-012M13 | Analyzer 卡片与活动模型 | 21 张固定顺序折叠卡；最多四项 FIFO 活动分析；新工作区默认空队列；V1 carrier 兼容 |
+| PROD-021 | M14 卡片排序 | 2026-09-01 批准前后插入、工作区全局顺序、鼠标/touch/点击动作/键盘、独立读屏播报、恢复默认和 V1 可选字段；不改变 FIFO |
 
 ## Closed in Editor E0 Review
 
@@ -51,4 +51,4 @@ next_action: "M13 已无阻断产品问题；PROD-015 继续阻断正式上线�
 
 ## Gate State
 
-M13 产品问题已关闭并获 owner 批准；PROD-021 只登记 M14 后续能力，不阻断 M13。M12 Analyzer readiness 保留为历史候选，当前 readiness 已由 M13 canonical 恢复；PROD-015 继续阻断正式上线。
+PROD-021 已由 owner 的完整实施指令关闭，M14 进入实现与 evidence 阶段。M13 readiness 保留为历史候选，M14 canonical 前当前 readiness 为 `in-review`；PROD-015 继续阻断正式上线。

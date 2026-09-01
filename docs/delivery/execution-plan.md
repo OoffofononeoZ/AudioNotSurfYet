@@ -9,7 +9,7 @@ upstream_docs:
   - "docs/architecture/system-design.md"
   - "docs/architecture/interface-contracts.md"
   - "docs/architecture/risk-register.md"
-next_action: "M13 已完成；M14 排序或 PROD-015 发布准备需 owner 另行开放"
+next_action: "执行已批准的 M14 顺序模型、可访问交互、V1 持久化与双浏览器证据"
 ---
 
 # Execution Plan
@@ -445,6 +445,27 @@ Verification:
 
 Exit：专项、typecheck、build、docs、diff check 与完整 provisional/canonical 通过；evidence/readiness 复核后 M13 才能 Complete。默认只创建本地提交，不推送。
 
+### M14 — Accessible card reordering
+
+Goal：让 21 张折叠/展开卡按用户全局顺序插入重排并跨刷新恢复，同时保持 FIFO、Worker、Canvas、M12 geometry 和无障碍输入等价。
+
+Implementation:
+
+- Slice 0：关闭 PROD-021；批准 ADR-0013、R-031–R-033、AC-M1401–AC-M1408 和 quality contract，并把 M13 readiness 标为历史候选。
+- Slice 1：增加完整 `featureOrder` reducer、drop hit-test、V1 可选字段 validator/default adapter，以及 store/service immutable snapshot/revision 集成。
+- Slice 2：MeydaCard 增加 header action slot；Analyzer 增加三横 handle、popup actions、reset、独立 live region、keyboard shortcuts 和 keyed DOM/masonry order。
+- Slice 3：实现 6px pointer drag、capture、ghost、before/after marker、48px/16px-frame auto-scroll 与全部 cancel cleanup；drop 才提交且无位移动画。
+- Slice 4：更新 M13 default-order 断言、geometry helper，增加 M14 unit/integration、Chrome/Edge 和 runner；排序不得调用 Coordinator。
+
+Verification:
+
+- Unit：permutation、insert/action/reset、first/last/no-op、单/双列 rect hit-test、间隙/平局/容器外。
+- Integration：旧 V1 默认、新 order round-trip、非法拒绝、queue/viewport/order 交错、quota/abort/revision，以及 Coordinator generation/cache/exact 保持。
+- Chrome/Edge：鼠标、touch pointer、点击动作、键盘快捷键、live announcement、长距离 auto-scroll、cancel、reload/track/reset；展开 details/Canvas/focus/FIFO 保持。
+- 390/1024 一列、1280/1920 两列、18px gap；20 次排序/resize/route 不累积 RAF/Observer/Canvas/Worker，不出现 console error/warn。
+
+Exit：M14 专项、M7–M13/E7 相邻回归、docs、typecheck、build、diff check、dirty provisional 与 clean canonical 全部通过；登记 evidence/readiness 并复核 R-031–R-033 后 Complete。只创建本地提交，不推送。
+
 ## 4. Cross-Cutting Ownership
 
 当前 `project-owner` 同时承担产品批准、技术决策、里程碑验收和学习任务验证。若后续分配工程/QA/release owner，更新各文档 frontmatter 和 milestone owner，但不改变已有门禁。
@@ -475,3 +496,5 @@ Exit：专项、typecheck、build、docs、diff check 与完整 provisional/cano
 2026-08-31，owner 以“PLEASE IMPLEMENT THIS PLAN”批准 M13 完整产品、架构、delivery 与 test plan，并授权在 E7 关闭后直接实施、提交、执行 canonical 与后续 evidence 复核。本轮只使用本地 Git，不推送远程。
 
 2026-09-01，M13 实现 commit `63c04005670145d83ee181d474197bce921c5300` 完成 21 卡、FIFO、懒挂载、V1 adapter 和串行 workspace save；clean canonical `M13-2026-08-31T17-44-39-680Z-63c04005` 17/17 通过，summary SHA-256 为 `25732179105b31b7bb05dfdb6626db1264567208a505a7cbf71434a4562e2afc`。evidence/readiness 与 R-028–R-030 已复核，M13 关闭；M14 未开放，远程未推送。
+
+同日，owner 以完整“PLEASE IMPLEMENT THIS PLAN”批准 M14 产品、ADR-0013、delivery、test/eval 与本地 Git/canonical/evidence 流程。M14 据此进入 `In Progress`；M13 canonical 保留为历史，PROD-015 继续独立阻断上线。

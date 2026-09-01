@@ -1,7 +1,7 @@
 <template>
     <main class="analyzer-page">
         <DotGridBg />
-        <div class="analyzer-content">
+        <div ref="analyzerContent" class="analyzer-content">
             <section class="timeline-toolbar" aria-label="共享时间轴控制">
                 <div class="toolbar-summary">
                     <div class="status-row" aria-live="polite">
@@ -60,6 +60,14 @@
                         25% →
                     </button>
                     <button
+                        type="button"
+                        data-testid="reset-feature-order"
+                        :disabled="isFeatureOrderDefault"
+                        @click="resetFeatureOrder"
+                    >
+                        恢复默认排序
+                    </button>
+                    <button
                         v-if="analysis.error?.recoverable"
                         type="button"
                         @click="retryAnalysis"
@@ -73,6 +81,15 @@
                 {{ analysis.error.message }}
             </p>
 
+            <p
+                class="visually-hidden"
+                aria-live="polite"
+                aria-atomic="true"
+                data-testid="reorder-announcement"
+            >
+                {{ reorderAnnouncement }}
+            </p>
+
             <section
                 ref="masonryRoot"
                 class="card-masonry"
@@ -82,11 +99,14 @@
                 data-testid="analyzer-masonry"
             >
                 <div
-                    v-for="featureId in FEATURE_IDS"
+                    v-for="(featureId, orderIndex) in featureOrder"
                     :key="featureId"
                     :ref="masonryItemRef(featureId)"
                     class="masonry-item"
+                    :class="masonryItemClasses(featureId)"
                     :data-slot="featureId"
+                    :data-order-index="orderIndex"
+                    :data-testid="`analyzer-card-${featureId}`"
                     :style="masonryItemStyle(featureId)"
                 >
                     <MeydaCard
@@ -101,9 +121,92 @@
                         :analysis-state="analysis.state"
                         @toggle="toggleCard(featureId)"
                         @seek="seek"
-                    />
+                    >
+                        <template #header-action>
+                            <div
+                                class="reorder-control"
+                                :data-reorder-control="featureId"
+                            >
+                                <button
+                                    :ref="reorderHandleRef(featureId)"
+                                    type="button"
+                                    class="reorder-handle"
+                                    :class="{
+                                        'is-active': dragState?.sourceId === featureId,
+                                    }"
+                                    :aria-label="`排序 ${featureLabel(featureId)}，当前位置 ${orderIndex + 1}/${featureOrder.length}`"
+                                    aria-haspopup="menu"
+                                    :aria-expanded="openOrderMenu === featureId"
+                                    :data-testid="`reorder-handle-${featureId}`"
+                                    @click.stop="handleReorderHandleClick(featureId)"
+                                    @keydown="handleReorderHandleKeydown($event, featureId)"
+                                    @pointerdown="handleDragPointerDown($event, featureId)"
+                                    @pointermove="handleDragPointerMove"
+                                    @pointerup="handleDragPointerUp"
+                                    @pointercancel="cancelDrag"
+                                    @lostpointercapture="handleLostPointerCapture"
+                                >
+                                    <span class="grip-icon" aria-hidden="true">
+                                        <span></span>
+                                        <span></span>
+                                        <span></span>
+                                    </span>
+                                </button>
+                                <div
+                                    v-if="openOrderMenu === featureId"
+                                    class="reorder-menu"
+                                    role="menu"
+                                    :aria-label="`${featureLabel(featureId)} 排序操作`"
+                                    :data-testid="`reorder-menu-${featureId}`"
+                                >
+                                    <button
+                                        type="button"
+                                        role="menuitem"
+                                        :disabled="orderIndex === 0"
+                                        @click.stop="applyOrderAction(featureId, 'up')"
+                                    >
+                                        上移
+                                    </button>
+                                    <button
+                                        type="button"
+                                        role="menuitem"
+                                        :disabled="orderIndex === featureOrder.length - 1"
+                                        @click.stop="applyOrderAction(featureId, 'down')"
+                                    >
+                                        下移
+                                    </button>
+                                    <button
+                                        type="button"
+                                        role="menuitem"
+                                        :disabled="orderIndex === 0"
+                                        @click.stop="applyOrderAction(featureId, 'first')"
+                                    >
+                                        置顶
+                                    </button>
+                                    <button
+                                        type="button"
+                                        role="menuitem"
+                                        :disabled="orderIndex === featureOrder.length - 1"
+                                        @click.stop="applyOrderAction(featureId, 'last')"
+                                    >
+                                        置底
+                                    </button>
+                                </div>
+                            </div>
+                        </template>
+                    </MeydaCard>
                 </div>
             </section>
+
+            <div
+                v-if="dragState?.active"
+                class="drag-ghost"
+                :style="dragGhostStyle"
+                aria-hidden="true"
+                data-testid="reorder-drag-ghost"
+            >
+                {{ featureLabel(dragState.sourceId) }}
+            </div>
         </div>
     </main>
 </template>
@@ -112,6 +215,7 @@
 import {
     type ComponentPublicInstance,
     computed,
+    nextTick,
     onBeforeUnmount,
     onMounted,
     reactive,
@@ -123,6 +227,16 @@ import MeydaCard from '../components/MeydaCard.vue';
 import { useAudioSessionService } from '../audio/audioSessionService';
 import { toggleActiveFeature } from '../analysis/activeFeatureQueue';
 import { useAnalysisCoordinator } from '../analysis/analysisCoordinator';
+import { FEATURE_REGISTRY } from '../analysis/featureRegistry';
+import {
+    defaultFeatureOrder,
+    findFeatureDropTarget,
+    insertFeatureOrder,
+    isDefaultFeatureOrder,
+    moveFeatureOrder,
+    type FeatureDropTarget,
+    type FeatureOrderAction,
+} from '../analysis/featureOrder';
 import {
     panTimelineViewport,
     normalizeTimelineViewport,
@@ -145,6 +259,21 @@ import type { PersistedTimelineViewport } from '../types/session';
 
 const MASONRY_GAP = 18;
 const MASONRY_WIDE_QUERY = '(min-width: 1280px)';
+const DRAG_START_THRESHOLD = 6;
+const AUTO_SCROLL_EDGE = 48;
+const AUTO_SCROLL_MAX = 16;
+
+interface ReorderDragState {
+    pointerId: number;
+    sourceId: FeatureId;
+    handle: HTMLElement;
+    startX: number;
+    startY: number;
+    currentX: number;
+    currentY: number;
+    active: boolean;
+    candidate: FeatureDropTarget | null;
+}
 
 const sessionStore = useAudioSessionStore();
 const audioSession = useAudioSessionService();
@@ -172,8 +301,20 @@ let masonryItemObserver: ResizeObserver | null = null;
 let masonryMediaQuery: MediaQueryList | null = null;
 let masonryFrame: number | null = null;
 let lastMasonryRootWidth = -1;
+const analyzerContent = ref<HTMLElement | null>(null);
+const openOrderMenu = ref<FeatureId | null>(null);
+const reorderAnnouncement = ref('');
+const dragState = ref<ReorderDragState | null>(null);
+const reorderHandles = new Map<FeatureId, HTMLElement>();
+let dragFrame: number | null = null;
+let suppressHandleClick = false;
+let suppressHandleClickTimer: number | null = null;
 
 const analysis = computed(() => sessionStore.analysis);
+const featureOrder = computed<FeatureId[]>(() =>
+    sessionStore.analysisWorkspace.featureOrder);
+const isFeatureOrderDefault = computed(() =>
+    isDefaultFeatureOrder(featureOrder.value));
 const activeFeatureQueue = computed<M10FeatureId[]>(() =>
     sessionStore.analysisWorkspace.activeFeatureQueue.filter(
         (featureId): featureId is M10FeatureId =>
@@ -209,6 +350,13 @@ const analysisStateLabel = computed(() => {
     } as const;
     return labels[analysis.value.state];
 });
+const dragGhostStyle = computed(() => ({
+    left: `${(dragState.value?.currentX ?? 0) + 12}px`,
+    top: `${(dragState.value?.currentY ?? 0) + 12}px`,
+}));
+
+const featureLabel = (featureId: FeatureId) =>
+    FEATURE_REGISTRY[featureId].label;
 
 const isExpanded = (featureId: FeatureId) =>
     activeFeatureQueue.value.includes(featureId);
@@ -224,6 +372,37 @@ const formatTime = (seconds: number): string => {
     return `${minutes}:${(safe % 60).toFixed(2).padStart(5, '0')}`;
 };
 
+const reorderHandleRefSetters = new Map<
+    FeatureId,
+    (element: Element | ComponentPublicInstance | null) => void
+>();
+const reorderHandleRef = (featureId: FeatureId) => {
+    let setter = reorderHandleRefSetters.get(featureId);
+    if (!setter) {
+        setter = (element) => {
+            if (element instanceof HTMLElement) {
+                reorderHandles.set(featureId, element);
+            } else {
+                reorderHandles.delete(featureId);
+            }
+        };
+        reorderHandleRefSetters.set(featureId, setter);
+    }
+    return setter;
+};
+
+const masonryItemClasses = (featureId: FeatureId) => ({
+    'is-drag-source': dragState.value?.active
+        && dragState.value.sourceId === featureId,
+    'is-drop-before': dragState.value?.active
+        && dragState.value.candidate?.featureId === featureId
+        && dragState.value.candidate.edge === 'before',
+    'is-drop-after': dragState.value?.active
+        && dragState.value.candidate?.featureId === featureId
+        && dragState.value.candidate.edge === 'after',
+    'has-open-reorder-menu': openOrderMenu.value === featureId,
+});
+
 const masonryItemStyle = (featureId: FeatureId) => {
     const placement = masonryPlacements[featureId];
     return {
@@ -237,7 +416,8 @@ const masonryItemStyle = (featureId: FeatureId) => {
 const performMasonryLayout = () => {
     masonryFrame = null;
     const root = masonryRoot.value;
-    const elements = FEATURE_IDS.map((featureId) =>
+    const order = featureOrder.value;
+    const elements = order.map((featureId) =>
         masonryItems.get(featureId));
     if (!root || elements.some((element) => !element)) return;
     const containerWidth = root.getBoundingClientRect().width;
@@ -253,7 +433,7 @@ const performMasonryLayout = () => {
         containerWidth,
         columnCount,
         gap: MASONRY_GAP,
-        items: FEATURE_IDS.map((featureId, index) => ({
+        items: order.map((featureId, index) => ({
             id: featureId,
             height: elements[index]!.getBoundingClientRect().height,
         })),
@@ -330,20 +510,28 @@ const disposeMasonryLayout = () => {
     masonryFrame = null;
 };
 
-const persistWorkspace = (
-    featureQueue: FeatureId[],
-    nextViewport: PersistedTimelineViewport | null,
-) => audioSession.updateAnalysisWorkspace({
-    activeFeatureQueue: [...featureQueue],
-    viewport: nextViewport,
+const persistWorkspace = (patch: {
+    featureQueue?: readonly FeatureId[];
+    nextViewport?: PersistedTimelineViewport | null;
+    nextFeatureOrder?: readonly FeatureId[];
+} = {}) => audioSession.updateAnalysisWorkspace({
+    activeFeatureQueue: [
+        ...(patch.featureQueue ?? activeFeatureQueue.value),
+    ],
+    featureOrder: [
+        ...(patch.nextFeatureOrder ?? featureOrder.value),
+    ],
+    viewport: patch.nextViewport === undefined
+        ? sessionStore.analysisWorkspace.viewport
+        : patch.nextViewport,
 });
 
 const applyFeatureQueue = async (featureQueue: FeatureId[]) => {
     const nextQueue = [...featureQueue];
-    const persist = persistWorkspace(
-        nextQueue,
-        durationSeconds.value > 0 ? viewport.value : null,
-    );
+    const persist = persistWorkspace({
+        featureQueue: nextQueue,
+        nextViewport: durationSeconds.value > 0 ? viewport.value : null,
+    });
     for (const key of Object.keys(exactValues) as M10FeatureId[]) {
         if (!nextQueue.includes(key)) {
             delete exactValues[key];
@@ -363,7 +551,7 @@ const toggleCard = (featureId: FeatureId) => {
 };
 
 const setViewport = (nextViewport: PersistedTimelineViewport) => {
-    void persistWorkspace(activeFeatureQueue.value, nextViewport);
+    void persistWorkspace({ nextViewport });
 };
 
 const zoom = (factor: number) => {
@@ -385,6 +573,318 @@ const pan = (direction: -1 | 1) => {
 
 const resetViewport = () => {
     setViewport(resetTimelineViewport(durationSeconds.value));
+};
+
+const focusReorderHandle = (featureId: FeatureId) => {
+    void nextTick(() => reorderHandles.get(featureId)?.focus());
+};
+
+const announceFeaturePosition = (
+    featureId: FeatureId,
+    order: readonly FeatureId[],
+) => {
+    reorderAnnouncement.value = `${featureLabel(featureId)} 已移动到第 ${
+        order.indexOf(featureId) + 1
+    } 项，共 ${order.length} 项。`;
+};
+
+const commitFeatureOrder = (
+    nextOrder: FeatureId[],
+    sourceId: FeatureId,
+    focusHandle = true,
+) => {
+    if (nextOrder.every((featureId, index) =>
+        featureId === featureOrder.value[index])) return;
+    void persistWorkspace({ nextFeatureOrder: nextOrder });
+    announceFeaturePosition(sourceId, nextOrder);
+    void nextTick(() => {
+        scheduleMasonryLayout();
+        if (focusHandle) reorderHandles.get(sourceId)?.focus();
+    });
+};
+
+const resetFeatureOrder = () => {
+    const nextOrder = defaultFeatureOrder();
+    if (isFeatureOrderDefault.value) return;
+    openOrderMenu.value = null;
+    void persistWorkspace({ nextFeatureOrder: nextOrder });
+    reorderAnnouncement.value = '已恢复默认特征顺序。';
+    void nextTick(scheduleMasonryLayout);
+};
+
+const applyOrderAction = (
+    featureId: FeatureId,
+    action: FeatureOrderAction,
+) => {
+    commitFeatureOrder(
+        moveFeatureOrder(featureOrder.value, featureId, action),
+        featureId,
+    );
+};
+
+const closeOrderMenu = (returnFocus = false) => {
+    const featureId = openOrderMenu.value;
+    openOrderMenu.value = null;
+    if (returnFocus && featureId) focusReorderHandle(featureId);
+};
+
+const handleReorderHandleClick = (featureId: FeatureId) => {
+    if (suppressHandleClick) {
+        suppressHandleClick = false;
+        if (suppressHandleClickTimer !== null) {
+            window.clearTimeout(suppressHandleClickTimer);
+            suppressHandleClickTimer = null;
+        }
+        return;
+    }
+    openOrderMenu.value = openOrderMenu.value === featureId
+        ? null
+        : featureId;
+};
+
+const armHandleClickSuppression = () => {
+    suppressHandleClick = true;
+    if (suppressHandleClickTimer !== null) {
+        window.clearTimeout(suppressHandleClickTimer);
+        suppressHandleClickTimer = null;
+    }
+    suppressHandleClick = false;
+    suppressHandleClickTimer = window.setTimeout(() => {
+        suppressHandleClick = false;
+        suppressHandleClickTimer = null;
+    }, 0);
+};
+
+const handleReorderHandleKeydown = (
+    event: KeyboardEvent,
+    featureId: FeatureId,
+) => {
+    if (event.altKey) {
+        const action = {
+            ArrowUp: 'up',
+            ArrowDown: 'down',
+            Home: 'first',
+            End: 'last',
+        }[event.key] as FeatureOrderAction | undefined;
+        if (action) {
+            event.preventDefault();
+            applyOrderAction(featureId, action);
+            return;
+        }
+    }
+    if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        openOrderMenu.value = openOrderMenu.value === featureId
+            ? null
+            : featureId;
+        return;
+    }
+    if (event.key === 'Escape' && openOrderMenu.value === featureId) {
+        event.preventDefault();
+        closeOrderMenu(true);
+    }
+};
+
+const cancelDragFrame = () => {
+    if (dragFrame !== null) window.cancelAnimationFrame(dragFrame);
+    dragFrame = null;
+};
+
+const releaseDragCapture = (state: ReorderDragState) => {
+    try {
+        if (state.handle.hasPointerCapture(state.pointerId)) {
+            state.handle.releasePointerCapture(state.pointerId);
+        }
+    } catch {
+        // Pointer capture may already be gone after blur or native cancellation.
+    }
+};
+
+const clearDrag = (returnFocus = false) => {
+    const state = dragState.value;
+    if (!state) return;
+    dragState.value = null;
+    cancelDragFrame();
+    releaseDragCapture(state);
+    if (returnFocus) focusReorderHandle(state.sourceId);
+};
+
+const cancelActiveDrag = (returnFocus = true) => {
+    const wasActive = dragState.value?.active ?? false;
+    clearDrag(returnFocus);
+    if (wasActive) armHandleClickSuppression();
+};
+
+const performDragFrame = () => {
+    dragFrame = null;
+    const state = dragState.value;
+    const root = masonryRoot.value;
+    if (!state || !root) return;
+    if (!state.active) {
+        const distance = Math.hypot(
+            state.currentX - state.startX,
+            state.currentY - state.startY,
+        );
+        if (distance < DRAG_START_THRESHOLD) return;
+        state.active = true;
+        openOrderMenu.value = null;
+    }
+
+    const rootRect = root.getBoundingClientRect();
+    const sourceRect = masonryItems.get(state.sourceId)
+        ?.getBoundingClientRect();
+    const overSource = sourceRect
+        && state.currentX >= sourceRect.left
+        && state.currentX <= sourceRect.right
+        && state.currentY >= sourceRect.top
+        && state.currentY <= sourceRect.bottom;
+    state.candidate = overSource
+        ? null
+        : findFeatureDropTarget(
+            state.currentX,
+            state.currentY,
+            rootRect,
+            featureOrder.value.flatMap((featureId) => {
+                const rect = masonryItems.get(featureId)
+                    ?.getBoundingClientRect();
+                return rect
+                    ? [{
+                        id: featureId,
+                        left: rect.left,
+                        top: rect.top,
+                        right: rect.right,
+                        bottom: rect.bottom,
+                    }]
+                    : [];
+            }),
+            state.sourceId,
+        );
+
+    const scroller = analyzerContent.value;
+    if (!scroller) return;
+    const scrollRect = scroller.getBoundingClientRect();
+    let scrollDelta = 0;
+    if (state.currentY < scrollRect.top + AUTO_SCROLL_EDGE) {
+        const proximity = Math.max(
+            0,
+            1 - (state.currentY - scrollRect.top) / AUTO_SCROLL_EDGE,
+        );
+        scrollDelta = -AUTO_SCROLL_MAX * proximity;
+    } else if (
+        state.currentY > scrollRect.bottom - AUTO_SCROLL_EDGE
+    ) {
+        const proximity = Math.max(
+            0,
+            1 - (scrollRect.bottom - state.currentY) / AUTO_SCROLL_EDGE,
+        );
+        scrollDelta = AUTO_SCROLL_MAX * proximity;
+    }
+    if (scrollDelta !== 0) {
+        const previousScrollTop = scroller.scrollTop;
+        scroller.scrollTop += scrollDelta;
+        if (scroller.scrollTop !== previousScrollTop) scheduleDragFrame();
+    }
+};
+
+const scheduleDragFrame = () => {
+    if (dragFrame !== null) return;
+    dragFrame = window.requestAnimationFrame(performDragFrame);
+};
+
+const handleDragPointerDown = (
+    event: PointerEvent,
+    featureId: FeatureId,
+) => {
+    if (event.button !== 0 || dragState.value) return;
+    const handle = event.currentTarget;
+    if (!(handle instanceof HTMLElement)) return;
+    dragState.value = {
+        pointerId: event.pointerId,
+        sourceId: featureId,
+        handle,
+        startX: event.clientX,
+        startY: event.clientY,
+        currentX: event.clientX,
+        currentY: event.clientY,
+        active: false,
+        candidate: null,
+    };
+    handle.setPointerCapture(event.pointerId);
+};
+
+const handleDragPointerMove = (event: PointerEvent) => {
+    const state = dragState.value;
+    if (!state || state.pointerId !== event.pointerId) return;
+    state.currentX = event.clientX;
+    state.currentY = event.clientY;
+    if (state.active) event.preventDefault();
+    scheduleDragFrame();
+};
+
+const handleDragPointerUp = (event: PointerEvent) => {
+    let state = dragState.value;
+    if (!state || state.pointerId !== event.pointerId) return;
+    state.currentX = event.clientX;
+    state.currentY = event.clientY;
+    cancelDragFrame();
+    performDragFrame();
+    state = dragState.value;
+    if (!state) return;
+    const active = state.active;
+    const candidate = state.candidate;
+    const sourceId = state.sourceId;
+    clearDrag();
+    if (!active) return;
+    armHandleClickSuppression();
+    if (candidate) {
+        commitFeatureOrder(
+            insertFeatureOrder(
+                featureOrder.value,
+                sourceId,
+                candidate.featureId,
+                candidate.edge,
+            ),
+            sourceId,
+        );
+    } else {
+        focusReorderHandle(sourceId);
+    }
+};
+
+const cancelDrag = (event?: Event) => {
+    if (
+        event
+        && 'pointerId' in event
+        && dragState.value
+        && event.pointerId !== dragState.value.pointerId
+    ) return;
+    cancelActiveDrag(true);
+};
+
+const handleLostPointerCapture = (event: PointerEvent) => {
+    if (dragState.value?.pointerId === event.pointerId) cancelActiveDrag(true);
+};
+
+const handleGlobalKeydown = (event: KeyboardEvent) => {
+    if (event.key !== 'Escape') return;
+    if (dragState.value) {
+        event.preventDefault();
+        cancelActiveDrag(true);
+    } else if (openOrderMenu.value) {
+        event.preventDefault();
+        closeOrderMenu(true);
+    }
+};
+
+const handleGlobalPointerDown = (event: PointerEvent) => {
+    const featureId = openOrderMenu.value;
+    if (!featureId) return;
+    const control = event.target instanceof Element
+        ? event.target.closest('[data-reorder-control]')
+        : null;
+    if (control?.getAttribute('data-reorder-control') !== featureId) {
+        closeOrderMenu(true);
+    }
 };
 
 const seek = async (seconds: number) => {
@@ -442,7 +942,10 @@ const initializeWorkspace = async () => {
             const initialViewport = durationSeconds.value > 0
                 ? resetTimelineViewport(durationSeconds.value)
                 : null;
-            const persist = persistWorkspace([], initialViewport);
+            const persist = persistWorkspace({
+                featureQueue: [],
+                nextViewport: initialViewport,
+            });
             await analysisLease.setActiveFeatures([]);
             await persist;
         } else {
@@ -451,10 +954,7 @@ const initializeWorkspace = async () => {
                 restoredQueue.length
                 !== sessionStore.analysisWorkspace.activeFeatureQueue.length
             ) {
-                await persistWorkspace(
-                    restoredQueue,
-                    sessionStore.analysisWorkspace.viewport,
-                );
+                await persistWorkspace({ featureQueue: restoredQueue });
             }
             await analysisLease.setActiveFeatures(restoredQueue);
         }
@@ -498,7 +998,7 @@ watch(
             || current.endSeconds !== repaired.endSeconds
             || current.zoom !== repaired.zoom
         ) {
-            void persistWorkspace(activeFeatureQueue.value, repaired);
+            void persistWorkspace({ nextViewport: repaired });
         }
     },
 );
@@ -517,8 +1017,16 @@ watch(
     },
 );
 
+watch(
+    () => featureOrder.value.join('|'),
+    () => void nextTick(scheduleMasonryLayout),
+);
+
 onMounted(() => {
     setupMasonryLayout();
+    window.addEventListener('keydown', handleGlobalKeydown);
+    window.addEventListener('blur', cancelDrag);
+    document.addEventListener('pointerdown', handleGlobalPointerDown, true);
     unsubscribeCoordinator = analysisLease.subscribe(() => {
         seriesRevision.value += 1;
         requestExactValues(false);
@@ -526,6 +1034,13 @@ onMounted(() => {
 });
 
 onBeforeUnmount(() => {
+    window.removeEventListener('keydown', handleGlobalKeydown);
+    window.removeEventListener('blur', cancelDrag);
+    document.removeEventListener('pointerdown', handleGlobalPointerDown, true);
+    clearDrag();
+    if (suppressHandleClickTimer !== null) {
+        window.clearTimeout(suppressHandleClickTimer);
+    }
     disposeMasonryLayout();
     unsubscribeCoordinator?.();
     unsubscribeCoordinator = null;
@@ -678,6 +1193,16 @@ button:focus:not(:focus-visible) {
     padding: 12px 14px;
 }
 
+.visually-hidden {
+    clip: rect(0 0 0 0);
+    clip-path: inset(50%);
+    height: 1px;
+    overflow: hidden;
+    position: absolute;
+    white-space: nowrap;
+    width: 1px;
+}
+
 .card-masonry {
     min-height: 220px;
     position: relative;
@@ -690,12 +1215,111 @@ button:focus:not(:focus-visible) {
     top: 0;
 }
 
+.masonry-item.has-open-reorder-menu {
+    z-index: 4;
+}
+
+.masonry-item.is-drag-source {
+    opacity: 0.42;
+}
+
+.masonry-item.is-drop-before::before,
+.masonry-item.is-drop-after::after {
+    background: #f8ff87;
+    border-radius: 999px;
+    box-shadow: 0 0 0 3px rgba(248, 255, 135, 0.2);
+    content: '';
+    height: 3px;
+    left: 8px;
+    pointer-events: none;
+    position: absolute;
+    right: 8px;
+    z-index: 6;
+}
+
+.masonry-item.is-drop-before::before {
+    top: -6px;
+}
+
+.masonry-item.is-drop-after::after {
+    bottom: -6px;
+}
+
 .card-masonry:not(.is-ready) .masonry-item {
     visibility: hidden;
 }
 
 .masonry-item > * {
     width: 100%;
+}
+
+.reorder-control {
+    position: relative;
+}
+
+.reorder-handle {
+    align-items: center;
+    display: inline-flex;
+    justify-content: center;
+    min-width: 36px;
+    padding: 7px 9px;
+    touch-action: none;
+}
+
+.reorder-handle.is-active {
+    border-color: #f8ff87;
+    color: #f8ff87;
+}
+
+.grip-icon {
+    display: grid;
+    gap: 3px;
+    width: 15px;
+}
+
+.grip-icon span {
+    background: currentColor;
+    border-radius: 999px;
+    display: block;
+    height: 2px;
+    width: 100%;
+}
+
+.reorder-menu {
+    background: rgba(5, 14, 9, 0.98);
+    border: 1px solid rgba(125, 255, 179, 0.42);
+    border-radius: 12px;
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5);
+    display: grid;
+    gap: 6px;
+    grid-template-columns: repeat(2, minmax(72px, 1fr));
+    padding: 8px;
+    position: absolute;
+    right: 0;
+    top: calc(100% + 8px);
+    width: max-content;
+    z-index: 8;
+}
+
+.reorder-menu button {
+    min-width: 72px;
+}
+
+.drag-ghost {
+    background: rgba(11, 23, 16, 0.96);
+    border: 1px solid #7dffb3;
+    border-radius: 10px;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
+    color: #effff5;
+    font-size: 0.78rem;
+    max-width: min(260px, calc(100vw - 32px));
+    overflow: hidden;
+    padding: 9px 12px;
+    pointer-events: none;
+    position: fixed;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    z-index: 30;
 }
 
 .empty-slot {

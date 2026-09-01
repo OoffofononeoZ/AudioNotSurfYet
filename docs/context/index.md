@@ -4,14 +4,14 @@ owner: "project-owner"
 last_reviewed: 2026-09-01
 upstream_docs:
   - "AGENTS.md"
-next_action: "M13 已关闭并恢复 Analyzer Ready with waivers；正式上线等待 PROD-015"
+next_action: "M14 已获批准并实施中；等待 clean canonical/evidence 恢复 Analyzer readiness"
 ---
 
 # Repository Context Index
 
 ## Purpose
 
-AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端。Editor E1–E7 已获批准并关闭。Analyzer M13 已把四个可替换 slot 改为 21 张固定顺序折叠卡和最多四项 FIFO 活动分析，clean canonical 17/17 通过并恢复 `Ready with waivers`；M3–M12 evidence 保留为历史。
+AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端。Editor E1–E7 已获批准并关闭。Analyzer M13 已交付 21 张折叠卡和最多四项 FIFO；M14 已获批准，正在增加全局自定义顺序、可访问排序和 V1 顺序持久化。M13 17/17 canonical 保留为历史，M14 evidence 前 readiness 为 `in-review`。
 
 本目录维护仓库事实、边界和工作记忆；生命周期路由与通用方法由 [AGENTS.md](../../AGENTS.md) 负责。当前代码事实与目标架构必须区分：现状见 [system map](system-map.md)，批准的目标见 [system design](../architecture/system-design.md)。
 
@@ -20,10 +20,10 @@ AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端。Editor E1–
 - Repository context：入口、决策注册表、system map、glossary 与 working agreements 均已批准。
 - Product intent：problem brief、scope、success metrics 和 open questions 中的 Editor E0 点/范围事件范围已于 2026-08-26 获 owner 批准。
 - System design：ADR-0012 已批准并实现；R-028/R-029/R-030 已由 M13 canonical 缓解。
-- Execution planning：M1–M13 `Complete`，M14 只登记；Editor E0-D/E1–E7 `Complete`。
+- Execution planning：M1–M13 `Complete`，M14 `In Progress`；Editor E0-D/E1–E7 `Complete`。
 - Quality and evals：M3–M12 与 Editor E1–E7 evidence 保留；M13 17/17 evidence 已批准。
-- Implementation：Editor E7 与 Analyzer M13 均已完成；M14 未开放。
-- Readiness、release、retrospective：Analyzer 为 `Ready with waivers`；PROD-015 仍阻断上线，Editor readiness 独立。
+- Implementation：Editor E7 与 Analyzer M13 已完成；M14 实施中。
+- Readiness、release、retrospective：Analyzer M14 为 `in-review`，M13 ready 仅作历史；PROD-015 仍阻断上线，Editor readiness 独立。
 
 ## Key Documents
 
@@ -93,6 +93,7 @@ AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端。Editor E1–
 - [ADR-0010](../architecture/adrs/0010-editor-compact-workbench.md)：Editor 紧凑双层工具栏、平面细线分区与响应式密度令牌。
 - [ADR-0011](../architecture/adrs/0011-editor-fullscreen-overlay.md)：Editor 窗口级全屏灰色浮层、复合入口、按歌曲 visibility 与 Buffer-only 关闭状态。
 - [ADR-0012](../architecture/adrs/0012-analyzer-all-cards-fifo-active-analysis.md)：Analyzer 21 张稳定折叠卡、最多四项 FIFO 与 V1 carrier。
+- [ADR-0013](../architecture/adrs/0013-analyzer-accessible-card-reordering.md)：Analyzer 自定义顺序、可访问排序与 V1 optional field。
 
 ## Repository Areas
 

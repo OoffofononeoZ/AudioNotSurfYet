@@ -7,6 +7,7 @@ import {
     MAX_ACTIVE_FEATURES,
     toggleActiveFeature,
 } from '../../src/analysis/activeFeatureQueue';
+import { defaultFeatureOrder } from '../../src/analysis/featureOrder';
 import {
     activeCardsToFeatureQueue,
     activeFeatureQueueToCards,
@@ -90,6 +91,7 @@ describe('M13 PersistedSessionV1 activeCards adapter', () => {
     test('validates runtime queue and persisted carrier independently', () => {
         expect(() => assertValidAnalysisWorkspace({
             activeFeatureQueue: ['rms', 'chroma'],
+            featureOrder: defaultFeatureOrder(),
             viewport: null,
         })).not.toThrow();
         expect(() => assertValidPersistedActiveCards([

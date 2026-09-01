@@ -4,7 +4,7 @@ owner: "project-owner"
 last_reviewed: 2026-09-01
 upstream_docs:
   - "docs/architecture/system-design.md"
-next_action: "M13 adapter 已验证；schema 或 M14 顺序持久化变化时复核"
+next_action: "实现并验证 M14 featureOrder、可访问排序与 V1 可选字段"
 ---
 
 # Interface Contracts
@@ -416,6 +416,7 @@ Invariants:
 interface AnalysisWorkspaceSnapshot {
   initialized: boolean
   activeFeatureQueue: FeatureId[]
+  featureOrder: FeatureId[]
   viewport: Pick<TimelineViewport, 'startSeconds' | 'endSeconds' | 'zoom'> | null
 }
 ```
@@ -424,7 +425,8 @@ Invariants:
 
 - `initialized: false` 表示从未保存过工作区，Analyzer 首次进入时建立空活动队列。
 - `initialized: true` 且 `activeFeatureQueue: []` 是有效的已保存空工作区，刷新后必须保持为空。
-- `AudioSessionService.updateAnalysisWorkspace(...)` 先用不可变快照更新内存，再把 queue 映射为 V1 cards 串行保存；只有最新 revision 可以发布 `ready`/`not-persisted`。
+- `featureOrder` 必须恰好包含全部 21 个唯一 `FEATURE_IDS`；顺序只表示卡片逻辑位置，不表示 FIFO 年龄。
+- `AudioSessionService.updateAnalysisWorkspace(...)` 先用不可变快照更新内存，再把 queue 映射为 V1 cards 并保存完整 feature order；只有最新 revision 可以发布 `ready`/`not-persisted`。
 - runtime validation 接受 0–4 个唯一 feature；viewport 所有值有限、`0 <= start < end`、`zoom > 0`。
 
 ## TimelineViewport
@@ -455,6 +457,7 @@ interface PersistedSessionV1 {
   queue: TrackRecord[]
   currentTrackId: TrackId | null
   activeCards: ActiveAnalysisCard[]
+  featureOrder?: FeatureId[]
   analysisConfig: Omit<AnalysisConfig, 'sampleRate' | 'configHash'>
   viewport: Pick<TimelineViewport, 'startSeconds' | 'endSeconds' | 'zoom'> | null
   handles: Array<{ trackId: TrackId; handleKey: string }>
@@ -479,6 +482,19 @@ Persistence rules:
 - 旧 generation、已取消命令或 disposed service 的 repository completion 不得更新当前 track 的 persistence state。
 - schema version 未识别时进入可恢复错误，不能尝试猜测字段。
 - `activeCards` schema 不变；其 slot 只承载 FIFO 索引。旧记录恢复时按 slot 排序，重复、未知或超过四项继续由严格 validator 拒绝。
+- `featureOrder` 为 V1 可选扩展：缺失代表旧会话并恢复 `FEATURE_IDS`；存在时必须是 21 项完整唯一 permutation。新版本保存始终写入，非法字段使 session 无效。
+
+## Analyzer card order interaction
+
+```ts
+type FeatureOrderAction = 'up' | 'down' | 'first' | 'last'
+type DropEdge = 'before' | 'after'
+```
+
+- 纯 reducer 接收完整 order、source feature、target feature/edge 或 action，返回新的完整 order；无效输入抛出，边界/no-op 返回等值副本且不触发持久化。
+- `MeydaCard` 只新增命名 header-action slot；既有 props 与 `toggle`/`seek` emit 不变。Analyzer 拥有 handle、popup、pointer state、hit-test、live text 和持久化。
+- wrapper 继续以 feature ID 为 key，并保留 `data-slot=featureId`；`data-order-index` 是一基位置。drop 后 DOM 顺序与该 index、屏幕阅读顺序和 masonry 输入一致。
+- 一次只允许一个 popup 或 drag；排序提交保持 source handle 焦点。排序不发出 analysis consumer message。
 
 ## Session Repository Results
 

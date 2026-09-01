@@ -5,7 +5,7 @@ last_reviewed: 2026-09-01
 upstream_docs:
   - "docs/product/problem-brief.md"
   - "docs/quality/release-readiness.md"
-next_action: "M13 范围已交付；M14 拖动排序保持范围外"
+next_action: "实施已批准的 M14 全局卡片排序；不扩大 FIFO、音频或浏览器范围"
 ---
 
 # Scope
@@ -27,6 +27,8 @@ next_action: "M13 范围已交付；M14 拖动排序保持范围外"
 - Canvas 负责数据图表，DOM 负责说明、固定参数、精确值、焦点与无障碍语义。
 - RMS 采用时间序列折线；Amplitude Spectrum 采用时频热图和游标频谱；Chroma 采用 12 类热图和游标柱图。
 - 播放、队列、当前歌曲、跳转和刷新恢复作为分析工作区的基础能力。
+- 21 张卡均可通过右上三横句柄按前/后插入排序；自定义逻辑顺序同时作为 DOM、键盘、读屏和瀑布流输入顺序。
+- 点击/触控句柄提供上移、下移、置顶、置底替代，键盘提供等价操作；工具栏可恢复 `FEATURE_IDS` 默认顺序。
 
 ### Audio and analysis
 
@@ -76,7 +78,7 @@ M13 是上述完成切片后的候选变更：以 21 张稳定折叠卡替代四
 - Editor、Visualizer 及其他尚未定义的空白 Tab；Editor 后续只能按下述 E0 独立范围推进。
 - 移动端、非 Chromium 浏览器和非 Chromium 兼容层。
 - Analyzer 中新增 Three.js 依赖。
-- M13 不实现卡片拖动排序、不显示三横拖动图标、不持久化自定义顺序；这些能力只登记为 M14 后续范围。
+- 不实现两卡交换、实时重排动画、多卡选择、按歌曲独立顺序、第三方拖动依赖或移动端产品支持；桌面 Chrome/Edge 的 touch Pointer Events 仍需验证。
 - 在 release 阶段前决定正式托管商、生产 URL、发布监控或回滚方案。
 
 ## Editor E0 Scope（approved）
@@ -164,6 +166,7 @@ E5 于 2026-08-27 在 E4 获批后改为 `In Progress`。若未来要求新的�
 - Editor E0 使用 owner 给出的聊天需求和 Git 忽略的 `docs/require/editor.txt` 作为输入；只有版本化产品文档是后续规范来源。
 - 点/范围事件的 JSON 字段、歌曲 identity、草稿数据库、右键状态机、BPM 算法和 renderer 数据流已由获批 Editor 架构固定；delivery planning 负责把它们映射到切片、验收和测试。
 - 任何新增依赖必须先说明用途、体积、许可与替代方案并获得 owner 明确批准。
+- Analyzer 顺序属于最近工作区而非歌曲；旧 V1 缺少顺序字段时使用 `FEATURE_IDS`，存在但非法的顺序不静默修复。
 
 ## Approval Notes
 
@@ -173,5 +176,6 @@ E5 于 2026-08-27 在 E4 获批后改为 `In Progress`。若未来要求新的�
 - Architecture approval：`project-owner` 于 2026-08-26 明确回复：“我批准 Editor E0 系统设计、接口契约、风险与 ADR；同意进入 Editor E1–E6 execution planning。”
 - Change rule：现有 Analyzer delivery、quality 与 readiness 仍只对 Analyzer 历史范围有效；Editor 必须建立并审批自己的 delivery 覆盖，E1–E6 不能因产品或架构批准而直接开始实现。
 - M13 approval：`project-owner` 于 2026-08-31 以完整实施指令批准 M13 范围及 M14 非目标；M13 保持 IndexedDB V1、本地音频和最多四项分析边界，本轮不推送远程仓库。
+- M14 approval：`project-owner` 于 2026-09-01 明确批准并要求实施插入排序、工作区全局持久化、点击动作面板、恢复默认、键盘/读屏和本地 canonical；M14 不推送远程仓库。
 
 File System Access 行为依据：[Chrome File System Access 文档](https://developer.chrome.com/docs/capabilities/web-apis/file-system-access) 与 [持久权限说明](https://developer.chrome.com/blog/persistent-permissions-for-the-file-system-access-api)。

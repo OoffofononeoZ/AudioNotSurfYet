@@ -78,7 +78,9 @@ test('expands four scalar cards, applies FIFO, and restores the queue', async ({
     await page.locator('[data-feature-id="spectralFlux"]')
         .getByRole('button', { name: '展开分析' })
         .click();
-    await expect(page.locator('[data-feature-id="rms"] [aria-expanded="false"]'))
+    await expect(page.locator(
+        '[data-feature-id="rms"] .toggle-card[aria-expanded="false"]',
+    ))
         .toHaveCount(1);
     await expect(page.locator('[data-feature-id="spectralFlux"] .plot-message'))
         .toHaveCount(0, { timeout: 30_000 });

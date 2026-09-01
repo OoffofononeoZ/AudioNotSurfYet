@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/product/scope.md"
   - "docs/architecture/system-design.md"
   - "docs/delivery/execution-plan.md"
-next_action: "DEC-035/M13 已完成；M14 或 PROD-015 需 owner 另行决策"
+next_action: "执行 DEC-036/M14 并以 clean canonical 复核 Analyzer readiness；PROD-015 仍开放"
 ---
 
 # Decision Registry
@@ -62,6 +62,7 @@ next_action: "DEC-035/M13 已完成；M14 或 PROD-015 需 owner 另行决策"
 | DEC-033 | 2026-08-29 | E7 增补窗口级全屏悬浮分析层、左上复合开关/21 项菜单、按歌曲 visibility；旧 44/44 run 保留为 pre-revision，新候选为 46 步 | project-owner | approved | [ADR-0011](../architecture/adrs/0011-editor-fullscreen-overlay.md) | E7 浮层范围、记忆规则、canonical 步数或 owner 门禁改变 |
 | DEC-034 | 2026-08-31 | 批准 E7 修订版 46/46 clean canonical 并关闭 E7；只采用已记录 artifact/补偿事实，不补写未提供的人工测量 | project-owner | approved | [Editor evidence](../quality/editor/evidence-index.md) | E7 candidate identity、artifact 或批准边界改变 |
 | DEC-035 | 2026-08-31 | 实施 M13：21 卡固定顺序、默认全收起、最多四项 FIFO、V1 adapter 与最新 generation/revision；M14 拖动只登记，本轮仅本地提交 | project-owner | approved | [ADR-0012](../architecture/adrs/0012-analyzer-all-cards-fifo-active-analysis.md) | M13 行为、M14 边界、canonical 或 Git 交付授权改变 |
+| DEC-036 | 2026-09-01 | 实施 M14：21 卡前后插入、全局 featureOrder、pointer/touch/click/keyboard、独立 live、V1 optional field；排序与 FIFO/Worker 隔离，只本地提交 | project-owner | approved | [ADR-0013](../architecture/adrs/0013-analyzer-accessible-card-reordering.md) | 顺序范围、输入语义、schema、canonical 或 Git 授权改变 |
 
 ## Approval Evidence
 
@@ -148,6 +149,8 @@ E5 clean canonical `E5-2026-08-27T11-03-22-177Z-78124177` 随后在 implementati
 2026-08-31，owner 以完整 M13 实施指令先批准 E7 修订候选，DEC-034 据此关闭 E7；随后批准 DEC-035/ADR-0012 并授权 agent 完成实现、本地提交、clean canonical 与 evidence/readiness 复核，不推送远程。M12 evidence 保留为历史，M13 未通过前 readiness 保持 `in-review`。
 
 2026-09-01，DEC-035 的实现 commit `63c04005670145d83ee181d474197bce921c5300` 与 clean canonical `M13-2026-08-31T17-44-39-680Z-63c04005` 已形成，17/17 通过，summary SHA-256 为 `25732179105b31b7bb05dfdb6626db1264567208a505a7cbf71434a4562e2afc`。该执行事实关闭 M13、缓解 R-028–R-030 并恢复 Analyzer `Ready with waivers`；M14 和 PROD-015 均未因此开放。
+
+同日，owner 先确认插入排序、工作区全局保存和“动作面板 + 恢复默认”，随后明确要求完整实施 M14。DEC-036/ADR-0013、产品/架构/delivery/eval、本地提交、clean canonical 与 evidence/readiness 复核据此获批；M13 readiness 转为历史，远程不推送。
 
 ## Historical Evidence Gap
 

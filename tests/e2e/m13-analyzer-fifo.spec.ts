@@ -71,9 +71,13 @@ test('keeps all 21 cards stable and applies an atomic four-item FIFO', async ({ 
     const fifthButton = card(page, fifth).locator('button.toggle-card');
     await fifthButton.click();
     await expect(fifthButton).toBeFocused();
-    await expect(card(page, FEATURE_IDS[0]).locator('[aria-expanded="false"]'))
+    await expect(card(page, FEATURE_IDS[0]).locator(
+        '.toggle-card[aria-expanded="false"]',
+    ))
         .toHaveCount(1);
-    await expect(card(page, fifth).locator('[aria-expanded="true"]'))
+    await expect(card(page, fifth).locator(
+        '.toggle-card[aria-expanded="true"]',
+    ))
         .toHaveCount(1);
     await expect(page.locator('.analysis-card [aria-expanded="true"]'))
         .toHaveCount(4);
@@ -184,9 +188,11 @@ test('starts analysis only after expansion, restores FIFO, and resets details', 
     expect(workerCountAfterReload).toBe(1);
     await expand(page, 'chroma');
     await expect(card(page, 'amplitudeSpectrum').locator(
-        '[aria-expanded="false"]',
+        '.toggle-card[aria-expanded="false"]',
     )).toHaveCount(1);
-    await expect(card(page, 'rms').locator('[aria-expanded="true"]'))
+    await expect(card(page, 'rms').locator(
+        '.toggle-card[aria-expanded="true"]',
+    ))
         .toHaveCount(1);
     await expect(page.locator('.analysis-card [aria-expanded="true"]'))
         .toHaveCount(4);
