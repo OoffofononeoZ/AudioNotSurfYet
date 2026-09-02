@@ -4,7 +4,7 @@ owner: "project-owner"
 last_reviewed: 2026-09-02
 upstream_docs:
   - "docs/context/index.md"
-next_action: "以已批准 Visualizer delivery 术语建立 V1 quality/eval 与 workspace foundation"
+next_action: "owner 复核 Visualizer V1 canonical 与人工门禁；V1 批准前 V2 保持 Planned"
 ---
 
 # Glossary
@@ -54,8 +54,9 @@ next_action: "以已批准 Visualizer delivery 术语建立 V1 quality/eval 与 
 | Spectral Flux v1 | 相邻幅度频谱逐 bin 正向差的 L1 和；第一帧与零能量帧为 0 | 替代 Meyda 5.6.3 有缺陷的 extractor，并由项目 golden 固定语义 | [ADR-0005](../architecture/adrs/0005-project-spectral-flux-and-silence-semantics.md) |
 | shared viewport | 所有活动卡共同读取的 start/end/zoom；cursor 由播放快照实时派生且不持久化 | zoom、pan、click seek 和键盘 seek 在所有卡保持同一时间身份 | [system design](../architecture/system-design.md) |
 | TestLands | `/testlands` 下的试验页面 | 当前不属于已批准产品表面或稳定接口 | [index](index.md) |
-| Visualizer V0 | 围绕当前本地歌曲，把固定值、最多四个 Analyzer 特征和同歌 Editor 事件映射到单一场景模板的音频可视化制作台 | 产品意图与系统设计已批准，但当前 `/comingsoon` 与试验 renderer 不能被当作已实现 Visualizer | [scope](../product/scope.md) |
+| Visualizer V0 | 围绕当前本地歌曲，把固定值、最多四个 Analyzer 特征和同歌 Editor 事件映射到单一场景模板的音频可视化制作台 | 产品意图、系统设计与 delivery 已批准；V1 只证明工作台基础，不能冒充动态场景已完成 | [scope](../product/scope.md) |
 | Visualizer V0-D | Visualizer V1–V6 的 execution、acceptance、test strategy 与 milestone planning 门禁 | 已于 2026-09-02 获批并关闭；当前只开放 V1，V2–V6 仍为 Planned | [milestone plan](../delivery/visualizer/milestone-plan.md) |
+| Visualizer V1 workspace foundation | `/visualizer/:trackId?`、pause-at-end route lease、三栏/互斥抽屉、中性 16:9 单 Canvas、strict JSON V1 和独立单草稿 | 已在 clean commit 上 21/21 通过但 evidence 仍为 in-review；不含 analysis consumer、动态 binding、真实场景或录制 | [Visualizer evidence](../quality/visualizer/evidence-index.md) |
 | unique analysis feature budget | 一个 Visualizer 场景中所有参数去重后的 Analyzer `FeatureId` 集合，首版上限为四 | 固定值和 Editor 事件不计数；多个参数共享同一特征只占一个名额，第五项必须在 Worker 前拒绝 | [open questions](../product/open-questions.md) |
 | scene template | Visualizer 中一次独占输出画布的受控完整场景；首版只有 Orthogonal Lines 与 Cube Swarm | 不是可执行 Vue/JavaScript/shader 插件，也不允许多模板叠加 | [scope](../product/scope.md) |
 | `VisualizerProjectV1` | 绑定单首歌曲的 strict JSON 工程，保存输出预设、单模板/version/seed、完整 bindings 和可选 Editor 快照 | 不保存 Analyzer 数组、PCM、cache、renderer 或录制 Blob；未知字段和错歌原子拒绝 | [project format](../architecture/visualizer/project-format-v1.md) |

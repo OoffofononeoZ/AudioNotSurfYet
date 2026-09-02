@@ -4,14 +4,14 @@ owner: "project-owner"
 last_reviewed: 2026-09-02
 upstream_docs:
   - "AGENTS.md"
-next_action: "先提交 Visualizer V1 quality/eval 契约并实施 workspace foundation；V2–V6 保持 Planned"
+next_action: "owner 复核 Visualizer V1 21/21 canonical 与 Chrome/Edge 原生文件人工门禁；批准前 V1 保持 In Progress、V2–V6 保持 Planned"
 ---
 
 # Repository Context Index
 
 ## Purpose
 
-AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端。Editor E1–E7 已获批准并关闭。Analyzer M14 已交付 21 张折叠卡的全局自定义顺序、可访问排序和 V1 顺序持久化，最多四项 FIFO 保持独立。M13 17/17 canonical 保留为历史，M14 19/19 canonical 是当前 Analyzer 候选。Visualizer V0 产品、系统设计与 V1–V6 delivery planning 均已获批准，V1 已开放但仍无实现证据。
+AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端。Editor E1–E7 已获批准并关闭。Analyzer M14 已交付 21 张折叠卡的全局自定义顺序、可访问排序和 V1 顺序持久化，最多四项 FIFO 保持独立。M13 17/17 canonical 保留为历史，M14 19/19 canonical 是当前 Analyzer 候选。Visualizer V0 产品、系统设计与 V1–V6 delivery planning 均已获批准；V1 工作台基础已经实现并在 clean commit 上 21/21 通过，当前等待 owner 人工门禁与 evidence 批准。
 
 本目录维护仓库事实、边界和工作记忆；生命周期路由与通用方法由 [AGENTS.md](../../AGENTS.md) 负责。当前代码事实与目标架构必须区分：现状见 [system map](system-map.md)，批准的目标见 [system design](../architecture/system-design.md)。
 
@@ -21,8 +21,8 @@ AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端。Editor E1–
 - Product intent：Analyzer/Editor 历史范围与 Visualizer V0 均已批准；PROD-014V 已关闭，PROD-022 保留为非阻断未来问题。
 - System design：Analyzer/Editor 历史设计仍是已批准/实现基线；Visualizer system design、接口、风险和 ADR-0014–0017 已获批准。
 - Execution planning：M1–M14、Editor E0-D/E1–E7 与 Visualizer V0-D 均为 `Complete`；Visualizer V1 为 `In Progress`，V2–V6 为 `Planned`。
-- Quality and evals：M3–M13 与 Editor E1–E7 evidence 保留；M14 19/19 evidence 已批准。
-- Implementation：Editor E7 与 Analyzer M14 已完成；Visualizer 仍只有 `/comingsoon` 入口，不得从试验组件推断已实现能力。
+- Quality and evals：M3–M13 与 Editor E1–E7 evidence 保留；M14 19/19 evidence 已批准；Visualizer V1 21/21 evidence 为 `in-review`。
+- Implementation：Editor E7 与 Analyzer M14 已完成；Visualizer V1 已实现 `/visualizer/:trackId?`、通用 route lease、三栏/抽屉、中性单 Canvas、strict JSON V1 与单草稿。V2 动态绑定、V3/V4 场景、V5 录制和 V6 加固仍未实现。
 - Readiness、release、retrospective：Analyzer M14 为 `Ready with waivers`；PROD-015 仍阻断上线，Editor readiness 独立。
 
 ## Key Documents
@@ -115,12 +115,12 @@ AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端。Editor E1–
 | Area | Current role | Target/change source |
 | --- | --- | --- |
 | `src/views/` | Analyzer 21 卡折叠/FIFO/排序与 M12 masonry，以及 E1–E7 Editor 页面 | system design + M7–M14 + E1–E7 |
-| `src/layouts/` | Header、页面内容与按有效 Editor playback lease 条件隐藏的 MusicBar 共享外壳 | ADR-0001/0006；E1 |
+| `src/layouts/` | Header、页面内容与按有效 Editor/Visualizer route playback lease 条件隐藏的 MusicBar 共享外壳 | ADR-0001/0006/0014；E1/V1 |
 | `src/components/` | 播放 UI、列表、“去编辑”入口、Editor timeline/point workspace、动画及 Canvas/WebGL 可视化 | ADR-0001/0004/0006/0008 |
-| `src/audio/` | 单一 AudioEngine 与 MainLayout-owned AudioSessionService；文件恢复及 E1 tokenized repeat-one lease | ADR-0001/0003/0006；E1 |
+| `src/audio/` | 单一 AudioEngine 与 MainLayout-owned AudioSessionService；文件恢复及通用 Editor repeat-one / Visualizer pause-at-end route lease | ADR-0001/0003/0006/0014；E1/V1 |
 | `src/analysis/` | 21 项分析平台、M14 feature-order 纯模型及 Analyzer/Editor 单一 active consumer lease；Editor 复用 Buffer retained PCM 与 tempo request | ADR-0002/0004/0005/0006/0013；M14/E1/E2 |
 | `src/editor/` | JSON V1 strict codec、原生文件 gateway、独立单草稿、route controller、timeline/tempo、point 命令与 overlay bounds/feature 契约 | ADR-0007–0009；E1–E4 |
-| `src/visualizer/`（planned） | 目标 route controller、strict project/draft、binding resolver、scene registry/host 与 recorder；当前目录尚不存在 | ADR-0014–0017 与 delivery 已批准；V1 quality 契约待提交 |
+| `src/visualizer/` | V1 route controller、strict project/descriptor/codec、原生文件 gateway、单草稿和中性单 Canvas 已实现；binding resolver、动态 scene renderer 与 recorder 仍为 V2–V5 目标 | ADR-0014–0017；V1 canonical in-review |
 | `src/persistence/` | 原生 IndexedDB V1 SessionRepository 与 runtime validator | ADR-0003；M5 |
 | `src/stores/` | 持久化 config 与可序列化 audioSessionStore/恢复/analysis 状态 | ADR-0001/0002/0003 |
 | `src/utils/` | 事件总线、M12 masonry placement 与其他纯工具函数 | 实现时按实际边界维护 |
@@ -132,7 +132,7 @@ AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端。Editor E1–
 
 - Product intent：[problem brief](../product/problem-brief.md)、[scope](../product/scope.md)、[success metrics](../product/success-metrics.md) 中的 Visualizer V0 已于 2026-09-02 获批
 - System design：[system design](../architecture/system-design.md)、[interface contracts](../architecture/interface-contracts.md)、Visualizer 三份子契约与 ADR-0014–0017 已于 2026-09-02 获批
-- Delivery planning：Analyzer M14、Editor E1–E7 与 Visualizer V0-D delivery 均已批准；V1 已开放
+- Delivery planning：Analyzer M14、Editor E1–E7 与 Visualizer V0-D delivery 均已批准；V1 为 `In Progress`，V2–V6 保持 `Planned`
 - Quality design：[eval plan](../quality/eval-plan.md) 已覆盖 M3–M14 并获批准
 - Quality evidence：[evidence index](../quality/evidence-index.md) 的 M3–M13 为历史，M14 当前 record 已批准
 - Editor E1 quality：[eval plan](../quality/editor/eval-plan.md)、[golden](../quality/editor/golden-examples.md)、[failure taxonomy](../quality/editor/failure-taxonomy.md) 与 [evidence](../quality/editor/evidence-index.md) 已获批准
@@ -148,7 +148,7 @@ AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端。Editor E1–
 
 2026-09-01，M14 implementation commit `0e991307d9045a1ec84ddaae0515612240894a92` 与 clean canonical `M14-2026-09-01T02-36-49-995Z-0e991307` 19/19 通过；evidence/readiness 和 R-031–R-033 已复核，M14 关闭且未推送远端。
 
-2026-09-02，owner 要求把 Visualizer 的单场景制作台、两个内置模板、最多四个唯一 Analyzer 特征、Editor 事件绑定和实时 WebM 路线转写为产品意图，并明确批准该 V0 产品意图、关闭 PROD-014V、开放 system design。随后 owner 明确批准 Visualizer V0 system design、接口契约、R-034–R-041 与 ADR-0014–0017，并批准 V1–V6 delivery planning、同意开始 V1。Analyzer/Editor 历史文档与 readiness 身份不变；V1 必须先提交 quality/eval 契约。
+2026-09-02，owner 要求把 Visualizer 的单场景制作台、两个内置模板、最多四个唯一 Analyzer 特征、Editor 事件绑定和实时 WebM 路线转写为产品意图，并明确批准该 V0 产品意图、关闭 PROD-014V、开放 system design。随后 owner 明确批准 Visualizer V0 system design、接口契约、R-034–R-041 与 ADR-0014–0017，并批准 V1–V6 delivery planning、同意开始 V1。V1 quality 契约与实现已分别提交；clean canonical `V1-2026-09-02T07-03-26-973Z-fd44c892` 在 commit `fd44c8921a534c22b2362ccffff7ec9e46f3ff02` 上 21/21 通过，summary SHA-256 为 `14c9ed2258baf6c9a2a3a20dfcaba65a0c643029f8510a1d9e4c6662c9c90300`。owner 批准前 V1 仍为 `In Progress`，V2 不开放。
 
 ## Current Known Gaps
 
@@ -161,7 +161,7 @@ AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端。Editor E1–
 - Analyzer M12/M13 clean canonical 保留为历史；M14 clean canonical `M14-2026-09-01T02-36-49-995Z-0e991307` 在 commit `0e991307d9045a1ec84ddaae0515612240894a92` 上 19/19 通过，R-031/R-032/R-033 已缓解，readiness 恢复。
 - Editor E1–E6 已实现并获批准；E6 双浏览器、三格式、10,000 事件、资源与无障碍 clean canonical 为 40/40。
 - Editor E1–E7 均为 `Complete`；M14 不重开 Editor delivery 或改变 overlay/lease/runtime 边界。
-- Visualizer 当前仍由 `/comingsoon` 占位；V0 产品、system design 与 delivery 已批准：通用 route lease、strict JSON/单草稿、同歌 Editor 快照、绝对时间双模板与 pre-Gain WebM。当前只开放 V1 workspace foundation，quality 契约尚待提交。
+- Visualizer V1 已从 `/comingsoon` 迁移到 `/visualizer/:trackId?`，并实现通用 route lease、strict JSON/单草稿、三栏/抽屉和中性单 Canvas；同歌 Editor 动态绑定、真实双模板效果与 pre-Gain WebM 仍属于 V2–V5。V1 canonical 为 `in-review`，不能表述为 V1 已关闭。
 - E1 clean canonical `E1-2026-08-26T15-24-21-043Z-792b424f` 在 clean commit `792b424fbab8e3621ad24d8c9add47d1c9bffcb4` 上 18/18 通过，summary SHA-256 为 `db51ba98b757ccd524d298243c6118eb24fad60101a74f20a5ff98478a5d5bc6`，并于 2026-08-26 获 owner 批准。
 - E2 clean canonical `E2-2026-08-26T16-42-47-634Z-9fc5c0a8` 在 clean commit `9fc5c0a81fcf90abfbc665412277147cd958200f` 上 22/22 通过，summary SHA-256 为 `4465c20343af9092601296b86a229200579f648ffa90641411b88f9861ba8660`；2026-08-27 owner 批准后 E2 为 `Complete`，E3 已开放。
 - E3 clean canonical `E3-2026-08-27T02-53-58-176Z-c670ddf5` 在 clean commit `c670ddf5494269f5a56abd20c3c5653ee5b27cef` 上 26/26 通过，summary SHA-256 为 `2a0a46b9a0e9b459ee17b11919451f074205fda58801d84a1274dbd12f5cfe4c`；2026-08-27 owner 批准后 E3 为 `Complete`，E4 已开放。

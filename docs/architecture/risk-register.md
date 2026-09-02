@@ -5,7 +5,7 @@ last_reviewed: 2026-09-02
 upstream_docs:
   - "docs/architecture/system-design.md"
   - "docs/architecture/interface-contracts.md"
-next_action: "在 Visualizer V1–V6 delivery planning 中映射 R-034–R-041；风险保持 Open 直至有实现证据"
+next_action: "owner 复核 Visualizer V1 canonical 与人工门禁；R-034/R-036/R-038 保持 Open，后续里程碑与审批继续累积缓解证据"
 ---
 
 # Risk Register
@@ -64,3 +64,4 @@ next_action: "在 Visualizer V1–V6 delivery planning 中映射 R-034–R-041�
 - 新的高影响风险或剩余风险超过已批准范围时，停止进入下一里程碑并由 `project-owner` 决策。
 - Analyzer R-001–R-021 的历史状态继续由 M3–M11 evidence 支持；R-028–R-030 由 M13、R-031–R-033 由 M14 clean canonical 缓解。Editor R-022–R-027 与 E7 不被 Visualizer 草案改写。
 - `project-owner` 于 2026-09-02 批准 Visualizer V0 架构、R-034–R-041 与 ADR-0014–0017，并开放 V1–V6 execution planning。R-034–R-041 仍均为 `Open`；只有后续里程碑的可复现证据和 owner 审批才能缓解，架构批准本身不等于风险已缓解。
+- Visualizer V1 clean canonical `V1-2026-09-02T07-03-26-973Z-fd44c892` 在 commit `fd44c8921a534c22b2362ccffff7ec9e46f3ff02` 上 21/21 通过，为 R-034 的 route token/pause-at-end、R-036 的 strict project/single draft、R-038 的单中性 Canvas 与 lifecycle 提供部分自动化证据。原生文件人工门禁、V2+ runtime 和 owner 批准尚未完成，因此三项风险继续为 `Open`。

@@ -6,7 +6,7 @@ upstream_docs:
   - "docs/quality/visualizer/eval-plan.md"
   - "docs/quality/visualizer/golden-examples.md"
   - "docs/architecture/risk-register.md"
-next_action: "使用 VFT-* 与 S0–S3 标记 provisional/canonical 失败，不覆盖失败 artifact"
+next_action: "owner 按 VFT-* 与 S0–S3 复核 V1 canonical 和人工门禁；未来失败不得覆盖现有 artifact"
 ---
 
 # Visualizer V1 Failure Taxonomy

@@ -6,7 +6,7 @@
 - Vitest：4.1.10。官方已发布但当前 npm 镜像尚未提供 Vitest 5，因此使用镜像可获得且仍受支持的 4.1 版本。
 - Playwright Test：1.62.0；必需浏览器为本机稳定版 Google Chrome 与 Microsoft Edge。
 - FFmpeg：8.1.2；只用于生成和检查受控 WAV/MP3/FLAC fixture。
-- 当前 M13 验证使用 Google Chrome 152.0.7977.64 与 Microsoft Edge 152.0.4191.53；`npm run test:e2e:edge` 使用真实 `msedge` channel，浏览器缺失时仍以退出码 2 报告 `blocked`。
+- 当前 Visualizer V1 canonical 使用 Google Chrome 152.0.7977.66 与 Microsoft Edge 152.0.4191.53；`npm run test:e2e:v1:edge` 使用真实 `msedge` channel，浏览器缺失时仍明确报告失败/blocked。
 
 M3–M13 不建设 CI。下列命令当前均为本地门禁；正式证据要求在干净 commit 上复跑。M3–M13 与 Editor E1–E7 canonical 均已获批准。E7 的 44/44 run 因全屏浮层修订成为 `pre-revision`，修订版 46/46 已于 2026-08-31 获 owner 批准。
 
@@ -85,6 +85,12 @@ M3–M13 不建设 CI。下列命令当前均为本地门禁；正式证据要�
 | `npm run test:e2e:e7` | 顺序执行真实 Chrome 与 Edge 的 E7 紧凑工作台套件 |
 | `npm run test:e7:unit` | E7 visibility/default/menu/active-set 纯逻辑 |
 | `npm run test:e7:integration` | E7 preference、刷新/导入、analysis 收敛与写失败 |
+| `npm run fixtures:v1:golden` | Visualizer V1 默认/完整/无效 strict project、descriptor、歌曲 identity 和四特征边界 golden |
+| `npm run test:v1:unit` | Visualizer V1 factory、canonical codec、strict descriptor/parameter/binding 和 route lease token |
+| `npm run test:v1:integration` | Visualizer route generation、Editor/Visualizer lease、单草稿、quota/abort、同/异歌恢复和导入原子性 |
+| `npm run test:e2e:v1:chrome` | Chrome Header/route、MusicBar、pause-at-end、三栏/抽屉、单 16:9 Canvas、transport 和资源循环 |
+| `npm run test:e2e:v1:edge` | 使用真实 Edge 执行同一 V1 route/lease/layout/resource 专项套件 |
+| `npm run test:e2e:v1` | 顺序执行真实 Chrome 与 Edge 的 V1 专项套件 |
 | `npm run test:e2e:edge` | 使用真实 Edge 执行全部 M3–M11 E2E；缺失时明确 blocked |
 | `npm run build` | TypeScript project build 和 Vite production build |
 | `npm run eval:m3:provisional` | 在未提交工作树生成本地 provisional run |
@@ -123,6 +129,8 @@ M3–M13 不建设 CI。下列命令当前均为本地门禁；正式证据要�
 | `npm run eval:e6` | 只允许在干净 commit 上执行 40 步 E6 canonical suite 并生成可登记证据 |
 | `npm run eval:e7:provisional` | 在 dirty worktree 执行 46 步 E7 全屏浮层、密度、E6 基线和 M12 双浏览器回归 |
 | `npm run eval:e7` | 只允许在干净 commit 上执行 46 步 E7 canonical suite 并生成可登记证据 |
+| `npm run eval:v1:provisional` | 在 dirty worktree 执行 21 步 V1 suite，只作为实现反馈 |
+| `npm run eval:v1` | 只允许在干净 implementation commit 上执行 21 步 V1 canonical suite |
 
 ## 目录职责
 
@@ -137,7 +145,7 @@ M3–M13 不建设 CI。下列命令当前均为本地门禁；正式证据要�
 - `tests/harness/`：被正常 Vitest 配置排除的 deliberate failure 及其自检。
 - `tests/scripts/`：浏览器检测和 M3–M13 run orchestration。
 - `tests/editor/`：Editor 工程格式、草稿、lease 和 session controller 的里程碑专项测试。
-- `tests/visualizer/`（V1 planned）：Visualizer strict project、route lease、单草稿和 session controller 的里程碑专项测试；quality 契约提交后才创建源码。
+- `tests/visualizer/`：Visualizer V1 strict project/descriptor、route lease、单草稿、session controller 和版本化 golden 专项测试。
 
 M4 浏览器测试中的损坏 WAV 与 65 秒、48kHz、单声道计时 WAV 都写入 `test-results/`，不提交二进制。长时钟测试用同一 DOM 采样同时读取 `performance.now()` 与 AudioContext 驱动快照；三次 seek 使用进度条真实几何。
 
@@ -177,9 +185,9 @@ E7 双浏览器套件固定验证紧凑令牌、窗口级 fixed 灰色 overlay�
 
 E7 clean run `E7-2026-08-28T15-02-48-298Z-78bc7f06` 在 commit `78bc7f06311a09948e5efae941a14599305b81a5` 上 44/44 通过，summary SHA-256 为 `43f63963fafa774ea18a8ddda290d573fd7869a269fc71798c22ca3076b14a4a`；全屏浮层修订后该 run 为 `pre-revision`。修订版 clean run `E7-2026-08-29T05-23-03-986Z-080f577f` 在 commit `080f577fe20fcb22a20184dce0b15892c5299464` 上 46/46 通过，summary SHA-256 为 `da7c5e7a931a1e8c6cb3a64c3eeac8f5cb7d5cc6d6b604de6e4ea7b009ec13f5`；owner 于 2026-08-31 批准并关闭 E7。
 
-Visualizer V1–V6 delivery planning 已于 2026-09-02 获 owner 批准；当前只开放 V1。V1 测试必须先提交 quality/eval 契约，再新增 `test:v1:*`、双浏览器 route/layout 回归与 clean canonical runner；V2 数据绑定和后续场景/录制仍不得进入。
+Visualizer V1 quality 契约、实现和双浏览器 runner 已完成。clean canonical `V1-2026-09-02T07-03-26-973Z-fd44c892` 在 commit `fd44c8921a534c22b2362ccffff7ec9e46f3ff02` 上 21/21 通过，summary SHA-256 为 `14c9ed2258baf6c9a2a3a20dfcaba65a0c643029f8510a1d9e4c6662c9c90300`；unit 12/12、integration 7/7、Chrome 4/4、Edge 4/4。V2 数据绑定和后续场景/录制仍不得进入。
 
-V1 quality contract 固定 AC-V101–AC-V108、V1-G01–G12、VFT-ROUTE/LEASE/PROJECT/DRAFT/FILE/LAYOUT/RESOURCE、21 步 clean canonical，以及 Chrome/Edge 原生 picker/覆盖提示人工补偿。quality 文档获批前 evidence 保持 `in-review`。
+V1 quality contract 固定 AC-V101–AC-V108、V1-G01–G12、VFT-ROUTE/LEASE/PROJECT/DRAFT/FILE/LAYOUT/RESOURCE、21 步 clean canonical，以及 Chrome/Edge 原生 picker、覆盖提示和 `beforeunload` 人工补偿。owner 完成人工任务并批准前，V1/evidence 保持 `In Progress`/`in-review`，R-034/R-036/R-038 保持 `Open`。
 
 E2 clean canonical `E2-2026-08-26T16-42-47-634Z-9fc5c0a8` 已在 commit `9fc5c0a81fcf90abfbc665412277147cd958200f` 上 22/22 通过，summary SHA-256 为 `4465c20343af9092601296b86a229200579f648ffa90641411b88f9861ba8660`；2026-08-27 owner 批准该结果并开放 E3。
 
