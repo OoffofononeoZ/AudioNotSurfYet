@@ -79,14 +79,14 @@
 | `npm run fixtures:v1:golden` / `test:v1:unit` / `test:v1:integration` | 运行 V1 strict project、descriptor、route lease、单草稿和 session 专项 | 已实现；用于 V1 质量回归 |
 | `npm run test:e2e:v1:chrome` / `test:e2e:v1:edge` | 在真实 Chrome/Edge 运行 V1 route/layout/resource 专项 | 原生 OS picker 仍需人工补偿 |
 | `npm run eval:v1:provisional` | 在 dirty worktree 运行 21 步 V1 suite | 只生成实现反馈 |
-| `npm run eval:v1` | 只在干净 implementation commit 上运行 21 步 V1 suite | 当前 canonical 21/21，evidence in-review |
+| `npm run eval:v1` | 只在干净 implementation commit 上运行 21 步 V1 suite | canonical 21/21 已获 owner 批准 |
 
 ## 已知测试缺口
 
 - 已建立 Vitest、Playwright、Worker、IndexedDB、fixture、golden、docs 和 deliberate-failure harness。
 - fixture/golden 生成改用 Node 24 原生 type stripping；不依赖在受限环境会产生 IPC `EPERM` 的 `tsx` CLI。
 - 当前没有正式 CI，自动化结论必须限定为本地环境。
-- Visualizer V1 clean canonical `V1-2026-09-02T07-03-26-973Z-fd44c892` 已在 commit `fd44c8921a534c22b2362ccffff7ec9e46f3ff02` 上 21/21 通过；原生 picker/覆盖/`beforeunload` 与 owner 批准尚待完成，不能把它表述为 V1 已关闭或 V2 已开放。
+- Visualizer V1 clean canonical `V1-2026-09-02T07-03-26-973Z-fd44c892` 已在 commit `fd44c8921a534c22b2362ccffff7ec9e46f3ff02` 上 21/21 通过，并于 2026-09-02 获 owner 人工批准；V1 已关闭，V2 数据绑定已开放。
 - 当前机器已安装 Edge 151；M11 clean canonical 已使用真实 `msedge` channel 全量 31/31 通过。原生权限 prompt 不能由 OPFS 自动化替代；当前候选已由 `project-owner` 于 2026-08-26 完成人工补偿签字，相关实现或浏览器变化后须重做。
 - 正式 M3 canonical run 已在 clean commit `17d16f0da37289c1f67f75203502beef999572ea` 上通过并登记，且已由 `project-owner` 批准。
 - 正式 M4 canonical run 已在 clean commit `e5cfe9e8ab62301f3c5b0ddcdd37847a2e131a0f` 上通过并登记，evidence 与 working agreements 已由 `project-owner` 批准。
