@@ -35,5 +35,6 @@ Golden 使用确定性歌曲 hash、虚构元数据、版本化 Editor point/ran
 | --- | --- | --- | --- |
 | analysis with finite registry min/max | registry min/max | descriptor default → max | attack 0 / release 0 |
 | analysis without complete finite range | `0..1` | descriptor default → max | attack 0 / release 0 |
-| editor-event | `0..1` | descriptor default → max | attack 0 / release 0.12s |
+| Editor point event | `0..1` | descriptor default → max | attack 0 / release 0.12s |
+| Editor range event | `0..1` | descriptor default → max | attack 0 / release 0 |
 | full vector | registry/fallback, component-wise | descriptor vector contract | attack 0 / release 0 only |
