@@ -2,7 +2,7 @@
     <main class="min-w-full h-dvh bg-black" id="main-layout">
         <HeaderBar />
         <router-view />
-        <MusicBar v-if="!editorPlaybackActive" :progress="0" />
+        <MusicBar v-if="!routePlaybackActive" :progress="0" />
     </main>
 </template>
 
@@ -32,6 +32,12 @@ import {
 } from '../editor/editorSessionController';
 import { EditorDraftRepository } from '../editor/editorDraftRepository';
 import { NativeEditorFileGateway } from '../editor/fileIO';
+import {
+    VisualizerSessionController,
+    visualizerSessionControllerKey,
+} from '../visualizer/visualizerSessionController';
+import { VisualizerDraftRepository } from '../visualizer/visualizerDraftRepository';
+import { NativeVisualizerFileGateway } from '../visualizer/fileIO';
 
 const audioSessionStore = useAudioSessionStore();
 const audioEngine = new AudioEngine();
@@ -65,6 +71,24 @@ const editorPlaybackActive = computed(() =>
     && ['ready', 'draft-conflict', 'draft-error'].includes(
         editorSnapshot.value.state,
     ));
+const visualizerController = new VisualizerSessionController({
+    audioSession,
+    store: audioSessionStore,
+    repository: new VisualizerDraftRepository(),
+    fileGateway: new NativeVisualizerFileGateway(),
+});
+provide(visualizerSessionControllerKey, visualizerController);
+const visualizerSnapshot = shallowRef(visualizerController.getSnapshot());
+const unsubscribeVisualizer = visualizerController.subscribe((snapshot) => {
+    visualizerSnapshot.value = snapshot;
+});
+const visualizerPlaybackActive = computed(() =>
+    visualizerSnapshot.value.activeTrackId !== null
+    && ['loading', 'ready', 'draft-conflict', 'not-persisted'].includes(
+        visualizerSnapshot.value.state,
+    ));
+const routePlaybackActive = computed(() =>
+    editorPlaybackActive.value || visualizerPlaybackActive.value);
 void audioSession.initialize().then((cache) => {
     analysisCoordinator.setRestoredCache(cache);
 });
@@ -153,6 +177,7 @@ if (import.meta.env.DEV) {
 
 onUnmounted(() => {
     unsubscribeEditor();
+    unsubscribeVisualizer();
     if (developmentBridge) {
         delete (
             window as typeof window & {
@@ -161,6 +186,7 @@ onUnmounted(() => {
         ).__AUDIO_NOT_SURF_YET_M6__;
     }
     void (async () => {
+        await visualizerController.dispose();
         await editorController.dispose();
         await analysisCoordinator.dispose();
         await audioSession.dispose();

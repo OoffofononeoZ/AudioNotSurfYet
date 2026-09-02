@@ -15,7 +15,7 @@ import type { TempoEstimateResult } from '../../src/analysis/types';
 import {
     AudioSessionService,
     type AudioEnginePort,
-    type EditorPlaybackLease,
+    type RoutePlaybackLease,
 } from '../../src/audio/audioSessionService';
 import {
     EditorDraftRepository,
@@ -124,9 +124,11 @@ const createControllerHarness = (
     const playbackReleases: string[] = [];
     const analysisReleases: string[] = [];
     const audioSession = {
-        acquireEditorPlayback: async (trackId: string): Promise<EditorPlaybackLease> => ({
+        acquireRoutePlayback: async ({ trackId }: { trackId: string }): Promise<RoutePlaybackLease> => ({
             token: `play-${trackId}`,
+            consumer: 'editor',
             trackId,
+            endedPolicy: 'repeat-one',
             release: () => playbackReleases.push(trackId),
         }),
         getDecodedTrackDescriptor: (trackId: string): DecodedAudioDescriptor => ({
@@ -434,8 +436,14 @@ describe('Editor E1 foundation integration', () => {
             requestFrame: () => 1,
             cancelFrame: () => undefined,
         });
-        const stale = await service.acquireEditorPlayback('track-a');
-        const current = await service.acquireEditorPlayback('track-a');
+        const stale = await service.acquireRoutePlayback({
+            consumer: 'editor',
+            trackId: 'track-a',
+        });
+        const current = await service.acquireRoutePlayback({
+            consumer: 'editor',
+            trackId: 'track-a',
+        });
         stale.release();
         engine.finish();
         await vi.waitFor(() => expect(engine.seekValues).toEqual([0]));

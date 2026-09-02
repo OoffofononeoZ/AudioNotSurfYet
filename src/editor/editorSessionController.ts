@@ -14,7 +14,7 @@ import type {
 } from '../analysis/types';
 import type {
     AudioSessionService,
-    EditorPlaybackLease,
+    RoutePlaybackLease,
 } from '../audio/audioSessionService';
 import type { useAudioSessionStore } from '../stores/audioSessionStore';
 import type { EditorDraftRepositoryPort } from './editorDraftRepository';
@@ -132,7 +132,7 @@ export class EditorSessionController {
     private readonly analysisListeners = new Set<AnalysisListener>();
     private snapshot = initialSnapshot();
     private analysisSnapshot: AnalysisCoordinatorSnapshot;
-    private playbackLease: EditorPlaybackLease | null = null;
+    private playbackLease: RoutePlaybackLease | null = null;
     private analysisLease: AnalysisConsumerLease | null = null;
     private unsubscribeAnalysis: (() => void) | null = null;
     private tempoRequestRevision = 0;
@@ -306,7 +306,10 @@ export class EditorSessionController {
             return;
         }
         try {
-            const playbackLease = await this.audioSession.acquireEditorPlayback(trackId);
+            const playbackLease = await this.audioSession.acquireRoutePlayback({
+                consumer: 'editor',
+                trackId,
+            });
             if (generation !== this.routeGeneration || this.disposed) {
                 playbackLease.release();
                 return;
@@ -424,9 +427,10 @@ export class EditorSessionController {
         const generation = ++this.routeGeneration;
         this.releaseLeases();
         try {
-            const playbackLease = await this.audioSession.acquireEditorPlayback(
-                previous.id,
-            );
+            const playbackLease = await this.audioSession.acquireRoutePlayback({
+                consumer: 'editor',
+                trackId: previous.id,
+            });
             if (generation !== this.routeGeneration || this.disposed) {
                 playbackLease.release();
                 return { kind: 'fallback' };
