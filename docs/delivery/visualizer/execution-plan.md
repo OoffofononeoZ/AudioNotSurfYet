@@ -88,16 +88,21 @@ Exit gate:
 
 Implementation:
 
-- 实现横线和竖线的 enabled、source intensity、颜色、粗细、亮度和衰减参数。
-- 推荐横线选择主要音色 lane，竖线选择 drum lane/inner class；默认保持未绑定并提供明确选择提示。
-- point 使用确定性 pulse，range 使用持续 gate；constant 可产生固定线条或关闭输出。
-- 场景只接收已解析参数、seed 和绝对歌曲时间，不访问 store、Worker 或 Editor DB。
+- 在现有 16:9 Canvas 上建立唯一 `VisualizerRendererHost`，独占一个 Three.js `WebGLRenderer` 和一个可取消视觉 RAF；DPR 上限为 2，播放连续绘制，暂停/seek/参数/resize 只请求单帧。
+- `SceneRegistry` descriptor 增加 scene factory；scene 接口固定 `render({ timeSeconds, values, bindingRevision })`、`resize(width,height,dpr)`、`dispose()`。父级同帧只调用一次 resolver，并把同一 resolved map 提供给 scene 和 inspector。
+- Orthogonal Lines 使用单全屏 quad/shader，在 `#020403` 背景中心绘制正交横线/竖线；scene 只消费解析值，不读取 store、Worker、Editor DB 或音频节点。
+- intensity 规范到 0–1，并同时控制中心向两侧的长度和主线 alpha；thickness 为 CSS px，brightness >1 增强 halo，enabled=false 完全隐藏，横竖状态互不串扰。
+- `horizontalDecay`/`verticalDecay` 保持 JSON V1 现有字段并以秒为单位；V2 point 默认 120ms release 后进入 60Hz 确定性余辉，range 先按 `[start,end)` gate，再按 decay 衰减。
+- scene 余辉使用一秒 checkpoint，按歌曲/template/binding revision 隔离；seek、刷新和暂停单帧从 checkpoint 重放，禁止 RAF delta。
+- 新工程 intensity 继续 constant 0，并显示“请选择主要音色/鼓点数据源”；不按 lane/class 名称隐式绑定。
+- 切换到 Cube Swarm 时 dispose Orthogonal Lines geometry/material，保留同一 host/renderer/Canvas 并显示 V4 中性预览。scene 异常进入可重试错误层，transport、模板、工程和草稿保持可用。
 
 Exit gate:
 
 - 横线/竖线绑定互不串扰；main/inner class、point/range/constant 和未绑定状态均有 golden。
-- 从 0 播放、直接 seek、刷新和暂停单帧在同一时间的场景状态一致。
-- template switch、dispose、错误隔离、键盘 inspector 与视觉非纯颜色状态通过。
+- 从 0 播放、直接 seek、刷新和暂停单帧在同一时间的 frame-state hash 一致，播放到可见线条响应 `<=50ms`，设置反馈 `<=100ms`。
+- 20 次 template/route 循环保持单 Canvas、RendererHost、WebGLRenderer 和视觉 RAF；无 Visualizer 归因主线程任务 `>50ms`，console/pageerror 为 0。
+- template switch、dispose、错误隔离/重试、1024/1280/1920、DPR/resize、键盘 inspector 与 reduced motion 通过。
 
 ### V4 — Cube Swarm
 

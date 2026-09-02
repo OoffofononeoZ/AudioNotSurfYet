@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/product/success-metrics.md"
   - "docs/architecture/system-design.md"
   - "docs/architecture/visualizer/project-format-v1.md"
-next_action: "在 V2–V4 delivery planning 中映射绑定、四特征、确定性与双场景验收；规划批准前不实现"
+next_action: "按 DEC-039 实施 V3 单 RendererHost、Orthogonal Lines 与确定性余辉；V4 保持 Planned"
 ---
 
 # Visualizer Binding and Scene Contracts
@@ -104,20 +104,33 @@ interface SceneTemplateDescriptor {
 }
 
 interface VisualizerScene {
-  render(input: { timeSeconds: number; values: ReadonlyMap<string, unknown> }): void
+  render(input: {
+    timeSeconds: number
+    values: ReadonlyMap<string, unknown>
+    bindingRevision: number
+  }): void
   resize(width: number, height: number, dpr: number): void
   dispose(): void
 }
 ```
 
+`VisualizerRendererHost` 独占现有 16:9 Canvas、一个 Three.js `WebGLRenderer` 和一个可取消视觉 RAF。host 读取共享 `PlaybackSnapshot`，不建立第二播放时钟；播放时连续绘制，暂停、seek、参数变更和 resize 只请求单帧。drawing DPR 固定为 `min(max(devicePixelRatio,1),2)`，CSS 尺寸和输出几何继续保持 16:9。
+
+父级每个绘制时点只调用一次 `resolveParameters(timeSeconds)`，把同一份只读 resolved map 同时交给 scene 与 inspector；scene 不能读取 store、Worker、Editor DB、音频节点或 exact cursor。scene create/render/resize 异常进入可重试错误层，transport、模板选择、工程导入导出和草稿继续可用；重试先 dispose 旧 scene，再在同一 host 中重建。
+
 首版 registry 只允许：
 
 ### Orthogonal Lines @1
 
-- horizontal/vertical 各自声明 enabled、source intensity、color、thickness、brightness、decay。
-- 推荐 horizontal 选择主要音色 lane，vertical 选择 drum lane/class；两者默认保持未绑定并提示选择。
-- range gate 持续显示，point 经确定性 smoothing 形成短脉冲；未绑定可以设 constant 或关闭。
-- 同一场景只使用一个 renderer/canvas/RAF。
+- horizontal/vertical 各自声明 enabled、source intensity、color、thickness、brightness、decay；`horizontalDecay`、`verticalDecay` 的单位均为秒，字段名和 JSON V1 保持不变。
+- 单个全屏 quad/shader 在固定背景 `#020403` 上绘制两条中心正交线。每个方向的 intensity 先裁剪到 `0…1`，可见长度为对应画布轴长度乘 display intensity，并从中心向两端伸展；主线 alpha 为 `clamp(displayIntensity × brightness,0,1)`。
+- thickness 使用 CSS px，DPR/resize 后视觉宽度不变；brightness 大于 1 时继续增强外围 halo，避免主线 alpha 饱和后失效。交点使用加法混合，但 horizontal/vertical 参数与状态互不回写。
+- `enabled=false` 时该方向完全隐藏。推荐 horizontal 选择主要音色 lane，vertical 选择 drum lane/class；新工程 intensity 仍为 constant 0，并显示“请选择主要音色/鼓点数据源”，不按名称或顺序自动绑定。
+- V2 point 先沿用默认 120ms release，range 在 `[start,end)` 内保持 gate；V3 再对 resolved intensity 应用视觉余辉。视觉余辉不修改 V2 resolved value。
+- 每个方向以固定 60Hz 更新 `E_n = max(I_n, E_(n-1) × exp(-4 × Δt / decaySeconds))`；decay 0 时 `E_n = I_n`，经过一个 decaySeconds 后历史余辉约剩 2%。每秒建立 checkpoint，并按歌曲身份、template 与 binding revision 隔离。
+- seek、刷新和暂停单帧从确定性 checkpoint 重放到绝对歌曲时间；禁止使用 RAF delta。同一工程、歌曲和时间产生相同 renderer-neutral frame-state hash。
+- reduced motion 只关闭工作台装饰过渡，不关闭用户主动播放产生的场景响应。
+- 同一场景只使用一个 renderer/canvas/RAF；scene dispose 必须释放自己的 geometry/material。
 
 ### Cube Swarm @1
 
@@ -127,6 +140,8 @@ interface VisualizerScene {
 - three satellites 的 `orbitSpeed` 默认 constant，也允许用户改绑。
 - cube count、colors、base size、camera distance、background 是 constant 参数。
 - 默认分析集合只有 Amplitude Spectrum 与 Energy，为用户保留两个 feature 名额。
+
+V3 切换到尚未实现的 Cube Swarm 时必须 dispose Orthogonal Lines 的 geometry/material，但保留同一个 host、renderer 和 Canvas，并显示明确的 V4 中性预览；该状态不是 renderer error，也不能被表述为 Cube Swarm 已完成。
 
 ## Renderer Host and Lifecycle
 

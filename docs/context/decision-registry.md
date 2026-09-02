@@ -69,6 +69,7 @@ next_action: "Visualizer V2 已获 owner 批准并关闭；V3 Orthogonal Lines �
 | DEC-036 | 2026-09-01 | 实施 M14：21 卡前后插入、全局 featureOrder、pointer/touch/click/keyboard、独立 live、V1 optional field；排序与 FIFO/Worker 隔离，只本地提交 | project-owner | approved | [ADR-0013](../architecture/adrs/0013-analyzer-accessible-card-reordering.md) | 顺序范围、输入语义、schema、canonical 或 Git 授权改变 |
 | DEC-037 | 2026-09-02 | 批准 Visualizer V0：当前本地歌曲、单场景、固定 16:9、最多四个唯一 Analyzer 特征、两个内置模板，先实时预览/JSON 后实时 WebM；开放 system design | project-owner | approved | [Scope](../product/scope.md) | 场景数量、特征上限、数据来源、输出格式、录制路线或产品边界改变 |
 | DEC-038 | 2026-09-02 | Visualizer delivery 固定新工程默认 Orthogonal Lines/720p30；1280+ 常驻三栏，1024–1279 中央预览加互斥抽屉；V1–V6 逐里程碑 canonical 与 owner 审批 | project-owner | approved | [Visualizer execution plan](../delivery/visualizer/execution-plan.md) | 默认模板/output、断点布局、切片、证据节奏或逐里程碑门禁变化 |
+| DEC-039 | 2026-09-02 | V3 Orthogonal Lines 使用中心正交结构；intensity 同时控制中心向两端的长度与透明度；decay 为不改写 V2 resolved value 的确定性时间余辉；背景固定 `#020403`，颜色由现有参数控制 | project-owner | approved | [Binding and scene contracts](../architecture/visualizer/binding-and-scene-contracts.md) | 线条构图、intensity 映射、decay 算法/单位、背景或参数所有权改变 |
 
 ## Approval Evidence
 
@@ -77,6 +78,8 @@ next_action: "Visualizer V2 已获 owner 批准并关闭；V3 Orthogonal Lines �
 2026-09-02，`project-owner` 明确回复：“我批准 Visualizer V0 产品意图、单场景模板模型、最多四项分析特征、两个内置场景与 WebM 路线；同意进入 Visualizer 架构设计。”DEC-037 与 PROD-014V 据此获批并开放 system design。随后 owner 明确批准 Visualizer V0 system design、接口契约、R-034–R-041 与 ADR-0014–0017，并进一步批准 Visualizer V1–V6 delivery planning、同意开始 V1；DEC-038 据此生效。V1 在 clean commit `fd44c8921a534c22b2362ccffff7ec9e46f3ff02` 上完成 21/21 canonical，并于同日获 owner 批准；V1 关闭、V2 开放，R-034 改为 `Mitigated`。该批准不构成 V2、场景、录制、readiness 或上线通过。
 
 同日，`project-owner` 明确回复“使用项目相关技能执行此计划”。随附计划要求保持 V2 canonical identity 不变、批准 V2 quality/evidence、关闭 V2 并开放 V3；据此 V2 为 `Complete`、R-035/R-036 为 `Mitigated`、V3 为 `In Progress`。该批准不补写用户未提供的人工观察值，不构成 V3 canonical、V4–V6 或生产上线通过；继续只创建本地提交，不 fetch、不 push。
+
+同一计划固定 DEC-039 的中心正交线条、intensity 长度/透明度双映射、确定性时间余辉与 `#020403` 背景，并授权先提交 V3 quality contract 再实施。该决定细化 ADR-0016，不改变 JSON V1、V2 resolved value、四特征上限或 V4–V6 范围。
 
 同日，`project-owner` 明确要求实施 Q0 质量设计计划，批准了 Q0 前置、四级严重度和 readiness 后置的阶段安排；同时要求三份质量文档先保持 `in-review`，经单独审阅后才生效。因此 DEC-010 的时序决定已批准，但 Q0 内容尚未批准。
 

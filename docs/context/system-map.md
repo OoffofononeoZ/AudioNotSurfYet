@@ -44,8 +44,9 @@ showOpenFilePicker → FileSystemFileHandle → File
   ├→ AnalysisConsumerLease(visualizer, deduped 0–4) → AnalysisCoordinator/Worker/cache [V2 current]
   ├→ validated EditorProjectV1 snapshot → BindingResolver [V2 current]
   └→ BindingResolver(60Hz absolute time + checkpoint) [V2 current]
-       → SceneRegistry(orthogonal-lines | cube-swarm) [V3/V4 target]
-       → one Canvas + one WebGLRenderer + one RAF
+       → SceneRegistry factory(orthogonal-lines | cube-swarm) [V3/V4 target]
+       → one VisualizerRendererHost + one Canvas/WebGLRenderer/visual RAF
+       → Orthogonal Lines 60Hz scene-local trail [V3 in progress]
        └→ captureStream + AudioEngine pre-Gain tap → MediaRecorder → WebM Blob
 ```
 

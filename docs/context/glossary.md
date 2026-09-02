@@ -4,7 +4,7 @@ owner: "project-owner"
 last_reviewed: 2026-09-02
 upstream_docs:
   - "docs/context/index.md"
-next_action: "Visualizer V2 已获 owner 批准；V3 Orthogonal Lines 为 In Progress"
+next_action: "V3 quality contract 与 DEC-039 已建立；实施单 RendererHost 与确定性余辉"
 ---
 
 # Glossary
@@ -55,9 +55,12 @@ next_action: "Visualizer V2 已获 owner 批准；V3 Orthogonal Lines 为 In Pro
 | shared viewport | 所有活动卡共同读取的 start/end/zoom；cursor 由播放快照实时派生且不持久化 | zoom、pan、click seek 和键盘 seek 在所有卡保持同一时间身份 | [system design](../architecture/system-design.md) |
 | TestLands | `/testlands` 下的试验页面 | 当前不属于已批准产品表面或稳定接口 | [index](index.md) |
 | Visualizer V0 | 围绕当前本地歌曲，把固定值、最多四个 Analyzer 特征和同歌 Editor 事件映射到单一场景模板的音频可视化制作台 | 产品意图、系统设计与 delivery 已批准；V1 只证明工作台基础，不能冒充动态场景已完成 | [scope](../product/scope.md) |
-| Visualizer V0-D | Visualizer V1–V6 的 execution、acceptance、test strategy 与 milestone planning 门禁 | 已于 2026-09-02 获批并关闭；当前只开放 V1，V2–V6 仍为 Planned | [milestone plan](../delivery/visualizer/milestone-plan.md) |
+| Visualizer V0-D | Visualizer V1–V6 的 execution、acceptance、test strategy 与 milestone planning 门禁 | 已于 2026-09-02 获批并关闭；V1/V2 已完成，当前 V3 为 In Progress | [milestone plan](../delivery/visualizer/milestone-plan.md) |
 | Visualizer V1 workspace foundation | `/visualizer/:trackId?`、pause-at-end route lease、三栏/互斥抽屉、中性 16:9 单 Canvas、strict JSON V1 和独立单草稿 | 21/21 canonical 与人工门禁已批准；不含动态 binding、真实场景或录制 | [Visualizer evidence](../quality/visualizer/evidence-index.md) |
 | Visualizer V2 data binding | 模板参数的 constant、analysis、editor-event 来源，0–4 唯一特征 planner、同歌 Editor snapshot 与 60Hz 绝对时间 resolver | 已实现且 clean canonical 26/26 获 owner 批准；V3 已开放 | [Visualizer V2 eval](../quality/visualizer/v2-eval-plan.md) |
+| Visualizer V3 Orthogonal Lines | 在固定 `#020403` 背景中心用单 quad/shader 绘制横竖正交线；intensity 同时控制长度和 alpha，decay 是 scene-local 确定性余辉 | quality contract 与 DEC-039 已建立；实现/canonical 尚未完成，V4 保持 Planned | [Visualizer V3 eval](../quality/visualizer/v3-eval-plan.md) |
+| display intensity | V2 resolved intensity 经 0–1 裁剪后，再由 V3 60Hz scene-local decay 得到的显示能量 | 只决定对应方向的长度、主线 alpha 与 halo，不回写工程或 V2 resolved value | [binding contracts](../architecture/visualizer/binding-and-scene-contracts.md) |
+| `VisualizerRendererHost` | Visualizer 页面中独占现有 Canvas、单一 Three.js WebGLRenderer 和单一可取消视觉 RAF 的 host | 读取共享 PlaybackSnapshot；播放连续绘制，暂停/seek/参数/resize 单帧；模板切换不重建 host | [ADR-0016](../architecture/adrs/0016-deterministic-scene-registry.md) |
 | unique analysis feature budget | 一个 Visualizer 场景中所有参数去重后的 Analyzer `FeatureId` 集合，首版上限为四 | 固定值和 Editor 事件不计数；多个参数共享同一特征只占一个名额，第五项必须在 Worker 前拒绝 | [open questions](../product/open-questions.md) |
 | scene template | Visualizer 中一次独占输出画布的受控完整场景；首版只有 Orthogonal Lines 与 Cube Swarm | 不是可执行 Vue/JavaScript/shader 插件，也不允许多模板叠加 | [scope](../product/scope.md) |
 | `VisualizerProjectV1` | 绑定单首歌曲的 strict JSON 工程，保存输出预设、单模板/version/seed、完整 bindings 和可选 Editor 快照 | 不保存 Analyzer 数组、PCM、cache、renderer 或录制 Blob；未知字段和错歌原子拒绝 | [project format](../architecture/visualizer/project-format-v1.md) |

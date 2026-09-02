@@ -4,7 +4,7 @@ owner: "project-owner"
 last_reviewed: 2026-09-02
 upstream_docs:
   - "docs/architecture/system-design.md"
-next_action: "在 Visualizer V1–V6 delivery planning 中把已批准接口映射为可验证切片；批准前不实现"
+next_action: "实施 V3 scene factory、bindingRevision render 输入与单 RendererHost；V4–V6 保持原门禁"
 ---
 
 # Interface Contracts
@@ -755,7 +755,7 @@ type AnalysisConsumer = 'analyzer' | 'editor' | 'visualizer'
 
 - `VisualizerProjectV1`、strict codec、歌曲 identity、单草稿和原子导入见 [Visualizer Project Format V1](visualizer/project-format-v1.md)。
 - constant/analysis/editor-event 联合、向量投影、确定性变换、四特征 planner、两个 scene descriptor 与 renderer host 见 [Binding and Scene Contracts](visualizer/binding-and-scene-contracts.md)。
-- 模板 registry 必须穷尽参数。renderer 只能接收已经解析的逐帧值、绝对时间和 seed，不能访问 store、Worker、Editor DB 或任意脚本。
+- 模板 registry 必须穷尽参数并提供 scene factory。renderer 只能接收已经解析的逐帧值、绝对时间、binding revision 和 seed，不能访问 store、Worker、Editor DB、音频节点、exact cursor 或任意脚本；父级同帧只解析一次参数并让 scene/inspector 共享同一只读 map。
 
 ### Recording contracts
 
