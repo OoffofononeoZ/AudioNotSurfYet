@@ -40,6 +40,7 @@ next_action: "实现 V2 planner、projection、Editor snapshot、deterministic r
 - point source 在一个 resolver quantum 内为 1；默认 transform 为即时 attack、120ms release。range 和 analysis 默认 attack/release 为 0，用户可修改。
 - analysis 输入范围优先使用 registry 中有限且严格递增的 min/max，否则为 `0..1`；analysis/editor-event 输出默认从 descriptor 默认值到 descriptor 最大值。
 - full vector 可逐分量投影/变换，但 attack/release 必须均为 0。
+- Buffer 的 compact display series 只保留当前时间采样的 `[min,max]` envelope pair；V2 对该二元向量执行 full/bin/band/mean/max/peak，不轮询 Analyzer 的 1024-sample exact cursor。原始 1024-sample frame 仍只属于 Analyzer exact 数据，不在 Visualizer 工程中伪造。
 
 ## Canonical Rule
 
