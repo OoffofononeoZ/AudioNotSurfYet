@@ -6,7 +6,7 @@ upstream_docs:
   - "docs/quality/visualizer/v2-eval-plan.md"
   - "docs/quality/visualizer/v2-golden-examples.md"
   - "docs/architecture/risk-register.md"
-next_action: "用 V2 unit/integration/browser/canonical 为每类失败建立可复现信号；owner 批准前不关闭 V2"
+next_action: "V2 unit/integration/Chrome/Edge/canonical 信号已登记；owner 批准前不关闭 V2"
 ---
 
 # Visualizer V2 Failure Taxonomy

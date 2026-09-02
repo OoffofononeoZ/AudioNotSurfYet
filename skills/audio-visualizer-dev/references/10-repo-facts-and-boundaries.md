@@ -31,7 +31,7 @@
 | `src/components/` | 播放条、列表、动画列表、Canvas/WebGL 背景和试验性图表 | 各 Vue SFC |
 | `src/audio/` | `AudioEngine` 独占 Web Audio 节点；`AudioSessionService` 编排 File、队列命令、能量和资源释放 | `audioEngine.ts`、`audioSessionService.ts` |
 | `src/analysis/` | M6 的 21 项 FeatureRegistry、AnalysisConfig、PCM/frame 工具、六类 compact codec、module Worker 与 AnalysisCoordinator | `featureRegistry.ts`、`compactCodec.ts`、`analysis.worker.ts`、`analysisCoordinator.ts` |
-| `src/visualizer/` | V1 strict project/descriptor/codec、route session、单草稿 repository、原生 JSON gateway 与中性单 Canvas 基础 | `types.ts`、`projectCodec.ts`、`sceneRegistry.ts`、`visualizerSessionController.ts` |
+| `src/visualizer/` | V1 strict project/route/单草稿基础与 V2 planner、projection、Editor snapshot、60Hz resolver；中间仍为中性单 Canvas | `types.ts`、`projectCodec.ts`、`bindingPlanner.ts`、`bindingResolver.ts`、`visualizerSessionController.ts` |
 | `src/persistence/` | 原生 IndexedDB V1 最近会话、句柄、current Blob/cache 和 runtime validator | `sessionRepository.ts` |
 | `src/stores/` | 持久化 UI/音量配置及可序列化播放/恢复状态 | `configStore.ts`、`audioSessionStore.ts` |
 | `src/utils/` | mitt 单例、能量角度映射、时间格式化和 clamp | `emitter.ts`、`utils.ts` |
@@ -44,7 +44,7 @@
 - 当前是单一前端仓库；未发现后端、数据库、认证、云端媒体库或部署配置。
 - 音频文件由用户通过 `showOpenFilePicker()` 选择；runtime File 保存在 session service，最近队列、文件句柄、唯一 current Blob 与匹配的分析 cache 由 SessionRepository 保存，Pinia `$state` 不持有浏览器资源、PCM 或 typed payload。
 - `configStore` 继续把 `volume` 和 `musicBarSettings.style` 保存到 localStorage；M5 最近会话使用独立 IndexedDB V1，不改变 config schema。
-- Analyzer 21/21 与 Analyzer-only readiness 已由版本化文档和证据确认；Editor E1–E7 已由 clean canonical 和 owner 批准。Visualizer V1 workspace foundation 的 21/21 canonical 与人工门禁也已批准；V2 动态绑定为 `In Progress`，V3/V4 场景、V5 录制和整体 readiness 尚无完成证据。`/comingsoon` 只是通用占位。
+- Analyzer 21/21 与 Analyzer-only readiness 已由版本化文档和证据确认；Editor E1–E7 已由 clean canonical 和 owner 批准。Visualizer V1 workspace foundation 的 21/21 canonical 与人工门禁也已批准；V2 动态绑定实现与 26/26 canonical 已完成但 evidence 仍为 `in-review`，V3/V4 场景、V5 录制和整体 readiness 尚无完成证据。`/comingsoon` 只是通用占位。
 - `testcomp.vue`、`TestLands.vue`、`threeDTable.vue` 和 `MeydaCard.vue` 含试验或占位内容，不应默认视为稳定公共接口。
 
 ## 证据优先级

@@ -5,7 +5,7 @@ last_reviewed: 2026-09-02
 upstream_docs:
   - "docs/quality/visualizer/v2-eval-plan.md"
   - "docs/architecture/visualizer/binding-and-scene-contracts.md"
-next_action: "实现版本化 binding/Editor/analysis golden 与运行时音频；canonical 通过后登记 hash"
+next_action: "版本化 V2 binding golden 与 26/26 canonical 已登记；等待 owner 人工复核"
 ---
 
 # Visualizer V2 Golden Examples
