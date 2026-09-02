@@ -76,12 +76,14 @@
 | `npm run eval:e6` | 只在干净 commit 上运行 40 步 E6 suite | 生成可登记的 E6 canonical 证据 |
 | `npm run eval:e7:provisional` | 在 dirty worktree 运行 46 步 E7/E6/M12 双浏览器 suite | 只生成实现反馈 |
 | `npm run eval:e7` | 只在干净 commit 上运行 46 步 E7 suite | 生成可登记的 E7 canonical 证据 |
+| `npm run eval:v1`（planned） | 只在干净 implementation commit 上运行 21 步 V1 suite | quality 契约已提交；实现后生成可登记的 V1 canonical 证据 |
 
 ## 已知测试缺口
 
 - 已建立 Vitest、Playwright、Worker、IndexedDB、fixture、golden、docs 和 deliberate-failure harness。
 - fixture/golden 生成改用 Node 24 原生 type stripping；不依赖在受限环境会产生 IPC `EPERM` 的 `tsx` CLI。
 - 当前没有正式 CI，自动化结论必须限定为本地环境。
+- Visualizer V1 quality 契约已建立；测试源码、npm 命令和 canonical 尚待实现，不能把契约表述为通过证据。
 - 当前机器已安装 Edge 151；M11 clean canonical 已使用真实 `msedge` channel 全量 31/31 通过。原生权限 prompt 不能由 OPFS 自动化替代；当前候选已由 `project-owner` 于 2026-08-26 完成人工补偿签字，相关实现或浏览器变化后须重做。
 - 正式 M3 canonical run 已在 clean commit `17d16f0da37289c1f67f75203502beef999572ea` 上通过并登记，且已由 `project-owner` 批准。
 - 正式 M4 canonical run 已在 clean commit `e5cfe9e8ab62301f3c5b0ddcdd37847a2e131a0f` 上通过并登记，evidence 与 working agreements 已由 `project-owner` 批准。

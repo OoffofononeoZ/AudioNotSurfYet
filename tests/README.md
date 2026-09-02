@@ -179,6 +179,8 @@ E7 clean run `E7-2026-08-28T15-02-48-298Z-78bc7f06` 在 commit `78bc7f06311a0994
 
 Visualizer V1–V6 delivery planning 已于 2026-09-02 获 owner 批准；当前只开放 V1。V1 测试必须先提交 quality/eval 契约，再新增 `test:v1:*`、双浏览器 route/layout 回归与 clean canonical runner；V2 数据绑定和后续场景/录制仍不得进入。
 
+V1 quality contract 固定 AC-V101–AC-V108、V1-G01–G12、VFT-ROUTE/LEASE/PROJECT/DRAFT/FILE/LAYOUT/RESOURCE、21 步 clean canonical，以及 Chrome/Edge 原生 picker/覆盖提示人工补偿。quality 文档获批前 evidence 保持 `in-review`。
+
 E2 clean canonical `E2-2026-08-26T16-42-47-634Z-9fc5c0a8` 已在 commit `9fc5c0a81fcf90abfbc665412277147cd958200f` 上 22/22 通过，summary SHA-256 为 `4465c20343af9092601296b86a229200579f648ffa90641411b88f9861ba8660`；2026-08-27 owner 批准该结果并开放 E3。
 
 E3 clean canonical `E3-2026-08-27T02-53-58-176Z-c670ddf5` 已在 commit `c670ddf5494269f5a56abd20c3c5653ee5b27cef` 上 26/26 通过，summary SHA-256 为 `2a0a46b9a0e9b459ee17b11919451f074205fda58801d84a1274dbd12f5cfe4c`；point 反馈 `28.5ms`、几何误差 `0 CSS px`，并已获 owner 批准。

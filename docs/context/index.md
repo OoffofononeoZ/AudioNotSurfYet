@@ -58,6 +58,10 @@ AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端。Editor E1–
 | [Visualizer acceptance criteria](../delivery/visualizer/acceptance-criteria.md) | AC-V101–AC-V607、阈值、证据方法和 R-034–R-041 映射 | project-owner / approved | Visualizer 指标、阈值、preset 或支持矩阵变化 |
 | [Visualizer test strategy](../delivery/visualizer/test-strategy.md) | V1–V6 测试层级、fixture、Chrome/Edge、WebM 与资源策略 | project-owner / approved | 测试工具、fixture、浏览器或证据能力变化 |
 | [Visualizer milestone plan](../delivery/visualizer/milestone-plan.md) | V0-D 与 V1–V6 状态、依赖、阻塞和退出证据 | project-owner / approved | 里程碑开放、关闭或 blocked 状态变化 |
+| [Visualizer V1 eval plan](../quality/visualizer/eval-plan.md) | AC-V101–AC-V108 的 route、lease、project、draft、layout 与 resource 契约 | project-owner / in-review | V1 行为、阈值、浏览器或证据能力变化 |
+| [Visualizer V1 golden](../quality/visualizer/golden-examples.md) | 默认/完整/无效工程、lease、草稿和 breakpoint 规范样例 | project-owner / in-review | V1 schema、identity、布局或恢复语义变化 |
+| [Visualizer V1 failure taxonomy](../quality/visualizer/failure-taxonomy.md) | route、lease、project、draft、file、layout、resource 失败分类 | project-owner / in-review | V1 失败域或严重度响应变化 |
+| [Visualizer evidence index](../quality/visualizer/evidence-index.md) | V1–V6 canonical 身份、hash、环境和 reviewer 记录 | project-owner / in-review | 新 Visualizer run、artifact 或审批状态变化 |
 | [eval-plan.md](../quality/eval-plan.md) | M3–M14 评估、FIFO/order/geometry/lifecycle 门禁与 canonical 规则 | project-owner / approved | 验收、测试覆盖或风险变化 |
 | [golden-examples.md](../quality/golden-examples.md) | 成功、失败、边界和异常黄金样例 | project-owner / approved | fixture、Meyda、参数或用户任务变化 |
 | [failure-taxonomy.md](../quality/failure-taxonomy.md) | 稳定失败类型、S0–S3、M14 order/pointer/a11y/persistence 失败和门禁响应 | project-owner / approved | 失败分类或风险接受规则变化 |
