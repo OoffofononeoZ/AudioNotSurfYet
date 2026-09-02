@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/architecture/interface-contracts.md"
   - "docs/architecture/risk-register.md"
   - "docs/delivery/visualizer/execution-plan.md"
-next_action: "以 AC-V101–AC-V108 建立 V1 quality/eval 契约并实施；V2–V6 验收保持 Planned"
+next_action: "owner 对照 AC-V101–AC-V108 复核 V1 canonical 与人工门禁；V2–V6 验收保持 Planned"
 ---
 
 # Visualizer V1–V6 Acceptance Criteria

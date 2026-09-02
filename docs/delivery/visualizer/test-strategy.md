@@ -8,7 +8,7 @@ upstream_docs:
   - "docs/architecture/risk-register.md"
   - "docs/delivery/visualizer/execution-plan.md"
   - "docs/delivery/visualizer/acceptance-criteria.md"
-next_action: "先提交 V1 eval/golden/failure/evidence 契约，再创建 V1 测试与 canonical runner"
+next_action: "owner 复核 V1 双浏览器自动化与原生 picker/覆盖/beforeunload 人工门禁；批准前不建立 V2 quality 契约"
 ---
 
 # Visualizer V1–V6 Test Strategy
@@ -34,6 +34,8 @@ next_action: "先提交 V1 eval/golden/failure/evidence 契约，再创建 V1 �
 | V4 | 频谱核心、drum scale、Energy rise、constant orbit | context loss、restore/renderer fail | seed、DPR/resize、20 次模板切换 | Three.js unit adapter + real Chrome |
 | V5 | 720p30 有声 WebM、save/retry | no MIME、busy、track/recorder/context error | 四 preset、页面 0 音量、save cancel、A/V sync | real Chrome/Edge + ffprobe/FFmpeg |
 | V6 | 三格式完整制作与回放 | 全部风险故障矩阵 | 15 分钟四特征、1024/1280/1920、20 次生命周期 | real Chrome/Edge + owner manual |
+
+V1 的 golden/unit/integration/Chrome/Edge 命令与 21 步 canonical runner 已实现；clean run `V1-2026-09-02T07-03-26-973Z-fd44c892` 21/21 通过。原生 OS picker、覆盖提示与 `beforeunload` 仍等待 owner 补偿验证，不能由自动化 OPFS 结果替代。
 
 ## 3. Test Layers
 

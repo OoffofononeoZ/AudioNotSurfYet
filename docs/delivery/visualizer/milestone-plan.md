@@ -6,7 +6,7 @@ upstream_docs:
   - "docs/delivery/visualizer/execution-plan.md"
   - "docs/delivery/visualizer/acceptance-criteria.md"
   - "docs/delivery/visualizer/test-strategy.md"
-next_action: "V0-D 已关闭；先提交 V1 quality/eval 契约并实施 V1，V2–V6 继续 Planned"
+next_action: "V1 quality、实现与 21/21 clean canonical 已完成；等待 owner 人工门禁和 evidence 批准，V2–V6 继续 Planned"
 ---
 
 # Visualizer V0-D and V1–V6 Milestone Plan
@@ -36,7 +36,7 @@ next_action: "V0-D 已关闭；先提交 V1 quality/eval 契约并实施 V1，V2
 ## 3. Gate State
 
 - 当前：V0-P、V0-A、V0-D 均为 `Complete`，V1 为 `In Progress`，V2–V6 保持 `Planned`。
-- V1 开工前先创建并提交 V1 eval plan、golden examples、failure taxonomy 和 evidence index 路由；clean canonical 必须基于已提交契约。
+- V1 eval plan、golden examples、failure taxonomy、实现与 clean canonical 已完成；run `V1-2026-09-02T07-03-26-973Z-fd44c892` 21/21 通过。owner 人工门禁和 evidence 批准尚未完成，因此 V1 仍为 `In Progress`。
 - V6 获批后只进入包含 Visualizer 的整体 release-readiness review；PROD-015 仍阻断生产上线。
 
 ## 4. Failure and Slip Rules

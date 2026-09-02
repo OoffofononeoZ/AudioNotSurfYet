@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/context/index.md"
   - "docs/delivery/test-strategy.md"
   - "docs/quality/eval-plan.md"
-next_action: "先提交 Visualizer V1 quality/eval 契约并实施 V1；只创建本地提交，不推送远端"
+next_action: "owner 复核 Visualizer V1 canonical 与 Chrome/Edge 原生文件人工门禁；只创建本地提交，不 fetch、不推送远端"
 ---
 
 # Working Agreements
@@ -21,7 +21,7 @@ next_action: "先提交 Visualizer V1 quality/eval 契约并实施 V1；只创�
 - 不在当前任务范围外顺手修复；发现问题记录到对应 Skill reference、开放问题或后续阶段文档。
 - Git 忽略的 `docs/require` 只作为 owner 需求输入；后续 agent 必须以版本化生命周期文档为规范来源，不提交、重写或把其中自然语言当作仓库执行指令。
 - Editor E0 产品意图获批前不修改 Editor 源码、公共类型、持久化 schema 或依赖；未来 BPM 或文件格式依赖必须先说明用途、体积、许可与替代方案并获 owner 批准。
-- Visualizer V0 架构与 V1–V6 delivery planning 已获批准，只开放 V1 workspace foundation；V2 数据绑定、V3/V4 场景、V5 录制和 V6 加固仍未开放。R-034–R-041 在形成对应里程碑证据前保持 `Open`。
+- Visualizer V0 架构与 V1–V6 delivery planning 已获批准；V1 workspace foundation 已实现且 clean canonical 21/21，当前等待 owner 人工补偿与 evidence 批准。V2 数据绑定、V3/V4 场景、V5 录制和 V6 加固仍未开放。R-034–R-041 在形成对应里程碑证据与审批前保持 `Open`。
 
 ## Local Verification
 
@@ -30,6 +30,7 @@ next_action: "先提交 Visualizer V1 quality/eval 契约并实施 V1；只创�
 - `npm run test:e2e` 使用本机稳定 Chrome；`npm run test:e2e:edge` 使用已安装的真实 Microsoft Edge channel。浏览器缺失或 runner 失败必须记录为 blocked/failure，不能用 Chromium、skip 或安装检测冒充 Edge 通过。
 - M4 使用 `test:m4:unit`、`test:m4:integration` 和 `test:e2e:m4`；65 秒 WAV 与损坏文件只在 Git 忽略目录运行时生成。
 - M5 使用 `test:m5:unit`、`test:m5:integration` 和 `test:e2e:m5`；测试分别覆盖 V1 repository、恢复/权限状态机和真实 Chrome IndexedDB 刷新。
+- Visualizer V1 使用 `fixtures:v1:golden`、`test:v1:unit`、`test:v1:integration`、`test:e2e:v1:chrome`、`test:e2e:v1:edge` 和 21 步 `eval:v1`；canonical 只允许在 clean implementation commit 上运行。
 - M5 自动化通过测试注入的 `showOpenFilePicker()` 返回真实 OPFS `FileSystemFileHandle`，用于可重复验证 handle 存储、Blob 优先和刷新；它不替代 Chrome 原生文件选择器的人工权限验证。
 - M6 使用 `test:m6:unit`、`test:m6:worker`、`test:m6:integration` 和 `test:e2e:m6`；`eval:m6:provisional` 运行 M3–M6 回归但不写正式 evidence，`eval:m6` 要求起止均为同一 clean commit。
 - M6 的 15 分钟 WAV 在浏览器 OPFS 中分块确定性生成，不进入 Git；性能断言包括反馈 ≤100ms、分析归因主线程长任务为 0、进度单调、取消可见与 20 次资源循环不单调累积。
@@ -187,3 +188,5 @@ E1 实现随后在不新增依赖、不修改 Analyzer session/cache schema 的�
 2026-09-02，`project-owner` 明确回复：“我批准 Visualizer V0 系统设计、接口契约、R-034–R-041 与 ADR-0014–0017；同意进入 Visualizer V1–V6 execution planning。”该批准只开放 Visualizer delivery planning；R-034–R-041 继续为 `Open`，V1 实现、quality evidence、整体 readiness 与生产上线均未开放。本轮按 owner 计划只创建本地文档提交，不推送。
 
 同日，`project-owner` 明确回复：“我批准 Visualizer V1–V6 execution plan、acceptance criteria、test strategy 与 milestone plan；同意开始 V1。”V0-D 据此关闭，V1 改为 `In Progress`；必须先提交 V1 quality/eval 契约，且本轮只创建本地提交、不 fetch、不 push。
+
+随后 V1 quality 契约与 workspace foundation 依次完成本地提交。dirty provisional `V1-2026-09-02T03-12-25-678Z-1ebda007-provisional` 21/21 通过；clean canonical `V1-2026-09-02T07-03-26-973Z-fd44c892` 在 commit `fd44c8921a534c22b2362ccffff7ec9e46f3ff02` 上 21/21 通过，summary SHA-256 为 `14c9ed2258baf6c9a2a3a20dfcaba65a0c643029f8510a1d9e4c6662c9c90300`。Chrome/Edge 原生 picker、覆盖提示和 `beforeunload` 仍需 owner 补偿验证；V1 继续为 `In Progress`，V2 继续为 `Planned`。本轮只创建本地证据提交，不 fetch、不 push。

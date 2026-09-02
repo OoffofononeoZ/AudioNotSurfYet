@@ -2,7 +2,7 @@
 
 ## 证据基线
 
-- 最后核对日期：2026-08-28。
+- 最后核对日期：2026-09-02。
 - 首要来源：当前仓库的 `package.json`、配置、`src/`、Git 状态与 Git 历史。
 - 补充来源：Codex 任务 `019f82bc-0838-7ab3-baba-1a7571992901`；只保留其中能由当前仓库或可复现验证支持的长期事实。
 - 历史任务结论不得覆盖当前代码；差异记录在 [开放问题与项目差异](99-open-questions-and-project-deltas.md)。
@@ -26,11 +26,12 @@
 
 | 区域 | 当前职责 | 主要证据 |
 | --- | --- | --- |
-| `src/views/` | 路由页面；Home 展示光线背景，Analyzer 展示分析数据入口，TestLands 是试验页，ComingSoon 是空占位 | `src/router/index.ts`、各 view |
+| `src/views/` | 路由页面；Home、Analyzer、Editor 和 Visualizer V1 工作台为产品表面，TestLands/ComingSoon 保持试验或通用占位 | `src/router/index.ts`、各 view |
 | `src/layouts/` | 应用共享外壳；`MainLayout` 组合 Header、路由内容和 MusicBar | `src/layouts/MainLayout.vue` |
 | `src/components/` | 播放条、列表、动画列表、Canvas/WebGL 背景和试验性图表 | 各 Vue SFC |
 | `src/audio/` | `AudioEngine` 独占 Web Audio 节点；`AudioSessionService` 编排 File、队列命令、能量和资源释放 | `audioEngine.ts`、`audioSessionService.ts` |
 | `src/analysis/` | M6 的 21 项 FeatureRegistry、AnalysisConfig、PCM/frame 工具、六类 compact codec、module Worker 与 AnalysisCoordinator | `featureRegistry.ts`、`compactCodec.ts`、`analysis.worker.ts`、`analysisCoordinator.ts` |
+| `src/visualizer/` | V1 strict project/descriptor/codec、route session、单草稿 repository、原生 JSON gateway 与中性单 Canvas 基础 | `types.ts`、`projectCodec.ts`、`sceneRegistry.ts`、`visualizerSessionController.ts` |
 | `src/persistence/` | 原生 IndexedDB V1 最近会话、句柄、current Blob/cache 和 runtime validator | `sessionRepository.ts` |
 | `src/stores/` | 持久化 UI/音量配置及可序列化播放/恢复状态 | `configStore.ts`、`audioSessionStore.ts` |
 | `src/utils/` | mitt 单例、能量角度映射、时间格式化和 clamp | `emitter.ts`、`utils.ts` |
@@ -43,7 +44,7 @@
 - 当前是单一前端仓库；未发现后端、数据库、认证、云端媒体库或部署配置。
 - 音频文件由用户通过 `showOpenFilePicker()` 选择；runtime File 保存在 session service，最近队列、文件句柄、唯一 current Blob 与匹配的分析 cache 由 SessionRepository 保存，Pinia `$state` 不持有浏览器资源、PCM 或 typed payload。
 - `configStore` 继续把 `volume` 和 `musicBarSettings.style` 保存到 localStorage；M5 最近会话使用独立 IndexedDB V1，不改变 config schema。
-- Analyzer 21/21 与 Analyzer-only readiness 已由版本化文档和证据确认；Editor E1–E7 已由 clean canonical 和 owner 批准。Visualizer V0 产品、系统设计与 V1–V6 delivery planning 已批准，当前只开放 V1；`/comingsoon` 仍是占位，不能推断 Visualizer 已实现或整体 readiness 已扩大。
+- Analyzer 21/21 与 Analyzer-only readiness 已由版本化文档和证据确认；Editor E1–E7 已由 clean canonical 和 owner 批准。Visualizer V1 workspace foundation 已实现并在 clean commit 上 21/21 通过，evidence 仍为 `in-review`；V2 动态绑定、V3/V4 场景、V5 录制和整体 readiness 尚无完成证据。`/comingsoon` 只是通用占位。
 - `testcomp.vue`、`TestLands.vue`、`threeDTable.vue` 和 `MeydaCard.vue` 含试验或占位内容，不应默认视为稳定公共接口。
 
 ## 证据优先级

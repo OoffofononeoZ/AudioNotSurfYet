@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/delivery/visualizer/acceptance-criteria.md"
   - "docs/delivery/visualizer/test-strategy.md"
   - "docs/architecture/risk-register.md"
-next_action: "实现并运行 V1 provisional/canonical；owner 批准 evidence 前 V2 保持 Planned"
+next_action: "owner 复核 21/21 V1 canonical 并在 Chrome/Edge 完成原生文件与 beforeunload 补偿检查；批准前 V2 保持 Planned"
 ---
 
 # Visualizer V1 Eval Plan

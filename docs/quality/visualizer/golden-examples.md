@@ -5,7 +5,7 @@ last_reviewed: 2026-09-02
 upstream_docs:
   - "docs/quality/visualizer/eval-plan.md"
   - "docs/architecture/visualizer/project-format-v1.md"
-next_action: "以版本化 V1 project golden 驱动 codec、route、draft 和 UI 测试"
+next_action: "owner 复核 V1 canonical、descriptor 边界与原生文件人工门禁；批准前保持 in-review"
 ---
 
 # Visualizer V1 Golden Examples
@@ -26,3 +26,25 @@ next_action: "以版本化 V1 project golden 驱动 codec、route、draft 和 UI
 | V1-G12 | boundary | 1279→1280 resize、1024 抽屉切换、1920 DPR resize | 抽屉/三栏按边界切换；只有一个 16:9 Canvas且焦点可恢复 | 固定易回归布局边界 |
 
 Golden 只使用确定性 UUID/hash 与虚构歌曲元数据；不得包含用户本地路径、私有音频名称或设备标识。
+
+## V1 Descriptor Boundary
+
+以下范围是 V1 strict project golden 的一部分；它们约束可导入工程，但 V1 中性预览不会执行动态 binding：
+
+| Template / parameter | Accepted source and value boundary |
+| --- | --- |
+| Orthogonal Lines `horizontalIntensity` / `verticalIntensity` | `0..1`；允许 constant、analysis、editor-event；analysis 数值 projection 可用 scalar/mean/max/peak/bin/band |
+| `horizontalThickness` / `verticalThickness` | `0.5..64`；仅 constant |
+| `horizontalBrightness` / `verticalBrightness` | `0..4`；仅 constant |
+| `horizontalDecaySeconds` / `verticalDecaySeconds` | `0..10`；仅 constant |
+| `horizontalEnabled` / `verticalEnabled` / colors | 仅 constant；类型必须分别为 boolean/color |
+| Cube Swarm `centerSpectrum` | 允许 constant/analysis；仅 full vector；component 为 default/specific/magnitude；空 vector 可作为中性值，constant 元素必须非负 |
+| `coreScale` | `0..8`；允许 constant、analysis、editor-event |
+| `riseSpeed` | `0..20`；允许 constant、analysis、editor-event |
+| `orbitSpeed` | `-12..12`；允许 constant、analysis、editor-event |
+| `cubeCount` | `1..512` 整数；仅 constant |
+| `baseSize` | `0.01..10`；仅 constant |
+| `cameraDistance` | `1..100`；仅 constant |
+| Cube Swarm colors | 仅 constant color |
+
+第五个唯一分析 FeatureId 必须在工程替换和 Coordinator/Worker 之前拒绝；多个参数共享相同 FeatureId 只计一个名额。

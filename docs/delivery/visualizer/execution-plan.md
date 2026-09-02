@@ -11,7 +11,7 @@ upstream_docs:
   - "docs/architecture/visualizer/project-format-v1.md"
   - "docs/architecture/visualizer/binding-and-scene-contracts.md"
   - "docs/architecture/visualizer/recording-contract.md"
-next_action: "先提交 V1 quality/eval 契约，再实现 V1 workspace foundation；V2–V6 保持 Planned"
+next_action: "owner 复核 V1 21/21 canonical 与原生文件人工门禁；批准前 V1 保持 In Progress、V2–V6 保持 Planned"
 ---
 
 # Visualizer V1–V6 Execution Plan
@@ -20,7 +20,7 @@ next_action: "先提交 V1 quality/eval 契约，再实现 V1 workspace foundati
 
 把已批准的 Visualizer V0 架构按六个可独立验证的纵向里程碑交付：先建立当前歌曲工作台和本地工程，再接入 Analyzer/Editor 绑定，随后分别交付两个内置场景、实时 WebM 录制和双浏览器最终加固。
 
-Visualizer 当前仍由 `/comingsoon` 占位。本文已获批准并只开放 V1；V1 开工前必须先提交 quality/eval 契约，V2–V6 继续保持 `Planned`。
+Visualizer V1 已实现 `/visualizer/:trackId?` 工作台基础并完成 21/21 clean canonical；当前 evidence 为 `in-review`。V2–V6 继续保持 `Planned`，不得把中性预览描述为真实场景完成。
 
 ## 2. Delivery Principles
 
@@ -171,7 +171,7 @@ npm run eval:vN
 
 ## 7. Approval Gate
 
-本计划与同目录 acceptance criteria、test strategy、milestone plan 已由 owner 批准。V0-D 据此为 `Complete`、V1 为 `In Progress`；V1 必须先提交 quality/eval 契约，V2–V6 继续为 `Planned`。
+本计划与同目录 acceptance criteria、test strategy、milestone plan 已由 owner 批准。V0-D 据此为 `Complete`、V1 为 `In Progress`；V1 quality 契约、实现与 21/21 clean canonical 已完成，仍须 owner 人工门禁和 evidence 批准。V2–V6 继续为 `Planned`。
 
 批准记录（2026-09-02）：
 
