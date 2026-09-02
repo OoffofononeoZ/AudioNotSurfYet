@@ -4,7 +4,7 @@ owner: "project-owner"
 last_reviewed: 2026-09-02
 upstream_docs:
   - "docs/context/index.md"
-next_action: "Visualizer 当前仍为占位；V1–V6 delivery planning 为 in-review，V1 实现后再更新当前事实"
+next_action: "Visualizer 当前仍为占位；delivery 已批准并开放 V1，V1 实现后再更新当前事实"
 ---
 
 # System Map
@@ -68,7 +68,7 @@ showOpenFilePicker → FileSystemFileHandle → File
 | Analyzer surface | 固定展示 21 张折叠卡、最多四项 FIFO 活动分析、共享 viewport/zoom/cursor/seek、DOM 精确值与分层 Canvas | store、AudioSessionService、AnalysisCoordinator、Canvas 2D | project-owner | `FEATURE_IDS` 稳定 DOM 顺序；实际高度最短列布局，390/1024 一列、1280/1920 两列、gap 18px；展开才挂载图表资源，默认活动队列为空 |
 | Editor E1–E7 surface | `/editor/:trackId?` 状态、精简 transport、JSON 工程、共享波形/tempo/point/range 时间列、21 项单选半透明 overlay、viewport-visible marker 与紧凑工作台布局 | EditorSessionController、AudioSessionService、AnalysisCoordinator、Vue Router、shared Canvas renderer、DOM controls | project-owner | E1–E7 已实现、获批准并关闭 |
 | Editor project and draft | strict JSON V1、歌曲 hash/时长绑定、原生 file gateway、单草稿 autosave 与恢复冲突 | `EditorFormatCodecRegistry`、`EditorDraftRepository`、`audionotsurfyet-editor` V1 | project-owner | 首版只注册 JSON；session database 不变 |
-| Visualizer target（planned） | `/visualizer/:trackId?` 三栏制作台、单场景预览、0–4 特征/Editor 绑定和 WebM 录制 | 已批准 ADR-0014–0017；目标 `VisualizerSessionController`、binding resolver、single RendererHost、recording tap | project-owner | 当前仍是 `/comingsoon` 占位；V1–V6 delivery planning 为 `in-review` |
+| Visualizer target（planned） | `/visualizer/:trackId?` 三栏制作台、单场景预览、0–4 特征/Editor 绑定和 WebM 录制 | 已批准 ADR-0014–0017；目标 `VisualizerSessionController`、binding resolver、single RendererHost、recording tap | project-owner | 当前仍是 `/comingsoon` 占位；V0-D 已完成，V1 为 `In Progress` |
 | Experimental charts | 试验性的 Three.js 2D 图和瀑布流 | Vue props、TestLands | unknown | 不视为稳定接口 |
 | Event bus | 跨组件事件类型与发送 | mitt singleton | unknown | `settings-open` 无已发现订阅者 |
 

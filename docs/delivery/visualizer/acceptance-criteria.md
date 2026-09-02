@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: approved
 owner: "project-owner"
 last_reviewed: 2026-09-02
 upstream_docs:
@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/architecture/interface-contracts.md"
   - "docs/architecture/risk-register.md"
   - "docs/delivery/visualizer/execution-plan.md"
-next_action: "由 project-owner 复核 AC-V101–AC-V607 的阈值、失败边界与人工补偿门禁"
+next_action: "以 AC-V101–AC-V108 建立 V1 quality/eval 契约并实施；V2–V6 验收保持 Planned"
 ---
 
 # Visualizer V1–V6 Acceptance Criteria
@@ -95,4 +95,4 @@ next_action: "由 project-owner 复核 AC-V101–AC-V607 的阈值、失败边�
 
 ## 8. Milestone Exit Rule
 
-每个里程碑只能在全部适用 AC 拥有明确 success、failure、boundary 或 exception 证据、相关风险复核、clean canonical 和 owner 批准后关闭。本文件获批只开放 V1，不表示任何 AC 已通过。
+每个里程碑只能在全部适用 AC 拥有明确 success、failure、boundary 或 exception 证据、相关风险复核、clean canonical 和 owner 批准后关闭。`project-owner` 于 2026-09-02 批准本文及其余 Visualizer delivery planning，并只开放 V1；该批准不表示任何 AC 已通过。

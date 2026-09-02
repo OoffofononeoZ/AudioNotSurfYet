@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/product/scope.md"
   - "docs/architecture/system-design.md"
   - "docs/delivery/execution-plan.md"
-next_action: "评审 Visualizer V1–V6 delivery planning；R-034–R-041 保持 Open，PROD-015 仍开放"
+next_action: "先提交 Visualizer V1 quality/eval 契约并实施 V1；R-034–R-041 保持 Open，PROD-015 仍开放"
 ---
 
 # Decision Registry
@@ -68,13 +68,13 @@ next_action: "评审 Visualizer V1–V6 delivery planning；R-034–R-041 保持
 | DEC-035 | 2026-08-31 | 实施 M13：21 卡固定顺序、默认全收起、最多四项 FIFO、V1 adapter 与最新 generation/revision；M14 拖动只登记，本轮仅本地提交 | project-owner | approved | [ADR-0012](../architecture/adrs/0012-analyzer-all-cards-fifo-active-analysis.md) | M13 行为、M14 边界、canonical 或 Git 交付授权改变 |
 | DEC-036 | 2026-09-01 | 实施 M14：21 卡前后插入、全局 featureOrder、pointer/touch/click/keyboard、独立 live、V1 optional field；排序与 FIFO/Worker 隔离，只本地提交 | project-owner | approved | [ADR-0013](../architecture/adrs/0013-analyzer-accessible-card-reordering.md) | 顺序范围、输入语义、schema、canonical 或 Git 授权改变 |
 | DEC-037 | 2026-09-02 | 批准 Visualizer V0：当前本地歌曲、单场景、固定 16:9、最多四个唯一 Analyzer 特征、两个内置模板，先实时预览/JSON 后实时 WebM；开放 system design | project-owner | approved | [Scope](../product/scope.md) | 场景数量、特征上限、数据来源、输出格式、录制路线或产品边界改变 |
-| DEC-038 | 2026-09-02 | Visualizer delivery 草案固定新工程默认 Orthogonal Lines/720p30；1280+ 常驻三栏，1024–1279 中央预览加互斥抽屉；V1–V6 逐里程碑 canonical 与 owner 审批 | project-owner | in-review | [Visualizer execution plan](../delivery/visualizer/execution-plan.md) | 默认模板/output、断点布局、切片、证据节奏或逐里程碑门禁变化 |
+| DEC-038 | 2026-09-02 | Visualizer delivery 固定新工程默认 Orthogonal Lines/720p30；1280+ 常驻三栏，1024–1279 中央预览加互斥抽屉；V1–V6 逐里程碑 canonical 与 owner 审批 | project-owner | approved | [Visualizer execution plan](../delivery/visualizer/execution-plan.md) | 默认模板/output、断点布局、切片、证据节奏或逐里程碑门禁变化 |
 
 ## Approval Evidence
 
 `project-owner` 于 2026-07-24 通过“PLEASE IMPLEMENT THIS PLAN”明确要求将随请求给出的产品、架构、里程碑和测试决定落入仓库。本注册表记录的是批准的决策；M3–M12 的实现状态仍以 [milestone plan](../delivery/milestone-plan.md) 和可复现证据为准。
 
-2026-09-02，`project-owner` 明确回复：“我批准 Visualizer V0 产品意图、单场景模板模型、最多四项分析特征、两个内置场景与 WebM 路线；同意进入 Visualizer 架构设计。”DEC-037 与 PROD-014V 据此获批并开放 system design。随后 owner 明确批准 Visualizer V0 system design、接口契约、R-034–R-041 与 ADR-0014–0017，同意进入 V1–V6 execution planning；架构批准不构成 delivery、实现、quality、readiness 或上线通过。
+2026-09-02，`project-owner` 明确回复：“我批准 Visualizer V0 产品意图、单场景模板模型、最多四项分析特征、两个内置场景与 WebM 路线；同意进入 Visualizer 架构设计。”DEC-037 与 PROD-014V 据此获批并开放 system design。随后 owner 明确批准 Visualizer V0 system design、接口契约、R-034–R-041 与 ADR-0014–0017，并进一步批准 Visualizer V1–V6 delivery planning、同意开始 V1；DEC-038 据此生效，但实现、quality evidence、readiness 或上线仍须各自证据与审批。
 
 同日，`project-owner` 明确要求实施 Q0 质量设计计划，批准了 Q0 前置、四级严重度和 readiness 后置的阶段安排；同时要求三份质量文档先保持 `in-review`，经单独审阅后才生效。因此 DEC-010 的时序决定已批准，但 Q0 内容尚未批准。
 

@@ -1,12 +1,12 @@
 ---
-status: in-review
+status: approved
 owner: "project-owner"
 last_reviewed: 2026-09-02
 upstream_docs:
   - "docs/delivery/visualizer/execution-plan.md"
   - "docs/delivery/visualizer/acceptance-criteria.md"
   - "docs/delivery/visualizer/test-strategy.md"
-next_action: "由 project-owner 批准 V0-D；批准后只开放 V1，V2–V6 继续 Planned"
+next_action: "V0-D 已关闭；先提交 V1 quality/eval 契约并实施 V1，V2–V6 继续 Planned"
 ---
 
 # Visualizer V0-D and V1–V6 Milestone Plan
@@ -25,8 +25,8 @@ next_action: "由 project-owner 批准 V0-D；批准后只开放 V1，V2–V6 �
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | V0-P | Product intent | Complete | Product gate | Analyzer/Editor historical baseline | 当前歌曲、单场景、两个模板、0–4 特征和 WebM 路线 | product docs、DEC-037、PROD-014V approved | project-owner |
 | V0-A | System design | Complete | Architecture gate | V0-P | route/analysis lease、project/binding、scene/renderer、recording、R-034–R-041 | system/contracts/subcontracts、ADR-0014–0017 approved | project-owner |
-| V0-D | Execution planning | In Review | Delivery gate | V0-A | Visualizer 专属 execution、AC、test strategy、milestone plan | 四份文档 owner approved | project-owner |
-| V1 | Workspace foundation | Planned | First implementation gate | V0-D | route、pause-at-end、三栏/抽屉、单 Canvas、JSON V1、单草稿、导入导出 | V1 eval contract + provisional + clean canonical + owner approval | project-owner |
+| V0-D | Execution planning | Complete | Delivery gate | V0-A | Visualizer 专属 execution、AC、test strategy、milestone plan | 四份文档 owner approved | project-owner |
+| V1 | Workspace foundation | In Progress | First implementation gate | V0-D | route、pause-at-end、三栏/抽屉、单 Canvas、JSON V1、单草稿、导入导出 | V1 eval contract + provisional + clean canonical + owner approval | project-owner |
 | V2 | Data binding | Planned | Binding gate | V1 | constant/analysis/editor-event、0–4 planner、Editor snapshot、deterministic resolver | planner/projection/golden + Chrome canonical + owner approval | project-owner |
 | V3 | Orthogonal Lines | Planned | First scene gate | V2 | 横/竖线、point pulse、range gate、参数 inspector | scene state golden + Chrome canonical + owner approval | project-owner |
 | V4 | Cube Swarm | Planned | Second scene gate | V3 | spectrum core、drum scale、Energy rise、constant orbit、context restore | deterministic/resource/context canonical + owner approval | project-owner |
@@ -35,8 +35,7 @@ next_action: "由 project-owner 批准 V0-D；批准后只开放 V1，V2–V6 �
 
 ## 3. Gate State
 
-- 当前：V0-P `Complete`、V0-A `Complete`、V0-D `In Review`、V1–V6 `Planned`。
-- owner 批准四份 delivery 文档后：V0-D `Complete`、V1 `In Progress`、V2–V6 保持 `Planned`。
+- 当前：V0-P、V0-A、V0-D 均为 `Complete`，V1 为 `In Progress`，V2–V6 保持 `Planned`。
 - V1 开工前先创建并提交 V1 eval plan、golden examples、failure taxonomy 和 evidence index 路由；clean canonical 必须基于已提交契约。
 - V6 获批后只进入包含 Visualizer 的整体 release-readiness review；PROD-015 仍阻断生产上线。
 
@@ -51,8 +50,8 @@ next_action: "由 project-owner 批准 V0-D；批准后只开放 V1，V2–V6 �
 
 ## 5. Approval Gate
 
-`project-owner` 于 2026-09-02 批准 Visualizer V0 system design、接口契约、R-034–R-041 与 ADR-0014–0017，只开放本 execution planning。四份 delivery 文档仍为 `in-review`，不构成 V1 实现授权。
+`project-owner` 于 2026-09-02 批准 Visualizer V0 system design、接口契约、R-034–R-041 与 ADR-0014–0017；随后批准四份 delivery planning 并开放 V1。R-034–R-041 仍为 `Open`，V2–V6 未开放。
 
-批准语句：
+批准语句（2026-09-02）：
 
 `我批准 Visualizer V1–V6 execution plan、acceptance criteria、test strategy 与 milestone plan；同意开始 V1。`

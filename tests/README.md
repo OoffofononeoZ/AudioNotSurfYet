@@ -137,6 +137,7 @@ M3–M13 不建设 CI。下列命令当前均为本地门禁；正式证据要�
 - `tests/harness/`：被正常 Vitest 配置排除的 deliberate failure 及其自检。
 - `tests/scripts/`：浏览器检测和 M3–M13 run orchestration。
 - `tests/editor/`：Editor 工程格式、草稿、lease 和 session controller 的里程碑专项测试。
+- `tests/visualizer/`（V1 planned）：Visualizer strict project、route lease、单草稿和 session controller 的里程碑专项测试；quality 契约提交后才创建源码。
 
 M4 浏览器测试中的损坏 WAV 与 65 秒、48kHz、单声道计时 WAV 都写入 `test-results/`，不提交二进制。长时钟测试用同一 DOM 采样同时读取 `performance.now()` 与 AudioContext 驱动快照；三次 seek 使用进度条真实几何。
 
@@ -175,6 +176,8 @@ E6 quality contract 固定真实 Chrome/Edge、WAV/MP3/FLAC、15 分钟 20 lanes
 E7 双浏览器套件固定验证紧凑令牌、窗口级 fixed 灰色 overlay、复合入口与 21 项菜单、按歌曲 visibility、关闭后的 Buffer-only active set、纵向滚动固定、时间列横向对齐、390/1024/1280/1920 响应式与既有交互回归。46 步 canonical 继续完整复用 E6 基线与 M12 双浏览器回归。
 
 E7 clean run `E7-2026-08-28T15-02-48-298Z-78bc7f06` 在 commit `78bc7f06311a09948e5efae941a14599305b81a5` 上 44/44 通过，summary SHA-256 为 `43f63963fafa774ea18a8ddda290d573fd7869a269fc71798c22ca3076b14a4a`；全屏浮层修订后该 run 为 `pre-revision`。修订版 clean run `E7-2026-08-29T05-23-03-986Z-080f577f` 在 commit `080f577fe20fcb22a20184dce0b15892c5299464` 上 46/46 通过，summary SHA-256 为 `da7c5e7a931a1e8c6cb3a64c3eeac8f5cb7d5cc6d6b604de6e4ea7b009ec13f5`；owner 于 2026-08-31 批准并关闭 E7。
+
+Visualizer V1–V6 delivery planning 已于 2026-09-02 获 owner 批准；当前只开放 V1。V1 测试必须先提交 quality/eval 契约，再新增 `test:v1:*`、双浏览器 route/layout 回归与 clean canonical runner；V2 数据绑定和后续场景/录制仍不得进入。
 
 E2 clean canonical `E2-2026-08-26T16-42-47-634Z-9fc5c0a8` 已在 commit `9fc5c0a81fcf90abfbc665412277147cd958200f` 上 22/22 通过，summary SHA-256 为 `4465c20343af9092601296b86a229200579f648ffa90641411b88f9861ba8660`；2026-08-27 owner 批准该结果并开放 E3。
 
