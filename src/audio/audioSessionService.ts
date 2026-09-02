@@ -90,21 +90,26 @@ export interface AudioSessionServiceOptions {
     createTrackId?: () => string;
 }
 
-export interface EditorPlaybackLease {
-    token: string;
-    trackId: string;
+export type RoutePlaybackConsumer = 'editor' | 'visualizer';
+export type RouteEndedPolicy = 'repeat-one' | 'pause-at-end';
+
+export interface RoutePlaybackLease {
+    readonly token: string;
+    readonly consumer: RoutePlaybackConsumer;
+    readonly trackId: string;
+    readonly endedPolicy: RouteEndedPolicy;
     release(): void;
 }
 
-export class EditorPlaybackUnavailableError extends Error {
+export class RoutePlaybackUnavailableError extends Error {
     readonly trackId: string;
 
     constructor(
         trackId: string,
-        message = 'The requested Editor track is unavailable.',
+        message = 'The requested route track is unavailable.',
     ) {
         super(message);
-        this.name = 'EditorPlaybackUnavailableError';
+        this.name = 'RoutePlaybackUnavailableError';
         this.trackId = trackId;
     }
 }
@@ -198,8 +203,13 @@ export class AudioSessionService {
     private commandGeneration = 0;
     private importGeneration = 0;
     private frameHandle: number | null = null;
-    private activeEditorPlayback: { token: string; trackId: string } | null = null;
-    private editorRepeatInFlight = false;
+    private activeRoutePlayback: {
+        token: string;
+        consumer: RoutePlaybackConsumer;
+        trackId: string;
+        endedPolicy: RouteEndedPolicy;
+    } | null = null;
+    private routeRepeatInFlight = false;
     private workspaceSaveRevision = 0;
     private workspaceSaveTail: Promise<void> = Promise.resolve();
     private disposed = false;
@@ -496,15 +506,19 @@ export class AudioSessionService {
         await this.loadRuntimeTrack(trackId, true);
     }
 
-    async acquireEditorPlayback(trackId: string): Promise<EditorPlaybackLease> {
+    async acquireRoutePlayback(input: {
+        consumer: RoutePlaybackConsumer;
+        trackId: string;
+    }): Promise<RoutePlaybackLease> {
+        const { consumer, trackId } = input;
         if (this.disposed) {
-            throw new EditorPlaybackUnavailableError(trackId);
+            throw new RoutePlaybackUnavailableError(trackId);
         }
         const record = this.getTrack(trackId);
         if (!record?.trackHash) {
-            throw new EditorPlaybackUnavailableError(
+            throw new RoutePlaybackUnavailableError(
                 trackId,
-                '找不到可编辑歌曲或歌曲内容身份尚未就绪。',
+                '找不到目标歌曲或歌曲内容身份尚未就绪。',
             );
         }
         const descriptor = this.engine.getDecodedAudioDescriptor();
@@ -517,22 +531,32 @@ export class AudioSessionService {
             || this.store.playback.trackId !== trackId
             || ['empty', 'loading', 'error'].includes(this.store.playback.state)
         ) {
-            throw new EditorPlaybackUnavailableError(
+            throw new RoutePlaybackUnavailableError(
                 trackId,
                 '歌曲文件当前不可恢复，请先在播放器中恢复访问或重新选择。',
             );
         }
         const token = crypto.randomUUID();
-        this.activeEditorPlayback = { token, trackId };
+        const endedPolicy: RouteEndedPolicy = consumer === 'editor'
+            ? 'repeat-one'
+            : 'pause-at-end';
+        this.activeRoutePlayback = {
+            token,
+            consumer,
+            trackId,
+            endedPolicy,
+        };
         let released = false;
         return {
             token,
+            consumer,
             trackId,
+            endedPolicy,
             release: () => {
                 if (released) return;
                 released = true;
-                if (this.activeEditorPlayback?.token === token) {
-                    this.activeEditorPlayback = null;
+                if (this.activeRoutePlayback?.token === token) {
+                    this.activeRoutePlayback = null;
                 }
             },
         };
@@ -771,7 +795,7 @@ export class AudioSessionService {
         if (this.disposed) return;
         this.disposed = true;
         ++this.workspaceSaveRevision;
-        this.activeEditorPlayback = null;
+        this.activeRoutePlayback = null;
         ++this.commandGeneration;
         ++this.importGeneration;
         this.stopFrameLoop();
@@ -1177,37 +1201,41 @@ export class AudioSessionService {
         this.stopFrameLoop();
         this.store.setEnergy(0);
         if (snapshot.state === 'ended' && this.store.queue.length > 0) {
-            const lease = this.activeEditorPlayback;
+            const lease = this.activeRoutePlayback;
             if (lease && snapshot.trackId === lease.trackId) {
-                void this.repeatEditorTrack(lease.token, lease.trackId);
+                if (lease.endedPolicy === 'repeat-one') {
+                    void this.repeatRouteTrack(lease.token, lease.trackId);
+                }
             } else {
                 void this.next();
             }
         }
     }
 
-    private async repeatEditorTrack(token: string, trackId: string): Promise<void> {
-        if (this.editorRepeatInFlight) return;
-        this.editorRepeatInFlight = true;
+    private async repeatRouteTrack(token: string, trackId: string): Promise<void> {
+        if (this.routeRepeatInFlight) return;
+        this.routeRepeatInFlight = true;
         try {
             if (
                 this.disposed
-                || this.activeEditorPlayback?.token !== token
-                || this.activeEditorPlayback.trackId !== trackId
+                || this.activeRoutePlayback?.token !== token
+                || this.activeRoutePlayback.trackId !== trackId
+                || this.activeRoutePlayback.endedPolicy !== 'repeat-one'
                 || this.engine.getDecodedAudioDescriptor()?.trackId !== trackId
             ) return;
             await this.engine.seek(0);
             if (
                 this.disposed
-                || this.activeEditorPlayback?.token !== token
-                || this.activeEditorPlayback.trackId !== trackId
+                || this.activeRoutePlayback?.token !== token
+                || this.activeRoutePlayback.trackId !== trackId
+                || this.activeRoutePlayback.endedPolicy !== 'repeat-one'
             ) return;
             await this.engine.play();
         } catch {
             // AudioEngine publishes the typed failure; the lease remains active
             // so the user can retry with the Editor transport.
         } finally {
-            this.editorRepeatInFlight = false;
+            this.routeRepeatInFlight = false;
         }
     }
 

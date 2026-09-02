@@ -13,7 +13,7 @@ import type {
 } from '../../src/analysis/types';
 import type {
     AudioSessionService,
-    EditorPlaybackLease,
+    RoutePlaybackLease,
 } from '../../src/audio/audioSessionService';
 import {
     EditorDraftRepository,
@@ -199,9 +199,11 @@ const createHarness = (value: EditorProjectV1) => {
     };
     const controller = new EditorSessionController({
         audioSession: {
-            acquireEditorPlayback: async (): Promise<EditorPlaybackLease> => ({
+            acquireRoutePlayback: async (): Promise<RoutePlaybackLease> => ({
                 token: 'e7-playback',
+                consumer: 'editor',
                 trackId: track.id,
+                endedPolicy: 'repeat-one',
                 release: () => undefined,
             }),
             getDecodedTrackDescriptor: () => ({
