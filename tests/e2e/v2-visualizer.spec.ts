@@ -188,7 +188,8 @@ test('loads same-song Editor point/range data and keeps wrong-song import atomic
     const editor = editorProjectFor(visualizer.track);
     await saveEditorDraft(page, editor);
     await page.getByTestId('reload-editor-draft').click();
-    await expect(page.getByText('同歌草稿', { exact: false })).toBeVisible();
+    await expect(page.getByTestId('visualizer-binding-inspector').locator('.editor-data p'))
+        .toContainText('同歌草稿');
     await expect(page.getByTestId('visualizer-binding-inspector'))
         .toHaveAttribute('data-editor-lane-count', '2');
 
