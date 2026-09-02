@@ -1,10 +1,10 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-09-02
+last_reviewed: 2026-09-03
 upstream_docs:
   - "docs/architecture/system-design.md"
-next_action: "实施 V3 scene factory、bindingRevision render 输入与单 RendererHost；V4–V6 保持原门禁"
+next_action: "验证 V4 defaultBinding、Cube scene 与 recovering context lifecycle；JSON V1 和 route 接口保持不变"
 ---
 
 # Interface Contracts

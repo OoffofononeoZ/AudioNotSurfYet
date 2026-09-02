@@ -45,7 +45,7 @@
         >
             <header class="workspace-toolbar">
                 <div>
-                    <p class="kicker">Visualizer · V3 正交线条</p>
+                    <p class="kicker">Visualizer · {{ activeTemplate?.title ?? '可视化制作台' }}</p>
                     <h1>{{ snapshot.project.track.title || snapshot.project.track.fileName }}</h1>
                     <p>
                         {{ snapshot.project.track.artist || 'unknown' }} ·
@@ -130,10 +130,9 @@
                                 重试场景
                             </button>
                         </div>
-                        <div v-else-if="snapshot.project.scene.templateId === 'cube-swarm'" class="neutral-notice">
-                            <strong>{{ activeTemplate?.title }}</strong>
-                            <span>V4 中性预览</span>
-                            <small>{{ activeTemplate?.description }}</small>
+                        <div v-else-if="rendererStatus.state === 'recovering'" class="context-notice" role="status">
+                            <strong>正在恢复 WebGL 场景</strong>
+                            <span>{{ rendererStatus.message }}</span>
                         </div>
                         <div v-else-if="needsSourcePrompt" class="source-prompt">
                             请选择主要音色/鼓点数据源
@@ -710,7 +709,7 @@ input:focus-visible {
     height: 100%;
 }
 
-.neutral-notice,
+.context-notice,
 .scene-error {
     position: absolute;
     inset: 0;
@@ -744,12 +743,12 @@ input:focus-visible {
     pointer-events: none;
 }
 
-.neutral-notice strong {
+.context-notice strong {
     color: #65ffa9;
     font-size: 1.5rem;
 }
 
-.neutral-notice small {
+.context-notice span {
     color: #9eb8aa;
 }
 

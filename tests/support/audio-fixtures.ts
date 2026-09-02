@@ -7,6 +7,9 @@ export const GENERATOR_VERSION = 'm3-audio-fixtures-v1';
 export const VISUALIZER_V3_DURATION_SECONDS = 6;
 export const VISUALIZER_V3_SAMPLE_COUNT = SAMPLE_RATE * VISUALIZER_V3_DURATION_SECONDS;
 export const VISUALIZER_V3_GENERATOR_VERSION = 'visualizer-v3-lines-fixture-v1';
+export const VISUALIZER_V4_DURATION_SECONDS = 6;
+export const VISUALIZER_V4_SAMPLE_COUNT = SAMPLE_RATE * VISUALIZER_V4_DURATION_SECONDS;
+export const VISUALIZER_V4_GENERATOR_VERSION = 'visualizer-v4-cube-swarm-fixture-v1';
 
 const TAU = Math.PI * 2;
 
@@ -116,6 +119,42 @@ export function createVisualizerV3LinesFixture(): Float32Array {
     addImpulse(1);
     addImpulse(2.5);
     addImpulse(3);
+    addImpulse(4);
+    addImpulse(5.98);
+    return output;
+}
+
+export function createVisualizerV4CubeSwarmFixture(): Float32Array {
+    const output = new Float32Array(VISUALIZER_V4_SAMPLE_COUNT);
+    const addTone = (
+        startSeconds: number,
+        endSeconds: number,
+        frequencyHz: number,
+        amplitude: number,
+    ) => {
+        const start = Math.round(startSeconds * SAMPLE_RATE);
+        const end = Math.round(endSeconds * SAMPLE_RATE);
+        const tone = createSine(frequencyHz, end - start, amplitude);
+        for (let index = start; index < end; index += 1) {
+            output[index] = Math.max(-1, Math.min(1, output[index]! + tone[index - start]!));
+        }
+    };
+    const addImpulse = (seconds: number, amplitude = 0.9) => {
+        const position = Math.min(output.length - 1, Math.round(seconds * SAMPLE_RATE));
+        output[position] = Math.max(-1, Math.min(1, output[position]! + amplitude));
+    };
+
+    // 0–0.5s is intentionally silent apart from the boundary impulse.
+    addTone(0.5, 2, 180, 0.08);
+    addTone(0.5, 2, 360, 0.04);
+    addTone(2, 4, 440, 0.42);
+    addTone(2, 4, 660, 0.28);
+    addTone(4, 5.5, 220, 0.2);
+    addTone(4, 5.5, 550, 0.16);
+    addTone(4, 5.5, 880, 0.12);
+    addImpulse(0.02);
+    addImpulse(1);
+    addImpulse(2.5);
     addImpulse(4);
     addImpulse(5.98);
     return output;

@@ -95,7 +95,7 @@ M3–M13 不建设 CI。下列命令当前均为本地门禁；正式证据要�
 | `npm run fixtures:v3:golden` | Visualizer V3 fixture 场景覆盖、固定 60Hz decay 与一秒 checkpoint golden |
 | `npm run test:v3:unit` | Orthogonal Lines 参数映射、方向隔离、确定性余辉、revision 和 frame hash |
 | `npm run test:v3:integration` | 单 RendererHost/renderer/RAF、共享 resolved map、scene dispose/switch 与错误重试 |
-| `npm run test:e2e:v3` | 真实 Chrome 的画面/设置反馈、seek/刷新 hash、DPR、V4 中性切换、错误恢复和 20 次资源循环 |
+| `npm run test:e2e:v3` | 真实 Chrome 的画面/设置反馈、seek/刷新 hash、DPR、真实 Cube 前向切换、错误恢复和 20 次资源循环 |
 | `npm run fixtures:v4:golden` | Visualizer V4 fixture、64-band 核心环、seed 布局与 60Hz rise/orbit checkpoint golden |
 | `npm run test:v4:unit` | Cube Swarm 参数隔离、频谱规范、确定性积分、revision 与 frame hash |
 | `npm run test:v4:integration` | 默认两项分析、单 host/resource dispose、context loss/restore 与错误隔离 |
@@ -163,7 +163,7 @@ M3–M13 不建设 CI。下列命令当前均为本地门禁；正式证据要�
 - `tests/harness/`：被正常 Vitest 配置排除的 deliberate failure 及其自检。
 - `tests/scripts/`：浏览器检测和 M3–M14、Editor、Visualizer run orchestration。
 - `tests/editor/`：Editor 工程格式、草稿、lease 和 session controller 的里程碑专项测试。
-- `tests/visualizer/`：Visualizer V1 strict project/route/草稿、V2 binding resolver，以及 V3 scene state/RendererHost 的版本化 golden、unit 和 integration 测试。
+- `tests/visualizer/`：Visualizer V1 strict project/route/草稿、V2 binding resolver、V3 Orthogonal Lines，以及 V4 Cube state/default binding/context recovery 的版本化 golden、unit 和 integration 测试。
 
 M4 浏览器测试中的损坏 WAV 与 65 秒、48kHz、单声道计时 WAV 都写入 `test-results/`，不提交二进制。长时钟测试用同一 DOM 采样同时读取 `performance.now()` 与 AudioContext 驱动快照；三次 seek 使用进度条真实几何。
 
@@ -207,7 +207,9 @@ Visualizer V1 quality 契约、实现和双浏览器 runner 已完成。clean ca
 
 Visualizer V2 已实现 constant/analysis/editor-event inspector、0–4 唯一特征 planner、FeatureRegistry projection、同歌 Editor snapshot 与 60Hz absolute-time resolver。clean canonical `V2-2026-09-02T08-46-21-778Z-769faafe` 在 commit `769faafeef576bf9b98a95f6904cdb9886298530` 上 26/26 通过，summary SHA-256 为 `18b7d83d68f068ac615c56e1bb844a3c80bb1460ac884116d94cb460dd07bafb`；golden 2/2、unit 6/6、integration 5/5、Chrome 3/3、Edge 3/3。Evidence 已于 2026-09-02 获 owner 批准；V2 关闭并开放 V3 真实场景。
 
-Visualizer V3 quality contract 固定 `visualizer-v3-lines-v1.wav` 与版本化 scene golden、单 `VisualizerRendererHost`、单 quad/shader、横竖参数隔离、point/range/analysis/constant、60Hz scene-local decay、一秒 checkpoint、同时间 frame-state hash、scene error/retry、Cube V4 中性切换、1024/1280/1920、DPR、键盘和 20 次资源循环。`fixtures:v3:golden`、`test:v3:unit`、`test:v3:integration`、`test:e2e:v3` 与 dirty/clean eval 命令均已建立；clean canonical `V3-2026-09-02T13-32-42-513Z-89be30eb` 在 commit `89be30eb23d4e53d2c38f24e111cd1af7ec0840d` 上 30/30 通过，summary SHA-256 为 `afe4cbe233fe1feded65380d6e976d5a4c32c2f9860fe2e0357a0d615d6a7b84`，正式 evidence 与人工门禁已于 2026-09-03 获 owner 批准。
+Visualizer V3 quality contract 固定 `visualizer-v3-lines-v1.wav` 与版本化 scene golden、单 `VisualizerRendererHost`、单 quad/shader、横竖参数隔离、point/range/analysis/constant、60Hz scene-local decay、一秒 checkpoint、同时间 frame-state hash、scene error/retry、1024/1280/1920、DPR、键盘和 20 次资源循环。原 V3 canonical 当时以 V4 中性场景验证切换；V4 实现后，当前前向回归改为真实 Cube scene 同 host 切换，历史 artifact 不修改。clean canonical `V3-2026-09-02T13-32-42-513Z-89be30eb` 在 commit `89be30eb23d4e53d2c38f24e111cd1af7ec0840d` 上 30/30 通过，summary SHA-256 为 `afe4cbe233fe1feded65380d6e976d5a4c32c2f9860fe2e0357a0d615d6a7b84`，正式 evidence 与人工门禁已于 2026-09-03 获 owner 批准。
+
+Visualizer V4 Cube Swarm candidate 使用共享 BoxGeometry、两个 MeshStandardMaterial、三个 InstancedMesh、默认 Amplitude Spectrum/Energy 双分析、60Hz rise/orbit checkpoint 与同 RendererHost context recovery。`visualizer-v4-cube-swarm-v1.wav`、Editor point/range 场景、版本化 state golden、unit/integration/Chrome 和 34 步 eval runner 已建立；V4 仍为 `In Progress`，等待 clean canonical、evidence 登记和 owner 人工门禁。
 
 V1 quality contract 固定 AC-V101–AC-V108、V1-G01–G12、VFT-ROUTE/LEASE/PROJECT/DRAFT/FILE/LAYOUT/RESOURCE、21 步 clean canonical，以及 Chrome/Edge 原生 picker、覆盖提示和 `beforeunload` 人工补偿。V1/evidence 已批准，R-034 为 `Mitigated`；V2 批准后 R-036 也为 `Mitigated`，R-038 继续由真实 renderer 里程碑验证。
 

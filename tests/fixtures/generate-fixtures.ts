@@ -18,15 +18,17 @@ import {
     GENERATOR_VERSION,
     SAMPLE_RATE,
     VISUALIZER_V3_GENERATOR_VERSION,
+    VISUALIZER_V4_GENERATOR_VERSION,
     createFormatMaster,
     createVisualizerV3LinesFixture,
+    createVisualizerV4CubeSwarmFixture,
     float32ToLittleEndianBuffer,
 } from '../support/audio-fixtures.ts';
 
 const REPOSITORY_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const AUDIO_DIRECTORY = path.join(REPOSITORY_ROOT, 'tests/fixtures/audio');
 const MANIFEST_PATH = path.join(REPOSITORY_ROOT, 'tests/fixtures/fixture-manifest.json');
-const GENERATED_AT = '2026-09-02';
+const GENERATED_AT = '2026-09-03';
 const SOURCE_ID = 'format-master-pcm-v1';
 
 interface CommandResult {
@@ -154,10 +156,16 @@ async function main(): Promise<void> {
         const flacPath = path.join(temporaryDirectory, 'format-master.flac');
         const visualizerV3MasterPath = path.join(temporaryDirectory, 'visualizer-v3-lines-v1.f32le');
         const visualizerV3WavPath = path.join(temporaryDirectory, 'visualizer-v3-lines-v1.wav');
+        const visualizerV4MasterPath = path.join(temporaryDirectory, 'visualizer-v4-cube-swarm-v1.f32le');
+        const visualizerV4WavPath = path.join(temporaryDirectory, 'visualizer-v4-cube-swarm-v1.wav');
         await writeFile(masterPath, float32ToLittleEndianBuffer(createFormatMaster()));
         await writeFile(
             visualizerV3MasterPath,
             float32ToLittleEndianBuffer(createVisualizerV3LinesFixture()),
+        );
+        await writeFile(
+            visualizerV4MasterPath,
+            float32ToLittleEndianBuffer(createVisualizerV4CubeSwarmFixture()),
         );
 
         const commonInput = [
@@ -223,6 +231,28 @@ async function main(): Promise<void> {
             'ffmpeg',
             [...visualizerV3Input, ...wavParameters, visualizerV3WavPath],
         ).command;
+        const visualizerV4Input = [
+            '-hide_banner',
+            '-loglevel',
+            'error',
+            '-y',
+            '-f',
+            'f32le',
+            '-ar',
+            String(SAMPLE_RATE),
+            '-ac',
+            '1',
+            '-i',
+            visualizerV4MasterPath,
+            '-map_metadata',
+            '-1',
+            '-fflags',
+            '+bitexact',
+        ];
+        const visualizerV4Command = run(
+            'ffmpeg',
+            [...visualizerV4Input, ...wavParameters, visualizerV4WavPath],
+        ).command;
 
         await mkdir(AUDIO_DIRECTORY, { recursive: true });
         await Promise.all([
@@ -231,6 +261,7 @@ async function main(): Promise<void> {
             copyFile(mp3Path, path.join(AUDIO_DIRECTORY, 'format-master.mp3')),
             copyFile(flacPath, path.join(AUDIO_DIRECTORY, 'format-master.flac')),
             copyFile(visualizerV3WavPath, path.join(AUDIO_DIRECTORY, 'visualizer-v3-lines-v1.wav')),
+            copyFile(visualizerV4WavPath, path.join(AUDIO_DIRECTORY, 'visualizer-v4-cube-swarm-v1.wav')),
         ]);
 
         const masterRelativePath = 'tests/fixtures/audio/format-master.f32le';
@@ -296,6 +327,17 @@ async function main(): Promise<void> {
                 ffmpegVersion,
                 'visualizer-v3-lines-pcm-v1',
                 VISUALIZER_V3_GENERATOR_VERSION,
+            ),
+            await fixtureRecord(
+                'visualizer-v4-cube-swarm-wav-v1',
+                'tests/fixtures/audio/visualizer-v4-cube-swarm-v1.wav',
+                'Visualizer V4 deterministic spectrum, energy, drum, orbit, and boundary scenarios',
+                'wav',
+                visualizerV4Command.replaceAll(temporaryDirectory, '<temp>'),
+                wavParameters,
+                ffmpegVersion,
+                'visualizer-v4-cube-swarm-pcm-v1',
+                VISUALIZER_V4_GENERATOR_VERSION,
             ),
         ];
 

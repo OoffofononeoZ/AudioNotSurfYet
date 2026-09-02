@@ -158,7 +158,7 @@ DEC-041 将 V4 首版视觉细化为“核心环群”，其中 `B = baseSize`�
 
 Cube 默认 binding 由 descriptor 声明：`centerSpectrum` 使用 `amplitudeSpectrum/default/full`；`riseSpeed` 使用 `energy/default/scalar`，transform 为输入 `[0,25]`、输出 `[0.25,3]`、clamp 开启且无 smoothing；其余参数使用现有 constant default。`SceneRegistry.createDefaultBindings()` 读取该声明，首次切换到 Cube 后 active analysis set 必须恰为两项；strict JSON 导入与草稿恢复保留工程原绑定，不应用默认值覆盖。
 
-V3 切换到尚未实现的 Cube Swarm 时必须 dispose Orthogonal Lines 的 geometry/material，但保留同一个 host、renderer 和 Canvas，并显示明确的 V4 中性预览；该状态不是 renderer error，也不能被表述为 Cube Swarm 已完成。
+V3 canonical 阶段曾以明确的 V4 中性预览验证 scene disposal 与单 host/renderer/Canvas；该历史 artifact 不改写。V4 implementation candidate 已用 DEC-041 的真实 Cube Swarm 替换中性预览，V3 前向回归现在验证真实 Cube 切换仍保留同一 host/renderer/Canvas。
 
 ## Renderer Host and Lifecycle
 

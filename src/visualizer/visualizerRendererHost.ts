@@ -20,6 +20,9 @@ export interface VisualizerRendererDiagnostics {
     renderedFrames: number;
     lastFrameHash: string;
     maxFrameDurationMs: number;
+    contextLosses: number;
+    contextRestores: number;
+    contextRestoreFailures: number;
 }
 
 export const visualizerRendererDiagnostics: VisualizerRendererDiagnostics = {
@@ -32,10 +35,14 @@ export const visualizerRendererDiagnostics: VisualizerRendererDiagnostics = {
     renderedFrames: 0,
     lastFrameHash: '',
     maxFrameDurationMs: 0,
+    contextLosses: 0,
+    contextRestores: 0,
+    contextRestoreFailures: 0,
 };
 
 declare global {
     interface Window {
+        __VISUALIZER_DIAGNOSTICS__?: VisualizerRendererDiagnostics;
         __VISUALIZER_V3_DIAGNOSTICS__?: VisualizerRendererDiagnostics;
     }
 }
@@ -82,6 +89,7 @@ export class VisualizerRendererHost implements VisualizerSceneHost {
     private height = 1;
     private dpr = 1;
     private disposed = false;
+    private contextLost = false;
     private failNextRender = false;
     private sampleCenterOnNextFrame = false;
 
@@ -96,7 +104,11 @@ export class VisualizerRendererHost implements VisualizerSceneHost {
         visualizerRendererDiagnostics.activeHosts += 1;
         visualizerRendererDiagnostics.activeRenderers += 1;
         this.canvas.dataset.rendererHostId = this.id;
+        this.canvas.dataset.webglContextState = 'ready';
+        this.canvas.addEventListener('webglcontextlost', this.handleContextLost);
+        this.canvas.addEventListener('webglcontextrestored', this.handleContextRestored);
         if (developmentBuild && typeof window !== 'undefined') {
+            window.__VISUALIZER_DIAGNOSTICS__ = visualizerRendererDiagnostics;
             window.__VISUALIZER_V3_DIAGNOSTICS__ = visualizerRendererDiagnostics;
             this.canvas.addEventListener('visualizer-scene-error-test', this.handleTestError);
             this.canvas.addEventListener('visualizer-sample-center-test', this.handleCenterSample);
@@ -112,6 +124,7 @@ export class VisualizerRendererHost implements VisualizerSceneHost {
         this.width = Math.max(1, width);
         this.height = Math.max(1, height);
         this.dpr = Math.min(Math.max(1, devicePixelRatio), 2);
+        if (this.contextLost) return;
         try {
             this.renderer.setPixelRatio(this.dpr);
             this.renderer.setSize(this.width, this.height, false);
@@ -128,13 +141,20 @@ export class VisualizerRendererHost implements VisualizerSceneHost {
     }
 
     requestFrame(): void {
-        if (this.disposed || this.frameHandle !== null) return;
+        if (this.disposed || this.contextLost || this.frameHandle !== null) return;
         this.frameHandle = this.requestAnimationFrameImpl(this.draw);
         visualizerRendererDiagnostics.activeVisualAnimationFrames += 1;
     }
 
     retry(): void {
         if (this.disposed) return;
+        if (this.contextLost) {
+            this.options.onStatus({
+                state: 'recovering',
+                message: '等待 WebGL 上下文恢复后再重建场景。',
+            });
+            return;
+        }
         try {
             this.disposeScene();
         } catch (error) {
@@ -151,16 +171,14 @@ export class VisualizerRendererHost implements VisualizerSceneHost {
     dispose(): void {
         if (this.disposed) return;
         this.disposed = true;
-        if (this.frameHandle !== null) {
-            this.cancelAnimationFrameImpl(this.frameHandle);
-            this.frameHandle = null;
-            visualizerRendererDiagnostics.activeVisualAnimationFrames -= 1;
-        }
+        this.cancelPendingFrame();
         try {
             this.disposeScene();
         } catch {
             // Host disposal must continue through renderer/context cleanup.
         }
+        this.canvas.removeEventListener('webglcontextlost', this.handleContextLost);
+        this.canvas.removeEventListener('webglcontextrestored', this.handleContextRestored);
         if (developmentBuild && typeof window !== 'undefined') {
             this.canvas.removeEventListener('visualizer-scene-error-test', this.handleTestError);
             this.canvas.removeEventListener('visualizer-sample-center-test', this.handleCenterSample);
@@ -170,6 +188,7 @@ export class VisualizerRendererHost implements VisualizerSceneHost {
         visualizerRendererDiagnostics.activeHosts -= 1;
         visualizerRendererDiagnostics.activeRenderers -= 1;
         delete this.canvas.dataset.rendererHostId;
+        delete this.canvas.dataset.webglContextState;
     }
 
     private readonly handleTestError = (): void => {
@@ -182,10 +201,63 @@ export class VisualizerRendererHost implements VisualizerSceneHost {
         this.requestFrame();
     };
 
+    private readonly handleContextLost = (event: Event): void => {
+        event.preventDefault();
+        if (this.disposed || this.contextLost) return;
+        this.contextLost = true;
+        this.cancelPendingFrame();
+        visualizerRendererDiagnostics.contextLosses += 1;
+        this.canvas.dataset.webglContextState = 'lost';
+        try {
+            // The old GL resources cannot be reused. Release their scene ownership
+            // while the context is lost so Three.js does not delete stale handles
+            // from the newly restored context.
+            this.disposeScene();
+        } catch {
+            // Keep the scene reference so restoration can retry disposal.
+        }
+        this.options.onStatus({
+            state: 'recovering',
+            message: 'WebGL 上下文已丢失；工程和播放状态保持不变。',
+        });
+    };
+
+    private readonly handleContextRestored = (): void => {
+        if (this.disposed || !this.contextLost) return;
+        this.contextLost = false;
+        visualizerRendererDiagnostics.contextRestores += 1;
+        this.canvas.dataset.webglContextState = 'restoring';
+        this.options.onStatus({
+            state: 'recovering',
+            message: 'WebGL 上下文已恢复，正在重建当前场景。',
+        });
+        try {
+            this.renderer.setPixelRatio(this.dpr);
+            this.renderer.setSize(this.width, this.height, false);
+            if (this.scene) this.disposeScene();
+        } catch (error) {
+            visualizerRendererDiagnostics.contextRestoreFailures += 1;
+            this.canvas.dataset.webglContextState = 'error';
+            this.options.onStatus({
+                state: 'error',
+                message: error instanceof Error ? error.message : 'WebGL 场景恢复失败。',
+            });
+            return;
+        }
+        this.requestFrame();
+    };
+
+    private cancelPendingFrame(): void {
+        if (this.frameHandle === null) return;
+        this.cancelAnimationFrameImpl(this.frameHandle);
+        this.frameHandle = null;
+        visualizerRendererDiagnostics.activeVisualAnimationFrames -= 1;
+    }
+
     private readonly draw: FrameRequestCallback = () => {
         this.frameHandle = null;
         visualizerRendererDiagnostics.activeVisualAnimationFrames -= 1;
-        if (this.disposed) return;
+        if (this.disposed || this.contextLost) return;
         const frame = this.options.readFrame();
         if (!frame) {
             this.options.onStatus({ state: 'idle' });
@@ -195,7 +267,7 @@ export class VisualizerRendererHost implements VisualizerSceneHost {
             const scene = this.ensureScene(frame);
             if (this.failNextRender) {
                 this.failNextRender = false;
-                throw new Error('V3 场景错误恢复测试。');
+                throw new Error('场景错误恢复测试。');
             }
             const values = this.options.resolveValuesAt(frame.timeSeconds);
             visualizerRendererDiagnostics.targetResolveCount += 1;
@@ -231,6 +303,7 @@ export class VisualizerRendererHost implements VisualizerSceneHost {
             this.canvas.dataset.frameStateHash = snapshot.hash;
             this.canvas.dataset.frameTime = frame.timeSeconds.toFixed(6);
             this.canvas.dataset.bindingRevision = frame.bindingRevision.toString();
+            this.canvas.dataset.webglContextState = 'ready';
             this.options.onFrame(values, snapshot);
             this.options.onStatus({ state: scene.kind === 'neutral' ? 'neutral' : 'ready' });
             if (frame.playbackState === 'playing') this.requestFrame();

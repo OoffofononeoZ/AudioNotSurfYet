@@ -95,7 +95,7 @@ Implementation:
 - `horizontalDecay`/`verticalDecay` 保持 JSON V1 现有字段并以秒为单位；V2 point 默认 120ms release 后进入 60Hz 确定性余辉，range 先按 `[start,end)` gate，再按 decay 衰减。
 - scene 余辉使用一秒 checkpoint，按歌曲/template/binding revision 隔离；seek、刷新和暂停单帧从 checkpoint 重放，禁止 RAF delta。
 - 新工程 intensity 继续 constant 0，并显示“请选择主要音色/鼓点数据源”；不按 lane/class 名称隐式绑定。
-- 切换到 Cube Swarm 时 dispose Orthogonal Lines geometry/material，保留同一 host/renderer/Canvas 并显示 V4 中性预览。scene 异常进入可重试错误层，transport、模板、工程和草稿保持可用。
+- V3 canonical 阶段切换到 Cube Swarm 时以中性预览验证 Orthogonal Lines disposal 和单 host/renderer/Canvas；V4 实现后，前向回归改为切换真实 Cube scene。scene 异常仍进入可重试错误层，transport、模板、工程和草稿保持可用。
 
 Exit gate:
 

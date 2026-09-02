@@ -1,12 +1,12 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-09-02
+last_reviewed: 2026-09-03
 upstream_docs:
   - "docs/product/scope.md"
   - "docs/product/success-metrics.md"
   - "docs/architecture/visualizer/binding-and-scene-contracts.md"
-next_action: "按 DEC-039 实施 V3 Orthogonal Lines 的单 host、60Hz 余辉与 scene lifecycle；V4 保持 Planned"
+next_action: "以 V4 34 步 canonical 验证 Cube 60Hz rise/orbit、单 host context recovery 与资源对称性"
 ---
 
 # ADR-0016: Deterministic Scene Registry

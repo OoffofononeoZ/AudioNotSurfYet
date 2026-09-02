@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-09-02",
+  "generatedAt": "2026-09-03",
   "generator": {
     "id": "m3-audio-fixtures-v1",
     "path": "tests/fixtures/generate-fixtures.ts",
@@ -148,6 +148,33 @@
           "pcm_s16le"
         ],
         "commandTemplate": "ffmpeg -hide_banner -loglevel error -y -f f32le -ar 48000 -ac 1 -i <temp>/visualizer-v3-lines-v1.f32le -map_metadata -1 -fflags +bitexact -flags:a +bitexact -c:a pcm_s16le <temp>/visualizer-v3-lines-v1.wav"
+      },
+      "license": "CC0-1.0",
+      "provenance": "Deterministically synthesized by tests/fixtures/generate-fixtures.ts"
+    },
+    {
+      "id": "visualizer-v4-cube-swarm-wav-v1",
+      "path": "tests/fixtures/audio/visualizer-v4-cube-swarm-v1.wav",
+      "purpose": "Visualizer V4 deterministic spectrum, energy, drum, orbit, and boundary scenarios",
+      "format": "wav",
+      "sha256": "5f2ee3c22f88d65c27e282c236e03774ee45c093549b7ef528a76baf137085b4",
+      "bytes": 576044,
+      "sampleRate": 48000,
+      "channels": 1,
+      "durationSeconds": 6,
+      "sourceId": "visualizer-v4-cube-swarm-pcm-v1",
+      "generationCommand": "npm run fixtures:generate",
+      "generatorVersion": "visualizer-v4-cube-swarm-fixture-v1",
+      "encoder": {
+        "name": "pcm_s16le",
+        "version": "ffmpeg version 8.1.2 Copyright (c) 2000-2026 the FFmpeg developers",
+        "parameters": [
+          "-flags:a",
+          "+bitexact",
+          "-c:a",
+          "pcm_s16le"
+        ],
+        "commandTemplate": "ffmpeg -hide_banner -loglevel error -y -f f32le -ar 48000 -ac 1 -i <temp>/visualizer-v4-cube-swarm-v1.f32le -map_metadata -1 -fflags +bitexact -flags:a +bitexact -c:a pcm_s16le <temp>/visualizer-v4-cube-swarm-v1.wav"
       },
       "license": "CC0-1.0",
       "provenance": "Deterministically synthesized by tests/fixtures/generate-fixtures.ts"

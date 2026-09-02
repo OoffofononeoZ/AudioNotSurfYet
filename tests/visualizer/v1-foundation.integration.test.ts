@@ -14,6 +14,7 @@ import type {
     TrackRecord,
 } from '../../src/types/audio';
 import type { VisualizerFileGateway } from '../../src/visualizer/fileIO';
+import { SceneRegistry } from '../../src/visualizer/sceneRegistry';
 import {
     createInitialVisualizerProject,
     encodeVisualizerProjectV1,
@@ -279,9 +280,9 @@ describe('Visualizer V1 foundation integration', () => {
             output: { resolution: '1080p', frameRate: 60 },
             scene: { templateId: 'cube-swarm' },
         });
-        expect(harness.repository.envelope?.project.scene.bindings.every(
-            (binding) => binding.source.kind === 'constant',
-        )).toBe(true);
+        expect(harness.repository.envelope?.project.scene.bindings.filter(
+            (binding) => binding.source.kind === 'analysis',
+        ).map((binding) => binding.parameterId)).toEqual(['centerSpectrum', 'riseSpeed']);
         await harness.controller.dispose();
     });
 
@@ -294,10 +295,17 @@ describe('Visualizer V1 foundation integration', () => {
         await expect(harness.controller.importProject()).rejects.toThrow();
         expect(harness.controller.getSnapshot().project).toEqual(original);
         const candidate = structuredClone(original);
+        candidate.scene.templateId = 'cube-swarm';
+        candidate.scene.bindings = new SceneRegistry().createDefaultBindings('cube-swarm');
+        const orbit = candidate.scene.bindings.find((binding) => binding.parameterId === 'orbitSpeed')!;
+        orbit.source = { kind: 'constant', value: 1.75 };
         candidate.output.frameRate = 60;
         harness.setOpenedProject(candidate);
         await expect(harness.controller.importProject()).resolves.toBe('imported');
         expect(harness.controller.getSnapshot().project?.output.frameRate).toBe(60);
+        expect(harness.controller.getSnapshot().project?.scene.bindings.find(
+            (binding) => binding.parameterId === 'orbitSpeed',
+        )?.source).toEqual({ kind: 'constant', value: 1.75 });
         expect(harness.repository.envelope?.project.output.frameRate).toBe(60);
         await harness.controller.dispose();
     });

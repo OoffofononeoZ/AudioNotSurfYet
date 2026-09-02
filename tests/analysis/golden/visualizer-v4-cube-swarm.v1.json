@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "fixture": "tests/fixtures/audio/visualizer-v4-cube-swarm-v1.wav",
+  "seed": 41,
+  "stepSeconds": 0.016666666666666666,
+  "checkpointSeconds": 1,
+  "editor": {
+    "drumPoints": [0.02, 1, 2.5, 4, 5.98],
+    "mainToneRanges": [
+      { "start": 0.5, "end": 2 },
+      { "start": 2, "end": 4 },
+      { "start": 4, "end": 5.5 }
+    ]
+  },
+  "energyWindows": {
+    "silence": [0.1, 0.4],
+    "low": [0.75, 1.75],
+    "high": [2.25, 3.75]
+  },
+  "samples": [
+    { "timeSeconds": 0, "hash": "2c5bc993", "integratedRise": 0, "integratedOrbit": 0 },
+    { "timeSeconds": 0.25, "hash": "14d8f7fe", "integratedRise": 0.0625, "integratedOrbit": 0.075 },
+    { "timeSeconds": 1, "hash": "13e32164", "integratedRise": 0.375, "integratedOrbit": 0.3 },
+    { "timeSeconds": 2.5, "hash": "d3741d2d", "integratedRise": 2.375, "integratedOrbit": 0.75 },
+    { "timeSeconds": 5.98, "hash": "bbfab976", "integratedRise": 12.815, "integratedOrbit": 1.794 }
+  ]
+}
