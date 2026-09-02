@@ -11,7 +11,7 @@ upstream_docs:
   - "docs/architecture/visualizer/project-format-v1.md"
   - "docs/architecture/visualizer/binding-and-scene-contracts.md"
   - "docs/architecture/visualizer/recording-contract.md"
-next_action: "V2 数据绑定与 26/26 clean canonical 已完成并处于 owner 评审；V3 尚未开放"
+next_action: "V2 已批准并关闭；实施 V3 Orthogonal Lines，V4–V6 保持 Planned"
 ---
 
 # Visualizer V1–V6 Execution Plan
@@ -20,7 +20,7 @@ next_action: "V2 数据绑定与 26/26 clean canonical 已完成并处于 owner 
 
 把已批准的 Visualizer V0 架构按六个可独立验证的纵向里程碑交付：先建立当前歌曲工作台和本地工程，再接入 Analyzer/Editor 绑定，随后分别交付两个内置场景、实时 WebM 录制和双浏览器最终加固。
 
-Visualizer V1 已实现 `/visualizer/:trackId?` 工作台基础、完成 21/21 clean canonical 并获 owner 批准。V2 已实现数据绑定并完成 26/26 clean canonical，当前仍为 `In Progress`、evidence 为 `in-review`；V3–V6 保持 `Planned`，不得把中性预览描述为真实场景完成。
+Visualizer V1 已实现 `/visualizer/:trackId?` 工作台基础、完成 21/21 clean canonical 并获 owner 批准。V2 数据绑定与 26/26 clean canonical 已获 owner 批准并关闭；V3 Orthogonal Lines 为 `In Progress`，V4–V6 保持 `Planned`，不得把 V4 中性预览描述为真实 Cube Swarm 完成。
 
 ## 2. Delivery Principles
 
@@ -171,8 +171,10 @@ npm run eval:vN
 
 ## 7. Approval Gate
 
-本计划与同目录 acceptance criteria、test strategy、milestone plan 已由 owner 批准。V0-D 与 V1 据此为 `Complete`，V2 为 `In Progress`，V3–V6 继续为 `Planned`。
+本计划与同目录 acceptance criteria、test strategy、milestone plan 已由 owner 批准。V0-D、V1、V2 据此为 `Complete`，V3 为 `In Progress`，V4–V6 继续为 `Planned`。
 
 批准记录（2026-09-02）：
 
 `我批准 Visualizer V1–V6 execution plan、acceptance criteria、test strategy 与 milestone plan；同意开始 V1。`
+
+V2 evidence 批准与 V3 开放原文（2026-09-02）：`使用项目相关技能执行此计划`。本原文按随附计划执行，不补写用户未提供的逐项人工观察值。

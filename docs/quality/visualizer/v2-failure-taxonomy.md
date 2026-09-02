@@ -1,12 +1,12 @@
 ---
-status: in-review
+status: approved
 owner: "project-owner"
 last_reviewed: 2026-09-02
 upstream_docs:
   - "docs/quality/visualizer/v2-eval-plan.md"
   - "docs/quality/visualizer/v2-golden-examples.md"
   - "docs/architecture/risk-register.md"
-next_action: "V2 unit/integration/Chrome/Edge/canonical 信号已登记；owner 批准前不关闭 V2"
+next_action: "V2 failure taxonomy 与 canonical evidence 已获 owner 批准；V3 继续复用相关分类"
 ---
 
 # Visualizer V2 Failure Taxonomy

@@ -8,7 +8,7 @@ upstream_docs:
   - "docs/architecture/risk-register.md"
   - "docs/delivery/visualizer/execution-plan.md"
   - "docs/delivery/visualizer/acceptance-criteria.md"
-next_action: "V2 planner/projection/Editor snapshot/resolver 26 步 canonical 已通过；等待 owner 人工复核"
+next_action: "V2 26 步 canonical 已获 owner 批准；建立并执行 V3 Orthogonal Lines 30 步证据"
 ---
 
 # Visualizer V1–V6 Test Strategy

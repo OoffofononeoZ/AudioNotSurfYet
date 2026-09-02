@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: approved
 owner: "project-owner"
 last_reviewed: 2026-09-02
 upstream_docs:
@@ -10,7 +10,7 @@ upstream_docs:
   - "docs/quality/visualizer/v2-golden-examples.md"
   - "docs/quality/visualizer/v2-failure-taxonomy.md"
   - "docs/delivery/visualizer/milestone-plan.md"
-next_action: "复核 V2 26/26 clean canonical 与人工绑定任务；owner 批准前 V2 保持 In Progress，V3 不开放"
+next_action: "V2 26/26 clean canonical 已获 owner 批准且 V3 已开放；等待 V3 implementation commit 与 canonical evidence"
 ---
 
 # Visualizer Evidence Index
@@ -19,8 +19,8 @@ next_action: "复核 V2 26/26 clean canonical 与人工绑定任务；owner 批�
 
 - V0-P、V0-A、V0-D：`Complete`。
 - V1：`Complete`；clean canonical 21/21 与适用人工门禁已由 owner 批准。
-- V2：`In Progress`；clean canonical 26/26 已登记为 `in-review`，等待 owner 人工批准；V3–V6：`Planned`。
-- R-034 根据 route lease、双浏览器 canonical 与 owner 人工批准改为 `Mitigated`；R-035、R-036、R-037、R-038 继续为 `Open`。
+- V2：`Complete`；clean canonical 26/26 已获 owner 批准；V3：`In Progress`；V4–V6：`Planned`。
+- R-034–R-036 为 `Mitigated`；涉及真实场景确定性与资源的 R-037、R-038 继续为 `Open`。
 - Analyzer/Editor canonical 是相邻回归，不能替代 Visualizer evidence。
 
 ## Record Contract
@@ -109,7 +109,7 @@ next_action: "复核 V2 26/26 clean canonical 与人工绑定任务；owner 批�
 | Field | Value |
 | --- | --- |
 | Milestone | V2 — Data binding |
-| State | `in-review` |
+| State | `approved` |
 | Implementation commit | `769faafeef576bf9b98a95f6904cdb9886298530` |
 | Evidence commit | 本记录所在的 `docs: register Visualizer V2 canonical evidence` 提交 |
 | Run ID | `V2-2026-09-02T08-46-21-778Z-769faafe` |
@@ -117,7 +117,7 @@ next_action: "复核 V2 26/26 clean canonical 与人工绑定任务；owner 批�
 | Clean identity | start/end commit 均为 `769faafeef576bf9b98a95f6904cdb9886298530`；start/end dirty 均为 `false` |
 | Summary SHA-256 | `18b7d83d68f068ac615c56e1bb844a3c80bb1460ac884116d94cb460dd07bafb` |
 | Artifact root | `artifacts/evals/V2-2026-09-02T08-46-21-778Z-769faafe/` |
-| Reviewer | `project-owner` — pending |
+| Reviewer | `project-owner` — approved 2026-09-02 |
 
 ### Environment
 
@@ -177,7 +177,15 @@ next_action: "复核 V2 26/26 clean canonical 与人工绑定任务；owner 批�
 
 ### Manual Gaps and Review Boundary
 
-- 原生 Editor JSON picker 的选择、取消和权限由 OS 对话框拥有，自动化使用受控文件入口验证解析与原子性；owner 仍需在最新版 Chrome 检查真实 picker。
+- 原生 Editor JSON picker 的选择、取消和权限由 OS 对话框拥有，自动化使用受控文件入口验证解析与原子性；owner 本次批准未补写用户未提供的逐项人工观察值。
 - V2 的中间 Canvas 继续是中性预览；本记录证明数据绑定和 resolver，不证明 V3 Orthogonal Lines、V4 Cube Swarm、V5 WebM 或 V6 最终加固。
-- R-035–R-038 在 owner 批准前继续为 `Open`；V3 不开放。
-- canonical artifact 保留至审批完成；只有 commit、run ID、summary 或 artifact 身份变化时才重跑。
+- R-035、R-036 依据 V2 planner、projection、Editor snapshot、原子导入与双浏览器证据改为 `Mitigated`；R-037、R-038 继续等待 V3 真实场景确定性与资源证据。
+- V2 canonical identity 保持不变且无需重跑；只有 commit、run ID、summary 或 artifact 身份变化时才重跑。
+
+### Owner Approval
+
+2026-09-02，`project-owner` 明确回复：
+
+`使用项目相关技能执行此计划`
+
+本批准关闭 V2、开放 V3，并接受现有 canonical evidence；不补写批准原文未提供的人工观察值，也不构成 V3/V4 场景、V5 WebM、V6 readiness 或生产上线通过。

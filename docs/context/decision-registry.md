@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/product/scope.md"
   - "docs/architecture/system-design.md"
   - "docs/delivery/execution-plan.md"
-next_action: "Visualizer V2 26/26 canonical 已登记为 in-review；owner 批准前 V3 不开放，PROD-015 仍开放"
+next_action: "Visualizer V2 已获 owner 批准并关闭；V3 Orthogonal Lines 为 In Progress，PROD-015 仍开放"
 ---
 
 # Decision Registry
@@ -75,6 +75,8 @@ next_action: "Visualizer V2 26/26 canonical 已登记为 in-review；owner 批�
 `project-owner` 于 2026-07-24 通过“PLEASE IMPLEMENT THIS PLAN”明确要求将随请求给出的产品、架构、里程碑和测试决定落入仓库。本注册表记录的是批准的决策；M3–M12 的实现状态仍以 [milestone plan](../delivery/milestone-plan.md) 和可复现证据为准。
 
 2026-09-02，`project-owner` 明确回复：“我批准 Visualizer V0 产品意图、单场景模板模型、最多四项分析特征、两个内置场景与 WebM 路线；同意进入 Visualizer 架构设计。”DEC-037 与 PROD-014V 据此获批并开放 system design。随后 owner 明确批准 Visualizer V0 system design、接口契约、R-034–R-041 与 ADR-0014–0017，并进一步批准 Visualizer V1–V6 delivery planning、同意开始 V1；DEC-038 据此生效。V1 在 clean commit `fd44c8921a534c22b2362ccffff7ec9e46f3ff02` 上完成 21/21 canonical，并于同日获 owner 批准；V1 关闭、V2 开放，R-034 改为 `Mitigated`。该批准不构成 V2、场景、录制、readiness 或上线通过。
+
+同日，`project-owner` 明确回复“使用项目相关技能执行此计划”。随附计划要求保持 V2 canonical identity 不变、批准 V2 quality/evidence、关闭 V2 并开放 V3；据此 V2 为 `Complete`、R-035/R-036 为 `Mitigated`、V3 为 `In Progress`。该批准不补写用户未提供的人工观察值，不构成 V3 canonical、V4–V6 或生产上线通过；继续只创建本地提交，不 fetch、不 push。
 
 同日，`project-owner` 明确要求实施 Q0 质量设计计划，批准了 Q0 前置、四级严重度和 readiness 后置的阶段安排；同时要求三份质量文档先保持 `in-review`，经单独审阅后才生效。因此 DEC-010 的时序决定已批准，但 Q0 内容尚未批准。
 
