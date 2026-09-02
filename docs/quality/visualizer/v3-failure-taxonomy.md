@@ -6,7 +6,7 @@ upstream_docs:
   - "docs/quality/visualizer/v3-eval-plan.md"
   - "docs/quality/visualizer/v3-golden-examples.md"
   - "docs/architecture/risk-register.md"
-next_action: "用 V3 provisional/canonical 信号登记失败与修复；owner 批准前不关闭 V3"
+next_action: "V3 canonical 无失败步骤；保留 pre-canonical 修复记录并等待 owner 批准"
 ---
 
 # Visualizer V3 Failure Taxonomy
@@ -31,3 +31,8 @@ next_action: "用 V3 provisional/canonical 信号登记失败与修复；owner �
 | S1 | Orthogonal Lines 核心映射、确定性、单 host 或资源释放不可成立 | 阻断 V3 |
 | S2 | 可恢复 scene error、单项参数反馈、布局或键盘缺陷 | 修复并复跑相关层，按影响决定全量重跑 |
 | S3 | 不改变场景事实的低等级文案或诊断差异 | 记录并按 AC 判断，不掩盖更高等级问题 |
+
+## Observed Implementation Signals
+
+- pre-canonical 真实 Chrome 检查发现全屏 quad 被 camera frustum culling，中心像素保持透明，属于 `V3FT-MAPPING / S1`。实现将 quad 固定为不参与 frustum culling，并增加渲染帧内中心像素断言；最终 provisional 与 clean canonical 均得到 `[31,215,109,255]` 并通过。
+- seek hash、ResizeObserver backing-store、E1 播放就绪和 V1 最终 RAF 采样在早期编排中出现等待边界不足；这些是 harness timing，不登记为产品 canonical failure。测试改为等待可观察产品状态后，目标专项重复通过且最终 30/30 clean canonical 无失败步骤。

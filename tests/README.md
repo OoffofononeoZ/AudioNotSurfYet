@@ -6,7 +6,7 @@
 - Vitest：4.1.10。官方已发布但当前 npm 镜像尚未提供 Vitest 5，因此使用镜像可获得且仍受支持的 4.1 版本。
 - Playwright Test：1.62.0；必需浏览器为本机稳定版 Google Chrome 与 Microsoft Edge。
 - FFmpeg：8.1.2；只用于生成和检查受控 WAV/MP3/FLAC fixture。
-- 当前 Visualizer V1/V2 canonical 使用 Google Chrome 152.0.7977.66 与 Microsoft Edge 152.0.4191.53；`test:e2e:v1:edge` 与 `test:e2e:v2:edge` 使用真实 `msedge` channel，浏览器缺失时仍明确报告失败/blocked。
+- 当前 Visualizer V1/V2/V3 canonical 使用 Google Chrome 152.0.7977.66 与 Microsoft Edge 152.0.4191.53；V3 场景专项运行真实 Chrome，固定 V1/V2 基线继续运行真实 Chrome/Edge，浏览器缺失时仍明确报告失败/blocked。
 
 M3–M13 不建设 CI。下列命令当前均为本地门禁；正式证据要求在干净 commit 上复跑。M3–M13 与 Editor E1–E7 canonical 均已获批准。E7 的 44/44 run 因全屏浮层修订成为 `pre-revision`，修订版 46/46 已于 2026-08-31 获 owner 批准。
 
@@ -201,7 +201,7 @@ Visualizer V1 quality 契约、实现和双浏览器 runner 已完成。clean ca
 
 Visualizer V2 已实现 constant/analysis/editor-event inspector、0–4 唯一特征 planner、FeatureRegistry projection、同歌 Editor snapshot 与 60Hz absolute-time resolver。clean canonical `V2-2026-09-02T08-46-21-778Z-769faafe` 在 commit `769faafeef576bf9b98a95f6904cdb9886298530` 上 26/26 通过，summary SHA-256 为 `18b7d83d68f068ac615c56e1bb844a3c80bb1460ac884116d94cb460dd07bafb`；golden 2/2、unit 6/6、integration 5/5、Chrome 3/3、Edge 3/3。Evidence 已于 2026-09-02 获 owner 批准；V2 关闭并开放 V3 真实场景。
 
-Visualizer V3 quality contract 固定 `visualizer-v3-lines-v1.wav` 与版本化 scene golden、单 `VisualizerRendererHost`、单 quad/shader、横竖参数隔离、point/range/analysis/constant、60Hz scene-local decay、一秒 checkpoint、同时间 frame-state hash、scene error/retry、Cube V4 中性切换、1024/1280/1920、DPR、键盘和 20 次资源循环。实现将新增 `fixtures:v3:golden`、`test:v3:unit`、`test:v3:integration`、`test:e2e:v3`、`eval:v3:provisional` 与 clean `eval:v3`；canonical 固定为 V2 26 步基线加四个 V3 专项，共 30 步。
+Visualizer V3 quality contract 固定 `visualizer-v3-lines-v1.wav` 与版本化 scene golden、单 `VisualizerRendererHost`、单 quad/shader、横竖参数隔离、point/range/analysis/constant、60Hz scene-local decay、一秒 checkpoint、同时间 frame-state hash、scene error/retry、Cube V4 中性切换、1024/1280/1920、DPR、键盘和 20 次资源循环。`fixtures:v3:golden`、`test:v3:unit`、`test:v3:integration`、`test:e2e:v3` 与 dirty/clean eval 命令均已建立；clean canonical `V3-2026-09-02T13-32-42-513Z-89be30eb` 在 commit `89be30eb23d4e53d2c38f24e111cd1af7ec0840d` 上 30/30 通过，summary SHA-256 为 `afe4cbe233fe1feded65380d6e976d5a4c32c2f9860fe2e0357a0d615d6a7b84`，正式 evidence 为 `in-review`。
 
 V1 quality contract 固定 AC-V101–AC-V108、V1-G01–G12、VFT-ROUTE/LEASE/PROJECT/DRAFT/FILE/LAYOUT/RESOURCE、21 步 clean canonical，以及 Chrome/Edge 原生 picker、覆盖提示和 `beforeunload` 人工补偿。V1/evidence 已批准，R-034 为 `Mitigated`；V2 批准后 R-036 也为 `Mitigated`，R-038 继续由真实 renderer 里程碑验证。
 

@@ -94,8 +94,9 @@
 - 当前没有正式 CI，自动化结论必须限定为本地环境。
 - Visualizer V1 clean canonical `V1-2026-09-02T07-03-26-973Z-fd44c892` 已在 commit `fd44c8921a534c22b2362ccffff7ec9e46f3ff02` 上 21/21 通过，并于 2026-09-02 获 owner 人工批准；V1 已关闭，V2 数据绑定已开放。
 - Visualizer V2 clean canonical `V2-2026-09-02T08-46-21-778Z-769faafe` 已在 commit `769faafeef576bf9b98a95f6904cdb9886298530` 上 26/26 通过，summary SHA-256 为 `18b7d83d68f068ac615c56e1bb844a3c80bb1460ac884116d94cb460dd07bafb`；evidence 已获 owner 批准，V2 关闭并开放 V3。
-- Visualizer V3 implementation candidate 已建立版本化 WAV/golden、单元/集成和 Chrome 专项；clean canonical 与 owner 人工验收前，V3 保持 `In Progress`，V4–V6 保持 `Planned`。
+- Visualizer V3 已建立版本化 WAV/golden、单元/集成和 Chrome 专项；clean canonical 已登记为 `in-review`，owner 人工验收前 V3 保持 `In Progress`，V4–V6 保持 `Planned`。
 - 最终 dirty candidate 的 provisional `V3-2026-09-02T13-25-25-465Z-75cbf292-provisional` 已 30/30 通过，summary SHA-256 为 `20452afedc68ab351647464c3e6c3335e1e6def0290c2ba1d35105004648a46d`；它绑定 dirty worktree，仅允许进入 implementation commit，不得登记为 canonical。
+- Visualizer V3 clean canonical `V3-2026-09-02T13-32-42-513Z-89be30eb` 已在 commit `89be30eb23d4e53d2c38f24e111cd1af7ec0840d` 上 30/30 通过，summary SHA-256 为 `afe4cbe233fe1feded65380d6e976d5a4c32c2f9860fe2e0357a0d615d6a7b84`；evidence 在 owner 人工批准前保持 `in-review`。
 - 当前机器已安装 Edge 151；M11 clean canonical 已使用真实 `msedge` channel 全量 31/31 通过。原生权限 prompt 不能由 OPFS 自动化替代；当前候选已由 `project-owner` 于 2026-08-26 完成人工补偿签字，相关实现或浏览器变化后须重做。
 - 正式 M3 canonical run 已在 clean commit `17d16f0da37289c1f67f75203502beef999572ea` 上通过并登记，且已由 `project-owner` 批准。
 - 正式 M4 canonical run 已在 clean commit `e5cfe9e8ab62301f3c5b0ddcdd37847a2e131a0f` 上通过并登记，evidence 与 working agreements 已由 `project-owner` 批准。

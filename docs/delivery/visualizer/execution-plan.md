@@ -11,7 +11,7 @@ upstream_docs:
   - "docs/architecture/visualizer/project-format-v1.md"
   - "docs/architecture/visualizer/binding-and-scene-contracts.md"
   - "docs/architecture/visualizer/recording-contract.md"
-next_action: "V2 已批准并关闭；实施 V3 Orthogonal Lines，V4–V6 保持 Planned"
+next_action: "V3 30/30 clean canonical 已登记为 in-review；等待 owner 人工验收，V4–V6 保持 Planned"
 ---
 
 # Visualizer V1–V6 Execution Plan
@@ -104,7 +104,7 @@ Exit gate:
 - 20 次 template/route 循环保持单 Canvas、RendererHost、WebGLRenderer 和视觉 RAF；无 Visualizer 归因主线程任务 `>50ms`，console/pageerror 为 0。
 - template switch、dispose、错误隔离/重试、1024/1280/1920、DPR/resize、键盘 inspector 与 reduced motion 通过。
 
-Current candidate（2026-09-02）：上述实现已进入工作树，并由 V3 golden/unit/integration 与真实 Chrome 专项验证；仍需按固定顺序完成 dirty provisional、implementation commit、30 步 clean canonical、evidence 登记和 owner 人工验收，因此 V3 保持 `In Progress`。
+Current candidate（2026-09-02）：上述实现已进入 commit `89be30eb23d4e53d2c38f24e111cd1af7ec0840d`；dirty provisional 与 clean canonical 均为 30/30，clean run 为 `V3-2026-09-02T13-32-42-513Z-89be30eb`。evidence 已登记为 `in-review`；owner 人工验收与明确批准前 V3 保持 `In Progress`，V4 不开放。
 
 ### V4 — Cube Swarm
 

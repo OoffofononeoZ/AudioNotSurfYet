@@ -8,7 +8,7 @@ upstream_docs:
   - "docs/delivery/visualizer/test-strategy.md"
   - "docs/architecture/visualizer/binding-and-scene-contracts.md"
   - "docs/architecture/risk-register.md"
-next_action: "提交 implementation candidate、执行 clean canonical 并登记 owner 评审证据"
+next_action: "30/30 clean canonical 已登记为 in-review；等待 owner 人工验收与明确批准"
 ---
 
 # Visualizer V3 Eval Plan
@@ -46,6 +46,12 @@ next_action: "提交 implementation candidate、执行 clean canonical 并登记
 2026-09-02 最终 dirty-worktree provisional `V3-2026-09-02T13-25-25-465Z-75cbf292-provisional` 按固定 30 步全部通过，summary SHA-256 为 `20452afedc68ab351647464c3e6c3335e1e6def0290c2ba1d35105004648a46d`。该 run 只证明当前未提交候选具备进入 implementation commit 的条件，不是 canonical evidence。
 
 该轮 Chrome 自动观测：画面反馈 `1.10ms`、设置反馈 `2.20ms`、中心像素 `[31,215,109,255]`、最大 Visualizer frame 工作 `7.10ms`；20 次 route 循环末尾为 1 Canvas、1 active host、1 active renderer、0 pending visual RAF，scene created/disposed 为 21/20，target resolve/rendered frame 为 47/47。数值只绑定该 provisional 环境，不代替 owner 最终视觉验收。
+
+## Canonical Candidate Signal
+
+Implementation commit `89be30eb23d4e53d2c38f24e111cd1af7ec0840d` 上的 clean canonical `V3-2026-09-02T13-32-42-513Z-89be30eb` 按固定 30 步全部通过，起止工作树均干净，summary SHA-256 为 `afe4cbe233fe1feded65380d6e976d5a4c32c2f9860fe2e0357a0d615d6a7b84`。正式记录见 evidence index，并保持 `in-review`。
+
+该轮 Chrome 自动观测：画面反馈 `1.10ms`、设置反馈 `2.30ms`、中心像素 `[31,215,109,255]`、最大 Visualizer frame 工作 `3.40ms`；20 次 route 循环末尾为 1 Canvas、1 active host、1 active renderer、0 pending visual RAF，scene created/disposed 为 21/20，target resolve/rendered frame 为 51/51。owner 人工验收与明确批准前，V3 继续为 `In Progress`，R-037/R-038 继续为 `Open`，V4 不开放。
 
 ## Evidence Gaps
 

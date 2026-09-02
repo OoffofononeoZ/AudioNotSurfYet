@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/architecture/interface-contracts.md"
   - "docs/architecture/risk-register.md"
   - "docs/delivery/visualizer/execution-plan.md"
-next_action: "V2 已批准；当前按 AC-V301–AC-V305 约束 V3 Orthogonal Lines，V4–V6 保持 Planned"
+next_action: "AC-V301–AC-V305 的 30/30 clean canonical 已登记为 in-review；等待 owner 人工验收，V4–V6 保持 Planned"
 ---
 
 # Visualizer V1–V6 Acceptance Criteria
