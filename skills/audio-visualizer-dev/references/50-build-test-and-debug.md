@@ -86,6 +86,9 @@
 | `npm run fixtures:v3:golden` / `test:v3:unit` / `test:v3:integration` | V3 scene fixture、参数/余辉与 RendererHost 所有权专项 | implementation candidate 的纯逻辑与集成门禁 |
 | `npm run test:e2e:v3` | Chrome 验证反馈、hash、DPR、switch/retry 与 20 次路由资源 | V3 浏览器门禁；不替代 owner 视觉验收 |
 | `npm run eval:v3:provisional` / `eval:v3` | V2 26 步基线 + V3 四专项的 dirty/clean 30 步链 | canonical 必须绑定 clean implementation commit |
+| `npm run fixtures:v4:golden` / `test:v4:unit` / `test:v4:integration` | V4 Cube fixture、64-band/seed/checkpoint state、默认绑定、host resource 与 context 专项 | 已批准 V4 quality contract；实现后进入门禁 |
+| `npm run test:e2e:v4` | Chrome 验证 Cube 参数隔离、seek/hash、context recovery、三视口、键盘与 20 次资源循环 | V4 浏览器门禁；不替代 owner 视觉验收 |
+| `npm run eval:v4:provisional` / `eval:v4` | V3 30 步基线 + V4 四专项的 dirty/clean 34 步链 | canonical 必须绑定 clean implementation commit |
 
 ## 已知测试缺口
 
