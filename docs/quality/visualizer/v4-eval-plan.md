@@ -8,7 +8,7 @@ upstream_docs:
   - "docs/delivery/visualizer/test-strategy.md"
   - "docs/architecture/visualizer/binding-and-scene-contracts.md"
   - "docs/architecture/risk-register.md"
-next_action: "按 DEC-041 实施 Cube Swarm、默认两项分析绑定、确定性 rise/orbit 与同 host context recovery"
+next_action: "V4 34/34 clean canonical 已登记为 in-review；等待 owner 完成人工验收"
 ---
 
 # Visualizer V4 Eval Plan
@@ -48,3 +48,7 @@ next_action: "按 DEC-041 实施 Cube Swarm、默认两项分析绑定、确定�
 | 最终 Cube 构图和运动审美不能由 state hash 表示 | hash 固定语义和几何，不替代人的视觉判断 | 自动化全绿仍可能不满足视觉预期 | owner 在最新版 Chrome 检查核心环、外围上升、卫星轨道和参数隔离 | project-owner |
 | context loss 自动化使用浏览器扩展 | 可重现软件注入不覆盖全部 GPU/驱动故障 | 特定驱动恢复可能不同 | Chrome 注入 + 明确错误层 + V6 Chrome/Edge 长会话复核 | project-owner |
 | 当前没有正式 CI | canonical 为本地流程 | 环境漂移不会自动触发 | 记录 Chrome/Edge/Node/npm/Three.js/硬件与 artifact hash | project-owner |
+
+## Canonical Result
+
+2026-09-03，clean run `V4-2026-09-02T17-47-40-271Z-5c2d24a3` 在 commit `5c2d24a3f1f413dba236563b3686237c6b8f2e21` 上 34/34 通过，summary SHA-256 为 `9b2a86e3dcdd4e634317c4234418dc3444da441a3be805a980562768dba5c3b2`。完整环境、指标与 artifact hash 见 [evidence index](evidence-index.md)。该结果保持 `in-review`；V4、R-039 与 V5 分别保持 `In Progress`、`Open` 与 `Planned`。

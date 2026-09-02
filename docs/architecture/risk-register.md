@@ -5,7 +5,7 @@ last_reviewed: 2026-09-03
 upstream_docs:
   - "docs/architecture/system-design.md"
   - "docs/architecture/interface-contracts.md"
-next_action: "V3 owner approval 已将 R-037/R-038 改为 Mitigated；V4 重点验证 R-039 context loss/recovery"
+next_action: "V4 clean canonical 已覆盖 preview context recovery；R-039 保持 Open，等待 owner 验收及 V5 录制中 context loss 证据"
 ---
 
 # Risk Register
@@ -50,9 +50,9 @@ next_action: "V3 owner approval 已将 R-037/R-038 改为 Mitigated；V4 重点�
 | R-034 | Visualizer ended policy 或旧 route lease 泄漏，导致播完切歌、Editor 不循环或离页后策略错误 | Medium | High | Visualizer ended 调用 next、旧 token release 覆盖新 route、出现第二播放时钟 | ADR-0014 通用 token lease；V1/V6 覆盖 Editor repeat-one、Visualizer pause-at-end、快速路由、刷新与 20 次生命周期 | V1 21/21 与 owner 人工门禁已通过；V6 继续回归，失败时回到 queue-next 并报告 | project-owner | Mitigated |
 | R-035 | 第五个特征、重复绑定或 stale 分析扩大 Worker/cache 或污染新模板 | Medium | High | active set >4、同 FeatureId 重算、旧 generation 更新场景 | 绑定 planner 去重并在 Coordinator 前拒绝第五项；generation + template/binding revision；V2 unit/integration/双浏览器验证 | 超限保持原绑定并解释；不能静默丢弃既有特征或创建第二 Worker | project-owner | Mitigated |
 | R-036 | Visualizer 工程、单草稿或 Editor 快照损坏/错歌，导致配置被部分覆盖 | Medium | High | 未知字段/模板被接受、hash/时长不匹配、quota/abort 丢旧草稿 | ADR-0015 strict codec、同歌快照、原子导入与独立 `draft/latest`；V1/V2 fault injection 和原生文件任务 | 失败保留内存工程与旧 durable draft；要求用户显式重新载入/导入 Editor 数据 | project-owner | Mitigated |
-| R-037 | 绑定平滑或场景运动依赖 RAF delta，seek/刷新/录制产生不同画面 | High | High | 同一绝对时间状态 hash 不同、seek 后粒子跳变、录制与预览不一致 | ADR-0016 绝对时间、seed 与可重放 smoothing；V3 固定 60Hz 余辉、一秒 checkpoint、歌曲/template/binding revision identity 与逐帧 hash；V3 clean canonical 30/30 的 seek/刷新 hash 与 Chrome 反馈通过 | 2026-09-03 owner 已批准 V3 人工视觉一致性；V4 rise/orbit 继续作为回归门禁，不以自动 hash 代替审美验收 | project-owner | Mitigated |
-| R-038 | Three.js scene/RAF/geometry/material 在切模板或路由时泄漏 | Medium | High | Canvas/WebGL/RAF 计数单调增长、旧场景仍更新 | 单 RendererHost、单 RAF、scene dispose；V3 clean canonical 20 次循环为 1 Canvas/host/renderer、0 pending visual RAF、scene 21/20、resolve/render 51/51 | 2026-09-03 owner 已批准 V3 长会话与切换结果；V4 新资源必须重复 20 次循环和对称释放验证 | project-owner | Mitigated |
-| R-039 | WebGL context lost 让预览空白或录制生成不完整文件 | Medium | High | `webglcontextlost`、恢复后参数/时间错位、录制仍显示成功 | context loss 保留工程/播放并重建；录制期间 loss 必须 abort/discard；Chrome/Edge 故障注入 | 实时预览可重试；未完成录制绝不进入 ready/save | project-owner | Open |
+| R-037 | 绑定平滑或场景运动依赖 RAF delta，seek/刷新/录制产生不同画面 | High | High | 同一绝对时间状态 hash 不同、seek 后粒子跳变、录制与预览不一致 | ADR-0016 绝对时间、seed 与可重放 smoothing；V3 固定余辉和 V4 rise/orbit 均使用 60Hz、一秒 checkpoint、歌曲/template/binding revision identity；V3 30/30 与 V4 34/34 clean canonical 的 seek/刷新 hash 通过 | V3 已获 owner 人工批准；V4 自动确定性已通过但审美与最终录制一致性仍由 V4/V5 人工和文件证据覆盖 | project-owner | Mitigated |
+| R-038 | Three.js scene/RAF/geometry/material 在切模板或路由时泄漏 | Medium | High | Canvas/WebGL/RAF 计数单调增长、旧场景仍更新 | 单 RendererHost、单 RAF、scene dispose；V3 clean canonical 已获批准；V4 34/34 clean canonical 的 20 次真实 Cube 切换保持 1 Canvas/host/renderer、scene 42/41、resolve/render 97/97，最大 frame 13.60ms | V3 已获 owner 长会话批准；V4 自动资源证据已通过，V4 owner 人工切换与 V6 双浏览器长会话继续复核 | project-owner | Mitigated |
+| R-039 | WebGL context lost 让预览空白或录制生成不完整文件 | Medium | High | `webglcontextlost`、恢复后参数/时间错位、录制仍显示成功 | V4 同 host preview recovery 保留工程/播放并按当前时间重建；clean canonical 记录 1 host/renderer、loss/restore/failure 1/1/0、resolve/render 45/45；V5 录制期间 loss 仍必须 abort/discard | synthetic Chrome 注入不覆盖全部 GPU/驱动故障，且录制路径未实现；因此保持 Open，实时预览可重试，未完成录制绝不进入 ready/save | project-owner | Open |
 | R-040 | MediaRecorder/MIME、origin-clean 或时钟差异导致无音轨、不可回放或音画漂移 | Medium | High | `isTypeSupported` 失败、captureStream SecurityError、ffprobe 缺轨、漂移 >100ms | ADR-0017 capability preflight、VP9→VP8、同一 AudioContext/canvas 时钟、origin-clean 资产；V5/V6 ffprobe + 双浏览器回放 | 不支持时明确失败并保留工程/预览；不输出伪成功文件 | project-owner | Open |
 | R-041 | 1080p60 实时录制造成掉帧、内存峰值或 Blob 过大 | High | High | selected preset 达不到 fps、长任务 >50ms、内存/Blob 持续增长、finalize 失败 | 固定 bitrate、15 分钟最重四特征预检/压力、录制期间锁定、单 Blob 生命周期；V5/V6 分预设记录设备与能力 | 不静默降级预设；设备不满足时该预设明确 unavailable，720p/30 等其他预设独立判定 | project-owner | Open |
 
@@ -63,5 +63,5 @@ next_action: "V3 owner approval 已将 R-037/R-038 改为 Mitigated；V4 重点�
 - `Accepted` 表示已知平台事实被接受，不表示无需实现降级路径。
 - 新的高影响风险或剩余风险超过已批准范围时，停止进入下一里程碑并由 `project-owner` 决策。
 - Analyzer R-001–R-021 的历史状态继续由 M3–M11 evidence 支持；R-028–R-030 由 M13、R-031–R-033 由 M14 clean canonical 缓解。Editor R-022–R-027 与 E7 不被 Visualizer 草案改写。
-- `project-owner` 于 2026-09-02 批准 Visualizer V0 架构、R-034–R-041 与 ADR-0014–0017，并开放 V1–V6 execution planning。R-034–R-041 仍均为 `Open`；只有后续里程碑的可复现证据和 owner 审批才能缓解，架构批准本身不等于风险已缓解。
-- Visualizer V1 clean canonical `V1-2026-09-02T07-03-26-973Z-fd44c892` 在 commit `fd44c8921a534c22b2362ccffff7ec9e46f3ff02` 上 21/21 通过，并于 2026-09-02 获 owner 人工批准；R-034 据此改为 `Mitigated`。V2 clean canonical `V2-2026-09-02T08-46-21-778Z-769faafe` 26/26 通过并于同日获 owner 批准，R-035、R-036 据此改为 `Mitigated`。V3 clean canonical `V3-2026-09-02T13-32-42-513Z-89be30eb` 在 implementation commit `89be30eb23d4e53d2c38f24e111cd1af7ec0840d` 上 30/30 通过；`project-owner` 于 2026-09-03 批准 canonical、Orthogonal Lines、确定性余辉和单 RendererHost，R-037、R-038 据此改为 `Mitigated` 并开放 V4。
+- `project-owner` 于 2026-09-02 批准 Visualizer V0 架构、R-034–R-041 与 ADR-0014–0017，并开放 V1–V6 execution planning。当前 R-034–R-038 为 `Mitigated`，R-039–R-041 为 `Open`；只有后续里程碑的可复现证据和 owner 审批才能继续推进，架构批准本身不等于风险已缓解。
+- Visualizer V1 clean canonical `V1-2026-09-02T07-03-26-973Z-fd44c892` 在 commit `fd44c8921a534c22b2362ccffff7ec9e46f3ff02` 上 21/21 通过，并于 2026-09-02 获 owner 人工批准；R-034 据此改为 `Mitigated`。V2 clean canonical `V2-2026-09-02T08-46-21-778Z-769faafe` 26/26 通过并于同日获 owner 批准，R-035、R-036 据此改为 `Mitigated`。V3 clean canonical `V3-2026-09-02T13-32-42-513Z-89be30eb` 在 implementation commit `89be30eb23d4e53d2c38f24e111cd1af7ec0840d` 上 30/30 通过；`project-owner` 于 2026-09-03 批准 canonical、Orthogonal Lines、确定性余辉和单 RendererHost，R-037、R-038 据此改为 `Mitigated` 并开放 V4。V4 clean canonical `V4-2026-09-02T17-47-40-271Z-5c2d24a3` 34/34 通过并登记为 `in-review`；它补充 R-037/R-038 回归并覆盖 R-039 的实时预览恢复，但在 owner 验收与 V5 录制 context 路径完成前不改变 R-039 的 `Open` 状态。

@@ -6,7 +6,7 @@ upstream_docs:
   - "docs/quality/visualizer/v4-eval-plan.md"
   - "docs/quality/visualizer/v4-golden-examples.md"
   - "docs/architecture/risk-register.md"
-next_action: "实施 V4 故障注入并把实际修复信号登记到本分类"
+next_action: "V4 context/renderer 故障注入与 34/34 clean canonical 已通过；等待 owner 人工验收"
 ---
 
 # Visualizer V4 Failure Taxonomy
@@ -35,3 +35,5 @@ V1–V3 的 route、project、binding、resolver、host、scene、responsive 与
 ## Evidence Recording
 
 所有 pre-canonical 失败保留类型、严重度、复现、修复和重跑结果。测试编排等待不足只在证明产品状态正确后归类为 harness timing；context、hash、资源或视觉断言失败不得通过延长等待掩盖。
+
+首次 clean run `V4-2026-09-02T17-42-53-826Z-95817304` 的唯一失败是 V2 Edge strict locator 同时命中状态文案与按钮；产品状态、V4 context/hash/resource 断言没有失败。该 artifact 保留为 harness selector failure；commit `5c2d24a3f1f413dba236563b3686237c6b8f2e21` 收窄 locator 后，V2 Edge 3/3 与 V4 clean canonical 34/34 均通过。受控 `WEBGL_lose_context` 注入产生的浏览器平台级 `CONTEXT_LOST_WEBGL` warning 是预期信号，不计为应用 console failure；其他 console/pageerror 仍必须为 0。

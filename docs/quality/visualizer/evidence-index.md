@@ -16,7 +16,7 @@ upstream_docs:
   - "docs/quality/visualizer/v4-golden-examples.md"
   - "docs/quality/visualizer/v4-failure-taxonomy.md"
   - "docs/delivery/visualizer/milestone-plan.md"
-next_action: "V3 evidence 已获 owner 批准并关闭；按已批准 V4 quality contract 实施并生成 34 步证据"
+next_action: "V4 clean canonical 34/34 已登记为 in-review；等待 owner 完成 Cube 视觉、绑定隔离、确定性、资源与 context recovery 人工验收"
 ---
 
 # Visualizer Evidence Index
@@ -201,7 +201,7 @@ next_action: "V3 evidence 已获 owner 批准并关闭；按已批准 V4 quality
 | Field | Value |
 | --- | --- |
 | Milestone | V3 — Orthogonal Lines |
-| State | `in-review` |
+| State | `approved` |
 | Implementation commit | `89be30eb23d4e53d2c38f24e111cd1af7ec0840d` |
 | Evidence commit | 本记录所在的 `docs: register Visualizer V3 canonical evidence` 提交 |
 | Run ID | `V3-2026-09-02T13-32-42-513Z-89be30eb` |
@@ -209,7 +209,7 @@ next_action: "V3 evidence 已获 owner 批准并关闭；按已批准 V4 quality
 | Clean identity | start/end commit 均为 `89be30eb23d4e53d2c38f24e111cd1af7ec0840d`；start/end dirty 均为 `false` |
 | Summary SHA-256 | `afe4cbe233fe1feded65380d6e976d5a4c32c2f9860fe2e0357a0d615d6a7b84` |
 | Artifact root | `artifacts/evals/V3-2026-09-02T13-32-42-513Z-89be30eb/` |
-| Reviewer | `project-owner` — pending manual acceptance and approval |
+| Reviewer | `project-owner` — approved 2026-09-03 |
 
 ### Environment
 
@@ -280,3 +280,94 @@ next_action: "V3 evidence 已获 owner 批准并关闭；按已批准 V4 quality
 已批准。`project-owner` 原文：
 
 `我批准 Visualizer V3 canonical evidence、Orthogonal Lines 场景、确定性余辉与单 RendererHost 结果；同意将 V3 标记为 Complete 并开放 V4。`
+
+## V4 Canonical Record
+
+| Field | Value |
+| --- | --- |
+| Milestone | V4 — Cube Swarm |
+| State | `in-review` |
+| Core feature commit | `9581730498a470e3fbd81c97414cb26087714009` |
+| Canonical implementation commit | `5c2d24a3f1f413dba236563b3686237c6b8f2e21` |
+| Evidence commit | 本记录所在的 `docs: register Visualizer V4 canonical evidence` 提交 |
+| Run ID | `V4-2026-09-02T17-47-40-271Z-5c2d24a3` |
+| Canonical result | 34/34 passed |
+| Clean identity | start/end commit 均为 `5c2d24a3f1f413dba236563b3686237c6b8f2e21`；start/end dirty 均为 `false` |
+| Summary SHA-256 | `9b2a86e3dcdd4e634317c4234418dc3444da441a3be805a980562768dba5c3b2` |
+| Artifact root | `artifacts/evals/V4-2026-09-02T17-47-40-271Z-5c2d24a3/` |
+| Reviewer | `project-owner` — pending manual acceptance and approval |
+
+### Environment
+
+| Item | Recorded value |
+| --- | --- |
+| OS | macOS 26.5.2, build 25F84, Darwin arm64 |
+| Hardware | MacBook Pro `MacBookPro17,1`, Apple M1, 8 cores, 16 GB memory |
+| Node / npm | Node v24.18.0 / npm 11.16.0 |
+| Browsers | Chrome 152.0.7977.66 / Edge 152.0.4191.53 |
+| Render / test runtime | Three.js 0.183.2 / Vitest 4.1.10 / Playwright 1.62.0 |
+
+硬件只登记机型、芯片、核心数和内存；artifact 中的序列号、UUID 或设备标识不进入版本化证据。
+
+### Result Summary
+
+- V4 golden、scene unit、renderer integration 和真实 Chrome 专项全部通过；V3 固定 30 步前向基线亦全部通过，完整 clean canonical 为 34/34。
+- Cube Swarm 的 64-band 对数频谱核心、seed 外围布局、Energy 上升、默认 constant 轨道、显式 orbit 改绑、descriptor 默认降级、默认两项 active analysis 与持久化 binding 保留均由 golden/unit/integration/Chrome 覆盖。
+- 连续播放、direct seek、暂停与刷新在同一绝对时间得到相同 renderer-neutral hash；rise/orbit 使用固定 60Hz、一秒 checkpoint 和 binding revision identity，不读取 RAF delta。
+- Chrome 自动观测画面反馈 `13ms`、设置反馈 `10.70ms`，低/高 Energy resolved rise 分别为 `0.41889` 与 `3`；均满足 `<=100ms` 设置反馈和 `<50ms` Visualizer frame 工作门禁。
+- context loss/recovery 后保持 1 active host、1 active renderer、0 pending visual RAF，scene created/disposed 为 3/2，resolve/render 为 45/45，context loss/restore/failure 为 1/1/0，最大 frame 工作 `15ms`。测试只排除浏览器在受控 `WEBGL_lose_context` 注入时产生的预期平台级 `CONTEXT_LOST_WEBGL` 警告；应用 console error 与 pageerror 均为 0。
+- 20 次 Orthogonal/Cube 模板切换后保持 1 Canvas、1 active host、1 active renderer、1 active visual RAF，scene created/disposed 为 42/41，resolve/render 为 97/97，最大 frame 工作 `13.60ms`；没有资源单调累积。
+- V1–V3、M3/M4/M5/M11 与 Editor E1/E7 相邻回归、docs、deliberate-failure harness、typecheck、build 和 diff check 全部通过。build 转换 1867 modules；最大 JS chunk 为 1,398.38 kB（gzip 423.91 kB），既有 chunk-size warning 保留，不能表述为已解决。
+- dirty provisional `V4-2026-09-02T17-36-29-618Z-151ca0bc-provisional` 为 34/34，summary SHA-256 `4d0f0c591ced70d17742ff56a5dc390146cfb2de70e642675dd79a903c3c6a40`；它只作实现反馈，不替代本 clean canonical。
+- 首次 clean run `V4-2026-09-02T17-42-53-826Z-95817304` 因 V2 Edge 测试中“同歌草稿”strict locator 同时命中状态文案和按钮而失败，summary SHA-256 `7a6bb15264e3231c08ea6a01eb0f16ff112b5f72665c9fbc403560ffe0ef51df`。该 artifact 不归入 V4FT-* 产品失败，保留为 harness selector failure；commit `5c2d24a3f1f413dba236563b3686237c6b8f2e21` 将断言收窄到 inspector 文案后，V2 Edge 3/3 和本次 34/34 clean canonical 通过。
+
+### Artifact Hashes
+
+| Artifact | SHA-256 |
+| --- | --- |
+| `summary.json` | `9b2a86e3dcdd4e634317c4234418dc3444da441a3be805a980562768dba5c3b2` |
+| `01-V4-golden.log` | `48b5588b468185fa590d4e65bc00b7aabe2d9c2e4fd5ac585dbee79e367ca75c` |
+| `02-V4-scene-unit.log` | `7ede4fcc9537640925473f64789390895e42fc3fd4cdd5646ec86abf0f09a660` |
+| `03-V4-renderer-integration.log` | `6b06e35be23dc3a70ae9a105512f2d95443868e743951f43093b1c6d6cf52e3b` |
+| `04-V4-Chrome.log` | `fbf53f8817ca4853466301aa25ed49c089f00cd8eac084a3c9cf75085ec3120c` |
+| `05-V3-golden.log` | `fe0a73e11acaaac10fe9252f4822bd45504cb127bcd969be82102d0a3ab083aa` |
+| `06-V3-scene-unit.log` | `7aa26191b2523de87d0b37caac844fae2f058afc3ff0fccdbecef4a04be5699f` |
+| `07-V3-renderer-integration.log` | `8ac4e728aff3d13135bfc4d4a6b1b6c19d0aee256f2675e7afb01cf4ed3ba41a` |
+| `08-V3-Chrome.log` | `71b8b19f38b22fbc31f0779bf07f4919c147f245e919956d54495d9f34b50cb1` |
+| `09-V2-golden.log` | `b3ad627b351e21586da7097c202fe83da5de31ee9d03df1f1a6edbf2a060c9ac` |
+| `10-V2-binding-unit.log` | `b010e628310a55cf7fd2a33412a1a3d57f4de6ce138b8c2bc94e5029cad5e5fc` |
+| `11-V2-binding-integration.log` | `1fe55219838e00701130eada67d4bbdb3e028fbef3443c3ae87fd25f96267fa4` |
+| `12-V2-Chrome.log` | `f9b56df1d392277fa4813cb9ab91cd1a63f56d546157af86a9184550a57ba69d` |
+| `13-V2-Edge.log` | `cae97b402181f4a848f904b310a64f28a636191c1eac4133fb4ec125bfd3daf2` |
+| `14-V1-golden.log` | `b743d3b085d264dc2ddd835397fdcac9ac089268363b66947db3e5e931ab7067` |
+| `15-V1-project-unit.log` | `225a2331fe8d4248adc81894f0d813227f5e359bbadfa70a3949f77272e2c70d` |
+| `16-V1-foundation-integration.log` | `fedad224be51ab66c7bb0e256c5f4ad93920810097dc6944a26b336249e01277` |
+| `17-V1-Chrome.log` | `12ce3e9d6d3b994b36fb25ce5ccc84c0d23b8dc9abf84855583387b4f2cc537e` |
+| `18-V1-Edge.log` | `2b0f512eeb6716de09f898021ef7b079b94f78548b12196f6135c32653108598` |
+| `19-M3-Chrome-smoke.log` | `849acbd80398da3d51fbfee39831e71d42901147525a81a8595dbd15e8feeb0b` |
+| `20-M4-engine-and-session-regression.log` | `78862d62caee8a8aacd4a16f406220dc89367bcc5dd9ae8916a460540152b402` |
+| `21-M4-Chrome-regression.log` | `6d8084d2104535ebcc7cfe42bc6fff14704af3939b1e8c4867229089e52b62b5` |
+| `22-M5-repository-and-recovery-regression.log` | `e8a5a693fa99dda8e2c4a94cebd264167d2ea085d6ea369601c80305a5f68cd6` |
+| `23-Editor-E1-project-unit.log` | `595da56d35711dc4a9db62c433bf93152f5979a3409adf4a241221ff2a51c330` |
+| `24-Editor-E1-integration.log` | `854969ab2b3c2e4ea0712fd10686d2154fd215bc3b128b517e3a5360ab0c4784` |
+| `25-Editor-E1-Chrome.log` | `8e0c02c0a897d37452dce4afa70ddd9697c58db4f8e147c82201627427fb76e3` |
+| `26-Editor-E7-unit.log` | `9b0443afe3493e49062086851999cb486744f1c68f41d3e2b188d05752443a1f` |
+| `27-Editor-E7-integration.log` | `462e7c3dfeb9edbaa5c54e855eae7319bfe2590ffa5411295c4e5075033fd39a` |
+| `28-M11-Chrome-resource-regression.log` | `15b4b74ab228ea5ef2d9cefb2f910d52630303359cb210719b92a19756837840` |
+| `29-M11-Edge-resource-regression.log` | `a2b264afeee58e1e1217d14770df0ec0d71395d3031bb1a538d9eb5cccf5c8f7` |
+| `30-docs.log` | `bb005ed0074179a47b895a5c66e79917e37ebf18976e21fe9d27b1dd63c8f151` |
+| `31-deliberate-failure.log` | `69bf5c3fa50230a4957ad0c60c8323dba68e494d92761fea0039cf5d580d70aa` |
+| `32-typecheck.log` | `fadc7f66199c28d2f7cca439bb300ebeb0320158f32a0f9b52ec77031538af4d` |
+| `33-build.log` | `b21bb4546895c041a4ceaef92352307b1130c717a02741217fe8eb31a8bdc042` |
+| `34-diff-check.log` | `e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855` |
+
+### Manual Gaps and Review Boundary
+
+- 自动化已固定核心环几何、参数隔离、两项默认分析、seek/refresh hash、20 次切换与 synthetic context recovery；它不替代 Cube 最终构图、运动审美、真实 GPU/驱动长会话和辅助技术的人工作业。
+- owner 必须在最新版 Chrome 人工确认核心频谱环、外围上升方块和三颗卫星；默认 active analysis 恰为 Amplitude Spectrum 与 Energy；drum 只影响 coreScale、Energy 只影响 riseSpeed、orbit 默认恒定且改绑后只影响轨道；seek/刷新确定性、20 次切换和 context recovery 可接受。
+- R-039 保持 `Open`，因为 V4 synthetic recovery 不能覆盖全部 GPU/驱动故障，且 V5 录制期间 context loss 的 abort/discard 尚未实现。V4 保持 `In Progress`、evidence 保持 `in-review`、V5–V6 保持 `Planned`。
+- V1–V3 canonical identity 不变且无需重跑；本记录不证明 WebM、录制状态机、V6 readiness 或生产上线。
+
+### Owner Review Status
+
+待 `project-owner` 完成人工验收并明确批准。只有该批准到达后，才可将 V4 标记为 `Complete`、按剩余风险处理 R-039 并开放 V5。
