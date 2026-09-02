@@ -1,13 +1,13 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-09-02
+last_reviewed: 2026-09-03
 upstream_docs:
   - "docs/product/scope.md"
   - "docs/product/success-metrics.md"
   - "docs/architecture/system-design.md"
   - "docs/architecture/visualizer/project-format-v1.md"
-next_action: "按 DEC-039 实施 V3 单 RendererHost、Orthogonal Lines 与确定性余辉；V4 保持 Planned"
+next_action: "V3 已获批准并关闭；按 DEC-041 细化并实施 V4 Cube Swarm 与 context recovery"
 ---
 
 # Visualizer Binding and Scene Contracts
@@ -160,4 +160,4 @@ V3 切换到尚未实现的 Cube Swarm 时必须 dispose Orthogonal Lines 的 ge
 
 ## Approval State
 
-`project-owner` 于 2026-09-02 批准 Visualizer V0 system design、接口契约、R-034–R-041 与 ADR-0014–0017。本契约据此为 `approved`。V3 implementation candidate 已实现 Orthogonal Lines 与单 RendererHost；只有 V3 clean canonical、人工验收和 owner 批准完成后才能把该候选视为已关闭里程碑，Cube Swarm 仍只是 V4 中性预览。
+`project-owner` 于 2026-09-02 批准 Visualizer V0 system design、接口契约、R-034–R-041 与 ADR-0014–0017。本契约据此为 `approved`。V3 implementation commit 与 30/30 clean canonical 已于 2026-09-03 获 owner 批准，V3 关闭并开放 V4；Cube Swarm 在 V4 实现提交形成前仍是中性预览。

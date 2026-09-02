@@ -1,14 +1,14 @@
 ---
-status: in-review
+status: approved
 owner: "project-owner"
-last_reviewed: 2026-09-02
+last_reviewed: 2026-09-03
 upstream_docs:
   - "docs/delivery/visualizer/execution-plan.md"
   - "docs/delivery/visualizer/acceptance-criteria.md"
   - "docs/delivery/visualizer/test-strategy.md"
   - "docs/architecture/visualizer/binding-and-scene-contracts.md"
   - "docs/architecture/risk-register.md"
-next_action: "30/30 clean canonical 已登记为 in-review；等待 owner 人工验收与明确批准"
+next_action: "V3 30/30 clean canonical 与人工验收已获 owner 批准；作为 V4 34 步 canonical 的回归基线"
 ---
 
 # Visualizer V3 Eval Plan
@@ -39,7 +39,7 @@ next_action: "30/30 clean canonical 已登记为 in-review；等待 owner 人工
 - `eval:v3:provisional` 允许 dirty worktree，只作为实现反馈。
 - `eval:v3` 只在 clean implementation commit 上运行，固定为 V2 的 26 步基线加 V3 golden、unit、integration、Chrome，共 30 步。
 - evidence 登记 implementation commit、run ID、环境、视觉同步、frame-state hash、反馈/长任务、资源计数、日志和 summary SHA-256。
-- V3 evidence 在 owner 人工验收与批准前保持 `in-review`；V4 不开放。
+- V3 evidence 与人工验收已获 owner 批准；V4 已开放，V3 契约继续作为前向回归基线。
 
 ## Implementation Candidate Signal
 
@@ -49,9 +49,9 @@ next_action: "30/30 clean canonical 已登记为 in-review；等待 owner 人工
 
 ## Canonical Candidate Signal
 
-Implementation commit `89be30eb23d4e53d2c38f24e111cd1af7ec0840d` 上的 clean canonical `V3-2026-09-02T13-32-42-513Z-89be30eb` 按固定 30 步全部通过，起止工作树均干净，summary SHA-256 为 `afe4cbe233fe1feded65380d6e976d5a4c32c2f9860fe2e0357a0d615d6a7b84`。正式记录见 evidence index，并保持 `in-review`。
+Implementation commit `89be30eb23d4e53d2c38f24e111cd1af7ec0840d` 上的 clean canonical `V3-2026-09-02T13-32-42-513Z-89be30eb` 按固定 30 步全部通过，起止工作树均干净，summary SHA-256 为 `afe4cbe233fe1feded65380d6e976d5a4c32c2f9860fe2e0357a0d615d6a7b84`。正式记录见 evidence index，并于 2026-09-03 获 owner 批准。
 
-该轮 Chrome 自动观测：画面反馈 `1.10ms`、设置反馈 `2.30ms`、中心像素 `[31,215,109,255]`、最大 Visualizer frame 工作 `3.40ms`；20 次 route 循环末尾为 1 Canvas、1 active host、1 active renderer、0 pending visual RAF，scene created/disposed 为 21/20，target resolve/rendered frame 为 51/51。owner 人工验收与明确批准前，V3 继续为 `In Progress`，R-037/R-038 继续为 `Open`，V4 不开放。
+该轮 Chrome 自动观测：画面反馈 `1.10ms`、设置反馈 `2.30ms`、中心像素 `[31,215,109,255]`、最大 Visualizer frame 工作 `3.40ms`；20 次 route 循环末尾为 1 Canvas、1 active host、1 active renderer、0 pending visual RAF，scene created/disposed 为 21/20，target resolve/rendered frame 为 51/51。`project-owner` 于 2026-09-03 明确批准 canonical evidence、Orthogonal Lines、确定性余辉与单 RendererHost；V3 据此为 `Complete`，R-037/R-038 为 `Mitigated`，V4 开放。
 
 ## Evidence Gaps
 

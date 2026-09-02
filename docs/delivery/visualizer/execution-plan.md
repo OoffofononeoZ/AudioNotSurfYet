@@ -1,7 +1,7 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-09-02
+last_reviewed: 2026-09-03
 upstream_docs:
   - "docs/product/scope.md"
   - "docs/product/success-metrics.md"
@@ -11,7 +11,7 @@ upstream_docs:
   - "docs/architecture/visualizer/project-format-v1.md"
   - "docs/architecture/visualizer/binding-and-scene-contracts.md"
   - "docs/architecture/visualizer/recording-contract.md"
-next_action: "V3 30/30 clean canonical 已登记为 in-review；等待 owner 人工验收，V4–V6 保持 Planned"
+next_action: "V3 已获批准并关闭；按 DEC-041 实施 V4 Cube Swarm 与 context recovery，V5–V6 保持 Planned"
 ---
 
 # Visualizer V1–V6 Execution Plan
@@ -20,7 +20,7 @@ next_action: "V3 30/30 clean canonical 已登记为 in-review；等待 owner 人
 
 把已批准的 Visualizer V0 架构按六个可独立验证的纵向里程碑交付：先建立当前歌曲工作台和本地工程，再接入 Analyzer/Editor 绑定，随后分别交付两个内置场景、实时 WebM 录制和双浏览器最终加固。
 
-Visualizer V1 已实现 `/visualizer/:trackId?` 工作台基础、完成 21/21 clean canonical 并获 owner 批准。V2 数据绑定与 26/26 clean canonical 已获 owner 批准并关闭；V3 Orthogonal Lines 为 `In Progress`，V4–V6 保持 `Planned`，不得把 V4 中性预览描述为真实 Cube Swarm 完成。
+Visualizer V1 已实现 `/visualizer/:trackId?` 工作台基础、完成 21/21 clean canonical 并获 owner 批准。V2 数据绑定与 26/26 clean canonical 已获 owner 批准并关闭；V3 Orthogonal Lines 与 30/30 clean canonical 已于 2026-09-03 获 owner 批准并关闭。V4 Cube Swarm 为 `In Progress`，V5–V6 保持 `Planned`；在 V4 implementation commit 形成前不得把中性预览描述为真实 Cube Swarm 完成。
 
 ## 2. Delivery Principles
 
@@ -104,7 +104,7 @@ Exit gate:
 - 20 次 template/route 循环保持单 Canvas、RendererHost、WebGLRenderer 和视觉 RAF；无 Visualizer 归因主线程任务 `>50ms`，console/pageerror 为 0。
 - template switch、dispose、错误隔离/重试、1024/1280/1920、DPR/resize、键盘 inspector 与 reduced motion 通过。
 
-Current candidate（2026-09-02）：上述实现已进入 commit `89be30eb23d4e53d2c38f24e111cd1af7ec0840d`；dirty provisional 与 clean canonical 均为 30/30，clean run 为 `V3-2026-09-02T13-32-42-513Z-89be30eb`。evidence 已登记为 `in-review`；owner 人工验收与明确批准前 V3 保持 `In Progress`，V4 不开放。
+Closed candidate（2026-09-03）：上述实现位于 commit `89be30eb23d4e53d2c38f24e111cd1af7ec0840d`；dirty provisional 与 clean canonical 均为 30/30，clean run 为 `V3-2026-09-02T13-32-42-513Z-89be30eb`。`project-owner` 已批准 canonical evidence、Orthogonal Lines、确定性余辉与单 RendererHost，V3 据此为 `Complete` 并开放 V4。
 
 ### V4 — Cube Swarm
 
@@ -178,7 +178,7 @@ npm run eval:vN
 
 ## 7. Approval Gate
 
-本计划与同目录 acceptance criteria、test strategy、milestone plan 已由 owner 批准。V0-D、V1、V2 据此为 `Complete`，V3 为 `In Progress`，V4–V6 继续为 `Planned`。
+本计划与同目录 acceptance criteria、test strategy、milestone plan 已由 owner 批准。V0-D、V1、V2、V3 据此为 `Complete`，V4 为 `In Progress`，V5–V6 继续为 `Planned`。
 
 批准记录（2026-09-02）：
 

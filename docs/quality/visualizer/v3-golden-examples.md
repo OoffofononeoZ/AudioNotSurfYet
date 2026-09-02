@@ -1,11 +1,11 @@
 ---
-status: in-review
+status: approved
 owner: "project-owner"
-last_reviewed: 2026-09-02
+last_reviewed: 2026-09-03
 upstream_docs:
   - "docs/quality/visualizer/v3-eval-plan.md"
   - "docs/architecture/visualizer/binding-and-scene-contracts.md"
-next_action: "fixture、scene golden 与 30/30 clean canonical 已登记；等待 owner 视觉验收"
+next_action: "V3 fixture、scene golden、30/30 canonical 与 owner 视觉验收已批准；作为 V4 回归基线"
 ---
 
 # Visualizer V3 Golden Examples

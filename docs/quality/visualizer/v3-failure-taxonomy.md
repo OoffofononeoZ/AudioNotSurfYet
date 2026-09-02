@@ -1,12 +1,12 @@
 ---
-status: in-review
+status: approved
 owner: "project-owner"
-last_reviewed: 2026-09-02
+last_reviewed: 2026-09-03
 upstream_docs:
   - "docs/quality/visualizer/v3-eval-plan.md"
   - "docs/quality/visualizer/v3-golden-examples.md"
   - "docs/architecture/risk-register.md"
-next_action: "V3 canonical 无失败步骤；保留 pre-canonical 修复记录并等待 owner 批准"
+next_action: "V3 canonical 与 owner 人工门禁已批准；分类继续用于 V4 相邻回归"
 ---
 
 # Visualizer V3 Failure Taxonomy

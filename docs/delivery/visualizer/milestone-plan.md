@@ -1,12 +1,12 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-09-02
+last_reviewed: 2026-09-03
 upstream_docs:
   - "docs/delivery/visualizer/execution-plan.md"
   - "docs/delivery/visualizer/acceptance-criteria.md"
   - "docs/delivery/visualizer/test-strategy.md"
-next_action: "V3 30/30 clean canonical 已登记为 in-review；等待 owner 人工验收与批准"
+next_action: "V3 已获批准并关闭；V4 Cube Swarm 为 In Progress"
 ---
 
 # Visualizer V0-D and V1–V6 Milestone Plan
@@ -28,14 +28,14 @@ next_action: "V3 30/30 clean canonical 已登记为 in-review；等待 owner 人
 | V0-D | Execution planning | Complete | Delivery gate | V0-A | Visualizer 专属 execution、AC、test strategy、milestone plan | 四份文档 owner approved | project-owner |
 | V1 | Workspace foundation | Complete | First implementation gate | V0-D | route、pause-at-end、三栏/抽屉、单 Canvas、JSON V1、单草稿、导入导出 | V1 eval contract + provisional + clean canonical + owner approval | project-owner |
 | V2 | Data binding | Complete | Binding gate | V1 | constant/analysis/editor-event、0–4 planner、Editor snapshot、deterministic resolver | clean canonical 26/26 + owner approval | project-owner |
-| V3 | Orthogonal Lines | In Progress | First scene gate | V2 | 单 RendererHost、横/竖线、point pulse、range gate、60Hz 余辉与错误隔离 | 30/30 clean canonical + owner approval | project-owner |
-| V4 | Cube Swarm | Planned | Second scene gate | V3 | spectrum core、drum scale、Energy rise、constant orbit、context restore | deterministic/resource/context canonical + owner approval | project-owner |
+| V3 | Orthogonal Lines | Complete | First scene gate | V2 | 单 RendererHost、横/竖线、point pulse、range gate、60Hz 余辉与错误隔离 | 30/30 clean canonical + owner approval | project-owner |
+| V4 | Cube Swarm | In Progress | Second scene gate | V3 | spectrum core、drum scale、Energy rise、constant orbit、context restore | deterministic/resource/context canonical + owner approval | project-owner |
 | V5 | WebM export | Planned | Recording gate | V4 | pre-Gain tap、strict preset、MediaRecorder、native save | Chrome/Edge 720p30 + ffprobe/A-V sync + owner approval | project-owner |
 | V6 | Final hardening | Planned | Readiness evidence gate | V5 | 双浏览器、三格式、15 分钟四特征、资源、无障碍与全回归 | V1–V6 canonical + owner complete task/evidence approval | project-owner |
 
 ## 3. Gate State
 
-- 当前：V0-P、V0-A、V0-D、V1、V2 均为 `Complete`；V3 为 `In Progress`；V4–V6 保持 `Planned`。
+- 当前：V0-P、V0-A、V0-D、V1、V2、V3 均为 `Complete`；V4 为 `In Progress`；V5–V6 保持 `Planned`。
 - V1 run `V1-2026-09-02T07-03-26-973Z-fd44c892` 21/21 通过，并于 2026-09-02 获 owner 批准；canonical identity 不变且无需重跑。
 - V2 run `V2-2026-09-02T08-46-21-778Z-769faafe` 26/26 通过，并于 2026-09-02 获 owner 批准；canonical identity 与 summary SHA-256 保持不变且无需重跑。
 - V6 获批后只进入包含 Visualizer 的整体 release-readiness review；PROD-015 仍阻断生产上线。
