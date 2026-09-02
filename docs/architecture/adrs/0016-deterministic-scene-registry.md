@@ -6,7 +6,7 @@ upstream_docs:
   - "docs/product/scope.md"
   - "docs/product/success-metrics.md"
   - "docs/architecture/visualizer/binding-and-scene-contracts.md"
-next_action: "在 V3/V4 delivery planning 中固定双模板、单 RendererHost 与确定性证据；规划批准前不实现"
+next_action: "按 DEC-039 实施 V3 Orthogonal Lines 的单 host、60Hz 余辉与 scene lifecycle；V4 保持 Planned"
 ---
 
 # ADR-0016: Deterministic Scene Registry
@@ -21,6 +21,7 @@ next_action: "在 V3/V4 delivery planning 中固定双模板、单 RendererHost 
 - 一个 `VisualizerRendererHost` 独占一个 Canvas、一个 Three.js WebGLRenderer 和一个可取消 RAF；scene 只拥有并 dispose 自己的 scene/camera/geometry/material。
 - binding smoothing、粒子布局、rise 与 orbit 只由 project seed、绝对歌曲时间和版本化算法决定。可重放 checkpoint 允许直接 seek 得到与从 0 连续播放相同状态；禁止依赖前一 RAF delta。
 - WebGL context restore 重建同一模板并从当前绝对时间恢复；录制期间 context loss 终止并丢弃未完成文件。
+- V3 Orthogonal Lines 的 scene-local 余辉固定为 60Hz、一秒 checkpoint 和 `max(I,current*exp(-4*dt/decaySeconds))`；identity 包含歌曲、template 和 binding revision。该状态不改写 V2 resolver，也不依赖 RAF delta。
 
 ## Consequences
 

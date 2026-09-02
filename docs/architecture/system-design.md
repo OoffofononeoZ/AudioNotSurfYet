@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/product/scope.md"
   - "docs/product/success-metrics.md"
   - "docs/product/open-questions.md"
-next_action: "创建并评审 Visualizer V1–V6 execution、acceptance、test 与 milestone planning；批准前不开始 V1"
+next_action: "按 DEC-039 实施 V3 Orthogonal Lines；V4–V6 继续遵守已批准架构门禁"
 ---
 
 # System Design
@@ -422,7 +422,8 @@ M6 只在 `import.meta.env.DEV` 安装无 UI bridge，提供活动特征、cance
 - 数据源固定为 constant、analysis 和 editor-event。Analysis 向量投影只允许 schema 声明的 full/bin/band/mean/max/peak；Editor whole-lane 采用布尔 OR/max 聚合，point 形成脉冲，range 在半开 `[start,end)` 内形成 gate。
 - 数值变换顺序固定为输入规范化、clamp、invert、确定性 attack/release、输出映射。平滑不能依赖上一 RAF；resolver 以歌曲 0 秒为起点建立可重放状态，使同一工程在 seek、刷新、从头播放和录制时对同一绝对时间输出一致。full-vector V1 不允许非零平滑。
 - `SceneRegistry` 只注册 `orthogonal-lines@1` 与 `cube-swarm@1`，并穷尽声明参数类型、默认值、范围、可绑定来源和 renderer factory。推荐 Editor lane 绑定保持未绑定并提示用户选择，不按名称或顺序猜测“主要音色”或“drum”。
-- `VisualizerRendererHost` 独占一个 16:9 Canvas、一个 Three.js `WebGLRenderer` 和一个可取消 RAF；暂停时按需绘制，播放/录制时只启用同一个 RAF。scene 只拥有 scene/camera/geometry/material 并必须对称 dispose。
+- `VisualizerRendererHost` 独占一个 16:9 Canvas、一个 Three.js `WebGLRenderer` 和一个可取消 RAF；DPR 上限为 2，暂停、seek、参数变化和 resize 按需单帧，播放/录制时只启用同一个 RAF。父级同帧只解析一次参数并把同一 resolved map 交给 scene 与 inspector；scene 只拥有 scene/camera/geometry/material 并必须对称 dispose。
+- V3 Orthogonal Lines 使用单全屏 quad/shader、固定 `#020403` 背景和中心正交线。intensity 同时控制中心向两端的长度与主线 alpha，brightness >1 继续增强 halo；decay 以秒为单位，使用固定 60Hz、一秒 checkpoint 和 `exp(-4*dt/decay)` 的确定性余辉，且不改写 V2 resolved value。详细视觉与错误边界见 DEC-039 和子契约。
 - 工程 seed 与绝对时间共同决定粒子初始位置、上升和轨道相位；不得累计 RAF delta。WebGL context lost 时保留工程/播放并重建 renderer；若发生在录制中则终止并丢弃未完成文件。详见 [Binding and Scene Contracts](visualizer/binding-and-scene-contracts.md)。
 
 ### Real-time WebM recording

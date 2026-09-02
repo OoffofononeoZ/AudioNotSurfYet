@@ -28,7 +28,7 @@ next_action: "V2 26/26 clean canonical 已获 owner 批准；V3 Orthogonal Lines
 | V0-D | Execution planning | Complete | Delivery gate | V0-A | Visualizer 专属 execution、AC、test strategy、milestone plan | 四份文档 owner approved | project-owner |
 | V1 | Workspace foundation | Complete | First implementation gate | V0-D | route、pause-at-end、三栏/抽屉、单 Canvas、JSON V1、单草稿、导入导出 | V1 eval contract + provisional + clean canonical + owner approval | project-owner |
 | V2 | Data binding | Complete | Binding gate | V1 | constant/analysis/editor-event、0–4 planner、Editor snapshot、deterministic resolver | clean canonical 26/26 + owner approval | project-owner |
-| V3 | Orthogonal Lines | In Progress | First scene gate | V2 | 横/竖线、point pulse、range gate、参数 inspector | scene state golden + Chrome canonical + owner approval | project-owner |
+| V3 | Orthogonal Lines | In Progress | First scene gate | V2 | 单 RendererHost、横/竖线、point pulse、range gate、60Hz 余辉与错误隔离 | 30/30 clean canonical + owner approval | project-owner |
 | V4 | Cube Swarm | Planned | Second scene gate | V3 | spectrum core、drum scale、Energy rise、constant orbit、context restore | deterministic/resource/context canonical + owner approval | project-owner |
 | V5 | WebM export | Planned | Recording gate | V4 | pre-Gain tap、strict preset、MediaRecorder、native save | Chrome/Edge 720p30 + ffprobe/A-V sync + owner approval | project-owner |
 | V6 | Final hardening | Planned | Readiness evidence gate | V5 | 双浏览器、三格式、15 分钟四特征、资源、无障碍与全回归 | V1–V6 canonical + owner complete task/evidence approval | project-owner |

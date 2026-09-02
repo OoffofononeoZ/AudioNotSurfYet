@@ -30,7 +30,7 @@ next_action: "V2 26 步 canonical 已获 owner 批准；建立并执行 V3 Ortho
 | --- | --- | --- | --- | --- |
 | V1 | 有效 route、pause-at-end、JSON/draft round-trip、三栏/抽屉 | 错歌、unknown schema、quota/abort、导入失败 | 旧 lease、刷新 paused、1024/1280 breakpoint、异歌取消 | Vitest + real Chrome；Edge route regression |
 | V2 | constant/analysis/editor-event、cache hit、共享 feature | 第五项、错歌 Editor、无效 projection、binding error | 0/1/4、最后引用释放、stale/cancel、point/range 端点 | Vitest + Worker/coordinator + real Chrome |
-| V3 | 横/竖线、point pulse、range gate | 未绑定、坏参数、scene error | seek/刷新/暂停同时间、template dispose | State golden + real Chrome |
+| V3 | 横/竖线映射、constant/analysis、point pulse、range gate | 未绑定、坏参数、scene create/render/resize error | 60Hz decay、seek/刷新/暂停、DPR/resize、Cube 中性切换、20 次 lifecycle | Versioned state golden + Vitest + real Chrome |
 | V4 | 频谱核心、drum scale、Energy rise、constant orbit | context loss、restore/renderer fail | seed、DPR/resize、20 次模板切换 | Three.js unit adapter + real Chrome |
 | V5 | 720p30 有声 WebM、save/retry | no MIME、busy、track/recorder/context error | 四 preset、页面 0 音量、save cancel、A/V sync | real Chrome/Edge + ffprobe/FFmpeg |
 | V6 | 三格式完整制作与回放 | 全部风险故障矩阵 | 15 分钟四特征、1024/1280/1920、20 次生命周期 | real Chrome/Edge + owner manual |
@@ -69,7 +69,7 @@ V1 的 golden/unit/integration/Chrome/Edge 命令与 21 步 canonical runner 已
 
 ## 4. Fixtures and Golden Data
 
-- `visualizer-events-v1`：固定歌曲与 EditorProjectV1，包含主要音色、drum、point、range、相邻区间、跨分类重叠和无效引用变体。
+- `visualizer-v3-lines-v1.wav`：V3 运行时确定性音频，配套同歌 EditorProjectV1 包含 main-tone range、drum point、相邻 range、多个 inner class、歌曲首尾、point/range 同时激活和无效引用变体。
 - `visualizer-analysis-v1`：静音、鼓点、能量变化、稳定频谱、丰富谐波和确定性音色段；固定 Analyzer payload/hash。
 - `visualizer-scenes-v1`：对批准时间点保存 resolved parameter 和 renderer-neutral scene state，不以跨平台像素截图作为唯一 golden。
 - `visualizer-avsync-v1`：在同一已知时间产生音频 impulse 与高对比视觉 flash，用于 ffprobe/FFmpeg 音画偏差测量。
@@ -115,9 +115,11 @@ npm run eval:vN
 
 V5/V6 另拆 `:chrome`、`:edge` 与聚合命令。每个 clean canonical 必须拒绝 dirty worktree，执行适用专项、历史回归、docs、harness、typecheck、build 和 diff check，并记录环境、步骤、日志、artifact 与 summary SHA-256。
 
-## 9. V1 Gate State
+V3 实际命令固定为 `fixtures:v3:golden`、`test:v3:unit`、`test:v3:integration`、`test:e2e:v3`、`eval:v3:provisional` 与 clean `eval:v3`。V3 canonical 恰为 V2 26 步基线加四个 V3 专项，共 30 步。
 
-- `project-owner` 于 2026-09-02 批准本文及其余 Visualizer delivery planning；V1 已开放，但必须先提交 V1 quality/eval、golden、failure taxonomy 与 evidence index。
-- Visualizer 测试源码和 npm 命令尚不存在；V1 契约提交前不得开始实现或产生 canonical 声明。
+## 9. Current Gate State
+
+- V1/V2 canonical 与 owner evidence 均已批准；V2 关闭，V3 为 `In Progress`，V4–V6 保持 `Planned`。
+- V3 quality/eval、golden 与 failure taxonomy 已建立为 `in-review`；实现和 30 步 canonical 只按该契约执行。
 - 当前没有正式 CI，所有结果限定为本地登记环境。
-- `/comingsoon`、`threeDTable`、TestLands 或现有 Three.js 组件不是 Visualizer implementation evidence。
+- `/comingsoon`、`threeDTable`、TestLands 或 V4 Cube 中性预览不是 V3 implementation evidence。

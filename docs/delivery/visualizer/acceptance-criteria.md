@@ -50,11 +50,11 @@ next_action: "V2 已批准；当前按 AC-V301–AC-V305 约束 V3 Orthogonal Li
 
 | ID | Criterion | Coverage and verification | Risk |
 | --- | --- | --- | --- |
-| AC-V301 | 横线与竖线分别支持 enabled、intensity、颜色、粗细、亮度和衰减，参数只影响声明对象 | scene state golden + Chrome inspector；success | R-037 |
-| AC-V302 | 用户可选择 main lane 或 inner class；point 产生 pulse、range 产生 gate、constant 固定显示、未绑定明确提示 | Editor fixture + frame golden；success/boundary | R-036, R-037 |
-| AC-V303 | 横线和竖线绑定互不串扰，同一事件可按用户配置驱动不同参数但不会隐式绑定名称 | parameter isolation unit/E2E；failure | R-036 |
-| AC-V304 | 从 0 播放、直接 seek、刷新和暂停单帧的同一绝对时间场景状态一致，播放到视觉偏差不超过 50ms | state hash + timing E2E；success/exception | R-037 |
-| AC-V305 | 切离场景后资源释放，错误只隔离当前 scene；transport、工程保存和模板选择继续可用 | renderer fault + lifecycle loop；failure | R-038 |
+| AC-V301 | 横线/竖线分别支持 enabled、intensity、color、CSS px thickness、brightness halo 和秒单位 decay；intensity 同时决定中心向两端长度与主线 alpha，参数只影响声明方向 | versioned scene-state golden + Chrome inspector/DPR；success/boundary | R-037 |
+| AC-V302 | constant、analysis、用户选择的 main lane/inner class 均可驱动；point 先沿用 V2 120ms release、range 为 `[start,end)` gate；默认 constant 0 显示“请选择主要音色/鼓点数据源” | V3 WAV/Editor fixture + frame golden；success/boundary | R-036, R-037 |
+| AC-V303 | horizontal/vertical resolved value、余辉 checkpoint 和视觉参数互不串扰；交点可加法混合但不回写状态，不按 lane/class 名称隐式绑定 | parameter isolation unit + Chrome；failure | R-036, R-037 |
+| AC-V304 | 60Hz 余辉使用 `max(I,previous*exp(-4*dt/decay))`、一秒 checkpoint 和歌曲/template/binding revision identity；从 0 播放、seek、刷新、暂停单帧同时间 hash 一致，视觉响应 `<=50ms`、设置反馈 `<=100ms` | state hash + timing/PerformanceObserver E2E；success/exception | R-037 |
+| AC-V305 | 单 `VisualizerRendererHost` 独占现有 Canvas、WebGLRenderer 和视觉 RAF；同帧一次 resolve；Cube 中性预览、scene error/retry、20 次模板/路由后仍保持单实例且无归因任务 `>50ms`、console/pageerror 0 | fake renderer integration + Chrome lifecycle/geometry/keyboard；failure/boundary | R-038 |
 
 ## 5. V4 — Cube Swarm
 
