@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: approved
 owner: "project-owner"
 last_reviewed: 2026-09-02
 upstream_docs:
@@ -8,7 +8,7 @@ upstream_docs:
   - "docs/architecture/risk-register.md"
   - "docs/delivery/visualizer/execution-plan.md"
   - "docs/delivery/visualizer/acceptance-criteria.md"
-next_action: "由 project-owner 复核 Visualizer test pyramid、fixture、浏览器/录制矩阵和人工缺口"
+next_action: "先提交 V1 eval/golden/failure/evidence 契约，再创建 V1 测试与 canonical runner"
 ---
 
 # Visualizer V1–V6 Test Strategy
@@ -113,8 +113,9 @@ npm run eval:vN
 
 V5/V6 另拆 `:chrome`、`:edge` 与聚合命令。每个 clean canonical 必须拒绝 dirty worktree，执行适用专项、历史回归、docs、harness、typecheck、build 和 diff check，并记录环境、步骤、日志、artifact 与 summary SHA-256。
 
-## 9. Known Gaps Before V1
+## 9. V1 Gate State
 
-- Visualizer quality/eval、golden、failure taxonomy、evidence index、测试源码和 npm 命令尚不存在；delivery planning 获批后先创建 V1 契约。
+- `project-owner` 于 2026-09-02 批准本文及其余 Visualizer delivery planning；V1 已开放，但必须先提交 V1 quality/eval、golden、failure taxonomy 与 evidence index。
+- Visualizer 测试源码和 npm 命令尚不存在；V1 契约提交前不得开始实现或产生 canonical 声明。
 - 当前没有正式 CI，所有结果限定为本地登记环境。
 - `/comingsoon`、`threeDTable`、TestLands 或现有 Three.js 组件不是 Visualizer implementation evidence。
