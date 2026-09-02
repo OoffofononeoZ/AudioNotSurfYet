@@ -45,7 +45,7 @@
         >
             <header class="workspace-toolbar">
                 <div>
-                    <p class="kicker">Visualizer · V1 工作台</p>
+                    <p class="kicker">Visualizer · V2 数据绑定</p>
                     <h1>{{ snapshot.project.track.title || snapshot.project.track.fileName }}</h1>
                     <p>
                         {{ snapshot.project.track.artist || 'unknown' }} ·
@@ -81,11 +81,12 @@
                 </button>
                 <button
                     type="button"
+                    aria-label="工程设置"
                     :aria-expanded="openDrawer === 'settings'"
                     aria-controls="visualizer-settings-panel"
                     @click="toggleDrawer('settings')"
                 >
-                    工程设置
+                    参数与绑定
                 </button>
             </div>
 
@@ -119,7 +120,7 @@
                         <canvas ref="previewCanvas" data-testid="visualizer-preview-canvas" />
                         <div class="neutral-notice">
                             <strong>{{ activeTemplate?.title }}</strong>
-                            <span>V1 中性预览</span>
+                            <span>V2 绑定预览值已就绪；真实场景在 V3/V4 开放</span>
                             <small>{{ activeTemplate?.description }}</small>
                         </div>
                     </div>
@@ -132,38 +133,47 @@
                     data-testid="visualizer-settings-panel"
                 >
                     <div class="panel-heading">
-                        <h2>工程设置</h2>
+                        <h2>参数与数据绑定</h2>
                         <button class="drawer-close" type="button" @click="openDrawer = null">关闭</button>
                     </div>
-                    <label>
-                        <span>输出分辨率</span>
-                        <select
-                            :value="snapshot.project.output.resolution"
-                            data-testid="visualizer-resolution"
-                            @change="setResolution"
-                        >
-                            <option value="720p">1280 × 720</option>
-                            <option value="1080p">1920 × 1080</option>
-                        </select>
-                    </label>
-                    <label>
-                        <span>帧率</span>
-                        <select
-                            :value="snapshot.project.output.frameRate"
-                            data-testid="visualizer-frame-rate"
-                            @change="setFrameRate"
-                        >
-                            <option :value="30">30 fps</option>
-                            <option :value="60">60 fps</option>
-                        </select>
-                    </label>
-                    <dl>
-                        <div><dt>画面比例</dt><dd>16:9</dd></div>
-                        <div><dt>模板版本</dt><dd>1</dd></div>
-                        <div><dt>确定性 Seed</dt><dd>{{ snapshot.project.scene.seed }}</dd></div>
-                        <div><dt>动态绑定</dt><dd>V2 开放</dd></div>
-                    </dl>
-                    <p>当前参数使用 registry 的 constant 默认值；不会启动分析 Worker。</p>
+                    <details class="output-settings" open>
+                        <summary>输出与工程设置</summary>
+                        <label>
+                            <span>输出分辨率</span>
+                            <select
+                                :value="snapshot.project.output.resolution"
+                                data-testid="visualizer-resolution"
+                                @change="setResolution"
+                            >
+                                <option value="720p">1280 × 720</option>
+                                <option value="1080p">1920 × 1080</option>
+                            </select>
+                        </label>
+                        <label>
+                            <span>帧率</span>
+                            <select
+                                :value="snapshot.project.output.frameRate"
+                                data-testid="visualizer-frame-rate"
+                                @change="setFrameRate"
+                            >
+                                <option :value="30">30 fps</option>
+                                <option :value="60">60 fps</option>
+                            </select>
+                        </label>
+                        <dl>
+                            <div><dt>画面比例</dt><dd>16:9</dd></div>
+                            <div><dt>模板版本</dt><dd>1</dd></div>
+                            <div><dt>确定性 Seed</dt><dd>{{ snapshot.project.scene.seed }}</dd></div>
+                        </dl>
+                    </details>
+                    <VisualizerBindingInspector
+                        v-if="activeTemplate"
+                        v-model:error="actionError"
+                        :project="snapshot.project"
+                        :runtime="snapshot.bindingRuntime"
+                        :descriptor="activeTemplate"
+                        :current-time-seconds="playback.currentTimeSeconds"
+                    />
                 </aside>
             </div>
 
@@ -205,6 +215,7 @@ import {
 } from 'vue';
 import { onBeforeRouteLeave, useRoute, useRouter } from 'vue-router';
 import { useAudioSessionService } from '../audio/audioSessionService';
+import VisualizerBindingInspector from '../components/VisualizerBindingInspector.vue';
 import { useAudioSessionStore } from '../stores/audioSessionStore';
 import type {
     VisualizerFrameRate,
@@ -561,6 +572,18 @@ input:focus-visible {
     display: grid;
     gap: 6px;
     margin-bottom: 14px;
+}
+
+.output-settings {
+    margin-bottom: 12px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid rgba(159, 196, 175, .18);
+}
+
+.output-settings summary {
+    margin-bottom: 10px;
+    color: #cfe7da;
+    cursor: pointer;
 }
 
 .settings-panel select {

@@ -97,6 +97,22 @@ export type VisualizerSessionState =
     | 'unavailable'
     | 'not-persisted';
 
+export type VisualizerEditorSnapshotSource =
+    | 'none'
+    | 'project'
+    | 'draft'
+    | 'imported';
+
+export interface VisualizerBindingRuntimeSnapshot {
+    bindingRevision: number;
+    activeFeatureIds: FeatureId[];
+    readyFeatureIds: FeatureId[];
+    analysisState: 'idle' | 'loading' | 'ready' | 'error';
+    analysisProgress: number;
+    analysisMessage?: string;
+    editorSnapshotSource: VisualizerEditorSnapshotSource;
+}
+
 export interface VisualizerSessionSnapshot {
     state: VisualizerSessionState;
     routeTrackId: string | null;
@@ -105,5 +121,6 @@ export interface VisualizerSessionSnapshot {
     conflictingDraft: VisualizerDraftEnvelopeV1 | null;
     persistence: VisualizerPersistenceState;
     restoredFromDraft: boolean;
+    bindingRuntime: VisualizerBindingRuntimeSnapshot;
     message?: string;
 }
