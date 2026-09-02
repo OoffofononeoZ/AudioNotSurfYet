@@ -4,7 +4,7 @@ owner: "project-owner"
 last_reviewed: 2026-09-02
 upstream_docs:
   - "AGENTS.md"
-next_action: "创建并评审 Visualizer V1–V6 execution、acceptance、test 与 milestone planning；批准前不开始 V1"
+next_action: "评审 Visualizer V1–V6 execution、acceptance、test 与 milestone planning；批准前不开始 V1"
 ---
 
 # Repository Context Index
@@ -20,7 +20,7 @@ AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端。Editor E1–
 - Repository context：入口、决策注册表、system map、glossary 与 working agreements 均已批准。
 - Product intent：Analyzer/Editor 历史范围与 Visualizer V0 均已批准；PROD-014V 已关闭，PROD-022 保留为非阻断未来问题。
 - System design：Analyzer/Editor 历史设计仍是已批准/实现基线；Visualizer system design、接口、风险和 ADR-0014–0017 已获批准。
-- Execution planning：M1–M14 与 Editor E0-D/E1–E7 均为 `Complete`；Visualizer V0-D 已开放并等待四份专属 delivery 文档完成评审。
+- Execution planning：M1–M14 与 Editor E0-D/E1–E7 均为 `Complete`；Visualizer V0-D 四份专属 delivery 文档为 `in-review`，V1–V6 均为 `Planned`。
 - Quality and evals：M3–M13 与 Editor E1–E7 evidence 保留；M14 19/19 evidence 已批准。
 - Implementation：Editor E7 与 Analyzer M14 已完成；Visualizer 仍只有 `/comingsoon` 入口，不得从试验组件推断已实现能力。
 - Readiness、release、retrospective：Analyzer M14 为 `Ready with waivers`；PROD-015 仍阻断上线，Editor readiness 独立。
@@ -54,6 +54,10 @@ AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端。Editor E1–
 | [Editor acceptance criteria](../delivery/editor/acceptance-criteria.md) | AC-E101–AC-E708、阈值、证据方法和风险映射 | project-owner / approved | Editor 指标、容差、容量或支持矩阵变化 |
 | [Editor test strategy](../delivery/editor/test-strategy.md) | E1–E7 测试层级、fixture、浏览器、性能与 evidence cadence | project-owner / approved | 测试工具、fixture、浏览器或证据能力变化 |
 | [Editor milestone plan](../delivery/editor/milestone-plan.md) | E0-D 与 E1–E7 状态、依赖和退出清单 | project-owner / approved | 里程碑关闭、阻塞或开放状态变化 |
+| [Visualizer execution plan](../delivery/visualizer/execution-plan.md) | V1–V6 切片、固定参数、证据节奏与范围控制 | project-owner / in-review | Visualizer 范围、架构、切片或依赖变化 |
+| [Visualizer acceptance criteria](../delivery/visualizer/acceptance-criteria.md) | AC-V101–AC-V607、阈值、证据方法和 R-034–R-041 映射 | project-owner / in-review | Visualizer 指标、阈值、preset 或支持矩阵变化 |
+| [Visualizer test strategy](../delivery/visualizer/test-strategy.md) | V1–V6 测试层级、fixture、Chrome/Edge、WebM 与资源策略 | project-owner / in-review | 测试工具、fixture、浏览器或证据能力变化 |
+| [Visualizer milestone plan](../delivery/visualizer/milestone-plan.md) | V0-D 与 V1–V6 状态、依赖、阻塞和退出证据 | project-owner / in-review | 里程碑开放、关闭或 blocked 状态变化 |
 | [eval-plan.md](../quality/eval-plan.md) | M3–M14 评估、FIFO/order/geometry/lifecycle 门禁与 canonical 规则 | project-owner / approved | 验收、测试覆盖或风险变化 |
 | [golden-examples.md](../quality/golden-examples.md) | 成功、失败、边界和异常黄金样例 | project-owner / approved | fixture、Meyda、参数或用户任务变化 |
 | [failure-taxonomy.md](../quality/failure-taxonomy.md) | 稳定失败类型、S0–S3、M14 order/pointer/a11y/persistence 失败和门禁响应 | project-owner / approved | 失败分类或风险接受规则变化 |
@@ -124,7 +128,7 @@ AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端。Editor E1–
 
 - Product intent：[problem brief](../product/problem-brief.md)、[scope](../product/scope.md)、[success metrics](../product/success-metrics.md) 中的 Visualizer V0 已于 2026-09-02 获批
 - System design：[system design](../architecture/system-design.md)、[interface contracts](../architecture/interface-contracts.md)、Visualizer 三份子契约与 ADR-0014–0017 已于 2026-09-02 获批
-- Delivery planning：Analyzer M14 与 Editor E1–E7 delivery 均已完成；Visualizer V0-D 已开放，四份专属文档待创建与评审
+- Delivery planning：Analyzer M14 与 Editor E1–E7 delivery 均已完成；Visualizer V0-D 四份专属文档已创建并保持 `in-review`
 - Quality design：[eval plan](../quality/eval-plan.md) 已覆盖 M3–M14 并获批准
 - Quality evidence：[evidence index](../quality/evidence-index.md) 的 M3–M13 为历史，M14 当前 record 已批准
 - Editor E1 quality：[eval plan](../quality/editor/eval-plan.md)、[golden](../quality/editor/golden-examples.md)、[failure taxonomy](../quality/editor/failure-taxonomy.md) 与 [evidence](../quality/editor/evidence-index.md) 已获批准

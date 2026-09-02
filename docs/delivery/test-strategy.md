@@ -14,7 +14,7 @@ next_action: "M14 provisional/canonical 已通过；候选或 runner 变化时�
 
 ## Scope Routing
 
-本文保留 Analyzer M1–M11 的已批准测试与证据历史，并增加 M12 瀑布流测试切片。Editor 继续使用独立 [E1–E6 test strategy](editor/test-strategy.md)；M12 runner 不登记或修改 Editor evidence。
+本文保留 Analyzer M1–M14 的已批准测试与证据历史。Editor 使用独立 [Editor test strategy](editor/test-strategy.md)；Visualizer V1–V6 使用独立 [Visualizer test strategy](visualizer/test-strategy.md)。Visualizer quality/eval 尚未创建，delivery strategy 获批后才建立对应 runner 与 evidence。
 
 ## 1. Objectives
 

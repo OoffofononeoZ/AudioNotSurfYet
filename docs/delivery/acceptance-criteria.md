@@ -14,7 +14,7 @@ next_action: "AC-M1401–AC-M1408 已由 M14 canonical 覆盖；候选变化时�
 
 ## Scope Routing
 
-本文保留 Analyzer M1–M11 的已批准验收历史，并以现有 AC-U05/U06 增加 M12 布局解释。Editor 使用独立 [E1–E6 acceptance criteria](editor/acceptance-criteria.md)，M12 不改变其状态或阈值。
+本文保留 Analyzer M1–M14 的已批准验收历史。Editor 使用独立 [Editor acceptance criteria](editor/acceptance-criteria.md)；Visualizer V1–V6 使用独立 [Visualizer acceptance criteria](visualizer/acceptance-criteria.md)。Visualizer 文档当前为 `in-review`，不能作为功能通过证据。
 
 ## 1. Evidence Rules
 

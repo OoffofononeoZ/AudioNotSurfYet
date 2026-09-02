@@ -16,7 +16,7 @@ next_action: "M14 已关闭；候选行为变化时按现有 M14 runner 回归"
 
 ## Scope Routing
 
-本文保留 Analyzer M1–M11 的已批准历史交付记录，并记录已完成的 M12 瀑布流布局切片。Editor E1–E6 继续由独立 [Editor execution plan](editor/execution-plan.md)、[acceptance criteria](editor/acceptance-criteria.md)、[test strategy](editor/test-strategy.md) 和 [milestone plan](editor/milestone-plan.md) 管理；M12 不改写 Editor E6 的证据或人工门禁。
+本文保留 Analyzer M1–M14 的已批准历史交付记录。Editor 由独立 [Editor execution plan](editor/execution-plan.md)、[acceptance criteria](editor/acceptance-criteria.md)、[test strategy](editor/test-strategy.md) 和 [milestone plan](editor/milestone-plan.md) 管理。Visualizer V1–V6 使用独立 [Visualizer execution plan](visualizer/execution-plan.md)、[acceptance criteria](visualizer/acceptance-criteria.md)、[test strategy](visualizer/test-strategy.md) 和 [milestone plan](visualizer/milestone-plan.md)；四份 Visualizer 文档获批前不开始 V1，也不改写 Analyzer/Editor 历史证据。
 
 ## 1. Delivery Outcome
 
