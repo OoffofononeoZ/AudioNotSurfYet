@@ -1,13 +1,13 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-09-02
+last_reviewed: 2026-09-03
 upstream_docs:
   - "docs/product/problem-brief.md"
   - "docs/product/scope.md"
   - "docs/product/success-metrics.md"
   - "docs/product/open-questions.md"
-next_action: "按 DEC-039 实施 V3 Orthogonal Lines；V4–V6 继续遵守已批准架构门禁"
+next_action: "按 DEC-041 验证 V4 Cube Swarm implementation candidate，并在 clean commit 运行 34 步 canonical"
 ---
 
 # System Design

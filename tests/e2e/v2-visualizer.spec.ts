@@ -125,11 +125,11 @@ test('plans four analysis features, deduplicates shared references and restores 
     const issues = browserIssues(page);
     await openV2(page);
     await page.getByRole('button', { name: /立方体群/ }).click();
-
-    await source(page, 'centerSpectrum').selectOption('analysis');
-    await source(page, 'coreScale').selectOption('analysis');
-    await source(page, 'riseSpeed').selectOption('analysis');
     await expect(page.getByTestId('active-analysis-features')).toContainText('2/4');
+    await expect(source(page, 'centerSpectrum')).toHaveValue('analysis');
+    await expect(source(page, 'riseSpeed')).toHaveValue('analysis');
+    await expect(source(page, 'coreScale')).toHaveValue('constant');
+    await expect(source(page, 'orbitSpeed')).toHaveValue('constant');
 
     await page.evaluate(() => {
         const target = document.querySelector('[data-testid="active-analysis-features"]');
@@ -143,7 +143,7 @@ test('plans four analysis features, deduplicates shared references and restores 
         });
         if (target) observer.observe(target, { childList: true, subtree: true, characterData: true });
     });
-    await feature(page, 'riseSpeed').selectOption('energy');
+    await source(page, 'coreScale').selectOption('analysis');
     await expect(page.getByTestId('active-analysis-features')).toContainText('3/4');
     const feedbackMs = await page.evaluate(() => (
         window as typeof window & { __v2Feedback?: { value: number | null } }

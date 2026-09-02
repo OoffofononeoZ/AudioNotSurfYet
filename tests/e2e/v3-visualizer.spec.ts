@@ -147,8 +147,9 @@ test('renders deterministic orthogonal lines and recovers scene failures in one 
     }
 
     await page.getByRole('button', { name: /立方体群/ }).click();
-    await expect(frame).toHaveAttribute('data-scene-status', 'neutral');
-    await expect(page.getByText('V4 中性预览', { exact: true })).toBeVisible();
+    await expect(frame).toHaveAttribute('data-scene-status', 'ready');
+    await expect(page.getByText('Visualizer · 立方体群', { exact: true })).toBeVisible();
+    await expect(page.getByText('V4 中性预览', { exact: true })).toHaveCount(0);
     expect(await canvas.getAttribute('data-renderer-host-id')).toBe(hostId);
     await page.getByRole('button', { name: /正交线条/ }).click();
     await expect(frame).toHaveAttribute('data-scene-status', 'ready');

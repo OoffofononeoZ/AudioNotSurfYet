@@ -263,19 +263,29 @@ describe('Visualizer V2 binding integration', () => {
         )!;
         const core = descriptor.parameters.find((entry) => entry.id === 'coreScale')!;
         const rise = descriptor.parameters.find((entry) => entry.id === 'riseSpeed')!;
+        const center = descriptor.parameters.find((entry) => entry.id === 'centerSpectrum')!;
+        expect(harness.coordinator.activeCalls).toEqual([['energy', 'amplitudeSpectrum']]);
         harness.controller.updateBinding(createDefaultAnalysisBinding(core, 'rms'));
+        expect(harness.coordinator.activeCalls.at(-1)).toEqual([
+            'rms', 'energy', 'amplitudeSpectrum',
+        ]);
         harness.controller.updateBinding(createDefaultAnalysisBinding(rise, 'rms'));
-        expect(harness.coordinator.activeCalls).toEqual([['rms']]);
+        expect(harness.coordinator.activeCalls.at(-1)).toEqual(['rms', 'amplitudeSpectrum']);
         harness.controller.updateBinding(createDefaultAnalysisBinding(core, 'zcr'));
-        expect(harness.coordinator.activeCalls.at(-1)).toEqual(['rms', 'zcr']);
+        expect(harness.coordinator.activeCalls.at(-1)).toEqual(['rms', 'zcr', 'amplitudeSpectrum']);
         harness.controller.updateBinding({
             parameterId: rise.id,
             source: { kind: 'constant', value: rise.defaultValue as number },
         });
-        expect(harness.coordinator.activeCalls.at(-1)).toEqual(['zcr']);
+        expect(harness.coordinator.activeCalls.at(-1)).toEqual(['zcr', 'amplitudeSpectrum']);
         harness.controller.updateBinding({
             parameterId: core.id,
             source: { kind: 'constant', value: core.defaultValue as number },
+        });
+        expect(harness.coordinator.activeCalls.at(-1)).toEqual(['amplitudeSpectrum']);
+        harness.controller.updateBinding({
+            parameterId: center.id,
+            source: { kind: 'constant', value: [] },
         });
         expect(harness.coordinator.activeCalls.at(-1)).toEqual([]);
         await harness.controller.dispose();

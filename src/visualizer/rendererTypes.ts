@@ -55,6 +55,6 @@ export interface VisualizerRenderFrame {
 }
 
 export interface VisualizerRendererStatus {
-    readonly state: 'idle' | 'ready' | 'neutral' | 'error';
+    readonly state: 'idle' | 'ready' | 'neutral' | 'recovering' | 'error';
     readonly message?: string;
 }

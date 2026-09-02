@@ -338,7 +338,7 @@ export class VisualizerSessionController {
                 templateId,
                 templateVersion: 1,
                 seed: project.scene.seed,
-                bindings: this.registry.createConstantBindings(templateId),
+                bindings: this.registry.createDefaultBindings(templateId),
             },
         }, true);
     }
@@ -847,11 +847,19 @@ export class VisualizerSessionController {
                 : ready.length === active.length && snapshot.state === 'ready'
                     ? 'ready'
                     : 'loading';
-        if (analysisState === 'ready') this.bindingResolver.reset();
+        const previousRuntime = this.snapshot.bindingRuntime;
+        const resolutionChanged = analysisState !== previousRuntime.analysisState
+            || ready.length !== previousRuntime.readyFeatureIds.length
+            || ready.some((featureId, index) =>
+                featureId !== previousRuntime.readyFeatureIds[index]);
+        if (resolutionChanged) this.bindingResolver.reset();
         this.publish({
             ...this.snapshot,
             bindingRuntime: {
                 ...this.snapshot.bindingRuntime,
+                bindingRevision: resolutionChanged
+                    ? this.snapshot.bindingRuntime.bindingRevision + 1
+                    : this.snapshot.bindingRuntime.bindingRevision,
                 readyFeatureIds: ready,
                 analysisState,
                 analysisProgress: snapshot.progress,

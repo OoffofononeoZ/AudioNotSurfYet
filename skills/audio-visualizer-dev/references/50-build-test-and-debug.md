@@ -83,7 +83,7 @@
 | `npm run fixtures:v2:golden` / `test:v2:unit` / `test:v2:integration` | 运行 V2 planner、projection、Editor snapshot 与 resolver 专项 | 已实现；用于 V2 质量回归 |
 | `npm run test:e2e:v2:chrome` / `test:e2e:v2:edge` | 在真实 Chrome/Edge 运行 V2 inspector、四特征与 Editor 绑定专项 | 原生 Editor JSON picker 仍需人工补偿 |
 | `npm run eval:v2:provisional` / `eval:v2` | dirty feedback / clean 26 步 canonical | clean 26/26 已登记并获 owner 批准 |
-| `npm run fixtures:v3:golden` / `test:v3:unit` / `test:v3:integration` | V3 scene fixture、参数/余辉与 RendererHost 所有权专项 | implementation candidate 的纯逻辑与集成门禁 |
+| `npm run fixtures:v3:golden` / `test:v3:unit` / `test:v3:integration` | V3 scene fixture、参数/余辉与 RendererHost 所有权专项 | clean 30/30 canonical 已获 owner 批准；继续作为 V4 前向基线 |
 | `npm run test:e2e:v3` | Chrome 验证反馈、hash、DPR、switch/retry 与 20 次路由资源 | V3 浏览器门禁；不替代 owner 视觉验收 |
 | `npm run eval:v3:provisional` / `eval:v3` | V2 26 步基线 + V3 四专项的 dirty/clean 30 步链 | canonical 必须绑定 clean implementation commit |
 | `npm run fixtures:v4:golden` / `test:v4:unit` / `test:v4:integration` | V4 Cube fixture、64-band/seed/checkpoint state、默认绑定、host resource 与 context 专项 | 已批准 V4 quality contract；实现后进入门禁 |
@@ -100,6 +100,7 @@
 - Visualizer V3 已建立版本化 WAV/golden、单元/集成和 Chrome 专项；clean canonical 与 owner 人工验收已于 2026-09-03 获批准，V3 为 `Complete`，V4 为 `In Progress`，V5–V6 保持 `Planned`。
 - 最终 dirty candidate 的 provisional `V3-2026-09-02T13-25-25-465Z-75cbf292-provisional` 已 30/30 通过，summary SHA-256 为 `20452afedc68ab351647464c3e6c3335e1e6def0290c2ba1d35105004648a46d`；它绑定 dirty worktree，仅允许进入 implementation commit，不得登记为 canonical。
 - Visualizer V3 clean canonical `V3-2026-09-02T13-32-42-513Z-89be30eb` 已在 commit `89be30eb23d4e53d2c38f24e111cd1af7ec0840d` 上 30/30 通过，summary SHA-256 为 `afe4cbe233fe1feded65380d6e976d5a4c32c2f9860fe2e0357a0d615d6a7b84`；evidence 与人工门禁已于 2026-09-03 获 owner 批准。
+- Visualizer V4 Cube Swarm implementation candidate 已建立 fixture/golden、unit、integration 和 Chrome 专项；局部 Chrome 已验证 seek/刷新 hash、context recovery、20 次模板切换与三视口，仍需 dirty provisional、clean 34 步 canonical、evidence 登记和 owner 验收。
 - 当前机器已安装 Edge 151；M11 clean canonical 已使用真实 `msedge` channel 全量 31/31 通过。原生权限 prompt 不能由 OPFS 自动化替代；当前候选已由 `project-owner` 于 2026-08-26 完成人工补偿签字，相关实现或浏览器变化后须重做。
 - 正式 M3 canonical run 已在 clean commit `17d16f0da37289c1f67f75203502beef999572ea` 上通过并登记，且已由 `project-owner` 批准。
 - 正式 M4 canonical run 已在 clean commit `e5cfe9e8ab62301f3c5b0ddcdd37847a2e131a0f` 上通过并登记，evidence 与 working agreements 已由 `project-owner` 批准。
