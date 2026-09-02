@@ -4,7 +4,7 @@ owner: "project-owner"
 last_reviewed: 2026-09-02
 upstream_docs:
   - "AGENTS.md"
-next_action: "Visualizer V1 已批准并关闭；V2 为 In Progress，先提交 quality contract 再交付数据绑定"
+next_action: "Visualizer V2 quality contract 已形成并为 in-review；实现 planner、projection、Editor snapshot、resolver 与 inspector"
 ---
 
 # Repository Context Index
@@ -61,7 +61,10 @@ AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端。Editor E1–
 | [Visualizer V1 eval plan](../quality/visualizer/eval-plan.md) | AC-V101–AC-V108 的 route、lease、project、draft、layout 与 resource 契约 | project-owner / approved | V1 行为、阈值、浏览器或证据能力变化 |
 | [Visualizer V1 golden](../quality/visualizer/golden-examples.md) | 默认/完整/无效工程、lease、草稿和 breakpoint 规范样例 | project-owner / approved | V1 schema、identity、布局或恢复语义变化 |
 | [Visualizer V1 failure taxonomy](../quality/visualizer/failure-taxonomy.md) | route、lease、project、draft、file、layout、resource 失败分类 | project-owner / approved | V1 失败域或严重度响应变化 |
-| [Visualizer evidence index](../quality/visualizer/evidence-index.md) | V1–V6 canonical 身份、hash、环境和 reviewer 记录 | project-owner / in-review | 新 Visualizer run、artifact 或审批状态变化 |
+| [Visualizer V2 eval plan](../quality/visualizer/v2-eval-plan.md) | AC-V201–AC-V208 的 inspector、projection、planner、Editor snapshot 与 resolver 契约 | project-owner / in-review | V2 行为、算法、阈值或证据能力变化 |
+| [Visualizer V2 golden](../quality/visualizer/v2-golden-examples.md) | 0–4、21 项 projection、point/range、stale 与 deterministic hash 规范样例 | project-owner / in-review | V2 fixture、默认映射或时间语义变化 |
+| [Visualizer V2 failure taxonomy](../quality/visualizer/v2-failure-taxonomy.md) | inspector、planner、projection、snapshot、transform、determinism 与 resource 分类 | project-owner / in-review | V2 失败域或严重度响应变化 |
+| [Visualizer evidence index](../quality/visualizer/evidence-index.md) | V1–V6 canonical 身份、hash、环境和 reviewer 记录 | project-owner / approved | 新 Visualizer run、artifact 或审批状态变化 |
 | [eval-plan.md](../quality/eval-plan.md) | M3–M14 评估、FIFO/order/geometry/lifecycle 门禁与 canonical 规则 | project-owner / approved | 验收、测试覆盖或风险变化 |
 | [golden-examples.md](../quality/golden-examples.md) | 成功、失败、边界和异常黄金样例 | project-owner / approved | fixture、Meyda、参数或用户任务变化 |
 | [failure-taxonomy.md](../quality/failure-taxonomy.md) | 稳定失败类型、S0–S3、M14 order/pointer/a11y/persistence 失败和门禁响应 | project-owner / approved | 失败分类或风险接受规则变化 |

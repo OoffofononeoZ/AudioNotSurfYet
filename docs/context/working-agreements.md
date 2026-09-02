@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/context/index.md"
   - "docs/delivery/test-strategy.md"
   - "docs/quality/eval-plan.md"
-next_action: "Visualizer V1 已批准；V2 按先 quality contract、再 provisional/clean canonical 的顺序实施，仍只创建本地提交"
+next_action: "Visualizer V2 quality contract 已提交；完成实现后运行 26 步 provisional/clean canonical，仍只创建本地提交"
 ---
 
 # Working Agreements
