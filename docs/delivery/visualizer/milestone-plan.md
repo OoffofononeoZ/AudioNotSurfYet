@@ -6,7 +6,7 @@ upstream_docs:
   - "docs/delivery/visualizer/execution-plan.md"
   - "docs/delivery/visualizer/acceptance-criteria.md"
   - "docs/delivery/visualizer/test-strategy.md"
-next_action: "V1 quality、实现与 21/21 clean canonical 已完成；等待 owner 人工门禁和 evidence 批准，V2–V6 继续 Planned"
+next_action: "V1 已批准并关闭；V2 为 In Progress，先提交 quality contract 再实现数据绑定"
 ---
 
 # Visualizer V0-D and V1–V6 Milestone Plan
@@ -26,8 +26,8 @@ next_action: "V1 quality、实现与 21/21 clean canonical 已完成；等待 ow
 | V0-P | Product intent | Complete | Product gate | Analyzer/Editor historical baseline | 当前歌曲、单场景、两个模板、0–4 特征和 WebM 路线 | product docs、DEC-037、PROD-014V approved | project-owner |
 | V0-A | System design | Complete | Architecture gate | V0-P | route/analysis lease、project/binding、scene/renderer、recording、R-034–R-041 | system/contracts/subcontracts、ADR-0014–0017 approved | project-owner |
 | V0-D | Execution planning | Complete | Delivery gate | V0-A | Visualizer 专属 execution、AC、test strategy、milestone plan | 四份文档 owner approved | project-owner |
-| V1 | Workspace foundation | In Progress | First implementation gate | V0-D | route、pause-at-end、三栏/抽屉、单 Canvas、JSON V1、单草稿、导入导出 | V1 eval contract + provisional + clean canonical + owner approval | project-owner |
-| V2 | Data binding | Planned | Binding gate | V1 | constant/analysis/editor-event、0–4 planner、Editor snapshot、deterministic resolver | planner/projection/golden + Chrome canonical + owner approval | project-owner |
+| V1 | Workspace foundation | Complete | First implementation gate | V0-D | route、pause-at-end、三栏/抽屉、单 Canvas、JSON V1、单草稿、导入导出 | V1 eval contract + provisional + clean canonical + owner approval | project-owner |
+| V2 | Data binding | In Progress | Binding gate | V1 | constant/analysis/editor-event、0–4 planner、Editor snapshot、deterministic resolver | planner/projection/golden + Chrome canonical + owner approval | project-owner |
 | V3 | Orthogonal Lines | Planned | First scene gate | V2 | 横/竖线、point pulse、range gate、参数 inspector | scene state golden + Chrome canonical + owner approval | project-owner |
 | V4 | Cube Swarm | Planned | Second scene gate | V3 | spectrum core、drum scale、Energy rise、constant orbit、context restore | deterministic/resource/context canonical + owner approval | project-owner |
 | V5 | WebM export | Planned | Recording gate | V4 | pre-Gain tap、strict preset、MediaRecorder、native save | Chrome/Edge 720p30 + ffprobe/A-V sync + owner approval | project-owner |
@@ -35,8 +35,8 @@ next_action: "V1 quality、实现与 21/21 clean canonical 已完成；等待 ow
 
 ## 3. Gate State
 
-- 当前：V0-P、V0-A、V0-D 均为 `Complete`，V1 为 `In Progress`，V2–V6 保持 `Planned`。
-- V1 eval plan、golden examples、failure taxonomy、实现与 clean canonical 已完成；run `V1-2026-09-02T07-03-26-973Z-fd44c892` 21/21 通过。owner 人工门禁和 evidence 批准尚未完成，因此 V1 仍为 `In Progress`。
+- 当前：V0-P、V0-A、V0-D、V1 均为 `Complete`，V2 为 `In Progress`，V3–V6 保持 `Planned`。
+- V1 run `V1-2026-09-02T07-03-26-973Z-fd44c892` 21/21 通过，并于 2026-09-02 获 owner 批准；canonical identity 不变且无需重跑。
 - V6 获批后只进入包含 Visualizer 的整体 release-readiness review；PROD-015 仍阻断生产上线。
 
 ## 4. Failure and Slip Rules

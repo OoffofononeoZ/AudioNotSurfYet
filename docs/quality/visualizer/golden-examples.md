@@ -1,11 +1,11 @@
 ---
-status: in-review
+status: approved
 owner: "project-owner"
 last_reviewed: 2026-09-02
 upstream_docs:
   - "docs/quality/visualizer/eval-plan.md"
   - "docs/architecture/visualizer/project-format-v1.md"
-next_action: "owner 复核 V1 canonical、descriptor 边界与原生文件人工门禁；批准前保持 in-review"
+next_action: "V1 已批准；V2 新增独立 binding golden，不改写本历史集合"
 ---
 
 # Visualizer V1 Golden Examples

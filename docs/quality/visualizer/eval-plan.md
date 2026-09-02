@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: approved
 owner: "project-owner"
 last_reviewed: 2026-09-02
 upstream_docs:
@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/delivery/visualizer/acceptance-criteria.md"
   - "docs/delivery/visualizer/test-strategy.md"
   - "docs/architecture/risk-register.md"
-next_action: "owner 复核 21/21 V1 canonical 并在 Chrome/Edge 完成原生文件与 beforeunload 补偿检查；批准前 V2 保持 Planned"
+next_action: "V1 已批准并关闭；后续变更由独立 V2 quality contract 评价"
 ---
 
 # Visualizer V1 Eval Plan
@@ -35,7 +35,7 @@ next_action: "owner 复核 21/21 V1 canonical 并在 Chrome/Edge 完成原生文
 - `eval:v1:provisional` 允许 dirty worktree，只作为实现反馈。
 - `eval:v1` 必须拒绝 dirty worktree，固定 21 个步骤并登记 run ID、实现 commit、Chrome/Edge、Node/npm/Meyda、脱敏硬件、逐步日志和 summary SHA-256。
 - canonical 使用受控 CC0 音频与浏览器 OPFS，不登记用户私有路径、文件名或设备标识。
-- V1 evidence 在 owner 完成人工任务前保持 `in-review`；V2 不开放。
+- V1 evidence 已于 2026-09-02 获 owner 批准；后续 V2 使用独立 eval plan，不改写本历史契约。
 
 ## Evidence Gaps
 

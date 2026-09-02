@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: approved
 owner: "project-owner"
 last_reviewed: 2026-09-02
 upstream_docs:
@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/quality/visualizer/golden-examples.md"
   - "docs/quality/visualizer/failure-taxonomy.md"
   - "docs/delivery/visualizer/milestone-plan.md"
-next_action: "owner 在 Chrome/Edge 完成原生 picker、覆盖提示与 beforeunload 补偿检查，并复核 V1 canonical 后决定是否批准 V1、开放 V2"
+next_action: "V2 已开放；先提交 V2 eval/golden/failure 契约，再实现数据绑定并形成独立 canonical evidence"
 ---
 
 # Visualizer Evidence Index
@@ -15,9 +15,9 @@ next_action: "owner 在 Chrome/Edge 完成原生 picker、覆盖提示与 before
 ## Current Gate
 
 - V0-P、V0-A、V0-D：`Complete`。
-- V1：`In Progress`；clean canonical 已 21/21 通过，evidence 为 `in-review`，尚未获得 owner 批准。
-- V2–V6：`Planned`，不得因 V1 自动化通过而提前开放。
-- R-034、R-036、R-038 继续为 `Open`；本次只增加 route lease、project/draft 和单 Canvas 生命周期的部分自动化缓解证据。
+- V1：`Complete`；clean canonical 21/21 与适用人工门禁已由 owner 批准。
+- V2：`In Progress`；V3–V6：`Planned`。
+- R-034 根据 route lease、双浏览器 canonical 与 owner 人工批准改为 `Mitigated`；R-035、R-036、R-037、R-038 继续为 `Open`。
 - Analyzer/Editor canonical 是相邻回归，不能替代 Visualizer evidence。
 
 ## Record Contract
@@ -29,7 +29,7 @@ next_action: "owner 在 Chrome/Edge 完成原生 picker、覆盖提示与 before
 | Field | Value |
 | --- | --- |
 | Milestone | V1 — Workspace foundation |
-| State | `in-review` |
+| State | `approved` |
 | Implementation commit | `fd44c8921a534c22b2362ccffff7ec9e46f3ff02` |
 | Evidence commit | 本记录所在的 `docs: register Visualizer V1 canonical evidence` 提交 |
 | Run ID | `V1-2026-09-02T07-03-26-973Z-fd44c892` |
@@ -37,7 +37,7 @@ next_action: "owner 在 Chrome/Edge 完成原生 picker、覆盖提示与 before
 | Clean identity | start/end commit 均为 `fd44c8921a534c22b2362ccffff7ec9e46f3ff02`；start/end dirty 均为 `false` |
 | Summary SHA-256 | `14c9ed2258baf6c9a2a3a20dfcaba65a0c643029f8510a1d9e4c6662c9c90300` |
 | Artifact root | `artifacts/evals/V1-2026-09-02T07-03-26-973Z-fd44c892/` |
-| Reviewer | `project-owner` — pending |
+| Reviewer | `project-owner` — approved 2026-09-02 |
 
 ### Environment
 
@@ -91,7 +91,12 @@ next_action: "owner 在 Chrome/Edge 完成原生 picker、覆盖提示与 before
 
 ### Manual Gaps and Review Boundary
 
-- 原生 OS 打开/保存 picker、取消与覆盖提示不能由 Playwright 完整控制，须由 owner 在最新版 Chrome/Edge 补偿检查。
-- `beforeunload` 的浏览器原生提示文案不可控制，须人工检查 pending/in-flight 时出现、稳定保存后不误报。
+- 原生 OS 打开/保存 picker、取消、覆盖提示与 `beforeunload` 不能由 Playwright 完整控制；owner 于 2026-09-02 对适用人工门禁完成签字。本记录只登记批准，不补写用户未提供的逐项数值或文案。
 - 本记录不证明 V2 动态绑定、V3/V4 场景、V5 WebM 或 V6 最终加固；中性预览明确不是完成场景。
-- owner 批准前，V1 保持 `In Progress`、quality 文档和 evidence 保持 `in-review`，V2 保持 `Planned`。
+- V1 canonical identity、artifact 与 hash 保持不变，无需重跑；V2 另行建立 quality contract 与 evidence。
+
+### Owner Approval
+
+2026-09-02，`project-owner` 明确回复：
+
+`我批准 Visualizer V1 canonical evidence、工作台、pause-at-end lease、JSON V1 与草稿恢复结果；同意将 V1 标记为 Complete 并开放 V2。`

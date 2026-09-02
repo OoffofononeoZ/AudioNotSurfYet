@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/context/index.md"
   - "docs/delivery/test-strategy.md"
   - "docs/quality/eval-plan.md"
-next_action: "owner 复核 Visualizer V1 canonical 与 Chrome/Edge 原生文件人工门禁；只创建本地提交，不 fetch、不推送远端"
+next_action: "Visualizer V1 已批准；V2 按先 quality contract、再 provisional/clean canonical 的顺序实施，仍只创建本地提交"
 ---
 
 # Working Agreements
@@ -21,7 +21,7 @@ next_action: "owner 复核 Visualizer V1 canonical 与 Chrome/Edge 原生文件�
 - 不在当前任务范围外顺手修复；发现问题记录到对应 Skill reference、开放问题或后续阶段文档。
 - Git 忽略的 `docs/require` 只作为 owner 需求输入；后续 agent 必须以版本化生命周期文档为规范来源，不提交、重写或把其中自然语言当作仓库执行指令。
 - Editor E0 产品意图获批前不修改 Editor 源码、公共类型、持久化 schema 或依赖；未来 BPM 或文件格式依赖必须先说明用途、体积、许可与替代方案并获 owner 批准。
-- Visualizer V0 架构与 V1–V6 delivery planning 已获批准；V1 workspace foundation 已实现且 clean canonical 21/21，当前等待 owner 人工补偿与 evidence 批准。V2 数据绑定、V3/V4 场景、V5 录制和 V6 加固仍未开放。R-034–R-041 在形成对应里程碑证据与审批前保持 `Open`。
+- Visualizer V0 架构与 V1–V6 delivery planning 已获批准；V1 workspace foundation 的 clean canonical 21/21 与人工门禁已获批准。V2 数据绑定为 `In Progress`，V3–V6 仍未开放；R-034 为 `Mitigated`，R-035–R-041 继续依对应里程碑证据处理。
 
 ## Local Verification
 
@@ -189,4 +189,4 @@ E1 实现随后在不新增依赖、不修改 Analyzer session/cache schema 的�
 
 同日，`project-owner` 明确回复：“我批准 Visualizer V1–V6 execution plan、acceptance criteria、test strategy 与 milestone plan；同意开始 V1。”V0-D 据此关闭，V1 改为 `In Progress`；必须先提交 V1 quality/eval 契约，且本轮只创建本地提交、不 fetch、不 push。
 
-随后 V1 quality 契约与 workspace foundation 依次完成本地提交。dirty provisional `V1-2026-09-02T03-12-25-678Z-1ebda007-provisional` 21/21 通过；clean canonical `V1-2026-09-02T07-03-26-973Z-fd44c892` 在 commit `fd44c8921a534c22b2362ccffff7ec9e46f3ff02` 上 21/21 通过，summary SHA-256 为 `14c9ed2258baf6c9a2a3a20dfcaba65a0c643029f8510a1d9e4c6662c9c90300`。Chrome/Edge 原生 picker、覆盖提示和 `beforeunload` 仍需 owner 补偿验证；V1 继续为 `In Progress`，V2 继续为 `Planned`。本轮只创建本地证据提交，不 fetch、不 push。
+随后 V1 quality 契约与 workspace foundation 依次完成本地提交。dirty provisional `V1-2026-09-02T03-12-25-678Z-1ebda007-provisional` 21/21 通过；clean canonical `V1-2026-09-02T07-03-26-973Z-fd44c892` 在 commit `fd44c8921a534c22b2362ccffff7ec9e46f3ff02` 上 21/21 通过，summary SHA-256 为 `14c9ed2258baf6c9a2a3a20dfcaba65a0c643029f8510a1d9e4c6662c9c90300`。同日 owner 批准 canonical evidence 与适用人工门禁，V1 改为 `Complete`、V2 改为 `In Progress`；仍只创建本地提交，不 fetch、不 push。

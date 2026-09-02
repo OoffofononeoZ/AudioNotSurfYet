@@ -5,7 +5,7 @@ last_reviewed: 2026-09-02
 upstream_docs:
   - "docs/architecture/system-design.md"
   - "docs/architecture/interface-contracts.md"
-next_action: "owner 复核 Visualizer V1 canonical 与人工门禁；R-034/R-036/R-038 保持 Open，后续里程碑与审批继续累积缓解证据"
+next_action: "V1 已批准，R-034 改为 Mitigated；V2 继续验证 R-035/R-036/R-037，R-038 等待真实 renderer"
 ---
 
 # Risk Register
@@ -47,7 +47,7 @@ next_action: "owner 复核 Visualizer V1 canonical 与人工门禁；R-034/R-036
 | R-031 | 自定义顺序与 DOM/masonry/focus/Canvas 身份错位 | Medium | High | order index、DOM 和视觉输入不同；排序关闭 details、丢焦点或重建 Canvas | 完整 permutation、feature keyed wrapper、drop 时一次提交、无位移动画；M14 unit 24/24 与 Chrome/Edge 各 3/3 验证 DOM/data/masonry 顺序、焦点、details/Canvas identity、reload/切歌/reset 和 FIFO 独立 | 交互、key 或 masonry 输入契约变化时重跑 M14 | project-owner | Mitigated |
 | R-032 | Pointer capture、auto-scroll、popup 或 drag RAF 未清理 | Medium | High | 取消后仍滚动、遗留 capture/ghost/marker、路由循环 RAF 增长、touch 无法恢复滚动 | 单 pointer state、单 drag RAF；pointercancel/lostcapture/Escape/blur/unmount 对称 cleanup；句柄局部 touch-action；M14 双浏览器 threshold/auto-scroll/工作区外/Escape 取消无 console issue，M12/M11 路由资源回归继续通过 | 原生触控设备与未自动制造的 blur/lostcapture 由等价 cleanup 契约和后续人工回归补偿；实现变化时重开 | project-owner | Mitigated |
 | R-033 | featureOrder 损坏或与 queue/viewport 保存交错覆盖最新状态 | Medium | High | 非完整/重复 order 被恢复；旧 save 覆盖新顺序或 FIFO；刷新顺序倒退 | V1 可选字段严格 permutation；缺失只映射默认；全 workspace immutable snapshot、串行写入和 revision guard；M14 integration 19/19 与双浏览器 reload/切歌通过，排序 Worker analyze request 保持 `1 → 1` | schema、repository 或 workspace snapshot 变化时重跑 validator/revision/quota | project-owner | Mitigated |
-| R-034 | Visualizer ended policy 或旧 route lease 泄漏，导致播完切歌、Editor 不循环或离页后策略错误 | Medium | High | Visualizer ended 调用 next、旧 token release 覆盖新 route、出现第二播放时钟 | ADR-0014 通用 token lease；V1/V6 覆盖 Editor repeat-one、Visualizer pause-at-end、快速路由、刷新与 20 次生命周期 | 无法证明 token/资源唯一性时阻断 V1/V6；释放失败时回到 queue-next 并报告 | project-owner | Open |
+| R-034 | Visualizer ended policy 或旧 route lease 泄漏，导致播完切歌、Editor 不循环或离页后策略错误 | Medium | High | Visualizer ended 调用 next、旧 token release 覆盖新 route、出现第二播放时钟 | ADR-0014 通用 token lease；V1/V6 覆盖 Editor repeat-one、Visualizer pause-at-end、快速路由、刷新与 20 次生命周期 | V1 21/21 与 owner 人工门禁已通过；V6 继续回归，失败时回到 queue-next 并报告 | project-owner | Mitigated |
 | R-035 | 第五个特征、重复绑定或 stale 分析扩大 Worker/cache 或污染新模板 | Medium | High | active set >4、同 FeatureId 重算、旧 generation 更新场景 | 绑定 planner 去重并在 Coordinator 前拒绝第五项；generation + template/binding revision；V2 unit/integration/双浏览器验证 | 超限保持原绑定并解释；不能静默丢弃既有特征或创建第二 Worker | project-owner | Open |
 | R-036 | Visualizer 工程、单草稿或 Editor 快照损坏/错歌，导致配置被部分覆盖 | Medium | High | 未知字段/模板被接受、hash/时长不匹配、quota/abort 丢旧草稿 | ADR-0015 strict codec、同歌快照、原子导入与独立 `draft/latest`；V1/V2 fault injection 和原生文件任务 | 失败保留内存工程与旧 durable draft；要求用户显式重新载入/导入 Editor 数据 | project-owner | Open |
 | R-037 | 绑定平滑或场景运动依赖 RAF delta，seek/刷新/录制产生不同画面 | High | High | 同一绝对时间状态 hash 不同、seek 后粒子跳变、录制与预览不一致 | ADR-0016 绝对时间、seed 与可重放 smoothing；逐帧 scene-state golden 覆盖从头播放/直接 seek/刷新/录制 | 确定性未通过时阻断 V3/V4/V5，不以视觉近似豁免 | project-owner | Open |
@@ -64,4 +64,4 @@ next_action: "owner 复核 Visualizer V1 canonical 与人工门禁；R-034/R-036
 - 新的高影响风险或剩余风险超过已批准范围时，停止进入下一里程碑并由 `project-owner` 决策。
 - Analyzer R-001–R-021 的历史状态继续由 M3–M11 evidence 支持；R-028–R-030 由 M13、R-031–R-033 由 M14 clean canonical 缓解。Editor R-022–R-027 与 E7 不被 Visualizer 草案改写。
 - `project-owner` 于 2026-09-02 批准 Visualizer V0 架构、R-034–R-041 与 ADR-0014–0017，并开放 V1–V6 execution planning。R-034–R-041 仍均为 `Open`；只有后续里程碑的可复现证据和 owner 审批才能缓解，架构批准本身不等于风险已缓解。
-- Visualizer V1 clean canonical `V1-2026-09-02T07-03-26-973Z-fd44c892` 在 commit `fd44c8921a534c22b2362ccffff7ec9e46f3ff02` 上 21/21 通过，为 R-034 的 route token/pause-at-end、R-036 的 strict project/single draft、R-038 的单中性 Canvas 与 lifecycle 提供部分自动化证据。原生文件人工门禁、V2+ runtime 和 owner 批准尚未完成，因此三项风险继续为 `Open`。
+- Visualizer V1 clean canonical `V1-2026-09-02T07-03-26-973Z-fd44c892` 在 commit `fd44c8921a534c22b2362ccffff7ec9e46f3ff02` 上 21/21 通过，并于 2026-09-02 获 owner 人工批准；R-034 据此改为 `Mitigated`。R-036 仍需 V2 Editor snapshot 证据，R-038 仍需 V3/V4 真实 renderer 与 V6 生命周期证据。
