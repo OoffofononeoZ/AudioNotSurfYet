@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/context/index.md"
   - "docs/delivery/test-strategy.md"
   - "docs/quality/eval-plan.md"
-next_action: "Visualizer V0 架构已批准；只创建并评审 V1–V6 delivery planning，不推送远端"
+next_action: "评审 Visualizer V1–V6 delivery planning；批准前不开始 V1，不推送远端"
 ---
 
 # Working Agreements

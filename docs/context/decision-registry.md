@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/product/scope.md"
   - "docs/architecture/system-design.md"
   - "docs/delivery/execution-plan.md"
-next_action: "创建并评审 Visualizer V1–V6 delivery planning；R-034–R-041 保持 Open，PROD-015 仍开放"
+next_action: "评审 Visualizer V1–V6 delivery planning；R-034–R-041 保持 Open，PROD-015 仍开放"
 ---
 
 # Decision Registry
@@ -68,6 +68,7 @@ next_action: "创建并评审 Visualizer V1–V6 delivery planning；R-034–R-0
 | DEC-035 | 2026-08-31 | 实施 M13：21 卡固定顺序、默认全收起、最多四项 FIFO、V1 adapter 与最新 generation/revision；M14 拖动只登记，本轮仅本地提交 | project-owner | approved | [ADR-0012](../architecture/adrs/0012-analyzer-all-cards-fifo-active-analysis.md) | M13 行为、M14 边界、canonical 或 Git 交付授权改变 |
 | DEC-036 | 2026-09-01 | 实施 M14：21 卡前后插入、全局 featureOrder、pointer/touch/click/keyboard、独立 live、V1 optional field；排序与 FIFO/Worker 隔离，只本地提交 | project-owner | approved | [ADR-0013](../architecture/adrs/0013-analyzer-accessible-card-reordering.md) | 顺序范围、输入语义、schema、canonical 或 Git 授权改变 |
 | DEC-037 | 2026-09-02 | 批准 Visualizer V0：当前本地歌曲、单场景、固定 16:9、最多四个唯一 Analyzer 特征、两个内置模板，先实时预览/JSON 后实时 WebM；开放 system design | project-owner | approved | [Scope](../product/scope.md) | 场景数量、特征上限、数据来源、输出格式、录制路线或产品边界改变 |
+| DEC-038 | 2026-09-02 | Visualizer delivery 草案固定新工程默认 Orthogonal Lines/720p30；1280+ 常驻三栏，1024–1279 中央预览加互斥抽屉；V1–V6 逐里程碑 canonical 与 owner 审批 | project-owner | in-review | [Visualizer execution plan](../delivery/visualizer/execution-plan.md) | 默认模板/output、断点布局、切片、证据节奏或逐里程碑门禁变化 |
 
 ## Approval Evidence
 
