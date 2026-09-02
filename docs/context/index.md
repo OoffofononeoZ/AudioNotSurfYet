@@ -21,7 +21,7 @@ AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端。Editor E1–
 - Product intent：Analyzer/Editor 历史范围与 Visualizer V0 均已批准；PROD-014V 已关闭，PROD-022 保留为非阻断未来问题。
 - System design：Analyzer/Editor 历史设计仍是已批准/实现基线；Visualizer system design、接口、风险和 ADR-0014–0017 已获批准。
 - Execution planning：M1–M14、Editor E0-D/E1–E7、Visualizer V0-D/V1–V3 均为 `Complete`；Visualizer V4 为 `In Progress`，V5–V6 为 `Planned`。
-- Quality and evals：M3–M14、Editor E1–E7 与 Visualizer V1–V3 evidence 已批准；V4 quality contract 为下一项交付输入。
+- Quality and evals：M3–M14、Editor E1–E7 与 Visualizer V1–V3 evidence 已批准；V4 quality contract 已按 DEC-041 获批准并开放实现。
 - Implementation：Editor E7、Analyzer M14、Visualizer V1–V3 已实现并关闭；V4 Cube Swarm 正在实施，V5 录制和 V6 加固仍未实现。
 - Readiness、release、retrospective：Analyzer M14 为 `Ready with waivers`；PROD-015 仍阻断上线，Editor readiness 独立。
 
@@ -67,6 +67,9 @@ AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端。Editor E1–
 | [Visualizer V3 eval plan](../quality/visualizer/v3-eval-plan.md) | AC-V301–AC-V305 的 Orthogonal Lines、单 RendererHost、确定性余辉与错误隔离契约 | project-owner / approved | V3 映射、余辉、host、阈值或证据能力变化 |
 | [Visualizer V3 golden](../quality/visualizer/v3-golden-examples.md) | 横竖映射、point/range、decay、seek/hash、DPR、切换与重试规范样例 | project-owner / approved | V3 fixture、scene state、checkpoint 或视觉映射变化 |
 | [Visualizer V3 failure taxonomy](../quality/visualizer/v3-failure-taxonomy.md) | mapping、trail、determinism、host、switch、scene、responsive 与 performance 分类 | project-owner / approved | V3 失败域或严重度响应变化 |
+| [Visualizer V4 eval plan](../quality/visualizer/v4-eval-plan.md) | AC-V401–AC-V406 的核心环、默认两项分析、确定性积分、资源与 context recovery 契约 | project-owner / approved | V4 映射、积分、context、阈值或证据能力变化 |
+| [Visualizer V4 golden](../quality/visualizer/v4-golden-examples.md) | 64-band 核心、seed 外围、三卫星、默认绑定、hash、context 与响应式规范样例 | project-owner / approved | V4 fixture、state、checkpoint、几何或默认绑定变化 |
+| [Visualizer V4 failure taxonomy](../quality/visualizer/v4-failure-taxonomy.md) | default、core、rise、orbit、determinism、resource、context 与 performance 分类 | project-owner / approved | V4 失败域或严重度响应变化 |
 | [Visualizer evidence index](../quality/visualizer/evidence-index.md) | V1–V6 canonical 身份、hash、环境和 reviewer 记录 | project-owner / approved | 新 Visualizer run、artifact 或审批状态变化 |
 | [eval-plan.md](../quality/eval-plan.md) | M3–M14 评估、FIFO/order/geometry/lifecycle 门禁与 canonical 规则 | project-owner / approved | 验收、测试覆盖或风险变化 |
 | [golden-examples.md](../quality/golden-examples.md) | 成功、失败、边界和异常黄金样例 | project-owner / approved | fixture、Meyda、参数或用户任务变化 |

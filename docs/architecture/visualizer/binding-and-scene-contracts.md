@@ -103,6 +103,11 @@ interface SceneTemplateDescriptor {
   create(host: VisualizerRendererHost, seed: number): VisualizerScene
 }
 
+interface SceneParameterDescriptor {
+  // Omitted means the existing constant defaultValue binding.
+  defaultBinding?: Omit<VisualizerParameterBindingV1, 'parameterId'>
+}
+
 interface VisualizerScene {
   render(input: {
     timeSeconds: number
@@ -141,6 +146,18 @@ interface VisualizerScene {
 - cube count、colors、base size、camera distance、background 是 constant 参数。
 - 默认分析集合只有 Amplitude Spectrum 与 Energy，为用户保留两个 feature 名额。
 
+DEC-041 将 V4 首版视觉细化为“核心环群”，其中 `B = baseSize`：
+
+- 一个共享 `BoxGeometry`、两个 `MeshStandardMaterial` 和三个 `InstancedMesh` 分别绘制 64 个中心频谱方块、`cubeCount` 个外围方块和三颗卫星；固定环境光/方向光，不加载 texture 或外部资产。
+- 任意长度的 `centerSpectrum` 等分为 64 个连续区间，每段取有限非负最大值；空段为 0，规范值为 `clamp(log1p(value) / log1p(128), 0, 1)`。中心环半径为 `0.85B`，径向长度为 `0.12B + 0.68B * amplitude`，横截面为 `0.08B`，整体视觉缩放为 `sqrt(clamp(coreScale,0,8))`。
+- seed 为每个外围方块固定左右区域、深度、初始高度、`0.08B…0.20B` 尺寸和朝向；`cubeCount` 只改变外围实例数量。高度使用 `-3B + mod(seedOffset + B * integratedRise, 6B)`。
+- 三颗卫星的轨道半径为 `1.8B`、`2.35B`、`2.9B`，轨道平面倾角为 `-25°`、`20°`、`55°`；seed 决定初相位，`orbitSpeed` 单位为 rad/s。
+- 相机使用 45° perspective FOV，位置为 `(0,0.8B,cameraDistance)` 并看向原点；resize 只更新 aspect/projection。背景、核心/卫星颜色与外围颜色分别读取批准的 constant 参数。
+- rise/orbit 均按固定 60Hz 从歌曲 0 秒积分 resolved speed，每秒建立 checkpoint 并按 binding revision 隔离；中心频谱和 coreScale 使用当前 resolved value。相同 seed、工程、数据、binding revision 与绝对时间必须产生相同状态，禁止 RAF delta。
+- renderer-neutral hash 以 `1e-6` 量化布局、频谱、积分相位、颜色和相机状态后稳定生成。binding loading/error 或非有限值按 descriptor 默认值降级；错误仍保留在 inspector，不污染其他参数。
+
+Cube 默认 binding 由 descriptor 声明：`centerSpectrum` 使用 `amplitudeSpectrum/default/full`；`riseSpeed` 使用 `energy/default/scalar`，transform 为输入 `[0,25]`、输出 `[0.25,3]`、clamp 开启且无 smoothing；其余参数使用现有 constant default。`SceneRegistry.createDefaultBindings()` 读取该声明，首次切换到 Cube 后 active analysis set 必须恰为两项；strict JSON 导入与草稿恢复保留工程原绑定，不应用默认值覆盖。
+
 V3 切换到尚未实现的 Cube Swarm 时必须 dispose Orthogonal Lines 的 geometry/material，但保留同一个 host、renderer 和 Canvas，并显示明确的 V4 中性预览；该状态不是 renderer error，也不能被表述为 Cube Swarm 已完成。
 
 ## Renderer Host and Lifecycle
@@ -149,7 +166,7 @@ V3 切换到尚未实现的 Cube Swarm 时必须 dispose Orthogonal Lines 的 ge
 - 播放/录制时 host 用 PlaybackSnapshot 的 AudioContext 基准时间渲染；暂停、seek、参数变更和 resize 只触发一次 request-render。
 - template switch 先停止旧 scene 更新、dispose geometry/material/texture/scene，再在同一 host 创建新 scene。DOM inspector 与 transport 不由 scene 管理。
 - seed 决定初始布局；粒子位置、rise 和 orbit 使用绝对时间公式或确定性积分/checkpoint，不依赖 frame count。
-- `webglcontextlost` 阻止默认销毁、暂停绘制并保留工程/播放；restore 时重建 renderer/scene 并从当前绝对时间绘制。录制期间 context loss 进入 error 并丢弃未完成 Blob。
+- `webglcontextlost` 阻止默认销毁、取消 pending visual RAF、进入带文字的 `recovering` 状态并保留工程/播放；不暂停或 seek transport。Three.js 先在同一 `WebGLRenderer` 对象内恢复 GL 内部状态，host 的 `webglcontextrestored` 处理随后 dispose 旧 scene、重建 scene GPU 资源并从当前绝对时间绘制。录制期间 context loss 进入 error 并丢弃未完成 Blob。
 - 所有图片/纹理必须为本地、同源或 origin-clean；否则在加载时拒绝，不能等到 `captureStream()` 才失败。
 
 ## Error Isolation
@@ -160,4 +177,4 @@ V3 切换到尚未实现的 Cube Swarm 时必须 dispose Orthogonal Lines 的 ge
 
 ## Approval State
 
-`project-owner` 于 2026-09-02 批准 Visualizer V0 system design、接口契约、R-034–R-041 与 ADR-0014–0017。本契约据此为 `approved`。V3 implementation commit 与 30/30 clean canonical 已于 2026-09-03 获 owner 批准，V3 关闭并开放 V4；Cube Swarm 在 V4 实现提交形成前仍是中性预览。
+`project-owner` 于 2026-09-02 批准 Visualizer V0 system design、接口契约、R-034–R-041 与 ADR-0014–0017。本契约据此为 `approved`。V3 implementation commit 与 30/30 clean canonical 已于 2026-09-03 获 owner 批准，V3 关闭并开放 V4；同日 owner 选择并批准 DEC-041“核心环群”细化及 V4 quality contract，允许直接实施。Cube Swarm 在 V4 实现提交形成前仍是中性预览。

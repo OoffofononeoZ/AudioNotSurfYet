@@ -71,6 +71,7 @@ next_action: "Visualizer V3 已获 owner 批准并关闭；V4 Cube Swarm 为 In 
 | DEC-038 | 2026-09-02 | Visualizer delivery 固定新工程默认 Orthogonal Lines/720p30；1280+ 常驻三栏，1024–1279 中央预览加互斥抽屉；V1–V6 逐里程碑 canonical 与 owner 审批 | project-owner | approved | [Visualizer execution plan](../delivery/visualizer/execution-plan.md) | 默认模板/output、断点布局、切片、证据节奏或逐里程碑门禁变化 |
 | DEC-039 | 2026-09-02 | V3 Orthogonal Lines 使用中心正交结构；intensity 同时控制中心向两端的长度与透明度；decay 为不改写 V2 resolved value 的确定性时间余辉；背景固定 `#020403`，颜色由现有参数控制 | project-owner | approved | [Binding and scene contracts](../architecture/visualizer/binding-and-scene-contracts.md) | 线条构图、intensity 映射、decay 算法/单位、背景或参数所有权改变 |
 | DEC-040 | 2026-09-03 | 批准 V3 30/30 canonical evidence、Orthogonal Lines、确定性余辉与单 RendererHost；V3 改为 Complete、R-037/R-038 改为 Mitigated并开放 V4 | project-owner | approved | [Visualizer evidence](../quality/visualizer/evidence-index.md) | V3 canonical identity、owner review 结论或 V4 开放门禁改变 |
+| DEC-041 | 2026-09-03 | V4 Cube Swarm 使用 64 方块核心频谱环、seed 外围上升方块和三颗分层轨道卫星；rise/orbit 使用 60Hz checkpoint 积分，同一 RendererHost 处理 context recovery | project-owner | approved | [Binding and scene contracts](../architecture/visualizer/binding-and-scene-contracts.md) | Cube 构图、频谱规范、几何常量、默认绑定、积分或 context 所有权改变 |
 
 ## Approval Evidence
 
@@ -83,6 +84,8 @@ next_action: "Visualizer V3 已获 owner 批准并关闭；V4 Cube Swarm 为 In 
 同一计划固定 DEC-039 的中心正交线条、intensity 长度/透明度双映射、确定性时间余辉与 `#020403` 背景，并授权先提交 V3 quality contract 再实施。该决定细化 ADR-0016，不改变 JSON V1、V2 resolved value、四特征上限或 V4–V6 范围。
 
 2026-09-03，`project-owner` 明确回复：“我批准 Visualizer V3 canonical evidence、Orthogonal Lines 场景、确定性余辉与单 RendererHost 结果；同意将 V3 标记为 Complete 并开放 V4。”DEC-040 据此生效；V3 canonical identity 保持不变且无需重跑，R-037/R-038 改为 `Mitigated`，V4 改为 `In Progress`。该批准不构成 Cube Swarm、WebM、V6 readiness 或生产上线通过。
+
+同轮 V4 计划澄清中，`project-owner` 选择“核心环群（推荐）”，并以“PLEASE IMPLEMENT THIS PLAN”批准完整 V4 实施计划。DEC-041 据此固定 64 方块频谱环、seed 外围上升方块、三颗分层轨道卫星、默认 Spectrum+Energy 两项分析、60Hz rise/orbit checkpoint 与同 RendererHost context recovery；V4 quality contract 可直接标记为 `approved` 并实施。该决定不修改 JSON V1，不构成 V4 canonical/人工门禁、V5 WebM 或生产上线批准。
 
 同日，`project-owner` 明确要求实施 Q0 质量设计计划，批准了 Q0 前置、四级严重度和 readiness 后置的阶段安排；同时要求三份质量文档先保持 `in-review`，经单独审阅后才生效。因此 DEC-010 的时序决定已批准，但 Q0 内容尚未批准。
 

@@ -117,9 +117,11 @@ V5/V6 另拆 `:chrome`、`:edge` 与聚合命令。每个 clean canonical 必须
 
 V3 实际命令固定为 `fixtures:v3:golden`、`test:v3:unit`、`test:v3:integration`、`test:e2e:v3`、`eval:v3:provisional` 与 clean `eval:v3`。V3 canonical 恰为 V2 26 步基线加四个 V3 专项，共 30 步。
 
+V4 实际命令固定为 `fixtures:v4:golden`、`test:v4:unit`、`test:v4:integration`、`test:e2e:v4`、`eval:v4:provisional` 与 clean `eval:v4`。V4 canonical 恰为 V3 30 步前向回归加四个 V4 专项，共 34 步；V4 Chrome 专项包含 `WEBGL_lose_context` 注入，真实 Edge 继续由既有相邻回归覆盖并在 V6 执行完整场景矩阵。
+
 ## 9. Current Gate State
 
 - V1–V3 canonical 与 owner evidence 均已批准并关闭；V4 为 `In Progress`，V5–V6 保持 `Planned`。
-- V3 quality/eval、golden、failure taxonomy、30 步 canonical 与人工门禁均已获批准；V4 继续把这 30 步作为回归基线。
+- V3 quality/eval、golden、failure taxonomy、30 步 canonical 与人工门禁均已获批准；V4 quality/eval、golden 与 failure taxonomy 已按 DEC-041 获批准，实施继续把 V3 30 步作为回归基线。
 - 当前没有正式 CI，所有结果限定为本地登记环境。
 - `/comingsoon`、`threeDTable`、TestLands 或 V4 Cube 中性预览不是 V3 implementation evidence。

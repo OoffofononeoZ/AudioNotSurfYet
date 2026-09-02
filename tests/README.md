@@ -96,6 +96,10 @@ M3–M13 不建设 CI。下列命令当前均为本地门禁；正式证据要�
 | `npm run test:v3:unit` | Orthogonal Lines 参数映射、方向隔离、确定性余辉、revision 和 frame hash |
 | `npm run test:v3:integration` | 单 RendererHost/renderer/RAF、共享 resolved map、scene dispose/switch 与错误重试 |
 | `npm run test:e2e:v3` | 真实 Chrome 的画面/设置反馈、seek/刷新 hash、DPR、V4 中性切换、错误恢复和 20 次资源循环 |
+| `npm run fixtures:v4:golden` | Visualizer V4 fixture、64-band 核心环、seed 布局与 60Hz rise/orbit checkpoint golden |
+| `npm run test:v4:unit` | Cube Swarm 参数隔离、频谱规范、确定性积分、revision 与 frame hash |
+| `npm run test:v4:integration` | 默认两项分析、单 host/resource dispose、context loss/restore 与错误隔离 |
+| `npm run test:e2e:v4` | 真实 Chrome 的 Cube 响应、seek/刷新、context recovery、DPR/三视口、键盘与 20 次资源循环 |
 | `npm run test:e2e:v1:chrome` | Chrome Header/route、MusicBar、pause-at-end、三栏/抽屉、单 16:9 Canvas、transport 和资源循环 |
 | `npm run test:e2e:v1:edge` | 使用真实 Edge 执行同一 V1 route/lease/layout/resource 专项套件 |
 | `npm run test:e2e:v1` | 顺序执行真实 Chrome 与 Edge 的 V1 专项套件 |
@@ -143,6 +147,8 @@ M3–M13 不建设 CI。下列命令当前均为本地门禁；正式证据要�
 | `npm run eval:v2` | 只允许在干净 implementation commit 上执行 26 步 V2 canonical suite |
 | `npm run eval:v3:provisional` | 在 dirty worktree 执行 V2 26 步基线加四个 V3 专项，只作为实现反馈 |
 | `npm run eval:v3` | 只允许在干净 implementation commit 上执行固定 30 步 V3 canonical suite |
+| `npm run eval:v4:provisional` | 在 dirty worktree 执行 V3 30 步基线加四个 V4 专项，只作为实现反馈 |
+| `npm run eval:v4` | 只允许在干净 implementation commit 上执行固定 34 步 V4 canonical suite |
 
 ## 目录职责
 

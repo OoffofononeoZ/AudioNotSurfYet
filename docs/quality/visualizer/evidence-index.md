@@ -12,8 +12,11 @@ upstream_docs:
   - "docs/quality/visualizer/v3-eval-plan.md"
   - "docs/quality/visualizer/v3-golden-examples.md"
   - "docs/quality/visualizer/v3-failure-taxonomy.md"
+  - "docs/quality/visualizer/v4-eval-plan.md"
+  - "docs/quality/visualizer/v4-golden-examples.md"
+  - "docs/quality/visualizer/v4-failure-taxonomy.md"
   - "docs/delivery/visualizer/milestone-plan.md"
-next_action: "V3 evidence 已获 owner 批准并关闭；V4 为 In Progress，等待 V4 quality contract 与实现证据"
+next_action: "V3 evidence 已获 owner 批准并关闭；按已批准 V4 quality contract 实施并生成 34 步证据"
 ---
 
 # Visualizer Evidence Index
