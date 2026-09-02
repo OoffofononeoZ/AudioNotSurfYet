@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: approved
 owner: "project-owner"
 last_reviewed: 2026-09-02
 upstream_docs:
@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/product/success-metrics.md"
   - "docs/architecture/system-design.md"
   - "docs/architecture/visualizer/binding-and-scene-contracts.md"
-next_action: "复核 pre-Gain 音频、能力检测、严格预设、录制状态机与失败边界；批准前不实现 MediaRecorder"
+next_action: "在 V5/V6 delivery planning 中映射录制状态机、严格预设、能力检测和 WebM 证据；规划批准前不实现"
 ---
 
 # Visualizer Real-time WebM Recording Contract
@@ -101,4 +101,4 @@ V5/V6 必须用 ffprobe/FFmpeg 和 Chrome/Edge 回放验证容器、codec、音�
 
 ## Approval State
 
-本录制契约为架构草案。架构批准只允许后续制定 V5 acceptance/test/eval；不代表当前浏览器、机器或 `/comingsoon` 已满足录制能力。
+`project-owner` 于 2026-09-02 批准 Visualizer V0 system design、接口契约、R-034–R-041 与 ADR-0014–0017。本录制契约据此为 `approved`，但只允许制定 V5/V6 delivery 与后续 eval；不代表当前浏览器、机器或 `/comingsoon` 已满足录制能力。

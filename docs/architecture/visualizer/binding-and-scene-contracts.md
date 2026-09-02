@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: approved
 owner: "project-owner"
 last_reviewed: 2026-09-02
 upstream_docs:
@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/product/success-metrics.md"
   - "docs/architecture/system-design.md"
   - "docs/architecture/visualizer/project-format-v1.md"
-next_action: "复核绑定投影、绝对时间确定性、四特征 planner 与两个场景 registry；批准前不实现 renderer"
+next_action: "在 V2–V4 delivery planning 中映射绑定、四特征、确定性与双场景验收；规划批准前不实现"
 ---
 
 # Visualizer Binding and Scene Contracts
@@ -145,4 +145,4 @@ interface VisualizerScene {
 
 ## Approval State
 
-本契约尚待 Visualizer architecture 审批。批准只开放 delivery/quality planning，不证明两个场景已实现、确定性指标已达到或 WebGL 录制可用。
+`project-owner` 于 2026-09-02 批准 Visualizer V0 system design、接口契约、R-034–R-041 与 ADR-0014–0017。本契约据此为 `approved`，但只开放 delivery planning；两个场景、确定性指标和 WebGL 生命周期仍没有实现或质量证据。

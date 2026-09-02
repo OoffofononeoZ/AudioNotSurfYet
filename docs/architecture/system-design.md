@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: approved
 owner: "project-owner"
 last_reviewed: 2026-09-02
 upstream_docs:
@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/product/scope.md"
   - "docs/product/success-metrics.md"
   - "docs/product/open-questions.md"
-next_action: "复核 Visualizer V0 runtime、工程/绑定、确定性场景与 WebM 录制设计；批准前不进入 delivery"
+next_action: "创建并评审 Visualizer V1–V6 execution、acceptance、test 与 milestone planning；批准前不开始 V1"
 ---
 
 # System Design
@@ -18,7 +18,7 @@ AudioNotSurfYet 采用一个实时 `AudioEngine`、一个 MainLayout-owned `Audi
 
 已批准的 Editor 扩展把 E0 产品意图接入同一运行时：Editor 使用 route-scoped playback/analysis lease、版本化本地 JSON、独立单草稿 IndexedDB、tempo 派生网格、点/范围事件和单特征半透明叠加层。它不创建第二个 AudioContext、播放时钟、Worker 或网络数据路径。
 
-Visualizer V0 架构草案在该历史基线上增加第三个 route consumer：使用 `pause-at-end` 播放 lease、0–4 项去重分析 lease、版本化单草稿工程、两个确定性场景和单一 WebGL renderer，并从既有 AudioEngine 的 pre-Gain 音频分支实时录制 WebM。该段设计仍为 `in-review`，不得被表述为当前 `/comingsoon` 已实现。
+已批准的 Visualizer V0 架构在该历史基线上增加第三个 route consumer：使用 `pause-at-end` 播放 lease、0–4 项去重分析 lease、版本化单草稿工程、两个确定性场景和单一 WebGL renderer，并从既有 AudioEngine 的 pre-Gain 音频分支实时录制 WebM。该批准只开放 delivery planning，不得被表述为当前 `/comingsoon` 已实现。
 
 ## 2. Goals and Non-Goals
 
@@ -401,7 +401,7 @@ M6 只在 `import.meta.env.DEV` 安装无 UI bridge，提供活动特征、cance
 - 全视口 Canvas 只在底层标记时间列的屏幕横向范围内绘制。纵向文档滚动不改变图形窗口坐标；窄屏时间列横向滚动只更新裁剪和横向几何，任意共享时间锚点误差仍不得超过 1 CSS px。
 - `topRatio`/`heightRatio` 改为 viewport-relative，三个手柄仍按 1%/Shift 5% 调整。visibility 持久化失败只发布 `not-persisted`，不得损坏工程、草稿、播放或标记。
 
-## 20. Visualizer V0 Target Architecture（in-review）
+## 20. Visualizer V0 Target Architecture（approved）
 
 ### Route and runtime ownership
 
@@ -438,4 +438,4 @@ M6 只在 `import.meta.env.DEV` 安装无 UI bridge，提供活动特征、cance
 - 旧 generation、旧 route token、旧 template 或旧 binding result 一律不得更新当前项目或场景。任何工程/草稿/Editor 快照导入失败都保留原内存和 durable draft。
 - 拒绝第二 AudioEngine/Worker、实时监听 Editor draft、可执行模板、多草稿工程库、依赖 RAF delta 的运动、静默录制预设降级。主要权衡见 [ADR-0014](adrs/0014-visualizer-runtime-leases.md) 至 [ADR-0017](adrs/0017-realtime-webm-recording.md)。
 
-Visualizer 架构尚待 `project-owner` 审批。批准后只开放 V0-D execution/acceptance/test/eval planning，不直接开放 V1 实现。
+`project-owner` 于 2026-09-02 明确回复：“我批准 Visualizer V0 系统设计、接口契约、R-034–R-041 与 ADR-0014–0017；同意进入 Visualizer V1–V6 execution planning。”本设计据此获批并只开放 V0-D delivery planning；当前 `/comingsoon`、V1 实现、quality evidence 与 release-readiness 均不因本批准自动完成。

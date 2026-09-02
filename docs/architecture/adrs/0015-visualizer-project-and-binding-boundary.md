@@ -1,12 +1,12 @@
 ---
-status: in-review
+status: approved
 owner: "project-owner"
 last_reviewed: 2026-09-02
 upstream_docs:
   - "docs/product/scope.md"
   - "docs/architecture/visualizer/project-format-v1.md"
   - "docs/architecture/visualizer/binding-and-scene-contracts.md"
-next_action: "由 project-owner 审批 strict JSON、同歌 Editor 快照、单草稿与非可执行绑定边界"
+next_action: "在 V1/V2 delivery planning 中固定 strict JSON、快照、单草稿与绑定验收；规划批准前不实现"
 ---
 
 # ADR-0015: Visualizer Project and Binding Boundary
@@ -37,4 +37,4 @@ Visualizer 必须交换可复现配置，但 Analyzer 数据量大，Editor 草�
 
 ## Approval
 
-本 ADR 为 `in-review`，与 [Visualizer Project Format V1](../visualizer/project-format-v1.md) 一并等待 owner 审批。
+`project-owner` 于 2026-09-02 批准 Visualizer V0 system design、接口契约、R-034–R-041 与 ADR-0014–0017。本 ADR 与 [Visualizer Project Format V1](../visualizer/project-format-v1.md) 据此为 `approved`，但不构成 V1/V2 实现授权。
