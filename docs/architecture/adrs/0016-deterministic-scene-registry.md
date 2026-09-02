@@ -6,7 +6,7 @@ upstream_docs:
   - "docs/product/scope.md"
   - "docs/product/success-metrics.md"
   - "docs/architecture/visualizer/binding-and-scene-contracts.md"
-next_action: "以 V4 34 步 canonical 验证 Cube 60Hz rise/orbit、单 host context recovery 与资源对称性"
+next_action: "V4 34/34 clean canonical 已验证 Cube 确定性、同 host context recovery 与资源对称性；等待 owner 人工验收"
 ---
 
 # ADR-0016: Deterministic Scene Registry
@@ -37,4 +37,4 @@ next_action: "以 V4 34 步 canonical 验证 Cube 60Hz rise/orbit、单 host con
 
 ## Approval
 
-`project-owner` 于 2026-09-02 批准 Visualizer V0 system design、接口契约、R-034–R-041 与 ADR-0014–0017。本 ADR 据此为 `approved`；两个模板仍须分别通过 V3/V4 实现、canonical 与 owner 审批。
+`project-owner` 于 2026-09-02 批准 Visualizer V0 system design、接口契约、R-034–R-041 与 ADR-0014–0017。本 ADR 据此为 `approved`。V3 已通过实现、canonical 与 owner 审批；V4 clean canonical 34/34 已通过并登记为 `in-review`，仍待 owner 人工审批。

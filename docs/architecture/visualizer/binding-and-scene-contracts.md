@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/product/success-metrics.md"
   - "docs/architecture/system-design.md"
   - "docs/architecture/visualizer/project-format-v1.md"
-next_action: "V3 已获批准并关闭；按 DEC-041 细化并实施 V4 Cube Swarm 与 context recovery"
+next_action: "V4 Cube Swarm 34/34 clean canonical 已登记为 in-review；等待 owner 人工验收"
 ---
 
 # Visualizer Binding and Scene Contracts
@@ -158,7 +158,7 @@ DEC-041 将 V4 首版视觉细化为“核心环群”，其中 `B = baseSize`�
 
 Cube 默认 binding 由 descriptor 声明：`centerSpectrum` 使用 `amplitudeSpectrum/default/full`；`riseSpeed` 使用 `energy/default/scalar`，transform 为输入 `[0,25]`、输出 `[0.25,3]`、clamp 开启且无 smoothing；其余参数使用现有 constant default。`SceneRegistry.createDefaultBindings()` 读取该声明，首次切换到 Cube 后 active analysis set 必须恰为两项；strict JSON 导入与草稿恢复保留工程原绑定，不应用默认值覆盖。
 
-V3 canonical 阶段曾以明确的 V4 中性预览验证 scene disposal 与单 host/renderer/Canvas；该历史 artifact 不改写。V4 implementation candidate 已用 DEC-041 的真实 Cube Swarm 替换中性预览，V3 前向回归现在验证真实 Cube 切换仍保留同一 host/renderer/Canvas。
+V3 canonical 阶段曾以明确的 V4 中性预览验证 scene disposal 与单 host/renderer/Canvas；该历史 artifact 不改写。V4 implementation candidate 已用 DEC-041 的真实 Cube Swarm 替换中性预览，V3 前向回归现在验证真实 Cube 切换仍保留同一 host/renderer/Canvas；V4 34/34 clean canonical 已登记为 `in-review`。
 
 ## Renderer Host and Lifecycle
 
@@ -177,4 +177,4 @@ V3 canonical 阶段曾以明确的 V4 中性预览验证 scene disposal 与单 h
 
 ## Approval State
 
-`project-owner` 于 2026-09-02 批准 Visualizer V0 system design、接口契约、R-034–R-041 与 ADR-0014–0017。本契约据此为 `approved`。V3 implementation commit 与 30/30 clean canonical 已于 2026-09-03 获 owner 批准，V3 关闭并开放 V4；同日 owner 选择并批准 DEC-041“核心环群”细化及 V4 quality contract，允许直接实施。Cube Swarm 在 V4 实现提交形成前仍是中性预览。
+`project-owner` 于 2026-09-02 批准 Visualizer V0 system design、接口契约、R-034–R-041 与 ADR-0014–0017。本契约据此为 `approved`。V3 implementation commit 与 30/30 clean canonical 已于 2026-09-03 获 owner 批准，V3 关闭并开放 V4；同日 owner 选择并批准 DEC-041“核心环群”细化及 V4 quality contract，允许直接实施。V4 Cube Swarm candidate 已实现并通过 34/34 clean canonical，当前等待 owner 人工验收。

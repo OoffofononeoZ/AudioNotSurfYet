@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/product/scope.md"
   - "docs/product/success-metrics.md"
   - "docs/product/open-questions.md"
-next_action: "按 DEC-041 验证 V4 Cube Swarm implementation candidate，并在 clean commit 运行 34 步 canonical"
+next_action: "V4 Cube Swarm 34/34 clean canonical 已登记为 in-review；等待 owner 人工验收"
 ---
 
 # System Design

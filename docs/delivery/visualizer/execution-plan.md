@@ -11,7 +11,7 @@ upstream_docs:
   - "docs/architecture/visualizer/project-format-v1.md"
   - "docs/architecture/visualizer/binding-and-scene-contracts.md"
   - "docs/architecture/visualizer/recording-contract.md"
-next_action: "V3 已获批准并关闭；按 DEC-041 实施 V4 Cube Swarm 与 context recovery，V5–V6 保持 Planned"
+next_action: "V4 34/34 clean canonical 已登记为 in-review；等待 owner 人工验收，V5–V6 保持 Planned"
 ---
 
 # Visualizer V1–V6 Execution Plan
@@ -20,7 +20,7 @@ next_action: "V3 已获批准并关闭；按 DEC-041 实施 V4 Cube Swarm 与 co
 
 把已批准的 Visualizer V0 架构按六个可独立验证的纵向里程碑交付：先建立当前歌曲工作台和本地工程，再接入 Analyzer/Editor 绑定，随后分别交付两个内置场景、实时 WebM 录制和双浏览器最终加固。
 
-Visualizer V1 已实现 `/visualizer/:trackId?` 工作台基础、完成 21/21 clean canonical 并获 owner 批准。V2 数据绑定与 26/26 clean canonical 已获 owner 批准并关闭；V3 Orthogonal Lines 与 30/30 clean canonical 已于 2026-09-03 获 owner 批准并关闭。V4 Cube Swarm 为 `In Progress`，V5–V6 保持 `Planned`；在 V4 implementation commit 形成前不得把中性预览描述为真实 Cube Swarm 完成。
+Visualizer V1 已实现 `/visualizer/:trackId?` 工作台基础、完成 21/21 clean canonical 并获 owner 批准。V2 数据绑定与 26/26 clean canonical 已获 owner 批准并关闭；V3 Orthogonal Lines 与 30/30 clean canonical 已于 2026-09-03 获 owner 批准并关闭。V4 Cube Swarm implementation candidate 已完成，clean canonical 34/34 已登记为 `in-review`；V4 仍为 `In Progress`，V5–V6 保持 `Planned`。
 
 ## 2. Delivery Principles
 
@@ -121,6 +121,8 @@ Exit gate:
 - 频谱、drum、Energy 和 constant orbit 分别只影响批准参数；默认分析预算为 2。
 - seek/刷新/连续播放状态一致，模板反复切换无第二 Canvas/renderer/RAF 或 geometry/material 累积。
 - Chrome context loss/recovery、renderer fatal error、DPR/resize 和 1024/1280/1920 通过。
+
+Canonical candidate（2026-09-03）：核心实现位于 commit `9581730498a470e3fbd81c97414cb26087714009`；用于 canonical 的实现/测试 commit 为 `5c2d24a3f1f413dba236563b3686237c6b8f2e21`。clean run `V4-2026-09-02T17-47-40-271Z-5c2d24a3` 为 34/34，summary SHA-256 为 `9b2a86e3dcdd4e634317c4234418dc3444da441a3be805a980562768dba5c3b2`。该 evidence 为 `in-review`；未获 owner 人工批准前，不关闭 V4、不缓解 R-039、不开放 V5。
 
 ### V5 — Real-time WebM Export
 

@@ -6,7 +6,7 @@ upstream_docs:
   - "docs/delivery/visualizer/execution-plan.md"
   - "docs/delivery/visualizer/acceptance-criteria.md"
   - "docs/delivery/visualizer/test-strategy.md"
-next_action: "V3 已获批准并关闭；V4 Cube Swarm 为 In Progress"
+next_action: "V4 34/34 clean canonical 已登记为 in-review；等待 owner 人工验收"
 ---
 
 # Visualizer V0-D and V1–V6 Milestone Plan
@@ -38,6 +38,8 @@ next_action: "V3 已获批准并关闭；V4 Cube Swarm 为 In Progress"
 - 当前：V0-P、V0-A、V0-D、V1、V2、V3 均为 `Complete`；V4 为 `In Progress`；V5–V6 保持 `Planned`。
 - V1 run `V1-2026-09-02T07-03-26-973Z-fd44c892` 21/21 通过，并于 2026-09-02 获 owner 批准；canonical identity 不变且无需重跑。
 - V2 run `V2-2026-09-02T08-46-21-778Z-769faafe` 26/26 通过，并于 2026-09-02 获 owner 批准；canonical identity 与 summary SHA-256 保持不变且无需重跑。
+- V3 run `V3-2026-09-02T13-32-42-513Z-89be30eb` 30/30 通过，并于 2026-09-03 获 owner 批准；V3 为 `Complete`。
+- V4 run `V4-2026-09-02T17-47-40-271Z-5c2d24a3` 在 commit `5c2d24a3f1f413dba236563b3686237c6b8f2e21` 上 34/34 通过，summary SHA-256 为 `9b2a86e3dcdd4e634317c4234418dc3444da441a3be805a980562768dba5c3b2`；evidence 为 `in-review`，等待 owner 人工验收。
 - V6 获批后只进入包含 Visualizer 的整体 release-readiness review；PROD-015 仍阻断生产上线。
 
 ## 4. Failure and Slip Rules

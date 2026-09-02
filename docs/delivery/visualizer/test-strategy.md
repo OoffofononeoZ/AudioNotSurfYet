@@ -8,7 +8,7 @@ upstream_docs:
   - "docs/architecture/risk-register.md"
   - "docs/delivery/visualizer/execution-plan.md"
   - "docs/delivery/visualizer/acceptance-criteria.md"
-next_action: "V3 30 步 canonical 已获批准；建立 V4 四专项与 34 步 canonical"
+next_action: "V4 四专项与 34/34 clean canonical 已登记；等待 owner 人工验收"
 ---
 
 # Visualizer V1–V6 Test Strategy
@@ -30,7 +30,7 @@ next_action: "V3 30 步 canonical 已获批准；建立 V4 四专项与 34 步 c
 | --- | --- | --- | --- | --- |
 | V1 | 有效 route、pause-at-end、JSON/draft round-trip、三栏/抽屉 | 错歌、unknown schema、quota/abort、导入失败 | 旧 lease、刷新 paused、1024/1280 breakpoint、异歌取消 | Vitest + real Chrome；Edge route regression |
 | V2 | constant/analysis/editor-event、cache hit、共享 feature | 第五项、错歌 Editor、无效 projection、binding error | 0/1/4、最后引用释放、stale/cancel、point/range 端点 | Vitest + Worker/coordinator + real Chrome |
-| V3 | 横/竖线映射、constant/analysis、point pulse、range gate | 未绑定、坏参数、scene create/render/resize error | 60Hz decay、seek/刷新/暂停、DPR/resize、Cube 中性切换、20 次 lifecycle | Versioned state golden + Vitest + real Chrome |
+| V3 | 横/竖线映射、constant/analysis、point pulse、range gate | 未绑定、坏参数、scene create/render/resize error | 60Hz decay、seek/刷新/暂停、DPR/resize、真实 Cube 前向切换、20 次 lifecycle | Versioned state golden + Vitest + real Chrome |
 | V4 | 频谱核心、drum scale、Energy rise、constant orbit | context loss、restore/renderer fail | seed、DPR/resize、20 次模板切换 | Three.js unit adapter + real Chrome |
 | V5 | 720p30 有声 WebM、save/retry | no MIME、busy、track/recorder/context error | 四 preset、页面 0 音量、save cancel、A/V sync | real Chrome/Edge + ffprobe/FFmpeg |
 | V6 | 三格式完整制作与回放 | 全部风险故障矩阵 | 15 分钟四特征、1024/1280/1920、20 次生命周期 | real Chrome/Edge + owner manual |
@@ -122,6 +122,6 @@ V4 实际命令固定为 `fixtures:v4:golden`、`test:v4:unit`、`test:v4:integr
 ## 9. Current Gate State
 
 - V1–V3 canonical 与 owner evidence 均已批准并关闭；V4 为 `In Progress`，V5–V6 保持 `Planned`。
-- V3 quality/eval、golden、failure taxonomy、30 步 canonical 与人工门禁均已获批准；V4 quality/eval、golden 与 failure taxonomy 已按 DEC-041 获批准，实施继续把 V3 30 步作为回归基线。
+- V3 quality/eval、golden、failure taxonomy、30 步 canonical 与人工门禁均已获批准。V4 quality/eval、golden 与 failure taxonomy 已按 DEC-041 获批准；clean run `V4-2026-09-02T17-47-40-271Z-5c2d24a3` 34/34 通过并登记为 `in-review`，等待 owner 人工验收。
 - 当前没有正式 CI，所有结果限定为本地登记环境。
-- `/comingsoon`、`threeDTable`、TestLands 或 V4 Cube 中性预览不是 V3 implementation evidence。
+- `/comingsoon`、`threeDTable`、TestLands 或 V3 历史 artifact 中的 V4 中性预览不是当前 V4 implementation evidence；真实 Cube 由 V4 专项与前向回归评价。

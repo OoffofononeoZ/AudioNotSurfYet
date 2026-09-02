@@ -4,7 +4,7 @@ owner: "project-owner"
 last_reviewed: 2026-09-03
 upstream_docs:
   - "docs/context/index.md"
-next_action: "V3 已获批准并关闭；实施 V4 Cube Swarm 与 context recovery"
+next_action: "V4 34/34 clean canonical 已登记为 in-review；等待 owner 人工验收"
 ---
 
 # System Map
@@ -13,7 +13,7 @@ next_action: "V3 已获批准并关闭；实施 V4 Cube Swarm 与 context recove
 
 当前系统是 Vue 3 单页应用。MainLayout 创建并提供唯一的 `AudioSessionService`、`AnalysisCoordinator`、`EditorSessionController` 与 `VisualizerSessionController`；服务通过 `AudioEngine` 解码、播放本地文件，并通过三个独立 IndexedDB repository 保存 Analyzer session、Editor 单草稿与 Visualizer 单草稿。Analyzer、Editor 与 Visualizer 已通过互斥 consumer lease 复用同一 coordinator；Visualizer 只把稳定去重后的 0–4 项送入现有 Worker/cache。File、Blob、handle、PCM、Worker 与音频节点均留在 store 外。MusicBar、Editor 与 Visualizer 读取同一播放快照；有效 Editor/Visualizer track 隐藏 MusicBar，通用 tokenized route lease 分别把 ended 策略改为 repeat-one 或 pause-at-end。
 
-Visualizer V1 已实现 `/visualizer/:trackId?`、通用 route playback lease、三栏/抽屉工作台、strict JSON V1、独立 single-draft repository、原生 JSON gateway 和一个 16:9 Canvas。V2 已实现并获批唯一 analysis consumer、constant/analysis/editor-event inspector、FeatureRegistry projection、同歌 Editor snapshot、0–4 planner 与 60Hz 绝对时间 resolver。V3 已由单一 `VisualizerRendererHost` 接管现有 Canvas，并实现 Orthogonal Lines shader、确定性 scene-local decay、共享 resolved map 与可重试错误层；30 步 clean canonical 与人工验收已获 owner 批准。V4 implementation candidate 已用真实 Cube Swarm 替换中性场景，增加默认 Spectrum/Energy、确定性 rise/orbit、context recovery 与通用诊断别名；仍需 clean 34 步 canonical 和 owner 人工验收，pre-Gain recording tap 仍是 V5 目标。
+Visualizer V1 已实现 `/visualizer/:trackId?`、通用 route playback lease、三栏/抽屉工作台、strict JSON V1、独立 single-draft repository、原生 JSON gateway 和一个 16:9 Canvas。V2 已实现并获批唯一 analysis consumer、constant/analysis/editor-event inspector、FeatureRegistry projection、同歌 Editor snapshot、0–4 planner 与 60Hz 绝对时间 resolver。V3 已由单一 `VisualizerRendererHost` 接管现有 Canvas，并实现 Orthogonal Lines shader、确定性 scene-local decay、共享 resolved map 与可重试错误层；30 步 clean canonical 与人工验收已获 owner 批准。V4 implementation candidate 已用真实 Cube Swarm 替换中性场景，增加默认 Spectrum/Energy、确定性 rise/orbit、context recovery 与通用诊断别名；34 步 clean canonical 已登记为 `in-review`，仍需 owner 人工验收，pre-Gain recording tap 仍是 V5 目标。
 
 ## Runtime Flow
 
@@ -44,9 +44,9 @@ showOpenFilePicker → FileSystemFileHandle → File
   ├→ AnalysisConsumerLease(visualizer, deduped 0–4) → AnalysisCoordinator/Worker/cache [V2 current]
   ├→ validated EditorProjectV1 snapshot → BindingResolver [V2 current]
   └→ BindingResolver(60Hz absolute time + checkpoint) [V2 current]
-       → SceneRegistry factory(orthogonal-lines | cube-swarm) [V3 current; Cube remains neutral]
-       → one VisualizerRendererHost + one Canvas/WebGLRenderer/visual RAF [V3 current]
-       → Orthogonal Lines 60Hz scene-local trail [V3 current]
+       → SceneRegistry factory(orthogonal-lines | cube-swarm) [V4 candidate]
+       → one VisualizerRendererHost + one Canvas/WebGLRenderer/visual RAF [V3 approved; V4 retained]
+       → Orthogonal Lines trail | Cube Swarm 60Hz rise/orbit [V4 candidate]
        └→ captureStream + AudioEngine pre-Gain tap → MediaRecorder → WebM Blob
 ```
 
