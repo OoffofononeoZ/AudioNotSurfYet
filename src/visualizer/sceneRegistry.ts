@@ -4,6 +4,9 @@ import type {
     VisualizerParameterBindingV1,
     VisualizerTemplateId,
 } from './types';
+import { createNeutralVisualizerScene } from './neutralScene';
+import { createOrthogonalLinesScene } from './orthogonalLinesScene';
+import type { VisualizerSceneFactory } from './rendererTypes';
 
 export type SceneParameterValueKind = 'number' | 'boolean' | 'color' | 'vector';
 export type SceneBindingSourceKind = 'constant' | 'analysis' | 'editor-event';
@@ -33,6 +36,7 @@ export interface SceneTemplateDescriptor {
     readonly title: string;
     readonly description: string;
     readonly parameters: readonly SceneParameterDescriptor[];
+    readonly create?: VisualizerSceneFactory;
 }
 
 const NUMERIC_ANALYSIS_COMPONENTS: readonly VisualizerAnalysisComponent[] = [
@@ -47,7 +51,8 @@ const ORTHOGONAL_LINES: SceneTemplateDescriptor = {
     id: 'orthogonal-lines',
     version: 1,
     title: '正交线条',
-    description: '横线和竖线的真实事件驱动效果将在 V3 开放。',
+    description: '横线和竖线由 Analyzer 特征或 Editor 事件实时驱动。',
+    create: createOrthogonalLinesScene,
     parameters: [
         { id: 'horizontalEnabled', label: '横线启用', valueKind: 'boolean', defaultValue: true, allowedSourceKinds: ['constant'] },
         { id: 'horizontalIntensity', label: '横线强度', valueKind: 'number', defaultValue: 0, allowedSourceKinds: ['constant', 'analysis', 'editor-event'], range: { min: 0, max: 1 }, allowedAnalysisComponents: NUMERIC_ANALYSIS_COMPONENTS, allowedAnalysisProjections: NUMERIC_ANALYSIS_PROJECTIONS },
@@ -68,7 +73,8 @@ const CUBE_SWARM: SceneTemplateDescriptor = {
     id: 'cube-swarm',
     version: 1,
     title: '立方体群',
-    description: '频谱、鼓点和能量驱动的真实 3D 效果将在 V4 开放。',
+    description: 'V4 立方体群中性预览；参数与工程数据保持可用。',
+    create: createNeutralVisualizerScene,
     parameters: [
         { id: 'centerSpectrum', label: '中心频谱', valueKind: 'vector', defaultValue: [], allowedSourceKinds: ['constant', 'analysis'], vectorElementRange: { min: 0, max: Number.MAX_VALUE }, allowEmptyVector: true, allowedAnalysisComponents: ['default', 'specific', 'magnitude'], allowedAnalysisProjections: ['full'] },
         { id: 'coreScale', label: '核心缩放', valueKind: 'number', defaultValue: 1, allowedSourceKinds: ['constant', 'analysis', 'editor-event'], range: { min: 0, max: 8 }, allowedAnalysisComponents: NUMERIC_ANALYSIS_COMPONENTS, allowedAnalysisProjections: NUMERIC_ANALYSIS_PROJECTIONS },

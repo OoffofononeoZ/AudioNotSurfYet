@@ -209,6 +209,10 @@ export class VisualizerSessionController {
         return this.registry.list();
     }
 
+    getSceneRegistry(): SceneRegistry {
+        return this.registry;
+    }
+
     hasActivePlaybackLease(): boolean {
         return this.playbackLease !== null && this.snapshot.activeTrackId !== null;
     }

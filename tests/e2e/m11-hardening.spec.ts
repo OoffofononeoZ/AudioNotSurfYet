@@ -335,10 +335,10 @@ test('releases WebGL contexts and bounds RAF ownership over 20 route cycles', as
             contextId: string,
             ...args: unknown[]
         ) {
-            const context = nativeGetContext.call(
+            const context = Reflect.apply(
+                nativeGetContext,
                 this,
-                contextId,
-                ...args,
+                [contextId, ...args],
             ) as RenderingContext | null;
             if (
                 context

@@ -6,7 +6,7 @@ upstream_docs:
   - "docs/quality/visualizer/v3-eval-plan.md"
   - "docs/quality/visualizer/v3-golden-examples.md"
   - "docs/architecture/risk-register.md"
-next_action: "用 V3 unit/integration/Chrome/canonical 信号分类失败；owner 批准前不关闭 V3"
+next_action: "用 V3 provisional/canonical 信号登记失败与修复；owner 批准前不关闭 V3"
 ---
 
 # Visualizer V3 Failure Taxonomy

@@ -4,7 +4,7 @@ owner: "project-owner"
 last_reviewed: 2026-09-02
 upstream_docs:
   - "docs/context/index.md"
-next_action: "Visualizer V2 已获批准；V3 真实 Orthogonal Lines 为 In Progress"
+next_action: "V3 Orthogonal Lines implementation candidate 已完成；等待 clean canonical 与 owner 人工验收"
 ---
 
 # System Map
@@ -13,7 +13,7 @@ next_action: "Visualizer V2 已获批准；V3 真实 Orthogonal Lines 为 In Pro
 
 当前系统是 Vue 3 单页应用。MainLayout 创建并提供唯一的 `AudioSessionService`、`AnalysisCoordinator`、`EditorSessionController` 与 `VisualizerSessionController`；服务通过 `AudioEngine` 解码、播放本地文件，并通过三个独立 IndexedDB repository 保存 Analyzer session、Editor 单草稿与 Visualizer 单草稿。Analyzer、Editor 与 Visualizer 已通过互斥 consumer lease 复用同一 coordinator；Visualizer 只把稳定去重后的 0–4 项送入现有 Worker/cache。File、Blob、handle、PCM、Worker 与音频节点均留在 store 外。MusicBar、Editor 与 Visualizer 读取同一播放快照；有效 Editor/Visualizer track 隐藏 MusicBar，通用 tokenized route lease 分别把 ended 策略改为 repeat-one 或 pause-at-end。
 
-Visualizer V1 已实现 `/visualizer/:trackId?`、通用 route playback lease、三栏/抽屉工作台、strict JSON V1、独立 single-draft repository、原生 JSON gateway 和一个中性 16:9 Canvas。V2 已实现并获批唯一 analysis consumer、constant/analysis/editor-event inspector、FeatureRegistry projection、同歌 Editor snapshot、0–4 planner 与 60Hz 绝对时间 resolver；V3 真实场景/WebGL RAF 正在实施，pre-Gain recording tap 仍是 V5 目标。
+Visualizer V1 已实现 `/visualizer/:trackId?`、通用 route playback lease、三栏/抽屉工作台、strict JSON V1、独立 single-draft repository、原生 JSON gateway 和一个 16:9 Canvas。V2 已实现并获批唯一 analysis consumer、constant/analysis/editor-event inspector、FeatureRegistry projection、同歌 Editor snapshot、0–4 planner 与 60Hz 绝对时间 resolver。V3 candidate 已由单一 `VisualizerRendererHost` 接管现有 Canvas，并实现 Orthogonal Lines shader、确定性 scene-local decay、共享 resolved map、V4 中性场景与可重试错误层；30 步 canonical 和 owner 人工验收尚未完成，pre-Gain recording tap 仍是 V5 目标。
 
 ## Runtime Flow
 
@@ -40,13 +40,13 @@ showOpenFilePicker → FileSystemFileHandle → File
 /visualizer/:trackId? → VisualizerSessionController
   ├→ RoutePlaybackLease(pause-at-end) → AudioSessionService → AudioEngine
   ├→ VisualizerProjectV1 ↔ audionotsurfyet-visualizer/draft/latest
-  ├→ one neutral 16:9 Canvas + three-column/drawer workspace [V1 current]
+  ├→ one 16:9 Canvas + three-column/drawer workspace [V1 current]
   ├→ AnalysisConsumerLease(visualizer, deduped 0–4) → AnalysisCoordinator/Worker/cache [V2 current]
   ├→ validated EditorProjectV1 snapshot → BindingResolver [V2 current]
   └→ BindingResolver(60Hz absolute time + checkpoint) [V2 current]
-       → SceneRegistry factory(orthogonal-lines | cube-swarm) [V3/V4 target]
-       → one VisualizerRendererHost + one Canvas/WebGLRenderer/visual RAF
-       → Orthogonal Lines 60Hz scene-local trail [V3 in progress]
+       → SceneRegistry factory(orthogonal-lines | cube-swarm) [V3 current; Cube remains neutral]
+       → one VisualizerRendererHost + one Canvas/WebGLRenderer/visual RAF [V3 current]
+       → Orthogonal Lines 60Hz scene-local trail [V3 candidate]
        └→ captureStream + AudioEngine pre-Gain tap → MediaRecorder → WebM Blob
 ```
 
@@ -70,7 +70,7 @@ showOpenFilePicker → FileSystemFileHandle → File
 | Analyzer surface | 固定展示 21 张折叠卡、最多四项 FIFO 活动分析、共享 viewport/zoom/cursor/seek、DOM 精确值与分层 Canvas | store、AudioSessionService、AnalysisCoordinator、Canvas 2D | project-owner | `FEATURE_IDS` 稳定 DOM 顺序；实际高度最短列布局，390/1024 一列、1280/1920 两列、gap 18px；展开才挂载图表资源，默认活动队列为空 |
 | Editor E1–E7 surface | `/editor/:trackId?` 状态、精简 transport、JSON 工程、共享波形/tempo/point/range 时间列、21 项单选半透明 overlay、viewport-visible marker 与紧凑工作台布局 | EditorSessionController、AudioSessionService、AnalysisCoordinator、Vue Router、shared Canvas renderer、DOM controls | project-owner | E1–E7 已实现、获批准并关闭 |
 | Editor project and draft | strict JSON V1、歌曲 hash/时长绑定、原生 file gateway、单草稿 autosave 与恢复冲突 | `EditorFormatCodecRegistry`、`EditorDraftRepository`、`audionotsurfyet-editor` V1 | project-owner | 首版只注册 JSON；session database 不变 |
-| Visualizer V1–V3 surface | `/visualizer/:trackId?` 三栏/互斥抽屉、中性 16:9 单 Canvas、底部 transport、pause-at-end、strict project/单草稿、参数 inspector 与 resolved values | `VisualizerSessionController`、`RoutePlaybackLease`、`AnalysisConsumerLease`、BindingPlanner/Resolver、Editor snapshot、native JSON gateway | project-owner | V1/V2 已批准；V3 Orthogonal Lines 正在实施，Cube Swarm/recording 未实现 |
+| Visualizer V1–V3 surface | `/visualizer/:trackId?` 三栏/互斥抽屉、16:9 单 Canvas、底部 transport、pause-at-end、strict project/单草稿、共享 resolved map、Orthogonal Lines shader 与 scene retry | `VisualizerSessionController`、`VisualizerRendererHost`、`SceneRegistry`、`RoutePlaybackLease`、`AnalysisConsumerLease`、BindingPlanner/Resolver、Editor snapshot | project-owner | V1/V2 已批准；V3 candidate 已实现但 canonical/人工审批未完成；Cube Swarm 仅为 V4 中性预览，recording 未实现 |
 | Experimental charts | 试验性的 Three.js 2D 图和瀑布流 | Vue props、TestLands | unknown | 不视为稳定接口 |
 | Event bus | 跨组件事件类型与发送 | mitt singleton | unknown | `settings-open` 无已发现订阅者 |
 
@@ -79,7 +79,7 @@ showOpenFilePicker → FileSystemFileHandle → File
 | Dependency | Why it exists | Failure impact | Replacement or fallback |
 | --- | --- | --- | --- |
 | Browser Web Audio API | 解码、播放和分析本地音频 | 核心播放与能量链路不可用 | 未定义 |
-| WebGL / Three.js | Home 光线和试验图表 | 部分可视化不可用 | 未定义 |
+| WebGL / Three.js | Home 光线、Visualizer 单 RendererHost/Orthogonal Lines 和试验图表 | Visualizer 场景进入可重试错误层，其他 WebGL 表面不可用 | Visualizer 保留 transport、工程、模板和草稿操作；无 2D 视觉 fallback |
 | Canvas 2D | Analyzer 静态数据层、游标层与点阵背景 | 单卡 renderer 可降级 | DOM 保留标题、参数、图例、精确值和重试语义 |
 | localStorage | 恢复音量和样式 | 配置回到默认或写入失败 | 未定义 |
 | IndexedDB | 最近会话、句柄、当前 Blob/cache 的本地持久化 | 刷新后无法自动恢复 | 当前页面继续使用并显示 not-persisted/restore-error |

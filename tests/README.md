@@ -92,6 +92,10 @@ M3–M13 不建设 CI。下列命令当前均为本地门禁；正式证据要�
 | `npm run test:v2:unit` | Visualizer V2 planner、21 项 projection、transform 与 60Hz deterministic resolver |
 | `npm run test:v2:integration` | Visualizer consumer、active set、第五项原子拒绝、Editor snapshot 与离页释放 |
 | `npm run test:e2e:v2:chrome` / `test:e2e:v2:edge` | 真实 Chrome/Edge 的 binding inspector、四特征、Editor 点/范围和 1024 键盘抽屉 |
+| `npm run fixtures:v3:golden` | Visualizer V3 fixture 场景覆盖、固定 60Hz decay 与一秒 checkpoint golden |
+| `npm run test:v3:unit` | Orthogonal Lines 参数映射、方向隔离、确定性余辉、revision 和 frame hash |
+| `npm run test:v3:integration` | 单 RendererHost/renderer/RAF、共享 resolved map、scene dispose/switch 与错误重试 |
+| `npm run test:e2e:v3` | 真实 Chrome 的画面/设置反馈、seek/刷新 hash、DPR、V4 中性切换、错误恢复和 20 次资源循环 |
 | `npm run test:e2e:v1:chrome` | Chrome Header/route、MusicBar、pause-at-end、三栏/抽屉、单 16:9 Canvas、transport 和资源循环 |
 | `npm run test:e2e:v1:edge` | 使用真实 Edge 执行同一 V1 route/lease/layout/resource 专项套件 |
 | `npm run test:e2e:v1` | 顺序执行真实 Chrome 与 Edge 的 V1 专项套件 |
@@ -137,6 +141,8 @@ M3–M13 不建设 CI。下列命令当前均为本地门禁；正式证据要�
 | `npm run eval:v1` | 只允许在干净 implementation commit 上执行 21 步 V1 canonical suite |
 | `npm run eval:v2:provisional` | 在 dirty worktree 执行 26 步 V2 suite，只作为实现反馈 |
 | `npm run eval:v2` | 只允许在干净 implementation commit 上执行 26 步 V2 canonical suite |
+| `npm run eval:v3:provisional` | 在 dirty worktree 执行 V2 26 步基线加四个 V3 专项，只作为实现反馈 |
+| `npm run eval:v3` | 只允许在干净 implementation commit 上执行固定 30 步 V3 canonical suite |
 
 ## 目录职责
 
@@ -149,9 +155,9 @@ M3–M13 不建设 CI。下列命令当前均为本地门禁；正式证据要�
 - `tests/e2e/`：由 Playwright 对真实 Chrome/Edge channel 执行的浏览器场景；只有实际命令通过后才声明对应浏览器证据。
 - `tests/docs/`：生命周期文档和特征计数检查。
 - `tests/harness/`：被正常 Vitest 配置排除的 deliberate failure 及其自检。
-- `tests/scripts/`：浏览器检测和 M3–M13 run orchestration。
+- `tests/scripts/`：浏览器检测和 M3–M14、Editor、Visualizer run orchestration。
 - `tests/editor/`：Editor 工程格式、草稿、lease 和 session controller 的里程碑专项测试。
-- `tests/visualizer/`：Visualizer V1 strict project/route/草稿与 V2 planner/projection/resolver/Editor snapshot 的版本化 golden、unit 和 integration 测试。
+- `tests/visualizer/`：Visualizer V1 strict project/route/草稿、V2 binding resolver，以及 V3 scene state/RendererHost 的版本化 golden、unit 和 integration 测试。
 
 M4 浏览器测试中的损坏 WAV 与 65 秒、48kHz、单声道计时 WAV 都写入 `test-results/`，不提交二进制。长时钟测试用同一 DOM 采样同时读取 `performance.now()` 与 AudioContext 驱动快照；三次 seek 使用进度条真实几何。
 

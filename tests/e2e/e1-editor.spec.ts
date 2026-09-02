@@ -124,6 +124,11 @@ test('keeps invalid project import atomic and exposes recovery for an invalid ro
     await installFilePickerStub(page);
     await page.goto('/');
     await chooseFiles(page, [AUDIO_FILES[0]!]);
+    await expect(page.locator('#music-bar-container')).toHaveAttribute(
+        'data-playback-state',
+        'playing',
+        { timeout: 20_000 },
+    );
     await page.getByTestId('header-editor-link').click();
     await expect(page.getByTestId('editor-ready')).toBeVisible({ timeout: 20_000 });
     const title = await page.getByTestId('editor-ready').locator('h2').textContent();

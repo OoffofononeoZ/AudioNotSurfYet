@@ -8,7 +8,7 @@ upstream_docs:
   - "docs/delivery/visualizer/test-strategy.md"
   - "docs/architecture/visualizer/binding-and-scene-contracts.md"
   - "docs/architecture/risk-register.md"
-next_action: "实现 V3 Orthogonal Lines、运行 30 步 provisional/canonical，并登记 owner 评审证据"
+next_action: "提交 implementation candidate、执行 clean canonical 并登记 owner 评审证据"
 ---
 
 # Visualizer V3 Eval Plan
@@ -40,6 +40,12 @@ next_action: "实现 V3 Orthogonal Lines、运行 30 步 provisional/canonical�
 - `eval:v3` 只在 clean implementation commit 上运行，固定为 V2 的 26 步基线加 V3 golden、unit、integration、Chrome，共 30 步。
 - evidence 登记 implementation commit、run ID、环境、视觉同步、frame-state hash、反馈/长任务、资源计数、日志和 summary SHA-256。
 - V3 evidence 在 owner 人工验收与批准前保持 `in-review`；V4 不开放。
+
+## Implementation Candidate Signal
+
+2026-09-02 最终 dirty-worktree provisional `V3-2026-09-02T13-25-25-465Z-75cbf292-provisional` 按固定 30 步全部通过，summary SHA-256 为 `20452afedc68ab351647464c3e6c3335e1e6def0290c2ba1d35105004648a46d`。该 run 只证明当前未提交候选具备进入 implementation commit 的条件，不是 canonical evidence。
+
+该轮 Chrome 自动观测：画面反馈 `1.10ms`、设置反馈 `2.20ms`、中心像素 `[31,215,109,255]`、最大 Visualizer frame 工作 `7.10ms`；20 次 route 循环末尾为 1 Canvas、1 active host、1 active renderer、0 pending visual RAF，scene created/disposed 为 21/20，target resolve/rendered frame 为 47/47。数值只绑定该 provisional 环境，不代替 owner 最终视觉验收。
 
 ## Evidence Gaps
 

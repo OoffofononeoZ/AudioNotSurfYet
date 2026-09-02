@@ -4,14 +4,14 @@ owner: "project-owner"
 last_reviewed: 2026-09-02
 upstream_docs:
   - "AGENTS.md"
-next_action: "V3 Orthogonal Lines quality contract 与 DEC-039 已建立；实施单 RendererHost、确定性余辉与 30 步 canonical"
+next_action: "V3 Orthogonal Lines implementation candidate 已完成；运行 provisional、提交实现并生成 30 步 clean canonical"
 ---
 
 # Repository Context Index
 
 ## Purpose
 
-AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端。Editor E1–E7 已获批准并关闭。Analyzer M14 已交付 21 张折叠卡的全局自定义顺序、可访问排序和 V1 顺序持久化，最多四项 FIFO 保持独立。M13 17/17 canonical 保留为历史，M14 19/19 canonical 是当前 Analyzer 候选。Visualizer V0 产品、系统设计与 V1–V6 delivery planning 均已获批准；V1 工作台基础与 V2 数据绑定 canonical 均已获 owner 批准，当前实施 V3 Orthogonal Lines。
+AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端。Editor E1–E7 已获批准并关闭。Analyzer M14 已交付 21 张折叠卡的全局自定义顺序、可访问排序和 V1 顺序持久化，最多四项 FIFO 保持独立。M13 17/17 canonical 保留为历史，M14 19/19 canonical 是当前 Analyzer 候选。Visualizer V0 产品、系统设计与 V1–V6 delivery planning 均已获批准；V1 工作台基础与 V2 数据绑定 canonical 均已获 owner 批准，V3 Orthogonal Lines implementation candidate 已完成并等待 canonical/人工验收。
 
 本目录维护仓库事实、边界和工作记忆；生命周期路由与通用方法由 [AGENTS.md](../../AGENTS.md) 负责。当前代码事实与目标架构必须区分：现状见 [system map](system-map.md)，批准的目标见 [system design](../architecture/system-design.md)。
 
@@ -21,8 +21,8 @@ AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端。Editor E1–
 - Product intent：Analyzer/Editor 历史范围与 Visualizer V0 均已批准；PROD-014V 已关闭，PROD-022 保留为非阻断未来问题。
 - System design：Analyzer/Editor 历史设计仍是已批准/实现基线；Visualizer system design、接口、风险和 ADR-0014–0017 已获批准。
 - Execution planning：M1–M14、Editor E0-D/E1–E7、Visualizer V0-D/V1/V2 均为 `Complete`；Visualizer V3 为 `In Progress`，V4–V6 为 `Planned`。
-- Quality and evals：M3–M14、Editor E1–E7 与 Visualizer V1/V2 evidence 已批准；V3 quality contract 为 `in-review`，等待实现、canonical 与 owner 评审。
-- Implementation：Editor E7、Analyzer M14、Visualizer V1 与 V2 数据绑定已实现；V3 Orthogonal Lines 正在实施，V4 场景、V5 录制和 V6 加固仍未实现。
+- Quality and evals：M3–M14、Editor E1–E7 与 Visualizer V1/V2 evidence 已批准；V3 quality contract 为 `in-review`，专项测试已建立，等待 30 步 canonical 与 owner 评审。
+- Implementation：Editor E7、Analyzer M14、Visualizer V1/V2 与 V3 Orthogonal Lines candidate 已实现；V3 尚未关闭，V4 场景、V5 录制和 V6 加固仍未实现。
 - Readiness、release、retrospective：Analyzer M14 为 `Ready with waivers`；PROD-015 仍阻断上线，Editor readiness 独立。
 
 ## Key Documents

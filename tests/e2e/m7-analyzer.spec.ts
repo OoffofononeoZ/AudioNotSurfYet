@@ -304,10 +304,10 @@ test('isolates a single-card Canvas context failure', async ({ page }) => {
             ) {
                 return null;
             }
-            return nativeGetContext.call(
+            return Reflect.apply(
+                nativeGetContext,
                 this,
-                contextId,
-                ...args,
+                [contextId, ...args],
             ) as RenderingContext | null;
         } as typeof HTMLCanvasElement.prototype.getContext;
     });

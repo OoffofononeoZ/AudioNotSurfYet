@@ -45,7 +45,7 @@
         >
             <header class="workspace-toolbar">
                 <div>
-                    <p class="kicker">Visualizer · V2 数据绑定</p>
+                    <p class="kicker">Visualizer · V3 正交线条</p>
                     <h1>{{ snapshot.project.track.title || snapshot.project.track.fileName }}</h1>
                     <p>
                         {{ snapshot.project.track.artist || 'unknown' }} ·
@@ -116,12 +116,27 @@
                 </aside>
 
                 <section class="preview-column" aria-label="可视化预览">
-                    <div class="preview-frame" data-testid="visualizer-preview-frame">
+                    <div
+                        class="preview-frame"
+                        data-testid="visualizer-preview-frame"
+                        :data-scene-status="rendererStatus.state"
+                        :data-frame-state-hash="sceneFrame.hash"
+                    >
                         <canvas ref="previewCanvas" data-testid="visualizer-preview-canvas" />
-                        <div class="neutral-notice">
+                        <div v-if="rendererStatus.state === 'error'" class="scene-error" role="alert">
+                            <strong>场景暂时无法渲染</strong>
+                            <span>{{ rendererStatus.message }}</span>
+                            <button type="button" data-testid="retry-visualizer-scene" @click="retryScene">
+                                重试场景
+                            </button>
+                        </div>
+                        <div v-else-if="snapshot.project.scene.templateId === 'cube-swarm'" class="neutral-notice">
                             <strong>{{ activeTemplate?.title }}</strong>
-                            <span>V2 绑定预览值已就绪；真实场景在 V3/V4 开放</span>
+                            <span>V4 中性预览</span>
                             <small>{{ activeTemplate?.description }}</small>
+                        </div>
+                        <div v-else-if="needsSourcePrompt" class="source-prompt">
+                            请选择主要音色/鼓点数据源
                         </div>
                     </div>
                 </section>
@@ -172,7 +187,7 @@
                         :project="snapshot.project"
                         :runtime="snapshot.bindingRuntime"
                         :descriptor="activeTemplate"
-                        :current-time-seconds="playback.currentTimeSeconds"
+                        :resolved-values="resolvedValues"
                     />
                 </aside>
             </div>
@@ -217,6 +232,7 @@ import { onBeforeRouteLeave, useRoute, useRouter } from 'vue-router';
 import { useAudioSessionService } from '../audio/audioSessionService';
 import VisualizerBindingInspector from '../components/VisualizerBindingInspector.vue';
 import { useAudioSessionStore } from '../stores/audioSessionStore';
+import type { VisualizerResolvedParameterMap } from '../visualizer/rendererTypes';
 import type {
     VisualizerFrameRate,
     VisualizerResolution,
@@ -224,6 +240,13 @@ import type {
     VisualizerTemplateId,
 } from '../visualizer/types';
 import { useVisualizerSessionController } from '../visualizer/visualizerSessionController';
+import {
+    VisualizerRendererHost,
+} from '../visualizer/visualizerRendererHost';
+import type {
+    VisualizerRendererStatus,
+    VisualizerSceneFrameSnapshot,
+} from '../visualizer/rendererTypes';
 
 const route = useRoute();
 const router = useRouter();
@@ -239,13 +262,29 @@ const previewCanvas = ref<HTMLCanvasElement | null>(null);
 const openDrawer = ref<'templates' | 'settings' | null>(null);
 const conflictExported = ref(false);
 const actionError = ref('');
+const resolvedValues = shallowRef<VisualizerResolvedParameterMap>(new Map());
+const rendererStatus = shallowRef<VisualizerRendererStatus>({ state: 'idle' });
+const sceneFrame = shallowRef<VisualizerSceneFrameSnapshot>({
+    hash: '',
+    needsSourcePrompt: false,
+});
 let resizeObserver: ResizeObserver | null = null;
+let rendererHost: VisualizerRendererHost | null = null;
 
 const playback = computed(() => sessionStore.playback);
 const isUsable = computed(() => ['ready', 'not-persisted'].includes(snapshot.value.state));
 const activeTemplate = computed(() => templates.find(
     (template) => template.id === snapshot.value.project?.scene.templateId,
 ));
+const needsSourcePrompt = computed(() => {
+    const project = snapshot.value.project;
+    if (!project || project.scene.templateId !== 'orthogonal-lines') return false;
+    return ['horizontalIntensity', 'verticalIntensity'].every((parameterId) => {
+        const binding = project.scene.bindings.find((entry) => entry.parameterId === parameterId);
+        return binding?.source.kind === 'constant'
+            && Number(binding.source.value) === 0;
+    });
+});
 const persistenceLabel = computed(() => ({
     clean: '新工程已建立',
     saving: '正在保存草稿…',
@@ -265,45 +304,67 @@ const formatTime = (seconds: number): string => {
     return `${minutes}:${remainder}`;
 };
 
-const drawNeutralPreview = () => {
+const resizePreview = () => {
     const canvas = previewCanvas.value;
-    if (!canvas) return;
+    if (!canvas || !rendererHost) return;
     const rect = canvas.getBoundingClientRect();
-    const dpr = Math.max(1, window.devicePixelRatio || 1);
-    canvas.width = Math.max(1, Math.round(rect.width * dpr));
-    canvas.height = Math.max(1, Math.round(rect.height * dpr));
-    const context = canvas.getContext('2d');
-    if (!context) return;
-    context.setTransform(dpr, 0, 0, dpr, 0, 0);
-    const gradient = context.createLinearGradient(0, 0, rect.width, rect.height);
-    gradient.addColorStop(0, '#07110d');
-    gradient.addColorStop(1, '#020403');
-    context.fillStyle = gradient;
-    context.fillRect(0, 0, rect.width, rect.height);
-    context.strokeStyle = 'rgba(101, 255, 169, .10)';
-    context.lineWidth = 1;
-    const spacing = Math.max(32, rect.width / 16);
-    for (let x = 0; x <= rect.width; x += spacing) {
-        context.beginPath();
-        context.moveTo(x, 0);
-        context.lineTo(x, rect.height);
-        context.stroke();
-    }
-    for (let y = 0; y <= rect.height; y += spacing) {
-        context.beginPath();
-        context.moveTo(0, y);
-        context.lineTo(rect.width, y);
-        context.stroke();
-    }
+    rendererHost.resize(rect.width, rect.height, window.devicePixelRatio || 1);
 };
 
 const attachPreviewObserver = async () => {
     await nextTick();
     resizeObserver?.disconnect();
     if (!previewCanvas.value) return;
-    resizeObserver = new ResizeObserver(drawNeutralPreview);
+    if (!rendererHost) {
+        try {
+            rendererHost = new VisualizerRendererHost({
+                canvas: previewCanvas.value,
+                registry: controller.getSceneRegistry(),
+                readFrame: () => {
+                    const project = snapshot.value.project;
+                    if (!project || !isUsable.value) return null;
+                    return {
+                        trackIdentity: project.track.contentHash,
+                        templateId: project.scene.templateId,
+                        templateVersion: project.scene.templateVersion,
+                        seed: project.scene.seed,
+                        timeSeconds: playback.value.currentTimeSeconds,
+                        bindingRevision: snapshot.value.bindingRuntime.bindingRevision,
+                        playbackState: playback.value.state,
+                    };
+                },
+                resolveValuesAt: (timeSeconds) => new Map(
+                    controller.resolveParameters(timeSeconds).map((entry) => [entry.parameterId, entry]),
+                ),
+                onFrame: (values, frame) => {
+                    resolvedValues.value = values;
+                    sceneFrame.value = frame;
+                },
+                onStatus: (status) => {
+                    rendererStatus.value = status;
+                },
+            });
+        } catch (error) {
+            rendererStatus.value = {
+                state: 'error',
+                message: error instanceof Error ? error.message : 'WebGL 渲染器创建失败。',
+            };
+            return;
+        }
+    }
+    resizeObserver = new ResizeObserver(resizePreview);
     resizeObserver.observe(previewCanvas.value);
-    drawNeutralPreview();
+    resizePreview();
+};
+
+const detachRenderer = () => {
+    resizeObserver?.disconnect();
+    resizeObserver = null;
+    rendererHost?.dispose();
+    rendererHost = null;
+    resolvedValues.value = new Map();
+    sceneFrame.value = { hash: '', needsSourcePrompt: false };
+    rendererStatus.value = { state: 'idle' };
 };
 
 watch(
@@ -328,9 +389,24 @@ watch(
 );
 
 watch(
-    () => [isUsable.value, snapshot.value.project?.scene.templateId],
-    () => void attachPreviewObserver(),
+    () => isUsable.value,
+    (usable) => {
+        if (usable) void attachPreviewObserver();
+        else detachRenderer();
+    },
     { immediate: true },
+);
+
+watch(
+    () => [
+        snapshot.value.project?.track.contentHash,
+        snapshot.value.project?.scene.templateId,
+        snapshot.value.project?.scene.seed,
+        snapshot.value.bindingRuntime.bindingRevision,
+        playback.value.currentTimeSeconds,
+        playback.value.state,
+    ],
+    () => rendererHost?.requestFrame(),
 );
 
 const toggleDrawer = (target: 'templates' | 'settings') => {
@@ -341,6 +417,8 @@ const switchTemplate = (templateId: VisualizerTemplateId) => {
     controller.switchTemplate(templateId);
     openDrawer.value = null;
 };
+
+const retryScene = () => rendererHost?.retry();
 
 const setResolution = (event: Event) => {
     const resolution = (event.target as HTMLSelectElement).value as VisualizerResolution;
@@ -402,7 +480,7 @@ onBeforeRouteLeave(async () => {
 });
 
 onBeforeUnmount(() => {
-    resizeObserver?.disconnect();
+    detachRenderer();
     unsubscribe();
 });
 </script>
@@ -632,7 +710,8 @@ input:focus-visible {
     height: 100%;
 }
 
-.neutral-notice {
+.neutral-notice,
+.scene-error {
     position: absolute;
     inset: 0;
     display: grid;
@@ -640,6 +719,28 @@ input:focus-visible {
     gap: 8px;
     padding: 20px;
     text-align: center;
+    pointer-events: none;
+}
+
+.scene-error {
+    background: rgba(2, 4, 3, .88);
+    pointer-events: auto;
+}
+
+.scene-error span {
+    color: #ffd2a6;
+}
+
+.source-prompt {
+    position: absolute;
+    right: 12px;
+    bottom: 12px;
+    padding: 6px 9px;
+    border: 1px solid rgba(101, 255, 169, .24);
+    border-radius: 4px;
+    color: #cfe7da;
+    background: rgba(2, 4, 3, .78);
+    font-size: .78rem;
     pointer-events: none;
 }
 
