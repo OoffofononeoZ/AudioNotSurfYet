@@ -1,5 +1,5 @@
 ---
-status: approved
+status: in-review
 owner: "project-owner"
 last_reviewed: 2026-09-02
 upstream_docs:
@@ -9,8 +9,11 @@ upstream_docs:
   - "docs/quality/visualizer/v2-eval-plan.md"
   - "docs/quality/visualizer/v2-golden-examples.md"
   - "docs/quality/visualizer/v2-failure-taxonomy.md"
+  - "docs/quality/visualizer/v3-eval-plan.md"
+  - "docs/quality/visualizer/v3-golden-examples.md"
+  - "docs/quality/visualizer/v3-failure-taxonomy.md"
   - "docs/delivery/visualizer/milestone-plan.md"
-next_action: "V2 26/26 clean canonical 已获 owner 批准且 V3 已开放；等待 V3 implementation commit 与 canonical evidence"
+next_action: "V3 30/30 clean canonical 已登记为 in-review；等待 owner 在最新版 Chrome 完成人工验收并明确批准"
 ---
 
 # Visualizer Evidence Index
@@ -19,7 +22,7 @@ next_action: "V2 26/26 clean canonical 已获 owner 批准且 V3 已开放；等
 
 - V0-P、V0-A、V0-D：`Complete`。
 - V1：`Complete`；clean canonical 21/21 与适用人工门禁已由 owner 批准。
-- V2：`Complete`；clean canonical 26/26 已获 owner 批准；V3：`In Progress`；V4–V6：`Planned`。
+- V2：`Complete`；clean canonical 26/26 已获 owner 批准；V3：`In Progress`，clean canonical 30/30 已登记为 `in-review`；V4–V6：`Planned`。
 - R-034–R-036 为 `Mitigated`；涉及真实场景确定性与资源的 R-037、R-038 继续为 `Open`。
 - Analyzer/Editor canonical 是相邻回归，不能替代 Visualizer evidence。
 
@@ -179,7 +182,7 @@ next_action: "V2 26/26 clean canonical 已获 owner 批准且 V3 已开放；等
 
 - 原生 Editor JSON picker 的选择、取消和权限由 OS 对话框拥有，自动化使用受控文件入口验证解析与原子性；owner 本次批准未补写用户未提供的逐项人工观察值。
 - V2 的中间 Canvas 继续是中性预览；本记录证明数据绑定和 resolver，不证明 V3 Orthogonal Lines、V4 Cube Swarm、V5 WebM 或 V6 最终加固。
-- R-035、R-036 依据 V2 planner、projection、Editor snapshot、原子导入与双浏览器证据改为 `Mitigated`；R-037、R-038 继续等待 V3 真实场景确定性与资源证据。
+- V2 记录建立时，R-035、R-036 依据 planner、projection、Editor snapshot、原子导入与双浏览器证据改为 `Mitigated`；当时 R-037、R-038 仍等待 V3 证据，当前状态以后续 V3 record 为准。
 - V2 canonical identity 保持不变且无需重跑；只有 commit、run ID、summary 或 artifact 身份变化时才重跑。
 
 ### Owner Approval
@@ -189,3 +192,88 @@ next_action: "V2 26/26 clean canonical 已获 owner 批准且 V3 已开放；等
 `使用项目相关技能执行此计划`
 
 本批准关闭 V2、开放 V3，并接受现有 canonical evidence；不补写批准原文未提供的人工观察值，也不构成 V3/V4 场景、V5 WebM、V6 readiness 或生产上线通过。
+
+## V3 Canonical Record
+
+| Field | Value |
+| --- | --- |
+| Milestone | V3 — Orthogonal Lines |
+| State | `in-review` |
+| Implementation commit | `89be30eb23d4e53d2c38f24e111cd1af7ec0840d` |
+| Evidence commit | 本记录所在的 `docs: register Visualizer V3 canonical evidence` 提交 |
+| Run ID | `V3-2026-09-02T13-32-42-513Z-89be30eb` |
+| Canonical result | 30/30 passed |
+| Clean identity | start/end commit 均为 `89be30eb23d4e53d2c38f24e111cd1af7ec0840d`；start/end dirty 均为 `false` |
+| Summary SHA-256 | `afe4cbe233fe1feded65380d6e976d5a4c32c2f9860fe2e0357a0d615d6a7b84` |
+| Artifact root | `artifacts/evals/V3-2026-09-02T13-32-42-513Z-89be30eb/` |
+| Reviewer | `project-owner` — pending manual acceptance and approval |
+
+### Environment
+
+| Item | Recorded value |
+| --- | --- |
+| OS | macOS 26.5.2, build 25F84, Darwin arm64 |
+| Hardware | MacBook Pro `MacBookPro17,1`, Apple M1, 8 cores, 16 GB memory |
+| Node / npm | Node v24.18.0 / npm 11.16.0 |
+| Browsers | Chrome 152.0.7977.66 / Edge 152.0.4191.53 |
+| Render / analysis / test runtime | Three.js 0.183.2 / Meyda 5.6.3 / Vitest 4.1.10 / Playwright 1.62.0 |
+
+硬件只登记机型、芯片、核心数和内存；artifact 中的序列号、UUID 或设备标识不进入版本化证据。
+
+### Result Summary
+
+- V3 golden 2/2、scene unit 4/4、renderer integration 5/5、真实 Chrome 2/2 通过；V2 固定 26 步基线全部通过，完整 canonical 为 30/30。
+- Orthogonal Lines 在单一 16:9 Canvas/RendererHost/WebGLRenderer 上渲染；横竖参数、constant/analysis/Editor point/range、固定 60Hz 余辉、一秒 checkpoint、seek/刷新 frame hash、暂停单帧、DPR/resize 和键盘路径均由专项覆盖。
+- Chrome 自动观测画面反馈 `1.10ms`、设置反馈 `2.30ms`、中心像素 `[31,215,109,255]`；20 次 route/template 循环后为 1 Canvas、1 active host、1 active renderer、0 pending visual RAF，scene created/disposed 为 21/20，target resolve/rendered frame 为 51/51，最大 Visualizer frame 工作 `3.40ms`。
+- Cube Swarm 仍是 V4 中性预览；模板切换保持同一 host/renderer/canvas 并释放旧 scene。故障注入验证 scene 错误层与重试，transport、模板、工程和草稿保持可用。
+- V1/V2、M3/M4/M5/M11 与 Editor E1/E7 相邻回归、docs、deliberate-failure harness、typecheck、build 和 diff check 均通过。build 转换 1866 modules；最大 JS chunk 为 1,381.47 kB（gzip 419.91 kB），既有 chunk-size warning 保留，不能表述为已解决。
+- 最终 dirty-worktree provisional `V3-2026-09-02T13-25-25-465Z-75cbf292-provisional` 亦为 30/30，summary SHA-256 `20452afedc68ab351647464c3e6c3335e1e6def0290c2ba1d35105004648a46d`；它只作实现反馈，不替代本 clean canonical。
+
+### Artifact Hashes
+
+| Artifact | SHA-256 |
+| --- | --- |
+| `summary.json` | `afe4cbe233fe1feded65380d6e976d5a4c32c2f9860fe2e0357a0d615d6a7b84` |
+| `01-V3-golden.log` | `82099657ea7beaec2925bf298ba1d91ea0010b2bacffa5b0d345e25d5a931fee` |
+| `02-V3-scene-unit.log` | `e3dc472ef809039805583d2871c1aca2ffe2a099da0a93c452dbc7f13a8d037c` |
+| `03-V3-renderer-integration.log` | `35e86d3d9be810e517ae356b4d3642e94b6145352a77dd731f457edfd02205f1` |
+| `04-V3-Chrome.log` | `cf775d2324e0f4d4e93a8b4331aa97321214df57e402a61adbaecf513d4f5038` |
+| `05-V2-golden.log` | `c1714d2ab14ac29255e730ee1effe186ec5604a79d1892a9b58e24d7680622b0` |
+| `06-V2-binding-unit.log` | `2b7cdab8fe6124f728a525ad97692c79a3477d3a9b0b9b4f0085a8a5fe2a1560` |
+| `07-V2-binding-integration.log` | `89e7694cd562528a4f983380c0dbd67bf753a6276e6b1d8f37241ca9d0644ad5` |
+| `08-V2-Chrome.log` | `436633825ea018ef97adfd9517989f2b11a32aefd415923eb5b56b088f1e48a5` |
+| `09-V2-Edge.log` | `b079d1c59d129791761b446ab1fe9cf832df761ce0d500a2e6124078e919db55` |
+| `10-V1-golden.log` | `dd1134ccbe5861e4db3505fe301db8646ceaa050b8d1bedc3743e9acf3ec704e` |
+| `11-V1-project-unit.log` | `a734196f48758f8a781d08eddfe236e0519e4b1b0b17b64b1fe71c8cfc64dc8b` |
+| `12-V1-foundation-integration.log` | `c1f71ac50269e2492399e19f13de063e93cc6ccaffc98062a646a26c53b183e0` |
+| `13-V1-Chrome.log` | `d9626126dc9e8737cc0c77cdb4eb396363b503911cf2cca7809d0080d14373ff` |
+| `14-V1-Edge.log` | `b8fc958de77b4666a7e651a145051fab82fdc0993615824dcfc1e893c2a8768b` |
+| `15-M3-Chrome-smoke.log` | `6321abf5860fe28a36ef33befc279633717ad75355310ecf9ebaf4484f5587a6` |
+| `16-M4-engine-and-session-regression.log` | `8b1952bdf15db19c2ad4283c48e68984d4d61b4db3eaef36f0ea986741fb53d3` |
+| `17-M4-Chrome-regression.log` | `7a4d0a902b82d488779a4993803a96ebc5068e0e08b8654cd3a4a9811686dc77` |
+| `18-M5-repository-and-recovery-regression.log` | `fd11b1423980779edae6d0a3bdb363f22ebdb0c149ca8334b952dd163d80108a` |
+| `19-Editor-E1-project-unit.log` | `f49d1e38a2da688f41a1abd8898de7c4d1b3921cf19beb3c226b5624b8a3fc1d` |
+| `20-Editor-E1-integration.log` | `62654aebd50aa9796f92d277bc66c2355149c2ebab1677b5d55ed062943a86b0` |
+| `21-Editor-E1-Chrome.log` | `fabd60867a3eea44651a5786608748080db597b5458215f0cf3acf67bea8a445` |
+| `22-Editor-E7-unit.log` | `51f6e88a358e97618e5c8ec146ee40441dcd964c369a14466ea2d201a6578c07` |
+| `23-Editor-E7-integration.log` | `f1ce3788b3bfa75ab395d03a5b66a0f4976b04bf017e97fe2074010bcefea083` |
+| `24-M11-Chrome-resource-regression.log` | `992bd6345922fd5baefdfd92322b3d70fc4c82d6cf726fdf36ec66fba61639e9` |
+| `25-M11-Edge-resource-regression.log` | `56f4efa07d1fcace6e57cb4ee061cfb88262e58495d9dcbf597bcae6f0f55d9f` |
+| `26-docs.log` | `bb005ed0074179a47b895a5c66e79917e37ebf18976e21fe9d27b1dd63c8f151` |
+| `27-deliberate-failure.log` | `69bf5c3fa50230a4957ad0c60c8323dba68e494d92761fea0039cf5d580d70aa` |
+| `28-typecheck.log` | `fadc7f66199c28d2f7cca439bb300ebeb0320158f32a0f9b52ec77031538af4d` |
+| `29-build.log` | `3b81b45585f9642a28f5c5e9a87e0d8a3494af8c69ba9a42c01774f9c9d0325a` |
+| `30-diff-check.log` | `e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855` |
+
+### Manual Gaps and Review Boundary
+
+- owner 尚需在最新版 Chrome 检查默认未绑定提示、横/竖线与 additive 交点、颜色/粗细/亮度/decay 隔离、point/range、播放/seek/暂停/刷新一致性、Cube Swarm 往返、1024 抽屉、键盘焦点、错误重试和工程恢复。
+- 自动中心像素、state hash 和资源 counter 证明受控输入有输出且满足代码契约，不替代最终视觉审美、GPU/驱动长会话或辅助技术人工判断。
+- R-037、R-038 已有 clean canonical 技术证据，但在 owner 人工验收与明确批准前继续为 `Open`；V3 保持 `In Progress`，V4 不开放。
+- V1/V2 canonical identity 不变且无需重跑；本记录不证明 Cube Swarm、WebM、V6 readiness 或生产上线。
+
+### Owner Review Status
+
+尚未批准。人工验收认可后由 `project-owner` 明确回复：
+
+`我批准 Visualizer V3 canonical evidence、Orthogonal Lines 场景、确定性余辉与单 RendererHost 结果；同意将 V3 标记为 Complete 并开放 V4。`

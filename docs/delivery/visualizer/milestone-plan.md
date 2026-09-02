@@ -6,7 +6,7 @@ upstream_docs:
   - "docs/delivery/visualizer/execution-plan.md"
   - "docs/delivery/visualizer/acceptance-criteria.md"
   - "docs/delivery/visualizer/test-strategy.md"
-next_action: "V2 26/26 clean canonical 已获 owner 批准；V3 Orthogonal Lines 为 In Progress"
+next_action: "V3 30/30 clean canonical 已登记为 in-review；等待 owner 人工验收与批准"
 ---
 
 # Visualizer V0-D and V1–V6 Milestone Plan
