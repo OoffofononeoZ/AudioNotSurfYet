@@ -1,11 +1,11 @@
 ---
-status: in-review
+status: approved
 owner: "project-owner"
 last_reviewed: 2026-09-02
 upstream_docs:
   - "docs/quality/visualizer/v2-eval-plan.md"
   - "docs/architecture/visualizer/binding-and-scene-contracts.md"
-next_action: "版本化 V2 binding golden 与 26/26 canonical 已登记；等待 owner 人工复核"
+next_action: "V2 binding golden 与 26/26 canonical 已获 owner 批准；作为 V3 相邻回归保留"
 ---
 
 # Visualizer V2 Golden Examples

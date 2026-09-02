@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: approved
 owner: "project-owner"
 last_reviewed: 2026-09-02
 upstream_docs:
@@ -8,7 +8,7 @@ upstream_docs:
   - "docs/delivery/visualizer/test-strategy.md"
   - "docs/architecture/visualizer/binding-and-scene-contracts.md"
   - "docs/architecture/risk-register.md"
-next_action: "V2 clean canonical 26/26 已登记为 in-review；owner 复核数据绑定、四特征边界、Editor snapshot 与 resolver 后决定是否开放 V3"
+next_action: "V2 quality contract 与 26/26 canonical 已获 owner 批准；作为历史基线由 V3 回归"
 ---
 
 # Visualizer V2 Eval Plan
@@ -47,12 +47,12 @@ next_action: "V2 clean canonical 26/26 已登记为 in-review；owner 复核数�
 - `eval:v2:provisional` 允许 dirty worktree，只作为实现反馈。
 - `eval:v2` 必须在 clean implementation commit 上运行，固定为 V1 21 步基线加 V2 golden、unit、integration、Chrome、Edge 共 26 步。
 - evidence 登记实现 commit、run ID、环境、active feature/consumer、确定性 hash、反馈、资源、日志和 summary SHA-256。
-- V2 evidence 在 owner 人工任务完成前保持 `in-review`；V3 不开放。
+- V2 evidence 已于 2026-09-02 获 owner 批准；V3 已开放，V2 canonical identity 无需重跑。
 
 ## Evidence Gaps
 
 | Gap | Reason | Residual risk | Compensating verification | Owner |
 | --- | --- | --- | --- | --- |
 | 原生 Editor JSON picker 的取消/权限由 OS 拥有 | Playwright 只能用受控 picker/OPFS | 自动化不能证明全部原生对话框路径 | owner 在最新版 Chrome 检查选择、取消、错歌与损坏文件 | project-owner |
-| V2 不绘制真实场景 | V3/V4 尚未开放 | resolved value 正确不等于最终视觉正确 | DOM resolved state + deterministic hash 固定数据语义；场景各自 canonical | project-owner |
+| V2 不绘制真实场景 | V3 正在实施、V4 尚未开放 | resolved value 正确不等于最终视觉正确 | DOM resolved state + deterministic hash 固定数据语义；场景各自 canonical | project-owner |
 | 当前没有正式 CI | canonical 为本地流程 | 环境漂移不会自动触发 | 记录浏览器/Node/npm/Meyda/硬件和完整 artifact hash | project-owner |

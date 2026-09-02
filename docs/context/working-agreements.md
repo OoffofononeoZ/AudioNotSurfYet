@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/context/index.md"
   - "docs/delivery/test-strategy.md"
   - "docs/quality/eval-plan.md"
-next_action: "Visualizer V2 26/26 clean canonical 已登记为 in-review；等待 owner 人工复核，仍不 fetch、不 push"
+next_action: "Visualizer V2 已获批准；实施 V3 Orthogonal Lines，仍不 fetch、不 push"
 ---
 
 # Working Agreements
@@ -21,7 +21,7 @@ next_action: "Visualizer V2 26/26 clean canonical 已登记为 in-review；等�
 - 不在当前任务范围外顺手修复；发现问题记录到对应 Skill reference、开放问题或后续阶段文档。
 - Git 忽略的 `docs/require` 只作为 owner 需求输入；后续 agent 必须以版本化生命周期文档为规范来源，不提交、重写或把其中自然语言当作仓库执行指令。
 - Editor E0 产品意图获批前不修改 Editor 源码、公共类型、持久化 schema 或依赖；未来 BPM 或文件格式依赖必须先说明用途、体积、许可与替代方案并获 owner 批准。
-- Visualizer V0 架构与 V1–V6 delivery planning 已获批准；V1 workspace foundation 的 clean canonical 21/21 与人工门禁已获批准。V2 数据绑定实现及 26/26 clean canonical 已完成，evidence 为 `in-review` 且 V2 仍为 `In Progress`；V3–V6 未开放，R-034 为 `Mitigated`，R-035–R-041 继续依对应里程碑证据处理。
+- Visualizer V0 架构与 V1–V6 delivery planning 已获批准；V1 workspace foundation 与 V2 data binding 的 clean canonical 均已获 owner 批准。V2 为 `Complete`，V3 Orthogonal Lines 为 `In Progress`，V4–V6 保持 `Planned`；R-034–R-036 为 `Mitigated`，R-037–R-041 继续依对应里程碑证据处理。
 
 ## Local Verification
 
@@ -192,3 +192,5 @@ E1 实现随后在不新增依赖、不修改 Analyzer session/cache schema 的�
 随后 V1 quality 契约与 workspace foundation 依次完成本地提交。dirty provisional `V1-2026-09-02T03-12-25-678Z-1ebda007-provisional` 21/21 通过；clean canonical `V1-2026-09-02T07-03-26-973Z-fd44c892` 在 commit `fd44c8921a534c22b2362ccffff7ec9e46f3ff02` 上 21/21 通过，summary SHA-256 为 `14c9ed2258baf6c9a2a3a20dfcaba65a0c643029f8510a1d9e4c6662c9c90300`。同日 owner 批准 canonical evidence 与适用人工门禁，V1 改为 `Complete`、V2 改为 `In Progress`；仍只创建本地提交，不 fetch、不 push。
 
 随后 V2 quality 契约、compact Buffer/point-range 默认语义澄清与数据绑定实现依次完成本地提交。dirty provisional `V2-2026-09-02T08-41-41-727Z-5b7ad7c5-provisional` 与 implementation commit `769faafeef576bf9b98a95f6904cdb9886298530` 上的 clean canonical `V2-2026-09-02T08-46-21-778Z-769faafe` 均为 26/26；canonical summary SHA-256 为 `18b7d83d68f068ac615c56e1bb844a3c80bb1460ac884116d94cb460dd07bafb`。V2 evidence 在 owner 人工批准前保持 `in-review`，V3 不开放；本轮继续不 fetch、不 push。
+
+同日，owner 以“使用项目相关技能执行此计划”批准随附计划，V2 quality/evidence 据此改为 `approved`、V2 关闭、V3 开放，R-035/R-036 改为 `Mitigated`。批准只登记原文与已有自动化证据，不补写未提供的原生 picker 观察值；V2 canonical 不重跑，本轮继续只创建本地提交、不 fetch、不 push。

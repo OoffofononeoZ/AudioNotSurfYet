@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/architecture/interface-contracts.md"
   - "docs/architecture/risk-register.md"
   - "docs/delivery/visualizer/execution-plan.md"
-next_action: "V1 已批准；当前按 AC-V201–AC-V208 约束 V2 数据绑定，V3–V6 保持 Planned"
+next_action: "V2 已批准；当前按 AC-V301–AC-V305 约束 V3 Orthogonal Lines，V4–V6 保持 Planned"
 ---
 
 # Visualizer V1–V6 Acceptance Criteria

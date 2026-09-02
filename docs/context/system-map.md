@@ -4,7 +4,7 @@ owner: "project-owner"
 last_reviewed: 2026-09-02
 upstream_docs:
   - "docs/context/index.md"
-next_action: "Visualizer V2 数据绑定与 26/26 canonical 已完成并处于 owner 评审；V3 真实 Orthogonal Lines 尚未开放"
+next_action: "Visualizer V2 已获批准；V3 真实 Orthogonal Lines 为 In Progress"
 ---
 
 # System Map
@@ -13,7 +13,7 @@ next_action: "Visualizer V2 数据绑定与 26/26 canonical 已完成并处于 o
 
 当前系统是 Vue 3 单页应用。MainLayout 创建并提供唯一的 `AudioSessionService`、`AnalysisCoordinator`、`EditorSessionController` 与 `VisualizerSessionController`；服务通过 `AudioEngine` 解码、播放本地文件，并通过三个独立 IndexedDB repository 保存 Analyzer session、Editor 单草稿与 Visualizer 单草稿。Analyzer、Editor 与 Visualizer 已通过互斥 consumer lease 复用同一 coordinator；Visualizer 只把稳定去重后的 0–4 项送入现有 Worker/cache。File、Blob、handle、PCM、Worker 与音频节点均留在 store 外。MusicBar、Editor 与 Visualizer 读取同一播放快照；有效 Editor/Visualizer track 隐藏 MusicBar，通用 tokenized route lease 分别把 ended 策略改为 repeat-one 或 pause-at-end。
 
-Visualizer V1 已实现 `/visualizer/:trackId?`、通用 route playback lease、三栏/抽屉工作台、strict JSON V1、独立 single-draft repository、原生 JSON gateway 和一个中性 16:9 Canvas。V2 已实现唯一 analysis consumer、constant/analysis/editor-event inspector、FeatureRegistry projection、同歌 Editor snapshot、0–4 planner 与 60Hz 绝对时间 resolver；真实场景/WebGL RAF 与 pre-Gain recording tap 仍是 V3–V5 目标。
+Visualizer V1 已实现 `/visualizer/:trackId?`、通用 route playback lease、三栏/抽屉工作台、strict JSON V1、独立 single-draft repository、原生 JSON gateway 和一个中性 16:9 Canvas。V2 已实现并获批唯一 analysis consumer、constant/analysis/editor-event inspector、FeatureRegistry projection、同歌 Editor snapshot、0–4 planner 与 60Hz 绝对时间 resolver；V3 真实场景/WebGL RAF 正在实施，pre-Gain recording tap 仍是 V5 目标。
 
 ## Runtime Flow
 
@@ -69,7 +69,7 @@ showOpenFilePicker → FileSystemFileHandle → File
 | Analyzer surface | 固定展示 21 张折叠卡、最多四项 FIFO 活动分析、共享 viewport/zoom/cursor/seek、DOM 精确值与分层 Canvas | store、AudioSessionService、AnalysisCoordinator、Canvas 2D | project-owner | `FEATURE_IDS` 稳定 DOM 顺序；实际高度最短列布局，390/1024 一列、1280/1920 两列、gap 18px；展开才挂载图表资源，默认活动队列为空 |
 | Editor E1–E7 surface | `/editor/:trackId?` 状态、精简 transport、JSON 工程、共享波形/tempo/point/range 时间列、21 项单选半透明 overlay、viewport-visible marker 与紧凑工作台布局 | EditorSessionController、AudioSessionService、AnalysisCoordinator、Vue Router、shared Canvas renderer、DOM controls | project-owner | E1–E7 已实现、获批准并关闭 |
 | Editor project and draft | strict JSON V1、歌曲 hash/时长绑定、原生 file gateway、单草稿 autosave 与恢复冲突 | `EditorFormatCodecRegistry`、`EditorDraftRepository`、`audionotsurfyet-editor` V1 | project-owner | 首版只注册 JSON；session database 不变 |
-| Visualizer V1–V2 surface | `/visualizer/:trackId?` 三栏/互斥抽屉、中性 16:9 单 Canvas、底部 transport、pause-at-end、strict project/单草稿、参数 inspector 与 resolved values | `VisualizerSessionController`、`RoutePlaybackLease`、`AnalysisConsumerLease`、BindingPlanner/Resolver、Editor snapshot、native JSON gateway | project-owner | V1 已批准；V2 clean canonical 26/26 为 in-review，真实 scene/recording 未实现 |
+| Visualizer V1–V3 surface | `/visualizer/:trackId?` 三栏/互斥抽屉、中性 16:9 单 Canvas、底部 transport、pause-at-end、strict project/单草稿、参数 inspector 与 resolved values | `VisualizerSessionController`、`RoutePlaybackLease`、`AnalysisConsumerLease`、BindingPlanner/Resolver、Editor snapshot、native JSON gateway | project-owner | V1/V2 已批准；V3 Orthogonal Lines 正在实施，Cube Swarm/recording 未实现 |
 | Experimental charts | 试验性的 Three.js 2D 图和瀑布流 | Vue props、TestLands | unknown | 不视为稳定接口 |
 | Event bus | 跨组件事件类型与发送 | mitt singleton | unknown | `settings-open` 无已发现订阅者 |
 
