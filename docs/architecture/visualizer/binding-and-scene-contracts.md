@@ -160,4 +160,4 @@ V3 切换到尚未实现的 Cube Swarm 时必须 dispose Orthogonal Lines 的 ge
 
 ## Approval State
 
-`project-owner` 于 2026-09-02 批准 Visualizer V0 system design、接口契约、R-034–R-041 与 ADR-0014–0017。本契约据此为 `approved`，但只开放 delivery planning；两个场景、确定性指标和 WebGL 生命周期仍没有实现或质量证据。
+`project-owner` 于 2026-09-02 批准 Visualizer V0 system design、接口契约、R-034–R-041 与 ADR-0014–0017。本契约据此为 `approved`。V3 implementation candidate 已实现 Orthogonal Lines 与单 RendererHost；只有 V3 clean canonical、人工验收和 owner 批准完成后才能把该候选视为已关闭里程碑，Cube Swarm 仍只是 V4 中性预览。

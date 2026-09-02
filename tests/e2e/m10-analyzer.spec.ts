@@ -163,10 +163,10 @@ test('isolates a Complex Spectrum renderer failure to its own card', async ({ pa
             ) {
                 return null;
             }
-            return nativeGetContext.call(
+            return Reflect.apply(
+                nativeGetContext,
                 this,
-                contextId,
-                ...args,
+                [contextId, ...args],
             ) as RenderingContext | null;
         } as typeof HTMLCanvasElement.prototype.getContext;
     });

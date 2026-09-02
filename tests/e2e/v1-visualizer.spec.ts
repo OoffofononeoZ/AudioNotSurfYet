@@ -223,6 +223,14 @@ test('keeps the neutral V1 lifecycle to one Canvas and zero analysis Workers', a
         await expect(page.getByTestId('visualizer-ready')).toBeVisible();
     }
 
+    await expect.poll(async () => page.evaluate(() => (
+        window as typeof window & {
+            __V1_RESOURCE_PROBE__?: { liveAnimationFrames: Set<number> };
+        }
+    ).__V1_RESOURCE_PROBE__!.liveAnimationFrames.size)).toBeLessThanOrEqual(
+        Math.max(1, baselineFrames),
+    );
+
     const resources = await page.evaluate(() => {
         const probe = (window as typeof window & {
             __V1_RESOURCE_PROBE__?: {

@@ -230,10 +230,10 @@ test('keeps renderer failures packed and releases masonry observers over route c
             ) {
                 return null;
             }
-            return nativeGetContext.call(
+            return Reflect.apply(
+                nativeGetContext,
                 this,
-                contextId,
-                ...args,
+                [contextId, ...args],
             ) as RenderingContext | null;
         } as typeof HTMLCanvasElement.prototype.getContext;
     });

@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "fixture": "tests/fixtures/audio/visualizer-v3-lines-v1.wav",
+  "scene": "orthogonal-lines@1",
+  "stepSeconds": 0.016666666666666666,
+  "checkpointSeconds": 1,
+  "decay": {
+    "formula": "max(current, previous * exp(-4 * dt / decaySeconds))",
+    "initialIntensity": 1,
+    "decaySeconds": 1,
+    "sampleTimesSeconds": [0, 0.25, 0.5, 1],
+    "expected": [1, 0.3678794412, 0.1353352832, 0.0183156389]
+  },
+  "scenarios": {
+    "mainToneRange": [{ "start": 0.5, "end": 2 }],
+    "drumPoints": [0.02, 1, 2.5, 3, 4, 5.98],
+    "adjacentRanges": [{ "start": 2, "end": 3 }, { "start": 3, "end": 4 }],
+    "multipleInnerClasses": ["main-tone", "secondary-tone", "kick", "snare"],
+    "beginningAndEnd": [0.02, 5.98],
+    "simultaneousPointAndRange": 4,
+    "invalidReferences": ["missing-lane", "missing-inner-class"]
+  }
+}

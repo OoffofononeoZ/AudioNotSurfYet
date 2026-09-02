@@ -5,7 +5,7 @@ last_reviewed: 2026-09-02
 upstream_docs:
   - "docs/quality/visualizer/v3-eval-plan.md"
   - "docs/architecture/visualizer/binding-and-scene-contracts.md"
-next_action: "实现 visualizer-v3-lines-v1 fixture 与版本化 scene golden，并用 V3 canonical 固定结果"
+next_action: "fixture 与版本化 scene golden 已实现；用 V3 provisional/canonical 固定结果并等待 owner 视觉验收"
 ---
 
 # Visualizer V3 Golden Examples

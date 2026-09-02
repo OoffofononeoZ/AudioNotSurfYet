@@ -281,6 +281,7 @@ import {
 } from '../visualizer/bindingDefaults';
 import { wouldExceedVisualizerFeatureLimit } from '../visualizer/bindingPlanner';
 import type { VisualizerResolvedParameter } from '../visualizer/bindingResolver';
+import type { VisualizerResolvedParameterMap } from '../visualizer/rendererTypes';
 import type {
     SceneBindingSourceKind,
     SceneParameterDescriptor,
@@ -299,15 +300,12 @@ const props = defineProps<{
     project: VisualizerProjectV1;
     runtime: VisualizerBindingRuntimeSnapshot;
     descriptor: SceneTemplateDescriptor;
-    currentTimeSeconds: number;
+    resolvedValues: VisualizerResolvedParameterMap;
 }>();
 
 const controller = useVisualizerSessionController();
 const localError = defineModel<string>('error', { default: '' });
 const editorProject = computed(() => props.project.editorSnapshot?.project ?? null);
-const resolvedValues = computed(() => new Map(
-    controller.resolveParameters(props.currentTimeSeconds).map((entry) => [entry.parameterId, entry]),
-));
 const editorReferenceCount = computed(() => props.project.scene.bindings.filter(
     (entry) => entry.source.kind === 'editor-event',
 ).length);
@@ -346,7 +344,7 @@ const binding = (parameterId: string): VisualizerParameterBindingV1 => {
     return value;
 };
 const resolved = (parameterId: string): VisualizerResolvedParameter | undefined =>
-    resolvedValues.value.get(parameterId);
+    props.resolvedValues.get(parameterId);
 const constantValue = (parameterId: string) => {
     const source = binding(parameterId).source;
     return source.kind === 'constant' ? source.value : 0;

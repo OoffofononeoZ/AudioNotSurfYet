@@ -17,14 +17,16 @@ import {
     FORMAT_MASTER_DURATION_SECONDS,
     GENERATOR_VERSION,
     SAMPLE_RATE,
+    VISUALIZER_V3_GENERATOR_VERSION,
     createFormatMaster,
+    createVisualizerV3LinesFixture,
     float32ToLittleEndianBuffer,
 } from '../support/audio-fixtures.ts';
 
 const REPOSITORY_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const AUDIO_DIRECTORY = path.join(REPOSITORY_ROOT, 'tests/fixtures/audio');
 const MANIFEST_PATH = path.join(REPOSITORY_ROOT, 'tests/fixtures/fixture-manifest.json');
-const GENERATED_AT = '2026-07-28';
+const GENERATED_AT = '2026-09-02';
 const SOURCE_ID = 'format-master-pcm-v1';
 
 interface CommandResult {
@@ -109,6 +111,8 @@ async function fixtureRecord(
     command: string,
     encoderParameters: string[],
     ffmpegVersion: string,
+    sourceId = SOURCE_ID,
+    generatorVersion = GENERATOR_VERSION,
 ) {
     const absolutePath = path.join(REPOSITORY_ROOT, relativePath);
     const metadata = await inspectAudio(absolutePath);
@@ -122,9 +126,9 @@ async function fixtureRecord(
         sampleRate: metadata.sampleRate,
         channels: metadata.channels,
         durationSeconds: metadata.durationSeconds,
-        sourceId: SOURCE_ID,
+        sourceId,
         generationCommand: 'npm run fixtures:generate',
-        generatorVersion: GENERATOR_VERSION,
+        generatorVersion,
         encoder: {
             name: metadata.codec,
             version: ffmpegVersion,
@@ -148,7 +152,13 @@ async function main(): Promise<void> {
         const wavPath = path.join(temporaryDirectory, 'format-master.wav');
         const mp3Path = path.join(temporaryDirectory, 'format-master.mp3');
         const flacPath = path.join(temporaryDirectory, 'format-master.flac');
+        const visualizerV3MasterPath = path.join(temporaryDirectory, 'visualizer-v3-lines-v1.f32le');
+        const visualizerV3WavPath = path.join(temporaryDirectory, 'visualizer-v3-lines-v1.wav');
         await writeFile(masterPath, float32ToLittleEndianBuffer(createFormatMaster()));
+        await writeFile(
+            visualizerV3MasterPath,
+            float32ToLittleEndianBuffer(createVisualizerV3LinesFixture()),
+        );
 
         const commonInput = [
             '-hide_banner',
@@ -191,6 +201,28 @@ async function main(): Promise<void> {
         const wavCommand = run('ffmpeg', [...commonInput, ...wavParameters, wavPath]).command;
         const mp3Command = run('ffmpeg', [...commonInput, ...mp3Parameters, mp3Path]).command;
         const flacCommand = run('ffmpeg', [...commonInput, ...flacParameters, flacPath]).command;
+        const visualizerV3Input = [
+            '-hide_banner',
+            '-loglevel',
+            'error',
+            '-y',
+            '-f',
+            'f32le',
+            '-ar',
+            String(SAMPLE_RATE),
+            '-ac',
+            '1',
+            '-i',
+            visualizerV3MasterPath,
+            '-map_metadata',
+            '-1',
+            '-fflags',
+            '+bitexact',
+        ];
+        const visualizerV3Command = run(
+            'ffmpeg',
+            [...visualizerV3Input, ...wavParameters, visualizerV3WavPath],
+        ).command;
 
         await mkdir(AUDIO_DIRECTORY, { recursive: true });
         await Promise.all([
@@ -198,6 +230,7 @@ async function main(): Promise<void> {
             copyFile(wavPath, path.join(AUDIO_DIRECTORY, 'format-master.wav')),
             copyFile(mp3Path, path.join(AUDIO_DIRECTORY, 'format-master.mp3')),
             copyFile(flacPath, path.join(AUDIO_DIRECTORY, 'format-master.flac')),
+            copyFile(visualizerV3WavPath, path.join(AUDIO_DIRECTORY, 'visualizer-v3-lines-v1.wav')),
         ]);
 
         const masterRelativePath = 'tests/fixtures/audio/format-master.f32le';
@@ -252,6 +285,17 @@ async function main(): Promise<void> {
                 flacCommand.replaceAll(temporaryDirectory, '<temp>'),
                 flacParameters,
                 ffmpegVersion,
+            ),
+            await fixtureRecord(
+                'visualizer-v3-lines-wav-v1',
+                'tests/fixtures/audio/visualizer-v3-lines-v1.wav',
+                'Visualizer V3 deterministic line response and boundary scenarios',
+                'wav',
+                visualizerV3Command.replaceAll(temporaryDirectory, '<temp>'),
+                wavParameters,
+                ffmpegVersion,
+                'visualizer-v3-lines-pcm-v1',
+                VISUALIZER_V3_GENERATOR_VERSION,
             ),
         ];
 

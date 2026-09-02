@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-07-28",
+  "generatedAt": "2026-09-02",
   "generator": {
     "id": "m3-audio-fixtures-v1",
     "path": "tests/fixtures/generate-fixtures.ts",
@@ -121,6 +121,33 @@
           "5"
         ],
         "commandTemplate": "ffmpeg -hide_banner -loglevel error -y -f f32le -ar 48000 -ac 1 -i <temp>/format-master.f32le -map_metadata -1 -fflags +bitexact -flags:a +bitexact -c:a flac -compression_level 5 <temp>/format-master.flac"
+      },
+      "license": "CC0-1.0",
+      "provenance": "Deterministically synthesized by tests/fixtures/generate-fixtures.ts"
+    },
+    {
+      "id": "visualizer-v3-lines-wav-v1",
+      "path": "tests/fixtures/audio/visualizer-v3-lines-v1.wav",
+      "purpose": "Visualizer V3 deterministic line response and boundary scenarios",
+      "format": "wav",
+      "sha256": "59f8976898d58d1174248b91d76e888c8970a98c88971a4be29bd37d4507cf97",
+      "bytes": 576044,
+      "sampleRate": 48000,
+      "channels": 1,
+      "durationSeconds": 6,
+      "sourceId": "visualizer-v3-lines-pcm-v1",
+      "generationCommand": "npm run fixtures:generate",
+      "generatorVersion": "visualizer-v3-lines-fixture-v1",
+      "encoder": {
+        "name": "pcm_s16le",
+        "version": "ffmpeg version 8.1.2 Copyright (c) 2000-2026 the FFmpeg developers",
+        "parameters": [
+          "-flags:a",
+          "+bitexact",
+          "-c:a",
+          "pcm_s16le"
+        ],
+        "commandTemplate": "ffmpeg -hide_banner -loglevel error -y -f f32le -ar 48000 -ac 1 -i <temp>/visualizer-v3-lines-v1.f32le -map_metadata -1 -fflags +bitexact -flags:a +bitexact -c:a pcm_s16le <temp>/visualizer-v3-lines-v1.wav"
       },
       "license": "CC0-1.0",
       "provenance": "Deterministically synthesized by tests/fixtures/generate-fixtures.ts"

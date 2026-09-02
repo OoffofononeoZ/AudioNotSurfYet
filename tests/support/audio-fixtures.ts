@@ -4,6 +4,9 @@ export const SAMPLE_RATE = 48_000;
 export const FORMAT_MASTER_DURATION_SECONDS = 4;
 export const FORMAT_MASTER_SAMPLE_COUNT = SAMPLE_RATE * FORMAT_MASTER_DURATION_SECONDS;
 export const GENERATOR_VERSION = 'm3-audio-fixtures-v1';
+export const VISUALIZER_V3_DURATION_SECONDS = 6;
+export const VISUALIZER_V3_SAMPLE_COUNT = SAMPLE_RATE * VISUALIZER_V3_DURATION_SECONDS;
+export const VISUALIZER_V3_GENERATOR_VERSION = 'visualizer-v3-lines-fixture-v1';
 
 const TAU = Math.PI * 2;
 
@@ -80,6 +83,41 @@ export function createFormatMaster(): Float32Array {
         createHarmonicRich(440, FORMAT_MASTER_SAMPLE_COUNT - harmonicStart, 0.5),
         harmonicStart,
     );
+    return output;
+}
+
+export function createVisualizerV3LinesFixture(): Float32Array {
+    const output = new Float32Array(VISUALIZER_V3_SAMPLE_COUNT);
+    const addTone = (
+        startSeconds: number,
+        endSeconds: number,
+        frequencyHz: number,
+        amplitude: number,
+    ) => {
+        const start = Math.round(startSeconds * SAMPLE_RATE);
+        const end = Math.round(endSeconds * SAMPLE_RATE);
+        const tone = createSine(frequencyHz, end - start, amplitude);
+        for (let index = start; index < end; index += 1) {
+            output[index] = Math.max(-1, Math.min(1, output[index]! + tone[index - start]!));
+        }
+    };
+    const addImpulse = (seconds: number, amplitude = 0.9) => {
+        const position = Math.min(output.length - 1, Math.round(seconds * SAMPLE_RATE));
+        output[position] = Math.max(-1, Math.min(1, output[position]! + amplitude));
+    };
+
+    addTone(0, 0.5, 220, 0.2);
+    addTone(0.5, 2, 440, 0.35);
+    addTone(2, 3, 330, 0.28);
+    addTone(3, 4, 550, 0.32);
+    addTone(4, 5.5, 440, 0.25);
+    addTone(4, 5.5, 660, 0.18);
+    addImpulse(0.02);
+    addImpulse(1);
+    addImpulse(2.5);
+    addImpulse(3);
+    addImpulse(4);
+    addImpulse(5.98);
     return output;
 }
 

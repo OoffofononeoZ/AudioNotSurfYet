@@ -120,6 +120,6 @@ V3 实际命令固定为 `fixtures:v3:golden`、`test:v3:unit`、`test:v3:integr
 ## 9. Current Gate State
 
 - V1/V2 canonical 与 owner evidence 均已批准；V2 关闭，V3 为 `In Progress`，V4–V6 保持 `Planned`。
-- V3 quality/eval、golden 与 failure taxonomy 已建立为 `in-review`；实现和 30 步 canonical 只按该契约执行。
+- V3 quality/eval、golden 与 failure taxonomy 已建立为 `in-review`；implementation candidate 与专项测试已就绪，30 步 canonical 只按该契约执行。
 - 当前没有正式 CI，所有结果限定为本地登记环境。
 - `/comingsoon`、`threeDTable`、TestLands 或 V4 Cube 中性预览不是 V3 implementation evidence。

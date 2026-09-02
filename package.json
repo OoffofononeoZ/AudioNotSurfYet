@@ -96,6 +96,9 @@
     "test:e2e:v2:chrome": "playwright test tests/e2e/v2-visualizer.spec.ts --project=chrome --workers=1",
     "test:e2e:v2:edge": "node tests/scripts/run-edge.mjs tests/e2e/v2-visualizer.spec.ts --workers=1",
     "test:e2e:v2": "npm run test:e2e:v2:chrome && npm run test:e2e:v2:edge",
+    "test:v3:unit": "vitest run tests/visualizer/v3-scene-unit.test.ts",
+    "test:v3:integration": "vitest run tests/visualizer/v3-renderer.integration.test.ts",
+    "test:e2e:v3": "playwright test tests/e2e/v3-visualizer.spec.ts --project=chrome --workers=1",
     "test:e2e:edge": "node tests/scripts/run-edge.mjs",
     "fixtures:generate": "node --experimental-strip-types tests/fixtures/generate-fixtures.ts",
     "fixtures:golden": "node --experimental-strip-types tests/analysis/generate-golden.ts",
@@ -118,6 +121,7 @@
     "fixtures:e5:golden:update": "node --experimental-strip-types tests/analysis/generate-e5-range-golden.ts --write",
     "fixtures:v1:golden": "vitest run tests/visualizer/v1-golden.test.ts",
     "fixtures:v2:golden": "vitest run tests/visualizer/v2-golden.test.ts",
+    "fixtures:v3:golden": "vitest run tests/visualizer/v3-golden.test.ts",
     "eval:m3": "node tests/scripts/run-m3-eval.mjs",
     "eval:m3:provisional": "node tests/scripts/run-m3-eval.mjs --provisional",
     "eval:m4": "node tests/scripts/run-m4-eval.mjs",
@@ -159,7 +163,9 @@
     "eval:v1": "node tests/scripts/run-v1-eval.mjs",
     "eval:v1:provisional": "node tests/scripts/run-v1-eval.mjs --provisional",
     "eval:v2": "node tests/scripts/run-v2-eval.mjs",
-    "eval:v2:provisional": "node tests/scripts/run-v2-eval.mjs --provisional"
+    "eval:v2:provisional": "node tests/scripts/run-v2-eval.mjs --provisional",
+    "eval:v3": "node tests/scripts/run-v3-eval.mjs",
+    "eval:v3:provisional": "node tests/scripts/run-v3-eval.mjs --provisional"
   },
   "dependencies": {
     "@chenglou/pretext": "^0.0.6",
