@@ -12,9 +12,9 @@
 
 `threeDTable.vue` 仍是试验表面；`MeydaCard.vue` 已是 Analyzer 21 项 Canvas/DOM renderer 容器。E4 已抽取 `analysisCanvasRenderer` 供 Analyzer card 与 Editor overlay 共用，E5 range 操作保持 overlay pointer-through；E6 已在真实 Chrome/Edge 和 10,000 事件压力下通过并获批准。E7 已把 overlay Teleport 为全视口 fixed Canvas，并在双浏览器验证 viewport backing store、marker-column clip、纵/横滚动与 `0 CSS px` 横轴 geometry；owner 视觉签字仍待完成。
 
-Visualizer V3 已由 DEC-039 固定为中心 Orthogonal Lines：现有 16:9 Canvas 由唯一 `VisualizerRendererHost` 接管，host 独占一个 Three.js renderer 和一个可取消视觉 RAF。场景使用单全屏 quad/shader、固定 `#020403` 背景；intensity 同时控制中心向两端长度与主线 alpha，thickness 为 CSS px，brightness >1 增强 halo，horizontal/vertical 互不串扰。
+Visualizer V3 已由 DEC-039 固定为中心 Orthogonal Lines，并由 30/30 canonical 与 2026-09-03 owner 人工验收关闭：现有 16:9 Canvas 由唯一 `VisualizerRendererHost` 接管，host 独占一个 Three.js renderer 和一个可取消视觉 RAF。场景使用单全屏 quad/shader、固定 `#020403` 背景；intensity 同时控制中心向两端长度与主线 alpha，thickness 为 CSS px，brightness >1 增强 halo，horizontal/vertical 互不串扰。
 
-V3 scene-local decay 的单位为秒，固定 60Hz 计算 `max(I, previous * exp(-4 * dt / decaySeconds))`，每秒 checkpoint 并按歌曲/template/binding revision 隔离；它不改写 V2 resolved value，也不能使用 RAF delta。播放持续绘制，暂停、seek、参数和 resize 只请求单帧；DPR 上限为 2。Cube Swarm 在 V4 前只显示中性预览，切换时仍要 dispose Orthogonal Lines scene 资源但不得重建 host/renderer/Canvas。
+V3 scene-local decay 的单位为秒，固定 60Hz 计算 `max(I, previous * exp(-4 * dt / decaySeconds))`，每秒 checkpoint 并按歌曲/template/binding revision 隔离；它不改写 V2 resolved value，也不能使用 RAF delta。播放持续绘制，暂停、seek、参数和 resize 只请求单帧；DPR 上限为 2。V4 当前负责用真实 Cube Swarm 替换中性预览，并保持同一 host/renderer/Canvas 与对称资源释放。
 
 ## RAF 与 Observer
 

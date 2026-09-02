@@ -1,13 +1,13 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-09-02
+last_reviewed: 2026-09-03
 upstream_docs:
   - "docs/product/success-metrics.md"
   - "docs/architecture/interface-contracts.md"
   - "docs/architecture/risk-register.md"
   - "docs/delivery/visualizer/execution-plan.md"
-next_action: "AC-V301–AC-V305 的 30/30 clean canonical 已登记为 in-review；等待 owner 人工验收，V4–V6 保持 Planned"
+next_action: "AC-V301–AC-V305 已获批准；实施并验证 AC-V401–AC-V406，V5–V6 保持 Planned"
 ---
 
 # Visualizer V1–V6 Acceptance Criteria

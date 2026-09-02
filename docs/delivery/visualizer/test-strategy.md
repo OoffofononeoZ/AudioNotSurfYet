@@ -1,14 +1,14 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-09-02
+last_reviewed: 2026-09-03
 upstream_docs:
   - "docs/product/success-metrics.md"
   - "docs/architecture/interface-contracts.md"
   - "docs/architecture/risk-register.md"
   - "docs/delivery/visualizer/execution-plan.md"
   - "docs/delivery/visualizer/acceptance-criteria.md"
-next_action: "V3 30 步 clean canonical 已登记为 in-review；等待 owner 人工验收与批准"
+next_action: "V3 30 步 canonical 已获批准；建立 V4 四专项与 34 步 canonical"
 ---
 
 # Visualizer V1–V6 Test Strategy
@@ -119,7 +119,7 @@ V3 实际命令固定为 `fixtures:v3:golden`、`test:v3:unit`、`test:v3:integr
 
 ## 9. Current Gate State
 
-- V1/V2 canonical 与 owner evidence 均已批准；V2 关闭，V3 为 `In Progress`，V4–V6 保持 `Planned`。
-- V3 quality/eval、golden 与 failure taxonomy 已建立为 `in-review`；implementation candidate 与专项测试已就绪，30 步 canonical 只按该契约执行。
+- V1–V3 canonical 与 owner evidence 均已批准并关闭；V4 为 `In Progress`，V5–V6 保持 `Planned`。
+- V3 quality/eval、golden、failure taxonomy、30 步 canonical 与人工门禁均已获批准；V4 继续把这 30 步作为回归基线。
 - 当前没有正式 CI，所有结果限定为本地登记环境。
 - `/comingsoon`、`threeDTable`、TestLands 或 V4 Cube 中性预览不是 V3 implementation evidence。

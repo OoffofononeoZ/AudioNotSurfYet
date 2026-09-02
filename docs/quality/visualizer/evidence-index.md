@@ -1,7 +1,7 @@
 ---
-status: in-review
+status: approved
 owner: "project-owner"
-last_reviewed: 2026-09-02
+last_reviewed: 2026-09-03
 upstream_docs:
   - "docs/quality/visualizer/eval-plan.md"
   - "docs/quality/visualizer/golden-examples.md"
@@ -13,7 +13,7 @@ upstream_docs:
   - "docs/quality/visualizer/v3-golden-examples.md"
   - "docs/quality/visualizer/v3-failure-taxonomy.md"
   - "docs/delivery/visualizer/milestone-plan.md"
-next_action: "V3 30/30 clean canonical 已登记为 in-review；等待 owner 在最新版 Chrome 完成人工验收并明确批准"
+next_action: "V3 evidence 已获 owner 批准并关闭；V4 为 In Progress，等待 V4 quality contract 与实现证据"
 ---
 
 # Visualizer Evidence Index
@@ -22,8 +22,8 @@ next_action: "V3 30/30 clean canonical 已登记为 in-review；等待 owner 在
 
 - V0-P、V0-A、V0-D：`Complete`。
 - V1：`Complete`；clean canonical 21/21 与适用人工门禁已由 owner 批准。
-- V2：`Complete`；clean canonical 26/26 已获 owner 批准；V3：`In Progress`，clean canonical 30/30 已登记为 `in-review`；V4–V6：`Planned`。
-- R-034–R-036 为 `Mitigated`；涉及真实场景确定性与资源的 R-037、R-038 继续为 `Open`。
+- V2：`Complete`；clean canonical 26/26 已获 owner 批准；V3：`Complete`，clean canonical 30/30 与人工门禁已获批准；V4：`In Progress`；V5–V6：`Planned`。
+- R-034–R-038 为 `Mitigated`；V4 WebGL context recovery 对应的 R-039 保持 `Open`。
 - Analyzer/Editor canonical 是相邻回归，不能替代 Visualizer evidence。
 
 ## Record Contract
@@ -95,7 +95,7 @@ next_action: "V3 30/30 clean canonical 已登记为 in-review；等待 owner 在
 | `20-build.log` | `f081c6d338e3a67faeca1191ef49bd7a7cab3449636f785b904d73b474e8e7ce` |
 | `21-diff-check.log` | `e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855` |
 
-### Manual Gaps and Review Boundary
+### Manual Review Result and Boundary
 
 - 原生 OS 打开/保存 picker、取消、覆盖提示与 `beforeunload` 不能由 Playwright 完整控制；owner 于 2026-09-02 对适用人工门禁完成签字。本记录只登记批准，不补写用户未提供的逐项数值或文案。
 - 本记录不证明 V2 动态绑定、V3/V4 场景、V5 WebM 或 V6 最终加固；中性预览明确不是完成场景。
@@ -267,13 +267,13 @@ next_action: "V3 30/30 clean canonical 已登记为 in-review；等待 owner 在
 
 ### Manual Gaps and Review Boundary
 
-- owner 尚需在最新版 Chrome 检查默认未绑定提示、横/竖线与 additive 交点、颜色/粗细/亮度/decay 隔离、point/range、播放/seek/暂停/刷新一致性、Cube Swarm 往返、1024 抽屉、键盘焦点、错误重试和工程恢复。
+- `project-owner` 于 2026-09-03 明确批准 Visualizer V3 canonical evidence、Orthogonal Lines 场景、确定性余辉与单 RendererHost 结果，并同意关闭 V3、开放 V4。
 - 自动中心像素、state hash 和资源 counter 证明受控输入有输出且满足代码契约，不替代最终视觉审美、GPU/驱动长会话或辅助技术人工判断。
-- R-037、R-038 已有 clean canonical 技术证据，但在 owner 人工验收与明确批准前继续为 `Open`；V3 保持 `In Progress`，V4 不开放。
+- R-037、R-038 依据 clean canonical 与 owner 人工验收改为 `Mitigated`；后续场景变更仍需作为回归风险持续验证。
 - V1/V2 canonical identity 不变且无需重跑；本记录不证明 Cube Swarm、WebM、V6 readiness 或生产上线。
 
 ### Owner Review Status
 
-尚未批准。人工验收认可后由 `project-owner` 明确回复：
+已批准。`project-owner` 原文：
 
 `我批准 Visualizer V3 canonical evidence、Orthogonal Lines 场景、确定性余辉与单 RendererHost 结果；同意将 V3 标记为 Complete 并开放 V4。`

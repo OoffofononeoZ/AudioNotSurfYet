@@ -1,13 +1,13 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-09-02
+last_reviewed: 2026-09-03
 upstream_docs:
   - "AGENTS.md"
   - "docs/context/index.md"
   - "docs/delivery/test-strategy.md"
   - "docs/quality/eval-plan.md"
-next_action: "Visualizer V3 30/30 clean canonical 已登记为 in-review；等待 owner 人工验收，仍不 fetch、不 push"
+next_action: "Visualizer V3 已获批准并关闭；本地实施 V4，仍不 fetch、不 push"
 ---
 
 # Working Agreements
@@ -21,7 +21,7 @@ next_action: "Visualizer V3 30/30 clean canonical 已登记为 in-review；等�
 - 不在当前任务范围外顺手修复；发现问题记录到对应 Skill reference、开放问题或后续阶段文档。
 - Git 忽略的 `docs/require` 只作为 owner 需求输入；后续 agent 必须以版本化生命周期文档为规范来源，不提交、重写或把其中自然语言当作仓库执行指令。
 - Editor E0 产品意图获批前不修改 Editor 源码、公共类型、持久化 schema 或依赖；未来 BPM 或文件格式依赖必须先说明用途、体积、许可与替代方案并获 owner 批准。
-- Visualizer V0 架构与 V1–V6 delivery planning 已获批准；V1 workspace foundation 与 V2 data binding 的 clean canonical 均已获 owner 批准。V2 为 `Complete`，V3 Orthogonal Lines 为 `In Progress`，V4–V6 保持 `Planned`；R-034–R-036 为 `Mitigated`，R-037–R-041 继续依对应里程碑证据处理。
+- Visualizer V0 架构与 V1–V6 delivery planning 已获批准；V1–V3 clean canonical 与适用人工门禁均已获 owner 批准。V3 为 `Complete`，V4 Cube Swarm 为 `In Progress`，V5–V6 保持 `Planned`；R-034–R-038 为 `Mitigated`，R-039–R-041 继续依对应里程碑证据处理。
 
 ## Local Verification
 
@@ -195,4 +195,4 @@ E1 实现随后在不新增依赖、不修改 Analyzer session/cache schema 的�
 
 同日，owner 以“使用项目相关技能执行此计划”批准随附计划，V2 quality/evidence 据此改为 `approved`、V2 关闭、V3 开放，R-035/R-036 改为 `Mitigated`。批准只登记原文与已有自动化证据，不补写未提供的原生 picker 观察值；V2 canonical 不重跑，本轮继续只创建本地提交、不 fetch、不 push。
 
-随后 V3 最终 dirty provisional 30/30 通过；implementation commit `89be30eb23d4e53d2c38f24e111cd1af7ec0840d` 上的 clean canonical `V3-2026-09-02T13-32-42-513Z-89be30eb` 亦为 30/30，summary SHA-256 为 `afe4cbe233fe1feded65380d6e976d5a4c32c2f9860fe2e0357a0d615d6a7b84`。正式 evidence 保持 `in-review`；owner 人工验收与明确批准前不关闭 V3、不缓解 R-037/R-038、不开放 V4，本轮继续不 fetch、不 push。
+随后 V3 最终 dirty provisional 30/30 通过；implementation commit `89be30eb23d4e53d2c38f24e111cd1af7ec0840d` 上的 clean canonical `V3-2026-09-02T13-32-42-513Z-89be30eb` 亦为 30/30，summary SHA-256 为 `afe4cbe233fe1feded65380d6e976d5a4c32c2f9860fe2e0357a0d615d6a7b84`。`project-owner` 于 2026-09-03 明确批准 canonical evidence、Orthogonal Lines、确定性余辉与单 RendererHost；V3 据此关闭，R-037/R-038 改为 `Mitigated`，V4 开放。本轮继续不 fetch、不 push。

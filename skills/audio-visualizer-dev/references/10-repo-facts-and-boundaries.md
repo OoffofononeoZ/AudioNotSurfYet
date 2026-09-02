@@ -2,7 +2,7 @@
 
 ## 证据基线
 
-- 最后核对日期：2026-09-02。
+- 最后核对日期：2026-09-03。
 - 首要来源：当前仓库的 `package.json`、配置、`src/`、Git 状态与 Git 历史。
 - 补充来源：Codex 任务 `019f82bc-0838-7ab3-baba-1a7571992901`；只保留其中能由当前仓库或可复现验证支持的长期事实。
 - 历史任务结论不得覆盖当前代码；差异记录在 [开放问题与项目差异](99-open-questions-and-project-deltas.md)。
@@ -26,7 +26,7 @@
 
 | 区域 | 当前职责 | 主要证据 |
 | --- | --- | --- |
-| `src/views/` | 路由页面；Home、Analyzer、Editor 和 Visualizer V1–V3 工作台为产品表面，TestLands/ComingSoon 保持试验或通用占位 | `src/router/index.ts`、各 view |
+| `src/views/` | 路由页面；Home、Analyzer、Editor 和 Visualizer V1–V4 工作台为产品表面，TestLands/ComingSoon 保持试验或通用占位 | `src/router/index.ts`、各 view |
 | `src/layouts/` | 应用共享外壳；`MainLayout` 组合 Header、路由内容和 MusicBar | `src/layouts/MainLayout.vue` |
 | `src/components/` | 播放条、列表、动画列表、Canvas/WebGL 背景和试验性图表 | 各 Vue SFC |
 | `src/audio/` | `AudioEngine` 独占 Web Audio 节点；`AudioSessionService` 编排 File、队列命令、能量和资源释放 | `audioEngine.ts`、`audioSessionService.ts` |
@@ -44,7 +44,7 @@
 - 当前是单一前端仓库；未发现后端、数据库、认证、云端媒体库或部署配置。
 - 音频文件由用户通过 `showOpenFilePicker()` 选择；runtime File 保存在 session service，最近队列、文件句柄、唯一 current Blob 与匹配的分析 cache 由 SessionRepository 保存，Pinia `$state` 不持有浏览器资源、PCM 或 typed payload。
 - `configStore` 继续把 `volume` 和 `musicBarSettings.style` 保存到 localStorage；M5 最近会话使用独立 IndexedDB V1，不改变 config schema。
-- Analyzer 21/21 与 Analyzer-only readiness 已由版本化文档和证据确认；Editor E1–E7 已由 clean canonical 和 owner 批准。Visualizer V1 workspace foundation 与 V2 动态绑定 canonical 均已获批准；V3 Orthogonal Lines clean canonical 30/30 已登记为 `in-review`，但尚无 owner 人工批准。V4 场景、V5 录制和整体 readiness 尚无完成证据。`/comingsoon` 只是通用占位。
+- Analyzer 21/21 与 Analyzer-only readiness 已由版本化文档和证据确认；Editor E1–E7 已由 clean canonical 和 owner 批准。Visualizer V1–V3 canonical 与人工门禁均已获批准；V4 Cube Swarm 为当前实现阶段，V5 录制和整体 readiness 尚无完成证据。`/comingsoon` 只是通用占位。
 - `testcomp.vue`、`TestLands.vue`、`threeDTable.vue` 和 `MeydaCard.vue` 含试验或占位内容，不应默认视为稳定公共接口。
 
 ## 证据优先级

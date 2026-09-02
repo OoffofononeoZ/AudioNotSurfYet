@@ -1,13 +1,13 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-09-02
+last_reviewed: 2026-09-03
 upstream_docs:
   - "docs/context/index.md"
   - "docs/product/scope.md"
   - "docs/architecture/system-design.md"
   - "docs/delivery/execution-plan.md"
-next_action: "Visualizer V2 已获 owner 批准并关闭；V3 Orthogonal Lines 为 In Progress，PROD-015 仍开放"
+next_action: "Visualizer V3 已获 owner 批准并关闭；V4 Cube Swarm 为 In Progress，PROD-015 仍开放"
 ---
 
 # Decision Registry
@@ -70,6 +70,7 @@ next_action: "Visualizer V2 已获 owner 批准并关闭；V3 Orthogonal Lines �
 | DEC-037 | 2026-09-02 | 批准 Visualizer V0：当前本地歌曲、单场景、固定 16:9、最多四个唯一 Analyzer 特征、两个内置模板，先实时预览/JSON 后实时 WebM；开放 system design | project-owner | approved | [Scope](../product/scope.md) | 场景数量、特征上限、数据来源、输出格式、录制路线或产品边界改变 |
 | DEC-038 | 2026-09-02 | Visualizer delivery 固定新工程默认 Orthogonal Lines/720p30；1280+ 常驻三栏，1024–1279 中央预览加互斥抽屉；V1–V6 逐里程碑 canonical 与 owner 审批 | project-owner | approved | [Visualizer execution plan](../delivery/visualizer/execution-plan.md) | 默认模板/output、断点布局、切片、证据节奏或逐里程碑门禁变化 |
 | DEC-039 | 2026-09-02 | V3 Orthogonal Lines 使用中心正交结构；intensity 同时控制中心向两端的长度与透明度；decay 为不改写 V2 resolved value 的确定性时间余辉；背景固定 `#020403`，颜色由现有参数控制 | project-owner | approved | [Binding and scene contracts](../architecture/visualizer/binding-and-scene-contracts.md) | 线条构图、intensity 映射、decay 算法/单位、背景或参数所有权改变 |
+| DEC-040 | 2026-09-03 | 批准 V3 30/30 canonical evidence、Orthogonal Lines、确定性余辉与单 RendererHost；V3 改为 Complete、R-037/R-038 改为 Mitigated并开放 V4 | project-owner | approved | [Visualizer evidence](../quality/visualizer/evidence-index.md) | V3 canonical identity、owner review 结论或 V4 开放门禁改变 |
 
 ## Approval Evidence
 
@@ -80,6 +81,8 @@ next_action: "Visualizer V2 已获 owner 批准并关闭；V3 Orthogonal Lines �
 同日，`project-owner` 明确回复“使用项目相关技能执行此计划”。随附计划要求保持 V2 canonical identity 不变、批准 V2 quality/evidence、关闭 V2 并开放 V3；据此 V2 为 `Complete`、R-035/R-036 为 `Mitigated`、V3 为 `In Progress`。该批准不补写用户未提供的人工观察值，不构成 V3 canonical、V4–V6 或生产上线通过；继续只创建本地提交，不 fetch、不 push。
 
 同一计划固定 DEC-039 的中心正交线条、intensity 长度/透明度双映射、确定性时间余辉与 `#020403` 背景，并授权先提交 V3 quality contract 再实施。该决定细化 ADR-0016，不改变 JSON V1、V2 resolved value、四特征上限或 V4–V6 范围。
+
+2026-09-03，`project-owner` 明确回复：“我批准 Visualizer V3 canonical evidence、Orthogonal Lines 场景、确定性余辉与单 RendererHost 结果；同意将 V3 标记为 Complete 并开放 V4。”DEC-040 据此生效；V3 canonical identity 保持不变且无需重跑，R-037/R-038 改为 `Mitigated`，V4 改为 `In Progress`。该批准不构成 Cube Swarm、WebM、V6 readiness 或生产上线通过。
 
 同日，`project-owner` 明确要求实施 Q0 质量设计计划，批准了 Q0 前置、四级严重度和 readiness 后置的阶段安排；同时要求三份质量文档先保持 `in-review`，经单独审阅后才生效。因此 DEC-010 的时序决定已批准，但 Q0 内容尚未批准。
 
