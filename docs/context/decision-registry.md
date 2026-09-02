@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/product/scope.md"
   - "docs/architecture/system-design.md"
   - "docs/delivery/execution-plan.md"
-next_action: "Visualizer V1 已批准，R-034 为 Mitigated；V2 数据绑定正在实施，PROD-015 仍开放"
+next_action: "Visualizer V2 26/26 canonical 已登记为 in-review；owner 批准前 V3 不开放，PROD-015 仍开放"
 ---
 
 # Decision Registry

@@ -8,7 +8,7 @@ upstream_docs:
   - "docs/delivery/visualizer/test-strategy.md"
   - "docs/architecture/visualizer/binding-and-scene-contracts.md"
   - "docs/architecture/risk-register.md"
-next_action: "实现 V2 planner、projection、Editor snapshot、deterministic resolver 与 inspector；通过 provisional 后在 clean commit 上运行 26 步 canonical"
+next_action: "V2 clean canonical 26/26 已登记为 in-review；owner 复核数据绑定、四特征边界、Editor snapshot 与 resolver 后决定是否开放 V3"
 ---
 
 # Visualizer V2 Eval Plan
