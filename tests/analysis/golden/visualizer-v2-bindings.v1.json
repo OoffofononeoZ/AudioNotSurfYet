@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "scalarInterpolation": {
+    "values": [0, 1],
+    "timeSeconds": 0.5,
+    "expected": 0.5
+  },
+  "vectorProjection": {
+    "quantizedFrames": [[2, 10, 6], [4, 6, 8]],
+    "scale": 0.5,
+    "timeSeconds": 0,
+    "expectedFull": [1, 5, 3],
+    "expectedBandMean": 3,
+    "expectedMean": 3,
+    "expectedMax": 5,
+    "expectedPeak": 0.5
+  },
+  "editorEvents": {
+    "range": [0.5, 1.5],
+    "sampleTimes": [0.499, 0.5, 1.499, 1.5],
+    "expectedGate": [0, 1, 1, 0],
+    "point": 1,
+    "pointReleaseSeconds": 0.12
+  },
+  "featurePlan": {
+    "requested": ["energy", "rms", "energy", "zcr", "spectralFlux"],
+    "expectedStableOrder": ["rms", "zcr", "energy", "spectralFlux"]
+  }
+}

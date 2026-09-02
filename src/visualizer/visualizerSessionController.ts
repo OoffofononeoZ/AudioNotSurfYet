@@ -5,6 +5,17 @@ import type {
 } from '../audio/audioSessionService';
 import type { useAudioSessionStore } from '../stores/audioSessionStore';
 import type { EditorTrackIdentityV1 } from '../editor/types';
+import type { EditorDraftRepositoryPort } from '../editor/editorDraftRepository';
+import type { EditorFileGateway } from '../editor/fileIO';
+import {
+    EditorFormatCodecRegistry,
+    validateEditorProjectV1,
+} from '../editor/projectCodec';
+import type {
+    AnalysisConsumerLease,
+    AnalysisCoordinator,
+} from '../analysis/analysisCoordinator';
+import type { AnalysisCoordinatorSnapshot } from '../analysis/types';
 import type { VisualizerFileGateway } from './fileIO';
 import {
     createInitialVisualizerProject,
@@ -13,6 +24,14 @@ import {
     visualizerProjectFileName,
 } from './projectCodec';
 import { SceneRegistry } from './sceneRegistry';
+import {
+    planVisualizerFeatures,
+    VisualizerBindingPlannerError,
+} from './bindingPlanner';
+import {
+    VisualizerBindingResolver,
+    type VisualizerResolvedParameter,
+} from './bindingResolver';
 import type {
     VisualizerDraftEnvelopeV1,
     VisualizerFrameRate,
@@ -21,6 +40,8 @@ import type {
     VisualizerSessionSnapshot,
     VisualizerTemplateId,
     VisualizerTrackValidationContext,
+    VisualizerParameterBindingV1,
+    VisualizerEditorSnapshotSource,
 } from './types';
 import type { VisualizerDraftRepositoryPort } from './visualizerDraftRepository';
 
@@ -35,6 +56,14 @@ const initialSnapshot = (): VisualizerSessionSnapshot => ({
     conflictingDraft: null,
     persistence: 'clean',
     restoredFromDraft: false,
+    bindingRuntime: {
+        bindingRevision: 0,
+        activeFeatureIds: [],
+        readyFeatureIds: [],
+        analysisState: 'idle',
+        analysisProgress: 0,
+        editorSnapshotSource: 'none',
+    },
 });
 
 const cloneProject = (project: VisualizerProjectV1): VisualizerProjectV1 =>
@@ -56,13 +85,40 @@ const cloneSnapshot = (
     conflictingDraft: snapshot.conflictingDraft
         ? cloneEnvelope(snapshot.conflictingDraft)
         : null,
+    bindingRuntime: {
+        ...snapshot.bindingRuntime,
+        activeFeatureIds: [...snapshot.bindingRuntime.activeFeatureIds],
+        readyFeatureIds: [...snapshot.bindingRuntime.readyFeatureIds],
+    },
 });
+
+export class VisualizerBindingUpdateError extends Error {
+    readonly code:
+        | 'binding-invalid'
+        | 'analysis-feature-limit'
+        | 'editor-snapshot-unavailable'
+        | 'editor-snapshot-mismatch'
+        | 'editor-snapshot-in-use';
+
+    constructor(
+        code: VisualizerBindingUpdateError['code'],
+        message: string,
+    ) {
+        super(message);
+        this.name = 'VisualizerBindingUpdateError';
+        this.code = code;
+    }
+}
 
 export interface VisualizerSessionControllerOptions {
     audioSession: AudioSessionService;
     store: AudioSessionStore;
     repository: VisualizerDraftRepositoryPort;
     fileGateway: VisualizerFileGateway;
+    analysisCoordinator?: AnalysisCoordinator;
+    editorRepository?: EditorDraftRepositoryPort;
+    editorFileGateway?: EditorFileGateway;
+    editorCodecs?: EditorFormatCodecRegistry;
     codecs?: VisualizerFormatCodecRegistry;
     registry?: SceneRegistry;
     now?: () => Date;
@@ -85,6 +141,10 @@ export class VisualizerSessionController {
     private readonly store: AudioSessionStore;
     private readonly repository: VisualizerDraftRepositoryPort;
     private readonly fileGateway: VisualizerFileGateway;
+    private readonly analysisCoordinator?: AnalysisCoordinator;
+    private readonly editorRepository?: EditorDraftRepositoryPort;
+    private readonly editorFileGateway?: EditorFileGateway;
+    private readonly editorCodecs: EditorFormatCodecRegistry;
     private readonly codecs: VisualizerFormatCodecRegistry;
     private readonly registry: SceneRegistry;
     private readonly now: () => Date;
@@ -102,6 +162,9 @@ export class VisualizerSessionController {
     private readonly listeners = new Set<VisualizerSessionListener>();
     private snapshot = initialSnapshot();
     private playbackLease: RoutePlaybackLease | null = null;
+    private analysisLease: AnalysisConsumerLease | null = null;
+    private unsubscribeAnalysis: (() => void) | null = null;
+    private readonly bindingResolver: VisualizerBindingResolver;
     private routeGeneration = 0;
     private saveTimer: ReturnType<typeof setTimeout> | null = null;
     private pendingProject: VisualizerProjectV1 | null = null;
@@ -114,8 +177,13 @@ export class VisualizerSessionController {
         this.store = options.store;
         this.repository = options.repository;
         this.fileGateway = options.fileGateway;
+        this.analysisCoordinator = options.analysisCoordinator;
+        this.editorRepository = options.editorRepository;
+        this.editorFileGateway = options.editorFileGateway;
+        this.editorCodecs = options.editorCodecs ?? new EditorFormatCodecRegistry();
         this.codecs = options.codecs ?? new VisualizerFormatCodecRegistry();
         this.registry = options.registry ?? new SceneRegistry();
+        this.bindingResolver = new VisualizerBindingResolver(this.registry);
         this.now = options.now ?? (() => new Date());
         this.createId = options.createId ?? (() => crypto.randomUUID());
         this.createSeed = options.createSeed
@@ -153,6 +221,7 @@ export class VisualizerSessionController {
         const generation = ++this.routeGeneration;
         await this.flush();
         if (generation !== this.routeGeneration || this.disposed) return;
+        this.releaseAnalysisLease();
         this.releaseLease();
         if (!trackId) {
             this.publish(initialSnapshot());
@@ -198,19 +267,47 @@ export class VisualizerSessionController {
                 return;
             }
             if (draft) {
-                const project = validateVisualizerProjectV1(
+                const restored = validateVisualizerProjectV1(
                     draft.project,
                     context,
                     this.registry,
                 );
-                this.publishReady(trackId, project, true, 'saved');
+                const enriched = await this.attachEditorDraft(
+                    restored,
+                    context,
+                    generation,
+                );
+                if (generation !== this.routeGeneration || this.disposed) return;
+                this.publishReady(
+                    trackId,
+                    enriched.project,
+                    true,
+                    enriched.changed ? 'saving' : 'saved',
+                    enriched.source,
+                );
+                this.activateAnalysis(enriched.project);
+                if (enriched.changed) this.queueSave(enriched.project, true);
                 return;
             }
-            const project = this.createProject(trackId);
-            this.publishReady(trackId, project, false, 'clean');
-            this.queueSave(project, true);
+            const created = this.createProject(trackId);
+            const enriched = await this.attachEditorDraft(
+                created,
+                context,
+                generation,
+            );
+            if (generation !== this.routeGeneration || this.disposed) return;
+            this.publishReady(
+                trackId,
+                enriched.project,
+                false,
+                'clean',
+                enriched.source,
+            );
+            this.activateAnalysis(enriched.project);
+            this.queueSave(enriched.project, true);
         } catch (error) {
             if (generation !== this.routeGeneration || this.disposed) return;
+            this.releaseAnalysisLease();
             this.releaseLease();
             this.publishUnavailable(
                 trackId,
@@ -249,10 +346,7 @@ export class VisualizerSessionController {
             !context
             || !['ready', 'not-persisted'].includes(this.snapshot.state)
         ) return;
-        const candidate = validateVisualizerProjectV1({
-            ...project,
-            updatedAt: this.now().toISOString(),
-        }, context, this.registry);
+        const candidate = this.validateCandidate(project, context);
         this.publish({
             ...this.snapshot,
             state: 'ready',
@@ -260,7 +354,109 @@ export class VisualizerSessionController {
             persistence: 'saving',
             message: undefined,
         });
+        this.advanceBindingRuntime(candidate);
         this.queueSave(candidate, immediate);
+    }
+
+    updateBinding(binding: VisualizerParameterBindingV1): void {
+        const project = this.snapshot.project;
+        if (!project) return;
+        const index = project.scene.bindings.findIndex(
+            (entry) => entry.parameterId === binding.parameterId,
+        );
+        if (index < 0) {
+            throw new VisualizerBindingUpdateError(
+                'binding-invalid',
+                '找不到对应的场景参数。',
+            );
+        }
+        const bindings = project.scene.bindings.map((entry, candidateIndex) =>
+            candidateIndex === index ? structuredClone(binding) : entry);
+        this.updateProject({
+            ...project,
+            scene: { ...project.scene, bindings },
+        }, true);
+    }
+
+    resolveParameters(timeSeconds: number): VisualizerResolvedParameter[] {
+        const project = this.snapshot.project;
+        if (!project) return [];
+        return this.bindingResolver.resolve(
+            project,
+            Math.max(0, Number.isFinite(timeSeconds) ? timeSeconds : 0),
+            (featureId) => this.analysisLease?.getSeries(featureId) ?? null,
+        );
+    }
+
+    async reloadEditorDraft(): Promise<'loaded' | 'unavailable'> {
+        const project = this.snapshot.project;
+        const context = this.currentTrackContext();
+        if (!project || !context || !this.editorRepository) return 'unavailable';
+        const generation = this.routeGeneration;
+        const envelope = await this.editorRepository.restore();
+        if (generation !== this.routeGeneration || this.disposed) return 'unavailable';
+        if (!envelope) {
+            throw new VisualizerBindingUpdateError(
+                'editor-snapshot-unavailable',
+                '没有可用的 Editor 草稿。',
+            );
+        }
+        const editorProject = this.validateEditorSnapshot(envelope.project, context);
+        this.commitEditorSnapshot(project, editorProject, envelope.savedAt, 'draft');
+        return 'loaded';
+    }
+
+    async importEditorProject(codecId = 'json-v1'): Promise<'imported' | 'cancelled'> {
+        const project = this.snapshot.project;
+        const context = this.currentTrackContext();
+        if (!project || !context || !this.editorFileGateway) return 'cancelled';
+        const generation = this.routeGeneration;
+        const codec = this.editorCodecs.get(codecId);
+        const opened = await this.editorFileGateway.open(codec);
+        if (!opened || generation !== this.routeGeneration || this.disposed) {
+            return 'cancelled';
+        }
+        let editorProject;
+        try {
+            editorProject = codec.decode(opened.bytes, context);
+        } catch (error) {
+            throw new VisualizerBindingUpdateError(
+                'editor-snapshot-mismatch',
+                error instanceof Error ? error.message : 'Editor 工程无效。',
+            );
+        }
+        if (generation !== this.routeGeneration || this.disposed) return 'cancelled';
+        this.commitEditorSnapshot(
+            project,
+            editorProject,
+            this.now().toISOString(),
+            'imported',
+        );
+        return 'imported';
+    }
+
+    removeEditorSnapshot(): void {
+        const project = this.snapshot.project;
+        if (!project?.editorSnapshot) return;
+        const references = project.scene.bindings.filter(
+            (binding) => binding.source.kind === 'editor-event',
+        );
+        if (references.length > 0) {
+            throw new VisualizerBindingUpdateError(
+                'editor-snapshot-in-use',
+                `仍有 ${references.length} 个参数使用 Editor 数据。`,
+            );
+        }
+        const candidate = structuredClone(project);
+        delete candidate.editorSnapshot;
+        this.updateProject(candidate, true);
+        this.publish({
+            ...this.snapshot,
+            bindingRuntime: {
+                ...this.snapshot.bindingRuntime,
+                editorSnapshotSource: 'none',
+            },
+        });
     }
 
     async importProject(codecId = 'json-v1'): Promise<'imported' | 'cancelled'> {
@@ -280,6 +476,14 @@ export class VisualizerSessionController {
             persistence: 'saving',
             message: undefined,
         });
+        this.publish({
+            ...this.snapshot,
+            bindingRuntime: {
+                ...this.snapshot.bindingRuntime,
+                editorSnapshotSource: candidate.editorSnapshot ? 'project' : 'none',
+            },
+        });
+        this.advanceBindingRuntime(candidate);
         this.queueSave(candidate, true);
         await this.flush();
         return 'imported';
@@ -300,7 +504,14 @@ export class VisualizerSessionController {
         const trackId = this.snapshot.activeTrackId;
         if (this.snapshot.state !== 'draft-conflict' || !trackId) return;
         const project = this.createProject(trackId);
-        this.publishReady(trackId, project, false, 'saving');
+        this.publishReady(
+            trackId,
+            project,
+            false,
+            'saving',
+            project.editorSnapshot ? 'project' : 'none',
+        );
+        this.activateAnalysis(project);
         this.queueSave(project, true);
         await this.flush();
     }
@@ -312,6 +523,7 @@ export class VisualizerSessionController {
             (track) => track.trackHash === draft.project.track.contentHash,
         );
         if (!previous) {
+            this.releaseAnalysisLease();
             this.releaseLease();
             this.publishUnavailable(
                 this.snapshot.routeTrackId ?? '',
@@ -320,6 +532,7 @@ export class VisualizerSessionController {
             return { kind: 'fallback' };
         }
         const generation = ++this.routeGeneration;
+        this.releaseAnalysisLease();
         this.releaseLease();
         try {
             const lease = await this.audioSession.acquireRoutePlayback({
@@ -338,9 +551,17 @@ export class VisualizerSessionController {
                 context,
                 this.registry,
             );
-            this.publishReady(previous.id, project, true, 'saved');
+            this.publishReady(
+                previous.id,
+                project,
+                true,
+                'saved',
+                project.editorSnapshot ? 'project' : 'none',
+            );
+            this.activateAnalysis(project);
             return { kind: 'restored-old', trackId: previous.id };
         } catch {
+            this.releaseAnalysisLease();
             this.releaseLease();
             this.publishUnavailable(previous.id, '旧歌曲当前无法恢复，草稿已保留。');
             return { kind: 'fallback' };
@@ -390,6 +611,7 @@ export class VisualizerSessionController {
     async leave(): Promise<void> {
         ++this.routeGeneration;
         await this.flush();
+        this.releaseAnalysisLease();
         this.releaseLease();
         this.publish(initialSnapshot());
     }
@@ -399,8 +621,10 @@ export class VisualizerSessionController {
         this.disposed = true;
         ++this.routeGeneration;
         await this.flush();
+        this.releaseAnalysisLease();
         this.releaseLease();
         this.repository.close();
+        this.editorRepository?.close();
         this.removeBeforeUnload();
         this.listeners.clear();
     }
@@ -443,6 +667,195 @@ export class VisualizerSessionController {
             : null;
     }
 
+    private currentTrackContext(): VisualizerTrackValidationContext | null {
+        return this.snapshot.activeTrackId
+            ? this.trackContext(this.snapshot.activeTrackId)
+            : null;
+    }
+
+    private validateCandidate(
+        project: VisualizerProjectV1,
+        context: VisualizerTrackValidationContext,
+    ): VisualizerProjectV1 {
+        try {
+            planVisualizerFeatures(project);
+        } catch (error) {
+            if (error instanceof VisualizerBindingPlannerError) {
+                throw new VisualizerBindingUpdateError(
+                    'analysis-feature-limit',
+                    error.message,
+                );
+            }
+            throw error;
+        }
+        try {
+            return validateVisualizerProjectV1({
+                ...project,
+                updatedAt: this.now().toISOString(),
+            }, context, this.registry);
+        } catch (error) {
+            throw new VisualizerBindingUpdateError(
+                'binding-invalid',
+                error instanceof Error ? error.message : '绑定无效。',
+            );
+        }
+    }
+
+    private validateEditorSnapshot(
+        project: Parameters<typeof validateEditorProjectV1>[0],
+        context: VisualizerTrackValidationContext,
+    ) {
+        try {
+            return validateEditorProjectV1(project, context);
+        } catch (error) {
+            throw new VisualizerBindingUpdateError(
+                'editor-snapshot-mismatch',
+                error instanceof Error ? error.message : 'Editor 工程与当前歌曲不匹配。',
+            );
+        }
+    }
+
+    private async attachEditorDraft(
+        project: VisualizerProjectV1,
+        context: VisualizerTrackValidationContext,
+        generation: number,
+    ): Promise<{
+        project: VisualizerProjectV1;
+        changed: boolean;
+        source: VisualizerEditorSnapshotSource;
+    }> {
+        if (project.editorSnapshot) {
+            return { project, changed: false, source: 'project' };
+        }
+        if (!this.editorRepository) {
+            return { project, changed: false, source: 'none' };
+        }
+        try {
+            const envelope = await this.editorRepository.restore();
+            if (
+                generation !== this.routeGeneration
+                || this.disposed
+                || !envelope
+                || envelope.project.track.contentHash !== context.contentHash
+            ) return { project, changed: false, source: 'none' };
+            const editorProject = validateEditorProjectV1(envelope.project, context);
+            const candidate = validateVisualizerProjectV1({
+                ...project,
+                editorSnapshot: {
+                    capturedAt: envelope.savedAt,
+                    project: editorProject,
+                },
+            }, context, this.registry);
+            return { project: candidate, changed: true, source: 'draft' };
+        } catch {
+            return { project, changed: false, source: 'none' };
+        }
+    }
+
+    private commitEditorSnapshot(
+        project: VisualizerProjectV1,
+        editorProject: ReturnType<typeof validateEditorProjectV1>,
+        capturedAt: string,
+        source: VisualizerEditorSnapshotSource,
+    ): void {
+        this.updateProject({
+            ...project,
+            editorSnapshot: { capturedAt, project: editorProject },
+        }, true);
+        this.publish({
+            ...this.snapshot,
+            bindingRuntime: {
+                ...this.snapshot.bindingRuntime,
+                editorSnapshotSource: source,
+            },
+        });
+    }
+
+    private activateAnalysis(project: VisualizerProjectV1): void {
+        if (!this.analysisCoordinator) return;
+        if (!this.analysisLease) {
+            this.analysisLease = this.analysisCoordinator.acquireConsumer('visualizer');
+            this.unsubscribeAnalysis = this.analysisLease.subscribe(
+                (snapshot) => this.handleAnalysisSnapshot(snapshot),
+            );
+        }
+        this.advanceBindingRuntime(project);
+    }
+
+    private advanceBindingRuntime(project: VisualizerProjectV1): void {
+        const featureIds = planVisualizerFeatures(project);
+        const previous = this.snapshot.bindingRuntime.activeFeatureIds;
+        const changed = previous.length !== featureIds.length
+            || previous.some((featureId, index) => featureId !== featureIds[index]);
+        this.bindingResolver.reset();
+        this.publish({
+            ...this.snapshot,
+            bindingRuntime: {
+                ...this.snapshot.bindingRuntime,
+                bindingRevision: this.snapshot.bindingRuntime.bindingRevision + 1,
+                activeFeatureIds: [...featureIds],
+                readyFeatureIds: changed
+                    ? []
+                    : [...this.snapshot.bindingRuntime.readyFeatureIds],
+                analysisState: featureIds.length === 0
+                    ? 'idle'
+                    : changed ? 'loading' : this.snapshot.bindingRuntime.analysisState,
+                analysisProgress: featureIds.length === 0
+                    ? 0
+                    : changed ? 0 : this.snapshot.bindingRuntime.analysisProgress,
+                analysisMessage: undefined,
+            },
+        });
+        if (!this.analysisLease || !changed) return;
+        const revision = this.snapshot.bindingRuntime.bindingRevision;
+        void this.analysisLease.setActiveFeatures(featureIds).catch((error) => {
+            if (
+                this.disposed
+                || revision !== this.snapshot.bindingRuntime.bindingRevision
+            ) return;
+            this.publish({
+                ...this.snapshot,
+                bindingRuntime: {
+                    ...this.snapshot.bindingRuntime,
+                    analysisState: 'error',
+                    analysisMessage: error instanceof Error
+                        ? error.message
+                        : '分析启动失败。',
+                },
+            });
+        });
+    }
+
+    private handleAnalysisSnapshot(snapshot: AnalysisCoordinatorSnapshot): void {
+        const project = this.snapshot.project;
+        if (!project || this.disposed) return;
+        if (
+            snapshot.trackHash
+            && snapshot.trackHash !== project.track.contentHash
+        ) return;
+        const active = this.snapshot.bindingRuntime.activeFeatureIds;
+        const ready = snapshot.readyFeatureIds.filter((featureId) =>
+            active.includes(featureId));
+        const analysisState = active.length === 0
+            ? 'idle'
+            : snapshot.error
+                ? 'error'
+                : ready.length === active.length && snapshot.state === 'ready'
+                    ? 'ready'
+                    : 'loading';
+        if (analysisState === 'ready') this.bindingResolver.reset();
+        this.publish({
+            ...this.snapshot,
+            bindingRuntime: {
+                ...this.snapshot.bindingRuntime,
+                readyFeatureIds: ready,
+                analysisState,
+                analysisProgress: snapshot.progress,
+                analysisMessage: snapshot.error?.message,
+            },
+        });
+    }
+
     private queueSave(project: VisualizerProjectV1, immediate: boolean): void {
         this.pendingProject = cloneProject(project);
         if (this.saveTimer) this.clearTimer(this.saveTimer);
@@ -470,6 +883,7 @@ export class VisualizerSessionController {
         project: VisualizerProjectV1,
         restoredFromDraft: boolean,
         persistence: VisualizerSessionSnapshot['persistence'],
+        editorSnapshotSource: VisualizerEditorSnapshotSource,
     ): void {
         this.publish({
             state: persistence === 'not-persisted' ? 'not-persisted' : 'ready',
@@ -479,6 +893,11 @@ export class VisualizerSessionController {
             conflictingDraft: null,
             persistence,
             restoredFromDraft,
+            bindingRuntime: {
+                ...initialSnapshot().bindingRuntime,
+                bindingRevision: this.snapshot.bindingRuntime.bindingRevision + 1,
+                editorSnapshotSource,
+            },
         });
     }
 
@@ -494,6 +913,14 @@ export class VisualizerSessionController {
     private releaseLease(): void {
         this.playbackLease?.release();
         this.playbackLease = null;
+    }
+
+    private releaseAnalysisLease(): void {
+        this.unsubscribeAnalysis?.();
+        this.unsubscribeAnalysis = null;
+        this.analysisLease?.release();
+        this.analysisLease = null;
+        this.bindingResolver.reset();
     }
 
     private publish(snapshot: VisualizerSessionSnapshot): void {

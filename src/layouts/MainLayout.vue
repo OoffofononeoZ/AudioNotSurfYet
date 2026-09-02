@@ -73,9 +73,12 @@ const editorPlaybackActive = computed(() =>
     ));
 const visualizerController = new VisualizerSessionController({
     audioSession,
+    analysisCoordinator,
     store: audioSessionStore,
     repository: new VisualizerDraftRepository(),
     fileGateway: new NativeVisualizerFileGateway(),
+    editorRepository: new EditorDraftRepository(),
+    editorFileGateway: new NativeEditorFileGateway(),
 });
 provide(visualizerSessionControllerKey, visualizerController);
 const visualizerSnapshot = shallowRef(visualizerController.getSnapshot());

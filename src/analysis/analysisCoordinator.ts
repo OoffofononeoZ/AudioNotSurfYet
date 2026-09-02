@@ -58,7 +58,7 @@ interface AnalysisWorkerPort {
 
 type WorkerFactory = () => AnalysisWorkerPort;
 
-export type AnalysisConsumer = 'analyzer' | 'editor';
+export type AnalysisConsumer = 'analyzer' | 'editor' | 'visualizer';
 
 export interface AnalysisConsumerLease {
     token: string;
