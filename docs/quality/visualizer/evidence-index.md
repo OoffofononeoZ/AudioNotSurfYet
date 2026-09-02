@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/quality/visualizer/golden-examples.md"
   - "docs/quality/visualizer/failure-taxonomy.md"
   - "docs/delivery/visualizer/milestone-plan.md"
-next_action: "V2 已开放；先提交 V2 eval/golden/failure 契约，再实现数据绑定并形成独立 canonical evidence"
+next_action: "V2 eval/golden/failure 契约已形成；完成实现、provisional 与 clean canonical 后追加 V2 in-review record"
 ---
 
 # Visualizer Evidence Index
