@@ -1,12 +1,12 @@
 ---
-status: in-review
+status: approved
 owner: "project-owner"
 last_reviewed: 2026-09-02
 upstream_docs:
   - "docs/product/scope.md"
   - "docs/architecture/system-design.md"
   - "docs/architecture/interface-contracts.md"
-next_action: "复核 Visualizer JSON V1、歌曲 identity、Editor 快照和单草稿边界；批准前不实现 codec"
+next_action: "在 V1/V2 delivery planning 中映射 codec、草稿、Editor 快照与原子导入验收；规划批准前不实现"
 ---
 
 # Visualizer Project Format V1
@@ -105,4 +105,4 @@ Visualizer 使用独立原生 IndexedDB：
 
 ## Approval State
 
-本格式为 Visualizer V0 架构草案。`project-owner` 批准 system design、interface contracts、风险和 ADR 前，不得实现 codec、数据库或导入导出 UI。
+`project-owner` 于 2026-09-02 批准 Visualizer V0 system design、接口契约、R-034–R-041 与 ADR-0014–0017。本格式据此为 `approved` 并开放 delivery planning；codec、数据库和导入导出 UI 仍须等待 V1 planning 获批后实现。

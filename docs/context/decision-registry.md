@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/product/scope.md"
   - "docs/architecture/system-design.md"
   - "docs/delivery/execution-plan.md"
-next_action: "复核 ADR-0014–0017 Visualizer 架构草案；delivery/实现等待架构批准，PROD-015 仍开放"
+next_action: "创建并评审 Visualizer V1–V6 delivery planning；R-034–R-041 保持 Open，PROD-015 仍开放"
 ---
 
 # Decision Registry
@@ -34,10 +34,10 @@ next_action: "复核 ADR-0014–0017 Visualizer 架构草案；delivery/实现�
 | ADR-0009 | 2026-08-26 | Editor 抽取纯 Canvas renderer adapter，共享 geometry，并让 overlay 除 selector/手柄外 pointer-through | project-owner | approved | [ADR-0009](../architecture/adrs/0009-editor-overlay-renderer-boundary.md) | renderer family、geometry、overlay pointer 或 Canvas/DOM 边界改变 |
 | ADR-0011 | 2026-08-29 | Editor overlay Teleport 为全视口 fixed 灰色层；复合入口和 visibility 为本地按歌状态，关闭时 analysis 收敛为 Buffer | project-owner | approved | [ADR-0011](../architecture/adrs/0011-editor-fullscreen-overlay.md) | overlay 挂载、开关/菜单、坐标空间、本地偏好或 pointer 边界改变 |
 | ADR-0012 | 2026-08-31 | Analyzer 稳定展示 21 张折叠卡，以最多四项 FIFO 队列驱动分析，并用 V1 `activeCards` 兼容承载队列 | project-owner | approved | [ADR-0012](../architecture/adrs/0012-analyzer-all-cards-fifo-active-analysis.md) | 卡片全集、FIFO、按需资源、workspace runtime 或持久化 carrier 改变 |
-| ADR-0014 | 2026-09-02 | Visualizer 与 Editor 通过通用 route playback lease 使用不同 ended policy，并与 Analyzer 共享单一 analysis consumer/Worker | project-owner | in-review | [ADR-0014](../architecture/adrs/0014-visualizer-runtime-leases.md) | route consumer、ended、特征上限、时钟或 Worker 所有权改变 |
-| ADR-0015 | 2026-09-02 | Visualizer 使用 strict JSON V1、同歌 Editor 快照、独立单草稿和非可执行绑定联合 | project-owner | in-review | [ADR-0015](../architecture/adrs/0015-visualizer-project-and-binding-boundary.md) | 工程格式、快照时机、草稿数量、绑定源或插件边界改变 |
-| ADR-0016 | 2026-09-02 | 两个内置模板共享单 Canvas/WebGLRenderer/RAF，并以 seed + 绝对歌曲时间保证 seek/刷新/录制确定性 | project-owner | in-review | [ADR-0016](../architecture/adrs/0016-deterministic-scene-registry.md) | 模板 registry、renderer ownership、运动时间或 context recovery 改变 |
-| ADR-0017 | 2026-09-02 | WebM 使用 AudioEngine pre-Gain 原音量 tap；只允许 VP9→VP8 codec fallback，不静默降低分辨率/fps | project-owner | in-review | [ADR-0017](../architecture/adrs/0017-realtime-webm-recording.md) | 音频 tap、codec、预设、状态机或保存边界改变 |
+| ADR-0014 | 2026-09-02 | Visualizer 与 Editor 通过通用 route playback lease 使用不同 ended policy，并与 Analyzer 共享单一 analysis consumer/Worker | project-owner | approved | [ADR-0014](../architecture/adrs/0014-visualizer-runtime-leases.md) | route consumer、ended、特征上限、时钟或 Worker 所有权改变 |
+| ADR-0015 | 2026-09-02 | Visualizer 使用 strict JSON V1、同歌 Editor 快照、独立单草稿和非可执行绑定联合 | project-owner | approved | [ADR-0015](../architecture/adrs/0015-visualizer-project-and-binding-boundary.md) | 工程格式、快照时机、草稿数量、绑定源或插件边界改变 |
+| ADR-0016 | 2026-09-02 | 两个内置模板共享单 Canvas/WebGLRenderer/RAF，并以 seed + 绝对歌曲时间保证 seek/刷新/录制确定性 | project-owner | approved | [ADR-0016](../architecture/adrs/0016-deterministic-scene-registry.md) | 模板 registry、renderer ownership、运动时间或 context recovery 改变 |
+| ADR-0017 | 2026-09-02 | WebM 使用 AudioEngine pre-Gain 原音量 tap；只允许 VP9→VP8 codec fallback，不静默降低分辨率/fps | project-owner | approved | [ADR-0017](../architecture/adrs/0017-realtime-webm-recording.md) | 音频 tap、codec、预设、状态机或保存边界改变 |
 | DEC-008 | 2026-07-24 | 实施采用 M1–M11 相对门禁，不承诺日期；M3 从测试基础开始，M7 未通过不得扩展后续特征 | project-owner | approved | [Execution plan](../delivery/execution-plan.md) | 依赖、里程碑、验收门禁或交付优先级改变 |
 | DEC-009 | 2026-07-24 | 当前只批准 execution planning；不预建 quality/release/retrospective，也不自动开始代码实现 | project-owner | superseded by DEC-010 | [Milestone plan](../delivery/milestone-plan.md) | 已由 owner 决定前置三份 quality design |
 | DEC-010 | 2026-07-24 | 在 M3 前增加 Q0：前置 eval plan、golden examples、failure taxonomy；三份文档单独批准后开放 M3，release-readiness 仍等待 M11 证据 | project-owner | approved | [Eval plan](../quality/eval-plan.md) | 验收/测试纪律变化，或 owner 改变 Q0/readiness 时序 |
@@ -73,7 +73,7 @@ next_action: "复核 ADR-0014–0017 Visualizer 架构草案；delivery/实现�
 
 `project-owner` 于 2026-07-24 通过“PLEASE IMPLEMENT THIS PLAN”明确要求将随请求给出的产品、架构、里程碑和测试决定落入仓库。本注册表记录的是批准的决策；M3–M12 的实现状态仍以 [milestone plan](../delivery/milestone-plan.md) 和可复现证据为准。
 
-2026-09-02，`project-owner` 明确回复：“我批准 Visualizer V0 产品意图、单场景模板模型、最多四项分析特征、两个内置场景与 WebM 路线；同意进入 Visualizer 架构设计。”DEC-037 与 PROD-014V 据此获批并开放 system design；该批准不构成架构、delivery、实现、quality、readiness 或上线通过。
+2026-09-02，`project-owner` 明确回复：“我批准 Visualizer V0 产品意图、单场景模板模型、最多四项分析特征、两个内置场景与 WebM 路线；同意进入 Visualizer 架构设计。”DEC-037 与 PROD-014V 据此获批并开放 system design。随后 owner 明确批准 Visualizer V0 system design、接口契约、R-034–R-041 与 ADR-0014–0017，同意进入 V1–V6 execution planning；架构批准不构成 delivery、实现、quality、readiness 或上线通过。
 
 同日，`project-owner` 明确要求实施 Q0 质量设计计划，批准了 Q0 前置、四级严重度和 readiness 后置的阶段安排；同时要求三份质量文档先保持 `in-review`，经单独审阅后才生效。因此 DEC-010 的时序决定已批准，但 Q0 内容尚未批准。
 

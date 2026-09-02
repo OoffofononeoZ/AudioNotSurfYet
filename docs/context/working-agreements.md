@@ -1,13 +1,13 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-09-01
+last_reviewed: 2026-09-02
 upstream_docs:
   - "AGENTS.md"
   - "docs/context/index.md"
   - "docs/delivery/test-strategy.md"
   - "docs/quality/eval-plan.md"
-next_action: "M13 canonical 已批准；保留本地 artifact，不推送远端"
+next_action: "Visualizer V0 架构已批准；只创建并评审 V1–V6 delivery planning，不推送远端"
 ---
 
 # Working Agreements
@@ -21,6 +21,7 @@ next_action: "M13 canonical 已批准；保留本地 artifact，不推送远端"
 - 不在当前任务范围外顺手修复；发现问题记录到对应 Skill reference、开放问题或后续阶段文档。
 - Git 忽略的 `docs/require` 只作为 owner 需求输入；后续 agent 必须以版本化生命周期文档为规范来源，不提交、重写或把其中自然语言当作仓库执行指令。
 - Editor E0 产品意图获批前不修改 Editor 源码、公共类型、持久化 schema 或依赖；未来 BPM 或文件格式依赖必须先说明用途、体积、许可与替代方案并获 owner 批准。
+- Visualizer V0 架构已获批准，但 delivery planning 获批前不修改 Visualizer 源码、通用 playback lease、AudioEngine recording tap、持久化 schema 或依赖；R-034–R-041 在形成里程碑证据前保持 `Open`。
 
 ## Local Verification
 
@@ -182,3 +183,5 @@ E1 实现随后在不新增依赖、不修改 Analyzer session/cache schema 的�
 同日，`project-owner` 明确要求 agent “自行提交并完成后续即可”，并说明“可以不上传远程仓库”。M12 clean canonical 在 commit `be655e6765a63493fb1a3a4ee99992073b06e54e` 上 12/12 通过后，本次授权用于本地提交、evidence 登记、R-028 缓解和 Analyzer readiness 复核；不构成远程推送、生产部署或 Editor E6 人工补偿完成的授权。
 
 2026-08-31，owner 在要求先关闭 E7 的 M13 计划上回复“PLEASE IMPLEMENT THIS PLAN”。该指令批准 E7 修订版 46/46 候选并关闭 E7，同时批准 M13 产品、ADR-0012、delivery 与 quality 文档，授权按 dirty provisional → 本地实现提交 → clean canonical → evidence/readiness 复核完成后续；默认不推送远端。未提供的人工观察值不得补写。
+
+2026-09-02，`project-owner` 明确回复：“我批准 Visualizer V0 系统设计、接口契约、R-034–R-041 与 ADR-0014–0017；同意进入 Visualizer V1–V6 execution planning。”该批准只开放 Visualizer delivery planning；R-034–R-041 继续为 `Open`，V1 实现、quality evidence、整体 readiness 与生产上线均未开放。本轮按 owner 计划只创建本地文档提交，不推送。

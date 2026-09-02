@@ -1,12 +1,12 @@
 ---
-status: in-review
+status: approved
 owner: "project-owner"
 last_reviewed: 2026-09-02
 upstream_docs:
   - "docs/product/scope.md"
   - "docs/product/success-metrics.md"
   - "docs/architecture/visualizer/binding-and-scene-contracts.md"
-next_action: "由 project-owner 审批受控双模板、单 RendererHost 与绝对时间确定性"
+next_action: "在 V3/V4 delivery planning 中固定双模板、单 RendererHost 与确定性证据；规划批准前不实现"
 ---
 
 # ADR-0016: Deterministic Scene Registry
@@ -36,4 +36,4 @@ next_action: "由 project-owner 审批受控双模板、单 RendererHost 与绝�
 
 ## Approval
 
-本 ADR 为 `in-review`。产品批准了两个模板的结果，不等于批准任意实现；绝对时间与单 host 设计等待 owner 评审。
+`project-owner` 于 2026-09-02 批准 Visualizer V0 system design、接口契约、R-034–R-041 与 ADR-0014–0017。本 ADR 据此为 `approved`；两个模板仍须分别通过 V3/V4 实现、canonical 与 owner 审批。

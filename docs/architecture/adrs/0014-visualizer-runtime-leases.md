@@ -1,12 +1,12 @@
 ---
-status: in-review
+status: approved
 owner: "project-owner"
 last_reviewed: 2026-09-02
 upstream_docs:
   - "docs/product/scope.md"
   - "docs/architecture/system-design.md"
   - "docs/architecture/interface-contracts.md"
-next_action: "由 project-owner 审批通用 route playback lease 与 Visualizer analysis consumer"
+next_action: "在 V1/V2 delivery planning 中固定迁移、token、ended 与四特征验证；规划批准前不实现"
 ---
 
 # ADR-0014: Visualizer Runtime Leases
@@ -36,4 +36,4 @@ Editor 已通过 tokenized lease 临时把唯一 AudioSessionService 的 ended �
 
 ## Approval
 
-本 ADR 为 `in-review`。产品批准只开放架构设计；`project-owner` 批准完整 Visualizer system design 前不实现该迁移。
+`project-owner` 于 2026-09-02 批准 Visualizer V0 system design、接口契约、R-034–R-041 与 ADR-0014–0017。本 ADR 据此为 `approved` 并开放 delivery planning；V1 planning 获批前不实现该迁移。

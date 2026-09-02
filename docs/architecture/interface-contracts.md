@@ -1,10 +1,10 @@
 ---
-status: in-review
+status: approved
 owner: "project-owner"
 last_reviewed: 2026-09-02
 upstream_docs:
   - "docs/architecture/system-design.md"
-next_action: "复核 Visualizer route lease、project/binding、scene 与 recording 接口；批准前不进入 delivery"
+next_action: "在 Visualizer V1–V6 delivery planning 中把已批准接口映射为可验证切片；批准前不实现"
 ---
 
 # Interface Contracts
@@ -725,9 +725,9 @@ Invariants:
 
 `project-owner` 于 2026-08-26 明确批准 Editor E0 系统设计、接口契约、风险与 ADR，并同意进入 E1–E6 execution planning。上述 Editor 接口据此获批；Analyzer 历史契约继续有效，但设计批准不能作为 Editor 代码已实现或验证的证据。
 
-## Visualizer Contract Status（in-review）
+## Visualizer Contract Status（approved）
 
-下列 Visualizer 接口是基于已批准 V0 产品意图的目标契约；Analyzer/Editor 上述接口仍是历史批准基线。当前 `/comingsoon` 不实现这些接口，架构批准前不得开始 delivery 或代码实现。
+下列 Visualizer 接口是已批准的目标契约；Analyzer/Editor 上述接口仍是历史批准基线。当前 `/comingsoon` 不实现这些接口；本次批准只允许创建 delivery planning，规划获批前不得开始代码实现。
 
 ### Route playback and analysis leases
 
@@ -772,4 +772,4 @@ type VisualizerRecordingState =
 - `AudioEngine.acquireRecordingTap()` 返回唯一 pre-Gain audio stream lease；第二持有者必须失败，release 对称停止/断开录制节点而不影响 destination 播放。
 - recorder 只进行 VP9+Opus 到 VP8+Opus codec fallback，不改变用户选择的分辨率/fps。preflight、状态机、锁定动作、比特率和 Blob 生命周期见 [Recording Contract](visualizer/recording-contract.md)。
 
-Visualizer contracts 在 `project-owner` 明确批准前保持 `in-review`；本节不是实现或 quality evidence。
+`project-owner` 于 2026-09-02 批准 Visualizer V0 system design、接口契约、R-034–R-041 与 ADR-0014–0017，并同意进入 V1–V6 execution planning。本节据此为 `approved`，但不是实现或 quality evidence。
