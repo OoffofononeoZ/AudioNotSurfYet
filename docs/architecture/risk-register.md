@@ -5,7 +5,7 @@ last_reviewed: 2026-09-03
 upstream_docs:
   - "docs/architecture/system-design.md"
   - "docs/architecture/interface-contracts.md"
-next_action: "V4 clean canonical 已覆盖 preview context recovery；R-039 保持 Open，等待 owner 验收及 V5 录制中 context loss 证据"
+next_action: "V4 preview context recovery 已获 owner 批准；R-039 保持 Open，等待 V5 录制中 abort/discard 证据"
 ---
 
 # Risk Register
@@ -64,4 +64,4 @@ next_action: "V4 clean canonical 已覆盖 preview context recovery；R-039 保�
 - 新的高影响风险或剩余风险超过已批准范围时，停止进入下一里程碑并由 `project-owner` 决策。
 - Analyzer R-001–R-021 的历史状态继续由 M3–M11 evidence 支持；R-028–R-030 由 M13、R-031–R-033 由 M14 clean canonical 缓解。Editor R-022–R-027 与 E7 不被 Visualizer 草案改写。
 - `project-owner` 于 2026-09-02 批准 Visualizer V0 架构、R-034–R-041 与 ADR-0014–0017，并开放 V1–V6 execution planning。当前 R-034–R-038 为 `Mitigated`，R-039–R-041 为 `Open`；只有后续里程碑的可复现证据和 owner 审批才能继续推进，架构批准本身不等于风险已缓解。
-- Visualizer V1 clean canonical `V1-2026-09-02T07-03-26-973Z-fd44c892` 在 commit `fd44c8921a534c22b2362ccffff7ec9e46f3ff02` 上 21/21 通过，并于 2026-09-02 获 owner 人工批准；R-034 据此改为 `Mitigated`。V2 clean canonical `V2-2026-09-02T08-46-21-778Z-769faafe` 26/26 通过并于同日获 owner 批准，R-035、R-036 据此改为 `Mitigated`。V3 clean canonical `V3-2026-09-02T13-32-42-513Z-89be30eb` 在 implementation commit `89be30eb23d4e53d2c38f24e111cd1af7ec0840d` 上 30/30 通过；`project-owner` 于 2026-09-03 批准 canonical、Orthogonal Lines、确定性余辉和单 RendererHost，R-037、R-038 据此改为 `Mitigated` 并开放 V4。V4 clean canonical `V4-2026-09-02T17-47-40-271Z-5c2d24a3` 34/34 通过并登记为 `in-review`；它补充 R-037/R-038 回归并覆盖 R-039 的实时预览恢复，但在 owner 验收与 V5 录制 context 路径完成前不改变 R-039 的 `Open` 状态。
+- Visualizer V1 clean canonical `V1-2026-09-02T07-03-26-973Z-fd44c892` 在 commit `fd44c8921a534c22b2362ccffff7ec9e46f3ff02` 上 21/21 通过，并于 2026-09-02 获 owner 人工批准；R-034 据此改为 `Mitigated`。V2 clean canonical `V2-2026-09-02T08-46-21-778Z-769faafe` 26/26 通过并于同日获 owner 批准，R-035、R-036 据此改为 `Mitigated`。V3 clean canonical `V3-2026-09-02T13-32-42-513Z-89be30eb` 在 implementation commit `89be30eb23d4e53d2c38f24e111cd1af7ec0840d` 上 30/30 通过；`project-owner` 于 2026-09-03 批准 canonical、Orthogonal Lines、确定性余辉和单 RendererHost，R-037、R-038 据此改为 `Mitigated` 并开放 V4。V4 clean canonical `V4-2026-09-02T17-47-40-271Z-5c2d24a3` 34/34 通过并于 2026-09-03 获 owner 批准、关闭 V4；它覆盖 R-039 的实时预览恢复，但录制中 context loss 尚未实现，因此 R-039 保持 `Open` 并在 V5 继续验证。

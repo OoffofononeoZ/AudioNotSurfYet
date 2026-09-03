@@ -6,7 +6,7 @@ upstream_docs:
   - "docs/quality/visualizer/v4-eval-plan.md"
   - "docs/quality/visualizer/v4-golden-examples.md"
   - "docs/architecture/risk-register.md"
-next_action: "V4 context/renderer 故障注入与 34/34 clean canonical 已通过；等待 owner 人工验收"
+next_action: "V4 failure taxonomy 与 evidence 已批准；V5 新增 recording failure 域"
 ---
 
 # Visualizer V4 Failure Taxonomy

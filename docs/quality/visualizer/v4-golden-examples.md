@@ -5,7 +5,7 @@ last_reviewed: 2026-09-03
 upstream_docs:
   - "docs/quality/visualizer/v4-eval-plan.md"
   - "docs/architecture/visualizer/binding-and-scene-contracts.md"
-next_action: "V4 golden 与 34/34 clean canonical 已通过；等待 owner 人工视觉验收"
+next_action: "V4 golden、34/34 canonical 与 owner 验收已批准；作为 V5 前向基线"
 ---
 
 # Visualizer V4 Golden Examples
