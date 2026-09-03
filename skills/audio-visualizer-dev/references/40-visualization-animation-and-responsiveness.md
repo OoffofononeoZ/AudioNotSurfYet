@@ -14,7 +14,7 @@
 
 Visualizer V3 已由 DEC-039 固定为中心 Orthogonal Lines，并由 30/30 canonical 与 2026-09-03 owner 人工验收关闭：现有 16:9 Canvas 由唯一 `VisualizerRendererHost` 接管，host 独占一个 Three.js renderer 和一个可取消视觉 RAF。场景使用单全屏 quad/shader、固定 `#020403` 背景；intensity 同时控制中心向两端长度与主线 alpha，thickness 为 CSS px，brightness >1 增强 halo，horizontal/vertical 互不串扰。
 
-V3 scene-local decay 的单位为秒，固定 60Hz 计算 `max(I, previous * exp(-4 * dt / decaySeconds))`，每秒 checkpoint 并按歌曲/template/binding revision 隔离；它不改写 V2 resolved value，也不能使用 RAF delta。播放持续绘制，暂停、seek、参数和 resize 只请求单帧；DPR 上限为 2。V4 implementation candidate 已用真实 Cube Swarm 替换中性预览，并保持同一 host/renderer/Canvas 与对称资源释放；34/34 clean canonical 已登记为 `in-review`，owner 视觉验收尚未完成。
+V3 scene-local decay 的单位为秒，固定 60Hz 计算 `max(I, previous * exp(-4 * dt / decaySeconds))`，每秒 checkpoint 并按歌曲/template/binding revision 隔离；它不改写 V2 resolved value，也不能使用 RAF delta。播放持续绘制，暂停、seek、参数和 resize 只请求单帧；DPR 上限为 2。V4 已用真实 Cube Swarm 替换中性预览，并保持同一 host/renderer/Canvas 与对称资源释放；34/34 clean canonical 与 owner 视觉验收已通过。
 
 DEC-041 固定 V4 为 64 方块中心频谱环、seed 外围上升方块与三颗分层轨道卫星。中心频谱按 64 个连续 band 的非负最大值和固定 log reference 128 映射；rise/orbit 按 60Hz 从 0 秒积分并每秒 checkpoint。Cube 使用共享 BoxGeometry、两个 MeshStandardMaterial、三个 InstancedMesh、固定灯光和 perspective camera，不使用纹理；context loss 在同 RendererHost/WebGLRenderer 内暂停视觉 RAF、恢复 scene GPU 资源并按当前绝对时间绘制。
 

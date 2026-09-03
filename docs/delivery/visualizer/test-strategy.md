@@ -8,7 +8,7 @@ upstream_docs:
   - "docs/architecture/risk-register.md"
   - "docs/delivery/visualizer/execution-plan.md"
   - "docs/delivery/visualizer/acceptance-criteria.md"
-next_action: "V4 四专项与 34/34 clean canonical 已登记；等待 owner 人工验收"
+next_action: "V4 已关闭；建立 V5 双浏览器 MediaRecorder 与 ffprobe/FFmpeg 40 步门禁"
 ---
 
 # Visualizer V1–V6 Test Strategy
@@ -78,7 +78,7 @@ V1 的 golden/unit/integration/Chrome/Edge 命令与 21 步 canonical runner 已
 
 ## 5. Browser and Recording Matrix
 
-- V1–V4：真实 Chrome 为专项 canonical 浏览器；Edge 运行对应 route/lease/WebGL 相邻回归，不能用 Chromium 替代真实 Edge。
+- V1–V4：真实 Chrome 为专项 canonical 浏览器；Edge 运行对应 route/lease/WebGL 相邻回归，不能用 Chromium 替代真实 Edge。V4 34/34 与 owner 门禁已批准。
 - V5：真实 Chrome 与 Edge 均必须成功输出默认 720p30；720p60、1080p30、1080p60 分浏览器记录 pass 或 typed unavailable。
 - V6：两浏览器执行 V1–V6 全量、三格式、15 分钟四特征、context loss、录制和关键 Analyzer/Editor 回归。
 - `ffprobe` 验证 format、codec、stream、width/height、frame rate、duration；FFmpeg 提取音频 impulse 和视频 flash 时间。若命令缺失则 V5/V6 blocked，不以浏览器“能播放”替代。
@@ -121,7 +121,7 @@ V4 实际命令固定为 `fixtures:v4:golden`、`test:v4:unit`、`test:v4:integr
 
 ## 9. Current Gate State
 
-- V1–V3 canonical 与 owner evidence 均已批准并关闭；V4 为 `In Progress`，V5–V6 保持 `Planned`。
-- V3 quality/eval、golden、failure taxonomy、30 步 canonical 与人工门禁均已获批准。V4 quality/eval、golden 与 failure taxonomy 已按 DEC-041 获批准；clean run `V4-2026-09-02T17-47-40-271Z-5c2d24a3` 34/34 通过并登记为 `in-review`，等待 owner 人工验收。
+- V1–V4 canonical 与 owner evidence 均已批准并关闭；V5 为 `In Progress`，V6 保持 `Planned`。
+- V4 quality/eval、golden、failure taxonomy、clean run `V4-2026-09-02T17-47-40-271Z-5c2d24a3` 34/34 与人工门禁均已获批准；V5 在此 34 步基线上增加六个录制专项。
 - 当前没有正式 CI，所有结果限定为本地登记环境。
 - `/comingsoon`、`threeDTable`、TestLands 或 V3 历史 artifact 中的 V4 中性预览不是当前 V4 implementation evidence；真实 Cube 由 V4 专项与前向回归评价。

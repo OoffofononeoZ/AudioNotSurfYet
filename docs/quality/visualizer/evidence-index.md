@@ -16,7 +16,7 @@ upstream_docs:
   - "docs/quality/visualizer/v4-golden-examples.md"
   - "docs/quality/visualizer/v4-failure-taxonomy.md"
   - "docs/delivery/visualizer/milestone-plan.md"
-next_action: "V4 clean canonical 34/34 已登记为 in-review；等待 owner 完成 Cube 视觉、绑定隔离、确定性、资源与 context recovery 人工验收"
+next_action: "V4 evidence 已获 owner 批准；V5 WebM 为 In Progress，等待专项实现与 canonical"
 ---
 
 # Visualizer Evidence Index
@@ -25,8 +25,8 @@ next_action: "V4 clean canonical 34/34 已登记为 in-review；等待 owner 完
 
 - V0-P、V0-A、V0-D：`Complete`。
 - V1：`Complete`；clean canonical 21/21 与适用人工门禁已由 owner 批准。
-- V2：`Complete`；clean canonical 26/26 已获 owner 批准；V3：`Complete`，clean canonical 30/30 与人工门禁已获批准；V4：`In Progress`；V5–V6：`Planned`。
-- R-034–R-038 为 `Mitigated`；V4 WebGL context recovery 对应的 R-039 保持 `Open`。
+- V2：`Complete`；clean canonical 26/26 已获 owner 批准；V3/V4：`Complete`，各自 canonical 与人工门禁已获批准；V5：`In Progress`；V6：`Planned`。
+- R-034–R-038 为 `Mitigated`；R-039 因 V5 录制中 context loss 尚未验证而保持 `Open`。
 - Analyzer/Editor canonical 是相邻回归，不能替代 Visualizer evidence。
 
 ## Record Contract
@@ -286,7 +286,7 @@ next_action: "V4 clean canonical 34/34 已登记为 in-review；等待 owner 完
 | Field | Value |
 | --- | --- |
 | Milestone | V4 — Cube Swarm |
-| State | `in-review` |
+| State | `approved` |
 | Core feature commit | `9581730498a470e3fbd81c97414cb26087714009` |
 | Canonical implementation commit | `5c2d24a3f1f413dba236563b3686237c6b8f2e21` |
 | Evidence commit | 本记录所在的 `docs: register Visualizer V4 canonical evidence` 提交 |
@@ -295,7 +295,7 @@ next_action: "V4 clean canonical 34/34 已登记为 in-review；等待 owner 完
 | Clean identity | start/end commit 均为 `5c2d24a3f1f413dba236563b3686237c6b8f2e21`；start/end dirty 均为 `false` |
 | Summary SHA-256 | `9b2a86e3dcdd4e634317c4234418dc3444da441a3be805a980562768dba5c3b2` |
 | Artifact root | `artifacts/evals/V4-2026-09-02T17-47-40-271Z-5c2d24a3/` |
-| Reviewer | `project-owner` — pending manual acceptance and approval |
+| Reviewer | `project-owner` — approved 2026-09-03 |
 
 ### Environment
 
@@ -365,9 +365,9 @@ next_action: "V4 clean canonical 34/34 已登记为 in-review；等待 owner 完
 
 - 自动化已固定核心环几何、参数隔离、两项默认分析、seek/refresh hash、20 次切换与 synthetic context recovery；它不替代 Cube 最终构图、运动审美、真实 GPU/驱动长会话和辅助技术的人工作业。
 - owner 必须在最新版 Chrome 人工确认核心频谱环、外围上升方块和三颗卫星；默认 active analysis 恰为 Amplitude Spectrum 与 Energy；drum 只影响 coreScale、Energy 只影响 riseSpeed、orbit 默认恒定且改绑后只影响轨道；seek/刷新确定性、20 次切换和 context recovery 可接受。
-- R-039 保持 `Open`，因为 V4 synthetic recovery 不能覆盖全部 GPU/驱动故障，且 V5 录制期间 context loss 的 abort/discard 尚未实现。V4 保持 `In Progress`、evidence 保持 `in-review`、V5–V6 保持 `Planned`。
+- R-039 保持 `Open`，因为 V4 synthetic recovery 不能覆盖全部 GPU/驱动故障，且 V5 录制期间 context loss 的 abort/discard 尚未实现。V4 已关闭，V5 为 `In Progress`，V6 保持 `Planned`。
 - V1–V3 canonical identity 不变且无需重跑；本记录不证明 WebM、录制状态机、V6 readiness 或生产上线。
 
 ### Owner Review Status
 
-待 `project-owner` 完成人工验收并明确批准。只有该批准到达后，才可将 V4 标记为 `Complete`、按剩余风险处理 R-039 并开放 V5。
+`project-owner` 于 2026-09-03 明确批准关闭 V4 并开放 V5。该批准接受既有 34/34 canonical 与人工门禁，不补写用户未提供的额外观察值；V4 标记为 `Complete`，R-039 按剩余录制风险保持 `Open`。

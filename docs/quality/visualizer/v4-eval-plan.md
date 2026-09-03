@@ -8,7 +8,7 @@ upstream_docs:
   - "docs/delivery/visualizer/test-strategy.md"
   - "docs/architecture/visualizer/binding-and-scene-contracts.md"
   - "docs/architecture/risk-register.md"
-next_action: "V4 34/34 clean canonical 已登记为 in-review；等待 owner 完成人工验收"
+next_action: "V4 34/34 canonical 与 owner 门禁已批准；作为 V5 40 步基线"
 ---
 
 # Visualizer V4 Eval Plan
@@ -39,7 +39,7 @@ next_action: "V4 34/34 clean canonical 已登记为 in-review；等待 owner 完
 - `eval:v4:provisional` 允许 dirty worktree，只作为实现反馈；`eval:v4` 只在 clean implementation commit 上运行。
 - V4 canonical 固定为 V3 的 30 步前向回归，加 V4 golden、unit、integration、Chrome 四步，共 34 步。
 - evidence 必须登记 implementation commit、run ID、环境、默认 active set、state hash、context loss/restore、资源/反馈/长任务、日志和 summary SHA-256。
-- canonical 通过后 evidence 保持 `in-review`、V4 保持 `In Progress`、R-039 保持 `Open`、V5 保持 `Planned`，直到 owner 完成人工验收并明确批准。
+- canonical 通过后曾保持 `in-review`；owner 于 2026-09-03 批准关闭 V4 并开放 V5。R-039 因录制中 context loss 尚未验证而保持 `Open`。
 
 ## Evidence Gaps
 
@@ -51,4 +51,4 @@ next_action: "V4 34/34 clean canonical 已登记为 in-review；等待 owner 完
 
 ## Canonical Result
 
-2026-09-03，clean run `V4-2026-09-02T17-47-40-271Z-5c2d24a3` 在 commit `5c2d24a3f1f413dba236563b3686237c6b8f2e21` 上 34/34 通过，summary SHA-256 为 `9b2a86e3dcdd4e634317c4234418dc3444da441a3be805a980562768dba5c3b2`。完整环境、指标与 artifact hash 见 [evidence index](evidence-index.md)。该结果保持 `in-review`；V4、R-039 与 V5 分别保持 `In Progress`、`Open` 与 `Planned`。
+2026-09-03，clean run `V4-2026-09-02T17-47-40-271Z-5c2d24a3` 在 commit `5c2d24a3f1f413dba236563b3686237c6b8f2e21` 上 34/34 通过，summary SHA-256 为 `9b2a86e3dcdd4e634317c4234418dc3444da441a3be805a980562768dba5c3b2`。完整环境、指标与 artifact hash 见 [evidence index](evidence-index.md)。owner 已批准该结果；V4、R-039 与 V5 分别为 `Complete`、`Open` 与 `In Progress`。

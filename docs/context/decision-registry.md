@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/product/scope.md"
   - "docs/architecture/system-design.md"
   - "docs/delivery/execution-plan.md"
-next_action: "Visualizer V3 已获 owner 批准并关闭；V4 Cube Swarm 为 In Progress，PROD-015 仍开放"
+next_action: "Visualizer V4 已获 owner 批准并关闭；V5 WebM 为 In Progress，PROD-015 仍开放"
 ---
 
 # Decision Registry
@@ -72,6 +72,8 @@ next_action: "Visualizer V3 已获 owner 批准并关闭；V4 Cube Swarm 为 In 
 | DEC-039 | 2026-09-02 | V3 Orthogonal Lines 使用中心正交结构；intensity 同时控制中心向两端的长度与透明度；decay 为不改写 V2 resolved value 的确定性时间余辉；背景固定 `#020403`，颜色由现有参数控制 | project-owner | approved | [Binding and scene contracts](../architecture/visualizer/binding-and-scene-contracts.md) | 线条构图、intensity 映射、decay 算法/单位、背景或参数所有权改变 |
 | DEC-040 | 2026-09-03 | 批准 V3 30/30 canonical evidence、Orthogonal Lines、确定性余辉与单 RendererHost；V3 改为 Complete、R-037/R-038 改为 Mitigated并开放 V4 | project-owner | approved | [Visualizer evidence](../quality/visualizer/evidence-index.md) | V3 canonical identity、owner review 结论或 V4 开放门禁改变 |
 | DEC-041 | 2026-09-03 | V4 Cube Swarm 使用 64 方块核心频谱环、seed 外围上升方块和三颗分层轨道卫星；rise/orbit 使用 60Hz checkpoint 积分，同一 RendererHost 处理 context recovery | project-owner | approved | [Binding and scene contracts](../architecture/visualizer/binding-and-scene-contracts.md) | Cube 构图、频谱规范、几何常量、默认绑定、积分或 context 所有权改变 |
+| DEC-042 | 2026-09-03 | 批准 V4 34/34 canonical evidence 与人工门禁；保持 canonical identity 不变，V4 改为 Complete 并开放 V5；R-039 因录制中 context loss 尚未验证而保持 Open | project-owner | approved | [Visualizer evidence](../quality/visualizer/evidence-index.md) | V4 canonical identity、owner review 结论、R-039 剩余范围或 V5 开放门禁改变 |
+| DEC-043 | 2026-09-03 | V5 准备失败恢复录制前时间/播放态；录制开始后的取消或错误停在当前时间并暂停；活动录制或 ready Blob 离页使用站内决策对话框 | project-owner | approved | [Recording contract](../architecture/visualizer/recording-contract.md) | 录制失败恢复、ready Blob、离页或播放 checkpoint 语义改变 |
 
 ## Approval Evidence
 
@@ -86,6 +88,8 @@ next_action: "Visualizer V3 已获 owner 批准并关闭；V4 Cube Swarm 为 In 
 2026-09-03，`project-owner` 明确回复：“我批准 Visualizer V3 canonical evidence、Orthogonal Lines 场景、确定性余辉与单 RendererHost 结果；同意将 V3 标记为 Complete 并开放 V4。”DEC-040 据此生效；V3 canonical identity 保持不变且无需重跑，R-037/R-038 改为 `Mitigated`，V4 改为 `In Progress`。该批准不构成 Cube Swarm、WebM、V6 readiness 或生产上线通过。
 
 同轮 V4 计划澄清中，`project-owner` 选择“核心环群（推荐）”，并以“PLEASE IMPLEMENT THIS PLAN”批准完整 V4 实施计划。DEC-041 据此固定 64 方块频谱环、seed 外围上升方块、三颗分层轨道卫星、默认 Spectrum+Energy 两项分析、60Hz rise/orbit checkpoint 与同 RendererHost context recovery；V4 quality contract 可直接标记为 `approved` 并实施。该决定不修改 JSON V1，不构成 V4 canonical/人工门禁、V5 WebM 或生产上线批准。
+
+同日，`project-owner` 明确回复“`我批准`关闭 V4 并开放 V5”，并在后续计划澄清中选择 R-039 保持 `Open`、分阶段播放恢复和站内离页决策对话框；随后以“PLEASE IMPLEMENT THIS PLAN”批准 V5 完整计划。DEC-042/DEC-043 据此生效：V4 canonical identity 不变且无需重跑，V4 evidence 改为 `approved`、V4 改为 `Complete`、V5 改为 `In Progress`。该批准不构成 V5 canonical、V6 readiness 或生产上线通过。
 
 同日，`project-owner` 明确要求实施 Q0 质量设计计划，批准了 Q0 前置、四级严重度和 readiness 后置的阶段安排；同时要求三份质量文档先保持 `in-review`，经单独审阅后才生效。因此 DEC-010 的时序决定已批准，但 Q0 内容尚未批准。
 

@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/product/scope.md"
   - "docs/product/success-metrics.md"
   - "docs/product/open-questions.md"
-next_action: "V4 Cube Swarm 34/34 clean canonical 已登记为 in-review；等待 owner 人工验收"
+next_action: "V4 已获批准并关闭；按已批准 recording contract 实施 V5 WebM"
 ---
 
 # System Design
