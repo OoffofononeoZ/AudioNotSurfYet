@@ -8,7 +8,7 @@ upstream_docs:
   - "docs/delivery/visualizer/test-strategy.md"
   - "docs/architecture/visualizer/recording-contract.md"
   - "docs/architecture/risk-register.md"
-next_action: "实施 V5 录制状态机、双浏览器 WebM 与媒体验证，形成 40 步 clean canonical"
+next_action: "V5 clean canonical 已 40/40 通过并登记；等待 owner 完成人工回放、原生保存和清理门禁"
 ---
 
 # Visualizer V5 Eval Plan

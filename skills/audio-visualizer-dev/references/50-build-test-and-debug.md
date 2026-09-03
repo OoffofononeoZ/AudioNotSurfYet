@@ -104,7 +104,7 @@
 - 最终 dirty candidate 的 provisional `V3-2026-09-02T13-25-25-465Z-75cbf292-provisional` 已 30/30 通过，summary SHA-256 为 `20452afedc68ab351647464c3e6c3335e1e6def0290c2ba1d35105004648a46d`；它绑定 dirty worktree，仅允许进入 implementation commit，不得登记为 canonical。
 - Visualizer V3 clean canonical `V3-2026-09-02T13-32-42-513Z-89be30eb` 已在 commit `89be30eb23d4e53d2c38f24e111cd1af7ec0840d` 上 30/30 通过，summary SHA-256 为 `afe4cbe233fe1feded65380d6e976d5a4c32c2f9860fe2e0357a0d615d6a7b84`；evidence 与人工门禁已于 2026-09-03 获 owner 批准。
 - Visualizer V4 Cube Swarm clean canonical `V4-2026-09-02T17-47-40-271Z-5c2d24a3` 已在 commit `5c2d24a3f1f413dba236563b3686237c6b8f2e21` 上 34/34 通过，summary SHA-256 为 `9b2a86e3dcdd4e634317c4234418dc3444da441a3be805a980562768dba5c3b2`；owner 已批准并关闭 V4，V5 为 `In Progress`。
-- Visualizer V5 已实现 realtime WebM 候选与六项专项；Chrome/Edge 强制默认 720p30 输出、其余三档 typed unavailable、媒体 packet/sync 和 clean 40 步 canonical 尚须以最终 implementation commit 登记。原生 OS picker 与人工回放仍保留 owner 门禁。
+- Visualizer V5 clean canonical `V5-2026-09-03T03-49-31-211Z-9b5af09c` 已在 implementation commit `9b5af09c5846415a8e5465e710e6095f1e7db310` 上 40/40 通过，summary SHA-256 为 `cec1fab0310852458c2aa4fbd3bebc90eee3e213a54b7695a524736e07b07b7b`；Chrome/Edge 强制默认 720p30 输出、其余三档 typed unavailable，evidence 为 `in-review`。原生 OS picker 与人工回放仍保留 owner 门禁。
 - 当前机器已安装 Edge 151；M11 clean canonical 已使用真实 `msedge` channel 全量 31/31 通过。原生权限 prompt 不能由 OPFS 自动化替代；当前候选已由 `project-owner` 于 2026-08-26 完成人工补偿签字，相关实现或浏览器变化后须重做。
 - 正式 M3 canonical run 已在 clean commit `17d16f0da37289c1f67f75203502beef999572ea` 上通过并登记，且已由 `project-owner` 批准。
 - 正式 M4 canonical run 已在 clean commit `e5cfe9e8ab62301f3c5b0ddcdd37847a2e131a0f` 上通过并登记，evidence 与 working agreements 已由 `project-owner` 批准。

@@ -218,7 +218,7 @@ Visualizer V3 quality contract 固定 `visualizer-v3-lines-v1.wav` 与版本化 
 
 Visualizer V4 Cube Swarm 使用共享 BoxGeometry、两个 MeshStandardMaterial、三个 InstancedMesh、默认 Amplitude Spectrum/Energy 双分析、60Hz rise/orbit checkpoint 与同 RendererHost context recovery。clean canonical `V4-2026-09-02T17-47-40-271Z-5c2d24a3` 已在 commit `5c2d24a3f1f413dba236563b3686237c6b8f2e21` 上 34/34 通过，summary SHA-256 为 `9b2a86e3dcdd4e634317c4234418dc3444da441a3be805a980562768dba5c3b2`。Owner 已批准并关闭 V4；V5 为 `In Progress`。
 
-Visualizer V5 当前候选使用唯一 pre-Gain audio tap、同一 Canvas capture lease 和原生 MediaRecorder/save picker；Chrome/Edge 强制默认 720p30 生成真实 WebM，三个 optional preset 因重复 packet cadence 不能稳定满足门禁而在 preflight 返回 typed `preset-unavailable`。每个成功文件都必须由 `test:v5:media` 独立验证；clean canonical 与 owner 原生保存/回放验收尚未完成。
+Visualizer V5 使用唯一 pre-Gain audio tap、同一 Canvas capture lease 和原生 MediaRecorder/save picker。clean canonical `V5-2026-09-03T03-49-31-211Z-9b5af09c` 已在 implementation commit `9b5af09c5846415a8e5465e710e6095f1e7db310` 上 40/40 通过，summary SHA-256 为 `cec1fab0310852458c2aa4fbd3bebc90eee3e213a54b7695a524736e07b07b7b`；Chrome/Edge 默认 720p30 的四个 Orthogonal/Cube 文件均通过 ffprobe/FFmpeg，三个 optional preset 在 preflight 返回 typed `preset-unavailable`。evidence 仍为 `in-review`，owner 原生保存/回放验收尚未完成。
 
 V1 quality contract 固定 AC-V101–AC-V108、V1-G01–G12、VFT-ROUTE/LEASE/PROJECT/DRAFT/FILE/LAYOUT/RESOURCE、21 步 clean canonical，以及 Chrome/Edge 原生 picker、覆盖提示和 `beforeunload` 人工补偿。V1/evidence 已批准，R-034 为 `Mitigated`；V2 批准后 R-036 也为 `Mitigated`，R-038 继续由真实 renderer 里程碑验证。
 

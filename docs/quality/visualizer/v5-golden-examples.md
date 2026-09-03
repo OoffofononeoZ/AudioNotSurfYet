@@ -5,7 +5,7 @@ last_reviewed: 2026-09-03
 upstream_docs:
   - "docs/quality/visualizer/v5-eval-plan.md"
   - "docs/architecture/visualizer/recording-contract.md"
-next_action: "生成 V5 3 秒 A/V fixture、版本化 golden 和真实 WebM artifact"
+next_action: "V5 fixture、golden 与 canonical WebM 已登记；等待 owner 人工回放和原生保存门禁"
 ---
 
 # Visualizer V5 Golden Examples
@@ -28,4 +28,3 @@ next_action: "生成 V5 3 秒 A/V fixture、版本化 golden 和真实 WebM arti
 | V5-G14 | lifecycle | 20 次 prepare/cancel/error/ready/discard | AudioContext、RAF、Canvas、renderer 恒定；tap/recorder/track/Blob 回到 0 | 固定资源对称性 |
 
 Golden fixture 固定为 48kHz、mono、3 秒 CC0 WAV：0.1–2.9 秒低电平 220Hz tone bed，1.5 秒开始叠加 50ms Hann-windowed 1kHz burst；同歌 Editor point 在 1.5 秒驱动 Orthogonal 横纵亮度。Cube 默认 Spectrum+Energy 工程用于动态录制和 preflight，不改变 sync fixture 的事件定义。
-

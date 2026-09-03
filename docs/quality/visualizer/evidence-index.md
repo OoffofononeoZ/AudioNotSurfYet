@@ -1,5 +1,5 @@
 ---
-status: approved
+status: in-review
 owner: "project-owner"
 last_reviewed: 2026-09-03
 upstream_docs:
@@ -19,7 +19,7 @@ upstream_docs:
   - "docs/quality/visualizer/v5-golden-examples.md"
   - "docs/quality/visualizer/v5-failure-taxonomy.md"
   - "docs/delivery/visualizer/milestone-plan.md"
-next_action: "V4 evidence 已获 owner 批准；V5 WebM 为 In Progress，等待专项实现与 canonical"
+next_action: "V5 clean canonical 已登记为 in-review；等待 owner 完成双浏览器回放、原生保存与清理人工门禁"
 ---
 
 # Visualizer Evidence Index
@@ -28,8 +28,8 @@ next_action: "V4 evidence 已获 owner 批准；V5 WebM 为 In Progress，等待
 
 - V0-P、V0-A、V0-D：`Complete`。
 - V1：`Complete`；clean canonical 21/21 与适用人工门禁已由 owner 批准。
-- V2：`Complete`；clean canonical 26/26 已获 owner 批准；V3/V4：`Complete`，各自 canonical 与人工门禁已获批准；V5：`In Progress`；V6：`Planned`。
-- R-034–R-038 为 `Mitigated`；R-039 因 V5 录制中 context loss 尚未验证而保持 `Open`。
+- V2：`Complete`；clean canonical 26/26 已获 owner 批准；V3/V4：`Complete`，各自 canonical 与人工门禁已获批准；V5：`In Progress`，clean canonical evidence 为 `in-review`；V6：`Planned`。
+- R-034–R-038 为 `Mitigated`；R-039/R-040/R-041 保持 `Open`，等待 V5 owner 人工门禁与 V6 长时加固。
 - Analyzer/Editor canonical 是相邻回归，不能替代 Visualizer evidence。
 
 ## Record Contract
@@ -374,3 +374,108 @@ next_action: "V4 evidence 已获 owner 批准；V5 WebM 为 In Progress，等待
 ### Owner Review Status
 
 `project-owner` 于 2026-09-03 明确批准关闭 V4 并开放 V5。该批准接受既有 34/34 canonical 与人工门禁，不补写用户未提供的额外观察值；V4 标记为 `Complete`，R-039 按剩余录制风险保持 `Open`。
+
+## V5 Canonical Record
+
+| Field | Value |
+| --- | --- |
+| Milestone | V5 — Realtime WebM export |
+| State | `in-review` |
+| Implementation commit | `9b5af09c5846415a8e5465e710e6095f1e7db310` |
+| Evidence commit | 本记录所在的 `docs: register Visualizer V5 canonical evidence` 提交 |
+| Run ID | `V5-2026-09-03T03-49-31-211Z-9b5af09c` |
+| Canonical result | 40/40 passed |
+| Clean identity | start/end commit 均为 `9b5af09c5846415a8e5465e710e6095f1e7db310`；start/end dirty 均为 `false` |
+| Summary SHA-256 | `cec1fab0310852458c2aa4fbd3bebc90eee3e213a54b7695a524736e07b07b7b` |
+| Artifact root | `artifacts/evals/V5-2026-09-03T03-49-31-211Z-9b5af09c/` |
+| Reviewer | `project-owner` — pending |
+
+### Environment
+
+| Item | Recorded value |
+| --- | --- |
+| OS | macOS 26.5.2, build 25F84, Darwin arm64 |
+| Hardware | MacBook Pro `MacBookPro17,1`, Apple M1, 8 cores, 16 GB memory |
+| Node / npm | Node v24.18.0 / npm 11.16.0 |
+| Browsers | Chrome 152.0.7977.66 / Edge 152.0.4191.53 |
+| Media / render / test runtime | FFmpeg/ffprobe 8.1.2 / Three.js 0.183.2 / Vitest 4.1.10 / Playwright 1.62.0 |
+
+硬件只登记机型、芯片、核心数和内存；artifact 中的序列号、UUID 或设备标识不进入版本化证据。
+
+### Result Summary
+
+- V5 golden 2/2、recording unit 13/13、integration 2/2、真实 Chrome 1/1、真实 Edge 1/1 和媒体核验全部通过；V4 固定 34 步基线亦全部通过，完整 clean canonical 为 40/40。
+- Chrome 与 Edge 均在页面音量为 0 时分别生成 Orthogonal Lines 和 Cube Swarm 的 720p30 WebM；四个文件均为单 VP9 视频轨加单 Opus 音轨、严格 1280×720、平均 30fps。720p60、1080p30、1080p60 在两个浏览器均于资源获取前返回 typed `preset-unavailable`，没有先录制再降级或追记 unavailable。
+- 四个文件时长为 3.007–3.009 秒，A/V 结束差为 25–29ms，最大视频 packet gap 为 40–41ms；页面静音后的音频 peak RMS 为 `0.766425`。Orthogonal 的音频 burst 与中心亮闪峰值差在 Chrome/Edge 分别为 2ms/3ms，满足 `<=100ms`。
+- Chrome/Edge 故障矩阵均记录 4 次 recorder start、2 次完整 finalize、2 次 abort 与 3 次保存尝试；context loss/restore/failure 为 1/1/0。结束后 active recording tap、MediaRecorder、capture stream、audio/video track 和 ready Blob 全部为 0，保持 1 host、1 renderer、1 visual RAF；最大 Visualizer frame 工作均为 14ms。
+- pre-Gain 单 holder、页面音量隔离、播放 checkpoint、准备回滚、活动取消、context/renderer/track/identity/recorder 错误、双层命令锁、ready Blob 保存取消/失败重试、同 Canvas 精确尺寸恢复与 20 次生命周期资源对称性均由 unit/integration/浏览器覆盖。未完成录制没有产生 ready 半文件。
+- 1024/1280/1920、capture DPR 1、键盘启动、状态文字/`aria-live`、站内离页决策和 renderer retry 通过双浏览器专项；console error 与 pageerror 为 0。原生 OS picker 的真实交互与最终人工回放仍保留 owner 门禁。
+- V1–V4、M3/M4/M5/M11 与 Editor E1/E7 相邻回归、docs、deliberate-failure harness、typecheck、build 和 diff check 全部通过。M4 60 秒 drift 为 3.5ms，最大 seek error 为 61.494ms；build 转换 1870 modules，最大 JS chunk 为 1,424.40 kB（gzip 431.20 kB），既有 chunk-size warning 保留。
+- 最终 dirty provisional `V5-2026-09-03T03-41-28-599Z-cc83d8b1-provisional` 为 40/40，summary SHA-256 `511ddf9557005b5bd3ffe08f697a34cb3353070812aa43a20d0dae9914d41a33`；它只作实现反馈，不替代本 clean canonical。
+- 较早 provisional `V5-2026-09-03T03-15-10-729Z-cc83d8b1-provisional` 暴露 optional preset packet cadence 不稳定及并行 E8 文档链接窗口，summary SHA-256 `7fadc017232ea7d79fe8463732c18ab9abfc3a4389d192ded973fbd5ceec37eb`；据此把三个 optional preset 固定为 preflight unavailable。`V5-2026-09-03T03-38-32-968Z-cc83d8b1-provisional` 暴露串行 Playwright webServer 端口延迟释放，summary SHA-256 `6b514961cd9e4a71345861887f88d6c599aad5b75c45e8dab3c8450ac6047a79`；runner 改为逐 E2E 隔离端口后最终 provisional 与 canonical 均通过。
+
+### Canonical Media Hashes
+
+| Browser / scene | WebM SHA-256 |
+| --- | --- |
+| Chrome / Orthogonal Lines 720p30 | `612abd2826afdfcbe7ac407872984954c677d35e42991d05dfa84fcccf183316` |
+| Chrome / Cube Swarm 720p30 | `01efc152c230748eabc594db527ca7ce1a343a85af71f98d0b7c837d7a73601f` |
+| Edge / Orthogonal Lines 720p30 | `d9a8a61fa4df268dad88be55bf194b3f60141fb80d64413e0f6dd77e66a8a9f7` |
+| Edge / Cube Swarm 720p30 | `2863587dd2556d962dd183ce7bcee4aea19e0469059e233222b89ebef9431978` |
+| `media/sync-report.json` | `dffd4820ec3b2640d23ee7a0c91953e5ba6f6dea09368fa74b784f346b13575d` |
+
+### Canonical Step Hashes
+
+| Artifact | SHA-256 |
+| --- | --- |
+| `01-V5-golden.log` | `3cc4b58c713e2a5ad1906e773c5ed5f75065697fdbb65173ad85e1ab525e7e9f` |
+| `02-V5-recording-unit.log` | `be86765d5d2f80abb7e9a14691132cb43fa370acd1398a36aa4a6a86b3a155c0` |
+| `03-V5-recording-integration.log` | `fba8449f336b561f99e7568501afaea2011ea191e6746de2d20705ac5f8b75f9` |
+| `04-V5-Chrome.log` | `0c58245c5cc5592e00e74663ac35625e214e6d773ddd756fcac42b552971f1f9` |
+| `05-V5-Edge.log` | `ced22075585822056706e871f5a4a34a52bc44a51f020d714ace8bcd21cfe76c` |
+| `06-V5-media-verification.log` | `813aa14af758b89980974979348e231d58c889832fce2b06fd8dd05e77bd5871` |
+| `07-V4-golden.log` | `0176d70fc858b0150d88accf5d475afcbbea4a34ccb41070fb801234c4892423` |
+| `08-V4-scene-unit.log` | `560726c229466b6dea14c091377a1a953dc1fa2043f3f6cdc2b8b7af426896c4` |
+| `09-V4-renderer-integration.log` | `db492fb18f9af39782378221997baefad15e0eb32988f67926b554a407345560` |
+| `10-V4-Chrome.log` | `964df4f502a61772fd8a5af0e961c1d6feedce907bbf9857b307c39d1ede091d` |
+| `11-V3-golden.log` | `36988834bd90d57a41a9f5714f3fd024a8ff59b56955ca1d8cf091e96f5025f9` |
+| `12-V3-scene-unit.log` | `56e00acb640f6eb53061957c0d666421a8d4806b640fa300d3232d4a725e2d69` |
+| `13-V3-renderer-integration.log` | `0fd5284ab184728750595672a64be0c0a5e4b1cc7a8f30b4c29b7b6e5018b320` |
+| `14-V3-Chrome.log` | `8832848fd163f529fe89535fe9c1ad9c37ee2c658922a1b116f2ec2bfa37e73d` |
+| `15-V2-golden.log` | `b0cb4bd69944ca231a624998e9ec1a62a090b2406c5e6effc5ed8ebad0b3c793` |
+| `16-V2-binding-unit.log` | `c25232736b9850088a1ae6fe7790e4b84f3ae6015996e758fdefee130c56f9b6` |
+| `17-V2-binding-integration.log` | `5f54d56ca3437c2b943660b075a9322a24d8025d6d504a8815b6fd2886b09f30` |
+| `18-V2-Chrome.log` | `1f6426827e8a469782882a0dc3d43e8ef5b7664c0a033fc824ee6374ed7bd1cc` |
+| `19-V2-Edge.log` | `50b43c0d23a4088fd0af637d38a57d0fc69e4e167122b9fd17126ec307b15c92` |
+| `20-V1-golden.log` | `0ed2734ef7cc42964f2bb0fa4d0539e3cda07b66099780af1172e673da66c984` |
+| `21-V1-project-unit.log` | `e8acacaaa66d287e74509a25f230bc26dfd85fef15b73eedb6e6d1b24ddb6633` |
+| `22-V1-foundation-integration.log` | `3cd50d3994e7ba1b97088b192ad604952b85fbd96687955c947a6283d8a26104` |
+| `23-V1-Chrome.log` | `29771d35a4f1eace1484b9523a9f55b9a2b6b53f6c54302c55cf2a89f6758eb8` |
+| `24-V1-Edge.log` | `24756967a8149ad1eb6b6291cc61d8835ce6c7eb31f97b431e1f021ac9762164` |
+| `25-M3-Chrome-smoke.log` | `93172cddc43c82b22ec47504414fc05c529ef437fe571fc594b218ac67ff7977` |
+| `26-M4-engine-and-session-regression.log` | `1e034bcf2abf9af310eac04362f30fceddb62021295a003ce00e2317b89f9817` |
+| `27-M4-Chrome-regression.log` | `03fa439cf470a73ec68590c6ef619b37b523deeb65040f310e233533e792df9f` |
+| `28-M5-repository-and-recovery-regression.log` | `2ca744297d2d3752e6543afe1843b824ddadeb10ab4c58eee6cecfd42a902362` |
+| `29-Editor-E1-project-unit.log` | `c5631d727643e2433e4988d369b02abe65e32b3dca521b9147fd9c426972b8bf` |
+| `30-Editor-E1-integration.log` | `00824441b08f35480afa04db81a6bb12a91a7ea3a597c1df40b5638db85721bf` |
+| `31-Editor-E1-Chrome.log` | `ba871b736800095e6ef208906957a45c73fa1567a1469cb342476e6207ee48c1` |
+| `32-Editor-E7-unit.log` | `66eaef39fcc70a7234b1fde8b920db74c441445623c009ee2fcfe8856c6fe2c1` |
+| `33-Editor-E7-integration.log` | `5cebe1a1880574f7f4592e0968fa4ca33e091503fff8fd5c1629bd0fd04c467b` |
+| `34-M11-Chrome-resource-regression.log` | `0f708aed6dc0e348271aea5c371209a7b6ac3db290a3d9f464c3db554a0332cd` |
+| `35-M11-Edge-resource-regression.log` | `d5c8bf706f77c3e87a2d2e56323631664feb4987a0b3a5003f59e67fcc1a8425` |
+| `36-docs.log` | `bb005ed0074179a47b895a5c66e79917e37ebf18976e21fe9d27b1dd63c8f151` |
+| `37-deliberate-failure.log` | `69bf5c3fa50230a4957ad0c60c8323dba68e494d92761fea0039cf5d580d70aa` |
+| `38-typecheck.log` | `fadc7f66199c28d2f7cca439bb300ebeb0320158f32a0f9b52ec77031538af4d` |
+| `39-build.log` | `2698a3e998bcc5f2a83a691cbf75767a27393ad84221866fdd7b1ec25e37966f` |
+| `40-diff-check.log` | `e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855` |
+
+### Manual Gaps and Review Boundary
+
+- 自动化证明了默认 720p30 双浏览器文件事实、页面静音仍有音轨、事件同步、命令锁、取消/context/renderer 清理、保存失败重试和资源边界；它不能替代 owner 对最终文件的实际回放、构图审美或 OS picker 权限/取消/覆盖流程。
+- owner 必须在 Chrome 与 Edge 各回放默认 720p30，确认画面和音轨可接受；确认页面音量 0 仍录入歌曲、Orthogonal burst/flash 同步、录制锁与取消/context 清理；并至少执行一次真实原生保存、picker 取消和失败后重试。
+- V5 继续保持 `In Progress`、evidence 为 `in-review`；R-039/R-040/R-041 继续 `Open`，V6 继续 `Planned`。只有 owner 明确批准后，才关闭 V5、将 R-039/R-040 改为 `Mitigated`并开放 V6；R-041 仍由 V6 长时压力覆盖。
+- V1–V4 canonical identity 保持不变且无需重跑；本记录不证明 15 分钟 1080p60、V6 overall readiness 或生产上线。
+
+### Owner Review Status
+
+等待 `project-owner` 人工确认与明确批准；当前 canonical 通过不自动关闭 V5。
