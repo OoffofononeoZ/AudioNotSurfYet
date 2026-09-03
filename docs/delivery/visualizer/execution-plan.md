@@ -11,7 +11,7 @@ upstream_docs:
   - "docs/architecture/visualizer/project-format-v1.md"
   - "docs/architecture/visualizer/binding-and-scene-contracts.md"
   - "docs/architecture/visualizer/recording-contract.md"
-next_action: "V1–V6 已全部关闭；进入独立 Visualizer release-readiness review"
+next_action: "实施 DEC-050 readiness 修订并登记双浏览器滚动隔离证据"
 ---
 
 # Visualizer V1–V6 Execution Plan
@@ -158,6 +158,18 @@ Exit gate:
 - 设置/控制反馈不超过 100ms；播放到视觉响应偏差不超过 50ms；A/V 漂移不超过 100ms；无 Visualizer/分析归因任务超过 50ms。
 - 三格式、双浏览器、四特征、两个场景、WebM、恢复、故障隔离、无障碍与资源均有 success/failure/boundary/exception 证据。
 - owner 完成从当前歌曲、Editor 数据、四特征绑定到 WebM 保存/回放的完整制作任务并批准 canonical 后，才进入整体 release-readiness。
+
+### Post-V6 — Viewport scrolling readiness remediation
+
+Implementation and verification:
+
+- 保持 V6 canonical 与 runtime topology 不变，把 Visualizer 页面改为确定的 `100dvh` 高度链；workspace 中只有左右侧栏拥有纵向滚动，preview、recording bar 和 transport 不随侧栏滚动。
+- 将 Analyzer 精确值表的 scrollbar 规则抽取为全局 `.app-scrollbar`，迁移 Analyzer 表和 Visualizer 两侧栏；项目 Skill 禁止后续为新增或修改的可见滚动容器复制局部 scrollbar 变体。
+- 在 1024/1280/1920、代表性高度和 DPR 下验证 document 无纵向滚动、两侧 scrollTop 隔离、compact drawer 边界、16:9 单 Canvas 与 console/pageerror。
+
+Exit gate:
+
+- AC-VR01–AC-VR04 自动化与 clean implementation commit 证据通过，owner 再确认一屏布局和两侧独立滚动。该修订不是 V7，也不重跑或替换 V6 canonical。
 
 ## 5. Commands and Evidence Cadence
 

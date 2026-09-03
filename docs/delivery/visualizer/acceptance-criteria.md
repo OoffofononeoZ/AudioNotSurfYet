@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/architecture/interface-contracts.md"
   - "docs/architecture/risk-register.md"
   - "docs/delivery/visualizer/execution-plan.md"
-next_action: "AC-V601–AC-V607 与 owner 人工门禁已通过；作为 readiness 基线保留"
+next_action: "实现并验证 AC-VR01–AC-VR04；V6 历史 AC 保持已批准"
 ---
 
 # Visualizer V1–V6 Acceptance Criteria
@@ -96,3 +96,12 @@ next_action: "AC-V601–AC-V607 与 owner 人工门禁已通过；作为 readine
 ## 8. Milestone Exit Rule
 
 每个里程碑只能在全部适用 AC 拥有明确 success、failure、boundary 或 exception 证据、相关风险复核、clean canonical 和 owner 批准后关闭。`project-owner` 于 2026-09-02 批准本文及其余 Visualizer delivery planning，并只开放 V1；该批准不表示任何 AC 已通过。
+
+## 9. Post-V6 Release-readiness Revision
+
+| ID | Criterion | Coverage and verification | Risk |
+| --- | --- | --- | --- |
+| AC-VR01 | `>=1024px` 时 Visualizer、document 与 body 的纵向高度不超过 viewport；Header、toolbar、preview、recording bar 和 transport 同处一屏 | 1024×720、1280×720/900、1920×1080 DOMRect/scroll geometry；boundary | VFT-LAYOUT |
+| AC-VR02 | 左模板与右参数侧栏各自滚动；滚动一侧不改变另一侧或 `window.scrollY`，到达边界后不发生 scroll chaining | 双侧 synthetic overflow + wheel/scrollTop E2E；success/exception | VFT-LAYOUT |
+| AC-VR03 | Visualizer 侧栏与 Analyzer 精确值表复用 `.app-scrollbar`，Firefox 为 `thin`、WebKit 为 10px，并共享 track/thumb/hover/gutter | computed style + source contract；success/regression | VFT-LAYOUT |
+| AC-VR04 | 1024 compact drawer 位于 workspace grid 内且不覆盖录制/transport；16:9、单 Canvas/renderer/RAF、键盘焦点、reduced motion、context recovery 和 console/pageerror 不回归 | Chrome/Edge targeted regression；boundary/exception | R-038 |

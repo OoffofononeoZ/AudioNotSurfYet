@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/product/scope.md"
   - "docs/product/success-metrics.md"
   - "docs/product/open-questions.md"
-next_action: "V6 已在既有架构内批准关闭；进入独立 Visualizer release-readiness review"
+next_action: "实施 DEC-050 一屏工作台与独立侧栏滚动；不改变 Visualizer runtime topology"
 ---
 
 # System Design
@@ -447,5 +447,12 @@ M6 只在 `import.meta.env.DEV` 安装无 UI bridge，提供活动特征、cance
 - 单个 analysis binding 未就绪时以中性 0 显示进度，失败只隔离到该绑定并可重试；录制 preflight 不允许以中性值伪装完整结果。
 - 旧 generation、旧 route token、旧 template 或旧 binding result 一律不得更新当前项目或场景。任何工程/草稿/Editor 快照导入失败都保留原内存和 durable draft。
 - 拒绝第二 AudioEngine/Worker、实时监听 Editor draft、可执行模板、多草稿工程库、依赖 RAF delta 的运动、静默录制预设降级。主要权衡见 [ADR-0014](adrs/0014-visualizer-runtime-leases.md) 至 [ADR-0017](adrs/0017-realtime-webm-recording.md)。
+
+### Workspace viewport and scrolling
+
+- DEC-050 将支持的 `>=1024px` 桌面 Visualizer 外壳固定为一个 `100dvh`：Header 仍为 64px fixed layer，页面以既有顶部/边缘留白占据剩余视觉空间，document/body 不拥有纵向滚动。
+- workspace 的 toolbar、可选 alert、中央 grid、recording bar 与 transport 使用有界 grid height；中央行必须 `minmax(0, 1fr)` 且所有中间容器允许 `min-height: 0`，不能由 inspector 的 min-content 高度撑开页面。
+- 左模板和右参数侧栏分别拥有 `overflow-y: auto`、隐藏横向溢出和 `overscroll-behavior: contain`。`1024–1279px` 抽屉以中央 workspace grid 为定位/裁切边界，不能覆盖 recording bar 或 transport；`<1024px` 保留现有最小宽度与横向兼容，不形成移动端支持承诺。
+- 产品自有的可见滚动容器使用共享 `.app-scrollbar`，其视觉来源是 Analyzer 精确值表。本次只迁移 Analyzer 表与 Visualizer；不使用全局通配选择器覆盖原生控件或第三方组件。
 
 `project-owner` 于 2026-09-02 明确回复：“我批准 Visualizer V0 系统设计、接口契约、R-034–R-041 与 ADR-0014–0017；同意进入 Visualizer V1–V6 execution planning。”本设计据此获批并只开放 V0-D delivery planning；当前 `/comingsoon`、V1 实现、quality evidence 与 release-readiness 均不因本批准自动完成。
