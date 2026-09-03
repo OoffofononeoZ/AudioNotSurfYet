@@ -1,0 +1,187 @@
+{
+  "schemaVersion": 1,
+  "generatorVersion": "visualizer-v6-hardening-v1",
+  "fixtureManifest": "tests/fixtures/fixture-manifest.json",
+  "fixtures": [
+    {
+      "id": "format-master-mp3-v1",
+      "path": "tests/fixtures/audio/format-master.mp3",
+      "sha256": "8f83304411c6d19de6db279f361a2568087c339d3eaf8312fa6f6a59da3b8771",
+      "durationSeconds": 4.032
+    },
+    {
+      "id": "format-master-wav-v1",
+      "path": "tests/fixtures/audio/format-master.wav",
+      "sha256": "13ece6c2c1f5c441ef3e6376dc765eea65fe57ece5f2c6dcdcbea1cd2fcacb84",
+      "durationSeconds": 4
+    },
+    {
+      "id": "format-master-flac-v1",
+      "path": "tests/fixtures/audio/format-master.flac",
+      "sha256": "720fd727757f758c3b89b0ab3c59227c97255763a89c6882e49e290612380a25",
+      "durationSeconds": 4
+    }
+  ],
+  "stressAudio": {
+    "storage": "opfs",
+    "format": "wav-pcm16",
+    "sampleRate": 48000,
+    "channels": 1,
+    "durationSeconds": 900,
+    "chunkSeconds": 5,
+    "committed": false
+  },
+  "cube": {
+    "templateId": "cube-swarm",
+    "templateVersion": 1,
+    "seed": 607,
+    "bindings": [
+      {
+        "parameterId": "centerSpectrum",
+        "source": {
+          "kind": "analysis",
+          "featureId": "complexSpectrum",
+          "component": "magnitude",
+          "projection": { "kind": "full" }
+        }
+      },
+      {
+        "parameterId": "coreScale",
+        "source": {
+          "kind": "analysis",
+          "featureId": "buffer",
+          "component": "default",
+          "projection": { "kind": "max" }
+        },
+        "transform": {
+          "inputMin": 0,
+          "inputMax": 1,
+          "outputMin": 0.5,
+          "outputMax": 2.5,
+          "clamp": true,
+          "invert": false,
+          "attackSeconds": 0,
+          "releaseSeconds": 0
+        }
+      },
+      {
+        "parameterId": "riseSpeed",
+        "source": {
+          "kind": "analysis",
+          "featureId": "loudness",
+          "component": "total",
+          "projection": { "kind": "scalar" }
+        },
+        "transform": {
+          "inputMin": 0,
+          "inputMax": 64,
+          "outputMin": 0.25,
+          "outputMax": 3,
+          "clamp": true,
+          "invert": false,
+          "attackSeconds": 0,
+          "releaseSeconds": 0
+        }
+      },
+      {
+        "parameterId": "orbitSpeed",
+        "source": {
+          "kind": "analysis",
+          "featureId": "amplitudeSpectrum",
+          "component": "default",
+          "projection": { "kind": "peak" }
+        },
+        "transform": {
+          "inputMin": 0,
+          "inputMax": 128,
+          "outputMin": 0,
+          "outputMax": 2,
+          "clamp": true,
+          "invert": false,
+          "attackSeconds": 0,
+          "releaseSeconds": 0
+        }
+      }
+    ],
+    "expectedActiveFeatureIds": [
+      "amplitudeSpectrum",
+      "loudness",
+      "complexSpectrum",
+      "buffer"
+    ]
+  },
+  "orthogonal": {
+    "templateId": "orthogonal-lines",
+    "templateVersion": 1,
+    "bindings": [
+      {
+        "parameterId": "horizontalIntensity",
+        "source": {
+          "kind": "analysis",
+          "featureId": "loudness",
+          "component": "total",
+          "projection": { "kind": "scalar" }
+        },
+        "transform": {
+          "inputMin": 0,
+          "inputMax": 64,
+          "outputMin": 0,
+          "outputMax": 1,
+          "clamp": true,
+          "invert": false,
+          "attackSeconds": 0,
+          "releaseSeconds": 0
+        }
+      },
+      {
+        "parameterId": "verticalIntensity",
+        "source": {
+          "kind": "analysis",
+          "featureId": "complexSpectrum",
+          "component": "magnitude",
+          "projection": { "kind": "mean" }
+        },
+        "transform": {
+          "inputMin": 0,
+          "inputMax": 128,
+          "outputMin": 0,
+          "outputMax": 1,
+          "clamp": true,
+          "invert": false,
+          "attackSeconds": 0,
+          "releaseSeconds": 0
+        }
+      }
+    ],
+    "expectedActiveFeatureIds": ["loudness", "complexSpectrum"]
+  },
+  "transition": {
+    "expectedActiveFeatureCounts": [4, 2, 4],
+    "expectedRestoredCubeFeatureIds": [
+      "amplitudeSpectrum",
+      "loudness",
+      "complexSpectrum",
+      "buffer"
+    ]
+  },
+  "media": {
+    "browserNames": ["chrome", "edge"],
+    "formatNames": ["mp3", "wav", "flac"],
+    "minimumFiles": 6,
+    "resolution": { "width": 1280, "height": 720 },
+    "frameRate": 30,
+    "videoCodecs": ["vp9", "vp8"],
+    "audioCodec": "opus",
+    "maximumFrameRateErrorPercent": 5,
+    "maximumPacketIntervals": 2,
+    "maximumDurationDeltaSeconds": 0.25,
+    "maximumAudioVideoEndDeltaSeconds": 0.1
+  },
+  "canonical": {
+    "upstreamV5Run": "V5-2026-09-03T03-49-31-211Z-9b5af09c",
+    "upstreamV5ImplementationCommit": "9b5af09c5846415a8e5465e710e6095f1e7db310",
+    "upstreamV5EvidenceCommit": "10a2bc0c7a30413d80689ed41dc98caae33ec21f",
+    "upstreamV5SummarySha256": "cec1fab0310852458c2aa4fbd3bebc90eee3e213a54b7695a524736e07b07b7b",
+    "expectedStepCount": 54
+  }
+}

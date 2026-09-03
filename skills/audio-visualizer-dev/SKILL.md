@@ -60,6 +60,7 @@ description: AudioNotSurfYet 项目专属的开发、诊断、代码评审、验
 - 离线分析改动覆盖 0/1/4 个活动特征、Worker progress/cancel/error、完整 cache identity、stale generation、exact cursor、持久化失败不影响播放，以及约 15 分钟输入的主线程响应与资源释放。
 - 可视化和布局改动覆盖至少一个窄视口、一个常见桌面视口和一个较宽视口；核对真实几何，不只看截图。
 - RAF、Observer、事件监听、Three.js 资源和对象 URL 必须检查创建与释放是否成对。
+- Visualizer final hardening 使用测试专用资源探针核对 AudioContext、Worker、RAF、Canvas/WebGL、MediaStreamTrack、Observer、window/document listener 和 Blob URL；生产诊断只追加可序列化时间与资源计数，不扩大公共接口。
 - 明确记录无法自动化的路径、原因、残余风险和补偿验证。
 - 运行 `git diff --check`，并确认改动范围与用户请求一致。
 

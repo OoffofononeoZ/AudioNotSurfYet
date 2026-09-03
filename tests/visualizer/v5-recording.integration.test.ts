@@ -383,11 +383,12 @@ describe('Visualizer V5 recording integration', () => {
         host.resize(800, 450, 1.5);
         expect(sizes.at(-1)).toEqual([1920, 1080, 1]);
         lease.renderNow();
-        expect(raf.callbacks.size).toBe(0);
+        expect(raf.callbacks.size).toBe(1);
         lease.release();
         expect(sizes.at(-1)).toEqual([800, 450, 1.5]);
         expect(raf.callbacks.size).toBe(1);
         raf.flush();
+        expect(raf.callbacks.size).toBe(0);
         host.dispose();
     });
 });

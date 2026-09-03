@@ -113,6 +113,12 @@
     "test:e2e:v5:edge": "node tests/scripts/run-edge.mjs tests/e2e/v5-visualizer.spec.ts --workers=1",
     "test:e2e:v5": "npm run test:e2e:v5:chrome && npm run test:e2e:v5:edge",
     "test:v5:media": "node tests/scripts/verify-v5-media.mjs",
+    "test:v6:unit": "vitest run tests/visualizer/v6-hardening-unit.test.ts",
+    "test:v6:integration": "vitest run tests/visualizer/v6-hardening.integration.test.ts tests/visualizer/v2-binding.integration.test.ts tests/visualizer/v5-recording.integration.test.ts",
+    "test:e2e:v6:chrome": "playwright test tests/e2e/v6-visualizer-hardening.spec.ts --project=chrome --workers=1",
+    "test:e2e:v6:edge": "node tests/scripts/run-edge.mjs tests/e2e/v6-visualizer-hardening.spec.ts --workers=1",
+    "test:e2e:v6": "npm run test:e2e:v6:chrome && npm run test:e2e:v6:edge",
+    "test:v6:media": "node tests/scripts/verify-v6-media.mjs",
     "test:e2e:edge": "node tests/scripts/run-edge.mjs",
     "fixtures:generate": "node --experimental-strip-types tests/fixtures/generate-fixtures.ts",
     "fixtures:golden": "node --experimental-strip-types tests/analysis/generate-golden.ts",
@@ -138,6 +144,7 @@
     "fixtures:v3:golden": "vitest run tests/visualizer/v3-golden.test.ts",
     "fixtures:v4:golden": "vitest run tests/visualizer/v4-golden.test.ts",
     "fixtures:v5:golden": "vitest run tests/visualizer/v5-golden.test.ts",
+    "fixtures:v6:golden": "vitest run tests/visualizer/v6-hardening-unit.test.ts",
     "eval:m3": "node tests/scripts/run-m3-eval.mjs",
     "eval:m3:provisional": "node tests/scripts/run-m3-eval.mjs --provisional",
     "eval:m4": "node tests/scripts/run-m4-eval.mjs",
@@ -187,7 +194,9 @@
     "eval:v4": "node tests/scripts/run-v4-eval.mjs",
     "eval:v4:provisional": "node tests/scripts/run-v4-eval.mjs --provisional",
     "eval:v5": "node tests/scripts/run-v5-eval.mjs",
-    "eval:v5:provisional": "node tests/scripts/run-v5-eval.mjs --provisional"
+    "eval:v5:provisional": "node tests/scripts/run-v5-eval.mjs --provisional",
+    "eval:v6": "node tests/scripts/run-v6-eval.mjs",
+    "eval:v6:provisional": "node tests/scripts/run-v6-eval.mjs --provisional"
   },
   "dependencies": {
     "@chenglou/pretext": "^0.0.6",

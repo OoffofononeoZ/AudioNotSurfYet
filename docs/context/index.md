@@ -4,7 +4,7 @@ owner: "project-owner"
 last_reviewed: 2026-09-03
 upstream_docs:
   - "AGENTS.md"
-next_action: "Editor E8 与 Visualizer V5 已批准关闭；实施 Visualizer V6 final hardening"
+next_action: "Visualizer V6 dirty provisional 已 54/54 通过；提交实现并运行 clean canonical"
 ---
 
 # Repository Context Index
@@ -22,7 +22,7 @@ AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端。Editor E1–
 - System design：Analyzer/Editor 历史设计仍是已批准/实现基线；Visualizer system design、接口、风险和 ADR-0014–0017 已获批准。
 - Execution planning：M1–M14、Editor E0-D/E1–E8、Visualizer V0-D/V1–V5 均为 `Complete`；Visualizer V6 为 `In Progress`。
 - Quality and evals：M3–M14、Editor E1–E8 与 Visualizer V1–V5 evidence 已批准；V6 eval/golden/failure taxonomy 已批准并开放实现。
-- Implementation：Editor E8 与 Visualizer V5 已完成；V6 双浏览器、三格式、长时资源与全回归加固正在实施。
+- Implementation：Editor E8 与 Visualizer V5 已完成；V6 双浏览器、三格式、900 秒四特征、六文件媒体、模板恢复与资源专项已实现，dirty provisional `V6-2026-09-03T10-15-47-668Z-0f90a77c-provisional` 54/54 通过；clean canonical 尚待执行。
 - Readiness、release、retrospective：Analyzer M14 为 `Ready with waivers`；PROD-015 仍阻断上线，Editor readiness 独立。
 
 ## Key Documents
@@ -139,7 +139,7 @@ AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端。Editor E1–
 | `src/audio/` | 单一 AudioEngine 与 MainLayout-owned AudioSessionService；文件恢复及通用 Editor repeat-one / Visualizer pause-at-end route lease | ADR-0001/0003/0006/0014；E1/V1 |
 | `src/analysis/` | 21 项分析平台、M14 feature-order 纯模型及 Analyzer/Editor 单一 active consumer lease；Editor 复用 Buffer retained PCM 与 tempo request | ADR-0002/0004/0005/0006/0013；M14/E1/E2 |
 | `src/editor/` | JSON V1 strict codec、原生文件 gateway、独立单草稿、route controller、timeline/tempo、point 命令与 overlay bounds/feature 契约 | ADR-0007–0009；E1–E4 |
-| `src/visualizer/` | V1 route/project/draft、V2 binding resolver、V3 Orthogonal Lines、V4 Cube Swarm 与 V5 recorder 均已实现并获批准；V6 只做最终加固 | ADR-0014–0017；V1–V5 approved，V6 In Progress |
+| `src/visualizer/` | V1 route/project/draft、V2 binding resolver、V3 Orthogonal Lines、V4 Cube Swarm 与 V5 recorder 均已实现并获批准；V6 候选追加双模板会话恢复和 renderer 时间诊断 | ADR-0014–0017；V1–V5 approved，V6 In Progress |
 | `src/persistence/` | 原生 IndexedDB V1 SessionRepository 与 runtime validator | ADR-0003；M5 |
 | `src/stores/` | 持久化 config 与可序列化 audioSessionStore/恢复/analysis 状态 | ADR-0001/0002/0003 |
 | `src/utils/` | 事件总线、M12 masonry placement 与其他纯工具函数 | 实现时按实际边界维护 |

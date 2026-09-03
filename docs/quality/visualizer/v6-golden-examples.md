@@ -5,7 +5,7 @@ last_reviewed: 2026-09-03
 upstream_docs:
   - "docs/quality/visualizer/v6-eval-plan.md"
   - "docs/quality/visualizer/v5-golden-examples.md"
-next_action: "生成 visualizer-v6-hardening.v1.json 并由 V6 unit/browser/media 专项消费"
+next_action: "版本化 golden 与 V6 专项已通过 dirty provisional；在 clean canonical 中复核身份"
 ---
 
 # Visualizer V6 Golden Examples

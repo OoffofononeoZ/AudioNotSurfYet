@@ -291,6 +291,81 @@ describe('Visualizer V2 binding integration', () => {
         await harness.controller.dispose();
     });
 
+    test('releases four Cube references for Orthogonal and restores the exact Cube bindings', async () => {
+        const harness = createHarness();
+        await harness.controller.enter(TRACK_ID);
+        harness.controller.switchTemplate('cube-swarm');
+        const descriptor = harness.controller.listTemplates().find(
+            (entry) => entry.id === 'cube-swarm',
+        )!;
+        const cases: Array<[string, FeatureId]> = [
+            ['centerSpectrum', 'complexSpectrum'],
+            ['coreScale', 'buffer'],
+            ['riseSpeed', 'loudness'],
+            ['orbitSpeed', 'amplitudeSpectrum'],
+        ];
+        for (const [parameterId, featureId] of cases) {
+            const parameter = descriptor.parameters.find((entry) => entry.id === parameterId)!;
+            const binding = createDefaultAnalysisBinding(parameter, featureId);
+            if (featureId === 'complexSpectrum') {
+                binding.source = {
+                    kind: 'analysis',
+                    featureId,
+                    component: 'magnitude',
+                    projection: { kind: 'full' },
+                };
+                delete binding.transform;
+            } else if (featureId === 'loudness') {
+                binding.source = {
+                    kind: 'analysis',
+                    featureId,
+                    component: 'total',
+                    projection: { kind: 'scalar' },
+                };
+            } else {
+                binding.source = {
+                    kind: 'analysis',
+                    featureId,
+                    projection: { kind: 'max' },
+                };
+            }
+            harness.controller.updateBinding(binding);
+        }
+        const cubeBindings = harness.controller.getSnapshot().project!.scene.bindings;
+        expect(harness.controller.getSnapshot().bindingRuntime.activeFeatureIds).toEqual([
+            'amplitudeSpectrum', 'loudness', 'complexSpectrum', 'buffer',
+        ]);
+
+        harness.controller.switchTemplate('orthogonal-lines');
+        const orthogonal = harness.controller.listTemplates().find(
+            (entry) => entry.id === 'orthogonal-lines',
+        )!;
+        for (const [parameterId, featureId, component, projection] of [
+            ['horizontalIntensity', 'loudness', 'total', 'scalar'],
+            ['verticalIntensity', 'complexSpectrum', 'magnitude', 'mean'],
+        ] as const) {
+            const parameter = orthogonal.parameters.find((entry) => entry.id === parameterId)!;
+            const binding = createDefaultAnalysisBinding(parameter, featureId);
+            binding.source = {
+                kind: 'analysis',
+                featureId,
+                component,
+                projection: { kind: projection },
+            };
+            harness.controller.updateBinding(binding);
+        }
+        expect(harness.controller.getSnapshot().bindingRuntime.activeFeatureIds).toEqual([
+            'loudness', 'complexSpectrum',
+        ]);
+
+        harness.controller.switchTemplate('cube-swarm');
+        expect(harness.controller.getSnapshot().project!.scene.bindings).toEqual(cubeBindings);
+        expect(harness.controller.getSnapshot().bindingRuntime.activeFeatureIds).toEqual([
+            'amplitudeSpectrum', 'loudness', 'complexSpectrum', 'buffer',
+        ]);
+        await harness.controller.dispose();
+    });
+
     test('rejects the fifth feature before mutating project or coordinator active set', async () => {
         const registry = new SceneRegistry([FIVE_PARAMETERS]);
         const harness = createHarness({ registry });

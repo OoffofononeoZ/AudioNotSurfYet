@@ -19,6 +19,8 @@ export interface VisualizerRendererDiagnostics {
     targetResolveCount: number;
     renderedFrames: number;
     lastFrameHash: string;
+    lastSongTimeSeconds: number;
+    lastFrameAtMs: number;
     maxFrameDurationMs: number;
     contextLosses: number;
     contextRestores: number;
@@ -47,6 +49,8 @@ export const visualizerRendererDiagnostics: VisualizerRendererDiagnostics = {
     targetResolveCount: 0,
     renderedFrames: 0,
     lastFrameHash: '',
+    lastSongTimeSeconds: 0,
+    lastFrameAtMs: 0,
     maxFrameDurationMs: 0,
     contextLosses: 0,
     contextRestores: 0,
@@ -371,9 +375,10 @@ export class VisualizerRendererHost implements VisualizerSceneHost {
             return;
         }
         // Queue the one permitted visual RAF before doing scene/renderer work.
-        // This keeps captureStream packet cadence stable even when a frame is
-        // close to the browser's presentation deadline.
-        if (frame.playbackState === 'playing') this.requestFrame();
+        // A capture lease keeps that same loop alive while transport is still
+        // paused during recorder startup/finalization, preventing an initial
+        // packet hole without introducing another clock or RAF owner.
+        if (frame.playbackState === 'playing' || this.captureToken) this.requestFrame();
         try {
             const scene = this.ensureScene(frame);
             if (this.failNextRender) {
@@ -410,6 +415,8 @@ export class VisualizerRendererHost implements VisualizerSceneHost {
                 }
             }
             visualizerRendererDiagnostics.lastFrameHash = snapshot.hash;
+            visualizerRendererDiagnostics.lastSongTimeSeconds = frame.timeSeconds;
+            visualizerRendererDiagnostics.lastFrameAtMs = performance.now();
             visualizerRendererDiagnostics.renderedFrames += 1;
             this.canvas.dataset.frameStateHash = snapshot.hash;
             this.canvas.dataset.frameTime = frame.timeSeconds.toFixed(6);

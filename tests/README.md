@@ -6,7 +6,7 @@
 - Vitest：4.1.10。官方已发布但当前 npm 镜像尚未提供 Vitest 5，因此使用镜像可获得且仍受支持的 4.1 版本。
 - Playwright Test：1.62.0；必需浏览器为本机稳定版 Google Chrome 与 Microsoft Edge。
 - FFmpeg：8.1.2；只用于生成和检查受控 WAV/MP3/FLAC fixture。
-- 当前 Visualizer V1/V2/V3 canonical 使用 Google Chrome 152.0.7977.66 与 Microsoft Edge 152.0.4191.53；V3 场景专项运行真实 Chrome，固定 V1/V2 基线继续运行真实 Chrome/Edge，浏览器缺失时仍明确报告失败/blocked。
+- 当前 Visualizer V1–V5 canonical 使用 Google Chrome 152.0.7977.66 与 Microsoft Edge 152.0.4191.53；V6 候选在同一本机的真实 Chrome/Edge 执行三格式、长时压力和录制专项，浏览器缺失时仍明确报告失败/blocked。
 
 M3–M13 不建设 CI。下列命令当前均为本地门禁；正式证据要求在干净 commit 上复跑。M3–M13 与 Editor E1–E8 canonical 均已获批准。E7 的 44/44 run 因全屏浮层修订成为 `pre-revision`，修订版 46/46 已于 2026-08-31 获 owner 批准；E8 的 25/25 clean canonical 与 owner 门禁已于 2026-09-03 获批准。
 
@@ -110,6 +110,12 @@ M3–M13 不建设 CI。下列命令当前均为本地门禁；正式证据要�
 | `npm run test:v5:integration` | controller 命令锁、Blob 保存重试、同 Canvas capture lease 与 20 次资源生命周期 |
 | `npm run test:e2e:v5` | 真实 Chrome/Edge 的 context/renderer abort、离页决策、静音页面录音、能力矩阵与资源诊断 |
 | `npm run test:v5:media` | ffprobe/FFmpeg 验证 WebM 双轨、codec、尺寸/fps、packet gap、时长、静音隔离与音画峰值 |
+| `npm run fixtures:v6:golden` | 校验 V6 三格式 SHA、900 秒 OPFS 压力工程、四特征/双模板 binding 与 54 步证据身份 golden |
+| `npm run test:v6:unit` | V6 golden、projection/component/transform、四项到两项再恢复、媒体矩阵与 V5 canonical 身份 |
+| `npm run test:v6:integration` | V6 renderer 时间诊断、单 host/renderer/Canvas 生命周期和幂等资源释放 |
+| `npm run test:e2e:v6:chrome` / `test:e2e:v6:edge` | 真实 Chrome/Edge 的 MP3/WAV/FLAC、六个默认 WebM、900 秒四特征压力、20 次 lifecycle 与故障矩阵 |
+| `npm run test:e2e:v6` | 顺序执行真实 Chrome 与 Edge 的同一 V6 final hardening 套件 |
+| `npm run test:v6:media` | ffprobe/FFmpeg 验证两浏览器六个默认 WebM 的双轨、codec、1280×720、30fps、时长、包间隙与非静音音轨 |
 | `npm run test:e2e:v1:chrome` | Chrome Header/route、MusicBar、pause-at-end、三栏/抽屉、单 16:9 Canvas、transport 和资源循环 |
 | `npm run test:e2e:v1:edge` | 使用真实 Edge 执行同一 V1 route/lease/layout/resource 专项套件 |
 | `npm run test:e2e:v1` | 顺序执行真实 Chrome 与 Edge 的 V1 专项套件 |
@@ -163,6 +169,8 @@ M3–M13 不建设 CI。下列命令当前均为本地门禁；正式证据要�
 | `npm run eval:v4` | 只允许在干净 implementation commit 上执行固定 34 步 V4 canonical suite |
 | `npm run eval:v5:provisional` | 在 dirty worktree 执行 V4 34 步基线加六个 V5 专项，只作为实现反馈 |
 | `npm run eval:v5` | 只允许在干净 implementation commit 上执行固定 40 步 V5 canonical suite |
+| `npm run eval:v6:provisional` | 在 dirty worktree 执行 V5 40 步基线、六个 V6 专项和八个 M6/M14 显式回归，只作为实现反馈 |
+| `npm run eval:v6` | 只允许在干净 implementation commit 上执行固定 54 步 V6 canonical suite |
 
 ## 目录职责
 
@@ -177,7 +185,7 @@ M3–M13 不建设 CI。下列命令当前均为本地门禁；正式证据要�
 - `tests/harness/`：被正常 Vitest 配置排除的 deliberate failure 及其自检。
 - `tests/scripts/`：浏览器检测和 M3–M14、Editor、Visualizer run orchestration。
 - `tests/editor/`：Editor 工程格式、草稿、lease 和 session controller 的里程碑专项测试。
-- `tests/visualizer/`：Visualizer V1 strict project/route/草稿、V2 binding resolver、V3 Orthogonal Lines、V4 Cube，以及 V5 recording state/capture/resource 的版本化 golden、unit 和 integration 测试。
+- `tests/visualizer/`：Visualizer V1 strict project/route/草稿、V2 binding resolver、V3 Orthogonal Lines、V4 Cube、V5 recording state/capture/resource，以及 V6 binding 恢复、renderer 时间诊断和证据身份测试。
 
 M4 浏览器测试中的损坏 WAV 与 65 秒、48kHz、单声道计时 WAV 都写入 `test-results/`，不提交二进制。长时钟测试用同一 DOM 采样同时读取 `performance.now()` 与 AudioContext 驱动快照；三次 seek 使用进度条真实几何。
 
@@ -232,6 +240,8 @@ Visualizer V3 quality contract 固定 `visualizer-v3-lines-v1.wav` 与版本化 
 Visualizer V4 Cube Swarm 使用共享 BoxGeometry、两个 MeshStandardMaterial、三个 InstancedMesh、默认 Amplitude Spectrum/Energy 双分析、60Hz rise/orbit checkpoint 与同 RendererHost context recovery。clean canonical `V4-2026-09-02T17-47-40-271Z-5c2d24a3` 已在 commit `5c2d24a3f1f413dba236563b3686237c6b8f2e21` 上 34/34 通过，summary SHA-256 为 `9b2a86e3dcdd4e634317c4234418dc3444da441a3be805a980562768dba5c3b2`。Owner 已批准并关闭 V4。
 
 Visualizer V5 使用唯一 pre-Gain audio tap、同一 Canvas capture lease 和原生 MediaRecorder/save picker。clean canonical `V5-2026-09-03T03-49-31-211Z-9b5af09c` 已在 implementation commit `9b5af09c5846415a8e5465e710e6095f1e7db310` 上 40/40 通过，summary SHA-256 为 `cec1fab0310852458c2aa4fbd3bebc90eee3e213a54b7695a524736e07b07b7b`；Chrome/Edge 默认 720p30 的四个 Orthogonal/Cube 文件均通过 ffprobe/FFmpeg，三个 optional preset 在 preflight 返回 typed `preset-unavailable`。canonical 与 owner 原生保存/回放门禁均已批准；V5 已关闭，V6 为 `In Progress`。
+
+Visualizer V6 候选新增版本化 hardening golden、同歌曲会话内的模板 binding 恢复、renderer 当前歌曲时间/帧时间诊断和测试专用资源探针。Chrome/Edge 专项分别使用 MP3 四特征 Cube、WAV Editor Orthogonal，以及完成 4→2→4 恢复证明后的 FLAC Orthogonal，确保每浏览器三个默认 720p30 WebM 覆盖三格式和两个模板；另覆盖 900 秒 OPFS 四特征压力、20 次 route/template/record/context lifecycle、响应与时钟阈值。dirty provisional `V6-2026-09-03T10-15-47-668Z-0f90a77c-provisional` 已 54/54 通过，summary SHA-256 为 `432ec71d21ec9c3c41310bf738603a6a8491c154f4ab0a01cd359432ef68b2c4`；它绑定 dirty worktree，只是实现反馈，不能登记为 V6 evidence。
 
 V1 quality contract 固定 AC-V101–AC-V108、V1-G01–G12、VFT-ROUTE/LEASE/PROJECT/DRAFT/FILE/LAYOUT/RESOURCE、21 步 clean canonical，以及 Chrome/Edge 原生 picker、覆盖提示和 `beforeunload` 人工补偿。V1/evidence 已批准，R-034 为 `Mitigated`；V2 批准后 R-036 也为 `Mitigated`，R-038 继续由真实 renderer 里程碑验证。
 
