@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/quality/visualizer/v6-golden-examples.md"
   - "docs/quality/visualizer/v5-failure-taxonomy.md"
   - "docs/architecture/risk-register.md"
-next_action: "在 V6 专项与 canonical 中按稳定 type/severity 记录失败和恢复结果"
+next_action: "V6 canonical 无未关闭自动化失败；人工门禁前保持 evidence in-review"
 ---
 
 # Visualizer V6 Failure Taxonomy
@@ -33,3 +33,5 @@ V1–V5 的 route、project、binding、scene、recording 与媒体分类继续�
 | S3 | 不改变事实的低等级文案或 evidence 展示差异 | 记录并按 AC 判断，不掩盖高等级问题 |
 
 只有资源获取前的 typed `preset-unavailable` 可作为 optional preset 能力事实；已生成媒体失败、测试超时、浏览器缺失或 harness 不稳定都不能转换为 unavailable。无法自动化的原生 picker、辅助技术和长会话体感必须保留 owner、原因、残余风险与补偿步骤。
+
+DEC-048 前的 clean 尝试 `V6-2026-09-03T10-25-21-807Z-088f21d3` 因 135ms 视频 packet gap 触发当时的 `V6FT-MEDIA / S1` 并提前停止；该 artifact 保留为失败事实，未生成或登记 canonical summary。阈值经 owner 明确取舍后以 DEC-048 前向修订，代码和测试在独立 commit 上重跑；最终 `V6-2026-09-03T16-33-03-497Z-ef12ce39` 54/54 通过，未观察到未关闭的自动化 S0/S1。人工门禁未完成，因此不能把 taxonomy 状态外推为 V6 Complete 或 R-041 Mitigated。

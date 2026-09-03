@@ -5,7 +5,7 @@ last_reviewed: 2026-09-04
 upstream_docs:
   - "docs/architecture/system-design.md"
   - "docs/architecture/interface-contracts.md"
-next_action: "E8 与 V5 风险门禁已批准；V6 继续验证并缓解 R-041"
+next_action: "V6 clean canonical 已通过；owner 人工门禁前 R-041 保持 Open"
 ---
 
 # Risk Register
@@ -54,7 +54,7 @@ next_action: "E8 与 V5 风险门禁已批准；V6 继续验证并缓解 R-041"
 | R-038 | Three.js scene/RAF/geometry/material 在切模板或路由时泄漏 | Medium | High | Canvas/WebGL/RAF 计数单调增长、旧场景仍更新 | 单 RendererHost、单 RAF、scene dispose；V3 clean canonical 已获批准；V4 34/34 clean canonical 的 20 次真实 Cube 切换保持 1 Canvas/host/renderer、scene 42/41、resolve/render 97/97，最大 frame 13.60ms | V3 已获 owner 长会话批准；V4 自动资源证据已通过，V4 owner 人工切换与 V6 双浏览器长会话继续复核 | project-owner | Mitigated |
 | R-039 | WebGL context lost 让预览空白或录制生成不完整文件 | Medium | High | `webglcontextlost`、恢复后参数/时间错位、录制仍显示成功 | V4 同 host preview recovery；V5 clean canonical 在 Chrome/Edge 注入录制中 context loss，均暂停、丢弃半文件、资源归零并由原 host 恢复，loss/restore/failure 为 1/1/0；owner 已批准 context 清理门禁 | 未完成录制绝不进入 ready/save；RendererHost、context 或录制 cleanup 顺序变化时重开 | project-owner | Mitigated |
 | R-040 | MediaRecorder/MIME、origin-clean 或时钟差异导致无音轨、不可回放或音画漂移 | Medium | High | `isTypeSupported` 失败、captureStream SecurityError、ffprobe 缺轨、漂移 >100ms | V5 clean canonical 的 Chrome/Edge 默认 720p30 均生成 VP9+Opus 双轨 WebM；页面静音后 peak RMS `0.766425`，Orthogonal A/V 峰值差为 2ms/3ms，错误和取消不产出半文件；owner 已批准真实回放与原生保存门禁 | optional preset 保持 typed unavailable；codec、浏览器、capture/tap 或保存实现变化时重开 | project-owner | Mitigated |
-| R-041 | 1080p60 实时录制造成掉帧、内存峰值或 Blob 过大 | High | High | selected preset 达不到 fps、分析归因任务 >50ms、Visualizer frame >=60ms、内存/Blob 持续增长、finalize 失败 | 固定 bitrate、录制锁与单 Blob 生命周期；V5 只开放默认 720p30；V6 候选关闭 MSAA、使用 `motion` hint 并优化等价 Cube 计算，三格式仍要求平均 30fps `±5%`，DEC-048 只容忍最多四帧 packet gap 与 `<60ms` Visualizer 峰值 | V6 clean canonical 与 owner 长时任务尚未完成；三个 optional preset 继续在资源获取前 typed unavailable，R-041 保持 Open | project-owner | Open |
+| R-041 | 1080p60 实时录制造成掉帧、内存峰值或 Blob 过大 | High | High | selected preset 达不到 fps、分析归因任务 >50ms、Visualizer frame >=60ms、内存/Blob 持续增长、finalize 失败 | 固定 bitrate、录制锁与单 Blob 生命周期；V5 只开放默认 720p30；V6 关闭 MSAA、使用 `motion` hint 并优化等价 Cube 计算，三格式仍要求平均 30fps `±5%`，DEC-048 只容忍最多四帧 packet gap 与 `<60ms` Visualizer 峰值 | V6 clean canonical `V6-2026-09-03T16-33-03-497Z-ef12ce39` 已 54/54 通过，六个默认文件、900 秒四特征和资源门禁合格；owner 长时制作/原生保存回放尚待完成，三个 optional preset 继续在资源获取前 typed unavailable，R-041 保持 Open | project-owner | Open |
 
 ## Review Rule
 

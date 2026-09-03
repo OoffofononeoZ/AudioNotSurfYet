@@ -1,13 +1,13 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-09-03
+last_reviewed: 2026-09-04
 upstream_docs:
   - "docs/context/index.md"
   - "docs/product/scope.md"
   - "docs/architecture/system-design.md"
   - "docs/delivery/execution-plan.md"
-next_action: "Editor E8 与 Visualizer V5 已关闭；实施 V6 final hardening，PROD-015 仍开放"
+next_action: "复核 V6 clean canonical 与人工任务；PROD-015 继续阻断上线"
 ---
 
 # Decision Registry
@@ -104,6 +104,8 @@ next_action: "Editor E8 与 Visualizer V5 已关闭；实施 V6 final hardening�
 同一轮，owner 以“PLEASE IMPLEMENT THIS PLAN”批准 V6 final hardening 的质量契约与实施。DEC-047 据此固定现有三格式 fixture、900 秒 OPFS WAV、Cube 四特征与 Orthogonal 双特征转换、测试专用全资源 probe、双浏览器六个默认 WebM 和 54 步 canonical。V6 quality 文档可标记为 `approved` 并实施；V6 canonical 登记后仍需独立 owner 门禁，且不改变 JSON V1、route、scene/recording 接口或生产拓扑。
 
 2026-09-04，V6 重复真实媒体采样证明同一 Canvas 可稳定约 60fps 绘制，但 Chrome/Edge 的 VP9 recorder 在组合负载下仍会偶发产生约 78–110ms packet gap，900 秒压力组合还出现单次 55.8ms Visualizer frame。`project-owner` 明确允许在卡顿较小时略微放宽标准并优先完成功能；DEC-048 据此把 V6 三格式门禁放宽为最多四个 30fps 帧间隔，并把 V6 Visualizer 单帧峰值调整为 `<60ms`，同时保持平均 fps `±5%`、媒体结构、时长、音轨、同步、分析归因 `<50ms`、反馈与时钟门禁。实现保留关闭 MSAA、`motion` hint 与等价 Cube 计算优化。该决定不改写 V5 canonical、JSON V1、录制拓扑或 V6 owner 最终门禁。
+
+同日，DEC-048 修订在独立 implementation commit `ef12ce397d0b1a054ce797bfa1b9ff5eb5af61cd` 上形成 clean canonical `V6-2026-09-03T16-33-03-497Z-ef12ce39`，54/54 通过且 summary SHA-256 为 `695bf0acf3831907b720551c7772ea07e0dd80a5db38e829cba868f12128a014`。本记录是执行证据而非新的产品决定；V6 保持 `In Progress`、evidence 保持 `in-review`、R-041 保持 `Open`，等待 owner 完成人工制作、原生保存/回放、键盘/焦点与长时清理门禁。
 
 同日，`project-owner` 明确要求实施 Q0 质量设计计划，批准了 Q0 前置、四级严重度和 readiness 后置的阶段安排；同时要求三份质量文档先保持 `in-review`，经单独审阅后才生效。因此 DEC-010 的时序决定已批准，但 Q0 内容尚未批准。
 

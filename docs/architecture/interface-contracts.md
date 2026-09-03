@@ -1,10 +1,10 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-09-03
+last_reviewed: 2026-09-04
 upstream_docs:
   - "docs/architecture/system-design.md"
-next_action: "Editor E8 与 Visualizer V5 已关闭；V6 只做既有接口上的最终加固"
+next_action: "V6 clean canonical 已验证接口前向回归；等待 owner 人工门禁"
 ---
 
 # Interface Contracts

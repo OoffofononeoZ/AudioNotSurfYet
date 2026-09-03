@@ -6,7 +6,7 @@ upstream_docs:
   - "docs/delivery/visualizer/execution-plan.md"
   - "docs/delivery/visualizer/acceptance-criteria.md"
   - "docs/delivery/visualizer/test-strategy.md"
-next_action: "提交 DEC-048 稳定性修复，并在该 clean HEAD 上生成 V6 canonical"
+next_action: "V6 clean canonical 已登记；等待 owner 人工任务与 evidence 批准"
 ---
 
 # Visualizer V0-D and V1–V6 Milestone Plan
@@ -41,7 +41,7 @@ next_action: "提交 DEC-048 稳定性修复，并在该 clean HEAD 上生成 V6
 - V3 run `V3-2026-09-02T13-32-42-513Z-89be30eb` 30/30 通过，并于 2026-09-03 获 owner 批准；V3 为 `Complete`。
 - V4 run `V4-2026-09-02T17-47-40-271Z-5c2d24a3` 在 commit `5c2d24a3f1f413dba236563b3686237c6b8f2e21` 上 34/34 通过，summary SHA-256 为 `9b2a86e3dcdd4e634317c4234418dc3444da441a3be805a980562768dba5c3b2`；2026-09-03 owner 批准 evidence 并关闭 V4，无需重跑。
 - V5 run `V5-2026-09-03T03-49-31-211Z-9b5af09c` 在 implementation commit `9b5af09c5846415a8e5465e710e6095f1e7db310` 上 40/40 通过，summary SHA-256 为 `cec1fab0310852458c2aa4fbd3bebc90eee3e213a54b7695a524736e07b07b7b`；2026-09-03 owner 批准 evidence 与人工门禁，V5 已关闭且无需重跑。
-- V6 golden/unit/integration、Chrome、Edge 与六文件 media 专项已完成；按 DEC-048 修订后的 dirty provisional `V6-2026-09-03T16-21-25-320Z-088f21d3-provisional` 54/54 通过，summary SHA-256 为 `58af3b253562f2db04aaa692b81e221186f5ba58f1d087ef56fa1f4d222f75d1`。稳定性修复提交和 clean canonical 尚待完成，V6 仍为 `In Progress`。
+- V6 golden/unit/integration、Chrome、Edge 与六文件 media 专项已完成；clean canonical `V6-2026-09-03T16-33-03-497Z-ef12ce39` 在 implementation commit `ef12ce397d0b1a054ce797bfa1b9ff5eb5af61cd` 上 54/54 通过，summary SHA-256 为 `695bf0acf3831907b720551c7772ea07e0dd80a5db38e829cba868f12128a014`。evidence 为 `in-review`，owner 人工任务尚待完成，V6 仍为 `In Progress`。
 - V6 获批后只进入包含 Visualizer 的整体 release-readiness review；PROD-015 仍阻断生产上线。
 
 ## 4. Failure and Slip Rules

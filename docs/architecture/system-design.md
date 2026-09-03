@@ -1,13 +1,13 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-09-03
+last_reviewed: 2026-09-04
 upstream_docs:
   - "docs/product/problem-brief.md"
   - "docs/product/scope.md"
   - "docs/product/success-metrics.md"
   - "docs/product/open-questions.md"
-next_action: "Editor E8 与 Visualizer V5 已关闭；V6 在既有架构内执行最终加固"
+next_action: "V6 已在既有架构内通过 clean canonical；等待 owner 人工门禁"
 ---
 
 # System Design

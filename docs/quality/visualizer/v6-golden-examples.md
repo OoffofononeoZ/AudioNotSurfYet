@@ -5,7 +5,7 @@ last_reviewed: 2026-09-04
 upstream_docs:
   - "docs/quality/visualizer/v6-eval-plan.md"
   - "docs/quality/visualizer/v5-golden-examples.md"
-next_action: "版本化 golden 与 V6 专项已通过 dirty provisional；在 clean canonical 中复核身份"
+next_action: "V6 golden 与 54 步 clean canonical 已通过；等待 owner 人工门禁"
 ---
 
 # Visualizer V6 Golden Examples
@@ -26,3 +26,5 @@ next_action: "版本化 golden 与 V6 专项已通过 dirty provisional；在 cl
 | V6-G12 | capability | optional preset 支持或不支持 | 支持则真实输出合格；不支持则 tap/capture/recorder 前返回 `preset-unavailable` | 防止静默降级或事后改判 |
 
 版本化 golden 只保存 fixture manifest identity、虚构 project、seed、四特征 binding、预期 active-set 转换和媒体期望；不保存用户文件、15 分钟音频、大型 WebM、trace 或设备标识。
+
+`V6-2026-09-03T16-33-03-497Z-ef12ce39` 的 54/54 clean canonical 已覆盖 V6-G01–G12 的自动化部分；G01/G02/G03/G04/G06/G07/G08/G09/G10/G11/G12 均有双浏览器、unit/integration 或媒体证据。原生 picker、最终回放、构图审美与长时操作体感仍由 owner 人工门禁覆盖，不能由 golden 通过外推。
