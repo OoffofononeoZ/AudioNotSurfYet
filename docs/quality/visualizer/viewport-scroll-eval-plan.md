@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/delivery/visualizer/acceptance-criteria.md"
   - "docs/delivery/visualizer/test-strategy.md"
   - "docs/quality/visualizer/evidence-index.md"
-next_action: "实现 DEC-050 并在 clean implementation commit 上运行双浏览器 targeted regression"
+next_action: "owner 视觉确认一屏布局、左右独立滚动与共享 scrollbar"
 ---
 
 # Visualizer Viewport Scroll Eval Plan
@@ -31,3 +31,12 @@ next_action: "实现 DEC-050 并在 clean implementation commit 上运行双浏�
 - dirty 运行只作反馈；正式记录绑定 clean implementation commit，登记 Chrome/Edge 版本、命令、视口几何和工作树状态。
 - 目标视口为 `1024×720`、`1280×720`、`1280×900`、`1920×1080`，并覆盖 DPR 1/2。
 - owner 视觉确认前 [release readiness](release-readiness.md) 保持 `in-review`；PROD-015 继续阻断上线。
+
+## Clean Result
+
+- Implementation commit：`9f3b55beaa0c8a3d799f3f1e16f1dd66c9aee77c`；正式命令开始与结束时源码工作树干净。
+- Browser：Chrome `152.0.7977.66` 2/2；Edge `152.0.4191.53` 2/2。
+- Geometry：`1024×720`、`1280×720`、`1280×900`、`1920×1080` 和 DPR 1/2 全部满足 VR-EV-VIEWPORT/COMPACT；preview 保持 16:9、单 Canvas/renderer/视觉 RAF。
+- Scroll/style：两栏独立 scrollTop、边界不 chaining；Visualizer 与 Analyzer computed scrollbar contract 一致，满足 VR-EV-PANELS/STYLE。
+- Regression：V1 Chrome/Edge 各 4/4、V6 integration 10/10、M7 Chrome 5/5；docs、Harness、typecheck、build 和 diff check 通过，console/pageerror 为 0。
+- 结论：自动化未观察到未关闭的 S1/S2；只剩 owner 视觉门禁，不能据此批准整体 readiness 或上线。

@@ -4,7 +4,7 @@ owner: "project-owner"
 last_reviewed: 2026-09-04
 upstream_docs:
   - "AGENTS.md"
-next_action: "实施 DEC-050 视口滚动修订；Visualizer release-readiness 保持 in-review"
+next_action: "owner 视觉确认 DEC-050 一屏布局与双侧独立滚动；Visualizer release-readiness 保持 in-review"
 ---
 
 # Repository Context Index
@@ -21,8 +21,8 @@ AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端。Editor E1–
 - Product intent：Analyzer/Editor 历史范围与 Visualizer V0 均已批准；PROD-014V 已关闭，PROD-022 保留为非阻断未来问题。
 - System design：Analyzer/Editor 历史设计仍是已批准/实现基线；Visualizer system design、接口、风险和 ADR-0014–0017 已获批准。
 - Execution planning：M1–M14、Editor E0-D/E1–E8、Visualizer V0-D/V1–V6 均为 `Complete`。
-- Quality and evals：M3–M14、Editor E1–E8 与 Visualizer V1–V6 evidence 均已批准；Visualizer 整体 release-readiness review 已创建并为 `in-review`，等待 DEC-050 修订证据。
-- Implementation：Editor E8 与 Visualizer V1–V6 均已完成。V6 clean canonical `V6-2026-09-03T16-33-03-497Z-ef12ce39` 在 implementation commit `ef12ce397d0b1a054ce797bfa1b9ff5eb5af61cd` 上 54/54 通过，summary SHA-256 为 `695bf0acf3831907b720551c7772ea07e0dd80a5db38e829cba868f12128a014`；2026-09-04 owner 批准 evidence 与人工门禁，R-041 已缓解。
+- Quality and evals：M3–M14、Editor E1–E8 与 Visualizer V1–V6 evidence 均已批准；DEC-050 clean 双浏览器修订证据已登记，Visualizer 整体 release-readiness 保持 `in-review`，等待 owner 视觉确认。
+- Implementation：Editor E8 与 Visualizer V1–V6 均已完成。V6 clean canonical `V6-2026-09-03T16-33-03-497Z-ef12ce39` 在 implementation commit `ef12ce397d0b1a054ce797bfa1b9ff5eb5af61cd` 上 54/54 通过，summary SHA-256 为 `695bf0acf3831907b720551c7772ea07e0dd80a5db38e829cba868f12128a014`；2026-09-04 owner 批准 evidence 与人工门禁，R-041 已缓解。post-V6 viewport 修订已在 clean commit `9f3b55beaa0c8a3d799f3f1e16f1dd66c9aee77c` 通过 Chrome/Edge 专项。
 - Readiness、release、retrospective：Analyzer M14 为 `Ready with waivers`；PROD-015 仍阻断上线，Editor readiness 独立。
 
 ## Key Documents

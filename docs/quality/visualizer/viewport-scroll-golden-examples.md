@@ -4,7 +4,7 @@ owner: "project-owner"
 last_reviewed: 2026-09-04
 upstream_docs:
   - "docs/quality/visualizer/viewport-scroll-eval-plan.md"
-next_action: "用双浏览器 E2E 固定 VR-G01–VR-G06"
+next_action: "自动化 VR-G01–VR-G06 已固定；等待 owner 视觉确认"
 ---
 
 # Visualizer Viewport Scroll Golden Examples
@@ -17,3 +17,7 @@ next_action: "用双浏览器 E2E 固定 VR-G01–VR-G06"
 | VR-G04 | exception | 右栏滚到底后继续 wheel | `window.scrollY` 和左栏 scrollTop 保持不变 | 防止 scroll chaining |
 | VR-G05 | success | 左右栏分别注入测试专用溢出内容 | 只改变当前目标栏 scrollTop | 证明滚动上下文独立 |
 | VR-G06 | regression | Analyzer 展开精确值表 | 与 Visualizer 两栏共享 Firefox/WebKit scrollbar 样式 | 防止复制样式漂移 |
+
+## Result
+
+VR-G01–VR-G06 已在 clean implementation commit `9f3b55beaa0c8a3d799f3f1e16f1dd66c9aee77c` 的 Chrome/Edge 专项中通过；Analyzer M7 Chrome 5/5 进一步确认 VR-G06。该结果是自动化证据，不替代 owner 视觉确认。

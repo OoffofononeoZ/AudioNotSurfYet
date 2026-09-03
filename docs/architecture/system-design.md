@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/product/scope.md"
   - "docs/product/success-metrics.md"
   - "docs/product/open-questions.md"
-next_action: "实施 DEC-050 一屏工作台与独立侧栏滚动；不改变 Visualizer runtime topology"
+next_action: "DEC-050 已实现并通过 clean 双浏览器验证；等待 Visualizer readiness owner 视觉确认"
 ---
 
 # System Design

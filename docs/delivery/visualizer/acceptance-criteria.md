@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/architecture/interface-contracts.md"
   - "docs/architecture/risk-register.md"
   - "docs/delivery/visualizer/execution-plan.md"
-next_action: "实现并验证 AC-VR01–AC-VR04；V6 历史 AC 保持已批准"
+next_action: "AC-VR01–AC-VR04 自动化已通过；等待 owner 视觉确认，V6 历史 AC 保持已批准"
 ---
 
 # Visualizer V1–V6 Acceptance Criteria
@@ -105,3 +105,5 @@ next_action: "实现并验证 AC-VR01–AC-VR04；V6 历史 AC 保持已批准"
 | AC-VR02 | 左模板与右参数侧栏各自滚动；滚动一侧不改变另一侧或 `window.scrollY`，到达边界后不发生 scroll chaining | 双侧 synthetic overflow + wheel/scrollTop E2E；success/exception | VFT-LAYOUT |
 | AC-VR03 | Visualizer 侧栏与 Analyzer 精确值表复用 `.app-scrollbar`，Firefox 为 `thin`、WebKit 为 10px，并共享 track/thumb/hover/gutter | computed style + source contract；success/regression | VFT-LAYOUT |
 | AC-VR04 | 1024 compact drawer 位于 workspace grid 内且不覆盖录制/transport；16:9、单 Canvas/renderer/RAF、键盘焦点、reduced motion、context recovery 和 console/pageerror 不回归 | Chrome/Edge targeted regression；boundary/exception | R-038 |
+
+AC-VR01–AC-VR04 已在 clean implementation commit `9f3b55beaa0c8a3d799f3f1e16f1dd66c9aee77c` 的 Chrome/Edge 专项中通过；V1 双浏览器、V6 integration 与 Analyzer M7 相邻回归也通过。它们仍需 owner 视觉确认后才可形成 Visualizer readiness 结论。

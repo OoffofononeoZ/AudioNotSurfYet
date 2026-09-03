@@ -11,7 +11,7 @@ upstream_docs:
   - "docs/architecture/visualizer/project-format-v1.md"
   - "docs/architecture/visualizer/binding-and-scene-contracts.md"
   - "docs/architecture/visualizer/recording-contract.md"
-next_action: "实施 DEC-050 readiness 修订并登记双浏览器滚动隔离证据"
+next_action: "DEC-050 实现与双浏览器证据已完成；等待 owner 视觉确认 readiness"
 ---
 
 # Visualizer V1–V6 Execution Plan
