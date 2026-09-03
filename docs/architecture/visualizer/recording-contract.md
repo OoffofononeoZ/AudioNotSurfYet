@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/product/success-metrics.md"
   - "docs/architecture/system-design.md"
   - "docs/architecture/visualizer/binding-and-scene-contracts.md"
-next_action: "DEC-042/DEC-043 已开放 V5；实施状态机、严格预设、双浏览器与 WebM 证据"
+next_action: "V5 状态机、严格预设、双浏览器与 WebM 证据已获批准；V6 前向回归"
 ---
 
 # Visualizer Real-time WebM Recording Contract

@@ -11,7 +11,7 @@ upstream_docs:
   - "docs/architecture/visualizer/project-format-v1.md"
   - "docs/architecture/visualizer/binding-and-scene-contracts.md"
   - "docs/architecture/visualizer/recording-contract.md"
-next_action: "V4 已获 owner 批准并关闭；实施 V5 实时 WebM"
+next_action: "V5 已获 owner 批准并关闭；实施 V6 final hardening"
 ---
 
 # Visualizer V1–V6 Execution Plan
@@ -20,7 +20,7 @@ next_action: "V4 已获 owner 批准并关闭；实施 V5 实时 WebM"
 
 把已批准的 Visualizer V0 架构按六个可独立验证的纵向里程碑交付：先建立当前歌曲工作台和本地工程，再接入 Analyzer/Editor 绑定，随后分别交付两个内置场景、实时 WebM 录制和双浏览器最终加固。
 
-Visualizer V1 已实现 `/visualizer/:trackId?` 工作台基础、完成 21/21 clean canonical 并获 owner 批准。V2 数据绑定与 26/26 clean canonical、V3 Orthogonal Lines 与 30/30 clean canonical 均已获 owner 批准并关闭。V4 Cube Swarm 34/34 clean canonical 于 2026-09-03 获 owner 批准并关闭；V5 为 `In Progress`，V6 保持 `Planned`。
+Visualizer V1–V4 的工作台、数据绑定与两个场景均已通过各自 clean canonical 和 owner 门禁。V5 realtime WebM 的 40/40 clean canonical 与人工门禁于 2026-09-03 获 owner 批准并关闭；V6 final hardening 为 `In Progress`。
 
 ## 2. Delivery Principles
 
@@ -180,7 +180,7 @@ npm run eval:vN
 
 ## 7. Approval Gate
 
-本计划与同目录 acceptance criteria、test strategy、milestone plan 已由 owner 批准。V0-D、V1–V4 为 `Complete`，V5 为 `In Progress`，V6 为 `Planned`。
+本计划与同目录 acceptance criteria、test strategy、milestone plan 已由 owner 批准。V0-D、V1–V5 为 `Complete`，V6 为 `In Progress`。
 
 批准记录（2026-09-02）：
 

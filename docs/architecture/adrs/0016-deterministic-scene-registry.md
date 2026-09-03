@@ -6,7 +6,7 @@ upstream_docs:
   - "docs/product/scope.md"
   - "docs/product/success-metrics.md"
   - "docs/architecture/visualizer/binding-and-scene-contracts.md"
-next_action: "V4 确定性、context recovery 与资源证据已获批准；V5 复用同一 host/clock 录制"
+next_action: "V4/V5 确定性、context recovery 与单 host/clock 已获批准；V6 长时复核"
 ---
 
 # ADR-0016: Deterministic Scene Registry

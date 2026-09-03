@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/product/success-metrics.md"
   - "docs/architecture/system-design.md"
   - "docs/architecture/visualizer/project-format-v1.md"
-next_action: "V4 Cube Swarm 已获 owner 批准并关闭；作为 V5 录制前向基线"
+next_action: "V3/V4 场景与 V5 录制已获 owner 批准；作为 V6 双模板前向基线"
 ---
 
 # Visualizer Binding and Scene Contracts
