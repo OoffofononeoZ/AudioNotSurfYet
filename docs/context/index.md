@@ -1,10 +1,10 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-09-03
+last_reviewed: 2026-09-04
 upstream_docs:
   - "AGENTS.md"
-next_action: "Visualizer V6 dirty provisional 已 54/54 通过；提交实现并运行 clean canonical"
+next_action: "提交 DEC-048 稳定性修复，并在该 clean HEAD 上运行 Visualizer V6 canonical"
 ---
 
 # Repository Context Index
@@ -22,7 +22,7 @@ AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端。Editor E1–
 - System design：Analyzer/Editor 历史设计仍是已批准/实现基线；Visualizer system design、接口、风险和 ADR-0014–0017 已获批准。
 - Execution planning：M1–M14、Editor E0-D/E1–E8、Visualizer V0-D/V1–V5 均为 `Complete`；Visualizer V6 为 `In Progress`。
 - Quality and evals：M3–M14、Editor E1–E8 与 Visualizer V1–V5 evidence 已批准；V6 eval/golden/failure taxonomy 已批准并开放实现。
-- Implementation：Editor E8 与 Visualizer V5 已完成；V6 双浏览器、三格式、900 秒四特征、六文件媒体、模板恢复与资源专项已实现，dirty provisional `V6-2026-09-03T10-15-47-668Z-0f90a77c-provisional` 54/54 通过；clean canonical 尚待执行。
+- Implementation：Editor E8 与 Visualizer V5 已完成；V6 双浏览器、三格式、900 秒四特征、六文件媒体、模板恢复与资源专项已实现。按 DEC-048 修订后的 dirty provisional `V6-2026-09-03T16-21-25-320Z-088f21d3-provisional` 54/54 通过，summary SHA-256 为 `58af3b253562f2db04aaa692b81e221186f5ba58f1d087ef56fa1f4d222f75d1`；该 run 只作实现反馈，稳定性修复提交与 clean canonical 尚待完成。
 - Readiness、release、retrospective：Analyzer M14 为 `Ready with waivers`；PROD-015 仍阻断上线，Editor readiness 独立。
 
 ## Key Documents

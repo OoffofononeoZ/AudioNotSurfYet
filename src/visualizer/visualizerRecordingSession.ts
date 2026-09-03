@@ -250,6 +250,11 @@ export class VisualizerRecordingSession {
             const audioTracks = this.tap.stream.getAudioTracks();
             const videoTracks = this.videoStream.getVideoTracks();
             this.validateTracks(audioTracks, videoTracks, preset);
+            try {
+                videoTracks[0]!.contentHint = 'motion';
+            } catch {
+                // The hint is advisory; unsupported browsers keep their default.
+            }
             this.combinedStream = this.createMediaStream([
                 ...audioTracks,
                 ...videoTracks,

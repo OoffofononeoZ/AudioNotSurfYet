@@ -1,7 +1,7 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-09-03
+last_reviewed: 2026-09-04
 upstream_docs:
   - "docs/quality/visualizer/v6-eval-plan.md"
   - "docs/quality/visualizer/v5-golden-examples.md"
@@ -22,7 +22,7 @@ next_action: "版本化 golden 与 V6 专项已通过 dirty provisional；在 cl
 | V6-G08 | exception | 每五轮触发 context loss/restore | 原 host 恢复；活动录制暂停并丢弃半文件；无第二 Canvas/renderer | 固定 R-039 前向回归 |
 | V6-G09 | failure | bad JSON、quota、stale analysis、无 MIME、recorder/renderer error | typed 可恢复状态；未受影响能力保留；绝不出现 ready 半文件 | 固定 AC-V605 |
 | V6-G10 | boundary | 1024/1280/1920、DPR 1/2、reduced motion | 16:9、抽屉/三栏、焦点和文字状态正确；场景主动播放不被关闭 | 固定布局和动效边界 |
-| V6-G11 | media | Chrome/Edge × WAV/MP3/FLAC 默认输出 | 至少六个 1280×720、30fps、单视频+单 Opus 音频 WebM 全部通过媒体检查 | 固定三格式录制事实 |
+| V6-G11 | media | Chrome/Edge × WAV/MP3/FLAC 默认输出 | 至少六个 1280×720、平均 30fps `±5%`、单视频+单 Opus 音频 WebM；packet gap 最多四个目标帧间隔 | 固定三格式录制事实与 DEC-048 容忍边界 |
 | V6-G12 | capability | optional preset 支持或不支持 | 支持则真实输出合格；不支持则 tap/capture/recorder 前返回 `preset-unavailable` | 防止静默降级或事后改判 |
 
 版本化 golden 只保存 fixture manifest identity、虚构 project、seed、四特征 binding、预期 active-set 转换和媒体期望；不保存用户文件、15 分钟音频、大型 WebM、trace 或设备标识。

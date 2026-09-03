@@ -1,14 +1,14 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-09-03
+last_reviewed: 2026-09-04
 upstream_docs:
   - "docs/product/success-metrics.md"
   - "docs/architecture/interface-contracts.md"
   - "docs/architecture/risk-register.md"
   - "docs/delivery/visualizer/execution-plan.md"
   - "docs/delivery/visualizer/acceptance-criteria.md"
-next_action: "V6 dirty provisional 已 54/54 通过；提交实现并运行 clean canonical"
+next_action: "提交已通过 provisional 的 DEC-048 修正，并在该 clean HEAD 上运行 V6 canonical"
 ---
 
 # Visualizer V1–V6 Test Strategy
@@ -82,6 +82,7 @@ V1 的 golden/unit/integration/Chrome/Edge 命令与 21 步 canonical runner 已
 - V5：真实 Chrome 与 Edge 均必须成功输出默认 720p30；720p60、1080p30、1080p60 分浏览器记录 pass 或 typed unavailable。
 - V6：两浏览器执行 V1–V6 全量、三格式、15 分钟四特征、context loss、录制和关键 Analyzer/Editor 回归。
 - `ffprobe` 验证 format、codec、stream、width/height、frame rate、duration；FFmpeg 提取音频 impulse 和视频 flash 时间。若命令缺失则 V5/V6 blocked，不以浏览器“能播放”替代。
+- V5 media 保持相邻 packet gap 最多两个目标帧间隔；V6 三格式组合负载按 DEC-048 最多四个目标帧间隔，平均 fps 仍须为目标 `±5%`，不得以该容忍掩盖持续低帧率。
 - 浏览器不支持选定 preset 时，验证 UI/command 明确失败并保留工程；不能自动降低到 720p30、30fps、无音频或不同 codec 组合。
 
 ## 6. Performance and Resource Method
@@ -90,7 +91,7 @@ V1 的 golden/unit/integration/Chrome/Edge 命令与 21 步 canonical runner 已
 - 在 fixture 的 point/range/analysis 峰记录 AudioContext 时间与 renderer state 变化，偏差 `<=50ms`。
 - 对 `visualizer-avsync-v1` 的输出文件比较 impulse/flash，漂移 `<=100ms`。
 - 约 15 分钟场景固定绑定 Amplitude Spectrum、Complex Spectrum、Buffer、Loudness；不得以更轻特征替代。
-- 记录 Visualizer/analysis 归因 LongTask；单个任务不得超过 50ms。
+- 分析归因 LongTask 必须 `<50ms`；V1–V5 既有门禁不变，V6 Visualizer frame 按 DEC-048 使用 `<60ms` 峰值上限。
 - 20 次 route/template/song restore/record loop 前后比较 AudioContext、Worker、RAF、Canvas/WebGL、MediaStreamTrack、Observer、listener、Blob URL。最终 live 数必须回到稳定基线，不允许单调累积。
 
 ## 7. Accessibility and Manual Gaps
@@ -126,7 +127,7 @@ V6 实际命令固定为 `fixtures:v6:golden`、`test:v6:unit`、`test:v6:integr
 ## 9. Current Gate State
 
 - V1–V5 canonical 与 owner evidence 均已批准并关闭；V6 quality contract 已批准且实现为 `In Progress`。
-- V6 golden/unit/integration、Chrome、Edge 与六文件 media verification 已通过；dirty provisional `V6-2026-09-03T10-15-47-668Z-0f90a77c-provisional` 54/54 通过，但仍须在独立 implementation commit 上完成 clean canonical 后才能登记 evidence。
+- 早期 dirty provisional `V6-2026-09-03T10-15-47-668Z-0f90a77c-provisional` 54/54 通过；后续重复媒体采样促成 DEC-048 与 renderer/encoder 加固。修订后的 dirty provisional `V6-2026-09-03T16-21-25-320Z-088f21d3-provisional` 54/54 通过，summary SHA-256 为 `58af3b253562f2db04aaa692b81e221186f5ba58f1d087ef56fa1f4d222f75d1`；仍须在独立稳定性提交的 clean HEAD 上完成 canonical 后才能登记 evidence。
 - V4 quality/eval、golden、failure taxonomy、clean run `V4-2026-09-02T17-47-40-271Z-5c2d24a3` 34/34 与人工门禁均已获批准；V5 在此 34 步基线上增加六个录制专项。
 - 当前没有正式 CI，所有结果限定为本地登记环境。
 - `/comingsoon`、`threeDTable`、TestLands 或 V3 历史 artifact 中的 V4 中性预览不是当前 V4 implementation evidence；真实 Cube 由 V4 专项与前向回归评价。

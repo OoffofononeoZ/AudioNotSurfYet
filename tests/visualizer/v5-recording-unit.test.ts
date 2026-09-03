@@ -16,6 +16,7 @@ import { visualizerVideoFileName } from '../../src/visualizer/videoFileIO';
 class FakeTrack extends EventTarget {
     readonly kind: 'audio' | 'video';
     readyState: MediaStreamTrackState = 'live';
+    contentHint = '';
     private readonly settings: MediaTrackSettings;
 
     constructor(kind: 'audio' | 'video', settings: MediaTrackSettings = {}) {
@@ -279,6 +280,7 @@ describe('Visualizer V5 recording unit contract', () => {
             startedAtContextTime: 10.5,
             mimeType: 'video/webm;codecs=vp9,opus',
         });
+        expect(value.videoTrack.contentHint).toBe('motion');
         expect(value.operations).toEqual([
             'pause',
             'seek:0',

@@ -12,6 +12,11 @@ import type {
     VisualizerSceneRenderInput,
 } from './rendererTypes';
 
+const CORE_TRANSFORMS = Array.from({ length: CUBE_SWARM_CORE_COUNT }, (_, index) => {
+    const angle = index / CUBE_SWARM_CORE_COUNT * Math.PI * 2;
+    return { angle, cosine: Math.cos(angle), sine: Math.sin(angle) };
+});
+
 export class CubeSwarmScene implements VisualizerScene {
     readonly kind = 'rendered' as const;
     private readonly host: VisualizerSceneHost;
@@ -45,6 +50,12 @@ export class CubeSwarmScene implements VisualizerScene {
     );
     private readonly stateResolver: CubeSwarmFrameStateResolver;
     private readonly transform = new THREE.Object3D();
+    private readonly matrix = new THREE.Matrix4();
+    private lastCoreColor: string | null = null;
+    private lastPeripheralColor: string | null = null;
+    private lastBackgroundColor: string | null = null;
+    private lastCameraBaseSize: number | null = null;
+    private lastCameraDistance: number | null = null;
     private disposed = false;
 
     constructor(host: VisualizerSceneHost, seed: number) {
@@ -75,23 +86,31 @@ export class CubeSwarmScene implements VisualizerScene {
         const base = state.baseSize;
         const visualScale = state.coreVisualScale;
         for (let index = 0; index < CUBE_SWARM_CORE_COUNT; index += 1) {
-            const angle = index / CUBE_SWARM_CORE_COUNT * Math.PI * 2;
+            const coreTransform = CORE_TRANSFORMS[index]!;
             const length = base * (0.12 + 0.68 * (state.coreAmplitudes[index] ?? 0));
             const cross = base * 0.08;
             const radius = base * 0.85;
-            this.transform.position.set(
-                Math.cos(angle) * radius * visualScale,
-                Math.sin(angle) * radius * visualScale,
+            const scaledLength = length * visualScale;
+            const scaledCross = cross * visualScale;
+            this.matrix.set(
+                coreTransform.cosine * scaledLength,
+                -coreTransform.sine * scaledCross,
                 0,
+                coreTransform.cosine * radius * visualScale,
+                coreTransform.sine * scaledLength,
+                coreTransform.cosine * scaledCross,
+                0,
+                coreTransform.sine * radius * visualScale,
+                0,
+                0,
+                scaledCross,
+                0,
+                0,
+                0,
+                0,
+                1,
             );
-            this.transform.rotation.set(0, 0, angle);
-            this.transform.scale.set(
-                length * visualScale,
-                cross * visualScale,
-                cross * visualScale,
-            );
-            this.transform.updateMatrix();
-            this.core.setMatrixAt(index, this.transform.matrix);
+            this.core.setMatrixAt(index, this.matrix);
         }
         this.core.instanceMatrix.needsUpdate = true;
 
@@ -114,13 +133,29 @@ export class CubeSwarmScene implements VisualizerScene {
         });
         this.satellites.instanceMatrix.needsUpdate = true;
 
-        this.coreMaterial.color.set(state.coreColor);
-        this.peripheralMaterial.color.set(state.peripheralColor);
-        this.host.renderer.setClearColor(state.backgroundColor, 1);
-        this.camera.position.set(0, 0.8 * base, state.cameraDistance);
-        this.camera.far = Math.max(100, state.cameraDistance * 4);
-        this.camera.lookAt(0, 0, 0);
-        this.camera.updateProjectionMatrix();
+        if (state.coreColor !== this.lastCoreColor) {
+            this.coreMaterial.color.set(state.coreColor);
+            this.lastCoreColor = state.coreColor;
+        }
+        if (state.peripheralColor !== this.lastPeripheralColor) {
+            this.peripheralMaterial.color.set(state.peripheralColor);
+            this.lastPeripheralColor = state.peripheralColor;
+        }
+        if (state.backgroundColor !== this.lastBackgroundColor) {
+            this.host.renderer.setClearColor(state.backgroundColor, 1);
+            this.lastBackgroundColor = state.backgroundColor;
+        }
+        if (
+            base !== this.lastCameraBaseSize
+            || state.cameraDistance !== this.lastCameraDistance
+        ) {
+            this.camera.position.set(0, 0.8 * base, state.cameraDistance);
+            this.camera.far = Math.max(100, state.cameraDistance * 4);
+            this.camera.lookAt(0, 0, 0);
+            this.camera.updateProjectionMatrix();
+            this.lastCameraBaseSize = base;
+            this.lastCameraDistance = state.cameraDistance;
+        }
         this.host.renderer.render(this.scene, this.camera);
         return { hash: state.hash, needsSourcePrompt: false };
     }

@@ -108,7 +108,7 @@ const developmentBuild = (
 const defaultRenderer = (canvas: HTMLCanvasElement): VisualizerRenderer =>
     new THREE.WebGLRenderer({
         canvas,
-        antialias: true,
+        antialias: false,
         alpha: false,
         powerPreference: 'high-performance',
     });
