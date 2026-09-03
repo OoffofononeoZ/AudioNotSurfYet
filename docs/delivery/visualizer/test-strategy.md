@@ -8,7 +8,7 @@ upstream_docs:
   - "docs/architecture/risk-register.md"
   - "docs/delivery/visualizer/execution-plan.md"
   - "docs/delivery/visualizer/acceptance-criteria.md"
-next_action: "V6 54 步 clean canonical 与人工任务已批准；作为 readiness 回归基线保留"
+next_action: "执行 DEC-050 双浏览器 viewport/scrollbar targeted regression"
 ---
 
 # Visualizer V1–V6 Test Strategy
@@ -123,6 +123,8 @@ V4 实际命令固定为 `fixtures:v4:golden`、`test:v4:unit`、`test:v4:integr
 V5 实际命令固定为 `fixtures:v5:golden`、`test:v5:unit`、`test:v5:integration`、`test:e2e:v5:chrome`、`test:e2e:v5:edge`、`test:e2e:v5`、`test:v5:media`、`eval:v5:provisional` 与 clean `eval:v5`。V5 canonical 恰为 V4 34 步基线加 golden、unit、integration、Chrome、Edge、media verification 六专项，共 40 步。
 
 V6 实际命令固定为 `fixtures:v6:golden`、`test:v6:unit`、`test:v6:integration`、`test:e2e:v6:chrome`、`test:e2e:v6:edge`、`test:e2e:v6`、`test:v6:media`、`eval:v6:provisional` 与 clean `eval:v6`。V6 canonical 恰为 V5 40 步基线、六个 V6 专项，以及 M6 unit/worker/integration/Chrome 与 M14 unit/integration/Chrome/Edge 八个显式关键回归，共 54 步。
+
+Post-V6 viewport 修订使用独立 `test:e2e:visualizer-layout:chrome`、`:edge` 与聚合命令，不改写 V6 runner 或 canonical。专项在 Visualizer 两侧栏临时插入测试专用 spacer，分别验证 scrollTop、scroll chaining、document 高度、compact drawer 边界与共享 scrollbar computed style；同时回归 Analyzer M7 精确值表、V1 双浏览器布局以及 V6 的单 Canvas/资源/焦点相关断言。clean 实现提交后登记目标命令、docs、harness、typecheck、build 和 diff check，不以历史 V6 54/54 替代新布局证据。
 
 ## 9. Current Gate State
 

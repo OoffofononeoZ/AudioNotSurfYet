@@ -46,6 +46,14 @@ Visualizer V1 已实现 `/visualizer/:trackId?`、Header 当前歌曲入口、�
 - 样式切换由 GSAP 时间线管理，`isStyleTransitioning` 在动画期间隐藏进度条并阻止重复切换。
 - 信息跑马灯依赖 `ResizeObserver`、DOM 宽度和 GSAP tween；内容或字体变化后需要重新测量并清理旧 tween。
 - `AnimatedList` 使用全局键盘监听和滚动可见性动画；组件卸载时必须移除监听。
+- DEC-050 固定支持的 `>=1024px` Visualizer 为单个 `100dvh` 页面：document/body 不纵向滚动，toolbar/preview/recording/transport 留在页面内，左模板和右参数侧栏分别滚动并使用 `overscroll-behavior: contain`。1024–1279 抽屉以 workspace grid 为定位边界；`<1024px` 继续只保留现有最小宽度/横向兼容，不视为移动端支持。
+
+## 共享滚动条
+
+- 全局 `.app-scrollbar` 是产品自有可见滚动容器的唯一默认样式，视觉事实源来自 Analyzer `MeydaCard` 精确值表：Firefox `scrollbar-width: thin`，WebKit 宽高 10px，深色轨道、绿色 thumb/hover、圆角和 stable gutter。
+- 新增或修改可见滚动容器时必须在元素上复用 `.app-scrollbar`，不得在 scoped CSS 或 Tailwind arbitrary selector 中新增另一套 `scrollbar-color`、track 或 thumb。需要新视觉变体时先形成明确 UI 决策并更新本 reference。
+- `scrollbar-hide` 只用于产品明确要求隐藏滚动条且内容仍可通过键盘、滚轮和触控访问的容器；原生控件、OS 对话框和第三方组件不由全局通配规则覆盖。
+- 本次只迁移 Analyzer 精确值表和 Visualizer 状态/左右侧栏；Editor、歌曲列表与 Analyzer 页面既有变体不顺带改写，后续触及它们时按本规则收敛。
 
 ## 变更检查
 

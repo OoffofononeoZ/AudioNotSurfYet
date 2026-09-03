@@ -4,7 +4,7 @@ owner: "project-owner"
 last_reviewed: 2026-09-04
 upstream_docs:
   - "AGENTS.md"
-next_action: "Visualizer V6 已批准关闭；创建独立 release-readiness review"
+next_action: "实施 DEC-050 视口滚动修订；Visualizer release-readiness 保持 in-review"
 ---
 
 # Repository Context Index
@@ -21,7 +21,7 @@ AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端。Editor E1–
 - Product intent：Analyzer/Editor 历史范围与 Visualizer V0 均已批准；PROD-014V 已关闭，PROD-022 保留为非阻断未来问题。
 - System design：Analyzer/Editor 历史设计仍是已批准/实现基线；Visualizer system design、接口、风险和 ADR-0014–0017 已获批准。
 - Execution planning：M1–M14、Editor E0-D/E1–E8、Visualizer V0-D/V1–V6 均为 `Complete`。
-- Quality and evals：M3–M14、Editor E1–E8 与 Visualizer V1–V6 evidence 均已批准；Visualizer 整体 release-readiness review 尚待创建。
+- Quality and evals：M3–M14、Editor E1–E8 与 Visualizer V1–V6 evidence 均已批准；Visualizer 整体 release-readiness review 已创建并为 `in-review`，等待 DEC-050 修订证据。
 - Implementation：Editor E8 与 Visualizer V1–V6 均已完成。V6 clean canonical `V6-2026-09-03T16-33-03-497Z-ef12ce39` 在 implementation commit `ef12ce397d0b1a054ce797bfa1b9ff5eb5af61cd` 上 54/54 通过，summary SHA-256 为 `695bf0acf3831907b720551c7772ea07e0dd80a5db38e829cba868f12128a014`；2026-09-04 owner 批准 evidence 与人工门禁，R-041 已缓解。
 - Readiness、release、retrospective：Analyzer M14 为 `Ready with waivers`；PROD-015 仍阻断上线，Editor readiness 独立。
 
@@ -77,6 +77,10 @@ AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端。Editor E1–
 | [Visualizer V6 golden](../quality/visualizer/v6-golden-examples.md) | 四特征切换、三格式、20 次生命周期、六文件与故障矩阵规范样例 | project-owner / approved | V6 fixture、binding、生命周期或媒体事实变化 |
 | [Visualizer V6 failure taxonomy](../quality/visualizer/v6-failure-taxonomy.md) | format、binding、clock、resource、recovery、a11y、media 与 evidence 分类 | project-owner / approved | V6 失败域或严重度响应变化 |
 | [Visualizer evidence index](../quality/visualizer/evidence-index.md) | V1–V6 canonical 身份、hash、环境和 reviewer 记录 | project-owner / approved | 新 Visualizer run、artifact 或审批状态变化 |
+| [Visualizer viewport scroll eval](../quality/visualizer/viewport-scroll-eval-plan.md) | post-V6 一屏工作台、独立侧栏滚动与共享 scrollbar 契约 | project-owner / approved | 支持断点、滚动所有权或共享样式变化 |
+| [Visualizer viewport scroll golden](../quality/visualizer/viewport-scroll-golden-examples.md) | 页面无纵向滚动、双侧隔离、compact drawer 与样式复用样例 | project-owner / approved | 几何、溢出或样式 token 变化 |
+| [Visualizer viewport scroll failure taxonomy](../quality/visualizer/viewport-scroll-failure-taxonomy.md) | viewport、scroll ownership、scroll chaining、style drift 与 regression 分类 | project-owner / approved | failure 域、严重度或响应变化 |
+| [Visualizer release readiness](../quality/visualizer/release-readiness.md) | V1–V6 已批准基线与 DEC-050 修订状态 | project-owner / in-review | 修订 evidence、waiver、PROD-015 或 owner 结论变化 |
 | [eval-plan.md](../quality/eval-plan.md) | M3–M14 评估、FIFO/order/geometry/lifecycle 门禁与 canonical 规则 | project-owner / approved | 验收、测试覆盖或风险变化 |
 | [golden-examples.md](../quality/golden-examples.md) | 成功、失败、边界和异常黄金样例 | project-owner / approved | fixture、Meyda、参数或用户任务变化 |
 | [failure-taxonomy.md](../quality/failure-taxonomy.md) | 稳定失败类型、S0–S3、M14 order/pointer/a11y/persistence 失败和门禁响应 | project-owner / approved | 失败分类或风险接受规则变化 |
@@ -162,7 +166,7 @@ AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端。Editor E1–
 - Editor E6 quality：[eval plan](../quality/editor/e6-eval-plan.md)、[golden](../quality/editor/e6-golden-examples.md)、[failure taxonomy](../quality/editor/e6-failure-taxonomy.md) 与 40/40 canonical record 已获批准
 - Editor E7 quality：[eval plan](../quality/editor/e7-eval-plan.md)、[golden](../quality/editor/e7-golden-examples.md)、[failure taxonomy](../quality/editor/e7-failure-taxonomy.md) 与修订版 46/46 canonical 已获批准；44/44 run 保留为 `pre-revision`
 - Editor E8 quality：[eval plan](../quality/editor/e8-eval-plan.md)、[golden](../quality/editor/e8-golden-examples.md)、[failure taxonomy](../quality/editor/e8-failure-taxonomy.md) 已批准；25/25 canonical record 与 owner 门禁均为 `approved`
-- Visualizer quality：V1–V6 契约、canonical 与 owner 门禁均已批准；整体 release-readiness review 尚待创建
+- Visualizer quality：V1–V6 契约、canonical 与 owner 门禁均已批准；整体 release-readiness review 已创建并为 `in-review`
 - Visualizer V6 quality：[eval plan](../quality/visualizer/v6-eval-plan.md)、[golden](../quality/visualizer/v6-golden-examples.md) 与 [failure taxonomy](../quality/visualizer/v6-failure-taxonomy.md) 已获批准；54/54 canonical 与 owner 人工门禁均已批准
 - Quality readiness：[Analyzer release readiness](../quality/release-readiness.md) 已按 M14 恢复 `Ready with waivers`；M13 结论只作历史
 - Release operations：`docs/release/` 尚未创建；PROD-015 的托管平台、域名和 SPA fallback 解决前不进入正式上线

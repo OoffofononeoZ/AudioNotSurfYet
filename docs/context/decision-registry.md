@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/product/scope.md"
   - "docs/architecture/system-design.md"
   - "docs/delivery/execution-plan.md"
-next_action: "V6 已批准关闭；创建 Visualizer release-readiness review，PROD-015 继续阻断上线"
+next_action: "实施并验证 DEC-050 视口滚动修订；Visualizer readiness 保持 in-review"
 ---
 
 # Decision Registry
@@ -81,6 +81,7 @@ next_action: "V6 已批准关闭；创建 Visualizer release-readiness review，
 | DEC-047 | 2026-09-03 | V6 final hardening 固定双浏览器三格式、15 分钟四特征、20 次跨 workspace 生命周期、六个默认 WebM 与 54 步 canonical；不改变生产接口、JSON V1 或 runtime topology | project-owner | approved | [V6 eval plan](../quality/visualizer/v6-eval-plan.md) | V6 fixture、浏览器矩阵、资源口径、canonical 步数或完成门禁改变 |
 | DEC-048 | 2026-09-04 | V6 以功能、平均 30fps 与可播放媒体为主：默认 renderer 关闭 MSAA、video track 使用 `motion` hint，三格式媒体允许最多四个目标帧间隔的偶发 packet gap，15 分钟压力的 Visualizer 单帧峰值放宽为 `<60ms`；平均 fps、双轨、codec、尺寸、时长、音轨、A/V 结束差、分析归因 `<50ms`、反馈与时钟门禁不变，V5 canonical 阈值不改 | project-owner | approved | [V6 eval plan](../quality/visualizer/v6-eval-plan.md) | V6 packet cadence、renderer frame、antialias、平均 fps 或录制拓扑改变 |
 | DEC-049 | 2026-09-04 | 批准 V6 54/54 clean canonical 及双浏览器制作、原生保存/回放、键盘/焦点、长时操作与 context 清理人工门禁；保持 canonical identity 不变且无需重跑，V6 改为 Complete、R-041 改为 Mitigated，并开放独立 Visualizer release-readiness review | project-owner | approved | [Visualizer evidence](../quality/visualizer/evidence-index.md) | V6 canonical identity、owner review 结论、R-041 或 readiness 边界改变 |
+| DEC-050 | 2026-09-04 | Visualizer 在支持的 `>=1024px` 桌面视口中固定占一个 `100dvh`，document/body 不纵向滚动，左右侧栏独立滚动且阻止 scroll chaining；Analyzer 精确值表样式抽取为共享 `.app-scrollbar`，本次只迁移 Analyzer 表与 Visualizer，后续新增或修改的可见滚动容器必须复用 | project-owner | approved | [Viewport scroll eval](../quality/visualizer/viewport-scroll-eval-plan.md) | 支持断点、页面/侧栏滚动所有权、共享样式或例外范围改变 |
 
 ## Approval Evidence
 
@@ -109,6 +110,8 @@ next_action: "V6 已批准关闭；创建 Visualizer release-readiness review，
 同日，DEC-048 修订在独立 implementation commit `ef12ce397d0b1a054ce797bfa1b9ff5eb5af61cd` 上形成 clean canonical `V6-2026-09-03T16-33-03-497Z-ef12ce39`，54/54 通过且 summary SHA-256 为 `695bf0acf3831907b720551c7772ea07e0dd80a5db38e829cba868f12128a014`。本记录是执行证据而非新的产品决定；V6 保持 `In Progress`、evidence 保持 `in-review`、R-041 保持 `Open`，等待 owner 完成人工制作、原生保存/回放、键盘/焦点与长时清理门禁。
 
 同日，`project-owner` 明确要求“先完成并且批准和关闭 V6”，并随后批准按关闭与视口滚动修订计划实施。DEC-049 据此将该批准登记为双浏览器完整制作、默认 WebM 原生保存/回放、键盘/焦点、长时操作和 context 清理人工门禁通过；implementation commit `ef12ce397d0b1a054ce797bfa1b9ff5eb5af61cd`、evidence registration commit `636e4d2defeb90147e949bcf20b7b0690dd77424`、run、54/54 结果、summary 和媒体 hash 均保持不变且无需重跑。V6 改为 `Complete`、R-041 改为 `Mitigated`；该批准只开放独立 Visualizer release-readiness review，不构成整体 readiness 或生产上线批准。
+
+同一实施计划批准 DEC-050：截图所示的 document 纵向滚动被登记为独立 Visualizer readiness 修订，不回开 V6、不创建 V7。支持的 `1024/1280/1920` 桌面宽度中，页面高度固定为一屏，左右工作台侧栏拥有各自滚动上下文；`<1024px` 现有最小宽度/横向兼容策略不扩展为移动端支持。共享滚动条以 Analyzer 精确值表为视觉事实源，本次只迁移该表和 Visualizer，Editor、歌曲列表和 Analyzer 页面既有滚动条不在本次范围。
 
 同日，`project-owner` 明确要求实施 Q0 质量设计计划，批准了 Q0 前置、四级严重度和 readiness 后置的阶段安排；同时要求三份质量文档先保持 `in-review`，经单独审阅后才生效。因此 DEC-010 的时序决定已批准，但 Q0 内容尚未批准。
 

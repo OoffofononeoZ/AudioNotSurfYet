@@ -6,7 +6,7 @@ upstream_docs:
   - "docs/delivery/visualizer/execution-plan.md"
   - "docs/delivery/visualizer/acceptance-criteria.md"
   - "docs/delivery/visualizer/test-strategy.md"
-next_action: "V1–V6 已全部关闭；进入独立 Visualizer release-readiness review"
+next_action: "V1–V6 保持关闭；完成 DEC-050 readiness 修订，不创建 V7"
 ---
 
 # Visualizer V0-D and V1–V6 Milestone Plan
@@ -43,6 +43,10 @@ next_action: "V1–V6 已全部关闭；进入独立 Visualizer release-readines
 - V5 run `V5-2026-09-03T03-49-31-211Z-9b5af09c` 在 implementation commit `9b5af09c5846415a8e5465e710e6095f1e7db310` 上 40/40 通过，summary SHA-256 为 `cec1fab0310852458c2aa4fbd3bebc90eee3e213a54b7695a524736e07b07b7b`；2026-09-03 owner 批准 evidence 与人工门禁，V5 已关闭且无需重跑。
 - V6 golden/unit/integration、Chrome、Edge 与六文件 media 专项已完成；clean canonical `V6-2026-09-03T16-33-03-497Z-ef12ce39` 在 implementation commit `ef12ce397d0b1a054ce797bfa1b9ff5eb5af61cd` 上 54/54 通过，summary SHA-256 为 `695bf0acf3831907b720551c7772ea07e0dd80a5db38e829cba868f12128a014`。2026-09-04 owner 批准 evidence 与人工任务，V6 已关闭且无需重跑。
 - V6 关闭后只进入包含 Visualizer 的整体 release-readiness review；PROD-015 仍阻断生产上线。
+
+### Post-V6 readiness correction
+
+DEC-050 的一屏工作台与侧栏滚动是 release-readiness 修订项，不是 V7，也不改变 V6 的 `Complete` 或历史 canonical。修订在独立实现提交上通过双浏览器 targeted regression 后登记到 readiness；owner 视觉确认前 readiness 保持 `in-review`。
 
 ## 4. Failure and Slip Rules
 
