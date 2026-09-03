@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/product/success-metrics.md"
   - "docs/architecture/system-design.md"
   - "docs/architecture/visualizer/binding-and-scene-contracts.md"
-next_action: "在 V5/V6 delivery planning 中映射录制状态机、严格预设、能力检测和 WebM 证据；规划批准前不实现"
+next_action: "DEC-042/DEC-043 已开放 V5；实施状态机、严格预设、双浏览器与 WebM 证据"
 ---
 
 # Visualizer Real-time WebM Recording Contract
@@ -58,7 +58,7 @@ Opus audio bitrate 固定为 192 kbps。MIME capability 顺序：
 - MIME 选择成功，pre-Gain audio stream 含一个 live audio track，Canvas stream 含一个 live video track。
 - 当前没有另一个 recording tap、MediaRecorder、未处理 ready Blob 或 route transition。
 
-preflight 失败保留工程、预览和播放能力；若失败发生在为录制做的 pause/seek 前，播放状态不变。
+preflight 失败保留工程、预览和播放能力。进入 `preparing` 前先保存包含歌曲、秒数和 `paused/playing/ended` 的内存 playback checkpoint；任何准备阶段失败或取消均恢复该 checkpoint。只有录制已经进入 `recording` 后的取消或错误才停在当前秒数并保持 paused。
 
 ## State Machine
 
@@ -81,13 +81,16 @@ ready/error → idle
 
 录制期间锁定 seek、play/pause、template、binding、Editor reload、resolution 和 fps。普通 inspector 浏览、焦点和取消仍可用。锁定不是只禁用按钮：命令层也必须拒绝并返回 typed `recording-locked`。
 
+唯一 RendererHost 提供 recording capture lease：capture 期间现有 Canvas 使用 preset 原生 backing size 与 DPR 1，CSS 展示尺寸保持响应式；ResizeObserver 只记录待恢复的预览尺寸。首帧由 host 同步绘制且不新建 RAF，lease 释放后恢复最后观察到的预览尺寸。context loss 仍由同一 host 恢复预览，录制 coordinator 只负责终止并丢弃未完成结果。
+
 ## Cancel, Leave and Save
 
-- 用户取消或确认离页时停止 MediaRecorder/streams、释放 tap、丢弃 chunks/未完成 Blob，并恢复可编辑状态；不产生可保存的半文件。
+- 用户在 `preparing` 取消时停止已取得资源、丢弃 chunks 并恢复 playback checkpoint。用户在 `recording/finalizing` 取消时先暂停在当前时间，再停止 MediaRecorder/streams、释放 tap、丢弃 chunks/未完成 Blob并恢复可编辑状态；不产生可保存的半文件。
 - WebGL context loss、track ended、MediaRecorder error、route/song identity 变化或 renderer fatal error 都进入 error，丢弃未完成结果并保留工程。
 - `ready` Blob 只在内存中保留。用户通过原生保存选择器写出 `.webm`；选择器取消不丢 Blob，可再次保存。
 - 开始新录制或离开 Visualizer 前必须显式丢弃/保存现有 ready Blob；release 时移除任何 object URL。
 - 工程 JSON 与 recording Blob 完全分离；保存视频失败不修改工程或 durable draft。
+- 活动录制离页使用站内“取消录制并离开/留在此页”决策；ready Blob 离页使用“保存并离开/丢弃并离开/留在此页”。保存 picker 取消或失败时继续留页并保留 Blob。浏览器 refresh/关闭使用 `beforeunload` 警告和 `pagehide` 最佳努力清理。
 
 ## Verification Boundary
 
@@ -101,4 +104,4 @@ V5/V6 必须用 ffprobe/FFmpeg 和 Chrome/Edge 回放验证容器、codec、音�
 
 ## Approval State
 
-`project-owner` 于 2026-09-02 批准 Visualizer V0 system design、接口契约、R-034–R-041 与 ADR-0014–0017。本录制契约据此为 `approved`，但只允许制定 V5/V6 delivery 与后续 eval；不代表当前浏览器、机器或 `/comingsoon` 已满足录制能力。
+`project-owner` 于 2026-09-02 批准 Visualizer V0 system design、接口契约、R-034–R-041 与 ADR-0014–0017。2026-09-03，owner 以 DEC-042/DEC-043 批准关闭 V4、开放 V5，并固定分阶段播放恢复与站内离页决策。本录制契约为 `approved`；只有 V5 双浏览器 canonical 和后续 owner 门禁才能证明当前实现满足能力。

@@ -15,6 +15,9 @@ upstream_docs:
   - "docs/quality/visualizer/v4-eval-plan.md"
   - "docs/quality/visualizer/v4-golden-examples.md"
   - "docs/quality/visualizer/v4-failure-taxonomy.md"
+  - "docs/quality/visualizer/v5-eval-plan.md"
+  - "docs/quality/visualizer/v5-golden-examples.md"
+  - "docs/quality/visualizer/v5-failure-taxonomy.md"
   - "docs/delivery/visualizer/milestone-plan.md"
 next_action: "V4 evidence 已获 owner 批准；V5 WebM 为 In Progress，等待专项实现与 canonical"
 ---
