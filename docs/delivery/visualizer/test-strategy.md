@@ -121,9 +121,11 @@ V4 实际命令固定为 `fixtures:v4:golden`、`test:v4:unit`、`test:v4:integr
 
 V5 实际命令固定为 `fixtures:v5:golden`、`test:v5:unit`、`test:v5:integration`、`test:e2e:v5:chrome`、`test:e2e:v5:edge`、`test:e2e:v5`、`test:v5:media`、`eval:v5:provisional` 与 clean `eval:v5`。V5 canonical 恰为 V4 34 步基线加 golden、unit、integration、Chrome、Edge、media verification 六专项，共 40 步。
 
+V6 实际命令固定为 `fixtures:v6:golden`、`test:v6:unit`、`test:v6:integration`、`test:e2e:v6:chrome`、`test:e2e:v6:edge`、`test:e2e:v6`、`test:v6:media`、`eval:v6:provisional` 与 clean `eval:v6`。V6 canonical 恰为 V5 40 步基线、六个 V6 专项，以及 M6 unit/worker/integration/Chrome 与 M14 unit/integration/Chrome/Edge 八个显式关键回归，共 54 步。
+
 ## 9. Current Gate State
 
-- V1–V5 canonical 与 owner evidence 均已批准并关闭；V6 为 `In Progress`。
+- V1–V5 canonical 与 owner evidence 均已批准并关闭；V6 quality contract 已批准且实现为 `In Progress`。
 - V4 quality/eval、golden、failure taxonomy、clean run `V4-2026-09-02T17-47-40-271Z-5c2d24a3` 34/34 与人工门禁均已获批准；V5 在此 34 步基线上增加六个录制专项。
 - 当前没有正式 CI，所有结果限定为本地登记环境。
 - `/comingsoon`、`threeDTable`、TestLands 或 V3 历史 artifact 中的 V4 中性预览不是当前 V4 implementation evidence；真实 Cube 由 V4 专项与前向回归评价。

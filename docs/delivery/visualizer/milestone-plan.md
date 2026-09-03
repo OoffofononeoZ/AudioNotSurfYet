@@ -6,7 +6,7 @@ upstream_docs:
   - "docs/delivery/visualizer/execution-plan.md"
   - "docs/delivery/visualizer/acceptance-criteria.md"
   - "docs/delivery/visualizer/test-strategy.md"
-next_action: "V5 已获 owner 批准并关闭；V6 final hardening 为 In Progress"
+next_action: "V6 quality contract 已获批准；实施双浏览器、三格式、15 分钟与资源专项"
 ---
 
 # Visualizer V0-D and V1–V6 Milestone Plan
