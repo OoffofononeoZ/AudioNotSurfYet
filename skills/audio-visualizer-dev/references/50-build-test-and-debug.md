@@ -46,6 +46,8 @@
 | `npm run test:e6:integration` | 运行 10,000 事件 JSON/IndexedDB round-trip 与无效导入原子隔离 | E6 persistence 压力契约 |
 | `npm run test:e2e:e6` | 顺序运行真实 Chrome/Edge 的三格式、压力、无障碍和 20 次资源循环 | E6 双浏览器自动化；不替代原生 picker/辅助技术人工门禁 |
 | `npm run test:e2e:e7` | 顺序运行真实 Chrome/Edge 的紧凑工具栏、平面分区、固定密度与多视口回归 | E7 布局自动化；截图只作人工补充 |
+| `npm run test:e8:unit` / `test:e8:integration` | 运行 E8 垂直几何、恢复决策、route generation 与草稿原子性 | E8 纯逻辑和服务边界 |
+| `npm run test:e2e:e8` | 顺序运行真实 Chrome/Edge 的 72/88px、同/异歌恢复和 marker 中心场景 | E8 双浏览器自动化；不替代 owner 视觉/真实重选门禁 |
 | `npm run test:e2e:edge` | 使用稳定 Edge 串行运行 M3–M11 全量 E2E | Edge 缺失时以退出码 2 明确 blocked；不得用 Chromium 替代 |
 | `npm run test:docs` | 检查生命周期 frontmatter、链接和 21 项特征 | 文档门禁 |
 | `npm run eval:m3:provisional` | 未提交工作树的本地 M3 run | 不创建正式 evidence index |
@@ -76,6 +78,8 @@
 | `npm run eval:e6` | 只在干净 commit 上运行 40 步 E6 suite | 生成可登记的 E6 canonical 证据 |
 | `npm run eval:e7:provisional` | 在 dirty worktree 运行 46 步 E7/E6/M12 双浏览器 suite | 只生成实现反馈 |
 | `npm run eval:e7` | 只在干净 commit 上运行 46 步 E7 suite | 生成可登记的 E7 canonical 证据 |
+| `npm run eval:e8:provisional` | 在 dirty worktree 运行 E8 与 E1/E2/E3/E7、M5 的 25 步 suite | 只生成 scoped 实现反馈 |
+| `npm run eval:e8` | 只在干净 E8 implementation commit 上运行 25 步 suite | canonical 25/25 已登记为 `in-review` |
 | `npm run fixtures:v1:golden` / `test:v1:unit` / `test:v1:integration` | 运行 V1 strict project、descriptor、route lease、单草稿和 session 专项 | 已实现；用于 V1 质量回归 |
 | `npm run test:e2e:v1:chrome` / `test:e2e:v1:edge` | 在真实 Chrome/Edge 运行 V1 route/layout/resource 专项 | 原生 OS picker 仍需人工补偿 |
 | `npm run eval:v1:provisional` | 在 dirty worktree 运行 21 步 V1 suite | 只生成实现反馈 |
@@ -113,7 +117,7 @@
 - 超出约 15 分钟支持边界的长音频未开始播放只作为非门禁压力观察；它不是规定的预期失败，也不能替代范围内性能或格式验证。
 - M6 当前 Meyda 的 `spectralFlux` 对有效输入抛出 `x is not defined`；已用预期失败测试和 R-020 固定，不能把 21 项 registry 误述为 21 项均可计算。
 - M6 dirty-worktree provisional 与 clean-commit canonical 均已 20/20 通过；正式 evidence 已登记，并由 `project-owner` 于 2026-07-30 批准，M6 已关闭。
-- M7–M11 已获批准并关闭。M11 clean canonical `M11-2026-08-25T10-05-12-783Z-99c67792` 在 commit `99c67792509d07456bcb431b90468252f8b0fdc3` 上 38/38 通过；Edge 原生权限、辅助技术与最终加固于 2026-08-26 获 owner 签字。Analyzer readiness 已获 `Ready with waivers` 批准。Editor E1–E6 clean canonical 与人工门禁均已获批准；E7 compact workbench 44/44 run 因全屏浮层修订成为 `pre-revision`，修订版 46/46 clean canonical 已通过并等待 owner 审批。
+- M7–M11 已获批准并关闭。M11 clean canonical `M11-2026-08-25T10-05-12-783Z-99c67792` 在 commit `99c67792509d07456bcb431b90468252f8b0fdc3` 上 38/38 通过；Edge 原生权限、辅助技术与最终加固于 2026-08-26 获 owner 签字。Analyzer readiness 已获 `Ready with waivers` 批准。Editor E1–E7 clean canonical 与人工门禁均已获批准；E7 旧 44/44 run 保留为 `pre-revision`。E8 clean canonical `E8-2026-09-03T04-07-28-904Z-84d9435c` 在 commit `84d9435cc6e8d1edb0932ff1b8dcd1b84dff32b5` 上 25/25 通过，evidence 为 `in-review` 并等待 owner 验收。
 
 ## 构建风险
 

@@ -8,7 +8,7 @@
 - FFmpeg：8.1.2；只用于生成和检查受控 WAV/MP3/FLAC fixture。
 - 当前 Visualizer V1/V2/V3 canonical 使用 Google Chrome 152.0.7977.66 与 Microsoft Edge 152.0.4191.53；V3 场景专项运行真实 Chrome，固定 V1/V2 基线继续运行真实 Chrome/Edge，浏览器缺失时仍明确报告失败/blocked。
 
-M3–M13 不建设 CI。下列命令当前均为本地门禁；正式证据要求在干净 commit 上复跑。M3–M13 与 Editor E1–E7 canonical 均已获批准。E7 的 44/44 run 因全屏浮层修订成为 `pre-revision`，修订版 46/46 已于 2026-08-31 获 owner 批准；E8 为 `In Progress`，已有 scoped/provisional 反馈并等待独立 implementation commit 与 clean canonical。
+M3–M13 不建设 CI。下列命令当前均为本地门禁；正式证据要求在干净 commit 上复跑。M3–M13 与 Editor E1–E7 canonical 均已获批准。E7 的 44/44 run 因全屏浮层修订成为 `pre-revision`，修订版 46/46 已于 2026-08-31 获 owner 批准；E8 为 `In Progress`，25/25 clean canonical 已登记为 `in-review` 并等待 owner 验收。
 
 当前 `npm audit` 在安全补丁更新后剩余 1 项 low：Vite 依赖的 esbuild 0.27.3 在 Windows 开发服务器场景存在本地任意文件读取风险。仓库目标验证机为 macOS，开发服务器不得暴露到不受信网络；依赖升级提供修复版本后复核。该缺口不被描述为已修复或生产 readiness。
 
@@ -221,6 +221,8 @@ E8 双浏览器套件固定验证 390/1024/1280/1920 的 `72/88/88/88px` stage�
 
 E8 最新 scoped run `E8-2026-09-03T04-04-25-163Z-10a2bc0c-provisional` 在 V5 已独立提交的基线上 25/25 通过，summary SHA-256 为 `829e50c177b14bb81febc81577c179deec0a01d703362083ebf2fa28bc7e5c0a`；Chrome/Edge 最大 marker/diamond/candidate/pin 中心误差均为 `0.009375 CSS px`。较早的 `E8-2026-09-03T03-23-23-119Z-cc83d8b1-provisional`、`E8-2026-09-03T03-27-19-090Z-cc83d8b1-provisional` 与 `E8-2026-09-03T03-41-39-925Z-cc83d8b1-provisional` 分别保留为 recovery signature、candidate box 居中及 V5/E8 分离提交前反馈。所有 provisional run 均绑定 dirty worktree，不是 canonical，不进入 evidence index。
 
+E8 clean canonical `E8-2026-09-03T04-07-28-904Z-84d9435c` 在 implementation commit `84d9435cc6e8d1edb0932ff1b8dcd1b84dff32b5` 上 25/25 通过，起止工作树干净，summary SHA-256 为 `ba9ff8db30868c8bf34140a3db2bf8cd7e3d56557ca7ac8682dfa6c3ce664a42`。Chrome/Edge E8 各 3/3，四视口高度为 `72/88/88/88px`，最大中心误差 `0.009375 CSS px`；E7、E3、E2、E1、M5 与静态门禁全部通过。evidence 为 `in-review`，不替代 owner 人工验收。
+
 Visualizer V1 quality 契约、实现和双浏览器 runner 已完成。clean canonical `V1-2026-09-02T07-03-26-973Z-fd44c892` 在 commit `fd44c8921a534c22b2362ccffff7ec9e46f3ff02` 上 21/21 通过，summary SHA-256 为 `14c9ed2258baf6c9a2a3a20dfcaba65a0c643029f8510a1d9e4c6662c9c90300`；unit 12/12、integration 7/7、Chrome 4/4、Edge 4/4，并于 2026-09-02 获 owner 批准。V2 数据绑定已开放，真实场景/录制仍不得提前进入。
 
 Visualizer V2 已实现 constant/analysis/editor-event inspector、0–4 唯一特征 planner、FeatureRegistry projection、同歌 Editor snapshot 与 60Hz absolute-time resolver。clean canonical `V2-2026-09-02T08-46-21-778Z-769faafe` 在 commit `769faafeef576bf9b98a95f6904cdb9886298530` 上 26/26 通过，summary SHA-256 为 `18b7d83d68f068ac615c56e1bb844a3c80bb1460ac884116d94cb460dd07bafb`；golden 2/2、unit 6/6、integration 5/5、Chrome 3/3、Edge 3/3。Evidence 已于 2026-09-02 获 owner 批准；V2 关闭并开放 V3 真实场景。
@@ -316,6 +318,6 @@ M13 最终 provisional `M13-2026-08-31T17-40-46-300Z-e62140ee-provisional` 在 d
 
 M13 clean canonical `M13-2026-08-31T17-44-39-680Z-63c04005` 在实现 commit `63c04005670145d83ee181d474197bce921c5300` 上 17/17 通过，summary SHA-256 为 `25732179105b31b7bb05dfdb6626db1264567208a505a7cbf71434a4562e2afc`。起止工作树干净；Chrome/Edge M13 各 2/2，M12 各 3/3；15 分钟最大反馈 `17.5ms`、归因长任务 0，刷新前后均为单 Worker，FIFO 年龄恢复后正确淘汰 Amplitude Spectrum。build 最大 JS chunk 仍为 `1,292.10 kB`。
 
-本 README 只记录真实执行结果。`project-owner` 已批准 M11–M13 与 Editor E1–E7 canonical evidence；E8 尚无 clean canonical 或 owner evidence 批准。Analyzer 已按 M13 恢复 `Ready with waivers`。Meyda 5.6.3 `spectralFlux` 上游缺陷仍保留，产品侧仅由 ADR-0005 项目实现缓解；PROD-015 仍阻断正式上线。
+本 README 只记录真实执行结果。`project-owner` 已批准 M11–M13 与 Editor E1–E7 canonical evidence；E8 clean canonical 已登记为 `in-review`，owner evidence 尚未批准。Analyzer 已按 M13 恢复 `Ready with waivers`。Meyda 5.6.3 `spectralFlux` 上游缺陷仍保留，产品侧仅由 ADR-0005 项目实现缓解；PROD-015 仍阻断正式上线。
 
 E1 最终 provisional `E1-2026-08-26T15-20-11-120Z-3ef4ec33-provisional` 已 18/18 通过。clean canonical `E1-2026-08-26T15-24-21-043Z-792b424f` 在 commit `792b424fbab8e3621ad24d8c9add47d1c9bffcb4` 上 18/18 通过，summary SHA-256 为 `db51ba98b757ccd524d298243c6118eb24fad60101a74f20a5ff98478a5d5bc6`；E1 unit 9/9、integration 7/7、Chrome 4/4。M4 60 秒漂移 0.8ms、seek 最大误差 66.827ms；M6 15 分钟最大反馈 18.1ms、分析归因长任务 0、20 次资源循环保持单 Worker/AudioContext。build 最大 JS chunk 为 1,204.24 kB，warning 保留。`project-owner` 于 2026-08-26 批准 E1 canonical、原生流程与人工任务，E1 为 `Complete`，E2 已开放。

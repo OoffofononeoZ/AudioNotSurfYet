@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/delivery/editor/acceptance-criteria.md"
   - "docs/delivery/editor/test-strategy.md"
   - "docs/quality/editor/e7-eval-plan.md"
-next_action: "25/25 scoped/provisional 已通过；等待独立 clean canonical 与 owner 验收，暂不登记 evidence index"
+next_action: "25/25 clean canonical 已登记为 in-review；等待 owner 验收"
 ---
 
 # Editor E8 Eval Plan
@@ -44,4 +44,5 @@ E8 只评价三项可用性修正：共享时间轴垂直尺寸、不可用 rout
 - 最新 scoped run `E8-2026-09-03T04-04-25-163Z-10a2bc0c-provisional` 在 V5 已独立提交的基线上 25/25 通过，summary SHA-256 为 `829e50c177b14bb81febc81577c179deec0a01d703362083ebf2fa28bc7e5c0a`。它覆盖 E8 Chrome/Edge 各 3/3、E7 Chrome/Edge 各 2/2、E3 Chrome 7/7、E2 Chrome 5/5、E1 Chrome 4/4、M5 Chrome 3/3 及全部 unit/integration/docs/harness/typecheck/build/diff check。
 - Chrome/Edge 四视口测量一致：timeline 为 `72/88/88/88px`；marker/diamond/candidate/pin 最大 X 误差为 390px 与 1024px 视口的 `0.009375 CSS px`，marker Y 为 `0.5px`，diamond Y 为 `0px`。同歌恢复保持 paused，异歌只在显式 replace 后进入。
 - 浏览器测试未捕获 `pageerror` 或异常 console；Vite 仍报告既有 browserslist stale 提示，build 仍报告既有大 chunk warning。这些 runner stderr 不冒充页面错误，也不改变 scoped 通过结论。
-- 本记录不写入 evidence index，不缓解已重开的 R-022/R-024/R-025；clean canonical 与 owner 验收仍未完成。
+- clean canonical `E8-2026-09-03T04-07-28-904Z-84d9435c` 在 implementation commit `84d9435cc6e8d1edb0932ff1b8dcd1b84dff32b5` 上 25/25 通过，起止工作树干净，summary SHA-256 为 `ba9ff8db30868c8bf34140a3db2bf8cd7e3d56557ca7ac8682dfa6c3ce664a42`。
+- 正式记录已写入 [evidence index](evidence-index.md) 并保持 `in-review`；R-022/R-024/R-025 与 E8 仍等待 owner 验收，不因自动化通过而提前关闭。

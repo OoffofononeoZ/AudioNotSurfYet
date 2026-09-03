@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/product/scope.md"
   - "docs/product/success-metrics.md"
   - "docs/product/open-questions.md"
-next_action: "Visualizer V5 与 Editor E8 均在实施；各自保持独立 provisional/canonical 门禁"
+next_action: "Visualizer V5 与 Editor E8 canonical 均为 in-review；等待各自 owner 门禁"
 ---
 
 # System Design
@@ -375,7 +375,7 @@ M6 只在 `import.meta.env.DEV` 安装无 UI bridge，提供活动特征、cance
 
 同日，M14 implementation commit `0e991307d9045a1ec84ddaae0515612240894a92` 与 clean canonical 19/19 验证上述设计；R-031–R-033 已缓解，Analyzer readiness 恢复为 `Ready with waivers`。
 
-2026-09-03，owner 以 E8 完整实施指令批准 ADR-0018 及本设计中的时间轴、不可用恢复与 point marker 修正，并开放 E8。该批准不改变 JSON/IndexedDB/runtime ownership，不构成 clean canonical、风险缓解或 E8 Complete。
+2026-09-03，owner 以 E8 完整实施指令批准 ADR-0018 及本设计中的时间轴、不可用恢复与 point marker 修正，并开放 E8。implementation commit `84d9435cc6e8d1edb0932ff1b8dcd1b84dff32b5` 的 25/25 clean canonical 已登记为 `in-review`；JSON/IndexedDB/runtime ownership 未改变，风险缓解和 E8 Complete 仍等待 owner 验收。
 
 ## 17. Editor Timeline and Interaction Architecture
 

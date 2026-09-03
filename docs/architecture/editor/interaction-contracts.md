@@ -6,7 +6,7 @@ upstream_docs:
   - "docs/product/scope.md"
   - "docs/architecture/system-design.md"
   - "docs/architecture/interface-contracts.md"
-next_action: "实施并验证 E8 同歌曲恢复、显式异歌切换与 point 中心几何"
+next_action: "E8 同歌恢复、显式异歌切换与 point 中心几何已通过 clean canonical；等待 owner 验收"
 ---
 
 # Editor Interaction Contracts
@@ -142,4 +142,4 @@ idle + drag start/end handle
 
 同日，owner 在开放 E2 时进一步确认：一个 beat 固定为 `60/BPM` 秒，拍号分母只表达音符单位；无合法 metered BPM 时 tempo boundary 按微秒规范化原始时间定位。该澄清登记为 DEC-026，不改变 JSON V1 或 ADR-0008 的秒数事实。
 
-2026-09-03，owner 以 E8 实施指令批准同歌曲自动重试、异歌显式切换、`88px/72px` 时间轴与 point 中心对齐契约。该批准只开放 E8，实现与风险关闭仍等待 scoped 验证、clean canonical 和 owner 验收。
+2026-09-03，owner 以 E8 实施指令批准同歌曲自动重试、异歌显式切换、`88px/72px` 时间轴与 point 中心对齐契约。implementation commit `84d9435cc6e8d1edb0932ff1b8dcd1b84dff32b5` 的 25/25 clean canonical 已登记为 `in-review`；风险关闭仍等待 owner 验收。

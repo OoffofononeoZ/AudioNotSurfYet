@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/product/scope.md"
   - "docs/architecture/system-design.md"
   - "docs/delivery/execution-plan.md"
-next_action: "Visualizer V5 与 Editor E8 独立 In Progress；E8 scoped 已通过并等待 clean canonical，PROD-015 仍开放"
+next_action: "Visualizer V5 与 Editor E8 canonical 均为 in-review；等待各自 owner 门禁，PROD-015 仍开放"
 ---
 
 # Decision Registry

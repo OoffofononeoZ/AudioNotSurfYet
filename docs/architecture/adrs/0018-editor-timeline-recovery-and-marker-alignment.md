@@ -5,7 +5,7 @@ last_reviewed: 2026-09-03
 upstream_docs:
   - "docs/product/scope.md"
   - "docs/architecture/system-design.md"
-next_action: "E8 scoped 25/25 已通过；等待 clean canonical 与 owner 验收后关闭"
+next_action: "E8 clean canonical 25/25 已登记为 in-review；等待 owner 验收后关闭"
 ---
 
 # ADR-0018: Editor Timeline Recovery and Marker Alignment
@@ -36,4 +36,4 @@ E7 紧凑工作台仍保留 176/144px 波形轨道，实际波形只占其中一
 
 ## Approval
 
-2026-09-03，`project-owner` 明确要求实施 E8 完整计划，包括 88/72px、同歌恢复、异歌显式入口和 `<=1 CSS px` 标记中心门禁。本 ADR 据此为 `approved`；批准不构成 E8 canonical 或完成证据。
+2026-09-03，`project-owner` 明确要求实施 E8 完整计划，包括 88/72px、同歌恢复、异歌显式入口和 `<=1 CSS px` 标记中心门禁。本 ADR 据此为 `approved`。随后 implementation commit `84d9435cc6e8d1edb0932ff1b8dcd1b84dff32b5` 的 25/25 clean canonical 已登记为 `in-review`；完成状态仍等待 owner 验收。

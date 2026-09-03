@@ -8,7 +8,7 @@ upstream_docs:
   - "docs/architecture/risk-register.md"
   - "docs/delivery/editor/execution-plan.md"
   - "docs/delivery/editor/acceptance-criteria.md"
-next_action: "E8 25 步 scoped/provisional 已通过；等待 clean canonical 复跑"
+next_action: "E8 25 步 clean canonical 已通过；等待 owner 验收"
 ---
 
 # Editor E1–E8 Test Strategy
@@ -138,4 +138,4 @@ E1–E7 命令已经存在、通过 clean canonical 并获批准。E8 新增 uni
 
 ## 9. Current Planning Gate
 
-`project-owner` 于 2026-08-26 批准本文并开放 E1，随后逐项批准 E1–E7。2026-09-03 的 E8 实施指令批准本策略扩展并开放 E8；已有 scoped/provisional 反馈通过，V5 独立提交后 owner 已允许单独提交 E8。clean canonical 和 owner evidence 获批前不得进入 Editor release-readiness review。
+`project-owner` 于 2026-08-26 批准本文并开放 E1，随后逐项批准 E1–E7。2026-09-03 的 E8 实施指令批准本策略扩展并开放 E8；已有 scoped/provisional 反馈通过，V5 独立提交后 owner 允许单独提交 E8。clean canonical `E8-2026-09-03T04-07-28-904Z-84d9435c` 已 25/25 通过；owner evidence 获批前不得进入 Editor release-readiness review。

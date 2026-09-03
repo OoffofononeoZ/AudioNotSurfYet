@@ -9,7 +9,7 @@ upstream_docs:
   - "docs/architecture/editor/project-format-v1.md"
   - "docs/architecture/editor/interaction-contracts.md"
   - "docs/delivery/editor/execution-plan.md"
-next_action: "AC-E801–AC-E805 scoped 已通过；clean canonical 与 owner 验收前 E8 保持 In Progress"
+next_action: "AC-E801–AC-E805 已由 25/25 clean canonical 覆盖；等待 owner 验收，E8 保持 In Progress"
 ---
 
 # Editor E1–E8 Acceptance Criteria
@@ -115,4 +115,4 @@ next_action: "AC-E801–AC-E805 scoped 已通过；clean canonical 与 owner 验
 
 每个里程碑只能在其全部适用 AC、有明确成功/失败/边界/异常证据、相关风险复核、clean canonical 和 owner 批准后关闭。本 AC 于 2026-08-26 获 `project-owner` 批准；E1 开放实施不构成 AC-E101–AC-E108 已通过。
 
-AC-E801–AC-E805 于 2026-09-03 随 owner 的 E8 实施指令获批。已有 dirty-worktree 通过结果只标记 scoped/provisional；V5 独立提交后 owner 已允许单独提交 E8。只有 E8 clean canonical 与 owner 验收后才可关闭 E8。
+AC-E801–AC-E805 于 2026-09-03 随 owner 的 E8 实施指令获批。已有 dirty-worktree 通过结果只标记 scoped/provisional；V5 独立提交后 owner 允许单独提交 E8。clean canonical `E8-2026-09-03T04-07-28-904Z-84d9435c` 已 25/25 通过；只有 owner 验收后才可关闭 E8。
