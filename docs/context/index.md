@@ -21,7 +21,7 @@ AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端。Editor E1–
 - Product intent：Analyzer/Editor 历史范围与 Visualizer V0 均已批准；PROD-014V 已关闭，PROD-022 保留为非阻断未来问题。
 - System design：Analyzer/Editor 历史设计仍是已批准/实现基线；Visualizer system design、接口、风险和 ADR-0014–0017 已获批准。
 - Execution planning：M1–M14、Editor E0-D/E1–E8、Visualizer V0-D/V1–V5 均为 `Complete`；Visualizer V6 为 `In Progress`。
-- Quality and evals：M3–M14、Editor E1–E8 与 Visualizer V1–V5 evidence 已批准；V6 quality contract 待本轮建立。
+- Quality and evals：M3–M14、Editor E1–E8 与 Visualizer V1–V5 evidence 已批准；V6 eval/golden/failure taxonomy 已批准并开放实现。
 - Implementation：Editor E8 与 Visualizer V5 已完成；V6 双浏览器、三格式、长时资源与全回归加固正在实施。
 - Readiness、release、retrospective：Analyzer M14 为 `Ready with waivers`；PROD-015 仍阻断上线，Editor readiness 独立。
 
@@ -73,6 +73,9 @@ AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端。Editor E1–
 | [Visualizer V5 eval plan](../quality/visualizer/v5-eval-plan.md) | AC-V501–AC-V509 的 pre-Gain、MediaRecorder、保存、双浏览器与媒体阈值 | project-owner / approved | V5 状态机、preset、阈值或证据能力变化 |
 | [Visualizer V5 golden](../quality/visualizer/v5-golden-examples.md) | 3 秒 A/V fixture、准备回滚、命令锁、abort、save 与 lifecycle 规范样例 | project-owner / approved | V5 fixture、恢复、离页或媒体事实变化 |
 | [Visualizer V5 failure taxonomy](../quality/visualizer/v5-failure-taxonomy.md) | tap、capability、preflight、sequence、abort、container、sync 与 resource 分类 | project-owner / approved | V5 失败域或严重度响应变化 |
+| [Visualizer V6 eval plan](../quality/visualizer/v6-eval-plan.md) | AC-V601–AC-V607 的三格式、双浏览器、长时压力、资源与 54 步 canonical 契约 | project-owner / approved | V6 压力工程、资源阈值、浏览器或证据能力变化 |
+| [Visualizer V6 golden](../quality/visualizer/v6-golden-examples.md) | 四特征切换、三格式、20 次生命周期、六文件与故障矩阵规范样例 | project-owner / approved | V6 fixture、binding、生命周期或媒体事实变化 |
+| [Visualizer V6 failure taxonomy](../quality/visualizer/v6-failure-taxonomy.md) | format、binding、clock、resource、recovery、a11y、media 与 evidence 分类 | project-owner / approved | V6 失败域或严重度响应变化 |
 | [Visualizer evidence index](../quality/visualizer/evidence-index.md) | V1–V6 canonical 身份、hash、环境和 reviewer 记录 | project-owner / approved | 新 Visualizer run、artifact 或审批状态变化 |
 | [eval-plan.md](../quality/eval-plan.md) | M3–M14 评估、FIFO/order/geometry/lifecycle 门禁与 canonical 规则 | project-owner / approved | 验收、测试覆盖或风险变化 |
 | [golden-examples.md](../quality/golden-examples.md) | 成功、失败、边界和异常黄金样例 | project-owner / approved | fixture、Meyda、参数或用户任务变化 |
@@ -82,7 +85,7 @@ AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端。Editor E1–
 | [Editor E1 eval plan](../quality/editor/eval-plan.md) | AC-E101–AC-E108 的成功、失败、边界、异常与 canonical 契约 | project-owner / approved | E1 行为、阈值、浏览器或证据能力变化 |
 | [Editor E1 golden examples](../quality/editor/golden-examples.md) | JSON、identity、lease、草稿和文件异常规范样例 | project-owner / approved | E1 schema、identity 或恢复语义变化 |
 | [Editor E1 failure taxonomy](../quality/editor/failure-taxonomy.md) | Editor 路由、lease、schema、草稿、文件和生命周期失败分类 | project-owner / approved | Editor 失败域或严重度响应变化 |
-| [Editor evidence index](../quality/editor/evidence-index.md) | E1–E7 canonical 身份、hash、环境与 reviewer 记录 | project-owner / approved | 新 Editor run、artifact 或审批状态变化 |
+| [Editor evidence index](../quality/editor/evidence-index.md) | E1–E8 canonical 身份、hash、环境与 reviewer 记录 | project-owner / approved | 新 Editor run、artifact 或审批状态变化 |
 | [Editor E2 eval plan](../quality/editor/e2-eval-plan.md) | AC-E201–AC-E206 的 geometry、tempo、BPM、竞态与回归契约 | project-owner / approved | E2 行为、阈值、算法或证据能力变化 |
 | [Editor E2 golden examples](../quality/editor/e2-golden-examples.md) | viewport、tempo map、BPM reliable/low-confidence 规范样例 | project-owner / approved | E2 fixture、拍号、阈值或边界语义变化 |
 | [Editor E2 failure taxonomy](../quality/editor/e2-failure-taxonomy.md) | E2 geometry、pointer、tempo、estimator 和 consumer 失败分类 | project-owner / approved | E2 失败域或严重度响应变化 |
@@ -159,7 +162,8 @@ AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端。Editor E1–
 - Editor E6 quality：[eval plan](../quality/editor/e6-eval-plan.md)、[golden](../quality/editor/e6-golden-examples.md)、[failure taxonomy](../quality/editor/e6-failure-taxonomy.md) 与 40/40 canonical record 已获批准
 - Editor E7 quality：[eval plan](../quality/editor/e7-eval-plan.md)、[golden](../quality/editor/e7-golden-examples.md)、[failure taxonomy](../quality/editor/e7-failure-taxonomy.md) 与修订版 46/46 canonical 已获批准；44/44 run 保留为 `pre-revision`
 - Editor E8 quality：[eval plan](../quality/editor/e8-eval-plan.md)、[golden](../quality/editor/e8-golden-examples.md)、[failure taxonomy](../quality/editor/e8-failure-taxonomy.md) 已批准；25/25 canonical record 与 owner 门禁均为 `approved`
-- Visualizer quality：V1–V5 契约、canonical 与 owner 门禁均已批准；V6 quality contract 待本轮建立
+- Visualizer quality：V1–V5 契约、canonical 与 owner 门禁均已批准；V6 quality contract 已批准
+- Visualizer V6 quality：[eval plan](../quality/visualizer/v6-eval-plan.md)、[golden](../quality/visualizer/v6-golden-examples.md) 与 [failure taxonomy](../quality/visualizer/v6-failure-taxonomy.md) 已获批准；canonical 尚未生成
 - Quality readiness：[Analyzer release readiness](../quality/release-readiness.md) 已按 M14 恢复 `Ready with waivers`；M13 结论只作历史
 - Release operations：`docs/release/` 尚未创建；PROD-015 的托管平台、域名和 SPA fallback 解决前不进入正式上线
 - Retrospectives：`docs/retrospectives/` 尚未创建；有发布、事故或重复摩擦证据后生成

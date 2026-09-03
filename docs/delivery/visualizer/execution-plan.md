@@ -11,7 +11,7 @@ upstream_docs:
   - "docs/architecture/visualizer/project-format-v1.md"
   - "docs/architecture/visualizer/binding-and-scene-contracts.md"
   - "docs/architecture/visualizer/recording-contract.md"
-next_action: "V5 已获 owner 批准并关闭；实施 V6 final hardening"
+next_action: "V6 quality contract 已获批准；实施专项、provisional 与 54 步 clean canonical"
 ---
 
 # Visualizer V1–V6 Execution Plan

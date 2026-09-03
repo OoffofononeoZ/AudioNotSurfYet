@@ -18,8 +18,11 @@ upstream_docs:
   - "docs/quality/visualizer/v5-eval-plan.md"
   - "docs/quality/visualizer/v5-golden-examples.md"
   - "docs/quality/visualizer/v5-failure-taxonomy.md"
+  - "docs/quality/visualizer/v6-eval-plan.md"
+  - "docs/quality/visualizer/v6-golden-examples.md"
+  - "docs/quality/visualizer/v6-failure-taxonomy.md"
   - "docs/delivery/visualizer/milestone-plan.md"
-next_action: "V5 canonical 与人工门禁已批准；V6 final hardening 为 In Progress"
+next_action: "V5 canonical 与人工门禁已批准；V6 quality contract 已批准并进入实现"
 ---
 
 # Visualizer Evidence Index
