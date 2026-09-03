@@ -25,6 +25,15 @@
                 <h2>这首歌曲暂时不能编辑</h2>
                 <p role="alert">{{ snapshot.message }}</p>
                 <p>请在底部播放器恢复文件访问或重新选择相同文件。</p>
+                <button
+                    v-if="unavailableRecovery.kind === 'offer-current'"
+                    type="button"
+                    data-testid="editor-edit-current-track"
+                    :aria-label="`编辑当前歌曲：${unavailableRecovery.title}`"
+                    @click="editCurrentTrack"
+                >
+                    编辑当前歌曲
+                </button>
             </section>
 
             <section v-else-if="snapshot.state === 'draft-error'" class="editor-state" data-testid="editor-draft-error">
@@ -155,6 +164,7 @@ import {
 } from 'element-plus';
 import { useAudioSessionService } from '../audio/audioSessionService';
 import { EditorFormatCodecRegistry } from '../editor/projectCodec';
+import { resolveEditorUnavailableRecovery } from '../editor/routeRecovery';
 import { useEditorSessionController } from '../editor/editorSessionController';
 import { useAudioSessionStore } from '../stores/audioSessionStore';
 import EditorTimeline from '../components/EditorTimeline.vue';
@@ -208,6 +218,41 @@ const returnPath = typeof historyBack === 'string'
     : '/';
 
 const playback = computed(() => sessionStore.playback);
+const unavailableRecovery = computed(() => resolveEditorUnavailableRecovery({
+    routeTrackId: routeTrackId(),
+    queue: sessionStore.queue,
+    currentTrackId: sessionStore.currentTrackId,
+    playback: playback.value,
+    persistenceState: sessionStore.persistence.state,
+}));
+let lastAutoRetrySignature: string | null = null;
+let pendingAutoRetrySignature: string | null = null;
+let autoRetryInFlight = false;
+
+const runPendingAutoRetry = async (signature: string) => {
+    pendingAutoRetrySignature = signature;
+    if (autoRetryInFlight) return;
+    autoRetryInFlight = true;
+    try {
+        while (pendingAutoRetrySignature) {
+            const pending = pendingAutoRetrySignature;
+            pendingAutoRetrySignature = null;
+            if (pending === lastAutoRetrySignature) continue;
+            const decision = unavailableRecovery.value;
+            if (
+                snapshot.value.state !== 'unavailable'
+                || decision.kind !== 'retry-route'
+                || decision.signature !== pending
+            ) {
+                continue;
+            }
+            lastAutoRetrySignature = pending;
+            await controller.enter(decision.trackId);
+        }
+    } finally {
+        autoRetryInFlight = false;
+    }
+};
 
 const performOverlayCursorRequest = async () => {
     const featureId = overlayFeatureId.value;
@@ -289,11 +334,24 @@ watch(
     () => route.params.trackId,
     () => {
         conflictExported.value = false;
+        lastAutoRetrySignature = null;
+        pendingAutoRetrySignature = null;
         if (sessionStore.persistence.state !== 'restoring') {
             void controller.enter(routeTrackId());
         }
     },
     { immediate: true },
+);
+
+watch(
+    () => snapshot.value.state === 'unavailable'
+        && unavailableRecovery.value.kind === 'retry-route'
+        ? unavailableRecovery.value.signature
+        : null,
+    (signature) => {
+        if (signature) void runPendingAutoRetry(signature);
+    },
+    { flush: 'post' },
 );
 
 watch(
@@ -325,6 +383,17 @@ watch(
 );
 
 const togglePlayback = () => void audioSession.togglePlayback();
+
+const editCurrentTrack = async () => {
+    const decision = unavailableRecovery.value;
+    if (decision.kind !== 'offer-current') return;
+    lastAutoRetrySignature = null;
+    pendingAutoRetrySignature = null;
+    await router.replace({
+        name: 'editor',
+        params: { trackId: decision.trackId },
+    });
+};
 
 const importProject = async () => {
     try {

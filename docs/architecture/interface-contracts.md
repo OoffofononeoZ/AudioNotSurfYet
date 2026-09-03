@@ -4,7 +4,7 @@ owner: "project-owner"
 last_reviewed: 2026-09-03
 upstream_docs:
   - "docs/architecture/system-design.md"
-next_action: "实现 V5 recording tap、capture lease、状态机与 native WebM save；JSON V1 保持不变"
+next_action: "分别实现 V5 recording 与 E8 Editor 时间轴/恢复/标记修正；两者均不得改变 JSON V1"
 ---
 
 # Interface Contracts
@@ -693,6 +693,17 @@ interface EditorTimelineGeometry {
   xToTime(xCssPixels: number): number
 }
 
+interface EditorWaveformVerticalGeometry {
+  centerY: number        // heightCssPixels / 2
+  amplitude: number      // max(0, (heightCssPixels - 12) / 2)
+  padding: 6
+}
+
+type EditorUnavailableRecoveryDecision =
+  | { kind: 'retry-route'; trackId: TrackId; signature: string }
+  | { kind: 'offer-current'; trackId: TrackId; title: string }
+  | { kind: 'none' }
+
 interface EditorRenderRequest {
   feature: FeatureDefinition
   series: AnalysisSeries
@@ -716,7 +727,10 @@ interface EditorRendererAdapter {
 Invariants:
 
 - waveform、tempo grid、point/range 与 overlay 必须共享同一个 geometry 实例/纯函数，CSS x 差异目标不超过 1 px。
+- waveform stage 在 `>=900px` 固定为 `88px`、`<900px` 固定为 `72px`；波形以 `height / 2` 为中心，上下各保留 `6px`，归一化 `+1/-1` 不被裁切。
 - Canvas backing store 为 CSS 尺寸乘 DPR；renderer 只接收绘制输入，不读 route、store、DOM 或 pointer 状态。
+- 不可用 route 的同歌曲恢复只允许合并后的 `retry-route`，成功保持 paused 且不得触发播放；另一首可播放歌曲只返回 `offer-current`，必须由用户点击后 `router.replace`，不得静默改路由。
+- point 事件时间 X、marker button 中心、菱形中心和候选框中心的误差不超过 `1 CSS px`；菱形 Y 中心误差同样不超过 `1 CSS px`，引线不参与菱形旋转或中心计算。
 - overlay 的数据 Canvas、说明和空白不接收 pointer；selector 与三个垂直手柄是唯一交互层。
 - Canvas failure 只使 overlay 进入可重试错误；底层工程、事件、播放和导出继续。
 - pointer/keyboard 状态机、右键优先级、12px 自适应网格和 cleanup 详见 [Editor Interaction Contracts](editor/interaction-contracts.md)。
@@ -724,6 +738,8 @@ Invariants:
 ## Editor Architecture Approval
 
 `project-owner` 于 2026-08-26 明确批准 Editor E0 系统设计、接口契约、风险与 ADR，并同意进入 E1–E6 execution planning。上述 Editor 接口据此获批；Analyzer 历史契约继续有效，但设计批准不能作为 Editor 代码已实现或验证的证据。
+
+`project-owner` 于 2026-09-03 以实施指令批准 ADR-0018 与上述 E8 内部契约，并开放 E8 实现。该批准不构成 clean canonical、风险关闭或 E8 完成证据。
 
 ## Visualizer Contract Status（approved）
 

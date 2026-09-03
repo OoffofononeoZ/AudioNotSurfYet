@@ -97,7 +97,7 @@ test('keeps the Editor workbench compact and functional across viewports', async
     });
 
     expect(desktopMetrics.toolbarHeight).toBeLessThanOrEqual(84);
-    expect(desktopMetrics.waveformHeight).toBe(176);
+    expect(desktopMetrics.waveformHeight).toBe(88);
     expect(desktopMetrics.pointRowHeight).toBe(44);
     expect(desktopMetrics.rangeRowHeight).toBe(44);
     expect(desktopMetrics.laneNameWidth).toBe(152);
@@ -139,7 +139,7 @@ test('keeps the Editor workbench compact and functional across viewports', async
                 bodyOverflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
             };
         });
-        expect(responsive.waveformHeight).toBe(viewport.width < 900 ? 144 : 176);
+        expect(responsive.waveformHeight).toBe(viewport.width < 900 ? 72 : 88);
         expect(responsive.toolbarBottom).toBeGreaterThan(72);
         expect(responsive.bodyOverflow).toBeLessThanOrEqual(1);
         if (viewport.width === 1024) {

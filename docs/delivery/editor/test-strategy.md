@@ -8,10 +8,10 @@ upstream_docs:
   - "docs/architecture/risk-register.md"
   - "docs/delivery/editor/execution-plan.md"
   - "docs/delivery/editor/acceptance-criteria.md"
-next_action: "E7 46/46 已批准；保留 artifact，行为变化时重跑"
+next_action: "E8 25 步 scoped/provisional 已通过；等待 clean canonical 复跑"
 ---
 
-# Editor E1–E7 Test Strategy
+# Editor E1–E8 Test Strategy
 
 ## 1. Objectives
 
@@ -51,7 +51,7 @@ Editor 测试体系必须回答：
 ### Browser E2E
 
 - E1–E5 使用本机稳定 Chrome channel 执行对应专项和适用 Analyzer 回归。
-- E6/E7 使用同一用例分别运行真实 Chrome 与 `msedge` channel；不得以 Chromium 代替 Edge。
+- E6–E8 使用对应用例分别运行真实 Chrome 与 `msedge` channel；不得以 Chromium 代替 Edge。
 - 读取 DOM 状态、可访问名称、真实 geometry、Canvas CSS/backing store、console/pageerror 和资源计数；截图只作补充。
 - 覆盖 1024/1280/1920、代表性 DPR、reduced motion、键盘与 pointer；E6 执行本地 MP3/WAV/FLAC。
 
@@ -74,8 +74,9 @@ Editor 测试体系必须回答：
 | E5 | range/overlap/handles | JSON/draft/rollback | create/cancel/drag/delete/keyboard | E6 全量 |
 | E6 | full regression | stress/resource/recovery | full + native manual | full + native manual |
 | E7 | compact tokens、visibility/default/active set | preference/import/cache/cancel | density、fixed fullscreen、menu、scroll/geometry/pointer-through | 同 Chrome 矩阵 |
+| E8 | 88/72 vertical geometry、recovery resolver、marker center | exact recovery、stale generation、draft atomicity | 四视口/DPR、同/异歌恢复、zoom/pan marker | 同 Chrome 矩阵 |
 
-每个里程碑同时回归与其变更相邻的 Analyzer 播放、session、Worker、route、Canvas 和资源契约。E6 运行 E1–E6 全量及 M3–M11 关键回归，不必篡改历史 canonical 身份。
+每个里程碑同时回归与其变更相邻的 Analyzer 播放、session、Worker、route、Canvas 和资源契约。E6 运行 E1–E6 全量及 M3–M11 关键回归；E8 固定回归 E1/E2/E3/E7 与 M5 恢复，不篡改历史 canonical 身份。
 
 ## 5. Fixture and Golden Plan
 
@@ -93,7 +94,7 @@ Editor 测试体系必须回答：
 
 ### Stress Data
 
-E6/E7 运行时复用约 15 分钟工程：20 lanes、每 lane 最多 8 inner classes、合计 10,000 point/range events，包含 viewport 内外、相邻 range、不同分类重叠和尾部边界。不提交大型 WAV、工程 artifact 或 trace，只登记生成参数、seed、命令和 artifact hash。E7 不新增音频或工程语义 fixture，只增加布局 golden 与双浏览器截图。
+E6/E7 运行时复用约 15 分钟工程：20 lanes、每 lane 最多 8 inner classes、合计 10,000 point/range events，包含 viewport 内外、相邻 range、不同分类重叠和尾部边界。不提交大型 WAV、工程 artifact 或 trace，只登记生成参数、seed、命令和 artifact hash。E8 不新增音频或工程语义 fixture，只增加恢复状态与中心几何 golden，并回归既有压力边界。
 
 ## 6. BPM Golden Method
 
@@ -112,7 +113,7 @@ E6/E7 运行时复用约 15 分钟工程：20 lanes、每 lane 最多 8 inner cl
 
 ## 8. Planned Commands and Evidence Cadence
 
-E1–E7 每个里程碑计划新增：
+E1–E8 每个里程碑计划新增：
 
 ```text
 npm run test:eN:unit
@@ -122,7 +123,7 @@ npm run eval:eN:provisional
 npm run eval:eN
 ```
 
-E1–E6 命令已经存在、通过 clean canonical 并获批准。修订版 E7 已增加 unit、integration、Chrome、Edge、双浏览器与 46 步 runner，并在 clean commit 上 46/46 通过；package、测试 README、本项目 Skill 与实际 runner 保持一致，不保留指向不存在文件的兼容别名。
+E1–E7 命令已经存在、通过 clean canonical 并获批准。E8 新增 unit、integration、Chrome、Edge、双浏览器与 25 步 runner；`eval:e8:provisional` 可在 dirty worktree 运行，`eval:e8` 必须拒绝 dirty worktree。package、测试 README、本项目 Skill 与实际 runner 保持一致，不保留指向不存在文件的兼容别名。
 
 固定流程：
 
@@ -137,4 +138,4 @@ E1–E6 命令已经存在、通过 clean canonical 并获批准。修订版 E7 
 
 ## 9. Current Planning Gate
 
-`project-owner` 于 2026-08-26 批准本文并开放 E1，随后逐项批准 E1–E5；2026-08-28 又批准 E6 40/40 canonical 与人工补偿结果。E7 据此开放；E7 clean canonical 和 owner evidence 获批前不得进入 Editor release-readiness review。
+`project-owner` 于 2026-08-26 批准本文并开放 E1，随后逐项批准 E1–E7。2026-09-03 的 E8 实施指令批准本策略扩展并开放 E8；已有 scoped/provisional 反馈通过，V5 独立提交后 owner 已允许单独提交 E8。clean canonical 和 owner evidence 获批前不得进入 Editor release-readiness review。

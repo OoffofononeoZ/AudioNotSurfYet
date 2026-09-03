@@ -1,12 +1,12 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-09-01
+last_reviewed: 2026-09-03
 upstream_docs:
   - "docs/product/scope.md"
   - "docs/architecture/system-design.md"
   - "docs/architecture/editor/interaction-contracts.md"
-next_action: "E7 已批准并关闭；布局或浮层行为变化时重开"
+next_action: "波形高度令牌由 ADR-0018 局部替代；其余 E7 决策继续有效"
 ---
 
 # ADR-0010: Editor Compact Workbench
@@ -20,7 +20,7 @@ E1–E6 已交付完整 Editor 能力，但页面由多个 20–24px 间距、24
 - Editor ready 状态使用两行紧凑工具栏：第一行承载工程/歌曲/保存状态，第二行承载 transport、时间、格式和导入导出；两行合计不超过 84px。
 - 主内容区不使用独立圆角卡片。Timeline、tempo、point/range 和 overlay 依靠 1px 分隔线、轻微背景层次与固定列宽表达结构。
 - 共享表现令牌固定为 30px 控件、44px point/range 行、152px lane 名称列、144px inner class 列、主区域 0–2px 圆角和控件 4px 圆角。
-- 波形桌面高度为 176px，窄视口为 144px；tempo segment 使用可横向滚动的参数条，不用独立卡片。
+- 波形桌面高度原定为 176px、窄视口为 144px；该高度令牌自 2026-09-03 起由 [ADR-0018](0018-editor-timeline-recovery-and-marker-alignment.md) 局部替代。tempo segment 继续使用可横向滚动的参数条，不用独立卡片。
 - 菜单、确认对话框和事件标记仍可保留 8px 以内圆角，因为它们是临时浮层或语义对象，而非主布局分区。
 - 布局变化不得私有化 viewport、改变时间事实、事件 schema、播放/分析 lease、pointer precedence 或 overlay pointer-through。
 
@@ -39,3 +39,5 @@ E1–E6 已交付完整 Editor 能力，但页面由多个 20–24px 间距、24
 ## Approval
 
 2026-08-28，`project-owner` 明确要求先批准 E6，再按 FL Studio 的紧凑工作台密度调整 Editor，并选择把介绍、歌曲信息和操作合并为双层工具栏；随后要求实施完整 E7 计划。本 ADR 据此为 `approved`。
+
+2026-09-03，owner 批准 E8 把波形高度收敛为 88/72px；本 ADR 仅在该高度令牌上被 ADR-0018 局部替代，工具栏、行高、列宽、圆角和 E7 历史证据不变。

@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/product/scope.md"
   - "docs/product/success-metrics.md"
   - "docs/product/open-questions.md"
-next_action: "V4 已获批准并关闭；按已批准 recording contract 实施 V5 WebM"
+next_action: "Visualizer V5 与 Editor E8 均在实施；各自保持独立 provisional/canonical 门禁"
 ---
 
 # System Design
@@ -284,7 +284,7 @@ M14 不升级数据库 version：`PersistedSessionV1.featureOrder?` 缺失时映
 | hash/config 不匹配 | 缓存失效并重算 | cache identity 单元测试 |
 | AudioContext suspended | 首次用户手势恢复；UI 反映 paused/suspended | 引擎集成测试 |
 | renderer 异常 | 单卡错误边界；其他卡和播放继续 | renderer failure 注入 |
-| Editor route target 无效 | 显示不可用/恢复状态并保留 MusicBar；不静默切歌或创建工程 | 直接路由、删除 track、权限/内容 hash 场景 |
+| Editor route target 无效或稍后恢复 | 无效时保留 MusicBar 且不创建工程；同一 target 恢复后合并重试并保持 paused；另一首当前歌曲只提供显式 `router.replace` 入口 | 直接路由、恢复/重选、错误 hash、快速 route 场景 |
 | 旧 playback/analysis lease 迟到释放 | token/generation 丢弃；当前 route 策略与结果不变 | 快速 Editor/Analyzer/Home 与换歌循环 |
 | JSON/schema/hash/事件不合法 | decode 拒绝且当前内存工程/草稿不变 | codec/validator success、failure、boundary golden |
 | Editor draft quota/abort | 当前内存编辑继续，显示 `not-persisted`；旧 durable 草稿保持 | 独立 IndexedDB fault injection |
@@ -375,6 +375,8 @@ M6 只在 `import.meta.env.DEV` 安装无 UI bridge，提供活动特征、cance
 
 同日，M14 implementation commit `0e991307d9045a1ec84ddaae0515612240894a92` 与 clean canonical 19/19 验证上述设计；R-031–R-033 已缓解，Analyzer readiness 恢复为 `Ready with waivers`。
 
+2026-09-03，owner 以 E8 完整实施指令批准 ADR-0018 及本设计中的时间轴、不可用恢复与 point marker 修正，并开放 E8。该批准不改变 JSON/IndexedDB/runtime ownership，不构成 clean canonical、风险缓解或 E8 Complete。
+
 ## 17. Editor Timeline and Interaction Architecture
 
 - `EditorTimelineModel` 以规范化秒数为持久化事实；tempo 只派生 measure/beat/grid。tempo、zoom 或 viewport 变化不得自动移动已保存事件。
@@ -389,9 +391,16 @@ M6 只在 `import.meta.env.DEV` 安装无 UI bridge，提供活动特征、cance
 - [ADR-0010](adrs/0010-editor-compact-workbench.md) 将 Editor 大区域统一为平面背景与 1px 低对比分隔线；圆角只保留给控件、事件标记、菜单和对话框。FL Studio 图片只用于说明密度与分区方向，不构成品牌、配色或具体控件复制要求。
 - ready 状态顶部由两行工具栏承载工程/歌曲/草稿及播放/格式/导入导出，两行总高度不超过 84px，桌面控件高度 30px；页面在 Header 下方保留 8px 间距并移除 Editor 1440px 最大宽度。
 - Editor 令牌固定为 point/range 行高 44px、lane 名称列 152px、inner class 列 144px、主区域圆角 0、控件圆角 4px、临时菜单/对话框圆角最多 8px。
-- 桌面波形高度为 176px，小于 900px 为 144px；窄屏只允许一个显式横向时间轴滚动区，不能通过压缩时间列破坏点击精度。
+- E7 原始波形高度 176/144px 由 [ADR-0018](adrs/0018-editor-timeline-recovery-and-marker-alignment.md) 局部替代：桌面固定 88px，小于 900px 固定 72px；波形以轨道中心绘制，上下各保留 6px。窄屏仍只允许一个显式横向时间轴滚动区，不能通过压缩时间列破坏点击精度。
 - 本变化只改变 DOM 布局与视觉令牌。歌曲、工程、viewport、tempo、point/range、overlay、JSON V1、IndexedDB、playback/analysis lease 与共享 `timeToX/xToTime` 均沿用现有契约。
 - 失败边界为：任何密度优化不得遮挡输入/事件、扩大时间映射误差、破坏 pointer-through、减少键盘语义或改变 10,000 事件的可见 DOM/资源门禁。
+
+### E8 recovery and marker correction
+
+- `EditorUnavailableRecoveryDecision` 只读取 route、队列、current track、playback 和 persistence 快照。`retry-route` 只针对同一 URL track；`offer-current` 不改变状态，直到用户点击“编辑当前歌曲”。
+- 自动重试使用 route generation、恢复 signature 与单一 in-flight 队列；重复状态不循环，迟到结果不能覆盖新 route。恢复成功保持 paused，失败继续 unavailable 且不得创建/覆盖草稿。
+- point button、diamond、事件时间和候选 pin 的横向中心误差不得超过 1 CSS px；diamond 与 marker surface 的垂直中心误差同样不得超过 1 CSS px。引线独立于菱形 transform。
+- 该修正不修改 AudioSessionService 严格身份规则、JSON V1、IndexedDB 或 E7 历史 artifact。
 
 ## 19. Editor Fullscreen Analysis Overlay
 
