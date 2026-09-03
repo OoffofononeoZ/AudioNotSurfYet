@@ -114,17 +114,21 @@ const mulberry32 = (seed: number): (() => number) => {
     };
 };
 
-const stableHash = (parts: readonly string[]): string => {
+const createStableHasher = () => {
     let hash = 0x811c9dc5;
-    for (const part of parts) {
-        for (let index = 0; index < part.length; index += 1) {
-            hash ^= part.charCodeAt(index);
+    return {
+        add(part: string): void {
+            for (let index = 0; index < part.length; index += 1) {
+                hash ^= part.charCodeAt(index);
+                hash = Math.imul(hash, 0x01000193);
+            }
+            hash ^= 124;
             hash = Math.imul(hash, 0x01000193);
-        }
-        hash ^= 124;
-        hash = Math.imul(hash, 0x01000193);
-    }
-    return (hash >>> 0).toString(16).padStart(8, '0');
+        },
+        digest(): string {
+            return (hash >>> 0).toString(16).padStart(8, '0');
+        },
+    };
 };
 
 const quantized = (value: number): string =>
@@ -259,7 +263,8 @@ export class CubeSwarmFrameStateResolver {
             1,
             100,
         );
-        const hashParts = [
+        const hasher = createStableHasher();
+        [
             'cube-swarm-v1',
             quantized(targetTime),
             quantized(baseSize),
@@ -276,33 +281,34 @@ export class CubeSwarmFrameStateResolver {
             quantized(0),
             quantized(0),
             quantized(0),
-        ];
+        ].forEach((part) => hasher.add(part));
         coreAmplitudes.forEach((amplitude, index) => {
             const angle = index / CUBE_SWARM_CORE_COUNT * Math.PI * 2;
             const radius = 0.85 * baseSize * coreVisualScale;
             const length = baseSize * (0.12 + 0.68 * amplitude) * coreVisualScale;
             const cross = 0.08 * baseSize * coreVisualScale;
-            hashParts.push(
-                quantized(amplitude),
-                quantized(Math.cos(angle) * radius),
-                quantized(Math.sin(angle) * radius),
-                quantized(length),
-                quantized(cross),
-                quantized(cross),
-            );
+            hasher.add(quantized(amplitude));
+            hasher.add(quantized(Math.cos(angle) * radius));
+            hasher.add(quantized(Math.sin(angle) * radius));
+            hasher.add(quantized(length));
+            hasher.add(quantized(cross));
+            hasher.add(quantized(cross));
         });
         for (const item of peripheral) {
-            hashParts.push(
-                quantized(item.x), quantized(item.y), quantized(item.z),
-                quantized(item.size), quantized(item.rotationX),
-                quantized(item.rotationY), quantized(item.rotationZ),
-            );
+            hasher.add(quantized(item.x));
+            hasher.add(quantized(item.y));
+            hasher.add(quantized(item.z));
+            hasher.add(quantized(item.size));
+            hasher.add(quantized(item.rotationX));
+            hasher.add(quantized(item.rotationY));
+            hasher.add(quantized(item.rotationZ));
         }
         for (const item of satellites) {
-            hashParts.push(
-                quantized(item.x), quantized(item.y), quantized(item.z),
-                quantized(item.angle), quantized(item.size),
-            );
+            hasher.add(quantized(item.x));
+            hasher.add(quantized(item.y));
+            hasher.add(quantized(item.z));
+            hasher.add(quantized(item.angle));
+            hasher.add(quantized(item.size));
         }
         return {
             timeSeconds: targetTime,
@@ -319,7 +325,7 @@ export class CubeSwarmFrameStateResolver {
             peripheralColor,
             backgroundColor,
             cameraDistance,
-            hash: stableHash(hashParts),
+            hash: hasher.digest(),
             needsSourcePrompt: false,
         };
     }

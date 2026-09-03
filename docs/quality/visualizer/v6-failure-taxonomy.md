@@ -1,7 +1,7 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-09-03
+last_reviewed: 2026-09-04
 upstream_docs:
   - "docs/quality/visualizer/v6-eval-plan.md"
   - "docs/quality/visualizer/v6-golden-examples.md"
@@ -22,7 +22,7 @@ V1–V5 的 route、project、binding、scene、recording 与媒体分类继续�
 | V6FT-RESOURCE | cross-workspace lifecycle | AudioContext、Worker、RAF、Canvas/WebGL、track、Observer、listener、Blob URL 单调累积 | V6-EV-RESOURCE | S0/S1；恢复单所有者和成对 cleanup |
 | V6FT-RECOVERY | compounded failure | context、quota、stale、坏 JSON、recorder 或 renderer 故障后工程/transport 不可恢复或伪造成功 | V6-EV-FAILURE | 阻断 V6；保留失败 artifact并修复原子边界 |
 | V6FT-A11Y | responsive/accessibility | 三视口/DPR 下遮挡、焦点丢失、状态只靠颜色或 reduced motion 关闭用户内容 | V6-EV-LAYOUT | 修复并重跑双浏览器矩阵 |
-| V6FT-MEDIA | tri-format WebM | 任一成功录制文件缺轨、codec/尺寸/fps/时长/packet gap 不合格 | V6-EV-MEDIA | 阻断对应浏览器；不得追记 unavailable |
+| V6FT-MEDIA | tri-format WebM | 任一成功录制文件缺轨、codec/尺寸/平均 fps/时长不合格，或相邻 packet gap 超过 DEC-048 的四个目标帧间隔 | V6-EV-MEDIA | 阻断对应浏览器；不得追记 unavailable |
 | V6FT-EVIDENCE | canonical identity | dirty canonical、步数错误、缺日志/hash/environment 或历史 artifact 被改写 | V6-EV-REGRESSION/EVIDENCE | 阻断登记；创建新的 clean run |
 
 | Severity | Meaning | Gate response |

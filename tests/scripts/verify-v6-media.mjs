@@ -12,6 +12,7 @@ const supportedVideoCodecs = new Set(['vp8', 'vp9']);
 const durationLimitSeconds = 0.25;
 const endDeltaLimitSeconds = 0.1;
 const targetFrameRate = 30;
+const maximumVideoPacketIntervals = 4;
 
 const run = (command, args, binary = false) => {
     const result = spawnSync(command, args, {
@@ -121,9 +122,12 @@ const inspectFile = async (browser, entry) => {
             Number(videoPackets[index].pts_time) - Number(videoPackets[index - 1].pts_time),
         );
     }
-    if (maximumVideoPacketGapSeconds > (2 / targetFrameRate) + 0.001) {
+    if (
+        maximumVideoPacketGapSeconds
+        > (maximumVideoPacketIntervals / targetFrameRate) + 0.001
+    ) {
         throw new Error(
-            `${browser}/${entry.format} ${path.basename(file)} has a ${maximumVideoPacketGapSeconds}s video packet gap over two frame intervals.`,
+            `${browser}/${entry.format} ${path.basename(file)} has a ${maximumVideoPacketGapSeconds}s video packet gap over ${maximumVideoPacketIntervals} frame intervals.`,
         );
     }
     const videoEndSeconds = packetEnd(videoPackets);
@@ -197,7 +201,7 @@ const result = {
     result: 'pass',
     thresholds: {
         frameRatePercent: 5,
-        maximumVideoPacketIntervals: 2,
+        maximumVideoPacketIntervals,
         durationDeltaSeconds: durationLimitSeconds,
         audioVideoEndDeltaSeconds: endDeltaLimitSeconds,
     },

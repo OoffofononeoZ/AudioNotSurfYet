@@ -1,14 +1,14 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-09-03
+last_reviewed: 2026-09-04
 upstream_docs:
   - "docs/delivery/visualizer/execution-plan.md"
   - "docs/delivery/visualizer/acceptance-criteria.md"
   - "docs/delivery/visualizer/test-strategy.md"
   - "docs/architecture/risk-register.md"
   - "docs/quality/visualizer/v5-eval-plan.md"
-next_action: "V6 dirty provisional 已 54/54 通过；提交 implementation commit 并运行 54 步 clean canonical"
+next_action: "提交已通过 provisional 的 DEC-048 修正，并在该 clean HEAD 上运行 54 步 V6 canonical"
 ---
 
 # Visualizer V6 Eval Plan
@@ -23,10 +23,10 @@ V6 只评价已批准 Visualizer 的最终加固：双浏览器三格式制作�
 | --- | --- | --- | --- | --- | --- |
 | V6-EV-FORMAT | MP3/WAV/FLAC 完整制作 | success + failure | Chrome/Edge E2E + native task | 每种格式身份精确；有效 route、导入导出、刷新 paused、pause-at-end 与错歌拒绝成立 | AC-V601；R-034/R-036 |
 | V6-EV-LAYOUT | 三视口与可访问性 | boundary | DOMRect/DPR + keyboard/focus/reduced-motion | 1024/1280/1920、DPR 1/2 无遮挡；状态不只靠颜色；核心任务可键盘完成 | AC-V602；R-038 |
-| V6-EV-STRESS | 15 分钟四特征与时钟 | capacity + performance | OPFS runtime WAV + PerformanceObserver + renderer diagnostics | feedback `<=100ms`；播放/scene 偏差 `<=50ms`；Visualizer frame 与分析归因任务均 `<50ms` | AC-V603；R-035/R-037/R-041 |
+| V6-EV-STRESS | 15 分钟四特征与时钟 | capacity + performance | OPFS runtime WAV + PerformanceObserver + renderer diagnostics | feedback `<=100ms`；播放/scene 偏差 `<=50ms`；Visualizer frame `<60ms`；分析归因任务 `<50ms` | AC-V603；R-035/R-037/R-041；DEC-048 |
 | V6-EV-RESOURCE | 跨 workspace 生命周期 | lifecycle + exception | 20 次双浏览器循环 + test resource probe | live 资源回到 route 基线；单 AudioContext/Worker/Canvas/renderer/visual RAF；录制资源在非活动态归零 | AC-V604；R-034/R-038/R-040/R-041 |
 | V6-EV-FAILURE | 完整故障矩阵 | failure + race + exception | fault injection + typed state assertions | context、stale/cancel、quota、错歌 Editor、坏 JSON、无 MIME、preset、recorder、renderer 均可恢复且不伪造成功 | AC-V605；R-035–R-041 |
-| V6-EV-MEDIA | 六个默认 WebM 文件事实 | success + boundary | MediaRecorder + ffprobe/FFmpeg | Chrome/Edge × MP3/WAV/FLAC 至少六个 720p30 有声文件满足 V5 媒体阈值 | AC-V601/V606；R-040/R-041 |
+| V6-EV-MEDIA | 六个默认 WebM 文件事实 | success + boundary | MediaRecorder + ffprobe/FFmpeg | Chrome/Edge × MP3/WAV/FLAC 至少六个 720p30 有声文件；平均 fps `±5%`，相邻 packet gap 最多四个目标帧间隔，其余结构/时长/音轨/A-V 门禁沿用 V5 | AC-V601/V606；R-040/R-041；DEC-048 |
 | V6-EV-REGRESSION | V1–V6 与相邻系统 | regression | 54-step canonical | V5 40 步、V6 六专项、M6 四步和 M14 四步全部通过；无异常 console/pageerror | AC-V606；R-034–R-041 |
 | V6-EV-EVIDENCE | 可审计候选与人工任务 | evidence + manual | clean identity audit + owner signature | run/commit/hash/environment/log/media 完整；owner 完成双浏览器制作、保存和回放 | AC-V607；R-034–R-041 |
 
@@ -43,6 +43,8 @@ V6 只评价已批准 Visualizer 的最终加固：双浏览器三格式制作�
 - V6 canonical 恰为 54 步：V5 40 步基线、六个 V6 专项、M6 unit/worker/integration/Chrome 四步及 M14 unit/integration/Chrome/Edge 四步。
 - provisional 允许 dirty worktree且只作实现反馈；canonical 必须在 clean implementation commit 上起止保持相同 HEAD 和空工作树。
 - runner 记录环境、浏览器能力、三格式输出 SHA-256、ffprobe、性能/时钟、资源 probe、逐步日志和 summary SHA-256；任一步失败均不得登记通过。
+- DEC-048 只允许 V6 三格式 recorder 的相邻视频 packet gap 最多四个目标帧间隔；平均帧率仍须在 30fps `±5%` 内。V5 canonical 与 `test:v5:media` 的两帧阈值保持不变。
+- DEC-048 只把 V6 压力场景的 Visualizer 单帧峰值调整为 `<60ms`；分析归因任务仍须 `<50ms`，反馈 `<=100ms`、时钟偏差 `<=50ms` 与资源门禁均不变。
 - canonical 后 V6 保持 `In Progress`、evidence 保持 `in-review`、R-041 保持 `Open`，直到 owner 人工门禁明确批准。
 
 ## Evidence Gaps
@@ -52,4 +54,5 @@ V6 只评价已批准 Visualizer 的最终加固：双浏览器三格式制作�
 | OS picker、覆盖提示与原生权限不能由 Playwright 完整控制 | 系统对话框由浏览器/OS 持有 | 自动化 stub 与真实保存体验不同 | owner 在 Chrome/Edge 各执行三格式打开、一次保存、取消和重试 | project-owner |
 | 长会话体感与辅助技术朗读不能由计数器替代 | 自动化只能测时序、DOM 与资源 | 真实操作疲劳或播报顺序可能不理想 | owner 完成键盘/焦点/reduced-motion/长时制作任务 | project-owner |
 | optional preset 是当前机器能力证据 | 浏览器/硬件 cadence 会变化 | 未来环境可能支持或退化 | 支持则验证真实文件；不支持只接受资源获取前 typed unavailable | project-owner |
+| VP9 recorder 在组合负载下存在小幅可变 packet cadence | 同一 Canvas 约 60fps 绘制时仍观察到 78–110ms 偶发间隙 | 短时画面可能轻微停顿 | 关闭 MSAA、使用 `motion` hint；V6 允许最多四帧间隔但继续约束平均 fps、时长、音轨和 A/V 结束差 | project-owner |
 | 没有正式 CI 或跨硬件基线 | canonical 是本机 clean run | 结论不可泛化到持续集成或所有设备 | 登记硬件/浏览器并在 readiness 中保留 waiver | project-owner |

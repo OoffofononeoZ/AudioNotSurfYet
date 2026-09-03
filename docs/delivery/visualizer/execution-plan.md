@@ -1,7 +1,7 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-09-03
+last_reviewed: 2026-09-04
 upstream_docs:
   - "docs/product/scope.md"
   - "docs/product/success-metrics.md"
@@ -11,7 +11,7 @@ upstream_docs:
   - "docs/architecture/visualizer/project-format-v1.md"
   - "docs/architecture/visualizer/binding-and-scene-contracts.md"
   - "docs/architecture/visualizer/recording-contract.md"
-next_action: "V6 dirty provisional 已 54/54 通过；提交实现并执行 54 步 clean canonical"
+next_action: "提交 DEC-048 稳定性修复，并在该 clean HEAD 上执行 54 步 V6 canonical"
 ---
 
 # Visualizer V1–V6 Execution Plan
@@ -22,7 +22,7 @@ next_action: "V6 dirty provisional 已 54/54 通过；提交实现并执行 54 �
 
 Visualizer V1–V4 的工作台、数据绑定与两个场景均已通过各自 clean canonical 和 owner 门禁。V5 realtime WebM 的 40/40 clean canonical 与人工门禁于 2026-09-03 获 owner 批准并关闭；V6 final hardening 为 `In Progress`。
 
-V6 当前候选已实现版本化 hardening golden、当前歌曲会话内的双模板 binding 精确恢复、renderer 歌曲/帧时间诊断、测试专用资源探针，以及共享 Chrome/Edge 三格式、900 秒压力、六文件媒体和 20 次生命周期专项。dirty provisional `V6-2026-09-03T10-15-47-668Z-0f90a77c-provisional` 54/54 通过，summary SHA-256 为 `432ec71d21ec9c3c41310bf738603a6a8491c154f4ab0a01cd359432ef68b2c4`；该 dirty run 只作为实现反馈，仍须独立实现提交与 clean canonical 才能登记正式 evidence。
+V6 当前候选已实现版本化 hardening golden、当前歌曲会话内的双模板 binding 精确恢复、renderer 歌曲/帧时间诊断、测试专用资源探针，以及共享 Chrome/Edge 三格式、900 秒压力、六文件媒体和 20 次生命周期专项。按 DEC-048 修订后的 dirty provisional `V6-2026-09-03T16-21-25-320Z-088f21d3-provisional` 54/54 通过，summary SHA-256 为 `58af3b253562f2db04aaa692b81e221186f5ba58f1d087ef56fa1f4d222f75d1`；该 dirty run 只作为实现反馈，仍须提交稳定性修复并在该 clean HEAD 上完成 canonical 才能登记正式 evidence。
 
 ## 2. Delivery Principles
 
