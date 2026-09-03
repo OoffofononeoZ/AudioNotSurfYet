@@ -10,12 +10,12 @@
 | `/comingsoon` | `ComingSoon.vue` | 通用空占位，不再作为 Visualizer 入口 |
 | `/analyzer` | `Analyzer.vue` | Canvas 点阵背景和静态 Meyda 数据入口 |
 | `/editor/:trackId?` | `Editor.vue` | E1–E7 已实现、clean canonical 并获 owner 批准 |
-| `/visualizer/:trackId?` | `Visualizer.vue` | V1–V4 已批准；V5 WebM 为 In Progress |
+| `/visualizer/:trackId?` | `Visualizer.vue` | V1–V4 已批准；V5 WebM 候选已实现、仍为 In Progress |
 | `/testlands` | `TestLands.vue` | 试验页面，不应当作生产契约 |
 
 Editor `/editor/:trackId?`、Header 当前歌曲入口、播放列表“去编辑”和 MusicBar 条件隐藏已由 E1 实现并获批准。E2 波形/网格/游标 Canvas、共享 viewport、seek/zoom/pan、tempo boundary、BPM/拍号/single-beat 和刷新恢复也已由 22/22 canonical 与 owner 批准。E3 point lane/class、自适应网格、鼠标/右键/键盘 marker 与 viewport-visible DOM 已由 26/26 clean canonical 和 owner 批准。E4 21 项单选 overlay、shared renderer、三手柄、pointer-through 与错误隔离已由 31/31 clean canonical 和 owner 批准。E5 range lane/class、E6 双浏览器/10,000 事件与人工补偿均已获批准；E7 在紧凑工作台基础上把 overlay 修订为窗口级 Teleport、复合入口与本地 visibility，修订版 46/46 clean canonical 已通过。
 
-Visualizer V1 已实现 `/visualizer/:trackId?`、Header 当前歌曲入口、有效 route 的 MusicBar 隐藏、`pause-at-end`、1280+ 三栏、1024–1279 互斥抽屉、中性 16:9 单 Canvas、JSON V1 与单草稿，且 21/21 canonical 已批准。V2 已实现 constant/analysis/editor-event inspector、最多四项分析、同歌 Editor snapshot 和确定性 resolved values，26/26 canonical 已获 owner 批准；V3 Orthogonal Lines 与单 RendererHost 已获批准。V4 Cube Swarm 已实现并通过 34/34 clean canonical 与 owner 门禁；WebM 是当前 V5 目标。
+Visualizer V1 已实现 `/visualizer/:trackId?`、Header 当前歌曲入口、有效 route 的 MusicBar 隐藏、`pause-at-end`、1280+ 三栏、1024–1279 互斥抽屉、中性 16:9 单 Canvas、JSON V1 与单草稿，且 21/21 canonical 已批准。V2 已实现 constant/analysis/editor-event inspector、最多四项分析、同歌 Editor snapshot 和确定性 resolved values，26/26 canonical 已获 owner 批准；V3 Orthogonal Lines 与单 RendererHost 已获批准。V4 Cube Swarm 已实现并通过 34/34 clean canonical 与 owner 门禁。V5 候选在同页面增加 recording 状态栏、双层命令锁、站内离页对话框和 ready Blob 保存/丢弃，不改变 route 或 project JSON V1。
 
 `MainLayout.vue` 固定组合 `HeaderBar`、当前 `router-view` 和 `MusicBar`，并创建/提供唯一 `AudioSessionService`、`AnalysisCoordinator`、Editor controller 与 Visualizer controller。修改页面高度、z-index、固定定位或底部空间时，要同时检查 Header、MusicBar 和两个 route lease。
 

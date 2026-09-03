@@ -100,6 +100,11 @@ M3–M13 不建设 CI。下列命令当前均为本地门禁；正式证据要�
 | `npm run test:v4:unit` | Cube Swarm 参数隔离、频谱规范、确定性积分、revision 与 frame hash |
 | `npm run test:v4:integration` | 默认两项分析、单 host/resource dispose、context loss/restore 与错误隔离 |
 | `npm run test:e2e:v4` | 真实 Chrome 的 Cube 响应、seek/刷新、context recovery、DPR/三视口、键盘与 20 次资源循环 |
+| `npm run fixtures:v5:golden` | V5 48kHz mono 三秒同步 fixture、Editor point/range 与 Orthogonal binding golden |
+| `npm run test:v5:unit` | recording preset/MIME、pre-Gain 单 holder、checkpoint、状态机、失败清理与保存语义 |
+| `npm run test:v5:integration` | controller 命令锁、Blob 保存重试、同 Canvas capture lease 与 20 次资源生命周期 |
+| `npm run test:e2e:v5` | 真实 Chrome/Edge 的 context/renderer abort、离页决策、静音页面录音、能力矩阵与资源诊断 |
+| `npm run test:v5:media` | ffprobe/FFmpeg 验证 WebM 双轨、codec、尺寸/fps、packet gap、时长、静音隔离与音画峰值 |
 | `npm run test:e2e:v1:chrome` | Chrome Header/route、MusicBar、pause-at-end、三栏/抽屉、单 16:9 Canvas、transport 和资源循环 |
 | `npm run test:e2e:v1:edge` | 使用真实 Edge 执行同一 V1 route/lease/layout/resource 专项套件 |
 | `npm run test:e2e:v1` | 顺序执行真实 Chrome 与 Edge 的 V1 专项套件 |
@@ -149,6 +154,8 @@ M3–M13 不建设 CI。下列命令当前均为本地门禁；正式证据要�
 | `npm run eval:v3` | 只允许在干净 implementation commit 上执行固定 30 步 V3 canonical suite |
 | `npm run eval:v4:provisional` | 在 dirty worktree 执行 V3 30 步基线加四个 V4 专项，只作为实现反馈 |
 | `npm run eval:v4` | 只允许在干净 implementation commit 上执行固定 34 步 V4 canonical suite |
+| `npm run eval:v5:provisional` | 在 dirty worktree 执行 V4 34 步基线加六个 V5 专项，只作为实现反馈 |
+| `npm run eval:v5` | 只允许在干净 implementation commit 上执行固定 40 步 V5 canonical suite |
 
 ## 目录职责
 
@@ -163,7 +170,7 @@ M3–M13 不建设 CI。下列命令当前均为本地门禁；正式证据要�
 - `tests/harness/`：被正常 Vitest 配置排除的 deliberate failure 及其自检。
 - `tests/scripts/`：浏览器检测和 M3–M14、Editor、Visualizer run orchestration。
 - `tests/editor/`：Editor 工程格式、草稿、lease 和 session controller 的里程碑专项测试。
-- `tests/visualizer/`：Visualizer V1 strict project/route/草稿、V2 binding resolver、V3 Orthogonal Lines，以及 V4 Cube state/default binding/context recovery 的版本化 golden、unit 和 integration 测试。
+- `tests/visualizer/`：Visualizer V1 strict project/route/草稿、V2 binding resolver、V3 Orthogonal Lines、V4 Cube，以及 V5 recording state/capture/resource 的版本化 golden、unit 和 integration 测试。
 
 M4 浏览器测试中的损坏 WAV 与 65 秒、48kHz、单声道计时 WAV 都写入 `test-results/`，不提交二进制。长时钟测试用同一 DOM 采样同时读取 `performance.now()` 与 AudioContext 驱动快照；三次 seek 使用进度条真实几何。
 
@@ -210,6 +217,8 @@ Visualizer V2 已实现 constant/analysis/editor-event inspector、0–4 唯一�
 Visualizer V3 quality contract 固定 `visualizer-v3-lines-v1.wav` 与版本化 scene golden、单 `VisualizerRendererHost`、单 quad/shader、横竖参数隔离、point/range/analysis/constant、60Hz scene-local decay、一秒 checkpoint、同时间 frame-state hash、scene error/retry、1024/1280/1920、DPR、键盘和 20 次资源循环。原 V3 canonical 当时以 V4 中性场景验证切换；V4 实现后，当前前向回归改为真实 Cube scene 同 host 切换，历史 artifact 不修改。clean canonical `V3-2026-09-02T13-32-42-513Z-89be30eb` 在 commit `89be30eb23d4e53d2c38f24e111cd1af7ec0840d` 上 30/30 通过，summary SHA-256 为 `afe4cbe233fe1feded65380d6e976d5a4c32c2f9860fe2e0357a0d615d6a7b84`，正式 evidence 与人工门禁已于 2026-09-03 获 owner 批准。
 
 Visualizer V4 Cube Swarm 使用共享 BoxGeometry、两个 MeshStandardMaterial、三个 InstancedMesh、默认 Amplitude Spectrum/Energy 双分析、60Hz rise/orbit checkpoint 与同 RendererHost context recovery。clean canonical `V4-2026-09-02T17-47-40-271Z-5c2d24a3` 已在 commit `5c2d24a3f1f413dba236563b3686237c6b8f2e21` 上 34/34 通过，summary SHA-256 为 `9b2a86e3dcdd4e634317c4234418dc3444da441a3be805a980562768dba5c3b2`。Owner 已批准并关闭 V4；V5 为 `In Progress`。
+
+Visualizer V5 当前候选使用唯一 pre-Gain audio tap、同一 Canvas capture lease 和原生 MediaRecorder/save picker；Chrome/Edge 强制默认 720p30 生成真实 WebM，三个 optional preset 因重复 packet cadence 不能稳定满足门禁而在 preflight 返回 typed `preset-unavailable`。每个成功文件都必须由 `test:v5:media` 独立验证；clean canonical 与 owner 原生保存/回放验收尚未完成。
 
 V1 quality contract 固定 AC-V101–AC-V108、V1-G01–G12、VFT-ROUTE/LEASE/PROJECT/DRAFT/FILE/LAYOUT/RESOURCE、21 步 clean canonical，以及 Chrome/Edge 原生 picker、覆盖提示和 `beforeunload` 人工补偿。V1/evidence 已批准，R-034 为 `Mitigated`；V2 批准后 R-036 也为 `Mitigated`，R-038 继续由真实 renderer 里程碑验证。
 

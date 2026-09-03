@@ -38,6 +38,7 @@ import {
 } from '../visualizer/visualizerSessionController';
 import { VisualizerDraftRepository } from '../visualizer/visualizerDraftRepository';
 import { NativeVisualizerFileGateway } from '../visualizer/fileIO';
+import { NativeVisualizerVideoFileGateway } from '../visualizer/videoFileIO';
 
 const audioSessionStore = useAudioSessionStore();
 const audioEngine = new AudioEngine();
@@ -77,6 +78,7 @@ const visualizerController = new VisualizerSessionController({
     store: audioSessionStore,
     repository: new VisualizerDraftRepository(),
     fileGateway: new NativeVisualizerFileGateway(),
+    videoGateway: new NativeVisualizerVideoFileGateway(),
     editorRepository: new EditorDraftRepository(),
     editorFileGateway: new NativeEditorFileGateway(),
 });

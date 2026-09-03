@@ -18,6 +18,8 @@ V3 scene-local decay 的单位为秒，固定 60Hz 计算 `max(I, previous * exp
 
 DEC-041 固定 V4 为 64 方块中心频谱环、seed 外围上升方块与三颗分层轨道卫星。中心频谱按 64 个连续 band 的非负最大值和固定 log reference 128 映射；rise/orbit 按 60Hz 从 0 秒积分并每秒 checkpoint。Cube 使用共享 BoxGeometry、两个 MeshStandardMaterial、三个 InstancedMesh、固定灯光和 perspective camera，不使用纹理；context loss 在同 RendererHost/WebGLRenderer 内暂停视觉 RAF、恢复 scene GPU 资源并按当前绝对时间绘制。
 
+V5 recording capture lease 暂时把同一 Canvas backing store 切到严格 preset 与 DPR 1，CSS 尺寸不变；capture 期间 resize 只记住最新 preview size，release 后恢复。持续播放仍只有 host 的一个视觉 RAF，且下一帧在当前 scene work 前排队以稳定 capture packet cadence；同步 time-zero 绘制、录制、context abort 或 renderer retry 都不得创建第二 Canvas、renderer 或 RAF。
+
 ## RAF 与 Observer
 
 - 每个持续动画只能有一个可取消的 RAF 句柄；开始前停止旧循环，停止/卸载时清空句柄。

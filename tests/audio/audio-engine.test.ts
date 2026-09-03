@@ -67,6 +67,23 @@ class FakeAnalyserNode extends FakeAudioNode {
     }
 }
 
+class FakeMediaStreamTrack {
+    readonly kind = 'audio';
+    readyState: MediaStreamTrackState = 'live';
+    stop = vi.fn(() => {
+        this.readyState = 'ended';
+    });
+}
+
+class FakeMediaStreamDestinationNode extends FakeAudioNode {
+    readonly track = new FakeMediaStreamTrack();
+    readonly stream = {
+        getTracks: () => [this.track],
+        getAudioTracks: () => [this.track],
+        getVideoTracks: () => [],
+    } as unknown as MediaStream;
+}
+
 class FakeBufferSourceNode extends FakeAudioNode {
     buffer: AudioBuffer | null = null;
     onended: (() => void) | null = null;
@@ -88,6 +105,7 @@ class FakeAudioContext {
     analyser = new FakeAnalyserNode();
     sources: FakeBufferSourceNode[] = [];
     decodeQueue: Array<Deferred<AudioBuffer>> = [];
+    mediaDestinations: FakeMediaStreamDestinationNode[] = [];
     resume = vi.fn(async () => {
         this.state = 'running';
     });
@@ -107,6 +125,12 @@ class FakeAudioContext {
         const source = new FakeBufferSourceNode();
         this.sources.push(source);
         return source as unknown as AudioBufferSourceNode;
+    }
+
+    createMediaStreamDestination() {
+        const destination = new FakeMediaStreamDestinationNode();
+        this.mediaDestinations.push(destination);
+        return destination as unknown as MediaStreamAudioDestinationNode;
     }
 
     decodeAudioData() {
@@ -374,5 +398,43 @@ describe('AudioEngine', () => {
         expect(context.gain.disconnect).toHaveBeenCalledTimes(1);
         expect(context.close).toHaveBeenCalledTimes(1);
         expect(factory).toHaveBeenCalledTimes(1);
+    });
+
+    test('leases one pre-Gain recording tap without changing playback or page volume', async () => {
+        const context = new FakeAudioContext();
+        const engine = new AudioEngine({
+            audioContextFactory: () => context as unknown as AudioContext,
+            createRecordingToken: () => 'recording-tap-1',
+        });
+        await engine.load({ trackId: 'track-a', encodedAudio: bytes() });
+        await engine.play();
+        context.currentTime = 1.25;
+        engine.setVolume(0);
+
+        const lease = engine.acquireRecordingTap();
+        expect(lease.token).toBe('recording-tap-1');
+        expect(lease.getContextTime()).toBe(1.25);
+        expect(context.analyser.connect).toHaveBeenLastCalledWith(
+            context.mediaDestinations[0],
+        );
+        expect(context.gain.gain.value).toBe(0);
+        expect(engine.getSnapshot()).toMatchObject({
+            state: 'playing',
+            currentTimeSeconds: 1.25,
+            volume: 0,
+        });
+        expect(() => engine.acquireRecordingTap()).toThrow(/已有录制/);
+
+        lease.release();
+        lease.release();
+        expect(context.analyser.disconnect).toHaveBeenCalledWith(
+            context.mediaDestinations[0],
+        );
+        expect(context.mediaDestinations[0]?.track.stop).toHaveBeenCalledTimes(1);
+        expect(engine.getSnapshot().state).toBe('playing');
+
+        const replacement = engine.acquireRecordingTap();
+        expect(replacement.stream.getAudioTracks()).toHaveLength(1);
+        replacement.release();
     });
 });

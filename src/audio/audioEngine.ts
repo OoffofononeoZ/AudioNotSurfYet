@@ -10,6 +10,30 @@ type SnapshotListener = (snapshot: PlaybackSnapshot) => void;
 
 export interface AudioEngineOptions {
     audioContextFactory?: AudioContextFactory;
+    createRecordingToken?: () => string;
+}
+
+export interface AudioPlaybackCheckpoint {
+    readonly trackId: string;
+    readonly state: 'paused' | 'playing' | 'ended';
+    readonly currentTimeSeconds: number;
+}
+
+export interface RecordingTapLease {
+    readonly token: string;
+    readonly stream: MediaStream;
+    getContextTime(): number;
+    release(): void;
+}
+
+export class RecordingTapError extends Error {
+    readonly code: 'recording-busy' | 'recording-unavailable';
+
+    constructor(code: RecordingTapError['code'], message: string) {
+        super(message);
+        this.name = 'RecordingTapError';
+        this.code = code;
+    }
 }
 
 const clamp = (value: number, minimum: number, maximum: number) =>
@@ -25,6 +49,7 @@ const emptySnapshot = (volume: number): PlaybackSnapshot => ({
 
 export class AudioEngine {
     private readonly audioContextFactory: AudioContextFactory;
+    private readonly createRecordingToken: () => string;
     private readonly listeners = new Set<SnapshotListener>();
     private audioContext: AudioContext | null = null;
     private gainNode: GainNode | null = null;
@@ -38,10 +63,17 @@ export class AudioEngine {
     private loadGeneration = 0;
     private decodedRevision = 0;
     private snapshot: PlaybackSnapshot = emptySnapshot(this.volume);
+    private recordingTap: {
+        token: string;
+        destination: MediaStreamAudioDestinationNode;
+        released: boolean;
+    } | null = null;
 
     constructor(options: AudioEngineOptions = {}) {
         this.audioContextFactory =
             options.audioContextFactory ?? (() => new AudioContext());
+        this.createRecordingToken = options.createRecordingToken
+            ?? (() => crypto.randomUUID());
     }
 
     async load(input: {
@@ -50,6 +82,7 @@ export class AudioEngine {
     }): Promise<'loaded' | 'stale'> {
         const generation = ++this.loadGeneration;
         ++this.decodedRevision;
+        this.releaseRecordingTap();
         this.stopSource();
         this.buffer = null;
         this.playbackOffsetSeconds = 0;
@@ -236,6 +269,96 @@ export class AudioEngine {
         };
     }
 
+    capturePlaybackCheckpoint(): AudioPlaybackCheckpoint | null {
+        const snapshot = this.getSnapshot();
+        if (
+            !snapshot.trackId
+            || !['paused', 'playing', 'ended'].includes(snapshot.state)
+        ) return null;
+        return {
+            trackId: snapshot.trackId,
+            state: snapshot.state as AudioPlaybackCheckpoint['state'],
+            currentTimeSeconds: snapshot.currentTimeSeconds,
+        };
+    }
+
+    async restorePlaybackCheckpoint(checkpoint: AudioPlaybackCheckpoint): Promise<void> {
+        if (!this.buffer || this.snapshot.trackId !== checkpoint.trackId) {
+            throw new RecordingTapError(
+                'recording-unavailable',
+                '录制前的歌曲已不可恢复。',
+            );
+        }
+        this.stopSource();
+        if (checkpoint.state === 'ended') {
+            this.playbackOffsetSeconds = this.buffer.duration;
+            this.publish({
+                trackId: checkpoint.trackId,
+                state: 'ended',
+                currentTimeSeconds: this.buffer.duration,
+                durationSeconds: this.buffer.duration,
+                volume: this.volume,
+            });
+            return;
+        }
+        this.playbackOffsetSeconds = clamp(
+            checkpoint.currentTimeSeconds,
+            0,
+            this.buffer.duration,
+        );
+        this.publish({
+            trackId: checkpoint.trackId,
+            state: 'paused',
+            currentTimeSeconds: this.playbackOffsetSeconds,
+            durationSeconds: this.buffer.duration,
+            volume: this.volume,
+        });
+        if (checkpoint.state === 'playing') await this.play();
+    }
+
+    acquireRecordingTap(): RecordingTapLease {
+        if (this.recordingTap) {
+            throw new RecordingTapError(
+                'recording-busy',
+                '已有录制正在使用音频输出。',
+            );
+        }
+        if (!this.buffer || !this.snapshot.trackId) {
+            throw new RecordingTapError(
+                'recording-unavailable',
+                '当前歌曲尚未完成解码。',
+            );
+        }
+        const context = this.ensureGraph();
+        if (typeof context.createMediaStreamDestination !== 'function') {
+            throw new RecordingTapError(
+                'recording-unavailable',
+                '当前浏览器不能建立录制音轨。',
+            );
+        }
+        const destination = context.createMediaStreamDestination();
+        const token = this.createRecordingToken();
+        try {
+            this.analyserNode!.connect(destination);
+        } catch (error) {
+            for (const track of destination.stream.getTracks()) track.stop();
+            throw new RecordingTapError(
+                'recording-unavailable',
+                error instanceof Error ? error.message : '录制音轨连接失败。',
+            );
+        }
+        this.recordingTap = { token, destination, released: false };
+        return {
+            token,
+            stream: destination.stream,
+            getContextTime: () => context.currentTime,
+            release: () => {
+                if (this.recordingTap?.token !== token) return;
+                this.releaseRecordingTap();
+            },
+        };
+    }
+
     copyDecodedChannelRange(input: {
         revision: number;
         channel: number;
@@ -273,6 +396,7 @@ export class AudioEngine {
     unload(): void {
         ++this.loadGeneration;
         ++this.decodedRevision;
+        this.releaseRecordingTap();
         this.stopSource();
         this.buffer = null;
         this.playbackOffsetSeconds = 0;
@@ -283,6 +407,7 @@ export class AudioEngine {
     async dispose(): Promise<void> {
         ++this.loadGeneration;
         ++this.decodedRevision;
+        this.releaseRecordingTap();
         this.stopSource();
         this.buffer = null;
         this.playbackOffsetSeconds = 0;
@@ -405,6 +530,24 @@ export class AudioEngine {
         source.disconnect();
         this.source = null;
         this.playbackStartContextTime = null;
+    }
+
+    private releaseRecordingTap(): void {
+        const tap = this.recordingTap;
+        if (!tap || tap.released) return;
+        tap.released = true;
+        this.recordingTap = null;
+        try {
+            this.analyserNode?.disconnect(tap.destination);
+        } catch {
+            // The graph may already be tearing down.
+        }
+        for (const track of tap.destination.stream.getTracks()) track.stop();
+        try {
+            tap.destination.disconnect();
+        } catch {
+            // MediaStreamAudioDestinationNode normally has no outputs.
+        }
     }
 
     private getCurrentTimeSeconds(): number {

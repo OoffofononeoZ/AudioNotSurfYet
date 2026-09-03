@@ -18,7 +18,7 @@ V1–V4 的 route、project、binding、determinism、renderer、context、respo
 | V5FT-TAP | audio tap/ownership | tap 不在 pre-Gain、出现第二 holder、release 影响播放或资源不归零 | V5-EV-TAP/RESOURCE | 阻断 V5；修复唯一 AudioEngine 分支 |
 | V5FT-CAPABILITY | MIME/preset | fallback 顺序错误、静默改 preset/fps/音轨，或输出失败后伪记 unavailable | V5-EV-CAPABILITY/MEDIA | 阻断 V5；只允许 codec fallback |
 | V5FT-PREFLIGHT | identity/readiness | 错歌、未 ready 分析、坏 binding/Editor、renderer/context 或 track 未被拒绝 | V5-EV-PREFLIGHT | 阻断 V5；恢复原工程和播放 checkpoint |
-| V5FT-SEQUENCE | recorder clock/order | 未从 0 开始、recorder 后于播放启动、使用第二 RAF/时钟或 ended 调 next | V5-EV-SEQUENCE | 阻断 V5；恢复批准顺序 |
+| V5FT-SEQUENCE | recorder clock/order | 未从 0 开始、time-zero audio handshake 先于 recorder start invocation、start event 前暴露 recording、使用第二 RAF/时钟或 ended 调 next | V5-EV-SEQUENCE | 阻断 V5；恢复批准顺序 |
 | V5FT-LOCK | command isolation | 录制中任一身份变更可从 UI 或直接命令绕过 | V5-EV-LOCK | 阻断 V5；在 controller 边界统一拒绝 |
 | V5FT-ABORT | incomplete output | cancel/context/track/route/recorder failure 留下活资源或产生 ready 半文件 | V5-EV-ABORT/RESOURCE | S0；停止 canonical，恢复幂等 cleanup |
 | V5FT-SAVE | ready/save/leave | picker cancel 丢 Blob、写失败改工程、离页静默丢弃或 Blob 跨 session 泄漏 | V5-EV-SAVE | 阻断 V5；保持内存 Blob直到明确处理 |
@@ -36,4 +36,3 @@ V1–V4 的 route、project、binding、determinism、renderer、context、respo
 | S3 | 不改变录制事实的低等级文案或诊断差异 | 记录并按 AC 判断，不掩盖更高等级问题 |
 
 受控 context loss 的平台 warning 只有在应用 cleanup、error state 和无 ready Blob 均通过时才可作为预期信号；WebM 媒体检查失败、无音轨或同步超限不能归类为 harness timing。
-

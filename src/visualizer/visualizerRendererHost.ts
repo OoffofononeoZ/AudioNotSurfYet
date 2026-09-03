@@ -23,6 +23,19 @@ export interface VisualizerRendererDiagnostics {
     contextLosses: number;
     contextRestores: number;
     contextRestoreFailures: number;
+    activeRecordingTaps: number;
+    activeMediaRecorders: number;
+    activeCaptureStreams: number;
+    activeAudioTracks: number;
+    activeVideoTracks: number;
+    readyRecordingBlobs: number;
+    recordingStarts: number;
+    recordingFinalizes: number;
+    recordingAborts: number;
+    recordingSaveAttempts: number;
+    recordingStage: string;
+    lastRecordingError: string;
+    lastRecorderState: string;
 }
 
 export const visualizerRendererDiagnostics: VisualizerRendererDiagnostics = {
@@ -38,6 +51,19 @@ export const visualizerRendererDiagnostics: VisualizerRendererDiagnostics = {
     contextLosses: 0,
     contextRestores: 0,
     contextRestoreFailures: 0,
+    activeRecordingTaps: 0,
+    activeMediaRecorders: 0,
+    activeCaptureStreams: 0,
+    activeAudioTracks: 0,
+    activeVideoTracks: 0,
+    readyRecordingBlobs: 0,
+    recordingStarts: 0,
+    recordingFinalizes: 0,
+    recordingAborts: 0,
+    recordingSaveAttempts: 0,
+    recordingStage: 'idle',
+    lastRecordingError: '',
+    lastRecorderState: 'inactive',
 };
 
 declare global {
@@ -60,6 +86,14 @@ export interface VisualizerRendererHostOptions {
     readonly createRenderer?: (canvas: HTMLCanvasElement) => VisualizerRenderer;
     readonly requestAnimationFrame?: (callback: FrameRequestCallback) => number;
     readonly cancelAnimationFrame?: (handle: number) => void;
+}
+
+export interface VisualizerRecordingSurfaceLease {
+    readonly canvas: HTMLCanvasElement;
+    readonly width: number;
+    readonly height: number;
+    renderNow(): void;
+    release(): void;
 }
 
 let nextHostId = 1;
@@ -88,8 +122,13 @@ export class VisualizerRendererHost implements VisualizerSceneHost {
     private width = 1;
     private height = 1;
     private dpr = 1;
+    private previewWidth = 1;
+    private previewHeight = 1;
+    private previewDpr = 1;
+    private captureToken: symbol | null = null;
     private disposed = false;
     private contextLost = false;
+    private renderBlocked = false;
     private failNextRender = false;
     private sampleCenterOnNextFrame = false;
 
@@ -121,15 +160,12 @@ export class VisualizerRendererHost implements VisualizerSceneHost {
 
     resize(width: number, height: number, devicePixelRatio = window.devicePixelRatio || 1): void {
         if (this.disposed) return;
-        this.width = Math.max(1, width);
-        this.height = Math.max(1, height);
-        this.dpr = Math.min(Math.max(1, devicePixelRatio), 2);
-        if (this.contextLost) return;
+        this.previewWidth = Math.max(1, width);
+        this.previewHeight = Math.max(1, height);
+        this.previewDpr = Math.min(Math.max(1, devicePixelRatio), 2);
+        if (this.captureToken || this.contextLost) return;
         try {
-            this.renderer.setPixelRatio(this.dpr);
-            this.renderer.setSize(this.width, this.height, false);
-            this.scene?.resize(this.width, this.height, this.dpr);
-            this.canvas.dataset.renderDpr = this.dpr.toString();
+            this.applySize(this.previewWidth, this.previewHeight, this.previewDpr);
         } catch (error) {
             this.options.onStatus({
                 state: 'error',
@@ -140,8 +176,71 @@ export class VisualizerRendererHost implements VisualizerSceneHost {
         this.requestFrame();
     }
 
+    acquireRecordingSurface(
+        width: number,
+        height: number,
+    ): VisualizerRecordingSurfaceLease {
+        if (this.disposed) throw new Error('Visualizer renderer host 已释放。');
+        if (this.contextLost) throw new Error('WebGL 上下文尚未恢复。');
+        if (this.renderBlocked) throw new Error('Visualizer 场景需要重试后才能录制。');
+        if (this.captureToken) throw new Error('Visualizer capture surface 正在使用。');
+        const token = Symbol('visualizer-recording-surface');
+        const captureWidth = Math.max(1, Math.round(width));
+        const captureHeight = Math.max(1, Math.round(height));
+        this.captureToken = token;
+        this.canvas.dataset.captureActive = 'true';
+        try {
+            this.applySize(captureWidth, captureHeight, 1);
+        } catch (error) {
+            this.captureToken = null;
+            delete this.canvas.dataset.captureActive;
+            throw error;
+        }
+        let released = false;
+        return {
+            canvas: this.canvas,
+            width: captureWidth,
+            height: captureHeight,
+            renderNow: () => {
+                if (released || this.captureToken !== token) return;
+                this.cancelPendingFrame();
+                this.renderCurrentFrame();
+            },
+            release: () => {
+                if (released) return;
+                released = true;
+                if (this.captureToken !== token) return;
+                this.captureToken = null;
+                delete this.canvas.dataset.captureActive;
+                if (this.disposed) return;
+                if (this.contextLost) {
+                    this.width = this.previewWidth;
+                    this.height = this.previewHeight;
+                    this.dpr = this.previewDpr;
+                    return;
+                }
+                try {
+                    this.applySize(this.previewWidth, this.previewHeight, this.previewDpr);
+                    this.requestFrame();
+                } catch (error) {
+                    this.options.onStatus({
+                        state: 'error',
+                        message: error instanceof Error
+                            ? error.message
+                            : '录制画布恢复失败。',
+                    });
+                }
+            },
+        };
+    }
+
     requestFrame(): void {
-        if (this.disposed || this.contextLost || this.frameHandle !== null) return;
+        if (
+            this.disposed
+            || this.contextLost
+            || this.renderBlocked
+            || this.frameHandle !== null
+        ) return;
         this.frameHandle = this.requestAnimationFrameImpl(this.draw);
         visualizerRendererDiagnostics.activeVisualAnimationFrames += 1;
     }
@@ -164,6 +263,7 @@ export class VisualizerRendererHost implements VisualizerSceneHost {
             });
             return;
         }
+        this.renderBlocked = false;
         this.options.onStatus({ state: 'idle' });
         this.requestFrame();
     }
@@ -171,6 +271,8 @@ export class VisualizerRendererHost implements VisualizerSceneHost {
     dispose(): void {
         if (this.disposed) return;
         this.disposed = true;
+        this.captureToken = null;
+        delete this.canvas.dataset.captureActive;
         this.cancelPendingFrame();
         try {
             this.disposeScene();
@@ -244,6 +346,7 @@ export class VisualizerRendererHost implements VisualizerSceneHost {
             });
             return;
         }
+        this.renderBlocked = false;
         this.requestFrame();
     };
 
@@ -257,12 +360,20 @@ export class VisualizerRendererHost implements VisualizerSceneHost {
     private readonly draw: FrameRequestCallback = () => {
         this.frameHandle = null;
         visualizerRendererDiagnostics.activeVisualAnimationFrames -= 1;
-        if (this.disposed || this.contextLost) return;
+        this.renderCurrentFrame();
+    };
+
+    private renderCurrentFrame(): void {
+        if (this.disposed || this.contextLost || this.renderBlocked) return;
         const frame = this.options.readFrame();
         if (!frame) {
             this.options.onStatus({ state: 'idle' });
             return;
         }
+        // Queue the one permitted visual RAF before doing scene/renderer work.
+        // This keeps captureStream packet cadence stable even when a frame is
+        // close to the browser's presentation deadline.
+        if (frame.playbackState === 'playing') this.requestFrame();
         try {
             const scene = this.ensureScene(frame);
             if (this.failNextRender) {
@@ -306,14 +417,25 @@ export class VisualizerRendererHost implements VisualizerSceneHost {
             this.canvas.dataset.webglContextState = 'ready';
             this.options.onFrame(values, snapshot);
             this.options.onStatus({ state: scene.kind === 'neutral' ? 'neutral' : 'ready' });
-            if (frame.playbackState === 'playing') this.requestFrame();
         } catch (error) {
+            this.cancelPendingFrame();
+            this.renderBlocked = true;
             this.options.onStatus({
                 state: 'error',
                 message: error instanceof Error ? error.message : '场景渲染失败。',
             });
         }
-    };
+    }
+
+    private applySize(width: number, height: number, dpr: number): void {
+        this.width = width;
+        this.height = height;
+        this.dpr = dpr;
+        this.renderer.setPixelRatio(dpr);
+        this.renderer.setSize(width, height, false);
+        this.scene?.resize(width, height, dpr);
+        this.canvas.dataset.renderDpr = dpr.toString();
+    }
 
     private ensureScene(frame: VisualizerRenderFrame): VisualizerScene {
         const nextKey = [
