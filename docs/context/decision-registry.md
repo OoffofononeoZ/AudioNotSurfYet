@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/product/scope.md"
   - "docs/architecture/system-design.md"
   - "docs/delivery/execution-plan.md"
-next_action: "实施并验证 DEC-050 视口滚动修订；Visualizer readiness 保持 in-review"
+next_action: "owner 视觉确认 DEC-050 一屏布局与双侧独立滚动；Visualizer readiness 保持 in-review"
 ---
 
 # Decision Registry
@@ -112,6 +112,8 @@ next_action: "实施并验证 DEC-050 视口滚动修订；Visualizer readiness 
 同日，`project-owner` 明确要求“先完成并且批准和关闭 V6”，并随后批准按关闭与视口滚动修订计划实施。DEC-049 据此将该批准登记为双浏览器完整制作、默认 WebM 原生保存/回放、键盘/焦点、长时操作和 context 清理人工门禁通过；implementation commit `ef12ce397d0b1a054ce797bfa1b9ff5eb5af61cd`、evidence registration commit `636e4d2defeb90147e949bcf20b7b0690dd77424`、run、54/54 结果、summary 和媒体 hash 均保持不变且无需重跑。V6 改为 `Complete`、R-041 改为 `Mitigated`；该批准只开放独立 Visualizer release-readiness review，不构成整体 readiness 或生产上线批准。
 
 同一实施计划批准 DEC-050：截图所示的 document 纵向滚动被登记为独立 Visualizer readiness 修订，不回开 V6、不创建 V7。支持的 `1024/1280/1920` 桌面宽度中，页面高度固定为一屏，左右工作台侧栏拥有各自滚动上下文；`<1024px` 现有最小宽度/横向兼容策略不扩展为移动端支持。共享滚动条以 Analyzer 精确值表为视觉事实源，本次只迁移该表和 Visualizer，Editor、歌曲列表和 Analyzer 页面既有滚动条不在本次范围。
+
+DEC-050 随后在独立 clean implementation commit `9f3b55beaa0c8a3d799f3f1e16f1dd66c9aee77c` 上完成。Chrome `152.0.7977.66` 与 Edge `152.0.4191.53` 专项各 2/2 通过，覆盖四组视口、DPR 1/2、页面高度、双侧滚动隔离、边界 chaining、compact drawer、16:9 与单 renderer/RAF；V1 双浏览器、V6 integration、Analyzer M7 和静态门禁均通过。该执行证据不改变 DEC-049/V6 canonical，也不构成 owner 视觉、整体 readiness 或生产上线批准。
 
 同日，`project-owner` 明确要求实施 Q0 质量设计计划，批准了 Q0 前置、四级严重度和 readiness 后置的阶段安排；同时要求三份质量文档先保持 `in-review`，经单独审阅后才生效。因此 DEC-010 的时序决定已批准，但 Q0 内容尚未批准。
 

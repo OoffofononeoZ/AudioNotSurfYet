@@ -244,6 +244,8 @@ Visualizer V5 使用唯一 pre-Gain audio tap、同一 Canvas capture lease 和�
 
 Visualizer V6 新增版本化 hardening golden、同歌曲会话内的模板 binding 恢复、renderer 当前歌曲时间/帧时间诊断和测试专用资源探针。Chrome/Edge 专项分别使用 MP3 四特征 Cube、WAV Editor Orthogonal，以及完成 4→2→4 恢复证明后的 FLAC Orthogonal，确保每浏览器三个默认 720p30 WebM 覆盖三格式和两个模板；另覆盖 900 秒 OPFS 四特征压力、20 次 route/template/record/context lifecycle、响应与时钟阈值。重复媒体采样后 DEC-048 固定关闭 MSAA、video `motion` hint 与等价 Cube 计算优化，并把 V6 三格式 packet-gap 容忍设为最多四个目标帧间隔、Visualizer frame 峰值设为 `<60ms`；平均 30fps `±5%`、分析归因 `<50ms` 与其余媒体门禁不变，V5 阈值不改。clean canonical `V6-2026-09-03T16-33-03-497Z-ef12ce39` 已在 implementation commit `ef12ce397d0b1a054ce797bfa1b9ff5eb5af61cd` 上 54/54 通过，summary SHA-256 为 `695bf0acf3831907b720551c7772ea07e0dd80a5db38e829cba868f12128a014`；2026-09-04 owner 批准 evidence 与人工门禁，V6 已关闭。
 
+post-V6 DEC-050 viewport 修订在 clean commit `9f3b55beaa0c8a3d799f3f1e16f1dd66c9aee77c` 上通过 Chrome/Edge layout 专项各 2/2、V1 各 4/4、V6 integration 10/10 与 Analyzer M7 Chrome 5/5。专项覆盖 `1024×720`、`1280×720/900`、`1920×1080`、DPR 1/2、document 无纵向滚动、左右 panel 隔离、边界不 chaining、compact drawer、共享 `.app-scrollbar` 和单 Canvas/renderer/视觉 RAF；这不是新的 V6 canonical，release-readiness 仍待 owner 视觉确认。
+
 V1 quality contract 固定 AC-V101–AC-V108、V1-G01–G12、VFT-ROUTE/LEASE/PROJECT/DRAFT/FILE/LAYOUT/RESOURCE、21 步 clean canonical，以及 Chrome/Edge 原生 picker、覆盖提示和 `beforeunload` 人工补偿。V1/evidence 已批准，R-034 为 `Mitigated`；V2 批准后 R-036 也为 `Mitigated`，R-038 继续由真实 renderer 里程碑验证。
 
 E2 clean canonical `E2-2026-08-26T16-42-47-634Z-9fc5c0a8` 已在 commit `9fc5c0a81fcf90abfbc665412277147cd958200f` 上 22/22 通过，summary SHA-256 为 `4465c20343af9092601296b86a229200579f648ffa90641411b88f9861ba8660`；2026-08-27 owner 批准该结果并开放 E3。

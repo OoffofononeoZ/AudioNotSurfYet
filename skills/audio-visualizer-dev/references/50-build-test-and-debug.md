@@ -99,6 +99,7 @@
 | `npm run fixtures:v6:golden` / `test:v6:unit` / `test:v6:integration` | V6 三格式/压力工程 golden、四到二再恢复、renderer 时间诊断与幂等资源专项 | 已实现；用于 final hardening 静态与集成门禁 |
 | `npm run test:e2e:v6:chrome` / `test:e2e:v6:edge` / `test:v6:media` | 真实双浏览器三格式、六 WebM、900 秒四特征、20 次 lifecycle、故障矩阵和媒体事实 | 单独专项已通过；仍需纳入 provisional/canonical runner |
 | `npm run eval:v6:provisional` / `eval:v6` | V5 40 步基线 + V6 六专项 + M6/M14 八项显式回归的 dirty/clean 54 步链 | clean canonical 必须绑定 implementation commit、六个媒体 SHA 与资源/性能指标 |
+| `npm run test:e2e:visualizer-layout` | Chrome/Edge post-V6 一屏高度、双侧滚动隔离、DPR、compact drawer、共享 scrollbar 与单 renderer/RAF | DEC-050 readiness 修订；不重建 V6 canonical |
 
 ## 已知测试缺口
 
@@ -113,6 +114,7 @@
 - Visualizer V4 Cube Swarm clean canonical `V4-2026-09-02T17-47-40-271Z-5c2d24a3` 已在 commit `5c2d24a3f1f413dba236563b3686237c6b8f2e21` 上 34/34 通过，summary SHA-256 为 `9b2a86e3dcdd4e634317c4234418dc3444da441a3be805a980562768dba5c3b2`；owner 已批准并关闭 V4。
 - Visualizer V5 clean canonical `V5-2026-09-03T03-49-31-211Z-9b5af09c` 已在 implementation commit `9b5af09c5846415a8e5465e710e6095f1e7db310` 上 40/40 通过，summary SHA-256 为 `cec1fab0310852458c2aa4fbd3bebc90eee3e213a54b7695a524736e07b07b7b`；Chrome/Edge 强制默认 720p30 输出、其余三档 typed unavailable，canonical 与 owner 原生保存/回放门禁均已批准。
 - Visualizer V6 覆盖三格式、900 秒 OPFS 四特征、模板 binding 往返、20 次 route/context/record lifecycle、renderer 时间诊断与测试专用资源基线。DEC-048 固定 V6 三格式平均帧率 `±5%`、packet gap 最多四个目标帧间隔、Visualizer frame `<60ms`，同时保持分析归因 `<50ms`，V5 门禁不变；关闭 MSAA、`motion` hint 与等价 Cube 优化用于降低实时编码竞争。clean canonical `V6-2026-09-03T16-33-03-497Z-ef12ce39` 已在 commit `ef12ce397d0b1a054ce797bfa1b9ff5eb5af61cd` 上 54/54 通过，summary SHA-256 为 `695bf0acf3831907b720551c7772ea07e0dd80a5db38e829cba868f12128a014`；2026-09-04 owner 批准 evidence 与人工门禁，V6 为 `Complete`、R-041 为 `Mitigated`。
+- DEC-050 post-V6 viewport 修订在 clean commit `9f3b55beaa0c8a3d799f3f1e16f1dd66c9aee77c` 上通过 Chrome/Edge 各 2/2、V1 各 4/4、V6 integration 10/10 与 M7 Chrome 5/5。它验证四组视口、DPR 1/2、独立 panel scroll、边界不 chaining、共享 `.app-scrollbar` 和单 Canvas/renderer/视觉 RAF；整体 readiness 仍等待 owner 视觉确认。
 - 当前机器已安装 Edge 151；M11 clean canonical 已使用真实 `msedge` channel 全量 31/31 通过。原生权限 prompt 不能由 OPFS 自动化替代；当前候选已由 `project-owner` 于 2026-08-26 完成人工补偿签字，相关实现或浏览器变化后须重做。
 - 正式 M3 canonical run 已在 clean commit `17d16f0da37289c1f67f75203502beef999572ea` 上通过并登记，且已由 `project-owner` 批准。
 - 正式 M4 canonical run 已在 clean commit `e5cfe9e8ab62301f3c5b0ddcdd37847a2e131a0f` 上通过并登记，evidence 与 working agreements 已由 `project-owner` 批准。

@@ -6,7 +6,7 @@ upstream_docs:
   - "docs/delivery/visualizer/execution-plan.md"
   - "docs/delivery/visualizer/acceptance-criteria.md"
   - "docs/delivery/visualizer/test-strategy.md"
-next_action: "V1–V6 保持关闭；完成 DEC-050 readiness 修订，不创建 V7"
+next_action: "V1–V6 保持关闭；DEC-050 自动化已通过，等待 owner 视觉确认，不创建 V7"
 ---
 
 # Visualizer V0-D and V1–V6 Milestone Plan
@@ -46,7 +46,7 @@ next_action: "V1–V6 保持关闭；完成 DEC-050 readiness 修订，不创建
 
 ### Post-V6 readiness correction
 
-DEC-050 的一屏工作台与侧栏滚动是 release-readiness 修订项，不是 V7，也不改变 V6 的 `Complete` 或历史 canonical。修订在独立实现提交上通过双浏览器 targeted regression 后登记到 readiness；owner 视觉确认前 readiness 保持 `in-review`。
+DEC-050 的一屏工作台与侧栏滚动是 release-readiness 修订项，不是 V7，也不改变 V6 的 `Complete` 或历史 canonical。独立 clean implementation commit `9f3b55beaa0c8a3d799f3f1e16f1dd66c9aee77c` 已通过 Chrome/Edge targeted regression 并登记到 readiness；owner 视觉确认前 readiness 保持 `in-review`。
 
 ## 4. Failure and Slip Rules
 

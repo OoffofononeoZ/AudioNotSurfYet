@@ -8,7 +8,7 @@ upstream_docs:
   - "docs/architecture/risk-register.md"
   - "docs/delivery/visualizer/execution-plan.md"
   - "docs/delivery/visualizer/acceptance-criteria.md"
-next_action: "执行 DEC-050 双浏览器 viewport/scrollbar targeted regression"
+next_action: "DEC-050 targeted regression 已通过；等待 owner 视觉确认 readiness"
 ---
 
 # Visualizer V1–V6 Test Strategy
@@ -126,10 +126,13 @@ V6 实际命令固定为 `fixtures:v6:golden`、`test:v6:unit`、`test:v6:integr
 
 Post-V6 viewport 修订使用独立 `test:e2e:visualizer-layout:chrome`、`:edge` 与聚合命令，不改写 V6 runner 或 canonical。专项在 Visualizer 两侧栏临时插入测试专用 spacer，分别验证 scrollTop、scroll chaining、document 高度、compact drawer 边界与共享 scrollbar computed style；同时回归 Analyzer M7 精确值表、V1 双浏览器布局以及 V6 的单 Canvas/资源/焦点相关断言。clean 实现提交后登记目标命令、docs、harness、typecheck、build 和 diff check，不以历史 V6 54/54 替代新布局证据。
 
+DEC-050 clean implementation commit `9f3b55beaa0c8a3d799f3f1e16f1dd66c9aee77c` 已按上述策略通过 Chrome/Edge 专项各 2/2、V1 各 4/4、V6 integration 10/10 与 M7 Chrome 5/5；静态门禁全部通过。该证据只关闭自动化缺口，owner 视觉确认前 readiness 仍为 `in-review`。
+
 ## 9. Current Gate State
 
 - V1–V6 canonical 与 owner evidence 均已批准并关闭；V6 54/54 clean canonical 保持为 Visualizer readiness 回归基线。
 - 早期 dirty provisional `V6-2026-09-03T10-15-47-668Z-0f90a77c-provisional` 54/54 通过；后续重复媒体采样促成 DEC-048 与 renderer/encoder 加固。修订后的 dirty provisional `V6-2026-09-03T16-21-25-320Z-088f21d3-provisional` 亦为 54/54；最终 clean canonical `V6-2026-09-03T16-33-03-497Z-ef12ce39` 在独立 implementation commit `ef12ce397d0b1a054ce797bfa1b9ff5eb5af61cd` 上 54/54 通过，summary SHA-256 为 `695bf0acf3831907b720551c7772ea07e0dd80a5db38e829cba868f12128a014`。2026-09-04 owner 批准 evidence 与人工门禁，无需重跑。
 - V4 quality/eval、golden、failure taxonomy、clean run `V4-2026-09-02T17-47-40-271Z-5c2d24a3` 34/34 与人工门禁均已获批准；V5 在此 34 步基线上增加六个录制专项。
 - 当前没有正式 CI，所有结果限定为本地登记环境。
+- Post-V6 viewport clean evidence 已完成，AC-VR01–AC-VR04 的自动化部分通过；只剩 owner 一屏布局、双侧滚动和 scrollbar 视觉门禁。
 - `/comingsoon`、`threeDTable`、TestLands 或 V3 历史 artifact 中的 V4 中性预览不是当前 V4 implementation evidence；真实 Cube 由 V4 专项与前向回归评价。
