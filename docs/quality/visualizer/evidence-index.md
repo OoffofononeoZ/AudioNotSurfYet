@@ -1,7 +1,7 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-09-03
+last_reviewed: 2026-09-04
 upstream_docs:
   - "docs/quality/visualizer/eval-plan.md"
   - "docs/quality/visualizer/golden-examples.md"
@@ -22,7 +22,7 @@ upstream_docs:
   - "docs/quality/visualizer/v6-golden-examples.md"
   - "docs/quality/visualizer/v6-failure-taxonomy.md"
   - "docs/delivery/visualizer/milestone-plan.md"
-next_action: "V5 canonical 与人工门禁已批准；V6 quality contract 已批准并进入实现"
+next_action: "V6 clean canonical 已登记为 in-review；等待 owner 人工制作与回放门禁"
 ---
 
 # Visualizer Evidence Index
@@ -32,7 +32,7 @@ next_action: "V5 canonical 与人工门禁已批准；V6 quality contract 已批
 - V0-P、V0-A、V0-D：`Complete`。
 - V1：`Complete`；clean canonical 21/21 与适用人工门禁已由 owner 批准。
 - V2：`Complete`；clean canonical 26/26 已获 owner 批准；V3–V5：`Complete`，各自 canonical 与人工门禁已获批准；V6：`In Progress`。
-- R-034–R-040 为 `Mitigated`；R-041 保持 `Open`，等待 V6 长时加固。
+- R-034–R-040 为 `Mitigated`；R-041 保持 `Open`，等待 V6 owner 长时制作、原生保存/回放与清理门禁。
 - Analyzer/Editor canonical 是相邻回归，不能替代 Visualizer evidence。
 
 ## Record Contract
@@ -482,3 +482,126 @@ next_action: "V5 canonical 与人工门禁已批准；V6 quality contract 已批
 ### Owner Review Status
 
 2026-09-03，`project-owner` 明确“批准 V5”，并以实施计划确认该批准覆盖上列人工边界。canonical identity、artifact 和 hash 保持不变且无需重跑；本批准不构成 V6、整体 readiness 或生产上线通过。
+
+## V6 Canonical Record
+
+| Field | Value |
+| --- | --- |
+| Milestone | V6 — Final hardening |
+| State | `in-review` |
+| Implementation commit | `ef12ce397d0b1a054ce797bfa1b9ff5eb5af61cd` |
+| Evidence commit | 本记录所在的 `docs: register Visualizer V6 canonical evidence` 提交 |
+| Run ID | `V6-2026-09-03T16-33-03-497Z-ef12ce39` |
+| Canonical result | 54/54 passed |
+| Clean identity | start/end commit 均为 `ef12ce397d0b1a054ce797bfa1b9ff5eb5af61cd`；start/end dirty 均为 `false` |
+| Summary SHA-256 | `695bf0acf3831907b720551c7772ea07e0dd80a5db38e829cba868f12128a014` |
+| Artifact root | `artifacts/evals/V6-2026-09-03T16-33-03-497Z-ef12ce39/` |
+| Reviewer | `project-owner` — pending |
+
+### Environment
+
+| Item | Recorded value |
+| --- | --- |
+| OS | macOS 26.5.2, build 25F84, Darwin arm64 |
+| Hardware | MacBook Pro `MacBookPro17,1`, Apple M1, 8 cores, 16 GB memory |
+| Node / npm | Node v24.18.0 / npm 11.16.0 |
+| Browsers | Chrome 152.0.7977.66 / Edge 152.0.4191.53 |
+| Media / render / test runtime | FFmpeg/ffprobe 8.1.2 / Three.js 0.183.2 / Vitest 4.1.10 / Playwright 1.62.0 |
+
+硬件只登记机型、芯片、核心数和内存；artifact 中的序列号、UUID 或设备标识不进入版本化证据。
+
+### Result Summary
+
+- V6 golden 3/3、unit 3/3、integration 10/10、真实 Chrome 2/2、真实 Edge 2/2 和六文件 media verification 全部通过；V5 的 40 步完整基线及 M6/M14 八项显式关键回归亦全部通过，完整 clean canonical 为 54/54。
+- Chrome/Edge 均完成 MP3 四特征 Cube、WAV Editor Orthogonal、FLAC 模板 4→2→4 恢复后的 Orthogonal 录制；六个文件均为单 VP9 视频轨加单 Opus 音轨、严格 1280×720。平均帧率为 29.337–30fps，最大相邻视频 packet gap 为 98ms，满足 DEC-048 的平均 30fps `±5%` 和最多四个目标帧间隔门禁。
+- 六文件容器时长与 4/4.032 秒 source 的差均不超过 27ms，A/V 结束差为 5–96ms；所有音轨非静音，RMS 为 0.261–0.270、peak 为 0.691–0.709。V5 未放宽的同步回归仍以最多两帧 packet gap 通过，Orthogonal 音频 burst 与中心亮闪差为 Chrome 37ms、Edge 32ms。
+- V6 录制期间 Canvas 渲染 cadence 为 59.001–60.134fps，最大 scene frame 为 Chrome 33ms、Edge 28.8ms；900 秒四特征压力中的最大 scene frame 为 Chrome 12.7ms、Edge 14.4ms，最大反馈为 24.1ms/28.2ms，scene/transport 与播放时钟偏差不超过 0.334ms，分析归因 long task 为 0。
+- Chrome/Edge 各执行 20 次 Visualizer/Analyzer/Editor/Home、模板、录制、歌曲恢复与周期性 context loss/restore。最终各保持单 AudioContext、Worker、Canvas、WebGL context、Visualizer host/renderer/RAF，recording resources、live media tracks 与 Blob URL 均为 0；受控故障没有产生 ready 半文件。
+- MP3/WAV/FLAC route、paused refresh、工程导入导出、错歌拒绝、Cube 四特征、Orthogonal 双特征、模板恢复、1024/1280/1920、DPR 1/2、键盘/焦点、文字状态、reduced motion、context recovery、坏 JSON、quota、stale/cancel、无 MIME、preset unavailable、recorder/renderer failure 均由 unit/integration/双浏览器专项覆盖，console error 与 pageerror 为 0。
+- M6 900 秒回归最大反馈为 16.6ms、分析归因 long task 为 0，20 次资源循环保持单 Worker/AudioContext；M14 的 21 卡片排序、FIFO 隔离和 Chrome/Edge 资源回归均通过。docs、deliberate-failure harness、typecheck、build 和 diff check 全部通过；build 转换 1871 modules，最大 JS chunk 为 1,427.74 kB（gzip 432.16 kB），既有 chunk-size warning 保留。
+- 修订后的 dirty provisional `V6-2026-09-03T16-21-25-320Z-088f21d3-provisional` 为 54/54，summary SHA-256 `58af3b253562f2db04aaa692b81e221186f5ba58f1d087ef56fa1f4d222f75d1`；它只作实现反馈，不替代本 clean canonical。
+- 较早 clean 尝试 `V6-2026-09-03T10-25-21-807Z-088f21d3` 在 DEC-048 前因 135ms 视频 packet gap 未通过并提前停止，没有 canonical summary；artifact 保留且不登记为通过。随后关闭 MSAA、设置 `motion` hint、采用等价 Cube 计算优化并按 owner 对小幅卡顿的取舍登记 DEC-048，最终在独立提交和新 run 上通过。
+
+### Canonical Media Hashes
+
+| Browser / format / scene | WebM SHA-256 | Avg fps / max packet gap |
+| --- | --- | --- |
+| Chrome / MP3 / Cube Swarm 720p30 | `7e5346b1d1bf53425b15a45d9a7c239c07f006419c5de65eb68452033981efdc` | 29.353 / 76ms |
+| Chrome / WAV / Orthogonal Lines 720p30 | `f7765b1f336dd343b10cd94fa0fe88b280101dea1ef578936747b1c1f286d0e5` | 30 / 41ms |
+| Chrome / FLAC / Orthogonal Lines 720p30 | `049dcf587ee01ca657088eb44be6568ac8b7f67d0ec7a84aaa6bcc4d29abda27` | 29.907 / 56ms |
+| Edge / MP3 / Cube Swarm 720p30 | `667c0af7c1e4400810d13e130352f36a6f221b8c7b7bf5034653d9077bb3b9f5` | 29.337 / 98ms |
+| Edge / WAV / Orthogonal Lines 720p30 | `c272f2c5326ad602d38a38d6af5ea4f63c359d60bc4e7d8331680d7865ec5458` | 30 / 39ms |
+| Edge / FLAC / Orthogonal Lines 720p30 | `853b024e8962c317817eca30f4555e89e1d8cdc17819cb5e1f973226221ee9cd` | 29.970 / 51ms |
+| `media/v6-media-report.json` | `5b92aa5e7d42e020dd808790f814deabba3e8e901f879717613a6f86f35e91e6` | threshold/result record |
+| Chrome capability matrix | `6026215eb386dd6aa14d540e82e47cefb77992a7a012fed60c7db64cc24d976f` | three formats + resources |
+| Edge capability matrix | `5966030b8dd65b267d64b32a9527ffd70614e6e5afa0e784c968c705e8051ebf` | three formats + resources |
+
+### Canonical Step Hashes
+
+| Artifact | SHA-256 |
+| --- | --- |
+| `01-V6-golden.log` | `ee87c907bb926856b1bf5b3eb80348c23a7c212b461477d146d9cb1d677d381f` |
+| `02-V6-unit.log` | `50a25eecf95f5e4f2f04e11fbd06479b56e007b6600683e1405cfb8f89c6ddb5` |
+| `03-V6-integration.log` | `59778c0bfe229c6bc1c167f7102ea6104896a8c502f93ff308fdc1b84229a872` |
+| `04-V6-Chrome.log` | `3c84945b4fe1e6823e9ce85b735b736551db9193f06b5b79f42cd8ecfdb10ad5` |
+| `05-V6-Edge.log` | `87193431ab02a0140b4dc10e8e02a46d068c07f01c02eb53f450a49043170abe` |
+| `06-V6-media.log` | `5dca27c0489c5afe3255253e579f6fef3f75dfece7b77c6d5b42a60cd5ed71bc` |
+| `07-V5-golden.log` | `4d24f0b5b3b99375cbfdb69da9730f1c2e71c1fc82f425dd4c7dede76ae93d0a` |
+| `08-V5-recording-unit.log` | `2eac6547c36ec34cd77fd5b4e6d167af89c7fd93a12cd8cd64a803a5cb82b229` |
+| `09-V5-recording-integration.log` | `bba8960fab59272637c99903ece437134adabd2226cc667a9b86b159953d06c7` |
+| `10-V5-Chrome.log` | `61c23dfcd1303d857530d2fef13b7dbb07b15773546140e00b93518b5bac4434` |
+| `11-V5-Edge.log` | `c772505961b1b54113946d0d7d884a7964c67f0f1f3448aa25ad8c8ebe906b40` |
+| `12-V5-media-verification.log` | `a22d070a9f3d72111176fb3fe321aca689f24b5ae49e2088de21c892cf2e955b` |
+| `13-V4-golden.log` | `a5267510b4a0cb2bc6305069b87958981d2ced417183da095640d30fd710f58a` |
+| `14-V4-scene-unit.log` | `225fc5fe2442dd0a90df373795057a5e96093beedade64755b5229ad7a7d7527` |
+| `15-V4-renderer-integration.log` | `fce389f3e3f1a62814ff4cb5f82482c60a718b41437fcbb17bdc6c835bab7c98` |
+| `16-V4-Chrome.log` | `f627ba25972edf3ebdf7593f6627a4d64c23be76851fc4a62449658022684d4a` |
+| `17-V3-golden.log` | `d55c54e79d0c256d33c85313601ce86e683c5094fae1fbd582aa68ac52a389ba` |
+| `18-V3-scene-unit.log` | `7ebe9741cc37001568332b94617378ef891fa4591efe69db072f4d5ecbe27d3b` |
+| `19-V3-renderer-integration.log` | `9b087d639ffae3324b7213dd8f5c8b637286892a9d82cc22782f5077cedbb6db` |
+| `20-V3-Chrome.log` | `d5dd60169070f2e388e90fa8ebcd861aca9814c4ef113e4b5bc83adfa40eed2c` |
+| `21-V2-golden.log` | `c8f512aade67c6a426cedbe1cc9f41716f321be78d60c8a5e24526de82374ce4` |
+| `22-V2-binding-unit.log` | `ceb3c49a2f5e14568fc53fa5f1bc801449cb2218b4c3c5f0ff62f89448567a17` |
+| `23-V2-binding-integration.log` | `6390d058b9dc57953b4af599a9d8fc18be1040b4a5d7642744f4a75f2a59bd50` |
+| `24-V2-Chrome.log` | `be648d942bc3f13bc087115d0f87db2aa1098f040db9b41b2949cc2d494774d3` |
+| `25-V2-Edge.log` | `29117e61285353fa7f0e73d26a1e7ce5b2215472c72861516ebe488ced2946e3` |
+| `26-V1-golden.log` | `1f1b39668f05dea3e981d3919ad1d578b11337c359aa16c7fd0981f7eb470e1e` |
+| `27-V1-project-unit.log` | `ac8e36f39400549c03af0385961a95aed1205b739025b166c993cd090e9fe372` |
+| `28-V1-foundation-integration.log` | `8055bc23b3888313760900bb06a0f2dbf9cdb63ecd5a2fcd7f412611593694df` |
+| `29-V1-Chrome.log` | `229802f39dd634d0e3bdb49d80ab1f8f2b082b0b07378bc000996f06c660dc57` |
+| `30-V1-Edge.log` | `c977790f0c0c4d68bc1e6d394dc3cf444e2cd13499a15bc53edfd5469c6e7c09` |
+| `31-M3-Chrome-smoke.log` | `b849c6a1e3fc24d2619ba5caa88d3e2ef086441331985cf2d52e25d32f0264ed` |
+| `32-M4-engine-and-session-regression.log` | `0696bcbf5adad120ebf2773e20fa04b3a95f309899cd6352e23871726221757b` |
+| `33-M4-Chrome-regression.log` | `d512bdd6342aa10b626300b859ca32b69f9369a6b85bbfea6032897b34bc202f` |
+| `34-M5-repository-and-recovery-regression.log` | `33bf0ad6c7aa85a3bf0cb2c7a241734823bf1b01d5fe0d84e5b3f58b044e1d99` |
+| `35-Editor-E1-project-unit.log` | `2480f265dc5f0e7930811b6784183e11f114405a36c59f8b229a5386471ecbe9` |
+| `36-Editor-E1-integration.log` | `cc0f53e048ab8eb563d252671b092dacdc7573c4c30eea323d4146efa5106aa4` |
+| `37-Editor-E1-Chrome.log` | `e0ea440d0cd258a09970f1f32ada0686650120c7f5e2cce7627881d008cd38a8` |
+| `38-Editor-E7-unit.log` | `f09faad23e9a2d9df30810cb60e912e30ac135d6377d8eab21272da90c41f320` |
+| `39-Editor-E7-integration.log` | `fb3f30c4ed4be1c3f6adb297a17c421ef02d811c43896e1cd0388a63d19df105` |
+| `40-M11-Chrome-resource-regression.log` | `24ff9b2b5827efdd618b330e9bfd3f08e81a1d1fac489ca06745a5943579d0b2` |
+| `41-M11-Edge-resource-regression.log` | `d85f19f6982f6fcd5fe2f88c8c054e802573e994946aab320550c589da2781df` |
+| `42-docs.log` | `bb005ed0074179a47b895a5c66e79917e37ebf18976e21fe9d27b1dd63c8f151` |
+| `43-deliberate-failure.log` | `69bf5c3fa50230a4957ad0c60c8323dba68e494d92761fea0039cf5d580d70aa` |
+| `44-typecheck.log` | `fadc7f66199c28d2f7cca439bb300ebeb0320158f32a0f9b52ec77031538af4d` |
+| `45-build.log` | `a953b858232d042d97ee736665b431c7df21ef447d7355af7d1265c6a1d5be8b` |
+| `46-diff-check.log` | `e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855` |
+| `47-M6-unit-explicit-regression.log` | `e9d11342cdd1007be086c92ddb584c8ad04de2896e5a015bfec36aa7f7c720d7` |
+| `48-M6-worker-explicit-regression.log` | `824cfe537f596653f7d28423b35f704be8c26add0c02804183a2bdd5e3c57bc9` |
+| `49-M6-integration-explicit-regression.log` | `407eab08ca23cc3f9186674656c434eabed13ed44e10c8998b7c857c679efb80` |
+| `50-M6-Chrome-explicit-regression.log` | `d71cae87204e5a8d05e5214aaad7907a7a90d82b2e52a6ebf1c7b570dc67a1dc` |
+| `51-M14-unit-explicit-regression.log` | `b37549bf5d778a35295035374f7078293f6a94a945579eed3812d1bd8b679209` |
+| `52-M14-integration-explicit-regression.log` | `922d2ca25b5b68cff4eb8847fd50c1e647a832ee505440faa555aeb2ee14c094` |
+| `53-M14-Chrome-explicit-regression.log` | `a6657fe3bdfbfe9c3be3116db08c9df6dd6fe2a1745d25e34c60f2a1d1afa74f` |
+| `54-M14-Edge-explicit-regression.log` | `541fcbeb091492cead5bc1a32a457bb0d9e0f21bc52e41fdefb6ab2435f8932b` |
+
+### Manual Gaps and Review Boundary
+
+- 自动化证明了双浏览器三格式、四特征/双特征模板转换、默认 720p30 六文件、短时 packet cadence、15 分钟分析压力、20 次生命周期、命令与错误隔离、键盘/焦点 DOM 状态和资源计数；它不能替代 owner 对最终视频构图、长时操作体感、辅助技术朗读或 OS picker 权限/取消/覆盖流程的实际判断。
+- owner 仍需在 Chrome/Edge 完成“当前歌曲 → Editor 数据 → 四特征 Cube → Orthogonal → 默认 WebM 原生保存/回放”，并确认长时操作、键盘/焦点与 context 清理。未提供的主观数值不得补写。
+- V6 保持 `In Progress`、evidence 保持 `in-review`、R-041 保持 `Open`。只有 owner 明确批准本 canonical 与人工任务后，才能把 V6 标记为 `Complete`、缓解 R-041，并另行创建 Visualizer 整体 release-readiness review。
+- 本记录不批准 optional 1080p60、生产部署或整体 release readiness；PROD-015 继续阻断上线声明。未提交 900 秒音频、大型 WebM 或 trace，历史 V1–V5 canonical identity 未改写。
+
+### Owner Review Status
+
+Pending. 本轮只登记 clean canonical 和自动化证据，不将用户对 DEC-048 小幅卡顿标准的取舍外推为 V6 最终视觉、原生保存/回放或 release 批准。

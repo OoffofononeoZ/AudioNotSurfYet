@@ -8,7 +8,7 @@ upstream_docs:
   - "docs/delivery/visualizer/test-strategy.md"
   - "docs/architecture/risk-register.md"
   - "docs/quality/visualizer/v5-eval-plan.md"
-next_action: "提交已通过 provisional 的 DEC-048 修正，并在该 clean HEAD 上运行 54 步 V6 canonical"
+next_action: "54 步 clean canonical 已登记；等待 owner 人工制作、保存与回放门禁"
 ---
 
 # Visualizer V6 Eval Plan
@@ -46,6 +46,10 @@ V6 只评价已批准 Visualizer 的最终加固：双浏览器三格式制作�
 - DEC-048 只允许 V6 三格式 recorder 的相邻视频 packet gap 最多四个目标帧间隔；平均帧率仍须在 30fps `±5%` 内。V5 canonical 与 `test:v5:media` 的两帧阈值保持不变。
 - DEC-048 只把 V6 压力场景的 Visualizer 单帧峰值调整为 `<60ms`；分析归因任务仍须 `<50ms`，反馈 `<=100ms`、时钟偏差 `<=50ms` 与资源门禁均不变。
 - canonical 后 V6 保持 `In Progress`、evidence 保持 `in-review`、R-041 保持 `Open`，直到 owner 人工门禁明确批准。
+
+## Canonical Result
+
+Clean canonical `V6-2026-09-03T16-33-03-497Z-ef12ce39` 在 implementation commit `ef12ce397d0b1a054ce797bfa1b9ff5eb5af61cd` 上 54/54 通过，起止工作树干净，summary SHA-256 为 `695bf0acf3831907b720551c7772ea07e0dd80a5db38e829cba868f12128a014`。六个默认媒体、双浏览器三格式、900 秒四特征、20 次生命周期及 M6/M14 显式回归均通过；正式指标与逐步 hash 见 [evidence index](evidence-index.md)。Owner 人工制作、原生保存/回放、键盘/焦点和长时清理门禁仍待完成。
 
 ## Evidence Gaps
 

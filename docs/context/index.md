@@ -4,7 +4,7 @@ owner: "project-owner"
 last_reviewed: 2026-09-04
 upstream_docs:
   - "AGENTS.md"
-next_action: "提交 DEC-048 稳定性修复，并在该 clean HEAD 上运行 Visualizer V6 canonical"
+next_action: "复核 Visualizer V6 canonical 与 owner 人工任务；批准前保持 In Progress"
 ---
 
 # Repository Context Index
@@ -21,8 +21,8 @@ AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端。Editor E1–
 - Product intent：Analyzer/Editor 历史范围与 Visualizer V0 均已批准；PROD-014V 已关闭，PROD-022 保留为非阻断未来问题。
 - System design：Analyzer/Editor 历史设计仍是已批准/实现基线；Visualizer system design、接口、风险和 ADR-0014–0017 已获批准。
 - Execution planning：M1–M14、Editor E0-D/E1–E8、Visualizer V0-D/V1–V5 均为 `Complete`；Visualizer V6 为 `In Progress`。
-- Quality and evals：M3–M14、Editor E1–E8 与 Visualizer V1–V5 evidence 已批准；V6 eval/golden/failure taxonomy 已批准并开放实现。
-- Implementation：Editor E8 与 Visualizer V5 已完成；V6 双浏览器、三格式、900 秒四特征、六文件媒体、模板恢复与资源专项已实现。按 DEC-048 修订后的 dirty provisional `V6-2026-09-03T16-21-25-320Z-088f21d3-provisional` 54/54 通过，summary SHA-256 为 `58af3b253562f2db04aaa692b81e221186f5ba58f1d087ef56fa1f4d222f75d1`；该 run 只作实现反馈，稳定性修复提交与 clean canonical 尚待完成。
+- Quality and evals：M3–M14、Editor E1–E8 与 Visualizer V1–V5 evidence 已批准；V6 eval/golden/failure taxonomy 已批准，54/54 clean canonical evidence 已登记为 `in-review`。
+- Implementation：Editor E8 与 Visualizer V5 已完成；V6 双浏览器、三格式、900 秒四特征、六文件媒体、模板恢复与资源专项已实现。clean canonical `V6-2026-09-03T16-33-03-497Z-ef12ce39` 在 implementation commit `ef12ce397d0b1a054ce797bfa1b9ff5eb5af61cd` 上 54/54 通过，summary SHA-256 为 `695bf0acf3831907b720551c7772ea07e0dd80a5db38e829cba868f12128a014`；evidence 为 `in-review`，V6 与 R-041 等待 owner 人工门禁。
 - Readiness、release、retrospective：Analyzer M14 为 `Ready with waivers`；PROD-015 仍阻断上线，Editor readiness 独立。
 
 ## Key Documents
@@ -162,8 +162,8 @@ AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端。Editor E1–
 - Editor E6 quality：[eval plan](../quality/editor/e6-eval-plan.md)、[golden](../quality/editor/e6-golden-examples.md)、[failure taxonomy](../quality/editor/e6-failure-taxonomy.md) 与 40/40 canonical record 已获批准
 - Editor E7 quality：[eval plan](../quality/editor/e7-eval-plan.md)、[golden](../quality/editor/e7-golden-examples.md)、[failure taxonomy](../quality/editor/e7-failure-taxonomy.md) 与修订版 46/46 canonical 已获批准；44/44 run 保留为 `pre-revision`
 - Editor E8 quality：[eval plan](../quality/editor/e8-eval-plan.md)、[golden](../quality/editor/e8-golden-examples.md)、[failure taxonomy](../quality/editor/e8-failure-taxonomy.md) 已批准；25/25 canonical record 与 owner 门禁均为 `approved`
-- Visualizer quality：V1–V5 契约、canonical 与 owner 门禁均已批准；V6 quality contract 已批准
-- Visualizer V6 quality：[eval plan](../quality/visualizer/v6-eval-plan.md)、[golden](../quality/visualizer/v6-golden-examples.md) 与 [failure taxonomy](../quality/visualizer/v6-failure-taxonomy.md) 已获批准；canonical 尚未生成
+- Visualizer quality：V1–V5 契约、canonical 与 owner 门禁均已批准；V6 quality contract 已批准，clean canonical 已登记为 `in-review`
+- Visualizer V6 quality：[eval plan](../quality/visualizer/v6-eval-plan.md)、[golden](../quality/visualizer/v6-golden-examples.md) 与 [failure taxonomy](../quality/visualizer/v6-failure-taxonomy.md) 已获批准；54/54 canonical 已生成，owner 人工门禁尚待完成
 - Quality readiness：[Analyzer release readiness](../quality/release-readiness.md) 已按 M14 恢复 `Ready with waivers`；M13 结论只作历史
 - Release operations：`docs/release/` 尚未创建；PROD-015 的托管平台、域名和 SPA fallback 解决前不进入正式上线
 - Retrospectives：`docs/retrospectives/` 尚未创建；有发布、事故或重复摩擦证据后生成

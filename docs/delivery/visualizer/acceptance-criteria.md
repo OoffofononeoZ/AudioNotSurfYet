@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/architecture/interface-contracts.md"
   - "docs/architecture/risk-register.md"
   - "docs/delivery/visualizer/execution-plan.md"
-next_action: "AC-V501–AC-V509 已获批准并关闭；实施并验证 AC-V601–AC-V607"
+next_action: "AC-V601–AC-V607 自动化证据已通过；等待 AC-V607 owner 人工签字"
 ---
 
 # Visualizer V1–V6 Acceptance Criteria
@@ -87,7 +87,7 @@ next_action: "AC-V501–AC-V509 已获批准并关闭；实施并验证 AC-V601�
 | --- | --- | --- | --- |
 | AC-V601 | 最新稳定 Chrome/Edge 均完成 MP3/WAV/FLAC、有效/无效 route、工程导入导出、恢复和 pause-at-end | dual-browser canonical + native task；success/failure | R-034, R-036 |
 | AC-V602 | 1024/1280/1920 与代表性 DPR 下三栏/抽屉、16:9 preview、inspector、transport 无遮挡；键盘、焦点、文字标签和 reduced motion 正确 | geometry + accessibility matrix；boundary | R-038 |
-| AC-V603 | 约 15 分钟、Amplitude Spectrum/Complex Spectrum/Buffer/Loudness 四项下设置反馈 `<=100ms`、视觉偏差 `<=50ms`、无归因任务 `>50ms` | runtime stress + PerformanceObserver/trace | R-035, R-037, R-041 |
+| AC-V603 | 约 15 分钟、Amplitude Spectrum/Complex Spectrum/Buffer/Loudness 四项下设置反馈 `<=100ms`、视觉偏差 `<=50ms`、Visualizer frame `<60ms`、无归因任务 `>50ms` | runtime stress + PerformanceObserver/trace；DEC-048 | R-035, R-037, R-041 |
 | AC-V604 | 20 次 route/template/song restore/record lifecycle 后 AudioContext、Worker、RAF、Canvas/WebGL、MediaStreamTrack、Observer、listener、Blob URL 不单调累积 | Chrome/Edge diagnostic counters | R-034, R-038, R-040, R-041 |
 | AC-V605 | context loss、stale/cancel、quota、错歌 Editor、坏 JSON、无 MIME、录制失败和 renderer error 均保持可恢复且不伪造成功 | full failure taxonomy execution | R-035–R-041 |
 | AC-V606 | V1–V6 与 M3/M6/M11/M14、Editor E1/E7 关键 lease/cache/route/resource 回归通过 | cumulative canonical | R-034–R-041 |
