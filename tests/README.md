@@ -6,7 +6,7 @@
 - Vitest：4.1.10。官方已发布但当前 npm 镜像尚未提供 Vitest 5，因此使用镜像可获得且仍受支持的 4.1 版本。
 - Playwright Test：1.62.0；必需浏览器为本机稳定版 Google Chrome 与 Microsoft Edge。
 - FFmpeg：8.1.2；只用于生成和检查受控 WAV/MP3/FLAC fixture。
-- 当前 Visualizer V1–V5 canonical 使用 Google Chrome 152.0.7977.66 与 Microsoft Edge 152.0.4191.53；V6 候选在同一本机的真实 Chrome/Edge 执行三格式、长时压力和录制专项，浏览器缺失时仍明确报告失败/blocked。
+- 当前 Visualizer V1–V6 canonical 使用 Google Chrome 152.0.7977.66 与 Microsoft Edge 152.0.4191.53；V6 已在同一本机的真实 Chrome/Edge 执行三格式、长时压力和录制专项并获 owner 批准，浏览器缺失时仍明确报告失败/blocked。
 
 M3–M13 不建设 CI。下列命令当前均为本地门禁；正式证据要求在干净 commit 上复跑。M3–M13 与 Editor E1–E8 canonical 均已获批准。E7 的 44/44 run 因全屏浮层修订成为 `pre-revision`，修订版 46/46 已于 2026-08-31 获 owner 批准；E8 的 25/25 clean canonical 与 owner 门禁已于 2026-09-03 获批准。
 
@@ -239,9 +239,9 @@ Visualizer V3 quality contract 固定 `visualizer-v3-lines-v1.wav` 与版本化 
 
 Visualizer V4 Cube Swarm 使用共享 BoxGeometry、两个 MeshStandardMaterial、三个 InstancedMesh、默认 Amplitude Spectrum/Energy 双分析、60Hz rise/orbit checkpoint 与同 RendererHost context recovery。clean canonical `V4-2026-09-02T17-47-40-271Z-5c2d24a3` 已在 commit `5c2d24a3f1f413dba236563b3686237c6b8f2e21` 上 34/34 通过，summary SHA-256 为 `9b2a86e3dcdd4e634317c4234418dc3444da441a3be805a980562768dba5c3b2`。Owner 已批准并关闭 V4。
 
-Visualizer V5 使用唯一 pre-Gain audio tap、同一 Canvas capture lease 和原生 MediaRecorder/save picker。clean canonical `V5-2026-09-03T03-49-31-211Z-9b5af09c` 已在 implementation commit `9b5af09c5846415a8e5465e710e6095f1e7db310` 上 40/40 通过，summary SHA-256 为 `cec1fab0310852458c2aa4fbd3bebc90eee3e213a54b7695a524736e07b07b7b`；Chrome/Edge 默认 720p30 的四个 Orthogonal/Cube 文件均通过 ffprobe/FFmpeg，三个 optional preset 在 preflight 返回 typed `preset-unavailable`。canonical 与 owner 原生保存/回放门禁均已批准；V5 已关闭，V6 为 `In Progress`。
+Visualizer V5 使用唯一 pre-Gain audio tap、同一 Canvas capture lease 和原生 MediaRecorder/save picker。clean canonical `V5-2026-09-03T03-49-31-211Z-9b5af09c` 已在 implementation commit `9b5af09c5846415a8e5465e710e6095f1e7db310` 上 40/40 通过，summary SHA-256 为 `cec1fab0310852458c2aa4fbd3bebc90eee3e213a54b7695a524736e07b07b7b`；Chrome/Edge 默认 720p30 的四个 Orthogonal/Cube 文件均通过 ffprobe/FFmpeg，三个 optional preset 在 preflight 返回 typed `preset-unavailable`。canonical 与 owner 原生保存/回放门禁均已批准；V5 已关闭。
 
-Visualizer V6 新增版本化 hardening golden、同歌曲会话内的模板 binding 恢复、renderer 当前歌曲时间/帧时间诊断和测试专用资源探针。Chrome/Edge 专项分别使用 MP3 四特征 Cube、WAV Editor Orthogonal，以及完成 4→2→4 恢复证明后的 FLAC Orthogonal，确保每浏览器三个默认 720p30 WebM 覆盖三格式和两个模板；另覆盖 900 秒 OPFS 四特征压力、20 次 route/template/record/context lifecycle、响应与时钟阈值。重复媒体采样后 DEC-048 固定关闭 MSAA、video `motion` hint 与等价 Cube 计算优化，并把 V6 三格式 packet-gap 容忍设为最多四个目标帧间隔、Visualizer frame 峰值设为 `<60ms`；平均 30fps `±5%`、分析归因 `<50ms` 与其余媒体门禁不变，V5 阈值不改。clean canonical `V6-2026-09-03T16-33-03-497Z-ef12ce39` 已在 implementation commit `ef12ce397d0b1a054ce797bfa1b9ff5eb5af61cd` 上 54/54 通过，summary SHA-256 为 `695bf0acf3831907b720551c7772ea07e0dd80a5db38e829cba868f12128a014`；V6 仍为 `In Progress`，等待 owner 人工门禁。
+Visualizer V6 新增版本化 hardening golden、同歌曲会话内的模板 binding 恢复、renderer 当前歌曲时间/帧时间诊断和测试专用资源探针。Chrome/Edge 专项分别使用 MP3 四特征 Cube、WAV Editor Orthogonal，以及完成 4→2→4 恢复证明后的 FLAC Orthogonal，确保每浏览器三个默认 720p30 WebM 覆盖三格式和两个模板；另覆盖 900 秒 OPFS 四特征压力、20 次 route/template/record/context lifecycle、响应与时钟阈值。重复媒体采样后 DEC-048 固定关闭 MSAA、video `motion` hint 与等价 Cube 计算优化，并把 V6 三格式 packet-gap 容忍设为最多四个目标帧间隔、Visualizer frame 峰值设为 `<60ms`；平均 30fps `±5%`、分析归因 `<50ms` 与其余媒体门禁不变，V5 阈值不改。clean canonical `V6-2026-09-03T16-33-03-497Z-ef12ce39` 已在 implementation commit `ef12ce397d0b1a054ce797bfa1b9ff5eb5af61cd` 上 54/54 通过，summary SHA-256 为 `695bf0acf3831907b720551c7772ea07e0dd80a5db38e829cba868f12128a014`；2026-09-04 owner 批准 evidence 与人工门禁，V6 已关闭。
 
 V1 quality contract 固定 AC-V101–AC-V108、V1-G01–G12、VFT-ROUTE/LEASE/PROJECT/DRAFT/FILE/LAYOUT/RESOURCE、21 步 clean canonical，以及 Chrome/Edge 原生 picker、覆盖提示和 `beforeunload` 人工补偿。V1/evidence 已批准，R-034 为 `Mitigated`；V2 批准后 R-036 也为 `Mitigated`，R-038 继续由真实 renderer 里程碑验证。
 

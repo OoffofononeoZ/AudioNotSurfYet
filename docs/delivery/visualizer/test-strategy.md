@@ -8,7 +8,7 @@ upstream_docs:
   - "docs/architecture/risk-register.md"
   - "docs/delivery/visualizer/execution-plan.md"
   - "docs/delivery/visualizer/acceptance-criteria.md"
-next_action: "V6 54 步 clean canonical 已登记；等待 owner 人工任务"
+next_action: "V6 54 步 clean canonical 与人工任务已批准；作为 readiness 回归基线保留"
 ---
 
 # Visualizer V1–V6 Test Strategy
@@ -126,8 +126,8 @@ V6 实际命令固定为 `fixtures:v6:golden`、`test:v6:unit`、`test:v6:integr
 
 ## 9. Current Gate State
 
-- V1–V5 canonical 与 owner evidence 均已批准并关闭；V6 quality contract 已批准，54/54 clean canonical evidence 为 `in-review`，里程碑仍为 `In Progress`。
-- 早期 dirty provisional `V6-2026-09-03T10-15-47-668Z-0f90a77c-provisional` 54/54 通过；后续重复媒体采样促成 DEC-048 与 renderer/encoder 加固。修订后的 dirty provisional `V6-2026-09-03T16-21-25-320Z-088f21d3-provisional` 亦为 54/54；最终 clean canonical `V6-2026-09-03T16-33-03-497Z-ef12ce39` 在独立 implementation commit `ef12ce397d0b1a054ce797bfa1b9ff5eb5af61cd` 上 54/54 通过，summary SHA-256 为 `695bf0acf3831907b720551c7772ea07e0dd80a5db38e829cba868f12128a014`。V6 evidence 与人工门禁仍待 owner 批准。
+- V1–V6 canonical 与 owner evidence 均已批准并关闭；V6 54/54 clean canonical 保持为 Visualizer readiness 回归基线。
+- 早期 dirty provisional `V6-2026-09-03T10-15-47-668Z-0f90a77c-provisional` 54/54 通过；后续重复媒体采样促成 DEC-048 与 renderer/encoder 加固。修订后的 dirty provisional `V6-2026-09-03T16-21-25-320Z-088f21d3-provisional` 亦为 54/54；最终 clean canonical `V6-2026-09-03T16-33-03-497Z-ef12ce39` 在独立 implementation commit `ef12ce397d0b1a054ce797bfa1b9ff5eb5af61cd` 上 54/54 通过，summary SHA-256 为 `695bf0acf3831907b720551c7772ea07e0dd80a5db38e829cba868f12128a014`。2026-09-04 owner 批准 evidence 与人工门禁，无需重跑。
 - V4 quality/eval、golden、failure taxonomy、clean run `V4-2026-09-02T17-47-40-271Z-5c2d24a3` 34/34 与人工门禁均已获批准；V5 在此 34 步基线上增加六个录制专项。
 - 当前没有正式 CI，所有结果限定为本地登记环境。
 - `/comingsoon`、`threeDTable`、TestLands 或 V3 历史 artifact 中的 V4 中性预览不是当前 V4 implementation evidence；真实 Cube 由 V4 专项与前向回归评价。

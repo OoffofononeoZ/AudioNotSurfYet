@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/product/scope.md"
   - "docs/architecture/system-design.md"
   - "docs/delivery/execution-plan.md"
-next_action: "复核 V6 clean canonical 与人工任务；PROD-015 继续阻断上线"
+next_action: "V6 已批准关闭；创建 Visualizer release-readiness review，PROD-015 继续阻断上线"
 ---
 
 # Decision Registry
@@ -80,6 +80,7 @@ next_action: "复核 V6 clean canonical 与人工任务；PROD-015 继续阻断�
 | DEC-046 | 2026-09-03 | 批准 V5 40/40 clean canonical、双浏览器默认 720p30 回放、页面静音音轨、同步、命令锁、取消/context 清理与原生保存门禁；保持 canonical identity 不变，V5 改为 Complete，R-039/R-040 改为 Mitigated并开放 V6 | project-owner | approved | [Visualizer evidence](../quality/visualizer/evidence-index.md) | V5 canonical identity、owner review 结论、R-039/R-040 或 V6 开放门禁改变 |
 | DEC-047 | 2026-09-03 | V6 final hardening 固定双浏览器三格式、15 分钟四特征、20 次跨 workspace 生命周期、六个默认 WebM 与 54 步 canonical；不改变生产接口、JSON V1 或 runtime topology | project-owner | approved | [V6 eval plan](../quality/visualizer/v6-eval-plan.md) | V6 fixture、浏览器矩阵、资源口径、canonical 步数或完成门禁改变 |
 | DEC-048 | 2026-09-04 | V6 以功能、平均 30fps 与可播放媒体为主：默认 renderer 关闭 MSAA、video track 使用 `motion` hint，三格式媒体允许最多四个目标帧间隔的偶发 packet gap，15 分钟压力的 Visualizer 单帧峰值放宽为 `<60ms`；平均 fps、双轨、codec、尺寸、时长、音轨、A/V 结束差、分析归因 `<50ms`、反馈与时钟门禁不变，V5 canonical 阈值不改 | project-owner | approved | [V6 eval plan](../quality/visualizer/v6-eval-plan.md) | V6 packet cadence、renderer frame、antialias、平均 fps 或录制拓扑改变 |
+| DEC-049 | 2026-09-04 | 批准 V6 54/54 clean canonical 及双浏览器制作、原生保存/回放、键盘/焦点、长时操作与 context 清理人工门禁；保持 canonical identity 不变且无需重跑，V6 改为 Complete、R-041 改为 Mitigated，并开放独立 Visualizer release-readiness review | project-owner | approved | [Visualizer evidence](../quality/visualizer/evidence-index.md) | V6 canonical identity、owner review 结论、R-041 或 readiness 边界改变 |
 
 ## Approval Evidence
 
@@ -106,6 +107,8 @@ next_action: "复核 V6 clean canonical 与人工任务；PROD-015 继续阻断�
 2026-09-04，V6 重复真实媒体采样证明同一 Canvas 可稳定约 60fps 绘制，但 Chrome/Edge 的 VP9 recorder 在组合负载下仍会偶发产生约 78–110ms packet gap，900 秒压力组合还出现单次 55.8ms Visualizer frame。`project-owner` 明确允许在卡顿较小时略微放宽标准并优先完成功能；DEC-048 据此把 V6 三格式门禁放宽为最多四个 30fps 帧间隔，并把 V6 Visualizer 单帧峰值调整为 `<60ms`，同时保持平均 fps `±5%`、媒体结构、时长、音轨、同步、分析归因 `<50ms`、反馈与时钟门禁。实现保留关闭 MSAA、`motion` hint 与等价 Cube 计算优化。该决定不改写 V5 canonical、JSON V1、录制拓扑或 V6 owner 最终门禁。
 
 同日，DEC-048 修订在独立 implementation commit `ef12ce397d0b1a054ce797bfa1b9ff5eb5af61cd` 上形成 clean canonical `V6-2026-09-03T16-33-03-497Z-ef12ce39`，54/54 通过且 summary SHA-256 为 `695bf0acf3831907b720551c7772ea07e0dd80a5db38e829cba868f12128a014`。本记录是执行证据而非新的产品决定；V6 保持 `In Progress`、evidence 保持 `in-review`、R-041 保持 `Open`，等待 owner 完成人工制作、原生保存/回放、键盘/焦点与长时清理门禁。
+
+同日，`project-owner` 明确要求“先完成并且批准和关闭 V6”，并随后批准按关闭与视口滚动修订计划实施。DEC-049 据此将该批准登记为双浏览器完整制作、默认 WebM 原生保存/回放、键盘/焦点、长时操作和 context 清理人工门禁通过；implementation commit `ef12ce397d0b1a054ce797bfa1b9ff5eb5af61cd`、evidence registration commit `636e4d2defeb90147e949bcf20b7b0690dd77424`、run、54/54 结果、summary 和媒体 hash 均保持不变且无需重跑。V6 改为 `Complete`、R-041 改为 `Mitigated`；该批准只开放独立 Visualizer release-readiness review，不构成整体 readiness 或生产上线批准。
 
 同日，`project-owner` 明确要求实施 Q0 质量设计计划，批准了 Q0 前置、四级严重度和 readiness 后置的阶段安排；同时要求三份质量文档先保持 `in-review`，经单独审阅后才生效。因此 DEC-010 的时序决定已批准，但 Q0 内容尚未批准。
 

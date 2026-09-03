@@ -1,13 +1,13 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-09-03
+last_reviewed: 2026-09-04
 upstream_docs:
   - "docs/product/success-metrics.md"
   - "docs/architecture/interface-contracts.md"
   - "docs/architecture/risk-register.md"
   - "docs/delivery/visualizer/execution-plan.md"
-next_action: "AC-V601–AC-V607 自动化证据已通过；等待 AC-V607 owner 人工签字"
+next_action: "AC-V601–AC-V607 与 owner 人工门禁已通过；作为 readiness 基线保留"
 ---
 
 # Visualizer V1–V6 Acceptance Criteria

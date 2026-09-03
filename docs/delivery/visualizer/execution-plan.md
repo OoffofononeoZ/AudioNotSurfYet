@@ -11,7 +11,7 @@ upstream_docs:
   - "docs/architecture/visualizer/project-format-v1.md"
   - "docs/architecture/visualizer/binding-and-scene-contracts.md"
   - "docs/architecture/visualizer/recording-contract.md"
-next_action: "V6 clean canonical 已登记；等待 owner 人工任务与 evidence 批准"
+next_action: "V1–V6 已全部关闭；进入独立 Visualizer release-readiness review"
 ---
 
 # Visualizer V1–V6 Execution Plan
@@ -20,9 +20,9 @@ next_action: "V6 clean canonical 已登记；等待 owner 人工任务与 eviden
 
 把已批准的 Visualizer V0 架构按六个可独立验证的纵向里程碑交付：先建立当前歌曲工作台和本地工程，再接入 Analyzer/Editor 绑定，随后分别交付两个内置场景、实时 WebM 录制和双浏览器最终加固。
 
-Visualizer V1–V4 的工作台、数据绑定与两个场景均已通过各自 clean canonical 和 owner 门禁。V5 realtime WebM 的 40/40 clean canonical 与人工门禁于 2026-09-03 获 owner 批准并关闭；V6 final hardening 为 `In Progress`。
+Visualizer V1–V4 的工作台、数据绑定与两个场景均已通过各自 clean canonical 和 owner 门禁。V5 realtime WebM 的 40/40 clean canonical 与人工门禁于 2026-09-03 获 owner 批准并关闭；V6 final hardening 也已在 2026-09-04 获批准并关闭。
 
-V6 当前候选已实现版本化 hardening golden、当前歌曲会话内的双模板 binding 精确恢复、renderer 歌曲/帧时间诊断、测试专用资源探针，以及共享 Chrome/Edge 三格式、900 秒压力、六文件媒体和 20 次生命周期专项。按 DEC-048 修订后的 clean canonical `V6-2026-09-03T16-33-03-497Z-ef12ce39` 在 implementation commit `ef12ce397d0b1a054ce797bfa1b9ff5eb5af61cd` 上 54/54 通过，summary SHA-256 为 `695bf0acf3831907b720551c7772ea07e0dd80a5db38e829cba868f12128a014`；V6 仍须 owner 人工门禁与 evidence 批准后才能关闭。
+V6 已实现版本化 hardening golden、当前歌曲会话内的双模板 binding 精确恢复、renderer 歌曲/帧时间诊断、测试专用资源探针，以及共享 Chrome/Edge 三格式、900 秒压力、六文件媒体和 20 次生命周期专项。按 DEC-048 修订后的 clean canonical `V6-2026-09-03T16-33-03-497Z-ef12ce39` 在 implementation commit `ef12ce397d0b1a054ce797bfa1b9ff5eb5af61cd` 上 54/54 通过，summary SHA-256 为 `695bf0acf3831907b720551c7772ea07e0dd80a5db38e829cba868f12128a014`；owner 已批准人工门禁与 evidence，V6 无需重跑。
 
 ## 2. Delivery Principles
 
@@ -182,7 +182,7 @@ npm run eval:vN
 
 ## 7. Approval Gate
 
-本计划与同目录 acceptance criteria、test strategy、milestone plan 已由 owner 批准。V0-D、V1–V5 为 `Complete`，V6 为 `In Progress`。
+本计划与同目录 acceptance criteria、test strategy、milestone plan 已由 owner 批准。V0-D、V1–V6 均为 `Complete`。
 
 批准记录（2026-09-02）：
 

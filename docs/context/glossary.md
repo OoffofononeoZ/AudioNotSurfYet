@@ -4,7 +4,7 @@ owner: "project-owner"
 last_reviewed: 2026-09-03
 upstream_docs:
   - "docs/context/index.md"
-next_action: "V5 WebM 已获批准并关闭；V6 final hardening 复用既有术语"
+next_action: "V1–V6 已获批准并关闭；readiness 继续复用既有术语"
 ---
 
 # Glossary
@@ -55,7 +55,7 @@ next_action: "V5 WebM 已获批准并关闭；V6 final hardening 复用既有术
 | shared viewport | 所有活动卡共同读取的 start/end/zoom；cursor 由播放快照实时派生且不持久化 | zoom、pan、click seek 和键盘 seek 在所有卡保持同一时间身份 | [system design](../architecture/system-design.md) |
 | TestLands | `/testlands` 下的试验页面 | 当前不属于已批准产品表面或稳定接口 | [index](index.md) |
 | Visualizer V0 | 围绕当前本地歌曲，把固定值、最多四个 Analyzer 特征和同歌 Editor 事件映射到单一场景模板的音频可视化制作台 | 产品意图、系统设计与 delivery 已批准；V1 只证明工作台基础，不能冒充动态场景已完成 | [scope](../product/scope.md) |
-| Visualizer V0-D | Visualizer V1–V6 的 execution、acceptance、test strategy 与 milestone planning 门禁 | 已于 2026-09-02 获批并关闭；V1–V5 已完成，当前 V6 为 In Progress | [milestone plan](../delivery/visualizer/milestone-plan.md) |
+| Visualizer V0-D | Visualizer V1–V6 的 execution、acceptance、test strategy 与 milestone planning 门禁 | 已于 2026-09-02 获批并关闭；V1–V6 均已完成 | [milestone plan](../delivery/visualizer/milestone-plan.md) |
 | Visualizer V1 workspace foundation | `/visualizer/:trackId?`、pause-at-end route lease、三栏/互斥抽屉、中性 16:9 单 Canvas、strict JSON V1 和独立单草稿 | 21/21 canonical 与人工门禁已批准；不含动态 binding、真实场景或录制 | [Visualizer evidence](../quality/visualizer/evidence-index.md) |
 | Visualizer V2 data binding | 模板参数的 constant、analysis、editor-event 来源，0–4 唯一特征 planner、同歌 Editor snapshot 与 60Hz 绝对时间 resolver | 已实现且 clean canonical 26/26 获 owner 批准；V3 已开放 | [Visualizer V2 eval](../quality/visualizer/v2-eval-plan.md) |
 | Visualizer V3 Orthogonal Lines | 在固定 `#020403` 背景中心用单 quad/shader 绘制横竖正交线；intensity 同时控制长度和 alpha，decay 是 scene-local 确定性余辉 | 30/30 canonical 与 owner 验收已批准，V3 为 Complete | [Visualizer V3 eval](../quality/visualizer/v3-eval-plan.md) |
