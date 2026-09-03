@@ -6,7 +6,7 @@ upstream_docs:
   - "docs/quality/visualizer/v5-eval-plan.md"
   - "docs/quality/visualizer/v5-golden-examples.md"
   - "docs/architecture/risk-register.md"
-next_action: "用 V5 unit/integration/双浏览器/媒体验证记录 recording failure"
+next_action: "V5 自动化 failure matrix 已登记；等待 owner 对残余原生流程与回放风险做人工评审"
 ---
 
 # Visualizer V5 Failure Taxonomy
