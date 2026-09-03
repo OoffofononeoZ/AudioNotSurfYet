@@ -10,12 +10,12 @@
 | `/comingsoon` | `ComingSoon.vue` | 通用空占位，不再作为 Visualizer 入口 |
 | `/analyzer` | `Analyzer.vue` | Canvas 点阵背景和静态 Meyda 数据入口 |
 | `/editor/:trackId?` | `Editor.vue` | E1–E8 已实现并获批准；E8 25/25 canonical 与 owner 门禁通过 |
-| `/visualizer/:trackId?` | `Visualizer.vue` | V1–V5 已批准；V6 final hardening 为 In Progress |
+| `/visualizer/:trackId?` | `Visualizer.vue` | V1–V6 canonical 与人工门禁均已批准 |
 | `/testlands` | `TestLands.vue` | 试验页面，不应当作生产契约 |
 
 Editor `/editor/:trackId?`、Header 当前歌曲入口、播放列表“去编辑”和 MusicBar 条件隐藏已由 E1 实现并获批准。E2 波形/网格/游标 Canvas、共享 viewport、seek/zoom/pan、tempo boundary、BPM/拍号/single-beat 和刷新恢复也已由 22/22 canonical 与 owner 批准。E3 point lane/class、自适应网格、鼠标/右键/键盘 marker 与 viewport-visible DOM 已由 26/26 clean canonical 和 owner 批准。E4 21 项单选 overlay、shared renderer、三手柄、pointer-through 与错误隔离已由 31/31 clean canonical 和 owner 批准。E5 range lane/class、E6 双浏览器/10,000 事件与人工补偿均已获批准；E7 窗口级 overlay 修订版 46/46 clean canonical 已获批准。E8 把 timeline stage 固定为桌面 `88px`、窄屏 `72px`，同 URL 歌曲恢复后合并 `enter(trackId)` 且保持 paused，另一首可播放歌曲只显示显式 `router.replace` 入口；25/25 canonical 与 owner 门禁已批准。
 
-Visualizer V1 已实现 `/visualizer/:trackId?`、Header 当前歌曲入口、有效 route 的 MusicBar 隐藏、`pause-at-end`、1280+ 三栏、1024–1279 互斥抽屉、中性 16:9 单 Canvas、JSON V1 与单草稿，且 21/21 canonical 已批准。V2 已实现 constant/analysis/editor-event inspector、最多四项分析、同歌 Editor snapshot 和确定性 resolved values，26/26 canonical 已获 owner 批准；V3 Orthogonal Lines 与单 RendererHost 已获批准。V4 Cube Swarm 已实现并通过 34/34 clean canonical 与 owner 门禁。V5 已在同页面增加 recording 状态栏、双层命令锁、站内离页对话框和 ready Blob 保存/丢弃，40/40 canonical 与 owner 门禁已批准；route 和 project JSON V1 不变。V6 候选在 controller 当前歌曲会话内分别缓存两个模板的完整 bindings：切换模板恢复该模板最近状态，首次进入仍使用 registry 默认值；离页或歌曲身份变化清空缓存，JSON 仍只持久化当前模板，因此未升级 schema。
+Visualizer V1 已实现 `/visualizer/:trackId?`、Header 当前歌曲入口、有效 route 的 MusicBar 隐藏、`pause-at-end`、1280+ 三栏、1024–1279 互斥抽屉、中性 16:9 单 Canvas、JSON V1 与单草稿，且 21/21 canonical 已批准。V2 已实现 constant/analysis/editor-event inspector、最多四项分析、同歌 Editor snapshot 和确定性 resolved values，26/26 canonical 已获 owner 批准；V3 Orthogonal Lines 与单 RendererHost 已获批准。V4 Cube Swarm 已实现并通过 34/34 clean canonical 与 owner 门禁。V5 已在同页面增加 recording 状态栏、双层命令锁、站内离页对话框和 ready Blob 保存/丢弃，40/40 canonical 与 owner 门禁已批准；route 和 project JSON V1 不变。V6 在 controller 当前歌曲会话内分别缓存两个模板的完整 bindings：切换模板恢复该模板最近状态，首次进入仍使用 registry 默认值；离页或歌曲身份变化清空缓存，JSON 仍只持久化当前模板，因此未升级 schema。V6 54/54 canonical 与人工门禁已获批准并关闭。
 
 `MainLayout.vue` 固定组合 `HeaderBar`、当前 `router-view` 和 `MusicBar`，并创建/提供唯一 `AudioSessionService`、`AnalysisCoordinator`、Editor controller 与 Visualizer controller。修改页面高度、z-index、固定定位或底部空间时，要同时检查 Header、MusicBar 和两个 route lease。
 

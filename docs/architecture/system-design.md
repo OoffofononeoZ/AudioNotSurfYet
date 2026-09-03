@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/product/scope.md"
   - "docs/product/success-metrics.md"
   - "docs/product/open-questions.md"
-next_action: "V6 已在既有架构内通过 clean canonical；等待 owner 人工门禁"
+next_action: "V6 已在既有架构内批准关闭；进入独立 Visualizer release-readiness review"
 ---
 
 # System Design

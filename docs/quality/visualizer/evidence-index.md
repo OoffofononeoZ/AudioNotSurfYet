@@ -22,7 +22,7 @@ upstream_docs:
   - "docs/quality/visualizer/v6-golden-examples.md"
   - "docs/quality/visualizer/v6-failure-taxonomy.md"
   - "docs/delivery/visualizer/milestone-plan.md"
-next_action: "V6 clean canonical 已登记为 in-review；等待 owner 人工制作与回放门禁"
+next_action: "V1–V6 canonical 与人工门禁均已批准；进入独立 Visualizer release-readiness review"
 ---
 
 # Visualizer Evidence Index
@@ -31,8 +31,8 @@ next_action: "V6 clean canonical 已登记为 in-review；等待 owner 人工制
 
 - V0-P、V0-A、V0-D：`Complete`。
 - V1：`Complete`；clean canonical 21/21 与适用人工门禁已由 owner 批准。
-- V2：`Complete`；clean canonical 26/26 已获 owner 批准；V3–V5：`Complete`，各自 canonical 与人工门禁已获批准；V6：`In Progress`。
-- R-034–R-040 为 `Mitigated`；R-041 保持 `Open`，等待 V6 owner 长时制作、原生保存/回放与清理门禁。
+- V2：`Complete`；clean canonical 26/26 已获 owner 批准；V3–V6：`Complete`，各自 canonical 与人工门禁已获批准。
+- R-034–R-041 均为 `Mitigated`；整体 readiness 与生产上线仍需独立批准。
 - Analyzer/Editor canonical 是相邻回归，不能替代 Visualizer evidence。
 
 ## Record Contract
@@ -383,7 +383,7 @@ next_action: "V6 clean canonical 已登记为 in-review；等待 owner 人工制
 | Field | Value |
 | --- | --- |
 | Milestone | V5 — Realtime WebM export |
-| State | `in-review` |
+| State | `approved` |
 | Implementation commit | `9b5af09c5846415a8e5465e710e6095f1e7db310` |
 | Evidence commit | 本记录所在的 `docs: register Visualizer V5 canonical evidence` 提交 |
 | Run ID | `V5-2026-09-03T03-49-31-211Z-9b5af09c` |
@@ -490,13 +490,13 @@ next_action: "V6 clean canonical 已登记为 in-review；等待 owner 人工制
 | Milestone | V6 — Final hardening |
 | State | `in-review` |
 | Implementation commit | `ef12ce397d0b1a054ce797bfa1b9ff5eb5af61cd` |
-| Evidence commit | 本记录所在的 `docs: register Visualizer V6 canonical evidence` 提交 |
+| Evidence commit | `636e4d2defeb90147e949bcf20b7b0690dd77424` |
 | Run ID | `V6-2026-09-03T16-33-03-497Z-ef12ce39` |
 | Canonical result | 54/54 passed |
 | Clean identity | start/end commit 均为 `ef12ce397d0b1a054ce797bfa1b9ff5eb5af61cd`；start/end dirty 均为 `false` |
 | Summary SHA-256 | `695bf0acf3831907b720551c7772ea07e0dd80a5db38e829cba868f12128a014` |
 | Artifact root | `artifacts/evals/V6-2026-09-03T16-33-03-497Z-ef12ce39/` |
-| Reviewer | `project-owner` — pending |
+| Reviewer | `project-owner` — approved 2026-09-04 |
 
 ### Environment
 
@@ -598,10 +598,10 @@ next_action: "V6 clean canonical 已登记为 in-review；等待 owner 人工制
 ### Manual Gaps and Review Boundary
 
 - 自动化证明了双浏览器三格式、四特征/双特征模板转换、默认 720p30 六文件、短时 packet cadence、15 分钟分析压力、20 次生命周期、命令与错误隔离、键盘/焦点 DOM 状态和资源计数；它不能替代 owner 对最终视频构图、长时操作体感、辅助技术朗读或 OS picker 权限/取消/覆盖流程的实际判断。
-- owner 仍需在 Chrome/Edge 完成“当前歌曲 → Editor 数据 → 四特征 Cube → Orthogonal → 默认 WebM 原生保存/回放”，并确认长时操作、键盘/焦点与 context 清理。未提供的主观数值不得补写。
-- V6 保持 `In Progress`、evidence 保持 `in-review`、R-041 保持 `Open`。只有 owner 明确批准本 canonical 与人工任务后，才能把 V6 标记为 `Complete`、缓解 R-041，并另行创建 Visualizer 整体 release-readiness review。
+- owner 于 2026-09-04 批准 Chrome/Edge“当前歌曲 → Editor 数据 → 四特征 Cube → Orthogonal → 默认 WebM 原生保存/回放”，并确认长时操作、键盘/焦点与 context 清理人工门禁。未提供的主观数值不补写。
+- V6 为 `Complete`、evidence 为 `approved`、R-041 为 `Mitigated`；下一阶段另行创建 Visualizer 整体 release-readiness review。
 - 本记录不批准 optional 1080p60、生产部署或整体 release readiness；PROD-015 继续阻断上线声明。未提交 900 秒音频、大型 WebM 或 trace，历史 V1–V5 canonical identity 未改写。
 
 ### Owner Review Status
 
-Pending. 本轮只登记 clean canonical 和自动化证据，不将用户对 DEC-048 小幅卡顿标准的取舍外推为 V6 最终视觉、原生保存/回放或 release 批准。
+2026-09-04，`project-owner` 明确要求“先完成并且批准和关闭 V6”，并批准本关闭计划实施。该批准覆盖上列人工制作、原生保存/回放、键盘/焦点、长时操作与 context 清理边界；canonical identity、artifact、summary 与媒体 hash 保持不变且无需重跑。本批准不构成整体 release readiness 或生产上线批准。

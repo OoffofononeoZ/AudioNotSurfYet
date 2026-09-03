@@ -4,7 +4,7 @@ owner: "project-owner"
 last_reviewed: 2026-09-04
 upstream_docs:
   - "docs/architecture/system-design.md"
-next_action: "V6 clean canonical 已验证接口前向回归；等待 owner 人工门禁"
+next_action: "V6 已批准关闭；保持现有接口作为 Visualizer readiness 基线"
 ---
 
 # Interface Contracts

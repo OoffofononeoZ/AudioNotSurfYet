@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/product/success-metrics.md"
   - "docs/architecture/system-design.md"
   - "docs/architecture/visualizer/project-format-v1.md"
-next_action: "V6 54 步 clean canonical 已通过；等待 owner 人工制作与回放门禁"
+next_action: "V6 54 步 clean canonical 与人工门禁已批准；保持为 readiness 基线"
 ---
 
 # Visualizer Binding and Scene Contracts
@@ -180,4 +180,4 @@ V3 canonical 阶段曾以明确的 V4 中性预览验证 scene disposal 与单 h
 
 ## Approval State
 
-`project-owner` 于 2026-09-02 批准 Visualizer V0 system design、接口契约、R-034–R-041 与 ADR-0014–0017。本契约据此为 `approved`。V3 implementation commit 与 30/30 clean canonical 已于 2026-09-03 获 owner 批准，V3 关闭并开放 V4；同日 owner 选择并批准 DEC-041“核心环群”细化及 V4 quality contract。V4 Cube Swarm 34/34 clean canonical 与 owner 门禁随后获批。V5 40/40 clean canonical 和人工门禁也于 2026-09-03 获批，V5 已关闭并开放 V6。V6 已在不改变本接口或生产拓扑的前提下通过 54/54 clean canonical；evidence 与人工门禁仍为 `in-review`，不构成 V6 Complete、R-041 缓解或上线批准。
+`project-owner` 于 2026-09-02 批准 Visualizer V0 system design、接口契约、R-034–R-041 与 ADR-0014–0017。本契约据此为 `approved`。V3 implementation commit 与 30/30 clean canonical 已于 2026-09-03 获 owner 批准，V3 关闭并开放 V4；同日 owner 选择并批准 DEC-041“核心环群”细化及 V4 quality contract。V4 Cube Swarm 34/34 clean canonical 与 owner 门禁随后获批。V5 40/40 clean canonical 和人工门禁也于 2026-09-03 获批，V5 已关闭并开放 V6。V6 在不改变本接口或生产拓扑的前提下完成 54/54 clean canonical，并于 2026-09-04 获 owner 人工门禁批准；V6 为 `Complete`、R-041 为 `Mitigated`，整体 readiness 与上线批准仍独立处理。

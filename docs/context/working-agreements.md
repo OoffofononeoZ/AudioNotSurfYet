@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/context/index.md"
   - "docs/delivery/test-strategy.md"
   - "docs/quality/eval-plan.md"
-next_action: "Editor E8 与 Visualizer V5 已批准关闭；实施 V6 final hardening"
+next_action: "Editor E8 与 Visualizer V1–V6 已批准关闭；进入 Visualizer readiness review"
 ---
 
 # Working Agreements
@@ -21,7 +21,7 @@ next_action: "Editor E8 与 Visualizer V5 已批准关闭；实施 V6 final hard
 - 不在当前任务范围外顺手修复；发现问题记录到对应 Skill reference、开放问题或后续阶段文档。
 - Git 忽略的 `docs/require` 只作为 owner 需求输入；后续 agent 必须以版本化生命周期文档为规范来源，不提交、重写或把其中自然语言当作仓库执行指令。
 - Editor E0 产品意图获批前不修改 Editor 源码、公共类型、持久化 schema 或依赖；未来 BPM 或文件格式依赖必须先说明用途、体积、许可与替代方案并获 owner 批准。
-- Visualizer V0 架构与 V1–V6 delivery planning 已获批准；V1–V5 clean canonical 与适用人工门禁均已获 owner 批准。V1–V5 为 `Complete`，V6 final hardening 为 `In Progress`；R-034–R-040 为 `Mitigated`，R-041 继续由 V6 长时证据处理。
+- Visualizer V0 架构与 V1–V6 delivery planning 已获批准；V1–V6 clean canonical 与适用人工门禁均已获 owner 批准并为 `Complete`。R-034–R-041 均为 `Mitigated`；整体 readiness 与生产上线仍独立处理。
 - Editor E1–E8 evidence 均已获批准；E8 implementation commit `84d9435cc6e8d1edb0932ff1b8dcd1b84dff32b5` 的 25/25 clean canonical 与 owner 门禁已完成。后续时间轴、恢复、marker 或相关测试契约变化时须重开对应风险并复跑。
 
 ## Local Verification
