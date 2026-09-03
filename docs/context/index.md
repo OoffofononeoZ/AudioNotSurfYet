@@ -4,14 +4,14 @@ owner: "project-owner"
 last_reviewed: 2026-09-03
 upstream_docs:
   - "AGENTS.md"
-next_action: "Visualizer V5 与 Editor E8 canonical 均为 in-review；分别等待 owner 人工门禁"
+next_action: "Editor E8 已批准关闭；Visualizer V5 继续等待独立 owner 人工门禁"
 ---
 
 # Repository Context Index
 
 ## Purpose
 
-AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端。Editor E1–E7 已获批准并关闭，E8 时间轴/恢复/标记修正为 `In Progress`，25/25 clean canonical 已登记为 `in-review`。Analyzer M14 已交付 21 张折叠卡的全局自定义顺序、可访问排序和 V1 顺序持久化，最多四项 FIFO 保持独立。M13 17/17 canonical 保留为历史，M14 19/19 canonical 是当前 Analyzer 候选。Visualizer V0 产品、系统设计与 V1–V6 delivery planning 均已获批准；V1–V4 canonical 与人工门禁均已获 owner 批准，V5 WebM 40/40 canonical 为 `in-review`。
+AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端。Editor E1–E8 已获批准并关闭；E8 的时间轴/恢复/标记修正通过 25/25 clean canonical 与 owner 门禁。Analyzer M14 已交付 21 张折叠卡的全局自定义顺序、可访问排序和 V1 顺序持久化，最多四项 FIFO 保持独立。M13 17/17 canonical 保留为历史，M14 19/19 canonical 是当前 Analyzer 候选。Visualizer V0 产品、系统设计与 V1–V6 delivery planning 均已获批准；V1–V4 canonical 与人工门禁均已获 owner 批准，V5 WebM 40/40 canonical 为 `in-review`。
 
 本目录维护仓库事实、边界和工作记忆；生命周期路由与通用方法由 [AGENTS.md](../../AGENTS.md) 负责。当前代码事实与目标架构必须区分：现状见 [system map](system-map.md)，批准的目标见 [system design](../architecture/system-design.md)。
 
@@ -20,9 +20,9 @@ AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端。Editor E1–
 - Repository context：入口、决策注册表、system map、glossary 与 working agreements 均已批准。
 - Product intent：Analyzer/Editor 历史范围与 Visualizer V0 均已批准；PROD-014V 已关闭，PROD-022 保留为非阻断未来问题。
 - System design：Analyzer/Editor 历史设计仍是已批准/实现基线；Visualizer system design、接口、风险和 ADR-0014–0017 已获批准。
-- Execution planning：M1–M14、Editor E0-D/E1–E7、Visualizer V0-D/V1–V4 均为 `Complete`；Editor E8 与 Visualizer V5 为 `In Progress`，V6 为 `Planned`。
-- Quality and evals：M3–M14、Editor E1–E7 与 Visualizer V1–V4 evidence 已批准；E8/V5 clean canonical 均已登记为 `in-review`。
-- Implementation：Editor E8 可用性修正与 Visualizer V5 录制均已实现并等待 owner 人工门禁；V6 加固仍未实现。
+- Execution planning：M1–M14、Editor E0-D/E1–E8、Visualizer V0-D/V1–V4 均为 `Complete`；Visualizer V5 为 `In Progress`，V6 为 `Planned`。
+- Quality and evals：M3–M14、Editor E1–E8 与 Visualizer V1–V4 evidence 已批准；V5 clean canonical 已登记为 `in-review`。
+- Implementation：Editor E8 可用性修正已完成；Visualizer V5 录制已实现并等待 owner 人工门禁，V6 加固仍未实现。
 - Readiness、release、retrospective：Analyzer M14 为 `Ready with waivers`；PROD-015 仍阻断上线，Editor readiness 独立。
 
 ## Key Documents
@@ -148,7 +148,7 @@ AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端。Editor E1–
 
 - Product intent：[problem brief](../product/problem-brief.md)、[scope](../product/scope.md)、[success metrics](../product/success-metrics.md) 中的 Visualizer V0 已于 2026-09-02 获批
 - System design：[system design](../architecture/system-design.md)、[interface contracts](../architecture/interface-contracts.md)、Visualizer 三份子契约与 ADR-0014–0017 已于 2026-09-02 获批
-- Delivery planning：Analyzer M14、Editor E1–E7、Visualizer V0-D/V1–V4 均已批准并关闭；Editor E8 与 Visualizer V5 为 `In Progress`，V6 保持 `Planned`
+- Delivery planning：Analyzer M14、Editor E1–E8、Visualizer V0-D/V1–V4 均已批准并关闭；Visualizer V5 为 `In Progress`，V6 保持 `Planned`
 - Quality design：[eval plan](../quality/eval-plan.md) 已覆盖 M3–M14 并获批准
 - Quality evidence：[evidence index](../quality/evidence-index.md) 的 M3–M13 为历史，M14 当前 record 已批准
 - Editor E1 quality：[eval plan](../quality/editor/eval-plan.md)、[golden](../quality/editor/golden-examples.md)、[failure taxonomy](../quality/editor/failure-taxonomy.md) 与 [evidence](../quality/editor/evidence-index.md) 已获批准
@@ -158,7 +158,7 @@ AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端。Editor E1–
 - Editor E5 quality：[eval plan](../quality/editor/e5-eval-plan.md)、[golden](../quality/editor/e5-golden-examples.md)、[failure taxonomy](../quality/editor/e5-failure-taxonomy.md) 与 35/35 canonical record 已获批准
 - Editor E6 quality：[eval plan](../quality/editor/e6-eval-plan.md)、[golden](../quality/editor/e6-golden-examples.md)、[failure taxonomy](../quality/editor/e6-failure-taxonomy.md) 与 40/40 canonical record 已获批准
 - Editor E7 quality：[eval plan](../quality/editor/e7-eval-plan.md)、[golden](../quality/editor/e7-golden-examples.md)、[failure taxonomy](../quality/editor/e7-failure-taxonomy.md) 与修订版 46/46 canonical 已获批准；44/44 run 保留为 `pre-revision`
-- Editor E8 quality：[eval plan](../quality/editor/e8-eval-plan.md)、[golden](../quality/editor/e8-golden-examples.md)、[failure taxonomy](../quality/editor/e8-failure-taxonomy.md) 已批准；25/25 canonical record 为 `in-review`
+- Editor E8 quality：[eval plan](../quality/editor/e8-eval-plan.md)、[golden](../quality/editor/e8-golden-examples.md)、[failure taxonomy](../quality/editor/e8-failure-taxonomy.md) 已批准；25/25 canonical record 与 owner 门禁均为 `approved`
 - Visualizer quality：V1–V4 契约与 evidence 已获批准；V5 WebM 40/40 canonical record 为 `in-review`
 - Quality readiness：[Analyzer release readiness](../quality/release-readiness.md) 已按 M14 恢复 `Ready with waivers`；M13 结论只作历史
 - Release operations：`docs/release/` 尚未创建；PROD-015 的托管平台、域名和 SPA fallback 解决前不进入正式上线
@@ -168,7 +168,7 @@ AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端。Editor E1–
 
 2026-09-02，owner 要求把 Visualizer 的单场景制作台、两个内置模板、最多四个唯一 Analyzer 特征、Editor 事件绑定和实时 WebM 路线转写为产品意图，并明确批准该 V0 产品意图、关闭 PROD-014V、开放 system design。随后 owner 明确批准 Visualizer V0 system design、接口契约、R-034–R-041 与 ADR-0014–0017，并批准 V1–V6 delivery planning、同意开始 V1。V1 clean canonical `V1-2026-09-02T07-03-26-973Z-fd44c892` 在 commit `fd44c8921a534c22b2362ccffff7ec9e46f3ff02` 上 21/21 通过，summary SHA-256 为 `14c9ed2258baf6c9a2a3a20dfcaba65a0c643029f8510a1d9e4c6662c9c90300`；同日 owner 批准 V1 evidence 与人工门禁，V1 关闭并开放 V2。V2 clean canonical `V2-2026-09-02T08-46-21-778Z-769faafe` 在 commit `769faafeef576bf9b98a95f6904cdb9886298530` 上 26/26 通过，summary SHA-256 为 `18b7d83d68f068ac615c56e1bb844a3c80bb1460ac884116d94cb460dd07bafb`；同日 owner 批准 V2 evidence，V2 关闭并开放 V3。随后 V3 Orthogonal Lines 在 implementation commit `89be30eb23d4e53d2c38f24e111cd1af7ec0840d` 上完成 clean canonical `V3-2026-09-02T13-32-42-513Z-89be30eb`，固定 30 步全部通过，summary SHA-256 为 `afe4cbe233fe1feded65380d6e976d5a4c32c2f9860fe2e0357a0d615d6a7b84`。`project-owner` 于 2026-09-03 明确批准该 canonical evidence、Orthogonal Lines、确定性余辉与单 RendererHost；V3 据此为 `Complete`、R-037/R-038 为 `Mitigated`，V4 为 `In Progress`。V4 clean canonical `V4-2026-09-02T17-47-40-271Z-5c2d24a3` 在 commit `5c2d24a3f1f413dba236563b3686237c6b8f2e21` 上 34/34 通过，summary SHA-256 为 `9b2a86e3dcdd4e634317c4234418dc3444da441a3be805a980562768dba5c3b2`；owner 于 2026-09-03 批准 evidence 并关闭 V4、开放 V5。R-039 因录制中 context loss 尚待实现仍为 `Open`。
 
-2026-09-03，Editor E8 implementation commit `84d9435cc6e8d1edb0932ff1b8dcd1b84dff32b5` 交付 `88px/72px` 时间轴、6px 波形安全区、同歌 paused 恢复、异歌显式 replace 与中心对齐 marker。clean canonical `E8-2026-09-03T04-07-28-904Z-84d9435c` 25/25 通过，summary SHA-256 为 `ba9ff8db30868c8bf34140a3db2bf8cd7e3d56557ca7ac8682dfa6c3ce664a42`；evidence 为 `in-review`，E8 与 R-022/R-024/R-025 等待 owner 人工验收。
+2026-09-03，Editor E8 implementation commit `84d9435cc6e8d1edb0932ff1b8dcd1b84dff32b5` 交付 `88px/72px` 时间轴、6px 波形安全区、同歌 paused 恢复、异歌显式 replace 与中心对齐 marker。clean canonical `E8-2026-09-03T04-07-28-904Z-84d9435c` 25/25 通过，summary SHA-256 为 `ba9ff8db30868c8bf34140a3db2bf8cd7e3d56557ca7ac8682dfa6c3ce664a42`；owner 随后批准 evidence 与人工门禁，E8 关闭，R-022/R-024/R-025 改为 `Mitigated`。
 
 ## Current Known Gaps
 
@@ -180,7 +180,7 @@ AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端。Editor E1–
 - M11 clean canonical 已在 Chrome/Edge 上 38/38 通过，其中 Edge 全量为 31/31；原生 Edge 权限、辅助技术与人工长会话补偿门禁已于 2026-08-26 获 owner 签字，M11 为 `Complete`。
 - Analyzer M12/M13 clean canonical 保留为历史；M14 clean canonical `M14-2026-09-01T02-36-49-995Z-0e991307` 在 commit `0e991307d9045a1ec84ddaae0515612240894a92` 上 19/19 通过，R-031/R-032/R-033 已缓解，readiness 恢复。
 - Editor E1–E6 已实现并获批准；E6 双浏览器、三格式、10,000 事件、资源与无障碍 clean canonical 为 40/40。
-- Editor E1–E7 均为 `Complete`；E8 为 `In Progress`，25/25 clean canonical 已登记为 `in-review`。它只调整时间轴垂直几何、不可用恢复编排和 point 视觉中心，不改变 JSON/IndexedDB/runtime ownership。
+- Editor E1–E8 均为 `Complete`；E8 的 25/25 clean canonical 与 owner 门禁已批准。它只调整时间轴垂直几何、不可用恢复编排和 point 视觉中心，不改变 JSON/IndexedDB/runtime ownership。
 - Visualizer V1 已从 `/comingsoon` 迁移到 `/visualizer/:trackId?`，并实现通用 route lease、strict JSON/单草稿、三栏/抽屉和中性单 Canvas；V1 canonical 已批准。V2 已实现同歌 Editor snapshot、constant/analysis/editor-event、0–4 planner 和绝对时间 resolver，canonical 已获批准；V3 Orthogonal Lines 与 V4 Cube Swarm canonical/人工门禁均已获批准；pre-Gain WebM 属于当前 V5。
 - E1 clean canonical `E1-2026-08-26T15-24-21-043Z-792b424f` 在 clean commit `792b424fbab8e3621ad24d8c9add47d1c9bffcb4` 上 18/18 通过，summary SHA-256 为 `db51ba98b757ccd524d298243c6118eb24fad60101a74f20a5ff98478a5d5bc6`，并于 2026-08-26 获 owner 批准。
 - E2 clean canonical `E2-2026-08-26T16-42-47-634Z-9fc5c0a8` 在 clean commit `9fc5c0a81fcf90abfbc665412277147cd958200f` 上 22/22 通过，summary SHA-256 为 `4465c20343af9092601296b86a229200579f648ffa90641411b88f9861ba8660`；2026-08-27 owner 批准后 E2 为 `Complete`，E3 已开放。

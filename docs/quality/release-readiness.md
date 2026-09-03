@@ -92,7 +92,7 @@ M14 在 clean commit `0e991307d9045a1ec84ddaae0515612240894a92` 上完成 19/19 
 | W-006 | R-020：Meyda 5.6.3 `spectralFlux` 上游缺陷仍存在 | 仅依赖 ADR-0005 项目 Flux v1 与 golden；不得表述为 Meyda 已修复 | `project-owner` — accepted 2026-08-26 | Meyda 升级、Flux 公式或 cache/exact cursor 语义变化 |
 | W-007 | ENG-007：esbuild 0.27.3 尚有 1 项 low 开发服务器 advisory | dev server 仅绑定可信本地环境，不作为生产服务或暴露到不受信网络 | `project-owner` — accepted 2026-08-26 | 上游兼容修复可用、部署方式变化或需要远程开发访问 |
 
-R-005 的权限跨会话不持久已在架构风险中由 owner 接受；当前 Blob、显式恢复访问和可见三态是产品恢复边界。R-018 的范围漂移风险继续为 Open：Editor E1–E7 已按独立门禁关闭且不继承 Analyzer readiness，Visualizer 与其他未定义 Tab 仍不属于当前批准范围。
+R-005 的权限跨会话不持久已在架构风险中由 owner 接受；当前 Blob、显式恢复访问和可见三态是产品恢复边界。R-018 的范围漂移风险继续为 Open：Editor E1–E8 已按独立门禁关闭且不继承 Analyzer readiness，Visualizer 与其他未定义 Tab 仍不属于当前批准范围。
 
 ## Approval Record and Follow-Up
 

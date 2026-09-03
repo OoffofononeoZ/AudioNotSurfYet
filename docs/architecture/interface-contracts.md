@@ -4,7 +4,7 @@ owner: "project-owner"
 last_reviewed: 2026-09-03
 upstream_docs:
   - "docs/architecture/system-design.md"
-next_action: "V5 recording 与 E8 Editor 修正均已实现并完成 clean canonical；等待各自 owner 门禁"
+next_action: "Editor E8 已关闭；Visualizer V5 clean canonical 继续等待独立 owner 门禁"
 ---
 
 # Interface Contracts
@@ -739,7 +739,7 @@ Invariants:
 
 `project-owner` 于 2026-08-26 明确批准 Editor E0 系统设计、接口契约、风险与 ADR，并同意进入 E1–E6 execution planning。上述 Editor 接口据此获批；Analyzer 历史契约继续有效，但设计批准不能作为 Editor 代码已实现或验证的证据。
 
-`project-owner` 于 2026-09-03 以实施指令批准 ADR-0018 与上述 E8 内部契约，并开放 E8 实现。E8 25/25 clean canonical 已登记为 `in-review`；风险关闭与 E8 完成仍等待 owner 验收。
+`project-owner` 于 2026-09-03 以实施指令批准 ADR-0018 与上述 E8 内部契约，并开放 E8 实现。E8 25/25 clean canonical 通过后，owner 又明确批准 evidence 与人工门禁；E8 已关闭，相关风险改为 `Mitigated`。
 
 ## Visualizer Contract Status（approved）
 

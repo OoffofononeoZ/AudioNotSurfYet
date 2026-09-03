@@ -13,7 +13,7 @@ upstream_docs:
   - "docs/quality/editor/e7-eval-plan.md"
   - "docs/quality/editor/e8-eval-plan.md"
   - "docs/delivery/editor/milestone-plan.md"
-next_action: "E8 clean canonical 25/25 已登记为 in-review；等待 owner 人工验收"
+next_action: "E8 clean canonical 与 owner 人工门禁已批准；Editor readiness 另行复核"
 ---
 
 # Editor Evidence Index
@@ -28,7 +28,7 @@ next_action: "E8 clean canonical 25/25 已登记为 in-review；等待 owner 人
 - E5：`Complete`。
 - E6：`Complete`。
 - E7：`Complete`。
-- E8：`In Progress`；clean canonical 已登记为 `in-review`，等待 owner 人工验收。
+- E8：`Complete`；clean canonical 与 owner 人工门禁均已批准。
 - E1 clean canonical 与 owner 人工门禁均已批准；Analyzer M3–M11 evidence 仍不能替代未来 Editor 里程碑证据。
 - E2 clean canonical 与 owner 门禁已于 2026-08-27 获批。
 - E3 clean canonical 与 owner 人工门禁已于 2026-08-27 获批；E4 clean canonical 与 owner 人工门禁随后获批。
@@ -36,7 +36,7 @@ next_action: "E8 clean canonical 25/25 已登记为 in-review；等待 owner 人
 - E5 clean canonical 35/35 与 owner 人工范围任务已于 2026-08-27 获批；E6 已开放。
 - E6 clean canonical 40/40、原生 OS picker、`beforeunload`、辅助技术与长会话补偿已于 2026-08-28 获 owner 批准；E7 紧凑工作台布局已开放，Editor readiness 延后至 E7 审批。
 - E7 修订版 clean canonical 已在实现 commit `080f577fe20fcb22a20184dce0b15892c5299464` 上 46/46 通过；原 44/44 run 保留为 `pre-revision`。2026-08-31 owner 批准修订版候选并关闭 E7，未提供的人工测量不补写。
-- E8 clean canonical 已在实现 commit `84d9435cc6e8d1edb0932ff1b8dcd1b84dff32b5` 上 25/25 通过；该自动化事实不代替 owner 对紧凑高度、恢复语义和 marker 可读性的人工验收。
+- E8 clean canonical 已在实现 commit `84d9435cc6e8d1edb0932ff1b8dcd1b84dff32b5` 上 25/25 通过；owner 已复核紧凑高度、恢复语义和 marker 可读性门禁并批准关闭 E8。
 
 ## 2. Record Contract
 
@@ -747,14 +747,14 @@ next_action: "E8 clean canonical 25/25 已登记为 in-review；等待 owner 人
 | --- | --- |
 | Run ID | `E8-2026-09-03T04-07-28-904Z-84d9435c` |
 | Milestone | E8 — Timeline, recovery and marker usability |
-| State | `in-review`（25/25 自动化通过，等待 owner 人工验收） |
+| State | `approved`（25/25 自动化与 owner 人工门禁均通过） |
 | Implementation commit | `84d9435cc6e8d1edb0932ff1b8dcd1b84dff32b5` |
 | Evidence commit | 本记录所在的 `docs: register Editor E8 canonical evidence` 提交 |
 | Dirty at start / end | `false` / `false` |
 | Commit at end | `84d9435cc6e8d1edb0932ff1b8dcd1b84dff32b5` |
 | Started at | 2026-09-03 04:07:28.904 UTC |
 | Method | `npm run eval:e8` |
-| Reviewer | `project-owner` — pending |
+| Reviewer | `project-owner` — approved 2026-09-03 |
 | Retention | `local-present`；至少保留到 E8 审批完成 |
 | Artifact root | `artifacts/evals/E8-2026-09-03T04-07-28-904Z-84d9435c/` |
 | Summary SHA-256 | `ba9ff8db30868c8bf34140a3db2bf8cd7e3d56557ca7ac8682dfa6c3ce664a42` |
@@ -830,5 +830,6 @@ E8 Chrome/Edge 测试均捕获 `pageerror` 和异常 console 并要求为空。r
 ### Manual Boundary and Approval Gate
 
 - 自动化证明 DOM/Canvas 几何、同歌恢复保持 paused、异歌不静默切换、accessible name 与双浏览器回归；它不能替代 owner 对 72/88px 密度、波形可读性、marker/stem 视觉中心和真实文件重选操作的判断。
-- owner 需人工确认：桌面/窄屏波形密度可接受；正确同歌重选后不自动播放；异歌入口文案与返回行为清晰；point marker、候选框和 stem 在实际缩放下易辨识。
-- E8 保持 `In Progress`，R-022/R-024/R-025 保持 `Open`。只有 owner 明确批准本 canonical 与人工门禁后，才把 evidence 改为 `approved`、E8 改为 `Complete` 并复核 Editor readiness。
+- owner 人工边界包括：桌面/窄屏波形密度可接受；正确同歌重选后不自动播放；异歌入口文案与返回行为清晰；point marker、候选框和 stem 在实际缩放下易辨识。
+- 2026-09-03，owner 要求评估 E8 是否可关闭并授权在满足时批准。审计确认 clean identity、25/25 结果、artifact hash、四视口密度、paused 恢复、显式异歌切换与 marker 几何均满足已批准门禁；owner 据此批准 canonical 与上述人工边界，不补写未提供的额外主观数值。
+- E8 为 `Complete`，R-022/R-024/R-025 为 `Mitigated`。Editor 整体 readiness 仍需独立 review，本批准不自动推定 readiness。
