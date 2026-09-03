@@ -5,7 +5,7 @@ last_reviewed: 2026-09-03
 upstream_docs:
   - "docs/quality/editor/e8-eval-plan.md"
   - "docs/delivery/editor/acceptance-criteria.md"
-next_action: "以 E8 scoped/provisional 复核全部 golden；clean canonical 后再登记 evidence"
+next_action: "E8 golden 已由 25/25 clean canonical 复核；等待 owner 人工验收"
 ---
 
 # Editor E8 Golden Examples

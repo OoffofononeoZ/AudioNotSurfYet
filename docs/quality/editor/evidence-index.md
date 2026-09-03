@@ -11,8 +11,9 @@ upstream_docs:
   - "docs/quality/editor/e5-eval-plan.md"
   - "docs/quality/editor/e6-eval-plan.md"
   - "docs/quality/editor/e7-eval-plan.md"
+  - "docs/quality/editor/e8-eval-plan.md"
   - "docs/delivery/editor/milestone-plan.md"
-next_action: "E7 已获 owner 批准并关闭；保留 44/44 pre-revision 与 46/46 canonical artifact"
+next_action: "E8 clean canonical 25/25 已登记为 in-review；等待 owner 人工验收"
 ---
 
 # Editor Evidence Index
@@ -27,6 +28,7 @@ next_action: "E7 已获 owner 批准并关闭；保留 44/44 pre-revision 与 46
 - E5：`Complete`。
 - E6：`Complete`。
 - E7：`Complete`。
+- E8：`In Progress`；clean canonical 已登记为 `in-review`，等待 owner 人工验收。
 - E1 clean canonical 与 owner 人工门禁均已批准；Analyzer M3–M11 evidence 仍不能替代未来 Editor 里程碑证据。
 - E2 clean canonical 与 owner 门禁已于 2026-08-27 获批。
 - E3 clean canonical 与 owner 人工门禁已于 2026-08-27 获批；E4 clean canonical 与 owner 人工门禁随后获批。
@@ -34,6 +36,7 @@ next_action: "E7 已获 owner 批准并关闭；保留 44/44 pre-revision 与 46
 - E5 clean canonical 35/35 与 owner 人工范围任务已于 2026-08-27 获批；E6 已开放。
 - E6 clean canonical 40/40、原生 OS picker、`beforeunload`、辅助技术与长会话补偿已于 2026-08-28 获 owner 批准；E7 紧凑工作台布局已开放，Editor readiness 延后至 E7 审批。
 - E7 修订版 clean canonical 已在实现 commit `080f577fe20fcb22a20184dce0b15892c5299464` 上 46/46 通过；原 44/44 run 保留为 `pre-revision`。2026-08-31 owner 批准修订版候选并关闭 E7，未提供的人工测量不补写。
+- E8 clean canonical 已在实现 commit `84d9435cc6e8d1edb0932ff1b8dcd1b84dff32b5` 上 25/25 通过；该自动化事实不代替 owner 对紧凑高度、恢复语义和 marker 可读性的人工验收。
 
 ## 2. Record Contract
 
@@ -737,3 +740,95 @@ next_action: "E7 已获 owner 批准并关闭；保留 44/44 pre-revision 与 46
 - 自动化证明 fixed geometry、计算样式、21 项菜单、开关/刷新记忆、Buffer-only 收敛、pointer-through 和双浏览器回归；它不能替代 owner 对灰色覆盖强度、图形可读性、底层操作体感和真实辅助技术的判断。
 - 2026-08-31，owner 在明确要求先关闭 E7 再实施 M13 的计划上回复“PLEASE IMPLEMENT THIS PLAN”，接受本记录已有的 46/46、artifact 与人工补偿并关闭 E7；该批准不补写 owner 未提供的逐项人工数值。
 - E7 为 `Complete`，本 evidence 为 `approved`；M13 仅改变 Analyzer，不重开 Editor 候选。
+
+## 11. E8 Canonical Record
+
+| Field | Value |
+| --- | --- |
+| Run ID | `E8-2026-09-03T04-07-28-904Z-84d9435c` |
+| Milestone | E8 — Timeline, recovery and marker usability |
+| State | `in-review`（25/25 自动化通过，等待 owner 人工验收） |
+| Implementation commit | `84d9435cc6e8d1edb0932ff1b8dcd1b84dff32b5` |
+| Evidence commit | 本记录所在的 `docs: register Editor E8 canonical evidence` 提交 |
+| Dirty at start / end | `false` / `false` |
+| Commit at end | `84d9435cc6e8d1edb0932ff1b8dcd1b84dff32b5` |
+| Started at | 2026-09-03 04:07:28.904 UTC |
+| Method | `npm run eval:e8` |
+| Reviewer | `project-owner` — pending |
+| Retention | `local-present`；至少保留到 E8 审批完成 |
+| Artifact root | `artifacts/evals/E8-2026-09-03T04-07-28-904Z-84d9435c/` |
+| Summary SHA-256 | `ba9ff8db30868c8bf34140a3db2bf8cd7e3d56557ca7ac8682dfa6c3ce664a42` |
+
+### Environment
+
+| Item | Recorded value |
+| --- | --- |
+| OS | macOS 26.5.2 (`25F84`), Darwin arm64 |
+| Hardware | MacBook Pro `MacBookPro17,1`；Apple M1 8-core；16 GB memory |
+| Node / npm | Node `v24.18.0`；npm `11.16.0` |
+| Vitest / Playwright | `4.1.10` / `1.62.0` |
+| Chrome binary / test user agent | Google Chrome `152.0.7977.66` / Chrome `151.0.7922.34` |
+| Edge binary / test user agent | Microsoft Edge `152.0.4191.53` / Edge `151.0.7922.34` |
+
+本记录只保存机型、芯片、核心数和内存，不复制 artifact 中的序列号、UUID、UDID 或设备标识。E8 使用仓库受控 WAV/MP3、虚构工程与浏览器临时状态，不读取或登记用户私有音频身份。
+
+### Results and Traceability
+
+| Step group | Result | Evidence |
+| --- | --- | --- |
+| E8 unit / integration | 5/5 + 2/2 pass | `88px/72px` 垂直几何、6px 安全区、exact-route 纯恢复决策、异歌显式入口、迟到 route generation 与草稿原子性 |
+| E8 Chrome / Edge | 3/3 + 3/3 pass | 四视口、Canvas DPR、同歌正确/错误重选、保持 paused、异歌 CTA accessible name 与显式 `router.replace` |
+| Timeline density | pass | 390/1024/1280/1920 的 stage 为 `72/88/88/88px`；波形上下保留 6px，边界控件未溢出 |
+| Marker geometry | pass | 两浏览器最大 marker/diamond/candidate/pin X 误差 `0.009375 CSS px`；marker Y `0.5px`，diamond Y `0px`，均低于 `1 CSS px` |
+| E7 regression | pass | unit 2/2、integration 4/4、Chrome/Edge 各 2/2；overlay geometry `0 CSS px`，工具栏 79px、point/range 行 44px |
+| E3 regression | pass | golden、unit 6/6、integration 4/4、Chrome 7/7；输入反馈 `29.9ms`、geometry `0 CSS px` |
+| E2 regression | pass | golden、unit 5/5、integration 17/17、Chrome 5/5；输入反馈 `3.5ms`、geometry `0.01 CSS px` |
+| E1 / M5 regression | pass | E1 unit 9/9、integration 8/8、Chrome 4/4；M5 Chrome 恢复 3/3 |
+| Docs / harness / typecheck | pass | lifecycle links、deliberate failure detection、`vue-tsc -b` |
+| Build | pass with warning | 1,871 modules；最大 JS chunk `1,426.08 kB`，既有 chunk warning 如实保留 |
+| Diff / identity | pass | canonical 起止均为同一 clean commit；`git diff --check` exit 0 |
+
+E8 Chrome/Edge 测试均捕获 `pageerror` 和异常 console 并要求为空。runner stderr 中的 browserslist stale 与 Vite 大 chunk 提示属于已知工具链 warning，不被误记为页面错误或静默忽略。
+
+### Provisional History
+
+- 最终 dirty-worktree provisional：`E8-2026-09-03T04-04-25-163Z-10a2bc0c-provisional`，25/25 pass，summary SHA-256 `829e50c177b14bb81febc81577c179deec0a01d703362083ebf2fa28bc7e5c0a`。
+- `E8-2026-09-03T03-41-39-925Z-cc83d8b1-provisional` 25/25 pass，summary SHA-256 `5df5b2b7a5f57d30e661c910dcf5d0cbe16b162edfa824162e72226308ab26b5`，保留为 V5/E8 分离提交前反馈。
+- 更早的两个 provisional 分别暴露并修正 recovery signature 合并和 candidate box 中心几何；它们不覆盖最终 provisional 或 canonical，也不登记为正式 evidence。
+
+### Local Artifact Hashes
+
+| Artifact | SHA-256 |
+| --- | --- |
+| `summary.json` | `ba9ff8db30868c8bf34140a3db2bf8cd7e3d56557ca7ac8682dfa6c3ce664a42` |
+| `01-E8-usability-unit.log` | `caffa81d07dfe828d00d3ac64dd439f514622a25fa19f4a29ed3a95376814f95` |
+| `02-E8-recovery-integration.log` | `99cfe372b6eabe3c8b9cf85e6a48edee23da6dc829daa4db3492021e6bd34523` |
+| `03-E8-Chrome-usability.log` | `e577b2a9a6ce594d5cc19ce097597c48d1de2698b44d18a0183b4f742f41f796` |
+| `04-E8-Edge-usability.log` | `2b33ca244459176db35bfb33607d0f58e226a75e06a4703735bb5567568d7ad7` |
+| `05-E7-overlay-unit-regression.log` | `d4fa967977f02552d319f5c41a54c07729a0357b966a22faddc5198c67b5068f` |
+| `06-E7-overlay-integration-regression.log` | `9953a0c15aff99222c164e5e4fa2365a9ca229218a6180e9390f62c4d4cdce0b` |
+| `07-E7-Chrome-workbench-regression.log` | `a4dc8cd1e8993e6d95801e0fede285bbd263c1833ac7f631b96605bdc4d5e8f2` |
+| `08-E7-Edge-workbench-regression.log` | `f43da4367a873578504a7e0905d43d79d0bec14cfc3ce7d0b267dd6340ad868c` |
+| `09-E3-point-golden-regression.log` | `f31f700d278cf3e4cf7ae1e43893e6bc0535de6c0ebf672b1d76aa3efc943fc6` |
+| `10-E3-point-unit-regression.log` | `3b5d35201dce231194933a99d87db5dc892f070d95e09ef329d11c412f0f575b` |
+| `11-E3-point-integration-regression.log` | `a100a9991eb798830d2adc901fadee3403cee3e3f60ab17742daf592c6f03a57` |
+| `12-E3-Chrome-point-regression.log` | `ea13c3c143be37102b3af5c0912faf66e36eddced8e76339ac648f1e81c448e9` |
+| `13-E2-tempo-golden-regression.log` | `2aa9988e158f22c4f25da1fc726f46aebc40cdb50002e02a4968896a28263cb2` |
+| `14-E2-timeline-unit-regression.log` | `25f4eb38a54e8e965ad45bcc1046922cf4837750220163fcbf1a6c310d11a878` |
+| `15-E2-timeline-integration-regression.log` | `75ba26e4d77dfe39b347a1e162145f30da904763096519847a437b159a11c177` |
+| `16-E2-Chrome-timeline-regression.log` | `29c66b8a5716887ad874a438277dcf01d61345e2cb3b5e3da5b722f418fb3fac` |
+| `17-E1-project-unit-regression.log` | `60a0432437dbf8149542717f2568e1edc733acc231510f1f1e0f739c059a74b1` |
+| `18-E1-foundation-integration-regression.log` | `e429360413a35e36be97db39960890ac71713ed9d48f94d12211c84965a3371a` |
+| `19-E1-Chrome-route-regression.log` | `54b018db26ba2ffa7dc81963557d5a6e6bf50c64b65fa6112f67596263b2adfa` |
+| `20-M5-recovery-regression.log` | `9d25555567d9449d7fcecf4932106286c7e38ec1a6338d99b35f5085d81dc43e` |
+| `21-docs.log` | `bb005ed0074179a47b895a5c66e79917e37ebf18976e21fe9d27b1dd63c8f151` |
+| `22-deliberate-failure.log` | `69bf5c3fa50230a4957ad0c60c8323dba68e494d92761fea0039cf5d580d70aa` |
+| `23-typecheck.log` | `fadc7f66199c28d2f7cca439bb300ebeb0320158f32a0f9b52ec77031538af4d` |
+| `24-build.log` | `526fcb5d7a9186d3888aff4655c81895f37096458a305045cc63001bc499d6cb` |
+| `25-diff-check.log` | `e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855` |
+
+### Manual Boundary and Approval Gate
+
+- 自动化证明 DOM/Canvas 几何、同歌恢复保持 paused、异歌不静默切换、accessible name 与双浏览器回归；它不能替代 owner 对 72/88px 密度、波形可读性、marker/stem 视觉中心和真实文件重选操作的判断。
+- owner 需人工确认：桌面/窄屏波形密度可接受；正确同歌重选后不自动播放；异歌入口文案与返回行为清晰；point marker、候选框和 stem 在实际缩放下易辨识。
+- E8 保持 `In Progress`，R-022/R-024/R-025 保持 `Open`。只有 owner 明确批准本 canonical 与人工门禁后，才把 evidence 改为 `approved`、E8 改为 `Complete` 并复核 Editor readiness。

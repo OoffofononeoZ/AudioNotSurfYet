@@ -6,7 +6,7 @@ upstream_docs:
   - "docs/delivery/editor/execution-plan.md"
   - "docs/delivery/editor/acceptance-criteria.md"
   - "docs/delivery/editor/test-strategy.md"
-next_action: "E8 scoped/provisional 25/25 已通过；等待 clean canonical 与 owner 验收"
+next_action: "E8 clean canonical 25/25 已登记为 in-review；等待 owner 验收"
 ---
 
 # Editor E1–E8 Milestone Plan
@@ -107,7 +107,8 @@ next_action: "E8 scoped/provisional 25/25 已通过；等待 clean canonical 与
 - [x] scoped/provisional 中另一首有效歌曲只显示显式入口，点击 replace 正确 route；错误文件与草稿不变。
 - [x] scoped/provisional 中 marker button、diamond、candidate 与事件 X/Y 误差均满足 `<=1 CSS px`，覆盖 zoom/pan/DPR。
 - [x] scoped/provisional 中 E1/E2/E3/E7、M5 恢复、键盘、overlay 与 MusicBar 互斥回归通过。
-- [ ] E8 implementation commit、clean canonical、evidence index 与 owner 验收完成；V5 已独立提交。
+- [x] E8 implementation commit、25/25 clean canonical 与 `in-review` evidence index 已完成；V5 已独立提交。
+- [ ] owner 完成人工验收并批准 canonical；在此之前不关闭 E8 或相关风险。
 
 ## 4. Failure and Slip Rules
 
@@ -130,7 +131,7 @@ next_action: "E8 scoped/provisional 25/25 已通过；等待 clean canonical 与
 - E6：`Complete`。
 - E7：`Complete`。
 - E8：`In Progress`。
-- 当前下一门禁：提交 E8 implementation commit 并运行独立 clean canonical；owner 验收前不关闭风险、不进入 Editor readiness。
+- 当前下一门禁：owner 验收 E8 canonical 与人工任务；通过前不关闭风险、不进入 Editor readiness。
 
 ## 6. Delivery Approval
 
@@ -165,3 +166,5 @@ next_action: "E8 scoped/provisional 25/25 已通过；等待 clean canonical 与
 2026-08-31，owner 在明确要求“先完成当前 Editor E7 的 owner 审批；E7 关闭前不实施 M13”的计划上回复“PLEASE IMPLEMENT THIS PLAN”。该指令批准上述修订版候选并关闭 E7；记录只采用已有 46/46、artifact 与人工补偿事实，不虚构额外测量。
 
 2026-09-03，owner 以“PLEASE IMPLEMENT THIS PLAN”批准 E8 时间轴、不可用恢复与 marker 修正计划，并开放 E8。E8 当前为 `In Progress`；该批准不代替 clean canonical 或 owner 验收，E1–E7 历史状态不变。
+
+同日，E8 implementation commit `84d9435cc6e8d1edb0932ff1b8dcd1b84dff32b5` 完成，clean canonical `E8-2026-09-03T04-07-28-904Z-84d9435c` 25/25 通过，summary SHA-256 为 `ba9ff8db30868c8bf34140a3db2bf8cd7e3d56557ca7ac8682dfa6c3ce664a42`。该事实登记为 `in-review`，不代替 owner 人工验收。

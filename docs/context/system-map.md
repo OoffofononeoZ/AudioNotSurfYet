@@ -4,7 +4,7 @@ owner: "project-owner"
 last_reviewed: 2026-09-03
 upstream_docs:
   - "docs/context/index.md"
-next_action: "映射 V5 recorder 与 E8 Editor 恢复/几何变更，两者独立验证"
+next_action: "V5 recorder 与 E8 恢复/几何已实现并完成 clean canonical；等待各自 owner 门禁"
 ---
 
 # System Map
@@ -13,7 +13,7 @@ next_action: "映射 V5 recorder 与 E8 Editor 恢复/几何变更，两者独�
 
 当前系统是 Vue 3 单页应用。MainLayout 创建并提供唯一的 `AudioSessionService`、`AnalysisCoordinator`、`EditorSessionController` 与 `VisualizerSessionController`；服务通过 `AudioEngine` 解码、播放本地文件，并通过三个独立 IndexedDB repository 保存 Analyzer session、Editor 单草稿与 Visualizer 单草稿。Analyzer、Editor 与 Visualizer 已通过互斥 consumer lease 复用同一 coordinator；Visualizer 只把稳定去重后的 0–4 项送入现有 Worker/cache。File、Blob、handle、PCM、Worker 与音频节点均留在 store 外。MusicBar、Editor 与 Visualizer 读取同一播放快照；有效 Editor/Visualizer track 隐藏 MusicBar，通用 tokenized route lease 分别把 ended 策略改为 repeat-one 或 pause-at-end。
 
-Visualizer V1 已实现 `/visualizer/:trackId?`、通用 route playback lease、三栏/抽屉工作台、strict JSON V1、独立 single-draft repository、原生 JSON gateway 和一个 16:9 Canvas。V2 已实现并获批唯一 analysis consumer、constant/analysis/editor-event inspector、FeatureRegistry projection、同歌 Editor snapshot、0–4 planner 与 60Hz 绝对时间 resolver。V3 已由单一 `VisualizerRendererHost` 接管现有 Canvas，并实现 Orthogonal Lines shader、确定性 scene-local decay、共享 resolved map 与可重试错误层；30 步 clean canonical 与人工验收已获 owner 批准。V4 已用真实 Cube Swarm 替换中性场景，增加默认 Spectrum/Energy、确定性 rise/orbit、context recovery 与通用诊断别名；34 步 clean canonical 与 owner 门禁已通过。pre-Gain recording tap 与实时 WebM 是当前 V5 目标；Editor E8 同时独立修正不可用恢复、`88px/72px` 时间轴与 point marker 中心。
+Visualizer V1 已实现 `/visualizer/:trackId?`、通用 route playback lease、三栏/抽屉工作台、strict JSON V1、独立 single-draft repository、原生 JSON gateway 和一个 16:9 Canvas。V2 已实现并获批唯一 analysis consumer、constant/analysis/editor-event inspector、FeatureRegistry projection、同歌 Editor snapshot、0–4 planner 与 60Hz 绝对时间 resolver。V3 已由单一 `VisualizerRendererHost` 接管现有 Canvas，并实现 Orthogonal Lines shader、确定性 scene-local decay、共享 resolved map 与可重试错误层；30 步 clean canonical 与人工验收已获 owner 批准。V4 已用真实 Cube Swarm 替换中性场景，增加默认 Spectrum/Energy、确定性 rise/orbit、context recovery 与通用诊断别名；34 步 clean canonical 与 owner 门禁已通过。V5 已实现唯一 pre-Gain recording tap、同 Canvas capture lease、MediaRecorder 状态机和原生保存 gateway，40 步 clean canonical 为 `in-review`。Editor E8 也已实现不可用恢复、`88px/72px` 时间轴与 point marker 中心修正，25 步 clean canonical 为 `in-review`。
 
 ## Runtime Flow
 
@@ -44,10 +44,10 @@ showOpenFilePicker → FileSystemFileHandle → File
   ├→ AnalysisConsumerLease(visualizer, deduped 0–4) → AnalysisCoordinator/Worker/cache [V2 current]
   ├→ validated EditorProjectV1 snapshot → BindingResolver [V2 current]
   └→ BindingResolver(60Hz absolute time + checkpoint) [V2 current]
-       → SceneRegistry factory(orthogonal-lines | cube-swarm) [V4 candidate]
-       → one VisualizerRendererHost + one Canvas/WebGLRenderer/visual RAF [V3 approved; V4 retained]
-       → Orthogonal Lines trail | Cube Swarm 60Hz rise/orbit [V4 candidate]
-       └→ captureStream + AudioEngine pre-Gain tap → MediaRecorder → WebM Blob
+       → SceneRegistry factory(orthogonal-lines | cube-swarm) [V4 approved]
+       → one VisualizerRendererHost + one Canvas/WebGLRenderer/visual RAF [V3/V4 approved]
+       → Orthogonal Lines trail | Cube Swarm 60Hz rise/orbit [V4 approved]
+       └→ captureStream + AudioEngine pre-Gain tap → MediaRecorder → WebM Blob [V5 in-review]
 ```
 
 目标边界：Editor 数据只在进入/显式 reload 时快照；analysis 第五项在 Coordinator 前拒绝；页面音量不影响录制；不支持的 resolution/fps 明确失败而非静默降级。
@@ -68,9 +68,9 @@ showOpenFilePicker → FileSystemFileHandle → File
 | Config persistence | 保存 volume 与 MusicBar style | Pinia、localStorage key `config` | project-owner | schema 保持不变；volume 为 0–100 |
 | Home visualization | 全屏 Three.js 光线 shader | `rayLength` prop、IntersectionObserver、reduced-motion media query | unknown | 常规模式使用 WebGL RAF；reduced motion 只静态渲染；卸载释放 mesh、geometry、material、render list、renderer 与 WebGL context |
 | Analyzer surface | 固定展示 21 张折叠卡、最多四项 FIFO 活动分析、共享 viewport/zoom/cursor/seek、DOM 精确值与分层 Canvas | store、AudioSessionService、AnalysisCoordinator、Canvas 2D | project-owner | `FEATURE_IDS` 稳定 DOM 顺序；实际高度最短列布局，390/1024 一列、1280/1920 两列、gap 18px；展开才挂载图表资源，默认活动队列为空 |
-| Editor E1–E8 surface | `/editor/:trackId?` 状态、精简 transport、JSON 工程、共享波形/tempo/point/range 时间列、21 项 overlay、`88px/72px` 波形、不可用恢复决策与中心对齐 marker | EditorSessionController、AudioSessionService、AnalysisCoordinator、Vue Router、shared Canvas renderer、DOM controls | project-owner | E1–E7 已关闭；E8 `In Progress`，只允许 scoped/provisional 结论 |
+| Editor E1–E8 surface | `/editor/:trackId?` 状态、精简 transport、JSON 工程、共享波形/tempo/point/range 时间列、21 项 overlay、`88px/72px` 波形、不可用恢复决策与中心对齐 marker | EditorSessionController、AudioSessionService、AnalysisCoordinator、Vue Router、shared Canvas renderer、DOM controls | project-owner | E1–E7 已关闭；E8 25/25 canonical 为 `in-review` |
 | Editor project and draft | strict JSON V1、歌曲 hash/时长绑定、原生 file gateway、单草稿 autosave 与恢复冲突 | `EditorFormatCodecRegistry`、`EditorDraftRepository`、`audionotsurfyet-editor` V1 | project-owner | 首版只注册 JSON；session database 不变 |
-| Visualizer V1–V4 surface | `/visualizer/:trackId?` 三栏/互斥抽屉、16:9 单 Canvas、底部 transport、pause-at-end、strict project/单草稿、共享 resolved map、Orthogonal Lines shader 与 scene retry | `VisualizerSessionController`、`VisualizerRendererHost`、`SceneRegistry`、`RoutePlaybackLease`、`AnalysisConsumerLease`、BindingPlanner/Resolver、Editor snapshot | project-owner | V1–V3 已批准；V4 Cube Swarm 为 `In Progress`；recording 未实现 |
+| Visualizer V1–V5 surface | `/visualizer/:trackId?` 三栏/互斥抽屉、16:9 单 Canvas、底部 transport、strict project/单草稿、两个确定性 scene、recording 状态栏与 WebM 保存 | `VisualizerSessionController`、`VisualizerRendererHost`、`SceneRegistry`、`RoutePlaybackLease`、`AnalysisConsumerLease`、BindingPlanner/Resolver、Editor snapshot、MediaRecorder | project-owner | V1–V4 已批准；V5 40/40 canonical 为 `in-review` |
 | Experimental charts | 试验性的 Three.js 2D 图和瀑布流 | Vue props、TestLands | unknown | 不视为稳定接口 |
 | Event bus | 跨组件事件类型与发送 | mitt singleton | unknown | `settings-open` 无已发现订阅者 |
 
@@ -118,13 +118,13 @@ showOpenFilePicker → FileSystemFileHandle → File
 
 E7 修订版 46/46 canonical 已由 owner 于 2026-08-31 批准并关闭；原 44/44 run 只作 pre-revision，E6 历史身份保持不变。M13 不重开 Editor 里程碑。
 
-E8 当前实现把波形 stage 缩为桌面 `88px`/窄屏 `72px`，以 6px 安全区计算垂直振幅；`Editor.vue` 通过纯恢复决策在同一 URL 歌曲恢复后合并重试，另一首歌曲只提供显式 replace 入口；point marker 的菱形和引线分离并以事件 X/Y 中心定位。JSON V1、Editor IndexedDB、AudioEngine 与 AudioSessionService 严格身份规则均不变。
+E8 当前实现把波形 stage 缩为桌面 `88px`/窄屏 `72px`，以 6px 安全区计算垂直振幅；`Editor.vue` 通过纯恢复决策在同一 URL 歌曲恢复后合并重试，另一首歌曲只提供显式 replace 入口；point marker 的菱形和引线分离并以事件 X/Y 中心定位。JSON V1、Editor IndexedDB、AudioEngine 与 AudioSessionService 严格身份规则均不变。clean canonical 25/25 已登记为 `in-review`。
 
 ## Approval Record
 
 `project-owner` 于 2026-08-21 确认 M7 卡片、共享视口、跳转、刷新恢复和 3/3 学习解释通过，并批准 M7 canonical、关闭 M7、开放 M8。随后 M8–M11 与 Analyzer readiness 依次完成并获批。2026-08-26，owner 又依次批准 Editor 产品、架构、delivery 与 E1 canonical/人工结果。2026-08-27，E2–E5 clean canonical 与人工门禁依次获 owner 批准；2026-08-28，E6 clean canonical 40/40 与人工补偿获批准，随后开放 E7 紧凑工作台。
 
-2026-09-03，owner 以 E8 完整实施指令批准 ADR-0018、E8 delivery/quality 计划并开放实现。E8 在 Visualizer V5 尚未提交时先形成 scoped/provisional 结果；V5 独立提交后，owner 明确允许单独提交 E8 并运行 clean canonical。evidence index 登记可随 canonical 结果推进，风险关闭和 E8 Complete 仍等待 owner 验收。
+2026-09-03，owner 以 E8 完整实施指令批准 ADR-0018、E8 delivery/quality 计划并开放实现。E8 在 Visualizer V5 尚未提交时先形成 scoped/provisional 结果；V5 独立提交后，owner 明确允许单独提交 E8 并运行 clean canonical。implementation commit `84d9435cc6e8d1edb0932ff1b8dcd1b84dff32b5` 与 25/25 canonical 已登记为 `in-review`；风险关闭和 E8 Complete 仍等待 owner 验收。
 
 同日，owner 要求自行提交并完成 M12 后续。M12 canonical `M12-2026-08-28T07-30-39-789Z-be655e67` 在 clean commit `be655e6765a63493fb1a3a4ee99992073b06e54e` 上 12/12 通过，稳定 DOM、实际高度最短列与 Observer/RAF 生命周期成为当前系统事实；M12 已关闭且 Analyzer readiness 恢复，PROD-015 与 Editor E6 不受该批准覆盖。
 
