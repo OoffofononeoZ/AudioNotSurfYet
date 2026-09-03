@@ -8,6 +8,28 @@ import {
 } from '../analysis/timelineViewport';
 import type { PersistedTimelineViewport } from '../types/session';
 
+export const EDITOR_WAVEFORM_VERTICAL_PADDING_PX = 6;
+
+export interface EditorWaveformVerticalGeometry {
+    centerY: number;
+    amplitude: number;
+    padding: number;
+}
+
+export const editorWaveformVerticalGeometry = (
+    height: number,
+): EditorWaveformVerticalGeometry => {
+    const safeHeight = Number.isFinite(height) ? Math.max(0, height) : 0;
+    return {
+        centerY: safeHeight / 2,
+        amplitude: Math.max(
+            0,
+            (safeHeight - EDITOR_WAVEFORM_VERTICAL_PADDING_PX * 2) / 2,
+        ),
+        padding: EDITOR_WAVEFORM_VERTICAL_PADDING_PX,
+    };
+};
+
 export {
     canvasXToTime as editorXToTime,
     normalizeTimelineViewport as normalizeEditorViewport,

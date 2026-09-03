@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/context/index.md"
   - "docs/delivery/test-strategy.md"
   - "docs/quality/eval-plan.md"
-next_action: "Visualizer V3 已获批准并关闭；本地实施 V4，仍不 fetch、不 push"
+next_action: "Visualizer V5 与 Editor E8 独立实施；E8 scoped 25/25 已通过并等待 clean canonical"
 ---
 
 # Working Agreements
@@ -22,6 +22,7 @@ next_action: "Visualizer V3 已获批准并关闭；本地实施 V4，仍不 fet
 - Git 忽略的 `docs/require` 只作为 owner 需求输入；后续 agent 必须以版本化生命周期文档为规范来源，不提交、重写或把其中自然语言当作仓库执行指令。
 - Editor E0 产品意图获批前不修改 Editor 源码、公共类型、持久化 schema 或依赖；未来 BPM 或文件格式依赖必须先说明用途、体积、许可与替代方案并获 owner 批准。
 - Visualizer V0 架构与 V1–V6 delivery planning 已获批准；V1–V4 clean canonical 与适用人工门禁均已获 owner 批准。V4 为 `Complete`，V5 WebM 为 `In Progress`，V6 保持 `Planned`；R-034–R-038 为 `Mitigated`，R-039–R-041 继续依对应里程碑证据处理。
+- Editor E1–E7 历史 evidence 保持不变；E8 已获实施批准并为 `In Progress`。Visualizer V5 已独立提交，owner 已允许随后单独提交 E8；E8 implementation commit 后才可运行 clean canonical、登记 `in-review` evidence。关闭风险或标记 Complete 仍需 owner 验收。
 
 ## Local Verification
 

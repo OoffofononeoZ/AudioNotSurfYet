@@ -181,6 +181,7 @@ import {
 } from '../editor/tempoMap';
 import {
     centerEditorViewport,
+    editorWaveformVerticalGeometry,
     editorTimeToX,
     editorXToTime,
     normalizeEditorViewport,
@@ -583,14 +584,15 @@ const drawStatic = () => {
     const series = props.bufferSeries;
     if (series?.payload.kind === 'waveform-envelope') {
         const range = visibleSampleRange(series, viewport.value);
-        const center = size.height * 0.31;
-        const amplitude = size.height * 0.24;
+        const { centerY, amplitude } = editorWaveformVerticalGeometry(
+            size.height,
+        );
         waveform.beginPath();
         for (let index = range.startIndex; index < range.endIndex; index += 1) {
             const x = editorTimeToX(index * series.sampleStepSeconds, viewport.value, size.width);
             const value = waveformEnvelopeAt(series.payload, index);
-            waveform.moveTo(x, center - value.max * amplitude);
-            waveform.lineTo(x, center - value.min * amplitude);
+            waveform.moveTo(x, centerY - value.max * amplitude);
+            waveform.lineTo(x, centerY - value.min * amplitude);
         }
         waveform.strokeStyle = '#65ffa9';
         waveform.globalAlpha = 0.9;
@@ -725,7 +727,7 @@ button:disabled { opacity: .4; }
 .timeline-class-rail strong { color: #effff6; }
 .timeline-stage {
     position: relative;
-    height: 176px;
+    height: 88px;
     overflow: hidden;
     border: 0;
     border-radius: 0;
@@ -769,7 +771,7 @@ button:disabled { opacity: .4; }
 @media (max-width: 900px) {
     .timeline-heading { align-items: flex-start; flex-wrap: wrap; }
     .timeline-titleline { flex-wrap: wrap; }
-    .timeline-stage { height: 144px; }
+    .timeline-stage { height: 72px; }
     .editor-timeline-panel { overflow-x: auto; }
 }
 @media (prefers-reduced-motion: reduce) {

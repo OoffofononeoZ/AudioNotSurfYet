@@ -10,22 +10,22 @@ upstream_docs:
   - "docs/architecture/risk-register.md"
   - "docs/architecture/editor/project-format-v1.md"
   - "docs/architecture/editor/interaction-contracts.md"
-next_action: "E7 修订版 46/46 已批准并关闭；后续 readiness 独立推进"
+next_action: "E8 scoped/provisional 25/25 已通过；等待独立 clean canonical 与 owner 验收"
 ---
 
-# Editor E1–E7 Execution Plan
+# Editor E1–E8 Execution Plan
 
 ## 1. Delivery Outcome
 
-把已批准的 Editor“逆向制曲”架构按 E1–E7 纵向切片交付：E1–E6 已完成入口、运行时、工程、时间轴、点/范围标注、分析叠加及最终加固；E7 在不改变这些行为契约的前提下，把页面收敛为紧凑工作台。
+把已批准的 Editor“逆向制曲”架构按 E1–E8 纵向切片交付：E1–E6 已完成入口、运行时、工程、时间轴、点/范围标注、分析叠加及最终加固；E7 把页面收敛为紧凑工作台；E8 修正共享时间轴高度、不可用歌曲恢复状态与 point marker 中心几何。
 
-本计划只覆盖 Editor，不重新打开已完成的 Analyzer 历史 canonical。`project-owner` 于 2026-08-26 批准 E1–E6 delivery，并于 2026-08-28 批准 E6 后开放 E7。Editor release-readiness 延后至 E7 owner 审批。
+本计划只覆盖 Editor，不重新打开已完成的 Analyzer 历史 canonical。`project-owner` 于 2026-08-26 批准 E1–E6 delivery，于 2026-08-28 开放 E7，并于 2026-09-03 以实施指令批准 E8。E1–E7 历史 evidence 保持不变，Editor readiness 等待 E8 关闭后再复核。
 
 ## 2. Delivery Principles
 
 - 每个里程碑必须形成可独立使用的纵向结果，不能用后续切片补足当前退出门禁。
 - 每个里程碑按“实现与专项测试 → dirty-worktree provisional → 实现提交 → clean-HEAD canonical → evidence 登记 → owner 审批”关闭。
-- E1–E5 专项 E2E 使用真实 Chrome；E6 在真实 Chrome 和 Edge 上执行 E1–E6 全量，并回归 M3–M11 关键播放、恢复、Worker、路由和资源契约。
+- E1–E5 专项 E2E 使用真实 Chrome；E6–E8 的对应专项在真实 Chrome 和 Edge 执行，并回归相关历史播放、恢复、Worker、路由和资源契约。
 - 一个里程碑未获 owner 批准时，下一个里程碑保持 `Planned`。不得并行扩大范围来绕过失败门禁。
 - 代码更新内存状态优先；持久化、分析或 overlay 失败不得破坏仍可用的播放与编辑能力。
 - 不新增第二 AudioEngine、AudioContext、播放时钟、播放 RAF、AnalysisCoordinator 或产品 Worker。
@@ -51,7 +51,8 @@ next_action: "E7 修订版 46/46 已批准并关闭；后续 readiness 独立推
 | Capacity gate | 约 15 分钟、20 lanes、每 lane 最多 8 inner classes、合计 10,000 point/range events | 这是 E6 性能门禁，不是 schema 硬上限 |
 | Compact toolbar | 两行总高度 `<=84px`；控件高度 `30px` | 只合并展示层，不改变项目、播放或文件操作语义 |
 | Compact lanes | 行高 `44px`；名称列 `152px`；分类列 `144px` | 时间列仍复用共享 geometry，窄屏使用单一横向滚动区 |
-| Compact waveform | 桌面 `176px`；`<900px` 为 `144px` | Canvas backing store 与 `<=1 CSS px` 门禁不变 |
+| E7 compact waveform（历史） | 桌面 `176px`；`<900px` 为 `144px` | 已由 E8/ADR-0018 覆盖，不改写 E7 evidence |
+| E8 shared timeline | 桌面 `88px`；`<900px` 为 `72px`；上下安全区各 `6px` | Canvas backing store、DPR 与 `<=1 CSS px` 门禁不变 |
 
 ## 4. Milestone Slices
 
@@ -174,6 +175,23 @@ Revision slice:
 - 全视口 Canvas 使用当前 marker time column 的屏幕横向 rect 进行裁剪/绘制，三个 bounds 手柄改为 viewport-relative。
 - 旧 44/44 canonical 只作为 `pre-revision` 历史记录；新增 E7 unit/integration 后运行 46 步候选。
 
+### E8 — Timeline, Recovery and Marker Usability
+
+Implementation:
+
+- 将共享时间轴固定为桌面 `88px`、`<900px` 为 `72px`；波形以轨道垂直中心绘制，上下各留 `6px`，Canvas 继续按 CSS 尺寸与 DPR 配置。
+- 新增纯恢复决策：同一 URL 歌曲恢复为有效文件或 paused/playing/ended 后，使用 route generation 与 signature/in-flight 防护合并为一次 `controller.enter(trackId)`，且不播放。
+- 当前可播放歌曲与 URL 不同时保留原不可用页面，显示可访问名称包含歌曲名的“编辑当前歌曲”；点击后 `router.replace` 到当前歌曲，由既有 route 流程进入。
+- 错误 hash、权限拒绝、文件缺失或解码失败保持不可用，不切歌、不新建/覆盖草稿；AudioSessionService 严格歌曲身份规则不变。
+- point marker button、菱形、候选框与事件时间共享同一 X 中心；菱形自身居中旋转，引线由按钮伪元素独立绘制。
+
+Exit gate:
+
+- AC-E801–AC-E805 的 unit、integration 与真实 Chrome/Edge 专项均通过；四视口高度、DPR、6px 安全区和 marker X/Y `<=1 CSS px` 有实际测量。
+- 同歌恢复保持 paused 且无重试循环；异歌不静默切换，显式 replace 后进入正确工程；错误文件与草稿原子性通过。
+- E1/E2/E3/E7 与 M5 恢复相关回归、typecheck、build、docs 和 diff check 通过且无 pageerror/异常 console。
+- Visualizer V5 已独立提交，owner 已允许随后单独提交 E8；E8 implementation commit 后运行 clean canonical 并登记 `in-review` evidence。只有 owner 验收后才关闭 R-022/R-024/R-025 并把 E8 标为 `Complete`。
+
 ## 5. Test and Eval Commands
 
 E1 已实现、通过并获 owner 批准；以下为真实命令：
@@ -196,7 +214,7 @@ npm run eval:eN:provisional
 npm run eval:eN
 ```
 
-其中 `N` 为 5–7。canonical 必须拒绝 dirty worktree，并记录 run ID、commit、环境、步骤结果、日志和 summary SHA-256。E1–E6 clean canonical 均已通过并获 owner 批准；原 E7 44/44 run 已因全屏浮层修订标为 `pre-revision`。修订版 run `E7-2026-08-29T05-23-03-986Z-080f577f` 已在 commit `080f577fe20fcb22a20184dce0b15892c5299464` 上 46/46 通过；owner 审批前 E7 仍为 `In Progress`。
+其中 `N` 为 5–8。E8 另提供 `test:e2e:e8:chrome`、`test:e2e:e8:edge` 与合并命令。canonical 必须拒绝 dirty worktree，并记录 run ID、commit、环境、步骤结果、日志和 summary SHA-256。E1–E7 clean canonical 与 owner approval 均保留为历史；E8 implementation commit 前只执行 `eval:e8:provisional`，clean canonical 后才写入 evidence index。
 
 ## 6. Change Control and Exclusions
 
@@ -236,3 +254,5 @@ npm run eval:eN
 2026-08-28，E6 clean canonical 在 commit `17d7fe1046ed02a3fb5137ccfe7cbf5590093aff` 上 40/40 通过。自动化实现阶段已完成；E6 的剩余交付门禁是 owner 对原生 OS picker、`beforeunload`、辅助技术与长会话的补偿验证和 evidence 审批，完成前不进入 Editor readiness。
 
 同日，owner 明确先批准 E6，再要求实施 E7 紧凑工作台。E6 据此关闭；E7 只改变布局密度和区域视觉，不改变 E1–E6 的公共契约。Editor readiness 延后到 E7 获批。
+
+2026-09-03，owner 以 E8 完整实施指令批准本计划扩展、ADR-0018、AC-E801–AC-E805 与 E8 quality 契约并开放实施。该批准不构成 E8 evidence；E8 在独立 clean commit 与 owner 验收前保持 `In Progress`。Visualizer V5 独立提交后，owner 明确允许随后单独提交 E8。

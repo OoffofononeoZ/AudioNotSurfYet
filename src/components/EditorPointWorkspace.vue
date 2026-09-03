@@ -577,17 +577,29 @@ const viewportPercent = (seconds: number) =>
 const markerStyle = (seconds: number) => ({ left: `${viewportPercent(seconds)}%` });
 const candidateStyle = (laneId: string, innerClassId: string) => {
     const cell = cellFor(laneId, innerClassId);
-    if (!cell) return {};
+    const active = candidate.value;
+    if (
+        !cell
+        || !active
+        || active.laneId !== laneId
+        || active.innerClassId !== innerClassId
+    ) return {};
+    const halfSpan = Math.max(1e-9, cell.endSeconds - cell.startSeconds) / 2;
     return {
-        left: `${viewportPercent(cell.startSeconds)}%`,
-        right: `${100 - viewportPercent(cell.endSeconds)}%`,
+        left: `${viewportPercent(active.timeSeconds - halfSpan)}%`,
+        right: `${100 - viewportPercent(active.timeSeconds + halfSpan)}%`,
     };
 };
 const candidatePinStyle = (laneId: string, innerClassId: string) => {
     const cell = cellFor(laneId, innerClassId);
-    if (!cell) return {};
-    const span = Math.max(1e-9, cell.endSeconds - cell.startSeconds);
-    return { left: `${(cell.timeSeconds - cell.startSeconds) / span * 100}%` };
+    const active = candidate.value;
+    if (
+        !cell
+        || !active
+        || active.laneId !== laneId
+        || active.innerClassId !== innerClassId
+    ) return {};
+    return { left: '50%' };
 };
 const visibleEvents = (lane: PointLaneV1, innerClassId: string) =>
     visibleSurfaceKeys.value.has(surfaceKey(lane.id, innerClassId))
@@ -1247,6 +1259,16 @@ button:disabled { opacity: .4; cursor: not-allowed; }
     transform: translate(-50%, -50%);
     overflow: visible;
 }
+.point-marker::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: calc(50% + 8px);
+    width: 2px;
+    height: 14px;
+    background: #caffdf;
+    transform: translateX(-50%);
+}
 .point-marker > span {
     position: absolute;
     left: 50%;
@@ -1256,18 +1278,8 @@ button:disabled { opacity: .4; cursor: not-allowed; }
     border: 2px solid #caffdf;
     background: #35ff8f;
     box-shadow: 0 0 0 3px rgba(53,255,143,.16), 0 0 18px rgba(53,255,143,.62);
-    transform: translate(-50%, -65%) rotate(45deg);
-}
-.point-marker > span::after {
-    content: '';
-    position: absolute;
-    left: 50%;
-    top: 100%;
-    width: 2px;
-    height: 14px;
-    background: #caffdf;
-    transform: translateX(-50%) rotate(-45deg);
-    transform-origin: top;
+    transform: translate(-50%, -50%) rotate(45deg);
+    transform-origin: center;
 }
 .point-marker:focus-visible > span,
 .point-marker:hover > span { background: #eafff2; box-shadow: 0 0 0 4px rgba(53,255,143,.25), 0 0 22px #35ff8f; }

@@ -56,7 +56,7 @@ test('supports waveform seek, zoom, context pan/menu and keyboard controls', asy
         });
         if (output) observer.observe(output, { childList: true, subtree: true, characterData: true });
     });
-    await page.mouse.click(bounds!.x + bounds!.width * 0.5, bounds!.y + 100);
+    await page.mouse.click(bounds!.x + bounds!.width * 0.5, bounds!.y + bounds!.height / 2);
     await expect(page.getByTestId('editor-current-time')).toContainText('0:06', {
         timeout: 1_000,
     });
@@ -69,19 +69,19 @@ test('supports waveform seek, zoom, context pan/menu and keyboard controls', asy
     expect(feedbackMs).toBeLessThanOrEqual(100);
     console.log(JSON.stringify({ metric: 'e2-input-feedback-ms', value: feedbackMs }));
 
-    await page.mouse.move(bounds!.x + bounds!.width * 0.25, bounds!.y + 100);
+    await page.mouse.move(bounds!.x + bounds!.width * 0.25, bounds!.y + bounds!.height / 2);
     await page.mouse.wheel(0, -120);
     await expect(page.getByTestId('editor-reset-viewport')).toBeEnabled();
     const viewportBeforeDrag = await page.getByTestId('editor-viewport-state').textContent();
-    await page.mouse.move(bounds!.x + bounds!.width * 0.65, bounds!.y + 130);
+    await page.mouse.move(bounds!.x + bounds!.width * 0.65, bounds!.y + bounds!.height / 2);
     await page.mouse.down({ button: 'right' });
-    await page.mouse.move(bounds!.x + bounds!.width * 0.45, bounds!.y + 130, { steps: 5 });
+    await page.mouse.move(bounds!.x + bounds!.width * 0.45, bounds!.y + bounds!.height / 2, { steps: 5 });
     await page.mouse.up({ button: 'right' });
     await expect(page.getByTestId('editor-viewport-state')).not.toHaveText(viewportBeforeDrag ?? '');
     await page.getByTestId('editor-pan-forward').click();
     await page.getByTestId('editor-pan-back').click();
 
-    await page.mouse.click(bounds!.x + 220, bounds!.y + 120, { button: 'right' });
+    await page.mouse.click(bounds!.x + 220, bounds!.y + bounds!.height / 2, { button: 'right' });
     await expect(page.getByTestId('editor-timeline-menu')).toBeVisible();
     await page.getByRole('menuitem', { name: '将此处居中' }).click();
 
@@ -107,7 +107,7 @@ test('estimates BPM, edits tempo segments and restores the project', async ({ pa
     }).toBeGreaterThan(99);
     expect(Number(await firstBpm.inputValue())).toBeLessThan(101);
 
-    await page.getByTestId('editor-timeline').click({ position: { x: 500, y: 100 } });
+    await page.getByTestId('editor-timeline').click({ position: { x: 500, y: 44 } });
     const addBoundary = page.getByTestId('add-tempo-boundary');
     await addBoundary.click();
     await expect(page.locator('.tempo-segment')).toHaveCount(2);

@@ -1,15 +1,15 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-08-29
+last_reviewed: 2026-09-03
 upstream_docs:
   - "docs/delivery/editor/execution-plan.md"
   - "docs/delivery/editor/acceptance-criteria.md"
   - "docs/delivery/editor/test-strategy.md"
-next_action: "E7 已获 owner 批准并关闭；Editor readiness 与 Analyzer M13 分开管理"
+next_action: "E8 scoped/provisional 25/25 已通过；等待 clean canonical 与 owner 验收"
 ---
 
-# Editor E1–E7 Milestone Plan
+# Editor E1–E8 Milestone Plan
 
 ## 1. Planning Convention
 
@@ -33,6 +33,7 @@ next_action: "E7 已获 owner 批准并关闭；Editor readiness 与 Analyzer M1
 | E5 | Range annotation | Complete | E4 | range 创建、取消、调整、重叠、删除和 round-trip | range matrix + import/draft + canonical + owner approval | project-owner |
 | E6 | Final hardening | Complete | E5 | Chrome/Edge、三格式、native flows、10,000 事件、资源与无障碍 | 双浏览器 canonical + owner complete task + evidence approval | project-owner |
 | E7 | Compact workbench + fullscreen overlay | Complete | E6 | 紧凑工作台、窗口级灰色浮层、复合入口、按歌曲 visibility 与双浏览器响应式 | 46 步 canonical + owner approval | project-owner |
+| E8 | Timeline, recovery and marker usability | In Progress | E7 | `88px/72px` 时间轴、同歌自动恢复、异歌显式 replace 与 marker 中心对齐 | scoped/provisional + clean canonical + owner approval | project-owner |
 
 ## 3. Exit Checklist by Milestone
 
@@ -98,6 +99,16 @@ next_action: "E7 已获 owner 批准并关闭；Editor readiness 与 Analyzer M1
 - [x] 10,000 事件反馈、长任务、可见 DOM 与资源门禁不回退。
 - [x] owner 批准紧凑工作台候选与 E7 canonical evidence；不补写未提供的人工测量值。
 
+### E8
+
+- [x] ADR-0018、AC-E801–AC-E805、测试策略与 quality 契约获实施批准。
+- [x] scoped/provisional 中 `88px/72px`、6px 安全区、Canvas DPR 与控件无裁切在 390/1024/1280/1920 通过。
+- [x] scoped/provisional 中同一 route 歌曲恢复自动进入且保持 paused；连续状态变化无重试循环。
+- [x] scoped/provisional 中另一首有效歌曲只显示显式入口，点击 replace 正确 route；错误文件与草稿不变。
+- [x] scoped/provisional 中 marker button、diamond、candidate 与事件 X/Y 误差均满足 `<=1 CSS px`，覆盖 zoom/pan/DPR。
+- [x] scoped/provisional 中 E1/E2/E3/E7、M5 恢复、键盘、overlay 与 MusicBar 互斥回归通过。
+- [ ] E8 implementation commit、clean canonical、evidence index 与 owner 验收完成；V5 已独立提交。
+
 ## 4. Failure and Slip Rules
 
 - canonical 失败：修复原因并重新提交后再运行新的 clean canonical；失败 run 保留身份与分类，不能覆盖。
@@ -118,7 +129,8 @@ next_action: "E7 已获 owner 批准并关闭；Editor readiness 与 Analyzer M1
 - E5：`Complete`。
 - E6：`Complete`。
 - E7：`Complete`。
-- 当前下一门禁：Editor readiness 保持独立；Analyzer M13 变更不重开 E7。
+- E8：`In Progress`。
+- 当前下一门禁：提交 E8 implementation commit 并运行独立 clean canonical；owner 验收前不关闭风险、不进入 Editor readiness。
 
 ## 6. Delivery Approval
 
@@ -151,3 +163,5 @@ next_action: "E7 已获 owner 批准并关闭；Editor readiness 与 Analyzer M1
 随后修订版实现 commit `080f577fe20fcb22a20184dce0b15892c5299464` 交付 Teleport 全屏层、复合入口、21 项临时菜单、按歌曲 visibility 与 Buffer-only 关闭状态。clean canonical `E7-2026-08-29T05-23-03-986Z-080f577f` 46/46 通过，summary SHA-256 为 `da7c5e7a931a1e8c6cb3a64c3eeac8f5cb7d5cc6d6b604de6e4ea7b009ec13f5`；自动化退出项已满足，owner 人工门禁仍未完成。
 
 2026-08-31，owner 在明确要求“先完成当前 Editor E7 的 owner 审批；E7 关闭前不实施 M13”的计划上回复“PLEASE IMPLEMENT THIS PLAN”。该指令批准上述修订版候选并关闭 E7；记录只采用已有 46/46、artifact 与人工补偿事实，不虚构额外测量。
+
+2026-09-03，owner 以“PLEASE IMPLEMENT THIS PLAN”批准 E8 时间轴、不可用恢复与 marker 修正计划，并开放 E8。E8 当前为 `In Progress`；该批准不代替 clean canonical 或 owner 验收，E1–E7 历史状态不变。

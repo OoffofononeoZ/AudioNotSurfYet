@@ -1,12 +1,12 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-09-01
+last_reviewed: 2026-09-03
 upstream_docs:
   - "docs/product/scope.md"
   - "docs/architecture/system-design.md"
   - "docs/architecture/interface-contracts.md"
-next_action: "E7 全屏 overlay 契约已验证；交互边界变化时重开"
+next_action: "实施并验证 E8 同歌曲恢复、显式异歌切换与 point 中心几何"
 ---
 
 # Editor Interaction Contracts
@@ -17,6 +17,7 @@ next_action: "E7 全屏 overlay 契约已验证；交互边界变化时重开"
 - Editor 内容分为基底编辑层和窗口级半透明 overlay 层。基底层从上到下是歌曲信息/波形/导入导出、tempo boundary 与输入、lane 列表；overlay root 固定覆盖整个 viewport，图形仅在 lane 可标记时间列对应的屏幕横向范围内绘制。
 - 每个 lane 使用对齐的三段结构：名称/事件类型、全部展开的 inner class、与波形和 tempo 网格共享横向几何的标记区。左侧宽度是布局变量，所有横向时间层使用扣除该宽度后的同一 CSS rect。
 - 波形与 lane 不各自滚动横向时间；共享 viewport 是唯一横向状态。inner class 不设内层滚动条，长页使用页面级纵向滚动。
+- 不可用 route 在同一歌曲恢复可用后自动重试进入，但不得播放；若当前可播放歌曲与 route 不同，只显示包含歌曲名的“编辑当前歌曲”入口，用户点击后才替换 route。
 
 ## Geometry and Grid
 
@@ -25,6 +26,7 @@ next_action: "E7 全屏 overlay 契约已验证；交互边界变化时重开"
 - metered segment 根据 BPM/meter 生成 measure/beat；与 measure 重合的 beat 不重复。single-beat segment 不画内部线，并把整个 segment 作为一个候选单元。
 - 自适应 subdivision 按 `[16, 8, 4, 2, 1]` 从细到粗选择预计宽度至少 12 CSS px 的单元；全部不足时使用 1 beat。hover、pointer 和键盘使用同一 snap 纯函数。
 - snap 只发生在创建或拖动确认时。viewport、zoom 或 tempo 修改不会自动重写已有事件秒数。
+- point marker 的按钮、菱形和候选框都以事件时间 X 为中心，任意视口、zoom、pan 与 DPR 下误差不超过 `1 CSS px`；菱形 Y 也以按钮中心为准，引线从按钮中心下方独立绘制。
 
 ## Shared Pointer Precedence
 
@@ -120,6 +122,10 @@ idle + drag start/end handle
 | Scenario | Required result |
 | --- | --- |
 | DPR/resize/zoom/pan | 所有层重用同一 CSS geometry，误差不超过 1 px |
+| 同一 route 歌曲重新获得有效文件 | 合并为一次 route 重试并恢复可编辑，保持 paused，不自动播放 |
+| 当前存在另一首可播放歌曲 | 原 route 继续显示不可用；显示带歌曲名的“编辑当前歌曲”，点击后才 replace route |
+| 重选错误 hash、权限拒绝或解码失败 | 保持不可用，不切歌、不新建或覆盖草稿 |
+| point marker geometry | event X、button、diamond、candidate 中心误差 `<=1px`；diamond Y 误差 `<=1px` |
 | 快速右键 drag 后 release | 只 pan；无菜单、无事件、无遗留 pressed |
 | pending range + Esc/blank right/route leave | pending 完全取消，draft 不增加 event |
 | range handle pointercancel | 恢复原 start/end |
@@ -135,3 +141,5 @@ idle + drag start/end handle
 本交互契约于 2026-08-26 随 Editor system design 创建，并由 `project-owner` 随后批准进入 E1–E6 execution planning。Delivery 必须把上述成功、失败、边界和异常路径映射到可执行验收；delivery 获批前不得实现。
 
 同日，owner 在开放 E2 时进一步确认：一个 beat 固定为 `60/BPM` 秒，拍号分母只表达音符单位；无合法 metered BPM 时 tempo boundary 按微秒规范化原始时间定位。该澄清登记为 DEC-026，不改变 JSON V1 或 ADR-0008 的秒数事实。
+
+2026-09-03，owner 以 E8 实施指令批准同歌曲自动重试、异歌显式切换、`88px/72px` 时间轴与 point 中心对齐契约。该批准只开放 E8，实现与风险关闭仍等待 scoped 验证、clean canonical 和 owner 验收。

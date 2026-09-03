@@ -9,10 +9,10 @@ upstream_docs:
   - "docs/architecture/editor/project-format-v1.md"
   - "docs/architecture/editor/interaction-contracts.md"
   - "docs/delivery/editor/execution-plan.md"
-next_action: "AC-E701–AC-E708 已获批准；Editor 行为变化时重开"
+next_action: "AC-E801–AC-E805 scoped 已通过；clean canonical 与 owner 验收前 E8 保持 In Progress"
 ---
 
-# Editor E1–E7 Acceptance Criteria
+# Editor E1–E8 Acceptance Criteria
 
 ## 1. Evidence Rules
 
@@ -94,13 +94,25 @@ next_action: "AC-E701–AC-E708 已获批准；Editor 行为变化时重开"
 | --- | --- | --- | --- |
 | AC-E701 | ready 状态顶部为两行紧凑工具栏，总高 `<=84px`、桌面控件高 `30px`；保留歌曲、草稿、播放、格式、导入和导出语义 | computed geometry + Chrome/Edge task regression | R-024, R-025 |
 | AC-E702 | Timeline、tempo、point/range 与 overlay 主区域使用平面背景和细分隔线；主区域圆角 `0–2px`、控件不超过 `4px`、菜单/对话框不超过 `8px`；point/range 行高 `44px` | computed style audit + golden screenshots | R-024, R-025 |
-| AC-E703 | 桌面波形为 `176px`、小于 900px 为 `144px`；390/1024/1280/1920 无遮挡或不可达控件，1024×900 可见工具栏、波形、tempo 和至少一条标记行 | dual-browser viewport matrix + geometry probes | R-024 |
+| AC-E703 | E7 历史候选的桌面波形为 `176px`、小于 900px 为 `144px`；该 token 后续由 AC-E801 覆盖但 E7 evidence 不改写 | dual-browser viewport matrix + geometry probes | R-024 |
 | AC-E704 | 共享时间映射仍 `<=1 CSS px`，E1–E6 功能/键盘/focus/pointer-through 不回归；10,000 事件反馈 `<=100ms`、无 Editor 归因任务 `>50ms` 且 DOM/资源不累积 | E6 baseline + E7 Chrome/Edge + M12 regression | R-024, R-025, R-027 |
 | AC-E705 | overlay root 与复合入口均为窗口级 fixed；开启时灰色背景覆盖 viewport，纵向滚动后 root、Canvas、图形、入口和手柄窗口坐标不变 | Chrome/Edge computed style + scroll geometry | R-024, R-025 |
 | AC-E706 | 主页面无常驻 feature select；主按钮、箭头菜单、21 项单选、首次聚焦、Escape/外部点击和键盘语义符合 ADR-0011 | unit + dual-browser interaction/a11y | R-025 |
 | AC-E707 | 关闭保留 featureId，但 active features 收敛为 Buffer、Canvas/手柄/exact cursor 卸载；同歌刷新恢复本地 visibility，导入 JSON 不覆盖开关，偏好失败保留内存状态 | unit + integration + Chrome/Edge | R-023, R-027 |
 | AC-E708 | 全视口 Canvas 只在时间列横向范围绘图；zoom、pan、resize、纵向滚动与窄屏横向滚动后共享时间锚点误差仍 `<=1 CSS px`，背景与图形保持 pointer-through | dual-browser geometry/hit-test | R-024, R-025 |
 
-## 9. Milestone Exit Rule
+## 9. E8 — Timeline, Recovery and Marker Usability
+
+| ID | Criterion | Verification | Risk |
+| --- | --- | --- | --- |
+| AC-E801 | 390/1024/1280/1920 的 timeline stage 高度分别为 `72/88/88/88px`；波形最大/最小值位于上下 `6px` 安全区，Canvas CSS/backing store 与 DPR 一致，左右轨道、边界标签和按钮无裁切/溢出 | pure vertical geometry unit + Chrome/Edge viewport/Canvas probe | R-024, R-025 |
+| AC-E802 | 直达不可用 Editor 后重新选择同一有效文件，页面自动恢复为可编辑并保持 paused；连续 restore/playback 变化只产生一次有效 route 重试且旧 generation 不覆盖新 route | resolver unit + controller integration + dual-browser E2E | R-022, R-023 |
+| AC-E803 | 当前加载另一首 paused/playing/ended 歌曲时不自动改 route；显示可访问名称含歌曲名的“编辑当前歌曲”，点击使用 replace 进入正确工程。错误 hash、权限拒绝或解码失败保持不可用且草稿不变 | route/service integration + dual-browser recovery E2E | R-022, R-023, R-025 |
+| AC-E804 | 事件预期 X、marker button、菱形与候选框中心误差均 `<=1 CSS px`，菱形 Y 中心误差同样 `<=1 CSS px`；覆盖四视口、zoom、pan 与 DPR | pure geometry + `getBoundingClientRect()` dual-browser probe | R-024 |
+| AC-E805 | 波形导航、tempo、边界、point/range、键盘、全屏 overlay 与 MusicBar 互斥回归通过；Chrome/Edge 无 `pageerror` 或异常 console；E1/E2/E3/E7 与 M5 恢复相关测试、typecheck/build/docs/diff check 通过 | E8 25 步 runner + adjacent regression + owner task | R-022–R-025, R-027 |
+
+## 10. Milestone Exit Rule
 
 每个里程碑只能在其全部适用 AC、有明确成功/失败/边界/异常证据、相关风险复核、clean canonical 和 owner 批准后关闭。本 AC 于 2026-08-26 获 `project-owner` 批准；E1 开放实施不构成 AC-E101–AC-E108 已通过。
+
+AC-E801–AC-E805 于 2026-09-03 随 owner 的 E8 实施指令获批。已有 dirty-worktree 通过结果只标记 scoped/provisional；V5 独立提交后 owner 已允许单独提交 E8。只有 E8 clean canonical 与 owner 验收后才可关闭 E8。

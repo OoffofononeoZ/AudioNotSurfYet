@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/product/scope.md"
   - "docs/architecture/system-design.md"
   - "docs/delivery/execution-plan.md"
-next_action: "Visualizer V4 已获 owner 批准并关闭；V5 WebM 为 In Progress，PROD-015 仍开放"
+next_action: "Visualizer V5 与 Editor E8 独立 In Progress；E8 scoped 已通过并等待 clean canonical，PROD-015 仍开放"
 ---
 
 # Decision Registry
@@ -38,6 +38,7 @@ next_action: "Visualizer V4 已获 owner 批准并关闭；V5 WebM 为 In Progre
 | ADR-0015 | 2026-09-02 | Visualizer 使用 strict JSON V1、同歌 Editor 快照、独立单草稿和非可执行绑定联合 | project-owner | approved | [ADR-0015](../architecture/adrs/0015-visualizer-project-and-binding-boundary.md) | 工程格式、快照时机、草稿数量、绑定源或插件边界改变 |
 | ADR-0016 | 2026-09-02 | 两个内置模板共享单 Canvas/WebGLRenderer/RAF，并以 seed + 绝对歌曲时间保证 seek/刷新/录制确定性 | project-owner | approved | [ADR-0016](../architecture/adrs/0016-deterministic-scene-registry.md) | 模板 registry、renderer ownership、运动时间或 context recovery 改变 |
 | ADR-0017 | 2026-09-02 | WebM 使用 AudioEngine pre-Gain 原音量 tap；只允许 VP9→VP8 codec fallback，不静默降低分辨率/fps | project-owner | approved | [ADR-0017](../architecture/adrs/0017-realtime-webm-recording.md) | 音频 tap、codec、预设、状态机或保存边界改变 |
+| ADR-0018 | 2026-09-03 | Editor 时间轴固定为 `88px/72px` 并保留 6px 波形安全区；同歌恢复不播放、异歌显式 replace、point 中心误差 `<=1 CSS px` | project-owner | approved | [ADR-0018](../architecture/adrs/0018-editor-timeline-recovery-and-marker-alignment.md) | 时间轴垂直几何、恢复决策、route 切换或 marker 锚点改变 |
 | DEC-008 | 2026-07-24 | 实施采用 M1–M11 相对门禁，不承诺日期；M3 从测试基础开始，M7 未通过不得扩展后续特征 | project-owner | approved | [Execution plan](../delivery/execution-plan.md) | 依赖、里程碑、验收门禁或交付优先级改变 |
 | DEC-009 | 2026-07-24 | 当前只批准 execution planning；不预建 quality/release/retrospective，也不自动开始代码实现 | project-owner | superseded by DEC-010 | [Milestone plan](../delivery/milestone-plan.md) | 已由 owner 决定前置三份 quality design |
 | DEC-010 | 2026-07-24 | 在 M3 前增加 Q0：前置 eval plan、golden examples、failure taxonomy；三份文档单独批准后开放 M3，release-readiness 仍等待 M11 证据 | project-owner | approved | [Eval plan](../quality/eval-plan.md) | 验收/测试纪律变化，或 owner 改变 Q0/readiness 时序 |
@@ -74,6 +75,7 @@ next_action: "Visualizer V4 已获 owner 批准并关闭；V5 WebM 为 In Progre
 | DEC-041 | 2026-09-03 | V4 Cube Swarm 使用 64 方块核心频谱环、seed 外围上升方块和三颗分层轨道卫星；rise/orbit 使用 60Hz checkpoint 积分，同一 RendererHost 处理 context recovery | project-owner | approved | [Binding and scene contracts](../architecture/visualizer/binding-and-scene-contracts.md) | Cube 构图、频谱规范、几何常量、默认绑定、积分或 context 所有权改变 |
 | DEC-042 | 2026-09-03 | 批准 V4 34/34 canonical evidence 与人工门禁；保持 canonical identity 不变，V4 改为 Complete 并开放 V5；R-039 因录制中 context loss 尚未验证而保持 Open | project-owner | approved | [Visualizer evidence](../quality/visualizer/evidence-index.md) | V4 canonical identity、owner review 结论、R-039 剩余范围或 V5 开放门禁改变 |
 | DEC-043 | 2026-09-03 | V5 准备失败恢复录制前时间/播放态；录制开始后的取消或错误停在当前时间并暂停；活动录制或 ready Blob 离页使用站内决策对话框 | project-owner | approved | [Recording contract](../architecture/visualizer/recording-contract.md) | 录制失败恢复、ready Blob、离页或播放 checkpoint 语义改变 |
+| DEC-044 | 2026-09-03 | Editor E8 固定 `88px/72px` 共享时间轴与 6px 波形安全区；同 URL 歌曲恢复后合并自动重试且不播放，异歌只提供显式 replace 入口；point marker 中心误差 `<=1 CSS px` | project-owner | approved | [ADR-0018](../architecture/adrs/0018-editor-timeline-recovery-and-marker-alignment.md) | 时间轴高度、恢复路由、自动播放边界、marker 几何或 canonical 约束改变 |
 
 ## Approval Evidence
 
@@ -90,6 +92,8 @@ next_action: "Visualizer V4 已获 owner 批准并关闭；V5 WebM 为 In Progre
 同轮 V4 计划澄清中，`project-owner` 选择“核心环群（推荐）”，并以“PLEASE IMPLEMENT THIS PLAN”批准完整 V4 实施计划。DEC-041 据此固定 64 方块频谱环、seed 外围上升方块、三颗分层轨道卫星、默认 Spectrum+Energy 两项分析、60Hz rise/orbit checkpoint 与同 RendererHost context recovery；V4 quality contract 可直接标记为 `approved` 并实施。该决定不修改 JSON V1，不构成 V4 canonical/人工门禁、V5 WebM 或生产上线批准。
 
 同日，`project-owner` 明确回复“`我批准`关闭 V4 并开放 V5”，并在后续计划澄清中选择 R-039 保持 `Open`、分阶段播放恢复和站内离页决策对话框；随后以“PLEASE IMPLEMENT THIS PLAN”批准 V5 完整计划。DEC-042/DEC-043 据此生效：V4 canonical identity 不变且无需重跑，V4 evidence 改为 `approved`、V4 改为 `Complete`、V5 改为 `In Progress`。该批准不构成 V5 canonical、V6 readiness 或生产上线通过。
+
+同日，`project-owner` 以“PLEASE IMPLEMENT THIS PLAN”批准 Editor E8 可用性修正及 ADR-0018、delivery 与 quality 计划。DEC-044 据此生效，E1–E7 历史 evidence 不改写，E8 改为 `In Progress`。E8 最初因工作树同时包含独立 Visualizer V5 修改而只形成 scoped/provisional 证据；V5 独立提交后，owner 又明确“e8的修改可以在v5提交后提交”，据此允许 E8 单独提交并运行 clean canonical。该授权不关闭 R-022/R-024/R-025，也不把 E8 标记为 `Complete`。
 
 同日，`project-owner` 明确要求实施 Q0 质量设计计划，批准了 Q0 前置、四级严重度和 readiness 后置的阶段安排；同时要求三份质量文档先保持 `in-review`，经单独审阅后才生效。因此 DEC-010 的时序决定已批准，但 Q0 内容尚未批准。
 
