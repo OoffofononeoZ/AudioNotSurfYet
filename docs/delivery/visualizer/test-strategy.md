@@ -8,7 +8,7 @@ upstream_docs:
   - "docs/architecture/risk-register.md"
   - "docs/delivery/visualizer/execution-plan.md"
   - "docs/delivery/visualizer/acceptance-criteria.md"
-next_action: "V5 已关闭；建立 V6 双浏览器、三格式、15 分钟与全回归门禁"
+next_action: "V6 dirty provisional 已 54/54 通过；提交实现并运行 clean canonical"
 ---
 
 # Visualizer V1–V6 Test Strategy
@@ -126,6 +126,7 @@ V6 实际命令固定为 `fixtures:v6:golden`、`test:v6:unit`、`test:v6:integr
 ## 9. Current Gate State
 
 - V1–V5 canonical 与 owner evidence 均已批准并关闭；V6 quality contract 已批准且实现为 `In Progress`。
+- V6 golden/unit/integration、Chrome、Edge 与六文件 media verification 已通过；dirty provisional `V6-2026-09-03T10-15-47-668Z-0f90a77c-provisional` 54/54 通过，但仍须在独立 implementation commit 上完成 clean canonical 后才能登记 evidence。
 - V4 quality/eval、golden、failure taxonomy、clean run `V4-2026-09-02T17-47-40-271Z-5c2d24a3` 34/34 与人工门禁均已获批准；V5 在此 34 步基线上增加六个录制专项。
 - 当前没有正式 CI，所有结果限定为本地登记环境。
 - `/comingsoon`、`threeDTable`、TestLands 或 V3 历史 artifact 中的 V4 中性预览不是当前 V4 implementation evidence；真实 Cube 由 V4 专项与前向回归评价。

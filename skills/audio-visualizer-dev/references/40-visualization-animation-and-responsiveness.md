@@ -18,7 +18,9 @@ V3 scene-local decay 的单位为秒，固定 60Hz 计算 `max(I, previous * exp
 
 DEC-041 固定 V4 为 64 方块中心频谱环、seed 外围上升方块与三颗分层轨道卫星。中心频谱按 64 个连续 band 的非负最大值和固定 log reference 128 映射；rise/orbit 按 60Hz 从 0 秒积分并每秒 checkpoint。Cube 使用共享 BoxGeometry、两个 MeshStandardMaterial、三个 InstancedMesh、固定灯光和 perspective camera，不使用纹理；context loss 在同 RendererHost/WebGLRenderer 内暂停视觉 RAF、恢复 scene GPU 资源并按当前绝对时间绘制。
 
-V5 recording capture lease 暂时把同一 Canvas backing store 切到严格 preset 与 DPR 1，CSS 尺寸不变；capture 期间 resize 只记住最新 preview size，release 后恢复。持续播放仍只有 host 的一个视觉 RAF，且下一帧在当前 scene work 前排队以稳定 capture packet cadence；同步 time-zero 绘制、录制、context abort 或 renderer retry 都不得创建第二 Canvas、renderer 或 RAF。
+V5 recording capture lease 暂时把同一 Canvas backing store 切到严格 preset 与 DPR 1，CSS 尺寸不变；capture 期间 resize 只记住最新 preview size，release 后恢复。capture lease 存续时由 host 的同一个视觉 RAF 保持画布帧节奏，包括 recorder 启动/收尾期间 transport 尚暂停的窗口；下一帧在当前 scene work 前排队，release 后暂停状态只再完成已排队单帧。同步 time-zero 绘制、录制、context abort 或 renderer retry 都不得创建第二 Canvas、renderer 或 RAF。
+
+V6 候选为既有开发诊断追加 `lastSongTimeSeconds` 与 `lastFrameAtMs`，每次成功 scene render 后同步更新；`__VISUALIZER_DIAGNOSTICS__` 与 `__VISUALIZER_V3_DIAGNOSTICS__` 仍指向同一诊断对象。测试专用资源探针只在 Playwright 页面中包装并计数 AudioContext、Worker、RAF、WebGL、MediaStreamTrack、Observer、window/document listener 与 Blob URL，不形成生产公共 API。
 
 ## RAF 与 Observer
 

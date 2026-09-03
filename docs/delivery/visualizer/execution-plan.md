@@ -11,7 +11,7 @@ upstream_docs:
   - "docs/architecture/visualizer/project-format-v1.md"
   - "docs/architecture/visualizer/binding-and-scene-contracts.md"
   - "docs/architecture/visualizer/recording-contract.md"
-next_action: "V6 quality contract 已获批准；实施专项、provisional 与 54 步 clean canonical"
+next_action: "V6 dirty provisional 已 54/54 通过；提交实现并执行 54 步 clean canonical"
 ---
 
 # Visualizer V1–V6 Execution Plan
@@ -21,6 +21,8 @@ next_action: "V6 quality contract 已获批准；实施专项、provisional 与 
 把已批准的 Visualizer V0 架构按六个可独立验证的纵向里程碑交付：先建立当前歌曲工作台和本地工程，再接入 Analyzer/Editor 绑定，随后分别交付两个内置场景、实时 WebM 录制和双浏览器最终加固。
 
 Visualizer V1–V4 的工作台、数据绑定与两个场景均已通过各自 clean canonical 和 owner 门禁。V5 realtime WebM 的 40/40 clean canonical 与人工门禁于 2026-09-03 获 owner 批准并关闭；V6 final hardening 为 `In Progress`。
+
+V6 当前候选已实现版本化 hardening golden、当前歌曲会话内的双模板 binding 精确恢复、renderer 歌曲/帧时间诊断、测试专用资源探针，以及共享 Chrome/Edge 三格式、900 秒压力、六文件媒体和 20 次生命周期专项。dirty provisional `V6-2026-09-03T10-15-47-668Z-0f90a77c-provisional` 54/54 通过，summary SHA-256 为 `432ec71d21ec9c3c41310bf738603a6a8491c154f4ab0a01cd359432ef68b2c4`；该 dirty run 只作为实现反馈，仍须独立实现提交与 clean canonical 才能登记正式 evidence。
 
 ## 2. Delivery Principles
 

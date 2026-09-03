@@ -96,6 +96,9 @@
 | `npm run fixtures:v5:golden` / `test:v5:unit` / `test:v5:integration` | V5 同步 fixture、tap/preset/state machine、controller lock、capture lease 与 20 次资源专项 | realtime recording 候选的静态与集成门禁 |
 | `npm run test:e2e:v5` / `test:v5:media` | 真实 Chrome/Edge MediaRecorder、故障清理、能力矩阵和 ffprobe/FFmpeg 文件事实 | optional preset 可在 preflight 明确 unavailable；已生成文件必须全部通过 |
 | `npm run eval:v5:provisional` / `eval:v5` | V4 34 步基线 + V5 六专项的 dirty/clean 40 步链 | clean canonical 必须绑定 implementation commit 与媒体 SHA |
+| `npm run fixtures:v6:golden` / `test:v6:unit` / `test:v6:integration` | V6 三格式/压力工程 golden、四到二再恢复、renderer 时间诊断与幂等资源专项 | 已实现；用于 final hardening 静态与集成门禁 |
+| `npm run test:e2e:v6:chrome` / `test:e2e:v6:edge` / `test:v6:media` | 真实双浏览器三格式、六 WebM、900 秒四特征、20 次 lifecycle、故障矩阵和媒体事实 | 单独专项已通过；仍需纳入 provisional/canonical runner |
+| `npm run eval:v6:provisional` / `eval:v6` | V5 40 步基线 + V6 六专项 + M6/M14 八项显式回归的 dirty/clean 54 步链 | clean canonical 必须绑定 implementation commit、六个媒体 SHA 与资源/性能指标 |
 
 ## 已知测试缺口
 
@@ -109,6 +112,7 @@
 - Visualizer V3 clean canonical `V3-2026-09-02T13-32-42-513Z-89be30eb` 已在 commit `89be30eb23d4e53d2c38f24e111cd1af7ec0840d` 上 30/30 通过，summary SHA-256 为 `afe4cbe233fe1feded65380d6e976d5a4c32c2f9860fe2e0357a0d615d6a7b84`；evidence 与人工门禁已于 2026-09-03 获 owner 批准。
 - Visualizer V4 Cube Swarm clean canonical `V4-2026-09-02T17-47-40-271Z-5c2d24a3` 已在 commit `5c2d24a3f1f413dba236563b3686237c6b8f2e21` 上 34/34 通过，summary SHA-256 为 `9b2a86e3dcdd4e634317c4234418dc3444da441a3be805a980562768dba5c3b2`；owner 已批准并关闭 V4。
 - Visualizer V5 clean canonical `V5-2026-09-03T03-49-31-211Z-9b5af09c` 已在 implementation commit `9b5af09c5846415a8e5465e710e6095f1e7db310` 上 40/40 通过，summary SHA-256 为 `cec1fab0310852458c2aa4fbd3bebc90eee3e213a54b7695a524736e07b07b7b`；Chrome/Edge 强制默认 720p30 输出、其余三档 typed unavailable，canonical 与 owner 原生保存/回放门禁均已批准。V6 final hardening 为 `In Progress`。
+- Visualizer V6 候选覆盖三格式、900 秒 OPFS 四特征、模板 binding 往返、20 次 route/context/record lifecycle、renderer 时间诊断与测试专用资源基线。dirty provisional `V6-2026-09-03T10-15-47-668Z-0f90a77c-provisional` 已 54/54 通过，summary SHA-256 为 `432ec71d21ec9c3c41310bf738603a6a8491c154f4ab0a01cd359432ef68b2c4`；clean canonical 尚未运行，因此 V6 evidence 仍为空且 R-041 保持 `Open`。
 - 当前机器已安装 Edge 151；M11 clean canonical 已使用真实 `msedge` channel 全量 31/31 通过。原生权限 prompt 不能由 OPFS 自动化替代；当前候选已由 `project-owner` 于 2026-08-26 完成人工补偿签字，相关实现或浏览器变化后须重做。
 - 正式 M3 canonical run 已在 clean commit `17d16f0da37289c1f67f75203502beef999572ea` 上通过并登记，且已由 `project-owner` 批准。
 - 正式 M4 canonical run 已在 clean commit `e5cfe9e8ab62301f3c5b0ddcdd37847a2e131a0f` 上通过并登记，evidence 与 working agreements 已由 `project-owner` 批准。

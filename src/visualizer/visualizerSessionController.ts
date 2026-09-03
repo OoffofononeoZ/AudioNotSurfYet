@@ -197,6 +197,11 @@ export class VisualizerSessionController {
     private pendingProject: VisualizerProjectV1 | null = null;
     private saveInFlight: Promise<void> | null = null;
     private beforeUnloadRegistered = false;
+    private templateBindingTrackHash: string | null = null;
+    private readonly templateBindings = new Map<
+        VisualizerTemplateId,
+        VisualizerParameterBindingV1[]
+    >();
     private disposed = false;
 
     constructor(options: VisualizerSessionControllerOptions) {
@@ -327,6 +332,7 @@ export class VisualizerSessionController {
         if (generation !== this.routeGeneration || this.disposed) return;
         this.releaseAnalysisLease();
         this.releaseLease();
+        this.clearTemplateBindings();
         if (!trackId) {
             this.publish(initialSnapshot());
             return;
@@ -434,13 +440,16 @@ export class VisualizerSessionController {
         this.assertRecordingUnlocked();
         const project = this.snapshot.project;
         if (!project || project.scene.templateId === templateId) return;
+        this.rememberTemplateBindings(project);
         this.updateProject({
             ...project,
             scene: {
                 templateId,
                 templateVersion: 1,
                 seed: project.scene.seed,
-                bindings: this.registry.createDefaultBindings(templateId),
+                bindings: this.templateBindings.get(templateId)
+                    ?.map((binding) => structuredClone(binding))
+                    ?? this.registry.createDefaultBindings(templateId),
             },
         }, true);
     }
@@ -454,6 +463,7 @@ export class VisualizerSessionController {
             || !['ready', 'not-persisted'].includes(this.snapshot.state)
         ) return;
         const candidate = this.validateCandidate(project, context);
+        this.rememberTemplateBindings(candidate);
         this.publish({
             ...this.snapshot,
             state: 'ready',
@@ -581,6 +591,7 @@ export class VisualizerSessionController {
         if (!opened || generation !== this.routeGeneration || this.disposed) return 'cancelled';
         const candidate = codec.decode(opened.bytes, context, this.registry);
         if (generation !== this.routeGeneration || this.disposed) return 'cancelled';
+        this.rememberTemplateBindings(candidate);
         this.publish({
             ...this.snapshot,
             state: 'ready',
@@ -726,6 +737,7 @@ export class VisualizerSessionController {
         await this.flush();
         this.releaseAnalysisLease();
         this.releaseLease();
+        this.clearTemplateBindings();
         this.publish(initialSnapshot());
     }
 
@@ -1008,6 +1020,7 @@ export class VisualizerSessionController {
         persistence: VisualizerSessionSnapshot['persistence'],
         editorSnapshotSource: VisualizerEditorSnapshotSource,
     ): void {
+        this.resetTemplateBindings(project);
         this.publish({
             state: persistence === 'not-persisted' ? 'not-persisted' : 'ready',
             routeTrackId: trackId,
@@ -1045,6 +1058,28 @@ export class VisualizerSessionController {
         this.analysisLease?.release();
         this.analysisLease = null;
         this.bindingResolver.reset();
+    }
+
+    private rememberTemplateBindings(project: VisualizerProjectV1): void {
+        if (this.templateBindingTrackHash !== project.track.contentHash) {
+            this.templateBindings.clear();
+            this.templateBindingTrackHash = project.track.contentHash;
+        }
+        this.templateBindings.set(
+            project.scene.templateId,
+            project.scene.bindings.map((binding) => structuredClone(binding)),
+        );
+    }
+
+    private resetTemplateBindings(project: VisualizerProjectV1): void {
+        this.templateBindings.clear();
+        this.templateBindingTrackHash = project.track.contentHash;
+        this.rememberTemplateBindings(project);
+    }
+
+    private clearTemplateBindings(): void {
+        this.templateBindings.clear();
+        this.templateBindingTrackHash = null;
     }
 
     private publish(snapshot: VisualizerSessionSnapshot): void {

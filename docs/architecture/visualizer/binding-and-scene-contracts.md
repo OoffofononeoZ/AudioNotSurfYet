@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/product/success-metrics.md"
   - "docs/architecture/system-design.md"
   - "docs/architecture/visualizer/project-format-v1.md"
-next_action: "V3/V4 场景与 V5 录制已获 owner 批准；作为 V6 双模板前向基线"
+next_action: "V6 54 步 dirty provisional 已通过；提交实现并在 clean HEAD 运行 canonical"
 ---
 
 # Visualizer Binding and Scene Contracts
@@ -158,14 +158,17 @@ DEC-041 将 V4 首版视觉细化为“核心环群”，其中 `B = baseSize`�
 
 Cube 默认 binding 由 descriptor 声明：`centerSpectrum` 使用 `amplitudeSpectrum/default/full`；`riseSpeed` 使用 `energy/default/scalar`，transform 为输入 `[0,25]`、输出 `[0.25,3]`、clamp 开启且无 smoothing；其余参数使用现有 constant default。`SceneRegistry.createDefaultBindings()` 读取该声明，首次切换到 Cube 后 active analysis set 必须恰为两项；strict JSON 导入与草稿恢复保留工程原绑定，不应用默认值覆盖。
 
+V6 在不升级 JSON V1 的前提下增加 controller-local 模板 binding 缓存。当前歌曲会话中，离开模板前保存其完整 bindings，切回时精确恢复；目标模板尚无会话缓存时才使用 descriptor 默认 bindings。同歌工程导入只替换导入模板的缓存并保留另一模板状态；离页、重新进入或歌曲 content hash 变化时清空缓存。持久化工程仍只包含当前模板，刷新后的非当前模板状态不被承诺恢复。
+
 V3 canonical 阶段曾以明确的 V4 中性预览验证 scene disposal 与单 host/renderer/Canvas；该历史 artifact 不改写。V4 已用 DEC-041 的真实 Cube Swarm 替换中性预览，V3 前向回归验证真实 Cube 切换仍保留同一 host/renderer/Canvas；V4 34/34 clean canonical 与 owner 门禁已获批准。
 
 ## Renderer Host and Lifecycle
 
 - 一个 Visualizer 页面只有一个 16:9 Canvas、一个 Three.js `WebGLRenderer` 和一个 cancellable RAF。scene 不能创建 renderer、AudioContext、Worker 或额外 RAF。
-- 播放/录制时 host 用 PlaybackSnapshot 的 AudioContext 基准时间渲染；暂停、seek、参数变更和 resize 只触发一次 request-render。
+- 播放时 host 用 PlaybackSnapshot 的 AudioContext 基准时间渲染；录制 capture lease 存续期间，同一个 host RAF 在 recorder 启动/收尾的暂停窗口也保持画布帧节奏，lease 释放后恢复“暂停、seek、参数变更和 resize 只触发一次 request-render”。
 - template switch 先停止旧 scene 更新、dispose geometry/material/texture/scene，再在同一 host 创建新 scene。DOM inspector 与 transport 不由 scene 管理。
 - seed 决定初始布局；粒子位置、rise 和 orbit 使用绝对时间公式或确定性积分/checkpoint，不依赖 frame count。
+- 开发诊断在每次成功绘制后记录 `lastSongTimeSeconds` 和 `lastFrameAtMs`，并继续通过 `__VISUALIZER_DIAGNOSTICS__` 与兼容别名 `__VISUALIZER_V3_DIAGNOSTICS__` 暴露同一对象；该追加不改变生产公共接口。
 - `webglcontextlost` 阻止默认销毁、取消 pending visual RAF、进入带文字的 `recovering` 状态并保留工程/播放；不暂停或 seek transport。Three.js 先在同一 `WebGLRenderer` 对象内恢复 GL 内部状态，host 的 `webglcontextrestored` 处理随后 dispose 旧 scene、重建 scene GPU 资源并从当前绝对时间绘制。录制期间 context loss 进入 error 并丢弃未完成 Blob。
 - 所有图片/纹理必须为本地、同源或 origin-clean；否则在加载时拒绝，不能等到 `captureStream()` 才失败。
 
@@ -177,4 +180,4 @@ V3 canonical 阶段曾以明确的 V4 中性预览验证 scene disposal 与单 h
 
 ## Approval State
 
-`project-owner` 于 2026-09-02 批准 Visualizer V0 system design、接口契约、R-034–R-041 与 ADR-0014–0017。本契约据此为 `approved`。V3 implementation commit 与 30/30 clean canonical 已于 2026-09-03 获 owner 批准，V3 关闭并开放 V4；同日 owner 选择并批准 DEC-041“核心环群”细化及 V4 quality contract。V4 Cube Swarm 34/34 clean canonical 与 owner 门禁随后获批，V4 已关闭并开放 V5。
+`project-owner` 于 2026-09-02 批准 Visualizer V0 system design、接口契约、R-034–R-041 与 ADR-0014–0017。本契约据此为 `approved`。V3 implementation commit 与 30/30 clean canonical 已于 2026-09-03 获 owner 批准，V3 关闭并开放 V4；同日 owner 选择并批准 DEC-041“核心环群”细化及 V4 quality contract。V4 Cube Swarm 34/34 clean canonical 与 owner 门禁随后获批。V5 40/40 clean canonical 和人工门禁也于 2026-09-03 获批，V5 已关闭并开放 V6；V6 当前只实施既有契约内的 final hardening，尚未形成 canonical。

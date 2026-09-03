@@ -8,7 +8,7 @@ upstream_docs:
   - "docs/delivery/visualizer/test-strategy.md"
   - "docs/architecture/risk-register.md"
   - "docs/quality/visualizer/v5-eval-plan.md"
-next_action: "实施 V6 专项、运行 dirty provisional，并在 implementation commit 上运行 54 步 clean canonical"
+next_action: "V6 dirty provisional 已 54/54 通过；提交 implementation commit 并运行 54 步 clean canonical"
 ---
 
 # Visualizer V6 Eval Plan
