@@ -6,7 +6,7 @@ upstream_docs:
   - "docs/quality/editor/e8-eval-plan.md"
   - "docs/quality/editor/e7-failure-taxonomy.md"
   - "docs/architecture/risk-register.md"
-next_action: "clean canonical 无失败步骤；owner 验收前保持相关风险 Open"
+next_action: "clean canonical 与 owner 门禁已批准；新 E8 类失败出现时重开对应风险"
 ---
 
 # Editor E8 Failure Taxonomy

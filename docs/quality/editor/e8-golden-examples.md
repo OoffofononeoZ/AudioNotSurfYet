@@ -5,7 +5,7 @@ last_reviewed: 2026-09-03
 upstream_docs:
   - "docs/quality/editor/e8-eval-plan.md"
   - "docs/delivery/editor/acceptance-criteria.md"
-next_action: "E8 golden 已由 25/25 clean canonical 复核；等待 owner 人工验收"
+next_action: "E8 golden 已由 clean canonical 与 owner 门禁批准；相关行为变化时复核"
 ---
 
 # Editor E8 Golden Examples

@@ -10,7 +10,7 @@ upstream_docs:
   - "docs/architecture/risk-register.md"
   - "docs/architecture/editor/project-format-v1.md"
   - "docs/architecture/editor/interaction-contracts.md"
-next_action: "E8 implementation commit 与 25/25 clean canonical 已完成；等待 owner 验收"
+next_action: "E8 已通过 clean canonical 与 owner 门禁并关闭；Editor readiness 另行复核"
 ---
 
 # Editor E1–E8 Execution Plan
@@ -19,7 +19,7 @@ next_action: "E8 implementation commit 与 25/25 clean canonical 已完成；等
 
 把已批准的 Editor“逆向制曲”架构按 E1–E8 纵向切片交付：E1–E6 已完成入口、运行时、工程、时间轴、点/范围标注、分析叠加及最终加固；E7 把页面收敛为紧凑工作台；E8 修正共享时间轴高度、不可用歌曲恢复状态与 point marker 中心几何。
 
-本计划只覆盖 Editor，不重新打开已完成的 Analyzer 历史 canonical。`project-owner` 于 2026-08-26 批准 E1–E6 delivery，于 2026-08-28 开放 E7，并于 2026-09-03 以实施指令批准 E8。E1–E7 历史 evidence 保持不变，Editor readiness 等待 E8 关闭后再复核。
+本计划只覆盖 Editor，不重新打开已完成的 Analyzer 历史 canonical。`project-owner` 于 2026-08-26 批准 E1–E6 delivery，于 2026-08-28 开放 E7，并于 2026-09-03 以实施指令批准 E8。E1–E8 历史 evidence 保持不变；E8 关闭后，Editor readiness 可按独立门禁复核。
 
 ## 2. Delivery Principles
 
@@ -190,7 +190,7 @@ Exit gate:
 - AC-E801–AC-E805 的 unit、integration 与真实 Chrome/Edge 专项均通过；四视口高度、DPR、6px 安全区和 marker X/Y `<=1 CSS px` 有实际测量。
 - 同歌恢复保持 paused 且无重试循环；异歌不静默切换，显式 replace 后进入正确工程；错误文件与草稿原子性通过。
 - E1/E2/E3/E7 与 M5 恢复相关回归、typecheck、build、docs 和 diff check 通过且无 pageerror/异常 console。
-- Visualizer V5 已独立提交，owner 已允许随后单独提交 E8；E8 implementation commit 与 25/25 clean canonical 已完成并登记 `in-review` evidence。只有 owner 验收后才关闭 R-022/R-024/R-025 并把 E8 标为 `Complete`。
+- Visualizer V5 已独立提交，owner 已允许随后单独提交 E8；E8 implementation commit 与 25/25 clean canonical 已完成。owner 又批准 canonical 与人工门禁，R-022/R-024/R-025 已改为 `Mitigated`，E8 已标为 `Complete`。
 
 ## 5. Test and Eval Commands
 
@@ -214,7 +214,7 @@ npm run eval:eN:provisional
 npm run eval:eN
 ```
 
-其中 `N` 为 5–8。E8 另提供 `test:e2e:e8:chrome`、`test:e2e:e8:edge` 与合并命令。canonical 必须拒绝 dirty worktree，并记录 run ID、commit、环境、步骤结果、日志和 summary SHA-256。E1–E7 clean canonical 与 owner approval 均保留为历史；E8 clean canonical 已按该契约登记为 `in-review`。
+其中 `N` 为 5–8。E8 另提供 `test:e2e:e8:chrome`、`test:e2e:e8:edge` 与合并命令。canonical 必须拒绝 dirty worktree，并记录 run ID、commit、环境、步骤结果、日志和 summary SHA-256。E1–E8 clean canonical 与 owner approval 均保留为历史证据。
 
 ## 6. Change Control and Exclusions
 
@@ -255,4 +255,4 @@ npm run eval:eN
 
 同日，owner 明确先批准 E6，再要求实施 E7 紧凑工作台。E6 据此关闭；E7 只改变布局密度和区域视觉，不改变 E1–E6 的公共契约。Editor readiness 延后到 E7 获批。
 
-2026-09-03，owner 以 E8 完整实施指令批准本计划扩展、ADR-0018、AC-E801–AC-E805 与 E8 quality 契约并开放实施。Visualizer V5 独立提交后，owner 明确允许随后单独提交 E8。implementation commit `84d9435cc6e8d1edb0932ff1b8dcd1b84dff32b5` 与 25/25 clean canonical 已完成；owner 验收前 E8 仍为 `In Progress`。
+2026-09-03，owner 以 E8 完整实施指令批准本计划扩展、ADR-0018、AC-E801–AC-E805 与 E8 quality 契约并开放实施。Visualizer V5 独立提交后，owner 明确允许随后单独提交 E8。implementation commit `84d9435cc6e8d1edb0932ff1b8dcd1b84dff32b5` 与 25/25 clean canonical 完成后，owner 又批准 evidence 与人工门禁；E8 据此改为 `Complete`。

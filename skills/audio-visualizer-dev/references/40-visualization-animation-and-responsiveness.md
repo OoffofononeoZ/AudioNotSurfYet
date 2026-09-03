@@ -10,7 +10,7 @@
 | `MusicBar.vue` | CSS conic-gradient + GSAP | 三种外形/灯带样式、进度和信息跑马灯 |
 | `AnimatedList.vue` | GSAP | 列表进入、选择和滚动可见性动画 |
 
-`threeDTable.vue` 仍是试验表面；`MeydaCard.vue` 已是 Analyzer 21 项 Canvas/DOM renderer 容器。E4 已抽取 `analysisCanvasRenderer` 供 Analyzer card 与 Editor overlay 共用，E5 range 操作保持 overlay pointer-through；E6 已在真实 Chrome/Edge 和 10,000 事件压力下通过并获批准。E7 已把 overlay Teleport 为全视口 fixed Canvas，并在双浏览器验证 viewport backing store、marker-column clip、纵/横滚动与 `0 CSS px` 横轴 geometry，修订版已获 owner 批准。E8 把共享波形 stage 收敛为 `88px/72px`，上下保留 6px，并把 14px point diamond 与 stem 分离；Chrome/Edge 四视口最大 marker/diamond/candidate/pin 中心误差为 `0.009375 CSS px`，canonical 为 `in-review`。
+`threeDTable.vue` 仍是试验表面；`MeydaCard.vue` 已是 Analyzer 21 项 Canvas/DOM renderer 容器。E4 已抽取 `analysisCanvasRenderer` 供 Analyzer card 与 Editor overlay 共用，E5 range 操作保持 overlay pointer-through；E6 已在真实 Chrome/Edge 和 10,000 事件压力下通过并获批准。E7 已把 overlay Teleport 为全视口 fixed Canvas，并在双浏览器验证 viewport backing store、marker-column clip、纵/横滚动与 `0 CSS px` 横轴 geometry，修订版已获 owner 批准。E8 把共享波形 stage 收敛为 `88px/72px`，上下保留 6px，并把 14px point diamond 与 stem 分离；Chrome/Edge 四视口最大 marker/diamond/candidate/pin 中心误差为 `0.009375 CSS px`，canonical 与 owner 门禁已批准。
 
 Visualizer V3 已由 DEC-039 固定为中心 Orthogonal Lines，并由 30/30 canonical 与 2026-09-03 owner 人工验收关闭：现有 16:9 Canvas 由唯一 `VisualizerRendererHost` 接管，host 独占一个 Three.js renderer 和一个可取消视觉 RAF。场景使用单全屏 quad/shader、固定 `#020403` 背景；intensity 同时控制中心向两端长度与主线 alpha，thickness 为 CSS px，brightness >1 增强 halo，horizontal/vertical 互不串扰。
 
