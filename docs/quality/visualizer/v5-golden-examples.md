@@ -5,7 +5,7 @@ last_reviewed: 2026-09-03
 upstream_docs:
   - "docs/quality/visualizer/v5-eval-plan.md"
   - "docs/architecture/visualizer/recording-contract.md"
-next_action: "V5 fixture、golden 与 canonical WebM 已登记；等待 owner 人工回放和原生保存门禁"
+next_action: "V5 fixture、golden、canonical WebM 与 owner 门禁已批准；作为 V6 基线保留"
 ---
 
 # Visualizer V5 Golden Examples

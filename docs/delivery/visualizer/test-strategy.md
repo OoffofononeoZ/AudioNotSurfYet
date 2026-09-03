@@ -8,7 +8,7 @@ upstream_docs:
   - "docs/architecture/risk-register.md"
   - "docs/delivery/visualizer/execution-plan.md"
   - "docs/delivery/visualizer/acceptance-criteria.md"
-next_action: "V4 已关闭；建立 V5 双浏览器 MediaRecorder 与 ffprobe/FFmpeg 40 步门禁"
+next_action: "V5 已关闭；建立 V6 双浏览器、三格式、15 分钟与全回归门禁"
 ---
 
 # Visualizer V1–V6 Test Strategy
@@ -123,7 +123,7 @@ V5 实际命令固定为 `fixtures:v5:golden`、`test:v5:unit`、`test:v5:integr
 
 ## 9. Current Gate State
 
-- V1–V4 canonical 与 owner evidence 均已批准并关闭；V5 为 `In Progress`，V6 保持 `Planned`。
+- V1–V5 canonical 与 owner evidence 均已批准并关闭；V6 为 `In Progress`。
 - V4 quality/eval、golden、failure taxonomy、clean run `V4-2026-09-02T17-47-40-271Z-5c2d24a3` 34/34 与人工门禁均已获批准；V5 在此 34 步基线上增加六个录制专项。
 - 当前没有正式 CI，所有结果限定为本地登记环境。
 - `/comingsoon`、`threeDTable`、TestLands 或 V3 历史 artifact 中的 V4 中性预览不是当前 V4 implementation evidence；真实 Cube 由 V4 专项与前向回归评价。

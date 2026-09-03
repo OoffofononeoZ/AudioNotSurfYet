@@ -13,7 +13,7 @@ next_action: "M14 已关闭；保留 canonical artifact，PROD-015 解决前不�
 
 ## Scope Routing
 
-本文保留 Analyzer M1–M14 的已批准历史状态；Editor 的 E0-D 与 E1–E7 由独立 [Editor milestone plan](editor/milestone-plan.md) 管理。Visualizer V0-D 与 V1–V6 由独立 [Visualizer milestone plan](visualizer/milestone-plan.md) 管理；当前 V0-D 为 `In Review`，V1–V6 均为 `Planned`。
+本文保留 Analyzer M1–M14 的已批准历史状态；Editor 的 E0-D 与 E1–E8 由独立 [Editor milestone plan](editor/milestone-plan.md) 管理。Visualizer V0-D 与 V1–V6 由独立 [Visualizer milestone plan](visualizer/milestone-plan.md) 管理；当前 V0-D 与 V1–V5 为 `Complete`，V6 为 `In Progress`。
 
 ## Planning Convention
 

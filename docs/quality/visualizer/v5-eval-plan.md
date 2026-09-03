@@ -8,7 +8,7 @@ upstream_docs:
   - "docs/delivery/visualizer/test-strategy.md"
   - "docs/architecture/visualizer/recording-contract.md"
   - "docs/architecture/risk-register.md"
-next_action: "V5 clean canonical 已 40/40 通过并登记；等待 owner 完成人工回放、原生保存和清理门禁"
+next_action: "V5 canonical 与人工门禁已批准；保持为 V6 前向回归基线"
 ---
 
 # Visualizer V5 Eval Plan
@@ -42,7 +42,7 @@ next_action: "V5 clean canonical 已 40/40 通过并登记；等待 owner 完成
 - V5 六专项固定为 `fixtures:v5:golden`、`test:v5:unit`、`test:v5:integration`、`test:e2e:v5:chrome`、`test:e2e:v5:edge`、`test:v5:media`。
 - `eval:v5:provisional` 允许 dirty worktree，只作为实现反馈；`eval:v5` 只在 clean implementation commit 上运行。
 - V5 canonical 为 V4 固定 34 步基线加六专项，共 40 步。runner 记录 WebM SHA-256、capability matrix、ffprobe JSON、同步报告、浏览器/运行时/硬件和资源/性能指标。
-- canonical 通过后 evidence 保持 `in-review`、V5 保持 `In Progress`、R-039/R-040/R-041 保持 `Open`、V6 保持 `Planned`，直到 owner 完成人工验收并明确批准。
+- 2026-09-03 owner 已批准 canonical 与人工验收；V5 evidence 为 `approved`、V5 为 `Complete`、R-039/R-040 为 `Mitigated`。R-041 与 V6 final hardening 继续独立验证。
 
 ## Evidence Gaps
 

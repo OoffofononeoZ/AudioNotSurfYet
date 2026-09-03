@@ -1,5 +1,5 @@
 ---
-status: in-review
+status: approved
 owner: "project-owner"
 last_reviewed: 2026-09-03
 upstream_docs:
@@ -19,7 +19,7 @@ upstream_docs:
   - "docs/quality/visualizer/v5-golden-examples.md"
   - "docs/quality/visualizer/v5-failure-taxonomy.md"
   - "docs/delivery/visualizer/milestone-plan.md"
-next_action: "V5 clean canonical 已登记为 in-review；等待 owner 完成双浏览器回放、原生保存与清理人工门禁"
+next_action: "V5 canonical 与人工门禁已批准；V6 final hardening 为 In Progress"
 ---
 
 # Visualizer Evidence Index
@@ -28,8 +28,8 @@ next_action: "V5 clean canonical 已登记为 in-review；等待 owner 完成双
 
 - V0-P、V0-A、V0-D：`Complete`。
 - V1：`Complete`；clean canonical 21/21 与适用人工门禁已由 owner 批准。
-- V2：`Complete`；clean canonical 26/26 已获 owner 批准；V3/V4：`Complete`，各自 canonical 与人工门禁已获批准；V5：`In Progress`，clean canonical evidence 为 `in-review`；V6：`Planned`。
-- R-034–R-038 为 `Mitigated`；R-039/R-040/R-041 保持 `Open`，等待 V5 owner 人工门禁与 V6 长时加固。
+- V2：`Complete`；clean canonical 26/26 已获 owner 批准；V3–V5：`Complete`，各自 canonical 与人工门禁已获批准；V6：`In Progress`。
+- R-034–R-040 为 `Mitigated`；R-041 保持 `Open`，等待 V6 长时加固。
 - Analyzer/Editor canonical 是相邻回归，不能替代 Visualizer evidence。
 
 ## Record Contract
@@ -472,10 +472,10 @@ next_action: "V5 clean canonical 已登记为 in-review；等待 owner 完成双
 ### Manual Gaps and Review Boundary
 
 - 自动化证明了默认 720p30 双浏览器文件事实、页面静音仍有音轨、事件同步、命令锁、取消/context/renderer 清理、保存失败重试和资源边界；它不能替代 owner 对最终文件的实际回放、构图审美或 OS picker 权限/取消/覆盖流程。
-- owner 必须在 Chrome 与 Edge 各回放默认 720p30，确认画面和音轨可接受；确认页面音量 0 仍录入歌曲、Orthogonal burst/flash 同步、录制锁与取消/context 清理；并至少执行一次真实原生保存、picker 取消和失败后重试。
-- V5 继续保持 `In Progress`、evidence 为 `in-review`；R-039/R-040/R-041 继续 `Open`，V6 继续 `Planned`。只有 owner 明确批准后，才关闭 V5、将 R-039/R-040 改为 `Mitigated`并开放 V6；R-041 仍由 V6 长时压力覆盖。
+- owner 已在本轮批准 Chrome/Edge 默认 720p30 回放、页面音量 0 音轨、Orthogonal burst/flash 同步、录制锁、取消/context 清理，以及真实原生保存、picker 取消和失败重试人工门禁；不补写 owner 未提供的主观数值。
+- V5 为 `Complete`、evidence 为 `approved`；R-039/R-040 为 `Mitigated`，V6 为 `In Progress`。R-041 仍由 V6 长时压力覆盖。
 - V1–V4 canonical identity 保持不变且无需重跑；本记录不证明 15 分钟 1080p60、V6 overall readiness 或生产上线。
 
 ### Owner Review Status
 
-等待 `project-owner` 人工确认与明确批准；当前 canonical 通过不自动关闭 V5。
+2026-09-03，`project-owner` 明确“批准 V5”，并以实施计划确认该批准覆盖上列人工边界。canonical identity、artifact 和 hash 保持不变且无需重跑；本批准不构成 V6、整体 readiness 或生产上线通过。

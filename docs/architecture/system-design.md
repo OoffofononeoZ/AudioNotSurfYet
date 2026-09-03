@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/product/scope.md"
   - "docs/product/success-metrics.md"
   - "docs/product/open-questions.md"
-next_action: "Editor E8 已关闭；Visualizer V5 canonical 继续等待独立 owner 门禁"
+next_action: "Editor E8 与 Visualizer V5 已关闭；V6 在既有架构内执行最终加固"
 ---
 
 # System Design

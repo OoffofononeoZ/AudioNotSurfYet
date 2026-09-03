@@ -6,7 +6,7 @@ upstream_docs:
   - "docs/product/scope.md"
   - "docs/product/success-metrics.md"
   - "docs/architecture/visualizer/recording-contract.md"
-next_action: "V5 已开放；实施 pre-Gain、codec-only fallback、严格预设与 WebM 证据"
+next_action: "V5 pre-Gain、codec-only fallback、严格预设与 WebM 证据已获批准；V6 前向回归"
 ---
 
 # ADR-0017: Real-time WebM Recording

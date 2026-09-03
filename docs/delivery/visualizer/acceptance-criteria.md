@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/architecture/interface-contracts.md"
   - "docs/architecture/risk-register.md"
   - "docs/delivery/visualizer/execution-plan.md"
-next_action: "AC-V401–AC-V406 已获批准；实施并验证 AC-V501–AC-V509"
+next_action: "AC-V501–AC-V509 已获批准并关闭；实施并验证 AC-V601–AC-V607"
 ---
 
 # Visualizer V1–V6 Acceptance Criteria

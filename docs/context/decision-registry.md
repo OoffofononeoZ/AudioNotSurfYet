@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/product/scope.md"
   - "docs/architecture/system-design.md"
   - "docs/delivery/execution-plan.md"
-next_action: "Editor E8 已关闭；Visualizer V5 继续等待 owner 门禁，PROD-015 仍开放"
+next_action: "Editor E8 与 Visualizer V5 已关闭；实施 V6 final hardening，PROD-015 仍开放"
 ---
 
 # Decision Registry
@@ -77,6 +77,7 @@ next_action: "Editor E8 已关闭；Visualizer V5 继续等待 owner 门禁，PR
 | DEC-043 | 2026-09-03 | V5 准备失败恢复录制前时间/播放态；录制开始后的取消或错误停在当前时间并暂停；活动录制或 ready Blob 离页使用站内决策对话框 | project-owner | approved | [Recording contract](../architecture/visualizer/recording-contract.md) | 录制失败恢复、ready Blob、离页或播放 checkpoint 语义改变 |
 | DEC-044 | 2026-09-03 | Editor E8 固定 `88px/72px` 共享时间轴与 6px 波形安全区；同 URL 歌曲恢复后合并自动重试且不播放，异歌只提供显式 replace 入口；point marker 中心误差 `<=1 CSS px` | project-owner | approved | [ADR-0018](../architecture/adrs/0018-editor-timeline-recovery-and-marker-alignment.md) | 时间轴高度、恢复路由、自动播放边界、marker 几何或 canonical 约束改变 |
 | DEC-045 | 2026-09-03 | 批准 E8 25/25 clean canonical、时间轴密度、恢复语义与 marker 可读性门禁；保持 canonical identity 不变，E8 改为 Complete，R-022/R-024/R-025 改为 Mitigated | project-owner | approved | [Editor evidence](../quality/editor/evidence-index.md) | E8 canonical identity、owner review 结论或 Editor readiness 边界改变 |
+| DEC-046 | 2026-09-03 | 批准 V5 40/40 clean canonical、双浏览器默认 720p30 回放、页面静音音轨、同步、命令锁、取消/context 清理与原生保存门禁；保持 canonical identity 不变，V5 改为 Complete，R-039/R-040 改为 Mitigated并开放 V6 | project-owner | approved | [Visualizer evidence](../quality/visualizer/evidence-index.md) | V5 canonical identity、owner review 结论、R-039/R-040 或 V6 开放门禁改变 |
 
 ## Approval Evidence
 
@@ -95,6 +96,8 @@ next_action: "Editor E8 已关闭；Visualizer V5 继续等待 owner 门禁，PR
 同日，`project-owner` 明确回复“`我批准`关闭 V4 并开放 V5”，并在后续计划澄清中选择 R-039 保持 `Open`、分阶段播放恢复和站内离页决策对话框；随后以“PLEASE IMPLEMENT THIS PLAN”批准 V5 完整计划。DEC-042/DEC-043 据此生效：V4 canonical identity 不变且无需重跑，V4 evidence 改为 `approved`、V4 改为 `Complete`、V5 改为 `In Progress`。该批准不构成 V5 canonical、V6 readiness 或生产上线通过。
 
 同日，`project-owner` 以“PLEASE IMPLEMENT THIS PLAN”批准 Editor E8 可用性修正及 ADR-0018、delivery 与 quality 计划。DEC-044 据此生效，E1–E7 历史 evidence 不改写，E8 改为 `In Progress`。E8 最初因工作树同时包含独立 Visualizer V5 修改而只形成 scoped/provisional 证据；V5 独立提交后，owner 又明确“e8的修改可以在v5提交后提交”，据此允许 E8 单独提交并运行 clean canonical。clean canonical 25/25 通过后，owner 于 2026-09-03 确认 E8 已完成；证据审计确认门禁满足，DEC-045 据此将 E8 改为 `Complete`，R-022/R-024/R-025 改为 `Mitigated`，不重跑或改写 canonical artifact。
+
+同日，`project-owner` 明确“批准 V5”，并以本计划确认该批准覆盖双浏览器默认 720p30 回放、页面静音音轨、音画同步、命令锁、取消/context 清理和真实原生保存人工门禁。DEC-046 据此保持 implementation commit `9b5af09c5846415a8e5465e710e6095f1e7db310`、evidence commit `10a2bc0c7a30413d80689ed41dc98caae33ec21f`、run `V5-2026-09-03T03-49-31-211Z-9b5af09c` 与 summary SHA-256 不变且无需重跑；V5 改为 `Complete`，R-039/R-040 改为 `Mitigated`，V6 改为 `In Progress`。R-041 继续由 V6 长时加固覆盖，本批准不构成 V6 canonical、整体 readiness 或生产上线通过。
 
 同日，`project-owner` 明确要求实施 Q0 质量设计计划，批准了 Q0 前置、四级严重度和 readiness 后置的阶段安排；同时要求三份质量文档先保持 `in-review`，经单独审阅后才生效。因此 DEC-010 的时序决定已批准，但 Q0 内容尚未批准。
 

@@ -4,7 +4,7 @@ owner: "project-owner"
 last_reviewed: 2026-09-03
 upstream_docs:
   - "docs/architecture/system-design.md"
-next_action: "Editor E8 已关闭；Visualizer V5 clean canonical 继续等待独立 owner 门禁"
+next_action: "Editor E8 与 Visualizer V5 已关闭；V6 只做既有接口上的最终加固"
 ---
 
 # Interface Contracts
