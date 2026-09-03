@@ -406,15 +406,36 @@ test('keeps the shared toolbar below the header and player overlays above it', a
     const scrollbar = await page.locator(
         '[data-feature-id="amplitudeSpectrum"] .table-scroll',
     ).evaluate((element) => ({
+        sharedClass: element.classList.contains('app-scrollbar'),
         color: getComputedStyle(element).scrollbarColor,
         width: getComputedStyle(element).scrollbarWidth,
+        gutter: getComputedStyle(element).scrollbarGutter,
+        hoverToken: getComputedStyle(element)
+            .getPropertyValue('--app-scrollbar-thumb-hover')
+            .trim(),
         webkitWidth: getComputedStyle(
             element,
             '::-webkit-scrollbar',
         ).width,
+        track: getComputedStyle(
+            element,
+            '::-webkit-scrollbar-track',
+        ).backgroundColor,
+        thumb: getComputedStyle(
+            element,
+            '::-webkit-scrollbar-thumb',
+        ).backgroundColor,
     }));
-    expect(scrollbar.color).not.toBe('auto');
+    expect(scrollbar.sharedClass).toBe(true);
+    expect(scrollbar.color).toBe(
+        'rgba(125, 255, 179, 0.65) rgba(5, 17, 11, 0.9)',
+    );
+    expect(scrollbar.width).toBe('thin');
+    expect(scrollbar.gutter).toContain('stable');
     expect(scrollbar.webkitWidth).toBe('10px');
+    expect(scrollbar.track).toBe('rgba(5, 17, 11, 0.9)');
+    expect(scrollbar.thumb).toBe('rgba(125, 255, 179, 0.58)');
+    expect(scrollbar.hoverToken).toBe('rgba(181, 255, 210, 0.82)');
     expect(issues).toEqual([]);
 });
 

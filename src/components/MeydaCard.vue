@@ -130,7 +130,7 @@
             <summary>
                 查看完整频率 bin 精确值（{{ exactVector.length }}）
             </summary>
-            <div class="table-scroll">
+            <div class="table-scroll app-scrollbar">
                 <table>
                     <thead>
                         <tr>
@@ -152,7 +152,7 @@
 
         <details v-if="featureId === 'mfcc'" class="value-table">
             <summary>查看 13 项 MFCC 精确值（{{ exactVector.length }}）</summary>
-            <div class="table-scroll compact">
+            <div class="table-scroll compact app-scrollbar">
                 <table>
                     <thead>
                         <tr>
@@ -174,7 +174,7 @@
             <summary>
                 查看当前 Buffer frame 精确值（{{ exactVector.length }}）
             </summary>
-            <div class="table-scroll">
+            <div class="table-scroll app-scrollbar">
                 <table>
                     <thead>
                         <tr>
@@ -196,7 +196,7 @@
             <summary>
                 查看 24 个 Bark band 精确值（{{ exactLoudness.specific.length }}）
             </summary>
-            <div class="table-scroll compact">
+            <div class="table-scroll compact app-scrollbar">
                 <table>
                     <thead>
                         <tr>
@@ -221,7 +221,7 @@
             <summary>
                 查看完整 Complex Spectrum 精确值（{{ complexRows.length }}）
             </summary>
-            <div class="table-scroll complex-table">
+            <div class="table-scroll complex-table app-scrollbar">
                 <table>
                     <thead>
                         <tr>
@@ -249,7 +249,7 @@
 
         <div v-if="featureId === 'chroma'" class="value-table">
             <p class="table-title">12 音级精确值</p>
-            <div class="table-scroll compact">
+            <div class="table-scroll compact app-scrollbar">
                 <table>
                     <thead>
                         <tr>
@@ -882,31 +882,6 @@ select:focus:not(:focus-visible) {
 .table-scroll {
     max-height: 220px;
     overflow: auto;
-    scrollbar-color: rgba(125, 255, 179, 0.65) rgba(5, 17, 11, 0.9);
-    scrollbar-gutter: stable;
-    scrollbar-width: thin;
-}
-
-.table-scroll::-webkit-scrollbar {
-    height: 10px;
-    width: 10px;
-}
-
-.table-scroll::-webkit-scrollbar-track {
-    background: rgba(5, 17, 11, 0.9);
-    border-radius: 999px;
-}
-
-.table-scroll::-webkit-scrollbar-thumb {
-    background: rgba(125, 255, 179, 0.58);
-    background-clip: padding-box;
-    border: 2px solid transparent;
-    border-radius: 999px;
-}
-
-.table-scroll::-webkit-scrollbar-thumb:hover {
-    background: rgba(181, 255, 210, 0.82);
-    background-clip: padding-box;
 }
 
 .table-scroll.compact {
