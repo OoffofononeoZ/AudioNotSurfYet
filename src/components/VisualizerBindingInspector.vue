@@ -1,6 +1,7 @@
 <template>
-    <div
+    <fieldset
         class="binding-inspector"
+        :disabled="locked"
         data-testid="visualizer-binding-inspector"
         :data-editor-lane-count="editorProject?.lanes.length ?? 0"
     >
@@ -262,7 +263,7 @@
                 </details>
             </article>
         </section>
-    </div>
+    </fieldset>
 </template>
 
 <script setup lang="ts">
@@ -301,6 +302,7 @@ const props = defineProps<{
     runtime: VisualizerBindingRuntimeSnapshot;
     descriptor: SceneTemplateDescriptor;
     resolvedValues: VisualizerResolvedParameterMap;
+    locked?: boolean;
 }>();
 
 const controller = useVisualizerSessionController();
@@ -602,6 +604,10 @@ const removeEditorSnapshot = () => run(() => controller.removeEditorSnapshot());
 .binding-inspector {
     display: grid;
     gap: 10px;
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
 }
 
 button,

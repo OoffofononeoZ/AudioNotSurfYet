@@ -10,6 +10,9 @@ export const VISUALIZER_V3_GENERATOR_VERSION = 'visualizer-v3-lines-fixture-v1';
 export const VISUALIZER_V4_DURATION_SECONDS = 6;
 export const VISUALIZER_V4_SAMPLE_COUNT = SAMPLE_RATE * VISUALIZER_V4_DURATION_SECONDS;
 export const VISUALIZER_V4_GENERATOR_VERSION = 'visualizer-v4-cube-swarm-fixture-v1';
+export const VISUALIZER_V5_DURATION_SECONDS = 3;
+export const VISUALIZER_V5_SAMPLE_COUNT = SAMPLE_RATE * VISUALIZER_V5_DURATION_SECONDS;
+export const VISUALIZER_V5_GENERATOR_VERSION = 'visualizer-v5-avsync-fixture-v1';
 
 const TAU = Math.PI * 2;
 
@@ -157,6 +160,19 @@ export function createVisualizerV4CubeSwarmFixture(): Float32Array {
     addImpulse(2.5);
     addImpulse(4);
     addImpulse(5.98);
+    return output;
+}
+
+export function createVisualizerV5AvSyncFixture(): Float32Array {
+    const output = createSine(220, VISUALIZER_V5_SAMPLE_COUNT, 0.02);
+    const burstLength = Math.round(0.05 * SAMPLE_RATE);
+    const burstStart = Math.round(1.5 * SAMPLE_RATE - burstLength / 2);
+    for (let index = 0; index < burstLength; index += 1) {
+        const phase = burstLength <= 1 ? 1 : index / (burstLength - 1);
+        const hann = 0.5 - 0.5 * Math.cos(TAU * phase);
+        const time = (burstStart + index) / SAMPLE_RATE;
+        output[burstStart + index] += 0.8 * hann * Math.sin(TAU * 1_200 * time);
+    }
     return output;
 }
 

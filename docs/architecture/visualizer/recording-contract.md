@@ -47,6 +47,8 @@ Opus audio bitrate 固定为 192 kbps。MIME capability 顺序：
 
 只有 codec 可以按上述顺序回退。若所选分辨率/fps、Canvas capture、audio track 或 MediaRecorder 不能满足，preflight 明确失败；不得静默改为更低预设、无音频、不同 fps 或仅下载画面。
 
+预设可用性包含“能否持续满足媒体质量门禁”，不只检查 API 是否存在。重复真实采样证明当前 Chrome/Edge 的 optional preset 会间歇超过两个目标帧间隔，因此 V5 只把强制默认 720p30 作为可靠输出，720p60/1080p30/1080p60 均在资源获取前返回 typed `preset-unavailable`。该限制不得伪装成录制后的降级，浏览器能力证据变化时才可修订。
+
 ## Preflight
 
 进入 `recording` 前必须同时满足：
@@ -54,11 +56,11 @@ Opus audio bitrate 固定为 192 kbps。MIME capability 顺序：
 - 当前 route/playback lease 仍指向工程歌曲，AudioBuffer 已解码且 duration/hash 匹配。
 - 当前 template、全部 binding 和 Editor snapshot 校验通过。
 - 去重后的 0–4 个 analysis feature 全部 ready；没有中性占位或 binding-local error。
-- renderer ready、context 未丢失、Canvas origin-clean，selected size/fps 可建立 capture stream。
-- MIME 选择成功，pre-Gain audio stream 含一个 live audio track，Canvas stream 含一个 live video track。
+- renderer ready、context 未丢失、Canvas capture API 存在，selected size/fps 通过当前浏览器质量能力策略。
+- MIME 选择成功，且 AudioEngine recording tap 当前没有 holder。
 - 当前没有另一个 recording tap、MediaRecorder、未处理 ready Blob 或 route transition。
 
-preflight 失败保留工程、预览和播放能力。进入 `preparing` 前先保存包含歌曲、秒数和 `paused/playing/ended` 的内存 playback checkpoint；任何准备阶段失败或取消均恢复该 checkpoint。只有录制已经进入 `recording` 后的取消或错误才停在当前秒数并保持 paused。
+preflight 失败保留工程、预览和播放能力。进入 `preparing` 前先保存包含歌曲、秒数和 `paused/playing/ended` 的内存 playback checkpoint；live audio/video track、精确尺寸和 track frame-rate settings 在 `preparing` 获取资源后、构造 recorder 前验证。任何准备阶段失败或取消均恢复该 checkpoint。只有录制已经进入 `recording` 后的取消或错误才停在当前秒数并保持 paused。
 
 ## State Machine
 
@@ -74,7 +76,7 @@ ready/error → idle
 2. 记住进入前播放状态，暂停当前歌曲。
 3. seek 到 0 秒，按绝对时间 0 解析 bindings 并绘制首帧。
 4. 取得 audio tap、Canvas stream 和 MIME，构造 MediaRecorder。
-5. 先 `MediaRecorder.start()`，确认进入 recording，再调用现有 AudioSessionService `play()`。
+5. 调用 `MediaRecorder.start()` 后，在 public state 仍为 `preparing` 时同时启动 time-zero audio handshake；Chrome/Edge 对 WebGL+WebAudio stream 需要首个 audio packet 才派发 recorder `start` event。只有收到该 event 后才发布 `recording`，任一握手失败仍按准备阶段 checkpoint 回滚。
 6. renderer 使用同一播放时钟和单 RAF；不以 recorder callback 或 frame count 推进场景。
 7. 歌曲自然 ended 进入 `finalizing`，停止 recorder；Visualizer `pause-at-end` 不调用 next。
 8. 收到最终 data/stop 后验证 tracks/chunks，释放 stream/tap，生成一个内存 Blob 并进入 `ready`。

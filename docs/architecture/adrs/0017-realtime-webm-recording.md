@@ -20,13 +20,14 @@ Visualizer V5 需要录制同一 Canvas 和歌曲音轨。页面音量是本地�
 - AudioEngine 只允许一个 pre-Gain recording tap：从 AnalyserNode 分支到 MediaStreamAudioDestinationNode。录制保持原歌曲音量，页面 mute/volume 不影响文件。
 - 使用唯一 Canvas `captureStream(fps)` 与 audio tap 合并 MediaStream；MIME 只按 VP9+Opus 到 VP8+Opus 回退。
 - 720p/1080p、30/60fps 是严格用户选择。所选组合不可用时明确失败，不静默降低分辨率、fps 或移除音轨。
-- 录制先 preflight，再 pause/seek 0/render 0/start recorder/play；自然 ended 自动 finalize。录制期间锁定影响输出 identity 的命令。
+- 录制先 preflight，再 pause/seek 0/render 0；`start()` 与 time-zero audio handshake 在 `preparing` 内并行，只有 recorder `start` event 后才发布 `recording`。这是 Chrome/Edge 的 WebGL+WebAudio 首包约束，不增加音频链路或时钟；自然 ended 自动 finalize。录制期间锁定影响输出 identity 的命令。
 - 完成 Blob 只在内存保存并通过原生 picker 写出；取消、离页、context loss 或 track/recorder error 丢弃未完成结果。
 
 ## Consequences
 
 - Positive：页面监听音量与导出解耦，输出身份明确，支持情况可测。
 - Negative：1080p60 可能在部分设备明确不可用；首版不能通过自动降级提高表面成功率。
+- Capability evidence：当前 Chrome/Edge 的 optional preset 实时 packet cadence 在重复样本中不能稳定满足两帧间隔门禁，因此 V5 只开放强制默认 720p30，其余三档在 preflight 返回 typed unavailable。
 - Failure boundary：没有完整 audio/video tracks、MIME、analysis ready 或 origin-clean canvas 时不得开始；未完成文件永不进入 ready。
 
 ## Alternatives Rejected

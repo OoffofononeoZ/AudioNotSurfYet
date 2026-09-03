@@ -2,7 +2,12 @@ import type { InjectionKey } from 'vue';
 import { inject, shallowReactive } from 'vue';
 import Meyda from 'meyda';
 import { parseBlob } from 'music-metadata';
-import { AudioEngine } from './audioEngine';
+import {
+    AudioEngine,
+    RecordingTapError,
+    type AudioPlaybackCheckpoint,
+    type RecordingTapLease,
+} from './audioEngine';
 import {
     InvalidPersistedSessionError,
     SessionRepository,
@@ -126,6 +131,9 @@ export interface AudioEnginePort {
     getSnapshot(): PlaybackSnapshot;
     getTimeDomainFloatData(): Float32Array | null;
     getDecodedAudioDescriptor(): DecodedAudioDescriptor | null;
+    capturePlaybackCheckpoint(): AudioPlaybackCheckpoint | null;
+    restorePlaybackCheckpoint(checkpoint: AudioPlaybackCheckpoint): Promise<void>;
+    acquireRecordingTap(): RecordingTapLease;
     copyDecodedChannelRange(input: {
         revision: number;
         channel: number;
@@ -200,6 +208,9 @@ export class AudioSessionService {
         new Map<string, RuntimeTrack>(),
     );
     private readonly unsubscribeEngine: () => void;
+    private readonly playbackListeners = new Set<(
+        snapshot: PlaybackSnapshot,
+    ) => void>();
     private commandGeneration = 0;
     private importGeneration = 0;
     private frameHandle: number | null = null;
@@ -567,6 +578,53 @@ export class AudioSessionService {
         return descriptor?.trackId === trackId ? { ...descriptor } : null;
     }
 
+    capturePlaybackCheckpoint(trackId: string): AudioPlaybackCheckpoint {
+        const checkpoint = this.engine.capturePlaybackCheckpoint();
+        if (checkpoint?.trackId !== trackId) {
+            throw new RecordingTapError(
+                'recording-unavailable',
+                '当前播放歌曲与可视化工程不一致。',
+            );
+        }
+        return checkpoint;
+    }
+
+    restorePlaybackCheckpoint(checkpoint: AudioPlaybackCheckpoint): Promise<void> {
+        return this.engine.restorePlaybackCheckpoint(checkpoint);
+    }
+
+    acquireRecordingTap(trackId: string): RecordingTapLease {
+        const descriptor = this.engine.getDecodedAudioDescriptor();
+        const route = this.activeRoutePlayback;
+        if (
+            descriptor?.trackId !== trackId
+            || route?.consumer !== 'visualizer'
+            || route.trackId !== trackId
+        ) {
+            throw new RecordingTapError(
+                'recording-unavailable',
+                'Visualizer 播放租约或歌曲身份已失效。',
+            );
+        }
+        return this.engine.acquireRecordingTap();
+    }
+
+    subscribePlayback(listener: (snapshot: PlaybackSnapshot) => void): () => void {
+        this.playbackListeners.add(listener);
+        listener({ ...this.store.playback });
+        return () => this.playbackListeners.delete(listener);
+    }
+
+    pause(): void {
+        if (this.disposed) return;
+        this.engine.pause();
+    }
+
+    async play(): Promise<void> {
+        if (this.disposed) return;
+        await this.engine.play();
+    }
+
     async togglePlayback(): Promise<void> {
         if (this.disposed || this.store.queue.length === 0) return;
 
@@ -800,6 +858,7 @@ export class AudioSessionService {
         ++this.importGeneration;
         this.stopFrameLoop();
         this.unsubscribeEngine();
+        this.playbackListeners.clear();
         for (const trackId of [...this.runtimeTracks.keys()]) {
             this.releaseRuntimeTrack(trackId);
         }
@@ -1189,6 +1248,12 @@ export class AudioSessionService {
     private handleEngineSnapshot(snapshot: PlaybackSnapshot): void {
         if (this.disposed) return;
         this.store.setPlayback(snapshot);
+        for (const listener of this.playbackListeners) {
+            listener({
+                ...snapshot,
+                error: snapshot.error ? { ...snapshot.error } : undefined,
+            });
+        }
         if (snapshot.trackId) {
             this.store.setCurrentTrack(snapshot.trackId);
         }

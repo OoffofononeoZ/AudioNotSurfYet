@@ -57,7 +57,12 @@
                     <span :data-state="snapshot.persistence" aria-live="polite">
                         {{ persistenceLabel }}
                     </span>
-                    <button type="button" data-testid="import-visualizer-project" @click="importProject">
+                    <button
+                        type="button"
+                        :disabled="recordingLocked"
+                        data-testid="import-visualizer-project"
+                        @click="importProject"
+                    >
                         导入工程
                     </button>
                     <button type="button" data-testid="export-visualizer-project" @click="exportProject">
@@ -108,6 +113,7 @@
                         class="template-button"
                         :class="{ active: snapshot.project.scene.templateId === template.id }"
                         :aria-pressed="snapshot.project.scene.templateId === template.id"
+                        :disabled="recordingLocked"
                         @click="switchTemplate(template.id)"
                     >
                         <strong>{{ template.title }}</strong>
@@ -156,6 +162,7 @@
                             <span>输出分辨率</span>
                             <select
                                 :value="snapshot.project.output.resolution"
+                                :disabled="recordingLocked"
                                 data-testid="visualizer-resolution"
                                 @change="setResolution"
                             >
@@ -167,6 +174,7 @@
                             <span>帧率</span>
                             <select
                                 :value="snapshot.project.output.frameRate"
+                                :disabled="recordingLocked"
                                 data-testid="visualizer-frame-rate"
                                 @change="setFrameRate"
                             >
@@ -187,13 +195,58 @@
                         :runtime="snapshot.bindingRuntime"
                         :descriptor="activeTemplate"
                         :resolved-values="resolvedValues"
+                        :locked="recordingLocked"
                     />
                 </aside>
             </div>
 
+            <section
+                class="recording-bar"
+                aria-label="WebM 录制"
+                aria-live="polite"
+                :data-recording-status="snapshot.recording.status"
+                :data-recording-error-code="snapshot.recording.status === 'error' ? snapshot.recording.code : ''"
+            >
+                <div>
+                    <strong data-testid="visualizer-recording-state">{{ recordingLabel }}</strong>
+                    <span>{{ formatTime(playback.currentTimeSeconds) }} / {{ formatTime(playback.durationSeconds) }}</span>
+                    <span v-if="recordingMime">{{ recordingMime }}</span>
+                    <span v-if="recordingSize">{{ recordingSize }}</span>
+                </div>
+                <div class="recording-actions">
+                    <button
+                        v-if="snapshot.recording.status === 'idle'"
+                        type="button"
+                        data-testid="start-visualizer-recording"
+                        @click="startRecording"
+                    >开始录制</button>
+                    <button
+                        v-if="recordingLocked"
+                        type="button"
+                        data-testid="cancel-visualizer-recording"
+                        @click="cancelRecording"
+                    >取消录制</button>
+                    <template v-if="snapshot.recording.status === 'ready'">
+                        <button type="button" data-testid="save-visualizer-recording" @click="saveRecording">
+                            保存 WebM
+                        </button>
+                        <button type="button" data-testid="discard-visualizer-recording" @click="discardRecording">
+                            丢弃
+                        </button>
+                    </template>
+                    <button
+                        v-if="snapshot.recording.status === 'error'"
+                        type="button"
+                        data-testid="reset-visualizer-recording-error"
+                        @click="resetRecordingError"
+                    >清除错误</button>
+                </div>
+            </section>
+
             <footer class="transport" aria-label="Visualizer 播放控制">
                 <button
                     type="button"
+                    :disabled="recordingLocked"
                     data-testid="visualizer-playback-toggle"
                     @click="togglePlayback"
                 >
@@ -208,6 +261,7 @@
                     :max="Math.max(0, playback.durationSeconds)"
                     step="0.001"
                     :value="playback.currentTimeSeconds"
+                    :disabled="recordingLocked"
                     aria-label="播放进度"
                     data-testid="visualizer-seek"
                     @input="seek"
@@ -215,6 +269,29 @@
                 <span class="ended-policy" data-testid="visualizer-ended-policy">播完暂停</span>
             </footer>
         </section>
+
+        <dialog ref="leaveDialog" class="leave-dialog" @cancel.prevent="stayOnPage">
+            <h2>{{ leaveMode === 'active' ? '录制尚未结束' : 'WebM 尚未处理' }}</h2>
+            <p v-if="leaveMode === 'active'">离开会取消当前录制，且不会生成半文件。</p>
+            <p v-else>请保存或明确丢弃内存中的 WebM 后再离开。</p>
+            <div class="state-actions">
+                <button
+                    v-if="leaveMode === 'active'"
+                    type="button"
+                    data-testid="leave-cancel-recording"
+                    @click="cancelAndLeave"
+                >取消录制并离开</button>
+                <template v-else>
+                    <button type="button" data-testid="leave-save-recording" @click="saveAndLeave">
+                        保存并离开
+                    </button>
+                    <button type="button" data-testid="leave-discard-recording" @click="discardAndLeave">
+                        丢弃并离开
+                    </button>
+                </template>
+                <button type="button" data-testid="leave-stay" @click="stayOnPage">留在此页</button>
+            </div>
+        </dialog>
     </main>
 </template>
 
@@ -228,7 +305,6 @@ import {
     watch,
 } from 'vue';
 import { onBeforeRouteLeave, useRoute, useRouter } from 'vue-router';
-import { useAudioSessionService } from '../audio/audioSessionService';
 import VisualizerBindingInspector from '../components/VisualizerBindingInspector.vue';
 import { useAudioSessionStore } from '../stores/audioSessionStore';
 import type { VisualizerResolvedParameterMap } from '../visualizer/rendererTypes';
@@ -250,7 +326,6 @@ import type {
 const route = useRoute();
 const router = useRouter();
 const controller = useVisualizerSessionController();
-const audioSession = useAudioSessionService();
 const sessionStore = useAudioSessionStore();
 const snapshot = shallowRef<VisualizerSessionSnapshot>(controller.getSnapshot());
 const unsubscribe = controller.subscribe((value) => {
@@ -258,6 +333,8 @@ const unsubscribe = controller.subscribe((value) => {
 });
 const templates = controller.listTemplates();
 const previewCanvas = ref<HTMLCanvasElement | null>(null);
+const leaveDialog = ref<HTMLDialogElement | null>(null);
+const leaveMode = ref<'active' | 'ready'>('active');
 const openDrawer = ref<'templates' | 'settings' | null>(null);
 const conflictExported = ref(false);
 const actionError = ref('');
@@ -269,9 +346,39 @@ const sceneFrame = shallowRef<VisualizerSceneFrameSnapshot>({
 });
 let resizeObserver: ResizeObserver | null = null;
 let rendererHost: VisualizerRendererHost | null = null;
+let detachRecordingTarget: (() => void) | null = null;
+let resolveLeaveDecision: ((value: boolean) => void) | null = null;
 
 const playback = computed(() => sessionStore.playback);
 const isUsable = computed(() => ['ready', 'not-persisted'].includes(snapshot.value.state));
+const recordingLocked = computed(() => [
+    'preparing',
+    'recording',
+    'finalizing',
+].includes(snapshot.value.recording.status));
+const recordingLabel = computed(() => {
+    const recording = snapshot.value.recording;
+    if (recording.status === 'error') return `录制错误：${recording.message}`;
+    return ({
+        idle: '录制待命',
+        preparing: '正在准备录制…',
+        recording: '正在录制',
+        finalizing: '正在生成 WebM…',
+        ready: 'WebM 已就绪',
+    } as const)[recording.status];
+});
+const recordingMime = computed(() => {
+    const recording = snapshot.value.recording;
+    return 'mimeType' in recording ? recording.mimeType : '';
+});
+const recordingSize = computed(() => {
+    const recording = snapshot.value.recording;
+    if (recording.status !== 'ready') return '';
+    if (recording.byteLength < 1024 * 1024) {
+        return `${(recording.byteLength / 1024).toFixed(1)} KiB`;
+    }
+    return `${(recording.byteLength / (1024 * 1024)).toFixed(2)} MiB`;
+});
 const activeTemplate = computed(() => templates.find(
     (template) => template.id === snapshot.value.project?.scene.templateId,
 ));
@@ -316,7 +423,7 @@ const attachPreviewObserver = async () => {
     if (!previewCanvas.value) return;
     if (!rendererHost) {
         try {
-            rendererHost = new VisualizerRendererHost({
+            const host = new VisualizerRendererHost({
                 canvas: previewCanvas.value,
                 registry: controller.getSceneRegistry(),
                 readFrame: () => {
@@ -341,7 +448,14 @@ const attachPreviewObserver = async () => {
                 },
                 onStatus: (status) => {
                     rendererStatus.value = status;
+                    controller.notifyRendererStatus(status);
                 },
+            });
+            rendererHost = host;
+            detachRecordingTarget = controller.attachRecordingTarget({
+                getStatus: () => rendererStatus.value,
+                acquireRecordingSurface: (width, height) =>
+                    host.acquireRecordingSurface(width, height),
             });
         } catch (error) {
             rendererStatus.value = {
@@ -359,6 +473,8 @@ const attachPreviewObserver = async () => {
 const detachRenderer = () => {
     resizeObserver?.disconnect();
     resizeObserver = null;
+    detachRecordingTarget?.();
+    detachRecordingTarget = null;
     rendererHost?.dispose();
     rendererHost = null;
     resolvedValues.value = new Map();
@@ -431,10 +547,45 @@ const setFrameRate = (event: Event) => {
     controller.updateOutput(resolution, frameRate);
 };
 
-const togglePlayback = () => void audioSession.togglePlayback();
-const seek = (event: Event) => {
-    void audioSession.seek(Number((event.target as HTMLInputElement).value));
+const togglePlayback = () => {
+    actionError.value = '';
+    void controller.togglePlayback().catch((error) => {
+        actionError.value = error instanceof Error ? error.message : '播放操作失败。';
+    });
 };
+const seek = (event: Event) => {
+    actionError.value = '';
+    void controller.seek(Number((event.target as HTMLInputElement).value)).catch((error) => {
+        actionError.value = error instanceof Error ? error.message : '定位失败。';
+    });
+};
+
+const startRecording = async () => {
+    actionError.value = '';
+    try {
+        await controller.startRecording();
+    } catch (error) {
+        actionError.value = error instanceof Error ? error.message : '录制启动失败。';
+    }
+};
+
+const cancelRecording = async () => {
+    actionError.value = '';
+    await controller.cancelRecording();
+};
+
+const saveRecording = async (): Promise<'saved' | 'cancelled'> => {
+    actionError.value = '';
+    try {
+        return await controller.saveRecording();
+    } catch (error) {
+        actionError.value = error instanceof Error ? error.message : 'WebM 保存失败。';
+        return 'cancelled';
+    }
+};
+
+const discardRecording = () => controller.discardRecording();
+const resetRecordingError = () => controller.resetRecordingError();
 
 const importProject = async () => {
     actionError.value = '';
@@ -473,7 +624,38 @@ const cancelConflict = async () => {
     }
 };
 
+const finishLeaveDecision = (decision: boolean) => {
+    leaveDialog.value?.close();
+    const resolve = resolveLeaveDecision;
+    resolveLeaveDecision = null;
+    resolve?.(decision);
+};
+
+const stayOnPage = () => finishLeaveDecision(false);
+const cancelAndLeave = async () => {
+    await controller.cancelRecording();
+    finishLeaveDecision(true);
+};
+const saveAndLeave = async () => {
+    if (await saveRecording() === 'saved') finishLeaveDecision(true);
+};
+const discardAndLeave = () => {
+    controller.discardRecording();
+    finishLeaveDecision(true);
+};
+const requestLeaveDecision = (): Promise<boolean> => {
+    leaveMode.value = snapshot.value.recording.status === 'ready' ? 'ready' : 'active';
+    return new Promise((resolve) => {
+        resolveLeaveDecision = resolve;
+        leaveDialog.value?.showModal();
+    });
+};
+
 onBeforeRouteLeave(async () => {
+    if (controller.hasUnresolvedRecordingOutput()) {
+        const shouldLeave = await requestLeaveDecision();
+        if (!shouldLeave) return false;
+    }
     await controller.leave();
     return true;
 });
@@ -564,7 +746,7 @@ input:focus-visible {
 
 .visualizer-workspace {
     display: grid;
-    grid-template-rows: auto auto minmax(0, 1fr) auto;
+    grid-template-rows: auto auto minmax(0, 1fr) auto auto;
     overflow: hidden;
 }
 
@@ -757,6 +939,52 @@ input:focus-visible {
     grid-template-columns: auto auto minmax(120px, 1fr) auto;
     padding: 10px 14px;
     border-top: 1px solid rgba(159, 196, 175, .18);
+}
+
+.recording-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 9px 14px;
+    border-top: 1px solid rgba(101, 255, 169, .22);
+    background: #050a07;
+}
+
+.recording-bar > div,
+.recording-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.recording-bar span {
+    color: #9eb8aa;
+    font-size: .78rem;
+}
+
+.leave-dialog {
+    max-width: min(520px, calc(100vw - 32px));
+    border: 1px solid rgba(101, 255, 169, .42);
+    border-radius: 6px;
+    color: #eafff2;
+    background: #07110d;
+}
+
+.leave-dialog::backdrop {
+    background: rgba(0, 0, 0, .72);
+}
+
+.leave-dialog h2 {
+    margin-top: 0;
+}
+
+button:disabled,
+select:disabled,
+input:disabled {
+    cursor: not-allowed;
+    opacity: .5;
 }
 
 .transport input {

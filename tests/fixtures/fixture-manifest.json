@@ -178,6 +178,33 @@
       },
       "license": "CC0-1.0",
       "provenance": "Deterministically synthesized by tests/fixtures/generate-fixtures.ts"
+    },
+    {
+      "id": "visualizer-v5-avsync-wav-v1",
+      "path": "tests/fixtures/audio/visualizer-v5-avsync-v1.wav",
+      "purpose": "Visualizer V5 deterministic 3-second audio/video synchronization burst",
+      "format": "wav",
+      "sha256": "613f72b1b9b19fbeb1c5d863d91f03ff991e55dac8e3a8b499c46fa185bd189d",
+      "bytes": 288044,
+      "sampleRate": 48000,
+      "channels": 1,
+      "durationSeconds": 3,
+      "sourceId": "visualizer-v5-avsync-pcm-v1",
+      "generationCommand": "npm run fixtures:generate",
+      "generatorVersion": "visualizer-v5-avsync-fixture-v1",
+      "encoder": {
+        "name": "pcm_s16le",
+        "version": "ffmpeg version 8.1.2 Copyright (c) 2000-2026 the FFmpeg developers",
+        "parameters": [
+          "-flags:a",
+          "+bitexact",
+          "-c:a",
+          "pcm_s16le"
+        ],
+        "commandTemplate": "ffmpeg -hide_banner -loglevel error -y -f f32le -ar 48000 -ac 1 -i <temp>/visualizer-v5-avsync-v1.f32le -map_metadata -1 -fflags +bitexact -flags:a +bitexact -c:a pcm_s16le <temp>/visualizer-v5-avsync-v1.wav"
+      },
+      "license": "CC0-1.0",
+      "provenance": "Deterministically synthesized by tests/fixtures/generate-fixtures.ts"
     }
   ]
 }

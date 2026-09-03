@@ -44,6 +44,16 @@ import type {
     VisualizerEditorSnapshotSource,
 } from './types';
 import type { VisualizerDraftRepositoryPort } from './visualizerDraftRepository';
+import type { VisualizerRendererStatus } from './rendererTypes';
+import {
+    VisualizerRecordingSession,
+    type VisualizerRecordingSessionOptions,
+    type VisualizerRecordingTarget,
+} from './visualizerRecordingSession';
+import {
+    NativeVisualizerVideoFileGateway,
+    type VisualizerVideoFileGateway,
+} from './videoFileIO';
 
 type AudioSessionStore = ReturnType<typeof useAudioSessionStore>;
 type VisualizerSessionListener = (snapshot: VisualizerSessionSnapshot) => void;
@@ -56,6 +66,7 @@ const initialSnapshot = (): VisualizerSessionSnapshot => ({
     conflictingDraft: null,
     persistence: 'clean',
     restoredFromDraft: false,
+    recording: { status: 'idle' },
     bindingRuntime: {
         bindingRevision: 0,
         activeFeatureIds: [],
@@ -90,6 +101,7 @@ const cloneSnapshot = (
         activeFeatureIds: [...snapshot.bindingRuntime.activeFeatureIds],
         readyFeatureIds: [...snapshot.bindingRuntime.readyFeatureIds],
     },
+    recording: { ...snapshot.recording },
 });
 
 export class VisualizerBindingUpdateError extends Error {
@@ -107,6 +119,15 @@ export class VisualizerBindingUpdateError extends Error {
         super(message);
         this.name = 'VisualizerBindingUpdateError';
         this.code = code;
+    }
+}
+
+export class VisualizerRecordingLockedError extends Error {
+    readonly code = 'recording-locked';
+
+    constructor(message = '录制准备、进行或收尾期间不能执行此操作。') {
+        super(message);
+        this.name = 'VisualizerRecordingLockedError';
     }
 }
 
@@ -130,6 +151,11 @@ export interface VisualizerSessionControllerOptions {
     ) => ReturnType<typeof setTimeout>;
     clearTimer?: (handle: ReturnType<typeof setTimeout>) => void;
     windowTarget?: Pick<Window, 'addEventListener' | 'removeEventListener'>;
+    videoGateway?: VisualizerVideoFileGateway;
+    recordingRuntime?: Pick<
+        VisualizerRecordingSessionOptions,
+        'createRecorder' | 'createMediaStream' | 'isTypeSupported' | 'isPresetAvailable'
+    >;
 }
 
 export type VisualizerDraftConflictResolution =
@@ -161,6 +187,7 @@ export class VisualizerSessionController {
     >;
     private readonly listeners = new Set<VisualizerSessionListener>();
     private snapshot = initialSnapshot();
+    private readonly recordingSession: VisualizerRecordingSession;
     private playbackLease: RoutePlaybackLease | null = null;
     private analysisLease: AnalysisConsumerLease | null = null;
     private unsubscribeAnalysis: (() => void) | null = null;
@@ -193,6 +220,26 @@ export class VisualizerSessionController {
         this.clearTimer = options.clearTimer ?? ((handle) => clearTimeout(handle));
         this.windowTarget = options.windowTarget
             ?? (typeof window === 'undefined' ? undefined : window);
+        this.recordingSession = new VisualizerRecordingSession({
+            ...options.recordingRuntime,
+            audioSession: this.audioSession,
+            readContext: () => ({
+                state: this.snapshot.state,
+                activeTrackId: this.snapshot.activeTrackId,
+                project: this.snapshot.project,
+                bindingRuntime: this.snapshot.bindingRuntime,
+                resolvedValues: this.resolveParameters(0),
+            }),
+            onState: (recording) => {
+                if (this.disposed) return;
+                this.publish({ ...this.snapshot, recording });
+                this.syncBeforeUnload();
+            },
+            videoGateway: options.videoGateway ?? new NativeVisualizerVideoFileGateway(),
+            setTimer: this.setTimer,
+            clearTimer: this.clearTimer,
+        });
+        this.windowTarget?.addEventListener('pagehide', this.handlePageHide);
     }
 
     getSnapshot(): VisualizerSessionSnapshot {
@@ -221,7 +268,60 @@ export class VisualizerSessionController {
         return this.pendingProject !== null || this.saveInFlight !== null;
     }
 
+    isRecordingLocked(): boolean {
+        return this.recordingSession.isLocked();
+    }
+
+    hasUnresolvedRecordingOutput(): boolean {
+        return this.recordingSession.hasUnresolvedOutput();
+    }
+
+    attachRecordingTarget(target: VisualizerRecordingTarget): () => void {
+        return this.recordingSession.attachTarget(target);
+    }
+
+    notifyRendererStatus(status: VisualizerRendererStatus): void {
+        this.recordingSession.notifyRendererStatus(status);
+    }
+
+    startRecording(): Promise<void> {
+        return this.recordingSession.start();
+    }
+
+    cancelRecording(): Promise<void> {
+        return this.recordingSession.cancel();
+    }
+
+    saveRecording(): Promise<'saved' | 'cancelled'> {
+        return this.recordingSession.save();
+    }
+
+    discardRecording(): void {
+        this.recordingSession.discard();
+    }
+
+    resetRecordingError(): void {
+        this.recordingSession.resetError();
+    }
+
+    getReadyRecordingBlobForDiagnostics(): Blob | null {
+        return this.recordingSession.getReadyBlobForDiagnostics();
+    }
+
+    async togglePlayback(): Promise<void> {
+        this.assertRecordingUnlocked();
+        await this.audioSession.togglePlayback();
+    }
+
+    async seek(seconds: number): Promise<void> {
+        this.assertRecordingUnlocked();
+        await this.audioSession.seek(seconds);
+    }
+
     async enter(trackId: string | null): Promise<void> {
+        if (this.recordingSession.isLocked()) {
+            await this.recordingSession.notifyIdentityChange();
+        }
         const generation = ++this.routeGeneration;
         await this.flush();
         if (generation !== this.routeGeneration || this.disposed) return;
@@ -321,6 +421,7 @@ export class VisualizerSessionController {
     }
 
     updateOutput(resolution: VisualizerResolution, frameRate: VisualizerFrameRate): void {
+        this.assertRecordingUnlocked();
         const project = this.snapshot.project;
         if (!project) return;
         this.updateProject({
@@ -330,6 +431,7 @@ export class VisualizerSessionController {
     }
 
     switchTemplate(templateId: VisualizerTemplateId): void {
+        this.assertRecordingUnlocked();
         const project = this.snapshot.project;
         if (!project || project.scene.templateId === templateId) return;
         this.updateProject({
@@ -344,6 +446,7 @@ export class VisualizerSessionController {
     }
 
     updateProject(project: VisualizerProjectV1, immediate = false): void {
+        this.assertRecordingUnlocked();
         const activeTrackId = this.snapshot.activeTrackId;
         const context = activeTrackId ? this.trackContext(activeTrackId) : null;
         if (
@@ -363,6 +466,7 @@ export class VisualizerSessionController {
     }
 
     updateBinding(binding: VisualizerParameterBindingV1): void {
+        this.assertRecordingUnlocked();
         const project = this.snapshot.project;
         if (!project) return;
         const index = project.scene.bindings.findIndex(
@@ -393,6 +497,7 @@ export class VisualizerSessionController {
     }
 
     async reloadEditorDraft(): Promise<'loaded' | 'unavailable'> {
+        this.assertRecordingUnlocked();
         const project = this.snapshot.project;
         const context = this.currentTrackContext();
         if (!project || !context || !this.editorRepository) return 'unavailable';
@@ -411,6 +516,7 @@ export class VisualizerSessionController {
     }
 
     async importEditorProject(codecId = 'json-v1'): Promise<'imported' | 'cancelled'> {
+        this.assertRecordingUnlocked();
         const project = this.snapshot.project;
         const context = this.currentTrackContext();
         if (!project || !context || !this.editorFileGateway) return 'cancelled';
@@ -440,6 +546,7 @@ export class VisualizerSessionController {
     }
 
     removeEditorSnapshot(): void {
+        this.assertRecordingUnlocked();
         const project = this.snapshot.project;
         if (!project?.editorSnapshot) return;
         const references = project.scene.bindings.filter(
@@ -464,6 +571,7 @@ export class VisualizerSessionController {
     }
 
     async importProject(codecId = 'json-v1'): Promise<'imported' | 'cancelled'> {
+        this.assertRecordingUnlocked();
         const activeTrackId = this.snapshot.activeTrackId;
         const context = activeTrackId ? this.trackContext(activeTrackId) : null;
         if (!activeTrackId || !context || !this.snapshot.project) return 'cancelled';
@@ -613,6 +721,7 @@ export class VisualizerSessionController {
     }
 
     async leave(): Promise<void> {
+        await this.recordingSession.handlePageHide();
         ++this.routeGeneration;
         await this.flush();
         this.releaseAnalysisLease();
@@ -624,12 +733,14 @@ export class VisualizerSessionController {
         if (this.disposed) return;
         this.disposed = true;
         ++this.routeGeneration;
+        await this.recordingSession.dispose();
         await this.flush();
         this.releaseAnalysisLease();
         this.releaseLease();
         this.repository.close();
         this.editorRepository?.close();
         this.removeBeforeUnload();
+        this.windowTarget?.removeEventListener('pagehide', this.handlePageHide);
         this.listeners.clear();
     }
 
@@ -905,6 +1016,7 @@ export class VisualizerSessionController {
             conflictingDraft: null,
             persistence,
             restoredFromDraft,
+            recording: { ...this.snapshot.recording },
             bindingRuntime: {
                 ...initialSnapshot().bindingRuntime,
                 bindingRevision: this.snapshot.bindingRuntime.bindingRevision + 1,
@@ -941,20 +1053,33 @@ export class VisualizerSessionController {
     }
 
     private readonly handleBeforeUnload = (event: BeforeUnloadEvent): void => {
-        if (!this.hasPendingWrite()) return;
+        if (!this.hasPendingWrite() && !this.hasUnresolvedRecordingOutput()) return;
         event.preventDefault();
         event.returnValue = '';
     };
 
     private syncBeforeUnload(): void {
-        if (this.hasPendingWrite() && !this.beforeUnloadRegistered) {
+        if (
+            (this.hasPendingWrite() || this.hasUnresolvedRecordingOutput())
+            && !this.beforeUnloadRegistered
+        ) {
             this.windowTarget?.addEventListener(
                 'beforeunload',
                 this.handleBeforeUnload as EventListener,
             );
             this.beforeUnloadRegistered = true;
-        } else if (!this.hasPendingWrite()) {
+        } else if (!this.hasPendingWrite() && !this.hasUnresolvedRecordingOutput()) {
             this.removeBeforeUnload();
+        }
+    }
+
+    private readonly handlePageHide = (): void => {
+        void this.recordingSession.handlePageHide();
+    };
+
+    private assertRecordingUnlocked(): void {
+        if (this.recordingSession.isLocked()) {
+            throw new VisualizerRecordingLockedError();
         }
     }
 

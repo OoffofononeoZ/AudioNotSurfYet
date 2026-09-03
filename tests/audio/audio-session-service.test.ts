@@ -94,6 +94,9 @@ class FakeEngine implements AudioEnginePort {
         return null;
     }
 
+    capturePlaybackCheckpoint() { return null; }
+    async restorePlaybackCheckpoint(): Promise<void> {}
+    acquireRecordingTap(): never { throw new Error('not implemented'); }
     copyDecodedChannelRange() {
         return null;
     }

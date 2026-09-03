@@ -263,6 +263,9 @@ class RepeatEngine implements AudioEnginePort {
             durationSeconds: 12,
         };
     }
+    capturePlaybackCheckpoint() { return null; }
+    async restorePlaybackCheckpoint(): Promise<void> {}
+    acquireRecordingTap(): never { throw new Error('not implemented'); }
     copyDecodedChannelRange() { return null; }
     subscribe(listener: (snapshot: PlaybackSnapshot) => void) {
         this.listeners.add(listener);
