@@ -1,22 +1,22 @@
 <template>
     <main class="visualizer-page" data-testid="visualizer-page">
-        <section v-if="snapshot.state === 'empty'" class="visualizer-state" data-testid="visualizer-empty">
+        <section v-if="snapshot.state === 'empty'" class="visualizer-state app-scrollbar" data-testid="visualizer-empty">
             <p class="kicker">Visualizer · 可视化制作台</p>
             <h1>先选择一首歌曲</h1>
             <p>可以在底部播放器导入或选择歌曲，再从导航栏 Visualizer 进入。</p>
         </section>
 
-        <section v-else-if="snapshot.state === 'loading'" class="visualizer-state" aria-live="polite">
+        <section v-else-if="snapshot.state === 'loading'" class="visualizer-state app-scrollbar" aria-live="polite">
             <h1>正在准备歌曲和可视化草稿…</h1>
         </section>
 
-        <section v-else-if="snapshot.state === 'unavailable'" class="visualizer-state" data-testid="visualizer-unavailable">
+        <section v-else-if="snapshot.state === 'unavailable'" class="visualizer-state app-scrollbar" data-testid="visualizer-unavailable">
             <h1>这首歌曲暂时不能用于可视化</h1>
             <p role="alert">{{ snapshot.message }}</p>
             <p>请在底部播放器恢复文件访问或重新选择相同文件。</p>
         </section>
 
-        <section v-else-if="snapshot.state === 'draft-conflict'" class="visualizer-state" data-testid="visualizer-draft-conflict">
+        <section v-else-if="snapshot.state === 'draft-conflict'" class="visualizer-state app-scrollbar" data-testid="visualizer-draft-conflict">
             <h1>另一首歌曲已有可视化草稿</h1>
             <p>{{ snapshot.message }}</p>
             <p v-if="snapshot.conflictingDraft">
@@ -98,7 +98,7 @@
             <div class="workspace-grid">
                 <aside
                     id="visualizer-template-panel"
-                    class="workspace-panel template-panel"
+                    class="workspace-panel template-panel app-scrollbar"
                     :class="{ 'drawer-open': openDrawer === 'templates' }"
                     data-testid="visualizer-template-panel"
                 >
@@ -148,7 +148,7 @@
 
                 <aside
                     id="visualizer-settings-panel"
-                    class="workspace-panel settings-panel"
+                    class="workspace-panel settings-panel app-scrollbar"
                     :class="{ 'drawer-open': openDrawer === 'settings' }"
                     data-testid="visualizer-settings-panel"
                 >
@@ -668,15 +668,18 @@ onBeforeUnmount(() => {
 
 <style scoped>
 .visualizer-page {
-    min-height: 100dvh;
+    height: 100dvh;
+    min-height: 0;
     padding: 72px 12px 12px;
+    overflow: hidden;
     color: #eafff2;
     background: #020403;
 }
 
 .visualizer-state,
 .visualizer-workspace {
-    min-height: calc(100dvh - 84px);
+    height: 100%;
+    min-height: 0;
     border: 1px solid rgba(101, 255, 169, .22);
     background: rgba(4, 10, 7, .94);
 }
@@ -686,6 +689,8 @@ onBeforeUnmount(() => {
     place-content: center;
     gap: 12px;
     padding: 32px;
+    overflow: auto;
+    overscroll-behavior: contain;
     text-align: center;
 }
 
@@ -746,11 +751,12 @@ input:focus-visible {
 
 .visualizer-workspace {
     display: grid;
-    grid-template-rows: auto auto minmax(0, 1fr) auto auto;
+    grid-template-rows: auto auto auto minmax(0, 1fr) auto auto;
     overflow: hidden;
 }
 
 .workspace-toolbar {
+    grid-row: 1;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -768,6 +774,7 @@ input:focus-visible {
 }
 
 .workspace-alert {
+    grid-row: 2;
     margin: 0;
     padding: 8px 14px;
     border-bottom: 1px solid rgba(255, 173, 96, .3);
@@ -775,15 +782,21 @@ input:focus-visible {
 }
 
 .workspace-grid {
+    grid-row: 4;
+    position: relative;
     display: grid;
     grid-template-columns: 220px minmax(0, 1fr) 336px;
     min-height: 0;
+    overflow: hidden;
 }
 
 .workspace-panel {
     min-width: 0;
+    min-height: 0;
     padding: 12px;
-    overflow: auto;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
     background: #050a07;
 }
 
@@ -810,6 +823,10 @@ input:focus-visible {
 .drawer-close,
 .compact-drawer-controls {
     display: none;
+}
+
+.compact-drawer-controls {
+    grid-row: 3;
 }
 
 .template-button {
@@ -880,6 +897,7 @@ input:focus-visible {
 .preview-frame {
     position: relative;
     width: min(100%, calc((100dvh - 240px) * 16 / 9));
+    max-height: 100%;
     aspect-ratio: 16 / 9;
     border: 1px solid rgba(101, 255, 169, .3);
     background: #020403;
@@ -935,6 +953,7 @@ input:focus-visible {
 }
 
 .transport {
+    grid-row: 6;
     display: grid;
     grid-template-columns: auto auto minmax(120px, 1fr) auto;
     padding: 10px 14px;
@@ -942,6 +961,7 @@ input:focus-visible {
 }
 
 .recording-bar {
+    grid-row: 5;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -996,11 +1016,6 @@ input:disabled {
 }
 
 @media (min-width: 1024px) and (max-width: 1279px) {
-    .visualizer-workspace {
-        position: relative;
-        grid-template-rows: auto auto auto minmax(0, 1fr) auto;
-    }
-
     .compact-drawer-controls {
         display: flex;
         position: relative;
@@ -1017,8 +1032,8 @@ input:disabled {
     .workspace-panel {
         position: absolute;
         z-index: 5;
-        top: 112px;
-        bottom: 54px;
+        top: 0;
+        bottom: 0;
         display: none;
         width: min(336px, 42vw);
         box-shadow: 0 18px 50px rgba(0, 0, 0, .55);

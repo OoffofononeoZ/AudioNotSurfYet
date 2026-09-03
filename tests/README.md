@@ -115,6 +115,7 @@ M3–M13 不建设 CI。下列命令当前均为本地门禁；正式证据要�
 | `npm run test:v6:integration` | V6 renderer 时间诊断、单 host/renderer/Canvas 生命周期和幂等资源释放 |
 | `npm run test:e2e:v6:chrome` / `test:e2e:v6:edge` | 真实 Chrome/Edge 的 MP3/WAV/FLAC、六个默认 WebM、900 秒四特征压力、20 次 lifecycle 与故障矩阵 |
 | `npm run test:e2e:v6` | 顺序执行真实 Chrome 与 Edge 的同一 V6 final hardening 套件 |
+| `npm run test:e2e:visualizer-layout` | 顺序执行 Chrome/Edge post-V6 一屏工作台、双侧滚动隔离、compact drawer 与共享 scrollbar 专项 |
 | `npm run test:v6:media` | ffprobe/FFmpeg 验证两浏览器六个默认 WebM 的双轨、codec、1280×720、平均 30fps `±5%`、最多四帧 packet gap、时长与非静音音轨 |
 | `npm run test:e2e:v1:chrome` | Chrome Header/route、MusicBar、pause-at-end、三栏/抽屉、单 16:9 Canvas、transport 和资源循环 |
 | `npm run test:e2e:v1:edge` | 使用真实 Edge 执行同一 V1 route/lease/layout/resource 专项套件 |

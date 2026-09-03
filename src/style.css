@@ -12,6 +12,38 @@
     --layer-header: 40;
     --layer-player: 60;
     --layer-player-popover: 70;
+    --app-scrollbar-track: rgba(5, 17, 11, 0.9);
+    --app-scrollbar-color: rgba(125, 255, 179, 0.65);
+    --app-scrollbar-thumb: rgba(125, 255, 179, 0.58);
+    --app-scrollbar-thumb-hover: rgba(181, 255, 210, 0.82);
+}
+
+.app-scrollbar {
+    scrollbar-color: var(--app-scrollbar-color) var(--app-scrollbar-track);
+    scrollbar-gutter: stable;
+    scrollbar-width: thin;
+}
+
+.app-scrollbar::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+.app-scrollbar::-webkit-scrollbar-track {
+    border-radius: 999px;
+    background: var(--app-scrollbar-track);
+}
+
+.app-scrollbar::-webkit-scrollbar-thumb {
+    border: 2px solid transparent;
+    border-radius: 999px;
+    background: var(--app-scrollbar-thumb);
+    background-clip: padding-box;
+}
+
+.app-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: var(--app-scrollbar-thumb-hover);
+    background-clip: padding-box;
 }
 
 .scrollbar-hide {
