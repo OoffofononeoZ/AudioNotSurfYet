@@ -119,6 +119,8 @@ V3 实际命令固定为 `fixtures:v3:golden`、`test:v3:unit`、`test:v3:integr
 
 V4 实际命令固定为 `fixtures:v4:golden`、`test:v4:unit`、`test:v4:integration`、`test:e2e:v4`、`eval:v4:provisional` 与 clean `eval:v4`。V4 canonical 恰为 V3 30 步前向回归加四个 V4 专项，共 34 步；V4 Chrome 专项包含 `WEBGL_lose_context` 注入，真实 Edge 继续由既有相邻回归覆盖并在 V6 执行完整场景矩阵。
 
+V5 实际命令固定为 `fixtures:v5:golden`、`test:v5:unit`、`test:v5:integration`、`test:e2e:v5:chrome`、`test:e2e:v5:edge`、`test:e2e:v5`、`test:v5:media`、`eval:v5:provisional` 与 clean `eval:v5`。V5 canonical 恰为 V4 34 步基线加 golden、unit、integration、Chrome、Edge、media verification 六专项，共 40 步。
+
 ## 9. Current Gate State
 
 - V1–V4 canonical 与 owner evidence 均已批准并关闭；V5 为 `In Progress`，V6 保持 `Planned`。

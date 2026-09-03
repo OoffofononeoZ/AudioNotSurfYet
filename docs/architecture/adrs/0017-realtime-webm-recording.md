@@ -6,7 +6,7 @@ upstream_docs:
   - "docs/product/scope.md"
   - "docs/product/success-metrics.md"
   - "docs/architecture/visualizer/recording-contract.md"
-next_action: "在 V5/V6 delivery planning 中固定 pre-Gain、codec-only fallback、严格预设与 WebM 证据；规划批准前不实现"
+next_action: "V5 已开放；实施 pre-Gain、codec-only fallback、严格预设与 WebM 证据"
 ---
 
 # ADR-0017: Real-time WebM Recording
@@ -37,4 +37,4 @@ Visualizer V5 需要录制同一 Canvas 和歌曲音轨。页面音量是本地�
 
 ## Approval
 
-`project-owner` 于 2026-09-02 批准 Visualizer V0 system design、接口契约、R-034–R-041 与 ADR-0014–0017。本 ADR 据此为 `approved`；详细比特率、状态机和保存边界继续以 [Recording Contract](../visualizer/recording-contract.md) 为准，V5 规划获批前不实现。
+`project-owner` 于 2026-09-02 批准 Visualizer V0 system design、接口契约、R-034–R-041 与 ADR-0014–0017。本 ADR 据此为 `approved`；2026-09-03 owner 关闭 V4 并开放 V5。详细比特率、状态机、播放恢复和保存边界继续以 [Recording Contract](../visualizer/recording-contract.md) 为准。

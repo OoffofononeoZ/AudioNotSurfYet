@@ -70,6 +70,9 @@ AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端。Editor E1–
 | [Visualizer V4 eval plan](../quality/visualizer/v4-eval-plan.md) | AC-V401–AC-V406 的核心环、默认两项分析、确定性积分、资源与 context recovery 契约 | project-owner / approved | V4 映射、积分、context、阈值或证据能力变化 |
 | [Visualizer V4 golden](../quality/visualizer/v4-golden-examples.md) | 64-band 核心、seed 外围、三卫星、默认绑定、hash、context 与响应式规范样例 | project-owner / approved | V4 fixture、state、checkpoint、几何或默认绑定变化 |
 | [Visualizer V4 failure taxonomy](../quality/visualizer/v4-failure-taxonomy.md) | default、core、rise、orbit、determinism、resource、context 与 performance 分类 | project-owner / approved | V4 失败域或严重度响应变化 |
+| [Visualizer V5 eval plan](../quality/visualizer/v5-eval-plan.md) | AC-V501–AC-V509 的 pre-Gain、MediaRecorder、保存、双浏览器与媒体阈值 | project-owner / approved | V5 状态机、preset、阈值或证据能力变化 |
+| [Visualizer V5 golden](../quality/visualizer/v5-golden-examples.md) | 3 秒 A/V fixture、准备回滚、命令锁、abort、save 与 lifecycle 规范样例 | project-owner / approved | V5 fixture、恢复、离页或媒体事实变化 |
+| [Visualizer V5 failure taxonomy](../quality/visualizer/v5-failure-taxonomy.md) | tap、capability、preflight、sequence、abort、container、sync 与 resource 分类 | project-owner / approved | V5 失败域或严重度响应变化 |
 | [Visualizer evidence index](../quality/visualizer/evidence-index.md) | V1–V6 canonical 身份、hash、环境和 reviewer 记录 | project-owner / approved | 新 Visualizer run、artifact 或审批状态变化 |
 | [eval-plan.md](../quality/eval-plan.md) | M3–M14 评估、FIFO/order/geometry/lifecycle 门禁与 canonical 规则 | project-owner / approved | 验收、测试覆盖或风险变化 |
 | [golden-examples.md](../quality/golden-examples.md) | 成功、失败、边界和异常黄金样例 | project-owner / approved | fixture、Meyda、参数或用户任务变化 |

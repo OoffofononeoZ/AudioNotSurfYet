@@ -4,7 +4,7 @@ owner: "project-owner"
 last_reviewed: 2026-09-03
 upstream_docs:
   - "docs/architecture/system-design.md"
-next_action: "验证 V4 defaultBinding、Cube scene 与 recovering context lifecycle；JSON V1 和 route 接口保持不变"
+next_action: "实现 V5 recording tap、capture lease、状态机与 native WebM save；JSON V1 保持不变"
 ---
 
 # Interface Contracts
@@ -771,5 +771,8 @@ type VisualizerRecordingState =
 
 - `AudioEngine.acquireRecordingTap()` 返回唯一 pre-Gain audio stream lease；第二持有者必须失败，release 对称停止/断开录制节点而不影响 destination 播放。
 - recorder 只进行 VP9+Opus 到 VP8+Opus codec fallback，不改变用户选择的分辨率/fps。preflight、状态机、锁定动作、比特率和 Blob 生命周期见 [Recording Contract](visualizer/recording-contract.md)。
+- `VisualizerSessionSnapshot.recording` 只保存可序列化状态；MediaRecorder、MediaStream、tracks、capture lease 和 Blob 均由 controller 内存运行时持有，不进入 Pinia、JSON V1 或 IndexedDB。
+- RendererHost recording capture lease 临时使用 preset 原生 backing size/DPR 1并同步绘制首帧；释放后恢复最新响应式预览尺寸。该 lease 不创建 Canvas、renderer 或 RAF。
+- preparing 失败恢复录制前 playback checkpoint；recording/finalizing 取消或错误停在当前时间 paused。UI 与命令层共同执行 `recording-locked`。
 
 `project-owner` 于 2026-09-02 批准 Visualizer V0 system design、接口契约、R-034–R-041 与 ADR-0014–0017，并同意进入 V1–V6 execution planning。本节据此为 `approved`，但不是实现或 quality evidence。
