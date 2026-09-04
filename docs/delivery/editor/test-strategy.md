@@ -8,7 +8,7 @@ upstream_docs:
   - "docs/architecture/risk-register.md"
   - "docs/delivery/editor/execution-plan.md"
   - "docs/delivery/editor/acceptance-criteria.md"
-next_action: "E9 29 步 canonical 已通过；保留 artifact 并等待 owner 视觉门禁"
+next_action: "复跑修订后的 E9 unit/integration/双浏览器与 29 步 clean canonical"
 ---
 
 # Editor E1–E9 Test Strategy
@@ -143,4 +143,4 @@ E1–E8 命令已经存在、通过 clean canonical 并获批准。E9 已新增 
 
 2026-09-04，owner 的 E9 完整实施指令批准 shared BPM lane、删除语义、三级单行展示、双浏览器矩阵和 29 步 canonical。E9 只增加版本化 geometry/presentation golden，不增加音频 fixture；E8 历史 artifact 不重写。
 
-同日 clean canonical 在 Chrome `152.0.7977.76` 与 Edge `152.0.4191.62` 上完成；两端覆盖 390/1024/1280/1920、DPR 1/2、最大共享几何误差 `0.009375 CSS px`，10 次路由往返的 live Observer/Canvas 基线不变。测试策略验证已完成，人工视觉判断仍由 owner 承担。
+同日首个 clean run 在 Chrome `152.0.7977.76` 与 Edge `152.0.4191.62` 上完成；两端覆盖 390/1024/1280/1920、DPR 1/2、最大共享几何误差 `0.009375 CSS px`，10 次路由往返的 live Observer/Canvas 基线不变。DEC-052 将该 run 保留为 `pre-revision`：修订套件必须增加 28px 等高、零间隙、12px 向上辅助线、11px/18px 同基线无框输入、无重复 rail 和唯一 scroller 断言，并在不增加步骤数的前提下重新执行 29 步 canonical。

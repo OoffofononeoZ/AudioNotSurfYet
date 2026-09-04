@@ -14,7 +14,7 @@ upstream_docs:
   - "docs/quality/editor/e8-eval-plan.md"
   - "docs/quality/editor/e9-eval-plan.md"
   - "docs/delivery/editor/milestone-plan.md"
-next_action: "E9 29/29 clean canonical 已登记为 in-review；等待 owner 视觉与交互门禁"
+next_action: "旧 E9 run 已转为 pre-revision；等待 DEC-052 新 implementation 与 revised canonical"
 ---
 
 # Editor Evidence Index
@@ -30,7 +30,7 @@ next_action: "E9 29/29 clean canonical 已登记为 in-review；等待 owner 视
 - E6：`Complete`。
 - E7：`Complete`。
 - E8：`Complete`；clean canonical 与 owner 人工门禁均已批准。
-- E9：`In Progress`；29/29 clean canonical 已登记为 `in-review`，R-042 保持 `Open`，等待 owner 视觉与交互确认。
+- E9：`In Progress`；首个 29/29 clean run 在 DEC-052 紧凑条修订后保留为 `pre-revision`，R-042 保持 `Open`，等待新 implementation 与 revised canonical。
 - E1 clean canonical 与 owner 人工门禁均已批准；Analyzer M3–M11 evidence 仍不能替代未来 Editor 里程碑证据。
 - E2 clean canonical 与 owner 门禁已于 2026-08-27 获批。
 - E3 clean canonical 与 owner 人工门禁已于 2026-08-27 获批；E4 clean canonical 与 owner 人工门禁随后获批。
@@ -39,7 +39,7 @@ next_action: "E9 29/29 clean canonical 已登记为 in-review；等待 owner 视
 - E6 clean canonical 40/40、原生 OS picker、`beforeunload`、辅助技术与长会话补偿已于 2026-08-28 获 owner 批准；E7 紧凑工作台布局已开放，Editor readiness 延后至 E7 审批。
 - E7 修订版 clean canonical 已在实现 commit `080f577fe20fcb22a20184dce0b15892c5299464` 上 46/46 通过；原 44/44 run 保留为 `pre-revision`。2026-08-31 owner 批准修订版候选并关闭 E7，未提供的人工测量不补写。
 - E8 clean canonical 已在实现 commit `84d9435cc6e8d1edb0932ff1b8dcd1b84dff32b5` 上 25/25 通过；owner 已复核紧凑高度、恢复语义和 marker 可读性门禁并批准关闭 E8。
-- E9 clean canonical 已在实现 commit `cf0a79b176d99eb183368818ce90ac5731d1cfa8` 上 29/29 通过；证据为 `in-review`，不代表 owner 人工门禁已通过。
+- E9 首个 clean run 已在实现 commit `cf0a79b176d99eb183368818ce90ac5731d1cfa8` 上 29/29 通过；DEC-052 后证据为 `pre-revision`，不再代表当前 owner 审批候选。
 
 ## 2. Record Contract
 
@@ -843,14 +843,14 @@ E8 Chrome/Edge 测试均捕获 `pageerror` 和异常 console 并要求为空。r
 | --- | --- |
 | Run ID | `E9-2026-09-04T02-49-18-960Z-cf0a79b1` |
 | Milestone | E9 — Tempo lane and marker interaction |
-| State | `in-review`（29/29 自动化通过；owner 视觉与交互门禁待完成） |
+| State | `pre-revision`（29/29 自动化通过；DEC-052 紧凑条修订后不再是正式候选） |
 | Implementation commit | `cf0a79b176d99eb183368818ce90ac5731d1cfa8` |
 | Evidence commit | 本记录所在的 `docs: register Editor E9 canonical evidence` 提交 |
 | Dirty at start / end | `false` / `false` |
 | Commit at end | `cf0a79b176d99eb183368818ce90ac5731d1cfa8` |
 | Started at | 2026-09-04 02:49:18.960 UTC |
 | Method | `npm run eval:e9` |
-| Reviewer | `project-owner` — pending |
+| Reviewer | `project-owner` — requested revision 2026-09-04 |
 | Retention | `local-present`；至少保留到 E9 审批完成 |
 | Artifact root | `artifacts/evals/E9-2026-09-04T02-49-18-960Z-cf0a79b1/` |
 | Summary SHA-256 | `d4c15f6801e6df4289dad97b816036a095a21e5781a314f1f3166ab663f3ca4a` |
@@ -900,8 +900,12 @@ E9 Chrome/Edge 专项均捕获 `pageerror` 和异常 console 并要求为空。B
 | `24-build.log` | `d68ed42693f0075d5c203636733a9ea91b171fd7dd590587c81c99c48004c3fb` |
 | `25-diff-check.log` | `e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855` |
 
+### Revision Boundary
+
+2026-09-04，owner 在人工门禁中要求把独立 66px tempo row 改为紧贴波形的 28px BPM 标记条，辅助线只向上指向波形，移除重复左 rail，并将 BPM/拍号改为 11px 无框行内编辑。该变化影响 DOM 拓扑、geometry、presentation threshold 与视觉验收，因此本 run 保留为 `pre-revision`，artifact 和 hash 不删除、不改写；修订版候选仍执行 29 步。
+
 ### Manual Boundary and Approval Gate
 
 - 自动化证明 DOM/Canvas 几何、共享滚动、删除事实、草稿恢复、计算样式与双浏览器资源基线；它不能替代 owner 对分类按钮视觉居中、candidate 竖线辨识度、BPM 轨道信息密度、三级缩放观感和右键删除直觉性的判断。
 - Owner 需在 Chrome/Edge 确认：“+分类”双轴居中；候选为单一绿色竖线；BPM caret/时间/输入与波形直观对齐；缩放时 full/summary/hidden 合理；右键删除为前段延伸；板块间只有一条横线。
-- 本记录登记后 E9 仍为 `In Progress`、evidence 为 `in-review`、R-042 为 `Open`。只有 owner 明确批准上述任务后，才可关闭 E9、缓解 R-042 并进入 Editor release-readiness。
+- 本记录现为 `pre-revision`；E9 仍为 `In Progress`、R-042 为 `Open`。只有新的 clean revised canonical 登记且 owner 明确批准上述任务后，才可关闭 E9、缓解 R-042 并进入 Editor release-readiness。

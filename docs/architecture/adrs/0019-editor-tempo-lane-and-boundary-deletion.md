@@ -5,7 +5,7 @@ last_reviewed: 2026-09-04
 upstream_docs:
   - "docs/product/scope.md"
   - "docs/architecture/system-design.md"
-next_action: "E9 29/29 canonical 已验证本 ADR；等待 owner 视觉与交互任务"
+next_action: "删除与共享 viewport 决策继续有效；轨道布局由 ADR-0020 修订并等待 revised canonical"
 ---
 
 # ADR-0019: Editor Tempo Lane and Boundary Deletion
@@ -36,3 +36,5 @@ E8 把波形 stage 收敛到 88/72px，但 tempo boundary 仍覆盖在波形中�
 ## Approval
 
 2026-09-04，`project-owner` 明确要求实施完整 E9 计划；该指令批准 DEC-051、本 ADR 与 E9 quality contract。批准不等于实现、canonical 或人工视觉门禁通过。
+
+同日 DEC-052/ADR-0020 取代本 ADR 的独立 66px BPM 轨道布局，但保留共享 viewport、唯一滚动、三级展示、内部 boundary 删除、前段延伸和秒数事实。

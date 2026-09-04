@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/product/scope.md"
   - "docs/architecture/system-design.md"
   - "docs/delivery/execution-plan.md"
-next_action: "owner 视觉确认 DEC-050 一屏布局与双侧独立滚动；Visualizer readiness 保持 in-review"
+next_action: "实施 DEC-052 紧凑 BPM 标记条；Visualizer readiness 仍独立保持 in-review"
 ---
 
 # Decision Registry
@@ -40,6 +40,7 @@ next_action: "owner 视觉确认 DEC-050 一屏布局与双侧独立滚动；Vis
 | ADR-0017 | 2026-09-02 | WebM 使用 AudioEngine pre-Gain 原音量 tap；只允许 VP9→VP8 codec fallback，不静默降低分辨率/fps | project-owner | approved | [ADR-0017](../architecture/adrs/0017-realtime-webm-recording.md) | 音频 tap、codec、预设、状态机或保存边界改变 |
 | ADR-0018 | 2026-09-03 | Editor 时间轴固定为 `88px/72px` 并保留 6px 波形安全区；同歌恢复不播放、异歌显式 replace、point 中心误差 `<=1 CSS px` | project-owner | approved | [ADR-0018](../architecture/adrs/0018-editor-timeline-recovery-and-marker-alignment.md) | 时间轴垂直几何、恢复决策、route 切换或 marker 锚点改变 |
 | ADR-0019 | 2026-09-04 | Editor 将 tempo boundary 与区间编辑移入和波形共享 viewport 的专用 BPM 轨道；内部边界可删除且由前段向右延伸 | project-owner | approved | [ADR-0019](../architecture/adrs/0019-editor-tempo-lane-and-boundary-deletion.md) | tempo 轨道布局、区间展示、boundary 删除或时间映射改变 |
+| ADR-0020 | 2026-09-04 | Editor 用紧贴波形的 28px BPM 标记条替代独立 66px tempo 模块；caret 与 12px 辅助线向上指向波形，区间使用 11px 无框行内编辑 | project-owner | approved | [ADR-0020](../architecture/adrs/0020-editor-compact-tempo-strip.md) | 标记条高度、合并拓扑、boundary 指向、紧凑编辑或展示阈值改变 |
 | DEC-008 | 2026-07-24 | 实施采用 M1–M11 相对门禁，不承诺日期；M3 从测试基础开始，M7 未通过不得扩展后续特征 | project-owner | approved | [Execution plan](../delivery/execution-plan.md) | 依赖、里程碑、验收门禁或交付优先级改变 |
 | DEC-009 | 2026-07-24 | 当前只批准 execution planning；不预建 quality/release/retrospective，也不自动开始代码实现 | project-owner | superseded by DEC-010 | [Milestone plan](../delivery/milestone-plan.md) | 已由 owner 决定前置三份 quality design |
 | DEC-010 | 2026-07-24 | 在 M3 前增加 Q0：前置 eval plan、golden examples、failure taxonomy；三份文档单独批准后开放 M3，release-readiness 仍等待 M11 证据 | project-owner | approved | [Eval plan](../quality/eval-plan.md) | 验收/测试纪律变化，或 owner 改变 Q0/readiness 时序 |
@@ -84,6 +85,7 @@ next_action: "owner 视觉确认 DEC-050 一屏布局与双侧独立滚动；Vis
 | DEC-049 | 2026-09-04 | 批准 V6 54/54 clean canonical 及双浏览器制作、原生保存/回放、键盘/焦点、长时操作与 context 清理人工门禁；保持 canonical identity 不变且无需重跑，V6 改为 Complete、R-041 改为 Mitigated，并开放独立 Visualizer release-readiness review | project-owner | approved | [Visualizer evidence](../quality/visualizer/evidence-index.md) | V6 canonical identity、owner review 结论、R-041 或 readiness 边界改变 |
 | DEC-050 | 2026-09-04 | Visualizer 在支持的 `>=1024px` 桌面视口中固定占一个 `100dvh`，document/body 不纵向滚动，左右侧栏独立滚动且阻止 scroll chaining；Analyzer 精确值表样式抽取为共享 `.app-scrollbar`，本次只迁移 Analyzer 表与 Visualizer，后续新增或修改的可见滚动容器必须复用 | project-owner | approved | [Viewport scroll eval](../quality/visualizer/viewport-scroll-eval-plan.md) | 支持断点、页面/侧栏滚动所有权、共享样式或例外范围改变 |
 | DEC-051 | 2026-09-04 | 实施 Editor E9：BPM 轨道与波形共享滚动/时间几何，区间按单行可用宽度在完整编辑、摘要、隐藏间切换，内部 boundary 支持右键和键盘删除；E8 canonical 保持历史不变 | project-owner | approved | [Editor E9 eval](../quality/editor/e9-eval-plan.md) | E9 范围、展示阈值、删除继承语义、29 步 canonical 或完成门禁改变 |
+| DEC-052 | 2026-09-04 | 修订 Editor E9：旧 29/29 run 保留为 `pre-revision`；删除独立 tempo row，将 28px BPM 标记条并入波形时间列，移除重复左侧标签并保留唯一滚动、三级展示和删除语义 | project-owner | approved | [ADR-0020](../architecture/adrs/0020-editor-compact-tempo-strip.md) | 紧凑条几何、输入样式、旧 evidence 状态、29 步 revised canonical 或 owner 门禁改变 |
 
 ## Approval Evidence
 
@@ -116,6 +118,8 @@ next_action: "owner 视觉确认 DEC-050 一屏布局与双侧独立滚动；Vis
 同一实施计划批准 DEC-050：截图所示的 document 纵向滚动被登记为独立 Visualizer readiness 修订，不回开 V6、不创建 V7。支持的 `1024/1280/1920` 桌面宽度中，页面高度固定为一屏，左右工作台侧栏拥有各自滚动上下文；`<1024px` 现有最小宽度/横向兼容策略不扩展为移动端支持。共享滚动条以 Analyzer 精确值表为视觉事实源，本次只迁移该表和 Visualizer，Editor、歌曲列表和 Analyzer 页面既有滚动条不在本次范围。
 
 DEC-050 随后在独立 clean implementation commit `9f3b55beaa0c8a3d799f3f1e16f1dd66c9aee77c` 上完成。Chrome `152.0.7977.66` 与 Edge `152.0.4191.53` 专项各 2/2 通过，覆盖四组视口、DPR 1/2、页面高度、双侧滚动隔离、边界 chaining、compact drawer、16:9 与单 renderer/RAF；V1 双浏览器、V6 integration、Analyzer M7 和静态门禁均通过。该执行证据不改变 DEC-049/V6 canonical，也不构成 owner 视觉、整体 readiness 或生产上线批准。
+
+同日，owner 在 E9 首个 29/29 候选的人工复核中要求取消独立 66px tempo 模块，把 BPM 信息压缩为紧贴波形的 28px 标记条；辅助线只向上指向波形，移除重复左侧标签，并以 11px 无框行内控件继续直接编辑。随后 owner 明确要求实施完整修订计划，DEC-052/ADR-0020 据此获批。旧 run `E9-2026-09-04T02-49-18-960Z-cf0a79b1` 保留为 `pre-revision` 且 artifact 不改写；E9、R-042 和 Editor readiness 门禁均不提前关闭。
 
 同日，`project-owner` 明确要求实施 Q0 质量设计计划，批准了 Q0 前置、四级严重度和 readiness 后置的阶段安排；同时要求三份质量文档先保持 `in-review`，经单独审阅后才生效。因此 DEC-010 的时序决定已批准，但 Q0 内容尚未批准。
 

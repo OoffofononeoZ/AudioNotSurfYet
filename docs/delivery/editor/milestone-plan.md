@@ -6,7 +6,7 @@ upstream_docs:
   - "docs/delivery/editor/execution-plan.md"
   - "docs/delivery/editor/acceptance-criteria.md"
   - "docs/delivery/editor/test-strategy.md"
-next_action: "E9 implementation 与 29/29 clean canonical 已完成；等待 owner 视觉与交互任务"
+next_action: "交付 DEC-052 紧凑 BPM 标记条并形成新的 29/29 clean canonical"
 ---
 
 # Editor E1–E9 Milestone Plan
@@ -115,9 +115,11 @@ next_action: "E9 implementation 与 29/29 clean canonical 已完成；等待 own
 
 - [x] DEC-051、ADR-0019、AC-E901–AC-E905 与 quality contract 获实施批准。
 - [x] `removeTempoBoundary`、shared BPM lane 与三级展示完成 unit/integration。
-- [x] Chrome/Edge 四视口、DPR、zoom/pan、右键/键盘和视觉几何专项通过。
-- [x] dirty provisional、implementation commit、29/29 clean canonical 与 evidence 登记完成。
-- [ ] owner 确认分类按钮、candidate 竖线、BPM 对齐/缩放、删除语义和单 divider。
+- [x] 首个 Chrome/Edge 候选和 29/29 clean run 已完成；DEC-052 后保留为 `pre-revision`。
+- [x] DEC-052/ADR-0020 紧凑 BPM 标记条与 revised quality contract 获实施批准。
+- [ ] 完成 28px 合并条、向上辅助线、11px 无框输入与修订后的 unit/integration/双浏览器专项。
+- [ ] dirty provisional、implementation commit、新 29/29 clean canonical 与 revised evidence 登记完成。
+- [ ] owner 确认紧凑条融入波形、指向正确、输入可用、重复标签消失、共享滚动、删除语义和单 divider。
 
 ## 4. Failure and Slip Rules
 
@@ -141,7 +143,7 @@ next_action: "E9 implementation 与 29/29 clean canonical 已完成；等待 own
 - E7：`Complete`。
 - E8：`Complete`。
 - E9：`In Progress`。
-- 当前下一门禁：owner 完成 E9 视觉与交互任务并明确批准；Editor readiness 不由 29/29 自动化结果自动推定。
+- 当前下一门禁：先完成 DEC-052 implementation 与 revised canonical，再由 owner 完成 E9 视觉与交互任务；Editor readiness 不由旧 29/29 自动化结果自动推定。
 
 ## 6. Delivery Approval
 
@@ -183,4 +185,4 @@ next_action: "E9 implementation 与 29/29 clean canonical 已完成；等待 own
 
 2026-09-04，owner 明确要求完整实施 E9 节拍轨道与标记交互计划。DEC-051、ADR-0019、delivery/quality contract 据此获批，E9 改为 `In Progress`；E1–E8 canonical、artifact 与批准状态保持不变。
 
-同日，E9 implementation commit `cf0a79b176d99eb183368818ce90ac5731d1cfa8` 完成专用 BPM 轨道、三级展示、boundary 删除和标记视觉修订。clean canonical `E9-2026-09-04T02-49-18-960Z-cf0a79b1` 29/29 通过，summary SHA-256 为 `d4c15f6801e6df4289dad97b816036a095a21e5781a314f1f3166ab663f3ca4a`；evidence 保持 `in-review`，等待 owner 门禁。
+同日，E9 implementation commit `cf0a79b176d99eb183368818ce90ac5731d1cfa8` 完成专用 BPM 轨道、三级展示、boundary 删除和标记视觉修订。clean run `E9-2026-09-04T02-49-18-960Z-cf0a79b1` 29/29 通过，summary SHA-256 为 `d4c15f6801e6df4289dad97b816036a095a21e5781a314f1f3166ab663f3ca4a`；DEC-052 紧凑条修订后该 evidence 保留为 `pre-revision`，等待新 implementation 与 revised canonical。
