@@ -206,7 +206,9 @@
     "eval:v5": "node tests/scripts/run-v5-eval.mjs",
     "eval:v5:provisional": "node tests/scripts/run-v5-eval.mjs --provisional",
     "eval:v6": "node tests/scripts/run-v6-eval.mjs",
-    "eval:v6:provisional": "node tests/scripts/run-v6-eval.mjs --provisional"
+    "eval:v6:provisional": "node tests/scripts/run-v6-eval.mjs --provisional",
+    "eval:editor-readiness": "node tests/scripts/run-editor-readiness-eval.mjs",
+    "eval:editor-readiness:provisional": "node tests/scripts/run-editor-readiness-eval.mjs --provisional"
   },
   "dependencies": {
     "@chenglou/pretext": "^0.0.6",

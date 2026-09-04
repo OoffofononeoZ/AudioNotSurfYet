@@ -83,6 +83,7 @@
 | `npm run test:e9:unit` / `test:e9:integration` | 运行 tempo boundary 删除、紧凑三级展示、shared geometry、autosave/JSON V1 与 stale cleanup | E9 静态与集成门禁 |
 | `npm run test:e2e:e9` | 顺序运行真实 Chrome/Edge 的 28px 合并条、向上 guide、11px 无框输入、单滚动、右键/键盘与视觉几何专项 | E9 双浏览器回归；人工门禁已批准 |
 | `npm run eval:e9:provisional` / `eval:e9` | E8 25 步基线 + E9 unit/integration/Chrome/Edge 的 dirty/clean 29 步链 | 首个 run 为 pre-revision；DEC-052 revised canonical 已批准 |
+| `npm run eval:editor-readiness:provisional` / `eval:editor-readiness` | 固定 E9 runtime candidate 的 E4–E9、Chrome/Edge 与静态门禁 24 步审计 | clean 模式拒绝 dirty，并要求相对 E9 implementation 的 `src/` 无漂移 |
 | `npm run fixtures:v1:golden` / `test:v1:unit` / `test:v1:integration` | 运行 V1 strict project、descriptor、route lease、单草稿和 session 专项 | 已实现；用于 V1 质量回归 |
 | `npm run test:e2e:v1:chrome` / `test:e2e:v1:edge` | 在真实 Chrome/Edge 运行 V1 route/layout/resource 专项 | 原生 OS picker 仍需人工补偿 |
 | `npm run eval:v1:provisional` | 在 dirty worktree 运行 21 步 V1 suite | 只生成实现反馈 |
