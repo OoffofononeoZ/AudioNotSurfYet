@@ -42,6 +42,8 @@ const openE3 = async (page: Page) => {
     await expect(page.getByTestId('editor-buffer-state')).toHaveText('波形已就绪', {
         timeout: 30_000,
     });
+    await expect(page.getByTestId('editor-tempo-lane')).toBeVisible();
+    await expect(page.locator('.tempo-row, .tempo-track-rail, .tempo-class-rail')).toHaveCount(0);
     await expect.poll(async () => Number(
         await page.getByTestId('tempo-bpm-0').inputValue(),
     ), { timeout: 30_000 }).toBeGreaterThan(99);

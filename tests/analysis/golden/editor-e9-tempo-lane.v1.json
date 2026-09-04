@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "generatedAt": "2026-09-04",
-  "generatorVersion": "editor-e9-tempo-lane-v1",
+  "generatorVersion": "editor-e9-compact-tempo-strip-v1",
   "tempoMap": [
     {
       "id": "tempo-0",
@@ -26,11 +26,19 @@
     }
   ],
   "durationSeconds": 146.866,
+  "compactGeometry": {
+    "stripHeight": 28,
+    "guideHeight": 12,
+    "guideWidth": 1,
+    "labelFontSize": 11,
+    "controlHeight": 18,
+    "boundarySafetyInset": 26
+  },
   "presentationCases": [
-    { "available": 420, "full": 420, "summary": 112, "expected": "full" },
-    { "available": 419.999, "full": 420, "summary": 112, "expected": "summary" },
-    { "available": 112, "full": 420, "summary": 112, "expected": "summary" },
-    { "available": 111.999, "full": 420, "summary": 112, "expected": "hidden" },
-    { "available": -1, "full": 420, "summary": 112, "expected": "hidden" }
+    { "available": 172, "full": 172, "summary": 88, "expected": "full" },
+    { "available": 171.999, "full": 172, "summary": 88, "expected": "summary" },
+    { "available": 88, "full": 172, "summary": 88, "expected": "summary" },
+    { "available": 87.999, "full": 172, "summary": 88, "expected": "hidden" },
+    { "available": -1, "full": 172, "summary": 88, "expected": "hidden" }
   ]
 }

@@ -100,12 +100,21 @@ const probeSharedGeometry = async (
         const waveform = document.querySelector<HTMLElement>('[data-testid="editor-timeline"]');
         const lane = document.querySelector<HTMLElement>('[data-testid="editor-tempo-lane"]');
         const boundary = document.querySelector<HTMLElement>('button[data-testid^="tempo-boundary-"]');
-        if (!panelElement || !waveform || !lane || !boundary) {
+        const status = document.querySelector<HTMLElement>('.timeline-status');
+        const boundaryTime = boundary?.dataset.timeSeconds;
+        const guide = boundaryTime
+            ? document.querySelector<HTMLElement>(`.tempo-boundary-guide[data-time-seconds="${boundaryTime}"]`)
+            : null;
+        const caret = boundary?.querySelector<HTMLElement>('.boundary-caret');
+        if (!panelElement || !waveform || !lane || !boundary || !status || !guide || !caret) {
             throw new Error('E9 shared geometry is incomplete.');
         }
         const waveformBounds = waveform.getBoundingClientRect();
         const laneBounds = lane.getBoundingClientRect();
         const boundaryBounds = boundary.getBoundingClientRect();
+        const statusBounds = status.getBoundingClientRect();
+        const guideBounds = guide.getBoundingClientRect();
+        const caretBounds = caret.getBoundingClientRect();
         const percent = Number.parseFloat(boundary.style.left) / 100;
         return {
             viewportWidth: innerWidth,
@@ -122,6 +131,16 @@ const probeSharedGeometry = async (
             tempoScrollLeft: lane.scrollLeft,
             tempoOverflowX: getComputedStyle(lane).overflowX,
             fixedBoundaryCount: lane.querySelectorAll('.tempo-lane-boundary--fixed').length,
+            stripHeight: laneBounds.height,
+            statusHeight: statusBounds.height,
+            waveformGap: Math.abs(laneBounds.top - waveformBounds.bottom),
+            guideWidth: guideBounds.width,
+            guideHeight: guideBounds.height,
+            guideBottomError: Math.abs(guideBounds.bottom - waveformBounds.bottom),
+            caretGap: Math.abs(caretBounds.top - waveformBounds.bottom),
+            duplicateTempoRailCount: document.querySelectorAll(
+                '.tempo-row, .tempo-track-rail, .tempo-class-rail',
+            ).length,
         };
     });
 };
@@ -134,10 +153,52 @@ test('shares waveform geometry and switches tempo content without wrapping', asy
 
     const firstSegment = page.getByTestId('tempo-segment-0');
     await expect(firstSegment).toHaveAttribute('data-presentation', 'full');
-    await seekAndAddBoundary(page, 0.5);
+    await page.getByTestId('editor-timeline').focus();
+    const compactControls = await page.evaluate(() => {
+        const bpm = document.querySelector<HTMLElement>('[data-testid="tempo-bpm-0"]');
+        const numerator = document.querySelector<HTMLElement>('.tempo-meter-numerator');
+        const denominator = document.querySelector<HTMLElement>('.tempo-meter-denominator');
+        const segment = document.querySelector<HTMLElement>('[data-testid="tempo-segment-0"]');
+        if (!bpm || !numerator || !denominator || !segment) {
+            throw new Error('E9 compact controls are incomplete.');
+        }
+        const bpmStyle = getComputedStyle(bpm);
+        const controls = [bpm, numerator, denominator].map((control) =>
+            control.getBoundingClientRect());
+        return {
+            fontSize: bpmStyle.fontSize,
+            height: controls[0]!.height,
+            baselineError: Math.max(...controls.map((bounds) => bounds.top))
+                - Math.min(...controls.map((bounds) => bounds.top)),
+            background: bpmStyle.backgroundColor,
+            borderTop: bpmStyle.borderTopWidth,
+            borderRight: bpmStyle.borderRightWidth,
+            borderBottomColor: bpmStyle.borderBottomColor,
+            sourceVisible: document.querySelectorAll('.tempo-source').length,
+            accessibleSource: segment.getAttribute('aria-label'),
+        };
+    });
+    expect(compactControls).toMatchObject({
+        fontSize: '11px',
+        height: 18,
+        baselineError: 0,
+        background: 'rgba(0, 0, 0, 0)',
+        borderTop: '0px',
+        borderRight: '0px',
+        borderBottomColor: 'rgba(0, 0, 0, 0)',
+        sourceVisible: 0,
+    });
+    expect(compactControls.accessibleSource).toContain('用户输入');
+    await page.getByTestId('tempo-bpm-0').focus();
+    await expect.poll(async () => page.getByTestId('tempo-bpm-0').evaluate(
+        (element) => getComputedStyle(element).borderBottomColor,
+    )).toBe('rgb(101, 255, 169)');
+    await page.getByTestId('editor-timeline').focus();
+
+    await seekAndAddBoundary(page, 0.25);
     await page.setViewportSize({ width: 1024, height: 900 });
     await expect(firstSegment).toHaveAttribute('data-presentation', 'summary');
-    await seekAndAddBoundary(page, 0.525);
+    await seekAndAddBoundary(page, 0.28);
     await expect(page.locator('[data-presentation="hidden"]')).toHaveCount(1);
 
     const geometry = await page.evaluate(() => {
@@ -145,12 +206,19 @@ test('shares waveform geometry and switches tempo content without wrapping', asy
         const lane = document.querySelector<HTMLElement>('[data-testid="editor-tempo-lane"]');
         const boundary = document.querySelector<HTMLElement>('button[data-testid^="tempo-boundary-"]');
         const summary = document.querySelector<HTMLElement>('.tempo-segment-summary');
-        if (!waveform || !lane || !boundary || !summary) {
+        const guide = boundary?.dataset.timeSeconds
+            ? document.querySelector<HTMLElement>(`.tempo-boundary-guide[data-time-seconds="${boundary.dataset.timeSeconds}"]`)
+            : null;
+        const caret = boundary?.querySelector<HTMLElement>('.boundary-caret');
+        const status = document.querySelector<HTMLElement>('.timeline-status');
+        if (!waveform || !lane || !boundary || !summary || !guide || !caret || !status) {
             throw new Error('E9 tempo geometry is incomplete.');
         }
         const waveformBounds = waveform.getBoundingClientRect();
         const laneBounds = lane.getBoundingClientRect();
         const boundaryBounds = boundary.getBoundingClientRect();
+        const guideBounds = guide.getBoundingClientRect();
+        const caretBounds = caret.getBoundingClientRect();
         const percent = Number.parseFloat(boundary.style.left) / 100;
         const expectedX = laneBounds.left + laneBounds.width * percent;
         return {
@@ -164,6 +232,16 @@ test('shares waveform geometry and switches tempo content without wrapping', asy
             tempoScrollLeft: lane.scrollLeft,
             panelHasScrollbar: document.querySelector('[aria-label="Editor 时间轴"]')
                 ?.classList.contains('app-scrollbar') ?? false,
+            stripHeight: laneBounds.height,
+            statusHeight: status.getBoundingClientRect().height,
+            waveformGap: Math.abs(laneBounds.top - waveformBounds.bottom),
+            guideWidth: guideBounds.width,
+            guideHeight: guideBounds.height,
+            guideBottomError: Math.abs(guideBounds.bottom - waveformBounds.bottom),
+            caretGap: Math.abs(caretBounds.top - waveformBounds.bottom),
+            duplicateTempoRailCount: document.querySelectorAll(
+                '.tempo-row, .tempo-track-rail, .tempo-class-rail',
+            ).length,
         };
     });
     expect(Math.max(geometry.leftError, geometry.widthError, geometry.boundaryError))
@@ -172,6 +250,18 @@ test('shares waveform geometry and switches tempo content without wrapping', asy
     expect(geometry.tempoOverflowX).toBe('hidden');
     expect(geometry.tempoScrollLeft).toBe(0);
     expect(geometry.panelHasScrollbar).toBe(true);
+    expect(geometry).toMatchObject({
+        stripHeight: 28,
+        statusHeight: 28,
+        guideWidth: 1,
+        guideHeight: 12,
+        duplicateTempoRailCount: 0,
+    });
+    expect(Math.max(
+        geometry.waveformGap,
+        geometry.guideBottomError,
+        geometry.caretGap,
+    )).toBeLessThanOrEqual(1);
 
     const responsiveMetrics = [];
     for (const width of [390, 1_024, 1_280, 1_920]) {
@@ -182,6 +272,15 @@ test('shares waveform geometry and switches tempo content without wrapping', asy
         expect(metric.tempoOverflowX).toBe('hidden');
         expect(metric.fixedBoundaryCount).toBe(2);
         expect(metric.panelScrollbarWidth).toBe('thin');
+        expect(metric).toMatchObject({
+            stripHeight: 28,
+            statusHeight: 28,
+            guideWidth: 1,
+            guideHeight: 12,
+            duplicateTempoRailCount: 0,
+        });
+        expect(Math.max(metric.waveformGap, metric.guideBottomError, metric.caretGap))
+            .toBeLessThanOrEqual(1);
         if (width === 390) {
             expect(metric.panelOverflowX).toBe('auto');
             expect(metric.panelScrollLeft).toBe(120);
@@ -343,6 +442,15 @@ test.describe('DPR 2 shared geometry', () => {
             expect(metric.dpr).toBe(2);
             expect(metric.tempoScrollLeft).toBe(0);
             expect(metric.fixedBoundaryCount).toBe(2);
+            expect(metric).toMatchObject({
+                stripHeight: 28,
+                statusHeight: 28,
+                guideWidth: 1,
+                guideHeight: 12,
+                duplicateTempoRailCount: 0,
+            });
+            expect(Math.max(metric.waveformGap, metric.guideBottomError, metric.caretGap))
+                .toBeLessThanOrEqual(1);
             metrics.push(metric);
         }
         console.log(JSON.stringify({

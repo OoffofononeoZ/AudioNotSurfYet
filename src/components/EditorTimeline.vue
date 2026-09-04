@@ -24,46 +24,189 @@
                 <strong>共享时间轴</strong>
                 <span>Tempo / 网格</span>
             </div>
-            <div
-                ref="stage"
-                class="timeline-stage"
-                data-testid="editor-timeline"
-                tabindex="0"
-                role="application"
-                aria-label="歌曲波形；点击跳转，滚轮缩放，右键拖动平移"
-                @contextmenu.prevent
-                @dragstart.prevent
-                @wheel="onWheel"
-                @pointerdown="onStagePointerDown"
-                @pointermove="onStagePointerMove"
-                @pointerup="onStagePointerUp"
-                @pointercancel="clearPointer"
-                @lostpointercapture="clearPointer"
-                @keydown="onStageKeydown"
-            >
-                <canvas ref="waveformCanvas" class="timeline-canvas" aria-hidden="true" />
-                <canvas ref="gridCanvas" class="timeline-canvas grid-canvas" aria-hidden="true" />
-                <canvas ref="cursorCanvas" class="timeline-canvas cursor-canvas" aria-hidden="true" />
-                <button
-                    type="button"
-                    class="add-boundary"
-                    data-testid="add-tempo-boundary"
-                    aria-label="新增 Tempo 边界"
-                    @click.stop="insertBoundaryAtPreferredTime"
+            <div class="timeline-time-column" data-testid="tempo-segments">
+                <div
+                    ref="stage"
+                    class="timeline-stage"
+                    data-testid="editor-timeline"
+                    tabindex="0"
+                    role="application"
+                    aria-label="歌曲波形；点击跳转，滚轮缩放，右键拖动平移"
+                    @contextmenu.prevent
+                    @dragstart.prevent
+                    @wheel="onWheel"
+                    @pointerdown="onStagePointerDown"
+                    @pointermove="onStagePointerMove"
+                    @pointerup="onStagePointerUp"
+                    @pointercancel="clearPointer"
+                    @lostpointercapture="clearPointer"
+                    @keydown="onStageKeydown"
                 >
-                    <span aria-hidden="true">＋</span>
-                </button>
+                    <canvas ref="waveformCanvas" class="timeline-canvas" aria-hidden="true" />
+                    <canvas ref="gridCanvas" class="timeline-canvas grid-canvas" aria-hidden="true" />
+                    <canvas ref="cursorCanvas" class="timeline-canvas cursor-canvas" aria-hidden="true" />
+                    <button
+                        type="button"
+                        class="add-boundary"
+                        data-testid="add-tempo-boundary"
+                        aria-label="新增 Tempo 边界"
+                        @click.stop="insertBoundaryAtPreferredTime"
+                    >
+                        <span aria-hidden="true">＋</span>
+                    </button>
+
+                    <div
+                        v-if="quickMenu"
+                        class="timeline-menu"
+                        role="menu"
+                        :style="{ left: `${quickMenu.x}px`, top: `${quickMenu.y}px` }"
+                        data-testid="editor-timeline-menu"
+                    >
+                        <button type="button" role="menuitem" @click="menuSeek(false)">跳到此处</button>
+                        <button type="button" role="menuitem" @click="menuSeek(true)">从此处播放</button>
+                        <button type="button" role="menuitem" @click="menuCenter">将此处居中</button>
+                    </div>
+                </div>
+
+                <div class="tempo-guide-layer" aria-hidden="true">
+                    <span
+                        v-for="guide in visibleTempoGuides"
+                        :key="guide.id"
+                        class="tempo-boundary-guide"
+                        :style="{ left: `${timeToPercent(guide.timeSeconds)}%` }"
+                        :data-time-seconds="guide.timeSeconds"
+                    />
+                </div>
 
                 <div
-                    v-if="quickMenu"
-                    class="timeline-menu"
-                    role="menu"
-                    :style="{ left: `${quickMenu.x}px`, top: `${quickMenu.y}px` }"
-                    data-testid="editor-timeline-menu"
+                    ref="tempoStage"
+                    class="tempo-lane-stage"
+                    data-testid="editor-tempo-lane"
+                    tabindex="0"
+                    aria-label="节拍边界与 BPM 区间；内部边界可右键或按 Delete 删除"
+                    @contextmenu.prevent
                 >
-                    <button type="button" role="menuitem" @click="menuSeek(false)">跳到此处</button>
-                    <button type="button" role="menuitem" @click="menuSeek(true)">从此处播放</button>
-                    <button type="button" role="menuitem" @click="menuCenter">将此处居中</button>
+                    <article
+                        v-for="entry in visibleTempoSegments"
+                        :key="entry.segment.id"
+                        class="tempo-segment"
+                        :class="`tempo-segment--${segmentPresentation(entry.index)}`"
+                        :style="segmentStyle(entry.index)"
+                        :data-testid="`tempo-segment-${entry.index}`"
+                        :data-presentation="segmentPresentation(entry.index)"
+                        role="group"
+                        :aria-label="segmentAccessibleLabel(entry.segment, entry.index)"
+                        :title="segmentAccessibleLabel(entry.segment, entry.index)"
+                    >
+                        <div v-if="segmentPresentation(entry.index) === 'full'" class="tempo-segment-content tempo-segment-full">
+                            <template v-if="entry.segment.mode === 'metered'">
+                                <label class="tempo-compact-field">
+                                    <input
+                                        class="tempo-compact-control tempo-bpm-input"
+                                        inputmode="decimal"
+                                        :value="tempoBpmDrafts[entry.segment.id] ?? entry.segment.bpm ?? ''"
+                                        placeholder="100"
+                                        :aria-label="`区间 ${entry.index + 1} BPM`"
+                                        :aria-invalid="Boolean(tempoErrors[entry.segment.id])"
+                                        :aria-describedby="tempoErrors[entry.segment.id] ? `tempo-error-${entry.segment.id}` : undefined"
+                                        :data-testid="`tempo-bpm-${entry.index}`"
+                                        @focus="clearError(entry.segment.id)"
+                                        @input="captureBpmDraft(entry.segment.id, $event)"
+                                        @blur="commitBpm(entry.segment.id, $event)"
+                                        @keydown.enter.prevent="commitBpm(entry.segment.id, $event)"
+                                    >
+                                    <span aria-hidden="true">BPM</span>
+                                </label>
+                                <span class="tempo-compact-separator" aria-hidden="true">·</span>
+                                <span class="meter-inputs">
+                                    <input
+                                        class="tempo-compact-control tempo-meter-numerator"
+                                        inputmode="numeric"
+                                        :value="tempoNumeratorDrafts[entry.segment.id] ?? entry.segment.meter.numerator"
+                                        :aria-label="`区间 ${entry.index + 1} 拍号分子`"
+                                        :aria-invalid="Boolean(tempoErrors[entry.segment.id])"
+                                        @input="captureNumeratorDraft(entry.segment.id, $event)"
+                                        @blur="commitMeter(entry.segment.id, $event, entry.segment.meter.denominator)"
+                                        @keydown.enter.prevent="commitMeter(entry.segment.id, $event, entry.segment.meter.denominator)"
+                                    >
+                                    <span aria-hidden="true">/</span>
+                                    <select
+                                        class="tempo-compact-control tempo-meter-denominator"
+                                        :value="entry.segment.meter.denominator"
+                                        :aria-label="`区间 ${entry.index + 1} 拍号分母`"
+                                        @change="commitMeter(entry.segment.id, entry.segment.meter.numerator, $event)"
+                                    >
+                                        <option v-for="value in meterDenominators" :key="value" :value="value">{{ value }}</option>
+                                    </select>
+                                </span>
+                            </template>
+                            <template v-else>
+                                <span class="single-beat">单拍</span>
+                                <button
+                                    type="button"
+                                    class="tempo-compact-action"
+                                    @click="restoreMetered(entry.segment.id)"
+                                >切回 4/4</button>
+                            </template>
+                        </div>
+                        <div v-else-if="segmentPresentation(entry.index) === 'summary'" class="tempo-segment-content tempo-segment-summary">
+                            {{ segmentSummary(entry.segment) }}
+                        </div>
+                        <span
+                            v-if="tempoErrors[entry.segment.id]"
+                            :id="`tempo-error-${entry.segment.id}`"
+                            class="sr-only"
+                        >{{ tempoErrors[entry.segment.id] }}</span>
+                    </article>
+
+                    <span
+                        v-for="boundary in fixedBoundaries"
+                        :key="boundary.id"
+                        class="tempo-lane-boundary tempo-lane-boundary--fixed"
+                        :class="boundary.edge ? `tempo-lane-boundary--${boundary.edge}` : ''"
+                        :style="{ left: `${timeToPercent(boundary.timeSeconds)}%` }"
+                        :data-testid="boundary.id"
+                        :data-time-seconds="boundary.timeSeconds"
+                        aria-hidden="true"
+                    >
+                        <span class="boundary-caret">^</span>
+                        <span class="boundary-time">{{ formatTime(boundary.timeSeconds) }}</span>
+                    </span>
+                    <button
+                        v-for="segment in internalSegments"
+                        :key="segment.id"
+                        type="button"
+                        class="tempo-lane-boundary"
+                        :style="{ left: `${timeToPercent(segment.startSeconds)}%` }"
+                        :aria-label="`${formatTime(segment.startSeconds)} 的 Tempo 边界；可拖动，右键或 Delete 删除`"
+                        :data-testid="`tempo-boundary-${segment.id}`"
+                        :data-time-seconds="segment.startSeconds"
+                        @contextmenu.stop.prevent="removeBoundary(segment.id)"
+                        @pointerdown.stop="beginBoundaryDrag($event, segment.id)"
+                        @pointermove.stop="moveBoundaryDrag"
+                        @pointerup.stop="endBoundaryDrag"
+                        @pointercancel.stop="cancelBoundaryDrag"
+                        @keydown="onBoundaryKeydown($event, segment.id)"
+                    >
+                        <span class="boundary-caret" aria-hidden="true">^</span>
+                        <span class="boundary-time">{{ formatTime(segment.startSeconds) }}</span>
+                    </button>
+
+                    <div class="tempo-measure" aria-hidden="true">
+                        <span ref="fullMeasure" class="tempo-segment-content tempo-segment-full">
+                            <label class="tempo-compact-field">
+                                <input class="tempo-compact-control tempo-bpm-input" value="300.000">
+                                <span>BPM</span>
+                            </label>
+                            <span class="tempo-compact-separator">·</span>
+                            <span class="meter-inputs">
+                                <input class="tempo-compact-control tempo-meter-numerator" value="32">
+                                <span>/</span>
+                                <select class="tempo-compact-control tempo-meter-denominator"><option>32</option></select>
+                            </span>
+                        </span>
+                        <span ref="summaryMeasure" class="tempo-segment-content tempo-segment-summary">300 BPM · 32/32</span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -73,132 +216,6 @@
             <span data-testid="editor-tempo-estimate-state">{{ estimateStateLabel }}</span>
             <span>游标 {{ formatTime(playback.currentTimeSeconds) }}</span>
             <span v-if="tempoLiveMessage" data-testid="tempo-live-message">{{ tempoLiveMessage }}</span>
-        </div>
-
-        <div class="timeline-layout-row tempo-row" data-testid="tempo-segments">
-            <div class="timeline-track-rail tempo-track-rail">
-                <strong>节拍地图</strong>
-                <span>边界 / 时间</span>
-            </div>
-            <div class="timeline-class-rail tempo-class-rail">
-                <strong>BPM / 拍号</strong>
-                <span>缩放后编辑</span>
-            </div>
-            <div
-                ref="tempoStage"
-                class="tempo-lane-stage"
-                data-testid="editor-tempo-lane"
-                tabindex="0"
-                aria-label="节拍边界与 BPM 区间；内部边界可右键或按 Delete 删除"
-                @contextmenu.prevent
-            >
-                <article
-                    v-for="entry in visibleTempoSegments"
-                    :key="entry.segment.id"
-                    class="tempo-segment"
-                    :class="`tempo-segment--${segmentPresentation(entry.index)}`"
-                    :style="segmentStyle(entry.index)"
-                    :data-testid="`tempo-segment-${entry.index}`"
-                    :data-presentation="segmentPresentation(entry.index)"
-                >
-                    <div v-if="segmentPresentation(entry.index) === 'full'" class="tempo-segment-content tempo-segment-full">
-                        <template v-if="entry.segment.mode === 'metered'">
-                            <label>
-                                BPM
-                                <input
-                                    inputmode="decimal"
-                                    :value="tempoBpmDrafts[entry.segment.id] ?? entry.segment.bpm ?? ''"
-                                    placeholder="100"
-                                    :aria-invalid="Boolean(tempoErrors[entry.segment.id])"
-                                    :aria-describedby="tempoErrors[entry.segment.id] ? `tempo-error-${entry.segment.id}` : undefined"
-                                    :data-testid="`tempo-bpm-${entry.index}`"
-                                    @focus="clearError(entry.segment.id)"
-                                    @input="captureBpmDraft(entry.segment.id, $event)"
-                                    @blur="commitBpm(entry.segment.id, $event)"
-                                    @keydown.enter.prevent="commitBpm(entry.segment.id, $event)"
-                                >
-                            </label>
-                            <label>
-                                拍号
-                                <span class="meter-inputs">
-                                    <input
-                                        inputmode="numeric"
-                                        :value="tempoNumeratorDrafts[entry.segment.id] ?? entry.segment.meter.numerator"
-                                        :aria-label="`区间 ${entry.index + 1} 拍号分子`"
-                                        :aria-invalid="Boolean(tempoErrors[entry.segment.id])"
-                                        @input="captureNumeratorDraft(entry.segment.id, $event)"
-                                        @blur="commitMeter(entry.segment.id, $event, entry.segment.meter.denominator)"
-                                        @keydown.enter.prevent="commitMeter(entry.segment.id, $event, entry.segment.meter.denominator)"
-                                    >
-                                    /
-                                    <select
-                                        :value="entry.segment.meter.denominator"
-                                        :aria-label="`区间 ${entry.index + 1} 拍号分母`"
-                                        @change="commitMeter(entry.segment.id, entry.segment.meter.numerator, $event)"
-                                    >
-                                        <option v-for="value in meterDenominators" :key="value" :value="value">{{ value }}</option>
-                                    </select>
-                                </span>
-                            </label>
-                            <span class="tempo-source">{{ sourceLabel(entry.segment.bpmSource) }}</span>
-                        </template>
-                        <template v-else>
-                            <span class="single-beat">单拍区间：不显示拍号和内部节拍线。</span>
-                            <button type="button" @click="restoreMetered(entry.segment.id)">切回 4/4 · 100 BPM</button>
-                        </template>
-                    </div>
-                    <div v-else-if="segmentPresentation(entry.index) === 'summary'" class="tempo-segment-content tempo-segment-summary">
-                        {{ segmentSummary(entry.segment) }}
-                    </div>
-                    <span
-                        v-if="tempoErrors[entry.segment.id]"
-                        :id="`tempo-error-${entry.segment.id}`"
-                        class="sr-only"
-                    >{{ tempoErrors[entry.segment.id] }}</span>
-                </article>
-
-                <span
-                    v-for="boundary in fixedBoundaries"
-                    :key="boundary.id"
-                    class="tempo-lane-boundary tempo-lane-boundary--fixed"
-                    :class="boundary.edge ? `tempo-lane-boundary--${boundary.edge}` : ''"
-                    :style="{ left: `${timeToPercent(boundary.timeSeconds)}%` }"
-                    :data-testid="boundary.id"
-                    :data-time-seconds="boundary.timeSeconds"
-                    aria-hidden="true"
-                >
-                    <span class="boundary-caret">^</span>
-                    <span class="boundary-time">{{ formatTime(boundary.timeSeconds) }}</span>
-                </span>
-                <button
-                    v-for="segment in internalSegments"
-                    :key="segment.id"
-                    type="button"
-                    class="tempo-lane-boundary"
-                    :style="{ left: `${timeToPercent(segment.startSeconds)}%` }"
-                    :aria-label="`${formatTime(segment.startSeconds)} 的 Tempo 边界；可拖动，右键或 Delete 删除`"
-                    :data-testid="`tempo-boundary-${segment.id}`"
-                    :data-time-seconds="segment.startSeconds"
-                    @contextmenu.stop.prevent="removeBoundary(segment.id)"
-                    @pointerdown.stop="beginBoundaryDrag($event, segment.id)"
-                    @pointermove.stop="moveBoundaryDrag"
-                    @pointerup.stop="endBoundaryDrag"
-                    @pointercancel.stop="cancelBoundaryDrag"
-                    @keydown="onBoundaryKeydown($event, segment.id)"
-                >
-                    <span class="boundary-caret" aria-hidden="true">^</span>
-                    <span class="boundary-time">{{ formatTime(segment.startSeconds) }}</span>
-                </button>
-
-                <div class="tempo-measure" aria-hidden="true">
-                    <span ref="fullMeasure" class="tempo-segment-content tempo-segment-full">
-                        <label>BPM <input value="300.000"></label>
-                        <label>拍号 <span class="meter-inputs"><input value="32"> / <select><option>32</option></select></span></label>
-                        <span class="tempo-source">等待输入或自动估计</span>
-                    </span>
-                    <span ref="summaryMeasure" class="tempo-segment-content tempo-segment-summary">300 BPM · 32/32</span>
-                </div>
-            </div>
         </div>
     </section>
 </template>
@@ -302,6 +319,16 @@ const fixedBoundaries = computed(() => [
     },
 ].filter((boundary) => boundary.timeSeconds >= viewport.value.startSeconds
     && boundary.timeSeconds <= viewport.value.endSeconds));
+const visibleTempoGuides = computed(() => [
+    ...fixedBoundaries.value.map((boundary) => ({
+        id: `guide-${boundary.id}`,
+        timeSeconds: boundary.timeSeconds,
+    })),
+    ...internalSegments.value.map((segment) => ({
+        id: `guide-${segment.id}`,
+        timeSeconds: segment.startSeconds,
+    })),
+]);
 
 const bufferStateLabel = computed(() => {
     if (props.bufferSeries?.payload.kind === 'waveform-envelope') return '波形已就绪';
@@ -588,6 +615,10 @@ const sourceLabel = (source: 'unset' | 'estimated' | 'user') => ({
     estimated: '自动估计',
     user: '用户输入',
 }[source]);
+const segmentAccessibleLabel = (segment: TempoSegmentV1, index: number) =>
+    segment.mode === 'single-beat'
+        ? `区间 ${index + 1}，单拍`
+        : `区间 ${index + 1}，${segment.bpm ?? '未设置'} BPM，拍号 ${segment.meter.numerator}/${segment.meter.denominator}，${sourceLabel(segment.bpmSource)}`;
 
 const preferredBoundaryTime = () => {
     const cursor = props.playback.currentTimeSeconds;
@@ -817,7 +848,7 @@ onBeforeUnmount(() => {
 .timeline-titleline,
 .timeline-controls,
 .timeline-status,
-.tempo-segment header,
+.tempo-compact-field,
 .meter-inputs {
     display: flex;
     align-items: center;
@@ -854,7 +885,6 @@ button:disabled { opacity: .4; }
     min-width: 760px;
     margin-top: 0;
 }
-.tempo-row { border-top: 1px solid var(--editor-divider, rgba(101,255,169,.14)); }
 .timeline-track-rail,
 .timeline-class-rail {
     display: grid;
@@ -870,9 +900,15 @@ button:disabled { opacity: .4; }
 .timeline-class-rail { border-right: 1px solid var(--editor-divider, rgba(101,255,169,.18)); }
 .timeline-track-rail strong,
 .timeline-class-rail strong { color: #effff6; }
+.timeline-time-column {
+    position: relative;
+    min-width: 0;
+    --editor-timeline-stage-height: 88px;
+}
 .timeline-stage {
     position: relative;
-    height: 88px;
+    z-index: 1;
+    height: var(--editor-timeline-stage-height);
     overflow: hidden;
     border: 0;
     border-radius: 0;
@@ -905,12 +941,43 @@ button:disabled { opacity: .4; }
     box-shadow: 0 14px 40px rgba(0,0,0,.5);
 }
 .timeline-menu button { border: 0; text-align: left; }
-.timeline-status { flex-wrap: wrap; gap: 14px; min-height: 28px; padding: 4px 8px; border-top: 1px solid var(--editor-divider, rgba(101,255,169,.14)); color: #a9c7b6; font-size: .76rem; }
-.tempo-track-rail,
-.tempo-class-rail { min-height: 66px; }
+.timeline-status {
+    box-sizing: border-box;
+    flex-wrap: nowrap;
+    gap: 14px;
+    width: 100%;
+    min-width: 760px;
+    height: 28px;
+    min-height: 28px;
+    overflow: hidden;
+    padding: 4px 8px;
+    border-top: 1px solid var(--editor-divider, rgba(101,255,169,.14));
+    color: #a9c7b6;
+    font-size: .76rem;
+    white-space: nowrap;
+}
+.tempo-guide-layer {
+    position: absolute;
+    z-index: 6;
+    top: calc(var(--editor-timeline-stage-height) - 12px);
+    right: 0;
+    left: 0;
+    height: 12px;
+    overflow: hidden;
+    pointer-events: none;
+}
+.tempo-boundary-guide {
+    position: absolute;
+    bottom: 0;
+    width: 1px;
+    height: 12px;
+    background: rgba(101,255,169,.48);
+    transform: translateX(-.5px);
+}
 .tempo-lane-stage {
     position: relative;
-    height: 66px;
+    z-index: 5;
+    height: 28px;
     min-width: 0;
     overflow: hidden;
     background: rgba(0, 8, 4, .92);
@@ -923,26 +990,71 @@ button:disabled { opacity: .4; }
     top: 0;
     bottom: 0;
     overflow: hidden;
-    border-right: 1px solid rgba(101,255,169,.12);
 }
 .tempo-segment-content {
     position: absolute;
-    top: 30px;
+    top: 10px;
     left: 26px;
     right: 26px;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
+    gap: 4px;
     min-width: max-content;
-    height: 30px;
+    height: 18px;
+    color: #cde8d8;
+    font-size: 11px;
+    line-height: 1;
     white-space: nowrap;
 }
-.tempo-segment-full label { display: flex; align-items: center; gap: 5px; margin: 0; white-space: nowrap; }
-.meter-inputs { gap: 6px; }
-.tempo-segment input { width: 68px; }
-.meter-inputs input { width: 48px; }
-.tempo-source,
+.tempo-compact-field { gap: 3px; margin: 0; white-space: nowrap; }
+.meter-inputs { gap: 2px; }
+.tempo-compact-control {
+    box-sizing: border-box;
+    min-height: 18px;
+    height: 18px;
+    border: 0;
+    border-bottom: 1px solid transparent;
+    border-radius: 0;
+    padding: 0 2px;
+    color: #effff6;
+    background: transparent;
+    font: inherit;
+    line-height: 17px;
+    text-align: center;
+}
+.tempo-compact-control:hover,
+.tempo-compact-control:focus-visible,
+.tempo-compact-control[aria-invalid='true'] {
+    border-bottom-color: #65ffa9;
+}
+.tempo-compact-control:focus-visible {
+    outline: 0;
+}
+.tempo-bpm-input { width: 52px; }
+.tempo-meter-numerator { width: 28px; }
+.tempo-meter-denominator {
+    width: 36px;
+    padding-right: 10px;
+}
+.tempo-compact-separator { color: #7ea992; }
+.tempo-compact-action {
+    min-height: 18px;
+    height: 18px;
+    border: 0;
+    border-bottom: 1px solid transparent;
+    border-radius: 0;
+    padding: 0 2px;
+    background: transparent;
+    color: #a9c7b6;
+    font: inherit;
+    line-height: 17px;
+}
+.tempo-compact-action:hover,
+.tempo-compact-action:focus-visible {
+    border-bottom-color: #65ffa9;
+    outline: 0;
+}
 .single-beat,
 .tempo-segment-summary { color: #a9c7b6; white-space: nowrap; }
 .tempo-lane-boundary {
@@ -961,35 +1073,25 @@ button:disabled { opacity: .4; }
     transform: translateX(-50%);
     cursor: ew-resize;
 }
-.tempo-lane-boundary::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    left: 50%;
-    width: 1px;
-    background: rgba(101,255,169,.42);
-    transform: translateX(-.5px);
-}
 .tempo-lane-boundary:hover,
-.tempo-lane-boundary:focus-visible { background: rgba(101,255,169,.08); }
+.tempo-lane-boundary:focus-visible { color: #b9ffd8; background: transparent; }
 .tempo-lane-boundary--fixed { pointer-events: none; }
 .boundary-caret {
     position: absolute;
-    top: -2px;
+    top: 0;
     left: 50%;
-    font-size: 18px;
+    font-size: 12px;
     font-weight: 800;
-    line-height: 1;
+    line-height: 10px;
     transform: translateX(-50%);
 }
 .boundary-time {
     position: absolute;
-    top: 14px;
+    top: 11px;
     left: 50%;
     color: #dfffee;
-    font-size: .62rem;
-    line-height: 1;
+    font-size: 10px;
+    line-height: 10px;
     white-space: nowrap;
     transform: translateX(-50%);
 }
@@ -1002,14 +1104,16 @@ button:disabled { opacity: .4; }
     visibility: hidden;
     pointer-events: none;
 }
-.tempo-measure .tempo-segment-content { position: static; width: max-content; padding-inline: 8px; }
-.tempo-measure input { width: 68px; }
-.tempo-measure .meter-inputs input { width: 48px; }
+.tempo-measure .tempo-segment-content {
+    position: static;
+    width: max-content;
+    padding-inline: 4px;
+}
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
 @media (max-width: 900px) {
     .timeline-heading { align-items: flex-start; flex-wrap: wrap; }
     .timeline-titleline { flex-wrap: wrap; }
-    .timeline-stage { height: 72px; }
+    .timeline-time-column { --editor-timeline-stage-height: 72px; }
     .editor-timeline-panel { overflow-x: auto; }
 }
 @media (prefers-reduced-motion: reduce) {
