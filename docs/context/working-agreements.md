@@ -23,6 +23,7 @@ next_action: "Editor E1–E9 与 Visualizer V1–V6 已批准关闭；分别推�
 - Editor E0 产品意图获批前不修改 Editor 源码、公共类型、持久化 schema 或依赖；未来 BPM 或文件格式依赖必须先说明用途、体积、许可与替代方案并获 owner 批准。
 - Visualizer V0 架构与 V1–V6 delivery planning 已获批准；V1–V6 clean canonical 与适用人工门禁均已获 owner 批准并为 `Complete`。R-034–R-041 均为 `Mitigated`；整体 readiness 与生产上线仍独立处理。
 - Editor E1–E9 evidence 均已获批准；E9 implementation commit `13614673bbf4d824f2ee109d36e04de6b3f8aabd` 的 revised 29/29 clean canonical 与 owner 门禁已完成。旧 E9 run 继续为 `pre-revision`；后续时间轴、tempo 删除、恢复、marker 或相关测试契约变化时须重开对应风险并复跑。
+- Editor readiness 的 provisional 24/24 只作相同 `src` tree 的反馈；clean attempt 因沙箱禁止监听测试端口而只有 14 个非浏览器步骤通过。DEC-055 要求 agent 不再申请沙箱外重跑，browser evidence gap 与 W-ED-001–W-ED-006 改由 owner 自行审阅；不得把该 gap 改写为 clean pass。
 
 ## Local Verification
 

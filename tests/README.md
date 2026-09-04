@@ -244,6 +244,8 @@ E9 quality contract 已由 2026-09-04 的完整实施指令批准。DEC-051 固�
 
 Editor readiness runner 固定运行时候选为 E9 implementation `13614673bbf4d824f2ee109d36e04de6b3f8aabd`，共 24 步：E4/E5 各四步、E6 四步、E7/E8/E9 双浏览器六步，以及 docs/Harness/typecheck/build/diff/source identity 六步。clean 命令拒绝 dirty worktree，且最后一步同时检查已提交与工作树中的 `src/` 漂移；artifact 使用 `EDITOR-RR-<timestamp>-<commit>`，provisional 不进入正式 evidence。
 
+readiness provisional `EDITOR-RR-2026-09-04T07-28-02-425Z-41afe431-provisional` 在相同 runtime source tree 上 24/24 通过，summary SHA-256 为 `8963fb95b8dd5b168ce0f9da03ea04d8a0e922e9c4ebf2e6ca2637fe1a99bed4`，但因 dirty worktree 只作反馈。clean attempt `EDITOR-RR-2026-09-04T07-40-29-751Z-788be6bb` 的 14 个非浏览器步骤通过，10 个浏览器步骤均因沙箱 `listen EPERM 127.0.0.1:4173` 未启动，summary SHA-256 为 `d0221d5b35ddf499fa5895eb567db202321fb3bfdd4a85818c0bdc6651d4096d`。owner 已指示跳过沙箱外重跑并自行审阅相关 gap；不得把该 clean artifact 记为 pass。
+
 Visualizer V1 quality 契约、实现和双浏览器 runner 已完成。clean canonical `V1-2026-09-02T07-03-26-973Z-fd44c892` 在 commit `fd44c8921a534c22b2362ccffff7ec9e46f3ff02` 上 21/21 通过，summary SHA-256 为 `14c9ed2258baf6c9a2a3a20dfcaba65a0c643029f8510a1d9e4c6662c9c90300`；unit 12/12、integration 7/7、Chrome 4/4、Edge 4/4，并于 2026-09-02 获 owner 批准。V2 数据绑定已开放，真实场景/录制仍不得提前进入。
 
 Visualizer V2 已实现 constant/analysis/editor-event inspector、0–4 唯一特征 planner、FeatureRegistry projection、同歌 Editor snapshot 与 60Hz absolute-time resolver。clean canonical `V2-2026-09-02T08-46-21-778Z-769faafe` 在 commit `769faafeef576bf9b98a95f6904cdb9886298530` 上 26/26 通过，summary SHA-256 为 `18b7d83d68f068ac615c56e1bb844a3c80bb1460ac884116d94cb460dd07bafb`；golden 2/2、unit 6/6、integration 5/5、Chrome 3/3、Edge 3/3。Evidence 已于 2026-09-02 获 owner 批准；V2 关闭并开放 V3 真实场景。

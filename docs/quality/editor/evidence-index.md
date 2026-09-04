@@ -14,7 +14,7 @@ upstream_docs:
   - "docs/quality/editor/e8-eval-plan.md"
   - "docs/quality/editor/e9-eval-plan.md"
   - "docs/delivery/editor/milestone-plan.md"
-next_action: "执行 Editor release-readiness 24 步审计；历史 E1–E9 canonical 不改写"
+next_action: "由 owner 自行审阅 readiness browser evidence gap 与 W-ED-001–W-ED-006；历史 E1–E9 canonical 不改写"
 ---
 
 # Editor Evidence Index
@@ -31,6 +31,7 @@ next_action: "执行 Editor release-readiness 24 步审计；历史 E1–E9 cano
 - E7：`Complete`。
 - E8：`Complete`；clean canonical 与 owner 人工门禁均已批准。
 - E9：`Complete`；revised 29/29 clean canonical 与人工门禁均已批准，首个独立模块 run 保持 `pre-revision`，R-042 为 `Mitigated`。
+- Editor readiness：`in-review / owner-review`；provisional 24/24 仅作反馈，clean attempt 14/24 且 10 个浏览器步骤由沙箱端口权限阻断，等待 owner 自行审阅。
 - E1 clean canonical 与 owner 人工门禁均已批准；Analyzer M3–M11 evidence 仍不能替代未来 Editor 里程碑证据。
 - E2 clean canonical 与 owner 门禁已于 2026-08-27 获批。
 - E3 clean canonical 与 owner 人工门禁已于 2026-08-27 获批；E4 clean canonical 与 owner 人工门禁随后获批。
@@ -979,3 +980,48 @@ Chrome/Edge E9 专项均捕获 `pageerror` 和异常 console 并要求为空。�
 - 自动化证明紧凑拓扑、共享坐标/滚动、删除事实、恢复、计算样式与资源基线；不能替代 owner 对信息密度和实际交互体感的判断。
 - `project-owner` 于 2026-09-04 批准已有修改，并通过完整关闭计划确认：BPM 条融入波形、caret/guide 方向、11px 无框输入、重复左标签移除、共享滚动、full/summary/hidden、前段延伸删除、分类按钮、candidate 和单 divider 人工门禁通过；不补写未提供的主观数值。
 - DEC-053 据此保持 canonical identity、artifact 与 hash 不变且无需重跑；E9 为 `Complete`、本 evidence 为 `approved`、R-042 为 `Mitigated`，并开放独立 Editor release-readiness 评审。第 12 节旧 run 继续为 `pre-revision`。
+
+## 14. Editor Release-readiness Audit Record
+
+### Candidate and Harness
+
+| Field | Value |
+| --- | --- |
+| Runtime candidate | `13614673bbf4d824f2ee109d36e04de6b3f8aabd` |
+| Runtime source tree | `c1a362221ea040d2679cef9ca4b3af27309b1879` |
+| E9 closure | DEC-053；evidence `299502d`；29/29 approved |
+| Readiness contract | DEC-054；status `in-review` |
+| Audit Harness | `788be6bb8018ce6bbe4274fd5138b6d55d4cb158` |
+| Browser review mode | DEC-055；owner 自行审阅，不再由 agent 申请沙箱外端口/浏览器 |
+
+### Provisional Feedback
+
+| Field | Value |
+| --- | --- |
+| Run ID | `EDITOR-RR-2026-09-04T07-28-02-425Z-41afe431-provisional` |
+| Result | 24/24 pass；dirty-worktree feedback，不是 clean canonical |
+| Start/end commit | `41afe4314f3cd4fbd4c5430b01b225732381a302` / same |
+| Dirty start/end | true / true |
+| Chrome / Edge | `152.0.7977.76` / `152.0.4191.62` |
+| Source identity | candidate/current tree 均为 `c1a362221ea040d2679cef9ca4b3af27309b1879`；pass |
+| Summary SHA-256 | `8963fb95b8dd5b168ce0f9da03ea04d8a0e922e9c4ebf2e6ca2637fe1a99bed4` |
+
+该 run 在相同 runtime source tree 上覆盖 E4–E9：E4/E5 最大反馈约 `2.3ms`/`34.1ms`；E6 双浏览器 900 秒、10,000 事件最大反馈约 `11.4ms`/`9.8ms`，归因长任务为 0、geometry 为 0；E8/E9 最大边界误差 `0.009375 CSS px`；E6 20 次和 E9 10 次生命周期资源回到既定基线；页面专项无异常 console/pageerror。由于 Harness/package/docs 尚未提交，该 run 不升级为正式 evidence。
+
+### Clean Environment-blocked Attempt
+
+| Field | Value |
+| --- | --- |
+| Run ID | `EDITOR-RR-2026-09-04T07-40-29-751Z-788be6bb` |
+| Result | fail；14/24 pass，10 个 browser steps 未启动 |
+| Start/end commit | `788be6bb8018ce6bbe4274fd5138b6d55d4cb158` / same |
+| Dirty start/end | false / false |
+| Source identity | candidate/current tree 均为 `c1a362221ea040d2679cef9ca4b3af27309b1879`；pass |
+| Environment failure | 所有 Chrome/Edge 步骤均为 `listen EPERM: operation not permitted 127.0.0.1:4173` |
+| Summary SHA-256 | `d0221d5b35ddf499fa5895eb567db202321fb3bfdd4a85818c0bdc6651d4096d` |
+
+通过的 14 步为 E4/E5 golden/unit/integration、E6 unit/integration，以及 docs、Harness、typecheck、build、diff check、runtime source identity。10 个浏览器步骤没有运行产品断言，因此不能记为 pass，也不据此重开 E4–E9；失败 artifact 原样保留。
+
+### Review Boundary
+
+`project-owner` 指示跳过沙箱外监听和 Chrome/Edge 重跑，把相关未验证项改为自行审阅。readiness 因此保持 `in-review`，不形成 clean 24/24 canonical 声明。Owner 后续需自行审阅 browser evidence gap、W-ED-001–W-ED-006 及整体 `Ready with waivers` 结论；PROD-015 和独立 Visualizer readiness 继续阻断整体 release planning。
