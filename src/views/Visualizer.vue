@@ -40,8 +40,12 @@
 
         <section
             v-else-if="isUsable && snapshot.project"
+            ref="workspaceElement"
             class="visualizer-workspace"
             data-testid="visualizer-ready"
+            @pointermove="handleWorkspacePointerMove"
+            @pointerleave="handleWorkspacePointerLeave"
+            @keydown.capture="handleWorkspaceKeydown"
         >
             <header class="workspace-toolbar">
                 <div>
@@ -243,7 +247,15 @@
                 </div>
             </section>
 
-            <footer class="transport" aria-label="Visualizer 播放控制">
+            <footer
+                class="transport"
+                :class="{ 'transport-hidden': isFullscreen && !fullscreenControlsVisible }"
+                aria-label="Visualizer 播放控制"
+                @pointerenter="handleTransportPointerEnter"
+                @pointerleave="handleTransportPointerLeave"
+                @focusin="handleTransportFocusIn"
+                @focusout="handleTransportFocusOut"
+            >
                 <button
                     type="button"
                     :disabled="recordingLocked"
@@ -267,6 +279,25 @@
                     @input="seek"
                 >
                 <span class="ended-policy" data-testid="visualizer-ended-policy">播完暂停</span>
+                <div class="fullscreen-actions">
+                    <span
+                        v-if="fullscreenStatusMessage"
+                        id="visualizer-fullscreen-status"
+                        class="fullscreen-status"
+                        role="status"
+                        aria-live="polite"
+                    >{{ fullscreenStatusMessage }}</span>
+                    <button
+                        type="button"
+                        :disabled="fullscreenButtonDisabled"
+                        :aria-pressed="isFullscreen"
+                        :aria-label="isFullscreen ? '退出全屏播放' : '进入全屏播放'"
+                        :aria-describedby="fullscreenStatusMessage ? 'visualizer-fullscreen-status' : undefined"
+                        :title="fullscreenButtonTitle"
+                        data-testid="visualizer-fullscreen-toggle"
+                        @click="toggleFullscreen"
+                    >{{ isFullscreen ? '退出全屏' : '全屏' }}</button>
+                </div>
             </footer>
         </section>
 
@@ -300,6 +331,7 @@ import {
     computed,
     nextTick,
     onBeforeUnmount,
+    onMounted,
     ref,
     shallowRef,
     watch,
@@ -333,11 +365,16 @@ const unsubscribe = controller.subscribe((value) => {
 });
 const templates = controller.listTemplates();
 const previewCanvas = ref<HTMLCanvasElement | null>(null);
+const workspaceElement = ref<HTMLElement | null>(null);
 const leaveDialog = ref<HTMLDialogElement | null>(null);
 const leaveMode = ref<'active' | 'ready'>('active');
 const openDrawer = ref<'templates' | 'settings' | null>(null);
 const conflictExported = ref(false);
 const actionError = ref('');
+const isFullscreen = ref(false);
+const fullscreenSupported = ref(false);
+const fullscreenControlsVisible = ref(true);
+const fullscreenControlError = ref('');
 const resolvedValues = shallowRef<VisualizerResolvedParameterMap>(new Map());
 const rendererStatus = shallowRef<VisualizerRendererStatus>({ state: 'idle' });
 const sceneFrame = shallowRef<VisualizerSceneFrameSnapshot>({
@@ -348,6 +385,10 @@ let resizeObserver: ResizeObserver | null = null;
 let rendererHost: VisualizerRendererHost | null = null;
 let detachRecordingTarget: (() => void) | null = null;
 let resolveLeaveDecision: ((value: boolean) => void) | null = null;
+let fullscreenHideTimer: number | null = null;
+let fullscreenPointerHeld = false;
+let fullscreenFocusHeld = false;
+let lastPointerY: number | null = null;
 
 const playback = computed(() => sessionStore.playback);
 const isUsable = computed(() => ['ready', 'not-persisted'].includes(snapshot.value.state));
@@ -356,6 +397,21 @@ const recordingLocked = computed(() => [
     'recording',
     'finalizing',
 ].includes(snapshot.value.recording.status));
+const fullscreenButtonDisabled = computed(() => (
+    !fullscreenSupported.value
+    || (!isFullscreen.value && recordingLocked.value)
+));
+const fullscreenStatusMessage = computed(() => {
+    if (fullscreenControlError.value) return fullscreenControlError.value;
+    if (!fullscreenSupported.value) return '当前浏览器不支持原生全屏。';
+    if (!isFullscreen.value && recordingLocked.value) return '录制期间不能进入全屏。';
+    return '';
+});
+const fullscreenButtonTitle = computed(() => {
+    if (!fullscreenSupported.value) return '当前浏览器不支持原生全屏';
+    if (!isFullscreen.value && recordingLocked.value) return '录制期间不能进入全屏';
+    return isFullscreen.value ? '退出全屏播放' : '进入全屏播放';
+});
 const recordingLabel = computed(() => {
     const recording = snapshot.value.recording;
     if (recording.status === 'error') return `录制错误：${recording.message}`;
@@ -417,8 +473,207 @@ const resizePreview = () => {
     rendererHost.resize(rect.width, rect.height, window.devicePixelRatio || 1);
 };
 
+const updateFullscreenSupport = () => {
+    const workspace = workspaceElement.value;
+    fullscreenSupported.value = Boolean(
+        document.fullscreenEnabled
+        && workspace
+        && typeof workspace.requestFullscreen === 'function',
+    );
+};
+
+const clearFullscreenHideTimer = () => {
+    if (fullscreenHideTimer === null) return;
+    window.clearTimeout(fullscreenHideTimer);
+    fullscreenHideTimer = null;
+};
+
+const shouldAutoHideFullscreenControls = () => (
+    isFullscreen.value
+    && playback.value.state === 'playing'
+    && !fullscreenPointerHeld
+    && !fullscreenFocusHeld
+);
+
+const scheduleFullscreenControlsHide = () => {
+    clearFullscreenHideTimer();
+    if (!shouldAutoHideFullscreenControls()) return;
+    fullscreenHideTimer = window.setTimeout(() => {
+        fullscreenHideTimer = null;
+        if (shouldAutoHideFullscreenControls()) {
+            fullscreenControlsVisible.value = false;
+        }
+    }, 2000);
+};
+
+const setFullscreenError = (message: string) => {
+    fullscreenControlError.value = message;
+    fullscreenControlsVisible.value = true;
+    clearFullscreenHideTimer();
+};
+
+const activeControlUsesKeyboardFocus = () => {
+    const active = document.activeElement;
+    if (!(active instanceof HTMLElement)) return false;
+    if (!active.closest('.transport')) return false;
+    try {
+        return active.matches(':focus-visible');
+    } catch {
+        return true;
+    }
+};
+
+const syncFullscreenState = () => {
+    const workspace = workspaceElement.value;
+    const ownsFullscreen = Boolean(workspace && document.fullscreenElement === workspace);
+    isFullscreen.value = ownsFullscreen;
+    fullscreenControlError.value = '';
+
+    if (ownsFullscreen) {
+        openDrawer.value = null;
+        fullscreenControlsVisible.value = true;
+        fullscreenFocusHeld = activeControlUsesKeyboardFocus();
+        const rect = workspace?.getBoundingClientRect();
+        fullscreenPointerHeld = Boolean(
+            rect
+            && lastPointerY !== null
+            && lastPointerY >= rect.bottom - 96,
+        );
+        scheduleFullscreenControlsHide();
+    } else {
+        fullscreenPointerHeld = false;
+        fullscreenFocusHeld = false;
+        lastPointerY = null;
+        fullscreenControlsVisible.value = true;
+        clearFullscreenHideTimer();
+    }
+
+    void nextTick().then(() => {
+        resizePreview();
+        rendererHost?.requestFrame();
+    });
+};
+
+const handleFullscreenError = () => {
+    syncFullscreenState();
+    setFullscreenError('浏览器拒绝了全屏操作，请重试或使用 Escape 退出。');
+};
+
+const exitOwnedFullscreen = async (): Promise<boolean> => {
+    const workspace = workspaceElement.value;
+    if (!workspace || document.fullscreenElement !== workspace) return true;
+    try {
+        await document.exitFullscreen();
+        return true;
+    } catch (error) {
+        setFullscreenError(error instanceof Error
+            ? `退出全屏失败：${error.message}`
+            : '退出全屏失败，请使用 Escape 重试。');
+        return false;
+    }
+};
+
+const toggleFullscreen = async () => {
+    fullscreenControlError.value = '';
+    const workspace = workspaceElement.value;
+    if (!workspace) {
+        setFullscreenError('可视化工作台尚未准备好。');
+        return;
+    }
+
+    if (document.fullscreenElement === workspace) {
+        await exitOwnedFullscreen();
+        return;
+    }
+    if (!fullscreenSupported.value) {
+        setFullscreenError('当前浏览器不支持原生全屏。');
+        return;
+    }
+    if (recordingLocked.value) {
+        setFullscreenError('录制期间不能进入全屏。');
+        return;
+    }
+    if (document.fullscreenElement) {
+        setFullscreenError('其他内容正在使用全屏，请先退出后重试。');
+        return;
+    }
+
+    try {
+        await workspace.requestFullscreen();
+    } catch (error) {
+        setFullscreenError(error instanceof Error
+            ? `进入全屏失败：${error.message}`
+            : '浏览器拒绝了全屏请求。');
+    }
+};
+
+const handleWorkspacePointerMove = (event: PointerEvent) => {
+    lastPointerY = event.clientY;
+    if (!isFullscreen.value) return;
+    const rect = workspaceElement.value?.getBoundingClientRect();
+    const inBottomHotZone = Boolean(rect && event.clientY >= rect.bottom - 96);
+    if (inBottomHotZone) {
+        fullscreenPointerHeld = true;
+        fullscreenControlsVisible.value = true;
+        clearFullscreenHideTimer();
+    } else if (fullscreenPointerHeld) {
+        fullscreenPointerHeld = false;
+        scheduleFullscreenControlsHide();
+    }
+};
+
+const handleWorkspacePointerLeave = () => {
+    lastPointerY = null;
+    if (!isFullscreen.value) return;
+    fullscreenPointerHeld = false;
+    scheduleFullscreenControlsHide();
+};
+
+const handleTransportPointerEnter = () => {
+    if (!isFullscreen.value) return;
+    fullscreenPointerHeld = true;
+    fullscreenControlsVisible.value = true;
+    clearFullscreenHideTimer();
+};
+
+const handleTransportPointerLeave = () => {
+    if (!isFullscreen.value) return;
+    const rect = workspaceElement.value?.getBoundingClientRect();
+    fullscreenPointerHeld = Boolean(
+        rect
+        && lastPointerY !== null
+        && lastPointerY >= rect.bottom - 96,
+    );
+    scheduleFullscreenControlsHide();
+};
+
+const handleWorkspaceKeydown = () => {
+    if (!isFullscreen.value) return;
+    fullscreenControlsVisible.value = true;
+    scheduleFullscreenControlsHide();
+};
+
+const handleTransportFocusIn = () => {
+    if (!isFullscreen.value) return;
+    void nextTick().then(() => {
+        fullscreenFocusHeld = activeControlUsesKeyboardFocus();
+        fullscreenControlsVisible.value = true;
+        if (fullscreenFocusHeld) clearFullscreenHideTimer();
+        else scheduleFullscreenControlsHide();
+    });
+};
+
+const handleTransportFocusOut = () => {
+    if (!isFullscreen.value) return;
+    void nextTick().then(() => {
+        fullscreenFocusHeld = activeControlUsesKeyboardFocus();
+        scheduleFullscreenControlsHide();
+    });
+};
+
 const attachPreviewObserver = async () => {
     await nextTick();
+    updateFullscreenSupport();
     resizeObserver?.disconnect();
     if (!previewCanvas.value) return;
     if (!rendererHost) {
@@ -522,6 +777,25 @@ watch(
         playback.value.state,
     ],
     () => rendererHost?.requestFrame(),
+);
+
+watch(
+    () => playback.value.state,
+    () => {
+        if (!isFullscreen.value) return;
+        if (playback.value.state === 'playing') scheduleFullscreenControlsHide();
+        else {
+            fullscreenControlsVisible.value = true;
+            clearFullscreenHideTimer();
+        }
+    },
+);
+
+watch(
+    () => recordingLocked.value,
+    (locked) => {
+        if (locked && isFullscreen.value) void exitOwnedFullscreen();
+    },
 );
 
 const toggleDrawer = (target: 'templates' | 'settings') => {
@@ -652,6 +926,7 @@ const requestLeaveDecision = (): Promise<boolean> => {
 };
 
 onBeforeRouteLeave(async () => {
+    if (!await exitOwnedFullscreen()) return false;
     if (controller.hasUnresolvedRecordingOutput()) {
         const shouldLeave = await requestLeaveDecision();
         if (!shouldLeave) return false;
@@ -660,7 +935,20 @@ onBeforeRouteLeave(async () => {
     return true;
 });
 
+onMounted(() => {
+    updateFullscreenSupport();
+    document.addEventListener('fullscreenchange', syncFullscreenState);
+    document.addEventListener('fullscreenerror', handleFullscreenError);
+    syncFullscreenState();
+});
+
 onBeforeUnmount(() => {
+    clearFullscreenHideTimer();
+    document.removeEventListener('fullscreenchange', syncFullscreenState);
+    document.removeEventListener('fullscreenerror', handleFullscreenError);
+    if (workspaceElement.value && document.fullscreenElement === workspaceElement.value) {
+        void document.exitFullscreen().catch(() => undefined);
+    }
     detachRenderer();
     unsubscribe();
 });
@@ -955,7 +1243,7 @@ input:focus-visible {
 .transport {
     grid-row: 6;
     display: grid;
-    grid-template-columns: auto auto minmax(120px, 1fr) auto;
+    grid-template-columns: auto auto minmax(120px, 1fr) auto auto;
     padding: 10px 14px;
     border-top: 1px solid rgba(159, 196, 175, .18);
 }
@@ -1013,6 +1301,96 @@ input:disabled {
 
 .ended-policy {
     color: #65ffa9;
+}
+
+.fullscreen-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
+.fullscreen-status {
+    max-width: 260px;
+    color: #ffd2a6;
+    font-size: .75rem;
+    line-height: 1.2;
+    text-align: right;
+}
+
+.visualizer-workspace:fullscreen {
+    position: relative;
+    display: block;
+    width: 100vw;
+    height: 100dvh;
+    border: 0;
+    background: #000;
+}
+
+.visualizer-workspace:fullscreen::backdrop {
+    background: #000;
+}
+
+.visualizer-workspace:fullscreen > .workspace-toolbar,
+.visualizer-workspace:fullscreen > .workspace-alert,
+.visualizer-workspace:fullscreen > .compact-drawer-controls,
+.visualizer-workspace:fullscreen > .recording-bar {
+    display: none;
+}
+
+.visualizer-workspace:fullscreen > .workspace-grid {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    width: 100%;
+    height: 100%;
+    grid-template-columns: minmax(0, 1fr);
+    background: #000;
+}
+
+.visualizer-workspace:fullscreen .workspace-panel {
+    display: none;
+}
+
+.visualizer-workspace:fullscreen .source-prompt {
+    display: none;
+}
+
+.visualizer-workspace:fullscreen .preview-column {
+    padding: 0;
+    background: #000;
+}
+
+.visualizer-workspace:fullscreen .preview-frame {
+    width: min(100vw, calc(100dvh * 16 / 9));
+    height: min(100dvh, calc(100vw * 9 / 16));
+    max-width: 100vw;
+    max-height: 100dvh;
+    border: 0;
+}
+
+.visualizer-workspace:fullscreen > .transport {
+    position: absolute;
+    z-index: 10;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    padding: 18px 24px 20px;
+    border-top-color: rgba(101, 255, 169, .28);
+    background: linear-gradient(180deg, rgba(0, 0, 0, .12), rgba(2, 8, 5, .94));
+    transition: opacity 160ms ease, transform 160ms ease;
+}
+
+.visualizer-workspace:fullscreen > .transport.transport-hidden {
+    opacity: 0;
+    transform: translateY(100%);
+    pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .visualizer-workspace:fullscreen > .transport {
+        transition: none;
+    }
 }
 
 @media (min-width: 1024px) and (max-width: 1279px) {
