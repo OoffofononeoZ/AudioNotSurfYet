@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/product/success-metrics.md"
   - "docs/architecture/system-design.md"
   - "docs/architecture/visualizer/project-format-v1.md"
-next_action: "V6 54 步 clean canonical 与人工门禁已批准；保持为 readiness 基线"
+next_action: "使用 ADR-0021 的 Scene Contract 双门禁扩展场景；新场景不得继承既有 readiness"
 ---
 
 # Visualizer Binding and Scene Contracts
@@ -123,7 +123,7 @@ interface VisualizerScene {
 
 父级每个绘制时点只调用一次 `resolveParameters(timeSeconds)`，把同一份只读 resolved map 同时交给 scene 与 inspector；scene 不能读取 store、Worker、Editor DB、音频节点或 exact cursor。scene create/render/resize 异常进入可重试错误层，transport、模板选择、工程导入导出和草稿继续可用；重试先 dispose 旧 scene，再在同一 host 中重建。
 
-首版 registry 只允许：
+V1–V6 的首版 registry 基线为：
 
 ### Orthogonal Lines @1
 
@@ -160,6 +160,15 @@ Cube 默认 binding 由 descriptor 声明：`centerSpectrum` 使用 `amplitudeSp
 
 V6 在不升级 JSON V1 的前提下增加 controller-local 模板 binding 缓存。当前歌曲会话中，离开模板前保存其完整 bindings，切回时精确恢复；目标模板尚无会话缓存时才使用 descriptor 默认 bindings。同歌工程导入只替换导入模板的缓存并保留另一模板状态；离页、重新进入或歌曲 content hash 变化时清空缓存。持久化工程仍只包含当前模板，刷新后的非当前模板状态不被承诺恢复。
 
+## Controlled Scene Extension
+
+- 每个新增场景必须先有 owner 批准的 `docs/architecture/visualizer/scenes/<template-id>.md`，固定视觉映射、完整参数表、默认绑定、Feature Registry projection/component/transform、seed/时间模型、资源预算、golden 状态与测试方案。
+- 新场景采用独立的纯状态解析器和 `VisualizerScene` 实现，再注册到现有 registry；默认模板保持 `orthogonal-lines`，导入或恢复的既有 bindings 不得被新默认值覆盖。
+- 默认分析集合通常不超过两个。使用三或四项时合同必须解释必要性；四项是不可绕过的硬上限。Editor lane/class 不按名称或顺序猜测，缺少用户选择时使用中性默认和明确提示。
+- 随机布局只从持久化 seed 派生，动画只依赖绝对歌曲时间；历史相关运动按固定 60Hz 与每秒 checkpoint 积分。相同工程、歌曲、binding revision、resolved values 和时间必须生成按 `1e-6` 量化的一致 renderer-neutral hash。
+- 单参数不可用时使用 descriptor 默认值并保留 inspector 错误。重复对象优先共享 geometry/material 并使用 instancing；dispose 必须幂等释放 geometry、material、texture 和 listener，并支持原 host 的 resize、录制尺寸切换及 context recovery。
+- 场景继续复用唯一 Canvas、WebGLRenderer、视觉 RAF、AudioContext 与 Worker。新 binding/value/projection 类型、JSON 版本、第二渲染链路、超过四项特征或外部资产许可会停止场景生成并触发独立架构评审。
+
 V3 canonical 阶段曾以明确的 V4 中性预览验证 scene disposal 与单 host/renderer/Canvas；该历史 artifact 不改写。V4 已用 DEC-041 的真实 Cube Swarm 替换中性预览，V3 前向回归验证真实 Cube 切换仍保留同一 host/renderer/Canvas；V4 34/34 clean canonical 与 owner 门禁已获批准。
 
 ## Renderer Host and Lifecycle
@@ -180,4 +189,4 @@ V3 canonical 阶段曾以明确的 V4 中性预览验证 scene disposal 与单 h
 
 ## Approval State
 
-`project-owner` 于 2026-09-02 批准 Visualizer V0 system design、接口契约、R-034–R-041 与 ADR-0014–0017。本契约据此为 `approved`。V3 implementation commit 与 30/30 clean canonical 已于 2026-09-03 获 owner 批准，V3 关闭并开放 V4；同日 owner 选择并批准 DEC-041“核心环群”细化及 V4 quality contract。V4 Cube Swarm 34/34 clean canonical 与 owner 门禁随后获批。V5 40/40 clean canonical 和人工门禁也于 2026-09-03 获批，V5 已关闭并开放 V6。V6 在不改变本接口或生产拓扑的前提下完成 54/54 clean canonical，并于 2026-09-04 获 owner 人工门禁批准；V6 为 `Complete`、R-041 为 `Mitigated`，整体 readiness 与上线批准仍独立处理。
+`project-owner` 于 2026-09-02 批准 Visualizer V0 system design、接口契约、R-034–R-041 与 ADR-0014–0017。本契约据此为 `approved`。V3 implementation commit 与 30/30 clean canonical 已于 2026-09-03 获 owner 批准，V3 关闭并开放 V4；同日 owner 选择并批准 DEC-041“核心环群”细化及 V4 quality contract。V4 Cube Swarm 34/34 clean canonical 与 owner 门禁随后获批。V5 40/40 clean canonical 和人工门禁也于 2026-09-03 获批，V5 已关闭并开放 V6。V6 在不改变本接口或生产拓扑的前提下完成 54/54 clean canonical，并于 2026-09-04 获 owner 人工门禁批准；V6 为 `Complete`、R-041 为 `Mitigated`。2026-09-04 批准的 DEC-056/ADR-0021 只开放上述受控扩展流程，整体 readiness 与上线批准仍独立处理。

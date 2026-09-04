@@ -11,7 +11,7 @@ upstream_docs:
   - "docs/architecture/visualizer/project-format-v1.md"
   - "docs/architecture/visualizer/binding-and-scene-contracts.md"
   - "docs/architecture/visualizer/recording-contract.md"
-next_action: "DEC-050 实现与双浏览器证据已完成；等待 owner 视觉确认 readiness"
+next_action: "按 DEC-056 交付场景生成 Skill；实际新场景仍须先完成 brief 与 Scene Contract 审批"
 ---
 
 # Visualizer V1–V6 Execution Plan
@@ -23,6 +23,8 @@ next_action: "DEC-050 实现与双浏览器证据已完成；等待 owner 视觉
 Visualizer V1–V4 的工作台、数据绑定与两个场景均已通过各自 clean canonical 和 owner 门禁。V5 realtime WebM 的 40/40 clean canonical 与人工门禁于 2026-09-03 获 owner 批准并关闭；V6 final hardening 也已在 2026-09-04 获批准并关闭。
 
 V6 已实现版本化 hardening golden、当前歌曲会话内的双模板 binding 精确恢复、renderer 歌曲/帧时间诊断、测试专用资源探针，以及共享 Chrome/Edge 三格式、900 秒压力、六文件媒体和 20 次生命周期专项。按 DEC-048 修订后的 clean canonical `V6-2026-09-03T16-33-03-497Z-ef12ce39` 在 implementation commit `ef12ce397d0b1a054ce797bfa1b9ff5eb5af61cd` 上 54/54 通过，summary SHA-256 为 `695bf0acf3831907b720551c7772ea07e0dd80a5db38e829cba868f12128a014`；owner 已批准人工门禁与 evidence，V6 无需重跑。
+
+post-V6 新内置场景不续编号为 V7，也不改写上述 canonical。它们按 DEC-056 使用输入完整性、Scene Contract 审批、实现与强制测试四步流程；场景完成后重新评审 Visualizer readiness。
 
 ## 2. Delivery Principles
 
@@ -171,6 +173,20 @@ Exit gate:
 
 - AC-VR01–AC-VR04 自动化与 clean implementation commit 证据通过，owner 再确认一屏布局和两侧独立滚动。该修订不是 V7，也不重跑或替换 V6 canonical。
 
+### Post-V6 — Controlled built-in scene extension
+
+Delivery sequence:
+
+1. 将自然语言规范化为 `SceneBriefV1`；缺少主要效果、驱动属性、绑定类型、响应语义或时间行为时返回 `INPUT_INCOMPLETE`，且不修改仓库。
+2. 结合当前 Feature Registry 形成确定 Scene Contract；在 owner 明确批准前保持 `AWAITING_APPROVAL`，不写场景代码。
+3. 批准后保存轻量场景合同，扩展 template union、strict whitelist、registry、纯状态解析器、renderer 和场景专项测试。
+4. 运行 unit、integration、Chrome/Edge、V1/V2、V5 recording 与 V6 resource/context 针对性回归。环境无法运行的浏览器项标为 `unverified`，不改记为通过。
+
+Exit gate:
+
+- AC-VS01–AC-VS06 全部具有可复现证据，工作树只包含已批准合同范围的代码与测试；历史 V1–V6 evidence 不变。
+- 每个场景到此只完成实现交付，不创建独立 milestone、eval plan 或 canonical。场景进入现有候选后必须重新评审 Visualizer readiness。
+
 ## 5. Commands and Evidence Cadence
 
 每个里程碑计划提供：
@@ -188,13 +204,13 @@ npm run eval:vN
 ## 6. Change Control and Exclusions
 
 - 麦克风、远端音频、多模板叠加、自由图层、外部代码/插件、独立 Analyzer 数据包、MP4、离线倍速渲染、后台录制保证、云同步和超过四个唯一分析特征继续排除。
-- 取消四特征上限、增加模板/工程格式、改变 JSON schema、引入第二 renderer/Worker/AudioContext 或改变 recording topology 必须回到 product/system design review。
+- 按 DEC-056 增加受控内置模板可沿用本计划；取消四特征上限、增加 binding/value/projection 类型、改变 JSON schema、引入第二 renderer/Worker/AudioContext/RAF、改变 recording topology 或引入外部资产许可必须回到 product/system design review。
 - 验收阈值、浏览器矩阵、preset 或 fixture identity 变化时，本 delivery planning 与下游 quality/evidence 待复核。
 - 当前没有正式 CI；所有 canonical 声明限定为已登记本地环境。
 
 ## 7. Approval Gate
 
-本计划与同目录 acceptance criteria、test strategy、milestone plan 已由 owner 批准。V0-D、V1–V6 均为 `Complete`。
+本计划与同目录 acceptance criteria、test strategy、milestone plan 已由 owner 批准。V0-D、V1–V6 均为 `Complete`；2026-09-04 的 DEC-056 另行批准 post-V6 受控场景扩展流程，但不批准任何具体新场景。
 
 批准记录（2026-09-02）：
 

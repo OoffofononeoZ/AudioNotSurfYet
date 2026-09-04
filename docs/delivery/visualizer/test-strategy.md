@@ -8,7 +8,7 @@ upstream_docs:
   - "docs/architecture/risk-register.md"
   - "docs/delivery/visualizer/execution-plan.md"
   - "docs/delivery/visualizer/acceptance-criteria.md"
-next_action: "DEC-050 targeted regression 已通过；等待 owner 视觉确认 readiness"
+next_action: "验证 visualizer-scene-generator Skill；后续每个获批场景执行受控扩展测试矩阵"
 ---
 
 # Visualizer V1–V6 Test Strategy
@@ -128,7 +128,16 @@ Post-V6 viewport 修订使用独立 `test:e2e:visualizer-layout:chrome`、`:edge
 
 DEC-050 clean implementation commit `9f3b55beaa0c8a3d799f3f1e16f1dd66c9aee77c` 已按上述策略通过 Chrome/Edge 专项各 2/2、V1 各 4/4、V6 integration 10/10 与 M7 Chrome 5/5；静态门禁全部通过。该证据只关闭自动化缺口，owner 视觉确认前 readiness 仍为 `in-review`。
 
-## 9. Current Gate State
+## 9. Controlled Scene Extension Matrix
+
+- Skill 本身使用无依赖 validator 覆盖完整输入、缺少主要效果、缺少绑定类型、缺少响应语义、非法枚举与不完整装饰绑定；dry run 分别证明 `INPUT_INCOMPLETE` 零写入、完整 brief 只到 `AWAITING_APPROVAL`，以及批准后列出的代码/registry/JSON/test 扩展点准确。
+- 每个场景 unit 必须覆盖数据映射、静音/低/高、vector 分配、seed 布局、direct/attack-release/integrated 时间行为、fallback 和同时间 hash。
+- 每个场景 integration 必须覆盖 registry/default bindings、特征上限、Project V1 round-trip、持久化绑定、参数错误隔离、context recovery、幂等释放和至少 20 次模板切换。
+- Chrome/Edge 覆盖 1024/1280/1920、DPR 1/2、绑定隔离、播放/暂停/seek/刷新确定性、单 Canvas/renderer/RAF、默认 720p30 录制兼容及零 console/pageerror；无法在当前环境执行的浏览器项必须记录为 `unverified`。
+- 针对性回归至少包含 Visualizer V1/V2、V5 recording 与 V6 resource/context。只有现有 fixture 无法表达效果时才新增确定性小型音频，不提交大型音频、WebM 或 trace。
+- 场景专项通过不产生独立 canonical 或 quality evidence，也不改写 V1–V6；它只提供现有 Visualizer readiness 重新评审的输入。
+
+## 10. Current Gate State
 
 - V1–V6 canonical 与 owner evidence 均已批准并关闭；V6 54/54 clean canonical 保持为 Visualizer readiness 回归基线。
 - 早期 dirty provisional `V6-2026-09-03T10-15-47-668Z-0f90a77c-provisional` 54/54 通过；后续重复媒体采样促成 DEC-048 与 renderer/encoder 加固。修订后的 dirty provisional `V6-2026-09-03T16-21-25-320Z-088f21d3-provisional` 亦为 54/54；最终 clean canonical `V6-2026-09-03T16-33-03-497Z-ef12ce39` 在独立 implementation commit `ef12ce397d0b1a054ce797bfa1b9ff5eb5af61cd` 上 54/54 通过，summary SHA-256 为 `695bf0acf3831907b720551c7772ea07e0dd80a5db38e829cba868f12128a014`。2026-09-04 owner 批准 evidence 与人工门禁，无需重跑。
@@ -136,3 +145,4 @@ DEC-050 clean implementation commit `9f3b55beaa0c8a3d799f3f1e16f1dd66c9aee77c` �
 - 当前没有正式 CI，所有结果限定为本地登记环境。
 - Post-V6 viewport clean evidence 已完成，AC-VR01–AC-VR04 的自动化部分通过；只剩 owner 一屏布局、双侧滚动和 scrollbar 视觉门禁。
 - `/comingsoon`、`threeDTable`、TestLands 或 V3 历史 artifact 中的 V4 中性预览不是当前 V4 implementation evidence；真实 Cube 由 V4 专项与前向回归评价。
+- DEC-056/ADR-0021 已批准受控内置场景扩展及 AC-VS01–AC-VS06；当前交付只创建生成 Skill，不生成第三个场景。

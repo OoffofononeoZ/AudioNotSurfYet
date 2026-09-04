@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/architecture/interface-contracts.md"
   - "docs/architecture/risk-register.md"
   - "docs/delivery/visualizer/execution-plan.md"
-next_action: "AC-VR01–AC-VR04 自动化已通过；等待 owner 视觉确认，V6 历史 AC 保持已批准"
+next_action: "用 AC-VS01–AC-VS06 验证场景生成 Skill 与后续受控内置场景；V1–V6 历史 AC 保持已批准"
 ---
 
 # Visualizer V1–V6 Acceptance Criteria
@@ -107,3 +107,14 @@ next_action: "AC-VR01–AC-VR04 自动化已通过；等待 owner 视觉确认�
 | AC-VR04 | 1024 compact drawer 位于 workspace grid 内且不覆盖录制/transport；16:9、单 Canvas/renderer/RAF、键盘焦点、reduced motion、context recovery 和 console/pageerror 不回归 | Chrome/Edge targeted regression；boundary/exception | R-038 |
 
 AC-VR01–AC-VR04 已在 clean implementation commit `9f3b55beaa0c8a3d799f3f1e16f1dd66c9aee77c` 的 Chrome/Edge 专项中通过；V1 双浏览器、V6 integration 与 Analyzer M7 相邻回归也通过。它们仍需 owner 视觉确认后才可形成 Visualizer readiness 结论。
+
+## 10. Controlled Scene Extension
+
+| ID | Criterion | Coverage and verification | Risk |
+| --- | --- | --- | --- |
+| AC-VS01 | 不完整自然语言请求稳定返回 `INPUT_INCOMPLETE` 与逐字段缺失项，且不会产生 tracked/untracked 仓库变化 | validator unit + clean status dry run；failure | R-043 |
+| AC-VS02 | 完整 brief 补齐 FeatureId/component/projection/transform、参数范围/default binding、seed/time、资源预算、golden 与测试计划后进入 `AWAITING_APPROVAL`；批准前不写代码 | contract review dry run；boundary | R-043 |
+| AC-VS03 | 获批场景只扩展现有 template union、strict V1 whitelist、SceneRegistry、纯状态解析器和 renderer；默认模板、JSON version 与公共 scene 接口不变 | source/codec/registry integration；success | R-036, R-043 |
+| AC-VS04 | 默认分析特征最少化且不超过两个，三至四项有合同理由，四项硬上限；Editor 来源不猜测，参数错误使用 descriptor default 并保留 inspector 错误 | descriptor/planner/resolver unit；failure/boundary | R-035, R-043 |
+| AC-VS05 | seed、绝对时间、固定 60Hz/checkpoint 与 `1e-6` 量化 hash 保证同时间确定性；共享资源、context、录制尺寸与幂等 dispose 不回归 | scene golden + 20-switch integration + resource/context probes；exception | R-037–R-041, R-043 |
+| AC-VS06 | 每个场景同时生成 unit、integration、Chrome/Edge 与 V1/V2/V5/V6 针对性回归；无法执行的浏览器项保持 `unverified`，新场景不自动获得 canonical/readiness | test matrix audit + owner readiness review；success/exception | R-043 |

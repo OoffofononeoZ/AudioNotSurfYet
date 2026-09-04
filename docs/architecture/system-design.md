@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/product/scope.md"
   - "docs/product/success-metrics.md"
   - "docs/product/open-questions.md"
-next_action: "在 Editor release-readiness 当前候选审计中回归 E1–E9 架构边界"
+next_action: "按 ADR-0021 执行新场景的输入与合同双门禁；任何新场景完成后重新评审 Visualizer readiness"
 ---
 
 # System Design
@@ -18,7 +18,7 @@ AudioNotSurfYet 采用一个实时 `AudioEngine`、一个 MainLayout-owned `Audi
 
 已批准的 Editor 扩展把 E0 产品意图接入同一运行时：Editor 使用 route-scoped playback/analysis lease、版本化本地 JSON、独立单草稿 IndexedDB、tempo 派生网格、点/范围事件和单特征半透明叠加层。它不创建第二个 AudioContext、播放时钟、Worker 或网络数据路径。
 
-已批准的 Visualizer V0 架构在该历史基线上增加第三个 route consumer：使用 `pause-at-end` 播放 lease、0–4 项去重分析 lease、版本化单草稿工程、两个确定性场景和单一 WebGL renderer，并从既有 AudioEngine 的 pre-Gain 音频分支实时录制 WebM。该批准只开放 delivery planning，不得被表述为当前 `/comingsoon` 已实现。
+已批准的 Visualizer V0 架构在该历史基线上增加第三个 route consumer：使用 `pause-at-end` 播放 lease、0–4 项去重分析 lease、版本化单草稿工程、首版两个确定性场景和单一 WebGL renderer，并从既有 AudioEngine 的 pre-Gain 音频分支实时录制 WebM。V1–V6 已关闭；ADR-0021 允许 post-V6 在不改变这些公共接口和资源拓扑的前提下增加经过合同审批的内置场景。
 
 ## 2. Goals and Non-Goals
 
@@ -34,6 +34,7 @@ AudioNotSurfYet 采用一个实时 `AudioEngine`、一个 MainLayout-owned `Audi
 - 让波形、tempo 网格、事件和分析叠加层共享一个时间几何，目标误差不超过 1 CSS px。
 - 让 Visualizer 以同一 AudioContext 时钟把最多四项分析特征和同歌 Editor 快照解析成可重复 seek 的单场景画面，并保存严格本地工程。
 - 让支持能力满足预设时，以同一画布和原歌曲音量实时录制 720p/1080p、30/60fps WebM，而不复制播放引擎。
+- 让新内置场景先通过完整输入和确定 Scene Contract，再在同一 binding、工程、renderer 与测试边界内扩展。
 
 ### Non-Goals
 
@@ -44,7 +45,7 @@ AudioNotSurfYet 采用一个实时 `AudioEngine`、一个 MainLayout-owned `Audi
 - 不实现按歌曲顺序、多选、两卡交换、实时位移动画、第三方拖动依赖或移动端产品支持。
 - 不在本阶段决定发布平台、监控和回滚。
 - 不在 E0 架构阶段实现 Editor、安装 BPM/文件格式依赖或创建 delivery/quality 证据。
-- 不允许 Visualizer 导入可执行模板、叠加多个场景、使用第五个唯一分析特征、创建第二个 AudioEngine/Worker，或静默降低录制分辨率与帧率。
+- 不允许 Visualizer 导入可执行模板、用户脚本、运行时插件或任意 Shader，叠加多个场景、使用第五个唯一分析特征、创建第二个 AudioEngine/Worker，或静默降低录制分辨率与帧率。
 
 ## 3. Constraints and Inputs
 
@@ -440,7 +441,7 @@ M6 只在 `import.meta.env.DEV` 安装无 UI bridge，提供活动特征、cance
 
 - 数据源固定为 constant、analysis 和 editor-event。Analysis 向量投影只允许 schema 声明的 full/bin/band/mean/max/peak；Editor whole-lane 采用布尔 OR/max 聚合，point 形成脉冲，range 在半开 `[start,end)` 内形成 gate。
 - 数值变换顺序固定为输入规范化、clamp、invert、确定性 attack/release、输出映射。平滑不能依赖上一 RAF；resolver 以歌曲 0 秒为起点建立可重放状态，使同一工程在 seek、刷新、从头播放和录制时对同一绝对时间输出一致。full-vector V1 不允许非零平滑。
-- `SceneRegistry` 只注册 `orthogonal-lines@1` 与 `cube-swarm@1`，并穷尽声明参数类型、默认值、范围、可绑定来源和 renderer factory。推荐 Editor lane 绑定保持未绑定并提示用户选择，不按名称或顺序猜测“主要音色”或“drum”。
+- V1–V6 历史 `SceneRegistry` 注册 `orthogonal-lines@1` 与 `cube-swarm@1`。post-V6 只允许追加由 owner 批准 Scene Contract 的内置场景；每个 descriptor 仍须穷尽声明参数类型、默认值、范围、可绑定来源和 renderer factory。Editor lane 绑定保持未绑定并提示用户选择，不按名称或顺序猜测来源。
 - `VisualizerRendererHost` 独占一个 16:9 Canvas、一个 Three.js `WebGLRenderer` 和一个可取消 RAF；DPR 上限为 2，暂停、seek、参数变化和 resize 按需单帧，播放/录制时只启用同一个 RAF。父级同帧只解析一次参数并把同一 resolved map 交给 scene 与 inspector；scene 只拥有 scene/camera/geometry/material 并必须对称 dispose。
 - V3 Orthogonal Lines 使用单全屏 quad/shader、固定 `#020403` 背景和中心正交线。intensity 同时控制中心向两端的长度与主线 alpha，brightness >1 继续增强 halo；decay 以秒为单位，使用固定 60Hz、一秒 checkpoint 和 `exp(-4*dt/decay)` 的确定性余辉，且不改写 V2 resolved value。详细视觉与错误边界见 DEC-039 和子契约。
 - 工程 seed 与绝对时间共同决定粒子初始位置、上升和轨道相位；不得累计 RAF delta。WebGL context lost 时保留工程/播放并重建 renderer；若发生在录制中则终止并丢弃未完成文件。详见 [Binding and Scene Contracts](visualizer/binding-and-scene-contracts.md)。
@@ -456,7 +457,15 @@ M6 只在 `import.meta.env.DEV` 安装无 UI bridge，提供活动特征、cance
 
 - 单个 analysis binding 未就绪时以中性 0 显示进度，失败只隔离到该绑定并可重试；录制 preflight 不允许以中性值伪装完整结果。
 - 旧 generation、旧 route token、旧 template 或旧 binding result 一律不得更新当前项目或场景。任何工程/草稿/Editor 快照导入失败都保留原内存和 durable draft。
-- 拒绝第二 AudioEngine/Worker、实时监听 Editor draft、可执行模板、多草稿工程库、依赖 RAF delta 的运动、静默录制预设降级。主要权衡见 [ADR-0014](adrs/0014-visualizer-runtime-leases.md) 至 [ADR-0017](adrs/0017-realtime-webm-recording.md)。
+- 拒绝第二 AudioEngine/Worker、实时监听 Editor draft、可执行模板、多草稿工程库、依赖 RAF delta 的运动、静默录制预设降级。主要权衡见 [ADR-0014](adrs/0014-visualizer-runtime-leases.md) 至 [ADR-0017](adrs/0017-realtime-webm-recording.md)，受控扩展见 [ADR-0021](adrs/0021-controlled-visualizer-scene-generation.md)。
+
+### Controlled post-V6 scene generation
+
+- 生成器先把自然语言规范化为 `SceneBriefV1`。缺少主要效果、被驱动属性、绑定数据类型、低/高响应或时间行为时返回 `INPUT_INCOMPLETE`，并保证工作树不变。
+- 完整 brief 必须结合当前 Feature Registry 形成确定 Scene Contract，包含 template ID、映射、参数/default bindings、seed/绝对时间模型、资源预算、golden 状态和测试计划；状态为 `AWAITING_APPROVAL` 时不得写代码。
+- owner 批准后，场景使用独立纯状态解析器与 renderer 并注册到现有 `SceneRegistry`。合同保存于 `docs/architecture/visualizer/scenes/<template-id>.md`，但不为每个场景建立里程碑或 canonical。
+- 默认分析特征应最少化且通常不超过两个，三至四项必须由合同解释，四项为硬上限。单参数错误按 descriptor 默认值降级并保留 inspector 错误。
+- 涉及新 binding/value/projection 类型、JSON schema、第二 renderer/AudioContext/Worker/RAF、超过四项特征或外部资产许可时停止生成并转入独立架构评审。
 
 ### Workspace viewport and scrolling
 
