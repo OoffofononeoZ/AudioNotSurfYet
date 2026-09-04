@@ -52,6 +52,7 @@
     "test:e6:integration": "vitest run tests/editor/e6-hardening.integration.test.ts",
     "test:docs": "node tests/docs/validate-docs.mjs",
     "test:harness": "node tests/harness/verify-failure-detection.mjs",
+    "test:skill:visualizer-scene-generator": "vitest run tests/skills/visualizer-scene-generator.test.ts",
     "test:e2e": "playwright test --project=chrome",
     "test:e2e:m3": "playwright test tests/e2e/app-smoke.spec.ts --project=chrome",
     "test:e2e:m4": "playwright test tests/e2e/m4-playback.spec.ts --project=chrome",

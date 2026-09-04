@@ -54,6 +54,7 @@ M3–M14 不建设 CI。下列命令当前均为本地门禁；正式证据要�
 | `npm run test:e6:integration` | 10,000 事件 JSON 与 IndexedDB round-trip、重叠工程原子拒绝和 durable draft 保留 |
 | `npm run test:docs` | 生命周期 frontmatter、内部链接和 21 项特征计数 |
 | `npm run test:harness` | 证明 deliberate failure 会非零退出 |
+| `npm run test:skill:visualizer-scene-generator` | 校验 SceneBriefV1 完整/缺失/非法/装饰 binding、零副作用输出与 Skill 输入门禁 |
 | `npm run test:e2e` | 稳定 Chrome 的全部当前 E2E |
 | `npm run test:e2e:m3` | M3 应用、Worker、IndexedDB 和三格式 smoke |
 | `npm run test:e2e:m4` | M4 播放/队列/错误/资源回归及 60 秒计时 |

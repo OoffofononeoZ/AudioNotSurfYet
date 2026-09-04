@@ -151,6 +151,7 @@ AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端。Editor E1–
 | `src/data/` | `analyzerData.ts` 的 21 项 Meyda 说明，由 M6 registry 穷尽映射 | M6 FeatureRegistry |
 | `tests/` | M3–M14 本地测试、fixture、golden、Chrome/Edge 浏览器 harness 和 eval runner | [tests README](../../tests/README.md) |
 | `skills/audio-visualizer-dev/` | 本项目开发、验证和文档路由 Skill | [SKILL.md](../../skills/audio-visualizer-dev/SKILL.md) |
+| `skills/visualizer-scene-generator/` | 新内置 Visualizer 场景的输入门禁、合同审批、代码与测试生成 Skill | [SKILL.md](../../skills/visualizer-scene-generator/SKILL.md) |
 
 ## Lifecycle Entry Points
 

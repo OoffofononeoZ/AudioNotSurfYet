@@ -7,7 +7,7 @@
 ## Working Model
 
 - 可长期影响行为的产品意图、技术决策、验收规则、发布约束和复盘结论必须进入仓库内的规范文档，不能只留在聊天或代码推断中。
-- AudioNotSurfYet 的开发、诊断、评审和本地验证使用 `$audio-visualizer-dev`；源码位于 `skills/audio-visualizer-dev/`。
+- AudioNotSurfYet 的开发、诊断、评审和本地验证使用 `$audio-visualizer-dev`；源码位于 `skills/audio-visualizer-dev/`。新增 Visualizer 内置场景改用 `$visualizer-scene-generator`；其源码位于 `skills/visualizer-scene-generator/`，修改或诊断已注册场景仍使用项目开发 Skill。
 - 生命周期文档请求先使用 `$harness-doc-orchestrator` 判定阶段，再交给对应阶段 Skill。
 - 项目文档只记录仓库事实、本地决策、阶段产物和事件证据；通用工作流以 Harness Skills 和本文件为准。
 - 事实、推断、建议和待人工确认项必须明确区分。当前代码、配置和可复现行为优先于历史任务记录。
@@ -48,7 +48,7 @@
 
 ## How to Work in This Repo
 
-- 先读本文件、`docs/context/index.md`、任务对应的生命周期文档和 `$audio-visualizer-dev` reference。
+- 先读本文件、`docs/context/index.md`、任务对应的生命周期文档和 `$audio-visualizer-dev` reference；若任务是新增 Visualizer 场景，再按 `$visualizer-scene-generator` 执行无写入输入门禁和 Scene Contract 审批。
 - 修改前检查 `git status --short`，保留用户已有修改；未经要求不提交、不推送、不重写历史。
 - 高影响实现前或同时更新相应规范文档。行为塑造型设计规则写入 architecture 或 ADR，不留在聊天、代码推断或一次性实现说明中。
 - 文档树使用渐进披露：父级索引暴露子文档，阶段摘要保持紧凑，过大的细节契约拆入受管理的子目录。
@@ -78,3 +78,4 @@
 - 发布：`docs/release/`
 - 复盘：`docs/retrospectives/`
 - 项目 Skill：`skills/audio-visualizer-dev/SKILL.md`
+- Visualizer 场景生成 Skill：`skills/visualizer-scene-generator/SKILL.md`

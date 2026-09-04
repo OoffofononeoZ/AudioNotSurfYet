@@ -10,6 +10,7 @@ description: AudioNotSurfYet 项目专属的开发、诊断、代码评审、验
 1. 确认目标是 AudioNotSurfYet：
    - 仓库应包含 `package.json`、`src/audio/audioEngine.ts`、`src/audio/audioSessionService.ts` 和 `src/components/MusicBar.vue`。
    - 若目标不是该仓库，停止使用本 Skill，改用更匹配的通用或项目 Skill。
+   - 若请求是新增或生成尚未注册的 Visualizer 场景，改用 `$visualizer-scene-generator` 执行输入与合同门禁；修改、诊断或评审已有场景继续使用本 Skill。
 2. 先读根 `AGENTS.md`（若存在）和 `git status --short`，再检查任务直接涉及的源码与配置。
 3. 按任务只读取所需资料：
    - 仓库结构、依赖或边界：读 [仓库事实与边界](references/10-repo-facts-and-boundaries.md)。
