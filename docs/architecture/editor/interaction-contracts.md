@@ -6,7 +6,7 @@ upstream_docs:
   - "docs/product/scope.md"
   - "docs/architecture/system-design.md"
   - "docs/architecture/interface-contracts.md"
-next_action: "E9 交互已批准；在 Editor release-readiness 中复核候选代码无漂移"
+next_action: "实施 E10 区间操作并回归 E9 单项 pointer/keyboard 行为"
 ---
 
 # Editor Interaction Contracts
@@ -139,6 +139,11 @@ idle + drag start/end handle
 | document vertical scroll | overlay root、图形、入口和手柄 viewport 坐标不变 |
 | Canvas/Worker failure | overlay error 隔离，标记/播放/导出继续 |
 | keyboard-only | 可完成播放、seek、zoom/pan、tempo、point/range、菜单替代和 overlay 调整 |
+| E10 mode off | E3/E5/E9 的创建、删除、quick menu、右键 pan、range handle 全部保持 |
+| E10 right drag | 只选择起始 lane/inner class 的真实小节；无 BPM metered 区间不产生选择 |
+| E10 copy/move conflict | 越界、重复 point 或 range overlap 时 project 字节等价不变并播报原因 |
+| E10 pointer cancel | preview 与 capture 清空，不调用 project update |
+| route leave dialog | 取消路径不离页、不写抑制偏好；确认路径先处理偏好再执行既有 leave |
 
 ## Approval
 
@@ -151,5 +156,7 @@ idle + drag start/end handle
 同日，owner 在首个 E9 候选复核后批准 ADR-0020：删除独立 66px tempo row，把 28px BPM 标记条并入波形时间列；caret/辅助线只向上指向波形，重复左侧标签移除，直接编辑改为 11px 无框紧凑控件。ADR-0019 的删除、继承、共享滚动和秒数事实继续有效。
 
 DEC-052 实现 commit `13614673bbf4d824f2ee109d36e04de6b3f8aabd` 的 Chrome/Edge revised canonical 已验证零间隙、12px 向上 guide、单滚动、三级展示、删除与刷新恢复；`project-owner` 于 2026-09-04 批准适用人工门禁，evidence 为 `approved`。
+
+2026-09-04，owner 进一步批准 DEC-057/ADR-0022：区间模式默认关闭；右拖只选择起始 lane/class；Cmd/Ctrl+C 立即向后复制；左拖吸附当前网格；所有冲突整批拒绝。键盘路径使用 Enter/Space 选择当前小节、Shift+左右扩展、Alt/Option+左右移动、Escape 清理；editable control 不拦截快捷键。站内未导出离页改用深色原生 dialog，浏览器原生 `beforeunload` 保持。
 
 2026-09-03，owner 以 E8 实施指令批准同歌曲自动重试、异歌显式切换、`88px/72px` 时间轴与 point 中心对齐契约。implementation commit `84d9435cc6e8d1edb0932ff1b8dcd1b84dff32b5` 的 25/25 clean canonical 通过，owner 随后批准 evidence 与人工门禁，E8 关闭。

@@ -8,7 +8,7 @@
 - FFmpeg：8.1.2；只用于生成和检查受控 WAV/MP3/FLAC fixture。
 - 当前 Visualizer V1–V6 canonical 使用 Google Chrome 152.0.7977.66 与 Microsoft Edge 152.0.4191.53；V6 已在同一本机的真实 Chrome/Edge 执行三格式、长时压力和录制专项并获 owner 批准，浏览器缺失时仍明确报告失败/blocked。
 
-M3–M14 不建设 CI。下列命令当前均为本地门禁；正式证据要求在干净 commit 上复跑。M3–M14 与 Editor E1–E9 canonical 均已获批准。E7 的 44/44 与 E9 首个 29/29 run 因后续修订成为 `pre-revision`；E7 修订版 46/46、E8 25/25 与 E9 revised 29/29 canonical 均已获 owner 批准。
+M3–M14 不建设 CI。下列命令当前均为本地门禁；正式证据要求在干净 commit 上复跑。M3–M14 与 Editor E1–E9 canonical 均已获批准；E10 正在实施。E7 的 44/44 与 E9 首个 29/29 run 因后续修订成为 `pre-revision`；E7 修订版 46/46、E8 25/25 与 E9 revised 29/29 canonical 均已获 owner 批准。
 
 当前 `npm audit` 在安全补丁更新后剩余 1 项 low：Vite 依赖的 esbuild 0.27.3 在 Windows 开发服务器场景存在本地任意文件读取风险。仓库目标验证机为 macOS，开发服务器不得暴露到不受信网络；依赖升级提供修复版本后复核。该缺口不被描述为已修复或生产 readiness。
 
@@ -95,6 +95,10 @@ M3–M14 不建设 CI。下列命令当前均为本地门禁；正式证据要�
 | `npm run test:e9:integration` | E9 JSON V1/autosave、event seconds、stale estimate 与 keyed draft/error cleanup |
 | `npm run test:e2e:e9:chrome` / `test:e2e:e9:edge` | 真实 Chrome/Edge 的 28px 合并 BPM 条、向上 guide、11px 无框输入、共享滚动、右键/键盘和 marker/category/divider 几何 |
 | `npm run test:e2e:e9` | 顺序执行真实 Chrome 与 Edge 的 E9 专项 |
+| `npm run test:e10:unit` | E10 measure selection、半开收集、连续复制、ID 与原子冲突纯逻辑 |
+| `npm run test:e10:integration` | E10 整批 autosave、刷新、JSON V1 round-trip 与模式外行为隔离 |
+| `npm run test:e2e:e10:chrome` / `test:e2e:e10:edge` | 真实 Chrome/Edge 的紧凑拍号、区间操作 pointer/键盘与深色离页 dialog |
+| `npm run test:e2e:e10` | 顺序执行真实 Chrome 与 Edge 的 E10 专项；环境阻断时只记 unverified |
 | `npm run fixtures:v1:golden` | Visualizer V1 默认/完整/无效 strict project、descriptor、歌曲 identity 和四特征边界 golden |
 | `npm run test:v1:unit` | Visualizer V1 factory、canonical codec、strict descriptor/parameter/binding 和 route lease token |
 | `npm run test:v1:integration` | Visualizer route generation、Editor/Visualizer lease、单草稿、quota/abort、同/异歌恢复和导入原子性 |
@@ -167,6 +171,8 @@ M3–M14 不建设 CI。下列命令当前均为本地门禁；正式证据要�
 | `npm run eval:e8` | 只允许在干净 E8 implementation commit 上执行 25 步 canonical suite；dirty worktree 必须拒绝 |
 | `npm run eval:e9:provisional` | 在 dirty worktree 执行 E8 25 步基线加 E9 四专项的 29 步实现反馈 |
 | `npm run eval:e9` | 只允许在干净 E9 implementation commit 上执行 29 步 canonical suite；DEC-052 revised canonical 已 29/29 |
+| `npm run eval:e10:provisional` | 在 dirty worktree 执行 E9 29 步基线加 E10 四专项的 33 步实现反馈 |
+| `npm run eval:e10` | 只允许在干净 E10 implementation commit 上执行 33 步 canonical suite；浏览器未验证时不得登记通过 |
 | `npm run eval:editor-readiness:provisional` | 在 dirty worktree 对固定 E9 runtime candidate 执行 24 步针对性 readiness 审计；只生成本地反馈 |
 | `npm run eval:editor-readiness` | 只允许从 clean HEAD 执行 24 步 E4–E9/双浏览器/静态门禁，并要求相对 E9 implementation 的 `src/` 无漂移 |
 | `npm run eval:v1:provisional` | 在 dirty worktree 执行 21 步 V1 suite，只作为实现反馈 |
@@ -244,6 +250,8 @@ E8 clean canonical `E8-2026-09-03T04-07-28-904Z-84d9435c` 在 implementation com
 E9 quality contract 已由 2026-09-04 的完整实施指令批准。DEC-051 固定共享 viewport、full/summary/hidden 单行展示、内部 boundary 前段延伸删除、3px point candidate、分类按钮居中和单 divider；DEC-052 把独立 tempo row 修订为紧贴波形的 28px BPM 条、12px 向上 guide 与 11px/18px 无框输入。E8 canonical 与 artifact 保持历史不变。首个 run `E9-2026-09-04T02-49-18-960Z-cf0a79b1` 保持 `pre-revision`；implementation `13614673bbf4d824f2ee109d36e04de6b3f8aabd` 的 revised run `E9-2026-09-04T03-51-33-088Z-13614673` 已 29/29 通过，summary SHA-256 为 `a9d195fba7715213366068143a12977600e5e166b93064cd532012ff7f992b7c`。owner 已批准 evidence 与人工门禁，E9 为 `Complete`、R-042 为 `Mitigated`；Editor readiness 为独立后续门禁。
 
 Editor readiness runner 固定运行时候选为 E9 implementation `13614673bbf4d824f2ee109d36e04de6b3f8aabd`，共 24 步：E4/E5 各四步、E6 四步、E7/E8/E9 双浏览器六步，以及 docs/Harness/typecheck/build/diff/source identity 六步。clean 命令拒绝 dirty worktree，且最后一步同时检查已提交与工作树中的 `src/` 漂移；artifact 使用 `EDITOR-RR-<timestamp>-<commit>`，provisional 不进入正式 evidence。
+
+E10 quality contract 已由完整实施指令批准。DEC-057/ADR-0022 固定瞬时区间操作模式、起始 lane/class 内按真实小节右拖选择、Cmd/Ctrl+C 向后连续复制、左拖吸附移动、整批原子冲突拒绝与页面自有深色离页 `<dialog>`。E10 canonical 设计为 E9 的 29 步加 E10 unit/integration/Chrome/Edge，共 33 步；按 DEC-055 无法执行的浏览器项必须保留 `unverified / owner-review`。E10 修改产品 `src/`，因此原 E9 readiness candidate 仅保留为 `pre-E10`。
 
 readiness provisional `EDITOR-RR-2026-09-04T07-28-02-425Z-41afe431-provisional` 在相同 runtime source tree 上 24/24 通过，summary SHA-256 为 `8963fb95b8dd5b168ce0f9da03ea04d8a0e922e9c4ebf2e6ca2637fe1a99bed4`，但因 dirty worktree 只作反馈。clean attempt `EDITOR-RR-2026-09-04T07-40-29-751Z-788be6bb` 的 14 个非浏览器步骤通过，10 个浏览器步骤均因沙箱 `listen EPERM 127.0.0.1:4173` 未启动，summary SHA-256 为 `d0221d5b35ddf499fa5895eb567db202321fb3bfdd4a85818c0bdc6651d4096d`。owner 已指示跳过沙箱外重跑并自行审阅相关 gap；不得把该 clean artifact 记为 pass。
 
@@ -346,6 +354,6 @@ M13 最终 provisional `M13-2026-08-31T17-40-46-300Z-e62140ee-provisional` 在 d
 
 M13 clean canonical `M13-2026-08-31T17-44-39-680Z-63c04005` 在实现 commit `63c04005670145d83ee181d474197bce921c5300` 上 17/17 通过，summary SHA-256 为 `25732179105b31b7bb05dfdb6626db1264567208a505a7cbf71434a4562e2afc`。起止工作树干净；Chrome/Edge M13 各 2/2，M12 各 3/3；15 分钟最大反馈 `17.5ms`、归因长任务 0，刷新前后均为单 Worker，FIFO 年龄恢复后正确淘汰 Amplitude Spectrum。build 最大 JS chunk 仍为 `1,292.10 kB`。
 
-本 README 只记录真实执行结果。`project-owner` 已批准 M11–M14 与 Editor E1–E9 canonical evidence；E9 已关闭。Analyzer 已按 M14 保持 `Ready with waivers`。Meyda 5.6.3 `spectralFlux` 上游缺陷仍保留，产品侧仅由 ADR-0005 项目实现缓解；PROD-015 仍阻断正式上线。
+本 README 只记录真实执行结果。`project-owner` 已批准 M11–M14 与 Editor E1–E9 canonical evidence；E9 已关闭，E10 为 `In Progress`。Analyzer 已按 M14 保持 `Ready with waivers`。Meyda 5.6.3 `spectralFlux` 上游缺陷仍保留，产品侧仅由 ADR-0005 项目实现缓解；PROD-015 仍阻断正式上线。
 
 E1 最终 provisional `E1-2026-08-26T15-20-11-120Z-3ef4ec33-provisional` 已 18/18 通过。clean canonical `E1-2026-08-26T15-24-21-043Z-792b424f` 在 commit `792b424fbab8e3621ad24d8c9add47d1c9bffcb4` 上 18/18 通过，summary SHA-256 为 `db51ba98b757ccd524d298243c6118eb24fad60101a74f20a5ff98478a5d5bc6`；E1 unit 9/9、integration 7/7、Chrome 4/4。M4 60 秒漂移 0.8ms、seek 最大误差 66.827ms；M6 15 分钟最大反馈 18.1ms、分析归因长任务 0、20 次资源循环保持单 Worker/AudioContext。build 最大 JS chunk 为 1,204.24 kB，warning 保留。`project-owner` 于 2026-08-26 批准 E1 canonical、原生流程与人工任务，E1 为 `Complete`，E2 已开放。

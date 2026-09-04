@@ -5,7 +5,7 @@ last_reviewed: 2026-09-04
 upstream_docs:
   - "docs/architecture/system-design.md"
   - "docs/architecture/interface-contracts.md"
-next_action: "以 DEC-056 输入门禁、Scene Contract 和强制测试缓解 R-043；新增场景后重新评审 Visualizer readiness"
+next_action: "以 E10 原子命令、单 pointer owner 和 unit/integration/browser 矩阵缓解 R-044；R-025 重新观察"
 ---
 
 # Risk Register
@@ -38,7 +38,7 @@ next_action: "以 DEC-056 输入门禁、Scene Contract 和强制测试缓解 R-
 | R-022 | Editor 循环策略、不可用恢复或旧 route cleanup 泄漏到其他页面/歌曲 | Medium | High | 离开后仍 repeat-one、自动重试循环、异歌被静默切换、旧请求覆盖新 route、出现第二 AudioContext/时钟 | ADR-0006 tokenized playback lease + ADR-0018 纯恢复决策与 route generation/signature/in-flight 防护；E8 25/25 canonical 覆盖同歌恢复、异歌显式切换、错误文件和竞态，并获 owner 批准 | lease 失效时强制回到 queue-next；任何自动播放、静默异歌、双 engine/clock 或重试循环仍阻断；route/lease/runtime ownership 变化时重开 | project-owner | Mitigated |
 | R-023 | 草稿覆盖、损坏导入或错误歌曲身份破坏当前工程 | Medium | High | 异歌静默覆盖、未知 schema 被接受、hash/时长不匹配仍应用、quota 后旧草稿丢失 | ADR-0007 strict codec + content hash + 独立原子 draft；E1 18/18 canonical 与 owner 签字覆盖 round-trip、unknown/invalid/hash/quota/abort/跨歌三选项；E5 35/35 canonical 回归 point/range JSON、draft 和 invalid overlap 原子拒绝 | 失败始终保留内存工程与旧 durable draft；schema/import/draft 变化时重开 | project-owner | Mitigated |
 | R-024 | 波形、tempo、事件与 overlay 在 zoom/DPR/resize 下错位 | Medium | High | 同一时间各层 x 差超过 1 CSS px、seek/marker/候选框中心偏移、缩短波形后极值裁切 | ADR-0008/0009/0011 共享 geometry + ADR-0018 `88px/72px`、6px 安全区和 marker 中心不变量；E8 canonical 在四视口、zoom/pan 与 DPR 的最大中心误差为 `0.009375 CSS px`，并获 owner 视觉门禁批准 | 单层不得私有化 viewport；时间轴高度、viewport、Canvas DPR 或 marker 几何变化时重开双浏览器验证 | project-owner | Mitigated |
-| R-025 | 大量事件 DOM、右键状态或键盘路径造成性能/可访问性回归 | Medium | High | 输入反馈 >100ms、遗留 pressed/capture/menu、键盘无法完成核心任务、异歌切换入口无可访问歌曲名或缩短轨道造成控件裁切 | Canvas 背景 + 可见事件 DOM；ADR-0018 要求 CTA 可访问名称、marker/stem 分离并保留既有 keyboard/pointer/focus 行为；E8 双浏览器专项、E1–E7 回归与 owner 可读性门禁已通过 | E6/E7 历史性能与辅助技术证据保留；交互、可访问名称、轨道密度或事件渲染策略变化时重开 | project-owner | Mitigated |
+| R-025 | 大量事件 DOM、右键状态或键盘路径造成性能/可访问性回归 | Medium | High | 输入反馈 >100ms、遗留 pressed/capture/menu、键盘无法完成核心任务、异歌切换入口无可访问歌曲名或缩短轨道造成控件裁切 | E1–E9 历史性能/辅助技术证据保留；E10 增加单 owner 模式、editable shortcut guard、可见 focus 与对称 pointer cleanup | E10 改变 pointer/keyboard 优先级，故恢复 Open 观察；unit/integration/browser 与 owner review 通过后再缓解 | project-owner | Open |
 | R-026 | BPM 误识别或低置信度被写成用户事实 | Medium | Medium | silence/歧义输入自动填入错误 BPM、用户编辑值被异步结果覆盖 | 同 Worker retained PCM、typed reliable/low-confidence、仅唯一空且未编辑 segment 可写；E2 golden 覆盖 silence、歧义、60/100/128/小数与 stale，22/22 canonical 与 2026-08-27 owner 批准通过 | 低置信度保持空并提示手动输入；算法、阈值或第三方依赖变化时重开 | project-owner | Mitigated |
 | R-027 | Analyzer/Editor 争用 active features、Worker retained PCM 或 current cache | Medium | High | Editor 结果显示到 Analyzer、旧 generation 覆盖、返回 Analyzer 卡片丢失、出现第二 Worker | ADR-0006 consumer lease + existing generation/identity；E4 consumer/renderer 回归；E6 clean canonical 双浏览器各 20 次 Editor/Analyzer/Home 循环保持单 Worker/AudioContext并回归 M6–M11；2026-08-28 owner 批准 | 允许返回 Analyzer 后部分重算，不允许错误 identity 或 workspace 改写；runtime ownership 改变时重开 | project-owner | Mitigated |
 | R-028 | Analyzer 动态瀑布流产生重叠、视觉/DOM 顺序偏离或 Observer/RAF 泄漏 | Medium | High | 21 卡相交、容器高度不足、展开/收起后焦点或 DOM 顺序偏离、路由循环资源单调增长、`ResizeObserver loop` 警告 | M12 的纯最短列、实测高度、container/item Observer 与单 RAF 继续使用；M13 以 21 feature wrapper、按需 body、四视口和反复生命周期重新验证 | M13 canonical 17/17；Chrome/Edge M12 各 3/3，21 wrapper 四视口无重叠，masonry/card Observer 与 RAF 路由后归零 | project-owner | Mitigated |
@@ -57,6 +57,7 @@ next_action: "以 DEC-056 输入门禁、Scene Contract 和强制测试缓解 R-
 | R-041 | 1080p60 实时录制造成掉帧、内存峰值或 Blob 过大 | High | High | selected preset 达不到 fps、分析归因任务 >50ms、Visualizer frame >=60ms、内存/Blob 持续增长、finalize 失败 | 固定 bitrate、录制锁与单 Blob 生命周期；V5 只开放默认 720p30；V6 关闭 MSAA、使用 `motion` hint 并优化等价 Cube 计算，三格式仍要求平均 30fps `±5%`，DEC-048 只容忍最多四帧 packet gap 与 `<60ms` Visualizer 峰值 | V6 clean canonical `V6-2026-09-03T16-33-03-497Z-ef12ce39` 54/54 通过，六个默认文件、900 秒四特征、资源门禁及 owner 长时制作/原生保存回放均已批准；三个 optional preset 继续在资源获取前 typed unavailable | project-owner | Mitigated |
 | R-042 | BPM 视图与波形使用不同模块、滚动或几何，或 boundary 删除/紧凑展示破坏节拍事实与可用性 | Medium | High | 标记条不等于 28px或与波形有间隙；辅助线向下；tempo caret 与波形相差 >1 CSS px；出现双水平滚动；控件换行；删错 segment/首 boundary；事件秒数变化；右键/键盘不可达 | ADR-0019 单 viewport/scroll 与纯删除；ADR-0020 波形时间列内紧凑条、12px 向上辅助线、无框单行编辑；E9 revised 29/29 canonical 和 owner 人工门禁均已通过 | E9 后续产品代码、时间几何、删除语义或滚动所有权变化时重开；不以隐藏控件、修改事件秒数或放宽 JSON validator 规避 | project-owner | Mitigated |
 | R-043 | 生成的新 Visualizer 场景违反绑定、确定性、资源或 strict project 契约 | Medium | High | 模糊请求直接改代码；第五特征进入 Worker；RAF delta/非 seed 随机；未知模板被宽松接受；renderer/RAF/geometry 累积；录制或 context 恢复失败 | DEC-056/ADR-0021 的输入完整性与 Scene Contract 双门禁；参数/Feature 显式声明；固定时间/hash；强制 unit/integration/Chrome/Edge 与 V1/V2/V5/V6 回归 | 在首个真实新场景及后续 readiness 重评前保持 Open；越过 JSON/拓扑/四特征/资产许可边界时停止并独立评审 | project-owner | Open |
+| R-044 | E10 小节批量选择、复制或移动产生跨轨误选、部分提交、ID/秒数漂移、pointer 泄漏或离页决策挂起 | Medium | High | 选择越过起始 lane/class；部分事件被跳过/覆盖；复制复用 ID；移动改 ID；冲突后工程变化；cancel 后提交；route guard Promise 未解析 | ADR-0022 单 owner transient state；纯 command 预校验后一次提交；typed errors；pointercancel/lostcapture/Escape；原生 dialog 安全默认；E10 success/failure/boundary 矩阵 | 完整 E10 canonical 或 owner 补偿 evidence 与人工交互门禁通过后缓解；批量范围、冲突、快捷键或 route dialog 改变时重开 | project-owner | Open |
 
 ## Review Rule
 
@@ -72,3 +73,4 @@ next_action: "以 DEC-056 输入门禁、Scene Contract 和强制测试缓解 R-
 - E8 clean canonical `E8-2026-09-03T04-07-28-904Z-84d9435c` 在 implementation commit `84d9435cc6e8d1edb0932ff1b8dcd1b84dff32b5` 上 25/25 通过；owner 于 2026-09-03 批准 canonical、时间轴密度、恢复语义与 marker 可读性门禁，R-022/R-024/R-025 据此改为 `Mitigated`。
 - E9 revised clean canonical `E9-2026-09-04T03-51-33-088Z-13614673` 在 implementation commit `13614673bbf4d824f2ee109d36e04de6b3f8aabd` 上 29/29 通过；owner 于 2026-09-04 批准紧凑条视觉、共享滚动、删除和标记交互门禁，R-042 据此改为 `Mitigated`。旧 E9 run 继续为 `pre-revision`。
 - 2026-09-04 的 DEC-056/ADR-0021 新增 R-043。当前只交付场景生成 Skill 与门禁，不存在第三个场景实现证据；因此风险保持 `Open`，直到具体场景完成强制矩阵并重新评审 Visualizer readiness。
+- 2026-09-04 的 DEC-057/ADR-0022 打开 E10 并新增 R-044。E10 改变 point/range pointer 与 keyboard 优先级，因此 R-025 从历史 `Mitigated` 恢复为 `Open` 观察；E1–E9 evidence 本身不改写。

@@ -13,8 +13,9 @@ upstream_docs:
   - "docs/quality/editor/e7-eval-plan.md"
   - "docs/quality/editor/e8-eval-plan.md"
   - "docs/quality/editor/e9-eval-plan.md"
+  - "docs/quality/editor/e10-eval-plan.md"
   - "docs/delivery/editor/milestone-plan.md"
-next_action: "由 owner 自行审阅 readiness browser evidence gap 与 W-ED-001–W-ED-006；历史 E1–E9 canonical 不改写"
+next_action: "执行 E10 implementation 与 33 步验证；历史 E1–E9 canonical 及 pre-E10 readiness artifact 不改写"
 ---
 
 # Editor Evidence Index
@@ -31,7 +32,8 @@ next_action: "由 owner 自行审阅 readiness browser evidence gap 与 W-ED-001
 - E7：`Complete`。
 - E8：`Complete`；clean canonical 与 owner 人工门禁均已批准。
 - E9：`Complete`；revised 29/29 clean canonical 与人工门禁均已批准，首个独立模块 run 保持 `pre-revision`，R-042 为 `Mitigated`。
-- Editor readiness：`in-review / owner-review`；provisional 24/24 仅作反馈，clean attempt 14/24 且 10 个浏览器步骤由沙箱端口权限阻断，等待 owner 自行审阅。
+- E10：`In Progress`；DEC-057/ADR-0022 与 quality contract 已批准，R-044 为 `Open`，R-025 恢复观察。
+- Editor readiness：E9 candidate 已标记为 `pre-E10`；原 provisional 24/24 与 clean attempt 14/24 artifact 保留，E10 后需要新的 candidate。
 - E1 clean canonical 与 owner 人工门禁均已批准；Analyzer M3–M11 evidence 仍不能替代未来 Editor 里程碑证据。
 - E2 clean canonical 与 owner 门禁已于 2026-08-27 获批。
 - E3 clean canonical 与 owner 人工门禁已于 2026-08-27 获批；E4 clean canonical 与 owner 人工门禁随后获批。

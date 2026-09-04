@@ -5,7 +5,7 @@ last_reviewed: 2026-09-04
 upstream_docs:
   - "docs/product/problem-brief.md"
   - "docs/quality/release-readiness.md"
-next_action: "按 DEC-056 通过受控 Scene Contract 扩展内置场景；新增场景完成后重新评审 Visualizer readiness"
+next_action: "按 DEC-057 实施 Editor E10；E10 evidence 后重新建立 Editor readiness candidate"
 ---
 
 # Scope
@@ -122,6 +122,12 @@ M13 是上述完成切片后的候选变更：以 21 张稳定折叠卡替代四
 - 起点和终点下方分别显示可水平拖动的箭头。创建和调整都沿用点事件的自适应网格；终点必须晚于起点，最短持续时间为一个当前网格单位，两个手柄不能互相穿越。
 - 同一 lane、同一 inner class 的范围事件不得重叠；不同 lane 或 inner class 可以重叠，点事件也可以位于范围事件内部。首版不自动合并、裁剪或自由时间拖动。
 
+### E10 marker block editing
+
+- “区间操作”是默认关闭的瞬态模式，不进入 JSON。右键拖动按真实小节选择起始 lane/inner class 中的标记；普通编辑模式的创建、删除、快速菜单和 viewport pan 在模式关闭时保持不变。
+- Cmd/Ctrl+C 将当前选择按等长秒数立即复制到其后；左键从选择内拖动按当前可见网格移动整段。复制生成新 ID，移动保留 ID；任何越界、point duplicate 或 range overlap 都整批拒绝。
+- 站内未导出离页提示使用符合 Editor 黑绿风格的自定义 dialog；浏览器刷新/关闭继续使用原生 `beforeunload`。是否警告和“不再提示”的既有规则不变。
+
 ### Analysis overlay
 
 - 左侧选择器一次只能选择累计 21 项中的一个特征；选择后收起，再次点击可更换。
@@ -143,13 +149,15 @@ M13 是上述完成切片后的候选变更：以 21 张稳定折叠卡替代四
 5. **E4 — Analysis overlay**：单 Meyda 特征半透明叠加、垂直调整与时间坐标对齐。
 6. **E5 — Range annotation**：长音色/效果的创建、取消、端点调整、不重叠校验、删除和导入导出。
 7. **E6 — Final hardening**：Chrome/Edge、性能、资源、无障碍、错误恢复、多视口与 canonical evidence。
+8. **E7–E9 — approved refinements**：紧凑工作台、恢复/marker 对齐及共享 BPM 标记条，历史 canonical 保持冻结。
+9. **E10 — Marker block editing**：单 lane/class 小节选择、原子复制/移动、拍号 select 修复和站内离页 dialog。
 
 E5 于 2026-08-27 在 E4 获批后改为 `In Progress`。若未来要求新的事件类别语义、自动合并、裁剪、同类重叠或自由时间精度，必须先重新评审产品与接口契约。
 
 ## Editor Non-goals
 
 - 修改 PCM、剪切或拼接音频、混音、母带、生成伴奏、实时录音或导出重新编码的歌曲。
-- 多轨编曲、乐器演奏、插件宿主、自动生成完整标注或替代专业 DAW。
+- 多轨编曲、乐器演奏、插件宿主、自动生成完整标注或替代专业 DAW；E10 不增加 Undo、系统剪贴板或跨轨批量编辑。
 - 远端上传、账户、云同步、协作、分享链接或跨设备工程库。
 - 首版 JSON 之外的工程格式；后续格式通过注册机制增量评审。
 - 移动端、非 Chromium 浏览器、生产托管和 Visualizer。

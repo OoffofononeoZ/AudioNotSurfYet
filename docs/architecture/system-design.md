@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/product/scope.md"
   - "docs/product/success-metrics.md"
   - "docs/product/open-questions.md"
-next_action: "按 ADR-0021 执行新场景的输入与合同双门禁；任何新场景完成后重新评审 Visualizer readiness"
+next_action: "实施 ADR-0022 的 Editor E10 单 owner 批量交互与原子命令；完整证据前 readiness 保持 pre-E10"
 ---
 
 # System Design
@@ -396,6 +396,14 @@ M6 只在 `import.meta.env.DEV` 安装无 UI bridge，提供活动特征、cance
 - 本修订不增加持久化字段、运行时资源或公共 transport/analysis 接口。现有 JSON V1 项目直接使用新视图，导入导出 bytes 语义保持不变。
 - 失败边界为：标记条与波形有间隙、辅助线向下贯穿或向上长度不是 12px、标记条不等于 28px、波形与 BPM X 误差超过 1 CSS px、区间控件换行、删除错误 segment、删除首 boundary、删除导致事件秒数变化、窄屏出现双水平滚动或临时交互状态未清理。
 - DEC-052 实现 commit `13614673bbf4d824f2ee109d36e04de6b3f8aabd` 与 29/29 clean revised canonical 已验证上述边界；`project-owner` 于 2026-09-04 批准适用视觉与交互门禁，E9 已关闭并开放独立 Editor readiness 评审。
+
+### Editor E10 marker block editing
+
+- `EditorPointWorkspace` 是批量模式、选择、drag preview、快捷键和 live status 的唯一 owner；嵌套 range workspace 只接收受控状态并回传标准化 pointer intent。模式与选择不持久化，歌曲、route、tempo map、lane/class identity 变化或模式关闭时清理。
+- 纯 `markerBlockOperations` 以 `{ laneId, innerClassId, startSeconds, endSeconds }` 选择为输入。point 使用半开包含，range 要求完全包含；复制新 ID，移动保留 ID和相对秒数。所有候选先完整校验，成功后一次性返回新 project，失败抛 typed error且不产生局部 project。
+- 小节选择由 tempo map 派生；single-beat segment 是一个单元，空 BPM metered segment 不可选。移动目标通过既有自适应 subdivision 吸附，drag 期间不调用 controller update。
+- 站内 route guard 以原生 modal dialog 等待单一 Promise；Stay/Escape/close/backdrop 都解析为 false，确认后才可写入 leave-warning preference 并调用既有 `leave()`。`beforeunload` 不经过该 dialog。
+- 本设计不改变 JSON V1、IndexedDB、AudioEngine、Worker、Overlay 或 router public contract。DEC-054 的 E9 runtime candidate 因 `src/` 漂移只保留为 `pre-E10`，历史 audit artifact 不改写。
 
 ## 18. Editor Compact Workbench
 
