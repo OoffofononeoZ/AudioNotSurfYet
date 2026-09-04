@@ -98,10 +98,14 @@ test('uses the compact waveform height and centers point marker geometry', async
             const boundaryButton = stage?.querySelector<HTMLElement>(
                 '[data-testid="add-tempo-boundary"]',
             );
-            if (!stage || !waveform || !boundaryButton) {
+            const tempoStrip = document.querySelector<HTMLElement>(
+                '[data-testid="editor-tempo-lane"]',
+            );
+            if (!stage || !waveform || !boundaryButton || !tempoStrip) {
                 throw new Error('Editor timeline geometry is incomplete.');
             }
             const stageBounds = stage.getBoundingClientRect();
+            const tempoStripBounds = tempoStrip.getBoundingClientRect();
             const boundaryBounds = boundaryButton.getBoundingClientRect();
             let firstDrawnRow: number | null = null;
             let lastDrawnRow: number | null = null;
@@ -125,6 +129,8 @@ test('uses the compact waveform height and centers point marker geometry', async
             }
             return {
                 height: stageBounds.height,
+                tempoStripHeight: tempoStripBounds.height,
+                tempoStripGap: Math.abs(tempoStripBounds.top - stageBounds.bottom),
                 dpr: window.devicePixelRatio,
                 canvasWidth: waveform.width,
                 canvasHeight: waveform.height,
@@ -139,6 +145,8 @@ test('uses the compact waveform height and centers point marker geometry', async
         }, viewport.width === 1280);
         const expectedHeight = viewport.width < 900 ? 72 : 88;
         expect(metrics.height).toBe(expectedHeight);
+        expect(metrics.tempoStripHeight).toBe(28);
+        expect(metrics.tempoStripGap).toBeLessThanOrEqual(1);
         expect(metrics.canvasWidth).toBe(Math.round(metrics.cssWidth * metrics.dpr));
         expect(metrics.canvasHeight).toBe(Math.round(expectedHeight * metrics.dpr));
         if (

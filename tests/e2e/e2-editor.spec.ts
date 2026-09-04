@@ -143,8 +143,8 @@ test('estimates BPM, edits tempo segments and restores the project', async ({ pa
 
     await page.getByTestId('tempo-bpm-0').fill('19.999');
     await page.getByTestId('tempo-bpm-0').blur();
-    await expect(page.getByText('单拍区间：不显示拍号和内部节拍线。').first()).toBeVisible();
-    await page.getByRole('button', { name: '切回 4/4 · 100 BPM' }).first().click();
+    await expect(page.getByText('单拍', { exact: true }).first()).toBeVisible();
+    await page.getByRole('button', { name: '切回 4/4' }).first().click();
     await page.getByTestId('tempo-bpm-0').fill('301');
     await page.getByTestId('tempo-bpm-0').blur();
     await expect(page.getByTestId('tempo-live-message')).toHaveText('BPM 不得高于 300。');

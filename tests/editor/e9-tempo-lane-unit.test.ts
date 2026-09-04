@@ -11,6 +11,14 @@ import type { TempoSegmentV1 } from '../../src/editor/types';
 interface Golden {
     tempoMap: TempoSegmentV1[];
     durationSeconds: number;
+    compactGeometry: {
+        stripHeight: number;
+        guideHeight: number;
+        guideWidth: number;
+        labelFontSize: number;
+        controlHeight: number;
+        boundarySafetyInset: number;
+    };
     presentationCases: Array<{
         available: number;
         full: number;
@@ -48,12 +56,23 @@ describe('Editor E9 tempo lane domain', () => {
     });
 
     test.each(golden.presentationCases)(
-        'selects $expected at $available CSS px without a viewport breakpoint',
+        'selects compact $expected at $available CSS px without a viewport breakpoint',
         ({ available, full, summary, expected }) => {
             expect(resolveTempoSegmentPresentation(available, full, summary))
                 .toBe(expected);
         },
     );
+
+    test('locks the compact strip geometry independently from viewport breakpoints', () => {
+        expect(golden.compactGeometry).toEqual({
+            stripHeight: 28,
+            guideHeight: 12,
+            guideWidth: 1,
+            labelFontSize: 11,
+            controlHeight: 18,
+            boundarySafetyInset: 26,
+        });
+    });
 
     test('uses the same time mapping for waveform and tempo caret anchors', () => {
         const viewport = { startSeconds: 20, endSeconds: 80, zoom: 146.866 / 60 };
