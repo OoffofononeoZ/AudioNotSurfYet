@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/delivery/editor/acceptance-criteria.md"
   - "docs/delivery/editor/test-strategy.md"
   - "docs/quality/editor/e8-eval-plan.md"
-next_action: "完成 E9 专项与 dirty provisional，提交 implementation 后运行 29 步 clean canonical"
+next_action: "29/29 clean canonical 已登记为 in-review；等待 owner 视觉与交互门禁"
 ---
 
 # Editor E9 Eval Plan
@@ -33,6 +33,15 @@ E9 只评价专用 BPM 轨道、内部 tempo boundary 删除、三级单行区�
 - `eval:e9` 必须在起止同一 clean implementation commit 上运行，固定为 E8 25 步基线加 E9 unit、integration、Chrome、Edge，共 29 步。
 - 记录 commit、run ID、Node/npm、真实 Chrome/Edge 版本、四视口/DPR 几何、交互结果、步骤日志和 summary SHA-256。
 - canonical 登记后 E9 仍为 `In Progress`、evidence `in-review`、R-042 `Open`，直到 owner 完成视觉和交互任务。
+
+## Canonical Evidence
+
+- Run：`E9-2026-09-04T02-49-18-960Z-cf0a79b1`。
+- Implementation：`cf0a79b176d99eb183368818ce90ac5731d1cfa8`；起止 clean identity 一致。
+- Result：29/29 pass；summary SHA-256 `d4c15f6801e6df4289dad97b816036a095a21e5781a314f1f3166ab663f3ca4a`。
+- Browser：Chrome `152.0.7977.76`、Edge `152.0.4191.62`；四视口、DPR 1/2 最大 shared geometry 误差 `0.009375 CSS px`。
+- Resource：两浏览器各 10 次 Editor/Analyzer 往返，live ResizeObserver `3–3`、Canvas `4–4`。
+- Review state：`in-review`；owner manual gate 尚未完成，R-042 保持 `Open`。
 
 ## Manual Gate
 

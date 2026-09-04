@@ -10,7 +10,7 @@ upstream_docs:
   - "docs/architecture/risk-register.md"
   - "docs/architecture/editor/project-format-v1.md"
   - "docs/architecture/editor/interaction-contracts.md"
-next_action: "交付 E9 BPM 轨道、boundary 删除和标记视觉；运行 dirty provisional 后提交实现"
+next_action: "E9 29/29 clean canonical 已登记；等待 owner 视觉与交互确认后进入 Editor readiness"
 ---
 
 # Editor E1–E9 Execution Plan
@@ -207,6 +207,8 @@ Verification and exit:
 - Chrome/Edge 覆盖 390/1024/1280/1920、DPR 1/2、zoom/pan、单滚动、右键/键盘、刷新、无换行、视觉细节、console/pageerror 和资源生命周期。
 - dirty provisional 通过后创建 implementation commit；clean E9 canonical 固定为 E8 25 步基线加 E9 unit/integration/Chrome/Edge，共 29 步。
 - canonical 登记后 E9 仍为 `In Progress`、evidence `in-review`、R-042 `Open`，直到 owner 完成视觉/交互任务。
+
+Delivery evidence：implementation commit `cf0a79b176d99eb183368818ce90ac5731d1cfa8`；clean canonical `E9-2026-09-04T02-49-18-960Z-cf0a79b1` 29/29 pass；summary SHA-256 `d4c15f6801e6df4289dad97b816036a095a21e5781a314f1f3166ab663f3ca4a`。该证据只完成自动化交付门禁，不关闭 E9。
 
 ## 5. Test and Eval Commands
 

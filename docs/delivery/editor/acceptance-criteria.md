@@ -9,7 +9,7 @@ upstream_docs:
   - "docs/architecture/editor/project-format-v1.md"
   - "docs/architecture/editor/interaction-contracts.md"
   - "docs/delivery/editor/execution-plan.md"
-next_action: "以 E9 unit/integration/双浏览器验证 AC-E901–AC-E905；canonical 后等待 owner 视觉门禁"
+next_action: "AC-E901–AC-E905 自动化证据 29/29 通过；等待 owner 视觉门禁"
 ---
 
 # Editor E1–E9 Acceptance Criteria
@@ -127,4 +127,4 @@ next_action: "以 E9 unit/integration/双浏览器验证 AC-E901–AC-E905；can
 
 AC-E801–AC-E805 于 2026-09-03 随 owner 的 E8 实施指令获批。已有 dirty-worktree 通过结果只标记 scoped/provisional；V5 独立提交后 owner 允许单独提交 E8。clean canonical `E8-2026-09-03T04-07-28-904Z-84d9435c` 25/25 通过，owner 随后批准 canonical 与人工门禁；E8 已关闭。
 
-AC-E901–AC-E905 于 2026-09-04 随 owner 的 E9 完整实施指令获批。实现、29/29 clean canonical、evidence 登记和 owner 视觉任务完成前，E9 保持 `In Progress`。
+AC-E901–AC-E905 于 2026-09-04 随 owner 的 E9 完整实施指令获批。implementation commit `cf0a79b176d99eb183368818ce90ac5731d1cfa8` 与 29/29 clean canonical 已满足自动化证据要求；owner 视觉任务尚未完成，因此 E9 保持 `In Progress`。

@@ -5,7 +5,7 @@ last_reviewed: 2026-09-04
 upstream_docs:
   - "docs/product/scope.md"
   - "docs/architecture/system-design.md"
-next_action: "实现 E9 并以 29 步 canonical 与 owner 视觉任务验证"
+next_action: "E9 29/29 canonical 已验证本 ADR；等待 owner 视觉与交互任务"
 ---
 
 # ADR-0019: Editor Tempo Lane and Boundary Deletion

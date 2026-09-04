@@ -5,7 +5,7 @@ last_reviewed: 2026-09-04
 upstream_docs:
   - "docs/quality/editor/e9-eval-plan.md"
   - "docs/delivery/editor/acceptance-criteria.md"
-next_action: "将 E9-G01–G10 编码为版本化 geometry/presentation fixture 并由 unit/E2E 消费"
+next_action: "E9-G01–G10 已由版本化 fixture、unit 与双浏览器 E2E 消费；等待 owner 视觉确认"
 ---
 
 # Editor E9 Golden Examples

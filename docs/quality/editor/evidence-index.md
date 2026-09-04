@@ -1,7 +1,7 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-09-01
+last_reviewed: 2026-09-04
 upstream_docs:
   - "docs/quality/editor/eval-plan.md"
   - "docs/quality/editor/golden-examples.md"
@@ -12,8 +12,9 @@ upstream_docs:
   - "docs/quality/editor/e6-eval-plan.md"
   - "docs/quality/editor/e7-eval-plan.md"
   - "docs/quality/editor/e8-eval-plan.md"
+  - "docs/quality/editor/e9-eval-plan.md"
   - "docs/delivery/editor/milestone-plan.md"
-next_action: "E8 clean canonical 与 owner 人工门禁已批准；Editor readiness 另行复核"
+next_action: "E9 29/29 clean canonical 已登记为 in-review；等待 owner 视觉与交互门禁"
 ---
 
 # Editor Evidence Index
@@ -29,6 +30,7 @@ next_action: "E8 clean canonical 与 owner 人工门禁已批准；Editor readin
 - E6：`Complete`。
 - E7：`Complete`。
 - E8：`Complete`；clean canonical 与 owner 人工门禁均已批准。
+- E9：`In Progress`；29/29 clean canonical 已登记为 `in-review`，R-042 保持 `Open`，等待 owner 视觉与交互确认。
 - E1 clean canonical 与 owner 人工门禁均已批准；Analyzer M3–M11 evidence 仍不能替代未来 Editor 里程碑证据。
 - E2 clean canonical 与 owner 门禁已于 2026-08-27 获批。
 - E3 clean canonical 与 owner 人工门禁已于 2026-08-27 获批；E4 clean canonical 与 owner 人工门禁随后获批。
@@ -37,6 +39,7 @@ next_action: "E8 clean canonical 与 owner 人工门禁已批准；Editor readin
 - E6 clean canonical 40/40、原生 OS picker、`beforeunload`、辅助技术与长会话补偿已于 2026-08-28 获 owner 批准；E7 紧凑工作台布局已开放，Editor readiness 延后至 E7 审批。
 - E7 修订版 clean canonical 已在实现 commit `080f577fe20fcb22a20184dce0b15892c5299464` 上 46/46 通过；原 44/44 run 保留为 `pre-revision`。2026-08-31 owner 批准修订版候选并关闭 E7，未提供的人工测量不补写。
 - E8 clean canonical 已在实现 commit `84d9435cc6e8d1edb0932ff1b8dcd1b84dff32b5` 上 25/25 通过；owner 已复核紧凑高度、恢复语义和 marker 可读性门禁并批准关闭 E8。
+- E9 clean canonical 已在实现 commit `cf0a79b176d99eb183368818ce90ac5731d1cfa8` 上 29/29 通过；证据为 `in-review`，不代表 owner 人工门禁已通过。
 
 ## 2. Record Contract
 
@@ -833,3 +836,72 @@ E8 Chrome/Edge 测试均捕获 `pageerror` 和异常 console 并要求为空。r
 - owner 人工边界包括：桌面/窄屏波形密度可接受；正确同歌重选后不自动播放；异歌入口文案与返回行为清晰；point marker、候选框和 stem 在实际缩放下易辨识。
 - 2026-09-03，owner 要求评估 E8 是否可关闭并授权在满足时批准。审计确认 clean identity、25/25 结果、artifact hash、四视口密度、paused 恢复、显式异歌切换与 marker 几何均满足已批准门禁；owner 据此批准 canonical 与上述人工边界，不补写未提供的额外主观数值。
 - E8 为 `Complete`，R-022/R-024/R-025 为 `Mitigated`。Editor 整体 readiness 仍需独立 review，本批准不自动推定 readiness。
+
+## 12. E9 Canonical Record
+
+| Field | Value |
+| --- | --- |
+| Run ID | `E9-2026-09-04T02-49-18-960Z-cf0a79b1` |
+| Milestone | E9 — Tempo lane and marker interaction |
+| State | `in-review`（29/29 自动化通过；owner 视觉与交互门禁待完成） |
+| Implementation commit | `cf0a79b176d99eb183368818ce90ac5731d1cfa8` |
+| Evidence commit | 本记录所在的 `docs: register Editor E9 canonical evidence` 提交 |
+| Dirty at start / end | `false` / `false` |
+| Commit at end | `cf0a79b176d99eb183368818ce90ac5731d1cfa8` |
+| Started at | 2026-09-04 02:49:18.960 UTC |
+| Method | `npm run eval:e9` |
+| Reviewer | `project-owner` — pending |
+| Retention | `local-present`；至少保留到 E9 审批完成 |
+| Artifact root | `artifacts/evals/E9-2026-09-04T02-49-18-960Z-cf0a79b1/` |
+| Summary SHA-256 | `d4c15f6801e6df4289dad97b816036a095a21e5781a314f1f3166ab663f3ca4a` |
+
+### Environment
+
+| Item | Recorded value |
+| --- | --- |
+| Platform / architecture | Darwin / arm64 |
+| Node / npm | Node `v24.18.0`；npm `11.16.0` |
+| Vitest / Playwright | `4.1.10` / `1.62.0` |
+| Chrome binary / test user agent | Google Chrome `152.0.7977.76` / Chrome `151.0.7922.34` |
+| Edge binary / test user agent | Microsoft Edge `152.0.4191.62` / Edge `151.0.7922.34` |
+
+E9 使用仓库受控 WAV、版本化虚构 tempo golden 与浏览器临时状态；本记录不包含用户私有音频、设备序列号或其他敏感标识。
+
+### Results and Traceability
+
+| Step group | Result | Evidence |
+| --- | --- | --- |
+| E9 unit / integration | 9/9 + 4/4 pass | 首/内部/未知/连续删除、前段延伸、ID/设置稳定、full/summary/hidden 临界宽度、共享 time↔x；JSON V1、单草稿原子替换及 point/range 秒值稳定 |
+| E9 Chrome / Edge | 3/3 + 3/3 pass | 专用 BPM 轨道、三级展示、右键/Delete 删除、错误草稿清理、刷新恢复、首尾固定边界、分类按钮、3px candidate、单 divider、reduced motion 与页面错误检查 |
+| Shared geometry | pass | 两浏览器均覆盖 390/1024/1280/1920 与 DPR 1/2；波形、BPM 轨道和内部 caret 最大误差 `0.009375 CSS px`，低于 `1 CSS px` |
+| Shared scrolling | pass | 390px 外层 EditorTimeline `scrollLeft=120` 且 `overflow-x:auto`；BPM stage `scrollLeft=0`、`overflow-x:hidden`；共享容器 computed `scrollbar-width:thin` |
+| Presentation / accessibility | pass | full、summary、hidden 随自然内容宽度切换且不换行；输入错误使用 `aria-invalid/aria-describedby` 和公共 `aria-live`；内部边界可聚焦并响应 Delete |
+| Route resources | pass | Chrome/Edge 各 10 次 Editor/Analyzer 往返；live ResizeObserver 始终为 3，live Canvas 始终为 4，无单调累积 |
+| E8 25-step baseline | 25/25 pass | E8/E7/E3/E2/E1/M5、docs、Harness、typecheck、build 与 diff check 全部通过；E1–E8 历史 artifact 未改写 |
+| Build | pass with warning | 1,871 modules；最大 JS chunk `1,432.66 kB`，既有 Vite chunk warning 如实保留 |
+| Identity | pass | canonical 起止均为同一 clean implementation commit；summary 记录 `result: pass`，`git diff --check` exit 0 |
+
+E9 Chrome/Edge 专项均捕获 `pageerror` 和异常 console 并要求为空。Browserslist stale 与 Vite chunk size 属于 runner/toolchain warning，不是页面运行错误。
+
+### Provisional History
+
+- 最终 dirty-worktree provisional：`E9-2026-09-04T02-45-05-001Z-b046ab53-provisional`，29/29 pass，summary SHA-256 `df3ab895935fa5c148321813bb2c8488f7c0909f02189dab178d0b9ae073f35c`。
+- provisional 绑定当时 dirty worktree，只用于进入 implementation commit；正式 canonical 绑定 `cf0a79b176d99eb183368818ce90ac5731d1cfa8`，两者身份未混用。
+
+### Local Artifact Hashes
+
+| Artifact | SHA-256 |
+| --- | --- |
+| `summary.json` | `d4c15f6801e6df4289dad97b816036a095a21e5781a314f1f3166ab663f3ca4a` |
+| `26-E9-tempo-lane-unit.log` | `a12d4ee2ec9c2bc41a91a9370d0ba395a002f87fde4a980226d7d19142a124a4` |
+| `27-E9-persistence-integration.log` | `95977f836dea427e5db9c89a46b5b2560fa7b0aba7a69099cfab979273d9a495` |
+| `28-E9-Chrome-tempo-lane.log` | `836cd5500289fab6febae06b461837213d807a90c15fc3b680bf5c4df97cf267` |
+| `29-E9-Edge-tempo-lane.log` | `ef2e2baeb38773d226c08e9e115934f0b54e5321e83b202322eeb7a2bed393c6` |
+| `24-build.log` | `d68ed42693f0075d5c203636733a9ea91b171fd7dd590587c81c99c48004c3fb` |
+| `25-diff-check.log` | `e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855` |
+
+### Manual Boundary and Approval Gate
+
+- 自动化证明 DOM/Canvas 几何、共享滚动、删除事实、草稿恢复、计算样式与双浏览器资源基线；它不能替代 owner 对分类按钮视觉居中、candidate 竖线辨识度、BPM 轨道信息密度、三级缩放观感和右键删除直觉性的判断。
+- Owner 需在 Chrome/Edge 确认：“+分类”双轴居中；候选为单一绿色竖线；BPM caret/时间/输入与波形直观对齐；缩放时 full/summary/hidden 合理；右键删除为前段延伸；板块间只有一条横线。
+- 本记录登记后 E9 仍为 `In Progress`、evidence 为 `in-review`、R-042 为 `Open`。只有 owner 明确批准上述任务后，才可关闭 E9、缓解 R-042 并进入 Editor release-readiness。
