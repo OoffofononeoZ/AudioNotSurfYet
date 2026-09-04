@@ -160,6 +160,38 @@ export const moveTempoBoundary = (
         : cloneTempoSegment(segment));
 };
 
+export const removeTempoBoundary = (
+    tempoMap: readonly TempoSegmentV1[],
+    id: string,
+): TempoSegmentV1[] => {
+    const index = tempoMap.findIndex((segment) => segment.id === id);
+    if (index <= 0) return tempoMap.map(cloneTempoSegment);
+    return tempoMap
+        .filter((segment) => segment.id !== id)
+        .map(cloneTempoSegment);
+};
+
+export type TempoSegmentPresentation = 'full' | 'summary' | 'hidden';
+
+export const resolveTempoSegmentPresentation = (
+    availableWidth: number,
+    fullRequiredWidth: number,
+    summaryRequiredWidth: number,
+): TempoSegmentPresentation => {
+    const available = Number.isFinite(availableWidth)
+        ? Math.max(0, availableWidth)
+        : 0;
+    const full = Number.isFinite(fullRequiredWidth)
+        ? Math.max(0, fullRequiredWidth)
+        : Number.POSITIVE_INFINITY;
+    const summary = Number.isFinite(summaryRequiredWidth)
+        ? Math.max(0, summaryRequiredWidth)
+        : Number.POSITIVE_INFINITY;
+    if (available >= full) return 'full';
+    if (available >= summary) return 'summary';
+    return 'hidden';
+};
+
 export type TempoInputResult =
     | { ok: true; segment: TempoSegmentV1 }
     | { ok: false; message: string };

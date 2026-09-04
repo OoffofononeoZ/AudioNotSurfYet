@@ -111,7 +111,7 @@ test('estimates BPM, edits tempo segments and restores the project', async ({ pa
     const addBoundary = page.getByTestId('add-tempo-boundary');
     await addBoundary.click();
     await expect(page.locator('.tempo-segment')).toHaveCount(2);
-    const boundary = page.locator('.tempo-boundary:not(.add-boundary)').first();
+    const boundary = page.locator('.tempo-lane-boundary:not(.tempo-lane-boundary--fixed)').first();
     const geometryError = await boundary.evaluate((element) => {
         const boundaryBounds = element.getBoundingClientRect();
         const stage = element.parentElement?.getBoundingClientRect();
@@ -147,7 +147,7 @@ test('estimates BPM, edits tempo segments and restores the project', async ({ pa
     await page.getByRole('button', { name: '切回 4/4 · 100 BPM' }).first().click();
     await page.getByTestId('tempo-bpm-0').fill('301');
     await page.getByTestId('tempo-bpm-0').blur();
-    await expect(page.getByText('BPM 不得高于 300。')).toBeVisible();
+    await expect(page.getByTestId('tempo-live-message')).toHaveText('BPM 不得高于 300。');
     await page.getByTestId('tempo-bpm-0').fill('100');
     await page.getByTestId('tempo-bpm-0').blur();
 

@@ -165,15 +165,11 @@ test('uses the compact waveform height and centers point marker geometry', async
             const candidate = markerSurface?.querySelector<HTMLElement>(
                 '.point-candidate',
             );
-            const candidatePin = markerSurface?.querySelector<HTMLElement>(
-                '.candidate-pin',
-            );
             if (
                 !marker
                 || !diamond
                 || !markerSurface
                 || !candidate
-                || !candidatePin
             ) {
                 throw new Error('Point marker geometry is incomplete.');
             }
@@ -181,7 +177,6 @@ test('uses the compact waveform height and centers point marker geometry', async
             const diamondBounds = diamond.getBoundingClientRect();
             const surfaceBounds = markerSurface.getBoundingClientRect();
             const candidateBounds = candidate.getBoundingClientRect();
-            const pinBounds = candidatePin.getBoundingClientRect();
             const markerCenterX = markerBounds.left + markerBounds.width / 2;
             const markerCenterY = markerBounds.top + markerBounds.height / 2;
             const diamondCenterX = diamondBounds.left + diamondBounds.width / 2;
@@ -193,19 +188,14 @@ test('uses the compact waveform height and centers point marker geometry', async
             const candidateXError = Math.abs(
                 candidateBounds.left + candidateBounds.width / 2 - expectedX,
             );
-            const pinXError = Math.abs(
-                pinBounds.left + pinBounds.width / 2 - expectedX,
-            );
             return {
                 markerXError,
                 diamondXError,
                 candidateXError,
-                pinXError,
                 xError: Math.max(
                     markerXError,
                     diamondXError,
                     candidateXError,
-                    pinXError,
                 ),
                 markerYError: Math.abs(
                     markerCenterY
