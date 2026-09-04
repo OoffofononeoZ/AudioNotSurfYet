@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "durationSeconds": 16,
+  "tempoMap": [
+    {
+      "id": "tempo-metered-a",
+      "startSeconds": 0,
+      "mode": "metered",
+      "bpm": 120,
+      "bpmSource": "user",
+      "meter": { "numerator": 4, "denominator": 4 }
+    },
+    {
+      "id": "tempo-single",
+      "startSeconds": 6,
+      "mode": "single-beat"
+    },
+    {
+      "id": "tempo-unset",
+      "startSeconds": 8,
+      "mode": "metered",
+      "bpm": null,
+      "bpmSource": "unset",
+      "meter": { "numerator": 4, "denominator": 4 }
+    },
+    {
+      "id": "tempo-metered-b",
+      "startSeconds": 10,
+      "mode": "metered",
+      "bpm": 60,
+      "bpmSource": "user",
+      "meter": { "numerator": 3, "denominator": 4 }
+    }
+  ],
+  "measureCases": [
+    { "timeSeconds": 0.4, "startSeconds": 0, "endSeconds": 2, "kind": "metered" },
+    { "timeSeconds": 3.9, "startSeconds": 2, "endSeconds": 4, "kind": "metered" },
+    { "timeSeconds": 7, "startSeconds": 6, "endSeconds": 8, "kind": "single-beat" },
+    { "timeSeconds": 12.2, "startSeconds": 10, "endSeconds": 13, "kind": "metered" },
+    { "timeSeconds": 15.9, "startSeconds": 13, "endSeconds": 16, "kind": "metered" }
+  ],
+  "unavailableTimeSeconds": 9
+}

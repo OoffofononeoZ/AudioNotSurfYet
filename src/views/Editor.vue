@@ -140,13 +140,54 @@
 
             </template>
         </section>
+
+        <dialog
+            ref="leaveDialog"
+            class="editor-leave-dialog"
+            data-testid="editor-leave-dialog"
+            aria-labelledby="editor-leave-dialog-title"
+            aria-describedby="editor-leave-dialog-description"
+            @cancel="onLeaveDialogCancel"
+            @click="onLeaveDialogBackdropClick"
+        >
+            <button
+                type="button"
+                class="leave-dialog-close"
+                aria-label="关闭并留在当前页面"
+                data-testid="editor-leave-close"
+                @click="finishLeaveDecision(false)"
+            >×</button>
+            <h2 id="editor-leave-dialog-title">离开 Editor？</h2>
+            <p id="editor-leave-dialog-description">
+                如果之后用其他歌曲进入 Editor，当前单草稿可能被覆盖。建议先导出工程。
+            </p>
+            <label class="leave-dialog-preference">
+                <input v-model="suppressFutureLeaveWarning" type="checkbox" data-testid="editor-leave-suppress">
+                <span>之后不再显示普通离页提示</span>
+            </label>
+            <div class="leave-dialog-actions">
+                <button
+                    ref="leaveStayButton"
+                    type="button"
+                    class="leave-stay"
+                    data-testid="editor-leave-stay"
+                    @click="finishLeaveDecision(false)"
+                >留在此页</button>
+                <button
+                    type="button"
+                    class="leave-confirm"
+                    data-testid="editor-leave-confirm"
+                    @click="confirmLeave"
+                >仍然离开</button>
+            </div>
+        </dialog>
     </main>
 </template>
 
 <script setup lang="ts">
 import {
     computed,
-    h,
+    nextTick,
     onBeforeUnmount,
     ref,
     shallowRef,
@@ -157,11 +198,7 @@ import {
     useRoute,
     useRouter,
 } from 'vue-router';
-import {
-    ElCheckbox,
-    ElMessage,
-    ElMessageBox,
-} from 'element-plus';
+import { ElMessage } from 'element-plus';
 import { useAudioSessionService } from '../audio/audioSessionService';
 import { EditorFormatCodecRegistry } from '../editor/projectCodec';
 import { resolveEditorUnavailableRecovery } from '../editor/routeRecovery';
@@ -441,37 +478,92 @@ const updateProject = (
     immediate: boolean,
 ) => controller.updateProject(project, immediate);
 
+const leaveDialog = ref<HTMLDialogElement | null>(null);
+const leaveStayButton = ref<HTMLButtonElement | null>(null);
+const suppressFutureLeaveWarning = ref(false);
+let pendingLeaveDecision: {
+    promise: Promise<boolean>;
+    resolve: (value: boolean) => void;
+} | null = null;
+let leaveTransition: Promise<void> | null = null;
+
+const finishLeaveDecision = (shouldLeave: boolean) => {
+    const pending = pendingLeaveDecision;
+    if (!pending) return;
+    pendingLeaveDecision = null;
+    if (leaveDialog.value?.open) leaveDialog.value.close();
+    pending.resolve(shouldLeave);
+};
+
+const requestLeaveDecision = (): Promise<boolean> => {
+    if (pendingLeaveDecision) return pendingLeaveDecision.promise;
+    suppressFutureLeaveWarning.value = false;
+    let resolveDecision!: (value: boolean) => void;
+    const promise = new Promise<boolean>((resolve) => {
+        resolveDecision = resolve;
+    });
+    pendingLeaveDecision = { promise, resolve: resolveDecision };
+    void nextTick(() => {
+        const dialog = leaveDialog.value;
+        if (!dialog || pendingLeaveDecision?.promise !== promise) {
+            finishLeaveDecision(false);
+            return;
+        }
+        try {
+            if (!dialog.open) dialog.showModal();
+        } catch {
+            finishLeaveDecision(false);
+            return;
+        }
+        leaveStayButton.value?.focus();
+    });
+    return promise;
+};
+
+const onLeaveDialogCancel = (event: Event) => {
+    event.preventDefault();
+    finishLeaveDecision(false);
+};
+
+const onLeaveDialogBackdropClick = (event: MouseEvent) => {
+    const dialog = leaveDialog.value;
+    if (!dialog || event.target !== dialog) return;
+    const bounds = dialog.getBoundingClientRect();
+    const outside = event.clientX < bounds.left
+        || event.clientX > bounds.right
+        || event.clientY < bounds.top
+        || event.clientY > bounds.bottom;
+    if (outside) finishLeaveDecision(false);
+};
+
+const confirmLeave = async () => {
+    try {
+        if (suppressFutureLeaveWarning.value) {
+            await controller.setLeaveWarningEnabled(false);
+        }
+        finishLeaveDecision(true);
+    } catch (error) {
+        ElMessage.error(error instanceof Error ? error.message : '无法保存离页提示设置。');
+        leaveStayButton.value?.focus();
+    }
+};
+
+const leaveEditorOnce = () => {
+    leaveTransition ??= controller.leave();
+    return leaveTransition;
+};
+
 onBeforeRouteLeave(async () => {
     if (controller.shouldWarnOnLeave()) {
-        let suppress = false;
-        try {
-            await ElMessageBox.confirm(
-                h('div', [
-                    h('p', '如果之后用其他歌曲进入 Editor，当前单草稿可能被覆盖。建议先导出工程。'),
-                    h(ElCheckbox, {
-                        modelValue: suppress,
-                        'onUpdate:modelValue': (value: boolean | string | number) => {
-                            suppress = Boolean(value);
-                        },
-                    }, () => '之后不再显示普通离页提示'),
-                ]),
-                '离开 Editor？',
-                {
-                    confirmButtonText: '仍然离开',
-                    cancelButtonText: '留在此页',
-                    type: 'warning',
-                },
-            );
-        } catch {
-            return false;
-        }
-        if (suppress) await controller.setLeaveWarningEnabled(false);
+        const shouldLeave = await requestLeaveDecision();
+        if (!shouldLeave) return false;
     }
-    await controller.leave();
+    await leaveEditorOnce();
     return true;
 });
 
 onBeforeUnmount(() => {
+    finishLeaveDecision(false);
     cursorRequestRevision += 1;
     if (cursorTimer) clearTimeout(cursorTimer);
     unsubscribe();
@@ -509,6 +601,82 @@ onBeforeUnmount(() => {
     border-radius: 8px;
     background: rgba(3, 12, 8, 0.82);
     box-shadow: inset 0 0 32px rgba(23, 255, 128, 0.035);
+}
+
+.editor-leave-dialog {
+    box-sizing: border-box;
+    width: min(520px, calc(100vw - 32px));
+    border: 1px solid rgba(101, 255, 169, .52);
+    border-radius: 8px;
+    padding: 20px;
+    color: #effff6;
+    background: #041009;
+    box-shadow: 0 24px 80px rgba(0, 0, 0, .72), inset 0 0 28px rgba(53, 255, 143, .035);
+}
+
+.editor-leave-dialog::backdrop {
+    background: rgba(0, 0, 0, .72);
+}
+
+.editor-leave-dialog h2 {
+    margin: 0 36px 10px 0;
+    color: #effff6;
+    font-size: 1.05rem;
+}
+
+.editor-leave-dialog p {
+    margin: 0;
+    color: #a9c7b6;
+    line-height: 1.65;
+}
+
+.leave-dialog-close {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 30px;
+    padding: 0;
+    border-color: transparent;
+    color: #a9c7b6;
+    background: transparent;
+    font-size: 1.2rem;
+}
+
+.leave-dialog-preference {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 16px;
+    color: #cde8d8;
+    font-size: .86rem;
+}
+
+.leave-dialog-preference input {
+    width: 16px;
+    height: 16px;
+    margin: 0;
+    accent-color: #35ff8f;
+}
+
+.leave-dialog-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 20px;
+}
+
+.leave-stay {
+    border-color: #65ffa9;
+    background: rgba(24, 92, 54, .9);
+}
+
+.leave-confirm {
+    color: #b8d4c4;
+    background: rgba(7, 24, 15, .72);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .editor-leave-dialog { scroll-behavior: auto; }
 }
 
 .editor-heading {

@@ -130,14 +130,16 @@
                                         @keydown.enter.prevent="commitMeter(entry.segment.id, $event, entry.segment.meter.denominator)"
                                     >
                                     <span aria-hidden="true">/</span>
-                                    <select
-                                        class="tempo-compact-control tempo-meter-denominator"
-                                        :value="entry.segment.meter.denominator"
-                                        :aria-label="`区间 ${entry.index + 1} 拍号分母`"
-                                        @change="commitMeter(entry.segment.id, entry.segment.meter.numerator, $event)"
-                                    >
-                                        <option v-for="value in meterDenominators" :key="value" :value="value">{{ value }}</option>
-                                    </select>
+                                    <span class="tempo-meter-denominator-shell">
+                                        <select
+                                            class="tempo-compact-control tempo-meter-denominator"
+                                            :value="entry.segment.meter.denominator"
+                                            :aria-label="`区间 ${entry.index + 1} 拍号分母`"
+                                            @change="commitMeter(entry.segment.id, entry.segment.meter.numerator, $event)"
+                                        >
+                                            <option v-for="value in meterDenominators" :key="value" :value="value">{{ value }}</option>
+                                        </select>
+                                    </span>
                                 </span>
                             </template>
                             <template v-else>
@@ -202,7 +204,9 @@
                             <span class="meter-inputs">
                                 <input class="tempo-compact-control tempo-meter-numerator" value="32">
                                 <span>/</span>
-                                <select class="tempo-compact-control tempo-meter-denominator"><option>32</option></select>
+                                <span class="tempo-meter-denominator-shell">
+                                    <select class="tempo-compact-control tempo-meter-denominator"><option>32</option></select>
+                                </span>
                             </span>
                         </span>
                         <span ref="summaryMeasure" class="tempo-segment-content tempo-segment-summary">300 BPM · 32/32</span>
@@ -1033,9 +1037,32 @@ button:disabled { opacity: .4; }
 }
 .tempo-bpm-input { width: 52px; }
 .tempo-meter-numerator { width: 28px; }
+.tempo-meter-denominator-shell {
+    position: relative;
+    display: inline-flex;
+    flex: 0 0 42px;
+    width: 42px;
+    height: 18px;
+}
+.tempo-meter-denominator-shell::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    right: 4px;
+    width: 5px;
+    height: 5px;
+    border-right: 1px solid #a9c7b6;
+    border-bottom: 1px solid #a9c7b6;
+    pointer-events: none;
+    transform: translateY(-70%) rotate(45deg);
+}
 .tempo-meter-denominator {
-    width: 36px;
-    padding-right: 10px;
+    width: 42px;
+    padding: 0 15px 0 3px;
+    appearance: none;
+    -webkit-appearance: none;
+    text-align: center;
+    text-align-last: center;
 }
 .tempo-compact-separator { color: #7ea992; }
 .tempo-compact-action {
