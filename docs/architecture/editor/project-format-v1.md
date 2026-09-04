@@ -1,12 +1,12 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-08-26
+last_reviewed: 2026-09-04
 upstream_docs:
   - "docs/product/scope.md"
   - "docs/architecture/system-design.md"
   - "docs/architecture/interface-contracts.md"
-next_action: "在 E1/E5 delivery 中映射 JSON V1、严格校验、歌曲身份与草稿验收"
+next_action: "E9 删除内部 tempo boundary 继续使用 JSON V1 数组删除语义；验证 round-trip 与事件秒数稳定"
 ---
 
 # Editor Project Format V1
@@ -130,7 +130,7 @@ interface RangeEventV1 {
 - metered meter numerator 是 1–32 的整数，denominator 属于固定联合。初始工程为 `4/4`、`bpm: null`、`bpmSource: 'unset'`；输入中的 `100` 只是 UI placeholder，不冒充识别结果。
 - metered BPM 为 `null` 或 20–300 的有限数。`null` 只允许 `bpmSource: 'unset'`；estimated/user 必须有合法 BPM。
 - UI 输入 `0 <= bpm < 20` 时把 segment 整体规范为 `single-beat`，不在 schema 中保留无意义的 meter/BPM。负数、非数字、Infinity 和大于 300 拒绝。
-- 新增内部 boundary 继承前一 segment 的规范值；移动 boundary 只改变 tempo 区间，不移动已有 event 秒数。首版没有删除 tempo boundary 的工程命令。
+- 新增内部 boundary 继承前一 segment 的规范值；移动 boundary 只改变 tempo 区间，不移动已有 event 秒数。E9 删除内部 boundary 时从 `tempoMap` 移除目标 segment，前一 segment 自然延伸到下一 start 或歌曲结尾；首 segment 不可删除，point/range 秒数保持不变。
 
 ### Lanes and events
 
@@ -199,3 +199,5 @@ interface EditorDraftEnvelopeV1 {
 ## Approval
 
 本契约于 2026-08-26 随 Editor system design 创建，并由 `project-owner` 随后批准进入 E1–E6 execution planning。E1 只能在 delivery 获批后把它实现为 TypeScript 类型、validator、codec 和 repository；源码存在本身不能替代 schema round-trip、failure 和 boundary evidence。
+
+2026-09-04 的 ADR-0019 只增加现有 `tempoMap` 数组的内部 segment 删除命令，不新增字段、迁移或 fallback；既有 V1 文件可无转换直接读取。

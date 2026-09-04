@@ -39,6 +39,7 @@ next_action: "owner 视觉确认 DEC-050 一屏布局与双侧独立滚动；Vis
 | ADR-0016 | 2026-09-02 | 两个内置模板共享单 Canvas/WebGLRenderer/RAF，并以 seed + 绝对歌曲时间保证 seek/刷新/录制确定性 | project-owner | approved | [ADR-0016](../architecture/adrs/0016-deterministic-scene-registry.md) | 模板 registry、renderer ownership、运动时间或 context recovery 改变 |
 | ADR-0017 | 2026-09-02 | WebM 使用 AudioEngine pre-Gain 原音量 tap；只允许 VP9→VP8 codec fallback，不静默降低分辨率/fps | project-owner | approved | [ADR-0017](../architecture/adrs/0017-realtime-webm-recording.md) | 音频 tap、codec、预设、状态机或保存边界改变 |
 | ADR-0018 | 2026-09-03 | Editor 时间轴固定为 `88px/72px` 并保留 6px 波形安全区；同歌恢复不播放、异歌显式 replace、point 中心误差 `<=1 CSS px` | project-owner | approved | [ADR-0018](../architecture/adrs/0018-editor-timeline-recovery-and-marker-alignment.md) | 时间轴垂直几何、恢复决策、route 切换或 marker 锚点改变 |
+| ADR-0019 | 2026-09-04 | Editor 将 tempo boundary 与区间编辑移入和波形共享 viewport 的专用 BPM 轨道；内部边界可删除且由前段向右延伸 | project-owner | approved | [ADR-0019](../architecture/adrs/0019-editor-tempo-lane-and-boundary-deletion.md) | tempo 轨道布局、区间展示、boundary 删除或时间映射改变 |
 | DEC-008 | 2026-07-24 | 实施采用 M1–M11 相对门禁，不承诺日期；M3 从测试基础开始，M7 未通过不得扩展后续特征 | project-owner | approved | [Execution plan](../delivery/execution-plan.md) | 依赖、里程碑、验收门禁或交付优先级改变 |
 | DEC-009 | 2026-07-24 | 当前只批准 execution planning；不预建 quality/release/retrospective，也不自动开始代码实现 | project-owner | superseded by DEC-010 | [Milestone plan](../delivery/milestone-plan.md) | 已由 owner 决定前置三份 quality design |
 | DEC-010 | 2026-07-24 | 在 M3 前增加 Q0：前置 eval plan、golden examples、failure taxonomy；三份文档单独批准后开放 M3，release-readiness 仍等待 M11 证据 | project-owner | approved | [Eval plan](../quality/eval-plan.md) | 验收/测试纪律变化，或 owner 改变 Q0/readiness 时序 |
@@ -82,6 +83,7 @@ next_action: "owner 视觉确认 DEC-050 一屏布局与双侧独立滚动；Vis
 | DEC-048 | 2026-09-04 | V6 以功能、平均 30fps 与可播放媒体为主：默认 renderer 关闭 MSAA、video track 使用 `motion` hint，三格式媒体允许最多四个目标帧间隔的偶发 packet gap，15 分钟压力的 Visualizer 单帧峰值放宽为 `<60ms`；平均 fps、双轨、codec、尺寸、时长、音轨、A/V 结束差、分析归因 `<50ms`、反馈与时钟门禁不变，V5 canonical 阈值不改 | project-owner | approved | [V6 eval plan](../quality/visualizer/v6-eval-plan.md) | V6 packet cadence、renderer frame、antialias、平均 fps 或录制拓扑改变 |
 | DEC-049 | 2026-09-04 | 批准 V6 54/54 clean canonical 及双浏览器制作、原生保存/回放、键盘/焦点、长时操作与 context 清理人工门禁；保持 canonical identity 不变且无需重跑，V6 改为 Complete、R-041 改为 Mitigated，并开放独立 Visualizer release-readiness review | project-owner | approved | [Visualizer evidence](../quality/visualizer/evidence-index.md) | V6 canonical identity、owner review 结论、R-041 或 readiness 边界改变 |
 | DEC-050 | 2026-09-04 | Visualizer 在支持的 `>=1024px` 桌面视口中固定占一个 `100dvh`，document/body 不纵向滚动，左右侧栏独立滚动且阻止 scroll chaining；Analyzer 精确值表样式抽取为共享 `.app-scrollbar`，本次只迁移 Analyzer 表与 Visualizer，后续新增或修改的可见滚动容器必须复用 | project-owner | approved | [Viewport scroll eval](../quality/visualizer/viewport-scroll-eval-plan.md) | 支持断点、页面/侧栏滚动所有权、共享样式或例外范围改变 |
+| DEC-051 | 2026-09-04 | 实施 Editor E9：BPM 轨道与波形共享滚动/时间几何，区间按单行可用宽度在完整编辑、摘要、隐藏间切换，内部 boundary 支持右键和键盘删除；E8 canonical 保持历史不变 | project-owner | approved | [Editor E9 eval](../quality/editor/e9-eval-plan.md) | E9 范围、展示阈值、删除继承语义、29 步 canonical 或完成门禁改变 |
 
 ## Approval Evidence
 

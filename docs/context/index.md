@@ -4,14 +4,14 @@ owner: "project-owner"
 last_reviewed: 2026-09-04
 upstream_docs:
   - "AGENTS.md"
-next_action: "owner 视觉确认 DEC-050 一屏布局与双侧独立滚动；Visualizer release-readiness 保持 in-review"
+next_action: "实施 Editor E9 BPM 轨道、boundary 删除与标记可用性；完成 29 步 clean canonical 后等待 owner 视觉确认"
 ---
 
 # Repository Context Index
 
 ## Purpose
 
-AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端。Editor E1–E8 已获批准并关闭；E8 的时间轴/恢复/标记修正通过 25/25 clean canonical 与 owner 门禁。Analyzer M14 已交付 21 张折叠卡的全局自定义顺序、可访问排序和 V1 顺序持久化，最多四项 FIFO 保持独立。M13 17/17 canonical 保留为历史，M14 19/19 canonical 是当前 Analyzer 候选。Visualizer V0 产品、系统设计与 V1–V6 delivery planning 均已获批准；V1–V6 canonical 与人工门禁均已获 owner 批准并关闭。
+AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端。Editor E1–E8 已获批准并关闭；E8 的 25/25 clean canonical 保留为历史。DEC-051/ADR-0019 已批准 Editor E9 专用 BPM 轨道、内部 boundary 删除与标记可用性修订，E9 为 `In Progress`。Analyzer M14 已交付 21 张折叠卡的全局自定义顺序、可访问排序和 V1 顺序持久化，最多四项 FIFO 保持独立。Visualizer V1–V6 canonical 与人工门禁均已获 owner 批准并关闭。
 
 本目录维护仓库事实、边界和工作记忆；生命周期路由与通用方法由 [AGENTS.md](../../AGENTS.md) 负责。当前代码事实与目标架构必须区分：现状见 [system map](system-map.md)，批准的目标见 [system design](../architecture/system-design.md)。
 
@@ -19,10 +19,10 @@ AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端。Editor E1–
 
 - Repository context：入口、决策注册表、system map、glossary 与 working agreements 均已批准。
 - Product intent：Analyzer/Editor 历史范围与 Visualizer V0 均已批准；PROD-014V 已关闭，PROD-022 保留为非阻断未来问题。
-- System design：Analyzer/Editor 历史设计仍是已批准/实现基线；Visualizer system design、接口、风险和 ADR-0014–0017 已获批准。
-- Execution planning：M1–M14、Editor E0-D/E1–E8、Visualizer V0-D/V1–V6 均为 `Complete`。
-- Quality and evals：M3–M14、Editor E1–E8 与 Visualizer V1–V6 evidence 均已批准；DEC-050 clean 双浏览器修订证据已登记，Visualizer 整体 release-readiness 保持 `in-review`，等待 owner 视觉确认。
-- Implementation：Editor E8 与 Visualizer V1–V6 均已完成。V6 clean canonical `V6-2026-09-03T16-33-03-497Z-ef12ce39` 在 implementation commit `ef12ce397d0b1a054ce797bfa1b9ff5eb5af61cd` 上 54/54 通过，summary SHA-256 为 `695bf0acf3831907b720551c7772ea07e0dd80a5db38e829cba868f12128a014`；2026-09-04 owner 批准 evidence 与人工门禁，R-041 已缓解。post-V6 viewport 修订已在 clean commit `9f3b55beaa0c8a3d799f3f1e16f1dd66c9aee77c` 通过 Chrome/Edge 专项。
+- System design：Analyzer、Visualizer 与 Editor E1–E8 历史设计保持已批准基线；ADR-0019 已批准并只修订 Editor tempo 交互，不升级 JSON V1。
+- Execution planning：M1–M14、Editor E0-D/E1–E8、Visualizer V0-D/V1–V6 均为 `Complete`；Editor E9 为 `In Progress`。
+- Quality and evals：M3–M14、Editor E1–E8 与 Visualizer V1–V6 evidence 均已批准；E9 quality contract 已批准但尚无 canonical evidence。
+- Implementation：Editor E9 待实现；E8 与 Visualizer V1–V6 保持已完成。post-V6 viewport 修订已在 clean commit `9f3b55beaa0c8a3d799f3f1e16f1dd66c9aee77c` 通过 Chrome/Edge 专项。
 - Readiness、release、retrospective：Analyzer M14 为 `Ready with waivers`；PROD-015 仍阻断上线，Editor readiness 独立。
 
 ## Key Documents
@@ -50,9 +50,9 @@ AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端。Editor E1–
 | [acceptance-criteria.md](../delivery/acceptance-criteria.md) | 可测量验收与阈值 | project-owner / approved | 成功指标、容差或支持矩阵变化 |
 | [test-strategy.md](../delivery/test-strategy.md) | 测试层级、fixture 和证据策略 | project-owner / approved | 工具、fixture 或验证能力变化 |
 | [milestone-plan.md](../delivery/milestone-plan.md) | 相对目标、状态和退出证据 | project-owner / approved | 里程碑关闭或阻塞状态变化 |
-| [Editor execution plan](../delivery/editor/execution-plan.md) | E1–E8 实施顺序、固定参数和逐里程碑证据节奏 | project-owner / approved | Editor 范围、架构、切片或依赖变化 |
-| [Editor acceptance criteria](../delivery/editor/acceptance-criteria.md) | AC-E101–AC-E805、阈值、证据方法和风险映射 | project-owner / approved | Editor 指标、容差、容量或支持矩阵变化 |
-| [Editor test strategy](../delivery/editor/test-strategy.md) | E1–E8 测试层级、fixture、浏览器、性能与 evidence cadence | project-owner / approved | 测试工具、fixture、浏览器或证据能力变化 |
+| [Editor execution plan](../delivery/editor/execution-plan.md) | E1–E9 实施顺序、固定参数和逐里程碑证据节奏 | project-owner / approved | Editor 范围、架构、切片或依赖变化 |
+| [Editor acceptance criteria](../delivery/editor/acceptance-criteria.md) | AC-E101–AC-E905、阈值、证据方法和风险映射 | project-owner / approved | Editor 指标、容差、容量或支持矩阵变化 |
+| [Editor test strategy](../delivery/editor/test-strategy.md) | E1–E9 测试层级、fixture、浏览器、性能与 evidence cadence | project-owner / approved | 测试工具、fixture、浏览器或证据能力变化 |
 | [Editor milestone plan](../delivery/editor/milestone-plan.md) | E0-D 与 E1–E8 状态、依赖和退出清单 | project-owner / approved | 里程碑关闭、阻塞或开放状态变化 |
 | [Visualizer execution plan](../delivery/visualizer/execution-plan.md) | V1–V6 切片、固定参数、证据节奏与范围控制 | project-owner / approved | Visualizer 范围、架构、切片或依赖变化 |
 | [Visualizer acceptance criteria](../delivery/visualizer/acceptance-criteria.md) | AC-V101–AC-V607、阈值、证据方法和 R-034–R-041 映射 | project-owner / approved | Visualizer 指标、阈值、preset 或支持矩阵变化 |

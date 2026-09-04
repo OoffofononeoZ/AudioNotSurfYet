@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/product/scope.md"
   - "docs/product/success-metrics.md"
   - "docs/product/open-questions.md"
-next_action: "DEC-050 已实现并通过 clean 双浏览器验证；等待 Visualizer readiness owner 视觉确认"
+next_action: "实施 ADR-0019 的 Editor E9 专用 BPM 轨道与内部 boundary 删除；保持 JSON V1 和秒数事实不变"
 ---
 
 # System Design
@@ -381,10 +381,18 @@ M6 只在 `import.meta.env.DEV` 安装无 UI bridge，提供活动特征、cance
 
 - `EditorTimelineModel` 以规范化秒数为持久化事实；tempo 只派生 measure/beat/grid。tempo、zoom 或 viewport 变化不得自动移动已保存事件。
 - `timeToX()`/`xToTime()` 是波形、tempo、point/range 和 overlay 的唯一横向映射；所有 Canvas 使用同一 CSS rect 与 DPR backing-store 规则，目标误差不超过 1 CSS px。
-- tempo segment 从 0 秒开始且按 start 排序；metered 支持空 BPM 或 20–300，single-beat 把整个 segment 视为一个单元。新边界继承前段设置，首版只增加/拖动内部边界，不提供删除。
+- tempo segment 从 0 秒开始且按 start 排序；metered 支持空 BPM 或 20–300，single-beat 把整个 segment 视为一个单元。新边界继承前段设置；ADR-0019 允许删除内部边界，删除后前一 segment 向右延伸，首边界固定且不可删除。
 - 自适应网格从 `1/16`、`1/8`、`1/4`、`1/2`、`1 beat` 中选择当前至少 12 CSS px 的最细单元；没有候选时使用 1 beat。该网格只约束创建/拖动时的吸附和最短 range，不进入 schema identity。
 - Canvas 绘制波形、tempo 网格和高密度背景；DOM 只渲染当前 viewport 可见事件、端点、表单与焦点语义。交互状态、右键优先级和键盘替代见 [Editor Interaction Contracts](editor/interaction-contracts.md) 与 [ADR-0008](adrs/0008-editor-time-and-event-model.md)。
 - overlay 由纯 renderer adapter 绘制；Canvas/说明/空白 `pointer-events: none`，只有 feature selector 与 top/move/bottom 三个手柄接收输入。三个手柄都有键盘等价操作，位置以 `topRatio + heightRatio <= 1` 持久化。详见 [ADR-0009](adrs/0009-editor-overlay-renderer-boundary.md)。
+
+### Editor E9 tempo lane revision
+
+- 波形 stage 不再承载 tempo boundary DOM；专用 BPM 轨道和波形共享同一 `EditorTimelineGeometry`、viewport 与窄屏外层水平滚动容器，禁止任何一行保存私有 scroll/zoom。
+- 轨道在真实 boundary 处绘制向上 caret、时间标签和 1px 分隔线；相邻 boundary 之间承载 BPM/拍号控件。区间按当前可用 CSS 宽度和同页自然宽度测量选择完整编辑、单行摘要或隐藏，不允许换行挤压。
+- 右键内部 boundary 或在其获得焦点时按 Delete/Backspace，调用纯 `removeTempoBoundary()`。首 boundary 和歌曲结束边界不可删除；未知 ID 幂等无操作。删除只移除目标 segment，前一 segment 设置自然延伸，不改写 point/range 秒数。
+- 本修订不增加持久化字段、运行时资源或公共 transport/analysis 接口。现有 JSON V1 项目直接使用新视图，导入导出 bytes 语义保持不变。
+- 失败边界为：波形与 BPM 轨道 X 误差超过 1 CSS px、区间控件换行、删除错误 segment、删除首 boundary、删除导致事件秒数变化、窄屏出现双水平滚动或临时交互状态未清理。
 
 ## 18. Editor Compact Workbench
 

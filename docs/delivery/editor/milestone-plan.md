@@ -6,10 +6,10 @@ upstream_docs:
   - "docs/delivery/editor/execution-plan.md"
   - "docs/delivery/editor/acceptance-criteria.md"
   - "docs/delivery/editor/test-strategy.md"
-next_action: "E8 已获 owner 批准并关闭；Editor readiness 需单独复核"
+next_action: "E9 已获实施批准并进入 In Progress；等待 implementation、29/29 canonical 与 owner 视觉任务"
 ---
 
-# Editor E1–E8 Milestone Plan
+# Editor E1–E9 Milestone Plan
 
 ## 1. Planning Convention
 
@@ -34,6 +34,7 @@ next_action: "E8 已获 owner 批准并关闭；Editor readiness 需单独复核
 | E6 | Final hardening | Complete | E5 | Chrome/Edge、三格式、native flows、10,000 事件、资源与无障碍 | 双浏览器 canonical + owner complete task + evidence approval | project-owner |
 | E7 | Compact workbench + fullscreen overlay | Complete | E6 | 紧凑工作台、窗口级灰色浮层、复合入口、按歌曲 visibility 与双浏览器响应式 | 46 步 canonical + owner approval | project-owner |
 | E8 | Timeline, recovery and marker usability | Complete | E7 | `88px/72px` 时间轴、同歌自动恢复、异歌显式 replace 与 marker 中心对齐 | scoped/provisional + clean canonical + owner approval | project-owner |
+| E9 | Tempo lane and marker interaction | In Progress | E8 | BPM 专用轨道、shared scroll/geometry、boundary 删除、candidate/category/divider 修订 | 29 步 clean canonical + owner visual task | project-owner |
 
 ## 3. Exit Checklist by Milestone
 
@@ -110,6 +111,14 @@ next_action: "E8 已获 owner 批准并关闭；Editor readiness 需单独复核
 - [x] E8 implementation commit、25/25 clean canonical 与 evidence index 登记已完成；V5 已独立提交。
 - [x] owner 完成人工验收并批准 canonical；E8 与相关风险状态已按证据关闭/缓解。
 
+### E9
+
+- [x] DEC-051、ADR-0019、AC-E901–AC-E905 与 quality contract 获实施批准。
+- [ ] `removeTempoBoundary`、shared BPM lane 与三级展示完成 unit/integration。
+- [ ] Chrome/Edge 四视口、DPR、zoom/pan、右键/键盘和视觉几何专项通过。
+- [ ] dirty provisional、implementation commit、29/29 clean canonical 与 evidence 登记完成。
+- [ ] owner 确认分类按钮、candidate 竖线、BPM 对齐/缩放、删除语义和单 divider。
+
 ## 4. Failure and Slip Rules
 
 - canonical 失败：修复原因并重新提交后再运行新的 clean canonical；失败 run 保留身份与分类，不能覆盖。
@@ -131,7 +140,8 @@ next_action: "E8 已获 owner 批准并关闭；Editor readiness 需单独复核
 - E6：`Complete`。
 - E7：`Complete`。
 - E8：`Complete`。
-- 当前下一门禁：E1–E8 已关闭；如需推进 Editor 整体 readiness，须另行执行 readiness review，不由本次 E8 批准自动推定。
+- E9：`In Progress`。
+- 当前下一门禁：完成 E9 implementation、29/29 clean canonical 与 owner 视觉任务；Editor readiness 不由 E9 实施批准自动推定。
 
 ## 6. Delivery Approval
 
@@ -170,3 +180,5 @@ next_action: "E8 已获 owner 批准并关闭；Editor readiness 需单独复核
 同日，E8 implementation commit `84d9435cc6e8d1edb0932ff1b8dcd1b84dff32b5` 完成，clean canonical `E8-2026-09-03T04-07-28-904Z-84d9435c` 25/25 通过，summary SHA-256 为 `ba9ff8db30868c8bf34140a3db2bf8cd7e3d56557ca7ac8682dfa6c3ce664a42`。该事实登记为 `in-review`，不代替 owner 人工验收。
 
 同日，owner 要求评估 E8 是否满足关闭条件并授权在满足时批准。审计确认 implementation 后仅有 evidence 文档提交、当前工作区干净、canonical 起止 identity 一致且 25/25 无失败，时间轴密度、paused 恢复、异歌显式 replace 与 marker 可读性门禁均有证据；owner 据此批准 canonical 与人工门禁。E8 改为 `Complete`，R-022/R-024/R-025 改为 `Mitigated`；该批准不自动批准 Editor 整体 readiness。
+
+2026-09-04，owner 明确要求完整实施 E9 节拍轨道与标记交互计划。DEC-051、ADR-0019、delivery/quality contract 据此获批，E9 改为 `In Progress`；E1–E8 canonical、artifact 与批准状态保持不变。
