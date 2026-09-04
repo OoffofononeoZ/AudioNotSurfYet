@@ -8,7 +8,7 @@ upstream_docs:
   - "docs/architecture/risk-register.md"
   - "docs/delivery/editor/execution-plan.md"
   - "docs/delivery/editor/acceptance-criteria.md"
-next_action: "复跑修订后的 E9 unit/integration/双浏览器与 29 步 clean canonical"
+next_action: "等待 owner 复核 E9 revised canonical 的双浏览器视觉与交互结果"
 ---
 
 # Editor E1–E9 Test Strategy
@@ -124,7 +124,7 @@ npm run eval:eN:provisional
 npm run eval:eN
 ```
 
-E1–E8 命令已经存在、通过 clean canonical 并获批准。E9 已新增 unit、integration、Chrome、Edge、双浏览器与 29 步 runner；`eval:e9:provisional` 可在 dirty worktree 运行，`eval:e9` 拒绝 dirty worktree。clean run `E9-2026-09-04T02-49-18-960Z-cf0a79b1` 已 29/29 通过；package、测试 README、本项目 Skill 与实际 runner 保持一致。
+E1–E8 命令已经存在、通过 clean canonical 并获批准。E9 已新增 unit、integration、Chrome、Edge、双浏览器与 29 步 runner；`eval:e9:provisional` 可在 dirty worktree 运行，`eval:e9` 拒绝 dirty worktree。首个 clean run `E9-2026-09-04T02-49-18-960Z-cf0a79b1` 保持 `pre-revision`；revised clean run `E9-2026-09-04T03-51-33-088Z-13614673` 已 29/29 通过。package、测试 README、本项目 Skill 与实际 runner 保持一致。
 
 固定流程：
 
@@ -144,3 +144,5 @@ E1–E8 命令已经存在、通过 clean canonical 并获批准。E9 已新增 
 2026-09-04，owner 的 E9 完整实施指令批准 shared BPM lane、删除语义、三级单行展示、双浏览器矩阵和 29 步 canonical。E9 只增加版本化 geometry/presentation golden，不增加音频 fixture；E8 历史 artifact 不重写。
 
 同日首个 clean run 在 Chrome `152.0.7977.76` 与 Edge `152.0.4191.62` 上完成；两端覆盖 390/1024/1280/1920、DPR 1/2、最大共享几何误差 `0.009375 CSS px`，10 次路由往返的 live Observer/Canvas 基线不变。DEC-052 将该 run 保留为 `pre-revision`：修订套件必须增加 28px 等高、零间隙、12px 向上辅助线、11px/18px 同基线无框输入、无重复 rail 和唯一 scroller 断言，并在不增加步骤数的前提下重新执行 29 步 canonical。
+
+修订套件在 Chrome `152.0.7977.76` 与 Edge `152.0.4191.62` 上再次覆盖同一四视口/DPR 矩阵；两端均测得 strip/status `28px`、waveform/caret gap `0`、guide `1×12px`、重复 tempo rail `0`、最大边界误差 `0.009375 CSS px`，10 次路由往返的 live ResizeObserver `3–3`、Canvas `4–4`。clean 29 步 revised canonical 全部通过。

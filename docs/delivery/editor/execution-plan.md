@@ -10,7 +10,7 @@ upstream_docs:
   - "docs/architecture/risk-register.md"
   - "docs/architecture/editor/project-format-v1.md"
   - "docs/architecture/editor/interaction-contracts.md"
-next_action: "实施 DEC-052 紧凑 BPM 标记条并登记 E9 revised canonical"
+next_action: "等待 owner 复核 E9 revised canonical 与紧凑 BPM 标记条人工门禁"
 ---
 
 # Editor E1–E9 Execution Plan
@@ -209,7 +209,9 @@ Verification and exit:
 - dirty provisional 通过后创建 implementation commit；clean E9 canonical 固定为 E8 25 步基线加 E9 unit/integration/Chrome/Edge，共 29 步。
 - canonical 登记后 E9 仍为 `In Progress`、evidence `in-review`、R-042 `Open`，直到 owner 完成视觉/交互任务。
 
-Pre-revision evidence：implementation commit `cf0a79b176d99eb183368818ce90ac5731d1cfa8`；run `E9-2026-09-04T02-49-18-960Z-cf0a79b1` 29/29 pass；summary SHA-256 `d4c15f6801e6df4289dad97b816036a095a21e5781a314f1f3166ab663f3ca4a`。DEC-052 后该证据只保留历史身份，不再是 owner 审批候选；修订实现仍需 dirty provisional、clean 29 步 canonical 和新 evidence 登记。
+Pre-revision evidence：implementation commit `cf0a79b176d99eb183368818ce90ac5731d1cfa8`；run `E9-2026-09-04T02-49-18-960Z-cf0a79b1` 29/29 pass；summary SHA-256 `d4c15f6801e6df4289dad97b816036a095a21e5781a314f1f3166ab663f3ca4a`。DEC-052 后该证据只保留历史身份，不再是 owner 审批候选。
+
+Revised evidence：implementation commit `13614673bbf4d824f2ee109d36e04de6b3f8aabd`；dirty provisional `E9-2026-09-04T03-47-53-947Z-951824c6-provisional` 29/29 pass；clean run `E9-2026-09-04T03-51-33-088Z-13614673` 29/29 pass；summary SHA-256 `a9d195fba7715213366068143a12977600e5e166b93064cd532012ff7f992b7c`。自动化门禁完成，E9 等待 owner 人工复核。
 
 ## 5. Test and Eval Commands
 

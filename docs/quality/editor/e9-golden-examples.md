@@ -5,7 +5,7 @@ last_reviewed: 2026-09-04
 upstream_docs:
   - "docs/quality/editor/e9-eval-plan.md"
   - "docs/delivery/editor/acceptance-criteria.md"
-next_action: "以修订后的 unit 与双浏览器 E2E 消费 E9-G01–G11"
+next_action: "等待 owner 复核已通过 revised canonical 的 E9-G01–G11 视觉结果"
 ---
 
 # Editor E9 Golden Examples

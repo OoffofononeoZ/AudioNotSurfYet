@@ -4,14 +4,14 @@ owner: "project-owner"
 last_reviewed: 2026-09-04
 upstream_docs:
   - "AGENTS.md"
-next_action: "实施 DEC-052 紧凑 BPM 标记条并形成 E9 revised canonical"
+next_action: "等待 owner 复核 E9 revised canonical 与紧凑 BPM 标记条人工门禁"
 ---
 
 # Repository Context Index
 
 ## Purpose
 
-AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端。Editor E1–E8 已获批准并关闭；E8 的 25/25 clean canonical 保留为历史。Editor E9 的首个 29/29 clean run 已完成，但 owner 在人工复核中要求用紧贴波形的 28px BPM 标记条替代独立模块，因此该 run 保留为 `pre-revision`，E9 继续 `In Progress`。Analyzer M14 已交付 21 张折叠卡的全局自定义顺序、可访问排序和 V1 顺序持久化，最多四项 FIFO 保持独立。Visualizer V1–V6 canonical 与人工门禁均已获 owner 批准并关闭。
+AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端。Editor E1–E8 已获批准并关闭；E8 的 25/25 clean canonical 保留为历史。Editor E9 的 28px 紧凑 BPM 标记条已完成 revised 29/29 clean canonical，evidence 为 `in-review`，E9 继续 `In Progress` 等待 owner 人工门禁；首个独立模块 run 保留为 `pre-revision`。Analyzer M14 已交付 21 张折叠卡的全局自定义顺序、可访问排序和 V1 顺序持久化，最多四项 FIFO 保持独立。Visualizer V1–V6 canonical 与人工门禁均已获 owner 批准并关闭。
 
 本目录维护仓库事实、边界和工作记忆；生命周期路由与通用方法由 [AGENTS.md](../../AGENTS.md) 负责。当前代码事实与目标架构必须区分：现状见 [system map](system-map.md)，批准的目标见 [system design](../architecture/system-design.md)。
 
@@ -21,8 +21,8 @@ AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端。Editor E1–
 - Product intent：Analyzer/Editor 历史范围与 Visualizer V0 均已批准；PROD-014V 已关闭，PROD-022 保留为非阻断未来问题。
 - System design：Analyzer、Visualizer 与 Editor E1–E8 历史设计保持已批准基线；ADR-0019 保留删除语义，ADR-0020 已批准紧凑 BPM 标记条，不升级 JSON V1。
 - Execution planning：M1–M14、Editor E0-D/E1–E8、Visualizer V0-D/V1–V6 均为 `Complete`；Editor E9 为 `In Progress`。
-- Quality and evals：M3–M14、Editor E1–E8 与 Visualizer V1–V6 evidence 均已批准；E9 首个 run `E9-2026-09-04T02-49-18-960Z-cf0a79b1` 为 29/29、`pre-revision`，等待新 implementation commit 上的 revised canonical。
-- Implementation：Editor E9 的删除、三级展示与标记修订已在 commit `cf0a79b176d99eb183368818ce90ac5731d1cfa8` 实现；DEC-052 紧凑条尚待交付。E8 与 Visualizer V1–V6 保持已完成。post-V6 viewport 修订已在 clean commit `9f3b55beaa0c8a3d799f3f1e16f1dd66c9aee77c` 通过 Chrome/Edge 专项。
+- Quality and evals：M3–M14、Editor E1–E8 与 Visualizer V1–V6 evidence 均已批准；E9 revised run `E9-2026-09-04T03-51-33-088Z-13614673` 为 29/29、`in-review`，首个 run `E9-2026-09-04T02-49-18-960Z-cf0a79b1` 保持 `pre-revision`。
+- Implementation：Editor E9 的删除、三级展示、28px 紧凑 BPM 标记条和标记修订已在 commit `13614673bbf4d824f2ee109d36e04de6b3f8aabd` 实现并通过 revised canonical。E8 与 Visualizer V1–V6 保持已完成。post-V6 viewport 修订已在 clean commit `9f3b55beaa0c8a3d799f3f1e16f1dd66c9aee77c` 通过 Chrome/Edge 专项。
 - Readiness、release、retrospective：Analyzer M14 为 `Ready with waivers`；PROD-015 仍阻断上线，Editor readiness 独立。
 
 ## Key Documents

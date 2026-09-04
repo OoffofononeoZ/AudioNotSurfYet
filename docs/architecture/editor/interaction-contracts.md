@@ -6,7 +6,7 @@ upstream_docs:
   - "docs/product/scope.md"
   - "docs/architecture/system-design.md"
   - "docs/architecture/interface-contracts.md"
-next_action: "按 ADR-0020 交付 28px 紧凑 BPM 标记条并复跑双浏览器 geometry"
+next_action: "等待 owner 复核 28px 紧凑 BPM 标记条的双浏览器 geometry"
 ---
 
 # Editor Interaction Contracts
@@ -149,5 +149,7 @@ idle + drag start/end handle
 2026-09-04，owner 以 E9 完整实施指令批准 ADR-0019：tempo boundary 与区间编辑移入专用 BPM 轨道；删除内部 boundary 时前段向右延伸；区间展示按单行可用宽度在完整、摘要、隐藏间切换。该修订不改变秒数事实或 JSON V1。
 
 同日，owner 在首个 E9 候选复核后批准 ADR-0020：删除独立 66px tempo row，把 28px BPM 标记条并入波形时间列；caret/辅助线只向上指向波形，重复左侧标签移除，直接编辑改为 11px 无框紧凑控件。ADR-0019 的删除、继承、共享滚动和秒数事实继续有效。
+
+DEC-052 实现 commit `13614673bbf4d824f2ee109d36e04de6b3f8aabd` 的 Chrome/Edge revised canonical 已验证零间隙、12px 向上 guide、单滚动、三级展示、删除与刷新恢复；evidence 保持 `in-review`。
 
 2026-09-03，owner 以 E8 实施指令批准同歌曲自动重试、异歌显式切换、`88px/72px` 时间轴与 point 中心对齐契约。implementation commit `84d9435cc6e8d1edb0932ff1b8dcd1b84dff32b5` 的 25/25 clean canonical 通过，owner 随后批准 evidence 与人工门禁，E8 关闭。

@@ -6,7 +6,7 @@ upstream_docs:
   - "docs/quality/editor/e9-eval-plan.md"
   - "docs/quality/editor/e8-failure-taxonomy.md"
   - "docs/architecture/risk-register.md"
-next_action: "以 revised canonical 排除紧凑条拓扑、指向与控件密度失败"
+next_action: "等待 owner 复核自动化未替代的紧凑条视觉失败边界"
 ---
 
 # Editor E9 Failure Taxonomy
