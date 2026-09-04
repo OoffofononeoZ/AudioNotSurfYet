@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-09-04",
+  "generatorVersion": "editor-e9-tempo-lane-v1",
+  "tempoMap": [
+    {
+      "id": "tempo-0",
+      "startSeconds": 0,
+      "mode": "metered",
+      "bpm": 100,
+      "bpmSource": "user",
+      "meter": { "numerator": 4, "denominator": 4 }
+    },
+    {
+      "id": "tempo-40",
+      "startSeconds": 40,
+      "mode": "metered",
+      "bpm": 128,
+      "bpmSource": "user",
+      "meter": { "numerator": 7, "denominator": 8 }
+    },
+    {
+      "id": "tempo-57",
+      "startSeconds": 57,
+      "mode": "single-beat"
+    }
+  ],
+  "durationSeconds": 146.866,
+  "presentationCases": [
+    { "available": 420, "full": 420, "summary": 112, "expected": "full" },
+    { "available": 419.999, "full": 420, "summary": 112, "expected": "summary" },
+    { "available": 112, "full": 420, "summary": 112, "expected": "summary" },
+    { "available": 111.999, "full": 420, "summary": 112, "expected": "hidden" },
+    { "available": -1, "full": 420, "summary": 112, "expected": "hidden" }
+  ]
+}

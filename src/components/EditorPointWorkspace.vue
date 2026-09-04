@@ -1,5 +1,5 @@
 <template>
-    <section ref="workspace" class="point-workspace" data-testid="editor-point-workspace" data-editor-major-region="true" aria-labelledby="point-workspace-title">
+    <section ref="workspace" class="point-workspace app-scrollbar" data-testid="editor-point-workspace" data-editor-major-region="true" aria-labelledby="point-workspace-title">
         <header class="workspace-heading">
             <div class="workspace-titleline">
                 <span class="workspace-kicker">Point & Range</span>
@@ -122,9 +122,7 @@
                             class="point-candidate"
                             :style="candidateStyle(lane.id, innerClass.id)"
                             aria-hidden="true"
-                        >
-                            <span class="candidate-pin" :style="candidatePinStyle(lane.id, innerClass.id)" />
-                        </span>
+                        />
                         <button
                             v-for="event in visibleEvents(lane, innerClass.id)"
                             :key="event.id"
@@ -576,30 +574,13 @@ const viewportPercent = (seconds: number) =>
     / Math.max(1e-9, viewport.value.endSeconds - viewport.value.startSeconds) * 100;
 const markerStyle = (seconds: number) => ({ left: `${viewportPercent(seconds)}%` });
 const candidateStyle = (laneId: string, innerClassId: string) => {
-    const cell = cellFor(laneId, innerClassId);
     const active = candidate.value;
     if (
-        !cell
-        || !active
+        !active
         || active.laneId !== laneId
         || active.innerClassId !== innerClassId
     ) return {};
-    const halfSpan = Math.max(1e-9, cell.endSeconds - cell.startSeconds) / 2;
-    return {
-        left: `${viewportPercent(active.timeSeconds - halfSpan)}%`,
-        right: `${100 - viewportPercent(active.timeSeconds + halfSpan)}%`,
-    };
-};
-const candidatePinStyle = (laneId: string, innerClassId: string) => {
-    const cell = cellFor(laneId, innerClassId);
-    const active = candidate.value;
-    if (
-        !cell
-        || !active
-        || active.laneId !== laneId
-        || active.innerClassId !== innerClassId
-    ) return {};
-    return { left: '50%' };
+    return { left: `${viewportPercent(active.timeSeconds)}%` };
 };
 const visibleEvents = (lane: PointLaneV1, innerClassId: string) =>
     visibleSurfaceKeys.value.has(surfaceKey(lane.id, innerClassId))
@@ -1124,8 +1105,8 @@ onBeforeUnmount(() => {
 <style scoped>
 .point-workspace {
     position: relative;
-    margin-top: 1px;
-    border-top: 1px solid var(--editor-divider-strong, rgba(72,255,151,.28));
+    margin-top: 0;
+    border-top: 0;
     border-bottom: 1px solid var(--editor-divider-strong, rgba(72,255,151,.28));
     border-radius: 0;
     padding: 0;
@@ -1208,7 +1189,7 @@ button:disabled { opacity: .4; cursor: not-allowed; }
 }
 .lane-meta label { display: none; }
 .lane-meta input { grid-column: 1; grid-row: 1; min-width: 0; min-height: 26px; height: 26px; }
-.lane-meta button { grid-column: 2; grid-row: 1; min-height: 26px; height: 26px; padding-inline: 5px; }
+.lane-meta button { grid-column: 2; grid-row: 1; place-self: center end; display: inline-flex; align-items: center; justify-content: center; min-height: 26px; height: 26px; padding: 0 5px; line-height: 1; }
 .lane-kind { grid-column: 1 / -1; grid-row: 2; overflow: hidden; color: #65ffa9; font-size: .62rem; letter-spacing: .04em; text-overflow: ellipsis; white-space: nowrap; }
 .inner-class-cell {
     grid-column: 2;
@@ -1235,18 +1216,17 @@ button:disabled { opacity: .4; cursor: not-allowed; }
 .point-candidate {
     position: absolute;
     z-index: 2;
-    top: 5px;
-    bottom: 5px;
-    min-width: 6px;
-    border: 1px solid rgba(101,255,169,.92);
-    border-radius: 8px;
-    background: rgba(101,255,169,.12);
-    box-shadow: 0 0 14px rgba(71,255,151,.16);
+    top: 4px;
+    bottom: 4px;
+    width: 3px;
+    border: 0;
+    border-radius: 0;
+    background: #65ffa9;
+    box-shadow: none;
     pointer-events: none;
-    transform: scaleY(1.04);
-    transition: transform 120ms ease, background 120ms ease;
+    transform: translateX(-50%);
+    transition: none;
 }
-.candidate-pin { position: absolute; top: 0; bottom: 0; width: 1px; background: #eafff2; transform: translateX(-50%); }
 .point-marker {
     position: absolute;
     z-index: 4;
@@ -1325,6 +1305,6 @@ button:disabled { opacity: .4; cursor: not-allowed; }
     .workspace-help { display: none; }
 }
 @media (prefers-reduced-motion: reduce) {
-    .point-candidate { transition: none; transform: none; }
+    .point-candidate { transition: none; }
 }
 </style>
