@@ -6,7 +6,7 @@ upstream_docs:
   - "docs/product/scope.md"
   - "docs/architecture/system-design.md"
   - "docs/architecture/interface-contracts.md"
-next_action: "E9 删除内部 tempo boundary 继续使用 JSON V1 数组删除语义；验证 round-trip 与事件秒数稳定"
+next_action: "E9 JSON V1 删除 round-trip 与 point/range 秒数稳定已验证；等待 owner 门禁"
 ---
 
 # Editor Project Format V1

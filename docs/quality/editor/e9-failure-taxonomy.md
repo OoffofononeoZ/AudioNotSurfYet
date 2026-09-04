@@ -6,7 +6,7 @@ upstream_docs:
   - "docs/quality/editor/e9-eval-plan.md"
   - "docs/quality/editor/e8-failure-taxonomy.md"
   - "docs/architecture/risk-register.md"
-next_action: "按 E9 taxonomy 分类 provisional/canonical 失败；不得通过改写 E8 evidence 或放宽秒数事实过门禁"
+next_action: "E9 29/29 canonical 无未解决失败；保留 taxonomy 供 owner 复核和后续回归"
 ---
 
 # Editor E9 Failure Taxonomy

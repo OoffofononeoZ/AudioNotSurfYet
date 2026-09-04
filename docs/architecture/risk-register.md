@@ -5,7 +5,7 @@ last_reviewed: 2026-09-04
 upstream_docs:
   - "docs/architecture/system-design.md"
   - "docs/architecture/interface-contracts.md"
-next_action: "以 E9 unit/integration/双浏览器 geometry 和 owner 视觉任务验证 R-042"
+next_action: "E9 自动化 geometry 与删除证据已通过；以 owner 视觉任务完成 R-042 最终复核"
 ---
 
 # Risk Register

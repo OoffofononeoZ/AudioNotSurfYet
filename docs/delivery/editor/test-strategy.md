@@ -8,7 +8,7 @@ upstream_docs:
   - "docs/architecture/risk-register.md"
   - "docs/delivery/editor/execution-plan.md"
   - "docs/delivery/editor/acceptance-criteria.md"
-next_action: "实现 E9 unit/integration/Chrome/Edge，并运行 29 步 provisional/canonical"
+next_action: "E9 29 步 canonical 已通过；保留 artifact 并等待 owner 视觉门禁"
 ---
 
 # Editor E1–E9 Test Strategy
@@ -124,7 +124,7 @@ npm run eval:eN:provisional
 npm run eval:eN
 ```
 
-E1–E8 命令已经存在、通过 clean canonical 并获批准。E9 新增 unit、integration、Chrome、Edge、双浏览器与 29 步 runner；`eval:e9:provisional` 可在 dirty worktree 运行，`eval:e9` 必须拒绝 dirty worktree。package、测试 README、本项目 Skill 与实际 runner 保持一致。
+E1–E8 命令已经存在、通过 clean canonical 并获批准。E9 已新增 unit、integration、Chrome、Edge、双浏览器与 29 步 runner；`eval:e9:provisional` 可在 dirty worktree 运行，`eval:e9` 拒绝 dirty worktree。clean run `E9-2026-09-04T02-49-18-960Z-cf0a79b1` 已 29/29 通过；package、测试 README、本项目 Skill 与实际 runner 保持一致。
 
 固定流程：
 
@@ -142,3 +142,5 @@ E1–E8 命令已经存在、通过 clean canonical 并获批准。E9 新增 uni
 `project-owner` 于 2026-08-26 批准本文并开放 E1，随后逐项批准 E1–E7。2026-09-03 的 E8 实施指令批准本策略扩展并开放 E8；已有 scoped/provisional 反馈通过，V5 独立提交后 owner 允许单独提交 E8。clean canonical `E8-2026-09-03T04-07-28-904Z-84d9435c` 25/25 通过并获 owner 批准；Editor release-readiness review 仍是独立门禁。
 
 2026-09-04，owner 的 E9 完整实施指令批准 shared BPM lane、删除语义、三级单行展示、双浏览器矩阵和 29 步 canonical。E9 只增加版本化 geometry/presentation golden，不增加音频 fixture；E8 历史 artifact 不重写。
+
+同日 clean canonical 在 Chrome `152.0.7977.76` 与 Edge `152.0.4191.62` 上完成；两端覆盖 390/1024/1280/1920、DPR 1/2、最大共享几何误差 `0.009375 CSS px`，10 次路由往返的 live Observer/Canvas 基线不变。测试策略验证已完成，人工视觉判断仍由 owner 承担。

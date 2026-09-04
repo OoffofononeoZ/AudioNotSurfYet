@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/product/scope.md"
   - "docs/product/success-metrics.md"
   - "docs/product/open-questions.md"
-next_action: "实施 ADR-0019 的 Editor E9 专用 BPM 轨道与内部 boundary 删除；保持 JSON V1 和秒数事实不变"
+next_action: "E9 架构实现与 29/29 canonical 已验证；等待 owner 视觉门禁，保持 JSON V1 和秒数事实不变"
 ---
 
 # System Design

@@ -6,7 +6,7 @@ upstream_docs:
   - "docs/product/scope.md"
   - "docs/architecture/system-design.md"
   - "docs/architecture/interface-contracts.md"
-next_action: "按 ADR-0019 实施 E9 BPM 轨道、三级区间展示与 boundary 删除，并执行双浏览器 geometry 回归"
+next_action: "E9 BPM 轨道、三级展示与删除已通过双浏览器 geometry 回归；等待 owner 视觉确认"
 ---
 
 # Editor Interaction Contracts

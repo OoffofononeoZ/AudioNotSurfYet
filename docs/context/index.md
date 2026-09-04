@@ -4,14 +4,14 @@ owner: "project-owner"
 last_reviewed: 2026-09-04
 upstream_docs:
   - "AGENTS.md"
-next_action: "实施 Editor E9 BPM 轨道、boundary 删除与标记可用性；完成 29 步 clean canonical 后等待 owner 视觉确认"
+next_action: "复核 Editor E9 29/29 canonical，并完成 BPM 轨道与标记交互的 owner 视觉确认"
 ---
 
 # Repository Context Index
 
 ## Purpose
 
-AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端。Editor E1–E8 已获批准并关闭；E8 的 25/25 clean canonical 保留为历史。DEC-051/ADR-0019 已批准 Editor E9 专用 BPM 轨道、内部 boundary 删除与标记可用性修订，E9 为 `In Progress`。Analyzer M14 已交付 21 张折叠卡的全局自定义顺序、可访问排序和 V1 顺序持久化，最多四项 FIFO 保持独立。Visualizer V1–V6 canonical 与人工门禁均已获 owner 批准并关闭。
+AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端。Editor E1–E8 已获批准并关闭；E8 的 25/25 clean canonical 保留为历史。Editor E9 已交付专用 BPM 轨道、内部 boundary 删除与标记可用性修订，29/29 clean canonical 已登记为 `in-review`，E9 仍为 `In Progress`。Analyzer M14 已交付 21 张折叠卡的全局自定义顺序、可访问排序和 V1 顺序持久化，最多四项 FIFO 保持独立。Visualizer V1–V6 canonical 与人工门禁均已获 owner 批准并关闭。
 
 本目录维护仓库事实、边界和工作记忆；生命周期路由与通用方法由 [AGENTS.md](../../AGENTS.md) 负责。当前代码事实与目标架构必须区分：现状见 [system map](system-map.md)，批准的目标见 [system design](../architecture/system-design.md)。
 
@@ -21,8 +21,8 @@ AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端。Editor E1–
 - Product intent：Analyzer/Editor 历史范围与 Visualizer V0 均已批准；PROD-014V 已关闭，PROD-022 保留为非阻断未来问题。
 - System design：Analyzer、Visualizer 与 Editor E1–E8 历史设计保持已批准基线；ADR-0019 已批准并只修订 Editor tempo 交互，不升级 JSON V1。
 - Execution planning：M1–M14、Editor E0-D/E1–E8、Visualizer V0-D/V1–V6 均为 `Complete`；Editor E9 为 `In Progress`。
-- Quality and evals：M3–M14、Editor E1–E8 与 Visualizer V1–V6 evidence 均已批准；E9 quality contract 已批准但尚无 canonical evidence。
-- Implementation：Editor E9 待实现；E8 与 Visualizer V1–V6 保持已完成。post-V6 viewport 修订已在 clean commit `9f3b55beaa0c8a3d799f3f1e16f1dd66c9aee77c` 通过 Chrome/Edge 专项。
+- Quality and evals：M3–M14、Editor E1–E8 与 Visualizer V1–V6 evidence 均已批准；E9 clean canonical `E9-2026-09-04T02-49-18-960Z-cf0a79b1` 为 29/29、`in-review`。
+- Implementation：Editor E9 已在 commit `cf0a79b176d99eb183368818ce90ac5731d1cfa8` 实现；等待 owner 视觉门禁。E8 与 Visualizer V1–V6 保持已完成。post-V6 viewport 修订已在 clean commit `9f3b55beaa0c8a3d799f3f1e16f1dd66c9aee77c` 通过 Chrome/Edge 专项。
 - Readiness、release、retrospective：Analyzer M14 为 `Ready with waivers`；PROD-015 仍阻断上线，Editor readiness 独立。
 
 ## Key Documents
