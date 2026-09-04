@@ -58,17 +58,19 @@
                         :class="{
                             'is-candidate': isActiveCandidate(lane.id, innerClass.id),
                             'is-pending': isPendingSurface(lane.id, innerClass.id),
+                            'is-block-mode': blockMode,
                         }"
                         :style="{ gridRow: innerIndex + 1 }"
                         :data-testid="`range-surface-${lane.id}-${innerClass.id}`"
                         :data-lane-id="lane.id"
                         :data-inner-class-id="innerClass.id"
+                        :data-candidate-seconds="candidate?.laneId === lane.id && candidate?.innerClassId === innerClass.id ? candidate.timeSeconds : undefined"
                         tabindex="0"
                         role="application"
                         :aria-label="`${lane.name}，${innerClass.label} 范围区域。第一次点击选择起点，第二次点击更晚位置完成。`"
                         @contextmenu.prevent
                         @dragstart.prevent
-                        @pointerdown="onSurfacePointerDown($event, lane.id, innerClass.id)"
+                        @pointerdown.capture="onSurfacePointerDown($event, lane.id, innerClass.id)"
                         @pointermove="onSurfacePointerMove"
                         @pointerup="onSurfacePointerUp"
                         @pointercancel="cancelSurfacePointer"
@@ -82,6 +84,15 @@
                             class="range-grid-canvas"
                             aria-hidden="true"
                         />
+                        <span
+                            v-if="blockSelectionFor(lane.id, innerClass.id)"
+                            class="marker-block-selection"
+                            :class="{ 'is-preview': Boolean(blockPreview) }"
+                            :style="blockSelectionStyle(lane.id, innerClass.id)"
+                            aria-hidden="true"
+                        >
+                            <span>{{ blockSelectionCount }} 个 · {{ blockSelectionLabel }}</span>
+                        </span>
                         <span
                             v-if="candidateFor(lane.id, innerClass.id)"
                             class="range-candidate"
@@ -238,6 +249,11 @@ import {
     visibleRangeEvents,
 } from '../editor/rangeAnnotations';
 import { movePointCell, type PointCell } from '../editor/pointAnnotations';
+import {
+    markerBlockEventCount,
+    selectMarkerBlockByMeasures,
+    type MarkerBlockSelection,
+} from '../editor/markerBlockOperations';
 import { generateTempoGrid } from '../editor/tempoMap';
 import {
     centerEditorViewport,
@@ -258,10 +274,16 @@ import type { PersistedTimelineViewport } from '../types/session';
 const props = defineProps<{
     project: EditorProjectV1;
     playback: PlaybackSnapshot;
+    blockMode: boolean;
+    blockSelection: MarkerBlockSelection | null;
+    blockPreview: MarkerBlockSelection | null;
 }>();
 const emit = defineEmits<{
     updateProject: [project: EditorProjectV1, immediate: boolean];
     status: [message: string];
+    selectBlock: [selection: MarkerBlockSelection];
+    previewBlockMove: [selection: MarkerBlockSelection | null];
+    commitBlockMove: [selection: MarkerBlockSelection, targetStartSeconds: number];
 }>();
 
 const audioSession = useAudioSessionService();
@@ -295,6 +317,35 @@ const formatTime = (seconds: number) => {
 };
 const formatDuration = (range: RangeEventV1) =>
     `${Math.max(0, range.endSeconds - range.startSeconds).toFixed(3)}s`;
+const displayedBlockSelection = computed(() => props.blockPreview ?? props.blockSelection);
+const blockSelectionCount = computed(() => {
+    const selection = props.blockSelection ?? displayedBlockSelection.value;
+    if (!selection) return 0;
+    try {
+        return markerBlockEventCount(props.project, selection);
+    } catch {
+        return 0;
+    }
+});
+const blockSelectionLabel = computed(() => {
+    const selection = displayedBlockSelection.value;
+    return selection
+        ? `${formatTime(selection.startSeconds)}–${formatTime(selection.endSeconds)}`
+        : '';
+});
+const blockSelectionFor = (laneId: string, innerClassId: string) => {
+    const selection = displayedBlockSelection.value;
+    return selection?.laneId === laneId && selection.innerClassId === innerClassId
+        ? selection
+        : null;
+};
+const blockSelectionStyle = (laneId: string, innerClassId: string) => {
+    const selection = blockSelectionFor(laneId, innerClassId);
+    if (!selection) return {};
+    const left = Math.max(0, Math.min(100, viewportPercent(selection.startSeconds)));
+    const right = Math.max(0, Math.min(100, viewportPercent(selection.endSeconds)));
+    return { left: `${left}%`, right: `${Math.max(0, 100 - right)}%` };
+};
 
 const setSurfaceRef = (
     laneId: string,
@@ -630,12 +681,14 @@ const pointFromSurface = (event: PointerEvent) => {
     const bounds = element.getBoundingClientRect();
     const x = Math.max(0, Math.min(bounds.width, event.clientX - bounds.left));
     const y = Math.max(0, Math.min(bounds.height, event.clientY - bounds.top));
+    const timeSeconds = editorXToTime(x, viewport.value, bounds.width);
     return {
         element,
         x,
         y,
+        timeSeconds,
         cell: rangeCellAtTime(
-            editorXToTime(x, viewport.value, bounds.width),
+            timeSeconds,
             props.project,
             bounds.width,
         ),
@@ -654,6 +707,11 @@ interface SurfacePointerState {
     latestViewport: PersistedTimelineViewport;
     moved: boolean;
     pendingAtStart: boolean;
+    action: 'normal' | 'select-block' | 'move-block';
+    anchorSeconds?: number;
+    dragOffsetSeconds?: number;
+    selectionAtStart?: MarkerBlockSelection;
+    targetStartSeconds?: number;
 }
 const surfacePointer = ref<SurfacePointerState | null>(null);
 const quickMenu = ref<{
@@ -668,9 +726,72 @@ const onSurfacePointerDown = (
     innerClassId: string,
 ) => {
     if (event.button !== 0 && event.button !== 2) return;
-    if ((event.target as HTMLElement).closest('button, input, select')) return;
     quickMenu.value = null;
     const point = pointFromSurface(event);
+    if (props.blockMode) {
+        event.preventDefault();
+        event.stopPropagation();
+        pending.value = null;
+        if (event.button === 0) {
+            const selection = props.blockSelection;
+            if (
+                !selection
+                || selection.laneId !== laneId
+                || selection.innerClassId !== innerClassId
+                || point.timeSeconds < selection.startSeconds
+                || point.timeSeconds >= selection.endSeconds
+            ) {
+                report('左键拖动必须从当前选区内开始。');
+                return;
+            }
+            surfacePointer.value = {
+                id: event.pointerId,
+                laneId,
+                innerClassId,
+                surfaceKey: surfaceKey(laneId, innerClassId),
+                element: point.element,
+                button: event.button,
+                startX: point.x,
+                startViewport: viewport.value,
+                latestViewport: viewport.value,
+                moved: false,
+                pendingAtStart: false,
+                action: 'move-block',
+                dragOffsetSeconds: point.timeSeconds - selection.startSeconds,
+                selectionAtStart: { ...selection },
+            };
+        } else {
+            try {
+                emit('selectBlock', selectMarkerBlockByMeasures(
+                    props.project,
+                    laneId,
+                    innerClassId,
+                    point.timeSeconds,
+                ));
+            } catch (error) {
+                report(error instanceof Error ? error.message : '无法选择当前小节。');
+                return;
+            }
+            surfacePointer.value = {
+                id: event.pointerId,
+                laneId,
+                innerClassId,
+                surfaceKey: surfaceKey(laneId, innerClassId),
+                element: point.element,
+                button: event.button,
+                startX: point.x,
+                startViewport: viewport.value,
+                latestViewport: viewport.value,
+                moved: false,
+                pendingAtStart: false,
+                action: 'select-block',
+                anchorSeconds: point.timeSeconds,
+            };
+        }
+        point.element.setPointerCapture(event.pointerId);
+        return;
+    }
+    if ((event.target as HTMLElement).closest('button, input, select')) return;
     activateCell(laneId, innerClassId, point.cell);
     surfacePointer.value = {
         id: event.pointerId,
@@ -684,6 +805,7 @@ const onSurfacePointerDown = (
         latestViewport: viewport.value,
         moved: false,
         pendingAtStart: Boolean(pending.value),
+        action: 'normal',
     };
     point.element.setPointerCapture(event.pointerId);
 };
@@ -698,6 +820,51 @@ const onSurfacePointerMove = (event: PointerEvent) => {
     }
     if (active.id !== event.pointerId) return;
     const point = pointFromSurface(event);
+    if (active.action === 'select-block') {
+        try {
+            emit('selectBlock', selectMarkerBlockByMeasures(
+                props.project,
+                active.laneId,
+                active.innerClassId,
+                active.anchorSeconds ?? point.timeSeconds,
+                point.timeSeconds,
+            ));
+        } catch (error) {
+            report(error instanceof Error ? error.message : '无法扩展小节选区。');
+        }
+        return;
+    }
+    if (active.action === 'move-block') {
+        const selection = active.selectionAtStart;
+        if (!selection) return;
+        if (Math.abs(point.x - active.startX) < EDITOR_CONTEXT_PAN_THRESHOLD_PX) return;
+        active.moved = true;
+        const rawTarget = point.timeSeconds - (active.dragOffsetSeconds ?? 0);
+        const cell = rangeCellAtTime(
+            rawTarget,
+            props.project,
+            point.element.getBoundingClientRect().width,
+        );
+        if (!cell) {
+            active.targetStartSeconds = undefined;
+            emit('previewBlockMove', null);
+            return;
+        }
+        const length = selection.endSeconds - selection.startSeconds;
+        const targetEnd = cell.timeSeconds + length;
+        if (targetEnd > props.project.track.durationSeconds) {
+            active.targetStartSeconds = undefined;
+            emit('previewBlockMove', null);
+            return;
+        }
+        active.targetStartSeconds = cell.timeSeconds;
+        emit('previewBlockMove', {
+            ...selection,
+            startSeconds: cell.timeSeconds,
+            endSeconds: targetEnd,
+        });
+        return;
+    }
     if (active.button === 2) {
         if (active.pendingAtStart) return;
         if (Math.abs(point.x - active.startX) >= EDITOR_CONTEXT_PAN_THRESHOLD_PX) {
@@ -734,6 +901,11 @@ const cancelPending = (message = '已取消待选范围。') => {
 const cancelSurfacePointer = () => {
     const active = surfacePointer.value;
     if (!active) return;
+    if (active.action !== 'normal') {
+        emit('previewBlockMove', null);
+        clearSurfacePointer();
+        return;
+    }
     if (active?.moved) {
         applyProject({
             ...props.project,
@@ -745,6 +917,7 @@ const cancelSurfacePointer = () => {
     quickMenu.value = null;
 };
 const advanceRangeCreation = (laneId: string, innerClassId: string) => {
+    if (props.blockMode) return;
     const cell = cellFor(laneId, innerClassId);
     if (!cell) {
         report('当前 Tempo 区间还没有可用网格。');
@@ -792,6 +965,22 @@ const onSurfacePointerUp = (event: PointerEvent) => {
     const active = surfacePointer.value;
     if (!active || active.id !== event.pointerId) return;
     const point = pointFromSurface(event);
+    if (active.action === 'select-block') {
+        clearSurfacePointer();
+        return;
+    }
+    if (active.action === 'move-block') {
+        if (!active.moved) {
+            // A click inside the selection keeps it selected without committing.
+        } else if (active.selectionAtStart && active.targetStartSeconds !== undefined) {
+            emit('commitBlockMove', active.selectionAtStart, active.targetStartSeconds);
+        } else {
+            report('目标区间不可用，标记保持原位。');
+        }
+        emit('previewBlockMove', null);
+        clearSurfacePointer();
+        return;
+    }
     if (active.button === 0) {
         activateCell(active.laneId, active.innerClassId, point.cell);
         advanceRangeCreation(active.laneId, active.innerClassId);
@@ -876,6 +1065,7 @@ const onSurfaceKeydown = (
     laneId: string,
     innerClassId: string,
 ) => {
+    if (event.defaultPrevented || props.blockMode) return;
     if (event.key === 'Enter' || event.key === ' ') {
         event.preventDefault();
         activateInitialCandidate(laneId, innerClassId);
@@ -930,6 +1120,7 @@ const focusRange = (
     innerClassId: string,
     range: RangeEventV1,
 ) => {
+    if (props.blockMode) return;
     focusedRange = {
         laneId,
         innerClassId,
@@ -945,6 +1136,7 @@ const removeRange = (
     innerClassId: string,
     range: RangeEventV1,
 ) => {
+    if (props.blockMode) return;
     try {
         candidate.value = { laneId, innerClassId, timeSeconds: range.startSeconds };
         applyProject(deleteRangeEvent(props.project, laneId, range.id));
@@ -961,6 +1153,7 @@ const onRangeKeydown = (
     innerClassId: string,
     range: RangeEventV1,
 ) => {
+    if (event.defaultPrevented || props.blockMode) return;
     if (event.key === 'Delete' || event.key === 'Backspace') {
         event.preventDefault();
         removeRange(laneId, innerClassId, range);
@@ -977,6 +1170,7 @@ const beginHandleDrag = (
     range: RangeEventV1,
     endpoint: Endpoint,
 ) => {
+    if (props.blockMode) return;
     if (event.button !== 0) return;
     const element = event.currentTarget as HTMLButtonElement;
     handleDrag.value = {
@@ -1070,6 +1264,7 @@ const onHandleKeydown = (
     range: RangeEventV1,
     endpoint: Endpoint,
 ) => {
+    if (event.defaultPrevented || props.blockMode) return;
     if (event.key === 'Delete' || event.key === 'Backspace') {
         event.preventDefault();
         removeRange(laneId, innerClassId, range);
@@ -1094,6 +1289,7 @@ const onHandleKeydown = (
 };
 
 const menuSeek = (play: boolean) => {
+    if (props.blockMode) return;
     const time = quickMenu.value?.timeSeconds;
     quickMenu.value = null;
     if (time === undefined) return;
@@ -1103,6 +1299,7 @@ const menuSeek = (play: boolean) => {
     });
 };
 const menuCenter = () => {
+    if (props.blockMode) return;
     const time = quickMenu.value?.timeSeconds;
     quickMenu.value = null;
     if (time === undefined) return;
@@ -1167,6 +1364,16 @@ const clearInteraction = () => {
 watch(
     () => [props.project.tempoMap, props.project.workspace.viewport, rangeLanes.value.length],
     () => void nextTick(drawAllGrids),
+);
+watch(
+    () => props.blockMode,
+    () => {
+        cancelSurfacePointer();
+        cancelHandleDrag();
+        pending.value = null;
+        quickMenu.value = null;
+        emit('previewBlockMove', null);
+    },
 );
 watch(
     () => [viewport.value.startSeconds, viewport.value.endSeconds],
@@ -1287,7 +1494,35 @@ button:disabled { opacity: .4; cursor: not-allowed; }
     touch-action: none;
     user-select: none;
 }
+.range-surface.is-block-mode { cursor: cell; }
 .range-grid-canvas { position: absolute; inset: 0; pointer-events: none; }
+.marker-block-selection {
+    position: absolute;
+    z-index: 3;
+    top: 2px;
+    bottom: 2px;
+    min-width: 2px;
+    overflow: hidden;
+    border: 1px solid rgba(101, 255, 169, .88);
+    background: rgba(53, 255, 143, .12);
+    pointer-events: none;
+}
+.marker-block-selection.is-preview {
+    border-style: dashed;
+    background: rgba(53, 255, 143, .2);
+}
+.marker-block-selection > span {
+    position: absolute;
+    top: 2px;
+    left: 4px;
+    overflow: hidden;
+    max-width: calc(100% - 8px);
+    color: #dfffee;
+    font-size: .62rem;
+    line-height: 1;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
 .range-candidate {
     position: absolute;
     z-index: 2;
