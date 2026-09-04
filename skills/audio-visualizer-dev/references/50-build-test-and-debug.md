@@ -128,6 +128,7 @@
 - M6 当前 Meyda 的 `spectralFlux` 对有效输入抛出 `x is not defined`；已用预期失败测试和 R-020 固定，不能把 21 项 registry 误述为 21 项均可计算。
 - M6 dirty-worktree provisional 与 clean-commit canonical 均已 20/20 通过；正式 evidence 已登记，并由 `project-owner` 于 2026-07-30 批准，M6 已关闭。
 - M7–M11 已获批准并关闭。M11 clean canonical `M11-2026-08-25T10-05-12-783Z-99c67792` 在 commit `99c67792509d07456bcb431b90468252f8b0fdc3` 上 38/38 通过；Edge 原生权限、辅助技术与最终加固于 2026-08-26 获 owner 签字。Analyzer readiness 已获 `Ready with waivers` 批准。Editor E1–E9 clean canonical 与人工门禁均已获批准；E7 旧 44/44 与 E9 首个 29/29 run 均保留为 `pre-revision`。E9 DEC-052 implementation `13614673bbf4d824f2ee109d36e04de6b3f8aabd` 的 revised run `E9-2026-09-04T03-51-33-088Z-13614673` 已 29/29 通过并获 owner 批准。
+- Editor readiness provisional 已在相同 runtime source tree 上 24/24 通过但不是 clean evidence；clean attempt 的非浏览器 14 步通过，10 个 browser steps 因沙箱端口权限未启动。DEC-055 后不再由 agent 申请沙箱外重跑，当前状态是 `in-review / owner-review`；不得将环境阻断记为 canonical pass。
 
 ## 构建风险
 

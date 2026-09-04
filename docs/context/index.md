@@ -4,7 +4,7 @@ owner: "project-owner"
 last_reviewed: 2026-09-04
 upstream_docs:
   - "AGENTS.md"
-next_action: "执行 Editor release-readiness 24 步当前候选审计并登记证据"
+next_action: "由 owner 自行审阅 Editor browser evidence gap、W-ED-001–W-ED-006 与 Ready with waivers 结论"
 ---
 
 # Repository Context Index
