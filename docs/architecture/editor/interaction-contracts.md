@@ -1,12 +1,12 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-09-03
+last_reviewed: 2026-09-04
 upstream_docs:
   - "docs/product/scope.md"
   - "docs/architecture/system-design.md"
   - "docs/architecture/interface-contracts.md"
-next_action: "E8 契约已获 owner 验收；相关交互或几何变化时重跑专项与相邻回归"
+next_action: "按 ADR-0019 实施 E9 BPM 轨道、三级区间展示与 boundary 删除，并执行双浏览器 geometry 回归"
 ---
 
 # Editor Interaction Contracts
@@ -14,7 +14,7 @@ next_action: "E8 契约已获 owner 验收；相关交互或几何变化时重�
 ## Page and Layer Topology
 
 - 页面保留共享 Header；有效 Editor track 时隐藏 MusicBar，并在 Editor 顶部提供精简播放/暂停、当前时间和 repeat-one 状态。空状态或无效 route target 保留 MusicBar。
-- Editor 内容分为基底编辑层和窗口级半透明 overlay 层。基底层从上到下是歌曲信息/波形/导入导出、tempo boundary 与输入、lane 列表；overlay root 固定覆盖整个 viewport，图形仅在 lane 可标记时间列对应的屏幕横向范围内绘制。
+- Editor 内容分为基底编辑层和窗口级半透明 overlay 层。基底层从上到下是歌曲信息/波形、与波形对齐的 BPM 轨道、lane 列表；overlay root 固定覆盖整个 viewport，图形仅在 lane 可标记时间列对应的屏幕横向范围内绘制。
 - 每个 lane 使用对齐的三段结构：名称/事件类型、全部展开的 inner class、与波形和 tempo 网格共享横向几何的标记区。左侧宽度是布局变量，所有横向时间层使用扣除该宽度后的同一 CSS rect。
 - 波形与 lane 不各自滚动横向时间；共享 viewport 是唯一横向状态。inner class 不设内层滚动条，长页使用页面级纵向滚动。
 - 不可用 route 在同一歌曲恢复可用后自动重试进入，但不得播放；若当前可播放歌曲与 route 不同，只显示包含歌曲名的“编辑当前歌曲”入口，用户点击后才替换 route。
@@ -86,10 +86,13 @@ idle + drag start/end handle
 - 初始 project 有歌曲开始/结束固定边界；结束前显示 add handle。单击 add handle 时优先使用播放 cursor，否则使用 viewport 中点；拖动后在 snapped 时间插入内部 boundary。
 - `BPM` 表示当前拍号单位的一拍每分钟次数：相邻 beat 固定为 `60 / BPM` 秒；numerator 决定每小节的 beat 数，denominator 只表达该 beat 的音符单位，不再按四分音符二次缩放。
 - 前一 segment 有合法 metered BPM 时，新增或移动 boundary 按当前可见 subdivision 吸附；BPM 为空或 segment 为 single-beat 时，没有 beat 网格，使用 `xToTime()` 后的微秒规范化原始时间。
-- 新 segment 继承前一 segment 的 metered/single-beat 值。首版内部 boundary 可水平拖动但不可跨越相邻 boundary，且不提供删除。
+- 新 segment 继承前一 segment 的 metered/single-beat 值。内部 boundary 可水平拖动但不可跨越相邻 boundary；右键或焦点状态 Delete/Backspace 删除目标 segment，前一 segment 向右延伸。0 秒首 boundary 与歌曲结束边界固定且不可删除。
 - 初始 metered segment 为 4/4、`bpm: null`、source unset；输入框显示 `bpm: 100` placeholder。只有一个 segment、仍为空且未被用户编辑时，才允许可靠 tempo estimate 填值。
 - 输入 20–300 进入/保持 metered；输入 `0 <= value < 20` 规范为 single-beat并隐藏 meter；无效输入不提交。切回 metered 需要显式选择 metered 并输入合法 BPM，不从旧 single-beat 数值猜测。
 - 修改 tempo 只重绘网格与改变后续 snap；现有 point/range 秒数不移动。
+- tempo boundary 不再覆盖波形；专用 BPM 轨道与波形使用同一 viewport 和唯一水平滚动容器。真实 boundary 显示向上 caret、下方时间与 1px 分隔线；相邻 boundary 之间显示 BPM/拍号。
+- 区间可容纳完整控件时直接编辑；只能容纳单行摘要时显示摘要；摘要也放不下时不显示区间内容。判断使用同页自然宽度测量并禁止换行，zoom/resize 后重新计算；隐藏区间不能隐藏真实 boundary。
+- 删除后清理目标 segment 的输入草稿和错误，flush 现有 autosave 并使 tempo estimate 结果失效；公共 `aria-live` 状态区播报删除或拒绝原因。
 
 ## Waveform and Seek
 
@@ -141,5 +144,7 @@ idle + drag start/end handle
 本交互契约于 2026-08-26 随 Editor system design 创建，并由 `project-owner` 随后批准进入 E1–E6 execution planning。Delivery 必须把上述成功、失败、边界和异常路径映射到可执行验收；delivery 获批前不得实现。
 
 同日，owner 在开放 E2 时进一步确认：一个 beat 固定为 `60/BPM` 秒，拍号分母只表达音符单位；无合法 metered BPM 时 tempo boundary 按微秒规范化原始时间定位。该澄清登记为 DEC-026，不改变 JSON V1 或 ADR-0008 的秒数事实。
+
+2026-09-04，owner 以 E9 完整实施指令批准 ADR-0019：tempo boundary 与区间编辑移入专用 BPM 轨道；删除内部 boundary 时前段向右延伸；区间展示按单行可用宽度在完整、摘要、隐藏间切换。该修订不改变秒数事实或 JSON V1。
 
 2026-09-03，owner 以 E8 实施指令批准同歌曲自动重试、异歌显式切换、`88px/72px` 时间轴与 point 中心对齐契约。implementation commit `84d9435cc6e8d1edb0932ff1b8dcd1b84dff32b5` 的 25/25 clean canonical 通过，owner 随后批准 evidence 与人工门禁，E8 关闭。

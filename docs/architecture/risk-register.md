@@ -5,7 +5,7 @@ last_reviewed: 2026-09-04
 upstream_docs:
   - "docs/architecture/system-design.md"
   - "docs/architecture/interface-contracts.md"
-next_action: "V6 canonical 与人工门禁已批准，R-041 已缓解；进入 Visualizer readiness review"
+next_action: "以 E9 unit/integration/双浏览器 geometry 和 owner 视觉任务验证 R-042"
 ---
 
 # Risk Register
@@ -55,6 +55,7 @@ next_action: "V6 canonical 与人工门禁已批准，R-041 已缓解；进入 V
 | R-039 | WebGL context lost 让预览空白或录制生成不完整文件 | Medium | High | `webglcontextlost`、恢复后参数/时间错位、录制仍显示成功 | V4 同 host preview recovery；V5 clean canonical 在 Chrome/Edge 注入录制中 context loss，均暂停、丢弃半文件、资源归零并由原 host 恢复，loss/restore/failure 为 1/1/0；owner 已批准 context 清理门禁 | 未完成录制绝不进入 ready/save；RendererHost、context 或录制 cleanup 顺序变化时重开 | project-owner | Mitigated |
 | R-040 | MediaRecorder/MIME、origin-clean 或时钟差异导致无音轨、不可回放或音画漂移 | Medium | High | `isTypeSupported` 失败、captureStream SecurityError、ffprobe 缺轨、漂移 >100ms | V5 clean canonical 的 Chrome/Edge 默认 720p30 均生成 VP9+Opus 双轨 WebM；页面静音后 peak RMS `0.766425`，Orthogonal A/V 峰值差为 2ms/3ms，错误和取消不产出半文件；owner 已批准真实回放与原生保存门禁 | optional preset 保持 typed unavailable；codec、浏览器、capture/tap 或保存实现变化时重开 | project-owner | Mitigated |
 | R-041 | 1080p60 实时录制造成掉帧、内存峰值或 Blob 过大 | High | High | selected preset 达不到 fps、分析归因任务 >50ms、Visualizer frame >=60ms、内存/Blob 持续增长、finalize 失败 | 固定 bitrate、录制锁与单 Blob 生命周期；V5 只开放默认 720p30；V6 关闭 MSAA、使用 `motion` hint 并优化等价 Cube 计算，三格式仍要求平均 30fps `±5%`，DEC-048 只容忍最多四帧 packet gap 与 `<60ms` Visualizer 峰值 | V6 clean canonical `V6-2026-09-03T16-33-03-497Z-ef12ce39` 54/54 通过，六个默认文件、900 秒四特征、资源门禁及 owner 长时制作/原生保存回放均已批准；三个 optional preset 继续在资源获取前 typed unavailable | project-owner | Mitigated |
+| R-042 | BPM 输入与波形使用不同滚动/几何，或 boundary 删除/窄区间展示破坏节拍事实与可用性 | Medium | High | tempo caret 与波形相差 >1 CSS px；出现双水平滚动；控件换行；删错 segment/首 boundary；事件秒数变化；右键/键盘不可达 | ADR-0019 单 viewport/scroll、纯 `removeTempoBoundary`、三级单行展示、右键与键盘等价；E9 golden、unit/integration、Chrome/Edge 四视口/DPR 和 owner 视觉任务 | 任一事实、geometry 或可访问性失败阻断 E9 关闭；不以隐藏控件、修改事件秒数或放宽 JSON validator 规避 | project-owner | Open |
 
 ## Review Rule
 
@@ -62,7 +63,7 @@ next_action: "V6 canonical 与人工门禁已批准，R-041 已缓解；进入 V
 - 风险只有在缓解措施有可复现证据时才能标记 Mitigated。
 - `Accepted` 表示已知平台事实被接受，不表示无需实现降级路径。
 - 新的高影响风险或剩余风险超过已批准范围时，停止进入下一里程碑并由 `project-owner` 决策。
-- Analyzer R-001–R-021 的历史状态继续由 M3–M11 evidence 支持；R-028–R-030 由 M13、R-031–R-033 由 M14 clean canonical 缓解。Editor E8 只重开 R-022、R-024、R-025；R-023、R-026、R-027 的历史缓解状态不变，且 Editor 与 Visualizer 草案互不改写。
+- Analyzer R-001–R-021 的历史状态继续由 M3–M11 evidence 支持；R-028–R-030 由 M13、R-031–R-033 由 M14 clean canonical 缓解。Editor E8 只重开 R-022、R-024、R-025；E9 以新 R-042 覆盖 tempo lane/delete 变化并回归 R-023–R-026，历史 canonical 与风险证据不改写。
 - `project-owner` 于 2026-09-02 批准 Visualizer V0 架构、R-034–R-041 与 ADR-0014–0017，并开放 V1–V6 execution planning。V1–V6 的可复现证据和 owner 审批现已完成，R-034–R-041 均为 `Mitigated`；整体 readiness 和生产上线仍需独立决策。
 - Visualizer V1 clean canonical `V1-2026-09-02T07-03-26-973Z-fd44c892` 在 commit `fd44c8921a534c22b2362ccffff7ec9e46f3ff02` 上 21/21 通过，并于 2026-09-02 获 owner 人工批准；R-034 据此改为 `Mitigated`。V2 clean canonical `V2-2026-09-02T08-46-21-778Z-769faafe` 26/26 通过并于同日获 owner 批准，R-035、R-036 据此改为 `Mitigated`。V3 clean canonical `V3-2026-09-02T13-32-42-513Z-89be30eb` 在 implementation commit `89be30eb23d4e53d2c38f24e111cd1af7ec0840d` 上 30/30 通过；`project-owner` 于 2026-09-03 批准 canonical、Orthogonal Lines、确定性余辉和单 RendererHost，R-037、R-038 据此改为 `Mitigated` 并开放 V4。V4 clean canonical `V4-2026-09-02T17-47-40-271Z-5c2d24a3` 34/34 通过并于 2026-09-03 获 owner 批准、关闭 V4；它覆盖 R-039 的实时预览恢复，但录制中 context loss 尚未实现，因此 R-039 保持 `Open` 并在 V5 继续验证。
 - V5 clean canonical `V5-2026-09-03T03-49-31-211Z-9b5af09c` 在 implementation commit `9b5af09c5846415a8e5465e710e6095f1e7db310` 上 40/40 通过；默认 720p30 双浏览器、同步、录制中 context abort、命令锁、资源清理与 owner 人工门禁均已批准。R-039/R-040 据此改为 `Mitigated`，R-041 继续交由 V6 的 15 分钟四特征与最终资源门禁。

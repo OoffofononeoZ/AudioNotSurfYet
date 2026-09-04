@@ -1,7 +1,7 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-09-01
+last_reviewed: 2026-09-04
 upstream_docs:
   - "docs/product/success-metrics.md"
   - "docs/architecture/interface-contracts.md"
@@ -9,10 +9,10 @@ upstream_docs:
   - "docs/architecture/editor/project-format-v1.md"
   - "docs/architecture/editor/interaction-contracts.md"
   - "docs/delivery/editor/execution-plan.md"
-next_action: "AC-E801–AC-E805 已由 clean canonical 与 owner 门禁批准；E8 已关闭"
+next_action: "以 E9 unit/integration/双浏览器验证 AC-E901–AC-E905；canonical 后等待 owner 视觉门禁"
 ---
 
-# Editor E1–E8 Acceptance Criteria
+# Editor E1–E9 Acceptance Criteria
 
 ## 1. Evidence Rules
 
@@ -111,8 +111,20 @@ next_action: "AC-E801–AC-E805 已由 clean canonical 与 owner 门禁批准；
 | AC-E804 | 事件预期 X、marker button、菱形与候选框中心误差均 `<=1 CSS px`，菱形 Y 中心误差同样 `<=1 CSS px`；覆盖四视口、zoom、pan 与 DPR | pure geometry + `getBoundingClientRect()` dual-browser probe | R-024 |
 | AC-E805 | 波形导航、tempo、边界、point/range、键盘、全屏 overlay 与 MusicBar 互斥回归通过；Chrome/Edge 无 `pageerror` 或异常 console；E1/E2/E3/E7 与 M5 恢复相关测试、typecheck/build/docs/diff check 通过 | E8 25 步 runner + adjacent regression + owner task | R-022–R-025, R-027 |
 
-## 10. Milestone Exit Rule
+## 10. E9 — Tempo Lane and Marker Interaction
+
+| ID | Criterion | Verification | Risk |
+| --- | --- | --- | --- |
+| AC-E901 | 波形只保留 waveform/grid/cursor/add；BPM 轨道在同一时间 rect 显示真实 boundary caret、下方时间和 1px 分隔线，四视口/DPR/zoom/pan 下与波形误差 `<=1 CSS px` | geometry unit + Chrome/Edge DOM/Canvas probe | R-024, R-042 |
+| AC-E902 | 波形与 BPM 轨道共享唯一 viewport 和窄屏水平滚动；区间按自然单行宽度依次显示完整编辑、摘要、隐藏，任何模式不换行且 boundary 不因内容隐藏而消失 | pure presentation golden + resize/scroll E2E | R-025, R-042 |
+| AC-E903 | 右键或 Delete/Backspace 删除内部 boundary，前段向右延伸；首 boundary、歌曲结尾和未知 ID 不改变 map；删除不移动任何 point/range 秒数 | tempo unit/property + integration + browser task | R-023, R-024, R-042 |
+| AC-E904 | 删除清理对应 draft/error、使旧 tempo estimate stale、flush autosave 并由 `aria-live` 播报；刷新和 JSON V1 round-trip 精确恢复，失败不部分写入 | controller/repository integration + keyboard E2E | R-023, R-026, R-042 |
+| AC-E905 | “+分类”内容双轴居中，point candidate 是无框/无影的 3px 绿色竖线，Timeline/PointWorkspace 之间只有一条 divider；E1–E8、keyboard/focus/reduced-motion、console/pageerror 和资源回归通过 | computed style + 29 步 canonical + owner visual task | R-024, R-025, R-042 |
+
+## 11. Milestone Exit Rule
 
 每个里程碑只能在其全部适用 AC、有明确成功/失败/边界/异常证据、相关风险复核、clean canonical 和 owner 批准后关闭。本 AC 于 2026-08-26 获 `project-owner` 批准；E1 开放实施不构成 AC-E101–AC-E108 已通过。
 
 AC-E801–AC-E805 于 2026-09-03 随 owner 的 E8 实施指令获批。已有 dirty-worktree 通过结果只标记 scoped/provisional；V5 独立提交后 owner 允许单独提交 E8。clean canonical `E8-2026-09-03T04-07-28-904Z-84d9435c` 25/25 通过，owner 随后批准 canonical 与人工门禁；E8 已关闭。
+
+AC-E901–AC-E905 于 2026-09-04 随 owner 的 E9 完整实施指令获批。实现、29/29 clean canonical、evidence 登记和 owner 视觉任务完成前，E9 保持 `In Progress`。

@@ -1,17 +1,17 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-09-01
+last_reviewed: 2026-09-04
 upstream_docs:
   - "docs/product/success-metrics.md"
   - "docs/architecture/interface-contracts.md"
   - "docs/architecture/risk-register.md"
   - "docs/delivery/editor/execution-plan.md"
   - "docs/delivery/editor/acceptance-criteria.md"
-next_action: "E8 25 步 clean canonical 与 owner 门禁已批准；后续相关变更触发复跑"
+next_action: "实现 E9 unit/integration/Chrome/Edge，并运行 29 步 provisional/canonical"
 ---
 
-# Editor E1–E8 Test Strategy
+# Editor E1–E9 Test Strategy
 
 ## 1. Objectives
 
@@ -75,6 +75,7 @@ Editor 测试体系必须回答：
 | E6 | full regression | stress/resource/recovery | full + native manual | full + native manual |
 | E7 | compact tokens、visibility/default/active set | preference/import/cache/cancel | density、fixed fullscreen、menu、scroll/geometry/pointer-through | 同 Chrome 矩阵 |
 | E8 | 88/72 vertical geometry、recovery resolver、marker center | exact recovery、stale generation、draft atomicity | 四视口/DPR、同/异歌恢复、zoom/pan marker | 同 Chrome 矩阵 |
+| E9 | boundary 删除/继承、展示阈值、shared x | autosave/JSON V1/stale/error cleanup | tempo lane、单滚动、右键/键盘、视觉细节 | 同 Chrome 矩阵 |
 
 每个里程碑同时回归与其变更相邻的 Analyzer 播放、session、Worker、route、Canvas 和资源契约。E6 运行 E1–E6 全量及 M3–M11 关键回归；E8 固定回归 E1/E2/E3/E7 与 M5 恢复，不篡改历史 canonical 身份。
 
@@ -113,7 +114,7 @@ E6/E7 运行时复用约 15 分钟工程：20 lanes、每 lane 最多 8 inner cl
 
 ## 8. Planned Commands and Evidence Cadence
 
-E1–E8 每个里程碑计划新增：
+E1–E9 每个里程碑计划新增：
 
 ```text
 npm run test:eN:unit
@@ -123,7 +124,7 @@ npm run eval:eN:provisional
 npm run eval:eN
 ```
 
-E1–E7 命令已经存在、通过 clean canonical 并获批准。E8 新增 unit、integration、Chrome、Edge、双浏览器与 25 步 runner；`eval:e8:provisional` 可在 dirty worktree 运行，`eval:e8` 必须拒绝 dirty worktree。package、测试 README、本项目 Skill 与实际 runner 保持一致，不保留指向不存在文件的兼容别名。
+E1–E8 命令已经存在、通过 clean canonical 并获批准。E9 新增 unit、integration、Chrome、Edge、双浏览器与 29 步 runner；`eval:e9:provisional` 可在 dirty worktree 运行，`eval:e9` 必须拒绝 dirty worktree。package、测试 README、本项目 Skill 与实际 runner 保持一致。
 
 固定流程：
 
@@ -139,3 +140,5 @@ E1–E7 命令已经存在、通过 clean canonical 并获批准。E8 新增 uni
 ## 9. Current Planning Gate
 
 `project-owner` 于 2026-08-26 批准本文并开放 E1，随后逐项批准 E1–E7。2026-09-03 的 E8 实施指令批准本策略扩展并开放 E8；已有 scoped/provisional 反馈通过，V5 独立提交后 owner 允许单独提交 E8。clean canonical `E8-2026-09-03T04-07-28-904Z-84d9435c` 25/25 通过并获 owner 批准；Editor release-readiness review 仍是独立门禁。
+
+2026-09-04，owner 的 E9 完整实施指令批准 shared BPM lane、删除语义、三级单行展示、双浏览器矩阵和 29 步 canonical。E9 只增加版本化 geometry/presentation golden，不增加音频 fixture；E8 历史 artifact 不重写。

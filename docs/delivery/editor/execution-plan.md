@@ -1,7 +1,7 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-09-01
+last_reviewed: 2026-09-04
 upstream_docs:
   - "docs/product/scope.md"
   - "docs/product/success-metrics.md"
@@ -10,16 +10,16 @@ upstream_docs:
   - "docs/architecture/risk-register.md"
   - "docs/architecture/editor/project-format-v1.md"
   - "docs/architecture/editor/interaction-contracts.md"
-next_action: "E8 已通过 clean canonical 与 owner 门禁并关闭；Editor readiness 另行复核"
+next_action: "交付 E9 BPM 轨道、boundary 删除和标记视觉；运行 dirty provisional 后提交实现"
 ---
 
-# Editor E1–E8 Execution Plan
+# Editor E1–E9 Execution Plan
 
 ## 1. Delivery Outcome
 
-把已批准的 Editor“逆向制曲”架构按 E1–E8 纵向切片交付：E1–E6 已完成入口、运行时、工程、时间轴、点/范围标注、分析叠加及最终加固；E7 把页面收敛为紧凑工作台；E8 修正共享时间轴高度、不可用歌曲恢复状态与 point marker 中心几何。
+把已批准的 Editor“逆向制曲”架构按 E1–E9 纵向切片交付：E1–E8 保持已关闭历史；E9 把 tempo boundary 和 BPM 输入整合为共享时间几何的专用轨道，并补齐删除与标记可用性。
 
-本计划只覆盖 Editor，不重新打开已完成的 Analyzer 历史 canonical。`project-owner` 于 2026-08-26 批准 E1–E6 delivery，于 2026-08-28 开放 E7，并于 2026-09-03 以实施指令批准 E8。E1–E8 历史 evidence 保持不变；E8 关闭后，Editor readiness 可按独立门禁复核。
+本计划只覆盖 Editor，不重新打开已完成的 Analyzer、Visualizer 或 Editor E1–E8 canonical。`project-owner` 于 2026-09-04 以完整实施指令批准 DEC-051/ADR-0019 和 E9 quality contract；E9 canonical 与人工门禁通过前不创建 Editor readiness 结论。
 
 ## 2. Delivery Principles
 
@@ -192,6 +192,22 @@ Exit gate:
 - E1/E2/E3/E7 与 M5 恢复相关回归、typecheck、build、docs 和 diff check 通过且无 pageerror/异常 console。
 - Visualizer V5 已独立提交，owner 已允许随后单独提交 E8；E8 implementation commit 与 25/25 clean canonical 已完成。owner 又批准 canonical 与人工门禁，R-022/R-024/R-025 已改为 `Mitigated`，E8 已标为 `Complete`。
 
+### E9 — Tempo Lane and Marker Interaction
+
+Implementation:
+
+- 从波形 stage 移除 tempo boundary DOM 和独立 BPM card scroller，增加与波形共享 viewport、时间映射和窄屏外层滚动的专用 BPM 轨道。
+- 真实 boundary 使用 caret、时间标签与竖直分隔线；相邻 boundary 之间按自然单行宽度显示完整表单、摘要或隐藏内容。
+- 增加纯 `removeTempoBoundary()`；内部 boundary 右键与 Delete/Backspace 删除，前段向右延伸，首 boundary/歌曲结尾固定，point/range 秒数不变。
+- 分类按钮双轴居中；point candidate 改为 3px 绿色竖线；Timeline 与 PointWorkspace 只保留一条横向分隔线；本次触及的 Editor 滚动容器复用 `.app-scrollbar`。
+
+Verification and exit:
+
+- Unit 覆盖删除、继承、幂等、三级宽度和共享 geometry；integration 覆盖 autosave、round-trip、草稿/error cleanup、stale estimate 和事件秒数稳定。
+- Chrome/Edge 覆盖 390/1024/1280/1920、DPR 1/2、zoom/pan、单滚动、右键/键盘、刷新、无换行、视觉细节、console/pageerror 和资源生命周期。
+- dirty provisional 通过后创建 implementation commit；clean E9 canonical 固定为 E8 25 步基线加 E9 unit/integration/Chrome/Edge，共 29 步。
+- canonical 登记后 E9 仍为 `In Progress`、evidence `in-review`、R-042 `Open`，直到 owner 完成视觉/交互任务。
+
 ## 5. Test and Eval Commands
 
 E1 已实现、通过并获 owner 批准；以下为真实命令：
@@ -214,7 +230,7 @@ npm run eval:eN:provisional
 npm run eval:eN
 ```
 
-其中 `N` 为 5–8。E8 另提供 `test:e2e:e8:chrome`、`test:e2e:e8:edge` 与合并命令。canonical 必须拒绝 dirty worktree，并记录 run ID、commit、环境、步骤结果、日志和 summary SHA-256。E1–E8 clean canonical 与 owner approval 均保留为历史证据。
+其中 `N` 为 5–9。E9 提供独立 Chrome/Edge 与合并命令；`eval:e9` 必须拒绝 dirty worktree并执行 29 步。canonical 记录 run ID、commit、环境、步骤结果、日志和 summary SHA-256。E1–E8 clean canonical 与 owner approval 均保留为历史证据。
 
 ## 6. Change Control and Exclusions
 
@@ -256,3 +272,5 @@ npm run eval:eN
 同日，owner 明确先批准 E6，再要求实施 E7 紧凑工作台。E6 据此关闭；E7 只改变布局密度和区域视觉，不改变 E1–E6 的公共契约。Editor readiness 延后到 E7 获批。
 
 2026-09-03，owner 以 E8 完整实施指令批准本计划扩展、ADR-0018、AC-E801–AC-E805 与 E8 quality 契约并开放实施。Visualizer V5 独立提交后，owner 明确允许随后单独提交 E8。implementation commit `84d9435cc6e8d1edb0932ff1b8dcd1b84dff32b5` 与 25/25 clean canonical 完成后，owner 又批准 evidence 与人工门禁；E8 据此改为 `Complete`。
+
+2026-09-04，owner 以完整 E9 实施指令批准 DEC-051、ADR-0019、AC-E901–AC-E905 与 E9 quality contract。E9 据此进入 `In Progress`；本批准不替代 implementation、29/29 clean canonical 或 owner 视觉任务。
