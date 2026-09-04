@@ -5,7 +5,7 @@ last_reviewed: 2026-09-04
 upstream_docs:
   - "docs/quality/editor/e9-eval-plan.md"
   - "docs/delivery/editor/acceptance-criteria.md"
-next_action: "等待 owner 复核已通过 revised canonical 的 E9-G01–G11 视觉结果"
+next_action: "E9-G01–G11 已通过 canonical 与 owner 门禁；在 readiness 中保持回归"
 ---
 
 # Editor E9 Golden Examples
@@ -25,3 +25,5 @@ next_action: "等待 owner 复核已通过 revised canonical 的 E9-G01–G11 �
 | E9-G11 | upward boundary guide | 任一真实 boundary | caret 与波形底边无可见间隙；1px guide 从接缝向上伸入波形 12px且不向下贯穿；时间紧贴 caret 下方 | 固定 owner 指定的指向与密度 |
 
 golden 只保存确定性 tempo/viewport/required-width 数值，不保存用户截图、私有音频或依赖平台字体的绝对测量。运行时用同一页面的自然宽度作为 full/summary 阈值。
+
+2026-09-04，`project-owner` 批准 revised E9 视觉与交互结果；本 golden 集随 E9 关闭并作为 Editor readiness 的已批准基线。

@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/product/scope.md"
   - "docs/architecture/system-design.md"
   - "docs/delivery/execution-plan.md"
-next_action: "等待 owner 复核 E9 revised canonical；Visualizer readiness 仍独立保持 in-review"
+next_action: "定义并执行 Editor release-readiness 当前候选审计；Visualizer readiness 仍独立保持 in-review"
 ---
 
 # Decision Registry
@@ -86,6 +86,7 @@ next_action: "等待 owner 复核 E9 revised canonical；Visualizer readiness �
 | DEC-050 | 2026-09-04 | Visualizer 在支持的 `>=1024px` 桌面视口中固定占一个 `100dvh`，document/body 不纵向滚动，左右侧栏独立滚动且阻止 scroll chaining；Analyzer 精确值表样式抽取为共享 `.app-scrollbar`，本次只迁移 Analyzer 表与 Visualizer，后续新增或修改的可见滚动容器必须复用 | project-owner | approved | [Viewport scroll eval](../quality/visualizer/viewport-scroll-eval-plan.md) | 支持断点、页面/侧栏滚动所有权、共享样式或例外范围改变 |
 | DEC-051 | 2026-09-04 | 实施 Editor E9：BPM 轨道与波形共享滚动/时间几何，区间按单行可用宽度在完整编辑、摘要、隐藏间切换，内部 boundary 支持右键和键盘删除；E8 canonical 保持历史不变 | project-owner | approved | [Editor E9 eval](../quality/editor/e9-eval-plan.md) | E9 范围、展示阈值、删除继承语义、29 步 canonical 或完成门禁改变 |
 | DEC-052 | 2026-09-04 | 修订 Editor E9：旧 29/29 run 保留为 `pre-revision`；删除独立 tempo row，将 28px BPM 标记条并入波形时间列，移除重复左侧标签并保留唯一滚动、三级展示和删除语义 | project-owner | approved | [ADR-0020](../architecture/adrs/0020-editor-compact-tempo-strip.md) | 紧凑条几何、输入样式、旧 evidence 状态、29 步 revised canonical 或 owner 门禁改变 |
+| DEC-053 | 2026-09-04 | 批准 E9 revised 29/29 canonical 与紧凑 BPM 条、向上标记、无框输入、共享滚动、删除语义、分类按钮、候选线和单分隔线人工门禁；保持 canonical identity 不变，E9 改为 Complete、R-042 改为 Mitigated并开放 Editor release-readiness | project-owner | approved | [Editor evidence](../quality/editor/evidence-index.md) | E9 canonical identity、owner review 结论、R-042 或 readiness 开放边界改变 |
 
 ## Approval Evidence
 
@@ -122,6 +123,8 @@ DEC-050 随后在独立 clean implementation commit `9f3b55beaa0c8a3d799f3f1e16f
 同日，owner 在 E9 首个 29/29 候选的人工复核中要求取消独立 66px tempo 模块，把 BPM 信息压缩为紧贴波形的 28px 标记条；辅助线只向上指向波形，移除重复左侧标签，并以 11px 无框行内控件继续直接编辑。随后 owner 明确要求实施完整修订计划，DEC-052/ADR-0020 据此获批。旧 run `E9-2026-09-04T02-49-18-960Z-cf0a79b1` 保留为 `pre-revision` 且 artifact 不改写；E9、R-042 和 Editor readiness 门禁均不提前关闭。
 
 DEC-052 的 implementation commit `13614673bbf4d824f2ee109d36e04de6b3f8aabd` 已形成；clean revised canonical `E9-2026-09-04T03-51-33-088Z-13614673` 29/29 通过，summary SHA-256 为 `a9d195fba7715213366068143a12977600e5e166b93064cd532012ff7f992b7c`。该执行事实只把当前 evidence 推进为 `in-review`；E9 仍为 `In Progress`、R-042 仍为 `Open`，等待 owner 人工门禁。
+
+同日，`project-owner` 明确要求“批准已有的修改”，并随后批准完整 E9 正式关闭与 Editor release-readiness 评审计划。DEC-053 据此把该批准登记为紧凑 BPM 条、箭头方向、无框输入、共享滚动、删除语义、分类按钮、候选线和单分隔线人工门禁通过；不补写未提供的主观数值。implementation `13614673bbf4d824f2ee109d36e04de6b3f8aabd`、evidence registration `299502d`、run、29/29 结果与 summary SHA-256 均保持不变且无需重跑。E9 evidence 改为 `approved`、E9 改为 `Complete`、R-042 改为 `Mitigated`；旧 E9 run 继续为 `pre-revision`。该批准只开放 Editor release-readiness 评审，不构成 readiness、整体产品或生产上线批准。
 
 同日，`project-owner` 明确要求实施 Q0 质量设计计划，批准了 Q0 前置、四级严重度和 readiness 后置的阶段安排；同时要求三份质量文档先保持 `in-review`，经单独审阅后才生效。因此 DEC-010 的时序决定已批准，但 Q0 内容尚未批准。
 

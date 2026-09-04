@@ -8,7 +8,7 @@ upstream_docs:
   - "docs/delivery/editor/acceptance-criteria.md"
   - "docs/delivery/editor/test-strategy.md"
   - "docs/quality/editor/e8-eval-plan.md"
-next_action: "等待 owner 复核 revised canonical 与紧凑 BPM 标记条人工门禁"
+next_action: "E9 evidence 已批准；在 Editor release-readiness 中回归当前候选"
 ---
 
 # Editor E9 Eval Plan
@@ -33,7 +33,7 @@ E9 只评价波形时间列内的紧凑 BPM 标记条、内部 tempo boundary �
 - `eval:e9:provisional` 允许 dirty worktree，只生成本地 artifact。
 - `eval:e9` 必须在起止同一 clean implementation commit 上运行，固定为 E8 25 步基线加 E9 unit、integration、Chrome、Edge，共 29 步。
 - 记录 commit、run ID、Node/npm、真实 Chrome/Edge 版本、四视口/DPR 几何、交互结果、步骤日志和 summary SHA-256。
-- canonical 登记后 E9 仍为 `In Progress`、evidence `in-review`、R-042 `Open`，直到 owner 完成视觉和交互任务。
+- canonical 登记后曾保持 `In Progress`；owner 已完成视觉和交互任务，E9 evidence 为 `approved`、R-042 为 `Mitigated`。
 
 ## Pre-revision Evidence
 
@@ -51,8 +51,10 @@ E9 只评价波形时间列内的紧凑 BPM 标记条、内部 tempo boundary �
 - Browser：Chrome `152.0.7977.76`、Edge `152.0.4191.62`；390/1024/1280/1920、DPR 1/2 最大 boundary 误差 `0.009375 CSS px`。
 - Geometry：strip/status 均为 `28px`，waveform/caret gap `0`，guide `1×12px` 且 bottom error `0`，重复 tempo rail `0`；窄屏只有 outer scroller。
 - Resource：两浏览器各 10 次 Editor/Analyzer 往返，live ResizeObserver `3–3`、Canvas `4–4`。
-- Review state：`in-review`；E9 仍为 `In Progress`、R-042 保持 `Open`，等待 owner 人工门禁。
+- Review state：`approved`；owner 已批准人工门禁，E9 为 `Complete`、R-042 为 `Mitigated`。
 
 ## Manual Gate
 
 Owner 在 Chrome/Edge 确认“+分类”居中、candidate 绿色竖线、28px BPM 条融入波形且 caret/辅助线向上指向、11px 无框输入可用、重复左 rail 消失、共享滚动对齐、缩放时完整/摘要/隐藏合理、右键删除为前段延伸、板块间只有一条横线。自动化不能替代该视觉判断。
+
+`project-owner` 于 2026-09-04 批准上述人工门禁；不补写未提供的主观数值。本计划和 canonical identity 保持不变。
