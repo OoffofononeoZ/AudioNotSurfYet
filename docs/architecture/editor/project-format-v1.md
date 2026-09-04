@@ -6,7 +6,7 @@ upstream_docs:
   - "docs/product/scope.md"
   - "docs/architecture/system-design.md"
   - "docs/architecture/interface-contracts.md"
-next_action: "E9 JSON V1 删除 round-trip 与 point/range 秒数稳定已验证；等待 owner 门禁"
+next_action: "以 E9 revised canonical 复核紧凑视图不改变 JSON V1 round-trip 与事件秒数"
 ---
 
 # Editor Project Format V1
@@ -201,3 +201,5 @@ interface EditorDraftEnvelopeV1 {
 本契约于 2026-08-26 随 Editor system design 创建，并由 `project-owner` 随后批准进入 E1–E6 execution planning。E1 只能在 delivery 获批后把它实现为 TypeScript 类型、validator、codec 和 repository；源码存在本身不能替代 schema round-trip、failure 和 boundary evidence。
 
 2026-09-04 的 ADR-0019 只增加现有 `tempoMap` 数组的内部 segment 删除命令，不新增字段、迁移或 fallback；既有 V1 文件可无转换直接读取。
+
+同日 ADR-0020 只改变 `tempoMap` 的 Editor 视图与控件密度；28px 标记条、caret/辅助线和无框输入均不进入 JSON V1，不改变 codec、validator、ID、BPM/meter/source 或事件秒数。

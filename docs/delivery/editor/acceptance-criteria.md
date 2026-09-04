@@ -9,7 +9,7 @@ upstream_docs:
   - "docs/architecture/editor/project-format-v1.md"
   - "docs/architecture/editor/interaction-contracts.md"
   - "docs/delivery/editor/execution-plan.md"
-next_action: "AC-E901–AC-E905 自动化证据 29/29 通过；等待 owner 视觉门禁"
+next_action: "在 E9 revised canonical 中重新验证 AC-E901–AC-E905 的紧凑条契约"
 ---
 
 # Editor E1–E9 Acceptance Criteria
@@ -115,11 +115,11 @@ next_action: "AC-E901–AC-E905 自动化证据 29/29 通过；等待 owner 视�
 
 | ID | Criterion | Verification | Risk |
 | --- | --- | --- | --- |
-| AC-E901 | 波形只保留 waveform/grid/cursor/add；BPM 轨道在同一时间 rect 显示真实 boundary caret、下方时间和 1px 分隔线，四视口/DPR/zoom/pan 下与波形误差 `<=1 CSS px` | geometry unit + Chrome/Edge DOM/Canvas probe | R-024, R-042 |
-| AC-E902 | 波形与 BPM 轨道共享唯一 viewport 和窄屏水平滚动；区间按自然单行宽度依次显示完整编辑、摘要、隐藏，任何模式不换行且 boundary 不因内容隐藏而消失 | pure presentation golden + resize/scroll E2E | R-025, R-042 |
+| AC-E901 | 波形只保留 waveform/grid/cursor/add；同一时间列中的 BPM 标记条固定 28px、与 88/72px 波形零间隙，真实 boundary caret 位于接缝，1px 辅助线只向上伸入波形 12px；四视口/DPR/zoom/pan 下 X 误差 `<=1 CSS px` | geometry unit + Chrome/Edge DOM/Canvas probe | R-024, R-042 |
+| AC-E902 | 波形与 BPM 标记条共享唯一 viewport 和窄屏水平滚动；无独立 tempo rail/模块。区间按自然单行宽度显示 11px、18px 高的无框直接编辑、摘要或隐藏，任何模式不换行且 boundary 不因内容隐藏而消失 | pure presentation golden + resize/scroll/computed-style E2E | R-025, R-042 |
 | AC-E903 | 右键或 Delete/Backspace 删除内部 boundary，前段向右延伸；首 boundary、歌曲结尾和未知 ID 不改变 map；删除不移动任何 point/range 秒数 | tempo unit/property + integration + browser task | R-023, R-024, R-042 |
 | AC-E904 | 删除清理对应 draft/error、使旧 tempo estimate stale、flush autosave 并由 `aria-live` 播报；刷新和 JSON V1 round-trip 精确恢复，失败不部分写入 | controller/repository integration + keyboard E2E | R-023, R-026, R-042 |
-| AC-E905 | “+分类”内容双轴居中，point candidate 是无框/无影的 3px 绿色竖线，Timeline/PointWorkspace 之间只有一条 divider；E1–E8、keyboard/focus/reduced-motion、console/pageerror 和资源回归通过 | computed style + 29 步 canonical + owner visual task | R-024, R-025, R-042 |
+| AC-E905 | “+分类”内容双轴居中，point candidate 是无框/无影的 3px 绿色竖线，Timeline/PointWorkspace 之间只有一条 divider；BPM/拍号同一基线且来源只在 accessible name/title；E1–E8、keyboard/focus/reduced-motion、console/pageerror 和资源回归通过 | computed style + 29 步 canonical + owner visual task | R-024, R-025, R-042 |
 
 ## 11. Milestone Exit Rule
 
@@ -127,4 +127,4 @@ next_action: "AC-E901–AC-E905 自动化证据 29/29 通过；等待 owner 视�
 
 AC-E801–AC-E805 于 2026-09-03 随 owner 的 E8 实施指令获批。已有 dirty-worktree 通过结果只标记 scoped/provisional；V5 独立提交后 owner 允许单独提交 E8。clean canonical `E8-2026-09-03T04-07-28-904Z-84d9435c` 25/25 通过，owner 随后批准 canonical 与人工门禁；E8 已关闭。
 
-AC-E901–AC-E905 于 2026-09-04 随 owner 的 E9 完整实施指令获批。implementation commit `cf0a79b176d99eb183368818ce90ac5731d1cfa8` 与 29/29 clean canonical 已满足自动化证据要求；owner 视觉任务尚未完成，因此 E9 保持 `In Progress`。
+AC-E901–AC-E905 于 2026-09-04 随 owner 的 E9 完整实施指令获批。首个 implementation commit `cf0a79b176d99eb183368818ce90ac5731d1cfa8` 与 29/29 clean run 已满足旧轨道契约，但 DEC-052/ADR-0020 改变合并拓扑和视觉几何，该 run 现为 `pre-revision`。修订 AC 已由 owner 的完整实施指令批准，仍需新 clean canonical；E9 保持 `In Progress`。

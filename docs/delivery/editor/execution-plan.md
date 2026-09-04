@@ -10,14 +10,14 @@ upstream_docs:
   - "docs/architecture/risk-register.md"
   - "docs/architecture/editor/project-format-v1.md"
   - "docs/architecture/editor/interaction-contracts.md"
-next_action: "E9 29/29 clean canonical 已登记；等待 owner 视觉与交互确认后进入 Editor readiness"
+next_action: "实施 DEC-052 紧凑 BPM 标记条并登记 E9 revised canonical"
 ---
 
 # Editor E1–E9 Execution Plan
 
 ## 1. Delivery Outcome
 
-把已批准的 Editor“逆向制曲”架构按 E1–E9 纵向切片交付：E1–E8 保持已关闭历史；E9 把 tempo boundary 和 BPM 输入整合为共享时间几何的专用轨道，并补齐删除与标记可用性。
+把已批准的 Editor“逆向制曲”架构按 E1–E9 纵向切片交付：E1–E8 保持已关闭历史；E9 把 tempo boundary 和 BPM 输入整合为共享时间几何的紧凑标记条，并补齐删除与标记可用性。
 
 本计划只覆盖 Editor，不重新打开已完成的 Analyzer、Visualizer 或 Editor E1–E8 canonical。`project-owner` 于 2026-09-04 以完整实施指令批准 DEC-051/ADR-0019 和 E9 quality contract；E9 canonical 与人工门禁通过前不创建 Editor readiness 结论。
 
@@ -196,19 +196,20 @@ Exit gate:
 
 Implementation:
 
-- 从波形 stage 移除 tempo boundary DOM 和独立 BPM card scroller，增加与波形共享 viewport、时间映射和窄屏外层滚动的专用 BPM 轨道。
-- 真实 boundary 使用 caret、时间标签与竖直分隔线；相邻 boundary 之间按自然单行宽度显示完整表单、摘要或隐藏内容。
+- 从波形 stage 移除 tempo boundary DOM 和独立 BPM card scroller；波形时间列由 88/72px stage 与紧贴其下的 28px BPM 标记条组成，共享 viewport、时间映射和窄屏外层滚动。
+- 删除独立 tempo row 及“节拍地图 / BPM / 拍号”左侧 rail。真实 boundary 的 caret 位于波形底边，1px 辅助线只向上伸入波形 12px，时间紧贴其下。
+- 相邻 boundary 之间按自然单行宽度显示 11px、18px 高的无框行内 BPM/拍号编辑、摘要或隐藏内容；视觉来源文本移入 accessible name/title。
 - 增加纯 `removeTempoBoundary()`；内部 boundary 右键与 Delete/Backspace 删除，前段向右延伸，首 boundary/歌曲结尾固定，point/range 秒数不变。
 - 分类按钮双轴居中；point candidate 改为 3px 绿色竖线；Timeline 与 PointWorkspace 只保留一条横向分隔线；本次触及的 Editor 滚动容器复用 `.app-scrollbar`。
 
 Verification and exit:
 
 - Unit 覆盖删除、继承、幂等、三级宽度和共享 geometry；integration 覆盖 autosave、round-trip、草稿/error cleanup、stale estimate 和事件秒数稳定。
-- Chrome/Edge 覆盖 390/1024/1280/1920、DPR 1/2、zoom/pan、单滚动、右键/键盘、刷新、无换行、视觉细节、console/pageerror 和资源生命周期。
+- Chrome/Edge 覆盖 390/1024/1280/1920、DPR 1/2、zoom/pan、28px 等高、零间隙、12px 向上辅助线、11px 同基线输入、单滚动、右键/键盘、刷新、无换行、console/pageerror 和资源生命周期。
 - dirty provisional 通过后创建 implementation commit；clean E9 canonical 固定为 E8 25 步基线加 E9 unit/integration/Chrome/Edge，共 29 步。
 - canonical 登记后 E9 仍为 `In Progress`、evidence `in-review`、R-042 `Open`，直到 owner 完成视觉/交互任务。
 
-Delivery evidence：implementation commit `cf0a79b176d99eb183368818ce90ac5731d1cfa8`；clean canonical `E9-2026-09-04T02-49-18-960Z-cf0a79b1` 29/29 pass；summary SHA-256 `d4c15f6801e6df4289dad97b816036a095a21e5781a314f1f3166ab663f3ca4a`。该证据只完成自动化交付门禁，不关闭 E9。
+Pre-revision evidence：implementation commit `cf0a79b176d99eb183368818ce90ac5731d1cfa8`；run `E9-2026-09-04T02-49-18-960Z-cf0a79b1` 29/29 pass；summary SHA-256 `d4c15f6801e6df4289dad97b816036a095a21e5781a314f1f3166ab663f3ca4a`。DEC-052 后该证据只保留历史身份，不再是 owner 审批候选；修订实现仍需 dirty provisional、clean 29 步 canonical 和新 evidence 登记。
 
 ## 5. Test and Eval Commands
 
