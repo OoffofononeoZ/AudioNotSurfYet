@@ -8,14 +8,16 @@ upstream_docs:
   - "docs/quality/visualizer/evidence-index.md"
   - "docs/quality/visualizer/viewport-scroll-eval-plan.md"
   - "docs/quality/visualizer/viewport-scroll-failure-taxonomy.md"
-next_action: "由 owner 视觉确认一屏布局、左右独立滚动与共享 scrollbar；PROD-015 继续阻断上线"
+  - "docs/quality/visualizer/fullscreen-playback-eval-plan.md"
+  - "docs/quality/visualizer/fullscreen-playback-failure-taxonomy.md"
+next_action: "owner 自行审阅一屏滚动与 fullscreen 构图、显隐和退出；PROD-015 继续阻断上线"
 ---
 
 # Visualizer Release Readiness
 
 ## Summary Decision
 
-- Status：`In review`；V1–V6 是已批准功能基线，DEC-050 自动化证据已通过，等待 owner 最终视觉确认。
+- Status：`In review`；V1–V6 是已批准功能基线，DEC-050 自动化证据已通过；该候选现标为 `pre-fullscreen`，等待 owner 审阅新显示模式。
 - Review date：2026-09-04。
 - Reviewer：`project-owner` — V6 approved；整体 readiness pending。
 - Decision boundary：本文件只评价 Visualizer 候选，不批准生产部署；PROD-015 继续独立阻断上线。
@@ -29,6 +31,7 @@ next_action: "由 owner 视觉确认一屏布局、左右独立滚动与共享 s
 | V6 canonical | `V6-2026-09-03T16-33-03-497Z-ef12ce39`；54/54 |
 | V6 summary SHA-256 | `695bf0acf3831907b720551c7772ea07e0dd80a5db38e829cba868f12128a014` |
 | Viewport revision implementation | `9f3b55beaa0c8a3d799f3f1e16f1dd66c9aee77c` |
+| Candidate status | `pre-fullscreen`；DEC-058 实现后需重新审阅 |
 | Browser environment | Chrome `152.0.7977.66`；Edge `152.0.4191.53` |
 
 ## Evidence Summary
@@ -40,6 +43,7 @@ next_action: "由 owner 视觉确认一屏布局、左右独立滚动与共享 s
 - Completed：Visualizer 两栏和 Analyzer 精确值表共同使用 `.app-scrollbar`；computed style 为 Firefox `thin`、stable gutter，WebKit `10px`，并共享 track/thumb/hover token。
 - Completed：`test:docs`、`test:harness`、`typecheck`、`build` 与 `git diff --check` 均通过；build 只保留既有 large-chunk warning。
 - Missing：owner 对实际页面的一屏构图、两侧滚动手感和 scrollbar 视觉进行最终确认。
+- Missing：fullscreen 自动化依 owner 最新指令跳过；全屏构图、2 秒隐藏、底部唤醒、暂停常驻、Escape/重复点击、录制锁与 route cleanup 均为 `unverified / owner-review`。
 - Significant boundary：`<1024px` 移动端支持不在范围；optional preset 继续按 V5/V6 capability 契约；无正式 CI 或跨硬件基线。
 
 ## Coverage Summary
@@ -53,6 +57,7 @@ next_action: "由 owner 视觉确认一屏布局、左右独立滚动与共享 s
 ## Blockers
 
 - `RR-VIS-001-MANUAL`：DEC-050 自动化已关闭 document 滚动与 panel chaining 缺陷；仍需 owner 对一屏布局、左右独立滚动和 scrollbar 样式进行最终视觉确认。
+- `RR-VIS-002-FULLSCREEN`：DEC-058 改变产品 `src/`；原候选只保留为 `pre-fullscreen`。本轮没有 fullscreen 自动化通过证据，owner 交互与视觉确认前 R-045 和 readiness 均保持开放。
 - `PROD-015`：托管平台、域名、HTTPS/生产 URL 与 SPA fallback 未决；即使 RR-VIS-001 关闭也不构成上线授权。
 
 ## Approval Boundary

@@ -4,7 +4,7 @@ owner: "project-owner"
 last_reviewed: 2026-09-03
 upstream_docs:
   - "docs/context/index.md"
-next_action: "V1–V6 已获批准并关闭；readiness 继续复用既有术语"
+next_action: "补充 post-V6 fullscreen 术语并等待 owner 审阅"
 ---
 
 # Glossary
@@ -67,6 +67,7 @@ next_action: "V1–V6 已获批准并关闭；readiness 继续复用既有术语
 | `VisualizerRendererHost` | Visualizer 页面中独占现有 Canvas、单一 Three.js WebGLRenderer 和单一可取消视觉 RAF 的 host | 读取共享 PlaybackSnapshot；播放连续绘制，暂停/seek/参数/resize 单帧；模板切换不重建 host | [ADR-0016](../architecture/adrs/0016-deterministic-scene-registry.md) |
 | unique analysis feature budget | 一个 Visualizer 场景中所有参数去重后的 Analyzer `FeatureId` 集合，首版上限为四 | 固定值和 Editor 事件不计数；多个参数共享同一特征只占一个名额，第五项必须在 Worker 前拒绝 | [open questions](../product/open-questions.md) |
 | scene template | Visualizer 中一次独占输出画布的受控完整场景；首版只有 Orthogonal Lines 与 Cube Swarm | 不是可执行 Vue/JavaScript/shader 插件，也不允许多模板叠加 | [scope](../product/scope.md) |
+| Visualizer fullscreen playback | 对现有 `.visualizer-workspace` 使用浏览器原生 Fullscreen API 的瞬时观看模式 | 只显示同一 16:9 Canvas 与 transport；不持久化、不改变播放状态、不创建第二 renderer/RAF | [ADR-0023](../architecture/adrs/0023-visualizer-fullscreen-playback.md) |
 | `VisualizerProjectV1` | 绑定单首歌曲的 strict JSON 工程，保存输出预设、单模板/version/seed、完整 bindings 和可选 Editor 快照 | 不保存 Analyzer 数组、PCM、cache、renderer 或录制 Blob；未知字段和错歌原子拒绝 | [project format](../architecture/visualizer/project-format-v1.md) |
 | Visualizer binding | 模板 parameter 到 constant、analysis 或 editor-event source 的受控映射，可带有限 projection 与 numeric transform | 禁止任意代码；同一 FeatureId 去重后受四项上限约束 | [binding contracts](../architecture/visualizer/binding-and-scene-contracts.md) |
 | deterministic scene time | 由 project seed、绝对歌曲秒数和版本化算法决定的场景状态，不依赖前一 RAF delta | 保证从头播放、直接 seek、刷新和录制在同一时间得到相同画面 | [ADR-0016](../architecture/adrs/0016-deterministic-scene-registry.md) |

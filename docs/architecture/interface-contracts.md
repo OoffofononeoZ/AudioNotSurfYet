@@ -4,7 +4,7 @@ owner: "project-owner"
 last_reviewed: 2026-09-04
 upstream_docs:
   - "docs/architecture/system-design.md"
-next_action: "实施 E10 内部 MarkerBlock command 与受控 workspace 交互；公共接口保持不变"
+next_action: "实现 Visualizer fullscreen 瞬时 UI 状态；公共接口与 JSON V1 保持不变"
 ---
 
 # Interface Contracts
@@ -818,5 +818,11 @@ type VisualizerRecordingState =
 - `VisualizerSessionSnapshot.recording` 只保存可序列化状态；MediaRecorder、MediaStream、tracks、capture lease 和 Blob 均由 controller 内存运行时持有，不进入 Pinia、JSON V1 或 IndexedDB。
 - RendererHost recording capture lease 临时使用 preset 原生 backing size/DPR 1并同步绘制首帧；释放后恢复最新响应式预览尺寸。该 lease 不创建 Canvas、renderer 或 RAF。
 - preparing 失败恢复录制前 playback checkpoint；recording/finalizing 取消或错误停在当前时间 paused。UI 与命令层共同执行 `recording-locked`。
+
+### Fullscreen UI contract
+
+- fullscreen state、controls visibility、timer handle 与 capability/error 只由 `Visualizer.vue` 页面会话持有，不加入 `VisualizerSessionSnapshot` 或任何公共 TypeScript/JSON 接口。
+- 浏览器 `fullscreenElement` 是事实源；按钮不得在 Promise resolve 或 reject 时自行伪造状态。全屏目标固定为现有 workspace，渲染输入、时间、Canvas 节点和 RendererHost identity 均保持不变。
+- 进入全屏在 `recording-locked` 时返回 UI 禁用状态；已进入后发生锁定则只退出显示模式。route/unmount 的退出与 cleanup 必须幂等。
 
 `project-owner` 于 2026-09-02 批准 Visualizer V0 system design、接口契约、R-034–R-041 与 ADR-0014–0017，并同意进入 V1–V6 execution planning。本节据此为 `approved`，但不是实现或 quality evidence。

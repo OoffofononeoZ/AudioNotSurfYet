@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/architecture/interface-contracts.md"
   - "docs/architecture/risk-register.md"
   - "docs/delivery/visualizer/execution-plan.md"
-next_action: "用 AC-VS01–AC-VS06 验证场景生成 Skill 与后续受控内置场景；V1–V6 历史 AC 保持已批准"
+next_action: "实现 AC-VR05–AC-VR09；本轮自动化跳过，等待 owner 自行审阅"
 ---
 
 # Visualizer V1–V6 Acceptance Criteria
@@ -105,6 +105,12 @@ next_action: "用 AC-VS01–AC-VS06 验证场景生成 Skill 与后续受控内�
 | AC-VR02 | 左模板与右参数侧栏各自滚动；滚动一侧不改变另一侧或 `window.scrollY`，到达边界后不发生 scroll chaining | 双侧 synthetic overflow + wheel/scrollTop E2E；success/exception | VFT-LAYOUT |
 | AC-VR03 | Visualizer 侧栏与 Analyzer 精确值表复用 `.app-scrollbar`，Firefox 为 `thin`、WebKit 为 10px，并共享 track/thumb/hover/gutter | computed style + source contract；success/regression | VFT-LAYOUT |
 | AC-VR04 | 1024 compact drawer 位于 workspace grid 内且不覆盖录制/transport；16:9、单 Canvas/renderer/RAF、键盘焦点、reduced motion、context recovery 和 console/pageerror 不回归 | Chrome/Edge targeted regression；boundary/exception | R-038 |
+
+| AC-VR05 | 全屏按钮对现有 workspace 使用原生 Fullscreen API；按钮文字、`aria-pressed` 与 fullscreenElement 一致，Escape 可同步退出 | owner review；success/boundary | R-045 |
+| AC-VR06 | 全屏只显示同一 16:9 Canvas 与覆盖式 transport；非 16:9 letterbox，Canvas/host/renderer/RAF identity 不变 | owner review + source audit；success | R-038, R-045 |
+| AC-VR07 | playing 静止 2000ms 隐藏 transport；底部 96px、hover、键盘与键盘焦点恢复；paused/ended 常驻，reduced motion 无位移动画 | owner review；boundary/a11y | R-045 |
+| AC-VR08 | 进入、退出、重复点击和 Escape 不改变播放/暂停、歌曲时间或 seek | owner review；regression | R-034, R-045 |
+| AC-VR09 | 不支持/拒绝不伪造状态；录制锁禁止进入并可迫使退出；route/unmount 清除 listener/timer | owner review + typecheck/build；failure/exception | R-039, R-040, R-045 |
 
 AC-VR01–AC-VR04 已在 clean implementation commit `9f3b55beaa0c8a3d799f3f1e16f1dd66c9aee77c` 的 Chrome/Edge 专项中通过；V1 双浏览器、V6 integration 与 Analyzer M7 相邻回归也通过。它们仍需 owner 视觉确认后才可形成 Visualizer readiness 结论。
 

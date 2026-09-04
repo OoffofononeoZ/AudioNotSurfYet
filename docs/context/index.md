@@ -4,7 +4,7 @@ owner: "project-owner"
 last_reviewed: 2026-09-04
 upstream_docs:
   - "AGENTS.md"
-next_action: "实施 Editor E10 小节批量编辑与站内离页对话框；E9 canonical 保持历史不变"
+next_action: "实施 Visualizer DEC-058 原生全屏；owner 自行审阅交互，V1–V6 保持历史不变"
 ---
 
 # Repository Context Index
@@ -12,6 +12,8 @@ next_action: "实施 Editor E10 小节批量编辑与站内离页对话框；E9 
 ## Purpose
 
 AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端。Editor E1–E9 canonical 与适用人工门禁均已获批准并关闭；E10 已由 DEC-057/ADR-0022 打开，增加单 lane/class 的小节批量选择、原子复制/移动和深色站内离页 dialog。E9 revised 29/29 canonical 保持历史身份，原 Editor readiness 候选只保留为 `pre-E10`。Analyzer M14 和 Visualizer V1–V6 的已批准基线不变。
+
+DEC-058/ADR-0023 另把 Visualizer 原生全屏登记为 post-V6 readiness 修订：只复用同一预览与 transport，不创建 V7。原 Visualizer candidate 标为 `pre-fullscreen`；本轮只做可运行门禁，交互与视觉由 owner 自行审阅。
 
 本目录维护仓库事实、边界和工作记忆；生命周期路由与通用方法由 [AGENTS.md](../../AGENTS.md) 负责。当前代码事实与目标架构必须区分：现状见 [system map](system-map.md)，批准的目标见 [system design](../architecture/system-design.md)。
 
@@ -133,6 +135,7 @@ AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端。Editor E1–
 - [ADR-0016](../architecture/adrs/0016-deterministic-scene-registry.md)：双模板 registry、单 RendererHost 与绝对时间确定性。
 - [ADR-0017](../architecture/adrs/0017-realtime-webm-recording.md)：pre-Gain 原音量、codec-only fallback 与严格 WebM preset。
 - [ADR-0018](../architecture/adrs/0018-editor-timeline-recovery-and-marker-alignment.md)：Editor `88px/72px` 时间轴、同/异歌恢复决策与 point marker 中心对齐。
+- [ADR-0023](../architecture/adrs/0023-visualizer-fullscreen-playback.md)：Visualizer 原生全屏、同 Canvas/RendererHost/RAF 与 2 秒自动隐藏 transport。
 
 ## Repository Areas
 
