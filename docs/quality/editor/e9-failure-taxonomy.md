@@ -6,7 +6,7 @@ upstream_docs:
   - "docs/quality/editor/e9-eval-plan.md"
   - "docs/quality/editor/e8-failure-taxonomy.md"
   - "docs/architecture/risk-register.md"
-next_action: "等待 owner 复核自动化未替代的紧凑条视觉失败边界"
+next_action: "R-042 已缓解；产品实现或 readiness 回归触发失败时按本分类重开"
 ---
 
 # Editor E9 Failure Taxonomy
@@ -34,3 +34,5 @@ E9 沿用 E1–E8 的 identity、draft、geometry、pointer、keyboard、resourc
 | S1 | 核心 geometry、删除、滚动、键盘或生命周期失败 | 阻断 E9 关闭 |
 | S2 | 不改变事实的视觉/文字问题 | 修复并复跑专项 |
 | S3 | 不影响任务、几何或可访问性的轻微差异 | 登记并由 owner 判断 |
+
+2026-09-04，E9 revised canonical 与 owner 人工门禁通过，R-042 改为 `Mitigated`。本分类继续作为 Editor readiness 和后续产品变更的失败响应依据。

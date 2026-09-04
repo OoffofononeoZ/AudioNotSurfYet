@@ -6,7 +6,7 @@ upstream_docs:
   - "docs/product/scope.md"
   - "docs/architecture/system-design.md"
   - "docs/architecture/interface-contracts.md"
-next_action: "等待 owner 复核已通过 revised canonical 的 E9 紧凑视图"
+next_action: "在 Editor release-readiness 中复核 JSON V1 与候选 src identity"
 ---
 
 # Editor Project Format V1
@@ -131,7 +131,7 @@ interface RangeEventV1 {
 - metered BPM 为 `null` 或 20–300 的有限数。`null` 只允许 `bpmSource: 'unset'`；estimated/user 必须有合法 BPM。
 - UI 输入 `0 <= bpm < 20` 时把 segment 整体规范为 `single-beat`，不在 schema 中保留无意义的 meter/BPM。负数、非数字、Infinity 和大于 300 拒绝。
 - 新增内部 boundary 继承前一 segment 的规范值；移动 boundary 只改变 tempo 区间，不移动已有 event 秒数。E9 删除内部 boundary 时从 `tempoMap` 移除目标 segment，前一 segment 自然延伸到下一 start 或歌曲结尾；首 segment 不可删除，point/range 秒数保持不变。
-- E9 revised canonical 在 implementation commit `13614673bbf4d824f2ee109d36e04de6b3f8aabd` 上验证 JSON V1、自动保存、刷新恢复和 point/range 秒值稳定；未增加 schema 字段。
+- E9 revised canonical 在 implementation commit `13614673bbf4d824f2ee109d36e04de6b3f8aabd` 上验证 JSON V1、自动保存、刷新恢复和 point/range 秒值稳定；未增加 schema 字段，并已于 2026-09-04 获 owner 批准。
 
 ### Lanes and events
 

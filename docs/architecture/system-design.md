@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/product/scope.md"
   - "docs/product/success-metrics.md"
   - "docs/product/open-questions.md"
-next_action: "等待 owner 复核 ADR-0020 实现与 E9 revised canonical"
+next_action: "在 Editor release-readiness 当前候选审计中回归 E1–E9 架构边界"
 ---
 
 # System Design
@@ -394,7 +394,7 @@ M6 只在 `import.meta.env.DEV` 安装无 UI bridge，提供活动特征、cance
 - 右键内部 boundary 或在其获得焦点时按 Delete/Backspace，调用纯 `removeTempoBoundary()`。首 boundary 和歌曲结束边界不可删除；未知 ID 幂等无操作。删除只移除目标 segment，前一 segment 设置自然延伸，不改写 point/range 秒数。
 - 本修订不增加持久化字段、运行时资源或公共 transport/analysis 接口。现有 JSON V1 项目直接使用新视图，导入导出 bytes 语义保持不变。
 - 失败边界为：标记条与波形有间隙、辅助线向下贯穿或向上长度不是 12px、标记条不等于 28px、波形与 BPM X 误差超过 1 CSS px、区间控件换行、删除错误 segment、删除首 boundary、删除导致事件秒数变化、窄屏出现双水平滚动或临时交互状态未清理。
-- DEC-052 实现 commit `13614673bbf4d824f2ee109d36e04de6b3f8aabd` 与 29/29 clean revised canonical 已验证上述边界；该证据为 `in-review`，不替代 owner 视觉签字。
+- DEC-052 实现 commit `13614673bbf4d824f2ee109d36e04de6b3f8aabd` 与 29/29 clean revised canonical 已验证上述边界；`project-owner` 于 2026-09-04 批准适用视觉与交互门禁，E9 已关闭并开放独立 Editor readiness 评审。
 
 ## 18. Editor Compact Workbench
 

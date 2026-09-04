@@ -10,7 +10,7 @@ upstream_docs:
   - "docs/architecture/risk-register.md"
   - "docs/architecture/editor/project-format-v1.md"
   - "docs/architecture/editor/interaction-contracts.md"
-next_action: "等待 owner 复核 E9 revised canonical 与紧凑 BPM 标记条人工门禁"
+next_action: "E1–E9 已关闭；执行独立 Editor release-readiness 当前候选审计"
 ---
 
 # Editor E1–E9 Execution Plan
@@ -19,7 +19,7 @@ next_action: "等待 owner 复核 E9 revised canonical 与紧凑 BPM 标记条�
 
 把已批准的 Editor“逆向制曲”架构按 E1–E9 纵向切片交付：E1–E8 保持已关闭历史；E9 把 tempo boundary 和 BPM 输入整合为共享时间几何的紧凑标记条，并补齐删除与标记可用性。
 
-本计划只覆盖 Editor，不重新打开已完成的 Analyzer、Visualizer 或 Editor E1–E8 canonical。`project-owner` 于 2026-09-04 以完整实施指令批准 DEC-051/ADR-0019 和 E9 quality contract；E9 canonical 与人工门禁通过前不创建 Editor readiness 结论。
+本计划只覆盖 Editor，不重新打开已完成的 Analyzer、Visualizer 或 Editor E1–E8 canonical。`project-owner` 于 2026-09-04 以完整实施指令批准 DEC-051/ADR-0019 和 E9 quality contract；E9 canonical 与人工门禁现均已通过，独立 Editor readiness 评审已获开放但尚未形成批准结论。
 
 ## 2. Delivery Principles
 
@@ -207,11 +207,11 @@ Verification and exit:
 - Unit 覆盖删除、继承、幂等、三级宽度和共享 geometry；integration 覆盖 autosave、round-trip、草稿/error cleanup、stale estimate 和事件秒数稳定。
 - Chrome/Edge 覆盖 390/1024/1280/1920、DPR 1/2、zoom/pan、28px 等高、零间隙、12px 向上辅助线、11px 同基线输入、单滚动、右键/键盘、刷新、无换行、console/pageerror 和资源生命周期。
 - dirty provisional 通过后创建 implementation commit；clean E9 canonical 固定为 E8 25 步基线加 E9 unit/integration/Chrome/Edge，共 29 步。
-- canonical 登记后 E9 仍为 `In Progress`、evidence `in-review`、R-042 `Open`，直到 owner 完成视觉/交互任务。
+- canonical 登记后曾保持 `In Progress`；`project-owner` 已于 2026-09-04 批准视觉/交互任务，E9 evidence 为 `approved`、E9 为 `Complete`、R-042 为 `Mitigated`。
 
 Pre-revision evidence：implementation commit `cf0a79b176d99eb183368818ce90ac5731d1cfa8`；run `E9-2026-09-04T02-49-18-960Z-cf0a79b1` 29/29 pass；summary SHA-256 `d4c15f6801e6df4289dad97b816036a095a21e5781a314f1f3166ab663f3ca4a`。DEC-052 后该证据只保留历史身份，不再是 owner 审批候选。
 
-Revised evidence：implementation commit `13614673bbf4d824f2ee109d36e04de6b3f8aabd`；dirty provisional `E9-2026-09-04T03-47-53-947Z-951824c6-provisional` 29/29 pass；clean run `E9-2026-09-04T03-51-33-088Z-13614673` 29/29 pass；summary SHA-256 `a9d195fba7715213366068143a12977600e5e166b93064cd532012ff7f992b7c`。自动化门禁完成，E9 等待 owner 人工复核。
+Revised evidence：implementation commit `13614673bbf4d824f2ee109d36e04de6b3f8aabd`；dirty provisional `E9-2026-09-04T03-47-53-947Z-951824c6-provisional` 29/29 pass；clean run `E9-2026-09-04T03-51-33-088Z-13614673` 29/29 pass；summary SHA-256 `a9d195fba7715213366068143a12977600e5e166b93064cd532012ff7f992b7c`。自动化与 owner 人工门禁均已完成，E9 已关闭。
 
 ## 5. Test and Eval Commands
 
@@ -279,3 +279,5 @@ npm run eval:eN
 2026-09-03，owner 以 E8 完整实施指令批准本计划扩展、ADR-0018、AC-E801–AC-E805 与 E8 quality 契约并开放实施。Visualizer V5 独立提交后，owner 明确允许随后单独提交 E8。implementation commit `84d9435cc6e8d1edb0932ff1b8dcd1b84dff32b5` 与 25/25 clean canonical 完成后，owner 又批准 evidence 与人工门禁；E8 据此改为 `Complete`。
 
 2026-09-04，owner 以完整 E9 实施指令批准 DEC-051、ADR-0019、AC-E901–AC-E905 与 E9 quality contract。E9 据此进入 `In Progress`；本批准不替代 implementation、29/29 clean canonical 或 owner 视觉任务。
+
+同日，revised 29/29 canonical 登记后 owner 批准紧凑 BPM 条及适用人工门禁。DEC-053 据此关闭 E9、缓解 R-042，并开放独立 Editor release-readiness；E1–E9 历史 canonical identity 均保持不变。
