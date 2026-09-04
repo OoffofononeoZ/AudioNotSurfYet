@@ -8,7 +8,7 @@ upstream_docs:
   - "docs/architecture/risk-register.md"
   - "docs/delivery/visualizer/execution-plan.md"
   - "docs/delivery/visualizer/acceptance-criteria.md"
-next_action: "验证 visualizer-scene-generator Skill；后续每个获批场景执行受控扩展测试矩阵"
+next_action: "本轮 fullscreen 不新增自动化；typecheck/build 后由 owner 自行审阅 AC-VR05–AC-VR09"
 ---
 
 # Visualizer V1–V6 Test Strategy
@@ -146,3 +146,9 @@ DEC-050 clean implementation commit `9f3b55beaa0c8a3d799f3f1e16f1dd66c9aee77c` �
 - Post-V6 viewport clean evidence 已完成，AC-VR01–AC-VR04 的自动化部分通过；只剩 owner 一屏布局、双侧滚动和 scrollbar 视觉门禁。
 - `/comingsoon`、`threeDTable`、TestLands 或 V3 历史 artifact 中的 V4 中性预览不是当前 V4 implementation evidence；真实 Cube 由 V4 专项与前向回归评价。
 - DEC-056/ADR-0021 已批准受控内置场景扩展及 AC-VS01–AC-VS06；当前交付只创建生成 Skill，不生成第三个场景。
+
+## 11. Fullscreen Verification Exception
+
+- DEC-058 原计划包含 unit/integration/Chrome/Edge 与 eval runner；owner 随后明确要求本次“不需要测试，能够运行即可”。因此本轮不新增或执行这些测试命令，也不登记 fullscreen 自动化 pass。
+- 仅运行 `npm run typecheck`、`npm run build` 和 `git diff --check` 证明静态可运行；全屏状态、构图、2 秒隐藏、底部唤醒、暂停常驻、录制锁和 route cleanup 全部登记为 `unverified / owner-review`。
+- 该例外不改写 V1–V6 canonical，不把缺失证据推断为通过；R-045 与 Visualizer readiness 保持开放。

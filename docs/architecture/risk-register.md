@@ -5,7 +5,7 @@ last_reviewed: 2026-09-04
 upstream_docs:
   - "docs/architecture/system-design.md"
   - "docs/architecture/interface-contracts.md"
-next_action: "以 E10 原子命令、单 pointer owner 和 unit/integration/browser 矩阵缓解 R-044；R-025 重新观察"
+next_action: "以原生 fullscreen 状态同步、单 timer 和 owner 自行审阅跟踪 R-045"
 ---
 
 # Risk Register
@@ -58,6 +58,7 @@ next_action: "以 E10 原子命令、单 pointer owner 和 unit/integration/brow
 | R-042 | BPM 视图与波形使用不同模块、滚动或几何，或 boundary 删除/紧凑展示破坏节拍事实与可用性 | Medium | High | 标记条不等于 28px或与波形有间隙；辅助线向下；tempo caret 与波形相差 >1 CSS px；出现双水平滚动；控件换行；删错 segment/首 boundary；事件秒数变化；右键/键盘不可达 | ADR-0019 单 viewport/scroll 与纯删除；ADR-0020 波形时间列内紧凑条、12px 向上辅助线、无框单行编辑；E9 revised 29/29 canonical 和 owner 人工门禁均已通过 | E9 后续产品代码、时间几何、删除语义或滚动所有权变化时重开；不以隐藏控件、修改事件秒数或放宽 JSON validator 规避 | project-owner | Mitigated |
 | R-043 | 生成的新 Visualizer 场景违反绑定、确定性、资源或 strict project 契约 | Medium | High | 模糊请求直接改代码；第五特征进入 Worker；RAF delta/非 seed 随机；未知模板被宽松接受；renderer/RAF/geometry 累积；录制或 context 恢复失败 | DEC-056/ADR-0021 的输入完整性与 Scene Contract 双门禁；参数/Feature 显式声明；固定时间/hash；强制 unit/integration/Chrome/Edge 与 V1/V2/V5/V6 回归 | 在首个真实新场景及后续 readiness 重评前保持 Open；越过 JSON/拓扑/四特征/资产许可边界时停止并独立评审 | project-owner | Open |
 | R-044 | E10 小节批量选择、复制或移动产生跨轨误选、部分提交、ID/秒数漂移、pointer 泄漏或离页决策挂起 | Medium | High | 选择越过起始 lane/class；部分事件被跳过/覆盖；复制复用 ID；移动改 ID；冲突后工程变化；cancel 后提交；route guard Promise 未解析 | ADR-0022 单 owner transient state；纯 command 预校验后一次提交；typed errors；pointercancel/lostcapture/Escape；原生 dialog 安全默认；E10 success/failure/boundary 矩阵 | 完整 E10 canonical 或 owner 补偿 evidence 与人工交互门禁通过后缓解；批量范围、冲突、快捷键或 route dialog 改变时重开 | project-owner | Open |
+| R-045 | Visualizer 原生全屏状态、自动隐藏控制栏或录制/route 生命周期分叉，导致控件不可恢复、播放时间变化或资源泄漏 | Medium | High | fullscreenElement 与按钮不一致；paused 控件消失；底部热区无效；进入/退出改变播放；录制锁后仍停留全屏；timer/listener 残留 | ADR-0023 以 fullscreenchange 为事实源、唯一 2 秒 timer、同 workspace/Canvas/RendererHost/RAF、录制锁主动退出与卸载清理；owner 审阅 FS-G01–FS-G06 | 本轮按 owner 指令不执行自动化，typecheck/build 只证明可运行；owner 交互与视觉确认前保持 Open | project-owner | Open |
 
 ## Review Rule
 
@@ -74,3 +75,4 @@ next_action: "以 E10 原子命令、单 pointer owner 和 unit/integration/brow
 - E9 revised clean canonical `E9-2026-09-04T03-51-33-088Z-13614673` 在 implementation commit `13614673bbf4d824f2ee109d36e04de6b3f8aabd` 上 29/29 通过；owner 于 2026-09-04 批准紧凑条视觉、共享滚动、删除和标记交互门禁，R-042 据此改为 `Mitigated`。旧 E9 run 继续为 `pre-revision`。
 - 2026-09-04 的 DEC-056/ADR-0021 新增 R-043。当前只交付场景生成 Skill 与门禁，不存在第三个场景实现证据；因此风险保持 `Open`，直到具体场景完成强制矩阵并重新评审 Visualizer readiness。
 - 2026-09-04 的 DEC-057/ADR-0022 打开 E10 并新增 R-044。E10 改变 point/range pointer 与 keyboard 优先级，因此 R-025 从历史 `Mitigated` 恢复为 `Open` 观察；E1–E9 evidence 本身不改写。
+- 2026-09-04 的 DEC-058/ADR-0023 新增 R-045。owner 明确跳过本轮自动化并自行审阅，因此实现即使通过 typecheck/build 也不缓解该风险；V1–V6 已批准资源证据不被反向改写。

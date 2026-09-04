@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/product/scope.md"
   - "docs/architecture/system-design.md"
   - "docs/delivery/execution-plan.md"
-next_action: "实施 DEC-057 Editor E10；完整浏览器证据或 owner 补偿前保持 In Progress"
+next_action: "实施 DEC-058 Visualizer 原生全屏；自动化跳过并由 owner 自行审阅交互"
 ---
 
 # Decision Registry
@@ -43,6 +43,7 @@ next_action: "实施 DEC-057 Editor E10；完整浏览器证据或 owner 补偿�
 | ADR-0020 | 2026-09-04 | Editor 用紧贴波形的 28px BPM 标记条替代独立 66px tempo 模块；caret 与 12px 辅助线向上指向波形，区间使用 11px 无框行内编辑 | project-owner | approved | [ADR-0020](../architecture/adrs/0020-editor-compact-tempo-strip.md) | 标记条高度、合并拓扑、boundary 指向、紧凑编辑或展示阈值改变 |
 | ADR-0021 | 2026-09-04 | post-V6 新内置场景使用完整 SceneBrief 与确定 Scene Contract 两阶段门禁；只扩展现有 JSON V1/SceneRegistry/单 RendererHost，不允许用户脚本、运行时插件或任意 Shader | project-owner | approved | [ADR-0021](../architecture/adrs/0021-controlled-visualizer-scene-generation.md) | binding/value/projection、JSON、renderer/Worker/AudioContext/RAF 拓扑、四特征上限或外部资产许可改变 |
 | ADR-0022 | 2026-09-04 | Editor 以瞬态区间操作模式按小节选择单 lane/class 标记，立即向后复制或按当前网格原子移动；站内未导出离页改用深色原生 dialog，beforeunload 不变 | project-owner | approved | [ADR-0022](../architecture/adrs/0022-editor-marker-block-editing.md) | 批量范围、冲突策略、快捷键、pointer 优先级、JSON 或离页状态机改变 |
+| ADR-0023 | 2026-09-04 | Visualizer 对现有 workspace 使用原生 Fullscreen API；全屏只保留同一 16:9 Canvas 与覆盖式 transport，播放中静止 2 秒自动隐藏 | project-owner | approved | [ADR-0023](../architecture/adrs/0023-visualizer-fullscreen-playback.md) | fullscreen 状态源、显隐计时、录制锁、route cleanup 或单 renderer 身份改变 |
 | DEC-008 | 2026-07-24 | 实施采用 M1–M11 相对门禁，不承诺日期；M3 从测试基础开始，M7 未通过不得扩展后续特征 | project-owner | approved | [Execution plan](../delivery/execution-plan.md) | 依赖、里程碑、验收门禁或交付优先级改变 |
 | DEC-009 | 2026-07-24 | 当前只批准 execution planning；不预建 quality/release/retrospective，也不自动开始代码实现 | project-owner | superseded by DEC-010 | [Milestone plan](../delivery/milestone-plan.md) | 已由 owner 决定前置三份 quality design |
 | DEC-010 | 2026-07-24 | 在 M3 前增加 Q0：前置 eval plan、golden examples、failure taxonomy；三份文档单独批准后开放 M3，release-readiness 仍等待 M11 证据 | project-owner | approved | [Eval plan](../quality/eval-plan.md) | 验收/测试纪律变化，或 owner 改变 Q0/readiness 时序 |
@@ -93,6 +94,7 @@ next_action: "实施 DEC-057 Editor E10；完整浏览器证据或 owner 补偿�
 | DEC-055 | 2026-09-04 | 跳过 agent 的沙箱外本地端口与 Chrome/Edge 重跑；保留 provisional 24/24 和 clean 环境阻断 artifact，不把未执行浏览器项记为通过，Editor readiness 改由 owner 自行审阅相关 evidence gap 与 waivers | project-owner | approved | [Editor release readiness](../quality/editor/release-readiness.md) | owner review 方式、browser evidence gap、自动化环境授权或 readiness 结论改变 |
 | DEC-056 | 2026-09-04 | 保留 V0 首版两个模板的历史事实，允许通过项目 Scene Generator Skill 添加受控内置场景；输入不完整零写入，完整合同须再次获批，场景完成后重评 readiness 且不改写 V1–V6 canonical | project-owner | approved | [ADR-0021](../architecture/adrs/0021-controlled-visualizer-scene-generation.md) | SceneBrief/合同门禁、生成职责、测试矩阵或 readiness 继承规则改变 |
 | DEC-057 | 2026-09-04 | 打开 Editor E10：区间模式只作用于右拖起始 lane/class；Cmd/Ctrl+C 立即向后复制；移动吸附当前网格；越界/point duplicate/range overlap 整批拒绝；E9 canonical 不变且 readiness 候选转为 pre-E10 | project-owner | approved | [E10 eval](../quality/editor/e10-eval-plan.md) | E10 行为、33 步证据、owner review 或 readiness candidate 改变 |
+| DEC-058 | 2026-09-04 | 在不创建 V7 或改写 V1–V6 canonical 的前提下增加 Visualizer 原生全屏播放；全屏瞬时状态不持久化，本轮只要求可运行并跳过自动化，未验证项由 owner 自行审阅 | project-owner | approved | [Fullscreen eval](../quality/visualizer/fullscreen-playback-eval-plan.md) | Fullscreen API、自动隐藏、验证范围、owner review 或 readiness 结论改变 |
 
 ## Approval Evidence
 
@@ -139,6 +141,8 @@ readiness provisional 随后在相同 runtime source tree 上 24/24 通过；cle
 同日，`project-owner` 明确要求实施 Visualizer Scene Generator Skill 落地计划。DEC-056/ADR-0021 据此获批：V0 的两个模板继续作为 V1–V6 历史基线，post-V6 新场景必须先完成无写入输入校验，再由 owner 批准确定 Scene Contract；本轮只交付 Skill、规则、validator 与测试，不生成第三个场景，也不改变现有 canonical、readiness 或 PROD-015。
 
 同日，`project-owner` 明确要求实施 Editor E10 小节批量编辑与离页弹窗修订计划。DEC-057/ADR-0022 据此获批，E10 改为 `In Progress`：模式默认关闭且不持久化，右拖只选择起始 lane/class 的真实小节，复制立即向后追加，移动吸附当前网格，所有冲突原子拒绝。该产品 `src/` 变化使 DEC-054 固定的 E9 readiness runtime candidate 只保留为 `pre-E10` 历史审计；E1–E9 canonical 和 artifact 不改写。
+
+同日，`project-owner` 明确要求实现 Visualizer 全屏播放，并批准使用现有 workspace 的原生 Fullscreen API、同 Canvas/RendererHost/RAF、2 秒播放栏自动隐藏、底部热区唤醒和录制锁/route cleanup 契约。随后 owner 将验证范围收敛为“无需测试，能够运行即可”；DEC-058/ADR-0023 据此批准实现，但不产生自动化 fullscreen 通过证据。现有 Visualizer readiness candidate 标为 `pre-fullscreen`，R-045 保持 `Open`，V1–V6 canonical 与 PROD-015 不变。
 
 同日，`project-owner` 明确要求实施 Q0 质量设计计划，批准了 Q0 前置、四级严重度和 readiness 后置的阶段安排；同时要求三份质量文档先保持 `in-review`，经单独审阅后才生效。因此 DEC-010 的时序决定已批准，但 Q0 内容尚未批准。
 

@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/product/scope.md"
   - "docs/product/success-metrics.md"
   - "docs/product/open-questions.md"
-next_action: "实施 ADR-0022 的 Editor E10 单 owner 批量交互与原子命令；完整证据前 readiness 保持 pre-E10"
+next_action: "实施 ADR-0023 的 Visualizer 原生全屏与单 timer 控制栏；owner 自行审阅交互"
 ---
 
 # System Design
@@ -481,5 +481,12 @@ M6 只在 `import.meta.env.DEV` 安装无 UI bridge，提供活动特征、cance
 - workspace 的 toolbar、可选 alert、中央 grid、recording bar 与 transport 使用有界 grid height；中央行必须 `minmax(0, 1fr)` 且所有中间容器允许 `min-height: 0`，不能由 inspector 的 min-content 高度撑开页面。
 - 左模板和右参数侧栏分别拥有 `overflow-y: auto`、隐藏横向溢出和 `overscroll-behavior: contain`。`1024–1279px` 抽屉以中央 workspace grid 为定位/裁切边界，不能覆盖 recording bar 或 transport；`<1024px` 保留现有最小宽度与横向兼容，不形成移动端支持承诺。
 - 产品自有的可见滚动容器使用共享 `.app-scrollbar`，其视觉来源是 Analyzer 精确值表。本次只迁移 Analyzer 表与 Visualizer；不使用全局通配选择器覆盖原生控件或第三方组件。
+
+### Post-V6 fullscreen playback
+
+- `.visualizer-workspace` 是唯一 fullscreen owner。组件只在用户手势中调用 `requestFullscreen()`/`document.exitFullscreen()`，并只以 `fullscreenchange` 读取真实状态；Fullscreen API 状态不进入 controller、Pinia、Project JSON 或草稿。
+- fullscreen CSS 隐藏 toolbar、alert、drawer、左右 panel 与 recording bar，把同一 preview 居中为 16:9 letterbox，并把现有 transport 绝对覆盖在底部。ResizeObserver 继续驱动同一个 RendererHost 的 `resize()`，不得创建第二 Canvas/renderer/RAF。
+- 组件持有唯一 2000ms timer。只有 `fullscreen && playing && !keyboardFocusHold` 时可隐藏；底部 96px pointer 热区、transport hover、键盘操作和键盘焦点显示，paused/ended 取消 timer 并保持显示。
+- recording lock 从 false 变 true 时退出本页面拥有的全屏，但不取消 recording；route guard 在既有录制离页决策前先退出全屏。请求/退出失败只更新可访问错误，卸载清除 document listener 与 timer。
 
 `project-owner` 于 2026-09-02 明确回复：“我批准 Visualizer V0 系统设计、接口契约、R-034–R-041 与 ADR-0014–0017；同意进入 Visualizer V1–V6 execution planning。”本设计据此获批并只开放 V0-D delivery planning；当前 `/comingsoon`、V1 实现、quality evidence 与 release-readiness 均不因本批准自动完成。

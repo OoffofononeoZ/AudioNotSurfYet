@@ -5,7 +5,7 @@ last_reviewed: 2026-09-04
 upstream_docs:
   - "docs/product/problem-brief.md"
   - "docs/quality/release-readiness.md"
-next_action: "按 DEC-057 实施 Editor E10；E10 evidence 后重新建立 Editor readiness candidate"
+next_action: "按 DEC-058 增加 Visualizer 原生全屏播放；交互由 owner 自行审阅"
 ---
 
 # Scope
@@ -171,6 +171,7 @@ E5 于 2026-08-27 在 E4 获批后改为 `In Progress`。若未来要求新的�
 - 有有效歌曲时工作台锁定当前歌曲并隐藏 MusicBar，页面内提供播放、暂停、时间与 seek；不允许切换到其他歌曲，不循环播放，自然结束后暂停。
 - 无歌曲或歌曲不可恢复时显示明确空状态并保留 MusicBar，使用户能够导入或恢复歌曲；不得静默改用队列中的其他歌曲。
 - 首版内置“正交线条”和“立方体群”两个模板，该事实由 V1–V6 历史 canonical 固定。post-V6 可按 DEC-056 增加项目内受控 renderer，但仍不是可执行 Vue/JavaScript/shader 插件。
+- post-V6 工作台提供浏览器原生全屏观看：只显示当前同一个 16:9 预览和底部播放栏；全屏切换不改变播放状态、歌曲时间、工程或绑定，也不写入 JSON/草稿。
 
 ### Data binding
 
@@ -209,6 +210,7 @@ E5 于 2026-08-27 在 E4 获批后改为 `In Progress`。若未来要求新的�
 - 首发支持最新稳定版 Chrome 与 Edge 桌面端，工作台验证 1024、1280、1920 CSS px 及代表性 DPR；输出画面固定 16:9。
 - 模板、参数、绑定、播放、seek、工程导入导出和录制必须有键盘路径、可见焦点与非纯颜色状态。
 - reduced motion 只关闭工作台装饰动画，不关闭用户主动播放、预览或录制的场景运动。
+- Fullscreen API 不支持或被拒绝时保留普通工作台并给出可访问反馈；不提供 CSS 假全屏、画中画、`F` 快捷键或触屏专用手势。
 
 ## Visualizer Proposed Delivery Slices
 

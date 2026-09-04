@@ -4,7 +4,7 @@ owner: "project-owner"
 last_reviewed: 2026-09-03
 upstream_docs:
   - "docs/context/index.md"
-next_action: "Editor E8 与 Visualizer V1–V6 已关闭；DEC-050 自动化已通过，等待 Visualizer readiness 视觉确认"
+next_action: "实现 Visualizer 原生全屏瞬时 UI；owner 自行审阅后再更新 readiness"
 ---
 
 # System Map
@@ -47,7 +47,8 @@ showOpenFilePicker → FileSystemFileHandle → File
        → SceneRegistry factory(orthogonal-lines | cube-swarm) [V4 approved]
        → one VisualizerRendererHost + one Canvas/WebGLRenderer/visual RAF [V3/V4 approved]
        → Orthogonal Lines trail | Cube Swarm 60Hz rise/orbit [V4 approved]
-       └→ captureStream + AudioEngine pre-Gain tap → MediaRecorder → WebM Blob [V5 approved]
+       ├→ captureStream + AudioEngine pre-Gain tap → MediaRecorder → WebM Blob [V5 approved]
+       └→ native Fullscreen API on existing workspace → same Canvas + transport [post-V6]
 ```
 
 目标边界：Editor 数据只在进入/显式 reload 时快照；analysis 第五项在 Coordinator 前拒绝；页面音量不影响录制；不支持的 resolution/fps 明确失败而非静默降级。
@@ -70,7 +71,7 @@ showOpenFilePicker → FileSystemFileHandle → File
 | Analyzer surface | 固定展示 21 张折叠卡、最多四项 FIFO 活动分析、共享 viewport/zoom/cursor/seek、DOM 精确值与分层 Canvas | store、AudioSessionService、AnalysisCoordinator、Canvas 2D | project-owner | `FEATURE_IDS` 稳定 DOM 顺序；实际高度最短列布局，390/1024 一列、1280/1920 两列、gap 18px；展开才挂载图表资源，默认活动队列为空 |
 | Editor E1–E9 surface | `/editor/:trackId?` 状态、精简 transport、JSON 工程、共享波形/tempo/point/range 时间列、21 项 overlay、`88px/72px` 波形、28px 紧凑 BPM 条、不可用恢复决策与中心对齐 marker | EditorSessionController、AudioSessionService、AnalysisCoordinator、Vue Router、shared Canvas renderer、DOM controls | project-owner | E1–E9 已关闭；E9 revised canonical 与 owner 门禁已批准 |
 | Editor project and draft | strict JSON V1、歌曲 hash/时长绑定、原生 file gateway、单草稿 autosave 与恢复冲突 | `EditorFormatCodecRegistry`、`EditorDraftRepository`、`audionotsurfyet-editor` V1 | project-owner | 首版只注册 JSON；session database 不变 |
-| Visualizer V1–V6 surface | `/visualizer/:trackId?` 单视口三栏/互斥抽屉、左右独立滚动、16:9 单 Canvas、底部 transport、strict project/单草稿、两个确定性 scene、recording 状态栏、WebM 保存与 final hardening | `VisualizerSessionController`、`VisualizerRendererHost`、`SceneRegistry`、`RoutePlaybackLease`、`AnalysisConsumerLease`、BindingPlanner/Resolver、Editor snapshot、MediaRecorder | project-owner | V1–V6 canonical 与 owner 门禁均已批准；DEC-050 clean 双浏览器自动化已通过，readiness 待视觉确认 |
+| Visualizer V1–V6 surface | `/visualizer/:trackId?` 单视口三栏/互斥抽屉、左右独立滚动、16:9 单 Canvas、底部 transport、strict project/单草稿、两个确定性 scene、recording 状态栏、WebM 保存、final hardening 与 post-V6 原生全屏 | `VisualizerSessionController`、`VisualizerRendererHost`、`SceneRegistry`、`RoutePlaybackLease`、`AnalysisConsumerLease`、BindingPlanner/Resolver、Editor snapshot、MediaRecorder、Fullscreen API | project-owner | V1–V6 canonical 保持批准；fullscreen 只为瞬时 UI，自动化跳过并待 owner 审阅 |
 | Experimental charts | 试验性的 Three.js 2D 图和瀑布流 | Vue props、TestLands | unknown | 不视为稳定接口 |
 | Event bus | 跨组件事件类型与发送 | mitt singleton | unknown | `settings-open` 无已发现订阅者 |
 

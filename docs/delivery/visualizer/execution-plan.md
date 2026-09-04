@@ -11,7 +11,7 @@ upstream_docs:
   - "docs/architecture/visualizer/project-format-v1.md"
   - "docs/architecture/visualizer/binding-and-scene-contracts.md"
   - "docs/architecture/visualizer/recording-contract.md"
-next_action: "按 DEC-056 交付场景生成 Skill；实际新场景仍须先完成 brief 与 Scene Contract 审批"
+next_action: "实现 DEC-058 原生全屏；本轮只做可运行门禁，owner 自行审阅交互"
 ---
 
 # Visualizer V1–V6 Execution Plan
@@ -186,6 +186,17 @@ Exit gate:
 
 - AC-VS01–AC-VS06 全部具有可复现证据，工作树只包含已批准合同范围的代码与测试；历史 V1–V6 evidence 不变。
 - 每个场景到此只完成实现交付，不创建独立 milestone、eval plan 或 canonical。场景进入现有候选后必须重新评审 Visualizer readiness。
+
+### Post-V6 — Fullscreen playback readiness remediation
+
+Implementation:
+
+1. 在现有 workspace 和 transport 中加入 Fullscreen API 状态同步与切换按钮。
+2. 用 fullscreen CSS 只保留同一预览与覆盖式 transport；保持 16:9 letterbox 和单 Canvas/RendererHost/RAF。
+3. 用唯一 2000ms timer 实现播放中隐藏、底部 96px/键盘/焦点唤醒，并处理 reduced motion。
+4. 把录制锁、请求失败、route leave 和 unmount 纳入幂等 cleanup。
+
+Exit gate：依 owner 最新指令，本轮不创建或运行自动化 fullscreen 测试，仅要求 typecheck/build 可运行；所有交互项保持 `owner-review`，不能据此批准 readiness 或缓解 R-045。
 
 ## 5. Commands and Evidence Cadence
 
