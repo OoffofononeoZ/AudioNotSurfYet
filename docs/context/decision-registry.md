@@ -87,6 +87,7 @@ next_action: "定义并执行 Editor release-readiness 当前候选审计；Visu
 | DEC-051 | 2026-09-04 | 实施 Editor E9：BPM 轨道与波形共享滚动/时间几何，区间按单行可用宽度在完整编辑、摘要、隐藏间切换，内部 boundary 支持右键和键盘删除；E8 canonical 保持历史不变 | project-owner | approved | [Editor E9 eval](../quality/editor/e9-eval-plan.md) | E9 范围、展示阈值、删除继承语义、29 步 canonical 或完成门禁改变 |
 | DEC-052 | 2026-09-04 | 修订 Editor E9：旧 29/29 run 保留为 `pre-revision`；删除独立 tempo row，将 28px BPM 标记条并入波形时间列，移除重复左侧标签并保留唯一滚动、三级展示和删除语义 | project-owner | approved | [ADR-0020](../architecture/adrs/0020-editor-compact-tempo-strip.md) | 紧凑条几何、输入样式、旧 evidence 状态、29 步 revised canonical 或 owner 门禁改变 |
 | DEC-053 | 2026-09-04 | 批准 E9 revised 29/29 canonical 与紧凑 BPM 条、向上标记、无框输入、共享滚动、删除语义、分类按钮、候选线和单分隔线人工门禁；保持 canonical identity 不变，E9 改为 Complete、R-042 改为 Mitigated并开放 Editor release-readiness | project-owner | approved | [Editor evidence](../quality/editor/evidence-index.md) | E9 canonical identity、owner review 结论、R-042 或 readiness 开放边界改变 |
+| DEC-054 | 2026-09-04 | Editor release-readiness 固定 E9 implementation 为运行时候选、禁止后续 `src/` 漂移，以 24 步双浏览器针对性审计复核 E1–E9；预期结论为 Ready with waivers，但 W-ED-001–W-ED-006 与整体结论仍需 owner 单独批准 | project-owner | approved | [Editor release readiness](../quality/editor/release-readiness.md) | 候选 identity、24 步范围、waiver、支持矩阵或批准边界改变 |
 
 ## Approval Evidence
 
@@ -125,6 +126,8 @@ DEC-050 随后在独立 clean implementation commit `9f3b55beaa0c8a3d799f3f1e16f
 DEC-052 的 implementation commit `13614673bbf4d824f2ee109d36e04de6b3f8aabd` 已形成；clean revised canonical `E9-2026-09-04T03-51-33-088Z-13614673` 29/29 通过，summary SHA-256 为 `a9d195fba7715213366068143a12977600e5e166b93064cd532012ff7f992b7c`。该执行事实只把当前 evidence 推进为 `in-review`；E9 仍为 `In Progress`、R-042 仍为 `Open`，等待 owner 人工门禁。
 
 同日，`project-owner` 明确要求“批准已有的修改”，并随后批准完整 E9 正式关闭与 Editor release-readiness 评审计划。DEC-053 据此把该批准登记为紧凑 BPM 条、箭头方向、无框输入、共享滚动、删除语义、分类按钮、候选线和单分隔线人工门禁通过；不补写未提供的主观数值。implementation `13614673bbf4d824f2ee109d36e04de6b3f8aabd`、evidence registration `299502d`、run、29/29 结果与 summary SHA-256 均保持不变且无需重跑。E9 evidence 改为 `approved`、E9 改为 `Complete`、R-042 改为 `Mitigated`；旧 E9 run 继续为 `pre-revision`。该批准只开放 Editor release-readiness 评审，不构成 readiness、整体产品或生产上线批准。
+
+同一计划批准 DEC-054 与 Editor release-readiness 契约：运行时代码固定为 E9 implementation commit，后续只允许文档和测试 Harness 变化，`src/` 漂移必须阻断。评审限定本地 E1–E9、三格式、约 15 分钟与最新 Chrome/Edge，采用 24 步当前候选审计；预期 `Ready with waivers` 及 W-ED-001–W-ED-006 仍须 owner 单独批准。PROD-015 与独立 Visualizer readiness 状态均不因本决定改变。
 
 同日，`project-owner` 明确要求实施 Q0 质量设计计划，批准了 Q0 前置、四级严重度和 readiness 后置的阶段安排；同时要求三份质量文档先保持 `in-review`，经单独审阅后才生效。因此 DEC-010 的时序决定已批准，但 Q0 内容尚未批准。
 

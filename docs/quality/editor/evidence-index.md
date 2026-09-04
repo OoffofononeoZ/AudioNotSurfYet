@@ -14,7 +14,7 @@ upstream_docs:
   - "docs/quality/editor/e8-eval-plan.md"
   - "docs/quality/editor/e9-eval-plan.md"
   - "docs/delivery/editor/milestone-plan.md"
-next_action: "E1–E9 evidence 均已批准；进入独立 Editor release-readiness 评审"
+next_action: "执行 Editor release-readiness 24 步审计；历史 E1–E9 canonical 不改写"
 ---
 
 # Editor Evidence Index

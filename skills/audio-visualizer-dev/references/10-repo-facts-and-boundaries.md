@@ -45,6 +45,7 @@
 - 音频文件由用户通过 `showOpenFilePicker()` 选择；runtime File 保存在 session service，最近队列、文件句柄、唯一 current Blob 与匹配的分析 cache 由 SessionRepository 保存，Pinia `$state` 不持有浏览器资源、PCM 或 typed payload。
 - `configStore` 继续把 `volume` 和 `musicBarSettings.style` 保存到 localStorage；M5 最近会话使用独立 IndexedDB V1，不改变 config schema。
 - Analyzer 21/21 与 Analyzer-only readiness 已由版本化文档和证据确认；Editor E1–E9 与 Visualizer V1–V6 已由 clean canonical 和 owner 批准。Editor 与 Visualizer 整体 readiness 均需独立评审；`/comingsoon` 只是通用占位。
+- Editor readiness 的运行时候选固定为 E9 implementation commit `13614673bbf4d824f2ee109d36e04de6b3f8aabd`；在该评审完成前，后续文档/Harness 提交必须以 `git diff ... -- src` 证明产品源代码无漂移。
 - `testcomp.vue`、`TestLands.vue`、`threeDTable.vue` 和 `MeydaCard.vue` 含试验或占位内容，不应默认视为稳定公共接口。
 
 ## 证据优先级
