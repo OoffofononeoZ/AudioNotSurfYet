@@ -1,12 +1,12 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-09-02
+last_reviewed: 2026-09-04
 upstream_docs:
   - "docs/product/scope.md"
   - "docs/architecture/system-design.md"
   - "docs/architecture/interface-contracts.md"
-next_action: "在 V1/V2 delivery planning 中映射 codec、草稿、Editor 快照与原子导入验收；规划批准前不实现"
+next_action: "新增内置场景时按 ADR-0021 追加 template ID 与严格白名单；保持 schemaVersion/templateVersion 为 1"
 ---
 
 # Visualizer Project Format V1
@@ -15,12 +15,15 @@ next_action: "在 V1/V2 delivery planning 中映射 codec、草稿、Editor 快�
 
 `VisualizerProjectV1` 是单首本地歌曲、单一内置场景的可移植工程。它保存输出预设、模板版本、确定性 seed、完整参数绑定和可选的已验证 Editor 快照；不保存 File、PCM、AudioBuffer、Analyzer 数组/cache、Worker、WebGL 对象、MediaStream 或录制 Blob。
 
-建议文件名为 `<歌曲名>.audiosurf-visualizer.json`。首版只注册 JSON codec，不安装格式依赖，也不提供可执行模板或脚本字段。
+建议文件名为 `<歌曲名>.audiosurf-visualizer.json`。V1 只注册 JSON codec，不安装格式依赖，也不提供可执行模板或脚本字段。V1–V6 的首版已注册两个模板；post-V6 只允许在批准 Scene Contract 后追加编译期内置 ID。
 
 ## Canonical Type
 
 ```ts
-type VisualizerTemplateId = 'orthogonal-lines' | 'cube-swarm'
+type VisualizerTemplateId =
+  | 'orthogonal-lines'
+  | 'cube-swarm'
+  // Approved built-in scene IDs are appended here at implementation time.
 type VisualizerResolution = '720p' | '1080p'
 type VisualizerFrameRate = 30 | 60
 
@@ -101,8 +104,9 @@ Visualizer 使用独立原生 IndexedDB：
 - schemaVersion 未知时拒绝，不猜测升级。
 - V1 不复用 Analyzer session DB 或 Editor draft DB，避免扩大已验证事务和清理边界。
 - templateVersion 是 scene compatibility identity。registry 没有完全相同版本时拒绝；不把旧参数映射到新模板。
-- 未来取消四特征上限、增加模板或工程格式时必须走新的产品/架构评审；不能用宽松 validator 改写 V1 含义。
+- 按 ADR-0021 增加受控内置模板时，同步扩展 `VisualizerTemplateId`、`SceneRegistry` 和 strict whitelist；`schemaVersion` 与 `templateVersion` 仍为 `1`，已有工程语义不变，默认模板仍为 `orthogonal-lines`。
+- 未包含新 ID 的旧应用可继续严格拒绝它；这不允许当前应用放宽未知模板校验。取消四特征上限、增加 binding/value/projection 类型或改变工程格式仍须独立产品/架构评审。
 
 ## Approval State
 
-`project-owner` 于 2026-09-02 批准 Visualizer V0 system design、接口契约、R-034–R-041 与 ADR-0014–0017。本格式据此为 `approved` 并开放 delivery planning；codec、数据库和导入导出 UI 仍须等待 V1 planning 获批后实现。
+`project-owner` 于 2026-09-02 批准 Visualizer V0 system design、接口契约、R-034–R-041 与 ADR-0014–0017。2026-09-04 又批准 DEC-056/ADR-0021，使新增受控内置场景可在保持 JSON V1 与严格校验的前提下追加 template ID；历史 V1–V6 canonical 不变。

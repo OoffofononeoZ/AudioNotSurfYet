@@ -5,7 +5,7 @@ last_reviewed: 2026-09-04
 upstream_docs:
   - "docs/architecture/system-design.md"
   - "docs/architecture/interface-contracts.md"
-next_action: "在 Editor release-readiness 中复核 E1–E9 风险与残余豁免；R-042 已缓解"
+next_action: "以 DEC-056 输入门禁、Scene Contract 和强制测试缓解 R-043；新增场景后重新评审 Visualizer readiness"
 ---
 
 # Risk Register
@@ -56,6 +56,7 @@ next_action: "在 Editor release-readiness 中复核 E1–E9 风险与残余豁�
 | R-040 | MediaRecorder/MIME、origin-clean 或时钟差异导致无音轨、不可回放或音画漂移 | Medium | High | `isTypeSupported` 失败、captureStream SecurityError、ffprobe 缺轨、漂移 >100ms | V5 clean canonical 的 Chrome/Edge 默认 720p30 均生成 VP9+Opus 双轨 WebM；页面静音后 peak RMS `0.766425`，Orthogonal A/V 峰值差为 2ms/3ms，错误和取消不产出半文件；owner 已批准真实回放与原生保存门禁 | optional preset 保持 typed unavailable；codec、浏览器、capture/tap 或保存实现变化时重开 | project-owner | Mitigated |
 | R-041 | 1080p60 实时录制造成掉帧、内存峰值或 Blob 过大 | High | High | selected preset 达不到 fps、分析归因任务 >50ms、Visualizer frame >=60ms、内存/Blob 持续增长、finalize 失败 | 固定 bitrate、录制锁与单 Blob 生命周期；V5 只开放默认 720p30；V6 关闭 MSAA、使用 `motion` hint 并优化等价 Cube 计算，三格式仍要求平均 30fps `±5%`，DEC-048 只容忍最多四帧 packet gap 与 `<60ms` Visualizer 峰值 | V6 clean canonical `V6-2026-09-03T16-33-03-497Z-ef12ce39` 54/54 通过，六个默认文件、900 秒四特征、资源门禁及 owner 长时制作/原生保存回放均已批准；三个 optional preset 继续在资源获取前 typed unavailable | project-owner | Mitigated |
 | R-042 | BPM 视图与波形使用不同模块、滚动或几何，或 boundary 删除/紧凑展示破坏节拍事实与可用性 | Medium | High | 标记条不等于 28px或与波形有间隙；辅助线向下；tempo caret 与波形相差 >1 CSS px；出现双水平滚动；控件换行；删错 segment/首 boundary；事件秒数变化；右键/键盘不可达 | ADR-0019 单 viewport/scroll 与纯删除；ADR-0020 波形时间列内紧凑条、12px 向上辅助线、无框单行编辑；E9 revised 29/29 canonical 和 owner 人工门禁均已通过 | E9 后续产品代码、时间几何、删除语义或滚动所有权变化时重开；不以隐藏控件、修改事件秒数或放宽 JSON validator 规避 | project-owner | Mitigated |
+| R-043 | 生成的新 Visualizer 场景违反绑定、确定性、资源或 strict project 契约 | Medium | High | 模糊请求直接改代码；第五特征进入 Worker；RAF delta/非 seed 随机；未知模板被宽松接受；renderer/RAF/geometry 累积；录制或 context 恢复失败 | DEC-056/ADR-0021 的输入完整性与 Scene Contract 双门禁；参数/Feature 显式声明；固定时间/hash；强制 unit/integration/Chrome/Edge 与 V1/V2/V5/V6 回归 | 在首个真实新场景及后续 readiness 重评前保持 Open；越过 JSON/拓扑/四特征/资产许可边界时停止并独立评审 | project-owner | Open |
 
 ## Review Rule
 
@@ -70,3 +71,4 @@ next_action: "在 Editor release-readiness 中复核 E1–E9 风险与残余豁�
 - V6 clean canonical `V6-2026-09-03T16-33-03-497Z-ef12ce39` 在 implementation commit `ef12ce397d0b1a054ce797bfa1b9ff5eb5af61cd` 上 54/54 通过；2026-09-04 owner 批准双浏览器制作、保存/回放、长时操作和清理门禁，R-041 据此改为 `Mitigated`。该状态不等于 optional preset 支持或生产上线批准。
 - E8 clean canonical `E8-2026-09-03T04-07-28-904Z-84d9435c` 在 implementation commit `84d9435cc6e8d1edb0932ff1b8dcd1b84dff32b5` 上 25/25 通过；owner 于 2026-09-03 批准 canonical、时间轴密度、恢复语义与 marker 可读性门禁，R-022/R-024/R-025 据此改为 `Mitigated`。
 - E9 revised clean canonical `E9-2026-09-04T03-51-33-088Z-13614673` 在 implementation commit `13614673bbf4d824f2ee109d36e04de6b3f8aabd` 上 29/29 通过；owner 于 2026-09-04 批准紧凑条视觉、共享滚动、删除和标记交互门禁，R-042 据此改为 `Mitigated`。旧 E9 run 继续为 `pre-revision`。
+- 2026-09-04 的 DEC-056/ADR-0021 新增 R-043。当前只交付场景生成 Skill 与门禁，不存在第三个场景实现证据；因此风险保持 `Open`，直到具体场景完成强制矩阵并重新评审 Visualizer readiness。

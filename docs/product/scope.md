@@ -1,11 +1,11 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-09-02
+last_reviewed: 2026-09-04
 upstream_docs:
   - "docs/product/problem-brief.md"
   - "docs/quality/release-readiness.md"
-next_action: "Visualizer V0 范围已获批准；进入 system design，获批前不得开始 delivery 或实现"
+next_action: "按 DEC-056 通过受控 Scene Contract 扩展内置场景；新增场景完成后重新评审 Visualizer readiness"
 ---
 
 # Scope
@@ -162,7 +162,7 @@ E5 于 2026-08-27 在 E4 获批后改为 `In Progress`。若未来要求新的�
 - 一次只启用一个完整场景模板。切换模板会切换整套视觉结构和参数面板，不支持把多个模板作为图层叠加。
 - 有有效歌曲时工作台锁定当前歌曲并隐藏 MusicBar，页面内提供播放、暂停、时间与 seek；不允许切换到其他歌曲，不循环播放，自然结束后暂停。
 - 无歌曲或歌曲不可恢复时显示明确空状态并保留 MusicBar，使用户能够导入或恢复歌曲；不得静默改用队列中的其他歌曲。
-- 首版内置“正交线条”和“立方体群”两个模板。模板是项目内受控 renderer，不是可执行 Vue/JavaScript/shader 插件。
+- 首版内置“正交线条”和“立方体群”两个模板，该事实由 V1–V6 历史 canonical 固定。post-V6 可按 DEC-056 增加项目内受控 renderer，但仍不是可执行 Vue/JavaScript/shader 插件。
 
 ### Data binding
 
@@ -179,6 +179,13 @@ E5 于 2026-08-27 在 E4 获批后改为 `In Progress`。若未来要求新的�
 - **Cube Swarm**：中心立方体簇默认由 Amplitude Spectrum 驱动，`coreScale` 推荐绑定 Editor drum main lane，周边立方体 `riseSpeed` 默认绑定 Energy，三个卫星立方体的 `orbitSpeed` 默认使用固定值但允许改绑。数量、颜色、基础尺寸、相机距离和背景是普通参数。
 - Cube Swarm 的默认设置只使用 Amplitude Spectrum 和 Energy 两个 Analyzer 特征；其他默认绑定优先使用 Editor 事件或固定值，为用户保留两个分析特征名额。
 - 两个模板必须在同一播放时间上实时响应；模板之间的 renderer、Canvas、RAF 与资源所有权由后续架构统一，产品范围不批准第二套播放时钟或音频引擎。
+
+### Controlled post-V6 scene extension
+
+- 新场景开始设计前必须至少说明一个主要数据驱动效果，包括视觉样式、被驱动属性、绑定数据类型、低/高响应语义和时间行为；输入不完整时必须在不修改仓库的前提下返回缺失项。
+- 输入完整后先形成确定的 Scene Contract，固定模板 ID、视觉映射、参数与默认绑定、seed/时间模型、资源预算、golden 状态和测试方案；只有 owner 明确批准该合同后才能生成代码。
+- 每个获批场景只增加一个轻量架构合同及其代码/测试，不创建新的 V 里程碑、canonical 或自动 release-ready 身份。任何新场景都会使当前 Visualizer readiness candidate 待重新评审。
+- 新 binding/value/projection 类型、JSON 版本、第二渲染/音频/分析链路、超过四项分析特征或外部资产许可继续要求独立产品与架构评审。
 
 ### Project and recording
 
@@ -214,6 +221,7 @@ V1–V6 每个里程碑均须独立完成 provisional、实现提交、clean can
 - 麦克风、直播流、远端音频、账户、上传、云同步或分享链接。
 - 多模板叠加、自由图层合成、任意节点图或完整视频剪辑时间线。
 - 导入外部 Vue、JavaScript、shader、Three.js 代码或其他可执行插件。
+- 用户脚本、运行时场景插件、任意 Shader 注入，或绕过 Scene Contract 审批的内置模板生成。
 - MP4、离线快速渲染、后台标签页导出或服务端渲染。
 - 独立 Analyzer 数据包；首版通过当前歌曲 cache/Worker 直接取得分析结果。
 - 一个场景使用超过四个唯一 Analyzer 特征；若出现明确场景需求，必须重新评审 Worker、缓存和性能边界。
@@ -247,5 +255,6 @@ V1–V6 每个里程碑均须独立完成 provisional、实现提交、clean can
 - M14 approval：`project-owner` 于 2026-09-01 明确批准并要求实施插入排序、工作区全局持久化、点击动作面板、恢复默认、键盘/读屏和本地 canonical；M14 不推送远程仓库。
 - M14 closure：implementation commit `0e991307d9045a1ec84ddaae0515612240894a92` 与 19/19 clean canonical 完成，范围内能力和非目标均保持；PROD-015 仍阻断上线。
 - Visualizer V0 status：`approved`；2026-09-02 owner 明确批准单场景、最多四项 Analyzer 特征、两个内置模板和 WebM 路线，并开放 system design。该批准不开放 delivery、实现、quality 或上线。
+- Controlled extension：2026-09-04 owner 通过完整实施计划批准 DEC-056；“首版两个模板”保持历史事实，新增受控内置场景须经过输入完整性与 Scene Contract 两阶段门禁，且不继承 V1–V6 canonical 或 readiness 身份。
 
 File System Access 行为依据：[Chrome File System Access 文档](https://developer.chrome.com/docs/capabilities/web-apis/file-system-access) 与 [持久权限说明](https://developer.chrome.com/blog/persistent-permissions-for-the-file-system-access-api)。

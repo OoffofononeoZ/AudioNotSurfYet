@@ -4,7 +4,7 @@ owner: "project-owner"
 last_reviewed: 2026-09-04
 upstream_docs:
   - "AGENTS.md"
-next_action: "由 owner 自行审阅 Editor browser evidence gap、W-ED-001–W-ED-006 与 Ready with waivers 结论"
+next_action: "完成 DEC-056 场景生成 Skill；新增场景必须经过合同审批并重评 Visualizer readiness"
 ---
 
 # Repository Context Index
@@ -144,7 +144,7 @@ AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端。Editor E1–
 | `src/audio/` | 单一 AudioEngine 与 MainLayout-owned AudioSessionService；文件恢复及通用 Editor repeat-one / Visualizer pause-at-end route lease | ADR-0001/0003/0006/0014；E1/V1 |
 | `src/analysis/` | 21 项分析平台、M14 feature-order 纯模型及 Analyzer/Editor 单一 active consumer lease；Editor 复用 Buffer retained PCM 与 tempo request | ADR-0002/0004/0005/0006/0013；M14/E1/E2 |
 | `src/editor/` | JSON V1 strict codec、原生文件 gateway、独立单草稿、route controller、timeline/tempo、point 命令与 overlay bounds/feature 契约 | ADR-0007–0009；E1–E4 |
-| `src/visualizer/` | V1 route/project/draft、V2 binding resolver、V3 Orthogonal Lines、V4 Cube Swarm、V5 recorder 与 V6 双模板恢复/时间诊断均已实现并获批准 | ADR-0014–0017；V1–V6 approved |
+| `src/visualizer/` | V1 route/project/draft、V2 binding resolver、V3 Orthogonal Lines、V4 Cube Swarm、V5 recorder 与 V6 双模板恢复/时间诊断均已实现并获批准；post-V6 场景只允许按 ADR-0021 受控追加 | ADR-0014–0017、0021；V1–V6 approved |
 | `src/persistence/` | 原生 IndexedDB V1 SessionRepository 与 runtime validator | ADR-0003；M5 |
 | `src/stores/` | 持久化 config 与可序列化 audioSessionStore/恢复/analysis 状态 | ADR-0001/0002/0003 |
 | `src/utils/` | 事件总线、M12 masonry placement 与其他纯工具函数 | 实现时按实际边界维护 |
@@ -169,6 +169,7 @@ AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端。Editor E1–
 - Editor E8 quality：[eval plan](../quality/editor/e8-eval-plan.md)、[golden](../quality/editor/e8-golden-examples.md)、[failure taxonomy](../quality/editor/e8-failure-taxonomy.md) 已批准；25/25 canonical record 与 owner 门禁均为 `approved`
 - Editor E9 quality：[eval plan](../quality/editor/e9-eval-plan.md)、[golden](../quality/editor/e9-golden-examples.md)、[failure taxonomy](../quality/editor/e9-failure-taxonomy.md) 已批准；revised 29/29 canonical 与 owner 门禁为 `approved`，旧 run 保持 `pre-revision`
 - Visualizer quality：V1–V6 契约、canonical 与 owner 门禁均已批准；整体 release-readiness review 已创建并为 `in-review`
+- Visualizer scene extension：DEC-056/ADR-0021 已批准输入完整性与 Scene Contract 双门禁；当前只开放生成 Skill，不存在第三个已批准场景
 - Visualizer V6 quality：[eval plan](../quality/visualizer/v6-eval-plan.md)、[golden](../quality/visualizer/v6-golden-examples.md) 与 [failure taxonomy](../quality/visualizer/v6-failure-taxonomy.md) 已获批准；54/54 canonical 与 owner 人工门禁均已批准
 - Quality readiness：[Analyzer release readiness](../quality/release-readiness.md) 已按 M14 恢复 `Ready with waivers`；[Editor release readiness](../quality/editor/release-readiness.md) 已创建并为 `in-review`；M13 结论只作历史
 - Release operations：`docs/release/` 尚未创建；PROD-015 的托管平台、域名和 SPA fallback 解决前不进入正式上线
@@ -194,6 +195,7 @@ AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端。Editor E1–
 - Editor E1–E6 已实现并获批准；E6 双浏览器、三格式、10,000 事件、资源与无障碍 clean canonical 为 40/40。
 - Editor E1–E9 均为 `Complete`；E9 revised 29/29 clean canonical 与 owner 门禁已批准。E9 只调整 BPM/波形布局和交互，不改变 JSON/IndexedDB/runtime ownership。
 - Visualizer V1 已从 `/comingsoon` 迁移到 `/visualizer/:trackId?`，并实现通用 route lease、strict JSON/单草稿、三栏/抽屉和中性单 Canvas；V1 canonical 已批准。V2 已实现同歌 Editor snapshot、constant/analysis/editor-event、0–4 planner 和绝对时间 resolver，canonical 已获批准；V3 Orthogonal Lines、V4 Cube Swarm、V5 pre-Gain WebM 与 V6 final hardening canonical/人工门禁均已获批准。
+- DEC-056 允许 post-V6 受控追加内置场景，但不改变默认模板、JSON V1、单 renderer/RAF/AudioContext/Worker 或四特征上限；新场景完成后必须重新评审 Visualizer readiness，R-043 在首个实际场景前保持 `Open`。
 - E1 clean canonical `E1-2026-08-26T15-24-21-043Z-792b424f` 在 clean commit `792b424fbab8e3621ad24d8c9add47d1c9bffcb4` 上 18/18 通过，summary SHA-256 为 `db51ba98b757ccd524d298243c6118eb24fad60101a74f20a5ff98478a5d5bc6`，并于 2026-08-26 获 owner 批准。
 - E2 clean canonical `E2-2026-08-26T16-42-47-634Z-9fc5c0a8` 在 clean commit `9fc5c0a81fcf90abfbc665412277147cd958200f` 上 22/22 通过，summary SHA-256 为 `4465c20343af9092601296b86a229200579f648ffa90641411b88f9861ba8660`；2026-08-27 owner 批准后 E2 为 `Complete`，E3 已开放。
 - E3 clean canonical `E3-2026-08-27T02-53-58-176Z-c670ddf5` 在 clean commit `c670ddf5494269f5a56abd20c3c5653ee5b27cef` 上 26/26 通过，summary SHA-256 为 `2a0a46b9a0e9b459ee17b11919451f074205fda58801d84a1274dbd12f5cfe4c`；2026-08-27 owner 批准后 E3 为 `Complete`，E4 已开放。

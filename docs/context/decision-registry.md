@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/product/scope.md"
   - "docs/architecture/system-design.md"
   - "docs/delivery/execution-plan.md"
-next_action: "由 owner 自行审阅 Editor browser evidence gap 与 W-ED-001–W-ED-006；Visualizer readiness 仍独立保持 in-review"
+next_action: "完成 DEC-056 场景生成 Skill；具体新场景仍须 Scene Contract 审批并重评 Visualizer readiness"
 ---
 
 # Decision Registry
@@ -41,6 +41,7 @@ next_action: "由 owner 自行审阅 Editor browser evidence gap 与 W-ED-001–
 | ADR-0018 | 2026-09-03 | Editor 时间轴固定为 `88px/72px` 并保留 6px 波形安全区；同歌恢复不播放、异歌显式 replace、point 中心误差 `<=1 CSS px` | project-owner | approved | [ADR-0018](../architecture/adrs/0018-editor-timeline-recovery-and-marker-alignment.md) | 时间轴垂直几何、恢复决策、route 切换或 marker 锚点改变 |
 | ADR-0019 | 2026-09-04 | Editor 将 tempo boundary 与区间编辑移入和波形共享 viewport 的专用 BPM 轨道；内部边界可删除且由前段向右延伸 | project-owner | approved | [ADR-0019](../architecture/adrs/0019-editor-tempo-lane-and-boundary-deletion.md) | tempo 轨道布局、区间展示、boundary 删除或时间映射改变 |
 | ADR-0020 | 2026-09-04 | Editor 用紧贴波形的 28px BPM 标记条替代独立 66px tempo 模块；caret 与 12px 辅助线向上指向波形，区间使用 11px 无框行内编辑 | project-owner | approved | [ADR-0020](../architecture/adrs/0020-editor-compact-tempo-strip.md) | 标记条高度、合并拓扑、boundary 指向、紧凑编辑或展示阈值改变 |
+| ADR-0021 | 2026-09-04 | post-V6 新内置场景使用完整 SceneBrief 与确定 Scene Contract 两阶段门禁；只扩展现有 JSON V1/SceneRegistry/单 RendererHost，不允许用户脚本、运行时插件或任意 Shader | project-owner | approved | [ADR-0021](../architecture/adrs/0021-controlled-visualizer-scene-generation.md) | binding/value/projection、JSON、renderer/Worker/AudioContext/RAF 拓扑、四特征上限或外部资产许可改变 |
 | DEC-008 | 2026-07-24 | 实施采用 M1–M11 相对门禁，不承诺日期；M3 从测试基础开始，M7 未通过不得扩展后续特征 | project-owner | approved | [Execution plan](../delivery/execution-plan.md) | 依赖、里程碑、验收门禁或交付优先级改变 |
 | DEC-009 | 2026-07-24 | 当前只批准 execution planning；不预建 quality/release/retrospective，也不自动开始代码实现 | project-owner | superseded by DEC-010 | [Milestone plan](../delivery/milestone-plan.md) | 已由 owner 决定前置三份 quality design |
 | DEC-010 | 2026-07-24 | 在 M3 前增加 Q0：前置 eval plan、golden examples、failure taxonomy；三份文档单独批准后开放 M3，release-readiness 仍等待 M11 证据 | project-owner | approved | [Eval plan](../quality/eval-plan.md) | 验收/测试纪律变化，或 owner 改变 Q0/readiness 时序 |
@@ -89,6 +90,7 @@ next_action: "由 owner 自行审阅 Editor browser evidence gap 与 W-ED-001–
 | DEC-053 | 2026-09-04 | 批准 E9 revised 29/29 canonical 与紧凑 BPM 条、向上标记、无框输入、共享滚动、删除语义、分类按钮、候选线和单分隔线人工门禁；保持 canonical identity 不变，E9 改为 Complete、R-042 改为 Mitigated并开放 Editor release-readiness | project-owner | approved | [Editor evidence](../quality/editor/evidence-index.md) | E9 canonical identity、owner review 结论、R-042 或 readiness 开放边界改变 |
 | DEC-054 | 2026-09-04 | Editor release-readiness 固定 E9 implementation 为运行时候选、禁止后续 `src/` 漂移，以 24 步双浏览器针对性审计复核 E1–E9；预期结论为 Ready with waivers，但 W-ED-001–W-ED-006 与整体结论仍需 owner 单独批准 | project-owner | approved | [Editor release readiness](../quality/editor/release-readiness.md) | 候选 identity、24 步范围、waiver、支持矩阵或批准边界改变 |
 | DEC-055 | 2026-09-04 | 跳过 agent 的沙箱外本地端口与 Chrome/Edge 重跑；保留 provisional 24/24 和 clean 环境阻断 artifact，不把未执行浏览器项记为通过，Editor readiness 改由 owner 自行审阅相关 evidence gap 与 waivers | project-owner | approved | [Editor release readiness](../quality/editor/release-readiness.md) | owner review 方式、browser evidence gap、自动化环境授权或 readiness 结论改变 |
+| DEC-056 | 2026-09-04 | 保留 V0 首版两个模板的历史事实，允许通过项目 Scene Generator Skill 添加受控内置场景；输入不完整零写入，完整合同须再次获批，场景完成后重评 readiness 且不改写 V1–V6 canonical | project-owner | approved | [ADR-0021](../architecture/adrs/0021-controlled-visualizer-scene-generation.md) | SceneBrief/合同门禁、生成职责、测试矩阵或 readiness 继承规则改变 |
 
 ## Approval Evidence
 
@@ -131,6 +133,8 @@ DEC-052 的 implementation commit `13614673bbf4d824f2ee109d36e04de6b3f8aabd` 已
 同一计划批准 DEC-054 与 Editor release-readiness 契约：运行时代码固定为 E9 implementation commit，后续只允许文档和测试 Harness 变化，`src/` 漂移必须阻断。评审限定本地 E1–E9、三格式、约 15 分钟与最新 Chrome/Edge，采用 24 步当前候选审计；预期 `Ready with waivers` 及 W-ED-001–W-ED-006 仍须 owner 单独批准。PROD-015 与独立 Visualizer readiness 状态均不因本决定改变。
 
 readiness provisional 随后在相同 runtime source tree 上 24/24 通过；clean HEAD 尝试中 14 个非浏览器步骤通过，10 个浏览器步骤因沙箱禁止监听 `127.0.0.1:4173` 而未启动。`project-owner` 随后明确指示跳过沙箱外端口和 Chrome/Edge 重跑，把相关未验证项改为自行审阅。DEC-055 据此要求同时保留 provisional 与 clean fail artifact，不把环境阻断改写为产品失败或正式通过；readiness 继续为 `in-review`，等待 owner 审阅 evidence gap、W-ED-001–W-ED-006 和整体结论。
+
+同日，`project-owner` 明确要求实施 Visualizer Scene Generator Skill 落地计划。DEC-056/ADR-0021 据此获批：V0 的两个模板继续作为 V1–V6 历史基线，post-V6 新场景必须先完成无写入输入校验，再由 owner 批准确定 Scene Contract；本轮只交付 Skill、规则、validator 与测试，不生成第三个场景，也不改变现有 canonical、readiness 或 PROD-015。
 
 同日，`project-owner` 明确要求实施 Q0 质量设计计划，批准了 Q0 前置、四级严重度和 readiness 后置的阶段安排；同时要求三份质量文档先保持 `in-review`，经单独审阅后才生效。因此 DEC-010 的时序决定已批准，但 Q0 内容尚未批准。
 
