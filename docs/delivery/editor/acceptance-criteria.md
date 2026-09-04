@@ -9,7 +9,7 @@ upstream_docs:
   - "docs/architecture/editor/project-format-v1.md"
   - "docs/architecture/editor/interaction-contracts.md"
   - "docs/delivery/editor/execution-plan.md"
-next_action: "在 E9 revised canonical 中重新验证 AC-E901–AC-E905 的紧凑条契约"
+next_action: "等待 owner 复核已通过 revised canonical 的 AC-E901–AC-E905 人工门禁"
 ---
 
 # Editor E1–E9 Acceptance Criteria
@@ -127,4 +127,4 @@ next_action: "在 E9 revised canonical 中重新验证 AC-E901–AC-E905 的紧�
 
 AC-E801–AC-E805 于 2026-09-03 随 owner 的 E8 实施指令获批。已有 dirty-worktree 通过结果只标记 scoped/provisional；V5 独立提交后 owner 允许单独提交 E8。clean canonical `E8-2026-09-03T04-07-28-904Z-84d9435c` 25/25 通过，owner 随后批准 canonical 与人工门禁；E8 已关闭。
 
-AC-E901–AC-E905 于 2026-09-04 随 owner 的 E9 完整实施指令获批。首个 implementation commit `cf0a79b176d99eb183368818ce90ac5731d1cfa8` 与 29/29 clean run 已满足旧轨道契约，但 DEC-052/ADR-0020 改变合并拓扑和视觉几何，该 run 现为 `pre-revision`。修订 AC 已由 owner 的完整实施指令批准，仍需新 clean canonical；E9 保持 `In Progress`。
+AC-E901–AC-E905 于 2026-09-04 随 owner 的 E9 完整实施指令获批。首个 implementation commit `cf0a79b176d99eb183368818ce90ac5731d1cfa8` 与 29/29 clean run 已满足旧轨道契约，但 DEC-052/ADR-0020 改变合并拓扑和视觉几何，该 run 现为 `pre-revision`。修订实现 commit `13614673bbf4d824f2ee109d36e04de6b3f8aabd` 的 clean canonical 29/29 通过，AC 自动化证据为 `in-review`；E9 保持 `In Progress` 等待 owner 人工门禁。

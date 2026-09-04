@@ -8,7 +8,7 @@ upstream_docs:
   - "docs/delivery/editor/acceptance-criteria.md"
   - "docs/delivery/editor/test-strategy.md"
   - "docs/quality/editor/e8-eval-plan.md"
-next_action: "运行修订后的 dirty provisional 与 clean 29 步 canonical"
+next_action: "等待 owner 复核 revised canonical 与紧凑 BPM 标记条人工门禁"
 ---
 
 # Editor E9 Eval Plan
@@ -43,6 +43,15 @@ E9 只评价波形时间列内的紧凑 BPM 标记条、内部 tempo boundary �
 - Browser：Chrome `152.0.7977.76`、Edge `152.0.4191.62`；四视口、DPR 1/2 最大 shared geometry 误差 `0.009375 CSS px`。
 - Resource：两浏览器各 10 次 Editor/Analyzer 往返，live ResizeObserver `3–3`、Canvas `4–4`。
 - Review state：`pre-revision`；DEC-052 改变合并拓扑和视觉几何，该 run 不再是 owner 审批候选，R-042 保持 `Open`。
+
+## Revised Canonical Evidence
+
+- Implementation：`13614673bbf4d824f2ee109d36e04de6b3f8aabd`；起止 clean identity 一致。
+- Run：`E9-2026-09-04T03-51-33-088Z-13614673`，29/29 pass；summary SHA-256 `a9d195fba7715213366068143a12977600e5e166b93064cd532012ff7f992b7c`。
+- Browser：Chrome `152.0.7977.76`、Edge `152.0.4191.62`；390/1024/1280/1920、DPR 1/2 最大 boundary 误差 `0.009375 CSS px`。
+- Geometry：strip/status 均为 `28px`，waveform/caret gap `0`，guide `1×12px` 且 bottom error `0`，重复 tempo rail `0`；窄屏只有 outer scroller。
+- Resource：两浏览器各 10 次 Editor/Analyzer 往返，live ResizeObserver `3–3`、Canvas `4–4`。
+- Review state：`in-review`；E9 仍为 `In Progress`、R-042 保持 `Open`，等待 owner 人工门禁。
 
 ## Manual Gate
 

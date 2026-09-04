@@ -5,7 +5,7 @@ last_reviewed: 2026-09-04
 upstream_docs:
   - "docs/architecture/system-design.md"
   - "docs/architecture/interface-contracts.md"
-next_action: "在 E9 revised canonical 中验证紧凑条零间隙、向上辅助线、单滚动与删除事实"
+next_action: "等待 owner 复核 E9 紧凑条视觉门禁；R-042 保持 Open"
 ---
 
 # Risk Register

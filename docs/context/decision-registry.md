@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/product/scope.md"
   - "docs/architecture/system-design.md"
   - "docs/delivery/execution-plan.md"
-next_action: "实施 DEC-052 紧凑 BPM 标记条；Visualizer readiness 仍独立保持 in-review"
+next_action: "等待 owner 复核 E9 revised canonical；Visualizer readiness 仍独立保持 in-review"
 ---
 
 # Decision Registry
@@ -120,6 +120,8 @@ next_action: "实施 DEC-052 紧凑 BPM 标记条；Visualizer readiness 仍独�
 DEC-050 随后在独立 clean implementation commit `9f3b55beaa0c8a3d799f3f1e16f1dd66c9aee77c` 上完成。Chrome `152.0.7977.66` 与 Edge `152.0.4191.53` 专项各 2/2 通过，覆盖四组视口、DPR 1/2、页面高度、双侧滚动隔离、边界 chaining、compact drawer、16:9 与单 renderer/RAF；V1 双浏览器、V6 integration、Analyzer M7 和静态门禁均通过。该执行证据不改变 DEC-049/V6 canonical，也不构成 owner 视觉、整体 readiness 或生产上线批准。
 
 同日，owner 在 E9 首个 29/29 候选的人工复核中要求取消独立 66px tempo 模块，把 BPM 信息压缩为紧贴波形的 28px 标记条；辅助线只向上指向波形，移除重复左侧标签，并以 11px 无框行内控件继续直接编辑。随后 owner 明确要求实施完整修订计划，DEC-052/ADR-0020 据此获批。旧 run `E9-2026-09-04T02-49-18-960Z-cf0a79b1` 保留为 `pre-revision` 且 artifact 不改写；E9、R-042 和 Editor readiness 门禁均不提前关闭。
+
+DEC-052 的 implementation commit `13614673bbf4d824f2ee109d36e04de6b3f8aabd` 已形成；clean revised canonical `E9-2026-09-04T03-51-33-088Z-13614673` 29/29 通过，summary SHA-256 为 `a9d195fba7715213366068143a12977600e5e166b93064cd532012ff7f992b7c`。该执行事实只把当前 evidence 推进为 `in-review`；E9 仍为 `In Progress`、R-042 仍为 `Open`，等待 owner 人工门禁。
 
 同日，`project-owner` 明确要求实施 Q0 质量设计计划，批准了 Q0 前置、四级严重度和 readiness 后置的阶段安排；同时要求三份质量文档先保持 `in-review`，经单独审阅后才生效。因此 DEC-010 的时序决定已批准，但 Q0 内容尚未批准。
 

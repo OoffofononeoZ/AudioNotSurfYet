@@ -6,7 +6,7 @@ upstream_docs:
   - "docs/product/scope.md"
   - "docs/architecture/system-design.md"
   - "docs/architecture/adrs/0019-editor-tempo-lane-and-boundary-deletion.md"
-next_action: "实现紧贴波形的 28px BPM 标记条并形成 E9 revised canonical"
+next_action: "等待 owner 复核紧凑 BPM 标记条的 revised canonical 与人工门禁"
 ---
 
 # ADR-0020: Editor Compact Tempo Strip
@@ -37,3 +37,5 @@ ADR-0019 已证明 tempo boundary 删除、共享时间映射和三级展示可�
 ## Approval
 
 2026-09-04，`project-owner` 明确要求实施完整紧凑 BPM 标记条修订计划；该指令批准 DEC-052、本 ADR 与修订后的 E9 quality contract。批准不等于 revised canonical 或人工视觉门禁通过。
+
+同日 implementation commit `13614673bbf4d824f2ee109d36e04de6b3f8aabd` 与 clean run `E9-2026-09-04T03-51-33-088Z-13614673` 已完成 29/29 自动化；本 ADR 的 owner 视觉门禁仍待复核。

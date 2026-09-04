@@ -165,7 +165,7 @@ M3–M13 不建设 CI。下列命令当前均为本地门禁；正式证据要�
 | `npm run eval:e8:provisional` | 在 dirty worktree 执行 25 步 E8 与 E1/E2/E3/E7、M5、双浏览器及静态回归，只生成 scoped artifact |
 | `npm run eval:e8` | 只允许在干净 E8 implementation commit 上执行 25 步 canonical suite；dirty worktree 必须拒绝 |
 | `npm run eval:e9:provisional` | 在 dirty worktree 执行 E8 25 步基线加 E9 四专项的 29 步实现反馈 |
-| `npm run eval:e9` | 只允许在干净 E9 implementation commit 上执行 29 步 canonical suite；首个 29/29 run 为 pre-revision |
+| `npm run eval:e9` | 只允许在干净 E9 implementation commit 上执行 29 步 canonical suite；DEC-052 revised canonical 已 29/29 |
 | `npm run eval:v1:provisional` | 在 dirty worktree 执行 21 步 V1 suite，只作为实现反馈 |
 | `npm run eval:v1` | 只允许在干净 implementation commit 上执行 21 步 V1 canonical suite |
 | `npm run eval:v2:provisional` | 在 dirty worktree 执行 26 步 V2 suite，只作为实现反馈 |
@@ -238,7 +238,7 @@ E8 最新 scoped run `E8-2026-09-03T04-04-25-163Z-10a2bc0c-provisional` 在 V5 �
 
 E8 clean canonical `E8-2026-09-03T04-07-28-904Z-84d9435c` 在 implementation commit `84d9435cc6e8d1edb0932ff1b8dcd1b84dff32b5` 上 25/25 通过，起止工作树干净，summary SHA-256 为 `ba9ff8db30868c8bf34140a3db2bf8cd7e3d56557ca7ac8682dfa6c3ce664a42`。Chrome/Edge E8 各 3/3，四视口高度为 `72/88/88/88px`，最大中心误差 `0.009375 CSS px`；E7、E3、E2、E1、M5 与静态门禁全部通过。owner 已批准 evidence 与人工门禁，E8 为 `Complete`。
 
-E9 quality contract 已由 2026-09-04 的完整实施指令批准。DEC-051 固定共享 viewport、full/summary/hidden 单行展示、内部 boundary 前段延伸删除、3px point candidate、分类按钮居中和单 divider；DEC-052 把独立 tempo row 修订为紧贴波形的 28px BPM 条、12px 向上 guide 与 11px/18px 无框输入。E8 canonical 与 artifact 保持历史不变。首个 run `E9-2026-09-04T02-49-18-960Z-cf0a79b1` 29/29 通过但现为 `pre-revision`；修订实现仍需新的 29 步 clean canonical。
+E9 quality contract 已由 2026-09-04 的完整实施指令批准。DEC-051 固定共享 viewport、full/summary/hidden 单行展示、内部 boundary 前段延伸删除、3px point candidate、分类按钮居中和单 divider；DEC-052 把独立 tempo row 修订为紧贴波形的 28px BPM 条、12px 向上 guide 与 11px/18px 无框输入。E8 canonical 与 artifact 保持历史不变。首个 run `E9-2026-09-04T02-49-18-960Z-cf0a79b1` 保持 `pre-revision`；implementation `13614673bbf4d824f2ee109d36e04de6b3f8aabd` 的 revised run `E9-2026-09-04T03-51-33-088Z-13614673` 已 29/29 通过，summary SHA-256 为 `a9d195fba7715213366068143a12977600e5e166b93064cd532012ff7f992b7c`。当前 evidence 为 `in-review`，等待 owner 人工门禁。
 
 Visualizer V1 quality 契约、实现和双浏览器 runner 已完成。clean canonical `V1-2026-09-02T07-03-26-973Z-fd44c892` 在 commit `fd44c8921a534c22b2362ccffff7ec9e46f3ff02` 上 21/21 通过，summary SHA-256 为 `14c9ed2258baf6c9a2a3a20dfcaba65a0c643029f8510a1d9e4c6662c9c90300`；unit 12/12、integration 7/7、Chrome 4/4、Edge 4/4，并于 2026-09-02 获 owner 批准。V2 数据绑定已开放，真实场景/录制仍不得提前进入。
 
