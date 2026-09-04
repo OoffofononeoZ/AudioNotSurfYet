@@ -4,7 +4,7 @@ owner: "project-owner"
 last_reviewed: 2026-09-04
 upstream_docs:
   - "docs/architecture/system-design.md"
-next_action: "V6 已批准关闭；保持现有接口作为 Visualizer readiness 基线"
+next_action: "实施 E10 内部 MarkerBlock command 与受控 workspace 交互；公共接口保持不变"
 ---
 
 # Interface Contracts
@@ -735,11 +735,39 @@ Invariants:
 - Canvas failure 只使 overlay 进入可重试错误；底层工程、事件、播放和导出继续。
 - pointer/keyboard 状态机、右键优先级、12px 自适应网格和 cleanup 详见 [Editor Interaction Contracts](editor/interaction-contracts.md)。
 
+### E10 internal marker block contract
+
+```ts
+interface MarkerBlockSelection {
+  laneId: string
+  innerClassId: string
+  startSeconds: number
+  endSeconds: number
+}
+
+type MarkerBlockErrorCode =
+  | 'selection-unavailable'
+  | 'empty-selection'
+  | 'target-out-of-bounds'
+  | 'point-conflict'
+  | 'range-conflict'
+
+interface MarkerBlockCommandResult {
+  project: EditorProjectV1
+  selection: MarkerBlockSelection
+  eventCount: number
+}
+```
+
+Invariants：选择只属于一个 lane/inner class；复制生成全新 event ID，移动保留 event ID；point 使用 `[start,end)`，range 必须完全包含；任何错误都在返回新 project 前检测完毕。该类型为模块内部契约，不从产品公共入口导出，也不进入 JSON。
+
 ## Editor Architecture Approval
 
 `project-owner` 于 2026-08-26 明确批准 Editor E0 系统设计、接口契约、风险与 ADR，并同意进入 E1–E6 execution planning。上述 Editor 接口据此获批；Analyzer 历史契约继续有效，但设计批准不能作为 Editor 代码已实现或验证的证据。
 
 `project-owner` 于 2026-09-03 以实施指令批准 ADR-0018 与上述 E8 内部契约，并开放 E8 实现。E8 25/25 clean canonical 通过后，owner 又明确批准 evidence 与人工门禁；E8 已关闭，相关风险改为 `Mitigated`。
+
+2026-09-04，owner 以 E10 完整实施指令批准 ADR-0022 与上述内部批量命令契约。该批准开放实现但不代表 E10 evidence、R-025/R-044 或 Editor readiness 已通过。
 
 ## Visualizer Contract Status（approved）
 

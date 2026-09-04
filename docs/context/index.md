@@ -4,14 +4,14 @@ owner: "project-owner"
 last_reviewed: 2026-09-04
 upstream_docs:
   - "AGENTS.md"
-next_action: "完成 DEC-056 场景生成 Skill；新增场景必须经过合同审批并重评 Visualizer readiness"
+next_action: "实施 Editor E10 小节批量编辑与站内离页对话框；E9 canonical 保持历史不变"
 ---
 
 # Repository Context Index
 
 ## Purpose
 
-AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端。Editor E1–E9 canonical 与适用人工门禁均已获批准并关闭；E9 revised 29/29 canonical 保持正式身份，首个独立模块 run 继续保留为 `pre-revision`。Analyzer M14 已交付 21 张折叠卡的全局自定义顺序、可访问排序和 V1 顺序持久化，最多四项 FIFO 保持独立。Visualizer V1–V6 canonical 与人工门禁均已获 owner 批准并关闭。
+AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端。Editor E1–E9 canonical 与适用人工门禁均已获批准并关闭；E10 已由 DEC-057/ADR-0022 打开，增加单 lane/class 的小节批量选择、原子复制/移动和深色站内离页 dialog。E9 revised 29/29 canonical 保持历史身份，原 Editor readiness 候选只保留为 `pre-E10`。Analyzer M14 和 Visualizer V1–V6 的已批准基线不变。
 
 本目录维护仓库事实、边界和工作记忆；生命周期路由与通用方法由 [AGENTS.md](../../AGENTS.md) 负责。当前代码事实与目标架构必须区分：现状见 [system map](system-map.md)，批准的目标见 [system design](../architecture/system-design.md)。
 

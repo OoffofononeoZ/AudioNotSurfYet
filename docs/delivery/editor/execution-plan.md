@@ -10,10 +10,10 @@ upstream_docs:
   - "docs/architecture/risk-register.md"
   - "docs/architecture/editor/project-format-v1.md"
   - "docs/architecture/editor/interaction-contracts.md"
-next_action: "E1–E9 已关闭；执行独立 Editor release-readiness 当前候选审计"
+next_action: "实施 E10；完成原子批量命令、交互、dialog 和可用证据后再重建 readiness candidate"
 ---
 
-# Editor E1–E9 Execution Plan
+# Editor E1–E10 Execution Plan
 
 ## 1. Delivery Outcome
 
@@ -213,6 +213,21 @@ Pre-revision evidence：implementation commit `cf0a79b176d99eb183368818ce90ac573
 
 Revised evidence：implementation commit `13614673bbf4d824f2ee109d36e04de6b3f8aabd`；dirty provisional `E9-2026-09-04T03-47-53-947Z-951824c6-provisional` 29/29 pass；clean run `E9-2026-09-04T03-51-33-088Z-13614673` 29/29 pass；summary SHA-256 `a9d195fba7715213366068143a12977600e5e166b93064cd532012ff7f992b7c`。自动化与 owner 人工门禁均已完成，E9 已关闭。
 
+### E10 — Marker Block Editing and Styled Leave Dialog
+
+Implementation:
+
+- 修复紧凑 denominator select 的内容/箭头分区；新增默认关闭、`aria-pressed` 的区间操作按钮。
+- 用纯 command 解析真实小节选择，限制在起始 lane/inner class；复制立即向后追加且生成新 ID，移动按当前网格吸附并保留 ID；所有冲突整批拒绝。
+- `EditorPointWorkspace` 持有唯一模式/选择/pointer/keyboard 状态，range workspace 只回传 intent；关闭模式时 E3/E5/E9 行为不变。
+- 用深色原生 dialog 替换站内 `ElMessageBox`，保持 leave warning、抑制偏好和原生 `beforeunload` 语义。
+
+Verification and exit:
+
+- E10 unit/integration 覆盖 success、conflict、boundary、autosave、refresh 与 JSON V1；Chrome/Edge 覆盖视口/DPR、pointer/keyboard、旧模式回归、dialog 和 console/resource。
+- dirty provisional 后提交实现；clean canonical 固定为 E9 29 步基线加 E10 unit/integration/Chrome/Edge，共 33 步。
+- DEC-055 环境边界继续有效：不可运行的浏览器项标记 `unverified / owner-review`，不计 pass。完整 evidence 与 owner 门禁前 E10 保持 `In Progress`，Editor readiness 候选保持 `pre-E10`。
+
 ## 5. Test and Eval Commands
 
 E1 已实现、通过并获 owner 批准；以下为真实命令：
@@ -235,7 +250,7 @@ npm run eval:eN:provisional
 npm run eval:eN
 ```
 
-其中 `N` 为 5–9。E9 提供独立 Chrome/Edge 与合并命令；`eval:e9` 必须拒绝 dirty worktree并执行 29 步。canonical 记录 run ID、commit、环境、步骤结果、日志和 summary SHA-256。E1–E8 clean canonical 与 owner approval 均保留为历史证据。
+其中 `N` 为 5–10。E9/E10 提供独立 Chrome/Edge 与合并命令；`eval:e10` 必须拒绝 dirty worktree并执行 33 步。canonical 记录 run ID、commit、环境、步骤结果、日志和 summary SHA-256。E1–E9 clean canonical 与 owner approval 均保留为历史证据。
 
 ## 6. Change Control and Exclusions
 
@@ -281,3 +296,5 @@ npm run eval:eN
 2026-09-04，owner 以完整 E9 实施指令批准 DEC-051、ADR-0019、AC-E901–AC-E905 与 E9 quality contract。E9 据此进入 `In Progress`；本批准不替代 implementation、29/29 clean canonical 或 owner 视觉任务。
 
 同日，revised 29/29 canonical 登记后 owner 批准紧凑 BPM 条及适用人工门禁。DEC-053 据此关闭 E9、缓解 R-042，并开放独立 Editor release-readiness；E1–E9 历史 canonical identity 均保持不变。
+
+同日，owner 以本 E10 完整实施指令批准 DEC-057/ADR-0022、delivery 与 quality contract。E10 据此为 `In Progress`；该批准不替代 implementation、33/33 clean evidence 或 owner 浏览器补偿审阅。

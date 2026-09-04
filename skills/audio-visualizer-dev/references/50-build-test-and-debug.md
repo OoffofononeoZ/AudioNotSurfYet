@@ -83,6 +83,9 @@
 | `npm run test:e9:unit` / `test:e9:integration` | 运行 tempo boundary 删除、紧凑三级展示、shared geometry、autosave/JSON V1 与 stale cleanup | E9 静态与集成门禁 |
 | `npm run test:e2e:e9` | 顺序运行真实 Chrome/Edge 的 28px 合并条、向上 guide、11px 无框输入、单滚动、右键/键盘与视觉几何专项 | E9 双浏览器回归；人工门禁已批准 |
 | `npm run eval:e9:provisional` / `eval:e9` | E8 25 步基线 + E9 unit/integration/Chrome/Edge 的 dirty/clean 29 步链 | 首个 run 为 pre-revision；DEC-052 revised canonical 已批准 |
+| `npm run test:e10:unit` / `test:e10:integration` | 运行 measure selection、整批复制/移动、原子冲突拒绝、autosave 与 JSON V1 round-trip | E10 纯领域与集成门禁 |
+| `npm run test:e2e:e10` | 顺序运行真实 Chrome/Edge 的拍号控件、模式 pointer/键盘交互和深色离页 `<dialog>` | DEC-055 环境不可执行时记为 unverified / owner-review |
+| `npm run eval:e10:provisional` / `eval:e10` | E9 29 步基线 + E10 unit/integration/Chrome/Edge 的 dirty/clean 33 步链 | 完整浏览器证据不足时 E10 保持 In Progress |
 | `npm run eval:editor-readiness:provisional` / `eval:editor-readiness` | 固定 E9 runtime candidate 的 E4–E9、Chrome/Edge 与静态门禁 24 步审计 | clean 模式拒绝 dirty，并要求相对 E9 implementation 的 `src/` 无漂移 |
 | `npm run fixtures:v1:golden` / `test:v1:unit` / `test:v1:integration` | 运行 V1 strict project、descriptor、route lease、单草稿和 session 专项 | 已实现；用于 V1 质量回归 |
 | `npm run test:e2e:v1:chrome` / `test:e2e:v1:edge` | 在真实 Chrome/Edge 运行 V1 route/layout/resource 专项 | 原生 OS picker 仍需人工补偿 |
@@ -128,7 +131,7 @@
 - M6 当前 Meyda 的 `spectralFlux` 对有效输入抛出 `x is not defined`；已用预期失败测试和 R-020 固定，不能把 21 项 registry 误述为 21 项均可计算。
 - M6 dirty-worktree provisional 与 clean-commit canonical 均已 20/20 通过；正式 evidence 已登记，并由 `project-owner` 于 2026-07-30 批准，M6 已关闭。
 - M7–M11 已获批准并关闭。M11 clean canonical `M11-2026-08-25T10-05-12-783Z-99c67792` 在 commit `99c67792509d07456bcb431b90468252f8b0fdc3` 上 38/38 通过；Edge 原生权限、辅助技术与最终加固于 2026-08-26 获 owner 签字。Analyzer readiness 已获 `Ready with waivers` 批准。Editor E1–E9 clean canonical 与人工门禁均已获批准；E7 旧 44/44 与 E9 首个 29/29 run 均保留为 `pre-revision`。E9 DEC-052 implementation `13614673bbf4d824f2ee109d36e04de6b3f8aabd` 的 revised run `E9-2026-09-04T03-51-33-088Z-13614673` 已 29/29 通过并获 owner 批准。
-- Editor readiness provisional 已在相同 runtime source tree 上 24/24 通过但不是 clean evidence；clean attempt 的非浏览器 14 步通过，10 个 browser steps 因沙箱端口权限未启动。DEC-055 后不再由 agent 申请沙箱外重跑，当前状态是 `in-review / owner-review`；不得将环境阻断记为 canonical pass。
+- Editor readiness provisional 已在相同 runtime source tree 上 24/24 通过但不是 clean evidence；clean attempt 的非浏览器 14 步通过，10 个 browser steps 因沙箱端口权限未启动。DEC-057 的产品 `src/` 变更已把该 E9 candidate 标记为 `pre-E10`；E10 后必须建立新 candidate，且不得将环境阻断记为 canonical pass。
 
 ## 构建风险
 

@@ -8,10 +8,10 @@ upstream_docs:
   - "docs/architecture/risk-register.md"
   - "docs/delivery/editor/execution-plan.md"
   - "docs/delivery/editor/acceptance-criteria.md"
-next_action: "执行独立 Editor release-readiness 24 步当前候选审计"
+next_action: "运行 E10 pure/integration；browser 受限时保留 unverified 并交 owner 审阅"
 ---
 
-# Editor E1–E9 Test Strategy
+# Editor E1–E10 Test Strategy
 
 ## 1. Objectives
 
@@ -76,6 +76,7 @@ Editor 测试体系必须回答：
 | E7 | compact tokens、visibility/default/active set | preference/import/cache/cancel | density、fixed fullscreen、menu、scroll/geometry/pointer-through | 同 Chrome 矩阵 |
 | E8 | 88/72 vertical geometry、recovery resolver、marker center | exact recovery、stale generation、draft atomicity | 四视口/DPR、同/异歌恢复、zoom/pan marker | 同 Chrome 矩阵 |
 | E9 | boundary 删除/继承、展示阈值、shared x | autosave/JSON V1/stale/error cleanup | tempo lane、单滚动、右键/键盘、视觉细节 | 同 Chrome 矩阵 |
+| E10 | measure selection、collect、copy/move atomicity、ID | autosave、refresh、JSON V1、route dialog | mode/pointer/keyboard、meter select、dialog、旧行为回归 | 同 Chrome 矩阵或 owner-review |
 
 每个里程碑同时回归与其变更相邻的 Analyzer 播放、session、Worker、route、Canvas 和资源契约。E6 运行 E1–E6 全量及 M3–M11 关键回归；E8 固定回归 E1/E2/E3/E7 与 M5 恢复，不篡改历史 canonical 身份。
 
@@ -114,7 +115,7 @@ E6/E7 运行时复用约 15 分钟工程：20 lanes、每 lane 最多 8 inner cl
 
 ## 8. Planned Commands and Evidence Cadence
 
-E1–E9 每个里程碑计划新增：
+E1–E10 每个里程碑计划新增：
 
 ```text
 npm run test:eN:unit
@@ -124,7 +125,7 @@ npm run eval:eN:provisional
 npm run eval:eN
 ```
 
-E1–E9 命令已经存在、通过 clean canonical 并获批准。E9 已新增 unit、integration、Chrome、Edge、双浏览器与 29 步 runner；`eval:e9:provisional` 可在 dirty worktree 运行，`eval:e9` 拒绝 dirty worktree。首个 clean run `E9-2026-09-04T02-49-18-960Z-cf0a79b1` 保持 `pre-revision`；revised clean run `E9-2026-09-04T03-51-33-088Z-13614673` 已 29/29 通过并获 owner 批准。package、测试 README、本项目 Skill 与实际 runner 保持一致。
+E1–E9 命令已经存在、通过 clean canonical 并获批准。E10 增加 unit、integration、Chrome、Edge、双浏览器与 33 步 runner；`eval:e10:provisional` 可在 dirty worktree 运行，`eval:e10` 拒绝 dirty worktree。DEC-055 后 agent 不申请沙箱外端口/浏览器，未执行项必须保持 `unverified / owner-review`。package、测试 README、本项目 Skill 与实际 runner 保持一致。
 
 固定流程：
 
@@ -148,3 +149,5 @@ E1–E9 命令已经存在、通过 clean canonical 并获批准。E9 已新增 
 修订套件在 Chrome `152.0.7977.76` 与 Edge `152.0.4191.62` 上再次覆盖同一四视口/DPR 矩阵；两端均测得 strip/status `28px`、waveform/caret gap `0`、guide `1×12px`、重复 tempo rail `0`、最大边界误差 `0.009375 CSS px`，10 次路由往返的 live ResizeObserver `3–3`、Canvas `4–4`。clean 29 步 revised canonical 全部通过。
 
 `project-owner` 随后批准 revised canonical 与适用人工视觉/交互门禁；E9 已关闭。Editor readiness 继续作为独立质量阶段，不从里程碑关闭自动推定。
+
+2026-09-04，owner 以完整 E10 实施指令批准小节选择、立即复制、当前网格移动、原子冲突、紧凑 denominator 和深色 route dialog 的测试扩展。E10 不新增音频 fixture；unit 使用版本化虚构 tempo/project golden，browser 复用现有 Editor fixture。完整证据前 E10 为 `In Progress`。

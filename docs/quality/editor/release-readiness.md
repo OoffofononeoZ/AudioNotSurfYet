@@ -12,30 +12,31 @@ upstream_docs:
   - "docs/delivery/editor/test-strategy.md"
   - "docs/quality/editor/evidence-index.md"
   - "docs/quality/editor/e9-eval-plan.md"
-next_action: "由 owner 自行审阅未在 clean HEAD 重跑的双浏览器项，并决定是否接受 W-ED-001–W-ED-006 与 Ready with waivers 结论"
+  - "docs/quality/editor/e10-eval-plan.md"
+next_action: "等待 E10 形成新的 implementation candidate；当前 E9 readiness candidate 只保留为 pre-E10 历史记录"
 ---
 
 # Editor Release Readiness
 
 ## 1. Proposed Decision
 
-- Candidate conclusion：`Ready with waivers`，当前仅为待审提案。
-- Review state：`owner-review`（frontmatter 继续为 `in-review`）；按 DEC-055 不再由 agent 申请沙箱外浏览器重跑，未在 clean HEAD 验证的项目交由 owner 自行审阅。
-- Decision boundary：本文件只评价 Editor E1–E9 候选是否可进入后续 release planning，不批准生产部署。
+- Candidate conclusion：E9 候选原提案为 `Ready with waivers`；DEC-057 后标记为 `pre-E10`，不再是当前可批准候选。
+- Review state：`pre-E10 / in-review`。E10 会修改产品 `src/`，因此必须在 E10 证据完成后建立新的 runtime candidate；按 DEC-055 未执行的浏览器项仍交由 owner 自行审阅。
+- Decision boundary：本文件保留 E1–E9 readiness 审计事实，并等待 E10 后续候选；不批准生产部署。
 - Production boundary：PROD-015 继续阻断正式上线；Visualizer readiness 独立保持 `in-review`，不能由本结论替代。
 
 ## 2. Candidate Identity and Freeze
 
 | Field | Fixed value |
 | --- | --- |
-| Runtime candidate | E9 implementation commit `13614673bbf4d824f2ee109d36e04de6b3f8aabd` |
+| Runtime candidate | `pre-E10`：E9 implementation commit `13614673bbf4d824f2ee109d36e04de6b3f8aabd`，仅作历史候选 |
 | E9 evidence | evidence registration `299502d`；run `E9-2026-09-04T03-51-33-088Z-13614673`；29/29；summary SHA-256 `a9d195fba7715213366068143a12977600e5e166b93064cd532012ff7f992b7c` |
 | Milestone closure | DEC-053；closure commit `4fb0fb4ae49434080b1633b3ccc1129123d4252d` |
-| Allowed post-candidate changes | 文档、测试 Harness、readiness runner 与本地 artifact；不得修改产品 `src/` |
-| Drift gate | `git diff --quiet 13614673bbf4d824f2ee109d36e04de6b3f8aabd..HEAD -- src` 必须为 exit 0 |
+| Superseding change | DEC-057 / ADR-0022 的 E10 小节批量编辑、拍号控件与离页对话框会修改产品 `src/` |
+| New candidate gate | E10 证据可用后固定新的 implementation commit，并重新运行适用于 E1–E10 的 readiness 审计 |
 | Audit Harness | commit `788be6bb8018ce6bbe4274fd5138b6d55d4cb158` |
 
-任何 `src/` 漂移都会使本候选身份失效并阻断审计。产品修复必须回到对应 Editor 里程碑/风险，形成新的 implementation commit 与 clean evidence；不得把测试或文档提交伪装成运行时候选。
+E9 candidate 的 source freeze 已由 E10 的已批准产品变更有意终止。历史 audit artifact、hash 与结论保留且不改写；E10 不得沿用 E9 candidate identity，也不得把测试或文档提交伪装成新的运行时候选。
 
 ## 3. Review Scope
 

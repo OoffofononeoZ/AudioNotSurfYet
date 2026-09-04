@@ -6,10 +6,10 @@ upstream_docs:
   - "docs/delivery/editor/execution-plan.md"
   - "docs/delivery/editor/acceptance-criteria.md"
   - "docs/delivery/editor/test-strategy.md"
-next_action: "E1–E9 已关闭；进入独立 Editor release-readiness 评审"
+next_action: "E10 In Progress；完整证据与 owner review 后再重建 Editor readiness"
 ---
 
-# Editor E1–E9 Milestone Plan
+# Editor E1–E10 Milestone Plan
 
 ## 1. Planning Convention
 
@@ -35,6 +35,7 @@ next_action: "E1–E9 已关闭；进入独立 Editor release-readiness 评审"
 | E7 | Compact workbench + fullscreen overlay | Complete | E6 | 紧凑工作台、窗口级灰色浮层、复合入口、按歌曲 visibility 与双浏览器响应式 | 46 步 canonical + owner approval | project-owner |
 | E8 | Timeline, recovery and marker usability | Complete | E7 | `88px/72px` 时间轴、同歌自动恢复、异歌显式 replace 与 marker 中心对齐 | scoped/provisional + clean canonical + owner approval | project-owner |
 | E9 | Tempo lane and marker interaction | Complete | E8 | 28px 紧凑 BPM 标记条、shared scroll/geometry、boundary 删除、candidate/category/divider 修订 | revised 29 步 clean canonical + owner approval | project-owner |
+| E10 | Marker block editing and leave dialog | In Progress | E9 | 单 lane/class 小节选择、原子复制/移动、denominator 修复与深色 route dialog | 33 步 clean evidence或 owner 补偿 + owner approval | project-owner |
 
 ## 3. Exit Checklist by Milestone
 
@@ -121,6 +122,14 @@ next_action: "E1–E9 已关闭；进入独立 Editor release-readiness 评审"
 - [x] dirty provisional、implementation commit、新 29/29 clean canonical 与 revised evidence 登记完成。
 - [x] owner 确认紧凑条融入波形、指向正确、输入可用、重复标签消失、共享滚动、删除语义和单 divider。
 
+### E10
+
+- [x] DEC-057、ADR-0022、AC-E1001–AC-E1007 与 quality contract 获实施批准。
+- [ ] 纯 selection/copy/move command、单 owner 交互、denominator 和 dialog 已实现。
+- [ ] unit/integration、dirty provisional 与 implementation commit 完成。
+- [ ] Chrome/Edge 完整运行，或按 DEC-055 明确登记 owner-review gap；未验证不得记 pass。
+- [ ] 33 步 clean evidence 与 owner 人工任务获批后关闭 E10、缓解 R-025/R-044。
+
 ## 4. Failure and Slip Rules
 
 - canonical 失败：修复原因并重新提交后再运行新的 clean canonical；失败 run 保留身份与分类，不能覆盖。
@@ -143,7 +152,8 @@ next_action: "E1–E9 已关闭；进入独立 Editor release-readiness 评审"
 - E7：`Complete`。
 - E8：`Complete`。
 - E9：`Complete`。
-- 当前下一门禁：建立并执行独立 Editor release-readiness 评审；E9 关闭不自动构成 readiness 或生产上线批准。
+- E10：`In Progress`。
+- 当前下一门禁：完成 E10 实现与证据；DEC-054 的 E9 readiness candidate 只保留为 `pre-E10`。
 
 ## 6. Delivery Approval
 

@@ -9,10 +9,10 @@ upstream_docs:
   - "docs/architecture/editor/project-format-v1.md"
   - "docs/architecture/editor/interaction-contracts.md"
   - "docs/delivery/editor/execution-plan.md"
-next_action: "AC-E101–AC-E905 已满足；在 Editor release-readiness 中执行当前候选回归"
+next_action: "验证 AC-E1001–AC-E1007；完整 browser/owner evidence 前 E10 保持 In Progress"
 ---
 
-# Editor E1–E9 Acceptance Criteria
+# Editor E1–E10 Acceptance Criteria
 
 ## 1. Evidence Rules
 
@@ -121,10 +121,24 @@ next_action: "AC-E101–AC-E905 已满足；在 Editor release-readiness 中执�
 | AC-E904 | 删除清理对应 draft/error、使旧 tempo estimate stale、flush autosave 并由 `aria-live` 播报；刷新和 JSON V1 round-trip 精确恢复，失败不部分写入 | controller/repository integration + keyboard E2E | R-023, R-026, R-042 |
 | AC-E905 | “+分类”内容双轴居中，point candidate 是无框/无影的 3px 绿色竖线，Timeline/PointWorkspace 之间只有一条 divider；BPM/拍号同一基线且来源只在 accessible name/title；E1–E8、keyboard/focus/reduced-motion、console/pageerror 和资源回归通过 | computed style + 29 步 canonical + owner visual task | R-024, R-025, R-042 |
 
-## 11. Milestone Exit Rule
+## 11. E10 — Marker Block Editing and Leave Dialog
+
+| ID | Criterion | Verification | Risk |
+| --- | --- | --- | --- |
+| AC-E1001 | “区间操作”位于两个新增轨道按钮之后、默认关闭且不持久化；关闭时 E3/E5/E9 pointer、menu、pan、创建、删除和 handle 行为不变 | component/integration + Chrome/Edge interaction | R-025, R-044 |
+| AC-E1002 | 右键拖动按真实小节选择且只作用于起始 lane/inner class；point 使用 `[start,end)`，range 仅完整包含，single-beat 可选且空 BPM metered 明确拒绝 | pure unit + pointer E2E | R-044 |
+| AC-E1003 | Cmd/Ctrl+C 立即向后复制并让选择跟随副本；新 ID、lane/class、相对秒数和范围长度正确，连续复制可重复 | deterministic unit + keyboard E2E | R-023, R-044 |
+| AC-E1004 | 左拖从选区内开始并吸附当前网格；移动保留 ID，preview/cancel 不改工程；越界、point duplicate、range overlap 都整批拒绝且只在成功时一次 update | unit/integration + fault E2E | R-023, R-044 |
+| AC-E1005 | Enter/Space 选择当前小节、Shift+左右扩展、Alt/Option+左右移动、Escape 清理；editable control 不被快捷键劫持；pointer/listener/capture 无泄漏 | keyboard/a11y + lifecycle E2E | R-025, R-044 |
+| AC-E1006 | denominator `1/2/4/8/16/32` 与 CSS 箭头无遮挡、11px 同基线，在 390/1024/1280/1920 与 DPR 1/2 无换行或裁切 | computed geometry/style Chrome/Edge | R-025 |
+| AC-E1007 | 有未导出修改时站内 route 使用深色原生 dialog；Stay/Escape/close/backdrop 不离页且不写偏好，确认才离页；重复请求和卸载不悬挂，beforeunload 不变 | controller/component + dual-browser route task | R-022, R-025, R-044 |
+
+## 12. Milestone Exit Rule
 
 每个里程碑只能在其全部适用 AC、有明确成功/失败/边界/异常证据、相关风险复核、clean canonical 和 owner 批准后关闭。本 AC 于 2026-08-26 获 `project-owner` 批准；E1 开放实施不构成 AC-E101–AC-E108 已通过。
 
 AC-E801–AC-E805 于 2026-09-03 随 owner 的 E8 实施指令获批。已有 dirty-worktree 通过结果只标记 scoped/provisional；V5 独立提交后 owner 允许单独提交 E8。clean canonical `E8-2026-09-03T04-07-28-904Z-84d9435c` 25/25 通过，owner 随后批准 canonical 与人工门禁；E8 已关闭。
 
 AC-E901–AC-E905 于 2026-09-04 随 owner 的 E9 完整实施指令获批。首个 implementation commit `cf0a79b176d99eb183368818ce90ac5731d1cfa8` 与 29/29 clean run 已满足旧轨道契约，但 DEC-052/ADR-0020 改变合并拓扑和视觉几何，该 run 现为 `pre-revision`。修订实现 commit `13614673bbf4d824f2ee109d36e04de6b3f8aabd` 的 clean canonical 29/29 通过；owner 随后批准适用人工门禁，AC-E901–AC-E905 已满足且 E9 已关闭。
+
+AC-E1001–AC-E1007 于 2026-09-04 随 owner 的 E10 完整实施指令获批。当前只开放实现与证据收集；完整 33 步或 owner 明确补偿结论前不得关闭 E10、缓解 R-025/R-044 或恢复 Editor readiness 候选。
