@@ -1,12 +1,7 @@
 <template>
     <div ref="containerRef" :class="`relative w-[500px] ${className}`.trim()">
-        <div ref="listRef" :class="`overflow-y-auto p-2 ${displayScrollbar
-            ? '[&::-webkit-scrollbar]:w-[8px] [&::-webkit-scrollbar-track]:bg-[#0b0b0b] [&::-webkit-scrollbar-thumb]:bg-[#222] [&::-webkit-scrollbar-thumb]:rounded-[4px]'
-            : 'scrollbar-hide'
-            }`" :style="{
-                scrollbarWidth: displayScrollbar ? 'thin' : 'none',
-                scrollbarColor: '#222 #0b0b0b',
-            }" @scroll="handleScroll">
+        <div ref="listRef" :class="`overflow-y-auto p-2 ${displayScrollbar ? 'app-scrollbar' : 'scrollbar-hide'}`"
+            @scroll="handleScroll">
             <div v-for="(item, index) in items" :key="index" ref="itemRefs" :data-index="index"
                 class="mb-4 cursor-pointer opacity-0 scale-70" @mouseenter="() => setSelectedIndex(index)" @click="
                     () => {
@@ -15,7 +10,7 @@
                     }
                 ">
                 <div
-                    :class="`p-2 bg-[#282828] rounded-lg ${selectedIndex === index ? 'bg-[#3a3a3a]' : ''} ${itemClassName}`">
+                    :class="`p-2 rounded-lg animated-item ${selectedIndex === index ? 'animated-item--selected' : ''} ${itemClassName}`">
                     <slot :name="item" :index="index" :data="slotData[index]">
                         <p class="text-white m-0">{{ item }}</p>
                     </slot>
@@ -24,10 +19,10 @@
         </div>
 
         <div v-if="showGradients" :style="{ opacity: topGradientOpacity }"
-            class="absolute top-0 left-0 right-0 h-[50px] bg-gradient-to-b from-[#0b0b0b] to-transparent pointer-events-none transition-opacity duration-300 ease">
+            class="absolute top-0 left-0 right-0 h-[50px] list-fade-top pointer-events-none transition-opacity duration-300 ease">
         </div>
         <div v-if="showGradients" :style="{ opacity: bottomGradientOpacity }"
-            class="absolute bottom-0 left-0 right-0 h-[100px] bg-gradient-to-t from-[#0b0b0b] to-transparent pointer-events-none transition-opacity duration-300 ease">
+            class="absolute bottom-0 left-0 right-0 h-[100px] list-fade-bottom pointer-events-none transition-opacity duration-300 ease">
         </div>
     </div>
 </template>
@@ -214,3 +209,21 @@ onUnmounted(() => {
     }
 });
 </script>
+
+<style scoped>
+.animated-item {
+    background-color: var(--surface-player);
+}
+
+.animated-item--selected {
+    background-color: var(--surface-item-selected);
+}
+
+.list-fade-top {
+    background: linear-gradient(to bottom, var(--canvas), transparent);
+}
+
+.list-fade-bottom {
+    background: linear-gradient(to top, var(--canvas), transparent);
+}
+</style>

@@ -1,11 +1,11 @@
 <template>
     <div class="list-container p-2 w-[516px]">
-        <div style="color: white;" class="flex pl-4 pr-4 justify-between items-center mt-2">
+        <div class="flex pl-4 pr-4 justify-between items-center mt-2 list-header">
             <div>
                 <span class="text-xl mr-2">播放列表</span>
                 <span data-testid="queue-count">{{ info.length }}</span>
-                <p v-if="persistence.message" class="text-xs text-amber-300 mt-1 max-w-80"
-                    data-testid="persistence-message" :data-persistence-state="persistence.state">
+            <p v-if="persistence.message" class="text-xs mt-1 max-w-80 persistence-note"
+                data-testid="persistence-message" :data-persistence-state="persistence.state">
                     {{ persistence.message }}
                     <button v-if="canClearPersisted" type="button"
                         class="ml-2 underline focus-visible:outline focus-visible:outline-2"
@@ -32,7 +32,7 @@
             class-name="max-h-full h-full" v-if="info.length > 0">
             <template v-for="value in key" :key="value" #[value]="{ index, data }">
                 <div class="flex items-center justify-between item-container" data-testid="queue-item"
-                    style="color: white;" role="button" tabindex="0" :aria-label="`播放 ${data?.title}`"
+                    role="button" tabindex="0" :aria-label="`播放 ${data?.title}`"
                     :data-track-id="data?.id"
                     @mouseenter="mouseEnteredIndex = index" @mouseleave="mouseEnteredIndex = null"
                     @focusin="mouseEnteredIndex = index"
@@ -43,11 +43,11 @@
                             <img :src="data?.albumCover" alt="cover">
                         </div>
                         <div class="max-w-72 text-sm">
-                            <p class="truncate">{{ data?.fileName }}</p>
-                            <p class="truncate">{{ data?.title }}</p>
-                            <p class="truncate">{{ data?.artist }}</p>
+                            <p class="truncate list-title">{{ data?.fileName }}</p>
+                            <p class="truncate list-subtitle">{{ data?.title }}</p>
+                            <p class="truncate list-meta">{{ data?.artist }}</p>
                             <p v-if="data?.restoreState !== 'available'"
-                                class="truncate text-xs text-amber-300" data-testid="track-restore-state"
+                                class="truncate text-xs restore-state" data-testid="track-restore-state"
                                 :data-restore-state="data?.restoreState">
                                 {{ restoreStateLabel(data?.restoreState) }}
                             </p>
@@ -67,7 +67,7 @@
                             </button>
                         </div>
                         <div v-else class="text-sm mr-2" v-show="mouseEnteredIndex !== index">
-                            <p>{{ data?.duration }}</p>
+                            <p class="list-duration">{{ data?.duration }}</p>
                         </div>
                         <div class="flex items-center gap-4 mr-2"
                             v-show="mouseEnteredIndex === index && !needsRecovery(data?.restoreState)">
@@ -156,14 +156,37 @@ const needsRecovery = (state?: RestoreState) =>
     height: 100%;
     max-height: 100%;
     overflow-y: hidden;
-    background-color: #181818;
+    background-color: var(--surface-panel);
     border-radius: 10px 0 0 10px;
+}
+
+.list-header,
+.item-container,
+.list-title {
+    color: var(--ink-strong);
+}
+
+.list-subtitle {
+    color: var(--ink);
+}
+
+.list-meta {
+    color: var(--body);
+}
+
+.list-duration {
+    color: var(--mute);
+}
+
+.persistence-note,
+.restore-state {
+    color: var(--warning);
 }
 
 .item-container:focus-visible,
 .icon-button:focus-visible {
-    border-radius: 6px;
-    outline: 2px solid var(--main-color);
+    border-radius: var(--radius-sm);
+    outline: 2px solid var(--accent);
     outline-offset: 2px;
 }
 
