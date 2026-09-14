@@ -26,7 +26,7 @@ async function walkMarkdown(directory) {
 }
 
 function extractFrontmatter(content, filePath) {
-    const match = content.match(/^---\n([\s\S]*?)\n---\n/);
+    const match = content.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n/);
     if (!match) {
         throw new Error(`${filePath}: missing leading frontmatter`);
     }
