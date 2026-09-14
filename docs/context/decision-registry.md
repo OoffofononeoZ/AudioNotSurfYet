@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/product/scope.md"
   - "docs/architecture/system-design.md"
   - "docs/delivery/execution-plan.md"
-next_action: "实施 DEC-058 Visualizer 原生全屏；自动化跳过并由 owner 自行审阅交互"
+next_action: "实施 DR1 全局 token 基线；按 DR0–DR10 逐轮推进设计改造并在每轮等待 owner 确认"
 ---
 
 # Decision Registry
@@ -95,6 +95,7 @@ next_action: "实施 DEC-058 Visualizer 原生全屏；自动化跳过并由 own
 | DEC-056 | 2026-09-04 | 保留 V0 首版两个模板的历史事实，允许通过项目 Scene Generator Skill 添加受控内置场景；输入不完整零写入，完整合同须再次获批，场景完成后重评 readiness 且不改写 V1–V6 canonical | project-owner | approved | [ADR-0021](../architecture/adrs/0021-controlled-visualizer-scene-generation.md) | SceneBrief/合同门禁、生成职责、测试矩阵或 readiness 继承规则改变 |
 | DEC-057 | 2026-09-04 | 打开 Editor E10：区间模式只作用于右拖起始 lane/class；Cmd/Ctrl+C 立即向后复制；移动吸附当前网格；越界/point duplicate/range overlap 整批拒绝；E9 canonical 不变且 readiness 候选转为 pre-E10 | project-owner | approved | [E10 eval](../quality/editor/e10-eval-plan.md) | E10 行为、33 步证据、owner review 或 readiness candidate 改变 |
 | DEC-058 | 2026-09-04 | 在不创建 V7 或改写 V1–V6 canonical 的前提下增加 Visualizer 原生全屏播放；全屏瞬时状态不持久化，本轮只要求可运行并跳过自动化，未验证项由 owner 自行审阅 | project-owner | approved | [Fullscreen eval](../quality/visualizer/fullscreen-playback-eval-plan.md) | Fullscreen API、自动隐藏、验证范围、owner review 或 readiness 结论改变 |
+| DEC-059 | 2026-09-14 | 采用 VoltAgent 设计语言并只在 `src/style.css` 的 `:root` 以 CSS 变量承载 token；主题色固定 `#27ff64`、只做暗色；canvas 绘制冻结；按 DR0–DR10 逐轮实施并逐轮等待 owner 确认；MusicBar 样式 2 多色进度环登记为例外 | project-owner | approved | [ADR-0024](../architecture/adrs/0024-design-language-adoption.md) | 设计语言来源、token 载体、canvas 边界、字体策略、轮次划分或例外规则改变 |
 
 ## Approval Evidence
 
@@ -229,6 +230,8 @@ E5 clean canonical `E5-2026-08-27T11-03-22-177Z-78124177` 随后在 implementati
 同日，owner 先确认插入排序、工作区全局保存和“动作面板 + 恢复默认”，随后明确要求完整实施 M14。DEC-036/ADR-0013、产品/架构/delivery/eval、本地提交、clean canonical 与 evidence/readiness 复核据此获批；M13 readiness 转为历史，远程不推送。
 
 同日，DEC-036 implementation commit `0e991307d9045a1ec84ddaae0515612240894a92` 与 clean canonical `M14-2026-09-01T02-36-49-995Z-0e991307` 已形成，19/19 通过，summary SHA-256 为 `b169d6ff082746fc3cbe5ac6064151233c4f2869cba6e41f9dcdd7d052916fcc`。该执行事实关闭 M14、缓解 R-031–R-033 并恢复 Analyzer `Ready with waivers`；PROD-015 仍开放。
+
+2026-09-14，`project-owner` 要求把项目逐步改造成 `skills/audio-visualizer-dev` 中登记的设计语言，并明确主题色必须沿用当前绿色、不准备白色版本；随后以明确实施指令批准"按 DR 轮次把 AudioNotSurfYet 逐步改造成 VoltAgent 设计语言"计划。DEC-059 据此生效：设计语言来源、纯暗色与单一强调色约束、CSS 变量 token 载体、canvas 绘制冻结、逐轮验证并等待确认的推进门禁，以及 MusicBar 多色进度环例外均以 [ADR-0024](../architecture/adrs/0024-design-language-adoption.md) 为准；实施顺序与每轮证据要求见 [Design remake execution plan](../delivery/design-remake/execution-plan.md)。该批准不改变 M1–M14、E1–E10、V1–V6 的 canonical 身份，也不构成任何页面重设计已经完成的结论。
 
 ## Historical Evidence Gap
 
