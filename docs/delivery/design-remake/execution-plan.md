@@ -6,7 +6,7 @@ upstream_docs:
   - "docs/architecture/adrs/0024-design-language-adoption.md"
   - "docs/architecture/system-design.md"
   - "skills/audio-visualizer-dev/references/60-design-language-and-brand.md"
-next_action: "实施 DR1 全局 token 基线；完成后等待 owner 确认再进入 DR2"
+next_action: "DR1 已提交；等待 owner 确认后实施 DR2 HeaderBar 共享 chrome"
 ---
 
 # Design Remake Execution Plan (DR0–DR10)
@@ -80,3 +80,19 @@ next_action: "实施 DR1 全局 token 基线；完成后等待 owner 确认再�
 - 写死色值断言的同轮更新清单已列出。
 - 形成该轮本地提交，不 push、不 fetch。
 - 输出轮次报告并等待 owner 确认后再开始下一轮。
+
+## 7. Round Status
+
+| Round | Status | Commit | Note |
+| --- | --- | --- | --- |
+| DR0 | Complete | `daaabc3` | ADR-0024、本计划、DEC-059 与 context index 已落库 |
+| DR1 | Complete | — | 仅在 `src/style.css` 的 `:root` 建立 token 与值保持别名；commit hash 于 DR2 轮回填 |
+| DR2 | Planned | — | HeaderBar 共享 chrome |
+| DR3 | Planned | — | MusicBar 共享 chrome |
+| DR4 | Planned | — | MusicList / AnimatedList / 列表反馈态 |
+| DR5 | Planned | — | Home 容器与遮罩 |
+| DR6 | Planned | — | Analyzer chrome 与 hairline 收敛 |
+| DR7 | Planned | — | Editor A：壳、工具栏、timeline stage |
+| DR8 | Planned | — | Editor B：标记、overlay、菜单与 dialog |
+| DR9 | Planned | — | Visualizer |
+| DR10 | Planned | — | 收尾与 readiness 复核 |

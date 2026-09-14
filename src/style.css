@@ -3,8 +3,89 @@
 @tailwind utilities;
 
 :root {
-    --main-color: #27ff64;
-    --main-color-tsp: #27ff6433;
+    /* 设计 token（DR1 基线）。取值与角色定义见
+       skills/audio-visualizer-dev/references/60-design-language-and-brand.md */
+    --accent: #27ff64;
+    --accent-soft: #65ffa9;
+    --accent-deep: #7dffb3;
+    --accent-tsp: #27ff6433;
+    --on-accent: #020403;
+    --canvas: #020403;
+    --surface-1: #0b1710;
+    --surface-2: #041009;
+    --surface-3: #07110d;
+    --ink: #effff6;
+    --body: #a9c7b6;
+    --mute: #91a99a;
+    --warning: #f8ff87;
+    --error: #ffb0a8;
+
+    /* hairline 与分隔线：DR1 映射现有实现值，Analyzer 范围在 DR6 收敛 */
+    --hairline-soft: rgba(101, 255, 169, 0.18);
+    --hairline: rgba(101, 255, 169, 0.28);
+    --hairline-strong: rgba(101, 255, 169, 0.42);
+    --hairline-focus: rgba(101, 255, 169, 0.52);
+    --divider: rgba(159, 196, 175, 0.16);
+    --divider-strong: rgba(101, 255, 169, 0.28);
+
+    /* 间距与圆角刻度 */
+    --space-xxs: 2px;
+    --space-xs: 4px;
+    --space-sm: 8px;
+    --space-md: 12px;
+    --space-lg: 16px;
+    --space-xl: 20px;
+    --space-2xl: 24px;
+    --space-3xl: 32px;
+    --space-4xl: 40px;
+    --space-5xl: 48px;
+    --space-6xl: 64px;
+    --radius-xs: 4px;
+    --radius-sm: 6px;
+    --radius-md: 8px;
+    --radius-pill: 9999px;
+
+    /* 排版层级：字体族保持现状，只对齐字号、行高、字重与字距 */
+    --font-sans: 'consolas', 'SimHei', sans-serif;
+    --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    --text-display-xl-size: 60px;
+    --text-display-xl-line: 60px;
+    --text-display-xl-weight: 400;
+    --text-display-xl-tracking: -0.65px;
+    --text-display-lg-size: 36px;
+    --text-display-lg-line: 40px;
+    --text-display-lg-weight: 400;
+    --text-display-lg-tracking: -0.9px;
+    --text-display-md-size: 24px;
+    --text-display-md-line: 32px;
+    --text-display-md-weight: 700;
+    --text-display-md-tracking: -0.6px;
+    --text-display-sm-size: 20px;
+    --text-display-sm-line: 28px;
+    --text-display-sm-weight: 600;
+    --text-eyebrow-size: 14px;
+    --text-eyebrow-line: 20px;
+    --text-eyebrow-weight: 600;
+    --text-eyebrow-tracking: 2.52px;
+    --text-body-lg-size: 18px;
+    --text-body-lg-line: 28px;
+    --text-body-lg-weight: 400;
+    --text-body-md-size: 16px;
+    --text-body-md-line: 26px;
+    --text-body-md-weight: 400;
+    --text-body-sm-size: 14px;
+    --text-body-sm-line: 20px;
+    --text-body-sm-weight: 400;
+    --text-caption-size: 12px;
+    --text-caption-line: 16px;
+    --text-caption-weight: 400;
+    --text-code-size: 13px;
+    --text-code-line: 18px;
+    --text-code-weight: 400;
+
+    /* 旧名别名：计算值不变，既有引用继续工作 */
+    --main-color: var(--accent);
+    --main-color-tsp: var(--accent-tsp);
     --app-header-height: 64px;
     --app-sticky-gap: 8px;
     --layer-content: 0;
