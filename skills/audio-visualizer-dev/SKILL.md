@@ -18,6 +18,7 @@ description: AudioNotSurfYet 项目专属的开发、诊断、代码评审、验
    - 音频加载、播放、跳转、元数据或能量分析：读 [音频播放与分析](references/30-audio-playback-and-analysis.md)。
    - Three.js、Canvas、GSAP、RAF 或响应式几何：读 [可视化、动画与响应式](references/40-visualization-animation-and-responsiveness.md)。
    - 构建、测试或调试：读 [构建、测试与调试](references/50-build-test-and-debug.md)。
+   - 色板、排版、组件 chrome 或整体视觉重设计：读 [设计语言与品牌约束](references/60-design-language-and-brand.md)。
    - 证据冲突、仓库漂移或工程约定缺口：读 [开放问题与项目差异](references/99-open-questions-and-project-deltas.md)。
 4. 将任务分成最小可验证改动；保留用户已有修改，不顺手改无关问题。
 5. 修改后按风险执行相关验证，并用实际证据说明“已实现”或“已验证”。
@@ -39,6 +40,7 @@ description: AudioNotSurfYet 项目专属的开发、诊断、代码评审、验
 - 检查工作树、目标文件及生成文件，避免覆盖用户修改。
 - 确认行为契约：输入、状态迁移、输出、失败路径、边界条件和资源所有权。
 - 涉及 UI 时确认路由、布局容器、定位上下文和目标视口。
+- 涉及视觉时先读 [设计语言与品牌约束](references/60-design-language-and-brand.md)：主题色固定 `#27ff64`，只做暗色版本；素材中未本地化的色值不得直接照搬。
 - 新增或修改产品自有的可见滚动容器时复用全局 `.app-scrollbar`；不要在组件内复制 `scrollbar-color` 或 `::-webkit-scrollbar` 变体。只有明确隐藏滚动条且键盘、滚轮和触控仍可访问时才使用 `scrollbar-hide`。
 - 涉及音频时确认用户手势、文件来源、AudioContext 状态、对象 URL、RAF 和节点释放责任。
 - 涉及生命周期文档时，先执行下节的门禁路由。
@@ -81,4 +83,5 @@ description: AudioNotSurfYet 项目专属的开发、诊断、代码评审、验
 - 所需浏览器、音频样本、权限或运行环境不可用，且没有可信替代验证。
 - 测试脚本、fixture 或上游文档缺失，无法形成声称通过所需的证据。
 - 产品范围、隐私规则、浏览器支持矩阵、性能预算或 release risk 需要人类确认。
+- 视觉重设计要改变已批准的布局/交互契约（如 DEC-050 一屏工作台、DEC-019 Header blur），或改变主题色与纯暗色约束。
 - Harness 阶段所需的上游文档不存在、不是 `approved`，或已因上游变化而过期。
