@@ -6,7 +6,7 @@ upstream_docs:
   - "docs/architecture/adrs/0024-design-language-adoption.md"
   - "docs/architecture/system-design.md"
   - "skills/audio-visualizer-dev/references/60-design-language-and-brand.md"
-next_action: "DR1 已提交；等待 owner 确认后实施 DR2 HeaderBar 共享 chrome"
+next_action: "DR2 已按 owner 要求撤回并重做（品牌/导航/Settings 对齐 token，不改 Header 背景）；等待 owner 确认"
 ---
 
 # Design Remake Execution Plan (DR0–DR10)
@@ -87,7 +87,7 @@ next_action: "DR1 已提交；等待 owner 确认后实施 DR2 HeaderBar 共享 
 | --- | --- | --- | --- |
 | DR0 | Complete | `daaabc3` | ADR-0024、本计划、DEC-059 与 context index 已落库 |
 | DR1 | Complete | — | 仅在 `src/style.css` 的 `:root` 建立 token 与值保持别名；commit hash 于 DR2 轮回填 |
-| DR2 | Planned | — | HeaderBar 共享 chrome |
+| DR2 | In Progress | — | HeaderBar 对齐 token：品牌 display-md、导航白色 body-sm 与当前路由强调线、Settings 去边框；保持 DR2 之前的 Header 背景写法不变；commit hash 于确认后回填 |
 | DR3 | Planned | — | MusicBar 共享 chrome |
 | DR4 | Planned | — | MusicList / AnimatedList / 列表反馈态 |
 | DR5 | Planned | — | Home 容器与遮罩 |
