@@ -6,7 +6,7 @@ upstream_docs:
   - "docs/architecture/adrs/0024-design-language-adoption.md"
   - "docs/architecture/system-design.md"
   - "skills/audio-visualizer-dev/references/60-design-language-and-brand.md"
-next_action: "DR2 已按 owner 要求撤回并重做（品牌/导航/Settings 对齐 token，不改 Header 背景）；等待 owner 确认"
+next_action: "DR3 MusicBar 共享 chrome 已提交；等待 owner 确认后实施 DR4"
 ---
 
 # Design Remake Execution Plan (DR0–DR10)
@@ -33,7 +33,7 @@ next_action: "DR2 已按 owner 要求撤回并重做（品牌/导航/Settings �
 | 暗色约束 | 只做暗色，不新增 `prefers-color-scheme: light` 分支 | 出现浅色需求时停止并请求决策 |
 | hairline 归一 | DR1 映射现值；DR6 收敛为 `.12 / .18 / .28 / .42 / .52` | 与其他页面共享的 `.app-scrollbar` 现值保持不变 |
 | Canvas 冻结 | `src/analysis/canvasRenderer.ts`、`src/visualizer/**`、LightBg、DotGridBg、MeydaCard plot、Editor Canvas、Visualizer 预览 | 任何绘制参数、配色或几何改动都需新决策 |
-| 登记例外 | MusicBar 样式 2 的 `conic-gradient` 多色进度环 | 新增例外必须写入 ADR-0024 |
+| 登记例外 | MusicBar 样式 0 与 1 的 `conic-gradient` 多色进度环 | 新增例外必须写入 ADR-0024 |
 | 不改动的契约 | DEC-050 一屏工作台、DEC-019 Header blur、`.app-scrollbar` 唯一滚动条、masonry 列数断点、E9 行高与 28px BPM 条、E10 选区语义 | 需要改变时停止并走独立决策 |
 
 ## 4. Round Slices
@@ -86,9 +86,9 @@ next_action: "DR2 已按 owner 要求撤回并重做（品牌/导航/Settings �
 | Round | Status | Commit | Note |
 | --- | --- | --- | --- |
 | DR0 | Complete | `daaabc3` | ADR-0024、本计划、DEC-059 与 context index 已落库 |
-| DR1 | Complete | — | 仅在 `src/style.css` 的 `:root` 建立 token 与值保持别名；commit hash 于 DR2 轮回填 |
-| DR2 | In Progress | — | HeaderBar 对齐 token：品牌 display-md、导航白色 body-sm 与当前路由强调线、Settings 去边框；保持 DR2 之前的 Header 背景写法不变；commit hash 于确认后回填 |
-| DR3 | Planned | — | MusicBar 共享 chrome |
+| DR1 | Complete | `f262f05` | 仅在 `src/style.css` 的 `:root` 建立 token 与值保持别名 |
+| DR2 | Complete | `19689d9` | HeaderBar 对齐 token：品牌 display-md、导航白色 body-sm 与当前路由强调线、Settings 去边框；保持 DR2 之前的 Header 背景写法不变 |
+| DR3 | In Progress | — | MusicBar 共享 chrome：文字层级、播放器表面、进度、焦点、滑块对齐 token；彩虹环更正为样式 0 与 1 例外；commit hash 于 DR4 回填 |
 | DR4 | Planned | — | MusicList / AnimatedList / 列表反馈态 |
 | DR5 | Planned | — | Home 容器与遮罩 |
 | DR6 | Planned | — | Analyzer chrome 与 hairline 收敛 |

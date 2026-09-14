@@ -24,7 +24,7 @@ next_action: "按 DR1–DR10 逐轮实施；每轮完成 build、相关 e2e 与�
 - Canvas 绘制冻结：`src/analysis/canvasRenderer.ts`、`src/visualizer/**` 的绘制逻辑，以及 LightBg、DotGridBg、MeydaCard plot、Editor 波形/棋盘/overlay、Visualizer 预览与场景的绘制参数、配色和几何不得改动。只允许修改画布外框、容器、工具栏与刻度标签等 DOM chrome。
 - hairline 归一：DR1 先把现有两组绿色系取值 `rgba(101, 255, 169, α)`、`rgba(125, 255, 179, α)` 与 `.app-scrollbar` 现值原样映射为变量；DR6 在 Analyzer 范围内收敛到统一刻度 `.12 / .18 / .28 / .42 / .52`。
 - 允许在对应 DR 内改变 e2e 中写死的色值断言，但必须在同一轮更新断言，并把受影响的 milestone/证据登记为需复核；不允许先改实现、把断言留到后续轮次。
-- MusicBar 样式 2 的多色 `conic-gradient` 进度环保留，登记为"单一强调色"规则的显式例外；它是本设计语言中唯一允许的第二色相来源。
+- MusicBar 样式 0 与 1 的多色 `conic-gradient` 进度环保留，登记为"单一强调色"规则的显式例外；它们是本设计语言中唯一允许的第二色相来源。
 
 ## Consequences
 

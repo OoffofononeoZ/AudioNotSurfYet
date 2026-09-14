@@ -60,7 +60,7 @@
 - 焦点可见性沿用现有 `--main-color` outline 与 `outline-offset`，不改为素材的灰色 focus 表现。
 - 字体族保持现状，只对齐字号、字重、行高与字距层级；不引入字体文件或 `@font-face`。
 - canvas 绘制冻结：`src/analysis/canvasRenderer.ts`、`src/visualizer/**` 的绘制逻辑，以及 LightBg、DotGridBg、MeydaCard plot、Editor 波形/棋盘/overlay、Visualizer 预览与场景的绘制参数、配色和几何都不改动；只改画布外框、容器、工具栏与刻度标签等 DOM chrome。
-- MusicBar 样式 2 的多色 `conic-gradient` 进度环是"单一强调色"规则的显式例外，也是唯一允许的第二色相来源。
+- MusicBar 样式 0 与 1 的多色 `conic-gradient` 进度环是"单一强调色"规则的显式例外，也是唯一允许的第二色相来源。
 - 按 DR 轮次推进，每轮完成 `npm run build`、该轮相关 e2e 与人工浏览审阅，并在同一轮更新受影响的写死色值断言后等待 owner 确认。
 
 ## 决策来源
