@@ -698,8 +698,10 @@ const handleEditTrack = async (index: number) => {
     background: conic-gradient(from var(--coinc-process), red, var(--main-color), rgb(0, 255, 255), violet, red);
 }
 
-.bg-style-2 {
-    background: rgb(145, 145, 145);
+#music-bar-container.bg-style-2 {
+    --border-width: 1px;
+    background: transparent;
+    border: 1px solid var(--hairline);
 }
 
 #music-bar {
