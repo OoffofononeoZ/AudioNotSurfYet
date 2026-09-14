@@ -79,3 +79,4 @@
 - 复盘：`docs/retrospectives/`
 - 项目 Skill：`skills/audio-visualizer-dev/SKILL.md`
 - Visualizer 场景生成 Skill：`skills/visualizer-scene-generator/SKILL.md`
+- 设计语言与品牌：`skills/audio-visualizer-dev/references/60-design-language-and-brand.md`
