@@ -5,16 +5,16 @@
         id="main-header"
     >
         <section class="min-w-32">
-            <router-link to="/" class="text-white font-bold text-2xl">AUDIOSURF</router-link>
+            <router-link to="/" class="header-brand">AUDIOSURF</router-link>
         </section>
-        <section class="flex gap-4">
-            <router-link :to="visualizerTarget" class="text-white" data-testid="header-visualizer-link">Visualizer</router-link>
-            <router-link to="/analyzer" class="text-white">Analyzer</router-link>
-            <router-link :to="editorTarget" class="text-white" data-testid="header-editor-link">Editor</router-link>
-            <router-link to="/testlands" class="text-white">TestLands</router-link>
+        <section class="header-nav">
+            <router-link :to="visualizerTarget" class="header-nav-link" data-testid="header-visualizer-link">Visualizer</router-link>
+            <router-link to="/analyzer" class="header-nav-link">Analyzer</router-link>
+            <router-link :to="editorTarget" class="header-nav-link" data-testid="header-editor-link">Editor</router-link>
+            <router-link to="/testlands" class="header-nav-link">TestLands</router-link>
         </section>
         <section class="min-w-32 flex justify-end">
-            <button @click="toggleSettings" class="text-white" :aria-expanded="settingsOpen"
+            <button @click="toggleSettings" class="header-settings" :aria-expanded="settingsOpen"
                 aria-label="打开或关闭设置">Settings</button>
         </section>
     </header>
@@ -50,6 +50,69 @@ const toggleSettings = () => {
     align-items: center;
     padding: 0 20px;
     z-index: var(--layer-header);
+}
+
+.header-brand {
+    color: var(--ink);
+    font-size: var(--text-display-md-size);
+    font-weight: var(--text-display-md-weight);
+    line-height: var(--text-display-md-line);
+    letter-spacing: var(--text-display-md-tracking);
+    text-decoration: none;
+}
+
+.header-nav {
+    display: flex;
+    gap: var(--space-lg);
+}
+
+.header-nav-link {
+    position: relative;
+    color: var(--ink-strong);
+    font-size: var(--text-body-sm-size);
+    font-weight: var(--text-body-sm-weight);
+    line-height: var(--text-body-sm-line);
+    text-decoration: none;
+    transition: color 120ms ease;
+}
+
+.header-nav-link:hover,
+.header-nav-link:focus-visible {
+    color: var(--accent-soft);
+}
+
+.header-nav-link.router-link-active {
+    color: var(--accent);
+}
+
+.header-nav-link.router-link-active::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -6px;
+    height: 2px;
+    border-radius: var(--radius-pill);
+    background: var(--accent);
+    pointer-events: none;
+}
+
+.header-settings {
+    color: var(--ink);
+    font-family: inherit;
+    font-size: var(--text-body-sm-size);
+    font-weight: var(--text-body-sm-weight);
+    line-height: var(--text-body-sm-line);
+    background: transparent;
+    border: none;
+    padding: var(--space-md) var(--space-lg);
+    cursor: pointer;
+    transition: color 120ms ease;
+}
+
+.header-settings:hover,
+.header-settings:focus-visible {
+    color: var(--accent-soft);
 }
 
 #main-header.main-header--contextual {
