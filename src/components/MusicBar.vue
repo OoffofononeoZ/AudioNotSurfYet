@@ -14,7 +14,8 @@
                         class="w-14 aspect-square object-cover min-w-14">
                 </div>
                 <div class="flex flex-col text-sm max-w-60" id="music-info-container">
-                    <div v-for="(text, idx) in infoLines" :key="idx" class="info-line-wrap">
+                    <div v-for="(text, idx) in infoLines" :key="idx" class="info-line-wrap"
+                        :class="{ 'info-line-wrap--secondary': idx === 1 }">
                         <div class="info-marquee-track">
                             <span class="info-text">{{ text }}</span>
                             <template v-if="shouldMarquee[idx]">
@@ -707,22 +708,26 @@ const handleEditTrack = async (index: number) => {
 #music-bar {
     width: calc(100% - var(--offset) * 2);
     margin: 0 var(--offset);
-    padding: 0 2rem;
+    padding: 0 var(--space-3xl);
     position: fixed;
     bottom: calc(var(--offset) / 4);
     left: 0;
     z-index: 2;
     border-radius: calc(var(--offset) * 2);
-    background-color: rgb(40, 40, 40);
+    background-color: var(--surface-player);
     display: flex;
     justify-content: space-between;
-    color: white;
+    color: var(--ink-strong);
 }
 
 .info-line-wrap {
     overflow: hidden;
     min-width: 0;
     max-width: 100%;
+}
+
+.info-line-wrap--secondary {
+    color: var(--body);
 }
 
 .info-marquee-track {
@@ -732,7 +737,7 @@ const handleEditTrack = async (index: number) => {
 }
 
 .info-text {
-    padding-right: 20px;
+    padding-right: var(--space-xl);
     display: inline-block;
     white-space: nowrap;
 }
@@ -780,7 +785,7 @@ const handleEditTrack = async (index: number) => {
     left: 0;
     height: 100%;
     width: var(--progress-width);
-    background: linear-gradient(to right, var(--main-color-tsp), var(--main-color));
+    background: linear-gradient(to right, var(--accent-tsp), var(--accent));
     border-radius: 100px;
 }
 
@@ -803,8 +808,8 @@ const handleEditTrack = async (index: number) => {
 svg[role="button"]:focus-visible,
 svg[role="slider"]:focus-visible,
 #progress-bar-container:focus-visible {
-    border-radius: 4px;
-    outline: 2px solid var(--main-color);
+    border-radius: var(--radius-xs);
+    outline: 2px solid var(--accent);
     outline-offset: 3px;
 }
 
@@ -825,11 +830,11 @@ svg[role="slider"]:focus:not(:focus-visible),
 }
 
 :deep(.el-slider__button) {
-    border: solid 2px #40ffda75;
+    border: 2px solid var(--accent);
 }
 
 :deep(.el-slider__bar) {
-    background-color: var(--main-color);
+    background-color: var(--accent);
 }
 
 @media (max-width: 640px) {
