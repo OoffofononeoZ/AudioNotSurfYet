@@ -52,16 +52,23 @@
 
 ## 落地规则
 
-以下为**建议标准**，尚未获得批准：
+以下规则已由 DEC-059/ADR-0024 批准：
 
-- 新颜色先在 `src/style.css` 的 `:root` 定义变量再引用；重设计时逐步收敛组件内的硬编码 hex，不新增同类散落值。
+- token 只以 `src/style.css` 的 `:root` CSS 自定义属性承载；不启用 Tailwind `theme.extend`，不引入第二套 token 来源。
+- 新颜色先定义变量再引用；硬编码 hex 只在当前轮次触及的文件内收敛，不做全仓扫荡。
 - 绿色保持 CTA、状态、焦点与数据可视化专用，不作为长段正文颜色；大面积使用仅限 hairline、glow、进度与波形/可视化的映射色。
 - 焦点可见性沿用现有 `--main-color` outline 与 `outline-offset`，不改为素材的灰色 focus 表现。
-- 排版与间距刻度可直接采用素材值；它们与当前仓库无冲突。
+- 字体族保持现状，只对齐字号、字重、行高与字距层级；不引入字体文件或 `@font-face`。
+- canvas 绘制冻结：`src/analysis/canvasRenderer.ts`、`src/visualizer/**` 的绘制逻辑，以及 LightBg、DotGridBg、MeydaCard plot、Editor 波形/棋盘/overlay、Visualizer 预览与场景的绘制参数、配色和几何都不改动；只改画布外框、容器、工具栏与刻度标签等 DOM chrome。
+- MusicBar 样式 2 的多色 `conic-gradient` 进度环是"单一强调色"规则的显式例外，也是唯一允许的第二色相来源。
+- 按 DR 轮次推进，每轮完成 `npm run build`、该轮相关 e2e 与人工浏览审阅，并在同一轮更新受影响的写死色值断言后等待 owner 确认。
 
-## 待人工确认
+## 决策来源
 
-- `hairline` 的具体取值与是否纳入 token 化收敛。
-- 组件内硬编码颜色收敛的范围、时机与风险，是否纳入同一轮改动。
-- 是否及何时按 AGENTS.md 把设计语言落成 `docs/architecture/` 的 ADR 或设计决策记录，并在 decision-registry 登记条目。
-- 视觉改版是否需要新增或修订 quality/readiness 证据。
+- [ADR-0024](../../../docs/architecture/adrs/0024-design-language-adoption.md)：设计语言采用、token 载体、canvas 边界、字体策略与登记例外。
+- [Design remake execution plan](../../../docs/delivery/design-remake/execution-plan.md)：DR0–DR10 轮次范围、固定参数、受影响证据与每轮退出门禁。
+- `hairline` 归一由 ADR-0024 固定：DR1 先映射现值，DR6 在 Analyzer 范围收敛为 `.12 / .18 / .28 / .42 / .52`。
+
+## 开放项
+
+- 受影响页面的 quality/readiness 复核范围，在 DR10 收尾时评估。
