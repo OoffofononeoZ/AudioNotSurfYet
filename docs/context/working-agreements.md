@@ -45,7 +45,7 @@ next_action: "Editor E1–E9 与 Visualizer V1–V6 已批准关闭；分别推�
 - M9 使用 `test:m9:unit`、`test:m9:integration` 和 `test:e2e:m9`；`eval:m9:provisional` 运行 32 步 M3–M9 回归，clean-HEAD `eval:m9` 要求起止为同一干净 commit。
 - M9 的 `m9-vectors-v1.wav` 在 `artifacts/fixtures/` 运行时生成；版本化 `m9-vectors.v1.json` 固定 Power Spectrum 平方关系、MFCC 13 维/顺序、Buffer 1024 维、正负 impulse 与尾帧语义。
 - M10 使用 `test:m10:unit`、`test:m10:integration` 和 `test:e2e:m10`；`eval:m10:provisional` 运行 36 步 M3–M10 回归，clean-HEAD `eval:m10` 要求起止为同一干净 commit。
-- M10 的 `m10-structures-v1.wav` 在 `artifacts/fixtures/` 运行时生成；版本化 `m10-structures.v1.json` 固定 total/24 Bark bands、real/imag 各 1024、相位差、静音和正负 impulse 语义。
+- M10 的 `m10-structures-v1.wav` 在 `artifacts/fixtures/` 运行时生成；版本化 `m10-structures.v1.json` 固定 total/24 Bark bands、real/imag 各 1024、相位差、静音和正负 impulse 语义。该 golden 与对应单元测试按固定 Meyda 容差（绝对 `1e-6`、相对 `1e-5`）比较数值，维度、键集与字符串/布尔/null 要求完全一致；canonical 记录产生自 macOS arm64，容差比较使 Windows x64 复跑同样可判为通过，不再要求逐字节一致。
 - M11 使用 `test:e2e:m11:chrome`、`test:e2e:m11:edge`、`eval:m11:provisional` 和 clean-HEAD `eval:m11`；两条浏览器命令必须使用真实 Chrome/Edge channel，并把浏览器产品名与版本写入 artifact。
 - M11 OPFS 自动化覆盖真实 IndexedDB/FileSystemFileHandle 的可重复路径；原生 OS picker 的 granted/prompt/denied、恢复访问和文件移动由 owner 在 Chrome 与 Edge 分别人工签字，自动化不得冒充该权限提示证据。
 - M12 使用 `test:m12:unit`、`test:e2e:m12:chrome`、`test:e2e:m12:edge`、`eval:m12:provisional` 和 clean-HEAD `eval:m12`；旧 Grid 列数断言改为实际 `DOMRect`、唯一横坐标、容器包围、无重叠和最短列几何。

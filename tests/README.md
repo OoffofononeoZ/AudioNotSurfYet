@@ -35,7 +35,7 @@ M3–M14 不建设 CI。下列命令当前均为本地门禁；正式证据要�
 | `npm run test:m8:integration` | 四 scalar Worker、Flux exact cursor、四卡持久化、quota 和 13 项有限值回归 |
 | `npm run test:m9:unit` | 三项 registry、direct Meyda、Power 平方关系、MFCC signed 量化、Buffer envelope/尾帧与 golden |
 | `npm run test:m9:integration` | 四种混合 shape、cache codec、exact cursor、stale/cancel/quota 与四张累计卡回归 |
-| `npm run test:m10:unit` | 21 项集合、direct Meyda、24/1024 维、零值、相位关系、结构 codec 与 golden |
+| `npm run test:m10:unit` | 21 项集合、direct Meyda、24/1024 维、零值、相位关系、结构 codec 与按固定容差校验的 golden |
 | `npm run test:m10:integration` | Loudness/Complex 混合 shape、cache round-trip、exact cursor、stale/cancel/quota 与四卡持久化 |
 | `npm run test:m12:unit` | Analyzer 最短列纯布局的单/双列、左列平局、动态重算、容器高度与无重叠 |
 | `npm run test:m13:unit` | FIFO reducer、0–4 项、第五项淘汰、重开年龄、唯一性、M12 masonry 与 V1 adapter |
@@ -309,7 +309,7 @@ E4 clean canonical `E4-2026-08-27T07-21-59-209Z-c9e03ab9` 已在 commit `c9e03ab
 - `npm run fixtures:m7:golden` 只验证 L1/L2/L3 学习 golden identity；`fixtures:m7:golden:update` 才写入版本化 JSON。
 - `npm run fixtures:m8:golden` 验证 M8 scalar/Flux golden 并生成本地学习 WAV；`fixtures:m8:golden:update` 才写入版本化 JSON。
 - `npm run fixtures:m9:golden` 验证 M9 vector/waveform golden 并生成本地学习 WAV；`fixtures:m9:golden:update` 才写入版本化 JSON。
-- `npm run fixtures:m10:golden` 验证 M10 structured golden 并生成本地学习 WAV；`fixtures:m10:golden:update` 才写入版本化 JSON。
+- `npm run fixtures:m10:golden` 验证 M10 structured golden 并生成本地学习 WAV；`fixtures:m10:golden:update` 才写入版本化 JSON。数值按固定 Meyda 容差（绝对 `1e-6`、相对 `1e-5`）比较，允许跨平台 ULP 级浮点差异；维度、键集与字符串/布尔/null 仍要求完全一致。
 - 更新后必须审阅数值 diff，并重新运行 `test:analysis`；测试失败不得自动覆盖 golden。
 
 ## Evidence 与本地产物

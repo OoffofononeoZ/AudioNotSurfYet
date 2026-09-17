@@ -31,7 +31,10 @@ import {
     createM10StructureFrames,
     M10_TEST_CONFIG,
 } from '../support/m10-structure-fixture';
-import { assertMeydaValueClose } from '../support/tolerance';
+import {
+    assertMeydaValueClose,
+    collectMeydaToleranceMismatches,
+} from '../support/tolerance';
 
 const assertVectorClose = (
     actual: readonly number[],
@@ -82,7 +85,12 @@ describe('M10 structured feature contract', () => {
         const committed = JSON.parse(
             await readFile(M10_STRUCTURE_GOLDEN_PATH, 'utf8'),
         ) as ReturnType<typeof buildM10StructureGolden>;
-        expect(committed).toEqual(buildM10StructureGolden());
+        expect(
+            collectMeydaToleranceMismatches(
+                buildM10StructureGolden(),
+                committed,
+            ),
+        ).toEqual([]);
 
         createM10StructureFrames().forEach((fixture, caseIndex) => {
             const result = extractM10Frame(
