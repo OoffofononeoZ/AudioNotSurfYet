@@ -77,6 +77,13 @@
     --overlay-hairline-strong: rgba(224, 235, 230, 0.82);
     --overlay-divider: rgba(230, 238, 234, 0.42);
     --overlay-copy: rgba(245, 249, 247, 0.94);
+    /* Visualizer 工作台表面（DR9，保留现值） */
+    --surface-deep: #050a07;
+    --surface-card-strong: rgba(4, 10, 7, 0.94);
+    --surface-veil: rgba(2, 4, 3, 0.88);
+    --surface-veil-soft: rgba(2, 4, 3, 0.78);
+    --surface-transport: rgba(2, 8, 5, 0.94);
+    --backdrop-modal: rgba(0, 0, 0, 0.72);
 
     /* hairline 与分隔线：DR1 映射现有实现值，Analyzer 范围在 DR6 收敛 */
     --hairline-soft: rgba(101, 255, 169, 0.18);
