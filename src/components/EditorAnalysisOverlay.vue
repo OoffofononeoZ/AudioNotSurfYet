@@ -81,7 +81,7 @@
                 <div
                     v-if="menuOpen"
                     id="editor-overlay-feature-menu"
-                    class="overlay-feature-menu"
+                    class="overlay-feature-menu app-scrollbar"
                     role="menu"
                     aria-label="选择声音特征"
                     data-testid="editor-overlay-feature-menu"
@@ -565,13 +565,13 @@ onBeforeUnmount(() => {
     height: 100dvh;
     pointer-events: none;
 }
-.overlay-backdrop { position: absolute; inset: 0; background: rgba(132, 136, 135, .28); pointer-events: none; }
+.overlay-backdrop { position: absolute; inset: 0; background: var(--overlay-backdrop); pointer-events: none; }
 .analysis-overlay-panel {
     position: absolute;
     z-index: 82;
     min-height: 42px;
-    border-top: 1px solid rgba(230, 238, 234, .42);
-    border-bottom: 1px solid rgba(230, 238, 234, .42);
+    border-top: 1px solid var(--overlay-divider);
+    border-bottom: 1px solid var(--overlay-divider);
     border-radius: 0;
     background: transparent;
     transition: top 120ms ease, height 120ms ease;
@@ -580,39 +580,38 @@ onBeforeUnmount(() => {
 .overlay-controls { position: fixed; z-index: 86; top: 72px; left: 12px; pointer-events: auto; }
 .overlay-toggle-group { display: inline-flex; min-height: 30px; filter: drop-shadow(0 4px 12px rgba(0, 0, 0, .38)); }
 .overlay-toggle,
-.overlay-menu-toggle { min-height: 30px; border: 1px solid rgba(218, 231, 225, .64); color: #f4fff8; background: rgba(31, 37, 34, .94); }
+.overlay-menu-toggle { min-height: 30px; border: 1px solid var(--overlay-hairline); color: var(--ink); background: var(--overlay-panel); }
 .overlay-toggle { min-width: 96px; border-radius: 4px 0 0 4px; padding: 4px 10px; }
 .overlay-menu-toggle { width: 32px; border-left: 0; border-radius: 0 4px 4px 0; padding: 0; }
-.overlay-toggle[aria-pressed="true"] { color: #07130c; background: #7dffb3; }
+.overlay-toggle[aria-pressed="true"] { color: var(--on-accent); background: var(--accent-deep); }
 .overlay-feature-menu {
     display: grid;
     width: min(272px, calc(100vw - 24px));
     max-height: min(520px, calc(100dvh - 118px));
     margin-top: 6px;
     overflow-y: auto;
-    border: 1px solid rgba(218, 231, 225, .5);
+    border: 1px solid var(--overlay-hairline-soft);
     border-radius: 8px;
     padding: 4px;
-    background: rgba(20, 25, 23, .98);
+    background: var(--overlay-menu);
     box-shadow: 0 12px 36px rgba(0, 0, 0, .48);
-    scrollbar-color: rgba(125, 255, 179, .6) rgba(8, 12, 10, .9);
 }
-.overlay-feature-menu button { display: flex; justify-content: space-between; min-height: 30px; border: 0; border-radius: 4px; padding: 5px 8px; color: #eafff2; background: transparent; text-align: left; }
+.overlay-feature-menu button { display: flex; justify-content: space-between; min-height: 30px; border: 0; border-radius: 4px; padding: 5px 8px; color: var(--ink); background: transparent; text-align: left; }
 .overlay-feature-menu button:hover,
-.overlay-feature-menu button[aria-checked="true"] { background: rgba(125, 255, 179, .16); }
+.overlay-feature-menu button[aria-checked="true"] { background: var(--marker-fill); }
 .overlay-toggle:focus-visible,
 .overlay-menu-toggle:focus-visible,
 .overlay-feature-menu button:focus-visible,
 .overlay-handle:focus-visible,
-.overlay-error button:focus-visible { outline: 2px solid #f8ff87; outline-offset: 2px; }
+.overlay-error button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .overlay-canvas { position: fixed; z-index: 81; inset: 0; width: 100vw; height: 100dvh; pointer-events: none; }
 .overlay-canvas.static { opacity: .72; }
 .overlay-canvas.cursor { opacity: .9; }
-.overlay-copy { position: absolute; z-index: 83; right: 9px; top: 7px; display: grid; justify-items: end; max-width: 46%; color: rgba(245, 249, 247, .94); font: .68rem ui-monospace, monospace; text-shadow: 0 1px 2px #000; pointer-events: none; }
-.overlay-copy strong { color: #fff; }
-.overlay-error { position: absolute; z-index: 84; inset: 8px 8px auto 52px; display: flex; justify-content: flex-end; align-items: center; gap: 8px; color: #ffd3ce; pointer-events: none; }
-.overlay-error button { min-height: 30px; border: 1px solid #ff9389; border-radius: 4px; color: #fff; background: #481713; pointer-events: auto; }
-.overlay-handle { position: absolute; z-index: 85; left: 0; width: 34px; height: 26px; padding: 0; border: 1px solid rgba(224, 235, 230, .82); border-radius: 4px; color: #effff6; background: rgba(31, 37, 34, .96); cursor: ns-resize; pointer-events: auto; touch-action: none; }
+.overlay-copy { position: absolute; z-index: 83; right: 9px; top: 7px; display: grid; justify-items: end; max-width: 46%; color: var(--overlay-copy); font: .68rem ui-monospace, monospace; text-shadow: 0 1px 2px #000; pointer-events: none; }
+.overlay-copy strong { color: var(--ink-strong); }
+.overlay-error { position: absolute; z-index: 84; inset: 8px 8px auto 52px; display: flex; justify-content: flex-end; align-items: center; gap: 8px; color: var(--error); pointer-events: none; }
+.overlay-error button { min-height: 30px; border: 1px solid var(--error); border-radius: 4px; color: var(--ink-strong); background: var(--error-surface); pointer-events: auto; }
+.overlay-handle { position: absolute; z-index: 85; left: 0; width: 34px; height: 26px; padding: 0; border: 1px solid var(--overlay-hairline-strong); border-radius: 4px; color: var(--ink); background: var(--overlay-panel-strong); cursor: ns-resize; pointer-events: auto; touch-action: none; }
 .overlay-handle.top { top: -13px; }
 .overlay-handle.move { top: 50%; transform: translateY(-50%); }
 .overlay-handle.bottom { bottom: -13px; }

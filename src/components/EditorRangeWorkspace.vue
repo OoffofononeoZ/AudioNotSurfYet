@@ -1427,7 +1427,7 @@ onBeforeUnmount(() => {
 .range-workspace { position: relative; }
 .range-lane-card {
     margin-top: 0;
-    border-bottom: 1px solid var(--editor-divider-strong, rgba(101,255,169,.28));
+    border-bottom: 1px solid var(--hairline);
     border-radius: 0;
     overflow: hidden;
     box-shadow: none;
@@ -1450,20 +1450,20 @@ onBeforeUnmount(() => {
     align-content: center;
     gap: 2px 4px;
     padding: 2px 5px;
-    border-right: 1px solid rgba(101,255,169,.18);
-    background: rgba(4,17,10,.82);
+    border-right: 1px solid var(--hairline-soft);
+    background: var(--editor-rail);
 }
 .range-lane-meta label { display: none; }
 .range-lane-meta input { grid-column: 1; grid-row: 1; min-width: 0; min-height: 26px; height: 26px; }
 .range-lane-meta button { grid-column: 2; grid-row: 1; min-height: 26px; height: 26px; padding-inline: 5px; }
-.range-lane-kind { grid-column: 1 / -1; grid-row: 2; overflow: hidden; color: #8fffc0; font-size: .62rem; letter-spacing: .04em; text-overflow: ellipsis; white-space: nowrap; }
+.range-lane-kind { grid-column: 1 / -1; grid-row: 2; overflow: hidden; color: var(--accent-soft); font-size: .62rem; letter-spacing: .04em; text-overflow: ellipsis; white-space: nowrap; }
 .range-inner-class-cell {
     grid-column: 2;
     gap: 6px;
     padding: 4px;
-    border-right: 1px solid rgba(101,255,169,.18);
-    border-bottom: 1px solid rgba(101,255,169,.12);
-    background: rgba(5,20,12,.78);
+    border-right: 1px solid var(--hairline-soft);
+    border-bottom: 1px solid var(--hairline-faint);
+    background: var(--editor-lane);
 }
 .range-inner-class-cell input { flex: 1 1 auto; min-width: 0; width: auto; }
 .range-delete-class { padding-inline: 5px; font-size: .7rem; }
@@ -1471,25 +1471,25 @@ button,
 input,
 select {
     min-height: var(--editor-control-height, 30px);
-    border: 1px solid rgba(101,255,169,.48);
+    border: 1px solid var(--hairline-focus);
     border-radius: var(--editor-control-radius, 4px);
     padding: 4px 8px;
-    color: #effff6;
-    background: rgba(7,24,15,.94);
+    color: var(--ink);
+    background: var(--editor-control-strong);
 }
-button:hover:not(:disabled) { border-color: #65ffa9; background: rgba(19,69,42,.9); }
+button:hover:not(:disabled) { border-color: var(--accent-soft); background: var(--editor-control-hover); }
 button:focus-visible,
 input:focus-visible,
 select:focus-visible,
-.range-surface:focus-visible { outline: 2px solid #65ffa9; outline-offset: 2px; }
+.range-surface:focus-visible { outline: 2px solid var(--accent-soft); outline-offset: 2px; }
 button:disabled { opacity: .4; cursor: not-allowed; }
 .range-surface {
     position: relative;
     grid-column: 3;
     min-height: var(--editor-row-height, 44px);
     overflow: hidden;
-    border-bottom: 1px solid rgba(101,255,169,.12);
-    background: rgba(0,0,0,.18);
+    border-bottom: 1px solid var(--hairline-faint);
+    background: var(--editor-row-stripe);
     cursor: crosshair;
     touch-action: none;
     user-select: none;
@@ -1503,13 +1503,13 @@ button:disabled { opacity: .4; cursor: not-allowed; }
     bottom: 2px;
     min-width: 2px;
     overflow: hidden;
-    border: 1px solid rgba(101, 255, 169, .88);
-    background: rgba(53, 255, 143, .12);
+    border: 1px solid var(--marker-bloom-strong);
+    background: var(--marker-fill-soft);
     pointer-events: none;
 }
 .marker-block-selection.is-preview {
     border-style: dashed;
-    background: rgba(53, 255, 143, .2);
+    background: var(--marker-fill);
 }
 .marker-block-selection > span {
     position: absolute;
@@ -1517,7 +1517,7 @@ button:disabled { opacity: .4; cursor: not-allowed; }
     left: 4px;
     overflow: hidden;
     max-width: calc(100% - 8px);
-    color: #dfffee;
+    color: var(--ink);
     font-size: .62rem;
     line-height: 1;
     text-overflow: ellipsis;
@@ -1529,9 +1529,9 @@ button:disabled { opacity: .4; cursor: not-allowed; }
     top: 3px;
     bottom: 23px;
     min-width: 5px;
-    border: 1px solid rgba(101,255,169,.78);
+    border: 1px solid var(--marker-bloom-strong);
     border-radius: 7px;
-    background: rgba(101,255,169,.09);
+    background: var(--marker-fill-soft);
     pointer-events: none;
     transition: transform 120ms ease, background 120ms ease;
 }
@@ -1541,13 +1541,13 @@ button:disabled { opacity: .4; cursor: not-allowed; }
     top: 3px;
     bottom: 23px;
     min-width: 4px;
-    border: 1px dashed #b8ffd6;
+    border: 1px dashed var(--accent-bright);
     border-radius: 4px;
-    background: rgba(53,255,143,.2);
-    box-shadow: 0 0 16px rgba(53,255,143,.25);
+    background: var(--marker-fill);
+    box-shadow: 0 0 16px var(--marker-glow);
     pointer-events: none;
 }
-.range-preview.is-invalid { border-color: #ff9d90; background: rgba(255,100,90,.14); }
+.range-preview.is-invalid { border-color: var(--error); background: var(--error-hairline); }
 .range-marker {
     position: absolute;
     z-index: 4;
@@ -1557,19 +1557,19 @@ button:disabled { opacity: .4; cursor: not-allowed; }
     min-height: 0;
     padding: 0 6px;
     overflow: hidden;
-    border: 1px solid #b8ffd6;
+    border: 1px solid var(--accent-bright);
     border-radius: 4px;
-    color: #eafff2;
-    background: rgba(38,228,124,.42);
-    box-shadow: 0 0 14px rgba(53,255,143,.22);
+    color: var(--ink);
+    background: var(--marker-ring);
+    box-shadow: 0 0 14px var(--marker-fill);
     font: .68rem ui-monospace, monospace;
     white-space: nowrap;
 }
 .range-marker:hover,
-.range-marker:focus-visible { background: rgba(75,255,155,.62); box-shadow: 0 0 20px rgba(53,255,143,.5); }
+.range-marker:focus-visible { background: var(--marker-bloom); box-shadow: 0 0 20px var(--marker-ring); }
 .range-marker.is-handle-preview {
     border-style: dashed;
-    background: rgba(75,255,155,.3);
+    background: var(--marker-glow);
 }
 .range-handle {
     position: absolute;
@@ -1584,17 +1584,17 @@ button:disabled { opacity: .4; cursor: not-allowed; }
     cursor: ew-resize;
     touch-action: none;
 }
-.range-handle.start { color: #a8ffd0; }
-.range-handle.end { color: #eafff2; }
+.range-handle.start { color: var(--accent-bright); }
+.range-handle.end { color: var(--ink); }
 .range-menu {
     position: absolute;
     z-index: 12;
     display: grid;
     min-width: 165px;
     padding: 6px;
-    border: 1px solid rgba(101,255,169,.5);
+    border: 1px solid var(--hairline-focus);
     border-radius: var(--editor-flyout-radius, 8px);
-    background: rgba(2,10,6,.98);
+    background: var(--editor-menu);
     box-shadow: 0 14px 40px rgba(0,0,0,.5);
 }
 .range-menu button { border: 0; text-align: left; }
@@ -1605,22 +1605,22 @@ button:disabled { opacity: .4; cursor: not-allowed; }
     display: grid;
     place-items: center;
     padding: 20px;
-    background: rgba(0,0,0,.7);
+    background: var(--editor-modal-backdrop);
 }
 .range-removal-dialog {
     width: min(520px, 100%);
-    border: 1px solid rgba(101,255,169,.5);
+    border: 1px solid var(--hairline-focus);
     border-radius: var(--editor-flyout-radius, 8px);
     padding: 18px;
-    color: #effff6;
-    background: #041009;
+    color: var(--ink);
+    background: var(--surface-2);
     box-shadow: 0 20px 70px rgba(0,0,0,.65);
 }
 .range-removal-dialog h3 { margin: 0 0 10px; }
 .range-removal-dialog label { display: grid; gap: 6px; margin-top: 16px; }
 .range-dialog-actions { flex-wrap: wrap; gap: 8px; margin-top: 18px; }
-.range-dialog-error { color: #ffb0a8; }
-.danger { border-color: rgba(255,120,110,.7); color: #ffd4cf; }
+.range-dialog-error { color: var(--error); }
+.danger { border-color: var(--error); color: var(--error); }
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
 @media (prefers-reduced-motion: reduce) {
     .range-candidate { transition: none; }
