@@ -71,4 +71,17 @@
 
 ## 开放项
 
-- 受影响页面的 quality/readiness 复核范围，在 DR10 收尾时评估。
+- 无。DR10 已给出证据复核结论：设计改造只改样式、token 与文档，`tests/e2e` 零改动，行为契约与验收规则未变，因此不触发 readiness 重审；若后续进入发布流程，需要把新的视觉层纳入 readiness 复核范围。
+
+## 保留项
+
+以下内容在本项目里是**有意保留**，不属于"未收敛的硬编码"，复核时不要按遗漏处理：
+
+- **canvas 绘制冻结**：`src/analysis/canvasRenderer.ts`、`src/visualizer/**` 的绘制逻辑，以及 LightBg、DotGridBg、MeydaCard plot、Editor 波形/游标/选区/overlay、Visualizer 预览与场景的绘制参数与配色。它们的颜色写在这些文件的脚本里，不是 DOM chrome。
+- **MusicBar 彩虹环**：样式 0 与 1 的多色 `conic-gradient` 进度环是"单一强调色"的唯一登记例外；进度轨道 `#444` 与手柄 `#fff` 保持中性。
+- **letterbox 与阴影**：`#000` letterbox（ADR-0023）、全部 `box-shadow`/`drop-shadow`、渐变淡出用的黑色，均为既定视觉行为。
+- **DEC-019 蒙层**：首页透明、非首页 18px blur + `rgba(2, 4, 3, 0.72)`，由契约断言固定。
+- **DR6 有意保留的 tint**：`rgba(101, 255, 169, .04/.06/.1/.15)`，数值保留、只统一基色。
+- **非生产范围**：`src/components/testcomp.vue` 只被 TestLands 使用，不属于设计范围。
+
+统计口径：核对剩余色值时用 `rg` 统计 `#[0-9a-fA-F]{3,8}` 与 `rgb()/rgba()`；注意 `icons.svg#add-music` 这类 SVG href 会被误匹配为 `#add`，需要人工排除。

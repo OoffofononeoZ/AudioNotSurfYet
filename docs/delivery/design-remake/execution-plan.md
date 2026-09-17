@@ -6,7 +6,7 @@ upstream_docs:
   - "docs/architecture/adrs/0024-design-language-adoption.md"
   - "docs/architecture/system-design.md"
   - "skills/audio-visualizer-dev/references/60-design-language-and-brand.md"
-next_action: "DR9 Visualizer 已提交；等待 owner 确认后实施 DR10 收尾与 readiness 复核"
+next_action: "DR0–DR10 已完成；等待 owner 整体复核（含 DR10 记录的 m4 时钟漂移遗留项）"
 ---
 
 # Design Remake Execution Plan (DR0–DR10)
@@ -94,5 +94,32 @@ next_action: "DR9 Visualizer 已提交；等待 owner 确认后实施 DR10 收�
 | DR6 | Complete | `2359418` | Analyzer chrome 与 hairline 收敛：基色统一到规范家族、alpha 就近并档、焦点/落点改用 accent/warning、错误块用 --error |
 | DR7 | Complete | `6a31198` | Editor A：壳、工具栏、timeline stage 与 BPM 条外框收敛 token |
 | DR8 | Complete | `c5dbe54` | Editor B：标记家族统一到 accent 阶梯、危险色并入 --error、overlay 语义 token、菜单与 dialog 收敛 |
-| DR9 | In Progress | — | Visualizer：chrome 收敛 token、橙色按语义拆分、移除最外层 1px 边框；commit hash 于 DR10 回填 |
-| DR10 | Planned | — | 收尾与 readiness 复核 |
+| DR9 | Complete | `601a78d` | Visualizer：chrome 收敛 token、橙色按语义拆分、移除最外层 1px 边框 |
+| DR10 | Complete | — | 收尾：剩余字面量分类、证据复核结论、全量 e2e（99/100，见 §10）；本行 commit 即本次提交 |
+
+## 8. 剩余字面量分类
+
+DR10 对 `src/**` 的色值字面量做了一次完整盘点（正则统计 `#hex` 与 `rgb()/rgba()`），剩余项全部落在以下四类，没有"该收敛而未收敛"的 DOM chrome：
+
+| 类别 | 位置与数量 | 处理 |
+| --- | --- | --- |
+| Token 定义 | `src/style.css` 83 处 | 设计源本身，不收敛 |
+| Canvas 与场景冻结 | `analysis/canvasRenderer.ts` 20、`src/visualizer/*.ts` 20、`DotGridBg.vue` 3、`LightBg.vue` 1，以及 `EditorTimeline.vue`、`EditorPointWorkspace.vue`、`EditorRangeWorkspace.vue` 脚本内的波形、游标、选区与描边色 | ADR-0024 冻结范围，不动 |
+| 登记例外 | MusicBar 的两个彩虹环与中性进度轨道/手柄：`#27ff64`、`#80ff00`、`#fe2912`、`#ff0000`、`rgb(0, 255, 255)`、`rgb(145, 145, 145)`、`#444`、`#fff` | ADR-0024 登记的单一强调色例外 |
+| 有意保留 | `#000` letterbox（ADR-0023）、全部 `box-shadow`/`drop-shadow`、渐变淡出用的黑色、DEC-019 的 `rgba(2, 4, 3, 0.72)`、DR6 有意保留的 tint（`rgba(101, 255, 169, .04/.06/.1/.15)`） | 既定视觉行为，不 token 化 |
+
+两点口径说明：`src/components/testcomp.vue` 只被 TestLands 使用，不属于本次设计范围；`#add`、`#ccc`、`#ddd` 一类命中来自 `icons.svg#add-music` 等 SVG href，并非颜色值。
+
+## 9. 证据复核结论
+
+- 已证实事实：自 DR1（`f262f05`）以来 `tests/e2e` 零改动，`git log --name-only f262f05..HEAD -- tests/e2e` 无输出；DR1–DR9 每轮的断言更新清单均为空。
+- 已证实事实：设计改造只修改样式、token 与文档；唯一涉及测试基础设施的改动是 M10 golden 改为固定容差，它把实现对齐 `docs/quality/eval-plan.md` EV-A 既有规则，已由 DEC-060 记录。
+- 结论：行为契约与验收规则未变，因此不触发 Analyzer、Editor、Visualizer 三份 readiness 文档的重审，各候选身份保持不变；三份 readiness 文档正文与状态本轮不动。
+- 残余风险与后续动作：若后续进入发布流程，readiness 评审需要把设计改造后的视觉层纳入复核范围；本结论不构成任何上线授权，PROD-015 等既有边界不变。
+
+## 10. DR10 全量回归结果
+
+- 命令：`npx playwright test --project=chrome --workers=1`（Node 24.18.0，29 个 spec、100 个测试、耗时 8.7 分钟）。
+- 结果：**99 passed / 1 failed**。唯一失败是 `tests/e2e/m4-playback.spec.ts:275` 的 AudioContext 时钟漂移断言（阈值 `<= 0.1s`，实测 `0.222s`）。
+- 诊断：该失败与设计改造无关，也不由 Node 版本引起。设计改造自 DR1 以来只改样式、token 与文档，未触碰音频或时钟代码；实测 m4 单 spec 在 Node 24.18.0 与系统 Node 22.13.1 下都失败（各 1 failed / 2 passed），而单独运行该用例时以 `0.0953s` 勉强通过，同一天早些时候（DR7 轮）整份 m4 曾以 `0.0041s` 通过。这是本机 Chrome 音频时钟相对墙钟漂移落在阈值边缘的既有时序敏感问题，与色彩/样式无关。
+- 处理：本轮如实记录，不调整断言阈值、不重跑掩盖。需要 owner 决定后续动作（沿用既有 waiver、提高阈值并复核 M4 证据，或在低负载窗口重跑）。

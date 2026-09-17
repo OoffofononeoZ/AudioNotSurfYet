@@ -27,7 +27,7 @@ DEC-059/ADR-0024 打开独立的设计改造 workstream：采用 skill 中登记
 - Execution planning：M1–M14、Editor E0-D/E1–E9、Visualizer V0-D/V1–V6 均为 `Complete`。
 - Quality and evals：M3–M14、Editor E1–E9 与 Visualizer V1–V6 evidence 均已批准；E9 revised run `E9-2026-09-04T03-51-33-088Z-13614673` 为 29/29、`approved`，首个 run `E9-2026-09-04T02-49-18-960Z-cf0a79b1` 保持 `pre-revision`。
 - Implementation：Editor E9 的删除、三级展示、28px 紧凑 BPM 标记条和标记修订已在 commit `13614673bbf4d824f2ee109d36e04de6b3f8aabd` 实现并通过 revised canonical。E8 与 Visualizer V1–V6 保持已完成。post-V6 viewport 修订已在 clean commit `9f3b55beaa0c8a3d799f3f1e16f1dd66c9aee77c` 通过 Chrome/Edge 专项。
-- Design remake：DR0 规划与决策已完成文档落库（[ADR-0024](../architecture/adrs/0024-design-language-adoption.md)、[execution plan](../delivery/design-remake/execution-plan.md)），DR1 起按轮次实施共享层与四个主页面；ComingSoon 与 TestLands 不在范围内。
+- Design remake：DR0–DR10 已完成（[ADR-0024](../architecture/adrs/0024-design-language-adoption.md)、[execution plan](../delivery/design-remake/execution-plan.md)），共享层与四个主页面均已收敛到设计语言 token，剩余字面量分类与证据复核结论已记录；ComingSoon 与 TestLands 不在范围内，等待 owner 整体复核。
 - Readiness、release、retrospective：Analyzer M14 为 `Ready with waivers`；Editor 已获准进入独立 release-readiness 评审；PROD-015 仍阻断上线。
 
 ## Key Documents

@@ -97,6 +97,7 @@ next_action: "实施 DR1 全局 token 基线；按 DR0–DR10 逐轮推进设计
 | DEC-058 | 2026-09-04 | 在不创建 V7 或改写 V1–V6 canonical 的前提下增加 Visualizer 原生全屏播放；全屏瞬时状态不持久化，本轮只要求可运行并跳过自动化，未验证项由 owner 自行审阅 | project-owner | approved | [Fullscreen eval](../quality/visualizer/fullscreen-playback-eval-plan.md) | Fullscreen API、自动隐藏、验证范围、owner review 或 readiness 结论改变 |
 | DEC-059 | 2026-09-14 | 采用 VoltAgent 设计语言并只在 `src/style.css` 的 `:root` 以 CSS 变量承载 token；主题色固定 `#27ff64`、只做暗色；canvas 绘制冻结；按 DR0–DR10 逐轮实施并逐轮等待 owner 确认；MusicBar 样式 2 多色进度环登记为例外 | project-owner | approved | [ADR-0024](../architecture/adrs/0024-design-language-adoption.md) | 设计语言来源、token 载体、canvas 边界、字体策略、轮次划分或例外规则改变 |
 | DEC-060 | 2026-09-17 | M10 golden 与单元测试改为按固定 Meyda 容差（绝对 `1e-6`、相对 `1e-5`）比较数值，维度/键集/字符串仍要求完全一致；`fixtures:m10:golden` 不再要求逐字节相等，原因是 canonical golden 产生自 macOS arm64，Windows x64 复跑出现 ULP 级差异 | project-owner | approved | [Eval plan](../quality/eval-plan.md) | M10 容差数值、比较范围、golden 生成平台或支持矩阵改变 |
+| DEC-061 | 2026-09-17 | 设计改造 DR0–DR10 收尾：剩余色值字面量全部归类为 token 定义、canvas 冻结、登记例外与有意保留；DR1–DR9 未改动任何 `tests/e2e` 断言，行为契约与验收规则未变，因此不触发 Analyzer/Editor/Visualizer readiness 重审 | project-owner | approved | [Design remake execution plan](../delivery/design-remake/execution-plan.md) | 设计范围、剩余字面量分类、断言纪律或 readiness 复核边界改变 |
 
 ## Approval Evidence
 
@@ -235,6 +236,8 @@ E5 clean canonical `E5-2026-08-27T11-03-22-177Z-78124177` 随后在 implementati
 2026-09-14，`project-owner` 要求把项目逐步改造成 `skills/audio-visualizer-dev` 中登记的设计语言，并明确主题色必须沿用当前绿色、不准备白色版本；随后以明确实施指令批准"按 DR 轮次把 AudioNotSurfYet 逐步改造成 VoltAgent 设计语言"计划。DEC-059 据此生效：设计语言来源、纯暗色与单一强调色约束、CSS 变量 token 载体、canvas 绘制冻结、逐轮验证并等待确认的推进门禁，以及 MusicBar 多色进度环例外均以 [ADR-0024](../architecture/adrs/0024-design-language-adoption.md) 为准；实施顺序与每轮证据要求见 [Design remake execution plan](../delivery/design-remake/execution-plan.md)。该批准不改变 M1–M14、E1–E10、V1–V6 的 canonical 身份，也不构成任何页面重设计已经完成的结论。
 
 2026-09-17，`project-owner` 要求在本机安装 nvm 并切换到仓库最低要求的 Node 版本（24.18.0）后复查 M10 golden 差异，随后同意把 M10 的 golden 校验改为容差比较并同步相关文档。DEC-060 据此生效：M10 单元测试与 `fixtures:m10:golden` 统一通过 `tests/support/tolerance.ts` 的固定 Meyda 容差（绝对 `1e-6`、相对 `1e-5`）比较数值，维度、键集与字符串/布尔/null 仍要求完全一致，`fixtures:m10:golden` 不再要求逐字节相等。复查已证实该差异与 Node 版本无关：在 v24.18.0 下生成器仍报差异，且差异为 ULP 级浮点值，M10 canonical 记录本身产生自 macOS 26.5.2 / Darwin arm64。本决定只是把实现对齐 [eval plan](../quality/eval-plan.md) EV-A 已要求的"所有适用值满足固定容差"，不改变 M10 的验收语义、golden 内容、canonical 身份或里程碑结论。
+
+2026-09-17，`project-owner` 批准 DR10 收尾方案。DEC-061 据此生效：DR0–DR10 的剩余色值字面量完成分类归档（token 定义、canvas 冻结、登记例外、有意保留），长期保留项写入 [设计语言与品牌约束](../../skills/audio-visualizer-dev/references/60-design-language-and-brand.md)，并在 [Design remake execution plan](../delivery/design-remake/execution-plan.md) 记录证据复核结论。该结论依据自 DR1（`f262f05`）以来 `tests/e2e` 零改动、每轮断言更新清单为空，以及唯一涉及测试基础设施的改动（M10 容差）已由 DEC-060 登记并对齐既有 EV-A 规则；因此不触发 Analyzer、Editor、Visualizer 三份 readiness 的重审，候选身份保持不变。本结论不构成发布授权。
 
 ## Historical Evidence Gap
 
