@@ -15,7 +15,10 @@
                 </div>
                 <div class="flex flex-col text-sm max-w-60" id="music-info-container">
                     <div v-for="(text, idx) in infoLines" :key="idx" class="info-line-wrap"
-                        :class="{ 'info-line-wrap--secondary': idx === 1 }">
+                        :class="{
+                            'info-line-wrap--subtitle': idx === 1,
+                            'info-line-wrap--meta': idx === 2,
+                        }">
                         <div class="info-marquee-track">
                             <span class="info-text">{{ text }}</span>
                             <template v-if="shouldMarquee[idx]">
@@ -726,7 +729,11 @@ const handleEditTrack = async (index: number) => {
     max-width: 100%;
 }
 
-.info-line-wrap--secondary {
+.info-line-wrap--subtitle {
+    color: var(--ink);
+}
+
+.info-line-wrap--meta {
     color: var(--body);
 }
 
