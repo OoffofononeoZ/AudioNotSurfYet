@@ -579,14 +579,15 @@ onBeforeUnmount(() => {
     --editor-inner-class-width: 144px;
     --editor-control-radius: 4px;
     --editor-flyout-radius: 8px;
-    --editor-divider: rgba(159, 196, 175, .16);
-    --editor-divider-strong: rgba(101, 255, 169, .28);
+    /* DR7：局部名保留为全局 token 的别名，供尚未收敛的 DR8 子组件继承同一取值 */
+    --editor-divider: var(--divider);
+    --editor-divider-strong: var(--hairline);
     min-height: 100dvh;
     padding: 72px 12px 24px;
-    color: #eafff2;
+    color: var(--ink);
     background:
-        radial-gradient(circle at 20% 0%, rgba(51, 255, 153, 0.12), transparent 35%),
-        #020403;
+        radial-gradient(circle at 20% 0%, var(--glow-accent), transparent 35%),
+        var(--canvas);
 }
 
 .editor-shell {
@@ -597,10 +598,10 @@ onBeforeUnmount(() => {
 .editor-heading,
 .editor-state,
 .future-panel > div {
-    border: 1px solid var(--editor-divider-strong);
+    border: 1px solid var(--hairline);
     border-radius: 8px;
-    background: rgba(3, 12, 8, 0.82);
-    box-shadow: inset 0 0 32px rgba(23, 255, 128, 0.035);
+    background: var(--editor-panel);
+    box-shadow: inset 0 0 32px var(--glow-inset);
 }
 
 .editor-leave-dialog {
@@ -691,20 +692,20 @@ onBeforeUnmount(() => {
 .editor-state h2,
 .future-panel h2 {
     margin: 4px 0 8px;
-    color: #fff;
+    color: var(--ink-strong);
 }
 
 .kicker,
 .state-badge,
 .repeat-badge {
-    color: #65ffa9;
+    color: var(--accent-soft);
     letter-spacing: 0.12em;
     text-transform: uppercase;
 }
 
 .state-badge,
 .repeat-badge {
-    border: 1px solid var(--editor-divider-strong);
+    border: 1px solid var(--hairline);
     border-radius: var(--editor-control-radius);
     padding: 4px 8px;
     white-space: nowrap;
@@ -716,10 +717,10 @@ onBeforeUnmount(() => {
 }
 
 .editor-workbench-toolbar {
-    border-top: 1px solid var(--editor-divider-strong);
-    border-bottom: 1px solid var(--editor-divider-strong);
+    border-top: 1px solid var(--hairline);
+    border-bottom: 1px solid var(--hairline);
     border-radius: 0;
-    background: rgba(3, 12, 8, .94);
+    background: var(--editor-panel-strong);
 }
 
 .editor-toolbar-primary,
@@ -734,8 +735,8 @@ onBeforeUnmount(() => {
 
 .editor-toolbar-secondary {
     min-height: 40px;
-    border-top: 1px solid var(--editor-divider);
-    background: rgba(7, 20, 13, .72);
+    border-top: 1px solid var(--divider);
+    background: var(--editor-toolbar);
 }
 
 .toolbar-identity,
@@ -752,7 +753,7 @@ onBeforeUnmount(() => {
     flex: 0 1 auto;
     overflow: hidden;
     margin: 0;
-    color: #fff;
+    color: var(--ink-strong);
     font-size: 1rem;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -767,14 +768,14 @@ onBeforeUnmount(() => {
 .toolbar-help,
 .time-readout,
 .persistence-state {
-    color: #a9c7b6;
+    color: var(--body);
     font-size: .78rem;
     white-space: nowrap;
 }
 
 .toolbar-help {
     overflow: hidden;
-    color: #779184;
+    color: var(--mute);
     text-overflow: ellipsis;
 }
 
@@ -787,7 +788,7 @@ onBeforeUnmount(() => {
 }
 
 .toolbar-state {
-    color: #65ffa9;
+    color: var(--accent-soft);
 }
 
 .button-row,
@@ -805,22 +806,22 @@ select {
     box-sizing: border-box;
     height: var(--editor-control-height);
     min-height: var(--editor-control-height);
-    border: 1px solid rgba(101, 255, 169, 0.48);
+    border: 1px solid var(--hairline-focus);
     border-radius: var(--editor-control-radius);
     padding: 4px 10px;
     line-height: 1;
-    color: #effff6;
-    background: rgba(7, 24, 15, 0.9);
+    color: var(--ink);
+    background: var(--editor-control);
 }
 
 button:hover {
-    border-color: #65ffa9;
-    background: rgba(19, 69, 42, 0.9);
+    border-color: var(--accent-soft);
+    background: var(--editor-control-hover);
 }
 
 button:focus-visible,
 select:focus-visible {
-    outline: 2px solid #65ffa9;
+    outline: 2px solid var(--accent-soft);
     outline-offset: 3px;
 }
 
@@ -838,12 +839,12 @@ select:focus-visible {
 .error-message {
     margin: 0;
     padding: 4px 8px;
-    border-top: 1px solid rgba(255, 176, 168, .22);
-    color: #ffb0a8;
+    border-top: 1px solid var(--error-hairline);
+    color: var(--error);
 }
 
 .success-message {
-    color: #65ffa9;
+    color: var(--accent-soft);
 }
 
 .future-panel {

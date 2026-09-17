@@ -37,6 +37,19 @@
     --error: #ffb0a8;
     --error-surface: rgba(89, 22, 22, 0.55);
     --warning-glow: rgba(248, 255, 135, 0.2);
+    /* Editor 面板、工具条、轨道与控件表面（DR7，保留现值） */
+    --editor-panel: rgba(3, 12, 8, 0.82);
+    --editor-panel-mid: rgba(3, 12, 8, 0.88);
+    --editor-panel-strong: rgba(3, 12, 8, 0.94);
+    --editor-toolbar: rgba(7, 20, 13, 0.72);
+    --editor-rail: rgba(4, 17, 10, 0.82);
+    --editor-stage-top: rgba(12, 35, 23, 0.9);
+    --editor-stage-bottom: rgba(2, 8, 5, 0.96);
+    --editor-control: rgba(7, 24, 15, 0.9);
+    --editor-control-strong: rgba(7, 24, 15, 0.94);
+    --editor-control-hover: rgba(19, 69, 42, 0.9);
+    --glow-inset: rgba(39, 255, 100, 0.035);
+    --error-hairline: rgba(255, 176, 168, 0.22);
 
     /* hairline 与分隔线：DR1 映射现有实现值，Analyzer 范围在 DR6 收敛 */
     --hairline-soft: rgba(101, 255, 169, 0.18);

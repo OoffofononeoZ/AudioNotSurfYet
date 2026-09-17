@@ -6,7 +6,7 @@ upstream_docs:
   - "docs/architecture/adrs/0024-design-language-adoption.md"
   - "docs/architecture/system-design.md"
   - "skills/audio-visualizer-dev/references/60-design-language-and-brand.md"
-next_action: "DR6 Analyzer chrome 已提交；等待 owner 确认后实施 DR7 Editor A"
+next_action: "DR7 Editor A 已提交；等待 owner 确认后实施 DR8 Editor B"
 ---
 
 # Design Remake Execution Plan (DR0–DR10)
@@ -91,8 +91,8 @@ next_action: "DR6 Analyzer chrome 已提交；等待 owner 确认后实施 DR7 E
 | DR3 | Complete | `c83ecd2` | MusicBar 共享 chrome：文字层级、播放器表面、进度、焦点、滑块对齐 token；彩虹环更正为样式 0 与 1 例外；收尾修正 `e15be78` 对齐歌曲信息三行层级 |
 | DR4 | Complete | `d76e5dd` | MusicList / AnimatedList / 列表反馈态：表面、四层文字、警告色与 `.app-scrollbar` 收敛 |
 | DR5 | Complete | `e107269` | Home 与布局底色 token 化：`MainLayout` 基础底色改用 `var(--canvas)`，Home 不新增 DOM |
-| DR6 | In Progress | — | Analyzer chrome 与 hairline 收敛：基色统一到规范家族、alpha 就近并档、焦点/落点改用 accent/warning、错误块用 --error；commit hash 于 DR7 回填 |
-| DR7 | Planned | — | Editor A：壳、工具栏、timeline stage |
+| DR6 | Complete | `2359418` | Analyzer chrome 与 hairline 收敛：基色统一到规范家族、alpha 就近并档、焦点/落点改用 accent/warning、错误块用 --error |
+| DR7 | In Progress | — | Editor A：壳、工具栏、timeline stage 与 BPM 条外框收敛 token；commit hash 于 DR8 回填 |
 | DR8 | Planned | — | Editor B：标记、overlay、菜单与 dialog |
 | DR9 | Planned | — | Visualizer |
 | DR10 | Planned | — | 收尾与 readiness 复核 |
