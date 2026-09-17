@@ -614,10 +614,10 @@ button,
 select,
 input {
     min-height: 28px;
-    border: 1px solid rgba(101, 255, 169, .34);
+    border: 1px solid var(--hairline);
     border-radius: 4px;
-    color: #eafff2;
-    background: #07110d;
+    color: var(--ink);
+    background: var(--surface-3);
 }
 
 button {
@@ -627,21 +627,21 @@ button {
 button:hover,
 select:hover,
 input:hover {
-    border-color: #65ffa9;
+    border-color: var(--accent-soft);
 }
 
 button:focus-visible,
 select:focus-visible,
 input:focus-visible,
 summary:focus-visible {
-    outline: 2px solid #65ffa9;
+    outline: 2px solid var(--accent-soft);
     outline-offset: 2px;
 }
 
 .inspector-section,
 .parameter-card {
     padding-bottom: 10px;
-    border-bottom: 1px solid rgba(159, 196, 175, .16);
+    border-bottom: 1px solid var(--divider);
 }
 
 .section-heading,
@@ -665,20 +665,20 @@ summary:focus-visible {
 .section-heading p,
 .field-note,
 .parameter-heading code {
-    color: #91aa9e;
+    color: var(--mute);
     font-size: .72rem;
 }
 
 .source-badge,
 .parameter-heading output {
-    color: #65ffa9;
+    color: var(--accent-soft);
     font-size: .72rem;
     text-align: right;
 }
 
 .parameter-heading output[data-state="error"],
 .inspector-error {
-    color: #ffd2a6;
+    color: var(--error);
 }
 
 .compact-actions {
@@ -695,8 +695,8 @@ summary:focus-visible {
 .analysis-status {
     align-items: flex-start;
     padding: 8px;
-    border: 1px solid rgba(101, 255, 169, .18);
-    color: #afc7ba;
+    border: 1px solid var(--hairline-soft);
+    color: var(--body);
     font-size: .72rem;
 }
 
@@ -735,7 +735,7 @@ summary:focus-visible {
 .field-row > span,
 .band-fields span,
 .transform-grid span {
-    color: #a9c0b4;
+    color: var(--body);
 }
 
 .field-row select,
@@ -772,7 +772,7 @@ summary:focus-visible {
 
 .mapping-details {
     margin-top: 8px;
-    color: #a9c0b4;
+    color: var(--body);
     font-size: .76rem;
 }
 
