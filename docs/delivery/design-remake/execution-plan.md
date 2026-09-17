@@ -6,7 +6,7 @@ upstream_docs:
   - "docs/architecture/adrs/0024-design-language-adoption.md"
   - "docs/architecture/system-design.md"
   - "skills/audio-visualizer-dev/references/60-design-language-and-brand.md"
-next_action: "DR7 Editor A 已提交；等待 owner 确认后实施 DR8 Editor B"
+next_action: "DR8 Editor B 已提交；等待 owner 确认后实施 DR9 Visualizer"
 ---
 
 # Design Remake Execution Plan (DR0–DR10)
@@ -92,7 +92,7 @@ next_action: "DR7 Editor A 已提交；等待 owner 确认后实施 DR8 Editor B
 | DR4 | Complete | `d76e5dd` | MusicList / AnimatedList / 列表反馈态：表面、四层文字、警告色与 `.app-scrollbar` 收敛 |
 | DR5 | Complete | `e107269` | Home 与布局底色 token 化：`MainLayout` 基础底色改用 `var(--canvas)`，Home 不新增 DOM |
 | DR6 | Complete | `2359418` | Analyzer chrome 与 hairline 收敛：基色统一到规范家族、alpha 就近并档、焦点/落点改用 accent/warning、错误块用 --error |
-| DR7 | In Progress | — | Editor A：壳、工具栏、timeline stage 与 BPM 条外框收敛 token；commit hash 于 DR8 回填 |
-| DR8 | Planned | — | Editor B：标记、overlay、菜单与 dialog |
+| DR7 | Complete | `6a31198` | Editor A：壳、工具栏、timeline stage 与 BPM 条外框收敛 token |
+| DR8 | In Progress | — | Editor B：标记家族统一到 accent 阶梯、危险色并入 --error、overlay 语义 token、菜单与 dialog 收敛；commit hash 于 DR9 回填 |
 | DR9 | Planned | — | Visualizer |
 | DR10 | Planned | — | 收尾与 readiness 复核 |

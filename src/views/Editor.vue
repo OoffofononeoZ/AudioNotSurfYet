@@ -579,9 +579,6 @@ onBeforeUnmount(() => {
     --editor-inner-class-width: 144px;
     --editor-control-radius: 4px;
     --editor-flyout-radius: 8px;
-    /* DR7：局部名保留为全局 token 的别名，供尚未收敛的 DR8 子组件继承同一取值 */
-    --editor-divider: var(--divider);
-    --editor-divider-strong: var(--hairline);
     min-height: 100dvh;
     padding: 72px 12px 24px;
     color: var(--ink);
@@ -607,27 +604,27 @@ onBeforeUnmount(() => {
 .editor-leave-dialog {
     box-sizing: border-box;
     width: min(520px, calc(100vw - 32px));
-    border: 1px solid rgba(101, 255, 169, .52);
+    border: 1px solid var(--hairline-focus);
     border-radius: 8px;
     padding: 20px;
-    color: #effff6;
-    background: #041009;
-    box-shadow: 0 24px 80px rgba(0, 0, 0, .72), inset 0 0 28px rgba(53, 255, 143, .035);
+    color: var(--ink);
+    background: var(--surface-2);
+    box-shadow: 0 24px 80px rgba(0, 0, 0, .72), inset 0 0 28px var(--glow-inset);
 }
 
 .editor-leave-dialog::backdrop {
-    background: rgba(0, 0, 0, .72);
+    background: var(--editor-modal-backdrop);
 }
 
 .editor-leave-dialog h2 {
     margin: 0 36px 10px 0;
-    color: #effff6;
+    color: var(--ink);
     font-size: 1.05rem;
 }
 
 .editor-leave-dialog p {
     margin: 0;
-    color: #a9c7b6;
+    color: var(--body);
     line-height: 1.65;
 }
 
@@ -638,7 +635,7 @@ onBeforeUnmount(() => {
     width: 30px;
     padding: 0;
     border-color: transparent;
-    color: #a9c7b6;
+    color: var(--body);
     background: transparent;
     font-size: 1.2rem;
 }
@@ -648,7 +645,7 @@ onBeforeUnmount(() => {
     align-items: center;
     gap: 8px;
     margin-top: 16px;
-    color: #cde8d8;
+    color: var(--ink);
     font-size: .86rem;
 }
 
@@ -656,7 +653,7 @@ onBeforeUnmount(() => {
     width: 16px;
     height: 16px;
     margin: 0;
-    accent-color: #35ff8f;
+    accent-color: var(--accent);
 }
 
 .leave-dialog-actions {
@@ -667,13 +664,13 @@ onBeforeUnmount(() => {
 }
 
 .leave-stay {
-    border-color: #65ffa9;
-    background: rgba(24, 92, 54, .9);
+    border-color: var(--accent-soft);
+    background: var(--editor-control-primary);
 }
 
 .leave-confirm {
-    color: #b8d4c4;
-    background: rgba(7, 24, 15, .72);
+    color: var(--body);
+    background: var(--editor-control-quiet);
 }
 
 @media (prefers-reduced-motion: reduce) {

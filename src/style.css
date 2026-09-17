@@ -50,6 +50,33 @@
     --editor-control-hover: rgba(19, 69, 42, 0.9);
     --glow-inset: rgba(39, 255, 100, 0.035);
     --error-hairline: rgba(255, 176, 168, 0.22);
+    /* Editor 标记阶梯（DR8，基色统一为 accent） */
+    --marker-fill-soft: rgba(39, 255, 100, 0.12);
+    --marker-fill: rgba(39, 255, 100, 0.2);
+    --marker-glow: rgba(39, 255, 100, 0.25);
+    --marker-ring: rgba(39, 255, 100, 0.42);
+    --marker-bloom: rgba(39, 255, 100, 0.62);
+    --marker-bloom-strong: rgba(39, 255, 100, 0.88);
+    --hairline-faint: rgba(101, 255, 169, 0.12);
+    /* Editor 菜单、行与控件（DR8，保留现值） */
+    --editor-menu: rgba(2, 10, 6, 0.98);
+    --editor-lane: rgba(5, 20, 12, 0.78);
+    --editor-lane-deep: rgba(0, 8, 4, 0.92);
+    --editor-row-stripe: rgba(0, 0, 0, 0.18);
+    --editor-control-pressed: rgba(29, 112, 64, 0.86);
+    --editor-control-quiet: rgba(7, 24, 15, 0.72);
+    --editor-control-primary: rgba(24, 92, 54, 0.9);
+    --editor-modal-backdrop: rgba(0, 0, 0, 0.7);
+    /* Editor analysis overlay chrome（DR8，保留中性灰现值） */
+    --overlay-backdrop: rgba(132, 136, 135, 0.28);
+    --overlay-panel: rgba(31, 37, 34, 0.94);
+    --overlay-panel-strong: rgba(31, 37, 34, 0.96);
+    --overlay-menu: rgba(20, 25, 23, 0.98);
+    --overlay-hairline: rgba(218, 231, 225, 0.64);
+    --overlay-hairline-soft: rgba(218, 231, 225, 0.5);
+    --overlay-hairline-strong: rgba(224, 235, 230, 0.82);
+    --overlay-divider: rgba(230, 238, 234, 0.42);
+    --overlay-copy: rgba(245, 249, 247, 0.94);
 
     /* hairline 与分隔线：DR1 映射现有实现值，Analyzer 范围在 DR6 收敛 */
     --hairline-soft: rgba(101, 255, 169, 0.18);
