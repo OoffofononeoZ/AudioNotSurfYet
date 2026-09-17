@@ -3,3 +3,7 @@
 # 两者不一致会让 git status 在每次 dev/build 后误报已修改。
 components.d.ts text eol=lf
 auto-imports.d.ts text eol=lf
+
+# 版本化 golden JSON：生成器用字符串比较校验，工作区必须是 LF，
+# 否则 core.autocrlf=true 的检出会让 fixtures:*:golden 误报 diff。
+tests/analysis/golden/*.json text eol=lf
