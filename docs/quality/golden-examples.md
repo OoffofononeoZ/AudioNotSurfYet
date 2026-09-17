@@ -40,7 +40,7 @@ next_action: "M14-G01–G07 已由 clean canonical 覆盖；候选行为变化�
 - M6 运行时 golden 使用确定性 PCM，直接调用同版本 Meyda 与产品 Worker/compact codec 对比；Energy 是平台验证项，不改变 M7 首批卡片仍为 RMS、Amplitude Spectrum、Chroma 的批准范围。
 - 当前 Meyda `5.6.3` 的 `spectralFlux` 对有效输入抛出 `x is not defined`。该上游异常继续固定为 R-020；M8 按 ADR-0005 使用项目 Flux v1 golden，不 patch 或伪称直接 Meyda 通过。
 - M9 golden 包含 silence、440Hz 纯音、近似同 RMS 丰富谐波、确定性噪声/正负 impulse 与 333-sample 非整 frame 尾段；固定 Power Spectrum 平方关系、MFCC 13 维/顺序、Buffer 1024 维和尾帧补 0。
-- M10 golden 包含 silence、同幅 220Hz/4kHz、相位相差 π/2 的同频 440Hz、正负 impulse；固定 Loudness total/24 bands、Complex real/imag 各 1024、相位差与幅度不变关系、静音零值和正负 impulse 幅度一致关系。
+- M10 golden 包含 silence、同幅 220Hz/4kHz、相位相差 π/2 的同频 440Hz、正负 impulse；固定 Loudness total/24 bands、Complex real/imag 各 1024、相位差与幅度不变关系、静音零值和正负 impulse 幅度一致关系。其数值按固定 Meyda 容差（绝对 `1e-6`、相对 `1e-5`）比较，维度、键集与字符串/布尔/null 仍要求完全一致，以允许跨平台 ULP 级浮点差异。
 
 ## 2. Success Examples
 

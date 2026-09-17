@@ -157,7 +157,7 @@ M9 新增 `test:m9:unit`、`test:m9:integration`、`test:e2e:m9`、`fixtures:m9:
 
 2026-08-21，M9 provisional 与 clean-HEAD canonical 均 32/32 通过；canonical run `M9-2026-08-21T09-14-14-110Z-f88ca331` 的 M9 unit 为 5/5、integration 为 7/7、Chrome 为 2/2。`project-owner` 于 2026-08-23 批准 canonical evidence 与非首页导航栏模糊效果，前述 Windows Chrome 视觉/学习清单据此完成签字；未提供的逐项数值或解释不作补写。
 
-M10 新增 `test:m10:unit`、`test:m10:integration`、`test:e2e:m10`、`fixtures:m10:golden`、`eval:m10:provisional` 与 clean-HEAD `eval:m10`。专项层覆盖 21 项集合、Loudness total/24 bands、Complex real/imag 各 1024、magnitude/phase 与相位环绕、静音/非有限值、两类 codec、exact cursor、stale/cancel/quota、四卡恢复、完整精确表、多视口和 15 分钟四重卡输入/long-task 门禁。36 步 suite 继续回归 M3–M9；M6 Chrome 回归承担 20 次 Worker/AudioContext/RAF 资源循环。
+M10 新增 `test:m10:unit`、`test:m10:integration`、`test:e2e:m10`、`fixtures:m10:golden`、`eval:m10:provisional` 与 clean-HEAD `eval:m10`。专项层覆盖 21 项集合、Loudness total/24 bands、Complex real/imag 各 1024、magnitude/phase 与相位环绕、静音/非有限值、两类 codec、exact cursor、stale/cancel/quota、四卡恢复、完整精确表、多视口和 15 分钟四重卡输入/long-task 门禁。M10 golden 与单元测试按固定 Meyda 容差（绝对 `1e-6`、相对 `1e-5`）比较数值，维度与键集要求完全一致；`fixtures:m10:golden` 不再要求逐字节相等，以允许跨平台 ULP 级浮点差异。36 步 suite 继续回归 M3–M9；M6 Chrome 回归承担 20 次 Worker/AudioContext/RAF 资源循环。
 
 2026-08-25，`project-owner` 批准 M10 canonical evidence 与 21/21 Analyzer 特征覆盖。该批准关闭 M10 产品门禁，但不替代 M11 的真实 Edge、三格式、权限恢复、资源、无障碍和最重性能矩阵。
 

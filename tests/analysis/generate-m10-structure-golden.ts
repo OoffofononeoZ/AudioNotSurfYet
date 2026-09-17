@@ -10,6 +10,10 @@ import {
     buildM10StructureGolden,
     createM10StructurePcm,
 } from '../support/m10-structure-fixture.ts';
+import {
+    collectMeydaToleranceMismatches,
+    describeMeydaToleranceMismatches,
+} from '../support/tolerance.ts';
 
 const REPOSITORY_ROOT = path.resolve(
     path.dirname(fileURLToPath(import.meta.url)),
@@ -33,13 +37,23 @@ async function main(): Promise<void> {
             `Updated ${path.relative(REPOSITORY_ROOT, M10_STRUCTURE_GOLDEN_PATH)}.`,
         );
     } else {
-        const existing = await readFile(M10_STRUCTURE_GOLDEN_PATH, 'utf8');
-        if (existing !== serialized) {
+        const existing = JSON.parse(
+            await readFile(M10_STRUCTURE_GOLDEN_PATH, 'utf8'),
+        ) as unknown;
+        const mismatches = collectMeydaToleranceMismatches(
+            buildM10StructureGolden(),
+            existing,
+        );
+        if (mismatches.length > 0) {
             throw new Error(
-                'M10 structure golden differs. Review the numeric diff before updating.',
+                'M10 structure golden differs beyond the fixed Meyda tolerance. '
+                + 'Review the numeric diff before updating.\n'
+                + describeMeydaToleranceMismatches(mismatches),
             );
         }
-        console.log('M10 structure golden matches the locked generator.');
+        console.log(
+            'M10 structure golden matches the locked generator within the fixed Meyda tolerance.',
+        );
     }
     await mkdir(path.dirname(M10_STRUCTURE_AUDIO_PATH), { recursive: true });
     await writeFile(
