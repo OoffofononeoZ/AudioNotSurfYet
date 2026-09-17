@@ -1,0 +1,5 @@
+# unplugin 自动生成的声明文件固定使用 LF：
+# 生成器写出 LF，而 core.autocrlf=true 的工作区期望是 CRLF，
+# 两者不一致会让 git status 在每次 dev/build 后误报已修改。
+components.d.ts text eol=lf
+auto-imports.d.ts text eol=lf

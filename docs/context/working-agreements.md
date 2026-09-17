@@ -1,7 +1,7 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-09-03
+last_reviewed: 2026-09-17
 upstream_docs:
   - "AGENTS.md"
   - "docs/context/index.md"
@@ -98,7 +98,7 @@ next_action: "Editor E1–E9 与 Visualizer V1–V6 已批准关闭；分别推�
 - 用户本地音频默认只在浏览器内处理；仓库没有上传或远端处理证据。
 - `SessionRepository` 独占原生 IndexedDB V1 的 `session`、`handles`、`current-blob` 和 `current-analysis-cache` 四个 object store；当前 Blob/cache 固定键替换必须在同一事务中完成。
 - `audioSessionStore` 只保存可序列化的恢复状态；`FileSystemFileHandle`、File、Blob、AudioBuffer 和 IndexedDB 连接不进入 Pinia `$state`。
-- 生成声明文件可能由构建插件更新；不要把这类变化与手写代码修改混为一谈。
+- 生成声明文件可能由构建插件更新；不要把这类变化与手写代码修改混为一谈。`components.d.ts` 与 `auto-imports.d.ts` 已由仓库根的 `.gitattributes` 固定为 `text eol=lf`，与 unplugin 的生成输出一致；在本机 `core.autocrlf=true` 下 dev/build 后不再产生需要手工还原的行尾差异。
 
 ## Review and Git
 
