@@ -694,11 +694,11 @@ onBeforeUnmount(() => {
 
 <style scoped>
 .analysis-card {
-    border: 1px solid rgba(125, 255, 179, 0.24);
+    border: 1px solid var(--hairline);
     border-radius: 18px;
-    background: rgba(4, 10, 7, 0.9);
+    background: var(--surface-card);
     box-shadow: 0 18px 60px rgba(0, 0, 0, 0.34);
-    color: #f2fff7;
+    color: var(--ink);
     min-width: 0;
     padding: 18px;
 }
@@ -724,7 +724,7 @@ onBeforeUnmount(() => {
 }
 
 .eyebrow {
-    color: #7dffb3;
+    color: var(--accent-deep);
     font-size: 0.68rem;
     letter-spacing: 0.14em;
     margin: 0;
@@ -737,10 +737,10 @@ onBeforeUnmount(() => {
 
 select,
 button {
-    border: 1px solid rgba(125, 255, 179, 0.34);
+    border: 1px solid var(--hairline);
     border-radius: 9px;
-    background: #0b1710;
-    color: #effff5;
+    background: var(--surface-1);
+    color: var(--ink);
     font: inherit;
     font-size: 0.78rem;
     min-height: 34px;
@@ -760,22 +760,22 @@ button {
 @media (hover: hover) and (pointer: fine) {
     button:hover,
     select:hover {
-        background: #10261a;
-        border-color: #7dffb3;
+        background: var(--control-hover);
+        border-color: var(--accent-deep);
     }
 }
 
 button:active:not(:disabled) {
-    background: #173624;
-    border-color: #b5ffd2;
-    box-shadow: inset 0 0 0 1px rgba(181, 255, 210, 0.3);
+    background: var(--control-active);
+    border-color: var(--accent-bright);
+    box-shadow: inset 0 0 0 1px var(--accent-bright-glow);
     transform: translateY(1px);
 }
 
 button:focus-visible,
 select:focus-visible,
 .plot:focus-visible {
-    outline: 3px solid #f8ff87;
+    outline: 3px solid var(--accent);
     outline-offset: 3px;
 }
 
@@ -785,7 +785,7 @@ select:focus:not(:focus-visible) {
 }
 
 .description {
-    color: #abc1b3;
+    color: var(--body);
     font-size: 0.8rem;
     line-height: 1.55;
     margin: 12px 0;
@@ -793,7 +793,7 @@ select:focus:not(:focus-visible) {
 }
 
 .plot {
-    border: 1px solid rgba(125, 255, 179, 0.18);
+    border: 1px solid var(--hairline-soft);
     border-radius: 12px;
     cursor: crosshair;
     height: 250px;
@@ -812,8 +812,8 @@ select:focus:not(:focus-visible) {
 
 .plot-message {
     align-items: center;
-    background: rgba(4, 10, 7, 0.82);
-    color: #abc1b3;
+    background: var(--surface-card-soft);
+    color: var(--body);
     display: flex;
     flex-direction: column;
     gap: 12px;
@@ -825,11 +825,11 @@ select:focus:not(:focus-visible) {
 }
 
 .plot-error {
-    color: #ffd6d6;
+    color: var(--error);
 }
 
 .axis-summary {
-    color: #789284;
+    color: var(--mute);
     font-size: 0.68rem;
     justify-content: space-between;
     margin-top: 7px;
@@ -844,14 +844,15 @@ select:focus:not(:focus-visible) {
 }
 
 .facts div {
-    background: rgba(125, 255, 179, 0.06);
+    /* 极淡 tint：保留数值，仅把基色统一到规范家族 */
+    background: rgba(101, 255, 169, 0.06);
     border-radius: 9px;
     min-width: 0;
     padding: 9px;
 }
 
 .facts dt {
-    color: #789284;
+    color: var(--mute);
     font-size: 0.66rem;
     text-transform: uppercase;
 }
@@ -864,8 +865,9 @@ select:focus:not(:focus-visible) {
 }
 
 .value-table {
-    border-top: 1px solid rgba(125, 255, 179, 0.15);
-    color: #abc1b3;
+    /* 极淡分隔：保留数值，仅把基色统一到规范家族 */
+    border-top: 1px solid rgba(101, 255, 169, 0.15);
+    color: var(--body);
     font-size: 0.75rem;
     margin-top: 14px;
     padding-top: 12px;
@@ -900,7 +902,8 @@ table {
 
 th,
 td {
-    border-bottom: 1px solid rgba(125, 255, 179, 0.1);
+    /* 极淡分隔：保留数值，仅把基色统一到规范家族 */
+    border-bottom: 1px solid rgba(101, 255, 169, 0.1);
     padding: 6px;
     text-align: right;
 }

@@ -1052,9 +1052,9 @@ onBeforeUnmount(() => {
 <style scoped>
 .analyzer-page {
     background:
-        radial-gradient(circle at 20% 10%, rgba(59, 255, 141, 0.12), transparent 28%),
-        #020403;
-    color: #f2fff7;
+        radial-gradient(circle at 20% 10%, var(--glow-accent), transparent 28%),
+        var(--canvas);
+    color: var(--ink);
     min-height: 100dvh;
     overflow: hidden;
     position: relative;
@@ -1080,23 +1080,23 @@ onBeforeUnmount(() => {
 }
 
 .status-row span {
-    background: rgba(10, 24, 16, 0.82);
-    border: 1px solid rgba(125, 255, 179, 0.22);
+    background: var(--surface-chip);
+    border: 1px solid var(--hairline-soft);
     border-radius: 999px;
-    color: #a8c5b3;
+    color: var(--body);
     font-size: 0.72rem;
     padding: 6px 10px;
 }
 
 .status-row span[data-state="ready"] {
-    color: #7dffb3;
+    color: var(--accent-deep);
 }
 
 .timeline-toolbar {
     align-items: center;
     backdrop-filter: blur(18px);
-    background: rgba(6, 15, 10, 0.86);
-    border: 1px solid rgba(125, 255, 179, 0.24);
+    background: var(--surface-toolbar);
+    border: 1px solid var(--hairline);
     border-radius: 16px;
     display: flex;
     gap: 18px;
@@ -1126,7 +1126,7 @@ onBeforeUnmount(() => {
 }
 
 .timeline-toolbar span {
-    color: #91a99a;
+    color: var(--mute);
     font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
     font-size: 0.72rem;
 }
@@ -1139,10 +1139,10 @@ onBeforeUnmount(() => {
 }
 
 button {
-    background: #0b1710;
-    border: 1px solid rgba(125, 255, 179, 0.34);
+    background: var(--surface-1);
+    border: 1px solid var(--hairline);
     border-radius: 9px;
-    color: #effff5;
+    color: var(--ink);
     cursor: pointer;
     font: inherit;
     font-size: 0.78rem;
@@ -1158,15 +1158,15 @@ button {
 
 @media (hover: hover) and (pointer: fine) {
     button:hover:not(:disabled) {
-        background: #10261a;
-        border-color: #7dffb3;
+        background: var(--control-hover);
+        border-color: var(--accent-deep);
     }
 }
 
 button:active:not(:disabled) {
-    background: #173624;
-    border-color: #b5ffd2;
-    box-shadow: inset 0 0 0 1px rgba(181, 255, 210, 0.3);
+    background: var(--control-active);
+    border-color: var(--accent-bright);
+    box-shadow: inset 0 0 0 1px var(--accent-bright-glow);
     transform: translateY(1px);
 }
 
@@ -1176,7 +1176,7 @@ button:disabled {
 }
 
 button:focus-visible {
-    outline: 3px solid #f8ff87;
+    outline: 3px solid var(--accent);
     outline-offset: 3px;
 }
 
@@ -1185,10 +1185,10 @@ button:focus:not(:focus-visible) {
 }
 
 .analysis-error {
-    background: rgba(89, 22, 22, 0.55);
-    border: 1px solid rgba(255, 130, 130, 0.5);
+    background: var(--error-surface);
+    border: 1px solid var(--error);
     border-radius: 12px;
-    color: #ffd6d6;
+    color: var(--error);
     margin: 0 0 18px;
     padding: 12px 14px;
 }
@@ -1225,9 +1225,9 @@ button:focus:not(:focus-visible) {
 
 .masonry-item.is-drop-before::before,
 .masonry-item.is-drop-after::after {
-    background: #f8ff87;
+    background: var(--warning);
     border-radius: 999px;
-    box-shadow: 0 0 0 3px rgba(248, 255, 135, 0.2);
+    box-shadow: 0 0 0 3px var(--warning-glow);
     content: '';
     height: 3px;
     left: 8px;
@@ -1267,8 +1267,8 @@ button:focus:not(:focus-visible) {
 }
 
 .reorder-handle.is-active {
-    border-color: #f8ff87;
-    color: #f8ff87;
+    border-color: var(--accent);
+    color: var(--accent);
 }
 
 .grip-icon {
@@ -1286,8 +1286,8 @@ button:focus:not(:focus-visible) {
 }
 
 .reorder-menu {
-    background: rgba(5, 14, 9, 0.98);
-    border: 1px solid rgba(125, 255, 179, 0.42);
+    background: var(--surface-menu);
+    border: 1px solid var(--hairline-strong);
     border-radius: 12px;
     box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5);
     display: grid;
@@ -1306,11 +1306,11 @@ button:focus:not(:focus-visible) {
 }
 
 .drag-ghost {
-    background: rgba(11, 23, 16, 0.96);
-    border: 1px solid #7dffb3;
+    background: var(--surface-ghost);
+    border: 1px solid var(--accent-deep);
     border-radius: 10px;
     box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
-    color: #effff5;
+    color: var(--ink);
     font-size: 0.78rem;
     max-width: min(260px, calc(100vw - 32px));
     overflow: hidden;
@@ -1325,10 +1325,11 @@ button:focus:not(:focus-visible) {
 .empty-slot {
     align-items: center;
     background:
-        linear-gradient(135deg, rgba(125, 255, 179, 0.04), transparent);
-    border: 1px dashed rgba(125, 255, 179, 0.28);
+        /* 极淡 tint：保留数值，仅把基色统一到规范家族 */
+        linear-gradient(135deg, rgba(101, 255, 169, 0.04), transparent);
+    border: 1px dashed var(--hairline);
     border-radius: 18px;
-    color: #9eb4a7;
+    color: var(--mute);
     display: flex;
     justify-content: space-between;
     min-height: 220px;
@@ -1336,7 +1337,7 @@ button:focus:not(:focus-visible) {
 }
 
 .empty-slot h2 {
-    color: #effff5;
+    color: var(--ink);
     font-size: 1.1rem;
     margin: 5px 0 8px;
 }
@@ -1348,7 +1349,7 @@ button:focus:not(:focus-visible) {
 }
 
 .slot-number {
-    color: #7dffb3 !important;
+    color: var(--accent-deep) !important;
     font-size: 0.68rem;
     letter-spacing: 0.16em;
 }
