@@ -1,5 +1,5 @@
 <template>
-    <main class="min-w-full h-dvh bg-black" id="main-layout">
+    <main class="min-w-full h-dvh" id="main-layout">
         <HeaderBar />
         <router-view />
         <MusicBar v-if="!routePlaybackActive" :progress="0" />
@@ -200,5 +200,7 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
-
+#main-layout {
+    background-color: var(--canvas);
+}
 </style>

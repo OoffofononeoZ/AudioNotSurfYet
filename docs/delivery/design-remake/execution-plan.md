@@ -6,7 +6,7 @@ upstream_docs:
   - "docs/architecture/adrs/0024-design-language-adoption.md"
   - "docs/architecture/system-design.md"
   - "skills/audio-visualizer-dev/references/60-design-language-and-brand.md"
-next_action: "DR4 MusicList/AnimatedList 已提交；等待 owner 确认后实施 DR5 Home"
+next_action: "DR5 布局底色已提交；等待 owner 确认后实施 DR6 Analyzer"
 ---
 
 # Design Remake Execution Plan (DR0–DR10)
@@ -88,9 +88,9 @@ next_action: "DR4 MusicList/AnimatedList 已提交；等待 owner 确认后实�
 | DR0 | Complete | `daaabc3` | ADR-0024、本计划、DEC-059 与 context index 已落库 |
 | DR1 | Complete | `f262f05` | 仅在 `src/style.css` 的 `:root` 建立 token 与值保持别名 |
 | DR2 | Complete | `19689d9` | HeaderBar 对齐 token：品牌 display-md、导航白色 body-sm 与当前路由强调线、Settings 去边框；保持 DR2 之前的 Header 背景写法不变 |
-| DR3 | Complete | `c83ecd2` | MusicBar 共享 chrome：文字层级、播放器表面、进度、焦点、滑块对齐 token；彩虹环更正为样式 0 与 1 例外 |
-| DR4 | In Progress | — | MusicList / AnimatedList / 列表反馈态：表面、四层文字、警告色与 `.app-scrollbar` 收敛；commit hash 于 DR5 回填 |
-| DR5 | Planned | — | Home 容器与遮罩 |
+| DR3 | Complete | `c83ecd2` | MusicBar 共享 chrome：文字层级、播放器表面、进度、焦点、滑块对齐 token；彩虹环更正为样式 0 与 1 例外；收尾修正 `e15be78` 对齐歌曲信息三行层级 |
+| DR4 | Complete | `d76e5dd` | MusicList / AnimatedList / 列表反馈态：表面、四层文字、警告色与 `.app-scrollbar` 收敛 |
+| DR5 | In Progress | — | Home 与布局底色 token 化：`MainLayout` 基础底色改用 `var(--canvas)`，Home 不新增 DOM；commit hash 于 DR6 回填 |
 | DR6 | Planned | — | Analyzer chrome 与 hairline 收敛 |
 | DR7 | Planned | — | Editor A：壳、工具栏、timeline stage |
 | DR8 | Planned | — | Editor B：标记、overlay、菜单与 dialog |
