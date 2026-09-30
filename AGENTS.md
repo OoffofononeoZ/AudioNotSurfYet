@@ -11,6 +11,7 @@
 - 生命周期文档请求先使用 `$harness-doc-orchestrator` 判定阶段，再交给对应阶段 Skill。
 - 项目文档只记录仓库事实、本地决策、阶段产物和事件证据；通用工作流以 Harness Skills 和本文件为准。
 - 事实、推断、建议和待人工确认项必须明确区分。当前代码、配置和可复现行为优先于历史任务记录。
+- `trash/` 仅供本地留存旧资料，已被 Git 忽略。任何 agent 或 Skill 都不得读取、搜索、索引或引用该目录及其内容；只有用户明确要求恢复或查看其中指定内容时才可访问。通常的删除操作仍按正常删除处理，不默认移入 `trash/`。
 
 ## Lifecycle Stages
 
@@ -79,4 +80,3 @@
 - 复盘：`docs/retrospectives/`
 - 项目 Skill：`skills/audio-visualizer-dev/SKILL.md`
 - Visualizer 场景生成 Skill：`skills/visualizer-scene-generator/SKILL.md`
-- 设计语言与品牌：`skills/audio-visualizer-dev/references/60-design-language-and-brand.md`
