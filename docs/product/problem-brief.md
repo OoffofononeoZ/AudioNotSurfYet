@@ -1,15 +1,23 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-09-02
+last_reviewed: 2026-10-01
 upstream_docs:
   - "docs/context/index.md"
   - "docs/context/glossary.md"
   - "docs/quality/release-readiness.md"
-next_action: "Visualizer V0 产品意图已获批准；进入 system design，delivery 与实现仍未开放"
+next_action: "以已批准的自动优先、人工可修正产品意图开展系统设计；具体处理能力和接口仍需架构评审"
 ---
 
 # Problem Brief
+
+## 当前产品目标（2026-10-01 获批）
+
+AudioNotSurfYet 的当前主目标是：从歌曲出发，尽可能自动完成可用的音频处理、时间标记、视觉映射和视频生成，输出与音频同步的可视化视频。用户不应为了完成一支视频，在音轨处理、节拍定位、音色或效果标记、视觉映射和视频输出之间反复手工转录时间与数据。用户必须能够检查并手动修改自动结果；自动处理不适用、失败或用户有意自行制作时，也应保留手动完成必要操作的路径。现有 Analyzer 帮助观察音频特征，Editor 提供人工标记，Visualizer 提供场景绑定与实时 WebM 输出；它们是已有能力和历史验收范围，不等于整条新流程已实现。
+
+目标流程以歌曲为输入，优先使用可用的自动分析和标记结果配置画面，允许用户在每个需要的环节修正或改为手动操作，最后输出可回放的视频。音轨分离、自动音色标记、变化 BPM 的自动处理及分离音轨转 MIDI 是候选环节，尚无获批的输入输出、运行位置或质量门槛。视觉素材输入属于目标流程；原子化视觉素材生成 Skill 不属于当前任务。当前主目标面向希望制作音频可视化视频的创作者；更细的用户画像留待后续调研，不改变本次批准的自动优先和人工可操作原则。
+
+下文记录 Analyzer、Editor 和 Visualizer V0 的既有批准意图及历史边界。新目标不会追溯改变其已完成 evidence 或候选身份。
 
 ## Summary
 

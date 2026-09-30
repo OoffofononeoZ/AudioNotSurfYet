@@ -1,6 +1,6 @@
 ---
 name: audio-visualizer-dev
-description: AudioNotSurfYet 项目专属的开发、诊断、代码评审、验证与文档路由指南。仅当任务明确作用于 AudioNotSurfYet 仓库，尤其涉及其 Vue 界面、路由与状态、Web Audio 播放和 Meyda 分析、Three.js/Canvas/GSAP 可视化、响应式布局、构建调试或 Harness Engineering 生命周期文档时使用；不要用于普通 Vue CRUD、其他音频项目或通用前端咨询。
+description: AudioNotSurfYet 项目专属的开发、诊断、评审、验证与文档路由指南。用于本仓库的 Vue 界面、音频分析与标记、Visualizer、视频输出及已批准目标的新视频制作流程；新处理能力先核对架构批准状态。不要用于其他音频项目或通用前端咨询。
 ---
 
 # Audio Visualizer Dev
@@ -11,15 +11,18 @@ description: AudioNotSurfYet 项目专属的开发、诊断、代码评审、验
    - 仓库应包含 `package.json`、`src/audio/audioEngine.ts`、`src/audio/audioSessionService.ts` 和 `src/components/MusicBar.vue`。
    - 若目标不是该仓库，停止使用本 Skill，改用更匹配的通用或项目 Skill。
    - 若请求是新增或生成尚未注册的 Visualizer 场景，改用 `$visualizer-scene-generator` 执行输入与合同门禁；修改、诊断或评审已有场景继续使用本 Skill。
+   - 视频制作的自动优先、人工可修正与手动完成原则已获产品批准。音轨分离、自动 BPM/音色标记、MIDI 或新的视频输出路线仍属待决策能力；没有获批范围与接口时先整理问题和方案，不从流程图推断已获实现许可。
 2. 先读根 `AGENTS.md`（若存在）和 `git status --short`，再检查任务直接涉及的源码与配置。
    - `trash/` 是本地归档区。不得读取、搜索、索引或引用其中任何内容；只有用户明确要求恢复或查看指定内容时才可访问。普通删除不默认移入 `trash/`。
 3. 按任务只读取所需资料：
    - 仓库结构、依赖或边界：读 [仓库事实与边界](references/10-repo-facts-and-boundaries.md)。
+   - 不熟悉代码入口、需要复用现有能力或评估影响面：读 [仓库事实与边界](references/10-repo-facts-and-boundaries.md) 的定位与复用顺序。
    - 路由、布局、组件通信或状态：读 [UI、路由与状态](references/20-ui-routing-and-state.md)。
    - 音频加载、播放、跳转、元数据或能量分析：读 [音频播放与分析](references/30-audio-playback-and-analysis.md)。
    - Three.js、Canvas、GSAP、RAF 或响应式几何：读 [可视化、动画与响应式](references/40-visualization-animation-and-responsiveness.md)。
    - 构建、测试或调试：读 [构建、测试与调试](references/50-build-test-and-debug.md)。
    - 证据冲突、仓库漂移或工程约定缺口：读 [开放问题与项目差异](references/99-open-questions-and-project-deltas.md)。
+   - 端到端视频制作或新增处理链：先读 `docs/product/problem-brief.md`、`scope.md` 和 `open-questions.md`，区分已批准的产品方向、待评审的系统设计与既有运行时合同。
 4. 将任务分成最小可验证改动；保留用户已有修改，不顺手改无关问题。
 5. 修改后按风险执行相关验证，并用实际证据说明“已实现”或“已验证”。
 
@@ -58,7 +61,7 @@ description: AudioNotSurfYet 项目专属的开发、诊断、代码评审、验
 
 ## 修改后验证
 
-- 运行与改动直接相关的静态检查和 `npm run build`。
+- 产品源码改动运行相关静态检查和 `npm run build`；只改文档或 Skill 时核对链接、元数据及适用的文档/Skill 校验，不为这类改动默认构建应用。
 - 交互改动使用真实浏览器验证目标路由，并检查控制台 error/warn。
 - 音频改动覆盖加载成功、加载失败或无数据、播放/暂停/跳转、列表清空与资源释放。
 - 离线分析改动覆盖 0/1/4 个活动特征、Worker progress/cancel/error、完整 cache identity、stale generation、exact cursor、持久化失败不影响播放，以及约 15 分钟输入的主线程响应与资源释放。
@@ -71,7 +74,7 @@ description: AudioNotSurfYet 项目专属的开发、诊断、代码评审、验
 ## Git 安全边界
 
 - 不覆盖、丢弃或格式化掉任务开始前的用户修改。
-- 未经明确要求，不提交、不推送、不切换分支、不重写历史。
+- 按根 `AGENTS.md` 执行 owner 明确批准后的本地提交；不自行推送、切换分支或重写历史。
 - 不用 `git reset --hard`、`git checkout --` 或等价方式清理工作树。
 - 构建若改写生成文件，恢复用户原有差异后再交付。
 
@@ -83,5 +86,6 @@ description: AudioNotSurfYet 项目专属的开发、诊断、代码评审、验
 - 所需浏览器、音频样本、权限或运行环境不可用，且没有可信替代验证。
 - 测试脚本、fixture 或上游文档缺失，无法形成声称通过所需的证据。
 - 产品范围、隐私规则、浏览器支持矩阵、性能预算或 release risk 需要人类确认。
+- 已批准的视频制作目标要求新的音轨、自动标记、绑定、工程格式或渲染拓扑，而相应系统设计尚未获批。
 - 视觉重设计要改变仍有效的布局或交互契约（如 DEC-050 一屏工作台、DEC-019 Header blur）。
 - Harness 阶段所需的上游文档不存在、不是 `approved`，或已因上游变化而过期。

@@ -1,13 +1,17 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-09-14
+last_reviewed: 2026-10-01
 upstream_docs:
   - "AGENTS.md"
-next_action: "旧设计资料已移至本地 trash 并停止引用；后续设计方向由 owner 另行确定"
+next_action: "按已批准的视频产出主目标复核系统设计，再依次复核交付、质量和发布范围"
 ---
 
 # Repository Context Index
+
+## 2026-10-01 产品方向批准与文档影响
+
+owner 已批准以歌曲尽可能自动生成同步音频可视化视频为主目标，并要求保留自动结果的人工修正及完整手动操作路径（DEC-062）。产品意图四份文档已批准；Analyzer、Editor、Visualizer 既有批准和 canonical evidence 仍只覆盖原候选。`system-design.md`、Visualizer execution plan 与 Visualizer readiness 已登记待复核；其余架构子契约、delivery 测试/验收、quality 和 release 文档在新目标形成接口决策后按影响逐一复核，不推断当前实现支持 Demucs、MIDI 或自动标记。
 
 ## Purpose
 
@@ -17,14 +21,14 @@ DEC-058/ADR-0023 另把 Visualizer 原生全屏登记为 post-V6 readiness 修�
 
 DEC-059/DEC-061 对应的旧设计指导和交付计划已归档，停止作为后续设计任务的依据。已经实现的样式仍是当前代码事实；新的设计方向由 owner 另行确定。
 
-本目录维护仓库事实、边界和工作记忆；生命周期路由与通用方法由 [AGENTS.md](../../AGENTS.md) 负责。当前代码事实与目标架构必须区分：现状见 [system map](system-map.md)，批准的目标见 [system design](../architecture/system-design.md)。
+本目录维护仓库事实、边界和工作记忆；生命周期路由与通用方法由 [AGENTS.md](../../AGENTS.md) 负责。当前代码事实与目标架构必须区分：现状见 [system map](system-map.md)，既有技术基线及新目标待复核项见 [system design](../architecture/system-design.md)。
 
 ## Current Stage
 
 - Repository context：入口、决策注册表、system map、glossary 与 working agreements 均已批准。
-- Product intent：Analyzer/Editor 历史范围与 Visualizer V0 均已批准；PROD-014V 已关闭，PROD-022 保留为非阻断未来问题。
-- System design：Analyzer、Visualizer 与 Editor E1–E9 设计保持已批准基线；ADR-0019 保留删除语义，ADR-0020 的紧凑 BPM 标记条已获实现与人工门禁批准，不升级 JSON V1。
-- Execution planning：M1–M14、Editor E0-D/E1–E9、Visualizer V0-D/V1–V6 均为 `Complete`。
+- Product intent：Analyzer/Editor 历史范围与 Visualizer V0 已批准；自动优先且可人工修正/手动完成的视频产出主目标已于 2026-10-01 获批。
+- System design：Analyzer、Visualizer 与 Editor E1–E9 的既有技术基线保留；新视频目标的输入链路与系统设计现可开展复核，尚未获批。
+- Execution planning：M1–M14、Editor E0-D/E1–E9、Visualizer V0-D/V1–V6 的历史切片均为 `Complete`；新视频目标没有获批交付计划。
 - Quality and evals：M3–M14、Editor E1–E9 与 Visualizer V1–V6 evidence 均已批准；E9 revised run `E9-2026-09-04T03-51-33-088Z-13614673` 为 29/29、`approved`，首个 run `E9-2026-09-04T02-49-18-960Z-cf0a79b1` 保持 `pre-revision`。
 - Implementation：Editor E9 的删除、三级展示、28px 紧凑 BPM 标记条和标记修订已在 commit `13614673bbf4d824f2ee109d36e04de6b3f8aabd` 实现并通过 revised canonical。E8 与 Visualizer V1–V6 保持已完成。post-V6 viewport 修订已在 clean commit `9f3b55beaa0c8a3d799f3f1e16f1dd66c9aee77c` 通过 Chrome/Edge 专项。
 - Design remake：旧设计资料已在本地归档，相关历史仍可由 Git 记录追溯；后续视觉方向待 owner 确定。
@@ -39,11 +43,11 @@ DEC-059/DEC-061 对应的旧设计指导和交付计划已归档，停止作为�
 | [glossary.md](glossary.md) | 当前项目词汇与代码含义 | project-owner / approved | 术语、状态或类型含义变化 |
 | [decision-registry.md](decision-registry.md) | 产品、架构和交付决策入口 | project-owner / approved | 形成、撤销或替代重要决策 |
 | [working-agreements.md](working-agreements.md) | 本地开发、验证和 Git 约定 | project-owner / approved | 工具链或验证能力变化 |
-| [problem-brief.md](../product/problem-brief.md) | Analyzer/Editor 历史意图与获批 Visualizer V0 用户、问题和结果 | project-owner / approved | Visualizer 目标用户或核心问题变化 |
-| [scope.md](../product/scope.md) | Analyzer/Editor 历史边界与获批 Visualizer 单场景、0–4 特征、两个模板和 WebM 路线 | project-owner / approved | Visualizer 能力、数据或兼容范围变化 |
-| [success-metrics.md](../product/success-metrics.md) | 历史指标与获批 Visualizer 绑定、场景、同步、录制和资源目标 | project-owner / approved | Visualizer 阈值、样本或观测方法变化 |
-| [open-questions.md](../product/open-questions.md) | PROD-014V 已关闭、PROD-022 四特征未来复核及其他开放问题 | project-owner / approved | 新能力进入范围或 release 开始 |
-| [system-design.md](../architecture/system-design.md) | Analyzer/Editor 历史基线与 Visualizer runtime/project/scene/recording 目标架构 | project-owner / approved | Visualizer 核心系统边界变化 |
+| [problem-brief.md](../product/problem-brief.md) | 历史意图及获批的视频产出主目标 | project-owner / approved | 新目标用户或核心问题变化 |
+| [scope.md](../product/scope.md) | 历史边界及自动优先、人工可操作的视频流程 | project-owner / approved | 新目标能力、数据或兼容范围变化 |
+| [success-metrics.md](../product/success-metrics.md) | 历史指标及获批的视频制作成功信号 | project-owner / approved | 新目标阈值、样本或观测方法变化 |
+| [open-questions.md](../product/open-questions.md) | 历史问题、已关闭 PROD-023 及待决策 PROD-024–029 | project-owner / approved | 自动处理或视频输出决策形成 |
+| [system-design.md](../architecture/system-design.md) | 既有技术基线；新视频流程架构待复核 | project-owner / in-review | 已批准产品目标需要自动处理和人工修正的输入输出边界 |
 | [interface-contracts.md](../architecture/interface-contracts.md) | Analyzer/Editor 历史契约与 Visualizer route lease、project/binding、scene、recording 接口 | project-owner / approved | Visualizer 消息、schema、身份或失败语义变化 |
 | [Visualizer Project V1](../architecture/visualizer/project-format-v1.md) | strict JSON、歌曲 identity、Editor snapshot、单草稿与原子导入 | project-owner / approved | Visualizer schema、草稿数量、快照或兼容策略变化 |
 | [Visualizer binding and scenes](../architecture/visualizer/binding-and-scene-contracts.md) | 受控 binding、四特征 planner、绝对时间确定性、双模板与单 RendererHost | project-owner / approved | source/projection、特征上限、模板或 renderer ownership 变化 |
@@ -59,7 +63,7 @@ DEC-059/DEC-061 对应的旧设计指导和交付计划已归档，停止作为�
 | [Editor acceptance criteria](../delivery/editor/acceptance-criteria.md) | AC-E101–AC-E905、阈值、证据方法和风险映射 | project-owner / approved | Editor 指标、容差、容量或支持矩阵变化 |
 | [Editor test strategy](../delivery/editor/test-strategy.md) | E1–E9 测试层级、fixture、浏览器、性能与 evidence cadence | project-owner / approved | 测试工具、fixture、浏览器或证据能力变化 |
 | [Editor milestone plan](../delivery/editor/milestone-plan.md) | E0-D 与 E1–E9 状态、依赖和退出清单 | project-owner / approved | 里程碑关闭、阻塞或开放状态变化 |
-| [Visualizer execution plan](../delivery/visualizer/execution-plan.md) | V1–V6 切片、固定参数、证据节奏与范围控制 | project-owner / approved | Visualizer 范围、架构、切片或依赖变化 |
+| [Visualizer execution plan](../delivery/visualizer/execution-plan.md) | V1–V6 历史切片；新视频流程待规划 | project-owner / in-review | 新目标架构和验收获批 |
 | [Visualizer acceptance criteria](../delivery/visualizer/acceptance-criteria.md) | AC-V101–AC-V607、阈值、证据方法和 R-034–R-041 映射 | project-owner / approved | Visualizer 指标、阈值、preset 或支持矩阵变化 |
 | [Visualizer test strategy](../delivery/visualizer/test-strategy.md) | V1–V6 测试层级、fixture、Chrome/Edge、WebM 与资源策略 | project-owner / approved | 测试工具、fixture、浏览器或证据能力变化 |
 | [Visualizer milestone plan](../delivery/visualizer/milestone-plan.md) | V0-D 与 V1–V6 状态、依赖、阻塞和退出证据 | project-owner / approved | 里程碑开放、关闭或 blocked 状态变化 |

@@ -24,11 +24,14 @@ V6 候选为既有开发诊断追加 `lastSongTimeSeconds` 与 `lastFrameAtMs`�
 
 ## RAF 与 Observer
 
+连续播放时间、分析帧值、动画相位和指针坐标留在音频时钟、renderer、RAF 或局部非响应式引用中；只有播放状态、当前选择、可见段落等实际变化的离散事实进入 Vue/Pinia。审查高频 callback 时检查是否每帧写 store、创建数组/对象或触发组件重渲染；必须进入响应式状态的低频值先比较新旧值并明确更新节奏。暂停、隐藏、离页与录制结束后核对不再产生无用更新。
+
 - 每个持续动画只能有一个可取消的 RAF 句柄；开始前停止旧循环，停止/卸载时清空句柄。
 - `LightBg` 使用 IntersectionObserver 控制可见性，并用 window resize 更新 renderer 尺寸与 shader uniform。
 - `DotGridBg` 优先使用 ResizeObserver，回退到 window resize；两条路径卸载时都要正确解除。
 - MusicBar 使用 ResizeObserver 重新计算文字跑马灯；旧 GSAP tween 必须 kill。
 - 监听或 Observer 的 callback 若封装过 throttle/debounce，移除时要使用同一函数引用。
+- 布局测量只在尺寸或影响布局的输入真实变化时更新；缓存键须包含实际影响画面的歌曲、模板、绑定、视口和 DPR，失效时清理旧资源。
 
 ## Three.js/WebGL 生命周期
 

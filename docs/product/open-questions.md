@@ -1,15 +1,34 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-09-02
+last_reviewed: 2026-10-01
 upstream_docs:
   - "docs/product/problem-brief.md"
   - "docs/product/scope.md"
   - "docs/product/success-metrics.md"
-next_action: "PROD-014V 已关闭；保留 PROD-022 为未来非阻断问题，并进入 Visualizer system design"
+next_action: "将 PROD-024–029 带入系统设计评审；自动优先与人工可操作原则已由 PROD-023 关闭"
 ---
 
 # Open Questions
+
+## 新视频目标的待决策项
+
+| ID | 待决定的问题 | 对后续工作的影响 | Owner | 下一步 |
+| --- | --- | --- | --- | --- |
+| PROD-024 | 是否采用 Demucs 或其他音轨分离方案；在浏览器、本机辅助程序还是服务端运行；输入、许可和数据留存如何处理？ | 隐私、依赖、资源预算和系统边界 | project-owner | 系统设计比较方案；决定前不添加依赖或处理链 |
+| PROD-025 | 鼓轨是否足以推断 BPM；变速歌曲、首尾静音及鼓轨中段空白如何表示置信度与人工修正？ | tempo map、失败语义和 golden fixture | project-owner | 系统设计定义时间与修正契约；保留现有人工 tempo 能力 |
+| PROD-026 | 较长音色/FX 如何自动识别持续区间；分离音轨转 MIDI 是否需要，如何与人工点/范围标记统一？ | 标记来源、时间身份、冲突处理和工程格式 | project-owner | 系统设计决定候选能力；此时不扩展 Editor JSON |
+| PROD-027 | 分离音轨、分析结果、标记与视觉素材如何进入同一视频工程，并保留来源和歌曲身份？ | 导入、持久化、绑定、许可与兼容 | project-owner | 系统设计提出统一工程契约；此时不改变 Project V1 |
+| PROD-028 | 视频生成沿用实时 WebM 到什么范围；是否需要离线、批量、其他格式或不同的音画同步目标？ | 录制架构、性能、浏览器支持和验收 | project-owner | 系统设计评估输出方案；当前只沿用已批准的实时录制边界 |
+| PROD-029 | 三维分析数据是否需要三维辅助图，以及原子视觉素材由谁提供或生成？ | 标记体验、素材许可与未来 Skill 边界 | project-owner | 设计阶段决定输入边界；此时不创建视觉素材生成 Skill |
+
+下列旧问题和批准记录保留其历史语境；新目标不能把已关闭的 PROD-014V 解释为对上述能力的批准。
+
+## Closed in Video Goal Review
+
+| ID | Decision | Resolution |
+| --- | --- | --- |
+| PROD-023 | 面向音频可视化视频创作者，优先尽可能自动生成，同时保留人工修正和完整手动操作 | 2026-10-01 由 `project-owner` 明确批准产品意图并补充此原则；细分用户画像与具体自动能力仍按后续阶段评审 |
 
 ## Open, Non-Blocking
 

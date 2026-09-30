@@ -1,7 +1,7 @@
 ---
-status: approved
+status: in-review
 owner: "project-owner"
-last_reviewed: 2026-09-04
+last_reviewed: 2026-10-01
 upstream_docs:
   - "docs/product/scope.md"
   - "docs/product/success-metrics.md"
@@ -11,10 +11,12 @@ upstream_docs:
   - "docs/architecture/visualizer/project-format-v1.md"
   - "docs/architecture/visualizer/binding-and-scene-contracts.md"
   - "docs/architecture/visualizer/recording-contract.md"
-next_action: "实现 DEC-058 原生全屏；本轮只做可运行门禁，owner 自行审阅交互"
+next_action: "保留 V1–V6 历史关闭记录；新视频流程待系统设计批准后另行规划交付"
 ---
 
 # Visualizer V1–V6 Execution Plan
+
+> 2026-10-01 影响登记：V1–V6 的关闭与 canonical 身份保持历史有效。产品意图已批准自动优先、可人工修正和手动完成的视频制作目标；本计划未覆盖音轨分离、自动标记、MIDI 或新的端到端视频制作任务。系统设计获批后才评审新交付切片，不将既有里程碑自动扩写为新目标的验收。
 
 ## 1. Delivery Outcome
 

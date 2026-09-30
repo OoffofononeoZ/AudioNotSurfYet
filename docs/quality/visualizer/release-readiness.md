@@ -1,7 +1,7 @@
 ---
 status: in-review
 owner: "project-owner"
-last_reviewed: 2026-09-04
+last_reviewed: 2026-10-01
 upstream_docs:
   - "docs/delivery/visualizer/acceptance-criteria.md"
   - "docs/delivery/visualizer/test-strategy.md"
@@ -10,10 +10,12 @@ upstream_docs:
   - "docs/quality/visualizer/viewport-scroll-failure-taxonomy.md"
   - "docs/quality/visualizer/fullscreen-playback-eval-plan.md"
   - "docs/quality/visualizer/fullscreen-playback-failure-taxonomy.md"
-next_action: "owner 自行审阅一屏滚动与 fullscreen 构图、显隐和退出；PROD-015 继续阻断上线"
+next_action: "继续审阅原候选的 fullscreen；已批准的新视频主目标待架构与专项证据，不由本候选覆盖"
 ---
 
 # Visualizer Release Readiness
+
+> 2026-10-01 范围说明：下述候选身份和证据只覆盖已有 Visualizer 基线及其 viewport/fullscreen 修订。已获产品批准的自动优先、可人工修正或手动完成的完整视频工作流尚无专项验收证据，不能继承本 readiness 结论。
 
 ## Summary Decision
 
