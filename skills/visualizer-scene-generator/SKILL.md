@@ -1,6 +1,6 @@
 ---
 name: visualizer-scene-generator
-description: 为 AudioNotSurfYet 新建受控内置 Visualizer 场景，负责把自然语言视觉需求规范化为 SceneBriefV1、执行输入与 Scene Contract 两阶段审批门禁，并在获批后生成确定性场景代码和强制测试。用户要求新增、生成或设计新的 Visualizer 模板/场景时使用；修改、诊断或评审 Orthogonal Lines、Cube Swarm 及其他已注册场景时改用 audio-visualizer-dev。
+description: 为 AudioNotSurfYet 新建受控内置 Visualizer 场景，执行 SceneBriefV1 输入与 Scene Contract 两阶段审批，并在获批后生成确定性场景代码和测试。只用于新增内置场景；音轨分离、自动标记、视频流程规划、原子视觉素材生成及已有场景修改改用项目开发与文档路由。
 ---
 
 # Visualizer Scene Generator
@@ -8,6 +8,8 @@ description: 为 AudioNotSurfYet 新建受控内置 Visualizer 场景，负责�
 ## Scope
 
 只在 AudioNotSurfYet 仓库中创建新的编译期内置场景。不要用本 Skill 修改或诊断已有场景，也不要生成用户脚本、运行时插件、任意 Shader、第二渲染链路或每场景 canonical/readiness 文档。
+
+音频制作流程图可作为产品意图证据，但它本身不是单个场景的 `SceneBriefV1` 或 Scene Contract。原子视觉素材生成属于另一类未来任务；本 Skill 不生成素材。流程图提出的分离音轨、自动标记或新绑定来源只有在对应产品和架构合同获批后才能进入场景输入。
 
 ## Workflow
 
@@ -37,7 +39,7 @@ description: 为 AudioNotSurfYet 新建受控内置 Visualizer 场景，负责�
 - 保留任务开始前的用户改动，不覆盖、不清理、不改写历史 evidence。
 - 默认不增加依赖、纹理、模型、远端资源、大型音频、WebM 或 trace。
 - 新场景必须复用唯一 Canvas、WebGLRenderer、视觉 RAF、AudioContext 和 Worker；只由持久化 seed 与绝对歌曲时间决定画面。
-- 只在用户明确要求提交时创建本地提交；永不自行 fetch、push、部署或声称 release-ready。
+- 按根 `AGENTS.md` 执行 owner 明确批准后的本地提交；不自行 fetch、push、部署或声称 release-ready。
 
 ## Stop Conditions
 

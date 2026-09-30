@@ -61,6 +61,10 @@ Visualizer V1 已实现 `/visualizer/:trackId?`、Header 当前歌曲入口、�
 
 ## 变更检查
 
+新功能优先按职责落位：路由 view 组合现有服务和展示组件；音频资源由 `src/audio/` 持有，分析调度由 `src/analysis/` 持有，Editor 时间与事件规则由 `src/editor/` 持有，场景/绑定/工程/录制由 `src/visualizer/` 持有。若一次改动让页面组件同时承担持久化、时序计算、渲染和资源释放，先沿这些边界拆分，不按固定行数机械拆文件。
+
+新增已获批的场景参数或设置时，检查参数 descriptor、默认绑定、Inspector、严格工程 codec、草稿恢复、导入导出、时间/资源所有权和相邻测试是否一致。新 source 或 projection 类型、外部素材或新输出格式先回到架构合同，不以 UI 上能选择为完成标准。
+
 - 新路由：检查 Header 导航、MainLayout 占位、直接访问与刷新。
 - 状态变更：检查刷新后的 localStorage 恢复、非法旧值和默认值。
 - 组件事件：检查事件名大小写、类型和父子两端。

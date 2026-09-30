@@ -1,16 +1,18 @@
 ---
-status: approved
+status: in-review
 owner: "project-owner"
-last_reviewed: 2026-09-04
+last_reviewed: 2026-10-01
 upstream_docs:
   - "docs/product/problem-brief.md"
   - "docs/product/scope.md"
   - "docs/product/success-metrics.md"
   - "docs/product/open-questions.md"
-next_action: "实施 ADR-0023 的 Visualizer 原生全屏与单 timer 控制栏；owner 自行审阅交互"
+next_action: "按 2026-10-01 获批产品意图评审自动优先、人工可修正的视频制作链路；现有架构继续作为已实现基线"
 ---
 
 # System Design
+
+> 2026-10-01 影响登记：自动优先、保留人工修正和完整手动操作的视频产出主目标已获产品批准。本文件下述架构描述的是已批准并实现的 Analyzer、Editor、Visualizer 基线；它尚未定义音轨分离、自动标记、MIDI、视觉素材或新的视频生成拓扑。下一步须补充系统设计、接口和风险评审，不能从现有 WebM 路线推断这些能力已获批准。
 
 ## 1. Decision Summary
 

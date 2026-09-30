@@ -1,13 +1,13 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-09-17
+last_reviewed: 2026-10-01
 upstream_docs:
   - "docs/context/index.md"
   - "docs/product/scope.md"
   - "docs/architecture/system-design.md"
   - "docs/delivery/execution-plan.md"
-next_action: "DEC-059/DEC-061 的旧设计资料已归档；等待 owner 确定后续设计方向"
+next_action: "按 DEC-062 开展新视频目标的系统设计，自动处理和统一工程契约仍待评审"
 ---
 
 # Decision Registry
@@ -98,6 +98,7 @@ next_action: "DEC-059/DEC-061 的旧设计资料已归档；等待 owner 确定�
 | DEC-059 | 2026-09-14 | 旧设计语言采用决策；设计资料已移至本地归档，停止作为后续设计依据 | project-owner | archived | Git 历史 | 后续设计方向确定 |
 | DEC-060 | 2026-09-17 | M10 golden 与单元测试改为按固定 Meyda 容差（绝对 `1e-6`、相对 `1e-5`）比较数值，维度/键集/字符串仍要求完全一致；`fixtures:m10:golden` 不再要求逐字节相等，原因是 canonical golden 产生自 macOS arm64，Windows x64 复跑出现 ULP 级差异 | project-owner | approved | [Eval plan](../quality/eval-plan.md) | M10 容差数值、比较范围、golden 生成平台或支持矩阵改变 |
 | DEC-061 | 2026-09-17 | 旧设计改造收尾记录；相关资料已移至本地归档 | project-owner | archived | Git 历史 | 后续设计方向确定 |
+| DEC-062 | 2026-10-01 | 批准以歌曲尽可能自动生成同步可视化视频为主目标，同时保留自动结果手动修正和完整手动操作路径 | project-owner | approved | `docs/product/problem-brief.md`、`docs/product/scope.md`、`docs/product/success-metrics.md`、`docs/product/open-questions.md`；owner 本轮批准 | 用户任务或自动/手动优先级实质变化 |
 
 ## Approval Evidence
 

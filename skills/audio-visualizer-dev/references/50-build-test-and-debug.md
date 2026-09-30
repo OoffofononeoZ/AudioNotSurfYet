@@ -1,5 +1,14 @@
 # 构建、测试与调试
 
+## 按改动选择验证
+
+- 纯文档或 Skill：核对路径、链接、frontmatter、触发边界与 `npm run test:docs`；若改动场景输入校验器，再运行 `npm run test:skill:visualizer-scene-generator`。不为文档改动默认运行应用构建。
+- 纯时间映射、codec、validator 或状态规则：先运行对应的 Vitest 单元和集成切片；产品源码仍以 `npm run typecheck` 和 `npm run build` 核对静态与打包门禁。
+- UI、布局、浏览器资源或录制：选择目标 Chrome/Edge 专项，核对真实状态、几何、console 与创建/释放；截图只作补充。正在运行的 dev server 可用于即时诊断，正式源码门禁仍按项目要求执行。
+- 已批准里程碑的 canonical/evidence：只按相应 delivery 与 quality 合同执行，不把普通修复或新获批的产品方向自动升级为新候选证据。
+
+下面的命令表是可用入口；按任务挑选，不因表中存在某项就默认全量执行。
+
 ## 当前命令
 
 | 命令 | 当前含义 | 门禁解释 |
@@ -161,7 +170,7 @@
 
 ## 交付前检查
 
-- `npm run build`
+- 产品源码改动：`npm run build`；纯文档或 Skill 改动：相关链接、元数据、`npm run test:docs` 和 Skill 校验
 - 相关浏览器场景及控制台
 - Markdown/配置改动的语法和链接检查
 - `git diff --check`
