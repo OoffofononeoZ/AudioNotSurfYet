@@ -4,7 +4,7 @@ owner: "project-owner"
 last_reviewed: 2026-09-14
 upstream_docs:
   - "AGENTS.md"
-next_action: "实施 DR1 全局 token 基线；按 DR0–DR10 逐轮推进设计改造并在每轮等待 owner 确认"
+next_action: "旧设计资料已移至本地 trash 并停止引用；后续设计方向由 owner 另行确定"
 ---
 
 # Repository Context Index
@@ -15,7 +15,7 @@ AudioNotSurfYet 当前是一个单仓库 Vue/Vite 浏览器前端。Editor E1–
 
 DEC-058/ADR-0023 另把 Visualizer 原生全屏登记为 post-V6 readiness 修订：只复用同一预览与 transport，不创建 V7。原 Visualizer candidate 标为 `pre-fullscreen`；本轮只做可运行门禁，交互与视觉由 owner 自行审阅。
 
-DEC-059/ADR-0024 打开独立的设计改造 workstream：采用 skill 中登记的设计语言，主题色固定 `#27ff64`、只做暗色，token 只以 `src/style.css` 的 CSS 变量承载，canvas 绘制冻结，并按 DR0–DR10 逐轮实施、逐轮等待 owner 确认。该 workstream 不改写任何 M1–M14、E1–E10、V1–V6 的 canonical 身份。
+DEC-059/DEC-061 对应的旧设计指导和交付计划已归档，停止作为后续设计任务的依据。已经实现的样式仍是当前代码事实；新的设计方向由 owner 另行确定。
 
 本目录维护仓库事实、边界和工作记忆；生命周期路由与通用方法由 [AGENTS.md](../../AGENTS.md) 负责。当前代码事实与目标架构必须区分：现状见 [system map](system-map.md)，批准的目标见 [system design](../architecture/system-design.md)。
 
@@ -27,7 +27,7 @@ DEC-059/ADR-0024 打开独立的设计改造 workstream：采用 skill 中登记
 - Execution planning：M1–M14、Editor E0-D/E1–E9、Visualizer V0-D/V1–V6 均为 `Complete`。
 - Quality and evals：M3–M14、Editor E1–E9 与 Visualizer V1–V6 evidence 均已批准；E9 revised run `E9-2026-09-04T03-51-33-088Z-13614673` 为 29/29、`approved`，首个 run `E9-2026-09-04T02-49-18-960Z-cf0a79b1` 保持 `pre-revision`。
 - Implementation：Editor E9 的删除、三级展示、28px 紧凑 BPM 标记条和标记修订已在 commit `13614673bbf4d824f2ee109d36e04de6b3f8aabd` 实现并通过 revised canonical。E8 与 Visualizer V1–V6 保持已完成。post-V6 viewport 修订已在 clean commit `9f3b55beaa0c8a3d799f3f1e16f1dd66c9aee77c` 通过 Chrome/Edge 专项。
-- Design remake：DR0–DR10 已完成（[ADR-0024](../architecture/adrs/0024-design-language-adoption.md)、[execution plan](../delivery/design-remake/execution-plan.md)），共享层与四个主页面均已收敛到设计语言 token，剩余字面量分类与证据复核结论已记录；ComingSoon 与 TestLands 不在范围内，等待 owner 整体复核。
+- Design remake：旧设计资料已在本地归档，相关历史仍可由 Git 记录追溯；后续视觉方向待 owner 确定。
 - Readiness、release、retrospective：Analyzer M14 为 `Ready with waivers`；Editor 已获准进入独立 release-readiness 评审；PROD-015 仍阻断上线。
 
 ## Key Documents
@@ -51,7 +51,6 @@ DEC-059/ADR-0024 打开独立的设计改造 workstream：采用 skill 中登记
 | [Editor Project V1](../architecture/editor/project-format-v1.md) | JSON schema、validator、歌曲 identity、codec 与独立 draft DB | project-owner / approved | 工程字段、时间、格式、身份或草稿策略变化 |
 | [Editor interactions](../architecture/editor/interaction-contracts.md) | tempo/grid、pointer/keyboard、point/range 和 overlay 状态机 | project-owner / approved | 手势、吸附、重叠、DOM/Canvas 或键盘规则变化 |
 | [risk-register.md](../architecture/risk-register.md) | Analyzer/Editor 历史风险与 Visualizer R-034–R-041 | project-owner / approved | Visualizer 每个里程碑及新高影响风险 |
-| [ADR-0024](../architecture/adrs/0024-design-language-adoption.md) | 设计语言采用、CSS 变量 token、canvas 冻结与登记例外 | project-owner / approved | 设计语言、token 载体、canvas 边界、字体策略或例外规则变化 |
 | [execution-plan.md](../delivery/execution-plan.md) | Q0、M1–M14 实施顺序和门禁 | project-owner / approved | 范围、架构或任务依赖变化 |
 | [acceptance-criteria.md](../delivery/acceptance-criteria.md) | 可测量验收与阈值 | project-owner / approved | 成功指标、容差或支持矩阵变化 |
 | [test-strategy.md](../delivery/test-strategy.md) | 测试层级、fixture 和证据策略 | project-owner / approved | 工具、fixture 或验证能力变化 |
@@ -64,7 +63,6 @@ DEC-059/ADR-0024 打开独立的设计改造 workstream：采用 skill 中登记
 | [Visualizer acceptance criteria](../delivery/visualizer/acceptance-criteria.md) | AC-V101–AC-V607、阈值、证据方法和 R-034–R-041 映射 | project-owner / approved | Visualizer 指标、阈值、preset 或支持矩阵变化 |
 | [Visualizer test strategy](../delivery/visualizer/test-strategy.md) | V1–V6 测试层级、fixture、Chrome/Edge、WebM 与资源策略 | project-owner / approved | 测试工具、fixture、浏览器或证据能力变化 |
 | [Visualizer milestone plan](../delivery/visualizer/milestone-plan.md) | V0-D 与 V1–V6 状态、依赖、阻塞和退出证据 | project-owner / approved | 里程碑开放、关闭或 blocked 状态变化 |
-| [Design remake execution plan](../delivery/design-remake/execution-plan.md) | DR0–DR10 轮次范围、固定参数、证据影响与每轮退出门禁 | project-owner / approved | 轮次划分、范围、验证方式或证据影响变化 |
 | [Visualizer V1 eval plan](../quality/visualizer/eval-plan.md) | AC-V101–AC-V108 的 route、lease、project、draft、layout 与 resource 契约 | project-owner / approved | V1 行为、阈值、浏览器或证据能力变化 |
 | [Visualizer V1 golden](../quality/visualizer/golden-examples.md) | 默认/完整/无效工程、lease、草稿和 breakpoint 规范样例 | project-owner / approved | V1 schema、identity、布局或恢复语义变化 |
 | [Visualizer V1 failure taxonomy](../quality/visualizer/failure-taxonomy.md) | route、lease、project、draft、file、layout、resource 失败分类 | project-owner / approved | V1 失败域或严重度响应变化 |

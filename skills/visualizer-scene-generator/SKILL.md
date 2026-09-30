@@ -33,6 +33,7 @@ description: 为 AudioNotSurfYet 新建受控内置 Visualizer 场景，负责�
 
 ## Repository Safety
 
+- `trash/` 是本地归档区。不得读取、搜索、索引或引用其中任何内容；只有用户明确要求恢复或查看指定内容时才可访问。普通删除不默认移入 `trash/`。
 - 保留任务开始前的用户改动，不覆盖、不清理、不改写历史 evidence。
 - 默认不增加依赖、纹理、模型、远端资源、大型音频、WebM 或 trace。
 - 新场景必须复用唯一 Canvas、WebGLRenderer、视觉 RAF、AudioContext 和 Worker；只由持久化 seed 与绝对歌曲时间决定画面。
