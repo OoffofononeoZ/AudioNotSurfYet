@@ -28,6 +28,7 @@ next_action: "DEC-071 已批准短段 max absolute 1.5e-3；继续原图双浏�
 - 同一拼接数据流写出每轨 planar Float32 和 stereo IEEE Float32 WAV，并生成 30Hz 双声道均方 RMS 的 [-80,0]dBFS UInt16 energy 与 waveform min/max；无增益、裁静音或额外编码程序。
 - P1 预检以 origin usage/quota 保守计算 native PCM、四轨 planar/WAV 和全部模型，默认上限10GiB；不自动驱逐。精确 cache accounting、租约和清理 UI 留在 P2。任务失败只清理其 UUID 目录；五秒不能清理则记录 residual ID。
 - 四轨完整后由当前 controller 检查 job/generation/source/role，再向独立 IDB results 发布 metadata；取消和迟到消息不能替换当前结果。测试专用入口不修改 Editor/Visualizer 工程。
+- controller 在 start 同步报告暂存开始；Worker 无新消息时主线程提供带 `heartbeatSource=controller` 的 elapsed 反馈，保持 phase/completedUnits 不变，不把它当作 Worker 仍在推进的证明。Worker 的实际消息标记为 `worker`。取消后停止反馈；4.5秒仍无终态则终止 Worker，登记 residual ID 并发出唯一 cancel，给五秒门禁保留调度余量；异步清理不能再次发送终态。
 
 ## Validation Boundary
 

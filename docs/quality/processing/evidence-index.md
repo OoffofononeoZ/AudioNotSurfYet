@@ -69,3 +69,9 @@ P1 保持 In Progress；R-046–R-055 全部 Open，P2–P6 Planned。下一步�
 四图初始化修复已本地提交为 `6d575ff`，34项专项、类型/构建/文档校验通过；诊断模型/运行库仅由dev fixture whitelist提供，不进入生产dist。后续精度诊断未解决drums超差，批准后的标准见 [numeric review](numeric-review.md)；现执行 DEC-071 的1.5e-3，不默认采用任何派生图/运行库。
 
 2026-10-04，owner 明确回复“批准 0.0015，继续完整验证（推荐）”。DEC-071 据此批准四专用模型对应 row 短段跨后端 max absolute ≤`1.5e-3`，保留原始模型和官方运行库，继续全部适用验证。上文按原 `1e-3` 的失败属于历史记录；P1 仍 In Progress、P2 Planned、R-046–R-055 Open。详见 [numeric review](numeric-review.md)。
+
+## Real Pipeline Provisional — 2026-10-04
+
+Chrome 专项 `artifacts/evals/p1-real-pipeline-chrome.json` 两场景通过：20000-frame / 44.1kHz stereo 补零和400003-frame / 48kHz mono 跨段均完成四原图顺序 load/release；每轨 WAV header/frame/finite/planar 全 sample 与独立 WAV 重算的30Hz energy、waveform 一致，暂存源 hash 重验通过。处理时间分别约77.93秒（下载另计17.18秒）和98.90秒；初始反馈≤0.3ms、最大心跳间隔747.1ms。
+
+六个真实取消阶段（staging/load/inference/stitch/derive/persist）均唯一终态且≤5秒清理/登记。此为未提交候选的专项反馈，尚非 clean canonical。新增20次真实任务资源计数、双浏览器十五分钟和三首本地音频12 WAV 生成进入完整 runner，尚未宣称通过；owner 听感与原生操作仍待人工结论。

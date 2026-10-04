@@ -3,7 +3,7 @@ import type { StagedPcm } from './storage';
 export interface ProcessingJob {jobId:string;trackId:string;generation:number;sourceHash:string;directory:string}
 export type WorkerCommand = {type:'start';job:ProcessingJob;pcm:StagedPcm;modelBase?:string}|{type:'cancel';job:ProcessingJob};
 export type WorkerEvent =
-    |{type:'progress';job:ProcessingJob;phase:string;completedUnits:number;totalUnits:number|null;elapsedMs:number;downloadElapsedMs:number;processingElapsedMs:number}
+    |{type:'progress';job:ProcessingJob;phase:string;completedUnits:number;totalUnits:number|null;elapsedMs:number;downloadElapsedMs:number;processingElapsedMs:number;heartbeatSource?:'controller'|'worker'}
     |{type:'result';job:ProcessingJob;result:SeparationResult}
     |{type:'cancel';job:ProcessingJob;residualArtifactIds:string[]}
     |{type:'error';job:ProcessingJob;code:string;message:string;residualArtifactIds?:string[]};

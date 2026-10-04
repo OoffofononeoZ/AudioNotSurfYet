@@ -12,7 +12,7 @@ interface WorkerPort {
 }
 export class SeparationController {
     private generation=0;
-    private active:{abort:AbortController;worker:WorkerPort|null;job:ProcessingJob|null;directory:string;finish:(error?:Error,result?:SeparationResult)=>void;cancelTimer:ReturnType<typeof setTimeout>|null}|null=null;
+    private active:{abort:AbortController;worker:WorkerPort|null;job:ProcessingJob|null;directory:string;finish:(error?:Error,result?:SeparationResult)=>void;cancelTimer:ReturnType<typeof setTimeout>|null;onEvent:(event:WorkerEvent)=>void}|null=null;
     private residuals=new Set<string>();
     get residualArtifactIds():string[]{return Array.from(this.residuals);}
     private recordCleanup(directory:string,ids:string[]):void {
@@ -27,25 +27,44 @@ export class SeparationController {
         const started=performance.now();
         return new Promise<SeparationResult>((resolve,reject)=>{
             let settled=false,terminalSeen=false,failed=false;
+            let lastProgress:Extract<WorkerEvent,{type:'progress'}>|null=null,receivedAt=started;
+            const publish=(event:Extract<WorkerEvent,{type:'progress'}>)=>{
+                if(settled||failed||abort.signal.aborted)return;
+                lastProgress=event;receivedAt=performance.now();onEvent(event);
+            };
+            const heartbeat=setInterval(()=>{
+                if(!lastProgress||settled||failed||terminalSeen||abort.signal.aborted)return;
+                const age=performance.now()-receivedAt;if(age<500)return;
+                // Main-thread elapsed feedback during synchronous session creation.
+                // It does not assert Worker liveness or advance completed work.
+                const downloading=lastProgress.phase==='model-download';
+                onEvent({...lastProgress,heartbeatSource:'controller',elapsedMs:lastProgress.elapsedMs+age,
+                    downloadElapsedMs:lastProgress.downloadElapsedMs+(downloading?age:0),
+                    processingElapsedMs:lastProgress.processingElapsedMs+(downloading?0:age)});
+            },250);
             const finish=(error?:Error,result?:SeparationResult)=>{
                 if(settled)return;settled=true;
+                clearInterval(heartbeat);
                 const current=this.active;
                 if(current?.directory===directory){if(current.cancelTimer)clearTimeout(current.cancelTimer);current.worker?.terminate();this.active=null;}
                 if(error)reject(error);else if(result)resolve(result);
             };
-            const current={abort,worker:null as WorkerPort|null,job:null as ProcessingJob|null,directory,finish,cancelTimer:null as ReturnType<typeof setTimeout>|null};this.active=current;
+            const stagingJob={jobId:directory,trackId:port.getDecodedAudioDescriptor()?.trackId??'',generation,sourceHash:'staging',directory};
+            const current={abort,worker:null as WorkerPort|null,job:stagingJob as ProcessingJob|null,directory,finish,cancelTimer:null as ReturnType<typeof setTimeout>|null,onEvent};this.active=current;
+            publish({type:'progress',job:stagingJob,phase:'pcm-staging',completedUnits:0,totalUnits:port.getDecodedAudioDescriptor()?.length??null,elapsedMs:0,downloadElapsedMs:0,processingElapsedMs:0,heartbeatSource:'controller'});
             const fail=async(error:Error)=>{
                 if(failed||settled)return;failed=true;
                 current.worker?.terminate();current.worker=null;
                 this.recordCleanup(directory,await removeJob(directory));
                 try{await databaseDelete('results',directory);}catch{this.residuals.add(directory);}
+                if(settled)return;
                 if(current.job)onEvent(error instanceof ProcessingError&&error.code==='job-cancelled'?{type:'cancel',job:current.job,residualArtifactIds:this.residualArtifactIds}:{type:'error',job:current.job,code:error instanceof ProcessingError?error.code:'inference-failed',message:error instanceof ProcessingError?error.message:'Processing failed.',residualArtifactIds:this.residualArtifactIds});
                 finish(error);
             };
             void (async()=>{
                 try{
                     const ref=await stagePcm(port,directory,abort.signal,(done,total)=>{
-                        onEvent({type:'progress',job:{jobId:directory,trackId:port.getDecodedAudioDescriptor()?.trackId??'',generation,sourceHash:'staging',directory},phase:'pcm-staging',completedUnits:done,totalUnits:total,elapsedMs:performance.now()-started,downloadElapsedMs:0,processingElapsedMs:performance.now()-started});
+                        publish({type:'progress',job:stagingJob,phase:'pcm-staging',completedUnits:done,totalUnits:total,elapsedMs:performance.now()-started,downloadElapsedMs:0,processingElapsedMs:performance.now()-started,heartbeatSource:'controller'});
                     });
                     if(abort.signal.aborted||this.active!==current)throw new ProcessingError('job-cancelled','Cancelled.');
                     const job:ProcessingJob={jobId:directory,trackId:ref.descriptor.trackId,generation,sourceHash:ref.hash,directory};current.job=job;
@@ -57,7 +76,7 @@ export class SeparationController {
                         if(this.active!==current||!sameJob(message.job,job))return;
                         if(abort.signal.aborted){if(message.type!=='progress')void fail(new ProcessingError('job-cancelled','Cancelled.'));return;}
                         if(terminalSeen)return;
-                        if(message.type==='progress'){onEvent({...message,elapsedMs:message.elapsedMs+stagingElapsed,processingElapsedMs:message.processingElapsedMs+stagingElapsed});return;}
+                        if(message.type==='progress'){publish({...message,heartbeatSource:'worker',elapsedMs:message.elapsedMs+stagingElapsed,processingElapsedMs:message.processingElapsedMs+stagingElapsed});return;}
                         terminalSeen=true;
                         if(message.type==='result'){
                             void (async()=>{
@@ -85,7 +104,8 @@ export class SeparationController {
             this.residuals.add(current.directory);
             void removeJob(current.directory).then(ids=>{this.recordCleanup(current.directory,ids);});
             void databaseDelete('results',current.directory).catch(()=>{this.residuals.add(current.directory);});
+            if(current.job)current.onEvent({type:'cancel',job:current.job,residualArtifactIds:this.residualArtifactIds});
             current.finish(new ProcessingError('job-cancelled','Cancelled; residual cleanup registered.'));
-        },5000);
+        },4500);
     }
 }
