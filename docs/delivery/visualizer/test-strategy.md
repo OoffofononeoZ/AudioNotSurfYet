@@ -8,12 +8,12 @@ upstream_docs:
   - "docs/architecture/risk-register.md"
   - "docs/delivery/visualizer/execution-plan.md"
   - "docs/delivery/visualizer/acceptance-criteria.md"
-next_action: "保留 V1–V6 历史关闭/evidence；DEC-063–066 新架构已批准，另行制定并评审 processing/V2 的计划、验收、测试与里程碑"
+next_action: "保留 V1–V6 历史关闭/evidence；processing TS-P1–P6 已批准，准备 P1 质量契约，尚无新链通过记录"
 ---
 
 # Visualizer V1–V6 Test Strategy
 
-> 2026-10-04 架构影响：浏览器 FT 分离、TypeScript 逐拍/局部 tempo、人工小节确认、只读 apply、V2 迁移与 tempo 显式刷新已获批准。本文件原 V1–V6/viewport/fullscreen 范围与 canonical 保持历史身份；对新链的覆盖需复核，旧 Worker/JSON V1 约束不能作为新架构上限或新验收证据。下一步规划兼容性/质量/性能首切片，再规划完整工作区，详见 [System Design §21](../../architecture/system-design.md#21-automated-audio-to-video-target-architectureapproved)。
+> 2026-10-04 架构影响：浏览器 FT 分离、TypeScript 逐拍/局部 tempo、人工小节确认、只读 apply、V2 迁移与 tempo 显式刷新已获批准。本文件原 V1–V6/viewport/fullscreen 范围与 canonical 保持历史身份；旧 Worker/JSON V1 约束不能作为新架构上限或新验收证据。新链测试独立列于 [Processing test strategy](../processing/test-strategy.md)（approved；P1 质量契约待单独评审），依据 [System Design §21](../../architecture/system-design.md#21-automated-audio-to-video-target-architectureapproved)。
 
 ## 1. Objectives
 
