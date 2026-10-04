@@ -81,3 +81,13 @@ Chrome 专项 `artifacts/evals/p1-real-pipeline-chrome.json` 两场景通过：2
 `P1-2026-10-04T12-29-04-163Z-389fd32e` 起止 commit/worktree 相同且干净；summary SHA-256 `8091556abc6259d9b8db148e06396eab1bc5aaf2e47bb682540e9125052ea532`，10组9 pass。Edge 四原图按 DEC-071 的1.5e-3全部通过；Chrome前三轨通过、vocals因Vite进程退出报 `Failed to fetch`。Vite在创建本地试听产物时监听到锁定文件并报 `EBUSY`；不是模型精度失败。失败原日志/trace保留，未重标通过，昂贵 pipeline/performance/listening 组因图组不完整未执行。
 
 修复在开发服务器监听中排除 artifacts/test-results/playwright-report 等产物目录；仍通过白名单 middleware读取固定公开模型。源码变更仍会触发HMR，因此正式候选运行期间不修改源码或Git状态。
+
+## Canonical Long-Storage Failure — ac1ba49
+
+`P1-2026-10-04T12-42-18-237Z-ac1ba498` 起止 commit/worktree 相同且干净；summary SHA-256 `7554d0ddcdbfd2bb7d8d502790eed0bb862bc16ba8166c1244d47e91b39fac46`，15组12 pass。双浏览器各四原图 parity、真实短段/48k mono跨段WAV/摘要、20次真实取消循环及下载取消/损坏模型/quota测试通过；两浏览器最长取消终态均4500.5ms，稳定点资源/临时目录/结果metadata/residual清空。两个十五分钟组和第三首歌曲生成失败；前两首八个WAV仅作为未完成试听材料保留。
+
+新增原始异常诊断的 Chrome 重现 `artifacts/evals/p1-long-diagnostic-chrome.json` 显示 `QuotaExceededError`，发生在 drums / persist，done=38181780、total=39690000。原错误笼统映射为 inference-failed，现按既有契约明确映射 quota-exceeded，abort全部stem writer、释放session并清理本任务。预检不是实际写入成功保证。
+
+默认隔离上下文使用临时存储。[Chromium quota说明](https://groups.google.com/a/chromium.org/g/blink-dev/c/00aHBCiUGzo/m/B0Dq06SFAQAJ)指出隐私窗口真实容量基于RAM，estimate可报人为扩大的值；大型参考改用[官方persistent context](https://playwright.dev/docs/api/class-browsertype#browser-type-launch-persistent-context)的独立普通磁盘profile，不改用户profile，不提高或伪造quota。十五分钟fixture处理期间持有完整48k stereo原始PCM，准备时间另计，并在处理后重验原始PCM全量hash。
+
+普通Chrome重测 `artifacts/evals/p1-persistent-long-chrome.json` 完成四轨：每轨39690000frames，WAV/planar及独立30Hz摘要一致，原始PCM不变；但处理1016.6576秒，超过900秒，性能门禁仍失败。反馈1.4ms、最大heartbeat749.5ms；设备wide显存观测峰值4373MiB、所有Chrome/Edge进程aggregate WS约2.62GB、private bytes约5.25GB；1秒请求采样包含其他tab，非应用独占分配量。保留失败trace，不关闭P1或风险；下一步优化重复重采样并重测。

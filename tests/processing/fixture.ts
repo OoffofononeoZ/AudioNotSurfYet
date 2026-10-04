@@ -19,3 +19,8 @@ export function syntheticPort(frames:number,rate=44100,channels=2):DecodedAudioC
     const descriptor={trackId:'p1-synthetic',revision:1,sampleRate:rate,channelCount:channels,length:frames,durationSeconds:frames/rate};
     return {getDecodedAudioDescriptor:()=>({...descriptor}),copyDecodedChannelRange:({revision,channel,start,length})=>revision===1&&channel<channels&&start>=0&&start+length<=frames?samples(channel,start,length,rate):null};
 }
+export function preparedSyntheticPort(frames:number,rate=48000,channels=2):DecodedAudioCopyPort {
+    const descriptor=syntheticPort(frames,rate,channels).getDecodedAudioDescriptor()!;
+    const pcm=Array.from({length:channels},(_,channel)=>samples(channel,0,frames,rate));
+    return {getDecodedAudioDescriptor:()=>({...descriptor}),copyDecodedChannelRange:({revision,channel,start,length})=>revision===1&&channel<channels&&start>=0&&start+length<=frames?pcm[channel]!.slice(start,start+length):null};
+}
