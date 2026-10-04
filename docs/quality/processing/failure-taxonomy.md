@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/quality/processing/golden-examples.md"
   - "docs/delivery/processing/acceptance-criteria.md"
   - "docs/architecture/risk-register.md"
-next_action: "DEC-070 已批准 P1 质量契约；实施独立 FT harness，缺少人工输入或测量不关闭 P1"
+next_action: "四模型在双浏览器 session 创建失败；依据 P1 evidence 复核兼容方案，P1 未完成，P2 不开放"
 ---
 
 # Browser FT P1 Failure Taxonomy
@@ -56,3 +56,7 @@ P1关闭需 AC-P101–P106 全部有实际证据、适用人工结论和 owner�
 ## Approval
 
 2026-10-04，owner 要求实施本轮计划（DEC-070），本质量契约获批。DEC-069 允许证据满足后自主推进；本批准不补写模型运行、人工试听或性能结论。
+
+## Implementation Evidence
+
+实际运行及缺口见 [P1 evidence index](evidence-index.md)。合成/注入通过与真实四图不兼容分别记录，预期样例不是通过声明；本轮没有 P1 关闭或风险缓解结论。
