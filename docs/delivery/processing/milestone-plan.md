@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/delivery/processing/acceptance-criteria.md"
   - "docs/delivery/processing/test-strategy.md"
   - "docs/architecture/system-design.md"
-next_action: "DEC-071 已批准短段 max absolute 1.5e-3；继续原图双浏览器、真实拼接/WAV、取消、试听和十五分钟验证；P1 未完成"
+next_action: "owner要求本轮收尾，P1执行暂停但未关闭；下次先提醒16分51.95秒性能失败及试听缺口，再继续验证"
 ---
 
 # Browser Processing Milestone Plan

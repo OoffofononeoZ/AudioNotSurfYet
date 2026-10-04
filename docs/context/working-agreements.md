@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/context/index.md"
   - "docs/delivery/test-strategy.md"
   - "docs/quality/eval-plan.md"
-next_action: "四原图在 JSEP 双浏览器可推断；drums parity 超差，先修正精度，P1 未完成，P2 不开放"
+next_action: "本轮按owner要求收尾；下次提醒FT完整性能16分51.95秒及试听/原生操作缺口；P1未关闭，代码本地提交授权继续有效"
 ---
 
 # Working Agreements

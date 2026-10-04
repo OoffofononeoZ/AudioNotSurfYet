@@ -90,7 +90,7 @@ const api={
         const hash=new Sha256().update(new TextEncoder().encode(JSON.stringify({version:FT_CONFIG.sourceHash,...descriptor})));
         for(let start=0;start<descriptor!.length;start+=16384){for(let channel=0;channel<descriptor!.channelCount;channel++){const pcm=retainedPcm.copyDecodedChannelRange({revision:descriptor!.revision,channel,start,length:Math.min(16384,descriptor!.length-start)});if(!pcm)throw Error('Original PCM missing');hash.update(new Uint8Array(pcm.buffer,pcm.byteOffset,pcm.byteLength));}await new Promise<void>(resolve=>setTimeout(resolve,0));}
         if(hash.hex()!==result.source.hash)throw Error('Original PCM changed');
-        return {artifacts:await inspectArtifacts(result),timeline:result.timeline,descriptor:result.source.descriptor,originalPcmUnchanged:true,metrics,provenance:result.provenance,residuals:controller.residualArtifactIds};
+        return {artifacts:await inspectArtifacts(result),timeline:result.timeline,timings:result.timings,descriptor:result.source.descriptor,originalPcmUnchanged:true,metrics,provenance:result.provenance,residuals:controller.residualArtifactIds};
     },
     report(){return {metrics,residuals:controller.residualArtifactIds,separating};},
     async local(){

@@ -29,6 +29,7 @@ public/audios
 test-results/
 playwright-report/
 artifacts/evals/
+artifacts/browser-profiles/
 artifacts/fixtures/
 public/test_audio
 public/processing-runtime/
