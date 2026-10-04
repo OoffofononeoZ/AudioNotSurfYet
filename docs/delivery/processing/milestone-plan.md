@@ -65,3 +65,7 @@ DEC-069/070 接受 P1 eval/golden/失败分类并开放实现。P1–P6 按全�
 ## P1 Implementation Checkpoint
 
 2026-10-04，固定四模型实际 size/SHA 已校验，独立内核与 oracle/故障测试已实现。Chrome/Edge 的四图均在 `/real_istft/ConstantOfShape` provider 分配处创建 session 失败，未进入真实推断、parity、长曲或试听。P1 保持 In Progress、P2–P6 Planned；见 [P1 evidence](../../quality/processing/evidence-index.md)，不将合成/注入通过写成真实模型通过。
+
+## P1 Canonical Exit Check
+
+2026-10-04，候选 `9198b37` 正式验证起止干净，8/10命令分组通过、双浏览器图组失败；见 [P1 evidence](../../quality/processing/evidence-index.md)。AC-P101/102 未通过，AC-P105/106 尚无试听/性能证据；P1 保持 In Progress，后续切片不开放。

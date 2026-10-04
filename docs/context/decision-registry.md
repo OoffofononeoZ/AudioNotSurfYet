@@ -8,7 +8,7 @@ upstream_docs:
   - "docs/architecture/system-design.md"
   - "docs/delivery/execution-plan.md"
   - "docs/delivery/processing/execution-plan.md"
-next_action: "DEC-068 delivery 批准已提交 d5f8ecd；评审 P1 三份 in-review 质量文档，单独批准后开放实际实现"
+next_action: "DEC-069/070 已登记；当前 P1 clean candidate 四图 session 失败，复核兼容方案，不提前关闭风险"
 ---
 
 # Decision Registry
@@ -268,3 +268,7 @@ E5 clean canonical `E5-2026-08-27T11-03-22-177Z-78124177` 随后在 implementati
 | DEC-070 | 2026-10-04 | approved | 批准三份 P1 质量契约并开放实际 FT harness；不代表质量/兼容/性能已通过 | [P1 eval](../quality/processing/eval-plan.md)、[milestones](../delivery/processing/milestone-plan.md) |
 
 owner 授权代码无需再次确认并直接提交 Git，并选择“已批路线自主推进”；随后要求“Implement the plan.”。本授权不替代必需人工结果，也不豁免新架构取舍。
+
+## P1 Implementation Evidence — 2026-10-04
+
+DEC-070 的实现 commit `9198b37` 与 clean canonical `P1-2026-10-04T09-24-45-541Z-9198b372` 已形成；summary SHA-256 `28423c589f615811e1b27c2e90bd72109549d6640ed4ac39b04bf3a969076679`。这是一条失败执行事实，不是新架构决定：34项P1专项和22项邻接回归通过，双浏览器的四个固定图均在 ConstantOfShape provider 分配处失败，P1 不关闭、P2 不开放；详情见 [P1 evidence](../quality/processing/evidence-index.md)。模型/runtime 身份不因诊断自动替换。

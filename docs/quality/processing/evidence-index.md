@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/quality/processing/golden-examples.md"
   - "docs/quality/processing/failure-taxonomy.md"
   - "docs/delivery/processing/milestone-plan.md"
-next_action: "提交验证 harness 并形成 clean canonical 失败记录；复核四图 WebGPU 兼容性，P1 不关闭"
+next_action: "clean canonical 已确认四图 session 失败；复核图/runtime 兼容方案，P1 不关闭、P2 不开放"
 ---
 
 # Browser Processing Evidence Index
@@ -28,6 +28,16 @@ Run `P1-2026-10-04T09-05-33-154Z-9b361fca-provisional`，summary SHA-256 `67912c
 | QUALITY、PERF / AC-P105/106 | 没有许可歌曲/试听结论；未进入长曲测速、峰值采样或原生保存/回放 | unverified，不能关闭 |
 
 实际环境：Windows `10.0.22631`、Node `v24.18.0`、RAM `16294899712` bytes；系统 GPU discovery 为 RTX 4060 Laptop、8188MiB、driver591.86。浏览器隐藏 device/description，只能从 adapter 证明 NVIDIA Lovelace，不能把 system discovery 冒充浏览器公开的精确 device ID。kernel placement 未能形成完整图分配记录。
+
+## P1 Canonical — Candidate 9198b37
+
+Run `P1-2026-10-04T09-24-45-541Z-9198b372`，summary SHA-256 `28423c589f615811e1b27c2e90bd72109549d6640ed4ac39b04bf3a969076679`；起止 commit 均为 `9198b3725b726f1937c453a5858542b3657b88e7`，起止工作树均干净。10个命令分组8 pass、2 fail；unit16、integration18、邻接回归22项通过。Chrome/Edge 各1个20次生命周期场景通过、4个真实图场景失败，无 skip/flaky；四图均仍未建立 session，parity 未运行。该正式失败记录被 DEC-069 接受，不是 P1 通过或关闭。
+
+本轮正式日志/JSON/trace 在 `artifacts/evals/<runId>/`；固定模型校验和六个实际运行资产身份与上表一致，未包含用户歌曲。独立合成 fixture 的版本、许可和固定 SHA 在 `tests/processing/fixture-manifest.json`；内核配置和 provenance 身份在 [kernel config](../../architecture/processing/ft-kernel-config.md)。
+
+### Graph Diagnosis
+
+在固定 bytes 上使用 protobuf schema 解析（未写回 ONNX），四图的 IR=8、default opset=17，共同节点 `/real_istft/ConstantOfShape` 的 `value` tensor data_type=11。官方 [ONNX v1.20.1 schema](https://github.com/onnx/onnx/blob/v1.20.1/onnx/onnx.proto3) 将 11 定义为 DOUBLE；固定 [ORT WebGPU supported types](https://github.com/microsoft/onnxruntime/blob/v1.30.0/onnxruntime/core/providers/webgpu/webgpu_supported_types.h) 的浮点类型表包含 float/MLFloat16，不含 double。这是内部 Float64 路径与浏览器运行支持不匹配的诊断线索；尚未证明只改此节点即可解决全部图兼容性，未更改固定模型或运行库。
 
 ## Failure and Next Action
 

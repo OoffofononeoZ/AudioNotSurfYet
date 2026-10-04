@@ -6,12 +6,12 @@ upstream_docs:
   - "docs/architecture/system-design.md"
   - "docs/architecture/adrs/0024-browser-processing-runtime.md"
   - "docs/architecture/adrs/0025-audio-processing-pipeline-and-timebase.md"
-next_action: "delivery 首个切片下载校验实际 bytes，锁定 ORT Web/assets 和处理配置，验证 WebGPU 图与四轨输出"
+next_action: "P1 已核对实际 bytes/assets；四图双浏览器 session 失败，复核内部 DOUBLE 与 runtime 兼容性"
 ---
 
 # FT ONNX Model Artifacts
 
-本文件记录批准采用的模型 artifact 身份和执行边界，供工程师与 delivery 评审使用。以下 SHA-256/size 是 2026-10-04 从发布者 Git LFS 指针核对的元数据；本轮未下载权重或运行推断，不构成 bytes 校验、WebGPU 兼容、质量或性能证据。
+本文件记录批准采用的模型 artifact 身份和执行边界，供工程师与 delivery 评审使用。以下 SHA-256/size 是 2026-10-04 从发布者 Git LFS 指针核对的元数据；架构批准时未下载权重或运行推断；随后 P1 已核对全部实际 bytes，但四图 session 创建失败，仍不构成推断、质量或性能通过。
 
 ## Source and Identity
 
@@ -32,7 +32,7 @@ next_action: "delivery 首个切片下载校验实际 bytes，锁定 ORT Web/ass
 
 - 输入为 `mix`，float32，shape `[1,2,343980]`，44.1kHz stereo、7.8 秒分段；输出为 `stems`，float32，shape `[1,4,2,343980]`，row 顺序 drums、bass、other、vocals。专用模型只取表中对应 row，其他 row 不作为该角色结果，更不能以一个专用模型冒充完整四轨。发布者 [bass](https://huggingface.co/StemSplitio/htdemucs-ft-bass-onnx) 和 [other](https://huggingface.co/StemSplitio/htdemucs-ft-other-onnx) model card 提供 tensor 与专用输出说明。
 - 按 drums → bass → other → vocals 顺序：加载一个 session，完成该角色的全曲分段与 overlap-add，保存 stem，释放 session/tensor/GPU buffers 后进入下一个。不得同时保留四个模型 session 或把全曲四轨都积在内存。
-- `fp16weights` 压缩权重存储，但推断仍用 fp32；不能把它当作 fp16 compute 或更低运行内存的承诺。[转换者说明](https://github.com/StemSplit/demucs-onnx/blob/main/docs/models.md)
+- `fp16weights` 压缩权重存储，输入/输出保持 Float32；P1 实际解析还发现内部 `/real_istft/ConstantOfShape` 的 DOUBLE 常量，不能据此宣称内部全程 fp32 或全图 GPU。不能把文件名当作 fp16 compute 或更低运行内存的承诺。[转换者说明](https://github.com/StemSplit/demucs-onnx/blob/main/docs/models.md)
 - 原始解码 PCM 保持不可变；mono 输入在模型边界复制为 stereo，原 source identity 不变。超过两个 channel 的分离输入明确报不兼容，不默做未定义 downmix。重采样、normalization/denormalization、overlap/窗函数、尾段 padding、拼接与精度参数必须进入版本化 config/hash，并以参考推断与合成 fixture 验证，不能跳过 preprocessing。
 - 输出使用 44.1kHz，frame count 为 `round(originalDurationSeconds × 44100)`；只允许不超过一个输出 sample 的尾部长度修正。重采样时补偿滤波延迟，分段 overlap 不得重复、遗漏或平移事件；首尾静音与原始绝对秒数必须保留。
 - browser WAV encoder 导出 stereo IEEE float32 WAV，按实际 frame count/sample rate 写 header；不改变增益、截静音或调用额外编码程序。waveform 与 30Hz energy 从同一已拼接 stem 生成。
@@ -48,3 +48,7 @@ P1 实施配置与实际部署资产见 [FT kernel configuration](ft-kernel-conf
 ## Approval
 
 2026-10-04，owner 随浏览器处理修订计划授权本模型契约和 ADR-0024/0025 获批；模型 bytes 校验、运行库锁定与浏览器验证仍是实施前置任务，R-046、R-048、R-049、R-052 保持 Open。
+
+## P1 Actual Checkpoint
+
+2026-10-04，四文件实际 bytes/size/SHA 与批准表全匹配；ORT 1.30.0 六项实际资产已锁定。clean candidate `9198b37` 的 Chrome/Edge 四图均在 session 创建处失败，具体错误及 DOUBLE 诊断见 [P1 evidence](../../quality/processing/evidence-index.md)。本轮未更改 artifact/model/runtime 身份，未进入真实推断/长曲/试听，相关风险仍 Open。
