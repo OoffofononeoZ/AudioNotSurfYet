@@ -4,7 +4,7 @@ owner: "project-owner"
 last_reviewed: 2026-10-04
 upstream_docs:
   - "AGENTS.md"
-next_action: "DEC-068 已批准 processing 四份 delivery 并关闭 P0-D；准备 P1 三份质量文档为 in-review，实际实现等待单独批准"
+next_action: "P1 ????????DEC-070???? FT ???? DEC-069 ???????????"
 ---
 
 # Repository Context Index
@@ -14,6 +14,8 @@ next_action: "DEC-068 已批准 processing 四份 delivery 并关闭 P0-D；准�
 DEC-062 的自动优先、人工可修正与完整手动视频目标不变。owner 本轮明确授权修订并批准浏览器 FT ONNX/WebGPU 分离、TypeScript BPM/逐拍/局部 tempo、用户小节确认、只读提案、Project V2 与显式 tempo 刷新（DEC-063–066）。系统设计、接口、风险与 ADR-0024–0027 均为 approved；PROD-024–029 已决定或明确延后。R-046–R-055 仍全部 Open，模型兼容、质量和参考机性能待实测。下一阶段为 execution planning；Visualizer 四份 delivery 文档及 readiness 待复核，Analyzer/Editor/Visualizer 已有 canonical 只覆盖历史候选，当前代码未据此获得自动处理。
 
 同日，DEC-067 固定完整 P1–P6 路线先验证 FT、数值对照加三首许可歌曲人工复核、可靠合成逐拍 70ms/F1 ≥0.95。owner 随后要求“实施计划”，批准 [Processing delivery](../delivery/processing/execution-plan.md) 四份落盘文档及相关本地提交（DEC-068），P0-D 为 Complete。仅开放 P1 质量规划：eval/golden/失败分类先保持 in-review，单独批准后才开放实际实现。P1–P6 保持 Planned；未安装依赖、下载模型或修改产品代码，模型兼容/质量/性能仍待验证。
+
+delivery 批准已在本地 commit `d5f8ecd` 登记。随后形成 [P1 eval plan](../quality/processing/eval-plan.md)、[golden examples](../quality/processing/golden-examples.md)和 [failure taxonomy](../quality/processing/failure-taxonomy.md)，覆盖 AC-P101–P106、24个预期样例与独立数值/时间/WAV、人工质量、性能/取消证据要求。三份文档均 in-review、暂不提交；没有 P1 实际验证结果，evidence index/readiness 尚未创建。
 
 ## Purpose
 
@@ -31,7 +33,7 @@ DEC-059/DEC-061 对应的旧设计指导和交付计划已归档，停止作为�
 - Product intent：Analyzer/Editor 历史范围与 Visualizer V0 已批准；自动优先且可人工修正/手动完成的视频产出主目标已于 2026-10-01 获批。
 - System design：Analyzer、Visualizer 与 Editor E1–E9 的既有技术基线保留；浏览器处理链、接口、风险与 ADR-0024–0027 已于 2026-10-04 获批；R-046–R-055 保持 Open。
 - Execution planning：M1–M14、Editor E0-D/E1–E9、Visualizer V0-D/V1–V6 的历史切片均为 `Complete`；processing 四份新交付文档 approved、P0-D Complete，P1–P6 Planned；仅开放 P1 质量规划，实际实现等待质量契约单独批准。
-- Quality and evals：M3–M14、Editor E1–E9 与 Visualizer V1–V6 evidence 均已批准；E9 revised run `E9-2026-09-04T03-51-33-088Z-13614673` 为 29/29、`approved`，首个 run `E9-2026-09-04T02-49-18-960Z-cf0a79b1` 保持 `pre-revision`。
+- Quality and evals：M3–M14、Editor E1–E9 与 Visualizer V1–V6 evidence 均已批准；E9 revised run `E9-2026-09-04T03-51-33-088Z-13614673` 为 29/29、`approved`，首个 run `E9-2026-09-04T02-49-18-960Z-cf0a79b1` 保持 `pre-revision`。processing P1 eval/golden/失败分类已形成并 in-review，尚无 P1 evidence。
 - Implementation：Editor E9 的删除、三级展示、28px 紧凑 BPM 标记条和标记修订已在 commit `13614673bbf4d824f2ee109d36e04de6b3f8aabd` 实现并通过 revised canonical。E8 与 Visualizer V1–V6 保持已完成。post-V6 viewport 修订已在 clean commit `9f3b55beaa0c8a3d799f3f1e16f1dd66c9aee77c` 通过 Chrome/Edge 专项。
 - Design remake：旧设计资料已在本地归档，相关历史仍可由 Git 记录追溯；后续视觉方向待 owner 确定。
 - Readiness、release、retrospective：Analyzer M14 为 `Ready with waivers`；Editor 已获准进入独立 release-readiness 评审；PROD-015 仍阻断上线。
@@ -75,6 +77,9 @@ DEC-059/DEC-061 对应的旧设计指导和交付计划已归档，停止作为�
 | [Processing acceptance criteria](../delivery/processing/acceptance-criteria.md) | AC-P101–P604；数值/人工质量、逐拍 F1、900 秒和工程保护 | project-owner / approved | 阈值、oracle、支持矩阵或行为变化 |
 | [Processing test strategy](../delivery/processing/test-strategy.md) | TS-P1–P6、WASM reference、fixture、故障/资源/媒体与人工补偿 | project-owner / approved | fixture、工具、覆盖或证据缺口变化 |
 | [Processing milestone plan](../delivery/processing/milestone-plan.md) | P0-D Complete、P1–P6 Planned，退出/复核/停止条件 | project-owner / approved | 里程碑批准、开放、关闭或阻塞状态变化 |
+| [Processing P1 eval plan](../quality/processing/eval-plan.md) | AC-P101–P106 的模型/runtime、独立 parity/时间/WAV、质量/性能/取消和证据要求 | project-owner / approved | 阈值、环境、模型/config、参考或证据能力变化 |
+| [Processing P1 golden examples](../quality/processing/golden-examples.md) | P1-G01–P1-G24 成功/失败/边界/人工预期，尚无实际结果 | project-owner / approved | fixture/oracle、输入或预期行为变化 |
+| [Processing P1 failure taxonomy](../quality/processing/failure-taxonomy.md) | PFT 九类、独立 S0–S3 严重度、P1 阻断/补偿与重验 | project-owner / approved | 失败域、严重度影响、响应或风险接受变化 |
 | [Visualizer execution plan](../delivery/visualizer/execution-plan.md) | V1–V6 历史切片；新链见已批准 processing 计划 | project-owner / in-review | 新目标架构和验收获批 |
 | [Visualizer acceptance criteria](../delivery/visualizer/acceptance-criteria.md) | 历史 AC-V101–AC-V607；新 processing/V2 验收待复核 | project-owner / in-review | Visualizer 指标、阈值、preset 或支持矩阵变化 |
 | [Visualizer test strategy](../delivery/visualizer/test-strategy.md) | 历史 V1–V6；新 browser model/beat/V2 测试待复核 | project-owner / in-review | 测试工具、fixture、浏览器或证据能力变化 |
@@ -325,3 +330,7 @@ M11 canonical run `M11-2026-08-25T10-05-12-783Z-99c67792` 随后在 clean commit
 `project-owner` 已明确要求“自行提交并完成后续即可”，并说明“可以不上传远程仓库”。该授权在 M12 canonical 全绿后登记为 evidence/readiness 复核：M12 改为 `Complete`，R-028 为 `Mitigated`，Analyzer 恢复 `Ready with waivers`；本轮仅做本地提交，不推送。PROD-015 继续阻断上线，Editor readiness 等待 E7。
 
 2026-10-04，owner 通过本轮计划授权修订/批准浏览器架构、ADR 与对应决定登记，并创建仅含相关文档的本地提交。该批准开放 execution planning；模型/质量/性能风险及新链 readiness 尚未收口，历史 canonical 不变。
+
+## 2026-10-04 Standing Authorization
+
+DEC-069 ???????????????????processing ?? P1?P6 ?????????????????DEC-070 ???? P1 ????????? FT ????????????????????????? P1 ?????

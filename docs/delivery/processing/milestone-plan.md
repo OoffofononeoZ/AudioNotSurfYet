@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/delivery/processing/acceptance-criteria.md"
   - "docs/delivery/processing/test-strategy.md"
   - "docs/architecture/system-design.md"
-next_action: "P0-D 已按 DEC-068 关闭；准备三份 P1 质量文档供评审，P1 实现及 P2–P6 保持 Planned"
+next_action: "DEC-070 ??? P1 ?????P1 In Progress???????/??/??/WAV ???? DEC-069 ????"
 ---
 
 # Browser Processing Milestone Plan
@@ -23,7 +23,7 @@ next_action: "P0-D 已按 DEC-068 关闭；准备三份 P1 质量文档供评审
 | ID | Milestone / status | Relative target / dependency | Review checkpoint and exit evidence | Owner |
 | --- | --- | --- | --- | --- |
 | P0-D | Delivery docs / Complete | 2026-10-04 批准；获批 architecture | 四份文档 approved、索引/DEC-067/068、docs/diff 验证；owner 明确批准并授权相关本地提交 | project-owner |
-| P1 | FT feasibility / Planned | P0-D Complete 后首切片 | AC-P101–P106、TS-P1：四图 bytes/session/parity、时间/energy/WAV、12 WAV 人工质量、双浏览器十五分钟分离/资源；证据与 owner 关闭 | project-owner |
+| P1 | FT feasibility / In Progress | P0-D Complete 后首切片 | AC-P101–P106、TS-P1：四图 bytes/session/parity、时间/energy/WAV、12 WAV 人工质量、双浏览器十五分钟分离/资源；证据与 owner 关闭 | project-owner |
 | P2 | Separation workspace / Planned | P1 Complete | AC-P201–P205、TS-P2：route/stage、下载/cache、quota/故障、cancel/迟到/残留、四轨结果和原生导出 | project-owner |
 | P3 | Beat candidates / Planned | P2 Complete | AC-P301–P305、TS-P3：逐段 F1/BPM、变化/歧义/静音、Worker/proposal、双浏览器完整 ≤900 秒 | project-owner |
 | P4 | Confirm and apply / Planned | P3 Complete | AC-P401–P405、TS-P4：小节确认、逐项 diff、hash/原子更新、rerun 和用户修改保护 | project-owner |
@@ -57,3 +57,7 @@ P1 的 <900 秒分离测速只判断必要条件；P3 完整分离加节拍 ≤9
 P6 关闭后，建立独立新候选 readiness review，审阅 P1–P6 evidence、残余风险与可能豁免；仅有证据支持且 owner 接受时逐项调整 R-046–R-055。历史 Analyzer/Editor/Visualizer readiness 继续保留范围/候选身份，PROD-015 与生产上线仍单独处理。
 
 自动音色/FX、MIDI、3D 辅助图、素材生成及离线/批量/其他视频输出不属本路线。进入这些能力前重新确认产品/架构，不把它们作为 P6 收尾任务。
+
+## 2026-10-04 Authorization Update
+
+DEC-069/070 ?? P1 eval/golden/??????????P1?P6 ????? AC????????????????????????????????????????????????????????????/??/??/???????????????????????????????????????

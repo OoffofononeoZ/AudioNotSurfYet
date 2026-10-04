@@ -46,11 +46,13 @@
 - 产品意图实质变化会使 architecture、delivery、quality、release 文档待复核；系统设计变化会使 delivery、quality、release 待复核；验收或测试覆盖规则变化会使相应 eval、readiness 和 release 文档待复核。
 - 工作流顺序、门禁、文档位置或跨阶段测试纪律变化会使本 `AGENTS.md` 待复核。
 - 所有生命周期文档维护 `status`、`owner`、`last_reviewed`、`upstream_docs` 和 `next_action`。
+- 2026-10-04 owner 授权（DEC-069/070）：已批准的 processing P1–P6 路线可按全部适用验收证据和必需人工输入自主关闭切片并推进；符合既定契约的后续质量文档由本授权接受，无需逐次阶段确认。新增产品范围、架构取舍、兼容路径、验收阈值和发布决定仍须人工确认，缺失试听、许可或测量不视为通过。
 
 ## How to Work in This Repo
 
 - 先读本文件、`docs/context/index.md`、任务对应的生命周期文档和 `$audio-visualizer-dev` reference；若任务是新增 Visualizer 场景，再按 `$visualizer-scene-generator` 执行无写入输入门禁和 Scene Contract 审批。
 - 修改前检查 `git status --short`，保留用户已有修改；未经要求或 owner 明确批准不提交，不推送、不重写历史。
+- owner 已长期授权：已授权任务范围内的代码修改完成适用验证后直接本地 Git 提交，无需再次确认；功能或视觉反馈作为后续修订输入。提交只包含相关改动，正式证据仍绑定干净实现 commit；此授权不含推送或历史重写。
 - owner 明确批准阶段文档或已完成工作后，先同步状态、索引和批准记录，再总结批准范围并创建只含相关改动的本地提交。讨论方向或请求建议不视为批准；推送仍须单独明确要求。
 - 高影响实现前或同时更新相应规范文档。行为塑造型设计规则写入 architecture 或 ADR，不留在聊天、代码推断或一次性实现说明中。
 - 文档树使用渐进披露：父级索引暴露子文档，阶段摘要保持紧凑，过大的细节契约拆入受管理的子目录。

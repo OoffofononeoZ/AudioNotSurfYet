@@ -8,7 +8,7 @@ upstream_docs:
   - "docs/architecture/system-design.md"
   - "docs/delivery/execution-plan.md"
   - "docs/delivery/processing/execution-plan.md"
-next_action: "DEC-068 已批准 processing delivery 与本地提交；准备 P1 质量文档为 in-review，单独批准后开放实际实现"
+next_action: "DEC-068 delivery 批准已提交 d5f8ecd；评审 P1 三份 in-review 质量文档，单独批准后开放实际实现"
 ---
 
 # Decision Registry
@@ -168,6 +168,8 @@ readiness provisional 随后在相同 runtime source tree 上 24/24 通过；cle
 
 ## Execution Evidence
 
+2026-10-04，DEC-068 的 delivery 批准登记已在本地 commit `d5f8ecd` 完成，提交只包含四份 processing delivery、context索引/决策与四份历史 Visualizer 文档入口，共10份Markdown。随后按授权形成 [P1 eval](../quality/processing/eval-plan.md)、[golden](../quality/processing/golden-examples.md)与 [failure taxonomy](../quality/processing/failure-taxonomy.md)，保持 in-review、暂不提交，覆盖 AC-P101–P106、24个预期golden及独立证据/人工补偿。该事件是规划执行事实，不新增产品决定，不构成模型下载/兼容/数值/质量/性能通过；P1实现与P2–P6仍Planned，风险全部保持原状态。
+
 2026-07-28，DEC-011–DEC-013 约束下的首个 [M3 canonical run](../quality/evidence-index.md) 在 clean commit `17d16f0da37289c1f67f75203502beef999572ea` 上通过。`project-owner` 随后明确批准该 evidence 与 working agreements，M3 据此关闭并开放 M4。该批准不是新的产品或架构决定，也不构成 Edge、M4–M11 或 readiness 通过。
 
 同日，`project-owner` 明确要求实施 M4 计划，DEC-014 与 ADR-0001 的 M4 运行策略据此生效。M4 源码存在不等同于里程碑通过；仍需干净 commit canonical run、evidence 登记和 owner 批准。
@@ -257,3 +259,12 @@ E5 clean canonical `E5-2026-08-27T11-03-22-177Z-78124177` 随后在 implementati
 ## Historical Evidence Gap
 
 在本轮 ADR 之前，仓库没有可追溯记录说明当前路由、三种 MusicBar 样式、Analyzer 试验组件或 Editor/Visualizer 占位分别由谁批准。它们只能作为当前代码事实，不能被反推为已批准产品范围。若后续保留、替代或删除这些行为，应在对应实施切片中记录新决策和回归证据。
+
+## 2026-10-04 Processing Implementation Authorization
+
+| ID | Date | Status | Decision | Source |
+| --- | --- | --- | --- | --- |
+| DEC-069 | 2026-10-04 | approved | owner ??????????????????? P1?P6 ????????????????/????????/??/??/????????????? | [AGENTS](../../AGENTS.md)?[working agreements](working-agreements.md) |
+| DEC-070 | 2026-10-04 | approved | owner ????????????? P1 ????????? FT harness??????/??/????? | [P1 eval](../quality/processing/eval-plan.md)?[milestones](../delivery/processing/milestone-plan.md) |
+
+owner ??????????????? Git????????????????????Implement the plan.??????? P1 ???????????????????????????????
