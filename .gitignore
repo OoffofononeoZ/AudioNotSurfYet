@@ -31,6 +31,7 @@ playwright-report/
 artifacts/evals/
 artifacts/fixtures/
 public/test_audio
+public/processing-runtime/
 
 # Local editor configuration (keep locally, do not commit)
 opencode.json

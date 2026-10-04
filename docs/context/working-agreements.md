@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/context/index.md"
   - "docs/delivery/test-strategy.md"
   - "docs/quality/eval-plan.md"
-next_action: "按 DEC-069/070 实施 P1；验证后自主本地提交，缺少人工输入保持里程碑未完成"
+next_action: "四模型在双浏览器 session 创建失败；依据 P1 evidence 复核兼容方案，P1 未完成，P2 不开放"
 ---
 
 # Working Agreements
@@ -202,3 +202,7 @@ E1 实现随后在不新增依赖、不修改 Analyzer session/cache schema 的�
 ## 2026-10-04 Processing Authorization
 
 owner 授权代码修改在适用验证后直接本地 Git 提交，无需再次确认；不推送、不重写历史。已批 P1–P6 按全部 AC/正式证据/必需人工输入满足后自主关闭及推进，符合既定契约的后续质量文档纳入本授权（DEC-069）。P1 质量契约获批并开放实现（DEC-070）。新范围/架构/兼容/阈值/发布仍另行确认；许可、12 WAV 试听和真实测量不能被授权替代。历史事件门禁保持原语境。
+
+## P1 Local Verification Commands
+
+`processing:models` 在 Windows 使用 PowerShell 网络配置下载固定公开模型并核对 size/SHA；文件在忽略的 artifacts/fixtures/p1-models。`processing:assets` 对照已锁定 manifest 准备忽略的 public/processing-runtime，含 attribution。`test:p1:unit` / `test:p1:integration`、真实 Chrome/Edge 的 `test:e2e:p1:*` 和 `eval:p1[:provisional]` 为独立 P1 专项，不扩写历史 M/E/V runner。canonical 要求起止干净且同一实现 commit，失败保留原日志；当前四图门禁失败，P1 不关闭。

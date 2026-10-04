@@ -9,7 +9,7 @@ upstream_docs:
   - "docs/architecture/processing/model-artifacts.md"
   - "docs/architecture/processing/worker-and-project-contracts.md"
   - "docs/context/working-agreements.md"
-next_action: "DEC-070 已批准 P1 质量契约；P1 In Progress，实施四图兼容/数值/时间/WAV 验证，按 DEC-069 证据推进"
+next_action: "四模型在双浏览器 session 创建失败；依据 P1 evidence 复核兼容方案，P1 未完成，P2 不开放"
 ---
 
 # Browser Processing Test Strategy
@@ -22,7 +22,7 @@ next_action: "DEC-070 已批准 P1 质量契约；P1 In Progress，实施四图�
 
 P1 固定 ORT Web 1.30.0 与 [execution plan](execution-plan.md) 的 npm integrity，再记录实际 JS/WASM asset hashes；模型 bytes/revisions/SHA 与 [Model Artifacts](../../architecture/processing/model-artifacts.md)完全一致。产品仍只有 WebGPU 分离，独立 WASM reference 仅用于测试且顺序运行，不增加产品 fallback/同时 session/第二播放 AudioContext。
 
-2026-10-04，DEC-068 批准四份 delivery 并开放 P1 质量规划。下一步创建有具体覆盖的 P1 eval、golden 和失败分类，保持 in-review、暂不提交；批准后才实现 harness。evidence index/readiness 等待实际证据，不预建占位。provisional、clean canonical、owner 审批按仓库既有证据约定，历史 M/E/V runner 仅作相关回归，不能把其 pass count 混作新 P 切片结果。
+2026-10-04，DEC-068 批准四份 delivery 并开放 P1 质量规划。三份 P1 质量契约已按 DEC-070 approved，独立 harness 已实现。evidence index/readiness 等待实际证据，不预建占位。provisional、clean canonical、必需人工输入及 DEC-069 自主推进按仓库约定，历史 M/E/V runner 仅作相关回归，不能把其 pass count 混作新 P 切片结果。
 
 ## 2. Fixture and Oracle Inputs
 
@@ -111,3 +111,7 @@ WAV parser 独立读取 format/channels/sampleRate/data/frameCount 与样本，s
 ## 2026-10-04 Authorization Update
 
 DEC-069/070 接受 P1 eval/golden/失败分类并开放实现。P1–P6 按全部适用 AC、干净候选证据和必需人工输入自主关闭及推进，无需逐次申请代码提交或阶段批准；符合既定契约的后续质量文档纳入本授权。新产品/架构/兼容/阈值与发布决定仍需人工确认。历史批准范围按原日期保留；风险与缺口不因授权消失。
+
+## P1 Implementation Checkpoint
+
+2026-10-04，固定四模型实际 size/SHA 已校验，独立内核与 oracle/故障测试已实现。Chrome/Edge 的四图均在 `/real_istft/ConstantOfShape` provider 分配处创建 session 失败，未进入真实推断、parity、长曲或试听。P1 保持 In Progress、P2–P6 Planned；见 [P1 evidence](../../quality/processing/evidence-index.md)，不将合成/注入通过写成真实模型通过。

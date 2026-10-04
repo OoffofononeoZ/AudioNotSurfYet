@@ -1,10 +1,10 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-09-03
+last_reviewed: 2026-10-04
 upstream_docs:
   - "docs/context/index.md"
-next_action: "实现 Visualizer 原生全屏瞬时 UI；owner 自行审阅后再更新 readiness"
+next_action: "四模型在双浏览器 session 创建失败；依据 P1 evidence 复核兼容方案，P1 未完成，P2 不开放"
 ---
 
 # System Map
@@ -136,3 +136,9 @@ E8 当前实现把波形 stage 缩为桌面 `88px`/窄屏 `72px`，以 6px 安�
 2026-08-31，owner 批准 M13 产品、ADR-0012、delivery 与 quality 计划并要求完整实施。Analyzer runtime 已改为 `activeFeatureQueue`，按 `FEATURE_IDS` 固定渲染 21 张卡，展开时才挂载图表资源；V1 `activeCards` 仅作为兼容 carrier。clean canonical `M13-2026-08-31T17-44-39-680Z-63c04005` 17/17 通过，当前实现身份为 commit `63c04005670145d83ee181d474197bce921c5300`。
 
 2026-09-01，owner 批准并完成 M14：runtime 增加独立 `featureOrder`，Analyzer 以 pointer/click/keyboard 改变 feature-keyed DOM 与 masonry 输入，V1 增加可选顺序字段；排序不触发 Coordinator 或改变 FIFO。clean canonical `M14-2026-09-01T02-36-49-995Z-0e991307` 19/19 通过，以上为当前代码与证据事实。
+
+## Browser Processing P1 — Isolated Implementation
+
+`src/processing/` 提供固定模型/runtime manifest、增量 hash、native PCM OPFS staging、单分离 Worker/controller、64-tap resampler、滚动 overlap-add、30Hz energy/waveform 和 Float32 WAV。独立测试入口在 `tests/processing/`，未注册 Processor 路由、未接 Editor/Visualizer。模型/metadata 使用独立 processing-p1 IDB，任务文件使用 OPFS UUID 目录；生产播放/analysis coordinator 保持原路径。
+
+两浏览器的真实四图均在 session 创建处失败，内核注入通过不能证明模型可用；见 [P1 evidence](../quality/processing/evidence-index.md)。后续接入等待图门禁及全部 P1 AC，R-046–R-055 保持 Open。

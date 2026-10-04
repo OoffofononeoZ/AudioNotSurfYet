@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "version": "p1-nonzero-stereo-v1",
+  "generator": "tests/processing/fixture.ts",
+  "license": { "spdx": "CC0-1.0", "noticePath": "tests/fixtures/CC0-1.0.txt" },
+  "seed": "analytic-no-randomness",
+  "sampleRate": 44100,
+  "channels": 2,
+  "frames": 343980,
+  "layout": "channel-major-f32le",
+  "sha256": "0c3732044aef596cff100eba809ca26b1c8252fbb1059c406eba831e3d4caff1",
+  "purpose": "Nonzero four-specialist WebGPU versus isolated WASM reference input; synthetic identity only, no user audio"
+}

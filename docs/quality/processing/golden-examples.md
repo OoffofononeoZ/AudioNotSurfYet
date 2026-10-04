@@ -7,14 +7,14 @@ upstream_docs:
   - "docs/delivery/processing/acceptance-criteria.md"
   - "docs/architecture/processing/model-artifacts.md"
   - "docs/architecture/processing/worker-and-project-contracts.md"
-next_action: "DEC-070 已批准 P1 质量契约；实施独立 FT harness，缺少人工输入或测量不关闭 P1"
+next_action: "四模型在双浏览器 session 创建失败；依据 P1 evidence 复核兼容方案，P1 未完成，P2 不开放"
 ---
 
 # Browser FT P1 Golden Examples
 
 ## 1. Example Identity
 
-本集合只覆盖 P1 AC-P101–P106，依据 [eval plan](eval-plan.md) 和批准模型/Worker 契约；所有条目均为预期，不是通过记录。本文 approved，fixture/harness 和实际 artifact 尚未创建。
+本集合只覆盖 P1 AC-P101–P106，依据 [eval plan](eval-plan.md) 和批准模型/Worker 契约；所有条目均为预期，不是通过记录。本文 approved，fixture/harness 已实现、实际模型已校验；逐条结果见 evidence index。
 
 合成 input/oracle 在正式运行前锁定版本、seed、sample rate/channel/frame count、config 和 hash，遵循仓库 fixture manifest 许可记录。model/runtime 身份引用批准表，时间/派生/WAV 的预期来自独立 oracle。每条 golden 的实际执行环境、结果、证据及失败类型单独记录；人工样例不伪造自动化数值。
 
@@ -60,3 +60,7 @@ case 只有在所有子条件和指定浏览器/人工检查均完成时才可�
 ## Approval
 
 2026-10-04，owner 要求实施本轮计划（DEC-070），本质量契约获批。DEC-069 允许证据满足后自主推进；本批准不补写模型运行、人工试听或性能结论。
+
+## Implementation Evidence
+
+实际运行及缺口见 [P1 evidence index](evidence-index.md)。合成/注入通过与真实四图不兼容分别记录，预期样例不是通过声明；本轮没有 P1 关闭或风险缓解结论。
