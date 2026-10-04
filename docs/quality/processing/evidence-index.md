@@ -75,3 +75,9 @@ P1 保持 In Progress；R-046–R-055 全部 Open，P2–P6 Planned。下一步�
 Chrome 专项 `artifacts/evals/p1-real-pipeline-chrome.json` 两场景通过：20000-frame / 44.1kHz stereo 补零和400003-frame / 48kHz mono 跨段均完成四原图顺序 load/release；每轨 WAV header/frame/finite/planar 全 sample 与独立 WAV 重算的30Hz energy、waveform 一致，暂存源 hash 重验通过。处理时间分别约77.93秒（下载另计17.18秒）和98.90秒；初始反馈≤0.3ms、最大心跳间隔747.1ms。
 
 六个真实取消阶段（staging/load/inference/stitch/derive/persist）均唯一终态且≤5秒清理/登记。此为未提交候选的专项反馈，尚非 clean canonical。新增20次真实任务资源计数、双浏览器十五分钟和三首本地音频12 WAV 生成进入完整 runner，尚未宣称通过；owner 听感与原生操作仍待人工结论。
+
+## Canonical Environment Failure — 389fd32
+
+`P1-2026-10-04T12-29-04-163Z-389fd32e` 起止 commit/worktree 相同且干净；summary SHA-256 `8091556abc6259d9b8db148e06396eab1bc5aaf2e47bb682540e9125052ea532`，10组9 pass。Edge 四原图按 DEC-071 的1.5e-3全部通过；Chrome前三轨通过、vocals因Vite进程退出报 `Failed to fetch`。Vite在创建本地试听产物时监听到锁定文件并报 `EBUSY`；不是模型精度失败。失败原日志/trace保留，未重标通过，昂贵 pipeline/performance/listening 组因图组不完整未执行。
+
+修复在开发服务器监听中排除 artifacts/test-results/playwright-report 等产物目录；仍通过白名单 middleware读取固定公开模型。源码变更仍会触发HMR，因此正式候选运行期间不修改源码或Git状态。

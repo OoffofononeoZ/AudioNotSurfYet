@@ -8,6 +8,9 @@ import { processingFixturePlugin } from './tests/processing/vitePlugin'
 
 // https://vite.dev/config/
 export default defineConfig({
+  server: {
+    watch: { ignored: ['**/artifacts/**', '**/test-results/**', '**/playwright-report/**', '**/trash/**'] },
+  },
   plugins: [
     processingFixturePlugin(),
     vue(),

@@ -210,3 +210,5 @@ owner 授权代码修改在适用验证后直接本地 Git 提交，无需再次
 ## P1 JSEP Checkpoint
 
 2026-10-04，同版 ORT JSEP + disabled 优化已在 Chrome/Edge 四原图实际推断，三轨 parity 通过，drums 段尾约0.00130，超过0.001门禁。当前仍为 P1 In Progress / P2 Planned；原 Asyncify 失败作为历史 evidence 保留。具体资产与调查见 [P1 evidence](../quality/processing/evidence-index.md)；不降低阈值或把诊断副本发布为固定模型。
+
+随后 owner 按 DEC-071 明确批准短段 max absolute ≤1.5e-3，原模型/官方库及其他门禁不变。P1仍需完整证据。开发服务器已排除 artifacts/test-results/playwright-report 的监听，避免大文件创建引发 Windows EBUSY；正式运行期间源码/配置仍保持固定。具体失败身份和后续结果以 [P1 evidence](../quality/processing/evidence-index.md) 为准。

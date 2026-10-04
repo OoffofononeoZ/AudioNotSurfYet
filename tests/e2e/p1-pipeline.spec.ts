@@ -38,6 +38,31 @@ test('P1 real FT cancellation terminates once in each pipeline phase within clea
         expect(report.code).toBe('job-cancelled');expect(report.separating).toBe(false);
         expect(report.metrics!.terminalCount).toBe(1);expect(report.metrics!.cancelMs).not.toBeNull();expect(report.metrics!.cancelMs!).toBeLessThanOrEqual(5000);
         expect(report.resources).toEqual({workers:0,contexts:0});
+        await expect.poll(async()=>{
+            const cleanup=await page.evaluate(()=>(window as unknown as HarnessWindow).__P1.cleanupReport());
+            return cleanup.directories.length+cleanup.resultKeys.length+cleanup.residuals.length;
+        },{timeout:10_000}).toBe(0);
     }
+});
+test('P1 real download cancellation, corrupt model and quota failures preserve verified cache',async({page},info)=>{
+    test.setTimeout(300_000);
+    await page.goto('/tests/processing/index.html');await page.waitForFunction(()=>!!(window as unknown as HarnessWindow).__P1);
+    const download=await page.evaluate(async()=>{const api=(window as unknown as HarnessWindow).__P1;let code='unexpected-success';try{await api.synthetic(20000,44100,2,'model-download');}catch(e){code=(e as {code:string}).code;}return {code,...api.report(),cleanup:await api.cleanupReport()};});
+    expect(download.code).toBe('job-cancelled');expect(download.cleanup.modelKeys).toHaveLength(0);expect(download.cleanup.resultKeys).toHaveLength(0);
+    await info.attach('download-cancellation',{body:JSON.stringify(download),contentType:'application/json'});
+    await page.evaluate(()=>(window as unknown as HarnessWindow).__P1.prime());
+    const before=await page.evaluate(()=>(window as unknown as HarnessWindow).__P1.cleanupReport());
+    const corruption=await page.evaluate(async()=>{const api=(window as unknown as HarnessWindow).__P1;await api.damageDrums();let code='unexpected-success';try{await api.synthetic(20000);}catch(e){code=(e as {code:string}).code;}finally{await api.restoreDrums();}return {code,...api.report()};});
+    expect(corruption.code).toBe('model-checksum-mismatch');expect(corruption.metrics!.phases).not.toContain('model-load');
+    for(const mode of ['quota','capacity']){
+        const answer=await page.evaluate(async mode=>{
+            const api=(window as unknown as HarnessWindow).__P1,estimate=navigator.storage.estimate;
+            navigator.storage.estimate=async()=>mode==='quota'?{usage:0,quota:1}:{usage:10*1024**3,quota:100*1024**3};
+            let code='unexpected-success';try{await api.synthetic(20000);}catch(e){code=(e as {code:string}).code;}finally{navigator.storage.estimate=estimate;}return {code,...api.report()};
+        },mode);expect(answer.code).toBe(mode==='quota'?'quota-exceeded':'cache-full');expect(answer.metrics!.terminalCount).toBe(1);
+    }
+    const after=await page.evaluate(()=>(window as unknown as HarnessWindow).__P1.cleanupReport());
+    expect(after.modelKeys).toEqual(before.modelKeys);expect(after.resultKeys).toEqual([]);expect(after.directories).toEqual([]);expect(after.residuals).toEqual([]);
+    await info.attach('corrupt-model',{body:JSON.stringify(corruption),contentType:'application/json'});
 });
 

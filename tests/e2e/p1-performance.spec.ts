@@ -6,11 +6,11 @@ test('P1 fifteen-minute new four-stem job meets reference separation budget',asy
     test.setTimeout(1_800_000);
     await page.goto('/tests/processing/index.html');await page.waitForFunction(()=>!!(window as unknown as HarnessWindow).__P1);
     await page.evaluate(()=>(window as unknown as HarnessWindow).__P1.prime());
-    const environment={...await systemEnvironment(),browser:browser.version(),project:info.project.name};
+    const environment={...await systemEnvironment(),browser:browser.version(),project:info.project.name,fixture:{frames:900*48000,sampleRate:48000,channels:2,durationSeconds:900}};
     expect(environment.gpu).toMatch(/RTX 4060 Laptop GPU/);
     const stopSampling=await startSystemSampler();let report;
     try{
-        await page.evaluate(()=>(window as unknown as HarnessWindow).__P1.synthetic(900*44100));
+        await page.evaluate(()=>(window as unknown as HarnessWindow).__P1.synthetic(900*48000,48000,2));
         report=await page.evaluate(()=>(window as unknown as HarnessWindow).__P1.inspect());
     }finally{
         const resources=await stopSampling();await info.attach('reference-performance',{body:JSON.stringify({environment,report,resources},null,2),contentType:'application/json'});

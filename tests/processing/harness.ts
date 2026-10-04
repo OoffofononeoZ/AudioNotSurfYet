@@ -1,6 +1,6 @@
 import { AudioEngine } from '../../src/audio/audioEngine';
 import { SeparationController } from '../../src/processing/controller';
-import { jobDirectory,removeJob,openPcm } from '../../src/processing/storage';
+import { jobDirectory,removeJob,openPcm,openDatabase,databaseGet,databasePut } from '../../src/processing/storage';
 import { syntheticPort } from './fixture';
 import type { SeparationResult } from '../../src/processing/kernel';
 import { ProcessingError } from '../../src/processing/modelManifest';
@@ -15,6 +15,7 @@ const controller=location.search.includes('gpu=unavailable')
     :new SeparationController();
 const engine=new AudioEngine();
 let result:SeparationResult|null=null;
+let originalDrums:Blob|null=null;
 let compatibility:{worker:Worker;reject:(error:Error)=>void}|null=null,separating=false;
 const urls:string[]=[];
 let metrics:{elapsedMs:number;downloadElapsedMs:number;processingElapsedMs:number;feedbackMs:number;maxHeartbeatGapMs:number;phases:string[];terminalCount:number;cancelMs:number|null}|null=null;
@@ -45,6 +46,18 @@ async function showExports(value:SeparationResult){
 }
 const api={
     async prime(){for(const model of FT_MODELS)await loadModel(model,new AbortController().signal,()=>{},`/p1-models/${model.file}`);},
+    async damageDrums(){
+        if(separating)throw Error('Task running');originalDrums=await databaseGet<Blob>('models',FT_MODELS[0]!.sha256)??null;if(!originalDrums)throw Error('Prime model first');
+        const first=new Uint8Array(await originalDrums.slice(0,1).arrayBuffer());first[0]=first[0]!^1;
+        await databasePut('models',FT_MODELS[0]!.sha256,new Blob([first,originalDrums.slice(1)]),new AbortController().signal);
+    },
+    async restoreDrums(){if(originalDrums){await databasePut('models',FT_MODELS[0]!.sha256,originalDrums,new AbortController().signal);originalDrums=null;}},
+    async cleanupReport(){
+        const db=await openDatabase();let modelKeys:IDBValidKey[]=[],resultKeys:IDBValidKey[]=[];
+        try{[modelKeys,resultKeys]=await Promise.all(['models','results'].map(store=>new Promise<IDBValidKey[]>((resolve,reject)=>{const request=db.transaction(store).objectStore(store).getAllKeys();request.onsuccess=()=>resolve(request.result);request.onerror=()=>reject(request.error);}))) as [IDBValidKey[],IDBValidKey[]];}finally{db.close();}
+        const directories:string[]=[];try{const root=await navigator.storage.getDirectory(),directory=await root.getDirectoryHandle('processing-p1');for await(const key of (directory as FileSystemDirectoryHandle&{keys():AsyncIterableIterator<string>}).keys())directories.push(key);}catch(e){if(!(e instanceof DOMException&&e.name==='NotFoundError'))throw e;}
+        return {modelKeys:modelKeys.sort(),resultKeys:resultKeys.sort(),directories:directories.sort(),residuals:controller.residualArtifactIds};
+    },
     async probe(mode:string,row:number){
         if(compatibility||separating)throw new ProcessingError('invalid-request','A processing task is already running.');
         return new Promise<Record<string,unknown>>((resolve,reject)=>{
