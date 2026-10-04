@@ -10,7 +10,7 @@ upstream_docs:
   - "docs/architecture/processing/model-artifacts.md"
   - "docs/architecture/processing/worker-and-project-contracts.md"
   - "docs/architecture/risk-register.md"
-next_action: "DEC-070 ?? P1 ????????? FT harness ????????????/????? P1"
+next_action: "DEC-070 已批准 P1 质量契约；实施独立 FT harness，缺少人工输入或测量不关闭 P1"
 ---
 
 # Browser FT P1 Eval Plan
@@ -19,7 +19,7 @@ next_action: "DEC-070 ?? P1 ????????? FT harness ????????????/????? P1"
 
 DEC-068 于 2026-10-04 批准四份 processing delivery，并仅开放 P1 质量规划。本计划只评价 AC-P101–P106 / TS-P1 的独立 FT harness：模型与运行库身份、四图 WebGPU、正确取轨、参考数值、时间变换、派生数据/WAV、人工质量、十五分钟分离与取消资源。
 
-本文与 [golden examples](golden-examples.md)、[failure taxonomy](failure-taxonomy.md)均为 in-review、暂不提交；没有 P1 实现、fixture bytes、模型下载、运行结果或人工试听通过。P1 实际实现与 P2–P6 保持 Planned，R-046–R-055 全部 Open。不评价 Processor 生产工作区、缓存管理、节拍 F1、工程 apply、V2 或 WebM；这些由后续切片独立验证。
+本文与 [golden examples](golden-examples.md)、[failure taxonomy](failure-taxonomy.md)均已于 2026-10-04 按 DEC-070 批准；没有 P1 实现、fixture bytes、模型下载、运行结果或人工试听通过。P1 实现已授权并为 In Progress，P2–P6 保持 Planned，R-046–R-055 全部 Open。不评价 Processor 生产工作区、缓存管理、节拍 F1、工程 apply、V2 或 WebM；这些由后续切片独立验证。
 
 owner 为 project-owner。全部阈值沿用已批准 [acceptance criteria](../../delivery/processing/acceptance-criteria.md)，不在 quality 层重新放宽。
 
@@ -57,7 +57,7 @@ fixture/config/version/seed/数据 hash 与参考代码身份在运行前固定�
 2. 四模型 Chrome/Edge session、对应 row、数值 parity；不通过则停止昂贵长曲接入。
 3. 时间/声道/边界、派生/WAV、故障、取消和邻接回归。
 4. 双浏览器十五分钟分离及资源指标，三首歌曲的 12 WAV 人工质量；缺歌曲时可先做其他项，但不能关闭 P1。
-5. 当前候选证据审计、owner 复核；全部适用 AC 通过后才请求 P1 关闭/P2 开放。
+5. 当前候选证据审计；全部适用 AC 与必需人工输入通过后，按 DEC-069 自主关闭 P1 并开放 P2。
 
 | Evidence group | Required fields / artifacts |
 | --- | --- |
@@ -85,4 +85,4 @@ P1 长曲基线要求模型已校验缓存、原曲已解码、结果 cache miss
 
 ## Approval
 
-2026-10-04?owner ????????? FT ?????DEC-070??????????DEC-069 ?????????????????????????????????
+2026-10-04，owner 要求实施本轮计划（DEC-070），本质量契约获批。DEC-069 允许证据满足后自主推进；本批准不补写模型运行、人工试听或性能结论。

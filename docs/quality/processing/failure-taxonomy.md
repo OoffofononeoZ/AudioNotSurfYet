@@ -7,14 +7,14 @@ upstream_docs:
   - "docs/quality/processing/golden-examples.md"
   - "docs/delivery/processing/acceptance-criteria.md"
   - "docs/architecture/risk-register.md"
-next_action: "DEC-070 ?? P1 ????????? FT harness ????????????/????? P1"
+next_action: "DEC-070 已批准 P1 质量契约；实施独立 FT harness，缺少人工输入或测量不关闭 P1"
 ---
 
 # Browser FT P1 Failure Taxonomy
 
 ## 1. Classification Boundary
 
-本文只分类 P1 AC-P101–P106 的失败，in-review、暂不提交。行为类型与严重度分别记录；同一个 PFT 可因影响不同被赋予不同严重度。owner 为 project-owner。
+本文只分类 P1 AC-P101–P106 的失败，已按 DEC-070 approved。行为类型与严重度分别记录；同一个 PFT 可因影响不同被赋予不同严重度。owner 为 project-owner。
 
 预期故障能否被正确拒绝是测试结果，注入本身不是缺陷：例如 checksum不符被正确拒绝可通过负向case；损坏模型仍被接收才是 PFT-MODEL 失败。环境缺失与产品失败也分开记录，但缺失关键证据同样不能关闭 P1。
 
@@ -55,4 +55,4 @@ P1关闭需 AC-P101–P106 全部有实际证据、适用人工结论和 owner�
 
 ## Approval
 
-2026-10-04?owner ????????? FT ?????DEC-070??????????DEC-069 ?????????????????????????????????
+2026-10-04，owner 要求实施本轮计划（DEC-070），本质量契约获批。DEC-069 允许证据满足后自主推进；本批准不补写模型运行、人工试听或性能结论。
