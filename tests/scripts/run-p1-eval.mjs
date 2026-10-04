@@ -24,10 +24,19 @@ npm('docs','test:docs');npm('runtime-assets','processing:assets');
 const models=run('model-bytes',['tests/processing/download-models.mjs','--verify-only']);
 npm('types','typecheck');npm('build','build');npm('unit','test:p1:unit');npm('integration','test:p1:integration');
 run('regression',['node_modules/vitest/vitest.mjs','run','tests/audio/audio-engine.test.ts','tests/worker/m6-worker.test.ts','tests/analysis/m6-coordinator.integration.test.ts']);
-if(models)for(const project of ['chrome','edge']){
- run(project,['node_modules/@playwright/test/cli.js','test','tests/e2e/p1-contracts.spec.ts','tests/e2e/p1-ft.spec.ts',`--project=${project}`,'--workers=1','--reporter=list,json'],
-  {PLAYWRIGHT_JSON_OUTPUT_FILE:path.join(directory,`${project}.json`)});
- if(fs.existsSync('test-results'))fs.cpSync('test-results',path.join(directory,`${project}-results`),{recursive:true});
+function browserGroup(name,project,specs){
+ const passed=run(name,['node_modules/@playwright/test/cli.js','test',...specs,`--project=${project}`,'--workers=1','--reporter=list,json'],
+  {PLAYWRIGHT_JSON_OUTPUT_FILE:path.join(directory,`${name}.json`),P1_GPU_VARIANT:''});
+ if(fs.existsSync('test-results'))fs.cpSync('test-results',path.join(directory,`${name}-results`),{recursive:true});return passed;
+}
+let graphsPassed=models,pipelinesPassed=false;
+if(models)for(const project of ['chrome','edge'])graphsPassed=browserGroup(project,project,['tests/e2e/p1-contracts.spec.ts','tests/e2e/p1-ft.spec.ts'])&&graphsPassed;
+if(graphsPassed){
+ pipelinesPassed=true;for(const project of ['chrome','edge'])pipelinesPassed=browserGroup(`${project}-pipeline`,project,['tests/e2e/p1-pipeline.spec.ts'])&&pipelinesPassed;
+}
+if(pipelinesPassed){
+ for(const project of ['chrome','edge'])browserGroup(`${project}-performance`,project,['tests/e2e/p1-performance.spec.ts']);
+ browserGroup('listening-artifacts','chrome',['tests/e2e/p1-listening.spec.ts']);
 }
 const gpu=spawnSync('nvidia-smi',['--query-gpu=name,memory.total,driver_version','--format=csv,noheader'],{encoding:'utf8'});
 const endCommit=git('rev-parse','HEAD'),endStatus=git('status','--porcelain');
@@ -36,7 +45,10 @@ const summary={schemaVersion:1,runId,kind:provisional?'provisional':'canonical',
  environment:{node:process.version,platform:process.platform,osRelease:os.release(),ramBytes:os.totalmem(),gpuDiscovery:gpu.status===0?gpu.stdout.trim():null},
  steps,passedSteps:steps.filter(s=>s.status==='pass').length,totalSteps:steps.length,
  milestoneStatus:'In Progress',closureEligible:false,
- unverified:['successful four-model WebGPU inference and isolated WASM parity if session creation fails','real FT stitching/export','three licensed songs / 12 owner listening conclusions','two-browser 15-minute reference performance and resource peaks','native WAV save/cancel/replay'],
+ unverified:[...(!graphsPassed?['four-model original WebGPU/WASM parity']:[]),...(!pipelinesPassed?['real FT pipeline / cancellation']:[]),
+  ...(['chrome','edge'].filter(p=>!steps.some(s=>s.name===`${p}-performance`&&s.status==='pass')).map(p=>`${p} fifteen-minute performance`)),
+  ...(!steps.some(s=>s.name==='listening-artifacts'&&s.status==='pass')?['three local songs / twelve reviewable WAVs']:[]),
+  'twelve owner listening conclusions','native WAV save/cancel/replay'],
 };
 const json=JSON.stringify(summary,null,2)+'\n';fs.writeFileSync(path.join(directory,'summary.json'),json);
 const sha=createHash('sha256').update(json).digest('hex');fs.writeFileSync(path.join(directory,'summary.sha256'),sha+'\n');

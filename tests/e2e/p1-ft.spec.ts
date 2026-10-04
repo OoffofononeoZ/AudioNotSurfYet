@@ -15,7 +15,8 @@ test.describe('P1 real FT graphs',()=>{
         await testInfo.attach('runtime-console',{body:logs.join('\n'),contentType:'text/plain'});
         await testInfo.attach('compatibility',{body:JSON.stringify(answer,null,2),contentType:'application/json'});
         expect(answer.type,JSON.stringify({...answer,result:{...answer.result as object,steps:undefined}})).toBe('result');
-        const result=answer.result as {parityPassed:boolean;maxError:number;adapter:{description:string};steps:Array<{kernelCounts?:Record<string,number>}>};
+        const result=answer.result as {parityPassed:boolean;maxError:number;parityLimit:number;runtimePatch:unknown;adapter:{description:string};steps:Array<{kernelCounts?:Record<string,number>}>};
+        expect(result.parityLimit).toBe(P1_PARITY_LIMIT);if(!process.env.P1_GPU_VARIANT)expect(result.runtimePatch).toBeNull();
         expect(result.adapter.description).not.toMatch(/swiftshader|software|llvmpipe/i);
         expect(result.steps.some(s=>(s.kernelCounts?.Conv??0)>0&&(s.kernelCounts?.ConvTranspose??0)>0),'actual GPU neural/spectral kernel profiles').toBe(true);
         console.log(JSON.stringify({role:row,maxError:result.maxError}));
