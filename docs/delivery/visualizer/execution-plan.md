@@ -11,12 +11,12 @@ upstream_docs:
   - "docs/architecture/visualizer/project-format-v1.md"
   - "docs/architecture/visualizer/binding-and-scene-contracts.md"
   - "docs/architecture/visualizer/recording-contract.md"
-next_action: "保留 V1–V6 历史关闭/evidence；DEC-063–066 新架构已批准，另行制定并评审 processing/V2 的计划、验收、测试与里程碑"
+next_action: "保留 V1–V6 历史关闭/evidence；processing P1–P6 delivery 已批准，先准备 P1 质量契约供单独评审"
 ---
 
 # Visualizer V1–V6 Execution Plan
 
-> 2026-10-04 架构影响：浏览器 FT 分离、TypeScript 逐拍/局部 tempo、人工小节确认、只读 apply、V2 迁移与 tempo 显式刷新已获批准。本文件原 V1–V6/viewport/fullscreen 范围与 canonical 保持历史身份；对新链的覆盖需复核，旧 Worker/JSON V1 约束不能作为新架构上限或新验收证据。下一步规划兼容性/质量/性能首切片，再规划完整工作区，详见 [System Design §21](../../architecture/system-design.md#21-automated-audio-to-video-target-architectureapproved)。
+> 2026-10-04 架构影响：浏览器 FT 分离、TypeScript 逐拍/局部 tempo、人工小节确认、只读 apply、V2 迁移与 tempo 显式刷新已获批准。本文件原 V1–V6/viewport/fullscreen 范围与 canonical 保持历史身份；对新链的覆盖需复核，旧 Worker/JSON V1 约束不能作为新架构上限或新验收证据。新链采用独立 P1–P6 完整路线，首切片验证 FT 兼容性/质量/性能；见 [Processing execution plan](../processing/execution-plan.md)（approved；P1 质量契约待单独评审）及 [System Design §21](../../architecture/system-design.md#21-automated-audio-to-video-target-architectureapproved)。
 
 > 2026-10-01 影响登记：V1–V6 的关闭与 canonical 身份保持历史有效。产品意图已批准自动优先、可人工修正和手动完成的视频制作目标；本计划未覆盖音轨分离、自动标记、MIDI 或新的端到端视频制作任务。系统设计获批后才评审新交付切片，不将既有里程碑自动扩写为新目标的验收。
 

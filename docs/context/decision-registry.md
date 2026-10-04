@@ -7,7 +7,8 @@ upstream_docs:
   - "docs/product/scope.md"
   - "docs/architecture/system-design.md"
   - "docs/delivery/execution-plan.md"
-next_action: "DEC-063–066 浏览器处理架构已批准；制定并评审新 execution plan/验收/测试/里程碑，风险保持 Open"
+  - "docs/delivery/processing/execution-plan.md"
+next_action: "DEC-068 已批准 processing delivery 与本地提交；准备 P1 质量文档为 in-review，单独批准后开放实际实现"
 ---
 
 # Decision Registry
@@ -104,6 +105,9 @@ next_action: "DEC-063–066 浏览器处理架构已批准；制定并评审新 
 | DEC-064 | 2026-10-04 | htdemucs_ft 四专用 fp16weights 模型按角色取 row、原 PCM 时间基准、TS DP 逐拍/局部 tempo；小节起点/拍号由用户确认；IDB/OPFS 10GB/quota，参考机十五分钟目标待测 | project-owner | approved | [ADR-0025](../architecture/adrs/0025-audio-processing-pipeline-and-timebase.md)、[Model Artifacts](../architecture/processing/model-artifacts.md) | 模型/算法、拼接/评分、容量或性能目标变化 |
 | DEC-065 | 2026-10-04 | 保留只读提案、canonical project hash 冲突、逐项人工确认与 rerun 零隐式覆盖；自动音色/FX、MIDI、3D 辅助图及素材生成明确延后 | project-owner | approved | [ADR-0026](../architecture/adrs/0026-processing-proposals-and-user-ownership.md)、[产品问题](../product/open-questions.md) | apply/覆盖规则、用户所有权或延后能力进入范围 |
 | DEC-066 | 2026-10-04 | 批准 Project V2 和 V1 单向迁移、默认横线 other energy/竖线 beat；用户改 tempo 后显式刷新 Editor snapshot 与节拍映射，继续实时 WebM | project-owner | approved | [ADR-0027](../architecture/adrs/0027-visualizer-project-v2-processing-bindings.md)、[Worker/V2 Contract](../architecture/processing/worker-and-project-contracts.md) | source/schema/迁移、tempo 刷新或输出路线变化 |
+| DEC-067 | 2026-10-04 | 选择完整 P1–P6 路线先验证 FT，数值对照加三首许可歌曲人工质量，可靠合成逐拍 70ms/F1 ≥0.95；落盘文档随后由 DEC-068 批准 | project-owner | approved | [Processing plan](../delivery/processing/execution-plan.md)、[Acceptance](../delivery/processing/acceptance-criteria.md)；owner 规划选项与实施请求 | 路线、数值/人工质量门禁、逐拍阈值或批准边界变化 |
+| DEC-068 | 2026-10-04 | 批准 processing 四份 delivery 和相关本地提交，关闭 P0-D；仅开放 P1 eval/golden/失败分类规划，三份质量文档先 in-review、暂不提交，实际实现等待单独批准 | project-owner | approved | [Processing milestone](../delivery/processing/milestone-plan.md)；owner 要求“实施计划”并选择准备 P1 质量文档 | delivery 参数、P1 质量契约、实现开放或提交边界变化 |
+
 ## Approval Evidence
 
 `project-owner` 于 2026-07-24 通过“PLEASE IMPLEMENT THIS PLAN”明确要求将随请求给出的产品、架构、里程碑和测试决定落入仓库。本注册表记录的是批准的决策；M3–M12 的实现状态仍以 [milestone plan](../delivery/milestone-plan.md) 和可复现证据为准。
@@ -157,6 +161,11 @@ readiness provisional 随后在相同 runtime source tree 上 24/24 通过；cle
 `project-owner` 于 2026-07-28 明确批准 Q0 三份质量文档和两份 delivery 修订，DEC-010 的内容门禁随之生效并开放 M3。该批准不构成任何测试、浏览器或 readiness 通过证据。
 
 2026-10-04，`project-owner` 明确要求实施随附“将自动处理架构改为浏览器本地方案，并批准、提交文档”计划。计划授权按本轮选择修订系统设计、接口、风险和 ADR-0024–0027，标记 approved、同步 PROD-024–029/索引/批准记录，并创建仅含相关文档的本地提交；下一阶段为 execution planning。DEC-063–066 据此生效，R-046–R-055 全部保持 Open。该授权不构成模型兼容、分离质量、节拍准确度、性能、delivery、readiness 或上线证据，不改写已有 canonical。
+
+同日，owner 在下一步规划中选择“完整路线，先验证 FT”“数值对照＋人工复核”和“70ms、F1 ≥0.95”，随后要求“Implement the plan.”。DEC-067 据此登记路线与已选参数，并授权在 `docs/delivery/processing/` 落盘 execution plan、acceptance criteria、test strategy 和 milestone plan 及索引。随附计划明确文档先为 in-review，owner 批准后同步状态/本地提交再开放 P1；因此本请求不将新文档改为 approved，不授权本轮安装依赖、下载模型或产品实现，也不构成实测通过。初始 ORT 1.30.0、WASM reference 每轨最大绝对误差 ≤1e-3 等落盘细节与整套文档一起待评审，风险继续 Open。
+
+同日，owner 在批准及下一步范围中选择“准备 P1 质量文档”，随后明确要求“实施计划”。随附计划明确实施即批准现有四份 processing delivery 及其本地提交；DEC-068 据此生效，文档改 approved、P0-D Complete，现有全部验收阈值不变。下一步仅创建 P1 eval/golden/失败分类为 in-review 并暂不提交；P1 产品实现、依赖安装及模型下载等待质量契约单独批准，P1–P6 仍 Planned。R-046–R-055 全部保持 Open，历史 canonical/readiness 不变，不授权推送。
+
 ## Execution Evidence
 
 2026-07-28，DEC-011–DEC-013 约束下的首个 [M3 canonical run](../quality/evidence-index.md) 在 clean commit `17d16f0da37289c1f67f75203502beef999572ea` 上通过。`project-owner` 随后明确批准该 evidence 与 working agreements，M3 据此关闭并开放 M4。该批准不是新的产品或架构决定，也不构成 Edge、M4–M11 或 readiness 通过。

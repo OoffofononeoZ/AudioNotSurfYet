@@ -4,7 +4,7 @@ owner: "project-owner"
 last_reviewed: 2026-10-04
 upstream_docs:
   - "AGENTS.md"
-next_action: "浏览器架构/ADR 已批准；制定 execution plan、acceptance criteria、test strategy、milestone plan，首切片验证 FT 分离兼容性/质量/性能"
+next_action: "DEC-068 已批准 processing 四份 delivery 并关闭 P0-D；准备 P1 三份质量文档为 in-review，实际实现等待单独批准"
 ---
 
 # Repository Context Index
@@ -12,6 +12,8 @@ next_action: "浏览器架构/ADR 已批准；制定 execution plan、acceptance
 ## 2026-10-04 浏览器架构批准与下一阶段
 
 DEC-062 的自动优先、人工可修正与完整手动视频目标不变。owner 本轮明确授权修订并批准浏览器 FT ONNX/WebGPU 分离、TypeScript BPM/逐拍/局部 tempo、用户小节确认、只读提案、Project V2 与显式 tempo 刷新（DEC-063–066）。系统设计、接口、风险与 ADR-0024–0027 均为 approved；PROD-024–029 已决定或明确延后。R-046–R-055 仍全部 Open，模型兼容、质量和参考机性能待实测。下一阶段为 execution planning；Visualizer 四份 delivery 文档及 readiness 待复核，Analyzer/Editor/Visualizer 已有 canonical 只覆盖历史候选，当前代码未据此获得自动处理。
+
+同日，DEC-067 固定完整 P1–P6 路线先验证 FT、数值对照加三首许可歌曲人工复核、可靠合成逐拍 70ms/F1 ≥0.95。owner 随后要求“实施计划”，批准 [Processing delivery](../delivery/processing/execution-plan.md) 四份落盘文档及相关本地提交（DEC-068），P0-D 为 Complete。仅开放 P1 质量规划：eval/golden/失败分类先保持 in-review，单独批准后才开放实际实现。P1–P6 保持 Planned；未安装依赖、下载模型或修改产品代码，模型兼容/质量/性能仍待验证。
 
 ## Purpose
 
@@ -28,7 +30,7 @@ DEC-059/DEC-061 对应的旧设计指导和交付计划已归档，停止作为�
 - Repository context：入口、决策注册表、system map、glossary 与 working agreements 均已批准。
 - Product intent：Analyzer/Editor 历史范围与 Visualizer V0 已批准；自动优先且可人工修正/手动完成的视频产出主目标已于 2026-10-01 获批。
 - System design：Analyzer、Visualizer 与 Editor E1–E9 的既有技术基线保留；浏览器处理链、接口、风险与 ADR-0024–0027 已于 2026-10-04 获批；R-046–R-055 保持 Open。
-- Execution planning：M1–M14、Editor E0-D/E1–E9、Visualizer V0-D/V1–V6 的历史切片均为 `Complete`；浏览器新链进入规划，尚无获批的新交付计划；首切片先验证 FT 分离。
+- Execution planning：M1–M14、Editor E0-D/E1–E9、Visualizer V0-D/V1–V6 的历史切片均为 `Complete`；processing 四份新交付文档 approved、P0-D Complete，P1–P6 Planned；仅开放 P1 质量规划，实际实现等待质量契约单独批准。
 - Quality and evals：M3–M14、Editor E1–E9 与 Visualizer V1–V6 evidence 均已批准；E9 revised run `E9-2026-09-04T03-51-33-088Z-13614673` 为 29/29、`approved`，首个 run `E9-2026-09-04T02-49-18-960Z-cf0a79b1` 保持 `pre-revision`。
 - Implementation：Editor E9 的删除、三级展示、28px 紧凑 BPM 标记条和标记修订已在 commit `13614673bbf4d824f2ee109d36e04de6b3f8aabd` 实现并通过 revised canonical。E8 与 Visualizer V1–V6 保持已完成。post-V6 viewport 修订已在 clean commit `9f3b55beaa0c8a3d799f3f1e16f1dd66c9aee77c` 通过 Chrome/Edge 专项。
 - Design remake：旧设计资料已在本地归档，相关历史仍可由 Git 记录追溯；后续视觉方向待 owner 确定。
@@ -69,10 +71,14 @@ DEC-059/DEC-061 对应的旧设计指导和交付计划已归档，停止作为�
 | [Editor acceptance criteria](../delivery/editor/acceptance-criteria.md) | AC-E101–AC-E905、阈值、证据方法和风险映射 | project-owner / approved | Editor 指标、容差、容量或支持矩阵变化 |
 | [Editor test strategy](../delivery/editor/test-strategy.md) | E1–E9 测试层级、fixture、浏览器、性能与 evidence cadence | project-owner / approved | 测试工具、fixture、浏览器或证据能力变化 |
 | [Editor milestone plan](../delivery/editor/milestone-plan.md) | E0-D 与 E1–E9 状态、依赖和退出清单 | project-owner / approved | 里程碑关闭、阻塞或开放状态变化 |
-| [Visualizer execution plan](../delivery/visualizer/execution-plan.md) | V1–V6 历史切片；新视频流程待规划 | project-owner / in-review | 新目标架构和验收获批 |
+| [Processing execution plan](../delivery/processing/execution-plan.md) | P1–P6 完整路线；首切片 FT 兼容性/质量/性能，先质量规划 | project-owner / approved | 模型/runtime、scope、切片或依赖变化 |
+| [Processing acceptance criteria](../delivery/processing/acceptance-criteria.md) | AC-P101–P604；数值/人工质量、逐拍 F1、900 秒和工程保护 | project-owner / approved | 阈值、oracle、支持矩阵或行为变化 |
+| [Processing test strategy](../delivery/processing/test-strategy.md) | TS-P1–P6、WASM reference、fixture、故障/资源/媒体与人工补偿 | project-owner / approved | fixture、工具、覆盖或证据缺口变化 |
+| [Processing milestone plan](../delivery/processing/milestone-plan.md) | P0-D Complete、P1–P6 Planned，退出/复核/停止条件 | project-owner / approved | 里程碑批准、开放、关闭或阻塞状态变化 |
+| [Visualizer execution plan](../delivery/visualizer/execution-plan.md) | V1–V6 历史切片；新链见已批准 processing 计划 | project-owner / in-review | 新目标架构和验收获批 |
 | [Visualizer acceptance criteria](../delivery/visualizer/acceptance-criteria.md) | 历史 AC-V101–AC-V607；新 processing/V2 验收待复核 | project-owner / in-review | Visualizer 指标、阈值、preset 或支持矩阵变化 |
 | [Visualizer test strategy](../delivery/visualizer/test-strategy.md) | 历史 V1–V6；新 browser model/beat/V2 测试待复核 | project-owner / in-review | 测试工具、fixture、浏览器或证据能力变化 |
-| [Visualizer milestone plan](../delivery/visualizer/milestone-plan.md) | 历史 V0-D/V1–V6；新链里程碑待规划 | project-owner / in-review | 里程碑开放、关闭或 blocked 状态变化 |
+| [Visualizer milestone plan](../delivery/visualizer/milestone-plan.md) | 历史 V0-D/V1–V6；新链 P0-D 已关闭，P1–P6 Planned | project-owner / in-review | 里程碑开放、关闭或 blocked 状态变化 |
 | [Visualizer V1 eval plan](../quality/visualizer/eval-plan.md) | AC-V101–AC-V108 的 route、lease、project、draft、layout 与 resource 契约 | project-owner / approved | V1 行为、阈值、浏览器或证据能力变化 |
 | [Visualizer V1 golden](../quality/visualizer/golden-examples.md) | 默认/完整/无效工程、lease、草稿和 breakpoint 规范样例 | project-owner / approved | V1 schema、identity、布局或恢复语义变化 |
 | [Visualizer V1 failure taxonomy](../quality/visualizer/failure-taxonomy.md) | route、lease、project、draft、file、layout、resource 失败分类 | project-owner / approved | V1 失败域或严重度响应变化 |
