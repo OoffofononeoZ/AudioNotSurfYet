@@ -6,7 +6,7 @@ export function processingFixturePlugin():Plugin {
     return {name:'processing-p1-public-model-fixtures',apply:'serve',configureServer(server){
         server.middlewares.use((request,response,next)=>{
             const probe=/^\/processing-probe\/([^/]+)$/.exec((request.url??'').split('?')[0]!);
-            const probeFiles=new Set(['ort.all.min.mjs','ort.webgpu.min.mjs','ort-wasm-simd-threaded.jsep.mjs','ort-wasm-simd-threaded.jsep.wasm','ort-wasm-simd-threaded.asyncify.mjs','ort-wasm-simd-threaded.asyncify.wasm','manifest.json','drums-window-f32.onnx','graph.json','drums-observe.onnx','observe.json']);
+            const probeFiles=new Set(['ort.all.min.mjs','ort.webgpu.min.mjs','ort-wasm-simd-threaded.jsep.mjs','ort-wasm-simd-threaded.jsep.wasm','ort-wasm-simd-threaded.asyncify.mjs','ort-wasm-simd-threaded.asyncify.wasm','manifest.json','drums-window-f32.onnx','graph.json','drums-observe.onnx','observe.json','drums-mean-f64.onnx','mean-f64.json']);
             if(probe&&probeFiles.has(probe[1]!)){
                 const file=path.resolve('artifacts/fixtures/p1-probe',probe[1]!);
                 if(!existsSync(file)){response.statusCode=404;response.end('Prepare the diagnostic fixtures first.');return;}

@@ -1,3 +1,4 @@
+import { P1_PARITY_LIMIT } from '../processing/acceptance';
 import { test,expect } from '@playwright/test';
 import fs from 'node:fs';
 test.describe('P1 real FT graphs',()=>{
@@ -18,6 +19,6 @@ test.describe('P1 real FT graphs',()=>{
         expect(result.adapter.description).not.toMatch(/swiftshader|software|llvmpipe/i);
         expect(result.steps.some(s=>(s.kernelCounts?.Conv??0)>0&&(s.kernelCounts?.ConvTranspose??0)>0),'actual GPU neural/spectral kernel profiles').toBe(true);
         console.log(JSON.stringify({role:row,maxError:result.maxError}));
-        expect(result.parityPassed,`role=${row}, maxError=${result.maxError}`).toBe(true);expect(result.maxError).toBeLessThanOrEqual(1e-3);
+        expect(result.parityPassed,`role=${row}, maxError=${result.maxError}`).toBe(true);expect(result.maxError).toBeLessThanOrEqual(P1_PARITY_LIMIT);
     });
 });

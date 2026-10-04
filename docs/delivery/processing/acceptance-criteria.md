@@ -10,7 +10,7 @@ upstream_docs:
   - "docs/architecture/risk-register.md"
   - "docs/architecture/processing/model-artifacts.md"
   - "docs/architecture/processing/worker-and-project-contracts.md"
-next_action: "四原图在 JSEP 双浏览器可推断；drums parity 超差，先修正精度，P1 未完成，P2 不开放"
+next_action: "DEC-071 已批准短段 max absolute 1.5e-3；继续原图双浏览器、真实拼接/WAV、取消、试听和十五分钟验证；P1 未完成"
 ---
 
 # Browser Processing Acceptance Criteria
@@ -21,7 +21,7 @@ next_action: "四原图在 JSEP 双浏览器可推断；drums parity 超差，�
 
 ### Numerical and Quality Gates
 
-- FT parity：每个模型只比较对应 role/row 的短段 Float32 输出；相同模型、输入 PCM、padding/config，独立 WASM 参考对照 WebGPU，每轨全量 sample 的最大绝对误差 ≤`1e-3`。shape、frame count、role 和 finite 检查必须完全通过。记录每轨最大误差和 RMS 误差；不以平均值掩盖峰值。此门禁验证 ONNX 后端差异，不声称等同原始 PyTorch 模型或源分离 SDR。
+- FT parity：每个模型只比较对应 role/row 的短段 Float32 输出；相同模型、输入 PCM、padding/config，独立 WASM 参考对照 WebGPU，每轨全量 sample 的最大绝对误差 ≤`1.5e-3`。shape、frame count、role 和 finite 检查必须完全通过。记录每轨最大误差和 RMS 误差；不以平均值掩盖峰值。此门禁验证 ONNX 后端差异，不声称等同原始 PyTorch 模型或源分离 SDR。
 - 时间变换：确定性恒等/脉冲 harness 验证事件时间误差 ≤一个 44.1kHz 输出 sample；真实 FT 不把模型本身的泄漏/扩散误判为时间变换错误。实际四轨 frame count=`round(source.durationSeconds×44100)`，首尾静音不裁剪，尾部长度只允许 ≤一个输出 sample 的校正，超限失败。
 - 人工质量：owner 用三首有许可的本地歌曲检查 12 个 WAV，逐轨记录“角色可辨识、串音、断裂、伪影”和结论（可用 / 需复核但可用 / 不可用）。角色不可辨识，或断裂/伪影使正常视觉映射无法使用，判不可用；任一不可用阻止 P1 关闭。提交匿名 case ID、许可确认与结论，不提交歌曲/WAV/用户路径/hash。尚无三首实际歌曲通过记录。
 - 逐拍：对每个可靠合成区段，将预测与真值在绝对差 ≤70ms 时作最大一对一匹配；并列匹配选择总误差较小者，禁止同一预测/真值重复计数。precision=`TP/(TP+FP)`，recall=`TP/(TP+FN)`，F1=`2TP/(2TP+FP+FN)`，每段 F1 ≥0.95，报告 TP/FP/FN 和时间误差。
@@ -105,3 +105,5 @@ DEC-069/070 接受 P1 eval/golden/失败分类并开放实现。P1–P6 按全�
 ## P1 Implementation Checkpoint
 
 2026-10-04，固定四模型实际 size/SHA 已校验，独立内核与 oracle/故障测试已实现。Chrome/Edge 的四图均在 `/real_istft/ConstantOfShape` provider 分配处创建 session 失败，未进入真实推断、parity、长曲或试听。P1 保持 In Progress、P2–P6 Planned；见 [P1 evidence](../../quality/processing/evidence-index.md)，不将合成/注入通过写成真实模型通过。
+
+2026-10-04，owner 明确批准短段跨后端最大绝对误差上限 `1.5e-3`（DEC-071）。原始 ONNX、官方 ORT、独立 WASM、逐 sample 比较及其余验收门禁保持不变；历史 `1e-3` 失败证据保留，不构成 P1 关闭。

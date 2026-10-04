@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/quality/processing/golden-examples.md"
   - "docs/quality/processing/failure-taxonomy.md"
   - "docs/delivery/processing/milestone-plan.md"
-next_action: "同版 JSEP 原图已双浏览器推断，drums parity 仍超差；修正精度后验证实际拼接/长曲/试听"
+next_action: "DEC-071 已批准短段 max absolute 1.5e-3；继续原图双浏览器、真实拼接/WAV、取消、试听和十五分钟验证；P1 未完成"
 ---
 
 # Browser Processing Evidence Index
@@ -65,3 +65,7 @@ P1 保持 In Progress；R-046–R-055 全部 Open，P2–P6 Planned。下一步�
 原始 JSON/trace 在忽略目录 `artifacts/evals/p1-jsep-four-{chrome,edge}/` 与对应 JSON。该记录是未提交候选的调查证据，不是 canonical/P1 close；全部 kernel placement、十五分钟资源、WAV 与人工结论尚未形成。
 
 隔离诊断包括：原 native disabled 仍报 DOUBLE provider；JSEP/WASM all 优化均 `std::bad_alloc`；disabled 均成功；禁用 ConstantFolding、NHWC 未使 drums 达到门禁；只把342个 iSTFT DOUBLE 窗口常量转为Float32的诊断副本使 native 可推断，但不能证明精度通过。原始 ONNX 未写回。相关 probes 使用独立配置，不进入 canonical 验收套件，也不把失败变成 expected pass。
+
+四图初始化修复已本地提交为 `6d575ff`，34项专项、类型/构建/文档校验通过；诊断模型/运行库仅由dev fixture whitelist提供，不进入生产dist。后续精度诊断未解决drums超差，批准后的标准见 [numeric review](numeric-review.md)；现执行 DEC-071 的1.5e-3，不默认采用任何派生图/运行库。
+
+2026-10-04，owner 明确回复“批准 0.0015，继续完整验证（推荐）”。DEC-071 据此批准四专用模型对应 row 短段跨后端 max absolute ≤`1.5e-3`，保留原始模型和官方运行库，继续全部适用验证。上文按原 `1e-3` 的失败属于历史记录；P1 仍 In Progress、P2 Planned、R-046–R-055 Open。详见 [numeric review](numeric-review.md)。

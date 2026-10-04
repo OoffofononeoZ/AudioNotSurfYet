@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/delivery/processing/acceptance-criteria.md"
   - "docs/delivery/processing/test-strategy.md"
   - "docs/architecture/system-design.md"
-next_action: "四原图在 JSEP 双浏览器可推断；drums parity 超差，先修正精度，P1 未完成，P2 不开放"
+next_action: "DEC-071 已批准短段 max absolute 1.5e-3；继续原图双浏览器、真实拼接/WAV、取消、试听和十五分钟验证；P1 未完成"
 ---
 
 # Browser Processing Milestone Plan
@@ -73,3 +73,5 @@ DEC-069/070 接受 P1 eval/golden/失败分类并开放实现。P1–P6 按全�
 ## P1 JSEP Checkpoint
 
 2026-10-04，同版 ORT JSEP + disabled 优化已在 Chrome/Edge 四原图实际推断，三轨 parity 通过，drums 段尾约0.00130，超过0.001门禁。当前仍为 P1 In Progress / P2 Planned；原 Asyncify 失败作为历史 evidence 保留。具体资产与调查见 [P1 evidence](../../quality/processing/evidence-index.md)；不降低阈值或把诊断副本发布为固定模型。
+
+2026-10-04，owner 明确回复“批准 0.0015，继续完整验证（推荐）”。DEC-071 据此批准四专用模型对应 row 短段跨后端 max absolute ≤`1.5e-3`，保留原始模型和官方运行库，继续全部适用验证。上文按原 `1e-3` 的失败属于历史记录；P1 仍 In Progress、P2 Planned、R-046–R-055 Open。详见 [numeric review](../../quality/processing/numeric-review.md)。

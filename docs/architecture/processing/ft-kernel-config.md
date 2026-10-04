@@ -6,7 +6,7 @@ upstream_docs:
   - "docs/architecture/processing/model-artifacts.md"
   - "docs/delivery/processing/execution-plan.md"
   - "docs/quality/processing/eval-plan.md"
-next_action: "原图已在 JSEP 双浏览器推断；修正 drums 段尾数值超差后再进入长曲，P1 未完成"
+next_action: "DEC-071 已批准短段 max absolute 1.5e-3；继续原图双浏览器、真实拼接/WAV、取消、试听和十五分钟验证；P1 未完成"
 ---
 
 # FT P1 Kernel Configuration
@@ -32,3 +32,5 @@ next_action: "原图已在 JSEP 双浏览器推断；修正 drums 段尾数值�
 ## Validation Boundary
 
 单元/注入成功不证明四个真实模型可运行。2026-10-04 原 Asyncify 构建的双浏览器 session 均报告 `/real_istft/ConstantOfShape` provider 未分配。随后同版本 JSEP + disabled 优化在双浏览器四图实际推断成功，GPU profile 记录 Conv/ConvTranspose；bass/other/vocals parity 通过，drums 最大误差约0.00130，超过0.001门禁，尚不能关闭 P1。长曲与试听仍未通过。R-046–R-055 保持 Open，P2 不开放；后续任何精度修正保留独立失败证据，不降低阈值或增加整图 CPU 重跑。
+
+2026-10-04，owner 明确回复“批准 0.0015，继续完整验证（推荐）”。DEC-071 据此批准四专用模型对应 row 短段跨后端 max absolute ≤`1.5e-3`，保留原始模型和官方运行库，继续全部适用验证。上文按原 `1e-3` 的失败属于历史记录；P1 仍 In Progress、P2 Planned、R-046–R-055 Open。详见 [numeric review](../../quality/processing/numeric-review.md)。

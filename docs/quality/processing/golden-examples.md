@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/delivery/processing/acceptance-criteria.md"
   - "docs/architecture/processing/model-artifacts.md"
   - "docs/architecture/processing/worker-and-project-contracts.md"
-next_action: "四原图在 JSEP 双浏览器可推断；drums parity 超差，先修正精度，P1 未完成，P2 不开放"
+next_action: "DEC-071 已批准短段 max absolute 1.5e-3；继续原图双浏览器、真实拼接/WAV、取消、试听和十五分钟验证；P1 未完成"
 ---
 
 # Browser FT P1 Golden Examples
@@ -29,7 +29,7 @@ next_action: "四原图在 JSEP 双浏览器可推断；drums parity 超差，�
 | P1-G05 | failure：缺 navigator.gpu/adapter、图 unsupported、device lost/OOM | 对应 typed error、释放资源，不自动整图 WASM/CPU 或小模型重跑 | P1-EV-RUNTIME/CANCEL；AC-P101/106；R-046/R-049/R-050；PFT-RUNTIME/PFT-RESOURCE |
 | P1-G06 | success/boundary：stub 输出四 row 有互异标记，四专用模型顺序处理 | 模型各取 row 0/1/2/3，仅产对应轨；drums→bass→other→vocals，前 session 释放后才建后者 | P1-EV-ROLE；AC-P102；R-052；PFT-ROLE |
 | P1-G07 | failure：单专用模型冒充四轨、错 row/shape/type 或 NaN/Infinity | role/tensor/finite 校验拒绝，不发布四轨成功；other 不改称 lead | P1-EV-ROLE；AC-P102；R-046/R-052；PFT-ROLE |
-| P1-G08 | success：确定性非零 stereo 短段 mix，同 ONNX/config 的 WASM 对 WebGPU | 四模型分别比较对应 row 全 sample；每轨 max absolute≤1e-3，报告 RMS/shape/finite | P1-EV-PARITY；AC-P102；R-046/R-052；PFT-NUMERIC |
+| P1-G08 | success：确定性非零 stereo 短段 mix，同 ONNX/config 的 WASM 对 WebGPU | 四模型分别比较对应 row 全 sample；每轨 max absolute≤1.5e-3，报告 RMS/shape/finite | P1-EV-PARITY；AC-P102；R-046/R-052；PFT-NUMERIC |
 | P1-G09 | failure：parity 超差、参考不可运行或非有限 | 独立失败/缺口，不能改成 skip/pass、自对照或只报平均值，P1 不关闭 | P1-EV-PARITY/EVIDENCE；AC-P102；R-046/R-052；PFT-NUMERIC/PFT-EVIDENCE |
 | P1-G10 | boundary：44.1/48kHz 恒等/脉冲 oracle，首尾带静音 | 补偿重采样延迟，事件绝对时间≤一个输出 sample，保留静音时长与整曲基准 | P1-EV-TIME；AC-P103；R-047；PFT-TIME |
 | P1-G11 | boundary/failure：mono、stereo、3 channel input | mono 仅在模型边界复制 stereo，原 descriptor/hash 不变；stereo 正常；>2channel 明确不兼容，不默 downmix | P1-EV-TIME；AC-P103；R-047；PFT-TIME |
@@ -64,3 +64,5 @@ case 只有在所有子条件和指定浏览器/人工检查均完成时才可�
 ## Implementation Evidence
 
 实际运行及缺口见 [P1 evidence index](evidence-index.md)。合成/注入通过与真实四图不兼容分别记录，预期样例不是通过声明；本轮没有 P1 关闭或风险缓解结论。
+
+2026-10-04，owner 明确批准短段跨后端最大绝对误差上限 `1.5e-3`（DEC-071）。原始 ONNX、官方 ORT、独立 WASM、逐 sample 比较及其余验收门禁保持不变；历史 `1e-3` 失败证据保留，不构成 P1 关闭。

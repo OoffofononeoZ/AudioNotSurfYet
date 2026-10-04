@@ -34,3 +34,18 @@ for(const name of outputs){if(!observed.graph.node.some(n=>n.output.includes(nam
 const observedBytes=type.encode(observed).finish();
 await fs.writeFile('artifacts/fixtures/p1-probe/drums-observe.onnx',observedBytes);
 await fs.writeFile('artifacts/fixtures/p1-probe/observe.json',JSON.stringify({diagnosticOnly:true,version:'spectral-observation-v1',sourceSha,sha256:createHash('sha256').update(observedBytes).digest('hex'),bytes:observedBytes.length,outputs},null,2));
+const precise=type.decode(data),meanNodes=[];
+precise.graph.node=precise.graph.node.flatMap(node=>{
+    if(node.opType!=='ReduceMean'||!/^\/[^/]+$/.test(node.name))return [node];
+    const input=node.input[0],output=node.output[0],privateInput=`${node.name}/p1-f64-input`,privateOutput=`${node.name}/p1-f64-output`;
+    node.input[0]=privateInput;node.output[0]=privateOutput;meanNodes.push(node.name);
+    return [
+        {name:`${node.name}/p1-to-f64`,opType:'Cast',input:[input],output:[privateInput],attribute:[{name:'to',type:2,i:11}]},
+        node,
+        {name:`${node.name}/p1-to-f32`,opType:'Cast',input:[privateOutput],output:[output],attribute:[{name:'to',type:2,i:1}]},
+    ];
+});
+if(meanNodes.length!==6)throw Error('Unexpected normalization statistics');
+const preciseBytes=type.encode(precise).finish();
+await fs.writeFile('artifacts/fixtures/p1-probe/drums-mean-f64.onnx',preciseBytes);
+await fs.writeFile('artifacts/fixtures/p1-probe/mean-f64.json',JSON.stringify({diagnosticOnly:true,version:'global-mean-f64-probe-v1',sourceSha,sha256:createHash('sha256').update(preciseBytes).digest('hex'),bytes:preciseBytes.length,meanNodes},null,2));
