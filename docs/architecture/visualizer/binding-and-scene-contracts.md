@@ -1,7 +1,7 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-09-04
+last_reviewed: 2026-10-04
 upstream_docs:
   - "docs/product/scope.md"
   - "docs/product/success-metrics.md"
@@ -11,6 +11,8 @@ next_action: "使用 ADR-0021 的 Scene Contract 双门禁扩展场景；新场�
 ---
 
 # Visualizer Binding and Scene Contracts
+
+> 2026-10-04：下文保留既有 V1 binding/scene 基线。目标 V2 新增 processing source、默认 other/beat 及 tempo 显式刷新，详见 [Worker/V2 子契约](../processing/worker-and-project-contracts.md)；既有单 renderer/RAF/播放时钟与四 Analyzer 特征边界继续有效。
 
 ## Binding Model
 

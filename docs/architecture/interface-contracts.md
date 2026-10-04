@@ -1,10 +1,10 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-09-04
+last_reviewed: 2026-10-04
 upstream_docs:
   - "docs/architecture/system-design.md"
-next_action: "实现 Visualizer fullscreen 瞬时 UI 状态；公共接口与 JSON V1 保持不变"
+next_action: "按批准的 browser Worker/V2 子契约制定 delivery 与专项验证；当前产品接口仍为既有实现"
 ---
 
 # Interface Contracts
@@ -826,3 +826,18 @@ type VisualizerRecordingState =
 - 进入全屏在 `recording-locked` 时返回 UI 禁用状态；已进入后发生锁定则只退出显示模式。route/unmount 的退出与 cleanup 必须幂等。
 
 `project-owner` 于 2026-09-02 批准 Visualizer V0 system design、接口契约、R-034–R-041 与 ADR-0014–0017，并同意进入 V1–V6 execution planning。本节据此为 `approved`，但不是实现或 quality evidence。
+
+## Automated Processing Contracts（approved）
+
+2026-10-04 批准的目标接口由受管理子文档承载：
+
+- [Worker and Project Contracts](processing/worker-and-project-contracts.md)：原始 PCM/runtime identity、start/progress/cancel/result/error、typed errors、只读候选与逐项 apply、Visualizer Project V2、V1 单向迁移以及显式 tempo 刷新。
+- [FT ONNX Model Artifacts](processing/model-artifacts.md)：四模型来源、immutable revision、大小/SHA-256、输出 role/row、44.1kHz 拼接、WAV 编码与运行库验证边界。
+
+处理保留现有 analysis Worker，最多增加一个专用 separation Worker；数据不离开浏览器。Processor 三个阶段显式操作，proposal/hash 检查与用户确认先于工程写入。自动节拍只检测 beat，小节起点与拍号由用户确认；派生小节首拍必须标为 editor-tempo-derived。
+
+前述 Analyzer、Editor 和 Visualizer V1–V6 继续描述历史批准/实现；Project V2 与新增 processing 接口尚无实现证据。V1 详细格式见 [历史 V1 契约](visualizer/project-format-v1.md)，新写入格式以批准的 V2 子契约为准。
+
+## Automated Processing Contract Approval
+
+2026-10-04，`project-owner` 明确要求实施随附浏览器本地修订计划，并授权批准本接口、第 21 节、风险与 ADR-0024–0027，登记决定并本地提交。当前阶段进入 execution planning；Worker/V2 代码、产品依赖与新 eval 仍需相应 delivery 审批。模型兼容、质量、性能和 readiness 尚未验证。

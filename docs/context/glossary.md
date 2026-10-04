@@ -1,10 +1,10 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-09-03
+last_reviewed: 2026-10-04
 upstream_docs:
   - "docs/context/index.md"
-next_action: "补充 post-V6 fullscreen 术语并等待 owner 审阅"
+next_action: "浏览器处理目标术语已登记；实施后核对 provenance/tempo 刷新与当前代码，fullscreen 仍待 owner 审阅"
 ---
 
 # Glossary
@@ -100,6 +100,18 @@ next_action: "补充 post-V6 fullscreen 术语并等待 owner 审阅"
 | compact workbench | Editor 以双层工具栏、平面内容区、细分隔线和 44px 轨道行组织的高密度桌面布局 | 只改变视觉层级与空间密度，不改变歌曲、工程、tempo、point/range、overlay 或 lease 语义 | [ADR-0010](../architecture/adrs/0010-editor-compact-workbench.md) |
 | Editor canonical | 某个 E 里程碑在 clean HEAD 上执行的正式 eval run，绑定 commit、环境、日志和 summary hash | provisional 不能替代 canonical；owner 批准后才开放下一个 E 里程碑 | [Editor execution plan](../delivery/editor/execution-plan.md) |
 
+## Approved Processing Target Terms（尚未实现）
+
+| Term | Definition | Why it matters | Related docs |
+| --- | --- | --- | --- |
+| Processor | 已批准的分离、节拍分析、提案确认工作区；每个阶段显式开始，失败保留人工制作路径 | 目标架构不等于现有运行时已提供能力 | [ADR-0024](../architecture/adrs/0024-browser-processing-runtime.md) |
+| FT specialist / fp16weights | htdemucs_ft 四专用 ONNX 权重；各自只取对应 row，存储压缩但仍 fp32 compute | 一个专用模型不能冒充四轨，文件大小不等于运行显存 | [模型契约](../architecture/processing/model-artifacts.md) |
+| algorithm-score | 内部 TS 自相关/DP 等算法产生的归一化评分，具体定义由 scoreVersion/config 标识 | 不代表神经网络概率或正确率保证 | [Worker 契约](../architecture/processing/worker-and-project-contracts.md) |
+| processing proposal | 只读、可拒绝的自动候选；apply 前须 source/hash 检查和逐项确认 | rerun 不隐式覆盖用户工程 | [ADR-0026](../architecture/adrs/0026-processing-proposals-and-user-ownership.md) |
+| editor-tempo-derived beat map | 用户确认小节起点/BPM/拍号后，从 Editor tempo map 派生的 beat/小节首拍 | 原始检测只有 beat；tempo 改动后需显式一起刷新快照/映射 | [ADR-0027](../architecture/adrs/0027-visualizer-project-v2-processing-bindings.md) |
+| Project V2 / milestone V2 | schemaVersion 2 的新工程，与历史第二个 Visualizer 交付里程碑 V2 分开理解 | 历史 V2 binding evidence 不证明新 JSON schema 已实现 | [V2 工程契约](../architecture/processing/worker-and-project-contracts.md) |
 ## Approval Record
 
 `project-owner` 于 2026-08-21 至 2026-08-28 依次批准 Analyzer M7–M12、Analyzer readiness 与 Editor E1–E6。E7 compact workbench 的旧 44/44 run 为 `pre-revision`；全屏浮层修订版 46/46 canonical 于 2026-08-31 获批准并关闭。M13 21 卡/FIFO 计划同日获批，clean canonical 17/17 通过后 Analyzer readiness 已恢复。
+
+2026-10-04，owner 随浏览器架构计划授权登记上述获批目标术语；它们不更新当前 system map 的实现事实。

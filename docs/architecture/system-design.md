@@ -1,18 +1,18 @@
 ---
-status: in-review
+status: approved
 owner: "project-owner"
-last_reviewed: 2026-10-01
+last_reviewed: 2026-10-04
 upstream_docs:
   - "docs/product/problem-brief.md"
   - "docs/product/scope.md"
   - "docs/product/success-metrics.md"
   - "docs/product/open-questions.md"
-next_action: "按 2026-10-01 获批产品意图评审自动优先、人工可修正的视频制作链路；现有架构继续作为已实现基线"
+next_action: "浏览器自动处理架构已批准；制定 execution plan、acceptance criteria、test strategy 与 milestone plan，先验证 FT 分离兼容性/质量/性能"
 ---
 
 # System Design
 
-> 2026-10-01 影响登记：自动优先、保留人工修正和完整手动操作的视频产出主目标已获产品批准。本文件下述架构描述的是已批准并实现的 Analyzer、Editor、Visualizer 基线；它尚未定义音轨分离、自动标记、MIDI、视觉素材或新的视频生成拓扑。下一步须补充系统设计、接口和风险评审，不能从现有 WebM 路线推断这些能力已获批准。
+> 2026-10-04 范围登记：第 1–20 节保留既有 Analyzer、Editor、Visualizer 技术基线；第 21 节的浏览器 FT 分离、TypeScript 节拍、只读提案与 Project V2 已获架构批准。新目标进入 execution planning，既有 canonical/readiness 不覆盖这些尚未实现、尚未验证的能力。
 
 ## 1. Decision Summary
 
@@ -492,3 +492,136 @@ M6 只在 `import.meta.env.DEV` 安装无 UI bridge，提供活动特征、cance
 - recording lock 从 false 变 true 时退出本页面拥有的全屏，但不取消 recording；route guard 在既有录制离页决策前先退出全屏。请求/退出失败只更新可访问错误，卸载清除 document listener 与 timer。
 
 `project-owner` 于 2026-09-02 明确回复：“我批准 Visualizer V0 系统设计、接口契约、R-034–R-041 与 ADR-0014–0017；同意进入 Visualizer V1–V6 execution planning。”本设计据此获批并只开放 V0-D delivery planning；当前 `/comingsoon`、V1 实现、quality evidence 与 release-readiness 均不因本批准自动完成。
+
+## 21. Automated Audio-to-Video Target Architecture（approved）
+
+### 21.1 Readers, constraints and decision scope
+
+本节面向实现工程师和架构评审者。2026-10-04，owner 批准浏览器本地自动处理架构：Processor 使用 ONNX Runtime Web/WebGPU 运行 `htdemucs_ft`，扩展项目 TypeScript 节拍算法，结果以只读提案经用户确认后进入 Editor/Visualizer，最后沿用实时 WebM。
+
+产品约束继续是自动优先、人工可修正和可完整手动制作；音频及工程不上传。自动音色/FX、MIDI、3D 辅助图、素材生成、离线/批量及其他视频格式明确延后。审批记录见 DEC-063–066 与 ADR-0024–0027；批准只开放 execution planning，当前代码与既有 canonical 不据此获得自动处理能力。
+
+### 21.2 System boundary and topology
+
+~~~mermaid
+flowchart LR
+  File[本地歌曲] --> Engine[单 AudioEngine 解码 / 原始 PCM]
+  Engine --> Processor[Processor controller]
+  Models[四个 FT ONNX 模型下载 / 校验] --> IDB[IndexedDB 模型与 metadata]
+  Processor --> Separation[最多一个专用分离 Worker / ORT WebGPU]
+  IDB --> Separation
+  Separation --> OPFS[OPFS 四轨 / 临时 PCM]
+  Engine --> Analysis[现有 analysis Worker / TS 逐拍跟踪]
+  OPFS -->|drums 辅助证据| Analysis
+  Separation --> Proposal[只读处理提案 / provenance]
+  Analysis --> Proposal
+  Proposal -->|用户确认小节信息与逐项应用| Editor[Editor V1 tempo / 人工修正]
+  Proposal -->|用户确认| Visualizer[Visualizer Project V2]
+  Editor -->|显式刷新快照与节拍映射| Visualizer
+  Visualizer --> Recorder[现有实时 WebM]
+~~~
+
+- SPA 拥有歌曲、解码、播放时钟、任务 controller、工程、预览与录制；Worker 只拥有离线计算与临时处理资源。
+- 保留当前 analysis Worker，最多增加一个专用 separation Worker；同一时刻仅一个自动计算 stage 运行。四模型顺序执行，不创建 ORT proxy Worker 或第二个播放 AudioContext。
+- 单 AudioEngine/AudioContext、RendererHost、视觉 RAF 与最多四个活动 Analyzer 特征的边界不变；processing series 不计作 Analyzer FeatureId。
+- 输入文件、PCM、stem 与工程在浏览器本地处理；网络仅用于应用/runtime assets 和明确显示的模型下载，不发送音频或结果。
+
+### 21.3 Processor workspace and staged control
+
+新增 `/processor/:trackId?`，复用歌曲身份与 route playback lease。三个阶段均需显式操作：
+
+1. **分离音轨**：检查 WebGPU、模型与空间；必要时展示下载大小/进度并校验缓存。以原始 PCM 运行四个专用模型，生成 drums、bass、other、vocals 的 waveform、30Hz energy 和 WAV 导出。
+2. **分析节拍**：原 mix 为主，已有 drums 为辅助；输出 BPM、逐拍位置、局部 tempo 候选和复核警告。分离被跳过或失败时仍可显式运行 mix-only TypeScript 分析，provenance 标明未用 drums。
+3. **应用提案**：显示来源、cache、算法评分、警告、目标工程 hash 和逐项 diff。用户确认小节起点、BPM 与拍号后，可选择将 tempo、处理快照与默认绑定应用到工程。
+
+阶段成功不自动启动下一步、播放或录制。用户可重试、取消、跳过或拒绝结果。首版不建立 stem 试听/mix 播放器；other 始终显示其规范角色，不改称 lead。
+
+### 21.4 Browser runtime, models and failure boundary
+
+- 分离使用 `onnxruntime-web/webgpu` 和 WebGPU EP；WebGPU/adapter 不可用、device lost、图不支持、模型损坏或推断失败均明确报 typed error，不自动改用 CPU 或小模型。现有人工标记、视觉映射、WebM 以及显式 mix-only 节拍分析仍可用。
+- 四个 FT 专用 ONNX 模型的 immutable revisions、文件 SHA-256、大小、tensor/row 与许可证来源见 [Model Artifacts](processing/model-artifacts.md)。每次仅加载一个模型，完成该角色全曲分段推断并保存后，释放 session/tensor/GPU buffers 再加载下一模型；禁止从单个专用模型取全部四轨。
+- 使用已转换的 fp16weights，仍为 fp32 推断。首次下载总量 662450544 bytes，显示逐文件下载、校验和 cache hit；取消下载不发布半成品。下载与音频处理分别计时，离线 cache hit 可复用完整模型。
+- ORT Web 版本、JS/WASM asset identity、实际后端与 preprocessing config 需在首个兼容性切片锁定。依赖文档支持 WebGPU 用法不等于本仓库模型已兼容；风险保持 Open。
+
+### 21.5 PCM time identity and browser cache
+
+- browser-decoded PCM 是唯一时间基准。source descriptor 固定原采样率、channel/frame count、duration 和 canonical pcmHash；Worker 通过有界分块/临时 OPFS 读取，禁止 detach AudioEngine 的 buffer 或全曲多次复制。
+- 模型边界重采样为 44.1kHz stereo；分段 normalization、overlap-add、滤波延迟补偿、末段 padding 与还原写入版本化 config/hash，输出保持 `[0, originalDuration)` 和首尾静音。仅允许不超过一个输出 sample 的尾部长度修正，超过则失败。
+- cache identity 包含 source/PCM、四模型 revision/hash、ORT Web/assets/backend、beat algorithm/version 及 canonical config hash；结果复用还需 artifact checksum，缺失/损坏必须 miss 或 typed error，不复用近似 identity。
+- IndexedDB 保存模型文件、结果 metadata 与 compact series；OPFS 保存大型 Float32 stem 和任务临时 PCM。工程不嵌音频/model/cache handle。写入先创建临时 artifact，完整校验后才发布 metadata；取消/失败不得发布部分四轨结果。
+- cache 默认 10GB，可配置；模型、结果、临时数据总量同时受 origin 实际可用 quota 限制。写前估算及写时失败均返回明确错误；清理入口列出歌曲/模型/大小/日期，由用户明确删除，无自动驱逐。浏览器自行清除 origin 数据后的 cache miss 可重算，但不宣称持久化必然成功。
+- cancel/route/track 变化撤销 generation、终止下载/推断并释放 Worker session/tensor，临时 artifact 在 5 秒内清理或登记为可清理残留。进程中断后的残留在下次初始化列出，不把残留误当作成功 cache。
+
+### 21.6 Separation, waveform, energy and WAV
+
+- 四轨输出选择、44.1kHz 拼接、Float32 artifact 与浏览器 WAV 编码遵守 [Model Artifacts](processing/model-artifacts.md)。waveform、energy 与导出必须来自同一拼接结果，不截去首尾静音或改变增益。
+- 30Hz 第 i 窗口为 `[floor(i × sampleRate/30), min(frameCount, floor((i+1) × sampleRate/30)))`；多声道按平方均值合并后开方为 RMS，转 dBFS、裁剪到 [-80,0] 并线性量化 UInt16。length 为 `ceil(30 × duration)`，零能量映射 0。
+- compact codec 固定版本、采样密度、长度、scale/offset 与 provenance；相同 stem bytes/config 生成逐字节相同 series。WebGPU 模型浮点结果按固定环境 reference/golden 容差验证，不承诺跨 GPU 逐字节相同。
+
+### 21.7 TypeScript beat and local tempo candidates
+
+- 复用当前 `src/analysis/tempoEstimator.ts` 的频谱通量、onset envelope、自相关 BPM 和置信度判断，在现有 analysis Worker 增加动态规划逐拍跟踪。原 mix 是主输入，drums 只提供 ±70ms 内 onset/beat agreement；鼓轨空白不能直接删除 mix beat。
+- 逐拍绝对位置保留算法评分与证据，confidence 明确为归一化算法评分，不标作神经网络概率或正确率。阈值、tracking penalty、局部窗口和聚合参数都进入算法/config identity；不使用固定假分数。
+- 局部可靠 beat interval 的中位数用于 BPM/变化候选；连续稳定窗口的 BPM 差不超过 2% 时可合并，否则形成待确认 boundary。静音、鼓轨空白、半速/倍速、beat gap、低置信度及不稳定区段均展示警告，不强制拉平为固定 BPM。
+- audible region 基线为 mix RMS 连续至少 500ms 高于 -60dBFS；相邻可靠 beat gap 超过 `max(4 × 局部中位 interval, 4s)` 时警告。保留静音秒数，不向首尾静音外推假节拍；无可靠 beat 时 BPM 为 null、候选为空。
+- 不承诺自动 downbeat 或拍号识别；检测结果只有 beat。用户在 Editor 确认小节起点、BPM 和 meter 后，按既有 tempo/grid 语义派生 beat 与小节首拍，并显式记录为 `editor-tempo-derived`。每四拍分组不是模型识别。
+- 原始候选不直接包含伪造 meter 的 Editor tempoMap。确认步骤才构造从 0 秒起的合法 Editor V1 map，首尾未确认区间可用 single-beat；不自动把无 meter 候选应用为 4/4。
+
+### 21.8 Proposal ownership and Editor application
+
+- ProcessingProposalV1 只读、可丢弃，保存 source/runtime/model/algorithm provenance、warnings、BPM/局部 tempo 候选及 Visualizer snapshot。它不直接修改工程。
+- 应用前显示每个目标的 canonical project hash 与结构化 diff，逐项选择 tempo、snapshot、默认 horizontal/vertical bindings；所选 tempo 需明确确认小节起点与拍号。
+- Editor 保持 EditorProjectV1；自动 BPM 使用 `bpmSource: estimated`，用户改后的 segment 遵守既有 `user` 语义。不伪造 point/range、音色、FX 或 MIDI 事件。
+- apply 同时检查 proposal source、job/generation 与目标工程 hash。任何目标冲突都返回 project-conflict 并要求重新审阅 diff；所选更新全部准备并校验后应用，失败不留下部分内存工程。持久化失败按既有 dirty/export 语义显式反馈。
+- rerun 生成新 proposal，不更新已应用工程。user tempo、marker、binding 或 snapshot 只能由新的逐项确认替换；恢复使用保存的原工程/普通撤销能力。
+
+### 21.9 Visualizer Project V2 and tempo refresh
+
+- V2 保留现有 strict schema、track identity、Editor snapshot、scene registry、recording preset、单草稿及四分析特征边界，增加 processingSnapshot/source。V1 用无 I/O 纯函数单向迁移，原字段/binding 值保留；仅写 V2，无双写/降级导出。
+- snapshot 嵌入四轨 UInt16 energy、检测 beat、warnings、source 与 provenance，不嵌 stem/model/OPFS handle。processing source 支持 stem-energy、beat，以及用户确认 tempo 后派生的 downbeat；小节首拍来源必须标明，不作为自动检测事件。
+- 用户应用默认映射时，Orthogonal Lines horizontalIntensity = other energy，verticalIntensity = beat pulse；颜色、粗细、亮度和 decay 沿模板默认。已有 binding 仅在 diff 中逐项选择后替换。
+- resolver 使用现有 AudioContext 绝对秒数，不创建新 polling/AudioContext/Worker/RAF。source identity 不符或需要数据缺失返回 typed unavailable，不把 0 当作有效结果。
+- Editor tempo 后续修改后，Visualizer 标记 Editor snapshot/tempo-derived beat map stale。用户显式“刷新 Editor 快照与节拍映射”，预览更新 diff 后一起更新 Editor 快照及派生 beat/downbeat（绑定值保留）；检测 beat 仍作为只读原始证据。stale 时受影响 source 显示 unavailable，录制 preflight 要求先刷新或显式移除该绑定，不默用旧节拍。
+- 没有 processing snapshot 的 V2 与迁移 V1 可继续使用 constant/analysis/editor-event；非 tempo 源不受 stale beat map 影响。
+
+### 21.10 Video output and end-to-end behavior
+
+沿用现有 pre-Gain、单 RendererHost capture lease、MediaRecorder 和 WebM 保存/丢弃状态机。处理成功不自动播放/录制；录制读取工程内 snapshot，无需分离 Worker 或 OPFS cache 存活。音画同步目标仍为 ≤100ms；30Hz series 与 pulse/tempo-derived resolver 独立用 golden 验证。
+
+### 21.11 Failure boundaries and delivery verification
+
+任务状态为 idle/ready/running/succeeded/failed/cancelled，消息契约见 [Worker and Project Contracts](processing/worker-and-project-contracts.md)。旧 source/job/generation 的迟到消息无条件丢弃。
+
+| Boundary | Required behavior | Verification signal |
+| --- | --- | --- |
+| WebGPU/adapter 不可用、图不支持、device lost/OOM | typed error，无模型/CPU 自动降级，人工流程可用 | Chrome/Edge capability + fault injection |
+| 模型损坏、下载失败/取消 | 字节进度与校验错误，半成品不可命中 cache | pinned artifact/checksum/download tests |
+| PCM 分块、重采样、四模型输出、拼接或 WAV 不符 | 原子拒绝不发布完整结果，不改变原时间基准 | 静音/脉冲/四轨/reference/WAV golden |
+| quota 不足、OPFS/IDB 写失败、cache corrupt | 明确失败、显式清理，无自动驱逐或近似命中 | storage boundary/transaction tests |
+| 取消、换歌、离页、迟到消息 | generation 隔离，释放 session/tensor/Worker，临时 artifact 清理或登记 | resource probes + race tests |
+| 固定/变化 BPM、鼓轨空白、半速/倍速、低置信度 | 保留候选与警告，不伪造 meter/downbeat | synthetic beat/tempo golden + owner 复核 |
+| 用户修改、proposal/hash 冲突、rerun | 零隐式覆盖；重新确认 diff | project/concurrency/partial-selection tests |
+| V1→V2、default mapping、tempo 刷新 | 纯确定迁移，旧 binding 保留，拒绝旧节拍映射 | codec/resolver/stale-snapshot tests |
+| WebM 音画同步 | 现有录制回归与 ≤100ms 目标 | 双浏览器媒体检查 |
+
+参考机为 NVIDIA RTX 4060 Laptop GPU 8GB。十五分钟歌曲在模型已下载并校验、原 PCM 已解码后，从分离任务 start 到四轨及 beat/tempo proposal ready 的总处理目标 ≤15 分钟且无 OOM；包括 PCM staging、session 初始化、拼接、waveform/energy 和结果写入，不包括首次模型下载、人工确认和实时录制。分别报告下载时间、各阶段 wall-clock、内存/显存、取消释放；UI 输入目标 ≤100ms，running progress 至少每秒一次（可报告当前 segment，不伪造进度）。目标尚无实测证据。
+
+可提交 fixture 覆盖合成四 stem、44.1/48kHz、首尾静音、固定/变化 BPM、鼓轨空白、歧义和冲突工程。owner 歌曲仅作未跟踪人工复核，不作为唯一正确性证据。delivery 首个切片先验证 FT 分离兼容性、质量和性能，再接入完整工作区。
+
+### 21.12 Alternatives and deferred options
+
+| Option | Decision | Reason |
+| --- | --- | --- |
+| 独立本机处理服务 | Reject | 额外安装、启动、配对与进程维护不符合本轮浏览器选择 |
+| 云端处理 | Reject | 改变本地音频与隐私边界 |
+| 单个 FT 专用模型取四轨 | Reject | 非对应 row 不是完整 FT 四轨质量结果 |
+| 自动 CPU/轻量模型 fallback | Reject | 隐式改变质量、耗时和 provenance |
+| 神经网络 beat/downbeat 依赖 | Reject for first slice | 选择内部 TypeScript 跟踪，小节起点/拍号由用户确认 |
+| cache 自动 LRU、stem 应用内 mix、V1/V2 双写 | Defer / Reject dual-write | 第一版显式清理与单播放引擎，迁移只有一个写入事实 |
+| 自动音色/FX、MIDI、3D 图、素材生成、离线/批量/其他格式 | Defer | 缺少专项分类、质量、许可或输入输出契约 |
+
+### 21.13 Approval and review triggers
+
+2026-10-04，`project-owner` 明确要求实施随附计划，授权将修订的系统设计、接口、风险与 ADR-0024–0027 标记 approved，登记产品决定并创建本地文档提交。批准范围是浏览器处理架构及进入 execution planning；R-046–R-055 全部保持 Open，不代表模型兼容、质量、性能、delivery、readiness 或生产上线已通过。
+
+更换模型/runtime/backend/节拍算法、改变联网/音频边界、PCM/缓存/Worker 拓扑、评分/聚合、小节确认、覆盖/刷新规则、V2 source/迁移或性能目标时复核相应契约与 ADR。新 execution plan、acceptance criteria、test strategy 和 milestone plan 仍须单独评审；本轮不创建实现代码或安装产品依赖。
