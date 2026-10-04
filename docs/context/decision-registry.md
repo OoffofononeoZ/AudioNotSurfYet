@@ -1,13 +1,13 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-10-01
+last_reviewed: 2026-10-04
 upstream_docs:
   - "docs/context/index.md"
   - "docs/product/scope.md"
   - "docs/architecture/system-design.md"
   - "docs/delivery/execution-plan.md"
-next_action: "按 DEC-062 开展新视频目标的系统设计，自动处理和统一工程契约仍待评审"
+next_action: "DEC-063–066 浏览器处理架构已批准；制定并评审新 execution plan/验收/测试/里程碑，风险保持 Open"
 ---
 
 # Decision Registry
@@ -100,6 +100,10 @@ next_action: "按 DEC-062 开展新视频目标的系统设计，自动处理和
 | DEC-061 | 2026-09-17 | 旧设计改造收尾记录；相关资料已移至本地归档 | project-owner | archived | Git 历史 | 后续设计方向确定 |
 | DEC-062 | 2026-10-01 | 批准以歌曲尽可能自动生成同步可视化视频为主目标，同时保留自动结果手动修正和完整手动操作路径 | project-owner | approved | `docs/product/problem-brief.md`、`docs/product/scope.md`、`docs/product/success-metrics.md`、`docs/product/open-questions.md`；owner 本轮批准 | 用户任务或自动/手动优先级实质变化 |
 
+| DEC-063 | 2026-10-04 | 批准浏览器 ORT Web/WebGPU 分离运行时，现有 analysis Worker + 最多一个专用分离 Worker；本地音频不上传，首次模型下载显示大小/进度，失败保留人工路径 | project-owner | approved | [ADR-0024](../architecture/adrs/0024-browser-processing-runtime.md)、[System Design §21](../architecture/system-design.md#21-automated-audio-to-video-target-architectureapproved)；owner 本轮计划授权 | runtime/backend、Worker/播放拓扑、联网/隐私或 fallback 变化 |
+| DEC-064 | 2026-10-04 | htdemucs_ft 四专用 fp16weights 模型按角色取 row、原 PCM 时间基准、TS DP 逐拍/局部 tempo；小节起点/拍号由用户确认；IDB/OPFS 10GB/quota，参考机十五分钟目标待测 | project-owner | approved | [ADR-0025](../architecture/adrs/0025-audio-processing-pipeline-and-timebase.md)、[Model Artifacts](../architecture/processing/model-artifacts.md) | 模型/算法、拼接/评分、容量或性能目标变化 |
+| DEC-065 | 2026-10-04 | 保留只读提案、canonical project hash 冲突、逐项人工确认与 rerun 零隐式覆盖；自动音色/FX、MIDI、3D 辅助图及素材生成明确延后 | project-owner | approved | [ADR-0026](../architecture/adrs/0026-processing-proposals-and-user-ownership.md)、[产品问题](../product/open-questions.md) | apply/覆盖规则、用户所有权或延后能力进入范围 |
+| DEC-066 | 2026-10-04 | 批准 Project V2 和 V1 单向迁移、默认横线 other energy/竖线 beat；用户改 tempo 后显式刷新 Editor snapshot 与节拍映射，继续实时 WebM | project-owner | approved | [ADR-0027](../architecture/adrs/0027-visualizer-project-v2-processing-bindings.md)、[Worker/V2 Contract](../architecture/processing/worker-and-project-contracts.md) | source/schema/迁移、tempo 刷新或输出路线变化 |
 ## Approval Evidence
 
 `project-owner` 于 2026-07-24 通过“PLEASE IMPLEMENT THIS PLAN”明确要求将随请求给出的产品、架构、里程碑和测试决定落入仓库。本注册表记录的是批准的决策；M3–M12 的实现状态仍以 [milestone plan](../delivery/milestone-plan.md) 和可复现证据为准。
@@ -152,6 +156,7 @@ readiness provisional 随后在相同 runtime source tree 上 24/24 通过；cle
 
 `project-owner` 于 2026-07-28 明确批准 Q0 三份质量文档和两份 delivery 修订，DEC-010 的内容门禁随之生效并开放 M3。该批准不构成任何测试、浏览器或 readiness 通过证据。
 
+2026-10-04，`project-owner` 明确要求实施随附“将自动处理架构改为浏览器本地方案，并批准、提交文档”计划。计划授权按本轮选择修订系统设计、接口、风险和 ADR-0024–0027，标记 approved、同步 PROD-024–029/索引/批准记录，并创建仅含相关文档的本地提交；下一阶段为 execution planning。DEC-063–066 据此生效，R-046–R-055 全部保持 Open。该授权不构成模型兼容、分离质量、节拍准确度、性能、delivery、readiness 或上线证据，不改写已有 canonical。
 ## Execution Evidence
 
 2026-07-28，DEC-011–DEC-013 约束下的首个 [M3 canonical run](../quality/evidence-index.md) 在 clean commit `17d16f0da37289c1f67f75203502beef999572ea` 上通过。`project-owner` 随后明确批准该 evidence 与 working agreements，M3 据此关闭并开放 M4。该批准不是新的产品或架构决定，也不构成 Edge、M4–M11 或 readiness 通过。

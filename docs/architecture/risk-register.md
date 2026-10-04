@@ -1,11 +1,11 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-09-04
+last_reviewed: 2026-10-04
 upstream_docs:
   - "docs/architecture/system-design.md"
   - "docs/architecture/interface-contracts.md"
-next_action: "以原生 fullscreen 状态同步、单 timer 和 owner 自行审阅跟踪 R-045"
+next_action: "R-046–R-055 风险登记已批准但全部 Open；delivery 覆盖浏览器模型、时间/节拍、quota、取消、覆盖/刷新与 V2 验证"
 ---
 
 # Risk Register
@@ -59,6 +59,16 @@ next_action: "以原生 fullscreen 状态同步、单 timer 和 owner 自行审�
 | R-043 | 生成的新 Visualizer 场景违反绑定、确定性、资源或 strict project 契约 | Medium | High | 模糊请求直接改代码；第五特征进入 Worker；RAF delta/非 seed 随机；未知模板被宽松接受；renderer/RAF/geometry 累积；录制或 context 恢复失败 | DEC-056/ADR-0021 的输入完整性与 Scene Contract 双门禁；参数/Feature 显式声明；固定时间/hash；强制 unit/integration/Chrome/Edge 与 V1/V2/V5/V6 回归 | 在首个真实新场景及后续 readiness 重评前保持 Open；越过 JSON/拓扑/四特征/资产许可边界时停止并独立评审 | project-owner | Open |
 | R-044 | E10 小节批量选择、复制或移动产生跨轨误选、部分提交、ID/秒数漂移、pointer 泄漏或离页决策挂起 | Medium | High | 选择越过起始 lane/class；部分事件被跳过/覆盖；复制复用 ID；移动改 ID；冲突后工程变化；cancel 后提交；route guard Promise 未解析 | ADR-0022 单 owner transient state；纯 command 预校验后一次提交；typed errors；pointercancel/lostcapture/Escape；原生 dialog 安全默认；E10 success/failure/boundary 矩阵 | 完整 E10 canonical 或 owner 补偿 evidence 与人工交互门禁通过后缓解；批量范围、冲突、快捷键或 route dialog 改变时重开 | project-owner | Open |
 | R-045 | Visualizer 原生全屏状态、自动隐藏控制栏或录制/route 生命周期分叉，导致控件不可恢复、播放时间变化或资源泄漏 | Medium | High | fullscreenElement 与按钮不一致；paused 控件消失；底部热区无效；进入/退出改变播放；录制锁后仍停留全屏；timer/listener 残留 | ADR-0023 以 fullscreenchange 为事实源、唯一 2 秒 timer、同 workspace/Canvas/RendererHost/RAF、录制锁主动退出与卸载清理；owner 审阅 FS-G01–FS-G06 | 本轮按 owner 指令不执行自动化，typecheck/build 只证明可运行；owner 交互与视觉确认前保持 Open | project-owner | Open |
+| R-046 | WebGPU/adapter、ORT 算子或四个 FT ONNX 图不兼容，浏览器分离无法启动 | High | High | 缺 navigator.gpu、session create 失败、图 unsupported、实际 kernel 分配与预期不符 | 首切片逐模型 Chrome/Edge session/短段 parity 与后端记录；显式 typed error；不以整图 CPU 或小模型掩盖失败 | 用户可转人工或显式 mix-only 节拍；ORT/图/backend/支持矩阵变化时重开 | project-owner | Open |
+| R-047 | 重采样、分段 overlap-add、滤波延迟或 stem/WAV 长度让标记和视频漂移 | Medium | High | 首尾静音消失、接缝脉冲错位、duration 超界、导出帧数不符 | 原解码 PCM 唯一基准；canonical hash、有界分块；44.1/48kHz/静音/脉冲拼接 golden，尾部最多一 sample 校正与 WAV/A/V 检查 | 模型/重采样/config/codec 改变时复跑；浏览器解码差异以 source identity 隔离 | project-owner | Open |
+| R-048 | 模型下载、revision/hash、ORT JS/WASM assets 或许可证来源漂移，缓存不可复现 | High | High | 半成品被命中、模型 SHA 不符、浮动 main、runtime asset 版本不同、许可缺项 | 四个 immutable artifact/SHA/size；runtime/assets/config 锁定；下载进度/取消/断网/checksum fault；校验后发布与来源 attribution | 本轮只核对发布指针，未下载 bytes 或验证 ORT 版本；任何 artifact/runtime 变化时复核 | project-owner | Open |
+| R-049 | 十五分钟歌曲在 RTX 4060 Laptop 8GB 超过十五分钟或浏览器/GPU 内存耗尽 | High | High | 四模型 + beat 总处理超时、device lost/OOM、主线程长任务、无进度 | 单 session/有界分段/OPFS 流式写；下载另计；参考机 wall-clock、内存/显存与 UI/progress 门禁；失败不静默降级 | fp16weights 仍为 fp32 compute；目标尚未实测，低于参考机不承诺同等性能 | project-owner | Open |
+| R-050 | 取消、换歌、离页或 Worker 崩溃后残留 GPU/session/临时 OPFS 或迟到结果 | Medium | High | 5 秒后 temp 未清理/登记、session 增长、旧结果发布工程、下载取消仍写完整 entry | job/source/generation 校验；取消 fetch、释放 tensor/session、必要时 terminate 分离 Worker；temp/complete 发布与残留登记；race/resource tests | 浏览器终止时需下次初始化登记清理；不能通过取消删除旧完整模型/结果 | project-owner | Open |
+| R-051 | 10GB 配置与 origin quota 不一致、IDB/OPFS 跨存储失败或 cache identity 不完整 | High | High | 写时 quota exceeded、metadata 指向残缺文件、artifact hash 错、无提示驱逐 | 模型/结果/temp 总量与 navigator.storage estimate；写时异常；checksum、先 artifact 后 metadata 发布；显式列表/清理，无自动 LRU | quota 估算不是保证，浏览器可清除 origin 数据；schema/容量/策略改变时重开 | project-owner | Open |
+| R-052 | 单专用模型冒充四轨，分离质量不足或 other 被误称 lead | High | High | role/row 不符、非对应输出被当完整 stem、人声/鼓泄漏、UI 显示 lead | 四模型按 drums/bass/other/vocals 专用 row 各取一次；reference parity、合成四轨与 owner 歌曲复核；waveform/energy/WAV/provenance | 上游质量不能替代浏览器实测；用户可拒绝/人工映射，模型/角色变化时独立评审 | project-owner | Open |
+| R-053 | TS 逐拍/局部 tempo 在变化 BPM、静音、空鼓轨、半速/倍速或低置信度中误导用户 | High | High | 静音假 beat、变化被拉平、空 drums 删除 mix、算法分数被称概率、伪造 4/4/downbeat | mix 主输入 + drums 辅助；DP/interval/version/config golden；歧义/gap 警告；无可靠 beat 为空；小节起点/BPM/拍号由用户确认 | 复杂曲仍需人工复核；评分/阈值/聚合或自动 meter 能力变化时重开 | project-owner | Open |
+| R-054 | rerun/apply 或 tempo 修改后旧快照覆盖用户数据或驱动画面 | Medium | High | hash 冲突仍写、未选字段变化、rerun 自动刷新、Editor tempo 变化仍使用旧 beat map | 只读 proposal + 逐项 diff/确认 + canonical hash；用户 tempo/marker/binding 保留；显式一起刷新 Editor snapshot 与派生 map；stale preflight；冲突/部分应用测试 | 用户仍需确认替换/刷新，持久化失败保留 dirty/export；apply/刷新/revision 语义变化时重开 | project-owner | Open |
+| R-055 | V1→V2 丢 binding、snapshot 膨胀/失配、派生 downbeat 被当模型事件或长期双写 | Medium | High | 迁移不确定、旧字段变化、V1/V2 草稿并存、工程嵌音频/handle、source/meter provenance 不符 | 纯单向迁移 + V2-only writes；strict codec/size golden；UInt16 compact；不嵌 stem/model/handle；identity、editor-tempo-derived 与 beat resolver 校验 | V2 不降级导出 V1；新工程需要独立 eval，source/schema/codec 改变时复核 | project-owner | Open |
 
 ## Review Rule
 
@@ -76,3 +86,5 @@ next_action: "以原生 fullscreen 状态同步、单 timer 和 owner 自行审�
 - 2026-09-04 的 DEC-056/ADR-0021 新增 R-043。当前只交付场景生成 Skill 与门禁，不存在第三个场景实现证据；因此风险保持 `Open`，直到具体场景完成强制矩阵并重新评审 Visualizer readiness。
 - 2026-09-04 的 DEC-057/ADR-0022 打开 E10 并新增 R-044。E10 改变 point/range pointer 与 keyboard 优先级，因此 R-025 从历史 `Mitigated` 恢复为 `Open` 观察；E1–E9 evidence 本身不改写。
 - 2026-09-04 的 DEC-058/ADR-0023 新增 R-045。owner 明确跳过本轮自动化并自行审阅，因此实现即使通过 typecheck/build 也不缓解该风险；V1–V6 已批准资源证据不被反向改写。
+
+- 2026-10-04，owner 批准浏览器处理风险登记；R-046–R-055 全部保持 Open，模型兼容、质量和性能均待实测。

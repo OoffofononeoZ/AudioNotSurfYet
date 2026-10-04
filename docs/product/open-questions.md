@@ -1,27 +1,28 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-10-01
+last_reviewed: 2026-10-04
 upstream_docs:
   - "docs/product/problem-brief.md"
   - "docs/product/scope.md"
   - "docs/product/success-metrics.md"
-next_action: "将 PROD-024–029 带入系统设计评审；自动优先与人工可操作原则已由 PROD-023 关闭"
+next_action: "PROD-024–029 已决定或明确延后；按 DEC-063–066 进入 execution planning，质量/性能阈值与证据尚待交付"
 ---
 
 # Open Questions
 
-## 新视频目标的待决策项
+## 视频目标架构决定（2026-10-04 approved）
 
-| ID | 待决定的问题 | 对后续工作的影响 | Owner | 下一步 |
+| ID | 状态 / 决定 | 对后续工作的影响 | Owner | 下一步 / 重访条件 |
 | --- | --- | --- | --- | --- |
-| PROD-024 | 是否采用 Demucs 或其他音轨分离方案；在浏览器、本机辅助程序还是服务端运行；输入、许可和数据留存如何处理？ | 隐私、依赖、资源预算和系统边界 | project-owner | 系统设计比较方案；决定前不添加依赖或处理链 |
-| PROD-025 | 鼓轨是否足以推断 BPM；变速歌曲、首尾静音及鼓轨中段空白如何表示置信度与人工修正？ | tempo map、失败语义和 golden fixture | project-owner | 系统设计定义时间与修正契约；保留现有人工 tempo 能力 |
-| PROD-026 | 较长音色/FX 如何自动识别持续区间；分离音轨转 MIDI 是否需要，如何与人工点/范围标记统一？ | 标记来源、时间身份、冲突处理和工程格式 | project-owner | 系统设计决定候选能力；此时不扩展 Editor JSON |
-| PROD-027 | 分离音轨、分析结果、标记与视觉素材如何进入同一视频工程，并保留来源和歌曲身份？ | 导入、持久化、绑定、许可与兼容 | project-owner | 系统设计提出统一工程契约；此时不改变 Project V1 |
-| PROD-028 | 视频生成沿用实时 WebM 到什么范围；是否需要离线、批量、其他格式或不同的音画同步目标？ | 录制架构、性能、浏览器支持和验收 | project-owner | 系统设计评估输出方案；当前只沿用已批准的实时录制边界 |
-| PROD-029 | 三维分析数据是否需要三维辅助图，以及原子视觉素材由谁提供或生成？ | 标记体验、素材许可与未来 Skill 边界 | project-owner | 设计阶段决定输入边界；此时不创建视觉素材生成 Skill |
+| PROD-024 | Decided：浏览器 ONNX Runtime Web/WebGPU + htdemucs_ft 四个专用 fp16weights 模型；音频不上传，模型/metadata 用 IDB、stem 用 OPFS | 本地边界、模型来源/校验、单专用分离 Worker、10GB/quota 与资源风险 | project-owner | 按 DEC-063/064 先验证兼容性/质量/性能，模型/runtime/许可变化时复核 |
+| PROD-025 | Decided：扩展现有 TS flux/onset/自相关 + DP 逐拍与局部 tempo，mix 主输入、drums 辅助；小节起点、BPM/拍号由用户确认 | 固定/变化 BPM、静音、空鼓轨、歧义和评分 golden；不承诺自动 downbeat/meter | project-owner | delivery 定义算法评分/阈值与人工复核验收；自动 meter 能力另行批准 |
+| PROD-026 | Deferred：自动长音色/FX 和 stem→MIDI 不进入首条交付链；现有人工 point/range 保留 | 不扩展 Editor V1 自动事件 schema；只读 proposal 与 hash 冲突检查 | project-owner | 有专项分类、质量、许可和输入输出契约后重新评审，不阻断本次 planning |
+| PROD-027 | Decided：只读提案、逐项确认、Visualizer Project V2、V1 单向迁移、compact energy/beat 与默认 other/beat 绑定 | 保留用户数据；Editor 改 tempo 后显式刷新 Editor 快照与节拍映射 | project-owner | 按 DEC-065/066 验证 apply/hash、迁移、source/stale、默认映射与导出 |
+| PROD-028 | Decided：首链继续实时 WebM，沿用 ≤100ms A/V 目标；离线、批量及其他格式延后 | 不改变现有单 RendererHost/pre-Gain 录制边界；模型下载与处理独立计时 | project-owner | 新 delivery 做双浏览器媒体回归；新增格式/离线任务需另行评审 |
+| PROD-029 | Deferred：3D 分析辅助图与原子视觉素材生成；第一条链只用已批准场景与输入 | 不扩展资产、许可或场景绑定边界 | project-owner | 具体视觉任务、数据映射和素材许可明确后独立设计，不阻断本次 planning |
 
+本轮授权已关闭架构取舍并明确延后范围；模型兼容、分离质量、节拍准确度和性能仍待 delivery 验证，不以 Decided 表示风险缓解。技术契约见 [system design 第 21 节](../architecture/system-design.md#21-automated-audio-to-video-target-architectureapproved)。
 下列旧问题和批准记录保留其历史语境；新目标不能把已关闭的 PROD-014V 解释为对上述能力的批准。
 
 ## Closed in Video Goal Review
@@ -77,4 +78,8 @@ next_action: "将 PROD-024–029 带入系统设计评审；自动优先与人�
 
 ## Gate State
 
-PROD-014V 已关闭并开放 Visualizer system design；delivery、代码和 quality 仍未开放。PROD-022 作为不阻断首版的未来复核项保留。PROD-021 已关闭，M14 clean canonical 19/19 通过并恢复 Analyzer `Ready with waivers`；PROD-015 继续阻断正式上线。
+2026-10-04，浏览器自动处理架构和 PROD-024–029 对应结论已获批准，下一阶段为 execution planning；新计划、实现、quality/readiness 尚未批准。既有 Analyzer/Editor/Visualizer canonical 身份保持历史有效；PROD-022 仍为未来复核项，PROD-015 继续阻断正式上线。
+
+## Browser Architecture Approval Record
+
+2026-10-04，project-owner 明确要求实施随附浏览器修订计划并授权登记决定/延后项、批准架构及本地文档提交。上表据此生效，未增加测试结果或未来能力批准。

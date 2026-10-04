@@ -1,17 +1,17 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-10-01
+last_reviewed: 2026-10-04
 upstream_docs:
   - "AGENTS.md"
-next_action: "按已批准的视频产出主目标复核系统设计，再依次复核交付、质量和发布范围"
+next_action: "浏览器架构/ADR 已批准；制定 execution plan、acceptance criteria、test strategy、milestone plan，首切片验证 FT 分离兼容性/质量/性能"
 ---
 
 # Repository Context Index
 
-## 2026-10-01 产品方向批准与文档影响
+## 2026-10-04 浏览器架构批准与下一阶段
 
-owner 已批准以歌曲尽可能自动生成同步音频可视化视频为主目标，并要求保留自动结果的人工修正及完整手动操作路径（DEC-062）。产品意图四份文档已批准；Analyzer、Editor、Visualizer 既有批准和 canonical evidence 仍只覆盖原候选。`system-design.md`、Visualizer execution plan 与 Visualizer readiness 已登记待复核；其余架构子契约、delivery 测试/验收、quality 和 release 文档在新目标形成接口决策后按影响逐一复核，不推断当前实现支持 Demucs、MIDI 或自动标记。
+DEC-062 的自动优先、人工可修正与完整手动视频目标不变。owner 本轮明确授权修订并批准浏览器 FT ONNX/WebGPU 分离、TypeScript BPM/逐拍/局部 tempo、用户小节确认、只读提案、Project V2 与显式 tempo 刷新（DEC-063–066）。系统设计、接口、风险与 ADR-0024–0027 均为 approved；PROD-024–029 已决定或明确延后。R-046–R-055 仍全部 Open，模型兼容、质量和参考机性能待实测。下一阶段为 execution planning；Visualizer 四份 delivery 文档及 readiness 待复核，Analyzer/Editor/Visualizer 已有 canonical 只覆盖历史候选，当前代码未据此获得自动处理。
 
 ## Purpose
 
@@ -21,14 +21,14 @@ DEC-058/ADR-0023 另把 Visualizer 原生全屏登记为 post-V6 readiness 修�
 
 DEC-059/DEC-061 对应的旧设计指导和交付计划已归档，停止作为后续设计任务的依据。已经实现的样式仍是当前代码事实；新的设计方向由 owner 另行确定。
 
-本目录维护仓库事实、边界和工作记忆；生命周期路由与通用方法由 [AGENTS.md](../../AGENTS.md) 负责。当前代码事实与目标架构必须区分：现状见 [system map](system-map.md)，既有技术基线及新目标待复核项见 [system design](../architecture/system-design.md)。
+本目录维护仓库事实、边界和工作记忆；生命周期路由与通用方法由 [AGENTS.md](../../AGENTS.md) 负责。当前代码事实与目标架构必须区分：现状见 [system map](system-map.md)，既有技术基线及获批目标架构见 [system design](../architecture/system-design.md)。
 
 ## Current Stage
 
 - Repository context：入口、决策注册表、system map、glossary 与 working agreements 均已批准。
 - Product intent：Analyzer/Editor 历史范围与 Visualizer V0 已批准；自动优先且可人工修正/手动完成的视频产出主目标已于 2026-10-01 获批。
-- System design：Analyzer、Visualizer 与 Editor E1–E9 的既有技术基线保留；新视频目标的输入链路与系统设计现可开展复核，尚未获批。
-- Execution planning：M1–M14、Editor E0-D/E1–E9、Visualizer V0-D/V1–V6 的历史切片均为 `Complete`；新视频目标没有获批交付计划。
+- System design：Analyzer、Visualizer 与 Editor E1–E9 的既有技术基线保留；浏览器处理链、接口、风险与 ADR-0024–0027 已于 2026-10-04 获批；R-046–R-055 保持 Open。
+- Execution planning：M1–M14、Editor E0-D/E1–E9、Visualizer V0-D/V1–V6 的历史切片均为 `Complete`；浏览器新链进入规划，尚无获批的新交付计划；首切片先验证 FT 分离。
 - Quality and evals：M3–M14、Editor E1–E9 与 Visualizer V1–V6 evidence 均已批准；E9 revised run `E9-2026-09-04T03-51-33-088Z-13614673` 为 29/29、`approved`，首个 run `E9-2026-09-04T02-49-18-960Z-cf0a79b1` 保持 `pre-revision`。
 - Implementation：Editor E9 的删除、三级展示、28px 紧凑 BPM 标记条和标记修订已在 commit `13614673bbf4d824f2ee109d36e04de6b3f8aabd` 实现并通过 revised canonical。E8 与 Visualizer V1–V6 保持已完成。post-V6 viewport 修订已在 clean commit `9f3b55beaa0c8a3d799f3f1e16f1dd66c9aee77c` 通过 Chrome/Edge 专项。
 - Design remake：旧设计资料已在本地归档，相关历史仍可由 Git 记录追溯；后续视觉方向待 owner 确定。
@@ -46,15 +46,21 @@ DEC-059/DEC-061 对应的旧设计指导和交付计划已归档，停止作为�
 | [problem-brief.md](../product/problem-brief.md) | 历史意图及获批的视频产出主目标 | project-owner / approved | 新目标用户或核心问题变化 |
 | [scope.md](../product/scope.md) | 历史边界及自动优先、人工可操作的视频流程 | project-owner / approved | 新目标能力、数据或兼容范围变化 |
 | [success-metrics.md](../product/success-metrics.md) | 历史指标及获批的视频制作成功信号 | project-owner / approved | 新目标阈值、样本或观测方法变化 |
-| [open-questions.md](../product/open-questions.md) | 历史问题、已关闭 PROD-023 及待决策 PROD-024–029 | project-owner / approved | 自动处理或视频输出决策形成 |
-| [system-design.md](../architecture/system-design.md) | 既有技术基线；新视频流程架构待复核 | project-owner / in-review | 已批准产品目标需要自动处理和人工修正的输入输出边界 |
-| [interface-contracts.md](../architecture/interface-contracts.md) | Analyzer/Editor 历史契约与 Visualizer route lease、project/binding、scene、recording 接口 | project-owner / approved | Visualizer 消息、schema、身份或失败语义变化 |
+| [open-questions.md](../product/open-questions.md) | 历史问题及已决定/延后的 PROD-024–029 | project-owner / approved | 自动处理或视频输出决策形成 |
+| [system-design.md](../architecture/system-design.md) | 既有基线与获批浏览器 FT/TS 节拍、人工确认、V2、实时 WebM 链路 | project-owner / approved | provider、时间基准、覆盖规则、schema、输出或性能目标变化 |
+| [interface-contracts.md](../architecture/interface-contracts.md) | 历史契约与获批 browser Worker/proposal、typed error、V2 及 tempo 刷新入口 | project-owner / approved | 处理 API、身份、错误、迁移或 processing binding 变化 |
 | [Visualizer Project V1](../architecture/visualizer/project-format-v1.md) | strict JSON、歌曲 identity、Editor snapshot、单草稿与原子导入 | project-owner / approved | Visualizer schema、草稿数量、快照或兼容策略变化 |
 | [Visualizer binding and scenes](../architecture/visualizer/binding-and-scene-contracts.md) | 受控 binding、四特征 planner、绝对时间确定性、双模板与单 RendererHost | project-owner / approved | source/projection、特征上限、模板或 renderer ownership 变化 |
 | [Visualizer recording](../architecture/visualizer/recording-contract.md) | pre-Gain audio tap、严格预设、MediaRecorder 状态机与 WebM 生命周期 | project-owner / approved | 录制音量、codec、preset、状态机或保存边界变化 |
 | [Editor Project V1](../architecture/editor/project-format-v1.md) | JSON schema、validator、歌曲 identity、codec 与独立 draft DB | project-owner / approved | 工程字段、时间、格式、身份或草稿策略变化 |
 | [Editor interactions](../architecture/editor/interaction-contracts.md) | tempo/grid、pointer/keyboard、point/range 和 overlay 状态机 | project-owner / approved | 手势、吸附、重叠、DOM/Canvas 或键盘规则变化 |
-| [risk-register.md](../architecture/risk-register.md) | Analyzer/Editor 历史风险与 Visualizer R-034–R-041 | project-owner / approved | Visualizer 每个里程碑及新高影响风险 |
+| [risk-register.md](../architecture/risk-register.md) | 历史风险与获批登记的 WebGPU、模型、quota、proposal、tempo/V2 风险；R-046–R-055 Open | project-owner / approved | 自动处理实现、provider/schema 变化或新验证证据 |
+| [ADR-0024](../architecture/adrs/0024-browser-processing-runtime.md) | 浏览器 ORT WebGPU、下载/存储与专用分离 Worker | project-owner / approved | runtime、Worker、联网或 fallback 变化 |
+| [ADR-0025](../architecture/adrs/0025-audio-processing-pipeline-and-timebase.md) | FT 四模型、TS 逐拍、PCM 时间基准、quota 和待测性能目标 | project-owner / approved | provider、模型、时间/能量算法或容量变化 |
+| [ADR-0026](../architecture/adrs/0026-processing-proposals-and-user-ownership.md) | 只读提案、小节确认、逐项 apply 与用户所有权 | project-owner / approved | 自动应用、合并或覆盖语义变化 |
+| [ADR-0027](../architecture/adrs/0027-visualizer-project-v2-processing-bindings.md) | Project V2、V1 单向迁移、默认映射与 tempo 显式刷新 | project-owner / approved | schema、binding、迁移或 snapshot 内容变化 |
+| [FT model artifacts](../architecture/processing/model-artifacts.md) | 四模型固定 revision/SHA-256、专用 row、拼接/WAV 与未验证边界 | project-owner / approved | 模型、runtime、tensor 或 config 变化 |
+| [Worker and V2 contracts](../architecture/processing/worker-and-project-contracts.md) | start/progress/cancel/result/error、算法候选/apply、V2/tempo 刷新 | project-owner / approved | 身份、评分、缓存、确认或 source/迁移变化 |
 | [execution-plan.md](../delivery/execution-plan.md) | Q0、M1–M14 实施顺序和门禁 | project-owner / approved | 范围、架构或任务依赖变化 |
 | [acceptance-criteria.md](../delivery/acceptance-criteria.md) | 可测量验收与阈值 | project-owner / approved | 成功指标、容差或支持矩阵变化 |
 | [test-strategy.md](../delivery/test-strategy.md) | 测试层级、fixture 和证据策略 | project-owner / approved | 工具、fixture 或验证能力变化 |
@@ -64,9 +70,9 @@ DEC-059/DEC-061 对应的旧设计指导和交付计划已归档，停止作为�
 | [Editor test strategy](../delivery/editor/test-strategy.md) | E1–E9 测试层级、fixture、浏览器、性能与 evidence cadence | project-owner / approved | 测试工具、fixture、浏览器或证据能力变化 |
 | [Editor milestone plan](../delivery/editor/milestone-plan.md) | E0-D 与 E1–E9 状态、依赖和退出清单 | project-owner / approved | 里程碑关闭、阻塞或开放状态变化 |
 | [Visualizer execution plan](../delivery/visualizer/execution-plan.md) | V1–V6 历史切片；新视频流程待规划 | project-owner / in-review | 新目标架构和验收获批 |
-| [Visualizer acceptance criteria](../delivery/visualizer/acceptance-criteria.md) | AC-V101–AC-V607、阈值、证据方法和 R-034–R-041 映射 | project-owner / approved | Visualizer 指标、阈值、preset 或支持矩阵变化 |
-| [Visualizer test strategy](../delivery/visualizer/test-strategy.md) | V1–V6 测试层级、fixture、Chrome/Edge、WebM 与资源策略 | project-owner / approved | 测试工具、fixture、浏览器或证据能力变化 |
-| [Visualizer milestone plan](../delivery/visualizer/milestone-plan.md) | V0-D 与 V1–V6 状态、依赖、阻塞和退出证据 | project-owner / approved | 里程碑开放、关闭或 blocked 状态变化 |
+| [Visualizer acceptance criteria](../delivery/visualizer/acceptance-criteria.md) | 历史 AC-V101–AC-V607；新 processing/V2 验收待复核 | project-owner / in-review | Visualizer 指标、阈值、preset 或支持矩阵变化 |
+| [Visualizer test strategy](../delivery/visualizer/test-strategy.md) | 历史 V1–V6；新 browser model/beat/V2 测试待复核 | project-owner / in-review | 测试工具、fixture、浏览器或证据能力变化 |
+| [Visualizer milestone plan](../delivery/visualizer/milestone-plan.md) | 历史 V0-D/V1–V6；新链里程碑待规划 | project-owner / in-review | 里程碑开放、关闭或 blocked 状态变化 |
 | [Visualizer V1 eval plan](../quality/visualizer/eval-plan.md) | AC-V101–AC-V108 的 route、lease、project、draft、layout 与 resource 契约 | project-owner / approved | V1 行为、阈值、浏览器或证据能力变化 |
 | [Visualizer V1 golden](../quality/visualizer/golden-examples.md) | 默认/完整/无效工程、lease、草稿和 breakpoint 规范样例 | project-owner / approved | V1 schema、identity、布局或恢复语义变化 |
 | [Visualizer V1 failure taxonomy](../quality/visualizer/failure-taxonomy.md) | route、lease、project、draft、file、layout、resource 失败分类 | project-owner / approved | V1 失败域或严重度响应变化 |
@@ -144,6 +150,10 @@ DEC-059/DEC-061 对应的旧设计指导和交付计划已归档，停止作为�
 - [ADR-0018](../architecture/adrs/0018-editor-timeline-recovery-and-marker-alignment.md)：Editor `88px/72px` 时间轴、同/异歌恢复决策与 point marker 中心对齐。
 - [ADR-0023](../architecture/adrs/0023-visualizer-fullscreen-playback.md)：Visualizer 原生全屏、同 Canvas/RendererHost/RAF 与 2 秒自动隐藏 transport。
 
+- [ADR-0024](../architecture/adrs/0024-browser-processing-runtime.md)：浏览器 ORT WebGPU、模型下载/缓存、最多一个分离 Worker。
+- [ADR-0025](../architecture/adrs/0025-audio-processing-pipeline-and-timebase.md)：四专用模型/PCM、TypeScript 逐拍/局部 tempo、人工小节确认与待测性能。
+- [ADR-0026](../architecture/adrs/0026-processing-proposals-and-user-ownership.md)：只读提案、逐项 apply、工程 hash 与零隐式覆盖。
+- [ADR-0027](../architecture/adrs/0027-visualizer-project-v2-processing-bindings.md)：V2、单向迁移、默认映射与显式 tempo 刷新。
 ## Repository Areas
 
 | Area | Current role | Target/change source |
@@ -307,3 +317,5 @@ M11 canonical run `M11-2026-08-25T10-05-12-783Z-99c67792` 随后在 clean commit
 首次 clean run `M12-2026-08-28T07-25-22-951Z-b50c2c1e` 因 M7 短 fixture 在观察前可能已接近结束、exact-cursor 计数窗口缺少播放输入而失败；失败 artifact 保留。测试先把进度归零并确认 `playing` 后，专项连续 5/5 通过，修复 commit 为 `be655e6765a63493fb1a3a4ee99992073b06e54e`。随后 canonical `M12-2026-08-28T07-30-39-789Z-be655e67` 在该 clean commit 上 12/12 通过，summary SHA-256 为 `76ffab8e9fd5db6370c22aa78c7ee08a0708d7a5d97e1b749fca284d4c696441`。
 
 `project-owner` 已明确要求“自行提交并完成后续即可”，并说明“可以不上传远程仓库”。该授权在 M12 canonical 全绿后登记为 evidence/readiness 复核：M12 改为 `Complete`，R-028 为 `Mitigated`，Analyzer 恢复 `Ready with waivers`；本轮仅做本地提交，不推送。PROD-015 继续阻断上线，Editor readiness 等待 E7。
+
+2026-10-04，owner 通过本轮计划授权修订/批准浏览器架构、ADR 与对应决定登记，并创建仅含相关文档的本地提交。该批准开放 execution planning；模型/质量/性能风险及新链 readiness 尚未收口，历史 canonical 不变。

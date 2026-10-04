@@ -1,11 +1,11 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-10-01
+last_reviewed: 2026-10-04
 upstream_docs:
   - "docs/product/problem-brief.md"
   - "docs/quality/release-readiness.md"
-next_action: "以自动优先、可人工修正和手动完成的产品范围进入系统设计；逐项决定新处理能力与接口"
+next_action: "按批准的浏览器四轨、TS 节拍、人工小节确认、只读提案和 V2 范围制定 delivery；延后项不纳入首链"
 ---
 
 # Scope
@@ -13,14 +13,14 @@ next_action: "以自动优先、可人工修正和手动完成的产品范围进
 ## 视频产出主目标（2026-10-01 获批）
 
 - **最终任务**：从一首歌曲出发，尽可能自动完成可用处理、标记和视觉映射，生成与歌曲同步、可回放的音频可视化视频，减少跨环节手工转录。
-- **自动优先**：优先评估自动处理结果如何进入同一制作任务。音轨分离、BPM 推断、音色或效果的自动标记是候选输入来源；算法、轨道种类、运行环境、质量和工程格式须另行评审。分离音轨转 MIDI 在流程图中为“暂定”，不作为当前交付承诺。
+- **自动优先**：优先评估自动处理结果如何进入同一制作任务。首链已批准浏览器四轨分离、BPM/逐拍/局部 tempo 候选和经确认的处理快照/默认映射；小节起点与拍号由用户确认。自动音色/FX 与分离音轨转 MIDI 明确延后，质量阈值与交付切片仍需规划。
 - **人工操作**：允许用户检查、修正或覆盖自动结果；自动处理不适用、失败或用户选择手动制作时，可手动完成节拍、点/范围标记、视觉配置和视频输出所需步骤。现有 Analyzer、Editor、Visualizer 功能可作为设计基线；当前实现只证明各自已批准的功能和候选，不证明整条制作任务已验收。
 - **视觉输入**：允许规划现有固定效果或已获许可的视觉素材如何进入制作流程；原子化视觉素材生成 Skill、任意外部资产导入和新场景绑定类型均不因本目标自动获批。
 - **产物边界**：现有实时 WebM 仍是当前已实现的输出路线；其他格式、离线渲染或无人值守批量生成须另行确定，不从“自动处理”推断实现方式。
 
-流程草案按三段理解：歌曲可产生原曲波形、Meyda 时域/频域分析与节拍信息，也可在未来获批后产生分离音轨；鼓、bass、人声、lead/other 四类音轨及去人声处理均为暂定。人工标记与未来自动结果应在同一时间轴上供检查和修正，短音色记录出现位置，长音色或 FX 记录起止位置。最后将固定视觉效果或已获许可的素材、音轨标记、分析响应与段落切换标记映射到视频画面；具体合并规则、文件格式和数据来源在架构阶段决定。
+首链按“分离音轨 → 分析节拍 → 应用提案”显式操作，四轨角色固定 drums、bass、other、vocals，other 不称 lead。原曲解码 PCM 保持唯一时间基准；自动结果仅作可拒绝提案，用户确认后进入同一制作任务。人工 point/range 标记继续保存出现/持续时间；首版沿用现有实时 WebM 和已批准场景。处理格式、覆盖/迁移与默认映射以 [批准架构](../architecture/system-design.md) 为准。
 
-本节的产品方向已获批准并开放系统设计。下列 Analyzer、Editor、Visualizer V0 范围仍记录历史批准基线；新流程的具体架构、交付与实现仍须经过各自门禁。
+本节产品方向保持 2026-10-01 批准；2026-10-04 的浏览器首链架构与决定见 DEC-063–066。下列 Analyzer、Editor、Visualizer V0 仍记录历史批准基线；新链进入 execution planning，尚未获得实现、quality/readiness 或上线批准。
 
 ## Scope Boundary
 
@@ -280,3 +280,5 @@ V1–V6 每个里程碑均须独立完成 provisional、实现提交、clean can
 - Controlled extension：2026-09-04 owner 通过完整实施计划批准 DEC-056；“首版两个模板”保持历史事实，新增受控内置场景须经过输入完整性与 Scene Contract 两阶段门禁，且不继承 V1–V6 canonical 或 readiness 身份。
 
 File System Access 行为依据：[Chrome File System Access 文档](https://developer.chrome.com/docs/capabilities/web-apis/file-system-access) 与 [持久权限说明](https://developer.chrome.com/blog/persistent-permissions-for-the-file-system-access-api)。
+
+2026-10-04，owner 随本轮浏览器处理计划明确批准首链范围与延后项，授权同步产品问题、批准架构并本地提交。产品主目标和历史候选边界不变；新增能力仍待 delivery 与实测。

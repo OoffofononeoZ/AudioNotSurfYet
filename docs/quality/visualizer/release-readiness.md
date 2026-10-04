@@ -1,7 +1,7 @@
 ---
 status: in-review
 owner: "project-owner"
-last_reviewed: 2026-10-01
+last_reviewed: 2026-10-04
 upstream_docs:
   - "docs/delivery/visualizer/acceptance-criteria.md"
   - "docs/delivery/visualizer/test-strategy.md"
@@ -10,12 +10,12 @@ upstream_docs:
   - "docs/quality/visualizer/viewport-scroll-failure-taxonomy.md"
   - "docs/quality/visualizer/fullscreen-playback-eval-plan.md"
   - "docs/quality/visualizer/fullscreen-playback-failure-taxonomy.md"
-next_action: "继续审阅原候选的 fullscreen；已批准的新视频主目标待架构与专项证据，不由本候选覆盖"
+next_action: "继续审阅原 fullscreen 候选；新 browser processing/V2 架构已批准，等待独立 delivery/eval/readiness，不继承本候选"
 ---
 
 # Visualizer Release Readiness
 
-> 2026-10-01 范围说明：下述候选身份和证据只覆盖已有 Visualizer 基线及其 viewport/fullscreen 修订。已获产品批准的自动优先、可人工修正或手动完成的完整视频工作流尚无专项验收证据，不能继承本 readiness 结论。
+> 2026-10-04 范围说明：下述候选身份和证据只覆盖已有 Visualizer 基线及其 viewport/fullscreen 修订。DEC-063–066 的浏览器 FT/TS 节拍、人工小节确认、只读提案与 V2/tempo 刷新已获架构批准，但没有独立 delivery/eval；R-046–R-055 全部 Open。架构批准和本轮文档校验不能证明模型兼容、质量、性能或新链 readiness，历史候选身份及媒体 hash 不改写。
 
 ## Summary Decision
 

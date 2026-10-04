@@ -1,15 +1,17 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-09-04
+last_reviewed: 2026-10-04
 upstream_docs:
   - "docs/product/scope.md"
   - "docs/architecture/system-design.md"
   - "docs/architecture/interface-contracts.md"
-next_action: "新增内置场景时按 ADR-0021 追加 template ID 与严格白名单；保持 schemaVersion/templateVersion 为 1"
+next_action: "保留历史 V1 格式与当前实现；新处理链按 ADR-0027/V2 子契约制定迁移 delivery，场景追加仍使用 ADR-0021"
 ---
 
 # Visualizer Project Format V1
+
+> 2026-10-04：本文保留 V1 已批准的历史格式与当前实现。浏览器处理目标的新建/草稿/导出将只写 V2，V1 import 单向迁移；未来格式以 [V2 子契约](../processing/worker-and-project-contracts.md#visualizer-v2-snapshot-migration-and-tempo-refresh) 为准，新代码仍待 delivery 批准。
 
 ## Purpose and Boundary
 
