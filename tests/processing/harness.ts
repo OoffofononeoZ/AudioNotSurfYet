@@ -14,7 +14,17 @@ let result:SeparationResult|null=null;
 let compatibility:{worker:Worker;reject:(error:Error)=>void}|null=null,separating=false;
 const urls:string[]=[];
 const api={
-    async compat(row:number){
+    async probe(mode:string,row:number){
+        if(compatibility||separating)throw new ProcessingError('invalid-request','A processing task is already running.');
+        return new Promise<Record<string,unknown>>((resolve,reject)=>{
+            const worker=new Worker(new URL('./runtime-probe.worker.ts',import.meta.url),{type:'module'});
+            compatibility={worker,reject};
+            worker.onmessage=event=>{if(event.data.type==='progress'){status.textContent=JSON.stringify(event.data);return;}worker.terminate();compatibility=null;resolve(event.data);};
+            worker.onerror=()=>{worker.terminate();compatibility=null;reject(new Error('Probe Worker failed.'));};
+            worker.postMessage({mode,row});
+        });
+    },
+    async compat(row:number,variant?:string){
         if(compatibility||separating)throw new ProcessingError('invalid-request','A processing task is already running.');
         return new Promise<Record<string,unknown>>((resolve,reject)=>{
             const worker=new Worker(new URL('./compat.worker.ts',import.meta.url),{type:'module'});
@@ -24,7 +34,7 @@ const api={
                 worker.terminate();compatibility=null;resolve(event.data);
             };
             worker.onerror=()=>{worker.terminate();compatibility=null;reject(new Error('Compatibility Worker failed.'));};
-            worker.postMessage({row});
+            worker.postMessage({row,variant});
         });
     },
     async synthetic(frames:number,rate=44100){

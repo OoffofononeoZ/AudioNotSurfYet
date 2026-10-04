@@ -4,7 +4,7 @@ import runtimeManifest from './runtime-manifest.json';
 import { hashBytes } from './sha256';
 import type { StemRole } from './modelManifest';
 import { loadModel } from './modelCache';
-import { initializeRuntime } from './runtime';
+import { initializeRuntime,FT_SESSION_OPTIONS } from './runtime';
 import { jobDirectory, openPcm, yieldTask } from './storage';
 import type { StagedPcm } from './storage';
 export interface StemArtifact {
@@ -30,7 +30,7 @@ export async function separate(ref:StagedPcm,signal:AbortSignal,
         let session:Awaited<ReturnType<typeof runtime.ort.InferenceSession.create>>|undefined;
         const writers:FileSystemWritableFileStream[]=[];
         try{
-            try{session=await runtime.ort.InferenceSession.create(artifact.bytes,{executionProviders:['webgpu'],logSeverityLevel:0,logVerbosityLevel:1});}
+            try{session=await runtime.ort.InferenceSession.create(artifact.bytes,{...FT_SESSION_OPTIONS,executionProviders:['webgpu']});}
             catch{throw new ProcessingError('model-incompatible',`${model.role}: FT graph cannot initialize on WebGPU.`);}
             if(session.inputNames.join(',')!=='mix'||session.outputNames.join(',')!=='stems')throw new ProcessingError('model-incompatible','FT tensor names mismatch.');
             const leftName=`${model.role}-left.f32`,rightName=`${model.role}-right.f32`,wavName=`${model.role}.wav`;

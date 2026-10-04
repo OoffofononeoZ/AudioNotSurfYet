@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/delivery/processing/acceptance-criteria.md"
   - "docs/delivery/processing/test-strategy.md"
   - "docs/architecture/system-design.md"
-next_action: "四模型在双浏览器 session 创建失败；依据 P1 evidence 复核兼容方案，P1 未完成，P2 不开放"
+next_action: "四原图在 JSEP 双浏览器可推断；drums parity 超差，先修正精度，P1 未完成，P2 不开放"
 ---
 
 # Browser Processing Milestone Plan
@@ -69,3 +69,7 @@ DEC-069/070 接受 P1 eval/golden/失败分类并开放实现。P1–P6 按全�
 ## P1 Canonical Exit Check
 
 2026-10-04，候选 `9198b37` 正式验证起止干净，8/10命令分组通过、双浏览器图组失败；见 [P1 evidence](../../quality/processing/evidence-index.md)。AC-P101/102 未通过，AC-P105/106 尚无试听/性能证据；P1 保持 In Progress，后续切片不开放。
+
+## P1 JSEP Checkpoint
+
+2026-10-04，同版 ORT JSEP + disabled 优化已在 Chrome/Edge 四原图实际推断，三轨 parity 通过，drums 段尾约0.00130，超过0.001门禁。当前仍为 P1 In Progress / P2 Planned；原 Asyncify 失败作为历史 evidence 保留。具体资产与调查见 [P1 evidence](../../quality/processing/evidence-index.md)；不降低阈值或把诊断副本发布为固定模型。

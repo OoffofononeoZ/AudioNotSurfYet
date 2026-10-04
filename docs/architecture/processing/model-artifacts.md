@@ -6,7 +6,7 @@ upstream_docs:
   - "docs/architecture/system-design.md"
   - "docs/architecture/adrs/0024-browser-processing-runtime.md"
   - "docs/architecture/adrs/0025-audio-processing-pipeline-and-timebase.md"
-next_action: "P1 已核对实际 bytes/assets；四图双浏览器 session 失败，复核内部 DOUBLE 与 runtime 兼容性"
+next_action: "四原图在同版 JSEP 双浏览器可推断；drums parity 超差，先修正精度，P1 未完成"
 ---
 
 # FT ONNX Model Artifacts
@@ -41,7 +41,7 @@ next_action: "P1 已核对实际 bytes/assets；四图双浏览器 session 失�
 
 P1 实施配置与实际部署资产见 [FT kernel configuration](ft-kernel-config.md)。这些是已授权的配置身份，不是模型兼容/质量/性能通过记录。
 
-使用 `onnxruntime-web/webgpu`、显式 WebGPU EP，关闭 ORT proxy Worker；在项目专用分离 Worker 内初始化 session。ORT JS、WASM assets、版本与 asset hash 必须一起锁定；具体兼容版本由首个 delivery 切片验证后登记。官方 [WebGPU 指南](https://onnxruntime.ai/docs/tutorials/web/ep-webgpu.html)与[部署指南](https://onnxruntime.ai/docs/tutorials/web/deploy.html)说明后端选择及资源部署要求，不能证明这四个图在本项目可运行。
+使用 ORT 显式 WebGPU EP，关闭 proxy Worker；在项目专用分离 Worker 内初始化 session。P1 已证明同一 ORT 1.30.0 包的 JSEP WebGPU 构建（`ort.all.min.mjs`、JSEP WASM）关闭图优化后能执行原始四图；原 `onnxruntime-web/webgpu` Asyncify 构建无法分配内部 DOUBLE 节点。JS/WASM、版本、构建及 asset hash 一起锁定，当前配置见 [FT kernel config](ft-kernel-config.md)。官方 [WebGPU 指南](https://onnxruntime.ai/docs/tutorials/web/ep-webgpu.html)与[部署指南](https://onnxruntime.ai/docs/tutorials/web/deploy.html)说明部署要求，不能替代本项目的数值、质量和性能证据。
 
 首个切片须记录每个模型的 session 创建、实际 kernel 分配、输出 role/shape、短段 reference parity、完整 overlap-add、取消释放和参考机长曲指标。不支持的图或 WebGPU/device 失败明确返回错误；不得通过整图 WASM/CPU 重跑来掩盖问题。任何 ORT 内部 CPU kernel 分配也要在验证证据中列出并计入资源/耗时，不能宣称全图 GPU。
 

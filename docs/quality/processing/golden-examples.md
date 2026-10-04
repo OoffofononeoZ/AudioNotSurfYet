@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/delivery/processing/acceptance-criteria.md"
   - "docs/architecture/processing/model-artifacts.md"
   - "docs/architecture/processing/worker-and-project-contracts.md"
-next_action: "四模型在双浏览器 session 创建失败；依据 P1 evidence 复核兼容方案，P1 未完成，P2 不开放"
+next_action: "四原图在 JSEP 双浏览器可推断；drums parity 超差，先修正精度，P1 未完成，P2 不开放"
 ---
 
 # Browser FT P1 Golden Examples
