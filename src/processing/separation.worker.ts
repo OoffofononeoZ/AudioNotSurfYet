@@ -1,5 +1,5 @@
 import { separate } from './kernel';
-import { ProcessingError } from './modelManifest';
+import { ProcessingError,FT_MODELS } from './modelManifest';
 import { removeJob } from './storage';
 import type { StagedPcm } from './storage';
 import type { ProcessingJob, WorkerCommand, WorkerEvent } from './workerProtocol';
@@ -12,7 +12,7 @@ self.onmessage=async(event:MessageEvent<WorkerCommand>)=>{
     }
     if(active){send({type:'error',job:command.job,code:'invalid-request',message:'Worker already has an active job.'});return;}
     const job=command.job,abort=new AbortController();active={job,abort};
-    let phase='pcm-staging',done=0,total:number|null=null;
+    let phase='pcm-staging',done=0,total:number|null=null,role:string|null=null;
     const start=performance.now();
     let phaseStart=start,downloadElapsed=0;
     const report=()=>{
@@ -23,15 +23,19 @@ self.onmessage=async(event:MessageEvent<WorkerCommand>)=>{
     try{
         if(!matches(job,command.pcm))throw new ProcessingError('source-identity-mismatch','Job and PCM identity mismatch.');
         const result=await separate(command.pcm,abort.signal,(p,d,t)=>{
+            if(p==='model-load')role=FT_MODELS[d]?.role??null;
             if(p!==phase){const now=performance.now();if(phase==='model-download')downloadElapsed+=now-phaseStart;phaseStart=now;phase=p;}
             done=d;total=t;report();
         },command.modelBase);
         if(abort.signal.aborted)throw new ProcessingError('job-cancelled','Cancelled.');
         send({type:'result',job,result});
     }catch(error){
+        const detail=error as {name?:unknown;message?:unknown};
+        const diagnostic={name:String(detail?.name??typeof error),message:String(detail?.message??error).slice(0,1500),phase,role,done,total};
+        if(!abort.signal.aborted)console.error('FT failure diagnostic',JSON.stringify(diagnostic));
         const residual=await removeJob(command.pcm.directory);
         if(abort.signal.aborted)send({type:'cancel',job,residualArtifactIds:residual});
-        else send({type:'error',job,code:error instanceof ProcessingError?error.code:'inference-failed',message:error instanceof ProcessingError?error.message:'FT processing failed.',residualArtifactIds:residual});
+        else send({type:'error',job,code:error instanceof ProcessingError?error.code:'inference-failed',message:error instanceof ProcessingError?error.message:'FT processing failed.',residualArtifactIds:residual,diagnostic});
     }finally{clearInterval(heartbeat);active=null;}
 };
 function matches(job:ProcessingJob,pcm:StagedPcm){return job.trackId===pcm.descriptor.trackId&&job.sourceHash===pcm.hash&&job.directory===pcm.directory;}

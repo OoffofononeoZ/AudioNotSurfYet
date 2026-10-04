@@ -2,16 +2,16 @@ import { it,expect,vi,beforeEach } from 'vitest';
 import { FT_FRAMES,FT_MODELS } from '../../src/processing/modelManifest';
 import { separate } from '../../src/processing/kernel';
 import { syntheticPort } from './fixture';
-const fake=vi.hoisted(()=>({timeline:[] as string[],files:new Map<string,Uint8Array>(),corrupt:false,throwInference:false,disposed:0}));
+const fake=vi.hoisted(()=>({timeline:[] as string[],files:new Map<string,Uint8Array>(),corrupt:false,throwInference:false,quota:false,disposed:0,aborts:0}));
 vi.mock('../../src/processing/storage',()=>({
     yieldTask:async()=>{},
     openPcm:async()=>({frames:40,sampleRate:44100,channels:2,read:async(_:number,_start:number,length:number)=>new Float32Array(length)}),
     jobDirectory:async()=>({getFileHandle:async(name:string)=>({
         getFile:async()=>new Blob([new Uint8Array(fake.files.get(name)!)]),
         createWritable:async()=>{const parts:Uint8Array[]=[];return {
-            write:async(data:ArrayBufferView)=>{parts.push(new Uint8Array(data.buffer.slice(data.byteOffset,data.byteOffset+data.byteLength)));},
+            write:async(data:ArrayBufferView)=>{if(fake.quota&&data.byteLength>44)throw new DOMException('Storage exhausted','QuotaExceededError');parts.push(new Uint8Array(data.buffer.slice(data.byteOffset,data.byteOffset+data.byteLength)));},
             close:async()=>{const total=parts.reduce((sum,c)=>sum+c.length,0),output=new Uint8Array(total);let at=0;for(const part of parts){output.set(part,at);at+=part.length;}fake.files.set(name,output);},
-            abort:async()=>{parts.length=0;},
+            abort:async()=>{parts.length=0;fake.aborts++;},
         };},
     })}),
 }));
@@ -29,7 +29,7 @@ vi.mock('../../src/processing/runtime',()=>({FT_SESSION_OPTIONS:{graphOptimizati
             }};
     }},
 }})}));
-beforeEach(()=>{fake.timeline.length=0;fake.files.clear();fake.corrupt=false;fake.throwInference=false;fake.disposed=0;});
+beforeEach(()=>{fake.timeline.length=0;fake.files.clear();fake.corrupt=false;fake.throwInference=false;fake.quota=false;fake.disposed=0;fake.aborts=0;});
 const ref=()=>({directory:'kernel',descriptor:syntheticPort(40).getDecodedAudioDescriptor()!,hash:'test'});
 it('streams the four specialist roles in sequence with releases, exact samples and WAV artifacts',async()=>{
     const result=await separate(ref(),new AbortController().signal,()=>{});
@@ -52,4 +52,8 @@ it.each(['corrupt','throwInference'])('inference %s failure releases tensors/ses
     if(mode==='corrupt')fake.corrupt=true;else fake.throwInference=true;
     await expect(separate(ref(),new AbortController().signal,()=>{})).rejects.toThrow();
     expect(fake.timeline.at(-1)).toBe('release:drums');expect(fake.disposed).toBe(mode==='corrupt'?2:1);
+});
+it('runtime quota exhaustion aborts all stem writers, releases session and reports explicit storage failure',async()=>{
+    fake.quota=true;await expect(separate(ref(),new AbortController().signal,()=>{})).rejects.toMatchObject({code:'quota-exceeded'});
+    expect(fake.timeline.at(-1)).toBe('release:drums');expect(fake.disposed).toBe(2);expect(fake.aborts).toBe(3);expect(fake.files.size).toBe(0);
 });

@@ -59,7 +59,11 @@ export async function separate(ref:StagedPcm,signal:AbortSignal,
             const wav=await (await directory.getFileHandle(wavName)).getFile();
             if(wav.size!==44+frames*8)throw new ProcessingError('artifact-export-failed','WAV byte count mismatch.');
             stems.push({role:model.role,frames,sampleRate:FT_RATE,wav:wavName,left:leftName,right:rightName,...summary.finish()});
-        }catch(error){await Promise.allSettled(writers.map(w=>w.abort()));throw error;}
+        }catch(error){
+            await Promise.allSettled(writers.map(w=>w.abort()));
+            if(error instanceof DOMException&&error.name==='QuotaExceededError')throw new ProcessingError('quota-exceeded','Browser storage quota is exhausted. Explicitly clear processing artifacts before retrying.');
+            throw error;
+        }
         finally{if(session)await session.release();timeline.push({role:model.role,event:'release',at:performance.now()});}
     }
     checkCancelled(signal);return {source:ref,config:FT_CONFIG,stems,adapter:runtime.adapter,timeline,

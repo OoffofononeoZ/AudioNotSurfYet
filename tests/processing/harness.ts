@@ -1,14 +1,15 @@
 import { AudioEngine } from '../../src/audio/audioEngine';
 import { SeparationController } from '../../src/processing/controller';
 import { jobDirectory,removeJob,openPcm,openDatabase,databaseGet,databasePut } from '../../src/processing/storage';
-import { syntheticPort } from './fixture';
+import { syntheticPort,preparedSyntheticPort } from './fixture';
 import type { SeparationResult } from '../../src/processing/kernel';
 import { ProcessingError } from '../../src/processing/modelManifest';
 import { databaseDelete } from '../../src/processing/storage';
 import { inspectArtifacts } from './artifactOracle';
 import { loadModel } from '../../src/processing/modelCache';
-import { FT_MODELS } from '../../src/processing/modelManifest';
+import { FT_MODELS,FT_CONFIG } from '../../src/processing/modelManifest';
 import type { WorkerEvent } from '../../src/processing/workerProtocol';
+import { Sha256 } from '../../src/processing/sha256';
 const status=document.querySelector<HTMLPreElement>('#status')!;
 const controller=location.search.includes('gpu=unavailable')
     ?new SeparationController(()=>new Worker(new URL('./unavailable.worker.ts',import.meta.url),{type:'module'}))
@@ -16,12 +17,13 @@ const controller=location.search.includes('gpu=unavailable')
 const engine=new AudioEngine();
 let result:SeparationResult|null=null;
 let originalDrums:Blob|null=null;
+let retainedPcm:Parameters<typeof controller.start>[0]|null=null;
 let compatibility:{worker:Worker;reject:(error:Error)=>void}|null=null,separating=false;
 const urls:string[]=[];
 let metrics:{elapsedMs:number;downloadElapsedMs:number;processingElapsedMs:number;feedbackMs:number;maxHeartbeatGapMs:number;phases:string[];terminalCount:number;cancelMs:number|null}|null=null;
 async function run(port:Parameters<typeof controller.start>[0],cancelAt?:string){
     if(compatibility||separating)throw new ProcessingError('invalid-request','A processing task is already running.');
-    separating=true;const started=performance.now();let last=started,cancelledAt:number|null=null;
+    separating=true;retainedPcm=port;const started=performance.now();let last=started,cancelledAt:number|null=null;
     metrics={elapsedMs:0,downloadElapsedMs:0,processingElapsedMs:0,feedbackMs:Infinity,maxHeartbeatGapMs:0,phases:[],terminalCount:0,cancelMs:null};
     try{
         result=await controller.start(port,(e:WorkerEvent)=>{
@@ -81,8 +83,15 @@ const api={
             worker.postMessage({row,variant});
         });
     },
-    synthetic(frames:number,rate=44100,channels=2,cancelAt?:string){return run(syntheticPort(frames,rate,channels),cancelAt);},
-    async inspect(){if(!result)throw Error('No result');await openPcm(result.source,new AbortController().signal);return {artifacts:await inspectArtifacts(result),timeline:result.timeline,descriptor:result.source.descriptor,metrics,provenance:result.provenance,residuals:controller.residualArtifactIds};},
+    synthetic(frames:number,rate=44100,channels=2,cancelAt?:string,prepared=false){if(compatibility||separating)throw Error('Task running');return run(prepared?preparedSyntheticPort(frames,rate,channels):syntheticPort(frames,rate,channels),cancelAt);},
+    async inspect(){
+        if(!result||!retainedPcm)throw Error('No result');await openPcm(result.source,new AbortController().signal);
+        const descriptor=retainedPcm.getDecodedAudioDescriptor();if(JSON.stringify(descriptor)!==JSON.stringify(result.source.descriptor))throw Error('Original PCM descriptor changed');
+        const hash=new Sha256().update(new TextEncoder().encode(JSON.stringify({version:FT_CONFIG.sourceHash,...descriptor})));
+        for(let start=0;start<descriptor!.length;start+=16384){for(let channel=0;channel<descriptor!.channelCount;channel++){const pcm=retainedPcm.copyDecodedChannelRange({revision:descriptor!.revision,channel,start,length:Math.min(16384,descriptor!.length-start)});if(!pcm)throw Error('Original PCM missing');hash.update(new Uint8Array(pcm.buffer,pcm.byteOffset,pcm.byteLength));}await new Promise<void>(resolve=>setTimeout(resolve,0));}
+        if(hash.hex()!==result.source.hash)throw Error('Original PCM changed');
+        return {artifacts:await inspectArtifacts(result),timeline:result.timeline,descriptor:result.source.descriptor,originalPcmUnchanged:true,metrics,provenance:result.provenance,residuals:controller.residualArtifactIds};
+    },
     report(){return {metrics,residuals:controller.residualArtifactIds,separating};},
     async local(){
         const file=document.querySelector<HTMLInputElement>('#audio')!.files?.[0];if(!file)throw Error('请选择音频文件。');
@@ -91,7 +100,7 @@ const api={
         await run(engine);await showExports(result!);return engine.getDecodedAudioDescriptor();
     },
     cancel(){controller.cancel();if(compatibility){const current=compatibility;compatibility=null;current.worker.terminate();current.reject(new ProcessingError('job-cancelled','Compatibility check cancelled.'));}},
-    async clear(){if(result){await removeJob(result.source.directory);await databaseDelete('results',result.source.directory);}result=null;},
+    async clear(){if(result){await removeJob(result.source.directory);await databaseDelete('results',result.source.directory);}result=null;retainedPcm=null;},
     async dispose(){api.cancel();await engine.dispose();urls.forEach(URL.revokeObjectURL);},
 };
 export type P1Api=typeof api;

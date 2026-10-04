@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import { test,expect } from '@playwright/test';
+import { expect } from '@playwright/test';
+import { test } from '../processing/persistentFixture';
 import type { P1Api } from '../processing/harness';
 type HarnessWindow={__P1:P1Api};
 test('P1 authorized local listening cases produce twelve verified reviewable WAVs',async({page},info)=>{
