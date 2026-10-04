@@ -338,3 +338,7 @@ DEC-069 登记授权范围内代码验证后直接本地提交、已批 P1–P6 
 ## P1 Runtime Checkpoint
 
 四模型实际校验与独立 harness 已形成；Chrome/Edge 均在 `/real_istft/ConstantOfShape` provider 分配处失败。详见 [P1 evidence](../quality/processing/evidence-index.md)和 [kernel config](../architecture/processing/ft-kernel-config.md)。P1 不关闭，P2 不开放；自主提交授权继续有效。
+
+## P1 Clean Candidate Evidence
+
+实现 commit `9198b3725b726f1937c453a5858542b3657b88e7` 的 canonical `P1-2026-10-04T09-24-45-541Z-9198b372` 起止干净、同一 HEAD，summary SHA-256 `28423c589f615811e1b27c2e90bd72109549d6640ed4ac39b04bf3a969076679`。8/10命令分组通过，34项P1专项加22项邻接回归通过；双浏览器各4图失败，P1/P2门禁不开放。正式记录见 [P1 evidence](../quality/processing/evidence-index.md)。

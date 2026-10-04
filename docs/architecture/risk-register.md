@@ -88,3 +88,7 @@ next_action: "R-046–R-055 风险登记已批准但全部 Open；delivery 覆�
 - 2026-09-04 的 DEC-058/ADR-0023 新增 R-045。owner 明确跳过本轮自动化并自行审阅，因此实现即使通过 typecheck/build 也不缓解该风险；V1–V6 已批准资源证据不被反向改写。
 
 - 2026-10-04，owner 批准浏览器处理风险登记；R-046–R-055 全部保持 Open，模型兼容、质量和性能均待实测。
+
+## Processing P1 Observation — 2026-10-04
+
+R-046/R-048 的兼容风险已有实际失败：固定四模型 bytes 全匹配，但 clean candidate `9198b37` 的 Chrome/Edge 均在 `/real_istft/ConstantOfShape` 创建 session 失败，实际图内 value 为 DOUBLE。见 [P1 evidence](../quality/processing/evidence-index.md)。R-046–R-055 仍全部 Open；P1 专项及负向生命周期通过不替代真实推断、parity、试听、性能或集成缓解证据。
