@@ -16,7 +16,7 @@ vi.mock('../../src/processing/storage',()=>({
     })}),
 }));
 vi.mock('../../src/processing/modelCache',()=>({loadModel:async(model:{role:string})=>{fake.timeline.push(`download:${model.role}`);return {bytes:new Uint8Array([FT_MODELS.findIndex(m=>m.role===model.role)]),cacheHit:true};}}));
-vi.mock('../../src/processing/runtime',()=>({initializeRuntime:async()=>({adapter:{description:'test-adapter'},ort:{
+vi.mock('../../src/processing/runtime',()=>({FT_SESSION_OPTIONS:{graphOptimizationLevel:'disabled'},initializeRuntime:async()=>({adapter:{description:'test-adapter'},ort:{
     Tensor:class{dispose(){fake.disposed++;}},
     InferenceSession:{create:async(bytes:Uint8Array)=>{
         const role=FT_MODELS[bytes[0]!]!.role;fake.timeline.push(`create:${role}`);

@@ -1,13 +1,13 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-09-17
+last_reviewed: 2026-10-04
 upstream_docs:
   - "AGENTS.md"
   - "docs/context/index.md"
   - "docs/delivery/test-strategy.md"
   - "docs/quality/eval-plan.md"
-next_action: "四模型在双浏览器 session 创建失败；依据 P1 evidence 复核兼容方案，P1 未完成，P2 不开放"
+next_action: "四原图在 JSEP 双浏览器可推断；drums parity 超差，先修正精度，P1 未完成，P2 不开放"
 ---
 
 # Working Agreements
@@ -206,3 +206,7 @@ owner 授权代码修改在适用验证后直接本地 Git 提交，无需再次
 ## P1 Local Verification Commands
 
 `processing:models` 在 Windows 使用 PowerShell 网络配置下载固定公开模型并核对 size/SHA；文件在忽略的 artifacts/fixtures/p1-models。`processing:assets` 对照已锁定 manifest 准备忽略的 public/processing-runtime，含 attribution。`test:p1:unit` / `test:p1:integration`、真实 Chrome/Edge 的 `test:e2e:p1:*` 和 `eval:p1[:provisional]` 为独立 P1 专项，不扩写历史 M/E/V runner。canonical 要求起止干净且同一实现 commit，失败保留原日志；当前四图门禁失败，P1 不关闭。
+
+## P1 JSEP Checkpoint
+
+2026-10-04，同版 ORT JSEP + disabled 优化已在 Chrome/Edge 四原图实际推断，三轨 parity 通过，drums 段尾约0.00130，超过0.001门禁。当前仍为 P1 In Progress / P2 Planned；原 Asyncify 失败作为历史 evidence 保留。具体资产与调查见 [P1 evidence](../quality/processing/evidence-index.md)；不降低阈值或把诊断副本发布为固定模型。

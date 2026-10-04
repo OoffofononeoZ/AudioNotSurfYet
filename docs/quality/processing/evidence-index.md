@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/quality/processing/golden-examples.md"
   - "docs/quality/processing/failure-taxonomy.md"
   - "docs/delivery/processing/milestone-plan.md"
-next_action: "clean canonical 已确认四图 session 失败；复核图/runtime 兼容方案，P1 不关闭、P2 不开放"
+next_action: "同版 JSEP 原图已双浏览器推断，drums parity 仍超差；修正精度后验证实际拼接/长曲/试听"
 ---
 
 # Browser Processing Evidence Index
@@ -48,3 +48,20 @@ P1 保持 In Progress；R-046–R-055 全部 Open，P2–P6 Planned。下一步�
 ## Reproduction
 
 使用已锁定依赖；`npm run processing:models` 下载/校验忽略目录中的四模型，`npm run processing:assets` 准备同版本资产。`npm run test:e2e:p1:chrome` / `test:e2e:p1:edge` 重现图门禁，`npm run eval:p1:provisional` 产生未提交反馈；干净实现提交后 `npm run eval:p1` 产生正式记录。独立入口 `/tests/processing/index.html` 由 Vite dev server 提供，不在生产路由注册。
+
+## JSEP Compatibility Investigation — 2026-10-04
+
+本轮 owner 要求继续完成 FT 并逐阶段本地提交，另授权使用本地音乐目录或生成音频测试；本记录只登记本地使用授权，不推断歌曲再分发许可，不提交路径/歌曲/hash。
+
+同包 ORT 1.30.0 的 JSEP WebGPU 构建，固定原模型、原合成 fixture、numThreads=1/proxy=false，GPU 与独立 WASM reference 均关闭图优化。Chrome/Edge 四图全部 session/run 成功，shape/finite 与对应 row 通过，实际 GPU profile 记录 Conv/ConvTranspose；两浏览器结果一致：
+
+| Role | Max absolute error | Numeric gate |
+| --- | --- | --- |
+| drums | 0.0012997835874557495 | fail：阈值仍为0.001 |
+| bass | 0.0002854093909263611 | pass |
+| other | 0.0008603809401392937 | pass |
+| vocals | 0.000008197035640478134 | pass |
+
+原始 JSON/trace 在忽略目录 `artifacts/evals/p1-jsep-four-{chrome,edge}/` 与对应 JSON。该记录是未提交候选的调查证据，不是 canonical/P1 close；全部 kernel placement、十五分钟资源、WAV 与人工结论尚未形成。
+
+隔离诊断包括：原 native disabled 仍报 DOUBLE provider；JSEP/WASM all 优化均 `std::bad_alloc`；disabled 均成功；禁用 ConstantFolding、NHWC 未使 drums 达到门禁；只把342个 iSTFT DOUBLE 窗口常量转为Float32的诊断副本使 native 可推断，但不能证明精度通过。原始 ONNX 未写回。相关 probes 使用独立配置，不进入 canonical 验收套件，也不把失败变成 expected pass。

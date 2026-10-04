@@ -9,13 +9,15 @@ test.describe('P1 real FT graphs',()=>{
         await page.goto('/tests/processing/index.html');
         await page.waitForFunction(()=>!!(window as unknown as {__P1:unknown}).__P1);
         const answer=await page.evaluate(async row=>{
-            return await (window as unknown as {__P1:{compat(row:number):Promise<Record<string,unknown>>}}).__P1.compat(row);
-        },row);
+            return await (window as unknown as {__P1:{compat(row:number,variant?:string):Promise<Record<string,unknown>>}}).__P1.compat(row.row,row.variant);
+        },{row,variant:process.env.P1_GPU_VARIANT});
         await testInfo.attach('runtime-console',{body:logs.join('\n'),contentType:'text/plain'});
         await testInfo.attach('compatibility',{body:JSON.stringify(answer,null,2),contentType:'application/json'});
-        expect(answer.type,JSON.stringify(answer)).toBe('result');
-        const result=answer.result as {parityPassed:boolean;maxError:number;adapter:{description:string}};
+        expect(answer.type,JSON.stringify({...answer,result:{...answer.result as object,steps:undefined}})).toBe('result');
+        const result=answer.result as {parityPassed:boolean;maxError:number;adapter:{description:string};steps:Array<{kernelCounts?:Record<string,number>}>};
         expect(result.adapter.description).not.toMatch(/swiftshader|software|llvmpipe/i);
-        expect(result.parityPassed,JSON.stringify(result)).toBe(true);expect(result.maxError).toBeLessThanOrEqual(1e-3);
+        expect(result.steps.some(s=>(s.kernelCounts?.Conv??0)>0&&(s.kernelCounts?.ConvTranspose??0)>0),'actual GPU neural/spectral kernel profiles').toBe(true);
+        console.log(JSON.stringify({role:row,maxError:result.maxError}));
+        expect(result.parityPassed,`role=${row}, maxError=${result.maxError}`).toBe(true);expect(result.maxError).toBeLessThanOrEqual(1e-3);
     });
 });

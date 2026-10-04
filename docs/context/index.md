@@ -4,7 +4,7 @@ owner: "project-owner"
 last_reviewed: 2026-10-04
 upstream_docs:
   - "AGENTS.md"
-next_action: "四模型在双浏览器 session 创建失败；依据 P1 evidence 复核兼容方案，P1 未完成，P2 不开放"
+next_action: "四原图在 JSEP 双浏览器可推断；drums parity 超差，先修正精度，P1 未完成，P2 不开放"
 ---
 
 # Repository Context Index
@@ -342,3 +342,7 @@ DEC-069 登记授权范围内代码验证后直接本地提交、已批 P1–P6 
 ## P1 Clean Candidate Evidence
 
 实现 commit `9198b3725b726f1937c453a5858542b3657b88e7` 的 canonical `P1-2026-10-04T09-24-45-541Z-9198b372` 起止干净、同一 HEAD，summary SHA-256 `28423c589f615811e1b27c2e90bd72109549d6640ed4ac39b04bf3a969076679`。8/10命令分组通过，34项P1专项加22项邻接回归通过；双浏览器各4图失败，P1/P2门禁不开放。正式记录见 [P1 evidence](../quality/processing/evidence-index.md)。
+
+## P1 JSEP Checkpoint
+
+2026-10-04，同版 ORT JSEP + disabled 优化已在 Chrome/Edge 四原图实际推断，三轨 parity 通过，drums 段尾约0.00130，超过0.001门禁。当前仍为 P1 In Progress / P2 Planned；原 Asyncify 失败作为历史 evidence 保留。具体资产与调查见 [P1 evidence](../quality/processing/evidence-index.md)；不降低阈值或把诊断副本发布为固定模型。

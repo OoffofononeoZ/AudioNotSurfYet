@@ -6,7 +6,7 @@ upstream_docs:
   - "docs/architecture/processing/model-artifacts.md"
   - "docs/delivery/processing/execution-plan.md"
   - "docs/quality/processing/eval-plan.md"
-next_action: "保持固定模型/ORT 身份，依据双浏览器失败证据复核图兼容方案；P1 未完成"
+next_action: "原图已在 JSEP 双浏览器推断；修正 drums 段尾数值超差后再进入长曲，P1 未完成"
 ---
 
 # FT P1 Kernel Configuration
@@ -15,7 +15,8 @@ next_action: "保持固定模型/ORT 身份，依据双浏览器失败证据复�
 
 ## Fixed Runtime and PCM
 
-- `onnxruntime-web@1.30.0`，npm integrity 与六个实际部署文件的 bytes/SHA 固定在 `src/processing/runtime-manifest.json`；`processing:assets` 拒绝安装文件与该 manifest 不符。WebGPU 包实际使用 Asyncify JS/WASM（由所安装的 `lib/wasm/wasm-utils-import.ts` 与浏览器请求证实），WASM reference 使用标准 WASM。两者分别约 26.9 MB / 14.3 MB，不把整个 npm 包体积当成浏览器下载量。
+- `onnxruntime-web@1.30.0`，npm integrity 与六个实际部署文件的 bytes/SHA 固定在 `src/processing/runtime-manifest.json`；`processing:assets` 拒绝安装文件与该 manifest 不符。P1 v2 选择同包 `ort.all.min.mjs` 的 JSEP WebGPU 构建及 JSEP JS/WASM（约29.18 MB），WASM reference 使用标准 WASM（约14.31 MB），不把整个 npm 包体积当成浏览器下载量。原 Asyncify 构建的失败保留在历史 evidence。
+- `graphOptimizationLevel=disabled` 对 GPU 与 WASM reference 一致；默认 all 优化在两构建的原图 session 创建中出现 `std::bad_alloc`。JSEP 能执行内部 DOUBLE 路径，原始四个 ONNX bytes 未改。非默认优化及派生图/运行库只用于隔离诊断，不能作为默认 P1 pass。
 - 显式 WebGPU EP、高性能硬件 adapter，proxy=false、numThreads=1；不启用 graph capture、不增加 CPU 重跑。模型顺序和角色来自原固定模型表，保存原始错误日志以核对 kernel placement。
 - native PCM 以 16384-frame 分块、保持原 channel 数写入 OPFS，增量 SHA-256 身份为版本化 descriptor JSON 后按块逐 channel 的 Float32 bytes；当前支持目标 Chrome/Edge Windows 的 little-endian Float32。Worker 重验完整长度/hash，mono 仅在模型边界复制，不创建播放上下文。
 - 输出 44.1kHz；64-tap Blackman windowed-sinc、1024 相位、cutoff=min(1,44100/sourceRate)、归一化系数、Float64 累加后 Float32；零相位补偿、边界 zero padding，44.1kHz 直接复制。所有分段按原始绝对 frame 索引取样。
@@ -30,4 +31,4 @@ next_action: "保持固定模型/ORT 身份，依据双浏览器失败证据复�
 
 ## Validation Boundary
 
-单元/注入成功不证明四个真实模型可运行。2026-10-04 的双浏览器实跑在 session 创建时均报告 `/real_istft/ConstantOfShape` provider 未分配；未形成真实推断、WASM parity、长曲或试听通过。R-046–R-055 保持 Open，P2 不开放。失败与后续 canonical 身份见质量证据索引；当前不得自动替换模型/runtime/backend 或降低阈值。
+单元/注入成功不证明四个真实模型可运行。2026-10-04 原 Asyncify 构建的双浏览器 session 均报告 `/real_istft/ConstantOfShape` provider 未分配。随后同版本 JSEP + disabled 优化在双浏览器四图实际推断成功，GPU profile 记录 Conv/ConvTranspose；bass/other/vocals parity 通过，drums 最大误差约0.00130，超过0.001门禁，尚不能关闭 P1。长曲与试听仍未通过。R-046–R-055 保持 Open，P2 不开放；后续任何精度修正保留独立失败证据，不降低阈值或增加整图 CPU 重跑。
