@@ -7,14 +7,14 @@ upstream_docs:
   - "docs/delivery/processing/acceptance-criteria.md"
   - "docs/delivery/processing/test-strategy.md"
   - "docs/architecture/system-design.md"
-next_action: "DEC-070 ??? P1 ?????P1 In Progress???????/??/??/WAV ???? DEC-069 ????"
+next_action: "DEC-070 已批准 P1 质量契约；P1 In Progress，实施四图兼容/数值/时间/WAV 验证，按 DEC-069 证据推进"
 ---
 
 # Browser Processing Milestone Plan
 
 ## 1. Current Boundary
 
-2026-10-04，浏览器架构与 ADR-0024–0027 已 approved。DEC-067 固定完整 P1–P6 路线、FT 数值加人工质量和节拍 70ms/F1 ≥0.95；owner 随后要求“实施计划”，批准四份落盘 delivery、相关本地提交与 P1 质量规划（DEC-068）。P0-D 为 Complete；P1 仅开放质量规划，实际实现未开工，P1–P6 保持 Planned，R-046–R-055 全部 Open。
+2026-10-04，浏览器架构与 ADR-0024–0027 已 approved。DEC-067 固定完整 P1–P6 路线、FT 数值加人工质量和节拍 70ms/F1 ≥0.95；owner 随后要求“实施计划”，批准四份落盘 delivery、相关本地提交与 P1 质量规划（DEC-068）。P0-D 为 Complete；DEC-070 开放 P1 实现，P1 为 In Progress，P2–P6 保持 Planned，R-046–R-055 全部 Open。
 
 相对目标是批准/退出节点，不是日历工期；每次进入切片时登记实际开始/复核日期。全部产品、技术和证据 review owner 为 project-owner，工程执行使用仓库协作方式，不新增未确认人员安排。状态与审批遵守 [AGENTS.md](../../../AGENTS.md)。
 
@@ -23,7 +23,7 @@ next_action: "DEC-070 ??? P1 ?????P1 In Progress???????/??/??/WAV ???? DEC-069 ?
 | ID | Milestone / status | Relative target / dependency | Review checkpoint and exit evidence | Owner |
 | --- | --- | --- | --- | --- |
 | P0-D | Delivery docs / Complete | 2026-10-04 批准；获批 architecture | 四份文档 approved、索引/DEC-067/068、docs/diff 验证；owner 明确批准并授权相关本地提交 | project-owner |
-| P1 | FT feasibility / In Progress | P0-D Complete 后首切片 | AC-P101–P106、TS-P1：四图 bytes/session/parity、时间/energy/WAV、12 WAV 人工质量、双浏览器十五分钟分离/资源；证据与 owner 关闭 | project-owner |
+| P1 | FT feasibility / In Progress | P0-D Complete 后首切片 | AC-P101–P106、TS-P1：四图 bytes/session/parity、时间/energy/WAV、12 WAV 人工质量、双浏览器十五分钟分离/资源；证据与必需人工输入，按 DEC-069 关闭 | project-owner |
 | P2 | Separation workspace / Planned | P1 Complete | AC-P201–P205、TS-P2：route/stage、下载/cache、quota/故障、cancel/迟到/残留、四轨结果和原生导出 | project-owner |
 | P3 | Beat candidates / Planned | P2 Complete | AC-P301–P305、TS-P3：逐段 F1/BPM、变化/歧义/静音、Worker/proposal、双浏览器完整 ≤900 秒 | project-owner |
 | P4 | Confirm and apply / Planned | P3 Complete | AC-P401–P405、TS-P4：小节确认、逐项 diff、hash/原子更新、rerun 和用户修改保护 | project-owner |
@@ -36,7 +36,7 @@ next_action: "DEC-070 ??? P1 ?????P1 In Progress???????/??/??/WAV ???? DEC-069 ?
 
 | Milestone | Review point / date record | Stop or delay response |
 | --- | --- | --- |
-| P0-D | 2026-10-04 owner 批准（DEC-068） | 已关闭；P1 质量契约仍须单独评审，未批准前不安装 runtime/下载模型/实现 harness |
+| P0-D | 2026-10-04 owner 批准（DEC-068） | 已关闭；P1 质量契约已按 DEC-070 批准，允许安装 runtime/下载模型/实现 harness |
 | P1 | 开始前核对 fixture/许可/runtime；四图短段后首次兼容性复核；长曲/试听后退出复核 | 图/参考不兼容、parity 超差、任一 WAV 不可用、OOM 或分离 ≥900 秒即停止 P2 接入；保存证据并复核方案，不静默 fallback |
 | P2 | storage/发布状态机后；真实 route/下载/取消/导出后 | quota/原子发布或迟到消息失败修复本切片；不绕过容量或自动驱逐，P3 不开放 |
 | P3 | 算法/config/oracle 锁定后；完整性能后 | F1/BPM/警告或 ≤900 秒失败保留 fail record；复核瓶颈/算法，不事后扩过渡窗或隐式改阈值 |
@@ -60,4 +60,4 @@ P6 关闭后，建立独立新候选 readiness review，审阅 P1–P6 evidence�
 
 ## 2026-10-04 Authorization Update
 
-DEC-069/070 ?? P1 eval/golden/??????????P1?P6 ????? AC????????????????????????????????????????????????????????????/??/??/???????????????????????????????????????
+DEC-069/070 接受 P1 eval/golden/失败分类并开放实现。P1–P6 按全部适用 AC、干净候选证据和必需人工输入自主关闭及推进，无需逐次申请代码提交或阶段批准；符合既定契约的后续质量文档纳入本授权。新产品/架构/兼容/阈值与发布决定仍需人工确认。历史批准范围按原日期保留；风险与缺口不因授权消失。

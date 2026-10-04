@@ -10,7 +10,7 @@ upstream_docs:
   - "docs/architecture/risk-register.md"
   - "docs/architecture/processing/model-artifacts.md"
   - "docs/architecture/processing/worker-and-project-contracts.md"
-next_action: "DEC-070 ??? P1 ?????P1 In Progress???????/??/??/WAV ???? DEC-069 ????"
+next_action: "DEC-070 已批准 P1 质量契约；P1 In Progress，实施四图兼容/数值/时间/WAV 验证，按 DEC-069 证据推进"
 ---
 
 # Browser Processing Execution Plan
@@ -19,7 +19,7 @@ next_action: "DEC-070 ??? P1 ?????P1 In Progress???????/??/??/WAV ???? DEC-069 ?
 
 交付浏览器内“分离音轨 → 分析节拍 → 应用提案 → 人工修正 → 视觉映射 → 实时 WebM”的完整路线，先以独立 FT 可行性切片决定是否接入工作区。依据为 [System Design §21](../../architecture/system-design.md#21-automated-audio-to-video-target-architectureapproved)、ADR-0024–0027 和 DEC-063–066。
 
-本计划、[验收标准](acceptance-criteria.md)、[测试策略](test-strategy.md)和[里程碑](milestone-plan.md)于 2026-10-04 经 owner 明确要求“实施计划”批准（DEC-068）。此前 DEC-067 固定完整路线先验证 FT、数值对照加人工复核、逐拍 70ms/F1 ≥0.95。P0-D 关闭，开放 P1 质量规划；P1 实际实现、依赖安装和模型下载仍等待其质量契约单独批准，P2–P6 保持 Planned。R-046–R-055 全部保持 Open。
+本计划、[验收标准](acceptance-criteria.md)、[测试策略](test-strategy.md)和[里程碑](milestone-plan.md)于 2026-10-04 经 owner 明确要求“实施计划”批准（DEC-068）。此前 DEC-067 固定完整路线先验证 FT、数值对照加人工复核、逐拍 70ms/F1 ≥0.95。P0-D 关闭，开放 P1 质量规划；P1 质量契约已按 DEC-070 批准，实际实现、依赖安装和模型下载已开放，P2–P6 保持 Planned。R-046–R-055 全部保持 Open。
 
 2026-10-04 代码核对：AudioEngine 已提供 `getDecodedAudioDescriptor()` 与 `copyDecodedChannelRange()`；现有 analysis Worker 的 tempo-estimate 只输出 BPM/评分，coordinator consumer 尚不含 Processor，tempo 请求默认超时为 15 秒；路由尚无 Processor。既有 Visualizer schema 为 V1，Editor 保持 V1。这些是可复用入口，不是新链完成证据。
 
@@ -30,11 +30,11 @@ next_action: "DEC-070 ??? P1 ?????P1 In Progress???????/??/??/WAV ???? DEC-069 ?
 | Slice | Result | Dependency | Acceptance / tests | Owner |
 | --- | --- | --- | --- | --- |
 | P1 — FT feasibility | 独立浏览器 harness 验证四模型、分段/拼接、energy/WAV、质量与长曲资源 | 四份 delivery 获批；P1 eval/fixture 契约经评审 | AC-P101–P106 / TS-P1 | project-owner |
-| P2 — Separation workspace | Processor 路由、下载/缓存/容量、任务控制、四轨结果和导出 | P1 证据及 owner 关闭 | AC-P201–P205 / TS-P2 | project-owner |
-| P3 — Beat candidates | 现有 analysis Worker 的 DP 跟踪、逐拍/局部 tempo/警告与只读提案 | P2 证据及 owner 关闭 | AC-P301–P305 / TS-P3 | project-owner |
-| P4 — Confirm and apply | 小节确认、逐项 diff、hash 冲突及原子应用，保留用户修改 | P3 证据及 owner 关闭 | AC-P401–P405 / TS-P4 | project-owner |
-| P5 — Visualizer Project V2 | strict codec/迁移、processing source、默认映射、tempo 显式刷新 | P4 证据及 owner 关闭 | AC-P501–P505 / TS-P5 | project-owner |
-| P6 — Complete production | 双浏览器完整制作、手动路径、新链媒体/性能与资源验证 | P5 证据及 owner 关闭 | AC-P601–P604 / TS-P6 | project-owner |
+| P2 — Separation workspace | Processor 路由、下载/缓存/容量、任务控制、四轨结果和导出 | P1 全部验收证据及必需人工输入（DEC-069） | AC-P201–P205 / TS-P2 | project-owner |
+| P3 — Beat candidates | 现有 analysis Worker 的 DP 跟踪、逐拍/局部 tempo/警告与只读提案 | P2 全部验收证据及必需人工输入（DEC-069） | AC-P301–P305 / TS-P3 | project-owner |
+| P4 — Confirm and apply | 小节确认、逐项 diff、hash 冲突及原子应用，保留用户修改 | P3 全部验收证据及必需人工输入（DEC-069） | AC-P401–P405 / TS-P4 | project-owner |
+| P5 — Visualizer Project V2 | strict codec/迁移、processing source、默认映射、tempo 显式刷新 | P4 全部验收证据及必需人工输入（DEC-069） | AC-P501–P505 / TS-P5 | project-owner |
+| P6 — Complete production | 双浏览器完整制作、手动路径、新链媒体/性能与资源验证 | P5 全部验收证据及必需人工输入（DEC-069） | AC-P601–P604 / TS-P6 | project-owner |
 
 日期使用门禁次序，不承诺未知工期。逐切片状态和复核点以 [milestone plan](milestone-plan.md) 为准。
 
@@ -111,4 +111,4 @@ P4 可在测试领域模型中准备 V2 更新和 apply diff，不提前向生�
 
 ## 2026-10-04 Authorization Update
 
-DEC-069/070 ?? P1 eval/golden/??????????P1?P6 ????? AC????????????????????????????????????????????????????????????/??/??/???????????????????????????????????????
+DEC-069/070 接受 P1 eval/golden/失败分类并开放实现。P1–P6 按全部适用 AC、干净候选证据和必需人工输入自主关闭及推进，无需逐次申请代码提交或阶段批准；符合既定契约的后续质量文档纳入本授权。新产品/架构/兼容/阈值与发布决定仍需人工确认。历史批准范围按原日期保留；风险与缺口不因授权消失。
