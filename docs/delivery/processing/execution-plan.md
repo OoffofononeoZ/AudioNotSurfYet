@@ -10,7 +10,7 @@ upstream_docs:
   - "docs/architecture/risk-register.md"
   - "docs/architecture/processing/model-artifacts.md"
   - "docs/architecture/processing/worker-and-project-contracts.md"
-next_action: "四原图在 JSEP 双浏览器可推断；drums parity 超差，先修正精度，P1 未完成，P2 不开放"
+next_action: "DEC-071 已批准短段 max absolute 1.5e-3；继续原图双浏览器、真实拼接/WAV、取消、试听和十五分钟验证；P1 未完成"
 ---
 
 # Browser Processing Execution Plan
@@ -41,10 +41,10 @@ next_action: "四原图在 JSEP 双浏览器可推断；drums parity 超差，�
 ## 3. P1 — Prove FT Before Integration
 
 1. 建立测试专用浏览器入口和有界 PCM/OPFS harness，复用 AudioEngine 的 descriptor/range 语义；不接完整 Processor 工作区、Editor apply 或生产 fallback。
-2. 固定 `onnxruntime-web@1.30.0` 作为验证版本，使用 `onnxruntime-web/webgpu`。锁定 npm integrity、实际部署 JS/WASM assets 的 SHA-256 与许可/体积，关闭 proxy Worker；四模型沿用 [Model Artifacts](../../architecture/processing/model-artifacts.md) 的 immutable revision/SHA/size。安装及模型下载仅在 P1 开放后进行。
+2. 固定 `onnxruntime-web@1.30.0` 作为验证版本，使用 同版官方 ORT JSEP `ort.all.min.mjs`（[kernel config](../../architecture/processing/ft-kernel-config.md)）。锁定 npm integrity、实际部署 JS/WASM assets 的 SHA-256 与许可/体积，关闭 proxy Worker；四模型沿用 [Model Artifacts](../../architecture/processing/model-artifacts.md) 的 immutable revision/SHA/size。安装及模型下载仅在 P1 开放后进行。
 3. 在 Chrome/Edge 逐模型校验实际 bytes，创建 session，记录 tensor shape、实际 GPU/CPU kernel placement 和角色 row；drums → bass → other → vocals，各角色完成全曲后释放再加载下一模型。
 4. 锁定 preprocessing/config identity：44.1kHz stereo、343980-frame 分段、尾段 padding、overlap/window/拼接、重采样延迟补偿和输出帧数。对齐固定来源参考脚本的处理语义，不能额外做未证明需要的 normalization。
-5. 测试专用 WASM 参考与 WebGPU 使用相同四 ONNX、相同输入短段；参考运行在隔离 harness 中并顺序执行，不进入产品分离路径。检查四个对应 row 的最大绝对误差 ≤`1e-3`；参考不可运行时记为缺口并阻止 P1 关闭。
+5. 测试专用 WASM 参考与 WebGPU 使用相同四 ONNX、相同输入短段；参考运行在隔离 harness 中并顺序执行，不进入产品分离路径。检查四个对应 row 的最大绝对误差 ≤`1.5e-3`；参考不可运行时记为缺口并阻止 P1 关闭。
 6. 用有确定答案的恒等/脉冲 harness 验证时间变换，再以真实 FT 验证拼接、四轨派生、30Hz energy 与浏览器 Float32 WAV。owner 复核三首有许可歌曲的 12 个 stem WAV。
 7. 参考 RTX 4060 Laptop 8GB 在两浏览器各完成十五分钟分离，记录 wall-clock、内存/显存、反馈/heartbeat、取消及释放。P1 分离耗时必须 <900 秒，为节拍保留实测余量；它不代表 P3 的完整目标达标。
 
@@ -116,3 +116,5 @@ DEC-069/070 接受 P1 eval/golden/失败分类并开放实现。P1–P6 按全�
 ## P1 Implementation Checkpoint
 
 2026-10-04，固定四模型实际 size/SHA 已校验，独立内核与 oracle/故障测试已实现。Chrome/Edge 的四图均在 `/real_istft/ConstantOfShape` provider 分配处创建 session 失败，未进入真实推断、parity、长曲或试听。P1 保持 In Progress、P2–P6 Planned；见 [P1 evidence](../../quality/processing/evidence-index.md)，不将合成/注入通过写成真实模型通过。
+
+2026-10-04，owner 明确批准短段跨后端最大绝对误差上限 `1.5e-3`（DEC-071）。原始 ONNX、官方 ORT、独立 WASM、逐 sample 比较及其余验收门禁保持不变；历史 `1e-3` 失败证据保留，不构成 P1 关闭。

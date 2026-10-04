@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/quality/processing/golden-examples.md"
   - "docs/delivery/processing/acceptance-criteria.md"
   - "docs/architecture/risk-register.md"
-next_action: "四原图在 JSEP 双浏览器可推断；drums parity 超差，先修正精度，P1 未完成，P2 不开放"
+next_action: "DEC-071 已批准短段 max absolute 1.5e-3；继续原图双浏览器、真实拼接/WAV、取消、试听和十五分钟验证；P1 未完成"
 ---
 
 # Browser FT P1 Failure Taxonomy
@@ -25,7 +25,7 @@ next_action: "四原图在 JSEP 双浏览器可推断；drums parity 超差，�
 | PFT-MODEL | revision/file/bytes/checksum/许可缺失或不符被接收，半成品成为可用输入；S1 | P1-EV-MODEL；P1-G01/G02 | AC-P101；R-048 | 拒绝 artifact，保留准确错误/来源，修复校验后重验；不换浮动模型 |
 | PFT-RUNTIME | ORT/assets/version、WebGPU图/session/实际后端不满足契约，隐式CPU或小模型fallback；S1 | P1-EV-RUNTIME；P1-G03/G04/G05 | AC-P101；R-046/R-048 | 停止后续接入，保存实际初始化/推断/placement证据，复核runtime；不静默降版本 |
 | PFT-ROLE | 单专用模型冒充四轨、错row/role/shape/type，非finite输出未拒绝；S1 | P1-EV-ROLE；P1-G04/G06/G07 | AC-P102；R-046/R-052 | 拒绝结果，修复selector/validator和顺序释放，重验四模型 |
-| PFT-NUMERIC | 对应轨max absolute>1e-3、参考不独立/不可用/非finite、只报平均误差；S1 | P1-EV-PARITY；P1-G08/G09 | AC-P102；R-046/R-052 | 保留每轨原误差/输入/config，阻止关闭，定位图/后端/预处理差异；不临时放宽 |
+| PFT-NUMERIC | 对应轨max absolute>1.5e-3、参考不独立/不可用/非finite、只报平均误差；S1 | P1-EV-PARITY；P1-G08/G09 | AC-P102；R-046/R-052 | 保留每轨原误差/输入/config，阻止关闭，定位图/后端/预处理差异；不临时放宽 |
 | PFT-TIME | PCM修改/detach、chunk缺帧/重复、重采样/拼接平移/裁静音、输出长度超限或未定义downmix；S1，源数据损坏升S0 | P1-EV-TIME；P1-G10–G14/G17 | AC-P103；R-047 | 不发布成功结果，保护原PCM；修复range/hash/resample/window/tail并重跑边界 |
 | PFT-DERIVED | waveform/energy/WAV来源不一致，RMS/codec/长度/header/样本错误，失败导出误报成功；S1 | P1-EV-DERIVED；P1-G15/G16/G22 | AC-P104；R-047/R-052 | 保留源artifact，修复派生/encoder/导出反馈并独立解析复核 |
 | PFT-QUALITY | 任一轨角色不可辨识或断裂/伪影导致不可用，隐藏串音问题或other误称lead；S1 | P1-EV-QUALITY；P1-G13/G18 | AC-P105；R-052 | 保存匿名听感结论，停止P2接入并复核模型/方案；不以parity替代实际质量 |
@@ -60,3 +60,5 @@ P1关闭需 AC-P101–P106 全部有实际证据、适用人工结论和 owner�
 ## Implementation Evidence
 
 实际运行及缺口见 [P1 evidence index](evidence-index.md)。合成/注入通过与真实四图不兼容分别记录，预期样例不是通过声明；本轮没有 P1 关闭或风险缓解结论。
+
+2026-10-04，owner 明确批准短段跨后端最大绝对误差上限 `1.5e-3`（DEC-071）。原始 ONNX、官方 ORT、独立 WASM、逐 sample 比较及其余验收门禁保持不变；历史 `1e-3` 失败证据保留，不构成 P1 关闭。

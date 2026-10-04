@@ -9,7 +9,7 @@ upstream_docs:
   - "docs/architecture/processing/model-artifacts.md"
   - "docs/architecture/processing/worker-and-project-contracts.md"
   - "docs/context/working-agreements.md"
-next_action: "四原图在 JSEP 双浏览器可推断；drums parity 超差，先修正精度，P1 未完成，P2 不开放"
+next_action: "DEC-071 已批准短段 max absolute 1.5e-3；继续原图双浏览器、真实拼接/WAV、取消、试听和十五分钟验证；P1 未完成"
 ---
 
 # Browser Processing Test Strategy
@@ -60,7 +60,7 @@ P4 集成测试可用经 strict validator 校验的目标领域模型/adapter �
 
 ## 4. FT Reference and Temporal Checks
 
-WASM 参考对四模型分别运行相同短段输入，先于/晚于 WebGPU session 执行并释放，排除同时驻留造成的资源竞争。逐 sample 比较对应 row，max absolute ≤`1e-3`；保存合成输入身份、配置、每轨 shape/误差、runtime/browser/backend。参考无法加载或非有限输出均不能 skip 成通过。
+WASM 参考对四模型分别运行相同短段输入，先于/晚于 WebGPU session 执行并释放，排除同时驻留造成的资源竞争。逐 sample 比较对应 row，max absolute ≤`1.5e-3`；保存合成输入身份、配置、每轨 shape/误差、runtime/browser/backend。参考无法加载或非有限输出均不能 skip 成通过。
 
 预处理参考来自 pinned [drums infer.py](https://huggingface.co/StemSplitio/htdemucs-ft-drums-onnx/raw/44f630d49a19053a61c12df7244fe1f01b9ccc4f/infer.py)：分段 343980 frames，overlap 为四分之一（85995 frames）、stride 257985，线性过渡权重、尾部 zero padding 与加权 overlap-add。P1 需核对实际 export graph 和其他三个模型脚本，锁定规范化/窗口/重采样 config 及 hash；不能盲加第二次 normalization，也不能仅凭脚本来源宣称兼容。
 
@@ -115,3 +115,5 @@ DEC-069/070 接受 P1 eval/golden/失败分类并开放实现。P1–P6 按全�
 ## P1 Implementation Checkpoint
 
 2026-10-04，固定四模型实际 size/SHA 已校验，独立内核与 oracle/故障测试已实现。Chrome/Edge 的四图均在 `/real_istft/ConstantOfShape` provider 分配处创建 session 失败，未进入真实推断、parity、长曲或试听。P1 保持 In Progress、P2–P6 Planned；见 [P1 evidence](../../quality/processing/evidence-index.md)，不将合成/注入通过写成真实模型通过。
+
+2026-10-04，owner 明确批准短段跨后端最大绝对误差上限 `1.5e-3`（DEC-071）。原始 ONNX、官方 ORT、独立 WASM、逐 sample 比较及其余验收门禁保持不变；历史 `1e-3` 失败证据保留，不构成 P1 关闭。

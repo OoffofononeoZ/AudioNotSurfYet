@@ -10,7 +10,7 @@ upstream_docs:
   - "docs/architecture/processing/model-artifacts.md"
   - "docs/architecture/processing/worker-and-project-contracts.md"
   - "docs/architecture/risk-register.md"
-next_action: "四原图在 JSEP 双浏览器可推断；drums parity 超差，先修正精度，P1 未完成，P2 不开放"
+next_action: "DEC-071 已批准短段 max absolute 1.5e-3；继续原图双浏览器、真实拼接/WAV、取消、试听和十五分钟验证；P1 未完成"
 ---
 
 # Browser FT P1 Eval Plan
@@ -19,7 +19,7 @@ next_action: "四原图在 JSEP 双浏览器可推断；drums parity 超差，�
 
 DEC-068 于 2026-10-04 批准四份 processing delivery，并仅开放 P1 质量规划。本计划只评价 AC-P101–P106 / TS-P1 的独立 FT harness：模型与运行库身份、四图 WebGPU、正确取轨、参考数值、时间变换、派生数据/WAV、人工质量、十五分钟分离与取消资源。
 
-本文与 [golden examples](golden-examples.md)、[failure taxonomy](failure-taxonomy.md)均已于 2026-10-04 按 DEC-070 批准；已实现 P1 harness 并校验实际 bytes；双浏览器 session 创建失败，尚无真实推断或人工试听通过。P1 实现已授权并为 In Progress，P2–P6 保持 Planned，R-046–R-055 全部 Open。不评价 Processor 生产工作区、缓存管理、节拍 F1、工程 apply、V2 或 WebM；这些由后续切片独立验证。
+本文与 [golden examples](golden-examples.md)、[failure taxonomy](failure-taxonomy.md)均已于 2026-10-04 按 DEC-070 批准；已实现 P1 harness 并校验实际 bytes；同版 JSEP 原始四图已在双浏览器推断；DEC-071 数值标准的干净候选重跑、人工试听和长曲验证尚未完成。P1 实现已授权并为 In Progress，P2–P6 保持 Planned，R-046–R-055 全部 Open。不评价 Processor 生产工作区、缓存管理、节拍 F1、工程 apply、V2 或 WebM；这些由后续切片独立验证。
 
 owner 为 project-owner。全部阈值沿用已批准 [acceptance criteria](../../delivery/processing/acceptance-criteria.md)，不在 quality 层重新放宽。
 
@@ -30,7 +30,7 @@ owner 为 project-owner。全部阈值沿用已批准 [acceptance criteria](../.
 | P1-EV-MODEL | 四 artifact/revision/size/SHA/许可；成功、损坏失败 | manifest/bytes 校验及 checksum 故障 | 完全匹配批准模型表；未校验/半成品不成为可用输入，身份不符明确失败 | AC-P101；R-048 | PFT-MODEL |
 | P1-EV-RUNTIME | ORT/assets/WebGPU session/后端；成功、缺 capability/图不支持/device 异常 | Chrome/Edge 每模型实际 session，asset/capability 故障注入 | 固定 ORT 1.30.0 与 delivery npm integrity/部署 asset SHA；四图均可运行，实际 kernel placement 有记录，不自动整图 CPU 重跑 | AC-P101；R-046/R-048 | PFT-RUNTIME |
 | P1-EV-ROLE | 专用 row、shape/finite、顺序释放；成功、错 row/shape/NaN、边界 | selector unit、标记 row oracle、真实四模型输出/session timeline | drums/bass/other/vocals 各取 row 0/1/2/3；输入 [1,2,343980]、输出 [1,4,2,343980] Float32；session 不重叠 | AC-P102；R-046/R-052 | PFT-ROLE |
-| P1-EV-PARITY | 对应四轨短段数值；成功、超差/参考不可用 | 隔离顺序 WASM reference 对 WebGPU，同 ONNX/input/config | 每模型对应 row 全量 sample max absolute ≤1e-3，finite/shape 完全通过；RMS 误差另报，不能替代 max | AC-P102；R-046/R-052 | PFT-NUMERIC |
+| P1-EV-PARITY | 对应四轨短段数值；成功、超差/参考不可用 | 隔离顺序 WASM reference 对 WebGPU，同 ONNX/input/config | 每模型对应 row 全量 sample max absolute ≤1.5e-3，finite/shape 完全通过；RMS 误差另报，不能替代 max | AC-P102；R-046/R-052 | PFT-NUMERIC |
 | P1-EV-TIME | 有界原 PCM、resample/overlap/tail、声道；成功、缺帧/hash/超限、边界 | 独立恒等/脉冲 oracle、真实 FT 拼接、AudioEngine 前后 hash | 原 PCM 不变；44.1/48kHz、mono/stereo、短尾/静音保持时间；oracle ≤一个输出 sample；frame=round(source duration×44100)，尾部校正≤一个 sample；>2ch 明确拒绝 | AC-P103；R-047 | PFT-TIME |
 | P1-EV-DERIVED | waveform、30Hz energy、Float32 WAV；成功、零能量/末窗、导出异常 | 独立 RMS/codec oracle、waveform source 检查、独立 WAV parser | 同一 stem；energy length=ceil(30×duration)、UInt16 payload/数值一致；WAV stereo/44.1kHz/IEEE Float32，header/frame/样本与 artifact 一致 | AC-P104；R-047/R-052 | PFT-DERIVED |
 | P1-EV-QUALITY | 三首许可歌曲 12 WAV；人工成功/不可用 | owner 试听与逐轨四维记录 | 每项角色可辨识、串音、断裂、伪影均记录；结论仅可用/需复核但可用/不可用；任一不可用阻止关闭 | AC-P105；R-052 | PFT-QUALITY |
@@ -90,3 +90,5 @@ P1 长曲基线要求模型已校验缓存、原曲已解码、结果 cache miss
 ## Implementation Evidence
 
 实际运行及缺口见 [P1 evidence index](evidence-index.md)。合成/注入通过与真实四图不兼容分别记录，预期样例不是通过声明；本轮没有 P1 关闭或风险缓解结论。
+
+2026-10-04，owner 明确批准短段跨后端最大绝对误差上限 `1.5e-3`（DEC-071）。原始 ONNX、官方 ORT、独立 WASM、逐 sample 比较及其余验收门禁保持不变；历史 `1e-3` 失败证据保留，不构成 P1 关闭。
