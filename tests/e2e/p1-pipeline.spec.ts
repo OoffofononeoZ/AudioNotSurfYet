@@ -27,7 +27,7 @@ test('P1 real FT cancellation terminates once in each pipeline phase within clea
         Object.defineProperty(window,'__p1Resources',{get:()=>({workers,contexts})});
     });
     await page.goto('/tests/processing/index.html');await page.waitForFunction(()=>!!(window as unknown as HarnessWindow).__P1);await page.evaluate(()=>(window as unknown as HarnessWindow).__P1.prime());
-    const phases=['pcm-staging','model-load','inference','stitch','derive','persist',...Array.from({length:14},(_,i)=>i%2===0?'pcm-staging':'inference')];
+    const phases=['pcm-staging','model-resample','model-load','inference','stitch','derive','persist',...Array.from({length:13},(_,i)=>i%2===0?'pcm-staging':'inference')];
     for(const [cycle,phase] of phases.entries()){
         const report=await page.evaluate(async phase=>{
             const api=(window as unknown as HarnessWindow).__P1;let code='unexpected-success';

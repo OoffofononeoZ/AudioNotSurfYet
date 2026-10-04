@@ -7,11 +7,12 @@ export const FT_OVERLAP = 85_995;
 export const FT_STRIDE = FT_FRAMES - FT_OVERLAP;
 export const ORT_VERSION = '1.30.0';
 export const FT_CONFIG = {
-    version: 'ft-browser-p1-v2', sampleRate: FT_RATE, frames: FT_FRAMES,
+    version: 'ft-browser-p1-v3', sampleRate: FT_RATE, frames: FT_FRAMES,
     runtimeBuild: 'ort-all-jsep', graphOptimization: 'disabled',
     overlap: FT_OVERLAP, stride: FT_STRIDE, normalization: 'none-export-graph',
     window: 'linear-25pct-f32-uncovered-endpoint-1e-8', padding: 'zero',
     resampler: 'blackman-sinc-64tap-1024phase-zero-phase-v1',
+    modelInput: 'native-44100-or-task-opfs-44100-stereo-reuse-v1',
     sourceHash: 'descriptor-v1-and-native-channel-chunks-16384-le-f32',
     energy: '30hz-channel-mean-square-rms-dbfs-minus80-zero-u16',
 } as const;

@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/quality/processing/golden-examples.md"
   - "docs/quality/processing/failure-taxonomy.md"
   - "docs/delivery/processing/milestone-plan.md"
-next_action: "DEC-071 已批准短段 max absolute 1.5e-3；继续原图双浏览器、真实拼接/WAV、取消、试听和十五分钟验证；P1 未完成"
+next_action: "owner要求本轮收尾；下次先告知性能未达标及试听缺口，再继续验证；P1未完成，900秒门禁不变"
 ---
 
 # Browser Processing Evidence Index
@@ -91,3 +91,21 @@ Chrome 专项 `artifacts/evals/p1-real-pipeline-chrome.json` 两场景通过：2
 默认隔离上下文使用临时存储。[Chromium quota说明](https://groups.google.com/a/chromium.org/g/blink-dev/c/00aHBCiUGzo/m/B0Dq06SFAQAJ)指出隐私窗口真实容量基于RAM，estimate可报人为扩大的值；大型参考改用[官方persistent context](https://playwright.dev/docs/api/class-browsertype#browser-type-launch-persistent-context)的独立普通磁盘profile，不改用户profile，不提高或伪造quota。十五分钟fixture处理期间持有完整48k stereo原始PCM，准备时间另计，并在处理后重验原始PCM全量hash。
 
 普通Chrome重测 `artifacts/evals/p1-persistent-long-chrome.json` 完成四轨：每轨39690000frames，WAV/planar及独立30Hz摘要一致，原始PCM不变；但处理1016.6576秒，超过900秒，性能门禁仍失败。反馈1.4ms、最大heartbeat749.5ms；设备wide显存观测峰值4373MiB、所有Chrome/Edge进程aggregate WS约2.62GB、private bytes约5.25GB；1秒请求采样包含其他tab，非应用独占分配量。保留失败trace，不关闭P1或风险；下一步优化重复重采样并重测。
+
+## Input Reuse and Timing Checkpoint — 2026-10-04
+
+P1 v3将非44.1kHz原PCM按原绝对索引sinc转换一次，四个专用模型复用本任务OPFS临时输入。mono/stereo的全部跨段和尾部样本与原直接转换逐字节相同；原PCM身份和时间基准不变，容量预检包含临时文件，任务结束/取消/失败清理。实际Chrome短段/48k mono跨段专项 `artifacts/evals/p1-input-reuse-chrome.json` 通过，四轨WAV/摘要与原PCM检查均通过。
+
+完整长曲重测 `artifacts/evals/p1-input-reuse-long-chrome.json` 仍使用四原图、官方JSEP、disabled优化及普通磁盘profile，处理期间持有完整48k stereo原PCM。四轨均39690000frames，WAV/planar/30Hz摘要一致、原PCM不变、下载耗时0；处理 **1011.9541秒（16分51.95秒）**，超过900秒，**AC-P106性能失败**。反馈2ms、最大heartbeat753.5ms；设备wide显存观测峰值4511MiB、浏览器aggregate WS 2628198400bytes、private 5344280576bytes，沿用上节采样边界。仅较前次少约4.7秒，不能据此认定输入复用足以解决性能。失败trace保存于同名忽略目录；Edge普通profile完整性能尚未重测。
+
+随后常规ORT日志改为warning，保留错误/警告及独立GPU profiling，追加各阶段耗时诊断。一分钟48k stereo实际四轨专项 `artifacts/evals/p1-stage-timing-chrome.json` 通过：处理104.5161秒、原PCM/WAV/摘要检查通过，四模型共44个segment；session初始化约48.10秒、推断约34.39秒、写入约0.65秒。此为未提交候选的短任务诊断，**不能推算或宣布十五分钟达标**；新日志配置未做双浏览器完整长曲重验。
+
+## Owner Requested Wrap-up — 2026-10-04
+
+owner明确要求：基本功能实现而耗时未达标时可暂时结束，在文档标记并于下次告知，随后总结实现内容。本轮据此停止继续长时间验证，保留当前可运行内核、专项结果和失败证据，并完成本地提交；不是把性能失败改为pass或永久放宽900秒阈值。
+
+已实现的是独立P1 harness及可复用FT内核：四个专用模型顺序推断/释放、正确role row、时间对齐的重采样/分段/拼接、waveform/30Hz energy/Float32 WAV、模型校验缓存、OPFS/IDB、进度/取消/迟到隔离及显式故障。生产Processor路由、TS逐拍/局部tempo、提案应用和Visualizer V2仍属P2–P6，尚未接通。
+
+下次开始先提醒：最后完整Chrome测量16分51.95秒仍失败；warning日志候选仅验证一分钟任务；三首试听目前仅前两首8个WAV，第三首4个WAV及12轨owner听感记录尚缺；Chrome/Edge原生保存/取消/回放结论及当前候选clean完整canonical尚缺。随后再决定恢复性能/质量验证的顺序。P1继续In Progress（执行暂停），P2–P6 Planned、R-046–R-055 Open；不创建新链readiness。
+
+本次收尾验证：`npm run test:p1:unit` 19/19、`npm run test:p1:integration` 20/20、`npm run typecheck`、`npm run build`、`npm run test:docs`与`git diff --check`通过，Chrome一分钟真实四轨诊断1/1通过。构建保留已有Browserslist陈旧与大chunk提示。以上不替代当前候选完整canonical、长曲性能或人工质量结论；原失败记录不改写。

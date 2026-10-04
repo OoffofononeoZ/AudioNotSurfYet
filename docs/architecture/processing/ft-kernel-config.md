@@ -6,7 +6,7 @@ upstream_docs:
   - "docs/architecture/processing/model-artifacts.md"
   - "docs/delivery/processing/execution-plan.md"
   - "docs/quality/processing/eval-plan.md"
-next_action: "DEC-071 已批准短段 max absolute 1.5e-3；继续原图双浏览器、真实拼接/WAV、取消、试听和十五分钟验证；P1 未完成"
+next_action: "本轮收尾；下次提醒完整性能16分51.95秒未达标，warning日志候选尚未做长曲重验；P1未关闭"
 ---
 
 # FT P1 Kernel Configuration
@@ -18,8 +18,10 @@ next_action: "DEC-071 已批准短段 max absolute 1.5e-3；继续原图双浏�
 - `onnxruntime-web@1.30.0`，npm integrity 与六个实际部署文件的 bytes/SHA 固定在 `src/processing/runtime-manifest.json`；`processing:assets` 拒绝安装文件与该 manifest 不符。P1 v2 选择同包 `ort.all.min.mjs` 的 JSEP WebGPU 构建及 JSEP JS/WASM（约29.18 MB），WASM reference 使用标准 WASM（约14.31 MB），不把整个 npm 包体积当成浏览器下载量。原 Asyncify 构建的失败保留在历史 evidence。
 - `graphOptimizationLevel=disabled` 对 GPU 与 WASM reference 一致；默认 all 优化在两构建的原图 session 创建中出现 `std::bad_alloc`。JSEP 能执行内部 DOUBLE 路径，原始四个 ONNX bytes 未改。非默认优化及派生图/运行库只用于隔离诊断，不能作为默认 P1 pass。
 - 显式 WebGPU EP、高性能硬件 adapter，proxy=false、numThreads=1；不启用 graph capture、不增加 CPU 重跑。模型顺序和角色来自原固定模型表，保存原始错误日志以核对 kernel placement。
+- 常规运行的ORT日志级别为warning（session severity=2），保留错误与警告，避免逐内核verbose日志进入浏览器通信/trace。GPU kernel placement仍由独立compat profiling记录，不以日志减少推断整图GPU执行。P1结果附带source/runtime/input准备及每模型session/inference/拼接/摘要/写入耗时，属于诊断数据，不改变模型或PCM数值。
 - native PCM 以 16384-frame 分块、保持原 channel 数写入 OPFS，增量 SHA-256 身份为版本化 descriptor JSON 后按块逐 channel 的 Float32 bytes；当前支持目标 Chrome/Edge Windows 的 little-endian Float32。Worker 重验完整长度/hash，mono 仅在模型边界复制，不创建播放上下文。
 - 输出 44.1kHz；64-tap Blackman windowed-sinc、1024 相位、cutoff=min(1,44100/sourceRate)、归一化系数、Float64 累加后 Float32；零相位补偿、边界 zero padding，44.1kHz 直接复制。所有分段按原始绝对 frame 索引取样。
+- P1 v3 对非44.1kHz原始PCM只转换一次：以65536输出frame的有界块写入本任务OPFS的两份44.1kHz模型输入，四专用模型复用；原始PCM仍为唯一时间/身份基准。缓存与原直接绝对索引sinc在mono/stereo全部跨段/尾部样本逐字节相同，不改变模型输入、padding或模型字节。临时输入的8bytes/output-frame纳入容量预检，四模型释放后删除，取消/失败按本任务清理；configHash包含该策略。
 
 ## Segment and Artifact
 

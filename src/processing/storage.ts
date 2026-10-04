@@ -49,7 +49,7 @@ export async function stagePcm(port:DecodedAudioCopyPort,name:string,signal:Abor
     checkCancelled(signal);
     // P1 conservative budget: native PCM plus four planar/WAV outputs and all
     // public model blobs. P2 replaces this with exact cache accounting.
-    await checkCapacity(descriptor.length*descriptor.channelCount*4+Math.round(descriptor.durationSeconds*44100)*64+662450544);
+    await checkCapacity(descriptor.length*descriptor.channelCount*4+Math.round(descriptor.durationSeconds*44100)*(64+(descriptor.sampleRate===44100?0:8))+662450544);
     const directory=await jobDirectory(name),writers:FileSystemWritableFileStream[]=[];
     const hash=new Sha256().update(new TextEncoder().encode(JSON.stringify({version:FT_CONFIG.sourceHash,...descriptor})));
     try {

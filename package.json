@@ -219,7 +219,7 @@
     "eval:editor-readiness:provisional": "node tests/scripts/run-editor-readiness-eval.mjs --provisional",
     "processing:assets": "node tests/processing/prepare-assets.mjs",
     "processing:models": "node tests/processing/download-models.mjs",
-    "test:p1:unit": "vitest run tests/processing/p1-dsp.test.ts tests/processing/p1-runtime.test.ts",
+    "test:p1:unit": "vitest run tests/processing/p1-dsp.test.ts tests/processing/p1-runtime.test.ts tests/processing/p1-model-input.test.ts",
     "test:p1:integration": "vitest run tests/processing/p1-storage.test.ts tests/processing/p1-controller.test.ts tests/processing/p1-kernel.test.ts",
     "test:e2e:p1:chrome": "playwright test tests/e2e/p1-contracts.spec.ts tests/e2e/p1-ft.spec.ts --project=chrome --workers=1",
     "test:e2e:p1:edge": "playwright test tests/e2e/p1-contracts.spec.ts tests/e2e/p1-ft.spec.ts --project=edge --workers=1",

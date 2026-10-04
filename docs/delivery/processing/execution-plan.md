@@ -10,7 +10,7 @@ upstream_docs:
   - "docs/architecture/risk-register.md"
   - "docs/architecture/processing/model-artifacts.md"
   - "docs/architecture/processing/worker-and-project-contracts.md"
-next_action: "DEC-071 已批准短段 max absolute 1.5e-3；继续原图双浏览器、真实拼接/WAV、取消、试听和十五分钟验证；P1 未完成"
+next_action: "按owner要求暂停本轮执行；下次先告知性能未达标与质量验证缺口，再恢复P1；不提前接入P2"
 ---
 
 # Browser Processing Execution Plan
@@ -26,6 +26,8 @@ next_action: "DEC-071 已批准短段 max absolute 1.5e-3；继续原图双浏�
 本计划的 P1–P6 不续用历史 Visualizer V1–V6 编号；Project V2 指 JSON schemaVersion 2。历史 canonical 和关闭记录保留，作为相邻回归，不能替代 processing 新链证据。旧计划的发现入口见 [Visualizer execution plan](../visualizer/execution-plan.md)。
 
 ## 2. Delivery Sequence
+
+2026-10-04收尾：owner允许基本功能完成而性能未达标时暂时结束，并要求文档记录和下次提醒。独立P1内核已可运行；最后完整Chrome测量1011.9541秒，AC-P106失败，warning日志候选完整性能尚未重验。执行暂停，P1仍未关闭；试听、原生操作及当前候选完整canonical缺口见 [收尾证据](../../quality/processing/evidence-index.md#owner-requested-wrap-up--2026-10-04)。本次不降低阈值，不开放P2。
 
 | Slice | Result | Dependency | Acceptance / tests | Owner |
 | --- | --- | --- | --- | --- |

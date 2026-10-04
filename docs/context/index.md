@@ -4,16 +4,22 @@ owner: "project-owner"
 last_reviewed: 2026-10-04
 upstream_docs:
   - "AGENTS.md"
-next_action: "DEC-071 已批准短段 max absolute 1.5e-3；继续原图双浏览器、真实拼接/WAV、取消、试听和十五分钟验证；P1 未完成"
+next_action: "owner要求本轮收尾；下次先提醒最后完整Chrome处理16分51.95秒未达标、试听及完整验证待补；P1执行暂停，P2未开放"
 ---
 
 # Repository Context Index
+
+## 2026-10-04 本轮收尾与恢复提醒
+
+owner要求基本功能实现后可暂时结束，耗时不符要求须记录并在下次告知。独立P1 FT内核/harness已可完成四轨分离、对齐拼接、waveform/energy/WAV、缓存及取消/故障处理；尚未接入生产Processor或后续节拍/提案/V2。最后完整Chrome十五分钟歌曲测试处理16分51.95秒，超过900秒；随后warning日志候选只完成一分钟专项，不能宣称完整性能已通过。三首试听尚缺第三首四轨、12轨人工结论及原生保存/回放，当前候选完整clean canonical亦未完成。
+
+本轮执行按owner要求暂停并提交；下次先明确告知以上缺口再继续。P1保持In Progress、P2–P6 Planned、风险Open，性能阈值未降低。最新证据与下一步见 [P1收尾记录](../quality/processing/evidence-index.md#owner-requested-wrap-up--2026-10-04)。
 
 ## 2026-10-04 浏览器架构批准与下一阶段
 
 DEC-062 的自动优先、人工可修正与完整手动视频目标不变。owner 本轮明确授权修订并批准浏览器 FT ONNX/WebGPU 分离、TypeScript BPM/逐拍/局部 tempo、用户小节确认、只读提案、Project V2 与显式 tempo 刷新（DEC-063–066）。系统设计、接口、风险与 ADR-0024–0027 均为 approved；PROD-024–029 已决定或明确延后。R-046–R-055 仍全部 Open，模型兼容、质量和参考机性能待实测。下一阶段为 execution planning；Visualizer 四份 delivery 文档及 readiness 待复核，Analyzer/Editor/Visualizer 已有 canonical 只覆盖历史候选，当前代码未据此获得自动处理。
 
-同日，DEC-067 固定完整 P1–P6 路线先验证 FT、数值对照加三首许可歌曲人工复核、可靠合成逐拍 70ms/F1 ≥0.95。owner 随后要求“实施计划”，批准 [Processing delivery](../delivery/processing/execution-plan.md) 四份落盘文档及相关本地提交（DEC-068），P0-D 为 Complete。DEC-070 已批准 P1 eval/golden/失败分类并开放实际实现。P1 In Progress，P2–P6 保持 Planned；已安装固定 ORT、校验四模型并实现独立 FT harness；双浏览器图兼容失败，质量/性能仍未验证。
+同日，DEC-067 固定完整 P1–P6 路线先验证 FT、数值对照加三首许可歌曲人工复核、可靠合成逐拍 70ms/F1 ≥0.95。owner 随后要求“实施计划”，批准 [Processing delivery](../delivery/processing/execution-plan.md) 四份落盘文档及相关本地提交（DEC-068），P0-D 为 Complete。DEC-070 已批准 P1 eval/golden/失败分类并开放实际实现。P1 In Progress，P2–P6 保持 Planned；已安装固定 ORT、校验四模型并实现独立 FT harness；官方同版JSEP已通过双浏览器四图及DEC-071数值门禁，质量尚待人工结论，完整性能已测但未达标。
 
 delivery 批准已在本地 commit `d5f8ecd` 登记。随后形成 [P1 eval plan](../quality/processing/eval-plan.md)、[golden examples](../quality/processing/golden-examples.md)和 [failure taxonomy](../quality/processing/failure-taxonomy.md)，覆盖 AC-P101–P106、24个预期样例与独立数值/时间/WAV、人工质量、性能/取消证据要求。三份文档均已按 DEC-070 approved；已有 [P1 evidence](../quality/processing/evidence-index.md) 记录双浏览器图失败；尚无新链 readiness。
 

@@ -6,7 +6,7 @@ import { verifyBlob } from './modelCache';
 export type OrtModule = typeof Ort;
 // The same locked ORT package's JSEP build can place internal FP64 kernels in
 // WASM while running neural kernels on WebGPU. No whole-model CPU retry.
-export const FT_SESSION_OPTIONS={graphOptimizationLevel:'disabled',logSeverityLevel:0,logVerbosityLevel:1} as const;
+export const FT_SESSION_OPTIONS={graphOptimizationLevel:'disabled',logSeverityLevel:2} as const;
 interface AdapterInfo { vendor:string;architecture:string;device:string;description:string;isFallbackAdapter:boolean }
 export async function initializeRuntime(signal:AbortSignal,reference=false):Promise<{ort:OrtModule;adapter:AdapterInfo|null}> {
     let adapter:GPUAdapter|null=null;
@@ -26,7 +26,7 @@ export async function initializeRuntime(signal:AbortSignal,reference=false):Prom
     const ort=await import(/* @vite-ignore */ url) as OrtModule;
     ort.env.wasm.numThreads=1;ort.env.wasm.proxy=false;
     ort.env.wasm.wasmPaths='/processing-runtime/';
-    ort.env.logLevel='verbose';
+    ort.env.logLevel='warning';
     if(adapter)ort.env.webgpu.adapter=adapter;
     return {ort,adapter:adapter?{vendor:adapter.info.vendor,architecture:adapter.info.architecture,device:adapter.info.device,description:adapter.info.description,isFallbackAdapter:adapter.info.isFallbackAdapter}:null};
 }
