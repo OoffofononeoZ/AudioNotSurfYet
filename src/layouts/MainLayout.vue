@@ -39,6 +39,7 @@ import {
 import { VisualizerDraftRepository } from '../visualizer/visualizerDraftRepository';
 import { NativeVisualizerFileGateway } from '../visualizer/fileIO';
 import { NativeVisualizerVideoFileGateway } from '../visualizer/videoFileIO';
+import { EditorSeparationService,editorSeparationServiceKey } from '../processing/editorSeparationService';
 
 const audioSessionStore = useAudioSessionStore();
 const audioEngine = new AudioEngine();
@@ -54,6 +55,8 @@ const analysisCoordinator = new AnalysisCoordinator(
 );
 audioSession.setVolume(useConfigstore().volume);
 provide(audioSessionServiceKey, audioSession);
+const editorSeparation = new EditorSeparationService(audioEngine);
+provide(editorSeparationServiceKey,editorSeparation);
 provide(analysisCoordinatorKey, analysisCoordinator);
 const editorController = new EditorSessionController({
     audioSession,
@@ -191,6 +194,7 @@ onUnmounted(() => {
         ).__AUDIO_NOT_SURF_YET_M6__;
     }
     void (async () => {
+        await editorSeparation.dispose();
         await visualizerController.dispose();
         await editorController.dispose();
         await analysisCoordinator.dispose();

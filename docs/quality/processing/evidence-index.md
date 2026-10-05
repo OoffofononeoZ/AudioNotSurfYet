@@ -12,6 +12,8 @@ next_action: "owner要求本轮收尾；下次先告知性能未达标及试听�
 
 # Browser Processing Evidence Index
 
+2026-10-05 DEC-072已开放Editor接入，P1历史缺口保留；新切片独立记录见[Editor接入证据](editor-integration-evidence.md)。
+
 本索引按 DEC-069/070 接受实际证据记录，包括失败；approved 指记录范围和结论被既定授权接受，不表示 P1 验收通过。模型、合成 fixture、运行资产和日志只保存在忽略的本地产物目录；用户歌曲、WAV、路径和内容 hash 不入 Git。未创建新链 readiness。
 
 ## P1 Provisional — 2026-10-04

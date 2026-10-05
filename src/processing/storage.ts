@@ -44,12 +44,12 @@ export function validateDescriptor(d:DecodedAudioDescriptor|null): asserts d is 
     }
 }
 export async function stagePcm(port:DecodedAudioCopyPort,name:string,signal:AbortSignal,
-    progress:(done:number,total:number)=>void=()=>{}):Promise<StagedPcm> {
+    progress:(done:number,total:number)=>void=()=>{},cacheLimit=10*1024**3):Promise<StagedPcm> {
     const descriptor=port.getDecodedAudioDescriptor();validateDescriptor(descriptor);
     checkCancelled(signal);
     // P1 conservative budget: native PCM plus four planar/WAV outputs and all
     // public model blobs. P2 replaces this with exact cache accounting.
-    await checkCapacity(descriptor.length*descriptor.channelCount*4+Math.round(descriptor.durationSeconds*44100)*(64+(descriptor.sampleRate===44100?0:8))+662450544);
+    await checkCapacity(descriptor.length*descriptor.channelCount*4+Math.round(descriptor.durationSeconds*44100)*(64+(descriptor.sampleRate===44100?0:8))+662450544,cacheLimit);
     const directory=await jobDirectory(name),writers:FileSystemWritableFileStream[]=[];
     const hash=new Sha256().update(new TextEncoder().encode(JSON.stringify({version:FT_CONFIG.sourceHash,...descriptor})));
     try {
@@ -93,8 +93,8 @@ export async function openPcm(ref:StagedPcm,signal:AbortSignal):Promise<PcmReade
 }
 export async function openDatabase():Promise<IDBDatabase> {
     return new Promise((resolve,reject)=>{
-        const request=indexedDB.open('processing-p1',1);
-        request.onupgradeneeded=()=>{request.result.createObjectStore('models');request.result.createObjectStore('results');};
+        const request=indexedDB.open('processing-p1',2);
+        request.onupgradeneeded=()=>{for(const name of ['models','results','editor-results'])if(!request.result.objectStoreNames.contains(name))request.result.createObjectStore(name);};
         request.onsuccess=()=>resolve(request.result);request.onerror=()=>reject(request.error);
     });
 }

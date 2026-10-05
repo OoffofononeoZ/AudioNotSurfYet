@@ -21,9 +21,9 @@ export class SeparationController {
     }
     private factory:()=>WorkerPort;
     constructor(factory:()=>WorkerPort=()=>new Worker(new URL('./separation.worker.ts',import.meta.url),{type:'module'})) {this.factory=factory;}
-    async start(port:DecodedAudioCopyPort,onEvent:(event:WorkerEvent)=>void=()=>{},modelBase?:string):Promise<SeparationResult> {
+    async start(port:DecodedAudioCopyPort,onEvent:(event:WorkerEvent)=>void=()=>{},modelBase?:string,options:{cacheLimit?:number;editor?:boolean}={}):Promise<SeparationResult> {
         if(this.active)throw new ProcessingError('invalid-request','A separation job is already running.');
-        const generation=++this.generation,directory=crypto.randomUUID(),abort=new AbortController();
+        const generation=++this.generation,directory=`${options.editor?'editor-':''}${crypto.randomUUID()}`,abort=new AbortController();
         const started=performance.now();
         return new Promise<SeparationResult>((resolve,reject)=>{
             let settled=false,terminalSeen=false,failed=false;
@@ -65,7 +65,7 @@ export class SeparationController {
                 try{
                     const ref=await stagePcm(port,directory,abort.signal,(done,total)=>{
                         publish({type:'progress',job:stagingJob,phase:'pcm-staging',completedUnits:done,totalUnits:total,elapsedMs:performance.now()-started,downloadElapsedMs:0,processingElapsedMs:performance.now()-started,heartbeatSource:'controller'});
-                    });
+                    },options.cacheLimit);
                     if(abort.signal.aborted||this.active!==current)throw new ProcessingError('job-cancelled','Cancelled.');
                     const job:ProcessingJob={jobId:directory,trackId:ref.descriptor.trackId,generation,sourceHash:ref.hash,directory};current.job=job;
                     const stagingElapsed=performance.now()-started;
