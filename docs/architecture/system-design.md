@@ -10,6 +10,8 @@ upstream_docs:
 next_action: "浏览器自动处理架构已批准；制定 execution plan、acceptance criteria、test strategy 与 milestone plan，先验证 FT 分离兼容性/质量/性能"
 ---
 
+2026-10-05 DEC-072更新：P2当前接入目标为现有Editor的四轨分离工作区，暂不新增独立Processor页面。owner明确授权布局/设计/动效，接入可先于P1性能/人工质量收口；全链性能目标及未验证事实保持。当前接入边界和资源/缓存行为见[Editor分离契约](processing/editor-separation.md)。原文关于独立Processor入口对本次接入已由该决定替代，后续节拍/提案/V2仍为后续切片。
+
 # System Design
 
 > 2026-10-04 范围登记：第 1–20 节保留既有 Analyzer、Editor、Visualizer 技术基线；第 21 节的浏览器 FT 分离、TypeScript 节拍、只读提案与 Project V2 已获架构批准。新目标进入 execution planning，既有 canonical/readiness 不覆盖这些尚未实现、尚未验证的能力。

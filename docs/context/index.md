@@ -4,10 +4,14 @@ owner: "project-owner"
 last_reviewed: 2026-10-04
 upstream_docs:
   - "AGENTS.md"
-next_action: "owner要求本轮收尾；下次先提醒最后完整Chrome处理16分51.95秒未达标、试听及完整验证待补；P1执行暂停，P2未开放"
+next_action: "DEC-072授权先接入Editor，验证四轨工作区；P1性能/试听缺口保留，不阻止本次接入"
 ---
 
 # Repository Context Index
+
+## 2026-10-05 Editor FT Integration
+
+owner明确要求暂不考虑运行时间，把当前分离实现接入Editor，并授权页面布局/设计/动效与阶段提交。DEC-072据此开放Editor分离接入，不等待P1全部收口；P1仍未完成，最后完整Chrome耗时16分51.95秒及人工质量缺口不改写。当前目标使用[Editor分离契约](../architecture/processing/editor-separation.md)替代P2独立Processor入口，生产模型仍为固定四原图/官方ORT，不新增CPU或本地模型fallback。P3–P6仍未开放；原Editor标记/草稿/V1与Visualizer能力保持可用。
 
 ## 2026-10-04 本轮收尾与恢复提醒
 

@@ -7,7 +7,7 @@ upstream_docs:
   - "docs/delivery/processing/acceptance-criteria.md"
   - "docs/delivery/processing/test-strategy.md"
   - "docs/architecture/system-design.md"
-next_action: "owner要求本轮收尾，P1执行暂停但未关闭；下次先提醒16分51.95秒性能失败及试听缺口，再继续验证"
+next_action: "P2 Editor接入按DEC-072 In Progress；验证服务、设计及真实双浏览器，不伪造P1关闭"
 ---
 
 # Browser Processing Milestone Plan
@@ -19,6 +19,8 @@ next_action: "owner要求本轮收尾，P1执行暂停但未关闭；下次先�
 相对目标是批准/退出节点，不是日历工期；每次进入切片时登记实际开始/复核日期。全部产品、技术和证据 review owner 为 project-owner，工程执行使用仓库协作方式，不新增未确认人员安排。状态与审批遵守 [AGENTS.md](../../../AGENTS.md)。
 
 ## 2. Milestone Register
+
+2026-10-05：DEC-072限定开放P2 Editor接入为In Progress，入口改为现有Editor双工作区；P1仍In Progress、性能/人工质量待补。下面P2的P1 Complete依赖仅对本次Editor接入由owner明确例外替代，完整路线/后续阶段不自动关闭。目标与检查见[Editor分离契约](../../architecture/processing/editor-separation.md)。
 
 | ID | Milestone / status | Relative target / dependency | Review checkpoint and exit evidence | Owner |
 | --- | --- | --- | --- | --- |
