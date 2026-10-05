@@ -10,7 +10,7 @@ upstream_docs:
   - "docs/architecture/risk-register.md"
   - "docs/architecture/processing/model-artifacts.md"
   - "docs/architecture/processing/worker-and-project-contracts.md"
-next_action: "按owner要求暂停本轮执行；下次先告知性能未达标与质量验证缺口，再恢复P1；不提前接入P2"
+next_action: "DEC-072开放Editor分离接入；先完成服务/存储、界面、真实双浏览器验证并阶段提交"
 ---
 
 # Browser Processing Execution Plan
@@ -26,6 +26,8 @@ next_action: "按owner要求暂停本轮执行；下次先告知性能未达标�
 本计划的 P1–P6 不续用历史 Visualizer V1–V6 编号；Project V2 指 JSON schemaVersion 2。历史 canonical 和关闭记录保留，作为相邻回归，不能替代 processing 新链证据。旧计划的发现入口见 [Visualizer execution plan](../visualizer/execution-plan.md)。
 
 ## 2. Delivery Sequence
+
+2026-10-05 DEC-072替代当前接入顺序：owner明确要求忽略运行时间先接入Editor，批准[Editor分离契约](../../architecture/processing/editor-separation.md)。本切片分三阶段：共享原PCM/单Worker服务及结果校验/显式清理；Editor双工作区/四轨展示/导出/动效；真实Chrome/Edge和原标记回归、布局/资源/故障验证。每阶段验证后本地提交。P1不因此Complete，本次Editor接入不受P1性能/尚缺人工试听阻断；原P2独立Processor路由要求对本切片被Editor入口替代，P3–P6尚未开放。
 
 2026-10-04收尾：owner允许基本功能完成而性能未达标时暂时结束，并要求文档记录和下次提醒。独立P1内核已可运行；最后完整Chrome测量1011.9541秒，AC-P106失败，warning日志候选完整性能尚未重验。执行暂停，P1仍未关闭；试听、原生操作及当前候选完整canonical缺口见 [收尾证据](../../quality/processing/evidence-index.md#owner-requested-wrap-up--2026-10-04)。本次不降低阈值，不开放P2。
 
