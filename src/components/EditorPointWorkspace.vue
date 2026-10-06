@@ -29,6 +29,7 @@
         </p>
 
         <EditorAnalysisOverlay
+            v-if="active !== false"
             :project="project"
             :playback="playback"
             :analysis="analysis"
@@ -301,6 +302,7 @@ import type { PlaybackSnapshot } from '../types/audio';
 import type { PersistedTimelineViewport } from '../types/session';
 
 const props = defineProps<{
+    active?: boolean;
     project: EditorProjectV1;
     playback: PlaybackSnapshot;
     analysis: AnalysisCoordinatorSnapshot;

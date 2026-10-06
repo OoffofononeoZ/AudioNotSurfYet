@@ -26,7 +26,7 @@ next_action: "P2 Editor接入按DEC-072 In Progress；验证服务、设计及�
 | --- | --- | --- | --- | --- |
 | P0-D | Delivery docs / Complete | 2026-10-04 批准；获批 architecture | 四份文档 approved、索引/DEC-067/068、docs/diff 验证；owner 明确批准并授权相关本地提交 | project-owner |
 | P1 | FT feasibility / In Progress | P0-D Complete 后首切片 | AC-P101–P106、TS-P1：四图 bytes/session/parity、时间/energy/WAV、12 WAV 人工质量、双浏览器十五分钟分离/资源；证据与必需人工输入，按 DEC-069 关闭 | project-owner |
-| P2 | Separation workspace / Planned | P1 Complete | AC-P201–P205、TS-P2：route/stage、下载/cache、quota/故障、cancel/迟到/残留、四轨结果和原生导出 | project-owner |
+| P2 | Separation workspace / In Progress | P1 Complete；Editor接入按DEC-072例外 | Editor界面/共享服务已实现，双浏览器证据待补；AC-P201–P205、TS-P2及原生导出/人工输入仍保留，不提前关闭完整P2 | project-owner |
 | P3 | Beat candidates / Planned | P2 Complete | AC-P301–P305、TS-P3：逐段 F1/BPM、变化/歧义/静音、Worker/proposal、双浏览器完整 ≤900 秒 | project-owner |
 | P4 | Confirm and apply / Planned | P3 Complete | AC-P401–P405、TS-P4：小节确认、逐项 diff、hash/原子更新、rerun 和用户修改保护 | project-owner |
 | P5 | Visualizer V2 / Planned | P4 Complete | AC-P501–P505、TS-P5：strict/单向迁移/V2-only、旧/新源、默认映射、stale/显式刷新/preflight | project-owner |

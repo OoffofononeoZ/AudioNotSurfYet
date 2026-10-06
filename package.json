@@ -219,6 +219,8 @@
     "eval:v6:provisional": "node tests/scripts/run-v6-eval.mjs --provisional",
     "eval:editor-readiness": "node tests/scripts/run-editor-readiness-eval.mjs",
     "eval:editor-readiness:provisional": "node tests/scripts/run-editor-readiness-eval.mjs --provisional",
+    "eval:editor-ft": "node tests/scripts/run-editor-ft-eval.mjs",
+    "eval:editor-ft:provisional": "node tests/scripts/run-editor-ft-eval.mjs --provisional",
     "processing:assets": "node tests/processing/prepare-assets.mjs",
     "processing:models": "node tests/processing/download-models.mjs",
     "test:p1:unit": "vitest run tests/processing/p1-dsp.test.ts tests/processing/p1-runtime.test.ts tests/processing/p1-model-input.test.ts",

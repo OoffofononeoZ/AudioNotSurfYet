@@ -72,11 +72,11 @@
                 >
                     <div class="editor-toolbar-primary" data-testid="editor-workbench-toolbar-primary">
                         <div class="toolbar-identity">
-                            <span class="kicker">逆向制曲工程</span>
+                            <span class="kicker">EDITOR</span>
                             <h2>{{ snapshot.project.track.title || snapshot.project.track.fileName }}</h2>
                             <span class="track-meta">
                                 {{ snapshot.project.track.artist || 'unknown' }} ·
-                                {{ formatTime(playback.durationSeconds) }} · JSON V1
+                                {{ formatTime(playback.durationSeconds) }}
                             </span>
                             <span class="toolbar-help">不修改原音频，只保存时间标注工程。</span>
                         </div>
@@ -116,6 +116,14 @@
                     <p v-if="snapshot.message" role="alert" class="error-message">{{ snapshot.message }}</p>
                 </section>
 
+                <nav class="editor-workspace-switch" aria-label="Editor工作区">
+                    <div role="tablist" aria-label="工作区选择" @keydown="switchWorkspaceFromKeyboard">
+                        <button id="editor-marking-tab" type="button" role="tab" aria-controls="editor-marking-panel" :aria-selected="workspace === 'marking'" :tabindex="workspace === 'marking' ? 0 : -1" data-testid="editor-marking-tab" @click="workspace = 'marking'">标记编辑</button>
+                        <button id="editor-separation-tab" type="button" role="tab" aria-controls="editor-separation-panel" :aria-selected="workspace === 'separation'" :tabindex="workspace === 'separation' ? 0 : -1" data-testid="editor-separation-tab" @click="workspace = 'separation'">音轨分离 <span class="workspace-new">FT</span></button>
+                    </div>
+                    <span class="workspace-context">{{ workspace === 'marking' ? '时间标记 · 节拍地图' : '四轨波形 · 能量 · WAV导出' }}</span>
+                </nav>
+                <div id="editor-marking-panel" v-show="workspace === 'marking'" role="tabpanel" aria-labelledby="editor-marking-tab">
                 <EditorTimeline
                     :project="snapshot.project"
                     :playback="playback"
@@ -126,6 +134,7 @@
                 />
 
                 <EditorPointWorkspace
+                    :active="workspace === 'marking'"
                     :project="snapshot.project"
                     :playback="playback"
                     :analysis="analysisSnapshot"
@@ -137,6 +146,16 @@
                     @select-overlay-feature="controller.selectOverlayFeature($event)"
                     @retry-overlay="controller.retryOverlayAnalysis()"
                 />
+                </div>
+                <div id="editor-separation-panel" v-show="workspace === 'separation'" role="tabpanel" aria-labelledby="editor-separation-tab">
+                    <EditorSeparationWorkspace
+                        :track-id="snapshot.activeTrackId!"
+                        :track-name="snapshot.project.track.fileName"
+                        :playback="playback"
+                        :active="workspace === 'separation'"
+                        @seek="audioSession.seek($event)"
+                    />
+                </div>
 
             </template>
         </section>
@@ -206,6 +225,8 @@ import { useEditorSessionController } from '../editor/editorSessionController';
 import { useAudioSessionStore } from '../stores/audioSessionStore';
 import EditorTimeline from '../components/EditorTimeline.vue';
 import EditorPointWorkspace from '../components/EditorPointWorkspace.vue';
+import EditorSeparationWorkspace from '../components/EditorSeparationWorkspace.vue';
+import { useEditorSeparationService } from '../processing/editorSeparationService';
 import type {
     AnalysisCursorValueResult,
     FeatureId,
@@ -217,6 +238,15 @@ const router = useRouter();
 const audioSession = useAudioSessionService();
 const sessionStore = useAudioSessionStore();
 const controller = useEditorSessionController();
+const separationService = useEditorSeparationService();
+const workspace = ref<'marking'|'separation'>('marking');
+function switchWorkspaceFromKeyboard(event: KeyboardEvent): void {
+    if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return;
+    event.preventDefault();
+    workspace.value = event.key === 'Home' ? 'marking' : event.key === 'End' ? 'separation'
+        : workspace.value === 'marking' ? 'separation' : 'marking';
+    document.getElementById(`editor-${workspace.value}-tab`)?.focus();
+}
 const snapshot = shallowRef(controller.getSnapshot());
 const unsubscribe = controller.subscribe((next) => {
     snapshot.value = next;
@@ -558,6 +588,7 @@ onBeforeRouteLeave(async () => {
         const shouldLeave = await requestLeaveDecision();
         if (!shouldLeave) return false;
     }
+    await separationService.bind(null);
     await leaveEditorOnce();
     return true;
 });
@@ -582,6 +613,7 @@ onBeforeUnmount(() => {
     min-height: 100dvh;
     padding: 72px 12px 24px;
     color: var(--ink);
+    font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
     background:
         radial-gradient(circle at 20% 0%, var(--glow-accent), transparent 35%),
         var(--canvas);
@@ -591,6 +623,15 @@ onBeforeUnmount(() => {
     width: 100%;
     margin: 0;
 }
+.editor-workspace-switch{display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--hairline);margin:18px 0 0;gap:10px}
+.editor-workspace-switch>div{display:flex;gap:24px}
+.editor-workspace-switch button{position:relative;border:0;border-radius:0;background:none;height:38px;min-height:38px;padding:0 2px;color:#8caa98;font-size:12px}
+.editor-workspace-switch button:after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:2px;background:#b2e2c7;transform:scaleX(0);transition:transform .2s}
+.editor-workspace-switch button[aria-selected=true]{color:#e0eee5}.editor-workspace-switch button[aria-selected=true]:after{transform:scaleX(1)}
+.workspace-new{display:inline-block;margin-left:6px;font:9px ui-monospace,monospace;letter-spacing:.02em;color:#9fbfae;border:1px solid #34523e;border-radius:3px;padding:1px 4px}
+.workspace-context{font-size:10px;color:#728c7c;padding-right:2px}
+@media(max-width:540px){.workspace-context{display:none}.editor-workspace-switch{margin-top:12px}}
+@media(prefers-reduced-motion:reduce){.editor-workspace-switch button:after{transition:none}}
 
 .editor-heading,
 .editor-state,
@@ -714,10 +755,10 @@ onBeforeUnmount(() => {
 }
 
 .editor-workbench-toolbar {
-    border-top: 1px solid var(--hairline);
-    border-bottom: 1px solid var(--hairline);
-    border-radius: 0;
-    background: var(--editor-panel-strong);
+    border: 1px solid rgba(155, 184, 170, .16);
+    border-radius: 10px;
+    background: #101b15;
+    overflow: hidden;
 }
 
 .editor-toolbar-primary,
@@ -732,8 +773,8 @@ onBeforeUnmount(() => {
 
 .editor-toolbar-secondary {
     min-height: 40px;
-    border-top: 1px solid var(--divider);
-    background: var(--editor-toolbar);
+    border-top: 1px solid rgba(155, 184, 170, .1);
+    background: #0c1711;
 }
 
 .toolbar-identity,
@@ -750,14 +791,16 @@ onBeforeUnmount(() => {
     flex: 0 1 auto;
     overflow: hidden;
     margin: 0;
-    color: var(--ink-strong);
-    font-size: 1rem;
+    color: #dce9e0;
+    font-size: 1.05rem;
+    font-weight: 500;
     text-overflow: ellipsis;
     white-space: nowrap;
 }
 
 .toolbar-identity .kicker {
-    font-size: .72rem;
+    color: #88a092;
+    font-size: .6rem;
     white-space: nowrap;
 }
 
@@ -785,8 +828,21 @@ onBeforeUnmount(() => {
 }
 
 .toolbar-state {
-    color: var(--accent-soft);
+    color: #a4d5b8;
 }
+
+.editor-toolbar-secondary button,
+.editor-toolbar-secondary select {
+    border-color: #35483b;
+    color: #d2e1d6;
+    background: #14231a;
+    font: inherit;
+    font-size: 12px;
+}
+
+.editor-toolbar-secondary button:hover { background: #22362a; }
+.editor-toolbar-secondary .repeat-badge { border-color: #34483a; color: #a4bcae; font-size: 10px; }
+.time-readout { font-family: ui-monospace, monospace; font-variant-numeric: tabular-nums; }
 
 .button-row,
 .transport,

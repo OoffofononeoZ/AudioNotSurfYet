@@ -1,10 +1,10 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-10-04
+last_reviewed: 2026-10-06
 upstream_docs:
   - "docs/context/index.md"
-next_action: "四模型在双浏览器 session 创建失败；依据 P1 evidence 复核兼容方案，P1 未完成，P2 不开放"
+next_action: "DEC-072 Editor四轨工作区已实现；完成干净双浏览器接入验证，P1性能与人工质量缺口保留"
 ---
 
 # System Map
@@ -12,6 +12,8 @@ next_action: "四模型在双浏览器 session 创建失败；依据 P1 evidence
 ## System Summary
 
 当前系统是 Vue 3 单页应用。MainLayout 创建并提供唯一的 `AudioSessionService`、`AnalysisCoordinator`、`EditorSessionController` 与 `VisualizerSessionController`；服务通过 `AudioEngine` 解码、播放本地文件，并通过三个独立 IndexedDB repository 保存 Analyzer session、Editor 单草稿与 Visualizer 单草稿。Analyzer、Editor 与 Visualizer 已通过互斥 consumer lease 复用同一 coordinator；Visualizer 只把稳定去重后的 0–4 项送入现有 Worker/cache。File、Blob、handle、PCM、Worker 与音频节点均留在 store 外。MusicBar、Editor 与 Visualizer 读取同一播放快照；有效 Editor/Visualizer track 隐藏 MusicBar，通用 tokenized route lease 分别把 ended 策略改为 repeat-one 或 pause-at-end。
+
+DEC-072另由MainLayout提供唯一`EditorSeparationService`，使用同一AudioEngine原始PCM；Editor增加分离工作区和四轨展示/导出。模型与结果索引使用`processing-p1` IndexedDB，原PCM/planar/WAV使用OPFS；最多一个专用分离Worker，播放及analysis所有权不变。
 
 Visualizer V1 已实现 `/visualizer/:trackId?`、通用 route playback lease、三栏/抽屉工作台、strict JSON V1、独立 single-draft repository、原生 JSON gateway 和一个 16:9 Canvas。V2 已实现并获批唯一 analysis consumer、constant/analysis/editor-event inspector、FeatureRegistry projection、同歌 Editor snapshot、0–4 planner 与 60Hz 绝对时间 resolver。V3 已由单一 `VisualizerRendererHost` 接管现有 Canvas，并实现 Orthogonal Lines shader、确定性 scene-local decay、共享 resolved map 与可重试错误层；30 步 clean canonical 与人工验收已获 owner 批准。V4 已用真实 Cube Swarm 替换中性场景，增加默认 Spectrum/Energy、确定性 rise/orbit、context recovery 与通用诊断别名；34 步 clean canonical 与 owner 门禁已通过。V5 已实现唯一 pre-Gain recording tap、同 Canvas capture lease、MediaRecorder 状态机和原生保存 gateway，40 步 clean canonical 与 owner 人工门禁已批准。Editor E8 的不可用恢复、`88px/72px` 时间轴与 point marker 中心修正已通过 25 步 clean canonical 和 owner 门禁。
 
@@ -137,8 +139,10 @@ E8 当前实现把波形 stage 缩为桌面 `88px`/窄屏 `72px`，以 6px 安�
 
 2026-09-01，owner 批准并完成 M14：runtime 增加独立 `featureOrder`，Analyzer 以 pointer/click/keyboard 改变 feature-keyed DOM 与 masonry 输入，V1 增加可选顺序字段；排序不触发 Coordinator 或改变 FIFO。clean canonical `M14-2026-09-01T02-36-49-995Z-0e991307` 19/19 通过，以上为当前代码与证据事实。
 
-## Browser Processing P1 — Isolated Implementation
+## Browser Processing — Editor FT Integration
 
-`src/processing/` 提供固定模型/runtime manifest、增量 hash、native PCM OPFS staging、单分离 Worker/controller、64-tap resampler、滚动 overlap-add、30Hz energy/waveform 和 Float32 WAV。独立测试入口在 `tests/processing/`，未注册 Processor 路由、未接 Editor/Visualizer。模型/metadata 使用独立 processing-p1 IDB，任务文件使用 OPFS UUID 目录；生产播放/analysis coordinator 保持原路径。
+`src/processing/`提供固定四FT模型/官方ORT JSEP manifest、增量hash、native PCM OPFS staging、单分离Worker/controller、64-tap resampler、滚动overlap-add、30Hz energy/waveform与Float32 WAV。独立harness继续位于`tests/processing/`；DEC-072的生产入口位于现有Editor“音轨分离”，不新增Processor路由，尚未接自动节拍/提案或Visualizer V2。
 
-两浏览器的真实四图均在 session 创建处失败，内核注入通过不能证明模型可用；见 [P1 evidence](../quality/processing/evidence-index.md)。后续接入等待图门禁及全部 P1 AC，R-046–R-055 保持 Open。
+`EditorSeparationService`串行拥有任务、generation、缓存恢复和导出URL；`EditorStemRepository`校验原PCM、模型/runtime/config、compact metadata与全部artifact checksum后发布/恢复。会话revision只用于当前PCM复制防护，跨刷新使用原descriptor header重验完整hash。用户可配置10GiB上限、显式清理Editor结果/残留或四模型；无自动驱逐和CPU/本地模型备用路径。切工作区保留任务，确认离页/换歌取消，人工工程V1不由分离更新。
+
+四原图已在Chrome/Edge独立harness跑通；Chrome主Editor反馈已完成四轨/WAV及刷新恢复，正式双浏览器接入证据待补。历史失败和P1尚缺性能/人工质量见[P1 evidence](../quality/processing/evidence-index.md)，当前入口验证见[Editor evidence](../quality/processing/editor-integration-evidence.md)；R-046–R-055仍Open。

@@ -1,10 +1,10 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-10-04
+last_reviewed: 2026-10-06
 upstream_docs:
   - "AGENTS.md"
-next_action: "DEC-072授权先接入Editor，验证四轨工作区；P1性能/试听缺口保留，不阻止本次接入"
+next_action: "Editor四轨接入Chrome反馈通过；完成干净Chrome/Edge与原编辑回归，保留P1性能/试听缺口"
 ---
 
 # Repository Context Index
@@ -12,6 +12,8 @@ next_action: "DEC-072授权先接入Editor，验证四轨工作区；P1性能/�
 ## 2026-10-05 Editor FT Integration
 
 owner明确要求暂不考虑运行时间，把当前分离实现接入Editor，并授权页面布局/设计/动效与阶段提交。DEC-072据此开放Editor分离接入，不等待P1全部收口；P1仍未完成，最后完整Chrome耗时16分51.95秒及人工质量缺口不改写。当前目标使用[Editor分离契约](../architecture/processing/editor-separation.md)替代P2独立Processor入口，生产模型仍为固定四原图/官方ORT，不新增CPU或本地模型fallback。P3–P6仍未开放；原Editor标记/草稿/V1与Visualizer能力保持可用。
+
+2026-10-06 owner恢复任务并明确“可以直接改代码”。共享服务阶段已提交`3752bdf`；分离界面、真实WAV导出、缓存恢复、显式清理、取消/换歌/离页与三视口在Chrome反馈8/8通过，尚待干净双浏览器canonical。证据入口为[Editor接入记录](../quality/processing/editor-integration-evidence.md)，只关闭本次接入工作，不把P1缺口或后续路线写成完成。
 
 ## 2026-10-04 本轮收尾与恢复提醒
 
@@ -42,7 +44,7 @@ DEC-059/DEC-061 对应的旧设计指导和交付计划已归档，停止作为�
 - Repository context：入口、决策注册表、system map、glossary 与 working agreements 均已批准。
 - Product intent：Analyzer/Editor 历史范围与 Visualizer V0 已批准；自动优先且可人工修正/手动完成的视频产出主目标已于 2026-10-01 获批。
 - System design：Analyzer、Visualizer 与 Editor E1–E9 的既有技术基线保留；浏览器处理链、接口、风险与 ADR-0024–0027 已于 2026-10-04 获批；R-046–R-055 保持 Open。
-- Execution planning：M1–M14、Editor E0-D/E1–E9、Visualizer V0-D/V1–V6 的历史切片均为 `Complete`；processing 四份新交付文档 approved、P0-D Complete，P1 In Progress、P2–P6 Planned；P1 质量契约已获批并开放实际实现。
+- Execution planning：M1–M14、Editor E0-D/E1–E9、Visualizer V0-D/V1–V6的历史切片均为`Complete`；processing四份交付文档approved、P0-D Complete，P1 In Progress；P2 Editor接入按DEC-072 In Progress，P3–P6 Planned。
 - Quality and evals：M3–M14、Editor E1–E9 与 Visualizer V1–V6 evidence 均已批准；E9 revised run `E9-2026-09-04T03-51-33-088Z-13614673` 为 29/29、`approved`，首个 run `E9-2026-09-04T02-49-18-960Z-cf0a79b1` 保持 `pre-revision`。processing P1 eval/golden/失败分类已形成并 approved，已有独立 P1 失败 evidence。
 - Implementation：Editor E9 的删除、三级展示、28px 紧凑 BPM 标记条和标记修订已在 commit `13614673bbf4d824f2ee109d36e04de6b3f8aabd` 实现并通过 revised canonical。E8 与 Visualizer V1–V6 保持已完成。post-V6 viewport 修订已在 clean commit `9f3b55beaa0c8a3d799f3f1e16f1dd66c9aee77c` 通过 Chrome/Edge 专项。
 - Design remake：旧设计资料已在本地归档，相关历史仍可由 Git 记录追溯；后续视觉方向待 owner 确定。

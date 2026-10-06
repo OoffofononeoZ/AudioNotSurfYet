@@ -1,7 +1,7 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-10-04
+last_reviewed: 2026-10-06
 upstream_docs:
   - "docs/delivery/processing/execution-plan.md"
   - "docs/product/scope.md"
@@ -18,6 +18,8 @@ next_action: "DEC-071 已批准短段 max absolute 1.5e-3；继续原图双浏�
 ## 1. Scope and Measurement
 
 本表把 [scope](../../product/scope.md)、[success metrics](../../product/success-metrics.md)与获批 [System Design §21](../../architecture/system-design.md#21-automated-audio-to-video-target-architectureapproved)映射到 P1–P6。每项 owner 为 project-owner；验证矩阵和证据方法见 [test strategy](test-strategy.md)。覆盖列中“成功/失败/边界/异常”指必须验证的行为，不表示已执行。
+
+DEC-072限定开放当前[Editor分离接入](../../architecture/processing/editor-separation.md)：P2入口使用现有Editor“标记编辑/音轨分离”，本切片不等待P1性能/全部人工质量收口。既有原PCM、单AudioContext/分离Worker、缓存校验、显式清理、取消/迟到保护和真实WAV要求保持；完整P1、P2人工门禁及P3–P6仍按各自证据判断。
 
 ### Numerical and Quality Gates
 

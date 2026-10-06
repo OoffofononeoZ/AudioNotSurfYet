@@ -30,9 +30,17 @@ async function listRecords():Promise<EditorStemRecord[]> {
     finally{db.close();}
 }
 function equalDescriptor(a:DecodedAudioDescriptor,b:DecodedAudioDescriptor):boolean {return JSON.stringify(a)===JSON.stringify(b);}
-export async function nativePcmHash(port:DecodedAudioCopyPort,signal:AbortSignal):Promise<string> {
+function equalAudioIdentity(a:DecodedAudioDescriptor,b:DecodedAudioDescriptor):boolean {
+    return a.trackId===b.trackId&&a.sampleRate===b.sampleRate&&a.length===b.length
+        &&a.channelCount===b.channelCount&&a.durationSeconds===b.durationSeconds;
+}
+export async function nativePcmHash(port:DecodedAudioCopyPort,signal:AbortSignal,hashDescriptor?:DecodedAudioDescriptor):Promise<string> {
     const descriptor=port.getDecodedAudioDescriptor();validateDescriptor(descriptor);
-    const hash=new Sha256().update(new TextEncoder().encode(JSON.stringify({version:FT_CONFIG.sourceHash,...descriptor})));
+    const identity=hashDescriptor??descriptor;validateDescriptor(identity);
+    if(!equalAudioIdentity(descriptor,identity))throw new ProcessingError('source-identity-mismatch','保存结果不属于当前音频。');
+    // Revision is a live copy guard, not a persistent song identity. Recompute
+    // the original digest header with current PCM; never copy using an old epoch.
+    const hash=new Sha256().update(new TextEncoder().encode(JSON.stringify({version:FT_CONFIG.sourceHash,...identity})));
     for(let start=0;start<descriptor.length;start+=PCM_CHUNK){
         checkCancelled(signal);const current=port.getDecodedAudioDescriptor();
         if(!current||!equalDescriptor(descriptor,current))throw new ProcessingError('source-identity-mismatch','当前歌曲已经改变。');
@@ -43,7 +51,10 @@ export async function nativePcmHash(port:DecodedAudioCopyPort,signal:AbortSignal
         }
         await yieldTask();
     }
-    checkCancelled(signal);return hash.hex();
+    checkCancelled(signal);
+    const current=port.getDecodedAudioDescriptor();
+    if(!current||!equalDescriptor(descriptor,current))throw new ProcessingError('source-identity-mismatch','当前歌曲已经改变。');
+    return hash.hex();
 }
 async function blobHash(blob:Blob,signal:AbortSignal):Promise<string> {
     const hash=new Sha256();
@@ -110,10 +121,17 @@ export class EditorStemRepository implements EditorStemRepositoryPort {
     }
     async restore(port:DecodedAudioCopyPort,signal:AbortSignal):Promise<SeparationResult|null> {
         const descriptor=port.getDecodedAudioDescriptor();validateDescriptor(descriptor);
-        const records=(await listRecords()).filter(r=>r.result?.source?.descriptor?.trackId===descriptor.trackId).sort((a,b)=>b.createdAt-a.createdAt);
+        const records=(await listRecords()).filter(r=>r.result?.source?.descriptor&&equalAudioIdentity(r.result.source.descriptor,descriptor)).sort((a,b)=>b.createdAt-a.createdAt);
         if(!records.length)return null;
-        const hash=await nativePcmHash(port,signal);
-        const match=records.find(r=>r.result.source.hash===hash&&equalDescriptor(r.result.source.descriptor,descriptor));if(!match)return null;
+        let match:EditorStemRecord|undefined;
+        const digests=new Map<number,string>();
+        for(const record of records){
+            const epoch=record.result.source.descriptor.revision;
+            let digest=digests.get(epoch);
+            if(!digest){digest=await nativePcmHash(port,signal,record.result.source.descriptor);digests.set(epoch,digest);}
+            if(record.result.source.hash===digest){match=record;break;}
+        }
+        if(!match)return null;
         validateResult(match.result);
         if(match.version!==1||match.metadataHash!==await metadataHash(match.result,signal))throw new ProcessingError('result-invalid','分离结果数据损坏，请重新分离或清理。');
         const expected=fileManifest(match.result);
@@ -121,7 +139,10 @@ export class EditorStemRepository implements EditorStemRepositoryPort {
         const directory=await jobDirectory(match.result.source.directory);
         try{for(const item of match.files){const file=await(await directory.getFileHandle(item.name)).getFile();if(file.size!==item.bytes||await blobHash(file,signal)!==item.sha256)throw Error('Corrupt artifact');}}
         catch(error){checkCancelled(signal);throw new ProcessingError('result-invalid','分离文件缺失或损坏，请重新分离或清理。');}
-        checkCancelled(signal);return match.result;
+        checkCancelled(signal);
+        const current=port.getDecodedAudioDescriptor();
+        if(!current||!equalDescriptor(descriptor,current))throw new ProcessingError('source-identity-mismatch','校验期间歌曲已经改变。');
+        return match.result;
     }
     async wav(result:SeparationResult,role:string):Promise<Blob> {
         validateResult(result);const stem=result.stems.find(s=>s.role===role);if(!stem)throw new ProcessingError('invalid-request','未知音轨。');

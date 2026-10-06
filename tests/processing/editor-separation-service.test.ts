@@ -6,7 +6,7 @@ import { ProcessingError } from '../../src/processing/modelManifest';
 import type { EditorStemRepositoryPort } from '../../src/processing/editorResultRepository';
 import { syntheticPort } from './fixture';
 
-function setup(){
+function setup(gpuAvailable=true){
     let port:DecodedAudioCopyPort=syntheticPort(40);
     const source={directory:'editor-00000000-0000-0000-0000-000000000000',descriptor:port.getDecodedAudioDescriptor()!,hash:'a'.repeat(64)};
     const result={source,stems:['drums','bass','other','vocals'].map(role=>({role})),config:{},timeline:[],provenance:{}} as unknown as SeparationResult;
@@ -15,7 +15,7 @@ function setup(){
     const controller={start:vi.fn((_port:DecodedAudioCopyPort)=>new Promise<SeparationResult>((yes,no)=>{resolve=yes;reject=no;})),cancel:vi.fn()};
     const urls:string[]=[],revoked:string[]=[];
     const service=new EditorSeparationService({getDecodedAudioDescriptor:()=>port.getDecodedAudioDescriptor(),copyDecodedChannelRange:input=>port.copyDecodedChannelRange(input)},
-        {controller,repository,createUrl:()=>{const url=`blob:${urls.length}`;urls.push(url);return url;},revokeUrl:url=>revoked.push(url)});
+        {controller,repository,isGpuAvailable:()=>gpuAvailable,createUrl:()=>{const url=`blob:${urls.length}`;urls.push(url);return url;},revokeUrl:url=>revoked.push(url)});
     return {service,repository,controller,result,urls,revoked,finish:()=>resolve(result),fail:(code:string)=>reject(new ProcessingError(code,'failed')),setPort:(next:DecodedAudioCopyPort)=>{port=next;}};
 }
 it('uses the shared PCM port and only publishes verified artifacts, with balanced result URLs',async()=>{
@@ -50,4 +50,16 @@ it('restores verified cache, rejects clearing during a job, and clears only afte
 it('does not publish when native PCM revision changes before a result completes',async()=>{
     const s=setup();await s.service.bind(s.result.source.descriptor.trackId);const job=s.service.start();s.setPort(syntheticPort(50));s.finish();await job;
     expect(s.repository.publish).not.toHaveBeenCalled();expect(s.service.getSnapshot()).toMatchObject({status:'error',errorCode:'source-identity-mismatch'});await s.service.dispose();
+});
+it('fails without WebGPU before staging or downloading anything',async()=>{
+    const s=setup(false);await s.service.bind(s.result.source.descriptor.trackId);await s.service.start();
+    expect(s.controller.start).not.toHaveBeenCalled();expect(s.repository.publish).not.toHaveBeenCalled();
+    expect(s.service.getSnapshot()).toMatchObject({status:'error',errorCode:'webgpu-unavailable',result:null});await s.service.dispose();
+});
+it('revokes partially created URLs and retains the complete result when a rerun cannot open its WAVs',async()=>{
+    const s=setup();await s.service.bind(s.result.source.descriptor.trackId);let job=s.service.start();s.finish();await job;
+    vi.mocked(s.repository.wav).mockResolvedValueOnce(new Blob()).mockRejectedValueOnce(new Error('OPFS file unavailable'));
+    job=s.service.start();s.finish();await job;
+    expect(s.service.getSnapshot()).toMatchObject({status:'error',result:s.result});
+    expect(s.revoked).toEqual([s.urls[4]]);await s.service.dispose();expect(new Set(s.revoked)).toEqual(new Set(s.urls));
 });

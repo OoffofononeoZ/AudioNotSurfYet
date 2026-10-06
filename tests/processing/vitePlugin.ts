@@ -16,6 +16,8 @@ export function processingFixturePlugin():Plugin {
             const match=/^\/p1-models\/(htdemucs_ft_(?:drums|bass|other|vocals)_fp16weights\.onnx)$/.exec((request.url??'').split('?')[0]!);
             if(!match){next();return;}
             const file=path.resolve('artifacts/fixtures/p1-models',match[1]!);
+            // Public pinned fixtures only; a cross-origin redirect has a null Origin.
+            response.setHeader('Access-Control-Allow-Origin','*');
             if(!existsSync(file)){response.statusCode=404;response.end('Run processing:models first.');return;}
             response.setHeader('Content-Type','application/octet-stream');
             createReadStream(file).on('error',()=>{response.destroy();}).pipe(response);

@@ -17,6 +17,7 @@ M3–M14 不建设 CI。下列命令当前均为本地门禁；正式证据要�
 | 命令 | 作用 |
 | --- | --- |
 | `npm run typecheck` | 运行 `vue-tsc -b` |
+| `npm run eval:editor-ft` / `eval:editor-ft:provisional` | DEC-072 Editor FT 接入：docs/assets/四图bytes/types/build、处理与Editor专项、Chrome/Edge真实四轨及E7–E10相关回归；保存candidate、截图/WAV身份和已知缺口，不关闭P1 |
 | `npm test` | 执行全部非 E2E Vitest 测试 |
 | `npm run test:unit` | PCM、容差和 isolated IndexedDB |
 | `npm run test:worker` | Worker transfer、cancel 和 error harness |
