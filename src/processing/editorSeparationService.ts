@@ -33,8 +33,10 @@ export class EditorSeparationService {
     private operation:Promise<void>|null=null;private binding:Promise<void>|null=null;private disposed=false;
     private state:EditorSeparationSnapshot={trackId:null,status:'idle',result:null,urls:{},progress:null,role:null,restored:false,message:null,errorCode:null,storage:null,cacheLimit:10*1024**3};
     private readonly port:DecodedAudioCopyPort;
-    constructor(port:DecodedAudioCopyPort,options:{controller?:ControllerPort;repository?:EditorStemRepositoryPort;createUrl?:(blob:Blob)=>string;revokeUrl?:(url:string)=>void}={}){
+    private readonly isGpuAvailable:()=>boolean;
+    constructor(port:DecodedAudioCopyPort,options:{controller?:ControllerPort;repository?:EditorStemRepositoryPort;createUrl?:(blob:Blob)=>string;revokeUrl?:(url:string)=>void;isGpuAvailable?:()=>boolean}={}){
         this.port=port;
+        this.isGpuAvailable=options.isGpuAvailable??(()=>typeof navigator!=='undefined'&&!!navigator.gpu);
         this.controller=options.controller??new SeparationController();this.repository=options.repository??new EditorStemRepository();
         this.createUrl=options.createUrl??(blob=>URL.createObjectURL(blob));this.revokeUrl=options.revokeUrl??(url=>URL.revokeObjectURL(url));
         try{const limit=Number(localStorage.getItem('editor-ft-cache-limit'));if(Number.isFinite(limit)&&limit>=1024**3&&limit<=100*1024**3)this.state.cacheLimit=limit;}catch{/* Settings are optional; quota remains enforced. */}
@@ -69,6 +71,7 @@ export class EditorSeparationService {
     }
     async start():Promise<void>{
         if(this.disposed||!this.state.trackId||busyStatuses.has(this.state.status)||this.operation)return;
+        if(!this.isGpuAvailable()){this.update({status:'error',errorCode:'webgpu-unavailable',message:errors['webgpu-unavailable']!,progress:null});return;}
         const generation=this.generation,trackId=this.state.trackId,abort=new AbortController();this.io=abort;
         this.update({status:'running',progress:null,role:null,message:null,errorCode:null,restored:false});
         let result:SeparationResult|undefined;
@@ -86,7 +89,7 @@ export class EditorSeparationService {
             }catch(error){
                 if(result)try{await this.repository.discard(result.source.directory);}catch{/* Explicit cleanup remains available. */}
                 if(generation===this.generation&&!this.disposed){const code=error instanceof ProcessingError?error.code:'inference-failed';this.update({status:code==='job-cancelled'?'cancelled':'error',errorCode:code,message:code==='job-cancelled'?'已取消本次分离，已有结果保留。':errors[code]??(error instanceof Error?error.message:'分离失败。')});}
-            }finally{if(generation===this.generation&&!this.disposed)try{this.update({storage:await this.repository.summary()});}catch{/* Keep the task outcome if accounting fails. */}}
+            }finally{if(generation===this.generation&&!this.disposed)try{const storage=await this.repository.summary();if(generation===this.generation&&!this.disposed)this.update({storage});}catch{/* Keep the task outcome if accounting fails. */}}
         })();this.operation=work;await work;if(this.operation===work)this.operation=null;
     }
     cancel():void{if(!['running','restoring'].includes(this.state.status))return;this.io?.abort();this.controller.cancel();this.update({status:'cancelling',message:'正在取消并清理本次任务…'});}

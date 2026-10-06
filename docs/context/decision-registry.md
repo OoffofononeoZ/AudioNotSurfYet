@@ -270,11 +270,11 @@ E5 clean canonical `E5-2026-08-27T11-03-22-177Z-78124177` 随后在 implementati
 
 owner 授权代码无需再次确认并直接提交 Git，并选择“已批路线自主推进”；随后要求“Implement the plan.”。本授权不替代必需人工结果，也不豁免新架构取舍。
 
-## P1 Implementation Evidence — 2026-10-04
-
 ## DEC-072 — Editor Integration — 2026-10-05
 
 owner明确要求“如果不考虑运行时间，现在可以成功分离音频，把当前的实现接入到项目中的Editor页面”，同时授权布局、设计、动效及阶段本地提交。批准先接入Editor的限定例外，不等待P1性能/全部人工质量关闭；完整900秒目标和人工事实缺口不改写。P2入口改为现有Editor中的分离工作区，不增加独立Processor路由；后续自动节拍、提案应用、V2及发布不由本次接入提前授权。具体行为与验证边界见[Editor分离契约](../architecture/processing/editor-separation.md)。
+
+2026-10-06，owner在暂停只读核对后恢复任务并追加“可以直接改代码”，沿用DEC-069/072的阶段本地提交授权。分离界面与缓存修复完成Chrome反馈8/8；下一步干净双浏览器证据见[Editor接入记录](../quality/processing/editor-integration-evidence.md)。此事件不新增模型、性能阈值、产品范围或发布决定。
 
 ## P1 Historical Implementation Evidence
 

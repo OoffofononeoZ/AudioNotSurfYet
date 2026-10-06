@@ -37,6 +37,23 @@ it('publishes complete checksummed artifacts and restores only the same native P
     const altered={...s.port,copyDecodedChannelRange:(input:Parameters<typeof s.port.copyDecodedChannelRange>[0])=>{const data=s.port.copyDecodedChannelRange(input);if(data)data[0]=.7;return data;}};
     expect(await s.repository.restore(altered,signal())).toBeNull();
 });
+it('restores identical PCM after a decode epoch change, while copying only with the current revision',async()=>{
+    const s=await fixture();await s.repository.publish(s.result,signal(),()=>{});
+    const descriptor={...s.port.getDecodedAudioDescriptor()!,revision:99},requests:number[]=[];
+    const redecoded={getDecodedAudioDescriptor:()=>descriptor,copyDecodedChannelRange:(input:Parameters<typeof s.port.copyDecodedChannelRange>[0])=>{
+        requests.push(input.revision);return input.revision===99?s.port.copyDecodedChannelRange({...input,revision:s.result.source.descriptor.revision}):null;
+    }};
+    expect((await s.repository.restore(redecoded,signal()))?.source.hash).toBe(s.result.source.hash);expect(new Set(requests)).toEqual(new Set([99]));
+    const changed={...redecoded,copyDecodedChannelRange:(input:Parameters<typeof redecoded.copyDecodedChannelRange>[0])=>{const data=redecoded.copyDecodedChannelRange(input);if(data)data[0]=.9;return data;}};
+    expect(await s.repository.restore(changed,signal())).toBeNull();
+});
+it('rejects a decode replaced during the final copied chunk, even when no next iteration can detect it',async()=>{
+    const s=await fixture();let descriptor=s.port.getDecodedAudioDescriptor()!;
+    const changing={getDecodedAudioDescriptor:()=>descriptor,copyDecodedChannelRange:(input:Parameters<typeof s.port.copyDecodedChannelRange>[0])=>{
+        const data=s.port.copyDecodedChannelRange(input);if(input.channel===1)descriptor={...descriptor,revision:descriptor.revision+1};return data;
+    }};
+    await expect(nativePcmHash(changing,signal())).rejects.toMatchObject({code:'source-identity-mismatch'});
+});
 it.each(['missing','file-bytes','compact-series','config','model-revision'])('rejects cached %s damage instead of presenting a successful hit',async damage=>{
     const s=await fixture();await s.repository.publish(s.result,signal(),()=>{});
     if(damage==='missing')directories.get(directory)!.delete('drums.wav');

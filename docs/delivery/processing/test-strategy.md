@@ -1,7 +1,7 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-10-04
+last_reviewed: 2026-10-06
 upstream_docs:
   - "docs/delivery/processing/execution-plan.md"
   - "docs/delivery/processing/acceptance-criteria.md"
@@ -15,6 +15,8 @@ next_action: "DEC-071 已批准短段 max absolute 1.5e-3；继续原图双浏�
 # Browser Processing Test Strategy
 
 ## 1. Test Environment and Evidence Boundary
+
+DEC-072的Editor分离接入使用[专属契约](../../architecture/processing/editor-separation.md)与[接入证据](../../quality/processing/editor-integration-evidence.md)：从主应用进入，真实四图/四WAV、缓存恢复、取消/换歌/离页、故障与原编辑回归，以及390/1280/1920布局。此切片不重跑十五分钟门禁，不把暂缓性能或尚缺owner试听/原生操作记录改写为通过；P1及后续路线保留原要求。
 
 沿用仓库 Vitest、真实 Chrome/Edge Playwright、IndexedDB/Worker harness 和版本化合成 fixture；命令入口以 [tests README](../../../tests/README.md)、[working agreements](../../context/working-agreements.md)为准。新 processing harness、fixture 和 runner 尚未实现，不把计划中的 TS-P 名称当作可执行 npm 命令。仅改本文档时执行 `npm run test:docs` 和 `git diff --check`。
 
