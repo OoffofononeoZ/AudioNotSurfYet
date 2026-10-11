@@ -1,7 +1,7 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-10-06
+last_reviewed: 2026-10-12
 upstream_docs:
   - "docs/context/index.md"
 next_action: "DEC-072 Editor四轨工作区已实现；完成干净双浏览器接入验证，P1性能与人工质量缺口保留"
@@ -15,7 +15,7 @@ next_action: "DEC-072 Editor四轨工作区已实现；完成干净双浏览器�
 
 DEC-072另由MainLayout提供唯一`EditorSeparationService`，使用同一AudioEngine原始PCM；Editor增加分离工作区和四轨展示/导出。模型与结果索引使用`processing-p1` IndexedDB，原PCM/planar/WAV使用OPFS；最多一个专用分离Worker，播放及analysis所有权不变。
 
-Visualizer V1 已实现 `/visualizer/:trackId?`、通用 route playback lease、三栏/抽屉工作台、strict JSON V1、独立 single-draft repository、原生 JSON gateway 和一个 16:9 Canvas。V2 已实现并获批唯一 analysis consumer、constant/analysis/editor-event inspector、FeatureRegistry projection、同歌 Editor snapshot、0–4 planner 与 60Hz 绝对时间 resolver。V3 已由单一 `VisualizerRendererHost` 接管现有 Canvas，并实现 Orthogonal Lines shader、确定性 scene-local decay、共享 resolved map 与可重试错误层；30 步 clean canonical 与人工验收已获 owner 批准。V4 已用真实 Cube Swarm 替换中性场景，增加默认 Spectrum/Energy、确定性 rise/orbit、context recovery 与通用诊断别名；34 步 clean canonical 与 owner 门禁已通过。V5 已实现唯一 pre-Gain recording tap、同 Canvas capture lease、MediaRecorder 状态机和原生保存 gateway，40 步 clean canonical 与 owner 人工门禁已批准。Editor E8 的不可用恢复、`88px/72px` 时间轴与 point marker 中心修正已通过 25 步 clean canonical 和 owner 门禁。
+Visualizer 已实现 `/visualizer/:trackId?`、route playback/analysis lease、strict JSON V1、独立单草稿、原生 JSON gateway 和一个 16:9 Canvas；binding 使用同歌 Editor snapshot、0–4 planner 与 60Hz 绝对时间 resolver。单一 `VisualizerRendererHost` 管理 Orthogonal Lines/Cube Swarm、确定性状态与错误恢复；录制使用唯一 pre-Gain tap、同 Canvas capture lease、MediaRecorder 和原生保存 gateway。具体职责见下表，历史审批与候选身份见对应 evidence。
 
 ## Runtime Flow
 
@@ -70,7 +70,7 @@ showOpenFilePicker → FileSystemFileHandle → File
 | Session persistence | 保存/恢复 V1 最近会话、全部句柄和唯一 current Blob/cache | 原生 IndexedDB `SessionRepository` | project-owner | `replaceCurrentAnalysisCache()` 校验 track/hash 并原子替换；unknown schema 不猜测迁移 |
 | Config persistence | 保存 volume 与 MusicBar style | Pinia、localStorage key `config` | project-owner | schema 保持不变；volume 为 0–100 |
 | Home visualization | 全屏 Three.js 光线 shader | `rayLength` prop、IntersectionObserver、reduced-motion media query | unknown | 常规模式使用 WebGL RAF；reduced motion 只静态渲染；卸载释放 mesh、geometry、material、render list、renderer 与 WebGL context |
-| Analyzer surface | 固定展示 21 张折叠卡、最多四项 FIFO 活动分析、共享 viewport/zoom/cursor/seek、DOM 精确值与分层 Canvas | store、AudioSessionService、AnalysisCoordinator、Canvas 2D | project-owner | `FEATURE_IDS` 稳定 DOM 顺序；实际高度最短列布局，390/1024 一列、1280/1920 两列、gap 18px；展开才挂载图表资源，默认活动队列为空 |
+| Analyzer surface | 固定展示 21 张折叠卡、最多四项 FIFO 活动分析、共享 viewport/zoom/cursor/seek、DOM 精确值与分层 Canvas | store、AudioSessionService、AnalysisCoordinator、Canvas 2D | project-owner | 独立 `featureOrder` 驱动 feature-keyed DOM 与 masonry，排序不触发 Coordinator 或改变 FIFO；实际高度最短列布局，390/1024 一列、1280/1920 两列、gap 18px；展开才挂载图表资源，默认活动队列为空 |
 | Editor E1–E9 surface | `/editor/:trackId?` 状态、精简 transport、JSON 工程、共享波形/tempo/point/range 时间列、21 项 overlay、`88px/72px` 波形、28px 紧凑 BPM 条、不可用恢复决策与中心对齐 marker | EditorSessionController、AudioSessionService、AnalysisCoordinator、Vue Router、shared Canvas renderer、DOM controls | project-owner | E1–E9 已关闭；E9 revised canonical 与 owner 门禁已批准 |
 | Editor project and draft | strict JSON V1、歌曲 hash/时长绑定、原生 file gateway、单草稿 autosave 与恢复冲突 | `EditorFormatCodecRegistry`、`EditorDraftRepository`、`audionotsurfyet-editor` V1 | project-owner | 首版只注册 JSON；session database 不变 |
 | Visualizer V1–V6 surface | `/visualizer/:trackId?` 单视口三栏/互斥抽屉、左右独立滚动、16:9 单 Canvas、底部 transport、strict project/单草稿、两个确定性 scene、recording 状态栏、WebM 保存、final hardening 与 post-V6 原生全屏 | `VisualizerSessionController`、`VisualizerRendererHost`、`SceneRegistry`、`RoutePlaybackLease`、`AnalysisConsumerLease`、BindingPlanner/Resolver、Editor snapshot、MediaRecorder、Fullscreen API | project-owner | V1–V6 canonical 保持批准；fullscreen 只为瞬时 UI，自动化跳过并待 owner 审阅 |
@@ -104,9 +104,9 @@ showOpenFilePicker → FileSystemFileHandle → File
 - Header 的 settings 事件没有已发现消费者；`/comingsoon` 只保留为通用占位，不再承载 Visualizer。Editor E1–E9 已获批准并关闭；E9 不改变 runtime/data ownership，Visualizer V1 也不改变该边界。
 - `components.d.ts` 和 `auto-imports.d.ts` 是构建插件生成文件，构建可能造成工作树变化。
 
-## Editor Boundary After E5
+## Editor 基线边界
 
-已实现事实：
+以下为 E1–E9 的已实现基线；E10 与 FT 接入修订的当前状态及合同见 [上下文入口](index.md)。
 
 - `/editor/:trackId?` 由 route-generation `EditorSessionController` 编排；Header 使用当前歌曲，播放列表“去编辑”先播放指定歌曲。
 - tokenized playback lease 隔离 repeat-one；analysis consumer lease 只允许 Analyzer/Editor 最新 token 生效。Editor 先激活 `buffer` 完成 waveform/tempo，再激活 `buffer + selected overlay`；选择 Buffer 时去重，快速切换与旧 generation 以最后选择为准。
@@ -119,25 +119,15 @@ showOpenFilePicker → FileSystemFileHandle → File
 - `analysisCanvasRenderer` 是 Analyzer card 与 Editor overlay 共用的纯 Canvas adapter；E4 overlay 一次选择累计 21 项中的一个，使用同一 viewport/time geometry、DPR backing store、40ms exact cursor 合并和 last-ready Buffer fallback。
 - overlay 通过 Teleport 固定覆盖窗口，灰色背景、全视口 Canvas 与说明穿透到 Header/底层标记；只有左上复合入口、临时 21 项菜单、重试和 top/move/bottom 手柄接收 pointer。bounds 仍为 0.10/0.35、最小 0.12，但相对 viewport；visibility 按歌曲 hash 本地保存，关闭时 active set 只保留 Buffer。
 
-E7 修订版 46/46 canonical 已由 owner 于 2026-08-31 批准并关闭；原 44/44 run 只作 pre-revision，E6 历史身份保持不变。M13 不重开 Editor 里程碑。
+E7 原 44/44 run 只作 `pre-revision`，修订版 46/46 与 E6/E8 的历史身份见 [Editor evidence](../quality/editor/evidence-index.md)，不因其他子系统修改而改写。
 
-E8 当前实现把波形 stage 缩为桌面 `88px`/窄屏 `72px`，以 6px 安全区计算垂直振幅；`Editor.vue` 通过纯恢复决策在同一 URL 歌曲恢复后合并重试，另一首歌曲只提供显式 replace 入口；point marker 的菱形和引线分离并以事件 X/Y 中心定位。JSON V1、Editor IndexedDB、AudioEngine 与 AudioSessionService 严格身份规则均不变。clean canonical 25/25 与 owner 门禁已批准。
+E8 当前实现把波形 stage 缩为桌面 `88px`/窄屏 `72px`，以 6px 安全区计算垂直振幅；`Editor.vue` 通过纯恢复决策在同一 URL 歌曲恢复后合并重试，另一首歌曲只提供显式 replace 入口；point marker 的菱形和引线分离并以事件 X/Y 中心定位。JSON V1、Editor IndexedDB、AudioEngine 与 AudioSessionService 严格身份规则均不变。
 
-## Approval Record
+## 当前边界与历史证据
 
-`project-owner` 于 2026-08-21 确认 M7 卡片、共享视口、跳转、刷新恢复和 3/3 学习解释通过，并批准 M7 canonical、关闭 M7、开放 M8。随后 M8–M11 与 Analyzer readiness 依次完成并获批。2026-08-26，owner 又依次批准 Editor 产品、架构、delivery 与 E1 canonical/人工结果。2026-08-27，E2–E5 clean canonical 与人工门禁依次获 owner 批准；2026-08-28，E6 clean canonical 40/40 与人工补偿获批准，随后开放 E7 紧凑工作台。
+Analyzer 运行态由 `activeFeatureQueue` 管理最多四项 FIFO，独立 `featureOrder` 决定卡片顺序；V1 `activeCards` 仅作为兼容 carrier，排序不取得新的 analysis consumer 或改变活动队列。
 
-2026-09-03，owner 以 E8 完整实施指令批准 ADR-0018、E8 delivery/quality 计划并开放实现。E8 在 Visualizer V5 尚未提交时先形成 scoped/provisional 结果；V5 独立提交后，owner 明确允许单独提交 E8 并运行 clean canonical。implementation commit `84d9435cc6e8d1edb0932ff1b8dcd1b84dff32b5` 与 25/25 canonical 通过，owner 随后批准 evidence 与人工门禁；E8 为 `Complete`，相关风险为 `Mitigated`。
-
-同日，owner 要求自行提交并完成 M12 后续。M12 canonical `M12-2026-08-28T07-30-39-789Z-be655e67` 在 clean commit `be655e6765a63493fb1a3a4ee99992073b06e54e` 上 12/12 通过，稳定 DOM、实际高度最短列与 Observer/RAF 生命周期成为当前系统事实；M12 已关闭且 Analyzer readiness 恢复，PROD-015 与 Editor E6 不受该批准覆盖。
-
-随后 Editor E7 紧凑工作台实现已提交，并由 clean canonical `E7-2026-08-28T15-02-48-298Z-78bc7f06` 在 commit `78bc7f06311a09948e5efae941a14599305b81a5` 上 44/44 验证；ADR-0011 修订后该 run 保留为 `pre-revision`，不再代表正式候选。
-
-2026-08-29，全屏 fixed overlay、窗口级复合入口、21 项临时菜单、按歌曲 visibility 与关闭后的 Buffer-only active set 在 commit `080f577fe20fcb22a20184dce0b15892c5299464` 上完成。修订版 clean canonical `E7-2026-08-29T05-23-03-986Z-080f577f` 46/46 通过，summary SHA-256 为 `da7c5e7a931a1e8c6cb3a64c3eeac8f5cb7d5cc6d6b604de6e4ea7b009ec13f5`；owner 于 2026-08-31 批准并关闭 E7，不补写未提供的人工测量。
-
-2026-08-31，owner 批准 M13 产品、ADR-0012、delivery 与 quality 计划并要求完整实施。Analyzer runtime 已改为 `activeFeatureQueue`，按 `FEATURE_IDS` 固定渲染 21 张卡，展开时才挂载图表资源；V1 `activeCards` 仅作为兼容 carrier。clean canonical `M13-2026-08-31T17-44-39-680Z-63c04005` 17/17 通过，当前实现身份为 commit `63c04005670145d83ee181d474197bce921c5300`。
-
-2026-09-01，owner 批准并完成 M14：runtime 增加独立 `featureOrder`，Analyzer 以 pointer/click/keyboard 改变 feature-keyed DOM 与 masonry 输入，V1 增加可选顺序字段；排序不触发 Coordinator 或改变 FIFO。clean canonical `M14-2026-09-01T02-36-49-995Z-0e991307` 19/19 通过，以上为当前代码与证据事实。
+批准原文与替代关系查 [decision registry](decision-registry.md)，canonical 身份、hash 和人工门禁分别查 [Analyzer evidence](../quality/evidence-index.md)、[Editor evidence](../quality/editor/evidence-index.md) 与 [Visualizer evidence](../quality/visualizer/evidence-index.md)。当前里程碑、候选与未解决缺口见 [上下文入口](index.md)；本页维护职责和数据流，历史通过不证明当前代码已获整体 readiness 或上线授权。
 
 ## Browser Processing — Editor FT Integration
 
