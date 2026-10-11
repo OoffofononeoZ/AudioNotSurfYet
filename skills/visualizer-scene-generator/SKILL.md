@@ -21,11 +21,11 @@ description: 为 AudioNotSurfYet 新建受控内置 Visualizer 场景，执行 S
 4. 读取 [场景规则](references/scene-rules.md)，并检查当前 Feature Registry、Scene Registry、参数 descriptor、project codec 和相邻场景实现。把抽象绑定类型落实为现有 `FeatureId/component/projection/transform` 或需要用户选择的 Editor 来源。
 5. 输出一份确定的 Scene Contract，至少包含 template ID/title、画面与数据映射、参数表/default bindings、低/高与静音状态、时间/seed/hash 模型、资源预算、golden 状态、测试与回归范围、停止条件。末尾输出 `AWAITING_APPROVAL`，等待用户明确批准这份合同；此时仍不得修改仓库。
 6. 只有用户批准刚刚展示的确定合同后才开始实现：
-   - 在 `docs/architecture/visualizer/scenes/<template-id>.md` 保存轻量合同，包含仓库生命周期 frontmatter。
+   - 在 `docs/architecture/visualizer/scenes/<template-id>.md` 保存轻量合同，保留 template ID、当前合同内容与用户批准来源；元数据按本文件用途维护。
    - 新增独立纯状态解析器和 renderer，扩展 `VisualizerTemplateId`、strict Project V1 whitelist 与 `SceneRegistry`。
    - 不改变默认 `orthogonal-lines`，不覆盖导入/恢复的持久化 binding，不扩大公共 scene/route/recording 接口。
-7. 读取 [测试矩阵](references/test-matrix.md)，生成场景专项 unit、integration 和 Chrome/Edge E2E，并运行要求的 V1/V2/V5/V6 针对性回归。浏览器或环境无法执行的项目明确记为 `unverified`，不得改记为通过。
-8. 报告合同文件、实现位置、测试结果、未验证项与 readiness 影响。场景实现完成后只请求 Visualizer readiness 重评；不要创建新 V 里程碑、eval plan、canonical evidence 或发布声明。
+7. 读取 [测试矩阵](references/test-matrix.md)，按具体场景合同生成 unit、integration 和 Chrome/Edge E2E，并选择受影响的 V1/V2/V5/V6 针对性回归；不默认运行累计 eval 链。浏览器或环境无法执行的项目明确记为 `unverified`，不得改记为通过。
+8. 按项目验证与交付 skills 同步发现入口和地图；报告合同文件、实现位置、测试结果、未验证项与 readiness 影响。场景实现完成后只请求 Visualizer readiness 重评；不要创建新 V 里程碑、eval plan、canonical evidence 或发布声明。
 
 ## Approval Gate
 

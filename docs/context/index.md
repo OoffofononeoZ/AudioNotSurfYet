@@ -1,13 +1,20 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-10-06
+last_reviewed: 2026-10-11
 upstream_docs:
   - "AGENTS.md"
-next_action: "Editor四轨接入Chrome反馈通过；完成干净Chrome/Edge与原编辑回归，保留P1性能/试听缺口"
+next_action: "按DEC-073项目skills与按需验证工作；Editor接入仍待干净双浏览器回归，P1性能/试听缺口保留"
 ---
 
 # Repository Context Index
+
+## 2026-10-11 Project Skills Migration
+
+owner 明确批准实施全局停用 9 个 Harness 文档 skills、7 个按职责项目 skills、仓库内发现入口、生成代码地图与按风险验证（DEC-073）。日常工作不再以通用阶段文件、统一元数据或逐阶段审批为前置；重大取舍、具体 Scene Contract、正式 evidence/readiness 与发布边界仍按有效合同处理。
+
+维护源为 `skills/`，发现入口为 `.agents/skills/`；工具用法见 [README](../../README.md)，职责选择见 [AGENTS.md](../../AGENTS.md)，代码定位见 [CODEMAP](../CODEMAP.md)。本轮只迁移工作规则与工具，保留现有阶段文档、历史候选与 P1 未关闭缺口。
+
 
 ## 2026-10-05 Editor FT Integration
 
@@ -37,7 +44,7 @@ DEC-058/ADR-0023 另把 Visualizer 原生全屏登记为 post-V6 readiness 修�
 
 DEC-059/DEC-061 对应的旧设计指导和交付计划已归档，停止作为后续设计任务的依据。已经实现的样式仍是当前代码事实；新的设计方向由 owner 另行确定。
 
-本目录维护仓库事实、边界和工作记忆；生命周期路由与通用方法由 [AGENTS.md](../../AGENTS.md) 负责。当前代码事实与目标架构必须区分：现状见 [system map](system-map.md)，既有技术基线及获批目标架构见 [system design](../architecture/system-design.md)。
+本目录维护仓库事实、边界和工作记忆；按需工作规则与项目 skill 导航由 [AGENTS.md](../../AGENTS.md) 负责。当前代码事实与目标架构必须区分：现状见 [system map](system-map.md)，既有技术基线及获批目标架构见 [system design](../architecture/system-design.md)。
 
 ## Current Stage
 
@@ -54,7 +61,7 @@ DEC-059/DEC-061 对应的旧设计指导和交付计划已归档，停止作为�
 
 | Path | Purpose | Owner / status | Review trigger |
 | --- | --- | --- | --- |
-| [AGENTS.md](../../AGENTS.md) | 根工作指南和 Harness 门禁 | project-owner / active | 工作流、门禁、文档位置或跨阶段测试纪律变化 |
+| [AGENTS.md](../../AGENTS.md) | 根工作指南与项目 skill 导航 | project-owner / active | 工作流、门禁、文档位置或跨阶段测试纪律变化 |
 | [system-map.md](system-map.md) | 当前子系统、接口和外部依赖 | project-owner / approved | 当前代码边界变化 |
 | [glossary.md](glossary.md) | 当前项目词汇与代码含义 | project-owner / approved | 术语、状态或类型含义变化 |
 | [decision-registry.md](decision-registry.md) | 产品、架构和交付决策入口 | project-owner / approved | 形成、撤销或替代重要决策 |
@@ -193,7 +200,7 @@ DEC-059/DEC-061 对应的旧设计指导和交付计划已归档，停止作为�
 | `src/utils/` | 事件总线、M12 masonry placement 与其他纯工具函数 | 实现时按实际边界维护 |
 | `src/data/` | `analyzerData.ts` 的 21 项 Meyda 说明，由 M6 registry 穷尽映射 | M6 FeatureRegistry |
 | `tests/` | M3–M14 本地测试、fixture、golden、Chrome/Edge 浏览器 harness 和 eval runner | [tests README](../../tests/README.md) |
-| `skills/audio-visualizer-dev/` | 本项目开发、验证和文档路由 Skill | [SKILL.md](../../skills/audio-visualizer-dev/SKILL.md) |
+| `skills/audio-visualizer-dev/` | 本项目领域开发与诊断 Skill | [SKILL.md](../../skills/audio-visualizer-dev/SKILL.md) |
 | `skills/visualizer-scene-generator/` | 新内置 Visualizer 场景的输入门禁、合同审批、代码与测试生成 Skill | [SKILL.md](../../skills/visualizer-scene-generator/SKILL.md) |
 
 ## Lifecycle Entry Points

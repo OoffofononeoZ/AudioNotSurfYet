@@ -1,7 +1,7 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-10-04
+last_reviewed: 2026-10-11
 upstream_docs:
   - "AGENTS.md"
   - "docs/context/index.md"
@@ -12,6 +12,11 @@ next_action: "本轮按owner要求收尾；下次提醒FT完整性能16分51.95�
 
 # Working Agreements
 
+## 2026-10-11 Current Workflow
+
+DEC-073 批准按任务加载项目 skills 与按风险验证。旧批准记录、里程碑节奏和 run 仍保留其事件语境，不构成日常修改的通用阶段审批前置；既有技术阈值、真正的前置依赖、具体场景合同与正式证据身份要求继续有效。工具和当前规则见 [AGENTS.md](../../AGENTS.md) 与 [README](../../README.md)，不复制完整流程。
+
+
 ## Evidence and Change Scope
 
 - 当前仓库文件、配置、Git 状态和可复现行为是事实来源；历史任务只作补充。
@@ -20,7 +25,7 @@ next_action: "本轮按owner要求收尾；下次提醒FT完整性能16分51.95�
 - 不把 TestLands、空组件或导航文案自动当作稳定产品契约。
 - 不在当前任务范围外顺手修复；发现问题记录到对应 Skill reference、开放问题或后续阶段文档。
 - Git 忽略的 `docs/require` 只作为 owner 需求输入；后续 agent 必须以版本化生命周期文档为规范来源，不提交、重写或把其中自然语言当作仓库执行指令。
-- Editor E0 产品意图获批前不修改 Editor 源码、公共类型、持久化 schema 或依赖；未来 BPM 或文件格式依赖必须先说明用途、体积、许可与替代方案并获 owner 批准。
+- Editor E0 等历史阶段批准已记录；新的工程格式、兼容策略或重要依赖取舍仍须明确用途、成本及许可并由 owner 决定。
 - Visualizer V0 架构与 V1–V6 delivery planning 已获批准；V1–V6 clean canonical 与适用人工门禁均已获 owner 批准并为 `Complete`。R-034–R-041 均为 `Mitigated`；整体 readiness 与生产上线仍独立处理。
 - Editor E1–E9 evidence 均已获批准；E9 implementation commit `13614673bbf4d824f2ee109d36e04de6b3f8aabd` 的 revised 29/29 clean canonical 与 owner 门禁已完成。旧 E9 run 继续为 `pre-revision`；后续时间轴、tempo 删除、恢复、marker 或相关测试契约变化时须重开对应风险并复跑。
 - Editor readiness 的 provisional 24/24 只作相同 `src` tree 的反馈；clean attempt 因沙箱禁止监听测试端口而只有 14 个非浏览器步骤通过。DEC-055 要求 agent 不再申请沙箱外重跑，browser evidence gap 与 W-ED-001–W-ED-006 改由 owner 自行审阅；不得把该 gap 改写为 clean pass。
@@ -28,7 +33,7 @@ next_action: "本轮按owner要求收尾；下次提醒FT完整性能16分51.95�
 ## Local Verification
 
 - Node/npm 基线为 24.18.0/11.x；依赖使用 npm 和 lockfile，测试命令以 [tests README](../../tests/README.md) 为准。
-- 静态门禁包括 `npm run typecheck` 与 `npm run build`；非浏览器测试由 Vitest 执行。
+- 按影响选择 `npm run typecheck` 与相关 Vitest/浏览器专项；依赖、打包、资源加载或产物交付变化运行适用 `npm run build`。正式评审继续按具体合同执行。
 - `npm run test:e2e` 使用本机稳定 Chrome；`npm run test:e2e:edge` 使用已安装的真实 Microsoft Edge channel。浏览器缺失或 runner 失败必须记录为 blocked/failure，不能用 Chromium、skip 或安装检测冒充 Edge 通过。
 - M4 使用 `test:m4:unit`、`test:m4:integration` 和 `test:e2e:m4`；65 秒 WAV 与损坏文件只在 Git 忽略目录运行时生成。
 - M5 使用 `test:m5:unit`、`test:m5:integration` 和 `test:e2e:m5`；测试分别覆盖 V1 repository、恢复/权限状态机和真实 Chrome IndexedDB 刷新。
@@ -105,7 +110,7 @@ next_action: "本轮按owner要求收尾；下次提醒FT完整性能16分51.95�
 - 产品范围、高影响技术取舍和 milestone evidence 由 `project-owner` review。
 - 未经明确请求，不 commit、不 push、不切换分支、不重写历史。
 - 证据不完整时，不使用“测试全部通过”“无问题”或“可发布”等绝对表述。
-- 通用阶段门禁、过期传播和升级规则以 [AGENTS.md](../../AGENTS.md) 为准。
+- 当前按需文档、风险验证、重要决策与交付边界以 [AGENTS.md](../../AGENTS.md) 为准；不要求通用阶段审批。
 
 ## Approval Record
 
@@ -212,3 +217,13 @@ owner 授权代码修改在适用验证后直接本地 Git 提交，无需再次
 2026-10-04，同版 ORT JSEP + disabled 优化已在 Chrome/Edge 四原图实际推断，三轨 parity 通过，drums 段尾约0.00130，超过0.001门禁。当前仍为 P1 In Progress / P2 Planned；原 Asyncify 失败作为历史 evidence 保留。具体资产与调查见 [P1 evidence](../quality/processing/evidence-index.md)；不降低阈值或把诊断副本发布为固定模型。
 
 随后 owner 按 DEC-071 明确批准短段 max absolute ≤1.5e-3，原模型/官方库及其他门禁不变。P1仍需完整证据。开发服务器已排除 artifacts/test-results/playwright-report 的监听，避免大文件创建引发 Windows EBUSY；正式运行期间源码/配置仍保持固定。具体失败身份和后续结果以 [P1 evidence](../quality/processing/evidence-index.md) 为准。
+
+## 2026-10-11 Skill and Tool Verification
+
+本轮 DEC-073 迁移只涉及指南、skills、工具与生成入口/地图；任务开始时 7 个 FT 界面/文档/测试修改保留。13 项 Node 工具行为测试通过，覆盖地图增删改/分页、只读检查、手写冲突、路径边界、归档排除与发现入口同步。项目检查确认 7 个 skills、166 份 Markdown 本地链接和地图一致性；37 项既有规模提示不阻断交付。
+
+新启动的本地 Codex app-server 通过只读 skills/list 确认 9 个全局 Harness skills 为 enabled:false，7 个项目 skills 从 .agents/skills 以 repo 作用域加载；仓库外未发现这些项目 skills。两个旧全局 junction 已核实目标并仅移除链接，维护源保留。
+
+代码定位、小型 UI 修复、FT 故障、文档修改及不完整场景输入进行了静态任务路由审阅；这不是独立模型行为评测。不完整 SceneBrief 的实际校验返回 INPUT_INCOMPLETE / exit 2，临时目录只含原 brief，Git 状态未变。
+
+本机没有可用 Python，未运行 skill-creator 的 quick_validate.py；使用项目 Node 元数据/引用/入口校验及 Codex 实际加载补充验证。没有运行应用构建、FT 推理或正式 canonical，既有质量/性能/试听缺口继续保留。

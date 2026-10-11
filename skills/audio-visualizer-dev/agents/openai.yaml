@@ -1,4 +1,4 @@
 interface:
   display_name: "Audio Visualizer Dev"
-  short_description: "AudioNotSurfYet 音频可视化开发、审查与文档路由"
+  short_description: "AudioNotSurfYet 界面、音频分析、FT 分离与可视化开发"
   default_prompt: "使用 $audio-visualizer-dev 诊断并验证 AudioNotSurfYet 的音频播放或可视化改动。"

@@ -1,91 +1,33 @@
 ---
 name: audio-visualizer-dev
-description: AudioNotSurfYet 项目专属的开发、诊断、评审、验证与文档路由指南。用于本仓库的 Vue 界面、音频分析与标记、Visualizer、视频输出及已批准目标的新视频制作流程；新处理能力先核对架构批准状态。不要用于其他音频项目或通用前端咨询。
+description: "开发、诊断或评审 AudioNotSurfYet 的 Vue 界面、播放、音频分析、Editor、FT 分离、Visualizer 与录制。新增内置场景使用 visualizer-scene-generator；不用于其他音频项目。"
 ---
 
 # Audio Visualizer Dev
 
-## 工作流
+确认目标包含 `src/audio/audioEngine.ts`、`src/audio/audioSessionService.ts` 和 `src/components/MusicBar.vue`。读取根 AGENTS.md 与任务相关源码；跨模块定位、拆分、验证和交付分别按项目对应 skill 处理，不默认加载全部。
 
-1. 确认目标是 AudioNotSurfYet：
-   - 仓库应包含 `package.json`、`src/audio/audioEngine.ts`、`src/audio/audioSessionService.ts` 和 `src/components/MusicBar.vue`。
-   - 若目标不是该仓库，停止使用本 Skill，改用更匹配的通用或项目 Skill。
-   - 若请求是新增或生成尚未注册的 Visualizer 场景，改用 `$visualizer-scene-generator` 执行输入与合同门禁；修改、诊断或评审已有场景继续使用本 Skill。
-   - 视频制作的自动优先、人工可修正与手动完成原则已获产品批准。音轨分离、自动 BPM/音色标记、MIDI 或新的视频输出路线仍属待决策能力；没有获批范围与接口时先整理问题和方案，不从流程图推断已获实现许可。
-2. 先读根 `AGENTS.md`（若存在）和 `git status --short`，再检查任务直接涉及的源码与配置。
-   - `trash/` 是本地归档区。不得读取、搜索、索引或引用其中任何内容；只有用户明确要求恢复或查看指定内容时才可访问。普通删除不默认移入 `trash/`。
-3. 按任务只读取所需资料：
-   - 仓库结构、依赖或边界：读 [仓库事实与边界](references/10-repo-facts-and-boundaries.md)。
-   - 不熟悉代码入口、需要复用现有能力或评估影响面：读 [仓库事实与边界](references/10-repo-facts-and-boundaries.md) 的定位与复用顺序。
-   - 路由、布局、组件通信或状态：读 [UI、路由与状态](references/20-ui-routing-and-state.md)。
-   - 音频加载、播放、跳转、元数据或能量分析：读 [音频播放与分析](references/30-audio-playback-and-analysis.md)。
-   - Three.js、Canvas、GSAP、RAF 或响应式几何：读 [可视化、动画与响应式](references/40-visualization-animation-and-responsiveness.md)。
-   - 构建、测试或调试：读 [构建、测试与调试](references/50-build-test-and-debug.md)。
-   - 证据冲突、仓库漂移或工程约定缺口：读 [开放问题与项目差异](references/99-open-questions-and-project-deltas.md)。
-   - 端到端视频制作或新增处理链：先读 `docs/product/problem-brief.md`、`scope.md` 和 `open-questions.md`，区分已批准的产品方向、待评审的系统设计与既有运行时合同。
-4. 将任务分成最小可验证改动；保留用户已有修改，不顺手改无关问题。
-5. 修改后按风险执行相关验证，并用实际证据说明“已实现”或“已验证”。
+## 按领域读取
 
-## 证据分类
+| 当前任务 | 资料 |
+| --- | --- |
+| 技术栈与运行时边界 | [仓库事实与边界](references/10-repo-facts-and-boundaries.md) |
+| 路由、布局、通信与状态 | [UI、路由与状态](references/20-ui-routing-and-state.md) |
+| 文件加载、播放、跳转与分析 | [音频播放与分析](references/30-audio-playback-and-analysis.md) |
+| Three.js、Canvas、动画与几何 | [可视化、动画与响应式](references/40-visualization-animation-and-responsiveness.md) |
+| FT 模型、分离任务与 Editor 接入 | [浏览器处理链](references/60-processing-and-editor-separation.md) |
+| 工程差异、未解决问题与漂移 | [项目差异](references/99-open-questions-and-project-deltas.md) |
 
-在分析、评审和文档中明确区分：
+新增内置场景使用 `$visualizer-scene-generator`；修改已有场景继续使用本 skill。处理新能力时先核对任务范围与相关接口、设计决定；已有浏览器处理架构和 Editor FT 接入已授权，当前状态以 [上下文入口](../../docs/context/index.md) 和证据为准。
 
-- **已证实事实**：可由当前仓库文件、配置、Git 状态、命令输出或可复现交互直接支持，并注明证据位置。
-- **推断约定**：由命名、代码形态或历史任务推得，但未被产品或技术负责人确认；必须标为推断。
-- **建议标准**：为了降低风险提出的做法，不得写成仓库既有要求。
-- **待人工确认**：涉及产品目标、范围、兼容性、隐私、发布风险、owner 或其他高影响取舍；记录影响和下一步，不代替人类决策。
+## 领域约束
 
-仓库当前代码与配置优先于历史任务记录；出现冲突时，将差异写入 `references/99-open-questions-and-project-deltas.md` 或相应项目文档。
+- Pinia 只持有可序列化状态；File、AudioBuffer、节点、Worker 和 typed payload 按运行时模块所有权保存与释放。
+- 播放与分析复用现有 service、lease、clock 和 Coordinator。跟踪 source identity、generation/revision、取消与迟到消息，保持换歌后的最后一次操作生效。
+- UI 修改先确认路由、布局容器、定位上下文和目标视口；高频数值/几何更新复用现有 Canvas、RAF 和生命周期模块。
+- 可见滚动容器复用 `.app-scrollbar`；样式和动画不得破坏焦点、输入、现有滚动与资源所有权。
+- 确认音频用户手势、AudioContext 状态、对象 URL 和节点释放。持久化失败不能破坏当前播放，缓存必须匹配完整身份。
+- Visualizer 使用现有单 RendererHost、Canvas、视觉 RAF 与确定性歌曲时间；录制复用既有 pre-Gain tap、capture lease 和 typed capability 行为。
+- 改变公共接口、工程格式、时间基准、binding 或渲染拓扑等重要取舍时说明影响并由用户确认。不通过增加 fallback 绕过失败。
 
-## 修改前检查
-
-- 阅读最近的 `AGENTS.md` 和任务相关 reference。
-- 检查工作树、目标文件及生成文件，避免覆盖用户修改。
-- 确认行为契约：输入、状态迁移、输出、失败路径、边界条件和资源所有权。
-- 涉及 UI 时确认路由、布局容器、定位上下文和目标视口。
-- 涉及视觉时以当前源码、仍有效的布局与交互契约及用户当前需求为准；已归档的旧设计规则不得作为新设计输入。
-- 新增或修改产品自有的可见滚动容器时复用全局 `.app-scrollbar`；不要在组件内复制 `scrollbar-color` 或 `::-webkit-scrollbar` 变体。只有明确隐藏滚动条且键盘、滚轮和触控仍可访问时才使用 `scrollbar-hide`。
-- 涉及音频时确认用户手势、文件来源、AudioContext 状态、对象 URL、RAF 和节点释放责任。
-- 涉及生命周期文档时，先执行下节的门禁路由。
-
-## 文档路由
-
-所有 AudioNotSurfYet 生命周期文档请求先交给 `$harness-doc-orchestrator` 判定阶段，再使用它指定的阶段 Skill。项目 Skill 只提供仓库事实和本地验证上下文，不复制 Harness 模板、通用阶段方法或审批规则。
-
-- 缺少或过期的 `AGENTS.md`：先用 `$maintain-agents-guide`。
-- 仓库上下文：用 `$repo-context-docs`。
-- 产品意图：用 `$product-intent-docs`。
-- 设计、交付、质量、发布和复盘：只有满足 Harness 上游状态门禁后才能继续。
-
-不得通过预建空文件或大量 `TBD` 绕过审批。上游内容变化时，按 Harness 规则标记并复核受影响的下游文档。
-
-## 修改后验证
-
-- 产品源码改动运行相关静态检查和 `npm run build`；只改文档或 Skill 时核对链接、元数据及适用的文档/Skill 校验，不为这类改动默认构建应用。
-- 交互改动使用真实浏览器验证目标路由，并检查控制台 error/warn。
-- 音频改动覆盖加载成功、加载失败或无数据、播放/暂停/跳转、列表清空与资源释放。
-- 离线分析改动覆盖 0/1/4 个活动特征、Worker progress/cancel/error、完整 cache identity、stale generation、exact cursor、持久化失败不影响播放，以及约 15 分钟输入的主线程响应与资源释放。
-- 可视化和布局改动覆盖至少一个窄视口、一个常见桌面视口和一个较宽视口；核对真实几何，不只看截图。
-- RAF、Observer、事件监听、Three.js 资源和对象 URL 必须检查创建与释放是否成对。
-- Visualizer final hardening 使用测试专用资源探针核对 AudioContext、Worker、RAF、Canvas/WebGL、MediaStreamTrack、Observer、window/document listener 和 Blob URL；生产诊断只追加可序列化时间与资源计数，不扩大公共接口。
-- 明确记录无法自动化的路径、原因、残余风险和补偿验证。
-- 运行 `git diff --check`，并确认改动范围与用户请求一致。
-
-## Git 安全边界
-
-- 不覆盖、丢弃或格式化掉任务开始前的用户修改。
-- 按根 `AGENTS.md` 执行 owner 明确批准后的本地提交；不自行推送、切换分支或重写历史。
-- 不用 `git reset --hard`、`git checkout --` 或等价方式清理工作树。
-- 构建若改写生成文件，恢复用户原有差异后再交付。
-
-## 停止条件
-
-遇到以下情况时停止相关下游工作并说明缺口、所需输入和继续推进的风险：
-
-- 缺少会实质改变行为的产品决策、接口契约或兼容性选择。
-- 所需浏览器、音频样本、权限或运行环境不可用，且没有可信替代验证。
-- 测试脚本、fixture 或上游文档缺失，无法形成声称通过所需的证据。
-- 产品范围、隐私规则、浏览器支持矩阵、性能预算或 release risk 需要人类确认。
-- 已批准的视频制作目标要求新的音轨、自动标记、绑定、工程格式或渲染拓扑，而相应系统设计尚未获批。
-- 视觉重设计要改变仍有效的布局或交互契约（如 DEC-050 一屏工作台、DEC-019 Header blur）。
-- Harness 阶段所需的上游文档不存在、不是 `approved`，或已因上游变化而过期。
+针对实际影响选择成功、失败、边界和资源清理验证，使用 [验证策略](../audiosurf-testing-strategy/SKILL.md)。已实现、已验证、未运行和推断分别说明；没有实际数据不得补写试听、性能或发布结论。

@@ -12,7 +12,7 @@
 - 装饰参数声明 binding 但缺少完整响应/时间语义时被拒绝。
 - validator 不写输入文件、仓库文件或其他副作用文件。
 
-## Tests Required for Every Approved Scene
+## 按具体 Scene Contract 选择
 
 ### Unit
 
@@ -40,6 +40,8 @@
 - console error、pageerror 为 0；环境无法运行时记录 `unverified` 与原因，不记作 pass。
 
 ### Targeted Regression
+
+按改变的 registry/codec、binding、renderer 或 recording 边界选择以下专项，不默认运行 V1–V6 累计 eval。只选择相关验证不改变具体合同的阈值与完成要求。
 
 - V1：route、project、default template、strict JSON、单 Canvas。
 - V2：binding planner、projection/transform、0–4 feature、Editor snapshot。

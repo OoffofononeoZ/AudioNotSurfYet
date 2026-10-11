@@ -22,13 +22,9 @@
 
 不得因依赖已安装就推断功能已达到产品可用状态；以实际路由和调用链为准。
 
-## 代码定位与复用顺序
+## 定位入口
 
-1. 结构或职责问题先读 `docs/context/system-map.md` 和下方目录表，并用当前源码核实入口；它们是人工维护的地图，不保证自动同步。
-2. 已知符号、文案、配置或路径用 `rg` 搜索，再沿定义、导入和调用方检查。文档或 CSS 字面量同样用 `rg`。同名声明、引用完整性或跨层影响无法从文本命中判定时，再用可用的 TypeScript 语义工具或逐层调用检查；不要把首个同名命中当作唯一实现。
-3. 新写解析、时间映射、特征、标记、场景或录制 helper 前，先检查相应领域目录与现有测试：`src/analysis/`、`src/editor/`、`src/visualizer/`、`src/audio/`。已有能力能扩展时优先复用其单一事实源；新需求若需要改变公共契约，先走架构复核。
-
-口头概念先在 `docs/context/glossary.md` 找到项目术语，再用符号搜索确认当前位置；不要在 Skill 中维护第二份易过期的路径清单。
+代码定位与复用顺序由 [导航 skill](../../audiosurf-codebase-navigation/SKILL.md) 提供。生成地图提供文件和有限引用，[system map](../../../docs/context/system-map.md) 解释当前职责，具体实现仍以源码为准。
 
 ## 目录职责
 
@@ -53,7 +49,7 @@
 - 音频文件由用户通过 `showOpenFilePicker()` 选择；runtime File 保存在 session service，最近队列、文件句柄、唯一 current Blob 与匹配的分析 cache 由 SessionRepository 保存，Pinia `$state` 不持有浏览器资源、PCM 或 typed payload。
 - `configStore` 继续把 `volume` 和 `musicBarSettings.style` 保存到 localStorage；M5 最近会话使用独立 IndexedDB V1，不改变 config schema。
 - Analyzer 21/21 与 Analyzer-only readiness 已由版本化文档和证据确认；Editor E1–E9 与 Visualizer V1–V6 已由 clean canonical 和 owner 批准。Editor 与 Visualizer 整体 readiness 均需独立评审；`/comingsoon` 只是通用占位。
-- Editor readiness 的运行时候选固定为 E9 implementation commit `13614673bbf4d824f2ee109d36e04de6b3f8aabd`；在该评审完成前，后续文档/Harness 提交必须以 `git diff ... -- src` 证明产品源代码无漂移。
+- 原 Editor E9 readiness 候选只作为历史证据，E10/后续 Editor 修改后的当前候选与缺口见对应 readiness 和接入 evidence；不以历史候选冻结日常实现。
 - `testcomp.vue`、`TestLands.vue`、`threeDTable.vue` 和 `MeydaCard.vue` 含试验或占位内容，不应默认视为稳定公共接口。
 
 ## 证据优先级
