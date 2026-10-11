@@ -1,7 +1,7 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-10-04
+last_reviewed: 2026-10-11
 upstream_docs:
   - "docs/context/index.md"
   - "docs/product/scope.md"
@@ -17,8 +17,9 @@ next_action: "DEC-072授权Editor分离接入和页面设计；记录本次验�
 
 | ID | Date | Decision | Owner | Status | Source | Revisit trigger |
 | --- | --- | --- | --- | --- | --- | --- |
-| DEC-001 | 2026-07-24 | AudioNotSurfYet 专属 Skill 源码纳入本仓库，并通过 `~/.codex/skills/audio-visualizer-dev` 软链接安装；不修改中央 skills 仓库 | project-owner | active | [Skill](../../skills/audio-visualizer-dev/SKILL.md) | 出现第二个真实同类项目、安装位置或项目边界改变 |
-| DEC-002 | 2026-07-24 | 采用 Harness Engineering 阶段文档与人工门禁；未批准上游不得创建或推进下游 | project-owner | active | [AGENTS.md](../../AGENTS.md) | 生命周期顺序、门禁或文档位置改变 |
+| DEC-001 | 2026-07-24 | AudioNotSurfYet 专属 Skill 源码纳入本仓库，并通过 `~/.codex/skills/audio-visualizer-dev` 软链接安装；不修改中央 skills 仓库 | project-owner | superseded by DEC-073 | [Skill](../../skills/audio-visualizer-dev/SKILL.md) | 出现第二个真实同类项目、安装位置或项目边界改变 |
+| DEC-002 | 2026-07-24 | 采用 Harness Engineering 阶段文档与人工门禁；未批准上游不得创建或推进下游 | project-owner | superseded by DEC-073 | [AGENTS.md](../../AGENTS.md) | 生命周期顺序、门禁或文档位置改变 |
+| DEC-073 | 2026-10-11 | 停用全部 9 个 Harness 文档 skills；项目维护源 skills/、生成 .agents/skills/ 入口与 CODEMAP；按职责加载、按需文档和风险验证，取消通用阶段审批前置；保留具体场景合同、重大取舍、阈值与正式证据/发布边界 | project-owner | approved | [AGENTS.md](../../AGENTS.md)、[README](../../README.md) | 用户改变全局停用、发现方式或工作规则 |
 | DEC-003 | 2026-07-24 | 项目文档与 Skill 默认使用中文，代码标识和命令保留原文 | project-owner | active | [AGENTS.md](../../AGENTS.md) | 团队确定新的文档语言政策 |
 | DEC-004 | 2026-07-24 | 主要用户为音频分析学习者，核心任务是把 Meyda 数值/数组对应到具体时刻、听感和音色 | project-owner | approved | [Problem brief](../product/problem-brief.md) | 目标用户、学习任务或核心问题改变 |
 | DEC-005 | 2026-07-24 | 最终覆盖 `analyzerData.ts` 全部 21 项；首批 RMS、Amplitude Spectrum、Chroma；最多四张唯一卡共享时间轴 | project-owner | approved | [Scope](../product/scope.md) | 特征覆盖、首批切片、卡片或时间轴规则改变 |
@@ -281,3 +282,7 @@ owner明确要求“如果不考虑运行时间，现在可以成功分离音频
 DEC-070 的实现 commit `9198b37` 与 clean canonical `P1-2026-10-04T09-24-45-541Z-9198b372` 已形成；summary SHA-256 `28423c589f615811e1b27c2e90bd72109549d6640ed4ac39b04bf3a969076679`。这是一条失败执行事实，不是新架构决定：34项P1专项和22项邻接回归通过，双浏览器的四个固定图均在 ConstantOfShape provider 分配处失败，P1 不关闭、P2 不开放；详情见 [P1 evidence](../quality/processing/evidence-index.md)。模型/runtime 身份不因诊断自动替换。
 
 2026-10-04，owner 明确回复“批准 0.0015，继续完整验证（推荐）”。DEC-071 据此批准四专用模型对应 row 短段跨后端 max absolute ≤`1.5e-3`，保留原始模型和官方运行库，继续全部适用验证。上文按原 `1e-3` 的失败属于历史记录；P1 仍 In Progress、P2 Planned、R-046–R-055 Open。详见 [numeric review](../quality/processing/numeric-review.md)。
+
+## 2026-10-11 Workflow Approval
+
+owner 在三个规划选择中确定“停用全部 9 个”“拆分并配套工具”“采用轻量规则”，随后明确要求“Implement the plan.”。该指令批准 DEC-073 替代 DEC-001 的全局安装方式和 DEC-002 的通用阶段门禁，并授权相关文档/工具修改及验证后的本地提交。它不改变 P1 质量/性能结果、工程契约、具体 Scene Contract 审批或发布授权。旧批准与候选身份保留原语境。

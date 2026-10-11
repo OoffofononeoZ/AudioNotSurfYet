@@ -22,8 +22,8 @@
 ## 当前仓库漂移
 
 - 2026-07-24 初始检查发现 `components.d.ts` 有未暂存的两行删除；它是用户已有修改，后续构建不得静默覆盖。
-- 本项目 Skill 源码只保存在 `skills/audio-visualizer-dev/` 与 `skills/visualizer-scene-generator/`；中央仓库 `/Users/huafang/Desktop/hf-main/skills` 不应因项目计划改变。
-- `~/.codex/skills/audio-visualizer-dev` 与 `~/.codex/skills/visualizer-scene-generator` 应分别指向对应项目源码。若任一目标变成文件、目录或错误链接，停止安装并报告，不覆盖。
+- 本项目 skills 的维护源统一为 `skills/`；`.agents/skills/` 为生成发现入口。名称、描述或已有 UI 元数据变更后同步 `skills:install`，只读检查用 `skills:check`。
+- 项目 skills 不再安装到全局目录。DEC-073 迁移时只移除已核实指向本项目维护源的原全局链接，不覆盖其他文件或目录。
 
 ## 历史证据边界
 

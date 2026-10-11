@@ -2,85 +2,56 @@
 
 ## Purpose
 
-本仓库使用文档优先的 Harness Engineering 工作方式。本文是工程师与 agent 在 AudioNotSurfYet 中工作的常驻入口：先确认当前阶段与上游批准状态，再读取相应项目文档和 Skill，最后用仓库证据完成实现与验证。
+AudioNotSurfYet 是 Vue / TypeScript / Vite 浏览器音频工作台，包含播放、Analyzer、Editor、Visualizer 和浏览器 FT 分离。当前目标是自动优先、可人工修正且可完整手动完成的视频制作。使用中文维护项目指南与 skills，代码标识和命令保留原文。
 
-## Working Model
+## Project Skills
 
-- 可长期影响行为的产品意图、技术决策、验收规则、发布约束和复盘结论必须进入仓库内的规范文档，不能只留在聊天或代码推断中。
-- AudioNotSurfYet 的开发、诊断、评审和本地验证使用 `$audio-visualizer-dev`；源码位于 `skills/audio-visualizer-dev/`。新增 Visualizer 内置场景改用 `$visualizer-scene-generator`；其源码位于 `skills/visualizer-scene-generator/`，修改或诊断已注册场景仍使用项目开发 Skill。
-- 生命周期文档请求先使用 `$harness-doc-orchestrator` 判定阶段，再交给对应阶段 Skill。
-- 项目文档只记录仓库事实、本地决策、阶段产物和事件证据；通用工作流以 Harness Skills 和本文件为准。
-- 事实、推断、建议和待人工确认项必须明确区分。当前代码、配置和可复现行为优先于历史任务记录。
-- `trash/` 仅供本地留存旧资料，已被 Git 忽略。任何 agent 或 Skill 都不得读取、搜索、索引或引用该目录及其内容；只有用户明确要求恢复或查看其中指定内容时才可访问。通常的删除操作仍按正常删除处理，不默认移入 `trash/`。
+项目 skills 只在本仓库按任务选择，不默认加载全部。维护源为 `skills/`，`.agents/skills/` 是生成的发现入口；修改名称、描述或已有 UI 元数据后运行 `npm run skills:install`，不直接编辑生成入口。
 
-## Lifecycle Stages
+| Skill | 何时读取 | 入口 |
+| --- | --- | --- |
+| `audiosurf-codebase-navigation` | 定位入口、职责、引用与调用方 | [SKILL.md](skills/audiosurf-codebase-navigation/SKILL.md) |
+| `audiosurf-file-modularization` | 新增、重构或评审模块职责 | [SKILL.md](skills/audiosurf-file-modularization/SKILL.md) |
+| `audio-visualizer-dev` | UI、播放、分析、Editor、FT、Visualizer 与录制 | [SKILL.md](skills/audio-visualizer-dev/SKILL.md) |
+| `visualizer-scene-generator` | 创建尚未注册的内置场景 | [SKILL.md](skills/visualizer-scene-generator/SKILL.md) |
+| `audiosurf-testing-strategy` | 选择验证、判断证据与验证缺口 | [SKILL.md](skills/audiosurf-testing-strategy/SKILL.md) |
+| `audiosurf-git-task-delivery` | 修改任务开始及验证后的本地交付 | [SKILL.md](skills/audiosurf-git-task-delivery/SKILL.md) |
+| `audiosurf-docs-maintenance` | 更新、清理、压缩或拆分相关文档 | [SKILL.md](skills/audiosurf-docs-maintenance/SKILL.md) |
 
-1. Repository context：维护系统地图、词汇、决策和工作约定。
-2. Product intent：定义问题、范围、指标和开放问题。
-3. System design：把已批准的产品意图转成架构、接口、风险和 ADR。
-4. Execution planning：定义里程碑、验收标准、任务切分和测试策略。
-5. Quality and evals：定义黄金样例、失败分类、评估与发布就绪证据。
-6. Release and feedback：准备发布、回滚、监控、发布说明与反馈。
-7. Retrospectives and improvements：基于发布、事故或重复摩擦沉淀改进，并回写规范文档。
+不使用 Harness Engineering 文档 Skill 系列，不再按通用阶段文件和逐阶段审批阻断任务。已授权、范围与完成标准明确的常规修改可直接推进；重大产品或技术取舍仍需用户决定。
 
-## Required Documents
+## Documentation
 
-- Repository context：`docs/context/`
-- Product intent：`docs/product/`
-- Architecture：`docs/architecture/`
-- Delivery planning：`docs/delivery/`
-- Quality and evals：`docs/quality/`
-- Release：`docs/release/`
-- Retrospectives：`docs/retrospectives/`
+- [README](README.md) 提供运行和工具命令；[代码地图](docs/CODEMAP.md) 提供生成的文件及有限静态引用。
+- [上下文入口](docs/context/index.md) 保存当前状态、契约、决策和未解决问题；人工 [system map](docs/context/system-map.md) 解释职责与设计原因。
+- 按任务更新实际受影响的文档，长期用户约束写回本指南或对应规范。既有 product、architecture、delivery、quality 等目录和历史证据继续保存；不要求新任务铺开阶段文件、空目录或统一元数据。
+- 高影响行为变化前或同时记录相关设计与接口决定。文档与代码或用户当前指令冲突时先核实，区分事实、推断、建议和待确认事项。
+- AGENTS.md、根 README、SKILL.md 约 150 行，普通说明约 300 行时审阅职责；只是整理提示，不自动截断或删除。
 
-不要预建未到阶段的空文件或目录。当前阶段与已存在文档从 `docs/context/index.md` 开始发现。
+## Working Rules
 
-## Gate Rules
+- 修改前检查工作树、分支和暂存区，保留用户已有修改。读取任务对应 skill、局部源码与相关契约，优先复用现有能力。
+- `trash/` 仅为本地旧资料留存区；不得读取、搜索、索引或引用内容。只有用户明确要求恢复或查看指定内容时才可访问；普通删除不默认移入该目录。
+- Node.js 基线为 24.18.0，使用 npm 11.x 和现有 lockfile；搜索优先 `rg` / `rg --files`，显式排除归档和生成产物。
+- 自有代码约 500 行时审阅职责与拆分；第三方、生成文件和锁文件除外。不为行数制造转发空壳，也不因规模提示批量重构历史文件。
+- 新增或修改产品可见滚动容器复用 `.app-scrollbar`。视觉修改依据当前源码、有效布局/交互契约和本次需求。
+- 默认不增加兼容或 legacy fallback；确需改变兼容策略时说明用途、代价及后果，并由用户确认。
+- 耗时处理、取消、换歌和离页不得让旧结果覆盖新状态；AudioContext、Worker、RAF、Observer、节点、监听和对象 URL 按所属模块释放。
+- 范围、隐私、支持矩阵、性能预算、验收阈值、工程格式、重要架构取舍及发布决定变更仍需用户确认。缺少必要环境、许可、输入或合同只阻断依赖它的工作，继续可独立完成的部分。
+- 新内置场景仍保留完整 SceneBriefV1 输入校验与确定 Scene Contract 审批；批准某个 skill 或本工作流不代表具体场景已获批。
 
-- 下游实现、集成或发布准备必须等待要求的上游文档存在，并由人类明确 review、approve 或以本仓库约定的其他方式接受。
-- System design 要求 `docs/product/problem-brief.md` 和 `docs/product/scope.md` 均为 `status: approved`。
-- Execution planning 要求 `docs/architecture/system-design.md` 为 `status: approved`。
-- Quality and evals 要求 delivery 的 execution plan、acceptance criteria 和 test strategy 已存在并经过评审。
-- Release and feedback 要求 `docs/quality/release-readiness.md` 提供就绪证据。
-- Retrospective 要求发布证据、事故证据或重复摩擦证据，并至少回写一个长期有效的仓库文档。
-- 产品意图实质变化会使 architecture、delivery、quality、release 文档待复核；系统设计变化会使 delivery、quality、release 待复核；验收或测试覆盖规则变化会使相应 eval、readiness 和 release 文档待复核。
-- 工作流顺序、门禁、文档位置或跨阶段测试纪律变化会使本 `AGENTS.md` 待复核。
-- 所有生命周期文档维护 `status`、`owner`、`last_reviewed`、`upstream_docs` 和 `next_action`。
-- 2026-10-04 owner 授权（DEC-069/070）：已批准的 processing P1–P6 路线可按全部适用验收证据和必需人工输入自主关闭切片并推进；符合既定契约的后续质量文档由本授权接受，无需逐次阶段确认。新增产品范围、架构取舍、兼容路径、验收阈值和发布决定仍须人工确认，缺失试听、许可或测量不视为通过。
-- 2026-10-05 owner授权（DEC-072）：暂不考虑运行时间，先把当前FT分离接入Editor，布局/设计/动效由agent决定并阶段提交；此接入可先于P1性能和人工质量收口。缺口继续记录，不把该例外扩大为P1通过、全链性能豁免、后续自动应用或发布授权。
+## Validation and Delivery
 
-## How to Work in This Repo
+按影响范围与风险选择必要验证；小改动不默认全量测试或应用构建，不为低影响文案和样式变化编写形式化测试。类型与领域逻辑选相关静态/单元/集成检查；交互、媒体、资源与性能选对应真实浏览器或测量。依赖、打包、资源加载和产物交付变化再运行适用构建。
 
-- 先读本文件、`docs/context/index.md`、任务对应的生命周期文档和 `$audio-visualizer-dev` reference；若任务是新增 Visualizer 场景，再按 `$visualizer-scene-generator` 执行无写入输入门禁和 Scene Contract 审批。
-- 修改前检查 `git status --short`，保留用户已有修改；未经要求或 owner 明确批准不提交，不推送、不重写历史。
-- owner 已长期授权：已授权任务范围内的代码修改完成适用验证后直接本地 Git 提交，无需再次确认；功能或视觉反馈作为后续修订输入。提交只包含相关改动，正式证据仍绑定干净实现 commit；此授权不含推送或历史重写。
-- owner 明确批准阶段文档或已完成工作后，先同步状态、索引和批准记录，再总结批准范围并创建只含相关改动的本地提交。讨论方向或请求建议不视为批准；推送仍须单独明确要求。
-- 高影响实现前或同时更新相应规范文档。行为塑造型设计规则写入 architecture 或 ADR，不留在聊天、代码推断或一次性实现说明中。
-- 文档树使用渐进披露：父级索引暴露子文档，阶段摘要保持紧凑，过大的细节契约拆入受管理的子目录。
-- 长期用户约束、例外规则和复盘结论必须回写本文件或对应规范文档。新信息与现有文档冲突时，先确认冲突，不擅自判定规则已改变。
-- 不默认增加额外兼容逻辑或 legacy fallback。确有需要时，先说明解决的问题、不增加的后果，并获得明确人工确认。
-- 实现发现前置条件不足时，说明缺少的输入、契约、数据、环境或决策，以及在缺口下继续的残余风险。
-- 验证尽可能覆盖成功、失败、边界或异常路径；不能自动化的路径记录原因、残余风险和补偿性的手工、监控或后续验证。
-- “已实现”或“已验证”必须有 diff、命令输出、浏览器状态、测试或其他具体证据。不能用单一成功路径代表完整验证。
-- 项目本地验证能力和已知缺口见 `docs/context/working-agreements.md` 与 Skill 的构建测试 reference。
-- 凡技能文档中已经定义的通用流程规范、阶段路由、交付约束或方法论说明，项目侧文档均不应重复描述。项目文档应聚焦仓库本地事实、业务与技术决策、阶段产物及事件证据；可复用的通用流程要求统一以对应技能文档与 AGENTS.md 为准。
+- 修改交付前同步 `npm run skills:install`、`npm run codemap`，运行 `npm run repo:check` 和 `git diff --check`；仅生成物改变时与任务一起提交。工具代码变更补 `npm run test:tools`。
+- 只读任务不生成文件、不提交。`skills:check`、`codemap:check`、`repo:check` 和 `test:docs` 是只读检查。
+- 日常验证不自动创建 canonical 或 readiness。正式评审按对应合同记录干净实现 commit、环境和真实 evidence；未运行、失败、人工输入缺失分别如实记录。
+- owner 已授权修改任务完成适用验证后直接本地提交一次，只包含本次改动；不自动推送、发布、切换分支或重写历史。Git 细节见交付 skill。
 
-## When to Escalate to Humans
+## Persistent Authorization and Gaps
 
-- 目标用户、产品问题、范围、优先级、owner 或成功阈值尚未确认。
-- 浏览器支持、隐私、性能预算或音频 fixture/许可会改变实现或验证策略。
-- 架构方案仍有实质取舍，或兼容性路径需要长期维护。
-- 发布风险、回滚能力或监控缺口超过已接受范围。
-- 所需上游文档缺失、未批准或因变化而待复核。
-
-## Reference Map
-
-- 仓库上下文：`docs/context/index.md`
-- 产品意图：`docs/product/`
-- 架构：`docs/architecture/`
-- 交付：`docs/delivery/`
-- 质量：`docs/quality/`
-- 发布：`docs/release/`
-- 复盘：`docs/retrospectives/`
-- 项目 Skill：`skills/audio-visualizer-dev/SKILL.md`
-- Visualizer 场景生成 Skill：`skills/visualizer-scene-generator/SKILL.md`
+- DEC-069/070：已批准 processing P1–P6 可按全部适用验收证据和必需人工输入自主关闭与推进；符合既定契约的后续质量文档由授权接受。新范围、架构、兼容、阈值和发布仍另行确认；缺少试听、许可或测量不视为通过。
+- DEC-072：允许当前 FT 先接入 Editor，布局、设计与动效由 agent 决定，并先于 P1 性能和人工质量收口；不扩展为性能豁免、自动应用或发布授权。
+- P1 最后完整 Chrome 15 分钟歌曲处理耗时为 16 分 51.95 秒，超过 900 秒；人工试听及原生保存/回放仍有缺口。恢复相关处理工作时告知这些缺口，不因工作流简化改写完成状态。
+- 现有正式证据仍绑定其历史候选；Editor/Visualizer 整体 readiness 与生产上线独立处理，PROD-015 继续阻断上线。

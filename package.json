@@ -228,7 +228,13 @@
     "test:e2e:p1:chrome": "playwright test tests/e2e/p1-contracts.spec.ts tests/e2e/p1-ft.spec.ts --project=chrome --workers=1",
     "test:e2e:p1:edge": "playwright test tests/e2e/p1-contracts.spec.ts tests/e2e/p1-ft.spec.ts --project=edge --workers=1",
     "eval:p1": "node tests/scripts/run-p1-eval.mjs",
-    "eval:p1:provisional": "node tests/scripts/run-p1-eval.mjs --provisional"
+    "eval:p1:provisional": "node tests/scripts/run-p1-eval.mjs --provisional",
+    "skills:install": "node scripts/install-project-skills.mjs",
+    "skills:check": "node scripts/install-project-skills.mjs --check",
+    "codemap": "node scripts/codemap.mjs",
+    "codemap:check": "node scripts/codemap.mjs --check",
+    "repo:check": "node scripts/check-repo.mjs",
+    "test:tools": "node --test tests/tools/*.test.mjs"
   },
   "dependencies": {
     "@chenglou/pretext": "^0.0.6",
