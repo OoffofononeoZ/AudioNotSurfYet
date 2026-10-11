@@ -1,7 +1,7 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-10-04
+last_reviewed: 2026-10-12
 upstream_docs:
   - "docs/product/scope.md"
   - "docs/product/success-metrics.md"
@@ -10,10 +10,12 @@ upstream_docs:
   - "docs/architecture/risk-register.md"
   - "docs/architecture/processing/model-artifacts.md"
   - "docs/architecture/processing/worker-and-project-contracts.md"
-next_action: "DEC-072开放Editor分离接入；先完成服务/存储、界面、真实双浏览器验证并阶段提交"
+next_action: "当前Editor FT接入按DEC-074功能收尾完成；后续路线及完整正式评审独立"
 ---
 
 # Browser Processing Execution Plan
+
+2026-10-12当前状态：owner按DEC-074接受汇总听感、第三首耗时及长曲时间容忍，Editor接入全量功能验证通过并收尾。具体例外见 [验收标准](acceptance-criteria.md#1-scope-and-measurement)，结果见 [Editor记录](../../quality/processing/editor-integration-evidence.md#current-functional-wrap-up--2026-10-12)。以下保存完整路线和历史门槛；完整P1/P2正式关闭、P3–P6及上线不因本轮功能收尾自动完成。
 
 ## 1. Outcome and Current State
 

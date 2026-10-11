@@ -108,6 +108,7 @@ test('missing GPU fails explicitly and preserves Editor playback and marking',as
 test('download cancellation and retry failure leave no partial result and allow navigation',async({page})=>{
     test.setTimeout(90_000);await page.route('https://huggingface.co/StemSplitio/**',async route=>{await new Promise(resolve=>setTimeout(resolve,15_000));await route.fulfill({status:503,headers:{'access-control-allow-origin':'*'},body:'offline'}).catch(()=>{});});
     await openEditor(page);await page.getByTestId('editor-separate-start').click();await expect(page.locator('.processing-heading')).toContainText('下载模型',{timeout:30_000});
+    await expect(page.locator('.processing-heading .role-pill')).toHaveText('drums');
     await page.getByTestId('editor-separate-cancel').click();await expect(page.getByTestId('editor-separation')).toHaveAttribute('data-state','cancelled',{timeout:6000});
     await expect(page.getByTestId('editor-stem-results')).toHaveCount(0);await page.getByTestId('editor-separate-start').click();await expect(page.getByTestId('editor-separation')).toHaveAttribute('data-state','error',{timeout:30_000});
     await expect(page.getByTestId('editor-separation-message')).toContainText('模型下载失败');await page.getByTestId('editor-marking-tab').click();await expect(page.getByTestId('editor-timeline')).toBeVisible();

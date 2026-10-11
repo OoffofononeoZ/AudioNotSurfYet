@@ -79,12 +79,14 @@ test('keeps the Editor workbench compact and functional across viewports', async
         const rangeRow = rect('.range-surface');
         const majorRadii = Array.from(
             document.querySelectorAll<HTMLElement>('[data-editor-major-region="true"]'),
-        ).map((element) => Number.parseFloat(getComputedStyle(element).borderRadius) || 0);
+        ).filter((element) => element.dataset.testid !== 'editor-ready')
+            .map((element) => Number.parseFloat(getComputedStyle(element).borderRadius) || 0);
         const controlHeights = Array.from(
             document.querySelectorAll<HTMLElement>('[data-testid="editor-ready"] button, [data-testid="editor-ready"] select'),
         ).map((element) => element.getBoundingClientRect().height);
         return {
             toolbarHeight: toolbar.height,
+            toolbarRadius: Number.parseFloat(style('[data-testid="editor-ready"]').borderRadius) || 0,
             waveformHeight: waveform.height,
             pointRowHeight: pointRow.height,
             rangeRowHeight: rangeRow.height,
@@ -102,6 +104,7 @@ test('keeps the Editor workbench compact and functional across viewports', async
     expect(desktopMetrics.rangeRowHeight).toBe(44);
     expect(desktopMetrics.laneNameWidth).toBe(152);
     expect(desktopMetrics.innerClassWidth).toBe(144);
+    expect(desktopMetrics.toolbarRadius).toBe(10);
     expect(Math.max(...desktopMetrics.majorRadii)).toBeLessThanOrEqual(2);
     expect(Math.max(...desktopMetrics.controlHeights)).toBeLessThanOrEqual(30.5);
     expect(desktopMetrics.pagePaddingTop).toBe(72);

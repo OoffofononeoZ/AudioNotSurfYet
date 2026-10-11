@@ -1,7 +1,7 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-10-06
+last_reviewed: 2026-10-12
 upstream_docs:
   - "docs/delivery/processing/execution-plan.md"
   - "docs/product/scope.md"
@@ -10,7 +10,7 @@ upstream_docs:
   - "docs/architecture/risk-register.md"
   - "docs/architecture/processing/model-artifacts.md"
   - "docs/architecture/processing/worker-and-project-contracts.md"
-next_action: "DEC-071 已批准短段 max absolute 1.5e-3；继续原图双浏览器、真实拼接/WAV、取消、试听和十五分钟验证；P1 未完成"
+next_action: "当前FT功能按DEC-074汇总听感及长曲耗时例外收尾；完整P1/P2与后续链路另按证据判断"
 ---
 
 # Browser Processing Acceptance Criteria
@@ -20,6 +20,8 @@ next_action: "DEC-071 已批准短段 max absolute 1.5e-3；继续原图双浏�
 本表把 [scope](../../product/scope.md)、[success metrics](../../product/success-metrics.md)与获批 [System Design §21](../../architecture/system-design.md#21-automated-audio-to-video-target-architectureapproved)映射到 P1–P6。每项 owner 为 project-owner；验证矩阵和证据方法见 [test strategy](test-strategy.md)。覆盖列中“成功/失败/边界/异常”指必须验证的行为，不表示已执行。
 
 DEC-072限定开放当前[Editor分离接入](../../architecture/processing/editor-separation.md)：P2入口使用现有Editor“标记编辑/音轨分离”，本切片不等待P1性能/全部人工质量收口。既有原PCM、单AudioContext/分离Worker、缓存校验、显式清理、取消/迟到保护和真实WAV要求保持；完整P1、P2人工门禁及P3–P6仍按各自证据判断。
+
+2026-10-12 当前功能交付例外（DEC-074）：owner 接受汇总试听结论及复杂音乐部分串音，前提是本地链路无问题；第三首处理时间视作通过，长曲可容忍较长耗时。其余适用测试通过即可收尾本轮，不以原 12 行试听表或 P1 <900 秒作为本轮交付阻断。下列定义仍保留用于历史测量与独立正式评审，不将此接受写成旧门槛实测通过，不新增数值上限，不自动改动 P3/P6 完整链性能承诺。原生 OS 检查、正式候选及支持范围不由本例外补齐，详见 [owner 验收](../../quality/processing/evidence-index.md#owner-acceptance--2026-10-12)。
 
 ### Numerical and Quality Gates
 

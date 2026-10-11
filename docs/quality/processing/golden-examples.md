@@ -1,16 +1,18 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-10-04
+last_reviewed: 2026-10-12
 upstream_docs:
   - "docs/quality/processing/eval-plan.md"
   - "docs/delivery/processing/acceptance-criteria.md"
   - "docs/architecture/processing/model-artifacts.md"
   - "docs/architecture/processing/worker-and-project-contracts.md"
-next_action: "DEC-071 已批准短段 max absolute 1.5e-3；继续原图双浏览器、真实拼接/WAV、取消、试听和十五分钟验证；P1 未完成"
+next_action: "DEC-074下当前FT功能收尾完成；以下完整P1正式样例及历史身份保留"
 ---
 
 # Browser FT P1 Golden Examples
+
+当前功能交付的汇总听感与长曲耗时按DEC-074接受，见 [验收例外](../../delivery/processing/acceptance-criteria.md#1-scope-and-measurement) 和 [owner验收](evidence-index.md#owner-acceptance--2026-10-12)。以下仍是完整P1样例及历史门槛，不以本轮接受补造12行记录、第三首秒数或原生OS结果。
 
 ## 1. Example Identity
 

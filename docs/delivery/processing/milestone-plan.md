@@ -1,13 +1,13 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-10-04
+last_reviewed: 2026-10-12
 upstream_docs:
   - "docs/delivery/processing/execution-plan.md"
   - "docs/delivery/processing/acceptance-criteria.md"
   - "docs/delivery/processing/test-strategy.md"
   - "docs/architecture/system-design.md"
-next_action: "P2 Editor接入按DEC-072 In Progress；验证服务、设计及真实双浏览器，不伪造P1关闭"
+next_action: "当前Editor FT功能按DEC-074收尾完成；完整P1/P2正式关闭和后续路线独立"
 ---
 
 # Browser Processing Milestone Plan
@@ -22,11 +22,13 @@ next_action: "P2 Editor接入按DEC-072 In Progress；验证服务、设计及�
 
 2026-10-05：DEC-072限定开放P2 Editor接入为In Progress，入口改为现有Editor双工作区；P1仍In Progress、性能/人工质量待补。下面P2的P1 Complete依赖仅对本次Editor接入由owner明确例外替代，完整路线/后续阶段不自动关闭。目标与检查见[Editor分离契约](../../architecture/processing/editor-separation.md)。
 
+2026-10-12：DEC-074接受当前汇总听感、第三首耗时及长曲时间容忍，其他适用测试通过后本轮Editor接入功能收尾完成（runner 9/9、92项非浏览器、Chrome/Edge各20/20）。本轮使用不变工作树的provisional证据，未创建完整P1/P2新canonical或readiness；原生OS操作等正式评审缺口保留。以下总体里程碑不因本次限定收尾变成Complete，P3–P6仍Planned。
+
 | ID | Milestone / status | Relative target / dependency | Review checkpoint and exit evidence | Owner |
 | --- | --- | --- | --- | --- |
 | P0-D | Delivery docs / Complete | 2026-10-04 批准；获批 architecture | 四份文档 approved、索引/DEC-067/068、docs/diff 验证；owner 明确批准并授权相关本地提交 | project-owner |
-| P1 | FT feasibility / In Progress | P0-D Complete 后首切片 | AC-P101–P106、TS-P1：四图 bytes/session/parity、时间/energy/WAV、12 WAV 人工质量、双浏览器十五分钟分离/资源；证据与必需人工输入，按 DEC-069 关闭 | project-owner |
-| P2 | Separation workspace / In Progress | P1 Complete；Editor接入按DEC-072例外 | Editor界面/共享服务已实现，双浏览器证据待补；AC-P201–P205、TS-P2及原生导出/人工输入仍保留，不提前关闭完整P2 | project-owner |
+| P1 | FT feasibility / In Progress（本轮功能接受） | P0-D Complete 后首切片 | 数值/时间/WAV历史证据保留；本轮听感及长曲耗时按DEC-074接受；完整P1 clean/双浏览器长曲及原生OS证据独立 | project-owner |
+| P2 | Separation workspace / In Progress（Editor接入本轮Complete） | P1 Complete；Editor接入按DEC-072/074例外 | Editor当前完整双浏览器功能验证通过；AC-P201–P205全范围及正式候选/原生OS记录仍独立，不提前关闭完整P2 | project-owner |
 | P3 | Beat candidates / Planned | P2 Complete | AC-P301–P305、TS-P3：逐段 F1/BPM、变化/歧义/静音、Worker/proposal、双浏览器完整 ≤900 秒 | project-owner |
 | P4 | Confirm and apply / Planned | P3 Complete | AC-P401–P405、TS-P4：小节确认、逐项 diff、hash/原子更新、rerun 和用户修改保护 | project-owner |
 | P5 | Visualizer V2 / Planned | P4 Complete | AC-P501–P505、TS-P5：strict/单向迁移/V2-only、旧/新源、默认映射、stale/显式刷新/preflight | project-owner |

@@ -27,10 +27,10 @@
         </div>
 
         <div v-if="busy && state.status !== 'clearing'" class="processing-panel" data-testid="editor-separation-progress" aria-live="polite">
-            <div class="processing-heading"><span class="activity-ring" /><strong>{{ phaseLabel }}</strong><span v-if="state.role && state.status === 'running'" class="role-pill">{{ state.role }}</span><span class="processing-time">{{ clockTime((state.progress?.elapsedMs ?? 0)/1000) }}</span></div>
+            <div class="processing-heading"><span class="activity-ring" /><strong>{{ phaseLabel }}</strong><span v-if="currentRole && state.status === 'running'" class="role-pill">{{ currentRole }}</span><span class="processing-time">{{ clockTime((state.progress?.elapsedMs ?? 0)/1000) }}</span></div>
             <div class="phase-progress" role="progressbar" :aria-label="phaseLabel" :aria-valuemin="0" :aria-valuemax="100" :aria-valuenow="determinate ? Math.round(phaseRatio*100) : undefined"><span :class="{ indeterminate:!determinate }" :style="determinate ? {width:`${phaseRatio*100}%`} : {}" /></div>
             <div class="processing-detail"><span>{{ progressDetail }}</span><span>下载 {{ clockTime((state.progress?.downloadElapsedMs ?? 0)/1000) }} · 处理 {{ clockTime((state.progress?.processingElapsedMs ?? 0)/1000) }}</span></div>
-            <div class="model-steps"><span v-for="(role,index) in roles" :key="role" :class="{ current:role === state.role, complete:index < activeRoleIndex || state.progress?.phase === 'result-verify' }" :style="{'--stem-color':STEM_PRESENTATION[role].color}"><span class="step-dot" />{{ role }}</span></div>
+            <div class="model-steps"><span v-for="(role,index) in roles" :key="role" :class="{ current:role === currentRole, complete:index < activeRoleIndex || state.progress?.phase === 'result-verify' }" :style="{'--stem-color':STEM_PRESENTATION[role].color}"><span class="step-dot" />{{ role }}</span></div>
         </div>
 
         <div v-if="state.message" class="stem-message" :class="{ 'is-error':state.status === 'error' }" :role="state.status === 'error' ? 'alert' : 'status'" data-testid="editor-separation-message"><span>{{ state.message }}</span><button type="button" @click="storageOpen = true">查看缓存</button></div>
@@ -74,7 +74,7 @@ import type { PlaybackSnapshot } from '../types/audio';
 import type { StemArtifact } from '../processing/kernel';
 import { FT_ROLES,type StemRole } from '../processing/modelManifest';
 import { useEditorSeparationService } from '../processing/editorSeparationService';
-import { STEM_PRESENTATION,PHASE_LABELS,clockTime,formatBytes,stemPaths } from '../processing/presentation';
+import { STEM_PRESENTATION,PHASE_LABELS,clockTime,formatBytes,stemPaths,currentModelRole } from '../processing/presentation';
 const props=defineProps<{trackId:string;trackName:string;playback:PlaybackSnapshot;active:boolean}>();
 const emit=defineEmits<{seek:[seconds:number]}>();
 const service=useEditorSeparationService(),state=shallowRef(service.getSnapshot()),roles=FT_ROLES;
@@ -84,7 +84,8 @@ const busy=computed(()=>['restoring','running','cancelling','clearing'].includes
 const phaseLabel=computed(()=>state.value.status==='restoring'?'检查本地分离结果':state.value.status==='cancelling'?'取消并清理本次任务':PHASE_LABELS[state.value.progress?.phase??'']??'准备开始分离');
 const determinate=computed(()=>state.value.status==='running'&&!!state.value.progress?.totalUnits&&!['model-load'].includes(state.value.progress.phase));
 const phaseRatio=computed(()=>Math.min(1,Math.max(0,(state.value.progress?.completedUnits??0)/(state.value.progress?.totalUnits??1))));
-const activeRoleIndex=computed(()=>state.value.role?roles.indexOf(state.value.role):-1);
+const currentRole=computed(()=>currentModelRole(state.value.progress?.phase,state.value.role));
+const activeRoleIndex=computed(()=>currentRole.value?roles.indexOf(currentRole.value):-1);
 const progressDetail=computed(()=>{const p=state.value.progress;if(!p||!determinate.value)return '完成当前阶段后继续更新';return p.phase==='model-download'||p.phase==='model-verify'?`${formatBytes(p.completedUnits)} / ${formatBytes(p.totalUnits!)}`:`本阶段 ${Math.round(phaseRatio.value*100)}%`;});
 const duration=computed(()=>state.value.result?.source.descriptor.durationSeconds??props.playback.durationSeconds);
 const cursorRatio=computed(()=>Math.min(1,Math.max(0,props.playback.currentTimeSeconds/(duration.value||1))));
