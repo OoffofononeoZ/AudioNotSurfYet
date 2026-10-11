@@ -1,14 +1,14 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-10-11
+last_reviewed: 2026-10-12
 upstream_docs:
   - "docs/context/index.md"
   - "docs/product/scope.md"
   - "docs/architecture/system-design.md"
   - "docs/delivery/execution-plan.md"
   - "docs/delivery/processing/execution-plan.md"
-next_action: "DEC-072授权Editor分离接入和页面设计；记录本次验证，保留P1性能/质量缺口"
+next_action: "DEC-074接受当前FT听感与长曲耗时；其余测试通过后完成本轮功能收尾，正式评审独立"
 ---
 
 # Decision Registry
@@ -20,6 +20,7 @@ next_action: "DEC-072授权Editor分离接入和页面设计；记录本次验�
 | DEC-001 | 2026-07-24 | AudioNotSurfYet 专属 Skill 源码纳入本仓库，并通过 `~/.codex/skills/audio-visualizer-dev` 软链接安装；不修改中央 skills 仓库 | project-owner | superseded by DEC-073 | [Skill](../../skills/audio-visualizer-dev/SKILL.md) | 出现第二个真实同类项目、安装位置或项目边界改变 |
 | DEC-002 | 2026-07-24 | 采用 Harness Engineering 阶段文档与人工门禁；未批准上游不得创建或推进下游 | project-owner | superseded by DEC-073 | [AGENTS.md](../../AGENTS.md) | 生命周期顺序、门禁或文档位置改变 |
 | DEC-073 | 2026-10-11 | 停用全部 9 个 Harness 文档 skills；项目维护源 skills/、生成 .agents/skills/ 入口与 CODEMAP；按职责加载、按需文档和风险验证，取消通用阶段审批前置；保留具体场景合同、重大取舍、阈值与正式证据/发布边界 | project-owner | approved | [AGENTS.md](../../AGENTS.md)、[README](../../README.md) | 用户改变全局停用、发现方式或工作规则 |
+| DEC-074 | 2026-10-12 | 接受当前 FT 汇总听感及复杂音乐部分串音，前提是本地链路无问题；第三首处理时间通过，长曲可容忍更长耗时；其余适用测试通过后收尾当前 Editor 接入 | project-owner | approved | [本轮验收](../quality/processing/evidence-index.md#owner-acceptance--2026-10-12) | 本地取轨/拼接/导出缺陷、不可用输出、新性能承诺或正式评审 |
 | DEC-003 | 2026-07-24 | 项目文档与 Skill 默认使用中文，代码标识和命令保留原文 | project-owner | active | [AGENTS.md](../../AGENTS.md) | 团队确定新的文档语言政策 |
 | DEC-004 | 2026-07-24 | 主要用户为音频分析学习者，核心任务是把 Meyda 数值/数组对应到具体时刻、听感和音色 | project-owner | approved | [Problem brief](../product/problem-brief.md) | 目标用户、学习任务或核心问题改变 |
 | DEC-005 | 2026-07-24 | 最终覆盖 `analyzerData.ts` 全部 21 项；首批 RMS、Amplitude Spectrum、Chroma；最多四张唯一卡共享时间轴 | project-owner | approved | [Scope](../product/scope.md) | 特征覆盖、首批切片、卡片或时间轴规则改变 |
@@ -286,3 +287,9 @@ DEC-070 的实现 commit `9198b37` 与 clean canonical `P1-2026-10-04T09-24-45-5
 ## 2026-10-11 Workflow Approval
 
 owner 在三个规划选择中确定“停用全部 9 个”“拆分并配套工具”“采用轻量规则”，随后明确要求“Implement the plan.”。该指令批准 DEC-073 替代 DEC-001 的全局安装方式和 DEC-002 的通用阶段门禁，并授权相关文档/工具修改及验证后的本地提交。它不改变 P1 质量/性能结果、工程契约、具体 Scene Contract 审批或发布授权。旧批准与候选身份保留原语境。
+
+## DEC-074 — Current FT Acceptance — 2026-10-12
+
+owner 报告已验证音频分离效果：音轨较多的音乐存在部分串音，drums 表现最好；若本地代码无问题，可按模型及音乐复杂性限制接受。owner 明确要求“第三首处理时间视作通过”，允许长曲更长处理时间，并授权其余测试无问题后收尾。
+
+本决定接受本轮汇总听感与当前 FT 耗时，不再以缺少原格式的 12 行试听表或原 900 秒分离门槛阻挡本轮功能交付。第三首没有提供精确秒数，不补造测量；复杂性/模型归因仍是结合链路检查的推断。旧性能失败、缺失原生 OS 操作与完整 P1 clean evidence 保留，正式 P1/P2、后续 P3/P6 完整链性能及发布独立处理；不新增数值上限、不扩大长音频支持范围。

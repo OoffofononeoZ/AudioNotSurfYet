@@ -1,13 +1,13 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-10-04
+last_reviewed: 2026-10-12
 upstream_docs:
   - "docs/quality/processing/eval-plan.md"
   - "docs/quality/processing/golden-examples.md"
   - "docs/quality/processing/failure-taxonomy.md"
   - "docs/delivery/processing/milestone-plan.md"
-next_action: "owner要求本轮收尾；下次先告知性能未达标及试听缺口，再继续验证；P1未完成，900秒门禁不变"
+next_action: "DEC-074接受当前听感与长曲耗时；Editor接入本轮功能收尾，独立正式证据缺口保留"
 ---
 
 # Browser Processing Evidence Index
@@ -111,3 +111,13 @@ owner明确要求：基本功能实现而耗时未达标时可暂时结束，在
 下次开始先提醒：最后完整Chrome测量16分51.95秒仍失败；warning日志候选仅验证一分钟任务；三首试听目前仅前两首8个WAV，第三首4个WAV及12轨owner听感记录尚缺；Chrome/Edge原生保存/取消/回放结论及当前候选clean完整canonical尚缺。随后再决定恢复性能/质量验证的顺序。P1继续In Progress（执行暂停），P2–P6 Planned、R-046–R-055 Open；不创建新链readiness。
 
 本次收尾验证：`npm run test:p1:unit` 19/19、`npm run test:p1:integration` 20/20、`npm run typecheck`、`npm run build`、`npm run test:docs`与`git diff --check`通过，Chrome一分钟真实四轨诊断1/1通过。构建保留已有Browserslist陈旧与大chunk提示。以上不替代当前候选完整canonical、长曲性能或人工质量结论；原失败记录不改写。
+
+## Owner Acceptance — 2026-10-12
+
+owner 已验证当前音频分离效果，汇总反馈为：当音乐本身音轨足够多时部分结果有串音，drums 分离最好；若非本地代码问题，可以按模型及音乐复杂性限制接受。owner 明确将第三首处理时间视作通过，允许长曲更长处理时间，并授权“其他部分如果你测试没问题就可以收尾了”。DEC-074据此接受本轮汇总听感与耗时，不追加原格式12行表或新的秒数上限作为本轮交付条件。
+
+本地复核：四专用模型依次运行并各取row 0/1/2/3；各角色有独立overlap-add和文件写入，未把其他角色或原mix加进结果；WAV只交错写入本轨左右声道，不改增益。92项现有专项通过，含互异row独立oracle、拼接/重采样边界、WAV精确样本、源PCM/hash、存储/取消/恢复。Chrome/Edge各20/20通过真实四原图、WAV文件checksum/frame/finite、恢复/清理及原Editor回归。检查未发现本地取轨/拼接/导出造成串音的错误；模型/复杂性归因仍是推断，不声称已对用户歌曲完成原始模型对照或SDR测量。
+
+第三首精确耗时、逐曲逐轨12行质量记录以及Chrome/Edge原生OS保存/取消/回放记录未提供，不补造。历史Chrome 1011.9541秒超过900秒仍为原门禁失败；当前owner接受该类长曲时间，不等同实测旧门槛通过。Edge普通profile完整长曲和完整P1 clean canonical缺口保留，P3/P6完整链性能与支持范围不在本例外中修改。
+
+当前Editor接入本轮功能收尾完成，完整provisional runner 9/9及具体身份见 [Editor记录](editor-integration-evidence.md#current-functional-wrap-up--2026-10-12)。本轮不创建新链readiness、不宣布完整P1/P2或上线通过，不继续实施后续新能力。

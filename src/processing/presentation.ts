@@ -1,4 +1,9 @@
 import type { StemArtifact } from './kernel';
+import { FT_ROLES,type StemRole } from './modelManifest';
+export function currentModelRole(phase:string|undefined,lastLoaded:StemRole|null):StemRole|null {
+    if(phase==='model-download'||phase==='model-verify')return FT_ROLES[lastLoaded?FT_ROLES.indexOf(lastLoaded)+1:0]??null;
+    return phase&&['model-load','inference','stitch','derive','persist'].includes(phase)?lastLoaded:null;
+}
 export const STEM_PRESENTATION={
     drums:{label:'鼓与打击乐',color:'#efa96b',short:'DR'},
     bass:{label:'低音',color:'#7eaddc',short:'BS'},

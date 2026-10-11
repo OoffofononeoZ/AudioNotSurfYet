@@ -1,16 +1,18 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-10-04
+last_reviewed: 2026-10-12
 upstream_docs:
   - "docs/quality/processing/eval-plan.md"
   - "docs/quality/processing/golden-examples.md"
   - "docs/delivery/processing/acceptance-criteria.md"
   - "docs/architecture/risk-register.md"
-next_action: "DEC-071 已批准短段 max absolute 1.5e-3；继续原图双浏览器、真实拼接/WAV、取消、试听和十五分钟验证；P1 未完成"
+next_action: "DEC-074接受当前FT听感/长曲耗时；其他功能异常仍须修复，正式评审独立"
 ---
 
 # Browser FT P1 Failure Taxonomy
+
+DEC-074接受当前复杂音乐部分串音及长曲耗时，见 [验收例外](../../delivery/processing/acceptance-criteria.md#1-scope-and-measurement) 和 [owner验收](evidence-index.md#owner-acceptance--2026-10-12)。本轮功能收尾不因已接受的耗时/汇总试听再次阻断；以下历史PFT-RESOURCE记录保留，本地错误、OOM、源PCM/角色/导出损坏、取消或迟到问题仍按实际失败处理。
 
 ## 1. Classification Boundary
 

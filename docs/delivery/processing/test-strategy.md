@@ -1,7 +1,7 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-10-06
+last_reviewed: 2026-10-12
 upstream_docs:
   - "docs/delivery/processing/execution-plan.md"
   - "docs/delivery/processing/acceptance-criteria.md"
@@ -9,10 +9,12 @@ upstream_docs:
   - "docs/architecture/processing/model-artifacts.md"
   - "docs/architecture/processing/worker-and-project-contracts.md"
   - "docs/context/working-agreements.md"
-next_action: "DEC-071 已批准短段 max absolute 1.5e-3；继续原图双浏览器、真实拼接/WAV、取消、试听和十五分钟验证；P1 未完成"
+next_action: "当前FT功能按DEC-074接受范围收尾；正式canonical及后续完整链验证独立"
 ---
 
 # Browser Processing Test Strategy
+
+本轮功能收尾采用 DEC-074 的汇总听感和长曲耗时接受范围，见 [当前验收例外](acceptance-criteria.md#1-scope-and-measurement)。以下保留完整路线及历史测试定义，不把原性能失败或缺失原生 OS 操作改写为通过；本轮全量 provisional 结果见 [Editor 记录](../../quality/processing/editor-integration-evidence.md#current-functional-wrap-up--2026-10-12)。
 
 ## 1. Test Environment and Evidence Boundary
 

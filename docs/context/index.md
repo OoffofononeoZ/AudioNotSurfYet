@@ -4,7 +4,7 @@ owner: "project-owner"
 last_reviewed: 2026-10-12
 upstream_docs:
   - "AGENTS.md"
-next_action: "按 DEC-073 项目 skills 与风险验证工作；Editor 接入待干净双浏览器证据，P1 性能/试听缺口保留"
+next_action: "当前Editor FT功能按DEC-074收尾；后续节拍/提案/V2仍Planned，正式评审缺口独立保留"
 ---
 
 # 仓库上下文入口
@@ -22,17 +22,17 @@ AudioNotSurfYet 是 Vue / TypeScript / Vite 浏览器音频工作台；当前目
 | Analyzer | M1–M14 历史切片已完成；M14 的 21 卡、FIFO 与独立排序基线获批，readiness 为 `Ready with waivers`。证据绑定历史候选。 |
 | Editor | E1–E9 canonical 与适用人工门禁已批准。E10 按 DEC-057 开放单 lane/class 小节批量编辑与站内离页 dialog；E9 revised 29/29 保持历史身份，原 readiness 候选为 `pre-E10`。 |
 | Visualizer | V1–V6 canonical 与适用人工门禁已批准，post-V6 viewport 修订已有 Chrome/Edge 专项证据。DEC-058 的原生全屏复用同一 Canvas/transport，不创建 V7；原 readiness 候选为 `pre-fullscreen`，交互与视觉由 owner 审阅。新场景仍须完整输入校验和确定 Scene Contract 审批。 |
-| FT 与处理链 | P0-D 已完成、P1 `In Progress`。固定四原图与官方 ORT JSEP 已通过独立 Chrome/Edge 推断及 DEC-071 短段数值门禁；完整性能与人工质量尚未收口。 |
-| Editor FT 接入 | DEC-072 允许先于 P1 性能/人工质量收口接入现有 Editor，替代独立 Processor 入口。四轨、WAV 导出、缓存恢复、显式清理和取消/换歌/离页已有 Chrome 反馈，P2 接入仍待干净双浏览器证据；P3–P6 `Planned`。 |
+| FT 与处理链 | P0-D 已完成；当前 FT 功能及汇总听感/长曲耗时按 DEC-074 接受。四原图与官方 ORT JSEP 的历史双浏览器数值门禁保留；完整 P1 正式关闭仍有独立证据缺口。 |
+| Editor FT 接入 | 本轮功能收尾完成：四轨/WAV、缓存恢复、清理、取消/换歌/离页及原编辑回归，当前全量 runner 9/9，92 项非浏览器、Chrome/Edge 各 20/20。证据为工作树不变的 provisional，不冒充 clean canonical；完整 P2 及 P3–P6 独立，后者仍 `Planned`。 |
 
 浏览器处理链、TypeScript 逐拍/局部 tempo、人工小节确认、只读提案与 Project V2 是获批路线，不代表后续能力已实现或可自动应用。里程碑与风险以对应合同及 evidence 为准；Editor/Visualizer 整体 readiness 独立处理，PROD-015 继续阻断上线。DEC-059/061 的旧设计资料已归档并停止作为新设计依据，既有样式仍是源码事实。
 
 ## 有效授权与未解决缺口
 
 - DEC-069/070 允许已批 P1–P6 按全部适用验收证据和必需人工输入自主关闭、推进；符合既定契约的后续质量文档纳入授权。重大范围、架构、兼容、阈值和发布变化仍须 owner 决定。DEC-072 只开放 Editor 接入例外，不豁免性能、质量或后续提案/V2 门禁。
-- P1 最后完整 Chrome 十五分钟歌曲处理为 **1011.9541 秒（16分51.95秒）**，超过 **900 秒**；后续 warning 日志候选仅验证一分钟任务，Edge 普通 profile 完整性能尚未重测。恢复处理工作时先告知这些缺口，不能宣称完整性能已通过。
-- 三首试听材料当时仅有前两首八个 WAV；第三首四个 WAV、12 轨 owner 听感记录、Chrome/Edge 原生保存/取消/回放及当前候选完整 clean canonical 尚缺。详见 [P1 收尾记录](../quality/processing/evidence-index.md#owner-requested-wrap-up--2026-10-04)。
-- Editor 接入当前仍待干净双浏览器 canonical；其 Chrome 反馈不关闭 P1 或新链 readiness。以 [Editor 接入记录](../quality/processing/editor-integration-evidence.md) 区分已验证与未验证内容。
+- DEC-074 接受当前 FT 汇总听感：复杂音乐存在部分串音，drums 最好；本地取轨/拼接/导出检查与现有专项未发现造成串音的错误，模型及音乐复杂性是当前推断。第三首耗时按 owner 结论通过，长曲允许较长处理时间，不反复要求已接受的项目。
+- 历史 Chrome 十五分钟处理 **1011.9541 秒（16分51.95秒）** 超过原 **900 秒** 的事实保留；本轮接受耗时不等同原门槛实测达标，不新增数值上限或扩大支持范围。Edge 普通 profile 完整性能和当前候选完整 P1 clean canonical 仍未补齐。
+- owner 本次提供汇总结论，未提供逐曲逐轨 12 行表、第三首精确秒数或双浏览器原生 OS 保存/取消/回放记录，不补造这些事实。当前功能收尾及独立正式评审的边界见 [owner 验收](../quality/processing/evidence-index.md#owner-acceptance--2026-10-12) 与 [Editor 接入记录](../quality/processing/editor-integration-evidence.md)。
 - 旧 Asyncify/provider 失败及原 `1e-3` 短段门禁失败属于历史 evidence；当前 DEC-071 上限为 max absolute ≤`1.5e-3`，仍使用原始四模型和官方运行库。R-046–R-055 保持 `Open`，不能把数值专项通过扩写为全部质量/性能通过。
 - Editor readiness 的 provisional 24/24 与 clean 环境阻断分别保留；DEC-055 将 browser evidence gap 和 W-ED-001–W-ED-006 交由 owner 审阅，不申请沙箱外重跑，也不记为 clean pass。
 - Meyda 上游 `spectralFlux` 的 `x is not defined` 缺陷未被修复；产品按 ADR-0005 使用项目 Flux。约十五分钟之外的长音频只作非门禁压力观察，不扩大支持范围或规定它必须失败。
@@ -180,7 +180,7 @@ AudioNotSurfYet 是 Vue / TypeScript / Vite 浏览器音频工作台；当前目
 | [Processing P1 golden examples](../quality/processing/golden-examples.md) | P1-G01–P1-G24 成功、失败、边界与人工预期 |
 | [Processing P1 failure taxonomy](../quality/processing/failure-taxonomy.md) | PFT 九类、独立 S0–S3 严重度、P1 阻断/补偿与重验 |
 | [Editor 分离契约](../architecture/processing/editor-separation.md) | DEC-072 的 Editor 四轨工作区、缓存、导出与取消边界 |
-| [Editor 接入记录](../quality/processing/editor-integration-evidence.md) | Editor 接入反馈与待补的干净双浏览器证据 |
+| [Editor 接入记录](../quality/processing/editor-integration-evidence.md) | 当前双浏览器功能收尾、历史 canonical 与证据边界 |
 | [P1 evidence](../quality/processing/evidence-index.md) | 固定模型的实际推断、历史失败、性能测量及人工缺口 |
 | [FT kernel config](../architecture/processing/ft-kernel-config.md) | 固定 FT 参数、重采样、拼接与输出配置 |
 | [Numeric review](../quality/processing/numeric-review.md) | DEC-071 的短段 parity 门禁与批准依据 |

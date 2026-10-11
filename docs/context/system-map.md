@@ -4,7 +4,7 @@ owner: "project-owner"
 last_reviewed: 2026-10-12
 upstream_docs:
   - "docs/context/index.md"
-next_action: "DEC-072 Editor四轨工作区已实现；完成干净双浏览器接入验证，P1性能与人工质量缺口保留"
+next_action: "Editor四轨接入本轮功能验证已收尾，owner接受当前听感与长曲耗时；正式评审独立"
 ---
 
 # System Map

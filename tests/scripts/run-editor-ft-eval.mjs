@@ -67,8 +67,10 @@ const summary={schemaVersion:1,runId,scope:'Editor FT integration / DEC-072',kin
     steps,browsers,mediaFiles,passedSteps:steps.filter(step=>step.status==='pass').length,totalSteps:steps.length,
     integrationVerified:!provisional&&!initialStatus&&unchanged&&steps.length===9&&steps.every(step=>step.status==='pass')&&browserPasses,
     p1Closed:false,releaseReady:false,
-    unverified:['P1 fifteen-minute performance (last Chrome 1011.9541s)','third listening song / twelve owner conclusions',
-        'native OS WAV save/cancel/replay','production model network access in the owner browser'],
+    // Report what this runner cannot establish; owner acceptance belongs in
+    // the decision/evidence records rather than a stale fixed listening gap.
+    unverified:['full P1 canonical and dual-browser long-song/resource review (outside Editor integration)',
+        'native OS WAV save/cancel/replay','production model network access in the owner browser (local fixture supply used here)'],
 };
 const json=JSON.stringify(summary,null,2)+'\n';fs.writeFileSync(path.join(directory,'summary.json'),json);
 const sha=createHash('sha256').update(json).digest('hex');fs.writeFileSync(path.join(directory,'summary.sha256'),sha+'\n');

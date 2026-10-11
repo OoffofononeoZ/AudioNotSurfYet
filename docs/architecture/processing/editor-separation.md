@@ -1,12 +1,12 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-10-06
+last_reviewed: 2026-10-12
 upstream_docs:
   - "docs/product/scope.md"
   - "docs/architecture/system-design.md"
   - "docs/architecture/processing/ft-kernel-config.md"
-next_action: "按DEC-072接入Editor，验证真实分离、缓存、导出、取消与原编辑功能；性能及人工质量缺口独立保留"
+next_action: "本轮接入及双浏览器功能验证完成；DEC-074接受当前听感/长曲耗时，正式评审独立"
 ---
 
 # Editor Four-Stem Separation
@@ -19,6 +19,7 @@ DEC-072来源为owner明确要求：暂不考虑运行时间，把当前成功�
 - MainLayout提供单个Editor分离服务，页面组合展示组件；单例串行等待旧任务终态后才允许新任务，generation/source/revision保护覆盖恢复、处理、导出和清理。原Editor V1、人工marker/tempo/overlay、草稿、导入导出不被分离修改。
 - 使用四个原始FT专用模型、固定官方ORT、当前PCM/拼接/WAV配置；生产模型地址使用immutable HTTPS模型表，测试仅由网络拦截提供同字节公开fixture，不加入本地模型或CPU备用路径。dev/build自动准备并校验固定运行资产。
 - 点击显式开始，先告知缺失模型bytes与本地音频隐私。下载和处理分开计时；显示真实phase、对应阶段单位及elapsed，不伪造整体百分比或剩余时间。初始化无可计量单位时使用不定进度；取消/错误后可重试，原曲播放和人工编辑可用。
+- 本次授权设计将Editor双层工具栏收敛为中性深色、10px圆角，仍保持桌面≤84px及紧凑控件；人工时间列/标记主区继续平面分区（≤2px）、88/72px波形、28px BPM条及44px point/range行。分离工作区使用薄荷主操作、四角色色、统一原曲游标、进入/进度动效和窄屏堆叠；键盘左右/Home/End切换工作区，reduced-motion关闭动画。
 
 ## Results and Storage
 
@@ -31,3 +32,5 @@ DEC-072来源为owner明确要求：暂不考虑运行时间，把当前成功�
 ## Verification Boundary
 
 验收本切片：真实Chrome/Edge从主应用导入歌曲→Editor→显式分离→四轨真实结果/导出，缓存恢复、失败/取消/换歌/离页、模型与结果清理、原编辑回归及390/1280/1920布局。自动化不替代owner听感和原生OS保存/回放；完整长曲耗时仍记录为未达标，当前任务不以其阻止Editor接入。P2更大范围和P3–P6状态另行按证据登记。
+
+2026-10-12，DEC-074接受当前汇总听感与长曲耗时，并允许其他适用测试通过后收尾本轮功能。当前完整runner 9/9、92项非浏览器及Chrome/Edge各20/20通过；保留provisional身份。复杂音乐部分串音为owner已接受的限制，本地检查未发现取轨、跨角色混合或WAV导出错误；模型/复杂性归因是推断。正式P1/P2 clean evidence及原生OS操作记录仍独立，不因当前收尾登记为通过。

@@ -1,12 +1,12 @@
 ---
-status: in-review
+status: approved
 owner: "project-owner"
-last_reviewed: 2026-10-06
+last_reviewed: 2026-10-12
 upstream_docs:
   - "docs/architecture/processing/editor-separation.md"
   - "docs/delivery/processing/execution-plan.md"
   - "docs/delivery/processing/test-strategy.md"
-next_action: "完成Editor界面、真实Chrome/Edge四轨链路和布局/故障/原编辑回归；本次不重跑性能门禁"
+next_action: "DEC-074下本轮功能验证与接入收尾完成；完整P1/P2正式评审和原生OS证据独立"
 ---
 
 # Editor FT Integration Evidence
@@ -34,3 +34,23 @@ Chrome v5已通过四轨/WAV、刷新恢复与人工marker保留，失败是测�
 界面实现阶段完成，下一步使用`npm run eval:editor-ft`在干净实现commit上验证双浏览器和原编辑回归。以上不提前宣称正式canonical或Edge通过。
 
 提交前补充最后一批PCM复制及完整缓存文件校验结束时的descriptor防护；新增“最后一批被替换”的回归，相关非浏览器专项64/64、build（含typecheck）、docs与diff检查通过。该修订仍保留原hash/模型配置，不修改持久化结果。
+
+## First Clean Candidate
+
+实现提交`05a200fc`的`EditorFT-2026-10-06T14-09-07-843Z-05a200fc`起止同一干净HEAD，summary SHA-256 `23eb91deb3ca4e1afeebd9ec24abff57e211612f7cb5a28512588ebb1b5898a6`，7/9命令组通过。90项非浏览器专项通过；Chrome/Edge各19/20，两个失败均为E7旧聚合圆角≤2px断言遇到此次已授权的10px工具栏。双浏览器新的Editor FT八项及E8/E9/E10、E7 overlay回归均通过；四轨/WAV/provenance、恢复/清理、故障及资源得到真实证据，整体候选仍不登记为通过。
+
+已将E7检查明确分为新工具栏10px和其余人工主区≤2px，继续保留84px工具栏、30px控件、88/72px波形、28px BPM条、44px marker行和全部交互断言；设计依据同步到Editor契约。后续以新干净提交重跑完整runner，失败run保留原身份，不把专项补跑替代正式结果。
+
+修订后的E7 Chrome/Edge专项4/4通过，真实工具栏78px/10px、四控件均30px、人工主区圆角0；overlay固定与pointer-through保持。收尾另修正下载/校验阶段的角色标签：后续专用模型下载显示下一角色，全量PCM/结果校验不标作某个专用模型；增加对应展示回归，不改Worker/kernel或模型。
+
+## Current Functional Wrap-up — 2026-10-12
+
+owner按DEC-074接受当前汇总听感、复杂音乐部分串音及第三首处理时间，允许长曲更长耗时；其他适用测试通过即可收尾本轮。接受范围及本地串音检查见 [owner验收](evidence-index.md#owner-acceptance--2026-10-12)。
+
+`EditorFT-2026-10-11T18-17-14-403Z-acbad9f3-provisional` 起止HEAD=`acbad9f35e352effc3dce631670bc6ef65f178e7`、工作树状态不变；summary SHA-256 `fcedfe94ede488e2a78a500f1f35d5bf07951eb9db545d7666602e25b09c1f3f`。完整9/9命令组通过：文档、固定运行资产、四模型bytes、类型、构建、92项非浏览器、Chrome及Edge各20/20、diff检查；无skip/flaky。日志、截图、8份合成fixture WAV和hash在忽略的同名artifacts/evals目录。
+
+真实浏览器覆盖四原图/正确role provenance、WAV/原PCM、缓存跨解码epoch恢复、marker保留、显式清理、缺GPU、下载取消/重试、换歌/离页、损坏模型、quota与资源释放；并覆盖E7–E10原编辑回归。390/1280/1920空态和结果截图已目视检查，四轨/导出/游标显示正常，分离工作区无溢出；原Header窄屏边界未扩展。
+
+本轮普通功能交付在上述测试及owner接受后完成。运行身份为provisional，`integrationVerified=false`来自runner的clean-canonical条件，不是测试失败；不将本地提交或本次通过冒充完整P1/P2 canonical/readiness。先前沙箱目录权限阻挡的`EditorFT-2026-10-11T18-16-22-520Z-acbad9f3-provisional`为5/9，构建/专项/双浏览器未进入产品测试，原失败日志保留；通过run在授权的正常宿主环境执行。
+
+尚未自动验证原生OS保存/取消/系统播放器回放及owner浏览器生产模型网络（本测试供应固定同字节公开fixture）。这些独立证据不登记为通过，本轮不再追加人工操作阻断功能收尾。报告内原固定试听/性能缺口文本由本次DEC-074记录补充解释；后续runner改为只报告其范围外的完整P1/原生/生产网络检查。

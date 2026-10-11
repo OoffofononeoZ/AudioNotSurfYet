@@ -1,7 +1,7 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-10-04
+last_reviewed: 2026-10-12
 upstream_docs:
   - "docs/delivery/processing/execution-plan.md"
   - "docs/delivery/processing/acceptance-criteria.md"
@@ -10,10 +10,12 @@ upstream_docs:
   - "docs/architecture/processing/model-artifacts.md"
   - "docs/architecture/processing/worker-and-project-contracts.md"
   - "docs/architecture/risk-register.md"
-next_action: "DEC-071 已批准短段 max absolute 1.5e-3；继续原图双浏览器、真实拼接/WAV、取消、试听和十五分钟验证；P1 未完成"
+next_action: "DEC-074下当前FT功能收尾完成；以下完整P1正式评审定义及独立缺口保留"
 ---
 
 # Browser FT P1 Eval Plan
+
+当前FT功能交付采用DEC-074的汇总听感与长曲耗时接受范围，见 [验收例外](../../delivery/processing/acceptance-criteria.md#1-scope-and-measurement) 和 [owner验收](evidence-index.md#owner-acceptance--2026-10-12)。以下保留完整P1正式评审及历史门槛；本轮功能收尾不追加已接受的输入，也不改写旧测量或缺失原生OS记录。
 
 ## 1. Boundary and Status
 
