@@ -154,6 +154,8 @@ const createHarness = (draft: VisualizerDraftEnvelopeV1 | null = null) => {
 };
 
 class PolicyEngine implements AudioEnginePort {
+    async setAuditionSource() {}
+    setAuditionMuted() {}
     snapshot: PlaybackSnapshot = {
         trackId: 'track-a',
         state: 'paused',

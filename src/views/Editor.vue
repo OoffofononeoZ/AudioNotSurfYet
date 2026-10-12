@@ -89,7 +89,7 @@
                     <div class="editor-toolbar-secondary" data-testid="editor-workbench-toolbar-secondary">
                         <div class="transport" aria-label="Editor 播放控制">
                             <button type="button" data-testid="editor-playback-toggle" @click="togglePlayback">
-                                {{ playback.state === 'playing' ? '暂停' : '播放' }}
+                                {{ ['playing','buffering'].includes(playback.state) ? '暂停' : '播放' }}
                             </button>
                             <span class="time-readout" data-testid="editor-current-time">
                                 {{ formatTime(playback.currentTimeSeconds) }} / {{ formatTime(playback.durationSeconds) }}
@@ -120,8 +120,9 @@
                     <div role="tablist" aria-label="工作区选择" @keydown="switchWorkspaceFromKeyboard">
                         <button id="editor-marking-tab" type="button" role="tab" aria-controls="editor-marking-panel" :aria-selected="workspace === 'marking'" :tabindex="workspace === 'marking' ? 0 : -1" data-testid="editor-marking-tab" @click="workspace = 'marking'">标记编辑</button>
                         <button id="editor-separation-tab" type="button" role="tab" aria-controls="editor-separation-panel" :aria-selected="workspace === 'separation'" :tabindex="workspace === 'separation' ? 0 : -1" data-testid="editor-separation-tab" @click="workspace = 'separation'">音轨分离 <span class="workspace-new">FT</span></button>
+                        <button id="editor-transcription-tab" type="button" role="tab" aria-controls="editor-transcription-panel" :aria-selected="workspace === 'transcription'" :tabindex="workspace === 'transcription' ? 0 : -1" data-testid="editor-transcription-tab" @click="workspace = 'transcription'">自动标记</button>
                     </div>
-                    <span class="workspace-context">{{ workspace === 'marking' ? '时间标记 · 节拍地图' : '四轨波形 · 能量 · WAV导出' }}</span>
+                    <span class="workspace-context">{{ workspace === 'marking' ? '时间标记 · 节拍地图' : workspace === 'separation' ? '四轨波形 · 能量 · WAV导出' : '模型候选 · 检查 · 应用' }}</span>
                 </nav>
                 <div id="editor-marking-panel" v-show="workspace === 'marking'" role="tabpanel" aria-labelledby="editor-marking-tab">
                 <EditorTimeline
@@ -155,6 +156,10 @@
                         :active="workspace === 'separation'"
                         @seek="audioSession.seek($event)"
                     />
+                </div>
+
+                <div id="editor-transcription-panel" v-show="workspace === 'transcription'" role="tabpanel" aria-labelledby="editor-transcription-tab">
+                    <EditorTranscriptionWorkspace :playback="playback" :duration="snapshot.project.track.durationSeconds" :active="workspace === 'transcription'" @seek="audioSession.seek($event)" />
                 </div>
 
             </template>
@@ -226,6 +231,7 @@ import { useAudioSessionStore } from '../stores/audioSessionStore';
 import EditorTimeline from '../components/EditorTimeline.vue';
 import EditorPointWorkspace from '../components/EditorPointWorkspace.vue';
 import EditorSeparationWorkspace from '../components/EditorSeparationWorkspace.vue';
+import EditorTranscriptionWorkspace from '../components/EditorTranscriptionWorkspace.vue';
 import { useEditorSeparationService } from '../processing/editorSeparationService';
 import type {
     AnalysisCursorValueResult,
@@ -239,12 +245,13 @@ const audioSession = useAudioSessionService();
 const sessionStore = useAudioSessionStore();
 const controller = useEditorSessionController();
 const separationService = useEditorSeparationService();
-const workspace = ref<'marking'|'separation'>('marking');
+const workspace = ref<'marking'|'separation'|'transcription'>('marking');
 function switchWorkspaceFromKeyboard(event: KeyboardEvent): void {
     if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return;
     event.preventDefault();
-    workspace.value = event.key === 'Home' ? 'marking' : event.key === 'End' ? 'separation'
-        : workspace.value === 'marking' ? 'separation' : 'marking';
+    const tabs = ['marking','separation','transcription'] as const;
+    workspace.value = event.key === 'Home' ? tabs[0] : event.key === 'End' ? tabs[2]
+        : tabs[(tabs.indexOf(workspace.value)+(event.key === 'ArrowRight' ? 1 : 2))%tabs.length]!;
     document.getElementById(`editor-${workspace.value}-tab`)?.focus();
 }
 const snapshot = shallowRef(controller.getSnapshot());

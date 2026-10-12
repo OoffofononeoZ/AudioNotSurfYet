@@ -128,6 +128,8 @@ export interface AudioEnginePort {
     pause(): void;
     seek(seconds: number): Promise<void>;
     setVolume(volume: number): void;
+    setAuditionSource(source:import('./auditionTypes').AuditionSource|null,options?:{play?:boolean}):Promise<void>;
+    setAuditionMuted(role:string,muted:boolean):void;
     getSnapshot(): PlaybackSnapshot;
     getTimeDomainFloatData(): Float32Array | null;
     getDecodedAudioDescriptor(): DecodedAudioDescriptor | null;
@@ -195,6 +197,7 @@ const isMissingFileError = (error: unknown) =>
 export class AudioSessionService {
     private readonly store: AudioSessionStore;
     private readonly engine: AudioEnginePort;
+    private transportRevision = 0;
     private readonly repository: SessionRepositoryPort;
     private readonly parseMetadata: MetadataParser;
     private readonly pickFiles: FilePicker;
@@ -617,18 +620,21 @@ export class AudioSessionService {
 
     pause(): void {
         if (this.disposed) return;
+        ++this.transportRevision;
         this.engine.pause();
     }
 
     async play(): Promise<void> {
         if (this.disposed) return;
+        ++this.transportRevision;
         await this.engine.play();
     }
 
     async togglePlayback(): Promise<void> {
         if (this.disposed || this.store.queue.length === 0) return;
+        ++this.transportRevision;
 
-        if (this.store.playback.state === 'playing') {
+        if (this.store.playback.state === 'playing' || this.store.playback.state === 'buffering') {
             this.engine.pause();
             return;
         }
@@ -636,6 +642,7 @@ export class AudioSessionService {
         if (
             this.store.playback.state === 'paused'
             || this.store.playback.state === 'ended'
+            || (this.store.playback.state === 'error' && this.store.playback.error?.code === 'audition-read')
         ) {
             try {
                 await this.engine.play();
@@ -662,11 +669,22 @@ export class AudioSessionService {
 
     async seek(seconds: number): Promise<void> {
         if (this.disposed) return;
+        ++this.transportRevision;
         try {
             await this.engine.seek(seconds);
         } catch {
             // The engine snapshot carries the typed error for the UI.
         }
+    }
+
+    async setAuditionSource(source:import('./auditionTypes').AuditionSource|null,options?:{play?:boolean}):Promise<void> {
+        if (this.disposed) { if (source) await source.close(); return; }
+        ++this.transportRevision;
+        await this.engine.setAuditionSource(source,options);
+    }
+
+    setAuditionMuted(role:string,muted:boolean):void {
+        if (!this.disposed) this.engine.setAuditionMuted(role,muted);
     }
 
     async updateAnalysisWorkspace(
@@ -1279,10 +1297,13 @@ export class AudioSessionService {
 
     private async repeatRouteTrack(token: string, trackId: string): Promise<void> {
         if (this.routeRepeatInFlight) return;
+        const revision = this.transportRevision;
+        const source = this.engine.getSnapshot().audition;
         this.routeRepeatInFlight = true;
         try {
             if (
                 this.disposed
+                || revision !== this.transportRevision
                 || this.activeRoutePlayback?.token !== token
                 || this.activeRoutePlayback.trackId !== trackId
                 || this.activeRoutePlayback.endedPolicy !== 'repeat-one'
@@ -1291,6 +1312,9 @@ export class AudioSessionService {
             await this.engine.seek(0);
             if (
                 this.disposed
+                || revision !== this.transportRevision
+                || this.engine.getSnapshot().audition?.kind !== source?.kind
+                || this.engine.getSnapshot().audition?.resultId !== source?.resultId
                 || this.activeRoutePlayback?.token !== token
                 || this.activeRoutePlayback.trackId !== trackId
                 || this.activeRoutePlayback.endedPolicy !== 'repeat-one'

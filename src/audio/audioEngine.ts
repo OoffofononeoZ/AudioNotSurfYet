@@ -4,6 +4,8 @@ import type {
     PlaybackErrorCode,
     PlaybackSnapshot,
 } from '../types/audio';
+import { ChunkedAudition } from './chunkedAudition';
+import type { AuditionSource } from './auditionTypes';
 
 type AudioContextFactory = () => AudioContext;
 type SnapshotListener = (snapshot: PlaybackSnapshot) => void;
@@ -63,6 +65,13 @@ export class AudioEngine {
     private loadGeneration = 0;
     private decodedRevision = 0;
     private snapshot: PlaybackSnapshot = emptySnapshot(this.volume);
+    private audition:ChunkedAudition|null = null;
+    private auditionSource:AuditionSource|null = null;
+    private auditionGeneration = 0;
+    private auditionSelectionPending = false;
+    private readonly auditionReleases = new Set<Promise<void>>();
+    private playbackRequested = false;
+    private playbackCommandGeneration = 0;
     private recordingTap: {
         token: string;
         destination: MediaStreamAudioDestinationNode;
@@ -81,6 +90,9 @@ export class AudioEngine {
         encodedAudio: ArrayBuffer;
     }): Promise<'loaded' | 'stale'> {
         const generation = ++this.loadGeneration;
+        ++this.auditionGeneration; ++this.playbackCommandGeneration;
+        this.playbackRequested = false; this.auditionSelectionPending = false;
+        const auditionRelease = this.detachAudition();
         ++this.decodedRevision;
         this.releaseRecordingTap();
         this.stopSource();
@@ -97,6 +109,8 @@ export class AudioEngine {
 
         let context: AudioContext;
         try {
+            if (auditionRelease) await auditionRelease;
+            if (generation !== this.loadGeneration) return 'stale';
             context = this.ensureGraph();
         } catch (error) {
             if (generation !== this.loadGeneration) return 'stale';
@@ -133,9 +147,15 @@ export class AudioEngine {
 
     async play(): Promise<void> {
         if (this.snapshot.state === 'playing' || !this.buffer) return;
+        this.playbackRequested = true;
+        const command = ++this.playbackCommandGeneration;
+        if (this.auditionSelectionPending) {
+            this.publish({...this.getSnapshot(),state:'buffering',error:undefined}); return;
+        }
+        const selectedAudition = this.audition;
 
         const generation = this.loadGeneration;
-        if (this.playbackOffsetSeconds >= this.buffer.duration) {
+        if (!selectedAudition && this.playbackOffsetSeconds >= this.buffer.duration) {
             this.playbackOffsetSeconds = 0;
         }
 
@@ -151,9 +171,11 @@ export class AudioEngine {
             throw error;
         }
 
-        if (generation !== this.loadGeneration || !this.buffer) return;
+        if (generation !== this.loadGeneration || !this.buffer || command !== this.playbackCommandGeneration
+            || !this.playbackRequested || selectedAudition !== this.audition) return;
 
         try {
+            if (selectedAudition) { await selectedAudition.play(); return; }
             this.startSource(context);
         } catch (error) {
             this.publishError('source', error, this.snapshot.trackId);
@@ -162,6 +184,9 @@ export class AudioEngine {
     }
 
     pause(): void {
+        this.playbackRequested = false; ++this.playbackCommandGeneration;
+        if (this.audition) { this.audition.pause(); return; }
+        if (this.auditionSelectionPending) { this.publish({...this.getSnapshot(),state:'paused'}); return; }
         if (
             !this.source
             || this.playbackStartContextTime === null
@@ -190,6 +215,11 @@ export class AudioEngine {
             0,
             duration,
         );
+        if (this.auditionSelectionPending) {
+            this.playbackOffsetSeconds = target;
+            this.publish({...this.getSnapshot(),currentTimeSeconds:target,state:this.playbackRequested?'buffering':'paused'}); return;
+        }
+        if (this.audition) { await this.audition.seek(target); return; }
         const wasPlaying = this.snapshot.state === 'playing';
         this.stopSource();
         this.playbackOffsetSeconds = target;
@@ -231,10 +261,78 @@ export class AudioEngine {
         return {
             ...this.snapshot,
             currentTimeSeconds,
+            audition:this.auditionSource ? {kind:this.auditionSource.kind,label:this.auditionSource.label,
+                resultId:this.auditionSource.resultId,roles:[...this.auditionSource.roles],mutedRoles:this.audition?.getSnapshot().mutedRoles ?? []}
+                : {kind:'original',label:'原曲',roles:[],mutedRoles:[]},
             error: this.snapshot.error
                 ? { ...this.snapshot.error }
                 : undefined,
         };
+    }
+
+    async setAuditionSource(source:AuditionSource|null,options?:{play?:boolean}):Promise<void> {
+        if (!source && !this.audition && !this.auditionSelectionPending && !this.auditionReleases.size) return;
+        if (!source && !this.buffer) {
+            ++this.auditionGeneration; this.auditionSelectionPending = false; this.playbackRequested = false;
+            const release = this.detachAudition(); if (release) await release; return;
+        }
+        if (source && (!this.buffer || source.trackId !== this.snapshot.trackId
+            || Math.abs(source.frames / source.sampleRate - this.buffer.duration) > 1 / source.sampleRate)) {
+            await source.close(); throw new Error('Audition source does not match the current song.');
+        }
+        const generation = ++this.auditionGeneration;
+        const loadGeneration = this.loadGeneration;
+        const position = this.getCurrentTimeSeconds();
+        const requested = options?.play ?? (this.playbackRequested || this.snapshot.state === 'playing' || this.snapshot.state === 'buffering');
+        this.stopSource();
+        const release = this.detachAudition();
+        this.playbackOffsetSeconds = position; this.playbackStartContextTime = null;
+        this.playbackRequested = requested; this.auditionSelectionPending = true;
+        this.publish({...this.getSnapshot(),state:requested?'buffering':'paused',currentTimeSeconds:position,error:undefined});
+        try {
+            if (release) await release;
+            if (generation !== this.auditionGeneration || loadGeneration !== this.loadGeneration) { if (source) await source.close(); return; }
+            if (source) {
+                const context = this.ensureGraph();
+                const audition = new ChunkedAudition(context,this.analyserNode!,source,snapshot => {
+                    if (this.audition !== audition) return;
+                    this.playbackOffsetSeconds = snapshot.currentTimeSeconds;
+                    if (snapshot.state === 'ended' || snapshot.state === 'error') this.playbackRequested = false;
+                    this.publish({trackId:source.trackId,state:snapshot.state,currentTimeSeconds:snapshot.currentTimeSeconds,
+                        durationSeconds:this.buffer?.duration ?? 0,volume:this.volume,
+                        error:snapshot.error ? {code:'audition-read',message:snapshot.error} : undefined});
+                });
+                this.audition = audition; this.auditionSource = source;
+                await audition.seek(this.playbackOffsetSeconds);
+            }
+            if (generation !== this.auditionGeneration || loadGeneration !== this.loadGeneration) return;
+            this.auditionSelectionPending = false;
+            this.publish({...this.getSnapshot(),state:'paused',error:undefined});
+            if (this.playbackRequested && this.buffer) await this.play();
+        } catch (error) {
+            if (generation !== this.auditionGeneration || loadGeneration !== this.loadGeneration) return;
+            this.auditionSelectionPending = false;
+            if (source && this.auditionSource !== source) await source.close();
+            this.publishError('audition-read',error,this.snapshot.trackId); throw error;
+        }
+    }
+
+    setAuditionMuted(role:string,muted:boolean):void {
+        if (!this.audition) throw new Error('No audition source is selected.');
+        this.audition.setMuted(role,muted);
+    }
+
+    private detachAudition():Promise<void>|null {
+        const audition = this.audition;
+        this.audition = null; this.auditionSource = null;
+        if (audition) {
+            const release = audition.dispose(); this.auditionReleases.add(release);
+            void release.then(() => this.auditionReleases.delete(release),() => this.auditionReleases.delete(release));
+        }
+        if (!this.auditionReleases.size) return null;
+        const pending = Promise.all([...this.auditionReleases]).then(() => undefined);
+        void pending.catch(() => undefined);
+        return pending;
     }
 
     getTimeDomainFloatData(): Float32Array | null {
@@ -273,11 +371,11 @@ export class AudioEngine {
         const snapshot = this.getSnapshot();
         if (
             !snapshot.trackId
-            || !['paused', 'playing', 'ended'].includes(snapshot.state)
+            || !['paused', 'playing', 'buffering', 'ended'].includes(snapshot.state)
         ) return null;
         return {
             trackId: snapshot.trackId,
-            state: snapshot.state as AudioPlaybackCheckpoint['state'],
+            state: snapshot.state === 'buffering' ? 'playing' : snapshot.state as AudioPlaybackCheckpoint['state'],
             currentTimeSeconds: snapshot.currentTimeSeconds,
         };
     }
@@ -288,6 +386,12 @@ export class AudioEngine {
                 'recording-unavailable',
                 '录制前的歌曲已不可恢复。',
             );
+        }
+        if (this.audition) {
+            this.pause(); await this.audition.seek(checkpoint.currentTimeSeconds);
+            if (checkpoint.state === 'playing') await this.play();
+            else if (checkpoint.state === 'ended') this.publish({...this.getSnapshot(),state:'ended'});
+            return;
         }
         this.stopSource();
         if (checkpoint.state === 'ended') {
@@ -395,6 +499,9 @@ export class AudioEngine {
 
     unload(): void {
         ++this.loadGeneration;
+        ++this.auditionGeneration; ++this.playbackCommandGeneration;
+        this.playbackRequested = false; this.auditionSelectionPending = false;
+        this.detachAudition();
         ++this.decodedRevision;
         this.releaseRecordingTap();
         this.stopSource();
@@ -406,12 +513,17 @@ export class AudioEngine {
 
     async dispose(): Promise<void> {
         ++this.loadGeneration;
+        ++this.auditionGeneration; ++this.playbackCommandGeneration;
+        this.playbackRequested = false; this.auditionSelectionPending = false;
+        const auditionRelease = this.detachAudition();
         ++this.decodedRevision;
         this.releaseRecordingTap();
         this.stopSource();
         this.buffer = null;
         this.playbackOffsetSeconds = 0;
         this.playbackStartContextTime = null;
+        let releaseError:unknown;
+        try { if (auditionRelease) await auditionRelease; } catch (error) { releaseError = error; }
 
         this.analyserNode?.disconnect();
         this.gainNode?.disconnect();
@@ -432,11 +544,13 @@ export class AudioEngine {
 
         if (closeError) {
             this.publishError('context', closeError, null);
+        } else if (releaseError) {
+            this.publishError('audition-read',releaseError,null);
         } else {
             this.publish(emptySnapshot(this.volume));
         }
         this.listeners.clear();
-        if (closeError) throw closeError;
+        if (closeError || releaseError) throw closeError ?? releaseError;
     }
 
     private ensureGraph(): AudioContext {
@@ -487,6 +601,7 @@ export class AudioEngine {
                 this.source = null;
                 this.playbackStartContextTime = null;
                 this.playbackOffsetSeconds = this.buffer.duration;
+                this.playbackRequested = false;
                 this.publish({
                     trackId: this.snapshot.trackId,
                     state: 'ended',
@@ -552,6 +667,7 @@ export class AudioEngine {
 
     private getCurrentTimeSeconds(): number {
         if (!this.buffer) return 0;
+        if (this.audition) return Math.min(this.buffer.duration,this.audition.getSnapshot().currentTimeSeconds);
         if (!this.source || this.playbackStartContextTime === null) {
             return clamp(
                 this.playbackOffsetSeconds,
@@ -599,6 +715,8 @@ export class AudioEngine {
                     ? error.message
                     : 'Unknown audio playback error.',
         };
+        this.playbackRequested = false;
+        this.audition?.pause();
         this.stopSource();
         this.publish({
             trackId,

@@ -31,12 +31,13 @@ export interface TrackRecord {
 export type PlaybackState =
     | 'empty'
     | 'loading'
+    | 'buffering'
     | 'paused'
     | 'playing'
     | 'ended'
     | 'error';
 
-export type PlaybackErrorCode = 'decode' | 'context' | 'source' | 'unsupported';
+export type PlaybackErrorCode = 'decode' | 'context' | 'source' | 'unsupported' | 'audition-read';
 
 export interface PlaybackError {
     code: PlaybackErrorCode;
@@ -50,6 +51,10 @@ export interface PlaybackSnapshot {
     durationSeconds: number;
     volume: number;
     error?: PlaybackError;
+    audition?: {
+        kind:'original'|'ft'|'auxiliary';label:string;resultId?:string;
+        roles:string[];mutedRoles:string[];
+    };
 }
 
 export interface DecodedAudioDescriptor {

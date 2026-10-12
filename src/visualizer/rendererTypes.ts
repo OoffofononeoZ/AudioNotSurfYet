@@ -51,7 +51,7 @@ export interface VisualizerRenderFrame {
     readonly seed: number;
     readonly timeSeconds: number;
     readonly bindingRevision: number;
-    readonly playbackState: 'empty' | 'loading' | 'paused' | 'playing' | 'ended' | 'error';
+    readonly playbackState: 'empty' | 'loading' | 'buffering' | 'paused' | 'playing' | 'ended' | 'error';
 }
 
 export interface VisualizerRendererStatus {

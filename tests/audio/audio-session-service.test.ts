@@ -15,6 +15,8 @@ import { useAudioSessionStore } from '../../src/stores/audioSessionStore';
 import type { PlaybackSnapshot } from '../../src/types/audio';
 
 class FakeEngine implements AudioEnginePort {
+    async setAuditionSource() {}
+    setAuditionMuted() {}
     snapshot: PlaybackSnapshot = {
         trackId: null,
         state: 'empty',

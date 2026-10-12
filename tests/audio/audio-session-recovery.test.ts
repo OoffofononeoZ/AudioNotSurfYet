@@ -22,6 +22,8 @@ import {
 } from '../../src/types/session';
 
 class RecoveryEngine implements AudioEnginePort {
+    async setAuditionSource() {}
+    setAuditionMuted() {}
     snapshot: PlaybackSnapshot = {
         trackId: null,
         state: 'empty',

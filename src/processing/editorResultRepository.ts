@@ -56,7 +56,7 @@ export async function nativePcmHash(port:DecodedAudioCopyPort,signal:AbortSignal
     if(!current||!equalDescriptor(descriptor,current))throw new ProcessingError('source-identity-mismatch','当前歌曲已经改变。');
     return hash.hex();
 }
-async function blobHash(blob:Blob,signal:AbortSignal):Promise<string> {
+export async function blobHash(blob:Blob,signal:AbortSignal):Promise<string> {
     const hash=new Sha256();
     for(let at=0;at<blob.size;at+=1024*1024){checkCancelled(signal);hash.update(new Uint8Array(await blob.slice(at,at+1024*1024).arrayBuffer()));await yieldTask();}
     checkCancelled(signal);return hash.hex();

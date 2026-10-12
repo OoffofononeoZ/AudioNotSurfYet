@@ -6,5 +6,7 @@
 
 | 文件 | 本地静态引用（最多显示 6 项） |
 | --- | --- |
-| [src/audio/audioEngine.ts](../../src/audio/audioEngine.ts) | [src/types/audio.ts](../../src/types/audio.ts) |
-| [src/audio/audioSessionService.ts](../../src/audio/audioSessionService.ts) | [src/analysis/featureOrder.ts](../../src/analysis/featureOrder.ts)、[src/audio/audioEngine.ts](../../src/audio/audioEngine.ts)、[src/persistence/sessionRepository.ts](../../src/persistence/sessionRepository.ts)、[src/stores/audioSessionStore.ts](../../src/stores/audioSessionStore.ts)、[src/types/audio.ts](../../src/types/audio.ts)、[src/types/session.ts](../../src/types/session.ts) |
+| [src/audio/audioEngine.ts](../../src/audio/audioEngine.ts) | [src/audio/auditionTypes.ts](../../src/audio/auditionTypes.ts)、[src/audio/chunkedAudition.ts](../../src/audio/chunkedAudition.ts)、[src/types/audio.ts](../../src/types/audio.ts) |
+| [src/audio/audioSessionService.ts](../../src/audio/audioSessionService.ts) | [src/analysis/featureOrder.ts](../../src/analysis/featureOrder.ts)、[src/audio/audioEngine.ts](../../src/audio/audioEngine.ts)、[src/audio/auditionTypes.ts](../../src/audio/auditionTypes.ts)、[src/persistence/sessionRepository.ts](../../src/persistence/sessionRepository.ts)、[src/stores/audioSessionStore.ts](../../src/stores/audioSessionStore.ts)、[src/types/audio.ts](../../src/types/audio.ts)、另 1 项，按需核对源码 |
+| [src/audio/auditionTypes.ts](../../src/audio/auditionTypes.ts) | [src/types/audio.ts](../../src/types/audio.ts) |
+| [src/audio/chunkedAudition.ts](../../src/audio/chunkedAudition.ts) | [src/audio/auditionTypes.ts](../../src/audio/auditionTypes.ts) |

@@ -4,7 +4,7 @@ owner: "project-owner"
 last_reviewed: 2026-10-12
 upstream_docs:
   - "AGENTS.md"
-next_action: "当前Editor FT功能按DEC-074收尾；后续节拍/提案/V2仍Planned，正式评审缺口独立保留"
+next_action: "DEC-075功能与适用验证已完成，提供短片/标记供owner复核新增质量；旧readiness与P3/V2独立"
 ---
 
 # 仓库上下文入口
@@ -24,11 +24,14 @@ AudioNotSurfYet 是 Vue / TypeScript / Vite 浏览器音频工作台；当前目
 | Visualizer | V1–V6 canonical 与适用人工门禁已批准，post-V6 viewport 修订已有 Chrome/Edge 专项证据。DEC-058 的原生全屏复用同一 Canvas/transport，不创建 V7；原 readiness 候选为 `pre-fullscreen`，交互与视觉由 owner 审阅。新场景仍须完整输入校验和确定 Scene Contract 审批。 |
 | FT 与处理链 | P0-D 已完成；当前 FT 功能及汇总听感/长曲耗时按 DEC-074 接受。四原图与官方 ORT JSEP 的历史双浏览器数值门禁保留；完整 P1 正式关闭仍有独立证据缺口。 |
 | Editor FT 接入 | 本轮功能收尾完成：四轨/WAV、缓存恢复、清理、取消/换歌/离页及原编辑回归，当前全量 runner 9/9，92 项非浏览器、Chrome/Edge 各 20/20。证据为工作树不变的 provisional，不冒充 clean canonical；完整 P2 及 P3–P6 独立，后者仍 `Planned`。 |
+| 分轨试听与有限自动标记 | DEC-075 授权四轨共同 transport、ADT_STR WASM 鼓种、Basic Pitch 音符和六轨钢琴／吉他辅助分析；共同试听与标记闭环已实现并完成双浏览器功能/受控质量测量，新增识别质量未获owner接受。沿用 EditorProjectV1，不包含 P3、正式 readiness 或发布。 |
 
 浏览器处理链、TypeScript 逐拍/局部 tempo、人工小节确认、只读提案与 Project V2 是获批路线，不代表后续能力已实现或可自动应用。里程碑与风险以对应合同及 evidence 为准；Editor/Visualizer 整体 readiness 独立处理，PROD-015 继续阻断上线。DEC-059/061 的旧设计资料已归档并停止作为新设计依据，既有样式仍是源码事实。
 
 ## 有效授权与未解决缺口
 
+- DEC-075 允许本轮新增能力及其回归使用本地端口、Chrome／Edge 和必要的沙箱外执行，旧 DEC-055 readiness 限制保留。完整范围与完成证据要求见 [Editor 自动标记契约](../architecture/processing/editor-auto-marking.md)，新增识别质量待 owner 复核。
+- 共同试听、候选服务/缓存/预览/修正与V1原子应用已接入；相关回归44文件243项、双浏览器30个不同场景及build通过，包含受控质量记录和15分钟源的120秒连续试听。合成snare漏标和音符多标保留，新增质量未获owner接受。当前证据和剩余工作见 [自动标记记录](../quality/processing/editor-auto-marking-evidence.md)。
 - DEC-069/070 允许已批 P1–P6 按全部适用验收证据和必需人工输入自主关闭、推进；符合既定契约的后续质量文档纳入授权。重大范围、架构、兼容、阈值和发布变化仍须 owner 决定。DEC-072 只开放 Editor 接入例外，不豁免性能、质量或后续提案/V2 门禁。
 - DEC-074 接受当前 FT 汇总听感：复杂音乐存在部分串音，drums 最好；本地取轨/拼接/导出检查与现有专项未发现造成串音的错误，模型及音乐复杂性是当前推断。第三首耗时按 owner 结论通过，长曲允许较长处理时间，不反复要求已接受的项目。
 - 历史 Chrome 十五分钟处理 **1011.9541 秒（16分51.95秒）** 超过原 **900 秒** 的事实保留；本轮接受耗时不等同原门槛实测达标，不新增数值上限或扩大支持范围。Edge 普通 profile 完整性能和当前候选完整 P1 clean canonical 仍未补齐。

@@ -1,6 +1,7 @@
 <template>
     <div id="music-bar-container" :class="'bg-style-' + styleMode"
         :data-playback-state="playback.state"
+        :data-audition-source="playback.audition?.kind ?? 'original'"
         :data-current-time="playback.currentTimeSeconds"
         :data-duration="playback.durationSeconds"
         :data-volume="playback.volume"
@@ -169,10 +170,10 @@ const playingTarget = computed(() => {
     );
     return index >= 0 ? index : 0;
 });
-const isPlaying = computed(() => playback.value.state === 'playing');
+const isPlaying = computed(() => ['playing','buffering'].includes(playback.value.state));
 const isLoading = computed(() => playback.value.state === 'loading');
 const audioReady = computed(() =>
-    ['paused', 'playing', 'ended'].includes(playback.value.state),
+    ['paused', 'playing', 'buffering', 'ended'].includes(playback.value.state),
 );
 const canSeek = computed(() =>
     queue.value.length > 0
@@ -463,7 +464,10 @@ watch(
 const infoLines = computed(() => [
     albumInfo.value[playingTarget.value]?.fileName || 'unknown file',
     albumInfo.value[playingTarget.value]?.title || 'unknown title',
-    albumInfo.value[playingTarget.value]?.artist || 'unknown artist',
+    [albumInfo.value[playingTarget.value]?.artist || 'unknown artist',
+        playback.value.audition?.kind && playback.value.audition.kind !== 'original' ? playback.value.audition.label : '',
+        playback.value.state === 'buffering' ? '等待音频数据' : playback.value.error?.code === 'audition-read' ? '试听读取失败' : '',
+    ].filter(Boolean).join(' · '),
 ]);
 
 const shouldMarquee = ref<boolean[]>([false, false, false]);
@@ -517,9 +521,9 @@ function setupInfoMarquee() {
 }
 
 watch(
-    () => albumInfo.value[playingTarget.value],
+    () => infoLines.value.join('\0'),
     () => setupInfoMarquee(),
-    { deep: true },
+    { flush: 'post' },
 );
 
 const progressPercent = () => {

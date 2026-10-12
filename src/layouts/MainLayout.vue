@@ -40,6 +40,8 @@ import { VisualizerDraftRepository } from '../visualizer/visualizerDraftReposito
 import { NativeVisualizerFileGateway } from '../visualizer/fileIO';
 import { NativeVisualizerVideoFileGateway } from '../visualizer/videoFileIO';
 import { EditorSeparationService,editorSeparationServiceKey } from '../processing/editorSeparationService';
+import { EditorProcessingGate } from '../processing/editorProcessingGate';
+import { EditorTranscriptionService,editorTranscriptionServiceKey } from '../transcription/editorTranscriptionService';
 
 const audioSessionStore = useAudioSessionStore();
 const audioEngine = new AudioEngine();
@@ -55,7 +57,8 @@ const analysisCoordinator = new AnalysisCoordinator(
 );
 audioSession.setVolume(useConfigstore().volume);
 provide(audioSessionServiceKey, audioSession);
-const editorSeparation = new EditorSeparationService(audioEngine);
+const editorProcessingGate = new EditorProcessingGate();
+const editorSeparation = new EditorSeparationService(audioEngine,audioSession,{gate:editorProcessingGate});
 provide(editorSeparationServiceKey,editorSeparation);
 provide(analysisCoordinatorKey, analysisCoordinator);
 const editorController = new EditorSessionController({
@@ -66,6 +69,8 @@ const editorController = new EditorSessionController({
     fileGateway: new NativeEditorFileGateway(),
 });
 provide(editorSessionControllerKey, editorController);
+const editorTranscription = new EditorTranscriptionService(audioSession,editorController,editorSeparation,editorProcessingGate);
+provide(editorTranscriptionServiceKey,editorTranscription);
 const editorSnapshot = shallowRef(editorController.getSnapshot());
 const unsubscribeEditor = editorController.subscribe((snapshot) => {
     editorSnapshot.value = snapshot;
@@ -194,6 +199,7 @@ onUnmounted(() => {
         ).__AUDIO_NOT_SURF_YET_M6__;
     }
     void (async () => {
+        await editorTranscription.dispose();
         await editorSeparation.dispose();
         await visualizerController.dispose();
         await editorController.dispose();

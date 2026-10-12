@@ -14,9 +14,10 @@ function setup(gpuAvailable=true){
     let resolve!:(result:SeparationResult)=>void,reject!:(error:Error)=>void;
     const controller={start:vi.fn((_port:DecodedAudioCopyPort)=>new Promise<SeparationResult>((yes,no)=>{resolve=yes;reject=no;})),cancel:vi.fn()};
     const urls:string[]=[],revoked:string[]=[];
+    const transport={setAuditionSource:vi.fn(async()=>{}),setAuditionMuted:vi.fn(),subscribePlayback:vi.fn(()=>()=>{}),play:vi.fn(async()=>{}),pause:vi.fn()};
     const service=new EditorSeparationService({getDecodedAudioDescriptor:()=>port.getDecodedAudioDescriptor(),copyDecodedChannelRange:input=>port.copyDecodedChannelRange(input)},
-        {controller,repository,isGpuAvailable:()=>gpuAvailable,createUrl:()=>{const url=`blob:${urls.length}`;urls.push(url);return url;},revokeUrl:url=>revoked.push(url)});
-    return {service,repository,controller,result,urls,revoked,finish:()=>resolve(result),fail:(code:string)=>reject(new ProcessingError(code,'failed')),setPort:(next:DecodedAudioCopyPort)=>{port=next;}};
+        transport,{controller,repository,isGpuAvailable:()=>gpuAvailable,createUrl:()=>{const url=`blob:${urls.length}`;urls.push(url);return url;},revokeUrl:url=>revoked.push(url)});
+    return {service,repository,controller,result,urls,revoked,transport,finish:()=>resolve(result),fail:(code:string)=>reject(new ProcessingError(code,'failed')),setPort:(next:DecodedAudioCopyPort)=>{port=next;}};
 }
 it('uses the shared PCM port and only publishes verified artifacts, with balanced result URLs',async()=>{
     const s=setup();await s.service.bind(s.result.source.descriptor.trackId);const job=s.service.start();
