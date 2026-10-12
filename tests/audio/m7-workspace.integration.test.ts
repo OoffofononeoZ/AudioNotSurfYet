@@ -30,6 +30,8 @@ import {
 } from '../../src/types/session';
 
 class WorkspaceEngine implements AudioEnginePort {
+    async setAuditionSource() {}
+    setAuditionMuted() {}
     private readonly snapshot: PlaybackSnapshot = {
         trackId: null,
         state: 'empty',

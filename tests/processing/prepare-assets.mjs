@@ -14,4 +14,9 @@ const pinned=JSON.parse(await fs.readFile('src/processing/runtime-manifest.json'
 if(JSON.stringify(manifest)!==JSON.stringify(pinned))throw Error('Installed runtime assets differ from pinned manifest.');
 await fs.writeFile(path.join(directory,'manifest.json'),JSON.stringify(manifest,null,2)+'\n');
 await fs.copyFile('src/processing/THIRD_PARTY_NOTICES.md',path.join(directory,'THIRD_PARTY_NOTICES.md'));
+const transcriptionDirectory=path.join(directory,'transcription');
+await fs.mkdir(path.join(transcriptionDirectory,'licenses'),{recursive:true});
+await fs.copyFile('src/transcription/THIRD_PARTY_NOTICES.md',path.join(transcriptionDirectory,'THIRD_PARTY_NOTICES.md'));
+await fs.copyFile('src/transcription/model-artifacts.json',path.join(transcriptionDirectory,'model-artifacts.json'));
+await fs.copyFile('src/transcription/licenses/BasicPitch-LICENSE.txt',path.join(transcriptionDirectory,'licenses','BasicPitch-LICENSE.txt'));
 console.log(JSON.stringify(manifest));

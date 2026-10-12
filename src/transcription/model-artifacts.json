@@ -1,0 +1,50 @@
+{
+  "version": 1,
+  "models": [
+    {
+      "id": "adt-encoder",
+      "repository": "swwallowws/coming-undone-browser-models",
+      "revision": "89a917875e272bb492311624d7536b5e27604a64",
+      "file": "adt_encoder.int8.onnx",
+      "bytes": 35709676,
+      "sha256": "71f89f6aba1dd74bf2792a9b19f89b4a8ec438362e6429d9578ffd9ea2e5320f",
+      "url": "https://huggingface.co/swwallowws/coming-undone-browser-models/resolve/89a917875e272bb492311624d7536b5e27604a64/adt_encoder.int8.onnx",
+      "license": "CC-BY-SA-4.0",
+      "backend": "wasm"
+    },
+    {
+      "id": "adt-decoder",
+      "repository": "swwallowws/coming-undone-browser-models",
+      "revision": "89a917875e272bb492311624d7536b5e27604a64",
+      "file": "adt_decoder.int8.onnx",
+      "bytes": 37204260,
+      "sha256": "7e8c7d3dc4013461d7a9ce5cf39043d7a052e68efb053ede3055d59c0d975b3e",
+      "url": "https://huggingface.co/swwallowws/coming-undone-browser-models/resolve/89a917875e272bb492311624d7536b5e27604a64/adt_decoder.int8.onnx",
+      "license": "CC-BY-SA-4.0",
+      "backend": "wasm"
+    },
+    {
+      "id": "basic-pitch",
+      "repository": "spotify/basic-pitch",
+      "revision": "9991303bba609a3b93089d13ec80d1d495083596",
+      "file": "nmp.onnx",
+      "bytes": 230444,
+      "sha256": "2c3c1d144bfa61ad236e92e169c13535c880469a12a047d4e73451f2c059a0ec",
+      "gitBlob": "c30e5f9438e798604b7177aa26be1fe64482f767",
+      "url": "https://raw.githubusercontent.com/spotify/basic-pitch/9991303bba609a3b93089d13ec80d1d495083596/basic_pitch/saved_models/icassp_2022/nmp.onnx",
+      "license": "Apache-2.0",
+      "backend": "wasm"
+    },
+    {
+      "id": "htdemucs-6s",
+      "repository": "StemSplitio/htdemucs-6s-onnx",
+      "revision": "49df9b6989cf2150840ea65b0bef77a2e471b678",
+      "file": "htdemucs_6s_fp16weights.onnx",
+      "bytes": 136428532,
+      "sha256": "7ce55792e2231c93fbf92de95f5fd5b3a5e6c89f7db690dfd693e8f1dce56869",
+      "url": "https://huggingface.co/StemSplitio/htdemucs-6s-onnx/resolve/49df9b6989cf2150840ea65b0bef77a2e471b678/htdemucs_6s_fp16weights.onnx",
+      "license": "MIT",
+      "backend": "webgpu"
+    }
+  ]
+}

@@ -136,3 +136,11 @@ Analyzer 运行态由 `activeFeatureQueue` 管理最多四项 FIFO，独立 `fea
 `EditorSeparationService`串行拥有任务、generation、缓存恢复和导出URL；`EditorStemRepository`校验原PCM、模型/runtime/config、compact metadata与全部artifact checksum后发布/恢复。会话revision只用于当前PCM复制防护，跨刷新使用原descriptor header重验完整hash。用户可配置10GiB上限、显式清理Editor结果/残留或四模型；无自动驱逐和CPU/本地模型备用路径。切工作区保留任务，确认离页/换歌取消，人工工程V1不由分离更新。
 
 四原图已在Chrome/Edge独立harness跑通；Chrome主Editor反馈已完成四轨/WAV及刷新恢复，正式双浏览器接入证据待补。历史失败和P1尚缺性能/人工质量见[P1 evidence](../quality/processing/evidence-index.md)，当前入口验证见[Editor evidence](../quality/processing/editor-integration-evidence.md)；R-046–R-055仍Open。
+
+## Editor 试听与有限自动标记（DEC-075）
+
+`AudioEngine`仍是唯一AudioContext、主gain/analyser与时钟所有者。`ChunkedAudition`只拥有分轨gain、四秒buffer、八秒预调度和读取任务；FT/辅助文件由`stemAuditionSource`租约有界读取，暂停、换歌、离页和清理均等待读取释放。播放快照包含原曲/FT/辅助来源与buffering状态；准备期间后发的暂停和seek优先。
+
+`MainLayout`提供共享`EditorProcessingGate`、`EditorSeparationService`和`EditorTranscriptionService`。FT切换/重跑/清理先释放自动标记消费者；一个处理槽位串行拥有FT或转录Worker。`src/transcription/`将模型manifest/许可、频谱与重采样、ADT_STR解码、Basic Pitch音符提取、六轨辅助OPFS输出、Worker/controller、候选与V1原子应用分别归属独立模块。session按阶段释放；六轨只保留guitar/piano，不转写FT other。
+
+`TranscriptionRepository`使用独立`editor-transcriptions` IndexedDB与`transcription-UUID` OPFS目录，保存候选修正、逐乐器分界、辅助PCM/WAV、完整来源与校验清单。修正不重新推理；显式应用创建确定ID的新point/range轨，工程格式不变。候选来源继续在独立缓存中保存，V1工程不承载新模型字段。三个Editor页签复用原transport；Canvas预览与分页候选表由组件展示，`.app-scrollbar`归候选表所有。质量与实际验证范围见[当前记录](../quality/processing/editor-auto-marking-evidence.md)。

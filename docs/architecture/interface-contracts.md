@@ -71,7 +71,7 @@ Invariants:
 ## PlaybackSnapshot
 
 ```ts
-type PlaybackState = 'empty' | 'loading' | 'paused' | 'playing' | 'ended' | 'error'
+type PlaybackState = 'empty' | 'loading' | 'paused' | 'buffering' | 'playing' | 'ended' | 'error'
 
 interface PlaybackSnapshot {
   trackId: TrackId | null
@@ -80,7 +80,7 @@ interface PlaybackSnapshot {
   durationSeconds: number
   volume: number
   error?: {
-    code: 'decode' | 'context' | 'source' | 'unsupported'
+    code: 'decode' | 'context' | 'source' | 'unsupported' | 'audition-read'
     message: string
   }
 }
@@ -92,6 +92,7 @@ Invariants:
 - `currentTimeSeconds` 始终被裁剪到 `[0, durationSeconds]`。
 - store 只保存快照；真实 AudioNode 保留在 AudioEngine。
 - 刷新恢复后的首个快照必须为 `paused`、时间 0。
+- DEC-075：快照另提供`audition`来源（original/ft/auxiliary）、结果ID、角色与静音角色。`buffering`表示数据尚未就绪，有效音频时钟冻结；`audition-read`失败可重试当前试听或返回原曲，不能重载歌曲掩盖错误。
 
 ## AudioEngine
 
@@ -105,6 +106,8 @@ interface AudioEngine {
   pause(): void
   seek(seconds: number): Promise<void>
   setVolume(volume: number): void
+  setAuditionSource(source: AuditionSource | null, options?: {play?: boolean}): Promise<void>
+  setAuditionMuted(role: string, muted: boolean): void
   getSnapshot(): PlaybackSnapshot
   getTimeDomainFloatData(): Float32Array | null
   getDecodedAudioDescriptor(): DecodedAudioDescriptor | null

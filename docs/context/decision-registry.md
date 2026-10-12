@@ -293,3 +293,9 @@ owner 在三个规划选择中确定“停用全部 9 个”“拆分并配套�
 owner 报告已验证音频分离效果：音轨较多的音乐存在部分串音，drums 表现最好；若本地代码无问题，可按模型及音乐复杂性限制接受。owner 明确要求“第三首处理时间视作通过”，允许长曲更长处理时间，并授权其余测试无问题后收尾。
 
 本决定接受本轮汇总听感与当前 FT 耗时，不再以缺少原格式的 12 行试听表或原 900 秒分离门槛阻挡本轮功能交付。第三首没有提供精确秒数，不补造测量；复杂性/模型归因仍是结合链路检查的推断。旧性能失败、缺失原生 OS 操作与完整 P1 clean evidence 保留，正式 P1/P2、后续 P3/P6 完整链性能及发布独立处理；不新增数值上限、不扩大长音频支持范围。
+
+## DEC-075 — Editor Audition and Limited Transcription — 2026-10-12
+
+owner 提供完整「修订版：Editor 分轨试听与有限乐器自动标记」，授权四条真实 FT 音轨在共同 transport 试听、ADT_STR WASM 鼓种识别、Basic Pitch 音符及独立六轨钢琴／吉他辅助分析、候选人工修正和显式 V1 原子应用。本轮不包含 MIDI、P3、V2 格式变化、复杂 other、正式 readiness 或发布。详细边界见 [Editor 自动标记契约](../architecture/processing/editor-auto-marking.md)；新增识别质量仍须 owner 复核，未运行或独立链路失败保留未完成状态。
+
+自动审批曾引用 DEC-055 拒绝新模型 Chrome 验证。owner 随后明确回复「允许本轮新增能力验证，旧 readiness 限制保留」：允许本轮模型、分轨试听及其回归使用本地开发端口并运行 Chrome／Edge，包括必要的沙箱外执行；DEC-055 对旧 Editor readiness 的限制、历史 evidence gap 与 waivers 不变。这项例外不授权重跑或关闭旧 readiness，不等于新增模型兼容／质量已经通过。

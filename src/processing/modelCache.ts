@@ -1,4 +1,4 @@
-import { checkCancelled, FT_MODELS, ProcessingError } from './modelManifest';
+import { checkCancelled, ProcessingError } from './modelManifest';
 import { Sha256 } from './sha256';
 import { databaseGet, databasePut, yieldTask } from './storage';
 
@@ -9,7 +9,8 @@ export async function verifyBlob(blob:Blob,bytes:number,checksum:string,signal:A
     checkCancelled(signal);
     if(hash.hex()!==checksum)throw new ProcessingError('model-checksum-mismatch','Model checksum mismatch.');
 }
-export async function loadModel(model:typeof FT_MODELS[number],signal:AbortSignal,
+export interface ModelArtifact { bytes:number;sha256:string;url:string }
+export async function loadModel(model:ModelArtifact,signal:AbortSignal,
     progress:(phase:'model-download'|'model-verify',done:number,total:number)=>void,
     url=model.url):Promise<{bytes:Uint8Array<ArrayBuffer>;cacheHit:boolean}> {
     const cached=await databaseGet<Blob>('models',model.sha256);

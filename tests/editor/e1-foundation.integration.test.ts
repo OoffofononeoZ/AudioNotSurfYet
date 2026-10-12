@@ -229,6 +229,8 @@ const createControllerHarness = (
 };
 
 class RepeatEngine implements AudioEnginePort {
+    async setAuditionSource() {}
+    setAuditionMuted() {}
     snapshot: PlaybackSnapshot = {
         trackId: 'track-a',
         state: 'paused',

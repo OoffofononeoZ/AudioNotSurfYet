@@ -8,6 +8,13 @@ import type { EditorStemRecord } from '../../src/processing/editorResultReposito
 
 const fixture=path.resolve('tests/fixtures/audio/visualizer-v4-cube-swarm-v1.wav');
 const output=path.resolve(process.env.EDITOR_FT_ARTIFACT_DIR??'artifacts/evals/editor-ft');
+async function sharedPlayback(page:Page){
+    return page.evaluate(async()=>{
+        const moduleUrl='/src/stores/audioSessionStore.ts';
+        const {useAudioSessionStore}=await import(moduleUrl) as {useAudioSessionStore():{playback:import('../../src/types/audio').PlaybackSnapshot;currentEnergy:number}};
+        const store=useAudioSessionStore();return {...store.playback,energy:store.currentEnergy};
+    });
+}
 async function openEditor(page:Page){
     await installFilePickerStub(page);await page.goto('/');await chooseFiles(page,[fixture]);
     await expect(page.locator('#music-bar-container')).toHaveAttribute('data-playback-state','playing',{timeout:30_000});
@@ -36,7 +43,7 @@ test('Editor FT layout and preserved manual editing at narrow, desktop and wide 
     expect(await page.locator('.stem-intro').evaluate(el=>getComputedStyle(el).animationName)).toBe('none');
     await page.getByTestId('editor-separation-tab').focus();await page.keyboard.press('ArrowLeft');
     await expect(page.getByTestId('editor-marking-tab')).toBeFocused();await expect(page.getByTestId('editor-timeline')).toBeVisible();
-    await page.keyboard.press('End');await expect(page.getByTestId('editor-separation-tab')).toBeFocused();
+    await page.keyboard.press('End');await expect(page.getByTestId('editor-transcription-tab')).toBeFocused();
     await page.getByTestId('editor-marking-tab').click();await expect(page.getByTestId('editor-timeline')).toBeVisible();
     await page.getByTestId('add-point-lane').click();await expect(page.locator('[data-testid^="marker-surface-"]').first()).toBeVisible();
     expect(issues).toEqual([]);
@@ -75,9 +82,40 @@ test('Editor runs four original FT models, exports exact WAVs, restores cache an
         for(let at=44;at<bytes.length;at+=4){const value=bytes.readFloatLE(at);if(!Number.isFinite(value)){firstNonFinite=at;break;}if(value!==0)nonzero++;}
         expect(firstNonFinite).toBe(-1);expect(nonzero).toBeGreaterThan(0);
     }
-    const slider=page.getByRole('slider',{name:'人声概览，跳转原曲'});await slider.focus();await slider.press('Home');await slider.press('ArrowRight');
+    const slider=page.getByRole('slider',{name:'人声概览，跳转当前试听'});await slider.focus();await slider.press('Home');await slider.press('ArrowRight');
     await expect(page.getByTestId('editor-current-time')).toContainText('0:01');
     await slider.blur();
+    for(const role of ['drums','bass','other','vocals'])await expect(page.getByTestId(`editor-mute-${role}`)).toHaveAttribute('aria-pressed','false');
+    await page.getByTestId('editor-stem-play').click();
+    await expect.poll(async()=>(await sharedPlayback(page)).audition?.kind).toBe('ft');
+    await expect.poll(async()=>(await sharedPlayback(page)).state).toBe('playing');
+    await expect.poll(async()=>(await sharedPlayback(page)).energy).toBeGreaterThan(0);
+    for(const role of ['drums','bass','other','vocals'])await page.getByTestId(`editor-mute-${role}`).click();
+    await expect.poll(async()=>(await sharedPlayback(page)).energy).toBe(0);
+    await expect.poll(async()=>(await sharedPlayback(page)).state).toBe('playing');
+    await page.getByTestId('editor-stem-play').click();
+    await expect.poll(async()=>(await sharedPlayback(page)).state).toBe('paused');
+    const pausedTime=(await sharedPlayback(page)).currentTimeSeconds;
+    await page.waitForTimeout(200);expect((await sharedPlayback(page)).currentTimeSeconds).toBeCloseTo(pausedTime,3);
+    await slider.focus();await slider.press('Home');await slider.press('ArrowRight');
+    await page.getByTestId('editor-mute-drums').click();
+    await page.getByTestId('editor-stem-play').click();
+    await expect.poll(async()=>(await sharedPlayback(page)).state).toBe('playing');
+    await page.getByTestId('editor-marking-tab').click();
+    await expect.poll(async()=>(await sharedPlayback(page)).audition?.kind).toBe('ft');
+    await expect(page.locator('[data-testid^="point-marker-"]')).toHaveCount(1);
+    await page.getByTestId('editor-separation-tab').click();await page.getByTestId('editor-stem-play').click();
+    await expect.poll(async()=>(await sharedPlayback(page)).state).toBe('paused');
+    await slider.focus();await slider.press('End');await slider.press('ArrowLeft');
+    await page.getByTestId('editor-stem-play').click();
+    await expect.poll(async()=>(await sharedPlayback(page)).state).toBe('playing');
+    await expect.poll(async()=>(await sharedPlayback(page)).currentTimeSeconds,{timeout:10000}).toBeGreaterThan(records[0]!.result.source.descriptor.durationSeconds-0.5);
+    await expect.poll(async()=>(await sharedPlayback(page)).currentTimeSeconds,{timeout:10000}).toBeLessThan(records[0]!.result.source.descriptor.durationSeconds-1.5);
+    await page.getByTestId('editor-stem-play').click();await expect.poll(async()=>(await sharedPlayback(page)).state).toBe('paused');
+    const returnPosition=(await sharedPlayback(page)).currentTimeSeconds;
+    await page.getByTestId('editor-audition-original').click();
+    await expect.poll(async()=>(await sharedPlayback(page)).audition?.kind).toBe('original');
+    expect((await sharedPlayback(page)).currentTimeSeconds).toBeCloseTo(returnPosition,3);
     for(const width of [390,1280,1920]){await page.setViewportSize({width,height:900});await page.evaluate(()=>scrollTo(0,0));await page.screenshot({path:path.join(output,`${info.project.name}-result-${width}.png`),fullPage:true});}
     const resources=await page.evaluate(()=>(window as unknown as {__editorFtResources:unknown}).__editorFtResources);
     expect(resources).toMatchObject({maxContexts:1});expect((resources as {maxWorkers:number;workers:number}).maxWorkers).toBeLessThanOrEqual(2);
