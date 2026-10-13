@@ -14,7 +14,7 @@ import {
 } from '../support/file-picker';
 import { encodeMonoWav } from '../support/m7-learning-fixture';
 import { createM8ScalarPcm } from '../support/m8-scalar-fixture';
-import { expectAnalyzerMasonry } from '../support/analyzer-masonry';
+import { expectAnalyzerList, readAnalyzerViewport, zoomAnalyzer } from '../support/analyzer-list';
 
 const REPOSITORY_ROOT = path.resolve(import.meta.dirname, '../..');
 const M8_WAV_FIXTURE = path.join(
@@ -62,7 +62,7 @@ test('expands four scalar cards, applies FIFO, and restores the queue', async ({
             .getByRole('button', { name: '展开分析' })
             .click();
     }
-    await expect(page.locator('.analysis-card [aria-expanded="true"]'))
+    await expect(page.locator('.analysis-card .toggle-card[aria-expanded="true"]'))
         .toHaveCount(4);
 
     await chooseFiles(page, [M8_WAV_FIXTURE]);
@@ -90,19 +90,19 @@ test('expands four scalar cards, applies FIFO, and restores the queue', async ({
         .toBeGreaterThan(0);
     const transientFlux = await exactScalar(page, 'spectralFlux');
 
-    await page.getByRole('button', { name: '放大时间轴' }).click();
-    await expect(page.locator('.timeline-toolbar')).toContainText('2.0×');
+    await zoomAnalyzer(page);
+    await expect.poll(async () => (await readAnalyzerViewport(page)).zoom).toBeCloseTo(1.12 ** 6, 10);
     await page.reload();
     await expect(page.locator('[data-feature-id]')).toHaveCount(21);
-    await expect(page.locator('.analysis-card [aria-expanded="true"]'))
+    await expect(page.locator('.analysis-card .toggle-card[aria-expanded="true"]'))
         .toHaveCount(4);
     await expect(page.locator('[data-feature-id="spectralFlux"] [aria-expanded="true"]'))
         .toHaveCount(1);
-    await expect(page.locator('.timeline-toolbar')).toContainText('2.0×');
+    await expect.poll(async () => (await readAnalyzerViewport(page)).zoom).toBeCloseTo(1.12 ** 6, 10);
 
     for (const width of [1_024, 1_280, 1_920]) {
-        const columnCount = (await expectAnalyzerMasonry(page, width)).columns;
-        expect(columnCount).toBe(width === 1_024 ? 1 : 2);
+        const columnCount = (await expectAnalyzerList(page, width)).columns;
+        expect(columnCount).toBe(1);
     }
     console.log(JSON.stringify({
         metric: 'm8-four-card-learning',
@@ -110,7 +110,7 @@ test('expands four scalar cards, applies FIFO, and restores the queue', async ({
         availableFeatures: 21,
         silenceEnergy,
         transientFlux,
-        viewportRestored: '2.0x',
+        viewportRestored: (1.12 ** 6).toFixed(4) + 'x',
         widths: [390, 1024, 1280, 1920],
     }));
     expect(issues).toEqual([]);

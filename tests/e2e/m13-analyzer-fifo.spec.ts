@@ -9,7 +9,7 @@ import {
     chooseFiles,
     installFilePickerStub,
 } from '../support/file-picker';
-import { expectAnalyzerMasonry } from '../support/analyzer-masonry';
+import { expectAnalyzerList } from '../support/analyzer-list';
 
 const REPOSITORY_ROOT = path.resolve(import.meta.dirname, '../..');
 const WAV_FIXTURE = path.join(
@@ -38,7 +38,7 @@ const expand = async (page: Page, featureId: string) => {
 };
 
 const expandedFeatureIds = (page: Page) => page.locator(
-    '.analysis-card:has([aria-expanded="true"])',
+    '.analysis-card:has(.toggle-card[aria-expanded="true"])',
 ).evaluateAll((elements) => elements.map((element) =>
     (element as HTMLElement).dataset.featureId));
 
@@ -53,17 +53,17 @@ test('keeps all 21 cards stable and applies an atomic four-item FIFO', async ({ 
     await expect(page.locator('.analysis-card canvas')).toHaveCount(0);
     await expect(page.locator('.analysis-card select')).toHaveCount(0);
     await expect(cards.getByRole('button', { name: '移除' })).toHaveCount(0);
-    await expect(page.locator('.timeline-toolbar')).toContainText(
-        '0/4 张展开卡',
+    await expect(page.locator('.analyzer-status')).toContainText(
+        '0/4 项展开分析',
     );
-    await expect(page.locator('.timeline-toolbar')).toContainText(
-        '展开卡片开始分析',
+    await expect(page.locator('.analyzer-status')).toContainText(
+        '展开分析开始分析',
     );
 
     for (const featureId of FEATURE_IDS.slice(0, 4)) {
         await expand(page, featureId);
     }
-    await expect(page.locator('.analysis-card [aria-expanded="true"]'))
+    await expect(page.locator('.analysis-card .toggle-card[aria-expanded="true"]'))
         .toHaveCount(4);
     await expect(page.locator('.analysis-card canvas')).toHaveCount(8);
 
@@ -79,7 +79,7 @@ test('keeps all 21 cards stable and applies an atomic four-item FIFO', async ({ 
         '.toggle-card[aria-expanded="true"]',
     ))
         .toHaveCount(1);
-    await expect(page.locator('.analysis-card [aria-expanded="true"]'))
+    await expect(page.locator('.analysis-card .toggle-card[aria-expanded="true"]'))
         .toHaveCount(4);
     await expect(page.locator('.analysis-card canvas')).toHaveCount(8);
 
@@ -89,9 +89,9 @@ test('keeps all 21 cards stable and applies an atomic four-item FIFO', async ({ 
     await expand(page, FEATURE_IDS[0]);
     expect(await expandedFeatureIds(page)).toEqual([
         FEATURE_IDS[0],
-        FEATURE_IDS[2],
-        FEATURE_IDS[3],
         FEATURE_IDS[4],
+        FEATURE_IDS[3],
+        FEATURE_IDS[2],
     ]);
 
     await page.evaluate((featureIds) => {
@@ -101,13 +101,13 @@ test('keeps all 21 cards stable and applies an atomic four-item FIFO', async ({ 
             )?.click();
         }
     }, FEATURE_IDS.slice(5, 15));
-    await expect(page.locator('.analysis-card [aria-expanded="true"]'))
+    await expect(page.locator('.analysis-card .toggle-card[aria-expanded="true"]'))
         .toHaveCount(4);
     await expect(page.locator('.analysis-card canvas')).toHaveCount(8);
 
     for (const width of [390, 1_024, 1_280, 1_920]) {
-        const geometry = await expectAnalyzerMasonry(page, width);
-        expect(geometry.columns).toBe(width >= 1_280 ? 2 : 1);
+        const geometry = await expectAnalyzerList(page, width);
+        expect(geometry.columns).toBe(1);
     }
     console.log(JSON.stringify({
         metric: 'm13-fifo-geometry',
@@ -194,7 +194,7 @@ test('starts analysis only after expansion, restores FIFO, and resets details', 
         '.toggle-card[aria-expanded="true"]',
     ))
         .toHaveCount(1);
-    await expect(page.locator('.analysis-card [aria-expanded="true"]'))
+    await expect(page.locator('.analysis-card .toggle-card[aria-expanded="true"]'))
         .toHaveCount(4);
     console.log(JSON.stringify({
         metric: 'm13-lazy-analysis-restore',

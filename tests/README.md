@@ -39,8 +39,8 @@ M3–M14 不建设 CI。下列命令当前均为本地门禁；正式证据要�
 | `npm run test:m9:integration` | 四种混合 shape、cache codec、exact cursor、stale/cancel/quota 与四张累计卡回归 |
 | `npm run test:m10:unit` | 21 项集合、direct Meyda、24/1024 维、零值、相位关系、结构 codec 与按固定容差校验的 golden |
 | `npm run test:m10:integration` | Loudness/Complex 混合 shape、cache round-trip、exact cursor、stale/cancel/quota 与四卡持久化 |
-| `npm run test:m12:unit` | Analyzer 最短列纯布局的单/双列、左列平局、动态重算、容器高度与无重叠 |
-| `npm run test:m13:unit` | FIFO reducer、0–4 项、第五项淘汰、重开年龄、唯一性、M12 masonry 与 V1 adapter |
+| `npm run test:m12:unit` | Analyzer 置顶区高度上下限、短内容优先和用户比例裁剪 |
+| `npm run test:m13:unit` | FIFO reducer、0–4 项、第五项淘汰、重开年龄、唯一性、置顶高度模型与 V1 adapter |
 | `npm run test:m13:integration` | V1 双向兼容、串行 workspace 保存、revision guard、quota 与 M13 Coordinator cache/generation |
 | `npm run test:e1:unit` | Editor JSON V1 初始工程、canonical round-trip、微秒规范化与 strict validator |
 | `npm run test:e1:integration` | playback/analysis lease、独立 IndexedDB、同/异歌草稿、原子导入和 quota 后内存保留 |
@@ -69,9 +69,9 @@ M3–M14 不建设 CI。下列命令当前均为本地门禁；正式证据要�
 | `npm run test:e2e:m11:chrome` | Chrome 三格式/分析/恢复、键盘/焦点/reduced motion、多视口、quota 和 20 次 WebGL/RAF 生命周期 |
 | `npm run test:e2e:m11:edge` | 使用真实 Edge 执行 M11 专项 hardening 场景 |
 | `npm run test:e2e:m11` | 顺序执行真实 Chrome 与 Edge 的 M11 专项场景 |
-| `npm run test:e2e:m12:chrome` | Chrome 执行 Analyzer 顶部精简、最短列几何、动态高度、状态保留与 Observer/RAF 清理 |
-| `npm run test:e2e:m12:edge` | 使用真实 Edge 执行同一 M12 瀑布流专项套件 |
-| `npm run test:e2e:m12` | 顺序执行真实 Chrome 与 Edge 的 M12 瀑布流专项套件 |
+| `npm run test:e2e:m12:chrome` | Chrome 执行 Analyzer 单列行、说明折叠、renderer 隔离和 Observer 清理 |
+| `npm run test:e2e:m12:edge` | 使用真实 Edge 执行同一 Analyzer 单列/说明/资源专项套件 |
+| `npm run test:e2e:m12` | 顺序执行真实 Chrome 与 Edge 的 Analyzer 单列/说明/资源专项套件 |
 | `npm run test:e2e:m13:chrome` | Chrome 执行 21 卡、懒挂载、FIFO、快速切换、V1 恢复和四视口专项 |
 | `npm run test:e2e:m13:edge` | 使用真实 Edge 执行同一 M13 全卡/FIFO 专项套件 |
 | `npm run test:e2e:m13` | 顺序执行真实 Chrome 与 Edge 的 M13 专项套件 |
@@ -196,7 +196,7 @@ M3–M14 不建设 CI。下列命令当前均为本地门禁；正式证据要�
 - `tests/audio/`：M4 AudioEngine fake clock 与 AudioSessionService/store 集成。
 - `tests/persistence/`：M5 原生 IndexedDB adapter、schema 和事务故障注入。
 - `tests/worker/`：M3 harness、M6 基线、M8 scalar/Flux、M9 vector/waveform 与 M10 structured 产品 workerCore 合约测试。
-- `tests/analysis/`：direct-Meyda extractor、committed golden、M6 platform、M7 viewport/学习、M8 scalar/Flux、M9 vector/waveform、M10 structured、M12 masonry 与 M13 FIFO/V1 adapter。
+- `tests/analysis/`：direct-Meyda extractor、committed golden、M6 platform、M7 viewport/学习、M8 scalar/Flux、M9 vector/waveform、M10 structured、置顶高度模型与 M13 FIFO/V1 adapter。
 - `tests/fixtures/`：确定性生成器、短格式文件、许可、manifest 与重建校验。
 - `tests/e2e/`：由 Playwright 对真实 Chrome/Edge channel 执行的浏览器场景；只有实际命令通过后才声明对应浏览器证据。
 - `tests/docs/`：生命周期文档和特征计数检查。
@@ -221,9 +221,9 @@ M10 浏览器测试运行时生成 Git 忽略的 `m10-structures-v1.wav`，版�
 
 M11 专项浏览器测试在同一文件上分别运行真实 Chrome/Edge，覆盖三格式队列切换、Analyzer 结果与刷新恢复，键盘播放/进度/Analyzer seek、可见焦点、reduced motion、390/1024/1280/1920 几何、quota 后内存播放，以及 20 次 Home/Analyzer 生命周期中的 WebGL context 与 RAF 上界。`test:e2e:edge` 还会在 Edge 上执行 M3–M10 全部回归。OPFS handle 自动化与原生 OS picker 权限提示继续分开；当前候选的 Edge 原生权限与最终人工加固已由 owner 于 2026-08-26 签字，相关实现或浏览器变化后仍须重做人工矩阵。
 
-M12 浏览器测试分别在真实 Chrome/Edge 运行，当前作为 M13 相邻回归覆盖顶部精简、状态 `aria-live`、390/1024 单列与 1280/1920 双列、动态重排、焦点/Canvas/zoom/seek 保留，以及 10 次 Home/Analyzer 循环中的 masonry/card ResizeObserver 和 RAF 清理。M7–M11 的旧 Grid 断言已统一改为实际 `DOMRect`、唯一横坐标、容器包围、无重叠和最短列几何。
+M12 浏览器命令当前覆盖真实 Chrome/Edge 单列、说明折叠和十次路由资源释放。M7–M11 几何断言统一检查单列、完整21项、原列表默认顺序和无横向溢出，详情见 [当前 Analyzer 契约](../docs/context/analyzer-list.md)。
 
-M13 浏览器测试固定断言 21 张卡按 `FEATURE_IDS` 保持 DOM/键盘/读屏顺序；默认 0 Canvas，展开才分析；第五张原子淘汰 FIFO 队首且焦点留在目标按钮；快速连续切换后仍为四张/八 Canvas。真实 Chrome/Edge 均覆盖四档视口、V1 队列恢复、`details` 重开复位、无 select/remove 与 console error/warn。
+M13 浏览器测试断言21项完整唯一、默认0 Canvas、展开才分析、四项FIFO/八Canvas、刷新恢复和details重开复位。置顶区倒序FIFO，未活动项固定默认顺序；M14浏览器命令当前覆盖可调高度、阅读锚点、归位和图表内滚轮缩放。
 
 E1 Chrome 测试使用注入 picker 返回浏览器 OPFS `FileSystemFileHandle`，覆盖 Header 当前歌曲、播放列表指定歌曲、“去编辑”Tooltip、MusicBar 条件隐藏、repeat-one 控件、JSON 导出、刷新暂停恢复、异歌草稿冲突、无效导入隔离和空/无效路由。它不替代原生 OS picker、浏览器离页提示或 Edge；这些缺口按 Editor eval plan 留给 owner/E6 补偿门禁。
 

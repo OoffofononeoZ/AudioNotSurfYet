@@ -8,7 +8,7 @@ import {
     chooseFiles,
     installFilePickerStub,
 } from '../support/file-picker';
-import { expectAnalyzerMasonry } from '../support/analyzer-masonry';
+import { expectAnalyzerList } from '../support/analyzer-list';
 
 const REPOSITORY_ROOT = path.resolve(import.meta.dirname, '../..');
 const AUDIO_FIXTURES = path.join(REPOSITORY_ROOT, 'tests/fixtures/audio');
@@ -182,7 +182,7 @@ test('keeps keyboard, focus, reduced motion and responsive geometry usable', asy
         musicBarInsideViewport: boolean;
     }> = {};
     for (const width of [390, 1_024, 1_280, 1_920]) {
-        const masonry = await expectAnalyzerMasonry(page, width);
+        const masonry = await expectAnalyzerList(page, width);
         geometries[width] = await page.evaluate((columns) => {
             const content = document.querySelector<HTMLElement>(
                 '.app-content',
@@ -224,7 +224,7 @@ test('keeps keyboard, focus, reduced motion and responsive geometry usable', asy
             musicBarInsideViewport: true,
         },
         1920: {
-            columns: 2,
+            columns: 1,
             documentOverflow: 0,
             navigationInset: 216,
             musicBarInsideViewport: true,

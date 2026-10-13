@@ -20,7 +20,7 @@ AudioNotSurfYet 是 Vue / TypeScript / Vite 浏览器音频工作台；当前目
 | 子系统 | 当前状态与边界 |
 | --- | --- |
 | 应用外壳与首页 | DEC-076：可收起侧边栏、窄屏隐藏导航和歌曲详情首页；布局及接口见 [应用外壳契约](app-shell.md)。 |
-| Analyzer | M1–M14 历史切片已完成；M14 的 21 卡、FIFO 与独立排序基线获批，readiness 为 `Ready with waivers`。证据绑定历史候选。 |
+| Analyzer | DEC-077：单列、FIFO 常驻区、可调高度与图表内滚轮缩放，见 [当前列表契约](analyzer-list.md)。M1–M14 readiness 与 canonical 继续绑定历史候选。 |
 | Editor | E1–E9 canonical 与适用人工门禁已批准。E10 按 DEC-057 开放单 lane/class 小节批量编辑与站内离页 dialog；E9 revised 29/29 保持历史身份，原 readiness 候选为 `pre-E10`。 |
 | Visualizer | V1–V6 canonical 与适用人工门禁已批准，post-V6 viewport 修订已有 Chrome/Edge 专项证据。DEC-058 的原生全屏复用同一 Canvas/transport，不创建 V7；原 readiness 候选为 `pre-fullscreen`，交互与视觉由 owner 审阅。新场景仍须完整输入校验和确定 Scene Contract 审批。 |
 | FT 与处理链 | P0-D 已完成；当前 FT 功能及汇总听感/长曲耗时按 DEC-074 接受。四原图与官方 ORT JSEP 的历史双浏览器数值门禁保留；完整 P1 正式关闭仍有独立证据缺口。 |

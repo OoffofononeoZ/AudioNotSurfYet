@@ -8,7 +8,7 @@
 | --- | --- | --- |
 | `/` | `Home.vue` | 共享能量光线背景、当前歌曲大字号 metadata/封面与展示按钮占位 |
 | `/comingsoon` | `ComingSoon.vue` | 通用空占位，不再作为 Visualizer 入口 |
-| `/analyzer` | `Analyzer.vue` | Canvas 点阵背景和静态 Meyda 数据入口 |
+| `/analyzer` | `Analyzer.vue` | 单列特征行、FIFO常驻分析区与可调高度；见 [列表契约](../../../docs/context/analyzer-list.md) |
 | `/editor/:trackId?` | `Editor.vue` | E1–E9 canonical 已批准；E10 小节批量编辑与离页对话框修订进行中 |
 | `/visualizer/:trackId?` | `Visualizer.vue` | V1–V6 canonical 与人工门禁均已批准 |
 | `/testlands` | `TestLands.vue` | 试验页面，不应当作生产契约 |

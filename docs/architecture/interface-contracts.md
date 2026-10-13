@@ -428,7 +428,7 @@ Invariants:
 
 - `initialized: false` 表示从未保存过工作区，Analyzer 首次进入时建立空活动队列。
 - `initialized: true` 且 `activeFeatureQueue: []` 是有效的已保存空工作区，刷新后必须保持为空。
-- `featureOrder` 必须恰好包含全部 21 个唯一 `FEATURE_IDS`；顺序只表示卡片逻辑位置，不表示 FIFO 年龄。
+- `featureOrder` 保留为 V1 的21项完整唯一数组；Analyzer 初始化规范为默认顺序，显示顺序由默认原列表与倒序 FIFO 派生。
 - `AudioSessionService.updateAnalysisWorkspace(...)` 先用不可变快照更新内存，再把 queue 映射为 V1 cards 并保存完整 feature order；只有最新 revision 可以发布 `ready`/`not-persisted`。
 - runtime validation 接受 0–4 个唯一 feature；viewport 所有值有限、`0 <= start < end`、`zoom > 0`。
 
@@ -448,7 +448,7 @@ Invariants:
 - `0 <= start < end <= track.duration`.
 - `cursorSeconds` 裁剪到 track duration，但可以在当前 viewport 之外。
 - 所有卡读取同一对象；renderer 不保存私有 zoom。
-- zoom 交互范围为 1–64；平移步长为当前窗口 25%，换歌时 viewport 裁剪到新 duration。
+- zoom 范围为1–64；Analyzer 提供图表内指针锚点滚轮缩放，旧25%平移入口移除；换歌时viewport裁剪到新duration。
 - `cursorSeconds` 始终来自播放快照，不进入 `PersistedSessionV1`。
 
 ## PersistedSessionV1
@@ -487,17 +487,11 @@ Persistence rules:
 - `activeCards` schema 不变；其 slot 只承载 FIFO 索引。旧记录恢复时按 slot 排序，重复、未知或超过四项继续由严格 validator 拒绝。
 - `featureOrder` 为 V1 可选扩展：缺失代表旧会话并恢复 `FEATURE_IDS`；存在时必须是 21 项完整唯一 permutation。新版本保存始终写入，非法字段使 session 无效。
 
-## Analyzer card order interaction
+## Analyzer row interaction
 
-```ts
-type FeatureOrderAction = 'up' | 'down' | 'first' | 'last'
-type DropEdge = 'before' | 'after'
-```
-
-- 纯 reducer 接收完整 order、source feature、target feature/edge 或 action，返回新的完整 order；无效输入抛出，边界/no-op 返回等值副本且不触发持久化。
-- `MeydaCard` 只新增命名 header-action slot；既有 props 与 `toggle`/`seek` emit 不变。Analyzer 拥有 handle、popup、pointer state、hit-test、live text 和持久化。
-- wrapper 继续以 feature ID 为 key，并保留 `data-slot=featureId`；`data-order-index` 是一基位置。drop 后 DOM 顺序与该 index、屏幕阅读顺序和 masonry 输入一致。
-- 一次只允许一个 popup 或 drag；排序提交保持 source handle 焦点。排序不发出 analysis consumer message。
+- `MeydaCard`新增受控`descriptionExpanded`，保留`toggle`/`seek`，增加`toggle-description`与`zoom(factor, anchorSeconds)`。
+- 顶部按队列倒序、原列表按FEATURE_IDS排除活动项渲染，每个feature只有一个实例；手动顺序动作、拖拽排序和header-action slot已移除。
+- 高度/说明状态为页面临时状态，V1结构不变；比例、键盘、取消和自然高度边界见 [当前列表契约](../context/analyzer-list.md)。
 
 ## Session Repository Results
 

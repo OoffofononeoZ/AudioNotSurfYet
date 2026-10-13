@@ -21,7 +21,6 @@ import type {
 import { useAudioSessionStore } from '../../src/stores/audioSessionStore';
 import {
     defaultFeatureOrder,
-    moveFeatureOrder,
 } from '../../src/analysis/featureOrder';
 import type { PlaybackSnapshot } from '../../src/types/audio';
 import {
@@ -232,11 +231,7 @@ describe('M7 analysis workspace integration', () => {
         expect(harness.store.analysisWorkspace.featureOrder)
             .toEqual(defaultFeatureOrder());
 
-        const customOrder = moveFeatureOrder(
-            defaultFeatureOrder(),
-            'buffer',
-            'first',
-        );
+        const customOrder = defaultFeatureOrder().reverse();
         await harness.service.updateAnalysisWorkspace({
             activeFeatureQueue: ['rms', 'chroma'],
             featureOrder: customOrder,
@@ -284,11 +279,7 @@ describe('M7 analysis workspace integration', () => {
         });
         const second = harness.service.updateAnalysisWorkspace({
             activeFeatureQueue: ['chroma', 'buffer'],
-            featureOrder: moveFeatureOrder(
-                defaultFeatureOrder(),
-                'buffer',
-                'first',
-            ),
+            featureOrder: defaultFeatureOrder().reverse(),
             viewport: { startSeconds: 1, endSeconds: 3, zoom: 2 },
         });
 

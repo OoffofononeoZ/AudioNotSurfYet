@@ -16,7 +16,7 @@ import {
     createM7LearningPcm,
     encodeMonoWav,
 } from '../support/m7-learning-fixture';
-import { expectAnalyzerMasonry } from '../support/analyzer-masonry';
+import { expectAnalyzerList, readAnalyzerViewport, zoomAnalyzer } from '../support/analyzer-list';
 
 const REPOSITORY_ROOT = path.resolve(import.meta.dirname, '../..');
 const LEARNING_WAV_FIXTURE = path.join(
@@ -101,8 +101,8 @@ test('starts with 21 collapsed cards and shares seek/zoom across three expanded 
             .getByRole('button', { name: '展开分析' })
             .click();
     }
-    await expect(page.locator('.timeline-toolbar')).toContainText(
-        '3/4 张展开卡',
+    await expect(page.locator('.analyzer-status')).toContainText(
+        '3/4 项展开分析',
     );
 
     await chooseFiles(page, [LEARNING_WAV_FIXTURE]);
@@ -189,8 +189,8 @@ test('starts with 21 collapsed cards and shares seek/zoom across three expanded 
         && Math.abs(entry.backingHeight - entry.cssHeight * entry.dpr) <= 1))
         .toBe(true);
 
-    await page.getByRole('button', { name: '放大时间轴' }).click();
-    await expect(page.locator('.timeline-toolbar')).toContainText('2.0×');
+    await zoomAnalyzer(page);
+    await expect.poll(async () => (await readAnalyzerViewport(page)).zoom).toBeCloseTo(1.12 ** 6, 10);
 
     const rmsPlot = page.locator('[data-feature-id="rms"] .plot');
     await page.getByTestId('toggle-playback').click();
@@ -245,9 +245,9 @@ test('starts with 21 collapsed cards and shares seek/zoom across three expanded 
         beforeKeyboard,
     );
 
-    await expectAnalyzerMasonry(page, 1_024);
-    const columns1280 = (await expectAnalyzerMasonry(page, 1_280)).columns;
-    const columns1920 = (await expectAnalyzerMasonry(page, 1_920, 1_080))
+    await expectAnalyzerList(page, 1_024);
+    const columns1280 = (await expectAnalyzerList(page, 1_280)).columns;
+    const columns1920 = (await expectAnalyzerList(page, 1_920, 1_080))
         .columns;
 
     console.log(JSON.stringify({
@@ -269,12 +269,12 @@ test('persists the empty FIFO and a subsequently expanded feature', async ({ pag
     const issues = captureBrowserIssues(page);
     await page.goto('/analyzer');
     await expect(page.locator('[data-feature-id]')).toHaveCount(21);
-    await expect(page.locator('.analysis-card [aria-expanded="true"]'))
+    await expect(page.locator('.analysis-card .toggle-card[aria-expanded="true"]'))
         .toHaveCount(0);
 
     await page.reload();
     await expect(page.locator('[data-feature-id]')).toHaveCount(21);
-    await expect(page.locator('.analysis-card [aria-expanded="true"]'))
+    await expect(page.locator('.analysis-card .toggle-card[aria-expanded="true"]'))
         .toHaveCount(0);
 
     await page.locator('[data-feature-id="rms"]')
@@ -331,7 +331,7 @@ test('isolates a single-card Canvas context failure', async ({ page }) => {
     expect(issues).toEqual([]);
 });
 
-test('keeps the shared toolbar inside the content area and player overlays above it', async ({ page }) => {
+test('keeps Analyzer status and height controls below Settings and player overlays above content', async ({ page }) => {
     const issues = captureBrowserIssues(page);
     await page.setViewportSize({ width: 1280, height: 720 });
     await page.goto('/analyzer');
@@ -339,23 +339,23 @@ test('keeps the shared toolbar inside the content area and player overlays above
         .getByRole('button', { name: '展开分析' })
         .click();
 
-    await page.locator('.analyzer-content').evaluate((element) => {
+    await page.locator('.original-list').evaluate((element) => {
         element.scrollTop = 360;
     });
     await expect.poll(async () => page.evaluate(() => {
         const toolbar = document.querySelector<HTMLElement>(
-            '.timeline-toolbar',
+            '.analyzer-status',
         );
         if (!toolbar) return Number.POSITIVE_INFINITY;
         return Math.abs(
             toolbar.getBoundingClientRect().top
-            - 8,
+            - 64,
         );
     })).toBeLessThanOrEqual(1);
 
     const layers = await page.evaluate(() => ({
         toolbar: Number(getComputedStyle(
-            document.querySelector<HTMLElement>('.timeline-toolbar')!,
+            document.querySelector<HTMLElement>('.analyzer-page')!,
         ).zIndex),
         navigation: Number(getComputedStyle(
             document.querySelector<HTMLElement>('#app-sidebar')!,
@@ -385,7 +385,7 @@ test('keeps the shared toolbar inside the content area and player overlays above
     await page.getByTestId('toggle-queue').click();
     await page.waitForTimeout(400);
 
-    const zoomButton = page.getByRole('button', { name: '放大时间轴' });
+    const zoomButton = page.getByTestId('analyzer-height-handle');
     await zoomButton.hover();
     const box = await zoomButton.boundingBox();
     if (!box) throw new Error('Zoom button geometry missing.');
@@ -570,21 +570,15 @@ test('keeps the 15-minute M7 workspace responsive and cancellable', async ({ pag
             }
             durations.push(performance.now() - started);
         }
-        const zoom = document.querySelector<HTMLButtonElement>(
-            '[aria-label="放大时间轴"]',
-        )!;
-        const beforeZoom = zoom.disabled;
-        const zoomStarted = performance.now();
-        zoom.click();
-        while (
-            zoom.disabled === beforeZoom
-            && performance.now() - zoomStarted < 1_000
-        ) {
-            await new Promise<void>((resolve) =>
-                requestAnimationFrame(() => resolve()));
-            break;
+        const plot = document.querySelector<HTMLElement>('.plot')!;
+        const beforeZoom = plot.dataset.zoom;
+        const started = performance.now();
+        const rect = plot.getBoundingClientRect();
+        plot.dispatchEvent(new WheelEvent('wheel', { deltaY: -120, clientX: rect.left + 100, bubbles: true, cancelable: true }));
+        while (plot.dataset.zoom === beforeZoom && performance.now() - started < 1000) {
+            await new Promise<void>(resolve => requestAnimationFrame(() => resolve()));
         }
-        durations.push(performance.now() - zoomStarted);
+        durations.push(performance.now() - started);
         return durations;
     });
     expect(feedbackDurations.every((duration) => duration <= 100))

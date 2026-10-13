@@ -12,9 +12,9 @@ owner 于 2026-10-13 批准本页方案并要求实现（DEC-076）。本次是�
 - `--app-sidebar-inset` 为桌面占位、窄屏 0；路由和 Editor 浮层控件共用该边界。Teleport 的 Canvas 和背景仍保持窗口级契约。
 - MusicBar 位于内容宽度容器之外，固定按整个窗口计算：长方形模式横跨 100% 宽度，类椭圆形两侧沿用既有间隙。侧栏展开/收起不改变播放器宽度；播放列表也按窗口边界裁切。
 - 播放器及其弹层位于普通应用 UI 最上层（100/110），覆盖左侧导航（40）、遮罩（39）和窗口级分析浮层（80–86）。窄屏导航不进入浏览器 modal top layer，避免阻断播放器；业务模态确认仍由其原生 dialog 管理。
-- 桌面页面顶部间距为 12px，Analyzer 工具栏初始顶部 24px、sticky 顶部 8px；窄屏给展开按钮留位，页面顶部 64px、sticky 顶部 60px。
+- Analyzer 页面顶部保留64px安全留白，内容和手柄位于Settings与MusicBar之间；其他页面保留既有顶部布局。
 - `.app-content` 是命名为 `app-workspace` 的宽度容器。Visualizer 在可用内容宽度 `<1280px` 时使用既有互斥抽屉，其他情况三栏；支持的 `>=1024px` 浏览器视口仍保持单个 `100dvh`，`<1024px` 仍不承诺移动端工作区支持。
-- Analyzer 按实际 masonry 容器宽度选择列数：`>=1232px` 两列，否则一列；间距保持 18px。侧栏切换由现有 ResizeObserver/RAF 重测，不重建卡片、Canvas、details 或分析消费者。
+- Analyzer 始终单列，顶部常驻区支持手柄调整高度，原列表独立滚动；见 [Analyzer 列表契约](analyzer-list.md)。侧栏变化重测说明和图表，不重建未转移的活动行或分析消费者。
 - 修改的可见滚动容器使用 `.app-scrollbar`。Sidebar media listener、导航订阅、背景 ResizeObserver 及既有资源按所属模块释放。
 
 ## 首页内容
@@ -28,7 +28,7 @@ owner 于 2026-10-13 批准本页方案并要求实现（DEC-076）。本次是�
 
 ## 验证入口
 
-日常验证使用 app shell/smoke、Analyzer masonry、Editor compact/leave 与 Visualizer viewport 专项，并检查 Chrome/Edge 的 390、1024、1280、1920px 视口。重点是导航占位、焦点、取消离页、实时 metadata/封面、播放样式及重排时组件身份；历史 canonical/evidence 保持原候选语境。
+日常验证使用 app shell/smoke、Analyzer单列/置顶区、Editor compact/leave 与 Visualizer viewport 专项，并检查 Chrome/Edge 的 390、1024、1280、1920px 视口。重点是导航占位、焦点、取消离页、实时 metadata/封面、播放样式及重排时组件身份；历史 canonical/evidence 保持原候选语境。
 
 2026-10-13 日常验证：最终修订后的五个界面专项 Chrome/Edge 各 20/20 通过，包含右上角纯图标设置、播放器独立宽度及窄屏导航上方的实际命中检查。跨列拖动专项双浏览器通过，选取的播放/恢复、导航层级、键盘重排与 FIFO 资源相邻检查通过。类型检查、技能入口/地图同步、仓库及文档检查通过；本次复用本地 5173 服务和指定浏览器安装路径，不生成正式 canonical/readiness。
 
