@@ -53,7 +53,7 @@ const bodyId = computed(() => 'analysis-card-' + props.featureId + '-body');
 </script>
 
 <style scoped>
-.analysis-card { position: relative; min-width: 0; padding: 16px 8px; color: var(--ink); }
+.analysis-card { position: relative; min-width: 0; padding: 16px clamp(16px, 4%, 64px); color: var(--ink); }
 .analysis-card::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 1px;
     background: linear-gradient(90deg, #0000, var(--main-color), #0000); pointer-events: none; }
 .card-header { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
