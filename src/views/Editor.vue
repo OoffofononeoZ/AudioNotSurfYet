@@ -78,7 +78,6 @@
                                 {{ snapshot.project.track.artist || 'unknown' }} ·
                                 {{ formatTime(playback.durationSeconds) }}
                             </span>
-                            <span class="toolbar-help">不修改原音频，只保存时间标注工程。</span>
                         </div>
                         <p class="persistence-state" :data-state="snapshot.persistence" aria-live="polite">
                             <span class="toolbar-state">{{ stateLabel }}</span>
@@ -122,7 +121,7 @@
                         <button id="editor-separation-tab" type="button" role="tab" aria-controls="editor-separation-panel" :aria-selected="workspace === 'separation'" :tabindex="workspace === 'separation' ? 0 : -1" data-testid="editor-separation-tab" @click="workspace = 'separation'">音轨分离 <span class="workspace-new">FT</span></button>
                         <button id="editor-transcription-tab" type="button" role="tab" aria-controls="editor-transcription-panel" :aria-selected="workspace === 'transcription'" :tabindex="workspace === 'transcription' ? 0 : -1" data-testid="editor-transcription-tab" @click="workspace = 'transcription'">自动标记</button>
                     </div>
-                    <span class="workspace-context">{{ workspace === 'marking' ? '时间标记 · 节拍地图' : workspace === 'separation' ? '四轨波形 · 能量 · WAV导出' : '模型候选 · 检查 · 应用' }}</span>
+                    <span v-if="workspace !== 'separation'" class="workspace-context">{{ workspace === 'marking' ? '时间标记 · 节拍地图' : '模型候选 · 检查 · 应用' }}</span>
                 </nav>
                 <div id="editor-marking-panel" v-show="workspace === 'marking'" role="tabpanel" aria-labelledby="editor-marking-tab">
                 <EditorTimeline
@@ -812,18 +811,11 @@ onBeforeUnmount(() => {
 }
 
 .track-meta,
-.toolbar-help,
 .time-readout,
 .persistence-state {
     color: var(--body);
     font-size: .78rem;
     white-space: nowrap;
-}
-
-.toolbar-help {
-    overflow: hidden;
-    color: var(--mute);
-    text-overflow: ellipsis;
 }
 
 .persistence-state {
@@ -937,9 +929,6 @@ select:focus-visible {
         flex-wrap: wrap;
     }
 
-    .toolbar-help {
-        display: none;
-    }
 
     .persistence-state {
         width: 100%;
