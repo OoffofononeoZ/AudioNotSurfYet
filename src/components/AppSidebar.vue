@@ -10,9 +10,9 @@
         class="app-sidebar" :class="{ 'is-collapsed': collapsed }" aria-label="应用导航"
         :data-collapsed="collapsed" @close="mobileOpen = false">
         <div class="sidebar-brand-row">
-            <router-link to="/" class="sidebar-brand" aria-label="AUDIOSURF" title="首页">
-                <svg aria-hidden="true"><use href="/icons.svg#nav-home" /></svg>
-                <span v-if="!collapsed">AUDIOSURF</span>
+            <router-link v-if="!collapsed" to="/" class="sidebar-brand" aria-label="AUDIOSURF" title="首页">
+                <span class="sidebar-icon"><svg aria-hidden="true"><use href="/icons.svg#nav-home" /></svg></span>
+                <span>AUDIOSURF</span>
             </router-link>
             <button type="button" class="sidebar-toggle" :aria-label="toggleLabel"
                 :title="toggleLabel" :aria-expanded="isNarrow ? mobileOpen : !collapsed"
@@ -28,7 +28,7 @@
                 class="sidebar-link" :class="{ 'is-active': item.active }"
                 :aria-current="item.active ? 'page' : undefined" :aria-label="item.label"
                 :title="collapsed ? item.label : undefined" :data-testid="item.testId">
-                <svg aria-hidden="true"><use :href="`/icons.svg#${item.icon}`" /></svg>
+                <span class="sidebar-icon"><svg aria-hidden="true"><use :href="`/icons.svg#${item.icon}`" /></svg></span>
                 <span v-if="!collapsed">{{ item.label }}</span>
             </router-link>
         </nav>
@@ -114,15 +114,16 @@ onUnmounted(() => {
     gap: 12px;
     width: var(--app-sidebar-width);
     height: 100dvh;
-    padding: 20px 12px 16px;
+    padding: 20px 10px 16px;
     border-right: 1px solid var(--divider);
     background: #07100b;
     color: var(--ink);
     font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
     transition: width 180ms ease;
 }
-.sidebar-brand-row { display: flex; align-items: center; justify-content: space-between; gap: 6px; }
-.sidebar-brand { display: flex; align-items: center; gap: 10px; color: var(--ink); text-decoration: none; }
+.sidebar-brand-row { display: flex; align-items: center; justify-content: space-between; gap: 6px; height: 44px; flex: none; }
+.sidebar-brand { display: flex; align-items: center; gap: 12px; color: var(--ink); text-decoration: none; }
+.sidebar-icon { display: grid; place-items: center; width: 44px; height: 44px; flex: none; }
 .sidebar-brand span { font-size: 15px; font-weight: 650; letter-spacing: -.04em; }
 .sidebar-brand svg { width: 26px; height: 26px; color: var(--accent-soft); }
 .sidebar-toggle, .sidebar-opener {
@@ -133,20 +134,23 @@ onUnmounted(() => {
 .sidebar-toggle svg, .sidebar-opener svg { width: 20px; height: 20px; }
 .sidebar-toggle:hover { background: var(--control-hover); color: var(--ink); }
 .sidebar-toggle .is-reversed { transform: rotate(180deg); }
-.sidebar-nav { display: flex; flex-direction: column; gap: 6px; flex: 1; min-height: 0; margin-top: 30px; overflow-y: auto; }
+.sidebar-nav {
+    display: flex; flex-direction: column; gap: 6px; flex: 1; min-height: 0;
+    width: calc(100% + 20px); margin: 30px -10px 0; overflow-x: hidden; overflow-y: auto;
+}
 .sidebar-link {
-    display: flex; align-items: center; flex: none; gap: 14px; min-height: 44px;
-    padding: 10px 12px; border: 0; border-radius: 7px; color: var(--body);
+    display: flex; align-items: center; flex: none; gap: 12px; height: 44px;
+    margin: 0 10px; padding: 0; border: 0; border-radius: 7px; color: var(--body);
     background: transparent; font: inherit; font-size: 13px; text-decoration: none;
     cursor: pointer; white-space: nowrap; text-align: left;
 }
 .sidebar-link svg { width: 22px; height: 22px; flex: none; }
 .sidebar-link:hover { color: var(--ink); background: var(--control-hover); }
 .sidebar-link.is-active { color: var(--accent-soft); background: var(--marker-fill-soft); }
-.is-collapsed { padding-left: 10px; padding-right: 10px; }
-.is-collapsed .sidebar-brand-row { flex-direction: column; gap: 16px; }
-.is-collapsed .sidebar-link { justify-content: center; padding-left: 0; padding-right: 0; }
-.is-collapsed .sidebar-nav { margin-top: 10px; }
+.is-collapsed .sidebar-brand-row { justify-content: flex-start; }
+.is-collapsed .sidebar-toggle { width: 44px; height: 44px; border-radius: 7px; }
+.is-collapsed .sidebar-nav { width: var(--app-sidebar-width); }
+.is-collapsed .sidebar-link { width: 44px; margin-right: 0; }
 .sidebar-opener {
     position: fixed; top: 12px; left: 12px; z-index: var(--layer-navigation);
     width: 36px; height: 36px; border-color: var(--divider); background: var(--surface-1); color: var(--ink);
