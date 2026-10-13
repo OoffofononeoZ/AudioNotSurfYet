@@ -11,6 +11,9 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
+    AnalyzerFeatureDescription: typeof import('./src/components/AnalyzerFeatureDescription.vue')['default']
+    AnalyzerFeatureValues: typeof import('./src/components/AnalyzerFeatureValues.vue')['default']
+    AnalyzerPlot: typeof import('./src/components/AnalyzerPlot.vue')['default']
     AnimatedList: typeof import('./src/components/AnimatedList.vue')['default']
     AppSettingsButton: typeof import('./src/components/AppSettingsButton.vue')['default']
     AppSidebar: typeof import('./src/components/AppSidebar.vue')['default']

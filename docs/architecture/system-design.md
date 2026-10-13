@@ -203,32 +203,17 @@ M8 标量以同一 Hanning frame 的 energy 判断零能量：零能量时全部
 - Amplitude Spectrum：时频热图和游标频谱。
 - Chroma：12 类热图和游标柱图。
 
-Canvas 只画数据、网格、游标和选择态；标题、解释、参数、数值、按钮、状态与可访问替代信息由 DOM 提供。App shell 使用统一 layer contract：Analyzer sticky 桌面位于窗口顶部 8px，MusicBar 与直属弹层高于导航/Analyzer；共享侧边栏占位和窄屏留位见 [应用外壳契约](../context/app-shell.md)；pressed 只表示瞬时按压，精确值表格使用可见的主题滚动条。
+Canvas 只画数据、网格、游标和选择态；标题、解释、参数、数值、按钮、状态与可访问替代信息由 DOM 提供。App shell 使用统一 layer contract：Analyzer 顶部常驻区位于页面安全留白之后，MusicBar 与直属弹层高于导航/Analyzer；共享侧边栏占位和窄屏留位见 [应用外壳契约](../context/app-shell.md)；pressed 只表示瞬时按压，精确值表格使用可见的主题滚动条。
 
-### Analyzer M12 masonry layout
+### Analyzer 当前单列与置顶模型
 
-- Analyzer 不再显示独立的开场标题与说明，分析状态、活动卡数量和持久化提示进入共享时间轴工具栏内的独立 `aria-live` 区域；快速变化的游标与 viewport 文本不进入 live region。
-- 四个 slot 始终按 `0 → 3` 保持稳定 DOM 顺序和组件身份。视觉布局按 slot 顺序逐项放入当前累计高度最短的列；列高相同时选择左列。
-- 实际 masonry 容器宽度小于 1232 CSS px 使用一列，否则两列，最多两列且横纵间距均为 18 CSS px。四个活动卡或空槽都参与同一布局计算。
-- 纯布局函数只接收容器宽度、列数、间距和实际 DOM 高度并返回列宽、坐标与容器高度。`@chenglou/pretext` 继续只用于 TestLands 文本估算，不参与 Analyzer 的 Canvas、错误态或展开表格测量。
-- Analyzer 使用一个容器 `ResizeObserver`、一个共享的 item `ResizeObserver` 和至多一个待执行布局 RAF。换卡、数据/错误状态、`details` 展开和 resize 都重新测量；Observer 回调必须通过 RAF 合并，路由卸载时 disconnect 并取消 RAF。
-- item 只改变绝对定位包装层的宽度和 transform，不移动或重建 `MeydaCard`，因此 Canvas、焦点、`details open` 和键盘/读屏 DOM 顺序保持稳定。重排不使用位移动画。
+DEC-077 替代 M12 masonry 和 M14 手动排序交互，完整行为见 [Analyzer 列表契约](../context/analyzer-list.md)。旧 ADR 与 canonical 保留历史语境。
 
-### Analyzer M13 all-card and FIFO activity model
-
-- Analyzer 按 `FEATURE_IDS` 渲染 21 个稳定 wrapper。M12 placement 输入由四个 slot 改为 21 个 feature ID，断点、gap、最短列、实测高度和单 RAF 规则不变。
-- 运行时 `activeFeatureQueue` 是唯一展开事实源，最多四项且唯一。纯 reducer 在一次响应式提交中完成收起、追加或“移除队首 + 追加目标”，因此 DOM 不出现短暂第五个展开 body。
-- 折叠卡只保留 header、简介和开关。展开 body 才挂载 Canvas、精确值、参数、结构明细及卡片内部 ResizeObserver；收起释放资源并让内部 `details` 下次恢复默认关闭。
-- Coordinator 仍以最多四项的单 job 分析，队列变更沿用 cancel/generation/cache hit/miss/exact cursor 隔离。工作区保存复制不可变 queue/viewport 快照，以串行 promise 链执行并用 revision guard 限制 persistence 状态更新。
-- `PersistedSessionV1.activeCards` 继续作为 V1 carrier：restore 按 slot 排序转 queue，save 按 queue index 转 slot。首次没有持久化工作区时建立空队列；旧会话原有最多四张卡仍按年龄顺序恢复。
-
-### Analyzer M14 accessible card order
-
-- `featureOrder` 是 21 项完整唯一 permutation，独立于 `activeFeatureQueue`。Analyzer 的 keyed `v-for`、DOM/键盘/读屏顺序和 M12 最短列 placement 都读取它；重排由 Vue 移动现有 wrapper，不改变 component、Canvas、焦点或 `<details>` 身份。
-- pointerdown 只在三横句柄建立候选；移动至少 6 CSS px 后进入 drag。capture 保证离开句柄仍收到 move/up；真实卡保留占位，ghost 与前/后 marker 只作视觉反馈，合法 drop 才一次提交。
-- 目标从 masonry item DOMRect 中选择；容器内空隙使用最近矩形，目标上/下半区分别代表 before/after。滚动容器边缘 48 CSS px 使用唯一 drag RAF，速度上限 16 CSS px/frame；pointercancel、lost capture、Escape、blur 与卸载全部取消。
-- 点击/轻触句柄打开单一动作面板，提供 up/down/first/last；Enter/Space 和 `Alt+ArrowUp/Down`、`Alt+Home/End` 提供键盘等价。动作后焦点跟随 keyed handle，独立 polite live region 播报“特征 + 新位置”。工具栏 reset 恢复 `FEATURE_IDS`。
-- 排序只提交 workspace snapshot，不调用 AnalysisCoordinator；FIFO 年龄、Worker generation、cache/exact request、展开状态和播放保持原值。交错 queue/viewport/order 保存继续由串行 promise 与 revision guard 保护。
+- 原列表固定默认顺序，FIFO倒序显示于顶部常驻区；第五项淘汰最早项并归位，描述独立折叠且原文不改写。
+- 两区独立滚动；高度下限40%、自然内容/工作区满高封顶，短内容优先；初始60%，当前页面记住用户比例，支持指针/触控/键盘手柄。
+- 页面持有队列、阅读锚点、说明状态与区间；行负责装配，说明测量、Canvas生命周期和精确值DOM分开。未转移的活动行/表格不重建。
+- 图表内滚轮按鼠标时间锚点同步所有start/end/zoom，保存按RAF合并；Coordinator、lease、cache、generation与串行持久化revision guard保持所有权。
+- 展开才挂载Canvas，收起或离页清理资源；V1 activeCards carrier和featureOrder字段保留，Analyzer初始化将旧顺序规范为FEATURE_IDS。
 
 ## 9. Persistence and Recovery
 

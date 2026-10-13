@@ -1,319 +1,84 @@
 <template>
     <main class="analyzer-page">
-        <DotGridBg />
-        <div ref="analyzerContent" class="analyzer-content app-scrollbar">
-            <section class="timeline-toolbar" aria-label="共享时间轴控制">
-                <div class="toolbar-summary">
-                    <div class="status-row" aria-live="polite">
-                        <span :data-state="analysis.state">
-                            {{ analysisStateLabel }}
-                        </span>
-                        <span>{{ activeFeatureQueue.length }}/4 张展开卡</span>
-                        <span v-if="activeFeatureQueue.length === 0">
-                            展开卡片开始分析
-                        </span>
-                        <span v-if="sessionStore.persistence.state === 'not-persisted'">
-                            当前工作区未持久化
-                        </span>
+        <DotGridBg :style="{ position: 'absolute', inset: '0', opacity: '0.25' }" />
+        <div class="analyzer-content">
+            <div class="analyzer-status" aria-live="polite">
+                <span :data-state="analysis.state">{{ analysisStateLabel }}</span>
+                <span>{{ activeFeatureQueue.length }}/4 项展开分析</span>
+                <span v-if="activeFeatureQueue.length === 0">展开分析开始分析</span>
+                <span v-if="sessionStore.persistence.state === 'not-persisted'">当前工作区未持久化</span>
+                <button v-if="analysis.error?.recoverable" type="button" @click="retryAnalysis">重试分析</button>
+            </div>
+            <p v-if="analysis.error" class="analysis-error" role="alert">{{ analysis.error.message }}</p>
+            <div :ref="setWorkspace" class="analyzer-workspace" data-testid="analyzer-workspace">
+                <section v-show="activeFeatureQueue.length > 0" class="pinned-panel"
+                    :style="{ height: height + 'px' }" aria-label="置顶分析" data-testid="analyzer-pinned">
+                    <div ref="pinnedScroll" class="pinned-scroll app-scrollbar">
+                        <div ref="pinnedBody" class="feature-list">
+                            <MeydaCard v-for="featureId in pinnedFeatureIds" :key="featureId"
+                                :data-testid="'analyzer-card-' + featureId" :feature-id="featureId"
+                                :expanded="true" :description-expanded="!!descriptionExpanded[featureId]"
+                                :series="seriesFor(featureId)" :viewport="viewport" :cursor-seconds="cursorSeconds"
+                                :duration-seconds="durationSeconds" :sample-rate="analysis.sampleRate"
+                                :exact-value="exactValues[featureId] ?? null" :analysis-state="analysis.state"
+                                @toggle="toggleCard(featureId)" @toggle-description="toggleDescription(featureId)"
+                                @seek="seek" @zoom="zoomAt" />
+                        </div>
                     </div>
-                    <div class="viewport-summary">
-                        <strong>共享视口</strong>
-                        <span>
-                            {{ formatTime(viewport.startSeconds) }}
-                            –
-                            {{ formatTime(viewport.endSeconds) }}
-                        </span>
-                        <span>游标 {{ formatTime(cursorSeconds) }}</span>
-                        <span>{{ viewport.zoom.toFixed(1) }}×</span>
-                    </div>
-                </div>
-                <div class="toolbar-actions">
-                    <button
-                        type="button"
-                        aria-label="向前平移四分之一视口"
-                        @click="pan(-1)"
-                    >
-                        ← 25%
+                    <button ref="resizeHandle" type="button" role="separator" aria-orientation="horizontal"
+                        aria-label="调整置顶分析区高度" aria-controls="analyzer-original-list" v-bind="ariaValues"
+                        :disabled="!canResize" class="pinned-resize-handle" :class="{ 'is-dragging': dragging }"
+                        data-testid="analyzer-height-handle"
+                        @pointerdown="beginDrag" @pointermove="moveDrag" @pointerup="endDrag"
+                        @pointercancel="cancelDrag" @lostpointercapture="cancelDrag" @keydown="handleKeydown">
+                        <span aria-hidden="true"></span>
                     </button>
-                    <button
-                        type="button"
-                        aria-label="缩小时间轴"
-                        :disabled="viewport.zoom <= 1"
-                        @click="zoom(0.5)"
-                    >
-                        −
-                    </button>
-                    <button type="button" @click="resetViewport">重置</button>
-                    <button
-                        type="button"
-                        aria-label="放大时间轴"
-                        :disabled="viewport.zoom >= 64"
-                        @click="zoom(2)"
-                    >
-                        +
-                    </button>
-                    <button
-                        type="button"
-                        aria-label="向后平移四分之一视口"
-                        @click="pan(1)"
-                    >
-                        25% →
-                    </button>
-                    <button
-                        type="button"
-                        data-testid="reset-feature-order"
-                        :disabled="isFeatureOrderDefault"
-                        @click="resetFeatureOrder"
-                    >
-                        恢复默认排序
-                    </button>
-                    <button
-                        v-if="analysis.error?.recoverable"
-                        type="button"
-                        @click="retryAnalysis"
-                    >
-                        重试分析
-                    </button>
-                </div>
-            </section>
-
-            <p v-if="analysis.error" class="analysis-error" role="alert">
-                {{ analysis.error.message }}
-            </p>
-
-            <p
-                class="visually-hidden"
-                aria-live="polite"
-                aria-atomic="true"
-                data-testid="reorder-announcement"
-            >
-                {{ reorderAnnouncement }}
-            </p>
-
-            <section
-                ref="masonryRoot"
-                class="card-masonry"
-                :class="{ 'is-ready': masonryReady }"
-                :style="{ height: `${masonryHeight}px` }"
-                aria-label="分析卡片工作区"
-                data-testid="analyzer-masonry"
-            >
-                <div
-                    v-for="(featureId, orderIndex) in featureOrder"
-                    :key="featureId"
-                    :ref="masonryItemRef(featureId)"
-                    class="masonry-item"
-                    :class="masonryItemClasses(featureId)"
-                    :data-slot="featureId"
-                    :data-order-index="orderIndex"
-                    :data-testid="`analyzer-card-${featureId}`"
-                    :style="masonryItemStyle(featureId)"
-                >
-                    <MeydaCard
-                        :feature-id="featureId"
-                        :expanded="isExpanded(featureId)"
-                        :series="seriesFor(featureId)"
-                        :viewport="viewport"
-                        :cursor-seconds="cursorSeconds"
-                        :duration-seconds="durationSeconds"
-                        :sample-rate="analysis.sampleRate"
-                        :exact-value="exactValues[featureId] ?? null"
-                        :analysis-state="analysis.state"
-                        @toggle="toggleCard(featureId)"
-                        @seek="seek"
-                    >
-                        <template #header-action>
-                            <div
-                                class="reorder-control"
-                                :data-reorder-control="featureId"
-                            >
-                                <button
-                                    :ref="reorderHandleRef(featureId)"
-                                    type="button"
-                                    class="reorder-handle"
-                                    :class="{
-                                        'is-active': dragState?.sourceId === featureId,
-                                    }"
-                                    :aria-label="`排序 ${featureLabel(featureId)}，当前位置 ${orderIndex + 1}/${featureOrder.length}`"
-                                    aria-haspopup="menu"
-                                    :aria-expanded="openOrderMenu === featureId"
-                                    :data-testid="`reorder-handle-${featureId}`"
-                                    @click.stop="handleReorderHandleClick(featureId)"
-                                    @keydown="handleReorderHandleKeydown($event, featureId)"
-                                    @pointerdown="handleDragPointerDown($event, featureId)"
-                                    @pointermove="handleDragPointerMove"
-                                    @pointerup="handleDragPointerUp"
-                                    @pointercancel="cancelDrag"
-                                    @lostpointercapture="handleLostPointerCapture"
-                                >
-                                    <span class="grip-icon" aria-hidden="true">
-                                        <span></span>
-                                        <span></span>
-                                        <span></span>
-                                    </span>
-                                </button>
-                                <div
-                                    v-if="openOrderMenu === featureId"
-                                    class="reorder-menu"
-                                    role="menu"
-                                    :aria-label="`${featureLabel(featureId)} 排序操作`"
-                                    :data-testid="`reorder-menu-${featureId}`"
-                                >
-                                    <button
-                                        type="button"
-                                        role="menuitem"
-                                        :disabled="orderIndex === 0"
-                                        @click.stop="applyOrderAction(featureId, 'up')"
-                                    >
-                                        上移
-                                    </button>
-                                    <button
-                                        type="button"
-                                        role="menuitem"
-                                        :disabled="orderIndex === featureOrder.length - 1"
-                                        @click.stop="applyOrderAction(featureId, 'down')"
-                                    >
-                                        下移
-                                    </button>
-                                    <button
-                                        type="button"
-                                        role="menuitem"
-                                        :disabled="orderIndex === 0"
-                                        @click.stop="applyOrderAction(featureId, 'first')"
-                                    >
-                                        置顶
-                                    </button>
-                                    <button
-                                        type="button"
-                                        role="menuitem"
-                                        :disabled="orderIndex === featureOrder.length - 1"
-                                        @click.stop="applyOrderAction(featureId, 'last')"
-                                    >
-                                        置底
-                                    </button>
-                                </div>
-                            </div>
-                        </template>
-                    </MeydaCard>
-                </div>
-            </section>
-
-            <div
-                v-if="dragState?.active"
-                class="drag-ghost"
-                :style="dragGhostStyle"
-                aria-hidden="true"
-                data-testid="reorder-drag-ghost"
-            >
-                {{ featureLabel(dragState.sourceId) }}
+                </section>
+                <section id="analyzer-original-list" ref="originalList" class="original-list app-scrollbar"
+                    :inert="listHidden" aria-label="特征列表" data-testid="analyzer-original">
+                    <MeydaCard v-for="featureId in originalFeatureIds" :key="featureId"
+                        :data-testid="'analyzer-card-' + featureId" :feature-id="featureId"
+                        :expanded="false" :description-expanded="!!descriptionExpanded[featureId]"
+                        :series="seriesFor(featureId)" :viewport="viewport" :cursor-seconds="cursorSeconds"
+                        :duration-seconds="durationSeconds" :sample-rate="analysis.sampleRate"
+                        :exact-value="exactValues[featureId] ?? null" :analysis-state="analysis.state"
+                        @toggle="toggleCard(featureId)" @toggle-description="toggleDescription(featureId)"
+                        @seek="seek" @zoom="zoomAt" />
+                </section>
             </div>
         </div>
     </main>
 </template>
 
 <script setup lang="ts">
-import {
-    type ComponentPublicInstance,
-    computed,
-    nextTick,
-    onBeforeUnmount,
-    onMounted,
-    reactive,
-    ref,
-    watch,
-} from 'vue';
+import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue';
 import DotGridBg from '../components/DotGridBg.vue';
 import MeydaCard from '../components/MeydaCard.vue';
+import { usePinnedPanel } from '../components/analyzer/usePinnedPanel';
 import { useAudioSessionService } from '../audio/audioSessionService';
 import { toggleActiveFeature } from '../analysis/activeFeatureQueue';
 import { useAnalysisCoordinator } from '../analysis/analysisCoordinator';
-import { FEATURE_REGISTRY } from '../analysis/featureRegistry';
-import {
-    defaultFeatureOrder,
-    findFeatureDropTarget,
-    insertFeatureOrder,
-    isDefaultFeatureOrder,
-    moveFeatureOrder,
-    type FeatureDropTarget,
-    type FeatureOrderAction,
-} from '../analysis/featureOrder';
-import {
-    panTimelineViewport,
-    normalizeTimelineViewport,
-    resetTimelineViewport,
-    zoomTimelineViewport,
-} from '../analysis/timelineViewport';
-import {
-    FEATURE_IDS,
-    type AnalysisCursorValueResult,
-    type AnalysisSeries,
-    type FeatureId,
-    type M10FeatureId,
-} from '../analysis/types';
+import { normalizeTimelineViewport, resetTimelineViewport, zoomTimelineViewport } from '../analysis/timelineViewport';
+import { FEATURE_IDS, type AnalysisCursorValueResult, type AnalysisSeries, type FeatureId, type M10FeatureId } from '../analysis/types';
 import { useAudioSessionStore } from '../stores/audioSessionStore';
-import {
-    calculateMasonryLayout,
-    type MasonryPlacement,
-} from '../utils/masonryLayout';
 import type { PersistedTimelineViewport } from '../types/session';
-
-const MASONRY_GAP = 18;
-const MASONRY_WIDE_CONTENT_WIDTH = 1232;
-const DRAG_START_THRESHOLD = 6;
-const AUTO_SCROLL_EDGE = 48;
-const AUTO_SCROLL_MAX = 16;
-
-interface ReorderDragState {
-    pointerId: number;
-    sourceId: FeatureId;
-    handle: HTMLElement;
-    startX: number;
-    startY: number;
-    currentX: number;
-    currentY: number;
-    active: boolean;
-    candidate: FeatureDropTarget | null;
-}
 
 const sessionStore = useAudioSessionStore();
 const audioSession = useAudioSessionService();
 const analysisCoordinator = useAnalysisCoordinator();
 const analysisLease = analysisCoordinator.acquireConsumer('analyzer');
 const seriesRevision = ref(0);
-const exactValues = reactive<
-    Partial<Record<M10FeatureId, AnalysisCursorValueResult>>
->({});
+const exactValues = reactive<Partial<Record<M10FeatureId, AnalysisCursorValueResult>>>({});
 const CURSOR_REQUEST_INTERVAL_MS = 40;
 let unsubscribeCoordinator: (() => void) | null = null;
 let cursorTimer: ReturnType<typeof setTimeout> | null = null;
 let lastCursorRequestAt = 0;
 let initializationPromise: Promise<void> | null = null;
 let workspaceBootstrapped = false;
-const masonryRoot = ref<HTMLElement | null>(null);
-const masonryHeight = ref(0);
-const masonryReady = ref(false);
-const masonryPlacements = reactive<
-    Partial<Record<FeatureId, MasonryPlacement<FeatureId>>>
->({});
-const masonryItems = new Map<FeatureId, HTMLElement>();
-let masonryRootObserver: ResizeObserver | null = null;
-let masonryItemObserver: ResizeObserver | null = null;
-let masonryFrame: number | null = null;
-let lastMasonryRootWidth = -1;
-const analyzerContent = ref<HTMLElement | null>(null);
-const openOrderMenu = ref<FeatureId | null>(null);
-const reorderAnnouncement = ref('');
-const dragState = ref<ReorderDragState | null>(null);
-const reorderHandles = new Map<FeatureId, HTMLElement>();
-let dragFrame: number | null = null;
-let suppressHandleClick = false;
-let suppressHandleClickTimer: number | null = null;
-
+const pendingViewport = ref<PersistedTimelineViewport | null>(null);
+let zoomFrame: number | null = null;
+let zoomTrackId: string | null = null;
 const analysis = computed(() => sessionStore.analysis);
-const featureOrder = computed<FeatureId[]>(() =>
-    sessionStore.analysisWorkspace.featureOrder);
-const isFeatureOrderDefault = computed(() =>
-    isDefaultFeatureOrder(featureOrder.value));
 const activeFeatureQueue = computed<M10FeatureId[]>(() =>
     sessionStore.analysisWorkspace.activeFeatureQueue.filter(
         (featureId): featureId is M10FeatureId =>
@@ -332,7 +97,7 @@ const cursorSeconds = computed(() =>
     ));
 const viewport = computed<PersistedTimelineViewport>(() =>
     normalizeTimelineViewport(
-        sessionStore.analysisWorkspace.viewport,
+        pendingViewport.value ?? sessionStore.analysisWorkspace.viewport,
         durationSeconds.value,
     ));
 const analysisStateLabel = computed(() => {
@@ -349,173 +114,27 @@ const analysisStateLabel = computed(() => {
     } as const;
     return labels[analysis.value.state];
 });
-const dragGhostStyle = computed(() => ({
-    left: `${(dragState.value?.currentX ?? 0) + 12}px`,
-    top: `${(dragState.value?.currentY ?? 0) + 12}px`,
-}));
 
-const featureLabel = (featureId: FeatureId) =>
-    FEATURE_REGISTRY[featureId].label;
-
-const isExpanded = (featureId: FeatureId) =>
-    activeFeatureQueue.value.includes(featureId);
-
+const pinnedFeatureIds = computed(() => [...activeFeatureQueue.value].reverse());
+const originalFeatureIds = computed(() => FEATURE_IDS.filter(id => !activeFeatureQueue.value.includes(id)));
+const descriptionExpanded = reactive<Partial<Record<FeatureId, boolean>>>({});
+const toggleDescription = (id: FeatureId) => { descriptionExpanded[id] = !descriptionExpanded[id]; };
+const { workspace: workspaceElement, pinnedBody, pinnedScroll, originalList, resizeHandle, height, canResize, listHidden,
+    ariaValues, dragging, beginDrag, moveDrag, endDrag, cancelDrag, handleKeydown
+} = usePinnedPanel(computed(() => activeFeatureQueue.value.length));
+const setWorkspace = (element: unknown) => { workspaceElement.value = element instanceof HTMLElement ? element : null; };
 const seriesFor = (featureId: M10FeatureId): AnalysisSeries | null => {
     void seriesRevision.value;
     return analysisLease.getSeries(featureId);
 };
-
-const formatTime = (seconds: number): string => {
-    const safe = Math.max(0, Number.isFinite(seconds) ? seconds : 0);
-    const minutes = Math.floor(safe / 60);
-    return `${minutes}:${(safe % 60).toFixed(2).padStart(5, '0')}`;
-};
-
-const reorderHandleRefSetters = new Map<
-    FeatureId,
-    (element: Element | ComponentPublicInstance | null) => void
->();
-const reorderHandleRef = (featureId: FeatureId) => {
-    let setter = reorderHandleRefSetters.get(featureId);
-    if (!setter) {
-        setter = (element) => {
-            if (element instanceof HTMLElement) {
-                reorderHandles.set(featureId, element);
-            } else {
-                reorderHandles.delete(featureId);
-            }
-        };
-        reorderHandleRefSetters.set(featureId, setter);
-    }
-    return setter;
-};
-
-const masonryItemClasses = (featureId: FeatureId) => ({
-    'is-drag-source': dragState.value?.active
-        && dragState.value.sourceId === featureId,
-    'is-drop-before': dragState.value?.active
-        && dragState.value.candidate?.featureId === featureId
-        && dragState.value.candidate.edge === 'before',
-    'is-drop-after': dragState.value?.active
-        && dragState.value.candidate?.featureId === featureId
-        && dragState.value.candidate.edge === 'after',
-    'has-open-reorder-menu': openOrderMenu.value === featureId,
-});
-
-const masonryItemStyle = (featureId: FeatureId) => {
-    const placement = masonryPlacements[featureId];
-    return {
-        width: placement ? `${placement.width}px` : '100%',
-        transform: placement
-            ? `translate3d(${placement.left}px, ${placement.top}px, 0)`
-            : 'translate3d(0, 0, 0)',
-    };
-};
-
-const performMasonryLayout = () => {
-    masonryFrame = null;
-    const root = masonryRoot.value;
-    const order = featureOrder.value;
-    const elements = order.map((featureId) =>
-        masonryItems.get(featureId));
-    if (!root || elements.some((element) => !element)) return;
-    const containerWidth = root.getBoundingClientRect().width;
-    const columnCount: 1 | 2 = containerWidth >= MASONRY_WIDE_CONTENT_WIDTH ? 2 : 1;
-    const columnWidth = Math.max(
-        0,
-        (containerWidth - MASONRY_GAP * (columnCount - 1)) / columnCount,
-    );
-    for (const element of elements) {
-        element!.style.width = `${columnWidth}px`;
-    }
-    const layout = calculateMasonryLayout({
-        containerWidth,
-        columnCount,
-        gap: MASONRY_GAP,
-        items: order.map((featureId, index) => ({
-            id: featureId,
-            height: elements[index]!.getBoundingClientRect().height,
-        })),
-    });
-    for (const placement of layout.placements) {
-        masonryPlacements[placement.id] = placement;
-    }
-    masonryHeight.value = layout.height;
-    masonryReady.value = true;
-    lastMasonryRootWidth = containerWidth;
-};
-
-const scheduleMasonryLayout = () => {
-    if (masonryFrame !== null) return;
-    masonryFrame = window.requestAnimationFrame(performMasonryLayout);
-};
-
-const registerMasonryItem = (
-    featureId: FeatureId,
-    element: Element | ComponentPublicInstance | null,
-) => {
-    const previous = masonryItems.get(featureId);
-    if (previous === element) return;
-    if (previous) masonryItemObserver?.unobserve(previous);
-    if (element instanceof HTMLElement) {
-        masonryItems.set(featureId, element);
-        masonryItemObserver?.observe(element);
-    } else {
-        masonryItems.delete(featureId);
-    }
-    if (typeof window !== 'undefined') scheduleMasonryLayout();
-};
-
-const masonryItemRefSetters = new Map<
-    FeatureId,
-    (element: Element | ComponentPublicInstance | null) => void
->();
-const masonryItemRef = (featureId: FeatureId) => {
-    let setter = masonryItemRefSetters.get(featureId);
-    if (!setter) {
-        setter = (element) => registerMasonryItem(featureId, element);
-        masonryItemRefSetters.set(featureId, setter);
-    }
-    return setter;
-};
-
-const setupMasonryLayout = () => {
-    const root = masonryRoot.value;
-    if (!root) return;
-    masonryRootObserver = new ResizeObserver(([entry]) => {
-        const width = entry?.contentRect.width ?? 0;
-        if (Math.abs(width - lastMasonryRootWidth) > 0.5) {
-            scheduleMasonryLayout();
-        }
-    });
-    masonryItemObserver = new ResizeObserver(() => scheduleMasonryLayout());
-    masonryRootObserver.observe(root);
-    for (const element of masonryItems.values()) {
-        masonryItemObserver.observe(element);
-    }
-    scheduleMasonryLayout();
-};
-
-const disposeMasonryLayout = () => {
-    masonryRootObserver?.disconnect();
-    masonryItemObserver?.disconnect();
-    masonryRootObserver = null;
-    masonryItemObserver = null;
-    if (masonryFrame !== null) window.cancelAnimationFrame(masonryFrame);
-    masonryFrame = null;
-};
-
 const persistWorkspace = (patch: {
     featureQueue?: readonly FeatureId[];
     nextViewport?: PersistedTimelineViewport | null;
-    nextFeatureOrder?: readonly FeatureId[];
 } = {}) => audioSession.updateAnalysisWorkspace({
     activeFeatureQueue: [
         ...(patch.featureQueue ?? activeFeatureQueue.value),
     ],
-    featureOrder: [
-        ...(patch.nextFeatureOrder ?? featureOrder.value),
-    ],
+    featureOrder: [...FEATURE_IDS],
     viewport: patch.nextViewport === undefined
         ? sessionStore.analysisWorkspace.viewport
         : patch.nextViewport,
@@ -537,351 +156,54 @@ const applyFeatureQueue = async (featureQueue: FeatureId[]) => {
     requestExactValues(true);
 };
 
+// Keep the remaining original list anchored while one row transfers between regions.
+const captureListAnchor = (movingId: FeatureId) => {
+    const list = originalList.value;
+    if (!list) return null;
+    const top = list.getBoundingClientRect().top;
+    const items = [...list.querySelectorAll<HTMLElement>('[data-feature-id]')];
+    const anchor = items.find(item => item.dataset.featureId !== movingId
+        && item.getBoundingClientRect().bottom > top);
+    return anchor ? { id: anchor.dataset.featureId!, offset: anchor.getBoundingClientRect().top - top } : null;
+};
+const restoreListAnchor = (anchor: ReturnType<typeof captureListAnchor>) => {
+    const list = originalList.value;
+    if (!list || !anchor) return;
+    const item = list.querySelector<HTMLElement>('[data-feature-id="' + anchor.id + '"]');
+    if (item) list.scrollTop += item.getBoundingClientRect().top - list.getBoundingClientRect().top - anchor.offset;
+};
 const toggleCard = (featureId: FeatureId) => {
-    const transition = toggleActiveFeature(
-        activeFeatureQueue.value,
-        featureId,
-    );
+    const anchor = captureListAnchor(featureId);
+    const transition = toggleActiveFeature(activeFeatureQueue.value, featureId);
     void applyFeatureQueue(transition.queue);
-};
-
-const setViewport = (nextViewport: PersistedTimelineViewport) => {
-    void persistWorkspace({ nextViewport });
-};
-
-const zoom = (factor: number) => {
-    setViewport(zoomTimelineViewport(
-        viewport.value,
-        durationSeconds.value,
-        viewport.value.zoom * factor,
-        cursorSeconds.value,
-    ));
-};
-
-const pan = (direction: -1 | 1) => {
-    setViewport(panTimelineViewport(
-        viewport.value,
-        durationSeconds.value,
-        direction,
-    ));
-};
-
-const resetViewport = () => {
-    setViewport(resetTimelineViewport(durationSeconds.value));
-};
-
-const focusReorderHandle = (featureId: FeatureId) => {
-    void nextTick(() => reorderHandles.get(featureId)?.focus());
-};
-
-const announceFeaturePosition = (
-    featureId: FeatureId,
-    order: readonly FeatureId[],
-) => {
-    reorderAnnouncement.value = `${featureLabel(featureId)} 已移动到第 ${
-        order.indexOf(featureId) + 1
-    } 项，共 ${order.length} 项。`;
-};
-
-const commitFeatureOrder = (
-    nextOrder: FeatureId[],
-    sourceId: FeatureId,
-    focusHandle = true,
-) => {
-    if (nextOrder.every((featureId, index) =>
-        featureId === featureOrder.value[index])) return;
-    void persistWorkspace({ nextFeatureOrder: nextOrder });
-    announceFeaturePosition(sourceId, nextOrder);
     void nextTick(() => {
-        scheduleMasonryLayout();
-        if (focusHandle) reorderHandles.get(sourceId)?.focus();
+        restoreListAnchor(anchor);
+        if (transition.expanded && pinnedScroll.value) pinnedScroll.value.scrollTop = 0;
+        const root = transition.expanded ? pinnedBody.value : originalList.value;
+        const button = root?.querySelector<HTMLButtonElement>('[data-feature-id="' + featureId + '"] .toggle-card');
+        if (!transition.expanded && listHidden.value) {
+            (pinnedBody.value?.querySelector<HTMLButtonElement>('.toggle-card') ?? resizeHandle.value)?.focus({ preventScroll: true });
+        } else button?.focus({ preventScroll: true });
     });
 };
-
-const resetFeatureOrder = () => {
-    const nextOrder = defaultFeatureOrder();
-    if (isFeatureOrderDefault.value) return;
-    openOrderMenu.value = null;
-    void persistWorkspace({ nextFeatureOrder: nextOrder });
-    reorderAnnouncement.value = '已恢复默认特征顺序。';
-    void nextTick(scheduleMasonryLayout);
+const flushZoom = () => {
+    if (zoomFrame !== null) cancelAnimationFrame(zoomFrame);
+    zoomFrame = null;
+    const next = pendingViewport.value;
+    pendingViewport.value = null;
+    if (next && zoomTrackId === sessionStore.currentTrackId) void persistWorkspace({ nextViewport: next });
 };
-
-const applyOrderAction = (
-    featureId: FeatureId,
-    action: FeatureOrderAction,
-) => {
-    commitFeatureOrder(
-        moveFeatureOrder(featureOrder.value, featureId, action),
-        featureId,
-    );
+const zoomAt = (factor: number, anchorSeconds: number) => {
+    zoomTrackId = sessionStore.currentTrackId;
+    pendingViewport.value = zoomTimelineViewport(viewport.value, durationSeconds.value,
+        viewport.value.zoom * factor, anchorSeconds);
+    if (zoomFrame === null) zoomFrame = requestAnimationFrame(flushZoom);
 };
-
-const closeOrderMenu = (returnFocus = false) => {
-    const featureId = openOrderMenu.value;
-    openOrderMenu.value = null;
-    if (returnFocus && featureId) focusReorderHandle(featureId);
-};
-
-const handleReorderHandleClick = (featureId: FeatureId) => {
-    if (suppressHandleClick) {
-        suppressHandleClick = false;
-        if (suppressHandleClickTimer !== null) {
-            window.clearTimeout(suppressHandleClickTimer);
-            suppressHandleClickTimer = null;
-        }
-        return;
-    }
-    openOrderMenu.value = openOrderMenu.value === featureId
-        ? null
-        : featureId;
-};
-
-const armHandleClickSuppression = () => {
-    suppressHandleClick = true;
-    if (suppressHandleClickTimer !== null) {
-        window.clearTimeout(suppressHandleClickTimer);
-        suppressHandleClickTimer = null;
-    }
-    suppressHandleClick = false;
-    suppressHandleClickTimer = window.setTimeout(() => {
-        suppressHandleClick = false;
-        suppressHandleClickTimer = null;
-    }, 0);
-};
-
-const handleReorderHandleKeydown = (
-    event: KeyboardEvent,
-    featureId: FeatureId,
-) => {
-    if (event.altKey) {
-        const action = {
-            ArrowUp: 'up',
-            ArrowDown: 'down',
-            Home: 'first',
-            End: 'last',
-        }[event.key] as FeatureOrderAction | undefined;
-        if (action) {
-            event.preventDefault();
-            applyOrderAction(featureId, action);
-            return;
-        }
-    }
-    if (event.key === 'Enter' || event.key === ' ') {
-        event.preventDefault();
-        openOrderMenu.value = openOrderMenu.value === featureId
-            ? null
-            : featureId;
-        return;
-    }
-    if (event.key === 'Escape' && openOrderMenu.value === featureId) {
-        event.preventDefault();
-        closeOrderMenu(true);
-    }
-};
-
-const cancelDragFrame = () => {
-    if (dragFrame !== null) window.cancelAnimationFrame(dragFrame);
-    dragFrame = null;
-};
-
-const releaseDragCapture = (state: ReorderDragState) => {
-    try {
-        if (state.handle.hasPointerCapture(state.pointerId)) {
-            state.handle.releasePointerCapture(state.pointerId);
-        }
-    } catch {
-        // Pointer capture may already be gone after blur or native cancellation.
-    }
-};
-
-const clearDrag = (returnFocus = false) => {
-    const state = dragState.value;
-    if (!state) return;
-    dragState.value = null;
-    cancelDragFrame();
-    releaseDragCapture(state);
-    if (returnFocus) focusReorderHandle(state.sourceId);
-};
-
-const cancelActiveDrag = (returnFocus = true) => {
-    const wasActive = dragState.value?.active ?? false;
-    clearDrag(returnFocus);
-    if (wasActive) armHandleClickSuppression();
-};
-
-const performDragFrame = () => {
-    dragFrame = null;
-    const state = dragState.value;
-    const root = masonryRoot.value;
-    if (!state || !root) return;
-    if (!state.active) {
-        const distance = Math.hypot(
-            state.currentX - state.startX,
-            state.currentY - state.startY,
-        );
-        if (distance < DRAG_START_THRESHOLD) return;
-        state.active = true;
-        openOrderMenu.value = null;
-    }
-
-    const rootRect = root.getBoundingClientRect();
-    const sourceRect = masonryItems.get(state.sourceId)
-        ?.getBoundingClientRect();
-    const overSource = sourceRect
-        && state.currentX >= sourceRect.left
-        && state.currentX <= sourceRect.right
-        && state.currentY >= sourceRect.top
-        && state.currentY <= sourceRect.bottom;
-    state.candidate = overSource
-        ? null
-        : findFeatureDropTarget(
-            state.currentX,
-            state.currentY,
-            rootRect,
-            featureOrder.value.flatMap((featureId) => {
-                const rect = masonryItems.get(featureId)
-                    ?.getBoundingClientRect();
-                return rect
-                    ? [{
-                        id: featureId,
-                        left: rect.left,
-                        top: rect.top,
-                        right: rect.right,
-                        bottom: rect.bottom,
-                    }]
-                    : [];
-            }),
-            state.sourceId,
-        );
-
-    const scroller = analyzerContent.value;
-    if (!scroller) return;
-    const scrollRect = scroller.getBoundingClientRect();
-    let scrollDelta = 0;
-    if (state.currentY < scrollRect.top + AUTO_SCROLL_EDGE) {
-        const proximity = Math.max(
-            0,
-            1 - (state.currentY - scrollRect.top) / AUTO_SCROLL_EDGE,
-        );
-        scrollDelta = -AUTO_SCROLL_MAX * proximity;
-    } else if (
-        state.currentY > scrollRect.bottom - AUTO_SCROLL_EDGE
-    ) {
-        const proximity = Math.max(
-            0,
-            1 - (scrollRect.bottom - state.currentY) / AUTO_SCROLL_EDGE,
-        );
-        scrollDelta = AUTO_SCROLL_MAX * proximity;
-    }
-    if (scrollDelta !== 0) {
-        const previousScrollTop = scroller.scrollTop;
-        scroller.scrollTop += scrollDelta;
-        if (scroller.scrollTop !== previousScrollTop) scheduleDragFrame();
-    }
-};
-
-const scheduleDragFrame = () => {
-    if (dragFrame !== null) return;
-    dragFrame = window.requestAnimationFrame(performDragFrame);
-};
-
-const handleDragPointerDown = (
-    event: PointerEvent,
-    featureId: FeatureId,
-) => {
-    if (event.button !== 0 || dragState.value) return;
-    const handle = event.currentTarget;
-    if (!(handle instanceof HTMLElement)) return;
-    dragState.value = {
-        pointerId: event.pointerId,
-        sourceId: featureId,
-        handle,
-        startX: event.clientX,
-        startY: event.clientY,
-        currentX: event.clientX,
-        currentY: event.clientY,
-        active: false,
-        candidate: null,
-    };
-    handle.setPointerCapture(event.pointerId);
-};
-
-const handleDragPointerMove = (event: PointerEvent) => {
-    const state = dragState.value;
-    if (!state || state.pointerId !== event.pointerId) return;
-    state.currentX = event.clientX;
-    state.currentY = event.clientY;
-    if (state.active) event.preventDefault();
-    scheduleDragFrame();
-};
-
-const handleDragPointerUp = (event: PointerEvent) => {
-    let state = dragState.value;
-    if (!state || state.pointerId !== event.pointerId) return;
-    state.currentX = event.clientX;
-    state.currentY = event.clientY;
-    cancelDragFrame();
-    performDragFrame();
-    state = dragState.value;
-    if (!state) return;
-    const active = state.active;
-    const candidate = state.candidate;
-    const sourceId = state.sourceId;
-    clearDrag();
-    if (!active) return;
-    armHandleClickSuppression();
-    if (candidate) {
-        commitFeatureOrder(
-            insertFeatureOrder(
-                featureOrder.value,
-                sourceId,
-                candidate.featureId,
-                candidate.edge,
-            ),
-            sourceId,
-        );
-    } else {
-        focusReorderHandle(sourceId);
-    }
-};
-
-const cancelDrag = (event?: Event) => {
-    if (
-        event
-        && 'pointerId' in event
-        && dragState.value
-        && event.pointerId !== dragState.value.pointerId
-    ) return;
-    cancelActiveDrag(true);
-};
-
-const handleLostPointerCapture = (event: PointerEvent) => {
-    if (dragState.value?.pointerId === event.pointerId) cancelActiveDrag(true);
-};
-
-const handleGlobalKeydown = (event: KeyboardEvent) => {
-    if (event.key !== 'Escape') return;
-    if (dragState.value) {
-        event.preventDefault();
-        cancelActiveDrag(true);
-    } else if (openOrderMenu.value) {
-        event.preventDefault();
-        closeOrderMenu(true);
-    }
-};
-
-const handleGlobalPointerDown = (event: PointerEvent) => {
-    const featureId = openOrderMenu.value;
-    if (!featureId) return;
-    const control = event.target instanceof Element
-        ? event.target.closest('[data-reorder-control]')
-        : null;
-    if (control?.getAttribute('data-reorder-control') !== featureId) {
-        closeOrderMenu(true);
-    }
-};
-
+watch(() => sessionStore.currentTrackId, () => {
+    if (zoomFrame !== null) cancelAnimationFrame(zoomFrame);
+    zoomFrame = null;
+    pendingViewport.value = null;
+}, { flush: 'sync' });
 const seek = async (seconds: number) => {
     await audioSession.seek(seconds);
     requestExactValues(true);
@@ -948,6 +270,7 @@ const initializeWorkspace = async () => {
             if (
                 restoredQueue.length
                 !== sessionStore.analysisWorkspace.activeFeatureQueue.length
+                || sessionStore.analysisWorkspace.featureOrder.some((id, index) => id !== FEATURE_IDS[index])
             ) {
                 await persistWorkspace({ featureQueue: restoredQueue });
             }
@@ -1012,365 +335,45 @@ watch(
     },
 );
 
-watch(
-    () => featureOrder.value.join('|'),
-    () => void nextTick(scheduleMasonryLayout),
-);
-
 onMounted(() => {
-    setupMasonryLayout();
-    window.addEventListener('keydown', handleGlobalKeydown);
-    window.addEventListener('blur', cancelDrag);
-    document.addEventListener('pointerdown', handleGlobalPointerDown, true);
     unsubscribeCoordinator = analysisLease.subscribe(() => {
         seriesRevision.value += 1;
         requestExactValues(false);
     });
 });
-
 onBeforeUnmount(() => {
-    window.removeEventListener('keydown', handleGlobalKeydown);
-    window.removeEventListener('blur', cancelDrag);
-    document.removeEventListener('pointerdown', handleGlobalPointerDown, true);
-    clearDrag();
-    if (suppressHandleClickTimer !== null) {
-        window.clearTimeout(suppressHandleClickTimer);
-    }
-    disposeMasonryLayout();
+    flushZoom();
     unsubscribeCoordinator?.();
-    unsubscribeCoordinator = null;
     if (cursorTimer) clearTimeout(cursorTimer);
     analysisLease.release();
 });
 </script>
 
 <style scoped>
-.analyzer-page {
-    background:
-        radial-gradient(circle at 20% 10%, var(--glow-accent), transparent 28%),
-        var(--canvas);
-    color: var(--ink);
-    min-height: 100dvh;
-    overflow: hidden;
-    position: relative;
-    z-index: var(--layer-content);
-}
-
-.analyzer-content {
-    box-sizing: border-box;
-    height: 100dvh;
-    overflow-y: auto;
-    padding:
-        0
-        max(24px, calc((100% - 1760px) / 2))
-        150px;
-    position: relative;
-}
-
-.status-row {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-}
-
-.status-row span {
-    background: var(--surface-chip);
-    border: 1px solid var(--hairline-soft);
-    border-radius: 999px;
-    color: var(--body);
-    font-size: 0.72rem;
-    padding: 6px 10px;
-}
-
-.status-row span[data-state="ready"] {
-    color: var(--accent-deep);
-}
-
-.timeline-toolbar {
-    align-items: center;
-    backdrop-filter: blur(18px);
-    background: var(--surface-toolbar);
-    border: 1px solid var(--hairline);
-    border-radius: 16px;
-    display: flex;
-    gap: 18px;
-    justify-content: space-between;
-    margin:
-        calc(var(--app-page-top-space) + 12px)
-        0
-        18px;
-    padding: 13px 56px 13px 15px;
-    position: sticky;
-    top: var(--app-sticky-top);
-    z-index: var(--layer-sticky);
-}
-
-.toolbar-summary {
-    align-items: flex-start;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-.viewport-summary {
-    align-items: center;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 12px;
-}
-
-.timeline-toolbar span {
-    color: var(--mute);
-    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-    font-size: 0.72rem;
-}
-
-.toolbar-actions,
-.feature-choices {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-}
-
-button {
-    background: var(--surface-1);
-    border: 1px solid var(--hairline);
-    border-radius: 9px;
-    color: var(--ink);
-    cursor: pointer;
-    font: inherit;
-    font-size: 0.78rem;
-    min-height: 36px;
-    padding: 7px 11px;
-    transition:
-        background-color 120ms ease,
-        border-color 120ms ease,
-        box-shadow 120ms ease,
-        color 120ms ease,
-        transform 80ms ease;
-}
-
-@media (hover: hover) and (pointer: fine) {
-    button:hover:not(:disabled) {
-        background: var(--control-hover);
-        border-color: var(--accent-deep);
-    }
-}
-
-button:active:not(:disabled) {
-    background: var(--control-active);
-    border-color: var(--accent-bright);
-    box-shadow: inset 0 0 0 1px var(--accent-bright-glow);
-    transform: translateY(1px);
-}
-
-button:disabled {
-    cursor: not-allowed;
-    opacity: 0.38;
-}
-
-button:focus-visible {
-    outline: 3px solid var(--accent);
-    outline-offset: 3px;
-}
-
-button:focus:not(:focus-visible) {
-    outline: none;
-}
-
-.analysis-error {
-    background: var(--error-surface);
-    border: 1px solid var(--error);
-    border-radius: 12px;
-    color: var(--error);
-    margin: 0 0 18px;
-    padding: 12px 14px;
-}
-
-.visually-hidden {
-    clip: rect(0 0 0 0);
-    clip-path: inset(50%);
-    height: 1px;
-    overflow: hidden;
-    position: absolute;
-    white-space: nowrap;
-    width: 1px;
-}
-
-.card-masonry {
-    min-height: 220px;
-    position: relative;
-    width: 100%;
-}
-
-.masonry-item {
-    left: 0;
-    position: absolute;
-    top: 0;
-}
-
-.masonry-item.has-open-reorder-menu {
-    z-index: 4;
-}
-
-.masonry-item.is-drag-source {
-    opacity: 0.42;
-}
-
-.masonry-item.is-drop-before::before,
-.masonry-item.is-drop-after::after {
-    background: var(--warning);
-    border-radius: 999px;
-    box-shadow: 0 0 0 3px var(--warning-glow);
-    content: '';
-    height: 3px;
-    left: 8px;
-    pointer-events: none;
-    position: absolute;
-    right: 8px;
-    z-index: 6;
-}
-
-.masonry-item.is-drop-before::before {
-    top: -6px;
-}
-
-.masonry-item.is-drop-after::after {
-    bottom: -6px;
-}
-
-.card-masonry:not(.is-ready) .masonry-item {
-    visibility: hidden;
-}
-
-.masonry-item > * {
-    width: 100%;
-}
-
-.reorder-control {
-    position: relative;
-}
-
-.reorder-handle {
-    align-items: center;
-    display: inline-flex;
-    justify-content: center;
-    min-width: 36px;
-    padding: 7px 9px;
-    touch-action: none;
-}
-
-.reorder-handle.is-active {
-    border-color: var(--accent);
-    color: var(--accent);
-}
-
-.grip-icon {
-    display: grid;
-    gap: 3px;
-    width: 15px;
-}
-
-.grip-icon span {
-    background: currentColor;
-    border-radius: 999px;
-    display: block;
-    height: 2px;
-    width: 100%;
-}
-
-.reorder-menu {
-    background: var(--surface-menu);
-    border: 1px solid var(--hairline-strong);
-    border-radius: 12px;
-    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5);
-    display: grid;
-    gap: 6px;
-    grid-template-columns: repeat(2, minmax(72px, 1fr));
-    padding: 8px;
-    position: absolute;
-    right: 0;
-    top: calc(100% + 8px);
-    width: max-content;
-    z-index: 8;
-}
-
-.reorder-menu button {
-    min-width: 72px;
-}
-
-.drag-ghost {
-    background: var(--surface-ghost);
-    border: 1px solid var(--accent-deep);
-    border-radius: 10px;
-    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
-    color: var(--ink);
-    font-size: 0.78rem;
-    max-width: min(260px, calc(100vw - 32px));
-    overflow: hidden;
-    padding: 9px 12px;
-    pointer-events: none;
-    position: fixed;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    z-index: 30;
-}
-
-.empty-slot {
-    align-items: center;
-    background:
-        /* 极淡 tint：保留数值，仅把基色统一到规范家族 */
-        linear-gradient(135deg, rgba(101, 255, 169, 0.04), transparent);
-    border: 1px dashed var(--hairline);
-    border-radius: 18px;
-    color: var(--mute);
-    display: flex;
-    justify-content: space-between;
-    min-height: 220px;
-    padding: 24px;
-}
-
-.empty-slot h2 {
-    color: var(--ink);
-    font-size: 1.1rem;
-    margin: 5px 0 8px;
-}
-
-.empty-slot p {
-    line-height: 1.55;
-    margin: 0;
-    max-width: 520px;
-}
-
-.slot-number {
-    color: var(--accent-deep) !important;
-    font-size: 0.68rem;
-    letter-spacing: 0.16em;
-}
-
-@media (max-width: 820px) {
-    .analyzer-content {
-        padding-left: 14px;
-        padding-right: 14px;
-    }
-
-    .timeline-toolbar,
-    .empty-slot {
-        align-items: stretch;
-        flex-direction: column;
-    }
-
-}
+.analyzer-page { position: relative; height: 100dvh; min-width: 0; overflow: hidden;
+    background: radial-gradient(circle at 20% 10%, var(--glow-accent), transparent 28%), var(--canvas);
+    color: var(--ink); z-index: var(--layer-content); }
+.analyzer-content { position: relative; display: flex; flex-direction: column; box-sizing: border-box;
+    height: 100%; padding: 64px max(24px, calc((100% - 1760px) / 2)) 150px; }
+.analyzer-status { display: flex; flex-wrap: wrap; align-items: center; flex: none;
+    gap: 6px 16px; padding: 0 8px 12px; color: var(--mute); font-size: 0.72rem; }
+.analyzer-status [data-state="ready"] { color: var(--accent-deep); }
+.analyzer-status button { background: transparent; border: 0; color: var(--accent); cursor: pointer; }
+.analysis-error { flex: none; color: var(--error); font-size: 0.8rem; margin: 0 8px 12px; }
+.analyzer-workspace { display: flex; flex: 1; flex-direction: column; min-height: 0; min-width: 0; }
+.pinned-panel { display: flex; flex-direction: column; flex: none; min-height: 0; min-width: 0; overflow: hidden; }
+.pinned-scroll { flex: 1; min-height: 0; overflow: auto; overscroll-behavior: contain; overflow-anchor: none; }
+.feature-list { min-width: 0; }
+.original-list { flex: 1; min-height: 0; overflow: auto; overscroll-behavior: contain; overflow-anchor: none; }
+.pinned-resize-handle { position: relative; display: grid; place-items: center; flex: none; width: 100%; height: 24px;
+    border: 0; padding: 0; color: var(--mute); background: transparent; cursor: row-resize; touch-action: none; user-select: none; }
+.pinned-resize-handle span { width: 36px; height: 3px; border-radius: 3px; background: currentColor; }
+.pinned-resize-handle::after { content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 1px;
+    background: linear-gradient(90deg, #0000, var(--main-color), #0000); pointer-events: none; }
+.pinned-resize-handle:hover, .pinned-resize-handle.is-dragging { color: var(--accent); background: var(--control-hover); }
+.pinned-resize-handle:disabled { opacity: 0.35; cursor: default; }
+.pinned-resize-handle:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
 @media (max-width: 767px) {
-    .timeline-toolbar { padding-right: 15px; }
-}
-
-@media (prefers-reduced-motion: reduce) {
-    *,
-    *::before,
-    *::after {
-        scroll-behavior: auto !important;
-        transition-duration: 0.001ms !important;
-    }
+    .analyzer-content { padding: 64px 12px 150px; }
 }
 </style>

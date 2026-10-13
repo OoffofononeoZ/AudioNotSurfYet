@@ -17,6 +17,7 @@
 | [src/analysis/frames.ts](../../src/analysis/frames.ts) | [src/analysis/types.ts](../../src/analysis/types.ts) |
 | [src/analysis/meydaAdapter.ts](../../src/analysis/meydaAdapter.ts) | [src/analysis/featureRegistry.ts](../../src/analysis/featureRegistry.ts)、[src/analysis/types.ts](../../src/analysis/types.ts) |
 | [src/analysis/pcm.ts](../../src/analysis/pcm.ts) | [src/types/audio.ts](../../src/types/audio.ts) |
+| [src/analysis/pinnedPanelHeight.ts](../../src/analysis/pinnedPanelHeight.ts) | — |
 | [src/analysis/rendererData.ts](../../src/analysis/rendererData.ts) | [src/analysis/types.ts](../../src/analysis/types.ts)、[src/types/session.ts](../../src/types/session.ts) |
 | [src/analysis/tempoEstimator.ts](../../src/analysis/tempoEstimator.ts) | [src/analysis/frames.ts](../../src/analysis/frames.ts)、[src/analysis/meydaAdapter.ts](../../src/analysis/meydaAdapter.ts)、[src/analysis/types.ts](../../src/analysis/types.ts) |
 | [src/analysis/timelineViewport.ts](../../src/analysis/timelineViewport.ts) | [src/types/session.ts](../../src/types/session.ts) |

@@ -39,7 +39,7 @@ next_action: "浏览器处理目标术语已登记；实施后核对 provenance/
 | analysis workspace | 有序 `activeFeatureQueue`（0–4 个唯一 feature）和一个持久化 viewport 的共享 Analyzer 状态 | 新工作区默认空队列；数组顺序同时表达活动集合和 FIFO 年龄 | [interface contracts](../architecture/interface-contracts.md) |
 | active feature queue | Analyzer 当前展开的 0–4 个唯一 FeatureId；展开第五项时移除队首并把目标追加到队尾 | 同一次响应式提交保证永不出现五张展开卡；收起再展开才刷新年龄 | [ADR-0012](../architecture/adrs/0012-analyzer-all-cards-fifo-active-analysis.md) |
 | V1 active-cards carrier | `PersistedSessionV1.activeCards` 的兼容保存字段；恢复按旧 slot 排序转为 FIFO，保存按队列索引重建 slot | 不升级 IndexedDB schema 也能恢复旧四槽会话，同时让运行时不再暴露 slot 语义 | [interface contracts](../architecture/interface-contracts.md) |
-| Feature order | Analyzer 21 个 `FeatureId` 的完整唯一数组；顺序同时驱动 keyed DOM、键盘/读屏和 masonry placement | 与 `activeFeatureQueue` 独立；不表示展开状态或 FIFO 年龄 | [ADR-0013](../architecture/adrs/0013-analyzer-accessible-card-reordering.md) |
+| Feature order | V1保留的21项完整唯一数组；Analyzer当前原列表按FEATURE_IDS固定排列 | 旧顺序可读取，Analyzer初始化规范为默认；置顶由FIFO倒序派生 | [当前契约](analyzer-list.md) |
 | Drop edge | pointer target 卡的 `before`/`after` 插入边；由目标矩形上/下半区决定 | drop 才提交，不在拖动中实时重排 DOM | [interface contracts](../architecture/interface-contracts.md) |
 | Reorder action | 无需拖动的 `up`/`down`/`first`/`last` 动作 | click/tap 面板与键盘快捷键共享同一纯 reducer | [ADR-0013](../architecture/adrs/0013-analyzer-accessible-card-reordering.md) |
 | `M7_FEATURE_IDS` | M7 唯一允许选择的 `rms`、`amplitudeSpectrum`、`chroma` 常量集合 | 防止提前暴露 Energy、`spectralFlux` 或其他 M8 特征 | [decision registry](decision-registry.md) |

@@ -62,7 +62,7 @@
 | [tests/scripts/verify-v5-media.mjs](../../tests/scripts/verify-v5-media.mjs) | — |
 | [tests/scripts/verify-v6-media.mjs](../../tests/scripts/verify-v6-media.mjs) | — |
 | [tests/skills/visualizer-scene-generator.test.ts](../../tests/skills/visualizer-scene-generator.test.ts) | — |
-| [tests/support/analyzer-masonry.ts](../../tests/support/analyzer-masonry.ts) | [src/analysis/types.ts](../../src/analysis/types.ts) |
+| [tests/support/analyzer-list.ts](../../tests/support/analyzer-list.ts) | [src/analysis/types.ts](../../src/analysis/types.ts) |
 | [tests/support/audio-fixtures.ts](../../tests/support/audio-fixtures.ts) | — |
 | [tests/support/e2-tempo-fixture.ts](../../tests/support/e2-tempo-fixture.ts) | [tests/support/audio-fixtures.ts](../../tests/support/audio-fixtures.ts)、[tests/support/m7-learning-fixture.ts](../../tests/support/m7-learning-fixture.ts) |
 | [tests/support/e3-point-fixture.ts](../../tests/support/e3-point-fixture.ts) | [tests/support/audio-fixtures.ts](../../tests/support/audio-fixtures.ts)、[tests/support/e2-tempo-fixture.ts](../../tests/support/e2-tempo-fixture.ts)、[tests/support/m7-learning-fixture.ts](../../tests/support/m7-learning-fixture.ts) |

@@ -14,7 +14,7 @@ import {
 } from '../support/file-picker';
 import { encodeMonoWav } from '../support/m7-learning-fixture';
 import { createM9VectorPcm } from '../support/m9-vector-fixture';
-import { expectAnalyzerMasonry } from '../support/analyzer-masonry';
+import { expectAnalyzerList, readAnalyzerViewport, zoomAnalyzer } from '../support/analyzer-list';
 
 const REPOSITORY_ROOT = path.resolve(import.meta.dirname, '../..');
 const M9_WAV_FIXTURE = path.join(
@@ -73,7 +73,7 @@ test('renders Power Spectrum, MFCC and Buffer as four persistent expanded cards'
             .click();
     }
     await expect(page.locator('[data-feature-id]')).toHaveCount(21);
-    await expect(page.locator('.analysis-card [aria-expanded="true"]'))
+    await expect(page.locator('.analysis-card .toggle-card[aria-expanded="true"]'))
         .toHaveCount(4);
     await expect(page.locator('[data-feature-id] select')).toHaveCount(0);
 
@@ -108,11 +108,9 @@ test('renders Power Spectrum, MFCC and Buffer as four persistent expanded cards'
             .getAttribute('data-current-time'),
     )).toBeGreaterThan(afterClick);
 
-    await page.getByRole('button', { name: '放大时间轴' }).click();
-    await page.getByRole('button', { name: '向后平移四分之一视口' }).click();
-    await expect(page.locator('.timeline-toolbar')).toContainText('2.0×');
-    const viewportBeforeReload = await page.locator('.timeline-toolbar')
-        .innerText();
+    await zoomAnalyzer(page);
+    await expect.poll(async () => (await readAnalyzerViewport(page)).zoom).toBeCloseTo(1.12 ** 6, 10);
+    const viewportBeforeReload = await readAnalyzerViewport(page);
     await page.reload();
     await expect(page.locator('[data-feature-id]')).toHaveCount(21);
     for (const featureId of expectedFeatures) {
@@ -121,22 +119,21 @@ test('renders Power Spectrum, MFCC and Buffer as four persistent expanded cards'
         ))
             .toHaveCount(1);
     }
-    await expect(page.locator('.timeline-toolbar')).toContainText('2.0×');
-    expect(await page.locator('.timeline-toolbar').innerText())
-        .toContain(viewportBeforeReload.match(/\d+:\d+\.\d+\s*–\s*\d+:\d+\.\d+/)?.[0]);
+    await expect.poll(async () => (await readAnalyzerViewport(page)).zoom).toBeCloseTo(1.12 ** 6, 10);
+    expect(await readAnalyzerViewport(page)).toEqual(viewportBeforeReload);
 
     const geometries: Record<number, number> = {};
     for (const width of [390, 1_024, 1_280, 1_920]) {
-        geometries[width] = (await expectAnalyzerMasonry(page, width)).columns;
+        geometries[width] = (await expectAnalyzerList(page, width)).columns;
     }
-    expect(geometries).toEqual({ 390: 1, 1024: 1, 1280: 1, 1920: 2 });
+    expect(geometries).toEqual({ 390: 1, 1024: 1, 1280: 1, 1920: 1 });
 
     console.log(JSON.stringify({
         metric: 'm9-vector-learning',
         activeCards: 4,
         availableFeatures: 21,
         exactDimensions: { powerSpectrum: 512, mfcc: 13, buffer: 1024 },
-        viewportRestored: '2.0x',
+        viewportRestored: (1.12 ** 6).toFixed(4) + 'x',
         geometries,
     }));
     expect(issues).toEqual([]);

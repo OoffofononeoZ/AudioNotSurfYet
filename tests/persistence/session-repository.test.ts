@@ -14,7 +14,6 @@ import {
 import { sha256Blob } from '../../src/audio/audioSessionService';
 import {
     defaultFeatureOrder,
-    moveFeatureOrder,
 } from '../../src/analysis/featureOrder';
 import type {
     PersistedSessionV1,
@@ -102,11 +101,7 @@ describe('PersistedSessionV1 validation', () => {
     });
 
     test('accepts legacy absence and rejects every malformed M14 order', () => {
-        const customOrder = moveFeatureOrder(
-            defaultFeatureOrder(),
-            'buffer',
-            'first',
-        );
+        const customOrder = defaultFeatureOrder().reverse();
         expect(validatePersistedSessionV1({
             ...session('track-1'),
             featureOrder: customOrder,
