@@ -4,9 +4,7 @@
         <div class="analyzer-content">
             <div class="analyzer-status" aria-live="polite">
                 <span :data-state="analysis.state">{{ analysisStateLabel }}</span>
-                <span>{{ activeFeatureQueue.length }}/4 项展开分析</span>
-                <span v-if="activeFeatureQueue.length === 0">展开分析开始分析</span>
-                <span v-if="sessionStore.persistence.state === 'not-persisted'">当前工作区未持久化</span>
+                <span>{{ activeFeatureQueue.length }}/4 项</span>                <span v-if="sessionStore.persistence.state === 'not-persisted'">当前工作区未持久化</span>
                 <button v-if="analysis.error?.recoverable" type="button" @click="retryAnalysis">重试分析</button>
             </div>
             <p v-if="analysis.error" class="analysis-error" role="alert">{{ analysis.error.message }}</p>
@@ -354,7 +352,7 @@ onBeforeUnmount(() => {
     background: radial-gradient(circle at 20% 10%, var(--glow-accent), transparent 28%), var(--canvas);
     color: var(--ink); z-index: var(--layer-content); }
 .analyzer-content { position: relative; display: flex; flex-direction: column; box-sizing: border-box;
-    height: 100%; padding: 64px max(24px, calc((100% - 1760px) / 2)) 150px; }
+    height: 100%; padding: 64px max(24px, calc((100% - 1760px) / 2)) 70px; }
 .analyzer-status { display: flex; flex-wrap: wrap; align-items: center; flex: none;
     gap: 6px 16px; padding: 0 8px 12px; color: var(--mute); font-size: 0.72rem; }
 .analyzer-status [data-state="ready"] { color: var(--accent-deep); }
