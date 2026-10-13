@@ -135,7 +135,7 @@ test('renders Loudness and full Complex Spectrum as persistent expanded cards', 
     for (const width of [390, 1_024, 1_280, 1_920]) {
         geometries[width] = (await expectAnalyzerMasonry(page, width)).columns;
     }
-    expect(geometries).toEqual({ 390: 1, 1024: 1, 1280: 2, 1920: 2 });
+    expect(geometries).toEqual({ 390: 1, 1024: 1, 1280: 1, 1920: 2 });
 
     console.log(JSON.stringify({
         metric: 'm10-structured-learning',

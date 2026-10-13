@@ -579,7 +579,7 @@ interface AudioSessionServiceEditorExtension {
 Invariants:
 
 - `/editor/:trackId?` 只以 `trackId` 查找当前 session；工程匹配使用 `trackHash`，不能把两种身份互换。
-- Header 入口用当前 track ID 导航且不隐式改变播放/暂停；播放列表“去编辑”必须先在同一用户手势中调用现有 `playTrack(trackId)`，成功后再导航。
+- 侧边栏入口用当前 track ID 导航且不隐式改变播放/暂停；播放列表“去编辑”必须先在同一用户手势中调用现有 `playTrack(trackId)`，成功后再导航。
 - 直接打开或刷新带 ID 路由时，可以用现有 session/handle/blob 恢复目标 track，但保持 0 秒 paused；未知、不可恢复或身份无效时返回显式不可用状态。
 - acquire 只有在 track 存在、内容 hash 已知且可解码/恢复时成功；失败不得切换到其他歌曲。
 - 当前 lease 将 ended policy 改为 repeat-one；同一个已解码 buffer 从 0 再次 `play()`，不调用 `next()`、不重新解码。

@@ -17,6 +17,8 @@ DEC-072另由MainLayout提供唯一`EditorSeparationService`，使用同一Audio
 
 Visualizer 已实现 `/visualizer/:trackId?`、route playback/analysis lease、strict JSON V1、独立单草稿、原生 JSON gateway 和一个 16:9 Canvas；binding 使用同歌 Editor snapshot、0–4 planner 与 60Hz 绝对时间 resolver。单一 `VisualizerRendererHost` 管理 Orthogonal Lines/Cube Swarm、确定性状态与错误恢复；录制使用唯一 pre-Gain tap、同 Canvas capture lease、MediaRecorder 和原生保存 gateway。具体职责见下表，历史审批与候选身份见对应 evidence。
 
+应用导航占位、窄屏隐藏、歌曲详情与内容宽度分界见 [应用外壳契约](app-shell.md)（DEC-076）；旧 canonical 数值与身份继续绑定历史实现。
+
 ## Runtime Flow
 
 ```text
@@ -59,7 +61,7 @@ showOpenFilePicker → FileSystemFileHandle → File
 
 | Subsystem | Purpose | Interfaces | Owner | Notes |
 | --- | --- | --- | --- | --- |
-| App shell and routing | 组合 Header、路由内容、MusicBar，并拥有 session service 生命周期 | Vue Router、provide/inject | project-owner | `createWebHistory()`；MainLayout 卸载时 dispose |
+| App shell and routing | 组合 AppSidebar、右上角齿轮、内容容器与独立 MusicBar，并拥有 session service 生命周期 | Vue Router、provide/inject | project-owner | `createWebHistory()`；MainLayout 卸载时 dispose |
 | MusicBar and queue UI | 文件选择、队列命令、进度、三种样式和错误消息 | AudioSessionService commands、audioSessionStore、MusicList events | project-owner | 不持有 File、AudioContext、播放 RAF 或队列事实 |
 | AudioSessionService | 元数据、runtime File/封面、竞态、ended 循环、单 RAF、工作区持久化与资源释放 | File/工作区输入；TrackRecord/PlaybackSnapshot/energy 输出 | project-owner | 工作区先更新内存，保存失败发布 not-persisted |
 | AudioEngine | 单一 AudioContext、解码、播放、暂停、seek、音量和时域数据 | ArrayBuffer 输入；PlaybackSnapshot/Float32Array 输出 | project-owner | AudioContext 与节点延迟创建；AudioContext 时钟为事实来源 |
@@ -68,9 +70,9 @@ showOpenFilePicker → FileSystemFileHandle → File
 | FeatureRegistry and codec | 21 项穷尽静态契约、六类紧凑 payload 与严格二进制 decoder | `FeatureId`、`FeatureDefinition`、`StoredAnalysisCache` | project-owner | Loudness 使用 total Float32 + 24 bands U16；Complex 使用 magnitude U16 + phase Int16；schema 保持 V1 |
 | Audio session state | 保存队列、当前 track、播放快照、能量、analysis 与 workspace snapshot | Pinia `audioSessionStore` | project-owner | `$state` 可 JSON 序列化，不含浏览器资源实例或 typed-array payload |
 | Session persistence | 保存/恢复 V1 最近会话、全部句柄和唯一 current Blob/cache | 原生 IndexedDB `SessionRepository` | project-owner | `replaceCurrentAnalysisCache()` 校验 track/hash 并原子替换；unknown schema 不猜测迁移 |
-| Config persistence | 保存 volume 与 MusicBar style | Pinia、localStorage key `config` | project-owner | schema 保持不变；volume 为 0–100 |
-| Home visualization | 全屏 Three.js 光线 shader | `rayLength` prop、IntersectionObserver、reduced-motion media query | unknown | 常规模式使用 WebGL RAF；reduced motion 只静态渲染；卸载释放 mesh、geometry、material、render list、renderer 与 WebGL context |
-| Analyzer surface | 固定展示 21 张折叠卡、最多四项 FIFO 活动分析、共享 viewport/zoom/cursor/seek、DOM 精确值与分层 Canvas | store、AudioSessionService、AnalysisCoordinator、Canvas 2D | project-owner | 独立 `featureOrder` 驱动 feature-keyed DOM 与 masonry，排序不触发 Coordinator 或改变 FIFO；实际高度最短列布局，390/1024 一列、1280/1920 两列、gap 18px；展开才挂载图表资源，默认活动队列为空 |
+| Config persistence | 保存 volume、MusicBar style 与桌面 sidebarCollapsed | Pinia、localStorage key `config` | project-owner | sidebarCollapsed 默认 false；volume 为 0–100 |
+| Home visualization | 歌曲详情与共享能量 Three.js 光线背景 | store metadata、service 封面 URL、`rayLength` prop、IntersectionObserver/ResizeObserver、reduced-motion media query | unknown | 常规模式使用 WebGL RAF；reduced motion 只静态渲染；卸载释放 mesh、geometry、material、render list、renderer 与 WebGL context |
+| Analyzer surface | 固定展示 21 张折叠卡、最多四项 FIFO 活动分析、共享 viewport/zoom/cursor/seek、DOM 精确值与分层 Canvas | store、AudioSessionService、AnalysisCoordinator、Canvas 2D | project-owner | 独立 `featureOrder` 驱动 feature-keyed DOM 与 masonry，排序不触发 Coordinator 或改变 FIFO；实际高度最短列布局，实际 masonry 宽度小于 1232px 一列、否则两列、gap 18px；展开才挂载图表资源，默认活动队列为空 |
 | Editor E1–E9 surface | `/editor/:trackId?` 状态、精简 transport、JSON 工程、共享波形/tempo/point/range 时间列、21 项 overlay、`88px/72px` 波形、28px 紧凑 BPM 条、不可用恢复决策与中心对齐 marker | EditorSessionController、AudioSessionService、AnalysisCoordinator、Vue Router、shared Canvas renderer、DOM controls | project-owner | E1–E9 已关闭；E9 revised canonical 与 owner 门禁已批准 |
 | Editor project and draft | strict JSON V1、歌曲 hash/时长绑定、原生 file gateway、单草稿 autosave 与恢复冲突 | `EditorFormatCodecRegistry`、`EditorDraftRepository`、`audionotsurfyet-editor` V1 | project-owner | 首版只注册 JSON；session database 不变 |
 | Visualizer V1–V6 surface | `/visualizer/:trackId?` 单视口三栏/互斥抽屉、左右独立滚动、16:9 单 Canvas、底部 transport、strict project/单草稿、两个确定性 scene、recording 状态栏、WebM 保存、final hardening 与 post-V6 原生全屏 | `VisualizerSessionController`、`VisualizerRendererHost`、`SceneRegistry`、`RoutePlaybackLease`、`AnalysisConsumerLease`、BindingPlanner/Resolver、Editor snapshot、MediaRecorder、Fullscreen API | project-owner | V1–V6 canonical 保持批准；fullscreen 只为瞬时 UI，自动化跳过并待 owner 审阅 |
@@ -101,14 +103,14 @@ showOpenFilePicker → FileSystemFileHandle → File
 - 刷新时 current Blob 优先并恢复为 0 秒 paused；其他曲目只在 `queryPermission()` 为 granted 时自动取回，`requestPermission()` 只由可见用户操作触发。
 - `--coinc-process` 既可能由 GSAP 写入，也可能由能量 RAF 写入，模式切换需明确所有权。
 - AudioContext、source、单播放 RAF、产品 Worker、pending analysis request 和封面 URL 由 MainLayout-owned service/coordinator 生命周期统一释放；Analyzer masonry 的容器/21 item ResizeObserver 与待执行 RAF 在卸载时成对释放，展开卡的 Canvas/卡片 ResizeObserver 在收起时释放，GSAP 和 Three.js 由各组件释放。
-- Header 的 settings 事件没有已发现消费者；`/comingsoon` 只保留为通用占位，不再承载 Visualizer。Editor E1–E9 已获批准并关闭；E9 不改变 runtime/data ownership，Visualizer V1 也不改变该边界。
+- 右上角齿轮的 settings 事件没有已发现消费者；`/comingsoon` 只保留为通用占位，不再承载 Visualizer。Editor E1–E9 已获批准并关闭；E9 不改变 runtime/data ownership，Visualizer V1 也不改变该边界。
 - `components.d.ts` 和 `auto-imports.d.ts` 是构建插件生成文件，构建可能造成工作树变化。
 
 ## Editor 基线边界
 
 以下为 E1–E9 的已实现基线；E10 与 FT 接入修订的当前状态及合同见 [上下文入口](index.md)。
 
-- `/editor/:trackId?` 由 route-generation `EditorSessionController` 编排；Header 使用当前歌曲，播放列表“去编辑”先播放指定歌曲。
+- `/editor/:trackId?` 由 route-generation `EditorSessionController` 编排；侧边栏使用当前歌曲，播放列表“去编辑”先播放指定歌曲。
 - tokenized playback lease 隔离 repeat-one；analysis consumer lease 只允许 Analyzer/Editor 最新 token 生效。Editor 先激活 `buffer` 完成 waveform/tempo，再激活 `buffer + selected overlay`；选择 Buffer 时去重，快速切换与旧 generation 以最后选择为准。
 - `EditorProjectV1`、strict JSON codec、原生 picker gateway 和独立 `audionotsurfyet-editor` V1 单草稿已实现；内存工程优先，quota 发布 `not-persisted`。
 - `EditorTimeline` 以同一 `timeToX/xToTime` 驱动 waveform、grid、cursor 与 boundary；viewport 支持 1–64 zoom、指针锚点、任意像素/25% pan、seek 和持久化。
@@ -117,7 +119,7 @@ showOpenFilePicker → FileSystemFileHandle → File
 - point 命令固定微秒唯一性、1/16–1 beat 自适应吸附、single-beat 整段一格与分类迁移/明确删除；右键 marker 删除，空白 4px 以上 pan，否则打开 quick menu。
 - range 命令使用微秒规范化半开 `[start,end)`；同 lane/inner class 真重叠拒绝、相邻允许，跨分类范围和内部 point 可并存。UI 支持两阶段创建、虚线 preview、Esc/空白右键取消、端点 pointer/keyboard 调整、pointercancel 回滚、分类迁移冲突与 viewport-visible 裁剪。
 - `analysisCanvasRenderer` 是 Analyzer card 与 Editor overlay 共用的纯 Canvas adapter；E4 overlay 一次选择累计 21 项中的一个，使用同一 viewport/time geometry、DPR backing store、40ms exact cursor 合并和 last-ready Buffer fallback。
-- overlay 通过 Teleport 固定覆盖窗口，灰色背景、全视口 Canvas 与说明穿透到 Header/底层标记；只有左上复合入口、临时 21 项菜单、重试和 top/move/bottom 手柄接收 pointer。bounds 仍为 0.10/0.35、最小 0.12，但相对 viewport；visibility 按歌曲 hash 本地保存，关闭时 active set 只保留 Buffer。
+- overlay 通过 Teleport 固定覆盖窗口，灰色背景、全视口 Canvas 与说明穿透到侧边栏/底层标记；只有左上复合入口、临时 21 项菜单、重试和 top/move/bottom 手柄接收 pointer。bounds 仍为 0.10/0.35、最小 0.12，但相对 viewport；visibility 按歌曲 hash 本地保存，关闭时 active set 只保留 Buffer。
 
 E7 原 44/44 run 只作 `pre-revision`，修订版 46/46 与 E6/E8 的历史身份见 [Editor evidence](../quality/editor/evidence-index.md)，不因其他子系统修改而改写。
 

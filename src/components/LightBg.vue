@@ -333,6 +333,8 @@ const initializeWebGL = async (): Promise<void> => {
         };
 
         window.addEventListener('resize', handleResize, { passive: true });
+        const sizeObserver = new ResizeObserver(handleResize);
+        sizeObserver.observe(containerRef.value);
         updatePlacement();
         if (prefersReducedMotion.value) {
             renderer.render(scene, camera);
@@ -347,6 +349,7 @@ const initializeWebGL = async (): Promise<void> => {
             }
 
             window.removeEventListener('resize', handleResize);
+            sizeObserver.disconnect();
 
             if (resizeTimeoutRef.value !== null) {
                 clearTimeout(resizeTimeoutRef.value);

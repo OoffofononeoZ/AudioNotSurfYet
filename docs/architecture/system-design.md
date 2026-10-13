@@ -131,11 +131,11 @@ Editor 不改变该拓扑。`EditorSessionController` 通过 tokenized lease 使
 
 ### Editor playback lease
 
-- `/editor/:trackId?` 是目标路由。Header 使用当前 track；没有当前 track 时进入 `/editor` 空状态并保留 MusicBar。播放列表“去编辑”先显式播放所选 track，再进入带 ID 路由。
+- `/editor/:trackId?` 是目标路由。侧边栏使用当前 track；没有当前 track 时进入 `/editor` 空状态并保留 MusicBar。播放列表“去编辑”先显式播放所选 track，再进入带 ID 路由。
 - 路由中的 track ID 只用于定位当前 session 记录；工程身份始终使用内容 SHA-256。未知、不可恢复或无内容 hash 的路由目标进入明确不可用状态，不静默切到其他歌曲。
 - `AudioSessionService.acquireEditorPlayback(trackId)` 返回带唯一 token 的 lease。lease 激活时，当前 track 自然 ended 由 service 对同一已解码 buffer 调用 `play()`，不执行 `next()` 或重新解码。
 - 只有当前 token 的 `release()` 可以恢复普通 queue-next 策略。旧组件、旧路由或迟到清理不得覆盖新 lease。
-- Header 进入当前歌曲时保留当时播放/暂停状态；播放列表入口由用户手势显式播放目标；刷新或直接打开依照现有 session 恢复规则保持 0 秒 paused，但 repeat-one 策略已准备好。
+- 侧边栏进入当前歌曲时保留当时播放/暂停状态；播放列表入口由用户手势显式播放目标；刷新或直接打开依照现有 session 恢复规则保持 0 秒 paused，但 repeat-one 策略已准备好。
 - 只有 lease 已绑定有效 track 时隐藏 MusicBar。Editor 内的精简播放控件只调用现有 service；空状态、无效目标或恢复失败时保留 MusicBar。
 
 ## 7. Analysis Pipeline
@@ -203,13 +203,13 @@ M8 标量以同一 Hanning frame 的 energy 判断零能量：零能量时全部
 - Amplitude Spectrum：时频热图和游标频谱。
 - Chroma：12 类热图和游标柱图。
 
-Canvas 只画数据、网格、游标和选择态；标题、解释、参数、数值、按钮、状态与可访问替代信息由 DOM 提供。App shell 使用统一 layer contract：Analyzer sticky 位于 Header 下 8px，MusicBar 与直属弹层高于 Header/Analyzer；pressed 只表示瞬时按压，精确值表格使用可见的主题滚动条。
+Canvas 只画数据、网格、游标和选择态；标题、解释、参数、数值、按钮、状态与可访问替代信息由 DOM 提供。App shell 使用统一 layer contract：Analyzer sticky 桌面位于窗口顶部 8px，MusicBar 与直属弹层高于导航/Analyzer；共享侧边栏占位和窄屏留位见 [应用外壳契约](../context/app-shell.md)；pressed 只表示瞬时按压，精确值表格使用可见的主题滚动条。
 
 ### Analyzer M12 masonry layout
 
 - Analyzer 不再显示独立的开场标题与说明，分析状态、活动卡数量和持久化提示进入共享时间轴工具栏内的独立 `aria-live` 区域；快速变化的游标与 viewport 文本不进入 live region。
 - 四个 slot 始终按 `0 → 3` 保持稳定 DOM 顺序和组件身份。视觉布局按 slot 顺序逐项放入当前累计高度最短的列；列高相同时选择左列。
-- 390/1024 CSS px 使用一列，1280/1920 CSS px 使用两列，最多两列且横纵间距均为 18 CSS px。四个活动卡或空槽都参与同一布局计算。
+- 实际 masonry 容器宽度小于 1232 CSS px 使用一列，否则两列，最多两列且横纵间距均为 18 CSS px。四个活动卡或空槽都参与同一布局计算。
 - 纯布局函数只接收容器宽度、列数、间距和实际 DOM 高度并返回列宽、坐标与容器高度。`@chenglou/pretext` 继续只用于 TestLands 文本估算，不参与 Analyzer 的 Canvas、错误态或展开表格测量。
 - Analyzer 使用一个容器 `ResizeObserver`、一个共享的 item `ResizeObserver` 和至多一个待执行布局 RAF。换卡、数据/错误状态、`details` 展开和 resize 都重新测量；Observer 回调必须通过 RAF 合并，路由卸载时 disconnect 并取消 RAF。
 - item 只改变绝对定位包装层的宽度和 transform，不移动或重建 `MeydaCard`，因此 Canvas、焦点、`details open` 和键盘/读屏 DOM 顺序保持稳定。重排不使用位移动画。
@@ -412,7 +412,7 @@ M6 只在 `import.meta.env.DEV` 安装无 UI bridge，提供活动特征、cance
 ## 18. Editor Compact Workbench
 
 - [ADR-0010](adrs/0010-editor-compact-workbench.md) 将 Editor 大区域统一为平面背景与 1px 低对比分隔线；圆角只保留给控件、事件标记、菜单和对话框。FL Studio 图片只用于说明密度与分区方向，不构成品牌、配色或具体控件复制要求。
-- ready 状态顶部由两行工具栏承载工程/歌曲/草稿及播放/格式/导入导出，两行总高度不超过 84px，桌面控件高度 30px；页面在 Header 下方保留 8px 间距并移除 Editor 1440px 最大宽度。
+- ready 状态顶部由两行工具栏承载工程/歌曲/草稿及播放/格式/导入导出，两行总高度不超过 84px，桌面控件高度 30px；页面采用应用外壳顶部留位并移除 Editor 1440px 最大宽度。
 - Editor 令牌固定为 point/range 行高 44px、lane 名称列 152px、inner class 列 144px、主区域圆角 0、控件圆角 4px、临时菜单/对话框圆角最多 8px。
 - E7 原始波形高度 176/144px 由 [ADR-0018](adrs/0018-editor-timeline-recovery-and-marker-alignment.md) 局部替代：桌面固定 88px，小于 900px 固定 72px；波形以轨道中心绘制，上下各保留 6px。窄屏仍只允许一个显式横向时间轴滚动区，不能通过压缩时间列破坏点击精度。
 - 本变化只改变 DOM 布局与视觉令牌。歌曲、工程、viewport、tempo、point/range、overlay、JSON V1、IndexedDB、playback/analysis lease 与共享 `timeToX/xToTime` 均沿用现有契约。
@@ -427,7 +427,7 @@ M6 只在 `import.meta.env.DEV` 安装无 UI bridge，提供活动特征、cance
 
 ## 19. Editor Fullscreen Analysis Overlay
 
-- [ADR-0011](adrs/0011-editor-fullscreen-overlay.md) 把分析叠加层通过 Vue `Teleport` 提升到窗口顶层，root 固定覆盖 viewport。背景为无模糊的灰色半透明层；背景、Canvas、说明和空白区域不接收 pointer，Header、时间轴和事件仍由浏览器直接命中。
+- [ADR-0011](adrs/0011-editor-fullscreen-overlay.md) 把分析叠加层通过 Vue `Teleport` 提升到窗口顶层，root 固定覆盖 viewport。背景为无模糊的灰色半透明层；背景、Canvas、说明和空白区域不接收 pointer，侧边栏、时间轴和事件仍由浏览器直接命中。
 - 左上角只保留固定复合入口：主按钮开关叠加层，箭头临时展开 21 项单选菜单。关闭保留工程中的 `featureId`，但 consumer active set 收敛为 `buffer`，exact cursor 与 overlay renderer 停止。
 - `EditorSessionSnapshot.overlayOpen` 是当前内存事实；现有 Editor `preferences` store 按歌曲 content hash 保存 visibility。该偏好不进入 JSON V1，导入工程不覆盖它，数据库版本不变。
 - 全视口 Canvas 只在底层标记时间列的屏幕横向范围内绘制。纵向文档滚动不改变图形窗口坐标；窄屏时间列横向滚动只更新裁剪和横向几何，任意共享时间锚点误差仍不得超过 1 CSS px。
@@ -437,7 +437,7 @@ M6 只在 `import.meta.env.DEV` 安装无 UI bridge，提供活动特征、cance
 
 ### Route and runtime ownership
 
-- 目标路由为 `/visualizer/:trackId?`。Header 使用当前歌曲进入；未知、不可恢复或内容身份不匹配的目标进入明确空状态，不静默选择队列中的其他歌曲。
+- 目标路由为 `/visualizer/:trackId?`。侧边栏使用当前歌曲进入；未知、不可恢复或内容身份不匹配的目标进入明确空状态，不静默选择队列中的其他歌曲。
 - `AudioSessionService` 把 Editor 专用 lease 泛化为 `RoutePlaybackLease`：Editor 使用 `repeat-one`，Visualizer 使用 `pause-at-end`。只有当前 token 能释放 ended policy；有效 route lease 隐藏 MusicBar，空状态保留 MusicBar。
 - `AnalysisCoordinator` 的 consumer 联合扩展为 `analyzer | editor | visualizer`。Visualizer 先对所有绑定 FeatureId 去重，只有 0–4 项合法；第五项在调用 Coordinator 前拒绝。分析值从 compact `AnalysisSeries` 按 AudioContext 绝对时间采样，不增加 exact-cursor 轮询或第二个 Worker。
 - V1 实现必须原子迁移 Editor 到通用 lease，不保留长期 `acquireEditorPlayback()` 兼容 adapter。迁移不得改变 Editor repeat-one、刷新暂停或离页恢复 queue-next 的已批准行为。
@@ -481,9 +481,9 @@ M6 只在 `import.meta.env.DEV` 安装无 UI bridge，提供活动特征、cance
 
 ### Workspace viewport and scrolling
 
-- DEC-050 将支持的 `>=1024px` 桌面 Visualizer 外壳固定为一个 `100dvh`：Header 仍为 64px fixed layer，页面以既有顶部/边缘留白占据剩余视觉空间，document/body 不拥有纵向滚动。
+- DEC-050 将支持的 `>=1024px` 桌面 Visualizer 外壳固定为一个 `100dvh`：DEC-076 改用共享侧边栏占位与 12px 桌面顶部留白，页面占据剩余内容宽度，document/body 不拥有纵向滚动。
 - workspace 的 toolbar、可选 alert、中央 grid、recording bar 与 transport 使用有界 grid height；中央行必须 `minmax(0, 1fr)` 且所有中间容器允许 `min-height: 0`，不能由 inspector 的 min-content 高度撑开页面。
-- 左模板和右参数侧栏分别拥有 `overflow-y: auto`、隐藏横向溢出和 `overscroll-behavior: contain`。`1024–1279px` 抽屉以中央 workspace grid 为定位/裁切边界，不能覆盖 recording bar 或 transport；`<1024px` 保留现有最小宽度与横向兼容，不形成移动端支持承诺。
+- 左模板和右参数侧栏分别拥有 `overflow-y: auto`、隐藏横向溢出和 `overscroll-behavior: contain`。可用内容宽度 `<1280px` 的抽屉以中央 workspace grid 为定位/裁切边界，不能覆盖 recording bar 或 transport；`<1024px` 保留现有最小宽度与横向兼容，不形成移动端支持承诺。
 - 产品自有的可见滚动容器使用共享 `.app-scrollbar`，其视觉来源是 Analyzer 精确值表。本次只迁移 Analyzer 表与 Visualizer；不使用全局通配选择器覆盖原生控件或第三方组件。
 
 ### Post-V6 fullscreen playback

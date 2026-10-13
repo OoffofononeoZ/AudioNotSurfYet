@@ -98,7 +98,8 @@ export const expectAnalyzerMasonry = async (
     expectedSlots: readonly string[] = FEATURE_IDS,
 ): Promise<AnalyzerMasonryGeometry> => {
     await page.setViewportSize({ width, height });
-    const expectedColumns = width >= 1_280 ? 2 : 1;
+    const contentWidth = await page.locator('[data-testid="analyzer-masonry"]').evaluate(element => element.getBoundingClientRect().width);
+    const expectedColumns = contentWidth >= 1232 ? 2 : 1;
     await expect.poll(async () => {
         const geometry = await readGeometry(page);
         return geometry && {

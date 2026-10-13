@@ -107,7 +107,7 @@ test('keeps the Editor workbench compact and functional across viewports', async
     expect(desktopMetrics.toolbarRadius).toBe(10);
     expect(Math.max(...desktopMetrics.majorRadii)).toBeLessThanOrEqual(2);
     expect(Math.max(...desktopMetrics.controlHeights)).toBeLessThanOrEqual(30.5);
-    expect(desktopMetrics.pagePaddingTop).toBe(72);
+    expect(desktopMetrics.pagePaddingTop).toBe(12);
 
     const playbackToggle = page.getByTestId('editor-playback-toggle');
     await playbackToggle.click();
@@ -143,7 +143,7 @@ test('keeps the Editor workbench compact and functional across viewports', async
             };
         });
         expect(responsive.waveformHeight).toBe(viewport.width < 900 ? 72 : 88);
-        expect(responsive.toolbarBottom).toBeGreaterThan(72);
+        expect(responsive.toolbarBottom).toBeGreaterThan(viewport.width < 768 ? 64 : 12);
         expect(responsive.bodyOverflow).toBeLessThanOrEqual(1);
         if (viewport.width === 1024) {
             expect(responsive.pointBottom).toBeLessThanOrEqual(viewport.height);
@@ -239,8 +239,8 @@ test('keeps the fullscreen overlay fixed, transient and pointer-through', async 
         position: 'fixed',
         pointerEvents: 'none',
     });
-    expect(initial.controls.left).toBe(12);
-    expect(initial.controls.top).toBe(72);
+    expect(initial.controls.left).toBe(228);
+    expect(initial.controls.top).toBe(12);
     expect(Math.abs(initial.panel.left - initial.marker.left)).toBeLessThanOrEqual(1);
     expect(Math.abs(initial.panel.width - initial.marker.width)).toBeLessThanOrEqual(1);
 

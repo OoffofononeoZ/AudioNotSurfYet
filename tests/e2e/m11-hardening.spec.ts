@@ -178,14 +178,14 @@ test('keeps keyboard, focus, reduced motion and responsive geometry usable', asy
     const geometries: Record<number, {
         columns: number;
         documentOverflow: number;
-        headerHeight: number;
+        navigationInset: number;
         musicBarInsideViewport: boolean;
     }> = {};
     for (const width of [390, 1_024, 1_280, 1_920]) {
         const masonry = await expectAnalyzerMasonry(page, width);
         geometries[width] = await page.evaluate((columns) => {
-            const header = document.querySelector<HTMLElement>(
-                '#main-header',
+            const content = document.querySelector<HTMLElement>(
+                '.app-content',
             )!;
             const music = document.querySelector<HTMLElement>(
                 '#music-bar-container',
@@ -197,7 +197,7 @@ test('keeps keyboard, focus, reduced motion and responsive geometry usable', asy
                     0,
                     document.documentElement.scrollWidth - window.innerWidth,
                 ),
-                headerHeight: header.getBoundingClientRect().height,
+                navigationInset: content.getBoundingClientRect().left,
                 musicBarInsideViewport:
                     musicRect.left >= -1
                     && musicRect.right <= window.innerWidth + 1,
@@ -208,25 +208,25 @@ test('keeps keyboard, focus, reduced motion and responsive geometry usable', asy
         390: {
             columns: 1,
             documentOverflow: 0,
-            headerHeight: 64,
+            navigationInset: 0,
             musicBarInsideViewport: true,
         },
         1024: {
             columns: 1,
             documentOverflow: 0,
-            headerHeight: 64,
+            navigationInset: 216,
             musicBarInsideViewport: true,
         },
         1280: {
-            columns: 2,
+            columns: 1,
             documentOverflow: 0,
-            headerHeight: 64,
+            navigationInset: 216,
             musicBarInsideViewport: true,
         },
         1920: {
             columns: 2,
             documentOverflow: 0,
-            headerHeight: 64,
+            navigationInset: 216,
             musicBarInsideViewport: true,
         },
     });

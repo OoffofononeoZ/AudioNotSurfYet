@@ -1,4 +1,31 @@
 <svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+    <symbol id="nav-home" viewBox="0 0 24 24">
+        <g fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="2.5"/><path d="M6 12a6 6 0 0 1 6-6m6 6a6 6 0 0 1-6 6"/></g>
+    </symbol>
+    <symbol id="nav-visualizer" viewBox="0 0 24 24">
+        <g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8m-4-4v4m-5-10h2l2-3 2 6 2-3h2"/></g>
+    </symbol>
+    <symbol id="nav-analyzer" viewBox="0 0 24 24">
+        <g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M4 9v6m4-9v12m4-15v18m4-15v12m4-9v6"/></g>
+    </symbol>
+    <symbol id="nav-editor" viewBox="0 0 24 24">
+        <g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4v16m0-12h16M4 16h16m9-12v16"/><rect x="7" y="5" width="4" height="6" rx="1"/><rect x="15" y="13" width="5" height="6" rx="1"/></g>
+    </symbol>
+    <symbol id="nav-testlands" viewBox="0 0 24 24">
+        <g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6m-5 0v6l-6 9a2 2 0 0 0 1.7 3h12.6a2 2 0 0 0 1.7-3l-6-9V3M7 15h10"/></g>
+    </symbol>
+    <symbol id="nav-settings" viewBox="0 0 24 24">
+        <g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="m10 3-.5 2-2 .9-1.8-.6-2 3.4 1.5 1.4v2.3l-1.5 1.4 2 3.4 1.8-.6 2 .9.5 2h4l.5-2 2-.9 1.8.6 2-3.4-1.5-1.4v-2.3l1.5-1.4-2-3.4-1.8.6-2-.9L14 3Z"/><circle cx="12" cy="11.3" r="3"/></g>
+    </symbol>
+    <symbol id="nav-collapse" viewBox="0 0 24 24">
+        <g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="m14 6-6 6 6 6m4-12v12"/></g>
+    </symbol>
+    <symbol id="nav-menu" viewBox="0 0 24 24">
+        <path fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" d="M4 6h16M4 12h16M4 18h16"/>
+    </symbol>
+    <symbol id="nav-close" viewBox="0 0 24 24">
+        <path fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" d="m6 6 12 12M6 18 18 6"/>
+    </symbol>
     <symbol id="next-song" viewBox="0 0 1024 1024">
         <path fill="currentColor" d="M101.9 684.1c22.6 53.4 54.9 101.3 96.1 142.5 41.2 41.2 89.1 73.5 142.5 96.1 55.3 23.4 114 35.2 174.5 35.2s119.2-11.9 174.5-35.2c53.4-22.6 101.3-54.9 142.5-96.1 41.2-41.2 73.5-89.1 96.1-142.5 23.4-55.3 35.2-114 35.2-174.5s-11.9-119.2-35.2-174.5c-22.6-53.4-54.9-101.3-96.1-142.5-41.2-41.2-89.1-73.5-142.5-96.1-55.3-23.4-114-35.2-174.5-35.2S395.7 73.1 340.4 96.5c-53.4 22.6-101.3 54.9-142.5 96.1-41.2 41.2-73.5 89.1-96.1 142.5-23.4 55.3-35.2 114-35.2 174.5s11.9 119.2 35.3 174.5z m413-542.8c203.1 0 368.3 165.2 368.3 368.3 0 203.1-165.2 368.3-368.3 368.3-203.1 0-368.3-165.2-368.3-368.3 0-203.1 165.2-368.3 368.3-368.3z" p-id="1363"></path>
         <path fill="currentColor" d="M343.9 679.2c12.4 7.1 27.6 7.1 40 0l233.8-135c3.1-1.8 5.8-3.9 8.3-6.4v124.7c0 22.1 17.9 40 40 40s40-17.9 40-40v-306c0-22.1-17.9-40-40-40s-40 17.9-40 40v124.7c-2.4-2.4-5.2-4.6-8.3-6.4l-233.8-135c-6.2-3.6-13.1-5.4-20-5.4s-13.8 1.8-20 5.4c-12.4 7.1-20 20.3-20 34.6v270c0 14.4 7.6 27.7 20 34.8z m60-235.3l113.8 65.7-113.8 65.7V443.9z" p-id="1364"></path>

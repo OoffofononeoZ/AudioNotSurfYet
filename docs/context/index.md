@@ -19,6 +19,7 @@ AudioNotSurfYet 是 Vue / TypeScript / Vite 浏览器音频工作台；当前目
 
 | 子系统 | 当前状态与边界 |
 | --- | --- |
+| 应用外壳与首页 | DEC-076：可收起侧边栏、窄屏隐藏导航和歌曲详情首页；布局及接口见 [应用外壳契约](app-shell.md)。 |
 | Analyzer | M1–M14 历史切片已完成；M14 的 21 卡、FIFO 与独立排序基线获批，readiness 为 `Ready with waivers`。证据绑定历史候选。 |
 | Editor | E1–E9 canonical 与适用人工门禁已批准。E10 按 DEC-057 开放单 lane/class 小节批量编辑与站内离页 dialog；E9 revised 29/29 保持历史身份，原 readiness 候选为 `pre-E10`。 |
 | Visualizer | V1–V6 canonical 与适用人工门禁已批准，post-V6 viewport 修订已有 Chrome/Edge 专项证据。DEC-058 的原生全屏复用同一 Canvas/transport，不创建 V7；原 readiness 候选为 `pre-fullscreen`，交互与视觉由 owner 审阅。新场景仍须完整输入校验和确定 Scene Contract 审批。 |
@@ -52,6 +53,7 @@ AudioNotSurfYet 是 Vue / TypeScript / Vite 浏览器音频工作台；当前目
 | --- | --- |
 | [AGENTS.md](../../AGENTS.md) | 根工作指南与项目 skill 导航 |
 | [system-map.md](system-map.md) | 当前子系统、接口和外部依赖 |
+| [app-shell.md](app-shell.md) | 当前侧边栏、内容边界、响应式布局与歌曲详情首页 |
 | [glossary.md](glossary.md) | 当前项目词汇与代码含义 |
 | [decision-registry.md](decision-registry.md) | 产品、架构和交付决策入口 |
 | [working-agreements.md](working-agreements.md) | 本地开发、验证和 Git 约定 |

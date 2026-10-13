@@ -111,9 +111,9 @@ test('offers persistent keyboard and click alternatives with reset', async ({ pa
 test('uses a six-pixel pointer threshold, insertion markers, auto-scroll, and cancellation', async ({ page }) => {
     test.setTimeout(90_000);
     const issues = captureBrowserIssues(page);
-    await page.setViewportSize({ width: 1_280, height: 720 });
+    await page.setViewportSize({ width: 1_536, height: 720 });
     await page.goto('/analyzer');
-    await expectAnalyzerMasonry(page, 1_280, 720);
+    await expectAnalyzerMasonry(page, 1_536, 720);
 
     const rmsHandleBox = await handle(page, 'rms').boundingBox();
     if (!rmsHandleBox) throw new Error('RMS reorder handle is missing.');
@@ -150,7 +150,7 @@ test('uses a six-pixel pointer threshold, insertion markers, auto-scroll, and ca
         ...FEATURE_IDS.slice(4),
     ];
     await expect.poll(() => readOrder(page)).toEqual(crossColumnOrder);
-    await expectAnalyzerMasonry(page, 1_280, 720, crossColumnOrder);
+    await expectAnalyzerMasonry(page, 1_536, 720, crossColumnOrder);
 
     const zcrBox = await handle(page, 'zcr').boundingBox();
     if (!zcrBox) throw new Error('ZCR reorder handle is missing.');
@@ -188,7 +188,7 @@ test('uses a six-pixel pointer threshold, insertion markers, auto-scroll, and ca
     await page.locator('.analyzer-content').evaluate((element) => {
         element.scrollTop = 0;
     });
-    await expectAnalyzerMasonry(page, 1_280, 720, autoScrolledOrder);
+    await expectAnalyzerMasonry(page, 1_536, 720, autoScrolledOrder);
     await handle(page, 'energy').scrollIntoViewIfNeeded();
     const energyBox = await handle(page, 'energy').boundingBox();
     if (!energyBox) throw new Error('Energy reorder handle is missing.');

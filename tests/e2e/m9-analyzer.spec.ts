@@ -38,42 +38,18 @@ const captureBrowserIssues = (page: Page): string[] => {
     return issues;
 };
 
-const headerStyle = (page: Page) => page.locator('#main-header').evaluate(
-    (element) => {
-        const style = getComputedStyle(element);
-        return {
-            backgroundColor: style.backgroundColor,
-            backdropFilter: style.backdropFilter,
-            webkitBackdropFilter: style.getPropertyValue(
-                '-webkit-backdrop-filter',
-            ),
-            height: element.getBoundingClientRect().height,
-        };
-    },
-);
-
-test('keeps home transparent and blurs every non-home header across routes', async ({ page }) => {
+test('keeps sidebar selection consistent across routes', async ({ page }) => {
     const issues = captureBrowserIssues(page);
     await page.goto('/?source=m9#home');
-    await expect.poll(async () => (await headerStyle(page)).backgroundColor)
-        .toBe('rgba(0, 0, 0, 0)');
-    expect((await headerStyle(page)).backdropFilter).toBe('none');
-
+    await expect(page.getByTestId('sidebar-home-link')).toHaveAttribute('aria-current', 'page');
     for (const route of ['/analyzer', '/comingsoon', '/testlands']) {
         await page.goto(route);
-        const style = await headerStyle(page);
-        expect(style.backgroundColor).toBe('rgba(2, 4, 3, 0.72)');
-        expect(
-            style.backdropFilter === 'blur(18px)'
-            || style.webkitBackdropFilter === 'blur(18px)',
-        ).toBe(true);
-        expect(style.height).toBe(64);
+        await expect(page.locator('#app-sidebar')).toBeVisible();
+        expect(await page.locator('#app-sidebar').evaluate(element => element.getBoundingClientRect().width)).toBe(216);
     }
-
-    await page.getByRole('link', { name: 'AUDIOSURF' }).click();
+    await page.getByRole('link', { name: 'AUDIOSURF', exact: true }).click();
     await expect(page).toHaveURL(/\/$/);
-    await expect.poll(async () => (await headerStyle(page)).backdropFilter)
-        .toBe('none');
+    await expect(page.getByTestId('sidebar-home-link')).toHaveAttribute('aria-current', 'page');
     expect(issues).toEqual([]);
 });
 
@@ -153,7 +129,7 @@ test('renders Power Spectrum, MFCC and Buffer as four persistent expanded cards'
     for (const width of [390, 1_024, 1_280, 1_920]) {
         geometries[width] = (await expectAnalyzerMasonry(page, width)).columns;
     }
-    expect(geometries).toEqual({ 390: 1, 1024: 1, 1280: 2, 1920: 2 });
+    expect(geometries).toEqual({ 390: 1, 1024: 1, 1280: 1, 1920: 2 });
 
     console.log(JSON.stringify({
         metric: 'm9-vector-learning',
