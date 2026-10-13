@@ -1,14 +1,18 @@
 <template>
-    <main class="min-w-full h-dvh" id="main-layout">
-        <HeaderBar />
-        <router-view />
+    <div id="main-layout">
+        <AppSidebar />
+        <AppSettingsButton />
+        <div class="app-content">
+            <router-view />
+        </div>
         <MusicBar v-if="!routePlaybackActive" :progress="0" />
-    </main>
+    </div>
 </template>
 
 <script setup lang="ts">
-import { computed, onUnmounted, provide, shallowRef } from 'vue';
-import HeaderBar from '../components/HeaderBar.vue';
+import { computed, onUnmounted, provide, shallowRef, watchEffect } from 'vue';
+import AppSidebar from '../components/AppSidebar.vue';
+import AppSettingsButton from '../components/AppSettingsButton.vue';
 import MusicBar from '../components/MusicBar.vue';
 import {
     AudioSessionService,
@@ -44,6 +48,12 @@ import { EditorProcessingGate } from '../processing/editorProcessingGate';
 import { EditorTranscriptionService,editorTranscriptionServiceKey } from '../transcription/editorTranscriptionService';
 
 const audioSessionStore = useAudioSessionStore();
+const configStore = useConfigstore();
+const previousSidebarWidth = document.documentElement.style.getPropertyValue('--app-sidebar-width');
+watchEffect(() => {
+    document.documentElement.style.setProperty('--app-sidebar-width',
+        configStore.sidebarCollapsed ? '64px' : '216px');
+});
 const audioEngine = new AudioEngine();
 const sessionRepository = new SessionRepository();
 const audioSession = new AudioSessionService(audioSessionStore, {
@@ -55,7 +65,7 @@ const analysisCoordinator = new AnalysisCoordinator(
     sessionRepository,
     audioSessionStore,
 );
-audioSession.setVolume(useConfigstore().volume);
+audioSession.setVolume(configStore.volume);
 provide(audioSessionServiceKey, audioSession);
 const editorProcessingGate = new EditorProcessingGate();
 const editorSeparation = new EditorSeparationService(audioEngine,audioSession,{gate:editorProcessingGate});
@@ -189,6 +199,8 @@ if (import.meta.env.DEV) {
 }
 
 onUnmounted(() => {
+    if (previousSidebarWidth) document.documentElement.style.setProperty('--app-sidebar-width', previousSidebarWidth);
+    else document.documentElement.style.removeProperty('--app-sidebar-width');
     unsubscribeEditor();
     unsubscribeVisualizer();
     if (developmentBridge) {
@@ -211,6 +223,17 @@ onUnmounted(() => {
 
 <style scoped>
 #main-layout {
+    min-height: 100dvh;
     background-color: var(--canvas);
+}
+.app-content {
+    width: calc(100% - var(--app-sidebar-inset));
+    min-height: 100dvh;
+    margin-left: var(--app-sidebar-inset);
+    container: app-workspace / inline-size;
+    transition: width 180ms ease, margin-left 180ms ease;
+}
+@media (max-width: 767px) {
+    .app-content { transition: none; }
 }
 </style>

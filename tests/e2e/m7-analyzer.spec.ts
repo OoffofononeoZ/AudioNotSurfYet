@@ -331,7 +331,7 @@ test('isolates a single-card Canvas context failure', async ({ page }) => {
     expect(issues).toEqual([]);
 });
 
-test('keeps the shared toolbar below the header and player overlays above it', async ({ page }) => {
+test('keeps the shared toolbar inside the content area and player overlays above it', async ({ page }) => {
     const issues = captureBrowserIssues(page);
     await page.setViewportSize({ width: 1280, height: 720 });
     await page.goto('/analyzer');
@@ -343,14 +343,12 @@ test('keeps the shared toolbar below the header and player overlays above it', a
         element.scrollTop = 360;
     });
     await expect.poll(async () => page.evaluate(() => {
-        const header = document.querySelector<HTMLElement>('#main-header');
         const toolbar = document.querySelector<HTMLElement>(
             '.timeline-toolbar',
         );
-        if (!header || !toolbar) return Number.POSITIVE_INFINITY;
+        if (!toolbar) return Number.POSITIVE_INFINITY;
         return Math.abs(
             toolbar.getBoundingClientRect().top
-            - header.getBoundingClientRect().bottom
             - 8,
         );
     })).toBeLessThanOrEqual(1);
@@ -359,15 +357,15 @@ test('keeps the shared toolbar below the header and player overlays above it', a
         toolbar: Number(getComputedStyle(
             document.querySelector<HTMLElement>('.timeline-toolbar')!,
         ).zIndex),
-        header: Number(getComputedStyle(
-            document.querySelector<HTMLElement>('#main-header')!,
+        navigation: Number(getComputedStyle(
+            document.querySelector<HTMLElement>('#app-sidebar')!,
         ).zIndex),
         player: Number(getComputedStyle(
             document.querySelector<HTMLElement>('#music-bar-container')!,
         ).zIndex),
     }));
-    expect(layers.toolbar).toBeLessThan(layers.header);
-    expect(layers.header).toBeLessThan(layers.player);
+    expect(layers.toolbar).toBeLessThan(layers.navigation);
+    expect(layers.navigation).toBeLessThan(layers.player);
 
     await page.getByTestId('toggle-queue').click();
     await page.waitForTimeout(400);

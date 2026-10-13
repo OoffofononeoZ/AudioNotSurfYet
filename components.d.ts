@@ -12,6 +12,8 @@ export {}
 declare module 'vue' {
   export interface GlobalComponents {
     AnimatedList: typeof import('./src/components/AnimatedList.vue')['default']
+    AppSettingsButton: typeof import('./src/components/AppSettingsButton.vue')['default']
+    AppSidebar: typeof import('./src/components/AppSidebar.vue')['default']
     DotGridBg: typeof import('./src/components/DotGridBg.vue')['default']
     EditorAnalysisOverlay: typeof import('./src/components/EditorAnalysisOverlay.vue')['default']
     EditorCandidateTimeline: typeof import('./src/components/EditorCandidateTimeline.vue')['default']
@@ -20,7 +22,6 @@ declare module 'vue' {
     EditorSeparationWorkspace: typeof import('./src/components/EditorSeparationWorkspace.vue')['default']
     EditorTimeline: typeof import('./src/components/EditorTimeline.vue')['default']
     EditorTranscriptionWorkspace: typeof import('./src/components/EditorTranscriptionWorkspace.vue')['default']
-    HeaderBar: typeof import('./src/components/HeaderBar.vue')['default']
     LightBg: typeof import('./src/components/LightBg.vue')['default']
     MeydaCard: typeof import('./src/components/MeydaCard.vue')['default']
     MusicBar: typeof import('./src/components/MusicBar.vue')['default']

@@ -958,7 +958,7 @@ onBeforeUnmount(() => {
 .visualizer-page {
     height: 100dvh;
     min-height: 0;
-    padding: 72px 12px 12px;
+    padding: var(--app-page-top-space) 12px 12px;
     overflow: hidden;
     color: var(--ink);
     background: var(--canvas);
@@ -1048,7 +1048,7 @@ input:focus-visible {
     align-items: center;
     justify-content: space-between;
     gap: 20px;
-    padding: 10px 14px;
+    padding: 10px 60px 10px 14px;
     border-bottom: 1px solid var(--divider);
 }
 
@@ -1392,7 +1392,7 @@ input:disabled {
     }
 }
 
-@media (min-width: 1024px) and (max-width: 1279px) {
+@container app-workspace (max-width: 1279px) {
     .compact-drawer-controls {
         display: flex;
         position: relative;

@@ -68,7 +68,8 @@ test('keeps the supported Visualizer workspace inside one viewport', async ({ pa
             requestAnimationFrame(() => requestAnimationFrame(() => resolve()));
         }));
 
-        if (viewport.width === 1024) {
+        const compact = await page.getByRole('button', { name: '工程设置', exact: true }).isVisible();
+        if (compact) {
             await page.getByRole('button', { name: '工程设置' }).click();
             await expect(page.getByTestId('visualizer-settings-panel')).toBeVisible();
         }
@@ -117,7 +118,7 @@ test('keeps the supported Visualizer workspace inside one viewport', async ({ pa
         expect(geometry.bodyHeight).toBeLessThanOrEqual(geometry.viewportHeight);
         expect(geometry.pageTop).toBe(0);
         expect(geometry.pageBottom).toBeLessThanOrEqual(geometry.viewportHeight);
-        expect(geometry.workspaceTop).toBeGreaterThanOrEqual(64);
+        expect(geometry.workspaceTop).toBeGreaterThanOrEqual(12);
         expect(geometry.workspaceBottom).toBeLessThanOrEqual(geometry.viewportHeight);
         expect(geometry.gridTop).toBeLessThan(geometry.gridBottom);
         expect(geometry.gridBottom).toBeLessThanOrEqual(geometry.recordingTop + 1);
@@ -129,7 +130,7 @@ test('keeps the supported Visualizer workspace inside one viewport', async ({ pa
         expect(geometry.activeVisualAnimationFrames).toBeLessThanOrEqual(1);
         expect(geometry.renderDpr).toBe(geometry.devicePixelRatio);
 
-        if (viewport.width === 1024) {
+        if (compact) {
             const containment = await page.evaluate(() => {
                 const panel = document.querySelector<HTMLElement>(
                     '[data-testid="visualizer-settings-panel"]',
@@ -187,7 +188,7 @@ test('keeps the supported Visualizer workspace inside one viewport', async ({ pa
 test('isolates both panel scroll positions and reuses the Analyzer scrollbar contract', async ({ page }) => {
     test.setTimeout(120_000);
     const issues = captureBrowserIssues(page);
-    await page.setViewportSize({ width: 1280, height: 720 });
+    await page.setViewportSize({ width: 1920, height: 900 });
     await openVisualizer(page);
 
     const templates = page.getByTestId('visualizer-template-panel');
@@ -268,5 +269,33 @@ test('isolates both panel scroll positions and reuses the Analyzer scrollbar con
         document.querySelectorAll('[data-test-scroll-spacer="true"]')
             .forEach((element) => element.remove());
     });
+    expect(issues).toEqual([]);
+});
+
+test('switches drawers and columns with sidebar width while retaining the preview canvas', async ({ page }) => {
+    const issues = captureBrowserIssues(page);
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await openVisualizer(page);
+    const drawerButton = page.getByRole('button', { name: '工程设置', exact: true });
+    await expect(drawerButton).toBeVisible();
+    await page.getByTestId('visualizer-preview-canvas').evaluate(element => {
+        (window as typeof window & { __shellCanvas?: Element }).__shellCanvas = element;
+    });
+    for (const collapsed of [true, false, true]) {
+        await page.getByTestId('sidebar-toggle').click();
+        await expect(page.locator('#app-sidebar')).toHaveAttribute('data-collapsed', String(collapsed));
+        if (collapsed) {
+            await expect(drawerButton).not.toBeVisible();
+            await expect(page.getByTestId('visualizer-template-panel')).toBeVisible();
+            await expect(page.getByTestId('visualizer-settings-panel')).toBeVisible();
+        } else await expect(drawerButton).toBeVisible();
+        const resource = await page.getByTestId('visualizer-preview-canvas').evaluate(element => ({
+            sameCanvas: (window as typeof window & { __shellCanvas?: Element }).__shellCanvas === element,
+            hosts: window.__VISUALIZER_DIAGNOSTICS__?.activeHosts,
+            renderers: window.__VISUALIZER_DIAGNOSTICS__?.activeRenderers,
+        }));
+        expect(resource).toEqual({ sameCanvas: true, hosts: 1, renderers: 1 });
+    }
     expect(issues).toEqual([]);
 });

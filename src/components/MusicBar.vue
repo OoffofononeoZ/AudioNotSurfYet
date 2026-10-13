@@ -715,7 +715,7 @@ const handleEditTrack = async (index: number) => {
 #music-bar {
     width: calc(100% - var(--offset) * 2);
     margin: 0 var(--offset);
-    padding: 0 var(--space-3xl);
+    padding: 0 var(--space-xl);
     position: fixed;
     bottom: calc(var(--offset) / 4);
     left: 0;
@@ -725,7 +725,13 @@ const handleEditTrack = async (index: number) => {
     display: flex;
     justify-content: space-between;
     color: var(--ink-strong);
+    gap: 16px;
 }
+
+.music-info-section { flex: 0 1 280px; min-width: 0; }
+#music-info-container { flex: 1; min-width: 0; }
+.transport-section { flex: 1; min-width: 120px; width: auto; }
+.actions-section { flex: none; width: auto; }
 
 .info-line-wrap {
     overflow: hidden;
@@ -832,10 +838,11 @@ svg[role="slider"]:focus:not(:focus-visible),
 
 .music-list-container {
     position: fixed;
-    height: calc(100% - 192px);
-    top: 96px;
+    top: calc(var(--app-page-top-space) + 12px);
     right: 0;
-    max-height: calc(100% - 192px);
+    height: calc(100dvh - var(--app-page-top-space) - 112px);
+    max-height: calc(100dvh - var(--app-page-top-space) - 112px);
+    width: min(516px, 100%);
     transform: translateX(100%);
     z-index: var(--layer-player-popover);
 }
@@ -863,9 +870,15 @@ svg[role="slider"]:focus:not(:focus-visible),
 
     .transport-section {
         flex: 1 1 auto;
-        margin-top: 0.5rem;
+        margin-top: 0.25rem;
+        gap: 18px;
         min-width: 110px;
         width: auto;
+    }
+
+    #progress-bar-container > .pt-1 {
+        font-size: 11px;
+        line-height: 14px;
     }
 
     .transport-section :deep(svg) {

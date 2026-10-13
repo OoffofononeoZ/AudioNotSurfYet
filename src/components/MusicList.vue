@@ -1,5 +1,5 @@
 <template>
-    <div class="list-container p-2 w-[516px]">
+    <div class="list-container p-2">
         <div class="flex pl-4 pr-4 justify-between items-center mt-2 list-header">
             <div>
                 <span class="text-xl mr-2">播放列表</span>
@@ -153,12 +153,18 @@ const needsRecovery = (state?: RestoreState) =>
 
 <style scoped>
 .list-container {
+    width: 100%;
     height: 100%;
     max-height: 100%;
     overflow-y: hidden;
     background-color: var(--surface-panel);
     border-radius: 10px 0 0 10px;
 }
+
+.item-container > div:first-child { min-width: 0; flex: 1; }
+.item-container > div:first-child > div:first-child { flex: none; }
+.item-container > div:first-child > div:last-child { min-width: 0; }
+.item-container > div:last-child { flex: none; }
 
 .list-header,
 .item-container,

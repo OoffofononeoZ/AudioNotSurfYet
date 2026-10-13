@@ -52,7 +52,7 @@ test('removes the learning header and packs 21 stable cards at every viewport', 
     expect(geometries).toEqual({
         390: 1,
         1024: 1,
-        1280: 2,
+        1280: 1,
         1920: 2,
     });
 
@@ -76,12 +76,11 @@ test('removes the learning header and packs 21 stable cards at every viewport', 
         (element) => element.scrollTop,
     )).toBeGreaterThan(0);
     await expect.poll(async () => page.evaluate(() => {
-        const header = document.querySelector<HTMLElement>('#main-header');
+
         const sticky = document.querySelector<HTMLElement>('.timeline-toolbar');
-        if (!header || !sticky) return Number.POSITIVE_INFINITY;
+        if (!sticky) return Number.POSITIVE_INFINITY;
         return Math.abs(
             sticky.getBoundingClientRect().top
-            - header.getBoundingClientRect().bottom
             - 8,
         );
     })).toBeLessThanOrEqual(1);
@@ -140,6 +139,18 @@ test('reflows measured structured cards without remounting details or canvases',
     await expectAnalyzerMasonry(page, 1_280);
     await expect(details).toHaveAttribute('open', '');
     await expect(page.locator('[data-feature-id] .plot canvas')).toHaveCount(8);
+
+    await expectAnalyzerMasonry(page, 1430);
+    await page.getByTestId('sidebar-toggle').click();
+    await expect(page.locator('#app-sidebar')).toHaveAttribute('data-collapsed', 'true');
+    await expect.poll(async () => (await expectAnalyzerMasonry(page, 1430)).columns).toBe(2);
+    await expect(details).toHaveAttribute('open', '');
+    expect(await details.evaluate(element => (
+        window as typeof window & { __m12DetailsIdentity?: Element }
+    ).__m12DetailsIdentity === element)).toBe(true);
+    await expect(page.locator('[data-feature-id] .plot canvas')).toHaveCount(8);
+    await page.getByTestId('sidebar-toggle').click();
+    await expect.poll(async () => (await expectAnalyzerMasonry(page, 1430)).columns).toBe(1);
 
     await page.getByRole('button', { name: '放大时间轴' }).click();
     await expect(page.locator('.timeline-toolbar')).toContainText('2.0×');

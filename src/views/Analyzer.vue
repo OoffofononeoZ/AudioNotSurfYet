@@ -1,7 +1,7 @@
 <template>
     <main class="analyzer-page">
         <DotGridBg />
-        <div ref="analyzerContent" class="analyzer-content">
+        <div ref="analyzerContent" class="analyzer-content app-scrollbar">
             <section class="timeline-toolbar" aria-label="共享时间轴控制">
                 <div class="toolbar-summary">
                     <div class="status-row" aria-live="polite">
@@ -258,7 +258,7 @@ import {
 import type { PersistedTimelineViewport } from '../types/session';
 
 const MASONRY_GAP = 18;
-const MASONRY_WIDE_QUERY = '(min-width: 1280px)';
+const MASONRY_WIDE_CONTENT_WIDTH = 1232;
 const DRAG_START_THRESHOLD = 6;
 const AUTO_SCROLL_EDGE = 48;
 const AUTO_SCROLL_MAX = 16;
@@ -298,7 +298,6 @@ const masonryPlacements = reactive<
 const masonryItems = new Map<FeatureId, HTMLElement>();
 let masonryRootObserver: ResizeObserver | null = null;
 let masonryItemObserver: ResizeObserver | null = null;
-let masonryMediaQuery: MediaQueryList | null = null;
 let masonryFrame: number | null = null;
 let lastMasonryRootWidth = -1;
 const analyzerContent = ref<HTMLElement | null>(null);
@@ -421,7 +420,7 @@ const performMasonryLayout = () => {
         masonryItems.get(featureId));
     if (!root || elements.some((element) => !element)) return;
     const containerWidth = root.getBoundingClientRect().width;
-    const columnCount: 1 | 2 = masonryMediaQuery?.matches ? 2 : 1;
+    const columnCount: 1 | 2 = containerWidth >= MASONRY_WIDE_CONTENT_WIDTH ? 2 : 1;
     const columnWidth = Math.max(
         0,
         (containerWidth - MASONRY_GAP * (columnCount - 1)) / columnCount,
@@ -483,7 +482,6 @@ const masonryItemRef = (featureId: FeatureId) => {
 const setupMasonryLayout = () => {
     const root = masonryRoot.value;
     if (!root) return;
-    masonryMediaQuery = window.matchMedia(MASONRY_WIDE_QUERY);
     masonryRootObserver = new ResizeObserver(([entry]) => {
         const width = entry?.contentRect.width ?? 0;
         if (Math.abs(width - lastMasonryRootWidth) > 0.5) {
@@ -495,17 +493,14 @@ const setupMasonryLayout = () => {
     for (const element of masonryItems.values()) {
         masonryItemObserver.observe(element);
     }
-    masonryMediaQuery.addEventListener('change', scheduleMasonryLayout);
     scheduleMasonryLayout();
 };
 
 const disposeMasonryLayout = () => {
     masonryRootObserver?.disconnect();
     masonryItemObserver?.disconnect();
-    masonryMediaQuery?.removeEventListener('change', scheduleMasonryLayout);
     masonryRootObserver = null;
     masonryItemObserver = null;
-    masonryMediaQuery = null;
     if (masonryFrame !== null) window.cancelAnimationFrame(masonryFrame);
     masonryFrame = null;
 };
@@ -1067,10 +1062,9 @@ onBeforeUnmount(() => {
     overflow-y: auto;
     padding:
         0
-        max(24px, calc((100vw - 1760px) / 2))
+        max(24px, calc((100% - 1760px) / 2))
         150px;
     position: relative;
-    scrollbar-width: thin;
 }
 
 .status-row {
@@ -1102,12 +1096,12 @@ onBeforeUnmount(() => {
     gap: 18px;
     justify-content: space-between;
     margin:
-        calc(var(--app-header-height) + 24px)
+        calc(var(--app-page-top-space) + 12px)
         0
         18px;
-    padding: 13px 15px;
+    padding: 13px 56px 13px 15px;
     position: sticky;
-    top: calc(var(--app-header-height) + var(--app-sticky-gap));
+    top: var(--app-sticky-top);
     z-index: var(--layer-sticky);
 }
 
@@ -1366,6 +1360,9 @@ button:focus:not(:focus-visible) {
         flex-direction: column;
     }
 
+}
+@media (max-width: 767px) {
+    .timeline-toolbar { padding-right: 15px; }
 }
 
 @media (prefers-reduced-motion: reduce) {

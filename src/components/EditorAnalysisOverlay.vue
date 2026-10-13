@@ -577,7 +577,7 @@ onBeforeUnmount(() => {
     transition: top 120ms ease, height 120ms ease;
     pointer-events: none;
 }
-.overlay-controls { position: fixed; z-index: 86; top: 72px; left: 12px; pointer-events: auto; }
+.overlay-controls { position: fixed; z-index: 86; top: var(--app-page-top-space); left: calc(var(--app-sidebar-inset) + 12px); pointer-events: auto; }
 .overlay-toggle-group { display: inline-flex; min-height: 30px; filter: drop-shadow(0 4px 12px rgba(0, 0, 0, .38)); }
 .overlay-toggle,
 .overlay-menu-toggle { min-height: 30px; border: 1px solid var(--overlay-hairline); color: var(--ink); background: var(--overlay-panel); }

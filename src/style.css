@@ -151,17 +151,27 @@
     /* 旧名别名：计算值不变，既有引用继续工作 */
     --main-color: var(--accent);
     --main-color-tsp: var(--accent-tsp);
-    --app-header-height: 64px;
-    --app-sticky-gap: 8px;
+    --app-sidebar-width: 216px;
+    --app-sidebar-inset: var(--app-sidebar-width);
+    --app-page-top-space: 12px;
+    --app-sticky-top: 8px;
     --layer-content: 0;
     --layer-sticky: 20;
-    --layer-header: 40;
-    --layer-player: 60;
-    --layer-player-popover: 70;
+    --layer-navigation: 40;
+    --layer-player: 100;
+    --layer-player-popover: 110;
     --app-scrollbar-track: rgba(5, 17, 11, 0.9);
     --app-scrollbar-color: rgba(125, 255, 179, 0.65);
     --app-scrollbar-thumb: rgba(125, 255, 179, 0.58);
     --app-scrollbar-thumb-hover: rgba(181, 255, 210, 0.82);
+}
+
+@media (max-width: 767px) {
+    :root {
+        --app-sidebar-inset: 0px;
+        --app-page-top-space: 64px;
+        --app-sticky-top: 60px;
+    }
 }
 
 .app-scrollbar {

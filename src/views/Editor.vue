@@ -617,7 +617,7 @@ onBeforeUnmount(() => {
     --editor-control-radius: 4px;
     --editor-flyout-radius: 8px;
     min-height: 100dvh;
-    padding: 72px 12px 24px;
+    padding: var(--app-page-top-space) 12px 24px;
     color: var(--ink);
     font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
     background:
@@ -729,7 +729,7 @@ onBeforeUnmount(() => {
     align-items: flex-start;
     justify-content: space-between;
     gap: 24px;
-    padding: 28px;
+    padding: 28px 64px 28px 28px;
 }
 
 .editor-heading h1,
@@ -775,6 +775,10 @@ onBeforeUnmount(() => {
     gap: 12px;
     min-height: 36px;
     padding: 3px 8px;
+}
+.editor-toolbar-primary { padding-right: 56px; }
+@media (max-width: 767px) {
+    .editor-toolbar-primary { padding-right: 8px; }
 }
 
 .editor-toolbar-secondary {
