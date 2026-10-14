@@ -32,6 +32,7 @@ description: "开发、诊断或评审 AudioNotSurfYet 的 Vue 界面、播放�
 - Pinia 只持有可序列化状态；File、AudioBuffer、节点、Worker 和 typed payload 按运行时模块所有权保存与释放。
 - 播放与分析复用现有 service、lease、clock 和 Coordinator。跟踪 source identity、generation/revision、取消与迟到消息，保持换歌后的最后一次操作生效。
 - UI 修改先确认路由、布局容器、定位上下文和目标视口；高频数值/几何更新复用现有 Canvas、RAF 和生命周期模块。
+- 新增或修改样式时按 [CSS 样式归置](references/20-ui-routing-and-state.md#css-样式归置与渐进迁移)选择 Tailwind、共享 CSS 或组件 `<style>`；旧写法只在本次实际涉及样式修改时渐进迁移。
 - 可见滚动容器复用 `.app-scrollbar`；样式和动画不得破坏焦点、输入、现有滚动与资源所有权。
 - 确认音频用户手势、AudioContext 状态、对象 URL 和节点释放。持久化失败不能破坏当前播放，缓存必须匹配完整身份。
 - Visualizer 使用现有单 RendererHost、Canvas、视觉 RAF 与确定性歌曲时间；录制复用既有 pre-Gain tap、capture lease 和 typed capability 行为。
