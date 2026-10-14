@@ -53,6 +53,20 @@ Visualizer V1 已实现 `/visualizer/:trackId?`、当前歌曲导航入口、有
 - `AnimatedList` 使用全局键盘监听和滚动可见性动画；组件卸载时必须移除监听。
 - DEC-076 把三栏/抽屉分界改为可用内容宽度 1280px；DEC-050 固定支持的 `>=1024px` Visualizer 为单个 `100dvh` 页面：document/body 不纵向滚动，toolbar/preview/recording/transport 留在页面内，左模板和右参数侧栏分别滚动并使用 `overscroll-behavior: contain`。紧凑抽屉以 workspace grid 为定位边界；`<1024px` 继续只保留现有最小宽度/横向兼容，不视为移动端支持。
 
+## CSS 样式归置与渐进迁移
+
+先判断样式是否通用或跨组件复用，再判断局部规则的长度、取值与属性是否适合 Tailwind。
+
+| 样式类型 | 建议写法 |
+| --- | --- |
+| 通用或跨组件复用的样式 | 放入共享 CSS 文件，优先复用或扩展 `src/style.css` 中的既有能力，避免在多个组件重复定义；即使规则较长或属性特殊，仍按共享职责归置 |
+| 较短且不通用的局部样式 | 优先使用 Tailwind CSS，不推荐单独写入组件 `<style>` |
+| 较长、取值不适合用 Tailwind 表达，或涉及特殊、不常用、实验性 CSS 属性的局部样式 | 建议写入组件 `<style>`，不为强行使用 Tailwind 堆叠冗长的 arbitrary values 或 selectors |
+
+“较短、较长”按可读性和表达复杂度判断，不设机械行数门槛。规则用于后续新增与实际修改的样式；既有写法在之后涉及样式修改时逐步迁移，仅处理本次涉及的部分，同组件中未涉及的样式也可暂时保留，不开展全组件或全仓库替换。
+
+写法迁移不额外改变本次需求之外的视觉、交互与作用域，继续遵守下方 `.app-scrollbar` 共享契约。
+
 ## 共享滚动条
 
 - 全局 `.app-scrollbar` 是产品自有可见滚动容器的唯一默认样式，视觉事实源来自 Analyzer `MeydaCard` 精确值表：Firefox `scrollbar-width: thin`，WebKit 宽高 10px，深色轨道、绿色 thumb/hover、圆角和 stable gutter。
