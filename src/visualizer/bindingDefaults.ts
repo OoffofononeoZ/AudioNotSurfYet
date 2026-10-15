@@ -1,9 +1,6 @@
 import { FEATURE_REGISTRY } from '../analysis/featureRegistry';
 import { FEATURE_IDS, type FeatureId } from '../analysis/types';
-import type { SceneParameterDescriptor } from './sceneRegistry';
-import {
-    VISUALIZER_POINT_RELEASE_SECONDS,
-} from './bindingResolver';
+import type { SceneParameterDescriptor } from './parameterDescriptor';
 import type {
     VisualizerAnalysisComponent,
     VisualizerAnalysisProjectionV1,
@@ -116,7 +113,6 @@ export const defaultAnalysisSelection = (
 export const defaultNumericTransform = (
     parameter: SceneParameterDescriptor,
     featureId?: FeatureId,
-    editorEvent = false,
 ): VisualizerNumericTransformV1 => {
     if (parameter.valueKind !== 'number' || !parameter.range) {
         throw new Error('只有数值参数可以建立数值映射。');
@@ -135,7 +131,7 @@ export const defaultNumericTransform = (
         clamp: true,
         invert: false,
         attackSeconds: 0,
-        releaseSeconds: editorEvent ? VISUALIZER_POINT_RELEASE_SECONDS : 0,
+        releaseSeconds: 0,
     };
 };
 
@@ -159,18 +155,3 @@ export const createDefaultAnalysisBinding = (
             : {}),
     };
 };
-
-export const createDefaultEditorBinding = (
-    parameter: SceneParameterDescriptor,
-    laneId: string,
-    innerClassId?: string,
-    pointEvent = false,
-): VisualizerParameterBindingV1 => ({
-    parameterId: parameter.id,
-    source: {
-        kind: 'editor-event',
-        laneId,
-        ...(innerClassId ? { innerClassId } : {}),
-    },
-    transform: defaultNumericTransform(parameter, undefined, pointEvent),
-});

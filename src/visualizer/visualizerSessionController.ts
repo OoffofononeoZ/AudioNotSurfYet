@@ -1,1138 +1,190 @@
 import { inject, type InjectionKey } from 'vue';
-import type {
-    AudioSessionService,
-    RoutePlaybackLease,
-} from '../audio/audioSessionService';
+import type { AudioSessionService, RoutePlaybackLease } from '../audio/audioSessionService';
 import type { useAudioSessionStore } from '../stores/audioSessionStore';
-import type { EditorTrackIdentityV1 } from '../editor/types';
+import type { AnalysisConsumerLease, AnalysisCoordinator } from '../analysis/analysisCoordinator';
+import type { AnalysisCoordinatorSnapshot } from '../analysis/types';
 import type { EditorDraftRepositoryPort } from '../editor/editorDraftRepository';
 import type { EditorFileGateway } from '../editor/fileIO';
-import {
-    EditorFormatCodecRegistry,
-    validateEditorProjectV1,
-} from '../editor/projectCodec';
-import type {
-    AnalysisConsumerLease,
-    AnalysisCoordinator,
-} from '../analysis/analysisCoordinator';
-import type { AnalysisCoordinatorSnapshot } from '../analysis/types';
+import { EditorFormatCodecRegistry, validateEditorProjectV1 } from '../editor/projectCodec';
+import { createComposition, validateComposition, encodeComposition, decodeComposition, compositionFileFormat } from './compositionCodec';
+import { CompositionResolver } from './compositionResolver';
+import { CompositionDraftWriter } from './compositionDraftWriter';
+import type { CompositionDraftRepositoryPort } from './compositionDraftRepository';
+import { compositionIssues, planCompositionFeatures, removeCompositionElement, reorderComposition } from './compositionModel';
+import { elementRegistry } from './elementRegistry';
+import { parameterKey } from './compositionEffects';
+import type { ElementType, VisualizerElement, ElementBinding, VisualizerProjectV3, CompositionSessionSnapshot } from './compositionTypes';
+import type { VisualizerTrackValidationContext, VisualizerResolution, VisualizerFrameRate } from './types';
+import type { VisualizerResolvedParameterMap, VisualizerRendererStatus } from './rendererTypes';
 import type { VisualizerFileGateway } from './fileIO';
-import {
-    createInitialVisualizerProject,
-    VisualizerFormatCodecRegistry,
-    validateVisualizerProjectV1,
-    visualizerProjectFileName,
-} from './projectCodec';
-import { SceneRegistry } from './sceneRegistry';
-import {
-    planVisualizerFeatures,
-    VisualizerBindingPlannerError,
-} from './bindingPlanner';
-import {
-    VisualizerBindingResolver,
-    type VisualizerResolvedParameter,
-} from './bindingResolver';
-import type {
-    VisualizerDraftEnvelopeV1,
-    VisualizerFrameRate,
-    VisualizerProjectV1,
-    VisualizerResolution,
-    VisualizerSessionSnapshot,
-    VisualizerTemplateId,
-    VisualizerTrackValidationContext,
-    VisualizerParameterBindingV1,
-    VisualizerEditorSnapshotSource,
-} from './types';
-import type { VisualizerDraftRepositoryPort } from './visualizerDraftRepository';
-import type { VisualizerRendererStatus } from './rendererTypes';
-import {
-    VisualizerRecordingSession,
-    type VisualizerRecordingSessionOptions,
-    type VisualizerRecordingTarget,
-} from './visualizerRecordingSession';
-import {
-    NativeVisualizerVideoFileGateway,
-    type VisualizerVideoFileGateway,
-} from './videoFileIO';
+import { NativeVisualizerVideoFileGateway, type VisualizerVideoFileGateway } from './videoFileIO';
+import { VisualizerRecordingSession, type VisualizerRecordingSessionOptions, type VisualizerRecordingTarget } from './visualizerRecordingSession';
 
-type AudioSessionStore = ReturnType<typeof useAudioSessionStore>;
-type VisualizerSessionListener = (snapshot: VisualizerSessionSnapshot) => void;
-
-const initialSnapshot = (): VisualizerSessionSnapshot => ({
-    state: 'empty',
-    routeTrackId: null,
-    activeTrackId: null,
-    project: null,
-    conflictingDraft: null,
-    persistence: 'clean',
-    restoredFromDraft: false,
-    recording: { status: 'idle' },
-    bindingRuntime: {
-        bindingRevision: 0,
-        activeFeatureIds: [],
-        readyFeatureIds: [],
-        analysisState: 'idle',
-        analysisProgress: 0,
-        editorSnapshotSource: 'none',
-    },
-});
-
-const cloneProject = (project: VisualizerProjectV1): VisualizerProjectV1 =>
-    structuredClone(project);
-
-const cloneEnvelope = (
-    envelope: VisualizerDraftEnvelopeV1,
-): VisualizerDraftEnvelopeV1 => ({
-    schemaVersion: 1,
-    savedAt: envelope.savedAt,
-    project: cloneProject(envelope.project),
-});
-
-const cloneSnapshot = (
-    snapshot: VisualizerSessionSnapshot,
-): VisualizerSessionSnapshot => ({
-    ...snapshot,
-    project: snapshot.project ? cloneProject(snapshot.project) : null,
-    conflictingDraft: snapshot.conflictingDraft
-        ? cloneEnvelope(snapshot.conflictingDraft)
-        : null,
-    bindingRuntime: {
-        ...snapshot.bindingRuntime,
-        activeFeatureIds: [...snapshot.bindingRuntime.activeFeatureIds],
-        readyFeatureIds: [...snapshot.bindingRuntime.readyFeatureIds],
-    },
-    recording: { ...snapshot.recording },
-});
-
-export class VisualizerBindingUpdateError extends Error {
-    readonly code:
-        | 'binding-invalid'
-        | 'analysis-feature-limit'
-        | 'editor-snapshot-unavailable'
-        | 'editor-snapshot-mismatch'
-        | 'editor-snapshot-in-use';
-
-    constructor(
-        code: VisualizerBindingUpdateError['code'],
-        message: string,
-    ) {
-        super(message);
-        this.name = 'VisualizerBindingUpdateError';
-        this.code = code;
-    }
-}
-
-export class VisualizerRecordingLockedError extends Error {
-    readonly code = 'recording-locked';
-
-    constructor(message = '录制准备、进行或收尾期间不能执行此操作。') {
-        super(message);
-        this.name = 'VisualizerRecordingLockedError';
-    }
-}
-
+const initial=():CompositionSessionSnapshot=>({state:'empty',routeTrackId:null,activeTrackId:null,project:null,conflictingDraft:null,unsupportedDraft:null,
+    persistence:'clean',restoredFromDraft:false,recording:{status:'idle'},bindingRuntime:{bindingRevision:0,activeFeatureIds:[],readyFeatureIds:[],analysisState:'idle',analysisProgress:0,editorSnapshotSource:'none'}});
 export interface VisualizerSessionControllerOptions {
-    audioSession: AudioSessionService;
-    store: AudioSessionStore;
-    repository: VisualizerDraftRepositoryPort;
-    fileGateway: VisualizerFileGateway;
-    analysisCoordinator?: AnalysisCoordinator;
-    editorRepository?: EditorDraftRepositoryPort;
-    editorFileGateway?: EditorFileGateway;
-    editorCodecs?: EditorFormatCodecRegistry;
-    codecs?: VisualizerFormatCodecRegistry;
-    registry?: SceneRegistry;
-    now?: () => Date;
-    createId?: () => string;
-    createSeed?: () => number;
-    setTimer?: (
-        handler: () => void,
-        timeout: number,
-    ) => ReturnType<typeof setTimeout>;
-    clearTimer?: (handle: ReturnType<typeof setTimeout>) => void;
-    windowTarget?: Pick<Window, 'addEventListener' | 'removeEventListener'>;
-    videoGateway?: VisualizerVideoFileGateway;
-    recordingRuntime?: Pick<
-        VisualizerRecordingSessionOptions,
-        'createRecorder' | 'createMediaStream' | 'isTypeSupported' | 'isPresetAvailable'
-    >;
+    audioSession:AudioSessionService;
+    store:ReturnType<typeof useAudioSessionStore>;
+    repository:CompositionDraftRepositoryPort;
+    fileGateway:VisualizerFileGateway;
+    analysisCoordinator?:AnalysisCoordinator;
+    editorRepository?:EditorDraftRepositoryPort;
+    editorFileGateway?:EditorFileGateway;
+    videoGateway?:VisualizerVideoFileGateway;
+    recordingRuntime?:Pick<VisualizerRecordingSessionOptions,'createRecorder'|'createMediaStream'|'isTypeSupported'|'isPresetAvailable'>;
+    windowTarget?:Pick<Window,'addEventListener'|'removeEventListener'>;
 }
-
-export type VisualizerDraftConflictResolution =
-    | { kind: 'restored-old'; trackId: string }
-    | { kind: 'fallback' };
-
+export class VisualizerRecordingLockedError extends Error {
+    readonly code='recording-locked';
+    constructor(){super('录制准备、进行或收尾期间不能修改工程。');}
+}
 export class VisualizerSessionController {
-    private readonly audioSession: AudioSessionService;
-    private readonly store: AudioSessionStore;
-    private readonly repository: VisualizerDraftRepositoryPort;
-    private readonly fileGateway: VisualizerFileGateway;
-    private readonly analysisCoordinator?: AnalysisCoordinator;
-    private readonly editorRepository?: EditorDraftRepositoryPort;
-    private readonly editorFileGateway?: EditorFileGateway;
-    private readonly editorCodecs: EditorFormatCodecRegistry;
-    private readonly codecs: VisualizerFormatCodecRegistry;
-    private readonly registry: SceneRegistry;
-    private readonly now: () => Date;
-    private readonly createId: () => string;
-    private readonly createSeed: () => number;
-    private readonly setTimer: (
-        handler: () => void,
-        timeout: number,
-    ) => ReturnType<typeof setTimeout>;
-    private readonly clearTimer: (handle: ReturnType<typeof setTimeout>) => void;
-    private readonly windowTarget?: Pick<
-        Window,
-        'addEventListener' | 'removeEventListener'
-    >;
-    private readonly listeners = new Set<VisualizerSessionListener>();
-    private snapshot = initialSnapshot();
-    private readonly recordingSession: VisualizerRecordingSession;
-    private playbackLease: RoutePlaybackLease | null = null;
-    private analysisLease: AnalysisConsumerLease | null = null;
-    private unsubscribeAnalysis: (() => void) | null = null;
-    private readonly bindingResolver: VisualizerBindingResolver;
-    private routeGeneration = 0;
-    private saveTimer: ReturnType<typeof setTimeout> | null = null;
-    private pendingProject: VisualizerProjectV1 | null = null;
-    private saveInFlight: Promise<void> | null = null;
-    private beforeUnloadRegistered = false;
-    private templateBindingTrackHash: string | null = null;
-    private readonly templateBindings = new Map<
-        VisualizerTemplateId,
-        VisualizerParameterBindingV1[]
-    >();
-    private disposed = false;
-
-    constructor(options: VisualizerSessionControllerOptions) {
-        this.audioSession = options.audioSession;
-        this.store = options.store;
-        this.repository = options.repository;
-        this.fileGateway = options.fileGateway;
-        this.analysisCoordinator = options.analysisCoordinator;
-        this.editorRepository = options.editorRepository;
-        this.editorFileGateway = options.editorFileGateway;
-        this.editorCodecs = options.editorCodecs ?? new EditorFormatCodecRegistry();
-        this.codecs = options.codecs ?? new VisualizerFormatCodecRegistry();
-        this.registry = options.registry ?? new SceneRegistry();
-        this.bindingResolver = new VisualizerBindingResolver(this.registry);
-        this.now = options.now ?? (() => new Date());
-        this.createId = options.createId ?? (() => crypto.randomUUID());
-        this.createSeed = options.createSeed
-            ?? (() => crypto.getRandomValues(new Uint32Array(1))[0]!);
-        this.setTimer = options.setTimer
-            ?? ((handler, timeout) => setTimeout(handler, timeout));
-        this.clearTimer = options.clearTimer ?? ((handle) => clearTimeout(handle));
-        this.windowTarget = options.windowTarget
-            ?? (typeof window === 'undefined' ? undefined : window);
-        this.recordingSession = new VisualizerRecordingSession({
-            ...options.recordingRuntime,
-            audioSession: this.audioSession,
-            readContext: () => ({
-                state: this.snapshot.state,
-                activeTrackId: this.snapshot.activeTrackId,
-                project: this.snapshot.project,
-                bindingRuntime: this.snapshot.bindingRuntime,
-                resolvedValues: this.resolveParameters(0),
-            }),
-            onState: (recording) => {
-                if (this.disposed) return;
-                this.publish({ ...this.snapshot, recording });
-                this.syncBeforeUnload();
-            },
-            videoGateway: options.videoGateway ?? new NativeVisualizerVideoFileGateway(),
-            setTimer: this.setTimer,
-            clearTimer: this.clearTimer,
+    private options:VisualizerSessionControllerOptions;
+    private snapshot=initial();
+    private listeners=new Set<(snapshot:CompositionSessionSnapshot)=>void>();
+    private playbackLease:RoutePlaybackLease|null=null;
+    private analysisLease:AnalysisConsumerLease|null=null;
+    private unsubscribeAnalysis:(()=>void)|null=null;
+    private resolver=new CompositionResolver();
+    private writer:CompositionDraftWriter;
+    private recording:VisualizerRecordingSession;
+    private generation=0;
+    private ioGeneration=0;
+    private disposed=false;
+    private windowTarget?:Pick<Window,'addEventListener'|'removeEventListener'>;
+    private beforeUnload=false;
+    constructor(options:VisualizerSessionControllerOptions) {
+        this.options=options;this.windowTarget=options.windowTarget ?? (typeof window==='undefined'?undefined:window);
+        this.writer=new CompositionDraftWriter(options.repository,(persistence,project,message)=>{
+            if(this.snapshot.project?.projectId!==project.projectId || this.disposed)return;
+            this.publish({...this.snapshot,persistence,state:persistence==='not-persisted'?'not-persisted':'ready',message:persistence==='not-persisted'?'草稿未保存：'+message:undefined});
         });
-        this.windowTarget?.addEventListener('pagehide', this.handlePageHide);
+        this.recording=new VisualizerRecordingSession({...options.recordingRuntime,audioSession:options.audioSession,videoGateway:options.videoGateway ?? new NativeVisualizerVideoFileGateway(),
+            readContext:()=>({state:this.snapshot.state,activeTrackId:this.snapshot.activeTrackId,project:this.snapshot.project,bindingRuntime:this.snapshot.bindingRuntime,
+                resolvedValues:[...this.resolveValuesAt(0).values(),...(this.snapshot.project?compositionIssues(this.snapshot.project):[]).map(message=>({parameterId:'configuration',state:'error' as const,message}))]}),
+            onState:recording=>{if(!this.disposed)this.publish({...this.snapshot,recording});}});
+        this.windowTarget?.addEventListener('pagehide',this.handlePageHide);
     }
-
-    getSnapshot(): VisualizerSessionSnapshot {
-        return cloneSnapshot(this.snapshot);
+    getSnapshot(){return structuredClone(this.snapshot);}
+    readProject(){return this.snapshot.project;}
+    subscribe(listener:(snapshot:CompositionSessionSnapshot)=>void){this.listeners.add(listener);listener(this.getSnapshot());return()=>this.listeners.delete(listener);}
+    private publish(snapshot:CompositionSessionSnapshot){this.snapshot=snapshot;for(const listener of this.listeners)listener(this.getSnapshot());this.syncBeforeUnload();}
+    private assertUnlocked(){if(this.recording.isLocked())throw new VisualizerRecordingLockedError();}
+    hasActivePlaybackLease(){return !!this.playbackLease;}
+    hasPendingWrite(){return this.writer.hasPending();}
+    isRecordingLocked(){return this.recording.isLocked();}
+    hasUnresolvedRecordingOutput(){return this.recording.hasUnresolvedOutput();}
+    attachRecordingTarget(target:VisualizerRecordingTarget){return this.recording.attachTarget(target);}
+    notifyRendererStatus(status:VisualizerRendererStatus){this.recording.notifyRendererStatus(status);}
+    startRecording(){return this.recording.start();}
+    cancelRecording(){return this.recording.cancel();}
+    saveRecording(){return this.recording.save();}
+    discardRecording(){this.recording.discard();}
+    resetRecordingError(){this.recording.resetError();}
+    getReadyRecordingBlobForDiagnostics(){return this.recording.getReadyBlobForDiagnostics();}
+    async togglePlayback(){this.assertUnlocked();await this.options.audioSession.togglePlayback();}
+    async seek(seconds:number){this.assertUnlocked();await this.options.audioSession.seek(seconds);}
+    private context(trackId=this.snapshot.activeTrackId):VisualizerTrackValidationContext|null {
+        const track=this.options.store.queue.find(t=>t.id===trackId), decoded=trackId?this.options.audioSession.getDecodedTrackDescriptor(trackId):null;
+        return track?.trackHash && decoded ? {contentHash:track.trackHash,durationSeconds:decoded.durationSeconds,sampleRate:decoded.sampleRate}:null;
     }
-
-    subscribe(listener: VisualizerSessionListener): () => void {
-        this.listeners.add(listener);
-        listener(cloneSnapshot(this.snapshot));
-        return () => this.listeners.delete(listener);
+    private createProject(trackId:string) {
+        const track=this.options.store.queue.find(t=>t.id===trackId),context=this.context(trackId);if(!track||!context)throw Error('歌曲身份尚未就绪。');
+        return createComposition({...context,fileName:track.name,...(track.metadata.title?{title:track.metadata.title}:{}),...(track.metadata.artist?{artist:track.metadata.artist}:{})});
     }
-
-    listTemplates() {
-        return this.registry.list();
-    }
-
-    getSceneRegistry(): SceneRegistry {
-        return this.registry;
-    }
-
-    hasActivePlaybackLease(): boolean {
-        return this.playbackLease !== null && this.snapshot.activeTrackId !== null;
-    }
-
-    hasPendingWrite(): boolean {
-        return this.pendingProject !== null || this.saveInFlight !== null;
-    }
-
-    isRecordingLocked(): boolean {
-        return this.recordingSession.isLocked();
-    }
-
-    hasUnresolvedRecordingOutput(): boolean {
-        return this.recordingSession.hasUnresolvedOutput();
-    }
-
-    attachRecordingTarget(target: VisualizerRecordingTarget): () => void {
-        return this.recordingSession.attachTarget(target);
-    }
-
-    notifyRendererStatus(status: VisualizerRendererStatus): void {
-        this.recordingSession.notifyRendererStatus(status);
-    }
-
-    startRecording(): Promise<void> {
-        return this.recordingSession.start();
-    }
-
-    cancelRecording(): Promise<void> {
-        return this.recordingSession.cancel();
-    }
-
-    saveRecording(): Promise<'saved' | 'cancelled'> {
-        return this.recordingSession.save();
-    }
-
-    discardRecording(): void {
-        this.recordingSession.discard();
-    }
-
-    resetRecordingError(): void {
-        this.recordingSession.resetError();
-    }
-
-    getReadyRecordingBlobForDiagnostics(): Blob | null {
-        return this.recordingSession.getReadyBlobForDiagnostics();
-    }
-
-    async togglePlayback(): Promise<void> {
-        this.assertRecordingUnlocked();
-        await this.audioSession.togglePlayback();
-    }
-
-    async seek(seconds: number): Promise<void> {
-        this.assertRecordingUnlocked();
-        await this.audioSession.seek(seconds);
-    }
-
-    async enter(trackId: string | null): Promise<void> {
-        if (this.recordingSession.isLocked()) {
-            await this.recordingSession.notifyIdentityChange();
-        }
-        const generation = ++this.routeGeneration;
-        await this.flush();
-        if (generation !== this.routeGeneration || this.disposed) return;
-        this.releaseAnalysisLease();
-        this.releaseLease();
-        this.clearTemplateBindings();
-        if (!trackId) {
-            this.publish(initialSnapshot());
-            return;
-        }
-        this.publish({
-            ...initialSnapshot(),
-            state: 'loading',
-            routeTrackId: trackId,
-        });
-        const track = this.store.queue.find((entry) => entry.id === trackId);
-        if (!track?.trackHash) {
-            this.publishUnavailable(trackId, '找不到该歌曲，或歌曲内容身份尚未就绪。');
-            return;
-        }
+    async enter(trackId:string|null,overwrite=false):Promise<void> {
+        this.assertUnlocked();const generation=++this.generation;this.ioGeneration++;
+        if(!await this.flush())throw Error('请先重试保存或导出当前工程。');
+        if(generation!==this.generation||this.disposed)return;
+        this.releaseLeases();
+        this.publish({...initial(),state:trackId?'loading':'empty',routeTrackId:trackId});if(!trackId)return;
         try {
-            const lease = await this.audioSession.acquireRoutePlayback({
-                consumer: 'visualizer',
-                trackId,
-            });
-            if (generation !== this.routeGeneration || this.disposed) {
-                lease.release();
-                return;
+            const lease=await this.options.audioSession.acquireRoutePlayback({consumer:'visualizer',trackId});
+            if(generation!==this.generation||this.disposed){lease.release();return;}this.playbackLease=lease;
+            this.publish({...this.snapshot,activeTrackId:trackId});
+            const context=this.context(trackId);if(!context)throw Error('歌曲无法解码。');
+            const restored=await this.options.repository.restore();if(generation!==this.generation||this.disposed)return;
+            if(!overwrite && restored?.kind==='unsupported'){this.publish({...this.snapshot,state:'unsupported-draft',unsupportedDraft:restored.raw,message:'旧版或无效草稿不能用于元素工程，请先导出或明确覆盖。'});return;}
+            if(!overwrite && restored?.kind==='current' && restored.draft.project.track.contentHash!==context.contentHash){this.publish({...this.snapshot,state:'draft-conflict',conflictingDraft:restored.draft,message:'另一首歌曲已有草稿。'});return;}
+            let project=!overwrite&&restored?.kind==='current'?validateComposition(restored.draft.project,context):this.createProject(trackId);
+            if(!project.editorSnapshot && this.options.editorRepository){
+                try {const editor=await this.options.editorRepository.restore();if(generation!==this.generation||this.disposed)return;
+                    if(editor?.project.track.contentHash===context.contentHash)project=validateComposition({...project,editorSnapshot:{capturedAt:editor.savedAt,project:editor.project}},context);
+                } catch { /* Optional Editor data remains explicitly disconnected. */ }
             }
-            this.playbackLease = lease;
-            this.publish({
-                ...this.snapshot,
-                state: 'loading',
-                activeTrackId: trackId,
-            });
-            const context = this.trackContext(trackId);
-            if (!context) throw new Error('歌曲解码信息不可用。');
-            const draft = await this.repository.restore();
-            if (generation !== this.routeGeneration || this.disposed) return;
-            if (draft && draft.project.track.contentHash !== context.contentHash) {
-                this.publish({
-                    ...this.snapshot,
-                    state: 'draft-conflict',
-                    activeTrackId: trackId,
-                    conflictingDraft: draft,
-                    message: '检测到另一首歌曲的可视化草稿，请先选择如何处理。',
-                });
-                return;
-            }
-            if (draft) {
-                const restored = validateVisualizerProjectV1(
-                    draft.project,
-                    context,
-                    this.registry,
-                );
-                const enriched = await this.attachEditorDraft(
-                    restored,
-                    context,
-                    generation,
-                );
-                if (generation !== this.routeGeneration || this.disposed) return;
-                this.publishReady(
-                    trackId,
-                    enriched.project,
-                    true,
-                    enriched.changed ? 'saving' : 'saved',
-                    enriched.source,
-                );
-                this.activateAnalysis(enriched.project);
-                if (enriched.changed) this.queueSave(enriched.project, true);
-                return;
-            }
-            const created = this.createProject(trackId);
-            const enriched = await this.attachEditorDraft(
-                created,
-                context,
-                generation,
-            );
-            if (generation !== this.routeGeneration || this.disposed) return;
-            this.publishReady(
-                trackId,
-                enriched.project,
-                false,
-                'clean',
-                enriched.source,
-            );
-            this.activateAnalysis(enriched.project);
-            this.queueSave(enriched.project, true);
-        } catch (error) {
-            if (generation !== this.routeGeneration || this.disposed) return;
-            this.releaseAnalysisLease();
-            this.releaseLease();
-            this.publishUnavailable(
-                trackId,
-                error instanceof Error ? error.message : '歌曲当前不可用于可视化。',
-            );
-        }
+            this.publish({...this.snapshot,state:'ready',project,persistence:restored?.kind==='current'&&!overwrite?'saved':'saving',restoredFromDraft:restored?.kind==='current'&&!overwrite,
+                bindingRuntime:{...initial().bindingRuntime,bindingRevision:this.snapshot.bindingRuntime.bindingRevision+1,editorSnapshotSource:project.editorSnapshot?'project':'none'}});
+            this.activateAnalysis();if(overwrite||!restored)this.writer.queue(project);this.syncBeforeUnload();
+        }catch(error){if(generation!==this.generation||this.disposed)return;this.releaseLeases();this.publish({...initial(),state:'unavailable',routeTrackId:trackId,message:(error as Error).message});}
     }
-
-    updateOutput(resolution: VisualizerResolution, frameRate: VisualizerFrameRate): void {
-        this.assertRecordingUnlocked();
-        const project = this.snapshot.project;
-        if (!project) return;
-        this.updateProject({
-            ...project,
-            output: { ...project.output, resolution, frameRate },
-        }, true);
+    updateProject(input:VisualizerProjectV3){
+        this.assertUnlocked();const context=this.context();if(!context||!this.snapshot.project)return;
+        const project=validateComposition({...input,updatedAt:new Date().toISOString()},context);
+        this.resolver.reset();this.publish({...this.snapshot,state:'ready',project,persistence:'saving',message:undefined,
+            bindingRuntime:{...this.snapshot.bindingRuntime,bindingRevision:this.snapshot.bindingRuntime.bindingRevision+1,editorSnapshotSource:project.editorSnapshot?this.snapshot.bindingRuntime.editorSnapshotSource==='none'?'project':this.snapshot.bindingRuntime.editorSnapshotSource:'none'}});
+        this.writer.queue(project);this.activateAnalysis();this.syncBeforeUnload();
     }
-
-    switchTemplate(templateId: VisualizerTemplateId): void {
-        this.assertRecordingUnlocked();
-        const project = this.snapshot.project;
-        if (!project || project.scene.templateId === templateId) return;
-        this.rememberTemplateBindings(project);
-        this.updateProject({
-            ...project,
-            scene: {
-                templateId,
-                templateVersion: 1,
-                seed: project.scene.seed,
-                bindings: this.templateBindings.get(templateId)
-                    ?.map((binding) => structuredClone(binding))
-                    ?? this.registry.createDefaultBindings(templateId),
-            },
-        }, true);
+    addElement(type:ElementType){const project=this.snapshot.project;if(!project)return null;const element=elementRegistry.create(type,project.track.durationSeconds,Math.max(-1,...project.elements.map(e=>e.layer))+1);
+        this.updateProject({...project,elements:[...project.elements,element]});return element.id;}
+    updateElement(id:string,patch:Partial<VisualizerElement>){const p=this.snapshot.project;if(p)this.updateProject({...p,elements:p.elements.map(e=>e.id===id?{...e,...structuredClone(patch),id}:e)});}
+    updateBinding(id:string,binding:ElementBinding){const e=this.snapshot.project?.elements.find(e=>e.id===id);if(e)this.updateElement(id,{bindings:e.bindings.map(b=>b.parameterId===binding.parameterId?structuredClone(binding):b)});}
+    removeElement(id:string){if(this.snapshot.project)this.updateProject(removeCompositionElement(this.snapshot.project,id));}
+    reorderElements(ids:string[]){if(this.snapshot.project)this.updateProject(reorderComposition(this.snapshot.project,ids));}
+    updateOutput(resolution:VisualizerResolution,frameRate:VisualizerFrameRate){const p=this.snapshot.project;if(p)this.updateProject({...p,output:{aspectRatio:'16:9',resolution,frameRate}});}
+    resolveValuesAt(time:number):VisualizerResolvedParameterMap {
+        const project=this.snapshot.project;if(!project)return new Map();
+        const result=this.resolver.resolve(project,Math.max(0,time),id=>this.analysisLease?.getSeries(id)??null);
+        const flat=new Map();for(const [id,values]of result)for(const [parameter,value]of values)flat.set(parameterKey(id,parameter),value);return flat;
     }
-
-    updateProject(project: VisualizerProjectV1, immediate = false): void {
-        this.assertRecordingUnlocked();
-        const activeTrackId = this.snapshot.activeTrackId;
-        const context = activeTrackId ? this.trackContext(activeTrackId) : null;
-        if (
-            !context
-            || !['ready', 'not-persisted'].includes(this.snapshot.state)
-        ) return;
-        const candidate = this.validateCandidate(project, context);
-        this.rememberTemplateBindings(candidate);
-        this.publish({
-            ...this.snapshot,
-            state: 'ready',
-            project: candidate,
-            persistence: 'saving',
-            message: undefined,
-        });
-        this.advanceBindingRuntime(candidate);
-        this.queueSave(candidate, immediate);
+    async reloadEditorDraft(){this.assertUnlocked();const generation=this.generation;const draft=await this.options.editorRepository?.restore();
+        if(generation!==this.generation||this.disposed)return;if(!draft)throw Error('没有可用的同歌 Editor 草稿。');this.setEditorSnapshot(draft.project,draft.savedAt,'draft');}
+    async importEditorProject(){this.assertUnlocked();const generation=this.generation;const codec=new EditorFormatCodecRegistry().get('json-v1');const opened=await this.options.editorFileGateway?.open(codec);
+        if(!opened||generation!==this.generation||this.disposed)return;const context=this.context();if(!context)return;this.setEditorSnapshot(codec.decode(opened.bytes,context),new Date().toISOString(),'imported');}
+    private setEditorSnapshot(input:unknown,capturedAt:string,source:'draft'|'imported'){
+        const context=this.context(),p=this.snapshot.project;if(!context||!p)return;
+        const project=validateEditorProjectV1(input,context);this.updateProject({...p,editorSnapshot:{capturedAt,project}});
+        this.publish({...this.snapshot,bindingRuntime:{...this.snapshot.bindingRuntime,editorSnapshotSource:source}});
     }
-
-    updateBinding(binding: VisualizerParameterBindingV1): void {
-        this.assertRecordingUnlocked();
-        const project = this.snapshot.project;
-        if (!project) return;
-        const index = project.scene.bindings.findIndex(
-            (entry) => entry.parameterId === binding.parameterId,
-        );
-        if (index < 0) {
-            throw new VisualizerBindingUpdateError(
-                'binding-invalid',
-                '找不到对应的场景参数。',
-            );
-        }
-        const bindings = project.scene.bindings.map((entry, candidateIndex) =>
-            candidateIndex === index ? structuredClone(binding) : entry);
-        this.updateProject({
-            ...project,
-            scene: { ...project.scene, bindings },
-        }, true);
+    removeEditorSnapshot(){const p=this.snapshot.project;if(!p)return;const next=structuredClone(p);delete next.editorSnapshot;this.updateProject(next);}
+    async importProject(){this.assertUnlocked();const generation=this.generation,io=++this.ioGeneration;const opened=await this.options.fileGateway.open(compositionFileFormat);
+        if(!opened||generation!==this.generation||io!==this.ioGeneration||this.disposed)return 'cancelled';const context=this.context();if(!context)return 'cancelled';
+        const project=decodeComposition(opened.bytes,context);this.updateProject(project);await this.flush();return 'imported';}
+    async exportProject(){const p=this.snapshot.project;if(!p)return 'cancelled';return this.options.fileGateway.save(compositionFileFormat,p.track.fileName.replace(/\.[^.]+$/,'')+compositionFileFormat.extension,encodeComposition(p));}
+    async exportConflictingDraft(){
+        const conflict=this.snapshot.conflictingDraft,raw=this.snapshot.unsupportedDraft;
+        if(conflict)return this.options.fileGateway.save(compositionFileFormat,conflict.project.track.fileName+compositionFileFormat.extension,encodeComposition(conflict.project));
+        if(raw!==null)return this.options.fileGateway.save(compositionFileFormat,'previous-visualizer-draft.json',new TextEncoder().encode(JSON.stringify(raw,null,2)+'\n'));
+        return 'cancelled';
     }
-
-    resolveParameters(timeSeconds: number): VisualizerResolvedParameter[] {
-        const project = this.snapshot.project;
-        if (!project) return [];
-        return this.bindingResolver.resolve(
-            project,
-            Math.max(0, Number.isFinite(timeSeconds) ? timeSeconds : 0),
-            (featureId) => this.analysisLease?.getSeries(featureId) ?? null,
-        );
+    async overwriteConflictingDraft(){if(this.snapshot.activeTrackId)await this.enter(this.snapshot.activeTrackId,true);}
+    retryAnalysis(){const features=this.snapshot.bindingRuntime.activeFeatureIds;return this.analysisLease?.setActiveFeatures(features);}
+    private activateAnalysis(){
+        const project=this.snapshot.project;if(!project||!this.options.analysisCoordinator)return;
+        const ids=planCompositionFeatures(project),previous=this.snapshot.bindingRuntime.activeFeatureIds;
+        const changed=ids.join('|')!==previous.join('|');
+        this.publish({...this.snapshot,bindingRuntime:{...this.snapshot.bindingRuntime,activeFeatureIds:ids,readyFeatureIds:changed?[]:this.snapshot.bindingRuntime.readyFeatureIds,
+            analysisState:ids.length?changed?'loading':this.snapshot.bindingRuntime.analysisState:'idle',analysisProgress:ids.length?this.snapshot.bindingRuntime.analysisProgress:0}});
+        const acquired=!this.analysisLease;
+        if(!this.analysisLease){this.analysisLease=this.options.analysisCoordinator.acquireConsumer('visualizer');this.unsubscribeAnalysis=this.analysisLease.subscribe(s=>this.handleAnalysis(s));}
+        if(changed||acquired){const generation=this.generation,revision=this.snapshot.bindingRuntime.bindingRevision;
+            void this.analysisLease.setActiveFeatures(ids).catch(error=>{if(generation===this.generation&&revision===this.snapshot.bindingRuntime.bindingRevision&&!this.disposed)
+                this.publish({...this.snapshot,bindingRuntime:{...this.snapshot.bindingRuntime,analysisState:'error',analysisMessage:(error as Error).message}});});}
     }
-
-    async reloadEditorDraft(): Promise<'loaded' | 'unavailable'> {
-        this.assertRecordingUnlocked();
-        const project = this.snapshot.project;
-        const context = this.currentTrackContext();
-        if (!project || !context || !this.editorRepository) return 'unavailable';
-        const generation = this.routeGeneration;
-        const envelope = await this.editorRepository.restore();
-        if (generation !== this.routeGeneration || this.disposed) return 'unavailable';
-        if (!envelope) {
-            throw new VisualizerBindingUpdateError(
-                'editor-snapshot-unavailable',
-                '没有可用的 Editor 草稿。',
-            );
-        }
-        const editorProject = this.validateEditorSnapshot(envelope.project, context);
-        this.commitEditorSnapshot(project, editorProject, envelope.savedAt, 'draft');
-        return 'loaded';
+    private handleAnalysis(s:AnalysisCoordinatorSnapshot){
+        if(!this.snapshot.project||this.disposed||s.trackHash&&s.trackHash!==this.snapshot.project.track.contentHash)return;
+        const r=this.snapshot.bindingRuntime,ready=s.readyFeatureIds.filter(id=>r.activeFeatureIds.includes(id));
+        const state=!r.activeFeatureIds.length?'idle':s.error?'error':ready.length===r.activeFeatureIds.length&&s.state==='ready'?'ready':'loading';
+        const changed=state!==r.analysisState||ready.join('|')!==r.readyFeatureIds.join('|');if(changed)this.resolver.reset();
+        this.publish({...this.snapshot,bindingRuntime:{...r,bindingRevision:r.bindingRevision+(changed?1:0),readyFeatureIds:ready,analysisState:state,analysisProgress:s.progress,analysisMessage:s.error?.message}});
     }
-
-    async importEditorProject(codecId = 'json-v1'): Promise<'imported' | 'cancelled'> {
-        this.assertRecordingUnlocked();
-        const project = this.snapshot.project;
-        const context = this.currentTrackContext();
-        if (!project || !context || !this.editorFileGateway) return 'cancelled';
-        const generation = this.routeGeneration;
-        const codec = this.editorCodecs.get(codecId);
-        const opened = await this.editorFileGateway.open(codec);
-        if (!opened || generation !== this.routeGeneration || this.disposed) {
-            return 'cancelled';
-        }
-        let editorProject;
-        try {
-            editorProject = codec.decode(opened.bytes, context);
-        } catch (error) {
-            throw new VisualizerBindingUpdateError(
-                'editor-snapshot-mismatch',
-                error instanceof Error ? error.message : 'Editor 工程无效。',
-            );
-        }
-        if (generation !== this.routeGeneration || this.disposed) return 'cancelled';
-        this.commitEditorSnapshot(
-            project,
-            editorProject,
-            this.now().toISOString(),
-            'imported',
-        );
-        return 'imported';
-    }
-
-    removeEditorSnapshot(): void {
-        this.assertRecordingUnlocked();
-        const project = this.snapshot.project;
-        if (!project?.editorSnapshot) return;
-        const references = project.scene.bindings.filter(
-            (binding) => binding.source.kind === 'editor-event',
-        );
-        if (references.length > 0) {
-            throw new VisualizerBindingUpdateError(
-                'editor-snapshot-in-use',
-                `仍有 ${references.length} 个参数使用 Editor 数据。`,
-            );
-        }
-        const candidate = structuredClone(project);
-        delete candidate.editorSnapshot;
-        this.updateProject(candidate, true);
-        this.publish({
-            ...this.snapshot,
-            bindingRuntime: {
-                ...this.snapshot.bindingRuntime,
-                editorSnapshotSource: 'none',
-            },
-        });
-    }
-
-    async importProject(codecId = 'json-v1'): Promise<'imported' | 'cancelled'> {
-        this.assertRecordingUnlocked();
-        const activeTrackId = this.snapshot.activeTrackId;
-        const context = activeTrackId ? this.trackContext(activeTrackId) : null;
-        if (!activeTrackId || !context || !this.snapshot.project) return 'cancelled';
-        const generation = this.routeGeneration;
-        const codec = this.codecs.get(codecId);
-        const opened = await this.fileGateway.open(codec);
-        if (!opened || generation !== this.routeGeneration || this.disposed) return 'cancelled';
-        const candidate = codec.decode(opened.bytes, context, this.registry);
-        if (generation !== this.routeGeneration || this.disposed) return 'cancelled';
-        this.rememberTemplateBindings(candidate);
-        this.publish({
-            ...this.snapshot,
-            state: 'ready',
-            project: candidate,
-            persistence: 'saving',
-            message: undefined,
-        });
-        this.publish({
-            ...this.snapshot,
-            bindingRuntime: {
-                ...this.snapshot.bindingRuntime,
-                editorSnapshotSource: candidate.editorSnapshot ? 'project' : 'none',
-            },
-        });
-        this.advanceBindingRuntime(candidate);
-        this.queueSave(candidate, true);
-        await this.flush();
-        return 'imported';
-    }
-
-    async exportProject(codecId = 'json-v1'): Promise<'saved' | 'cancelled'> {
-        const project = this.snapshot.project;
-        if (!project) return 'cancelled';
-        return this.exportProjectValue(project, codecId);
-    }
-
-    async exportConflictingDraft(): Promise<'saved' | 'cancelled'> {
-        const draft = this.snapshot.conflictingDraft;
-        return draft ? this.exportProjectValue(draft.project) : 'cancelled';
-    }
-
-    async overwriteConflictingDraft(): Promise<void> {
-        const trackId = this.snapshot.activeTrackId;
-        if (this.snapshot.state !== 'draft-conflict' || !trackId) return;
-        const project = this.createProject(trackId);
-        this.publishReady(
-            trackId,
-            project,
-            false,
-            'saving',
-            project.editorSnapshot ? 'project' : 'none',
-        );
-        this.activateAnalysis(project);
-        this.queueSave(project, true);
-        await this.flush();
-    }
-
-    async cancelConflictingEntry(): Promise<VisualizerDraftConflictResolution> {
-        const draft = this.snapshot.conflictingDraft;
-        if (!draft) return { kind: 'fallback' };
-        const previous = this.store.queue.find(
-            (track) => track.trackHash === draft.project.track.contentHash,
-        );
-        if (!previous) {
-            this.releaseAnalysisLease();
-            this.releaseLease();
-            this.publishUnavailable(
-                this.snapshot.routeTrackId ?? '',
-                '旧草稿对应歌曲已不在播放列表中，草稿已保留。',
-            );
-            return { kind: 'fallback' };
-        }
-        const generation = ++this.routeGeneration;
-        this.releaseAnalysisLease();
-        this.releaseLease();
-        try {
-            const lease = await this.audioSession.acquireRoutePlayback({
-                consumer: 'visualizer',
-                trackId: previous.id,
-            });
-            if (generation !== this.routeGeneration || this.disposed) {
-                lease.release();
-                return { kind: 'fallback' };
-            }
-            this.playbackLease = lease;
-            const context = this.trackContext(previous.id);
-            if (!context) throw new Error('旧歌曲无法恢复解码信息。');
-            const project = validateVisualizerProjectV1(
-                draft.project,
-                context,
-                this.registry,
-            );
-            this.publishReady(
-                previous.id,
-                project,
-                true,
-                'saved',
-                project.editorSnapshot ? 'project' : 'none',
-            );
-            this.activateAnalysis(project);
-            return { kind: 'restored-old', trackId: previous.id };
-        } catch {
-            this.releaseAnalysisLease();
-            this.releaseLease();
-            this.publishUnavailable(previous.id, '旧歌曲当前无法恢复，草稿已保留。');
-            return { kind: 'fallback' };
-        }
-    }
-
-    async flush(): Promise<void> {
-        if (this.saveTimer) {
-            this.clearTimer(this.saveTimer);
-            this.saveTimer = null;
-        }
-        if (this.saveInFlight) await this.saveInFlight;
-        if (!this.pendingProject) {
-            this.syncBeforeUnload();
-            return;
-        }
-        const project = this.pendingProject;
-        this.pendingProject = null;
-        this.publish({ ...this.snapshot, persistence: 'saving' });
-        this.saveInFlight = this.repository.replace({
-            schemaVersion: 1,
-            savedAt: this.now().toISOString(),
-            project,
-        }).then(() => {
-            this.publish({
-                ...this.snapshot,
-                state: 'ready',
-                persistence: 'saved',
-                message: undefined,
-            });
-        }).catch(() => {
-            this.publish({
-                ...this.snapshot,
-                state: 'not-persisted',
-                persistence: 'not-persisted',
-                message: '当前可视化工程仍在内存中，但无法保存草稿。',
-            });
-        }).finally(() => {
-            this.saveInFlight = null;
-            this.syncBeforeUnload();
-        });
-        this.syncBeforeUnload();
-        await this.saveInFlight;
-        if (this.pendingProject) await this.flush();
-    }
-
-    async leave(): Promise<void> {
-        await this.recordingSession.handlePageHide();
-        ++this.routeGeneration;
-        await this.flush();
-        this.releaseAnalysisLease();
-        this.releaseLease();
-        this.clearTemplateBindings();
-        this.publish(initialSnapshot());
-    }
-
-    async dispose(): Promise<void> {
-        if (this.disposed) return;
-        this.disposed = true;
-        ++this.routeGeneration;
-        await this.recordingSession.dispose();
-        await this.flush();
-        this.releaseAnalysisLease();
-        this.releaseLease();
-        this.repository.close();
-        this.editorRepository?.close();
-        this.removeBeforeUnload();
-        this.windowTarget?.removeEventListener('pagehide', this.handlePageHide);
-        this.listeners.clear();
-    }
-
-    private createProject(trackId: string): VisualizerProjectV1 {
-        const track = this.trackIdentity(trackId);
-        if (!track) throw new Error('歌曲内容身份或解码信息不可用。');
-        return createInitialVisualizerProject({
-            track,
-            registry: this.registry,
-            createId: this.createId,
-            createSeed: this.createSeed,
-            now: this.now,
-        });
-    }
-
-    private trackIdentity(trackId: string): EditorTrackIdentityV1 | null {
-        const track = this.store.queue.find((entry) => entry.id === trackId);
-        const descriptor = this.audioSession.getDecodedTrackDescriptor(trackId);
-        if (!track?.trackHash || !descriptor) return null;
-        return {
-            contentHash: track.trackHash,
-            fileName: track.name,
-            ...(track.metadata.title ? { title: track.metadata.title } : {}),
-            ...(track.metadata.artist ? { artist: track.metadata.artist } : {}),
-            durationSeconds: descriptor.durationSeconds,
-            sampleRate: descriptor.sampleRate,
-        };
-    }
-
-    private trackContext(trackId: string): VisualizerTrackValidationContext | null {
-        const track = this.store.queue.find((entry) => entry.id === trackId);
-        const descriptor = this.audioSession.getDecodedTrackDescriptor(trackId);
-        return track?.trackHash && descriptor
-            ? {
-                contentHash: track.trackHash,
-                durationSeconds: descriptor.durationSeconds,
-                sampleRate: descriptor.sampleRate,
-            }
-            : null;
-    }
-
-    private currentTrackContext(): VisualizerTrackValidationContext | null {
-        return this.snapshot.activeTrackId
-            ? this.trackContext(this.snapshot.activeTrackId)
-            : null;
-    }
-
-    private validateCandidate(
-        project: VisualizerProjectV1,
-        context: VisualizerTrackValidationContext,
-    ): VisualizerProjectV1 {
-        try {
-            planVisualizerFeatures(project);
-        } catch (error) {
-            if (error instanceof VisualizerBindingPlannerError) {
-                throw new VisualizerBindingUpdateError(
-                    'analysis-feature-limit',
-                    error.message,
-                );
-            }
-            throw error;
-        }
-        try {
-            return validateVisualizerProjectV1({
-                ...project,
-                updatedAt: this.now().toISOString(),
-            }, context, this.registry);
-        } catch (error) {
-            throw new VisualizerBindingUpdateError(
-                'binding-invalid',
-                error instanceof Error ? error.message : '绑定无效。',
-            );
-        }
-    }
-
-    private validateEditorSnapshot(
-        project: Parameters<typeof validateEditorProjectV1>[0],
-        context: VisualizerTrackValidationContext,
-    ) {
-        try {
-            return validateEditorProjectV1(project, context);
-        } catch (error) {
-            throw new VisualizerBindingUpdateError(
-                'editor-snapshot-mismatch',
-                error instanceof Error ? error.message : 'Editor 工程与当前歌曲不匹配。',
-            );
-        }
-    }
-
-    private async attachEditorDraft(
-        project: VisualizerProjectV1,
-        context: VisualizerTrackValidationContext,
-        generation: number,
-    ): Promise<{
-        project: VisualizerProjectV1;
-        changed: boolean;
-        source: VisualizerEditorSnapshotSource;
-    }> {
-        if (project.editorSnapshot) {
-            return { project, changed: false, source: 'project' };
-        }
-        if (!this.editorRepository) {
-            return { project, changed: false, source: 'none' };
-        }
-        try {
-            const envelope = await this.editorRepository.restore();
-            if (
-                generation !== this.routeGeneration
-                || this.disposed
-                || !envelope
-                || envelope.project.track.contentHash !== context.contentHash
-            ) return { project, changed: false, source: 'none' };
-            const editorProject = validateEditorProjectV1(envelope.project, context);
-            const candidate = validateVisualizerProjectV1({
-                ...project,
-                editorSnapshot: {
-                    capturedAt: envelope.savedAt,
-                    project: editorProject,
-                },
-            }, context, this.registry);
-            return { project: candidate, changed: true, source: 'draft' };
-        } catch {
-            return { project, changed: false, source: 'none' };
-        }
-    }
-
-    private commitEditorSnapshot(
-        project: VisualizerProjectV1,
-        editorProject: ReturnType<typeof validateEditorProjectV1>,
-        capturedAt: string,
-        source: VisualizerEditorSnapshotSource,
-    ): void {
-        this.updateProject({
-            ...project,
-            editorSnapshot: { capturedAt, project: editorProject },
-        }, true);
-        this.publish({
-            ...this.snapshot,
-            bindingRuntime: {
-                ...this.snapshot.bindingRuntime,
-                editorSnapshotSource: source,
-            },
-        });
-    }
-
-    private activateAnalysis(project: VisualizerProjectV1): void {
-        if (!this.analysisCoordinator) return;
-        if (!this.analysisLease) {
-            this.analysisLease = this.analysisCoordinator.acquireConsumer('visualizer');
-            this.unsubscribeAnalysis = this.analysisLease.subscribe(
-                (snapshot) => this.handleAnalysisSnapshot(snapshot),
-            );
-        }
-        this.advanceBindingRuntime(project);
-    }
-
-    private advanceBindingRuntime(project: VisualizerProjectV1): void {
-        const featureIds = planVisualizerFeatures(project);
-        const previous = this.snapshot.bindingRuntime.activeFeatureIds;
-        const changed = previous.length !== featureIds.length
-            || previous.some((featureId, index) => featureId !== featureIds[index]);
-        this.bindingResolver.reset();
-        this.publish({
-            ...this.snapshot,
-            bindingRuntime: {
-                ...this.snapshot.bindingRuntime,
-                bindingRevision: this.snapshot.bindingRuntime.bindingRevision + 1,
-                activeFeatureIds: [...featureIds],
-                readyFeatureIds: changed
-                    ? []
-                    : [...this.snapshot.bindingRuntime.readyFeatureIds],
-                analysisState: featureIds.length === 0
-                    ? 'idle'
-                    : changed ? 'loading' : this.snapshot.bindingRuntime.analysisState,
-                analysisProgress: featureIds.length === 0
-                    ? 0
-                    : changed ? 0 : this.snapshot.bindingRuntime.analysisProgress,
-                analysisMessage: undefined,
-            },
-        });
-        if (!this.analysisLease || !changed) return;
-        const revision = this.snapshot.bindingRuntime.bindingRevision;
-        void this.analysisLease.setActiveFeatures(featureIds).catch((error) => {
-            if (
-                this.disposed
-                || revision !== this.snapshot.bindingRuntime.bindingRevision
-            ) return;
-            this.publish({
-                ...this.snapshot,
-                bindingRuntime: {
-                    ...this.snapshot.bindingRuntime,
-                    analysisState: 'error',
-                    analysisMessage: error instanceof Error
-                        ? error.message
-                        : '分析启动失败。',
-                },
-            });
-        });
-    }
-
-    private handleAnalysisSnapshot(snapshot: AnalysisCoordinatorSnapshot): void {
-        const project = this.snapshot.project;
-        if (!project || this.disposed) return;
-        if (
-            snapshot.trackHash
-            && snapshot.trackHash !== project.track.contentHash
-        ) return;
-        const active = this.snapshot.bindingRuntime.activeFeatureIds;
-        const ready = snapshot.readyFeatureIds.filter((featureId) =>
-            active.includes(featureId));
-        const analysisState = active.length === 0
-            ? 'idle'
-            : snapshot.error
-                ? 'error'
-                : ready.length === active.length && snapshot.state === 'ready'
-                    ? 'ready'
-                    : 'loading';
-        const previousRuntime = this.snapshot.bindingRuntime;
-        const resolutionChanged = analysisState !== previousRuntime.analysisState
-            || ready.length !== previousRuntime.readyFeatureIds.length
-            || ready.some((featureId, index) =>
-                featureId !== previousRuntime.readyFeatureIds[index]);
-        if (resolutionChanged) this.bindingResolver.reset();
-        this.publish({
-            ...this.snapshot,
-            bindingRuntime: {
-                ...this.snapshot.bindingRuntime,
-                bindingRevision: resolutionChanged
-                    ? this.snapshot.bindingRuntime.bindingRevision + 1
-                    : this.snapshot.bindingRuntime.bindingRevision,
-                readyFeatureIds: ready,
-                analysisState,
-                analysisProgress: snapshot.progress,
-                analysisMessage: snapshot.error?.message,
-            },
-        });
-    }
-
-    private queueSave(project: VisualizerProjectV1, immediate: boolean): void {
-        this.pendingProject = cloneProject(project);
-        if (this.saveTimer) this.clearTimer(this.saveTimer);
-        this.saveTimer = this.setTimer(() => {
-            this.saveTimer = null;
-            void this.flush();
-        }, immediate ? 0 : 250);
-        this.syncBeforeUnload();
-    }
-
-    private async exportProjectValue(
-        project: VisualizerProjectV1,
-        codecId = 'json-v1',
-    ): Promise<'saved' | 'cancelled'> {
-        const codec = this.codecs.get(codecId);
-        return this.fileGateway.save(
-            codec,
-            visualizerProjectFileName(project.track.fileName, codec),
-            codec.encode(project, this.registry),
-        );
-    }
-
-    private publishReady(
-        trackId: string,
-        project: VisualizerProjectV1,
-        restoredFromDraft: boolean,
-        persistence: VisualizerSessionSnapshot['persistence'],
-        editorSnapshotSource: VisualizerEditorSnapshotSource,
-    ): void {
-        this.resetTemplateBindings(project);
-        this.publish({
-            state: persistence === 'not-persisted' ? 'not-persisted' : 'ready',
-            routeTrackId: trackId,
-            activeTrackId: trackId,
-            project,
-            conflictingDraft: null,
-            persistence,
-            restoredFromDraft,
-            recording: { ...this.snapshot.recording },
-            bindingRuntime: {
-                ...initialSnapshot().bindingRuntime,
-                bindingRevision: this.snapshot.bindingRuntime.bindingRevision + 1,
-                editorSnapshotSource,
-            },
-        });
-    }
-
-    private publishUnavailable(trackId: string, message: string): void {
-        this.publish({
-            ...initialSnapshot(),
-            state: 'unavailable',
-            routeTrackId: trackId || null,
-            message,
-        });
-    }
-
-    private releaseLease(): void {
-        this.playbackLease?.release();
-        this.playbackLease = null;
-    }
-
-    private releaseAnalysisLease(): void {
-        this.unsubscribeAnalysis?.();
-        this.unsubscribeAnalysis = null;
-        this.analysisLease?.release();
-        this.analysisLease = null;
-        this.bindingResolver.reset();
-    }
-
-    private rememberTemplateBindings(project: VisualizerProjectV1): void {
-        if (this.templateBindingTrackHash !== project.track.contentHash) {
-            this.templateBindings.clear();
-            this.templateBindingTrackHash = project.track.contentHash;
-        }
-        this.templateBindings.set(
-            project.scene.templateId,
-            project.scene.bindings.map((binding) => structuredClone(binding)),
-        );
-    }
-
-    private resetTemplateBindings(project: VisualizerProjectV1): void {
-        this.templateBindings.clear();
-        this.templateBindingTrackHash = project.track.contentHash;
-        this.rememberTemplateBindings(project);
-    }
-
-    private clearTemplateBindings(): void {
-        this.templateBindings.clear();
-        this.templateBindingTrackHash = null;
-    }
-
-    private publish(snapshot: VisualizerSessionSnapshot): void {
-        this.snapshot = snapshot;
-        for (const listener of this.listeners) listener(cloneSnapshot(snapshot));
-    }
-
-    private readonly handleBeforeUnload = (event: BeforeUnloadEvent): void => {
-        if (!this.hasPendingWrite() && !this.hasUnresolvedRecordingOutput()) return;
-        event.preventDefault();
-        event.returnValue = '';
-    };
-
-    private syncBeforeUnload(): void {
-        if (
-            (this.hasPendingWrite() || this.hasUnresolvedRecordingOutput())
-            && !this.beforeUnloadRegistered
-        ) {
-            this.windowTarget?.addEventListener(
-                'beforeunload',
-                this.handleBeforeUnload as EventListener,
-            );
-            this.beforeUnloadRegistered = true;
-        } else if (!this.hasPendingWrite() && !this.hasUnresolvedRecordingOutput()) {
-            this.removeBeforeUnload();
-        }
-    }
-
-    private readonly handlePageHide = (): void => {
-        void this.recordingSession.handlePageHide();
-    };
-
-    private assertRecordingUnlocked(): void {
-        if (this.recordingSession.isLocked()) {
-            throw new VisualizerRecordingLockedError();
-        }
-    }
-
-    private removeBeforeUnload(): void {
-        if (!this.beforeUnloadRegistered) return;
-        this.windowTarget?.removeEventListener(
-            'beforeunload',
-            this.handleBeforeUnload as EventListener,
-        );
-        this.beforeUnloadRegistered = false;
-    }
+    async flush(){const success=await this.writer.flush();this.syncBeforeUnload();return success;}
+    private releaseLeases(){this.unsubscribeAnalysis?.();this.unsubscribeAnalysis=null;this.analysisLease?.release();this.analysisLease=null;this.playbackLease?.release();this.playbackLease=null;this.resolver.reset();}
+    async leave(){if(this.recording.isLocked())await this.recording.cancel();await this.flush();this.generation++;this.ioGeneration++;this.releaseLeases();this.publish(initial());}
+    async dispose(){await this.leave();await this.recording.dispose();this.disposed=true;this.options.repository.close();this.options.editorRepository?.close();this.windowTarget?.removeEventListener('pagehide',this.handlePageHide);this.windowTarget?.removeEventListener('beforeunload',this.handleBeforeUnload as EventListener);this.listeners.clear();}
+    private readonly handlePageHide=()=>{void this.recording.handlePageHide();};
+    private readonly handleBeforeUnload=(event:BeforeUnloadEvent)=>{if(this.hasPendingWrite()||this.hasUnresolvedRecordingOutput()){event.preventDefault();event.returnValue='';}};
+    private syncBeforeUnload(){const needed=this.hasPendingWrite()||this.hasUnresolvedRecordingOutput();if(needed===this.beforeUnload)return;this.beforeUnload=needed;
+        if(needed)this.windowTarget?.addEventListener('beforeunload',this.handleBeforeUnload as EventListener);else this.windowTarget?.removeEventListener('beforeunload',this.handleBeforeUnload as EventListener);}
 }
-
-export const visualizerSessionControllerKey: InjectionKey<VisualizerSessionController> =
-    Symbol('visualizer-session-controller');
-
-export const useVisualizerSessionController = (): VisualizerSessionController => {
-    const controller = inject(visualizerSessionControllerKey);
-    if (!controller) throw new Error('VisualizerSessionController has not been provided.');
-    return controller;
-};
+export const visualizerSessionControllerKey:InjectionKey<VisualizerSessionController>=Symbol('visualizer-session-controller');
+export const useVisualizerSessionController=()=>{const controller=inject(visualizerSessionControllerKey);if(!controller)throw Error('Visualizer controller 未提供。');return controller;};

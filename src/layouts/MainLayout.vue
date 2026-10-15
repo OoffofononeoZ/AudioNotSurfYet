@@ -5,7 +5,7 @@
         <div class="app-content">
             <router-view />
         </div>
-        <MusicBar v-if="!routePlaybackActive" :progress="0" />
+        <MusicBar v-if="!editorPlaybackActive" :progress="0" />
     </div>
 </template>
 
@@ -40,7 +40,7 @@ import {
     VisualizerSessionController,
     visualizerSessionControllerKey,
 } from '../visualizer/visualizerSessionController';
-import { VisualizerDraftRepository } from '../visualizer/visualizerDraftRepository';
+import { CompositionDraftRepository } from '../visualizer/compositionDraftRepository';
 import { NativeVisualizerFileGateway } from '../visualizer/fileIO';
 import { NativeVisualizerVideoFileGateway } from '../visualizer/videoFileIO';
 import { EditorSeparationService,editorSeparationServiceKey } from '../processing/editorSeparationService';
@@ -95,24 +95,13 @@ const visualizerController = new VisualizerSessionController({
     audioSession,
     analysisCoordinator,
     store: audioSessionStore,
-    repository: new VisualizerDraftRepository(),
+    repository: new CompositionDraftRepository(),
     fileGateway: new NativeVisualizerFileGateway(),
     videoGateway: new NativeVisualizerVideoFileGateway(),
     editorRepository: new EditorDraftRepository(),
     editorFileGateway: new NativeEditorFileGateway(),
 });
 provide(visualizerSessionControllerKey, visualizerController);
-const visualizerSnapshot = shallowRef(visualizerController.getSnapshot());
-const unsubscribeVisualizer = visualizerController.subscribe((snapshot) => {
-    visualizerSnapshot.value = snapshot;
-});
-const visualizerPlaybackActive = computed(() =>
-    visualizerSnapshot.value.activeTrackId !== null
-    && ['loading', 'ready', 'draft-conflict', 'not-persisted'].includes(
-        visualizerSnapshot.value.state,
-    ));
-const routePlaybackActive = computed(() =>
-    editorPlaybackActive.value || visualizerPlaybackActive.value);
 void audioSession.initialize().then((cache) => {
     analysisCoordinator.setRestoredCache(cache);
 });
@@ -203,7 +192,6 @@ onUnmounted(() => {
     if (previousSidebarWidth) document.documentElement.style.setProperty('--app-sidebar-width', previousSidebarWidth);
     else document.documentElement.style.removeProperty('--app-sidebar-width');
     unsubscribeEditor();
-    unsubscribeVisualizer();
     if (developmentBridge) {
         delete (
             window as typeof window & {

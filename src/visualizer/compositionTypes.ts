@@ -1,5 +1,5 @@
 import type { EditorProjectV1, EditorTrackIdentityV1 } from '../editor/types';
-import type { VisualizerParameterBindingV1, VisualizerResolution, VisualizerFrameRate } from './types';
+import type { VisualizerParameterBindingV1, VisualizerResolution, VisualizerFrameRate, VisualizerBindingRuntimeSnapshot, VisualizerRecordingState, VisualizerPersistenceState, VisualizerSessionState } from './types';
 
 export type ElementType = 'solid' | 'spectral-strings' | 'spectral-dots' | 'reactive-rings' | 'scale' | 'blur' | 'fade';
 export type ElementKind = 'visual' | 'modifier' | 'transition';
@@ -38,4 +38,18 @@ export interface CompositionDraft {
     schemaVersion: 3;
     savedAt: string;
     project: VisualizerProjectV3;
+}
+
+export interface CompositionSessionSnapshot {
+    state: VisualizerSessionState | 'unsupported-draft';
+    routeTrackId:string|null;
+    activeTrackId:string|null;
+    project:VisualizerProjectV3|null;
+    conflictingDraft:CompositionDraft|null;
+    unsupportedDraft:unknown;
+    persistence:VisualizerPersistenceState;
+    restoredFromDraft:boolean;
+    bindingRuntime:VisualizerBindingRuntimeSnapshot;
+    recording:VisualizerRecordingState;
+    message?:string;
 }

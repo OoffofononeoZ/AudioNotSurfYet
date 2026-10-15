@@ -1,5 +1,4 @@
 import * as THREE from 'three';
-import type { SceneRegistry } from './sceneRegistry';
 import type {
     VisualizerRenderFrame,
     VisualizerRenderer,
@@ -79,7 +78,7 @@ declare global {
 
 export interface VisualizerRendererHostOptions {
     readonly canvas: HTMLCanvasElement;
-    readonly registry: SceneRegistry;
+    readonly createScene: (host: VisualizerSceneHost) => VisualizerScene;
     readonly readFrame: () => VisualizerRenderFrame | null;
     readonly resolveValuesAt: (timeSeconds: number) => VisualizerResolvedParameterMap;
     readonly onFrame: (
@@ -447,17 +446,11 @@ export class VisualizerRendererHost implements VisualizerSceneHost {
     private ensureScene(frame: VisualizerRenderFrame): VisualizerScene {
         const nextKey = [
             frame.trackIdentity,
-            frame.templateId,
-            frame.templateVersion,
             frame.seed,
         ].join(':');
         if (this.scene && this.sceneKey === nextKey) return this.scene;
         this.disposeScene();
-        const descriptor = this.options.registry.get(frame.templateId, frame.templateVersion);
-        if (!descriptor.create) {
-            throw new Error(`场景 ${frame.templateId}@${frame.templateVersion} 没有渲染工厂。`);
-        }
-        this.scene = descriptor.create(this, frame.seed);
+        this.scene = this.options.createScene(this);
         this.sceneKey = nextKey;
         this.scene.resize(this.width, this.height, this.dpr);
         visualizerRendererDiagnostics.scenesCreated += 1;

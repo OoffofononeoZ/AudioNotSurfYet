@@ -11,6 +11,10 @@ description: 为 AudioNotSurfYet 新建受控内置 Visualizer 场景，执行 S
 
 音频制作流程图可作为产品意图证据，但它本身不是单个场景的 `SceneBriefV1` 或 Scene Contract。原子视觉素材生成属于另一类未来任务；本 Skill 不生成素材。流程图提出的分离音轨、自动标记或新绑定来源只有在对应产品和架构合同获批后才能进入场景输入。
 
+## 当前版本边界
+
+2026-10-15 的 Project V3 原子组合改版已移除 SceneRegistry 和旧单模板 codec。下方完整场景生成步骤只适用于其历史模型，当前不得直接执行旧 V1 注册步骤。新增原子元素使用 audio-visualizer-dev；未来重新引入完整场景时，仍须先确认与 V3 的集成契约并完成本 skill 的输入与具体 Scene Contract 审批。
+
 ## Workflow
 
 1. 验证仓库包含 `AGENTS.md`、`src/visualizer/sceneRegistry.ts`、`src/visualizer/projectCodec.ts` 和 `src/analysis/featureRegistry.ts`。读取根指南、`docs/context/index.md`、ADR-0021、Visualizer project/binding contracts，并执行 `git status --short`。

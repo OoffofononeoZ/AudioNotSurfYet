@@ -1,5 +1,7 @@
 # AudioNotSurfYet 测试说明
 
+2026-10-15：当前 Visualizer 为 Project V3 原子组合模型，使用 `npm run test:visualizer` 与 `npm run test:e2e:visualizer`。V1–V6 的结果、fixture、golden 和候选身份保持历史语境；旧模板专用测试及 npm 别名已退役，重放旧 canonical 需使用其原提交。
+
 ## 环境
 
 - Node.js：24.18.0；npm：11.x。仓库使用 `.nvmrc`、`engines` 和 `package-lock.json` 锁定基线。
@@ -101,36 +103,7 @@ M3–M14 不建设 CI。下列命令当前均为本地门禁；正式证据要�
 | `npm run test:e10:integration` | E10 整批 autosave、刷新、JSON V1 round-trip 与模式外行为隔离 |
 | `npm run test:e2e:e10:chrome` / `test:e2e:e10:edge` | 真实 Chrome/Edge 的紧凑拍号、区间操作 pointer/键盘与深色离页 dialog |
 | `npm run test:e2e:e10` | 顺序执行真实 Chrome 与 Edge 的 E10 专项；环境阻断时只记 unverified |
-| `npm run fixtures:v1:golden` | Visualizer V1 默认/完整/无效 strict project、descriptor、歌曲 identity 和四特征边界 golden |
-| `npm run test:v1:unit` | Visualizer V1 factory、canonical codec、strict descriptor/parameter/binding 和 route lease token |
-| `npm run test:v1:integration` | Visualizer route generation、Editor/Visualizer lease、单草稿、quota/abort、同/异歌恢复和导入原子性 |
-| `npm run fixtures:v2:golden` | Visualizer V2 scalar/vector projection、point/range 端点和稳定四特征顺序 golden |
-| `npm run test:v2:unit` | Visualizer V2 planner、21 项 projection、transform 与 60Hz deterministic resolver |
-| `npm run test:v2:integration` | Visualizer consumer、active set、第五项原子拒绝、Editor snapshot 与离页释放 |
-| `npm run test:e2e:v2:chrome` / `test:e2e:v2:edge` | 真实 Chrome/Edge 的 binding inspector、四特征、Editor 点/范围和 1024 键盘抽屉 |
-| `npm run fixtures:v3:golden` | Visualizer V3 fixture 场景覆盖、固定 60Hz decay 与一秒 checkpoint golden |
-| `npm run test:v3:unit` | Orthogonal Lines 参数映射、方向隔离、确定性余辉、revision 和 frame hash |
-| `npm run test:v3:integration` | 单 RendererHost/renderer/RAF、共享 resolved map、scene dispose/switch 与错误重试 |
-| `npm run test:e2e:v3` | 真实 Chrome 的画面/设置反馈、seek/刷新 hash、DPR、真实 Cube 前向切换、错误恢复和 20 次资源循环 |
-| `npm run fixtures:v4:golden` | Visualizer V4 fixture、64-band 核心环、seed 布局与 60Hz rise/orbit checkpoint golden |
-| `npm run test:v4:unit` | Cube Swarm 参数隔离、频谱规范、确定性积分、revision 与 frame hash |
-| `npm run test:v4:integration` | 默认两项分析、单 host/resource dispose、context loss/restore 与错误隔离 |
-| `npm run test:e2e:v4` | 真实 Chrome 的 Cube 响应、seek/刷新、context recovery、DPR/三视口、键盘与 20 次资源循环 |
-| `npm run fixtures:v5:golden` | V5 48kHz mono 三秒同步 fixture、Editor point/range 与 Orthogonal binding golden |
-| `npm run test:v5:unit` | recording preset/MIME、pre-Gain 单 holder、checkpoint、状态机、失败清理与保存语义 |
-| `npm run test:v5:integration` | controller 命令锁、Blob 保存重试、同 Canvas capture lease 与 20 次资源生命周期 |
-| `npm run test:e2e:v5` | 真实 Chrome/Edge 的 context/renderer abort、离页决策、静音页面录音、能力矩阵与资源诊断 |
-| `npm run test:v5:media` | ffprobe/FFmpeg 验证 WebM 双轨、codec、尺寸/fps、packet gap、时长、静音隔离与音画峰值 |
-| `npm run fixtures:v6:golden` | 校验 V6 三格式 SHA、900 秒 OPFS 压力工程、四特征/双模板 binding 与 54 步证据身份 golden |
-| `npm run test:v6:unit` | V6 golden、projection/component/transform、四项到两项再恢复、媒体矩阵与 V5 canonical 身份 |
-| `npm run test:v6:integration` | V6 renderer 时间诊断、单 host/renderer/Canvas 生命周期和幂等资源释放 |
-| `npm run test:e2e:v6:chrome` / `test:e2e:v6:edge` | 真实 Chrome/Edge 的 MP3/WAV/FLAC、六个默认 WebM、900 秒四特征压力、20 次 lifecycle 与故障矩阵 |
-| `npm run test:e2e:v6` | 顺序执行真实 Chrome 与 Edge 的同一 V6 final hardening 套件 |
 | `npm run test:e2e:visualizer-layout` | 顺序执行 Chrome/Edge post-V6 一屏工作台、双侧滚动隔离、compact drawer 与共享 scrollbar 专项 |
-| `npm run test:v6:media` | ffprobe/FFmpeg 验证两浏览器六个默认 WebM 的双轨、codec、1280×720、平均 30fps `±5%`、最多四帧 packet gap、时长与非静音音轨 |
-| `npm run test:e2e:v1:chrome` | Chrome Header/route、MusicBar、pause-at-end、三栏/抽屉、单 16:9 Canvas、transport 和资源循环 |
-| `npm run test:e2e:v1:edge` | 使用真实 Edge 执行同一 V1 route/lease/layout/resource 专项套件 |
-| `npm run test:e2e:v1` | 顺序执行真实 Chrome 与 Edge 的 V1 专项套件 |
 | `npm run test:e2e:edge` | 使用真实 Edge 执行全部 M3–M11 E2E；缺失时明确 blocked |
 | `npm run build` | TypeScript project build 和 Vite production build |
 | `npm run eval:m3:provisional` | 在未提交工作树生成本地 provisional run |
@@ -177,18 +150,6 @@ M3–M14 不建设 CI。下列命令当前均为本地门禁；正式证据要�
 | `npm run eval:e10` | 只允许在干净 E10 implementation commit 上执行 33 步 canonical suite；浏览器未验证时不得登记通过 |
 | `npm run eval:editor-readiness:provisional` | 在 dirty worktree 对固定 E9 runtime candidate 执行 24 步针对性 readiness 审计；只生成本地反馈 |
 | `npm run eval:editor-readiness` | 只允许从 clean HEAD 执行 24 步 E4–E9/双浏览器/静态门禁，并要求相对 E9 implementation 的 `src/` 无漂移 |
-| `npm run eval:v1:provisional` | 在 dirty worktree 执行 21 步 V1 suite，只作为实现反馈 |
-| `npm run eval:v1` | 只允许在干净 implementation commit 上执行 21 步 V1 canonical suite |
-| `npm run eval:v2:provisional` | 在 dirty worktree 执行 26 步 V2 suite，只作为实现反馈 |
-| `npm run eval:v2` | 只允许在干净 implementation commit 上执行 26 步 V2 canonical suite |
-| `npm run eval:v3:provisional` | 在 dirty worktree 执行 V2 26 步基线加四个 V3 专项，只作为实现反馈 |
-| `npm run eval:v3` | 只允许在干净 implementation commit 上执行固定 30 步 V3 canonical suite |
-| `npm run eval:v4:provisional` | 在 dirty worktree 执行 V3 30 步基线加四个 V4 专项，只作为实现反馈 |
-| `npm run eval:v4` | 只允许在干净 implementation commit 上执行固定 34 步 V4 canonical suite |
-| `npm run eval:v5:provisional` | 在 dirty worktree 执行 V4 34 步基线加六个 V5 专项，只作为实现反馈 |
-| `npm run eval:v5` | 只允许在干净 implementation commit 上执行固定 40 步 V5 canonical suite |
-| `npm run eval:v6:provisional` | 在 dirty worktree 执行 V5 40 步基线、六个 V6 专项和八个 M6/M14 显式回归，只作为实现反馈 |
-| `npm run eval:v6` | 只允许在干净 implementation commit 上执行固定 54 步 V6 canonical suite |
 
 ## 目录职责
 
@@ -203,7 +164,7 @@ M3–M14 不建设 CI。下列命令当前均为本地门禁；正式证据要�
 - `tests/harness/`：被正常 Vitest 配置排除的 deliberate failure 及其自检。
 - `tests/scripts/`：浏览器检测和 M3–M14、Editor、Visualizer run orchestration。
 - `tests/editor/`：Editor 工程格式、草稿、lease 和 session controller 的里程碑专项测试。
-- `tests/visualizer/`：Visualizer V1 strict project/route/草稿、V2 binding resolver、V3 Orthogonal Lines、V4 Cube、V5 recording state/capture/resource，以及 V6 binding 恢复、renderer 时间诊断和证据身份测试。
+- `tests/visualizer/`：Project V3 codec/引用、确定性元素合成、RendererHost、录制状态机与当前生命周期回归。
 
 M4 浏览器测试中的损坏 WAV 与 65 秒、48kHz、单声道计时 WAV 都写入 `test-results/`，不提交二进制。长时钟测试用同一 DOM 采样同时读取 `performance.now()` 与 AudioContext 驱动快照；三次 seek 使用进度条真实几何。
 

@@ -1,9 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import type { VisualizerResolvedParameter } from '../../src/visualizer/bindingResolver';
-import type {
-    SceneTemplateDescriptor,
-} from '../../src/visualizer/sceneRegistry';
-import { SceneRegistry } from '../../src/visualizer/sceneRegistry';
+import type { VisualizerResolvedParameter } from '../../src/visualizer/rendererTypes';
 import type {
     VisualizerRenderFrame,
     VisualizerRenderer,
@@ -24,8 +20,6 @@ const resolvedEntry: VisualizerResolvedParameter = {
 
 const frame = (): VisualizerRenderFrame => ({
     trackIdentity: 'v3-track-hash',
-    templateId: 'orthogonal-lines',
-    templateVersion: 1,
     seed: 7,
     timeSeconds: 1.25,
     bindingRevision: 3,
@@ -40,6 +34,9 @@ const fakeCanvas = (): HTMLCanvasElement => ({
 
 const fakeRenderer = (canvas: HTMLCanvasElement): VisualizerRenderer => ({
     domElement: canvas,
+    autoClear:true,
+    clear(){},
+    setRenderTarget(){},
     setPixelRatio() {},
     setSize() {},
     setClearColor() {},
@@ -76,41 +73,10 @@ const registryHarness = (input: {
     throwOnDispose?: () => boolean;
 }) => {
     let sequence = 0;
-    const descriptor = (
-        id: 'orthogonal-lines' | 'cube-swarm',
-        kind: VisualizerScene['kind'],
-    ): SceneTemplateDescriptor => ({
-        id,
-        version: 1,
-        title: id,
-        description: id,
-        parameters: [],
-        create: () => {
-            const sceneId = `${id}-${++sequence}`;
-            return {
-                kind,
-                render(frameInput) {
-                    if (input.throwOnRender?.()) throw new Error('fixture render failure');
-                    input.onRender?.(sceneId, frameInput);
-                    return {
-                        hash: `${sceneId}:${frameInput.timeSeconds}`,
-                        needsSourcePrompt: false,
-                    };
-                },
-                resize() {
-                    if (input.throwOnResize?.()) throw new Error('fixture resize failure');
-                },
-                dispose() {
-                    if (input.throwOnDispose?.()) throw new Error('fixture dispose failure');
-                    input.onDispose?.(sceneId);
-                },
-            };
-        },
-    });
-    return new SceneRegistry([
-        descriptor('orthogonal-lines', 'rendered'),
-        descriptor('cube-swarm', 'neutral'),
-    ]);
+    return ():VisualizerScene => {
+        const sceneId='scene-'+ ++sequence;
+        return {kind:'rendered',render(frameInput){if(input.throwOnRender?.())throw Error('fixture render failure');input.onRender?.(sceneId,frameInput);return {hash:sceneId+':'+frameInput.timeSeconds,needsSourcePrompt:false};},resize(){if(input.throwOnResize?.())throw Error('fixture resize failure');},dispose(){if(input.throwOnDispose?.())throw Error('fixture dispose failure');input.onDispose?.(sceneId);}};
+    };
 };
 
 describe('Visualizer V3 renderer host integration', () => {
@@ -126,7 +92,7 @@ describe('Visualizer V3 renderer host integration', () => {
         let rendererCreateCount = 0;
         const host = new VisualizerRendererHost({
             canvas,
-            registry: registryHarness({
+            createScene: registryHarness({
                 onRender: (_sceneId, input) => { renderedMap = input.values; },
             }),
             readFrame: () => currentFrame,
@@ -170,7 +136,7 @@ describe('Visualizer V3 renderer host integration', () => {
         let rendererCreateCount = 0;
         const host = new VisualizerRendererHost({
             canvas,
-            registry: registryHarness({ onDispose: (sceneId) => disposed.push(sceneId) }),
+            createScene: registryHarness({ onDispose: (sceneId) => disposed.push(sceneId) }),
             readFrame: () => currentFrame,
             resolveValuesAt: () => new Map(),
             onFrame() {},
@@ -185,15 +151,15 @@ describe('Visualizer V3 renderer host integration', () => {
         host.requestFrame();
         raf.flush();
         const hostId = host.id;
-        currentFrame = { ...currentFrame, templateId: 'cube-swarm' };
+        currentFrame = { ...currentFrame, seed: 8 };
         host.requestFrame();
         raf.flush();
-        expect(disposed).toEqual(['orthogonal-lines-1']);
+        expect(disposed).toEqual(['scene-1']);
         expect(host.id).toBe(hostId);
         expect(host.canvas).toBe(canvas);
         expect(rendererCreateCount).toBe(1);
         host.dispose();
-        expect(disposed).toEqual(['orthogonal-lines-1', 'cube-swarm-2']);
+        expect(disposed).toEqual(['scene-1', 'scene-2']);
     });
 
     test('isolates scene errors and retry creates one replacement scene', () => {
@@ -203,7 +169,7 @@ describe('Visualizer V3 renderer host integration', () => {
         const disposed: string[] = [];
         const host = new VisualizerRendererHost({
             canvas: fakeCanvas(),
-            registry: registryHarness({
+            createScene: registryHarness({
                 throwOnRender: () => {
                     const value = fail;
                     fail = false;
@@ -225,7 +191,7 @@ describe('Visualizer V3 renderer host integration', () => {
         expect(raf.callbacks.size).toBe(0);
         host.retry();
         raf.flush();
-        expect(disposed).toEqual(['orthogonal-lines-1']);
+        expect(disposed).toEqual(['scene-1']);
         expect(statuses.at(-1)).toBe('ready');
         host.dispose();
     });
@@ -237,7 +203,7 @@ describe('Visualizer V3 renderer host integration', () => {
         const disposed: string[] = [];
         const host = new VisualizerRendererHost({
             canvas: fakeCanvas(),
-            registry: registryHarness({
+            createScene: registryHarness({
                 throwOnResize: () => failResize,
                 onDispose: (sceneId) => disposed.push(sceneId),
             }),
@@ -257,7 +223,7 @@ describe('Visualizer V3 renderer host integration', () => {
         failResize = false;
         host.retry();
         raf.flush();
-        expect(disposed).toEqual(['orthogonal-lines-1']);
+        expect(disposed).toEqual(['scene-1']);
         expect(statuses.at(-1)).toBe('ready');
         host.dispose();
     });
@@ -270,7 +236,7 @@ describe('Visualizer V3 renderer host integration', () => {
         let rendererCreateCount = 0;
         const host = new VisualizerRendererHost({
             canvas: fakeCanvas(),
-            registry: registryHarness({
+            createScene: registryHarness({
                 throwOnDispose: () => {
                     const value = failDispose;
                     failDispose = false;
@@ -296,7 +262,7 @@ describe('Visualizer V3 renderer host integration', () => {
         expect(raf.callbacks.size).toBe(0);
         host.retry();
         raf.flush();
-        expect(disposed).toEqual(['orthogonal-lines-1']);
+        expect(disposed).toEqual(['scene-1']);
         expect(statuses.at(-1)).toBe('ready');
         expect(rendererCreateCount).toBe(1);
         host.dispose();

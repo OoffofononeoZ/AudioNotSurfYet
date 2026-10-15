@@ -1,5 +1,9 @@
 # 可视化、动画与响应式
 
+## 当前 Visualizer
+
+2026-10-15 起当前 Visualizer 已转为 Project V3 原子元素组合：ElementRegistry、CompositionResolver/Scene、三个复用 render targets，保留单 RendererHost/Canvas/RAF。普通页显示 MusicBar，视频内图标控制，全屏仅画面与进度。当前契约见 [Project V3](../../../docs/architecture/visualizer/project-format-v3.md)，阶段状态见 [组合工作区](../../../docs/context/visualizer-composition.md)。下方 V3–V6 术语为历史里程碑，不等同当前 schemaVersion。
+
 ## 当前可视化表面
 
 | 组件 | 技术 | 当前职责 |

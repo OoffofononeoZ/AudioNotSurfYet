@@ -5,7 +5,7 @@ import type {
 import { RecordingTapError } from '../audio/audioEngine';
 import type { AudioSessionService, RecordingTransportLease } from '../audio/audioSessionService';
 import type { PlaybackSnapshot } from '../types/audio';
-import type { VisualizerResolvedParameter } from './bindingResolver';
+import type { VisualizerResolvedParameter } from './rendererTypes';
 import {
     getVisualizerRecordingPreset,
     isReliableVisualizerRecordingPreset,
@@ -19,11 +19,11 @@ import type {
 import { visualizerRendererDiagnostics } from './visualizerRendererHost';
 import type {
     VisualizerBindingRuntimeSnapshot,
-    VisualizerProjectV1,
     VisualizerRecordingErrorCode,
     VisualizerRecordingState,
     VisualizerSessionState,
 } from './types';
+import type { VisualizerProjectV3 } from './compositionTypes';
 import {
     type VisualizerVideoFileGateway,
     visualizerVideoFileName,
@@ -41,9 +41,9 @@ export interface VisualizerRecordingTarget {
 }
 
 export interface VisualizerRecordingContext {
-    readonly state: VisualizerSessionState;
+    readonly state: VisualizerSessionState | 'unsupported-draft';
     readonly activeTrackId: string | null;
-    readonly project: VisualizerProjectV1 | null;
+    readonly project: VisualizerProjectV3 | null;
     readonly bindingRuntime: VisualizerBindingRuntimeSnapshot;
     readonly resolvedValues: readonly VisualizerResolvedParameter[];
 }
@@ -219,7 +219,7 @@ export class VisualizerRecordingSession {
         this.expectedTrackId = trackId;
         this.suggestedFileName = visualizerVideoFileName({
             fileName: project.track.fileName,
-            templateId: project.scene.templateId,
+            templateId: 'composition',
             resolution: project.output.resolution,
             frameRate: project.output.frameRate,
         });
