@@ -22,7 +22,7 @@
             <VisualizerDraftNotice v-if="snapshot.state==='draft-conflict'||snapshot.state==='unsupported-draft'" :file-name="snapshot.conflictingDraft?.project.track.fileName" @export="run(()=>controller.exportConflictingDraft())" @replace="run(()=>controller.overwriteConflictingDraft())" @cancel="router.push('/')"/>
             <template v-else-if="snapshot.state==='empty'"><h1>先选择一首歌曲</h1><p>使用底部播放器导入或选择歌曲。</p></template><template v-else-if="snapshot.state==='loading'"><p role="status">正在准备工程…</p></template><template v-else><h1>歌曲暂时不可用</h1><p role="alert">{{snapshot.message}}</p></template><p v-if="actionError" class="viz-error" role="alert">{{actionError}}</p>
         </section>
-        <VisualizerElementCatalog :open="catalogOpen" @close="catalogOpen=false" @add="addElement"/>
+        <VisualizerElementCatalog :open="catalogOpen" @close="catalogOpen=false" @add="addElement" @preset="addPreset"/>
         <dialog ref="leaveDialog" class="viz-leave-dialog" aria-labelledby="viz-leave-title" @cancel.prevent="resolveLeave(false)"><h2 id="viz-leave-title">{{leaveKind==='project'?'切换歌曲工程':locked?'录制尚未结束':'WebM 尚未处理'}}</h2><p>{{leaveKind==='project'?'当前只保留一个可视化草稿。可以先导出当前工程，或明确覆盖为目标歌曲的空工程。':locked?'离开会取消当前录制，不生成半文件。':'请先保存或明确丢弃当前 WebM。'}}</p><div class="viz-inline-actions"><template v-if="leaveKind==='project'"><button type="button" @click="run(()=>controller.exportProject())">导出当前工程</button><button type="button" data-testid="confirm-track-project-switch" @click="resolveLeave(true)">覆盖草稿并切换</button></template><button v-else-if="locked" type="button" @click="cancelAndLeave">取消录制并离开</button><template v-else><button type="button" @click="saveAndLeave">保存并离开</button><button type="button" @click="discardAndLeave">丢弃并离开</button></template><button type="button" @click="resolveLeave(false)">留在此页</button></div></dialog>
     </main>
 </template>
@@ -31,6 +31,7 @@ import { computed,onBeforeUnmount,ref,shallowRef,watch } from 'vue';import { onB
 import VisualizerIcon from '../components/visualizer/VisualizerIcon.vue';import VisualizerElementList from '../components/visualizer/VisualizerElementList.vue';import VisualizerElementCatalog from '../components/visualizer/VisualizerElementCatalog.vue';import VisualizerElementInspector from '../components/visualizer/VisualizerElementInspector.vue';import VisualizerBottomPanel from '../components/visualizer/VisualizerBottomPanel.vue';
 import AppPlaybackProgress from '../components/controls/AppPlaybackProgress.vue';
 import VisualizerDraftNotice from '../components/visualizer/VisualizerDraftNotice.vue';
+import type { CompositionPresetId } from '../visualizer/compositionPresets';
 import { useAudioSessionService } from '../audio/audioSessionService';
 import { useAudioSessionStore } from '../stores/audioSessionStore';import { useVisualizerSessionController } from '../visualizer/visualizerSessionController';import { useVisualizerPreview } from '../visualizer/useVisualizerPreview';import { useVisualizerFullscreen } from '../visualizer/useVisualizerFullscreen';import type { ElementType } from '../visualizer/compositionTypes';import { formatSecToTime as formatTime } from '../utils/utils';import '../visualizer/workspace.css';
 const route=useRoute(),router=useRouter(),controller=useVisualizerSessionController(),store=useAudioSessionStore(),audioSession=useAudioSessionService();
@@ -44,6 +45,7 @@ const recordingLabel=computed(()=>({preparing:'准备录制',recording:'正在�
 async function run(operation:()=>unknown){actionError.value='';try{return await operation();}catch(error){actionError.value=(error as Error).message;return null;}}
 function selectElement(id:string){selection.value=id;drawer.value=drawer.value==='elements'?'inspector':drawer.value;}
 async function addElement(type:ElementType){const id=await run(()=>controller.addElement(type));if(typeof id==='string'){selection.value=id;catalogOpen.value=false;drawer.value=null;}}
+async function addPreset(id:CompositionPresetId){const ids=await run(()=>controller.addPreset(id));if(Array.isArray(ids)&&ids.length){selection.value=ids[0];catalogOpen.value=false;drawer.value=null;}}
 async function startRecording(){if(!await fullscreen.exit())return;await run(()=>controller.startRecording());}
 let requestedPlayTarget:string|null=null,entryRevision=0;
 let approval:{trackId:string;project:ReturnType<typeof controller.readProject>}|null=null;

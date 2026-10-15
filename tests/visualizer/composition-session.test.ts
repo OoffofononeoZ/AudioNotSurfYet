@@ -46,6 +46,17 @@ function harness(restored: RestoredComposition = null, editorRepository?: Editor
 
 beforeEach(() => setActivePinia(createPinia()));
 
+test('adds a preset atomically, retains existing elements and persists the expanded composition',async()=>{
+    const h=harness();await h.controller.enter('first');const existing=h.controller.addElement('solid');
+    const notifications=vi.fn();const unsubscribe=h.controller.subscribe(notifications);notifications.mockClear();
+    const added=h.controller.addPreset('geometric-0.6');
+    expect(added).toHaveLength(11);expect(h.controller.readProject()?.elements[0]?.id).toBe(existing);
+    expect(h.controller.getSnapshot().bindingRuntime.activeFeatureIds).toEqual([]);
+    expect(notifications.mock.calls.filter(([s])=>s.project.elements.length===12).length).toBeGreaterThan(0);
+    await h.controller.flush();await h.controller.enter('first');expect(h.controller.readProject()?.elements.map(e=>e.id)).toEqual([existing,...added]);
+    unsubscribe();await h.controller.dispose();
+});
+
 test('starts empty, restores the same song, and protects the single draft on a different song', async () => {
     const h = harness();
     await h.controller.enter('first');

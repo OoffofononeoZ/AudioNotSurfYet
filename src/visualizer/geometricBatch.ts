@@ -4,12 +4,15 @@ export type Ink = readonly [number, number, number, number];
 export class GeometricBatch {
     readonly positions = new Float32Array(65536 * 3);
     readonly colors = new Float32Array(65536 * 4);
+    readonly edges = new Float32Array(65536 * 2);
+    pixelSize = 1/1080;
     count = 0;
     reset() { this.count = 0; }
-    vertex(x: number, y: number, color: Ink) {
+    vertex(x: number, y: number, color: Ink, distance=0, halfWidth=1) {
         if (this.count >= 65536) throw Error('几何元素超过顶点容量。');
         this.positions.set([x, y, 0], this.count * 3);
-        this.colors.set(color, this.count * 4); this.count++;
+        this.colors.set(color, this.count * 4);
+        this.edges.set([distance,halfWidth],this.count*2); this.count++;
     }
     triangle(a: Point3, b: Point3, c: Point3, color: Ink) {
         this.vertex(a[0], a[1], color); this.vertex(b[0], b[1], color); this.vertex(c[0], c[1], color);
@@ -17,10 +20,12 @@ export class GeometricBatch {
     line(a: Point3, b: Point3, width: number, color: Ink) {
         const dx=b[0]-a[0], dy=b[1]-a[1], length=Math.hypot(dx,dy);
         if (length < 1e-10) return;
-        const nx=-dy/length*width/2, ny=dx/length*width/2;
+        const half=width/2, outer=half+this.pixelSize;
+        const nx=-dy/length*outer, ny=dx/length*outer;
         const p:Point3=[a[0]+nx,a[1]+ny,0], q:Point3=[b[0]+nx,b[1]+ny,0];
         const r:Point3=[b[0]-nx,b[1]-ny,0], s:Point3=[a[0]-nx,a[1]-ny,0];
-        this.triangle(p,q,r,color); this.triangle(p,r,s,color);
+        this.vertex(p[0],p[1],color,outer,half);this.vertex(q[0],q[1],color,outer,half);this.vertex(r[0],r[1],color,-outer,half);
+        this.vertex(p[0],p[1],color,outer,half);this.vertex(r[0],r[1],color,-outer,half);this.vertex(s[0],s[1],color,-outer,half);
     }
 }
 
