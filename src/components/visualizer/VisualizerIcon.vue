@@ -2,6 +2,10 @@
 <script setup lang="ts">
 defineProps<{name:string}>();
 const paths:Record<string,string>={
+    radial:'M12 2l2 4 4-1-1 4 5 3-5 2 1 4-4-1-2 5-2-5-4 1 1-4-5-2 5-3-1-4 4 1z',
+    orbit:'M5 5h4v4H5zM16 14h4v4h-4zM12 2a10 10 0 0 1 10 10M12 22A10 10 0 0 1 2 12M12 9l3 3-3 3-3-3z',
+    wireform:'m12 2 9 5v10l-9 5-9-5V7zm0 0v10m9-5-9 5-9-5m9 5v10',
+    arcs:'M3 12a9 9 0 0 1 9-9m9 9a9 9 0 0 1-9 9M6 12a6 6 0 0 0 6 6m6-6a6 6 0 0 0-6-6M9 12a3 3 0 0 1 3-3m3 3a3 3 0 0 1-3 3',
     music:'M9 18V5l11-2v13M9 8l11-2M9 18a3 3 0 1 1-3-3c2 0 3 1 3 3m11-2a3 3 0 1 1-3-3c2 0 3 1 3 3',right:'m9 5 7 7-7 7',
     add:'M12 5v14M5 12h14',close:'m6 6 12 12M18 6 6 18',import:'M12 3v12m-4-4 4 4 4-4M4 15v5h16v-5',export:'M12 15V3m-4 4 4-4 4 4M4 15v5h16v-5',
     fullscreen:'M9 4H4v5m11-5h5v5M4 15v5h5m6 0h5v-5',exit:'M4 9h5V4m6 0v5h5M9 20v-5H4m16 0h-5v5',

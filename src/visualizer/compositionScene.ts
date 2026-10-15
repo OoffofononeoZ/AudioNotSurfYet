@@ -3,6 +3,8 @@ import { primitiveFragment, quadVertex, effectFragment } from './compositionShad
 import { SpectralStringsState, spectrumBands } from './spectralStringsState';
 import { elementRange, orderedElements } from './compositionModel';
 import { elementRegistry } from './elementRegistry';
+import { isGeometricElement } from './geometricElements';
+import { GeometricElementRenderer } from './geometricElementRenderer';
 import { elementNumber, elementValue, effectsFor, fadeOpacity, parameterKey } from './compositionEffects';
 import type { VisualizerElement, VisualizerProjectV3 } from './compositionTypes';
 import type { VisualizerScene, VisualizerSceneRenderInput, VisualizerResolvedParameterMap } from './rendererTypes';
@@ -28,6 +30,7 @@ export class CompositionScene implements VisualizerScene {
     private readonly targets=[new THREE.WebGLRenderTarget(1,1,{depthBuffer:false}),new THREE.WebGLRenderTarget(1,1,{depthBuffer:false})];
     private readonly accumulation=new THREE.WebGLRenderTarget(1,1,{depthBuffer:false});
     private readonly strings=new Map<string,SpectralStringsState>();
+    private readonly geometric=new GeometricElementRenderer();
     private readonly levels=new Float32Array(64);
     private readonly color=new THREE.Color();
     private width=1;
@@ -48,6 +51,9 @@ export class CompositionScene implements VisualizerScene {
         this.options.renderer.setRenderTarget(target); this.options.renderer.setClearColor('#000000',0); this.options.renderer.clear(true,false,false);
     }
     private drawPrimitive(e:VisualizerElement,input:VisualizerSceneRenderInput,seed:number) {
+        if(isGeometricElement(e.type)) {
+            this.clear(this.targets[0]!);this.geometric.render(this.options.renderer,e,input,seed);return;
+        }
         const u=this.primitive.uniforms, values=input.values;
         const kinds={'solid':0,'spectral-strings':1,'spectral-dots':2,'reactive-rings':3};
         u.uKind!.value=kinds[e.type as keyof typeof kinds];
@@ -125,12 +131,14 @@ export class CompositionScene implements VisualizerScene {
     resize(width:number,height:number,dpr:number) {
         this.width=Math.max(1,Math.round(width*dpr)); this.height=Math.max(1,Math.round(height*dpr));
         this.primitive.uniforms.uViewport!.value.set(this.width,this.height);
+        this.geometric.resize(this.width,this.height);
         for (const target of [...this.targets,this.accumulation]) target.setSize(this.width,this.height);
     }
     dispose() {
         if (this.disposed) return; this.disposed=true;
         for(const state of this.strings.values()) state.reset(); this.strings.clear();
         this.geometry.dispose(); this.primitive.dispose(); this.effect.dispose();
+        this.geometric.dispose();
         for (const target of [...this.targets,this.accumulation]) target.dispose(); this.scene.clear();
     }
 }
