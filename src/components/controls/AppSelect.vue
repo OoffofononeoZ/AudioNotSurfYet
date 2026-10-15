@@ -71,7 +71,7 @@ function changed(event: Event) {
     box-shadow: 0 10px 32px rgba(0, 0, 0, .4);
     scrollbar-width: inherit;
     scrollbar-color: inherit;
-    scrollbar-gutter: inherit;
+    scrollbar-gutter: auto;
 }
 .app-select option {
     gap: 8px;
