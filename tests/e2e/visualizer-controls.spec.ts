@@ -45,3 +45,40 @@ test('shared selects and number steppers keep keyboard, bounds and recording loc
     await expect(opacity).toBeEnabled();
     expect(errors).toEqual([]);
 });
+
+test('fullscreen shares MusicBar track styling, supports dragging and keeps the same canvas', async ({ page }) => {
+    await page.setViewportSize({ width: 1920, height: 1080 });
+    await installFilePickerStub(page); await page.goto('/');
+    await chooseFiles(page, [path.resolve(import.meta.dirname, '../fixtures/audio/format-master.wav')]);
+    await page.getByTestId('toggle-playback').click();
+    const musicStyle = await page.getByTestId('playback-progress').evaluate(element => ({
+        background: getComputedStyle(element).backgroundColor,
+        fill: getComputedStyle(element, '::before').backgroundImage,
+        height: getComputedStyle(element).height,
+    }));
+    await page.getByTestId('header-visualizer-link').click();
+    const canvas = page.getByTestId('visualizer-preview-canvas');
+    const host = await canvas.getAttribute('data-renderer-host-id');
+    await page.getByTestId('visualizer-preview-frame').hover();
+    await page.getByTestId('visualizer-fullscreen-toggle').click();
+    const seek = page.getByTestId('visualizer-seek');
+    await expect(seek).toBeVisible();
+    const videoStyle = await seek.evaluate(element => {
+        const track = element.parentElement!;
+        return { background: getComputedStyle(track).backgroundColor,
+            fill: getComputedStyle(track, '::before').backgroundImage, height: getComputedStyle(track).height };
+    });
+    expect(videoStyle).toEqual(musicStyle);
+    await seek.fill('1.5'); await seek.dispatchEvent('input');
+    await expect(page.locator('#music-bar-container')).toHaveAttribute('data-current-time', '1.5');
+    const box = (await seek.boundingBox())!;
+    await page.mouse.move(box.x + box.width * .4, box.y + box.height / 2);
+    await page.mouse.down(); await page.mouse.move(box.x + box.width * .75, box.y + box.height / 2, { steps: 5 });
+    await page.mouse.up();
+    await expect.poll(async () => Number(await page.locator('#music-bar-container').getAttribute('data-current-time'))).toBeCloseTo(3, 1);
+    await seek.focus(); await page.keyboard.press('Home');
+    await expect(page.locator('#music-bar-container')).toHaveAttribute('data-current-time', '0');
+    await page.screenshot({ path: 'artifacts/visualizer-composition/fullscreen-controls.png' });
+    await page.keyboard.press('Escape');
+    expect(await canvas.getAttribute('data-renderer-host-id')).toBe(host);
+});

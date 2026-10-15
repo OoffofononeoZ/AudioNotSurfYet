@@ -1,0 +1,30 @@
+.app-playback-progress {
+    --progress-width: 0%;
+    position: relative;
+    width: 100%;
+    height: 5px;
+    border-radius: 100px;
+    background: #444;
+}
+.app-playback-progress::before {
+    content: '';
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: var(--progress-width);
+    border-radius: inherit;
+    background: linear-gradient(to right, var(--accent-tsp), var(--accent));
+    pointer-events: none;
+}
+.app-playback-progress__thumb {
+    position: absolute;
+    top: 50%;
+    left: var(--progress-width);
+    width: 10px;
+    height: 10px;
+    border-radius: 100px;
+    background: #fff;
+    transform: translate(-50%, -50%);
+    cursor: pointer;
+    transition: scale .2s ease-in-out;
+}
+.app-playback-progress__thumb:hover { scale: 1.3; }

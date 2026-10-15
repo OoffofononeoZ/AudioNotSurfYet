@@ -23,6 +23,8 @@ owner 于 2026-10-15 批准本轮实现计划：以原子元素替代完整场�
 
 输出底栏及元素属性统一使用通用 AppSelect/AppNumberInput。下拉菜单在当前 Chrome/Edge 使用可定制原生 picker，保持键盘选择、取消和焦点；数值输入使用自有步进按钮，提交有限数值并遵守 min/max，录制锁传入全部控件。AnimatedList 的方向键只在列表内获得焦点时处理，Tab 使用正常焦点顺序。
 
+全屏进度条由 AppPlaybackProgress 展示，与 MusicBar 共用 playbackProgress.css 的 5px 灰色轨道、绿色渐变和白色圆点；保留原有音频命令和同一 Canvas。草稿冲突/版本提示使用 VisualizerDraftNotice 卡片，导出、明确覆盖和取消语义保持不变。
+
 ## 播放策略
 
 顺序播放为新默认，到队尾停止；列表循环首尾衔接；随机播放每轮避免重复，上一首回到历史。Visualizer 与 Editor 的 route lease 都覆盖为单曲循环，不持久化覆盖值；Visualizer 直接列表选歌先处理工程覆盖；选歌后播放，取消时不切歌、不改工程。

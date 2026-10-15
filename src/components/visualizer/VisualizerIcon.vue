@@ -2,6 +2,7 @@
 <script setup lang="ts">
 defineProps<{name:string}>();
 const paths:Record<string,string>={
+    music:'M9 18V5l11-2v13M9 8l11-2M9 18a3 3 0 1 1-3-3c2 0 3 1 3 3m11-2a3 3 0 1 1-3-3c2 0 3 1 3 3',right:'m9 5 7 7-7 7',
     add:'M12 5v14M5 12h14',close:'m6 6 12 12M18 6 6 18',import:'M12 3v12m-4-4 4 4 4-4M4 15v5h16v-5',export:'M12 15V3m-4 4 4-4 4 4M4 15v5h16v-5',
     fullscreen:'M9 4H4v5m11-5h5v5M4 15v5h5m6 0h5v-5',exit:'M4 9h5V4m6 0v5h5M9 20v-5H4m16 0h-5v5',
     record:'M12 4a8 8 0 1 0 0 16 8 8 0 0 0 0-16M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8',stop:'M6 6h12v12H6z',play:'m9 5 10 7-10 7z',pause:'M8 5v14M16 5v14',

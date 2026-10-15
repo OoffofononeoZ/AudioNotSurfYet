@@ -32,7 +32,7 @@
             </section>
             <section class="transport-section flex-col flex w-1/2 mt-4 gap-1.5">
                 <div class="progress-bar-slot">
-                    <div id="progress-bar-container" data-testid="playback-progress" :class="{
+                    <div id="progress-bar-container" class="app-playback-progress" data-testid="playback-progress" :class="{
                         'progress-bar-hidden': isStyleTransitioning,
                         'progress-bar-disabled': !canSeek,
                     }" role="slider" :tabindex="canSeek ? 0 : -1" aria-label="播放进度"
@@ -41,7 +41,7 @@
                         :aria-valuetext="currentTimeText + '/' + (albumInfo[playingTarget]?.duration || '00:00')"
                         :aria-disabled="!canSeek" @mousedown="handleDragStart" @keydown="handleProgressKeydown"
                         @mouseenter="hovering = canSeek && !isStyleTransitioning" @mouseleave="hovering = false">
-                        <div id="progress-button" v-show="hovering && canSeek && !isStyleTransitioning"
+                        <div id="progress-button" class="app-playback-progress__thumb" v-show="hovering && canSeek && !isStyleTransitioning"
                             ref="progressBarRef"></div>
                         <div class="pt-1" style="pointer-events: none;" v-if="styleMode !== 2">
                             {{ currentTimeText + "/" + (albumInfo[playingTarget]?.duration || '00:00') }}
@@ -149,6 +149,7 @@ import { useAudioSessionStore } from '../stores/audioSessionStore';
 import { useConfigstore } from '../stores/configStore';
 import { clamp, formatSecToTime, mapEnergyToDeg } from '../utils/utils';
 import MusicList from './MusicList.vue';
+import './controls/playbackProgress.css';
 import { PLAYBACK_MODES, PLAYBACK_MODE_LABELS } from '../audio/playbackPolicy';
 
 const configStore = useConfigstore();
@@ -803,15 +804,6 @@ const handleEditTrack = async (index: number) => {
     height: 5px;
 }
 
-#progress-bar-container {
-    --progress-width: 0%;
-    width: 100%;
-    height: 5px;
-    background-color: #444;
-    border-radius: 100px;
-    position: relative;
-}
-
 .bg-style-2 #progress-bar-container {
     position: fixed;
     left: 0;
@@ -832,33 +824,6 @@ const handleEditTrack = async (index: number) => {
 
 #progress-bar-container:not(.progress-bar-disabled) {
     cursor: pointer;
-}
-
-#progress-bar-container::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    height: 100%;
-    width: var(--progress-width);
-    background: linear-gradient(to right, var(--accent-tsp), var(--accent));
-    border-radius: 100px;
-}
-
-#progress-button {
-    width: 10px;
-    height: 10px;
-    background-color: #fff;
-    border-radius: 100px;
-    position: absolute;
-    top: -50%;
-    left: calc(var(--progress-width) - 5px);
-    cursor: pointer;
-    transition: scale 0.2s ease-in-out;
-}
-
-#progress-button:hover {
-    scale: 1.3;
 }
 
 svg[role="button"]:focus-visible,
