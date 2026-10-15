@@ -1,4 +1,4 @@
-import type { VisualizerFormatCodec } from './projectCodec';
+export interface VisualizerFileFormat { extension: string; mimeType: string; }
 
 type WritableFileHandle = FileSystemFileHandle & {
     createWritable(): Promise<FileSystemWritableFileStream>;
@@ -9,9 +9,9 @@ export interface VisualizerOpenedFile {
     bytes: ArrayBuffer;
 }
 export interface VisualizerFileGateway {
-    open(codec: VisualizerFormatCodec): Promise<VisualizerOpenedFile | null>;
+    open(codec: VisualizerFileFormat): Promise<VisualizerOpenedFile | null>;
     save(
-        codec: VisualizerFormatCodec,
+        codec: VisualizerFileFormat,
         suggestedName: string,
         bytes: Uint8Array,
     ): Promise<'saved' | 'cancelled'>;
@@ -34,7 +34,7 @@ const isAbortError = (error: unknown): boolean =>
     error instanceof DOMException && error.name === 'AbortError';
 
 export class NativeVisualizerFileGateway implements VisualizerFileGateway {
-    async open(codec: VisualizerFormatCodec): Promise<VisualizerOpenedFile | null> {
+    async open(codec: VisualizerFileFormat): Promise<VisualizerOpenedFile | null> {
         const picker = (
             window as typeof window & {
                 showOpenFilePicker?: (
@@ -71,7 +71,7 @@ export class NativeVisualizerFileGateway implements VisualizerFileGateway {
     }
 
     async save(
-        codec: VisualizerFormatCodec,
+        codec: VisualizerFileFormat,
         suggestedName: string,
         bytes: Uint8Array,
     ): Promise<'saved' | 'cancelled'> {
