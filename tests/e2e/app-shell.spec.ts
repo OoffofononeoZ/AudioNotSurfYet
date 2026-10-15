@@ -250,3 +250,51 @@ test('wraps long titles, survives an artwork error and retains usable playback a
     }
     expect(issues).toEqual([]);
 });
+
+test('uses uniform MusicBar action icons and keeps queue keyboard navigation local', async ({ page }) => {
+    const issues = captureIssues(page);
+    await installFilePickerStub(page); await page.goto('/');
+    for (const width of [390, 1024, 1920]) {
+        await page.setViewportSize({ width, height: 900 });
+        for (const style of [0, 1, 2]) {
+            await expect(page.locator('#music-bar-container')).toHaveClass(new RegExp(`bg-style-${style}`));
+            const geometry = await page.locator('.musicbar-action').evaluateAll(buttons => buttons.map(button => {
+                const box = button.getBoundingClientRect(), icon = button.querySelector('svg')!;
+                const glyph = icon.getBoundingClientRect();
+                return { width: box.width, height: box.height, iconWidth: glyph.width, iconHeight: glyph.height,
+                    stroke: icon.getAttribute('stroke-width'), inside: box.left >= 0 && box.right <= innerWidth };
+            }));
+            expect(geometry).toHaveLength(6);
+            expect(new Set(geometry.map(item => `${item.width}:${item.height}:${item.iconWidth}:${item.iconHeight}:${item.stroke}`)).size).toBe(1);
+            expect(geometry.every(item => item.inside)).toBe(true);
+            await page.getByTestId('change-musicbar-style').click();
+            await expect(page.locator('#progress-bar-container')).not.toHaveClass(/progress-bar-hidden/);
+        }
+    }
+    await page.screenshot({ path: 'artifacts/visualizer-composition/musicbar-icons.png' });
+    const mode = page.getByTestId('playback-mode');
+    const icons = [];
+    for (const label of ['顺序播放', '单曲循环', '列表循环', '随机播放']) {
+        await expect(mode).toHaveAttribute('aria-label', label);
+        icons.push(await mode.locator('svg').innerHTML()); await mode.click();
+    }
+    expect(new Set(icons).size).toBe(4);
+    const volume = page.getByTestId('volume-control');
+    await volume.focus(); await page.keyboard.press('Home');
+    await expect(volume).toHaveAttribute('aria-valuenow', '0');
+    await expect(page.locator('#music-bar-container')).toHaveAttribute('data-volume', '0');
+    await page.keyboard.press('ArrowUp'); await expect(volume).toHaveAttribute('aria-valuenow', '5');
+    await page.keyboard.press('End'); await expect(volume).toHaveAttribute('aria-valuenow', '100');
+    expect(await page.getByTestId('change-musicbar-style').locator('svg').innerHTML()).not.toBe(icons[2]);
+    await chooseFiles(page, [path.join(ROOT, 'tests/fixtures/audio/format-master.wav'), path.join(ROOT, 'tests/fixtures/audio/format-master.mp3')]);
+    await page.getByTestId('toggle-playback').click();
+    await page.getByTestId('toggle-queue').click();
+    await expect(page.getByTestId('toggle-queue')).toHaveAttribute('aria-expanded', 'true');
+    const rows = page.getByTestId('queue-item');
+    await rows.first().focus(); await page.keyboard.press('ArrowDown');
+    await expect(rows.nth(1)).toBeFocused();
+    const id = await rows.nth(1).getAttribute('data-track-id');
+    await page.keyboard.press('Enter');
+    await expect(page.locator('#music-bar-container')).toHaveAttribute('data-current-track-id', id!);
+    expect(issues).toEqual([]);
+});

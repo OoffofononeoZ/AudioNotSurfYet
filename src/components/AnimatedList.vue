@@ -146,6 +146,8 @@ const handleKeyDown = (e: KeyboardEvent) => {
     const target = e.target;
     if (e.defaultPrevented || !(target instanceof Element) || !containerRef.value?.contains(target)
         || target.closest('input,select,textarea,button,[contenteditable="true"]')) return;
+    const focusedRow = target.closest<HTMLElement>('[data-index]');
+    if (focusedRow) selectedIndex.value = Number(focusedRow.dataset.index);
     if (e.key === 'ArrowDown') {
         e.preventDefault();
         keyboardNav.value = true;

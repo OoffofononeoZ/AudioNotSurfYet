@@ -31,6 +31,8 @@ declare module 'vue' {
     LightBg: typeof import('./src/components/LightBg.vue')['default']
     MeydaCard: typeof import('./src/components/MeydaCard.vue')['default']
     MusicBar: typeof import('./src/components/MusicBar.vue')['default']
+    MusicBarActions: typeof import('./src/components/MusicBarActions.vue')['default']
+    MusicBarIcon: typeof import('./src/components/MusicBarIcon.vue')['default']
     MusicList: typeof import('./src/components/MusicList.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
