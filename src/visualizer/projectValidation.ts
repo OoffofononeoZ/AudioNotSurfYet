@@ -400,4 +400,3 @@ export const canonicalBinding = (
     }
     return { parameterId: parameter.id, source, ...(transform ? { transform } : {}) };
 };
-

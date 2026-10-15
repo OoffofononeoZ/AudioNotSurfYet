@@ -101,4 +101,3 @@ export class ScalarSmoothingResolver {
         return state + (target - state) * alpha;
     }
 }
-
