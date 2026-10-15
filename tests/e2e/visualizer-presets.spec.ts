@@ -23,3 +23,18 @@ test('market applies the geometric preset, edits it, restores it and renders sil
     await page.getByTestId('add-visualizer-element').click();await page.getByRole('button',{name:'预设',exact:true}).click();await page.getByLabel('搜索元素').fill('没有的预设');await expect(page.getByText('没有匹配的预设')).toBeVisible();await page.keyboard.press('Escape');
     expect(errors).toEqual([]);
 });
+
+test('PV preset renders four distinct chapters, seeks deterministically and reuses the fullscreen canvas',async({page},info)=>{
+    const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));page.on('console',m=>{if(m.type()==='error')errors.push(m.text());});
+    await open(page);await preset(page,'prismatic-voyage');await expect(page.locator('.viz-element-row')).toHaveCount(12);
+    const p=await exported(page);p.seed=314159;
+    for(const e of p.elements)for(const b of e.bindings)if(b.parameterId==='spectrum')b.source={kind:'constant',value:Array.from({length:512},(_,i)=>Math.max(0,Math.sin(i*.08))*6)};
+    await importProject(page,p);
+    const canvas=page.getByTestId('visualizer-preview-canvas'),host=await canvas.getAttribute('data-renderer-host-id');
+    await page.getByTestId('visualizer-preview-frame').hover();await page.getByTestId('visualizer-fullscreen-toggle').click();await expect.poll(()=>page.evaluate(()=>!!document.fullscreenElement)).toBe(true);
+    const seek=page.getByTestId('visualizer-seek');const pictures:Buffer[]=[];
+    for(const [name,portion] of [['intro',.08],['drive',.3],['climax',.65],['outro',.9]] as const){await seek.fill(String(Number((p.track.durationSeconds*portion).toFixed(3))));await seek.dispatchEvent('input');await page.waitForTimeout(150);pictures.push(await canvas.screenshot({path:`test-results/pv-${name}-${info.project.name}.png`}));}
+    expect(new Set(pictures.map(p=>p.toString('base64'))).size).toBe(4);
+    await seek.fill(String(Number((p.track.durationSeconds*.65).toFixed(3))));await seek.dispatchEvent('input');await page.waitForTimeout(150);expect((await canvas.screenshot()).equals(pictures[2]!)).toBe(true);
+    expect(await canvas.getAttribute('data-renderer-host-id')).toBe(host);await page.keyboard.press('Escape');expect(errors).toEqual([]);
+});

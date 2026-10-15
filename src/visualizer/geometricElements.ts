@@ -1,5 +1,6 @@
 import { elementNumber, elementValue } from './compositionEffects';
 import { GeometricBatch, geometricSpectrum, randomUnit, rotate, type Point3, type Ink } from './geometricBatch';
+import { buildLightTunnel, buildStarfield } from './cinematicElements';
 import type { VisualizerElement } from './compositionTypes';
 import type { VisualizerResolvedParameterMap } from './rendererTypes';
 
@@ -14,7 +15,7 @@ const pyramidEdges=[0,1,0,2,0,3,0,4,1,2,2,3,3,4,4,1];
 const cubeFaces=[0,2,1,0,3,2,4,5,6,4,6,7,0,1,5,0,5,4,3,7,6,3,6,2,0,4,7,0,7,3,1,2,6,1,6,5];
 const pyramidFaces=[0,1,2,0,2,3,0,3,4,0,4,1];
 
-export const isGeometricElement=(type:string) => ['radial-spectrum','orbit-solids','wireform','arc-lattice'].includes(type);
+export const isGeometricElement=(type:string) => ['radial-spectrum','orbit-solids','wireform','arc-lattice','light-tunnel','starfield'].includes(type);
 
 /** Each call rebuilds only this atom from absolute song time; no mutable animation history. */
 export function buildGeometricElement(batch:GeometricBatch,e:VisualizerElement,values:VisualizerResolvedParameterMap,time:number,seed:number,aspect:number,levels:Float32Array) {
@@ -50,7 +51,11 @@ export function buildGeometricElement(batch:GeometricBatch,e:VisualizerElement,v
         if(fill) for(let i=0;i<faces.length;i+=3) batch.triangle(vertices[faces[i]!]!,vertices[faces[i+1]!]!,vertices[faces[i+2]!]!,fill);
         for(let i=0;i<edges.length;i+=2) line(vertices[edges[i]!]!,vertices[edges[i+1]!]!);
     };
-    if(e.type==='radial-spectrum') {
+    if(e.type==='light-tunnel') {
+        buildLightTunnel(batch,n,time,peak,white,rgb(String(elementValue(values,e,'accent') ?? '#ff408e'),alpha),cx,cy);
+    } else if(e.type==='starfield') {
+        buildStarfield(batch,n,time,seed,peak,white,cx,cy,aspect);
+    } else if(e.type==='radial-spectrum') {
         const repeat=n('repeat',2), count=levels.length*repeat, ink=colorful&&peak>=.15?accent:white;
         let previous:Point3|null=null;
         for(let i=0;i<=count;i++) {

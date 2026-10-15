@@ -13,7 +13,7 @@ function harness(type:ElementType,spectrum:number[]) {
     return {at,batch};
 }
 describe('geometric atoms',()=>{
-    for(const type of ['radial-spectrum','orbit-solids','wireform','arc-lattice'] as const) {
+    for(const type of ['radial-spectrum','orbit-solids','wireform','arc-lattice','light-tunnel','starfield'] as const) {
         test(type+' preserves an idle outline and responds deterministically to music',()=>{
             const idle=harness(type,[]), active=harness(type,Array.from({length:512},(_,i)=>i%17===0?64:2));
             const frame=active.at(3);expect(frame.every(Number.isFinite)).toBe(true);expect(idle.at(3).length).toBeGreaterThan(0);

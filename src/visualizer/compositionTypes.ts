@@ -2,7 +2,7 @@ import type { EditorProjectV1, EditorTrackIdentityV1 } from '../editor/types';
 import type { VisualizerParameterBindingV1, VisualizerResolution, VisualizerFrameRate, VisualizerBindingRuntimeSnapshot, VisualizerRecordingState, VisualizerPersistenceState, VisualizerSessionState } from './types';
 
 export type ElementType = 'solid' | 'spectral-strings' | 'spectral-dots' | 'reactive-rings'
-    | 'radial-spectrum' | 'orbit-solids' | 'wireform' | 'arc-lattice'
+    | 'radial-spectrum' | 'orbit-solids' | 'wireform' | 'arc-lattice' | 'light-tunnel' | 'starfield'
     | 'scale' | 'blur' | 'fade';
 export type ElementKind = 'visual' | 'modifier' | 'transition';
 export type ElementTiming =
