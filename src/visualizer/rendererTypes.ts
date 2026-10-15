@@ -1,6 +1,10 @@
 import type * as THREE from 'three';
-import type { VisualizerResolvedParameter } from './bindingResolver';
-import type { VisualizerTemplateId } from './types';
+export interface VisualizerResolvedParameter {
+    parameterId:string;
+    state:'ready'|'loading'|'error';
+    value?:number|string|boolean|number[];
+    message?:string;
+}
 
 export type VisualizerResolvedParameterMap = ReadonlyMap<string, VisualizerResolvedParameter>;
 
@@ -17,6 +21,9 @@ export interface VisualizerSceneFrameSnapshot {
 
 export interface VisualizerRenderer {
     readonly domElement: HTMLCanvasElement;
+    autoClear: boolean;
+    clear(color?:boolean,depth?:boolean,stencil?:boolean):void;
+    setRenderTarget(target:THREE.WebGLRenderTarget | null):void;
     setPixelRatio(value: number): void;
     setSize(width: number, height: number, updateStyle?: boolean): void;
     setClearColor(color: THREE.ColorRepresentation, alpha?: number): void;
@@ -46,8 +53,6 @@ export type VisualizerSceneFactory = (
 
 export interface VisualizerRenderFrame {
     readonly trackIdentity: string;
-    readonly templateId: VisualizerTemplateId;
-    readonly templateVersion: 1;
     readonly seed: number;
     readonly timeSeconds: number;
     readonly bindingRevision: number;

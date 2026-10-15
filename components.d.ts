@@ -35,5 +35,11 @@ declare module 'vue' {
     ThreeDTable: typeof import('./src/components/ThreeDTable.vue')['default']
     TwoDTable: typeof import('./src/components/TwoDTable.vue')['default']
     VisualizerBindingInspector: typeof import('./src/components/VisualizerBindingInspector.vue')['default']
+    VisualizerBottomPanel: typeof import('./src/components/visualizer/VisualizerBottomPanel.vue')['default']
+    VisualizerElementCatalog: typeof import('./src/components/visualizer/VisualizerElementCatalog.vue')['default']
+    VisualizerElementInspector: typeof import('./src/components/visualizer/VisualizerElementInspector.vue')['default']
+    VisualizerElementList: typeof import('./src/components/visualizer/VisualizerElementList.vue')['default']
+    VisualizerIcon: typeof import('./src/components/visualizer/VisualizerIcon.vue')['default']
+    VisualizerParameterField: typeof import('./src/components/visualizer/VisualizerParameterField.vue')['default']
   }
 }

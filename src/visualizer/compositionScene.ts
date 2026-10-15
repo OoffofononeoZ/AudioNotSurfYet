@@ -7,7 +7,7 @@ import { elementNumber, elementValue, effectsFor, fadeOpacity, parameterKey } fr
 import type { VisualizerElement, VisualizerProjectV3 } from './compositionTypes';
 import type { VisualizerScene, VisualizerSceneRenderInput, VisualizerResolvedParameterMap } from './rendererTypes';
 
-export type CompositionRenderPort = Pick<THREE.WebGLRenderer,'render'|'setRenderTarget'|'clear'|'setClearColor'|'autoClear'>;
+export type CompositionRenderPort = Pick<import('./rendererTypes').VisualizerRenderer,'render'|'setRenderTarget'|'clear'|'setClearColor'|'autoClear'>;
 export interface CompositionSceneOptions {
     renderer: CompositionRenderPort;
     readProject(): VisualizerProjectV3 | null;
@@ -29,6 +29,7 @@ export class CompositionScene implements VisualizerScene {
     private readonly accumulation=new THREE.WebGLRenderTarget(1,1,{depthBuffer:false});
     private readonly strings=new Map<string,SpectralStringsState>();
     private readonly levels=new Float32Array(64);
+    private readonly color=new THREE.Color();
     private width=1;
     private height=1;
     private disposed=false;
@@ -36,7 +37,7 @@ export class CompositionScene implements VisualizerScene {
     constructor(options:CompositionSceneOptions) {
         this.options=options;
         this.primitive=new THREE.ShaderMaterial({vertexShader:quadVertex,fragmentShader:primitiveFragment,depthTest:false,depthWrite:false,toneMapped:false,
-            uniforms:{uKind:{value:0},uViewport:{value:new THREE.Vector2(1,1)},uColor:{value:new THREE.Color()},uPosition:{value:new THREE.Vector2(.5,.5)},
+            uniforms:{uKind:{value:0},uViewport:{value:new THREE.Vector2(1,1)},uColor:{value:this.color},uPosition:{value:new THREE.Vector2(.5,.5)},
                 uExtent:{value:new THREE.Vector2(1,1)},uOpacity:{value:1},uCount:{value:64},uRows:{value:5},uSize:{value:1},uSpacing:{value:10},
                 uAmplitude:{value:.1},uSensitivity:{value:1},uRadius:{value:.1},uAmount:{value:0},uPhase:{value:0},uLevels:{value:new Float32Array(64)},uMotion:{value:new Float32Array(64)}}});
         this.effect=new THREE.ShaderMaterial({vertexShader:quadVertex,fragmentShader:effectFragment,depthTest:false,depthWrite:false,toneMapped:false,premultipliedAlpha:true,
@@ -50,7 +51,7 @@ export class CompositionScene implements VisualizerScene {
         const u=this.primitive.uniforms, values=input.values;
         const kinds={'solid':0,'spectral-strings':1,'spectral-dots':2,'reactive-rings':3};
         u.uKind!.value=kinds[e.type as keyof typeof kinds];
-        u.uColor!.value.set(elementValue(values,e,'color') ?? '#edf5f1',THREE.LinearSRGBColorSpace);
+        this.color.setStyle(String(elementValue(values,e,'color') ?? '#edf5f1'),THREE.LinearSRGBColorSpace);
         u.uPosition!.value.set(elementNumber(values,e,'x',.5),elementNumber(values,e,'y',.5));
         u.uExtent!.value.set(elementNumber(values,e,'width',1),elementNumber(values,e,'height',1));
         for (const [uniform,parameter,fallback] of [['uOpacity','opacity',1],['uCount','count',1],['uRows','rows',1],['uSize',e.type==='spectral-dots'?'size':'thickness',1],
@@ -65,7 +66,7 @@ export class CompositionScene implements VisualizerScene {
             });
             u.uMotion!.value=motion.position;
         }
-        this.quad.material=this.primitive; this.clear(this.targets[0]!); this.options.renderer.render(this.scene,this.camera);
+        this.primitive.uniformsNeedUpdate=true; this.quad.material=this.primitive; this.clear(this.targets[0]!); this.options.renderer.render(this.scene,this.camera);
     }
     private pass(source:THREE.WebGLRenderTarget,target:THREE.WebGLRenderTarget | null, options:{scale?:number;opacity?:number;blurX?:number;blurY?:number;blend?:boolean;final?:boolean}={}) {
         const u=this.effect.uniforms;
@@ -75,6 +76,7 @@ export class CompositionScene implements VisualizerScene {
         u.uFinal!.value=options.final ?? false;
         this.effect.transparent=options.blend ?? false;
         this.effect.blending=options.blend ? THREE.NormalBlending : THREE.NoBlending;
+        this.effect.uniformsNeedUpdate=true;
         this.quad.material=this.effect;
         if (options.blend) this.options.renderer.setRenderTarget(target); else this.clear(target);
         this.options.renderer.render(this.scene,this.camera);

@@ -7,7 +7,8 @@ import {
     isReliableVisualizerRecordingPreset,
     selectVisualizerRecordingMimeType,
 } from '../../src/visualizer/recordingPresets';
-import type { VisualizerProjectV1, VisualizerRecordingState } from '../../src/visualizer/types';
+import type { VisualizerRecordingState } from '../../src/visualizer/types';
+import { createComposition } from '../../src/visualizer/compositionCodec';
 import {
     VisualizerRecordingSession,
 } from '../../src/visualizer/visualizerRecordingSession';
@@ -63,26 +64,7 @@ class FakeRecorder extends EventTarget {
     }
 }
 
-const project = (): VisualizerProjectV1 => ({
-    format: 'audiosurf-visualizer',
-    schemaVersion: 1,
-    projectId: '00000000-0000-4000-8000-000000000501',
-    createdAt: '2026-09-03T00:00:00.000Z',
-    updatedAt: '2026-09-03T00:00:00.000Z',
-    track: {
-        contentHash: '5'.repeat(64),
-        fileName: 'V5 同步测试.wav',
-        durationSeconds: 3,
-        sampleRate: 48_000,
-    },
-    output: { aspectRatio: '16:9', resolution: '720p', frameRate: 30 },
-    scene: {
-        templateId: 'orthogonal-lines',
-        templateVersion: 1,
-        seed: 51,
-        bindings: [],
-    },
-});
+const project = () => createComposition({contentHash:'5'.repeat(64),fileName:'V5 同步测试.wav',durationSeconds:3,sampleRate:48000});
 
 const flush = async () => {
     await Promise.resolve();
@@ -270,10 +252,10 @@ describe('Visualizer V5 recording unit contract', () => {
         )).toBe(false);
         expect(visualizerVideoFileName({
             fileName: 'V5 同步测试.wav',
-            templateId: 'orthogonal-lines',
+            templateId: 'composition',
             resolution: '720p',
             frameRate: 30,
-        })).toBe('V5-同步测试-orthogonal-lines-720p30fps.webm');
+        })).toBe('V5-同步测试-composition-720p30fps.webm');
     });
 
     test('runs the fixed prepare/start/finalize order and preserves ready Blob on save cancel', async () => {
@@ -306,7 +288,7 @@ describe('Visualizer V5 recording unit contract', () => {
         expect(value.operations).toContain('release-tap');
         expect(value.operations).toContain('release-surface');
 
-        value.project.scene.templateId = 'cube-swarm';
+        value.project.elements = [];
         value.project.output = { ...value.project.output, resolution: '1080p', frameRate: 60 };
         value.saves.push('cancelled', 'saved');
         await expect(value.session.save()).resolves.toBe('cancelled');
@@ -315,7 +297,7 @@ describe('Visualizer V5 recording unit contract', () => {
         expect(value.session.getState()).toEqual({ status: 'idle' });
         expect(value.gateway.save).toHaveBeenCalledTimes(2);
         expect(value.gateway.save).toHaveBeenLastCalledWith(
-            'V5-同步测试-orthogonal-lines-720p30fps.webm',
+            'V5-同步测试-composition-720p30fps.webm',
             expect.any(Blob),
         );
     });

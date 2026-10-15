@@ -2,7 +2,7 @@ import type { AnalysisSeries, FeatureId } from '../analysis/types';
 import { projectAnalysisSeries } from './analysisProjection';
 import { ScalarSmoothingResolver, normalizedTarget, outputValue } from './bindingSmoothing';
 import { elementRegistry } from './elementRegistry';
-import type { VisualizerResolvedParameter } from './bindingResolver';
+import type { VisualizerResolvedParameter } from './rendererTypes';
 import type { VisualizerProjectV3 } from './compositionTypes';
 export type ResolvedComposition = ReadonlyMap<string, ReadonlyMap<string, VisualizerResolvedParameter>>;
 

@@ -76,7 +76,7 @@
             </section>
             <section class="actions-section flex gap-4 items-center justify-end w-80 m-1">
                 <button type="button" class="playback-mode-button" data-testid="playback-mode"
-                    :disabled="audioSession.playbackPolicy.state.modeLocked || recordingLocked"
+                    :disabled="modeLocked || recordingLocked"
                     :aria-label="modeLabel" :title="modeLabel" @click="cycleMode">
                     <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
                         <template v-if="mode === 'shuffle'"><path d="M3 6h3l12 12h3M3 18h3L18 6h3M18 3l3 3-3 3M18 15l3 3-3 3"/></template>
@@ -137,7 +137,7 @@ import {
     watch,
 } from 'vue';
 import { storeToRefs } from 'pinia';
-import { useRouter } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import gsap from 'gsap';
 import {
     ElMessage,
@@ -155,12 +155,14 @@ const configStore = useConfigstore();
 const audioSessionStore = useAudioSessionStore();
 const audioSession = useAudioSessionService();
 const router = useRouter();
+const route = useRoute();
 const recordingLocked = computed(() => audioSession.playbackPolicy.state.recordingLocked);
-const mode = computed(() => audioSession.playbackPolicy.state.effectiveMode);
+const modeLocked = computed(() => route.name === 'visualizer' || audioSession.playbackPolicy.state.modeLocked);
+const mode = computed(() => route.name === 'visualizer' ? 'repeat-one' : audioSession.playbackPolicy.state.effectiveMode);
 const modeLabel = computed(() => PLAYBACK_MODE_LABELS[mode.value]
-    + (audioSession.playbackPolicy.state.modeLocked ? '（工作区已锁定）' : ''));
+    + (modeLocked.value ? '（工作区已锁定）' : ''));
 const cycleMode = () => {
-    if (recordingLocked.value || audioSession.playbackPolicy.state.modeLocked) return;
+    if (recordingLocked.value || modeLocked.value) return;
     configStore.playbackMode = PLAYBACK_MODES[(PLAYBACK_MODES.indexOf(mode.value) + 1) % PLAYBACK_MODES.length]!;
 };
 const {
@@ -224,6 +226,11 @@ const tl1 = gsap.timeline();
 const tl2 = gsap.timeline();
 const tl3 = gsap.timeline();
 let resizeObserver: ResizeObserver | null = null;
+let playerObserver: ResizeObserver | null = null;
+const updatePlayerInset = () => {
+    const player=document.getElementById('music-bar-container');
+    if(player)document.documentElement.style.setProperty('--app-player-inset',Math.max(0,window.innerHeight-player.getBoundingClientRect().top)+'px');
+};
 const marqueeTweens: gsap.core.Tween[] = [];
 let musicListVisible = false;
 let previousEnergy = 0;
@@ -231,6 +238,8 @@ const prefersReducedMotion = () =>
     window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 onMounted(() => {
+    const player=document.getElementById('music-bar-container');
+    if(player){playerObserver=new ResizeObserver(updatePlayerInset);playerObserver.observe(player);updatePlayerInset();}
     // A zero-duration paused GSAP tween renders its end state immediately.
     // Keep a near-instant non-zero duration so closed/collapsed initial state
     // remains authoritative while still honoring reduced motion.
@@ -281,6 +290,8 @@ onUnmounted(() => {
     tl2.kill();
     tl3.kill();
     resizeObserver?.disconnect();
+    playerObserver?.disconnect();
+    document.documentElement.style.removeProperty('--app-player-inset');
     marqueeTweens.forEach((tween) => tween.kill());
     marqueeTweens.length = 0;
     window.removeEventListener('mousemove', handleDragMove);

@@ -4,7 +4,7 @@ owner 于 2026-10-13 批准本页方案并要求实现（DEC-076）。本次是�
 
 ## 导航与布局
 
-- `MainLayout` 组合 `AppSidebar`、右上角 `AppSettingsButton`、路由内容和独立条件显示的 `MusicBar`，继续提供唯一音频及工作区服务。
+- `MainLayout` 组合 `AppSidebar`、右上角 `AppSettingsButton`、路由内容和独立 `MusicBar`（有效 Editor track 隐藏，Visualizer 普通工作区显示），继续提供唯一音频及工作区服务。
 - 桌面默认展开 216px，收起为 64px 图标栏；`config.sidebarCollapsed` 保存桌面选择，旧配置缺少该字段时使用 store 默认值 `false`。
 - 收起时隐藏品牌和品牌图标，展开按钮占据原品牌图标位置。品牌及导航共用 44px 图标列，展开/收起不移动列表图标的水平或垂直位置；收起后的展开按钮、导航项悬停区域统一为 44×44px 正方形。
 - `<768px` 初始隐藏，只保留展开按钮；展开使用非模态 dialog 和常规遮罩，支持 Escape、遮罩关闭和焦点恢复，播放器仍可操作。业务确认 dialog 打开时不由导航处理 Escape。成功导航后隐藏，路由拦截取消时保留菜单。窄屏开合不覆盖桌面偏好。
@@ -16,6 +16,8 @@ owner 于 2026-10-13 批准本页方案并要求实现（DEC-076）。本次是�
 - `.app-content` 是命名为 `app-workspace` 的宽度容器。Visualizer 在可用内容宽度 `<1280px` 时使用既有互斥抽屉，其他情况三栏；支持的 `>=1024px` 浏览器视口仍保持单个 `100dvh`，`<1024px` 仍不承诺移动端工作区支持。
 - Analyzer 始终单列，顶部常驻区支持手柄调整高度，原列表独立滚动；见 [Analyzer 列表契约](analyzer-list.md)。侧栏变化重测说明和图表，不重建未转移的活动行或分析消费者。
 - 修改的可见滚动容器使用 `.app-scrollbar`。Sidebar media listener、导航订阅、背景 ResizeObserver 及既有资源按所属模块释放。
+
+Visualizer 当前布局、全屏视频控制及原子组合契约见 [组合工作区](visualizer-composition.md) 和 [Project V3](../architecture/visualizer/project-format-v3.md)。普通工作区按 MusicBar 实际占高留位；全屏不显示 MusicBar。
 
 ## 播放模式
 
