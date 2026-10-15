@@ -90,6 +90,7 @@ test('old draft export and cancellation preserve raw data until explicit replace
     }, raw);
     await page.getByTestId('header-visualizer-link').click();
     await expect(page.getByTestId('visualizer-unsupported-draft')).toBeVisible();
+    await page.screenshot({ path: 'artifacts/visualizer-composition/draft-notice.png' });
     expect(await draft(page)).toEqual(raw);
     await page.getByRole('button', { name: '导出原草稿' }).click();
     await expect.poll(async () => (await savedPickerEntries(page)).length).toBe(1);
