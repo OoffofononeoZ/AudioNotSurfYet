@@ -1,6 +1,7 @@
 <template>
     <div id="music-bar-container" :class="'bg-style-' + styleMode"
         :data-playback-state="playback.state"
+        :data-recording-locked="recordingLocked"
         :data-audition-source="playback.audition?.kind ?? 'original'"
         :data-current-time="playback.currentTimeSeconds"
         :data-duration="playback.durationSeconds"
@@ -74,6 +75,15 @@
                 </div>
             </section>
             <section class="actions-section flex gap-4 items-center justify-end w-80 m-1">
+                <button type="button" class="playback-mode-button" data-testid="playback-mode"
+                    :disabled="audioSession.playbackPolicy.state.modeLocked || recordingLocked"
+                    :aria-label="modeLabel" :title="modeLabel" @click="cycleMode">
+                    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+                        <template v-if="mode === 'shuffle'"><path d="M3 6h3l12 12h3M3 18h3L18 6h3M18 3l3 3-3 3M18 15l3 3-3 3"/></template>
+                        <template v-else-if="mode === 'sequence'"><path d="M4 6h16M4 12h16M4 18h9m4-3 3 3-3 3"/></template>
+                        <template v-else><path d="M4 8h14l-3-3m3 3-3 3M20 16H6l3 3m-3-3 3-3"/><path v-if="mode === 'repeat-one'" d="M12 11v5m-2-4 2-1"/></template>
+                    </svg>
+                </button>
                 <el-tooltip placement="top">
                     <svg class="w-7 h-7 cursor-pointer" data-testid="volume-control" role="slider" tabindex="0"
                         aria-label="音量" aria-valuemin="0" aria-valuemax="100" :aria-valuenow="volume"
@@ -108,7 +118,7 @@
                 </svg>
             </section>
         </div>
-        <aside class="music-list-container">
+        <aside class="music-list-container" :inert="recordingLocked">
             <MusicList :info="albumInfo" :persistence="persistence" @select-index="handleSelectIndex"
                 @edit-track="handleEditTrack" @delete="toggleDelete" @clear="toggleClear"
                 @restore-access="handleRestoreAccess" @reselect-track="handleReselectTrack"
@@ -139,11 +149,20 @@ import { useAudioSessionStore } from '../stores/audioSessionStore';
 import { useConfigstore } from '../stores/configStore';
 import { clamp, formatSecToTime, mapEnergyToDeg } from '../utils/utils';
 import MusicList from './MusicList.vue';
+import { PLAYBACK_MODES, PLAYBACK_MODE_LABELS } from '../audio/playbackPolicy';
 
 const configStore = useConfigstore();
 const audioSessionStore = useAudioSessionStore();
 const audioSession = useAudioSessionService();
 const router = useRouter();
+const recordingLocked = computed(() => audioSession.playbackPolicy.state.recordingLocked);
+const mode = computed(() => audioSession.playbackPolicy.state.effectiveMode);
+const modeLabel = computed(() => PLAYBACK_MODE_LABELS[mode.value]
+    + (audioSession.playbackPolicy.state.modeLocked ? '（工作区已锁定）' : ''));
+const cycleMode = () => {
+    if (recordingLocked.value || audioSession.playbackPolicy.state.modeLocked) return;
+    configStore.playbackMode = PLAYBACK_MODES[(PLAYBACK_MODES.indexOf(mode.value) + 1) % PLAYBACK_MODES.length]!;
+};
 const {
     queue,
     currentTrackId,
@@ -177,6 +196,7 @@ const audioReady = computed(() =>
 );
 const canSeek = computed(() =>
     queue.value.length > 0
+    && !recordingLocked.value
     && audioReady.value
     && !isLoading.value
     && playback.value.durationSeconds > 0,
@@ -670,6 +690,14 @@ const handleEditTrack = async (index: number) => {
 </script>
 
 <style scoped>
+.playback-mode-button { display: grid; place-items: center; border: 0; padding: 4px; background: transparent; color: inherit; cursor: pointer; }
+.playback-mode-button:disabled { opacity: .45; cursor: default; }
+.playback-mode-button:focus-visible { outline: 2px solid var(--accent-soft); outline-offset: 3px; }
+#music-bar-container[data-recording-locked="true"] [data-testid="toggle-playback"],
+#music-bar-container[data-recording-locked="true"] [data-testid="previous-track"],
+#music-bar-container[data-recording-locked="true"] [data-testid="next-track"],
+#music-bar-container[data-recording-locked="true"] [data-testid="import-audio"] { opacity: .35; cursor: default; }
+
 #music-bar-container {
     user-select: none;
     --offset: 2rem;

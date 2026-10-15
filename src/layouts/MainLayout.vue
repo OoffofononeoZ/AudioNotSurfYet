@@ -66,6 +66,7 @@ const analysisCoordinator = new AnalysisCoordinator(
     audioSessionStore,
 );
 audioSession.setVolume(configStore.volume);
+watchEffect(() => audioSession.setPreferredPlaybackMode(configStore.playbackMode));
 provide(audioSessionServiceKey, audioSession);
 const editorProcessingGate = new EditorProcessingGate();
 const editorSeparation = new EditorSeparationService(audioEngine,audioSession,{gate:editorProcessingGate});

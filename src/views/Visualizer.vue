@@ -278,7 +278,7 @@
                     data-testid="visualizer-seek"
                     @input="seek"
                 >
-                <span class="ended-policy" data-testid="visualizer-ended-policy">播完暂停</span>
+                <span class="ended-policy" data-testid="visualizer-ended-policy">单曲循环</span>
                 <div class="fullscreen-actions">
                     <span
                         v-if="fullscreenStatusMessage"

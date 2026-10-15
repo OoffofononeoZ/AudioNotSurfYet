@@ -33,6 +33,7 @@
 | [tests/audio/chunked-audition.test.ts](../../tests/audio/chunked-audition.test.ts) | [src/audio/auditionTypes.ts](../../src/audio/auditionTypes.ts)、[src/audio/chunkedAudition.ts](../../src/audio/chunkedAudition.ts) |
 | [tests/audio/engine-audition.integration.test.ts](../../tests/audio/engine-audition.integration.test.ts) | [src/audio/audioEngine.ts](../../src/audio/audioEngine.ts)、[src/audio/auditionTypes.ts](../../src/audio/auditionTypes.ts) |
 | [tests/audio/m7-workspace.integration.test.ts](../../tests/audio/m7-workspace.integration.test.ts) | [src/analysis/featureOrder.ts](../../src/analysis/featureOrder.ts)、[src/audio/audioSessionService.ts](../../src/audio/audioSessionService.ts)、[src/persistence/sessionRepository.ts](../../src/persistence/sessionRepository.ts)、[src/stores/audioSessionStore.ts](../../src/stores/audioSessionStore.ts)、[src/types/audio.ts](../../src/types/audio.ts)、[src/types/session.ts](../../src/types/session.ts) |
+| [tests/audio/playback-policy.test.ts](../../tests/audio/playback-policy.test.ts) | [src/audio/playbackPolicy.ts](../../src/audio/playbackPolicy.ts) |
 | [tests/docs/validate-docs.mjs](../../tests/docs/validate-docs.mjs) | [scripts/check-repo.mjs](../../scripts/check-repo.mjs)、[scripts/lib/repository.mjs](../../scripts/lib/repository.mjs) |
 | [tests/e2e/app-shell.spec.ts](../../tests/e2e/app-shell.spec.ts) | [tests/support/file-picker.ts](../../tests/support/file-picker.ts) |
 | [tests/e2e/app-smoke.spec.ts](../../tests/e2e/app-smoke.spec.ts) | [tests/support/file-picker.ts](../../tests/support/file-picker.ts) |
@@ -105,4 +106,3 @@
 | [tests/processing/acceptance.ts](../../tests/processing/acceptance.ts) | — |
 | [tests/processing/artifactOracle.ts](../../tests/processing/artifactOracle.ts) | [src/processing/kernel.ts](../../src/processing/kernel.ts)、[src/processing/storage.ts](../../src/processing/storage.ts) |
 | [tests/processing/compat.worker.ts](../../tests/processing/compat.worker.ts) | [src/processing/dsp.ts](../../src/processing/dsp.ts)、[src/processing/modelCache.ts](../../src/processing/modelCache.ts)、[src/processing/modelManifest.ts](../../src/processing/modelManifest.ts)、[src/processing/runtime.ts](../../src/processing/runtime.ts)、[src/processing/sha256.ts](../../src/processing/sha256.ts)、[tests/processing/acceptance.ts](../../tests/processing/acceptance.ts)、另 1 项，按需核对源码 |
-| [tests/processing/download-models.mjs](../../tests/processing/download-models.mjs) | — |

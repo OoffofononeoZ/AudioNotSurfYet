@@ -134,6 +134,10 @@ const harness = (input: {
         release: vi.fn(() => operations.push('release-tap')),
     };
     const audioSession = {
+        acquireRecordingTransport: () => ({
+            pause: () => audioSession.pause(), seek: (seconds: number) => audioSession.seek(seconds),
+            play: () => audioSession.play(), release: vi.fn(),
+        }),
         capturePlaybackCheckpoint: () => checkpoint,
         restorePlaybackCheckpoint,
         acquireRecordingTap: () => {

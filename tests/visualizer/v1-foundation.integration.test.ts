@@ -336,7 +336,7 @@ describe('Visualizer V1 foundation integration', () => {
         await harness.controller.dispose();
     });
 
-    test('maps Editor to repeat-one and Visualizer to pause-at-end', async () => {
+    test('temporarily repeats both workspaces and restores the preferred mode', async () => {
         const store = useAudioSessionStore();
         store.appendTracks([track('track-a', HASH_A)]);
         store.setCurrentTrack('track-a');
@@ -368,16 +368,16 @@ describe('Visualizer V1 foundation integration', () => {
             consumer: 'visualizer',
             trackId: 'track-a',
         });
-        expect(visualizer.endedPolicy).toBe('pause-at-end');
+        expect(visualizer.endedPolicy).toBe('repeat-one');
         editor.release();
         engine.finish();
         await Promise.resolve();
-        expect(engine.seekValues).toEqual([0]);
-        expect(engine.playCount).toBe(1);
-        expect(store.playback.state).toBe('ended');
+        await vi.waitFor(() => expect(engine.seekValues).toEqual([0, 0]));
+        expect(engine.playCount).toBe(2);
+        expect(store.playback.state).toBe('playing');
         await service.togglePlayback();
         expect(engine.getSnapshot()).toMatchObject({
-            state: 'playing',
+            state: 'paused',
             currentTimeSeconds: 0,
         });
         visualizer.release();
