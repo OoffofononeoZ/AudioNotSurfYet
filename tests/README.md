@@ -103,7 +103,9 @@ M3–M14 不建设 CI。下列命令当前均为本地门禁；正式证据要�
 | `npm run test:e10:integration` | E10 整批 autosave、刷新、JSON V1 round-trip 与模式外行为隔离 |
 | `npm run test:e2e:e10:chrome` / `test:e2e:e10:edge` | 真实 Chrome/Edge 的紧凑拍号、区间操作 pointer/键盘与深色离页 dialog |
 | `npm run test:e2e:e10` | 顺序执行真实 Chrome 与 Edge 的 E10 专项；环境阻断时只记 unverified |
-| `npm run test:e2e:visualizer-layout` | 顺序执行 Chrome/Edge post-V6 一屏工作台、双侧滚动隔离、compact drawer 与共享 scrollbar 专项 |
+| `npm run test:visualizer` | 当前 Project V3 strict codec、原子组合/解析/渲染、会话、保存失败与异步失效，以及共享 host/录制专项 |
+| `npm run test:e2e:visualizer` | Chrome/Edge 当前元素工作区、布局、GPU 像素、全屏、实际录制、换歌/草稿保护、资源释放和保存取消；短 WebM 保留在本地 artifacts/visualizer-composition/ |
+| `npm run test:e2e:visualizer-layout` | 顺序执行 Chrome/Edge 当前原子元素一屏工作台、双侧滚动隔离、compact drawer 与共享 scrollbar 专项 |
 | `npm run test:e2e:edge` | 使用真实 Edge 执行全部 M3–M11 E2E；缺失时明确 blocked |
 | `npm run build` | TypeScript project build 和 Vite production build |
 | `npm run eval:m3:provisional` | 在未提交工作树生成本地 provisional run |

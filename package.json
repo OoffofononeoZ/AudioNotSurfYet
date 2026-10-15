@@ -196,8 +196,8 @@
     "repo:check": "node scripts/check-repo.mjs",
     "test:tools": "node --test tests/tools/*.test.mjs",
     "test:visualizer": "vitest run tests/visualizer",
-    "test:e2e:visualizer:chrome": "playwright test tests/e2e/visualizer-composition.spec.ts tests/e2e/visualizer-layout-scroll.spec.ts tests/e2e/visualizer-pixels.spec.ts --project=chrome --workers=1",
-    "test:e2e:visualizer:edge": "playwright test tests/e2e/visualizer-composition.spec.ts tests/e2e/visualizer-layout-scroll.spec.ts tests/e2e/visualizer-pixels.spec.ts --project=edge --workers=1",
+    "test:e2e:visualizer:chrome": "playwright test tests/e2e/visualizer-composition.spec.ts tests/e2e/visualizer-layout-scroll.spec.ts tests/e2e/visualizer-pixels.spec.ts tests/e2e/visualizer-lifecycle.spec.ts --project=chrome --workers=1",
+    "test:e2e:visualizer:edge": "playwright test tests/e2e/visualizer-composition.spec.ts tests/e2e/visualizer-layout-scroll.spec.ts tests/e2e/visualizer-pixels.spec.ts tests/e2e/visualizer-lifecycle.spec.ts --project=edge --workers=1",
     "test:e2e:visualizer": "npm run test:e2e:visualizer:chrome && npm run test:e2e:visualizer:edge"
   },
   "dependencies": {

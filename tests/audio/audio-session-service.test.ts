@@ -235,6 +235,38 @@ beforeEach(() => {
 });
 
 describe('AudioSessionService', () => {
+    test('delegates playlist selection and guards deletion and clear before changing the queue', async () => {
+        const { engine, service, store } = createHarness();
+        await service.importFiles(inputs(createFile('first.wav'), createFile('second.wav')));
+        const select = vi.fn(async () => undefined);
+        const beforeMutation = vi.fn(async () => false);
+        const cleared = vi.fn(async () => undefined);
+        const detach = service.attachTrackNavigation({ select, beforeMutation, cleared });
+        const loads = engine.loadIds.length;
+        await service.playTrack('track-2');
+        expect(select).toHaveBeenCalledWith('track-2');
+        expect(store.currentTrackId).toBe('track-1');
+        expect(engine.loadIds.length).toBe(loads);
+        await service.deleteTrack('track-1');
+        expect(beforeMutation).toHaveBeenCalledWith('track-2');
+        expect(store.queue).toHaveLength(2);
+        await service.clear();
+        expect(beforeMutation).toHaveBeenLastCalledWith(null);
+        expect(store.queue).toHaveLength(2);
+        beforeMutation.mockResolvedValue(true);
+        await service.clear();
+        expect(store.queue).toHaveLength(0);
+        expect(cleared).toHaveBeenCalledOnce();
+        // Import from an empty Visualizer only appends; it cannot silently replace its project.
+        await service.importFiles(inputs(createFile('third.wav')));
+        expect(store.queue).toHaveLength(1);
+        expect(store.currentTrackId).toBeNull();
+        detach();
+        await service.playTrack('track-3');
+        expect(store.currentTrackId).toBe('track-3');
+        await service.dispose();
+    });
+
     test('sequence stops at the end; repeat-one next and previous restart without decoding', async () => {
         const { engine, service, store } = createHarness();
         await service.importFiles(inputs(createFile('first.wav'), createFile('second.wav')));
