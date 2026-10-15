@@ -2,8 +2,7 @@
     <section class="viz-draft-notice" :aria-labelledby="titleId">
         <div class="viz-draft-notice__body">
             <div class="viz-draft-notice__icon"><VisualizerIcon name="layers"/></div>
-            <h1 :id="titleId">{{ unsupported?'草稿版本不兼容':'另一首歌曲已有草稿' }}</h1>
-            <p>{{ message }}</p>
+            <h1 :id="titleId">已有可视化草稿</h1>
             <div v-if="fileName" class="viz-draft-notice__file"><VisualizerIcon name="music"/><span>{{ fileName }}</span></div>
         </div>
         <footer>
@@ -17,7 +16,7 @@
 <script setup lang="ts">
 import { useId } from 'vue';
 import VisualizerIcon from './VisualizerIcon.vue';
-defineProps<{ unsupported: boolean; message?: string; fileName?: string }>();
+defineProps<{ fileName?: string }>();
 defineEmits<{ export: []; replace: []; cancel: [] }>();
 const titleId = useId();
 </script>
@@ -27,8 +26,7 @@ const titleId = useId();
 .viz-draft-notice__body { padding: 28px; }
 .viz-draft-notice__icon { display: grid; place-items: center; width: 40px; height: 40px; margin-bottom: 20px; border: 1px solid var(--hairline-soft); border-radius: var(--radius-sm); background: var(--surface-chip); color: var(--accent-soft); }
 .viz-draft-notice__icon svg { width: 22px; height: 22px; }
-.viz-draft-notice h1 { margin: 0 0 12px; font-size: 20px; font-weight: 500; line-height: 28px; }
-.viz-draft-notice p { margin: 0; color: var(--body); font-size: 13px; line-height: 22px; }
+.viz-draft-notice h1 { margin: 0; font-size: 20px; font-weight: 500; line-height: 28px; }
 .viz-draft-notice__file { display: flex; align-items: center; gap: 8px; margin-top: 20px; padding: 10px 12px; border: 1px solid var(--divider); border-radius: var(--radius-xs); color: var(--body); font-size: 12px; }
 .viz-draft-notice__file svg { width: 16px; height: 16px; flex: none; }
 .viz-draft-notice__file span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
