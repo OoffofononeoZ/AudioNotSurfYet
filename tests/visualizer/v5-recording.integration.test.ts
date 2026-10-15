@@ -113,6 +113,7 @@ const controllerHarness = () => {
     };
     const tapReleases: ReturnType<typeof vi.fn>[] = [];
     const audioSession = {
+        acquireRecordingTransport: () => ({ pause: () => audioSession.pause(), seek: (seconds: number) => audioSession.seek(seconds), play: () => audioSession.play(), release() {} }),
         acquireRoutePlayback: async (): Promise<RoutePlaybackLease> => ({
             token: 'route-v5',
             consumer: 'visualizer',

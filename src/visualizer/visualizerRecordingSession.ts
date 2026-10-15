@@ -3,7 +3,7 @@ import type {
     RecordingTapLease,
 } from '../audio/audioEngine';
 import { RecordingTapError } from '../audio/audioEngine';
-import type { AudioSessionService } from '../audio/audioSessionService';
+import type { AudioSessionService, RecordingTransportLease } from '../audio/audioSessionService';
 import type { PlaybackSnapshot } from '../types/audio';
 import type { VisualizerResolvedParameter } from './bindingResolver';
 import {
@@ -112,6 +112,7 @@ export class VisualizerRecordingSession {
     private target: VisualizerRecordingTarget | null = null;
     private checkpoint: AudioPlaybackCheckpoint | null = null;
     private tap: RecordingTapLease | null = null;
+    private transport: RecordingTransportLease | null = null;
     private surface: VisualizerRecordingSurfaceLease | null = null;
     private videoStream: MediaStream | null = null;
     private combinedStream: MediaStream | null = null;
@@ -212,6 +213,7 @@ export class VisualizerRecordingSession {
             project.output.frameRate,
         );
         const checkpoint = this.options.audioSession.capturePlaybackCheckpoint(trackId);
+        this.transport = this.options.audioSession.acquireRecordingTransport(trackId);
         const generation = ++this.generation;
         this.checkpoint = checkpoint;
         this.expectedTrackId = trackId;
@@ -231,8 +233,8 @@ export class VisualizerRecordingSession {
         );
 
         try {
-            this.options.audioSession.pause();
-            await this.options.audioSession.seek(0);
+            this.transport.pause();
+            await this.transport.seek(0);
             this.assertGeneration(generation);
 
             this.surface = target.acquireRecordingSurface(preset.width, preset.height);
@@ -280,7 +282,7 @@ export class VisualizerRecordingSession {
             // the recorder event confirms the stream.
             await Promise.all([
                 this.startRecorder(this.recorder, generation),
-                this.options.audioSession.play(),
+                this.transport.play(),
             ]);
             this.assertGeneration(generation);
             if (this.recorder.state !== 'recording') {
@@ -653,7 +655,7 @@ export class VisualizerRecordingSession {
         visualizerRendererDiagnostics.recordingAborts += 1;
         visualizerRendererDiagnostics.recordingStage = cancelled ? 'cancelled' : 'error';
         visualizerRendererDiagnostics.lastRecordingError = message;
-        if (!wasPreparing) this.options.audioSession.pause();
+        if (!wasPreparing) this.transport?.pause();
         await this.cleanupResources();
         if (wasPreparing && checkpoint) {
             try {
@@ -743,6 +745,8 @@ export class VisualizerRecordingSession {
             );
         }
         surface?.release();
+        this.transport?.release();
+        this.transport = null;
         this.cleaning = false;
     }
 

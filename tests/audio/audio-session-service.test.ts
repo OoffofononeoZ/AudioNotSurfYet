@@ -235,6 +235,40 @@ beforeEach(() => {
 });
 
 describe('AudioSessionService', () => {
+    test('sequence stops at the end; repeat-one next and previous restart without decoding', async () => {
+        const { engine, service, store } = createHarness();
+        await service.importFiles(inputs(createFile('first.wav'), createFile('second.wav')));
+        await service.next();
+        engine.finish();
+        await Promise.resolve();
+        expect(store.currentTrackId).toBe('track-2');
+        expect(store.playback.state).toBe('ended');
+        service.setPreferredPlaybackMode('repeat-one');
+        const loads = engine.loadIds.length;
+        await service.next(); await service.previous();
+        expect(engine.seekValues).toEqual([0, 0]);
+        expect(engine.loadIds.length).toBe(loads);
+        expect(store.currentTrackId).toBe('track-2');
+        await service.dispose();
+    });
+
+    test('recording transport blocks public commands and prevents end looping', async () => {
+        const { engine, service, store } = createHarness();
+        await service.importFiles(inputs(createFile('first.wav'), createFile('second.wav')));
+        service.setPreferredPlaybackMode('repeat-one');
+        const lease = service.acquireRecordingTransport('track-1');
+        const loads = engine.loadIds.length;
+        service.pause(); await service.seek(3); await service.next(); await service.playTrack('track-2');
+        await service.clear(); await service.deleteTrack('track-1');
+        expect(engine.pauseCount).toBe(0); expect(engine.seekValues).toEqual([]);
+        expect(engine.loadIds.length).toBe(loads); expect(store.queue.length).toBe(2);
+        await lease.seek(0); await lease.play(); engine.finish(); await Promise.resolve();
+        expect(engine.seekValues).toEqual([0]);
+        expect(store.playback.state).toBe('ended');
+        lease.release(); expect(service.playbackPolicy.state.recordingLocked).toBe(false);
+        await service.next(); expect(store.playback.state).toBe('playing');
+        await service.dispose();
+    });
     test('autoplays the first empty-queue import and appends later files without interruption', async () => {
         const { engine, service, store } = createHarness();
 

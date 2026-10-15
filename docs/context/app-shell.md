@@ -17,6 +17,10 @@ owner 于 2026-10-13 批准本页方案并要求实现（DEC-076）。本次是�
 - Analyzer 始终单列，顶部常驻区支持手柄调整高度，原列表独立滚动；见 [Analyzer 列表契约](analyzer-list.md)。侧栏变化重测说明和图表，不重建未转移的活动行或分析消费者。
 - 修改的可见滚动容器使用 `.app-scrollbar`。Sidebar media listener、导航订阅、背景 ResizeObserver 及既有资源按所属模块释放。
 
+## 播放模式
+
+MusicBar 提供顺序、单曲循环、列表循环和随机播放图标，默认顺序播放并保存偏好。Editor/Visualizer 租约临时使用单曲循环，释放后恢复用户偏好；模式按钮在工作区锁定。单曲循环下上一首/下一首从零重播当前歌。录制专属传输租约阻止公开播放、seek 和队列修改，音量仍可用。Visualizer 原子元素改版及阶段状态见 [组合工作区](visualizer-composition.md)。
+
 ## 首页内容
 
 - 音频能量继续驱动 `LightBg.rayLength`；背景容器尺寸变化会重新测量同一个 Renderer，reduced motion 保持静态渲染。
