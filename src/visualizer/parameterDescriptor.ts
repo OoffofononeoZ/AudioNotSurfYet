@@ -21,4 +21,3 @@ export interface SceneParameterDescriptor {
     readonly allowedAnalysisProjections?: readonly VisualizerAnalysisProjectionV1['kind'][];
     readonly defaultBinding?: Omit<VisualizerParameterBindingV1, 'parameterId'>;
 }
-
