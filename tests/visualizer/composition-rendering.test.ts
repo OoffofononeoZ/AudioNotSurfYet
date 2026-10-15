@@ -24,7 +24,7 @@ describe('composition rendering',()=>{
         const h=harness(); const blur=h.p.elements.find(e=>e.type==='blur')!;
         h.values.set(parameterKey(blur.id,'amount'),{parameterId:'amount',state:'ready',value:8});
         h.scene.render({timeSeconds:1,values:h.values,bindingRevision:1});
-        expect(h.targets.size).toBe(3); expect(h.calls.filter(c=>c.blend)).toHaveLength(4);
+        expect(h.targets.size).toBe(3); expect(h.calls.filter(c=>c.blend&&c.op===0)).toHaveLength(h.p.elements.filter(e=>elementRegistry.get(e.type).kind==='visual').length);
         expect(h.calls.filter(c=>c.op===1)).toHaveLength(2); expect(h.calls.at(-1)).toMatchObject({target:null,final:true});
         expect(h.port.autoClear).toBe(true); h.scene.dispose(); h.scene.dispose(); expect(h.releases()).toBe(3);
     });
