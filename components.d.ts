@@ -34,7 +34,6 @@ declare module 'vue' {
     Testcomp: typeof import('./src/components/testcomp.vue')['default']
     ThreeDTable: typeof import('./src/components/ThreeDTable.vue')['default']
     TwoDTable: typeof import('./src/components/TwoDTable.vue')['default']
-    VisualizerBindingInspector: typeof import('./src/components/VisualizerBindingInspector.vue')['default']
     VisualizerBottomPanel: typeof import('./src/components/visualizer/VisualizerBottomPanel.vue')['default']
     VisualizerElementCatalog: typeof import('./src/components/visualizer/VisualizerElementCatalog.vue')['default']
     VisualizerElementInspector: typeof import('./src/components/visualizer/VisualizerElementInspector.vue')['default']

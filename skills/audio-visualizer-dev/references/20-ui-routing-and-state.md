@@ -10,7 +10,7 @@
 | `/comingsoon` | `ComingSoon.vue` | 通用空占位，不再作为 Visualizer 入口 |
 | `/analyzer` | `Analyzer.vue` | 单列特征行、FIFO常驻分析区与可调高度；见 [列表契约](../../../docs/context/analyzer-list.md) |
 | `/editor/:trackId?` | `Editor.vue` | E1–E9 canonical 已批准；E10 小节批量编辑与离页对话框修订进行中 |
-| `/visualizer/:trackId?` | `Visualizer.vue` | V1–V6 canonical 与人工门禁均已批准 |
+| `/visualizer/:trackId?` | `Visualizer.vue` | 当前为 Project V3 原子元素工作区；历史 V1–V6 evidence 不作为当前 readiness |
 | `/testlands` | `TestLands.vue` | 试验页面，不应当作生产契约 |
 
 Editor `/editor/:trackId?`、当前歌曲导航入口、播放列表“去编辑”和 MusicBar 条件隐藏已由 E1 实现并获批准。E2 波形/网格/游标 Canvas、共享 viewport、seek/zoom/pan、tempo boundary、BPM/拍号/single-beat 和刷新恢复也已由 22/22 canonical 与 owner 批准。E3 point lane/class、自适应网格、鼠标/右键/键盘 marker 与 viewport-visible DOM 已由 26/26 clean canonical 和 owner 批准。E4 21 项单选 overlay、shared renderer、三手柄、pointer-through 与错误隔离已由 31/31 clean canonical 和 owner 批准。E5 range lane/class、E6 双浏览器/10,000 事件与人工补偿均已获批准；E7 窗口级 overlay 修订版 46/46 clean canonical 已获批准。E8 把 timeline stage 固定为桌面 `88px`、窄屏 `72px`，同 URL 歌曲恢复后合并 `enter(trackId)` 且保持 paused，另一首可播放歌曲只显示显式 `router.replace` 入口；25/25 canonical 与 owner 门禁已批准。
@@ -19,7 +19,9 @@ E9 已按 DEC-051/ADR-0019 建立共享 viewport、三级展示与 tempo boundar
 
 E10 按 DEC-057/ADR-0022 在 PointWorkspace 统一持有瞬时“区间操作”模式与选区：开启时右键拖动按真实小节选择起始 lane/class，左键拖动已选区整批移动，Cmd/Ctrl+C 立即向选区后方原子复制；关闭后必须恢复 E9 的创建、删除、菜单、平移与 range handle 行为。模式、选择和预览不进入 JSON V1。Editor 的站内未保存离页提示改用页面自有 `<dialog>`，刷新/关闭窗口仍使用原生 `beforeunload`。
 
-Visualizer V1 已实现 `/visualizer/:trackId?`、当前歌曲导航入口、有效 route 的 MusicBar 隐藏、`pause-at-end`、历史视口 1280+ 三栏、1024–1279 互斥抽屉、中性 16:9 单 Canvas、JSON V1 与单草稿，且 21/21 canonical 已批准。V2 已实现 constant/analysis/editor-event inspector、最多四项分析、同歌 Editor snapshot 和确定性 resolved values，26/26 canonical 已获 owner 批准；V3 Orthogonal Lines 与单 RendererHost 已获批准。V4 Cube Swarm 已实现并通过 34/34 clean canonical 与 owner 门禁。V5 已在同页面增加 recording 状态栏、双层命令锁、站内离页对话框和 ready Blob 保存/丢弃，40/40 canonical 与 owner 门禁已批准；route 和 project JSON V1 不变。V6 在 controller 当前歌曲会话内分别缓存两个模板的完整 bindings：切换模板恢复该模板最近状态，首次进入仍使用 registry 默认值；离页或歌曲身份变化清空缓存，JSON 仍只持久化当前模板，因此未升级 schema。V6 54/54 canonical 与人工门禁已获批准并关闭。
+当前 Visualizer 以 [Project V3](../../../docs/architecture/visualizer/project-format-v3.md) 与 [组合工作区](../../../docs/context/visualizer-composition.md) 为事实源。普通页保留 MusicBar，四种播放模式的用户偏好在工作区暂时覆盖为单曲循环，离页恢复；直接选歌先保护当前单草稿及 WebM。左元素列表、右所选元素属性、中央零 padding 视频和工程底栏替代场景模板。下段为历史边界，不再描述生产实现。
+
+历史 Visualizer V1 已实现 `/visualizer/:trackId?`、当前歌曲导航入口、有效 route 的 MusicBar 隐藏、`pause-at-end`、历史视口 1280+ 三栏、1024–1279 互斥抽屉、中性 16:9 单 Canvas、JSON V1 与单草稿，且 21/21 canonical 已批准。V2 已实现 constant/analysis/editor-event inspector、最多四项分析、同歌 Editor snapshot 和确定性 resolved values，26/26 canonical 已获 owner 批准；V3 Orthogonal Lines 与单 RendererHost 已获批准。V4 Cube Swarm 已实现并通过 34/34 clean canonical 与 owner 门禁。V5 已在同页面增加 recording 状态栏、双层命令锁、站内离页对话框和 ready Blob 保存/丢弃，40/40 canonical 与 owner 门禁已批准；route 和 project JSON V1 不变。V6 在 controller 当前歌曲会话内分别缓存两个模板的完整 bindings：切换模板恢复该模板最近状态，首次进入仍使用 registry 默认值；离页或歌曲身份变化清空缓存，JSON 仍只持久化当前模板，因此未升级 schema。V6 54/54 canonical 与人工门禁已获批准并关闭。
 
 `MainLayout.vue` 固定组合 `AppSidebar`、内容容器内的 `router-view`、右上角 `AppSettingsButton` 和独立 `MusicBar`，并创建/提供唯一 `AudioSessionService`、`AnalysisCoordinator`、Editor controller 与 Visualizer controller。修改页面高度、z-index、固定定位或底部空间时，要同时检查侧边栏、MusicBar 和两个 route lease。
 
@@ -27,7 +29,7 @@ Visualizer V1 已实现 `/visualizer/:trackId?`、当前歌曲导航入口、有
 
 - `MainLayout` 创建并 provide 唯一 `AudioSessionService` 与 `AnalysisCoordinator`，在布局卸载时先 dispose coordinator 再释放 session service。
 - `MusicBar` 读取 `audioSessionStore` 并调用 session commands；只拥有拖动预览、列表开合、跑马灯和 GSAP 样式时间线。
-- `MusicList` 通过 `select-index`、`add-to-analysis`、`delete`、`clear`、`restore-access`、`reselect-track`、`clear-persisted` 和 `close-list` 事件回传操作；事件名已统一为 kebab-case。
+- `MusicList` 通过 `select-index`、`edit-track`、`delete`、`clear`、`restore-access`、`reselect-track`、`clear-persisted` 和 `close-list` 事件回传操作；事件名已统一为 kebab-case。
 - `MusicList` 的 `edit-track` 入口先显式播放目标歌曲，再导航到带 track ID 的 Editor；侧边栏 Editor 入口只使用当前歌曲且不隐式改变播放状态。
 - `audioSessionStore` 是 Pinia store，保存 `TrackRecord[]`、current track ID、`PlaybackSnapshot`、persistence snapshot、analysis snapshot 和当前 energy；Home 与 MusicBar 读取同一能量。
 - runtime File、封面对象 URL、AudioContext、AudioBuffer 和 AudioNode 均不得进入 store。
@@ -39,6 +41,7 @@ Visualizer V1 已实现 `/visualizer/:trackId?`、当前歌曲导航入口、有
 `configStore.ts` 使用 key `config` 写入 `localStorage`：
 
 - `volume`: UI 百分比值，AudioSessionService 转为 0–1 Gain 值。
+- `playbackMode`: sequence/repeat-one/repeat-all/shuffle，默认 sequence；route/录制租约的临时覆盖不持久化。
 - `musicBarSettings.style`: 当前音乐条样式模式，代码使用 0、1、2。
 - `sidebarCollapsed`: 桌面导航收起状态，默认 `false`；窄屏开合为组件临时状态。
 
@@ -51,7 +54,7 @@ Visualizer V1 已实现 `/visualizer/:trackId?`、当前歌曲导航入口、有
 - 样式切换由 GSAP 时间线管理，`isStyleTransitioning` 在动画期间隐藏进度条并阻止重复切换。
 - 信息跑马灯依赖 `ResizeObserver`、DOM 宽度和 GSAP tween；内容或字体变化后需要重新测量并清理旧 tween。
 - `AnimatedList` 使用全局键盘监听和滚动可见性动画；组件卸载时必须移除监听。
-- DEC-076 把三栏/抽屉分界改为可用内容宽度 1280px；DEC-050 固定支持的 `>=1024px` Visualizer 为单个 `100dvh` 页面：document/body 不纵向滚动，toolbar/preview/recording/transport 留在页面内，左模板和右参数侧栏分别滚动并使用 `overscroll-behavior: contain`。紧凑抽屉以 workspace grid 为定位边界；`<1024px` 继续只保留现有最小宽度/横向兼容，不视为移动端支持。
+- DEC-076 把三栏/抽屉分界改为可用内容宽度 1280px；DEC-050 固定支持的 `>=1024px` Visualizer 为单个 `100dvh` 页面：document/body 不纵向滚动，toolbar/preview/工程底栏/MusicBar 留在页面内，左元素和右属性侧栏分别滚动并使用 `overscroll-behavior: contain`。紧凑抽屉以 workspace grid 为定位边界；`<1024px` 继续只保留现有最小宽度/横向兼容，不视为移动端支持。
 
 ## CSS 样式归置与渐进迁移
 

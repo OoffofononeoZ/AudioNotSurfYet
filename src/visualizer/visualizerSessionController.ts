@@ -50,6 +50,7 @@ export class VisualizerSessionController {
     private recording:VisualizerRecordingSession;
     private generation=0;
     private ioGeneration=0;
+    private editorIoGeneration=0;
     private disposed=false;
     private windowTarget?:Pick<Window,'addEventListener'|'removeEventListener'>;
     private beforeUnload=false;
@@ -93,7 +94,7 @@ export class VisualizerSessionController {
         return createComposition({...context,fileName:track.name,...(track.metadata.title?{title:track.metadata.title}:{}),...(track.metadata.artist?{artist:track.metadata.artist}:{})});
     }
     async enter(trackId:string|null,overwrite=false):Promise<void> {
-        this.assertUnlocked();const generation=++this.generation;this.ioGeneration++;
+        this.assertUnlocked();const generation=++this.generation;this.ioGeneration++;this.editorIoGeneration++;
         if(!await this.flush())throw Error('请先重试保存或导出当前工程。');
         if(generation!==this.generation||this.disposed)return;
         this.releaseLeases();
@@ -136,10 +137,10 @@ export class VisualizerSessionController {
         const result=this.resolver.resolve(project,Math.max(0,time),id=>this.analysisLease?.getSeries(id)??null);
         const flat=new Map();for(const [id,values]of result)for(const [parameter,value]of values)flat.set(parameterKey(id,parameter),value);return flat;
     }
-    async reloadEditorDraft(){this.assertUnlocked();const generation=this.generation;const draft=await this.options.editorRepository?.restore();
-        if(generation!==this.generation||this.disposed)return;if(!draft)throw Error('没有可用的同歌 Editor 草稿。');this.setEditorSnapshot(draft.project,draft.savedAt,'draft');}
-    async importEditorProject(){this.assertUnlocked();const generation=this.generation;const codec=new EditorFormatCodecRegistry().get('json-v1');const opened=await this.options.editorFileGateway?.open(codec);
-        if(!opened||generation!==this.generation||this.disposed)return;const context=this.context();if(!context)return;this.setEditorSnapshot(codec.decode(opened.bytes,context),new Date().toISOString(),'imported');}
+    async reloadEditorDraft(){this.assertUnlocked();const generation=this.generation,io=++this.editorIoGeneration;const draft=await this.options.editorRepository?.restore();
+        if(generation!==this.generation||io!==this.editorIoGeneration||this.disposed)return;if(!draft)throw Error('没有可用的同歌 Editor 草稿。');this.setEditorSnapshot(draft.project,draft.savedAt,'draft');}
+    async importEditorProject(){this.assertUnlocked();const generation=this.generation,io=++this.editorIoGeneration;const codec=new EditorFormatCodecRegistry().get('json-v1');const opened=await this.options.editorFileGateway?.open(codec);
+        if(!opened||generation!==this.generation||io!==this.editorIoGeneration||this.disposed)return;const context=this.context();if(!context)return;this.setEditorSnapshot(codec.decode(opened.bytes,context),new Date().toISOString(),'imported');}
     private setEditorSnapshot(input:unknown,capturedAt:string,source:'draft'|'imported'){
         const context=this.context(),p=this.snapshot.project;if(!context||!p)return;
         const project=validateEditorProjectV1(input,context);this.updateProject({...p,editorSnapshot:{capturedAt,project}});
@@ -179,7 +180,7 @@ export class VisualizerSessionController {
     }
     async flush(){const success=await this.writer.flush();this.syncBeforeUnload();return success;}
     private releaseLeases(){this.unsubscribeAnalysis?.();this.unsubscribeAnalysis=null;this.analysisLease?.release();this.analysisLease=null;this.playbackLease?.release();this.playbackLease=null;this.resolver.reset();}
-    async leave(){if(this.recording.isLocked())await this.recording.cancel();await this.flush();this.generation++;this.ioGeneration++;this.releaseLeases();this.publish(initial());}
+    async leave(){this.generation++;this.ioGeneration++;this.editorIoGeneration++;if(this.recording.isLocked())await this.recording.cancel();await this.flush();this.releaseLeases();this.publish(initial());}
     async dispose(){await this.leave();await this.recording.dispose();this.disposed=true;this.options.repository.close();this.options.editorRepository?.close();this.windowTarget?.removeEventListener('pagehide',this.handlePageHide);this.windowTarget?.removeEventListener('beforeunload',this.handleBeforeUnload as EventListener);this.listeners.clear();}
     private readonly handlePageHide=()=>{void this.recording.handlePageHide();};
     private readonly handleBeforeUnload=(event:BeforeUnloadEvent)=>{if(this.hasPendingWrite()||this.hasUnresolvedRecordingOutput()){event.preventDefault();event.returnValue='';}};

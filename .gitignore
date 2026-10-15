@@ -32,6 +32,7 @@ artifacts/evals/
 artifacts/browser-profiles/
 artifacts/app-shell/
 artifacts/fixtures/
+artifacts/visualizer-composition/
 public/test_audio
 public/processing-runtime/
 public/processing-probe/

@@ -170,6 +170,8 @@ test('shows live metadata and embedded artwork through import, replacement and p
     await expect.poll(() => cover.evaluate(element => (element as HTMLImageElement).naturalWidth)).toBeGreaterThan(0);
     const oldArtwork = await cover.getAttribute('src');
     await chooseFiles(page, [path.join(ROOT, 'tests/fixtures/audio/format-master.wav')]);
+    await expect(title).toHaveText('测试歌曲');
+    await page.getByTestId('next-track').click();
     await expect(title).toHaveText('format-master.wav');
     await expect(page.locator('.song-metadata')).toHaveText('未知艺术家');
     await expect(cover).toHaveAttribute('src', '/default_cover.png');

@@ -1,5 +1,6 @@
 import { expect,test,type Page } from '@playwright/test';
 import path from 'node:path';
+import { mkdir,writeFile } from 'node:fs/promises';
 import { chooseFiles,installFilePickerStub,savedPickerEntries,queuePickerData } from '../support/file-picker';
 import { createInitialEditorProject } from '../../src/editor/projectCodec';
 import type { VisualizerProjectV3 } from '../../src/visualizer/compositionTypes';
@@ -26,9 +27,9 @@ test('fullscreen uses the same canvas and exposes only video transport',async({p
     expect(await canvas.getAttribute('data-renderer-host-id')).toBe(host);await page.getByTestId('visualizer-seek').fill('1');await page.getByTestId('visualizer-seek').dispatchEvent('input');
     await page.keyboard.press('Escape');await expect.poll(()=>page.evaluate(()=>!!document.fullscreenElement)).toBe(false);await expect(page.locator('#music-bar-container')).toBeVisible();
 });
-test('records a composition once and preserves the ready WebM until save',async({page})=>{
+test('records a composition once and preserves the ready WebM until save',async({page},testInfo)=>{
     test.setTimeout(60000);const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));await open(page);await add(page,'spectral-dots');await add(page,'blur');await page.getByLabel('模糊半径',{exact:true}).fill('4');await page.getByLabel('模糊半径',{exact:true}).dispatchEvent('change');
     await expect.poll(()=>page.evaluate(()=>document.querySelector('.viz-preview-frame')?.getAttribute('data-scene-status'))).toBe('ready');await page.getByTestId('visualizer-preview-frame').hover();await page.getByTestId('start-visualizer-recording').click();
-    await expect(page.locator('#music-bar-container')).toHaveAttribute('data-recording-locked','true');await expect(page.locator('[data-recording-status=ready]')).toBeVisible({timeout:30000});await expect(page.locator('#music-bar-container')).toHaveAttribute('data-playback-state','ended');
-    await page.waitForTimeout(350);await expect(page.locator('#music-bar-container')).toHaveAttribute('data-playback-state','ended');await page.getByTestId('save-visualizer-recording').click();await expect.poll(async()=>(await savedPickerEntries(page)).length).toBe(1);const entries=await savedPickerEntries(page);expect(entries[entries.length-1]!.name).toMatch(/composition-720p30fps.webm$/);expect(Buffer.from(entries[entries.length-1]!.base64,'base64').byteLength).toBeGreaterThan(10000);expect(errors).toEqual([]);
+    await expect(page.locator('#music-bar-container')).toHaveAttribute('data-recording-locked','true');await expect(page.getByTestId('cancel-visualizer-recording')).toBeVisible();await expect(page.getByTestId('visualizer-fullscreen-toggle')).toBeDisabled();await expect(page.locator('[data-recording-status=ready]')).toBeVisible({timeout:30000});await expect(page.locator('#music-bar-container')).toHaveAttribute('data-playback-state','ended');
+    await page.waitForTimeout(350);await expect(page.locator('#music-bar-container')).toHaveAttribute('data-playback-state','ended');await page.getByTestId('save-visualizer-recording').click();await expect.poll(async()=>(await savedPickerEntries(page)).length).toBe(1);const entries=await savedPickerEntries(page);expect(entries[entries.length-1]!.name).toMatch(/composition-720p30fps.webm$/);const bytes=Buffer.from(entries[entries.length-1]!.base64,'base64');expect(bytes.byteLength).toBeGreaterThan(10000);await mkdir('artifacts/visualizer-composition',{recursive:true});await writeFile('artifacts/visualizer-composition/'+testInfo.project.name+'.webm',bytes);expect(errors).toEqual([]);
 });

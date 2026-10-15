@@ -1,7 +1,7 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-10-12
+last_reviewed: 2026-10-15
 upstream_docs:
   - "docs/context/index.md"
 next_action: "Editor四轨接入本轮功能验证已收尾，owner接受当前听感与长曲耗时；正式评审独立"
@@ -38,24 +38,24 @@ showOpenFilePicker → FileSystemFileHandle → File
                     → SessionRepository + audioSessionStore
 ```
 
-## Visualizer Current and Target Flow
+## Visualizer 当前流程
 
 ```text
 /visualizer/:trackId? → VisualizerSessionController
   ├→ RoutePlaybackLease(repeat-one; recording transport overrides) → AudioSessionService → AudioEngine
   ├→ VisualizerProjectV3 ↔ audionotsurfyet-visualizer/draft/latest
-  ├→ one 16:9 Canvas + three-column/drawer workspace [V1 current]
-  ├→ AnalysisConsumerLease(visualizer, deduped 0–4) → AnalysisCoordinator/Worker/cache [V2 current]
-  ├→ validated EditorProjectV1 snapshot → BindingResolver [V2 current]
-  └→ BindingResolver(60Hz absolute time + checkpoint) [V2 current]
+  ├→ one 16:9 Canvas + element list/inspector + project bottom panel + MusicBar
+  ├→ AnalysisConsumerLease(visualizer, deduped 0–4) → AnalysisCoordinator/Worker/cache
+  ├→ validated EditorProjectV1 snapshot → exact laneId/eventId range transition
+  └→ CompositionResolver(60Hz absolute time + checkpoint)
        → ElementRegistry → CompositionScene → three reusable render targets
-       → one VisualizerRendererHost + one Canvas/WebGLRenderer/visual RAF [V3/V4 approved]
-       → Orthogonal Lines trail | Cube Swarm 60Hz rise/orbit [V4 approved]
-       ├→ captureStream + AudioEngine pre-Gain tap → MediaRecorder → WebM Blob [V5 approved]
-       └→ native Fullscreen API on existing workspace → same Canvas + transport [post-V6]
+       → spectral strings(120Hz integration) / dots / rings / solid + target/composition effects
+       → one VisualizerRendererHost + one Canvas/WebGLRenderer/visual RAF
+       ├→ captureStream + AudioEngine pre-Gain tap → MediaRecorder → WebM Blob
+       └→ native Fullscreen API on existing workspace → same Canvas + video transport
 ```
 
-目标边界：Editor 数据只在进入/显式 reload 时快照；analysis 第五项在 Coordinator 前拒绝；页面音量不影响录制；不支持的 resolution/fps 明确失败而非静默降级。
+当前边界：Editor 数据只在进入/显式 reload 时快照；analysis 第五项在 Coordinator 前拒绝；页面音量不影响录制；不支持的 resolution/fps 明确失败。直接列表换歌在改变歌曲前处理单草稿覆盖与未处理 WebM；取消保留原歌曲和工程。
 
 ## Subsystems
 
@@ -70,12 +70,12 @@ showOpenFilePicker → FileSystemFileHandle → File
 | FeatureRegistry and codec | 21 项穷尽静态契约、六类紧凑 payload 与严格二进制 decoder | `FeatureId`、`FeatureDefinition`、`StoredAnalysisCache` | project-owner | Loudness 使用 total Float32 + 24 bands U16；Complex 使用 magnitude U16 + phase Int16；schema 保持 V1 |
 | Audio session state | 保存队列、当前 track、播放快照、能量、analysis 与 workspace snapshot | Pinia `audioSessionStore` | project-owner | `$state` 可 JSON 序列化，不含浏览器资源实例或 typed-array payload |
 | Session persistence | 保存/恢复 V1 最近会话、全部句柄和唯一 current Blob/cache | 原生 IndexedDB `SessionRepository` | project-owner | `replaceCurrentAnalysisCache()` 校验 track/hash 并原子替换；unknown schema 不猜测迁移 |
-| Config persistence | 保存 volume、MusicBar style 与桌面 sidebarCollapsed | Pinia、localStorage key `config` | project-owner | sidebarCollapsed 默认 false；volume 为 0–100 |
+| Config persistence | 保存 volume、playbackMode、MusicBar style 与桌面 sidebarCollapsed | Pinia、localStorage key `config` | project-owner | sidebarCollapsed 默认 false；volume 为 0–100 |
 | Home visualization | 歌曲详情与共享能量 Three.js 光线背景 | store metadata、service 封面 URL、`rayLength` prop、IntersectionObserver/ResizeObserver、reduced-motion media query | unknown | 常规模式使用 WebGL RAF；reduced motion 只静态渲染；卸载释放 mesh、geometry、material、render list、renderer 与 WebGL context |
 | Analyzer surface | 21项单列行、最多四项FIFO置顶分析、同步区间与精确值 | store、AudioSessionService、AnalysisCoordinator、Canvas 2D | project-owner | 默认原列表、倒序FIFO、40%–满高可调且自然内容封顶；见 [列表契约](analyzer-list.md) |
 | Editor E1–E9 surface | `/editor/:trackId?` 状态、精简 transport、JSON 工程、共享波形/tempo/point/range 时间列、21 项 overlay、`88px/72px` 波形、28px 紧凑 BPM 条、不可用恢复决策与中心对齐 marker | EditorSessionController、AudioSessionService、AnalysisCoordinator、Vue Router、shared Canvas renderer、DOM controls | project-owner | E1–E9 已关闭；E9 revised canonical 与 owner 门禁已批准 |
 | Editor project and draft | strict JSON V1、歌曲 hash/时长绑定、原生 file gateway、单草稿 autosave 与恢复冲突 | `EditorFormatCodecRegistry`、`EditorDraftRepository`、`audionotsurfyet-editor` V1 | project-owner | 首版只注册 JSON；session database 不变 |
-| Visualizer V1–V6 surface | `/visualizer/:trackId?` 单视口三栏/互斥抽屉、左右独立滚动、16:9 单 Canvas、底部 transport、strict project/单草稿、两个确定性 scene、recording 状态栏、WebM 保存、final hardening 与 post-V6 原生全屏 | `VisualizerSessionController`、`VisualizerRendererHost`、`ElementRegistry`、`RoutePlaybackLease`、`AnalysisConsumerLease`、BindingPlanner/Resolver、Editor snapshot、MediaRecorder、Fullscreen API | project-owner | V1–V6 canonical 保持批准；fullscreen 只为瞬时 UI，自动化跳过并待 owner 审阅 |
+| Visualizer composition surface | `/visualizer/:trackId?` 原子元素列表/属性/工程底栏、单视口三栏或抽屉、16:9 单 Canvas、保留 MusicBar、strict Project V3 单草稿、组合效果、WebM 与原生全屏 | `VisualizerSessionController`、`VisualizerRendererHost`、`ElementRegistry`、`CompositionResolver/Scene`、playback/analysis leases、Editor snapshot、MediaRecorder、Fullscreen API | project-owner | V1–V6 evidence 只绑定历史实现；当前自动化与媒体检查见组合工作区 |
 | Experimental charts | 试验性的 Three.js 2D 图和瀑布流 | Vue props、TestLands | unknown | 不视为稳定接口 |
 | Event bus | 跨组件事件类型与发送 | mitt singleton | unknown | `settings-open` 无已发现订阅者 |
 
@@ -84,7 +84,7 @@ showOpenFilePicker → FileSystemFileHandle → File
 | Dependency | Why it exists | Failure impact | Replacement or fallback |
 | --- | --- | --- | --- |
 | Browser Web Audio API | 解码、播放和分析本地音频 | 核心播放与能量链路不可用 | 未定义 |
-| WebGL / Three.js | Home 光线、Visualizer 单 RendererHost/Orthogonal Lines 和试验图表 | Visualizer 场景进入可重试错误层，其他 WebGL 表面不可用 | Visualizer 保留 transport、工程、模板和草稿操作；无 2D 视觉 fallback |
+| WebGL / Three.js | Home 光线、Visualizer 单 RendererHost/组合 shader 和试验图表 | Visualizer 场景进入可重试错误层，其他 WebGL 表面不可用 | Visualizer 保留 transport、工程、元素属性和草稿操作；无 2D 视觉 fallback |
 | Canvas 2D | Analyzer 静态数据层、游标层与点阵背景 | 单卡 renderer 可降级 | DOM 保留标题、参数、图例、精确值和重试语义 |
 | localStorage | 恢复音量和样式 | 配置回到默认或写入失败 | 未定义 |
 | IndexedDB | 最近会话、句柄、当前 Blob/cache 的本地持久化 | 刷新后无法自动恢复 | 当前页面继续使用并显示 not-persisted/restore-error |

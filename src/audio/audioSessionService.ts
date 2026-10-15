@@ -39,6 +39,12 @@ import {
 import { restoredFeatureOrder } from '../analysis/featureOrder';
 import { PlaybackPolicy, type PlaybackMode } from './playbackPolicy';
 
+export interface TrackNavigation {
+    select(trackId:string):Promise<void>;
+    beforeMutation(nextTrackId:string|null):Promise<boolean>;
+    cleared():Promise<void>;
+}
+
 export interface RecordingTransportLease {
     pause(): void;
     seek(seconds: number): Promise<void>;
@@ -205,6 +211,8 @@ const isMissingFileError = (error: unknown) =>
 export class AudioSessionService {
     readonly playbackPolicy = new PlaybackPolicy();
     private recordingTransportToken: symbol | null = null;
+    private trackNavigation: {token:symbol; commands:TrackNavigation}|null=null;
+    private pendingQueueCommands=0;
     private readonly store: AudioSessionStore;
     private readonly engine: AudioEnginePort;
     private transportRevision = 0;
@@ -452,7 +460,7 @@ export class AudioSessionService {
         if (this.disposed || inputs.length === 0) return;
 
         const importGeneration = ++this.importGeneration;
-        const shouldAutoplay = this.store.queue.length === 0 && !this.activeRoutePlayback;
+        const shouldAutoplay = this.store.queue.length === 0 && !this.activeRoutePlayback && !this.trackNavigation;
         const records: TrackRecord[] = [];
 
         for (const input of inputs) {
@@ -528,8 +536,18 @@ export class AudioSessionService {
         }
     }
 
+    attachTrackNavigation(commands:TrackNavigation):()=>void {
+        const token=Symbol('track-navigation');this.trackNavigation={token,commands};
+        return ()=>{if(this.trackNavigation?.token===token)this.trackNavigation=null;};
+    }
+
     async playTrack(trackId: string): Promise<void> {
         if (this.recordingTransportToken) return;
+        if(this.trackNavigation){
+            if(trackId===this.store.currentTrackId)await this.restartCurrent();
+            else await this.trackNavigation.commands.select(trackId);
+            return;
+        }
         await this.loadRuntimeTrack(trackId, true);
     }
 
@@ -701,7 +719,7 @@ export class AudioSessionService {
     }
 
     acquireRecordingTransport(trackId: string): RecordingTransportLease {
-        if (this.recordingTransportToken || this.store.currentTrackId !== trackId) {
+        if (this.recordingTransportToken || this.pendingQueueCommands > 0 || this.store.currentTrackId !== trackId) {
             throw new RecordingTapError('recording-busy', '播放命令已锁定或歌曲身份失效。');
         }
         const token = Symbol('recording-transport');
@@ -868,6 +886,12 @@ export class AudioSessionService {
     }
 
     async deleteTrack(trackId: string): Promise<void> {
+        if(this.recordingTransportToken||this.disposed)return;
+        this.pendingQueueCommands++;
+        try{await this.deleteTrackNow(trackId);}finally{this.pendingQueueCommands--;}
+    }
+
+    private async deleteTrackNow(trackId: string): Promise<void> {
         if (this.recordingTransportToken) return;
         if (this.disposed) return;
         const index = this.store.queue.findIndex(
@@ -876,6 +900,10 @@ export class AudioSessionService {
         if (index < 0) return;
 
         const wasCurrent = this.store.currentTrackId === trackId;
+        const remaining=this.store.queue.filter(track=>track.id!==trackId);
+        const nextId=remaining[Math.min(index,remaining.length-1)]?.id??null;
+        if(wasCurrent&&this.trackNavigation&&!await this.trackNavigation.commands.beforeMutation(nextId))return;
+        if(this.recordingTransportToken||this.disposed)return;
         this.releaseRuntimeTrack(trackId);
         this.store.removeTrack(trackId);
 
@@ -901,8 +929,15 @@ export class AudioSessionService {
     }
 
     async clear(): Promise<void> {
+        if(this.recordingTransportToken||this.disposed)return;
+        this.pendingQueueCommands++;
+        try{await this.clearNow();}finally{this.pendingQueueCommands--;}
+    }
+
+    private async clearNow(): Promise<void> {
         if (this.recordingTransportToken) return;
         if (this.disposed) return;
+        if(this.trackNavigation&&!await this.trackNavigation.commands.beforeMutation(null))return;
         try {
             await this.repository.clear();
         } catch {
@@ -914,15 +949,24 @@ export class AudioSessionService {
         }
         this.clearRuntimeSession();
         this.store.setPersistence({ state: 'ready' });
+        await this.trackNavigation?.commands.cleared();
     }
 
     async clearPersistedSession(): Promise<void> {
+        if(this.recordingTransportToken||this.disposed)return;
+        this.pendingQueueCommands++;
+        try{await this.clearPersistedSessionNow();}finally{this.pendingQueueCommands--;}
+    }
+
+    private async clearPersistedSessionNow(): Promise<void> {
         if (this.recordingTransportToken) return;
         if (this.disposed) return;
+        if(this.trackNavigation&&!await this.trackNavigation.commands.beforeMutation(null))return;
         try {
             await this.repository.clear();
             this.clearRuntimeSession();
             this.store.setPersistence({ state: 'ready' });
+            await this.trackNavigation?.commands.cleared();
         } catch {
             this.store.setPersistence({
                 state: 'restore-error',
@@ -936,6 +980,7 @@ export class AudioSessionService {
         this.disposed = true;
         ++this.workspaceSaveRevision;
         this.activeRoutePlayback = null;
+        this.trackNavigation = null;
         ++this.commandGeneration;
         ++this.importGeneration;
         this.stopFrameLoop();
