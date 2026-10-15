@@ -33,11 +33,11 @@
 .viz-field { display:flex; align-items:center; justify-content:space-between; gap:12px; min-width:0; min-height:34px; margin:3px 0; font-size:12px; color:var(--body); }
 .viz-field > span { flex:1; min-width:0; }
 .viz-field.stacked { flex-direction:column; align-items:stretch; gap:8px; }
-.viz-field input:not([type=checkbox]),.viz-field select { min-width:0; width:135px; min-height:29px; padding:4px 7px; border:1px solid rgba(173,206,187,.13); border-radius:4px; background:#0b1510; color:var(--ink); font-size:12px; }
+.viz-field > input:not([type=checkbox]) { min-width:0; width:135px; min-height:29px; padding:4px 7px; border:1px solid rgba(173,206,187,.13); border-radius:4px; background:#0b1510; color:var(--ink); font-size:12px; }
 .viz-field.stacked select { width:100%; }
 .viz-field input[type=checkbox] { accent-color:var(--accent-soft); }
 .viz-field input[type=color] { width:40px; padding:3px; }
-.viz-field input:disabled,.viz-field select:disabled { opacity:.4; }
+.viz-field > input:disabled,.viz-field > select:disabled { opacity:.4; }
 .viz-field input[type=number] { font-variant-numeric:tabular-nums; }
 .viz-parameter + .viz-parameter { margin-top:10px; }
 .viz-mapping { padding:3px 0 8px; font-size:11px; }
@@ -67,7 +67,7 @@
 .viz-save-state[data-state=not-persisted] { color:#ffa49a; }
 .viz-bottom-content { height:calc(100% - 36px); overflow:auto; overscroll-behavior:contain; padding:13px 16px; font-size:12px; }
 .viz-output-grid { border:0; margin:0; padding:0; display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); column-gap:30px; }
-.viz-output-grid .viz-field input,.viz-output-grid .viz-field select { width:130px; }
+.viz-output-grid .viz-field { --app-control-width:130px; }
 .viz-bottom-editor { display:flex; flex-direction:column; gap:14px; }
 .viz-inline-actions { display:flex; flex-wrap:wrap; gap:8px; }
 .viz-inline-actions button,.viz-preview-error button,.viz-status-lines button,.viz-bottom-content>button { min-height:28px; padding:4px 10px; background:#0c1811; color:var(--body); border:1px solid var(--divider); border-radius:4px; font-size:12px; cursor:pointer; }

@@ -15,6 +15,8 @@ declare module 'vue' {
     AnalyzerFeatureValues: typeof import('./src/components/AnalyzerFeatureValues.vue')['default']
     AnalyzerPlot: typeof import('./src/components/AnalyzerPlot.vue')['default']
     AnimatedList: typeof import('./src/components/AnimatedList.vue')['default']
+    AppNumberInput: typeof import('./src/components/controls/AppNumberInput.vue')['default']
+    AppSelect: typeof import('./src/components/controls/AppSelect.vue')['default']
     AppSettingsButton: typeof import('./src/components/AppSettingsButton.vue')['default']
     AppSidebar: typeof import('./src/components/AppSidebar.vue')['default']
     DotGridBg: typeof import('./src/components/DotGridBg.vue')['default']
