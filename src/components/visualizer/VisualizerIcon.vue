@@ -2,6 +2,8 @@
 <script setup lang="ts">
 defineProps<{name:string}>();
 const paths:Record<string,string>={
+    tunnel:'m12 2 10 6v8l-10 6-10-6V8zm0 4 6 4v4l-6 4-6-4v-4zm0 4 2 1v2l-2 1-2-1v-2zM2 8l8 3m12-3-8 3M12 2v8m0 12v-8',
+    stars:'m12 3 1 4 4 1-4 1-1 4-1-4-4-1 4-1zm6 11 1 3 3 1-3 1-1 3-1-3-3-1 3-1zM3 16l2-2m0 7 4-4M19 3l2-2',
     radial:'M12 2l2 4 4-1-1 4 5 3-5 2 1 4-4-1-2 5-2-5-4 1 1-4-5-2 5-3-1-4 4 1z',
     orbit:'M5 5h4v4H5zM16 14h4v4h-4zM12 2a10 10 0 0 1 10 10M12 22A10 10 0 0 1 2 12M12 9l3 3-3 3-3-3z',
     wireform:'m12 2 9 5v10l-9 5-9-5V7zm0 0v10m9-5-9 5-9-5m9 5v10',
