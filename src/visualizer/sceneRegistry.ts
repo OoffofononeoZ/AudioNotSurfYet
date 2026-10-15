@@ -8,28 +8,8 @@ import { createCubeSwarmScene } from './cubeSwarmScene';
 import { createOrthogonalLinesScene } from './orthogonalLinesScene';
 import type { VisualizerSceneFactory } from './rendererTypes';
 
-export type SceneParameterValueKind = 'number' | 'boolean' | 'color' | 'vector';
-export type SceneBindingSourceKind = 'constant' | 'analysis' | 'editor-event';
-
-export interface SceneNumericRange {
-    readonly min: number;
-    readonly max: number;
-    readonly integer?: boolean;
-}
-
-export interface SceneParameterDescriptor {
-    readonly id: string;
-    readonly label: string;
-    readonly valueKind: SceneParameterValueKind;
-    readonly defaultValue: number | string | boolean | readonly number[];
-    readonly allowedSourceKinds: readonly SceneBindingSourceKind[];
-    readonly range?: SceneNumericRange;
-    readonly vectorElementRange?: SceneNumericRange;
-    readonly allowEmptyVector?: boolean;
-    readonly allowedAnalysisComponents?: readonly VisualizerAnalysisComponent[];
-    readonly allowedAnalysisProjections?: readonly VisualizerAnalysisProjectionV1['kind'][];
-    readonly defaultBinding?: Omit<VisualizerParameterBindingV1, 'parameterId'>;
-}
+export type { SceneNumericRange, SceneParameterDescriptor, SceneBindingSourceKind, SceneParameterValueKind } from './parameterDescriptor';
+import type { SceneParameterDescriptor } from './parameterDescriptor';
 
 export interface SceneTemplateDescriptor {
     readonly id: VisualizerTemplateId;

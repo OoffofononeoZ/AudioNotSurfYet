@@ -6,6 +6,7 @@
 
 | 文件 | 本地静态引用（最多显示 6 项） |
 | --- | --- |
+| [tests/visualizer/v2-golden.test.ts](../../tests/visualizer/v2-golden.test.ts) | [src/analysis/types.ts](../../src/analysis/types.ts)、[src/visualizer/analysisProjection.ts](../../src/visualizer/analysisProjection.ts)、[src/visualizer/bindingPlanner.ts](../../src/visualizer/bindingPlanner.ts)、[src/visualizer/projectCodec.ts](../../src/visualizer/projectCodec.ts) |
 | [tests/visualizer/v3-golden.test.ts](../../tests/visualizer/v3-golden.test.ts) | [src/visualizer/orthogonalLinesState.ts](../../src/visualizer/orthogonalLinesState.ts)、[src/visualizer/rendererTypes.ts](../../src/visualizer/rendererTypes.ts) |
 | [tests/visualizer/v3-renderer.integration.test.ts](../../tests/visualizer/v3-renderer.integration.test.ts) | [src/visualizer/bindingResolver.ts](../../src/visualizer/bindingResolver.ts)、[src/visualizer/rendererTypes.ts](../../src/visualizer/rendererTypes.ts)、[src/visualizer/sceneRegistry.ts](../../src/visualizer/sceneRegistry.ts)、[src/visualizer/visualizerRendererHost.ts](../../src/visualizer/visualizerRendererHost.ts) |
 | [tests/visualizer/v3-scene-unit.test.ts](../../tests/visualizer/v3-scene-unit.test.ts) | [src/visualizer/orthogonalLinesState.ts](../../src/visualizer/orthogonalLinesState.ts)、[src/visualizer/rendererTypes.ts](../../src/visualizer/rendererTypes.ts) |
