@@ -12,6 +12,7 @@ import { CompositionDraftWriter } from './compositionDraftWriter';
 import type { CompositionDraftRepositoryPort } from './compositionDraftRepository';
 import { compositionIssues, planCompositionFeatures, removeCompositionElement, reorderComposition } from './compositionModel';
 import { elementRegistry } from './elementRegistry';
+import { createPresetElements, type CompositionPresetId } from './compositionPresets';
 import { parameterKey } from './compositionEffects';
 import type { ElementType, VisualizerElement, ElementBinding, VisualizerProjectV3, CompositionSessionSnapshot } from './compositionTypes';
 import type { VisualizerTrackValidationContext, VisualizerResolution, VisualizerFrameRate } from './types';
@@ -127,6 +128,9 @@ export class VisualizerSessionController {
     }
     addElement(type:ElementType){const project=this.snapshot.project;if(!project)return null;const element=elementRegistry.create(type,project.track.durationSeconds,Math.max(-1,...project.elements.map(e=>e.layer))+1);
         this.updateProject({...project,elements:[...project.elements,element]});return element.id;}
+    addPreset(id:CompositionPresetId){this.assertUnlocked();const p=this.snapshot.project;if(!p)return [];
+        const added=createPresetElements(id,p.track.durationSeconds,Math.max(-1,...p.elements.map(e=>e.layer))+1);
+        this.updateProject({...p,elements:[...p.elements,...added]});return added.map(e=>e.id);}
     updateElement(id:string,patch:Partial<VisualizerElement>){const p=this.snapshot.project;if(p)this.updateProject({...p,elements:p.elements.map(e=>e.id===id?{...e,...structuredClone(patch),id}:e)});}
     updateBinding(id:string,binding:ElementBinding){const e=this.snapshot.project?.elements.find(e=>e.id===id);if(e)this.updateElement(id,{bindings:e.bindings.map(b=>b.parameterId===binding.parameterId?structuredClone(binding):b)});}
     removeElement(id:string){if(this.snapshot.project)this.updateProject(removeCompositionElement(this.snapshot.project,id));}

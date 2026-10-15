@@ -46,5 +46,6 @@ declare module 'vue' {
     VisualizerElementList: typeof import('./src/components/visualizer/VisualizerElementList.vue')['default']
     VisualizerIcon: typeof import('./src/components/visualizer/VisualizerIcon.vue')['default']
     VisualizerParameterField: typeof import('./src/components/visualizer/VisualizerParameterField.vue')['default']
+    VisualizerPresetPreview: typeof import('./src/components/visualizer/VisualizerPresetPreview.vue')['default']
   }
 }
