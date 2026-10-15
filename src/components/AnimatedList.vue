@@ -143,11 +143,14 @@ const updateItemsInView = () => {
 };
 
 const handleKeyDown = (e: KeyboardEvent) => {
-    if (e.key === 'ArrowDown' || (e.key === 'Tab' && !e.shiftKey)) {
+    const target = e.target;
+    if (e.defaultPrevented || !(target instanceof Element) || !containerRef.value?.contains(target)
+        || target.closest('input,select,textarea,button,[contenteditable="true"]')) return;
+    if (e.key === 'ArrowDown') {
         e.preventDefault();
         keyboardNav.value = true;
         setSelectedIndex(Math.min(selectedIndex.value + 1, props.items.length - 1));
-    } else if (e.key === 'ArrowUp' || (e.key === 'Tab' && e.shiftKey)) {
+    } else if (e.key === 'ArrowUp') {
         e.preventDefault();
         keyboardNav.value = true;
         setSelectedIndex(Math.max(selectedIndex.value - 1, 0));
@@ -156,6 +159,9 @@ const handleKeyDown = (e: KeyboardEvent) => {
             e.preventDefault();
             emit('itemSelected', props.items[selectedIndex.value] || '', selectedIndex.value);
         }
+    }
+    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+        nextTick(() => containerRef.value?.querySelector<HTMLElement>(`[data-index="${selectedIndex.value}"] [tabindex="0"]`)?.focus());
     }
 };
 
