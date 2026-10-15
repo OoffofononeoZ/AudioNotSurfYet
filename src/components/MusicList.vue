@@ -75,7 +75,7 @@
                                 <button type="button" class="icon-button" data-testid="edit-track"
                                     :aria-label="`去编辑 ${data?.title}`" @click="emit('edit-track', index)">
                                     <svg class="w-6 h-6" aria-hidden="true">
-                                        <use href="/icons.svg#add-music"></use>
+                                        <use href="/icons.svg#nav-editor"></use>
                                     </svg>
                                 </button>
                             </el-tooltip>

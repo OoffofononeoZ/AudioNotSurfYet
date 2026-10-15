@@ -74,49 +74,10 @@
                     </div>
                 </div>
             </section>
-            <section class="actions-section flex gap-4 items-center justify-end w-80 m-1">
-                <button type="button" class="playback-mode-button" data-testid="playback-mode"
-                    :disabled="modeLocked || recordingLocked"
-                    :aria-label="modeLabel" :title="modeLabel" @click="cycleMode">
-                    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
-                        <template v-if="mode === 'shuffle'"><path d="M3 6h3l12 12h3M3 18h3L18 6h3M18 3l3 3-3 3M18 15l3 3-3 3"/></template>
-                        <template v-else-if="mode === 'sequence'"><path d="M4 6h16M4 12h16M4 18h9m4-3 3 3-3 3"/></template>
-                        <template v-else><path d="M4 8h14l-3-3m3 3-3 3M20 16H6l3 3m-3-3 3-3"/><path v-if="mode === 'repeat-one'" d="M12 11v5m-2-4 2-1"/></template>
-                    </svg>
-                </button>
-                <el-tooltip placement="top">
-                    <svg class="w-7 h-7 cursor-pointer" data-testid="volume-control" role="slider" tabindex="0"
-                        aria-label="音量" aria-valuemin="0" aria-valuemax="100" :aria-valuenow="volume"
-                        :aria-valuetext="`${volume}%`" @keydown="handleVolumeKeydown">
-                        <use href="/icons.svg#volume-control"></use>
-                    </svg>
-                    <template #content>
-                        <div class="pt-2 pb-4 flex flex-col items-center" style="margin: -5px;">
-                            <span class="pb-2">{{ volume }}%</span>
-                            <el-slider vertical height="100px" :showTooltip="false" :max="100" :min="0" :step="1"
-                                v-model="volume" @change="setVolume"></el-slider>
-                        </div>
-                    </template>
-                </el-tooltip>
-                <svg class="w-7 h-7 cursor-pointer" data-testid="toggle-queue" role="button" tabindex="0"
-                    aria-label="播放列表" @click="toggleMusicList" @keydown.enter.prevent="toggleMusicList"
-                    @keydown.space.prevent="toggleMusicList">
-                    <use href="/icons.svg#music-list"></use>
-                </svg>
-                <svg class="w-7 h-7 cursor-pointer" data-testid="import-audio" role="button" tabindex="0"
-                    aria-label="导入本地音频" @click="toggleSelectFile" @keydown.enter.prevent="toggleSelectFile"
-                    @keydown.space.prevent="toggleSelectFile">
-                    <use href="/icons.svg#add-music"></use>
-                </svg>
-                <svg class="w-7 h-7 cursor-pointer" data-testid="change-musicbar-style" role="button" tabindex="0"
-                    aria-label="切换播放器样式" @click="toggleChangeStyle"
-                    @keydown.enter.prevent="toggleChangeStyle" @keydown.space.prevent="toggleChangeStyle">
-                    <use href="/icons.svg#change-style"></use>
-                </svg>
-                <svg class="w-7 h-7" aria-label="更多功能尚未开放" aria-disabled="true">
-                    <use href="/icons.svg#more-menu"></use>
-                </svg>
-            </section>
+            <MusicBarActions :mode="mode" :mode-label="modeLabel" :mode-locked="modeLocked" :recording-locked="recordingLocked"
+                v-model:volume="volume" :queue-open="musicListVisible" :transitioning="isStyleTransitioning"
+                @mode="cycleMode" @volume-keydown="handleVolumeKeydown" @volume="setVolume" @queue="toggleMusicList"
+                @import="toggleSelectFile" @appearance="toggleChangeStyle"/>
         </div>
         <aside class="music-list-container" :inert="recordingLocked">
             <MusicList :info="albumInfo" :persistence="persistence" @select-index="handleSelectIndex"
@@ -141,7 +102,6 @@ import { useRoute, useRouter } from 'vue-router';
 import gsap from 'gsap';
 import {
     ElMessage,
-    ElSlider,
     ElTooltip,
 } from 'element-plus';
 import { useAudioSessionService } from '../audio/audioSessionService';
@@ -149,6 +109,7 @@ import { useAudioSessionStore } from '../stores/audioSessionStore';
 import { useConfigstore } from '../stores/configStore';
 import { clamp, formatSecToTime, mapEnergyToDeg } from '../utils/utils';
 import MusicList from './MusicList.vue';
+import MusicBarActions from './MusicBarActions.vue';
 import './controls/playbackProgress.css';
 import { PLAYBACK_MODES, PLAYBACK_MODE_LABELS } from '../audio/playbackPolicy';
 
@@ -233,7 +194,7 @@ const updatePlayerInset = () => {
     if(player)document.documentElement.style.setProperty('--app-player-inset',Math.max(0,window.innerHeight-player.getBoundingClientRect().top)+'px');
 };
 const marqueeTweens: gsap.core.Tween[] = [];
-let musicListVisible = false;
+const musicListVisible = ref(false);
 let previousEnergy = 0;
 const prefersReducedMotion = () =>
     window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -344,7 +305,8 @@ const toggleClear = () => {
     void audioSession.clear();
 };
 const setVolume = (value: number | number[]) => {
-    const nextVolume = Array.isArray(value) ? (value[0] ?? 0) : value;
+    const nextVolume = clamp(Array.isArray(value) ? (value[0] ?? 0) : value, 0, 100);
+    configStore.volume = nextVolume;
     audioSession.setVolume(nextVolume);
 };
 
@@ -372,8 +334,8 @@ const handleVolumeKeydown = (event: KeyboardEvent) => {
 };
 
 const toggleMusicList = () => {
-    musicListVisible = !musicListVisible;
-    musicListVisible ? tl2.play() : tl2.reverse();
+    musicListVisible.value = !musicListVisible.value;
+    musicListVisible.value ? tl2.play() : tl2.reverse();
 };
 
 const toggleSelectFile = async () => {
@@ -702,9 +664,6 @@ const handleEditTrack = async (index: number) => {
 </script>
 
 <style scoped>
-.playback-mode-button { display: grid; place-items: center; border: 0; padding: 4px; background: transparent; color: inherit; cursor: pointer; }
-.playback-mode-button:disabled { opacity: .45; cursor: default; }
-.playback-mode-button:focus-visible { outline: 2px solid var(--accent-soft); outline-offset: 3px; }
 #music-bar-container[data-recording-locked="true"] [data-testid="toggle-playback"],
 #music-bar-container[data-recording-locked="true"] [data-testid="previous-track"],
 #music-bar-container[data-recording-locked="true"] [data-testid="next-track"],
@@ -851,14 +810,6 @@ svg[role="slider"]:focus:not(:focus-visible),
     z-index: var(--layer-player-popover);
 }
 
-:deep(.el-slider__button) {
-    border: 2px solid var(--accent);
-}
-
-:deep(.el-slider__bar) {
-    background-color: var(--accent);
-}
-
 @media (max-width: 640px) {
     #music-bar-container {
         --offset: 0.5rem;
@@ -890,16 +841,6 @@ svg[role="slider"]:focus:not(:focus-visible),
         width: 1.75rem;
     }
 
-    .actions-section {
-        flex: 0 0 auto;
-        gap: 0.5rem;
-        width: auto;
-    }
-
-    .actions-section :deep(svg) {
-        height: 1.5rem;
-        width: 1.5rem;
-    }
 }
 
 @media (prefers-reduced-motion: reduce) {
