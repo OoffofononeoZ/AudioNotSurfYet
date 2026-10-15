@@ -56,11 +56,11 @@ const handleArtworkError = (event: Event) => {
     color: var(--ink); background: var(--canvas);
     font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
 }
-.home-rays { position: absolute; inset: 0; z-index: 0; opacity: .44; }
+.home-rays { position: absolute; inset: 0; z-index: 0; opacity: 1; }
 .home-content {
     position: relative; z-index: 1; display: flex; flex-direction: column;
     height: 100%; padding: 24px 32px 112px; overflow-y: auto; overscroll-behavior: contain;
-    background: linear-gradient(180deg, transparent 0%, rgba(2, 4, 3, .22) 45%, var(--canvas) 100%);
+    background: transparent;
 }
 .home-display-switch { display: flex; justify-content: center; gap: 4px; flex: none; }
 .home-display-switch button {
