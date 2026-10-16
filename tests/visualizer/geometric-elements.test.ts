@@ -5,6 +5,8 @@ import { GeometricBatch, geometricSpectrum } from '../../src/visualizer/geometri
 import { buildGeometricElement } from '../../src/visualizer/geometricElements';
 import type { ElementType } from '../../src/visualizer/compositionTypes';
 import type { VisualizerResolvedParameterMap } from '../../src/visualizer/rendererTypes';
+import { Matrix4,Vector3 } from 'three';
+import { createPresetElements } from '../../src/visualizer/compositionPresets';
 
 function harness(type:ElementType,spectrum:number[]) {
     const e=elementRegistry.create(type,10,0), batch=new GeometricBatch(), levels=new Float32Array(128);
@@ -13,6 +15,16 @@ function harness(type:ElementType,spectrum:number[]) {
     return {at,batch};
 }
 describe('geometric atoms',()=>{
+    test('reference pyramid has three base corners and rotates around the translated p5 pivot',()=>{
+        const e=createPresetElements('geometric-0.6',10).find(e=>e.name==='中心棱锥')!,batch=new GeometricBatch();
+        const values:VisualizerResolvedParameterMap=new Map(e.bindings.map(b=>[parameterKey(e.id,b.parameterId),{parameterId:b.parameterId,state:'ready',value:b.source.kind==='constant'?b.source.value:[]}]));
+        const time=1.7,a=time*.9;
+        buildGeometricElement(batch,e,values,time,1,16/9,new Float32Array(128));expect(batch.count).toBe(36);
+        const model=new Matrix4().makeRotationY(a).multiply(new Matrix4().makeRotationX(a)).multiply(new Matrix4().makeRotationZ(a)).multiply(new Matrix4().makeTranslation(0,20/1600,0));
+        const apex=new Vector3(0,84.85/3200,0).applyMatrix4(model),projection=.8660254/(.8660254-apex.z);
+        const start=[(batch.positions[0]!+batch.positions[15]!)/2,(batch.positions[1]!+batch.positions[16]!)/2];
+        expect(start[0]).toBeCloseTo(apex.x*projection,7);expect(start[1]).toBeCloseTo(-apex.y*projection,7);
+    });
     for(const type of ['radial-spectrum','orbit-solids','wireform','arc-lattice','light-tunnel','starfield'] as const) {
         test(type+' preserves an idle outline and responds deterministically to music',()=>{
             const idle=harness(type,[]), active=harness(type,Array.from({length:512},(_,i)=>i%17===0?64:2));

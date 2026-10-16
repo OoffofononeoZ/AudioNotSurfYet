@@ -30,14 +30,23 @@ export class GeometricBatch {
     }
 }
 
-export function rotate([x,y,z]:Point3, ax:number, ay:number, az:number):Point3 {
-    const y1=y*Math.cos(ax)-z*Math.sin(ax), z1=y*Math.sin(ax)+z*Math.cos(ax);
-    const x2=x*Math.cos(ay)+z1*Math.sin(ay), z2=-x*Math.sin(ay)+z1*Math.cos(ay);
-    return [x2*Math.cos(az)-y1*Math.sin(az),x2*Math.sin(az)+y1*Math.cos(az),z2];
+/** p5 post-multiplies model transforms: the last named axis acts on a vertex first. */
+export function rotate([x,y,z]:Point3, ax:number, ay:number, az:number, order:'xyz'|'yxz'='xyz'):Point3 {
+    const x1=x*Math.cos(az)-y*Math.sin(az), y1=x*Math.sin(az)+y*Math.cos(az);
+    if(order==='yxz') {
+        const y2=y1*Math.cos(ax)-z*Math.sin(ax), z2=y1*Math.sin(ax)+z*Math.cos(ax);
+        return [x1*Math.cos(ay)+z2*Math.sin(ay),y2,-x1*Math.sin(ay)+z2*Math.cos(ay)];
+    }
+    const x2=x1*Math.cos(ay)+z*Math.sin(ay), z2=-x1*Math.sin(ay)+z*Math.cos(ay);
+    return [x2,y1*Math.cos(ax)-z2*Math.sin(ax),y1*Math.sin(ax)+z2*Math.cos(ax)];
 }
 
 /** Fixed reference response, independent of song loudness history, RAF rate and seeking. */
-export function geometricSpectrum(input: readonly number[], sensitivity: number, output: Float32Array = new Float32Array(128)) {
+export function geometricSpectrum(input: readonly number[], sensitivity: number, output: Float32Array = new Float32Array(128),nativeStereo=false) {
+    if(nativeStereo) {
+        for(let i=0;i<output.length;i++)output[i]=Math.min(1,Math.log1p(input[i]??0)/Math.log1p(SPECTRUM_REFERENCE))*sensitivity;
+        return output;
+    }
     // Wallpaper Engine supplies 64 bands per channel. Analyzer supplies mono FFT;
     // repeat its 64 bands into both channel slots to preserve the source's radial symmetry.
     const bands=output.length/2;

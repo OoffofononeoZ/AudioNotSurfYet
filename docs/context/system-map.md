@@ -46,6 +46,7 @@ showOpenFilePicker → FileSystemFileHandle → File
   ├→ VisualizerProjectV3 ↔ audionotsurfyet-visualizer/draft/latest
   ├→ one 16:9 Canvas + element list/inspector + project bottom panel + MusicBar
   ├→ AnalysisConsumerLease(visualizer, deduped 0–4) → AnalysisCoordinator/Worker/cache
+  ├→ NativeAudioSource → bounded decoded PCM → offline Web Audio stereo FFT/waveform chunks
   ├→ validated EditorProjectV1 snapshot → exact laneId/eventId range transition
   └→ CompositionResolver(60Hz absolute time + checkpoint)
        → ElementRegistry → CompositionScene → three reusable render targets

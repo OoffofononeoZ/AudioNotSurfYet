@@ -2,13 +2,13 @@
 
 owner 于 2026-10-16 要求：新增可独立编辑的原子视觉元素，复刻 Wallpaper Engine workshop 3093808768 的 geometric visualizer（responsiveness 0.6），在元素库增加“预设”，并额外创作歌曲 PV 风格组合；每个完成阶段单独本地提交。
 
-本任务扩展现有 Project V3 ElementRegistry 与组合器，不注册完整内置 Scene，不引入新的工程格式、分析来源、Canvas、renderer 或 RAF。预设最终展开为普通元素，可单独修改及删除，导出与草稿沿用现有 V3 codec。
+本任务扩展现有 Project V3 ElementRegistry 与组合器，不注册完整内置 Scene，不引入新的 Canvas、renderer 或 RAF。预设最终展开为普通元素，可单独修改及删除，导出与草稿沿用现有 V3 codec；后续修正中 owner 补充授权 [原生 Web Audio 输入](visualizer-native-input.md) 及对应 source 类型。
 
 ## 原项目与响应
 
 参考为 owner 指定的本地 index.html、project.json 和两张静音/播放截图；不复制其 p5 运行库、字体或远程依赖。源实现为双环频谱、12 个频段方块、中心方块/棱锥、三个旋转环、三个小棱锥和 19 条弧。截图未显示曲名；复刻按该视觉组合执行。
 
-原项目的输入为 Wallpaper Engine 音频数组，当前输入为已有 Analyzer amplitudeSpectrum，两者数值标度不同。[Wallpaper Engine 官方音频文档](https://docs.wallpaperengine.io/en/web/audio/visualizer.html)定义左右各 64 个频段。当前将 mono FFT 压为 64 个 band，再复制到左右槽位以保留原双环重复对称；不声称保留左右声道差异。使用固定 log reference 128 归一化后乘响应系数 0.6，不按每首歌动态归一化；这是输入适配，不声称与 Wallpaper Engine FFT 逐 bin 等价。双环、尺寸、弧线和填色公式沿源结构。源逐帧旋转以 60 fps 转为绝对歌曲秒；随机彩色改用 seed 和绝对帧索引，seek/循环/录制可重现。
+原项目的输入为 Wallpaper Engine 音频数组，[官方音频文档](https://docs.wallpaperengine.io/en/web/audio/visualizer.html)定义左右各 64 个频段。初版将 Analyzer mono FFT 线性等分后取峰值，低频能量挤在开头，高频空尾重复到圆周形成突变；数值标度也影响了整体扩张。新版“几何律动”默认使用原生立体声频谱，频段和幅度适配见 [原生输入](visualizer-native-input.md)。显式选择 Analyzer 时仍使用 mono 64 band 复制到左右槽位，保留原工程行为。两种来源都不按每首歌动态归一化，不声称与 Wallpaper Engine FFT 逐 bin 等价。双环、尺寸、弧线和填色公式沿源结构。源逐帧旋转以 60 fps 转为绝对歌曲秒；随机彩色改用 seed 和绝对帧索引，seek/循环/录制可重现。
 
 几何以短边 1600 为设计参考，位置为归一化画面坐标。新增环形频谱、轨道几何体、旋转线框和旋转弧簇；形状、数量、半径、尺寸、速度、相位、阈值、线宽与响应系数可独立编辑。线段使用三角形，避免依赖平台 WebGL 宽线支持。几何仅共用一组动态 BufferGeometry/ShaderMaterial，并在组合器释放时回收。
 
@@ -20,3 +20,11 @@ owner 于 2026-10-16 要求：新增可独立编辑的原子视觉元素，复�
 4. 实际浏览器、音频及输出回归：已完成。Visualizer 进入前等待歌曲 session 恢复，并以 generation 防止等待期间离页后继续获取播放租约；直接刷新可恢复工程。最终类型检查、生产构建和 43 项 Visualizer 测试通过。Chrome/Edge 回归首轮 38/40 通过，两个失败来自旧布局测试仍要求视频顶对齐；依据 owner 已提交的居中行为修正断言，保持几何精度，布局专项复测 6/6 通过。预设专项包含实际 Analyzer 频谱与静音对照、四段构图、确定性 seek、全屏复用、短 WebM、context recovery 和反复离页释放；额外运行本地音乐的两个时段截图并检查画面。本地歌曲不加入 fixture 或工程。
 
 两种预设在 Chrome/Edge 导出的四份短 WebM 均通过 FFprobe 流/严格递增 packet PTS 检查和 FFmpeg 实际解码：1280×720 VP9 视频、48 kHz 双声道 Opus 音频。解码使用源 WebM 的毫秒时间基，避免 null 输出按名义帧率取整。产物与检查摘要仅存本地忽略目录 `artifacts/visualizer-composition/presets/`。这证明当前短片段链路可工作，不替代长曲性能、原生 OS picker 人工验收、正式 readiness 或发布结论。
+
+## owner 反馈后的修正
+
+本轮对照了原作使用的 p5 1.8 源码：`cone(...,4)` 包含接缝顶点，实际为三角底面，初版误作四角底面且顶底方向相反；中心棱锥应在 Y/X/Z 旋转之后作局部 20px 平移，小棱锥高宽比为 16/12 且不带外围方块的逐个自转相位。现已修正这些几何，以及 p5 矩阵右乘的旋转顺序和屏幕 Y 方向。中心位移随自转一起变换，投影中心不再固定在旧模型的中心。
+
+内外环继续使用源公式：外环基础半径乘 `(1+peak)*(1+band)`，内环基础半径乘 `(1+band)`；原生输入的固定标度修正负责避免上游饱和把整个环过度放大，响应系数仍为 0.6。既有草稿不自动改绑，重新添加预设或手动切换为“原生输入 → 频谱（立体声）”即可使用新链路。
+
+本轮类型检查及 62 项 Visualizer 测试通过；Chrome/Edge 完整 Visualizer 回归 46/46 通过，补齐标准混音与弦线原生历史后相关 10/10 再次通过。包含原生来源/可用特征切换、真实左右异频/单声道/多声道 FFT、API 失败重试、草稿恢复、实际音频和 WebM；已检查本地音乐两个时段修改前后的全屏画面。验证边界仍为本地功能回归，不改写历史 readiness。

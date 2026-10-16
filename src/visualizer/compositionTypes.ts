@@ -1,5 +1,6 @@
 import type { EditorProjectV1, EditorTrackIdentityV1 } from '../editor/types';
 import type { VisualizerParameterBindingV1, VisualizerResolution, VisualizerFrameRate, VisualizerBindingRuntimeSnapshot, VisualizerRecordingState, VisualizerPersistenceState, VisualizerSessionState } from './types';
+import type { NativeInputFeature } from './nativeAudioAnalysis';
 
 export type ElementType = 'solid' | 'spectral-strings' | 'spectral-dots' | 'reactive-rings'
     | 'radial-spectrum' | 'orbit-solids' | 'wireform' | 'arc-lattice' | 'light-tunnel' | 'starfield'
@@ -10,7 +11,8 @@ export type ElementTiming =
     | { kind: 'editor-range'; laneId: string; eventId: string }
     | { kind: 'unbound' };
 export type ElementBinding = Omit<VisualizerParameterBindingV1, 'source'> & {
-    source: Exclude<VisualizerParameterBindingV1['source'], { kind: 'editor-event' }> | { kind: 'unbound' };
+    source: Exclude<VisualizerParameterBindingV1['source'], { kind: 'editor-event' }> | { kind: 'unbound' }
+        | {kind:'native';featureId:NativeInputFeature};
 };
 export type EffectTargets = { kind: 'composition' } | { kind: 'elements'; ids: string[] };
 export interface VisualizerElement {

@@ -5,6 +5,7 @@ import type { AnalysisConsumerLease, AnalysisCoordinator } from '../analysis/ana
 import type { AnalysisCoordinatorSnapshot } from '../analysis/types';
 import type { DecodedAudioCopyPort } from '../analysis/pcm';
 import { VisualizerWaveformSource } from './waveformSource';
+import { NativeAudioSource } from './nativeAudioSource';
 import type { EditorDraftRepositoryPort } from '../editor/editorDraftRepository';
 import type { EditorFileGateway } from '../editor/fileIO';
 import { EditorFormatCodecRegistry, validateEditorProjectV1 } from '../editor/projectCodec';
@@ -47,11 +48,13 @@ export class VisualizerSessionController {
     private options:VisualizerSessionControllerOptions;
     private snapshot=initial();
     private listeners=new Set<(snapshot:CompositionSessionSnapshot)=>void>();
+    private nativeListeners=new Set<()=>void>();
     private playbackLease:RoutePlaybackLease|null=null;
     private analysisLease:AnalysisConsumerLease|null=null;
     private unsubscribeAnalysis:(()=>void)|null=null;
     private resolver=new CompositionResolver();
     private waveform:VisualizerWaveformSource|null;
+    private native:NativeAudioSource|null;
     private writer:CompositionDraftWriter;
     private recording:VisualizerRecordingSession;
     private generation=0;
@@ -62,6 +65,7 @@ export class VisualizerSessionController {
     private beforeUnload=false;
     constructor(options:VisualizerSessionControllerOptions) {
         this.waveform=options.decodedAudio?new VisualizerWaveformSource(options.decodedAudio):null;
+        this.native=options.decodedAudio?new NativeAudioSource(options.decodedAudio,()=>{if(!this.disposed)for(const listener of this.nativeListeners)listener();}):null;
         this.options=options;this.windowTarget=options.windowTarget ?? (typeof window==='undefined'?undefined:window);
         this.writer=new CompositionDraftWriter(options.repository,(persistence,project,message)=>{
             if(this.snapshot.project?.projectId!==project.projectId || this.disposed)return;
@@ -76,6 +80,7 @@ export class VisualizerSessionController {
     getSnapshot(){return structuredClone(this.snapshot);}
     readProject(){return this.snapshot.project;}
     subscribe(listener:(snapshot:CompositionSessionSnapshot)=>void){this.listeners.add(listener);listener(this.getSnapshot());return()=>this.listeners.delete(listener);}
+    subscribeNativeInput(listener:()=>void){this.nativeListeners.add(listener);return()=>{this.nativeListeners.delete(listener);};}
     private publish(snapshot:CompositionSessionSnapshot){this.snapshot=snapshot;for(const listener of this.listeners)listener(this.getSnapshot());this.syncBeforeUnload();}
     private assertUnlocked(){if(this.recording.isLocked())throw new VisualizerRecordingLockedError();}
     hasActivePlaybackLease(){return !!this.playbackLease;}
@@ -84,7 +89,16 @@ export class VisualizerSessionController {
     hasUnresolvedRecordingOutput(){return this.recording.hasUnresolvedOutput();}
     attachRecordingTarget(target:VisualizerRecordingTarget){return this.recording.attachTarget(target);}
     notifyRendererStatus(status:VisualizerRendererStatus){this.recording.notifyRendererStatus(status);}
-    startRecording(){return this.recording.start();}
+    async startRecording(){
+        this.assertUnlocked();const project=this.snapshot.project,trackId=this.snapshot.activeTrackId,generation=this.generation;
+        if(project&&trackId&&project.elements.some(e=>e.enabled&&e.bindings.some(b=>b.source.kind==='native'))) {
+            if(!this.native)throw Error('原生输入不可用。');
+            await this.native.prepare(trackId,0);
+            for(const e of project.elements.filter(e=>e.enabled&&e.type==='spectral-strings'))for(const b of e.bindings)if(b.source.kind==='native')await this.native.prepareHistory(trackId,0,b.source.featureId);
+            if(generation!==this.generation||this.snapshot.project!==project||this.disposed)return;
+        }
+        return this.recording.start();
+    }
     cancelRecording(){return this.recording.cancel();}
     saveRecording(){return this.recording.save();}
     discardRecording(){this.recording.discard();}
@@ -148,7 +162,8 @@ export class VisualizerSessionController {
         const project=this.snapshot.project;if(!project)return new Map();
         const trackId=this.snapshot.activeTrackId;
         const result=this.resolver.resolve(project,Math.max(0,time),id=>this.analysisLease?.getSeries(id)??null,
-            at=>trackId?this.waveform?.read(trackId,at)??null:null);
+            at=>trackId?this.waveform?.read(trackId,at)??null:null,
+            (feature,at,history)=>trackId?(history?this.native?.readHistory(trackId,at,feature):this.native?.read(trackId,at,feature))??null:null);
         const flat=new Map();for(const [id,values]of result)for(const [parameter,value]of values)flat.set(parameterKey(id,parameter),value);return flat;
     }
     async reloadEditorDraft(){this.assertUnlocked();const generation=this.generation,io=++this.editorIoGeneration;const draft=await this.options.editorRepository?.restore();
@@ -173,8 +188,11 @@ export class VisualizerSessionController {
     }
     async overwriteConflictingDraft(){if(this.snapshot.activeTrackId)await this.enter(this.snapshot.activeTrackId,true);}
     retryAnalysis(){const features=this.snapshot.bindingRuntime.activeFeatureIds;return this.analysisLease?.setActiveFeatures(features);}
+    retryNativeInput(){this.assertUnlocked();this.native?.reset();this.publish({...this.snapshot,bindingRuntime:{...this.snapshot.bindingRuntime,bindingRevision:this.snapshot.bindingRuntime.bindingRevision+1}});}
     private activateAnalysis(){
-        const project=this.snapshot.project;if(!project||!this.options.analysisCoordinator)return;
+        const project=this.snapshot.project;if(!project)return;
+        this.native?.configureHistory(project.elements.filter(e=>e.enabled&&e.type==='spectral-strings').flatMap(e=>e.bindings.flatMap(b=>b.source.kind==='native'?[b.source.featureId]:[])));
+        if(!this.options.analysisCoordinator)return;
         const ids=planCompositionFeatures(project),previous=this.snapshot.bindingRuntime.activeFeatureIds;
         const changed=ids.join('|')!==previous.join('|');
         this.publish({...this.snapshot,bindingRuntime:{...this.snapshot.bindingRuntime,activeFeatureIds:ids,readyFeatureIds:changed?[]:this.snapshot.bindingRuntime.readyFeatureIds,
@@ -193,9 +211,9 @@ export class VisualizerSessionController {
         this.publish({...this.snapshot,bindingRuntime:{...r,bindingRevision:r.bindingRevision+(changed?1:0),readyFeatureIds:ready,analysisState:state,analysisProgress:s.progress,analysisMessage:s.error?.message}});
     }
     async flush(){const success=await this.writer.flush();this.syncBeforeUnload();return success;}
-    private releaseLeases(){this.unsubscribeAnalysis?.();this.unsubscribeAnalysis=null;this.analysisLease?.release();this.analysisLease=null;this.playbackLease?.release();this.playbackLease=null;this.resolver.reset();this.waveform?.reset();}
+    private releaseLeases(){this.unsubscribeAnalysis?.();this.unsubscribeAnalysis=null;this.analysisLease?.release();this.analysisLease=null;this.playbackLease?.release();this.playbackLease=null;this.resolver.reset();this.waveform?.reset();this.native?.reset();}
     async leave(){this.generation++;this.ioGeneration++;this.editorIoGeneration++;if(this.recording.isLocked())await this.recording.cancel();await this.flush();this.releaseLeases();this.publish(initial());}
-    async dispose(){await this.leave();await this.recording.dispose();this.disposed=true;this.options.repository.close();this.options.editorRepository?.close();this.windowTarget?.removeEventListener('pagehide',this.handlePageHide);this.windowTarget?.removeEventListener('beforeunload',this.handleBeforeUnload as EventListener);this.listeners.clear();}
+    async dispose(){await this.leave();await this.recording.dispose();this.disposed=true;this.options.repository.close();this.options.editorRepository?.close();this.windowTarget?.removeEventListener('pagehide',this.handlePageHide);this.windowTarget?.removeEventListener('beforeunload',this.handleBeforeUnload as EventListener);this.listeners.clear();this.nativeListeners.clear();}
     private readonly handlePageHide=()=>{void this.recording.handlePageHide();};
     private readonly handleBeforeUnload=(event:BeforeUnloadEvent)=>{if(this.hasPendingWrite()||this.hasUnresolvedRecordingOutput()){event.preventDefault();event.returnValue='';}};
     private syncBeforeUnload(){const needed=this.hasPendingWrite()||this.hasUnresolvedRecordingOutput();if(needed===this.beforeUnload)return;this.beforeUnload=needed;

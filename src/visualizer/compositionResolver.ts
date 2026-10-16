@@ -5,12 +5,13 @@ import { ScalarSmoothingResolver, normalizedTarget, outputValue } from './bindin
 import { elementRegistry } from './elementRegistry';
 import type { VisualizerResolvedParameter } from './rendererTypes';
 import type { VisualizerProjectV3 } from './compositionTypes';
+import type { NativeInputFeature } from './nativeAudioAnalysis';
 export type ResolvedComposition = ReadonlyMap<string, ReadonlyMap<string, VisualizerResolvedParameter>>;
 
 export class CompositionResolver {
     private smoothers = new Map<string, ScalarSmoothingResolver>();
     reset() { this.smoothers.clear(); }
-    resolve(project: VisualizerProjectV3, time: number, getSeries: (id:FeatureId) => AnalysisSeries | null, getWaveform?: (time:number) => readonly number[] | null): ResolvedComposition {
+    resolve(project: VisualizerProjectV3, time: number, getSeries: (id:FeatureId) => AnalysisSeries | null, getWaveform?: (time:number) => readonly number[] | null,getNative?:(feature:NativeInputFeature,time:number,history:boolean)=>number[]|null): ResolvedComposition {
         const result=new Map<string, Map<string, VisualizerResolvedParameter>>();
         for (const e of project.elements.filter(e => e.enabled)) {
             const values=new Map<string, VisualizerResolvedParameter>(); result.set(e.id,values);
@@ -21,6 +22,10 @@ export class CompositionResolver {
                 try {
                     if (binding.source.kind === 'unbound') { values.set(parameterId,{parameterId,state:'error',message:'输入未配置'}); continue; }
                     if (binding.source.kind === 'constant') { values.set(parameterId,{parameterId,state:'ready',value:binding.source.value}); continue; }
+                    if(binding.source.kind==='native') {
+                        const value=getNative?.(binding.source.featureId,time,e.type==='spectral-strings');
+                        values.set(parameterId,value?{parameterId,state:'ready',value}:{parameterId,state:'loading',message:'原生输入准备中'});continue;
+                    }
                     const source=binding.source;
                     const series=getSeries(source.featureId);
                     if (!series || series.trackHash !== project.track.contentHash) { values.set(parameterId,{parameterId,state:'loading',message:'等待分析数据'}); continue; }
