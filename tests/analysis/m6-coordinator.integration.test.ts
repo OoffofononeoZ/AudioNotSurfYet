@@ -250,6 +250,26 @@ beforeEach(() => {
 });
 
 describe('AnalysisCoordinator integration', () => {
+    test('copies stereo only on a Wallpaper cache miss and restores exact cursors without PCM extraction', async () => {
+        const harness = setup({ pcm: createSine(440, 48000) });
+        harness.engine.channels = [createSine(440, 48000), createSine(4000, 48000)];
+        await harness.coordinator.setActiveFeatures(['wallpaperEngineSpectrum', 'rms']);
+        await vi.waitFor(() => expect(harness.coordinator.getSnapshot().cacheState).toBe('persisted'));
+        expect(harness.worker.analyzeRequests[0]?.stereoPcm).toHaveLength(2);
+        const exact = await harness.coordinator.requestCursorValue('wallpaperEngineSpectrum', 0.51);
+        expect(exact?.value).toHaveLength(128);
+        const series = harness.coordinator.getSeries('wallpaperEngineSpectrum')!;
+        const cacheKey = createAnalysisCacheKey('track-hash', series.configHash, 'wallpaperEngineSpectrum');
+        const restored = setup({ pcm: createSine(440, 48000) });
+        restored.coordinator.setRestoredCache({manifest:{trackId:'track-1',trackHash:'track-hash',configHash:series.configHash,featureIds:['wallpaperEngineSpectrum'],cacheKeys:[cacheKey]},payloads:[{cacheKey,payload:encodeAnalysisSeries(series)}]});
+        await restored.coordinator.setActiveFeatures(['wallpaperEngineSpectrum', 'energy']);
+        await vi.waitFor(() => expect(restored.coordinator.getSnapshot().state).toBe('ready'));
+        expect(restored.worker.analyzeRequests[0]?.featureIds).toEqual(['energy']);
+        expect(restored.worker.analyzeRequests[0]?.stereoPcm).toBeUndefined();
+        expect((await restored.coordinator.requestCursorValue('wallpaperEngineSpectrum',0.51))?.value).toEqual(exact?.value);
+        await harness.coordinator.dispose(); await restored.coordinator.dispose();
+        expect(harness.worker.terminated && restored.worker.terminated).toBe(true);
+    });
     test('keeps the default at zero features without creating a Worker', async () => {
         const harness = setup();
         await harness.coordinator.setActiveFeatures([]);

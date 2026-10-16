@@ -311,6 +311,7 @@ const payloadArrays = (
 }> => {
     switch (payload.kind) {
         case 'scalar-f32':
+        case 'stereo-spectrum-f32':
         case 'frequency-u16':
         case 'category-u16':
             return [{ name: 'values', value: payload.values }];
@@ -348,6 +349,8 @@ const headerForSeries = (
         ranges,
     };
     switch (series.payload.kind) {
+        case 'stereo-spectrum-f32':
+            return { ...common, width: series.payload.width };
         case 'scalar-f32':
             return common;
         case 'frequency-u16':
@@ -553,6 +556,9 @@ const decodePayload = (
     arrays: Map<string, Float32Array | Uint16Array | Int16Array>,
 ): CompactPayload => {
     switch (header.payloadKind) {
+        case 'stereo-spectrum-f32':
+            if (header.width !== 128) throw new Error('Stereo spectrum width is invalid.');
+            return { kind: 'stereo-spectrum-f32', width: 128, values: requiredArray(arrays, 'values', Float32Array) };
         case 'scalar-f32':
             return {
                 kind: 'scalar-f32',
@@ -644,7 +650,14 @@ export const validateSeriesShape = (series: AnalysisSeries): void => {
         throw new Error('Analysis series metadata is invalid.');
     }
     const payload = series.payload;
+    if ((series.featureId === 'wallpaperEngineSpectrum') !== (payload.kind === 'stereo-spectrum-f32')) throw new Error('Stereo spectrum feature/payload mismatch.');
     switch (payload.kind) {
+        case 'stereo-spectrum-f32':
+            if (payload.width !== 128 || series.dimensions.length !== 1 || series.dimensions[0] !== 128
+                || series.sampleStepSeconds !== 1 / 30 || series.sampleCount <= 0
+                || payload.values.length !== series.sampleCount * 128 || !(payload.values instanceof Float32Array)
+                || payload.values.some(value => !Number.isFinite(value) || value < 0)) throw new Error('Stereo spectrum payload is invalid.');
+            break;
         case 'scalar-f32':
             if (payload.values.length !== series.sampleCount) {
                 throw new Error('Scalar payload length does not match.');

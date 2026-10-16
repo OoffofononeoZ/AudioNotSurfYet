@@ -129,7 +129,7 @@ E8 当前实现把波形 stage 缩为桌面 `88px`/窄屏 `72px`，以 6px 安�
 
 ## 当前边界与历史证据
 
-Analyzer 运行态由 `activeFeatureQueue` 管理最多四项 FIFO，顶部倒序显示，原列表按 `FEATURE_IDS` 归位；V1 `activeCards` 与 `featureOrder` 字段保留，Analyzer 将旧手动顺序规范为默认顺序。
+Analyzer 运行态由 `activeFeatureQueue` 管理最多四项 FIFO，顶部倒序显示，原列表按 `FEATURE_IDS` 归位。V1 会话保留 `activeCards`，Analyzer 工作区版本为 2，移除排序字段，旧工作区及分析缓存清空；队列与独立草稿保留。[Wallpaper Engine 风格频谱](wallpaper-spectrum.md)首位注册，独立立体声 DFT 与完整精度 payload 沿用唯一 Worker，Meyda 数值算法不变。
 
 批准原文与替代关系查 [decision registry](decision-registry.md)，canonical 身份、hash 和人工门禁分别查 [Analyzer evidence](../quality/evidence-index.md)、[Editor evidence](../quality/editor/evidence-index.md) 与 [Visualizer evidence](../quality/visualizer/evidence-index.md)。当前里程碑、候选与未解决缺口见 [上下文入口](index.md)；本页维护职责和数据流，历史通过不证明当前代码已获整体 readiness 或上线授权。
 

@@ -8,6 +8,7 @@ import {
     waveformEnvelopeAt,
 } from './rendererData';
 import { timeToCanvasX } from './timelineViewport';
+import { drawWallpaperHeatmap, drawWallpaperCursor } from './wallpaperCanvas';
 import type {
     AnalysisCursorValueResult,
     AnalysisSeries,
@@ -503,6 +504,7 @@ export const analysisCanvasRenderer: EditorRendererAdapter = {
         const { width, height } = size(request);
         drawGrid(context, width, height);
         if (!request.series) return;
+        if (request.feature.id === 'wallpaperEngineSpectrum') { drawWallpaperHeatmap(request, context); return; }
         switch (request.feature.outputShape) {
             case 'scalar': drawScalar(request, context); break;
             case 'waveform': drawWaveform(request, context); break;
@@ -521,6 +523,7 @@ export const analysisCanvasRenderer: EditorRendererAdapter = {
         context.lineTo(x + 0.5, height);
         context.stroke();
         if (request.feature.outputShape === 'scalar') return;
+        if (request.feature.id === 'wallpaperEngineSpectrum') { drawWallpaperCursor(request, cursorSeconds, exactValue, context); return; }
         if (request.feature.id === 'loudness') {
             drawLoudnessCursor(context, width, height, exactValue);
             return;

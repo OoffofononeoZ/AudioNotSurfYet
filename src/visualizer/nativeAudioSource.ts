@@ -64,7 +64,7 @@ export class NativeAudioSource {
         let chunks=this.history.get(feature);if(!chunks){chunks=new Map();this.history.set(feature,chunks);}
         chunks.set(chunk,frames.map(frame=>Float32Array.from({length:64},(_,i)=>{
             const input=frame[feature],start=Math.floor(i*input.length/64),end=Math.max(start+1,Math.floor((i+1)*input.length/64));
-            let peak=0;for(let bin=start;bin<end;bin++)peak=Math.max(peak,input[bin]??0);return peak;
+            let peak=0;for(let bin=start;bin<end;bin++)peak=Math.max(peak,feature==='waveform'?Math.abs(input[bin]??0):input[bin]??0);return peak;
         })));
     }
     async prepare(trackId:string,time:number) {

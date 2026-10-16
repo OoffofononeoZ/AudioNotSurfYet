@@ -1,13 +1,14 @@
 import { SPECTRUM_REFERENCE } from './analysisSignal';
+import type { SpectrumUnit } from './rendererTypes';
 const BANDS = 64;
 const STEP = 1 / 60;
 const clamp = (v:number) => Math.max(0,Math.min(1,v));
-export function spectrumBands(values: readonly number[], output: Float32Array = new Float32Array(BANDS)): Float32Array {
+export function spectrumBands(values: readonly number[], output: Float32Array = new Float32Array(BANDS), unit: SpectrumUnit = 'meyda-amplitude'): Float32Array {
     for (let band=0;band<BANDS;band++) {
         const start=Math.floor(band*values.length/BANDS), end=Math.max(start+1,Math.floor((band+1)*values.length/BANDS));
         let peak=0;
-        for (let i=start;i<end;i++) peak=Math.max(peak,values[i] ?? 0);
-        output[band]=clamp(Math.log1p(peak)/Math.log1p(SPECTRUM_REFERENCE));
+        for (let i=start;i<end;i++) peak=Math.max(peak,unit==='signed-waveform'?Math.abs(values[i]??0):values[i] ?? 0);
+        output[band]=clamp(unit==='we-strength'||unit==='signed-waveform'?peak:unit==='byte-frequency'?peak/255:Math.log1p(peak)/Math.log1p(SPECTRUM_REFERENCE));
     }
     return output;
 }
@@ -21,12 +22,12 @@ export class SpectralStringsState {
     private checkpoints=new Map<number,State>();
     private latest=fresh();
     reset() { this.key=''; this.checkpoints.clear(); this.latest=fresh(); }
-    resolve(time:number, key:string, decay:number, source:(time:number)=>readonly number[]):State {
+    resolve(time:number, key:string, decay:number, source:(time:number)=>readonly number[], unit: SpectrumUnit = 'meyda-amplitude'):State {
         if (key !== this.key) { this.reset(); this.key=key; this.checkpoints.set(0,fresh()); }
         const tick=Math.max(0,Math.floor(time*60+1e-8));
         if (this.latest.tick > tick) this.latest=copy(this.checkpoints.get(Math.floor(tick/60)*60) ?? this.checkpoints.get(0)!);
         while (this.latest.tick < tick) {
-            const s=this.latest; spectrumBands(source(s.tick*STEP),s.levels);
+            const s=this.latest; spectrumBands(source(s.tick*STEP),s.levels,unit);
             for (let b=0;b<BANDS;b++) {
                 const level=s.levels[b]!, rise=Math.max(0,level-s.previous[b]!);
                 s.velocity[b]!+=rise*(12+8*b/(BANDS-1));

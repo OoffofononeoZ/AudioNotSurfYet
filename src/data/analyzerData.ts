@@ -11,6 +11,16 @@ export interface AnalyzerData {
 
 export const analyzerData: AnalyzerData[] = [
     {
+        title: 'Wallpaper Engine 风格频谱（近似）',
+        abbreviation: 'wallpaperEngineSpectrum',
+        belongsTo: '立体声频谱',
+        detail: {
+            description: '用于音频响应动画的 128 项频谱：左声道 0–63、右声道 64–127，各自从低频到高频，约 30Hz。官方说明通常为 0–1，短时可以超过 1。本项目采用实数 PCM 的独立 DFT；根据官方开发者 2017 年的历史说明，将 DFT 输入约 67% 用于连续 PCM、其余尾部补零。640-bin 扫描、0.25 次幂分频与避免跳过频段的规则、频率权重、每 8 段动态增益和时间平滑参考 OWE 固定提交 4aaec723；这些细节并非官方完整规格。增益使用默认录音音量，关闭可选阈值，不添加粉噪校准、空间模糊或去零尾。单声道复制为双声道，多声道按 speakers 规则下混。频率范围为参考 DFT bin 范围，不用于精确响度或声学测量，也不承诺与当前 Wallpaper Engine 逐值相同。',
+            usedfor: '音频响应动画。',
+            range: '非负 Float32，通常为 0–1，允许超过 1。',
+        },
+    },
+    {
         title: 'RMS',
         abbreviation: 'rms',
         belongsTo: '时域特征',

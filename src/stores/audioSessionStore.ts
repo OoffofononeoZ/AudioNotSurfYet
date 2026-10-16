@@ -10,12 +10,10 @@ import type {
 } from '../analysis/types';
 import {
     cloneActiveFeatureQueue,
-    cloneFeatureOrder,
     clonePersistedTimelineViewport,
     type AnalysisWorkspaceSnapshot,
     type PersistedSessionV1,
 } from '../types/session';
-import { defaultFeatureOrder } from '../analysis/featureOrder';
 
 const createEmptyPlayback = (): PlaybackSnapshot => ({
     trackId: null,
@@ -64,7 +62,6 @@ export const useAudioSessionStore = defineStore('audio-session', {
         analysisWorkspace: {
             initialized: false,
             activeFeatureQueue: [],
-            featureOrder: defaultFeatureOrder(),
             viewport: null,
         },
         analysisCacheManifest: null,
@@ -98,7 +95,6 @@ export const useAudioSessionStore = defineStore('audio-session', {
                     activeFeatureQueue: cloneActiveFeatureQueue(
                         workspace.activeFeatureQueue,
                     ),
-                    featureOrder: cloneFeatureOrder(workspace.featureOrder),
                     viewport: clonePersistedTimelineViewport(
                         workspace.viewport,
                     ),
@@ -159,7 +155,6 @@ export const useAudioSessionStore = defineStore('audio-session', {
                 activeFeatureQueue: cloneActiveFeatureQueue(
                     snapshot.activeFeatureQueue,
                 ),
-                featureOrder: cloneFeatureOrder(snapshot.featureOrder),
                 viewport: clonePersistedTimelineViewport(snapshot.viewport),
             };
         },
@@ -206,7 +201,6 @@ export const useAudioSessionStore = defineStore('audio-session', {
             this.analysisWorkspace = {
                 initialized: false,
                 activeFeatureQueue: [],
-                featureOrder: defaultFeatureOrder(),
                 viewport: null,
             };
             this.analysisCacheManifest = null;

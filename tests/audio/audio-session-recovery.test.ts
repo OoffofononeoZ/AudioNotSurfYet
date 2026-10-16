@@ -185,6 +185,7 @@ const restoredBundle = (
 ): RestoredSessionBundle => ({
     session: {
         schemaVersion: 1,
+        analyzerWorkspaceVersion: 2,
         savedAt: '2026-07-29T00:00:00.000Z',
         queue: ['track-1', 'track-2', 'track-3'].map(record),
         currentTrackId: 'track-2',
@@ -274,8 +275,13 @@ describe('AudioSessionService recovery', () => {
             },
         ]);
         const { engine, service, store } = createService(repository);
-
-        await service.initialize();
+        let cachePublished = false;
+        const load = engine.load.bind(engine);
+        engine.load = async (...args: Parameters<typeof engine.load>) => {
+            expect(cachePublished).toBe(true);
+            return load(...args);
+        };
+        await service.initialize(() => { cachePublished = true; });
 
         expect(store.currentTrackId).toBe('track-2');
         expect(store.playback.state).toBe('paused');

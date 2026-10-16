@@ -1,9 +1,12 @@
 import type * as THREE from 'three';
+export type SpectrumUnit = 'meyda-amplitude' | 'we-strength' | 'byte-frequency' | 'signed-waveform';
 export interface VisualizerResolvedParameter {
     parameterId:string;
     state:'ready'|'loading'|'error';
     value?:number|string|boolean|number[];
     message?:string;
+    unit?:SpectrumUnit;
+    channelLayout?:'mono'|'stereo-64'|'stereo-1024';
 }
 
 export type VisualizerResolvedParameterMap = ReadonlyMap<string, VisualizerResolvedParameter>;

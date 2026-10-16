@@ -12,9 +12,6 @@ import {
     validatePersistedSessionV1,
 } from '../../src/persistence/sessionRepository';
 import { sha256Blob } from '../../src/audio/audioSessionService';
-import {
-    defaultFeatureOrder,
-} from '../../src/analysis/featureOrder';
 import type {
     PersistedSessionV1,
     StoredHandle,
@@ -48,6 +45,7 @@ const session = (
     ids = ['track-1', 'track-2'],
 ): PersistedSessionV1 => ({
     schemaVersion: 1,
+    analyzerWorkspaceVersion: 2,
     savedAt: '2026-07-29T00:00:00.000Z',
     queue: ids.map(track),
     currentTrackId,
@@ -100,24 +98,13 @@ describe('PersistedSessionV1 validation', () => {
         })).toThrow(InvalidPersistedSessionError);
     });
 
-    test('accepts legacy absence and rejects every malformed M14 order', () => {
-        const customOrder = defaultFeatureOrder().reverse();
-        expect(validatePersistedSessionV1({
-            ...session('track-1'),
-            featureOrder: customOrder,
-        }).featureOrder).toEqual(customOrder);
-        expect(validatePersistedSessionV1(session('track-1')).featureOrder)
-            .toBeUndefined();
-        for (const featureOrder of [
-            customOrder.slice(0, -1),
-            [...customOrder.slice(0, -1), customOrder[0]],
-            [...customOrder.slice(0, -1), 'unknown'],
-        ]) {
-            expect(() => validatePersistedSessionV1({
-                ...session('track-1'),
-                featureOrder,
-            })).toThrow(InvalidPersistedSessionError);
-        }
+    test('discards old Analyzer workspace while retaining queue and handles', () => {
+        const old = { ...session('track-1'), analyzerWorkspaceVersion: undefined, activeCards: [{slot:0,featureId:'rms'}], viewport:{startSeconds:1,endSeconds:3,zoom:2}, featureOrder:'broken', currentAnalysisCache:{broken:true} };
+        const restored = validatePersistedSessionV1(old);
+        expect(restored).toMatchObject({analyzerWorkspaceVersion:2, activeCards:[], viewport:null});
+        expect(restored.currentAnalysisCache).toBeUndefined();
+        expect(restored).not.toHaveProperty('featureOrder');
+        expect(restored.queue).toEqual(old.queue); expect(restored.handles).toEqual(old.handles);
     });
 
     test('computes deterministic SHA-256 content identity', async () => {

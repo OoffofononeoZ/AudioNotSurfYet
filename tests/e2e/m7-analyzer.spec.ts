@@ -80,7 +80,7 @@ const installCursorRequestCounters = async (page: Page) => {
     });
 };
 
-test('starts with 21 collapsed cards and shares seek/zoom across three expanded cards', async ({ page }) => {
+test('starts with 22 collapsed cards and shares seek/zoom across three expanded cards', async ({ page }) => {
     const issues = captureBrowserIssues(page);
     await installFilePickerStub(page);
     await installCursorRequestCounters(page);
@@ -88,7 +88,7 @@ test('starts with 21 collapsed cards and shares seek/zoom across three expanded 
     await page.goto('/analyzer');
 
     const cards = page.locator('[data-feature-id]');
-    await expect(cards).toHaveCount(21);
+    await expect(cards).toHaveCount(22);
     await expect(page.locator('[data-feature-id="rms"]')).toHaveCount(1);
     await expect(page.locator('[data-feature-id="amplitudeSpectrum"]'))
         .toHaveCount(1);
@@ -253,7 +253,7 @@ test('starts with 21 collapsed cards and shares seek/zoom across three expanded 
     console.log(JSON.stringify({
         metric: 'm13-three-expanded-card-interaction',
         activeCards: 3,
-        cards: 21,
+        cards: 22,
         cursorRequestsIn550ms: cursorCounts,
         cursorWindowElapsedMs: cursorWindow.elapsedMs,
         maximumCursorRequests,
@@ -268,12 +268,12 @@ test('starts with 21 collapsed cards and shares seek/zoom across three expanded 
 test('persists the empty FIFO and a subsequently expanded feature', async ({ page }) => {
     const issues = captureBrowserIssues(page);
     await page.goto('/analyzer');
-    await expect(page.locator('[data-feature-id]')).toHaveCount(21);
+    await expect(page.locator('[data-feature-id]')).toHaveCount(22);
     await expect(page.locator('.analysis-card .toggle-card[aria-expanded="true"]'))
         .toHaveCount(0);
 
     await page.reload();
-    await expect(page.locator('[data-feature-id]')).toHaveCount(21);
+    await expect(page.locator('[data-feature-id]')).toHaveCount(22);
     await expect(page.locator('.analysis-card .toggle-card[aria-expanded="true"]'))
         .toHaveCount(0);
 
@@ -283,7 +283,7 @@ test('persists the empty FIFO and a subsequently expanded feature', async ({ pag
     await expect(page.locator('[data-feature-id="rms"] [aria-expanded="true"]'))
         .toHaveCount(1);
     await page.reload();
-    await expect(page.locator('[data-feature-id]')).toHaveCount(21);
+    await expect(page.locator('[data-feature-id]')).toHaveCount(22);
     await expect(page.locator('[data-feature-id="rms"] [aria-expanded="true"]'))
         .toHaveCount(1);
     expect(issues).toEqual([]);

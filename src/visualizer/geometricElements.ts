@@ -1,4 +1,4 @@
-import { elementNumber, elementValue } from './compositionEffects';
+import { elementNumber, elementValue, parameterKey } from './compositionEffects';
 import { GeometricBatch, geometricSpectrum, randomUnit, rotate, type Point3, type Ink } from './geometricBatch';
 import { buildLightTunnel, buildStarfield } from './cinematicElements';
 import { createRadialSpectrumSampler } from './radialSpectrum';
@@ -23,8 +23,7 @@ export function buildGeometricElement(batch:GeometricBatch,e:VisualizerElement,v
     batch.reset();
     const n=(id:string,fallback=0)=>elementNumber(values,e,id,fallback);
     const input=elementValue(values,e,'spectrum');
-    const source=e.bindings.find(b=>b.parameterId==='spectrum')?.source;
-    geometricSpectrum(Array.isArray(input)?input:[],n('sensitivity',.6),levels,source?.kind==='native'&&source.featureId==='frequency');
+    geometricSpectrum(Array.isArray(input)?input:[],n('sensitivity',.6),levels,values.get(parameterKey(e.id,'spectrum'))?.unit);
     let peak=0; for(const level of levels) peak=Math.max(peak,level);
     const alpha=n('opacity',1), white=rgb(String(elementValue(values,e,'color') ?? '#ffffff'),alpha);
     const colorful=elementValue(values,e,'chromatic') === true;

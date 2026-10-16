@@ -15,10 +15,6 @@ import {
     FEATURE_IDS,
     isFeatureId,
 } from '../analysis/types';
-import {
-    assertValidFeatureOrder,
-    defaultFeatureOrder,
-} from '../analysis/featureOrder';
 import { createAnalysisCacheKey } from '../analysis/config';
 
 const DATABASE_NAME = 'audionotsurfyet-session';
@@ -105,6 +101,11 @@ export const validatePersistedSessionV1 = (
     if (value.schemaVersion !== 1) {
         throw new UnsupportedSessionSchemaError(value.schemaVersion);
     }
+    // Analyzer workspace is disposable. Queue, Blob and handles keep their V1 carrier.
+    if (value.analyzerWorkspaceVersion !== 2) {
+        value = { ...value, analyzerWorkspaceVersion: 2, activeCards: [], viewport: null, currentAnalysisCache: undefined };
+    }
+    if (!isRecord(value)) throw new InvalidPersistedSessionError();
     if (
         typeof value.savedAt !== 'string'
         || !Array.isArray(value.queue)
@@ -118,8 +119,6 @@ export const validatePersistedSessionV1 = (
             && typeof card.featureId === 'string'
             && FEATURE_ID_SET.has(card.featureId))
         || !isAnalysisConfig(value.analysisConfig)
-        || (value.featureOrder !== undefined
-            && !Array.isArray(value.featureOrder))
         || (value.viewport !== null
             && (!isRecord(value.viewport)
                 || !isFiniteNumber(value.viewport.startSeconds)
@@ -141,14 +140,8 @@ export const validatePersistedSessionV1 = (
             activeFeatureQueue: activeCardsToFeatureQueue(
                 value.activeCards as PersistedSessionV1['activeCards'],
             ),
-            featureOrder: value.featureOrder === undefined
-                ? defaultFeatureOrder()
-                : value.featureOrder as FeatureId[],
             viewport: value.viewport as PersistedSessionV1['viewport'],
         });
-        if (value.featureOrder !== undefined) {
-            assertValidFeatureOrder(value.featureOrder);
-        }
     } catch {
         throw new InvalidPersistedSessionError(
             'Persisted analysis workspace is invalid.',
@@ -206,7 +199,13 @@ export const validatePersistedSessionV1 = (
             'Persisted analysis cache identity is invalid.',
         );
     }
-    return value as unknown as PersistedSessionV1;
+    // Return a fresh current-format carrier; unknown workspace metadata is not persisted.
+    return {
+        schemaVersion: 1, analyzerWorkspaceVersion: 2, savedAt: value.savedAt,
+        queue: value.queue, currentTrackId: value.currentTrackId, activeCards: value.activeCards,
+        analysisConfig: value.analysisConfig, viewport: value.viewport, handles: value.handles,
+        currentBlob: value.currentBlob, currentAnalysisCache: value.currentAnalysisCache,
+    } as PersistedSessionV1;
 };
 
 export interface PersistedQueueInput {
@@ -333,6 +332,13 @@ export class SessionRepository implements SessionRepositoryPort {
                 return null;
             }
             const session = validatePersistedSessionV1(rawSession);
+            if (isRecord(rawSession) && rawSession.analyzerWorkspaceVersion !== 2) {
+                const cleanup = database.transaction([STORES.session, STORES.currentCache], 'readwrite');
+                const cleaned = transactionDone(cleanup);
+                cleanup.objectStore(STORES.session).put(session, SESSION_KEY);
+                cleanup.objectStore(STORES.currentCache).clear();
+                await cleaned;
+            }
             const cacheManifest = session.currentAnalysisCache;
             const validCurrentAnalysisCache =
                 currentAnalysisCache

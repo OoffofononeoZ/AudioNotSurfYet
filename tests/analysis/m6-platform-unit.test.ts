@@ -1,3 +1,4 @@
+import { WALLPAPER_SPECTRUM_IDENTITY } from '../../src/analysis/wallpaperSpectrum';
 import {
     describe,
     expect,
@@ -44,17 +45,17 @@ import {
 import { analyzerData } from '../../src/data/analyzerData';
 
 describe('M6 feature registry and identity', () => {
-    test('is bidirectionally exhaustive for all 21 analyzer entries', async () => {
+    test('is bidirectionally exhaustive for all registered analyzer entries', async () => {
         const config = await createAnalysisConfig(48_000);
         expect(Object.keys(FEATURE_REGISTRY)).toEqual([...FEATURE_IDS]);
         expect(analyzerData.map(({ abbreviation }) => abbreviation))
             .toEqual([...FEATURE_IDS]);
-        expect(new Set(FEATURE_IDS)).toHaveLength(21);
+        expect(new Set(FEATURE_IDS)).toHaveLength(22);
         expect(() => validateFeatureRegistry(config)).not.toThrow();
         expect(new Set(
             FEATURE_IDS.filter((id) =>
                 FEATURE_REGISTRY[id].workerSupported),
-        )).toEqual(new Set(M10_AVAILABLE_FEATURE_IDS));
+        )).toEqual(new Set([...M10_AVAILABLE_FEATURE_IDS, 'wallpaperEngineSpectrum']));
 
         for (const featureId of FEATURE_IDS) {
             const definition = FEATURE_REGISTRY[featureId];
@@ -84,7 +85,7 @@ describe('M6 feature registry and identity', () => {
     test('hashes the fixed config canonically and keys every identity field', async () => {
         expect(canonicalAnalysisConfig(48_000)).toBe(
             'analysis-config:v1|frame=1024|hop=512|window=hanning'
-            + '|mfcc=13|channel=average-mono|sampleRate=48000',
+            + '|mfcc=13|channel=average-mono|sampleRate=48000|' + WALLPAPER_SPECTRUM_IDENTITY,
         );
         const first = await createAnalysisConfig(48_000);
         const same = await createAnalysisConfig(48_000);

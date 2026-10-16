@@ -1,4 +1,5 @@
 import type { AnalysisConfig, ConfigHash, FeatureId } from './types';
+import { WALLPAPER_SPECTRUM_IDENTITY } from './wallpaperSpectrum';
 
 export const ANALYSIS_CONFIG_PREFIX = 'analysis-config:v1';
 
@@ -14,6 +15,7 @@ export const canonicalAnalysisConfig = (sampleRate: number): string => {
         'mfcc=13',
         'channel=average-mono',
         `sampleRate=${sampleRate}`,
+        WALLPAPER_SPECTRUM_IDENTITY,
     ].join('|');
 };
 

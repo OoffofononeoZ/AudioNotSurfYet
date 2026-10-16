@@ -18,7 +18,6 @@ import {
     visibleSampleRange,
 } from '../../src/analysis/rendererData';
 import type { AnalysisSeries } from '../../src/analysis/types';
-import { defaultFeatureOrder } from '../../src/analysis/featureOrder';
 import { assertValidAnalysisWorkspace } from '../../src/types/session';
 
 describe('M7 shared timeline', () => {
@@ -113,12 +112,10 @@ describe('M7 workspace invariants', () => {
     test('accepts empty and unique workspaces', () => {
         expect(() => assertValidAnalysisWorkspace({
             activeFeatureQueue: [],
-            featureOrder: defaultFeatureOrder(),
             viewport: null,
         })).not.toThrow();
         expect(() => assertValidAnalysisWorkspace({
             activeFeatureQueue: ['rms', 'chroma'],
-            featureOrder: defaultFeatureOrder(),
             viewport: {
                 startSeconds: 0,
                 endSeconds: 5,
@@ -130,19 +127,16 @@ describe('M7 workspace invariants', () => {
     test('rejects duplicate features and invalid viewport values', () => {
         expect(() => assertValidAnalysisWorkspace({
             activeFeatureQueue: ['rms', 'rms'],
-            featureOrder: defaultFeatureOrder(),
             viewport: null,
         })).toThrow(/unique active features/);
         expect(() => assertValidAnalysisWorkspace({
             activeFeatureQueue: [
                 'rms', 'chroma', 'energy', 'mfcc', 'buffer',
             ],
-            featureOrder: defaultFeatureOrder(),
             viewport: null,
         })).toThrow(/unique active features/);
         expect(() => assertValidAnalysisWorkspace({
             activeFeatureQueue: [],
-            featureOrder: defaultFeatureOrder(),
             viewport: {
                 startSeconds: 5,
                 endSeconds: 5,

@@ -3,10 +3,12 @@ import type {
     CategoryPayload,
     ComplexPayload,
     FrequencyPayload,
+    StereoSpectrumPayload,
     LoudnessPayload,
     WaveformPayload,
 } from './types';
 import type { PersistedTimelineViewport } from '../types/session';
+import { wallpaperFrameIndex } from './wallpaperSpectrum';
 
 export interface VisibleSampleRange {
     startIndex: number;
@@ -64,6 +66,7 @@ export const cursorSampleIndex = (
     cursorSeconds: number,
 ): number => {
     if (series.sampleCount <= 0 || series.sampleStepSeconds <= 0) return 0;
+    if (series.featureId === 'wallpaperEngineSpectrum') return wallpaperFrameIndex(cursorSeconds, series.sampleCount);
     return Math.min(
         series.sampleCount - 1,
         Math.max(0, Math.floor(cursorSeconds / series.sampleStepSeconds)),
@@ -77,7 +80,7 @@ export const decodeQuantizedValue = (
 ): number => value * scale + offset;
 
 export const vectorAt = (
-    payload: FrequencyPayload | CategoryPayload,
+    payload: FrequencyPayload | CategoryPayload | StereoSpectrumPayload,
     sampleIndex: number,
 ): number[] => {
     const safeIndex = Math.min(
@@ -87,7 +90,7 @@ export const vectorAt = (
     const offset = safeIndex * payload.width;
     return Array.from(
         payload.values.subarray(offset, offset + payload.width),
-        (value) => decodeQuantizedValue(
+        (value) => payload.kind === 'stereo-spectrum-f32' ? value : decodeQuantizedValue(
             value,
             payload.scale,
             payload.offset,

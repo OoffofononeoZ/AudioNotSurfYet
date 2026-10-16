@@ -83,7 +83,7 @@ describe('Visualizer Analyzer input', () => {
 });
 
 
-test('all 21 Worker features retain their scalar/vector dimensions and finite projections', async () => {
+test('all registered Worker features retain their scalar/vector dimensions and finite projections', async () => {
     const config = await createAnalysisConfig(track.sampleRate);
     const pcm = Float32Array.from({ length: 4096 }, (_, i) => Math.sin(i * .09) * (.3 + .2 * Math.cos(i * .001)));
     const waveform = exactM10Value('buffer', createAnalysisFrame(pcm, 0, config), config) as number[];
@@ -91,7 +91,7 @@ test('all 21 Worker features retain their scalar/vector dimensions and finite pr
         const featureIds = FEATURE_IDS.slice(start, start + 4);
         const { result } = await runAnalysisJob({ kind: 'analyze', jobId: 'projection', generation: 1,
             trackHash: track.contentHash, config, featureIds, cursorFeatureIds: featureIds,
-            pcm: pcm.slice().buffer, durationSeconds: pcm.length / config.sampleRate });
+            pcm: pcm.slice().buffer, stereoPcm: [pcm.slice().buffer, pcm.slice().buffer], durationSeconds: pcm.length / config.sampleRate });
         for (const s of result.series) for (const component of analysisComponentsForFeature(s.featureId)) {
             const vector = analysisComponentIsVector(s.featureId, component);
             const value = projectAnalysisSeries(s, component, { kind: vector ? 'full' : 'scalar' }, .005, waveform);

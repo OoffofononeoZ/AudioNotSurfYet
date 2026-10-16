@@ -71,3 +71,8 @@ export const cursorFrameIndex = (
         Math.floor(clamped * config.sampleRate / config.hopSize),
     );
 };
+
+export const analysisAggregationFactor = (
+    sampleRate: number,
+    hopSize: number,
+): number => Math.max(1, Math.ceil(sampleRate / (hopSize * 30)));

@@ -2,7 +2,8 @@
     <div class="feature-values">
 <div class="axis-summary" aria-hidden="true">
             <span>{{ formatTime(viewport.startSeconds) }}</span>
-            <span v-if="isSpectrumFeature">
+            <span v-if="featureId === 'wallpaperEngineSpectrum'">左 0–63 · 右 64–127 · 各自低频 → 高频</span>
+            <span v-else-if="isSpectrumFeature">
                 0 – {{ formatFrequency(nyquist) }}
             </span>
             <span v-else-if="featureId === 'loudness'">
@@ -69,6 +70,16 @@
             </div>
         </dl>
 
+        <details v-if="featureId === 'wallpaperEngineSpectrum'" class="value-table">
+            <summary>查看 128 项完整精度频谱值（{{ exactVector.length }}）</summary>
+            <div class="table-scroll app-scrollbar"><table>
+                <thead><tr><th>数组索引</th><th>声道 / 频段</th><th>参考频率范围</th><th>原始值</th></tr></thead>
+                <tbody><tr v-for="(value, index) in exactVector" :key="index">
+                    <th scope="row">{{ index }}</th><td>{{ index < 64 ? '左 L' : '右 R' }} / {{ index % 64 }}</td>
+                    <td>{{ wallpaperRangeLabel(index % 64) }}</td><td>{{ String(value) }}</td>
+                </tr></tbody>
+            </table></div>
+        </details>
         <details v-if="isSpectrumFeature" class="value-table">
             <summary>
                 查看完整频率 bin 精确值（{{ exactVector.length }}）
@@ -216,11 +227,12 @@
 import { computed } from 'vue';
 import { FEATURE_REGISTRY } from '../analysis/featureRegistry';
 import { peakBin, signedFftBinFrequency } from '../analysis/rendererData';
-import type { AnalysisCursorValueResult, M10FeatureId } from '../analysis/types';
+import { wallpaperBandRanges, wallpaperBlockLength, wallpaperPcmLength } from '../analysis/wallpaperSpectrum';
+import type { AnalysisCursorValueResult, FeatureId } from '../analysis/types';
 import type { PersistedTimelineViewport } from '../types/session';
 
 const props = defineProps<{
-    featureId: M10FeatureId;
+    featureId: FeatureId;
     viewport: PersistedTimelineViewport;
     durationSeconds: number;
     sampleRate: number | null;
@@ -235,6 +247,7 @@ const isSpectrumFeature = computed(() =>
 const spectrumValueHeading = computed(() =>
     props.featureId === 'powerSpectrum' ? 'Power' : 'Amplitude');
 const parameterLabel = computed(() => {
+    if (props.featureId === 'wallpaperEngineSpectrum') return `${wallpaperBlockLength(props.sampleRate ?? 44100)} DFT / ${wallpaperPcmLength(props.sampleRate ?? 44100)} PCM / 30Hz`;
     if (props.featureId === 'mfcc') {
         return '1024 frame / 512 hop / Hanning / 13 MFCC';
     }
@@ -426,6 +439,12 @@ const binFrequency = (index: number): number =>
     props.sampleRate
         ? index * props.sampleRate / 1024
         : 0;
+
+const wallpaperRanges = computed(() => wallpaperBandRanges(props.sampleRate ?? 44100));
+const wallpaperRangeLabel = (index: number): string => {
+    const range = wallpaperRanges.value[index]!;
+    return `${formatFrequency(range[0])} – ${formatFrequency(range[1])}`;
+};
 
 
 </script>

@@ -50,6 +50,12 @@ const scalar = (
 });
 
 export const FEATURE_REGISTRY = {
+    wallpaperEngineSpectrum: defineFeature('wallpaperEngineSpectrum', {
+        outputShape: 'frequency-vector', renderer: 'stereo-spectrum',
+        range: { min: 0, unit: 'WE approximate' }, dependencies: [],
+        dimensions: () => [128], deliveryMilestone: 'M10', workerSupported: true,
+        extractionSource: 'project-wallpaper-spectrum-v1',
+    }),
     rms: scalar('rms', {
         range: { min: 0 },
         dependencies: [],
@@ -228,7 +234,7 @@ export const validateFeatureRegistry = (
         || uniqueSourceIds.size !== FEATURE_IDS.length
     ) {
         throw new Error(
-            'analyzerData abbreviations must contain 21 unique entries.',
+            `analyzerData abbreviations must contain ${FEATURE_IDS.length} unique entries.`,
         );
     }
 

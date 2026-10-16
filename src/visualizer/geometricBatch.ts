@@ -1,4 +1,5 @@
 import { SPECTRUM_REFERENCE } from './analysisSignal';
+import type { SpectrumUnit } from './rendererTypes';
 /** Reusable CPU mesh. Lines are triangles so width is consistent on WebGL implementations. */
 export type Point3 = readonly [number, number, number];
 export type Ink = readonly [number, number, number, number];
@@ -42,9 +43,18 @@ export function rotate([x,y,z]:Point3, ax:number, ay:number, az:number, order:'x
 }
 
 /** Fixed reference response, independent of song loudness history, RAF rate and seeking. */
-export function geometricSpectrum(input: readonly number[], sensitivity: number, output: Float32Array = new Float32Array(128),nativeStereo=false) {
-    if(nativeStereo) {
-        for(let i=0;i<output.length;i++)output[i]=Math.min(1,Math.log1p(input[i]??0)/Math.log1p(SPECTRUM_REFERENCE))*sensitivity;
+export function geometricSpectrum(input: readonly number[], sensitivity: number, output: Float32Array = new Float32Array(128),unit:SpectrumUnit='meyda-amplitude') {
+    if(unit==='we-strength') {
+        for(let i=0;i<output.length;i++)output[i]=(input[i]??0)*sensitivity;
+        return output;
+    }
+    if(unit==='byte-frequency') {
+        const sourceBands=input.length/2;
+        for(let channel=0;channel<2;channel++)for(let band=0;band<64;band++) {
+            const start=Math.floor(band*sourceBands/64),end=Math.max(start+1,Math.floor((band+1)*sourceBands/64));
+            let peak=0;for(let i=start;i<end;i++)peak=Math.max(peak,input[channel*sourceBands+i]??0);
+            output[channel*64+band]=peak/255*sensitivity;
+        }
         return output;
     }
     // Wallpaper Engine supplies 64 bands per channel. Analyzer supplies mono FFT;
@@ -52,8 +62,8 @@ export function geometricSpectrum(input: readonly number[], sensitivity: number,
     const bands=output.length/2;
     for (let i=0;i<bands;i++) {
         const start=Math.floor(i*input.length/bands), end=Math.max(start+1,Math.floor((i+1)*input.length/bands));
-        let peak=0; for(let j=start;j<end;j++) peak=Math.max(peak,input[j] ?? 0);
-        output[i]=Math.min(1,Math.log1p(peak)/Math.log1p(SPECTRUM_REFERENCE))*sensitivity;
+        let peak=0; for(let j=start;j<end;j++) peak=Math.max(peak,unit==='signed-waveform'?Math.abs(input[j]??0):input[j] ?? 0);
+        output[i]=(unit==='signed-waveform'?peak:Math.min(1,Math.log1p(peak)/Math.log1p(SPECTRUM_REFERENCE)))*sensitivity;
         output[i+bands]=output[i]!;
     }
     return output;

@@ -1,6 +1,6 @@
 import { expect,test,vi } from 'vitest';
 import { NativeAudioSource } from '../../src/visualizer/nativeAudioSource';
-import { nativeFrequencyBands,NATIVE_CHUNK_FRAMES,type NativeAudioFrame } from '../../src/visualizer/nativeAudioAnalysis';
+import { NATIVE_CHUNK_FRAMES,type NativeAudioFrame } from '../../src/visualizer/nativeAudioAnalysis';
 import { CompositionResolver } from '../../src/visualizer/compositionResolver';
 import { createComposition,decodeComposition,encodeComposition,validateComposition } from '../../src/visualizer/compositionCodec';
 import { createPresetElements } from '../../src/visualizer/compositionPresets';
@@ -16,15 +16,11 @@ function harness(render=vi.fn(async()=>frames(12))) {
     const source=new NativeAudioSource(port,changed,render);
     return {source,render,port,changed,bump:()=>revision++};
 }
-test('native stereo bands preserve silence, suppress DC and keep frequency ordering',()=>{
-    expect(nativeFrequencyBands(new Uint8Array(1024),48000)).toEqual(Array(64).fill(0));
-    const dc=new Uint8Array(1024);dc[0]=255;expect(nativeFrequencyBands(dc,48000)).toEqual(Array(64).fill(0));
-    const low=new Uint8Array(1024),high=new Uint8Array(1024);low[10]=255;high[170]=255;
-    const a=nativeFrequencyBands(low,48000),b=nativeFrequencyBands(high,48000);
-    expect(a.indexOf(Math.max(...a))).toBeLessThan(b.indexOf(Math.max(...b)));
-    const stereo=geometricSpectrum([...a,...b],.6,new Float32Array(128),true);
+test('native byte FFT is converted only by the renderer, preserving stereo',()=>{
+    const input=Array(2048).fill(0);input[10]=255;input[1024+170]=128;
+    const stereo=geometricSpectrum(input,.6,new Float32Array(128),'byte-frequency');
     expect([...stereo.slice(0,64)]).not.toEqual([...stereo.slice(64)]);
-    expect(Math.max(...stereo)).toBeLessThanOrEqual(.6);
+    expect(Math.max(...stereo)).toBeCloseTo(.6);
 });
 test('native cache shares Web Audio jobs, stays bounded and invalidates decoded revisions',async()=>{
     const h=harness();expect(h.source.read('song',0,'frequency')).toBeNull();await h.source.prepare('song',0);
@@ -53,6 +49,7 @@ test('integrated native strings prepare complete compact history and survive raw
 });
 test('native bindings round trip, resolve independently of Analyzer and reject unavailable features',()=>{
     const p=createComposition(track);p.elements=createPresetElements('geometric-0.6',32);
+    for(const e of p.elements)for(const b of e.bindings)if(b.parameterId==='spectrum')b.source={kind:'native',featureId:'frequency'};
     expect(decodeComposition(encodeComposition(p).buffer as ArrayBuffer)).toEqual(p);
     const e=p.elements.find(e=>e.type==='radial-spectrum')!,resolver=new CompositionResolver();
     const pending=resolver.resolve(p,1,()=>null).get(e.id)?.get('spectrum');expect(pending?.state).toBe('loading');

@@ -7,7 +7,7 @@ test('presets expand to editable strict V3 elements with independent identities'
     for(const preset of compositionPresets){
         const p=createComposition(track);p.elements=createPresetElements(preset.id,track.durationSeconds,3);
         expect(p.elements[0]!.layer).toBe(3);expect(compositionIssues(p)).toEqual([]);
-        expect(planCompositionFeatures(p)).toEqual(preset.id==='geometric-0.6'?[]:['amplitudeSpectrum']);
+        expect(planCompositionFeatures(p)).toEqual(preset.id==='geometric-0.6'?['wallpaperEngineSpectrum']:['amplitudeSpectrum']);
         const bytes=encodeComposition(p);expect(decodeComposition(bytes.buffer as ArrayBuffer)).toEqual(p);
         const second=createPresetElements(preset.id,track.durationSeconds,p.elements.length+3);
         expect(new Set([...p.elements,...second].map(e=>e.id)).size).toBe(p.elements.length+second.length);
