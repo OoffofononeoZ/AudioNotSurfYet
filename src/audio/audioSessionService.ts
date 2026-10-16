@@ -902,6 +902,10 @@ export class AudioSessionService {
         const wasCurrent = this.store.currentTrackId === trackId;
         const remaining=this.store.queue.filter(track=>track.id!==trackId);
         const nextId=remaining[Math.min(index,remaining.length-1)]?.id??null;
+        if (wasCurrent && !nextId) {
+            await this.clear();
+            return;
+        }
         if(wasCurrent&&this.trackNavigation&&!await this.trackNavigation.commands.beforeMutation(nextId))return;
         if(this.recordingTransportToken||this.disposed)return;
         this.releaseRuntimeTrack(trackId);

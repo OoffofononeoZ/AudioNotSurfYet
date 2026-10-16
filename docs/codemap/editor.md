@@ -8,7 +8,7 @@
 | --- | --- |
 | [src/editor/editorConfig.ts](../../src/editor/editorConfig.ts) | — |
 | [src/editor/editorDraftRepository.ts](../../src/editor/editorDraftRepository.ts) | [src/editor/projectCodec.ts](../../src/editor/projectCodec.ts)、[src/editor/types.ts](../../src/editor/types.ts) |
-| [src/editor/editorSessionController.ts](../../src/editor/editorSessionController.ts) | [src/analysis/analysisCoordinator.ts](../../src/analysis/analysisCoordinator.ts)、[src/analysis/types.ts](../../src/analysis/types.ts)、[src/audio/audioSessionService.ts](../../src/audio/audioSessionService.ts)、[src/editor/editorDraftRepository.ts](../../src/editor/editorDraftRepository.ts)、[src/editor/fileIO.ts](../../src/editor/fileIO.ts)、[src/editor/overlay.ts](../../src/editor/overlay.ts)、另 4 项，按需核对源码 |
+| [src/editor/editorSessionController.ts](../../src/editor/editorSessionController.ts) | [src/analysis/analysisCoordinator.ts](../../src/analysis/analysisCoordinator.ts)、[src/analysis/types.ts](../../src/analysis/types.ts)、[src/audio/audioSessionService.ts](../../src/audio/audioSessionService.ts)、[src/editor/editorDraftRepository.ts](../../src/editor/editorDraftRepository.ts)、[src/editor/fileIO.ts](../../src/editor/fileIO.ts)、[src/editor/overlay.ts](../../src/editor/overlay.ts)、另 5 项，按需核对源码 |
 | [src/editor/fileIO.ts](../../src/editor/fileIO.ts) | [src/editor/projectCodec.ts](../../src/editor/projectCodec.ts) |
 | [src/editor/markerBlockOperations.ts](../../src/editor/markerBlockOperations.ts) | [src/editor/projectCodec.ts](../../src/editor/projectCodec.ts)、[src/editor/rangeAnnotations.ts](../../src/editor/rangeAnnotations.ts)、[src/editor/tempoMap.ts](../../src/editor/tempoMap.ts)、[src/editor/types.ts](../../src/editor/types.ts) |
 | [src/editor/overlay.ts](../../src/editor/overlay.ts) | [src/analysis/types.ts](../../src/analysis/types.ts) |
@@ -18,4 +18,6 @@
 | [src/editor/routeRecovery.ts](../../src/editor/routeRecovery.ts) | [src/types/audio.ts](../../src/types/audio.ts) |
 | [src/editor/tempoMap.ts](../../src/editor/tempoMap.ts) | [src/editor/editorConfig.ts](../../src/editor/editorConfig.ts)、[src/editor/projectCodec.ts](../../src/editor/projectCodec.ts)、[src/editor/types.ts](../../src/editor/types.ts)、[src/types/session.ts](../../src/types/session.ts) |
 | [src/editor/timeline.ts](../../src/editor/timeline.ts) | [src/analysis/timelineViewport.ts](../../src/analysis/timelineViewport.ts)、[src/types/session.ts](../../src/types/session.ts) |
+| [src/editor/trackChangeApproval.ts](../../src/editor/trackChangeApproval.ts) | [src/editor/types.ts](../../src/editor/types.ts) |
 | [src/editor/types.ts](../../src/editor/types.ts) | [src/analysis/types.ts](../../src/analysis/types.ts)、[src/types/session.ts](../../src/types/session.ts) |
+| [src/editor/useEditorTrackNavigation.ts](../../src/editor/useEditorTrackNavigation.ts) | [src/audio/audioSessionService.ts](../../src/audio/audioSessionService.ts)、[src/editor/editorSessionController.ts](../../src/editor/editorSessionController.ts)、[src/processing/editorSeparationService.ts](../../src/processing/editorSeparationService.ts) |

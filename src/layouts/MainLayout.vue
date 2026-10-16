@@ -5,12 +5,12 @@
         <div class="app-content">
             <router-view />
         </div>
-        <MusicBar v-if="!editorPlaybackActive" :progress="0" />
+        <MusicBar :progress="0" />
     </div>
 </template>
 
 <script setup lang="ts">
-import { computed, onUnmounted, provide, shallowRef, watchEffect } from 'vue';
+import { onUnmounted, provide, watchEffect } from 'vue';
 import AppSidebar from '../components/AppSidebar.vue';
 import AppSettingsButton from '../components/AppSettingsButton.vue';
 import MusicBar from '../components/MusicBar.vue';
@@ -82,15 +82,6 @@ const editorController = new EditorSessionController({
 provide(editorSessionControllerKey, editorController);
 const editorTranscription = new EditorTranscriptionService(audioSession,editorController,editorSeparation,editorProcessingGate);
 provide(editorTranscriptionServiceKey,editorTranscription);
-const editorSnapshot = shallowRef(editorController.getSnapshot());
-const unsubscribeEditor = editorController.subscribe((snapshot) => {
-    editorSnapshot.value = snapshot;
-});
-const editorPlaybackActive = computed(() =>
-    editorSnapshot.value.activeTrackId !== null
-    && ['ready', 'draft-conflict', 'draft-error'].includes(
-        editorSnapshot.value.state,
-    ));
 const audioReady = audioSession.initialize().then((cache) => {
     analysisCoordinator.setRestoredCache(cache);
 });
@@ -193,7 +184,6 @@ if (import.meta.env.DEV) {
 onUnmounted(() => {
     if (previousSidebarWidth) document.documentElement.style.setProperty('--app-sidebar-width', previousSidebarWidth);
     else document.documentElement.style.removeProperty('--app-sidebar-width');
-    unsubscribeEditor();
     if (developmentBridge) {
         delete (
             window as typeof window & {

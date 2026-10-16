@@ -11,7 +11,7 @@ next_action: "Editor四轨接入本轮功能验证已收尾，owner接受当前�
 
 ## System Summary
 
-当前系统是 Vue 3 单页应用。MainLayout 创建并提供唯一的 `AudioSessionService`、`AnalysisCoordinator`、`EditorSessionController` 与 `VisualizerSessionController`；服务通过 `AudioEngine` 解码、播放本地文件，并通过三个独立 IndexedDB repository 保存 Analyzer session、Editor 单草稿与 Visualizer 单草稿。Analyzer、Editor 与 Visualizer 已通过互斥 consumer lease 复用同一 coordinator；Visualizer 只把稳定去重后的 0–4 项送入现有 Worker/cache。File、Blob、handle、PCM、Worker 与音频节点均留在 store 外。MusicBar、Editor 与 Visualizer 读取同一播放快照；有效 Editor track 隐藏 MusicBar，Visualizer 普通工作区保留 MusicBar；两个工作区的 tokenized route lease 临时使用 repeat-one，录制传输租约优先停止循环。
+当前系统是 Vue 3 单页应用。MainLayout 创建并提供唯一的 `AudioSessionService`、`AnalysisCoordinator`、`EditorSessionController` 与 `VisualizerSessionController`；服务通过 `AudioEngine` 解码、播放本地文件，并通过三个独立 IndexedDB repository 保存 Analyzer session、Editor 单草稿与 Visualizer 单草稿。Analyzer、Editor 与 Visualizer 已通过互斥 consumer lease 复用同一 coordinator；Visualizer 只把稳定去重后的 0–4 项送入现有 Worker/cache。File、Blob、handle、PCM、Worker 与音频节点均留在 store 外。MusicBar、Editor 与 Visualizer 读取同一播放快照；Editor 与 Visualizer 普通工作区保留 MusicBar；两个工作区的 tokenized route lease 临时使用 repeat-one，录制传输租约优先停止循环。
 
 DEC-072另由MainLayout提供唯一`EditorSeparationService`，使用同一AudioEngine原始PCM；Editor增加分离工作区和四轨展示/导出。模型与结果索引使用`processing-p1` IndexedDB，原PCM/planar/WAV使用OPFS；最多一个专用分离Worker，播放及analysis所有权不变。
 

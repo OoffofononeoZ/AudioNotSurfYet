@@ -34,6 +34,7 @@ import type {
     EditorTrackValidationContext,
 } from './types';
 import { useEstimatedBpm } from './tempoMap';
+import { EditorTrackChangeApproval } from './trackChangeApproval';
 import {
     editorOverlayFeatureIds,
     resolveEditorOverlayOpen,
@@ -149,6 +150,7 @@ export class EditorSessionController {
     private hasUnexportedChanges = false;
     private overlayVisibilityPersistFailed = false;
     private overlayVisibilityWriteRevision = 0;
+    private readonly trackChangeApproval = new EditorTrackChangeApproval();
 
     constructor(options: EditorSessionControllerOptions) {
         this.audioSession = options.audioSession;
@@ -283,10 +285,26 @@ export class EditorSessionController {
         }
     }
 
-    async enter(trackId: string | null): Promise<void> {
+    async approveTrackChange(targetTrackId: string | null): Promise<symbol | null> {
+        const project = this.snapshot.project;
+        this.trackChangeApproval.clear();
+        if (!project || this.snapshot.state !== 'ready') return null;
+        // Retry a failed draft write before allowing its single slot to be replaced.
+        if (this.snapshot.persistence === 'not-persisted') this.queueSave(project, true);
+        await this.flush();
+        if (this.snapshot.project !== project || this.snapshot.persistence !== 'saved') return null;
+        return this.trackChangeApproval.issue(targetTrackId, project);
+    }
+
+    isTrackChangeApproved(token: symbol | undefined, target: string | null): boolean {
+        return this.trackChangeApproval.valid(token, target, this.snapshot.project);
+    }
+
+    async enter(trackId: string | null, approval?: symbol): Promise<void> {
         const generation = ++this.routeGeneration;
         await this.flush();
         if (generation !== this.routeGeneration || this.disposed) return;
+        const overwriteDraft = this.trackChangeApproval.consume(approval, trackId, this.snapshot.project);
         this.releaseLeases();
         this.overlayVisibilityWriteRevision += 1;
         this.overlayVisibilityPersistFailed = false;
@@ -334,6 +352,7 @@ export class EditorSessionController {
                 return;
             }
             if (generation !== this.routeGeneration || this.disposed) return;
+            if (overwriteDraft) draft = null;
             if (draft && draft.project.track.contentHash !== context.contentHash) {
                 this.publish({
                     ...this.snapshot,
@@ -607,6 +626,7 @@ export class EditorSessionController {
     }
 
     async leave(): Promise<void> {
+        this.trackChangeApproval.clear();
         ++this.routeGeneration;
         await this.flush();
         this.releaseLeases();
