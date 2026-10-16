@@ -41,7 +41,7 @@ export function createPresetElements(id:CompositionPresetId,duration:number,star
     add('solid','纯黑背景',{color:'#000000'});
     add('radial-spectrum','外环 · 双重复频谱',{radius:.25,repeat:2,expansion:1});
     add('radial-spectrum','内环 · 四重复频谱',{radius:.225,repeat:4,expansion:0,thickness:.6});
-    add('orbit-solids','十二频段方块');
+    const bandBlocks=add('orbit-solids','十二频段方块');
     add('arc-lattice','十九条旋转弧');
     add('wireform','中心响应方块');
     add('wireform','中心棱锥',{shape:1,size:.0375,amplitude:0,speed:.9,chromatic:false});
@@ -49,6 +49,6 @@ export function createPresetElements(id:CompositionPresetId,duration:number,star
     add('wireform','主旋转环',{shape:2,size:.050625,amplitude:300/81,speed:1.5,chromatic:false});
     add('wireform','交错环 A',{shape:2,size:.0378125,amplitude:150/60.5,speed:1.5,phase:Math.PI/3,chromatic:false});
     add('wireform','交错环 B',{shape:2,size:.0378125,amplitude:150/60.5,speed:1.5,phase:Math.PI*2/3,chromatic:false});
-    for(const e of result)for(const b of e.bindings)if(b.parameterId==='spectrum')b.source={kind:'analysis',featureId:'wallpaperEngineSpectrum',projection:{kind:'full'}};
+    for(const e of result)for(const b of e.bindings)if(b.parameterId==='spectrum')b.source={kind:'analysis',featureId:e===bandBlocks?'amplitudeSpectrum':'wallpaperEngineSpectrum',projection:{kind:'full'}};
     return result;
 }

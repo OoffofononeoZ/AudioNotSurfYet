@@ -7,11 +7,19 @@ test('presets expand to editable strict V3 elements with independent identities'
     for(const preset of compositionPresets){
         const p=createComposition(track);p.elements=createPresetElements(preset.id,track.durationSeconds,3);
         expect(p.elements[0]!.layer).toBe(3);expect(compositionIssues(p)).toEqual([]);
-        expect(planCompositionFeatures(p)).toEqual(preset.id==='geometric-0.6'?['wallpaperEngineSpectrum']:['amplitudeSpectrum']);
+        expect(planCompositionFeatures(p)).toEqual(preset.id==='geometric-0.6'?['wallpaperEngineSpectrum','amplitudeSpectrum']:['amplitudeSpectrum']);
         const bytes=encodeComposition(p);expect(decodeComposition(bytes.buffer as ArrayBuffer)).toEqual(p);
         const second=createPresetElements(preset.id,track.durationSeconds,p.elements.length+3);
         expect(new Set([...p.elements,...second].map(e=>e.id)).size).toBe(p.elements.length+second.length);
         for(const e of p.elements.filter(e=>e.type!=='solid'))expect(e.bindings.find(b=>b.parameterId==='sensitivity')?.source).toEqual({kind:'constant',value:.6});
+    }
+});
+test('geometric blocks use amplitude spectrum and every other spectrum uses the WE approximation',()=>{
+    const elements=createPresetElements('geometric-0.6',track.durationSeconds);
+    for(const element of elements){
+        const spectrum=element.bindings.find(b=>b.parameterId==='spectrum');
+        if(element.type==='solid'){expect(spectrum).toBeUndefined();continue;}
+        expect(spectrum?.source).toEqual({kind:'analysis',featureId:element.name==='十二频段方块'?'amplitudeSpectrum':'wallpaperEngineSpectrum',projection:{kind:'full'}});
     }
 });
 test('PV chapters cover the entire song and remain editable manual intervals',()=>{
