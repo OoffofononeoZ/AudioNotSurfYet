@@ -52,29 +52,33 @@
                 </section>
             </template>
 
+            <Teleport to="#editor-overlay-slot">
             <div ref="controls" class="overlay-controls" data-testid="editor-overlay-controls">
                 <div class="overlay-toggle-group">
                     <button
                         ref="toggleButton"
                         type="button"
-                        class="overlay-toggle"
+                        class="editor-icon-button overlay-toggle"
+                        :aria-label="overlayOpen ? '关闭叠加层' : '打开叠加层'"
+                        :title="overlayOpen ? '关闭叠加层' : '打开叠加层'"
                         :aria-pressed="overlayOpen"
                         data-testid="editor-overlay-toggle"
                         @click="toggleOverlay"
                     >
-                        叠加层 {{ overlayOpen ? '开' : '关' }}
+                        <EditorIcon name="overlay" />
                     </button>
                     <button
                         type="button"
-                        class="overlay-menu-toggle"
+                        class="editor-icon-button overlay-menu-toggle"
                         aria-label="选择叠加特征"
+                        title="选择叠加特征"
                         aria-haspopup="menu"
                         :aria-expanded="menuOpen"
                         aria-controls="editor-overlay-feature-menu"
                         data-testid="editor-overlay-menu-toggle"
                         @click="toggleMenu"
                     >
-                        <span aria-hidden="true">▾</span>
+                        <EditorIcon name="features" />
                     </button>
                 </div>
 
@@ -101,6 +105,7 @@
                     </button>
                 </div>
             </div>
+            </Teleport>
         </div>
     </Teleport>
 </template>
@@ -119,6 +124,7 @@ import {
     type EditorRenderRequest,
 } from '../analysis/canvasRenderer';
 import { FEATURE_REGISTRY } from '../analysis/featureRegistry';
+import EditorIcon from './EditorIcon.vue';
 import type {
     AnalysisCoordinatorSnapshot,
     AnalysisCursorValueResult,
@@ -577,17 +583,15 @@ onBeforeUnmount(() => {
     transition: top 120ms ease, height 120ms ease;
     pointer-events: none;
 }
-.overlay-controls { position: fixed; z-index: 86; top: var(--app-page-top-space); left: calc(var(--app-sidebar-inset) + 12px); pointer-events: auto; }
-.overlay-toggle-group { display: inline-flex; min-height: 30px; filter: drop-shadow(0 4px 12px rgba(0, 0, 0, .38)); }
-.overlay-toggle,
-.overlay-menu-toggle { min-height: 30px; border: 1px solid var(--overlay-hairline); color: var(--ink); background: var(--overlay-panel); }
-.overlay-toggle { min-width: 96px; border-radius: 4px 0 0 4px; padding: 4px 10px; }
-.overlay-menu-toggle { width: 32px; border-left: 0; border-radius: 0 4px 4px 0; padding: 0; }
-.overlay-toggle[aria-pressed="true"] { color: var(--on-accent); background: var(--accent-deep); }
+.overlay-controls { position: relative; z-index: 96; pointer-events: auto; }
+.overlay-toggle-group { display: flex; gap: 4px; }
 .overlay-feature-menu {
+    position: absolute;
+    top: 100%;
+    right: 0;
     display: grid;
     width: min(272px, calc(100vw - 24px));
-    max-height: min(520px, calc(100dvh - 118px));
+    max-height: min(520px, calc(100dvh - var(--app-player-inset, 80px) - 64px));
     margin-top: 6px;
     overflow-y: auto;
     border: 1px solid var(--overlay-hairline-soft);

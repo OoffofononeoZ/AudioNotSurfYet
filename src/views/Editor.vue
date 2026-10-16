@@ -1,17 +1,8 @@
 <template>
     <main class="editor-page" data-testid="editor-page">
-        <section class="editor-shell">
-            <header v-if="snapshot.state !== 'ready'" class="editor-heading">
-                <div>
-                    <p class="kicker">Editor · 逆向制曲</p>
-                    <h1>逆向制曲工程</h1>
-                    <p>在不修改原音频的前提下，为歌曲建立可恢复、可导出的时间标注工程。</p>
-                </div>
-                <span class="state-badge" :data-state="snapshot.state">
-                    {{ stateLabel }}
-                </span>
-            </header>
-
+        <EditorToolbar :ready="snapshot.state === 'ready'" v-model:workspace="workspace" :persistence="snapshot.persistence" @import="importProject" @export="exportProject" />
+        <p v-if="snapshot.state === 'ready' && snapshot.message" role="alert" class="editor-error">{{ snapshot.message }}</p>
+        <section class="editor-shell" :data-testid="snapshot.state === 'ready' ? 'editor-ready' : undefined">
             <section v-if="snapshot.state === 'empty'" class="editor-state" data-testid="editor-empty">
                 <h2>先选择一首歌曲</h2>
                 <p>可以在底部播放器导入或选择歌曲，再从导航栏 Editor 进入。</p>
@@ -65,64 +56,6 @@
             </section>
 
             <template v-else-if="snapshot.state === 'ready' && snapshot.project">
-                <section
-                    class="editor-workbench-toolbar"
-                    data-testid="editor-ready"
-                    data-editor-major-region="true"
-                >
-                    <div class="editor-toolbar-primary" data-testid="editor-workbench-toolbar-primary">
-                        <div class="toolbar-identity">
-                            <span class="kicker">EDITOR</span>
-                            <h2>{{ snapshot.project.track.title || snapshot.project.track.fileName }}</h2>
-                            <span class="track-meta">
-                                {{ snapshot.project.track.artist || 'unknown' }} ·
-                                {{ formatTime(playback.durationSeconds) }}
-                            </span>
-                        </div>
-                        <p class="persistence-state" :data-state="snapshot.persistence" aria-live="polite">
-                            <span class="toolbar-state">{{ stateLabel }}</span>
-                            <span aria-hidden="true">·</span>
-                            <span>{{ persistenceLabel }}</span>
-                        </p>
-                    </div>
-                    <div class="editor-toolbar-secondary" data-testid="editor-workbench-toolbar-secondary">
-                        <div class="transport" aria-label="Editor 播放控制">
-                            <button type="button" data-testid="editor-playback-toggle" @click="togglePlayback">
-                                {{ ['playing','buffering'].includes(playback.state) ? '暂停' : '播放' }}
-                            </button>
-                            <span class="time-readout" data-testid="editor-current-time">
-                                {{ formatTime(playback.currentTimeSeconds) }} / {{ formatTime(playback.durationSeconds) }}
-                            </span>
-                            <span class="repeat-badge" data-testid="editor-repeat-state">单曲循环</span>
-                        </div>
-                        <div class="project-actions">
-                            <label>
-                                <span>格式</span>
-                                <select v-model="codecId" aria-label="工程格式">
-                                    <option v-for="codec in codecs" :key="codec.id" :value="codec.id">
-                                        {{ codec.label }}
-                                    </option>
-                                </select>
-                            </label>
-                            <button type="button" data-testid="import-editor-project" @click="importProject">
-                                导入工程
-                            </button>
-                            <button type="button" data-testid="export-editor-project" @click="exportProject">
-                                导出工程
-                            </button>
-                        </div>
-                    </div>
-                    <p v-if="snapshot.message" role="alert" class="error-message">{{ snapshot.message }}</p>
-                </section>
-
-                <nav class="editor-workspace-switch" aria-label="Editor工作区">
-                    <div role="tablist" aria-label="工作区选择" @keydown="switchWorkspaceFromKeyboard">
-                        <button id="editor-marking-tab" type="button" role="tab" aria-controls="editor-marking-panel" :aria-selected="workspace === 'marking'" :tabindex="workspace === 'marking' ? 0 : -1" data-testid="editor-marking-tab" @click="workspace = 'marking'">标记编辑</button>
-                        <button id="editor-separation-tab" type="button" role="tab" aria-controls="editor-separation-panel" :aria-selected="workspace === 'separation'" :tabindex="workspace === 'separation' ? 0 : -1" data-testid="editor-separation-tab" @click="workspace = 'separation'">音轨分离 <span class="workspace-new">FT</span></button>
-                        <button id="editor-transcription-tab" type="button" role="tab" aria-controls="editor-transcription-panel" :aria-selected="workspace === 'transcription'" :tabindex="workspace === 'transcription' ? 0 : -1" data-testid="editor-transcription-tab" @click="workspace = 'transcription'">自动标记</button>
-                    </div>
-                    <span v-if="workspace !== 'separation'" class="workspace-context">{{ workspace === 'marking' ? '时间标记 · 节拍地图' : '模型候选 · 检查 · 应用' }}</span>
-                </nav>
                 <div id="editor-marking-panel" v-show="workspace === 'marking'" role="tabpanel" aria-labelledby="editor-marking-tab">
                 <EditorTimeline
                     :project="snapshot.project"
@@ -224,7 +157,8 @@ import {
 } from 'vue-router';
 import { ElMessage } from 'element-plus';
 import { useAudioSessionService } from '../audio/audioSessionService';
-import { EditorFormatCodecRegistry } from '../editor/projectCodec';
+import EditorToolbar from '../components/EditorToolbar.vue';
+import '../editor/controls.css';
 import { resolveEditorUnavailableRecovery } from '../editor/routeRecovery';
 import { useEditorSessionController } from '../editor/editorSessionController';
 import { useAudioSessionStore } from '../stores/audioSessionStore';
@@ -249,14 +183,6 @@ const controller = useEditorSessionController();
 const separationService = useEditorSeparationService();
 const trackNavigation = useEditorTrackNavigation(controller, audioSession, separationService, router);
 const workspace = ref<'marking'|'separation'|'transcription'>('marking');
-function switchWorkspaceFromKeyboard(event: KeyboardEvent): void {
-    if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return;
-    event.preventDefault();
-    const tabs = ['marking','separation','transcription'] as const;
-    workspace.value = event.key === 'Home' ? tabs[0] : event.key === 'End' ? tabs[2]
-        : tabs[(tabs.indexOf(workspace.value)+(event.key === 'ArrowRight' ? 1 : 2))%tabs.length]!;
-    document.getElementById(`editor-${workspace.value}-tab`)?.focus();
-}
 const snapshot = shallowRef(controller.getSnapshot());
 const unsubscribe = controller.subscribe((next) => {
     snapshot.value = next;
@@ -284,9 +210,6 @@ const CURSOR_REQUEST_INTERVAL_MS = 40;
 let cursorTimer: ReturnType<typeof setTimeout> | null = null;
 let lastCursorRequestAt = 0;
 let cursorRequestRevision = 0;
-const codecRegistry = new EditorFormatCodecRegistry();
-const codecs = codecRegistry.list();
-const codecId = ref('json-v1');
 const conflictExported = ref(false);
 const historyBack = window.history.state?.back;
 const returnPath = typeof historyBack === 'string'
@@ -385,28 +308,6 @@ const routeTrackId = () => {
     return typeof value === 'string' && value.length > 0 ? value : null;
 };
 
-const stateLabel = computed(() => ({
-    empty: '等待歌曲',
-    loading: '正在载入',
-    ready: snapshot.value.restoredFromDraft ? '草稿已恢复' : '工程已就绪',
-    'draft-conflict': '需要处理旧草稿',
-    unavailable: '歌曲不可用',
-    'draft-error': '草稿损坏',
-})[snapshot.value.state]);
-
-const persistenceLabel = computed(() => ({
-    clean: '新工程已在内存中建立',
-    saving: '正在保存本地草稿…',
-    saved: '本地草稿已保存',
-    'not-persisted': '草稿未持久化；当前页面内容仍可使用',
-})[snapshot.value.persistence]);
-
-const formatTime = (seconds: number): string => {
-    const safe = Math.max(0, Number.isFinite(seconds) ? seconds : 0);
-    const minutes = Math.floor(safe / 60);
-    return `${minutes}:${Math.floor(safe % 60).toString().padStart(2, '0')}`;
-};
-
 watch(
     () => route.params.trackId,
     () => {
@@ -459,7 +360,7 @@ watch(
     () => requestOverlayCursorValue(playback.value.state !== 'playing'),
 );
 
-const togglePlayback = () => void audioSession.togglePlayback();
+
 
 const editCurrentTrack = async () => {
     const decision = unavailableRecovery.value;
@@ -474,7 +375,7 @@ const editCurrentTrack = async () => {
 
 const importProject = async () => {
     try {
-        const result = await controller.importProject(codecId.value);
+        const result = await controller.importProject('json-v1');
         if (result === 'imported') ElMessage.success('工程已导入并写入本地草稿。');
     } catch (error) {
         ElMessage.error(error instanceof Error ? error.message : '工程导入失败。');
@@ -483,7 +384,7 @@ const importProject = async () => {
 
 const exportProject = async () => {
     try {
-        const result = await controller.exportProject(codecId.value);
+        const result = await controller.exportProject('json-v1');
         if (result === 'saved') ElMessage.success('工程已导出。');
     } catch (error) {
         ElMessage.error(error instanceof Error ? error.message : '工程导出失败。');
@@ -621,37 +522,21 @@ onBeforeUnmount(() => {
     --editor-control-radius: 4px;
     --editor-flyout-radius: 8px;
     min-height: 100dvh;
-    padding: var(--app-page-top-space) 12px calc(var(--app-player-inset, 150px) + 24px);
+    padding: 0 0 var(--app-player-inset, 150px);
     color: var(--ink);
     font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
-    background:
-        radial-gradient(circle at 20% 0%, var(--glow-accent), transparent 35%),
-        var(--canvas);
+    background: var(--canvas);
 }
-
-.editor-shell {
-    width: 100%;
-    margin: 0;
-}
-.editor-workspace-switch{display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--hairline);margin:18px 0 0;gap:10px}
-.editor-workspace-switch>div{display:flex;gap:24px}
-.editor-workspace-switch button{position:relative;border:0;border-radius:0;background:none;height:38px;min-height:38px;padding:0 2px;color:#8caa98;font-size:12px}
-.editor-workspace-switch button:after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:2px;background:#b2e2c7;transform:scaleX(0);transition:transform .2s}
-.editor-workspace-switch button[aria-selected=true]{color:#e0eee5}.editor-workspace-switch button[aria-selected=true]:after{transform:scaleX(1)}
-.workspace-new{display:inline-block;margin-left:6px;font:9px ui-monospace,monospace;letter-spacing:.02em;color:#9fbfae;border:1px solid #34523e;border-radius:3px;padding:1px 4px}
-.workspace-context{font-size:10px;color:#728c7c;padding-right:2px}
-@media(max-width:540px){.workspace-context{display:none}.editor-workspace-switch{margin-top:12px}}
-@media(prefers-reduced-motion:reduce){.editor-workspace-switch button:after{transition:none}}
-
-.editor-heading,
-.editor-state,
-.future-panel > div {
-    border: 1px solid var(--hairline);
-    border-radius: 8px;
-    background: var(--editor-panel);
-    box-shadow: inset 0 0 32px var(--glow-inset);
-}
-
+.editor-shell { width: 100%; min-width: 0; }
+.editor-state { margin: 20px; border: 1px solid var(--hairline); border-radius: 4px; padding: 24px; background: var(--surface-2); }
+.editor-state h2 { margin: 0 0 12px; font-size: 17px; }
+.editor-state p { margin: 8px 0; color: var(--body); line-height: 1.65; font-size: 13px; }
+.button-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+button { box-sizing: border-box; min-height: 30px; border: 1px solid var(--hairline-focus); border-radius: 4px; padding: 4px 10px; color: var(--ink); background: var(--editor-control); }
+button:hover { background: var(--editor-control-hover); }
+button:focus-visible { outline: 2px solid var(--accent-soft); outline-offset: 2px; }
+.editor-error { margin: 0; padding: 6px 14px; border-bottom: 1px solid var(--error-hairline); color: var(--error); font-size: 12px; line-height: 1.5; }
+.editor-state .success-message { color: var(--accent-soft); }
 .editor-leave-dialog {
     box-sizing: border-box;
     width: min(520px, calc(100vw - 32px));
@@ -728,218 +613,4 @@ onBeforeUnmount(() => {
     .editor-leave-dialog { scroll-behavior: auto; }
 }
 
-.editor-heading {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 24px;
-    padding: 28px 64px 28px 28px;
-}
-
-.editor-heading h1,
-.editor-state h2,
-.future-panel h2 {
-    margin: 4px 0 8px;
-    color: var(--ink-strong);
-}
-
-.kicker,
-.state-badge,
-.repeat-badge {
-    color: var(--accent-soft);
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-}
-
-.state-badge,
-.repeat-badge {
-    border: 1px solid var(--hairline);
-    border-radius: var(--editor-control-radius);
-    padding: 4px 8px;
-    white-space: nowrap;
-}
-
-.editor-state {
-    margin-top: 20px;
-    padding: 28px;
-}
-
-.editor-workbench-toolbar {
-    border: 1px solid rgba(155, 184, 170, .16);
-    border-radius: 10px;
-    background: #101b15;
-    overflow: hidden;
-}
-
-.editor-toolbar-primary,
-.editor-toolbar-secondary {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    min-height: 36px;
-    padding: 3px 8px;
-}
-.editor-toolbar-primary { padding-right: 56px; }
-@media (max-width: 767px) {
-    .editor-toolbar-primary { padding-right: 8px; }
-}
-
-.editor-toolbar-secondary {
-    min-height: 40px;
-    border-top: 1px solid rgba(155, 184, 170, .1);
-    background: #0c1711;
-}
-
-.toolbar-identity,
-.transport,
-.project-actions,
-.project-actions label {
-    display: flex;
-    align-items: center;
-    min-width: 0;
-    gap: 10px;
-}
-
-.toolbar-identity h2 {
-    flex: 0 1 auto;
-    overflow: hidden;
-    margin: 0;
-    color: #dce9e0;
-    font-size: 1.05rem;
-    font-weight: 500;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-.toolbar-identity .kicker {
-    color: #88a092;
-    font-size: .6rem;
-    white-space: nowrap;
-}
-
-.track-meta,
-.time-readout,
-.persistence-state {
-    color: var(--body);
-    font-size: .78rem;
-    white-space: nowrap;
-}
-
-.persistence-state {
-    flex: 0 0 auto;
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    margin: 0;
-}
-
-.toolbar-state {
-    color: #a4d5b8;
-}
-
-.editor-toolbar-secondary button,
-.editor-toolbar-secondary select {
-    border-color: #35483b;
-    color: #d2e1d6;
-    background: #14231a;
-    font: inherit;
-    font-size: 12px;
-}
-
-.editor-toolbar-secondary button:hover { background: #22362a; }
-.editor-toolbar-secondary .repeat-badge { border-color: #34483a; color: #a4bcae; font-size: 10px; }
-.time-readout { font-family: ui-monospace, monospace; font-variant-numeric: tabular-nums; }
-
-.button-row,
-.transport,
-.project-actions {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 8px;
-    margin-top: 0;
-}
-
-button,
-select {
-    box-sizing: border-box;
-    height: var(--editor-control-height);
-    min-height: var(--editor-control-height);
-    border: 1px solid var(--hairline-focus);
-    border-radius: var(--editor-control-radius);
-    padding: 4px 10px;
-    line-height: 1;
-    color: var(--ink);
-    background: var(--editor-control);
-}
-
-button:hover {
-    border-color: var(--accent-soft);
-    background: var(--editor-control-hover);
-}
-
-button:focus-visible,
-select:focus-visible {
-    outline: 2px solid var(--accent-soft);
-    outline-offset: 3px;
-}
-
-.project-actions label {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.error-message,
-.success-message {
-    margin-top: 14px;
-}
-
-.error-message {
-    margin: 0;
-    padding: 4px 8px;
-    border-top: 1px solid var(--error-hairline);
-    color: var(--error);
-}
-
-.success-message {
-    color: var(--accent-soft);
-}
-
-.future-panel {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 20px;
-    margin-top: 20px;
-}
-
-.future-panel > div {
-    min-height: 220px;
-    padding: 28px;
-    opacity: 0.72;
-}
-
-@media (max-width: 800px) {
-    .editor-page {
-        padding: 72px 0 calc(var(--app-player-inset, 150px) + 20px);
-    }
-
-    .editor-heading,
-    .future-panel {
-        grid-template-columns: 1fr;
-        flex-direction: column;
-    }
-
-    .editor-toolbar-primary,
-    .editor-toolbar-secondary {
-        align-items: flex-start;
-        flex-wrap: wrap;
-    }
-
-
-    .persistence-state {
-        width: 100%;
-    }
-}
 </style>
