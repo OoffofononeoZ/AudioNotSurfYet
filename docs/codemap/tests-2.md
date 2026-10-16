@@ -6,6 +6,7 @@
 
 | 文件 | 本地静态引用（最多显示 6 项） |
 | --- | --- |
+| [tests/persistence/m6-analysis-cache.test.ts](../../tests/persistence/m6-analysis-cache.test.ts) | [src/analysis/compactCodec.ts](../../src/analysis/compactCodec.ts)、[src/analysis/config.ts](../../src/analysis/config.ts)、[src/analysis/types.ts](../../src/analysis/types.ts)、[src/persistence/sessionRepository.ts](../../src/persistence/sessionRepository.ts)、[src/types/session.ts](../../src/types/session.ts) |
 | [tests/persistence/session-repository.test.ts](../../tests/persistence/session-repository.test.ts) | [src/audio/audioSessionService.ts](../../src/audio/audioSessionService.ts)、[src/persistence/sessionRepository.ts](../../src/persistence/sessionRepository.ts)、[src/types/session.ts](../../src/types/session.ts) |
 | [tests/processing/acceptance.ts](../../tests/processing/acceptance.ts) | — |
 | [tests/processing/artifactOracle.ts](../../tests/processing/artifactOracle.ts) | [src/processing/kernel.ts](../../src/processing/kernel.ts)、[src/processing/storage.ts](../../src/processing/storage.ts) |
@@ -66,6 +67,7 @@
 | [tests/scripts/run-v6-eval.mjs](../../tests/scripts/run-v6-eval.mjs) | — |
 | [tests/scripts/verify-v5-media.mjs](../../tests/scripts/verify-v5-media.mjs) | — |
 | [tests/scripts/verify-v6-media.mjs](../../tests/scripts/verify-v6-media.mjs) | — |
+| [tests/scripts/verify-visualizer-output.mjs](../../tests/scripts/verify-visualizer-output.mjs) | — |
 | [tests/skills/visualizer-scene-generator.test.ts](../../tests/skills/visualizer-scene-generator.test.ts) | — |
 | [tests/support/analyzer-list.ts](../../tests/support/analyzer-list.ts) | [src/analysis/types.ts](../../src/analysis/types.ts) |
 | [tests/support/audio-fixtures.ts](../../tests/support/audio-fixtures.ts) | — |
@@ -104,5 +106,3 @@
 | [tests/unit/audio-fixtures.test.ts](../../tests/unit/audio-fixtures.test.ts) | [tests/support/audio-fixtures.ts](../../tests/support/audio-fixtures.ts) |
 | [tests/unit/indexeddb-harness.test.ts](../../tests/unit/indexeddb-harness.test.ts) | — |
 | [tests/unit/tolerance.test.ts](../../tests/unit/tolerance.test.ts) | [tests/support/tolerance.ts](../../tests/support/tolerance.ts) |
-| [tests/visualizer/analysis-input.test.ts](../../tests/visualizer/analysis-input.test.ts) | [src/analysis/config.ts](../../src/analysis/config.ts)、[src/analysis/frames.ts](../../src/analysis/frames.ts)、[src/analysis/meydaAdapter.ts](../../src/analysis/meydaAdapter.ts)、[src/analysis/types.ts](../../src/analysis/types.ts)、[src/analysis/workerCore.ts](../../src/analysis/workerCore.ts)、[src/visualizer/analysisProjection.ts](../../src/visualizer/analysisProjection.ts)、另 5 项，按需核对源码 |
-| [tests/visualizer/composition-model.test.ts](../../tests/visualizer/composition-model.test.ts) | [src/editor/projectCodec.ts](../../src/editor/projectCodec.ts)、[src/visualizer/compositionCodec.ts](../../src/visualizer/compositionCodec.ts)、[src/visualizer/compositionDraftRepository.ts](../../src/visualizer/compositionDraftRepository.ts)、[src/visualizer/compositionModel.ts](../../src/visualizer/compositionModel.ts)、[src/visualizer/elementRegistry.ts](../../src/visualizer/elementRegistry.ts) |

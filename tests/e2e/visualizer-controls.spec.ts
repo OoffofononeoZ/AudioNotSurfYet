@@ -59,11 +59,12 @@ test('shared selects and number steppers keep keyboard, bounds and recording loc
     await expect.poll(() => fps.evaluate(element => element.matches(':open'))).toBe(true);
     await page.screenshot({ path: 'artifacts/visualizer-composition/output-controls.png' });
     await page.keyboard.press('ArrowDown'); await page.keyboard.press('Enter');
-    await expect(fps).toHaveValue('60');
+    await expect(fps).toHaveValue('30');
+    await expect(fps.locator('option[value="60"]')).toHaveAttribute('disabled', '');
     await expect(fps).toBeFocused();
     await fps.press('Space'); await page.keyboard.press('Escape');
     await expect.poll(() => fps.evaluate(element => element.matches(':open'))).toBe(false);
-    await expect(fps).toHaveValue('60');
+    await expect(fps).toHaveValue('30');
     const seed = page.getByRole('spinbutton', { name: '确定性 Seed', exact: true });
     await seed.fill('4294967295'); await seed.press('Enter');
     await expect(page.getByRole('button', { name: '确定性 Seed增加', exact: true })).toBeDisabled();

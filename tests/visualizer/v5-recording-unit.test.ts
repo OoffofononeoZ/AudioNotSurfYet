@@ -4,6 +4,7 @@ import type { AudioSessionService } from '../../src/audio/audioSessionService';
 import type { PlaybackSnapshot } from '../../src/types/audio';
 import {
     getVisualizerRecordingPreset,
+    getVisualizerRecordingAvailability,
     isReliableVisualizerRecordingPreset,
     selectVisualizerRecordingMimeType,
 } from '../../src/visualizer/recordingPresets';
@@ -238,6 +239,11 @@ describe('Visualizer V5 recording unit contract', () => {
             getVisualizerRecordingPreset('720p', 60),
             'Mozilla/5.0 Edg/151.0.0.0',
         )).toBe(false);
+        for (const resolution of ['720p','1080p'] as const) for (const fps of [30,60] as const) {
+            const availability = getVisualizerRecordingAvailability(resolution,fps);
+            expect(isReliableVisualizerRecordingPreset(getVisualizerRecordingPreset(resolution,fps))).toBe(availability.available);
+            if (!availability.available) expect(availability.reason).toContain('尚未通过录制稳定性验证');
+        }
         expect(isReliableVisualizerRecordingPreset(
             getVisualizerRecordingPreset('1080p', 30),
             'Mozilla/5.0 Edg/151.0.0.0',

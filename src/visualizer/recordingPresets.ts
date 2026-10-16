@@ -64,7 +64,25 @@ export const selectVisualizerRecordingMimeType = (
     isTypeSupported: (mimeType: string) => boolean,
 ): string | null => VISUALIZER_RECORDING_MIME_TYPES.find(isTypeSupported) ?? null;
 
+export interface VisualizerRecordingAvailability {
+    readonly available: boolean;
+    readonly reason: string | null;
+}
+const UNVERIFIED = { available: false, reason: '该档位尚未通过录制稳定性验证。' } as const;
+// Keep the established default. Optional profiles need both browsers to pass,
+// including the first recording in a fresh browser, before being enabled.
+const AVAILABILITY: Record<`${VisualizerResolution}-${VisualizerFrameRate}`, VisualizerRecordingAvailability> = {
+    '720p-30': { available: true, reason: null },
+    '720p-60': UNVERIFIED,
+    '1080p-30': UNVERIFIED,
+    '1080p-60': UNVERIFIED,
+};
+export const getVisualizerRecordingAvailability = (
+    resolution: VisualizerResolution,
+    frameRate: VisualizerFrameRate,
+): VisualizerRecordingAvailability => AVAILABILITY[`${resolution}-${frameRate}`];
+
 export const isReliableVisualizerRecordingPreset = (
     preset: VisualizerRecordingPreset,
     _userAgent = typeof navigator === 'undefined' ? '' : navigator.userAgent,
-): boolean => preset.resolution === '720p' && preset.frameRate === 30;
+): boolean => getVisualizerRecordingAvailability(preset.resolution, preset.frameRate).available;
