@@ -1,3 +1,4 @@
+import { SPECTRUM_REFERENCE } from './analysisSignal';
 const BANDS = 64;
 const STEP = 1 / 60;
 const clamp = (v:number) => Math.max(0,Math.min(1,v));
@@ -6,7 +7,7 @@ export function spectrumBands(values: readonly number[], output: Float32Array = 
         const start=Math.floor(band*values.length/BANDS), end=Math.max(start+1,Math.floor((band+1)*values.length/BANDS));
         let peak=0;
         for (let i=start;i<end;i++) peak=Math.max(peak,values[i] ?? 0);
-        output[band]=clamp(Math.log1p(peak)/Math.log1p(128));
+        output[band]=clamp(Math.log1p(peak)/Math.log1p(SPECTRUM_REFERENCE));
     }
     return output;
 }

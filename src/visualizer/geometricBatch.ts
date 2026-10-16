@@ -1,3 +1,4 @@
+import { SPECTRUM_REFERENCE } from './analysisSignal';
 /** Reusable CPU mesh. Lines are triangles so width is consistent on WebGL implementations. */
 export type Point3 = readonly [number, number, number];
 export type Ink = readonly [number, number, number, number];
@@ -43,7 +44,7 @@ export function geometricSpectrum(input: readonly number[], sensitivity: number,
     for (let i=0;i<bands;i++) {
         const start=Math.floor(i*input.length/bands), end=Math.max(start+1,Math.floor((i+1)*input.length/bands));
         let peak=0; for(let j=start;j<end;j++) peak=Math.max(peak,input[j] ?? 0);
-        output[i]=Math.min(1,Math.log1p(peak)/Math.log1p(128))*sensitivity;
+        output[i]=Math.min(1,Math.log1p(peak)/Math.log1p(SPECTRUM_REFERENCE))*sensitivity;
         output[i+bands]=output[i]!;
     }
     return output;

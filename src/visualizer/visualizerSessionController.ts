@@ -3,6 +3,8 @@ import type { AudioSessionService, RoutePlaybackLease } from '../audio/audioSess
 import type { useAudioSessionStore } from '../stores/audioSessionStore';
 import type { AnalysisConsumerLease, AnalysisCoordinator } from '../analysis/analysisCoordinator';
 import type { AnalysisCoordinatorSnapshot } from '../analysis/types';
+import type { DecodedAudioCopyPort } from '../analysis/pcm';
+import { VisualizerWaveformSource } from './waveformSource';
 import type { EditorDraftRepositoryPort } from '../editor/editorDraftRepository';
 import type { EditorFileGateway } from '../editor/fileIO';
 import { EditorFormatCodecRegistry, validateEditorProjectV1 } from '../editor/projectCodec';
@@ -30,6 +32,7 @@ export interface VisualizerSessionControllerOptions {
     repository:CompositionDraftRepositoryPort;
     fileGateway:VisualizerFileGateway;
     analysisCoordinator?:AnalysisCoordinator;
+    decodedAudio?:DecodedAudioCopyPort;
     editorRepository?:EditorDraftRepositoryPort;
     editorFileGateway?:EditorFileGateway;
     videoGateway?:VisualizerVideoFileGateway;
@@ -48,6 +51,7 @@ export class VisualizerSessionController {
     private analysisLease:AnalysisConsumerLease|null=null;
     private unsubscribeAnalysis:(()=>void)|null=null;
     private resolver=new CompositionResolver();
+    private waveform:VisualizerWaveformSource|null;
     private writer:CompositionDraftWriter;
     private recording:VisualizerRecordingSession;
     private generation=0;
@@ -57,6 +61,7 @@ export class VisualizerSessionController {
     private windowTarget?:Pick<Window,'addEventListener'|'removeEventListener'>;
     private beforeUnload=false;
     constructor(options:VisualizerSessionControllerOptions) {
+        this.waveform=options.decodedAudio?new VisualizerWaveformSource(options.decodedAudio):null;
         this.options=options;this.windowTarget=options.windowTarget ?? (typeof window==='undefined'?undefined:window);
         this.writer=new CompositionDraftWriter(options.repository,(persistence,project,message)=>{
             if(this.snapshot.project?.projectId!==project.projectId || this.disposed)return;
@@ -141,7 +146,9 @@ export class VisualizerSessionController {
     updateOutput(resolution:VisualizerResolution,frameRate:VisualizerFrameRate){const p=this.snapshot.project;if(p)this.updateProject({...p,output:{aspectRatio:'16:9',resolution,frameRate}});}
     resolveValuesAt(time:number):VisualizerResolvedParameterMap {
         const project=this.snapshot.project;if(!project)return new Map();
-        const result=this.resolver.resolve(project,Math.max(0,time),id=>this.analysisLease?.getSeries(id)??null);
+        const trackId=this.snapshot.activeTrackId;
+        const result=this.resolver.resolve(project,Math.max(0,time),id=>this.analysisLease?.getSeries(id)??null,
+            at=>trackId?this.waveform?.read(trackId,at)??null:null);
         const flat=new Map();for(const [id,values]of result)for(const [parameter,value]of values)flat.set(parameterKey(id,parameter),value);return flat;
     }
     async reloadEditorDraft(){this.assertUnlocked();const generation=this.generation,io=++this.editorIoGeneration;const draft=await this.options.editorRepository?.restore();
@@ -186,7 +193,7 @@ export class VisualizerSessionController {
         this.publish({...this.snapshot,bindingRuntime:{...r,bindingRevision:r.bindingRevision+(changed?1:0),readyFeatureIds:ready,analysisState:state,analysisProgress:s.progress,analysisMessage:s.error?.message}});
     }
     async flush(){const success=await this.writer.flush();this.syncBeforeUnload();return success;}
-    private releaseLeases(){this.unsubscribeAnalysis?.();this.unsubscribeAnalysis=null;this.analysisLease?.release();this.analysisLease=null;this.playbackLease?.release();this.playbackLease=null;this.resolver.reset();}
+    private releaseLeases(){this.unsubscribeAnalysis?.();this.unsubscribeAnalysis=null;this.analysisLease?.release();this.analysisLease=null;this.playbackLease?.release();this.playbackLease=null;this.resolver.reset();this.waveform?.reset();}
     async leave(){this.generation++;this.ioGeneration++;this.editorIoGeneration++;if(this.recording.isLocked())await this.recording.cancel();await this.flush();this.releaseLeases();this.publish(initial());}
     async dispose(){await this.leave();await this.recording.dispose();this.disposed=true;this.options.repository.close();this.options.editorRepository?.close();this.windowTarget?.removeEventListener('pagehide',this.handlePageHide);this.windowTarget?.removeEventListener('beforeunload',this.handleBeforeUnload as EventListener);this.listeners.clear();}
     private readonly handlePageHide=()=>{void this.recording.handlePageHide();};

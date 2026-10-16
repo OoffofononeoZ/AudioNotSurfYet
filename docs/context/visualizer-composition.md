@@ -29,6 +29,12 @@ owner 于 2026-10-15 批准本轮实现计划：以原子元素替代完整场�
 
 MusicBar 右侧由 MusicBarActions/MusicBarIcon 展示，六个按钮统一 32px 点击区、20px 图标及 1.6px 描边；窄屏点击区统一 28px。样式切换使用叠放播放器布局图标，播放模式仍使用顺序/单曲/列表/随机图形；旧右侧 sprite 符号移除，导航与 transport 图标继续保留。
 
+## Analyzer 输入
+
+Buffer 的 compact payload 只保存时间桶的最小/最大值，不能作为完整波形向量。当前 V3 从已有 AudioEngine 的 decoded copy port 按绝对歌曲时间读取 1024 点帧，沿用 Analyzer 的 512 hop、average-mono、Hanning 窗和尾部补零；不插值两个波形帧，不新增音频上下文或逐帧 Worker 请求。最多缓存 16 帧，按曲目与 decoded revision 隔离，离页/释放租约时清理；缺少完整波形时明确报错，不退回包络。Inspector 和工程校验的 Buffer Bin/范围上限同步为 1024 点。
+
+完整向量未配置显式数值变换时，先适配为视觉强度，再交给共用渲染器：Buffer 取绝对值、Chroma 使用非负值，二者的单位幅度换算到既有 128 参考；Power Spectrum 开平方还原振幅；MFCC 取绝对值，避免负系数被直接截成零。Amplitude Spectrum、Loudness specific、Complex magnitude 保留既有参考和维度。标量及 mean/max/peak/bin/band 投影保留原始单位和符号，继续由数值映射控制；Complex phase 的时间插值沿圆周最短路径跨越 ±π。V3 序列化字段和 Analyzer 缓存格式不变，旧 V2 的 Buffer 两端点策略只作为历史记录保留。
+
 ## 播放策略
 
 顺序播放为新默认，到队尾停止；列表循环首尾衔接；随机播放每轮避免重复，上一首回到历史。Visualizer 与 Editor 的 route lease 都覆盖为单曲循环，不持久化覆盖值；Visualizer 直接列表选歌先处理工程覆盖；选歌后播放，取消时不切歌、不改工程。
@@ -40,5 +46,7 @@ MusicBar 右侧由 MusicBarActions/MusicBarIcon 展示，六个按钮统一 32px
 阶段一：播放策略、session、工作区租约及录制单元/集成共 25 项通过。阶段二：V3 模型及共享 codec/binding 相邻回归 30 项、类型检查通过。阶段三：组合渲染、V3、既有 host/录制相邻回归 17 项与类型检查通过；GPU shader 和实际媒体将在页面接入后验证。阶段四：类型及 40 项 Visualizer/播放/输入合同专项通过，Chrome/Edge 各 7 项新界面、GPU 像素、全屏与实际录制回归通过。阶段五：Visualizer/播放/恢复/工作区/输入合同 61 项通过，最终 Chrome/Edge 各 12 项组合工作区专项通过（共 24 项），涵盖换歌、旧草稿、非法导入、取消/context recovery/重复进入资源回收、WebM 保存取消与离页保护；应用外壳及 Editor 相邻浏览器检查共 20 项通过。类型检查与 production build 通过；既有 Browserslist 过期及大 chunk 提示保留。
 
 实际媒体：Chrome/Edge 生成的约 3 秒受控 WebM 均为 VP9、1280×720、标称 30 fps，含 48kHz 双声道 Opus；ffprobe 读出有效音视频帧，末帧约为歌曲结尾的 3 秒，包时间严格递增。FFmpeg 按输入 timebase 完整解码通过；这些短片检查不代替长时间帧率/同步预算或 OS 保存人工验收。产物保留于本地忽略目录 artifacts/visualizer-composition/，不提交二进制。
+
+2026-10-16 Analyzer 输入修复：类型检查和 Visualizer/M9/M10 相关 68 项单元及集成通过，其中涵盖全部 21 特征的维度/有限值、Buffer 与 Analyzer 精确帧一致性、尾帧补零、缓存上限、换歌失效和相位环绕。Chrome/Edge 各 1 项专项通过，实际切换七种向量输入，并验证 Buffer 的分段高度、全屏同 Canvas、往返 seek 像素一致和 WebM 生成/保存；专项已加入 test:e2e:visualizer 的两浏览器入口。
 
 本轮不产生正式 canonical/readiness 或发布结论。

@@ -38,9 +38,7 @@ export const analysisVectorLength = (
     if (featureId === 'complexSpectrum') return 1024;
     if (featureId === 'chroma') return 12;
     if (featureId === 'mfcc') return 13;
-    // The persisted display series retains the Buffer frame extrema only.
-    // Visualizer V2 never polls exact-cursor data to reconstruct 1,024 samples.
-    if (featureId === 'buffer') return 2;
+    if (featureId === 'buffer') return 1024;
     return 512;
 };
 
