@@ -18,7 +18,7 @@ const deferred = <T>() => {
     return { promise, resolve, reject };
 };
 
-function harness(restored: RestoredComposition = null, editorRepository?: EditorDraftRepositoryPort) {
+function harness(restored: RestoredComposition = null, editorRepository?: EditorDraftRepositoryPort, audioReady?:Promise<unknown>) {
     const store = useAudioSessionStore();
     for (const [id, hash] of [['first', 'a'], ['second', 'b']]) store.queue.push({
         id: id!, name: `${id}.wav`, trackHash: hash!.repeat(64), mimeType: 'audio/wav',
@@ -40,11 +40,20 @@ function harness(restored: RestoredComposition = null, editorRepository?: Editor
     const fileGateway: VisualizerFileGateway = {
         open: vi.fn(async () => null), save: vi.fn(async () => 'saved' as const),
     };
-    const controller = new VisualizerSessionController({ audioSession, store, repository, fileGateway, editorRepository });
+    const controller = new VisualizerSessionController({ audioSession, store, repository, fileGateway, editorRepository, audioReady });
     return { controller, repository, fileGateway, release, audioSession };
 }
 
 beforeEach(() => setActivePinia(createPinia()));
+
+test('waits for audio restoration and invalidates entry when leaving during that wait',async()=>{
+    const ready=deferred<void>(),h=harness(null,undefined,ready.promise);
+    const entry=h.controller.enter('first');await Promise.resolve();await Promise.resolve();
+    expect(h.audioSession.acquireRoutePlayback).not.toHaveBeenCalled();
+    await h.controller.leave();ready.resolve();await entry;
+    expect(h.audioSession.acquireRoutePlayback).not.toHaveBeenCalled();expect(h.controller.getSnapshot().state).toBe('empty');
+    await h.controller.enter('first');expect(h.controller.getSnapshot().state).toBe('ready');await h.controller.dispose();
+});
 
 test('adds a preset atomically, retains existing elements and persists the expanded composition',async()=>{
     const h=harness();await h.controller.enter('first');const existing=h.controller.addElement('solid');

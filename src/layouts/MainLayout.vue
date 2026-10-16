@@ -91,8 +91,12 @@ const editorPlaybackActive = computed(() =>
     && ['ready', 'draft-conflict', 'draft-error'].includes(
         editorSnapshot.value.state,
     ));
+const audioReady = audioSession.initialize().then((cache) => {
+    analysisCoordinator.setRestoredCache(cache);
+});
 const visualizerController = new VisualizerSessionController({
     audioSession,
+    audioReady,
     analysisCoordinator,
     store: audioSessionStore,
     repository: new CompositionDraftRepository(),
@@ -102,9 +106,6 @@ const visualizerController = new VisualizerSessionController({
     editorFileGateway: new NativeEditorFileGateway(),
 });
 provide(visualizerSessionControllerKey, visualizerController);
-void audioSession.initialize().then((cache) => {
-    analysisCoordinator.setRestoredCache(cache);
-});
 
 interface M6DevelopmentBridge {
     setActiveFeatures(ids: string[]): Promise<void>;

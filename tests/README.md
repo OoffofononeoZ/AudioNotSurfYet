@@ -2,6 +2,8 @@
 
 2026-10-15：当前 Visualizer 为 Project V3 原子组合模型，使用 `npm run test:visualizer` 与 `npm run test:e2e:visualizer`。V1–V6 的结果、fixture、golden 和候选身份保持历史语境；旧模板专用测试及 npm 别名已退役，重放旧 canonical 需使用其原提交。
 
+几何/PV 预设由 `tests/e2e/visualizer-presets.spec.ts` 覆盖：元素库、静音/实际频谱、V3 往返与刷新、四段构图、seek 确定性、全屏、WebM、context recovery 和资源释放。默认使用版本化短 WAV；可显式设置 `VISUALIZER_MUSIC_FILE` 运行额外的本地音乐截图检查，文件仅留本地，不加入 fixture manifest。当前视频按 owner 的居中修改验证水平/垂直中心，保持原几何精度。
+
 ## 环境
 
 - Node.js：24.18.0；npm：11.x。仓库使用 `.nvmrc`、`engines` 和 `package-lock.json` 锁定基线。

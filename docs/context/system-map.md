@@ -15,7 +15,7 @@ next_action: "Editor四轨接入本轮功能验证已收尾，owner接受当前�
 
 DEC-072另由MainLayout提供唯一`EditorSeparationService`，使用同一AudioEngine原始PCM；Editor增加分离工作区和四轨展示/导出。模型与结果索引使用`processing-p1` IndexedDB，原PCM/planar/WAV使用OPFS；最多一个专用分离Worker，播放及analysis所有权不变。
 
-Visualizer 当前实现 Project V3 原子组合、ElementRegistry、同歌单范围转场、目标/整体效果和组合 RendererHost。布局及接口见 [组合工作区](visualizer-composition.md) 与 [Project V3](../architecture/visualizer/project-format-v3.md)；历史 V1–V6 审批及候选身份保持历史语境。
+Visualizer 当前实现 Project V3 原子组合、ElementRegistry、同歌单范围转场、目标/整体效果和组合 RendererHost；元素库预设展开为可独立编辑的普通元素。布局及接口见 [组合工作区](visualizer-composition.md)、[几何与 PV 预设](visualizer-presets.md) 与 [Project V3](../architecture/visualizer/project-format-v3.md)；历史 V1–V6 审批及候选身份保持历史语境。
 
 应用导航占位、窄屏隐藏、歌曲详情与内容宽度分界见 [应用外壳契约](app-shell.md)（DEC-076）；旧 canonical 数值与身份继续绑定历史实现。
 
@@ -49,7 +49,8 @@ showOpenFilePicker → FileSystemFileHandle → File
   ├→ validated EditorProjectV1 snapshot → exact laneId/eventId range transition
   └→ CompositionResolver(60Hz absolute time + checkpoint)
        → ElementRegistry → CompositionScene → three reusable render targets
-       → spectral strings(120Hz integration) / dots / rings / solid + target/composition effects
+       → spectral strings(120Hz integration) / dots / rings / solid / geometric atoms / tunnel / stars
+       → target/composition effects
        → one VisualizerRendererHost + one Canvas/WebGLRenderer/visual RAF
        ├→ captureStream + AudioEngine pre-Gain tap → MediaRecorder → WebM Blob
        └→ native Fullscreen API on existing workspace → same Canvas + video transport

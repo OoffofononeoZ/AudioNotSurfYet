@@ -25,6 +25,7 @@ const initial=():CompositionSessionSnapshot=>({state:'empty',routeTrackId:null,a
     persistence:'clean',restoredFromDraft:false,recording:{status:'idle'},bindingRuntime:{bindingRevision:0,activeFeatureIds:[],readyFeatureIds:[],analysisState:'idle',analysisProgress:0,editorSnapshotSource:'none'}});
 export interface VisualizerSessionControllerOptions {
     audioSession:AudioSessionService;
+    audioReady?:Promise<unknown>;
     store:ReturnType<typeof useAudioSessionStore>;
     repository:CompositionDraftRepositoryPort;
     fileGateway:VisualizerFileGateway;
@@ -101,6 +102,8 @@ export class VisualizerSessionController {
         this.releaseLeases();
         this.publish({...initial(),state:trackId?'loading':'empty',routeTrackId:trackId});if(!trackId)return;
         try {
+            await this.options.audioReady;
+            if(generation!==this.generation||this.disposed)return;
             const lease=await this.options.audioSession.acquireRoutePlayback({consumer:'visualizer',trackId});
             if(generation!==this.generation||this.disposed){lease.release();return;}this.playbackLease=lease;
             this.publish({...this.snapshot,activeTrackId:trackId});
