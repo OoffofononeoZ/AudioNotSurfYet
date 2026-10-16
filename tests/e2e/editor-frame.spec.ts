@@ -128,3 +128,128 @@ test('toolbar tabs and overlay icons preserve keyboard access and menu focus', a
     await page.getByTestId('editor-overlay-toggle').click();
     await expect(page.getByTestId('editor-analysis-overlay-panel')).toHaveCount(0);
 });
+
+test('independent workspaces retain nodes and scroll positions inside the player inset', async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 460 });
+    await openEditor(page);
+    for (let index = 0; index < 14; index++) await page.getByTestId('add-point-lane').click();
+    const positions: Record<string, number> = {};
+    for (const name of ['marking', 'separation', 'transcription']) {
+        await page.getByTestId(`editor-${name}-tab`).click();
+        const panel = page.locator(`#editor-${name}-panel`);
+        positions[name] = await panel.evaluate(element => {
+            element.scrollTop = element.scrollHeight;
+            return element.scrollTop;
+        });
+        expect(positions[name]).toBeGreaterThan(0);
+        await panel.evaluate(element => element.setAttribute('data-retained-node', 'yes'));
+    }
+    for (const name of ['marking', 'separation', 'transcription']) {
+        await page.getByTestId(`editor-${name}-tab`).click();
+        const panel = page.locator(`#editor-${name}-panel`);
+        await expect(panel).toHaveAttribute('data-retained-node', 'yes');
+        expect(await panel.evaluate(element => element.scrollTop)).toBe(positions[name]);
+    }
+    expect(await page.evaluate(() => window.scrollY)).toBe(0);
+    await expect(page.getByTestId('editor-toolbar')).toHaveCSS('height', '64px');
+});
+
+test('responsive shell stays within the viewport for both sidebars and all player styles', async ({ page }, info) => {
+    test.setTimeout(90000);
+    await openEditor(page);
+    const style = page.getByTestId('change-musicbar-style');
+    for (const width of [1024, 1280, 1920, 390]) {
+        await page.setViewportSize({ width, height: 900 });
+        for (const collapsed of [false, true]) {
+            if (width >= 768) {
+                await page.evaluate(async value => {
+                    const url = '/src/stores/configStore.ts';
+                    const { useConfigstore } = await import(url);
+                    useConfigstore().sidebarCollapsed = value;
+                }, collapsed);
+            }
+            for (let mode = 0; mode < 3; mode++) {
+                await expect(style).toBeEnabled();
+                await style.click();
+                await expect(style).toBeEnabled();
+                await expect.poll(() => page.evaluate(() => {
+                    const frame = document.querySelector('[data-testid="editor-page"]')!.getBoundingClientRect();
+                    const player = document.querySelector('#music-bar-container')!.getBoundingClientRect();
+                    return Math.abs(frame.bottom - player.top);
+                })).toBeLessThanOrEqual(1);
+                const metrics = await page.evaluate(() => {
+                    const toolbar = document.querySelector('[data-testid="editor-toolbar"]')!.getBoundingClientRect();
+                    const panel = document.querySelector('#editor-marking-panel')!.getBoundingClientRect();
+                    const settings = document.querySelector('[data-testid="app-settings"]')!;
+                    const r = settings.getBoundingClientRect();
+                    const settingReachable = settings.contains(document.elementFromPoint(r.x + r.width / 2, r.y + r.height / 2));
+                    return { toolbar: toolbar.height, panelTop: panel.top, panelBottom: panel.bottom, frameBottom: document.querySelector('[data-testid="editor-page"]')!.getBoundingClientRect().bottom,
+                        available: document.querySelector('.app-content')!.getBoundingClientRect().width,
+                        scrollHeight: document.documentElement.scrollHeight, height: innerHeight, overflow: document.documentElement.scrollWidth - innerWidth, settingReachable };
+                });
+                expect(metrics.toolbar).toBe(metrics.available < 800 ? 106 : 64);
+                expect(metrics.panelTop).toBe(metrics.toolbar);
+                expect(Math.abs(metrics.panelBottom - metrics.frameBottom)).toBeLessThanOrEqual(1);
+                expect(metrics.scrollHeight).toBe(metrics.height);
+                expect(metrics.overflow).toBeLessThanOrEqual(1);
+                expect(metrics.settingReachable).toBe(true);
+                await expect(page.getByTestId('editor-overlay-menu-toggle')).toBeInViewport();
+                await expect(page.getByTestId('export-editor-project')).toBeInViewport();
+            }
+        }
+        await page.screenshot({ path: info.outputPath(`editor-frame-${width}.png`) });
+    }
+});
+
+test('player style animation keeps the workspace aligned with its measured top edge', async ({ page }) => {
+    await openEditor(page);
+    for (let mode = 0; mode < 3; mode++) {
+        await page.evaluate(() => {
+            const samples: number[] = [];
+            (window as typeof window & { __insetSamples?: number[] }).__insetSamples = samples;
+            const started = performance.now();
+            const sample = () => {
+                const frame = document.querySelector('[data-testid="editor-page"]')!.getBoundingClientRect();
+                const player = document.querySelector('#music-bar-container')!.getBoundingClientRect();
+                samples.push(Math.abs(frame.bottom - player.top));
+                if (performance.now() - started < 400) requestAnimationFrame(() => setTimeout(sample, 0));
+            };
+            requestAnimationFrame(() => setTimeout(sample, 0));
+        });
+        await page.getByTestId('change-musicbar-style').click();
+        await page.waitForTimeout(450);
+        const samples = await page.evaluate(() => (window as typeof window & { __insetSamples?: number[] }).__insetSamples!);
+        expect(samples.length).toBeGreaterThan(5);
+        expect(Math.max(...samples)).toBeLessThanOrEqual(1);
+    }
+});
+
+test('MusicBar supports drag, keyboard seek, volume and restores the preferred mode on leaving', async ({ page }) => {
+    await openEditor(page);
+    const bar = page.locator('#music-bar-container');
+    const progress = page.getByTestId('playback-progress');
+    const bounds = (await progress.boundingBox())!;
+    await page.mouse.move(bounds.x + bounds.width * .2, bounds.y + bounds.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(bounds.x + bounds.width * .7, bounds.y + bounds.height / 2, { steps: 5 });
+    await page.mouse.up();
+    await expect.poll(async () => Number(await bar.getAttribute('data-current-time'))).toBeGreaterThan(2);
+    await expect(bar).toHaveAttribute('data-playback-state', 'paused');
+    await progress.focus();
+    await page.keyboard.press('Home');
+    await expect(bar).toHaveAttribute('data-current-time', '0');
+    await page.keyboard.press('ArrowRight');
+    await expect.poll(async () => Number(await bar.getAttribute('data-current-time'))).toBeGreaterThan(0);
+    await page.getByTestId('volume-control').focus();
+    await page.keyboard.press('Home');
+    await expect(bar).toHaveAttribute('data-volume', '0');
+    await page.keyboard.press('End');
+    await expect(bar).toHaveAttribute('data-volume', '1');
+    await expect(page.getByTestId('playback-mode')).toBeDisabled();
+    await expect(page.getByTestId('playback-mode')).toHaveAttribute('aria-label', /单曲循环/);
+    await page.getByTestId('export-editor-project').click();
+    await expect.poll(async () => (await savedPickerEntries(page)).length).toBe(1);
+    await page.getByRole('link', { name: 'AUDIOSURF' }).click();
+    await expect(page.getByTestId('playback-mode')).toBeEnabled();
+    await expect(page.getByTestId('playback-mode')).toHaveAttribute('aria-label', /顺序/);
+});

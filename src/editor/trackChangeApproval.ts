@@ -22,4 +22,6 @@ export class EditorTrackChangeApproval {
     }
 
     clear(): void { this.pending = null; }
+
+    hasPending(project: EditorProjectV1): boolean { return this.pending?.project === project; }
 }

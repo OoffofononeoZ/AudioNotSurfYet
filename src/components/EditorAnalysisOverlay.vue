@@ -52,7 +52,7 @@
                 </section>
             </template>
 
-            <Teleport to="#editor-overlay-slot">
+            <Teleport to="body">
             <div ref="controls" class="overlay-controls" data-testid="editor-overlay-controls">
                 <div class="overlay-toggle-group">
                     <button
@@ -583,7 +583,7 @@ onBeforeUnmount(() => {
     transition: top 120ms ease, height 120ms ease;
     pointer-events: none;
 }
-.overlay-controls { position: relative; z-index: 96; pointer-events: auto; }
+.overlay-controls { position: fixed; z-index: 86; top: 15px; right: 60px; pointer-events: auto; }
 .overlay-toggle-group { display: flex; gap: 4px; }
 .overlay-feature-menu {
     position: absolute;

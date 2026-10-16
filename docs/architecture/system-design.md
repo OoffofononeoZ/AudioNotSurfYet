@@ -136,7 +136,7 @@ Editor 不改变该拓扑。`EditorSessionController` 通过 tokenized lease 使
 - `AudioSessionService.acquireEditorPlayback(trackId)` 返回带唯一 token 的 lease。lease 激活时，当前 track 自然 ended 由 service 对同一已解码 buffer 调用 `play()`，不执行 `next()` 或重新解码。
 - 只有当前 token 的 `release()` 可以恢复普通 queue-next 策略。旧组件、旧路由或迟到清理不得覆盖新 lease。
 - 侧边栏进入当前歌曲时保留当时播放/暂停状态；播放列表入口由用户手势显式播放目标；刷新或直接打开依照现有 session 恢复规则保持 0 秒 paused，但 repeat-one 策略已准备好。
-- 只有 lease 已绑定有效 track 时隐藏 MusicBar。Editor 内的精简播放控件只调用现有 service；空状态、无效目标或恢复失败时保留 MusicBar。
+- Editor 所有状态均保留 MusicBar，由共享 service 提供歌曲信息和播放控制。有效 track 的 lease 仍强制 repeat-one；框架与换歌保护以[当前 Editor 契约](../context/editor-workspace.md)为准。
 
 ## 7. Analysis Pipeline
 
@@ -423,7 +423,7 @@ M6 只在 `import.meta.env.DEV` 安装无 UI bridge，提供活动特征、cance
 ### Route and runtime ownership
 
 - 目标路由为 `/visualizer/:trackId?`。侧边栏使用当前歌曲进入；未知、不可恢复或内容身份不匹配的目标进入明确空状态，不静默选择队列中的其他歌曲。
-- `AudioSessionService` 把 Editor 专用 lease 泛化为 `RoutePlaybackLease`：Editor 使用 `repeat-one`，Visualizer 使用 `pause-at-end`。只有当前 token 能释放 ended policy；有效 route lease 隐藏 MusicBar，空状态保留 MusicBar。
+- `AudioSessionService` 把 Editor 专用 lease 泛化为 `RoutePlaybackLease`；只有当前 token 能释放 ended policy。当前 Editor/Visualizer 普通工作区保留 MusicBar 并临时使用 repeat-one，Visualizer 录制传输租约另行锁定 ended 行为；历史 pause-at-end 和隐藏策略不再描述当前普通工作区。
 - `AnalysisCoordinator` 的 consumer 联合扩展为 `analyzer | editor | visualizer`。Visualizer 先对所有绑定 FeatureId 去重，只有 0–4 项合法；第五项在调用 Coordinator 前拒绝。分析值从 compact `AnalysisSeries` 按 AudioContext 绝对时间采样，不增加 exact-cursor 轮询或第二个 Worker。
 - V1 实现必须原子迁移 Editor 到通用 lease，不保留长期 `acquireEditorPlayback()` 兼容 adapter。迁移不得改变 Editor repeat-one、刷新暂停或离页恢复 queue-next 的已批准行为。
 

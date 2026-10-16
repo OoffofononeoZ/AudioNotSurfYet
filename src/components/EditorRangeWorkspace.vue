@@ -229,6 +229,7 @@ import {
     onMounted,
     reactive,
     ref,
+    shallowRef,
     watch,
     type ComponentPublicInstance,
 } from 'vue';
@@ -713,7 +714,7 @@ interface SurfacePointerState {
     selectionAtStart?: MarkerBlockSelection;
     targetStartSeconds?: number;
 }
-const surfacePointer = ref<SurfacePointerState | null>(null);
+const surfacePointer = shallowRef<SurfacePointerState | null>(null);
 const quickMenu = ref<{
     surfaceKey: string;
     x: number;

@@ -6,6 +6,8 @@
 
 ## 环境
 
+2026-10-16 Editor 公共框架回归：`npx playwright test tests/e2e/editor-frame.spec.ts tests/e2e/editor-navigation-lifecycle.spec.ts --project=chrome --project=edge --workers=1`。覆盖三种播放器样式、动画留位、页签/菜单焦点、滚动保留、草稿失败、播放列表操作与运行中任务换歌保护；旧 E1–E10 交互专项已按常驻 MusicBar 和内部滚动更新，历史 canonical 身份不改写。布局契约见 [Editor 工作区](../docs/context/editor-workspace.md)。
+
 - Node.js：24.18.0；npm：11.x。仓库使用 `.nvmrc`、`engines` 和 `package-lock.json` 锁定基线。
 - Vitest：4.1.10。官方已发布但当前 npm 镜像尚未提供 Vitest 5，因此使用镜像可获得且仍受支持的 4.1 版本。
 - Playwright Test：1.62.0；必需浏览器为本机稳定版 Google Chrome 与 Microsoft Edge。

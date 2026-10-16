@@ -30,7 +30,7 @@ const openEditor = async (page: Page) => {
     await expect(page.getByTestId('editor-buffer-state')).toHaveText('波形已就绪', {
         timeout: 30_000,
     });
-    await page.getByTestId('editor-playback-toggle').click();
+    await page.getByTestId('toggle-playback').click();
     await page.getByTestId('tempo-bpm-0').fill('240');
     await page.getByTestId('tempo-bpm-0').press('Enter');
     await page.getByTestId('add-point-lane').click();

@@ -46,7 +46,6 @@ export function useEditorTrackNavigation(
                 return;
             }
             approval = token;
-            decision.value = null;
             const resolve = resolveDecision;
             resolveDecision = null;
             resolve?.(true);
@@ -69,6 +68,9 @@ export function useEditorTrackNavigation(
 
     async function prepare(target: string | null): Promise<boolean> {
         if (disposed || preparing) return false;
+        const current = controller.getSnapshot();
+        // Cancelling an entry conflict has already restored this song and its leases.
+        if (target && current.activeTrackId === target && current.state === 'ready') return true;
         preparing = true;
         try {
             if (!controller.isTrackChangeApproved(approval, target)) {
@@ -82,14 +84,18 @@ export function useEditorTrackNavigation(
             // bind(null) aborts and awaits separation plus its transcription consumers.
             await separation.bind(null);
             return !disposed;
-        } finally { preparing = false; }
+        } finally {
+            preparing = false;
+            if (!resolveDecision) decision.value = null;
+        }
     }
 
     async function enter(trackId: string | null) {
         const revision = ++entryRevision;
         const token = approval;
         approval = undefined;
-        await controller.enter(trackId, token);
+        const current = controller.getSnapshot();
+        if (current.state !== 'ready' || current.activeTrackId !== trackId) await controller.enter(trackId, token);
         if (disposed || revision !== entryRevision) return;
         if (trackId && requestedPlayTarget === trackId && controller.getSnapshot().state === 'ready') {
             requestedPlayTarget = null;

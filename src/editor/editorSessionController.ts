@@ -293,6 +293,8 @@ export class EditorSessionController {
         if (this.snapshot.persistence === 'not-persisted') this.queueSave(project, true);
         await this.flush();
         if (this.snapshot.project !== project || this.snapshot.persistence !== 'saved') return null;
+        // Once confirmed, freeze old analysis revisions while processing consumers drain.
+        this.tempoRequestRevision += 1;
         return this.trackChangeApproval.issue(targetTrackId, project);
     }
 
@@ -890,6 +892,7 @@ export class EditorSessionController {
         const segment = project?.tempoMap[0];
         if (
             !project
+            || this.trackChangeApproval.hasPending(project)
             || project.tempoMap.length !== 1
             || segment?.mode !== 'metered'
             || segment.bpm !== null

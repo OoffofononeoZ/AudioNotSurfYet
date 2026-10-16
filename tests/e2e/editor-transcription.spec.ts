@@ -38,7 +38,7 @@ test('Editor real FT → five-role candidates → auxiliary audition → atomic 
     });
     await installFilePickerStub(page);await page.goto('/');await chooseFiles(page,[path.resolve('tests/fixtures/audio/visualizer-v4-cube-swarm-v1.wav')]);
     await expect(page.locator('#music-bar-container')).toHaveAttribute('data-playback-state','playing',{timeout:30000});
-    await page.getByTestId('header-editor-link').click();await expect(page.getByTestId('editor-ready')).toBeVisible({timeout:30000});await page.getByTestId('editor-playback-toggle').click();
+    await page.getByTestId('header-editor-link').click();await expect(page.getByTestId('editor-ready')).toBeVisible({timeout:30000});await page.getByTestId('toggle-playback').click();
     await page.getByTestId('tempo-bpm-0').fill('120');await page.getByTestId('tempo-bpm-0').press('Enter');await page.getByTestId('add-point-lane').click();
     const surface = page.locator('[data-testid^="marker-surface-"]').first(),bounds = await surface.boundingBox();await surface.click({position:{x:bounds!.width*.2,y:bounds!.height/2}});
     await expect(page.locator('[data-testid^="point-marker-"]')).toHaveCount(1);await expect.poll(async() => (await project(page)).lanes[0]?.events.length).toBe(1);
@@ -66,7 +66,7 @@ test('Editor real FT → five-role candidates → auxiliary audition → atomic 
     const defaultPreview = await page.evaluate(async({project,result}) => { const url = '/src/transcription/applyCandidates.ts';const {applyCandidateResult} = await import(url);try { return {project:applyCandidateResult(project,result,{})}; } catch (error) { return {error:String(error)}; } },{project:before,result:record.bundle.result});
     await fs.writeFile(path.join(directory,'default-300ms-preview.json'),JSON.stringify(defaultPreview,null,2));
     await page.getByTestId('transcription-listen-piano').click();await expect.poll(async() => (await playback(page)).audition?.kind).toBe('auxiliary');await expect.poll(async() => (await playback(page)).state).toBe('playing');
-    await page.getByTestId('editor-playback-toggle').click();await expect.poll(async() => (await playback(page)).state).toBe('paused');const position = (await playback(page)).currentTimeSeconds;
+    await page.getByTestId('toggle-playback').click();await expect.poll(async() => (await playback(page)).state).toBe('paused');const position = (await playback(page)).currentTimeSeconds;
     await page.getByRole('button',{name:'返回原曲',exact:true}).filter({visible:true}).click();await expect.poll(async() => (await playback(page)).audition?.kind).toBe('original');expect((await playback(page)).currentTimeSeconds).toBeCloseTo(position,3);
     for (const instrument of ['低音','人声','钢琴','吉他','未知乐器']) { const input = page.getByRole('spinbutton',{name:`${instrument}长短分界毫秒`});await input.fill('10000');await input.blur(); }
     const correction = page.getByRole('combobox',{name:'修正候选乐器'}).first();if (await correction.count()) { await correction.selectOption('unknown'); }

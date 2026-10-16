@@ -46,14 +46,14 @@ test('opens the current track from Header and preserves the E1 draft on refresh'
     await page.getByTestId('header-editor-link').click();
     await expect(page).toHaveURL(new RegExp(`/editor/${trackId}$`));
     await expect(page.getByTestId('editor-ready')).toBeVisible({ timeout: 20_000 });
-    await expect(page.getByTestId('editor-repeat-state')).toHaveText('单曲循环');
-    await expect(musicBar).toHaveCount(0);
+    await expect(page.getByTestId('playback-mode')).toHaveAttribute('aria-label', /单曲循环/);
+    await expect(musicBar).toBeVisible();
 
-    const playbackToggle = page.getByTestId('editor-playback-toggle');
+    const playbackToggle = page.getByTestId('toggle-playback');
     await playbackToggle.click();
-    await expect(playbackToggle).toHaveText('播放');
+    await expect(playbackToggle).toHaveAttribute('aria-label', '播放');
     await playbackToggle.click();
-    await expect(playbackToggle).toHaveText('暂停');
+    await expect(playbackToggle).toHaveAttribute('aria-label', '暂停');
 
     await page.getByTestId('export-editor-project').click();
     await expect.poll(async () => (await savedPickerEntries(page)).length)
@@ -71,10 +71,10 @@ test('opens the current track from Header and preserves the E1 draft on refresh'
 
     await page.reload();
     await expect(page.getByTestId('editor-ready')).toBeVisible({ timeout: 20_000 });
-    await expect(page.getByText('草稿已恢复', { exact: true })).toBeVisible();
-    await expect(page.getByTestId('editor-playback-toggle')).toHaveText('播放');
-    await expect(page.getByTestId('editor-current-time')).toContainText('0:00 /');
-    await expect(musicBar).toHaveCount(0);
+    await expect(page.getByTestId('editor-save-state')).toBeVisible();
+    await expect(page.getByTestId('toggle-playback')).toHaveAttribute('aria-label', '播放');
+    await expect(page.getByTestId('playback-progress')).toHaveAttribute('aria-valuetext', /0:00/);
+    await expect(musicBar).toBeVisible();
     expect(issues).toEqual([]);
 });
 
@@ -97,6 +97,7 @@ test('uses the playlist “去编辑” entry and protects a different-song draf
     await expect(musicBar).toBeVisible();
 
     await page.getByTestId('toggle-queue').click();
+    await expect(page.locator('.music-list-container')).toHaveCSS('transform', 'matrix(1, 0, 0, 1, 0, 0)');
     const items = page.getByTestId('queue-item');
     await expect(items).toHaveCount(2);
     await items.nth(1).hover();
@@ -110,11 +111,11 @@ test('uses the playlist “去编辑” entry and protects a different-song draf
     await expect(page.getByTestId('editor-draft-conflict')).toBeVisible({
         timeout: 20_000,
     });
-    await expect(musicBar).toHaveCount(0);
+    await expect(musicBar).toBeVisible();
     await page.getByTestId('cancel-editor-entry').click();
     await expect(page).toHaveURL(new RegExp(`/editor/${firstTrackId}$`));
     await expect(page.getByTestId('editor-ready')).toBeVisible();
-    await expect(page.getByText('草稿已恢复', { exact: true })).toBeVisible();
+    await expect(page.getByTestId('editor-save-state')).toBeVisible();
     expect(issues).toEqual([]);
 });
 
@@ -131,7 +132,7 @@ test('keeps invalid project import atomic and exposes recovery for an invalid ro
     );
     await page.getByTestId('header-editor-link').click();
     await expect(page.getByTestId('editor-ready')).toBeVisible({ timeout: 20_000 });
-    const title = await page.getByTestId('editor-ready').locator('h2').textContent();
+    const title = await page.locator('#music-info-container').textContent();
 
     const invalidPath = path.join(
         REPOSITORY_ROOT,
@@ -140,7 +141,7 @@ test('keeps invalid project import atomic and exposes recovery for an invalid ro
     await queuePickerFiles(page, [invalidPath]);
     await page.getByTestId('import-editor-project').click();
     await expect(page.locator('.el-message--error')).toBeVisible();
-    await expect(page.getByTestId('editor-ready').locator('h2')).toHaveText(title ?? '');
+    await expect(page.locator('#music-info-container')).toHaveText(title ?? '');
 
     await page.goto('/editor/missing-track');
     await expect(page.getByTestId('editor-unavailable')).toBeVisible();

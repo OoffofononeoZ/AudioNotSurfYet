@@ -12,7 +12,7 @@ owner 于 2026-10-13 批准本页方案并要求实现（DEC-076）。本次是�
 - `--app-sidebar-inset` 为桌面占位、窄屏 0；路由和 Editor 浮层控件共用该边界。Teleport 的 Canvas 和背景仍保持窗口级契约。
 - MusicBar 位于内容宽度容器之外，固定按整个窗口计算：长方形模式横跨 100% 宽度，类椭圆形两侧沿用既有间隙。侧栏展开/收起不改变播放器宽度；播放列表也按窗口边界裁切。
 - 播放器及其弹层位于普通应用 UI 最上层（100/110），覆盖左侧导航（40）、遮罩（39）和窗口级分析浮层（80–86）。窄屏导航不进入浏览器 modal top layer，避免阻断播放器；业务模态确认仍由其原生 dialog 管理。
-- Analyzer 页面顶部保留64px安全留白，内容和手柄位于Settings与MusicBar之间；其他页面保留既有顶部布局。
+- Analyzer 页面顶部保留64px安全留白，内容和手柄位于Settings与MusicBar之间；Editor 使用[固定顶栏和独立滚动工作区](editor-workspace.md)，不再增加页面顶部留白。
 - `.app-content` 是命名为 `app-workspace` 的宽度容器。Visualizer 在可用内容宽度 `<1280px` 时使用既有互斥抽屉，其他情况三栏；支持的 `>=1024px` 浏览器视口仍保持单个 `100dvh`，`<1024px` 仍不承诺移动端工作区支持。
 - Analyzer 始终单列，顶部常驻区支持手柄调整高度，原列表独立滚动；见 [Analyzer 列表契约](analyzer-list.md)。侧栏变化重测说明和图表，不重建未转移的活动行或分析消费者。
 - 修改的可见滚动容器使用 `.app-scrollbar`。Sidebar media listener、导航订阅、背景 ResizeObserver 及既有资源按所属模块释放。

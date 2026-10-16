@@ -32,7 +32,7 @@ const openEditor = async (page: Page) => {
     await expect(page.getByTestId('editor-buffer-state')).toHaveText('波形已就绪', {
         timeout: 30_000,
     });
-    await page.getByTestId('editor-playback-toggle').click();
+    await page.getByTestId('toggle-playback').click();
     await page.getByTestId('tempo-bpm-0').fill('100');
     await page.getByTestId('tempo-bpm-0').press('Enter');
 };
@@ -195,10 +195,11 @@ test('shares waveform geometry and switches tempo content without wrapping', asy
     )).toBe('rgb(101, 255, 169)');
     await page.getByTestId('editor-timeline').focus();
 
-    await seekAndAddBoundary(page, 0.25);
+    // Leave enough pixels for summary content within the sidebar-adjusted 1024px shell.
+    await seekAndAddBoundary(page, 0.35);
     await page.setViewportSize({ width: 1024, height: 900 });
     await expect(firstSegment).toHaveAttribute('data-presentation', 'summary');
-    await seekAndAddBoundary(page, 0.28);
+    await seekAndAddBoundary(page, 0.38);
     await expect(page.locator('[data-presentation="hidden"]')).toHaveCount(1);
 
     const geometry = await page.evaluate(() => {

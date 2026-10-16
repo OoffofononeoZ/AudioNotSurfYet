@@ -32,7 +32,7 @@ function switchFromKeyboard(event: KeyboardEvent) {
 }
 </script>
 <style scoped>
-.editor-toolbar { position: sticky; top: 0; z-index: 90; flex: none; display: grid; grid-template-columns: minmax(72px, 1fr) auto minmax(150px, 1fr); align-items: center; column-gap: 12px; height: 64px; min-height: 64px; padding: 0 60px 0 14px; border-bottom: 1px solid var(--divider); background: var(--canvas); }
+.editor-toolbar { position: sticky; top: 0; z-index: var(--layer-sticky); flex: none; display: grid; grid-template-columns: minmax(72px, 1fr) auto minmax(150px, 1fr); align-items: center; column-gap: 12px; height: 64px; min-height: 64px; padding: 0 60px 0 14px; border-bottom: 1px solid var(--divider); background: var(--canvas); }
 .project-actions, .toolbar-status, .editor-tabs { display: flex; align-items: center; gap: 4px; }
 .toolbar-status { justify-content: flex-end; gap: 12px; }
 .persistence-state { white-space: nowrap; font-size: 11px; color: var(--mute); }

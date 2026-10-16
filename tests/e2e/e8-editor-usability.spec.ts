@@ -287,8 +287,8 @@ test('automatically recovers the exact route after the same file is reselected',
         timeout: 30_000,
     });
     await expect(page).toHaveURL(new RegExp(`/editor/${targetTrackId}$`));
-    await expect(page.getByTestId('editor-playback-toggle')).toHaveText('播放');
-    await expect(page.locator('#music-bar-container')).toHaveCount(0);
+    await expect(page.getByTestId('toggle-playback')).toHaveAttribute('aria-label', '播放');
+    await expect(page.locator('#music-bar-container')).toBeVisible();
     expect(issues).toEqual([]);
 });
 
@@ -320,7 +320,7 @@ test('offers but never silently switches to a different paused song', async ({ p
     await expect(page.getByTestId('editor-ready')).toBeVisible({
         timeout: 30_000,
     });
-    await expect(page.getByTestId('editor-playback-toggle')).toHaveText('播放');
-    await expect(page.locator('#music-bar-container')).toHaveCount(0);
+    await expect(page.getByTestId('toggle-playback')).toHaveAttribute('aria-label', '播放');
+    await expect(page.locator('#music-bar-container')).toBeVisible();
     expect(issues).toEqual([]);
 });

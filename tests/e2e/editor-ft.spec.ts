@@ -19,7 +19,7 @@ async function openEditor(page:Page){
     await installFilePickerStub(page);await page.goto('/');await chooseFiles(page,[fixture]);
     await expect(page.locator('#music-bar-container')).toHaveAttribute('data-playback-state','playing',{timeout:30_000});
     await page.getByTestId('header-editor-link').click();await expect(page.getByTestId('editor-ready')).toBeVisible({timeout:30_000});
-    await page.getByTestId('editor-playback-toggle').click();await page.getByTestId('editor-separation-tab').click();
+    await page.getByTestId('toggle-playback').click();await page.getByTestId('editor-separation-tab').click();
     await expect(page.getByTestId('editor-separation')).toHaveAttribute('data-state','idle',{timeout:30_000});
 }
 async function localModels(page:Page){
@@ -83,13 +83,18 @@ test('Editor runs four original FT models, exports exact WAVs, restores cache an
         expect(firstNonFinite).toBe(-1);expect(nonzero).toBeGreaterThan(0);
     }
     const slider=page.getByRole('slider',{name:'人声概览，跳转当前试听'});await slider.focus();await slider.press('Home');await slider.press('ArrowRight');
-    await expect(page.getByTestId('editor-current-time')).toContainText('0:01');
+    await expect(page.getByTestId('playback-progress')).toHaveAttribute('aria-valuetext', /0:01/);
     await slider.blur();
     for(const role of ['drums','bass','other','vocals'])await expect(page.getByTestId(`editor-mute-${role}`)).toHaveAttribute('aria-pressed','false');
     await page.getByTestId('editor-stem-play').click();
     await expect.poll(async()=>(await sharedPlayback(page)).audition?.kind).toBe('ft');
     await expect.poll(async()=>(await sharedPlayback(page)).state).toBe('playing');
     await expect.poll(async()=>(await sharedPlayback(page)).energy).toBeGreaterThan(0);
+    await page.getByTestId('toggle-playback').click();
+    await expect.poll(async()=>(await sharedPlayback(page)).state).toBe('paused');
+    await expect(page.locator('#music-bar-container')).toHaveAttribute('data-audition-source','ft');
+    await page.getByTestId('toggle-playback').click();
+    await expect.poll(async()=>(await sharedPlayback(page)).state).toBe('playing');
     for(const role of ['drums','bass','other','vocals'])await page.getByTestId(`editor-mute-${role}`).click();
     await expect.poll(async()=>(await sharedPlayback(page)).energy).toBe(0);
     await expect.poll(async()=>(await sharedPlayback(page)).state).toBe('playing');
@@ -141,7 +146,7 @@ test('missing GPU fails explicitly and preserves Editor playback and marking',as
     test.setTimeout(90_000);await page.addInitScript(()=>Object.defineProperty(navigator,'gpu',{value:undefined}));await openEditor(page);
     await page.getByTestId('editor-separate-start').click();await expect(page.getByTestId('editor-separation')).toHaveAttribute('data-state','error',{timeout:30_000});
     await expect(page.getByTestId('editor-separation-message')).toContainText('WebGPU');await page.getByTestId('editor-marking-tab').click();
-    await expect(page.getByTestId('editor-timeline')).toBeVisible();await page.getByTestId('editor-playback-toggle').click();await expect(page.getByTestId('editor-playback-toggle')).toHaveText('暂停');
+    await expect(page.getByTestId('editor-timeline')).toBeVisible();await page.getByTestId('toggle-playback').click();await expect(page.getByTestId('toggle-playback')).toHaveAttribute('aria-label', '暂停');
 });
 test('download cancellation and retry failure leave no partial result and allow navigation',async({page})=>{
     test.setTimeout(90_000);await page.route('https://huggingface.co/StemSplitio/**',async route=>{await new Promise(resolve=>setTimeout(resolve,15_000));await route.fulfill({status:503,headers:{'access-control-allow-origin':'*'},body:'offline'}).catch(()=>{});});

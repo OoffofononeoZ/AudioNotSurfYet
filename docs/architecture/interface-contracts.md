@@ -579,7 +579,7 @@ Invariants:
 - 当前 lease 将 ended policy 改为 repeat-one；同一个已解码 buffer 从 0 再次 `play()`，不调用 `next()`、不重新解码。
 - 只有当前 token 的 `release()` 生效；重复 release 幂等，旧 token 不改变当前策略。
 - lease 是 runtime 状态，不进入 `PersistedSessionV1`。刷新依照现有规则恢复 0 秒 paused，再由 Editor route 获取新 lease。
-- 只有有效 track 的 lease 存在时隐藏 MusicBar；`empty`/不可用状态保留 MusicBar，Editor 页内控件不创建隐藏媒体元素。
+- Editor 所有状态均保留 MusicBar，歌曲信息与通用 transport 由其提供；有效 track 的 lease 继续强制 repeat-one。公共顶栏、独立滚动和换歌保护见[当前 Editor 框架](../context/editor-workspace.md)，不创建隐藏媒体元素。
 
 ## Analysis Consumer Lease and Tempo Messages
 
