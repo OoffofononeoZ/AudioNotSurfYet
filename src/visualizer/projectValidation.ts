@@ -233,9 +233,7 @@ const projectionLength = (featureId: FeatureId, component: VisualizerAnalysisCom
     if (definition.outputShape === 'category-vector') {
         return featureId === 'mfcc' ? 13 : 12;
     }
-    // Buffer's compact display payload exposes the [min, max] envelope pair.
-    // Raw 1,024-sample cursor frames remain Analyzer-only exact data.
-    if (definition.outputShape === 'waveform') return 2;
+    if (definition.outputShape === 'waveform') return 1024;
     return invalid(`${featureId} has an unsupported projection shape.`);
 };
 

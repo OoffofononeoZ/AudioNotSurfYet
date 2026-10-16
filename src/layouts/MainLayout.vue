@@ -96,6 +96,7 @@ const audioReady = audioSession.initialize().then((cache) => {
 });
 const visualizerController = new VisualizerSessionController({
     audioSession,
+    decodedAudio: audioEngine,
     audioReady,
     analysisCoordinator,
     store: audioSessionStore,

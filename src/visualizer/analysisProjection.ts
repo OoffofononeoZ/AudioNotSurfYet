@@ -1,4 +1,5 @@
 import type { AnalysisSeries } from '../analysis/types';
+import { WAVEFORM_FRAME_SIZE } from './waveformSource';
 import type {
     VisualizerAnalysisComponent,
     VisualizerAnalysisProjectionV1,
@@ -47,10 +48,7 @@ const frameVector = (
     }
     if (payload.kind === 'waveform-envelope') {
         if (component !== 'default') throw new Error('Buffer 只支持 default 分量。');
-        return [
-            finite((payload.min[index] ?? 0) * payload.scale),
-            finite((payload.max[index] ?? 0) * payload.scale),
-        ];
+        throw new Error('Buffer 包络不包含完整波形帧。');
     }
     if (payload.kind === 'loudness') {
         if (component !== 'specific') throw new Error('Loudness specific 才是向量。');
@@ -84,7 +82,13 @@ const sampleRaw = (
     series: AnalysisSeries,
     component: VisualizerAnalysisComponent,
     timeSeconds: number,
+    waveform?: readonly number[] | null,
 ): VisualizerProjectedValue => {
+    if (series.featureId === 'buffer') {
+        if (component !== 'default') throw new Error('Buffer 只支持 default 分量。');
+        if (!waveform || waveform.length !== WAVEFORM_FRAME_SIZE) throw new Error('完整波形帧尚未就绪。');
+        return Array.from(waveform, finite);
+    }
     const { left, right, ratio } = sampleIndexes(series, timeSeconds);
     if (series.payload.kind === 'scalar-f32') {
         if (component !== 'default') throw new Error('标量只支持 default 分量。');
@@ -106,8 +110,15 @@ const sampleRaw = (
     if (leftVector.length !== rightVector.length) {
         throw new Error('分析向量维度发生变化。');
     }
-    return leftVector.map((value, index) =>
-        interpolate(value, rightVector[index] ?? value, ratio));
+    return leftVector.map((value, index) => {
+        const next = rightVector[index] ?? value;
+        if (component === 'phase') {
+            const delta = Math.atan2(Math.sin(next - value), Math.cos(next - value));
+            const phase = value + delta * ratio;
+            return finite(Math.atan2(Math.sin(phase), Math.cos(phase)));
+        }
+        return interpolate(value, next, ratio);
+    });
 };
 
 export const projectAnalysisSeries = (
@@ -115,8 +126,9 @@ export const projectAnalysisSeries = (
     component: VisualizerAnalysisComponent,
     projection: VisualizerAnalysisProjectionV1,
     timeSeconds: number,
+    waveform?: readonly number[] | null,
 ): VisualizerProjectedValue => {
-    const raw = sampleRaw(series, component, timeSeconds);
+    const raw = sampleRaw(series, component, timeSeconds, waveform);
     if (typeof raw === 'number') {
         if (projection.kind !== 'scalar') throw new Error('标量 projection 不匹配。');
         return raw;
@@ -125,7 +137,7 @@ export const projectAnalysisSeries = (
     if (raw.length === 0) throw new Error('分析向量为空。');
     if (projection.kind === 'bin') {
         const value = raw[projection.index];
-        if (value === undefined) throw new Error('分析 bin 超出 compact 数据范围。');
+        if (value === undefined) throw new Error('分析 bin 超出向量范围。');
         return finite(value);
     }
     const values = projection.kind === 'band'
