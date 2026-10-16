@@ -1,6 +1,7 @@
 import { elementNumber, elementValue } from './compositionEffects';
 import { GeometricBatch, geometricSpectrum, randomUnit, rotate, type Point3, type Ink } from './geometricBatch';
 import { buildLightTunnel, buildStarfield } from './cinematicElements';
+import { createRadialSpectrumSampler } from './radialSpectrum';
 import type { VisualizerElement } from './compositionTypes';
 import type { VisualizerResolvedParameterMap } from './rendererTypes';
 
@@ -59,9 +60,10 @@ export function buildGeometricElement(batch:GeometricBatch,e:VisualizerElement,v
         buildStarfield(batch,n,time,seed,peak,white,cx,cy,aspect);
     } else if(e.type==='radial-spectrum') {
         const repeat=n('repeat',2), count=levels.length*repeat, ink=colorful&&peak>=.15?accent:white;
+        const sample=createRadialSpectrumSampler(levels);
         let previous:Point3|null=null;
         for(let i=0;i<=count;i++) {
-            const a=i/count*TAU, value=levels[i%levels.length] ?? 0;
+            const a=i/count*TAU, value=sample(i);
             const r=n('radius',.25)*(1+peak*n('expansion',1))*(1+value*n('amplitude',1));
             const current=point(Math.cos(a)*r,Math.sin(a)*r);
             if(previous)line(previous,current,ink); previous=current;
