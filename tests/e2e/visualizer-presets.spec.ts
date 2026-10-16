@@ -62,7 +62,7 @@ test('market applies the geometric preset, edits it, restores it and renders sil
     p.seed=314159;for(const e of p.elements)for(const b of e.bindings)if(b.parameterId==='spectrum')b.source={kind:'constant',value:[]};
     await importProject(page,p);await page.waitForTimeout(150);await canvas.screenshot({path:`test-results/geometric-idle-${info.project.name}.png`});
     const idle=await canvas.screenshot();
-    for(const e of p.elements)for(const b of e.bindings)if(b.parameterId==='spectrum')b.source={kind:'constant',value:Array.from({length:512},(_,i)=>i%41<2?50:Math.max(0,Math.sin(i*.06))*4)};
+    for(const e of p.elements)for(const b of e.bindings)if(b.parameterId==='spectrum')b.source={kind:'constant',value:Array.from({length:512},(_,i)=>i>=320?0:i%41<2?50:Math.max(0,Math.sin(i*.06))*4)};
     await importProject(page,p);await page.waitForTimeout(150);const active=await canvas.screenshot({path:`test-results/geometric-active-${info.project.name}.png`});expect(active.equals(idle)).toBe(false);
     expect(await canvas.getAttribute('data-renderer-host-id')).toBe(host);
     await page.reload();await expect(page.getByTestId('visualizer-ready')).toBeVisible();await expect(page.locator('.viz-element-row')).toHaveCount(11);
@@ -128,6 +128,13 @@ test('optional local music visual review captures both presets at two song secti
         await page.getByTestId('visualizer-preview-frame').hover();await page.getByTestId('visualizer-fullscreen-toggle').click();const seek=page.getByTestId('visualizer-seek');
         for(const portion of [.2,.65]){await seek.fill(String(Number((empty.track.durationSeconds*portion).toFixed(3))));await seek.dispatchEvent('input');await page.waitForTimeout(150);if(id==='geometric-0.6')await expect(page.getByTestId('visualizer-preview-canvas')).toHaveAttribute('data-native-input-state','ready');await page.getByTestId('visualizer-preview-canvas').screenshot({path:`test-results/music-${id}-${portion}-${info.project.name}.png`});}
         await page.keyboard.press('Escape');
+        if(id==='geometric-0.6') {
+            const analyzer=await exported(page);for(const e of analyzer.elements)for(const b of e.bindings)if(b.parameterId==='spectrum')b.source={kind:'analysis',featureId:'amplitudeSpectrum',projection:{kind:'full'}};
+            await importProject(page,analyzer);await expect(page.locator('.viz-status-lines')).toContainText('已就绪',{timeout:60000});
+            await page.getByTestId('visualizer-preview-frame').hover();await page.getByTestId('visualizer-fullscreen-toggle').click();
+            for(const portion of [.2,.65]){await seek.fill(String(Number((empty.track.durationSeconds*portion).toFixed(3))));await seek.dispatchEvent('input');await page.waitForTimeout(150);await page.getByTestId('visualizer-preview-canvas').screenshot({path:`test-results/music-geometric-analyzer-${portion}-${info.project.name}.png`});}
+            await page.keyboard.press('Escape');
+        }
     }
     expect(errors).toEqual([]);
 });
