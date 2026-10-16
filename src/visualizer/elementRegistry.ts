@@ -20,7 +20,7 @@ const dynamic = (p: SceneParameterDescriptor): SceneParameterDescriptor => ({ ..
 });
 const signal: SceneParameterDescriptor = {
     id: 'spectrum', label: '频谱输入', valueKind: 'vector', defaultValue: [],
-    allowedSourceKinds: ['analysis', 'constant'], allowEmptyVector: true,
+    allowedSourceKinds: ['analysis', 'constant', 'native'], allowEmptyVector: true,
     vectorElementRange: { min: 0, max: Number.MAX_VALUE },
     allowedAnalysisComponents: ['default', 'specific', 'magnitude'], allowedAnalysisProjections: ['full'],
     defaultBinding: { source: { kind: 'analysis', featureId: 'amplitudeSpectrum', projection: { kind: 'full' } } },

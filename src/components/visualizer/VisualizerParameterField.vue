@@ -7,6 +7,7 @@
             <input v-else-if="parameter.valueKind==='boolean'" type="checkbox" :checked="binding.source.value===true" :aria-label="parameter.label" @change="constantChanged"/>
             <span v-else class="viz-muted">静态</span>
         </label>
+        <label v-if="native" class="viz-field"><span>特征</span><AppSelect :model-value="native.featureId" :label="parameter.label+'原生特征'" :options="nativeInputFeatures" :disabled="disabled" @change="nativeFeatureChanged"/></label>
         <template v-if="analysis">
             <label class="viz-field"><span>特征</span><AppSelect :model-value="analysis.featureId" :label="parameter.label+'分析特征'" :options="featureOptions" :disabled="disabled" @change="featureChanged"/></label>
             <label v-if="components.length>1" class="viz-field"><span>分量</span><AppSelect :model-value="analysis.component??'default'" :label="parameter.label+'分量'" :options="componentOptions" :disabled="disabled" @change="componentChanged"/></label>
@@ -27,9 +28,11 @@ import type { SceneParameterDescriptor } from '../../visualizer/parameterDescrip
 import type { ElementBinding,VisualizerProjectV3 } from '../../visualizer/compositionTypes';
 import type { VisualizerAnalysisComponent,VisualizerAnalysisProjectionV1,VisualizerNumericTransformV1 } from '../../visualizer/types';
 import { analysisComponentsForFeature,analysisVectorLength,compatibleAnalysisFeatures,compatibleAnalysisProjections,createDefaultAnalysisBinding,createProjection,defaultNumericTransform } from '../../visualizer/bindingDefaults';
+import { nativeInputFeatures,type NativeInputFeature } from '../../visualizer/nativeAudioAnalysis';
 const props=defineProps<{parameter:SceneParameterDescriptor;binding:ElementBinding;project:VisualizerProjectV3;elementId:string;disabled?:boolean}>();const emit=defineEmits<{change:[binding:ElementBinding]}>();
 const dynamic=computed(()=>props.parameter.allowedSourceKinds.includes('analysis'));
 const analysis=computed(()=>props.binding.source.kind==='analysis'?props.binding.source:null);
+const native=computed(()=>props.binding.source.kind==='native'?props.binding.source:null);
 const features=computed(()=>compatibleAnalysisFeatures(props.parameter));
 const components=computed(()=>analysis.value?analysisComponentsForFeature(analysis.value.featureId).filter(c=>props.parameter.allowedAnalysisComponents?.includes(c)):[]);
 const projections=computed(()=>analysis.value?compatibleAnalysisProjections(props.parameter,analysis.value.featureId,analysis.value.component??'default'):[]);
@@ -37,13 +40,14 @@ const vectorLength=computed(()=>analysis.value?analysisVectorLength(analysis.val
 const transform=computed(()=>props.binding.transform??defaultNumericTransform(props.parameter,analysis.value?.featureId));
 const transformFields=[{key:'inputMin',label:'输入下限'},{key:'inputMax',label:'输入上限'},{key:'outputMin',label:'输出下限'},{key:'outputMax',label:'输出上限'},{key:'attackSeconds',label:'起音（秒）'},{key:'releaseSeconds',label:'释放（秒）'}] as const;
 const projectionLabels:Record<string,string>={scalar:'标量',full:'完整向量',mean:'平均值',max:'最大值',peak:'峰值位置',bin:'单个 Bin',band:'频段平均'};
-const sourceOptions=computed(()=>[{value:'constant',label:'固定值'},{value:'analysis',label:'Analyzer'},{value:'stem-analysis',label:'分轨 Analyzer（未接入）',disabled:true},...(props.binding.source.kind==='unbound'?[{value:'unbound',label:'未配置'}]:[])]);
+const sourceOptions=computed(()=>[{value:'constant',label:'固定值'},{value:'analysis',label:'Analyzer'},...(props.parameter.allowedSourceKinds.includes('native')?[{value:'native',label:'原生输入'}]:[]),{value:'stem-analysis',label:'分轨 Analyzer（未接入）',disabled:true},...(props.binding.source.kind==='unbound'?[{value:'unbound',label:'未配置'}]:[])]);
 const featureOptions=computed(()=>features.value.map(id=>({value:id,label:FEATURE_REGISTRY[id].label,disabled:featureDisabled(id)})));
 const componentOptions=computed(()=>components.value.map(value=>({value,label:value})));
 const projectionOptions=computed(()=>projections.value.map(value=>({value,label:projectionLabels[value]??value})));
 function featureDisabled(id:FeatureId){const ids=new Set<FeatureId>();for(const e of props.project.elements)for(const b of e.bindings)if(!(e.id===props.elementId&&b.parameterId===props.parameter.id)&&b.source.kind==='analysis')ids.add(b.source.featureId);ids.add(id);return ids.size>4;}
 function defaultBinding(id:FeatureId){return createDefaultAnalysisBinding(props.parameter,id) as ElementBinding;}
-function sourceChanged(value:string|number){if(value==='constant')emit('change',{parameterId:props.parameter.id,source:{kind:'constant',value:structuredClone(props.parameter.defaultValue) as number|string|boolean|number[]}});else {const feature=features.value.includes('energy')?'energy':features.value[0];if(feature)emit('change',props.parameter.defaultBinding?{parameterId:props.parameter.id,...structuredClone(props.parameter.defaultBinding)} as ElementBinding:defaultBinding(feature));}}
+function sourceChanged(value:string|number){if(value==='constant')emit('change',{parameterId:props.parameter.id,source:{kind:'constant',value:structuredClone(props.parameter.defaultValue) as number|string|boolean|number[]}});else if(value==='native')nativeFeatureChanged('frequency');else if(value==='analysis'){const feature=features.value.includes('energy')?'energy':features.value[0];if(feature)emit('change',props.parameter.defaultBinding?{parameterId:props.parameter.id,...structuredClone(props.parameter.defaultBinding)} as ElementBinding:defaultBinding(feature));}}
+function nativeFeatureChanged(value:string|number){emit('change',{parameterId:props.parameter.id,source:{kind:'native',featureId:value as NativeInputFeature}});}
 function constantNumber(value:number){emit('change',{parameterId:props.parameter.id,source:{kind:'constant',value}});}
 function constantChanged(event:Event){const input=event.target as HTMLInputElement;emit('change',{parameterId:props.parameter.id,source:{kind:'constant',value:props.parameter.valueKind==='boolean'?input.checked:props.parameter.valueKind==='number'?Number(input.value):input.value}});}
 function featureChanged(value:string|number){emit('change',defaultBinding(value as FeatureId));}

@@ -49,5 +49,6 @@ export function createPresetElements(id:CompositionPresetId,duration:number,star
     add('wireform','主旋转环',{shape:2,size:.050625,amplitude:300/81,speed:1.5,chromatic:false});
     add('wireform','交错环 A',{shape:2,size:.0378125,amplitude:150/60.5,speed:1.5,phase:Math.PI/3,chromatic:false});
     add('wireform','交错环 B',{shape:2,size:.0378125,amplitude:150/60.5,speed:1.5,phase:Math.PI*2/3,chromatic:false});
+    for(const e of result)for(const b of e.bindings)if(b.parameterId==='spectrum')b.source={kind:'native',featureId:'frequency'};
     return result;
 }

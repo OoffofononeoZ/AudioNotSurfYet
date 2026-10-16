@@ -8,7 +8,7 @@ owner 于 2026-10-15 随改版计划批准本接口和兼容决定。本页为�
 - 顶层包含 projectId、createdAt/updatedAt、同歌 track、16:9 output、全工程 seed、elements，以及可选的已验证 EditorProjectV1 快照。Editor 格式不变。
 - 元素包含稳定 UUID、已注册 type/version、name、enabled、layer、timing、完整 bindings；影响效果额外包含 targets。新工程 elements 为空。
 - 元素库预设仅为普通 V3 元素的创建工厂，添加时生成新 UUID、使用当前歌曲时长并保留原元素；没有 preset 工程字段。几何和 PV 元素及输入适配见 [几何元素与预设](../../context/visualizer-presets.md)。
-- bindings 复用 constant/analysis、FeatureRegistry component/projection 和数值映射；不允许 editor-event、分轨分析、脚本或远端资源。全工程最多四个不同 Analyzer 特征；仅启用元素参与当前分析请求。
+- bindings 复用 constant/analysis、FeatureRegistry component/projection 和数值映射；本轮 owner 另授权支持向量频谱元素的 native source，特征为 frequency/waveform，严格字段和时间/资源契约见 [原生输入](../../context/visualizer-native-input.md)。不允许 editor-event、分轨分析、脚本或远端资源。全工程最多四个不同 Analyzer 特征，native 不占此额度；仅启用元素参与当前分析请求。
 - strict codec 拒绝未知字段、类型/版本、非法数值、重复 ID、跨歌快照、失效标记/目标和不兼容投影。导入候选完整校验后才原子替换工程。
 - 输入或转场尚未选择时使用明确 unbound，效果可以暂时没有目标，草稿可保存；启用的未配置元素阻止录制。
 - V1/V2 JSON 导入直接拒绝。原 IndexedDB database/store/version 保持不变；旧版或无效 envelope 只读保留，提供原始 JSON 导出、明确覆盖、取消，不能静默清除或自动转换。

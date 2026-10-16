@@ -4,6 +4,8 @@
 
 几何/PV 预设由 `tests/e2e/visualizer-presets.spec.ts` 覆盖：元素库、静音/实际频谱、V3 往返与刷新、四段构图、seek 确定性、全屏、WebM、context recovery 和资源释放。默认使用版本化短 WAV；可显式设置 `VISUALIZER_MUSIC_FILE` 运行额外的本地音乐截图检查，文件仅留本地，不加入 fixture manifest。当前视频按 owner 的居中修改验证水平/垂直中心，保持原几何精度。
 
+原生输入另覆盖 Web Audio 左右异频 FFT、来源/可用特征切换、失败重试和暂停 seek 的画面一致性；`tests/visualizer/native-input.test.ts` 验证缓存上限、decoded revision/取消失效和严格 native binding。时间与资源边界见 [原生输入契约](../docs/context/visualizer-native-input.md)。
+
 ## 环境
 
 2026-10-16 Editor 公共框架回归：`npx playwright test tests/e2e/editor-frame.spec.ts tests/e2e/editor-navigation-lifecycle.spec.ts --project=chrome --project=edge --workers=1`。覆盖三种播放器样式、动画留位、页签/菜单焦点、滚动保留、草稿失败、播放列表操作与运行中任务换歌保护；旧 E1–E10 交互专项已按常驻 MusicBar 和内部滚动更新，历史 canonical 身份不改写。布局契约见 [Editor 工作区](../docs/context/editor-workspace.md)。

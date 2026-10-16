@@ -1,6 +1,6 @@
 import type { VisualizerAnalysisComponent, VisualizerAnalysisProjectionV1, VisualizerParameterBindingV1 } from './types';
 export type SceneParameterValueKind = 'number' | 'boolean' | 'color' | 'vector';
-export type SceneBindingSourceKind = 'constant' | 'analysis' | 'editor-event';
+export type SceneBindingSourceKind = 'constant' | 'analysis' | 'editor-event' | 'native';
 
 export interface SceneNumericRange {
     readonly min: number;
