@@ -27,6 +27,7 @@ declare module 'vue' {
     EditorRangeWorkspace: typeof import('./src/components/EditorRangeWorkspace.vue')['default']
     EditorSeparationWorkspace: typeof import('./src/components/EditorSeparationWorkspace.vue')['default']
     EditorTimeline: typeof import('./src/components/EditorTimeline.vue')['default']
+    EditorTrackChangeDialog: typeof import('./src/components/EditorTrackChangeDialog.vue')['default']
     EditorTranscriptionWorkspace: typeof import('./src/components/EditorTranscriptionWorkspace.vue')['default']
     LightBg: typeof import('./src/components/LightBg.vue')['default']
     MeydaCard: typeof import('./src/components/MeydaCard.vue')['default']

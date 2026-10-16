@@ -353,6 +353,35 @@ describe('Editor E1 foundation integration', () => {
         await harness.controller.dispose();
     });
 
+    test('consumes a confirmed track switch once and keeps ordinary entry conflicts', async () => {
+        const h = createControllerHarness();
+        await h.controller.enter(h.trackA.id);
+        const approval = await h.controller.approveTrackChange(h.trackB.id);
+        expect(approval).not.toBeNull();
+        await h.controller.enter(h.trackB.id, approval!);
+        expect(h.controller.getSnapshot().state).toBe('ready');
+        await h.controller.flush();
+        await h.controller.enter(h.trackA.id, approval!);
+        expect(h.controller.getSnapshot().state).toBe('draft-conflict');
+        await h.controller.dispose();
+    });
+
+    test('binds approval to the destination and source revision and blocks failed saves', async () => {
+        const h = createControllerHarness();
+        await h.controller.enter(h.trackA.id);
+        const approval = await h.controller.approveTrackChange(h.trackB.id);
+        expect(h.controller.isTrackChangeApproved(approval!, null)).toBe(false);
+        h.controller.updateProject(h.controller.getSnapshot().project!);
+        expect(h.controller.isTrackChangeApproved(approval!, h.trackB.id)).toBe(false);
+        h.repository.failReplace = true;
+        expect(await h.controller.approveTrackChange(h.trackB.id)).toBeNull();
+        expect(h.controller.getSnapshot().activeTrackId).toBe(h.trackA.id);
+        expect(await h.controller.exportProject()).toBe('saved');
+        h.repository.failReplace = false;
+        expect(await h.controller.approveTrackChange(h.trackB.id)).not.toBeNull();
+        await h.controller.dispose();
+    });
+
     test('validates imports before atomic replacement', async () => {
         const harness = createControllerHarness();
         await harness.controller.enter(harness.trackA.id);

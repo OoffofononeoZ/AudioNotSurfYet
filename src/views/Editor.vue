@@ -164,6 +164,7 @@
             </template>
         </section>
 
+        <EditorTrackChangeDialog :decision="trackNavigation.decision.value" @confirm="trackNavigation.confirm" @cancel="trackNavigation.cancel" @export="trackNavigation.exportCurrent" />
         <dialog
             ref="leaveDialog"
             class="editor-leave-dialog"
@@ -231,6 +232,8 @@ import EditorTimeline from '../components/EditorTimeline.vue';
 import EditorPointWorkspace from '../components/EditorPointWorkspace.vue';
 import EditorSeparationWorkspace from '../components/EditorSeparationWorkspace.vue';
 import EditorTranscriptionWorkspace from '../components/EditorTranscriptionWorkspace.vue';
+import EditorTrackChangeDialog from '../components/EditorTrackChangeDialog.vue';
+import { useEditorTrackNavigation } from '../editor/useEditorTrackNavigation';
 import { useEditorSeparationService } from '../processing/editorSeparationService';
 import type {
     AnalysisCursorValueResult,
@@ -244,6 +247,7 @@ const audioSession = useAudioSessionService();
 const sessionStore = useAudioSessionStore();
 const controller = useEditorSessionController();
 const separationService = useEditorSeparationService();
+const trackNavigation = useEditorTrackNavigation(controller, audioSession, separationService, router);
 const workspace = ref<'marking'|'separation'|'transcription'>('marking');
 function switchWorkspaceFromKeyboard(event: KeyboardEvent): void {
     if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return;
@@ -410,7 +414,7 @@ watch(
         lastAutoRetrySignature = null;
         pendingAutoRetrySignature = null;
         if (sessionStore.persistence.state !== 'restoring') {
-            void controller.enter(routeTrackId());
+            void trackNavigation.enter(routeTrackId());
         }
     },
     { immediate: true },
@@ -617,7 +621,7 @@ onBeforeUnmount(() => {
     --editor-control-radius: 4px;
     --editor-flyout-radius: 8px;
     min-height: 100dvh;
-    padding: var(--app-page-top-space) 12px 24px;
+    padding: var(--app-page-top-space) 12px calc(var(--app-player-inset, 150px) + 24px);
     color: var(--ink);
     font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
     background:
@@ -918,7 +922,7 @@ select:focus-visible {
 
 @media (max-width: 800px) {
     .editor-page {
-        padding: 72px 0 20px;
+        padding: 72px 0 calc(var(--app-player-inset, 150px) + 20px);
     }
 
     .editor-heading,

@@ -4,7 +4,7 @@ owner 于 2026-10-13 批准本页方案并要求实现（DEC-076）。本次是�
 
 ## 导航与布局
 
-- `MainLayout` 组合 `AppSidebar`、右上角 `AppSettingsButton`、路由内容和独立 `MusicBar`（有效 Editor track 隐藏，Visualizer 普通工作区显示），继续提供唯一音频及工作区服务。
+- `MainLayout` 组合 `AppSidebar`、右上角 `AppSettingsButton`、路由内容和独立 `MusicBar`（Editor 与 Visualizer 普通工作区均显示），继续提供唯一音频及工作区服务。
 - 桌面默认展开 216px，收起为 64px 图标栏；`config.sidebarCollapsed` 保存桌面选择，旧配置缺少该字段时使用 store 默认值 `false`。
 - 收起时隐藏品牌和品牌图标，展开按钮占据原品牌图标位置。品牌及导航共用 44px 图标列，展开/收起不移动列表图标的水平或垂直位置；收起后的展开按钮、导航项悬停区域统一为 44×44px 正方形。
 - `<768px` 初始隐藏，只保留展开按钮；展开使用非模态 dialog 和常规遮罩，支持 Escape、遮罩关闭和焦点恢复，播放器仍可操作。业务确认 dialog 打开时不由导航处理 Escape。成功导航后隐藏，路由拦截取消时保留菜单。窄屏开合不覆盖桌面偏好。
@@ -20,6 +20,8 @@ owner 于 2026-10-13 批准本页方案并要求实现（DEC-076）。本次是�
 Visualizer 当前布局、全屏视频控制及原子组合契约见 [组合工作区](visualizer-composition.md) 和 [Project V3](../architecture/visualizer/project-format-v3.md)。普通工作区按 MusicBar 实际占高留位；全屏不显示 MusicBar。
 
 ## 播放模式
+
+Editor 列表换歌、删除当前歌曲与清空队列先弹出工程保护对话框；导出后仍需明确确认，取消不改变歌曲、播放或任务。确认前必须成功保存草稿，批准仅绑定目标歌曲和当前工程修订、消费一次；清空保留 Editor 单草稿。确认后先释放旧歌曲的分离和自动标记任务，再进入目标歌曲；普通进入与刷新仍执行草稿冲突检查。
 
 MusicBar 提供顺序、单曲循环、列表循环和随机播放图标，默认顺序播放并保存偏好。Editor/Visualizer 租约临时使用单曲循环，释放后恢复用户偏好；模式按钮在工作区锁定。单曲循环下上一首/下一首从零重播当前歌。录制专属传输租约阻止公开播放、seek 和队列修改，音量仍可用。Visualizer 原子元素改版及阶段状态见 [组合工作区](visualizer-composition.md)。
 
