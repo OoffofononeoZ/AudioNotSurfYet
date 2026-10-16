@@ -26,8 +26,9 @@ export function buildGeometricElement(batch:GeometricBatch,e:VisualizerElement,v
     let peak=0; for(const level of levels) peak=Math.max(peak,level);
     const alpha=n('opacity',1), white=rgb(String(elementValue(values,e,'color') ?? '#ffffff'),alpha);
     const colorful=elementValue(values,e,'chromatic') === true;
-    const frame=Math.floor(time*60), colorIndex=Math.floor(randomUnit(seed,frame)*palette.length);
-    const accent=rgb(palette[colorIndex]!,alpha), width=n('thickness',1)/1600;
+    const frame=Math.floor(time*60);
+    const randomInk=(index:number):Ink=>[randomUnit(seed,index),randomUnit(seed,index+1),randomUnit(seed,index+2),alpha];
+    const accent=randomInk(frame*3),width=n('thickness',1)/1600;
     const cx=(n('x',.5)-.5)*aspect, cy=n('y',.5)-.5;
     const point=(x:number,y:number,z=0):Point3=>{
         const projection=.8660254/(.8660254-z);
@@ -75,13 +76,16 @@ export function buildGeometricElement(batch:GeometricBatch,e:VisualizerElement,v
         for(let i=0;i<count;i++) {
             const a=i/count*TAU+time*n('orbitSpeed'), wobble=time*.5+i*Math.PI/3;
             const value=shape===1?peak:levels[Math.min(127,i*11)] ?? 0, filled=value>=n('threshold',.05);
-            const ink=colorful?rgb(palette[i%palette.length]!,alpha):white;
+            const ink=colorful?(shape===1?randomInk(frame*9+i*3):rgb(palette[i%palette.length]!,alpha)):white;
             solid(shape,n('size',.00875)*(shape===0&&filled?19/14:1),radius*Math.cos(a)+n('wobble')*Math.cos(wobble),radius*Math.sin(a)+n('wobble')*Math.sin(wobble),speed+i*.1,speed+i*.1,0,filled?ink:null);
         }
     } else if(e.type==='wireform') {
         const size=n('size',.00875)*(1+peak*n('amplitude',7.5)), angle=time*n('speed',-.6)+n('phase');
         if(n('shape')===2) arc(size/2,0,TAU,angle,angle);
-        else solid(n('shape'),size,0,0,angle,angle,angle,colorful&&peak>=n('threshold',.1286)?accent:null);
+        else {
+            const fill:Ink=[(30+152*randomUnit(seed,frame*3+1000000))/255,(9+91*randomUnit(seed,frame*3+1000001))/255,(99+randomUnit(seed,frame*3+1000002))/255,alpha];
+            solid(n('shape'),size,0,0,angle,angle,angle,colorful&&peak>=n('threshold',.1286)?fill:null);
+        }
     }
     return batch.count;
 }

@@ -26,5 +26,16 @@ describe('geometric atoms',()=>{
         const full=geometricSpectrum(Array(512).fill(128),.6);
         expect(full[0]).toBeCloseTo(.6);expect(full[127]).toBeCloseTo(.6);
         expect(geometricSpectrum(Array(512).fill(128),0)[0]).toBe(0);
+        const asymmetric=geometricSpectrum(Array.from({length:512},(_,i)=>i<8?128:0),.6);
+        expect(asymmetric[0]).toBeCloseTo(.6);expect(asymmetric[1]).toBe(0);
+        expect([...asymmetric.slice(0,64)]).toEqual([...asymmetric.slice(64)]);
+    });
+    test('maximum count and sweep remain inside the shared geometry capacity',()=>{
+        for(const type of ['arc-lattice','light-tunnel','starfield'] as const){
+            const e=elementRegistry.create(type,10,0),batch=new GeometricBatch();
+            const values:VisualizerResolvedParameterMap=new Map(elementRegistry.get(type).parameters.map(p=>[parameterKey(e.id,p.id),{parameterId:p.id,state:'ready',value:p.id==='spectrum'?Array(512).fill(128):p.valueKind==='number'?Number(p.range?.max ?? p.defaultValue):p.defaultValue as number|string|boolean|number[]}]));
+            buildGeometricElement(batch,e,values,3,314159,16/9,new Float32Array(128));
+            expect(batch.count).toBeGreaterThan(0);expect(batch.count).toBeLessThan(65536);expect([...batch.positions.subarray(0,batch.count*3)].every(Number.isFinite)).toBe(true);
+        }
     });
 });
