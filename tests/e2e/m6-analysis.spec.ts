@@ -330,6 +330,10 @@ test('does not accumulate Worker, AudioContext or RAF resources over 20 lifecycl
     await waitForBridge(page);
 
     const rafSamples: number[] = [];
+    // This test cycles through both tracks repeatedly; sequence mode stops at the last.
+    await page.getByTestId('playback-mode').click();
+    await page.getByTestId('playback-mode').click();
+    await expect(page.getByTestId('playback-mode')).toHaveAttribute('aria-label', '列表循环');
     for (let index = 0; index < 20; index += 1) {
         await page.getByRole('link', { name: 'Analyzer' }).click();
         await page.evaluate(async () => {
@@ -338,15 +342,14 @@ test('does not accumulate Worker, AudioContext or RAF resources over 20 lifecycl
                     __AUDIO_NOT_SURF_YET_M6__: Bridge;
                 }
             ).__AUDIO_NOT_SURF_YET_M6__;
-            await api.setActiveFeatures(['rms']);
+            await api.setActiveFeatures(['wallpaperEngineSpectrum', 'rms']);
             api.cancel();
         });
+        const musicBar = page.locator('#music-bar-container');
+        const beforeTrack = await musicBar.getAttribute('data-current-track-id');
         await page.getByTestId('next-track').click();
-        await expect(page.locator('#music-bar-container')).toHaveAttribute(
-            'data-playback-state',
-            'playing',
-            { timeout: 20_000 },
-        );
+        await expect(musicBar).not.toHaveAttribute('data-current-track-id', beforeTrack!);
+        await expect(musicBar).toHaveAttribute('data-playback-state', 'playing', {timeout:20_000});
         await page.getByRole('link', { name: 'AUDIOSURF' }).click();
         rafSamples.push(await page.evaluate(() =>
             (

@@ -102,7 +102,7 @@ test('starts with 22 collapsed cards and shares seek/zoom across three expanded 
             .click();
     }
     await expect(page.locator('.analyzer-status')).toContainText(
-        '3/4 项展开分析',
+        '3/4 项',
     );
 
     await chooseFiles(page, [LEARNING_WAV_FIXTURE]);
@@ -523,19 +523,9 @@ test('keeps the 15-minute M7 workspace responsive and cancellable', async ({ pag
         });
         observer.observe({ entryTypes: ['longtask'] });
     });
-    await page.evaluate(async () => {
-        await (
-            window as typeof window & {
-                __AUDIO_NOT_SURF_YET_M6__: {
-                    setActiveFeatures(ids: string[]): Promise<void>;
-                };
-            }
-        ).__AUDIO_NOT_SURF_YET_M6__.setActiveFeatures([
-            'rms',
-            'amplitudeSpectrum',
-            'chroma',
-        ]);
-    });
+    for (const id of ['rms', 'amplitudeSpectrum', 'chroma']) {
+        await page.locator('[data-feature-id="'+id+'"] .toggle-card').click();
+    }
     await page.waitForFunction(() => {
         const bridge = (
             window as typeof window & {

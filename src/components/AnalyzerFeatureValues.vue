@@ -2,7 +2,7 @@
     <div class="feature-values">
 <div class="axis-summary" aria-hidden="true">
             <span>{{ formatTime(viewport.startSeconds) }}</span>
-            <span v-if="featureId === 'wallpaperEngineSpectrum'">左 0–63 · 右 64–127 · 各自低频 → 高频</span>
+            <span v-if="featureId === 'wallpaperEngineSpectrum'">左 0–63 · 右 64–127 · {{ formatFrequency(wallpaperRanges[0]![0]) }} – {{ formatFrequency(wallpaperRanges[63]![1]) }}（参考）</span>
             <span v-else-if="isSpectrumFeature">
                 0 – {{ formatFrequency(nyquist) }}
             </span>
