@@ -7,11 +7,11 @@
                 <p data-testid="editor-viewport-state">{{ formatTime(viewport.startSeconds) }} — {{ formatTime(viewport.endSeconds) }} · {{ viewport.zoom.toFixed(1) }}×</p>
             </div>
             <div class="timeline-controls" aria-label="共享视口控制">
-                <button type="button" data-testid="editor-pan-back" @click="panBy(-0.25)">← 25%</button>
-                <button type="button" data-testid="editor-zoom-out" :disabled="viewport.zoom <= 1" @click="zoomBy(0.5)">−</button>
-                <button type="button" data-testid="editor-reset-viewport" @click="resetViewport">重置</button>
-                <button type="button" data-testid="editor-zoom-in" :disabled="viewport.zoom >= 64" @click="zoomBy(2)">+</button>
-                <button type="button" data-testid="editor-pan-forward" @click="panBy(0.25)">25% →</button>
+                <button type="button" class="editor-icon-button" aria-label="向前平移 25%" title="向前平移 25%" data-testid="editor-pan-back" @click="panBy(-0.25)"><EditorIcon name="left" /></button>
+                <button type="button" class="editor-icon-button" aria-label="缩小时间轴" title="缩小时间轴" data-testid="editor-zoom-out" :disabled="viewport.zoom <= 1" @click="zoomBy(0.5)"><EditorIcon name="zoomOut" /></button>
+                <button type="button" class="editor-icon-button" aria-label="重置时间轴" title="重置时间轴" data-testid="editor-reset-viewport" @click="resetViewport"><EditorIcon name="reset" /></button>
+                <button type="button" class="editor-icon-button" aria-label="放大时间轴" title="放大时间轴" data-testid="editor-zoom-in" :disabled="viewport.zoom >= 64" @click="zoomBy(2)"><EditorIcon name="zoomIn" /></button>
+                <button type="button" class="editor-icon-button" aria-label="向后平移 25%" title="向后平移 25%" data-testid="editor-pan-forward" @click="panBy(0.25)"><EditorIcon name="right" /></button>
             </div>
         </header>
 
@@ -238,6 +238,7 @@ import type { AnalysisCoordinatorSnapshot, AnalysisSeries } from '../analysis/ty
 import { visibleSampleRange, waveformEnvelopeAt } from '../analysis/rendererData';
 import { useAudioSessionService } from '../audio/audioSessionService';
 import type { PlaybackSnapshot } from '../types/audio';
+import EditorIcon from './EditorIcon.vue';
 import type { PersistedTimelineViewport } from '../types/session';
 import {
     EDITOR_CONTEXT_PAN_THRESHOLD_PX,
@@ -868,7 +869,9 @@ onBeforeUnmount(() => {
 .timeline-heading h2 { margin: 0; font-size: .96rem; white-space: nowrap; }
 .timeline-titleline p { margin: 0; color: var(--body); font-size: .76rem; white-space: nowrap; }
 .timeline-kicker { color: var(--accent-soft); font-size: .68rem; letter-spacing: .1em; text-transform: uppercase; white-space: nowrap; }
-.timeline-controls { flex-wrap: wrap; gap: 8px; }
+.timeline-controls { flex-wrap: wrap; gap: 4px; }
+.timeline-controls .editor-icon-button { min-height: 34px; border: 0; padding: 7px; background: transparent; }
+.timeline-controls .editor-icon-button:hover:not(:disabled) { background: rgba(180, 220, 199, .08); }
 button,
 input,
 select {

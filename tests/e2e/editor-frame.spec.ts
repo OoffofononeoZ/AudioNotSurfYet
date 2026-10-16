@@ -93,3 +93,38 @@ test('a failed draft save blocks switching while export and cancellation remain 
     await expect(bar).toHaveAttribute('data-playback-state', 'paused');
     await expect(page.getByTestId('editor-point-workspace').locator('article')).toHaveCount(1);
 });
+
+test('toolbar tabs and overlay icons preserve keyboard access and menu focus', async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await openEditor(page);
+    const toolbar = page.getByTestId('editor-toolbar');
+    await expect(toolbar).toHaveCSS('height', '64px');
+    await expect(page.getByRole('combobox', { name: '工程格式' })).toHaveCount(0);
+    await expect(page.getByTestId('import-editor-project')).toHaveAttribute('title', '导入工程（JSON V1）');
+    await expect(page.getByTestId('editor-playback-toggle')).toHaveCount(0);
+    await page.getByTestId('editor-marking-tab').focus();
+    await page.keyboard.press('ArrowRight');
+    await expect(page.getByTestId('editor-separation-tab')).toBeFocused();
+    await expect(page.locator('#editor-separation-panel')).toBeVisible();
+    await expect(page.getByTestId('editor-overlay-toggle')).toHaveCount(0);
+    await page.keyboard.press('End');
+    await expect(page.getByTestId('editor-transcription-tab')).toBeFocused();
+    await page.keyboard.press('Home');
+    await expect(page.getByTestId('editor-marking-tab')).toBeFocused();
+    await page.getByTestId('editor-overlay-toggle').click();
+    const menu = page.getByTestId('editor-overlay-feature-menu');
+    await expect(menu).toBeVisible();
+    await expect(menu.getByRole('menuitemradio').first()).toBeFocused();
+    const menuRect = await menu.boundingBox(), controlsRect = await page.getByTestId('editor-overlay-controls').boundingBox();
+    expect(menuRect!.y).toBeGreaterThanOrEqual(controlsRect!.y + controlsRect!.height);
+    expect(Math.abs(menuRect!.x + menuRect!.width - controlsRect!.x - controlsRect!.width)).toBeLessThanOrEqual(1);
+    await page.keyboard.press('Escape');
+    await expect(page.getByTestId('editor-overlay-toggle')).toBeFocused();
+    await page.getByTestId('editor-overlay-menu-toggle').click();
+    await menu.locator('[data-feature-id="energy"]').click();
+    await expect(page.getByTestId('editor-overlay-toggle')).toHaveAttribute('aria-pressed', 'true');
+    await expect(page.getByTestId('editor-analysis-overlay-panel')).toHaveAttribute('data-analysis-state', 'ready', { timeout: 30000 });
+    for (const handle of ['top', 'move', 'bottom']) await expect(page.getByTestId('editor-overlay-handle-' + handle)).toBeVisible();
+    await page.getByTestId('editor-overlay-toggle').click();
+    await expect(page.getByTestId('editor-analysis-overlay-panel')).toHaveCount(0);
+});

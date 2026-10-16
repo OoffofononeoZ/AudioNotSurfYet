@@ -54,6 +54,7 @@ AudioNotSurfYet 是 Vue / TypeScript / Vite 浏览器音频工作台；当前目
 | [AGENTS.md](../../AGENTS.md) | 根工作指南与项目 skill 导航 |
 | [system-map.md](system-map.md) | 当前子系统、接口和外部依赖 |
 | [app-shell.md](app-shell.md) | 当前侧边栏、内容边界、响应式布局与歌曲详情首页 |
+| [editor-workspace.md](editor-workspace.md) | Editor 公共顶栏、MusicBar、页签与草稿换歌保护 |
 | [glossary.md](glossary.md) | 当前项目词汇与代码含义 |
 | [decision-registry.md](decision-registry.md) | 产品、架构和交付决策入口 |
 | [working-agreements.md](working-agreements.md) | 本地开发、验证和 Git 约定 |

@@ -1,0 +1,6 @@
+.editor-icon-button { display: inline-grid; place-items: center; flex: none; width: 34px; height: 34px; min-height: 34px; padding: 7px; border: 0; border-radius: 5px; color: var(--body); background: transparent; cursor: pointer; }
+.editor-icon-button svg { display: block; width: 20px; height: 20px; }
+.editor-icon-button:hover:not(:disabled) { color: var(--ink-strong); background: rgba(180, 220, 199, .08); }
+.editor-icon-button[aria-pressed='true'] { color: var(--accent-soft); background: var(--control-active); }
+.editor-icon-button:focus-visible { outline: 2px solid var(--accent-soft); outline-offset: 2px; }
+.editor-icon-button:disabled { opacity: .35; cursor: default; }
