@@ -31,7 +31,7 @@
 | [src/components/MusicBarIcon.vue](../../src/components/MusicBarIcon.vue) | — |
 | [src/components/MusicList.vue](../../src/components/MusicList.vue) | [src/components/AnimatedList.vue](../../src/components/AnimatedList.vue)、[src/types/audio.ts](../../src/types/audio.ts) |
 | [src/components/analyzer/usePinnedPanel.ts](../../src/components/analyzer/usePinnedPanel.ts) | [src/analysis/pinnedPanelHeight.ts](../../src/analysis/pinnedPanelHeight.ts) |
-| [src/components/controls/AppNumberInput.vue](../../src/components/controls/AppNumberInput.vue) | — |
+| [src/components/controls/AppNumberInput.vue](../../src/components/controls/AppNumberInput.vue) | [src/utils/numberEditing.ts](../../src/utils/numberEditing.ts) |
 | [src/components/controls/AppPlaybackProgress.vue](../../src/components/controls/AppPlaybackProgress.vue) | — |
 | [src/components/controls/AppSelect.vue](../../src/components/controls/AppSelect.vue) | — |
 | [src/components/testcomp.vue](../../src/components/testcomp.vue) | — |

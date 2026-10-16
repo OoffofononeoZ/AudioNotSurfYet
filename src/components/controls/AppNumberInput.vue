@@ -1,26 +1,38 @@
 <template>
     <div class="app-number-input" :class="{ 'is-disabled': disabled }">
         <input ref="input" v-bind="$attrs" type="number" :value="modelValue" :aria-label="label"
-            :min="Number.isFinite(min)?min:undefined" :max="Number.isFinite(max)?max:undefined" :step="step" :disabled="disabled"
+            :min="Number.isFinite(min)?min:undefined" :max="Number.isFinite(max)?max:undefined" :step="effectiveStep" :disabled="disabled"
             @change.stop="commit" @keydown.up.prevent="increment(1)" @keydown.down.prevent="increment(-1)"
-            @keydown.enter.prevent="commit"/>
+            @keydown.enter.prevent="commit" v-on="wheelEnabled?{wheel}:{}"/>
         <div class="app-number-input__steps">
-            <button type="button" tabindex="-1" :aria-label="label+'增加'" :disabled="disabled||modelValue>=max"
+            <button type="button" tabindex="-1" :aria-label="label+'增加'" :disabled="disabled||!canIncrement(1)"
                 @mousedown.prevent @click="increment(1)"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="m4.5 9.5 3.5-3.5 3.5 3.5"/></svg></button>
-            <button type="button" tabindex="-1" :aria-label="label+'减少'" :disabled="disabled||modelValue<=min"
+            <button type="button" tabindex="-1" :aria-label="label+'减少'" :disabled="disabled||!canIncrement(-1)"
                 @mousedown.prevent @click="increment(-1)"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="m4.5 6.5 3.5 3.5 3.5-3.5"/></svg></button>
         </div>
     </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
+import { numberEditingStep, stepEditedNumber } from '../../utils/numberEditing';
 defineOptions({ inheritAttrs: false });
 const props = withDefaults(defineProps<{
     modelValue: number; label: string; min?: number; max?: number; step?: number; disabled?: boolean;
+    editingPrecision?: number; wheelEnabled?: boolean; isStepValid?: (value: number) => boolean;
 }>(), { min: -Infinity, max: Infinity, step: 1 });
 const emit = defineEmits<{ 'update:modelValue': [value: number]; change: [value: number] }>();
 const input = ref<HTMLInputElement | null>(null);
+const effectiveStep = computed(() => props.editingPrecision === undefined ? props.step : numberEditingStep(props.editingPrecision));
+function nextValue(value: number, direction: 1 | -1) {
+    return stepEditedNumber(value, props.modelValue, direction, {
+        precision: props.editingPrecision!, min: props.min, max: props.max, isValid: props.isStepValid,
+    });
+}
+function canIncrement(direction: 1 | -1) {
+    if (props.editingPrecision !== undefined) return nextValue(props.modelValue, direction) !== props.modelValue;
+    return direction === 1 ? props.modelValue < props.max : props.modelValue > props.min;
+}
 function commit() {
     const field = input.value;
     if (!field || field.matches(':disabled')) return;
@@ -36,8 +48,15 @@ function increment(direction: 1 | -1) {
     const field = input.value;
     if (!field || field.matches(':disabled')) return;
     if (!Number.isFinite(field.valueAsNumber)) field.value = String(props.modelValue);
-    field.stepUp(direction);
+    if (props.editingPrecision === undefined) field.stepUp(direction);
+    else field.value = String(nextValue(field.valueAsNumber, direction));
     commit();
+}
+function wheel(event: WheelEvent) {
+    if (!props.wheelEnabled || event.ctrlKey || event.metaKey || event.deltaY === 0 || input.value?.matches(':disabled')) return;
+    event.preventDefault();
+    event.stopPropagation();
+    increment(event.deltaY < 0 ? 1 : -1);
 }
 </script>
 

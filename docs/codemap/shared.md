@@ -35,4 +35,5 @@
 | [src/types/events.ts](../../src/types/events.ts) | — |
 | [src/types/session.ts](../../src/types/session.ts) | [src/analysis/types.ts](../../src/analysis/types.ts)、[src/types/audio.ts](../../src/types/audio.ts) |
 | [src/utils/emitter.ts](../../src/utils/emitter.ts) | [src/types/events.ts](../../src/types/events.ts) |
+| [src/utils/numberEditing.ts](../../src/utils/numberEditing.ts) | — |
 | [src/utils/utils.ts](../../src/utils/utils.ts) | — |

@@ -1,4 +1,5 @@
 import { elementRegistry } from './elementRegistry';
+import { roundEditingValue } from '../utils/numberEditing';
 import type { ElementType, VisualizerElement } from './compositionTypes';
 
 export type CompositionPresetId = 'geometric-0.6' | 'prismatic-voyage';
@@ -13,7 +14,10 @@ export function createPresetElements(id:CompositionPresetId,duration:number,star
     const result:VisualizerElement[]=[];
     const add=(type:ElementType,name:string,constants:Constants={})=>{
         const e=elementRegistry.create(type,duration,startLayer+result.length);e.name=name;
-        for(const b of e.bindings)if(Object.prototype.hasOwnProperty.call(constants,b.parameterId))b.source={kind:'constant',value:constants[b.parameterId]!};
+        for(const b of e.bindings)if(Object.prototype.hasOwnProperty.call(constants,b.parameterId)){
+            const value=constants[b.parameterId]!,parameter=elementRegistry.get(type).parameters.find(p=>p.id===b.parameterId)!;
+            b.source={kind:'constant',value:typeof value==='number'?roundEditingValue(value,parameter.range?.editingPrecision??2):value};
+        }
         result.push(e);return e;
     };
     if(id==='prismatic-voyage') {

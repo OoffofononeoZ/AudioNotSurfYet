@@ -6,6 +6,8 @@ export interface SceneNumericRange {
     readonly min: number;
     readonly max: number;
     readonly integer?: boolean;
+    /** Decimal precision for new defaults and UI editing; never quantizes loaded projects. */
+    readonly editingPrecision?: number;
 }
 
 export interface SceneParameterDescriptor {
