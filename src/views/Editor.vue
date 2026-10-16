@@ -2,7 +2,7 @@
     <main class="editor-page" data-testid="editor-page">
         <EditorToolbar :ready="snapshot.state === 'ready'" v-model:workspace="workspace" :persistence="snapshot.persistence" @import="importProject" @export="exportProject" />
         <p v-if="snapshot.state === 'ready' && snapshot.message" role="alert" class="editor-error">{{ snapshot.message }}</p>
-        <section class="editor-shell" :data-testid="snapshot.state === 'ready' ? 'editor-ready' : undefined">
+        <section class="editor-shell" :class="{ 'editor-state-shell app-scrollbar': snapshot.state !== 'ready' }" :data-testid="snapshot.state === 'ready' ? 'editor-ready' : undefined">
             <section v-if="snapshot.state === 'empty'" class="editor-state" data-testid="editor-empty">
                 <h2>先选择一首歌曲</h2>
                 <p>可以在底部播放器导入或选择歌曲，再从导航栏 Editor 进入。</p>
@@ -56,7 +56,7 @@
             </section>
 
             <template v-else-if="snapshot.state === 'ready' && snapshot.project">
-                <div id="editor-marking-panel" v-show="workspace === 'marking'" role="tabpanel" aria-labelledby="editor-marking-tab">
+                <div id="editor-marking-panel" v-show="workspace === 'marking'" class="editor-panel app-scrollbar" role="tabpanel" aria-labelledby="editor-marking-tab" tabindex="0">
                 <EditorTimeline
                     :project="snapshot.project"
                     :playback="playback"
@@ -80,7 +80,7 @@
                     @retry-overlay="controller.retryOverlayAnalysis()"
                 />
                 </div>
-                <div id="editor-separation-panel" v-show="workspace === 'separation'" role="tabpanel" aria-labelledby="editor-separation-tab">
+                <div id="editor-separation-panel" v-show="workspace === 'separation'" class="editor-panel app-scrollbar" role="tabpanel" aria-labelledby="editor-separation-tab" tabindex="0">
                     <EditorSeparationWorkspace
                         :track-id="snapshot.activeTrackId!"
                         :track-name="snapshot.project.track.fileName"
@@ -90,7 +90,7 @@
                     />
                 </div>
 
-                <div id="editor-transcription-panel" v-show="workspace === 'transcription'" role="tabpanel" aria-labelledby="editor-transcription-tab">
+                <div id="editor-transcription-panel" v-show="workspace === 'transcription'" class="editor-panel app-scrollbar" role="tabpanel" aria-labelledby="editor-transcription-tab" tabindex="0">
                     <EditorTranscriptionWorkspace :playback="playback" :duration="snapshot.project.track.durationSeconds" :active="workspace === 'transcription'" @seek="audioSession.seek($event)" />
                 </div>
 
@@ -98,66 +98,26 @@
         </section>
 
         <EditorTrackChangeDialog :decision="trackNavigation.decision.value" @confirm="trackNavigation.confirm" @cancel="trackNavigation.cancel" @export="trackNavigation.exportCurrent" />
-        <dialog
-            ref="leaveDialog"
-            class="editor-leave-dialog"
-            data-testid="editor-leave-dialog"
-            aria-labelledby="editor-leave-dialog-title"
-            aria-describedby="editor-leave-dialog-description"
-            @cancel="onLeaveDialogCancel"
-            @click="onLeaveDialogBackdropClick"
-        >
-            <button
-                type="button"
-                class="leave-dialog-close"
-                aria-label="关闭并留在当前页面"
-                data-testid="editor-leave-close"
-                @click="finishLeaveDecision(false)"
-            >×</button>
-            <h2 id="editor-leave-dialog-title">离开 Editor？</h2>
-            <p id="editor-leave-dialog-description">
-                如果之后用其他歌曲进入 Editor，当前单草稿可能被覆盖。建议先导出工程。
-            </p>
-            <label class="leave-dialog-preference">
-                <input v-model="suppressFutureLeaveWarning" type="checkbox" data-testid="editor-leave-suppress">
-                <span>之后不再显示普通离页提示</span>
-            </label>
-            <div class="leave-dialog-actions">
-                <button
-                    ref="leaveStayButton"
-                    type="button"
-                    class="leave-stay"
-                    data-testid="editor-leave-stay"
-                    @click="finishLeaveDecision(false)"
-                >留在此页</button>
-                <button
-                    type="button"
-                    class="leave-confirm"
-                    data-testid="editor-leave-confirm"
-                    @click="confirmLeave"
-                >仍然离开</button>
-            </div>
-        </dialog>
+        <EditorLeaveGuard />
     </main>
 </template>
 
 <script setup lang="ts">
 import {
     computed,
-    nextTick,
     onBeforeUnmount,
     ref,
     shallowRef,
     watch,
 } from 'vue';
 import {
-    onBeforeRouteLeave,
     useRoute,
     useRouter,
 } from 'vue-router';
 import { ElMessage } from 'element-plus';
 import { useAudioSessionService } from '../audio/audioSessionService';
 import EditorToolbar from '../components/EditorToolbar.vue';
+import EditorLeaveGuard from '../components/EditorLeaveGuard.vue';
 import '../editor/controls.css';
 import { resolveEditorUnavailableRecovery } from '../editor/routeRecovery';
 import { useEditorSessionController } from '../editor/editorSessionController';
@@ -419,93 +379,7 @@ const updateProject = (
     immediate: boolean,
 ) => controller.updateProject(project, immediate);
 
-const leaveDialog = ref<HTMLDialogElement | null>(null);
-const leaveStayButton = ref<HTMLButtonElement | null>(null);
-const suppressFutureLeaveWarning = ref(false);
-let pendingLeaveDecision: {
-    promise: Promise<boolean>;
-    resolve: (value: boolean) => void;
-} | null = null;
-let leaveTransition: Promise<void> | null = null;
-
-const finishLeaveDecision = (shouldLeave: boolean) => {
-    const pending = pendingLeaveDecision;
-    if (!pending) return;
-    pendingLeaveDecision = null;
-    if (leaveDialog.value?.open) leaveDialog.value.close();
-    pending.resolve(shouldLeave);
-};
-
-const requestLeaveDecision = (): Promise<boolean> => {
-    if (pendingLeaveDecision) return pendingLeaveDecision.promise;
-    suppressFutureLeaveWarning.value = false;
-    let resolveDecision!: (value: boolean) => void;
-    const promise = new Promise<boolean>((resolve) => {
-        resolveDecision = resolve;
-    });
-    pendingLeaveDecision = { promise, resolve: resolveDecision };
-    void nextTick(() => {
-        const dialog = leaveDialog.value;
-        if (!dialog || pendingLeaveDecision?.promise !== promise) {
-            finishLeaveDecision(false);
-            return;
-        }
-        try {
-            if (!dialog.open) dialog.showModal();
-        } catch {
-            finishLeaveDecision(false);
-            return;
-        }
-        leaveStayButton.value?.focus();
-    });
-    return promise;
-};
-
-const onLeaveDialogCancel = (event: Event) => {
-    event.preventDefault();
-    finishLeaveDecision(false);
-};
-
-const onLeaveDialogBackdropClick = (event: MouseEvent) => {
-    const dialog = leaveDialog.value;
-    if (!dialog || event.target !== dialog) return;
-    const bounds = dialog.getBoundingClientRect();
-    const outside = event.clientX < bounds.left
-        || event.clientX > bounds.right
-        || event.clientY < bounds.top
-        || event.clientY > bounds.bottom;
-    if (outside) finishLeaveDecision(false);
-};
-
-const confirmLeave = async () => {
-    try {
-        if (suppressFutureLeaveWarning.value) {
-            await controller.setLeaveWarningEnabled(false);
-        }
-        finishLeaveDecision(true);
-    } catch (error) {
-        ElMessage.error(error instanceof Error ? error.message : '无法保存离页提示设置。');
-        leaveStayButton.value?.focus();
-    }
-};
-
-const leaveEditorOnce = () => {
-    leaveTransition ??= controller.leave();
-    return leaveTransition;
-};
-
-onBeforeRouteLeave(async () => {
-    if (controller.shouldWarnOnLeave()) {
-        const shouldLeave = await requestLeaveDecision();
-        if (!shouldLeave) return false;
-    }
-    await separationService.bind(null);
-    await leaveEditorOnce();
-    return true;
-});
-
 onBeforeUnmount(() => {
-    finishLeaveDecision(false);
     cursorRequestRevision += 1;
     if (cursorTimer) clearTimeout(cursorTimer);
     unsubscribe();
@@ -521,13 +395,21 @@ onBeforeUnmount(() => {
     --editor-inner-class-width: 144px;
     --editor-control-radius: 4px;
     --editor-flyout-radius: 8px;
-    min-height: 100dvh;
-    padding: 0 0 var(--app-player-inset, 150px);
+    display: flex;
+    flex-direction: column;
+    height: calc(100dvh - var(--app-player-inset, 80px));
+    min-height: 0;
+    overflow: hidden;
+    padding: 0;
     color: var(--ink);
     font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
     background: var(--canvas);
 }
-.editor-shell { width: 100%; min-width: 0; }
+.editor-shell { flex: 1; display: flex; flex-direction: column; width: 100%; min-width: 0; min-height: 0; overflow: hidden; }
+.editor-panel { flex: 1; min-height: 0; overflow: auto; overscroll-behavior: contain; }
+.editor-panel:focus-visible { outline: 2px solid var(--accent-soft); outline-offset: -2px; }
+.editor-state-shell { overflow: auto; overscroll-behavior: contain; }
+.editor-panel :deep(.stem-workspace) { padding-top: 0; }
 .editor-state { margin: 20px; border: 1px solid var(--hairline); border-radius: 4px; padding: 24px; background: var(--surface-2); }
 .editor-state h2 { margin: 0 0 12px; font-size: 17px; }
 .editor-state p { margin: 8px 0; color: var(--body); line-height: 1.65; font-size: 13px; }
@@ -537,80 +419,4 @@ button:hover { background: var(--editor-control-hover); }
 button:focus-visible { outline: 2px solid var(--accent-soft); outline-offset: 2px; }
 .editor-error { margin: 0; padding: 6px 14px; border-bottom: 1px solid var(--error-hairline); color: var(--error); font-size: 12px; line-height: 1.5; }
 .editor-state .success-message { color: var(--accent-soft); }
-.editor-leave-dialog {
-    box-sizing: border-box;
-    width: min(520px, calc(100vw - 32px));
-    border: 1px solid var(--hairline-focus);
-    border-radius: 8px;
-    padding: 20px;
-    color: var(--ink);
-    background: var(--surface-2);
-    box-shadow: 0 24px 80px rgba(0, 0, 0, .72), inset 0 0 28px var(--glow-inset);
-}
-
-.editor-leave-dialog::backdrop {
-    background: var(--editor-modal-backdrop);
-}
-
-.editor-leave-dialog h2 {
-    margin: 0 36px 10px 0;
-    color: var(--ink);
-    font-size: 1.05rem;
-}
-
-.editor-leave-dialog p {
-    margin: 0;
-    color: var(--body);
-    line-height: 1.65;
-}
-
-.leave-dialog-close {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    width: 30px;
-    padding: 0;
-    border-color: transparent;
-    color: var(--body);
-    background: transparent;
-    font-size: 1.2rem;
-}
-
-.leave-dialog-preference {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-top: 16px;
-    color: var(--ink);
-    font-size: .86rem;
-}
-
-.leave-dialog-preference input {
-    width: 16px;
-    height: 16px;
-    margin: 0;
-    accent-color: var(--accent);
-}
-
-.leave-dialog-actions {
-    display: flex;
-    justify-content: flex-end;
-    gap: 8px;
-    margin-top: 20px;
-}
-
-.leave-stay {
-    border-color: var(--accent-soft);
-    background: var(--editor-control-primary);
-}
-
-.leave-confirm {
-    color: var(--body);
-    background: var(--editor-control-quiet);
-}
-
-@media (prefers-reduced-motion: reduce) {
-    .editor-leave-dialog { scroll-behavior: auto; }
-}
-
 </style>

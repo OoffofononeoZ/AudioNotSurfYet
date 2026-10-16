@@ -246,6 +246,7 @@ import {
     onMounted,
     reactive,
     ref,
+    shallowRef,
     watch,
     type ComponentPublicInstance,
 } from 'vue';
@@ -876,7 +877,7 @@ interface SurfacePointerState {
     dragOffsetSeconds?: number;
     selectionAtStart?: MarkerBlockSelection;
 }
-const pointer = ref<SurfacePointerState | null>(null);
+const pointer = shallowRef<SurfacePointerState | null>(null);
 const quickMenu = ref<{
     surfaceKey: string;
     x: number;

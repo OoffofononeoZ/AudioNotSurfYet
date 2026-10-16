@@ -48,8 +48,8 @@ const decodeSavedProject = async (page: Page, index = 0) => {
 const openCurrentEditor = async (page: Page) => {
     await page.getByTestId('header-editor-link').click();
     await expect(page.getByTestId('editor-ready')).toBeVisible({ timeout: 30_000 });
-    await expect(page.getByTestId('editor-repeat-state')).toHaveText('单曲循环');
-    await expect(page.locator('#music-bar-container')).toHaveCount(0);
+    await expect(page.getByTestId('playback-mode')).toHaveAttribute('aria-label', /单曲循环/);
+    await expect(page.locator('#music-bar-container')).toBeVisible();
 };
 
 const createFifteenMinuteFixture = async (page: Page) => {
@@ -333,8 +333,8 @@ test('hardens the three audio formats and project file failure boundaries', asyn
         }
         observedFormats.push(extension);
         if (index < FORMAT_FIXTURES.length - 1) {
-            const playbackToggle = page.getByTestId('editor-playback-toggle');
-            if (await playbackToggle.textContent() === '暂停') {
+            const playbackToggle = page.getByTestId('toggle-playback');
+            if (await playbackToggle.getAttribute('aria-label') === '暂停') {
                 await playbackToggle.click();
             }
             await page.getByRole('link', { name: 'AUDIOSURF' }).click();
@@ -350,7 +350,7 @@ test('hardens the three audio formats and project file failure boundaries', asyn
         }
     }
 
-    const title = await page.getByTestId('editor-ready').locator('h2').textContent();
+    const title = await page.locator('#music-info-container').textContent();
     await queuePickerData(page, [{
         name: 'wrong-track.audiosurf-editor.json',
         mimeType: 'application/json',
@@ -358,10 +358,10 @@ test('hardens the three audio formats and project file failure boundaries', asyn
     }]);
     await page.getByTestId('import-editor-project').click();
     await expect(page.locator('.el-message--error')).toBeVisible();
-    await expect(page.getByTestId('editor-ready').locator('h2')).toHaveText(title ?? '');
+    await expect(page.locator('#music-info-container')).toHaveText(title ?? '');
     await page.reload();
     await expect(page.getByTestId('editor-ready')).toBeVisible({ timeout: 30_000 });
-    await expect(page.getByTestId('editor-playback-toggle')).toHaveText('播放');
+    await expect(page.getByTestId('toggle-playback')).toHaveAttribute('aria-label', '播放');
 
     console.log(JSON.stringify({
         metric: 'e6-format-project-matrix',
@@ -450,12 +450,12 @@ test('keeps a deterministic 10,000-event project virtualized and responsive', as
     const timeline = page.getByTestId('editor-timeline');
     const timelineBounds = await timeline.boundingBox();
     expect(timelineBounds).toBeTruthy();
-    const beforeSeek = await page.getByTestId('editor-current-time').textContent();
-    await observeInputToMutation(page, '[data-testid="editor-timeline"]', '[data-testid="editor-current-time"]', 'seek');
+    const beforeSeek = await page.getByTestId('playback-progress').getAttribute('aria-valuenow');
+    await observeInputToMutation(page, '[data-testid="editor-timeline"]', '[data-testid="playback-progress"]', 'seek');
     await timeline.click({
         position: { x: timelineBounds!.width * 0.6, y: timelineBounds!.height * 0.5 },
     });
-    await expect(page.getByTestId('editor-current-time')).not.toHaveText(beforeSeek ?? '');
+    await expect(page.getByTestId('playback-progress')).not.toHaveAttribute('aria-valuenow', beforeSeek ?? '');
     feedback.seek = await readFeedback(page, 'seek');
 
     await firstPointSurface.scrollIntoViewIfNeeded();
@@ -571,7 +571,7 @@ test('keeps keyboard semantics, visible focus and stable resources over 20 cycle
             await page.getByTestId('overwrite-conflicting-draft').click();
         }
         await expect(page.getByTestId('editor-ready')).toBeVisible({ timeout: 30_000 });
-        const playback = page.getByTestId('editor-playback-toggle');
+        const playback = page.getByTestId('toggle-playback');
         await playback.focus();
         await page.keyboard.press('Space');
         const focus = await playback.evaluate((element) => ({

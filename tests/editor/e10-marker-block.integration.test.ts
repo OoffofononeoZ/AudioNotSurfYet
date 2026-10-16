@@ -142,7 +142,7 @@ describe('Editor E10 marker block integration', () => {
     test('uses a native themed dialog while retaining the route guard and beforeunload controller path', () => {
         const source = readFileSync(path.resolve(
             import.meta.dirname,
-            '../../src/views/Editor.vue',
+            '../../src/components/EditorLeaveGuard.vue',
         ), 'utf8');
         expect(source).toContain('<dialog');
         expect(source).toContain('dialog.showModal()');

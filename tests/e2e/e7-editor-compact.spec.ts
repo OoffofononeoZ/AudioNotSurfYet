@@ -36,7 +36,7 @@ const openEditor = async (page: Page) => {
     );
     await page.getByTestId('header-editor-link').click();
     await expect(page.getByTestId('editor-ready')).toBeVisible({ timeout: 30_000 });
-    await expect(page.locator('#music-bar-container')).toHaveCount(0);
+    await expect(page.locator('#music-bar-container')).toBeVisible();
 };
 
 const selectOverlay = async (page: Page, featureId: string) => {
@@ -73,7 +73,7 @@ test('keeps the Editor workbench compact and functional across viewports', async
             if (!element) throw new Error(`Missing ${selector}`);
             return getComputedStyle(element);
         };
-        const toolbar = rect('[data-testid="editor-ready"]');
+        const toolbar = rect('[data-testid="editor-toolbar"]');
         const waveform = rect('[data-testid="editor-timeline"]');
         const pointRow = rect('.marker-surface');
         const rangeRow = rect('.range-surface');
@@ -82,11 +82,11 @@ test('keeps the Editor workbench compact and functional across viewports', async
         ).filter((element) => element.dataset.testid !== 'editor-ready')
             .map((element) => Number.parseFloat(getComputedStyle(element).borderRadius) || 0);
         const controlHeights = Array.from(
-            document.querySelectorAll<HTMLElement>('[data-testid="editor-ready"] button, [data-testid="editor-ready"] select'),
+            document.querySelectorAll<HTMLElement>('[data-testid="editor-toolbar"] .project-actions button'),
         ).map((element) => element.getBoundingClientRect().height);
         return {
             toolbarHeight: toolbar.height,
-            toolbarRadius: Number.parseFloat(style('[data-testid="editor-ready"]').borderRadius) || 0,
+            toolbarRadius: Number.parseFloat(style('[data-testid="editor-toolbar"]').borderRadius) || 0,
             waveformHeight: waveform.height,
             pointRowHeight: pointRow.height,
             rangeRowHeight: rangeRow.height,
@@ -98,22 +98,22 @@ test('keeps the Editor workbench compact and functional across viewports', async
         };
     });
 
-    expect(desktopMetrics.toolbarHeight).toBeLessThanOrEqual(84);
+    expect(desktopMetrics.toolbarHeight).toBe(64);
     expect(desktopMetrics.waveformHeight).toBe(88);
     expect(desktopMetrics.pointRowHeight).toBe(44);
     expect(desktopMetrics.rangeRowHeight).toBe(44);
     expect(desktopMetrics.laneNameWidth).toBe(152);
     expect(desktopMetrics.innerClassWidth).toBe(144);
-    expect(desktopMetrics.toolbarRadius).toBe(10);
+    expect(desktopMetrics.toolbarRadius).toBe(0);
     expect(Math.max(...desktopMetrics.majorRadii)).toBeLessThanOrEqual(2);
-    expect(Math.max(...desktopMetrics.controlHeights)).toBeLessThanOrEqual(30.5);
-    expect(desktopMetrics.pagePaddingTop).toBe(12);
+    expect(Math.max(...desktopMetrics.controlHeights)).toBe(34);
+    expect(desktopMetrics.pagePaddingTop).toBe(0);
 
-    const playbackToggle = page.getByTestId('editor-playback-toggle');
+    const playbackToggle = page.getByTestId('toggle-playback');
     await playbackToggle.click();
-    await expect(playbackToggle).toHaveText('播放');
+    await expect(playbackToggle).toHaveAttribute('aria-label', '播放');
     await playbackToggle.click();
-    await expect(playbackToggle).toHaveText('暂停');
+    await expect(playbackToggle).toHaveAttribute('aria-label', '暂停');
 
     const viewportBefore = await page.getByTestId('editor-viewport-state').textContent();
     await page.getByTestId('editor-zoom-in').click();
@@ -133,7 +133,7 @@ test('keeps the Editor workbench compact and functional across viewports', async
         const responsive = await page.evaluate(() => {
             const stage = document.querySelector<HTMLElement>('[data-testid="editor-timeline"]');
             const point = document.querySelector<HTMLElement>('.marker-surface');
-            const toolbar = document.querySelector<HTMLElement>('[data-testid="editor-ready"]');
+            const toolbar = document.querySelector<HTMLElement>('[data-testid="editor-toolbar"]');
             if (!stage || !point || !toolbar) throw new Error('Editor workbench is incomplete.');
             return {
                 waveformHeight: stage.getBoundingClientRect().height,
@@ -239,13 +239,14 @@ test('keeps the fullscreen overlay fixed, transient and pointer-through', async 
         position: 'fixed',
         pointerEvents: 'none',
     });
-    expect(initial.controls.left).toBe(228);
-    expect(initial.controls.top).toBe(12);
+    expect(initial.controls.left + initial.controls.width).toBe(1220);
+    expect(initial.controls.top).toBe(15);
     expect(Math.abs(initial.panel.left - initial.marker.left)).toBeLessThanOrEqual(1);
     expect(Math.abs(initial.panel.width - initial.marker.width)).toBeLessThanOrEqual(1);
 
-    await page.evaluate(() => window.scrollTo({ top: 420, behavior: 'instant' }));
-    await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(0);
+    await page.locator('#editor-marking-panel').evaluate(element => element.scrollTo({ top: 420, behavior: 'instant' }));
+    await expect.poll(() => page.locator('#editor-marking-panel').evaluate(element => element.scrollTop)).toBeGreaterThan(0);
+    expect(await page.evaluate(() => window.scrollY)).toBe(0);
     const afterScroll = await page.evaluate(() => {
         const rect = (selector: string) => {
             const element = document.querySelector<HTMLElement>(selector);

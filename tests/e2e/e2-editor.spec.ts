@@ -40,13 +40,13 @@ test('supports waveform seek, zoom, context pan/menu and keyboard controls', asy
     test.setTimeout(90_000);
     const issues = issuesFor(page);
     await openE2(page);
-    await page.getByTestId('editor-playback-toggle').click();
+    await page.getByTestId('toggle-playback').click();
     const timeline = page.getByTestId('editor-timeline');
     await timeline.scrollIntoViewIfNeeded();
     const bounds = await timeline.boundingBox();
     expect(bounds).toBeTruthy();
     await page.evaluate(() => {
-        const output = document.querySelector('[data-testid="editor-current-time"]');
+        const output = document.querySelector('[data-testid="playback-progress"]');
         const state = { startedAt: performance.now(), value: null as number | null };
         (window as typeof window & { __e2Feedback?: typeof state }).__e2Feedback = state;
         const observer = new MutationObserver(() => {
@@ -54,10 +54,10 @@ test('supports waveform seek, zoom, context pan/menu and keyboard controls', asy
             state.value = performance.now() - state.startedAt;
             observer.disconnect();
         });
-        if (output) observer.observe(output, { childList: true, subtree: true, characterData: true });
+        if (output) observer.observe(output, { attributes: true, attributeFilter: ['aria-valuenow'] });
     });
     await page.mouse.click(bounds!.x + bounds!.width * 0.5, bounds!.y + bounds!.height / 2);
-    await expect(page.getByTestId('editor-current-time')).toContainText('0:06', {
+    await expect(page.getByTestId('playback-progress')).toHaveAttribute('aria-valuetext', /0:06/, {
         timeout: 1_000,
     });
     await expect.poll(() => page.evaluate(() =>
@@ -87,9 +87,9 @@ test('supports waveform seek, zoom, context pan/menu and keyboard controls', asy
 
     await timeline.focus();
     await timeline.press('Home');
-    await expect(page.getByTestId('editor-current-time')).toContainText('0:00');
+    await expect(page.getByTestId('playback-progress')).toHaveAttribute('aria-valuetext', /0:00/);
     await timeline.press('End');
-    await expect(page.getByTestId('editor-current-time')).toContainText('0:12');
+    await expect(page.getByTestId('playback-progress')).toHaveAttribute('aria-valuetext', /0:12/);
     await timeline.press('Shift+F10');
     await expect(page.getByTestId('editor-timeline-menu')).toBeVisible();
     await page.keyboard.press('Escape');

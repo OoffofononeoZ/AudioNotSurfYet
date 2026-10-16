@@ -97,7 +97,7 @@ next_action: "浏览器处理目标术语已登记；实施后核对 provenance/
 | pointer-through overlay | E7 修订的窗口级灰色半透明分析层；背景、全视口 Canvas、说明和空白不接收 pointer，只有复合入口、菜单、重试和三个垂直手柄接收输入 | 让固定浮层覆盖 Header 与工作台而不夺取底层命中 | [ADR-0011](../architecture/adrs/0011-editor-fullscreen-overlay.md) |
 | overlay visibility | 按歌曲 content hash 保存于 Editor preferences 的本地开关；与 JSON V1 中保留的上次 `featureId` 分离 | 同歌刷新恢复打开/关闭；导入工程不携带开关；关闭时 analysis 只保留 Buffer | [ADR-0011](../architecture/adrs/0011-editor-fullscreen-overlay.md) |
 | viewport-visible event DOM | 只为当前时间视口内可见 point/range 创建交互 DOM，全部空格与高密度网格由 Canvas 表达 | 允许 E6 验证 10,000 事件而不把容量门禁变成 schema 硬上限 | [Editor test strategy](../delivery/editor/test-strategy.md) |
-| compact workbench | Editor 以双层工具栏、平面内容区、细分隔线和 44px 轨道行组织的高密度桌面布局 | 只改变视觉层级与空间密度，不改变歌曲、工程、tempo、point/range、overlay 或 lease 语义 | [ADR-0010](../architecture/adrs/0010-editor-compact-workbench.md) |
+| compact workbench | Editor 固定顶栏、独立滚动工作区、常驻 MusicBar、细分隔线和 44px 轨道行 | 公共框架已替代历史双层工具栏；工程仍为 JSON V1 | [当前框架](editor-workspace.md)、历史 [ADR-0010](../architecture/adrs/0010-editor-compact-workbench.md) |
 | Editor canonical | 某个 E 里程碑在 clean HEAD 上执行的正式 eval run，绑定 commit、环境、日志和 summary hash | provisional 不能替代 canonical；owner 批准后才开放下一个 E 里程碑 | [Editor execution plan](../delivery/editor/execution-plan.md) |
 
 ## Approved Processing Target Terms（尚未实现）

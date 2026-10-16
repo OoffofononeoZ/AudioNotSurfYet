@@ -382,6 +382,24 @@ describe('Editor E1 foundation integration', () => {
         await h.controller.dispose();
     });
 
+    test('freezes late tempo results after confirming a track change', async () => {
+        let resolveTempo!: (value: TempoEstimateResult | null) => void;
+        const tempo = new Promise<TempoEstimateResult | null>(resolve => { resolveTempo = resolve; });
+        const h = createControllerHarness(null, tempo);
+        await h.controller.enter(h.trackA.id);
+        await vi.waitFor(() => expect(h.controller.getSnapshot().tempoEstimateState).toBe('estimating'));
+        const project = h.controller.getSnapshot().project;
+        const token = await h.controller.approveTrackChange(h.trackB.id);
+        resolveTempo({ kind: 'tempo-estimate-result', requestId: 'late-after-confirm', generation: 1, trackHash: HASH_A,
+            configHash: 'config', state: 'reliable', bpm: 140, confidence: .95 });
+        await new Promise(resolve => setTimeout(resolve, 0));
+        expect(h.controller.getSnapshot().project).toEqual(project);
+        expect(h.controller.isTrackChangeApproved(token!, h.trackB.id)).toBe(true);
+        await h.controller.enter(h.trackB.id, token!);
+        expect(h.controller.getSnapshot().state).toBe('ready');
+        await h.controller.dispose();
+    });
+
     test('validates imports before atomic replacement', async () => {
         const harness = createControllerHarness();
         await harness.controller.enter(harness.trackA.id);

@@ -24,6 +24,7 @@ declare module 'vue' {
     EditorAnalysisOverlay: typeof import('./src/components/EditorAnalysisOverlay.vue')['default']
     EditorCandidateTimeline: typeof import('./src/components/EditorCandidateTimeline.vue')['default']
     EditorIcon: typeof import('./src/components/EditorIcon.vue')['default']
+    EditorLeaveGuard: typeof import('./src/components/EditorLeaveGuard.vue')['default']
     EditorPointWorkspace: typeof import('./src/components/EditorPointWorkspace.vue')['default']
     EditorRangeWorkspace: typeof import('./src/components/EditorRangeWorkspace.vue')['default']
     EditorSeparationWorkspace: typeof import('./src/components/EditorSeparationWorkspace.vue')['default']
