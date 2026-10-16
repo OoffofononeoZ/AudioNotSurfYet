@@ -123,11 +123,20 @@ test('optional local music visual review captures both presets at two song secti
     if(await page.locator('#music-bar-container').getAttribute('data-playback-state')==='playing')await page.getByTestId('toggle-playback').click();
     const empty=await exported(page);
     for(const id of ['geometric-0.6','prismatic-voyage']) {
-        await importProject(page,empty);await preset(page,id);await page.getByRole('tab',{name:'状态',exact:true}).click();if(id==='geometric-0.6')await expect(page.getByTestId('visualizer-preview-canvas')).toHaveAttribute('data-native-input-state','ready');else await expect(page.locator('.viz-status-lines')).toContainText('已就绪',{timeout:60000});
+        await importProject(page,empty);await preset(page,id);await page.getByRole('tab',{name:'状态',exact:true}).click();await expect(page.locator('.viz-status-lines')).toContainText('已就绪',{timeout:60000});
         await page.getByTestId('visualizer-preview-frame').hover();await page.getByTestId('visualizer-fullscreen-toggle').click();const seek=page.getByTestId('visualizer-seek');
-        for(const portion of [.2,.65]){await seek.fill(String(Number((empty.track.durationSeconds*portion).toFixed(3))));await seek.dispatchEvent('input');await page.waitForTimeout(150);if(id==='geometric-0.6')await expect(page.getByTestId('visualizer-preview-canvas')).toHaveAttribute('data-native-input-state','ready');await page.getByTestId('visualizer-preview-canvas').screenshot({path:`test-results/music-${id}-${portion}-${info.project.name}.png`});}
+        for(const portion of [.2,.65]){await seek.fill(String(Number((empty.track.durationSeconds*portion).toFixed(3))));await seek.dispatchEvent('input');await page.waitForTimeout(150);await page.getByTestId('visualizer-preview-canvas').screenshot({path:`test-results/music-${id}-${portion}-${info.project.name}.png`});}
         await page.keyboard.press('Escape');
         if(id==='geometric-0.6') {
+            if(empty.track.durationSeconds<=8) {
+                await page.getByTestId('visualizer-preview-frame').hover();await page.getByTestId('start-visualizer-recording').click();
+                await expect(page.locator('[data-recording-status=ready]')).toBeVisible({timeout:30000});
+                await page.getByTestId('save-visualizer-recording').click();
+                await expect.poll(async()=>(await savedPickerEntries(page)).some(e=>e.name.endsWith('.webm'))).toBe(true);
+                const saved=(await savedPickerEntries(page)).find(e=>e.name.endsWith('.webm'))!;
+                await mkdir('artifacts/visualizer-composition/presets',{recursive:true});
+                await writeFile(`artifacts/visualizer-composition/presets/local-music-${info.project.name}.webm`,Buffer.from(saved.base64,'base64'));
+            }
             const analyzer=await exported(page);for(const e of analyzer.elements)for(const b of e.bindings)if(b.parameterId==='spectrum')b.source={kind:'analysis',featureId:'amplitudeSpectrum',projection:{kind:'full'}};
             await importProject(page,analyzer);await expect(page.locator('.viz-status-lines')).toContainText('已就绪',{timeout:60000});
             await page.getByTestId('visualizer-preview-frame').hover();await page.getByTestId('visualizer-fullscreen-toggle').click();

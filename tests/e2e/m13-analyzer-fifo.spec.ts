@@ -42,7 +42,7 @@ const expandedFeatureIds = (page: Page) => page.locator(
 ).evaluateAll((elements) => elements.map((element) =>
     (element as HTMLElement).dataset.featureId));
 
-test('keeps all 21 cards stable and applies an atomic four-item FIFO', async ({ page }) => {
+test('keeps all registered cards stable and applies an atomic four-item FIFO', async ({ page }) => {
     const issues = captureBrowserIssues(page);
     await page.goto('/analyzer');
 
@@ -54,10 +54,7 @@ test('keeps all 21 cards stable and applies an atomic four-item FIFO', async ({ 
     await expect(page.locator('.analysis-card select')).toHaveCount(0);
     await expect(cards.getByRole('button', { name: '移除' })).toHaveCount(0);
     await expect(page.locator('.analyzer-status')).toContainText(
-        '0/4 项展开分析',
-    );
-    await expect(page.locator('.analyzer-status')).toContainText(
-        '展开分析开始分析',
+        '0/4 项',
     );
 
     for (const featureId of FEATURE_IDS.slice(0, 4)) {

@@ -40,7 +40,7 @@ test('first feature exposes stereo charts, sources and exact cached 30Hz cursor 
     const first = await sample(1.21); expect(first.value).toHaveLength(128); expect(Math.max(...first.value)).toBeGreaterThan(0);
     expect(first.frameStartSeconds).toBeCloseTo(1.2,10); await sample(2.8); expect(await sample(1.21)).toEqual(first);
     await card.locator('.plot').click({position:{x:250,y:65}});
-    await card.screenshot({path:`test-results/wallpaper-spectrum-${info.project.name}.png`});
+    await card.locator('.plot').screenshot({path:`test-results/wallpaper-spectrum-${info.project.name}.png`});
     await page.reload(); await ready(page);
     expect(await sample(1.21)).toEqual(first);
     await expect.poll(()=>page.evaluate(() => (window as unknown as {__AUDIO_NOT_SURF_YET_M6__: Bridge}).__AUDIO_NOT_SURF_YET_M6__.getState().cacheState)).toBe('hit');
@@ -49,13 +49,16 @@ test('first feature exposes stereo charts, sources and exact cached 30Hz cursor 
 
 test('old Analyzer workspace is cleared and rewritten without losing queue or the current Blob', async ({page}) => {
     await installFilePickerStub(page); await page.goto('/'); await chooseFiles(page,[fixture]);
+    await expect(page.locator('#music-bar-container')).toHaveAttribute('data-playback-state','playing');
+    await page.getByTestId('toggle-playback').click();
+    await expect(page.locator('#music-bar-container')).toHaveAttribute('data-playback-state','paused');
     await expect(page.locator('#music-bar-container')).toHaveAttribute('data-persistence-state','ready');
     await page.evaluate(async () => {
         const db = await new Promise<IDBDatabase>((resolve,reject)=>{const r=indexedDB.open('audionotsurfyet-session',1);r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error);});
         await new Promise<void>((resolve,reject)=>{
             const tx=db.transaction(['session','current-analysis-cache'],'readwrite'),store=tx.objectStore('session'),read=store.get('latest');
             read.onsuccess=()=>{const s=read.result;delete s.analyzerWorkspaceVersion;s.featureOrder='obsolete';s.activeCards=[{slot:0,featureId:'rms'}];s.viewport={startSeconds:1,endSeconds:3,zoom:2};s.currentAnalysisCache={obsolete:true};store.put(s,'latest');tx.objectStore('current-analysis-cache').put({obsolete:true},'current');};
-            tx.oncomplete=()=>resolve();tx.onerror=()=>reject(tx.error);
+            tx.oncomplete=()=>resolve();tx.onerror=()=>reject(tx.error);tx.onabort=()=>reject(tx.error);
         });db.close();
     });
     await page.reload(); await page.getByRole('link',{name:'Analyzer',exact:true}).click();

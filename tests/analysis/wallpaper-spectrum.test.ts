@@ -98,3 +98,17 @@ test('cancellation is observed at bounded batches and malformed stereo is reject
     await expect(analyzeWallpaperSpectrum(pcm, pcm, config, 'song', { isCancelled: () => cancelled, yieldControl: async () => { cancelled = true; } })).rejects.toThrow('cancelled');
     await expect(runAnalysisJob({ kind:'analyze',jobId:'bad',generation:1,trackHash:'song',config,featureIds:['wallpaperEngineSpectrum'],cursorFeatureIds:['wallpaperEngineSpectrum'],pcm:pcm.buffer,durationSeconds:1 })).rejects.toThrow('stereo PCM');
 });
+
+test('Float32 stereo cache preserves spikes and rejects invalid values or layout', async () => {
+    const config = await createAnalysisConfig(48000), pcm = tone(220,4800);
+    const series = await analyzeWallpaperSpectrum(pcm,pcm,config,'song',{yieldControl});
+    if (series.payload.kind !== 'stereo-spectrum-f32') throw Error('wrong payload');
+    series.payload.values[72] = 2.125;
+    expect(decodeAnalysisSeries(encodeAnalysisSeries(series))).toEqual(series);
+    for(const bad of [-1, NaN, Infinity]) {
+        series.payload.values[72] = bad;
+        expect(()=>encodeAnalysisSeries(series)).toThrow('invalid');
+    }
+    series.payload.values[72] = 2.125;
+    expect(()=>encodeAnalysisSeries({...series,dimensions:[64,2]})).toThrow('invalid');
+});

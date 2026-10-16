@@ -76,7 +76,7 @@ test('playlist switch asks before replacing a draft; cancellation preserves song
 
 test('old draft export and cancellation preserve raw data until explicit replacement', async ({ page }) => {
     await setup(page);
-    const raw = { schemaVersion: 1, analyzerWorkspaceVersion: 2, savedAt: '2026-01-01T00:00:00Z', project: { scene: 'previous-project' } };
+    const raw = { schemaVersion: 1, savedAt: '2026-01-01T00:00:00Z', project: { scene: 'previous-project' } };
     await page.evaluate(async envelope => {
         const db = await new Promise<IDBDatabase>((resolve, reject) => {
             const open = indexedDB.open('audionotsurfyet-visualizer', 1);

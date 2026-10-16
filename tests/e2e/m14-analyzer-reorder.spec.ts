@@ -29,9 +29,9 @@ test('pins newest first, restores default positions, and preserves the original 
     await expect(page.locator('.pinned-panel .toggle-card').first()).toBeFocused();
     const originals = await original.locator('.analysis-card').evaluateAll(els => els.map(el => (el as HTMLElement).dataset.featureId));
     expect(originals).toEqual(FEATURE_IDS.filter(id => !FEATURE_IDS.slice(1, 5).includes(id)));
-    await page.locator('.pinned-panel [data-feature-id="zcr"] .toggle-card').click();
-    await expand(page, 'rms');
-    expect(await pinnedIds(page)).toEqual(['rms', ...FEATURE_IDS.slice(2, 5).reverse()]);
+    await page.locator('.pinned-panel [data-feature-id="' + FEATURE_IDS[1] + '"] .toggle-card').click();
+    await expand(page, FEATURE_IDS[0]);
+    expect(await pinnedIds(page)).toEqual([FEATURE_IDS[0], ...FEATURE_IDS.slice(2, 5).reverse()]);
     await expect(page.locator('.plot canvas')).toHaveCount(8);
     await expectAnalyzerList(page, 1280);
     await expect(page.locator('#music-bar-container')).toHaveAttribute('data-persistence-state', 'ready');
@@ -112,18 +112,22 @@ test('zooms all plots at the pointer while preserving normal scrolling outside p
     const before = await readAnalyzerViewport(page);
     const rect = (await plot.boundingBox())!;
     const x = rect.width * 0.3;
-    const anchor = before.start + (before.end - before.start) * 0.3;
+    await plot.evaluate(el => el.addEventListener('wheel', event => {
+        (el as HTMLElement).dataset.testWheelX = String((event as WheelEvent).clientX);
+    }, {once:true}));
     await page.mouse.move(rect.x + x, rect.y + 60);
     await page.mouse.wheel(0, -120);
     await expect(plot).toHaveAttribute('data-zoom', '1.12');
     const after = await readAnalyzerViewport(page);
-    expect(after.start + (after.end - after.start) * 0.3).toBeCloseTo(anchor, 5);
+    const ratio = (Number(await plot.getAttribute('data-test-wheel-x')) - rect.x) / rect.width;
+    const anchor = before.start + (before.end - before.start) * ratio;
+    expect(after.start + (after.end - after.start) * ratio).toBeCloseTo(anchor, 5);
     expect(await page.locator('.plot').evaluateAll(els => els.map(el => ({
         zoom: (el as HTMLElement).dataset.zoom, start: (el as HTMLElement).dataset.start, end: (el as HTMLElement).dataset.end,
     })))).toEqual(Array(2).fill({ zoom: String(after.zoom), start: String(after.start), end: String(after.end) }));
     const original = page.locator('.original-list');
-    const listBounds = (await original.boundingBox())!;
-    await page.mouse.move(listBounds.x + 100, listBounds.y + 50);
+    await original.evaluate(el => { el.scrollTop = 0; });
+    await original.hover({position:{x:100,y:10}});
     await page.mouse.wheel(0, 250);
     await expect.poll(() => original.evaluate(el => el.scrollTop)).toBeGreaterThan(0);
     expect(await readAnalyzerViewport(page)).toEqual(after);

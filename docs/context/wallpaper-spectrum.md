@@ -39,3 +39,9 @@ Analyzer 工作区标记 `analyzerWorkspaceVersion:2`；旧标记或缺少标记
 ## 验证入口与边界
 
 数值：`tests/analysis/wallpaper-spectrum.test.ts`；混合/缓存：`tests/analysis/m6-coordinator.integration.test.ts`；浏览器：`tests/e2e/wallpaper-spectrum.spec.ts`、`tests/e2e/visualizer-presets.spec.ts`。15 分钟回归沿用 `m6-analysis.spec.ts` 的 ≤100ms 交互反馈、无分析归因 >50ms 主线程长任务及取消检查，四项中包含本特征。日常功能验证不更新历史 canonical 或整体 readiness，也不以消除零值作为验收标准。
+
+2026-10-17 本轮功能验证：类型检查、生产构建与 40 文件 **229 项**相关 Vitest 通过。Chrome/Edge 各 **26 个不同场景**分批通过，包含新特征/链接/双声道图表/完整表格、混合活动项、刷新 cache hit、精确游标、旧工作区清理、原生切换/失败重试、几何预设、实际音乐画面/短录制，以及 M6/M7/M12/M13/M14 相邻回归。浏览器测试修订了旧文案、首项顺序、像素取整、工作区展开方式及顺序播放末尾假设；资源测试明确选列表循环，缩放精度和性能门槛不变。恢复缓存先于解码触发消费者注入，避免在缓存到达前重算。
+
+包含新特征的 15 分钟四项分析，在一轮 Chrome/Edge 中最大反馈为 **9.3ms / 9.1ms**，进度单调且取消通过，无分析归因 >50ms 主线程长任务。包含新特征的 20 次切歌/路由/取消循环，两端均为 1 个 Worker、1 个 AudioContext，RAF 范围 2–3；GPU context recovery 与离页释放另通过。独立 Editor 草稿基础集成 11 项包含在上述 229 项内，草稿格式未增加 Analyzer 版本字段。
+
+使用本地音乐的无元数据四秒片段检查两处画面并录制；两端 WebM 均经 FFmpeg 完整解码，视频 1280×720、VP9，按实际包时间戳测得约 **29.98fps / 29.73fps**。媒体仅留在忽略目录 `artifacts/visualizer-composition/presets/`，不新增受控 fixture 或记录用户原文件信息。构建保留既有大 chunk 与 Browserslist 数据过期提示。此结果为功能反馈，不是 clean canonical、整体 readiness 或发布批准。

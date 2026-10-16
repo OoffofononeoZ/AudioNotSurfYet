@@ -27,6 +27,15 @@ function resolve(s: AnalysisSeries, waveform?: (time: number) => readonly number
 }
 
 describe('Visualizer Analyzer input', () => {
+    test('Wallpaper vectors carry stereo units and preserve values above one through projection', () => {
+        const values = Float32Array.from({length:128},(_,i)=>i===72?2.125:i/128);
+        const s = series('wallpaperEngineSpectrum',{kind:'stereo-spectrum-f32',width:128,values});
+        const resolved = resolve(s);
+        expect(resolved).toMatchObject({state:'ready',unit:'we-strength',channelLayout:'stereo-64'});
+        expect(resolved.value).toEqual([...values]);
+        expect(projectAnalysisSeries(s,'default',{kind:'bin',index:72},0)).toBe(2.125);
+        expect(spectrumBands(resolved.value as number[],undefined,resolved.unit)[36]).toBe(1);
+    });
     test('requires the complete Buffer frame instead of treating extrema as samples', () => {
         expect(() => projectAnalysisSeries(buffer(), 'default', { kind: 'full' }, 0)).toThrow(/波形/);
         const samples = Array.from({ length: 1024 }, (_, i) => (i - 512) / 1024);
