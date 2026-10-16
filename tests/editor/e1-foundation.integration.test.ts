@@ -298,6 +298,7 @@ describe('Editor E1 foundation integration', () => {
         await repository.setLeaveWarningEnabled(false);
         expect(await repository.restore()).toEqual({
             schemaVersion: 1,
+            analyzerWorkspaceVersion: 2,
             savedAt: NOW.toISOString(),
             project,
         });

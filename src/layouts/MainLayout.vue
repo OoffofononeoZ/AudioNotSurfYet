@@ -82,9 +82,9 @@ const editorController = new EditorSessionController({
 provide(editorSessionControllerKey, editorController);
 const editorTranscription = new EditorTranscriptionService(audioSession,editorController,editorSeparation,editorProcessingGate);
 provide(editorTranscriptionServiceKey,editorTranscription);
-const audioReady = audioSession.initialize().then((cache) => {
+const audioReady = audioSession.initialize(cache => {
     analysisCoordinator.setRestoredCache(cache);
-});
+}).then(() => undefined);
 const visualizerController = new VisualizerSessionController({
     audioSession,
     decodedAudio: audioEngine,

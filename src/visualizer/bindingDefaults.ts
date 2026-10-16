@@ -39,6 +39,7 @@ export const analysisVectorLength = (
     if (featureId === 'chroma') return 12;
     if (featureId === 'mfcc') return 13;
     if (featureId === 'buffer') return 1024;
+    if (featureId === 'wallpaperEngineSpectrum') return 128;
     return 512;
 };
 

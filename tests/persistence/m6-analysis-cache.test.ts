@@ -27,6 +27,7 @@ const databaseName = () => {
 
 const session = (): PersistedSessionV1 => ({
     schemaVersion: 1,
+    analyzerWorkspaceVersion: 2,
     savedAt: '2026-07-29T00:00:00.000Z',
     queue: [{
         id: 'track-1',

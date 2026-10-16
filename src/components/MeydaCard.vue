@@ -27,10 +27,10 @@ import AnalyzerFeatureDescription from './AnalyzerFeatureDescription.vue';
 import AnalyzerPlot from './AnalyzerPlot.vue';
 import AnalyzerFeatureValues from './AnalyzerFeatureValues.vue';
 import { FEATURE_REGISTRY } from '../analysis/featureRegistry';
-import type { AnalysisCoordinatorState, AnalysisCursorValueResult, AnalysisSeries, M10FeatureId } from '../analysis/types';
+import type { AnalysisCoordinatorState, AnalysisCursorValueResult, AnalysisSeries, FeatureId } from '../analysis/types';
 import type { PersistedTimelineViewport } from '../types/session';
 const props = defineProps<{
-    featureId: M10FeatureId;
+    featureId: FeatureId;
     expanded: boolean;
     descriptionExpanded: boolean;
     series: AnalysisSeries | null;

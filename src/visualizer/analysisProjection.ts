@@ -1,4 +1,5 @@
 import type { AnalysisSeries } from '../analysis/types';
+import { wallpaperFrameIndex } from '../analysis/wallpaperSpectrum';
 import { WAVEFORM_FRAME_SIZE } from './waveformSource';
 import type {
     VisualizerAnalysisComponent,
@@ -38,6 +39,10 @@ const frameVector = (
     component: VisualizerAnalysisComponent,
 ): number[] => {
     const payload = series.payload;
+    if (payload.kind === 'stereo-spectrum-f32') {
+        if (component !== 'default') throw new Error('该特征只支持 default 分量。');
+        return Array.from(payload.values.subarray(index * 128, (index + 1) * 128), finite);
+    }
     if (payload.kind === 'frequency-u16' || payload.kind === 'category-u16') {
         if (component !== 'default') throw new Error('该特征只支持 default 分量。');
         const offset = index * payload.width;
@@ -90,6 +95,7 @@ const sampleRaw = (
         return Array.from(waveform, finite);
     }
     const { left, right, ratio } = sampleIndexes(series, timeSeconds);
+    if (series.payload.kind === 'stereo-spectrum-f32') return frameVector(series, wallpaperFrameIndex(timeSeconds, series.sampleCount), component);
     if (series.payload.kind === 'scalar-f32') {
         if (component !== 'default') throw new Error('标量只支持 default 分量。');
         return interpolate(

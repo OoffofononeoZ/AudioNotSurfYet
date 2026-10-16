@@ -1,10 +1,4 @@
-import {
-    aggregateComplex,
-    aggregateWaveform,
-    aggregateScalars,
-    aggregateVectors,
-    quantizeToUint16,
-} from './compactCodec';
+import { buildSeries } from './seriesBuilder';
 import { validateAnalysisConfig } from './config';
 import {
     analysisFrameCount,
@@ -22,9 +16,11 @@ import {
     vectorMeydaValue,
 } from './meydaAdapter';
 import { estimateTempo } from './tempoEstimator';
+import { analyzeWallpaperSpectrum, wallpaperFrameIndex } from './wallpaperSpectrum';
 import {
     isFeatureId,
     isM10FeatureId,
+    isSupportedFeatureId,
     type AnalysisCursorValueRequest,
     type AnalysisCursorValueResult,
     type AnalysisJobRequest,
@@ -32,7 +28,6 @@ import {
     type AnalysisSeries,
     type AnalysisWorkerResponse,
     type FeatureId,
-    type M10FeatureId,
     type TempoEstimateRequest,
     type TempoEstimateResult,
 } from './types';
@@ -78,6 +73,7 @@ export interface RetainedAnalysisPcm {
     pcm: Float32Array;
     durationSeconds: number;
     featureIds: readonly FeatureId[];
+    wallpaperSeries?: AnalysisSeries;
 }
 
 const invalid = (message: string): never => {
@@ -123,7 +119,7 @@ export const validateAnalysisJobRequest = async (
         invalid('Analysis feature IDs must be unique.');
     }
     const unsupported = request.cursorFeatureIds.find((featureId) =>
-        !isM10FeatureId(featureId));
+        !isSupportedFeatureId(featureId));
     if (unsupported) {
         throw new AnalysisWorkerCoreError(
             'unsupported-feature',
@@ -133,6 +129,11 @@ export const validateAnalysisJobRequest = async (
     }
     if (!await validateAnalysisConfig(request.config)) {
         invalid('Analysis config or config hash is invalid.');
+    }
+    if (request.featureIds.includes('wallpaperEngineSpectrum')
+        && (!request.stereoPcm || request.stereoPcm.length !== 2
+            || request.stereoPcm.some(channel => !(channel instanceof ArrayBuffer) || channel.byteLength !== request.pcm.byteLength))) {
+        invalid('Wallpaper spectrum requires matching stereo PCM.');
     }
     const sampleLength =
         request.pcm.byteLength / Float32Array.BYTES_PER_ELEMENT;
@@ -145,156 +146,7 @@ export const validateAnalysisJobRequest = async (
     }
 };
 
-export const analysisAggregationFactor = (
-    sampleRate: number,
-    hopSize: number,
-): number => Math.max(1, Math.ceil(sampleRate / (hopSize * 30)));
-
-const buildSeries = (
-    request: AnalysisJobRequest,
-    featureIds: readonly M10FeatureId[],
-    scalarFrames: Map<FeatureId, number[]>,
-    vectorFrames: Map<FeatureId, number[][]>,
-    loudnessFrames: Array<{ total: number; specific: number[] }>,
-    complexFrames: Array<{ real: number[]; imag: number[] }>,
-): AnalysisSeries[] => {
-    const factor = analysisAggregationFactor(
-        request.config.sampleRate,
-        request.config.hopSize,
-    );
-    const sampleStepSeconds =
-        factor * request.config.hopSize / request.config.sampleRate;
-    return featureIds.map((featureId) => {
-        const definition = getFeatureDefinition(featureId);
-        const dimensions = definition.dimensions(request.config);
-        if (definition.outputShape === 'scalar') {
-            const values = aggregateScalars(
-                scalarFrames.get(featureId) ?? [],
-                factor,
-            );
-            return {
-                schemaVersion: 1,
-                trackHash: request.trackHash,
-                configHash: request.config.configHash,
-                featureId,
-                startTimeSeconds: 0,
-                sampleStepSeconds,
-                sampleCount: values.length,
-                dimensions,
-                payload: {
-                    kind: 'scalar-f32',
-                    values,
-                },
-            };
-        }
-        if (definition.outputShape === 'waveform') {
-            const values = aggregateWaveform(
-                vectorFrames.get(featureId) ?? [],
-                factor,
-            );
-            return {
-                schemaVersion: 1,
-                trackHash: request.trackHash,
-                configHash: request.config.configHash,
-                featureId,
-                startTimeSeconds: 0,
-                sampleStepSeconds,
-                sampleCount: values.min.length,
-                dimensions,
-                payload: {
-                    kind: 'waveform-envelope',
-                    min: values.min,
-                    max: values.max,
-                    scale: values.scale,
-                },
-            };
-        }
-        if (definition.outputShape === 'loudness-structure') {
-            const total = aggregateScalars(
-                loudnessFrames.map((frame) => frame.total),
-                factor,
-            );
-            const specificValues = aggregateVectors(
-                loudnessFrames.map((frame) => frame.specific),
-                factor,
-                24,
-            );
-            let maximumSpecific = 0;
-            for (const value of specificValues) {
-                maximumSpecific = Math.max(maximumSpecific, value);
-            }
-            const specific = quantizeToUint16(specificValues, {
-                min: 0,
-                max: maximumSpecific,
-            });
-            return {
-                schemaVersion: 1,
-                trackHash: request.trackHash,
-                configHash: request.config.configHash,
-                featureId,
-                startTimeSeconds: 0,
-                sampleStepSeconds,
-                sampleCount: total.length,
-                dimensions,
-                payload: {
-                    kind: 'loudness',
-                    total,
-                    specific: specific.values,
-                    bands: 24,
-                    scale: specific.scale,
-                    offset: specific.offset,
-                },
-            };
-        }
-        if (definition.outputShape === 'complex-spectrum') {
-            const bins = dimensions[0] ?? 0;
-            const values = aggregateComplex(complexFrames, factor, bins);
-            return {
-                schemaVersion: 1,
-                trackHash: request.trackHash,
-                configHash: request.config.configHash,
-                featureId,
-                startTimeSeconds: 0,
-                sampleStepSeconds,
-                sampleCount: values.magnitude.length / bins,
-                dimensions,
-                payload: {
-                    kind: 'complex-derived',
-                    magnitude: values.magnitude,
-                    phase: values.phase,
-                    bins,
-                    magnitudeScale: values.magnitudeScale,
-                },
-            };
-        }
-        const width = dimensions[0] ?? 0;
-        const values = aggregateVectors(
-            vectorFrames.get(featureId) ?? [],
-            factor,
-            width,
-        );
-        const quantized = quantizeToUint16(values);
-        return {
-            schemaVersion: 1,
-            trackHash: request.trackHash,
-            configHash: request.config.configHash,
-            featureId,
-            startTimeSeconds: 0,
-            sampleStepSeconds,
-            sampleCount: values.length / width,
-            dimensions,
-            payload: {
-                kind: featureId === 'chroma' || featureId === 'mfcc'
-                    ? 'category-u16'
-                    : 'frequency-u16',
-                values: quantized.values,
-                width,
-                scale: quantized.scale,
-                offset: quantized.offset,
-            },
-        };
-    });
-};
+export { analysisAggregationFactor } from './frames';
 
 export const runAnalysisJob = async (
     request: AnalysisJobRequest,
@@ -304,8 +156,7 @@ export const runAnalysisJob = async (
     retained: RetainedAnalysisPcm;
 }> => {
     await validateAnalysisJobRequest(request);
-    const featureIds =
-        request.featureIds as readonly M10FeatureId[];
+    const featureIds = request.featureIds.filter(isM10FeatureId);
     const pcm = new Float32Array(request.pcm);
     const totalFrames = analysisFrameCount(
         pcm.length,
@@ -335,9 +186,19 @@ export const runAnalysisJob = async (
     let batchFrames = 0;
     let previousAmplitudeSpectrum: number[] | undefined;
 
+    let wallpaperSeries: AnalysisSeries | undefined;
+    const wallpaperFrames = request.featureIds.includes('wallpaperEngineSpectrum')
+        ? Math.ceil(pcm.length / request.config.sampleRate * 30) : 0;
+    const meydaFrames = featureIds.length ? totalFrames : 0;
     try {
+        if (wallpaperFrames && request.stereoPcm) {
+            wallpaperSeries = await analyzeWallpaperSpectrum(new Float32Array(request.stereoPcm[0]), new Float32Array(request.stereoPcm[1]), request.config, request.trackHash, {
+                ...hooks, yieldControl,
+                onProgress: (completed) => hooks.onProgress?.(completed, wallpaperFrames + meydaFrames),
+            });
+        }
         if (featureIds.length === 0) {
-            hooks.onProgress?.(totalFrames, totalFrames);
+            hooks.onProgress?.(wallpaperFrames || totalFrames, wallpaperFrames || totalFrames);
         }
         for (let frameIndex = 0; frameIndex < totalFrames; frameIndex += 1) {
             if (featureIds.length === 0) break;
@@ -406,7 +267,7 @@ export const runAnalysisJob = async (
                 || batchFrames >= 32
                 || now() - batchStartedAt >= 8
             ) {
-                hooks.onProgress?.(completed, totalFrames);
+                hooks.onProgress?.(wallpaperFrames + completed, wallpaperFrames + meydaFrames);
                 if (completed < totalFrames) {
                     await yieldControl();
                     batchFrames = 0;
@@ -415,6 +276,7 @@ export const runAnalysisJob = async (
             }
         }
     } catch (error) {
+        if (hooks.isCancelled?.()) throw new AnalysisWorkerCoreError('cancelled', 'Analysis job was cancelled.');
         if (error instanceof AnalysisWorkerCoreError) throw error;
         throw new AnalysisWorkerCoreError(
             'extract-failed',
@@ -432,6 +294,7 @@ export const runAnalysisJob = async (
         loudnessFrames,
         complexFrames,
     );
+    if (wallpaperSeries) series.unshift(wallpaperSeries);
     return {
         result: {
             kind: 'result',
@@ -448,6 +311,9 @@ export const runAnalysisJob = async (
             pcm,
             durationSeconds: request.durationSeconds,
             featureIds: [...request.cursorFeatureIds],
+            // Result buffers are transferred. Retain only this small exact sequence, never stereo PCM.
+            wallpaperSeries: wallpaperSeries ? { ...wallpaperSeries, payload: { kind: 'stereo-spectrum-f32', width: 128,
+                values: new Float32Array(wallpaperSeries.payload.kind === 'stereo-spectrum-f32' ? wallpaperSeries.payload.values : []) } } : undefined,
         },
     };
 };
@@ -461,9 +327,17 @@ export const extractCursorValue = (
         || request.trackHash !== retained.trackHash
         || request.config.configHash !== retained.config.configHash
         || !retained.featureIds.includes(request.featureId)
-        || !isM10FeatureId(request.featureId)
+        || !isSupportedFeatureId(request.featureId)
     ) {
         return null;
+    }
+    if (request.featureId === 'wallpaperEngineSpectrum') {
+        const series = retained.wallpaperSeries;
+        if (!series || series.payload.kind !== 'stereo-spectrum-f32') return null;
+        const index = wallpaperFrameIndex(request.timeSeconds, series.sampleCount);
+        return { kind: 'cursor-value-result', requestId: request.requestId, generation: request.generation,
+            trackHash: request.trackHash, configHash: request.config.configHash, featureId: request.featureId,
+            frameStartSeconds: index / 30, value: Array.from(series.payload.values.subarray(index * 128, (index + 1) * 128)) };
     }
     const totalFrames = analysisFrameCount(
         retained.pcm.length,
@@ -543,6 +417,7 @@ export const responseTransferables = (
     for (const series of response.series) {
         switch (series.payload.kind) {
             case 'scalar-f32':
+            case 'stereo-spectrum-f32':
             case 'frequency-u16':
             case 'category-u16':
                 transferables.push(series.payload.values.buffer);

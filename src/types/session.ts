@@ -9,10 +9,6 @@ import {
     type ConfigHash,
     type FeatureId,
 } from '../analysis/types';
-import {
-    assertValidFeatureOrder,
-    cloneFeatureOrder,
-} from '../analysis/featureOrder';
 
 export type TrackHash = string;
 export type { ConfigHash, FeatureId };
@@ -47,13 +43,11 @@ export interface TimelineViewport extends PersistedTimelineViewport {
 export interface AnalysisWorkspaceSnapshot {
     initialized: boolean;
     activeFeatureQueue: ActiveFeatureQueue;
-    featureOrder: FeatureId[];
     viewport: PersistedTimelineViewport | null;
 }
 
 export interface AnalysisWorkspaceUpdate {
     activeFeatureQueue: ActiveFeatureQueue;
-    featureOrder: FeatureId[];
     viewport: PersistedTimelineViewport | null;
 }
 
@@ -62,8 +56,8 @@ export interface PersistedSessionV1 {
     savedAt: string;
     queue: TrackRecord[];
     currentTrackId: TrackId | null;
+    analyzerWorkspaceVersion?: 2;
     activeCards: ActiveAnalysisCard[];
-    featureOrder?: FeatureId[];
     analysisConfig: PersistedAnalysisConfig;
     viewport: PersistedTimelineViewport | null;
     handles: Array<{ trackId: TrackId; handleKey: string }>;
@@ -133,7 +127,6 @@ export const cloneActiveFeatureQueue = (
     featureIds: readonly FeatureId[],
 ): ActiveFeatureQueue => [...featureIds];
 
-export { cloneFeatureOrder };
 
 export const activeCardsToFeatureQueue = (
     cards: readonly ActiveAnalysisCard[],
@@ -168,7 +161,6 @@ export const assertValidAnalysisWorkspace = (
             'Analysis workspace requires 0–4 unique active features.',
         );
     }
-    assertValidFeatureOrder(workspace.featureOrder);
     const viewport = workspace.viewport;
     if (
         viewport !== null

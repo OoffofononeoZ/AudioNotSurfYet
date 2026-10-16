@@ -23,11 +23,11 @@ import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { FEATURE_REGISTRY } from '../analysis/featureRegistry';
 import { canvasXToTime } from '../analysis/timelineViewport';
 import { analysisCanvasRenderer, prepareCanvasSurface, type EditorRenderRequest } from '../analysis/canvasRenderer';
-import type { AnalysisCoordinatorState, AnalysisCursorValueResult, AnalysisSeries, M10FeatureId } from '../analysis/types';
+import type { AnalysisCoordinatorState, AnalysisCursorValueResult, AnalysisSeries, FeatureId } from '../analysis/types';
 import type { PersistedTimelineViewport } from '../types/session';
 
 const props = defineProps<{
-    featureId: M10FeatureId;
+    featureId: FeatureId;
     series: AnalysisSeries | null;
     viewport: PersistedTimelineViewport;
     cursorSeconds: number;
@@ -40,7 +40,7 @@ const emit = defineEmits<{
     zoom: [factor: number, anchorSeconds: number];
 }>();
 const definition = computed(() => FEATURE_REGISTRY[props.featureId]);
-const isStructuredFeature = computed(() => props.featureId === 'loudness' || props.featureId === 'complexSpectrum');
+const isStructuredFeature = computed(() => props.featureId === 'wallpaperEngineSpectrum' || props.featureId === 'loudness' || props.featureId === 'complexSpectrum');
 const staticCanvas = ref<HTMLCanvasElement | null>(null);
 const cursorCanvas = ref<HTMLCanvasElement | null>(null);
 const plotElement = ref<HTMLElement | null>(null);

@@ -67,10 +67,13 @@ export const copyDecodedAudioToMono = async (
     options: {
         chunkSize?: number;
         yieldControl?: () => Promise<void>;
+        stereo?: boolean;
+        isCancelled?: () => boolean;
     } = {},
 ): Promise<{
     descriptor: DecodedAudioDescriptor;
     pcm: Float32Array;
+    stereoPcm?: readonly [Float32Array, Float32Array];
 }> => {
     const descriptor = engine.getDecodedAudioDescriptor();
     if (!descriptor || descriptor.length <= 0 || descriptor.channelCount <= 0) {
@@ -86,10 +89,14 @@ export const copyDecodedAudioToMono = async (
     const yieldControl = options.yieldControl
         ?? (() => new Promise<void>((resolve) => setTimeout(resolve, 0)));
     const pcm = new Float32Array(descriptor.length);
+    const stereoPcm = options.stereo
+        ? [new Float32Array(descriptor.length), new Float32Array(descriptor.length)] as const : undefined;
 
     for (let start = 0; start < descriptor.length; start += chunkSize) {
+        if (options.isCancelled?.()) throw new PcmCopyError('stale', 'PCM copy cancelled.');
         const length = Math.min(chunkSize, descriptor.length - start);
         const accumulator = new Float32Array(length);
+        const channels: Float32Array[] = [];
         for (
             let channel = 0;
             channel < descriptor.channelCount;
@@ -113,6 +120,7 @@ export const copyDecodedAudioToMono = async (
                     'Decoded audio returned an unexpected channel length.',
                 );
             }
+            if (stereoPcm) channels.push(values);
             for (let index = 0; index < length; index += 1) {
                 accumulator[index] =
                     (accumulator[index] ?? 0) + (values[index] ?? 0);
@@ -123,6 +131,10 @@ export const copyDecodedAudioToMono = async (
             accumulator[index] = (accumulator[index] ?? 0) / divisor;
         }
         pcm.set(accumulator, start);
+        if (stereoPcm) {
+            const [left, right] = speakersToStereo(channels);
+            stereoPcm[0].set(left, start); stereoPcm[1].set(right, start);
+        }
         await yieldControl();
         const current = engine.getDecodedAudioDescriptor();
         if (!current || current.revision !== descriptor.revision) {
@@ -133,5 +145,21 @@ export const copyDecodedAudioToMono = async (
         }
     }
 
-    return { descriptor, pcm };
+    return { descriptor, pcm, stereoPcm };
 };
+
+/** Web Audio speakers downmix: mono, stereo, quad and 5.1; other counts use discrete. */
+export function speakersToStereo(channels: readonly Float32Array[]): readonly [Float32Array, Float32Array] {
+    if (!channels.length || !channels[0]?.length || channels.some(c => c.length !== channels[0]!.length)) throw new PcmCopyError('length-mismatch', 'PCM channels must have equal nonzero lengths.');
+    const left = new Float32Array(channels[0]!), right = new Float32Array(channels[1] ?? channels[0]!);
+    for (let i = 0; i < left.length; i++) {
+        if (channels.length === 4) {
+            left[i] = (channels[0]![i]! + channels[2]![i]!) * 0.5;
+            right[i] = (channels[1]![i]! + channels[3]![i]!) * 0.5;
+        } else if (channels.length === 6) {
+            left[i] = channels[0]![i]! + Math.SQRT1_2 * (channels[2]![i]! + channels[4]![i]!);
+            right[i] = channels[1]![i]! + Math.SQRT1_2 * (channels[2]![i]! + channels[5]![i]!);
+        }
+    }
+    return [left, right];
+}

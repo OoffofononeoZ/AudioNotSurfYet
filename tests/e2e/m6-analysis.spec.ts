@@ -467,7 +467,7 @@ test('keeps 15-minute analysis responsive, progressive and cancellable', async (
             'rms',
             'energy',
             'amplitudeSpectrum',
-            'chroma',
+            'wallpaperEngineSpectrum',
         ]);
     });
     await page.waitForFunction(() => {

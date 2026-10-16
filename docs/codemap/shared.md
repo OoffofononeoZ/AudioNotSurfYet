@@ -9,9 +9,9 @@
 | [src/App.vue](../../src/App.vue) | — |
 | [src/data/analyzerData.ts](../../src/data/analyzerData.ts) | — |
 | [src/main.ts](../../src/main.ts) | [src/App.vue](../../src/App.vue)、[src/router/index.ts](../../src/router/index.ts) |
-| [src/persistence/sessionRepository.ts](../../src/persistence/sessionRepository.ts) | [src/analysis/config.ts](../../src/analysis/config.ts)、[src/analysis/featureOrder.ts](../../src/analysis/featureOrder.ts)、[src/analysis/types.ts](../../src/analysis/types.ts)、[src/types/session.ts](../../src/types/session.ts) |
+| [src/persistence/sessionRepository.ts](../../src/persistence/sessionRepository.ts) | [src/analysis/config.ts](../../src/analysis/config.ts)、[src/analysis/types.ts](../../src/analysis/types.ts)、[src/types/session.ts](../../src/types/session.ts) |
 | [src/router/index.ts](../../src/router/index.ts) | [src/layouts/MainLayout.vue](../../src/layouts/MainLayout.vue)、[src/views/Analyzer.vue](../../src/views/Analyzer.vue)、[src/views/ComingSoon.vue](../../src/views/ComingSoon.vue)、[src/views/Editor.vue](../../src/views/Editor.vue)、[src/views/Home.vue](../../src/views/Home.vue)、[src/views/TestLands.vue](../../src/views/TestLands.vue)、另 1 项，按需核对源码 |
-| [src/stores/audioSessionStore.ts](../../src/stores/audioSessionStore.ts) | [src/analysis/featureOrder.ts](../../src/analysis/featureOrder.ts)、[src/analysis/types.ts](../../src/analysis/types.ts)、[src/types/audio.ts](../../src/types/audio.ts)、[src/types/session.ts](../../src/types/session.ts) |
+| [src/stores/audioSessionStore.ts](../../src/stores/audioSessionStore.ts) | [src/analysis/types.ts](../../src/analysis/types.ts)、[src/types/audio.ts](../../src/types/audio.ts)、[src/types/session.ts](../../src/types/session.ts) |
 | [src/stores/configStore.ts](../../src/stores/configStore.ts) | [src/audio/playbackPolicy.ts](../../src/audio/playbackPolicy.ts) |
 | [src/transcription/applyCandidates.ts](../../src/transcription/applyCandidates.ts) | [src/editor/projectCodec.ts](../../src/editor/projectCodec.ts)、[src/editor/types.ts](../../src/editor/types.ts)、[src/processing/modelManifest.ts](../../src/processing/modelManifest.ts)、[src/processing/sha256.ts](../../src/processing/sha256.ts)、[src/transcription/candidateTypes.ts](../../src/transcription/candidateTypes.ts)、[src/transcription/candidates.ts](../../src/transcription/candidates.ts) |
 | [src/transcription/auxiliarySeparation.ts](../../src/transcription/auxiliarySeparation.ts) | [src/processing/dsp.ts](../../src/processing/dsp.ts)、[src/processing/modelInput.ts](../../src/processing/modelInput.ts)、[src/processing/modelManifest.ts](../../src/processing/modelManifest.ts)、[src/processing/sha256.ts](../../src/processing/sha256.ts)、[src/processing/storage.ts](../../src/processing/storage.ts)、[src/transcription/modelManifest.ts](../../src/transcription/modelManifest.ts)、另 1 项，按需核对源码 |
@@ -33,6 +33,6 @@
 | [src/transcription/workerProtocol.ts](../../src/transcription/workerProtocol.ts) | [src/processing/kernel.ts](../../src/processing/kernel.ts)、[src/processing/workerProtocol.ts](../../src/processing/workerProtocol.ts)、[src/transcription/auxiliarySeparation.ts](../../src/transcription/auxiliarySeparation.ts)、[src/transcription/candidateTypes.ts](../../src/transcription/candidateTypes.ts) |
 | [src/types/audio.ts](../../src/types/audio.ts) | — |
 | [src/types/events.ts](../../src/types/events.ts) | — |
-| [src/types/session.ts](../../src/types/session.ts) | [src/analysis/featureOrder.ts](../../src/analysis/featureOrder.ts)、[src/analysis/types.ts](../../src/analysis/types.ts)、[src/types/audio.ts](../../src/types/audio.ts) |
+| [src/types/session.ts](../../src/types/session.ts) | [src/analysis/types.ts](../../src/analysis/types.ts)、[src/types/audio.ts](../../src/types/audio.ts) |
 | [src/utils/emitter.ts](../../src/utils/emitter.ts) | [src/types/events.ts](../../src/types/events.ts) |
 | [src/utils/utils.ts](../../src/utils/utils.ts) | — |

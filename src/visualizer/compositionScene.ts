@@ -64,12 +64,13 @@ export class CompositionScene implements VisualizerScene {
             ['uSpacing','spacing',10],['uAmplitude','amplitude',0],['uSensitivity','sensitivity',1],['uRadius','radius',.1],['uAmount','amount',0]] as const)
             u[uniform]!.value=elementNumber(values,e,parameter,fallback);
         u.uPhase!.value=(seed%65536)/65536*Math.PI*2;
-        const spectrum=elementValue(values,e,'spectrum'); spectrumBands(Array.isArray(spectrum)?spectrum:[],this.levels); u.uLevels!.value=this.levels;
+        const spectrum=elementValue(values,e,'spectrum'),unit=values.get(parameterKey(e.id,'spectrum'))?.unit;
+        spectrumBands(Array.isArray(spectrum)?spectrum:[],this.levels,unit); u.uLevels!.value=this.levels;
         if (e.type==='spectral-strings') {
             let state=this.strings.get(e.id); if (!state) {state=new SpectralStringsState();this.strings.set(e.id,state);}
             const motion=state.resolve(input.timeSeconds,input.bindingRevision+':'+seed,elementNumber(values,e,'decay',.6),time=>{
                 const value=this.options.resolveAt(time).get(parameterKey(e.id,'spectrum'))?.value; return Array.isArray(value)?value:[];
-            });
+            },unit);
             u.uMotion!.value=motion.position;
         }
         this.primitive.uniformsNeedUpdate=true; this.quad.material=this.primitive; this.clear(this.targets[0]!); this.options.renderer.render(this.scene,this.camera);

@@ -7,7 +7,7 @@
 | 文件 | 本地静态引用（最多显示 6 项） |
 | --- | --- |
 | [src/components/AnalyzerFeatureDescription.vue](../../src/components/AnalyzerFeatureDescription.vue) | — |
-| [src/components/AnalyzerFeatureValues.vue](../../src/components/AnalyzerFeatureValues.vue) | [src/analysis/featureRegistry.ts](../../src/analysis/featureRegistry.ts)、[src/analysis/rendererData.ts](../../src/analysis/rendererData.ts)、[src/analysis/types.ts](../../src/analysis/types.ts)、[src/types/session.ts](../../src/types/session.ts) |
+| [src/components/AnalyzerFeatureValues.vue](../../src/components/AnalyzerFeatureValues.vue) | [src/analysis/featureRegistry.ts](../../src/analysis/featureRegistry.ts)、[src/analysis/rendererData.ts](../../src/analysis/rendererData.ts)、[src/analysis/types.ts](../../src/analysis/types.ts)、[src/analysis/wallpaperSpectrum.ts](../../src/analysis/wallpaperSpectrum.ts)、[src/types/session.ts](../../src/types/session.ts) |
 | [src/components/AnalyzerPlot.vue](../../src/components/AnalyzerPlot.vue) | [src/analysis/canvasRenderer.ts](../../src/analysis/canvasRenderer.ts)、[src/analysis/featureRegistry.ts](../../src/analysis/featureRegistry.ts)、[src/analysis/timelineViewport.ts](../../src/analysis/timelineViewport.ts)、[src/analysis/types.ts](../../src/analysis/types.ts)、[src/types/session.ts](../../src/types/session.ts) |
 | [src/components/AnimatedList.vue](../../src/components/AnimatedList.vue) | — |
 | [src/components/AppSettingsButton.vue](../../src/components/AppSettingsButton.vue) | [src/utils/emitter.ts](../../src/utils/emitter.ts) |

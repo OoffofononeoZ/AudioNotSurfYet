@@ -4,11 +4,13 @@ owner 于 2026-10-16 要求：新增可独立编辑的原子视觉元素，复�
 
 本任务扩展现有 Project V3 ElementRegistry 与组合器，不注册完整内置 Scene，不引入新的 Canvas、renderer 或 RAF。预设最终展开为普通元素，可单独修改及删除，导出与草稿沿用现有 V3 codec；后续修正中 owner 补充授权 [原生 Web Audio 输入](visualizer-native-input.md) 及对应 source 类型。
 
+2026-10-17 当前修订：[Wallpaper Engine 风格频谱（近似）](wallpaper-spectrum.md)成为新版“几何律动”的默认输入，完整 128 向量直接乘 0.6。原生输入恢复线性 FFT byte bin 与有符号波形；撤回特殊分频、空间平滑、平方响应、2/3 校准和环向零尾/接缝适配。原工程不改绑，原几何棱锥、旋转中心与半径修正保留。下方原生适配及零尾修正段落为历史记录，其当前行为由本段和链接合同替代。
+
 ## 原项目与响应
 
 参考为 owner 指定的本地 index.html、project.json 和两张静音/播放截图；不复制其 p5 运行库、字体或远程依赖。源实现为双环频谱、12 个频段方块、中心方块/棱锥、三个旋转环、三个小棱锥和 19 条弧。截图未显示曲名；复刻按该视觉组合执行。
 
-原项目的输入为 Wallpaper Engine 音频数组，[官方音频文档](https://docs.wallpaperengine.io/en/web/audio/visualizer.html)定义左右各 64 个频段。初版将 Analyzer mono FFT 线性等分后取峰值，低频能量挤在开头，高频空尾重复到圆周形成突变；数值标度也影响了整体扩张。新版“几何律动”默认使用原生立体声频谱，频段和幅度适配见 [原生输入](visualizer-native-input.md)。显式选择 Analyzer 时仍使用 mono 64 band 复制到左右槽位，保留原工程行为。两种来源都不按每首歌动态归一化，不声称与 Wallpaper Engine FFT 逐 bin 等价。双环、尺寸、弧线和填色公式沿源结构。源逐帧旋转以 60 fps 转为绝对歌曲秒；随机彩色改用 seed 和绝对帧索引，seek/循环/录制可重现。
+原项目的输入为 Wallpaper Engine 音频数组，[官方音频文档](https://docs.wallpaperengine.io/en/web/audio/visualizer.html)定义左右各 64 个频段。当前默认使用独立近似提取器的立体声 128 向量，允许短时超过 1，直接乘 0.6，不再次使用 Meyda 幅度标度。既有 Amplitude Spectrum 绑定仍将 mono 64 段复制到左右槽位；原生输入在渲染层进行固定单位换算。双环按完整数组直接重复，包括真实零尾和声道接缝。双环、尺寸、弧线和填色公式沿源结构。源逐帧旋转以 60 fps 转为绝对歌曲秒；随机彩色改用 seed 和绝对帧索引，seek/循环/录制可重现。
 
 几何以短边 1600 为设计参考，位置为归一化画面坐标。新增环形频谱、轨道几何体、旋转线框和旋转弧簇；形状、数量、半径、尺寸、速度、相位、阈值、线宽与响应系数可独立编辑。线段使用三角形，避免依赖平台 WebGL 宽线支持。几何仅共用一组动态 BufferGeometry/ShaderMaterial，并在组合器释放时回收。
 

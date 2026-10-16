@@ -10,6 +10,11 @@
         <div ref="textArea" class="description-area">
             <p :id="descriptionId" class="description" :class="{ 'is-expanded': expanded && overflowing }">{{ text }}</p>
             <p ref="probe" class="description-probe" aria-hidden="true">{{ text }}</p>
+            <p v-if="featureId === 'wallpaperEngineSpectrum' && expanded" class="source-links">
+                <a href="https://docs.wallpaperengine.io/en/web/audio/visualizer.html" target="_blank" rel="noopener noreferrer">官方接口</a> ·
+                <a href="https://steamcommunity.com/sharedfiles/filedetails/?id=837435817" target="_blank" rel="noopener noreferrer">开发者历史说明（2017）</a> ·
+                <a href="https://github.com/deepratna-awale/open-wallpaper-engine-mac/wiki/Audio-System" target="_blank" rel="noopener noreferrer">OWE 近似参考</a>
+            </p>
         </div>
     </div>
 </template>
@@ -57,6 +62,7 @@ onBeforeUnmount(() => {
 .description, .description-probe { margin: 0; line-height: inherit; }
 .description { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .description.is-expanded { white-space: normal; }
+.source-links { margin: 8px 0 0; } .source-links a { color: var(--accent); }
 .description-probe { position: absolute; top: 0; left: 0; width: 100%; visibility: hidden;
     pointer-events: none; white-space: normal; }
 .description-toggle { display: grid; place-items: center; width: 24px; height: 24px; margin-top: -2px;

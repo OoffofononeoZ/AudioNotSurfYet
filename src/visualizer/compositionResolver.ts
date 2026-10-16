@@ -24,7 +24,9 @@ export class CompositionResolver {
                     if (binding.source.kind === 'constant') { values.set(parameterId,{parameterId,state:'ready',value:binding.source.value}); continue; }
                     if(binding.source.kind==='native') {
                         const value=getNative?.(binding.source.featureId,time,e.type==='spectral-strings');
-                        values.set(parameterId,value?{parameterId,state:'ready',value}:{parameterId,state:'loading',message:'原生输入准备中'});continue;
+                        values.set(parameterId,value?{parameterId,state:'ready',value,
+                            unit:binding.source.featureId==='frequency'?'byte-frequency':'signed-waveform',
+                            channelLayout:binding.source.featureId==='frequency'?'stereo-1024':'mono'}:{parameterId,state:'loading',message:'原生输入准备中'});continue;
                     }
                     const source=binding.source;
                     const series=getSeries(source.featureId);
@@ -45,7 +47,9 @@ export class CompositionResolver {
                         }
                         value=smoother.resolve(time);
                     }
-                    values.set(parameterId,{parameterId,state:'ready',value});
+                    values.set(parameterId,{parameterId,state:'ready',value,
+                        unit:source.featureId==='wallpaperEngineSpectrum'?'we-strength':'meyda-amplitude',
+                        channelLayout:source.featureId==='wallpaperEngineSpectrum'?'stereo-64':'mono'});
                 } catch (error) { values.set(parameterId,{parameterId,state:'error',message:(error as Error).message}); }
             }
         }

@@ -57,7 +57,7 @@ import { useAudioSessionService } from '../audio/audioSessionService';
 import { toggleActiveFeature } from '../analysis/activeFeatureQueue';
 import { useAnalysisCoordinator } from '../analysis/analysisCoordinator';
 import { normalizeTimelineViewport, resetTimelineViewport, zoomTimelineViewport } from '../analysis/timelineViewport';
-import { FEATURE_IDS, type AnalysisCursorValueResult, type AnalysisSeries, type FeatureId, type M10FeatureId } from '../analysis/types';
+import { FEATURE_IDS, type AnalysisCursorValueResult, type AnalysisSeries, type FeatureId } from '../analysis/types';
 import { useAudioSessionStore } from '../stores/audioSessionStore';
 import type { PersistedTimelineViewport } from '../types/session';
 
@@ -66,7 +66,7 @@ const audioSession = useAudioSessionService();
 const analysisCoordinator = useAnalysisCoordinator();
 const analysisLease = analysisCoordinator.acquireConsumer('analyzer');
 const seriesRevision = ref(0);
-const exactValues = reactive<Partial<Record<M10FeatureId, AnalysisCursorValueResult>>>({});
+const exactValues = reactive<Partial<Record<FeatureId, AnalysisCursorValueResult>>>({});
 const CURSOR_REQUEST_INTERVAL_MS = 40;
 let unsubscribeCoordinator: (() => void) | null = null;
 let cursorTimer: ReturnType<typeof setTimeout> | null = null;
@@ -77,9 +77,9 @@ const pendingViewport = ref<PersistedTimelineViewport | null>(null);
 let zoomFrame: number | null = null;
 let zoomTrackId: string | null = null;
 const analysis = computed(() => sessionStore.analysis);
-const activeFeatureQueue = computed<M10FeatureId[]>(() =>
+const activeFeatureQueue = computed<FeatureId[]>(() =>
     sessionStore.analysisWorkspace.activeFeatureQueue.filter(
-        (featureId): featureId is M10FeatureId =>
+        (featureId): featureId is FeatureId =>
             (FEATURE_IDS as readonly string[]).includes(featureId),
     ));
 const activeFeatureIds = activeFeatureQueue;
@@ -121,7 +121,7 @@ const { workspace: workspaceElement, pinnedBody, pinnedScroll, originalList, res
     ariaValues, dragging, beginDrag, moveDrag, endDrag, cancelDrag, handleKeydown
 } = usePinnedPanel(computed(() => activeFeatureQueue.value.length));
 const setWorkspace = (element: unknown) => { workspaceElement.value = element instanceof HTMLElement ? element : null; };
-const seriesFor = (featureId: M10FeatureId): AnalysisSeries | null => {
+const seriesFor = (featureId: FeatureId): AnalysisSeries | null => {
     void seriesRevision.value;
     return analysisLease.getSeries(featureId);
 };
@@ -132,7 +132,7 @@ const persistWorkspace = (patch: {
     activeFeatureQueue: [
         ...(patch.featureQueue ?? activeFeatureQueue.value),
     ],
-    featureOrder: [...FEATURE_IDS],
+
     viewport: patch.nextViewport === undefined
         ? sessionStore.analysisWorkspace.viewport
         : patch.nextViewport,
@@ -144,7 +144,7 @@ const applyFeatureQueue = async (featureQueue: FeatureId[]) => {
         featureQueue: nextQueue,
         nextViewport: durationSeconds.value > 0 ? viewport.value : null,
     });
-    for (const key of Object.keys(exactValues) as M10FeatureId[]) {
+    for (const key of Object.keys(exactValues) as FeatureId[]) {
         if (!nextQueue.includes(key)) {
             delete exactValues[key];
         }
@@ -268,7 +268,7 @@ const initializeWorkspace = async () => {
             if (
                 restoredQueue.length
                 !== sessionStore.analysisWorkspace.activeFeatureQueue.length
-                || sessionStore.analysisWorkspace.featureOrder.some((id, index) => id !== FEATURE_IDS[index])
+
             ) {
                 await persistWorkspace({ featureQueue: restoredQueue });
             }

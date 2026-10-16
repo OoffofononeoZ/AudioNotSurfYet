@@ -28,7 +28,6 @@ import {
     activeFeatureQueueToCards,
     assertValidAnalysisWorkspace,
     cloneActiveFeatureQueue,
-    cloneFeatureOrder,
     clonePersistedTimelineViewport,
     DEFAULT_PERSISTED_ANALYSIS_CONFIG,
     type AnalysisWorkspaceUpdate,
@@ -36,7 +35,6 @@ import {
     type StoredAnalysisCache,
     type StoredHandle,
 } from '../types/session';
-import { restoredFeatureOrder } from '../analysis/featureOrder';
 import { PlaybackPolicy, type PlaybackMode } from './playbackPolicy';
 
 export interface TrackNavigation {
@@ -271,7 +269,7 @@ export class AudioSessionService {
         });
     }
 
-    async initialize(): Promise<StoredAnalysisCache | undefined> {
+    async initialize(onRestoredCache?: (cache: StoredAnalysisCache | undefined) => void): Promise<StoredAnalysisCache | undefined> {
         if (this.disposed) return undefined;
         const generation = ++this.importGeneration;
         ++this.commandGeneration;
@@ -308,6 +306,8 @@ export class AudioSessionService {
             this.store.setPersistence({ state: 'ready' });
             return undefined;
         }
+        // Publish cache identity before loading decoded audio can activate a route consumer.
+        onRestoredCache?.(restored.currentAnalysisCache);
 
         for (const trackId of [...this.runtimeTracks.keys()]) {
             this.releaseRuntimeTrack(trackId);
@@ -332,9 +332,7 @@ export class AudioSessionService {
                 activeFeatureQueue: activeCardsToFeatureQueue(
                     restored.session.activeCards,
                 ),
-                featureOrder: restoredFeatureOrder(
-                    restored.session.featureOrder,
-                ),
+
                 viewport: restored.session.viewport,
             },
         );
@@ -773,7 +771,7 @@ export class AudioSessionService {
             activeFeatureQueue: cloneActiveFeatureQueue(
                 workspace.activeFeatureQueue,
             ),
-            featureOrder: cloneFeatureOrder(workspace.featureOrder),
+
             viewport: clonePersistedTimelineViewport(workspace.viewport),
         };
         this.store.setAnalysisWorkspace({
@@ -1279,6 +1277,7 @@ export class AudioSessionService {
                 : undefined;
         return {
             schemaVersion: 1,
+            analyzerWorkspaceVersion: 2,
             savedAt: new Date().toISOString(),
             queue: this.store.queue.map((track) => ({
                 ...track,
@@ -1288,9 +1287,7 @@ export class AudioSessionService {
             activeCards: activeFeatureQueueToCards(
                 this.store.analysisWorkspace.activeFeatureQueue,
             ),
-            featureOrder: cloneFeatureOrder(
-                this.store.analysisWorkspace.featureOrder,
-            ),
+
             analysisConfig: {
                 ...DEFAULT_PERSISTED_ANALYSIS_CONFIG,
             },

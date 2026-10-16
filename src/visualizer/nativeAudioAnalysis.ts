@@ -1,4 +1,4 @@
-import { SPECTRUM_REFERENCE } from './analysisSignal';
+
 
 export type NativeInputFeature = 'frequency' | 'waveform';
 export const nativeInputFeatures = [
@@ -9,28 +9,6 @@ export const NATIVE_FFT_SIZE=2048;
 export const NATIVE_FRAME_RATE=30;
 export const NATIVE_CHUNK_FRAMES=120;
 export interface NativeAudioFrame { frequency:number[]; waveform:number[] }
-
-/** Low frequencies use near-linear bands, then exponential bands up to 16 kHz. */
-export function nativeFrequencyBands(bytes:Uint8Array,sampleRate:number):number[] {
-    const edge=(i:number)=>i<=29?700*i/29:700*Math.pow(Math.min(16000,sampleRate/2)/700,(i-29)/35);
-    const bands=Array.from({length:64},(_,i)=>{
-        const start=Math.max(1,edge(i)*NATIVE_FFT_SIZE/sampleRate);
-        const end=Math.max(start+.001,Math.min(bytes.length,edge(i+1)*NATIVE_FFT_SIZE/sampleRate));
-        let sum=0,weight=0;
-        for(let bin=Math.floor(start);bin<Math.ceil(end);bin++) {
-            const w=Math.max(0,Math.min(end,bin+1)-Math.max(start,bin));
-            sum+=(bytes[bin]??0)*w;weight+=w;
-        }
-        return sum/weight/255;
-    });
-    // Spatial smoothing only. No dependence on playback/RAF history, no wrap across channels.
-    return bands.map((value,i)=>{
-        const average=((bands[Math.max(0,i-1)]??0)+2*value+(bands[Math.min(63,i+1)]??0))/4;
-        // Fixed visual calibration; keeps 0.6 responsiveness and avoids the default -30 dB ceiling.
-        const strength=average*average*2/3;
-        return Math.expm1(strength*Math.log1p(SPECTRUM_REFERENCE));
-    });
-}
 
 /** Browser-native FFT, in bounded silent offline chunks so pause/seek/export use identical data. */
 export async function renderNativeAudioChunk(pcm:readonly Float32Array<ArrayBuffer>[],sampleRate:number,isCancelled:()=>boolean):Promise<NativeAudioFrame[]> {
@@ -45,7 +23,7 @@ export async function renderNativeAudioChunk(pcm:readonly Float32Array<ArrayBuff
     source.buffer=buffer;source.connect(downmix);downmix.connect(splitter);silent.gain.value=0;silent.connect(context.destination);
     analysers.forEach((analyser,i)=>{
         analyser.fftSize=NATIVE_FFT_SIZE;analyser.smoothingTimeConstant=0;
-        analyser.minDecibels=-100;analyser.maxDecibels=0;
+        analyser.minDecibels=-100;analyser.maxDecibels=-30;
         splitter.connect(analyser,i);analyser.connect(silent);
     });
     source.start();
@@ -58,10 +36,10 @@ export async function renderNativeAudioChunk(pcm:readonly Float32Array<ArrayBuff
             if(isCancelled())break;
             const frequency:number[]=[];
             analysers.forEach((analyser,i)=>{
-                analyser.getByteFrequencyData(bytes);frequency.push(...nativeFrequencyBands(bytes,sampleRate));
+                analyser.getByteFrequencyData(bytes);frequency.push(...bytes);
                 analyser.getFloatTimeDomainData(waves[i]!);
             });
-            const waveform=Array.from(waves[0]!, (value,i)=>Math.abs((value+waves[1]![i]!)/2)*SPECTRUM_REFERENCE);
+            const waveform=Array.from(waves[0]!, (value,i)=>(value+waves[1]![i]!)/2);
             frames.push({frequency,waveform});
             if(frame+1<NATIVE_CHUNK_FRAMES)pause=context.suspend(NATIVE_FFT_SIZE/sampleRate+(frame+1)/NATIVE_FRAME_RATE);
             await context.resume();

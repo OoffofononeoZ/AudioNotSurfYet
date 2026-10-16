@@ -1,6 +1,7 @@
 import type { TrackHash } from '../types/session';
 
 export const FEATURE_IDS = [
+    'wallpaperEngineSpectrum',
     'rms',
     'zcr',
     'energy',
@@ -119,6 +120,7 @@ export type FeatureShape =
     | 'complex-spectrum';
 
 export type RendererId =
+    | 'stereo-spectrum'
     | 'scalar-line'
     | 'frequency-heatmap'
     | 'chroma-heatmap'
@@ -145,7 +147,7 @@ export interface FeatureDefinition<T extends FeatureId = FeatureId> {
     dimensions(config: AnalysisConfig): readonly number[];
     deliveryMilestone: DeliveryMilestone;
     workerSupported: boolean;
-    extractionSource: 'meyda' | 'project-spectral-flux-v1';
+    extractionSource: 'meyda' | 'project-spectral-flux-v1' | 'project-wallpaper-spectrum-v1';
     zeroEnergyValue?: 0;
 }
 
@@ -160,6 +162,12 @@ export interface FrequencyPayload {
     width: number;
     scale: number;
     offset: number;
+}
+
+export interface StereoSpectrumPayload {
+    kind: 'stereo-spectrum-f32';
+    values: Float32Array;
+    width: 128;
 }
 
 export interface CategoryPayload {
@@ -195,6 +203,7 @@ export interface ComplexPayload {
 }
 
 export type CompactPayload =
+    | StereoSpectrumPayload
     | ScalarPayload
     | FrequencyPayload
     | CategoryPayload
@@ -229,6 +238,7 @@ export interface AnalysisJobRequest {
     featureIds: readonly FeatureId[];
     cursorFeatureIds: readonly FeatureId[];
     pcm: ArrayBuffer;
+    stereoPcm?: readonly [ArrayBuffer, ArrayBuffer];
     durationSeconds: number;
 }
 
@@ -397,3 +407,6 @@ export const isM10FeatureId = (
     value: FeatureId,
 ): value is M10FeatureId =>
     (M10_AVAILABLE_FEATURE_IDS as readonly FeatureId[]).includes(value);
+
+export const isSupportedFeatureId = (value: FeatureId): boolean =>
+    value === 'wallpaperEngineSpectrum' || isM10FeatureId(value);

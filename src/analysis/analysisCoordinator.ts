@@ -23,9 +23,10 @@ import {
     type DecodedAudioCopyPort,
     PcmCopyError,
 } from './pcm';
+import { wallpaperFrameIndex } from './wallpaperSpectrum';
 import {
     isFeatureId,
-    isM10FeatureId,
+    isSupportedFeatureId,
     type AnalysisCoordinatorSnapshot,
     type AnalysisErrorCode,
     type AnalysisCursorValueResult,
@@ -292,6 +293,13 @@ export class AnalysisCoordinator {
         ) {
             return Promise.resolve(null);
         }
+        const spectrum = this.series.get(featureId);
+        if (featureId === 'wallpaperEngineSpectrum' && spectrum?.payload.kind === 'stereo-spectrum-f32') {
+            const index = wallpaperFrameIndex(timeSeconds, spectrum.sampleCount);
+            return Promise.resolve({ kind: 'cursor-value-result', requestId: this.createJobId(), generation: this.snapshot.generation,
+                trackHash: spectrum.trackHash, configHash: spectrum.configHash, featureId, frameStartSeconds: index * spectrum.sampleStepSeconds,
+                value: Array.from(spectrum.payload.values.subarray(index * 128, (index + 1) * 128)) });
+        }
         const previous = this.cursorRequests.get(featureId);
         if (previous) {
             clearTimeout(previous.timeout);
@@ -471,7 +479,7 @@ export class AnalysisCoordinator {
                 'Analysis requires 0–4 unique feature IDs.',
             );
         }
-        const unsupported = ids.find((id) => !isM10FeatureId(id));
+        const unsupported = ids.find((id) => !isSupportedFeatureId(id));
         if (unsupported) {
             throw new AnalysisCoordinatorError(
                 'unsupported-feature',
@@ -539,6 +547,8 @@ export class AnalysisCoordinator {
         try {
             copied = await copyDecodedAudioToMono(this.engine, {
                 yieldControl: this.copyYieldControl,
+                stereo: misses.includes('wallpaperEngineSpectrum'),
+                isCancelled: () => !this.isCurrentGeneration(generation),
             });
         } catch (error) {
             if (!this.isCurrentGeneration(generation)) return;
@@ -587,9 +597,10 @@ export class AnalysisCoordinator {
             featureIds: misses,
             cursorFeatureIds: [...this.snapshot.activeFeatureIds],
             pcm: copied.pcm.buffer as ArrayBuffer,
+            stereoPcm: copied.stereoPcm ? [copied.stereoPcm[0].buffer as ArrayBuffer, copied.stereoPcm[1].buffer as ArrayBuffer] : undefined,
             durationSeconds: copied.descriptor.durationSeconds,
         };
-        worker.postMessage(request, [request.pcm]);
+        worker.postMessage(request, [request.pcm, ...(request.stereoPcm ?? [])]);
     }
 
     private restoreCacheHits(

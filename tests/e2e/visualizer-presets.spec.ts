@@ -14,7 +14,7 @@ test('native input lists available Web Audio features, persists changes and seek
     const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));await open(page);await preset(page,'geometric-0.6');
     await page.getByRole('button',{name:'外环 · 双重复频谱',exact:true}).click();
     const source=page.getByRole('combobox',{name:'频谱输入数据来源',exact:true}),feature=page.getByRole('combobox',{name:'频谱输入原生特征',exact:true});
-    await expect(source).toHaveValue('native');await expect(feature.locator('option')).toHaveText(['频谱（立体声）','时域波形']);
+    await expect(source).toHaveValue('analysis');await expect(page.getByRole('combobox',{name:'频谱输入分析特征',exact:true})).toHaveValue('wallpaperEngineSpectrum');await source.selectOption('native');await expect(feature.locator('option')).toHaveText(['频谱（立体声）','时域波形']);
     await feature.selectOption('waveform');await expect(page.getByTestId('visualizer-preview-canvas')).toHaveAttribute('data-native-input-state','ready');
     expect((await exported(page)).elements.find(e=>e.type==='radial-spectrum')!.bindings.find(b=>b.parameterId==='spectrum')!.source).toEqual({kind:'native',featureId:'waveform'});
     await source.selectOption('analysis');await expect(page.getByRole('combobox',{name:'频谱输入分析特征',exact:true})).toHaveValue('amplitudeSpectrum');await expect(feature).toHaveCount(0);
@@ -36,11 +36,11 @@ test('browser native FFT keeps stereo frequencies separate',async({page})=>{
         const rate=48000,length=NATIVE_FFT_SIZE+rate*4;
         const pcm=[250,4000].map(f=>Float32Array.from({length},(_,i)=>i<NATIVE_FFT_SIZE?0:.3*Math.sin(2*Math.PI*f*(i-NATIVE_FFT_SIZE)/rate)));
         const frames=await renderNativeAudioChunk(pcm,rate,()=>false),frequency=frames[30].frequency as number[];
-        const left=frequency.slice(0,64),right=frequency.slice(64);
+        const left=frequency.slice(0,1024),right=frequency.slice(1024);
         const surround=Array.from({length:6},()=>new Float32Array(length));surround[2]=pcm[0]!;
         const center=(await renderNativeAudioChunk(surround,rate,()=>false))[30].frequency as number[];
         const mono=(await renderNativeAudioChunk([pcm[0]!],rate,()=>false))[30].frequency as number[];
-        return {count:frames.length,expected:NATIVE_CHUNK_FRAMES,left:left.indexOf(Math.max(...left)),right:right.indexOf(Math.max(...right)),max:Math.max(...frequency),waveMax:Math.max(...frames[30].waveform),silentMax:Math.max(...frames[0].frequency),center:[Math.max(...center.slice(0,64)),Math.max(...center.slice(64))],mono:mono.slice(0,64).every((v,i)=>v===mono[i+64])};
+        return {count:frames.length,expected:NATIVE_CHUNK_FRAMES,left:left.indexOf(Math.max(...left)),right:right.indexOf(Math.max(...right)),max:Math.max(...frequency),waveMax:Math.max(...frames[30].waveform),silentMax:Math.max(...frames[0].frequency),center:[Math.max(...center.slice(0,1024)),Math.max(...center.slice(1024))],mono:mono.slice(0,1024).every((v,i)=>v===mono[i+1024])};
     });
     expect(result.count).toBe(result.expected);expect(result.left).toBeLessThan(result.right);expect(result.max).toBeGreaterThan(0);expect(result.waveMax).toBeGreaterThan(0);expect(result.silentMax).toBe(0);
     expect(result.center.every(v=>v>0)).toBe(true);expect(result.mono).toBe(true);
@@ -49,7 +49,7 @@ test('browser native FFT keeps stereo frequencies separate',async({page})=>{
 test('native input reports an unavailable browser analyser and retries without falling back',async({page})=>{
     await open(page);
     await page.evaluate(()=>{const root=window as unknown as {OfflineAudioContext:unknown;nativeOriginal?:unknown};root.nativeOriginal=root.OfflineAudioContext;root.OfflineAudioContext=class{constructor(){throw Error('native analyser test failure');}};});
-    await preset(page,'geometric-0.6');await expect(page.getByTestId('visualizer-preview-canvas')).toHaveAttribute('data-native-input-state','error');await expect(page.getByRole('alert')).toContainText('native analyser test failure');
+    await preset(page,'geometric-0.6');await page.getByRole('button',{name:'外环 · 双重复频谱',exact:true}).click();await page.getByRole('combobox',{name:'频谱输入数据来源',exact:true}).selectOption('native');await expect(page.getByTestId('visualizer-preview-canvas')).toHaveAttribute('data-native-input-state','error');await expect(page.getByRole('alert')).toContainText('native analyser test failure');
     await page.evaluate(()=>{const root=window as unknown as {OfflineAudioContext:unknown;nativeOriginal?:unknown};root.OfflineAudioContext=root.nativeOriginal;delete root.nativeOriginal;});
     await page.getByRole('button',{name:'重试原生输入',exact:true}).click();await expect(page.getByTestId('visualizer-preview-canvas')).toHaveAttribute('data-native-input-state','ready');
 });
@@ -73,17 +73,16 @@ test('market applies the geometric preset, edits it, restores it and renders sil
 for(const id of ['geometric-0.6','prismatic-voyage'])test(id+' responds to actual audio, survives refresh and records the composition',async({page},info)=>{
     test.setTimeout(60000);const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));page.on('console',m=>{if(m.type()==='error')errors.push(m.text());});
     await open(page);await preset(page,id);
-    if(id==='geometric-0.6')await expect(page.getByTestId('visualizer-preview-canvas')).toHaveAttribute('data-native-input-state','ready');
-    else await expect.poll(()=>page.evaluate(()=>{
+    await expect.poll(()=>page.evaluate((id)=>{
         const w=window as unknown as {__AUDIO_NOT_SURF_YET_M6__?:{getState():{readyFeatureIds:string[]}}};
-        return w.__AUDIO_NOT_SURF_YET_M6__?.getState().readyFeatureIds.includes('amplitudeSpectrum');
-    })).toBe(true);
+        return w.__AUDIO_NOT_SURF_YET_M6__?.getState().readyFeatureIds.includes(id==='geometric-0.6'?'wallpaperEngineSpectrum':'amplitudeSpectrum');
+    },id)).toBe(true);
     const p=await exported(page),progress=page.getByRole('slider',{name:'播放进度',exact:true});const rect=await progress.boundingBox();expect(rect).not.toBeNull();await progress.click({position:{x:rect!.width*.4,y:rect!.height/2}});
-    const canvas=page.getByTestId('visualizer-preview-canvas');if(id==='geometric-0.6')await expect(canvas).toHaveAttribute('data-native-input-state','ready');await page.waitForTimeout(150);const actual=await canvas.screenshot({path:`test-results/${id}-real-audio-${info.project.name}.png`});
+    const canvas=page.getByTestId('visualizer-preview-canvas');await page.waitForTimeout(150);const actual=await canvas.screenshot({path:`test-results/${id}-real-audio-${info.project.name}.png`});
     const silent=structuredClone(p);for(const e of silent.elements)for(const b of e.bindings)if(b.parameterId==='spectrum')b.source={kind:'constant',value:[]};
     await importProject(page,silent);await page.waitForTimeout(150);expect((await canvas.screenshot()).equals(actual)).toBe(false);
     await importProject(page,p);await page.reload();await expect(page.getByTestId('visualizer-ready')).toBeVisible();
-    await page.getByRole('tab',{name:'状态',exact:true}).click();if(id==='geometric-0.6')await expect(canvas).toHaveAttribute('data-native-input-state','ready');else await expect(page.locator('.viz-status-lines')).toContainText('已就绪');
+    await page.getByRole('tab',{name:'状态',exact:true}).click();await expect(page.locator('.viz-status-lines')).toContainText('已就绪');
     await page.getByTestId('visualizer-preview-frame').hover();await page.getByTestId('start-visualizer-recording').click();
     await expect(page.getByTestId('add-visualizer-element')).toBeDisabled();await expect(page.locator('[data-recording-status=ready]')).toBeVisible({timeout:30000});
     await page.getByTestId('save-visualizer-recording').click();await expect.poll(async()=>(await savedPickerEntries(page)).some(e=>e.name.endsWith('.webm'))).toBe(true);
