@@ -8,6 +8,7 @@ import type { PlaybackSnapshot } from '../types/audio';
 import type { VisualizerResolvedParameter } from './rendererTypes';
 import {
     getVisualizerRecordingPreset,
+    getVisualizerRecordingAvailability,
     isReliableVisualizerRecordingPreset,
     selectVisualizerRecordingMimeType,
 } from './recordingPresets';
@@ -422,7 +423,8 @@ export class VisualizerRecordingSession {
         if (!this.isPresetAvailable(preset)) {
             return this.failPreflight(
                 'preset-unavailable',
-                '当前浏览器无法稳定提供所选录制尺寸或帧率。',
+                getVisualizerRecordingAvailability(preset.resolution,preset.frameRate).reason
+                    ?? '当前浏览器无法稳定提供所选录制尺寸或帧率。',
             );
         }
         return context;

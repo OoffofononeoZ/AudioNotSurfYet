@@ -9,6 +9,7 @@
             </fieldset>
             <div v-else-if="tab==='editor'" class="viz-bottom-editor"><span>{{project.editorSnapshot?'已载入同歌快照 · '+rangeCount+' 个范围标记':'未载入 Editor 数据'}}</span><div class="viz-inline-actions"><button type="button" :disabled="locked" @click="$emit('reload-editor')">重新载入草稿</button><button type="button" :disabled="locked" @click="$emit('import-editor')">导入 Editor JSON</button><button type="button" :disabled="locked||!project.editorSnapshot||editorInUse" @click="$emit('remove-editor')">移除</button></div></div>
             <div v-else class="viz-status-lines" aria-live="polite"><div><span>分析</span><span>{{analysisLabel}} · {{Math.round(snapshot.bindingRuntime.analysisProgress*100)}}% · {{snapshot.bindingRuntime.activeFeatureIds.length}}/4</span><button v-if="snapshot.bindingRuntime.analysisState==='error'" type="button" :disabled="locked" @click="$emit('retry-analysis')">重试</button></div><progress v-if="snapshot.bindingRuntime.analysisState==='loading'" max="1" :value="snapshot.bindingRuntime.analysisProgress"/><p v-if="snapshot.bindingRuntime.analysisMessage" class="viz-error">{{snapshot.bindingRuntime.analysisMessage}}</p><p v-for="issue in issues" :key="issue" class="viz-error">{{issue}}</p><div :data-recording-status="snapshot.recording.status"><span>{{recordingLabel}}</span><div class="viz-inline-actions"><template v-if="snapshot.recording.status==='ready'"><button type="button" data-testid="save-visualizer-recording" @click="$emit('save-recording')">保存 WebM</button><button type="button" data-testid="discard-visualizer-recording" @click="$emit('discard-recording')">丢弃</button></template><button v-if="snapshot.recording.status==='error'" type="button" @click="$emit('reset-recording')">清除错误</button></div></div><p v-if="snapshot.recording.status==='error'" class="viz-error">{{snapshot.recording.message}}</p></div>
+            <p v-if="tab==='output'&&!outputAvailability.available" class="viz-error" role="status">{{outputAvailability.reason}}请选择可用的分辨率和帧率。</p>
             <p v-if="error||snapshot.message" class="viz-error" role="alert">{{error||snapshot.message}}</p><button v-if="snapshot.persistence==='not-persisted'" type="button" @click="$emit('retry-save')">重试保存</button>
         </div>
     </section>
@@ -18,6 +19,7 @@ import { computed,ref,watch } from 'vue';import VisualizerIcon from './Visualize
 import AppSelect from '../controls/AppSelect.vue';
 import AppNumberInput from '../controls/AppNumberInput.vue';
 import { compositionIssues } from '../../visualizer/compositionModel';
+import { getVisualizerRecordingAvailability } from '../../visualizer/recordingPresets';
 import type { CompositionSessionSnapshot,VisualizerProjectV3 } from '../../visualizer/compositionTypes';
 import type { VisualizerResolution,VisualizerFrameRate } from '../../visualizer/types';
 const props=defineProps<{snapshot:CompositionSessionSnapshot;project:VisualizerProjectV3;locked:boolean;error:string}>();
@@ -30,8 +32,15 @@ const issues=computed(()=>compositionIssues(props.project));
 const rangeCount=computed(()=>props.project.editorSnapshot?.project.lanes.reduce((n,l)=>n+(l.eventKind==='range'?l.events.length:0),0)??0);
 const editorInUse=computed(()=>props.project.elements.some(e=>e.timing.kind==='editor-range'));
 watch(()=>[props.error,props.snapshot.recording.status,props.snapshot.persistence],()=>{if(props.error||props.snapshot.recording.status!=='idle'||props.snapshot.persistence==='not-persisted'){tab.value='status';collapsed.value=false;}});
-const resolutions=[{value:'720p',label:'1280 × 720'},{value:'1080p',label:'1920 × 1080'}];
-const frameRates=[{value:30,label:'30 fps'},{value:60,label:'60 fps'}];
+const outputAvailability=computed(()=>getVisualizerRecordingAvailability(props.project.output.resolution,props.project.output.frameRate));
+const resolutions=computed(()=>(['720p','1080p'] as const).map(value=>{
+    const disabled=![30,60].some(fps=>getVisualizerRecordingAvailability(value,fps as VisualizerFrameRate).available);
+    return {value,label:(value==='720p'?'1280 × 720':'1920 × 1080')+(disabled?'（暂不可用）':''),disabled};
+}));
+const frameRates=computed(()=>([30,60] as const).map(value=>{
+    const disabled=!(['720p','1080p'] as const).some(res=>getVisualizerRecordingAvailability(res,value).available);
+    return {value,label:value+' fps'+(disabled?'（暂不可用）':''),disabled};
+}));
 function setResolution(value:string|number){emit('output',value as VisualizerResolution,props.project.output.frameRate);}
 function setFrameRate(value:string|number){emit('output',props.project.output.resolution,Number(value) as VisualizerFrameRate);}
 </script>
