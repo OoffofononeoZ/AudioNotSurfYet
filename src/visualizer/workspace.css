@@ -18,13 +18,11 @@
 .viz-element-row { position:relative; border-left:2px solid transparent; }
 .viz-element-row.selected { background:rgba(134,237,181,.065); border-left-color:var(--accent-soft); }
 .viz-element-row.muted .viz-element-select { opacity:.45; }
-.viz-element-select { border:0; border-radius:0; background:transparent; color:var(--body); display:flex; align-items:center; gap:10px; width:100%; min-height:46px; padding:10px 14px; text-align:left; font-size:12px; cursor:pointer; }
+.viz-element-select { border:0; border-radius:0; background:transparent; color:var(--body); display:flex; align-items:center; gap:10px; width:100%; min-height:40px; padding:10px 14px 4px; text-align:left; font-size:12px; cursor:pointer; }
 .viz-element-select svg { width:18px; height:18px; flex:none; }
 .viz-element-select span { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-.viz-element-row.selected .viz-element-select { color:var(--ink); padding-bottom:32px; }
-.viz-row-actions { position:absolute; bottom:4px; left:38px; display:none; gap:4px; }
-.viz-element-row.selected .viz-row-actions,.viz-element-row:focus-within .viz-row-actions { display:flex; }
-.viz-element-row:focus-within .viz-element-select { padding-bottom:32px; }
+.viz-element-row.selected .viz-element-select { color:var(--ink); }
+.viz-row-actions { display:flex; gap:4px; padding:0 0 4px 38px; }
 .viz-list-empty,.viz-inspector-empty { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:14px; padding:55px 12px; color:var(--muted); font-size:12px; }
 .viz-list-empty svg,.viz-inspector-empty svg { width:28px; height:28px; opacity:.4; }
 .viz-inspector-fields { flex:1; border:0; margin:0; padding:0 16px; min-width:0; min-height:0; overflow:auto; overscroll-behavior:contain; }

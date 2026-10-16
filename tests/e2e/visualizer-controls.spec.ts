@@ -2,6 +2,50 @@ import { expect, test } from '@playwright/test';
 import path from 'node:path';
 import { chooseFiles, installFilePickerStub } from '../support/file-picker';
 
+test('element actions stay visible without selecting or resizing rows', async ({ page }) => {
+    await page.setViewportSize({ width: 1920, height: 1080 });
+    await installFilePickerStub(page); await page.goto('/');
+    await chooseFiles(page, [path.resolve(import.meta.dirname, '../fixtures/audio/format-master.wav')]);
+    await page.getByTestId('header-visualizer-link').click();
+    await expect(page.getByTestId('visualizer-ready')).toBeVisible();
+    for (let i = 0; i < 3; i++) {
+        await page.getByTestId('add-visualizer-element').click();
+        await page.locator('[data-element-type=solid]').click();
+    }
+    const rows = page.locator('.viz-element-row');
+    const selected = await rows.filter({ has: page.locator('[aria-pressed=true]') }).getAttribute('data-element-id');
+    const other = rows.nth(1), otherId = await other.getAttribute('data-element-id');
+    const row = page.locator(`.viz-element-row[data-element-id="${otherId}"]`);
+    const height = (await row.boundingBox())!.height;
+    await expect(row.getByRole('button', { name: '隐藏元素' })).toBeVisible();
+    await row.getByRole('button', { name: '隐藏元素' }).click();
+    await expect(row).toHaveClass(/muted/);
+    await row.getByRole('button', { name: '显示元素' }).click();
+    await row.getByRole('button', { name: '上移元素' }).click();
+    await expect(rows.first()).toHaveAttribute('data-element-id', otherId!);
+    await expect(rows.first().getByRole('button', { name: '上移元素' })).toBeDisabled();
+    await expect(rows.last().getByRole('button', { name: '下移元素' })).toBeDisabled();
+    await expect(page.locator('.viz-element-row.selected')).toHaveAttribute('data-element-id', selected!);
+    await row.locator('.viz-element-select').click();
+    await expect(page.locator('.viz-element-row.selected')).toHaveAttribute('data-element-id', otherId!);
+    expect((await row.boundingBox())!.height).toBe(height);
+    const name = page.getByRole('textbox', { name: '元素名称', exact: true });
+    await name.fill('一个很长的元素名称用于验证操作按钮始终完整显示'); await name.press('Tab');
+    await page.setViewportSize({ width: 1024, height: 720 });
+    await page.getByRole('button', { name: '元素列表', exact: true }).click();
+    for (const label of ['上移元素', '下移元素', '隐藏元素', '删除元素']) {
+        await expect(row.getByRole('button', { name: label })).toBeVisible();
+    }
+    await row.getByRole('button', { name: '删除元素' }).click();
+    await expect(rows).toHaveCount(2);
+    await page.setViewportSize({ width: 1920, height: 1080 });
+    await page.getByTestId('visualizer-preview-frame').hover();
+    await page.getByTestId('start-visualizer-recording').click();
+    await expect(page.getByTestId('cancel-visualizer-recording')).toBeVisible();
+    for (const button of await rows.locator('.viz-row-actions button').all()) await expect(button).toBeDisabled();
+    await page.getByTestId('cancel-visualizer-recording').click();
+});
+
 test('shared selects and number steppers keep keyboard, bounds and recording locks', async ({ page }) => {
     await page.setViewportSize({ width: 1920, height: 1080 });
     const errors: string[] = [];
