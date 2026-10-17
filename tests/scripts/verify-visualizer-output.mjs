@@ -1,10 +1,12 @@
 import { spawnSync } from 'node:child_process';
 import { readdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
+import { measureOutputSynchronization } from '../support/visualizer-media-alignment.mjs';
 
 // Functional output checks, separate from historical V5/V6 canonical evidence.
 const root = path.resolve('artifacts/visualizer-composition/output');
 const runId = process.argv[2] ?? 'current';
+const allowFrameDrops = process.argv.includes('--allow-frame-drops');
 if (!/^[a-zA-Z0-9-]+$/.test(runId)) throw Error('Use an alphanumeric run ID.');
 const run = (command, args, binary = false) => {
     const result = spawnSync(command, args, { encoding: binary ? null : 'utf8', maxBuffer: 128 * 1024 * 1024 });
@@ -17,22 +19,27 @@ const end = packets => Math.max(...packets.map(p => Number(p.pts_time) + Number(
 function audioSignal(file) {
     const pcm = run('ffmpeg', ['-v', 'error', '-i', file, '-map', '0:a:0', '-ac', '1', '-ar', '48000', '-f', 'f32le', 'pipe:1'], true);
     let total = 0, peakRms = 0, peakTime = 0;
+    const windows = [];
     const count = pcm.length / 4;
     for (let offset = 0; offset < count; offset += 480) {
         const stop = Math.min(offset + 480, count); let sum = 0;
         for (let i = offset; i < stop; i++) { const sample = pcm.readFloatLE(i * 4); sum += sample * sample; }
         total += sum;
         const rms = Math.sqrt(sum / (stop - offset));
+        windows.push({ rms, time: (offset + (stop - offset) / 2) / 48000 });
         if (rms > peakRms) { peakRms = rms; peakTime = (offset + (stop - offset) / 2) / 48000; }
     }
-    return { rms: Math.sqrt(total / count), peakRms, peakTime };
+    return { rms: Math.sqrt(total / count), peakRms, peakTime, windows };
 }
-function flashTime(file) {
+function flashTimes(file) {
     const frames = json('ffprobe', ['-select_streams', 'v:0', '-show_frames', '-show_entries', 'frame=best_effort_timestamp_time', file]).frames;
     const pixels = run('ffmpeg', ['-v', 'error', '-i', file, '-map', '0:v:0', '-vf', 'crop=64:64:(iw-64)/2:(ih-64)/2,scale=1:1,format=gray', '-fps_mode', 'passthrough', '-f', 'rawvideo', '-pix_fmt', 'gray', 'pipe:1'], true);
-    const index = pixels.findIndex(value => value >= 128);
-    if (index < 0 || !frames[index]) throw Error('No decoded synchronization flash.');
-    return Number(frames[index].best_effort_timestamp_time);
+    const times = [];
+    for (let i = 0; i < pixels.length; i++) {
+        if (pixels[i] >= 128 && (i === 0 || pixels[i - 1] < 128) && frames[i]) times.push(Number(frames[i].best_effort_timestamp_time));
+    }
+    if (!times.length) throw Error('No decoded synchronization flash.');
+    return times;
 }
 
 const entries = (await readdir(root)).filter(name => name.startsWith(`${runId}-`) && name.endsWith('.webm.capture.json')).sort();
@@ -42,8 +49,11 @@ for (const entry of entries) {
     const capture = JSON.parse(await readFile(path.join(root, entry), 'utf8'));
     const file = path.join(root, entry.replace(/\.capture\.json$/, ''));
     const result = { file: path.basename(file), browser: capture.browser, browserVersion: capture.browserVersion,
-        resolution: capture.preset.resolution, targetFps: capture.preset.frameRate, kind: capture.kind, failures: [] };
+        resolution: capture.preset.resolution, targetFps: capture.preset.frameRate, kind: capture.kind, failures: [], frameDropWarnings: [] };
     const check = (condition, message) => { if (!condition) result.failures.push(message); };
+    const checkCadence = (condition, message) => {
+        if (!condition) { result.frameDropWarnings.push(message); if (!allowFrameDrops) result.failures.push(message); }
+    };
     try {
         const probe = json('ffprobe', ['-show_streams', '-show_packets', '-show_format', file]);
         const video = probe.streams.filter(s => s.codec_type === 'video'), audio = probe.streams.filter(s => s.codec_type === 'audio');
@@ -57,18 +67,19 @@ for (const entry of entries) {
         const maxGap = Math.max(...vp.slice(1).map((p, i) => Number(p.pts_time) - Number(vp[i].pts_time)));
         const videoEnd = end(vp), audioEnd = end(ap), duration = Number(probe.format.duration ?? Math.max(videoEnd, audioEnd) - Number(probe.format.start_time ?? 0));
         check(vp.length >= capture.preset.frameRate * 2, 'Insufficient video packets.');
-        check(Number.isFinite(fps) && Math.abs(fps - capture.preset.frameRate) <= capture.preset.frameRate * .05, 'Packet FPS outside ±5%.');
-        check(maxGap <= 4 / capture.preset.frameRate + .001, 'Video packet gap over four target intervals.');
+        check(Number.isFinite(fps) && fps > 0, 'Packet FPS must be finite and positive.');
+        checkCadence(Math.abs(fps - capture.preset.frameRate) <= capture.preset.frameRate * .05, 'Packet FPS outside ±5%.');
+        checkCadence(maxGap <= 4 / capture.preset.frameRate + .001, 'Video packet gap over four target intervals.');
         check([videoEnd, audioEnd, duration].every(v => Math.abs(v - capture.sourceDurationSeconds) <= .25), 'Duration differs by over 250ms.');
         check(Math.abs(videoEnd - audioEnd) <= .1, 'A/V end delta over 100ms.');
         const signal = audioSignal(file);
         check(signal.rms >= .001 && signal.peakRms >= .005, 'Pre-Gain recording is silent at page volume zero.');
         Object.assign(result, { codec: video[0].codec_name, width: video[0].width, height: video[0].height, fps, maxGap, videoEnd, audioEnd, duration, audioRms: signal.rms });
         if (capture.kind === 'sync') {
-            const flash = flashTime(file), syncDelta = Math.abs(flash - signal.peakTime);
-            Object.assign(result, { flashTime: flash, audioPeakTime: signal.peakTime, syncDelta });
-            check(syncDelta <= .1, 'A/V event delta over 100ms.');
-            check(Math.abs(flash - 1.5) <= .1 && Math.abs(signal.peakTime - 1.525) <= .1, 'Synchronization event shifted over 100ms.');
+            const flashes = flashTimes(file), expected = capture.syncEventsSeconds ?? [1.5];
+            const { syncEvents, syncDriftSeconds, failures } = measureOutputSynchronization(expected, flashes, signal.windows, capture.syncFlashSeconds ?? 0);
+            result.failures.push(...failures);
+            Object.assign(result, { syncEvents, syncDriftSeconds });
         }
         run('ffmpeg', ['-v', 'error', '-xerror', '-i', file, '-map', '0:v:0', '-map', '0:a:0', '-fps_mode', 'passthrough', '-enc_time_base:v', '-1', '-f', 'null', '-']);
     } catch (error) { result.failures.push(error.message); }
@@ -77,9 +88,10 @@ for (const entry of entries) {
 const profiles = [...new Set(results.map(r => `${r.resolution}${r.targetFps}`))].map(id => {
     const rows = results.filter(r => `${r.resolution}${r.targetFps}` === id);
     const complete = ['chrome', 'edge'].every(browser => ['sync', 'music'].every(kind => rows.some(r => r.browser === browser && r.kind === kind)));
-    return { id, complete, passed: complete && rows.every(r => r.failures.length === 0) };
+    return { id, complete, passed: complete && rows.every(r => r.failures.length === 0), frameDropWarning: rows.some(r => r.frameDropWarnings.length > 0) };
 });
-await writeFile(path.join(root, `${runId}-measurement.json`), JSON.stringify({ runId, results, profiles }, null, 2) + '\n');
-for (const row of results) console.log(`${row.browser} ${row.resolution}${row.targetFps} ${row.kind}: ${row.fps?.toFixed(2)} fps, gap ${row.maxGap?.toFixed(3)}s, ${row.failures.length ? row.failures.join(' ') : 'PASS'}`);
+const policy = allowFrameDrops ? 'alignment-with-frame-drop-warning' : 'strict';
+await writeFile(path.join(root, `${runId}-${policy}-measurement.json`), JSON.stringify({ runId, policy, results, profiles }, null, 2) + '\n');
+for (const row of results) console.log(`${row.browser} ${row.resolution}${row.targetFps} ${row.kind}: ${row.fps?.toFixed(2)} fps, gap ${row.maxGap?.toFixed(3)}s, ${row.failures.length ? row.failures.join(' ') : 'PASS'}${row.frameDropWarnings.length ? ' [frame-drop warning]' : ''}`);
 console.log(JSON.stringify(profiles));
 if (profiles.some(p => !p.passed)) process.exitCode = 1;

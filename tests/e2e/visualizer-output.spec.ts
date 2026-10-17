@@ -5,6 +5,7 @@ import { chooseFiles, installFilePickerStub, queuePickerData, savedPickerEntries
 import { elementRegistry } from '../../src/visualizer/elementRegistry';
 import { getVisualizerRecordingPreset, isReliableVisualizerRecordingPreset } from '../../src/visualizer/recordingPresets';
 import type { VisualizerProjectV3 } from '../../src/visualizer/compositionTypes';
+import { createOutputSyncWav, OUTPUT_SYNC_EVENTS, OUTPUT_SYNC_FLASH_SECONDS } from '../support/visualizer-output-sync';
 
 const root = 'artifacts/visualizer-composition/output';
 async function exported(page: Page): Promise<VisualizerProjectV3> {
@@ -53,7 +54,7 @@ for (const resolution of ['720p', '1080p'] as const) for (const frameRate of [30
     for (const kind of ['sync', 'music'] as const) test(`${resolution}${frameRate} records ${kind} at the requested quality`, async ({ page, browser }, info) => {
         test.skip(!process.env.VISUALIZER_RECORDING_TRIAL && !isReliableVisualizerRecordingPreset(preset), 'Preset is excluded by the shared measured availability table.');
         test.skip(kind === 'music' && !process.env.VISUALIZER_MUSIC_FILE, 'Set VISUALIZER_MUSIC_FILE to a short local music file.');
-        test.setTimeout(60000);
+        test.setTimeout(90000);
         const errors: string[] = []; page.on('pageerror', e => errors.push(e.message));
         await page.setViewportSize({ width: 1920, height: 1080 });
         await installFilePickerStub(page);
@@ -68,12 +69,20 @@ for (const resolution of ['720p', '1080p'] as const) for (const frameRate of [30
         }
         await page.addInitScript(() => {
             const capture = HTMLCanvasElement.prototype.captureStream;
-            const state = { requestedFps: 0, captureStart: 0, frames: [] as number[], longTasks: [] as { start: number; duration: number }[], tracks: [] as MediaStreamTrack[], options: {} as MediaRecorderOptions };
+            const state = { requestedFps: 0, captureStart: 0, frames: [] as number[], clockSamples: [] as { wall: number; audio: number; song: number; outputAudio: number; outputWall: number }[], longTasks: [] as { start: number; duration: number }[], tracks: [] as MediaStreamTrack[], options: {} as MediaRecorderOptions };
+            let audioContext: AudioContext | null = null, lastClockSample = 0;
+            window.AudioContext = new Proxy(window.AudioContext, { construct(target, args) { audioContext = Reflect.construct(target, args); return audioContext!; } });
             new PerformanceObserver(list => { for (const e of list.getEntries()) state.longTasks.push({ start: e.startTime, duration: e.duration }); }).observe({ type: 'longtask', buffered: true });
             const raf = window.requestAnimationFrame;
             window.requestAnimationFrame = callback => raf.call(window, time => {
                 if (state.captureStart && state.frames.at(-1) !== time) state.frames.push(time);
                 callback(time);
+                if (state.captureStart && audioContext && time - lastClockSample >= 200) {
+                    const output = audioContext.getOutputTimestamp();
+                    state.clockSamples.push({ wall: performance.now(), audio: audioContext.currentTime, song: window.__VISUALIZER_DIAGNOSTICS__?.lastSongTimeSeconds ?? 0,
+                        outputAudio: output.contextTime ?? 0, outputWall: output.performanceTime ?? 0 });
+                    lastClockSample = time;
+                }
             });
             (window as unknown as { __outputProbe: typeof state }).__outputProbe = state;
             HTMLCanvasElement.prototype.captureStream = function (fps) {
@@ -85,7 +94,10 @@ for (const resolution of ['720p', '1080p'] as const) for (const frameRate of [30
             } });
         });
         await page.goto('/');
-        const audio = kind === 'sync' ? path.resolve(import.meta.dirname, '../fixtures/audio/visualizer-v5-avsync-v1.wav') : process.env.VISUALIZER_MUSIC_FILE!;
+        await mkdir(root, { recursive: true });
+        const syncAudio = path.resolve(root, 'timeline-sync.wav');
+        if (kind === 'sync') await writeFile(syncAudio, createOutputSyncWav());
+        const audio = kind === 'sync' ? syncAudio : process.env.VISUALIZER_MUSIC_FILE!;
         await chooseFiles(page, [audio]);
         await expect(page.locator('#music-bar-container')).toHaveAttribute('data-playback-state', 'playing');
         await page.getByTestId('toggle-playback').click();
@@ -99,24 +111,25 @@ for (const resolution of ['720p', '1080p'] as const) for (const frameRate of [30
             await page.locator('[data-preset-id="geometric-0.6"]').click();
         }
         const project = await exported(page);
-        expect(project.track.durationSeconds).toBeLessThanOrEqual(8);
+        expect(project.track.durationSeconds).toBeLessThanOrEqual(kind === 'sync' ? 12 : 8);
         project.output = { aspectRatio: '16:9', resolution, frameRate };
         if (kind === 'sync') {
             const background = elementRegistry.create('solid', project.track.durationSeconds, 0);
             background.bindings.find(b => b.parameterId === 'color')!.source = { kind: 'constant', value: '#000000' };
-            const flash = elementRegistry.create('solid', project.track.durationSeconds, 1);
-            flash.bindings.find(b => b.parameterId === 'color')!.source = { kind: 'constant', value: '#ffffff' };
-            flash.timing = { kind: 'manual', startSeconds: 1.5, endSeconds: 1.55 };
-            // Keep the canvas changing between sync events: Chromium may omit
-            // duplicate all-black frames even while the visual RAF runs at 60Hz.
+            // Continuous motion around four independent center sync events.
             const motion = elementRegistry.create('wireform', project.track.durationSeconds, 1);
             for (const binding of motion.bindings) {
                 if (binding.parameterId === 'spectrum') binding.source = { kind: 'constant', value: [] };
                 if (binding.parameterId === 'x' || binding.parameterId === 'y') binding.source = { kind: 'constant', value: .15 };
                 if (binding.parameterId === 'size') binding.source = { kind: 'constant', value: .03 };
             }
-            flash.layer = 2;
-            project.elements = [background, motion, flash];
+            const flashes = OUTPUT_SYNC_EVENTS.map((time, index) => {
+                const flash = elementRegistry.create('solid', project.track.durationSeconds, index + 2);
+                flash.bindings.find(b => b.parameterId === 'color')!.source = { kind: 'constant', value: '#ffffff' };
+                flash.timing = { kind: 'manual', startSeconds: time, endSeconds: time + OUTPUT_SYNC_FLASH_SECONDS };
+                return flash;
+            });
+            project.elements = [background, motion, ...flashes];
         }
         await queuePickerData(page, [{ name: 'output.json', mimeType: 'application/json', text: JSON.stringify(project) }]);
         await page.getByTestId('import-visualizer-project').click();
@@ -136,8 +149,8 @@ for (const resolution of ['720p', '1080p'] as const) for (const frameRate of [30
         await expect(canvas).not.toHaveAttribute('data-capture-active', 'true');
         await expect(page.getByTestId('add-visualizer-element')).toBeEnabled();
         const probe = await page.evaluate(() => {
-            const p = (window as unknown as { __outputProbe: { requestedFps: number; captureStart: number; frames: number[]; longTasks: { start: number; duration: number }[]; tracks: MediaStreamTrack[]; options: MediaRecorderOptions } }).__outputProbe;
-            return { requestedFps: p.requestedFps, captureStart: p.captureStart, frames: p.frames, longTasks: p.longTasks, tracks: p.tracks.map(t => ({ state: t.readyState, settings: t.getSettings() })), options: p.options };
+            const p = (window as unknown as { __outputProbe: { requestedFps: number; captureStart: number; frames: number[]; clockSamples: unknown[]; longTasks: { start: number; duration: number }[]; tracks: MediaStreamTrack[]; options: MediaRecorderOptions } }).__outputProbe;
+            return { requestedFps: p.requestedFps, captureStart: p.captureStart, frames: p.frames, clockSamples: p.clockSamples, longTasks: p.longTasks, tracks: p.tracks.map(t => ({ state: t.readyState, settings: t.getSettings() })), options: p.options };
         });
         expect(probe.requestedFps).toBe(frameRate); expect(probe.tracks.every(t => t.state === 'ended')).toBe(true);
         expect(probe.options.videoBitsPerSecond).toBe(preset.videoBitsPerSecond); expect(probe.options.audioBitsPerSecond).toBe(192000);
@@ -145,9 +158,10 @@ for (const resolution of ['720p', '1080p'] as const) for (const frameRate of [30
         await expect.poll(async () => (await savedPickerEntries(page)).some(e => e.name.endsWith('.webm'))).toBe(true);
         const saved = (await savedPickerEntries(page)).find(e => e.name.endsWith('.webm'))!;
         await mkdir(root, { recursive: true });
-        const file = `${root}/${process.env.VISUALIZER_OUTPUT_RUN ?? 'current'}-${info.project.name}-${resolution}${frameRate}-${kind}.webm`;
+        const file = `${root}/${process.env.VISUALIZER_OUTPUT_RUN ?? 'current'}-${info.project.name}-${resolution}${frameRate}-${kind}${info.repeatEachIndex ? '-repeat'+info.repeatEachIndex : ''}.webm`;
         await writeFile(file, Buffer.from(saved.base64, 'base64'));
-        await writeFile(`${file}.capture.json`, JSON.stringify({ browser: info.project.name, browserVersion: browser.version(), candidateTrial: !!process.env.VISUALIZER_RECORDING_TRIAL, kind, sourceDurationSeconds: project.track.durationSeconds, preset, probe }, null, 2) + '\n');
+        await writeFile(`${file}.capture.json`, JSON.stringify({ browser: info.project.name, browserVersion: browser.version(), candidateTrial: !!process.env.VISUALIZER_RECORDING_TRIAL, kind, sourceDurationSeconds: project.track.durationSeconds,
+            ...(kind === 'sync' ? { syncEventsSeconds: OUTPUT_SYNC_EVENTS, syncFlashSeconds: OUTPUT_SYNC_FLASH_SECONDS } : {}), preset, probe }, null, 2) + '\n');
         expect(errors).toEqual([]);
     });
 }
