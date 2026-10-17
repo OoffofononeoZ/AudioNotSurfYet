@@ -6,6 +6,7 @@
 
 | 文件 | 本地静态引用（最多显示 6 项） |
 | --- | --- |
+| [tests/transcription/vitePlugin.ts](../../tests/transcription/vitePlugin.ts) | — |
 | [tests/unit/audio-fixtures.test.ts](../../tests/unit/audio-fixtures.test.ts) | [tests/support/audio-fixtures.ts](../../tests/support/audio-fixtures.ts) |
 | [tests/unit/indexeddb-harness.test.ts](../../tests/unit/indexeddb-harness.test.ts) | — |
 | [tests/unit/tolerance.test.ts](../../tests/unit/tolerance.test.ts) | [tests/support/tolerance.ts](../../tests/support/tolerance.ts) |

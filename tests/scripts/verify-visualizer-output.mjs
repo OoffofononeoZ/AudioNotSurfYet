@@ -2,11 +2,13 @@ import { spawnSync } from 'node:child_process';
 import { readdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { measureOutputSynchronization } from '../support/visualizer-media-alignment.mjs';
+import { measureAudioPcm, parseAudioTimeline } from '../support/visualizer-audio-timeline.mjs';
 
 // Functional output checks, separate from historical V5/V6 canonical evidence.
 const root = path.resolve('artifacts/visualizer-composition/output');
 const runId = process.argv[2] ?? 'current';
 const allowFrameDrops = process.argv.includes('--allow-frame-drops');
+const measurementVersion = 'pts-audio-v2';
 if (!/^[a-zA-Z0-9-]+$/.test(runId)) throw Error('Use an alphanumeric run ID.');
 const run = (command, args, binary = false) => {
     const result = spawnSync(command, args, { encoding: binary ? null : 'utf8', maxBuffer: 128 * 1024 * 1024 });
@@ -17,19 +19,11 @@ const json = (command, args) => JSON.parse(run(command, ['-v', 'error', ...args,
 const end = packets => Math.max(...packets.map(p => Number(p.pts_time) + Number(p.duration_time ?? 0)));
 
 function audioSignal(file) {
-    const pcm = run('ffmpeg', ['-v', 'error', '-i', file, '-map', '0:a:0', '-ac', '1', '-ar', '48000', '-f', 'f32le', 'pipe:1'], true);
-    let total = 0, peakRms = 0, peakTime = 0;
-    const windows = [];
-    const count = pcm.length / 4;
-    for (let offset = 0; offset < count; offset += 480) {
-        const stop = Math.min(offset + 480, count); let sum = 0;
-        for (let i = offset; i < stop; i++) { const sample = pcm.readFloatLE(i * 4); sum += sample * sample; }
-        total += sum;
-        const rms = Math.sqrt(sum / (stop - offset));
-        windows.push({ rms, time: (offset + (stop - offset) / 2) / 48000 });
-        if (rms > peakRms) { peakRms = rms; peakTime = (offset + (stop - offset) / 2) / 48000; }
-    }
-    return { rms: Math.sqrt(total / count), peakRms, peakTime, windows };
+    const decoded = spawnSync('ffmpeg', ['-v', 'info', '-nostats', '-i', file, '-map', '0:a:0',
+        '-af', 'aformat=sample_fmts=flt:sample_rates=48000:channel_layouts=mono,ashowinfo',
+        '-f', 'f32le', 'pipe:1'], { maxBuffer: 256 * 1024 * 1024 });
+    if (decoded.status !== 0) throw Error(`Audio decode failed: ${decoded.stderr || decoded.error?.message}`);
+    return measureAudioPcm(decoded.stdout, parseAudioTimeline(decoded.stderr.toString('utf8')));
 }
 function flashTimes(file) {
     const frames = json('ffprobe', ['-select_streams', 'v:0', '-show_frames', '-show_entries', 'frame=best_effort_timestamp_time', file]).frames;
@@ -91,7 +85,7 @@ const profiles = [...new Set(results.map(r => `${r.resolution}${r.targetFps}`))]
     return { id, complete, passed: complete && rows.every(r => r.failures.length === 0), frameDropWarning: rows.some(r => r.frameDropWarnings.length > 0) };
 });
 const policy = allowFrameDrops ? 'alignment-with-frame-drop-warning' : 'strict';
-await writeFile(path.join(root, `${runId}-${policy}-measurement.json`), JSON.stringify({ runId, policy, results, profiles }, null, 2) + '\n');
+await writeFile(path.join(root, `${runId}-${policy}-${measurementVersion}-measurement.json`), JSON.stringify({ runId, policy, measurementVersion, results, profiles }, null, 2) + '\n');
 for (const row of results) console.log(`${row.browser} ${row.resolution}${row.targetFps} ${row.kind}: ${row.fps?.toFixed(2)} fps, gap ${row.maxGap?.toFixed(3)}s, ${row.failures.length ? row.failures.join(' ') : 'PASS'}${row.frameDropWarnings.length ? ' [frame-drop warning]' : ''}`);
 console.log(JSON.stringify(profiles));
 if (profiles.some(p => !p.passed)) process.exitCode = 1;
