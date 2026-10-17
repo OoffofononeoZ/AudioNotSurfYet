@@ -34,6 +34,8 @@ const openE2 = async (page: Page) => {
     await expect(page.getByTestId('editor-buffer-state')).toHaveText('波形已就绪', {
         timeout: 30_000,
     });
+    // These historical seek/geometry cases intentionally exercise the full-song window.
+    await page.getByLabel('标记显示范围', { exact:true }).selectOption('all');
 };
 
 test('supports waveform seek, zoom, context pan/menu and keyboard controls', async ({ page }) => {

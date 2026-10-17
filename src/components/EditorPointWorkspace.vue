@@ -94,7 +94,7 @@
                             :data-testid="`delete-inner-class-${innerClass.id}`"
                             @click="requestInnerClassRemoval(lane, innerClass)"
                         >
-                            删除
+                            <EditorIcon name="trash" />
                         </button>
                     </div>
 
@@ -240,6 +240,7 @@
 <script setup lang="ts">
 import EditorContextMenu from './EditorContextMenu.vue';
 import EditorLaneDeleteButton from './EditorLaneDeleteButton.vue';
+import EditorIcon from './EditorIcon.vue';
 import { useEditorGrid } from '../editor/useEditorGrid';
 import { useMarkerMovement } from '../editor/useMarkerMovement';
 import { divisorColour, divisorHeight } from '../editor/beatSnap';

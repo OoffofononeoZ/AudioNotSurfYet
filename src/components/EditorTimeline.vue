@@ -20,7 +20,7 @@
 
         <div class="timeline-layout-row waveform-row">
             <div class="timeline-track-rail">
-                <strong>歌曲总览</strong>
+                <strong>歌曲波形</strong>
                 <span>波形 / 播放游标</span>
             </div>
             <div class="timeline-class-rail">

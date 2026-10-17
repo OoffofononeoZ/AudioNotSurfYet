@@ -4,6 +4,7 @@ import {
     type Page,
 } from '@playwright/test';
 import path from 'node:path';
+import { FEATURE_IDS } from '../../src/analysis/types';
 import {
     chooseFiles,
     installFilePickerStub,
@@ -184,7 +185,7 @@ test('keeps the fullscreen overlay fixed, transient and pointer-through', async 
     await expect(page.getByTestId('editor-overlay-feature')).toHaveCount(0);
     await page.getByTestId('editor-overlay-toggle').click();
     const firstMenu = page.getByTestId('editor-overlay-feature-menu');
-    await expect(firstMenu.locator('[role="menuitemradio"]')).toHaveCount(21);
+    await expect(firstMenu.locator('[role="menuitemradio"]')).toHaveCount(FEATURE_IDS.length);
     await expect(firstMenu.locator('[role="menuitemradio"]').first()).toBeFocused();
     await page.keyboard.press('Escape');
     await expect(firstMenu).toHaveCount(0);
@@ -302,7 +303,7 @@ test('keeps the fullscreen overlay fixed, transient and pointer-through', async 
             Math.abs(initial.panel.width - initial.marker.width),
         ),
         fixedAfterScroll: true,
-        featureCount: 21,
+        featureCount: FEATURE_IDS.length,
     }));
     expect(issues).toEqual([]);
 });

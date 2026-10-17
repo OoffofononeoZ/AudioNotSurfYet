@@ -122,6 +122,7 @@ import EditorLeaveGuard from '../components/EditorLeaveGuard.vue';
 import '../editor/controls.css';
 import '../editor/marking.css';
 import { provideEditorGrid } from '../editor/useEditorGrid';
+import { useEditorHorizontalScroll } from '../editor/useEditorHorizontalScroll';
 import { resolveEditorUnavailableRecovery } from '../editor/routeRecovery';
 import { useEditorSessionController } from '../editor/editorSessionController';
 import { useAudioSessionStore } from '../stores/audioSessionStore';
@@ -139,6 +140,7 @@ import type {
 import type { EditorProjectV1 } from '../editor/types';
 
 const route = useRoute();
+useEditorHorizontalScroll();
 const router = useRouter();
 const audioSession = useAudioSessionService();
 const sessionStore = useAudioSessionStore();

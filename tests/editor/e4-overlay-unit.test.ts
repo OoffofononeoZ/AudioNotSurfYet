@@ -61,9 +61,12 @@ describe('Editor E4 overlay contract', () => {
             E4_OVERLAY_GOLDEN_PATH,
             'utf8',
         ));
-        expect(committed).toEqual(buildE4OverlayGolden());
-        expect(FEATURE_IDS).toHaveLength(21);
-        expect(committed.features).toEqual(FEATURE_IDS.map((featureId) => ({
+        const current = buildE4OverlayGolden();
+        const historicalIds = FEATURE_IDS.filter(id => id !== 'wallpaperEngineSpectrum');
+        // The historical canonical remains 21 features; Wallpaper spectrum was added later.
+        expect(committed).toEqual({ ...current, features: current.features.filter(item => item.featureId !== 'wallpaperEngineSpectrum') });
+        expect(historicalIds).toHaveLength(21);
+        expect(committed.features).toEqual(historicalIds.map((featureId) => ({
             featureId,
             outputShape: FEATURE_REGISTRY[featureId].outputShape,
             renderer: FEATURE_REGISTRY[featureId].renderer,

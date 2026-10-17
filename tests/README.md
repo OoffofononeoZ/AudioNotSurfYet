@@ -14,6 +14,8 @@
 
 2026-10-16 Editor 公共框架回归：`npx playwright test tests/e2e/editor-frame.spec.ts tests/e2e/editor-navigation-lifecycle.spec.ts --project=chrome --project=edge --workers=1`。覆盖三种播放器样式、动画留位、页签/菜单焦点、滚动保留、草稿失败、播放列表操作与运行中任务换歌保护；旧 E1–E10 交互专项已按常驻 MusicBar 和内部滚动更新，历史 canonical 身份不改写。布局契约见 [Editor 工作区](../docs/context/editor-workspace.md)。
 
+2026-10-17 标记改版专项：`npx playwright test tests/e2e/editor-marking.spec.ts tests/e2e/editor-marking-layout.spec.ts --project=chrome --project=edge --workers=1`。覆盖菜单／轨道删除、细分偏好、手动定时／Tap、局部视口、单项移动及四视口／DPR 1–2 布局；截图存本地忽略目录 `artifacts/editor-marking/`。领域检查纳入 `npx vitest run tests/editor`；完整本轮回归范围和历史断言调整见[标记工作区](../docs/context/editor-marking.md)。
+
 - Node.js：24.18.0；npm：11.x。仓库使用 `.nvmrc`、`engines` 和 `package-lock.json` 锁定基线。
 - Vitest：4.1.10。官方已发布但当前 npm 镜像尚未提供 Vitest 5，因此使用镜像可获得且仍受支持的 4.1 版本。
 - Playwright Test：1.62.0；必需浏览器为本机稳定版 Google Chrome 与 Microsoft Edge。
@@ -58,9 +60,9 @@ M3–M14 不建设 CI。下列命令当前均为本地门禁；正式证据要�
 | `npm run test:e1:integration` | playback/analysis lease、独立 IndexedDB、同/异歌草稿、原子导入和 quota 后内存保留 |
 | `npm run test:e2:unit` | Editor viewport/geometry、Tempo map、拍号/single-beat、BPM onset/autocorrelation 与 golden |
 | `npm run test:e2:integration` | Buffer retained PCM、tempo identity/stale、JSON viewport/tempo round-trip 与 coordinator 回归 |
-| `npm run test:e3:unit` | Editor point lane/class 命令、迁移冲突、微秒唯一性、自适应吸附与可见事件过滤 |
+| `npm run test:e3:unit` | Editor point lane/class 命令、迁移冲突、微秒唯一性、显式细分吸附与可见事件过滤 |
 | `npm run test:e3:integration` | point/range JSON 兼容、独立草稿恢复、tempo 秒数稳定与 viewport-visible 模型 |
-| `npm run test:e4:unit` | Editor 21 项 overlay registry、六类纯 Canvas renderer、bounds、Buffer 去重与 exact summary |
+| `npm run test:e4:unit` | Editor 历史 21 项 golden、当前 overlay registry、六类纯 Canvas renderer、bounds、Buffer 去重与 exact summary |
 | `npm run test:e4:integration` | Buffer-first consumer、快速换特征、错误重试、Analyzer 隔离与 overlay 草稿恢复 |
 | `npm run test:e5:unit` | Editor range lane/class、半开重叠、最短网格、端点更新、迁移冲突与可见范围过滤 |
 | `npm run test:e5:integration` | point/range JSON 与草稿 round-trip、无效导入隔离、tempo 秒数稳定与稳定 ID |
@@ -90,7 +92,7 @@ M3–M14 不建设 CI。下列命令当前均为本地门禁；正式证据要�
 | `npm run test:e2e:e1` | Chrome Header/播放列表入口、“去编辑”、MusicBar 显隐、JSON picker、草稿冲突和刷新恢复 |
 | `npm run test:e2e:e2` | Chrome 波形、seek、wheel/right-pan/menu、tempo boundary、输入边界、恢复与多视口 geometry |
 | `npm run test:e2e:e3` | Chrome point lane/class、鼠标/键盘/右键标记、迁移对话框、可见 DOM、range 身份兼容与多视口 geometry |
-| `npm run test:e2e:e4` | Chrome 21 项单选 overlay、六类 renderer、三手柄、pointer-through、错误隔离与多视口 geometry |
+| `npm run test:e2e:e4` | Chrome 当前注册特征单选 overlay、六类 renderer、三手柄、pointer-through、错误隔离与多视口 geometry |
 | `npm run test:e2e:e5` | Chrome range 创建/预览/取消/端点/重叠/迁移、右键、键盘、overlay 穿透、恢复与多视口 geometry |
 | `npm run test:e2e:e6:chrome` | Chrome 三格式、工程失败隔离、10,000 事件、反馈/长任务、虚拟化、无障碍与 20 次资源循环 |
 | `npm run test:e2e:e6:edge` | 使用真实 Edge 执行同一 E6 最终加固套件 |

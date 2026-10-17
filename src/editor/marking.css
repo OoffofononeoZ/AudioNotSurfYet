@@ -12,11 +12,20 @@
 #editor-marking-panel .range-lane-meta input,
 #editor-marking-panel .inner-class-cell input,
 #editor-marking-panel .range-inner-class-cell input { border-color:transparent; background:transparent; font-size:12px; }
-#editor-marking-panel input:hover,
-#editor-marking-panel input:focus-visible { border-color:var(--hairline-focus); }
+#editor-marking-panel input:not(.tempo-compact-control):hover,
+#editor-marking-panel input:not(.tempo-compact-control):focus-visible { border-color:var(--hairline-focus); }
 #editor-marking-panel .timing-toggle { font-size:12px; min-height:30px; padding:4px 8px; }
 #editor-marking-panel .tempo-segment[data-selected="true"] { background:rgba(134,237,181,.045); }
 #editor-marking-panel .timeline-heading { flex-wrap:wrap; align-items:center; }
+#editor-marking-panel .timeline-heading,
+#editor-marking-panel .workspace-heading,
+#editor-marking-panel .editor-timing-panel { position:sticky; left:0; }
+#editor-marking-panel .lane-meta button:not(.editor-lane-delete),
+#editor-marking-panel .range-lane-meta button:not(.editor-lane-delete) { width:48px; padding-inline:0; font-size:11px; }
+#editor-marking-panel .delete-class,
+#editor-marking-panel .range-delete-class { width:26px; height:26px; min-height:26px; padding:4px; }
+#editor-marking-panel .delete-class svg,
+#editor-marking-panel .range-delete-class svg { display:block; width:16px; height:16px; }
 #editor-marking-panel .timeline-controls { min-width:0; }
 #editor-marking-panel .timeline-controls>.app-select { --app-control-width:100px; font-size:12px; }
 #editor-marking-panel .timeline-controls>button:not(.editor-icon-button) { font-size:12px; }

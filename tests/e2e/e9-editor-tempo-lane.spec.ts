@@ -294,14 +294,8 @@ test('shares waveform geometry and switches tempo content without wrapping', asy
         viewports: responsiveMetrics,
     }));
 
-    await page.getByTestId('editor-zoom-in').click();
-    await page.getByTestId('editor-zoom-in').click();
-    await page.getByTestId('editor-zoom-in').click();
-    await page.getByTestId('editor-zoom-in').click();
-    await page.getByTestId('editor-zoom-in').click();
-    await page.getByTestId('editor-pan-forward').click();
-    await page.getByTestId('editor-pan-forward').click();
-    await page.getByTestId('editor-zoom-in').click();
+    await page.getByLabel('标记显示范围', { exact:true }).selectOption('1');
+    await expect(page.getByTestId('editor-zoom-in')).toBeDisabled();
     await expect.poll(async () => page.locator('[data-presentation="full"]').count())
         .toBeGreaterThan(0);
     expect(issues).toEqual([]);

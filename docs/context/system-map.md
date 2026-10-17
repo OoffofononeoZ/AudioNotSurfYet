@@ -110,22 +110,24 @@ showOpenFilePicker → FileSystemFileHandle → File
 
 ## Editor 基线边界
 
-以下为 E1–E9 的已实现基线；E10 与 FT 接入修订的当前状态及合同见 [上下文入口](index.md)。
+以下为 Editor 当前实现；E1–E9 历史基线及后续修订的证据身份分别保存，当前内部标记交互见[标记工作区](editor-marking.md)，E10 与 FT 接入状态见[上下文入口](index.md)。
 
 - `/editor/:trackId?` 由 route-generation `EditorSessionController` 编排；侧边栏使用当前歌曲，播放列表“去编辑”先播放指定歌曲。
 - tokenized playback lease 隔离 repeat-one；analysis consumer lease 只允许 Analyzer/Editor 最新 token 生效。Editor 先激活 `buffer` 完成 waveform/tempo，再激活 `buffer + selected overlay`；选择 Buffer 时去重，快速切换与旧 generation 以最后选择为准。
 - `EditorProjectV1`、strict JSON codec、原生 picker gateway 和独立 `audionotsurfyet-editor` V1 单草稿已实现；内存工程优先，quota 发布 `not-persisted`。
-- `EditorTimeline` 以同一 `timeToX/xToTime` 驱动 waveform、grid、cursor 与 boundary；viewport 支持 1–64 zoom、指针锚点、任意像素/25% pan、seek 和持久化。
+- `EditorTimeline` 以同一 `timeToX/xToTime` 驱动 waveform、grid、cursor 与 boundary；独立 Editor viewport 默认四小节、最少一小节，支持全曲、指针锚点、任意像素/25% pan、seek 和持久化；不受 Analyzer 的 64× 限制。
 - tempo map 支持 metered/single-beat、20–300 小数 BPM、拍号、继承式 boundary 和内部 onset/autocorrelation 估计；低置信度或 stale 结果不写入工程。
 - `EditorPointWorkspace` 使用同一 viewport/time geometry 展开 point lane 与全部 inner class；Canvas 绘制背景网格，DOM 只实例化当前横向 viewport 内的稳定 ID marker。
-- point 命令固定微秒唯一性、1/16–1 beat 自适应吸附、single-beat 整段一格与分类迁移/明确删除；右键 marker 删除，空白 4px 以上 pan，否则打开 quick menu。
+- point 命令固定微秒唯一性，使用 osu 式显式细分与颜色、single-beat 整段一格及分类迁移/明确删除；缩放只稀疏网格绘制，不改变吸附。右键 marker 删除，空白 4px 以上 pan，否则打开 body 级 quick menu；三类时间轨道共用菜单生命周期。
 - range 命令使用微秒规范化半开 `[start,end)`；同 lane/inner class 真重叠拒绝、相邻允许，跨分类范围和内部 point 可并存。UI 支持两阶段创建、虚线 preview、Esc/空白右键取消、端点 pointer/keyboard 调整、pointercancel 回滚、分类迁移冲突与 viewport-visible 裁剪。
-- `analysisCanvasRenderer` 是 Analyzer card 与 Editor overlay 共用的纯 Canvas adapter；E4 overlay 一次选择累计 21 项中的一个，使用同一 viewport/time geometry、DPR backing store、40ms exact cursor 合并和 last-ready Buffer fallback。
-- overlay 通过 Teleport 固定覆盖窗口，灰色背景、全视口 Canvas 与说明穿透到侧边栏/底层标记；只有左上复合入口、临时 21 项菜单、重试和 top/move/bottom 手柄接收 pointer。bounds 仍为 0.10/0.35、最小 0.12，但相对 viewport；visibility 按歌曲 hash 本地保存，关闭时 active set 只保留 Buffer。
+- point/range 主体支持同分类单项拖动与 Alt+左右移动，范围保留长度；预览本地保存，确认时校验当前工程后原子提交。空轨直接删除、非空轨确认后删除，最后一轨也可删除；窄屏时间轴与轨道物理横向滚动同步。
+- 手动定时默认收起；区间列表与 BPM 辅助栏共用现有 tempo 命令和播放快照，Tap 只在显式应用后写入；细分偏好按歌曲 hash 独立保存，JSON V1 与 IndexedDB schema 不变。
+- `analysisCanvasRenderer` 是 Analyzer card 与 Editor overlay 共用的纯 Canvas adapter；overlay 一次选择当前注册集合中的一项，使用同一 viewport/time geometry、DPR backing store、40ms exact cursor 合并和 last-ready Buffer fallback。
+- overlay 通过 Teleport 固定覆盖窗口，灰色背景、全视口 Canvas 与说明穿透到侧边栏/底层标记；只有顶栏右侧图标、临时特征菜单、重试和 top/move/bottom 手柄接收 pointer。bounds 仍为 0.10/0.35、最小 0.12，但相对 viewport；visibility 按歌曲 hash 本地保存，关闭时 active set 只保留 Buffer。
 
 E7 原 44/44 run 只作 `pre-revision`，修订版 46/46 与 E6/E8 的历史身份见 [Editor evidence](../quality/editor/evidence-index.md)，不因其他子系统修改而改写。
 
-E8 当前实现把波形 stage 缩为桌面 `88px`/窄屏 `72px`，以 6px 安全区计算垂直振幅；`Editor.vue` 通过纯恢复决策在同一 URL 歌曲恢复后合并重试，另一首歌曲只提供显式 replace 入口；point marker 的菱形和引线分离并以事件 X/Y 中心定位。JSON V1、Editor IndexedDB、AudioEngine 与 AudioSessionService 严格身份规则均不变。
+E8 引入桌面 `88px`/窄屏 `72px` 波形 stage，以 6px 安全区计算垂直振幅；`Editor.vue` 通过纯恢复决策在同一 URL 歌曲恢复后合并重试，另一首歌曲只提供显式 replace 入口。当前 point 已改为短键，仍以事件 X/Y 中心定位。JSON V1、Editor IndexedDB schema、AudioEngine 与 AudioSessionService 严格身份规则均不变。
 
 ## 当前边界与历史证据
 
