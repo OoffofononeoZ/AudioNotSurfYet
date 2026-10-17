@@ -1,0 +1,16 @@
+/* Marking-only workbench primitives; separation and transcription keep their own surfaces. */
+#editor-marking-panel { background:var(--canvas); }
+#editor-marking-panel .timeline-heading,
+#editor-marking-panel .workspace-heading { min-height:48px; padding:4px 14px; background:var(--surface-2); }
+#editor-marking-panel .timeline-heading h2,
+#editor-marking-panel .workspace-heading h2 { font-size:13px; font-weight:500; }
+#editor-marking-panel .lane-card,
+#editor-marking-panel .range-lane-card { background:var(--surface-2); }
+#editor-marking-panel .lane-meta,
+#editor-marking-panel .range-lane-meta { background:#080e0b; }
+#editor-marking-panel .lane-meta input,
+#editor-marking-panel .range-lane-meta input,
+#editor-marking-panel .inner-class-cell input,
+#editor-marking-panel .range-inner-class-cell input { border-color:transparent; background:transparent; font-size:12px; }
+#editor-marking-panel input:hover,
+#editor-marking-panel input:focus-visible { border-color:var(--hairline-focus); }

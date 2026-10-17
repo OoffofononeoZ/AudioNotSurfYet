@@ -25,6 +25,7 @@
                     >
                         ＋ 分类
                     </button>
+                    <EditorLaneDeleteButton :project="project" :lane-id="lane.id" @update-project="applyProject" @removed="clearInteraction" />
                 </div>
 
                 <template v-for="(innerClass, innerIndex) in lane.innerClasses" :key="innerClass.id">
@@ -163,17 +164,11 @@
                             </button>
                         </template>
 
-                        <div
+                        <EditorContextMenu
                             v-if="quickMenu?.surfaceKey === surfaceKey(lane.id, innerClass.id)"
-                            class="range-menu"
-                            role="menu"
-                            :style="{ left: `${quickMenu.x}px`, top: `${quickMenu.y}px` }"
-                            data-testid="editor-range-menu"
-                        >
-                            <button type="button" role="menuitem" @click.stop="menuSeek(false)">跳到此处</button>
-                            <button type="button" role="menuitem" @click.stop="menuSeek(true)">从此处播放</button>
-                            <button type="button" role="menuitem" @click.stop="menuCenter">将此处居中</button>
-                        </div>
+                            :anchor="surfaceRefs.get(quickMenu.surfaceKey)" :x="quickMenu.x" :y="quickMenu.y" test-id="editor-range-menu"
+                            @action="$event === 'center' ? menuCenter() : menuSeek($event === 'play')" @close="quickMenu = null"
+                        />
                     </div>
                 </template>
             </div>
@@ -222,6 +217,8 @@
 </template>
 
 <script setup lang="ts">
+import EditorContextMenu from './EditorContextMenu.vue';
+import EditorLaneDeleteButton from './EditorLaneDeleteButton.vue';
 import {
     computed,
     nextTick,
@@ -995,8 +992,8 @@ const onSurfacePointerUp = (event: PointerEvent) => {
     } else {
         quickMenu.value = {
             surfaceKey: active.surfaceKey,
-            x: Math.min(point.x, Math.max(0, point.element.clientWidth - 170)),
-            y: Math.min(point.y, Math.max(0, point.element.clientHeight - 116)),
+            x: point.x,
+            y: point.y,
             timeSeconds: editorXToTime(point.x, viewport.value, point.element.clientWidth),
         };
     }
@@ -1355,6 +1352,7 @@ const drawAllGrids = () => {
 };
 const clearInteraction = () => {
     cancelSurfacePointer();
+    focusedRange = null;
     cancelHandleDrag();
     pending.value = null;
     candidate.value = null;
@@ -1446,7 +1444,7 @@ onBeforeUnmount(() => {
     grid-column: 1;
     grid-row: 1 / span var(--lane-rows);
     display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-columns: minmax(0, 1fr) auto auto;
     grid-template-rows: 26px 12px;
     align-content: center;
     gap: 2px 4px;
@@ -1457,6 +1455,7 @@ onBeforeUnmount(() => {
 .range-lane-meta label { display: none; }
 .range-lane-meta input { grid-column: 1; grid-row: 1; min-width: 0; min-height: 26px; height: 26px; }
 .range-lane-meta button { grid-column: 2; grid-row: 1; min-height: 26px; height: 26px; padding-inline: 5px; }
+.range-lane-meta .editor-lane-delete { grid-column:3; }
 .range-lane-kind { grid-column: 1 / -1; grid-row: 2; overflow: hidden; color: var(--accent-soft); font-size: .62rem; letter-spacing: .04em; text-overflow: ellipsis; white-space: nowrap; }
 .range-inner-class-cell {
     grid-column: 2;

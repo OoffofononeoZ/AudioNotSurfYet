@@ -2,9 +2,7 @@
     <section ref="workspace" class="point-workspace app-scrollbar" data-testid="editor-point-workspace" data-editor-major-region="true" aria-labelledby="point-workspace-title" @keydown.capture="onWorkspaceKeydown">
         <header class="workspace-heading">
             <div class="workspace-titleline">
-                <span class="workspace-kicker">Point & Range</span>
-                <h2 id="point-workspace-title">点与范围标记轨道</h2>
-                <span class="workspace-help">按共享节拍网格标记音符、音色和效果。</span>
+                <h2 id="point-workspace-title">标记轨道</h2>
             </div>
             <div class="workspace-actions">
                 <button type="button" data-testid="add-point-lane" @click="addLane">
@@ -72,6 +70,7 @@
                     >
                         ＋ 分类
                     </button>
+                    <EditorLaneDeleteButton :project="project" :lane-id="lane.id" @update-project="applyProject" @removed="clearInteraction" />
                 </div>
 
                 <template v-for="(innerClass, innerIndex) in lane.innerClasses" :key="innerClass.id">
@@ -163,17 +162,11 @@
                             <span aria-hidden="true" />
                         </button>
 
-                        <div
+                        <EditorContextMenu
                             v-if="quickMenu?.surfaceKey === surfaceKey(lane.id, innerClass.id)"
-                            class="point-menu"
-                            role="menu"
-                            :style="{ left: `${quickMenu.x}px`, top: `${quickMenu.y}px` }"
-                            data-testid="editor-point-menu"
-                        >
-                            <button type="button" role="menuitem" @click.stop="menuSeek(false)">跳到此处</button>
-                            <button type="button" role="menuitem" @click.stop="menuSeek(true)">从此处播放</button>
-                            <button type="button" role="menuitem" @click.stop="menuCenter">将此处居中</button>
-                        </div>
+                            :anchor="surfaceRefs.get(quickMenu.surfaceKey)" :x="quickMenu.x" :y="quickMenu.y" test-id="editor-point-menu"
+                            @action="$event === 'center' ? menuCenter() : menuSeek($event === 'play')" @close="quickMenu = null"
+                        />
                     </div>
                 </template>
             </div>
@@ -239,6 +232,8 @@
 </template>
 
 <script setup lang="ts">
+import EditorContextMenu from './EditorContextMenu.vue';
+import EditorLaneDeleteButton from './EditorLaneDeleteButton.vue';
 import {
     computed,
     nextTick,
@@ -1144,8 +1139,8 @@ const onSurfacePointerUp = (event: PointerEvent) => {
     } else {
         quickMenu.value = {
             surfaceKey: active.surfaceKey,
-            x: Math.min(point.x, Math.max(0, point.element.clientWidth - 170)),
-            y: Math.min(point.y, Math.max(0, point.element.clientHeight - 116)),
+            x: point.x,
+            y: point.y,
             timeSeconds: editorXToTime(
                 point.x,
                 viewport.value,
@@ -1398,6 +1393,7 @@ const drawAllGrids = () => {
 
 const clearInteraction = () => {
     cancelPointer();
+    focusedMarker = null;
     candidate.value = null;
     quickMenu.value = null;
     removalDialog.value = null;
@@ -1560,7 +1556,7 @@ button:disabled { opacity: .4; cursor: not-allowed; }
     grid-column: 1;
     grid-row: 1 / span var(--lane-rows);
     display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-columns: minmax(0, 1fr) auto auto;
     grid-template-rows: 26px 12px;
     align-content: center;
     gap: 2px 4px;
@@ -1571,6 +1567,7 @@ button:disabled { opacity: .4; cursor: not-allowed; }
 .lane-meta label { display: none; }
 .lane-meta input { grid-column: 1; grid-row: 1; min-width: 0; min-height: 26px; height: 26px; }
 .lane-meta button { grid-column: 2; grid-row: 1; place-self: center end; display: inline-flex; align-items: center; justify-content: center; min-height: 26px; height: 26px; padding: 0 5px; line-height: 1; }
+.lane-meta .editor-lane-delete { grid-column:3; }
 .lane-kind { grid-column: 1 / -1; grid-row: 2; overflow: hidden; color: var(--accent-soft); font-size: .62rem; letter-spacing: .04em; text-overflow: ellipsis; white-space: nowrap; }
 .inner-class-cell {
     grid-column: 2;
