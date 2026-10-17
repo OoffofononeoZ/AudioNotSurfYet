@@ -2,8 +2,7 @@
     <section class="editor-timeline-panel app-scrollbar" aria-label="Editor 时间轴" data-editor-major-region="true">
         <header class="timeline-heading">
             <div class="timeline-titleline">
-                <span class="timeline-kicker">Timeline / Tempo</span>
-                <h2>波形与节拍地图</h2>
+                <h2>节拍</h2>
                 <p data-testid="editor-viewport-state">{{ formatTime(viewport.startSeconds) }} — {{ formatTime(viewport.endSeconds) }} · {{ viewport.zoom.toFixed(1) }}×</p>
             </div>
             <div class="timeline-controls" aria-label="共享视口控制">
@@ -55,17 +54,12 @@
                         <span aria-hidden="true">＋</span>
                     </button>
 
-                    <div
+                    <EditorContextMenu
                         v-if="quickMenu"
-                        class="timeline-menu"
-                        role="menu"
-                        :style="{ left: `${quickMenu.x}px`, top: `${quickMenu.y}px` }"
-                        data-testid="editor-timeline-menu"
-                    >
-                        <button type="button" role="menuitem" @click="menuSeek(false)">跳到此处</button>
-                        <button type="button" role="menuitem" @click="menuSeek(true)">从此处播放</button>
-                        <button type="button" role="menuitem" @click="menuCenter">将此处居中</button>
-                    </div>
+                        :anchor="stage" :x="quickMenu.x" :y="quickMenu.y" test-id="editor-timeline-menu"
+                        @action="$event === 'center' ? menuCenter() : menuSeek($event === 'play')"
+                        @close="quickMenu = null"
+                    />
                 </div>
 
                 <div class="tempo-guide-layer" aria-hidden="true">
@@ -239,6 +233,7 @@ import { visibleSampleRange, waveformEnvelopeAt } from '../analysis/rendererData
 import { useAudioSessionService } from '../audio/audioSessionService';
 import type { PlaybackSnapshot } from '../types/audio';
 import EditorIcon from './EditorIcon.vue';
+import EditorContextMenu from './EditorContextMenu.vue';
 import type { PersistedTimelineViewport } from '../types/session';
 import {
     EDITOR_CONTEXT_PAN_THRESHOLD_PX,
@@ -450,8 +445,8 @@ const onStagePointerUp = (event: PointerEvent) => {
         updateViewport(viewport.value, true);
     } else {
         quickMenu.value = {
-            x: Math.min(point.x, Math.max(0, size.width - 170)),
-            y: Math.min(point.y, Math.max(0, size.height - 118)),
+            x: point.x,
+            y: point.y,
             timeSeconds: editorXToTime(point.x, viewport.value, size.width),
         };
     }

@@ -93,6 +93,8 @@ AudioNotSurfYet 是 Vue / TypeScript / Vite 浏览器音频工作台；当前目
 
 ### Editor
 
+当前标记编辑的分阶段改版、菜单与轨道删除见 [标记工作区](editor-marking.md)。
+
 | 入口 | 用途 |
 | --- | --- |
 | [Editor Project V1](../architecture/editor/project-format-v1.md) | JSON schema、validator、歌曲 identity、codec 与独立 draft DB |

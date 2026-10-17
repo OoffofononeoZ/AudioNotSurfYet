@@ -6,6 +6,8 @@
 
 | 文件 | 本地静态引用（最多显示 6 项） |
 | --- | --- |
+| [tests/fixtures/fixture-manifest.test.ts](../../tests/fixtures/fixture-manifest.test.ts) | — |
+| [tests/fixtures/generate-fixtures.ts](../../tests/fixtures/generate-fixtures.ts) | [tests/support/audio-fixtures.ts](../../tests/support/audio-fixtures.ts) |
 | [tests/harness/intentional-failure.test.ts](../../tests/harness/intentional-failure.test.ts) | — |
 | [tests/harness/verify-failure-detection.mjs](../../tests/harness/verify-failure-detection.mjs) | — |
 | [tests/persistence/m6-analysis-cache.test.ts](../../tests/persistence/m6-analysis-cache.test.ts) | [src/analysis/compactCodec.ts](../../src/analysis/compactCodec.ts)、[src/analysis/config.ts](../../src/analysis/config.ts)、[src/analysis/types.ts](../../src/analysis/types.ts)、[src/persistence/sessionRepository.ts](../../src/persistence/sessionRepository.ts)、[src/types/session.ts](../../src/types/session.ts) |
@@ -104,5 +106,3 @@
 | [tests/transcription/harness.ts](../../tests/transcription/harness.ts) | — |
 | [tests/transcription/model-probe.worker.ts](../../tests/transcription/model-probe.worker.ts) | [src/processing/dsp.ts](../../src/processing/dsp.ts)、[src/processing/modelManifest.ts](../../src/processing/modelManifest.ts)、[src/processing/sha256.ts](../../src/processing/sha256.ts)、[src/transcription/drumFeatures.ts](../../src/transcription/drumFeatures.ts)、[src/transcription/drumModel.ts](../../src/transcription/drumModel.ts)、[src/transcription/modelManifest.ts](../../src/transcription/modelManifest.ts)、另 2 项，按需核对源码 |
 | [tests/transcription/pitch-notes.test.ts](../../tests/transcription/pitch-notes.test.ts) | [src/transcription/pitchNotes.ts](../../src/transcription/pitchNotes.ts) |
-| [tests/transcription/preprocessing.test.ts](../../tests/transcription/preprocessing.test.ts) | [src/processing/dsp.ts](../../src/processing/dsp.ts)、[src/transcription/drumFeatures.ts](../../src/transcription/drumFeatures.ts)、[src/transcription/drumTokens.ts](../../src/transcription/drumTokens.ts)、[src/transcription/monoResampler.ts](../../src/transcription/monoResampler.ts) |
-| [tests/transcription/quality-metrics.test.ts](../../tests/transcription/quality-metrics.test.ts) | [tests/transcription/qualityMetrics.ts](../../tests/transcription/qualityMetrics.ts) |

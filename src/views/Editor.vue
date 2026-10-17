@@ -119,6 +119,7 @@ import { useAudioSessionService } from '../audio/audioSessionService';
 import EditorToolbar from '../components/EditorToolbar.vue';
 import EditorLeaveGuard from '../components/EditorLeaveGuard.vue';
 import '../editor/controls.css';
+import '../editor/marking.css';
 import { resolveEditorUnavailableRecovery } from '../editor/routeRecovery';
 import { useEditorSessionController } from '../editor/editorSessionController';
 import { useAudioSessionStore } from '../stores/audioSessionStore';

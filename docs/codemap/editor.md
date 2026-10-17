@@ -6,10 +6,12 @@
 
 | 文件 | 本地静态引用（最多显示 6 项） |
 | --- | --- |
+| [src/editor/contextMenuOwnership.ts](../../src/editor/contextMenuOwnership.ts) | — |
 | [src/editor/editorConfig.ts](../../src/editor/editorConfig.ts) | — |
 | [src/editor/editorDraftRepository.ts](../../src/editor/editorDraftRepository.ts) | [src/editor/projectCodec.ts](../../src/editor/projectCodec.ts)、[src/editor/types.ts](../../src/editor/types.ts) |
 | [src/editor/editorSessionController.ts](../../src/editor/editorSessionController.ts) | [src/analysis/analysisCoordinator.ts](../../src/analysis/analysisCoordinator.ts)、[src/analysis/types.ts](../../src/analysis/types.ts)、[src/audio/audioSessionService.ts](../../src/audio/audioSessionService.ts)、[src/editor/editorDraftRepository.ts](../../src/editor/editorDraftRepository.ts)、[src/editor/fileIO.ts](../../src/editor/fileIO.ts)、[src/editor/overlay.ts](../../src/editor/overlay.ts)、另 5 项，按需核对源码 |
 | [src/editor/fileIO.ts](../../src/editor/fileIO.ts) | [src/editor/projectCodec.ts](../../src/editor/projectCodec.ts) |
+| [src/editor/laneOperations.ts](../../src/editor/laneOperations.ts) | [src/editor/types.ts](../../src/editor/types.ts) |
 | [src/editor/markerBlockOperations.ts](../../src/editor/markerBlockOperations.ts) | [src/editor/projectCodec.ts](../../src/editor/projectCodec.ts)、[src/editor/rangeAnnotations.ts](../../src/editor/rangeAnnotations.ts)、[src/editor/tempoMap.ts](../../src/editor/tempoMap.ts)、[src/editor/types.ts](../../src/editor/types.ts) |
 | [src/editor/overlay.ts](../../src/editor/overlay.ts) | [src/analysis/types.ts](../../src/analysis/types.ts) |
 | [src/editor/pointAnnotations.ts](../../src/editor/pointAnnotations.ts) | [src/editor/projectCodec.ts](../../src/editor/projectCodec.ts)、[src/editor/tempoMap.ts](../../src/editor/tempoMap.ts)、[src/editor/types.ts](../../src/editor/types.ts)、[src/types/session.ts](../../src/types/session.ts) |
