@@ -24,19 +24,16 @@ export interface VisualizerRendererDiagnostics {
     contextLosses: number;
     contextRestores: number;
     contextRestoreFailures: number;
-    activeRecordingTaps: number;
-    activeMediaRecorders: number;
-    activeCaptureStreams: number;
-    activeAudioTracks: number;
-    activeVideoTracks: number;
-    readyRecordingBlobs: number;
-    recordingStarts: number;
-    recordingFinalizes: number;
-    recordingAborts: number;
-    recordingSaveAttempts: number;
-    recordingStage: string;
-    lastRecordingError: string;
-    lastRecorderState: string;
+    activeExportJobs: number;
+    readyExportFiles: number;
+    exportStarts: number;
+    exportFinalizes: number;
+    exportAborts: number;
+    exportSaveAttempts: number;
+    exportFramesDone: number;
+    exportTotalFrames: number;
+    exportStage: string;
+    lastExportError: string;
 }
 
 export const visualizerRendererDiagnostics: VisualizerRendererDiagnostics = {
@@ -54,19 +51,16 @@ export const visualizerRendererDiagnostics: VisualizerRendererDiagnostics = {
     contextLosses: 0,
     contextRestores: 0,
     contextRestoreFailures: 0,
-    activeRecordingTaps: 0,
-    activeMediaRecorders: 0,
-    activeCaptureStreams: 0,
-    activeAudioTracks: 0,
-    activeVideoTracks: 0,
-    readyRecordingBlobs: 0,
-    recordingStarts: 0,
-    recordingFinalizes: 0,
-    recordingAborts: 0,
-    recordingSaveAttempts: 0,
-    recordingStage: 'idle',
-    lastRecordingError: '',
-    lastRecorderState: 'inactive',
+    activeExportJobs: 0,
+    readyExportFiles: 0,
+    exportStarts: 0,
+    exportFinalizes: 0,
+    exportAborts: 0,
+    exportSaveAttempts: 0,
+    exportFramesDone: 0,
+    exportTotalFrames: 0,
+    exportStage: 'idle',
+    lastExportError: '',
 };
 
 declare global {
@@ -91,11 +85,11 @@ export interface VisualizerRendererHostOptions {
     readonly cancelAnimationFrame?: (handle: number) => void;
 }
 
-export interface VisualizerRecordingSurfaceLease {
+export interface VisualizerExportSurfaceLease {
     readonly canvas: HTMLCanvasElement;
     readonly width: number;
     readonly height: number;
-    renderNow(): void;
+    renderAtTime(timeSeconds: number): void;
     release(): void;
 }
 
@@ -128,7 +122,7 @@ export class VisualizerRendererHost implements VisualizerSceneHost {
     private previewWidth = 1;
     private previewHeight = 1;
     private previewDpr = 1;
-    private captureToken: symbol | null = null;
+    private exportToken: symbol | null = null;
     private disposed = false;
     private contextLost = false;
     private renderBlocked = false;
@@ -166,7 +160,7 @@ export class VisualizerRendererHost implements VisualizerSceneHost {
         this.previewWidth = Math.max(1, width);
         this.previewHeight = Math.max(1, height);
         this.previewDpr = Math.min(Math.max(1, devicePixelRatio), 2);
-        if (this.captureToken || this.contextLost) return;
+        if (this.exportToken || this.contextLost) return;
         try {
             this.applySize(this.previewWidth, this.previewHeight, this.previewDpr);
         } catch (error) {
@@ -179,42 +173,45 @@ export class VisualizerRendererHost implements VisualizerSceneHost {
         this.requestFrame();
     }
 
-    acquireRecordingSurface(
+    acquireExportSurface(
         width: number,
         height: number,
-    ): VisualizerRecordingSurfaceLease {
+    ): VisualizerExportSurfaceLease {
         if (this.disposed) throw new Error('Visualizer renderer host 已释放。');
         if (this.contextLost) throw new Error('WebGL 上下文尚未恢复。');
-        if (this.renderBlocked) throw new Error('Visualizer 场景需要重试后才能录制。');
-        if (this.captureToken) throw new Error('Visualizer capture surface 正在使用。');
-        const token = Symbol('visualizer-recording-surface');
-        const captureWidth = Math.max(1, Math.round(width));
-        const captureHeight = Math.max(1, Math.round(height));
-        this.captureToken = token;
-        this.canvas.dataset.captureActive = 'true';
+        if (this.renderBlocked) throw new Error('Visualizer 场景需要重试后才能导出。');
+        if (this.exportToken) throw new Error('Visualizer export surface 正在使用。');
+        const token = Symbol('visualizer-export-surface');
+        const exportWidth = Math.max(1, Math.round(width));
+        const exportHeight = Math.max(1, Math.round(height));
+        this.exportToken = token;
+        this.canvas.dataset.exportActive = 'true';
         try {
-            this.applySize(captureWidth, captureHeight, 1);
+            this.cancelPendingFrame();
+            this.disposeScene();
+            this.applySize(exportWidth, exportHeight, 1);
         } catch (error) {
-            this.captureToken = null;
-            delete this.canvas.dataset.captureActive;
+            this.exportToken = null;
+            delete this.canvas.dataset.exportActive;
             throw error;
         }
         let released = false;
         return {
             canvas: this.canvas,
-            width: captureWidth,
-            height: captureHeight,
-            renderNow: () => {
-                if (released || this.captureToken !== token) return;
-                this.cancelPendingFrame();
-                this.renderCurrentFrame();
+            width: exportWidth,
+            height: exportHeight,
+            renderAtTime: timeSeconds => {
+                if (released || this.exportToken !== token || this.disposed || this.contextLost || this.renderBlocked) throw new Error('导出渲染租约已失效。');
+                const frame = this.options.readFrame();
+                if (!frame) throw new Error('导出工程身份已失效。');
+                this.renderCurrentFrame({ ...frame, timeSeconds });
             },
             release: () => {
                 if (released) return;
                 released = true;
-                if (this.captureToken !== token) return;
-                this.captureToken = null;
-                delete this.canvas.dataset.captureActive;
+                if (this.exportToken !== token) return;
+                this.exportToken = null;
+                delete this.canvas.dataset.exportActive;
                 if (this.disposed) return;
                 if (this.contextLost) {
                     this.width = this.previewWidth;
@@ -223,6 +220,7 @@ export class VisualizerRendererHost implements VisualizerSceneHost {
                     return;
                 }
                 try {
+                    this.disposeScene();
                     this.applySize(this.previewWidth, this.previewHeight, this.previewDpr);
                     this.requestFrame();
                 } catch (error) {
@@ -230,7 +228,7 @@ export class VisualizerRendererHost implements VisualizerSceneHost {
                         state: 'error',
                         message: error instanceof Error
                             ? error.message
-                            : '录制画布恢复失败。',
+                            : '导出画布恢复失败。',
                     });
                 }
             },
@@ -242,6 +240,7 @@ export class VisualizerRendererHost implements VisualizerSceneHost {
             this.disposed
             || this.contextLost
             || this.renderBlocked
+            || this.exportToken
             || this.frameHandle !== null
         ) return;
         this.frameHandle = this.requestAnimationFrameImpl(this.draw);
@@ -274,8 +273,8 @@ export class VisualizerRendererHost implements VisualizerSceneHost {
     dispose(): void {
         if (this.disposed) return;
         this.disposed = true;
-        this.captureToken = null;
-        delete this.canvas.dataset.captureActive;
+        this.exportToken = null;
+        delete this.canvas.dataset.exportActive;
         this.cancelPendingFrame();
         try {
             this.disposeScene();
@@ -366,18 +365,15 @@ export class VisualizerRendererHost implements VisualizerSceneHost {
         this.renderCurrentFrame();
     };
 
-    private renderCurrentFrame(): void {
+    private renderCurrentFrame(override?: VisualizerRenderFrame): void {
         if (this.disposed || this.contextLost || this.renderBlocked) return;
-        const frame = this.options.readFrame();
+        if (this.exportToken && !override) return;
+        const frame = override ?? this.options.readFrame();
         if (!frame) {
             this.options.onStatus({ state: 'idle' });
             return;
         }
-        // Queue the one permitted visual RAF before doing scene/renderer work.
-        // A capture lease keeps that same loop alive while transport is still
-        // paused during recorder startup/finalization, preventing an initial
-        // packet hole without introducing another clock or RAF owner.
-        if (frame.playbackState === 'playing' || this.captureToken) this.requestFrame();
+        if (frame.playbackState === 'playing' && !this.exportToken) this.requestFrame();
         try {
             const scene = this.ensureScene(frame);
             if (this.failNextRender) {
@@ -430,6 +426,7 @@ export class VisualizerRendererHost implements VisualizerSceneHost {
                 state: 'error',
                 message: error instanceof Error ? error.message : '场景渲染失败。',
             });
+            if (override) throw error;
         }
     }
 

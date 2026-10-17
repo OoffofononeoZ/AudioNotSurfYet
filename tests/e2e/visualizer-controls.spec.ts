@@ -40,10 +40,10 @@ test('element actions stay visible without selecting or resizing rows', async ({
     await expect(rows).toHaveCount(2);
     await page.setViewportSize({ width: 1920, height: 1080 });
     await page.getByTestId('visualizer-preview-frame').hover();
-    await page.getByTestId('start-visualizer-recording').click();
-    await expect(page.getByTestId('cancel-visualizer-recording')).toBeVisible();
+    await page.getByTestId('start-visualizer-export').click();
+    await expect(page.getByTestId('cancel-visualizer-export')).toBeVisible();
     for (const button of await rows.locator('.viz-row-actions button').all()) await expect(button).toBeDisabled();
-    await page.getByTestId('cancel-visualizer-recording').click();
+    await page.getByTestId('cancel-visualizer-export').click();
 });
 
 test('shared selects and number steppers keep keyboard, bounds and recording locks', async ({ page }) => {
@@ -55,16 +55,17 @@ test('shared selects and number steppers keep keyboard, bounds and recording loc
     await page.getByTestId('header-visualizer-link').click();
     await expect(page.getByTestId('visualizer-ready')).toBeVisible();
     const fps = page.getByRole('combobox', { name: '输出帧率', exact: true });
+    await expect(fps.locator('option[value="60"]')).not.toHaveAttribute('disabled', '');
     await fps.focus(); await fps.press('Space');
     await expect.poll(() => fps.evaluate(element => element.matches(':open'))).toBe(true);
     await page.screenshot({ path: 'artifacts/visualizer-composition/output-controls.png' });
     await page.keyboard.press('ArrowDown'); await page.keyboard.press('Enter');
-    await expect(fps).toHaveValue('30');
-    await expect(fps.locator('option[value="60"]')).toHaveAttribute('disabled', '');
+    await expect(fps).toHaveValue('60');
+    await expect(fps.locator('option[value="60"]')).not.toHaveAttribute('disabled', '');
     await expect(fps).toBeFocused();
     await fps.press('Space'); await page.keyboard.press('Escape');
     await expect.poll(() => fps.evaluate(element => element.matches(':open'))).toBe(false);
-    await expect(fps).toHaveValue('30');
+    await expect(fps).toHaveValue('60');
     const seed = page.getByRole('spinbutton', { name: '确定性 Seed', exact: true });
     await seed.fill('4294967295'); await seed.press('Enter');
     await expect(page.getByRole('button', { name: '确定性 Seed增加', exact: true })).toBeDisabled();
@@ -83,13 +84,13 @@ test('shared selects and number steppers keep keyboard, bounds and recording loc
     await page.screenshot({ path: 'artifacts/visualizer-composition/inspector-controls.png' });
     await fps.selectOption('30');
     await page.getByTestId('visualizer-preview-frame').hover();
-    await page.getByTestId('start-visualizer-recording').click();
-    await expect(page.getByTestId('cancel-visualizer-recording')).toBeVisible();
+    await page.getByTestId('start-visualizer-export').click();
+    await expect(page.getByTestId('cancel-visualizer-export')).toBeVisible();
     await expect(opacity).toBeDisabled();
     await opacity.hover(); await page.mouse.wheel(0, -100); await expect(opacity).toHaveValue('0.6');
     await expect(page.getByRole('spinbutton', { name: '元素层级', exact: true })).toBeDisabled();
     await page.getByTestId('visualizer-preview-frame').hover();
-    await page.getByTestId('cancel-visualizer-recording').click();
+    await page.getByTestId('cancel-visualizer-export').click();
     await expect(opacity).toBeEnabled();
     expect(errors).toEqual([]);
 });

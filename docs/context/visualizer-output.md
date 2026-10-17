@@ -1,5 +1,9 @@
 # Visualizer 输出质量与可用性
 
+当前产品已用[离线确定性导出](visualizer-offline-export.md)替换实时录制，以下档位禁用、掉帧和时间偏移数据均为已退役实时链路的历史记录。当前能力按实际 WebCodecs 配置查询，不使用下表。
+
+## 历史实时录制与排查
+
 owner 随后通过 [DEC-080](decision-registry.md#dec-080--录制档位按时间对齐先行开放--2026-10-17) 授权：先尝试缓解首录问题；掉帧不破坏时间对齐时可先开放，明确保留流畅度限制。当前开放状态如下；下方首批测量保留原始失败结论，后续多标记验证见文末。
 
 2026-10-17 按 owner 批准的计划核对当前工程输出设置。分辨率与帧率已经进入真实录制链路，无需另建导出通路：Project V3 → RecordingSession → DPR 1 的同一 Canvas → `captureStream(frameRate)` → MediaRecorder。录制结束恢复预览尺寸，沿用 pre-Gain 音轨、取消、命令锁与资源释放。

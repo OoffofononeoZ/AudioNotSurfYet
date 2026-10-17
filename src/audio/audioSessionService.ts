@@ -4,9 +4,8 @@ import Meyda from 'meyda';
 import { parseBlob } from 'music-metadata';
 import {
     AudioEngine,
-    RecordingTapError,
+    AudioTransportError,
     type AudioPlaybackCheckpoint,
-    type RecordingTapLease,
 } from './audioEngine';
 import {
     InvalidPersistedSessionError,
@@ -43,10 +42,8 @@ export interface TrackNavigation {
     cleared():Promise<void>;
 }
 
-export interface RecordingTransportLease {
+export interface ExportTransportLease {
     pause(): void;
-    seek(seconds: number): Promise<void>;
-    play(): Promise<void>;
     release(): void;
 }
 
@@ -147,7 +144,6 @@ export interface AudioEnginePort {
     getDecodedAudioDescriptor(): DecodedAudioDescriptor | null;
     capturePlaybackCheckpoint(): AudioPlaybackCheckpoint | null;
     restorePlaybackCheckpoint(checkpoint: AudioPlaybackCheckpoint): Promise<void>;
-    acquireRecordingTap(): RecordingTapLease;
     copyDecodedChannelRange(input: {
         revision: number;
         channel: number;
@@ -208,7 +204,7 @@ const isMissingFileError = (error: unknown) =>
 
 export class AudioSessionService {
     readonly playbackPolicy = new PlaybackPolicy();
-    private recordingTransportToken: symbol | null = null;
+    private exportTransportToken: symbol | null = null;
     private trackNavigation: {token:symbol; commands:TrackNavigation}|null=null;
     private pendingQueueCommands=0;
     private readonly store: AudioSessionStore;
@@ -432,7 +428,7 @@ export class AudioSessionService {
     }
 
     async selectAndImportFiles(): Promise<'imported' | 'cancelled'> {
-        if (this.recordingTransportToken) return 'cancelled';
+        if (this.exportTransportToken) return 'cancelled';
         if (this.disposed) return 'cancelled';
         let handles: FileSystemFileHandle[];
         try {
@@ -454,7 +450,7 @@ export class AudioSessionService {
     }
 
     async importFiles(inputs: LocalAudioInput[]): Promise<void> {
-        if (this.recordingTransportToken) return;
+        if (this.exportTransportToken) return;
         if (this.disposed || inputs.length === 0) return;
 
         const importGeneration = ++this.importGeneration;
@@ -540,7 +536,7 @@ export class AudioSessionService {
     }
 
     async playTrack(trackId: string): Promise<void> {
-        if (this.recordingTransportToken) return;
+        if (this.exportTransportToken) return;
         if(this.trackNavigation){
             if(trackId===this.store.currentTrackId)await this.restartCurrent();
             else await this.trackNavigation.commands.select(trackId);
@@ -613,8 +609,8 @@ export class AudioSessionService {
     capturePlaybackCheckpoint(trackId: string): AudioPlaybackCheckpoint {
         const checkpoint = this.engine.capturePlaybackCheckpoint();
         if (checkpoint?.trackId !== trackId) {
-            throw new RecordingTapError(
-                'recording-unavailable',
+            throw new AudioTransportError(
+                'transport-unavailable',
                 '当前播放歌曲与可视化工程不一致。',
             );
         }
@@ -625,22 +621,6 @@ export class AudioSessionService {
         return this.engine.restorePlaybackCheckpoint(checkpoint);
     }
 
-    acquireRecordingTap(trackId: string): RecordingTapLease {
-        const descriptor = this.engine.getDecodedAudioDescriptor();
-        const route = this.activeRoutePlayback;
-        if (
-            descriptor?.trackId !== trackId
-            || route?.consumer !== 'visualizer'
-            || route.trackId !== trackId
-        ) {
-            throw new RecordingTapError(
-                'recording-unavailable',
-                'Visualizer 播放租约或歌曲身份已失效。',
-            );
-        }
-        return this.engine.acquireRecordingTap();
-    }
-
     subscribePlayback(listener: (snapshot: PlaybackSnapshot) => void): () => void {
         this.playbackListeners.add(listener);
         listener({ ...this.store.playback });
@@ -648,21 +628,21 @@ export class AudioSessionService {
     }
 
     pause(): void {
-        if (this.recordingTransportToken) return;
+        if (this.exportTransportToken) return;
         if (this.disposed) return;
         ++this.transportRevision;
         this.engine.pause();
     }
 
     async play(): Promise<void> {
-        if (this.recordingTransportToken) return;
+        if (this.exportTransportToken) return;
         if (this.disposed) return;
         ++this.transportRevision;
         await this.engine.play();
     }
 
     async togglePlayback(): Promise<void> {
-        if (this.recordingTransportToken) return;
+        if (this.exportTransportToken) return;
         if (this.disposed || this.store.queue.length === 0) return;
         ++this.transportRevision;
 
@@ -697,7 +677,7 @@ export class AudioSessionService {
     async previous(): Promise<void> { await this.advance(-1); }
 
     private async advance(delta: -1 | 1): Promise<void> {
-        if (this.recordingTransportToken) return;
+        if (this.exportTransportToken) return;
         if (this.playbackPolicy.state.effectiveMode === 'repeat-one') {
             await this.restartCurrent();
             return;
@@ -707,42 +687,40 @@ export class AudioSessionService {
     }
 
     private async restartCurrent(): Promise<void> {
-        if (this.recordingTransportToken || !this.store.currentTrackId) return;
+        if (this.exportTransportToken || !this.store.currentTrackId) return;
         const trackId = this.store.currentTrackId;
         const revision = ++this.transportRevision;
         await this.engine.seek(0);
-        if (this.disposed || this.recordingTransportToken || revision !== this.transportRevision
+        if (this.disposed || this.exportTransportToken || revision !== this.transportRevision
             || this.store.currentTrackId !== trackId) return;
         await this.engine.play();
     }
 
-    acquireRecordingTransport(trackId: string): RecordingTransportLease {
-        if (this.recordingTransportToken || this.pendingQueueCommands > 0 || this.store.currentTrackId !== trackId) {
-            throw new RecordingTapError('recording-busy', '播放命令已锁定或歌曲身份失效。');
+    acquireExportTransport(trackId: string): ExportTransportLease {
+        if (this.exportTransportToken || this.pendingQueueCommands > 0 || this.store.currentTrackId !== trackId) {
+            throw new AudioTransportError('transport-busy', '播放命令已锁定或歌曲身份失效。');
         }
-        const token = Symbol('recording-transport');
-        this.recordingTransportToken = token;
-        this.playbackPolicy.state.recordingLocked = true;
+        const token = Symbol('export-transport');
+        this.exportTransportToken = token;
+        this.playbackPolicy.state.exportLocked = true;
         ++this.transportRevision;
         ++this.commandGeneration;
         ++this.importGeneration;
-        const valid = () => !this.disposed && this.recordingTransportToken === token
+        const valid = () => !this.disposed && this.exportTransportToken === token
             && this.store.currentTrackId === trackId;
         return {
             pause: () => { if (valid()) this.engine.pause(); },
-            seek: async seconds => { if (valid()) await this.engine.seek(seconds); },
-            play: async () => { if (valid()) await this.engine.play(); },
             release: () => {
-                if (this.recordingTransportToken !== token) return;
-                this.recordingTransportToken = null;
-                this.playbackPolicy.state.recordingLocked = false;
+                if (this.exportTransportToken !== token) return;
+                this.exportTransportToken = null;
+                this.playbackPolicy.state.exportLocked = false;
                 ++this.transportRevision;
             },
         };
     }
 
     async seek(seconds: number): Promise<void> {
-        if (this.recordingTransportToken) return;
+        if (this.exportTransportToken) return;
         if (this.disposed) return;
         ++this.transportRevision;
         try {
@@ -753,13 +731,13 @@ export class AudioSessionService {
     }
 
     async setAuditionSource(source:import('./auditionTypes').AuditionSource|null,options?:{play?:boolean}):Promise<void> {
-        if (this.disposed || this.recordingTransportToken) { if (source) await source.close(); return; }
+        if (this.disposed || this.exportTransportToken) { if (source) await source.close(); return; }
         ++this.transportRevision;
         await this.engine.setAuditionSource(source,options);
     }
 
     setAuditionMuted(role:string,muted:boolean):void {
-        if (!this.disposed && !this.recordingTransportToken) this.engine.setAuditionMuted(role,muted);
+        if (!this.disposed && !this.exportTransportToken) this.engine.setAuditionMuted(role,muted);
     }
 
     async updateAnalysisWorkspace(
@@ -808,7 +786,7 @@ export class AudioSessionService {
     }
 
     async restoreAccess(trackId: string): Promise<void> {
-        if (this.recordingTransportToken) return;
+        if (this.exportTransportToken) return;
         if (this.disposed) return;
         const runtime = this.runtimeTracks.get(trackId);
         const handle = runtime?.handle;
@@ -844,7 +822,7 @@ export class AudioSessionService {
     }
 
     async reselectTrack(trackId: string): Promise<void> {
-        if (this.recordingTransportToken) return;
+        if (this.exportTransportToken) return;
         if (this.disposed) return;
         const record = this.getTrack(trackId);
         if (!record?.trackHash) return;
@@ -884,13 +862,13 @@ export class AudioSessionService {
     }
 
     async deleteTrack(trackId: string): Promise<void> {
-        if(this.recordingTransportToken||this.disposed)return;
+        if(this.exportTransportToken||this.disposed)return;
         this.pendingQueueCommands++;
         try{await this.deleteTrackNow(trackId);}finally{this.pendingQueueCommands--;}
     }
 
     private async deleteTrackNow(trackId: string): Promise<void> {
-        if (this.recordingTransportToken) return;
+        if (this.exportTransportToken) return;
         if (this.disposed) return;
         const index = this.store.queue.findIndex(
             (track) => track.id === trackId,
@@ -905,7 +883,7 @@ export class AudioSessionService {
             return;
         }
         if(wasCurrent&&this.trackNavigation&&!await this.trackNavigation.commands.beforeMutation(nextId))return;
-        if(this.recordingTransportToken||this.disposed)return;
+        if(this.exportTransportToken||this.disposed)return;
         this.releaseRuntimeTrack(trackId);
         this.store.removeTrack(trackId);
 
@@ -931,13 +909,13 @@ export class AudioSessionService {
     }
 
     async clear(): Promise<void> {
-        if(this.recordingTransportToken||this.disposed)return;
+        if(this.exportTransportToken||this.disposed)return;
         this.pendingQueueCommands++;
         try{await this.clearNow();}finally{this.pendingQueueCommands--;}
     }
 
     private async clearNow(): Promise<void> {
-        if (this.recordingTransportToken) return;
+        if (this.exportTransportToken) return;
         if (this.disposed) return;
         if(this.trackNavigation&&!await this.trackNavigation.commands.beforeMutation(null))return;
         try {
@@ -955,13 +933,13 @@ export class AudioSessionService {
     }
 
     async clearPersistedSession(): Promise<void> {
-        if(this.recordingTransportToken||this.disposed)return;
+        if(this.exportTransportToken||this.disposed)return;
         this.pendingQueueCommands++;
         try{await this.clearPersistedSessionNow();}finally{this.pendingQueueCommands--;}
     }
 
     private async clearPersistedSessionNow(): Promise<void> {
-        if (this.recordingTransportToken) return;
+        if (this.exportTransportToken) return;
         if (this.disposed) return;
         if(this.trackNavigation&&!await this.trackNavigation.commands.beforeMutation(null))return;
         try {
@@ -1395,7 +1373,7 @@ export class AudioSessionService {
 
         this.stopFrameLoop();
         this.store.setEnergy(0);
-        if (justEnded && this.store.queue.length > 0 && !this.recordingTransportToken) {
+        if (justEnded && this.store.queue.length > 0 && !this.exportTransportToken) {
             const lease = this.activeRoutePlayback;
             if (lease && snapshot.trackId === lease.trackId) {
                 if (lease.endedPolicy === 'repeat-one') {

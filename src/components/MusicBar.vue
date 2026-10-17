@@ -1,7 +1,7 @@
 <template>
     <div id="music-bar-container" :class="'bg-style-' + styleMode"
         :data-playback-state="playback.state"
-        :data-recording-locked="recordingLocked"
+        :data-export-locked="exportLocked"
         :data-audition-source="playback.audition?.kind ?? 'original'"
         :data-current-time="playback.currentTimeSeconds"
         :data-duration="playback.durationSeconds"
@@ -74,12 +74,12 @@
                     </div>
                 </div>
             </section>
-            <MusicBarActions :mode="mode" :mode-label="modeLabel" :mode-locked="modeLocked" :recording-locked="recordingLocked"
+            <MusicBarActions :mode="mode" :mode-label="modeLabel" :mode-locked="modeLocked" :export-locked="exportLocked"
                 v-model:volume="volume" :queue-open="musicListVisible" :transitioning="isStyleTransitioning"
                 @mode="cycleMode" @volume-keydown="handleVolumeKeydown" @volume="setVolume" @queue="toggleMusicList"
                 @import="toggleSelectFile" @appearance="toggleChangeStyle"/>
         </div>
-        <aside class="music-list-container" :inert="recordingLocked">
+        <aside class="music-list-container" :inert="exportLocked">
             <MusicList :info="albumInfo" :persistence="persistence" @select-index="handleSelectIndex"
                 @edit-track="handleEditTrack" @delete="toggleDelete" @clear="toggleClear"
                 @restore-access="handleRestoreAccess" @reselect-track="handleReselectTrack"
@@ -118,13 +118,13 @@ const audioSessionStore = useAudioSessionStore();
 const audioSession = useAudioSessionService();
 const router = useRouter();
 const route = useRoute();
-const recordingLocked = computed(() => audioSession.playbackPolicy.state.recordingLocked);
+const exportLocked = computed(() => audioSession.playbackPolicy.state.exportLocked);
 const modeLocked = computed(() => route.name === 'visualizer' || audioSession.playbackPolicy.state.modeLocked);
 const mode = computed(() => route.name === 'visualizer' ? 'repeat-one' : audioSession.playbackPolicy.state.effectiveMode);
 const modeLabel = computed(() => PLAYBACK_MODE_LABELS[mode.value]
     + (modeLocked.value ? '（工作区已锁定）' : ''));
 const cycleMode = () => {
-    if (recordingLocked.value || modeLocked.value) return;
+    if (exportLocked.value || modeLocked.value) return;
     configStore.playbackMode = PLAYBACK_MODES[(PLAYBACK_MODES.indexOf(mode.value) + 1) % PLAYBACK_MODES.length]!;
 };
 const {
@@ -160,7 +160,7 @@ const audioReady = computed(() =>
 );
 const canSeek = computed(() =>
     queue.value.length > 0
-    && !recordingLocked.value
+    && !exportLocked.value
     && audioReady.value
     && !isLoading.value
     && playback.value.durationSeconds > 0,
@@ -664,10 +664,10 @@ const handleEditTrack = async (index: number) => {
 </script>
 
 <style scoped>
-#music-bar-container[data-recording-locked="true"] [data-testid="toggle-playback"],
-#music-bar-container[data-recording-locked="true"] [data-testid="previous-track"],
-#music-bar-container[data-recording-locked="true"] [data-testid="next-track"],
-#music-bar-container[data-recording-locked="true"] [data-testid="import-audio"] { opacity: .35; cursor: default; }
+#music-bar-container[data-export-locked="true"] [data-testid="toggle-playback"],
+#music-bar-container[data-export-locked="true"] [data-testid="previous-track"],
+#music-bar-container[data-export-locked="true"] [data-testid="next-track"],
+#music-bar-container[data-export-locked="true"] [data-testid="import-audio"] { opacity: .35; cursor: default; }
 
 #music-bar-container {
     user-select: none;

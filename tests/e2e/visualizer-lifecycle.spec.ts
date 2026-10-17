@@ -117,15 +117,15 @@ test('invalid import preserves the saved composition', async ({ page }) => {
     await expect(page.locator('.viz-element-row')).toHaveCount(1);
 });
 
-test('cancel, context recovery and repeated entry release the renderer and recording resources', async ({ page }) => {
+test('cancel, context recovery and repeated entry release the renderer and export resources', async ({ page }) => {
     test.setTimeout(60000);
     await installV6ResourceProbe(page); await setup(page); await enter(page); await solid(page);
     await page.getByTestId('visualizer-preview-frame').hover();
-    await page.getByTestId('start-visualizer-recording').click();
-    await expect(player(page)).toHaveAttribute('data-recording-locked', 'true');
-    await page.getByTestId('cancel-visualizer-recording').click();
-    await expect(player(page)).toHaveAttribute('data-recording-locked', 'false');
-    await expect.poll(async () => (await readV6ResourceProbe(page)).recordingResources).toBe(0);
+    await page.getByTestId('start-visualizer-export').click();
+    await expect(player(page)).toHaveAttribute('data-export-locked', 'true');
+    await page.getByTestId('cancel-visualizer-export').click();
+    await expect(player(page)).toHaveAttribute('data-export-locked', 'false');
+    await expect.poll(async () => (await readV6ResourceProbe(page)).exportResources).toBe(0);
     await expect.poll(async () => (await readV6ResourceProbe(page)).liveMediaTracks).toBe(0);
     await page.getByTestId('visualizer-preview-canvas').evaluate(canvas => {
         const gl = (canvas as HTMLCanvasElement).getContext('webgl2')!;
@@ -139,7 +139,7 @@ test('cancel, context recovery and repeated entry release the renderer and recor
         await expect.poll(async () => (await readV6ResourceProbe(page)).visualizerHosts).toBe(0);
         const left = await readV6ResourceProbe(page);
         expect(left.visualizerRenderers).toBe(0); expect(left.visualizerRafs).toBe(0);
-        expect(left.visualizerCanvases).toBe(0); expect(left.recordingResources).toBe(0);
+        expect(left.visualizerCanvases).toBe(0); expect(left.exportResources).toBe(0);
         await enter(page);
         const active = await readV6ResourceProbe(page);
         expect(active.visualizerHosts).toBe(1); expect(active.visualizerRenderers).toBe(1);
@@ -149,15 +149,15 @@ test('cancel, context recovery and repeated entry release the renderer and recor
 
 test('ready WebM blocks leaving and survives a cancelled save', async ({ page }) => {
     test.setTimeout(60000); await setup(page); await enter(page); await solid(page);
-    await page.getByTestId('visualizer-preview-frame').hover(); await page.getByTestId('start-visualizer-recording').click();
-    await expect(page.locator('[data-recording-status=ready]')).toBeVisible({ timeout: 30000 });
+    await page.getByTestId('visualizer-preview-frame').hover(); await page.getByTestId('start-visualizer-export').click();
+    await expect(page.locator('[data-export-status=ready]')).toBeVisible({ timeout: 30000 });
     await page.getByRole('link', { name: '首页', exact: true }).click();
     await expect(page.getByRole('dialog', { name: 'WebM 尚未处理' })).toBeVisible();
     await page.evaluate(() => { (window as unknown as {showSaveFilePicker:()=>Promise<never>}).showSaveFilePicker = async () => { throw new DOMException('Cancelled', 'AbortError'); }; });
     await page.getByRole('button', { name: '保存并离开' }).click();
     await expect(page.getByRole('dialog', { name: 'WebM 尚未处理' })).toBeVisible();
     await page.getByRole('button', { name: '留在此页' }).click();
-    await expect(page.locator('[data-recording-status=ready]')).toBeVisible();
+    await expect(page.locator('[data-export-status=ready]')).toBeVisible();
     await page.getByRole('link', { name: '首页', exact: true }).click();
     await page.getByRole('button', { name: '丢弃并离开' }).click();
     await expect(page).toHaveURL('/');

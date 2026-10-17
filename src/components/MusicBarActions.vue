@@ -1,6 +1,6 @@
 <template>
     <section class="actions-section musicbar-actions" aria-label="播放器选项">
-        <button type="button" class="musicbar-action" data-testid="playback-mode" :disabled="modeLocked||recordingLocked"
+        <button type="button" class="musicbar-action" data-testid="playback-mode" :disabled="modeLocked||exportLocked"
             :aria-label="modeLabel" :title="modeLabel" @click="$emit('mode')"><MusicBarIcon :name="mode"/></button>
         <ElTooltip placement="top" popper-class="musicbar-volume-popover">
             <button type="button" class="musicbar-action" data-testid="volume-control" role="slider"
@@ -16,7 +16,7 @@
         <button type="button" class="musicbar-action" data-testid="toggle-queue" aria-label="播放列表" title="播放列表"
             :aria-expanded="queueOpen" @click="$emit('queue')"><MusicBarIcon name="queue"/></button>
         <button type="button" class="musicbar-action" data-testid="import-audio" aria-label="导入本地音频" title="导入本地音频"
-            :disabled="recordingLocked" @click="$emit('import')"><MusicBarIcon name="import"/></button>
+            :disabled="exportLocked" @click="$emit('import')"><MusicBarIcon name="import"/></button>
         <button type="button" class="musicbar-action" data-testid="change-musicbar-style" aria-label="切换播放器样式" title="切换播放器样式"
             :disabled="transitioning" @click="$emit('appearance')"><MusicBarIcon name="appearance"/></button>
         <button type="button" class="musicbar-action" disabled aria-label="更多功能尚未开放" title="更多功能尚未开放"><MusicBarIcon name="more"/></button>
@@ -28,7 +28,7 @@ import { ElSlider, ElTooltip } from 'element-plus';
 import MusicBarIcon from './MusicBarIcon.vue';
 import type { PlaybackMode } from '../audio/playbackPolicy';
 defineProps<{
-    mode: PlaybackMode; modeLabel: string; modeLocked: boolean; recordingLocked: boolean;
+    mode: PlaybackMode; modeLabel: string; modeLocked: boolean; exportLocked: boolean;
     volume: number; queueOpen: boolean; transitioning: boolean;
 }>();
 defineEmits<{

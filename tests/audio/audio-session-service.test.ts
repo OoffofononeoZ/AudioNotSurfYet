@@ -98,7 +98,6 @@ class FakeEngine implements AudioEnginePort {
 
     capturePlaybackCheckpoint() { return null; }
     async restorePlaybackCheckpoint(): Promise<void> {}
-    acquireRecordingTap(): never { throw new Error('not implemented'); }
     copyDecodedChannelRange() {
         return null;
     }
@@ -284,20 +283,21 @@ describe('AudioSessionService', () => {
         await service.dispose();
     });
 
-    test('recording transport blocks public commands and prevents end looping', async () => {
+    test('export transport pauses playback, blocks public commands and prevents end looping', async () => {
         const { engine, service, store } = createHarness();
         await service.importFiles(inputs(createFile('first.wav'), createFile('second.wav')));
         service.setPreferredPlaybackMode('repeat-one');
-        const lease = service.acquireRecordingTransport('track-1');
+        const lease = service.acquireExportTransport('track-1');
         const loads = engine.loadIds.length;
         service.pause(); await service.seek(3); await service.next(); await service.playTrack('track-2');
         await service.clear(); await service.deleteTrack('track-1');
         expect(engine.pauseCount).toBe(0); expect(engine.seekValues).toEqual([]);
         expect(engine.loadIds.length).toBe(loads); expect(store.queue.length).toBe(2);
-        await lease.seek(0); await lease.play(); engine.finish(); await Promise.resolve();
-        expect(engine.seekValues).toEqual([0]);
+        lease.pause(); expect(engine.pauseCount).toBe(1);
+        engine.finish(); await Promise.resolve();
+        expect(engine.seekValues).toEqual([]);
         expect(store.playback.state).toBe('ended');
-        lease.release(); expect(service.playbackPolicy.state.recordingLocked).toBe(false);
+        lease.release(); expect(service.playbackPolicy.state.exportLocked).toBe(false);
         await service.next(); expect(store.playback.state).toBe('playing');
         await service.dispose();
     });

@@ -80,35 +80,3 @@ export interface VisualizerBindingRuntimeSnapshot {
     analysisMessage?: string;
     editorSnapshotSource: VisualizerEditorSnapshotSource;
 }
-
-export type VisualizerRecordingErrorCode =
-    | 'recording-busy'
-    | 'output-pending'
-    | 'track-mismatch'
-    | 'analysis-not-ready'
-    | 'binding-invalid'
-    | 'renderer-unavailable'
-    | 'context-lost'
-    | 'capture-unsupported'
-    | 'capture-security'
-    | 'preset-unavailable'
-    | 'mime-unavailable'
-    | 'audio-track-unavailable'
-    | 'video-track-unavailable'
-    | 'recorder-start-failed'
-    | 'recorder-failed'
-    | 'track-ended'
-    | 'identity-changed'
-    | 'empty-output';
-
-export type VisualizerRecordingState =
-    | { status: 'idle' }
-    | { status: 'preparing' }
-    | { status: 'recording'; startedAtContextTime: number; mimeType: string }
-    | { status: 'finalizing'; mimeType: string }
-    | { status: 'ready'; mimeType: string; byteLength: number }
-    | {
-        status: 'error';
-        code: VisualizerRecordingErrorCode;
-        message: string;
-    };

@@ -35,7 +35,7 @@ description: "开发、诊断或评审 AudioNotSurfYet 的 Vue 界面、播放�
 - 新增或修改样式时按 [CSS 样式归置](references/20-ui-routing-and-state.md#css-样式归置与渐进迁移)选择 Tailwind、共享 CSS 或组件 `<style>`；旧写法只在本次实际涉及样式修改时渐进迁移。
 - 可见滚动容器复用 `.app-scrollbar`；样式和动画不得破坏焦点、输入、现有滚动与资源所有权。
 - 确认音频用户手势、AudioContext 状态、对象 URL 和节点释放。持久化失败不能破坏当前播放，缓存必须匹配完整身份。
-- Visualizer 使用现有单 RendererHost、Canvas、视觉 RAF 与确定性歌曲时间；录制复用既有 pre-Gain tap、capture lease 和 typed capability 行为。
+- Visualizer 预览使用单 RendererHost、Canvas 与视觉 RAF；视频导出使用同一 renderer 的手动租约、绝对帧时间、解码 PCM 和 WebCodecs/OPFS，不创建实时录制链路。当前契约见 [离线导出](../../docs/context/visualizer-offline-export.md)。
 - 改变公共接口、工程格式、时间基准、binding 或渲染拓扑等重要取舍时说明影响并由用户确认。不通过增加 fallback 绕过失败。
 
 针对实际影响选择成功、失败、边界和资源清理验证，使用 [验证策略](../audiosurf-testing-strategy/SKILL.md)。已实现、已验证、未运行和推断分别说明；没有实际数据不得补写试听、性能或发布结论。

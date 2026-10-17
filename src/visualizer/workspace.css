@@ -13,7 +13,7 @@
 .viz-icon-button.small { width:24px; height:26px; padding:5px; }
 .viz-icon-button:hover:not(:disabled) { color:var(--ink-strong); background:rgba(180,220,199,.08); }
 .viz-icon-button:disabled { opacity:.3; cursor:default; }
-.viz-icon-button.recording { color:#ff7474; }
+.viz-icon-button.exporting { color:#ff7474; }
 .viz-element-items { flex:1; min-height:0; overflow:auto; overscroll-behavior:contain; padding:6px 0; }
 .viz-element-row { position:relative; border-left:2px solid transparent; }
 .viz-element-row.selected { background:rgba(134,237,181,.065); border-left-color:var(--accent-soft); }
@@ -53,8 +53,8 @@
 .viz-preview-frame:hover .viz-video-controls,.viz-video-controls:has(:focus-visible),.viz-video-controls.controls-visible { opacity:1; pointer-events:auto; }
 .viz-controls-spacer { flex:1; }
 .viz-video-controls .viz-icon-button { color:#fff; }
-.viz-recording-badge { position:absolute; top:12px; left:14px; display:flex; align-items:center; gap:7px; font-size:11px; color:#fff; padding:5px 8px; background:rgba(0,0,0,.45); border-radius:4px; }
-.viz-recording-badge i { width:6px; height:6px; background:#f66; border-radius:50%; }
+.viz-export-badge { position:absolute; top:12px; left:14px; display:flex; align-items:center; gap:7px; font-size:11px; color:#fff; padding:5px 8px; background:rgba(0,0,0,.45); border-radius:4px; }
+.viz-export-badge i { width:6px; height:6px; background:#f66; border-radius:50%; }
 .viz-bottom { height:160px; flex:none; min-width:0; overflow:hidden; border-top:1px solid var(--divider); background:#080e0b; }
 .viz-bottom.collapsed { height:36px; }
 .viz-bottom-tabs { height:36px; padding:0 10px 0 14px; display:flex; align-items:center; border-bottom:1px solid var(--divider); gap:8px; }

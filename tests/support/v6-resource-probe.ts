@@ -27,7 +27,7 @@ export interface V6ResourceSnapshot {
     visualizerHosts: number;
     visualizerRenderers: number;
     visualizerRafs: number;
-    recordingResources: number;
+    exportResources: number;
 }
 
 export const installV6ResourceProbe = async (page: Page): Promise<void> => {
@@ -36,14 +36,10 @@ export const installV6ResourceProbe = async (page: Page): Promise<void> => {
             __V6_RESOURCE_PROBE__?: { snapshot(): V6ResourceSnapshot };
             __VISUALIZER_DIAGNOSTICS__?: {
                 activeHosts: number;
+                activeExportJobs: number;
+                readyExportFiles: number;
                 activeRenderers: number;
                 activeVisualAnimationFrames: number;
-                activeRecordingTaps: number;
-                activeMediaRecorders: number;
-                activeCaptureStreams: number;
-                activeAudioTracks: number;
-                activeVideoTracks: number;
-                readyRecordingBlobs: number;
             };
         };
         const audioContexts = new Set<AudioContext>();
@@ -265,13 +261,8 @@ export const installV6ResourceProbe = async (page: Page): Promise<void> => {
         target.__V6_RESOURCE_PROBE__ = {
             snapshot: () => {
                 const diagnostics = target.__VISUALIZER_DIAGNOSTICS__;
-                const recordingResources = diagnostics
-                    ? diagnostics.activeRecordingTaps
-                        + diagnostics.activeMediaRecorders
-                        + diagnostics.activeCaptureStreams
-                        + diagnostics.activeAudioTracks
-                        + diagnostics.activeVideoTracks
-                        + diagnostics.readyRecordingBlobs
+                const exportResources = diagnostics
+                    ? diagnostics.activeExportJobs + diagnostics.readyExportFiles
                     : 0;
                 return {
                     audioContextsCreated,
@@ -302,7 +293,7 @@ export const installV6ResourceProbe = async (page: Page): Promise<void> => {
                     visualizerHosts: diagnostics?.activeHosts ?? 0,
                     visualizerRenderers: diagnostics?.activeRenderers ?? 0,
                     visualizerRafs: diagnostics?.activeVisualAnimationFrames ?? 0,
-                    recordingResources,
+                    exportResources,
                 };
             },
         };

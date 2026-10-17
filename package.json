@@ -105,7 +105,7 @@
     "test:e2e:e10:edge": "node tests/scripts/run-edge.mjs tests/e2e/e10-editor-block-editing.spec.ts --workers=1",
     "test:e2e:e10": "npm run test:e2e:e10:chrome && npm run test:e2e:e10:edge",
     "test:v3:integration": "vitest run tests/visualizer/v3-renderer.integration.test.ts",
-    "test:v5:unit": "vitest run tests/audio/audio-engine.test.ts tests/visualizer/v5-recording-unit.test.ts",
+    "test:v5:unit": "vitest run tests/audio/audio-engine.test.ts tests/visualizer/export-session.test.ts tests/visualizer/offline-export-core.test.ts",
     "test:v5:media": "node tests/scripts/verify-v5-media.mjs",
     "test:v6:media": "node tests/scripts/verify-v6-media.mjs",
     "test:e2e:visualizer-layout:chrome": "playwright test tests/e2e/visualizer-layout-scroll.spec.ts --project=chrome --workers=1",

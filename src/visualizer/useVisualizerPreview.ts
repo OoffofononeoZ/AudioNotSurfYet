@@ -23,7 +23,7 @@ export function useVisualizerPreview(canvas:Ref<HTMLCanvasElement|null>,controll
                     nativeMessage.value=inputs.find(v=>v?.state==='error')?.message??'';
                     element.dataset.nativeInputState=nativeStatus.value;
                 },onStatus:value=>{status.value=value;controller.notifyRendererStatus(value);}});
-            const target=host;detach=controller.attachRecordingTarget({getStatus:()=>status.value,acquireRecordingSurface:(w,h)=>target.acquireRecordingSurface(w,h)});
+            const target=host;detach=controller.attachExportTarget({getStatus:()=>status.value,acquireExportSurface:(w,h)=>target.acquireExportSurface(w,h)});
             detachNative=controller.subscribeNativeInput(()=>target.requestFrame());
             observer=new ResizeObserver(()=>{const rect=element.getBoundingClientRect();target.resize(rect.width,rect.height);});observer.observe(element);
             const rect=element.getBoundingClientRect();target.resize(rect.width,rect.height);

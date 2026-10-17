@@ -54,9 +54,9 @@ test('Analyzer vector inputs render complete data and Buffer remains determinist
     expect((await canvas.screenshot()).equals(picture)).toBe(true);
     expect(await canvas.getAttribute('data-renderer-host-id')).toBe(host);
     await page.keyboard.press('Escape'); await page.getByTestId('visualizer-preview-frame').hover();
-    await page.getByTestId('start-visualizer-recording').click();
-    await expect(page.locator('[data-recording-status=ready]')).toBeVisible({ timeout: 30000 });
-    await page.getByTestId('save-visualizer-recording').click();
+    await page.getByTestId('start-visualizer-export').click();
+    await expect(page.locator('[data-export-status=ready]')).toBeVisible({ timeout: 30000 });
+    await page.getByTestId('save-visualizer-export').click();
     await expect.poll(async () => (await savedPickerEntries(page)).filter(e => e.name.endsWith('.webm')).length).toBe(1);
     const saved = (await savedPickerEntries(page)).find(e => e.name.endsWith('.webm'))!;
     expect(Buffer.from(saved.base64, 'base64').length).toBeGreaterThan(10000);
