@@ -89,9 +89,9 @@ for(const id of ['geometric-0.6','prismatic-voyage'])test(id+' responds to actua
     await importProject(page,silent);await page.waitForTimeout(150);expect((await canvas.screenshot()).equals(actual)).toBe(false);
     await importProject(page,p);await page.reload();await expect(page.getByTestId('visualizer-ready')).toBeVisible();
     await page.getByRole('tab',{name:'状态',exact:true}).click();await expect(page.locator('.viz-status-lines')).toContainText('已就绪');
-    await page.getByTestId('visualizer-preview-frame').hover();await page.getByTestId('start-visualizer-recording').click();
-    await expect(page.getByTestId('add-visualizer-element')).toBeDisabled();await expect(page.locator('[data-recording-status=ready]')).toBeVisible({timeout:30000});
-    await page.getByTestId('save-visualizer-recording').click();await expect.poll(async()=>(await savedPickerEntries(page)).some(e=>e.name.endsWith('.webm'))).toBe(true);
+    await page.getByTestId('visualizer-preview-frame').hover();await page.getByTestId('start-visualizer-export').click();
+    await expect(page.getByTestId('add-visualizer-element')).toBeDisabled();await expect(page.locator('[data-export-status=ready]')).toBeVisible({timeout:30000});
+    await page.getByTestId('save-visualizer-export').click();await expect.poll(async()=>(await savedPickerEntries(page)).some(e=>e.name.endsWith('.webm'))).toBe(true);
     const saved=(await savedPickerEntries(page)).find(e=>e.name.endsWith('.webm'))!;await mkdir('artifacts/visualizer-composition/presets',{recursive:true});await writeFile(`artifacts/visualizer-composition/presets/${id}-${info.project.name}.webm`,Buffer.from(saved.base64,'base64'));
     expect(errors).toEqual([]);
 });
@@ -135,9 +135,9 @@ test('optional local music visual review captures both presets at two song secti
         await page.keyboard.press('Escape');
         if(id==='geometric-0.6') {
             if(empty.track.durationSeconds<=8) {
-                await page.getByTestId('visualizer-preview-frame').hover();await page.getByTestId('start-visualizer-recording').click();
-                await expect(page.locator('[data-recording-status=ready]')).toBeVisible({timeout:30000});
-                await page.getByTestId('save-visualizer-recording').click();
+                await page.getByTestId('visualizer-preview-frame').hover();await page.getByTestId('start-visualizer-export').click();
+                await expect(page.locator('[data-export-status=ready]')).toBeVisible({timeout:30000});
+                await page.getByTestId('save-visualizer-export').click();
                 await expect.poll(async()=>(await savedPickerEntries(page)).some(e=>e.name.endsWith('.webm'))).toBe(true);
                 const saved=(await savedPickerEntries(page)).find(e=>e.name.endsWith('.webm'))!;
                 await mkdir('artifacts/visualizer-composition/presets',{recursive:true});

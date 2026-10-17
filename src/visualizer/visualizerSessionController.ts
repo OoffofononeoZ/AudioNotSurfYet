@@ -22,10 +22,10 @@ import type { VisualizerTrackValidationContext, VisualizerResolution, Visualizer
 import type { VisualizerResolvedParameterMap, VisualizerRendererStatus } from './rendererTypes';
 import type { VisualizerFileGateway } from './fileIO';
 import { NativeVisualizerVideoFileGateway, type VisualizerVideoFileGateway } from './videoFileIO';
-import { VisualizerRecordingSession, type VisualizerRecordingSessionOptions, type VisualizerRecordingTarget } from './visualizerRecordingSession';
+import { VisualizerExportSession, type VisualizerExportSessionOptions, type VisualizerExportTarget } from './visualizerExportSession';
 
 const initial=():CompositionSessionSnapshot=>({state:'empty',routeTrackId:null,activeTrackId:null,project:null,conflictingDraft:null,unsupportedDraft:null,
-    persistence:'clean',restoredFromDraft:false,recording:{status:'idle'},bindingRuntime:{bindingRevision:0,activeFeatureIds:[],readyFeatureIds:[],analysisState:'idle',analysisProgress:0,editorSnapshotSource:'none'}});
+    persistence:'clean',restoredFromDraft:false,export:{status:'idle'},bindingRuntime:{bindingRevision:0,activeFeatureIds:[],readyFeatureIds:[],analysisState:'idle',analysisProgress:0,editorSnapshotSource:'none'}});
 export interface VisualizerSessionControllerOptions {
     audioSession:AudioSessionService;
     audioReady?:Promise<unknown>;
@@ -37,12 +37,12 @@ export interface VisualizerSessionControllerOptions {
     editorRepository?:EditorDraftRepositoryPort;
     editorFileGateway?:EditorFileGateway;
     videoGateway?:VisualizerVideoFileGateway;
-    recordingRuntime?:Pick<VisualizerRecordingSessionOptions,'createRecorder'|'createMediaStream'|'isTypeSupported'|'isPresetAvailable'>;
+    exportRuntime?:Pick<VisualizerExportSessionOptions,'probeCapability'|'createArtifact'|'runExport'|'now'>;
     windowTarget?:Pick<Window,'addEventListener'|'removeEventListener'>;
 }
-export class VisualizerRecordingLockedError extends Error {
-    readonly code='recording-locked';
-    constructor(){super('录制准备、进行或收尾期间不能修改工程。');}
+export class VisualizerExportLockedError extends Error {
+    readonly code='export-locked';
+    constructor(){super('导出准备、进行或收尾期间不能修改工程。');}
 }
 export class VisualizerSessionController {
     private options:VisualizerSessionControllerOptions;
@@ -56,7 +56,7 @@ export class VisualizerSessionController {
     private waveform:VisualizerWaveformSource|null;
     private native:NativeAudioSource|null;
     private writer:CompositionDraftWriter;
-    private recording:VisualizerRecordingSession;
+    private exporter:VisualizerExportSession;
     private generation=0;
     private ioGeneration=0;
     private editorIoGeneration=0;
@@ -71,10 +71,11 @@ export class VisualizerSessionController {
             if(this.snapshot.project?.projectId!==project.projectId || this.disposed)return;
             this.publish({...this.snapshot,persistence,state:persistence==='not-persisted'?'not-persisted':'ready',message:persistence==='not-persisted'?'草稿未保存：'+message:undefined});
         });
-        this.recording=new VisualizerRecordingSession({...options.recordingRuntime,audioSession:options.audioSession,videoGateway:options.videoGateway ?? new NativeVisualizerVideoFileGateway(),
+        this.exporter=new VisualizerExportSession({...options.exportRuntime,audioSession:options.audioSession,source:options.decodedAudio,videoGateway:options.videoGateway ?? new NativeVisualizerVideoFileGateway(),
             readContext:()=>({state:this.snapshot.state,activeTrackId:this.snapshot.activeTrackId,project:this.snapshot.project,bindingRuntime:this.snapshot.bindingRuntime,
-                resolvedValues:[...this.resolveValuesAt(0).values(),...(this.snapshot.project?compositionIssues(this.snapshot.project):[]).map(message=>({parameterId:'configuration',state:'error' as const,message}))]}),
-            onState:recording=>{if(!this.disposed)this.publish({...this.snapshot,recording});}});
+                configurationIssues:this.snapshot.project?compositionIssues(this.snapshot.project):[]}),
+            prepareFrame:(time,signal)=>this.prepareExportFrame(time,signal),resolveValues:time=>[...this.resolveValuesAt(time).values()],
+            onState:value=>{if(!this.disposed)this.publish({...this.snapshot,export:value});}});
         this.windowTarget?.addEventListener('pagehide',this.handlePageHide);
     }
     getSnapshot(){return structuredClone(this.snapshot);}
@@ -82,28 +83,36 @@ export class VisualizerSessionController {
     subscribe(listener:(snapshot:CompositionSessionSnapshot)=>void){this.listeners.add(listener);listener(this.getSnapshot());return()=>this.listeners.delete(listener);}
     subscribeNativeInput(listener:()=>void){this.nativeListeners.add(listener);return()=>{this.nativeListeners.delete(listener);};}
     private publish(snapshot:CompositionSessionSnapshot){this.snapshot=snapshot;for(const listener of this.listeners)listener(this.getSnapshot());this.syncBeforeUnload();}
-    private assertUnlocked(){if(this.recording.isLocked())throw new VisualizerRecordingLockedError();}
+    private assertUnlocked(){if(this.exporter.isLocked())throw new VisualizerExportLockedError();}
     hasActivePlaybackLease(){return !!this.playbackLease;}
     hasPendingWrite(){return this.writer.hasPending();}
-    isRecordingLocked(){return this.recording.isLocked();}
-    hasUnresolvedRecordingOutput(){return this.recording.hasUnresolvedOutput();}
-    attachRecordingTarget(target:VisualizerRecordingTarget){return this.recording.attachTarget(target);}
-    notifyRendererStatus(status:VisualizerRendererStatus){this.recording.notifyRendererStatus(status);}
-    async startRecording(){
-        this.assertUnlocked();const project=this.snapshot.project,trackId=this.snapshot.activeTrackId,generation=this.generation;
-        if(project&&trackId&&project.elements.some(e=>e.enabled&&e.bindings.some(b=>b.source.kind==='native'))) {
-            if(!this.native)throw Error('原生输入不可用。');
-            await this.native.prepare(trackId,0);
-            for(const e of project.elements.filter(e=>e.enabled&&e.type==='spectral-strings'))for(const b of e.bindings)if(b.source.kind==='native')await this.native.prepareHistory(trackId,0,b.source.featureId);
-            if(generation!==this.generation||this.snapshot.project!==project||this.disposed)return;
-        }
-        return this.recording.start();
+    isExportLocked(){return this.exporter.isLocked();}
+    hasUnresolvedExportOutput(){return this.exporter.hasUnresolvedOutput();}
+    attachExportTarget(target:VisualizerExportTarget){return this.exporter.attachTarget(target);}
+    notifyRendererStatus(status:VisualizerRendererStatus){this.exporter.notifyRendererStatus(status);}
+    startExport(){return this.exporter.start();}
+    cancelExport(){return this.exporter.cancel();}
+    saveExport(){return this.exporter.save();}
+    discardExport(){return this.exporter.discard();}
+    resetExportError(){this.exporter.resetError();}
+    getReadyExportFileForDiagnostics(){return this.exporter.getReadyFileForDiagnostics();}
+    private async prepareExportFrame(time:number,signal:AbortSignal){
+        signal.throwIfAborted();const project=this.snapshot.project,trackId=this.snapshot.activeTrackId;
+        if(!project||!trackId)throw Error('导出歌曲身份已失效。');
+        const nativeElements=project.elements.filter(e=>e.enabled&&e.bindings.some(b=>b.source.kind==='native'));
+        if(!nativeElements.length)return;
+        if(!this.native)throw Error('原生输入不可用。');
+        let abort!:()=>void;
+        const cancelled=new Promise<never>((_,reject)=>{abort=()=>{this.native?.reset();reject(signal.reason);};signal.addEventListener('abort',abort,{once:true});});
+        try{
+            await Promise.race([(async()=>{
+                await this.native!.prepare(trackId,time);signal.throwIfAborted();
+                for(const e of nativeElements.filter(e=>e.type==='spectral-strings'))for(const b of e.bindings)if(b.source.kind==='native'){
+                    await this.native!.prepareHistory(trackId,time,b.source.featureId);signal.throwIfAborted();
+                }
+            })(),cancelled]);
+        }finally{signal.removeEventListener('abort',abort);}
     }
-    cancelRecording(){return this.recording.cancel();}
-    saveRecording(){return this.recording.save();}
-    discardRecording(){this.recording.discard();}
-    resetRecordingError(){this.recording.resetError();}
-    getReadyRecordingBlobForDiagnostics(){return this.recording.getReadyBlobForDiagnostics();}
     async togglePlayback(){this.assertUnlocked();await this.options.audioSession.togglePlayback();}
     async seek(seconds:number){this.assertUnlocked();await this.options.audioSession.seek(seconds);}
     private context(trackId=this.snapshot.activeTrackId):VisualizerTrackValidationContext|null {
@@ -117,6 +126,8 @@ export class VisualizerSessionController {
     async enter(trackId:string|null,overwrite=false):Promise<void> {
         this.assertUnlocked();const generation=++this.generation;this.ioGeneration++;this.editorIoGeneration++;
         if(!await this.flush())throw Error('请先重试保存或导出当前工程。');
+        if(generation!==this.generation||this.disposed)return;
+        await this.exporter.notifyIdentityChange();
         if(generation!==this.generation||this.disposed)return;
         this.releaseLeases();
         this.publish({...initial(),state:trackId?'loading':'empty',routeTrackId:trackId});if(!trackId)return;
@@ -212,11 +223,11 @@ export class VisualizerSessionController {
     }
     async flush(){const success=await this.writer.flush();this.syncBeforeUnload();return success;}
     private releaseLeases(){this.unsubscribeAnalysis?.();this.unsubscribeAnalysis=null;this.analysisLease?.release();this.analysisLease=null;this.playbackLease?.release();this.playbackLease=null;this.resolver.reset();this.waveform?.reset();this.native?.reset();}
-    async leave(){this.generation++;this.ioGeneration++;this.editorIoGeneration++;if(this.recording.isLocked())await this.recording.cancel();await this.flush();this.releaseLeases();this.publish(initial());}
-    async dispose(){await this.leave();await this.recording.dispose();this.disposed=true;this.options.repository.close();this.options.editorRepository?.close();this.windowTarget?.removeEventListener('pagehide',this.handlePageHide);this.windowTarget?.removeEventListener('beforeunload',this.handleBeforeUnload as EventListener);this.listeners.clear();this.nativeListeners.clear();}
-    private readonly handlePageHide=()=>{void this.recording.handlePageHide();};
-    private readonly handleBeforeUnload=(event:BeforeUnloadEvent)=>{if(this.hasPendingWrite()||this.hasUnresolvedRecordingOutput()){event.preventDefault();event.returnValue='';}};
-    private syncBeforeUnload(){const needed=this.hasPendingWrite()||this.hasUnresolvedRecordingOutput();if(needed===this.beforeUnload)return;this.beforeUnload=needed;
+    async leave(){this.generation++;this.ioGeneration++;this.editorIoGeneration++;await this.exporter.notifyIdentityChange();await this.flush();this.releaseLeases();this.publish(initial());}
+    async dispose(){await this.leave();await this.exporter.dispose();this.disposed=true;this.options.repository.close();this.options.editorRepository?.close();this.windowTarget?.removeEventListener('pagehide',this.handlePageHide);this.windowTarget?.removeEventListener('beforeunload',this.handleBeforeUnload as EventListener);this.listeners.clear();this.nativeListeners.clear();}
+    private readonly handlePageHide=()=>{void this.exporter.handlePageHide();};
+    private readonly handleBeforeUnload=(event:BeforeUnloadEvent)=>{if(this.hasPendingWrite()||this.hasUnresolvedExportOutput()){event.preventDefault();event.returnValue='';}};
+    private syncBeforeUnload(){const needed=this.hasPendingWrite()||this.hasUnresolvedExportOutput();if(needed===this.beforeUnload)return;this.beforeUnload=needed;
         if(needed)this.windowTarget?.addEventListener('beforeunload',this.handleBeforeUnload as EventListener);else this.windowTarget?.removeEventListener('beforeunload',this.handleBeforeUnload as EventListener);}
 }
 export const visualizerSessionControllerKey:InjectionKey<VisualizerSessionController>=Symbol('visualizer-session-controller');

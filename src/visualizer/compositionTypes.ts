@@ -1,5 +1,6 @@
+import type { VisualizerExportState } from './exportTypes';
 import type { EditorProjectV1, EditorTrackIdentityV1 } from '../editor/types';
-import type { VisualizerParameterBindingV1, VisualizerResolution, VisualizerFrameRate, VisualizerBindingRuntimeSnapshot, VisualizerRecordingState, VisualizerPersistenceState, VisualizerSessionState } from './types';
+import type { VisualizerParameterBindingV1, VisualizerResolution, VisualizerFrameRate, VisualizerBindingRuntimeSnapshot, VisualizerPersistenceState, VisualizerSessionState } from './types';
 import type { NativeInputFeature } from './nativeAudioAnalysis';
 
 export type ElementType = 'solid' | 'spectral-strings' | 'spectral-dots' | 'reactive-rings'
@@ -54,6 +55,6 @@ export interface CompositionSessionSnapshot {
     persistence:VisualizerPersistenceState;
     restoredFromDraft:boolean;
     bindingRuntime:VisualizerBindingRuntimeSnapshot;
-    recording:VisualizerRecordingState;
+    export:VisualizerExportState;
     message?:string;
 }

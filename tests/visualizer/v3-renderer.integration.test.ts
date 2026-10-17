@@ -80,6 +80,23 @@ const registryHarness = (input: {
 };
 
 describe('Visualizer V3 renderer host integration', () => {
+    test('manual export pauses visual RAF, renders explicit timestamps and restores the latest preview size', () => {
+        const raf = createRafHarness(), canvas = fakeCanvas(), rendered: number[] = [];
+        const sizes: number[][] = [], ratios: number[] = [];
+        const host = new VisualizerRendererHost({ canvas, readFrame: () => ({ ...frame(), playbackState: 'playing' }),
+            createScene: registryHarness({ onRender: (_, input) => { rendered.push(input.timeSeconds); } }),
+            resolveValuesAt: () => new Map(), onFrame() {}, onStatus() {},
+            createRenderer: c => ({ ...fakeRenderer(c), setSize: (w, h) => { sizes.push([w, h]); }, setPixelRatio: dpr => { ratios.push(dpr); } }),
+            requestAnimationFrame: cb => raf.request(cb), cancelAnimationFrame: id => raf.cancel(id) });
+        host.resize(640, 360, 2); raf.flush();
+        const surface = host.acquireExportSurface(1920, 1080);
+        expect(raf.callbacks.size).toBe(0); expect(ratios.at(-1)).toBe(1);
+        host.requestFrame(); host.resize(800, 450, 2); expect(raf.callbacks.size).toBe(0);
+        surface.renderAtTime(0); surface.renderAtTime(1 / 60); surface.renderAtTime(8);
+        expect(rendered.slice(-3)).toEqual([0, 1 / 60, 8]); expect(raf.callbacks.size).toBe(0);
+        surface.release(); expect(sizes.at(-1)).toEqual([800, 450]); expect(ratios.at(-1)).toBe(2);
+        expect(raf.callbacks.size).toBe(1); expect(() => surface.renderAtTime(9)).toThrow(); host.dispose();
+    });
     test('shares one target map, one renderer, and one cancelable visual RAF', () => {
         const initialHosts = visualizerRendererDiagnostics.activeHosts;
         const initialRenderers = visualizerRendererDiagnostics.activeRenderers;

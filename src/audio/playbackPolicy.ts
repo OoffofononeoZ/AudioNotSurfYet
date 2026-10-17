@@ -14,7 +14,7 @@ export class PlaybackPolicy {
         preferredMode: 'sequence' as PlaybackMode,
         effectiveMode: 'sequence' as PlaybackMode,
         modeLocked: false,
-        recordingLocked: false,
+        exportLocked: false,
     });
     private history: string[] = [];
     private historyIndex = -1;

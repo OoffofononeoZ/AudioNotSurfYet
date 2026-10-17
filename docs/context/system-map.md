@@ -42,7 +42,7 @@ showOpenFilePicker → FileSystemFileHandle → File
 
 ```text
 /visualizer/:trackId? → VisualizerSessionController
-  ├→ RoutePlaybackLease(repeat-one; recording transport overrides) → AudioSessionService → AudioEngine
+  ├→ RoutePlaybackLease(repeat-one; export transport locks) → AudioSessionService → AudioEngine
   ├→ VisualizerProjectV3 ↔ audionotsurfyet-visualizer/draft/latest
   ├→ one 16:9 Canvas + element list/inspector + project bottom panel + MusicBar
   ├→ AnalysisConsumerLease(visualizer, deduped 0–4) → AnalysisCoordinator/Worker/cache
@@ -53,11 +53,11 @@ showOpenFilePicker → FileSystemFileHandle → File
        → spectral strings(120Hz integration) / dots / rings / solid / geometric atoms / tunnel / stars
        → target/composition effects
        → one VisualizerRendererHost + one Canvas/WebGLRenderer/visual RAF
-       ├→ captureStream + AudioEngine pre-Gain tap → MediaRecorder → WebM Blob
+       ├→ manual export lease → indexed frame times + decoded PCM → WebCodecs/Mediabunny → OPFS WebM File
        └→ native Fullscreen API on existing workspace → same Canvas + video transport
 ```
 
-当前边界：Editor 数据只在进入/显式 reload 时快照；analysis 第五项在 Coordinator 前拒绝；页面音量不影响录制；不支持的 resolution/fps 明确失败。直接列表换歌在改变歌曲前处理单草稿覆盖与未处理 WebM；取消保留原歌曲和工程。
+当前边界：Editor 数据只在进入/显式 reload 时快照；analysis 第五项在 Coordinator 前拒绝；页面音量不影响导出音轨；不支持的编码配置明确失败。导出暂停播放并独占现有 renderer，按帧编号推进，不依赖播放时钟。直接列表换歌在改变歌曲前处理单草稿覆盖与未处理 WebM；取消保留原歌曲和工程。
 
 ## Subsystems
 

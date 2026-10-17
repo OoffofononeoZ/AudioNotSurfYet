@@ -400,41 +400,4 @@ describe('AudioEngine', () => {
         expect(factory).toHaveBeenCalledTimes(1);
     });
 
-    test('leases one pre-Gain recording tap without changing playback or page volume', async () => {
-        const context = new FakeAudioContext();
-        const engine = new AudioEngine({
-            audioContextFactory: () => context as unknown as AudioContext,
-            createRecordingToken: () => 'recording-tap-1',
-        });
-        await engine.load({ trackId: 'track-a', encodedAudio: bytes() });
-        await engine.play();
-        context.currentTime = 1.25;
-        engine.setVolume(0);
-
-        const lease = engine.acquireRecordingTap();
-        expect(lease.token).toBe('recording-tap-1');
-        expect(lease.getContextTime()).toBe(1.25);
-        expect(context.analyser.connect).toHaveBeenLastCalledWith(
-            context.mediaDestinations[0],
-        );
-        expect(context.gain.gain.value).toBe(0);
-        expect(engine.getSnapshot()).toMatchObject({
-            state: 'playing',
-            currentTimeSeconds: 1.25,
-            volume: 0,
-        });
-        expect(() => engine.acquireRecordingTap()).toThrow(/已有录制/);
-
-        lease.release();
-        lease.release();
-        expect(context.analyser.disconnect).toHaveBeenCalledWith(
-            context.mediaDestinations[0],
-        );
-        expect(context.mediaDestinations[0]?.track.stop).toHaveBeenCalledTimes(1);
-        expect(engine.getSnapshot().state).toBe('playing');
-
-        const replacement = engine.acquireRecordingTap();
-        expect(replacement.stream.getAudioTracks()).toHaveLength(1);
-        replacement.release();
-    });
 });

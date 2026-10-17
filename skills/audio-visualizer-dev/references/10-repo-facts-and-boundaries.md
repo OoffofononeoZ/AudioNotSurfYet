@@ -35,7 +35,7 @@
 | `src/components/` | 播放条、列表、动画列表、Canvas/WebGL 背景和试验性图表 | 各 Vue SFC |
 | `src/audio/` | `AudioEngine` 独占 Web Audio 节点；`AudioSessionService` 编排 File、队列命令、能量和资源释放 | `audioEngine.ts`、`audioSessionService.ts` |
 | `src/analysis/` | M6 的 21 项 FeatureRegistry、AnalysisConfig、PCM/frame 工具、六类 compact codec、module Worker 与 AnalysisCoordinator | `featureRegistry.ts`、`compactCodec.ts`、`analysis.worker.ts`、`analysisCoordinator.ts` |
-| `src/visualizer/` | V1 strict project/route/单草稿、V2 binding、V3/V4 scenes、单 RendererHost/context recovery，以及 V5 realtime WebM state/capture/save leases | `visualizerSessionController.ts`、`visualizerRecordingSession.ts`、`visualizerRendererHost.ts`、`recordingPresets.ts`、`videoFileIO.ts` |
+| `src/visualizer/` | Project V3 单草稿/元素 binding、单 RendererHost/context recovery、离线 WebM 编码/临时文件/保存租约 | `visualizerSessionController.ts`、`visualizerExportSession.ts`、`visualizerRendererHost.ts`、`offlineExport.ts`、`exportArtifact.ts` |
 | `src/persistence/` | 原生 IndexedDB V1 最近会话、句柄、current Blob/cache 和 runtime validator | `sessionRepository.ts` |
 | `src/stores/` | 持久化 UI/音量配置及可序列化播放/恢复状态 | `configStore.ts`、`audioSessionStore.ts` |
 | `src/utils/` | mitt 单例、能量角度映射、时间格式化和 clamp | `emitter.ts`、`utils.ts` |
