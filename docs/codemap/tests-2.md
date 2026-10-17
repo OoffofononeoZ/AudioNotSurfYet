@@ -67,7 +67,7 @@
 | [tests/scripts/run-v6-eval.mjs](../../tests/scripts/run-v6-eval.mjs) | — |
 | [tests/scripts/verify-v5-media.mjs](../../tests/scripts/verify-v5-media.mjs) | — |
 | [tests/scripts/verify-v6-media.mjs](../../tests/scripts/verify-v6-media.mjs) | — |
-| [tests/scripts/verify-visualizer-output.mjs](../../tests/scripts/verify-visualizer-output.mjs) | — |
+| [tests/scripts/verify-visualizer-output.mjs](../../tests/scripts/verify-visualizer-output.mjs) | [tests/support/visualizer-media-alignment.mjs](../../tests/support/visualizer-media-alignment.mjs) |
 | [tests/skills/visualizer-scene-generator.test.ts](../../tests/skills/visualizer-scene-generator.test.ts) | — |
 | [tests/support/analyzer-list.ts](../../tests/support/analyzer-list.ts) | [src/analysis/types.ts](../../src/analysis/types.ts) |
 | [tests/support/audio-fixtures.ts](../../tests/support/audio-fixtures.ts) | — |
@@ -84,9 +84,12 @@
 | [tests/support/meyda-golden.ts](../../tests/support/meyda-golden.ts) | — |
 | [tests/support/tolerance.ts](../../tests/support/tolerance.ts) | — |
 | [tests/support/v6-resource-probe.ts](../../tests/support/v6-resource-probe.ts) | — |
+| [tests/support/visualizer-media-alignment.mjs](../../tests/support/visualizer-media-alignment.mjs) | — |
+| [tests/support/visualizer-output-sync.ts](../../tests/support/visualizer-output-sync.ts) | — |
 | [tests/tools/fixture.mjs](../../tests/tools/fixture.mjs) | [scripts/lib/repository.mjs](../../scripts/lib/repository.mjs) |
 | [tests/tools/repository.test.mjs](../../tests/tools/repository.test.mjs) | [scripts/check-repo.mjs](../../scripts/check-repo.mjs)、[scripts/codemap.mjs](../../scripts/codemap.mjs)、[scripts/install-project-skills.mjs](../../scripts/install-project-skills.mjs)、[scripts/lib/repository.mjs](../../scripts/lib/repository.mjs)、[scripts/lib/source-map.mjs](../../scripts/lib/source-map.mjs)、[tests/tools/fixture.mjs](../../tests/tools/fixture.mjs) |
 | [tests/tools/skills.test.mjs](../../tests/tools/skills.test.mjs) | [scripts/install-project-skills.mjs](../../scripts/install-project-skills.mjs)、[scripts/lib/repository.mjs](../../scripts/lib/repository.mjs)、[tests/tools/fixture.mjs](../../tests/tools/fixture.mjs) |
+| [tests/tools/visualizer-media-alignment.test.mjs](../../tests/tools/visualizer-media-alignment.test.mjs) | [tests/support/visualizer-media-alignment.mjs](../../tests/support/visualizer-media-alignment.mjs) |
 | [tests/transcription/auditionHarness.ts](../../tests/transcription/auditionHarness.ts) | [src/audio/audioEngine.ts](../../src/audio/audioEngine.ts)、[src/audio/auditionTypes.ts](../../src/audio/auditionTypes.ts)、[src/processing/stemAuditionSource.ts](../../src/processing/stemAuditionSource.ts)、[src/processing/storage.ts](../../src/processing/storage.ts) |
 | [tests/transcription/candidates.test.ts](../../tests/transcription/candidates.test.ts) | [src/editor/projectCodec.ts](../../src/editor/projectCodec.ts)、[src/transcription/applyCandidates.ts](../../src/transcription/applyCandidates.ts)、[src/transcription/candidateTypes.ts](../../src/transcription/candidateTypes.ts)、[src/transcription/candidates.ts](../../src/transcription/candidates.ts) |
 | [tests/transcription/controller.test.ts](../../tests/transcription/controller.test.ts) | [src/processing/kernel.ts](../../src/processing/kernel.ts)、[src/transcription/candidateTypes.ts](../../src/transcription/candidateTypes.ts)、[src/transcription/controller.ts](../../src/transcription/controller.ts)、[src/transcription/workerProtocol.ts](../../src/transcription/workerProtocol.ts) |
@@ -103,6 +106,3 @@
 | [tests/transcription/qualityMetrics.ts](../../tests/transcription/qualityMetrics.ts) | — |
 | [tests/transcription/result-repository.test.ts](../../tests/transcription/result-repository.test.ts) | [src/processing/dsp.ts](../../src/processing/dsp.ts)、[src/processing/modelManifest.ts](../../src/processing/modelManifest.ts)、[src/processing/sha256.ts](../../src/processing/sha256.ts)、[src/transcription/modelManifest.ts](../../src/transcription/modelManifest.ts)、[src/transcription/resultRepository.ts](../../src/transcription/resultRepository.ts)、[src/transcription/workerProtocol.ts](../../src/transcription/workerProtocol.ts) |
 | [tests/transcription/vitePlugin.ts](../../tests/transcription/vitePlugin.ts) | — |
-| [tests/unit/audio-fixtures.test.ts](../../tests/unit/audio-fixtures.test.ts) | [tests/support/audio-fixtures.ts](../../tests/support/audio-fixtures.ts) |
-| [tests/unit/indexeddb-harness.test.ts](../../tests/unit/indexeddb-harness.test.ts) | — |
-| [tests/unit/tolerance.test.ts](../../tests/unit/tolerance.test.ts) | [tests/support/tolerance.ts](../../tests/support/tolerance.ts) |
