@@ -1,5 +1,6 @@
 import { expect, test, type Page } from '@playwright/test';
 import path from 'node:path';
+import { FEATURE_IDS } from '../../src/analysis/types';
 import {
     chooseFiles,
     installFilePickerStub,
@@ -56,17 +57,17 @@ const selectOverlay = async (page: Page, featureId: string) => {
         .not.toHaveText('等待精确值', { timeout: 10_000 });
 };
 
-test('offers all 21 features and renders every shared renderer family', async ({ page }) => {
+test('offers every registered feature and renders every shared renderer family', async ({ page }) => {
     test.setTimeout(180_000);
     const issues = issuesFor(page);
     await openE4(page);
     await page.getByTestId('editor-overlay-menu-toggle').click();
     const options = page.getByTestId('editor-overlay-feature-menu')
         .locator('[role="menuitemradio"]');
-    await expect(options).toHaveCount(21);
+    await expect(options).toHaveCount(FEATURE_IDS.length);
     expect(await options.evaluateAll((entries) => entries.map(
         (entry) => entry.getAttribute('data-feature-id'),
-    ))).toHaveLength(21);
+    ))).toEqual([...FEATURE_IDS]);
     await page.keyboard.press('Escape');
 
     for (const featureId of [

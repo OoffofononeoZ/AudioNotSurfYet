@@ -47,6 +47,7 @@ const openE3 = async (page: Page) => {
     await expect.poll(async () => Number(
         await page.getByTestId('tempo-bpm-0').inputValue(),
     ), { timeout: 30_000 }).toBeGreaterThan(99);
+    await page.getByLabel('标记显示范围', { exact:true }).selectOption('all');
 };
 
 const addLane = async (page: Page) => {
