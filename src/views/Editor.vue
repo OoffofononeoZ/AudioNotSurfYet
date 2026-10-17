@@ -58,6 +58,7 @@
             <template v-else-if="snapshot.state === 'ready' && snapshot.project">
                 <div id="editor-marking-panel" v-show="workspace === 'marking'" class="editor-panel app-scrollbar" role="tabpanel" aria-labelledby="editor-marking-tab" tabindex="0">
                 <EditorTimeline
+                    :active="workspace === 'marking'"
                     :project="snapshot.project"
                     :playback="playback"
                     :analysis="analysisSnapshot"

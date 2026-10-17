@@ -83,3 +83,40 @@ test('osu divisors stay fixed through zoom, drive point keyboard steps and resto
     await expect(control).toHaveAttribute('data-divisor', '6');
     await expect(page.getByRole('spinbutton', { name: '自定义细分', exact: true })).toHaveValue('12');
 });
+
+test('collapsed timing workspace selects intervals, edits BPM and applies tap only on request', async ({ page }) => {
+    const errors: string[] = []; page.on('pageerror', error => errors.push(error.message));
+    await openEditor(page);
+    await expect(page.getByTestId('editor-timing-panel')).toHaveCount(0);
+    await page.getByTestId('toggle-editor-timing').click();
+    const assistant = page.getByRole('complementary', { name: 'BPM 辅助标记' });
+    await expect(assistant).toBeVisible();
+    await expect(page.getByRole('spinbutton', { name: '辅助区间起点（毫秒）', exact: true })).toBeDisabled();
+    await page.getByRole('spinbutton', { name: '辅助 BPM', exact: true }).fill('150');
+    await page.getByRole('spinbutton', { name: '辅助 BPM', exact: true }).press('Enter');
+    await expect(page.getByTestId('tempo-bpm-0')).toHaveValue('150');
+    await page.evaluate(() => {
+        const nativeNow = performance.now.bind(performance); let time = 10000;
+        performance.now = () => time;
+        try { for (let index = 0; index < 8; index++) { time += 500; document.querySelector<HTMLButtonElement>('[data-testid="timing-tap"]')!.click(); } }
+        finally { performance.now = nativeNow; }
+    });
+    await expect(page.getByTestId('timing-tap-preview')).toHaveText('120 BPM');
+    await expect(page.getByTestId('tempo-bpm-0')).toHaveValue('150');
+    await page.getByTestId('timing-apply-tap').click();
+    await expect(page.getByTestId('tempo-bpm-0')).toHaveValue('120');
+    await page.getByTestId('editor-timeline').click({ position: { x: 250, y: 40 } });
+    await page.getByTestId('timing-add-boundary').click();
+    await expect(page.getByTestId('timing-select-1')).toHaveAttribute('aria-pressed', 'true');
+    const start = page.getByRole('spinbutton', { name: '辅助区间起点（毫秒）', exact: true });
+    await expect(start).toBeEnabled();
+    await start.fill('400'); await start.press('Enter');
+    await expect(page.locator('button[data-testid^="tempo-boundary-"]')).toHaveAttribute('data-time-seconds', '0.4');
+    await page.getByTestId('timing-select-0').click();
+    await expect(page.getByTestId('timing-tap-preview')).toHaveText('点按 8 次后预览');
+    await page.getByTestId('toggle-editor-timing').click();
+    await expect(page.getByTestId('editor-timing-panel')).toHaveCount(0);
+    await page.reload(); await expect(page.getByTestId('editor-ready')).toBeVisible();
+    await expect(page.getByTestId('editor-timing-panel')).toHaveCount(0);
+    expect(errors).toEqual([]);
+});

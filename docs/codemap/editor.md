@@ -19,6 +19,7 @@
 | [src/editor/projectCodec.ts](../../src/editor/projectCodec.ts) | [src/analysis/types.ts](../../src/analysis/types.ts)、[src/editor/types.ts](../../src/editor/types.ts) |
 | [src/editor/rangeAnnotations.ts](../../src/editor/rangeAnnotations.ts) | [src/editor/beatSnap.ts](../../src/editor/beatSnap.ts)、[src/editor/pointAnnotations.ts](../../src/editor/pointAnnotations.ts)、[src/editor/projectCodec.ts](../../src/editor/projectCodec.ts)、[src/editor/types.ts](../../src/editor/types.ts)、[src/types/session.ts](../../src/types/session.ts) |
 | [src/editor/routeRecovery.ts](../../src/editor/routeRecovery.ts) | [src/types/audio.ts](../../src/types/audio.ts) |
+| [src/editor/tapTempo.ts](../../src/editor/tapTempo.ts) | — |
 | [src/editor/tempoMap.ts](../../src/editor/tempoMap.ts) | [src/editor/beatSnap.ts](../../src/editor/beatSnap.ts)、[src/editor/editorConfig.ts](../../src/editor/editorConfig.ts)、[src/editor/projectCodec.ts](../../src/editor/projectCodec.ts)、[src/editor/types.ts](../../src/editor/types.ts)、[src/types/session.ts](../../src/types/session.ts) |
 | [src/editor/timeline.ts](../../src/editor/timeline.ts) | [src/analysis/timelineViewport.ts](../../src/analysis/timelineViewport.ts)、[src/types/session.ts](../../src/types/session.ts) |
 | [src/editor/trackChangeApproval.ts](../../src/editor/trackChangeApproval.ts) | [src/editor/types.ts](../../src/editor/types.ts) |

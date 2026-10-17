@@ -1,6 +1,6 @@
 <template>
     <div class="app-number-input" :class="{ 'is-disabled': disabled }">
-        <input ref="input" v-bind="$attrs" type="number" :value="modelValue" :aria-label="label"
+        <input ref="input" v-bind="$attrs" type="number" :value="empty ? '' : modelValue" :aria-label="label"
             :min="Number.isFinite(min)?min:undefined" :max="Number.isFinite(max)?max:undefined" :step="effectiveStep" :disabled="disabled"
             @change.stop="commit" @keydown.up.prevent="increment(1)" @keydown.down.prevent="increment(-1)"
             @keydown.enter.prevent="commit" v-on="wheelEnabled?{wheel}:{}"/>
@@ -19,7 +19,7 @@ import { numberEditingStep, stepEditedNumber } from '../../utils/numberEditing';
 defineOptions({ inheritAttrs: false });
 const props = withDefaults(defineProps<{
     modelValue: number; label: string; min?: number; max?: number; step?: number; disabled?: boolean;
-    editingPrecision?: number; wheelEnabled?: boolean; isStepValid?: (value: number) => boolean;
+    editingPrecision?: number; wheelEnabled?: boolean; isStepValid?: (value: number) => boolean; empty?: boolean;
 }>(), { min: -Infinity, max: Infinity, step: 1 });
 const emit = defineEmits<{ 'update:modelValue': [value: number]; change: [value: number] }>();
 const input = ref<HTMLInputElement | null>(null);
@@ -40,7 +40,7 @@ function commit() {
     if (!Number.isFinite(value)) { field.value = String(props.modelValue); return; }
     const bounded = Math.max(props.min, Math.min(props.max, value));
     field.value = String(bounded);
-    if (bounded === props.modelValue) return;
+    if (!props.empty && bounded === props.modelValue) return;
     emit('update:modelValue', bounded);
     emit('change', bounded);
 }
