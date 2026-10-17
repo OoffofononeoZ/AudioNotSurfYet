@@ -24,7 +24,7 @@ next_action: "实施 E10 区间操作并回归 E9 单项 pointer/keyboard 行为
 - 波形、tempo、point/range 和 overlay 从同一个 `EditorTimelineGeometry` 读取 viewport、CSS rect 和 `timeToX/xToTime`；任何层不得保存私有横向 zoom/cursor。
 - Canvas backing store 为 CSS 尺寸乘 DPR，绘制前将 context 变换回 CSS pixel 坐标。多层同一时间的目标偏差不超过 1 CSS px。
 - metered segment 根据 BPM/meter 生成 measure/beat；与 measure 重合的 beat 不重复。single-beat segment 不画内部线，并把整个 segment 作为一个候选单元。
-- 自适应 subdivision 按 `[16, 8, 4, 2, 1]` 从细到粗选择预计宽度至少 12 CSS px 的单元；全部不足时使用 1 beat。hover、pointer 和键盘使用同一 snap 纯函数。
+- 2026-10-17 标记改版采用显式 subdivision：常规 `[1,2,4,8,16]`、三连音 `[1,3,6,12]`、自定义 1–64 的因数预设。默认每拍四等分；hover、pointer、端点与键盘共享同一设置。缩放不改变吸附粒度，只减少过密次级线绘制，分隔颜色和层级沿用 osu。
 - snap 只发生在创建或拖动确认时。viewport、zoom 或 tempo 修改不会自动重写已有事件秒数。
 - point marker 的按钮、菱形和候选框都以事件时间 X 为中心，任意视口、zoom、pan 与 DPR 下误差不超过 `1 CSS px`；菱形 Y 也以按钮中心为准，引线从按钮中心下方独立绘制。
 

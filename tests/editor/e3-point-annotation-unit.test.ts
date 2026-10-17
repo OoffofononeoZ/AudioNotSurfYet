@@ -126,12 +126,12 @@ describe('Editor E3 point annotation domain', () => {
         expect(firstPointLane(project).events.map((event) => event.id)).toEqual(['end']);
     });
 
-    test('matches the versioned adaptive subdivision golden', () => {
+    test('supports historical timing examples with an explicit divisor rather than viewport-driven snapping', () => {
         const project = createProject();
         const golden = buildE3PointGolden();
         for (const entry of golden.snappingCases) {
             project.workspace.viewport = entry.viewport;
-            const cell = pointCellAtTime(entry.rawSeconds, project, entry.widthCssPx);
+            const cell = pointCellAtTime(entry.rawSeconds, project, entry.widthCssPx, { preset: 'common', divisor: entry.expectedSubdivision, customDivisor: 5 });
             expect(cell?.subdivision, entry.id).toBe(entry.expectedSubdivision);
             expect(cell?.timeSeconds, entry.id).toBe(entry.expectedSeconds);
         }

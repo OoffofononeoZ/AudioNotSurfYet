@@ -6,6 +6,7 @@
                 <p data-testid="editor-viewport-state">{{ formatTime(viewport.startSeconds) }} — {{ formatTime(viewport.endSeconds) }} · {{ viewport.zoom.toFixed(1) }}×</p>
             </div>
             <div class="timeline-controls" aria-label="共享视口控制">
+                <EditorBeatDivisorControl />
                 <button type="button" class="editor-icon-button" aria-label="向前平移 25%" title="向前平移 25%" data-testid="editor-pan-back" @click="panBy(-0.25)"><EditorIcon name="left" /></button>
                 <button type="button" class="editor-icon-button" aria-label="缩小时间轴" title="缩小时间轴" data-testid="editor-zoom-out" :disabled="viewport.zoom <= 1" @click="zoomBy(0.5)"><EditorIcon name="zoomOut" /></button>
                 <button type="button" class="editor-icon-button" aria-label="重置时间轴" title="重置时间轴" data-testid="editor-reset-viewport" @click="resetViewport"><EditorIcon name="reset" /></button>
@@ -234,6 +235,9 @@ import { useAudioSessionService } from '../audio/audioSessionService';
 import type { PlaybackSnapshot } from '../types/audio';
 import EditorIcon from './EditorIcon.vue';
 import EditorContextMenu from './EditorContextMenu.vue';
+import EditorBeatDivisorControl from './EditorBeatDivisorControl.vue';
+import { useEditorGrid } from '../editor/useEditorGrid';
+import { divisorColour, divisorHeight } from '../editor/beatSnap';
 import type { PersistedTimelineViewport } from '../types/session';
 import {
     EDITOR_CONTEXT_PAN_THRESHOLD_PX,
@@ -242,15 +246,12 @@ import {
     applyBpmInput,
     applyMeterInput,
     cloneTempoSegment,
-    generateTempoGrid,
     insertTempoBoundary,
     moveTempoBoundary,
     removeTempoBoundary,
     resolveTempoSegmentPresentation,
     segmentAtTime,
     segmentEndSeconds,
-    selectVisibleSubdivision,
-    snapEditorTime,
 } from '../editor/tempoMap';
 import {
     centerEditorViewport,
@@ -279,6 +280,7 @@ const emit = defineEmits<{
 }>();
 
 const audioSession = useAudioSessionService();
+const { setting: beatSnap, generateTempoGrid, snapEditorTime } = useEditorGrid();
 const stage = ref<HTMLDivElement | null>(null);
 const tempoStage = ref<HTMLDivElement | null>(null);
 const fullMeasure = ref<HTMLElement | null>(null);
@@ -716,7 +718,7 @@ const onBoundaryKeydown = (event: KeyboardEvent, id: string) => {
     if (!segment) return;
     const active = segmentAtTime(props.project.tempoMap, segment.startSeconds - 1e-6);
     const step = active.mode === 'metered' && active.bpm !== null
-        ? 60 / active.bpm / selectVisibleSubdivision(60 / active.bpm, viewport.value, size.width)
+        ? 60 / active.bpm / beatSnap.value.divisor
         : (viewport.value.endSeconds - viewport.value.startSeconds) * (event.shiftKey ? 0.05 : 0.01);
     const direction = event.key === 'ArrowLeft' ? -1 : 1;
     emit('updateProject', {
@@ -769,17 +771,17 @@ const drawStatic = () => {
         waveform.globalAlpha = 1;
     }
     grid.clearRect(0, 0, size.width, size.height);
-    for (const line of generateTempoGrid(props.project.tempoMap, durationSeconds.value, viewport.value)) {
+    for (const line of generateTempoGrid(props.project.tempoMap, durationSeconds.value, viewport.value, size.width)) {
         const x = editorTimeToX(line.timeSeconds, viewport.value, size.width);
         grid.beginPath();
-        grid.moveTo(Math.round(x) + 0.5, 0);
+        grid.moveTo(Math.round(x) + 0.5, line.kind === 'measure' ? 0 : size.height * (1 - divisorHeight(line.divisor)));
         grid.lineTo(Math.round(x) + 0.5, size.height);
-        grid.strokeStyle = line.kind === 'measure'
-            ? 'rgba(255,255,255,0.82)'
-            : 'rgba(255,255,255,0.25)';
+        grid.strokeStyle = divisorColour(line.divisor);
+        grid.globalAlpha = line.kind === 'measure' ? .85 : .45;
         grid.lineWidth = 1;
         grid.stroke();
     }
+    grid.globalAlpha = 1;
     drawCursor();
 };
 
@@ -808,6 +810,10 @@ watch(
     () => [props.project.tempoMap, size.width],
     () => void nextTick(measurePresentationWidths),
     { deep: true },
+);
+watch(
+    beatSnap,
+    () => void nextTick(drawStatic),
 );
 watch(
     () => props.playback.currentTimeSeconds,

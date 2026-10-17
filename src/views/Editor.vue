@@ -120,6 +120,7 @@ import EditorToolbar from '../components/EditorToolbar.vue';
 import EditorLeaveGuard from '../components/EditorLeaveGuard.vue';
 import '../editor/controls.css';
 import '../editor/marking.css';
+import { provideEditorGrid } from '../editor/useEditorGrid';
 import { resolveEditorUnavailableRecovery } from '../editor/routeRecovery';
 import { useEditorSessionController } from '../editor/editorSessionController';
 import { useAudioSessionStore } from '../stores/audioSessionStore';
@@ -145,6 +146,7 @@ const separationService = useEditorSeparationService();
 const trackNavigation = useEditorTrackNavigation(controller, audioSession, separationService, router);
 const workspace = ref<'marking'|'separation'|'transcription'>('marking');
 const snapshot = shallowRef(controller.getSnapshot());
+provideEditorGrid(() => snapshot.value.project?.track.contentHash);
 const unsubscribe = controller.subscribe((next) => {
     snapshot.value = next;
 });

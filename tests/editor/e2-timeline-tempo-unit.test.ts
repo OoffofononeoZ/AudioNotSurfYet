@@ -59,7 +59,7 @@ describe('Editor E2 timeline and tempo', () => {
             tempo,
             8,
             { startSeconds: 0, endSeconds: 8, zoom: 1 },
-        );
+        ).filter(line => line.kind !== 'subdivision');
         expect(lines[1]!.timeSeconds - lines[0]!.timeSeconds)
             .toBeCloseTo(beatSecondsFor(127.5), 6);
         expect(lines[0]!.kind).toBe('measure');

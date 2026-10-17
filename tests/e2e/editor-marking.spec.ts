@@ -59,3 +59,27 @@ test('track deletion confirms nonempty lanes, cancels safely and persists deleti
     await page.reload(); await expect(page.getByTestId('editor-ready')).toBeVisible();
     await expect(page.locator('[data-testid^="delete-lane-"]')).toHaveCount(0);
 });
+
+test('osu divisors stay fixed through zoom, drive point keyboard steps and restore custom presets', async ({ page }) => {
+    await openEditor(page);
+    const control = page.getByTestId('editor-beat-divisor');
+    await expect(control).toHaveAttribute('data-divisor', '4');
+    await page.getByTestId('add-point-lane').click();
+    const surface = page.locator('[data-testid^="marker-surface-"]').first();
+    await surface.focus(); await page.keyboard.press('Home'); await page.keyboard.press('ArrowRight');
+    await expect(surface).toHaveAttribute('data-candidate-seconds', '0.125');
+    await page.getByTestId('editor-zoom-in').click();
+    await expect(control).toHaveAttribute('data-divisor', '4');
+    await page.getByLabel('细分预设', { exact: true }).selectOption('triplets');
+    await expect(control).toHaveAttribute('data-divisor', '6');
+    await surface.focus(); await page.keyboard.press('Home'); await page.keyboard.press('ArrowRight');
+    await expect(surface).toHaveAttribute('data-candidate-seconds', '0.083333');
+    await page.getByLabel('细分预设', { exact: true }).selectOption('custom');
+    await page.getByRole('spinbutton', { name: '自定义细分', exact: true }).fill('12');
+    await page.getByRole('spinbutton', { name: '自定义细分', exact: true }).press('Enter');
+    await page.getByRole('button', { name: '减小节拍细分', exact: true }).click();
+    await expect(control).toHaveAttribute('data-divisor', '6');
+    await page.reload(); await expect(page.getByTestId('editor-ready')).toBeVisible();
+    await expect(control).toHaveAttribute('data-divisor', '6');
+    await expect(page.getByRole('spinbutton', { name: '自定义细分', exact: true })).toHaveValue('12');
+});

@@ -145,11 +145,11 @@ describe('Editor E5 range annotation domain', () => {
             .toEqual(['target-a']);
     });
 
-    test('matches adaptive minimum-range golden and reports missing grids', () => {
+    test('supports explicit minimum-range divisors and reports missing grids', () => {
         const project = createProject();
-        for (const entry of buildE5RangeGolden().snappingCases) {
+        for (const [index, entry] of buildE5RangeGolden().snappingCases.entries()) {
             project.workspace.viewport = entry.viewport;
-            expect(nextRangeCell(entry.startSeconds, project, entry.widthCssPx)?.timeSeconds)
+            expect(nextRangeCell(entry.startSeconds, project, entry.widthCssPx, { preset: 'common', divisor: [4, 16][index]!, customDivisor: 5 })?.timeSeconds)
                 .toBe(entry.expectedEndSeconds);
         }
         project.tempoMap = [{
