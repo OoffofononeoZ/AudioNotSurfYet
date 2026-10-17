@@ -6,6 +6,7 @@
 
 | 文件 | 本地静态引用（最多显示 6 项） |
 | --- | --- |
+| [tests/harness/verify-failure-detection.mjs](../../tests/harness/verify-failure-detection.mjs) | — |
 | [tests/persistence/m6-analysis-cache.test.ts](../../tests/persistence/m6-analysis-cache.test.ts) | [src/analysis/compactCodec.ts](../../src/analysis/compactCodec.ts)、[src/analysis/config.ts](../../src/analysis/config.ts)、[src/analysis/types.ts](../../src/analysis/types.ts)、[src/persistence/sessionRepository.ts](../../src/persistence/sessionRepository.ts)、[src/types/session.ts](../../src/types/session.ts) |
 | [tests/persistence/session-repository.test.ts](../../tests/persistence/session-repository.test.ts) | [src/audio/audioSessionService.ts](../../src/audio/audioSessionService.ts)、[src/persistence/sessionRepository.ts](../../src/persistence/sessionRepository.ts)、[src/types/session.ts](../../src/types/session.ts) |
 | [tests/processing/acceptance.ts](../../tests/processing/acceptance.ts) | — |
@@ -105,4 +106,3 @@
 | [tests/transcription/quality-probe.worker.ts](../../tests/transcription/quality-probe.worker.ts) | [src/processing/sha256.ts](../../src/processing/sha256.ts)、[src/processing/stemAuditionSource.ts](../../src/processing/stemAuditionSource.ts)、[src/processing/storage.ts](../../src/processing/storage.ts)、[src/transcription/auxiliarySeparation.ts](../../src/transcription/auxiliarySeparation.ts)、[src/transcription/drumModel.ts](../../src/transcription/drumModel.ts)、[src/transcription/modelManifest.ts](../../src/transcription/modelManifest.ts)、另 3 项，按需核对源码 |
 | [tests/transcription/qualityFixtures.ts](../../tests/transcription/qualityFixtures.ts) | — |
 | [tests/transcription/qualityMetrics.ts](../../tests/transcription/qualityMetrics.ts) | — |
-| [tests/transcription/result-repository.test.ts](../../tests/transcription/result-repository.test.ts) | [src/processing/dsp.ts](../../src/processing/dsp.ts)、[src/processing/modelManifest.ts](../../src/processing/modelManifest.ts)、[src/processing/sha256.ts](../../src/processing/sha256.ts)、[src/transcription/modelManifest.ts](../../src/transcription/modelManifest.ts)、[src/transcription/resultRepository.ts](../../src/transcription/resultRepository.ts)、[src/transcription/workerProtocol.ts](../../src/transcription/workerProtocol.ts) |

@@ -9,6 +9,7 @@ import { transcriptionFixturePlugin } from './tests/transcription/vitePlugin'
 
 // https://vite.dev/config/
 export default defineConfig({
+  optimizeDeps: { include: ['mediabunny'] },
   server: {
     watch: { ignored: ['**/artifacts/**', '**/test-results/**', '**/playwright-report/**', '**/trash/**'] },
   },
