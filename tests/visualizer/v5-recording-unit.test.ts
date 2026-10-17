@@ -5,7 +5,7 @@ import type { PlaybackSnapshot } from '../../src/types/audio';
 import {
     getVisualizerRecordingPreset,
     getVisualizerRecordingAvailability,
-    isReliableVisualizerRecordingPreset,
+    isVisualizerRecordingPresetAvailable,
     selectVisualizerRecordingMimeType,
 } from '../../src/visualizer/recordingPresets';
 import type { VisualizerRecordingState } from '../../src/visualizer/types';
@@ -235,27 +235,28 @@ describe('Visualizer V5 recording unit contract', () => {
         expect(selectVisualizerRecordingMimeType(() => true)).toContain('vp9');
         expect(selectVisualizerRecordingMimeType((mime) => mime.includes('vp8'))).toContain('vp8');
         expect(selectVisualizerRecordingMimeType(() => false)).toBeNull();
-        expect(isReliableVisualizerRecordingPreset(
+        expect(isVisualizerRecordingPresetAvailable(
             getVisualizerRecordingPreset('720p', 60),
             'Mozilla/5.0 Edg/151.0.0.0',
         )).toBe(false);
         for (const resolution of ['720p','1080p'] as const) for (const fps of [30,60] as const) {
             const availability = getVisualizerRecordingAvailability(resolution,fps);
-            expect(isReliableVisualizerRecordingPreset(getVisualizerRecordingPreset(resolution,fps))).toBe(availability.available);
-            if (!availability.available) expect(availability.reason).toContain('尚未通过录制稳定性验证');
+            expect(isVisualizerRecordingPresetAvailable(getVisualizerRecordingPreset(resolution,fps))).toBe(availability.available);
+            if (!availability.available) expect(availability.reason).toContain('音画时间偏移');
+            else expect(availability.warning).toContain('掉帧');
         }
-        expect(isReliableVisualizerRecordingPreset(
+        expect(isVisualizerRecordingPresetAvailable(
             getVisualizerRecordingPreset('1080p', 30),
             'Mozilla/5.0 Edg/151.0.0.0',
         )).toBe(false);
-        expect(isReliableVisualizerRecordingPreset(
+        expect(isVisualizerRecordingPresetAvailable(
             getVisualizerRecordingPreset('720p', 30),
             'Mozilla/5.0 Edg/151.0.0.0',
         )).toBe(true);
-        expect(isReliableVisualizerRecordingPreset(
+        expect(isVisualizerRecordingPresetAvailable(
             getVisualizerRecordingPreset('1080p', 60),
             'Mozilla/5.0 Chrome/151.0.0.0 Safari/537.36',
-        )).toBe(false);
+        )).toBe(true);
         expect(visualizerVideoFileName({
             fileName: 'V5 同步测试.wav',
             templateId: 'composition',

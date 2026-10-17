@@ -3,7 +3,7 @@ import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { chooseFiles, installFilePickerStub, queuePickerData, savedPickerEntries } from '../support/file-picker';
 import { elementRegistry } from '../../src/visualizer/elementRegistry';
-import { getVisualizerRecordingPreset, isReliableVisualizerRecordingPreset } from '../../src/visualizer/recordingPresets';
+import { getVisualizerRecordingPreset, isVisualizerRecordingPresetAvailable } from '../../src/visualizer/recordingPresets';
 import type { VisualizerProjectV3 } from '../../src/visualizer/compositionTypes';
 import { createOutputSyncWav, OUTPUT_SYNC_EVENTS, OUTPUT_SYNC_FLASH_SECONDS } from '../support/visualizer-output-sync';
 
@@ -25,34 +25,41 @@ test('output availability preserves imported settings and rejects unsupported pr
     await expect(page.getByTestId('visualizer-ready')).toBeVisible();
     const resolution = page.getByRole('combobox', { name: '输出分辨率', exact: true });
     const fps = page.getByRole('combobox', { name: '输出帧率', exact: true });
-    await expect(resolution.locator('option[value="1080p"]')).toHaveAttribute('disabled', '');
+    await expect(resolution.locator('option[value="1080p"]')).not.toHaveAttribute('disabled', '');
+    await expect(resolution.locator('option[value="1080p"]')).toContainText('60 fps');
     await expect(fps.locator('option[value="60"]')).toHaveAttribute('disabled', '');
-    const project = await exported(page); project.output = { aspectRatio: '16:9', resolution: '1080p', frameRate: 60 };
+    const project = await exported(page); project.output = { aspectRatio: '16:9', resolution: '1080p', frameRate: 30 };
     await queuePickerData(page, [{ name: 'unsupported-output.json', mimeType: 'application/json', text: JSON.stringify(project) }]);
     await page.getByTestId('import-visualizer-project').click();
-    await expect(resolution).toHaveValue('1080p'); await expect(fps).toHaveValue('60');
-    await expect(page.getByRole('status')).toContainText('该档位尚未通过录制稳定性验证');
+    await expect(resolution).toHaveValue('1080p'); await expect(fps).toHaveValue('30');
+    await expect(page.getByRole('status')).toContainText('音画时间偏移');
     await expect(page.getByText('已保存', { exact: true })).toBeVisible();
     await page.reload(); await expect(page.getByTestId('visualizer-ready')).toBeVisible();
-    await expect(resolution).toHaveValue('1080p'); await expect(fps).toHaveValue('60');
+    await expect(resolution).toHaveValue('1080p'); await expect(fps).toHaveValue('30');
     expect((await exported(page)).output).toEqual(project.output);
     const position = await page.locator('#music-bar-container').getAttribute('data-current-time');
     await page.getByTestId('visualizer-preview-frame').hover(); await page.getByTestId('start-visualizer-recording').click();
     await expect(page.locator('[data-recording-status=error]')).toBeVisible();
-    await expect(page.locator('.viz-status-lines')).toContainText('该档位尚未通过录制稳定性验证');
+    await expect(page.locator('.viz-status-lines')).toContainText('音画时间偏移');
     await expect(page.getByTestId('visualizer-preview-canvas')).not.toHaveAttribute('data-capture-active', 'true');
     await expect(page.locator('#music-bar-container')).toHaveAttribute('data-recording-locked', 'false');
     await expect(page.locator('#music-bar-container')).toHaveAttribute('data-current-time', position!);
     await page.getByRole('button', { name: '清除错误', exact: true }).click(); await page.getByRole('tab', { name: '输出', exact: true }).click();
     await resolution.selectOption('720p'); await fps.selectOption('30');
-    await expect(page.getByRole('status')).toHaveCount(0);
+    await expect(page.getByRole('status')).toContainText('首次录制可能短暂掉帧');
+    expect((await exported(page)).output).toEqual({ aspectRatio: '16:9', resolution: '720p', frameRate: 30 });
+    await resolution.selectOption('1080p'); await expect(fps).toHaveValue('60');
+    await expect(fps.locator('option[value="30"]')).toHaveAttribute('disabled', '');
+    expect((await exported(page)).output).toEqual({ aspectRatio: '16:9', resolution: '1080p', frameRate: 60 });
+    await expect(page.getByRole('status')).toContainText('首次录制可能短暂掉帧');
+    await resolution.selectOption('720p'); await expect(fps).toHaveValue('30');
     expect((await exported(page)).output).toEqual({ aspectRatio: '16:9', resolution: '720p', frameRate: 30 });
 });
 
 for (const resolution of ['720p', '1080p'] as const) for (const frameRate of [30, 60] as const) {
     const preset = getVisualizerRecordingPreset(resolution, frameRate);
     for (const kind of ['sync', 'music'] as const) test(`${resolution}${frameRate} records ${kind} at the requested quality`, async ({ page, browser }, info) => {
-        test.skip(!process.env.VISUALIZER_RECORDING_TRIAL && !isReliableVisualizerRecordingPreset(preset), 'Preset is excluded by the shared measured availability table.');
+        test.skip(!process.env.VISUALIZER_RECORDING_TRIAL && !isVisualizerRecordingPresetAvailable(preset), 'Preset is excluded by the shared measured availability table.');
         test.skip(kind === 'music' && !process.env.VISUALIZER_MUSIC_FILE, 'Set VISUALIZER_MUSIC_FILE to a short local music file.');
         test.setTimeout(90000);
         const errors: string[] = []; page.on('pageerror', e => errors.push(e.message));

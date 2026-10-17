@@ -9,7 +9,7 @@ import type { VisualizerResolvedParameter } from './rendererTypes';
 import {
     getVisualizerRecordingPreset,
     getVisualizerRecordingAvailability,
-    isReliableVisualizerRecordingPreset,
+    isVisualizerRecordingPresetAvailable,
     selectVisualizerRecordingMimeType,
 } from './recordingPresets';
 import type { VisualizerRecordingPreset } from './recordingPresets';
@@ -139,7 +139,7 @@ export class VisualizerRecordingSession {
             ?? ((mimeType) => typeof MediaRecorder !== 'undefined'
                 && MediaRecorder.isTypeSupported(mimeType));
         this.isPresetAvailable = options.isPresetAvailable
-            ?? isReliableVisualizerRecordingPreset;
+            ?? isVisualizerRecordingPresetAvailable;
         this.setTimer = options.setTimer
             ?? ((handler, timeout) => setTimeout(handler, timeout));
         this.clearTimer = options.clearTimer ?? ((handle) => clearTimeout(handle));

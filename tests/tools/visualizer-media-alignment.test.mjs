@@ -18,3 +18,10 @@ test('alignment rejects cumulative drift even when individual offsets remain bel
     assert.ok(result.syncEvents.every(e => Math.abs(e.offset) < .1));
     assert.match(result.failures.join(' '), /drift over 100ms/);
 });
+test('a late flash remains in drift diagnostics instead of disappearing from the sample set', () => {
+    const result = measureOutputSynchronization([.15, 6, 10.5], [.169, 5.998, 10.632],
+        [.185, 6.035, 10.535].map(time => ({ time, rms: .5 })), .05);
+    assert.ok(Math.abs(result.syncEvents[2].offset - .097) < 1e-9);
+    assert.ok(result.syncDriftSeconds > .13);
+    assert.match(result.failures.join(' '), /drift over 100ms/);
+});
