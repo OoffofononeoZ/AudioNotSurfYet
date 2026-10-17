@@ -7,6 +7,7 @@
             </div>
             <div class="timeline-controls" aria-label="共享视口控制">
                 <EditorBeatDivisorControl />
+                <button type="button" class="timing-toggle" data-testid="toggle-editor-timing" :aria-expanded="timingOpen" aria-controls="editor-timing-workspace" @click="timingOpen = !timingOpen">手动定时 {{ timingOpen ? '⌃' : '⌄' }}</button>
                 <button type="button" class="editor-icon-button" aria-label="向前平移 25%" title="向前平移 25%" data-testid="editor-pan-back" @click="panBy(-0.25)"><EditorIcon name="left" /></button>
                 <button type="button" class="editor-icon-button" aria-label="缩小时间轴" title="缩小时间轴" data-testid="editor-zoom-out" :disabled="viewport.zoom <= 1" @click="zoomBy(0.5)"><EditorIcon name="zoomOut" /></button>
                 <button type="button" class="editor-icon-button" aria-label="重置时间轴" title="重置时间轴" data-testid="editor-reset-viewport" @click="resetViewport"><EditorIcon name="reset" /></button>
@@ -92,6 +93,8 @@
                         role="group"
                         :aria-label="segmentAccessibleLabel(entry.segment, entry.index)"
                         :title="segmentAccessibleLabel(entry.segment, entry.index)"
+                        :data-selected="selectedTempoId === entry.segment.id"
+                        @click="selectedTempoId = entry.segment.id"
                     >
                         <div v-if="segmentPresentation(entry.index) === 'full'" class="tempo-segment-content tempo-segment-full">
                             <template v-if="entry.segment.mode === 'metered'">
@@ -210,6 +213,9 @@
             </div>
         </div>
 
+        <EditorTimingPanel v-if="timingOpen && active !== false" id="editor-timing-workspace" :project="project" :playback="playback" :selected-id="selectedTempoId"
+            @select="selectedTempoId = $event" @seek="audioSession.seek($event)" @update-project="emit('updateProject',$event,true)" />
+
         <div class="timeline-status" aria-live="polite">
             <span data-testid="editor-buffer-state">{{ bufferStateLabel }}</span>
             <span data-testid="editor-tempo-estimate-state">{{ estimateStateLabel }}</span>
@@ -236,6 +242,7 @@ import type { PlaybackSnapshot } from '../types/audio';
 import EditorIcon from './EditorIcon.vue';
 import EditorContextMenu from './EditorContextMenu.vue';
 import EditorBeatDivisorControl from './EditorBeatDivisorControl.vue';
+import EditorTimingPanel from './EditorTimingPanel.vue';
 import { useEditorGrid } from '../editor/useEditorGrid';
 import { divisorColour, divisorHeight } from '../editor/beatSnap';
 import type { PersistedTimelineViewport } from '../types/session';
@@ -268,6 +275,7 @@ import type { EditorProjectV1, TempoSegmentV1 } from '../editor/types';
 import type { EditorSessionSnapshot } from '../editor/types';
 
 const props = defineProps<{
+    active?: boolean;
     project: EditorProjectV1;
     playback: PlaybackSnapshot;
     analysis: AnalysisCoordinatorSnapshot;
@@ -293,6 +301,8 @@ const tempoErrors = reactive<Record<string, string>>({});
 const tempoBpmDrafts = reactive<Record<string, string>>({});
 const tempoNumeratorDrafts = reactive<Record<string, string>>({});
 const tempoLiveMessage = ref('');
+const timingOpen = ref(false);
+const selectedTempoId = ref<string | null>(props.project.tempoMap[0]?.id ?? null);
 const presentationWidths = reactive({ full: 420, summary: 112 });
 const meterDenominators = [1, 2, 4, 8, 16, 32] as const;
 const createId = () => crypto.randomUUID();
@@ -667,6 +677,7 @@ const removeBoundary = (id: string) => {
 
 const boundaryDrag = ref<{ id: string; pointerId: number; original: TempoSegmentV1[] } | null>(null);
 const beginBoundaryDrag = (event: PointerEvent, id: string) => {
+    selectedTempoId.value = id;
     if (event.button !== 0) return;
     boundaryDrag.value = {
         id,
@@ -810,6 +821,18 @@ watch(
     () => [props.project.tempoMap, size.width],
     () => void nextTick(measurePresentationWidths),
     { deep: true },
+);
+watch(
+    () => props.project.track.contentHash,
+    () => { timingOpen.value = false; selectedTempoId.value = props.project.tempoMap[0]?.id ?? null; },
+);
+watch(
+    () => props.project.tempoMap,
+    () => {
+        const ids = new Set(props.project.tempoMap.map(segment => segment.id));
+        if (!selectedTempoId.value || !ids.has(selectedTempoId.value)) selectedTempoId.value = props.project.tempoMap[0]?.id ?? null;
+        for (const drafts of [tempoErrors, tempoBpmDrafts, tempoNumeratorDrafts]) for (const id of Object.keys(drafts)) if (!ids.has(id)) delete drafts[id];
+    },
 );
 watch(
     beatSnap,

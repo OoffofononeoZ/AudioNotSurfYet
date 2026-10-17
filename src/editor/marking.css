@@ -14,3 +14,5 @@
 #editor-marking-panel .range-inner-class-cell input { border-color:transparent; background:transparent; font-size:12px; }
 #editor-marking-panel input:hover,
 #editor-marking-panel input:focus-visible { border-color:var(--hairline-focus); }
+#editor-marking-panel .timing-toggle { font-size:12px; min-height:30px; padding:4px 8px; }
+#editor-marking-panel .tempo-segment[data-selected="true"] { background:rgba(134,237,181,.045); }

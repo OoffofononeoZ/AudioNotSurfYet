@@ -7,6 +7,7 @@
 | 文件 | 本地静态引用（最多显示 6 项） |
 | --- | --- |
 | [tests/editor/lane-operations.test.ts](../../tests/editor/lane-operations.test.ts) | [src/editor/laneOperations.ts](../../src/editor/laneOperations.ts)、[src/editor/pointAnnotations.ts](../../src/editor/pointAnnotations.ts)、[src/editor/projectCodec.ts](../../src/editor/projectCodec.ts) |
+| [tests/editor/tap-tempo.test.ts](../../tests/editor/tap-tempo.test.ts) | [src/editor/tapTempo.ts](../../src/editor/tapTempo.ts) |
 | [tests/fixtures/fixture-manifest.test.ts](../../tests/fixtures/fixture-manifest.test.ts) | — |
 | [tests/fixtures/generate-fixtures.ts](../../tests/fixtures/generate-fixtures.ts) | [tests/support/audio-fixtures.ts](../../tests/support/audio-fixtures.ts) |
 | [tests/harness/intentional-failure.test.ts](../../tests/harness/intentional-failure.test.ts) | — |
@@ -105,4 +106,3 @@
 | [tests/transcription/download-models.ps1](../../tests/transcription/download-models.ps1) | — |
 | [tests/transcription/editor-service.test.ts](../../tests/transcription/editor-service.test.ts) | [src/editor/projectCodec.ts](../../src/editor/projectCodec.ts)、[src/editor/types.ts](../../src/editor/types.ts)、[src/processing/editorProcessingGate.ts](../../src/processing/editorProcessingGate.ts)、[src/processing/editorSeparationService.ts](../../src/processing/editorSeparationService.ts)、[src/processing/modelManifest.ts](../../src/processing/modelManifest.ts)、[src/transcription/candidateTypes.ts](../../src/transcription/candidateTypes.ts)、另 3 项，按需核对源码 |
 | [tests/transcription/harness.ts](../../tests/transcription/harness.ts) | — |
-| [tests/transcription/model-probe.worker.ts](../../tests/transcription/model-probe.worker.ts) | [src/processing/dsp.ts](../../src/processing/dsp.ts)、[src/processing/modelManifest.ts](../../src/processing/modelManifest.ts)、[src/processing/sha256.ts](../../src/processing/sha256.ts)、[src/transcription/drumFeatures.ts](../../src/transcription/drumFeatures.ts)、[src/transcription/drumModel.ts](../../src/transcription/drumModel.ts)、[src/transcription/modelManifest.ts](../../src/transcription/modelManifest.ts)、另 2 项，按需核对源码 |

@@ -83,6 +83,8 @@ idle + drag start/end handle
 
 ## Tempo Interaction
 
+2026-10-17 新增默认收起的手动定时区：展开后使用区间列表与右侧 BPM 辅助栏；选择与时间条边界联动，不随播放自动切换编辑对象。辅助栏输入复用公共控件；Tap 仅预览，显式应用后才修改当前区间。完整现行行为见[标记工作区](../../context/editor-marking.md)。
+
 - 初始 project 有歌曲开始/结束固定边界；结束前显示 add handle。单击 add handle 时优先使用播放 cursor，否则使用 viewport 中点；拖动后在 snapped 时间插入内部 boundary。
 - `BPM` 表示当前拍号单位的一拍每分钟次数：相邻 beat 固定为 `60 / BPM` 秒；numerator 决定每小节的 beat 数，denominator 只表达该 beat 的音符单位，不再按四分音符二次缩放。
 - 前一 segment 有合法 metered BPM 时，新增或移动 boundary 按当前可见 subdivision 吸附；BPM 为空或 segment 为 single-beat 时，没有 beat 网格，使用 `xToTime()` 后的微秒规范化原始时间。
