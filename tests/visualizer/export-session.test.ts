@@ -4,6 +4,7 @@ import { createComposition } from '../../src/visualizer/compositionCodec';
 import type { AudioSessionService } from '../../src/audio/audioSessionService';
 import type { OfflineExportOptions } from '../../src/visualizer/offlineExport';
 import type { VisualizerExportState } from '../../src/visualizer/exportTypes';
+import { visualizerRendererDiagnostics } from '../../src/visualizer/visualizerRendererHost';
 
 function harness(run?: (options: OfflineExportOptions) => Promise<File>) {
     const project = createComposition({ contentHash: 'a'.repeat(64), fileName: 'export.wav', durationSeconds: 3, sampleRate: 48000 });
@@ -79,4 +80,19 @@ test('save failures retain output and concurrent save calls share one operation'
     expect(h.session.getReadyFileForDiagnostics()).toBe(h.file);
     const first = h.session.save(), second = h.session.save(); expect(first).toBe(second); await first;
     expect(h.save).toHaveBeenCalledTimes(2); expect(h.artifact.discard).toHaveBeenCalledOnce();
+});
+
+test.each(['encode', 'restore'] as const)('decoded revision changes during %s cannot promote a late File', async phase => {
+    const h = harness(async () => { if (phase === 'encode') h.descriptor.revision++; return h.file; });
+    if (phase === 'restore') h.restore.mockImplementationOnce(async () => { h.descriptor.revision++; });
+    await h.session.start();
+    expect(h.session.getState()).toMatchObject({ status: 'error', code: 'identity-changed' });
+    expect(h.session.getReadyFileForDiagnostics()).toBeNull(); expect(h.artifact.discard).toHaveBeenCalledOnce();
+    if (phase === 'encode') expect(h.restore).not.toHaveBeenCalled();
+});
+
+test('each new job resets progress rather than reporting the preceding completed export', async () => {
+    const h = harness(); await h.session.start(); await h.session.discard();
+    const task = h.session.start(); expect(visualizerRendererDiagnostics.exportFramesDone).toBe(0);
+    await task; await h.session.discard();
 });

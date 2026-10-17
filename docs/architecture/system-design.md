@@ -14,6 +14,8 @@ next_action: "浏览器自动处理架构已批准；制定 execution plan、acc
 
 # System Design
 
+2026-10-17 DEC-081 更新：当前 Project V3 的视频生成已替换为[离线确定性导出](../context/visualizer-offline-export.md)，按显式帧时间与解码 PCM 编码 WebM，复用单 renderer，暂停预览 RAF。下方 V0/V5、P2 录制与 pre-Gain/tap 描述保留历史架构语境，当前行为以该新契约及 [system map](../context/system-map.md) 为准。
+
 > 2026-10-04 范围登记：第 1–20 节保留既有 Analyzer、Editor、Visualizer 技术基线；第 21 节的浏览器 FT 分离、TypeScript 节拍、只读提案与 Project V2 已获架构批准。新目标进入 execution planning，既有 canonical/readiness 不覆盖这些尚未实现、尚未验证的能力。
 
 ## 1. Decision Summary
