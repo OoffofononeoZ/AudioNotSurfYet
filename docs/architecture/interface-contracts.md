@@ -800,6 +800,8 @@ type AnalysisConsumer = 'analyzer' | 'editor' | 'visualizer'
 
 ### Recording contracts
 
+2026-10-17 DEC-081 已用 [Visualizer 离线导出契约](../context/visualizer-offline-export.md)替换此节的实时接口。当前为 `CompositionSessionSnapshot.export` / `VisualizerExportState`、`acquireExportTransport`、手动 renderer lease 与 OPFS File；以下 V5 状态/tap/Blob 定义仅保留历史候选语境，不再是当前实现接口。
+
 ```ts
 type VisualizerRecordingState =
   | { status: 'idle' }

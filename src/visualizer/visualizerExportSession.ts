@@ -1,6 +1,7 @@
 import type { AudioPlaybackCheckpoint } from '../audio/audioEngine';
 import type { AudioSessionService, ExportTransportLease } from '../audio/audioSessionService';
 import type { DecodedAudioCopyPort } from '../analysis/pcm';
+import type { DecodedAudioDescriptor } from '../types/audio';
 import type { VisualizerProjectV3 } from './compositionTypes';
 import type { VisualizerBindingRuntimeSnapshot, VisualizerSessionState } from './types';
 import type { VisualizerRendererStatus, VisualizerResolvedParameter } from './rendererTypes';
@@ -10,6 +11,7 @@ import { createExportArtifact, type ExportArtifact } from './exportArtifact';
 import { getVisualizerExportPreset, probeVisualizerExport } from './exportPresets';
 import { VisualizerExportError, type VisualizerExportCapability, type VisualizerExportPreset, type VisualizerExportState } from './exportTypes';
 import { runOfflineExport } from './offlineExport';
+import { assertExportAudio } from './offlineExportAudio';
 import { type VisualizerVideoFileGateway, visualizerVideoFileName } from './videoFileIO';
 
 export interface VisualizerExportTarget {
@@ -81,6 +83,8 @@ export class VisualizerExportSession {
         if (this.isLocked()) return Promise.reject(new VisualizerExportError('export-busy', '导出已经在进行。'));
         if (this.ready) return Promise.reject(new VisualizerExportError('output-pending', '请先保存或丢弃当前 WebM。'));
         this.abortController = new AbortController(); this.restoreAllowed = true;
+        diagnostics.exportFramesDone = 0; diagnostics.exportTotalFrames = 0;
+        diagnostics.lastExportError = '';
         this.setState({ status: 'preparing' });
         const task = this.perform(this.abortController.signal);
         this.task = task;
@@ -92,17 +96,17 @@ export class VisualizerExportSession {
         let artifact: ExportArtifact | null = null, surface: VisualizerExportSurfaceLease | null = null;
         let transport: ExportTransportLease | null = null, checkpoint: AudioPlaybackCheckpoint | null = null;
         let file: File | null = null, failure: unknown, fileName = '';
-        let sourceRevision: number | null = null;
+        let expectedAudio: DecodedAudioDescriptor | null = null;
         const source = this.options.source;
         diagnostics.activeExportJobs++; diagnostics.exportStarts++; diagnostics.exportStage = 'preparing';
         const now = this.options.now ?? (() => performance.now());
         let lastProgress = -Infinity;
         try {
             const context = this.options.readContext(), project = context.project;
-            const descriptor = source?.getDecodedAudioDescriptor();
-            if (!project || !descriptor || descriptor.trackId !== context.activeTrackId
+            const currentAudio = source?.getDecodedAudioDescriptor();
+            if (!project || !currentAudio || currentAudio.trackId !== context.activeTrackId
                 || !['ready', 'not-persisted'].includes(context.state)) throw new VisualizerExportError('track-mismatch', '当前歌曲或工程身份不可导出。');
-            sourceRevision = descriptor.revision;
+            const descriptor = expectedAudio = { ...currentAudio };
             const bindings = context.bindingRuntime;
             if (bindings.activeFeatureIds.length && (bindings.analysisState !== 'ready'
                 || bindings.activeFeatureIds.some(id => !bindings.readyFeatureIds.includes(id)))) throw new VisualizerExportError('analysis-not-ready', '活动分析尚未全部就绪。');
@@ -113,6 +117,7 @@ export class VisualizerExportSession {
             const capability = await (this.options.probeCapability ?? probeVisualizerExport)(preset);
             signal.throwIfAborted();
             if (!capability.available || !capability.codec) throw new VisualizerExportError('export-unsupported', capability.reason ?? '当前设备不支持所选导出配置。');
+            assertExportAudio(source!, descriptor);
             checkpoint = this.options.audioSession.capturePlaybackCheckpoint(descriptor.trackId);
             transport = this.options.audioSession.acquireExportTransport(descriptor.trackId); transport.pause();
             surface = target.acquireExportSurface(preset.width, preset.height);
@@ -132,17 +137,21 @@ export class VisualizerExportSession {
                     lastProgress = now(); this.setState({ status: 'exporting', framesDone, totalFrames });
                 }, onFinalizing: () => this.setState({ status: 'finalizing' }) });
             signal.throwIfAborted();
+            assertExportAudio(source!, descriptor);
             if (!file.size) throw new VisualizerExportError('empty-output', '离线编码没有生成有效数据。');
         } catch (error) { failure = error; }
         finally {
             try { surface?.release(); } catch (error) { failure ??= error; }
             try { transport?.release(); } catch (error) { failure ??= error; }
             const current = source?.getDecodedAudioDescriptor();
-            if (checkpoint && this.restoreAllowed && current?.trackId === checkpoint.trackId && current.revision === sourceRevision) {
+            if (checkpoint && this.restoreAllowed && current?.trackId === checkpoint.trackId && current.revision === expectedAudio?.revision) {
                 try { await this.options.audioSession.restorePlaybackCheckpoint(checkpoint); }
                 catch (error) { failure ??= error; }
             }
             diagnostics.activeExportJobs--;
+        }
+        if (!failure && file && source && expectedAudio) {
+            try { assertExportAudio(source, expectedAudio); } catch (error) { failure = error; }
         }
         if (signal.aborted) failure = signal.reason;
         if (failure || !file || !artifact) {

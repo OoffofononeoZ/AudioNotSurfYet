@@ -4,11 +4,31 @@ import {mkdir,writeFile} from 'node:fs/promises';
 import {chooseFiles,installFilePickerStub,savedPickerEntries,queuePickerData} from '../support/file-picker';
 import {installV6ResourceProbe,readV6ResourceProbe} from '../support/v6-resource-probe';
 import type {VisualizerProjectV3} from '../../src/visualizer/compositionTypes';
+import {createOutputSyncWav} from '../support/visualizer-output-sync';
 const audio=path.resolve(import.meta.dirname,'../fixtures/audio/visualizer-v5-avsync-v1.wav');
-async function open(page:Page){await page.setViewportSize({width:1920,height:1080});await installFilePickerStub(page);await page.goto('/');await chooseFiles(page,[audio]);await page.getByTestId('header-visualizer-link').click();await expect(page.getByTestId('visualizer-ready')).toBeVisible();if(await page.locator('#music-bar-container').getAttribute('data-playback-state')==='playing')await page.getByTestId('toggle-playback').click();}
+async function open(page:Page,file=audio){await page.setViewportSize({width:1920,height:1080});await installFilePickerStub(page);await page.goto('/');await chooseFiles(page,[file]);await page.getByTestId('header-visualizer-link').click();await expect(page.getByTestId('visualizer-ready')).toBeVisible();if(await page.locator('#music-bar-container').getAttribute('data-playback-state')==='playing')await page.getByTestId('toggle-playback').click();}
 async function exported(page:Page):Promise<VisualizerProjectV3>{const count=(await savedPickerEntries(page)).length;await page.getByTestId('export-visualizer-project').click();await expect.poll(async()=>(await savedPickerEntries(page)).length).toBe(count+1);return JSON.parse(Buffer.from((await savedPickerEntries(page)).at(-1)!.base64,'base64').toString('utf8'));}
 async function importProject(page:Page,p:VisualizerProjectV3){await queuePickerData(page,[{name:'preset.json',mimeType:'application/json',text:JSON.stringify(p)}]);await page.getByTestId('import-visualizer-project').click();await expect(page.getByTestId('visualizer-preview-frame')).toHaveAttribute('data-scene-status','ready');}
 async function preset(page:Page,id:string){await page.getByTestId('add-visualizer-element').click();await page.getByRole('button',{name:'预设',exact:true}).click();await page.locator('[data-preset-id="'+id+'"]').click();}
+
+test('native strings export awaits chunk history after a seek and restores the exact preview frame',async({page},info)=>{
+    test.setTimeout(60000);const root='artifacts/visualizer-composition/presets';await mkdir(root,{recursive:true});
+    const file=path.resolve(root,'native-history.wav');await writeFile(file,createOutputSyncWav());await open(page,file);
+    await page.getByTestId('add-visualizer-element').click();await page.locator('[data-element-type="spectral-strings"]').click();
+    await page.getByRole('combobox',{name:'频谱输入数据来源',exact:true}).selectOption('native');
+    const canvas=page.getByTestId('visualizer-preview-canvas');
+    await page.getByTestId('visualizer-preview-frame').hover();await page.getByTestId('visualizer-fullscreen-toggle').click();
+    const seek=page.getByTestId('visualizer-seek');await seek.fill('9.2');await seek.dispatchEvent('input');
+    await expect(canvas).toHaveAttribute('data-frame-time','9.200000');await expect(canvas).toHaveAttribute('data-native-input-state','ready');
+    const hash=await canvas.getAttribute('data-frame-state-hash');
+    await page.getByTestId('visualizer-fullscreen-toggle').click();await page.getByTestId('visualizer-preview-frame').hover();
+    await page.getByTestId('start-visualizer-export').click();await expect(page.locator('[data-export-status=ready]')).toBeVisible({timeout:30000});
+    await expect(canvas).toHaveAttribute('data-frame-time','9.200000');await expect(canvas).toHaveAttribute('data-frame-state-hash',hash!);
+    await page.getByTestId('save-visualizer-export').click();
+    await expect.poll(async()=>(await savedPickerEntries(page)).filter(e=>e.name.endsWith('.webm')).length).toBe(1);
+    const saved=(await savedPickerEntries(page)).find(e=>e.name.endsWith('.webm'))!;
+    await writeFile(`${root}/native-strings-offline-${info.project.name}.webm`,Buffer.from(saved.base64,'base64'));
+});
 
 test('native input lists available Web Audio features, persists changes and seeks to the same frame',async({page})=>{
     const errors:string[]=[];page.on('pageerror',e=>errors.push(e.message));await open(page);await preset(page,'geometric-0.6');

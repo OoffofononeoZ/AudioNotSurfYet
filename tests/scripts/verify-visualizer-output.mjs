@@ -3,12 +3,15 @@ import { readdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { measureOutputSynchronization } from '../support/visualizer-media-alignment.mjs';
 import { measureAudioPcm, parseAudioTimeline } from '../support/visualizer-audio-timeline.mjs';
+import { measureOfflineVideoTimeline } from '../support/visualizer-video-timeline.mjs';
 
 // Functional output checks, separate from historical V5/V6 canonical evidence.
 const root = path.resolve('artifacts/visualizer-composition/output');
 const runId = process.argv[2] ?? 'current';
 const allowFrameDrops = process.argv.includes('--allow-frame-drops');
-const measurementVersion = 'pts-audio-v2';
+const filesOnly = process.argv.includes('--files-only');
+if (filesOnly && process.argv.includes('--all')) throw Error('Choose --files-only or --all.');
+const measurementVersion = 'offline-frames-v3';
 if (!/^[a-zA-Z0-9-]+$/.test(runId)) throw Error('Use an alphanumeric run ID.');
 const run = (command, args, binary = false) => {
     const result = spawnSync(command, args, { encoding: binary ? null : 'utf8', maxBuffer: 128 * 1024 * 1024 });
@@ -25,25 +28,27 @@ function audioSignal(file) {
     if (decoded.status !== 0) throw Error(`Audio decode failed: ${decoded.stderr || decoded.error?.message}`);
     return measureAudioPcm(decoded.stdout, parseAudioTimeline(decoded.stderr.toString('utf8')));
 }
-function flashTimes(file) {
-    const frames = json('ffprobe', ['-select_streams', 'v:0', '-show_frames', '-show_entries', 'frame=best_effort_timestamp_time', file]).frames;
+function flashTimes(file, times) {
     const pixels = run('ffmpeg', ['-v', 'error', '-i', file, '-map', '0:v:0', '-vf', 'crop=64:64:(iw-64)/2:(ih-64)/2,scale=1:1,format=gray', '-fps_mode', 'passthrough', '-f', 'rawvideo', '-pix_fmt', 'gray', 'pipe:1'], true);
-    const times = [];
+    const flashes = [];
     for (let i = 0; i < pixels.length; i++) {
-        if (pixels[i] >= 128 && (i === 0 || pixels[i - 1] < 128) && frames[i]) times.push(Number(frames[i].best_effort_timestamp_time));
+        if (pixels[i] >= 128 && (i === 0 || pixels[i - 1] < 128)) flashes.push(times[i]);
     }
-    if (!times.length) throw Error('No decoded synchronization flash.');
-    return times;
+    if (pixels.length !== times.length) throw Error('Decoded video pixels and timestamps differ.');
+    if (!flashes.length) throw Error('No decoded synchronization flash.');
+    return flashes;
 }
 
 const entries = (await readdir(root)).filter(name => name.startsWith(`${runId}-`) && name.endsWith('.webm.capture.json')).sort();
-if (entries.length === 0 || process.argv.includes('--all') && entries.length !== 16) throw Error(`Incomplete matrix: ${entries.length} recordings.`);
+if (entries.length === 0) throw Error('No output artifacts.');
 const results = [];
 for (const entry of entries) {
     const capture = JSON.parse(await readFile(path.join(root, entry), 'utf8'));
+    if (capture.mode === 'offline' && allowFrameDrops) throw Error('Offline export requires strict frame checks.');
     const file = path.join(root, entry.replace(/\.capture\.json$/, ''));
     const result = { file: path.basename(file), browser: capture.browser, browserVersion: capture.browserVersion,
-        resolution: capture.preset.resolution, targetFps: capture.preset.frameRate, kind: capture.kind, failures: [], frameDropWarnings: [] };
+        resolution: capture.preset.resolution, targetFps: capture.preset.frameRate, kind: capture.kind,
+        mode: capture.mode ?? 'realtime', scenario: capture.scenario ?? null, failures: [], frameDropWarnings: [] };
     const check = (condition, message) => { if (!condition) result.failures.push(message); };
     const checkCadence = (condition, message) => {
         if (!condition) { result.frameDropWarnings.push(message); if (!allowFrameDrops) result.failures.push(message); }
@@ -67,10 +72,16 @@ for (const entry of entries) {
         check([videoEnd, audioEnd, duration].every(v => Math.abs(v - capture.sourceDurationSeconds) <= .25), 'Duration differs by over 250ms.');
         check(Math.abs(videoEnd - audioEnd) <= .1, 'A/V end delta over 100ms.');
         const signal = audioSignal(file);
+        const times = json('ffprobe', ['-select_streams', 'v:0', '-show_frames', '-show_entries', 'frame=best_effort_timestamp_time', file]).frames.map(f => Number(f.best_effort_timestamp_time));
+        if (capture.mode === 'offline') {
+            const timeline = measureOfflineVideoTimeline(times, capture.sourceDurationSeconds, capture.preset.frameRate);
+            result.failures.push(...timeline.failures);
+            Object.assign(result, { expectedFrames: timeline.expectedFrames, decodedFrames: timeline.decodedFrames });
+        }
         check(signal.rms >= .001 && signal.peakRms >= .005, 'Pre-Gain recording is silent at page volume zero.');
         Object.assign(result, { codec: video[0].codec_name, width: video[0].width, height: video[0].height, fps, maxGap, videoEnd, audioEnd, duration, audioRms: signal.rms });
         if (capture.kind === 'sync') {
-            const flashes = flashTimes(file), expected = capture.syncEventsSeconds ?? [1.5];
+            const flashes = flashTimes(file, times), expected = capture.syncEventsSeconds ?? [1.5];
             const { syncEvents, syncDriftSeconds, failures } = measureOutputSynchronization(expected, flashes, signal.windows, capture.syncFlashSeconds ?? 0);
             result.failures.push(...failures);
             Object.assign(result, { syncEvents, syncDriftSeconds });
@@ -81,11 +92,13 @@ for (const entry of entries) {
 }
 const profiles = [...new Set(results.map(r => `${r.resolution}${r.targetFps}`))].map(id => {
     const rows = results.filter(r => `${r.resolution}${r.targetFps}` === id);
-    const complete = ['chrome', 'edge'].every(browser => ['sync', 'music'].every(kind => rows.some(r => r.browser === browser && r.kind === kind)));
+    const complete = ['chrome', 'edge'].every(browser => ['sync', 'music'].every(kind => rows.some(r => r.browser === browser && r.kind === kind)))
+        && (rows[0].mode !== 'offline' || ['chrome', 'edge'].every(browser => ['cold', 'repeat', 'music'].every(scenario => rows.some(r => r.browser === browser && r.scenario === scenario))));
     return { id, complete, passed: complete && rows.every(r => r.failures.length === 0), frameDropWarning: rows.some(r => r.frameDropWarnings.length > 0) };
 });
 const policy = allowFrameDrops ? 'alignment-with-frame-drop-warning' : 'strict';
+if (process.argv.includes('--all') && (profiles.length !== 4 || profiles.some(p => !p.complete))) throw Error(`Incomplete matrix: ${entries.length} artifacts.`);
 await writeFile(path.join(root, `${runId}-${policy}-${measurementVersion}-measurement.json`), JSON.stringify({ runId, policy, measurementVersion, results, profiles }, null, 2) + '\n');
 for (const row of results) console.log(`${row.browser} ${row.resolution}${row.targetFps} ${row.kind}: ${row.fps?.toFixed(2)} fps, gap ${row.maxGap?.toFixed(3)}s, ${row.failures.length ? row.failures.join(' ') : 'PASS'}${row.frameDropWarnings.length ? ' [frame-drop warning]' : ''}`);
 console.log(JSON.stringify(profiles));
-if (profiles.some(p => !p.passed)) process.exitCode = 1;
+if (filesOnly ? results.some(r => r.failures.length) : profiles.some(p => !p.passed)) process.exitCode = 1;

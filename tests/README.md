@@ -4,6 +4,8 @@
 
 2026-10-17：视频生成已替换为[离线确定性导出](../docs/context/visualizer-offline-export.md)。`visualizer-output.spec.ts` 默认验证四档选择和能力拒绝；显式设置 `VISUALIZER_OUTPUT_MATRIX=1` 执行每档首次/重复同步片与音乐，共两浏览器 24 份文件。`VISUALIZER_OUTPUT_RUN` 隔离输出；`VISUALIZER_MUSIC_FILE` 可指定本地短音乐片，不记录源文件元数据。旧 `test:v5:unit` 命令现运行播放检查点和离线导出单元，不能用于声称历史 V5 候选通过。
 
+媒体校验使用 `node tests/scripts/verify-visualizer-output.mjs <run-id> --all`；当前 `offline-frames-v3` 按真实音频 PTS 检查同步，并对离线视频检查精确帧数和每帧时间戳，离线文件不接受 `--allow-frame-drops`。`visualizer-offline-core.spec.ts` 验证 44.1/48kHz 分块编码、取消和存储失败，纳入日常 Visualizer 浏览器专项。长曲另显式设置 `VISUALIZER_EXPORT_LONG=1`，运行 `npx playwright test tests/e2e/visualizer-offline-long.spec.ts --project=chrome --project=edge --workers=1`，再以 `node tests/scripts/verify-visualizer-output.mjs offline-long --files-only` 核验；单文件模式不声称完整四档矩阵。十五分钟源按五秒块写入 OPFS，输出按 1MiB 切片保存到测试进程，不在测试端额外整体编码为 base64。
+
 几何/PV 预设由 `tests/e2e/visualizer-presets.spec.ts` 覆盖：元素库、静音/实际频谱、V3 往返与刷新、四段构图、seek 确定性、全屏、WebM、context recovery 和资源释放。默认使用版本化短 WAV；可显式设置 `VISUALIZER_MUSIC_FILE` 运行额外的本地音乐截图检查，文件仅留本地，不加入 fixture manifest。当前视频按 owner 的居中修改验证水平/垂直中心，保持原几何精度。
 
 原生输入另覆盖 Web Audio 左右异频 FFT、来源/可用特征切换、失败重试和暂停 seek 的画面一致性；`tests/visualizer/native-input.test.ts` 验证缓存上限、decoded revision/取消失效和严格 native binding。时间与资源边界见 [原生输入契约](../docs/context/visualizer-native-input.md)。
@@ -111,8 +113,8 @@ M3–M14 不建设 CI。下列命令当前均为本地门禁；正式证据要�
 | `npm run test:e10:integration` | E10 整批 autosave、刷新、JSON V1 round-trip 与模式外行为隔离 |
 | `npm run test:e2e:e10:chrome` / `test:e2e:e10:edge` | 真实 Chrome/Edge 的紧凑拍号、区间操作 pointer/键盘与深色离页 dialog |
 | `npm run test:e2e:e10` | 顺序执行真实 Chrome 与 Edge 的 E10 专项；环境阻断时只记 unverified |
-| `npm run test:visualizer` | 当前 Project V3 strict codec、原子组合/解析/渲染、会话、保存失败与异步失效，以及共享 host/录制专项 |
-| `npm run test:e2e:visualizer` | Chrome/Edge 当前元素工作区、布局、GPU 像素、全屏、实际录制、换歌/草稿保护、资源释放和保存取消；短 WebM 保留在本地 artifacts/visualizer-composition/ |
+| `npm run test:visualizer` | 当前 Project V3 strict codec、原子组合/解析/渲染、会话、保存失败与异步失效，以及共享 host/离线导出专项 |
+| `npm run test:e2e:visualizer` | Chrome/Edge 当前元素工作区、布局、GPU 像素、全屏、离线编码、换歌/草稿保护、资源释放和保存取消；短 WebM 保留在本地 artifacts/visualizer-composition/ |
 | `npm run test:e2e:visualizer-layout` | 顺序执行 Chrome/Edge 当前原子元素一屏工作台、双侧滚动隔离、compact drawer 与共享 scrollbar 专项 |
 | `npm run test:e2e:edge` | 使用真实 Edge 执行全部 M3–M11 E2E；缺失时明确 blocked |
 | `npm run build` | TypeScript project build 和 Vite production build |
@@ -174,7 +176,7 @@ M3–M14 不建设 CI。下列命令当前均为本地门禁；正式证据要�
 - `tests/harness/`：被正常 Vitest 配置排除的 deliberate failure 及其自检。
 - `tests/scripts/`：浏览器检测和 M3–M14、Editor、Visualizer run orchestration。
 - `tests/editor/`：Editor 工程格式、草稿、lease 和 session controller 的里程碑专项测试。
-- `tests/visualizer/`：Project V3 codec/引用、确定性元素合成、RendererHost、录制状态机与当前生命周期回归。
+- `tests/visualizer/`：Project V3 codec/引用、确定性元素合成、RendererHost、离线导出状态机与当前生命周期回归。
 
 M4 浏览器测试中的损坏 WAV 与 65 秒、48kHz、单声道计时 WAV 都写入 `test-results/`，不提交二进制。长时钟测试用同一 DOM 采样同时读取 `performance.now()` 与 AudioContext 驱动快照；三次 seek 使用进度条真实几何。
 
