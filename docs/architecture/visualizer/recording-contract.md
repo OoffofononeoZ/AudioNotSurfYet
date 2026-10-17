@@ -1,7 +1,7 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-09-02
+last_reviewed: 2026-10-17
 upstream_docs:
   - "docs/product/scope.md"
   - "docs/product/success-metrics.md"
@@ -48,6 +48,8 @@ Opus audio bitrate 固定为 192 kbps。MIME capability 顺序：
 只有 codec 可以按上述顺序回退。若所选分辨率/fps、Canvas capture、audio track 或 MediaRecorder 不能满足，preflight 明确失败；不得静默改为更低预设、无音频、不同 fps 或仅下载画面。
 
 预设可用性包含“能否持续满足媒体质量门禁”，不只检查 API 是否存在。重复真实采样证明当前 Chrome/Edge 的 optional preset 会间歇超过两个目标帧间隔，因此 V5 只把强制默认 720p30 作为可靠输出，720p60/1080p30/1080p60 均在资源获取前返回 typed `preset-unavailable`。该限制不得伪装成录制后的降级，浏览器能力证据变化时才可修订。
+
+2026-10-17 当前 Project V3 修订：owner 通过 [DEC-080](../../context/decision-registry.md#dec-080--录制档位按时间对齐先行开放--2026-10-17) 允许在时间对齐通过后先开放仍可能掉帧的档位。现保留 720p30、开放 1080p60，界面及文档标记首录掉帧；720p60/1080p30 因 Edge 的实际时间偏移继续禁用。原始 fps/间隔失败及 V5/V6 历史门槛不改写，尺寸/结构/音轨/时间对齐/解码仍须通过，不保证所有设备或长曲。具体测量和适用边界见[当前输出说明](../../context/visualizer-output.md)。
 
 ## Preflight
 
