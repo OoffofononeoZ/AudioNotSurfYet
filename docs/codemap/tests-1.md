@@ -78,6 +78,7 @@
 | [tests/e2e/visualizer-controls.spec.ts](../../tests/e2e/visualizer-controls.spec.ts) | [tests/support/file-picker.ts](../../tests/support/file-picker.ts) |
 | [tests/e2e/visualizer-layout-scroll.spec.ts](../../tests/e2e/visualizer-layout-scroll.spec.ts) | [tests/support/file-picker.ts](../../tests/support/file-picker.ts) |
 | [tests/e2e/visualizer-lifecycle.spec.ts](../../tests/e2e/visualizer-lifecycle.spec.ts) | [tests/support/file-picker.ts](../../tests/support/file-picker.ts)、[tests/support/v6-resource-probe.ts](../../tests/support/v6-resource-probe.ts) |
+| [tests/e2e/visualizer-offline-core.spec.ts](../../tests/e2e/visualizer-offline-core.spec.ts) | — |
 | [tests/e2e/visualizer-output.spec.ts](../../tests/e2e/visualizer-output.spec.ts) | [src/visualizer/compositionTypes.ts](../../src/visualizer/compositionTypes.ts)、[src/visualizer/elementRegistry.ts](../../src/visualizer/elementRegistry.ts)、[src/visualizer/recordingPresets.ts](../../src/visualizer/recordingPresets.ts)、[tests/support/file-picker.ts](../../tests/support/file-picker.ts)、[tests/support/visualizer-output-sync.ts](../../tests/support/visualizer-output-sync.ts) |
 | [tests/e2e/visualizer-pixels.spec.ts](../../tests/e2e/visualizer-pixels.spec.ts) | — |
 | [tests/e2e/visualizer-presets.spec.ts](../../tests/e2e/visualizer-presets.spec.ts) | [src/visualizer/compositionTypes.ts](../../src/visualizer/compositionTypes.ts)、[tests/support/file-picker.ts](../../tests/support/file-picker.ts)、[tests/support/v6-resource-probe.ts](../../tests/support/v6-resource-probe.ts) |
@@ -105,4 +106,3 @@
 | [tests/fixtures/fixture-manifest.test.ts](../../tests/fixtures/fixture-manifest.test.ts) | — |
 | [tests/fixtures/generate-fixtures.ts](../../tests/fixtures/generate-fixtures.ts) | [tests/support/audio-fixtures.ts](../../tests/support/audio-fixtures.ts) |
 | [tests/harness/intentional-failure.test.ts](../../tests/harness/intentional-failure.test.ts) | — |
-| [tests/harness/verify-failure-detection.mjs](../../tests/harness/verify-failure-detection.mjs) | — |
