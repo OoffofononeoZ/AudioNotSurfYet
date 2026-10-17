@@ -92,6 +92,7 @@ idle + drag start/end handle
 - 初始 metered segment 为 4/4、`bpm: null`、source unset；输入框显示 `bpm: 100` placeholder。只有一个 segment、仍为空且未被用户编辑时，才允许可靠 tempo estimate 填值。
 - 输入 20–300 进入/保持 metered；输入 `0 <= value < 20` 规范为 single-beat并隐藏 meter；无效输入不提交。切回 metered 需要显式选择 metered 并输入合法 BPM，不从旧 single-beat 数值猜测。
 - 修改 tempo 只重绘网格与改变后续 snap；现有 point/range 秒数不移动。
+- 2026-10-17：标记窗口默认四小节，允许 1/2/4/8 小节和全曲；缩放最小一小节，Editor 不再受固定 64× 限制。点和范围主体支持同分类内单项拖动及 Alt+左右微移，范围整体保持长度；预览不入草稿，确认时再做边界与冲突校验，取消保持原值。完整约定见[标记工作区](../../context/editor-marking.md)。
 - tempo boundary 不再覆盖波形 stage；紧凑 BPM 标记条是波形时间列的一部分，使用同一 viewport 和唯一水平滚动容器，不带独立左 rail、标签或模块边框。标记条固定 28px 并与波形零间隙相接。
 - 真实 boundary 的向上 caret 位于波形底边，1px 辅助线只向上伸入波形 12px，时间紧贴在 caret 下。相邻 boundary 之间以 11px 同基线显示无框 BPM/拍号控件；输入高 18px，焦点或错误时才显示绿色边线，来源移入 accessible name/title。
 - 区间可容纳完整控件时直接编辑；只能容纳单行摘要时显示摘要；摘要也放不下时不显示区间内容。判断使用同页自然宽度测量、两侧各 26px 安全区并禁止换行，zoom/resize 后重新计算；隐藏区间不能隐藏真实 boundary。

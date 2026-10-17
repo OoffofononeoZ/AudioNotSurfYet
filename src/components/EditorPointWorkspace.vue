@@ -150,7 +150,9 @@
                             :ref="(element) => setMarkerRef(event.id, element)"
                             type="button"
                             class="point-marker"
-                            :style="markerStyle(event.atSeconds)"
+                            :class="{ 'is-selected': movement.isSelected(event.id), 'is-move-invalid': movement.invalid(event.id) }"
+                            :style="markerStyle(movement.time(event.id,event.atSeconds))"
+                            :data-time-seconds="movement.time(event.id,event.atSeconds)"
                             :data-testid="`point-marker-${event.id}`"
                             :data-point-id="event.id"
                             :aria-label="`${innerClass.label} 标记，${formatTime(event.atSeconds)}；右键或删除键移除`"
@@ -158,6 +160,8 @@
                             @contextmenu.stop.prevent="removePoint(lane.id, innerClass.id, event.id, event.atSeconds)"
                             @focus="focusMarker(lane.id, innerClass.id, event.id, event.atSeconds)"
                             @keydown="onMarkerKeydown($event, lane.id, innerClass.id, event.id, event.atSeconds)"
+                            @pointerdown.stop="movement.begin($event,lane.id,event.id)" @pointermove.stop="movement.move" @pointerup.stop="movement.finish"
+                            @pointercancel.stop="movement.cancel" @lostpointercapture.stop="movement.cancel"
                         >
                             <span aria-hidden="true" />
                         </button>
@@ -167,12 +171,14 @@
                             :anchor="surfaceRefs.get(quickMenu.surfaceKey)" :x="quickMenu.x" :y="quickMenu.y" test-id="editor-point-menu"
                             @action="$event === 'center' ? menuCenter() : menuSeek($event === 'play')" @close="quickMenu = null"
                         />
+                        <span v-if="movement.hint(lane.id,innerClass.id)" class="marker-move-hint" role="status">{{ movement.hint(lane.id,innerClass.id) }}</span>
                     </div>
                 </template>
             </div>
         </article>
 
         <EditorRangeWorkspace
+            :active="active"
             :project="project"
             :playback="playback"
             :block-mode="blockMode"
@@ -235,6 +241,7 @@
 import EditorContextMenu from './EditorContextMenu.vue';
 import EditorLaneDeleteButton from './EditorLaneDeleteButton.vue';
 import { useEditorGrid } from '../editor/useEditorGrid';
+import { useMarkerMovement } from '../editor/useMarkerMovement';
 import { divisorColour, divisorHeight } from '../editor/beatSnap';
 import {
     computed,
@@ -507,6 +514,7 @@ const copySelectedBlock = () => {
 const applyProject = (project: EditorProjectV1, immediate = true) => {
     emit('updateProject', project, immediate);
 };
+const movement = useMarkerMovement(() => props.project, () => blockMode.value || props.active === false, applyProject, report);
 
 const addLane = () => {
     const project = createPointLane(props.project);
@@ -1305,6 +1313,7 @@ const focusMarker = (
     eventId: string,
     timeSeconds: number,
 ) => {
+    movement.select(laneId,eventId);
     focusedMarker = { laneId, innerClassId, eventId, timeSeconds };
     candidate.value = { laneId, innerClassId, timeSeconds };
 };
@@ -1335,6 +1344,7 @@ const onMarkerKeydown = (
     timeSeconds: number,
 ) => {
     if (event.defaultPrevented || blockMode.value) return;
+    if (movement.key(event,laneId,eventId)) return;
     if (event.key === 'Delete' || event.key === 'Backspace') {
         event.preventDefault();
         removePoint(laneId, innerClassId, eventId, timeSeconds);
@@ -1393,6 +1403,7 @@ const drawAllGrids = () => {
 };
 
 const clearInteraction = () => {
+    movement.clear();
     cancelPointer();
     focusedMarker = null;
     candidate.value = null;

@@ -16,3 +16,15 @@
 #editor-marking-panel input:focus-visible { border-color:var(--hairline-focus); }
 #editor-marking-panel .timing-toggle { font-size:12px; min-height:30px; padding:4px 8px; }
 #editor-marking-panel .tempo-segment[data-selected="true"] { background:rgba(134,237,181,.045); }
+#editor-marking-panel .timeline-heading { flex-wrap:wrap; align-items:center; }
+#editor-marking-panel .timeline-controls { min-width:0; }
+#editor-marking-panel .timeline-controls>.app-select { --app-control-width:100px; font-size:12px; }
+#editor-marking-panel .timeline-controls>button:not(.editor-icon-button) { font-size:12px; }
+#editor-marking-panel .point-marker { cursor:ew-resize; touch-action:none; }
+#editor-marking-panel .point-marker::after { display:none; }
+#editor-marking-panel .point-marker>span { width:10px; height:16px; border:1px solid var(--accent-soft); border-radius:2px; background:#9cceb0; box-shadow:none; transform:translate(-50%,-50%); }
+#editor-marking-panel .point-marker:is(:hover,:focus-visible,.is-selected)>span { background:var(--accent-soft); box-shadow:0 0 0 3px #86edb526; }
+#editor-marking-panel .range-marker { top:14px; bottom:auto; height:16px; border-radius:3px; box-shadow:none; cursor:ew-resize; touch-action:none; }
+#editor-marking-panel .range-marker:is(:hover,:focus-visible,.is-selected) { background:var(--marker-bloom); box-shadow:0 0 0 2px #86edb526; }
+#editor-marking-panel .is-move-invalid { outline:2px solid var(--error); outline-offset:1px; }
+.marker-move-hint { position:absolute; z-index:10; top:1px; right:5px; max-width:calc(100% - 10px); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; pointer-events:none; font-size:10px; padding:1px 4px; border-radius:3px; color:var(--ink); background:var(--surface-2); }
