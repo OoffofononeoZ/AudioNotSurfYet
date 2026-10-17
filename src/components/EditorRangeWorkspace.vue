@@ -219,6 +219,8 @@
 <script setup lang="ts">
 import EditorContextMenu from './EditorContextMenu.vue';
 import EditorLaneDeleteButton from './EditorLaneDeleteButton.vue';
+import { useEditorGrid } from '../editor/useEditorGrid';
+import { divisorColour, divisorHeight } from '../editor/beatSnap';
 import {
     computed,
     nextTick,
@@ -236,8 +238,6 @@ import {
     addRangeInnerClass,
     createRangeEvent,
     deleteRangeEvent,
-    nextRangeCell,
-    rangeCellAtTime,
     rangeInnerClassEventCount,
     rangeLaneInnerClasses,
     removeRangeInnerClass,
@@ -246,13 +246,12 @@ import {
     updateRangeEvent,
     visibleRangeEvents,
 } from '../editor/rangeAnnotations';
-import { movePointCell, type PointCell } from '../editor/pointAnnotations';
+import type { PointCell } from '../editor/pointAnnotations';
 import {
     markerBlockEventCount,
     selectMarkerBlockByMeasures,
     type MarkerBlockSelection,
 } from '../editor/markerBlockOperations';
-import { generateTempoGrid } from '../editor/tempoMap';
 import {
     centerEditorViewport,
     editorTimeToX,
@@ -285,6 +284,7 @@ const emit = defineEmits<{
 }>();
 
 const audioSession = useAudioSessionService();
+const { setting: beatSnap, rangeCellAtTime, nextRangeCell, movePointCell, generateTempoGrid } = useEditorGrid();
 const rangeLanes = computed(() => props.project.lanes.filter(
     (lane): lane is RangeLaneV1 => lane.eventKind === 'range',
 ));
@@ -1333,17 +1333,18 @@ const drawGrid = (canvas: HTMLCanvasElement) => {
         props.project.tempoMap,
         props.project.track.durationSeconds,
         viewport.value,
+        width,
     )) {
         const x = editorTimeToX(line.timeSeconds, viewport.value, width);
         context.beginPath();
-        context.moveTo(Math.round(x) + 0.5, 0);
+        context.moveTo(Math.round(x) + 0.5, line.kind === 'measure' ? 0 : height * (1 - divisorHeight(line.divisor)));
         context.lineTo(Math.round(x) + 0.5, height);
-        context.strokeStyle = line.kind === 'measure'
-            ? 'rgba(255,255,255,.78)'
-            : 'rgba(255,255,255,.22)';
+        context.strokeStyle = divisorColour(line.divisor);
+        context.globalAlpha = line.kind === 'measure' ? .85 : .45;
         context.lineWidth = 1;
         context.stroke();
     }
+    context.globalAlpha = 1;
 };
 const drawAllGrids = () => {
     for (const [key, canvas] of gridCanvasRefs) {
@@ -1360,6 +1361,10 @@ const clearInteraction = () => {
     removalDialog.value = null;
 };
 
+watch(
+    beatSnap,
+    () => { clearInteraction(); void nextTick(drawAllGrids); },
+);
 watch(
     () => [props.project.tempoMap, props.project.workspace.viewport, rangeLanes.value.length],
     () => void nextTick(drawAllGrids),

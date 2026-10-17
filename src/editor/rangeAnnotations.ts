@@ -1,4 +1,5 @@
 import type { PersistedTimelineViewport } from '../types/session';
+import { DEFAULT_BEAT_SNAP, type EditorBeatSnapSetting } from './beatSnap';
 import { normalizeEditorSeconds } from './projectCodec';
 import {
     movePointCell,
@@ -394,8 +395,9 @@ export const nextRangeCell = (
     startSeconds: number,
     project: Pick<EditorProjectV1, 'tempoMap' | 'track' | 'workspace'>,
     width: number,
+    setting: Readonly<EditorBeatSnapSetting> = DEFAULT_BEAT_SNAP,
 ): PointCell | null => {
-    const current = pointCellAtTime(startSeconds, project, width);
+    const current = pointCellAtTime(startSeconds, project, width, setting);
     if (!current) return null;
     if (current.subdivision === 'single-beat') {
         return {
@@ -403,7 +405,7 @@ export const nextRangeCell = (
             timeSeconds: current.endSeconds,
         };
     }
-    return movePointCell(startSeconds, 1, project, width);
+    return movePointCell(startSeconds, 1, project, width, setting);
 };
 
 export const rangeLaneInnerClasses = (

@@ -1,4 +1,5 @@
 import { validateEditorProjectV1 } from './projectCodec';
+import { validateBeatSnap, type EditorBeatSnapSetting } from './beatSnap';
 import type {
     EditorDraftEnvelopeV1,
     EditorProjectV1,
@@ -151,6 +152,21 @@ export class EditorDraftRepository implements EditorDraftRepositoryPort {
         ) as StoredLeaveWarningPreferenceRecord | undefined;
         await transactionDone(transaction);
         return record?.value ?? true;
+    }
+
+    async getBeatSnap(contentHash: string): Promise<EditorBeatSnapSetting | null> {
+        const database = await this.open();
+        const transaction = database.transaction(STORES.preferences, 'readonly');
+        const record = await requestResult(transaction.objectStore(STORES.preferences).get(`beat-snap:${contentHash}`)) as { value: unknown } | undefined;
+        await transactionDone(transaction);
+        return record ? validateBeatSnap(record.value) : null;
+    }
+
+    async setBeatSnap(contentHash: string, setting: EditorBeatSnapSetting): Promise<void> {
+        const database = await this.open();
+        const transaction = database.transaction(STORES.preferences, 'readwrite');
+        transaction.objectStore(STORES.preferences).put({ key: `beat-snap:${contentHash}`, value: validateBeatSnap(setting) });
+        await transactionDone(transaction);
     }
 
     async setLeaveWarningEnabled(enabled: boolean): Promise<void> {

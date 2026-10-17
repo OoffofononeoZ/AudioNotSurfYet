@@ -234,6 +234,8 @@
 <script setup lang="ts">
 import EditorContextMenu from './EditorContextMenu.vue';
 import EditorLaneDeleteButton from './EditorLaneDeleteButton.vue';
+import { useEditorGrid } from '../editor/useEditorGrid';
+import { divisorColour, divisorHeight } from '../editor/beatSnap';
 import {
     computed,
     nextTick,
@@ -260,8 +262,6 @@ import {
     createPointLane,
     deletePointEvent,
     findPointAt,
-    movePointCell,
-    pointCellAtTime,
     pointInnerClassEventCount,
     pointLaneInnerClasses,
     removePointInnerClass,
@@ -280,7 +280,6 @@ import {
     type MarkerBlockSelection,
 } from '../editor/markerBlockOperations';
 import { EDITOR_CONTEXT_PAN_THRESHOLD_PX } from '../editor/editorConfig';
-import { generateTempoGrid } from '../editor/tempoMap';
 import {
     centerEditorViewport,
     editorTimeToX,
@@ -315,6 +314,7 @@ const emit = defineEmits<{
 }>();
 
 const audioSession = useAudioSessionService();
+const { setting: beatSnap, pointCellAtTime, movePointCell, generateTempoGrid } = useEditorGrid();
 const workspace = ref<HTMLElement | null>(null);
 const dialogElement = ref<HTMLElement | null>(null);
 const pointLanes = computed(() => props.project.lanes.filter(
@@ -1372,17 +1372,18 @@ const drawGrid = (canvas: HTMLCanvasElement) => {
         props.project.tempoMap,
         props.project.track.durationSeconds,
         viewport.value,
+        width,
     )) {
         const x = editorTimeToX(line.timeSeconds, viewport.value, width);
         context.beginPath();
-        context.moveTo(Math.round(x) + 0.5, 0);
+        context.moveTo(Math.round(x) + 0.5, line.kind === 'measure' ? 0 : height * (1 - divisorHeight(line.divisor)));
         context.lineTo(Math.round(x) + 0.5, height);
-        context.strokeStyle = line.kind === 'measure'
-            ? 'rgba(255,255,255,.78)'
-            : 'rgba(255,255,255,.22)';
+        context.strokeStyle = divisorColour(line.divisor);
+        context.globalAlpha = line.kind === 'measure' ? .85 : .45;
         context.lineWidth = 1;
         context.stroke();
     }
+    context.globalAlpha = 1;
 };
 
 const drawAllGrids = () => {
@@ -1399,6 +1400,10 @@ const clearInteraction = () => {
     removalDialog.value = null;
 };
 
+watch(
+    beatSnap,
+    () => { clearInteraction(); void nextTick(drawAllGrids); },
+);
 watch(
     () => [props.project.tempoMap, props.project.workspace.viewport, pointLanes.value.length],
     () => void nextTick(drawAllGrids),

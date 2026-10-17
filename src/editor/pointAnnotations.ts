@@ -4,8 +4,8 @@ import {
     beatSecondsFor,
     segmentAtTime,
     segmentEndSeconds,
-    selectVisibleSubdivision,
 } from './tempoMap';
+import { DEFAULT_BEAT_SNAP, type EditorBeatSnapSetting } from './beatSnap';
 import type {
     EditorProjectV1,
     InnerClassV1,
@@ -50,7 +50,7 @@ export interface PointCell {
     startSeconds: number;
     endSeconds: number;
     stepSeconds: number;
-    subdivision: 1 | 2 | 4 | 8 | 16 | 'single-beat';
+    subdivision: number | 'single-beat';
     segmentId: string;
 }
 
@@ -306,6 +306,7 @@ export const pointCellAtTime = (
     rawSeconds: number,
     project: Pick<EditorProjectV1, 'tempoMap' | 'track' | 'workspace'>,
     width: number,
+    setting: Readonly<EditorBeatSnapSetting> = DEFAULT_BEAT_SNAP,
 ): PointCell | null => {
     const duration = project.track.durationSeconds;
     const clamped = Math.max(0, Math.min(duration, rawSeconds));
@@ -324,11 +325,7 @@ export const pointCellAtTime = (
     }
     if (segment.bpm === null || width <= 0) return null;
     const beatSeconds = beatSecondsFor(segment.bpm);
-    const subdivision = selectVisibleSubdivision(
-        beatSeconds,
-        project.workspace.viewport,
-        width,
-    );
+    const subdivision = setting.divisor;
     const step = beatSeconds / subdivision;
     const snapped = normalizeEditorSeconds(Math.max(
         segment.startSeconds,
@@ -353,14 +350,16 @@ export const movePointCell = (
     direction: -1 | 1,
     project: Pick<EditorProjectV1, 'tempoMap' | 'track' | 'workspace'>,
     width: number,
+    setting: Readonly<EditorBeatSnapSetting> = DEFAULT_BEAT_SNAP,
 ): PointCell | null => {
-    const current = pointCellAtTime(currentSeconds, project, width);
+    const current = pointCellAtTime(currentSeconds, project, width, setting);
     if (!current) return null;
     const epsilon = direction * 1e-6;
     return pointCellAtTime(
         current.timeSeconds + direction * current.stepSeconds + epsilon,
         project,
         width,
+        setting,
     );
 };
 

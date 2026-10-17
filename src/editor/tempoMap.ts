@@ -5,18 +5,20 @@ import {
     EDITOR_MIN_SUBDIVISION_WIDTH_PX,
 } from './editorConfig';
 import { normalizeEditorSeconds } from './projectCodec';
+import { DEFAULT_BEAT_SNAP, divisorForIndex, type EditorBeatSnapSetting } from './beatSnap';
 import type {
     MeterDenominator,
     MeteredTempoSegmentV1,
     TempoSegmentV1,
 } from './types';
 
-export type EditorGridLineKind = 'measure' | 'beat';
+export type EditorGridLineKind = 'measure' | 'beat' | 'subdivision';
 
 export interface EditorGridLine {
     timeSeconds: number;
     kind: EditorGridLineKind;
     segmentId: string;
+    divisor: number;
 }
 
 export const cloneTempoSegment = (
@@ -65,9 +67,10 @@ export const selectVisibleSubdivision = (
 export const snapEditorTime = (
     rawSeconds: number,
     tempoMap: readonly TempoSegmentV1[],
-    viewport: PersistedTimelineViewport,
-    width: number,
+    _viewport: PersistedTimelineViewport,
+    _width: number,
     durationSeconds: number,
+    setting: Readonly<EditorBeatSnapSetting> = DEFAULT_BEAT_SNAP,
 ): number => {
     const clamped = Math.max(0, Math.min(durationSeconds, rawSeconds));
     const segment = segmentAtTime(tempoMap, clamped);
@@ -75,12 +78,14 @@ export const snapEditorTime = (
         return normalizeEditorSeconds(clamped);
     }
     const beatSeconds = beatSecondsFor(segment.bpm);
-    const subdivision = selectVisibleSubdivision(beatSeconds, viewport, width);
+    const subdivision = setting.divisor;
     const step = beatSeconds / subdivision;
+    const index = tempoMap.findIndex(entry => entry.id === segment.id);
+    const end = segmentEndSeconds(tempoMap, index, durationSeconds);
     return normalizeEditorSeconds(Math.max(
         segment.startSeconds,
         Math.min(
-            durationSeconds,
+            end,
             segment.startSeconds
                 + Math.round((clamped - segment.startSeconds) / step) * step,
         ),
@@ -91,30 +96,38 @@ export const generateTempoGrid = (
     tempoMap: readonly TempoSegmentV1[],
     durationSeconds: number,
     viewport: PersistedTimelineViewport,
+    setting: Readonly<EditorBeatSnapSetting> = DEFAULT_BEAT_SNAP,
+    width = 1_000,
 ): EditorGridLine[] => {
     const lines: EditorGridLine[] = [];
     tempoMap.forEach((segment, segmentIndex) => {
         if (segment.mode !== 'metered' || segment.bpm === null) return;
         const beatSeconds = beatSecondsFor(segment.bpm);
         const end = segmentEndSeconds(tempoMap, segmentIndex, durationSeconds);
+        // Draw only a legible subset; the selected editing divisor is never changed.
+        const pixelsPerBeat = width * beatSeconds / Math.max(1e-9, viewport.endSeconds - viewport.startSeconds);
+        const displayDivisor = Array.from({ length: setting.divisor }, (_, i) => setting.divisor - i)
+            .find(value => setting.divisor % value === 0 && pixelsPerBeat / value >= 4) ?? 1;
+        const step = beatSeconds / displayDivisor;
         const firstBeat = Math.max(
             0,
-            Math.ceil((viewport.startSeconds - segment.startSeconds) / beatSeconds),
+            Math.ceil((viewport.startSeconds - segment.startSeconds) / step),
         );
         const lastBeat = Math.floor(
-            (Math.min(viewport.endSeconds, end) - segment.startSeconds) / beatSeconds,
+            (Math.min(viewport.endSeconds, end) - segment.startSeconds) / step,
         );
         for (let beatIndex = firstBeat; beatIndex <= lastBeat; beatIndex += 1) {
             const timeSeconds = normalizeEditorSeconds(
-                segment.startSeconds + beatIndex * beatSeconds,
+                segment.startSeconds + beatIndex * step,
             );
-            if (timeSeconds <= segment.startSeconds && segmentIndex > 0) continue;
+            if (timeSeconds >= end && segmentIndex < tempoMap.length - 1) continue;
             lines.push({
                 timeSeconds,
-                kind: beatIndex % segment.meter.numerator === 0
+                kind: beatIndex % (segment.meter.numerator * displayDivisor) === 0
                     ? 'measure'
-                    : 'beat',
+                    : beatIndex % displayDivisor === 0 ? 'beat' : 'subdivision',
                 segmentId: segment.id,
+                divisor: divisorForIndex(beatIndex, displayDivisor),
             });
         }
     });

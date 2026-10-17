@@ -22,6 +22,7 @@ declare module 'vue' {
     AppSidebar: typeof import('./src/components/AppSidebar.vue')['default']
     DotGridBg: typeof import('./src/components/DotGridBg.vue')['default']
     EditorAnalysisOverlay: typeof import('./src/components/EditorAnalysisOverlay.vue')['default']
+    EditorBeatDivisorControl: typeof import('./src/components/EditorBeatDivisorControl.vue')['default']
     EditorCandidateTimeline: typeof import('./src/components/EditorCandidateTimeline.vue')['default']
     EditorContextMenu: typeof import('./src/components/EditorContextMenu.vue')['default']
     EditorIcon: typeof import('./src/components/EditorIcon.vue')['default']
