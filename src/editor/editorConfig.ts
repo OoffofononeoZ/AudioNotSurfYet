@@ -3,6 +3,5 @@ export const EDITOR_MAX_BPM = 300;
 export const EDITOR_MIN_SUBDIVISION_WIDTH_PX = 12;
 export const EDITOR_CONTEXT_PAN_THRESHOLD_PX = 4;
 export const EDITOR_ZOOM_MIN = 1;
-export const EDITOR_ZOOM_MAX = 64;
 export const EDITOR_BUTTON_PAN_RATIO = 0.25;
 export const EDITOR_AUTOSAVE_DEBOUNCE_MS = 250;

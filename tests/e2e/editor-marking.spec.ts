@@ -2,10 +2,10 @@ import { expect, test, type Page } from '@playwright/test';
 import path from 'node:path';
 import { chooseFiles, installFilePickerStub } from '../support/file-picker';
 
-async function openEditor(page: Page) {
+async function openEditor(page: Page, fixture = 'tests/fixtures/audio/format-master.wav') {
     await installFilePickerStub(page);
     await page.goto('/');
-    await chooseFiles(page, [path.resolve('tests/fixtures/audio/format-master.wav')]);
+    await chooseFiles(page, [path.resolve(fixture)]);
     await expect(page.locator('#music-bar-container')).toHaveAttribute('data-playback-state', 'playing');
     await page.getByTestId('header-editor-link').click();
     await expect(page.getByTestId('editor-ready')).toBeVisible();
@@ -119,4 +119,63 @@ test('collapsed timing workspace selects intervals, edits BPM and applies tap on
     await page.reload(); await expect(page.getByTestId('editor-ready')).toBeVisible();
     await expect(page.getByTestId('editor-timing-panel')).toHaveCount(0);
     expect(errors).toEqual([]);
+});
+
+test('local viewport defaults to four bars, stops at one bar and restores saved local windows', async ({ page }) => {
+    await openEditor(page,'artifacts/fixtures/editor-e2-tempo-100-v1.wav');
+    const state = page.getByTestId('editor-viewport-state');
+    await expect(state).toContainText('0:08.000');
+    await page.getByTestId('editor-zoom-in').click();
+    await page.getByTestId('editor-zoom-in').click();
+    await expect(page.getByTestId('editor-zoom-in')).toBeDisabled();
+    const local = await state.textContent();
+    await page.reload(); await expect(page.getByTestId('editor-ready')).toBeVisible();
+    await expect(state).toHaveText(local!);
+    await page.getByTestId('editor-reset-viewport').click();
+    await expect(state).toContainText('0:08.000');
+    await page.getByLabel('标记显示范围', { exact:true }).selectOption('all');
+    await expect(state).toContainText('0:12.000');
+    await page.getByTestId('editor-reset-viewport').click();
+    await expect(state).toContainText('0:08.000');
+});
+
+test('single point movement snaps, rejects duplicates, cancels previews and persists a pointer drag', async ({ page }) => {
+    const errors:string[] = []; page.on('pageerror',error => errors.push(error.message));
+    await openEditor(page); await page.getByTestId('add-point-lane').click();
+    const surface = page.locator('[data-testid^="marker-surface-"]').first();
+    await surface.focus(); await page.keyboard.press('Home'); await page.keyboard.press('ArrowRight'); await page.keyboard.press('Enter');
+    const first = page.locator('[data-testid^="point-marker-"]').first();
+    await first.focus(); await page.keyboard.press('Alt+ArrowRight');
+    await expect(first).toHaveAttribute('data-time-seconds','0.25');
+    await surface.focus(); await page.keyboard.press('Home'); for (let i=0;i<3;i++) await page.keyboard.press('ArrowRight'); await page.keyboard.press('Enter');
+    await first.focus(); await page.keyboard.press('Alt+ArrowRight');
+    await expect(first).toHaveAttribute('data-time-seconds','0.25');
+    await expect(page.getByTestId('point-workspace-status')).toContainText('目标已有');
+    const bounds = await first.boundingBox(), row = await surface.boundingBox();
+    const x = bounds!.x + bounds!.width/2, y = bounds!.y + bounds!.height/2;
+    await page.mouse.move(x,y); await page.mouse.down(); await page.mouse.move(x + row!.width/8,y,{steps:4});
+    await expect(surface.locator('.marker-move-hint')).toBeVisible();
+    await page.keyboard.press('Escape'); await page.mouse.up();
+    await expect(first).toHaveAttribute('data-time-seconds','0.25');
+    await page.mouse.move(x,y); await page.mouse.down(); await page.mouse.move(x + row!.width/8,y,{steps:4}); await page.mouse.up();
+    await expect(page.locator('[data-testid^="point-marker-"][data-time-seconds="0.75"]')).toHaveCount(1);
+    await page.reload(); await expect(page.getByTestId('editor-ready')).toBeVisible();
+    await expect(page.locator('[data-testid^="point-marker-"][data-time-seconds="0.75"]')).toHaveCount(1);
+    expect(errors).toEqual([]);
+});
+
+test('range body movement preserves length while its endpoint controls remain independent', async ({ page }) => {
+    await openEditor(page); await page.getByTestId('add-range-lane').click();
+    const surface = page.locator('[data-testid^="range-surface-"]').first();
+    await surface.focus(); await page.keyboard.press('Home'); await page.keyboard.press('ArrowRight'); await page.keyboard.press('Enter');
+    await page.keyboard.press('ArrowRight'); await page.keyboard.press('ArrowRight'); await page.keyboard.press('Enter');
+    const marker = page.locator('[data-testid^="range-marker-"]').first();
+    await marker.focus(); await page.keyboard.press('Alt+ArrowRight');
+    await expect(marker).toHaveAttribute('data-start-seconds','0.25'); await expect(marker).toHaveAttribute('data-end-seconds','0.5');
+    const bounds = await marker.boundingBox(), row = await surface.boundingBox();
+    const x = bounds!.x + bounds!.width/2, y = bounds!.y + 3;
+    await page.mouse.move(x,y); await page.mouse.down(); await page.mouse.move(x + row!.width/16,y,{steps:4}); await page.mouse.up();
+    await expect(marker).toHaveAttribute('data-start-seconds','0.5'); await expect(marker).toHaveAttribute('data-end-seconds','0.75');
+    await page.locator('[data-testid^="range-end-handle-"]').first().focus(); await page.keyboard.press('ArrowRight');
+    await expect(marker).toHaveAttribute('data-start-seconds','0.5'); await expect(marker).toHaveAttribute('data-end-seconds','0.875');
 });

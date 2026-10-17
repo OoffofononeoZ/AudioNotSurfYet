@@ -11,8 +11,10 @@
                 <button type="button" class="editor-icon-button" aria-label="向前平移 25%" title="向前平移 25%" data-testid="editor-pan-back" @click="panBy(-0.25)"><EditorIcon name="left" /></button>
                 <button type="button" class="editor-icon-button" aria-label="缩小时间轴" title="缩小时间轴" data-testid="editor-zoom-out" :disabled="viewport.zoom <= 1" @click="zoomBy(0.5)"><EditorIcon name="zoomOut" /></button>
                 <button type="button" class="editor-icon-button" aria-label="重置时间轴" title="重置时间轴" data-testid="editor-reset-viewport" @click="resetViewport"><EditorIcon name="reset" /></button>
-                <button type="button" class="editor-icon-button" aria-label="放大时间轴" title="放大时间轴" data-testid="editor-zoom-in" :disabled="viewport.zoom >= 64" @click="zoomBy(2)"><EditorIcon name="zoomIn" /></button>
+                <button type="button" class="editor-icon-button" aria-label="放大时间轴" title="放大时间轴" data-testid="editor-zoom-in" :disabled="viewport.endSeconds - viewport.startSeconds <= minimumWindow + 1e-6" @click="zoomBy(2)"><EditorIcon name="zoomIn" /></button>
                 <button type="button" class="editor-icon-button" aria-label="向后平移 25%" title="向后平移 25%" data-testid="editor-pan-forward" @click="panBy(0.25)"><EditorIcon name="right" /></button>
+                <AppSelect :model-value="windowSelection" label="标记显示范围" :options="windowOptions" @update:model-value="selectWindow" />
+                <button type="button" data-testid="editor-reveal-playback" @click="revealPlayback">查看播放位置</button>
             </div>
         </header>
 
@@ -243,6 +245,8 @@ import EditorIcon from './EditorIcon.vue';
 import EditorContextMenu from './EditorContextMenu.vue';
 import EditorBeatDivisorControl from './EditorBeatDivisorControl.vue';
 import EditorTimingPanel from './EditorTimingPanel.vue';
+import AppSelect from './controls/AppSelect.vue';
+import { useEditorViewport } from '../editor/useEditorViewport';
 import { useEditorGrid } from '../editor/useEditorGrid';
 import { divisorColour, divisorHeight } from '../editor/beatSnap';
 import type { PersistedTimelineViewport } from '../types/session';
@@ -265,10 +269,9 @@ import {
     editorWaveformVerticalGeometry,
     editorTimeToX,
     editorXToTime,
-    normalizeEditorViewport,
+    editorMeasureSeconds,
     panEditorViewportByPixels,
     panEditorViewportByRatio,
-    resetEditorViewport,
     zoomEditorViewportAtX,
 } from '../editor/timeline';
 import type { EditorProjectV1, TempoSegmentV1 } from '../editor/types';
@@ -308,10 +311,18 @@ const meterDenominators = [1, 2, 4, 8, 16, 32] as const;
 const createId = () => crypto.randomUUID();
 let resizeObserver: ResizeObserver | null = null;
 
-const viewport = computed(() => normalizeEditorViewport(
-    props.project.workspace.viewport,
-    props.project.track.durationSeconds,
-));
+const viewportController = useEditorViewport(() => props.project, () => props.playback.currentTimeSeconds, (project, immediate) => emit('updateProject',project,immediate));
+const { viewport } = viewportController;
+const minimumWindow = computed(() => Math.min(props.project.track.durationSeconds, editorMeasureSeconds(props.project.tempoMap, (viewport.value.startSeconds + viewport.value.endSeconds) / 2) ?? 1));
+const windowSelection = computed(() => {
+    if (viewport.value.zoom <= 1 + 1e-6) return 'all';
+    const measure = editorMeasureSeconds(props.project.tempoMap, viewport.value.startSeconds);
+    const count = measure ? (viewport.value.endSeconds - viewport.value.startSeconds) / measure : 0;
+    return [1,2,4,8].find(value => Math.abs(value - count) < 1e-5)?.toString() ?? 'custom';
+});
+const windowOptions = computed(() => [...[1,2,4,8].map(value => ({ value: String(value), label: `${value} 小节`, disabled: editorMeasureSeconds(props.project.tempoMap, props.playback.currentTimeSeconds) === null })), { value:'all', label:'全曲', disabled:false }, { value:'custom', label:'当前窗口', disabled:true }]);
+const selectWindow = (value: string | number) => { if (value !== 'custom') viewportController.measures(value === 'all' ? 'all' : Number(value)); };
+const revealPlayback = () => updateViewport(centerEditorViewport(viewport.value, props.project.track.durationSeconds, props.playback.currentTimeSeconds), true);
 const durationSeconds = computed(() => props.project.track.durationSeconds);
 const internalSegments = computed(() => props.project.tempoMap.slice(1).filter(
     (segment) => segment.startSeconds >= viewport.value.startSeconds
@@ -366,10 +377,7 @@ const formatTime = (seconds: number): string => {
 };
 
 const updateViewport = (next: PersistedTimelineViewport, immediate: boolean) => {
-    emit('updateProject', {
-        ...props.project,
-        workspace: { ...props.project.workspace, viewport: next },
-    }, immediate);
+    viewportController.update(next, immediate);
 };
 
 const zoomBy = (factor: number, anchorX = size.width / 2, immediate = true) => {
@@ -379,6 +387,7 @@ const zoomBy = (factor: number, anchorX = size.width / 2, immediate = true) => {
         viewport.value.zoom * factor,
         anchorX,
         size.width,
+        editorMeasureSeconds(props.project.tempoMap, editorXToTime(anchorX, viewport.value, size.width)) ?? 1,
     ), immediate);
 };
 const panBy = (ratio: number) => updateViewport(panEditorViewportByRatio(
@@ -386,7 +395,7 @@ const panBy = (ratio: number) => updateViewport(panEditorViewportByRatio(
     durationSeconds.value,
     ratio,
 ), true);
-const resetViewport = () => updateViewport(resetEditorViewport(durationSeconds.value), true);
+const resetViewport = () => viewportController.measures(4);
 
 const canvasPoint = (event: PointerEvent | WheelEvent): { x: number; y: number } => {
     const bounds = stage.value?.getBoundingClientRect();

@@ -116,15 +116,18 @@
                                 :ref="(element) => setRangeRef(range.id, element)"
                                 type="button"
                                 class="range-marker"
-                                :class="{ 'is-handle-preview': isHandlePreview(range) }"
+                                :class="{ 'is-handle-preview': isHandlePreview(range), 'is-selected': movement.isSelected(range.id), 'is-move-invalid': movement.invalid(range.id) }"
                                 :style="rangeStyle(range)"
                                 :data-testid="`range-marker-${range.id}`"
                                 :data-range-id="range.id"
+                                :data-start-seconds="previewRange(range).startSeconds" :data-end-seconds="previewRange(range).endSeconds"
                                 :aria-label="`${innerClass.label} 范围，${formatTime(range.startSeconds)} 至 ${formatTime(range.endSeconds)}；右键或删除键移除`"
                                 @click.stop="focusRange(lane.id, innerClass.id, range)"
                                 @contextmenu.stop.prevent="removeRange(lane.id, innerClass.id, range)"
                                 @focus="focusRange(lane.id, innerClass.id, range)"
                                 @keydown="onRangeKeydown($event, lane.id, innerClass.id, range)"
+                                @pointerdown.stop="movement.begin($event,lane.id,range.id)" @pointermove.stop="movement.move" @pointerup.stop="movement.finish"
+                                @pointercancel.stop="movement.cancel" @lostpointercapture.stop="movement.cancel"
                             >
                                 <span aria-hidden="true">{{ formatDuration(range) }}</span>
                             </button>
@@ -169,6 +172,7 @@
                             :anchor="surfaceRefs.get(quickMenu.surfaceKey)" :x="quickMenu.x" :y="quickMenu.y" test-id="editor-range-menu"
                             @action="$event === 'center' ? menuCenter() : menuSeek($event === 'play')" @close="quickMenu = null"
                         />
+                        <span v-if="movement.hint(lane.id,innerClass.id)" class="marker-move-hint" role="status">{{ movement.hint(lane.id,innerClass.id) }}</span>
                     </div>
                 </template>
             </div>
@@ -220,6 +224,7 @@
 import EditorContextMenu from './EditorContextMenu.vue';
 import EditorLaneDeleteButton from './EditorLaneDeleteButton.vue';
 import { useEditorGrid } from '../editor/useEditorGrid';
+import { useMarkerMovement } from '../editor/useMarkerMovement';
 import { divisorColour, divisorHeight } from '../editor/beatSnap';
 import {
     computed,
@@ -269,6 +274,7 @@ import type { PlaybackSnapshot } from '../types/audio';
 import type { PersistedTimelineViewport } from '../types/session';
 
 const props = defineProps<{
+    active?: boolean;
     project: EditorProjectV1;
     playback: PlaybackSnapshot;
     blockMode: boolean;
@@ -309,6 +315,7 @@ const applyProject = (project: EditorProjectV1, immediate = true) => {
     emit('updateProject', project, immediate);
 };
 const report = (message: string) => emit('status', message);
+const movement = useMarkerMovement(() => props.project, () => props.blockMode || props.active === false, applyProject, report);
 const formatTime = (seconds: number) => {
     const minutes = Math.floor(Math.max(0, seconds) / 60);
     return `${minutes}:${(Math.max(0, seconds) % 60).toFixed(3).padStart(6, '0')}`;
@@ -622,6 +629,8 @@ interface HandleDragState {
 }
 const handleDrag = ref<HandleDragState | null>(null);
 const previewRange = (range: RangeEventV1): RangeEventV1 => {
+    const movedStart = movement.time(range.id,range.startSeconds);
+    if (movedStart !== range.startSeconds) return { ...range, startSeconds:movedStart, endSeconds:movedStart + range.endSeconds - range.startSeconds };
     const active = handleDrag.value;
     if (!active || active.range.id !== range.id || !active.candidateCell) return range;
     return {
@@ -1119,6 +1128,7 @@ const focusRange = (
     range: RangeEventV1,
 ) => {
     if (props.blockMode) return;
+    movement.select(laneId,range.id);
     focusedRange = {
         laneId,
         innerClassId,
@@ -1152,6 +1162,7 @@ const onRangeKeydown = (
     range: RangeEventV1,
 ) => {
     if (event.defaultPrevented || props.blockMode) return;
+    if (movement.key(event,laneId,range.id)) return;
     if (event.key === 'Delete' || event.key === 'Backspace') {
         event.preventDefault();
         removeRange(laneId, innerClassId, range);
@@ -1352,6 +1363,7 @@ const drawAllGrids = () => {
     }
 };
 const clearInteraction = () => {
+    movement.clear();
     cancelSurfacePointer();
     focusedRange = null;
     cancelHandleDrag();
