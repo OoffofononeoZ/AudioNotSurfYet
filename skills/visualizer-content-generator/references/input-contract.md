@@ -8,13 +8,14 @@
 
 | 字段 | 含义 |
 | --- | --- |
-| `schemaVersion` | 固定为 `1`，仅是 skill 输入版本，不是 Project V3 的 schemaVersion |
+| `schemaVersion` | 固定为 `1`，仅是 skill 输入版本，不是 Project V4 或资源包的版本 |
 | `kind` | `element` 或 `preset` |
 | `intent` | 必填非空文本，描述这次新增内容的目标 |
 | `elements` | 非空元素意图数组；element 模式必须恰好一个 `new` 元素，preset 可复用或新增多个元素 |
 | `requestedName` | 可选显示名 |
 | `referenceImages` | 可选 `{source, role}` 数组，role 为 `inspiration` / `priority-match` |
 | `preferences` | 可选非空文本字段：palette、background、camera、density、motionRhythm、reducedMotion、targetFixture、performancePriority |
+| `commonControls` | preset 可选，显式描述共同处理控件及目标；省略时合同提出控件方案，不自动汇总同名样式参数 |
 
 每个元素意图：
 
@@ -22,7 +23,7 @@
 | --- | --- |
 | `key` | brief 内唯一 kebab-case 引用名，不是工程 UUID |
 | `origin` | `existing` / `new` |
-| `type` | 已有 ElementType 或拟新增的 kebab-case type；不以此宣称已注册 |
+| `type` | 已有资源 ID 或拟新增的 kebab-case ID；不以此宣称已注册。合同另固定精确资源版本与内核身份 |
 | `kind` | `visual` / `modifier` / `transition` |
 | `appearance`、`spatialStructure`、`motion` | new 元素三个字段均为必填非空文本；existing 可省略，使用已知元素行为。静态元素明确写出静止行为 |
 | `bindings` | 可选绑定意图数组；纯静态内容可为空。未指定的可选参数由合同提出默认值，不伪造用户输入 |
@@ -49,6 +50,12 @@ Editor point/range 不作为 source。转场时间与效果目标独立于 bindi
 | targets | `{kind:'composition'}` 或 `{kind:'elements',keys:['local-visual-key']}`；keys 可显式为空表示稍后选择，不得重复、悬空或引用效果 |
 
 省略转场 timing 时合同须明确提出 `unbound`，不得猜测 lane/event ID；省略普通 timing 时合同提出全曲手动时段。设计需要动态驱动时必须填齐 binding，不能用空 bindings 掩盖缺失信息。`unbound` 是明确的待配置方案，启用时阻止导出；输入未说明必要意图则返回输入不完整。
+
+## 共同处理控件
+
+`commonControls` 每项包含唯一 key、label、kind（value/binding/transform）、parameter、targets（非空且不重复的元素 key）和 intent。transform 另提供 field：inputMin/inputMax/outputMin/outputMax/clamp/invert/attackSeconds/releaseSeconds。可选 defaultValue 为已确定的有限处理数值或布尔；输入默认配置写入元素的 binding 意图，由合同确定运行时共同 binding。
+
+不能把大小、位置、颜色、透明度等样式值列为共同参数。Brief 校验只检查声明与引用；具体内核是否支持该处理字段、默认值是否一致、范围交集与依赖身份仍由资源 codec 和合同核对。实例采用批量写入，单独修改后提示差异，可重新应用共同值，不采用继承。
 
 ## 示例
 

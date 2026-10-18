@@ -1,0 +1,154 @@
+{
+    "format": "audiosurf-visualizer-resource",
+    "schemaVersion": 1,
+    "id": "reactive-rings",
+    "version": 1,
+    "elements": [
+        {
+            "id": "reactive-rings",
+            "version": 1,
+            "kernelId": "reactive-rings",
+            "kernelVersion": 1,
+            "kind": "visual",
+            "title": "响应圆环",
+            "icon": "rings",
+            "inputParameter": "amount",
+            "parameters": [
+                {
+                    "id": "amount",
+                    "label": "响应强度",
+                    "defaultValue": 0,
+                    "valueKind": "number",
+                    "allowedSourceKinds": ["constant", "analysis"],
+                    "range": {
+                        "min": 0,
+                        "max": 1,
+                        "integer": false,
+                        "editingPrecision": 2
+                    },
+                    "allowedAnalysisComponents": ["default", "total", "specific", "real", "imag", "magnitude", "phase"],
+                    "allowedAnalysisProjections": ["scalar", "mean", "max", "peak", "bin", "band"],
+                    "defaultBinding": {
+                        "source": {
+                            "kind": "analysis",
+                            "featureId": "energy",
+                            "projection": {
+                                "kind": "scalar"
+                            }
+                        },
+                        "transform": {
+                            "inputMin": 0,
+                            "inputMax": 25,
+                            "outputMin": 0,
+                            "outputMax": 1,
+                            "clamp": true,
+                            "invert": false,
+                            "attackSeconds": 0.04,
+                            "releaseSeconds": 0.2
+                        }
+                    }
+                },
+                {
+                    "id": "color",
+                    "label": "颜色",
+                    "defaultValue": "#edf5f1",
+                    "valueKind": "color",
+                    "allowedSourceKinds": ["constant"]
+                },
+                {
+                    "id": "opacity",
+                    "label": "透明度",
+                    "defaultValue": 1,
+                    "valueKind": "number",
+                    "allowedSourceKinds": ["constant"],
+                    "range": {
+                        "min": 0,
+                        "max": 1,
+                        "integer": false,
+                        "editingPrecision": 2
+                    }
+                },
+                {
+                    "id": "count",
+                    "label": "圆环数量",
+                    "defaultValue": 3,
+                    "valueKind": "number",
+                    "allowedSourceKinds": ["constant"],
+                    "range": {
+                        "min": 1,
+                        "max": 8,
+                        "integer": true,
+                        "editingPrecision": 0
+                    }
+                },
+                {
+                    "id": "radius",
+                    "label": "基础半径",
+                    "defaultValue": 0.12,
+                    "valueKind": "number",
+                    "allowedSourceKinds": ["constant"],
+                    "range": {
+                        "min": 0.005,
+                        "max": 0.5,
+                        "integer": false,
+                        "editingPrecision": 4
+                    }
+                },
+                {
+                    "id": "thickness",
+                    "label": "粗细",
+                    "defaultValue": 1.5,
+                    "valueKind": "number",
+                    "allowedSourceKinds": ["constant"],
+                    "range": {
+                        "min": 0.3,
+                        "max": 10,
+                        "integer": false,
+                        "editingPrecision": 2
+                    }
+                },
+                {
+                    "id": "amplitude",
+                    "label": "响应幅度",
+                    "defaultValue": 0.12,
+                    "valueKind": "number",
+                    "allowedSourceKinds": ["constant"],
+                    "range": {
+                        "min": 0,
+                        "max": 0.4,
+                        "integer": false,
+                        "editingPrecision": 5
+                    }
+                },
+                {
+                    "id": "x",
+                    "label": "水平位置",
+                    "defaultValue": 0.5,
+                    "valueKind": "number",
+                    "allowedSourceKinds": ["constant"],
+                    "range": {
+                        "min": 0,
+                        "max": 1,
+                        "integer": false,
+                        "editingPrecision": 3
+                    }
+                },
+                {
+                    "id": "y",
+                    "label": "垂直位置",
+                    "defaultValue": 0.5,
+                    "valueKind": "number",
+                    "allowedSourceKinds": ["constant"],
+                    "range": {
+                        "min": 0,
+                        "max": 1,
+                        "integer": false,
+                        "editingPrecision": 3
+                    }
+                }
+            ],
+            "hash": "4110726c8a983d599e46809cd686f83e7d87ee52c36f986eb39810a7fbcbbdb9"
+        }
+    ],
+    "presets": []
+}

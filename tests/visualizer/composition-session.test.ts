@@ -2,7 +2,10 @@ import { beforeEach, expect, test, vi } from 'vitest';
 import { createPinia, setActivePinia } from 'pinia';
 import { VisualizerSessionController } from '../../src/visualizer/visualizerSessionController';
 import { CompositionDraftWriter } from '../../src/visualizer/compositionDraftWriter';
-import type { CompositionDraftRepositoryPort, RestoredComposition } from '../../src/visualizer/compositionDraftRepository';
+import type {
+    CompositionDraftRepositoryPort,
+    RestoredComposition,
+} from '../../src/visualizer/compositionDraftRepository';
 import type { AudioSessionService } from '../../src/audio/audioSessionService';
 import type { VisualizerFileGateway } from '../../src/visualizer/fileIO';
 import { useAudioSessionStore } from '../../src/stores/audioSessionStore';
@@ -14,16 +17,33 @@ const track = { contentHash: 'a'.repeat(64), fileName: 'first.wav', durationSeco
 const deferred = <T>() => {
     let resolve!: (value: T) => void;
     let reject!: (error: Error) => void;
-    const promise = new Promise<T>((yes, no) => { resolve = yes; reject = no; });
+    const promise = new Promise<T>((yes, no) => {
+        resolve = yes;
+        reject = no;
+    });
     return { promise, resolve, reject };
 };
 
-function harness(restored: RestoredComposition = null, editorRepository?: EditorDraftRepositoryPort, audioReady?:Promise<unknown>) {
+function harness(
+    restored: RestoredComposition = null,
+    editorRepository?: EditorDraftRepositoryPort,
+    audioReady?: Promise<unknown>,
+) {
     const store = useAudioSessionStore();
-    for (const [id, hash] of [['first', 'a'], ['second', 'b']]) store.queue.push({
-        id: id!, name: `${id}.wav`, trackHash: hash!.repeat(64), mimeType: 'audio/wav',
-        byteSize: 1, lastModified: 1, metadata: {}, restoreState: 'available',
-    });
+    for (const [id, hash] of [
+        ['first', 'a'],
+        ['second', 'b'],
+    ])
+        store.queue.push({
+            id: id!,
+            name: `${id}.wav`,
+            trackHash: hash!.repeat(64),
+            mimeType: 'audio/wav',
+            byteSize: 1,
+            lastModified: 1,
+            metadata: {},
+            restoreState: 'available',
+        });
     const release = vi.fn();
     const audioSession = {
         acquireRoutePlayback: vi.fn(async ({ trackId }: { trackId: string }) => {
@@ -34,36 +54,66 @@ function harness(restored: RestoredComposition = null, editorRepository?: Editor
     } as unknown as AudioSessionService;
     const repository: CompositionDraftRepositoryPort = {
         restore: vi.fn(async () => restored),
-        replace: vi.fn(async draft => { restored = { kind: 'current', draft }; }),
+        replace: vi.fn(async draft => {
+            restored = { kind: 'current', draft };
+        }),
         close: vi.fn(),
     };
     const fileGateway: VisualizerFileGateway = {
-        open: vi.fn(async () => null), save: vi.fn(async () => 'saved' as const),
+        open: vi.fn(async () => null),
+        save: vi.fn(async () => 'saved' as const),
     };
-    const controller = new VisualizerSessionController({ audioSession, store, repository, fileGateway, editorRepository, audioReady });
+    const controller = new VisualizerSessionController({
+        audioSession,
+        store,
+        repository,
+        fileGateway,
+        editorRepository,
+        audioReady,
+    });
     return { controller, repository, fileGateway, release, audioSession };
 }
 
 beforeEach(() => setActivePinia(createPinia()));
 
-test('waits for audio restoration and invalidates entry when leaving during that wait',async()=>{
-    const ready=deferred<void>(),h=harness(null,undefined,ready.promise);
-    const entry=h.controller.enter('first');await Promise.resolve();await Promise.resolve();
+test('waits for audio restoration and invalidates entry when leaving during that wait', async () => {
+    const ready = deferred<void>(),
+        h = harness(null, undefined, ready.promise);
+    const entry = h.controller.enter('first');
+    await Promise.resolve();
+    await Promise.resolve();
     expect(h.audioSession.acquireRoutePlayback).not.toHaveBeenCalled();
-    await h.controller.leave();ready.resolve();await entry;
-    expect(h.audioSession.acquireRoutePlayback).not.toHaveBeenCalled();expect(h.controller.getSnapshot().state).toBe('empty');
-    await h.controller.enter('first');expect(h.controller.getSnapshot().state).toBe('ready');await h.controller.dispose();
+    await h.controller.leave();
+    ready.resolve();
+    await entry;
+    expect(h.audioSession.acquireRoutePlayback).not.toHaveBeenCalled();
+    expect(h.controller.getSnapshot().state).toBe('empty');
+    await h.controller.enter('first');
+    expect(h.controller.getSnapshot().state).toBe('ready');
+    await h.controller.dispose();
 });
 
-test('adds a preset atomically, retains existing elements and persists the expanded composition',async()=>{
-    const h=harness();await h.controller.enter('first');const existing=h.controller.addElement('solid');
-    const notifications=vi.fn();const unsubscribe=h.controller.subscribe(notifications);notifications.mockClear();
-    const added=h.controller.addPreset('geometric-0.6');
-    expect(added).toHaveLength(11);expect(h.controller.readProject()?.elements[0]?.id).toBe(existing);
+test('adds a preset atomically, retains existing elements and persists the expanded composition', async () => {
+    const h = harness();
+    await h.controller.enter('first');
+    const existing = h.controller.addElement('solid');
+    const notifications = vi.fn();
+    const unsubscribe = h.controller.subscribe(notifications);
+    notifications.mockClear();
+    const added = h.controller.addPreset('geometric-0.6');
+    expect(h.controller.readProject()?.items.find(i => i.id === added)?.kind).toBe('preset');
+    const addedIds = h.controller
+        .readProject()!
+        .elements.slice(1)
+        .map(e => e.id);
+    expect(h.controller.readProject()?.elements[0]?.id).toBe(existing);
     expect(h.controller.getSnapshot().bindingRuntime.activeFeatureIds).toEqual([]);
-    expect(notifications.mock.calls.filter(([s])=>s.project.elements.length===12).length).toBeGreaterThan(0);
-    await h.controller.flush();await h.controller.enter('first');expect(h.controller.readProject()?.elements.map(e=>e.id)).toEqual([existing,...added]);
-    unsubscribe();await h.controller.dispose();
+    expect(notifications.mock.calls.filter(([s]) => s.project.elements.length === 12).length).toBeGreaterThan(0);
+    await h.controller.flush();
+    await h.controller.enter('first');
+    expect(h.controller.readProject()?.elements.map(e => e.id)).toEqual([existing, ...addedIds]);
+    unsubscribe();
+    await h.controller.dispose();
 });
 
 test('starts empty, restores the same song, and protects the single draft on a different song', async () => {
@@ -88,8 +138,8 @@ test('starts empty, restores the same song, and protects the single draft on a d
     expect(h.repository.close).toHaveBeenCalledOnce();
 });
 
-test('exports unsupported bytes without writing or replacing them', async () => {
-    const raw = { schemaVersion: 1, project: { arbitrary: 'old bytes' } };
+test('exports invalid V4 draft bytes without writing or replacing them', async () => {
+    const raw = { schemaVersion: 4, project: { arbitrary: 'invalid bytes' } };
     const h = harness({ kind: 'unsupported', raw });
     await h.controller.enter('first');
     expect(h.controller.getSnapshot().state).toBe('unsupported-draft');
@@ -108,7 +158,10 @@ test('invalid imports leave the active and durable project intact', async () => 
     await h.controller.flush();
     const before = h.controller.getSnapshot().project;
     const count = vi.mocked(h.repository.replace).mock.calls.length;
-    vi.mocked(h.fileGateway.open).mockResolvedValue({ name: 'old.json', bytes: new TextEncoder().encode('{"schemaVersion":1}').buffer });
+    vi.mocked(h.fileGateway.open).mockResolvedValue({
+        name: 'old.json',
+        bytes: new TextEncoder().encode('{"schemaVersion":1}').buffer,
+    });
     await expect(h.controller.importProject()).rejects.toThrow();
     expect(h.controller.readProject()).toEqual(before);
     expect(vi.mocked(h.repository.replace).mock.calls).toHaveLength(count);
@@ -117,9 +170,14 @@ test('invalid imports leave the active and durable project intact', async () => 
 
 test('Editor refresh is atomic and only the latest request can replace its snapshot', async () => {
     const editorRepository: EditorDraftRepositoryPort = {
-        restore: vi.fn(async () => null), replace: vi.fn(), close: vi.fn(), clear: vi.fn(),
-        getLeaveWarningEnabled: async () => true, setLeaveWarningEnabled: vi.fn(),
-        getOverlayVisibility: async () => null, setOverlayVisibility: vi.fn(),
+        restore: vi.fn(async () => null),
+        replace: vi.fn(),
+        close: vi.fn(),
+        clear: vi.fn(),
+        getLeaveWarningEnabled: async () => true,
+        setLeaveWarningEnabled: vi.fn(),
+        getOverlayVisibility: async () => null,
+        setOverlayVisibility: vi.fn(),
     };
     const h = harness(null, editorRepository);
     await h.controller.enter('first');
@@ -157,7 +215,8 @@ test('only the latest entry can publish, and leaving invalidates a pending resto
     const entry = h.controller.enter('first');
     await vi.waitFor(() => expect(h.repository.restore).toHaveBeenCalledTimes(3));
     await h.controller.leave();
-    pending.resolve(null); await entry;
+    pending.resolve(null);
+    await entry;
     expect(h.controller.getSnapshot().state).toBe('empty');
     expect(h.controller.hasActivePlaybackLease()).toBe(false);
     await h.controller.dispose();
@@ -180,13 +239,15 @@ test('a failed save blocks changing songs and retries the latest project', async
 });
 
 test('concurrent flush callers all await the latest queued write, with no overlapping transaction', async () => {
-    const first = deferred<void>(), last = deferred<void>();
+    const first = deferred<void>(),
+        last = deferred<void>();
     const replace = vi.fn().mockReturnValueOnce(first.promise).mockReturnValueOnce(last.promise);
     const writer = new CompositionDraftWriter({ restore: async () => null, replace, close() {} }, vi.fn());
     writer.queue(createComposition(track));
     const a = writer.flush();
     await vi.waitFor(() => expect(replace).toHaveBeenCalledOnce());
-    const latest = createComposition(track); latest.seed = 42;
+    const latest = createComposition(track);
+    latest.seed = 42;
     writer.queue(latest);
     const b = writer.flush();
     expect(a).toBe(b);
@@ -203,9 +264,12 @@ test('a failed write retains a newer pending revision for retry', async () => {
     const pending = deferred<void>();
     const replace = vi.fn().mockReturnValueOnce(pending.promise).mockResolvedValue(undefined);
     const writer = new CompositionDraftWriter({ restore: async () => null, replace, close() {} }, vi.fn());
-    writer.queue(createComposition(track)); const flush = writer.flush();
+    writer.queue(createComposition(track));
+    const flush = writer.flush();
     await vi.waitFor(() => expect(replace).toHaveBeenCalledOnce());
-    const latest = createComposition(track); latest.seed = 99; writer.queue(latest);
+    const latest = createComposition(track);
+    latest.seed = 99;
+    writer.queue(latest);
     pending.reject(new Error('disk full'));
     expect(await flush).toBe(false);
     expect(writer.hasPending()).toBe(true);

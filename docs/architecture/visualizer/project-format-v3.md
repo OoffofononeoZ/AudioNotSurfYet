@@ -1,6 +1,6 @@
 # Visualizer Project V3 与元素组合
 
-owner 于 2026-10-15 随改版计划批准本接口和兼容决定。本页为当前实现契约；[Project V1](project-format-v1.md) 与旧 binding/scene 文档保留历史候选语境。
+owner 于 2026-10-15 随改版计划批准本接口和兼容决定。本页保留 V3 历史契约；2026-10-18 的 [Project V4](project-format-v4.md) 已替代当前工程、预设身份与旧草稿行为。下文不作为新内容生成指令。[Project V1](project-format-v1.md) 与旧 binding/scene 文档同样保留历史候选语境。
 
 ## 工程与兼容
 

@@ -1,31 +1,48 @@
 import type { CompositionDraftRepositoryPort } from './compositionDraftRepository';
-import type { VisualizerProjectV3 } from './compositionTypes';
+import type { VisualizerProjectV4 } from './compositionTypes';
 
 export class CompositionDraftWriter {
-    private pending: VisualizerProjectV3 | null = null;
+    private pending: VisualizerProjectV4 | null = null;
     private active: Promise<boolean> | null = null;
     private timer: ReturnType<typeof setTimeout> | null = null;
 
     private repository: CompositionDraftRepositoryPort;
-    private notify: (state: 'saving' | 'saved' | 'not-persisted', project: VisualizerProjectV3, message?: string) => void;
+    private notify: (
+        state: 'saving' | 'saved' | 'not-persisted',
+        project: VisualizerProjectV4,
+        message?: string,
+    ) => void;
 
     constructor(repository: CompositionDraftRepositoryPort, notify: CompositionDraftWriter['notify']) {
         this.repository = repository;
         this.notify = notify;
     }
 
-    hasPending() { return !!(this.pending || this.active); }
+    hasPending() {
+        return !!(this.pending || this.active);
+    }
 
-    queue(project: VisualizerProjectV3) {
+    queue(project: VisualizerProjectV4) {
         this.pending = structuredClone(project);
         if (this.timer) clearTimeout(this.timer);
-        this.timer = setTimeout(() => { this.timer = null; void this.flush(); }, 250);
+        this.timer = setTimeout(() => {
+            this.timer = null;
+            void this.flush();
+        }, 250);
     }
 
     flush(): Promise<boolean> {
-        if (this.timer) { clearTimeout(this.timer); this.timer = null; }
+        if (this.timer) {
+            clearTimeout(this.timer);
+            this.timer = null;
+        }
         // Every caller waits for the same drain, including edits queued during a write.
-        if (!this.active) this.active = Promise.resolve().then(() => this.drain()).finally(() => { this.active = null; });
+        if (!this.active)
+            this.active = Promise.resolve()
+                .then(() => this.drain())
+                .finally(() => {
+                    this.active = null;
+                });
         return this.active;
     }
 
@@ -35,7 +52,7 @@ export class CompositionDraftWriter {
             this.pending = null;
             this.notify('saving', project);
             try {
-                await this.repository.replace({ schemaVersion: 3, savedAt: new Date().toISOString(), project });
+                await this.repository.replace({ schemaVersion: 4, savedAt: new Date().toISOString(), project });
             } catch (error) {
                 if (!this.pending) this.pending = project;
                 this.notify('not-persisted', project, (error as Error).message);

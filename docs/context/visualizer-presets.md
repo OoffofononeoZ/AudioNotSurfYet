@@ -1,5 +1,7 @@
 # Visualizer 几何元素与预设
 
+2026-10-18 当前资源已迁入 [JSON 资源包 V1 过渡版](../architecture/visualizer/resource-packages-v1.md)，工程使用 [Project V4](../architecture/visualizer/project-format-v4.md) 保存预设组及共同处理参数。响应系数统一批量修改；几何律动的两种频谱输入分别声明控件，棱镜航行保持原输入与分镜。以下 V3 展开工厂和验证记录为历史实现语境，视觉与数据映射继续沿用。
+
 owner 于 2026-10-16 要求：新增可独立编辑的原子视觉元素，复刻 Wallpaper Engine workshop 3093808768 的 geometric visualizer（responsiveness 0.6），在元素库增加“预设”，并额外创作歌曲 PV 风格组合；每个完成阶段单独本地提交。
 
 本任务扩展现有 Project V3 ElementRegistry 与组合器，不注册完整内置 Scene，不引入新的 Canvas、renderer 或 RAF。预设最终展开为普通元素，可单独修改及删除，导出与草稿沿用现有 V3 codec；后续修正中 owner 补充授权 [原生 Web Audio 输入](visualizer-native-input.md) 及对应 source 类型。

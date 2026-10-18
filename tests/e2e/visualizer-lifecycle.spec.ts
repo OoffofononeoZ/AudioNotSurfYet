@@ -1,6 +1,6 @@
 import { expect, test, type Page } from '@playwright/test';
 import path from 'node:path';
-import { chooseFiles, installFilePickerStub, queuePickerData, savedPickerEntries } from '../support/file-picker';
+import { chooseFiles, installFilePickerStub, queuePickerData } from '../support/file-picker';
 import { installV6ResourceProbe, readV6ResourceProbe } from '../support/v6-resource-probe';
 
 const audio = path.resolve(import.meta.dirname, '../fixtures/audio/visualizer-v5-avsync-v1.wav');
@@ -25,14 +25,18 @@ async function draft(page: Page): Promise<any> {
     return page.evaluate(async () => {
         const db = await new Promise<IDBDatabase>((resolve, reject) => {
             const open = indexedDB.open('audionotsurfyet-visualizer', 1);
-            open.onsuccess = () => resolve(open.result); open.onerror = () => reject(open.error);
+            open.onsuccess = () => resolve(open.result);
+            open.onerror = () => reject(open.error);
         });
         try {
             return await new Promise((resolve, reject) => {
                 const request = db.transaction('draft').objectStore('draft').get('latest');
-                request.onsuccess = () => resolve(request.result?.envelope); request.onerror = () => reject(request.error);
+                request.onsuccess = () => resolve(request.result?.envelope);
+                request.onerror = () => reject(request.error);
             });
-        } finally { db.close(); }
+        } finally {
+            db.close();
+        }
     });
 }
 
@@ -41,7 +45,8 @@ test('playlist switch asks before replacing a draft; cancellation preserves song
     for (let i = 0; i < 3; i++) await page.getByTestId('playback-mode').click();
     await expect(page.getByTestId('playback-mode')).toHaveAttribute('aria-label', /随机/);
     const firstId = await player(page).getAttribute('data-current-track-id');
-    await enter(page); await solid(page);
+    await enter(page);
+    await solid(page);
     await expect(page.getByTestId('playback-mode')).toBeDisabled();
     await expect(page.getByTestId('playback-mode')).toHaveAttribute('aria-label', /单曲循环/);
     const firstUrl = page.url();
@@ -62,7 +67,8 @@ test('playlist switch asks before replacing a draft; cancellation preserves song
     await expect(player(page)).toHaveAttribute('data-playback-state', 'playing');
     await expect(page.locator('.viz-element-row')).toHaveCount(0);
     const secondId = await player(page).getAttribute('data-current-track-id');
-    await page.getByTestId('previous-track').click(); await page.getByTestId('next-track').click();
+    await page.getByTestId('previous-track').click();
+    await page.getByTestId('next-track').click();
     await expect(player(page)).toHaveAttribute('data-current-track-id', secondId!);
     await page.getByTestId('clear-queue').click();
     await expect(page.getByTestId('visualizer-empty')).toBeVisible();
@@ -74,40 +80,32 @@ test('playlist switch asks before replacing a draft; cancellation preserves song
     await expect(page.getByTestId('playback-mode')).toHaveAttribute('aria-label', /随机/);
 });
 
-test('old draft export and cancellation preserve raw data until explicit replacement', async ({ page }) => {
+test('old drafts are ignored without prompting and replaced by a V4 draft', async ({ page }) => {
     await setup(page);
-    const raw = { schemaVersion: 1, savedAt: '2026-01-01T00:00:00Z', project: { scene: 'previous-project' } };
-    await page.evaluate(async envelope => {
+    await page.evaluate(async () => {
         const db = await new Promise<IDBDatabase>((resolve, reject) => {
-            const open = indexedDB.open('audionotsurfyet-visualizer', 1);
-            open.onupgradeneeded = () => open.result.createObjectStore('draft', { keyPath: 'key' });
-            open.onsuccess = () => resolve(open.result); open.onerror = () => reject(open.error);
+            const r = indexedDB.open('audionotsurfyet-visualizer', 1);
+            r.onupgradeneeded = () => r.result.createObjectStore('draft', { keyPath: 'key' });
+            r.onsuccess = () => resolve(r.result);
+            r.onerror = () => reject(r.error);
         });
-        await new Promise<void>((resolve, reject) => {
-            const tx = db.transaction('draft', 'readwrite'); tx.objectStore('draft').put({ key: 'latest', envelope });
-            tx.oncomplete = () => resolve(); tx.onerror = () => reject(tx.error);
-        }); db.close();
-    }, raw);
-    await page.getByTestId('header-visualizer-link').click();
-    await expect(page.getByTestId('visualizer-unsupported-draft')).toBeVisible();
-    await page.screenshot({ path: 'artifacts/visualizer-composition/draft-notice.png' });
-    expect(await draft(page)).toEqual(raw);
-    await page.getByRole('button', { name: '导出原草稿' }).click();
-    await expect.poll(async () => (await savedPickerEntries(page)).length).toBe(1);
-    const saved = (await savedPickerEntries(page))[0]!;
-    expect(JSON.parse(Buffer.from(saved.base64, 'base64').toString())).toEqual(raw);
-    await page.getByRole('button', { name: '取消进入' }).click();
-    await expect(page).toHaveURL('/');
-    expect(await draft(page)).toEqual(raw);
-    await page.getByTestId('header-visualizer-link').click();
-    await page.getByRole('button', { name: '覆盖草稿', exact: true }).click();
-    await expect(page.getByTestId('visualizer-ready')).toBeVisible();
-    await expect.poll(async () => (await draft(page))?.schemaVersion).toBe(3);
-    expect((await draft(page)).project.elements).toEqual([]);
+        await new Promise<void>(resolve => {
+            const tx = db.transaction('draft', 'readwrite');
+            tx.objectStore('draft').put({ key: 'latest', envelope: { schemaVersion: 3, project: { elements: [] } } });
+            tx.oncomplete = () => resolve();
+        });
+        db.close();
+    });
+    await enter(page);
+    await expect(page.getByTestId('visualizer-unsupported-draft')).toHaveCount(0);
+    await expect.poll(async () => (await draft(page))?.schemaVersion).toBe(4);
+    expect((await draft(page)).project.items).toEqual([]);
 });
 
 test('invalid import preserves the saved composition', async ({ page }) => {
-    await setup(page); await enter(page); await solid(page);
+    await setup(page);
+    await enter(page);
+    await solid(page);
     await expect.poll(async () => (await draft(page))?.project.elements.length).toBe(1);
     const before = await draft(page);
     await queuePickerData(page, [{ name: 'invalid.json', mimeType: 'application/json', text: '{"schemaVersion":1}' }]);
@@ -119,7 +117,10 @@ test('invalid import preserves the saved composition', async ({ page }) => {
 
 test('cancel, context recovery and repeated entry release the renderer and export resources', async ({ page }) => {
     test.setTimeout(60000);
-    await installV6ResourceProbe(page); await setup(page); await enter(page); await solid(page);
+    await installV6ResourceProbe(page);
+    await setup(page);
+    await enter(page);
+    await solid(page);
     await page.getByTestId('visualizer-preview-frame').hover();
     await page.getByTestId('start-visualizer-export').click();
     await expect(player(page)).toHaveAttribute('data-export-locked', 'true');
@@ -130,7 +131,8 @@ test('cancel, context recovery and repeated entry release the renderer and expor
     await page.getByTestId('visualizer-preview-canvas').evaluate(canvas => {
         const gl = (canvas as HTMLCanvasElement).getContext('webgl2')!;
         const extension = gl.getExtension('WEBGL_lose_context')!;
-        extension.loseContext(); setTimeout(() => extension.restoreContext(), 400);
+        extension.loseContext();
+        setTimeout(() => extension.restoreContext(), 400);
     });
     await expect(page.getByTestId('visualizer-preview-frame')).toHaveAttribute('data-scene-status', 'recovering');
     await expect(page.getByTestId('visualizer-preview-frame')).toHaveAttribute('data-scene-status', 'ready');
@@ -138,22 +140,33 @@ test('cancel, context recovery and repeated entry release the renderer and expor
         await page.getByRole('link', { name: '首页', exact: true }).click();
         await expect.poll(async () => (await readV6ResourceProbe(page)).visualizerHosts).toBe(0);
         const left = await readV6ResourceProbe(page);
-        expect(left.visualizerRenderers).toBe(0); expect(left.visualizerRafs).toBe(0);
-        expect(left.visualizerCanvases).toBe(0); expect(left.exportResources).toBe(0);
+        expect(left.visualizerRenderers).toBe(0);
+        expect(left.visualizerRafs).toBe(0);
+        expect(left.visualizerCanvases).toBe(0);
+        expect(left.exportResources).toBe(0);
         await enter(page);
         const active = await readV6ResourceProbe(page);
-        expect(active.visualizerHosts).toBe(1); expect(active.visualizerRenderers).toBe(1);
+        expect(active.visualizerHosts).toBe(1);
+        expect(active.visualizerRenderers).toBe(1);
         expect(active.visualizerCanvases).toBe(1);
     }
 });
 
 test('ready WebM blocks leaving and survives a cancelled save', async ({ page }) => {
-    test.setTimeout(60000); await setup(page); await enter(page); await solid(page);
-    await page.getByTestId('visualizer-preview-frame').hover(); await page.getByTestId('start-visualizer-export').click();
+    test.setTimeout(60000);
+    await setup(page);
+    await enter(page);
+    await solid(page);
+    await page.getByTestId('visualizer-preview-frame').hover();
+    await page.getByTestId('start-visualizer-export').click();
     await expect(page.locator('[data-export-status=ready]')).toBeVisible({ timeout: 30000 });
     await page.getByRole('link', { name: '首页', exact: true }).click();
     await expect(page.getByRole('dialog', { name: 'WebM 尚未处理' })).toBeVisible();
-    await page.evaluate(() => { (window as unknown as {showSaveFilePicker:()=>Promise<never>}).showSaveFilePicker = async () => { throw new DOMException('Cancelled', 'AbortError'); }; });
+    await page.evaluate(() => {
+        (window as unknown as { showSaveFilePicker: () => Promise<never> }).showSaveFilePicker = async () => {
+            throw new DOMException('Cancelled', 'AbortError');
+        };
+    });
     await page.getByRole('button', { name: '保存并离开' }).click();
     await expect(page.getByRole('dialog', { name: 'WebM 尚未处理' })).toBeVisible();
     await page.getByRole('button', { name: '留在此页' }).click();
