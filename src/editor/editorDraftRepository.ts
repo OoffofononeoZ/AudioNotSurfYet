@@ -1,5 +1,6 @@
 import { validateEditorProjectV1 } from './projectCodec';
 import { validateBeatSnap, type EditorBeatSnapSetting } from './beatSnap';
+import { normalizeMarkerSpan } from './markerTimeView';
 import type {
     EditorDraftEnvelopeV1,
     EditorProjectV1,
@@ -166,6 +167,21 @@ export class EditorDraftRepository implements EditorDraftRepositoryPort {
         const database = await this.open();
         const transaction = database.transaction(STORES.preferences, 'readwrite');
         transaction.objectStore(STORES.preferences).put({ key: `beat-snap:${contentHash}`, value: validateBeatSnap(setting) });
+        await transactionDone(transaction);
+    }
+
+    async getMarkerSpan(contentHash: string): Promise<number | null> {
+        const database = await this.open();
+        const transaction = database.transaction(STORES.preferences, 'readonly');
+        const record = await requestResult(transaction.objectStore(STORES.preferences).get(`marker-span:${contentHash}`)) as { value: unknown } | undefined;
+        await transactionDone(transaction);
+        return typeof record?.value === 'number' ? normalizeMarkerSpan(record.value) : null;
+    }
+
+    async setMarkerSpan(contentHash: string, span: number): Promise<void> {
+        const database = await this.open();
+        const transaction = database.transaction(STORES.preferences, 'readwrite');
+        transaction.objectStore(STORES.preferences).put({ key: `marker-span:${contentHash}`, value: normalizeMarkerSpan(span) });
         await transactionDone(transaction);
     }
 
