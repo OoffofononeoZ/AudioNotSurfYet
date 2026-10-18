@@ -1,5 +1,5 @@
 <template>
-    <section class="editor-timing-panel" data-testid="editor-timing-panel" aria-label="手动定时">
+    <section class="editor-timing-panel app-scrollbar" data-testid="editor-timing-panel" aria-label="BPM 设置">
         <div class="timing-list">
             <header><h3>Tempo 区间</h3><button type="button" @click="selectCurrent">定位播放区间</button></header>
             <div class="timing-rows app-scrollbar" role="list" aria-label="Tempo 区间列表">
@@ -13,7 +13,7 @@
             <footer><button type="button" data-testid="timing-add-boundary" @click="add">在播放位置新增</button><button type="button" :disabled="selectedIndex === 0" data-testid="timing-delete-boundary" @click="remove">删除边界</button></footer>
         </div>
         <aside class="timing-assistant" aria-label="BPM 辅助标记">
-            <header><h3>BPM 辅助标记</h3><span>{{ selectedIndex + 1 }} / {{ project.tempoMap.length }}</span></header>
+            <header><h3>当前区间</h3><span>{{ selectedIndex + 1 }} / {{ project.tempoMap.length }}</span></header>
             <div class="beat-phase" aria-label="当前区间节拍位置">
                 <i v-for="beat in beatCount" :key="beat" :class="{ active: phase === beat - 1, downbeat: beat === 1 }" />
                 <span>{{ selected.mode === 'metered' && selected.bpm !== null ? `${selected.bpm} BPM` : '尚无节拍网格' }}</span>
@@ -24,12 +24,13 @@
                 <div class="timing-field"><span>拍号</span><div class="meter-fields"><AppNumberInput :model-value="selected.meter.numerator" label="辅助拍号分子" :min="1" :max="32" @update:model-value="setMeter($event,selected.mode === 'metered' ? selected.meter.denominator : 4)" /><span>/</span><AppSelect :model-value="selected.meter.denominator" label="辅助拍号分母" :options="denominators" @update:model-value="setMeter(selected.mode === 'metered' ? selected.meter.numerator : 4,Number($event))" /></div></div>
             </template>
             <button v-else type="button" @click="restoreMetered">设置为 100 BPM · 4/4</button>
+        </aside>
             <div class="tap-controls">
+                <h3>点按节拍</h3>
                 <button type="button" class="tap-button" data-testid="timing-tap" @click="tap" @keydown="tapKey">点按节拍<span>{{ tapped.count ? `${tapped.count} 次` : 'Tap' }}</span></button>
                 <div class="tap-result"><strong data-testid="timing-tap-preview">{{ tapped.bpm === null ? '点按 8 次后预览' : `${tapped.bpm} BPM` }}</strong><span v-if="tapped.bpm !== null && !validTap" class="error">BPM 必须在 20–300 之间</span><div><button type="button" data-testid="timing-apply-tap" :disabled="!validTap" @click="applyTap">应用到当前区间</button><button type="button" @click="resetTap">重置</button></div></div>
             </div>
             <p v-if="message" :class="{ error: failed }" role="status" data-testid="timing-status">{{ message }}</p>
-        </aside>
     </section>
 </template>
 <script setup lang="ts">
@@ -108,11 +109,11 @@ watch(() => [selected.value.id, props.project.projectId], () => { resetTap(); me
 onBeforeUnmount(resetTap);
 </script>
 <style scoped>
-.editor-timing-panel { display:grid; grid-template-columns:minmax(220px,1fr) 350px; border-top:1px solid var(--divider); background:#080e0b; font-size:12px; }
+.editor-timing-panel { display:grid; grid-template-columns:minmax(220px,1fr) minmax(260px,300px) minmax(210px,260px); align-items:start; max-height:min(280px,35cqh); overflow:auto; border-top:1px solid var(--divider); background:#080e0b; font-size:12px; }
 header { display:flex; align-items:center; justify-content:space-between; min-height:42px; padding:6px 14px; border-bottom:1px solid var(--divider); gap:8px; }
 h3 { margin:0; font-size:12px; font-weight:500; } header>span { color:var(--muted); font-size:11px; }
 .timing-list { min-width:0; display:flex; flex-direction:column; }
-.timing-rows { overflow:auto; max-height:280px; flex:1; min-height:100px; }
+.timing-rows { flex:1; min-height:0; }
 .timing-row { display:flex; align-items:center; border-left:2px solid transparent; border-bottom:1px solid var(--divider); }
 .timing-row.selected { border-left-color:var(--accent-soft); background:var(--control-active); }
 .timing-select { display:grid; grid-template-columns:minmax(70px,1fr) minmax(75px,1fr) 40px; gap:8px; flex:1; text-align:left; padding:10px 12px; background:transparent; border:0; font-variant-numeric:tabular-nums; }
@@ -127,13 +128,15 @@ footer { display:flex; gap:8px; padding:12px 14px; border-top:1px solid var(--di
 .beat-phase i.active { background:var(--accent-soft); box-shadow:0 0 8px #86edb54d; }
 .beat-phase i.downbeat { width:10px; height:10px; }
 .beat-phase span { margin-left:auto; font-size:11px; color:var(--muted); }
-.tap-controls { display:flex; gap:12px; padding:14px 14px 4px; align-items:center; border-top:1px solid var(--divider); margin-top:12px; }
-.tap-button { display:flex; flex:none; flex-direction:column; align-items:center; justify-content:center; gap:6px; border-radius:50%; width:78px; height:78px; border-color:var(--hairline-focus); color:var(--accent-soft); }
+.tap-controls { display:flex; flex-wrap:wrap; gap:10px; padding:14px; align-items:center; min-width:0; }
+.tap-controls h3 { width:100%; margin:0 0 4px; }
+.tap-button { display:flex; flex:none; align-items:center; justify-content:center; gap:8px; border-radius:4px; width:100%; height:36px; border-color:var(--hairline-focus); color:var(--accent-soft); }
 .tap-button span { font-size:10px; color:var(--muted); }.tap-button:active { background:var(--control-active); }
-.tap-result { display:grid; gap:10px; min-width:0; }.tap-result strong { font-weight:500; font-variant-numeric:tabular-nums; }.tap-result>div { display:flex; gap:5px; flex-wrap:wrap; }
+.tap-result { display:flex; align-items:center; flex-wrap:wrap; gap:8px; min-width:0; }.tap-result strong { font-weight:500; font-variant-numeric:tabular-nums; }.tap-result>div { display:flex; gap:5px; flex-wrap:wrap; }
 button { min-height:28px; padding:4px 8px; border:1px solid var(--divider); border-radius:4px; color:var(--body); background:var(--editor-control); font:inherit; cursor:pointer; }
 button:hover:not(:disabled) { background:var(--control-active); color:var(--ink); }button:focus-visible { outline:2px solid var(--accent-soft); outline-offset:2px; }button:disabled { opacity:.35; cursor:default; }
 p { margin:8px 14px 0; font-size:11px; line-height:1.6; color:var(--body); }.error { color:var(--error); font-size:11px; }
-@media(max-width:900px) { .editor-timing-panel { grid-template-columns:minmax(0,1fr); }.timing-assistant { border-left:0; border-top:1px solid var(--divider); } }
+@container (max-width:1000px) { .editor-timing-panel { grid-template-columns:minmax(220px,1fr) minmax(260px,1fr); }.tap-controls { grid-column:1 / -1; border-top:1px solid var(--divider); }.tap-button { width:150px; }.tap-controls h3 { width:auto; } }
+@container (max-width:560px) { .editor-timing-panel { grid-template-columns:minmax(0,1fr); }.timing-assistant { border-left:0; border-top:1px solid var(--divider); } }
 @media(prefers-reduced-motion:reduce) { .beat-phase i.active { box-shadow:none; } }
 </style>

@@ -8,19 +8,21 @@
     </Teleport>
 </template>
 <script setup lang="ts">
-import { nextTick, onBeforeUnmount, onMounted, reactive, ref } from 'vue';
+import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref } from 'vue';
 import { claimEditorContextMenu } from '../editor/contextMenuOwnership';
 
-const props = defineProps<{ anchor: HTMLElement | null | undefined; x: number; y: number; testId: string }>();
-const emit = defineEmits<{ action: [id: 'seek' | 'play' | 'center']; close: [] }>();
-const items = [{ id: 'seek', label: '跳到此处' }, { id: 'play', label: '从此处播放' }, { id: 'center', label: '将此处居中' }] as const;
+const props = defineProps<{ anchor: HTMLElement | null | undefined; x: number; y: number; testId: string; waveform?: boolean }>();
+type Action = 'seek' | 'play' | 'center' | 'reset';
+const emit = defineEmits<{ action: [id: Action]; close: [] }>();
+const items = computed(() => [{ id: 'seek' as Action, label: '跳到此处' }, { id: 'play' as Action, label: '从此处播放' },
+    ...(props.waveform ? [{ id: 'center' as Action, label: '将此处居中' }, { id: 'reset' as Action, label: '重置为全曲' }] : [])]);
 const menu = ref<HTMLElement | null>(null);
 const position = reactive({ x: 8, y: 8 });
 let release: (() => void) | undefined;
 let disposed = false;
 const close = () => emit('close');
 const returnFocus = () => props.anchor?.isConnected && props.anchor.focus({ preventScroll: true });
-function select(id: 'seek' | 'play' | 'center') { emit('action', id); close(); returnFocus(); }
+function select(id: Action) { emit('action', id); close(); returnFocus(); }
 function outside(event: PointerEvent) { if (!menu.value?.contains(event.target as Node)) close(); }
 function scroll(event: Event) { if (!menu.value?.contains(event.target as Node)) close(); }
 function onKeydown(event: KeyboardEvent) {

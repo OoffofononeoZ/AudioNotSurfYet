@@ -35,9 +35,9 @@ function cycle(direction: number) {
 }
 </script>
 <style scoped>
-.beat-divisor { display:grid; grid-template-columns:76px 130px 88px; align-items:center; gap:5px 8px; padding:5px 0; position:relative; font-size:11px; }
-.divisor-ticks { position:relative; height:24px; grid-column:1; margin:0 2px; }
-.divisor-ticks i { position:absolute; bottom:0; width:1px; opacity:.9; }
+.beat-divisor { display:grid; grid-template-columns:minmax(0,1fr) 88px; align-items:center; gap:4px 8px; position:relative; font-size:11px; }
+.divisor-ticks { position:relative; height:20px; grid-column:1 / -1; grid-row:2; margin:0 2px; }
+.divisor-ticks i { position:absolute; top:50%; transform:translateY(-50%); width:1px; opacity:.9; }
 .divisor-ticks input { position:absolute; inset:0; margin:0; padding:0; width:100%; height:100%; opacity:0; cursor:pointer; }
 .divisor-ticks:focus-within { outline:2px solid var(--accent-soft); outline-offset:3px; }
 .divisor-value { display:flex; align-items:center; justify-content:space-between; gap:6px; }
@@ -45,6 +45,6 @@ function cycle(direction: number) {
 .divisor-value button { border:0; padding:0 4px; min-height:28px; color:var(--body); background:transparent; font-size:20px; cursor:pointer; }
 .divisor-value button:disabled { opacity:.3; cursor:default; }
 .beat-divisor :deep(.app-select) { width:88px; min-height:28px; padding:3px 6px; }
-.beat-divisor :deep(.app-number-input) { grid-column:2 / 4; width:100%; min-height:28px; }
+.beat-divisor :deep(.app-number-input) { grid-column:1 / -1; width:100%; min-height:28px; }
 .preference-error { grid-column:1 / -1; color:var(--error); font-size:11px; }
 </style>

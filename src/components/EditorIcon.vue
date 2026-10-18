@@ -4,6 +4,10 @@
 <script setup lang="ts">
 defineProps<{ name: keyof typeof paths }>();
 const paths = {
+    plus: 'M12 5v14M5 12h14',
+    down: 'm6 9 6 6 6-6',
+    up: 'm6 15 6-6 6 6',
+    locate: 'M12 3v4m0 10v4M3 12h4m10 0h4M12 7a5 5 0 1 0 0 10 5 5 0 0 0 0-10',
     trash: 'M3 6h18M9 6V3h6v3M5 6l1 15h12l1-15M10 10v7m4-7v7',
     import: 'M12 3v12m-4-4 4 4 4-4M4 15v5h16v-5',
     export: 'M12 15V3m-4 4 4-4 4 4M4 15v5h16v-5',
