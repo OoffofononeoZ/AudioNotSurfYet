@@ -394,9 +394,6 @@ onBeforeUnmount(() => {
 <style scoped>
 .editor-page {
     --editor-control-height: 30px;
-    --editor-row-height: 44px;
-    --editor-lane-name-width: 152px;
-    --editor-inner-class-width: 144px;
     --editor-control-radius: 4px;
     --editor-flyout-radius: 8px;
     display: flex;

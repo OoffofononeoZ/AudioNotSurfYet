@@ -60,7 +60,7 @@ function navigateMenu(action: string) {
     if (time === undefined) return;
     void audioSession.seek(time).then(() => action === 'play' && props.playback.state !== 'playing' ? audioSession.togglePlayback() : undefined);
 }
-function escape(event: KeyboardEvent) { if (props.active !== false && event.key === 'Escape') { editing.cancel(); editing.cancelPending(); editing.blocks.clear(); addMenu.value = false; } }
+function escape(event: KeyboardEvent) { if (!event.defaultPrevented && props.active !== false && event.key === 'Escape') { editing.escape(); addMenu.value = false; } }
 watch(editable, () => { addMenu.value = false; });
 onMounted(() => window.addEventListener('keydown',escape));
 onBeforeUnmount(() => { drawing.dispose(); window.removeEventListener('keydown',escape); });

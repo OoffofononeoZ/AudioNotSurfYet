@@ -34,8 +34,6 @@ const openE2 = async (page: Page) => {
     await expect(page.getByTestId('editor-buffer-state')).toHaveText('波形已就绪', {
         timeout: 30_000,
     });
-    // These historical seek/geometry cases intentionally exercise the full-song window.
-    await page.getByLabel('标记显示范围', { exact:true }).selectOption('all');
 };
 
 test('supports waveform seek, zoom, context pan/menu and keyboard controls', async ({ page }) => {
@@ -73,15 +71,13 @@ test('supports waveform seek, zoom, context pan/menu and keyboard controls', asy
 
     await page.mouse.move(bounds!.x + bounds!.width * 0.25, bounds!.y + bounds!.height / 2);
     await page.mouse.wheel(0, -120);
-    await expect(page.getByTestId('editor-reset-viewport')).toBeEnabled();
     const viewportBeforeDrag = await page.getByTestId('editor-viewport-state').textContent();
     await page.mouse.move(bounds!.x + bounds!.width * 0.65, bounds!.y + bounds!.height / 2);
     await page.mouse.down({ button: 'right' });
     await page.mouse.move(bounds!.x + bounds!.width * 0.45, bounds!.y + bounds!.height / 2, { steps: 5 });
     await page.mouse.up({ button: 'right' });
     await expect(page.getByTestId('editor-viewport-state')).not.toHaveText(viewportBeforeDrag ?? '');
-    await page.getByTestId('editor-pan-forward').click();
-    await page.getByTestId('editor-pan-back').click();
+    await timeline.focus(); await timeline.press(']'); await timeline.press('[');
 
     await page.mouse.click(bounds!.x + 220, bounds!.y + bounds!.height / 2, { button: 'right' });
     await expect(page.getByTestId('editor-timeline-menu')).toBeVisible();
@@ -95,7 +91,7 @@ test('supports waveform seek, zoom, context pan/menu and keyboard controls', asy
     await timeline.press('Shift+F10');
     await expect(page.getByTestId('editor-timeline-menu')).toBeVisible();
     await page.keyboard.press('Escape');
-    await page.getByTestId('editor-reset-viewport').click();
+    await timeline.press('Shift+F10'); await page.getByRole('menuitem',{name:'重置为全曲'}).click();
     expect(issues).toEqual([]);
 });
 

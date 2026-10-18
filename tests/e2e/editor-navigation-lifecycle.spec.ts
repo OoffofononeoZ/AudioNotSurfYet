@@ -1,6 +1,7 @@
 import { expect, test, type Page, type Route } from '@playwright/test';
 import path from 'node:path';
 import { chooseFiles, installFilePickerStub } from '../support/file-picker';
+import { addMarkerLane } from '../support/editor-marking';
 
 async function open(page: Page) {
     await installFilePickerStub(page);
@@ -42,7 +43,7 @@ test('tabs and cancelled selection retain a running task; confirmed selection re
 
 test('deleting the final current song enters empty state and preserves its Editor draft', async ({ page }) => {
     await open(page);
-    await page.getByTestId('add-point-lane').click();
+    await addMarkerLane(page,'point');
     await expect(page.getByTestId('editor-save-state')).toHaveAttribute('data-state', 'saved');
     await page.getByTestId('toggle-queue').click();
     await expect(page.locator('.music-list-container')).toHaveCSS('transform', 'matrix(1, 0, 0, 1, 0, 0)');

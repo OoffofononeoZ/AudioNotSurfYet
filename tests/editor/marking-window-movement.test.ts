@@ -1,5 +1,5 @@
 import { expect, test } from 'vitest';
-import { editorViewportForMeasures, editorMeasureSeconds, normalizeEditorViewport, zoomEditorViewportAtX, constrainEditorViewport } from '../../src/editor/timeline';
+import { normalizeEditorViewport, zoomEditorViewportAtX } from '../../src/editor/timeline';
 import { createInitialEditorProject, validateEditorProjectV1 } from '../../src/editor/projectCodec';
 import { createPointLane, createPointEvent } from '../../src/editor/pointAnnotations';
 import { createRangeLane, createRangeEvent } from '../../src/editor/rangeAnnotations';
@@ -11,21 +11,17 @@ function project(): EditorProjectV1 {
     value.tempoMap = tempo;
     return value;
 }
-test('15-minute songs show four bars and zoom no closer than one bar without Analyzer zoom limits', () => {
-    const viewport = editorViewportForMeasures(900,tempo,4,37);
-    expect(viewport).toEqual({ startSeconds:36,endSeconds:44,zoom:112.5 });
+test('15-minute waveform defaults to full song and restores a saved viewport independently of tempo', () => {
+    expect(normalizeEditorViewport(null,900)).toEqual({startSeconds:0,endSeconds:900,zoom:1});
+    const viewport = { startSeconds:36,endSeconds:44,zoom:112.5 };
     expect(normalizeEditorViewport(viewport,900)).toEqual(viewport);
     expect(zoomEditorViewportAtX(viewport,900,10000,400,800,2)).toEqual({ startSeconds:39,endSeconds:41,zoom:450 });
-    expect(constrainEditorViewport({ startSeconds:0,endSeconds:1,zoom:900 },900,tempo)).toEqual({ startSeconds:0,endSeconds:2,zoom:450 });
     const value = project(); value.workspace.viewport = viewport;
     expect(validateEditorProjectV1(value).workspace.viewport).toEqual(viewport);
 });
-test('window handles short songs, missing BPM and meter-denominator semantics', () => {
-    expect(editorViewportForMeasures(1,tempo,4,0)).toEqual({ startSeconds:0,endSeconds:1,zoom:1 });
-    expect(editorViewportForMeasures(30,[],4,0)).toEqual({ startSeconds:0,endSeconds:10,zoom:3 });
-    const sixEight: TempoSegmentV1[] = [{ ...tempo[0]!, id:'six', mode:'metered', bpm:120, bpmSource:'user', meter:{ numerator:6,denominator:8 } }];
-    expect(editorMeasureSeconds(sixEight,0)).toBe(3);
-    expect(editorViewportForMeasures(900,sixEight,4,0).endSeconds).toBe(12);
+test('waveform zoom handles short songs and has a one-second minimum independent of meter', () => {
+    expect(normalizeEditorViewport(null,.2)).toEqual({startSeconds:0,endSeconds:.2,zoom:1});
+    expect(zoomEditorViewportAtX(normalizeEditorViewport(null,30),30,1000,400,800)).toEqual({startSeconds:14.5,endSeconds:15.5,zoom:30});
 });
 test('point movement preserves identity and rejects duplicates and out-of-song targets atomically', () => {
     let value = createPointLane(project()), lane = value.lanes[0]!;

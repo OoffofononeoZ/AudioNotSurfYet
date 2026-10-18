@@ -20,7 +20,7 @@
                     :style="intervalStyle(event.startSeconds,event.endSeconds)" :data-testid="`range-marker-${event.id}`" :data-event-id="event.id"
                     :data-start-seconds="event.startSeconds" :data-end-seconds="event.endSeconds" :tabindex="markerEventReachable(view,event) ? 0 : -1"
                     :aria-label="`范围 ${event.startSeconds.toFixed(3)} 至 ${event.endSeconds.toFixed(3)} 秒`" :title="`${event.startSeconds.toFixed(3)} — ${event.endSeconds.toFixed(3)} 秒`" @focus="selectEvent(event)" />
-                <button v-for="endpoint in (['start','end'] as const)" v-show="endpointVisible(endpoint === 'start' ? event.startSeconds : event.endSeconds)" :key="endpoint"
+                <button v-for="endpoint in (['start','end'] as const)" v-show="markerEventReachable(view,event) && endpointVisible(endpoint === 'start' ? event.startSeconds : event.endSeconds)" :key="endpoint"
                     type="button" class="marker-endpoint" :class="{ selected: editing.selected.value === event.id }" :style="{ left:percent(endpoint === 'start' ? event.startSeconds : event.endSeconds) }"
                     :data-testid="`range-${endpoint}-handle-${event.id}`" :data-event-id="event.id" :data-endpoint="endpoint"
                     :aria-label="`${endpoint === 'start' ? '起点' : '终点'} ${event.id}`" :title="`${endpoint === 'start' ? '起点' : '终点'} ${(endpoint === 'start' ? event.startSeconds : event.endSeconds).toFixed(3)} 秒`" @focus="selectEvent(event)" />
@@ -30,7 +30,7 @@
     </div>
 </template>
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { computed, nextTick, ref, watch } from 'vue';
 import { markerEventReachable, type MarkerTimeView } from '../editor/markerTimeView';
 import { useMarkerSurfaceDrawing } from '../editor/useMarkerSurfaceDrawing';
 import type { MarkerEditing } from '../editor/useMarkerEditing';
@@ -52,6 +52,12 @@ const pendingPreview = computed(() => {
 const events = computed(() => !visible.value ? [] : props.lane.events.filter(event => event.innerClassId === props.innerClassId).map(event => props.editing.displayEvent(event)).filter(event => 'atSeconds' in event
     ? event.atSeconds >= props.view.startSeconds && event.atSeconds <= props.view.endSeconds
     : event.endSeconds > props.view.startSeconds && event.startSeconds < props.view.endSeconds));
+watch(events,next=>{
+    const focused = document.activeElement as HTMLElement | null;
+    if (focused?.closest('.marker-surface') === surface.value && focused?.dataset.eventId && !next.some(event=>event.id === focused.dataset.eventId)) {
+        void nextTick(()=>surface.value?.focus({preventScroll:true}));
+    }
+});
 const endpointVisible = (time: number) => props.view.editable && time >= props.view.cursorSeconds && time <= Math.min(props.view.endSeconds,props.view.durationSeconds);
 function selectEvent(event: PointEventV1 | RangeEventV1) { if (markerEventReachable(props.view,event)) props.editing.selected.value = event.id; }
 </script>

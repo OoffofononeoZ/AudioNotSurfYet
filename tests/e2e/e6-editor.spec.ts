@@ -3,6 +3,8 @@ import path from 'node:path';
 import { visiblePointEvents } from '../../src/editor/pointAnnotations';
 import { visibleRangeEvents } from '../../src/editor/rangeAnnotations';
 import type { EditorProjectV1 } from '../../src/editor/types';
+import { createMarkerTimeView } from '../../src/editor/markerTimeView';
+import { addMarkerLane } from '../support/editor-marking';
 import {
     buildE6StressProject,
     E6_STRESS_DURATION_SECONDS,
@@ -109,6 +111,7 @@ const createFifteenMinuteFixture = async (page: Page) => {
 };
 
 const expectedVisibleCounts = (project: EditorProjectV1) => {
+    const view = createMarkerTimeView(0,project.track.durationSeconds);
     let points = 0;
     let ranges = 0;
     for (const lane of project.lanes) {
@@ -117,13 +120,13 @@ const expectedVisibleCounts = (project: EditorProjectV1) => {
                 points += visiblePointEvents(
                     lane,
                     innerClass.id,
-                    project.workspace.viewport,
+                    view,
                 ).length;
             } else {
                 ranges += visibleRangeEvents(
                     lane,
                     innerClass.id,
-                    project.workspace.viewport,
+                    view,
                 ).length;
             }
         }
@@ -154,7 +157,7 @@ const observeInputToMutation = async (
         const start = () => {
             record.startedAt ??= performance.now();
         };
-        const inputEvents = ['pointerdown', 'keydown', 'input', 'change', 'click'];
+        const inputEvents = ['pointerdown', 'keydown', 'input', 'change', 'click', 'wheel'];
         for (const eventName of inputEvents) {
             source?.addEventListener(eventName, start, { capture: true });
         }
@@ -382,6 +385,8 @@ test('keeps a deterministic 10,000-event project virtualized and responsive', as
     await page.goto('/');
     await createFifteenMinuteFixture(page);
     await openCurrentEditor(page);
+    await page.getByTestId('toggle-playback').click();
+    await page.getByTestId('editor-timeline').press('Home');
     await page.getByTestId('export-editor-project').click();
     await expect.poll(async () => (await savedPickerEntries(page)).length)
         .toBe(1);
@@ -395,17 +400,14 @@ test('keeps a deterministic 10,000-event project virtualized and responsive', as
         text: `${JSON.stringify(stressProject, null, 2)}\n`,
     }]);
     await page.getByTestId('import-editor-project').click();
-    await expect(page.getByTestId('point-workspace-status'))
-        .toContainText('当前 10 条点轨道、5000 个点；10 条范围轨道、5000 个范围', {
-            timeout: 60_000,
-        });
+    await expect(page.locator('.marker-lane')).toHaveCount(20,{timeout:60000});
     const firstPointSurface = page.locator('.marker-surface').first();
     await firstPointSurface.scrollIntoViewIfNeeded();
-    await expect.poll(async () => page.locator('.point-marker, .range-marker').count())
+    await expect.poll(async () => page.locator('.marker-point, .marker-range').count())
         .toBeGreaterThan(0);
     const visibleEventDom = {
-        points: await page.locator('.point-marker').count(),
-        ranges: await page.locator('.range-marker').count(),
+        points: await page.locator('.marker-point').count(),
+        ranges: await page.locator('.marker-range').count(),
     };
     expect(visibleEventDom.points)
         .toBeLessThanOrEqual(expectedVisible.points);
@@ -435,19 +437,18 @@ test('keeps a deterministic 10,000-event project virtualized and responsive', as
     });
 
     const feedback: Record<string, number> = {};
-    const zoomButton = page.getByTestId('editor-zoom-in');
-    await zoomButton.scrollIntoViewIfNeeded();
+    const timeline = page.getByTestId('editor-timeline');
+    await timeline.scrollIntoViewIfNeeded();
     await page.evaluate(() => new Promise<void>((resolve) => {
         requestAnimationFrame(() => requestAnimationFrame(() => resolve()));
     }));
-    await observeInputToMutation(page, '[data-testid="editor-zoom-in"]', '[data-testid="editor-viewport-state"]', 'zoom');
-    await zoomButton.click();
+    await observeInputToMutation(page, '[data-testid="editor-timeline"]', '[data-testid="editor-viewport-state"]', 'zoom');
+    await timeline.press('+');
     feedback.zoom = await readFeedback(page, 'zoom');
-    await observeInputToMutation(page, '[data-testid="editor-pan-forward"]', '[data-testid="editor-viewport-state"]', 'pan');
-    await page.getByTestId('editor-pan-forward').click();
+    await observeInputToMutation(page, '[data-testid="editor-timeline"]', '[data-testid="editor-viewport-state"]', 'pan');
+    await timeline.press(']');
     feedback.pan = await readFeedback(page, 'pan');
 
-    const timeline = page.getByTestId('editor-timeline');
     const timelineBounds = await timeline.boundingBox();
     expect(timelineBounds).toBeTruthy();
     const beforeSeek = await page.getByTestId('playback-progress').getAttribute('aria-valuenow');
@@ -459,18 +460,19 @@ test('keeps a deterministic 10,000-event project virtualized and responsive', as
     feedback.seek = await readFeedback(page, 'seek');
 
     await firstPointSurface.scrollIntoViewIfNeeded();
-    const pointBefore = await page.locator('.point-marker').count();
+    const pointBefore = await page.locator('.marker-point').count();
     await observeInputToMutation(page, '.marker-surface', '[data-testid="editor-point-workspace"]', 'point');
-    await firstPointSurface.click({ position: { x: 700, y: 20 } });
-    await expect.poll(async () => page.locator('.point-marker').count())
+    await firstPointSurface.click({ position: { x: (await firstPointSurface.boundingBox())!.width * .7, y: 20 } });
+    await expect.poll(async () => page.locator('.marker-point').count())
         .toBeGreaterThanOrEqual(pointBefore);
     feedback.point = await readFeedback(page, 'point');
 
-    await page.locator('.range-surface').first().scrollIntoViewIfNeeded();
+    await timeline.press('Home');
+    await page.locator('[data-testid^="range-surface-"]').first().scrollIntoViewIfNeeded();
     const firstRangeHandle = page.locator('[data-testid^="range-end-handle-"]').first();
     await firstRangeHandle.scrollIntoViewIfNeeded();
     await observeInputToMutation(page, '[data-testid^="range-end-handle-"]', '[data-testid="editor-point-workspace"]', 'range');
-    await firstRangeHandle.press('ArrowRight');
+    await firstRangeHandle.press('ArrowLeft');
     feedback.range = await readFeedback(page, 'range');
 
     await page.getByTestId('editor-overlay-menu-toggle').click();
@@ -498,7 +500,7 @@ test('keeps a deterministic 10,000-event project virtualized and responsive', as
         await firstPointSurface.scrollIntoViewIfNeeded();
         const [surfaceBounds, timelineBox, overlayBox] = await Promise.all([
             firstPointSurface.boundingBox(),
-            timeline.boundingBox(),
+            page.getByTestId('marker-ruler-time').boundingBox(),
             page.getByTestId('editor-analysis-overlay-panel').boundingBox(),
         ]);
         expect(surfaceBounds).toBeTruthy();
@@ -518,6 +520,8 @@ test('keeps a deterministic 10,000-event project virtualized and responsive', as
         invalidBackingStores: canvases.filter((element) => {
             const canvas = element as HTMLCanvasElement;
             const bounds = canvas.getBoundingClientRect();
+            const scroll = canvas.closest('.marker-scroll')?.getBoundingClientRect();
+            if (scroll && (bounds.bottom <= scroll.top || bounds.top >= scroll.bottom)) return false;
             const visible = bounds.bottom >= 0
                 && bounds.top <= innerHeight
                 && bounds.right >= 0
@@ -571,6 +575,9 @@ test('keeps keyboard semantics, visible focus and stable resources over 20 cycle
             await page.getByTestId('overwrite-conflicting-draft').click();
         }
         await expect(page.getByTestId('editor-ready')).toBeVisible({ timeout: 30_000 });
+        if (await page.locator('#music-bar-container').getAttribute('data-playback-state') === 'playing') await page.getByTestId('toggle-playback').click();
+        await addMarkerLane(page,'point'); await addMarkerLane(page,'range');
+        await expect(page.getByTestId('editor-save-state')).toHaveAttribute('data-state','saved');
         const playback = page.getByTestId('toggle-playback');
         await playback.focus();
         await page.keyboard.press('Space');
@@ -582,6 +589,9 @@ test('keeps keyboard semantics, visible focus and stable resources over 20 cycle
         expect(focus.outlineWidth).not.toBe('0px');
         await page.keyboard.press('Space');
         await page.getByRole('link', { name: 'Analyzer' }).click();
+        if (await page.getByTestId('editor-leave-dialog').isVisible()) {
+            await page.getByTestId('editor-leave-suppress').check(); await page.getByTestId('editor-leave-confirm').click();
+        }
         await expect(page).toHaveURL(/\/analyzer$/);
         await page.getByRole('link', { name: 'AUDIOSURF' }).click();
         await expect(page.locator('#music-bar-container')).toBeVisible();
