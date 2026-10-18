@@ -13,7 +13,7 @@ owner 已授权修改任务完成适用验证后本地提交一次，无需再�
 
 ## 完成
 
-1. 按实际改动运行适用验证，修复相关失败；不能运行的部分如实说明。
+1. Prettier 支持的手写代码按明确的本次修改文件列表运行 `npm run format -- <file...>` 与 `npm run format:check -- <file...>`；其他代码人工正常排版。不格式化全仓、生成文件或用户无关修改，不压缩代码规避行数。再按实际改动运行适用验证，修复相关失败；不能运行的部分如实说明。
 2. 修改交付时运行 `npm run skills:install`、`npm run codemap` 和 `npm run repo:check`；工具实现变化再运行 `npm run test:tools`。检查 `git diff --check`。
 3. 审阅 diff，区分用户已有修改；只暂存本次文件或明确片段。审阅 `git diff --cached`、`--name-status` 和 `--check`。
 4. 已有无关暂存修改时用临时索引隔离本次提交，保留用户索引；同文件混合改动无法可靠分离时说明阻碍，不一起提交。

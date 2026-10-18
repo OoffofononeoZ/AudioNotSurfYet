@@ -6,6 +6,8 @@
 
 | 文件 | 本地静态引用（最多显示 6 项） |
 | --- | --- |
+| [tests/tools/visualizer-media-alignment.test.mjs](../../tests/tools/visualizer-media-alignment.test.mjs) | [tests/support/visualizer-audio-timeline.mjs](../../tests/support/visualizer-audio-timeline.mjs)、[tests/support/visualizer-media-alignment.mjs](../../tests/support/visualizer-media-alignment.mjs) |
+| [tests/tools/visualizer-video-timeline.test.mjs](../../tests/tools/visualizer-video-timeline.test.mjs) | [tests/support/visualizer-video-timeline.mjs](../../tests/support/visualizer-video-timeline.mjs) |
 | [tests/transcription/auditionHarness.ts](../../tests/transcription/auditionHarness.ts) | [src/audio/audioEngine.ts](../../src/audio/audioEngine.ts)、[src/audio/auditionTypes.ts](../../src/audio/auditionTypes.ts)、[src/processing/stemAuditionSource.ts](../../src/processing/stemAuditionSource.ts)、[src/processing/storage.ts](../../src/processing/storage.ts) |
 | [tests/transcription/candidates.test.ts](../../tests/transcription/candidates.test.ts) | [src/editor/projectCodec.ts](../../src/editor/projectCodec.ts)、[src/transcription/applyCandidates.ts](../../src/transcription/applyCandidates.ts)、[src/transcription/candidateTypes.ts](../../src/transcription/candidateTypes.ts)、[src/transcription/candidates.ts](../../src/transcription/candidates.ts) |
 | [tests/transcription/controller.test.ts](../../tests/transcription/controller.test.ts) | [src/processing/kernel.ts](../../src/processing/kernel.ts)、[src/transcription/candidateTypes.ts](../../src/transcription/candidateTypes.ts)、[src/transcription/controller.ts](../../src/transcription/controller.ts)、[src/transcription/workerProtocol.ts](../../src/transcription/workerProtocol.ts) |
