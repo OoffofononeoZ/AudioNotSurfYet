@@ -4,3 +4,4 @@
 .editor-icon-button[aria-pressed='true'] { color: var(--accent-soft); background: var(--control-active); }
 .editor-icon-button:focus-visible { outline: 2px solid var(--accent-soft); outline-offset: 2px; }
 .editor-icon-button:disabled { opacity: .35; cursor: default; }
+.editor-exp-badge { display: inline-flex; align-items: center; flex: none; padding: 1px 5px; border: 1px solid color-mix(in srgb, var(--warning) 20%, transparent); border-radius: var(--radius-xs); background: color-mix(in srgb, var(--warning) 5%, transparent); color: color-mix(in srgb, var(--warning) 65%, var(--mute)); font: 10px/14px ui-monospace, monospace; letter-spacing: .02em; }

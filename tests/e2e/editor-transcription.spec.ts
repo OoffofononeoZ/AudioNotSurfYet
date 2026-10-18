@@ -1,3 +1,4 @@
+import { openEditorWorkspace } from '../support/editor-workspaces';
 import { addMarkerLane } from '../support/editor-marking';
 import fs from 'node:fs/promises';
 import {readFileSync} from 'node:fs';
@@ -44,13 +45,13 @@ test('Editor real FT → five-role candidates → auxiliary audition → atomic 
     const surface = page.locator('[data-testid^="marker-surface-"]').first(),bounds = await surface.boundingBox();await surface.click({position:{x:bounds!.width*.2,y:bounds!.height/2}});
     await expect(page.locator('[data-testid^="point-marker-"]')).toHaveCount(1);await expect.poll(async() => (await project(page)).lanes[0]?.events.length).toBe(1);
     const before = await project(page);
-    await page.getByTestId('editor-separation-tab').click();await expect(page.getByTestId('editor-separation')).toHaveAttribute('data-state','idle',{timeout:30000});
+    await openEditorWorkspace(page,'separation');await expect(page.getByTestId('editor-separation')).toHaveAttribute('data-state','idle',{timeout:30000});
     const stopSampler = await startSystemSampler(),started = Date.now();let memory:Awaited<ReturnType<typeof stopSampler>>;
     try {
         await page.getByTestId('editor-separate-start').click();
         await expect.poll(() => page.getByTestId('editor-separation').getAttribute('data-state'),{timeout:500000}).toMatch(/^(ready|error|cancelled)$/);
         expect(await page.getByTestId('editor-separation').getAttribute('data-state'),(await page.getByTestId('editor-separation-message').allTextContents()).join(' ')).toBe('ready');
-        await page.getByTestId('editor-transcription-tab').click();await expect(page.getByTestId('transcription-start')).toBeEnabled({timeout:30000});await page.getByTestId('transcription-start').click();
+        await openEditorWorkspace(page,'transcription');await expect(page.getByTestId('transcription-start')).toBeEnabled({timeout:30000});await page.getByTestId('transcription-start').click();
         await expect.poll(() => page.getByTestId('editor-transcription').getAttribute('data-state'),{timeout:500000}).toMatch(/^(ready|partial|error|cancelled)$/);
     } finally { memory = await stopSampler();await fs.writeFile(path.join(directory,'memory.json'),JSON.stringify(memory,null,2));await fs.writeFile(path.join(directory,'console.json'),JSON.stringify({logs,issues},null,2)); }
     const status = await page.getByTestId('editor-transcription').getAttribute('data-state');
@@ -75,7 +76,7 @@ test('Editor real FT → five-role candidates → auxiliary audition → atomic 
     await page.getByTestId('transcription-apply').click();await expect(page.getByTestId('transcription-apply'),(await page.getByTestId('transcription-message').allTextContents()).join(' ')).toHaveText('本结果已应用');await expect(page.getByTestId('transcription-apply')).toBeDisabled();
     await expect.poll(async() => (await project(page)).lanes.length).toBeGreaterThan(before.lanes.length);const after = await project(page);expect(after.tempoMap).toEqual(before.tempoMap);expect(after.lanes[0]).toEqual(before.lanes[0]);await fs.writeFile(path.join(directory,'applied-project-v1.json'),JSON.stringify(after,null,2));
     for (const width of [390,1280]) { await page.setViewportSize({width,height:900});await page.screenshot({path:path.join(directory,`review-${width}.png`),fullPage:true});expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth+1)).toBe(true); }
-    await page.reload();await expect(page.getByTestId('editor-ready')).toBeVisible({timeout:30000});await page.getByTestId('editor-transcription-tab').click();await expect(page.getByTestId('editor-transcription')).toHaveAttribute('data-state','ready',{timeout:30000});await expect(page.getByTestId('transcription-apply')).toBeDisabled();expect((await project(page)).lanes).toEqual(after.lanes);
+    await page.reload();await expect(page.getByTestId('editor-ready')).toBeVisible({timeout:30000});await openEditorWorkspace(page,'transcription');await expect(page.getByTestId('editor-transcription')).toHaveAttribute('data-state','ready',{timeout:30000});await expect(page.getByTestId('transcription-apply')).toBeDisabled();expect((await project(page)).lanes).toEqual(after.lanes);
     await page.getByTestId('transcription-start').click();await expect(page.getByTestId('editor-transcription')).toHaveAttribute('data-state','running');await page.getByTestId('transcription-cancel').click();await expect(page.getByTestId('editor-transcription')).toHaveAttribute('data-state','cancelled',{timeout:15000});await expect(page.getByTestId('transcription-apply')).toBeDisabled();expect((await records(page))[0]!.bundle.result.id).toBe(record.bundle.result.id);
     for (const instrument of ['低音','人声','钢琴','吉他']) await page.getByRole('checkbox',{name:new RegExp(`^${instrument} Basic Pitch`)}).uncheck();
     const encoderHash = '71f89f6aba1dd74bf2792a9b19f89b4a8ec438362e6429d9578ffd9ea2e5320f';

@@ -1,3 +1,4 @@
+import { openEditorWorkspace } from '../support/editor-workspaces';
 import { addMarkerLane } from '../support/editor-marking';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -20,7 +21,7 @@ async function openEditor(page:Page){
     await installFilePickerStub(page);await page.goto('/');await chooseFiles(page,[fixture]);
     await expect(page.locator('#music-bar-container')).toHaveAttribute('data-playback-state','playing',{timeout:30_000});
     await page.getByTestId('header-editor-link').click();await expect(page.getByTestId('editor-ready')).toBeVisible({timeout:30_000});
-    await page.getByTestId('toggle-playback').click();await page.getByTestId('editor-separation-tab').click();
+    await page.getByTestId('toggle-playback').click();await openEditorWorkspace(page,'separation');
     await expect(page.getByTestId('editor-separation')).toHaveAttribute('data-state','idle',{timeout:30_000});
 }
 async function localModels(page:Page){
@@ -63,7 +64,7 @@ test('Editor runs four original FT models, exports exact WAVs, restores cache an
     await page.getByTestId('editor-marking-tab').click();await page.getByTestId('tempo-bpm-0').fill('120');await page.getByTestId('tempo-bpm-0').press('Enter');await addMarkerLane(page,'point');
     const surface=page.locator('[data-testid^="marker-surface-"]').first(),bounds=await surface.boundingBox();
     await surface.click({position:{x:bounds!.width*.2,y:bounds!.height/2}});await expect(page.locator('[data-testid^="point-marker-"]')).toHaveCount(1);
-    await page.getByTestId('editor-separation-tab').click();
+    await openEditorWorkspace(page,'separation');
     await expect.poll(()=>page.getByTestId('editor-separation').getAttribute('data-state'),{timeout:500_000}).toMatch(/^(ready|error|cancelled)$/);
     expect(await page.getByTestId('editor-separation').getAttribute('data-state'),(await page.getByTestId('editor-separation-message').allTextContents()).join(' ')||'FT completion').toBe('ready');
     const records=await page.evaluate(async()=>{
@@ -110,7 +111,7 @@ test('Editor runs four original FT models, exports exact WAVs, restores cache an
     await page.getByTestId('editor-marking-tab').click();
     await expect.poll(async()=>(await sharedPlayback(page)).audition?.kind).toBe('ft');
     await expect(page.locator('[data-testid^="point-marker-"]')).toHaveCount(1);
-    await page.getByTestId('editor-separation-tab').click();await page.getByTestId('editor-stem-play').click();
+    await openEditorWorkspace(page,'separation');await page.getByTestId('editor-stem-play').click();
     await expect.poll(async()=>(await sharedPlayback(page)).state).toBe('paused');
     await slider.focus();await slider.press('End');await slider.press('ArrowLeft');
     await page.getByTestId('editor-stem-play').click();
@@ -126,9 +127,9 @@ test('Editor runs four original FT models, exports exact WAVs, restores cache an
     const resources=await page.evaluate(()=>(window as unknown as {__editorFtResources:unknown}).__editorFtResources);
     expect(resources).toMatchObject({maxContexts:1});expect((resources as {maxWorkers:number;workers:number}).maxWorkers).toBeLessThanOrEqual(2);
     expect((resources as {workers:number}).workers).toBeLessThanOrEqual(1);
-    await page.reload();await expect(page.getByTestId('editor-ready')).toBeVisible({timeout:30_000});await page.getByTestId('editor-separation-tab').click();
+    await page.reload();await expect(page.getByTestId('editor-ready')).toBeVisible({timeout:30_000});await openEditorWorkspace(page,'separation');
     await expect(page.getByTestId('editor-separation-saved')).toHaveText('已恢复本地结果',{timeout:60_000});
-    await page.getByTestId('editor-marking-tab').click();await expect(page.locator('[data-testid^="point-marker-"]')).toHaveCount(1);await page.getByTestId('editor-separation-tab').click();
+    await page.getByTestId('editor-marking-tab').click();await expect(page.locator('[data-testid^="point-marker-"]')).toHaveCount(1);await openEditorWorkspace(page,'separation');
     await page.getByTestId('editor-separate-start').click();
     await expect(page.getByTestId('editor-separation')).toHaveAttribute('data-state','running');
     await page.getByRole('link',{name:'AUDIOSURF',exact:true}).click();await expect(page.getByRole('dialog',{name:'离开 Editor？'})).toBeVisible();
@@ -136,7 +137,7 @@ test('Editor runs four original FT models, exports exact WAVs, restores cache an
     await page.getByRole('link',{name:'AUDIOSURF',exact:true}).click();await page.getByRole('button',{name:'仍然离开',exact:true}).click();
     await expect(page).toHaveURL(/\/$/,{timeout:10_000});
     await page.getByTestId('header-editor-link').click();await expect(page.getByTestId('editor-ready')).toBeVisible();
-    await page.getByTestId('editor-separation-tab').click();await expect(page.getByTestId('editor-separation-saved')).toHaveText('已恢复本地结果',{timeout:60_000});
+    await openEditorWorkspace(page,'separation');await expect(page.getByTestId('editor-separation-saved')).toHaveText('已恢复本地结果',{timeout:60_000});
     await page.getByTestId('editor-separation-storage-toggle').click();await page.getByTestId('editor-clear-stem-results').click();await page.getByTestId('editor-confirm-stem-clear').click();
     await expect(page.getByTestId('editor-separation')).toHaveAttribute('data-state','idle');await expect(page.getByTestId('editor-stem-results')).toHaveCount(0);
     await expect(page.getByTestId('editor-model-download-size')).toContainText('四个模型已缓存');
@@ -167,7 +168,7 @@ test('switching songs cancels the old Editor task and never presents its result 
     await page.getByTestId('next-track').click();await expect(page.locator('#music-bar-container')).toHaveAttribute('data-playback-state','playing');
     await page.getByTestId('header-editor-link').click();await expect(page.getByTestId('overwrite-conflicting-draft')).toBeVisible();
     await page.getByTestId('overwrite-conflicting-draft').click();await expect(page.getByTestId('editor-ready')).toBeVisible();
-    expect(page.url()).not.toBe(original);await page.getByTestId('editor-separation-tab').click();
+    expect(page.url()).not.toBe(original);await openEditorWorkspace(page,'separation');
     await expect(page.getByTestId('editor-separation')).toHaveAttribute('data-state','idle');await expect(page.getByTestId('editor-stem-results')).toHaveCount(0);
     await page.waitForTimeout(1000);await expect(page.getByTestId('editor-separation')).toHaveAttribute('data-state','idle');
 });

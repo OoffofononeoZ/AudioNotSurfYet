@@ -2,6 +2,7 @@ import { expect, test, type Page } from '@playwright/test';
 import path from 'node:path';
 import { chooseFiles, installFilePickerStub, savedPickerEntries } from '../support/file-picker';
 import { addMarkerLane } from '../support/editor-marking';
+import { openEditorWorkspace } from '../support/editor-workspaces';
 
 async function openEditor(page: Page) {
     await installFilePickerStub(page);
@@ -135,8 +136,8 @@ test('independent workspaces retain nodes and scroll positions inside the player
     await openEditor(page);
     for (let index = 0; index < 14; index++) await addMarkerLane(page,'point');
     const positions: Record<string, number> = {};
-    for (const name of ['marking', 'separation', 'transcription']) {
-        await page.getByTestId(`editor-${name}-tab`).click();
+    for (const name of ['marking', 'separation', 'transcription'] as const) {
+        await openEditorWorkspace(page, name);
         const panel = name === 'marking' ? page.locator('.marker-scroll') : page.locator(`#editor-${name}-panel`);
         positions[name] = await panel.evaluate(element => {
             element.scrollTop = element.scrollHeight;
@@ -145,8 +146,8 @@ test('independent workspaces retain nodes and scroll positions inside the player
         expect(positions[name]).toBeGreaterThan(0);
         await panel.evaluate(element => element.setAttribute('data-retained-node', 'yes'));
     }
-    for (const name of ['marking', 'separation', 'transcription']) {
-        await page.getByTestId(`editor-${name}-tab`).click();
+    for (const name of ['marking', 'separation', 'transcription'] as const) {
+        await openEditorWorkspace(page, name);
         const panel = name === 'marking' ? page.locator('.marker-scroll') : page.locator(`#editor-${name}-panel`);
         await expect(panel).toHaveAttribute('data-retained-node', 'yes');
         expect(await panel.evaluate(element => element.scrollTop)).toBe(positions[name]);
@@ -189,8 +190,9 @@ test('responsive shell stays within the viewport for both sidebars and all playe
                         scrollHeight: document.documentElement.scrollHeight, height: innerHeight, overflow: document.documentElement.scrollWidth - innerWidth, settingReachable };
                 });
                 expect(metrics.toolbar).toBe(metrics.available < 800 ? 106 : 64);
-                expect(metrics.panelTop).toBe(metrics.toolbar);
-                expect(Math.abs(metrics.panelBottom - metrics.frameBottom)).toBeLessThanOrEqual(1);
+                const padding = width <= 600 ? 12 : 16;
+                expect(metrics.panelTop).toBe(metrics.toolbar + padding);
+                expect(Math.abs(metrics.panelBottom - metrics.frameBottom + padding)).toBeLessThanOrEqual(1);
                 expect(metrics.scrollHeight).toBe(metrics.height);
                 expect(metrics.overflow).toBeLessThanOrEqual(1);
                 expect(metrics.settingReachable).toBe(true);
