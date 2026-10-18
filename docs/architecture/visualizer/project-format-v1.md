@@ -6,10 +6,12 @@ upstream_docs:
   - "docs/product/scope.md"
   - "docs/architecture/system-design.md"
   - "docs/architecture/interface-contracts.md"
-next_action: "保留历史 V1 格式与当前实现；新处理链按 ADR-0027/V2 子契约制定迁移 delivery，场景追加仍使用 ADR-0021"
+next_action: "保留历史 V1 与未实施的 V2 设计；现行格式为 Project V3，内容生成按 DEC-082"
 ---
 
 # Visualizer Project Format V1
+
+> 当前格式与生成适用关系：新建/草稿/导出只使用 [Project V3](project-format-v3.md)，V1/V2 不迁移。新增元素与预设遵循[内容生成契约](content-generation.md)，下文 V1、旧 V2 计划与场景注册仅保留历史语境。
 
 > 2026-10-04：本文保留 V1 已批准的历史格式与当前实现。浏览器处理目标的新建/草稿/导出将只写 V2，V1 import 单向迁移；未来格式以 [V2 子契约](../processing/worker-and-project-contracts.md#visualizer-v2-snapshot-migration-and-tempo-refresh) 为准，新代码仍待 delivery 批准。
 

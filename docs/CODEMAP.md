@@ -40,4 +40,4 @@
 - [audiosurf-file-modularization](../skills/audiosurf-file-modularization/SKILL.md)
 - [audiosurf-git-task-delivery](../skills/audiosurf-git-task-delivery/SKILL.md)
 - [audiosurf-testing-strategy](../skills/audiosurf-testing-strategy/SKILL.md)
-- [visualizer-scene-generator](../skills/visualizer-scene-generator/SKILL.md)
+- [visualizer-content-generator](../skills/visualizer-content-generator/SKILL.md)

@@ -1,0 +1,6 @@
+interface:
+  display_name: "Visualizer Content Generator"
+  short_description: "为 AudioNotSurfYet 生成先审批合同的原子元素与组合预设"
+  default_prompt: "Use $visualizer-content-generator to turn my visual idea into editable AudioNotSurfYet elements or a composition preset; validate the brief and present a concrete contract for approval before implementation."
+policy:
+  allow_implicit_invocation: true

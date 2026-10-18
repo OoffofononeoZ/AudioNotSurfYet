@@ -11,4 +11,4 @@
 | [scripts/install-project-skills.mjs](../../scripts/install-project-skills.mjs) | [scripts/lib/repository.mjs](../../scripts/lib/repository.mjs) |
 | [scripts/lib/repository.mjs](../../scripts/lib/repository.mjs) | — |
 | [scripts/lib/source-map.mjs](../../scripts/lib/source-map.mjs) | [scripts/lib/repository.mjs](../../scripts/lib/repository.mjs) |
-| [skills/visualizer-scene-generator/scripts/validate-scene-brief.mjs](../../skills/visualizer-scene-generator/scripts/validate-scene-brief.mjs) | — |
+| [skills/visualizer-content-generator/scripts/validate-content-brief.mjs](../../skills/visualizer-content-generator/scripts/validate-content-brief.mjs) | — |

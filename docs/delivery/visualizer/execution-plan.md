@@ -179,6 +179,8 @@ Exit gate:
 
 ### Post-V6 — Controlled built-in scene extension
 
+> 历史交付流程：DEC-082/[内容生成契约](../../architecture/visualizer/content-generation.md)已替代以下 SceneBriefV1、template/registry 和实时录制验证步骤。当前新增元素与组合预设（含纯复用）均先批准具体合同；不执行此处旧生成链。
+
 Delivery sequence:
 
 1. 将自然语言规范化为 `SceneBriefV1`；缺少主要效果、驱动属性、绑定类型、响应语义或时间行为时返回 `INPUT_INCOMPLETE`，且不修改仓库。

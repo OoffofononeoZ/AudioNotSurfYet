@@ -7,10 +7,12 @@ upstream_docs:
   - "docs/architecture/system-design.md"
   - "docs/architecture/visualizer/project-format-v1.md"
   - "docs/architecture/visualizer/binding-and-scene-contracts.md"
-next_action: "实现并安装 visualizer-scene-generator Skill；第一个真实新场景仍须单独提交完整 brief 与 Scene Contract 审批"
+next_action: "保留历史批准；当前原子元素与预设生成改用 DEC-082 和 content-generation 契约"
 ---
 
 # ADR-0021: Controlled Visualizer Scene Generation
+
+> 2026-10-18 适用关系：下文保留 2026-09-04 的批准事实。Project V3 已移除旧模板注册；DEC-082/[当前内容生成契约](../visualizer/content-generation.md)替代本 ADR 的输入 schema、注册与测试执行步骤，将输入校验和具体合同审批延续到所有新增原子元素与组合预设。历史 evidence/readiness 不变。
 
 ## Context
 
