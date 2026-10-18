@@ -20,10 +20,10 @@
 | Editor 领域与工程 | 28 | [模块地图](codemap/editor.md) |
 | FT 分离与处理 | 16 | [模块地图](codemap/processing.md) |
 | Visualizer、场景与录制 | 42 | [模块地图](codemap/visualizer.md) |
-| 页面、布局与组件 | 53 | [模块地图](codemap/ui.md) |
+| 页面、布局与组件 | 54 | [模块地图](codemap/ui.md) |
 | 应用入口、状态与共享模块 | 31 | [模块地图](codemap/shared.md) |
 | 仓库工具 | 6 | [模块地图](codemap/tooling.md) |
-| 验证 | 237 | [模块地图](codemap/tests.md) |
+| 验证 | 239 | [模块地图](codemap/tests.md) |
 
 ## 规范与资料入口
 

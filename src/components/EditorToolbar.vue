@@ -5,7 +5,7 @@
             <button type="button" class="editor-icon-button" :disabled="!ready" aria-label="导出工程（JSON V1）" title="导出工程（JSON V1）" data-testid="export-editor-project" @click="emit('export')"><EditorIcon name="export" /></button>
         </div>
         <nav class="editor-tabs" aria-label="Editor 工作区" role="tablist" @keydown="switchFromKeyboard">
-            <button v-for="tab in tabs" :id="`editor-${tab.id}-tab`" :key="tab.id" type="button" role="tab" :aria-controls="`editor-${tab.id}-panel`" :aria-selected="workspace === tab.id" :tabindex="workspace === tab.id ? 0 : -1" :disabled="!ready" :data-testid="`editor-${tab.id}-tab`" @click="emit('update:workspace', tab.id)">{{ tab.label }}</button>
+            <button v-for="tab in tabs" :id="`editor-${tab.id}-tab`" :key="tab.id" type="button" role="tab" :aria-label="tab.label + (tab.id === 'marking' ? '' : '（实验性）')" :aria-controls="`editor-${tab.id}-panel`" :aria-selected="workspace === tab.id" :tabindex="workspace === tab.id ? 0 : -1" :disabled="!ready" :data-testid="`editor-${tab.id}-tab`" @click="emit('update:workspace', tab.id)">{{ tab.label }}<span v-if="tab.id !== 'marking'" class="editor-exp-badge" aria-hidden="true">exp</span></button>
         </nav>
         <div class="toolbar-status">
             <span class="persistence-state" :data-state="persistence" aria-live="polite" data-testid="editor-save-state">{{ ready ? persistenceLabel : '新工程' }}</span>
@@ -39,14 +39,14 @@ function switchFromKeyboard(event: KeyboardEvent) {
 .persistence-state[data-state='not-persisted'] { color: var(--error); }
 .overlay-slot { width: 72px; height: 34px; flex: none; }
 .editor-tabs { gap: 24px; height: 100%; }
-.editor-tabs button { position: relative; height: 100%; padding: 0 2px; border: 0; border-radius: 0; color: var(--mute); background: transparent; font-size: 12px; white-space: nowrap; }
+.editor-tabs button { position: relative; display: inline-flex; align-items: center; gap: 6px; height: 100%; padding: 0 2px; border: 0; border-radius: 0; color: var(--mute); background: transparent; font-size: 12px; white-space: nowrap; }
 .editor-tabs button[aria-selected='true'] { color: var(--accent-soft); }
 .editor-tabs button[aria-selected='true']::after { content: ''; position: absolute; height: 2px; bottom: 0; left: 0; right: 0; background: var(--accent-soft); }
 .editor-tabs button:focus-visible { outline: 2px solid var(--accent-soft); outline-offset: -4px; }
 button:disabled { opacity: .35; cursor: default; }
 @container app-workspace (max-width: 799px) {
     .editor-toolbar { grid-template-columns: 1fr auto; height: 106px; grid-template-rows: 63px 42px; }
-    .editor-tabs { grid-column: 1 / -1; grid-row: 2; justify-content: center; height: 42px; }
+    .editor-tabs { grid-column: 1 / -1; grid-row: 2; justify-content: center; gap: 16px; height: 42px; }
     .toolbar-status { grid-column: 2; grid-row: 1; }
 }
 @media (max-width: 767px) { .editor-toolbar { padding-left: 60px; column-gap: 4px; } .toolbar-status { gap: 8px; } }

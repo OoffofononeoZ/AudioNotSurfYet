@@ -69,18 +69,21 @@
                     @retry-overlay="controller.retryOverlayAnalysis()"
                 />
                 </div>
-                <div id="editor-separation-panel" v-show="workspace === 'separation'" class="editor-panel app-scrollbar" role="tabpanel" aria-labelledby="editor-separation-tab" tabindex="0">
+                <div id="editor-separation-panel" v-show="workspace === 'separation'" class="editor-panel app-scrollbar" :class="{ 'editor-experiment-prompt': !experimentAccepted.separation }" role="tabpanel" aria-labelledby="editor-separation-tab" tabindex="0">
+                    <EditorExperimentNotice v-if="!experimentAccepted.separation" feature="separation" @continue="acceptExperiment('separation')" @cancel="returnToMarking" />
                     <EditorSeparationWorkspace
+                        v-show="experimentAccepted.separation"
                         :track-id="snapshot.activeTrackId!"
                         :track-name="snapshot.project.track.fileName"
                         :playback="playback"
-                        :active="workspace === 'separation'"
+                        :active="workspace === 'separation' && experimentAccepted.separation"
                         @seek="audioSession.seek($event)"
                     />
                 </div>
 
-                <div id="editor-transcription-panel" v-show="workspace === 'transcription'" class="editor-panel app-scrollbar" role="tabpanel" aria-labelledby="editor-transcription-tab" tabindex="0">
-                    <EditorTranscriptionWorkspace :playback="playback" :duration="snapshot.project.track.durationSeconds" :active="workspace === 'transcription'" @seek="audioSession.seek($event)" />
+                <div id="editor-transcription-panel" v-show="workspace === 'transcription'" class="editor-panel app-scrollbar" :class="{ 'editor-experiment-prompt': !experimentAccepted.transcription }" role="tabpanel" aria-labelledby="editor-transcription-tab" tabindex="0">
+                    <EditorExperimentNotice v-if="!experimentAccepted.transcription" feature="transcription" @continue="acceptExperiment('transcription')" @cancel="returnToMarking" />
+                    <EditorTranscriptionWorkspace v-show="experimentAccepted.transcription" :playback="playback" :duration="snapshot.project.track.durationSeconds" :active="workspace === 'transcription' && experimentAccepted.transcription" @seek="audioSession.seek($event)" />
                 </div>
 
             </template>
@@ -94,6 +97,7 @@
 <script setup lang="ts">
 import {
     computed,
+    nextTick,
     onBeforeUnmount,
     ref,
     shallowRef,
@@ -108,6 +112,7 @@ import { useAudioSessionService } from '../audio/audioSessionService';
 import EditorToolbar from '../components/EditorToolbar.vue';
 import EditorLeaveGuard from '../components/EditorLeaveGuard.vue';
 import EditorDraftNotice from '../components/EditorDraftNotice.vue';
+import EditorExperimentNotice from '../components/EditorExperimentNotice.vue';
 import '../editor/controls.css';
 import '../editor/marking.css';
 import { provideEditorGrid } from '../editor/useEditorGrid';
@@ -135,6 +140,15 @@ const controller = useEditorSessionController();
 const separationService = useEditorSeparationService();
 const trackNavigation = useEditorTrackNavigation(controller, audioSession, separationService, router);
 const workspace = ref<'marking'|'separation'|'transcription'>('marking');
+const experimentAccepted = ref({ separation: false, transcription: false });
+function acceptExperiment(feature: 'separation' | 'transcription') {
+    experimentAccepted.value[feature] = true;
+    void nextTick(() => document.getElementById(`editor-${feature}-panel`)?.focus({ preventScroll: true }));
+}
+function returnToMarking() {
+    workspace.value = 'marking';
+    void nextTick(() => document.getElementById('editor-marking-tab')?.focus());
+}
 const snapshot = shallowRef(controller.getSnapshot());
 provideEditorGrid(() => snapshot.value.project?.track.contentHash);
 const unsubscribe = controller.subscribe((next) => {
@@ -395,7 +409,7 @@ onBeforeUnmount(() => {
     font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
     background: var(--canvas);
 }
-.editor-shell { flex: 1; display: flex; flex-direction: column; width: 100%; min-width: 0; min-height: 0; overflow: hidden; }
+.editor-shell { box-sizing: border-box; flex: 1; display: flex; flex-direction: column; width: 100%; min-width: 0; min-height: 0; overflow: hidden; padding: 16px; }
 .editor-panel { flex: 1; min-height: 0; overflow: auto; overscroll-behavior: contain; }
 #editor-marking-panel { container-type:size; display:flex; flex-direction:column; overflow:hidden; }
 #editor-marking-panel :deep(.editor-timeline-panel) { flex:none; overflow-x:auto; }
@@ -403,6 +417,8 @@ onBeforeUnmount(() => {
 .editor-state-shell { overflow: auto; overscroll-behavior: contain; }
 .editor-notice-shell { box-sizing: border-box; align-items: center; padding: 28px; }
 .editor-notice-shell > .editor-notice { flex: none; margin-block: auto; }
+.editor-experiment-prompt { display: flex; flex-direction: column; align-items: center; padding: 12px; }
+.editor-experiment-prompt > .editor-notice { flex: none; margin-block: auto; }
 .editor-panel :deep(.stem-workspace) { padding-top: 0; }
 .editor-state { margin: 20px; border: 1px solid var(--hairline); border-radius: 4px; padding: 24px; background: var(--surface-2); }
 .editor-state h2 { margin: 0 0 12px; font-size: 17px; }
@@ -411,5 +427,5 @@ button { box-sizing: border-box; min-height: 30px; border: 1px solid var(--hairl
 button:hover { background: var(--editor-control-hover); }
 button:focus-visible { outline: 2px solid var(--accent-soft); outline-offset: 2px; }
 .editor-error { margin: 0; padding: 6px 14px; border-bottom: 1px solid var(--error-hairline); color: var(--error); font-size: 12px; line-height: 1.5; }
-@media (max-width: 600px) { .editor-notice-shell { padding: 20px 16px; } }
+@media (max-width: 600px) { .editor-shell { padding: 12px; } .editor-notice-shell { padding: 20px 16px; } .editor-experiment-prompt { padding: 4px; } }
 </style>

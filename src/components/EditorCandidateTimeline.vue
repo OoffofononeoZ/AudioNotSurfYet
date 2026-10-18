@@ -59,5 +59,20 @@ onMounted(() => { observer = new ResizeObserver(schedule);if (surface.value) obs
 onBeforeUnmount(() => { observer?.disconnect();if (frame !== null) cancelAnimationFrame(frame); });
 </script>
 <style scoped>
-.candidate-timeline{border:1px solid #2b4334;border-radius:8px;background:#101c14;overflow:hidden}.timeline-controls{display:flex;align-items:center;flex-wrap:wrap;gap:12px;padding:10px;color:#9eb5a7;font-size:12px}.timeline-controls input{width:62px}.timeline-controls input,.timeline-controls button{border:1px solid #3a5241;border-radius:4px;background:#17291e;color:#d3e8db;padding:4px}.timeline-body{display:flex}.row-labels{width:58px;flex:none;background:#13251a;color:#a8c8b6;font-size:11px}.row-labels span{display:flex;align-items:center;height:24px;padding-left:9px}.timeline-surface{position:relative;min-width:0;flex:1;height:192px;cursor:crosshair}.timeline-surface canvas{display:block;width:100%;height:192px}.candidate-cursor{position:absolute;top:0;bottom:0;width:1px;background:#eff9db;pointer-events:none}.candidate-timeline p{margin:0;padding:8px 10px;color:#85a390;font-size:11px}
+.candidate-timeline { overflow: hidden; border: 1px solid var(--divider); border-radius: var(--radius-sm); background: var(--surface-1); }
+.timeline-controls { display: flex; align-items: center; flex-wrap: wrap; gap: 10px 12px; padding: 12px; color: var(--body); font-size: 12px; }
+.timeline-controls label { display: flex; align-items: center; gap: 6px; }
+.timeline-controls input { width: 62px; }
+.timeline-controls input, .timeline-controls button { min-height: 30px; border: 1px solid var(--divider); border-radius: var(--radius-xs); padding: 4px 8px; background: var(--surface-3); color: var(--ink); font: inherit; }
+.timeline-controls button { cursor: pointer; }
+.timeline-controls button:hover { background: var(--control-hover); }
+.timeline-controls input:focus-visible, .timeline-controls button:focus-visible, .timeline-surface:focus-visible { outline: 2px solid var(--accent-soft); outline-offset: -2px; }
+.timeline-controls > span { color: var(--mute); font-size: 11px; font-variant-numeric: tabular-nums; }
+.timeline-body { display: flex; border-block: 1px solid var(--divider); }
+.row-labels { width: 58px; flex: none; background: var(--surface-3); color: var(--body); font-size: 11px; }
+.row-labels span { display: flex; align-items: center; height: 24px; padding-left: 9px; }
+.timeline-surface { position: relative; min-width: 0; flex: 1; height: 192px; cursor: crosshair; }
+.timeline-surface canvas { display: block; width: 100%; height: 192px; }
+.candidate-cursor { position: absolute; top: 0; bottom: 0; width: 1px; background: var(--ink-strong); pointer-events: none; }
+.candidate-timeline p { margin: 0; padding: 10px 12px; color: var(--mute); font-size: 11px; line-height: 1.7; }
 </style>
