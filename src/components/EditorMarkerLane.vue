@@ -94,7 +94,7 @@ onBeforeUnmount(() => dialog.value?.close());
 .marker-lane-management { height:36px; }.marker-category-management { height:48px; padding-left:18px; background:#0b120f; }
 .marker-lane-time-header { position:relative; background:#101a15; }
 .marker-lane-time-header::after { content:''; position:absolute; top:0; bottom:0; left:15%; width:1px; background:#b7dfcf; opacity:.6; }
-input { width:100%; min-width:0; height:26px; padding:3px 4px; border:1px solid transparent; border-radius:3px; color:var(--ink); background:transparent; font:12px inherit; }
+input { width:100%; min-width:0; height:26px; padding:3px 4px; border:1px solid transparent; border-radius:3px; color:var(--ink); background:transparent; font-family:inherit; font-size:12px; }
 input:hover:not(:disabled),input:focus-visible { border-color:var(--hairline-focus); outline:none; background:var(--editor-control); }
 .icon-button { flex:none; display:grid; place-items:center; width:24px; height:26px; padding:4px; border:0; background:transparent; color:var(--muted); cursor:pointer; }
 .icon-button svg { width:16px; height:16px; }.icon-button:hover:not(:disabled) { color:var(--accent-soft); }.icon-button:focus-visible { outline:2px solid var(--accent-soft); outline-offset:-2px; }

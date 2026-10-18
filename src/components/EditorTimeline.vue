@@ -4,7 +4,7 @@
             <aside class="beat-control-rail">
                 <h2>节拍标记</h2>
                 <EditorBeatDivisorControl />
-                <div class="timing-disclosure"><span>BPM</span><button type="button" data-testid="toggle-editor-timing" aria-label="展开 BPM 设置" :aria-expanded="timingOpen" aria-controls="editor-timing-workspace" @click="timingOpen = !timingOpen"><EditorIcon :name="timingOpen ? 'up' : 'down'" /></button></div>
+                <div class="timing-disclosure"><span>BPM</span><button type="button" data-testid="toggle-editor-timing" :aria-label="timingOpen ? '收起 BPM 设置' : '展开 BPM 设置'" :aria-expanded="timingOpen" aria-controls="editor-timing-workspace" @click="timingOpen = !timingOpen"><EditorIcon :name="timingOpen ? 'up' : 'down'" /></button></div>
             </aside>
             <div class="timeline-time-column" data-testid="tempo-segments">
                 <div

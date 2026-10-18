@@ -723,11 +723,11 @@ interface EditorRendererAdapter {
 
 Invariants:
 
-- waveform、tempo grid、point/range 与 overlay 必须共享同一个 geometry 实例/纯函数，CSS x 差异目标不超过 1 px。
+- 波形／tempo 使用 `workspace.viewport`；point/range／overlay 显式接收只读 `MarkerTimeView`，不再共享波形视口。两套视图各自内部 CSS x 差异不超过 1 px。轨道默认 10 秒、限制 1–10 秒，播放线固定绘图区 15%，歌曲边界外留白不入工程；跨度按歌曲 hash 保存到 preferences。完整交互替代规则见[当前标记契约](../context/editor-marking.md)。
 - waveform stage 在 `>=900px` 固定为 `88px`、`<900px` 固定为 `72px`；波形以 `height / 2` 为中心，上下各保留 `6px`，归一化 `+1/-1` 不被裁切。
 - Canvas backing store 为 CSS 尺寸乘 DPR；renderer 只接收绘制输入，不读 route、store、DOM 或 pointer 状态。
 - 不可用 route 的同歌曲恢复只允许合并后的 `retry-route`，成功保持 paused 且不得触发播放；另一首可播放歌曲只返回 `offer-current`，必须由用户点击后 `router.replace`，不得静默改路由。
-- point 事件时间 X、marker button 中心、菱形中心和候选框中心的误差不超过 `1 CSS px`；菱形 Y 中心误差同样不超过 `1 CSS px`，引线不参与菱形旋转或中心计算。
+- point 事件时间 X、短实心键中心及候选刻线中心误差不超过 `1 CSS px`；键的 Y 中心与分类行中线误差不超过 `1 CSS px`。范围横条同高，时间由提示提供。
 - overlay 的数据 Canvas、说明和空白不接收 pointer；selector 与三个垂直手柄是唯一交互层。
 - Canvas failure 只使 overlay 进入可重试错误；底层工程、事件、播放和导出继续。
 - pointer/keyboard 状态机、右键优先级、12px 自适应网格和 cleanup 详见 [Editor Interaction Contracts](editor/interaction-contracts.md)。
@@ -740,6 +740,7 @@ interface MarkerBlockSelection {
   innerClassId: string
   startSeconds: number
   endSeconds: number
+  eventIds?: string[]
 }
 
 type MarkerBlockErrorCode =
@@ -756,7 +757,7 @@ interface MarkerBlockCommandResult {
 }
 ```
 
-Invariants：选择只属于一个 lane/inner class；复制生成全新 event ID，移动保留 event ID；point 使用 `[start,end)`，range 必须完全包含；任何错误都在返回新 project 前检测完毕。该类型为模块内部契约，不从产品公共入口导出，也不进入 JSON。
+Invariants：选择只属于一个 lane/inner class；复制生成全新 event ID，移动保留 event ID；新选区冻结 eventIds，point 使用 `[start,end)`，range 可由右侧相交部分加入；完整位于播放线左侧的事件排除。鼠标操作位置及键盘／菜单／批量命令统一检查暂停状态和右侧边界，任何错误都在返回新 project 前检测完毕。该类型为模块内部契约，不从产品公共入口导出，也不进入 JSON。
 
 ## Editor Architecture Approval
 

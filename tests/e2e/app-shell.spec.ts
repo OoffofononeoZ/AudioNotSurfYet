@@ -198,7 +198,8 @@ test('retains the open narrow menu when Editor navigation is cancelled', async (
     await page.getByTestId('sidebar-open').click();
     await page.getByTestId('header-editor-link').click();
     await expect(page.getByTestId('editor-ready')).toBeVisible();
-    await page.getByTestId('add-point-lane').click();
+    await page.getByTestId('toggle-playback').click();
+    await page.getByTestId('add-marker-lane').click(); await page.getByTestId('add-point-lane').click();
     await page.getByTestId('sidebar-open').click();
     await page.getByRole('link', { name: 'Analyzer', exact: true }).click();
     await expect(page.getByTestId('editor-leave-dialog')).toBeVisible();

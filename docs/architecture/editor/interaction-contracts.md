@@ -1,7 +1,7 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-09-04
+last_reviewed: 2026-10-18
 upstream_docs:
   - "docs/product/scope.md"
   - "docs/architecture/system-design.md"
@@ -14,32 +14,34 @@ next_action: "维护当前标记工作区交互；正式 readiness 独立评审"
 ## Page and Layer Topology
 
 - 页面保留共享 Header 和常驻 MusicBar；固定 Editor 顶栏提供工程操作、三工作区页签及叠加层图标。播放与歌曲信息由 MusicBar 提供，Editor 播放租约维持 repeat-one；公共框架见[工作区契约](../../context/editor-workspace.md)。
-- Editor 内容分为基底编辑层和窗口级半透明 overlay 层。标记工作区从上到下为节拍工具栏、由波形与紧贴其下的 28px BPM 标记条组成的共享时间轴、默认收起的手动定时区、状态行和 lane 列表；overlay root 固定覆盖整个 viewport，图形仅在 lane 可标记时间列对应的屏幕横向范围内绘制。
-- 每个 lane 使用对齐的三段结构：名称/事件类型、全部展开的 inner class、与波形和 tempo 网格共享横向几何的标记区。左侧宽度是布局变量，所有横向时间层使用扣除该宽度后的同一 CSS rect。
-- 共享 viewport 是唯一音乐时间窗口。窄屏波形与 lane 的物理横向滚动同步，工具栏和手动定时区固定在容器左缘；inner class 不设内层滚动条，纵向滚动归标记工作区，页面不穿过常驻 MusicBar。
+- 标记页上方为约 280px 节拍控制栏、独立波形与紧贴其下的 28px BPM 条；默认收起的 BPM 面板包含区间列表、当前参数、紧凑 Tap 三块，按容器宽度改为两列／单列，自然高度上限 `min(280px, 标记区高度的35%)`，溢出独立滚动。下方为工具栏、状态与轨道列表；overlay root 仍固定覆盖整个 viewport。
+- lane 按工程顺序混排，合并管理栏为宽屏 224px／窄容器 160px，36px 组标题、48px 分类行，可行内重命名与会话折叠。点／范围共用外框；分类迁移／明确删除、非空轨确认及最后一轨删除保留。
+- 波形与轨道的时间视图和横向滚动独立。上方节拍区保持可见，纵向滚动归下方 `.marker-scroll.app-scrollbar`，不穿过常驻 MusicBar。
 - 不可用 route 在同一歌曲恢复可用后自动重试进入，但不得播放；若当前可播放歌曲与 route 不同，只显示包含歌曲名的“编辑当前歌曲”入口，用户点击后才替换 route。
 
 ## Geometry and Grid
 
-- 波形、tempo、point/range 和 overlay 从同一个 `EditorTimelineGeometry` 读取 viewport、CSS rect 和 `timeToX/xToTime`；任何层不得保存私有横向 zoom/cursor。
-- Canvas backing store 为 CSS 尺寸乘 DPR，绘制前将 context 变换回 CSS pixel 坐标。多层同一时间的目标偏差不超过 1 CSS px。
+- 波形／tempo 使用工程 `workspace.viewport`，首次／重置为全曲并恢复已有保存范围，不随 BPM 改窗口。point/range、吸附、移动、批量与 overlay 显式读取只读 `MarkerTimeView`，默认 10 秒、1–10 秒跨度；起点为播放时间减跨度的 15%，播放线固定绘图区 15%，首尾以不可编辑留白补足。动态起点不入 JSON V1；跨度按歌曲 hash 存现有 preferences。
+- 唯一时间来源是已有 PlaybackSnapshot，播放帧不改工程／不保存草稿。Canvas backing store 为 CSS 尺寸乘 DPR，绘制使用 CSS pixel；波形／tempo 及轨道／overlay 两套视图分别内部共线，误差不超过 1 CSS px。只绘制可见行和事件，轨道／overlay 合并 RAF 请求。
 - metered segment 根据 BPM/meter 生成 measure/beat；与 measure 重合的 beat 不重复。single-beat segment 不画内部线，并把整个 segment 作为一个候选单元。
 - 2026-10-17 标记改版采用显式 subdivision：常规 `[1,2,4,8,16]`、三连音 `[1,3,6,12]`、自定义 1–64 的因数预设。默认每拍四等分；hover、pointer、端点与键盘共享同一设置。缩放不改变吸附粒度，只减少过密次级线绘制，分隔颜色和层级沿用 osu。
 - snap 只发生在创建或拖动确认时。viewport、zoom 或 tempo 修改不会自动重写已有事件秒数。
+- 播放只预览、缩放与查看信息，显示“暂停后编辑”；暂停后开放标记及名称／分类等管理。鼠标、键盘、菜单、批量统一拦截播放线左侧的操作位置；新点与端点吸附后不得回到左侧，无合法刻度时不创建。跨线范围可由右侧选择、整体移动／删除；完整左侧事件不加入新批量选区。管理操作不受 15% 空间限制。
+- 仅轨道时间绘图区接管普通滚轮，每次约 1.12 倍，管理栏保持纵向滚动，Ctrl／Meta 保留浏览器行为；拖动时冻结缩放，seek／播放／源身份变化取消未提交拖动。
+- 区间模式左键拖空白选择小节、拖选区移动；Shift+左右分别向左右扩选，Alt+左右按当前细分移动，Ctrl／Cmd+C 向后复制。Esc 先清选区，再退出模式；输入控件保留自身键盘行为。
 - point marker 为居中实心短键，range 主体为同高长条；按钮、短键图形和候选框以事件时间 X 为中心，任意视口、zoom、pan 与 DPR 下误差不超过 `1 CSS px`，图形 Y 也以按钮中心为准。
 
 ## Shared Pointer Precedence
 
 Editor 只在 waveform/tempo/event timeline 区域阻止 `contextmenu`、文本选择和原生拖拽；Header、表单、链接、页面滚动和辅助技术默认行为保持不变。
 
-右键优先级不可交换：
+轨道右键不平移：
 
-1. 目标为已有 point/range/handle：删除对应事件；不开始 pan，不打开菜单。
-2. range 处于 `awaiting-end`：空白右键取消 pending range；不开始 pan，不打开菜单。
-3. idle 空白右键 pointerdown 后使用 pointer capture；水平移动达到 4 CSS px 进入 pan。
-4. pointerup 前未达到 4 CSS px 时打开快速菜单，提供“跳到此处”“从此处播放”“将此处居中”。
+1. 目标为已有 point/range/handle 且符合暂停及操作位置边界：删除对应事件，不打开菜单。
+2. 右侧空白打开“跳到此处／从此处播放”菜单，统一调用歌曲 seek；不提供“居中”。
+3. 波形保留 4px 右拖 pan、右击 seek／播放／居中菜单，并增加“重置为全曲”。
 
-`pointerup`、`pointercancel`、`lostpointercapture`、blur、Esc 和 route leave 都必须清理 capture、pressed、hover candidate、pending drag 和 menu 状态；不能留下半成品事件或持续按压样式。
+`pointerup`、`pointercancel`、`lostpointercapture`、blur、Esc 和 route leave 清理 capture、pressed 与未提交拖动；菜单由外部点击、滚动、resize 和离页清理。待完成范围起点是独立状态，只按下节的条件清理。
 
 ## Point State Machine
 
@@ -52,7 +54,7 @@ idle
 ```
 
 - point 创建使用当前 lane、inner class 和 snapped seconds；重复 key 不创建第二项，并提供非破坏性反馈。
-- 可见 point 是可聚焦 DOM button；背景空 cell 不生成 DOM。方向键移动候选一个当前 subdivision，Home/End 跳到歌曲边界。
+- 可编辑 point 是可聚焦 DOM button；背景空 cell 不生成 DOM。左右键移动候选一个 subdivision，上下键切分类，Home/End 在当前右侧合法窗口内定位。
 - 右键 point 删除遵循 shared precedence；键盘 Delete/Backspace 是等价路径。
 
 ## Range State Machine
@@ -65,8 +67,8 @@ awaiting-end(start)
   ├─ hover/focus later cell → preview [start, candidate)
   ├─ left click valid later cell → validate overlap → create → idle
   ├─ left click same/earlier cell → stay awaiting-end + explain invalid
-  ├─ Esc / empty right click / blur / route leave → cancel → idle
-  └─ pointercancel → cancel → idle
+  ├─ 同歌 seek / 导航 / 播放 → 保留起点，暂停后选择终点
+  └─ Esc / 取消 / 所属分类删除 / 切页签 / 换工程或歌曲 / 离页 → cancel → idle
 
 idle + drag start/end handle
   → pointer capture
@@ -78,12 +80,12 @@ idle + drag start/end handle
 - preview 是半透明且 pointer-through；未完成 range 不进入 project/draft。
 - range 最短长度为创建/拖动当时一个当前 subdivision；end 必须严格晚于 start，两个 handle 不能穿越。
 - 同 lane/inner class 使用半开区间冲突检查；相邻允许、真实相交拒绝。拖动失败恢复原 event，不产生部分写入。
-- start/end 下方各有可聚焦水平手柄。方向键移动一个当前 subdivision，Shift+方向键移动一个 beat；Home/End 只移动当前端点到合法边界，不能穿越或制造重叠。
+- start/end 手柄位于分类行内，悬停、选中与键盘焦点突出。左右键移动一个 subdivision，Shift+左右移动一个 beat；Home/End 仅移动当前端点到当前可编辑窗口的合法边界，不能穿越或制造重叠。
 - 右键已有 range 删除整项；主体可按当前细分吸附整体移动并保持长度。不裁剪、拆分、自动合并或自由时间拖动。
 
 ## Tempo Interaction
 
-2026-10-17 新增默认收起的手动定时区：展开后使用区间列表与右侧 BPM 辅助栏；选择与时间条边界联动，不随播放自动切换编辑对象。辅助栏输入复用公共控件；Tap 仅预览，显式应用后才修改当前区间。完整现行行为见[标记工作区](../../context/editor-marking.md)。
+默认收起的 BPM 面板由标题与独立 chevron 展开，保留键盘与 aria-expanded；选择与时间条边界联动，不随播放自动切换编辑对象。输入复用公共控件；Tap 保留热身／预览／样本算法，仅显式应用后修改区间。完整现行行为见[标记工作区](../../context/editor-marking.md)。
 
 - 初始 project 有歌曲开始/结束固定边界；结束前显示 add handle。单击 add handle 时优先使用播放 cursor，否则使用 viewport 中点；拖动后在 snapped 时间插入内部 boundary。
 - `BPM` 表示当前拍号单位的一拍每分钟次数：相邻 beat 固定为 `60 / BPM` 秒；numerator 决定每小节的 beat 数，denominator 只表达该 beat 的音符单位，不再按四分音符二次缩放。
@@ -92,7 +94,7 @@ idle + drag start/end handle
 - 初始 metered segment 为 4/4、`bpm: null`、source unset；输入框显示 `bpm: 100` placeholder。只有一个 segment、仍为空且未被用户编辑时，才允许可靠 tempo estimate 填值。
 - 输入 20–300 进入/保持 metered；输入 `0 <= value < 20` 规范为 single-beat并隐藏 meter；无效输入不提交。切回 metered 需要显式选择 metered 并输入合法 BPM，不从旧 single-beat 数值猜测。
 - 修改 tempo 只重绘网格与改变后续 snap；现有 point/range 秒数不移动。
-- 2026-10-17：标记窗口默认四小节，允许 1/2/4/8 小节和全曲；缩放最小一小节，Editor 不再受固定 64× 限制。点和范围主体支持同分类内单项拖动及 Alt+左右微移，范围整体保持长度；预览不入草稿，确认时再做边界与冲突校验，取消保持原值。完整约定见[标记工作区](../../context/editor-marking.md)。
+- 移除小节显示范围及自动窗口规则；点与范围主体支持同分类单项拖动及 Alt+左右微移，范围保持长度；预览不入草稿，确认时复核边界／源身份／冲突，取消保持原值。
 - tempo boundary 不再覆盖波形 stage；紧凑 BPM 标记条是波形时间列的一部分，使用同一 viewport 和唯一水平滚动容器，不带独立左 rail、标签或模块边框。标记条固定 28px 并与波形零间隙相接。
 - 真实 boundary 的向上 caret 位于波形底边，1px 辅助线只向上伸入波形 12px，时间紧贴在 caret 下。相邻 boundary 之间以 11px 同基线显示无框 BPM/拍号控件；输入高 18px，焦点或错误时才显示绿色边线，来源移入 accessible name/title。
 - 区间可容纳完整控件时直接编辑；只能容纳单行摘要时显示摘要；摘要也放不下时不显示区间内容。判断使用同页自然宽度测量、两侧各 26px 安全区并禁止换行，zoom/resize 后重新计算；隐藏区间不能隐藏真实 boundary。
@@ -101,7 +103,7 @@ idle + drag start/end handle
 ## Waveform and Seek
 
 - 左键 waveform 映射到秒并调用唯一 `AudioSessionService.seek()`；播放 cursor 仍来自 `PlaybackSnapshot`。
-- wheel 在 pointer 对应时间锚定 zoom，并阻止该 timeline 区域的页面滚动；普通页面区域继续滚动。
+- 普通 wheel 在 pointer 时间锚定 zoom，Ctrl／Meta 保留浏览器行为；波形右上“查看播放位置／添加分段”图标各为 30×30px。
 - idle 空白右键 drag 执行 pan。键盘提供 zoom in/out/reset、pan 25%、方向键 seek 和 Home/End。
 - 所有命令复用共享 service，不创建媒体元素、播放 RAF 或第二个时钟。
 
@@ -120,7 +122,7 @@ idle + drag start/end handle
 ## DOM and Capacity Boundary
 
 - tempo/beat/measure、波形、empty cells 和 overlay data 使用 Canvas；DOM 只创建当前 viewport 可见的 point/range、端点、表单和语义控件。
-- inner class 全部纵向展开，不使用 lane 内滚动条；标记工作区负责纵向滚动。
+- lane 可折叠，状态仅限当前页面会话；分类不使用内层滚动条，轨道列表负责纵向滚动。
 - viewport 外 event 留在 project model，不进入 DOM；进入 viewport 时用稳定 event ID 恢复焦点语义。若当前焦点事件离开 viewport，焦点回到对应 lane 的候选控制，而不是落到 document body。
 - 所有可见状态都提供文字/形状或 ARIA 语义，不只依赖颜色。hover 放大和 preview 动画尊重 reduced motion。
 
@@ -128,7 +130,7 @@ idle + drag start/end handle
 
 | Scenario | Required result |
 | --- | --- |
-| DPR/resize/zoom/pan | 所有层重用同一 CSS geometry，误差不超过 1 px |
+| DPR/resize/zoom/pan | 两套视图各自内部 geometry 误差不超过 1 px，互不改变对方范围 |
 | 同一 route 歌曲重新获得有效文件 | 合并为一次 route 重试并恢复可编辑，保持 paused，不自动播放 |
 | 当前存在另一首可播放歌曲 | 原 route 继续显示不可用；显示带歌曲名的“编辑当前歌曲”，点击后才 replace route |
 | 重选错误 hash、权限拒绝或解码失败 | 保持不可用，不切歌、不新建或覆盖草稿 |
@@ -136,8 +138,9 @@ idle + drag start/end handle
 | tempo/point/range quick menu | 菜单完整位于视口内；键盘可操作、关闭后返回焦点，滚动和离页清理 |
 | 删除非空／最后一条 lane | 明确确认或取消；确认后移除该轨及事件并持久化，取消不改工程 |
 | 单项主体拖动／Alt+左右 | 同 lane/class 吸附，range 长度不变；冲突和取消不写工程 |
-| 快速右键 drag 后 release | 只 pan；无菜单、无事件、无遗留 pressed |
-| pending range + Esc/blank right/route leave | pending 完全取消，draft 不增加 event |
+| 轨道右键 drag | 不平移；波形继续原右拖 pan |
+| pending range + Esc/取消/分类删除/切页签/换歌/离页 | pending 完全取消，draft 不增加 event |
+| pending range + 同歌导航/播放 | 起点保留，暂停后可跨窗口完成 |
 | range handle pointercancel | 恢复原 start/end |
 | tempo change after markers | grid 变化，event seconds 不变 |
 | overlay pointer click | 事件命中底层 lane；selector/handle 除外 |
@@ -145,13 +148,15 @@ idle + drag start/end handle
 | document vertical scroll | overlay root、图形、入口和手柄 viewport 坐标不变 |
 | Canvas/Worker failure | overlay error 隔离，标记/播放/导出继续 |
 | keyboard-only | 可完成播放、seek、zoom/pan、tempo、point/range、菜单替代和 overlay 调整 |
-| E10 mode off | E3/E5/E9 的创建、删除、quick menu、右键 pan、range handle 全部保持 |
-| E10 right drag | 只选择起始 lane/inner class 的真实小节；无 BPM metered 区间不产生选择 |
+| 区间模式关闭 | 普通创建、删除、菜单与端点编辑恢复 |
+| 区间模式左键拖空白 | 仅选择起始 lane/class 的真实小节；无 BPM 不选择，完整左侧事件排除，跨线范围可从右侧加入 |
 | E10 copy/move conflict | 越界、重复 point 或 range overlap 时 project 字节等价不变并播报原因 |
 | E10 pointer cancel | preview 与 capture 清空，不调用 project update |
 | route leave dialog | 取消路径不离页、不写抑制偏好；确认路径先处理偏好再执行既有 leave |
 
 ## Approval
+
+2026-10-18 owner 明确要求实施“Editor 标记编辑重设计”四阶段计划，批准上述独立时间视图、暂停与操作位置规则、三层布局及批量手势替换旧共享视口／小节窗口／轨道右键 pan。JSON V1、秒数与处理工作区边界不变；以下批准记录及 canonical 身份保留为历史版本，不据此宣称新 readiness。
 
 本交互契约于 2026-08-26 随 Editor system design 创建，并由 `project-owner` 随后批准进入 E1–E6 execution planning。Delivery 必须把上述成功、失败、边界和异常路径映射到可执行验收；delivery 获批前不得实现。
 

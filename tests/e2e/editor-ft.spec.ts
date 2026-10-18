@@ -1,3 +1,4 @@
+import { addMarkerLane } from '../support/editor-marking';
 import fs from 'node:fs';
 import path from 'node:path';
 import { createHash } from 'node:crypto';
@@ -45,7 +46,7 @@ test('Editor FT layout and preserved manual editing at narrow, desktop and wide 
     await expect(page.getByTestId('editor-marking-tab')).toBeFocused();await expect(page.getByTestId('editor-timeline')).toBeVisible();
     await page.keyboard.press('End');await expect(page.getByTestId('editor-transcription-tab')).toBeFocused();
     await page.getByTestId('editor-marking-tab').click();await expect(page.getByTestId('editor-timeline')).toBeVisible();
-    await page.getByTestId('add-point-lane').click();await expect(page.locator('[data-testid^="marker-surface-"]').first()).toBeVisible();
+    await addMarkerLane(page,'point');await expect(page.locator('[data-testid^="marker-surface-"]').first()).toBeVisible();
     expect(issues).toEqual([]);
 });
 test('Editor runs four original FT models, exports exact WAVs, restores cache and explicitly clears it',async({page},info)=>{
@@ -59,7 +60,7 @@ test('Editor runs four original FT models, exports exact WAVs, restores cache an
     });
     await openEditor(page);await page.getByTestId('editor-separate-start').click();
     await expect(page.getByTestId('editor-separation')).toHaveAttribute('data-state','running');
-    await page.getByTestId('editor-marking-tab').click();await page.getByTestId('tempo-bpm-0').fill('120');await page.getByTestId('tempo-bpm-0').press('Enter');await page.getByTestId('add-point-lane').click();
+    await page.getByTestId('editor-marking-tab').click();await page.getByTestId('tempo-bpm-0').fill('120');await page.getByTestId('tempo-bpm-0').press('Enter');await addMarkerLane(page,'point');
     const surface=page.locator('[data-testid^="marker-surface-"]').first(),bounds=await surface.boundingBox();
     await surface.click({position:{x:bounds!.width*.2,y:bounds!.height/2}});await expect(page.locator('[data-testid^="point-marker-"]')).toHaveCount(1);
     await page.getByTestId('editor-separation-tab').click();

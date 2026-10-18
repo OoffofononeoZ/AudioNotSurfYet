@@ -14,7 +14,7 @@
 
 2026-10-16 Editor 公共框架回归：`npx playwright test tests/e2e/editor-frame.spec.ts tests/e2e/editor-navigation-lifecycle.spec.ts --project=chrome --project=edge --workers=1`。覆盖三种播放器样式、动画留位、页签/菜单焦点、滚动保留、草稿失败、播放列表操作与运行中任务换歌保护；旧 E1–E10 交互专项已按常驻 MusicBar 和内部滚动更新，历史 canonical 身份不改写。布局契约见 [Editor 工作区](../docs/context/editor-workspace.md)。
 
-2026-10-17 标记改版专项：`npx playwright test tests/e2e/editor-marking.spec.ts tests/e2e/editor-marking-layout.spec.ts --project=chrome --project=edge --workers=1`。覆盖菜单／轨道删除、细分偏好、手动定时／Tap、局部视口、单项移动及四视口／DPR 1–2 布局；截图存本地忽略目录 `artifacts/editor-marking/`。领域检查纳入 `npx vitest run tests/editor`；完整本轮回归范围和历史断言调整见[标记工作区](../docs/context/editor-marking.md)。
+2026-10-18 标记重设计专项：`npx playwright test tests/e2e/editor-marker-redesign.spec.ts tests/e2e/editor-marking.spec.ts tests/e2e/editor-marking-layout.spec.ts --project=chrome --project=edge --workers=1`。覆盖独立时间视图、暂停／历史边界、跨窗口范围、批量操作、管理／迁移、BPM／Tap 及四视口、DPR 1–2、两种侧栏和三种 MusicBar。E2–E10 UI 场景按当前交互迁移；历史 canonical 需在原候选重放，fixture／golden 和性能阈值不改写。E6 继续真实 900 秒／10,000 事件、100ms 反馈、50ms 长任务和 20 次资源循环门禁。截图存本地忽略目录 `artifacts/editor-marking/`，领域检查为 `npx vitest run tests/editor`；实际结果见[标记工作区](../docs/context/editor-marking.md)。
 
 - Node.js：24.18.0；npm：11.x。仓库使用 `.nvmrc`、`engines` 和 `package-lock.json` 锁定基线。
 - Vitest：4.1.10。官方已发布但当前 npm 镜像尚未提供 Vitest 5，因此使用镜像可获得且仍受支持的 4.1 版本。

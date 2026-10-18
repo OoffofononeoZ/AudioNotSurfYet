@@ -4,8 +4,6 @@ import {
     timeToCanvasX,
 } from '../analysis/timelineViewport';
 import type { PersistedTimelineViewport } from '../types/session';
-import { segmentAtTime } from './tempoMap';
-import type { TempoSegmentV1 } from './types';
 
 export const EDITOR_WAVEFORM_VERTICAL_PADDING_PX = 6;
 
@@ -34,7 +32,7 @@ export {
     timeToCanvasX as editorTimeToX,
 };
 
-/** Editor uses musical window bounds; Analyzer retains its independent 1–64 range. */
+/** Waveform viewport only; marker tracks use MarkerTimeView. */
 export function normalizeEditorViewport(viewport: PersistedTimelineViewport | null, durationSeconds: number): PersistedTimelineViewport {
     const duration = Math.max(0, Number.isFinite(durationSeconds) ? durationSeconds : 0);
     if (!duration) return { startSeconds: 0, endSeconds: 1, zoom: 1 };
@@ -42,33 +40,6 @@ export function normalizeEditorViewport(viewport: PersistedTimelineViewport | nu
     const span = clamp(duration / zoom, Math.min(duration, 1e-6), duration);
     const startSeconds = clamp(Number.isFinite(viewport?.startSeconds) ? viewport!.startSeconds : 0, 0, duration - span);
     return { startSeconds, endSeconds: startSeconds + span, zoom: duration / span };
-}
-
-export function editorMeasureSeconds(map: readonly TempoSegmentV1[], time: number): number | null {
-    if (!map.length) return null;
-    const segment = segmentAtTime(map, time);
-    return segment.mode === 'metered' && segment.bpm !== null ? 60 / segment.bpm * segment.meter.numerator : null;
-}
-
-export function editorViewportForMeasures(duration: number, map: readonly TempoSegmentV1[], measures: number, anchor: number): PersistedTimelineViewport {
-    if (duration <= 0) return normalizeEditorViewport(null, duration);
-    const measure = editorMeasureSeconds(map, anchor);
-    const span = Math.min(duration, measure === null ? 10 : measure * measures);
-    const segment = map.length ? segmentAtTime(map, anchor) : null;
-    const start = measure !== null && segment ? segment.startSeconds + Math.floor(Math.max(0, anchor - segment.startSeconds) / measure) * measure : anchor;
-    const startSeconds = clamp(start, 0, duration - span);
-    return { startSeconds, endSeconds: startSeconds + span, zoom: duration / span };
-}
-
-export const resetEditorViewport = (duration: number, map: readonly TempoSegmentV1[] = [], anchor = 0) => editorViewportForMeasures(duration, map, 4, anchor);
-
-export function constrainEditorViewport(viewport: PersistedTimelineViewport, duration: number, map: readonly TempoSegmentV1[]): PersistedTimelineViewport {
-    const normalized = normalizeEditorViewport(viewport, duration);
-    const center = (normalized.startSeconds + normalized.endSeconds) / 2;
-    const minimum = Math.min(duration, editorMeasureSeconds(map, center) ?? 1);
-    if (normalized.endSeconds - normalized.startSeconds >= minimum - 1e-9) return normalized;
-    const startSeconds = clamp(center - minimum / 2, 0, duration - minimum);
-    return { startSeconds, endSeconds: startSeconds + minimum, zoom: duration / minimum };
 }
 
 export const zoomEditorViewportAtX = (

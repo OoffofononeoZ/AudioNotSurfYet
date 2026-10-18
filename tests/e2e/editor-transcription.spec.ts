@@ -1,3 +1,4 @@
+import { addMarkerLane } from '../support/editor-marking';
 import fs from 'node:fs/promises';
 import {readFileSync} from 'node:fs';
 import path from 'node:path';
@@ -39,7 +40,7 @@ test('Editor real FT → five-role candidates → auxiliary audition → atomic 
     await installFilePickerStub(page);await page.goto('/');await chooseFiles(page,[path.resolve('tests/fixtures/audio/visualizer-v4-cube-swarm-v1.wav')]);
     await expect(page.locator('#music-bar-container')).toHaveAttribute('data-playback-state','playing',{timeout:30000});
     await page.getByTestId('header-editor-link').click();await expect(page.getByTestId('editor-ready')).toBeVisible({timeout:30000});await page.getByTestId('toggle-playback').click();
-    await page.getByTestId('tempo-bpm-0').fill('120');await page.getByTestId('tempo-bpm-0').press('Enter');await page.getByTestId('add-point-lane').click();
+    await page.getByTestId('tempo-bpm-0').fill('120');await page.getByTestId('tempo-bpm-0').press('Enter');await addMarkerLane(page,'point');
     const surface = page.locator('[data-testid^="marker-surface-"]').first(),bounds = await surface.boundingBox();await surface.click({position:{x:bounds!.width*.2,y:bounds!.height/2}});
     await expect(page.locator('[data-testid^="point-marker-"]')).toHaveCount(1);await expect.poll(async() => (await project(page)).lanes[0]?.events.length).toBe(1);
     const before = await project(page);

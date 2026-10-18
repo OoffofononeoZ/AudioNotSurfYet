@@ -230,13 +230,7 @@ const handles: Array<{ id: EditorOverlayHandle; label: string }> = [
 
 const geometryTargets = () => {
     const ruler = document.querySelector<HTMLElement>('.marker-ruler-time');
-    if (ruler) return [ruler];
-    const markers = Array.from(
-        document.querySelectorAll<HTMLElement>('.marker-surface'),
-    );
-    if (markers.length > 0) return markers;
-    const timeline = document.querySelector<HTMLElement>('.timeline-stage');
-    return timeline ? [timeline] : [];
+    return ruler ? [ruler] : [];
 };
 
 const measurePlot = () => {

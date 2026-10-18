@@ -1,3 +1,4 @@
+import { addMarkerLane } from '../support/editor-marking';
 import { expect, test, type Page } from '@playwright/test';
 import path from 'node:path';
 import { FEATURE_IDS } from '../../src/analysis/types';
@@ -38,8 +39,9 @@ const openE4 = async (page: Page) => {
     await expect(page.getByTestId('editor-buffer-state')).toHaveText('波形已就绪', {
         timeout: 30_000,
     });
-    await page.getByTestId('add-point-lane').click();
-    await expect(page.locator('.lane-card')).toHaveCount(1);
+    await page.getByTestId('toggle-playback').click(); await page.getByTestId('editor-timeline').press('Home');
+    await addMarkerLane(page,'point');
+    await expect(page.locator('article[data-testid^="point-lane-"]')).toHaveCount(1);
 };
 
 const selectOverlay = async (page: Page, featureId: string) => {
@@ -119,7 +121,7 @@ test('keeps overlay geometry aligned and passes pointer input to point cells', a
         surfaceBounds!.x + surfaceBounds!.width * 0.65,
         surfaceBounds!.y + surfaceBounds!.height * 0.62,
     );
-    await expect(page.locator('.point-marker')).toHaveCount(1);
+    await expect(page.locator('.marker-point')).toHaveCount(1);
     const feedbackMs = await page.evaluate(() =>
         (window as typeof window & { __e4Feedback?: { value: number | null } })
             .__e4Feedback?.value ?? Number.POSITIVE_INFINITY);
@@ -215,7 +217,7 @@ test('isolates an overlay Canvas failure from Buffer and point editing', async (
         surfaceBounds!.x + surfaceBounds!.width * 0.75,
         surfaceBounds!.y + surfaceBounds!.height * 0.8,
     );
-    await expect(page.locator('.point-marker')).toHaveCount(1);
+    await expect(page.locator('.marker-point')).toHaveCount(1);
     await page.evaluate(() => {
         (window as typeof window & { __restoreE4Canvas?: () => void })
             .__restoreE4Canvas?.();

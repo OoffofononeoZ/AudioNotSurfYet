@@ -1,6 +1,7 @@
 import { expect, test, type Page } from '@playwright/test';
 import path from 'node:path';
 import { chooseFiles, installFilePickerStub, savedPickerEntries } from '../support/file-picker';
+import { addMarkerLane } from '../support/editor-marking';
 
 async function openEditor(page: Page) {
     await installFilePickerStub(page);
@@ -80,7 +81,7 @@ test('a failed draft save blocks switching while export and cancellation remain 
             return put.apply(this, args);
         };
     });
-    await page.getByTestId('add-point-lane').click();
+    await addMarkerLane(page,'point');
     await expect(page.getByTestId('editor-page').getByRole('alert')).toContainText('无法保存草稿');
     await page.getByTestId('toggle-queue').click();
     await page.getByTestId('queue-item').nth(1).click();
@@ -132,11 +133,11 @@ test('toolbar tabs and overlay icons preserve keyboard access and menu focus', a
 test('independent workspaces retain nodes and scroll positions inside the player inset', async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 460 });
     await openEditor(page);
-    for (let index = 0; index < 14; index++) await page.getByTestId('add-point-lane').click();
+    for (let index = 0; index < 14; index++) await addMarkerLane(page,'point');
     const positions: Record<string, number> = {};
     for (const name of ['marking', 'separation', 'transcription']) {
         await page.getByTestId(`editor-${name}-tab`).click();
-        const panel = page.locator(`#editor-${name}-panel`);
+        const panel = name === 'marking' ? page.locator('.marker-scroll') : page.locator(`#editor-${name}-panel`);
         positions[name] = await panel.evaluate(element => {
             element.scrollTop = element.scrollHeight;
             return element.scrollTop;
@@ -146,7 +147,7 @@ test('independent workspaces retain nodes and scroll positions inside the player
     }
     for (const name of ['marking', 'separation', 'transcription']) {
         await page.getByTestId(`editor-${name}-tab`).click();
-        const panel = page.locator(`#editor-${name}-panel`);
+        const panel = name === 'marking' ? page.locator('.marker-scroll') : page.locator(`#editor-${name}-panel`);
         await expect(panel).toHaveAttribute('data-retained-node', 'yes');
         expect(await panel.evaluate(element => element.scrollTop)).toBe(positions[name]);
     }

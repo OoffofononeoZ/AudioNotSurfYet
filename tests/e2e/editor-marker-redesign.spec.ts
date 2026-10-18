@@ -84,6 +84,20 @@ test('long range survives song navigation and playback; crossing range remains o
     await page.keyboard.press('Escape'); await expect(page.getByTestId('marker-pending')).toHaveCount(0);
 });
 
+test('switching songs clears pending creation and isolates marker span preferences by song hash',async({page})=>{
+    await installFilePickerStub(page); await page.goto('/');
+    await chooseFiles(page,['artifacts/fixtures/editor-e2-tempo-100-v1.wav','tests/fixtures/audio/format-master.mp3'].map(value=>path.resolve(value)));
+    await expect(page.locator('#music-bar-container')).toHaveAttribute('data-playback-state','playing');
+    await page.getByTestId('header-editor-link').click(); await expect(page.getByTestId('editor-ready')).toBeVisible(); await page.getByTestId('toggle-playback').click();
+    await page.getByTestId('tempo-bpm-0').fill('120'); await page.getByTestId('tempo-bpm-0').press('Enter'); await seek(page,0); await addLane(page,'range');
+    await clickTime(page,'range',1); await expect(page.getByTestId('marker-pending')).toBeVisible();
+    await page.locator('[data-testid^="range-surface-"]').first().hover(); for(let i=0;i<30;i++) await page.mouse.wheel(0,-100);
+    await expect(page.getByTestId('marker-span')).toHaveText('1.00 秒');
+    await page.getByTestId('toggle-queue').click(); await page.getByTestId('queue-item').nth(1).click();
+    await page.getByTestId('editor-track-change-confirm').click(); await expect(page.getByTestId('editor-ready')).toBeVisible();
+    await expect(page.getByTestId('marker-pending')).toHaveCount(0); await expect(page.getByTestId('marker-span')).toHaveText('10.00 秒');
+});
+
 test('left drag selects bars, copies and moves atomically; dragging freezes zoom and Escape cancels', async ({ page }) => {
     await openTracks(page); await addLane(page,'point');
     await clickTime(page,'marker',.5); await clickTime(page,'marker',1);
@@ -95,7 +109,7 @@ test('left drag selects bars, copies and moves atomically; dragging freezes zoom
     await surface.focus(); await page.keyboard.press('Control+c');
     await expect(page.locator('[data-testid^="point-marker-"]')).toHaveCount(4);
     await page.keyboard.press('Alt+ArrowRight');
-    await expect(page.locator('[data-testid^="point-marker-"][data-time-seconds="4.5"]')).toHaveCount(1);
+    await expect(page.locator('[data-testid^="point-marker-"][data-time-seconds="2.625"]')).toHaveCount(1);
     await page.getByTestId('toggle-block-mode').click();
     const marker = page.locator('[data-testid^="point-marker-"][data-time-seconds="0.5"]');
     const before = await page.getByTestId('marker-span').textContent(), rect = (await marker.boundingBox())!;

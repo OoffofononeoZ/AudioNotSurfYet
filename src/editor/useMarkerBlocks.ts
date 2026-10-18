@@ -2,8 +2,10 @@ import { ref, shallowRef } from 'vue';
 import { assertMarkerBlockEditable, editableMarkerBlock, type MarkerTimeView } from './markerTimeView';
 import { copyMarkerBlockAfter, markerMeasureAtTime, moveMarkerBlock, selectMarkerBlockByMeasures, type MarkerBlockSelection } from './markerBlockOperations';
 import type { EditorProjectV1 } from './types';
+import type { EditorBeatSnapSetting } from './beatSnap';
+import { movePointCell } from './pointAnnotations';
 
-export function useMarkerBlocks(project: () => EditorProjectV1, view: () => MarkerTimeView,
+export function useMarkerBlocks(project: () => EditorProjectV1, view: () => MarkerTimeView, setting: () => EditorBeatSnapSetting,
     publish: (value: EditorProjectV1) => void, report: (text: string) => void) {
     const mode = ref(false), selection = shallowRef<MarkerBlockSelection | null>(null), preview = shallowRef<MarkerBlockSelection | null>(null);
     function select(laneId: string, innerClassId: string, anchor: number, extent = anchor) {
@@ -19,7 +21,7 @@ export function useMarkerBlocks(project: () => EditorProjectV1, view: () => Mark
         else preview.value = result.selection;
         return result;
     }
-    function key(event: KeyboardEvent): boolean {
+    function key(event: KeyboardEvent, width: number): boolean {
         if (!mode.value || !selection.value || !view().editable) return false;
         const current = selection.value;
         if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'c') {
@@ -34,12 +36,13 @@ export function useMarkerBlocks(project: () => EditorProjectV1, view: () => Mark
         event.preventDefault(); event.stopPropagation();
         const direction = event.key === 'ArrowLeft' ? -1 : 1;
         if (event.altKey) {
-            const unit = markerMeasureAtTime(project(), direction < 0 ? current.startSeconds - 1e-6 : current.endSeconds + 1e-6);
-            move(unit.startSeconds, true);
+            const cell = movePointCell(current.startSeconds,direction,project(),width,setting());
+            if (cell) move(cell.timeSeconds,true);
         } else {
-            const last = markerMeasureAtTime(project(), current.endSeconds - 1e-6);
-            const extent = direction > 0 ? current.endSeconds + 1e-6 : Math.max(view().cursorSeconds, last.startSeconds - 1e-6);
-            select(current.laneId, current.innerClassId, Math.max(view().cursorSeconds, current.startSeconds), extent);
+            const adjacent = markerMeasureAtTime(project(),direction < 0 ? Math.max(view().cursorSeconds,current.startSeconds - 1e-6) : current.endSeconds + 1e-6);
+            const start = direction < 0 ? Math.min(current.startSeconds,adjacent.startSeconds) : current.startSeconds;
+            const end = direction > 0 ? Math.max(current.endSeconds,adjacent.endSeconds) : current.endSeconds;
+            select(current.laneId,current.innerClassId,Math.max(view().cursorSeconds,start),end - 1e-6);
         }
         return true;
     }

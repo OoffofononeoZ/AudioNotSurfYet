@@ -29,6 +29,8 @@ E10 按 DEC-057/ADR-0022 在 PointWorkspace 统一持有瞬时“区间操作”
 
 Editor 当前公共框架按 [Editor 工作区契约](../../../docs/context/editor-workspace.md)：64px 顶栏、常驻 MusicBar、按实测 player inset 扣高、三个常驻且独立滚动的页签。叠加层控制区独立 Teleport 并对齐顶栏右侧；换歌保护与原生离页 dialog 分别由导航 composable 和 EditorLeaveGuard 持有。上文 E1–E9 的批准继续表示历史候选，不恢复旧播放器隐藏或双层标题布局。
 
+2026-10-18 [标记重设计](../../../docs/context/editor-marking.md)替代旧共享视口／小节窗口／轨道右键平移：波形默认全曲且独立保存范围；轨道使用只读 MarkerTimeView，1–10 秒跨度、15% 固定播放线、播放只读与暂停右侧操作，长范围起点跨同歌导航保留。节拍区保持可见，下方轨道列表独立滚动，overlay 显式使用轨道时间范围和标尺几何。上文历史 E2–E10 的交互描述不覆盖此当前规则。
+
 - `MainLayout` 创建并 provide 唯一 `AudioSessionService` 与 `AnalysisCoordinator`，在布局卸载时先 dispose coordinator 再释放 session service。
 - `MusicBar` 读取 `audioSessionStore` 并调用 session commands；只拥有拖动预览、列表开合、跑马灯和 GSAP 样式时间线。
 - `MusicList` 通过 `select-index`、`edit-track`、`delete`、`clear`、`restore-access`、`reselect-track`、`clear-persisted` 和 `close-list` 事件回传操作；事件名已统一为 kebab-case。
