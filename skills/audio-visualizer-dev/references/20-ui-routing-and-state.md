@@ -76,8 +76,10 @@ Editor 当前公共框架按 [Editor 工作区契约](../../../docs/context/edit
 
 ## 共享滚动条
 
-- 全局 `.app-scrollbar` 是产品自有可见滚动容器的唯一默认样式，视觉事实源来自 Analyzer `MeydaCard` 精确值表：Firefox `scrollbar-width: thin`，WebKit 宽高 10px，深色轨道、绿色 thumb/hover、圆角和 stable gutter。
+- 全局 `.app-scrollbar` 是产品自有可见滚动容器的唯一默认样式，视觉事实源来自 Analyzer `MeydaCard` 精确值表：Firefox `scrollbar-width: thin`，WebKit 宽高 10px，深色轨道、绿色 thumb/hover、圆角；`scrollbar-gutter: auto`，无溢出时不预留空轨道。
 - 新增或修改可见滚动容器时必须在元素上复用 `.app-scrollbar`，不得在 scoped CSS 或 Tailwind arbitrary selector 中新增另一套 `scrollbar-color`、track 或 thumb。需要新视觉变体时先形成明确 UI 决策并更新本 reference。
+- `.app-scrollbar` 只负责外观，实际滚动项使用 `overflow: auto` 或单轴 `auto`，并约束可用高度／宽度；Flex/Grid 滚动项配合 `min-height: 0`／`min-width: 0`。不要用 `overflow: scroll` 或 `scrollbar-gutter: stable` 强行占位，不要用隐藏滚动条、负 margin、补偿 padding 或 JS 测高掩盖空轨道。
+- 嵌套滚动时分别确认每一层是否真实溢出，固定布局外框不额外创建滚动层。验证内容增减／折叠、页签切换、窗口缩放和短弹窗：无溢出时扣除边框后 `offsetWidth - clientWidth`／`offsetHeight - clientHeight` 应为零；有溢出时仍可滚轮、键盘或拖动滚动，并复核 Canvas、时间标尺和叠加层的 ResizeObserver 对齐。
 - `scrollbar-hide` 只用于产品明确要求隐藏滚动条且内容仍可通过键盘、滚轮和触控访问的容器；原生控件、OS 对话框和第三方组件不由全局通配规则覆盖。
 - 当前复用范围包含 Analyzer 精确值表/页面、Visualizer 状态/左右侧栏与应用导航；其余既有变体在后续触及时按本规则收敛。
 

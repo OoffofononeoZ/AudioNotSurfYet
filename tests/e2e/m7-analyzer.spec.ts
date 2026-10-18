@@ -429,7 +429,7 @@ test('keeps Analyzer status and height controls below Settings and player overla
         'rgba(125, 255, 179, 0.65) rgba(5, 17, 11, 0.9)',
     );
     expect(scrollbar.width).toBe('thin');
-    expect(scrollbar.gutter).toContain('stable');
+    expect(scrollbar.gutter).toBe('auto');
     expect(scrollbar.webkitWidth).toBe('10px');
     expect(scrollbar.track).toBe('rgba(5, 17, 11, 0.9)');
     expect(scrollbar.thumb).toBe('rgba(125, 255, 179, 0.58)');

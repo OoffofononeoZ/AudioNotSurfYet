@@ -174,9 +174,16 @@
     }
 }
 
+/*
+ * 仅统一滚动条外观；在实际滚动容器上按需设置 overflow: auto（或单轴 auto）。
+ * gutter 使用 auto：未溢出时不预留空轨道，避免在嵌套容器、弹窗中形成假 padding。
+ * 不用 overflow: scroll / scrollbar-gutter: stable 强制占位，也不靠隐藏滚动条修补。
+ * Flex/Grid 布局须给滚动项设置 min-height/min-width: 0，并约束可用尺寸。
+ * 内容增减、折叠、窗口缩放和切页签后，检查无溢出时零占位、有溢出时仍可滚动。
+ */
 .app-scrollbar {
     scrollbar-color: var(--app-scrollbar-color) var(--app-scrollbar-track);
-    scrollbar-gutter: stable;
+    scrollbar-gutter: auto;
     scrollbar-width: thin;
 }
 

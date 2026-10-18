@@ -132,8 +132,19 @@ test('toolbar tabs and overlay icons preserve keyboard access and menu focus', a
 });
 
 test('independent workspaces retain nodes and scroll positions inside the player inset', async ({ page }) => {
-    await page.setViewportSize({ width: 1280, height: 460 });
+    await page.setViewportSize({ width: 1280, height: 900 });
     await openEditor(page);
+    const markerScroll = page.locator('.marker-scroll');
+    const unusedGutters = () => page.locator('#editor-marking-panel,.marker-scroll,.editor-timeline-panel').evaluateAll(elements => elements.map(element => {
+        const node = element as HTMLElement, style = getComputedStyle(node);
+        return {
+            x: node.offsetWidth - node.clientWidth - parseFloat(style.borderLeftWidth) - parseFloat(style.borderRightWidth),
+            y: node.offsetHeight - node.clientHeight - parseFloat(style.borderTopWidth) - parseFloat(style.borderBottomWidth),
+        };
+    }));
+    expect(await markerScroll.evaluate(element => element.scrollHeight <= element.clientHeight)).toBe(true);
+    for (const gutter of await unusedGutters()) { expect(gutter.x).toBe(0); expect(gutter.y).toBe(0); }
+    await page.setViewportSize({ width: 1280, height: 460 });
     for (let index = 0; index < 14; index++) await addMarkerLane(page,'point');
     const positions: Record<string, number> = {};
     for (const name of ['marking', 'separation', 'transcription'] as const) {
@@ -154,6 +165,10 @@ test('independent workspaces retain nodes and scroll positions inside the player
     }
     expect(await page.evaluate(() => window.scrollY)).toBe(0);
     await expect(page.getByTestId('editor-toolbar')).toHaveCSS('height', '64px');
+    await page.getByTestId('editor-marking-tab').click();
+    await page.setViewportSize({ width: 1280, height: 2160 });
+    await expect.poll(() => markerScroll.evaluate(element => element.scrollHeight <= element.clientHeight)).toBe(true);
+    for (const gutter of await unusedGutters()) { expect(gutter.x).toBe(0); expect(gutter.y).toBe(0); }
 });
 
 test('responsive shell stays within the viewport for both sidebars and all player styles', async ({ page }, info) => {
