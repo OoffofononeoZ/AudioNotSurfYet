@@ -143,9 +143,13 @@ import {
 } from '../editor/overlay';
 import type { EditorProjectV1 } from '../editor/types';
 import type { PlaybackSnapshot } from '../types/audio';
+import type { MarkerTimeView } from '../editor/markerTimeView';
+import type { MarkerDrawing } from '../editor/markerDrawing';
 
 const props = defineProps<{
     project: EditorProjectV1;
+    timeView: MarkerTimeView;
+    drawing: MarkerDrawing;
     playback: PlaybackSnapshot;
     analysis: AnalysisCoordinatorSnapshot;
     series: AnalysisSeries | null;
@@ -174,7 +178,7 @@ const renderRevision = ref(0);
 const menuOpen = ref(false);
 const plotRect = ref<PlotRect>({ left: 340, width: 420 });
 let resizeObserver: ResizeObserver | null = null;
-let geometryFrame: number | null = null;
+let disposed = false;
 
 const featureId = computed(() => props.project.workspace.overlay.featureId);
 const definition = computed(() => featureId.value
@@ -225,6 +229,8 @@ const handles: Array<{ id: EditorOverlayHandle; label: string }> = [
 ];
 
 const geometryTargets = () => {
+    const ruler = document.querySelector<HTMLElement>('.marker-ruler-time');
+    if (ruler) return [ruler];
     const markers = Array.from(
         document.querySelectorAll<HTMLElement>('.marker-surface'),
     );
@@ -267,7 +273,7 @@ const renderRequest = (): EditorRenderRequest => {
     return {
         feature,
         series: props.series,
-        viewport: props.project.workspace.viewport,
+        viewport: props.timeView,
         widthCssPixels: size.plotWidth,
         heightCssPixels: size.panelHeight,
         devicePixelRatio: size.dpr,
@@ -323,6 +329,7 @@ const drawCursor = () => {
 const render = async () => {
     if (!props.overlayOpen || !featureId.value) return;
     await nextTick();
+    if (disposed) return;
     try {
         measurePlot();
         drawStatic();
@@ -335,13 +342,8 @@ const render = async () => {
     }
 };
 
-const scheduleGeometryRender = () => {
-    if (geometryFrame !== null) return;
-    geometryFrame = requestAnimationFrame(() => {
-        geometryFrame = null;
-        void render();
-    });
-};
+const renderFrame = () => { void render(); };
+const scheduleGeometryRender = () => { props.drawing.request(renderFrame); };
 
 const applyBounds = (next: EditorOverlayBounds, immediate: boolean) => {
     emit('updateProject', {
@@ -488,7 +490,7 @@ const retry = () => {
     renderRevision.value += 1;
     rendererError.value = null;
     emit('retry');
-    void render();
+    scheduleGeometryRender();
 };
 
 const onDocumentPointerDown = (event: PointerEvent) => {
@@ -508,7 +510,7 @@ watch(
         props.overlayOpen,
         featureId.value,
         props.series,
-        props.project.workspace.viewport,
+        props.timeView,
         bounds.value.topRatio,
         bounds.value.heightRatio,
         props.analysis.generation,
@@ -517,20 +519,14 @@ watch(
     ],
     () => void nextTick(() => {
         observeGeometryTargets();
-        void render();
+        scheduleGeometryRender();
     }),
     { deep: true },
 );
 watch(
     () => [props.playback.currentTimeSeconds, props.exactValue],
     () => {
-        try {
-            drawCursor();
-        } catch (error) {
-            rendererError.value = error instanceof Error
-                ? error.message
-                : '叠加游标 renderer 出错。';
-        }
+        scheduleGeometryRender();
     },
 );
 watch(() => props.overlayOpen, (open) => {
@@ -545,13 +541,13 @@ onMounted(() => {
     window.addEventListener('blur', cancelHandleDrag);
     window.addEventListener('resize', scheduleGeometryRender);
     window.addEventListener('scroll', scheduleGeometryRender, true);
-    void render();
+    scheduleGeometryRender();
 });
 onBeforeUnmount(() => {
     menuOpen.value = false;
     cancelHandleDrag();
-    if (geometryFrame !== null) cancelAnimationFrame(geometryFrame);
-    geometryFrame = null;
+    disposed = true;
+    props.drawing.remove(renderFrame);
     resizeObserver?.disconnect();
     resizeObserver = null;
     document.removeEventListener('pointerdown', onDocumentPointerDown, true);

@@ -49,13 +49,18 @@ export function markerCellAtTime(raw: number, project: EditorProjectV1, view: Ma
 
 /** Freeze explicit event IDs so later commands cannot pull historical events into a selection. */
 export function editableMarkerBlock(project: EditorProjectV1, selection: MarkerBlockSelection, view: MarkerTimeView): MarkerBlockSelection {
-    return { ...selection, eventIds: collectMarkerBlockEvents(project, selection).filter(event => markerEventReachable(view, event)).map(event => event.id) };
+    const lane = project.lanes.find(item => item.id === selection.laneId);
+    const events = lane?.events.filter(event => event.innerClassId === selection.innerClassId && markerEventReachable(view, event)
+        && ('atSeconds' in event ? event.atSeconds >= selection.startSeconds && event.atSeconds < selection.endSeconds
+            : event.startSeconds < selection.endSeconds && event.endSeconds > Math.max(selection.startSeconds, view.cursorSeconds))) ?? [];
+    return { ...selection, eventIds: events.map(event => event.id) };
 }
 
 export function assertMarkerBlockEditable(project: EditorProjectV1, selection: MarkerBlockSelection, view: MarkerTimeView, offset = 0): void {
     const events = collectMarkerBlockEvents(project, selection);
     if (!view.editable || events.some(event => !markerEventReachable(view, event)
-        || ('atSeconds' in event ? event.atSeconds + offset < view.cursorSeconds : event.endSeconds + offset <= view.cursorSeconds))) {
+        || ('atSeconds' in event ? event.atSeconds + offset < view.cursorSeconds || event.atSeconds + offset > view.durationSeconds
+            : event.endSeconds + offset <= view.cursorSeconds || event.startSeconds + offset < 0 || event.endSeconds + offset > view.durationSeconds))) {
         throw new Error('只能在暂停后操作播放线右侧的标记。');
     }
 }

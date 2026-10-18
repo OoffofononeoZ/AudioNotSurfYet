@@ -191,14 +191,12 @@ export const collectMarkerBlockEvents = (
     return lane.eventKind === 'point'
         ? lane.events.filter((event) =>
             event.innerClassId === selection.innerClassId
-            && (!selectedIds || selectedIds.has(event.id))
-            && event.atSeconds >= selection.startSeconds
-            && event.atSeconds < selection.endSeconds)
+            && (selectedIds ? selectedIds.has(event.id) : event.atSeconds >= selection.startSeconds
+            && event.atSeconds < selection.endSeconds))
         : lane.events.filter((event) =>
             event.innerClassId === selection.innerClassId
-            && (!selectedIds || selectedIds.has(event.id))
-            && event.startSeconds >= selection.startSeconds
-            && event.endSeconds <= selection.endSeconds);
+            && (selectedIds ? selectedIds.has(event.id) : event.startSeconds >= selection.startSeconds
+            && event.endSeconds <= selection.endSeconds));
 };
 
 export const markerBlockEventCount = (

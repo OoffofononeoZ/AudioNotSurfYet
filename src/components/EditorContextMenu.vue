@@ -3,7 +3,7 @@
         <div ref="menu" class="editor-context-menu app-scrollbar" role="menu" aria-label="时间轴操作"
             :data-testid="testId" :style="{ left: `${position.x}px`, top: `${position.y}px` }"
             @contextmenu.prevent @keydown="onKeydown">
-            <button v-for="item in items" :key="item.id" type="button" role="menuitem" @click="select(item.id)">{{ item.label }}</button>
+            <button v-for="item in items" :key="item.id" type="button" role="menuitem" :data-testid="item.testId" @click="select(item.id)">{{ item.label }}</button>
         </div>
     </Teleport>
 </template>
@@ -11,11 +11,11 @@
 import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref } from 'vue';
 import { claimEditorContextMenu } from '../editor/contextMenuOwnership';
 
-const props = defineProps<{ anchor: HTMLElement | null | undefined; x: number; y: number; testId: string; waveform?: boolean }>();
-type Action = 'seek' | 'play' | 'center' | 'reset';
+const props = defineProps<{ anchor: HTMLElement | null | undefined; x: number; y: number; testId: string; waveform?: boolean; options?: { id: string; label: string; testId?: string }[] }>();
+type Action = string;
 const emit = defineEmits<{ action: [id: Action]; close: [] }>();
-const items = computed(() => [{ id: 'seek' as Action, label: '跳到此处' }, { id: 'play' as Action, label: '从此处播放' },
-    ...(props.waveform ? [{ id: 'center' as Action, label: '将此处居中' }, { id: 'reset' as Action, label: '重置为全曲' }] : [])]);
+const items = computed<{ id: string; label: string; testId?: string }[]>(() => props.options ?? [{ id: 'seek', label: '跳到此处' }, { id: 'play', label: '从此处播放' },
+    ...(props.waveform ? [{ id: 'center', label: '将此处居中' }, { id: 'reset', label: '重置为全曲' }] : [])]);
 const menu = ref<HTMLElement | null>(null);
 const position = reactive({ x: 8, y: 8 });
 let release: (() => void) | undefined;
