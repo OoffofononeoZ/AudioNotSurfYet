@@ -333,3 +333,7 @@ owner 明确要求「不再使用实时录制，替换为离线确定性导出�
 ## DEC-082 — 原子元素与组合预设生成 Skill — 2026-10-18
 
 owner 要求核对 Visualizer 生成 skill 与当前原子化方案，规划中选择改名为 `visualizer-content-generator`，并明确所有新增原子元素和组合预设（含纯复用预设）都先批准具体合同，随后要求“Implement the plan.”。本决定授权更新 skill、VisualizerContentBriefV1 只读校验器、测试、项目入口和[内容生成契约](../architecture/visualizer/content-generation.md)，替代 DEC-056/ADR-0021 的 SceneBriefV1、旧场景注册与测试执行步骤。既有内容修正按开发 skill；不批准任何具体新内容、不恢复旧模板、不增加兼容入口，也不改变 Project V3、支持矩阵、性能阈值、历史 evidence/readiness 或发布边界。适用验证通过后一次本地提交，不推送。
+
+## DEC-083 — 代码规模、格式与组件拆分 — 2026-10-18
+
+owner 要求将手写代码文件的 500 行提示改为推荐不超过 1000 行、超过 1300 行警告、除极端特殊情况不得超过 2000 行，并禁止压缩代码凑行数；参考 testcomp.vue/MusicList.vue 的正常排版，Vue 属性推荐逻辑指令、数据、事件顺序但不强制。规划中选择接入格式工具并渐进应用，明确 codemap 无需新增功能；随后纠正误选，指定超过 2000 行直接失败，并以“Implement the plan.”批准实施。例外须记录具体文件、获准最大行数、原因及 owner 批准来源，当前不批准任何例外。Vue 组件拆分指提取完整功能区域，单独迁出 CSS 或 TS/JS 不算。授权更新 skill、规模检查、锁定 Prettier 3.9.0、针对性测试和入口文档；不批量重构/格式化历史产品文件，不改变技术契约、运行时接口或发布边界。验证后一次本地提交，不推送。

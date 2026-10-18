@@ -1,0 +1,33 @@
+# Local archives, dependencies, third-party and generated code
+**/trash/**
+**/node_modules/**
+**/vendor/**
+**/third_party/**
+**/__generated__/**
+**/*.generated.*
+.git/
+.agents/
+auto-imports.d.ts
+components.d.ts
+
+# Build, media, test artifacts and generated maps
+dist/
+dist-ssr/
+build/
+release/
+artifacts/
+test-results/
+playwright-report/
+public/processing-runtime/
+public/processing-probe/
+public/test_audio/
+public/audios/
+docs/CODEMAP.md
+docs/codemap/
+**/golden/**
+
+# Lockfiles are maintained by their package managers
+package-lock.json
+npm-shrinkwrap.json
+pnpm-lock.yaml
+yarn.lock

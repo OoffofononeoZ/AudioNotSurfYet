@@ -6,9 +6,10 @@
 
 | 文件 | 本地静态引用（最多显示 6 项） |
 | --- | --- |
-| [scripts/check-repo.mjs](../../scripts/check-repo.mjs) | [scripts/codemap.mjs](../../scripts/codemap.mjs)、[scripts/install-project-skills.mjs](../../scripts/install-project-skills.mjs)、[scripts/lib/repository.mjs](../../scripts/lib/repository.mjs) |
+| [scripts/check-repo.mjs](../../scripts/check-repo.mjs) | [scripts/codemap.mjs](../../scripts/codemap.mjs)、[scripts/install-project-skills.mjs](../../scripts/install-project-skills.mjs)、[scripts/lib/code-size-policy.mjs](../../scripts/lib/code-size-policy.mjs)、[scripts/lib/repository.mjs](../../scripts/lib/repository.mjs) |
 | [scripts/codemap.mjs](../../scripts/codemap.mjs) | [scripts/lib/repository.mjs](../../scripts/lib/repository.mjs)、[scripts/lib/source-map.mjs](../../scripts/lib/source-map.mjs) |
 | [scripts/install-project-skills.mjs](../../scripts/install-project-skills.mjs) | [scripts/lib/repository.mjs](../../scripts/lib/repository.mjs) |
+| [scripts/lib/code-size-policy.mjs](../../scripts/lib/code-size-policy.mjs) | [scripts/lib/repository.mjs](../../scripts/lib/repository.mjs) |
 | [scripts/lib/repository.mjs](../../scripts/lib/repository.mjs) | — |
 | [scripts/lib/source-map.mjs](../../scripts/lib/source-map.mjs) | [scripts/lib/repository.mjs](../../scripts/lib/repository.mjs) |
 | [skills/visualizer-content-generator/scripts/validate-content-brief.mjs](../../skills/visualizer-content-generator/scripts/validate-content-brief.mjs) | — |
