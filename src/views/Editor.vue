@@ -122,7 +122,6 @@ import EditorLeaveGuard from '../components/EditorLeaveGuard.vue';
 import '../editor/controls.css';
 import '../editor/marking.css';
 import { provideEditorGrid } from '../editor/useEditorGrid';
-import { useEditorHorizontalScroll } from '../editor/useEditorHorizontalScroll';
 import { resolveEditorUnavailableRecovery } from '../editor/routeRecovery';
 import { useEditorSessionController } from '../editor/editorSessionController';
 import { useAudioSessionStore } from '../stores/audioSessionStore';
@@ -140,7 +139,6 @@ import type {
 import type { EditorProjectV1 } from '../editor/types';
 
 const route = useRoute();
-useEditorHorizontalScroll();
 const router = useRouter();
 const audioSession = useAudioSessionService();
 const sessionStore = useAudioSessionStore();
@@ -413,7 +411,8 @@ onBeforeUnmount(() => {
 }
 .editor-shell { flex: 1; display: flex; flex-direction: column; width: 100%; min-width: 0; min-height: 0; overflow: hidden; }
 .editor-panel { flex: 1; min-height: 0; overflow: auto; overscroll-behavior: contain; }
-#editor-marking-panel { container-type:size; }
+#editor-marking-panel { container-type:size; display:flex; flex-direction:column; overflow:hidden; }
+#editor-marking-panel :deep(.editor-timeline-panel) { flex:none; overflow-x:auto; }
 .editor-panel:focus-visible { outline: 2px solid var(--accent-soft); outline-offset: -2px; }
 .editor-state-shell { overflow: auto; overscroll-behavior: contain; }
 .editor-panel :deep(.stem-workspace) { padding-top: 0; }

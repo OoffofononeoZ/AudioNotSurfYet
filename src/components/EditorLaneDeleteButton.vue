@@ -1,9 +1,9 @@
 <template>
     <button ref="trigger" type="button" class="editor-lane-delete" :aria-label="`删除轨道 ${lane?.name ?? ''}`" title="删除轨道"
-        :data-testid="`delete-lane-${laneId}`" @click="request"><EditorIcon name="trash" /></button>
+        :data-testid="`delete-lane-${laneId}`" :disabled="disabled" @click="request"><EditorIcon name="trash" /></button>
     <Teleport to="body">
-        <dialog ref="dialog" class="editor-delete-dialog" data-testid="editor-delete-lane-dialog" aria-labelledby="editor-delete-lane-title" @cancel.prevent="cancel">
-            <h2 id="editor-delete-lane-title">删除轨道？</h2>
+        <dialog ref="dialog" class="editor-delete-dialog" data-testid="editor-delete-lane-dialog" :aria-labelledby="`editor-delete-lane-title-${laneId}`" @cancel.prevent="cancel">
+            <h2 :id="`editor-delete-lane-title-${laneId}`">删除轨道？</h2>
             <p>“{{ lane?.name }}”及其中 {{ lane?.events.length ?? 0 }} 个标记将被删除。</p>
             <div class="actions"><button type="button" class="danger" data-testid="confirm-delete-lane" @click="remove">删除轨道与标记</button><button ref="cancelButton" type="button" @click="cancel">取消</button></div>
         </dialog>
@@ -14,18 +14,18 @@ import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue';
 import EditorIcon from './EditorIcon.vue';
 import { removeEditorLane } from '../editor/laneOperations';
 import type { EditorProjectV1 } from '../editor/types';
-const props = defineProps<{ project: EditorProjectV1; laneId: string }>();
+const props = defineProps<{ project: EditorProjectV1; laneId: string; disabled?: boolean }>();
 const emit = defineEmits<{ updateProject: [project: EditorProjectV1, immediate: boolean]; removed: [] }>();
 const lane = computed(() => props.project.lanes.find(item => item.id === props.laneId));
 const dialog = ref<HTMLDialogElement | null>(null), trigger = ref<HTMLButtonElement | null>(null), cancelButton = ref<HTMLButtonElement | null>(null);
 function cancel() { dialog.value?.close(); trigger.value?.focus({ preventScroll: true }); }
 async function request() {
-    if (!lane.value) return;
+    if (!lane.value || props.disabled) return;
     if (!lane.value.events.length) return remove();
     dialog.value?.showModal(); await nextTick(); cancelButton.value?.focus();
 }
 function remove() {
-    if (!lane.value) return;
+    if (!lane.value || props.disabled) return;
     const index = props.project.lanes.indexOf(lane.value);
     const next = props.project.lanes[index + 1] ?? props.project.lanes[index - 1];
     dialog.value?.close();
@@ -33,10 +33,10 @@ function remove() {
     emit('updateProject', removeEditorLane(props.project, props.laneId), true);
     void nextTick(() => {
         const target = next ? document.getElementById(`${next.eventKind === 'range' ? 'range-' : ''}lane-name-${next.id}`) : null;
-        (target ?? document.querySelector<HTMLElement>('[data-testid="add-point-lane"]'))?.focus();
+        (target ?? document.querySelector<HTMLElement>('[data-testid="add-marker-lane"]'))?.focus();
     });
 }
-watch(() => [props.project.projectId, props.project.track.contentHash], () => dialog.value?.close());
+watch(() => [props.project.projectId, props.project.track.contentHash,props.disabled], () => dialog.value?.close());
 onBeforeUnmount(() => dialog.value?.close());
 </script>
 <style scoped>
