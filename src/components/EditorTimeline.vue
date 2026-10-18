@@ -1,32 +1,11 @@
 <template>
     <section class="editor-timeline-panel app-scrollbar" aria-label="Editor 时间轴" data-editor-major-region="true">
-        <header class="timeline-heading">
-            <div class="timeline-titleline">
-                <h2>节拍</h2>
-                <p data-testid="editor-viewport-state">{{ formatTime(viewport.startSeconds) }} — {{ formatTime(viewport.endSeconds) }} · {{ viewport.zoom.toFixed(1) }}×</p>
-            </div>
-            <div class="timeline-controls" aria-label="共享视口控制">
-                <EditorBeatDivisorControl />
-                <button type="button" class="timing-toggle" data-testid="toggle-editor-timing" :aria-expanded="timingOpen" aria-controls="editor-timing-workspace" @click="timingOpen = !timingOpen">手动定时 {{ timingOpen ? '⌃' : '⌄' }}</button>
-                <button type="button" class="editor-icon-button" aria-label="向前平移 25%" title="向前平移 25%" data-testid="editor-pan-back" @click="panBy(-0.25)"><EditorIcon name="left" /></button>
-                <button type="button" class="editor-icon-button" aria-label="缩小时间轴" title="缩小时间轴" data-testid="editor-zoom-out" :disabled="viewport.zoom <= 1" @click="zoomBy(0.5)"><EditorIcon name="zoomOut" /></button>
-                <button type="button" class="editor-icon-button" aria-label="重置时间轴" title="重置时间轴" data-testid="editor-reset-viewport" @click="resetViewport"><EditorIcon name="reset" /></button>
-                <button type="button" class="editor-icon-button" aria-label="放大时间轴" title="放大时间轴" data-testid="editor-zoom-in" :disabled="viewport.endSeconds - viewport.startSeconds <= minimumWindow + 1e-6" @click="zoomBy(2)"><EditorIcon name="zoomIn" /></button>
-                <button type="button" class="editor-icon-button" aria-label="向后平移 25%" title="向后平移 25%" data-testid="editor-pan-forward" @click="panBy(0.25)"><EditorIcon name="right" /></button>
-                <AppSelect :model-value="windowSelection" label="标记显示范围" :options="windowOptions" @update:model-value="selectWindow" />
-                <button type="button" data-testid="editor-reveal-playback" @click="revealPlayback">查看播放位置</button>
-            </div>
-        </header>
-
         <div class="timeline-layout-row waveform-row">
-            <div class="timeline-track-rail">
-                <strong>歌曲波形</strong>
-                <span>波形 / 播放游标</span>
-            </div>
-            <div class="timeline-class-rail">
-                <strong>共享时间轴</strong>
-                <span>Tempo / 网格</span>
-            </div>
+            <aside class="beat-control-rail">
+                <h2>节拍标记</h2>
+                <EditorBeatDivisorControl />
+                <div class="timing-disclosure"><span>BPM</span><button type="button" data-testid="toggle-editor-timing" aria-label="展开 BPM 设置" :aria-expanded="timingOpen" aria-controls="editor-timing-workspace" @click="timingOpen = !timingOpen"><EditorIcon :name="timingOpen ? 'up' : 'down'" /></button></div>
+            </aside>
             <div class="timeline-time-column" data-testid="tempo-segments">
                 <div
                     ref="stage"
@@ -48,20 +27,25 @@
                     <canvas ref="waveformCanvas" class="timeline-canvas" aria-hidden="true" />
                     <canvas ref="gridCanvas" class="timeline-canvas grid-canvas" aria-hidden="true" />
                     <canvas ref="cursorCanvas" class="timeline-canvas cursor-canvas" aria-hidden="true" />
+                    <div class="waveform-actions">
+                    <button type="button" class="waveform-icon" aria-label="查看播放位置" title="查看播放位置" data-testid="editor-reveal-playback" @pointerdown.stop @click.stop="revealPlayback"><EditorIcon name="locate" /></button>
                     <button
                         type="button"
                         class="add-boundary"
                         data-testid="add-tempo-boundary"
-                        aria-label="新增 Tempo 边界"
+                        aria-label="添加分段" title="添加分段"
+                        @pointerdown.stop
                         @click.stop="insertBoundaryAtPreferredTime"
                     >
-                        <span aria-hidden="true">＋</span>
+                        <EditorIcon name="plus" />
                     </button>
+                    </div>
 
                     <EditorContextMenu
                         v-if="quickMenu"
                         :anchor="stage" :x="quickMenu.x" :y="quickMenu.y" test-id="editor-timeline-menu"
-                        @action="$event === 'center' ? menuCenter() : menuSeek($event === 'play')"
+                        waveform
+                        @action="$event === 'reset' ? resetViewport() : $event === 'center' ? menuCenter() : menuSeek($event === 'play')"
                         @close="quickMenu = null"
                     />
                 </div>
@@ -219,6 +203,7 @@
             @select="selectedTempoId = $event" @seek="audioSession.seek($event)" @update-project="emit('updateProject',$event,true)" />
 
         <div class="timeline-status" aria-live="polite">
+            <span data-testid="editor-viewport-state">{{ formatTime(viewport.startSeconds) }} — {{ formatTime(viewport.endSeconds) }}</span>
             <span data-testid="editor-buffer-state">{{ bufferStateLabel }}</span>
             <span data-testid="editor-tempo-estimate-state">{{ estimateStateLabel }}</span>
             <span>游标 {{ formatTime(playback.currentTimeSeconds) }}</span>
@@ -245,7 +230,6 @@ import EditorIcon from './EditorIcon.vue';
 import EditorContextMenu from './EditorContextMenu.vue';
 import EditorBeatDivisorControl from './EditorBeatDivisorControl.vue';
 import EditorTimingPanel from './EditorTimingPanel.vue';
-import AppSelect from './controls/AppSelect.vue';
 import { useEditorViewport } from '../editor/useEditorViewport';
 import { useEditorGrid } from '../editor/useEditorGrid';
 import { divisorColour, divisorHeight } from '../editor/beatSnap';
@@ -269,7 +253,6 @@ import {
     editorWaveformVerticalGeometry,
     editorTimeToX,
     editorXToTime,
-    editorMeasureSeconds,
     panEditorViewportByPixels,
     panEditorViewportByRatio,
     zoomEditorViewportAtX,
@@ -311,17 +294,8 @@ const meterDenominators = [1, 2, 4, 8, 16, 32] as const;
 const createId = () => crypto.randomUUID();
 let resizeObserver: ResizeObserver | null = null;
 
-const viewportController = useEditorViewport(() => props.project, () => props.playback.currentTimeSeconds, (project, immediate) => emit('updateProject',project,immediate));
+const viewportController = useEditorViewport(() => props.project, (project, immediate) => emit('updateProject',project,immediate));
 const { viewport } = viewportController;
-const minimumWindow = computed(() => Math.min(props.project.track.durationSeconds, editorMeasureSeconds(props.project.tempoMap, (viewport.value.startSeconds + viewport.value.endSeconds) / 2) ?? 1));
-const windowSelection = computed(() => {
-    if (viewport.value.zoom <= 1 + 1e-6) return 'all';
-    const measure = editorMeasureSeconds(props.project.tempoMap, viewport.value.startSeconds);
-    const count = measure ? (viewport.value.endSeconds - viewport.value.startSeconds) / measure : 0;
-    return [1,2,4,8].find(value => Math.abs(value - count) < 1e-5)?.toString() ?? 'custom';
-});
-const windowOptions = computed(() => [...[1,2,4,8].map(value => ({ value: String(value), label: `${value} 小节`, disabled: editorMeasureSeconds(props.project.tempoMap, props.playback.currentTimeSeconds) === null })), { value:'all', label:'全曲', disabled:false }, { value:'custom', label:'当前窗口', disabled:true }]);
-const selectWindow = (value: string | number) => { if (value !== 'custom') viewportController.measures(value === 'all' ? 'all' : Number(value)); };
 const revealPlayback = () => updateViewport(centerEditorViewport(viewport.value, props.project.track.durationSeconds, props.playback.currentTimeSeconds), true);
 const durationSeconds = computed(() => props.project.track.durationSeconds);
 const internalSegments = computed(() => props.project.tempoMap.slice(1).filter(
@@ -387,7 +361,7 @@ const zoomBy = (factor: number, anchorX = size.width / 2, immediate = true) => {
         viewport.value.zoom * factor,
         anchorX,
         size.width,
-        editorMeasureSeconds(props.project.tempoMap, editorXToTime(anchorX, viewport.value, size.width)) ?? 1,
+        1,
     ), immediate);
 };
 const panBy = (ratio: number) => updateViewport(panEditorViewportByRatio(
@@ -395,7 +369,7 @@ const panBy = (ratio: number) => updateViewport(panEditorViewportByRatio(
     durationSeconds.value,
     ratio,
 ), true);
-const resetViewport = () => viewportController.measures(4);
+const resetViewport = () => viewportController.reset();
 
 const canvasPoint = (event: PointerEvent | WheelEvent): { x: number; y: number } => {
     const bounds = stage.value?.getBoundingClientRect();
@@ -406,6 +380,7 @@ const canvasPoint = (event: PointerEvent | WheelEvent): { x: number; y: number }
 };
 
 const onWheel = (event: WheelEvent) => {
+    if (event.ctrlKey || event.metaKey || pointer.value || boundaryDrag.value) return;
     event.preventDefault();
     const { x } = canvasPoint(event);
     zoomBy(event.deltaY < 0 ? 1.12 : 1 / 1.12, x, false);
@@ -794,8 +769,9 @@ const drawStatic = () => {
     for (const line of generateTempoGrid(props.project.tempoMap, durationSeconds.value, viewport.value, size.width)) {
         const x = editorTimeToX(line.timeSeconds, viewport.value, size.width);
         grid.beginPath();
-        grid.moveTo(Math.round(x) + 0.5, line.kind === 'measure' ? 0 : size.height * (1 - divisorHeight(line.divisor)));
-        grid.lineTo(Math.round(x) + 0.5, size.height);
+        const tickHeight = size.height * (line.kind === 'measure' ? 1 : divisorHeight(line.divisor));
+        grid.moveTo(Math.round(x) + 0.5, (size.height - tickHeight) / 2);
+        grid.lineTo(Math.round(x) + 0.5, (size.height + tickHeight) / 2);
         grid.strokeStyle = divisorColour(line.divisor);
         grid.globalAlpha = line.kind === 'measure' ? .85 : .45;
         grid.lineWidth = 1;
@@ -872,6 +848,11 @@ onBeforeUnmount(() => {
 </script>
 
 <style scoped>
+.beat-control-rail { display:grid; align-content:center; gap:3px; padding:8px 14px; min-width:0; background:var(--editor-rail); }
+.beat-control-rail h2 { margin:0; font-size:12px; font-weight:600; }
+.timing-disclosure { display:flex; align-items:center; justify-content:space-between; font-size:12px; }
+.timing-disclosure button { width:30px; height:26px; min-height:26px; border:0; padding:4px; background:transparent; }
+.timing-disclosure svg { width:16px; height:16px; }
 .editor-timeline-panel {
     margin-top: 1px;
     border-top: 1px solid var(--hairline);
@@ -921,8 +902,8 @@ select:focus-visible { outline: 2px solid var(--accent-soft); outline-offset: 2p
 button:disabled { opacity: .4; }
 .timeline-layout-row {
     display: grid;
-    grid-template-columns: var(--editor-lane-name-width) var(--editor-inner-class-width) minmax(420px, 1fr);
-    min-width: 760px;
+    grid-template-columns: 280px minmax(240px, 1fr);
+    min-width: 520px;
     margin-top: 0;
 }
 .timeline-track-rail,
@@ -960,15 +941,9 @@ button:disabled { opacity: .4; }
 .timeline-canvas { position: absolute; inset: 0; pointer-events: none; }
 .grid-canvas { z-index: 2; }
 .cursor-canvas { z-index: 3; }
-.add-boundary {
-    position: absolute;
-    z-index: 5;
-    top: 50%;
-    right: 8px;
-    min-width: 32px;
-    transform: translateY(-50%);
-    cursor: pointer;
-}
+.waveform-actions { position:absolute; z-index:8; top:5px; right:6px; display:flex; gap:4px; }
+.waveform-actions button { display:grid; place-items:center; width:30px; height:30px; min-width:30px; min-height:30px; padding:6px; border:0; background:var(--editor-control-strong); cursor:pointer; }
+.waveform-actions svg { width:18px; height:18px; }
 .timeline-menu {
     position: absolute;
     z-index: 10;
@@ -986,7 +961,7 @@ button:disabled { opacity: .4; }
     flex-wrap: nowrap;
     gap: 14px;
     width: 100%;
-    min-width: 760px;
+    min-width: 520px;
     height: 28px;
     min-height: 28px;
     overflow: hidden;

@@ -413,6 +413,7 @@ onBeforeUnmount(() => {
 }
 .editor-shell { flex: 1; display: flex; flex-direction: column; width: 100%; min-width: 0; min-height: 0; overflow: hidden; }
 .editor-panel { flex: 1; min-height: 0; overflow: auto; overscroll-behavior: contain; }
+#editor-marking-panel { container-type:size; }
 .editor-panel:focus-visible { outline: 2px solid var(--accent-soft); outline-offset: -2px; }
 .editor-state-shell { overflow: auto; overscroll-behavior: contain; }
 .editor-panel :deep(.stem-workspace) { padding-top: 0; }
