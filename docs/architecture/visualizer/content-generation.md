@@ -1,0 +1,37 @@
+# Visualizer 原子内容生成契约
+
+2026-10-18，owner 在规划中选择将旧生成 skill 改名为 `visualizer-content-generator`，并要求**所有新增原子元素和组合预设都先批准具体合同**，随后以“Implement the plan.”批准实施。本轮更新 skill、校验器、测试及入口，不批准任何具体产品内容。
+
+## 当前模型与适用关系
+
+生成目标为 [Project V3](project-format-v3.md) 的 ElementRegistry 原子元素与可展开的组合预设，包括 visual、modifier、transition，以及复用已有元素或含新增类型的预设。完整画面描述按该模型拆解；既有内容修正使用 audio-visualizer-dev，新增部分走本契约。
+
+本契约及 DEC-082 替代 ADR-0021/DEC-056 中的 SceneBriefV1、SceneRegistry、Project V1 注册与旧生成测试步骤。历史批准、V1–V6 canonical/evidence 和 readiness 身份继续保留；两阶段输入/具体合同门禁延续到所有新增元素与预设。位图素材生成、处理分轨、自动标记和独立视频流程规划不属于该生成能力。
+
+## 输入与批准
+
+- 自然语言规范化为 `VisualizerContentBriefV1`：元素或预设模式、视觉意图、复用/新增元素、所需数据响应、时间和效果目标。允许纯静态元素；只有声明动态驱动时才要求完整响应、向量映射与时间语义。
+- 无依赖校验器读取临时 JSON，返回 `INPUT_INCOMPLETE`（exit 2、路径化问题）或 `READY_FOR_CONTRACT`（exit 0）。不写入文件，不兼容旧 brief；结构完整不等于 runtime 可行或批准。
+- 必要意图不完整时询问，不补造用户选择。可选设计在合同提出明确默认值；显式 unbound 与输入缺失分开处理。
+- agent 核对当前 registry/codec/resolver 后展示具体 Content Contract，固定 ID、拆分、参数/default bindings、映射、时序/目标、确定性、资源预算和验收；预设同时固定展开清单、层级、时段与内部引用。展示后标记 `AWAITING_APPROVAL`。
+- 输入不足或合同未批准时，仓库零写入；完整 brief 也不能触发占位源码、合同文档或测试生成。只有展示合同后明确指向它的用户批准才允许实现；视觉、数据、时间、目标或资源要求实质变化须再次批准。
+- 获批合同按需保存至 `content/<element-or-preset>-<id>.md`，记录具体批准来源。没有实际内容批准时不创建合同占位、阶段目录或每内容 readiness 文件。
+
+## 实现不变量
+
+- 元素接入现有 ElementType/ElementRegistry 和组合器分派，使用完整 descriptor。预设由现有工厂生成普通 V3 元素，独立 UUID、当前歌曲时长和新增层级；原元素保持，内部目标映射到本次新 UUID。工程不增加 preset 字段或隐藏实例状态。
+- 默认值只在新增时应用，遵守 editingPrecision；导入/草稿及歌曲时长不量化、不改绑。严格 codec 与候选完整校验保持，失败不能部分替换工程。
+- 来源仅为当前 descriptor 允许的 constant/analysis/native 或明确 unbound；Editor range 是转场时间引用，不是参数来源。普通元素手动时段，效果指向视觉元素或整体合成，不引用其他效果。
+- 全工程最多四种不同 Analyzer 特征，严格工程校验包含禁用元素，运行时只请求启用集合；native 不计额度。预设加入已有工程时检查并集，不自动改绑/禁用原元素腾额度。
+- loading/error、未配置输入、未选范围/目标沿用当前提示、渲染和导出预检规则，不沿用旧场景的默认值静默 fallback。
+- seed/绝对歌曲时间决定画面，带历史的状态必须定义可重建求值与缓存失效；参数单位、向量维度和声道布局由当前输入/渲染层处理。
+- 复用唯一 RendererHost/Canvas/WebGLRenderer/视觉 RAF、现有 render targets、分析及原生输入服务。自有资源幂等释放，旧任务不得覆盖新身份。新元素不创建独立音频、分析或输出链路。
+- 视频生成遵循 [离线导出](../../context/visualizer-offline-export.md)：同一 renderer 的手动租约、绝对帧时间、输入准备、WebCodecs/OPFS。旧实时录制不是新内容的实现或验证入口。
+
+需要新增 source/value/component/projection、工程版本策略、拓扑、支持矩阵、阈值或不明许可资产时，停止依赖这些变更的生成并请求独立决定。不得新增 legacy fallback、用户脚本、运行时插件或任意 shader 注入。
+
+## 验证与交付
+
+具体输入结构与命令见 [输入契约](../../../skills/visualizer-content-generator/references/input-contract.md)，实现规则与按影响选择的验证见 [生成 skill](../../../skills/visualizer-content-generator/SKILL.md)。校验器测试证明输入与 CLI 行为，不能单独证明 agent 的审批或 runtime 实现符合要求。
+
+内容验证按实际变化选择 V3 往返、重复展开/引用隔离、数据映射、确定性、GPU、生命周期和短离线媒体检查；不默认累计历史评审或长曲矩阵。适用阈值保持，未运行/失败如实记录。本轮 skill 改版无需应用构建或产品浏览器回归；验证后按项目规则一次本地提交，不推送、不发布、不产生 readiness 结论。

@@ -7,10 +7,12 @@ upstream_docs:
   - "docs/product/success-metrics.md"
   - "docs/architecture/system-design.md"
   - "docs/architecture/visualizer/project-format-v1.md"
-next_action: "使用 ADR-0021 的 Scene Contract 双门禁扩展场景；新场景不得继承既有 readiness"
+next_action: "保留历史 binding/scene 基线；现行来源与生成遵循 Project V3 和 DEC-082，不继承既有 readiness"
 ---
 
 # Visualizer Binding and Scene Contracts
+
+> 当前适用关系：[Project V3](project-format-v3.md) 与[内容生成契约](content-generation.md)已替代下文的单场景生成指令；参数来源、原生输入、转场和离线导出以当前契约为准。旧 V1/V2 设计及证据保留历史语境。
 
 > 2026-10-04：下文保留既有 V1 binding/scene 基线。目标 V2 新增 processing source、默认 other/beat 及 tempo 显式刷新，详见 [Worker/V2 子契约](../processing/worker-and-project-contracts.md)；既有单 renderer/RAF/播放时钟与四 Analyzer 特征边界继续有效。
 

@@ -203,6 +203,8 @@ E5 于 2026-08-27 在 E4 获批后改为 `In Progress`。若未来要求新的�
 
 ### Controlled post-V6 scene extension
 
+> 本节保留 DEC-056 的历史场景扩展范围。2026-10-18 的 DEC-082/[内容生成契约](../architecture/visualizer/content-generation.md)改用 Project V3 原子元素与组合预设，支持静态内容；所有新增内容都须完整输入和具体合同审批，不再执行下述单模板注册流程。
+
 - 新场景开始设计前必须至少说明一个主要数据驱动效果，包括视觉样式、被驱动属性、绑定数据类型、低/高响应语义和时间行为；输入不完整时必须在不修改仓库的前提下返回缺失项。
 - 输入完整后先形成确定的 Scene Contract，固定模板 ID、视觉映射、参数与默认绑定、seed/时间模型、资源预算、golden 状态和测试方案；只有 owner 明确批准该合同后才能生成代码。
 - 每个获批场景只增加一个轻量架构合同及其代码/测试，不创建新的 V 里程碑、canonical 或自动 release-ready 身份。任何新场景都会使当前 Visualizer readiness candidate 待重新评审。

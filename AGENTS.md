@@ -13,7 +13,7 @@ AudioNotSurfYet 是 Vue / TypeScript / Vite 浏览器音频工作台，包含播
 | `audiosurf-codebase-navigation` | 定位入口、职责、引用与调用方 | [SKILL.md](skills/audiosurf-codebase-navigation/SKILL.md) |
 | `audiosurf-file-modularization` | 新增、重构或评审模块职责 | [SKILL.md](skills/audiosurf-file-modularization/SKILL.md) |
 | `audio-visualizer-dev` | UI、播放、分析、Editor、FT、Visualizer 与录制 | [SKILL.md](skills/audio-visualizer-dev/SKILL.md) |
-| `visualizer-scene-generator` | 创建尚未注册的内置场景 | [SKILL.md](skills/visualizer-scene-generator/SKILL.md) |
+| `visualizer-content-generator` | 新增原子元素和组合预设，先校验输入并批准具体合同 | [SKILL.md](skills/visualizer-content-generator/SKILL.md) |
 | `audiosurf-testing-strategy` | 选择验证、判断证据与验证缺口 | [SKILL.md](skills/audiosurf-testing-strategy/SKILL.md) |
 | `audiosurf-git-task-delivery` | 修改任务开始及验证后的本地交付 | [SKILL.md](skills/audiosurf-git-task-delivery/SKILL.md) |
 | `audiosurf-docs-maintenance` | 更新、清理、压缩或拆分相关文档 | [SKILL.md](skills/audiosurf-docs-maintenance/SKILL.md) |
@@ -38,7 +38,7 @@ AudioNotSurfYet 是 Vue / TypeScript / Vite 浏览器音频工作台，包含播
 - 默认不增加兼容或 legacy fallback；确需改变兼容策略时说明用途、代价及后果，并由用户确认。
 - 耗时处理、取消、换歌和离页不得让旧结果覆盖新状态；AudioContext、Worker、RAF、Observer、节点、监听和对象 URL 按所属模块释放。
 - 范围、隐私、支持矩阵、性能预算、验收阈值、工程格式、重要架构取舍及发布决定变更仍需用户确认。缺少必要环境、许可、输入或合同只阻断依赖它的工作，继续可独立完成的部分。
-- 新内置场景仍保留完整 SceneBriefV1 输入校验与确定 Scene Contract 审批；批准某个 skill 或本工作流不代表具体场景已获批。
+- 所有新增 Visualizer 原子元素和组合预设（包括仅复用已有元素）都先校验 VisualizerContentBriefV1 并批准具体 Content Contract；批准 skill 或工作流不代表具体内容获批。当前替代关系见[内容生成契约](docs/architecture/visualizer/content-generation.md)。
 
 ## Validation and Delivery
 

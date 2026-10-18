@@ -13,7 +13,7 @@ next_action: "DEC-075功能与适用验证已完成，提供短片/标记供owne
 
 AudioNotSurfYet 是 Vue / TypeScript / Vite 浏览器音频工作台；当前目标是自动优先、可人工修正且可完整手动完成的视频制作。当前实现见 [system map](system-map.md)，获批目标架构见 [system design](../architecture/system-design.md)，两者不混作完成状态。
 
-工作规则和项目 skill 选择以 [AGENTS.md](../../AGENTS.md) 为准，运行与工具命令见 [README](../../README.md)。DEC-073 已替代通用阶段审批前置；既有技术契约、具体 Scene Contract、正式证据身份与发布边界继续有效。维护源为 `skills/`，发现入口为 `.agents/skills/`，代码定位使用 [CODEMAP](../CODEMAP.md)。
+工作规则和项目 skill 选择以 [AGENTS.md](../../AGENTS.md) 为准，运行与工具命令见 [README](../../README.md)。DEC-073 已替代通用阶段审批前置；既有技术契约、具体内容合同、正式证据身份与发布边界继续有效。维护源为 `skills/`，发现入口为 `.agents/skills/`，代码定位使用 [CODEMAP](../CODEMAP.md)。
 
 ## 当前实现与证据状态
 
@@ -22,7 +22,7 @@ AudioNotSurfYet 是 Vue / TypeScript / Vite 浏览器音频工作台；当前目
 | 应用外壳与首页 | DEC-076：可收起侧边栏、窄屏隐藏导航和歌曲详情首页；布局及接口见 [应用外壳契约](app-shell.md)。 |
 | Analyzer | DEC-077：单列、FIFO 常驻区、可调高度与图表内滚轮缩放，见 [当前列表契约](analyzer-list.md)。新增首项 [Wallpaper Engine 风格频谱（近似）](wallpaper-spectrum.md)，旧 Analyzer 工作区清空，独立草稿保留。M1–M14 readiness 与 canonical 继续绑定历史候选。 |
 | Editor | DEC-078 的[公共框架](editor-workspace.md)统一顶栏、常驻 MusicBar 与草稿／换歌保护；[标记工作区](editor-marking.md)现为独立波形、左侧节拍栏及 15% 固定播放线轨道，1–10 秒跨度、播放只读、暂停后右侧编辑，保留批量与跨窗口范围创建。E1–E9 canonical 与适用人工门禁继续绑定历史候选；原 readiness 候选为 `pre-E10`。 |
-| Visualizer | 当前已接入 [Project V3 元素组合工作区](visualizer-composition.md)，旧模板和旧 JSON 导入退役；DEC-081 已以[离线确定性导出](visualizer-offline-export.md)替换实时录制，四档按实际能力查询。本轮功能验证不等同 readiness。V1–V6 canonical 与适用人工门禁已批准，post-V6 viewport 修订已有 Chrome/Edge 专项证据。DEC-058 的原生全屏复用同一 Canvas/transport，不创建 V7；原 readiness 候选为 `pre-fullscreen`，交互与视觉由 owner 审阅。新场景仍须完整输入校验和确定 Scene Contract 审批。 |
+| Visualizer | 当前已接入 [Project V3 元素组合工作区](visualizer-composition.md)，旧模板和旧 JSON 导入退役；DEC-081 已以[离线确定性导出](visualizer-offline-export.md)替换实时录制，四档按实际能力查询。本轮功能验证不等同 readiness。V1–V6 canonical 与适用人工门禁已批准，post-V6 viewport 修订已有 Chrome/Edge 专项证据。DEC-058 的原生全屏复用同一 Canvas/transport，不创建 V7；原 readiness 候选为 `pre-fullscreen`，交互与视觉由 owner 审阅。DEC-082 将生成入口更新为原子元素与组合预设，所有新增内容均须输入校验和[具体合同审批](../architecture/visualizer/content-generation.md)。 |
 | FT 与处理链 | P0-D 已完成；当前 FT 功能及汇总听感/长曲耗时按 DEC-074 接受。四原图与官方 ORT JSEP 的历史双浏览器数值门禁保留；完整 P1 正式关闭仍有独立证据缺口。 |
 | Editor FT 接入 | 本轮功能收尾完成：四轨/WAV、缓存恢复、清理、取消/换歌/离页及原编辑回归，当前全量 runner 9/9，92 项非浏览器、Chrome/Edge 各 20/20。证据为工作树不变的 provisional，不冒充 clean canonical；完整 P2 及 P3–P6 独立，后者仍 `Planned`。 |
 | 分轨试听与有限自动标记 | DEC-075 授权四轨共同 transport、ADT_STR WASM 鼓种、Basic Pitch 音符和六轨钢琴／吉他辅助分析；共同试听与标记闭环已实现并完成双浏览器功能/受控质量测量，新增识别质量未获owner接受。沿用 EditorProjectV1，不包含 P3、正式 readiness 或发布。 |
@@ -62,7 +62,7 @@ AudioNotSurfYet 是 Vue / TypeScript / Vite 浏览器音频工作台；当前目
 | [CODEMAP](../CODEMAP.md) | 生成的文件地图与有限静态引用 |
 | [tests README](../../tests/README.md) | 专项 runner、fixture、golden 和历史执行反馈 |
 | [audio-visualizer-dev](../../skills/audio-visualizer-dev/SKILL.md) | 领域开发与诊断路由 |
-| [visualizer-scene-generator](../../skills/visualizer-scene-generator/SKILL.md) | 新内置场景的输入校验与具体合同审批 |
+| [visualizer-content-generator](../../skills/visualizer-content-generator/SKILL.md) | 新增原子元素/组合预设的输入校验与具体合同审批 |
 | [Skill 项目差异](../../skills/audio-visualizer-dev/references/99-open-questions-and-project-deltas.md) | 实现差异与待核实工程事实 |
 
 ### 产品与共享技术契约
@@ -217,7 +217,7 @@ AudioNotSurfYet 是 Vue / TypeScript / Vite 浏览器音频工作台；当前目
 | [ADR-0018](../architecture/adrs/0018-editor-timeline-recovery-and-marker-alignment.md) | Editor `88px/72px` 时间轴、同/异歌恢复决策与 point marker 中心对齐 |
 | [ADR-0019](../architecture/adrs/0019-editor-tempo-lane-and-boundary-deletion.md) | Editor tempo lane 与 boundary 删除 |
 | [ADR-0020](../architecture/adrs/0020-editor-compact-tempo-strip.md) | Editor 紧凑 BPM 条与层级展示 |
-| [ADR-0021](../architecture/adrs/0021-controlled-visualizer-scene-generation.md) | 受控场景生成与具体 Scene Contract 门禁 |
+| [内容生成契约](../architecture/visualizer/content-generation.md) | 当前原子元素/组合预设生成；替代 [ADR-0021](../architecture/adrs/0021-controlled-visualizer-scene-generation.md) 的历史场景注册流程 |
 | [ADR-0022](../architecture/adrs/0022-editor-marker-block-editing.md) | Editor 单 lane/class 小节批量编辑 |
 | [ADR-0023](../architecture/adrs/0023-visualizer-fullscreen-playback.md) | Visualizer 原生全屏、同 Canvas/RendererHost/RAF 与 2 秒自动隐藏 transport |
 | [ADR-0024](../architecture/adrs/0024-browser-processing-runtime.md) | 浏览器 ORT WebGPU、模型下载/缓存、最多一个分离 Worker |

@@ -154,6 +154,8 @@ readiness provisional 随后在相同 runtime source tree 上 24/24 通过；cle
 
 同日，`project-owner` 明确要求实施 Visualizer Scene Generator Skill 落地计划。DEC-056/ADR-0021 据此获批：V0 的两个模板继续作为 V1–V6 历史基线，post-V6 新场景必须先完成无写入输入校验，再由 owner 批准确定 Scene Contract；本轮只交付 Skill、规则、validator 与测试，不生成第三个场景，也不改变现有 canonical、readiness 或 PROD-015。
 
+2026-10-18 适用关系：DEC-082 以 Project V3 原子内容工作流替代 DEC-056/ADR-0021 的旧 brief、模板注册和测试步骤；输入校验与具体合同审批延续到所有新增元素与预设，上述历史批准保持原语境。
+
 同日，`project-owner` 明确要求实施 Editor E10 小节批量编辑与离页弹窗修订计划。DEC-057/ADR-0022 据此获批，E10 改为 `In Progress`：模式默认关闭且不持久化，右拖只选择起始 lane/class 的真实小节，复制立即向后追加，移动吸附当前网格，所有冲突原子拒绝。该产品 `src/` 变化使 DEC-054 固定的 E9 readiness runtime candidate 只保留为 `pre-E10` 历史审计；E1–E9 canonical 和 artifact 不改写。
 
 同日，`project-owner` 明确要求实现 Visualizer 全屏播放，并批准使用现有 workspace 的原生 Fullscreen API、同 Canvas/RendererHost/RAF、2 秒播放栏自动隐藏、底部热区唤醒和录制锁/route cleanup 契约。随后 owner 将验证范围收敛为“无需测试，能够运行即可”；DEC-058/ADR-0023 据此批准实现，但不产生自动化 fullscreen 通过证据。现有 Visualizer readiness candidate 标为 `pre-fullscreen`，R-045 保持 `Open`，V1–V6 canonical 与 PROD-015 不变。
@@ -327,3 +329,7 @@ owner 明确要求「尝试解决录制问题，如果掉帧现象不影响视�
 ## DEC-081 — 离线确定性导出替换实时录制 — 2026-10-17
 
 owner 明确要求「不再使用实时录制，替换为离线确定性导出」，并批准实施计划。使用同一 renderer 手动渲染、固定帧/PCM 时间轴、WebCodecs、Mediabunny 1.61.6 与 OPFS 流式 WebM，移除旧实时链路。保留 Project V3、四档输出参数和生成后保存流程；能力按实际编码配置查询。修正音频 PTS 测量，保留历史原始证据与既有同步/时长门槛；离线输出另检查精确帧数/时间序列。按阶段本地提交，不自动发布。当前行为与验证边界见[离线导出契约](visualizer-offline-export.md)。
+
+## DEC-082 — 原子元素与组合预设生成 Skill — 2026-10-18
+
+owner 要求核对 Visualizer 生成 skill 与当前原子化方案，规划中选择改名为 `visualizer-content-generator`，并明确所有新增原子元素和组合预设（含纯复用预设）都先批准具体合同，随后要求“Implement the plan.”。本决定授权更新 skill、VisualizerContentBriefV1 只读校验器、测试、项目入口和[内容生成契约](../architecture/visualizer/content-generation.md)，替代 DEC-056/ADR-0021 的 SceneBriefV1、旧场景注册与测试执行步骤。既有内容修正按开发 skill；不批准任何具体新内容、不恢复旧模板、不增加兼容入口，也不改变 Project V3、支持矩阵、性能阈值、历史 evidence/readiness 或发布边界。适用验证通过后一次本地提交，不推送。

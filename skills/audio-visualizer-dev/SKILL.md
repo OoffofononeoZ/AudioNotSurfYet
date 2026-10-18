@@ -1,6 +1,6 @@
 ---
 name: audio-visualizer-dev
-description: "开发、诊断或评审 AudioNotSurfYet 的 Vue 界面、播放、音频分析、Editor、FT 分离、Visualizer 与录制。新增内置场景使用 visualizer-scene-generator；不用于其他音频项目。"
+description: "开发、诊断或评审 AudioNotSurfYet 的 Vue 界面、播放、音频分析、Editor、FT 分离、Visualizer 与导出。新增原子元素和组合预设使用 visualizer-content-generator；不用于其他音频项目。"
 ---
 
 # Audio Visualizer Dev
@@ -18,7 +18,7 @@ description: "开发、诊断或评审 AudioNotSurfYet 的 Vue 界面、播放�
 | FT 模型、分离任务与 Editor 接入 | [浏览器处理链](references/60-processing-and-editor-separation.md) |
 | 工程差异、未解决问题与漂移 | [项目差异](references/99-open-questions-and-project-deltas.md) |
 
-新增内置场景使用 `$visualizer-scene-generator`；修改已有场景继续使用本 skill。处理新能力时先核对任务范围与相关接口、设计决定；已有浏览器处理架构和 Editor FT 接入已授权，当前状态以 [上下文入口](../../docs/context/index.md) 和证据为准。
+新增 Visualizer 原子元素和组合预设使用 `$visualizer-content-generator`，包括仅复用已有元素的预设；已有元素/预设修正、诊断继续使用本 skill，涉及新增类型或预设的部分须另走具体合同审批。处理新能力时先核对任务范围与相关接口、设计决定；已有浏览器处理架构和 Editor FT 接入已授权，当前状态以 [上下文入口](../../docs/context/index.md) 和证据为准。
 
 ## 页面设计文案
 

@@ -40,7 +40,7 @@ AudioNotSurfYet 采用一个实时 `AudioEngine`、一个 MainLayout-owned `Audi
 - 让波形、tempo 网格、事件和分析叠加层共享一个时间几何，目标误差不超过 1 CSS px。
 - 让 Visualizer 以同一 AudioContext 时钟把最多四项分析特征和同歌 Editor 快照解析成可重复 seek 的单场景画面，并保存严格本地工程。
 - 让支持能力满足预设时，以同一画布和原歌曲音量实时录制 720p/1080p、30/60fps WebM，而不复制播放引擎。
-- 让新内置场景先通过完整输入和确定 Scene Contract，再在同一 binding、工程、renderer 与测试边界内扩展。
+- 新增原子元素与组合预设先校验输入并批准具体 Content Contract，再在当前 Project V3、输入、组合 renderer 与测试边界内扩展，见[内容生成契约](visualizer/content-generation.md)。
 
 ### Non-Goals
 
@@ -422,6 +422,8 @@ M6 只在 `import.meta.env.DEV` 安装无 UI bridge，提供活动特征、cance
 
 ## 20. Visualizer V0 Target Architecture（approved）
 
+> 下方 V0 单模板与实时录制设计保留历史语境；当前生产模型见 [Project V3](visualizer/project-format-v3.md)、[离线导出](../context/visualizer-offline-export.md)，生成流程见本节“当前原子内容生成”和[内容生成契约](visualizer/content-generation.md)。
+
 ### Route and runtime ownership
 
 - 目标路由为 `/visualizer/:trackId?`。侧边栏使用当前歌曲进入；未知、不可恢复或内容身份不匹配的目标进入明确空状态，不静默选择队列中的其他歌曲。
@@ -458,13 +460,12 @@ M6 只在 `import.meta.env.DEV` 安装无 UI bridge，提供活动特征、cance
 - 旧 generation、旧 route token、旧 template 或旧 binding result 一律不得更新当前项目或场景。任何工程/草稿/Editor 快照导入失败都保留原内存和 durable draft。
 - 拒绝第二 AudioEngine/Worker、实时监听 Editor draft、可执行模板、多草稿工程库、依赖 RAF delta 的运动、静默录制预设降级。主要权衡见 [ADR-0014](adrs/0014-visualizer-runtime-leases.md) 至 [ADR-0017](adrs/0017-realtime-webm-recording.md)，受控扩展见 [ADR-0021](adrs/0021-controlled-visualizer-scene-generation.md)。
 
-### Controlled post-V6 scene generation
+### 当前原子内容生成（DEC-082）
 
-- 生成器先把自然语言规范化为 `SceneBriefV1`。缺少主要效果、被驱动属性、绑定数据类型、低/高响应或时间行为时返回 `INPUT_INCOMPLETE`，并保证工作树不变。
-- 完整 brief 必须结合当前 Feature Registry 形成确定 Scene Contract，包含 template ID、映射、参数/default bindings、seed/绝对时间模型、资源预算、golden 状态和测试计划；状态为 `AWAITING_APPROVAL` 时不得写代码。
-- owner 批准后，场景使用独立纯状态解析器与 renderer 并注册到现有 `SceneRegistry`。合同保存于 `docs/architecture/visualizer/scenes/<template-id>.md`，但不为每个场景建立里程碑或 canonical。
-- 默认分析特征应最少化且通常不超过两个，三至四项必须由合同解释，四项为硬上限。单参数错误按 descriptor 默认值降级并保留 inspector 错误。
-- 涉及新 binding/value/projection 类型、JSON schema、第二 renderer/AudioContext/Worker/RAF、超过四项特征或外部资产许可时停止生成并转入独立架构评审。
+- 使用 visualizer-content-generator 将自然语言规范化为 `VisualizerContentBriefV1`，支持静态/动态新元素和组合预设。输入不完整或具体合同未获批时仓库零写入；所有新增内容，包括仅复用已有元素的预设，均须展示合同并等待批准。
+- 合同核对当前 registry、参数/默认绑定、数据单位与映射、时序/目标、seed/绝对时间、资源预算和测试范围。批准后扩展 ElementRegistry/组合器或预设工厂，工程沿用 strict V3；不恢复 SceneRegistry、不添加 preset 工程字段。
+- 全工程最多四种不同 Analyzer 特征，native 不计额度；未就绪/未配置行为使用当前 resolver、合成器和离线导出预检，不沿用旧场景静默 fallback。
+- 完整接口、停止条件与 ADR-0021/DEC-056 的替代关系见[内容生成契约](visualizer/content-generation.md)。历史场景及实时录制段落保留历史语境，当前输出按离线导出契约，不自动创建 canonical/readiness。
 
 ### Workspace viewport and scrolling
 
