@@ -2,7 +2,7 @@
     <main class="editor-page" data-testid="editor-page">
         <EditorToolbar :ready="snapshot.state === 'ready'" v-model:workspace="workspace" :persistence="snapshot.persistence" @import="importProject" @export="exportProject" />
         <p v-if="snapshot.state === 'ready' && snapshot.message" role="alert" class="editor-error">{{ snapshot.message }}</p>
-        <section class="editor-shell" :class="{ 'editor-state-shell app-scrollbar': snapshot.state !== 'ready' }" :data-testid="snapshot.state === 'ready' ? 'editor-ready' : undefined">
+        <section class="editor-shell" :class="{ 'editor-state-shell app-scrollbar': snapshot.state !== 'ready', 'editor-notice-shell': snapshot.state === 'draft-conflict' }" :data-testid="snapshot.state === 'ready' ? 'editor-ready' : undefined">
             <section v-if="snapshot.state === 'empty'" class="editor-state" data-testid="editor-empty">
                 <h2>先选择一首歌曲</h2>
                 <p>可以在底部播放器导入或选择歌曲，再从导航栏 Editor 进入。</p>
@@ -33,27 +33,15 @@
                 <button type="button" @click="clearInvalidDraft">清除损坏草稿并新建</button>
             </section>
 
-            <section v-else-if="snapshot.state === 'draft-conflict'" class="editor-state conflict" data-testid="editor-draft-conflict">
-                <h2>另一首歌曲已有草稿</h2>
-                <p>{{ snapshot.message }}</p>
-                <p v-if="snapshot.conflictingDraft">
-                    旧工程：{{ snapshot.conflictingDraft.project.track.fileName }}
-                </p>
-                <p v-if="conflictExported" class="success-message">
-                    旧工程已导出；仍需明确选择“覆盖草稿”才能继续。
-                </p>
-                <div class="button-row">
-                    <button type="button" data-testid="export-conflicting-draft" @click="exportConflict">
-                        导出旧工程
-                    </button>
-                    <button type="button" data-testid="overwrite-conflicting-draft" @click="overwriteConflict">
-                        覆盖草稿
-                    </button>
-                    <button type="button" data-testid="cancel-editor-entry" @click="cancelConflict">
-                        取消进入
-                    </button>
-                </div>
-            </section>
+            <EditorDraftNotice
+                v-else-if="snapshot.state === 'draft-conflict'"
+                :file-name="snapshot.conflictingDraft?.project.track.fileName"
+                :message="snapshot.message"
+                :exported="conflictExported"
+                @export="exportConflict"
+                @replace="overwriteConflict"
+                @cancel="cancelConflict"
+            />
 
             <template v-else-if="snapshot.state === 'ready' && snapshot.project">
                 <div id="editor-marking-panel" v-show="workspace === 'marking'" class="editor-panel app-scrollbar" role="tabpanel" aria-labelledby="editor-marking-tab" tabindex="0">
@@ -119,6 +107,7 @@ import { ElMessage } from 'element-plus';
 import { useAudioSessionService } from '../audio/audioSessionService';
 import EditorToolbar from '../components/EditorToolbar.vue';
 import EditorLeaveGuard from '../components/EditorLeaveGuard.vue';
+import EditorDraftNotice from '../components/EditorDraftNotice.vue';
 import '../editor/controls.css';
 import '../editor/marking.css';
 import { provideEditorGrid } from '../editor/useEditorGrid';
@@ -412,14 +401,15 @@ onBeforeUnmount(() => {
 #editor-marking-panel :deep(.editor-timeline-panel) { flex:none; overflow-x:auto; }
 .editor-panel:focus-visible { outline: 2px solid var(--accent-soft); outline-offset: -2px; }
 .editor-state-shell { overflow: auto; overscroll-behavior: contain; }
+.editor-notice-shell { box-sizing: border-box; align-items: center; padding: 28px; }
+.editor-notice-shell > .editor-notice { flex: none; margin-block: auto; }
 .editor-panel :deep(.stem-workspace) { padding-top: 0; }
 .editor-state { margin: 20px; border: 1px solid var(--hairline); border-radius: 4px; padding: 24px; background: var(--surface-2); }
 .editor-state h2 { margin: 0 0 12px; font-size: 17px; }
 .editor-state p { margin: 8px 0; color: var(--body); line-height: 1.65; font-size: 13px; }
-.button-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
 button { box-sizing: border-box; min-height: 30px; border: 1px solid var(--hairline-focus); border-radius: 4px; padding: 4px 10px; color: var(--ink); background: var(--editor-control); }
 button:hover { background: var(--editor-control-hover); }
 button:focus-visible { outline: 2px solid var(--accent-soft); outline-offset: 2px; }
 .editor-error { margin: 0; padding: 6px 14px; border-bottom: 1px solid var(--error-hairline); color: var(--error); font-size: 12px; line-height: 1.5; }
-.editor-state .success-message { color: var(--accent-soft); }
+@media (max-width: 600px) { .editor-notice-shell { padding: 20px 16px; } }
 </style>
