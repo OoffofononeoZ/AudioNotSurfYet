@@ -25,6 +25,7 @@ declare module 'vue' {
     EditorBeatDivisorControl: typeof import('./src/components/EditorBeatDivisorControl.vue')['default']
     EditorCandidateTimeline: typeof import('./src/components/EditorCandidateTimeline.vue')['default']
     EditorContextMenu: typeof import('./src/components/EditorContextMenu.vue')['default']
+    EditorDraftNotice: typeof import('./src/components/EditorDraftNotice.vue')['default']
     EditorIcon: typeof import('./src/components/EditorIcon.vue')['default']
     EditorLaneDeleteButton: typeof import('./src/components/EditorLaneDeleteButton.vue')['default']
     EditorLeaveGuard: typeof import('./src/components/EditorLeaveGuard.vue')['default']

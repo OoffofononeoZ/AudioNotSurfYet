@@ -1,7 +1,7 @@
 <template>
         <dialog
             ref="leaveDialog"
-            class="editor-leave-dialog"
+            class="editor-leave-dialog editor-notice app-scrollbar"
             data-testid="editor-leave-dialog"
             aria-labelledby="editor-leave-dialog-title"
             aria-describedby="editor-leave-dialog-description"
@@ -14,30 +14,33 @@
                 aria-label="关闭并留在当前页面"
                 data-testid="editor-leave-close"
                 @click="finishLeaveDecision(false)"
-            >×</button>
-            <h2 id="editor-leave-dialog-title">离开 Editor？</h2>
-            <p id="editor-leave-dialog-description">
-                如果之后用其他歌曲进入 Editor，当前单草稿可能被覆盖。建议先导出工程。
-            </p>
-            <label class="leave-dialog-preference">
-                <input v-model="suppressFutureLeaveWarning" type="checkbox" data-testid="editor-leave-suppress">
-                <span>之后不再显示普通离页提示</span>
-            </label>
-            <div class="leave-dialog-actions">
-                <button
-                    ref="leaveStayButton"
-                    type="button"
-                    class="leave-stay"
-                    data-testid="editor-leave-stay"
-                    @click="finishLeaveDecision(false)"
-                >留在此页</button>
+            ><EditorIcon name="close" /></button>
+            <div class="editor-notice__body">
+                <div class="editor-notice__icon"><EditorIcon name="leave" /></div>
+                <h2 id="editor-leave-dialog-title">离开 Editor？</h2>
+                <p id="editor-leave-dialog-description" class="editor-notice__description">
+                    如果之后用其他歌曲进入 Editor，当前单草稿可能被覆盖。建议先导出工程。
+                </p>
+                <label class="leave-dialog-preference">
+                    <input v-model="suppressFutureLeaveWarning" type="checkbox" data-testid="editor-leave-suppress">
+                    <span>之后不再显示普通离页提示</span>
+                </label>
+            </div>
+            <footer class="editor-notice__actions">
                 <button
                     type="button"
-                    class="leave-confirm"
+                    class="editor-notice__quiet"
                     data-testid="editor-leave-confirm"
                     @click="confirmLeave"
                 >仍然离开</button>
-            </div>
+                <button
+                    ref="leaveStayButton"
+                    type="button"
+                    class="editor-notice__primary"
+                    data-testid="editor-leave-stay"
+                    @click="finishLeaveDecision(false)"
+                >留在此页</button>
+            </footer>
         </dialog>
 </template>
 <script setup lang="ts">
@@ -46,6 +49,8 @@ import { onBeforeRouteLeave } from 'vue-router';
 import { ElMessage } from 'element-plus';
 import { useEditorSessionController } from '../editor/editorSessionController';
 import { useEditorSeparationService } from '../processing/editorSeparationService';
+import EditorIcon from './EditorIcon.vue';
+import '../editor/notices.css';
 const controller = useEditorSessionController();
 const separationService = useEditorSeparationService();
 const leaveDialog = ref<HTMLDialogElement | null>(null);
@@ -137,18 +142,12 @@ onBeforeRouteLeave(async () => {
 onBeforeUnmount(() => finishLeaveDecision(false));
 </script>
 <style scoped>
-button { box-sizing: border-box; min-height: 30px; border: 1px solid var(--hairline-focus); border-radius: 4px; padding: 4px 10px; color: var(--ink); background: var(--editor-control); }
-button:hover { background: var(--editor-control-hover); }
-button:focus-visible { outline: 2px solid var(--accent-soft); outline-offset: 2px; }
 .editor-leave-dialog {
-    box-sizing: border-box;
-    width: min(520px, calc(100vw - 32px));
-    border: 1px solid var(--hairline-focus);
-    border-radius: 8px;
-    padding: 20px;
-    color: var(--ink);
-    background: var(--surface-2);
-    box-shadow: 0 24px 80px rgba(0, 0, 0, .72), inset 0 0 28px var(--glow-inset);
+    width: min(500px, calc(100vw - 32px));
+    max-height: calc(100dvh - 32px);
+    overflow: auto;
+    overscroll-behavior: contain;
+    padding: 0;
 }
 
 .editor-leave-dialog::backdrop {
@@ -156,64 +155,39 @@ button:focus-visible { outline: 2px solid var(--accent-soft); outline-offset: 2p
 }
 
 .editor-leave-dialog h2 {
-    margin: 0 36px 10px 0;
-    color: var(--ink);
-    font-size: 1.05rem;
+    padding-right: 20px;
 }
 
-.editor-leave-dialog p {
-    margin: 0;
-    color: var(--body);
-    line-height: 1.65;
-}
-
-.leave-dialog-close {
+.editor-leave-dialog .leave-dialog-close {
     position: absolute;
     top: 10px;
     right: 10px;
     width: 30px;
+    height: 30px;
+    min-height: 30px;
     padding: 0;
-    border-color: transparent;
     color: var(--body);
     background: transparent;
-    font-size: 1.2rem;
 }
+.editor-leave-dialog .leave-dialog-close:hover { color: var(--ink); background: var(--control-hover); }
 
 .leave-dialog-preference {
     display: flex;
     align-items: center;
     gap: 8px;
-    margin-top: 16px;
-    color: var(--ink);
-    font-size: .86rem;
+    margin-top: 20px;
+    color: var(--body);
+    font-size: 12px;
+    line-height: 20px;
+    cursor: pointer;
 }
 
 .leave-dialog-preference input {
     width: 16px;
     height: 16px;
+    flex: none;
     margin: 0;
-    accent-color: var(--accent);
-}
-
-.leave-dialog-actions {
-    display: flex;
-    justify-content: flex-end;
-    gap: 8px;
-    margin-top: 20px;
-}
-
-.leave-stay {
-    border-color: var(--accent-soft);
-    background: var(--editor-control-primary);
-}
-
-.leave-confirm {
-    color: var(--body);
-    background: var(--editor-control-quiet);
-}
-
-@media (prefers-reduced-motion: reduce) {
-    .editor-leave-dialog { scroll-behavior: auto; }
+    accent-color: var(--accent-soft);
 }
 
 </style>

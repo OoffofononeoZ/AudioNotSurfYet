@@ -23,8 +23,8 @@ owner 于 2026-10-16 要求实施“Editor 页面框架与控件改版”计划�
 - Editor 使用 `calc(100dvh - var(--app-player-inset, 80px))`，不在 document 上滚动。MusicBar 的实测占高继续由其 ResizeObserver 发布，三种样式及切换动画均按实际 top 留位。
 - 顶栏始终可见，切页签只使用 `v-show` 与现有 active 状态，不重启分离或自动标记。分离／自动标记继续各自 `.editor-panel.app-scrollbar` 滚动；标记页保持节拍区可见，`.marker-scroll.app-scrollbar` 独立滚动并保留 scrollTop。
 - 工作内容从顶栏下沿开始。波形仍为 88/72px，280px 左侧节拍栏、可折叠 BPM 区；轨道采用 224/160px 合并管理栏、36px 组标题和 48px 分类行。波形与轨道横向滚动及时间视图分别独立。
-- 空、加载、不可用、草稿冲突和损坏状态使用同一状态外框及可滚动状态区；原有恢复、导出、覆盖和取消操作保留。
-- 离页提示由 `EditorLeaveGuard` 处理原生 dialog 与路由 guard，刷新继续由 controller 的 beforeunload 保护；未增加持久化字段。
+- 空、加载、不可用和损坏状态使用原有状态外框及可滚动状态区；草稿冲突使用居中卡片，参照 Visualizer 的图标、文件名和独立底部操作区，保留导出、明确覆盖、取消及导出结果提示。
+- 离页提示由 `EditorLeaveGuard` 处理原生 dialog 与路由 guard，沿用草稿卡片样式，默认聚焦“留在此页”；关闭、Escape、背景取消和“不再提示”的保存规则不变。刷新继续由 controller 的 beforeunload 保护；未增加持久化字段。
 
 ## 本次验证
 
