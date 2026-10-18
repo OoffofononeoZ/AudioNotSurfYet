@@ -127,7 +127,6 @@ function drop(ids: string[], target: string, parentId?: string) {
 <style scoped>
 .viz-preset-children {
     margin: 4px 0 8px 14px;
-    padding-left: 8px;
-    border-left: 1px solid #35473c;
+    box-shadow: inset 1px 0 #35473c;
 }
 </style>
