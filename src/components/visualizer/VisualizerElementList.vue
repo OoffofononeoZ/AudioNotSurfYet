@@ -12,7 +12,7 @@
             <VisualizerIcon name="add" />
         </button>
     </div>
-    <div class="viz-element-items app-scrollbar" role="list" aria-label="可视化元素">
+    <div class="viz-element-items app-scrollbar divide-y divide-[var(--divider)]" role="list" aria-label="可视化元素">
         <div v-for="(item, index) in roots" :key="item.id" class="viz-root-item" :data-root-item-id="item.id">
             <VisualizerCompositionRow
                 :id="item.id"
@@ -46,7 +46,7 @@
                 @dragend="dragged = null" />
             <div
                 v-if="item.kind === 'preset' && expanded.has(item.id)"
-                class="viz-preset-children"
+                class="viz-preset-children divide-y divide-[var(--divider)] border-t border-[var(--divider)]"
                 role="list"
                 :aria-label="item.name + '内部元素'">
                 <VisualizerCompositionRow
