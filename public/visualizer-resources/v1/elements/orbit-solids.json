@@ -1,0 +1,228 @@
+{
+    "format": "audiosurf-visualizer-resource",
+    "schemaVersion": 1,
+    "id": "orbit-solids",
+    "version": 1,
+    "elements": [
+        {
+            "id": "orbit-solids",
+            "version": 1,
+            "kernelId": "orbit-solids",
+            "kernelVersion": 1,
+            "kind": "visual",
+            "title": "轨道几何体",
+            "icon": "orbit",
+            "inputParameter": "spectrum",
+            "parameters": [
+                {
+                    "id": "spectrum",
+                    "label": "频谱输入",
+                    "valueKind": "vector",
+                    "defaultValue": [],
+                    "allowedSourceKinds": ["analysis", "constant", "native"],
+                    "allowEmptyVector": true,
+                    "vectorElementRange": {
+                        "min": 0,
+                        "max": 1.7976931348623157e308
+                    },
+                    "allowedAnalysisComponents": ["default", "specific", "magnitude"],
+                    "allowedAnalysisProjections": ["full"],
+                    "defaultBinding": {
+                        "source": {
+                            "kind": "analysis",
+                            "featureId": "amplitudeSpectrum",
+                            "projection": {
+                                "kind": "full"
+                            }
+                        }
+                    }
+                },
+                {
+                    "id": "color",
+                    "label": "线条颜色",
+                    "defaultValue": "#ffffff",
+                    "valueKind": "color",
+                    "allowedSourceKinds": ["constant"]
+                },
+                {
+                    "id": "opacity",
+                    "label": "透明度",
+                    "defaultValue": 1,
+                    "valueKind": "number",
+                    "allowedSourceKinds": ["constant"],
+                    "range": {
+                        "min": 0,
+                        "max": 1,
+                        "integer": false,
+                        "editingPrecision": 2
+                    }
+                },
+                {
+                    "id": "x",
+                    "label": "水平位置",
+                    "defaultValue": 0.5,
+                    "valueKind": "number",
+                    "allowedSourceKinds": ["constant"],
+                    "range": {
+                        "min": 0,
+                        "max": 1,
+                        "integer": false,
+                        "editingPrecision": 3
+                    }
+                },
+                {
+                    "id": "y",
+                    "label": "垂直位置",
+                    "defaultValue": 0.5,
+                    "valueKind": "number",
+                    "allowedSourceKinds": ["constant"],
+                    "range": {
+                        "min": 0,
+                        "max": 1,
+                        "integer": false,
+                        "editingPrecision": 3
+                    }
+                },
+                {
+                    "id": "sensitivity",
+                    "label": "响应系数",
+                    "defaultValue": 0.6,
+                    "valueKind": "number",
+                    "allowedSourceKinds": ["constant"],
+                    "range": {
+                        "min": 0,
+                        "max": 5,
+                        "integer": false,
+                        "editingPrecision": 2
+                    }
+                },
+                {
+                    "id": "thickness",
+                    "label": "线宽",
+                    "defaultValue": 1,
+                    "valueKind": "number",
+                    "allowedSourceKinds": ["constant"],
+                    "range": {
+                        "min": 0.3,
+                        "max": 8,
+                        "integer": false,
+                        "editingPrecision": 2
+                    }
+                },
+                {
+                    "id": "chromatic",
+                    "label": "强音彩色",
+                    "valueKind": "boolean",
+                    "defaultValue": true,
+                    "allowedSourceKinds": ["constant"]
+                },
+                {
+                    "id": "shape",
+                    "label": "形状（0 方块 / 1 棱锥）",
+                    "defaultValue": 0,
+                    "valueKind": "number",
+                    "allowedSourceKinds": ["constant"],
+                    "range": {
+                        "min": 0,
+                        "max": 1,
+                        "integer": true,
+                        "editingPrecision": 0
+                    }
+                },
+                {
+                    "id": "count",
+                    "label": "几何体数量",
+                    "defaultValue": 12,
+                    "valueKind": "number",
+                    "allowedSourceKinds": ["constant"],
+                    "range": {
+                        "min": 1,
+                        "max": 32,
+                        "integer": true,
+                        "editingPrecision": 0
+                    }
+                },
+                {
+                    "id": "radius",
+                    "label": "轨道半径",
+                    "defaultValue": 0.0875,
+                    "valueKind": "number",
+                    "allowedSourceKinds": ["constant"],
+                    "range": {
+                        "min": 0,
+                        "max": 0.5,
+                        "integer": false,
+                        "editingPrecision": 4
+                    }
+                },
+                {
+                    "id": "size",
+                    "label": "几何体尺寸",
+                    "defaultValue": 0.00875,
+                    "valueKind": "number",
+                    "allowedSourceKinds": ["constant"],
+                    "range": {
+                        "min": 0.001,
+                        "max": 0.15,
+                        "integer": false,
+                        "editingPrecision": 5
+                    }
+                },
+                {
+                    "id": "speed",
+                    "label": "自转速度",
+                    "defaultValue": 0.6,
+                    "valueKind": "number",
+                    "allowedSourceKinds": ["constant"],
+                    "range": {
+                        "min": -4,
+                        "max": 4,
+                        "integer": false,
+                        "editingPrecision": 3
+                    }
+                },
+                {
+                    "id": "orbitSpeed",
+                    "label": "公转速度",
+                    "defaultValue": 0,
+                    "valueKind": "number",
+                    "allowedSourceKinds": ["constant"],
+                    "range": {
+                        "min": -4,
+                        "max": 4,
+                        "integer": false,
+                        "editingPrecision": 3
+                    }
+                },
+                {
+                    "id": "wobble",
+                    "label": "轨道游移",
+                    "defaultValue": 0,
+                    "valueKind": "number",
+                    "allowedSourceKinds": ["constant"],
+                    "range": {
+                        "min": 0,
+                        "max": 0.2,
+                        "integer": false,
+                        "editingPrecision": 5
+                    }
+                },
+                {
+                    "id": "threshold",
+                    "label": "填色阈值",
+                    "defaultValue": 0.05,
+                    "valueKind": "number",
+                    "allowedSourceKinds": ["constant"],
+                    "range": {
+                        "min": 0,
+                        "max": 1,
+                        "integer": false,
+                        "editingPrecision": 4
+                    }
+                }
+            ],
+            "hash": "fa5bbcea03e9a0faa12c29a3fca0a662e5a877d13ff5da1bad342f7a5a368664"
+        }
+    ],
+    "presets": []
+}

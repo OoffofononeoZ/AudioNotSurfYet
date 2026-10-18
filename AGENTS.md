@@ -40,6 +40,7 @@ AudioNotSurfYet 是 Vue / TypeScript / Vite 浏览器音频工作台，包含播
 - 耗时处理、取消、换歌和离页不得让旧结果覆盖新状态；AudioContext、Worker、RAF、Observer、节点、监听和对象 URL 按所属模块释放。
 - 范围、隐私、支持矩阵、性能预算、验收阈值、工程格式、重要架构取舍及发布决定变更仍需用户确认。缺少必要环境、许可、输入或合同只阻断依赖它的工作，继续可独立完成的部分。
 - 所有新增 Visualizer 原子元素和组合预设（包括仅复用已有元素）都先校验 VisualizerContentBriefV1 并批准具体 Content Contract；批准 skill 或工作流不代表具体内容获批。当前替代关系见[内容生成契约](docs/architecture/visualizer/content-generation.md)。
+- Visualizer 当前为 Project V4 与 JSON 资源包 V1 过渡版；内置内容位于 `public/visualizer-resources/v1/`，编写规则见[资源包契约](docs/architecture/visualizer/resource-packages-v1.md)。预设持久化分组，共同参数只含处理字段，批量写入并提示子元素差异；新绘制算法仍需应用内核。旧版工程不迁移，旧版草稿不提供覆盖/原文导出提示。
 
 ## Validation and Delivery
 

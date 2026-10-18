@@ -1,0 +1,54 @@
+{
+    "format": "audiosurf-visualizer-resource",
+    "schemaVersion": 1,
+    "id": "fade",
+    "version": 1,
+    "elements": [
+        {
+            "id": "fade",
+            "version": 1,
+            "kernelId": "fade",
+            "kernelVersion": 1,
+            "kind": "transition",
+            "title": "淡入淡出",
+            "icon": "fade",
+            "parameters": [
+                {
+                    "id": "from",
+                    "label": "起始透明度",
+                    "defaultValue": 0,
+                    "valueKind": "number",
+                    "allowedSourceKinds": ["constant"],
+                    "range": {
+                        "min": 0,
+                        "max": 1,
+                        "integer": false,
+                        "editingPrecision": 2
+                    }
+                },
+                {
+                    "id": "to",
+                    "label": "终止透明度",
+                    "defaultValue": 1,
+                    "valueKind": "number",
+                    "allowedSourceKinds": ["constant"],
+                    "range": {
+                        "min": 0,
+                        "max": 1,
+                        "integer": false,
+                        "editingPrecision": 2
+                    }
+                },
+                {
+                    "id": "smooth",
+                    "label": "平滑过渡",
+                    "valueKind": "boolean",
+                    "defaultValue": true,
+                    "allowedSourceKinds": ["constant"]
+                }
+            ],
+            "hash": "315b4dce9560f3ee9a428050aa40fd2470052e893b9e924eb00569508ab64543"
+        }
+    ],
+    "presets": []
+}

@@ -15,7 +15,7 @@ next_action: "Editor四轨接入本轮功能验证已收尾，owner接受当前�
 
 DEC-072另由MainLayout提供唯一`EditorSeparationService`，使用同一AudioEngine原始PCM；Editor增加分离工作区和四轨展示/导出。模型与结果索引使用`processing-p1` IndexedDB，原PCM/planar/WAV使用OPFS；最多一个专用分离Worker，播放及analysis所有权不变。
 
-Visualizer 当前实现 Project V3 原子组合、ElementRegistry、同歌单范围转场、目标/整体效果和组合 RendererHost；元素库预设展开为可独立编辑的普通元素。布局及接口见 [组合工作区](visualizer-composition.md)、[几何与 PV 预设](visualizer-presets.md) 与 [Project V3](../architecture/visualizer/project-format-v3.md)；新增元素与预设按[内容生成契约](../architecture/visualizer/content-generation.md)先批准具体合同，历史 V1–V6 审批及候选身份保持历史语境。
+Visualizer 当前实现 Project V4、分组预设、共同处理参数、同歌单范围转场和组合 RendererHost；JSON 资源包通过请求或磁盘导入，导入库独立保存到 IndexedDB，工程内嵌定义快照。当前为已有绘制内核驱动的过渡版，不支持外部算法脚本。布局及接口见 [组合工作区](visualizer-composition.md)、[资源包](../architecture/visualizer/resource-packages-v1.md)与 [Project V4](../architecture/visualizer/project-format-v4.md)；新增内容按[内容生成契约](../architecture/visualizer/content-generation.md)先批准具体合同，历史 V1–V6 审批及候选身份保持历史语境。
 
 应用导航占位、窄屏隐藏、歌曲详情与内容宽度分界见 [应用外壳契约](app-shell.md)（DEC-076）；旧 canonical 数值与身份继续绑定历史实现。
 
@@ -43,7 +43,8 @@ showOpenFilePicker → FileSystemFileHandle → File
 ```text
 /visualizer/:trackId? → VisualizerSessionController
   ├→ RoutePlaybackLease(repeat-one; export transport locks) → AudioSessionService → AudioEngine
-  ├→ VisualizerProjectV3 ↔ audionotsurfyet-visualizer/draft/latest
+  ├→ VisualizerProjectV4 ↔ audionotsurfyet-visualizer/draft/latest
+  ├→ JSON packages → ResourceLibrary ↔ independent IndexedDB library/packages
   ├→ one 16:9 Canvas + element list/inspector + project bottom panel + MusicBar
   ├→ AnalysisConsumerLease(visualizer, deduped 0–4) → AnalysisCoordinator/Worker/cache
   ├→ NativeAudioSource → bounded decoded PCM → offline Web Audio stereo FFT/waveform chunks
@@ -77,7 +78,7 @@ showOpenFilePicker → FileSystemFileHandle → File
 | Analyzer surface | 21项单列行、最多四项FIFO置顶分析、同步区间与精确值 | store、AudioSessionService、AnalysisCoordinator、Canvas 2D | project-owner | 默认原列表、倒序FIFO、40%–满高可调且自然内容封顶；见 [列表契约](analyzer-list.md) |
 | Editor E1–E9 surface | `/editor/:trackId?` 状态、精简 transport、JSON 工程、共享波形/tempo/point/range 时间列、21 项 overlay、`88px/72px` 波形、28px 紧凑 BPM 条、不可用恢复决策与中心对齐 marker | EditorSessionController、AudioSessionService、AnalysisCoordinator、Vue Router、shared Canvas renderer、DOM controls | project-owner | E1–E9 已关闭；E9 revised canonical 与 owner 门禁已批准 |
 | Editor project and draft | strict JSON V1、歌曲 hash/时长绑定、原生 file gateway、单草稿 autosave 与恢复冲突 | `EditorFormatCodecRegistry`、`EditorDraftRepository`、`audionotsurfyet-editor` V1 | project-owner | 首版只注册 JSON；session database 不变 |
-| Visualizer composition surface | `/visualizer/:trackId?` 原子元素列表/属性/工程底栏、单视口三栏或抽屉、16:9 单 Canvas、保留 MusicBar、strict Project V3 单草稿、组合效果、WebM 与原生全屏 | `VisualizerSessionController`、`VisualizerRendererHost`、`ElementRegistry`、`CompositionResolver/Scene`、playback/analysis leases、Editor snapshot、MediaRecorder、Fullscreen API | project-owner | V1–V6 evidence 只绑定历史实现；当前自动化与媒体检查见组合工作区 |
+| Visualizer composition surface | `/visualizer/:trackId?` 分组列表/共同处理参数/元素属性/工程底栏、单视口三栏或抽屉、16:9 单 Canvas、保留 MusicBar、strict Project V4 单草稿、JSON 资源库、离线 WebM 与原生全屏 | `VisualizerSessionController`、`VisualizerResourceLibrary`、`VisualizerRendererHost`、`CompositionResolver/Scene`、playback/analysis leases、Editor snapshot、WebCodecs/OPFS、Fullscreen API | project-owner | V1–V6 evidence 只绑定历史实现；当前自动化与媒体检查见组合工作区 |
 | Experimental charts | 试验性的 Three.js 2D 图和瀑布流 | Vue props、TestLands | unknown | 不视为稳定接口 |
 | Event bus | 跨组件事件类型与发送 | mitt singleton | unknown | `settings-open` 无已发现订阅者 |
 

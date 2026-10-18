@@ -1,12 +1,12 @@
 # AudioNotSurfYet 测试说明
 
-2026-10-15：当前 Visualizer 为 Project V3 原子组合模型，使用 `npm run test:visualizer` 与 `npm run test:e2e:visualizer`。V1–V6 的结果、fixture、golden 和候选身份保持历史语境；旧模板专用测试及 npm 别名已退役，重放旧 canonical 需使用其原提交。
+2026-10-18：当前 Visualizer 为 Project V4 分组预设与资源包 V1 过渡版，使用 `npm run test:visualizer` 与 `npm run test:e2e:visualizer`。`resources-v4.test.ts` 覆盖 schema/内嵌定义、共同参数、引用/层级、请求与持久化失败；`visualizer-resources.spec.ts` 覆盖实际文件导入、离线恢复、折叠/差异/重应用、窄屏和短离线导出。Vitest 的 `setup-visualizer-resources.ts` 只在测试进程读取实际 JSON 初始化资源库；生产始终通过请求或文件加载。V1–V6 结果、fixture、golden 和候选身份保持历史语境，旧 canonical 需使用原提交重放。
 
 2026-10-17：视频生成已替换为[离线确定性导出](../docs/context/visualizer-offline-export.md)。`visualizer-output.spec.ts` 默认验证四档选择和能力拒绝；显式设置 `VISUALIZER_OUTPUT_MATRIX=1` 执行每档首次/重复同步片与音乐，共两浏览器 24 份文件。`VISUALIZER_OUTPUT_RUN` 隔离输出；`VISUALIZER_MUSIC_FILE` 可指定本地短音乐片，不记录源文件元数据。旧 `test:v5:unit` 命令现运行播放检查点和离线导出单元，不能用于声称历史 V5 候选通过。
 
 媒体校验使用 `node tests/scripts/verify-visualizer-output.mjs <run-id> --all`；当前 `offline-frames-v3` 按真实音频 PTS 检查同步，并对离线视频检查精确帧数和每帧时间戳，离线文件不接受 `--allow-frame-drops`。`visualizer-offline-core.spec.ts` 验证 44.1/48kHz 分块编码、取消和存储失败，纳入日常 Visualizer 浏览器专项。长曲另显式设置 `VISUALIZER_EXPORT_LONG=1`，运行 `npx playwright test tests/e2e/visualizer-offline-long.spec.ts --project=chrome --project=edge --workers=1`，再以 `node tests/scripts/verify-visualizer-output.mjs offline-long --files-only` 核验；单文件模式不声称完整四档矩阵。十五分钟源按五秒块写入 OPFS，输出按 1MiB 切片保存到测试进程，不在测试端额外整体编码为 base64。
 
-几何/PV 预设由 `tests/e2e/visualizer-presets.spec.ts` 覆盖：元素库、静音/实际频谱、V3 往返与刷新、四段构图、seek 确定性、全屏、WebM、context recovery 和资源释放。默认使用版本化短 WAV；可显式设置 `VISUALIZER_MUSIC_FILE` 运行额外的本地音乐截图检查，文件仅留本地，不加入 fixture manifest。当前视频按 owner 的居中修改验证水平/垂直中心，保持原几何精度。
+几何/PV 预设由 `tests/e2e/visualizer-presets.spec.ts` 覆盖：元素库、静音/实际频谱、V4 往返与刷新、四段构图、seek 确定性、全屏、WebM、context recovery 和资源释放。默认使用版本化短 WAV；可显式设置 `VISUALIZER_MUSIC_FILE` 运行额外的本地音乐截图检查，文件仅留本地，不加入 fixture manifest。当前视频按 owner 的居中修改验证水平/垂直中心，保持原几何精度。
 
 原生输入另覆盖 Web Audio 左右异频 FFT、来源/可用特征切换、失败重试和暂停 seek 的画面一致性；`tests/visualizer/native-input.test.ts` 验证缓存上限、decoded revision/取消失效和严格 native binding。时间与资源边界见 [原生输入契约](../docs/context/visualizer-native-input.md)。
 
