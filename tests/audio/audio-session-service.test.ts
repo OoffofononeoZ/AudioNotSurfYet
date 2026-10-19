@@ -1,15 +1,6 @@
 import { createPinia, setActivePinia } from 'pinia';
-import {
-    beforeEach,
-    describe,
-    expect,
-    test,
-    vi,
-} from 'vitest';
-import {
-    AudioSessionService,
-    type AudioEnginePort,
-} from '../../src/audio/audioSessionService';
+import { beforeEach, describe, expect, test, vi } from 'vitest';
+import { AudioSessionService, type AudioEnginePort } from '../../src/audio/audioSessionService';
 import type { SessionRepositoryPort } from '../../src/persistence/sessionRepository';
 import { useAudioSessionStore } from '../../src/stores/audioSessionStore';
 import type { PlaybackSnapshot } from '../../src/types/audio';
@@ -32,10 +23,7 @@ class FakeEngine implements AudioEnginePort {
     unloadCount = 0;
     disposeCount = 0;
 
-    async load(input: {
-        trackId: string;
-        encodedAudio: ArrayBuffer;
-    }): Promise<'loaded'> {
+    async load(input: { trackId: string; encodedAudio: ArrayBuffer }): Promise<'loaded'> {
         this.loadIds.push(input.trackId);
         this.emit({
             trackId: input.trackId,
@@ -82,9 +70,7 @@ class FakeEngine implements AudioEnginePort {
     getSnapshot() {
         return {
             ...this.snapshot,
-            error: this.snapshot.error
-                ? { ...this.snapshot.error }
-                : undefined,
+            error: this.snapshot.error ? { ...this.snapshot.error } : undefined,
         };
     }
 
@@ -96,7 +82,9 @@ class FakeEngine implements AudioEnginePort {
         return null;
     }
 
-    capturePlaybackCheckpoint() { return null; }
+    capturePlaybackCheckpoint() {
+        return null;
+    }
     async restorePlaybackCheckpoint(): Promise<void> {}
     copyDecodedChannelRange() {
         return null;
@@ -144,10 +132,7 @@ interface ControlledFile extends File {
     resolveRead: () => void;
 }
 
-function createFile(
-    name: string,
-    options: { controlled?: boolean } = {},
-): File | ControlledFile {
+function createFile(name: string, options: { controlled?: boolean } = {}): File | ControlledFile {
     if (!options.controlled) {
         return new File([new Uint8Array([1, 2, 3])], name, {
             type: 'audio/wav',
@@ -156,7 +141,7 @@ function createFile(
     }
 
     let resolveRead!: () => void;
-    const read = new Promise<ArrayBuffer>((resolve) => {
+    const read = new Promise<ArrayBuffer>(resolve => {
         resolveRead = () => resolve(new Uint8Array([1, 2, 3]).buffer);
     });
     return {
@@ -169,7 +154,7 @@ function createFile(
     } as unknown as ControlledFile;
 }
 
-const inputs = (...files: File[]) => files.map((file) => ({ file }));
+const inputs = (...files: File[]) => files.map(file => ({ file }));
 
 function createHarness(
     options: {
@@ -202,21 +187,21 @@ function createHarness(
         engine,
         repository,
         parseMetadata:
-            options.parseMetadata
-            ?? (async () => ({
+            options.parseMetadata ??
+            (async () => ({
                 common: { title: 'Fixture', artist: 'CC0' },
                 format: { duration: 4, sampleRate: 48_000 },
             })),
         createTrackId: () => `track-${++id}`,
-        hashFile: async (file) => (file as File).name,
+        hashFile: async file => (file as File).name,
         createObjectURL: () => `blob:artwork-${id}`,
-        revokeObjectURL: (url) => revoked.push(url),
-        requestFrame: (callback) => {
+        revokeObjectURL: url => revoked.push(url),
+        requestFrame: callback => {
             const handle = ++nextFrame;
             frames.set(handle, callback);
             return handle;
         },
-        cancelFrame: (handle) => {
+        cancelFrame: handle => {
             frames.delete(handle);
         },
     });
@@ -231,6 +216,51 @@ function createHarness(
 
 beforeEach(() => {
     setActivePinia(createPinia());
+});
+
+describe('recording playback observations', () => {
+    test('reads the engine clock between visual frames and notifies before discontinuities, not pauses', async () => {
+        const { service, engine, store } = createHarness();
+        await service.importFiles(inputs(createFile('recording.wav')));
+        engine.snapshot.currentTimeSeconds = 1.06;
+        expect(store.playback.currentTimeSeconds).toBe(0);
+        expect(service.getPlaybackSnapshot().currentTimeSeconds).toBe(1.06);
+        const positions: number[] = [];
+        const unsubscribe = service.subscribePlaybackDiscontinuity(() =>
+            positions.push(service.getPlaybackSnapshot().currentTimeSeconds),
+        );
+        service.pause();
+        await service.play();
+        expect(positions).toEqual([]);
+        await service.seek(2);
+        expect(positions).toEqual([1.06]);
+        await service.setAuditionSource(null);
+        expect(positions).toEqual([1.06, 2]);
+        await service.restorePlaybackCheckpoint({ trackId: 'track-1', state: 'paused', currentTimeSeconds: 0 });
+        expect(positions).toEqual([1.06, 2, 2]);
+        unsubscribe();
+        await service.seek(3);
+        expect(positions).toHaveLength(3);
+        await service.dispose();
+    });
+
+    test('publishes the terminal position before repeat restarts and clears subscriptions on disposal', async () => {
+        const { service, engine } = createHarness();
+        await service.importFiles(inputs(createFile('recording.wav')));
+        service.setPreferredPlaybackMode('repeat-one');
+        const order: string[] = [];
+        service.subscribePlayback(value => {
+            if (value.state === 'ended' && value.currentTimeSeconds === value.durationSeconds)
+                order.push(`ended:${value.currentTimeSeconds}`);
+        });
+        service.subscribePlaybackDiscontinuity(() => order.push('discontinuity'));
+        engine.finish();
+        await Promise.resolve();
+        expect(order).toEqual(['ended:4', 'discontinuity']);
+        await service.dispose();
+        await service.restorePlaybackCheckpoint({ trackId: 'track-1', state: 'paused', currentTimeSeconds: 0 });
+        expect(order).toHaveLength(2);
+    });
 });
 
 describe('AudioSessionService', () => {
@@ -276,7 +306,8 @@ describe('AudioSessionService', () => {
         expect(store.playback.state).toBe('ended');
         service.setPreferredPlaybackMode('repeat-one');
         const loads = engine.loadIds.length;
-        await service.next(); await service.previous();
+        await service.next();
+        await service.previous();
         expect(engine.seekValues).toEqual([0, 0]);
         expect(engine.loadIds.length).toBe(loads);
         expect(store.currentTrackId).toBe('track-2');
@@ -289,16 +320,26 @@ describe('AudioSessionService', () => {
         service.setPreferredPlaybackMode('repeat-one');
         const lease = service.acquireExportTransport('track-1');
         const loads = engine.loadIds.length;
-        service.pause(); await service.seek(3); await service.next(); await service.playTrack('track-2');
-        await service.clear(); await service.deleteTrack('track-1');
-        expect(engine.pauseCount).toBe(0); expect(engine.seekValues).toEqual([]);
-        expect(engine.loadIds.length).toBe(loads); expect(store.queue.length).toBe(2);
-        lease.pause(); expect(engine.pauseCount).toBe(1);
-        engine.finish(); await Promise.resolve();
+        service.pause();
+        await service.seek(3);
+        await service.next();
+        await service.playTrack('track-2');
+        await service.clear();
+        await service.deleteTrack('track-1');
+        expect(engine.pauseCount).toBe(0);
+        expect(engine.seekValues).toEqual([]);
+        expect(engine.loadIds.length).toBe(loads);
+        expect(store.queue.length).toBe(2);
+        lease.pause();
+        expect(engine.pauseCount).toBe(1);
+        engine.finish();
+        await Promise.resolve();
         expect(engine.seekValues).toEqual([]);
         expect(store.playback.state).toBe('ended');
-        lease.release(); expect(service.playbackPolicy.state.exportLocked).toBe(false);
-        await service.next(); expect(store.playback.state).toBe('playing');
+        lease.release();
+        expect(service.playbackPolicy.state.exportLocked).toBe(false);
+        await service.next();
+        expect(store.playback.state).toBe('playing');
         await service.dispose();
     });
     test('autoplays the first empty-queue import and appends later files without interruption', async () => {
@@ -319,18 +360,10 @@ describe('AudioSessionService', () => {
 
     test('lets only the latest rapid track selection reach decode and play', async () => {
         const { engine, service, store } = createHarness();
-        await service.importFiles(inputs(
-            createFile('seed.wav'),
-        ));
+        await service.importFiles(inputs(createFile('seed.wav')));
 
-        const first = createFile(
-            'first-controlled.wav',
-            { controlled: true },
-        ) as ControlledFile;
-        const second = createFile(
-            'second-controlled.wav',
-            { controlled: true },
-        ) as ControlledFile;
+        const first = createFile('first-controlled.wav', { controlled: true }) as ControlledFile;
+        const second = createFile('second-controlled.wav', { controlled: true }) as ControlledFile;
         await service.importFiles(inputs(first, second));
         engine.loadIds.length = 0;
         engine.playCount = 0;
@@ -357,7 +390,7 @@ describe('AudioSessionService', () => {
             saveQueue: async () => undefined,
             replaceCurrent: async () => {
                 if (!blockCurrentWrite) return;
-                await new Promise<void>((resolve) => {
+                await new Promise<void>(resolve => {
                     releaseCurrentWrite = resolve;
                 });
             },
@@ -366,10 +399,7 @@ describe('AudioSessionService', () => {
             clear: async () => undefined,
         };
         const { service, store } = createHarness({ repository });
-        await service.importFiles(inputs(
-            createFile('first.wav'),
-            createFile('second.wav'),
-        ));
+        await service.importFiles(inputs(createFile('first.wav'), createFile('second.wav')));
 
         blockCurrentWrite = true;
         const switchCommand = service.next();
@@ -385,11 +415,7 @@ describe('AudioSessionService', () => {
 
     test('loops on ended and preserves deletion semantics', async () => {
         const { engine, service, store } = createHarness();
-        await service.importFiles(inputs(
-            createFile('first.wav'),
-            createFile('second.wav'),
-            createFile('third.wav'),
-        ));
+        await service.importFiles(inputs(createFile('first.wav'), createFile('second.wav'), createFile('third.wav')));
 
         engine.finish();
         await vi.waitFor(() => {
@@ -416,18 +442,16 @@ describe('AudioSessionService', () => {
             .mockRejectedValueOnce(new Error('missing tags'))
             .mockResolvedValueOnce({
                 common: {
-                    picture: [{
-                        data: new Uint8Array([1, 2]),
-                        format: 'image/png',
-                    }],
+                    picture: [
+                        {
+                            data: new Uint8Array([1, 2]),
+                            format: 'image/png',
+                        },
+                    ],
                 },
                 format: { duration: 4 },
             });
-        const {
-            revoked,
-            service,
-            store,
-        } = createHarness({ parseMetadata });
+        const { revoked, service, store } = createHarness({ parseMetadata });
 
         await service.importFiles(inputs(createFile('fallback.wav')));
         expect(store.queue[0]?.metadata.title).toBe('fallback.wav');
@@ -443,12 +467,7 @@ describe('AudioSessionService', () => {
     });
 
     test('keeps Pinia state serializable and owns only one animation frame', async () => {
-        const {
-            engine,
-            frames,
-            service,
-            store,
-        } = createHarness();
+        const { engine, frames, service, store } = createHarness();
         await service.importFiles(inputs(createFile('first.wav')));
 
         expect(frames.size).toBe(1);
