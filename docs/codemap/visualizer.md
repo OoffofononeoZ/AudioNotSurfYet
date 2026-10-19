@@ -6,6 +6,8 @@
 
 | 文件 | 本地静态引用（最多显示 6 项） |
 | --- | --- |
+| [src/visualizer/algorithmCodec.ts](../../src/visualizer/algorithmCodec.ts) | [src/visualizer/algorithmTypes.ts](../../src/visualizer/algorithmTypes.ts)、[src/visualizer/projectValidation.ts](../../src/visualizer/projectValidation.ts)、[src/visualizer/resourceIdentity.ts](../../src/visualizer/resourceIdentity.ts) |
+| [src/visualizer/algorithmTypes.ts](../../src/visualizer/algorithmTypes.ts) | [src/visualizer/compositionTypes.ts](../../src/visualizer/compositionTypes.ts)、[src/visualizer/parameterDescriptor.ts](../../src/visualizer/parameterDescriptor.ts)、[src/visualizer/resourceTypes.ts](../../src/visualizer/resourceTypes.ts) |
 | [src/visualizer/analysisProjection.ts](../../src/visualizer/analysisProjection.ts) | [src/analysis/types.ts](../../src/analysis/types.ts)、[src/analysis/wallpaperSpectrum.ts](../../src/analysis/wallpaperSpectrum.ts)、[src/visualizer/types.ts](../../src/visualizer/types.ts)、[src/visualizer/waveformSource.ts](../../src/visualizer/waveformSource.ts) |
 | [src/visualizer/analysisSignal.ts](../../src/visualizer/analysisSignal.ts) | [src/analysis/types.ts](../../src/analysis/types.ts) |
 | [src/visualizer/bindingDefaults.ts](../../src/visualizer/bindingDefaults.ts) | [src/analysis/featureRegistry.ts](../../src/analysis/featureRegistry.ts)、[src/analysis/types.ts](../../src/analysis/types.ts)、[src/visualizer/parameterDescriptor.ts](../../src/visualizer/parameterDescriptor.ts)、[src/visualizer/types.ts](../../src/visualizer/types.ts) |

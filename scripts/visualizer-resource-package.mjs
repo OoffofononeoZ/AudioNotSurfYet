@@ -2,6 +2,7 @@ import { createHash } from 'node:crypto';
 import { readFileSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
+import { compileExecutableCatalog } from './lib/visualizer-resource-v2.mjs';
 
 function canonical(value) {
     if (value === null || typeof value !== 'object') return JSON.stringify(value);
@@ -41,6 +42,12 @@ export function sealPackage(input) {
     return pack;
 }
 function main(args) {
+    if (args[0] === '--build' || args[0] === '--check-build') {
+        const check = args[0] === '--check-build';
+        compileExecutableCatalog(args[1] ?? 'resources/visualizer', args[2] ?? 'public/visualizer-resources/v2', check);
+        process.stdout.write(`${check ? 'Checked' : 'Built'} executable visualizer resources\n`);
+        return;
+    }
     const check = args[0] === '--check';
     const files = check ? args.slice(1) : args;
     if (!files.length)
