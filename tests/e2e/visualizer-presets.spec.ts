@@ -22,6 +22,10 @@ async function exported(page: Page): Promise<VisualizerProjectV5> {
     await expect.poll(async () => (await savedPickerEntries(page)).length).toBe(count + 1);
     return JSON.parse(Buffer.from((await savedPickerEntries(page)).at(-1)!.base64, 'base64').toString('utf8'));
 }
+async function selectElement(page: Page, resourceId: string) {
+    const element = (await exported(page)).elements.find(e => e.resource.id === resourceId)!;
+    await page.locator(`[data-element-id="${element.id}"] .viz-element-select`).click();
+}
 async function importProject(page: Page, p: VisualizerProjectV5) {
     await queuePickerData(page, [{ name: 'preset.json', mimeType: 'application/json', text: JSON.stringify(p) }]);
     await page.getByTestId('import-visualizer-project').click();
@@ -81,7 +85,7 @@ test('native input lists available Web Audio features, persists changes and seek
     page.on('pageerror', e => errors.push(e.message));
     await open(page);
     await preset(page, 'geometric-0.6');
-    await page.getByRole('button', { name: '外环 · 双重复频谱', exact: true }).click();
+    await selectElement(page, 'radial-spectrum');
     const source = page.getByRole('combobox', { name: '频谱输入数据来源', exact: true }),
         feature = page.getByRole('combobox', { name: '频谱输入原生特征', exact: true });
     await expect(source).toHaveValue('analysis');
@@ -108,7 +112,7 @@ test('native input lists available Web Audio features, persists changes and seek
     await page.reload();
     await expect(page.getByTestId('visualizer-ready')).toBeVisible();
     await expandPresets(page);
-    await page.getByRole('button', { name: '外环 · 双重复频谱', exact: true }).click();
+    await selectElement(page, 'radial-spectrum');
     await expect(source).toHaveValue('native');
     await page.getByTestId('add-visualizer-element').click();
     await page.getByRole('button', { name: '全部', exact: true }).click();
@@ -188,7 +192,7 @@ test('native input reports an unavailable browser analyser and retries without f
         };
     });
     await preset(page, 'geometric-0.6');
-    await page.getByRole('button', { name: '外环 · 双重复频谱', exact: true }).click();
+    await selectElement(page, 'radial-spectrum');
     await page.getByRole('combobox', { name: '频谱输入数据来源', exact: true }).selectOption('native');
     await expect(page.getByTestId('visualizer-preview-canvas')).toHaveAttribute('data-native-input-state', 'error');
     await expect(page.getByRole('alert')).toContainText('native analyser test failure');
@@ -214,13 +218,17 @@ test('market applies the geometric preset, edits it, restores it and renders sil
     await expect(page.locator('.viz-element-row[data-element-id]')).toHaveCount(11);
     const p = await exported(page);
     expect(p.elements.filter(e => e.resource.id === 'radial-spectrum')).toHaveLength(2);
+    const blocksId =
+        p.items[0]!.kind === 'preset'
+            ? p.items[0]!.children[p.resources.presets[0]!.elements.findIndex(e => e.key === 'element-3')]
+            : undefined;
     const spectra = p.elements.flatMap(e =>
-        e.bindings.filter(b => b.parameterId === 'spectrum').map(b => ({ name: e.name, source: b.source })),
+        e.bindings.filter(b => b.parameterId === 'spectrum').map(b => ({ id: e.id, source: b.source })),
     );
     for (const b of spectra)
         expect(b.source).toEqual({
             kind: 'analysis',
-            featureId: b.name === '十二频段方块' ? 'amplitudeSpectrum' : 'wallpaperEngineSpectrum',
+            featureId: b.id === blocksId ? 'amplitudeSpectrum' : 'wallpaperEngineSpectrum',
             projection: { kind: 'full' },
         });
     await importProject(page, p);

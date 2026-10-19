@@ -39,11 +39,12 @@ test('new visual defaults use semantic precision while loaded projects keep orig
             expect(p.defaultValue).toBe(roundEditingValue(Number(p.defaultValue), p.range!.editingPrecision!));
         }
     const elements = createPresetElements('geometric-0.6', 123.456789);
-    const constant = (name: string, id: string) =>
-        elements.find(e => e.name === name)!.bindings.find(b => b.parameterId === id)!.source;
-    expect(constant('交错环 A', 'size')).toEqual({ kind: 'constant', value: 0.03781 });
-    expect(constant('主旋转环', 'amplitude')).toEqual({ kind: 'constant', value: 3.7 });
-    expect(constant('十九条旋转弧', 'amplitude')).toEqual({ kind: 'constant', value: 0.00469 });
+    const template = elementRegistry.presets.find(p => p.id === 'geometric-0.6')!;
+    const element = (key: string) => elements[template.elements.findIndex(e => e.key === key)]!;
+    const constant = (key: string, id: string) => element(key).bindings.find(b => b.parameterId === id)!.source;
+    expect(constant('element-9', 'size')).toEqual({ kind: 'constant', value: 0.03781 });
+    expect(constant('element-8', 'amplitude')).toEqual({ kind: 'constant', value: 3.7 });
+    expect(constant('element-4', 'amplitude')).toEqual({ kind: 'constant', value: 0.00469 });
     const project = createComposition({
         contentHash: 'a'.repeat(64),
         fileName: 'precision.wav',
@@ -52,7 +53,7 @@ test('new visual defaults use semantic precision while loaded projects keep orig
     });
     project.elements = elements;
     attachElements(project);
-    elements.find(e => e.name === '交错环 A')!.bindings.find(b => b.parameterId === 'size')!.source = {
+    element('element-9').bindings.find(b => b.parameterId === 'size')!.source = {
         kind: 'constant',
         value: 0.0378125,
     };

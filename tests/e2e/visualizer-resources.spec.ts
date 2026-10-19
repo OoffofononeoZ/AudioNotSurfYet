@@ -49,7 +49,8 @@ test('two presets and three leaves form five roots; shared values, child differe
     await expect(page.locator('.viz-preset-children')).toHaveCount(0);
     await input(page, '响应系数', '1.1');
     await page.getByRole('button', { name: '展开几何律动', exact: true }).click();
-    await page.getByRole('button', { name: '外环 · 双重复频谱', exact: true }).click();
+    const outer = (await exported(page)).elements.find(e => e.resource.id === 'radial-spectrum')!;
+    await page.locator(`[data-element-id="${outer.id}"] .viz-element-select`).click();
     await expect(page.getByRole('spinbutton', { name: '响应系数', exact: true })).toHaveValue('1.1');
     await input(page, '响应系数', '0.8');
     await page.getByRole('button', { name: '几何律动', exact: true }).click();
@@ -63,11 +64,30 @@ test('two presets and three leaves form five roots; shared values, child differe
     expect(p.schemaVersion).toBe(5);
     expect(p.items).toHaveLength(5);
     expect(p.resources.presets).toHaveLength(2);
+    for (const element of p.elements) {
+        const definition = p.resources.elements.find(d => d.hash === element.resource.hash)!;
+        expect(element.name).toBe(definition.title);
+    }
+    await page.getByRole('button', { name: '展开棱镜航行', exact: true }).click();
+    await expect(page.getByRole('button', { name: '旋转线框', exact: true })).toHaveCount(8);
+    await expect(page.getByRole('button', { name: '光轨隧道', exact: true })).toHaveCount(4);
+    const wires = p.elements.filter(e => e.resource.id === 'wireform');
+    expect(wires.length).toBeGreaterThan(1);
+    const size = (element: VisualizerProjectV5['elements'][number]) =>
+        element.bindings.find(b => b.parameterId === 'size')!.source;
+    await page.locator(`[data-element-id="${wires[0]!.id}"] .viz-element-select`).click();
+    await input(page, '基础尺寸', '0.08');
+    await page.locator(`[data-element-id="${wires[1]!.id}"] .viz-element-select`).click();
+    await expect(page.locator('.viz-inspector-fields')).toHaveAttribute('data-element-id', wires[1]!.id);
+    const edited = await exported(page);
+    expect(size(edited.elements.find(e => e.id === wires[0]!.id)!)).toEqual({ kind: 'constant', value: 0.08 });
+    expect(size(edited.elements.find(e => e.id === wires[1]!.id)!)).toEqual(size(wires[1]!));
     await expect(page.getByText('已保存', { exact: true })).toBeVisible();
     await page.reload();
     await expect(page.getByTestId('visualizer-ready')).toBeVisible();
     await expect(page.locator('.viz-root-item')).toHaveCount(5);
     await expect(page.locator('.viz-preset-children')).toHaveCount(0);
+    expect((await exported(page)).elements).toEqual(edited.elements);
     await page.getByRole('button', { name: '几何律动', exact: true }).click();
     await expect(page.getByRole('spinbutton', { name: '响应系数', exact: true })).toHaveValue('1.1');
     await page.locator('.viz-root-item').last().getByRole('button', { name: '上移预设', exact: true }).click();

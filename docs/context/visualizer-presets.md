@@ -1,12 +1,14 @@
 # Visualizer 几何元素与预设
 
-核查日期：2026-10-19。当前作者定义存于[资源目录](../../resources/visualizer)，[资源包V2](../architecture/visualizer/resource-packages-v2.md)封装算法/Shader及控件/目标，[Project V5](../architecture/visualizer/project-format-v5.md)保存预设组、共同值和完整算法快照。13个元素/效果及两预设保持迁移前视觉与输入计算。
+核查日期：2026-10-20。当前作者定义存于[资源目录](../../resources/visualizer)，[资源包V2](../architecture/visualizer/resource-packages-v2.md)封装算法/Shader及控件/目标，[Project V5](../architecture/visualizer/project-format-v5.md)保存预设组、共同值和完整算法快照。13个元素/效果及两预设保持迁移前视觉与输入计算。
+
+两预设的23个子元素均直接复用商城已有定义；形状、数量、颜色、数据来源和分镜差异由参数与时段表达，不另建同效果元素。两预设及所属资源包的内容版本为3，子元素默认名称与其引用定义的商城名称一致，不附加位置或章节名。同名实例仍有独立UUID和参数；只影响新添加的预设，已有工程/草稿的默认名、自定义名与参数不自动更新。包格式仍为V2、工程仍为V5，旧内容版本可凭工程快照与新版共存。
 
 ## 几何律动
 
 owner于2026-10-16指定复刻Wallpaper Engine workshop 3093808768的geometric visualizer，responsiveness=0.6；参考输入为owner给出的本地index/project和静音/播放截图，不复制p5运行库、字体或远程依赖。目标为双环、12频段方块、中心方块/棱锥、三个旋转环、小棱锥与19条弧，非歌曲标题识别。
 
-- 预设包含11个可独立编辑元素；黑背景不请求分析。十二频段方块默认amplitudeSpectrum full，其余频谱输入默认wallpaperEngineSpectrum full，新建共请求两项，响应系数0.6；导入/旧草稿不自动改绑。
+- 预设包含11个可独立编辑元素；黑背景不请求分析。数量为12的方块形“轨道几何体”默认amplitudeSpectrum full，其余频谱输入默认wallpaperEngineSpectrum full，新建共请求两项，响应系数0.6；导入/旧草稿不自动改绑。共同控件“十二频段方块输入”保留其用途标签，目标仍仅此实例。
 - Wallpaper近似输入为左右各64的立体声128向量，允许短时>1，直接乘0.6，不再次按Meyda标度换算。双环直接使用完整数组，保留真实零尾和声道接缝。
 - 已有Amplitude Spectrum绑定把mono64段复制到左右槽；native采用[当前线性FFT byte bins/有符号波形](visualizer-native-input.md)及固定单位换算。旧特殊分频、空间平滑、平方响应、2/3校准和环向零尾适配已删除。
 - 几何以短边1600为设计参考、位置归一化；形状/数量/半径/尺寸/速度/相位/阈值/线宽/响应可编辑。线段用三角形，共享动态BufferGeometry/ShaderMaterial并对称释放。
