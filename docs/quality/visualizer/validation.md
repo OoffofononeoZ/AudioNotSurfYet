@@ -7,7 +7,7 @@
 | 范围 | 验证要求 |
 | --- | --- |
 | 工程/草稿 | V5 strict schema、歌曲 identity、候选完整初始化后原子导入、同歌/异歌/损坏草稿、quota/取消与离页保护；旧 V1–V4 文件拒绝、旧草稿不提示恢复 |
-| 资源 | 项目内 catalog 安全路径、HTTP/损坏/哈希/ABI/重复定义、模块与 Shader 失败、工程算法快照独立恢复；无磁盘资源库或任意 URL 加载入口 |
+| 资源 | 外部目录选择/取消、只读权限恢复/拒绝、句柄保存失败、刷新/切换/stale、路径/损坏/哈希/依赖/ABI/预设仅引用限制、模块与 Shader 失败、URL 释放及工程快照独立恢复；无 ZIP 或任意 URL 加载入口 |
 | 算法隔离 | 未注册算法/新参数经完整工程路径绘制；opaque iframe + Worker + CSP 限制 DOM/网络/存储/嵌套 Worker；取消/超时终止，DrawPacket 拒绝非法程序、uniform 和 mesh；主页面仅执行通用 GPU 渲染 |
 | 分组/控件 | 叶元素恰好归属一次、连续 layer、整组移动/隐藏、子项排序/删除、effect 引用清理；共同处理参数完整校验后批量应用，差异提示与重新应用 |
 | Binding | constant/analysis/native/Editor 引用、projection/component/单位/transform、同歌 ID、缺失/未就绪/错误隔离；全工程四种 Analyzer 特征硬上限，不自动清空其他元素 |

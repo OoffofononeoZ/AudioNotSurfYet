@@ -1,10 +1,12 @@
 import { expect, test, type Page } from '@playwright/test';
 import path from 'node:path';
+import { sourceModule } from '../support/visualizer-assets.mjs';
+const { spectrumBands } = await import(/* @vite-ignore */ sourceModule('spectral-strings', 'shared/strings.js'));
 import { chooseFiles, installFilePickerStub, savedPickerEntries } from '../support/file-picker';
 import type { VisualizerSessionController } from '../../src/visualizer/visualizerSessionController';
 
 async function inputAt(page: Page, time: number) {
-    return page.getByTestId('visualizer-ready').evaluate(async (node, time) => {
+    const value = await page.getByTestId('visualizer-ready').evaluate(async (node, time) => {
         // Inspect the injected controller in the development app without adding a production debug API.
         const provides = (
             node as HTMLElement & { __vueParentComponent: { provides: Record<symbol, VisualizerSessionController> } }
@@ -14,14 +16,13 @@ async function inputAt(page: Page, time: number) {
         const controller = provides[visualizerSessionControllerKey]!;
         const element = controller.readProject()!.elements.find(e => e.resource.id === 'spectral-dots')!;
         const value = controller.resolveValuesAt(time).get(element.id + ':spectrum');
-        const modulePath = '/resources/visualizer/shared/strings.js';
-        const { spectrumBands } = await import(modulePath);
-        return { ...value, levels: Array.isArray(value?.value) ? [...spectrumBands(value.value)] : [] };
+        return value;
     }, time);
+    return { ...value, levels: Array.isArray(value?.value) ? [...spectrumBands(value.value)] : [] };
 }
 async function open(page: Page) {
     await page.setViewportSize({ width: 1920, height: 1080 });
-    await installFilePickerStub(page);
+    await installFilePickerStub(page, { visualizerAssets: true });
     await page.goto('/');
     await chooseFiles(page, [path.resolve(import.meta.dirname, '../fixtures/audio/visualizer-v5-avsync-v1.wav')]);
     await page.getByTestId('header-visualizer-link').click();

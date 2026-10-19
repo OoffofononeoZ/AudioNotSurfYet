@@ -1,6 +1,6 @@
 # 当前决策与授权
 
-核查日期：2026-10-19。本文保存仍有效的决定和必要批准来源；具体行为只在对应专题维护。旧过程和被替代的详细方案可从Git的`0bd2a67:docs/context/decision-registry.md`查回，不再作为当前指令。
+核查日期：2026-10-20。本文保存仍有效的决定和必要批准来源；具体行为只在对应专题维护。旧过程和被替代的详细方案可从Git的`0bd2a67:docs/context/decision-registry.md`查回，不再作为当前指令。
 
 ## 持续边界
 
@@ -39,6 +39,7 @@
 | DEC-085 / 2026-10-19 | owner批准按分类行1–9/0播放录入点/范围、当前细分吸附和取消/停止规则；工程V1及鼠标暂停限制不变，见[Editor交互](../architecture/editor/interaction-contracts.md#数字键实时录入dec-085) |
 | DEC-086 / 2026-10-19 | owner要求文档建议≤500、>500提示、≥800禁提交，压缩文字且可能损失关键信息时汇报/不提交；本轮又明确冲突采用最新、删除旧规定、保留有效内容，并以“Implement the plan.”批准清理及页面契约拆分 |
 | DEC-087 / 2026-10-19 | owner选择算法资源包、工程内嵌算法、浏览器原生隔离、新格式替换及暂时隐藏磁盘资源包入口，并以“Implement the plan.”批准实施；仅项目内资源，不接后端/外部源，不改内容生成skill。见[V5](../architecture/visualizer/project-format-v5.md)和[V2](../architecture/visualizer/resource-packages-v2.md)，不含发布/readiness授权 |
+| DEC-088 / 2026-10-20 | owner 以实施本轮外部资源库计划授权迁移现有 13 元素/两预设到 WheresYourElements/assets、只读目录选择/句柄恢复/刷新、清理内置资源和升级独立 skill 2.0.0；替代 DEC-087 的仅项目内目录及暂不升级 skill 限制。V5 自包含与算法隔离不变，不含 ZIP、外部 Git/历史目录、未来内容合同或发布授权 |
 
 ## DEC-075 — Editor Audition and Limited Transcription — 2026-10-12
 

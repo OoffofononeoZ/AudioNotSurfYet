@@ -8,17 +8,14 @@ export default defineConfig({
     outputDir: 'test-results',
     fullyParallel: false,
     retries: 0,
-    reporter: [
-        ['list'],
-        ['html', { outputFolder: 'playwright-report', open: 'never' }],
-    ],
+    reporter: [['list'], ['html', { outputFolder: 'playwright-report', open: 'never' }]],
     use: {
         baseURL: serverUrl,
         trace: 'retain-on-failure',
         screenshot: 'only-on-failure',
     },
     webServer: {
-        command: `npm run dev -- --host 127.0.0.1 --port ${serverPort}`,
+        command: `npm run ${process.env.PLAYWRIGHT_PREVIEW === '1' ? 'preview' : 'dev'} -- --host 127.0.0.1 --port ${serverPort}`,
         url: serverUrl,
         reuseExistingServer: false,
         timeout: 120_000,

@@ -26,11 +26,28 @@
             </div>
             <input v-model="query" type="search" aria-label="搜索元素" placeholder="搜索元素" />
         </div>
-        <div v-if="state.status === 'loading'" role="status" class="viz-catalog-message">正在加载资源</div>
-        <div v-if="state.status === 'error'" class="viz-catalog-message" role="alert">
-            {{ state.message }}<button type="button" :disabled="locked" @click="library.load()">重试加载</button>
+        <div class="viz-catalog-message viz-library-actions">
+            <button type="button" :disabled="locked" @click="library.choose()">选择文件夹</button>
+            <button v-if="state.canRestore" type="button" :disabled="locked" @click="library.recover()">
+                恢复访问
+            </button>
+            <button
+                v-if="state.folderName || state.status === 'error'"
+                type="button"
+                :disabled="locked"
+                @click="library.reload()">
+                重新加载
+            </button>
+            <span v-if="state.folderName"
+                >{{ state.folderName }} · {{ state.elements.length }} 个元素 / {{ state.presets.length }} 个预设</span
+            >
+            <span v-else>请选择 WheresYourElements/assets 文件夹</span>
         </div>
-        <p v-if="error" class="viz-catalog-message" role="alert">{{ error }}</p>
+        <div v-if="state.status === 'loading'" role="status" class="viz-catalog-message">正在加载资源</div>
+        <div v-if="state.message" class="viz-catalog-message" role="alert">
+            {{ state.message }}
+        </div>
+
         <div v-if="category === 'preset'" class="viz-catalog-grid app-scrollbar">
             <button
                 v-for="preset in filteredPresets"
@@ -40,7 +57,7 @@
                 :data-preset-id="preset.id"
                 :disabled="locked"
                 @click="$emit('preset', resourceKey(preset))">
-                <VisualizerPresetPreview :cinematic="preset.preview === 'cinematic'" /><span
+                <img class="viz-preset-preview" :src="metadata(preset)?.previewUrl" alt="" /><span
                     >{{ preset.title
                     }}<small v-if="hasVersions('presets', preset.id)" class="viz-resource-version"
                         >v{{ preset.version }}</small
@@ -61,7 +78,7 @@
                 :disabled="locked"
                 @click="$emit('add', resourceKey(descriptor))">
                 <div class="viz-catalog-preview" :class="descriptor.icon">
-                    <VisualizerIcon :name="descriptor.icon" />
+                    <img :src="metadata(descriptor)?.previewUrl" alt="" />
                 </div>
                 <span
                     >{{ descriptor.title
@@ -75,26 +92,18 @@
     </dialog>
 </template>
 <script setup lang="ts">
-import { computed, ref, shallowRef, watch, nextTick, onMounted, onBeforeUnmount } from 'vue';
+import { computed, ref, watch, nextTick } from 'vue';
 import VisualizerIcon from './VisualizerIcon.vue';
-import VisualizerPresetPreview from './VisualizerPresetPreview.vue';
-import { VisualizerResourceLibrary } from '../../visualizer/resourceLibrary';
+import { useResourceLibrary } from '../../visualizer/useResourceLibrary';
+import type { ResourceRef } from '../../visualizer/resourceTypes';
 import { resourceKey } from '../../visualizer/resourceIdentity';
-import { useVisualizerSessionController } from '../../visualizer/visualizerSessionController';
 const props = defineProps<{ open: boolean; locked: boolean }>();
-const controller = useVisualizerSessionController();
-const library = new VisualizerResourceLibrary(
-        undefined,
-        undefined,
-        import.meta.env.BASE_URL + 'visualizer-resources/v2/',
-        (resources, signal) => controller.validateResources(resources, signal),
-    ),
-    state = shallowRef(library.snapshot()),
-    detach = library.subscribe(value => (state.value = value));
+const { library, state } = useResourceLibrary();
+const metadata = (resource: ResourceRef) =>
+    state.value.entries.find(e => resourceKey(e.info.resource) === resourceKey(resource));
 const dialog = ref<HTMLDialogElement | null>(null),
     query = ref(''),
-    category = ref('all'),
-    error = ref('');
+    category = ref('all');
 const categories = [
     { id: 'all', label: '全部' },
     { id: 'visual', label: '视觉' },
@@ -117,18 +126,12 @@ watch(
         await nextTick();
         if (open && !dialog.value?.open) {
             query.value = '';
-            error.value = '';
             dialog.value?.showModal();
         } else if (!open) dialog.value?.close();
     },
     { immediate: true },
 );
 const emit = defineEmits<{ close: []; add: [id: string]; preset: [id: string] }>();
-onMounted(() => void library.load());
-onBeforeUnmount(() => {
-    detach();
-    library.dispose();
-});
 function backdrop(event: MouseEvent) {
     const element = dialog.value;
     if (!element || event.target !== element) return;
@@ -156,22 +159,16 @@ function backdrop(event: MouseEvent) {
     margin-left: 12px;
     text-decoration: underline;
 }
-.viz-imported-packages {
-    max-height: 150px;
-    overflow: auto;
-    margin: 12px 20px;
-    font-size: 12px;
-    color: #aabbb0;
-}
-.viz-imported-packages > div {
+.viz-library-actions {
     display: flex;
-    align-items: center;
-    justify-content: space-between;
     gap: 12px;
-    padding: 6px 0;
+    flex-wrap: wrap;
+    align-items: center;
 }
-.viz-imported-packages button {
-    color: #e1c3a2;
+.viz-catalog-preview img {
+    width: 70px;
+    height: 70px;
+    opacity: 0.9;
 }
 .viz-preset-preview {
     width: 100%;

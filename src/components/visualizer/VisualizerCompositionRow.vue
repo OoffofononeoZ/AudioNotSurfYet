@@ -27,7 +27,9 @@
                 :aria-pressed="selected"
                 :disabled="locked"
                 @click="$emit('select')">
-                <VisualizerIcon :name="icon" /><span>{{ name }}</span>
+                <img v-if="preview" :src="preview" alt="" /><VisualizerIcon v-else :name="icon" /><span>{{
+                    name
+                }}</span>
             </button>
         </div>
         <div class="viz-row-actions">
@@ -77,6 +79,7 @@ defineProps<{
     name: string;
     kind: 'element' | 'preset';
     icon: string;
+    preview?: string;
     enabled: boolean;
     selected: boolean;
     locked: boolean;
@@ -96,6 +99,12 @@ defineEmits<{
 }>();
 </script>
 <style scoped>
+.viz-element-select > img {
+    width: 24px;
+    height: 24px;
+    object-fit: contain;
+    flex: none;
+}
 .viz-item-title {
     display: flex;
     align-items: center;

@@ -1,3 +1,5 @@
+import { sourceModule } from '../support/visualizer-assets.mjs';
+const { SpectralStringsState } = await import(/* @vite-ignore */ sourceModule('spectral-strings', 'shared/strings.js'));
 import { AlgorithmRuntimeFixture, createTestAlgorithm } from './algorithm-runtime-fixture';
 import { attachElements } from './resource-fixtures';
 import * as THREE from 'three';
@@ -7,7 +9,7 @@ import { createInitialEditorProject } from '../../src/editor/projectCodec';
 import { CompositionScene, type CompositionRenderPort } from '../../src/visualizer/compositionScene';
 import { elementRegistry } from '../../src/visualizer/elementRegistry';
 import { effectsFor, parameterKey } from '../../src/visualizer/compositionEffects';
-import { SpectralStringsState } from '../../resources/visualizer/shared/strings.js';
+
 const track = { contentHash: 'a'.repeat(64), fileName: 'render.wav', durationSeconds: 10, sampleRate: 48000 };
 function harness() {
     const p = createComposition(track);

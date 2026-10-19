@@ -19,7 +19,7 @@ async function exported(page: Page): Promise<VisualizerProjectV5> {
 }
 async function open(page: Page, audio = fixture) {
     await page.setViewportSize({ width: 1920, height: 1080 });
-    await installFilePickerStub(page);
+    await installFilePickerStub(page, { visualizerAssets: true });
     await page.goto('/');
     await chooseFiles(page, [audio]);
     await expect(page.locator('#music-bar-container')).toHaveAttribute('data-playback-state', 'playing');

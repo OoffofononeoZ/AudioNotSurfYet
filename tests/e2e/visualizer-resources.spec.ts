@@ -1,5 +1,6 @@
 import { expect, test, type Page } from '@playwright/test';
 import path from 'node:path';
+import { mkdirSync, writeFileSync } from 'node:fs';
 import type { VisualizerProjectV5 } from '../../src/visualizer/compositionTypes';
 import { chooseFiles, installFilePickerStub, savedPickerEntries, queuePickerData } from '../support/file-picker';
 import { resourceHash, resourceRef } from '../../src/visualizer/resourceIdentity';
@@ -9,7 +10,7 @@ import type { ElementDefinition } from '../../src/visualizer/resourceTypes';
 const audio = path.resolve(import.meta.dirname, '../fixtures/audio/visualizer-v5-avsync-v1.wav');
 async function open(page: Page) {
     await page.setViewportSize({ width: 1920, height: 1080 });
-    await installFilePickerStub(page);
+    await installFilePickerStub(page, { visualizerAssets: true });
     await page.goto('/');
     await chooseFiles(page, [audio]);
     await page.getByTestId('header-visualizer-link').click();
@@ -104,7 +105,13 @@ test('embedded algorithms restore and export while the project catalog is unavai
     expect(project.schemaVersion).toBe(5);
     expect(project.resources.algorithms.length).toBeGreaterThan(0);
     await expect(page.getByText('已保存', { exact: true })).toBeVisible();
-    await page.route('**/visualizer-resources/v2/**', route => route.fulfill({ status: 503, body: '' }));
+    await page.evaluate(async () => {
+        await new Promise<void>((resolve, reject) => {
+            const r = indexedDB.deleteDatabase('audionotsurfyet-resource-directory');
+            r.onsuccess = () => resolve();
+            r.onerror = () => reject(r.error);
+        });
+    });
     await page.reload();
     await expect(page.getByTestId('visualizer-ready')).toBeVisible();
     await expect(page.getByTestId('visualizer-preview-frame')).toHaveAttribute('data-scene-status', 'ready');
@@ -171,8 +178,11 @@ test('an unregistered algorithm and parameter render through the complete V5 imp
     await expect(page.getByRole('spinbutton', { name: '测试参数', exact: true })).toHaveValue('0.25');
     const canvas = page.getByTestId('visualizer-preview-canvas');
     await expect(page.getByTestId('visualizer-preview-frame')).toHaveAttribute('data-scene-status', 'ready');
-    await canvas.dispatchEvent('visualizer-sample-center-test');
-    await expect.poll(() => canvas.getAttribute('data-center-pixel')).toMatch(/^6[3-5],12[7-9],255,255$/);
+    // Pixel diagnostics are development-only; production still exercises import and candidate failures.
+    if (process.env.PLAYWRIGHT_PREVIEW !== '1') {
+        await canvas.dispatchEvent('visualizer-sample-center-test');
+        await expect.poll(() => canvas.getAttribute('data-center-pixel')).toMatch(/^6[3-5],12[7-9],255,255$/);
+    }
     const bad = structuredClone(project);
     bad.resources.algorithms[0]!.source = 'throw Error("invalid candidate module");';
     bad.resources.algorithms[0]!.hash = resourceHash(bad.resources.algorithms[0]!);
@@ -197,13 +207,10 @@ test('an unregistered algorithm and parameter render through the complete V5 imp
     expect((await exported(page)).resources).toEqual(project.resources);
 });
 
-test('catalog request failures retry and preset controls remain usable in narrow drawers', async ({ page }) => {
-    await page.route('**/visualizer-resources/v2/catalog.json', route => route.fulfill({ status: 503, body: '' }));
+test('catalog refresh and preset controls remain usable in narrow drawers', async ({ page }) => {
     await open(page);
     await page.getByTestId('add-visualizer-element').click();
-    await expect(page.getByRole('alert')).toContainText('资源索引加载失败');
-    await page.unroute('**/visualizer-resources/v2/catalog.json');
-    await page.getByRole('button', { name: '重试加载', exact: true }).click();
+    await page.getByRole('button', { name: '重新加载', exact: true }).click();
     await page.getByRole('button', { name: '预设', exact: true }).click();
     await page.locator('[data-preset-id="geometric-0.6"]').click();
     await page.setViewportSize({ width: 1024, height: 720 });
@@ -237,4 +244,10 @@ test('group edits lock during a short deterministic offline export on the same r
             ),
         )
         .toBe(true);
+    const media = (await savedPickerEntries(page)).find(e => e.name.endsWith('.webm'))!;
+    mkdirSync('artifacts/visualizer-composition/resources', { recursive: true });
+    writeFileSync(
+        `artifacts/visualizer-composition/resources/external-${test.info().project.name}.webm`,
+        Buffer.from(media.base64, 'base64'),
+    );
 });

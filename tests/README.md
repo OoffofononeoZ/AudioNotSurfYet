@@ -208,3 +208,9 @@ Node24.18.0/npm11.x，依赖版本以lockfile为准；浏览器专项使用真�
 原始日志、summary、trace、截图、长音频、WAV/WebM和模型保留在现有忽略目录与其原身份下；本次文档清理不删除或重算它们。fixture/golden/manifest仍由现有生成工具和独立oracle管理，不把Markdown当测试数据。Editor无效导入使用专用文本fixture。
 
 用户歌曲、私有名称/路径/hash、歌词和许可不明二进制不得入库。fixture许可与来源继续核对；OS原生保存/权限、辅助技术、试听或真实GPU缺口如实记录，不能用stub/注入/合成结果替代。
+
+## 外部 Visualizer 资源
+
+资源专项从默认 `C:\Users\Ryan\Desktop\WheresYourElements\assets` 读取，使用 `$env:VISUALIZER_ASSETS_DIR = "<assets>"` 覆盖。`npm run visualizer:resources:check` 校验 15 个资源的源码封装与哈希；`npm run test:visualizer` 运行领域测试。缺少库时 Vitest 仅排除依赖资源的专项并明确提示，其他领域和纯逻辑测试照常运行。
+
+`npx playwright test tests/e2e/visualizer-resource-directory.spec.ts tests/e2e/visualizer-resources.spec.ts --project=chrome --project=edge --workers=1` 覆盖目录/预览/恢复、损坏刷新与 V5 独立恢复及短离线输出。测试用真实 OPFS 句柄和 IndexedDB structured clone，picker/许可为替身；它不证明原生 OS 文件夹选择和磁盘授权 UI。原生人工检查需实际选择 assets、拒绝/恢复访问、关闭重开浏览器，并检查外部文件未被应用改写。

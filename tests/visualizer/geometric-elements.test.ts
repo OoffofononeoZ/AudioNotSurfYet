@@ -1,8 +1,11 @@
+import { sourceModule } from '../support/visualizer-assets.mjs';
+const { GeometricBatch, geometricSpectrum, buildGeometricElement } = await import(
+    /* @vite-ignore */ sourceModule('radial-spectrum', 'shared/geometry.js')
+);
 import { describe, expect, test } from 'vitest';
 import { elementRegistry } from '../../src/visualizer/elementRegistry';
 import { parameterKey } from '../../src/visualizer/compositionEffects';
-import { GeometricBatch, geometricSpectrum } from '../../resources/visualizer/shared/geometry.js';
-import { buildGeometricElement } from '../../resources/visualizer/shared/geometry.js';
+
 type ElementType = string;
 import type { VisualizerResolvedParameterMap } from '../../src/visualizer/rendererTypes';
 import { Matrix4, Vector3 } from 'three';

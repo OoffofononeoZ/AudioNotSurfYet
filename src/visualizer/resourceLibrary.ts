@@ -1,33 +1,57 @@
 import { elementRegistry, type ElementRegistry } from './elementRegistry';
-import { mergeResources, validateResourcePackage, validateResourceSnapshot } from './resourceCodec';
-import { record, keys } from './projectValidation';
 import { validateRuntimeSnapshot } from './validateRuntimeSnapshot';
+import {
+    readResourceDirectory,
+    type DirectoryCandidate,
+    type ResourceDirectoryHandle,
+    type ResourceInfo,
+} from './resourceDirectory';
+import { IndexedDbResourceDirectoryRepository, type ResourceDirectoryRepository } from './resourceDirectoryRepository';
 import type { ResourceSnapshot } from './resourceTypes';
+
 export interface ResourceLibraryState extends ResourceSnapshot {
-    status: 'idle' | 'loading' | 'ready' | 'error';
+    status: 'idle' | 'loading' | 'ready' | 'error' | 'permission';
+    entries: Array<{ info: ResourceInfo; previewUrl: string }>;
+    folderName?: string;
     message?: string;
+    canRestore: boolean;
 }
-const empty = (): ResourceSnapshot => ({ algorithms: [], elements: [], presets: [] });
-/** Only the project-owned catalog is a library source. Project snapshots stay independent. */
+export interface ResourceLibraryOptions {
+    registry?: ElementRegistry;
+    repository?: ResourceDirectoryRepository;
+    picker?: () => Promise<ResourceDirectoryHandle>;
+    read?: (handle: ResourceDirectoryHandle, signal: AbortSignal) => Promise<DirectoryCandidate>;
+    validate?: typeof validateRuntimeSnapshot;
+    createUrl?: (blob: Blob) => string;
+    revokeUrl?: (url: string) => void;
+}
+const empty = (): ResourceLibraryState => ({
+    algorithms: [],
+    elements: [],
+    presets: [],
+    entries: [],
+    status: 'idle',
+    canRestore: false,
+});
+type Task = { generation: number; signal: AbortSignal };
+/** One page owns the handle, candidate task and preview URLs; projects use embedded snapshots. */
 export class VisualizerResourceLibrary {
-    private state: ResourceLibraryState = { ...empty(), status: 'idle' };
+    private state = empty();
+    private settled = this.state;
     private task: AbortController | null = null;
     private generation = 0;
+    private disposed = false;
+    private active: ResourceDirectoryHandle | null = null;
+    private pending: ResourceDirectoryHandle | null = null;
+    private writes = Promise.resolve();
     private listeners = new Set<(state: ResourceLibraryState) => void>();
-    private request: typeof fetch;
     private registry: ElementRegistry;
-    private base: string;
-    private validate: typeof validateRuntimeSnapshot;
-    constructor(
-        request: typeof fetch = fetch,
-        registry: ElementRegistry = elementRegistry,
-        base = '/visualizer-resources/v2/',
-        validate = validateRuntimeSnapshot,
-    ) {
-        this.request = request.bind(globalThis);
-        this.registry = registry;
-        this.base = base;
-        this.validate = validate;
+    private repository: ResourceDirectoryRepository;
+    private options: ResourceLibraryOptions;
+    constructor(options: ResourceLibraryOptions = {}) {
+        this.options = options;
+        this.registry = options.registry ?? elementRegistry;
+        this.repository = options.repository ?? new IndexedDbResourceDirectoryRepository();
     }
     subscribe(listener: (state: ResourceLibraryState) => void) {
         this.listeners.add(listener);
@@ -39,62 +63,168 @@ export class VisualizerResourceLibrary {
     }
     private publish(state: ResourceLibraryState) {
         this.state = state;
+        if (state.status !== 'loading') this.settled = state;
         for (const listener of this.listeners) listener(this.snapshot());
     }
-    async load() {
+    private begin(): Task {
         this.task?.abort();
-        const task = new AbortController(),
-            generation = ++this.generation;
-        this.task = task;
-        this.publish({ ...this.state, status: 'loading', message: undefined });
-        try {
-            const response = await this.request(this.base + 'catalog.json', { signal: task.signal });
-            if (!response.ok) throw Error('资源索引加载失败。');
-            const index = record(await response.json(), '资源索引');
-            keys(index, ['format', 'schemaVersion', 'packages']);
-            task.signal.throwIfAborted();
-            if (
-                index.format !== 'audiosurf-visualizer-catalog' ||
-                index.schemaVersion !== 2 ||
-                !Array.isArray(index.packages) ||
-                index.packages.some(p => typeof p !== 'string' || !/^[a-z0-9._-]+\.json$/.test(p))
-            )
-                throw Error('资源索引格式无效。');
-            const raw = await Promise.all(
-                (index.packages as string[]).map(async path => {
-                    const response = await this.request(this.base + path, { signal: task.signal });
-                    if (!response.ok) throw Error('资源加载失败：' + path);
-                    return record(await response.json(), '资源包');
-                }),
-            );
-            const combined = validateResourceSnapshot({
-                algorithms: raw.flatMap(p => (Array.isArray(p.algorithms) ? p.algorithms : [])),
-                elements: raw.flatMap(p => (Array.isArray(p.elements) ? p.elements : [])),
-                presets: raw.flatMap(p => (Array.isArray(p.presets) ? p.presets : [])),
+        this.task = new AbortController();
+        const task = { generation: ++this.generation, signal: this.task.signal };
+        this.publish({ ...this.settled, status: 'loading', message: undefined });
+        return task;
+    }
+    private current(task: Task) {
+        return !this.disposed && task.generation === this.generation && !task.signal.aborted;
+    }
+    private failure(task: Task, error: unknown) {
+        if (!this.current(task)) return;
+        if ((error as Error).name === 'AbortError') {
+            this.publish(this.settled);
+            return;
+        }
+        if (this.pending && ['NotAllowedError', 'SecurityError'].includes((error as Error).name)) {
+            this.publish({
+                ...this.settled,
+                status: 'permission',
+                canRestore: true,
+                message: '资源文件夹读取权限已失效，请恢复访问。',
             });
-            const packages = raw.map(p => validateResourcePackage(p, combined));
-            const identities = new Map<string, string>();
-            for (const pack of packages) {
-                const key = pack.id + '@' + pack.version,
-                    content = JSON.stringify(pack);
-                if (identities.has(key) && identities.get(key) !== content) throw Error('资源包 ID 与版本冲突。');
-                identities.set(key, content);
+            return;
+        }
+        this.publish({ ...this.settled, status: 'error', message: (error as Error).message });
+    }
+    async restore() {
+        if (this.disposed) return;
+        const task = this.begin();
+        try {
+            const handle = await this.repository.read();
+            if (!this.current(task)) return;
+            if (!handle) {
+                this.publish({ ...this.settled, status: 'idle' });
+                return;
             }
-            const resources = mergeResources(...packages);
-            task.signal.throwIfAborted();
-            await this.validate(resources, task.signal);
-            if (generation !== this.generation || task.signal.aborted) return;
-            this.registry.replace(resources);
-            this.publish({ ...resources, status: 'ready' });
+            this.pending = handle;
+            await this.loadHandle(handle, task, false);
         } catch (error) {
-            if (generation !== this.generation || task.signal.aborted) return;
-            this.publish({ ...this.state, status: 'error', message: (error as Error).message });
+            this.failure(task, error);
         }
     }
+    async choose() {
+        if (this.disposed) return;
+        const task = this.begin();
+        try {
+            const picker =
+                this.options.picker ??
+                (() => {
+                    const host = window as unknown as {
+                        showDirectoryPicker?: (options: {
+                            id: string;
+                            mode: 'read';
+                        }) => Promise<ResourceDirectoryHandle>;
+                    };
+                    if (!host.showDirectoryPicker) throw Error('当前浏览器不支持选择资源文件夹。');
+                    return host.showDirectoryPicker({ id: 'visualizer-assets', mode: 'read' });
+                });
+            const handle = await picker();
+            if (!this.current(task)) return;
+            this.pending = handle;
+            await this.loadHandle(handle, task, true);
+        } catch (error) {
+            this.failure(task, error);
+        }
+    }
+    async recover() {
+        if (this.disposed || !this.pending) return;
+        const task = this.begin(),
+            handle = this.pending;
+        try {
+            // Called directly from a visible button; never request permission during restore.
+            if ((await handle.requestPermission({ mode: 'read' })) !== 'granted') {
+                if (this.current(task))
+                    this.publish({
+                        ...this.settled,
+                        status: 'permission',
+                        canRestore: true,
+                        message: '未获得资源文件夹的读取权限。',
+                    });
+                return;
+            }
+            if (this.current(task)) await this.loadHandle(handle, task, true);
+        } catch (error) {
+            this.failure(task, error);
+        }
+    }
+    async reload() {
+        const handle = this.active ?? this.pending;
+        if (this.disposed || !handle) return;
+        const task = this.begin();
+        try {
+            await this.loadHandle(handle, task, true);
+        } catch (error) {
+            this.failure(task, error);
+        }
+    }
+    private async loadHandle(handle: ResourceDirectoryHandle, task: Task, persist: boolean) {
+        const permission = await handle.queryPermission({ mode: 'read' });
+        if (!this.current(task)) return;
+        if (permission !== 'granted') {
+            this.pending = handle;
+            this.publish({
+                ...this.settled,
+                status: 'permission',
+                canRestore: true,
+                message: '请恢复资源文件夹的读取权限。',
+            });
+            return;
+        }
+        const candidate = await (this.options.read ?? readResourceDirectory)(handle, task.signal);
+        task.signal.throwIfAborted();
+        await (this.options.validate ?? validateRuntimeSnapshot)(candidate.resources, task.signal);
+        if (!this.current(task)) return;
+        const entries: ResourceLibraryState['entries'] = [];
+        try {
+            for (const entry of candidate.entries)
+                entries.push({
+                    info: entry.info,
+                    previewUrl: (this.options.createUrl ?? URL.createObjectURL)(entry.preview),
+                });
+        } catch (error) {
+            this.release(entries);
+            throw error;
+        }
+        const old = this.state.entries;
+        this.registry.replace(candidate.resources);
+        this.active = handle;
+        this.pending = handle;
+        this.publish({ ...candidate.resources, entries, status: 'ready', folderName: handle.name, canRestore: false });
+        this.release(old);
+        if (persist) {
+            const save = this.writes.then(async () => {
+                if (this.current(task)) await this.repository.save(handle);
+            });
+            this.writes = save.catch(() => {});
+            try {
+                await save;
+            } catch {
+                if (this.current(task))
+                    this.publish({ ...this.state, message: '资源已加载，但无法记住文件夹；下次打开需重新选择。' });
+            }
+        }
+    }
+    private release(entries: ResourceLibraryState['entries']) {
+        for (const e of entries) (this.options.revokeUrl ?? URL.revokeObjectURL)(e.previewUrl);
+    }
     dispose() {
+        this.disposed = true;
         this.generation++;
         this.task?.abort();
         this.task = null;
+        this.release(this.state.entries);
+        this.registry.replace({ algorithms: [], elements: [], presets: [] });
         this.listeners.clear();
+        this.state = empty();
+        this.settled = this.state;
+        this.active = null;
+        this.pending = null;
     }
 }

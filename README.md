@@ -19,7 +19,9 @@ Editor 分轨试听与有限乐器自动标记已按 [DEC-075 契约](docs/archi
 
 Visualizer 使用[离线确定性导出](docs/context/visualizer-offline-export.md)生成 WebM，支持 720p/1080p 与 30/60fps，按帧生成并显示进度；预览播放速度不决定输出视频时长。相关依赖许可见[第三方声明](THIRD_PARTY_NOTICES.md)。
 
-Visualizer 使用[可执行资源包 V2](docs/architecture/visualizer/resource-packages-v2.md)。作者源位于 `resources/visualizer/`，运行 `npm run visualizer:resources` 生成项目内资源；dev/build 前自动生成，`npm run visualizer:resources:check` 只读核对。JS 算法在隔离 Worker 中计算，宿主统一绘制；[Project V5](docs/architecture/visualizer/project-format-v5.md)保存算法、Shader、定义及分组快照。当前不接外部地址或后端，磁盘资源包入口暂时隐藏；生成 skill 仍是旧格式，留待独立升级。
+Visualizer 使用[可执行资源包 V2](docs/architecture/visualizer/resource-packages-v2.md)。在“添加元素”中选择 `C:\Users\Ryan\Desktop\WheresYourElements\assets`，只读加载外部 13 个元素和两套预设；授权有效时自动恢复，失效时点击“恢复访问”，外部更改后点击“重新加载”。应用不保存或打包资源库，V5 工程及草稿内嵌完整快照，离线恢复与导出不依赖资源库。生成 skill 2.0.0 维护于 `skills/visualizer-content-generator/`，独立副本在 `WheresYourElements/skill/visualizer-content-generator/`。
+
+`npm run visualizer:resources` 封装外部库，`npm run visualizer:resources:check` 只读核对；两者及资源专项使用 `VISUALIZER_ASSETS_DIR` 覆盖默认位置。dev/build 不调用封装器，资源缺失不阻断应用构建或无关测试。
 
 ## 项目工具
 

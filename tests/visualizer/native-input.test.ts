@@ -1,3 +1,6 @@
+import { sourceModule } from '../support/visualizer-assets.mjs';
+const { geometricSpectrum } = await import(/* @vite-ignore */ sourceModule('radial-spectrum', 'shared/geometry.js'));
+const { SpectralStringsState } = await import(/* @vite-ignore */ sourceModule('spectral-strings', 'shared/strings.js'));
 import { attachElements } from './resource-fixtures';
 import { expect, test, vi } from 'vitest';
 import { NativeAudioSource } from '../../src/visualizer/nativeAudioSource';
@@ -10,8 +13,6 @@ import {
     validateComposition,
 } from '../../src/visualizer/compositionCodec';
 import { createPresetElements } from '../../src/visualizer/compositionPresets';
-import { geometricSpectrum } from '../../resources/visualizer/shared/geometry.js';
-import { SpectralStringsState } from '../../resources/visualizer/shared/strings.js';
 
 const track = { contentHash: 'a'.repeat(64), fileName: 'native.wav', durationSeconds: 32, sampleRate: 48000 };
 const frames = (value: number): NativeAudioFrame[] =>

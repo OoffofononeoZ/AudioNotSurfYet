@@ -8,7 +8,7 @@ import { createOutputSyncWav } from '../support/visualizer-output-sync';
 const audio = path.resolve(import.meta.dirname, '../fixtures/audio/visualizer-v5-avsync-v1.wav');
 async function open(page: Page, file = audio) {
     await page.setViewportSize({ width: 1920, height: 1080 });
-    await installFilePickerStub(page);
+    await installFilePickerStub(page, { visualizerAssets: true });
     await page.goto('/');
     await chooseFiles(page, [file]);
     await page.getByTestId('header-visualizer-link').click();
@@ -413,7 +413,7 @@ test('optional local music visual review captures both presets at two song secti
     const errors: string[] = [];
     page.on('pageerror', e => errors.push(e.message));
     await page.setViewportSize({ width: 1920, height: 1080 });
-    await installFilePickerStub(page);
+    await installFilePickerStub(page, { visualizerAssets: true });
     await page.goto('/');
     await chooseFiles(page, [process.env.VISUALIZER_MUSIC_FILE!]);
     await page.getByTestId('header-visualizer-link').click();

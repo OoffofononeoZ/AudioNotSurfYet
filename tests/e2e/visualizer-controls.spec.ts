@@ -4,7 +4,7 @@ import { chooseFiles, installFilePickerStub } from '../support/file-picker';
 
 test('element actions stay visible without selecting or resizing rows', async ({ page }) => {
     await page.setViewportSize({ width: 1920, height: 1080 });
-    await installFilePickerStub(page);
+    await installFilePickerStub(page, { visualizerAssets: true });
     await page.goto('/');
     await chooseFiles(page, [path.resolve(import.meta.dirname, '../fixtures/audio/format-master.wav')]);
     await page.getByTestId('header-visualizer-link').click();
@@ -53,7 +53,7 @@ test('shared selects and number steppers keep keyboard, bounds and recording loc
     await page.setViewportSize({ width: 1920, height: 1080 });
     const errors: string[] = [];
     page.on('pageerror', error => errors.push(error.message));
-    await installFilePickerStub(page);
+    await installFilePickerStub(page, { visualizerAssets: true });
     await page.goto('/');
     await chooseFiles(page, [path.resolve(import.meta.dirname, '../fixtures/audio/format-master.wav')]);
     await page.getByTestId('header-visualizer-link').click();
@@ -118,7 +118,7 @@ test('property wheel and steppers use semantic precision, valid bounds and persi
     await page.setViewportSize({ width: 1920, height: 900 });
     const errors: string[] = [];
     page.on('pageerror', e => errors.push(e.message));
-    await installFilePickerStub(page);
+    await installFilePickerStub(page, { visualizerAssets: true });
     await page.goto('/');
     await chooseFiles(page, [path.resolve(import.meta.dirname, '../fixtures/audio/format-master.wav')]);
     await page.getByTestId('header-visualizer-link').click();
@@ -197,7 +197,7 @@ test('property wheel and steppers use semantic precision, valid bounds and persi
 
 test('projection and mapping wheel edits respect integer bands and target precision', async ({ page }) => {
     await page.setViewportSize({ width: 1920, height: 900 });
-    await installFilePickerStub(page);
+    await installFilePickerStub(page, { visualizerAssets: true });
     await page.goto('/');
     await chooseFiles(page, [path.resolve(import.meta.dirname, '../fixtures/audio/format-master.wav')]);
     await page.getByTestId('header-visualizer-link').click();
@@ -237,7 +237,7 @@ test('projection and mapping wheel edits respect integer bands and target precis
 
 test('fullscreen shares MusicBar track styling, supports dragging and keeps the same canvas', async ({ page }) => {
     await page.setViewportSize({ width: 1920, height: 1080 });
-    await installFilePickerStub(page);
+    await installFilePickerStub(page, { visualizerAssets: true });
     await page.goto('/');
     await chooseFiles(page, [path.resolve(import.meta.dirname, '../fixtures/audio/format-master.wav')]);
     await expect(page.locator('#music-bar-container')).toHaveAttribute('data-playback-state', 'playing');

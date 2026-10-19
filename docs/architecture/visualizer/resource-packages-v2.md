@@ -1,6 +1,6 @@
 # Visualizer 可执行资源包 V2
 
-2026-10-19，owner 批准项目内可加载算法资源包计划：原生浏览器隔离执行，工程内嵌算法，新格式替换旧格式。不增加后端、外部 URL 或磁盘资源包加载，不修改内容生成 skill。
+DEC-087 批准 V2 算法包、V5 自包含工程及原生隔离。2026-10-20 的 DEC-088 批准外部文件夹、只读目录加载和独立 skill 2.0.0，替代仅项目内 catalog 及暂不升级 skill 的限制；不授权未来具体内容、ZIP、后端、任意 URL 或发布。
 
 ## 格式基础
 
@@ -8,15 +8,23 @@
 - AlgorithmDefinition 包含 apiVersion:1、contract、source 和 programs。contract 声明参数能力、共同处理字段与历史输入；programs 保存具名 Shader、几何类型和 uniform 类型。
 - source 为自包含 ES Module，导出 create 工厂；源码、Shader、契约共同参与规范化 JSON SHA-256。哈希用于身份，不是作者认证。校验和解析不执行源码。
 - 作者文件独立维护 JS、Shader 和 JSON，封装器把文本内嵌进生成包。输入路径限制在作者目录内，模块禁止外部导入，跨包引用按算法→元素→预设顺序封装。
-- [Project V5](project-format-v5.md)保存元素、预设和算法快照，恢复不依赖商城目录。旧 V4/V1 不迁移；生成 skill 暂时仍描述旧格式。
+- [Project V5](project-format-v5.md)保存元素、预设和算法快照，恢复不依赖商城目录。旧 V4/V1 不迁移；生成 skill 2.0.0 使用 VisualizerContentBriefV2，不兼容旧输入。
 
-## 作者目录与封装
+## 外部文件夹与封装
 
-作者源在 `resources/visualizer/`，catalog.json 登记平级包文件。每个包声明算法契约、entry、可选 includes 和具名 programs；程序以 vertexFile/fragmentFile 指向目录内文本。封装器按 includes 顺序连接辅助源码及 entry，形成不含 import 的单个 ES Module；代码、Shader 和 JSON 均在资源目录维护，不从应用源码导入。
+默认库为 `C:\Users\Ryan\Desktop\WheresYourElements\assets`。元素放 `elements/<id>/`，预设放 `presets/<id>/`，各包含 `resource-info.json`、`preview.svg`、`source/`、`resource-package.json`。完整信息格式见独立 skill 的[资源格式与 ABI](../../../skills/visualizer-content-generator/references/resource-format.md)。
 
-`npm run visualizer:resources` 生成 `public/visualizer-resources/v2/`；dev/build 前自动执行。`npm run visualizer:resources:check` 对比源和产物，只读检查。工具封装身份和引用，不代替运行时 schema、依赖、模块初始化及画面验证。
+信息 schemaVersion:1，含精确 resource、kind、title、description、creator、createdAt、previewPath、sourceEntry、packagePath、dependencies 和 order。creator 默认 default；createdAt 是实际创建时间，重新封装不重置。路径相对自身资源根，不接受点段、绝对路径或跨资源依赖。元素包含完整辅助源码及 Shader；预设包只含组合定义，不含算法或元素，dependencies 恰为已有元素的去重精确引用。
 
-当前 13 个算法及两套预设已迁移。商城只请求同一项目目录内索引和 JSON，不接受任意 URL；包整体通过校验和隔离初始化后注册。磁盘资源包及旧导入库入口暂时隐藏，不读取或清空旧库；工程文件 IO 继续有效。
+`npm run visualizer:resources` 封装外部库，`npm run visualizer:resources:check` 只读核对，`VISUALIZER_ASSETS_DIR` 覆盖默认位置。独立 skill 可运行 `node <skill>/scripts/resource-library.mjs --build|--check <assets>`。dev/build 不执行封装、不复制外部库；仓库不再保存这 15 个资源的源码、运行包和专用预览。
+
+## 目录加载与所有权
+
+“添加元素”首次提示选择 assets，由“选择文件夹”调用 `showDirectoryPicker({mode:'read'})`。独立 `audionotsurfyet-resource-directory` IndexedDB 仅保存目录句柄，不复制资源库。进入页面只 `queryPermission`，授权有效时自动恢复；失效时由可见“恢复访问”按钮 `requestPermission`。权限语义依据 [Chrome File System Access 说明](https://developer.chrome.com/docs/capabilities/web-apis/file-system-access)。
+
+读取信息、预览、运行包及源码入口存在性，校验路径、身份/依赖、重复项、预设组成及算法/Shader 初始化，整体通过才替换可添加库。取消、失败、迟到结果及离页不得覆盖当前可用库；句柄保存失败只提示下次需重新选择。“重新加载”读取外部新增/修改，失败保留当前库；浏览器不写外部文件。
+
+Visualizer 页面统一拥有资源库、任务和预览对象 URL，商城/列表共享元数据与 URL。成功刷新/切换释放旧 URL，失败保留；离页取消任务并释放。未连接库时列表显示通用资源标记；V5 工程和草稿依靠内嵌快照继续渲染与导出，工程格式和隔离接口不变。
 
 ## 隔离与帧契约
 

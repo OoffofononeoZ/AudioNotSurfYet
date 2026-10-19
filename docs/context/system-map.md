@@ -15,7 +15,7 @@ upstream_docs:
 
 DEC-072另由MainLayout提供唯一`EditorSeparationService`，使用同一AudioEngine原始PCM；Editor增加分离工作区和四轨展示/导出。模型与结果索引使用`processing-p1` IndexedDB，原PCM/planar/WAV使用OPFS；最多一个专用分离Worker，播放及analysis所有权不变。
 
-Visualizer 当前实现 Project V5、可执行资源包 V2、分组预设及同歌范围转场。项目内目录提供算法/Shader/定义，工程保存完整快照；算法通过无同源权限 iframe 所属 Worker 隔离计算，宿主校验数据后统一绘制。暂时隐藏磁盘资源包入口，不接后端或外部 URL。布局及接口见[组合工作区](visualizer-composition.md)、[资源包](../architecture/visualizer/resource-packages-v2.md)与[Project V5](../architecture/visualizer/project-format-v5.md)；新增内容仍需具体合同，内容生成 skill 本轮未升级，历史 evidence/readiness 不自动继承。
+Visualizer 当前实现 Project V5、可执行资源包 V2、分组预设及同歌范围转场。用户选择的只读外部 assets 文件夹提供算法/Shader/定义，工程保存完整快照；算法通过无同源权限 iframe 所属 Worker 隔离计算，宿主校验数据后统一绘制。Visualizer 页面拥有独立资源库实例、目录句柄任务和共享预览 URL；独立 IndexedDB 仅记住目录句柄。离页取消任务并释放预览，不接 ZIP、后端或外部 URL。布局及接口见[组合工作区](visualizer-composition.md)、[资源包](../architecture/visualizer/resource-packages-v2.md)与[Project V5](../architecture/visualizer/project-format-v5.md)；新增内容仍需具体合同，内容生成 skill 2.0.0 独立封装 V2 资源并保留具体内容审批，历史 evidence/readiness 不自动继承。
 
 应用导航占位、窄屏隐藏、歌曲详情与内容宽度分界见 [应用外壳契约](app-shell.md)（DEC-076）；旧 canonical 数值与身份继续绑定历史实现。
 
