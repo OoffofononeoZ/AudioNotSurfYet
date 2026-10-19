@@ -37,3 +37,16 @@ test('marking has no outer padding, processing retains padding and BPM columns s
         }
     }
 });
+
+test('BPM controls omit meter without changing the left beat subdivision', async ({ page }) => {
+    await prepareMarkerEditor(page);
+    await page.getByTestId('toggle-editor-timing').click();
+    await expect(page.getByLabel(/拍号/)).toHaveCount(0);
+    await expect(page.locator('.meter-inputs,.meter-fields,.beat-phase')).toHaveCount(0);
+    await expect(page.getByTestId('editor-beat-divisor')).toHaveAttribute('data-divisor', '4');
+    await page.getByRole('spinbutton', { name: '辅助 BPM', exact: true }).fill('127.5');
+    await page.getByRole('spinbutton', { name: '辅助 BPM', exact: true }).press('Enter');
+    await expect(page.getByTestId('tempo-bpm-0')).toHaveValue('127.5');
+    await expect(page.getByTestId('editor-tempo-lane')).not.toContainText('4/4');
+    await expect(page.locator('.timing-select')).not.toContainText('4/4');
+});

@@ -23,7 +23,7 @@ upstream_docs:
 
 - 波形／tempo 使用工程 `workspace.viewport`，首次／重置为全曲并恢复已有保存范围，不随 BPM 改窗口。point/range、吸附、移动、批量与 overlay 显式读取只读 `MarkerTimeView`，默认 10 秒、1–10 秒跨度；起点为播放时间减跨度的 15%，播放线固定绘图区 15%，首尾以不可编辑留白补足。动态起点不入 JSON V1；跨度按歌曲 hash 存现有 preferences。
 - 唯一时间来源是已有 PlaybackSnapshot，播放帧不改工程／不保存草稿。Canvas backing store 为 CSS 尺寸乘 DPR，绘制使用 CSS pixel；波形／tempo 及轨道／overlay 两套视图分别内部共线，误差不超过 1 CSS px。只绘制可见行和事件，轨道／overlay 合并 RAF 请求。
-- metered segment 根据 BPM/meter 生成 measure/beat；与 measure 重合的 beat 不重复。single-beat segment 不画内部线，并把整个 segment 作为一个候选单元。
+- metered segment 仅根据 BPM 和当前细分生成 beat/subdivision，不再区分小节。single-beat segment 不画内部线，并把整个 segment 作为一个候选单元。
 - 2026-10-17 标记改版采用显式 subdivision：常规 `[1,2,4,8,16]`、三连音 `[1,3,6,12]`、自定义 1–64 的因数预设。默认每拍四等分；hover、pointer、端点与键盘共享同一设置。缩放不改变吸附粒度，只减少过密次级线绘制，分隔颜色和层级沿用 osu。
 - snap 只发生在创建或拖动确认时。viewport、zoom 或 tempo 修改不会自动重写已有事件秒数。
 - 播放期间开放下节的数字键录入，鼠标编辑与名称／分类管理仍须暂停。暂停编辑的鼠标、键盘、菜单、批量统一拦截播放线左侧的操作位置；新点与端点吸附后不得回到左侧，无合法刻度时不创建。跨线范围可由右侧选择、整体移动／删除；完整左侧事件不加入新批量选区。管理操作不受 15% 空间限制。
@@ -98,7 +98,7 @@ idle + drag start/end handle
 默认收起的 BPM 面板由标题与独立 chevron 展开，保留键盘与 aria-expanded；选择与时间条边界联动，不随播放自动切换编辑对象。输入复用公共控件；Tap 保留热身／预览／样本算法，仅显式应用后修改区间。完整现行行为见[标记工作区](../../context/editor-marking.md)。
 
 - 初始 project 有歌曲开始/结束固定边界；结束前显示 add handle。单击 add handle 时优先使用播放 cursor，否则使用 viewport 中点；拖动后在 snapped 时间插入内部 boundary。
-- `BPM` 表示当前拍号单位的一拍每分钟次数：相邻 beat 固定为 `60 / BPM` 秒；numerator 决定每小节的 beat 数，denominator 只表达该 beat 的音符单位，不再按四分音符二次缩放。
+- 相邻 beat 固定为 `60 / BPM` 秒，当前细分决定每拍等分数；拍号不再参与网格生成。Project V1 的 meter 字段继续按原值保存，新建仍使用现有默认值，不迁移工程格式。
 - 前一 segment 有合法 metered BPM 时，新增或移动 boundary 按当前选定 subdivision 吸附；BPM 为空或 segment 为 single-beat 时，没有 beat 网格，使用 `xToTime()` 后的微秒规范化原始时间。
 - 新 segment 继承前一 segment 的 metered/single-beat 值。内部 boundary 可水平拖动但不可跨越相邻 boundary；右键或焦点状态 Delete/Backspace 删除目标 segment，前一 segment 向右延伸。0 秒首 boundary 与歌曲结束边界固定且不可删除。
 - 初始 metered segment 为 4/4、`bpm: null`、source unset；输入框显示 `bpm: 100` placeholder。只有一个 segment、仍为空且未被用户编辑时，才允许可靠 tempo estimate 填值。
@@ -106,7 +106,7 @@ idle + drag start/end handle
 - 修改 tempo 只重绘网格与改变后续 snap；现有 point/range 秒数不移动。
 - 移除小节显示范围及自动窗口规则；点与范围主体支持同分类单项拖动及 Alt+左右微移，范围保持长度；预览不入草稿，确认时复核边界／源身份／冲突，取消保持原值。
 - tempo boundary 不再覆盖波形 stage；紧凑 BPM 标记条是波形时间列的一部分，使用同一 viewport 和唯一水平滚动容器，不带独立左 rail、标签或模块边框。标记条固定 28px 并与波形零间隙相接。
-- 真实 boundary 的向上 caret 位于波形底边，1px 辅助线只向上伸入波形 12px，时间紧贴在 caret 下。相邻 boundary 之间以 11px 同基线显示无框 BPM/拍号控件；输入高 18px，焦点或错误时才显示绿色边线，来源移入 accessible name/title。
+- 真实 boundary 的向上 caret 位于波形底边，1px 辅助线只向上伸入波形 12px，时间紧贴在 caret 下。相邻 boundary 之间以 11px 同基线显示无框 BPM 控件；输入高 18px，焦点或错误时才显示绿色边线，来源移入 accessible name/title。紧凑条、区间列表和展开面板不显示或修改拍号，不绘制按拍号分组的圆点。
 - 区间可容纳完整控件时直接编辑；只能容纳单行摘要时显示摘要；摘要也放不下时不显示区间内容。判断使用同页自然宽度测量、两侧各 26px 安全区并禁止换行，zoom/resize 后重新计算；隐藏区间不能隐藏真实 boundary。
 - 删除后清理目标 segment 的输入草稿和错误，flush 现有 autosave 并使 tempo estimate 结果失效；公共 `aria-live` 状态区播报删除或拒绝原因。
 
