@@ -14,9 +14,11 @@
 入口：[audioEngine.ts](../../src/audio/audioEngine.ts)、[audioSessionService.ts](../../src/audio/audioSessionService.ts)、[audio.ts](../../src/types/audio.ts)。
 
 - 播放秒数来自 engine 音频时钟，裁剪到歌曲范围，不累计 RAF delta。刷新恢复到 0 秒 paused，不隐式播放。
+- `PlaybackSnapshot` 和导出 `AudioPlaybackCheckpoint` 必含 `playbackRate`。全局速度默认 1，支持 0.1–2，原曲、FT 和辅助试听统一使用原生 AudioBufferSource playbackRate，音高随速度变化；时钟按速度换算回原曲秒数，分析、标记、BPM 和工程时间不缩放。修改速度保留当前位置；分块试听中止旧读取并按最新 generation 重排，静音与播放意图保留。
 - 加载、解码、恢复和持久化检查 generation/revision；旧任务、取消或 dispose 后的完成结果不得覆盖新歌曲与新状态。
 - Editor/Visualizer 通过 tokenized route lease 临时使用 repeat-one；只有当前 token 的 release 生效，离页恢复用户偏好。导出 transport lease 优先锁定歌曲、播放与 seek。
-- `getPlaybackSnapshot()` 读取 engine 即时快照；`subscribePlaybackDiscontinuity()` 在跳转、重启或试听源切换前通知，返回清理函数。数字录入按 [Editor 交互](editor/interaction-contracts.md)取消未提交范围。
+- `getPlaybackSnapshot()` 读取 engine 即时快照；`subscribePlaybackDiscontinuity()` 在跳转、重启、变速或试听源切换前通知，返回清理函数。数字录入按 [Editor 交互](editor/interaction-contracts.md)取消未提交范围，鼠标拖动也取消。
+- 导出锁定速度控件和公开变速命令；离线导出仍按原曲 PCM 和绝对时间推进，不继承试听速度或音高，结束后从 checkpoint 恢复速度、位置与播放状态。
 - 分轨与原曲共用 transport。buffering 冻结有效时钟；audition-read 可重试当前源或显式返回原曲，不通过重载歌曲掩盖错误。
 
 ## 分析租约与时间

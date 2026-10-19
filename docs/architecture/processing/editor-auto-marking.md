@@ -17,7 +17,7 @@ FX、Pad、合成器预设区分、复杂 other 与 YourMT3+ 转换／部署留�
 ## 试听 transport
 
 - 四条真实 FT 音轨分别静音，默认全部未静音；统一播放／暂停播放所有未静音轨，提供返回原曲入口。鼓种只是标记类别，不新增鼓内音源分离或 kick/snare/hat 静音。
-- 复用唯一 AudioEngine 的 AudioContext、播放时钟、暂停、seek、总音量、结束和 Editor repeat-one 策略。原曲／FT／辅助乐器切换保留当前原曲绝对秒数。PlaybackSnapshot 明确提供当前试听来源与等待／读取错误。
+- 复用唯一 AudioEngine 的 AudioContext、播放时钟、暂停、seek、总音量、全局变速、结束和 Editor repeat-one 策略。原曲／FT／辅助乐器切换保留当前原曲绝对秒数和速度，音高随原生 playbackRate 变化。PlaybackSnapshot 明确提供速度、当前试听来源与等待／读取错误；变速前取消未提交标记，分块读取检查 generation 后按新速度重排。
 - 初始 PCM 块约四秒、提前准备八秒；使用有界文件读取与节点调度，不整体解码或驻留四条长音轨。读取未就绪／失败必须停止有效播放时钟推进并显示状态，不能让游标继续前进而没有音频。
 - 钢琴／吉他候选复用同一 transport 试听辅助音频。切回标记工作区保留试听；换歌、确认离开 Editor、清理相关缓存或 dispose 结束读取与试听租约，返回原曲并释放节点、buffer、监听及文件引用。
 

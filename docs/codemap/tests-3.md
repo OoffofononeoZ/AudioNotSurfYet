@@ -6,6 +6,7 @@
 
 | 文件 | 本地静态引用（最多显示 6 项） |
 | --- | --- |
+| [tests/support/visualizer-video-timeline.mjs](../../tests/support/visualizer-video-timeline.mjs) | — |
 | [tests/tools/code-size.test.mjs](../../tests/tools/code-size.test.mjs) | [scripts/check-repo.mjs](../../scripts/check-repo.mjs)、[scripts/codemap.mjs](../../scripts/codemap.mjs)、[scripts/install-project-skills.mjs](../../scripts/install-project-skills.mjs)、[scripts/lib/code-size-policy.mjs](../../scripts/lib/code-size-policy.mjs)、[scripts/lib/repository.mjs](../../scripts/lib/repository.mjs)、[tests/tools/fixture.mjs](../../tests/tools/fixture.mjs) |
 | [tests/tools/document-size.test.mjs](../../tests/tools/document-size.test.mjs) | [scripts/check-repo.mjs](../../scripts/check-repo.mjs)、[scripts/codemap.mjs](../../scripts/codemap.mjs)、[scripts/install-project-skills.mjs](../../scripts/install-project-skills.mjs)、[scripts/lib/repository.mjs](../../scripts/lib/repository.mjs)、[tests/tools/fixture.mjs](../../tests/tools/fixture.mjs) |
 | [tests/tools/fixture.mjs](../../tests/tools/fixture.mjs) | [scripts/lib/repository.mjs](../../scripts/lib/repository.mjs) |

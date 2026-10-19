@@ -26,6 +26,7 @@ import {
     type StoredHandle,
 } from '../types/session';
 import { PlaybackPolicy, type PlaybackMode } from './playbackPolicy';
+import { assertPlaybackRate } from './playbackRate';
 
 export interface TrackNavigation {
     select(trackId: string): Promise<void>;
@@ -114,6 +115,7 @@ export interface AudioEnginePort {
     pause(): void;
     seek(seconds: number): Promise<void>;
     setVolume(volume: number): void;
+    setPlaybackRate(rate: number): Promise<void>;
     setAuditionSource(
         source: import('./auditionTypes').AuditionSource | null,
         options?: { play?: boolean },
@@ -332,6 +334,7 @@ export class AudioSessionService {
                     currentTimeSeconds: 0,
                     durationSeconds: currentTrack?.durationSeconds ?? 0,
                     volume: this.engine.getSnapshot().volume,
+                    playbackRate: this.engine.getSnapshot().playbackRate,
                 });
             }
         }
@@ -729,6 +732,14 @@ export class AudioSessionService {
         this.engine.setVolume(normalized);
     }
 
+    async setPlaybackRate(rate: number): Promise<void> {
+        assertPlaybackRate(rate);
+        if (this.disposed || this.exportTransportToken || rate === this.engine.getSnapshot().playbackRate) return;
+        this.notifyPlaybackDiscontinuity();
+        ++this.transportRevision;
+        await this.engine.setPlaybackRate(rate);
+    }
+
     async restoreAccess(trackId: string): Promise<void> {
         if (this.exportTransportToken) return;
         if (this.disposed) return;
@@ -946,6 +957,7 @@ export class AudioSessionService {
                 currentTimeSeconds: 0,
                 durationSeconds: record.durationSeconds ?? 0,
                 volume: this.engine.getSnapshot().volume,
+                playbackRate: this.engine.getSnapshot().playbackRate,
             });
             return;
         }
@@ -962,6 +974,7 @@ export class AudioSessionService {
             currentTimeSeconds: 0,
             durationSeconds: record.durationSeconds ?? 0,
             volume: this.engine.getSnapshot().volume,
+            playbackRate: this.engine.getSnapshot().playbackRate,
         });
 
         try {
@@ -998,6 +1011,7 @@ export class AudioSessionService {
                     currentTimeSeconds: 0,
                     durationSeconds: record.durationSeconds ?? 0,
                     volume: this.engine.getSnapshot().volume,
+                    playbackRate: this.engine.getSnapshot().playbackRate,
                     error: {
                         code: 'decode',
                         message: error instanceof Error ? error.message : 'Unable to read this audio file.',

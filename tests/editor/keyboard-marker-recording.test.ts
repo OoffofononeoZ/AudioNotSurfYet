@@ -32,6 +32,7 @@ function harness(kinds: ('point' | 'range')[] = ['point', 'range']) {
         currentTimeSeconds: 1.06,
         durationSeconds: 8,
         volume: 1,
+        playbackRate: 1,
     };
     let active = true,
         pending: readonly KeyboardRangeRecording[] = [],

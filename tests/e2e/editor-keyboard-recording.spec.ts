@@ -132,13 +132,33 @@ test('seek, Escape, blur, grid changes and workspace changes cancel; inputs and 
     await prepareMarkerEditor(page);
     await addMarkerLane(page, 'range');
     await play(page);
-    for (const action of ['seek', 'escape', 'blur', 'hidden', 'focus', 'dialog', 'grid', 'import', 'workspace']) {
+    for (const action of [
+        'seek',
+        'speed',
+        'escape',
+        'blur',
+        'hidden',
+        'focus',
+        'dialog',
+        'grid',
+        'import',
+        'workspace',
+    ]) {
         await page.keyboard.down('1');
         await expect(page.getByTestId('keyboard-recording-status')).toBeVisible();
         if (action === 'seek') {
             await page.getByTestId('editor-timeline').focus();
             await page.keyboard.press('Home');
             await page.keyboard.press('ArrowRight');
+        }
+        if (action === 'speed') {
+            await page.getByTestId('playback-speed').click();
+            await page.locator('.speed-panel input').evaluate(element => {
+                const slider = element as HTMLInputElement;
+                slider.value = '0.5';
+                slider.dispatchEvent(new Event('input', { bubbles: true }));
+            });
+            await page.keyboard.press('Escape');
         }
         if (action === 'escape') await page.keyboard.press('Escape');
         if (action === 'blur') await page.evaluate(() => window.dispatchEvent(new Event('blur')));
@@ -168,6 +188,8 @@ test('seek, Escape, blur, grid changes and workspace changes cancel; inputs and 
                 { name: 'same-project.json', mimeType: 'application/json', text: JSON.stringify(await draft(page)) },
             ]);
             await page.getByTestId('import-editor-project').click();
+            await page.mouse.move(0, 500);
+            await expect(page.getByRole('alert')).toHaveCount(0);
         }
         if (action === 'workspace') {
             await page.getByTestId('editor-separation-tab').click();

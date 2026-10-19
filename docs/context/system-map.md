@@ -58,7 +58,7 @@ showOpenFilePicker → FileSystemFileHandle → File
        └→ native Fullscreen API on existing workspace → same Canvas + video transport
 ```
 
-当前边界：Editor 数据只在进入/显式 reload 时快照；analysis 第五项在 Coordinator 前拒绝；页面音量不影响导出音轨；不支持的编码配置明确失败。导出暂停播放并独占现有 renderer，按帧编号推进，不依赖播放时钟。直接列表换歌在改变歌曲前处理单草稿覆盖与未处理 WebM；取消保留原歌曲和工程。
+当前边界：Editor 数据只在进入/显式 reload 时快照；analysis 第五项在 Coordinator 前拒绝；页面音量和试听速度不影响导出音轨；不支持的编码配置明确失败。导出暂停播放并独占现有 renderer，按帧编号推进，不依赖播放时钟。直接列表换歌在改变歌曲前处理单草稿覆盖与未处理 WebM；取消保留原歌曲和工程。
 
 ## Subsystems
 
@@ -67,13 +67,13 @@ showOpenFilePicker → FileSystemFileHandle → File
 | App shell and routing | 组合 AppSidebar、右上角齿轮、内容容器与独立 MusicBar，并拥有 session service 生命周期 | Vue Router、provide/inject | project-owner | `createWebHistory()`；MainLayout 卸载时 dispose |
 | MusicBar and queue UI | 文件选择、队列命令、进度、三种样式和错误消息 | AudioSessionService commands、audioSessionStore、MusicList events | project-owner | 不持有 File、AudioContext、播放 RAF 或队列事实 |
 | AudioSessionService | 元数据、runtime File/封面、竞态、ended 循环、单 RAF、工作区持久化与资源释放 | File/工作区输入；TrackRecord/PlaybackSnapshot/energy 输出 | project-owner | 工作区先更新内存，保存失败发布 not-persisted |
-| AudioEngine | 单一 AudioContext、解码、播放、暂停、seek、音量和时域数据 | ArrayBuffer 输入；PlaybackSnapshot/Float32Array 输出 | project-owner | AudioContext 与节点延迟创建；AudioContext 时钟为事实来源 |
+| AudioEngine | 单一 AudioContext、解码、播放、暂停、seek、变速、音量和时域数据 | ArrayBuffer 输入；PlaybackSnapshot/Float32Array 输出 | project-owner | AudioContext 与节点延迟创建；AudioContext 时钟为事实来源 |
 | AnalysisCoordinator | 校验 0–4 活动特征、管理 generation/job/cache identity、合并 cache hit/miss、取消/重试和精确游标请求 | AudioEngine PCM copy、module Worker、SessionRepository、Pinia snapshot | project-owner | 默认活动集为空；完整身份不匹配或旧 generation 一律丢弃 |
 | Analysis Worker | 固定 frame/hop/window 下批量提取累计 21 项特征，聚合、量化、编码并响应 exact cursor | typed Worker request/response、transferable PCM/ArrayBuffer | project-owner | 每批最多 32 frame 或约 8ms yield；同帧一次 Meyda batch；Flux 复用相邻幅度频谱 |
 | FeatureRegistry and codec | 21 项穷尽静态契约、六类紧凑 payload 与严格二进制 decoder | `FeatureId`、`FeatureDefinition`、`StoredAnalysisCache` | project-owner | Loudness 使用 total Float32 + 24 bands U16；Complex 使用 magnitude U16 + phase Int16；schema 保持 V1 |
 | Audio session state | 保存队列、当前 track、播放快照、能量、analysis 与 workspace snapshot | Pinia `audioSessionStore` | project-owner | `$state` 可 JSON 序列化，不含浏览器资源实例或 typed-array payload |
 | Session persistence | 保存/恢复 V1 最近会话、全部句柄和唯一 current Blob/cache | 原生 IndexedDB `SessionRepository` | project-owner | `replaceCurrentAnalysisCache()` 校验 track/hash 并原子替换；unknown schema 不猜测迁移 |
-| Config persistence | 保存 volume、playbackMode、MusicBar style 与桌面 sidebarCollapsed | Pinia、localStorage key `config` | project-owner | sidebarCollapsed 默认 false；volume 为 0–100 |
+| Config persistence | 保存 volume、playbackRate、playbackMode、MusicBar style 与桌面 sidebarCollapsed | Pinia、localStorage key `config` | project-owner | sidebarCollapsed 默认 false；volume 为 0–100；playbackRate 为 0.1–2，默认 1 |
 | Home visualization | 歌曲详情与共享能量 Three.js 光线背景 | store metadata、service 封面 URL、`rayLength` prop、IntersectionObserver/ResizeObserver、reduced-motion media query | unknown | 常规模式使用 WebGL RAF；reduced motion 只静态渲染；卸载释放 mesh、geometry、material、render list、renderer 与 WebGL context |
 | Analyzer surface | 当前注册特征单列、最多四项FIFO置顶与精确值 | AudioSessionService、AnalysisCoordinator、Canvas 2D | project-owner | 当前集合含Wallpaper频谱，界面见[列表](analyzer-list.md) |
 | Editor surface | 标记/FT/自动标记、公共顶栏/MusicBar、独立MarkerTimeView、overlay和数字录入 | EditorSessionController、processing/transcription服务、共享engine/coordinator与Canvas adapter | project-owner | [当前接口](../architecture/editor/interface-contracts.md)，历史readiness不继承 |
@@ -121,7 +121,7 @@ showOpenFilePicker → FileSystemFileHandle → File
 - `EditorPointWorkspace` 装配只读 `MarkerTimeView`、统一点／范围轨道和叠加层；轨道直接跟随播放快照，默认 10 秒、1–10 秒跨度，固定 15% 播放线与歌曲边界留白。动态起点不入工程，跨度按 hash 保存 preferences。行与事件只在可见范围绘制，轨道与 overlay 共享合并 RAF。
 - point 命令固定微秒唯一性，使用 osu 式显式细分与居中彩色刻线、single-beat 整段一格及分类迁移／明确删除；缩放只稀疏网格，不改变吸附。轨道右键 marker 删除，空白打开 body 级 seek／播放菜单，不平移；波形继续独立 pan／菜单。
 - range 命令使用微秒规范化半开 `[start,end)`；同 lane/inner class 真重叠拒绝、相邻允许，跨分类可并存。两次点击起点可跨同歌导航与播放保留，暂停后选择终点；显式取消／Esc、所属分类删除、切页签、工程身份变化与离页清理。端点 pointer／keyboard 调整及拖动回滚复用原校验。
-- DEC-085 由 `KeyboardMarkerRecorder`／`useKeyboardMarkerRecording` 独立管理播放中的分类行数字键点按／按住录入；即时 engine 快照经 service 只读入口读取，跳转前取消，暂停／曲终同步收尾，最新 controller 工程合并后防抖保存。鼠标仍须暂停，暂停后可编辑整条可见轨道；左侧遮罩和15%播放线样式保留。`useMarkerEditing` 管理拖动／候选／鼠标待完成范围，`useMarkerBlocks` 管理连续时间批量，源身份变化或 seek／播放取消拖动。`EditorMarkerLane` 拥有 224/160px 管理栏、36px 组标题、48px 分类行、会话折叠与确认删除，轨道列表独立滚动；波形与轨道横向滚动解耦。
+- DEC-085 由 `KeyboardMarkerRecorder`／`useKeyboardMarkerRecording` 独立管理播放中的分类行数字键点按／按住录入；即时 engine 快照经 service 只读入口读取，跳转前取消，暂停／曲终同步收尾，最新 controller 工程合并后防抖保存。鼠标仍须暂停，暂停后可编辑整条可见轨道；左侧遮罩和15%播放线样式保留。`useMarkerEditing` 管理拖动／候选／鼠标待完成范围，`useMarkerBlocks` 管理连续时间批量，源身份变化或 seek／变速／播放取消拖动。`EditorMarkerLane` 拥有 224/160px 管理栏、36px 组标题、48px 分类行、会话折叠与确认删除，轨道列表独立滚动；波形与轨道横向滚动解耦。
 - 手动定时默认收起；区间列表与 BPM 辅助栏共用现有 tempo 命令和播放快照，Tap 只在显式应用后写入；细分偏好按歌曲 hash 独立保存，JSON V1 与 IndexedDB schema 不变。
 - `analysisCanvasRenderer` 是 Analyzer card 与 Editor overlay 共用的纯 Canvas adapter；overlay 一次选择当前注册集合中的一项，显式接收轨道 MarkerTimeView、对齐标尺绘图区，保留 DPR backing store、40ms exact cursor 合并和原错误隔离。
 - overlay 通过 Teleport 固定覆盖窗口，灰色背景、全视口 Canvas 与说明穿透到侧边栏/底层标记；只有顶栏右侧图标、临时特征菜单、重试和 top/move/bottom 手柄接收 pointer。bounds 仍为 0.10/0.35、最小 0.12，但相对 viewport；visibility 按歌曲 hash 本地保存，关闭时 active set 只保留 Buffer。

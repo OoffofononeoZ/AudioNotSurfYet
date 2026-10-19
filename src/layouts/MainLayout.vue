@@ -14,45 +14,29 @@ import { onUnmounted, provide, watchEffect } from 'vue';
 import AppSidebar from '../components/AppSidebar.vue';
 import AppSettingsButton from '../components/AppSettingsButton.vue';
 import MusicBar from '../components/MusicBar.vue';
-import {
-    AudioSessionService,
-    audioSessionServiceKey,
-} from '../audio/audioSessionService';
+import { AudioSessionService, audioSessionServiceKey } from '../audio/audioSessionService';
 import { AudioEngine } from '../audio/audioEngine';
-import {
-    AnalysisCoordinator,
-    analysisCoordinatorKey,
-} from '../analysis/analysisCoordinator';
-import {
-    isFeatureId,
-    type FeatureId,
-} from '../analysis/types';
+import { AnalysisCoordinator, analysisCoordinatorKey } from '../analysis/analysisCoordinator';
+import { isFeatureId, type FeatureId } from '../analysis/types';
 import { SessionRepository } from '../persistence/sessionRepository';
 import { useAudioSessionStore } from '../stores/audioSessionStore';
 import { useConfigstore } from '../stores/configStore';
-import {
-    EditorSessionController,
-    editorSessionControllerKey,
-} from '../editor/editorSessionController';
+import { EditorSessionController, editorSessionControllerKey } from '../editor/editorSessionController';
 import { EditorDraftRepository } from '../editor/editorDraftRepository';
 import { NativeEditorFileGateway } from '../editor/fileIO';
-import {
-    VisualizerSessionController,
-    visualizerSessionControllerKey,
-} from '../visualizer/visualizerSessionController';
+import { VisualizerSessionController, visualizerSessionControllerKey } from '../visualizer/visualizerSessionController';
 import { CompositionDraftRepository } from '../visualizer/compositionDraftRepository';
 import { NativeVisualizerFileGateway } from '../visualizer/fileIO';
 import { NativeVisualizerVideoFileGateway } from '../visualizer/videoFileIO';
-import { EditorSeparationService,editorSeparationServiceKey } from '../processing/editorSeparationService';
+import { EditorSeparationService, editorSeparationServiceKey } from '../processing/editorSeparationService';
 import { EditorProcessingGate } from '../processing/editorProcessingGate';
-import { EditorTranscriptionService,editorTranscriptionServiceKey } from '../transcription/editorTranscriptionService';
+import { EditorTranscriptionService, editorTranscriptionServiceKey } from '../transcription/editorTranscriptionService';
 
 const audioSessionStore = useAudioSessionStore();
 const configStore = useConfigstore();
 const previousSidebarWidth = document.documentElement.style.getPropertyValue('--app-sidebar-width');
 watchEffect(() => {
-    document.documentElement.style.setProperty('--app-sidebar-width',
-        configStore.sidebarCollapsed ? '64px' : '216px');
+    document.documentElement.style.setProperty('--app-sidebar-width', configStore.sidebarCollapsed ? '64px' : '216px');
 });
 const audioEngine = new AudioEngine();
 const sessionRepository = new SessionRepository();
@@ -60,17 +44,14 @@ const audioSession = new AudioSessionService(audioSessionStore, {
     engine: audioEngine,
     repository: sessionRepository,
 });
-const analysisCoordinator = new AnalysisCoordinator(
-    audioEngine,
-    sessionRepository,
-    audioSessionStore,
-);
+const analysisCoordinator = new AnalysisCoordinator(audioEngine, sessionRepository, audioSessionStore);
 audioSession.setVolume(configStore.volume);
+void audioSession.setPlaybackRate(configStore.playbackRate);
 watchEffect(() => audioSession.setPreferredPlaybackMode(configStore.playbackMode));
 provide(audioSessionServiceKey, audioSession);
 const editorProcessingGate = new EditorProcessingGate();
-const editorSeparation = new EditorSeparationService(audioEngine,audioSession,{gate:editorProcessingGate});
-provide(editorSeparationServiceKey,editorSeparation);
+const editorSeparation = new EditorSeparationService(audioEngine, audioSession, { gate: editorProcessingGate });
+provide(editorSeparationServiceKey, editorSeparation);
 provide(analysisCoordinatorKey, analysisCoordinator);
 const editorController = new EditorSessionController({
     audioSession,
@@ -80,11 +61,18 @@ const editorController = new EditorSessionController({
     fileGateway: new NativeEditorFileGateway(),
 });
 provide(editorSessionControllerKey, editorController);
-const editorTranscription = new EditorTranscriptionService(audioSession,editorController,editorSeparation,editorProcessingGate);
-provide(editorTranscriptionServiceKey,editorTranscription);
-const audioReady = audioSession.initialize(cache => {
-    analysisCoordinator.setRestoredCache(cache);
-}).then(() => undefined);
+const editorTranscription = new EditorTranscriptionService(
+    audioSession,
+    editorController,
+    editorSeparation,
+    editorProcessingGate,
+);
+provide(editorTranscriptionServiceKey, editorTranscription);
+const audioReady = audioSession
+    .initialize(cache => {
+        analysisCoordinator.setRestoredCache(cache);
+    })
+    .then(() => undefined);
 const visualizerController = new VisualizerSessionController({
     audioSession,
     decodedAudio: audioEngine,
@@ -112,10 +100,7 @@ interface M6DevelopmentBridge {
             dimensions: readonly number[];
         }>;
     };
-    getCursorValue(
-        featureId: string,
-        timeSeconds: number,
-    ): ReturnType<AnalysisCoordinator['requestCursorValue']>;
+    getCursorValue(featureId: string, timeSeconds: number): ReturnType<AnalysisCoordinator['requestCursorValue']>;
 }
 
 let developmentBridge: M6DevelopmentBridge | null = null;
@@ -125,9 +110,7 @@ if (import.meta.env.DEV) {
             if (!ids.every(isFeatureId)) {
                 throw new TypeError('Unknown analysis feature ID.');
             }
-            const proxy = analysisCoordinator.getDevelopmentConsumerProxy(
-                'analyzer',
-            );
+            const proxy = analysisCoordinator.getDevelopmentConsumerProxy('analyzer');
             if (!proxy) throw new Error('Analyzer consumer is not active.');
             await proxy.setActiveFeatures(ids);
         },
@@ -137,41 +120,39 @@ if (import.meta.env.DEV) {
             }
         },
         retry() {
-            const proxy = analysisCoordinator.getDevelopmentConsumerProxy(
-                'analyzer',
-            );
+            const proxy = analysisCoordinator.getDevelopmentConsumerProxy('analyzer');
             return proxy
-                ? proxy.setActiveFeatures(
-                    analysisCoordinator.getSnapshot().activeFeatureIds,
-                )
+                ? proxy.setActiveFeatures(analysisCoordinator.getSnapshot().activeFeatureIds)
                 : Promise.resolve();
         },
         getState() {
             const snapshot = analysisCoordinator.getSnapshot();
             return {
                 ...snapshot,
-                series: snapshot.readyFeatureIds.flatMap((featureId) => {
-                    const series = analysisCoordinator
-                        .getDevelopmentConsumerProxy('analyzer')
-                        ?.getSeries(featureId) ?? null;
+                series: snapshot.readyFeatureIds.flatMap(featureId => {
+                    const series =
+                        analysisCoordinator.getDevelopmentConsumerProxy('analyzer')?.getSeries(featureId) ?? null;
                     return series
-                        ? [{
-                            featureId,
-                            sampleCount: series.sampleCount,
-                            sampleStepSeconds: series.sampleStepSeconds,
-                            payloadKind: series.payload.kind,
-                            dimensions: series.dimensions,
-                        }]
+                        ? [
+                              {
+                                  featureId,
+                                  sampleCount: series.sampleCount,
+                                  sampleStepSeconds: series.sampleStepSeconds,
+                                  payloadKind: series.payload.kind,
+                                  dimensions: series.dimensions,
+                              },
+                          ]
                         : [];
                 }),
             };
         },
         getCursorValue(featureId, timeSeconds) {
             if (!isFeatureId(featureId)) return Promise.resolve(null);
-            return analysisCoordinator
-                .getDevelopmentConsumerProxy('analyzer')
-                ?.requestCursorValue(featureId, timeSeconds)
-                ?? Promise.resolve(null);
+            return (
+                analysisCoordinator
+                    .getDevelopmentConsumerProxy('analyzer')
+                    ?.requestCursorValue(featureId, timeSeconds) ?? Promise.resolve(null)
+            );
         },
     };
     (
@@ -212,9 +193,13 @@ onUnmounted(() => {
     min-height: 100dvh;
     margin-left: var(--app-sidebar-inset);
     container: app-workspace / inline-size;
-    transition: width 180ms ease, margin-left 180ms ease;
+    transition:
+        width 180ms ease,
+        margin-left 180ms ease;
 }
 @media (max-width: 767px) {
-    .app-content { transition: none; }
+    .app-content {
+        transition: none;
+    }
 }
 </style>

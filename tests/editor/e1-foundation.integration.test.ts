@@ -1,16 +1,7 @@
 import 'fake-indexeddb/auto';
 import { createPinia, setActivePinia } from 'pinia';
-import {
-    beforeEach,
-    describe,
-    expect,
-    test,
-    vi,
-} from 'vitest';
-import {
-    AnalysisCoordinator,
-    type AnalysisConsumerLease,
-} from '../../src/analysis/analysisCoordinator';
+import { beforeEach, describe, expect, test, vi } from 'vitest';
+import { AnalysisCoordinator, type AnalysisConsumerLease } from '../../src/analysis/analysisCoordinator';
 import type { TempoEstimateResult } from '../../src/analysis/types';
 import {
     AudioSessionService,
@@ -24,21 +15,11 @@ import {
 } from '../../src/editor/editorDraftRepository';
 import { EditorSessionController } from '../../src/editor/editorSessionController';
 import type { EditorFileGateway } from '../../src/editor/fileIO';
-import {
-    createInitialEditorProject,
-    encodeEditorProjectV1,
-} from '../../src/editor/projectCodec';
-import type {
-    EditorDraftEnvelopeV1,
-    EditorProjectV1,
-} from '../../src/editor/types';
+import { createInitialEditorProject, encodeEditorProjectV1 } from '../../src/editor/projectCodec';
+import type { EditorDraftEnvelopeV1, EditorProjectV1 } from '../../src/editor/types';
 import type { SessionRepositoryPort } from '../../src/persistence/sessionRepository';
 import { useAudioSessionStore } from '../../src/stores/audioSessionStore';
-import type {
-    DecodedAudioDescriptor,
-    PlaybackSnapshot,
-    TrackRecord,
-} from '../../src/types/audio';
+import type { DecodedAudioDescriptor, PlaybackSnapshot, TrackRecord } from '../../src/types/audio';
 
 const HASH_A = 'a'.repeat(64);
 const HASH_B = 'b'.repeat(64);
@@ -101,9 +82,7 @@ class MemoryDraftRepository implements EditorDraftRepositoryPort {
     }
 
     async getOverlayVisibility(contentHash: string) {
-        return this.overlayVisibility?.contentHash === contentHash
-            ? this.overlayVisibility.enabled
-            : null;
+        return this.overlayVisibility?.contentHash === contentHash ? this.overlayVisibility.enabled : null;
     }
 
     async setOverlayVisibility(contentHash: string, enabled: boolean) {
@@ -163,7 +142,7 @@ const createControllerHarness = (
             requestCursorValue: async () => null,
             requestTempoEstimate: () => tempoRequest ?? Promise.resolve(null),
             getSeries: () => null,
-            subscribe: (listener) => {
+            subscribe: listener => {
                 if (tempoRequest) {
                     listener({
                         state: 'ready',
@@ -191,9 +170,7 @@ const createControllerHarness = (
     const savedFiles: Uint8Array[] = [];
     let openedBytes: ArrayBuffer | null = null;
     const fileGateway: EditorFileGateway = {
-        open: async () => openedBytes
-            ? { name: 'fixture.audiosurf-editor.json', bytes: openedBytes }
-            : null,
+        open: async () => (openedBytes ? { name: 'fixture.audiosurf-editor.json', bytes: openedBytes } : null),
         save: async (_codec, _name, bytes) => {
             savedFiles.push(bytes.slice());
             return 'saved';
@@ -219,10 +196,7 @@ const createControllerHarness = (
         savedFiles,
         setOpenedBytes: (bytes: Uint8Array | null) => {
             openedBytes = bytes
-                ? bytes.buffer.slice(
-                    bytes.byteOffset,
-                    bytes.byteOffset + bytes.byteLength,
-                ) as ArrayBuffer
+                ? (bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength) as ArrayBuffer)
                 : null;
         },
     };
@@ -237,24 +211,39 @@ class RepeatEngine implements AudioEnginePort {
         currentTimeSeconds: 5,
         durationSeconds: 12,
         volume: 1,
+
+        playbackRate: 1,
     };
     listeners = new Set<(snapshot: PlaybackSnapshot) => void>();
     seekValues: number[] = [];
     playCount = 0;
 
-    async load(): Promise<'loaded'> { return 'loaded'; }
+    async load(): Promise<'loaded'> {
+        return 'loaded';
+    }
     async play() {
         this.playCount += 1;
         this.emit({ ...this.snapshot, state: 'playing' });
     }
-    pause() { this.emit({ ...this.snapshot, state: 'paused' }); }
+    pause() {
+        this.emit({ ...this.snapshot, state: 'paused' });
+    }
     async seek(seconds: number) {
         this.seekValues.push(seconds);
         this.emit({ ...this.snapshot, currentTimeSeconds: seconds });
     }
-    setVolume(volume: number) { this.emit({ ...this.snapshot, volume }); }
-    getSnapshot() { return { ...this.snapshot }; }
-    getTimeDomainFloatData() { return null; }
+    async setPlaybackRate(playbackRate: number) {
+        this.snapshot.playbackRate = playbackRate;
+    }
+    setVolume(volume: number) {
+        this.emit({ ...this.snapshot, volume });
+    }
+    getSnapshot() {
+        return { ...this.snapshot };
+    }
+    getTimeDomainFloatData() {
+        return null;
+    }
     getDecodedAudioDescriptor(): DecodedAudioDescriptor {
         return {
             trackId: 'track-a',
@@ -265,10 +254,16 @@ class RepeatEngine implements AudioEnginePort {
             durationSeconds: 12,
         };
     }
-    capturePlaybackCheckpoint() { return null; }
+    capturePlaybackCheckpoint() {
+        return null;
+    }
     async restorePlaybackCheckpoint(): Promise<void> {}
-    acquireRecordingTap(): never { throw new Error('not implemented'); }
-    copyDecodedChannelRange() { return null; }
+    acquireRecordingTap(): never {
+        throw new Error('not implemented');
+    }
+    copyDecodedChannelRange() {
+        return null;
+    }
     subscribe(listener: (snapshot: PlaybackSnapshot) => void) {
         this.listeners.add(listener);
         listener(this.getSnapshot());
@@ -333,9 +328,7 @@ describe('Editor E1 foundation integration', () => {
 
     test('requires an explicit cross-track choice and can restore the old draft', async () => {
         const oldProject = projectFor(track('track-a', HASH_A));
-        const harness = createControllerHarness(
-            createEditorDraftEnvelope(oldProject, () => NOW),
-        );
+        const harness = createControllerHarness(createEditorDraftEnvelope(oldProject, () => NOW));
         await harness.controller.enter(harness.trackB.id);
         expect(harness.controller.getSnapshot()).toMatchObject({
             state: 'draft-conflict',
@@ -384,14 +377,24 @@ describe('Editor E1 foundation integration', () => {
 
     test('freezes late tempo results after confirming a track change', async () => {
         let resolveTempo!: (value: TempoEstimateResult | null) => void;
-        const tempo = new Promise<TempoEstimateResult | null>(resolve => { resolveTempo = resolve; });
+        const tempo = new Promise<TempoEstimateResult | null>(resolve => {
+            resolveTempo = resolve;
+        });
         const h = createControllerHarness(null, tempo);
         await h.controller.enter(h.trackA.id);
         await vi.waitFor(() => expect(h.controller.getSnapshot().tempoEstimateState).toBe('estimating'));
         const project = h.controller.getSnapshot().project;
         const token = await h.controller.approveTrackChange(h.trackB.id);
-        resolveTempo({ kind: 'tempo-estimate-result', requestId: 'late-after-confirm', generation: 1, trackHash: HASH_A,
-            configHash: 'config', state: 'reliable', bpm: 140, confidence: .95 });
+        resolveTempo({
+            kind: 'tempo-estimate-result',
+            requestId: 'late-after-confirm',
+            generation: 1,
+            trackHash: HASH_A,
+            configHash: 'config',
+            state: 'reliable',
+            bpm: 140,
+            confidence: 0.95,
+        });
         await new Promise(resolve => setTimeout(resolve, 0));
         expect(h.controller.getSnapshot().project).toEqual(project);
         expect(h.controller.isTrackChangeApproved(token!, h.trackB.id)).toBe(true);
@@ -413,8 +416,7 @@ describe('Editor E1 foundation integration', () => {
         imported.updatedAt = '2026-08-26T01:01:00.000Z';
         harness.setOpenedBytes(encodeEditorProjectV1(imported));
         await expect(harness.controller.importProject()).resolves.toBe('imported');
-        expect(harness.repository.envelope?.project.updatedAt)
-            .toBe('2026-08-26T01:01:00.000Z');
+        expect(harness.repository.envelope?.project.updatedAt).toBe('2026-08-26T01:01:00.000Z');
         await harness.controller.dispose();
     });
 
@@ -433,13 +435,14 @@ describe('Editor E1 foundation integration', () => {
 
     test('does not let a late tempo estimate overwrite a user tempo edit', async () => {
         let resolveTempo!: (value: TempoEstimateResult | null) => void;
-        const tempoRequest = new Promise<TempoEstimateResult | null>((resolve) => {
+        const tempoRequest = new Promise<TempoEstimateResult | null>(resolve => {
             resolveTempo = resolve;
         });
         const harness = createControllerHarness(null, tempoRequest);
         await harness.controller.enter(harness.trackA.id);
-        await vi.waitFor(() => expect(harness.controller.getSnapshot())
-            .toMatchObject({ tempoEstimateState: 'estimating' }));
+        await vi.waitFor(() =>
+            expect(harness.controller.getSnapshot()).toMatchObject({ tempoEstimateState: 'estimating' }),
+        );
         const project = harness.controller.getSnapshot().project!;
         project.tempoMap[0] = {
             id: project.tempoMap[0]!.id,
@@ -461,10 +464,11 @@ describe('Editor E1 foundation integration', () => {
             bpm: 100,
         });
         await tempoRequest;
-        await vi.waitFor(() => expect(harness.controller.getSnapshot().project)
-            .toMatchObject({
+        await vi.waitFor(() =>
+            expect(harness.controller.getSnapshot().project).toMatchObject({
                 tempoMap: [{ bpm: 127.5, bpmSource: 'user' }],
-            }));
+            }),
+        );
         expect(harness.controller.getSnapshot().tempoEstimateState).toBe('idle');
         await harness.controller.dispose();
     });
@@ -520,16 +524,11 @@ describe('Editor E1 foundation integration', () => {
             removeTrack: async () => undefined,
             clear: async () => undefined,
         } satisfies SessionRepositoryPort;
-        const coordinator = new AnalysisCoordinator(
-            engine,
-            repository,
-            store,
-            {
-                workerFactory: () => {
-                    throw new Error('E1 Editor must not start a Worker job.');
-                },
+        const coordinator = new AnalysisCoordinator(engine, repository, store, {
+            workerFactory: () => {
+                throw new Error('E1 Editor must not start a Worker job.');
             },
-        );
+        });
         const analyzer = coordinator.acquireConsumer('analyzer');
         const editor = coordinator.acquireConsumer('editor');
         await analyzer.setActiveFeatures(['rms']);

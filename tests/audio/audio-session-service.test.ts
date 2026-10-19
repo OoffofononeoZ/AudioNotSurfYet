@@ -14,6 +14,7 @@ class FakeEngine implements AudioEnginePort {
         currentTimeSeconds: 0,
         durationSeconds: 0,
         volume: 1,
+        playbackRate: 1,
     };
     listeners = new Set<(snapshot: PlaybackSnapshot) => void>();
     loadIds: string[] = [];
@@ -31,6 +32,7 @@ class FakeEngine implements AudioEnginePort {
             currentTimeSeconds: 0,
             durationSeconds: 4,
             volume: this.snapshot.volume,
+            playbackRate: this.snapshot.playbackRate,
         });
         return 'loaded';
     }
@@ -60,6 +62,9 @@ class FakeEngine implements AudioEnginePort {
         });
     }
 
+    async setPlaybackRate(playbackRate: number) {
+        this.emit({ ...this.snapshot, playbackRate });
+    }
     setVolume(volume: number) {
         this.emit({
             ...this.snapshot,
@@ -104,6 +109,7 @@ class FakeEngine implements AudioEnginePort {
             currentTimeSeconds: 0,
             durationSeconds: 0,
             volume: this.snapshot.volume,
+            playbackRate: this.snapshot.playbackRate,
         });
     }
 
@@ -219,6 +225,26 @@ beforeEach(() => {
 });
 
 describe('recording playback observations', () => {
+    test('cancels before rate changes, preserves global rate on song/clear and rejects commands while exporting', async () => {
+        const { service, engine, store } = createHarness();
+        await service.importFiles(inputs(createFile('rate-a.wav'), createFile('rate-b.wav')));
+        const before: number[] = [];
+        service.subscribePlaybackDiscontinuity(() => before.push(engine.getSnapshot().playbackRate));
+        await service.setPlaybackRate(2);
+        expect(before).toEqual([1]);
+        expect(store.playback.playbackRate).toBe(2);
+        const lease = service.acquireExportTransport(store.currentTrackId!);
+        await service.setPlaybackRate(0.5);
+        expect(store.playback.playbackRate).toBe(2);
+        expect(before).toEqual([1]);
+        lease.release();
+        await service.playTrack('track-2');
+        expect(store.playback.playbackRate).toBe(2);
+        await service.clear();
+        expect(store.playback.playbackRate).toBe(2);
+        await expect(service.setPlaybackRate(NaN)).rejects.toThrow(RangeError);
+        await service.dispose();
+    });
     test('reads the engine clock between visual frames and notifies before discontinuities, not pauses', async () => {
         const { service, engine, store } = createHarness();
         await service.importFiles(inputs(createFile('recording.wav')));
@@ -236,7 +262,12 @@ describe('recording playback observations', () => {
         expect(positions).toEqual([1.06]);
         await service.setAuditionSource(null);
         expect(positions).toEqual([1.06, 2]);
-        await service.restorePlaybackCheckpoint({ trackId: 'track-1', state: 'paused', currentTimeSeconds: 0 });
+        await service.restorePlaybackCheckpoint({
+            trackId: 'track-1',
+            state: 'paused',
+            currentTimeSeconds: 0,
+            playbackRate: 1,
+        });
         expect(positions).toEqual([1.06, 2, 2]);
         unsubscribe();
         await service.seek(3);
@@ -258,7 +289,12 @@ describe('recording playback observations', () => {
         await Promise.resolve();
         expect(order).toEqual(['ended:4', 'discontinuity']);
         await service.dispose();
-        await service.restorePlaybackCheckpoint({ trackId: 'track-1', state: 'paused', currentTimeSeconds: 0 });
+        await service.restorePlaybackCheckpoint({
+            trackId: 'track-1',
+            state: 'paused',
+            currentTimeSeconds: 0,
+            playbackRate: 1,
+        });
         expect(order).toHaveLength(2);
     });
 });
