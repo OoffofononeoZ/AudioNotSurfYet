@@ -3,7 +3,7 @@ import path from 'node:path';
 import { mkdir, writeFile } from 'node:fs/promises';
 import { chooseFiles, installFilePickerStub, savedPickerEntries, queuePickerData } from '../support/file-picker';
 import { createInitialEditorProject } from '../../src/editor/projectCodec';
-import type { VisualizerProjectV4 } from '../../src/visualizer/compositionTypes';
+import type { VisualizerProjectV5 } from '../../src/visualizer/compositionTypes';
 const audio = path.resolve(import.meta.dirname, '../fixtures/audio/visualizer-v5-avsync-v1.wav');
 async function open(page: Page) {
     await page.setViewportSize({ width: 1920, height: 1080 });
@@ -18,7 +18,7 @@ async function add(page: Page, type: string) {
     await page.locator('[data-element-type="' + type + '"]').click();
     await expect(page.getByRole('dialog', { name: '添加元素' })).not.toBeVisible();
 }
-async function exported(page: Page): Promise<VisualizerProjectV4> {
+async function exported(page: Page): Promise<VisualizerProjectV5> {
     const previous = (await savedPickerEntries(page)).length;
     await page.getByTestId('export-visualizer-project').click();
     await expect.poll(async () => (await savedPickerEntries(page)).length).toBe(previous + 1);
@@ -37,7 +37,7 @@ test('adds seven independent elements and configures targets and exact manual FX
         await add(page, type);
     await expect(page.locator('.viz-element-row')).toHaveCount(7);
     const p = await exported(page);
-    expect(p.schemaVersion).toBe(4);
+    expect(p.schemaVersion).toBe(5);
     expect(p.elements).toHaveLength(7);
     const editor = createInitialEditorProject({ track: p.track }),
         laneId = crypto.randomUUID(),
@@ -58,7 +58,7 @@ test('adds seven independent elements and configures targets and exact manual FX
     await page.getByLabel('纯色背景', { exact: true }).check();
     await page.getByLabel('频谱点阵', { exact: true }).check();
     const next = await exported(page),
-        fade = next.elements.find(e => e.type === 'fade')!;
+        fade = next.elements.find(e => e.resource.id === 'fade')!;
     expect(fade.timing).toEqual({ kind: 'editor-range', laneId, eventId });
     expect(fade.targets).toMatchObject({ kind: 'elements', ids: expect.any(Array) });
     if (fade.targets?.kind === 'elements') expect(fade.targets.ids).toHaveLength(2);

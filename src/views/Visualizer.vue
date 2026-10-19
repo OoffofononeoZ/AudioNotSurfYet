@@ -8,7 +8,8 @@
                 aria-label="导入工程"
                 title="导入工程"
                 data-testid="import-visualizer-project"
-                @click="run(() => controller.importProject())">
+                :aria-busy="importBusy"
+                @click="importProject">
                 <VisualizerIcon name="import" /></button
             ><button
                 type="button"
@@ -311,8 +312,11 @@ const workspace = ref<HTMLElement | null>(null),
     catalogOpen = ref(false),
     selection = ref<string | null>(null),
     drawer = ref<'elements' | 'inspector' | null>(null),
-    actionError = ref('');
-const locked = computed(() => ['preparing', 'exporting', 'finalizing'].includes(snapshot.value.export.status));
+    actionError = ref(''),
+    importBusy = ref(false);
+const locked = computed(
+    () => importBusy.value || ['preparing', 'exporting', 'finalizing'].includes(snapshot.value.export.status),
+);
 const usable = computed(() => ['ready', 'not-persisted'].includes(snapshot.value.state));
 const selectedElement = computed(() => snapshot.value.project?.elements.find(e => e.id === selection.value) ?? null);
 const selectedPreset = computed(() => {
@@ -338,6 +342,15 @@ async function run(operation: () => unknown) {
     } catch (error) {
         actionError.value = (error as Error).message;
         return null;
+    }
+}
+async function importProject() {
+    if (locked.value) return;
+    importBusy.value = true;
+    try {
+        await run(() => controller.importProject());
+    } finally {
+        importBusy.value = false;
     }
 }
 function selectElement(id: string) {

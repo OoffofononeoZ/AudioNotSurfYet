@@ -99,7 +99,14 @@ export function compileExecutableCatalog(root, output, check = false) {
         const pack = JSON.parse(readFileSync(contained(root, path), 'utf8'));
         for (const algorithm of pack.algorithms) {
             const filename = contained(root, algorithm.entry);
-            algorithm.source = moduleSource(readFileSync(filename, 'utf8'), filename);
+            algorithm.source = moduleSource(
+                [
+                    ...(algorithm.includes ?? []).map(p => readFileSync(contained(root, p), 'utf8')),
+                    readFileSync(filename, 'utf8'),
+                ].join('\n'),
+                filename,
+            );
+            delete algorithm.includes;
             delete algorithm.entry;
             for (const program of Object.values(algorithm.programs)) {
                 program.vertex = readFileSync(contained(root, program.vertexFile), 'utf8');

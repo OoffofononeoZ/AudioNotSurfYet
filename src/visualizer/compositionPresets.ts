@@ -12,8 +12,6 @@ export function instantiatePreset(id: string | ResourceRef, duration: number, st
         const d = elementRegistry.get(e.element);
         return {
             id: ids.get(e.key)!,
-            type: d.kernelId,
-            version: 1,
             resource: resourceRef(d),
             name: e.name,
             enabled: e.enabled,
@@ -46,6 +44,15 @@ export function instantiatePreset(id: string | ResourceRef, duration: number, st
         })),
     };
     const resources: ResourceSnapshot = {
+        algorithms: [
+            ...new Map(
+                definition.elements.map(e => {
+                    const d = elementRegistry.get(e.element);
+                    const a = findResource(elementRegistry.algorithms, d.algorithm);
+                    return [a.hash, a];
+                }),
+            ).values(),
+        ],
         elements: [
             ...new Map(
                 definition.elements.map(e => {

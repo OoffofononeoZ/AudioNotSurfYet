@@ -19,7 +19,7 @@ Editor 分轨试听与有限乐器自动标记已按 [DEC-075 契约](docs/archi
 
 Visualizer 使用[离线确定性导出](docs/context/visualizer-offline-export.md)生成 WebM，支持 720p/1080p 与 30/60fps，按帧生成并显示进度；预览播放速度不决定输出视频时长。相关依赖许可见[第三方声明](THIRD_PARTY_NOTICES.md)。
 
-Visualizer 元素与预设使用 [JSON 资源包 V1 过渡版](docs/architecture/visualizer/resource-packages-v1.md)，内置内容位于 `public/visualizer-resources/v1/`，通过请求或元素库文件导入加载。新绘制算法仍需内置内核；[Project V4](docs/architecture/visualizer/project-format-v4.md)保存预设分组、共同处理参数及定义快照。封装资源文件使用 `node scripts/visualizer-resource-package.mjs <package.json>`，只读核对使用 `--check <package.json>`。
+Visualizer 使用[可执行资源包 V2](docs/architecture/visualizer/resource-packages-v2.md)。作者源位于 `resources/visualizer/`，运行 `npm run visualizer:resources` 生成项目内资源；dev/build 前自动生成，`npm run visualizer:resources:check` 只读核对。JS 算法在隔离 Worker 中计算，宿主统一绘制；[Project V5](docs/architecture/visualizer/project-format-v5.md)保存算法、Shader、定义及分组快照。当前不接外部地址或后端，磁盘资源包入口暂时隐藏；生成 skill 仍是旧格式，留待独立升级。
 
 ## 项目工具
 

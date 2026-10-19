@@ -19,7 +19,7 @@ import {
 const track = { contentHash: 'a'.repeat(64), fileName: 'composition.wav', durationSeconds: 10, sampleRate: 48000 };
 const project = () => createComposition(track);
 
-describe('V4 composition project', () => {
+describe('V5 composition project', () => {
     test('starts empty and round trips every registered element', () => {
         const p = project();
         expect(p.elements).toEqual([]);
@@ -92,7 +92,7 @@ describe('V4 composition project', () => {
         attachElements(p);
         expect(() => validateComposition(p)).toThrow(/四个/);
     });
-    test('ignores old drafts without a conflict prompt and writes V4', async () => {
+    test('ignores old drafts without a conflict prompt and writes V5', async () => {
         const name = 'composition-' + crypto.randomUUID();
         const open = indexedDB.open(name, 1);
         const db = await new Promise<IDBDatabase>((resolve, reject) => {
@@ -110,7 +110,7 @@ describe('V4 composition project', () => {
         const repo = new CompositionDraftRepository(indexedDB, name);
         expect(await repo.restore()).toBeNull();
         expect(await repo.restore()).toBeNull();
-        const draft = { schemaVersion: 4 as const, savedAt: new Date().toISOString(), project: project() };
+        const draft = { schemaVersion: 5 as const, savedAt: new Date().toISOString(), project: project() };
         await repo.replace(draft);
         expect(await repo.restore()).toEqual({ kind: 'current', draft });
         repo.close();

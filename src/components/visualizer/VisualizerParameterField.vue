@@ -132,7 +132,7 @@ import AppNumberInput from '../controls/AppNumberInput.vue';
 import { FEATURE_REGISTRY } from '../../analysis/featureRegistry';
 import type { FeatureId } from '../../analysis/types';
 import type { SceneParameterDescriptor } from '../../visualizer/parameterDescriptor';
-import type { ElementBinding, VisualizerProjectV4 } from '../../visualizer/compositionTypes';
+import type { ElementBinding, VisualizerProjectV5 } from '../../visualizer/compositionTypes';
 import type {
     VisualizerAnalysisComponent,
     VisualizerAnalysisProjectionV1,
@@ -151,7 +151,7 @@ import { nativeInputFeatures, type NativeInputFeature } from '../../visualizer/n
 const props = defineProps<{
     parameter: SceneParameterDescriptor;
     binding: ElementBinding;
-    project: VisualizerProjectV4;
+    project: VisualizerProjectV5;
     elementId: string;
     disabled?: boolean;
     affectedElementIds?: string[];

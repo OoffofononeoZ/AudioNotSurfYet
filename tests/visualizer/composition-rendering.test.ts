@@ -1,13 +1,13 @@
+import { AlgorithmRuntimeFixture, createTestAlgorithm } from './algorithm-runtime-fixture';
 import { attachElements } from './resource-fixtures';
 import * as THREE from 'three';
-import { describe, expect, test } from 'vitest';
+import { describe, expect, test, vi } from 'vitest';
 import { createComposition, validateComposition } from '../../src/visualizer/compositionCodec';
 import { createInitialEditorProject } from '../../src/editor/projectCodec';
 import { CompositionScene, type CompositionRenderPort } from '../../src/visualizer/compositionScene';
 import { elementRegistry } from '../../src/visualizer/elementRegistry';
-import { effectsFor, fadeOpacity, parameterKey } from '../../src/visualizer/compositionEffects';
-import { SpectralStringsState } from '../../src/visualizer/spectralStringsState';
-import type { VisualizerResolvedParameterMap } from '../../src/visualizer/rendererTypes';
+import { effectsFor, parameterKey } from '../../src/visualizer/compositionEffects';
+import { SpectralStringsState } from '../../resources/visualizer/shared/strings.js';
 const track = { contentHash: 'a'.repeat(64), fileName: 'render.wav', durationSeconds: 10, sampleRate: 48000 };
 function harness() {
     const p = createComposition(track);
@@ -32,7 +32,13 @@ function harness() {
                           ? Array(512).fill(40)
                           : 1.1,
             });
-    const calls: Array<{ target: THREE.WebGLRenderTarget | null; op: number; final: boolean; blend: boolean }> = [];
+    const calls: Array<{
+        target: THREE.WebGLRenderTarget | null;
+        op: number;
+        final: boolean;
+        blend: boolean;
+        copy: boolean;
+    }> = [];
     let target: THREE.WebGLRenderTarget | null = null;
     const targets = new Set<THREE.WebGLRenderTarget>();
     let releases = 0;
@@ -56,22 +62,46 @@ function harness() {
                 op: m.uniforms.uOperation?.value ?? -1,
                 final: m.uniforms.uFinal?.value ?? false,
                 blend: m.transparent,
+                copy: !!m.uniforms.uImage && !m.uniforms.uOperation,
             });
         },
     };
-    const scene = new CompositionScene({ renderer: port, readProject: () => p, resolveAt: () => values });
+    const scene = new CompositionScene({
+        renderer: port,
+        readProject: () => p,
+        resolveAt: () => values,
+        runtimeFactory: () => new AlgorithmRuntimeFixture(),
+    });
     scene.resize(640, 360, 2);
     return { p, values, scene, port, calls, targets, releases: () => releases };
 }
 describe('composition rendering', () => {
-    test('uses three reusable targets, composits visual layers and applies global effects', () => {
+    test('removing the last element releases its algorithm runtime before leaving the page', async () => {
+        const release = vi.spyOn(AlgorithmRuntimeFixture.prototype, 'dispose');
         const h = harness();
-        const blur = h.p.elements.find(e => e.type === 'blur')!;
+        try {
+            const input = { timeSeconds: 1, values: h.values, bindingRevision: 1 };
+            await h.scene.prepare(input);
+            h.p.elements = [];
+            await h.scene.prepare(input);
+            h.scene.render(input);
+            expect(release).toHaveBeenCalledTimes(1);
+            h.scene.dispose();
+            expect(release).toHaveBeenCalledTimes(1);
+        } finally {
+            h.scene.dispose();
+            release.mockRestore();
+        }
+    });
+    test('uses three reusable targets, composits visual layers and applies global effects', async () => {
+        const h = harness();
+        const blur = h.p.elements.find(e => e.resource.id === 'blur')!;
         h.values.set(parameterKey(blur.id, 'amount'), { parameterId: 'amount', state: 'ready', value: 8 });
+        await h.scene.prepare({ timeSeconds: 1, values: h.values, bindingRevision: 1 });
         h.scene.render({ timeSeconds: 1, values: h.values, bindingRevision: 1 });
         expect(h.targets.size).toBe(3);
-        expect(h.calls.filter(c => c.blend && c.op === 0)).toHaveLength(
-            h.p.elements.filter(e => elementRegistry.get(e.type).kind === 'visual').length,
+        expect(h.calls.filter(c => c.blend && c.copy)).toHaveLength(
+            h.p.elements.filter(e => elementRegistry.get(e.resource.id).kind === 'visual').length,
         );
         expect(h.calls.filter(c => c.op === 1)).toHaveLength(2);
         expect(h.calls.at(-1)).toMatchObject({ target: null, final: true });
@@ -80,13 +110,17 @@ describe('composition rendering', () => {
         h.scene.dispose();
         expect(h.releases()).toBe(3);
     });
-    test('direct seek and sequential rendering produce the same frame state', () => {
+    test('direct seek and sequential rendering produce the same frame state', async () => {
         const h = harness();
-        const at = (time: number) => h.scene.render({ timeSeconds: time, values: h.values, bindingRevision: 1 }).hash;
-        for (let t = 0; t < 180; t++) at(t / 60);
-        const expected = at(3);
-        at(0.5);
-        expect(at(3)).toBe(expected);
+        const at = async (time: number) => {
+            const input = { timeSeconds: time, values: h.values, bindingRevision: 1 };
+            await h.scene.prepare(input);
+            return h.scene.render(input).hash;
+        };
+        for (let t = 0; t < 180; t++) await at(t / 60);
+        const expected = await at(3);
+        await at(0.5);
+        expect(await at(3)).toBe(expected);
         h.scene.dispose();
         const direct = harness();
         direct.p.projectId = h.p.projectId;
@@ -95,6 +129,7 @@ describe('composition rendering', () => {
         attachElements(direct.p);
         direct.values.clear();
         for (const [key, value] of h.values) direct.values.set(key, value);
+        await direct.scene.prepare({ timeSeconds: 3, values: direct.values, bindingRevision: 1 });
         expect(direct.scene.render({ timeSeconds: 3, values: direct.values, bindingRevision: 1 }).hash).toBe(expected);
         direct.scene.dispose();
     });
@@ -108,7 +143,7 @@ describe('composition rendering', () => {
         expect([...state.resolve(3, 'key', 0.6, source).position]).toEqual(expected);
         expect([...new SpectralStringsState().resolve(3, 'key', 0.6, source).position]).toEqual(expected);
     });
-    test('multi-target effects are isolated and later transitions take over the held value', () => {
+    test('multi-target effects are isolated and later transitions take over the held value', async () => {
         const p = createComposition(track);
         const visual = elementRegistry.create('solid', 10, 0),
             other = elementRegistry.create('solid', 10, 1),
@@ -141,10 +176,23 @@ describe('composition rendering', () => {
         expect(effectsFor(p, other.id, 2)).toEqual([]);
         expect(effectsFor(p, null, 3)).toEqual([a]);
         expect(effectsFor(p, null, 4.5)).toEqual([b]);
-        const values: VisualizerResolvedParameterMap = new Map([
-            [parameterKey(a.id, 'from'), { parameterId: 'from', state: 'ready', value: 1 }],
-            [parameterKey(a.id, 'to'), { parameterId: 'to', state: 'ready', value: 0 }],
-        ]);
-        expect(fadeOpacity(p, a, 3, values)).toBe(0);
+        const definition = elementRegistry.get('fade');
+        const instance = await createTestAlgorithm(
+            elementRegistry.algorithms.find(v => v.hash === definition.algorithm.hash)!,
+        );
+        const packet = await instance.prepareFrame(
+            {
+                time: 3,
+                seed: 1,
+                revision: '1',
+                width: 640,
+                height: 360,
+                range: { startSeconds: 1, endSeconds: 2 },
+                parameters: { from: { value: 1 }, to: { value: 0 }, smooth: { value: false } },
+            },
+            { history: async () => [] },
+        );
+        expect(packet.passes[0]!.uniforms.uOpacity).toBe(0);
+        instance.dispose?.();
     });
 });

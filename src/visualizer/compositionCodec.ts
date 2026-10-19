@@ -22,7 +22,7 @@ import type {
     ElementTiming,
     EffectTargets,
     VisualizerElement,
-    VisualizerProjectV4,
+    VisualizerProjectV5,
     CompositionDraft,
 } from './compositionTypes';
 import type { VisualizerTrackValidationContext } from './types';
@@ -32,7 +32,7 @@ const id = (input: unknown) => {
     if (!UUID_PATTERN.test(value)) invalid('元素或工程 ID 无效。');
     return value;
 };
-function timing(input: unknown, transition: boolean, project: VisualizerProjectV4): ElementTiming {
+function timing(input: unknown, transition: boolean, project: VisualizerProjectV5): ElementTiming {
     const value = record(input, 'timing');
     if (transition) {
         if (value.kind === 'unbound') {
@@ -56,13 +56,13 @@ function timing(input: unknown, transition: boolean, project: VisualizerProjectV
         return invalid('元素时间范围超出歌曲。');
     return { kind: 'manual', startSeconds, endSeconds };
 }
-function element(input: unknown, project: VisualizerProjectV4): VisualizerElement {
+function element(input: unknown, project: VisualizerProjectV5): VisualizerElement {
     const v = record(input, 'element');
-    keys(v, ['id', 'type', 'version', 'resource', 'name', 'enabled', 'layer', 'timing', 'bindings'], ['targets']);
+    keys(v, ['id', 'resource', 'name', 'enabled', 'layer', 'timing', 'bindings'], ['targets']);
     const resource = validateResourceRef(v.resource);
     const descriptor = project.resources.elements.find(d => sameResource(d, resource));
-    if (!descriptor || descriptor.kernelId !== v.type) return invalid('元素定义缺失或内核不匹配。');
-    if (v.version !== 1 || typeof v.enabled !== 'boolean') return invalid('元素版本或启用状态无效。');
+    if (!descriptor) return invalid('元素定义缺失。');
+    if (typeof v.enabled !== 'boolean') return invalid('元素版本或启用状态无效。');
     const layer = integer(v.layer, 'layer');
     if (!Number.isSafeInteger(layer)) return invalid('层级必须为安全整数。');
     const bindings = validateElementBindings(v.bindings, descriptor.parameters);
@@ -84,8 +84,6 @@ function element(input: unknown, project: VisualizerProjectV4): VisualizerElemen
     }
     return {
         id: id(v.id),
-        type: descriptor.kernelId,
-        version: 1,
         resource,
         name: text(v.name, 'name'),
         enabled: v.enabled,
@@ -95,12 +93,12 @@ function element(input: unknown, project: VisualizerProjectV4): VisualizerElemen
         ...(targets ? { targets } : {}),
     };
 }
-export function validateComposition(input: unknown, context?: VisualizerTrackValidationContext): VisualizerProjectV4 {
+export function validateComposition(input: unknown, context?: VisualizerTrackValidationContext): VisualizerProjectV5 {
     const v = record(input, 'project');
-    if (v.schemaVersion !== 4)
+    if (v.schemaVersion !== 5)
         throw new VisualizerProjectValidationError(
             'unsupported-schema',
-            '旧版 Visualizer 工程不兼容，请使用 V4 资源工程。',
+            '旧版 Visualizer 工程不兼容，请使用 V5 资源工程。',
         );
     keys(
         v,
@@ -134,9 +132,9 @@ export function validateComposition(input: unknown, context?: VisualizerTrackVal
     const createdAt = iso(v.createdAt, 'createdAt'),
         updatedAt = iso(v.updatedAt, 'updatedAt');
     if (Date.parse(updatedAt) < Date.parse(createdAt)) return invalid('更新时间早于创建时间。');
-    const project: VisualizerProjectV4 = {
+    const project: VisualizerProjectV5 = {
         format: 'audiosurf-visualizer',
-        schemaVersion: 4,
+        schemaVersion: 5,
         projectId: id(v.projectId),
         createdAt,
         updatedAt,
@@ -176,11 +174,11 @@ export function validateComposition(input: unknown, context?: VisualizerTrackVal
     }
     return project;
 }
-export const createComposition = (track: EditorTrackIdentityV1): VisualizerProjectV4 => {
+export const createComposition = (track: EditorTrackIdentityV1): VisualizerProjectV5 => {
     const now = new Date().toISOString();
     return validateComposition({
         format: 'audiosurf-visualizer',
-        schemaVersion: 4,
+        schemaVersion: 5,
         projectId: crypto.randomUUID(),
         createdAt: now,
         updatedAt: now,
@@ -189,10 +187,10 @@ export const createComposition = (track: EditorTrackIdentityV1): VisualizerProje
         seed: crypto.getRandomValues(new Uint32Array(1))[0],
         elements: [],
         items: [],
-        resources: { elements: [], presets: [] },
+        resources: { algorithms: [], elements: [], presets: [] },
     });
 };
-export const encodeComposition = (project: VisualizerProjectV4) =>
+export const encodeComposition = (project: VisualizerProjectV5) =>
     new TextEncoder().encode(JSON.stringify(validateComposition(project), null, 2) + '\n');
 export const decodeComposition = (bytes: ArrayBuffer, context?: VisualizerTrackValidationContext) => {
     let value: unknown;
@@ -206,8 +204,8 @@ export const decodeComposition = (bytes: ArrayBuffer, context?: VisualizerTrackV
 export function validateCompositionDraft(input: unknown): CompositionDraft {
     const v = record(input, 'draft');
     keys(v, ['schemaVersion', 'savedAt', 'project']);
-    if (v.schemaVersion !== 4) return invalid('草稿版本不兼容。');
-    return { schemaVersion: 4, savedAt: iso(v.savedAt, 'savedAt'), project: validateComposition(v.project) };
+    if (v.schemaVersion !== 5) return invalid('草稿版本不兼容。');
+    return { schemaVersion: 5, savedAt: iso(v.savedAt, 'savedAt'), project: validateComposition(v.project) };
 }
 export const compositionFileFormat = {
     id: 'json',

@@ -1,9 +1,10 @@
 import { expect, test, type Page } from '@playwright/test';
 import path from 'node:path';
-import { readFileSync } from 'node:fs';
-import { resourceHash } from '../../src/visualizer/resourceIdentity';
-import type { VisualizerProjectV4 } from '../../src/visualizer/compositionTypes';
-import { chooseFiles, installFilePickerStub, queuePickerData, savedPickerEntries } from '../support/file-picker';
+import type { VisualizerProjectV5 } from '../../src/visualizer/compositionTypes';
+import { chooseFiles, installFilePickerStub, savedPickerEntries, queuePickerData } from '../support/file-picker';
+import { resourceHash, resourceRef } from '../../src/visualizer/resourceIdentity';
+import type { AlgorithmDefinition } from '../../src/visualizer/algorithmTypes';
+import type { ElementDefinition } from '../../src/visualizer/resourceTypes';
 
 const audio = path.resolve(import.meta.dirname, '../fixtures/audio/visualizer-v5-avsync-v1.wav');
 async function open(page: Page) {
@@ -26,7 +27,7 @@ async function add(page: Page, type: string) {
     await page.getByRole('button', { name: '全部', exact: true }).click();
     await page.locator(`[data-element-type="${type}"]`).click();
 }
-async function exported(page: Page): Promise<VisualizerProjectV4> {
+async function exported(page: Page): Promise<VisualizerProjectV5> {
     const count = (await savedPickerEntries(page)).length;
     await page.getByTestId('export-visualizer-project').click();
     await expect.poll(async () => (await savedPickerEntries(page)).length).toBe(count + 1);
@@ -37,20 +38,6 @@ async function input(page: Page, label: string, value: string) {
     await field.fill(value);
     await field.dispatchEvent('change');
 }
-function pack() {
-    const p = JSON.parse(
-        readFileSync(
-            path.resolve(import.meta.dirname, '../../public/visualizer-resources/v1/elements/wireform.json'),
-            'utf8',
-        ),
-    );
-    p.id = 'local-wire';
-    p.elements[0].id = 'local-wire';
-    p.elements[0].title = '本地线框';
-    p.elements[0].hash = resourceHash(p.elements[0]);
-    return p;
-}
-
 test('two presets and three leaves form five roots; shared values, child differences and reapply survive restore', async ({
     page,
 }) => {
@@ -73,7 +60,7 @@ test('two presets and three leaves form five roots; shared values, child differe
     for (const type of ['solid', 'blur', 'spectral-dots']) await add(page, type);
     await expect(page.locator('.viz-root-item')).toHaveCount(5);
     const p = await exported(page);
-    expect(p.schemaVersion).toBe(4);
+    expect(p.schemaVersion).toBe(5);
     expect(p.items).toHaveLength(5);
     expect(p.resources.presets).toHaveLength(2);
     await expect(page.getByText('已保存', { exact: true })).toBeVisible();
@@ -90,53 +77,112 @@ test('two presets and three leaves form five roots; shared values, child differe
     expect(errors).toEqual([]);
 });
 
-test('local packages persist, reject conflicts and can be removed while their embedded project remains usable offline', async ({
-    page,
-}) => {
-    const errors: string[] = [];
-    page.on('pageerror', e => errors.push(e.message));
+test('embedded algorithms restore and export while the project catalog is unavailable', async ({ page }) => {
     await open(page);
-    await page.getByTestId('add-visualizer-element').click();
-    const resource = pack();
-    await queuePickerData(page, [{ name: 'local.json', mimeType: 'application/json', text: JSON.stringify(resource) }]);
-    await page.getByRole('button', { name: '导入资源包', exact: true }).click();
-    await page.locator('[data-resource-id=local-wire]').click();
-    let p = await exported(page);
-    expect(p.elements[0]!.type).toBe('wireform');
-    expect(p.elements[0]!.resource.id).toBe('local-wire');
-    expect(p.resources.elements).toHaveLength(1);
+    await addPreset(page, 'geometric-0.6');
+    const project = await exported(page);
+    expect(project.schemaVersion).toBe(5);
+    expect(project.resources.algorithms.length).toBeGreaterThan(0);
     await expect(page.getByText('已保存', { exact: true })).toBeVisible();
-    await page.reload();
-    await expect(page.getByTestId('visualizer-ready')).toBeVisible();
-    await page.getByTestId('add-visualizer-element').click();
-    await expect(page.locator('[data-resource-id=local-wire]')).toBeVisible();
-    const conflict = pack();
-    conflict.elements[0].title = '冲突线框';
-    conflict.elements[0].hash = resourceHash(conflict.elements[0]);
-    await queuePickerData(page, [
-        { name: 'conflict.json', mimeType: 'application/json', text: JSON.stringify(conflict) },
-    ]);
-    await page.getByRole('button', { name: '导入资源包', exact: true }).click();
-    await expect(page.getByRole('alert')).toContainText('不同内容');
-    await page.getByText('已导入资源包', { exact: true }).click();
-    await page.getByRole('button', { name: '移除资源包 local-wire', exact: true }).click();
-    await expect(page.locator('[data-resource-id=local-wire]')).toHaveCount(0);
-    await page.getByRole('button', { name: '关闭元素库', exact: true }).click();
-    await page.route('**/visualizer-resources/**', route => route.abort());
+    await page.route('**/visualizer-resources/v2/**', route => route.fulfill({ status: 503, body: '' }));
     await page.reload();
     await expect(page.getByTestId('visualizer-ready')).toBeVisible();
     await expect(page.getByTestId('visualizer-preview-frame')).toHaveAttribute('data-scene-status', 'ready');
-    p = await exported(page);
-    expect(p.resources.elements[0]!.title).toBe('本地线框');
-    expect(errors).toEqual([]);
+    expect((await exported(page)).resources).toEqual(project.resources);
+});
+
+test('an unregistered algorithm and parameter render through the complete V5 import path', async ({ page }) => {
+    await open(page);
+    const project = await exported(page);
+    const algorithm: AlgorithmDefinition = {
+        id: 'fixture-only-algorithm',
+        version: 1,
+        hash: '',
+        apiVersion: 1,
+        contract: {
+            kind: 'visual',
+            sharedParameters: [],
+            historyParameters: [],
+            parameters: [
+                { id: 'novelAmount', valueKind: 'number', allowedSourceKinds: ['constant'], range: { min: 0, max: 1 } },
+            ],
+        },
+        source: 'export function create() { return { prepareFrame(frame) { return { passes: [{program:"draw", uniforms:{uNovel:frame.parameters.novelAmount.value}}] }; } }; }',
+        programs: {
+            draw: {
+                geometry: 'quad',
+                vertex: 'void main(){gl_Position=vec4(position,1.0);}',
+                fragment: 'uniform float uNovel;void main(){gl_FragColor=vec4(uNovel,0.5,1.0,1.0);}',
+                uniforms: { uNovel: { type: 'number' } },
+            },
+        },
+    };
+    algorithm.hash = resourceHash(algorithm);
+    const element: ElementDefinition = {
+        id: 'fixture-only-element',
+        version: 1,
+        hash: '',
+        algorithm: resourceRef(algorithm),
+        kind: 'visual',
+        title: '测试算法',
+        icon: 'square',
+        parameters: [{ ...algorithm.contract.parameters[0]!, label: '测试参数', defaultValue: 0.25 }],
+    };
+    element.hash = resourceHash(element);
+    const id = crypto.randomUUID();
+    project.resources = { algorithms: [algorithm], elements: [element], presets: [] };
+    project.elements = [
+        {
+            id,
+            resource: resourceRef(element),
+            name: '测试算法',
+            enabled: true,
+            layer: 0,
+            timing: { kind: 'manual', startSeconds: 0, endSeconds: project.track.durationSeconds },
+            bindings: [{ parameterId: 'novelAmount', source: { kind: 'constant', value: 0.25 } }],
+        },
+    ];
+    project.items = [{ kind: 'element', id }];
+    await queuePickerData(page, [
+        { name: 'algorithm.json', mimeType: 'application/json', text: JSON.stringify(project) },
+    ]);
+    await page.getByTestId('import-visualizer-project').click();
+    await page.getByRole('button', { name: '测试算法', exact: true }).click();
+    await expect(page.getByRole('spinbutton', { name: '测试参数', exact: true })).toHaveValue('0.25');
+    const canvas = page.getByTestId('visualizer-preview-canvas');
+    await expect(page.getByTestId('visualizer-preview-frame')).toHaveAttribute('data-scene-status', 'ready');
+    await canvas.dispatchEvent('visualizer-sample-center-test');
+    await expect.poll(() => canvas.getAttribute('data-center-pixel')).toMatch(/^6[3-5],12[7-9],255,255$/);
+    const bad = structuredClone(project);
+    bad.resources.algorithms[0]!.source = 'throw Error("invalid candidate module");';
+    bad.resources.algorithms[0]!.hash = resourceHash(bad.resources.algorithms[0]!);
+    bad.resources.elements[0]!.algorithm = resourceRef(bad.resources.algorithms[0]!);
+    bad.resources.elements[0]!.hash = resourceHash(bad.resources.elements[0]!);
+    bad.elements[0]!.resource = resourceRef(bad.resources.elements[0]!);
+    await queuePickerData(page, [{ name: 'bad.json', mimeType: 'application/json', text: JSON.stringify(bad) }]);
+    await page.getByTestId('import-visualizer-project').click();
+    await expect(page.getByRole('alert')).toContainText('invalid candidate module');
+    expect((await exported(page)).resources).toEqual(project.resources);
+    const badShader = structuredClone(project);
+    badShader.resources.algorithms[0]!.programs.draw!.fragment = 'not valid GLSL';
+    badShader.resources.algorithms[0]!.hash = resourceHash(badShader.resources.algorithms[0]!);
+    badShader.resources.elements[0]!.algorithm = resourceRef(badShader.resources.algorithms[0]!);
+    badShader.resources.elements[0]!.hash = resourceHash(badShader.resources.elements[0]!);
+    badShader.elements[0]!.resource = resourceRef(badShader.resources.elements[0]!);
+    await queuePickerData(page, [
+        { name: 'bad-shader.json', mimeType: 'application/json', text: JSON.stringify(badShader) },
+    ]);
+    await page.getByTestId('import-visualizer-project').click();
+    await expect(page.getByRole('alert')).toContainText('Shader 编译或链接失败');
+    expect((await exported(page)).resources).toEqual(project.resources);
 });
 
 test('catalog request failures retry and preset controls remain usable in narrow drawers', async ({ page }) => {
-    await page.route('**/visualizer-resources/v1/catalog.json', route => route.fulfill({ status: 503, body: '' }));
+    await page.route('**/visualizer-resources/v2/catalog.json', route => route.fulfill({ status: 503, body: '' }));
     await open(page);
     await page.getByTestId('add-visualizer-element').click();
     await expect(page.getByRole('alert')).toContainText('资源索引加载失败');
-    await page.unroute('**/visualizer-resources/v1/catalog.json');
+    await page.unroute('**/visualizer-resources/v2/catalog.json');
     await page.getByRole('button', { name: '重试加载', exact: true }).click();
     await page.getByRole('button', { name: '预设', exact: true }).click();
     await page.locator('[data-preset-id="geometric-0.6"]').click();

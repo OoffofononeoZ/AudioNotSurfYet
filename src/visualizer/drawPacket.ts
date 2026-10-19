@@ -4,7 +4,7 @@ import type { AlgorithmDefinition, DrawPacket, DrawPass, MeshPacket } from './al
 
 export function validateDrawPacket(input: unknown, algorithm: AlgorithmDefinition): DrawPacket {
     const v = record(input, '绘图数据');
-    keys(v, ['passes']);
+    keys(v, ['passes'], ['state']);
     if (!Array.isArray(v.passes)) return invalid('绘图 pass 必须为列表。');
     const passes = v.passes.map(raw => {
         const p = record(raw, '绘图 pass');
@@ -39,5 +39,9 @@ export function validateDrawPacket(input: unknown, algorithm: AlgorithmDefinitio
             ...(p.mesh ? { mesh: p.mesh as unknown as MeshPacket } : {}),
         } as DrawPass;
     });
-    return { passes };
+    if (v.state !== undefined) {
+        if (!Array.isArray(v.state) || v.state.length > 65536) invalid('算法状态快照无效。');
+        for (const value of v.state as unknown[]) finite(value, '算法状态');
+    }
+    return { passes, ...(v.state !== undefined ? { state: v.state as number[] } : {}) };
 }

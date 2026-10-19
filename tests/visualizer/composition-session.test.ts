@@ -64,6 +64,7 @@ function harness(
         save: vi.fn(async () => 'saved' as const),
     };
     const controller = new VisualizerSessionController({
+        validateAlgorithms: async () => {},
         audioSession,
         store,
         repository,
@@ -138,8 +139,8 @@ test('starts empty, restores the same song, and protects the single draft on a d
     expect(h.repository.close).toHaveBeenCalledOnce();
 });
 
-test('exports invalid V4 draft bytes without writing or replacing them', async () => {
-    const raw = { schemaVersion: 4, project: { arbitrary: 'invalid bytes' } };
+test('exports invalid V5 draft bytes without writing or replacing them', async () => {
+    const raw = { schemaVersion: 5, project: { arbitrary: 'invalid bytes' } };
     const h = harness({ kind: 'unsupported', raw });
     await h.controller.enter('first');
     expect(h.controller.getSnapshot().state).toBe('unsupported-draft');

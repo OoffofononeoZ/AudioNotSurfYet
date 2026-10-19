@@ -2,9 +2,9 @@ import type { AnalysisSeries, FeatureId } from '../analysis/types';
 import { projectAnalysisSeries } from './analysisProjection';
 import { analysisSignal } from './analysisSignal';
 import { ScalarSmoothingResolver, normalizedTarget, outputValue } from './bindingSmoothing';
-import { elementDescriptor, effectiveElements } from './compositionModel';
+import { elementDescriptor, elementAlgorithm, effectiveElements } from './compositionModel';
 import type { VisualizerResolvedParameter } from './rendererTypes';
-import type { VisualizerProjectV4 } from './compositionTypes';
+import type { VisualizerProjectV5 } from './compositionTypes';
 import type { NativeInputFeature } from './nativeAudioAnalysis';
 export type ResolvedComposition = ReadonlyMap<string, ReadonlyMap<string, VisualizerResolvedParameter>>;
 
@@ -14,7 +14,7 @@ export class CompositionResolver {
         this.smoothers.clear();
     }
     resolve(
-        project: VisualizerProjectV4,
+        project: VisualizerProjectV5,
         time: number,
         getSeries: (id: FeatureId) => AnalysisSeries | null,
         getWaveform?: (time: number) => readonly number[] | null,
@@ -38,7 +38,11 @@ export class CompositionResolver {
                         continue;
                     }
                     if (binding.source.kind === 'native') {
-                        const value = getNative?.(binding.source.featureId, time, e.type === 'spectral-strings');
+                        const value = getNative?.(
+                            binding.source.featureId,
+                            time,
+                            elementAlgorithm(project, e).contract.historyParameters.includes(parameterId),
+                        );
                         values.set(
                             parameterId,
                             value

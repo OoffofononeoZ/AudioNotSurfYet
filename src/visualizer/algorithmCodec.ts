@@ -10,7 +10,8 @@ import type {
 
 const identifier = (value: unknown) => {
     const id = text(value, '算法标识');
-    if (!/^[a-zA-Z_][a-zA-Z0-9_.-]*$/.test(id)) invalid('算法标识无效。');
+    if (!/^[a-zA-Z_][a-zA-Z0-9_.-]*$/.test(id) || ['__proto__', 'prototype', 'constructor'].includes(id))
+        invalid('算法标识无效。');
     return id;
 };
 const list = (value: unknown, allowed?: readonly string[]): string[] => {

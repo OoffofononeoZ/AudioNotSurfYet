@@ -1,3 +1,4 @@
+/// <reference types="vite/client" />
 import workerSource from './algorithmWorker.js?raw';
 import { sandboxBridge } from './algorithmSandboxBridge';
 import { validateAlgorithmDefinition } from './algorithmCodec';

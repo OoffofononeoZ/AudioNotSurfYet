@@ -1,3 +1,4 @@
+import { validateRuntimeSnapshot } from './validateRuntimeSnapshot';
 import { inject, type InjectionKey } from 'vue';
 import type { AudioSessionService, RoutePlaybackLease } from '../audio/audioSessionService';
 import type { useAudioSessionStore } from '../stores/audioSessionStore';
@@ -28,17 +29,18 @@ import {
     synchronizeLayers,
     effectiveElements,
     pruneCompositionResources,
+    elementAlgorithm,
 } from './compositionModel';
 import { elementRegistry } from './elementRegistry';
 import { instantiatePreset, type CompositionPresetId } from './compositionPresets';
 import { mergeResources } from './resourceCodec';
 import { applyCommonControl } from './commonControls';
-import type { CommonValue } from './resourceTypes';
+import type { CommonValue, ResourceSnapshot } from './resourceTypes';
 import { parameterKey } from './compositionEffects';
 import type {
     VisualizerElement,
     ElementBinding,
-    VisualizerProjectV4,
+    VisualizerProjectV5,
     CompositionSessionSnapshot,
 } from './compositionTypes';
 import type { VisualizerTrackValidationContext, VisualizerResolution, VisualizerFrameRate } from './types';
@@ -82,6 +84,7 @@ export interface VisualizerSessionControllerOptions {
     editorFileGateway?: EditorFileGateway;
     videoGateway?: VisualizerVideoFileGateway;
     exportRuntime?: Pick<VisualizerExportSessionOptions, 'probeCapability' | 'createArtifact' | 'runExport' | 'now'>;
+    validateAlgorithms?: typeof validateRuntimeSnapshot;
     windowTarget?: Pick<Window, 'addEventListener' | 'removeEventListener'>;
 }
 export class VisualizerExportLockedError extends Error {
@@ -107,6 +110,8 @@ export class VisualizerSessionController {
     private ioGeneration = 0;
     private editorIoGeneration = 0;
     private disposed = false;
+    private algorithmTask: AbortController | null = null;
+    private programValidator: ((resources: ResourceSnapshot) => void) | null = null;
     private windowTarget?: Pick<Window, 'addEventListener' | 'removeEventListener'>;
     private beforeUnload = false;
     constructor(options: VisualizerSessionControllerOptions) {
@@ -187,6 +192,17 @@ export class VisualizerSessionController {
     attachExportTarget(target: VisualizerExportTarget) {
         return this.exporter.attachTarget(target);
     }
+    attachAlgorithmValidator(validator: (resources: ResourceSnapshot) => void) {
+        this.programValidator = validator;
+        return () => {
+            if (this.programValidator === validator) this.programValidator = null;
+        };
+    }
+    async validateResources(resources: ResourceSnapshot, signal?: AbortSignal) {
+        await (this.options.validateAlgorithms ?? validateRuntimeSnapshot)(resources, signal);
+        signal?.throwIfAborted();
+        this.programValidator?.(resources);
+    }
     notifyRendererStatus(status: VisualizerRendererStatus) {
         this.exporter.notifyRendererStatus(status);
     }
@@ -231,9 +247,14 @@ export class VisualizerSessionController {
                 (async () => {
                     await this.native!.prepare(trackId, time);
                     signal.throwIfAborted();
-                    for (const e of nativeElements.filter(e => e.type === 'spectral-strings'))
+                    for (const e of nativeElements.filter(
+                        e => elementAlgorithm(project, e).contract.historyParameters.length > 0,
+                    ))
                         for (const b of e.bindings)
-                            if (b.source.kind === 'native') {
+                            if (
+                                b.source.kind === 'native' &&
+                                elementAlgorithm(project, e).contract.historyParameters.includes(b.parameterId)
+                            ) {
                                 await this.native!.prepareHistory(trackId, time, b.source.featureId);
                                 signal.throwIfAborted();
                             }
@@ -273,6 +294,7 @@ export class VisualizerSessionController {
     async enter(trackId: string | null, overwrite = false): Promise<void> {
         this.assertUnlocked();
         const generation = ++this.generation;
+        this.algorithmTask?.abort();
         this.ioGeneration++;
         this.editorIoGeneration++;
         if (!(await this.flush())) throw Error('请先重试保存或导出当前工程。');
@@ -301,7 +323,7 @@ export class VisualizerSessionController {
                     ...this.snapshot,
                     state: 'unsupported-draft',
                     unsupportedDraft: restored.raw,
-                    message: 'V4 草稿无效，请先导出或明确覆盖。',
+                    message: 'V5 草稿无效，请先导出或明确覆盖。',
                 });
                 return;
             }
@@ -335,6 +357,10 @@ export class VisualizerSessionController {
                     /* Optional Editor data remains explicitly disconnected. */
                 }
             }
+            const algorithmTask = new AbortController();
+            this.algorithmTask = algorithmTask;
+            await this.validateResources(project.resources, algorithmTask.signal);
+            if (generation !== this.generation || this.disposed || algorithmTask.signal.aborted) return;
             this.publish({
                 ...this.snapshot,
                 state: 'ready',
@@ -361,7 +387,7 @@ export class VisualizerSessionController {
             });
         }
     }
-    updateProject(input: VisualizerProjectV4) {
+    updateProject(input: VisualizerProjectV5) {
         this.assertUnlocked();
         const context = this.context();
         if (!context || !this.snapshot.project) return;
@@ -524,6 +550,19 @@ export class VisualizerSessionController {
         const context = this.context();
         if (!context) return 'cancelled';
         const project = decodeComposition(opened.bytes, context);
+        const previous = this.snapshot.project;
+        this.algorithmTask?.abort();
+        const task = new AbortController();
+        this.algorithmTask = task;
+        await this.validateResources(project.resources, task.signal);
+        if (
+            generation !== this.generation ||
+            io !== this.ioGeneration ||
+            this.disposed ||
+            task.signal.aborted ||
+            this.snapshot.project !== previous
+        )
+            return 'cancelled';
         this.updateProject(project);
         await this.flush();
         return 'imported';
@@ -577,8 +616,15 @@ export class VisualizerSessionController {
         if (!project) return;
         this.native?.configureHistory(
             effectiveElements(project)
-                .filter(e => e.enabled && e.type === 'spectral-strings')
-                .flatMap(e => e.bindings.flatMap(b => (b.source.kind === 'native' ? [b.source.featureId] : []))),
+                .filter(e => e.enabled && elementAlgorithm(project, e).contract.historyParameters.length > 0)
+                .flatMap(e =>
+                    e.bindings.flatMap(b =>
+                        b.source.kind === 'native' &&
+                        elementAlgorithm(project, e).contract.historyParameters.includes(b.parameterId)
+                            ? [b.source.featureId]
+                            : [],
+                    ),
+                ),
         );
         if (!this.options.analysisCoordinator) return;
         const ids = planCompositionFeatures(project),
@@ -666,6 +712,7 @@ export class VisualizerSessionController {
         this.native?.reset();
     }
     async leave() {
+        this.algorithmTask?.abort();
         this.generation++;
         this.ioGeneration++;
         this.editorIoGeneration++;

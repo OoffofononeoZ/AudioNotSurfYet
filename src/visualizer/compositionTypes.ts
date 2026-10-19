@@ -11,20 +11,6 @@ import type {
 import type { NativeInputFeature } from './nativeAudioAnalysis';
 import type { CompositionItem, ResourceRef, ResourceSnapshot } from './resourceTypes';
 
-export type ElementType =
-    | 'solid'
-    | 'spectral-strings'
-    | 'spectral-dots'
-    | 'reactive-rings'
-    | 'radial-spectrum'
-    | 'orbit-solids'
-    | 'wireform'
-    | 'arc-lattice'
-    | 'light-tunnel'
-    | 'starfield'
-    | 'scale'
-    | 'blur'
-    | 'fade';
 export type ElementKind = 'visual' | 'modifier' | 'transition';
 export type ElementTiming =
     | { kind: 'manual'; startSeconds: number; endSeconds: number }
@@ -39,8 +25,6 @@ export type ElementBinding = Omit<VisualizerParameterBindingV1, 'source'> & {
 export type EffectTargets = { kind: 'composition' } | { kind: 'elements'; ids: string[] };
 export interface VisualizerElement {
     id: string;
-    type: ElementType;
-    version: 1;
     resource: ResourceRef;
     name: string;
     enabled: boolean;
@@ -49,9 +33,9 @@ export interface VisualizerElement {
     bindings: ElementBinding[];
     targets?: EffectTargets;
 }
-export interface VisualizerProjectV4 {
+export interface VisualizerProjectV5 {
     format: 'audiosurf-visualizer';
-    schemaVersion: 4;
+    schemaVersion: 5;
     projectId: string;
     createdAt: string;
     updatedAt: string;
@@ -65,16 +49,16 @@ export interface VisualizerProjectV4 {
     editorSnapshot?: { capturedAt: string; project: EditorProjectV1 };
 }
 export interface CompositionDraft {
-    schemaVersion: 4;
+    schemaVersion: 5;
     savedAt: string;
-    project: VisualizerProjectV4;
+    project: VisualizerProjectV5;
 }
 
 export interface CompositionSessionSnapshot {
     state: VisualizerSessionState | 'unsupported-draft';
     routeTrackId: string | null;
     activeTrackId: string | null;
-    project: VisualizerProjectV4 | null;
+    project: VisualizerProjectV5 | null;
     conflictingDraft: CompositionDraft | null;
     unsupportedDraft: unknown;
     persistence: VisualizerPersistenceState;

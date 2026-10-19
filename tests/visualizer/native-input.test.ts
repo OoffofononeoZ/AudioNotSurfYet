@@ -10,8 +10,8 @@ import {
     validateComposition,
 } from '../../src/visualizer/compositionCodec';
 import { createPresetElements } from '../../src/visualizer/compositionPresets';
-import { geometricSpectrum } from '../../src/visualizer/geometricBatch';
-import { SpectralStringsState } from '../../src/visualizer/spectralStringsState';
+import { geometricSpectrum } from '../../resources/visualizer/shared/geometry.js';
+import { SpectralStringsState } from '../../resources/visualizer/shared/strings.js';
 
 const track = { contentHash: 'a'.repeat(64), fileName: 'native.wav', durationSeconds: 32, sampleRate: 48000 };
 const frames = (value: number): NativeAudioFrame[] =>
@@ -106,7 +106,7 @@ test('native bindings round trip, resolve independently of Analyzer and reject u
         for (const b of e.bindings)
             if (b.parameterId === 'spectrum') b.source = { kind: 'native', featureId: 'frequency' };
     expect(decodeComposition(encodeComposition(p).buffer as ArrayBuffer)).toEqual(p);
-    const e = p.elements.find(e => e.type === 'radial-spectrum')!,
+    const e = p.elements.find(e => e.resource.id === 'radial-spectrum')!,
         resolver = new CompositionResolver();
     const pending = resolver
         .resolve(p, 1, () => null)

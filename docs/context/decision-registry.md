@@ -35,9 +35,10 @@
 | DEC-081 / 2026-10-17 | owner明确离线确定性导出替代实时录制：同renderer、固定帧/PCM、WebCodecs/Mediabunny/OPFS；保留真实媒体与同步阈值，见[离线导出](visualizer-offline-export.md) |
 | DEC-082 / 2026-10-18 | 新增原子元素和预设（含纯复用）先校验brief并批准具体合同，visualizer-content-generator替代旧SceneBrief/注册步骤；见[内容合同](../architecture/visualizer/content-generation.md) |
 | DEC-083 / 2026-10-18 | 手写代码建议≤1000、>1300警告、>2000阻断；禁止压行、按完整功能区域拆Vue、Prettier渐进显式文件格式化；见[模块skill](../../skills/audiosurf-file-modularization/SKILL.md) |
-| DEC-084 / 2026-10-18 | JSON资源包过渡版、内嵌定义、分组预设/共同处理参数、仅V4、旧草稿不提示；不开放任意JS/Shader/DSL，见[V4](../architecture/visualizer/project-format-v4.md)与[资源包](../architecture/visualizer/resource-packages-v1.md) |
+| DEC-084 / 2026-10-18 | 分组预设、共同处理参数及旧草稿不提示保持；V4/V1和仅应用内核限制由DEC-087替代 |
 | DEC-085 / 2026-10-19 | owner批准按分类行1–9/0播放录入点/范围、当前细分吸附和取消/停止规则；工程V1及鼠标暂停限制不变，见[Editor交互](../architecture/editor/interaction-contracts.md#数字键实时录入dec-085) |
 | DEC-086 / 2026-10-19 | owner要求文档建议≤500、>500提示、≥800禁提交，压缩文字且可能损失关键信息时汇报/不提交；本轮又明确冲突采用最新、删除旧规定、保留有效内容，并以“Implement the plan.”批准清理及页面契约拆分 |
+| DEC-087 / 2026-10-19 | owner选择算法资源包、工程内嵌算法、浏览器原生隔离、新格式替换及暂时隐藏磁盘资源包入口，并以“Implement the plan.”批准实施；仅项目内资源，不接后端/外部源，不改内容生成skill。见[V5](../architecture/visualizer/project-format-v5.md)和[V2](../architecture/visualizer/resource-packages-v2.md)，不含发布/readiness授权 |
 
 ## DEC-075 — Editor Audition and Limited Transcription — 2026-10-12
 

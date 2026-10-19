@@ -1,0 +1,19 @@
+{
+    "packages": [
+        "solid.json",
+        "spectral-strings.json",
+        "spectral-dots.json",
+        "reactive-rings.json",
+        "scale.json",
+        "blur.json",
+        "fade.json",
+        "radial-spectrum.json",
+        "orbit-solids.json",
+        "wireform.json",
+        "arc-lattice.json",
+        "light-tunnel.json",
+        "starfield.json",
+        "geometric-0.6.json",
+        "prismatic-voyage.json"
+    ]
+}

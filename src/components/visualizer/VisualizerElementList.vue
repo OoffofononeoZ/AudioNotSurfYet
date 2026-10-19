@@ -81,9 +81,9 @@ import { computed, ref } from 'vue';
 import VisualizerIcon from './VisualizerIcon.vue';
 import VisualizerCompositionRow from './VisualizerCompositionRow.vue';
 import { elementDescriptor } from '../../visualizer/compositionModel';
-import type { VisualizerProjectV4 } from '../../visualizer/compositionTypes';
+import type { VisualizerProjectV5 } from '../../visualizer/compositionTypes';
 import type { CompositionItem } from '../../visualizer/resourceTypes';
-const props = defineProps<{ project: VisualizerProjectV4; selection: string | null; locked: boolean }>();
+const props = defineProps<{ project: VisualizerProjectV5; selection: string | null; locked: boolean }>();
 const emit = defineEmits<{
     add: [];
     select: [id: string];

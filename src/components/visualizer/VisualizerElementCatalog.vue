@@ -8,9 +8,7 @@
         <header>
             <h2 id="element-catalog-title">添加元素</h2>
             <div class="viz-catalog-header-actions">
-                <button type="button" :disabled="locked || busy || state.status === 'loading'" @click="importPackage">
-                    导入资源包</button
-                ><button type="button" class="viz-icon-button" aria-label="关闭元素库" @click="$emit('close')">
+                <button type="button" class="viz-icon-button" aria-label="关闭元素库" @click="$emit('close')">
                     <VisualizerIcon name="close" />
                 </button>
             </div>
@@ -30,7 +28,7 @@
         </div>
         <div v-if="state.status === 'loading'" role="status" class="viz-catalog-message">正在加载资源</div>
         <div v-if="state.status === 'error'" class="viz-catalog-message" role="alert">
-            {{ state.message }}<button type="button" :disabled="busy" @click="library.load()">重试加载</button>
+            {{ state.message }}<button type="button" :disabled="locked" @click="library.load()">重试加载</button>
         </div>
         <p v-if="error" class="viz-catalog-message" role="alert">{{ error }}</p>
         <div v-if="category === 'preset'" class="viz-catalog-grid app-scrollbar">
@@ -40,7 +38,7 @@
                 type="button"
                 class="viz-catalog-card viz-preset-card"
                 :data-preset-id="preset.id"
-                :disabled="locked || busy"
+                :disabled="locked"
                 @click="$emit('preset', resourceKey(preset))">
                 <VisualizerPresetPreview :cinematic="preset.preview === 'cinematic'" /><span
                     >{{ preset.title
@@ -58,9 +56,9 @@
                 :key="resourceKey(descriptor)"
                 type="button"
                 class="viz-catalog-card"
-                :data-element-type="descriptor.kernelId"
+                :data-element-type="descriptor.algorithm.id"
                 :data-resource-id="descriptor.id"
-                :disabled="locked || busy"
+                :disabled="locked"
                 @click="$emit('add', resourceKey(descriptor))">
                 <div class="viz-catalog-preview" :class="descriptor.icon">
                     <VisualizerIcon :name="descriptor.icon" />
@@ -74,19 +72,6 @@
             </button>
             <p v-if="state.status !== 'loading' && !filtered.length">没有匹配的元素</p>
         </div>
-        <details v-if="state.imported.length" class="viz-imported-packages app-scrollbar">
-            <summary>已导入资源包</summary>
-            <div v-for="pack in state.imported" :key="pack.id + '@' + pack.version">
-                <span>{{ pack.id }} · v{{ pack.version }}</span
-                ><button
-                    type="button"
-                    :disabled="locked || busy"
-                    :aria-label="'移除资源包 ' + pack.id"
-                    @click="remove(pack.id, pack.version)">
-                    移除
-                </button>
-            </div>
-        </details>
     </dialog>
 </template>
 <script setup lang="ts">
@@ -95,24 +80,21 @@ import VisualizerIcon from './VisualizerIcon.vue';
 import VisualizerPresetPreview from './VisualizerPresetPreview.vue';
 import { VisualizerResourceLibrary } from '../../visualizer/resourceLibrary';
 import { resourceKey } from '../../visualizer/resourceIdentity';
-import { resourceFileFormat } from '../../visualizer/resourceCodec';
-import { NativeVisualizerFileGateway } from '../../visualizer/fileIO';
+import { useVisualizerSessionController } from '../../visualizer/visualizerSessionController';
 const props = defineProps<{ open: boolean; locked: boolean }>();
+const controller = useVisualizerSessionController();
 const library = new VisualizerResourceLibrary(
         undefined,
         undefined,
-        undefined,
-        import.meta.env.BASE_URL + 'visualizer-resources/v1/',
+        import.meta.env.BASE_URL + 'visualizer-resources/v2/',
+        (resources, signal) => controller.validateResources(resources, signal),
     ),
     state = shallowRef(library.snapshot()),
-    detach = library.subscribe(value => (state.value = value)),
-    files = new NativeVisualizerFileGateway();
+    detach = library.subscribe(value => (state.value = value));
 const dialog = ref<HTMLDialogElement | null>(null),
     query = ref(''),
     category = ref('all'),
-    error = ref(''),
-    busy = ref(false);
-let fileGeneration = 0;
+    error = ref('');
 const categories = [
     { id: 'all', label: '全部' },
     { id: 'visual', label: '视觉' },
@@ -132,7 +114,6 @@ const hasVersions = (kind: 'elements' | 'presets', id: string) => state.value[ki
 watch(
     () => props.open,
     async open => {
-        if (!open) fileGeneration++;
         await nextTick();
         if (open && !dialog.value?.open) {
             query.value = '';
@@ -145,37 +126,9 @@ watch(
 const emit = defineEmits<{ close: []; add: [id: string]; preset: [id: string] }>();
 onMounted(() => void library.load());
 onBeforeUnmount(() => {
-    fileGeneration++;
     detach();
     library.dispose();
 });
-async function importPackage() {
-    if (busy.value || props.locked) return;
-    const revision = ++fileGeneration;
-    busy.value = true;
-    error.value = '';
-    try {
-        const opened = await files.open(resourceFileFormat);
-        if (!opened || revision !== fileGeneration || !props.open || props.locked) return;
-        await library.import(opened.bytes);
-    } catch (e) {
-        if (revision === fileGeneration) error.value = (e as Error).message;
-    } finally {
-        busy.value = false;
-    }
-}
-async function remove(id: string, version: number) {
-    if (busy.value || props.locked) return;
-    busy.value = true;
-    error.value = '';
-    try {
-        await library.remove(id, version);
-    } catch (e) {
-        error.value = (e as Error).message;
-    } finally {
-        busy.value = false;
-    }
-}
 function backdrop(event: MouseEvent) {
     const element = dialog.value;
     if (!element || event.target !== element) return;

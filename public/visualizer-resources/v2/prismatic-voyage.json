@@ -1,0 +1,1371 @@
+{
+  "format": "audiosurf-visualizer-resource",
+  "schemaVersion": 2,
+  "id": "prismatic-voyage",
+  "version": 2,
+  "elements": [],
+  "presets": [
+    {
+      "id": "prismatic-voyage",
+      "version": 2,
+      "title": "棱镜航行",
+      "description": "光轨隧道与跃迁星尘 · 四段动态构图",
+      "preview": "cinematic",
+      "elements": [
+        {
+          "key": "element-0",
+          "element": {
+            "id": "solid",
+            "version": 2,
+            "hash": "3bcbf3c1103bd35f96e5af1efd88732a92125cca12de741fe2818663984f55ef"
+          },
+          "name": "深空背景",
+          "enabled": true,
+          "bindings": [
+            {
+              "parameterId": "color",
+              "source": {
+                "kind": "constant",
+                "value": "#02030c"
+              }
+            },
+            {
+              "parameterId": "opacity",
+              "source": {
+                "kind": "constant",
+                "value": 1
+              }
+            }
+          ],
+          "timing": {
+            "kind": "relative",
+            "start": 0,
+            "end": 1
+          }
+        },
+        {
+          "key": "element-1",
+          "element": {
+            "id": "starfield",
+            "version": 2,
+            "hash": "34030a5862a5c94ec156500fd35bcf70a87ca4b5574bed87c0729d921dd8a116"
+          },
+          "name": "跃迁星尘",
+          "enabled": true,
+          "bindings": [
+            {
+              "parameterId": "spectrum",
+              "source": {
+                "kind": "analysis",
+                "featureId": "amplitudeSpectrum",
+                "projection": {
+                  "kind": "full"
+                }
+              }
+            },
+            {
+              "parameterId": "color",
+              "source": {
+                "kind": "constant",
+                "value": "#9bcfff"
+              }
+            },
+            {
+              "parameterId": "opacity",
+              "source": {
+                "kind": "constant",
+                "value": 0.8
+              }
+            },
+            {
+              "parameterId": "x",
+              "source": {
+                "kind": "constant",
+                "value": 0.5
+              }
+            },
+            {
+              "parameterId": "y",
+              "source": {
+                "kind": "constant",
+                "value": 0.5
+              }
+            },
+            {
+              "parameterId": "sensitivity",
+              "source": {
+                "kind": "constant",
+                "value": 0.6
+              }
+            },
+            {
+              "parameterId": "thickness",
+              "source": {
+                "kind": "constant",
+                "value": 1.8
+              }
+            },
+            {
+              "parameterId": "count",
+              "source": {
+                "kind": "constant",
+                "value": 240
+              }
+            },
+            {
+              "parameterId": "speed",
+              "source": {
+                "kind": "constant",
+                "value": 0.09
+              }
+            },
+            {
+              "parameterId": "stretch",
+              "source": {
+                "kind": "constant",
+                "value": 0.045
+              }
+            },
+            {
+              "parameterId": "spread",
+              "source": {
+                "kind": "constant",
+                "value": 1
+              }
+            }
+          ],
+          "timing": {
+            "kind": "relative",
+            "start": 0,
+            "end": 1
+          }
+        },
+        {
+          "key": "element-2",
+          "element": {
+            "id": "light-tunnel",
+            "version": 2,
+            "hash": "3b8444cf73fb807df7a1c0b0ebdced3401edfb7c0a658653494cdfb3b35f12b6"
+          },
+          "name": "序幕 · 光轨隧道",
+          "enabled": true,
+          "bindings": [
+            {
+              "parameterId": "spectrum",
+              "source": {
+                "kind": "analysis",
+                "featureId": "amplitudeSpectrum",
+                "projection": {
+                  "kind": "full"
+                }
+              }
+            },
+            {
+              "parameterId": "color",
+              "source": {
+                "kind": "constant",
+                "value": "#36b9ff"
+              }
+            },
+            {
+              "parameterId": "opacity",
+              "source": {
+                "kind": "constant",
+                "value": 0.9
+              }
+            },
+            {
+              "parameterId": "x",
+              "source": {
+                "kind": "constant",
+                "value": 0.5
+              }
+            },
+            {
+              "parameterId": "y",
+              "source": {
+                "kind": "constant",
+                "value": 0.5
+              }
+            },
+            {
+              "parameterId": "sensitivity",
+              "source": {
+                "kind": "constant",
+                "value": 0.6
+              }
+            },
+            {
+              "parameterId": "thickness",
+              "source": {
+                "kind": "constant",
+                "value": 2
+              }
+            },
+            {
+              "parameterId": "accent",
+              "source": {
+                "kind": "constant",
+                "value": "#7761ff"
+              }
+            },
+            {
+              "parameterId": "count",
+              "source": {
+                "kind": "constant",
+                "value": 20
+              }
+            },
+            {
+              "parameterId": "sides",
+              "source": {
+                "kind": "constant",
+                "value": 6
+              }
+            },
+            {
+              "parameterId": "speed",
+              "source": {
+                "kind": "constant",
+                "value": 0.035
+              }
+            },
+            {
+              "parameterId": "twist",
+              "source": {
+                "kind": "constant",
+                "value": 1.2
+              }
+            },
+            {
+              "parameterId": "spread",
+              "source": {
+                "kind": "constant",
+                "value": 0.8
+              }
+            },
+            {
+              "parameterId": "drift",
+              "source": {
+                "kind": "constant",
+                "value": 0.045
+              }
+            }
+          ],
+          "timing": {
+            "kind": "relative",
+            "start": 0,
+            "end": 0.18
+          }
+        },
+        {
+          "key": "element-3",
+          "element": {
+            "id": "light-tunnel",
+            "version": 2,
+            "hash": "3b8444cf73fb807df7a1c0b0ebdced3401edfb7c0a658653494cdfb3b35f12b6"
+          },
+          "name": "推进 · 光轨隧道",
+          "enabled": true,
+          "bindings": [
+            {
+              "parameterId": "spectrum",
+              "source": {
+                "kind": "analysis",
+                "featureId": "amplitudeSpectrum",
+                "projection": {
+                  "kind": "full"
+                }
+              }
+            },
+            {
+              "parameterId": "color",
+              "source": {
+                "kind": "constant",
+                "value": "#5d7dff"
+              }
+            },
+            {
+              "parameterId": "opacity",
+              "source": {
+                "kind": "constant",
+                "value": 0.9
+              }
+            },
+            {
+              "parameterId": "x",
+              "source": {
+                "kind": "constant",
+                "value": 0.5
+              }
+            },
+            {
+              "parameterId": "y",
+              "source": {
+                "kind": "constant",
+                "value": 0.5
+              }
+            },
+            {
+              "parameterId": "sensitivity",
+              "source": {
+                "kind": "constant",
+                "value": 0.6
+              }
+            },
+            {
+              "parameterId": "thickness",
+              "source": {
+                "kind": "constant",
+                "value": 2
+              }
+            },
+            {
+              "parameterId": "accent",
+              "source": {
+                "kind": "constant",
+                "value": "#ff45b8"
+              }
+            },
+            {
+              "parameterId": "count",
+              "source": {
+                "kind": "constant",
+                "value": 28
+              }
+            },
+            {
+              "parameterId": "sides",
+              "source": {
+                "kind": "constant",
+                "value": 4
+              }
+            },
+            {
+              "parameterId": "speed",
+              "source": {
+                "kind": "constant",
+                "value": 0.07
+              }
+            },
+            {
+              "parameterId": "twist",
+              "source": {
+                "kind": "constant",
+                "value": 2.4
+              }
+            },
+            {
+              "parameterId": "spread",
+              "source": {
+                "kind": "constant",
+                "value": 1
+              }
+            },
+            {
+              "parameterId": "drift",
+              "source": {
+                "kind": "constant",
+                "value": 0.045
+              }
+            }
+          ],
+          "timing": {
+            "kind": "relative",
+            "start": 0.18,
+            "end": 0.46
+          }
+        },
+        {
+          "key": "element-4",
+          "element": {
+            "id": "light-tunnel",
+            "version": 2,
+            "hash": "3b8444cf73fb807df7a1c0b0ebdced3401edfb7c0a658653494cdfb3b35f12b6"
+          },
+          "name": "高潮 · 光轨隧道",
+          "enabled": true,
+          "bindings": [
+            {
+              "parameterId": "spectrum",
+              "source": {
+                "kind": "analysis",
+                "featureId": "amplitudeSpectrum",
+                "projection": {
+                  "kind": "full"
+                }
+              }
+            },
+            {
+              "parameterId": "color",
+              "source": {
+                "kind": "constant",
+                "value": "#ffbd72"
+              }
+            },
+            {
+              "parameterId": "opacity",
+              "source": {
+                "kind": "constant",
+                "value": 0.9
+              }
+            },
+            {
+              "parameterId": "x",
+              "source": {
+                "kind": "constant",
+                "value": 0.5
+              }
+            },
+            {
+              "parameterId": "y",
+              "source": {
+                "kind": "constant",
+                "value": 0.5
+              }
+            },
+            {
+              "parameterId": "sensitivity",
+              "source": {
+                "kind": "constant",
+                "value": 0.6
+              }
+            },
+            {
+              "parameterId": "thickness",
+              "source": {
+                "kind": "constant",
+                "value": 2
+              }
+            },
+            {
+              "parameterId": "accent",
+              "source": {
+                "kind": "constant",
+                "value": "#e837fa"
+              }
+            },
+            {
+              "parameterId": "count",
+              "source": {
+                "kind": "constant",
+                "value": 32
+              }
+            },
+            {
+              "parameterId": "sides",
+              "source": {
+                "kind": "constant",
+                "value": 3
+              }
+            },
+            {
+              "parameterId": "speed",
+              "source": {
+                "kind": "constant",
+                "value": 0.11
+              }
+            },
+            {
+              "parameterId": "twist",
+              "source": {
+                "kind": "constant",
+                "value": -2.7
+              }
+            },
+            {
+              "parameterId": "spread",
+              "source": {
+                "kind": "constant",
+                "value": 1.15
+              }
+            },
+            {
+              "parameterId": "drift",
+              "source": {
+                "kind": "constant",
+                "value": 0.045
+              }
+            }
+          ],
+          "timing": {
+            "kind": "relative",
+            "start": 0.46,
+            "end": 0.8
+          }
+        },
+        {
+          "key": "element-5",
+          "element": {
+            "id": "light-tunnel",
+            "version": 2,
+            "hash": "3b8444cf73fb807df7a1c0b0ebdced3401edfb7c0a658653494cdfb3b35f12b6"
+          },
+          "name": "尾声 · 光轨隧道",
+          "enabled": true,
+          "bindings": [
+            {
+              "parameterId": "spectrum",
+              "source": {
+                "kind": "analysis",
+                "featureId": "amplitudeSpectrum",
+                "projection": {
+                  "kind": "full"
+                }
+              }
+            },
+            {
+              "parameterId": "color",
+              "source": {
+                "kind": "constant",
+                "value": "#b0faff"
+              }
+            },
+            {
+              "parameterId": "opacity",
+              "source": {
+                "kind": "constant",
+                "value": 0.9
+              }
+            },
+            {
+              "parameterId": "x",
+              "source": {
+                "kind": "constant",
+                "value": 0.5
+              }
+            },
+            {
+              "parameterId": "y",
+              "source": {
+                "kind": "constant",
+                "value": 0.5
+              }
+            },
+            {
+              "parameterId": "sensitivity",
+              "source": {
+                "kind": "constant",
+                "value": 0.6
+              }
+            },
+            {
+              "parameterId": "thickness",
+              "source": {
+                "kind": "constant",
+                "value": 2
+              }
+            },
+            {
+              "parameterId": "accent",
+              "source": {
+                "kind": "constant",
+                "value": "#8a6fff"
+              }
+            },
+            {
+              "parameterId": "count",
+              "source": {
+                "kind": "constant",
+                "value": 16
+              }
+            },
+            {
+              "parameterId": "sides",
+              "source": {
+                "kind": "constant",
+                "value": 8
+              }
+            },
+            {
+              "parameterId": "speed",
+              "source": {
+                "kind": "constant",
+                "value": 0.025
+              }
+            },
+            {
+              "parameterId": "twist",
+              "source": {
+                "kind": "constant",
+                "value": 0.7
+              }
+            },
+            {
+              "parameterId": "spread",
+              "source": {
+                "kind": "constant",
+                "value": 0.9
+              }
+            },
+            {
+              "parameterId": "drift",
+              "source": {
+                "kind": "constant",
+                "value": 0.045
+              }
+            }
+          ],
+          "timing": {
+            "kind": "relative",
+            "start": 0.8,
+            "end": 1
+          }
+        },
+        {
+          "key": "element-6",
+          "element": {
+            "id": "radial-spectrum",
+            "version": 2,
+            "hash": "dc902d582f151d2bd1bbcc641779f2caeab7dc8d5f600ec4496381ca64752b75"
+          },
+          "name": "远端频谱光环",
+          "enabled": true,
+          "bindings": [
+            {
+              "parameterId": "spectrum",
+              "source": {
+                "kind": "analysis",
+                "featureId": "amplitudeSpectrum",
+                "projection": {
+                  "kind": "full"
+                }
+              }
+            },
+            {
+              "parameterId": "color",
+              "source": {
+                "kind": "constant",
+                "value": "#78dbff"
+              }
+            },
+            {
+              "parameterId": "opacity",
+              "source": {
+                "kind": "constant",
+                "value": 0.4
+              }
+            },
+            {
+              "parameterId": "x",
+              "source": {
+                "kind": "constant",
+                "value": 0.5
+              }
+            },
+            {
+              "parameterId": "y",
+              "source": {
+                "kind": "constant",
+                "value": 0.5
+              }
+            },
+            {
+              "parameterId": "sensitivity",
+              "source": {
+                "kind": "constant",
+                "value": 0.6
+              }
+            },
+            {
+              "parameterId": "thickness",
+              "source": {
+                "kind": "constant",
+                "value": 1.6
+              }
+            },
+            {
+              "parameterId": "chromatic",
+              "source": {
+                "kind": "constant",
+                "value": false
+              }
+            },
+            {
+              "parameterId": "radius",
+              "source": {
+                "kind": "constant",
+                "value": 0.3
+              }
+            },
+            {
+              "parameterId": "repeat",
+              "source": {
+                "kind": "constant",
+                "value": 2
+              }
+            },
+            {
+              "parameterId": "expansion",
+              "source": {
+                "kind": "constant",
+                "value": 0.3
+              }
+            },
+            {
+              "parameterId": "amplitude",
+              "source": {
+                "kind": "constant",
+                "value": 0.3
+              }
+            }
+          ],
+          "timing": {
+            "kind": "relative",
+            "start": 0,
+            "end": 1
+          }
+        },
+        {
+          "key": "element-7",
+          "element": {
+            "id": "arc-lattice",
+            "version": 2,
+            "hash": "0692a003aeaed249ec37d842787b369d13fea97a2c0143ebcce0dc2dc9a45f21"
+          },
+          "name": "导航弧簇",
+          "enabled": true,
+          "bindings": [
+            {
+              "parameterId": "spectrum",
+              "source": {
+                "kind": "analysis",
+                "featureId": "amplitudeSpectrum",
+                "projection": {
+                  "kind": "full"
+                }
+              }
+            },
+            {
+              "parameterId": "color",
+              "source": {
+                "kind": "constant",
+                "value": "#6889ff"
+              }
+            },
+            {
+              "parameterId": "opacity",
+              "source": {
+                "kind": "constant",
+                "value": 0.65
+              }
+            },
+            {
+              "parameterId": "x",
+              "source": {
+                "kind": "constant",
+                "value": 0.5
+              }
+            },
+            {
+              "parameterId": "y",
+              "source": {
+                "kind": "constant",
+                "value": 0.5
+              }
+            },
+            {
+              "parameterId": "sensitivity",
+              "source": {
+                "kind": "constant",
+                "value": 0.6
+              }
+            },
+            {
+              "parameterId": "thickness",
+              "source": {
+                "kind": "constant",
+                "value": 1.8
+              }
+            },
+            {
+              "parameterId": "count",
+              "source": {
+                "kind": "constant",
+                "value": 12
+              }
+            },
+            {
+              "parameterId": "radius",
+              "source": {
+                "kind": "constant",
+                "value": 0.11
+              }
+            },
+            {
+              "parameterId": "spacing",
+              "source": {
+                "kind": "constant",
+                "value": 0.009
+              }
+            },
+            {
+              "parameterId": "sweep",
+              "source": {
+                "kind": "constant",
+                "value": 75
+              }
+            },
+            {
+              "parameterId": "amplitude",
+              "source": {
+                "kind": "constant",
+                "value": 0.0015
+              }
+            },
+            {
+              "parameterId": "speed",
+              "source": {
+                "kind": "constant",
+                "value": 0.07
+              }
+            }
+          ],
+          "timing": {
+            "kind": "relative",
+            "start": 0,
+            "end": 1
+          }
+        },
+        {
+          "key": "element-8",
+          "element": {
+            "id": "wireform",
+            "version": 2,
+            "hash": "cadcd8bc729340ac2b8175de40140a40ba0328b6a12f8c4df28bcb8d800dbfca"
+          },
+          "name": "棱镜核心",
+          "enabled": true,
+          "bindings": [
+            {
+              "parameterId": "spectrum",
+              "source": {
+                "kind": "analysis",
+                "featureId": "amplitudeSpectrum",
+                "projection": {
+                  "kind": "full"
+                }
+              }
+            },
+            {
+              "parameterId": "color",
+              "source": {
+                "kind": "constant",
+                "value": "#e1f7ff"
+              }
+            },
+            {
+              "parameterId": "opacity",
+              "source": {
+                "kind": "constant",
+                "value": 1
+              }
+            },
+            {
+              "parameterId": "x",
+              "source": {
+                "kind": "constant",
+                "value": 0.5
+              }
+            },
+            {
+              "parameterId": "y",
+              "source": {
+                "kind": "constant",
+                "value": 0.5
+              }
+            },
+            {
+              "parameterId": "sensitivity",
+              "source": {
+                "kind": "constant",
+                "value": 0.6
+              }
+            },
+            {
+              "parameterId": "thickness",
+              "source": {
+                "kind": "constant",
+                "value": 2.4
+              }
+            },
+            {
+              "parameterId": "chromatic",
+              "source": {
+                "kind": "constant",
+                "value": false
+              }
+            },
+            {
+              "parameterId": "shape",
+              "source": {
+                "kind": "constant",
+                "value": 1
+              }
+            },
+            {
+              "parameterId": "size",
+              "source": {
+                "kind": "constant",
+                "value": 0.065
+              }
+            },
+            {
+              "parameterId": "amplitude",
+              "source": {
+                "kind": "constant",
+                "value": 1.3
+              }
+            },
+            {
+              "parameterId": "speed",
+              "source": {
+                "kind": "constant",
+                "value": 0.27
+              }
+            },
+            {
+              "parameterId": "phase",
+              "source": {
+                "kind": "constant",
+                "value": 0
+              }
+            },
+            {
+              "parameterId": "threshold",
+              "source": {
+                "kind": "constant",
+                "value": 0.1286
+              }
+            }
+          ],
+          "timing": {
+            "kind": "relative",
+            "start": 0,
+            "end": 1
+          }
+        },
+        {
+          "key": "element-9",
+          "element": {
+            "id": "wireform",
+            "version": 2,
+            "hash": "cadcd8bc729340ac2b8175de40140a40ba0328b6a12f8c4df28bcb8d800dbfca"
+          },
+          "name": "倾斜光环 A",
+          "enabled": true,
+          "bindings": [
+            {
+              "parameterId": "spectrum",
+              "source": {
+                "kind": "analysis",
+                "featureId": "amplitudeSpectrum",
+                "projection": {
+                  "kind": "full"
+                }
+              }
+            },
+            {
+              "parameterId": "color",
+              "source": {
+                "kind": "constant",
+                "value": "#78dcff"
+              }
+            },
+            {
+              "parameterId": "opacity",
+              "source": {
+                "kind": "constant",
+                "value": 0.8
+              }
+            },
+            {
+              "parameterId": "x",
+              "source": {
+                "kind": "constant",
+                "value": 0.5
+              }
+            },
+            {
+              "parameterId": "y",
+              "source": {
+                "kind": "constant",
+                "value": 0.5
+              }
+            },
+            {
+              "parameterId": "sensitivity",
+              "source": {
+                "kind": "constant",
+                "value": 0.6
+              }
+            },
+            {
+              "parameterId": "thickness",
+              "source": {
+                "kind": "constant",
+                "value": 1.8
+              }
+            },
+            {
+              "parameterId": "chromatic",
+              "source": {
+                "kind": "constant",
+                "value": false
+              }
+            },
+            {
+              "parameterId": "shape",
+              "source": {
+                "kind": "constant",
+                "value": 2
+              }
+            },
+            {
+              "parameterId": "size",
+              "source": {
+                "kind": "constant",
+                "value": 0.2
+              }
+            },
+            {
+              "parameterId": "amplitude",
+              "source": {
+                "kind": "constant",
+                "value": 0.3
+              }
+            },
+            {
+              "parameterId": "speed",
+              "source": {
+                "kind": "constant",
+                "value": 0.32
+              }
+            },
+            {
+              "parameterId": "phase",
+              "source": {
+                "kind": "constant",
+                "value": 1.2
+              }
+            },
+            {
+              "parameterId": "threshold",
+              "source": {
+                "kind": "constant",
+                "value": 0.1286
+              }
+            }
+          ],
+          "timing": {
+            "kind": "relative",
+            "start": 0,
+            "end": 1
+          }
+        },
+        {
+          "key": "element-10",
+          "element": {
+            "id": "wireform",
+            "version": 2,
+            "hash": "cadcd8bc729340ac2b8175de40140a40ba0328b6a12f8c4df28bcb8d800dbfca"
+          },
+          "name": "倾斜光环 B",
+          "enabled": true,
+          "bindings": [
+            {
+              "parameterId": "spectrum",
+              "source": {
+                "kind": "analysis",
+                "featureId": "amplitudeSpectrum",
+                "projection": {
+                  "kind": "full"
+                }
+              }
+            },
+            {
+              "parameterId": "color",
+              "source": {
+                "kind": "constant",
+                "value": "#ff70c6"
+              }
+            },
+            {
+              "parameterId": "opacity",
+              "source": {
+                "kind": "constant",
+                "value": 0.65
+              }
+            },
+            {
+              "parameterId": "x",
+              "source": {
+                "kind": "constant",
+                "value": 0.5
+              }
+            },
+            {
+              "parameterId": "y",
+              "source": {
+                "kind": "constant",
+                "value": 0.5
+              }
+            },
+            {
+              "parameterId": "sensitivity",
+              "source": {
+                "kind": "constant",
+                "value": 0.6
+              }
+            },
+            {
+              "parameterId": "thickness",
+              "source": {
+                "kind": "constant",
+                "value": 1.8
+              }
+            },
+            {
+              "parameterId": "chromatic",
+              "source": {
+                "kind": "constant",
+                "value": false
+              }
+            },
+            {
+              "parameterId": "shape",
+              "source": {
+                "kind": "constant",
+                "value": 2
+              }
+            },
+            {
+              "parameterId": "size",
+              "source": {
+                "kind": "constant",
+                "value": 0.23
+              }
+            },
+            {
+              "parameterId": "amplitude",
+              "source": {
+                "kind": "constant",
+                "value": 0.4
+              }
+            },
+            {
+              "parameterId": "speed",
+              "source": {
+                "kind": "constant",
+                "value": -0.23
+              }
+            },
+            {
+              "parameterId": "phase",
+              "source": {
+                "kind": "constant",
+                "value": 2.4
+              }
+            },
+            {
+              "parameterId": "threshold",
+              "source": {
+                "kind": "constant",
+                "value": 0.1286
+              }
+            }
+          ],
+          "timing": {
+            "kind": "relative",
+            "start": 0,
+            "end": 1
+          }
+        },
+        {
+          "key": "element-11",
+          "element": {
+            "id": "orbit-solids",
+            "version": 2,
+            "hash": "0a44ecd7992bb90b9d4e504defe1b8fff8b596d24fad6df9f717ad8d88ffa0d2"
+          },
+          "name": "轨道信标",
+          "enabled": true,
+          "bindings": [
+            {
+              "parameterId": "spectrum",
+              "source": {
+                "kind": "analysis",
+                "featureId": "amplitudeSpectrum",
+                "projection": {
+                  "kind": "full"
+                }
+              }
+            },
+            {
+              "parameterId": "color",
+              "source": {
+                "kind": "constant",
+                "value": "#75dfff"
+              }
+            },
+            {
+              "parameterId": "opacity",
+              "source": {
+                "kind": "constant",
+                "value": 1
+              }
+            },
+            {
+              "parameterId": "x",
+              "source": {
+                "kind": "constant",
+                "value": 0.5
+              }
+            },
+            {
+              "parameterId": "y",
+              "source": {
+                "kind": "constant",
+                "value": 0.5
+              }
+            },
+            {
+              "parameterId": "sensitivity",
+              "source": {
+                "kind": "constant",
+                "value": 0.6
+              }
+            },
+            {
+              "parameterId": "thickness",
+              "source": {
+                "kind": "constant",
+                "value": 1.5
+              }
+            },
+            {
+              "parameterId": "chromatic",
+              "source": {
+                "kind": "constant",
+                "value": false
+              }
+            },
+            {
+              "parameterId": "shape",
+              "source": {
+                "kind": "constant",
+                "value": 0
+              }
+            },
+            {
+              "parameterId": "count",
+              "source": {
+                "kind": "constant",
+                "value": 6
+              }
+            },
+            {
+              "parameterId": "radius",
+              "source": {
+                "kind": "constant",
+                "value": 0.16
+              }
+            },
+            {
+              "parameterId": "size",
+              "source": {
+                "kind": "constant",
+                "value": 0.013
+              }
+            },
+            {
+              "parameterId": "speed",
+              "source": {
+                "kind": "constant",
+                "value": 0.4
+              }
+            },
+            {
+              "parameterId": "orbitSpeed",
+              "source": {
+                "kind": "constant",
+                "value": 0.12
+              }
+            },
+            {
+              "parameterId": "wobble",
+              "source": {
+                "kind": "constant",
+                "value": 0
+              }
+            },
+            {
+              "parameterId": "threshold",
+              "source": {
+                "kind": "constant",
+                "value": 0.05
+              }
+            }
+          ],
+          "timing": {
+            "kind": "relative",
+            "start": 0,
+            "end": 1
+          }
+        }
+      ],
+      "controls": [
+        {
+          "id": "sensitivity",
+          "label": "响应系数",
+          "kind": "value",
+          "parameterId": "sensitivity",
+          "targets": [
+            "element-1",
+            "element-2",
+            "element-3",
+            "element-4",
+            "element-5",
+            "element-6",
+            "element-7",
+            "element-8",
+            "element-9",
+            "element-10",
+            "element-11"
+          ],
+          "value": 0.6
+        },
+        {
+          "id": "input-0",
+          "label": "频谱输入",
+          "kind": "binding",
+          "parameterId": "spectrum",
+          "targets": [
+            "element-1",
+            "element-2",
+            "element-3",
+            "element-4",
+            "element-5",
+            "element-6",
+            "element-7",
+            "element-8",
+            "element-9",
+            "element-10",
+            "element-11"
+          ],
+          "value": {
+            "source": {
+              "kind": "analysis",
+              "featureId": "amplitudeSpectrum",
+              "projection": {
+                "kind": "full"
+              }
+            }
+          }
+        }
+      ],
+      "hash": "ab2959a540d21e96628330b06f75c8c634ea30a12ffe83df47185a3731f2da36"
+    }
+  ],
+  "algorithms": []
+}

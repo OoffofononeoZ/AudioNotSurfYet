@@ -2,10 +2,10 @@ import { validateResourceRef } from './resourceCodec';
 import { sameResource, canonicalJson } from './resourceIdentity';
 import { validateCommonControls } from './commonControls';
 import { invalid, keys, record, text, UUID_PATTERN } from './projectValidation';
-import type { VisualizerProjectV4 } from './compositionTypes';
+import type { VisualizerProjectV5 } from './compositionTypes';
 import type { CompositionItem } from './resourceTypes';
 
-export function validateCompositionItems(input: unknown, project: VisualizerProjectV4): CompositionItem[] {
+export function validateCompositionItems(input: unknown, project: VisualizerProjectV5): CompositionItem[] {
     if (!Array.isArray(input)) return invalid('items 必须为列表。');
     const elements = new Map(project.elements.map(e => [e.id, e])),
         ids = new Set<string>(),
@@ -46,7 +46,7 @@ export function validateCompositionItems(input: unknown, project: VisualizerProj
                 ];
             }),
         );
-        const controls = validateCommonControls(i.controls, targets);
+        const controls = validateCommonControls(i.controls, targets, project.resources.algorithms);
         for (const c of controls) {
             const original = definition.controls.find(d => d.id === c.id);
             const shape = (v: typeof c) => ({

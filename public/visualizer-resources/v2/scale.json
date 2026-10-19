@@ -1,0 +1,152 @@
+{
+  "format": "audiosurf-visualizer-resource",
+  "schemaVersion": 2,
+  "id": "scale",
+  "version": 2,
+  "algorithms": [
+    {
+      "id": "scale",
+      "version": 1,
+      "apiVersion": 1,
+      "contract": {
+        "kind": "modifier",
+        "inputParameter": "amount",
+        "parameters": [
+          {
+            "id": "amount",
+            "valueKind": "number",
+            "allowedSourceKinds": [
+              "constant",
+              "analysis"
+            ],
+            "range": {
+              "min": 0.05,
+              "max": 8,
+              "integer": false,
+              "editingPrecision": 2
+            },
+            "allowedAnalysisComponents": [
+              "default",
+              "total",
+              "specific",
+              "real",
+              "imag",
+              "magnitude",
+              "phase"
+            ],
+            "allowedAnalysisProjections": [
+              "scalar",
+              "mean",
+              "max",
+              "peak",
+              "bin",
+              "band"
+            ]
+          }
+        ],
+        "sharedParameters": [],
+        "historyParameters": []
+      },
+      "programs": {
+        "draw": {
+          "geometry": "quad",
+          "uniforms": {
+            "uImage": {
+              "type": "source"
+            },
+            "uOperation": {
+              "type": "int"
+            },
+            "uScale": {
+              "type": "number"
+            },
+            "uOpacity": {
+              "type": "number"
+            },
+            "uBlurStep": {
+              "type": "vec2"
+            },
+            "uFinal": {
+              "type": "boolean"
+            }
+          },
+          "vertex": "\n    varying vec2 vUv;\n    void main() { vUv=uv; gl_Position=vec4(position,1.0); }\n",
+          "fragment": "\n    precision highp float;\n    varying vec2 vUv;\n    uniform sampler2D uImage;\n    uniform int uOperation;\n    uniform float uScale;\n    uniform float uOpacity;\n    uniform vec2 uBlurStep;\n    uniform bool uFinal;\n    vec4 sampleImage(vec2 point) {\n        if (any(lessThan(point,vec2(0.0))) || any(greaterThan(point,vec2(1.0)))) return vec4(0.0);\n        return texture2D(uImage,point);\n    }\n    void main() {\n        vec2 point=(vUv-0.5)/uScale+0.5;\n        vec4 value=sampleImage(point);\n        if (uOperation == 1) {\n            value*=0.227027;\n            value+=sampleImage(point+uBlurStep*1.384615)*0.316216;\n            value+=sampleImage(point-uBlurStep*1.384615)*0.316216;\n            value+=sampleImage(point+uBlurStep*3.230769)*0.070270;\n            value+=sampleImage(point-uBlurStep*3.230769)*0.070270;\n        }\n        value*=uOpacity;\n        if (uFinal) value=vec4(value.rgb+vec3(2.0,4.0,3.0)/255.0*(1.0-value.a),1.0);\n        gl_FragColor=value;\n    }\n"
+        }
+      },
+      "source": "export function create() {\n    return {\n        prepareFrame(frame) {\n            const n = (id, fallback = 0) =>\n                typeof frame.parameters[id]?.value === 'number' ? frame.parameters[id].value : fallback;\n            const pass = changes => ({\n                program: 'draw',\n                uniforms: {\n                    uImage: 'source',\n                    uOperation: 0,\n                    uScale: 1,\n                    uOpacity: 1,\n                    uBlurStep: [0, 0],\n                    uFinal: false,\n                    ...changes,\n                },\n            });\n            return { passes: [pass({ uScale: n('amount', 1) })] };\n        },\n    };\n}\n",
+      "hash": "ead8de4205177d728fc8b7468e308a9357104f915df6131e3ae45457ba28561b"
+    }
+  ],
+  "elements": [
+    {
+      "id": "scale",
+      "version": 2,
+      "kind": "modifier",
+      "title": "缩放",
+      "icon": "scale",
+      "inputParameter": "amount",
+      "parameters": [
+        {
+          "id": "amount",
+          "label": "缩放比例",
+          "defaultValue": 1,
+          "valueKind": "number",
+          "allowedSourceKinds": [
+            "constant",
+            "analysis"
+          ],
+          "range": {
+            "min": 0.05,
+            "max": 8,
+            "integer": false,
+            "editingPrecision": 2
+          },
+          "allowedAnalysisComponents": [
+            "default",
+            "total",
+            "specific",
+            "real",
+            "imag",
+            "magnitude",
+            "phase"
+          ],
+          "allowedAnalysisProjections": [
+            "scalar",
+            "mean",
+            "max",
+            "peak",
+            "bin",
+            "band"
+          ],
+          "defaultBinding": {
+            "source": {
+              "kind": "analysis",
+              "featureId": "energy",
+              "projection": {
+                "kind": "scalar"
+              }
+            },
+            "transform": {
+              "inputMin": 0,
+              "inputMax": 25,
+              "outputMin": 1,
+              "outputMax": 1.15,
+              "clamp": true,
+              "invert": false,
+              "attackSeconds": 0.04,
+              "releaseSeconds": 0.2
+            }
+          }
+        }
+      ],
+      "algorithm": {
+        "id": "scale",
+        "version": 1,
+        "hash": "ead8de4205177d728fc8b7468e308a9357104f915df6131e3ae45457ba28561b"
+      },
+      "hash": "197d4d52d3f34d75a314d3f6111f4321e0c54c5e3061749b7745fdfa7357ea28"
+    }
+  ],
+  "presets": []
+}

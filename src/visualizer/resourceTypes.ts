@@ -1,4 +1,5 @@
-import type { ElementBinding, ElementKind, ElementType, EffectTargets } from './compositionTypes';
+import type { ElementBinding, ElementKind, EffectTargets } from './compositionTypes';
+import type { AlgorithmDefinition } from './algorithmTypes';
 import type { SceneParameterDescriptor } from './parameterDescriptor';
 import type { VisualizerNumericTransformV1 } from './types';
 
@@ -8,8 +9,7 @@ export interface ResourceRef {
     hash: string;
 }
 export interface ElementDefinition extends ResourceRef {
-    kernelId: ElementType;
-    kernelVersion: 1;
+    algorithm: ResourceRef;
     kind: ElementKind;
     title: string;
     icon: string;
@@ -44,12 +44,13 @@ export interface PresetDefinition extends ResourceRef {
     controls: CommonControl[];
 }
 export interface ResourceSnapshot {
+    algorithms: AlgorithmDefinition[];
     elements: ElementDefinition[];
     presets: PresetDefinition[];
 }
-export interface VisualizerResourcePackageV1 extends ResourceSnapshot {
+export interface VisualizerResourcePackageV2 extends ResourceSnapshot {
     format: 'audiosurf-visualizer-resource';
-    schemaVersion: 1;
+    schemaVersion: 2;
     id: string;
     version: number;
 }

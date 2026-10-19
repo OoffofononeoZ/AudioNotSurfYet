@@ -4,7 +4,7 @@ import { expect, test } from '@playwright/test';
 import { appendFile, mkdir, writeFile } from 'node:fs/promises';
 import { installFilePickerStub, queuePickerData, savedPickerEntries } from '../support/file-picker';
 import { elementRegistry } from '../../src/visualizer/elementRegistry';
-import type { VisualizerProjectV4 } from '../../src/visualizer/compositionTypes';
+import type { VisualizerProjectV5 } from '../../src/visualizer/compositionTypes';
 import { startSystemSampler } from '../processing/systemSampler';
 
 const root = 'artifacts/visualizer-composition/output';
@@ -115,7 +115,7 @@ test('fifteen-minute offline native input stays responsive, exports fully and ca
     await expect.poll(async () => (await savedPickerEntries(page)).length).toBe(1);
     const project = JSON.parse(
         Buffer.from((await savedPickerEntries(page)).at(-1)!.base64, 'base64').toString(),
-    ) as VisualizerProjectV4;
+    ) as VisualizerProjectV5;
     project.seed = 1234567;
     project.output = { aspectRatio: '16:9', resolution: '1080p', frameRate: 60 };
     const background = elementRegistry.create('solid', 900, 0);

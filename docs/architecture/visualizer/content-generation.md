@@ -2,11 +2,11 @@
 
 2026-10-18，owner 在规划中选择将旧生成 skill 改名为 `visualizer-content-generator`，并要求**所有新增原子元素和组合预设都先批准具体合同**，随后以“Implement the plan.”批准实施。本轮更新 skill、校验器、测试及入口，不批准任何具体产品内容。
 
-同日 owner 批准 DEC-084 资源包与分组预设改造：当前目标改为 Project V4 与 JSON 资源包 V1 过渡版。以下实现规则已同步；具体内容审批门禁继续有效。资源包并非最终自由发布方案，新绘制算法仍需受控应用内核。
+同日 owner 批准 DEC-084 资源包与分组预设改造；2026-10-19 又以 DEC-087 批准可加载算法资源包。当前运行时为 Project V5 与资源包 V2，具体内容审批门禁继续有效。本轮仅迁移既有内容与运行时；按 owner 要求不修改生成元素和预设的 skill，其 V4/V1 输出说明暂不适用于当前格式，不能直接安装。
 
 ## 当前模型与适用关系
 
-生成目标为 [Project V4](project-format-v4.md) 的元素定义与持久化分组预设，包括 visual、modifier、transition，以及复用已有元素或含新增类型的预设。[资源包 V1](resource-packages-v1.md) 描述编写、依赖和加载边界。完整画面描述按该模型拆解；既有内容修正使用 audio-visualizer-dev，新增部分走本契约。
+当前资源目标为 [Project V5](project-format-v5.md) 的元素定义与持久化分组预设，包括 visual、modifier、transition，以及复用已有元素或含新增类型的预设。[资源包 V2](resource-packages-v2.md) 描述编写、算法 ABI、依赖和隔离边界。完整画面描述按该模型拆解；既有内容修正使用 audio-visualizer-dev，新增部分仍先走本契约的输入与具体合同审批。
 
 本契约及 DEC-082 替代 ADR-0021/DEC-056 中的 SceneBriefV1、SceneRegistry、Project V1 注册与旧生成测试步骤。历史批准、V1–V6 canonical/evidence 和 readiness 身份继续保留；两阶段输入/具体合同门禁延续到所有新增元素与预设。位图素材生成、处理分轨、自动标记和独立视频流程规划不属于该生成能力。
 
@@ -21,8 +21,8 @@
 
 ## 实现不变量
 
-- 优先用 JSON 定义引用已有 kernelId/version，提供完整参数和默认绑定；新绘制算法才扩展应用内核及 ABI。预设创建独立组与子元素 UUID，保存归属、精确依赖、共同控件及最后批量值；内部目标映射到本次 UUID，组内顺序决定连续图层。
-- 共同控件显式声明处理字段和目标，样式常量禁止提升到组级。子元素可单独修改；对应控件显示差异，重新应用覆盖对应目标。V4 内嵌定义快照，恢复不依赖商城或已安装资源；当前包不能提供任意 JS、DSL 或外部 Shader。
+- 元素定义精确引用 algorithm 的 ID/version/hash，提供完整参数和默认绑定；新算法在包内提供自包含模块和 Shader，经隔离计算与受控 DrawPacket 渲染。符合现有 ABI 的新算法无需修改应用内核；扩展 ABI 仍属独立架构决定。预设创建独立组与子元素 UUID，保存归属、精确依赖、共同控件及最后批量值；内部目标映射到本次 UUID，组内顺序决定连续图层。
+- 共同控件显式声明处理字段和目标，样式常量禁止提升到组级。子元素可单独修改；对应控件显示差异，重新应用覆盖对应目标。V5 内嵌定义、算法源码和 Shader 快照，恢复不依赖商城；包不能获得主页面执行权限、DOM、网络、存储或音频对象。
 - 默认值只在新增时应用，遵守 editingPrecision；导入/草稿及歌曲时长不量化、不改绑。严格 codec 与候选完整校验保持，失败不能部分替换工程。
 - 来源仅为当前 descriptor 允许的 constant/analysis/native 或明确 unbound；Editor range 是转场时间引用，不是参数来源。普通元素手动时段，效果指向视觉元素或整体合成，不引用其他效果。
 - 全工程最多四种不同 Analyzer 特征，严格工程校验包含禁用元素，运行时只请求启用集合；native 不计额度。预设加入已有工程时检查并集，不自动改绑/禁用原元素腾额度。
@@ -31,10 +31,10 @@
 - 复用唯一 RendererHost/Canvas/WebGLRenderer/视觉 RAF、现有 render targets、分析及原生输入服务。自有资源幂等释放，旧任务不得覆盖新身份。新元素不创建独立音频、分析或输出链路。
 - 视频生成遵循 [离线导出](../../context/visualizer-offline-export.md)：同一 renderer 的手动租约、绝对帧时间、输入准备、WebCodecs/OPFS。旧实时录制不是新内容的实现或验证入口。
 
-需要新增 source/value/component/projection、工程版本策略、拓扑、支持矩阵、阈值或不明许可资产时，停止依赖这些变更的生成并请求独立决定。不得新增 legacy fallback、用户脚本、运行时插件或任意 shader 注入。
+需要新增 source/value/component/projection、工程版本策略、拓扑、支持矩阵、阈值或不明许可资产时，停止依赖这些变更的生成并请求独立决定。不得新增 legacy fallback、主页面脚本执行或绕过包校验的 Shader 注入；当前资源源限定项目内 catalog，不包含任意地址加载、磁盘资源导入或后端接口。
 
 ## 验证与交付
 
 具体输入结构与命令见 [输入契约](../../../skills/visualizer-content-generator/references/input-contract.md)，实现规则与按影响选择的验证见 [生成 skill](../../../skills/visualizer-content-generator/SKILL.md)。校验器测试证明输入与 CLI 行为，不能单独证明 agent 的审批或 runtime 实现符合要求。
 
-内容验证按实际变化选择 V4 往返、资源包校验与持久化、分组/引用隔离、共同参数差异、数据映射、确定性、GPU、生命周期和短离线媒体检查；不默认累计历史评审或长曲矩阵。适用阈值保持，未运行/失败如实记录。仅修改 skill 时无需应用构建或产品浏览器回归；资源加载或产品行为变化选择对应验证。完成后按项目规则一次本地提交，不推送、不发布、不产生 readiness 结论。
+内容验证按实际变化选择 V5 往返、资源包校验与隔离执行、分组/引用隔离、共同参数差异、数据映射、确定性、GPU、生命周期和短离线媒体检查；不默认累计历史评审或长曲矩阵。适用阈值保持，未运行/失败如实记录。仅修改 skill 时无需应用构建或产品浏览器回归；资源加载或产品行为变化选择对应验证。完成后按项目交付规则本地提交，不推送、不发布、不产生 readiness 结论。
