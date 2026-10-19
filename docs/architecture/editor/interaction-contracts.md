@@ -26,7 +26,7 @@ upstream_docs:
 - metered segment 仅根据 BPM 和当前细分生成 beat/subdivision，不再区分小节。single-beat segment 不画内部线，并把整个 segment 作为一个候选单元。
 - 2026-10-17 标记改版采用显式 subdivision：常规 `[1,2,4,8,16]`、三连音 `[1,3,6,12]`、自定义 1–64 的因数预设。默认每拍四等分；hover、pointer、端点与键盘共享同一设置。缩放不改变吸附粒度，只减少过密次级线绘制，分隔颜色和层级沿用 osu。
 - snap 只发生在创建或拖动确认时。viewport、zoom 或 tempo 修改不会自动重写已有事件秒数。
-- 播放期间开放下节的数字键录入，鼠标编辑与名称／分类管理仍须暂停。暂停编辑的鼠标、键盘、菜单、批量统一拦截播放线左侧的操作位置；新点与端点吸附后不得回到左侧，无合法刻度时不创建。跨线范围可由右侧选择、整体移动／删除；完整左侧事件不加入新批量选区。管理操作不受 15% 空间限制。
+- 播放期间开放下节的数字键录入，鼠标编辑与名称／分类管理仍须暂停。暂停后整条可见轨道的有效歌曲时间均可创建、移动、调整端点、删除及批量操作；不以播放线为界。15% 播放线和左侧遮罩样式保留，遮罩不拦截操作；歌曲首尾之外的留白不可创建标记，无合法刻度时不创建。
 - 仅轨道时间绘图区接管普通滚轮，每次约 1.12 倍，管理栏保持纵向滚动，Ctrl／Meta 保留浏览器行为；拖动时冻结缩放，seek／播放／源身份变化取消未提交拖动。
 - 区间模式左键拖空白选择小节、拖选区移动；Shift+左右分别向左右扩选，Alt+左右按当前细分移动，Ctrl／Cmd+C 向后复制。Esc 先清选区，再退出模式；输入控件保留自身键盘行为。
 - point marker 为居中实心短键，range 主体为同高长条；按钮、短键图形和候选框以事件时间 X 为中心，任意视口、zoom、pan 与 DPR 下误差不超过 `1 CSS px`，图形 Y 也以按钮中心为准。
@@ -35,7 +35,7 @@ upstream_docs:
 
 - 按工程轨道顺序展开分类行，前十行对应 `1–9、0`，主数字区与 NumLock 开启的小键盘等价。折叠、滚动不重编号；增删分类按当前工程顺序重算，之后的行不分配键位。
 - 仅标记页签活动、工程歌曲与播放歌曲匹配且处于 `playing` 时开始录入。点在 keydown 创建一次，范围在 keydown 捕获起点、keyup 捕获终点；不同数字可同时按住，同一数字的重复事件／双键盘别名不重复开始。
-- `AudioSessionService.getPlaybackSnapshot()` 直接读取既有 engine 的即时 PlaybackSnapshot；复用当前节拍细分、tempo 区间／single-beat 候选及微秒规范化。无 BPM 且没有候选时拒绝并提示，不写原始时间。数字录入允许吸附到播放线左侧最近刻度，不套用暂停右侧限制。
+- `AudioSessionService.getPlaybackSnapshot()` 直接读取既有 engine 的即时 PlaybackSnapshot；复用当前节拍细分、tempo 区间／single-beat 候选及微秒规范化。无 BPM 且没有候选时拒绝并提示，不写原始时间。数字录入和暂停编辑均可吸附到播放线左侧最近刻度。
 - 正常松键的端点分别吸附，终点不足起点之后一格时补到下一格；歌曲范围内无合法下一格则拒绝。暂停／曲终以停止快照吸附终点，不足一格不创建；曲终同步处理先于自动循环。收尾后持续按住不再次录入，须松开再按。
 - seek、重启、恢复位置或试听源切换通过 `subscribePlaybackDiscontinuity(listener)` 在变更前取消；订阅返回清理函数。换歌／工程、tempo／细分／编号变化、非播放状态、切页签、失焦、页面隐藏、Esc、进入输入控件／菜单／模态框与离页也取消未提交范围。
 - 录入 preview 只属运行时，独立于鼠标两次点击的待完成范围。确认时从 controller 最新工程应用既有点重复／范围半开重叠校验；多范围停止一次累计提交，各项冲突独立反馈，沿用 250ms 草稿防抖。播放帧与按住期间不写工程，不改变 JSON V1。
@@ -48,7 +48,7 @@ Editor 只在 waveform/tempo/event timeline 区域阻止 `contextmenu`、文本�
 轨道右键不平移：
 
 1. 目标为已有 point/range/handle 且符合暂停及操作位置边界：删除对应事件，不打开菜单。
-2. 右侧空白打开“跳到此处／从此处播放”菜单，统一调用歌曲 seek；不提供“居中”。
+2. 有效歌曲时间内的空白打开“跳到此处／从此处播放”菜单，统一调用歌曲 seek；不提供“居中”。
 3. 波形保留 4px 右拖 pan、右击 seek／播放／居中菜单，并增加“重置为全曲”。
 
 `pointerup`、`pointercancel`、`lostpointercapture`、blur、Esc 和 route leave 清理 capture、pressed 与未提交拖动；菜单由外部点击、滚动、resize 和离页清理。待完成范围起点是独立状态，只按下节的条件清理。
@@ -64,7 +64,7 @@ idle
 ```
 
 - point 创建使用当前 lane、inner class 和 snapped seconds；重复 key 不创建第二项，并提供非破坏性反馈。
-- 可编辑 point 是可聚焦 DOM button；背景空 cell 不生成 DOM。左右键移动候选一个 subdivision，上下键切分类，Home/End 在当前右侧合法窗口内定位。
+- 可编辑 point 是可聚焦 DOM button；背景空 cell 不生成 DOM。左右键移动候选一个 subdivision，上下键切分类，Home/End 在当前可见歌曲时间范围的两端定位。
 - 右键 point 删除遵循 shared precedence；键盘 Delete/Backspace 是等价路径。
 
 ## Range State Machine
@@ -159,7 +159,7 @@ idle + drag start/end handle
 | Canvas/Worker failure | overlay error 隔离，标记/播放/导出继续 |
 | keyboard-only | 可完成播放、seek、zoom/pan、tempo、point/range、菜单替代和 overlay 调整 |
 | 区间模式关闭 | 普通创建、删除、菜单与端点编辑恢复 |
-| 区间模式左键拖空白 | 仅选择起始 lane/class 的真实小节；无 BPM 不选择，完整左侧事件排除，跨线范围可从右侧加入 |
+| 区间模式左键拖空白 | 仅选择起始 lane/class；暂停后包括播放线两侧的可见事件，保留完整范围与原子校验 |
 | E10 copy/move conflict | 越界、重复 point 或 range overlap 时 project 字节等价不变并播报原因 |
 | E10 pointer cancel | preview 与 capture 清空，不调用 project update |
 | route leave dialog | 取消路径不离页、不写抑制偏好；确认路径先处理偏好再执行既有 leave |
