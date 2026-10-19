@@ -2,12 +2,12 @@
   "format": "audiosurf-visualizer-resource",
   "schemaVersion": 2,
   "id": "geometric-0.6",
-  "version": 2,
+  "version": 3,
   "elements": [],
   "presets": [
     {
       "id": "geometric-0.6",
-      "version": 2,
+      "version": 3,
       "title": "几何律动",
       "description": "双环频谱与旋转几何 · 响应系数 0.6",
       "preview": "geometric",
@@ -19,7 +19,7 @@
             "version": 2,
             "hash": "3bcbf3c1103bd35f96e5af1efd88732a92125cca12de741fe2818663984f55ef"
           },
-          "name": "纯黑背景",
+          "name": "纯色背景",
           "enabled": true,
           "bindings": [
             {
@@ -50,7 +50,7 @@
             "version": 2,
             "hash": "dc902d582f151d2bd1bbcc641779f2caeab7dc8d5f600ec4496381ca64752b75"
           },
-          "name": "外环 · 双重复频谱",
+          "name": "环形频谱",
           "enabled": true,
           "bindings": [
             {
@@ -154,7 +154,7 @@
             "version": 2,
             "hash": "dc902d582f151d2bd1bbcc641779f2caeab7dc8d5f600ec4496381ca64752b75"
           },
-          "name": "内环 · 四重复频谱",
+          "name": "环形频谱",
           "enabled": true,
           "bindings": [
             {
@@ -258,7 +258,7 @@
             "version": 2,
             "hash": "0a44ecd7992bb90b9d4e504defe1b8fff8b596d24fad6df9f717ad8d88ffa0d2"
           },
-          "name": "十二频段方块",
+          "name": "轨道几何体",
           "enabled": true,
           "bindings": [
             {
@@ -390,7 +390,7 @@
             "version": 2,
             "hash": "0692a003aeaed249ec37d842787b369d13fea97a2c0143ebcce0dc2dc9a45f21"
           },
-          "name": "十九条旋转弧",
+          "name": "旋转弧簇",
           "enabled": true,
           "bindings": [
             {
@@ -501,7 +501,7 @@
             "version": 2,
             "hash": "cadcd8bc729340ac2b8175de40140a40ba0328b6a12f8c4df28bcb8d800dbfca"
           },
-          "name": "中心响应方块",
+          "name": "旋转线框",
           "enabled": true,
           "bindings": [
             {
@@ -619,7 +619,7 @@
             "version": 2,
             "hash": "cadcd8bc729340ac2b8175de40140a40ba0328b6a12f8c4df28bcb8d800dbfca"
           },
-          "name": "中心棱锥",
+          "name": "旋转线框",
           "enabled": true,
           "bindings": [
             {
@@ -737,7 +737,7 @@
             "version": 2,
             "hash": "0a44ecd7992bb90b9d4e504defe1b8fff8b596d24fad6df9f717ad8d88ffa0d2"
           },
-          "name": "三颗游移棱锥",
+          "name": "轨道几何体",
           "enabled": true,
           "bindings": [
             {
@@ -869,7 +869,7 @@
             "version": 2,
             "hash": "cadcd8bc729340ac2b8175de40140a40ba0328b6a12f8c4df28bcb8d800dbfca"
           },
-          "name": "主旋转环",
+          "name": "旋转线框",
           "enabled": true,
           "bindings": [
             {
@@ -987,7 +987,7 @@
             "version": 2,
             "hash": "cadcd8bc729340ac2b8175de40140a40ba0328b6a12f8c4df28bcb8d800dbfca"
           },
-          "name": "交错环 A",
+          "name": "旋转线框",
           "enabled": true,
           "bindings": [
             {
@@ -1105,7 +1105,7 @@
             "version": 2,
             "hash": "cadcd8bc729340ac2b8175de40140a40ba0328b6a12f8c4df28bcb8d800dbfca"
           },
-          "name": "交错环 B",
+          "name": "旋转线框",
           "enabled": true,
           "bindings": [
             {
@@ -1282,7 +1282,7 @@
           }
         }
       ],
-      "hash": "7872ebc9ec19f075529e1f5c685ae584224f1859f194a90a5fb5559b15a41bf2"
+      "hash": "186d17f34b990e915dadded5d7ad4641adea73b3f32f234a305bda68f6be8209"
     }
   ],
   "algorithms": []

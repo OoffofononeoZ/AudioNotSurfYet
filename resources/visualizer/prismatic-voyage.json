@@ -2,12 +2,12 @@
     "format": "audiosurf-visualizer-resource",
     "schemaVersion": 2,
     "id": "prismatic-voyage",
-    "version": 2,
+    "version": 3,
     "elements": [],
     "presets": [
         {
             "id": "prismatic-voyage",
-            "version": 2,
+            "version": 3,
             "title": "棱镜航行",
             "description": "光轨隧道与跃迁星尘 · 四段动态构图",
             "preview": "cinematic",
@@ -19,7 +19,7 @@
                         "version": 2,
                         "hash": ""
                     },
-                    "name": "深空背景",
+                    "name": "纯色背景",
                     "enabled": true,
                     "bindings": [
                         {
@@ -147,7 +147,7 @@
                         "version": 2,
                         "hash": ""
                     },
-                    "name": "序幕 · 光轨隧道",
+                    "name": "光轨隧道",
                     "enabled": true,
                     "bindings": [
                         {
@@ -265,7 +265,7 @@
                         "version": 2,
                         "hash": ""
                     },
-                    "name": "推进 · 光轨隧道",
+                    "name": "光轨隧道",
                     "enabled": true,
                     "bindings": [
                         {
@@ -383,7 +383,7 @@
                         "version": 2,
                         "hash": ""
                     },
-                    "name": "高潮 · 光轨隧道",
+                    "name": "光轨隧道",
                     "enabled": true,
                     "bindings": [
                         {
@@ -501,7 +501,7 @@
                         "version": 2,
                         "hash": ""
                     },
-                    "name": "尾声 · 光轨隧道",
+                    "name": "光轨隧道",
                     "enabled": true,
                     "bindings": [
                         {
@@ -619,7 +619,7 @@
                         "version": 2,
                         "hash": ""
                     },
-                    "name": "远端频谱光环",
+                    "name": "环形频谱",
                     "enabled": true,
                     "bindings": [
                         {
@@ -723,7 +723,7 @@
                         "version": 2,
                         "hash": ""
                     },
-                    "name": "导航弧簇",
+                    "name": "旋转弧簇",
                     "enabled": true,
                     "bindings": [
                         {
@@ -834,7 +834,7 @@
                         "version": 2,
                         "hash": ""
                     },
-                    "name": "棱镜核心",
+                    "name": "旋转线框",
                     "enabled": true,
                     "bindings": [
                         {
@@ -952,7 +952,7 @@
                         "version": 2,
                         "hash": ""
                     },
-                    "name": "倾斜光环 A",
+                    "name": "旋转线框",
                     "enabled": true,
                     "bindings": [
                         {
@@ -1070,7 +1070,7 @@
                         "version": 2,
                         "hash": ""
                     },
-                    "name": "倾斜光环 B",
+                    "name": "旋转线框",
                     "enabled": true,
                     "bindings": [
                         {
@@ -1188,7 +1188,7 @@
                         "version": 2,
                         "hash": ""
                     },
-                    "name": "轨道信标",
+                    "name": "轨道几何体",
                     "enabled": true,
                     "bindings": [
                         {

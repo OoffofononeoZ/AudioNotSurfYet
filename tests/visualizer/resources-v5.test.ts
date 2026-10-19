@@ -61,6 +61,78 @@ const group = (p: VisualizerProjectV5, index = 0) =>
     p.items.filter((i): i is PresetInstance => i.kind === 'preset')[index]!;
 
 describe('V5 preset ownership and bulk controls', () => {
+    for (const [id, previousNames] of [
+        [
+            'geometric-0.6',
+            [
+                '纯黑背景',
+                '外环 · 双重复频谱',
+                '内环 · 四重复频谱',
+                '十二频段方块',
+                '十九条旋转弧',
+                '中心响应方块',
+                '中心棱锥',
+                '三颗游移棱锥',
+                '主旋转环',
+                '交错环 A',
+                '交错环 B',
+            ],
+        ],
+        [
+            'prismatic-voyage',
+            [
+                '深空背景',
+                '跃迁星尘',
+                '序幕 · 光轨隧道',
+                '推进 · 光轨隧道',
+                '高潮 · 光轨隧道',
+                '尾声 · 光轨隧道',
+                '远端频谱光环',
+                '导航弧簇',
+                '棱镜核心',
+                '倾斜光环 A',
+                '倾斜光环 B',
+                '轨道信标',
+            ],
+        ],
+    ] as const)
+        test(`${id} preserves saved names and edits alongside the renamed preset version`, () => {
+            const previous = structuredClone(instantiatePreset(id, track.durationSeconds));
+            const definition = previous.resources.presets[0]!;
+            expect(definition.elements).toHaveLength(previousNames.length);
+            previous.resources.presets[0] = seal({
+                ...definition,
+                version: 2,
+                elements: definition.elements.map((e, index) => ({ ...e, name: previousNames[index]! })),
+            });
+            previous.group.resource = resourceRef(previous.resources.presets[0]);
+            previous.elements.forEach((e, index) => {
+                e.name = previousNames[index]!;
+            });
+            previous.elements[0]!.name = '我的背景';
+            previous.elements[0]!.bindings.find(b => b.parameterId === 'opacity')!.source = {
+                kind: 'constant',
+                value: 0.75,
+            };
+            const saved = validateComposition(
+                synchronizeLayers({
+                    ...createComposition(track),
+                    elements: previous.elements,
+                    items: [previous.group],
+                    resources: previous.resources,
+                }),
+            );
+            const encoded = encodeComposition(saved);
+            const restored = decodeComposition(encoded.buffer as ArrayBuffer);
+            const added = addPreset(restored, id);
+            expect(added.elements.slice(0, saved.elements.length)).toEqual(saved.elements);
+            expect(added.resources.presets.map(p => p.version)).toEqual([2, 3]);
+            const fresh = added.elements.slice(saved.elements.length);
+            for (const element of fresh) expect(element.name).toBe(elementRegistry.get(element.resource).title);
+            expect(new Set(added.elements.map(e => e.id)).size).toBe(added.elements.length);
+            const result = encodeComposition(added);
+            expect(decodeComposition(result.buffer as ArrayBuffer)).toEqual(added);
+        });
     test('separate shared smoothing fields tolerate an independently changed child source', () => {
         const leaf = elementRegistry.create('reactive-rings', 12, 0);
         const controls = [

@@ -6,7 +6,7 @@ import { buildGeometricElement } from '../../resources/visualizer/shared/geometr
 type ElementType = string;
 import type { VisualizerResolvedParameterMap } from '../../src/visualizer/rendererTypes';
 import { Matrix4, Vector3 } from 'three';
-import { createPresetElements } from '../../src/visualizer/compositionPresets';
+import { compositionPresets, createPresetElements } from '../../src/visualizer/compositionPresets';
 
 function harness(type: ElementType, spectrum: number[]) {
     const e = elementRegistry.create(type, 10, 0),
@@ -38,7 +38,8 @@ function harness(type: ElementType, spectrum: number[]) {
 }
 describe('geometric atoms', () => {
     test('reference pyramid has three base corners and rotates around the translated p5 pivot', () => {
-        const e = createPresetElements('geometric-0.6', 10).find(e => e.name === '中心棱锥')!,
+        const template = compositionPresets.find(p => p.id === 'geometric-0.6')!;
+        const e = createPresetElements('geometric-0.6', 10)[template.elements.findIndex(e => e.key === 'element-6')]!,
             batch = new GeometricBatch();
         const values: VisualizerResolvedParameterMap = new Map(
             e.bindings.map(b => [

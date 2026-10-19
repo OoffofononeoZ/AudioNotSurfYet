@@ -2,12 +2,12 @@
   "format": "audiosurf-visualizer-resource",
   "schemaVersion": 2,
   "id": "prismatic-voyage",
-  "version": 2,
+  "version": 3,
   "elements": [],
   "presets": [
     {
       "id": "prismatic-voyage",
-      "version": 2,
+      "version": 3,
       "title": "棱镜航行",
       "description": "光轨隧道与跃迁星尘 · 四段动态构图",
       "preview": "cinematic",
@@ -19,7 +19,7 @@
             "version": 2,
             "hash": "3bcbf3c1103bd35f96e5af1efd88732a92125cca12de741fe2818663984f55ef"
           },
-          "name": "深空背景",
+          "name": "纯色背景",
           "enabled": true,
           "bindings": [
             {
@@ -147,7 +147,7 @@
             "version": 2,
             "hash": "3b8444cf73fb807df7a1c0b0ebdced3401edfb7c0a658653494cdfb3b35f12b6"
           },
-          "name": "序幕 · 光轨隧道",
+          "name": "光轨隧道",
           "enabled": true,
           "bindings": [
             {
@@ -265,7 +265,7 @@
             "version": 2,
             "hash": "3b8444cf73fb807df7a1c0b0ebdced3401edfb7c0a658653494cdfb3b35f12b6"
           },
-          "name": "推进 · 光轨隧道",
+          "name": "光轨隧道",
           "enabled": true,
           "bindings": [
             {
@@ -383,7 +383,7 @@
             "version": 2,
             "hash": "3b8444cf73fb807df7a1c0b0ebdced3401edfb7c0a658653494cdfb3b35f12b6"
           },
-          "name": "高潮 · 光轨隧道",
+          "name": "光轨隧道",
           "enabled": true,
           "bindings": [
             {
@@ -501,7 +501,7 @@
             "version": 2,
             "hash": "3b8444cf73fb807df7a1c0b0ebdced3401edfb7c0a658653494cdfb3b35f12b6"
           },
-          "name": "尾声 · 光轨隧道",
+          "name": "光轨隧道",
           "enabled": true,
           "bindings": [
             {
@@ -619,7 +619,7 @@
             "version": 2,
             "hash": "dc902d582f151d2bd1bbcc641779f2caeab7dc8d5f600ec4496381ca64752b75"
           },
-          "name": "远端频谱光环",
+          "name": "环形频谱",
           "enabled": true,
           "bindings": [
             {
@@ -723,7 +723,7 @@
             "version": 2,
             "hash": "0692a003aeaed249ec37d842787b369d13fea97a2c0143ebcce0dc2dc9a45f21"
           },
-          "name": "导航弧簇",
+          "name": "旋转弧簇",
           "enabled": true,
           "bindings": [
             {
@@ -834,7 +834,7 @@
             "version": 2,
             "hash": "cadcd8bc729340ac2b8175de40140a40ba0328b6a12f8c4df28bcb8d800dbfca"
           },
-          "name": "棱镜核心",
+          "name": "旋转线框",
           "enabled": true,
           "bindings": [
             {
@@ -952,7 +952,7 @@
             "version": 2,
             "hash": "cadcd8bc729340ac2b8175de40140a40ba0328b6a12f8c4df28bcb8d800dbfca"
           },
-          "name": "倾斜光环 A",
+          "name": "旋转线框",
           "enabled": true,
           "bindings": [
             {
@@ -1070,7 +1070,7 @@
             "version": 2,
             "hash": "cadcd8bc729340ac2b8175de40140a40ba0328b6a12f8c4df28bcb8d800dbfca"
           },
-          "name": "倾斜光环 B",
+          "name": "旋转线框",
           "enabled": true,
           "bindings": [
             {
@@ -1188,7 +1188,7 @@
             "version": 2,
             "hash": "0a44ecd7992bb90b9d4e504defe1b8fff8b596d24fad6df9f717ad8d88ffa0d2"
           },
-          "name": "轨道信标",
+          "name": "轨道几何体",
           "enabled": true,
           "bindings": [
             {
@@ -1364,7 +1364,7 @@
           }
         }
       ],
-      "hash": "ab2959a540d21e96628330b06f75c8c634ea30a12ffe83df47185a3731f2da36"
+      "hash": "10ad79b64e818bc05ce2101903ec6a493c0bc34d3af5e5c3c254d781b734a751"
     }
   ],
   "algorithms": []

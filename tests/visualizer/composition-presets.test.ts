@@ -28,7 +28,8 @@ test('presets expand to editable strict V5 elements with independent identities'
 });
 test('geometric blocks use amplitude spectrum and every other spectrum uses the WE approximation', () => {
     const elements = createPresetElements('geometric-0.6', track.durationSeconds);
-    for (const element of elements) {
+    const template = compositionPresets.find(p => p.id === 'geometric-0.6')!;
+    for (const [index, element] of elements.entries()) {
         const spectrum = element.bindings.find(b => b.parameterId === 'spectrum');
         if (element.resource.id === 'solid') {
             expect(spectrum).toBeUndefined();
@@ -36,7 +37,7 @@ test('geometric blocks use amplitude spectrum and every other spectrum uses the 
         }
         expect(spectrum?.source).toEqual({
             kind: 'analysis',
-            featureId: element.name === '十二频段方块' ? 'amplitudeSpectrum' : 'wallpaperEngineSpectrum',
+            featureId: template.elements[index]!.key === 'element-3' ? 'amplitudeSpectrum' : 'wallpaperEngineSpectrum',
             projection: { kind: 'full' },
         });
     }
