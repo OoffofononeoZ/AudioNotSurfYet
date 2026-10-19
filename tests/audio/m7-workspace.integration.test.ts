@@ -1,18 +1,6 @@
-import {
-    createPinia,
-    setActivePinia,
-} from 'pinia';
-import {
-    beforeEach,
-    describe,
-    expect,
-    test,
-    vi,
-} from 'vitest';
-import {
-    AudioSessionService,
-    type AudioEnginePort,
-} from '../../src/audio/audioSessionService';
+import { createPinia, setActivePinia } from 'pinia';
+import { beforeEach, describe, expect, test, vi } from 'vitest';
+import { AudioSessionService, type AudioEnginePort } from '../../src/audio/audioSessionService';
 import type {
     PersistedCurrentInput,
     PersistedQueueInput,
@@ -20,10 +8,7 @@ import type {
 } from '../../src/persistence/sessionRepository';
 import { useAudioSessionStore } from '../../src/stores/audioSessionStore';
 import type { PlaybackSnapshot } from '../../src/types/audio';
-import {
-    DEFAULT_PERSISTED_ANALYSIS_CONFIG,
-    type RestoredSessionBundle,
-} from '../../src/types/session';
+import { DEFAULT_PERSISTED_ANALYSIS_CONFIG, type RestoredSessionBundle } from '../../src/types/session';
 
 class WorkspaceEngine implements AudioEnginePort {
     async setAuditionSource() {}
@@ -34,6 +19,8 @@ class WorkspaceEngine implements AudioEnginePort {
         currentTimeSeconds: 0,
         durationSeconds: 0,
         volume: 1,
+
+        playbackRate: 1,
     };
 
     async load() {
@@ -42,6 +29,9 @@ class WorkspaceEngine implements AudioEnginePort {
     async play() {}
     pause() {}
     async seek() {}
+    async setPlaybackRate(playbackRate: number) {
+        this.snapshot.playbackRate = playbackRate;
+    }
     setVolume() {}
     getSnapshot() {
         return { ...this.snapshot };
@@ -52,9 +42,13 @@ class WorkspaceEngine implements AudioEnginePort {
     getDecodedAudioDescriptor() {
         return null;
     }
-    capturePlaybackCheckpoint() { return null; }
+    capturePlaybackCheckpoint() {
+        return null;
+    }
     async restorePlaybackCheckpoint(): Promise<void> {}
-    acquireRecordingTap(): never { throw new Error('not implemented'); }
+    acquireRecordingTap(): never {
+        throw new Error('not implemented');
+    }
     copyDecodedChannelRange() {
         return null;
     }
@@ -124,9 +118,7 @@ describe('M7 analysis workspace integration', () => {
     test('updates memory before persistence and stores FIFO cards/viewport', async () => {
         const harness = createHarness();
         const promise = harness.service.updateAnalysisWorkspace({
-            activeFeatureQueue: [
-                'rms', 'amplitudeSpectrum', 'chroma', 'spectralFlux',
-            ],
+            activeFeatureQueue: ['rms', 'amplitudeSpectrum', 'chroma', 'spectralFlux'],
             viewport: {
                 startSeconds: 2,
                 endSeconds: 6,
@@ -136,9 +128,7 @@ describe('M7 analysis workspace integration', () => {
 
         expect(harness.store.analysisWorkspace).toMatchObject({
             initialized: true,
-            activeFeatureQueue: [
-                'rms', 'amplitudeSpectrum', 'chroma', 'spectralFlux',
-            ],
+            activeFeatureQueue: ['rms', 'amplitudeSpectrum', 'chroma', 'spectralFlux'],
             viewport: {
                 startSeconds: 2,
                 endSeconds: 6,
@@ -146,8 +136,7 @@ describe('M7 analysis workspace integration', () => {
             },
         });
         await promise;
-        expect(harness.repository.saves[0]?.session.activeCards)
-            .toHaveLength(4);
+        expect(harness.repository.saves[0]?.session.activeCards).toHaveLength(4);
         expect(harness.repository.saves[0]?.session.viewport).toEqual({
             startSeconds: 2,
             endSeconds: 6,
@@ -157,10 +146,7 @@ describe('M7 analysis workspace integration', () => {
 
     test('keeps current workspace usable when persistence fails', async () => {
         const repository = new WorkspaceRepository();
-        repository.saveError = new DOMException(
-            'quota',
-            'QuotaExceededError',
-        );
+        repository.saveError = new DOMException('quota', 'QuotaExceededError');
         const harness = createHarness(repository);
 
         await harness.service.updateAnalysisWorkspace({
@@ -168,8 +154,7 @@ describe('M7 analysis workspace integration', () => {
             viewport: null,
         });
 
-        expect(harness.store.analysisWorkspace.activeFeatureQueue)
-            .toEqual(['chroma']);
+        expect(harness.store.analysisWorkspace.activeFeatureQueue).toEqual(['chroma']);
         expect(harness.store.persistence).toMatchObject({
             state: 'not-persisted',
         });
@@ -226,7 +211,6 @@ describe('M7 analysis workspace integration', () => {
         await harness.service.initialize();
         expect(harness.store.analysisWorkspace.activeFeatureQueue).toEqual([]);
 
-
         await harness.service.updateAnalysisWorkspace({
             activeFeatureQueue: ['rms', 'chroma'],
             viewport: { startSeconds: 0, endSeconds: 4, zoom: 2 },
@@ -243,9 +227,7 @@ describe('M7 analysis workspace integration', () => {
     test('persists four unique cumulative M10 cards without a schema bump', async () => {
         const repository = new WorkspaceRepository();
         const harness = createHarness(repository);
-        const activeFeatureQueue = [
-            'loudness', 'complexSpectrum', 'buffer', 'spectralFlux',
-        ] as const;
+        const activeFeatureQueue = ['loudness', 'complexSpectrum', 'buffer', 'spectralFlux'] as const;
 
         await harness.service.updateAnalysisWorkspace({
             activeFeatureQueue: [...activeFeatureQueue],
@@ -277,11 +259,8 @@ describe('M7 analysis workspace integration', () => {
         await vi.waitFor(() => {
             expect(repository.pending).toHaveLength(1);
         });
-        expect(repository.pending[0]?.input.session.activeCards).toEqual([
-            { slot: 0, featureId: 'rms' },
-        ]);
-        expect(harness.store.analysisWorkspace.activeFeatureQueue)
-            .toEqual(['chroma', 'buffer']);
+        expect(repository.pending[0]?.input.session.activeCards).toEqual([{ slot: 0, featureId: 'rms' }]);
+        expect(harness.store.analysisWorkspace.activeFeatureQueue).toEqual(['chroma', 'buffer']);
         repository.pending[0]?.reject(new Error('old save failed'));
         await vi.waitFor(() => {
             expect(repository.pending).toHaveLength(2);
@@ -301,7 +280,6 @@ describe('M7 analysis workspace integration', () => {
 
         await Promise.all([first, second]);
         expect(harness.store.persistence.state).toBe('ready');
-        expect(harness.store.analysisWorkspace.activeFeatureQueue)
-            .toEqual(['chroma', 'buffer']);
+        expect(harness.store.analysisWorkspace.activeFeatureQueue).toEqual(['chroma', 'buffer']);
     });
 });

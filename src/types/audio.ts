@@ -28,14 +28,7 @@ export interface TrackRecord {
     restoreState: RestoreState;
 }
 
-export type PlaybackState =
-    | 'empty'
-    | 'loading'
-    | 'buffering'
-    | 'paused'
-    | 'playing'
-    | 'ended'
-    | 'error';
+export type PlaybackState = 'empty' | 'loading' | 'buffering' | 'paused' | 'playing' | 'ended' | 'error';
 
 export type PlaybackErrorCode = 'decode' | 'context' | 'source' | 'unsupported' | 'audition-read';
 
@@ -50,10 +43,14 @@ export interface PlaybackSnapshot {
     currentTimeSeconds: number;
     durationSeconds: number;
     volume: number;
+    playbackRate: number;
     error?: PlaybackError;
     audition?: {
-        kind:'original'|'ft'|'auxiliary';label:string;resultId?:string;
-        roles:string[];mutedRoles:string[];
+        kind: 'original' | 'ft' | 'auxiliary';
+        label: string;
+        resultId?: string;
+        roles: string[];
+        mutedRoles: string[];
     };
 }
 
@@ -67,13 +64,7 @@ export interface DecodedAudioDescriptor {
 }
 
 export type SessionPersistenceState =
-    | 'idle'
-    | 'restoring'
-    | 'ready'
-    | 'saving'
-    | 'not-persisted'
-    | 'unsupported-schema'
-    | 'restore-error';
+    'idle' | 'restoring' | 'ready' | 'saving' | 'not-persisted' | 'unsupported-schema' | 'restore-error';
 
 export interface SessionPersistenceSnapshot {
     state: SessionPersistenceState;

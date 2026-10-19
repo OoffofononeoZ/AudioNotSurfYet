@@ -1,9 +1,4 @@
-import {
-    describe,
-    expect,
-    test,
-    vi,
-} from 'vitest';
+import { describe, expect, test, vi } from 'vitest';
 import { AudioEngine } from '../../src/audio/audioEngine';
 
 interface Deferred<T> {
@@ -32,20 +27,11 @@ class FakeAudioBuffer {
     constructor(duration = 10) {
         this.duration = duration;
         this.length = duration * this.sampleRate;
-        this.values = Float32Array.from(
-            { length: this.length },
-            (_, index) => index / this.length,
-        );
+        this.values = Float32Array.from({ length: this.length }, (_, index) => index / this.length);
     }
 
-    copyFromChannel(
-        destination: Float32Array,
-        _channel: number,
-        start: number,
-    ) {
-        destination.set(
-            this.values.subarray(start, start + destination.length),
-        );
+    copyFromChannel(destination: Float32Array, _channel: number, start: number) {
+        destination.set(this.values.subarray(start, start + destination.length));
     }
 }
 
@@ -85,6 +71,7 @@ class FakeMediaStreamDestinationNode extends FakeAudioNode {
 }
 
 class FakeBufferSourceNode extends FakeAudioNode {
+    playbackRate = { value: 1 };
     buffer: AudioBuffer | null = null;
     onended: (() => void) | null = null;
     start = vi.fn();
@@ -136,20 +123,52 @@ class FakeAudioContext {
     decodeAudioData() {
         const controlled = this.decodeQueue.shift();
         if (controlled) return controlled.promise;
-        return Promise.resolve(
-            new FakeAudioBuffer() as unknown as AudioBuffer,
-        );
+        return Promise.resolve(new FakeAudioBuffer() as unknown as AudioBuffer);
     }
 }
 
 const bytes = () => new Uint8Array([1, 2, 3]).buffer;
 
 describe('AudioEngine', () => {
+    test('changes native rate without jumping source time and restores rate with the export checkpoint', async () => {
+        const context = new FakeAudioContext();
+        const engine = new AudioEngine({ audioContextFactory: () => context as unknown as AudioContext });
+        await engine.setPlaybackRate(2);
+        await engine.load({ trackId: 'rate-song', encodedAudio: bytes() });
+        await engine.play();
+        expect(context.sources[0]!.playbackRate.value).toBe(2);
+        context.currentTime = 2;
+        expect(engine.getSnapshot().currentTimeSeconds).toBe(4);
+        await engine.setPlaybackRate(0.5);
+        expect(engine.getSnapshot()).toMatchObject({ currentTimeSeconds: 4, playbackRate: 0.5, state: 'playing' });
+        expect(context.sources).toHaveLength(1);
+        context.currentTime = 4;
+        expect(engine.getSnapshot().currentTimeSeconds).toBe(5);
+        const checkpoint = engine.capturePlaybackCheckpoint()!;
+        expect(checkpoint.playbackRate).toBe(0.5);
+        engine.pause();
+        await engine.setPlaybackRate(1.5);
+        await engine.seek(8);
+        await engine.restorePlaybackCheckpoint(checkpoint);
+        expect(engine.getSnapshot()).toMatchObject({ currentTimeSeconds: 5, playbackRate: 0.5, state: 'playing' });
+        expect(context.sources.at(-1)!.playbackRate.value).toBe(0.5);
+        context.currentTime = 6;
+        expect(engine.getSnapshot().currentTimeSeconds).toBe(6);
+        engine.pause();
+        await engine.seek(3);
+        await engine.play();
+        context.currentTime = 8;
+        expect(engine.getSnapshot().currentTimeSeconds).toBe(4);
+        engine.unload();
+        expect(engine.getSnapshot().playbackRate).toBe(0.5);
+        for (const rate of [0, 2.1, NaN, Infinity])
+            await expect(engine.setPlaybackRate(rate)).rejects.toThrow(RangeError);
+        await engine.dispose();
+    });
     test('copies decoded PCM by revision without exposing AudioBuffer', async () => {
         const context = new FakeAudioContext();
         const engine = new AudioEngine({
-            audioContextFactory: () =>
-                context as unknown as AudioContext,
+            audioContextFactory: () => context as unknown as AudioContext,
         });
         await engine.load({
             trackId: 'track-pcm',
@@ -171,29 +190,31 @@ describe('AudioEngine', () => {
         });
         expect(copied).toEqual(new Float32Array([0.03, 0.04]));
         engine.unload();
-        expect(engine.copyDecodedChannelRange({
-            revision: descriptor!.revision,
-            channel: 0,
-            start: 0,
-            length: 1,
-        })).toBeNull();
+        expect(
+            engine.copyDecodedChannelRange({
+                revision: descriptor!.revision,
+                channel: 0,
+                start: 0,
+                length: 1,
+            }),
+        ).toBeNull();
     });
 
     test('creates one lazy graph and uses the AudioContext clock', async () => {
         const context = new FakeAudioContext();
-        const factory = vi.fn(
-            () => context as unknown as AudioContext,
-        );
+        const factory = vi.fn(() => context as unknown as AudioContext);
         const engine = new AudioEngine({ audioContextFactory: factory });
 
         expect(factory).not.toHaveBeenCalled();
         engine.setVolume(0.4);
         expect(factory).not.toHaveBeenCalled();
 
-        await expect(engine.load({
-            trackId: 'track-a',
-            encodedAudio: bytes(),
-        })).resolves.toBe('loaded');
+        await expect(
+            engine.load({
+                trackId: 'track-a',
+                encodedAudio: bytes(),
+            }),
+        ).resolves.toBe('loaded');
         expect(factory).toHaveBeenCalledTimes(1);
         expect(context.gain.gain.value).toBe(0.4);
 
@@ -216,11 +237,10 @@ describe('AudioEngine', () => {
     test('clamps seeks, rebuilds a playing source, and restarts after ended', async () => {
         const context = new FakeAudioContext();
         const engine = new AudioEngine({
-            audioContextFactory: () =>
-                context as unknown as AudioContext,
+            audioContextFactory: () => context as unknown as AudioContext,
         });
         const states: string[] = [];
-        engine.subscribe((snapshot) => states.push(snapshot.state));
+        engine.subscribe(snapshot => states.push(snapshot.state));
 
         await engine.load({ trackId: 'track-a', encodedAudio: bytes() });
         await engine.seek(-4);
@@ -237,17 +257,14 @@ describe('AudioEngine', () => {
 
         context.sources.at(-1)?.finishNaturally();
         context.sources.at(-1)?.finishNaturally();
-        expect(states.filter((state) => state === 'ended')).toHaveLength(1);
+        expect(states.filter(state => state === 'ended')).toHaveLength(1);
         expect(engine.getSnapshot()).toMatchObject({
             state: 'ended',
             currentTimeSeconds: 10,
         });
 
         await engine.play();
-        expect(context.sources.at(-1)?.start).toHaveBeenCalledWith(
-            context.currentTime,
-            0,
-        );
+        expect(context.sources.at(-1)?.start).toHaveBeenCalledWith(context.currentTime, 0);
         engine.pause();
         await engine.seek(999);
         expect(engine.getSnapshot()).toMatchObject({
@@ -269,8 +286,7 @@ describe('AudioEngine', () => {
         const secondDecode = deferred<AudioBuffer>();
         context.decodeQueue.push(firstDecode, secondDecode);
         const engine = new AudioEngine({
-            audioContextFactory: () =>
-                context as unknown as AudioContext,
+            audioContextFactory: () => context as unknown as AudioContext,
         });
 
         const first = engine.load({
@@ -281,13 +297,9 @@ describe('AudioEngine', () => {
             trackId: 'track-b',
             encodedAudio: bytes(),
         });
-        secondDecode.resolve(
-            new FakeAudioBuffer(8) as unknown as AudioBuffer,
-        );
+        secondDecode.resolve(new FakeAudioBuffer(8) as unknown as AudioBuffer);
         await expect(second).resolves.toBe('loaded');
-        firstDecode.resolve(
-            new FakeAudioBuffer(4) as unknown as AudioBuffer,
-        );
+        firstDecode.resolve(new FakeAudioBuffer(4) as unknown as AudioBuffer);
         await expect(first).resolves.toBe('stale');
         expect(engine.getSnapshot()).toMatchObject({
             trackId: 'track-b',
@@ -301,18 +313,14 @@ describe('AudioEngine', () => {
         const failedDecode = deferred<AudioBuffer>();
         decodeContext.decodeQueue.push(failedDecode);
         const decodeEngine = new AudioEngine({
-            audioContextFactory: () =>
-                decodeContext as unknown as AudioContext,
+            audioContextFactory: () => decodeContext as unknown as AudioContext,
         });
 
         const loading = decodeEngine.load({
             trackId: 'broken',
             encodedAudio: bytes(),
         });
-        failedDecode.reject(new DOMException(
-            'Unsupported stream',
-            'NotSupportedError',
-        ));
+        failedDecode.reject(new DOMException('Unsupported stream', 'NotSupportedError'));
         await expect(loading).rejects.toThrow('Unsupported stream');
         expect(decodeEngine.getSnapshot()).toMatchObject({
             trackId: 'broken',
@@ -326,10 +334,12 @@ describe('AudioEngine', () => {
                 throw contextError;
             },
         });
-        await expect(contextEngine.load({
-            trackId: 'track-a',
-            encodedAudio: bytes(),
-        })).rejects.toThrow(contextError);
+        await expect(
+            contextEngine.load({
+                trackId: 'track-a',
+                encodedAudio: bytes(),
+            }),
+        ).rejects.toThrow(contextError);
         expect(contextEngine.getSnapshot()).toMatchObject({
             state: 'error',
             error: { code: 'context' },
@@ -340,16 +350,13 @@ describe('AudioEngine', () => {
             throw new Error('Source allocation failed');
         };
         const sourceEngine = new AudioEngine({
-            audioContextFactory: () =>
-                sourceContext as unknown as AudioContext,
+            audioContextFactory: () => sourceContext as unknown as AudioContext,
         });
         await sourceEngine.load({
             trackId: 'track-a',
             encodedAudio: bytes(),
         });
-        await expect(sourceEngine.play()).rejects.toThrow(
-            'Source allocation failed',
-        );
+        await expect(sourceEngine.play()).rejects.toThrow('Source allocation failed');
         expect(sourceEngine.getSnapshot()).toMatchObject({
             state: 'error',
             error: { code: 'source' },
@@ -360,19 +367,15 @@ describe('AudioEngine', () => {
         failedSource.start.mockImplementation(() => {
             throw new Error('Source start failed');
         });
-        startContext.createBufferSource = () =>
-            failedSource as unknown as AudioBufferSourceNode;
+        startContext.createBufferSource = () => failedSource as unknown as AudioBufferSourceNode;
         const startEngine = new AudioEngine({
-            audioContextFactory: () =>
-                startContext as unknown as AudioContext,
+            audioContextFactory: () => startContext as unknown as AudioContext,
         });
         await startEngine.load({
             trackId: 'track-a',
             encodedAudio: bytes(),
         });
-        await expect(startEngine.play()).rejects.toThrow(
-            'Source start failed',
-        );
+        await expect(startEngine.play()).rejects.toThrow('Source start failed');
         expect(failedSource.disconnect).toHaveBeenCalled();
         expect(startEngine.getSnapshot()).toMatchObject({
             state: 'error',
@@ -382,9 +385,7 @@ describe('AudioEngine', () => {
 
     test('unloads and disposes resources without eagerly creating a replacement context', async () => {
         const context = new FakeAudioContext();
-        const factory = vi.fn(
-            () => context as unknown as AudioContext,
-        );
+        const factory = vi.fn(() => context as unknown as AudioContext);
         const engine = new AudioEngine({ audioContextFactory: factory });
 
         await engine.load({ trackId: 'track-a', encodedAudio: bytes() });
@@ -399,5 +400,4 @@ describe('AudioEngine', () => {
         expect(context.close).toHaveBeenCalledTimes(1);
         expect(factory).toHaveBeenCalledTimes(1);
     });
-
 });

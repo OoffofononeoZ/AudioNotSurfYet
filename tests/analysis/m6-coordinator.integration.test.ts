@@ -1,30 +1,15 @@
-import {
-    createPinia,
-    setActivePinia,
-} from 'pinia';
-import {
-    beforeEach,
-    describe,
-    expect,
-    test,
-    vi,
-} from 'vitest';
+import { createPinia, setActivePinia } from 'pinia';
+import { beforeEach, describe, expect, test, vi } from 'vitest';
 import { AnalysisCoordinator } from '../../src/analysis/analysisCoordinator';
 import { encodeAnalysisSeries } from '../../src/analysis/compactCodec';
-import {
-    createAnalysisCacheKey,
-    createAnalysisConfig,
-} from '../../src/analysis/config';
+import { createAnalysisCacheKey, createAnalysisConfig } from '../../src/analysis/config';
 import {
     AnalysisWorkerCoreError,
     extractTempoEstimate,
     runAnalysisJob,
     type RetainedAnalysisPcm,
 } from '../../src/analysis/workerCore';
-import type {
-    AnalysisWorkerRequest,
-    AnalysisWorkerResponse,
-} from '../../src/analysis/types';
+import type { AnalysisWorkerRequest, AnalysisWorkerResponse } from '../../src/analysis/types';
 import type {
     PersistedCurrentInput,
     PersistedQueueInput,
@@ -32,18 +17,11 @@ import type {
     SessionRepositoryPort,
 } from '../../src/persistence/sessionRepository';
 import { useAudioSessionStore } from '../../src/stores/audioSessionStore';
-import type {
-    DecodedAudioDescriptor,
-    PlaybackSnapshot,
-} from '../../src/types/audio';
-import {
-    createSine,
-    SAMPLE_RATE,
-} from '../support/audio-fixtures';
+import type { DecodedAudioDescriptor, PlaybackSnapshot } from '../../src/types/audio';
+import { createSine, SAMPLE_RATE } from '../support/audio-fixtures';
 
 class FakeAnalysisEngine {
-    readonly listeners =
-        new Set<(snapshot: PlaybackSnapshot) => void>();
+    readonly listeners = new Set<(snapshot: PlaybackSnapshot) => void>();
     revision = 1;
     channels: Float32Array[];
     snapshot: PlaybackSnapshot;
@@ -56,6 +34,8 @@ class FakeAnalysisEngine {
             currentTimeSeconds: 0,
             durationSeconds: channels[0]!.length / SAMPLE_RATE,
             volume: 1,
+
+            playbackRate: 1,
         };
     }
 
@@ -79,17 +59,9 @@ class FakeAnalysisEngine {
         };
     }
 
-    copyDecodedChannelRange(input: {
-        revision: number;
-        channel: number;
-        start: number;
-        length: number;
-    }) {
+    copyDecodedChannelRange(input: { revision: number; channel: number; start: number; length: number }) {
         if (input.revision !== this.revision) return null;
-        return this.channels[input.channel]?.slice(
-            input.start,
-            input.start + input.length,
-        ) ?? null;
+        return this.channels[input.channel]?.slice(input.start, input.start + input.length) ?? null;
     }
 
     emit(snapshot: PlaybackSnapshot) {
@@ -111,9 +83,7 @@ class FakeRepository implements SessionRepositoryPort {
 
     async replaceCurrent(_input: PersistedCurrentInput) {}
 
-    async replaceCurrentAnalysisCache(
-        input: ReplaceCurrentAnalysisCacheInput,
-    ) {
+    async replaceCurrentAnalysisCache(input: ReplaceCurrentAnalysisCacheInput) {
         if (this.cacheError) throw this.cacheError;
         this.cacheInputs.push(input);
         return this.cacheResult;
@@ -125,14 +95,9 @@ class FakeRepository implements SessionRepositoryPort {
 }
 
 class CoreWorker {
-    onmessage:
-        | ((event: MessageEvent<AnalysisWorkerResponse>) => void)
-        | null = null;
+    onmessage: ((event: MessageEvent<AnalysisWorkerResponse>) => void) | null = null;
     onerror: ((event: ErrorEvent) => void) | null = null;
-    readonly analyzeRequests: Extract<
-        AnalysisWorkerRequest,
-        { kind: 'analyze' }
-    >[] = [];
+    readonly analyzeRequests: Extract<AnalysisWorkerRequest, { kind: 'analyze' }>[] = [];
     readonly cancelled = new Set<string>();
     terminated = false;
     retained: RetainedAnalysisPcm | null = null;
@@ -146,9 +111,7 @@ class CoreWorker {
             return;
         }
         if (request.kind === 'tempo-estimate') {
-            const result = this.retained
-                ? extractTempoEstimate(this.retained, request)
-                : null;
+            const result = this.retained ? extractTempoEstimate(this.retained, request) : null;
             if (result) {
                 this.onmessage?.({ data: result } as MessageEvent<AnalysisWorkerResponse>);
             }
@@ -169,26 +132,26 @@ class CoreWorker {
                 } as MessageEvent<AnalysisWorkerResponse>);
             },
             yieldControl: async () => undefined,
-        }).then(({ result, retained }) => {
-            this.retained = retained;
-            this.onmessage?.({
-                data: result,
-            } as MessageEvent<AnalysisWorkerResponse>);
-        }).catch((error) => {
-            const known = error instanceof AnalysisWorkerCoreError;
-            this.onmessage?.({
-                data: {
-                    kind: 'error',
-                    jobId: request.jobId,
-                    generation: request.generation,
-                    code: known ? error.code : 'worker-failed',
-                    message: error instanceof Error
-                        ? error.message
-                        : 'failed',
-                    recoverable: true,
-                },
-            } as MessageEvent<AnalysisWorkerResponse>);
-        });
+        })
+            .then(({ result, retained }) => {
+                this.retained = retained;
+                this.onmessage?.({
+                    data: result,
+                } as MessageEvent<AnalysisWorkerResponse>);
+            })
+            .catch(error => {
+                const known = error instanceof AnalysisWorkerCoreError;
+                this.onmessage?.({
+                    data: {
+                        kind: 'error',
+                        jobId: request.jobId,
+                        generation: request.generation,
+                        code: known ? error.code : 'worker-failed',
+                        message: error instanceof Error ? error.message : 'failed',
+                        recoverable: true,
+                    },
+                } as MessageEvent<AnalysisWorkerResponse>);
+            });
     }
 
     terminate() {
@@ -208,33 +171,30 @@ const setup = (
     const repository = options.repository ?? new FakeRepository();
     const worker = options.worker ?? new CoreWorker();
     const store = useAudioSessionStore();
-    store.queue = [{
-        id: 'track-1',
-        name: 'fixture.wav',
-        mimeType: 'audio/wav',
-        byteSize: pcm.byteLength,
-        lastModified: 1,
-        metadata: { title: 'fixture' },
-        trackHash: 'track-hash',
-        restoreState: 'available',
-    }];
+    store.queue = [
+        {
+            id: 'track-1',
+            name: 'fixture.wav',
+            mimeType: 'audio/wav',
+            byteSize: pcm.byteLength,
+            lastModified: 1,
+            metadata: { title: 'fixture' },
+            trackHash: 'track-hash',
+            restoreState: 'available',
+        },
+    ];
     store.currentTrackId = 'track-1';
     store.playback = { ...engine.snapshot };
     const workerFactory = vi.fn(() => worker);
-    const coordinator = new AnalysisCoordinator(
-        engine,
-        repository,
-        store,
-        {
-            workerFactory,
-            copyYieldControl: async () => undefined,
-            createJobId: (() => {
-                let id = 0;
-                return () => `id-${++id}`;
-            })(),
-            cursorTimeoutMs: 20,
-        },
-    );
+    const coordinator = new AnalysisCoordinator(engine, repository, store, {
+        workerFactory,
+        copyYieldControl: async () => undefined,
+        createJobId: (() => {
+            let id = 0;
+            return () => `id-${++id}`;
+        })(),
+        cursorTimeoutMs: 20,
+    });
     return {
         coordinator,
         engine,
@@ -261,13 +221,25 @@ describe('AnalysisCoordinator integration', () => {
         const series = harness.coordinator.getSeries('wallpaperEngineSpectrum')!;
         const cacheKey = createAnalysisCacheKey('track-hash', series.configHash, 'wallpaperEngineSpectrum');
         const restored = setup({ pcm: createSine(440, 48000) });
-        restored.coordinator.setRestoredCache({manifest:{trackId:'track-1',trackHash:'track-hash',configHash:series.configHash,featureIds:['wallpaperEngineSpectrum'],cacheKeys:[cacheKey]},payloads:[{cacheKey,payload:encodeAnalysisSeries(series)}]});
+        restored.coordinator.setRestoredCache({
+            manifest: {
+                trackId: 'track-1',
+                trackHash: 'track-hash',
+                configHash: series.configHash,
+                featureIds: ['wallpaperEngineSpectrum'],
+                cacheKeys: [cacheKey],
+            },
+            payloads: [{ cacheKey, payload: encodeAnalysisSeries(series) }],
+        });
         await restored.coordinator.setActiveFeatures(['wallpaperEngineSpectrum', 'energy']);
         await vi.waitFor(() => expect(restored.coordinator.getSnapshot().state).toBe('ready'));
         expect(restored.worker.analyzeRequests[0]?.featureIds).toEqual(['energy']);
         expect(restored.worker.analyzeRequests[0]?.stereoPcm).toBeUndefined();
-        expect((await restored.coordinator.requestCursorValue('wallpaperEngineSpectrum',0.51))?.value).toEqual(exact?.value);
-        await harness.coordinator.dispose(); await restored.coordinator.dispose();
+        expect((await restored.coordinator.requestCursorValue('wallpaperEngineSpectrum', 0.51))?.value).toEqual(
+            exact?.value,
+        );
+        await harness.coordinator.dispose();
+        await restored.coordinator.dispose();
         expect(harness.worker.terminated && restored.worker.terminated).toBe(true);
     });
     test('keeps the default at zero features without creating a Worker', async () => {
@@ -285,16 +257,10 @@ describe('AnalysisCoordinator integration', () => {
 
     test('runs four unique features, persists them, and keeps Pinia serializable', async () => {
         const harness = setup();
-        await harness.coordinator.setActiveFeatures([
-            'energy',
-            'zcr',
-            'spectralFlux',
-            'spectralFlatness',
-        ]);
+        await harness.coordinator.setActiveFeatures(['energy', 'zcr', 'spectralFlux', 'spectralFlatness']);
         await vi.waitFor(() => {
             expect(harness.coordinator.getSnapshot().state).toBe('ready');
-            expect(harness.coordinator.getSnapshot().cacheState)
-                .toBe('persisted');
+            expect(harness.coordinator.getSnapshot().cacheState).toBe('persisted');
         });
         expect(harness.worker.analyzeRequests[0]?.featureIds).toEqual([
             'energy',
@@ -302,13 +268,10 @@ describe('AnalysisCoordinator integration', () => {
             'spectralFlux',
             'spectralFlatness',
         ]);
-        expect(harness.repository.cacheInputs[0]?.payloads)
-            .toHaveLength(4);
+        expect(harness.repository.cacheInputs[0]?.payloads).toHaveLength(4);
         expect(() => JSON.stringify(harness.store.$state)).not.toThrow();
-        expect(JSON.stringify(harness.store.$state))
-            .not.toContain('ArrayBuffer');
-        expect(JSON.stringify(harness.store.$state))
-            .not.toContain('Float32Array');
+        expect(JSON.stringify(harness.store.$state)).not.toContain('ArrayBuffer');
+        expect(JSON.stringify(harness.store.$state)).not.toContain('Float32Array');
         await harness.coordinator.dispose();
         expect(harness.worker.terminated).toBe(true);
     });
@@ -328,11 +291,7 @@ describe('AnalysisCoordinator integration', () => {
             durationSeconds: pcm.length / SAMPLE_RATE,
         });
         const cachedSeries = direct.result.series[0]!;
-        const cacheKey = createAnalysisCacheKey(
-            'track-hash',
-            config.configHash,
-            'loudness',
-        );
+        const cacheKey = createAnalysisCacheKey('track-hash', config.configHash, 'loudness');
         const harness = setup({ pcm });
         harness.coordinator.setRestoredCache({
             manifest: {
@@ -342,34 +301,28 @@ describe('AnalysisCoordinator integration', () => {
                 featureIds: ['loudness'],
                 cacheKeys: [cacheKey],
             },
-            payloads: [{
-                cacheKey,
-                payload: encodeAnalysisSeries(cachedSeries),
-            }],
+            payloads: [
+                {
+                    cacheKey,
+                    payload: encodeAnalysisSeries(cachedSeries),
+                },
+            ],
         });
 
-        await harness.coordinator.setActiveFeatures([
-            'loudness',
-            'complexSpectrum',
-        ]);
+        await harness.coordinator.setActiveFeatures(['loudness', 'complexSpectrum']);
         await vi.waitFor(() => {
             expect(harness.coordinator.getSnapshot().state).toBe('ready');
         });
-        expect(harness.worker.analyzeRequests[0]?.featureIds)
-            .toEqual(['complexSpectrum']);
-        expect(harness.coordinator.getSeries('loudness'))
-            .toEqual(cachedSeries);
-        expect(harness.coordinator.getSnapshot().readyFeatureIds)
-            .toEqual(['loudness', 'complexSpectrum']);
+        expect(harness.worker.analyzeRequests[0]?.featureIds).toEqual(['complexSpectrum']);
+        expect(harness.coordinator.getSeries('loudness')).toEqual(cachedSeries);
+        expect(harness.coordinator.getSnapshot().readyFeatureIds).toEqual(['loudness', 'complexSpectrum']);
         await harness.coordinator.dispose();
     });
 
     test('drops stale results after an active-feature generation change', async () => {
         const worker = new CoreWorker();
         const harness = setup({ worker });
-        worker.postMessage = function postMessage(
-            request: AnalysisWorkerRequest,
-        ) {
+        worker.postMessage = function postMessage(request: AnalysisWorkerRequest) {
             if (request.kind === 'analyze') {
                 this.analyzeRequests.push(request);
             } else if (request.kind === 'cancel') {
@@ -387,27 +340,21 @@ describe('AnalysisCoordinator integration', () => {
         worker.onmessage?.({
             data: staleOutput.result,
         } as MessageEvent<AnalysisWorkerResponse>);
-        expect(harness.coordinator.getSnapshot().staleMessageCount)
-            .toBeGreaterThan(0);
+        expect(harness.coordinator.getSnapshot().staleMessageCount).toBeGreaterThan(0);
         expect(harness.coordinator.getSeries('rms')).toBeNull();
-        expect(harness.coordinator.getSnapshot().configHash)
-            .toBe(config.configHash);
+        expect(harness.coordinator.getSnapshot().configHash).toBe(config.configHash);
         await harness.coordinator.dispose();
     });
 
     test('keeps playback intact when cache persistence fails', async () => {
         const repository = new FakeRepository();
-        repository.cacheError = new DOMException(
-            'quota',
-            'QuotaExceededError',
-        );
+        repository.cacheError = new DOMException('quota', 'QuotaExceededError');
         const harness = setup({ repository });
         harness.store.playback.state = 'playing';
         await harness.coordinator.setActiveFeatures(['rms']);
         await vi.waitFor(() => {
             expect(harness.coordinator.getSnapshot().state).toBe('ready');
-            expect(harness.coordinator.getSnapshot().cacheState)
-                .toBe('not-persisted');
+            expect(harness.coordinator.getSnapshot().cacheState).toBe('not-persisted');
         });
         expect(harness.store.playback.state).toBe('playing');
         expect(harness.coordinator.getSeries('rms')).not.toBeNull();
@@ -416,25 +363,17 @@ describe('AnalysisCoordinator integration', () => {
 
     test('rejects duplicate, five-item and unknown feature intent', async () => {
         const harness = setup();
-        await expect(harness.coordinator.setActiveFeatures([
-            'rms',
-            'rms',
-        ])).rejects.toMatchObject({
+        await expect(harness.coordinator.setActiveFeatures(['rms', 'rms'])).rejects.toMatchObject({
             code: 'invalid-active-features',
         });
-        await expect(harness.coordinator.setActiveFeatures([
-            'rms',
-            'energy',
-            'amplitudeSpectrum',
-            'chroma',
-            'powerSpectrum',
-        ])).rejects.toMatchObject({
+        await expect(
+            harness.coordinator.setActiveFeatures(['rms', 'energy', 'amplitudeSpectrum', 'chroma', 'powerSpectrum']),
+        ).rejects.toMatchObject({
             code: 'invalid-active-features',
         });
-        await expect(harness.coordinator.setActiveFeatures([
-            'unknown-feature' as never,
-        ]))
-            .rejects.toMatchObject({ code: 'invalid-active-features' });
+        await expect(harness.coordinator.setActiveFeatures(['unknown-feature' as never])).rejects.toMatchObject({
+            code: 'invalid-active-features',
+        });
         await harness.coordinator.dispose();
     });
 

@@ -1,13 +1,6 @@
 import { defineStore } from 'pinia';
-import type {
-    PlaybackSnapshot,
-    SessionPersistenceSnapshot,
-    TrackRecord,
-} from '../types/audio';
-import type {
-    AnalysisCoordinatorSnapshot,
-    FeatureId,
-} from '../analysis/types';
+import type { PlaybackSnapshot, SessionPersistenceSnapshot, TrackRecord } from '../types/audio';
+import type { AnalysisCoordinatorSnapshot, FeatureId } from '../analysis/types';
 import {
     cloneActiveFeatureQueue,
     clonePersistedTimelineViewport,
@@ -21,6 +14,7 @@ const createEmptyPlayback = (): PlaybackSnapshot => ({
     currentTimeSeconds: 0,
     durationSeconds: 0,
     volume: 1,
+    playbackRate: 1,
 });
 
 interface AudioSessionState {
@@ -31,8 +25,7 @@ interface AudioSessionState {
     persistence: SessionPersistenceSnapshot;
     analysis: AnalysisCoordinatorSnapshot;
     analysisWorkspace: AnalysisWorkspaceSnapshot;
-    analysisCacheManifest:
-        NonNullable<PersistedSessionV1['currentAnalysisCache']> | null;
+    analysisCacheManifest: NonNullable<PersistedSessionV1['currentAnalysisCache']> | null;
 }
 
 export const useAudioSessionStore = defineStore('audio-session', {
@@ -73,7 +66,7 @@ export const useAudioSessionStore = defineStore('audio-session', {
             volume: number,
             workspace?: Omit<AnalysisWorkspaceSnapshot, 'initialized'>,
         ) {
-            this.queue = queue.map((track) => ({
+            this.queue = queue.map(track => ({
                 ...track,
                 metadata: { ...track.metadata },
             }));
@@ -82,22 +75,16 @@ export const useAudioSessionStore = defineStore('audio-session', {
                 trackId: currentTrackId,
                 state: currentTrackId ? 'loading' : 'empty',
                 currentTimeSeconds: 0,
-                durationSeconds:
-                    this.queue.find(
-                        (track) => track.id === currentTrackId,
-                    )?.durationSeconds ?? 0,
+                durationSeconds: this.queue.find(track => track.id === currentTrackId)?.durationSeconds ?? 0,
                 volume,
+                playbackRate: this.playback.playbackRate,
             };
             this.currentEnergy = 0;
             if (workspace) {
                 this.analysisWorkspace = {
                     initialized: true,
-                    activeFeatureQueue: cloneActiveFeatureQueue(
-                        workspace.activeFeatureQueue,
-                    ),
-                    viewport: clonePersistedTimelineViewport(
-                        workspace.viewport,
-                    ),
+                    activeFeatureQueue: cloneActiveFeatureQueue(workspace.activeFeatureQueue),
+                    viewport: clonePersistedTimelineViewport(workspace.viewport),
                 };
             }
         },
@@ -105,11 +92,11 @@ export const useAudioSessionStore = defineStore('audio-session', {
             this.queue.push(...tracks);
         },
         removeTrack(trackId: string) {
-            const index = this.queue.findIndex((track) => track.id === trackId);
+            const index = this.queue.findIndex(track => track.id === trackId);
             if (index >= 0) this.queue.splice(index, 1);
         },
         updateTrack(trackId: string, patch: Partial<TrackRecord>) {
-            const index = this.queue.findIndex((track) => track.id === trackId);
+            const index = this.queue.findIndex(track => track.id === trackId);
             if (index < 0) return;
             const current = this.queue[index];
             if (!current) return;
@@ -132,9 +119,7 @@ export const useAudioSessionStore = defineStore('audio-session', {
             };
         },
         setEnergy(energy: number) {
-            this.currentEnergy = Number.isFinite(energy)
-                ? Math.max(0, energy)
-                : 0;
+            this.currentEnergy = Number.isFinite(energy) ? Math.max(0, energy) : 0;
         },
         setPersistence(snapshot: SessionPersistenceSnapshot) {
             this.persistence = {
@@ -152,23 +137,17 @@ export const useAudioSessionStore = defineStore('audio-session', {
         setAnalysisWorkspace(snapshot: AnalysisWorkspaceSnapshot) {
             this.analysisWorkspace = {
                 initialized: snapshot.initialized,
-                activeFeatureQueue: cloneActiveFeatureQueue(
-                    snapshot.activeFeatureQueue,
-                ),
+                activeFeatureQueue: cloneActiveFeatureQueue(snapshot.activeFeatureQueue),
                 viewport: clonePersistedTimelineViewport(snapshot.viewport),
             };
         },
-        setAnalysisCacheManifest(
-            manifest:
-                NonNullable<PersistedSessionV1['currentAnalysisCache']>
-                | null,
-        ) {
+        setAnalysisCacheManifest(manifest: NonNullable<PersistedSessionV1['currentAnalysisCache']> | null) {
             this.analysisCacheManifest = manifest
                 ? {
-                    ...manifest,
-                    featureIds: [...manifest.featureIds] as FeatureId[],
-                    cacheKeys: [...manifest.cacheKeys],
-                }
+                      ...manifest,
+                      featureIds: [...manifest.featureIds] as FeatureId[],
+                      cacheKeys: [...manifest.cacheKeys],
+                  }
                 : null;
         },
         clearSession(volume?: number) {
@@ -178,6 +157,7 @@ export const useAudioSessionStore = defineStore('audio-session', {
             this.playback = {
                 ...createEmptyPlayback(),
                 volume: nextVolume,
+                playbackRate: this.playback.playbackRate,
             };
             this.currentEnergy = 0;
             this.persistence = {

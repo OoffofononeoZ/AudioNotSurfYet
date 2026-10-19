@@ -1,9 +1,6 @@
 import { createPinia, setActivePinia } from 'pinia';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
-import type {
-    AnalysisConsumerLease,
-    AnalysisCoordinator,
-} from '../../src/analysis/analysisCoordinator';
+import type { AnalysisConsumerLease, AnalysisCoordinator } from '../../src/analysis/analysisCoordinator';
 import type { AudioSessionService, RoutePlaybackLease } from '../../src/audio/audioSessionService';
 import type { EditorDraftRepositoryPort } from '../../src/editor/editorDraftRepository';
 import { EditorSessionController } from '../../src/editor/editorSessionController';
@@ -31,15 +28,23 @@ class MemoryRepository implements EditorDraftRepositoryPort {
     envelope: EditorDraftEnvelopeV1 | null = null;
     replaceCount = 0;
 
-    async restore() { return this.envelope ? structuredClone(this.envelope) : null; }
+    async restore() {
+        return this.envelope ? structuredClone(this.envelope) : null;
+    }
     async replace(value: EditorDraftEnvelopeV1) {
         this.replaceCount += 1;
         this.envelope = structuredClone(value);
     }
-    async clear() { this.envelope = null; }
-    async getLeaveWarningEnabled() { return true; }
+    async clear() {
+        this.envelope = null;
+    }
+    async getLeaveWarningEnabled() {
+        return true;
+    }
     async setLeaveWarningEnabled() {}
-    async getOverlayVisibility() { return null; }
+    async getOverlayVisibility() {
+        return null;
+    }
     async setOverlayVisibility() {}
     close() {}
 }
@@ -93,6 +98,8 @@ describe('Editor E8 unavailable recovery integration', () => {
             currentTimeSeconds: 0,
             durationSeconds: 12,
             volume: 1,
+
+            playbackRate: 1,
         });
         const repository = new MemoryRepository();
         let canAcquire = false;
@@ -107,16 +114,17 @@ describe('Editor E8 unavailable recovery integration', () => {
                     release: () => undefined,
                 };
             },
-            getDecodedTrackDescriptor: (): DecodedAudioDescriptor | null => canAcquire
-                ? {
-                    trackId: routeTrack.id,
-                    revision: 1,
-                    sampleRate: 48_000,
-                    length: 576_000,
-                    channelCount: 1,
-                    durationSeconds: 12,
-                }
-                : null,
+            getDecodedTrackDescriptor: (): DecodedAudioDescriptor | null =>
+                canAcquire
+                    ? {
+                          trackId: routeTrack.id,
+                          revision: 1,
+                          sampleRate: 48_000,
+                          length: 576_000,
+                          channelCount: 1,
+                          durationSeconds: 12,
+                      }
+                    : null,
         } as unknown as AudioSessionService;
         const controller = new EditorSessionController({
             audioSession,
@@ -139,6 +147,8 @@ describe('Editor E8 unavailable recovery integration', () => {
             currentTimeSeconds: 0,
             durationSeconds: 12,
             volume: 1,
+
+            playbackRate: 1,
         });
         const decision = resolveEditorUnavailableRecovery({
             routeTrackId: routeTrack.id,
@@ -172,7 +182,7 @@ describe('Editor E8 unavailable recovery integration', () => {
         trackB.restoreState = 'available';
         store.appendTracks([trackA, trackB]);
         let resolveTrackA!: () => void;
-        const trackAGate = new Promise<void>((resolve) => {
+        const trackAGate = new Promise<void>(resolve => {
             resolveTrackA = resolve;
         });
         const releases: string[] = [];
@@ -192,13 +202,13 @@ describe('Editor E8 unavailable recovery integration', () => {
             getDecodedTrackDescriptor: (trackId: string): DecodedAudioDescriptor | null =>
                 descriptorTrackId === trackId
                     ? {
-                        trackId,
-                        revision: 1,
-                        sampleRate: 48_000,
-                        length: 576_000,
-                        channelCount: 1,
-                        durationSeconds: 12,
-                    }
+                          trackId,
+                          revision: 1,
+                          sampleRate: 48_000,
+                          length: 576_000,
+                          channelCount: 1,
+                          durationSeconds: 12,
+                      }
                     : null,
         } as unknown as AudioSessionService;
         const repository = new MemoryRepository();
@@ -212,8 +222,9 @@ describe('Editor E8 unavailable recovery integration', () => {
         });
 
         const staleEntry = controller.enter(trackA.id);
-        await vi.waitFor(() => expect(controller.getSnapshot())
-            .toMatchObject({ state: 'loading', routeTrackId: trackA.id }));
+        await vi.waitFor(() =>
+            expect(controller.getSnapshot()).toMatchObject({ state: 'loading', routeTrackId: trackA.id }),
+        );
         const currentEntry = controller.enter(trackB.id);
         await currentEntry;
         resolveTrackA();

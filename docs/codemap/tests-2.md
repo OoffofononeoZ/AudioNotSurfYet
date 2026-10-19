@@ -6,6 +6,7 @@
 
 | 文件 | 本地静态引用（最多显示 6 项） |
 | --- | --- |
+| [tests/editor/e6-hardening.integration.test.ts](../../tests/editor/e6-hardening.integration.test.ts) | [src/editor/editorDraftRepository.ts](../../src/editor/editorDraftRepository.ts)、[src/editor/projectCodec.ts](../../src/editor/projectCodec.ts)、[src/editor/types.ts](../../src/editor/types.ts)、[tests/support/e6-stress-project.ts](../../tests/support/e6-stress-project.ts) |
 | [tests/editor/e7-fullscreen-overlay-unit.test.ts](../../tests/editor/e7-fullscreen-overlay-unit.test.ts) | [src/editor/overlay.ts](../../src/editor/overlay.ts) |
 | [tests/editor/e7-fullscreen-overlay.integration.test.ts](../../tests/editor/e7-fullscreen-overlay.integration.test.ts) | [src/analysis/analysisCoordinator.ts](../../src/analysis/analysisCoordinator.ts)、[src/analysis/types.ts](../../src/analysis/types.ts)、[src/audio/audioSessionService.ts](../../src/audio/audioSessionService.ts)、[src/editor/editorDraftRepository.ts](../../src/editor/editorDraftRepository.ts)、[src/editor/editorSessionController.ts](../../src/editor/editorSessionController.ts)、[src/editor/fileIO.ts](../../src/editor/fileIO.ts)、另 4 项，按需核对源码 |
 | [tests/editor/e8-usability-unit.test.ts](../../tests/editor/e8-usability-unit.test.ts) | [src/editor/routeRecovery.ts](../../src/editor/routeRecovery.ts)、[src/editor/timeline.ts](../../src/editor/timeline.ts)、[src/types/audio.ts](../../src/types/audio.ts) |
@@ -105,4 +106,3 @@
 | [tests/support/visualizer-audio-timeline.mjs](../../tests/support/visualizer-audio-timeline.mjs) | — |
 | [tests/support/visualizer-media-alignment.mjs](../../tests/support/visualizer-media-alignment.mjs) | — |
 | [tests/support/visualizer-output-sync.ts](../../tests/support/visualizer-output-sync.ts) | — |
-| [tests/support/visualizer-video-timeline.mjs](../../tests/support/visualizer-video-timeline.mjs) | — |

@@ -209,7 +209,9 @@ watch(editable, () => {
     addMenu.value = false;
 });
 onMounted(() => window.addEventListener('keydown', escape));
+const unsubscribeDiscontinuity = audioSession.subscribePlaybackDiscontinuity(() => editing.cancel());
 onBeforeUnmount(() => {
+    unsubscribeDiscontinuity();
     drawing.dispose();
     window.removeEventListener('keydown', escape);
 });

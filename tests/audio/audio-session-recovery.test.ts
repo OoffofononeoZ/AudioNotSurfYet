@@ -1,14 +1,6 @@
 import { createPinia, setActivePinia } from 'pinia';
-import {
-    beforeEach,
-    describe,
-    expect,
-    test,
-} from 'vitest';
-import {
-    AudioSessionService,
-    type AudioEnginePort,
-} from '../../src/audio/audioSessionService';
+import { beforeEach, describe, expect, test } from 'vitest';
+import { AudioSessionService, type AudioEnginePort } from '../../src/audio/audioSessionService';
 import type {
     PersistedCurrentInput,
     PersistedQueueInput,
@@ -16,10 +8,7 @@ import type {
 } from '../../src/persistence/sessionRepository';
 import { useAudioSessionStore } from '../../src/stores/audioSessionStore';
 import type { PlaybackSnapshot } from '../../src/types/audio';
-import {
-    DEFAULT_PERSISTED_ANALYSIS_CONFIG,
-    type RestoredSessionBundle,
-} from '../../src/types/session';
+import { DEFAULT_PERSISTED_ANALYSIS_CONFIG, type RestoredSessionBundle } from '../../src/types/session';
 
 class RecoveryEngine implements AudioEnginePort {
     async setAuditionSource() {}
@@ -30,6 +19,8 @@ class RecoveryEngine implements AudioEnginePort {
         currentTimeSeconds: 0,
         durationSeconds: 0,
         volume: 1,
+
+        playbackRate: 1,
     };
     listeners = new Set<(snapshot: PlaybackSnapshot) => void>();
     playCount = 0;
@@ -41,6 +32,8 @@ class RecoveryEngine implements AudioEnginePort {
             currentTimeSeconds: 0,
             durationSeconds: 4,
             volume: this.snapshot.volume,
+
+            playbackRate: this.snapshot.playbackRate,
         });
         return 'loaded';
     }
@@ -58,6 +51,9 @@ class RecoveryEngine implements AudioEnginePort {
         this.emit({ ...this.snapshot, currentTimeSeconds: seconds });
     }
 
+    async setPlaybackRate(playbackRate: number) {
+        this.snapshot.playbackRate = playbackRate;
+    }
     setVolume(volume: number) {
         this.emit({ ...this.snapshot, volume });
     }
@@ -74,9 +70,13 @@ class RecoveryEngine implements AudioEnginePort {
         return null;
     }
 
-    capturePlaybackCheckpoint() { return null; }
+    capturePlaybackCheckpoint() {
+        return null;
+    }
     async restorePlaybackCheckpoint(): Promise<void> {}
-    acquireRecordingTap(): never { throw new Error('not implemented'); }
+    acquireRecordingTap(): never {
+        throw new Error('not implemented');
+    }
     copyDecodedChannelRange() {
         return null;
     }
@@ -94,6 +94,8 @@ class RecoveryEngine implements AudioEnginePort {
             currentTimeSeconds: 0,
             durationSeconds: 0,
             volume: this.snapshot.volume,
+
+            playbackRate: this.snapshot.playbackRate,
         });
     }
 
@@ -141,28 +143,25 @@ interface FakeHandleOptions {
     getFileError?: DOMException;
 }
 
-const fakeHandle = (
-    file: File,
-    log: string[],
-    options: FakeHandleOptions = {},
-): FileSystemFileHandle => ({
-    kind: 'file',
-    name: file.name,
-    queryPermission: async () => {
-        log.push(`query:${file.name}`);
-        return options.query ?? 'granted';
-    },
-    requestPermission: async () => {
-        log.push(`request:${file.name}`);
-        return options.request ?? 'granted';
-    },
-    getFile: async () => {
-        log.push(`file:${file.name}`);
-        if (options.getFileError) throw options.getFileError;
-        return file;
-    },
-    isSameEntry: async () => false,
-} as unknown as FileSystemFileHandle);
+const fakeHandle = (file: File, log: string[], options: FakeHandleOptions = {}): FileSystemFileHandle =>
+    ({
+        kind: 'file',
+        name: file.name,
+        queryPermission: async () => {
+            log.push(`query:${file.name}`);
+            return options.query ?? 'granted';
+        },
+        requestPermission: async () => {
+            log.push(`request:${file.name}`);
+            return options.request ?? 'granted';
+        },
+        getFile: async () => {
+            log.push(`file:${file.name}`);
+            if (options.getFileError) throw options.getFileError;
+            return file;
+        },
+        isSameEntry: async () => false,
+    }) as unknown as FileSystemFileHandle;
 
 const record = (id: string) => ({
     id,
@@ -230,7 +229,7 @@ const createService = (
         engine,
         repository,
         pickFiles: options.pickFiles,
-        hashFile: async (file) => (file as File).name,
+        hashFile: async file => (file as File).name,
         parseMetadata: async () => ({
             common: {},
             format: { duration: 4, sampleRate: 48_000 },
@@ -252,26 +251,15 @@ describe('AudioSessionService recovery', () => {
         repository.restored = restoredBundle([
             {
                 trackId: 'track-1',
-                handle: fakeHandle(
-                    new File(['one'], 'track-1.wav'),
-                    log,
-                    { query: 'prompt' },
-                ),
+                handle: fakeHandle(new File(['one'], 'track-1.wav'), log, { query: 'prompt' }),
             },
             {
                 trackId: 'track-2',
-                handle: fakeHandle(
-                    new File(['two'], 'track-2.wav'),
-                    log,
-                ),
+                handle: fakeHandle(new File(['two'], 'track-2.wav'), log),
             },
             {
                 trackId: 'track-3',
-                handle: fakeHandle(
-                    new File(['three'], 'track-3.wav'),
-                    log,
-                    { query: 'denied' },
-                ),
+                handle: fakeHandle(new File(['three'], 'track-3.wav'), log, { query: 'denied' }),
             },
         ]);
         const { engine, service, store } = createService(repository);
@@ -281,17 +269,16 @@ describe('AudioSessionService recovery', () => {
             expect(cachePublished).toBe(true);
             return load(...args);
         };
-        await service.initialize(() => { cachePublished = true; });
+        await service.initialize(() => {
+            cachePublished = true;
+        });
 
         expect(store.currentTrackId).toBe('track-2');
         expect(store.playback.state).toBe('paused');
         expect(store.playback.currentTimeSeconds).toBe(0);
         expect(engine.playCount).toBe(0);
-        expect(log.filter((entry) => entry.startsWith('query:'))).toEqual([
-            'query:track-3.wav',
-            'query:track-1.wav',
-        ]);
-        expect(log.some((entry) => entry.startsWith('request:'))).toBe(false);
+        expect(log.filter(entry => entry.startsWith('query:'))).toEqual(['query:track-3.wav', 'query:track-1.wav']);
+        expect(log.some(entry => entry.startsWith('request:'))).toBe(false);
         expect(store.queue[0]?.restoreState).toBe('permission-required');
         expect(store.queue[2]?.restoreState).toBe('permission-denied');
     });
@@ -299,26 +286,16 @@ describe('AudioSessionService recovery', () => {
     test('requests permission only after restoreAccess and restores the file', async () => {
         const log: string[] = [];
         const repository = new MemoryRepository();
-        const handle = fakeHandle(
-            new File(['one'], 'track-1.wav'),
-            log,
-            { query: 'prompt', request: 'granted' },
-        );
+        const handle = fakeHandle(new File(['one'], 'track-1.wav'), log, { query: 'prompt', request: 'granted' });
         repository.restored = restoredBundle([
             { trackId: 'track-1', handle },
             {
                 trackId: 'track-2',
-                handle: fakeHandle(
-                    new File(['two'], 'track-2.wav'),
-                    log,
-                ),
+                handle: fakeHandle(new File(['two'], 'track-2.wav'), log),
             },
             {
                 trackId: 'track-3',
-                handle: fakeHandle(
-                    new File(['three'], 'track-3.wav'),
-                    log,
-                ),
+                handle: fakeHandle(new File(['three'], 'track-3.wav'), log),
             },
         ]);
         const { service, store } = createService(repository);
@@ -334,28 +311,15 @@ describe('AudioSessionService recovery', () => {
     test('marks changed and missing files without affecting current Blob', async () => {
         const log: string[] = [];
         const repository = new MemoryRepository();
-        const changed = fakeHandle(
-            new File(['changed'], 'different.wav'),
-            log,
-        );
-        const missing = fakeHandle(
-            new File(['missing'], 'track-3.wav'),
-            log,
-            {
-                getFileError: new DOMException(
-                    'missing',
-                    'NotFoundError',
-                ),
-            },
-        );
+        const changed = fakeHandle(new File(['changed'], 'different.wav'), log);
+        const missing = fakeHandle(new File(['missing'], 'track-3.wav'), log, {
+            getFileError: new DOMException('missing', 'NotFoundError'),
+        });
         repository.restored = restoredBundle([
             { trackId: 'track-1', handle: changed },
             {
                 trackId: 'track-2',
-                handle: fakeHandle(
-                    new File(['two'], 'track-2.wav'),
-                    log,
-                ),
+                handle: fakeHandle(new File(['two'], 'track-2.wav'), log),
             },
             { trackId: 'track-3', handle: missing },
         ]);
@@ -393,10 +357,7 @@ describe('AudioSessionService recovery', () => {
 
     test('keeps playback usable when current Blob persistence fails', async () => {
         const repository = new MemoryRepository();
-        repository.replaceError = new DOMException(
-            'quota',
-            'QuotaExceededError',
-        );
+        repository.replaceError = new DOMException('quota', 'QuotaExceededError');
         const file = new File(['audio'], 'fixture.wav', {
             type: 'audio/wav',
         });
@@ -419,9 +380,7 @@ describe('AudioSessionService recovery', () => {
             },
         });
 
-        await expect(service.selectAndImportFiles()).resolves.toBe(
-            'cancelled',
-        );
+        await expect(service.selectAndImportFiles()).resolves.toBe('cancelled');
         expect(store.queue).toHaveLength(0);
         expect(store.persistence.state).toBe('idle');
     });
