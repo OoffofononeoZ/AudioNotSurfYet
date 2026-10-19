@@ -4,7 +4,18 @@
             <aside class="beat-control-rail">
                 <h2>节拍标记</h2>
                 <EditorBeatDivisorControl />
-                <div class="timing-disclosure"><span>BPM</span><button type="button" data-testid="toggle-editor-timing" :aria-label="timingOpen ? '收起 BPM 设置' : '展开 BPM 设置'" :aria-expanded="timingOpen" aria-controls="editor-timing-workspace" @click="timingOpen = !timingOpen"><EditorIcon :name="timingOpen ? 'up' : 'down'" /></button></div>
+                <div class="timing-disclosure">
+                    <span>BPM</span
+                    ><button
+                        type="button"
+                        data-testid="toggle-editor-timing"
+                        :aria-label="timingOpen ? '收起 BPM 设置' : '展开 BPM 设置'"
+                        :aria-expanded="timingOpen"
+                        aria-controls="editor-timing-workspace"
+                        @click="timingOpen = !timingOpen">
+                        <EditorIcon :name="timingOpen ? 'up' : 'down'" />
+                    </button>
+                </div>
             </aside>
             <div class="timeline-time-column" data-testid="tempo-segments">
                 <div
@@ -22,32 +33,48 @@
                     @pointerup="onStagePointerUp"
                     @pointercancel="clearPointer"
                     @lostpointercapture="clearPointer"
-                    @keydown="onStageKeydown"
-                >
+                    @keydown="onStageKeydown">
                     <canvas ref="waveformCanvas" class="timeline-canvas" aria-hidden="true" />
                     <canvas ref="gridCanvas" class="timeline-canvas grid-canvas" aria-hidden="true" />
                     <canvas ref="cursorCanvas" class="timeline-canvas cursor-canvas" aria-hidden="true" />
                     <div class="waveform-actions">
-                    <button type="button" class="waveform-icon" aria-label="查看播放位置" title="查看播放位置" data-testid="editor-reveal-playback" @pointerdown.stop @click.stop="revealPlayback"><EditorIcon name="locate" /></button>
-                    <button
-                        type="button"
-                        class="add-boundary"
-                        data-testid="add-tempo-boundary"
-                        aria-label="添加分段" title="添加分段"
-                        @pointerdown.stop
-                        @click.stop="insertBoundaryAtPreferredTime"
-                    >
-                        <EditorIcon name="plus" />
-                    </button>
+                        <button
+                            type="button"
+                            class="waveform-icon"
+                            aria-label="查看播放位置"
+                            title="查看播放位置"
+                            data-testid="editor-reveal-playback"
+                            @pointerdown.stop
+                            @click.stop="revealPlayback">
+                            <EditorIcon name="locate" />
+                        </button>
+                        <button
+                            type="button"
+                            class="add-boundary"
+                            data-testid="add-tempo-boundary"
+                            aria-label="添加分段"
+                            title="添加分段"
+                            @pointerdown.stop
+                            @click.stop="insertBoundaryAtPreferredTime">
+                            <EditorIcon name="plus" />
+                        </button>
                     </div>
 
                     <EditorContextMenu
                         v-if="quickMenu"
-                        :anchor="stage" :x="quickMenu.x" :y="quickMenu.y" test-id="editor-timeline-menu"
+                        :anchor="stage"
+                        :x="quickMenu.x"
+                        :y="quickMenu.y"
+                        test-id="editor-timeline-menu"
                         waveform
-                        @action="$event === 'reset' ? resetViewport() : $event === 'center' ? menuCenter() : menuSeek($event === 'play')"
-                        @close="quickMenu = null"
-                    />
+                        @action="
+                            $event === 'reset'
+                                ? resetViewport()
+                                : $event === 'center'
+                                  ? menuCenter()
+                                  : menuSeek($event === 'play')
+                        "
+                        @close="quickMenu = null" />
                 </div>
 
                 <div class="tempo-guide-layer" aria-hidden="true">
@@ -56,8 +83,7 @@
                         :key="guide.id"
                         class="tempo-boundary-guide"
                         :style="{ left: `${timeToPercent(guide.timeSeconds)}%` }"
-                        :data-time-seconds="guide.timeSeconds"
-                    />
+                        :data-time-seconds="guide.timeSeconds" />
                 </div>
 
                 <div
@@ -66,8 +92,7 @@
                     data-testid="editor-tempo-lane"
                     tabindex="0"
                     aria-label="节拍边界与 BPM 区间；内部边界可右键或按 Delete 删除"
-                    @contextmenu.prevent
-                >
+                    @contextmenu.prevent>
                     <article
                         v-for="entry in visibleTempoSegments"
                         :key="entry.segment.id"
@@ -80,9 +105,10 @@
                         :aria-label="segmentAccessibleLabel(entry.segment, entry.index)"
                         :title="segmentAccessibleLabel(entry.segment, entry.index)"
                         :data-selected="selectedTempoId === entry.segment.id"
-                        @click="selectedTempoId = entry.segment.id"
-                    >
-                        <div v-if="segmentPresentation(entry.index) === 'full'" class="tempo-segment-content tempo-segment-full">
+                        @click="selectedTempoId = entry.segment.id">
+                        <div
+                            v-if="segmentPresentation(entry.index) === 'full'"
+                            class="tempo-segment-content tempo-segment-full">
                             <template v-if="entry.segment.mode === 'metered'">
                                 <label class="tempo-compact-field">
                                     <input
@@ -92,57 +118,40 @@
                                         placeholder="100"
                                         :aria-label="`区间 ${entry.index + 1} BPM`"
                                         :aria-invalid="Boolean(tempoErrors[entry.segment.id])"
-                                        :aria-describedby="tempoErrors[entry.segment.id] ? `tempo-error-${entry.segment.id}` : undefined"
+                                        :aria-describedby="
+                                            tempoErrors[entry.segment.id]
+                                                ? `tempo-error-${entry.segment.id}`
+                                                : undefined
+                                        "
                                         :data-testid="`tempo-bpm-${entry.index}`"
                                         @focus="clearError(entry.segment.id)"
                                         @input="captureBpmDraft(entry.segment.id, $event)"
                                         @blur="commitBpm(entry.segment.id, $event)"
-                                        @keydown.enter.prevent="commitBpm(entry.segment.id, $event)"
-                                    >
+                                        @keydown.enter.prevent="commitBpm(entry.segment.id, $event)" />
                                     <span aria-hidden="true">BPM</span>
                                 </label>
-                                <span class="tempo-compact-separator" aria-hidden="true">·</span>
-                                <span class="meter-inputs">
-                                    <input
-                                        class="tempo-compact-control tempo-meter-numerator"
-                                        inputmode="numeric"
-                                        :value="tempoNumeratorDrafts[entry.segment.id] ?? entry.segment.meter.numerator"
-                                        :aria-label="`区间 ${entry.index + 1} 拍号分子`"
-                                        :aria-invalid="Boolean(tempoErrors[entry.segment.id])"
-                                        @input="captureNumeratorDraft(entry.segment.id, $event)"
-                                        @blur="commitMeter(entry.segment.id, $event, entry.segment.meter.denominator)"
-                                        @keydown.enter.prevent="commitMeter(entry.segment.id, $event, entry.segment.meter.denominator)"
-                                    >
-                                    <span aria-hidden="true">/</span>
-                                    <span class="tempo-meter-denominator-shell">
-                                        <select
-                                            class="tempo-compact-control tempo-meter-denominator"
-                                            :value="entry.segment.meter.denominator"
-                                            :aria-label="`区间 ${entry.index + 1} 拍号分母`"
-                                            @change="commitMeter(entry.segment.id, entry.segment.meter.numerator, $event)"
-                                        >
-                                            <option v-for="value in meterDenominators" :key="value" :value="value">{{ value }}</option>
-                                        </select>
-                                    </span>
-                                </span>
                             </template>
                             <template v-else>
                                 <span class="single-beat">单拍</span>
                                 <button
                                     type="button"
                                     class="tempo-compact-action"
-                                    @click="restoreMetered(entry.segment.id)"
-                                >切回 4/4</button>
+                                    @click="restoreMetered(entry.segment.id)">
+                                    设置为 100 BPM
+                                </button>
                             </template>
                         </div>
-                        <div v-else-if="segmentPresentation(entry.index) === 'summary'" class="tempo-segment-content tempo-segment-summary">
+                        <div
+                            v-else-if="segmentPresentation(entry.index) === 'summary'"
+                            class="tempo-segment-content tempo-segment-summary">
                             {{ segmentSummary(entry.segment) }}
                         </div>
                         <span
                             v-if="tempoErrors[entry.segment.id]"
                             :id="`tempo-error-${entry.segment.id}`"
                             class="sr-only"
-                        >{{ tempoErrors[entry.segment.id] }}</span>
+                            >{{ tempoErrors[entry.segment.id] }}</span
+                        >
                     </article>
 
                     <span
@@ -153,8 +162,7 @@
                         :style="{ left: `${timeToPercent(boundary.timeSeconds)}%` }"
                         :data-testid="boundary.id"
                         :data-time-seconds="boundary.timeSeconds"
-                        aria-hidden="true"
-                    >
+                        aria-hidden="true">
                         <span class="boundary-caret">^</span>
                         <span class="boundary-time">{{ formatTime(boundary.timeSeconds) }}</span>
                     </span>
@@ -172,8 +180,7 @@
                         @pointermove.stop="moveBoundaryDrag"
                         @pointerup.stop="endBoundaryDrag"
                         @pointercancel.stop="cancelBoundaryDrag"
-                        @keydown="onBoundaryKeydown($event, segment.id)"
-                    >
+                        @keydown="onBoundaryKeydown($event, segment.id)">
                         <span class="boundary-caret" aria-hidden="true">^</span>
                         <span class="boundary-time">{{ formatTime(segment.startSeconds) }}</span>
                     </button>
@@ -181,29 +188,32 @@
                     <div class="tempo-measure" aria-hidden="true">
                         <span ref="fullMeasure" class="tempo-segment-content tempo-segment-full">
                             <label class="tempo-compact-field">
-                                <input class="tempo-compact-control tempo-bpm-input" value="300.000">
+                                <input class="tempo-compact-control tempo-bpm-input" value="300.000" />
                                 <span>BPM</span>
                             </label>
-                            <span class="tempo-compact-separator">·</span>
-                            <span class="meter-inputs">
-                                <input class="tempo-compact-control tempo-meter-numerator" value="32">
-                                <span>/</span>
-                                <span class="tempo-meter-denominator-shell">
-                                    <select class="tempo-compact-control tempo-meter-denominator"><option>32</option></select>
-                                </span>
-                            </span>
                         </span>
-                        <span ref="summaryMeasure" class="tempo-segment-content tempo-segment-summary">300 BPM · 32/32</span>
+                        <span ref="summaryMeasure" class="tempo-segment-content tempo-segment-summary"
+                            >300 BPM · 32/32</span
+                        >
                     </div>
                 </div>
             </div>
         </div>
 
-        <EditorTimingPanel v-if="timingOpen && active !== false" id="editor-timing-workspace" :project="project" :playback="playback" :selected-id="selectedTempoId"
-            @select="selectedTempoId = $event" @seek="audioSession.seek($event)" @update-project="emit('updateProject',$event,true)" />
+        <EditorTimingPanel
+            v-if="timingOpen && active !== false"
+            id="editor-timing-workspace"
+            :project="project"
+            :playback="playback"
+            :selected-id="selectedTempoId"
+            @select="selectedTempoId = $event"
+            @seek="audioSession.seek($event)"
+            @update-project="emit('updateProject', $event, true)" />
 
         <div class="timeline-status" aria-live="polite">
-            <span data-testid="editor-viewport-state">{{ formatTime(viewport.startSeconds) }} — {{ formatTime(viewport.endSeconds) }}</span>
+            <span data-testid="editor-viewport-state"
+                >{{ formatTime(viewport.startSeconds) }} — {{ formatTime(viewport.endSeconds) }}</span
+            >
             <span data-testid="editor-buffer-state">{{ bufferStateLabel }}</span>
             <span data-testid="editor-tempo-estimate-state">{{ estimateStateLabel }}</span>
             <span>游标 {{ formatTime(playback.currentTimeSeconds) }}</span>
@@ -213,15 +223,7 @@
 </template>
 
 <script setup lang="ts">
-import {
-    computed,
-    nextTick,
-    onBeforeUnmount,
-    onMounted,
-    reactive,
-    ref,
-    watch,
-} from 'vue';
+import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue';
 import type { AnalysisCoordinatorSnapshot, AnalysisSeries } from '../analysis/types';
 import { visibleSampleRange, waveformEnvelopeAt } from '../analysis/rendererData';
 import { useAudioSessionService } from '../audio/audioSessionService';
@@ -234,12 +236,9 @@ import { useEditorViewport } from '../editor/useEditorViewport';
 import { useEditorGrid } from '../editor/useEditorGrid';
 import { divisorColour, divisorHeight } from '../editor/beatSnap';
 import type { PersistedTimelineViewport } from '../types/session';
-import {
-    EDITOR_CONTEXT_PAN_THRESHOLD_PX,
-} from '../editor/editorConfig';
+import { EDITOR_CONTEXT_PAN_THRESHOLD_PX } from '../editor/editorConfig';
 import {
     applyBpmInput,
-    applyMeterInput,
     cloneTempoSegment,
     insertTempoBoundary,
     moveTempoBoundary,
@@ -285,43 +284,61 @@ const cursorCanvas = ref<HTMLCanvasElement | null>(null);
 const size = reactive({ width: 0, height: 0, dpr: 1 });
 const tempoErrors = reactive<Record<string, string>>({});
 const tempoBpmDrafts = reactive<Record<string, string>>({});
-const tempoNumeratorDrafts = reactive<Record<string, string>>({});
 const tempoLiveMessage = ref('');
 const timingOpen = ref(false);
 const selectedTempoId = ref<string | null>(props.project.tempoMap[0]?.id ?? null);
 const presentationWidths = reactive({ full: 420, summary: 112 });
-const meterDenominators = [1, 2, 4, 8, 16, 32] as const;
 const createId = () => crypto.randomUUID();
 let resizeObserver: ResizeObserver | null = null;
 
-const viewportController = useEditorViewport(() => props.project, (project, immediate) => emit('updateProject',project,immediate));
+const viewportController = useEditorViewport(
+    () => props.project,
+    (project, immediate) => emit('updateProject', project, immediate),
+);
 const { viewport } = viewportController;
-const revealPlayback = () => updateViewport(centerEditorViewport(viewport.value, props.project.track.durationSeconds, props.playback.currentTimeSeconds), true);
+const revealPlayback = () =>
+    updateViewport(
+        centerEditorViewport(viewport.value, props.project.track.durationSeconds, props.playback.currentTimeSeconds),
+        true,
+    );
 const durationSeconds = computed(() => props.project.track.durationSeconds);
-const internalSegments = computed(() => props.project.tempoMap.slice(1).filter(
-    (segment) => segment.startSeconds >= viewport.value.startSeconds
-        && segment.startSeconds <= viewport.value.endSeconds,
-));
-const visibleTempoSegments = computed(() => props.project.tempoMap
-    .map((segment, index) => ({ segment, index }))
-    .filter(({ segment, index }) => segment.startSeconds < viewport.value.endSeconds
-        && segmentEndSeconds(props.project.tempoMap, index, durationSeconds.value)
-            > viewport.value.startSeconds));
-const fixedBoundaries = computed(() => [
-    { id: 'tempo-boundary-start', timeSeconds: 0, edge: 'start' as const },
-    {
-        id: 'tempo-boundary-end',
-        timeSeconds: durationSeconds.value,
-        edge: 'end' as const,
-    },
-].filter((boundary) => boundary.timeSeconds >= viewport.value.startSeconds
-    && boundary.timeSeconds <= viewport.value.endSeconds));
+const internalSegments = computed(() =>
+    props.project.tempoMap
+        .slice(1)
+        .filter(
+            segment =>
+                segment.startSeconds >= viewport.value.startSeconds &&
+                segment.startSeconds <= viewport.value.endSeconds,
+        ),
+);
+const visibleTempoSegments = computed(() =>
+    props.project.tempoMap
+        .map((segment, index) => ({ segment, index }))
+        .filter(
+            ({ segment, index }) =>
+                segment.startSeconds < viewport.value.endSeconds &&
+                segmentEndSeconds(props.project.tempoMap, index, durationSeconds.value) > viewport.value.startSeconds,
+        ),
+);
+const fixedBoundaries = computed(() =>
+    [
+        { id: 'tempo-boundary-start', timeSeconds: 0, edge: 'start' as const },
+        {
+            id: 'tempo-boundary-end',
+            timeSeconds: durationSeconds.value,
+            edge: 'end' as const,
+        },
+    ].filter(
+        boundary =>
+            boundary.timeSeconds >= viewport.value.startSeconds && boundary.timeSeconds <= viewport.value.endSeconds,
+    ),
+);
 const visibleTempoGuides = computed(() => [
-    ...fixedBoundaries.value.map((boundary) => ({
+    ...fixedBoundaries.value.map(boundary => ({
         id: `guide-${boundary.id}`,
         timeSeconds: boundary.timeSeconds,
     })),
-    ...internalSegments.value.map((segment) => ({
+    ...internalSegments.value.map(segment => ({
         id: `guide-${segment.id}`,
         timeSeconds: segment.startSeconds,
     })),
@@ -332,17 +349,21 @@ const bufferStateLabel = computed(() => {
     if (props.analysis.state === 'error') return '波形不可用，Tempo 仍可手动编辑';
     return '正在准备波形…';
 });
-const estimateStateLabel = computed(() => ({
-    idle: 'BPM 等待估计',
-    estimating: '正在估计 BPM…',
-    reliable: `BPM 已自动填入${props.project.tempoMap[0]?.mode === 'metered' ? `：${props.project.tempoMap[0].bpm}` : ''}`,
-    'low-confidence': 'BPM 置信度不足，请手动输入',
-    unavailable: 'BPM 自动估计不可用，请手动输入',
-}[props.tempoEstimateState
-    ?? (props.project.tempoMap[0]?.mode === 'metered'
-        && props.project.tempoMap[0].bpmSource === 'estimated'
-        ? 'reliable'
-        : 'idle')] ?? 'BPM 可手动输入'));
+const estimateStateLabel = computed(
+    () =>
+        ({
+            idle: 'BPM 等待估计',
+            estimating: '正在估计 BPM…',
+            reliable: `BPM 已自动填入${props.project.tempoMap[0]?.mode === 'metered' ? `：${props.project.tempoMap[0].bpm}` : ''}`,
+            'low-confidence': 'BPM 置信度不足，请手动输入',
+            unavailable: 'BPM 自动估计不可用，请手动输入',
+        })[
+            props.tempoEstimateState ??
+                (props.project.tempoMap[0]?.mode === 'metered' && props.project.tempoMap[0].bpmSource === 'estimated'
+                    ? 'reliable'
+                    : 'idle')
+        ] ?? 'BPM 可手动输入',
+);
 
 const formatTime = (seconds: number): string => {
     const safe = Math.max(0, Number.isFinite(seconds) ? seconds : 0);
@@ -355,20 +376,20 @@ const updateViewport = (next: PersistedTimelineViewport, immediate: boolean) => 
 };
 
 const zoomBy = (factor: number, anchorX = size.width / 2, immediate = true) => {
-    updateViewport(zoomEditorViewportAtX(
-        viewport.value,
-        durationSeconds.value,
-        viewport.value.zoom * factor,
-        anchorX,
-        size.width,
-        1,
-    ), immediate);
+    updateViewport(
+        zoomEditorViewportAtX(
+            viewport.value,
+            durationSeconds.value,
+            viewport.value.zoom * factor,
+            anchorX,
+            size.width,
+            1,
+        ),
+        immediate,
+    );
 };
-const panBy = (ratio: number) => updateViewport(panEditorViewportByRatio(
-    viewport.value,
-    durationSeconds.value,
-    ratio,
-), true);
+const panBy = (ratio: number) =>
+    updateViewport(panEditorViewportByRatio(viewport.value, durationSeconds.value, ratio), true);
 const resetViewport = () => viewportController.reset();
 
 const canvasPoint = (event: PointerEvent | WheelEvent): { x: number; y: number } => {
@@ -421,12 +442,10 @@ const onStagePointerMove = (event: PointerEvent) => {
         active.moved = true;
     }
     if (active.moved) {
-        updateViewport(panEditorViewportByPixels(
-            active.startViewport,
-            durationSeconds.value,
-            x - active.startX,
-            size.width,
-        ), false);
+        updateViewport(
+            panEditorViewportByPixels(active.startViewport, durationSeconds.value, x - active.startX, size.width),
+            false,
+        );
     }
     active.lastX = x;
 };
@@ -503,13 +522,8 @@ const onStageKeydown = (event: KeyboardEvent) => {
 };
 
 const timeToPercent = (seconds: number) =>
-    editorTimeToX(seconds, viewport.value, Math.max(1, size.width))
-    / Math.max(1, size.width) * 100;
-const segmentEnd = (index: number) => segmentEndSeconds(
-    props.project.tempoMap,
-    index,
-    durationSeconds.value,
-);
+    (editorTimeToX(seconds, viewport.value, Math.max(1, size.width)) / Math.max(1, size.width)) * 100;
+const segmentEnd = (index: number) => segmentEndSeconds(props.project.tempoMap, index, durationSeconds.value);
 const segmentPixelBounds = (index: number) => {
     const segment = props.project.tempoMap[index];
     if (!segment) return { left: 0, width: 0 };
@@ -522,29 +536,32 @@ const segmentPixelBounds = (index: number) => {
 const segmentStyle = (index: number) => {
     const bounds = segmentPixelBounds(index);
     return {
-        left: `${bounds.left / Math.max(1, size.width) * 100}%`,
-        width: `${bounds.width / Math.max(1, size.width) * 100}%`,
+        left: `${(bounds.left / Math.max(1, size.width)) * 100}%`,
+        width: `${(bounds.width / Math.max(1, size.width)) * 100}%`,
     };
 };
-const segmentPresentation = (index: number) => resolveTempoSegmentPresentation(
-    Math.max(0, segmentPixelBounds(index).width - 52),
-    presentationWidths.full,
-    presentationWidths.summary,
-);
-const segmentSummary = (segment: TempoSegmentV1) => segment.mode === 'single-beat'
-    ? '单拍'
-    : `${segment.bpm ?? '—'} BPM · ${segment.meter.numerator}/${segment.meter.denominator}`;
+const segmentPresentation = (index: number) =>
+    resolveTempoSegmentPresentation(
+        Math.max(0, segmentPixelBounds(index).width - 52),
+        presentationWidths.full,
+        presentationWidths.summary,
+    );
+const segmentSummary = (segment: TempoSegmentV1) =>
+    segment.mode === 'single-beat' ? '单拍' : `${segment.bpm ?? '—'} BPM`;
 const measurePresentationWidths = () => {
-    presentationWidths.full = Math.ceil(fullMeasure.value?.scrollWidth ?? 420);
+    presentationWidths.full = Math.ceil(fullMeasure.value?.scrollWidth ?? 100);
     presentationWidths.summary = Math.ceil(summaryMeasure.value?.scrollWidth ?? 112);
 };
 
 const replaceTempoSegment = (next: TempoSegmentV1) => {
-    emit('updateProject', {
-        ...props.project,
-        tempoMap: props.project.tempoMap.map((segment) =>
-            segment.id === next.id ? next : segment),
-    }, true);
+    emit(
+        'updateProject',
+        {
+            ...props.project,
+            tempoMap: props.project.tempoMap.map(segment => (segment.id === next.id ? next : segment)),
+        },
+        true,
+    );
 };
 const clearError = (id: string) => {
     delete tempoErrors[id];
@@ -553,11 +570,8 @@ const clearError = (id: string) => {
 const captureBpmDraft = (id: string, event: Event) => {
     tempoBpmDrafts[id] = (event.target as HTMLInputElement).value;
 };
-const captureNumeratorDraft = (id: string, event: Event) => {
-    tempoNumeratorDrafts[id] = (event.target as HTMLInputElement).value;
-};
 const commitBpm = (id: string, event: Event) => {
-    const segment = props.project.tempoMap.find((entry) => entry.id === id);
+    const segment = props.project.tempoMap.find(entry => entry.id === id);
     if (!segment) return;
     const input = tempoBpmDrafts[id] ?? (event.target as HTMLInputElement).value;
     if (input.trim() === '') return;
@@ -572,29 +586,8 @@ const commitBpm = (id: string, event: Event) => {
     tempoLiveMessage.value = 'BPM 已保存。';
     replaceTempoSegment(result.segment);
 };
-const commitMeter = (id: string, first: Event | number, second: Event | number) => {
-    const segment = props.project.tempoMap.find((entry) => entry.id === id);
-    if (!segment) return;
-    const read = (value: Event | number) => typeof value === 'number'
-        ? value
-        : Number((value.target as HTMLInputElement | HTMLSelectElement).value);
-    const numerator = typeof first === 'number'
-        ? first
-        : Number(tempoNumeratorDrafts[id]
-            ?? (first.target as HTMLInputElement).value);
-    const result = applyMeterInput(segment, numerator, read(second));
-    if (!result.ok) {
-        tempoErrors[id] = result.message;
-        tempoLiveMessage.value = result.message;
-        return;
-    }
-    delete tempoErrors[id];
-    delete tempoNumeratorDrafts[id];
-    tempoLiveMessage.value = '拍号已保存。';
-    replaceTempoSegment(result.segment);
-};
 const restoreMetered = (id: string) => {
-    const segment = props.project.tempoMap.find((entry) => entry.id === id);
+    const segment = props.project.tempoMap.find(entry => entry.id === id);
     if (!segment) return;
     replaceTempoSegment({
         id,
@@ -604,55 +597,44 @@ const restoreMetered = (id: string) => {
         bpmSource: 'user',
         meter: { numerator: 4, denominator: 4 },
     });
-    tempoLiveMessage.value = '区间已切回 4/4 · 100 BPM。';
+    tempoLiveMessage.value = '区间已切回 100 BPM。';
 };
-const sourceLabel = (source: 'unset' | 'estimated' | 'user') => ({
-    unset: '等待输入或自动估计',
-    estimated: '自动估计',
-    user: '用户输入',
-}[source]);
+const sourceLabel = (source: 'unset' | 'estimated' | 'user') =>
+    ({
+        unset: '等待输入或自动估计',
+        estimated: '自动估计',
+        user: '用户输入',
+    })[source];
 const segmentAccessibleLabel = (segment: TempoSegmentV1, index: number) =>
     segment.mode === 'single-beat'
         ? `区间 ${index + 1}，单拍`
-        : `区间 ${index + 1}，${segment.bpm ?? '未设置'} BPM，拍号 ${segment.meter.numerator}/${segment.meter.denominator}，${sourceLabel(segment.bpmSource)}`;
+        : `区间 ${index + 1}，${segment.bpm ?? '未设置'} BPM，${sourceLabel(segment.bpmSource)}`;
 
 const preferredBoundaryTime = () => {
     const cursor = props.playback.currentTimeSeconds;
-    const raw = Number.isFinite(cursor) && cursor > 0 && cursor < durationSeconds.value
-        ? cursor
-        : (viewport.value.startSeconds + viewport.value.endSeconds) / 2;
-    return snapEditorTime(
-        raw,
-        props.project.tempoMap,
-        viewport.value,
-        size.width,
-        durationSeconds.value,
-    );
+    const raw =
+        Number.isFinite(cursor) && cursor > 0 && cursor < durationSeconds.value
+            ? cursor
+            : (viewport.value.startSeconds + viewport.value.endSeconds) / 2;
+    return snapEditorTime(raw, props.project.tempoMap, viewport.value, size.width, durationSeconds.value);
 };
 const insertBoundaryAtPreferredTime = () => {
-    const tempoMap = insertTempoBoundary(
-        props.project.tempoMap,
-        preferredBoundaryTime(),
-        createId,
-    );
+    const tempoMap = insertTempoBoundary(props.project.tempoMap, preferredBoundaryTime(), createId);
     if (tempoMap.length === props.project.tempoMap.length) return;
     tempoLiveMessage.value = '已新增 Tempo 边界。';
     emit('updateProject', { ...props.project, tempoMap }, true);
 };
 
 const removeBoundary = (id: string) => {
-    const index = props.project.tempoMap.findIndex((segment) => segment.id === id);
+    const index = props.project.tempoMap.findIndex(segment => segment.id === id);
     if (index <= 0) {
-        tempoLiveMessage.value = index === 0
-            ? '歌曲开始边界不可删除。'
-            : 'Tempo 边界不存在。';
+        tempoLiveMessage.value = index === 0 ? '歌曲开始边界不可删除。' : 'Tempo 边界不存在。';
         return;
     }
     const removed = props.project.tempoMap[index]!;
     const tempoMap = removeTempoBoundary(props.project.tempoMap, id);
     delete tempoErrors[id];
     delete tempoBpmDrafts[id];
-    delete tempoNumeratorDrafts[id];
     if (boundaryDrag.value?.id === id) boundaryDrag.value = null;
     tempoLiveMessage.value = `已删除 ${formatTime(removed.startSeconds)} 的 Tempo 边界，前一区间已向右延伸。`;
     emit('updateProject', { ...props.project, tempoMap }, true);
@@ -675,19 +657,8 @@ const moveBoundaryDrag = (event: PointerEvent) => {
     if (!drag || drag.pointerId !== event.pointerId) return;
     const { x } = canvasPoint(event);
     const raw = editorXToTime(x, viewport.value, size.width);
-    const snapped = snapEditorTime(
-        raw,
-        props.project.tempoMap,
-        viewport.value,
-        size.width,
-        durationSeconds.value,
-    );
-    const tempoMap = moveTempoBoundary(
-        props.project.tempoMap,
-        drag.id,
-        snapped,
-        durationSeconds.value,
-    );
+    const snapped = snapEditorTime(raw, props.project.tempoMap, viewport.value, size.width, durationSeconds.value);
+    const tempoMap = moveTempoBoundary(props.project.tempoMap, drag.id, snapped, durationSeconds.value);
     emit('updateProject', { ...props.project, tempoMap }, false);
 };
 const endBoundaryDrag = () => {
@@ -709,22 +680,27 @@ const onBoundaryKeydown = (event: KeyboardEvent, id: string) => {
     }
     if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
     event.preventDefault();
-    const segment = props.project.tempoMap.find((entry) => entry.id === id);
+    const segment = props.project.tempoMap.find(entry => entry.id === id);
     if (!segment) return;
     const active = segmentAtTime(props.project.tempoMap, segment.startSeconds - 1e-6);
-    const step = active.mode === 'metered' && active.bpm !== null
-        ? 60 / active.bpm / beatSnap.value.divisor
-        : (viewport.value.endSeconds - viewport.value.startSeconds) * (event.shiftKey ? 0.05 : 0.01);
+    const step =
+        active.mode === 'metered' && active.bpm !== null
+            ? 60 / active.bpm / beatSnap.value.divisor
+            : (viewport.value.endSeconds - viewport.value.startSeconds) * (event.shiftKey ? 0.05 : 0.01);
     const direction = event.key === 'ArrowLeft' ? -1 : 1;
-    emit('updateProject', {
-        ...props.project,
-        tempoMap: moveTempoBoundary(
-            props.project.tempoMap,
-            id,
-            segment.startSeconds + step * direction,
-            durationSeconds.value,
-        ),
-    }, true);
+    emit(
+        'updateProject',
+        {
+            ...props.project,
+            tempoMap: moveTempoBoundary(
+                props.project.tempoMap,
+                id,
+                segment.startSeconds + step * direction,
+                durationSeconds.value,
+            ),
+        },
+        true,
+    );
 };
 
 const configureCanvas = (canvas: HTMLCanvasElement | null) => {
@@ -749,9 +725,7 @@ const drawStatic = () => {
     const series = props.bufferSeries;
     if (series?.payload.kind === 'waveform-envelope') {
         const range = visibleSampleRange(series, viewport.value);
-        const { centerY, amplitude } = editorWaveformVerticalGeometry(
-            size.height,
-        );
+        const { centerY, amplitude } = editorWaveformVerticalGeometry(size.height);
         waveform.beginPath();
         for (let index = range.startIndex; index < range.endIndex; index += 1) {
             const x = editorTimeToX(index * series.sampleStepSeconds, viewport.value, size.width);
@@ -769,11 +743,11 @@ const drawStatic = () => {
     for (const line of generateTempoGrid(props.project.tempoMap, durationSeconds.value, viewport.value, size.width)) {
         const x = editorTimeToX(line.timeSeconds, viewport.value, size.width);
         grid.beginPath();
-        const tickHeight = size.height * (line.kind === 'measure' ? 1 : divisorHeight(line.divisor));
+        const tickHeight = size.height * (line.kind === 'beat' ? 1 : divisorHeight(line.divisor));
         grid.moveTo(Math.round(x) + 0.5, (size.height - tickHeight) / 2);
         grid.lineTo(Math.round(x) + 0.5, (size.height + tickHeight) / 2);
         grid.strokeStyle = divisorColour(line.divisor);
-        grid.globalAlpha = line.kind === 'measure' ? .85 : .45;
+        grid.globalAlpha = line.kind === 'beat' ? 0.85 : 0.45;
         grid.lineWidth = 1;
         grid.stroke();
     }
@@ -798,7 +772,14 @@ const drawCursor = () => {
 };
 
 watch(
-    () => [props.bufferSeries, props.project.tempoMap, props.project.workspace.viewport, size.width, size.height, size.dpr],
+    () => [
+        props.bufferSeries,
+        props.project.tempoMap,
+        props.project.workspace.viewport,
+        size.width,
+        size.height,
+        size.dpr,
+    ],
     () => void nextTick(drawStatic),
     { deep: true },
 );
@@ -809,20 +790,22 @@ watch(
 );
 watch(
     () => props.project.track.contentHash,
-    () => { timingOpen.value = false; selectedTempoId.value = props.project.tempoMap[0]?.id ?? null; },
+    () => {
+        timingOpen.value = false;
+        selectedTempoId.value = props.project.tempoMap[0]?.id ?? null;
+    },
 );
 watch(
     () => props.project.tempoMap,
     () => {
         const ids = new Set(props.project.tempoMap.map(segment => segment.id));
-        if (!selectedTempoId.value || !ids.has(selectedTempoId.value)) selectedTempoId.value = props.project.tempoMap[0]?.id ?? null;
-        for (const drafts of [tempoErrors, tempoBpmDrafts, tempoNumeratorDrafts]) for (const id of Object.keys(drafts)) if (!ids.has(id)) delete drafts[id];
+        if (!selectedTempoId.value || !ids.has(selectedTempoId.value))
+            selectedTempoId.value = props.project.tempoMap[0]?.id ?? null;
+        for (const drafts of [tempoErrors, tempoBpmDrafts])
+            for (const id of Object.keys(drafts)) if (!ids.has(id)) delete drafts[id];
     },
 );
-watch(
-    beatSnap,
-    () => void nextTick(drawStatic),
-);
+watch(beatSnap, () => void nextTick(drawStatic));
 watch(
     () => props.playback.currentTimeSeconds,
     () => void nextTick(drawCursor),
@@ -848,11 +831,37 @@ onBeforeUnmount(() => {
 </script>
 
 <style scoped>
-.beat-control-rail { display:grid; align-content:center; gap:3px; padding:8px 14px; min-width:0; background:var(--editor-rail); }
-.beat-control-rail h2 { margin:0; font-size:12px; font-weight:600; }
-.timing-disclosure { display:flex; align-items:center; justify-content:space-between; font-size:12px; }
-.timing-disclosure button { width:30px; height:26px; min-height:26px; border:0; padding:4px; background:transparent; }
-.timing-disclosure svg { width:16px; height:16px; }
+.beat-control-rail {
+    display: grid;
+    align-content: center;
+    gap: 3px;
+    padding: 8px 14px;
+    min-width: 0;
+    background: var(--editor-rail);
+}
+.beat-control-rail h2 {
+    margin: 0;
+    font-size: 12px;
+    font-weight: 600;
+}
+.timing-disclosure {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 12px;
+}
+.timing-disclosure button {
+    width: 30px;
+    height: 26px;
+    min-height: 26px;
+    border: 0;
+    padding: 4px;
+    background: transparent;
+}
+.timing-disclosure svg {
+    width: 16px;
+    height: 16px;
+}
 .editor-timeline-panel {
     margin-top: 1px;
     border-top: 1px solid var(--hairline);
@@ -868,10 +877,6 @@ onBeforeUnmount(() => {
 .timeline-controls,
 .timeline-status,
 .tempo-compact-field,
-.meter-inputs {
-    display: flex;
-    align-items: center;
-}
 .timeline-heading {
     justify-content: space-between;
     gap: 12px;
@@ -879,13 +884,41 @@ onBeforeUnmount(() => {
     padding: 4px 8px;
     border-bottom: 1px solid var(--divider);
 }
-.timeline-titleline { min-width: 0; gap: 10px; }
-.timeline-heading h2 { margin: 0; font-size: .96rem; white-space: nowrap; }
-.timeline-titleline p { margin: 0; color: var(--body); font-size: .76rem; white-space: nowrap; }
-.timeline-kicker { color: var(--accent-soft); font-size: .68rem; letter-spacing: .1em; text-transform: uppercase; white-space: nowrap; }
-.timeline-controls { flex-wrap: wrap; gap: 4px; }
-.timeline-controls .editor-icon-button { min-height: 34px; border: 0; padding: 7px; background: transparent; }
-.timeline-controls .editor-icon-button:hover:not(:disabled) { background: rgba(180, 220, 199, .08); }
+.timeline-titleline {
+    min-width: 0;
+    gap: 10px;
+}
+.timeline-heading h2 {
+    margin: 0;
+    font-size: 0.96rem;
+    white-space: nowrap;
+}
+.timeline-titleline p {
+    margin: 0;
+    color: var(--body);
+    font-size: 0.76rem;
+    white-space: nowrap;
+}
+.timeline-kicker {
+    color: var(--accent-soft);
+    font-size: 0.68rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+.timeline-controls {
+    flex-wrap: wrap;
+    gap: 4px;
+}
+.timeline-controls .editor-icon-button {
+    min-height: 34px;
+    border: 0;
+    padding: 7px;
+    background: transparent;
+}
+.timeline-controls .editor-icon-button:hover:not(:disabled) {
+    background: rgba(180, 220, 199, 0.08);
+}
 button,
 input,
 select {
@@ -898,8 +931,13 @@ select {
 }
 button:focus-visible,
 input:focus-visible,
-select:focus-visible { outline: 2px solid var(--accent-soft); outline-offset: 2px; }
-button:disabled { opacity: .4; }
+select:focus-visible {
+    outline: 2px solid var(--accent-soft);
+    outline-offset: 2px;
+}
+button:disabled {
+    opacity: 0.4;
+}
 .timeline-layout-row {
     display: grid;
     grid-template-columns: 280px minmax(240px, 1fr);
@@ -917,10 +955,17 @@ button:disabled { opacity: .4; }
     color: var(--body);
     background: var(--editor-rail);
 }
-.timeline-track-rail { border-right: 1px solid var(--divider); border-radius: 0; }
-.timeline-class-rail { border-right: 1px solid var(--divider); }
+.timeline-track-rail {
+    border-right: 1px solid var(--divider);
+    border-radius: 0;
+}
+.timeline-class-rail {
+    border-right: 1px solid var(--divider);
+}
 .timeline-track-rail strong,
-.timeline-class-rail strong { color: var(--ink); }
+.timeline-class-rail strong {
+    color: var(--ink);
+}
 .timeline-time-column {
     position: relative;
     min-width: 0;
@@ -938,12 +983,41 @@ button:disabled { opacity: .4; }
     touch-action: none;
     user-select: none;
 }
-.timeline-canvas { position: absolute; inset: 0; pointer-events: none; }
-.grid-canvas { z-index: 2; }
-.cursor-canvas { z-index: 3; }
-.waveform-actions { position:absolute; z-index:8; top:5px; right:6px; display:flex; gap:4px; }
-.waveform-actions button { display:grid; place-items:center; width:30px; height:30px; min-width:30px; min-height:30px; padding:6px; border:0; background:var(--editor-control-strong); cursor:pointer; }
-.waveform-actions svg { width:18px; height:18px; }
+.timeline-canvas {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+}
+.grid-canvas {
+    z-index: 2;
+}
+.cursor-canvas {
+    z-index: 3;
+}
+.waveform-actions {
+    position: absolute;
+    z-index: 8;
+    top: 5px;
+    right: 6px;
+    display: flex;
+    gap: 4px;
+}
+.waveform-actions button {
+    display: grid;
+    place-items: center;
+    width: 30px;
+    height: 30px;
+    min-width: 30px;
+    min-height: 30px;
+    padding: 6px;
+    border: 0;
+    background: var(--editor-control-strong);
+    cursor: pointer;
+}
+.waveform-actions svg {
+    width: 18px;
+    height: 18px;
+}
 .timeline-menu {
     position: absolute;
     z-index: 10;
@@ -953,9 +1027,12 @@ button:disabled { opacity: .4; }
     border: 1px solid var(--hairline-focus);
     border-radius: var(--editor-flyout-radius, 8px);
     background: var(--editor-menu);
-    box-shadow: 0 14px 40px rgba(0,0,0,.5);
+    box-shadow: 0 14px 40px rgba(0, 0, 0, 0.5);
 }
-.timeline-menu button { border: 0; text-align: left; }
+.timeline-menu button {
+    border: 0;
+    text-align: left;
+}
 .timeline-status {
     box-sizing: border-box;
     flex-wrap: nowrap;
@@ -968,7 +1045,7 @@ button:disabled { opacity: .4; }
     padding: 4px 8px;
     border-top: 1px solid var(--divider);
     color: var(--body);
-    font-size: .76rem;
+    font-size: 0.76rem;
     white-space: nowrap;
 }
 .tempo-guide-layer {
@@ -987,7 +1064,7 @@ button:disabled { opacity: .4; }
     width: 1px;
     height: 12px;
     background: var(--hairline-focus);
-    transform: translateX(-.5px);
+    transform: translateX(-0.5px);
 }
 .tempo-lane-stage {
     position: relative;
@@ -998,7 +1075,10 @@ button:disabled { opacity: .4; }
     background: var(--editor-lane-deep);
     user-select: none;
 }
-.tempo-lane-stage:focus-visible { outline: 2px solid var(--accent-soft); outline-offset: -2px; }
+.tempo-lane-stage:focus-visible {
+    outline: 2px solid var(--accent-soft);
+    outline-offset: -2px;
+}
 .tempo-segment {
     position: absolute;
     z-index: 2;
@@ -1022,8 +1102,11 @@ button:disabled { opacity: .4; }
     line-height: 1;
     white-space: nowrap;
 }
-.tempo-compact-field { gap: 3px; margin: 0; white-space: nowrap; }
-.meter-inputs { gap: 2px; }
+.tempo-compact-field {
+    gap: 3px;
+    margin: 0;
+    white-space: nowrap;
+}
 .tempo-compact-control {
     box-sizing: border-box;
     min-height: 18px;
@@ -1046,36 +1129,9 @@ button:disabled { opacity: .4; }
 .tempo-compact-control:focus-visible {
     outline: 0;
 }
-.tempo-bpm-input { width: 52px; }
-.tempo-meter-numerator { width: 28px; }
-.tempo-meter-denominator-shell {
-    position: relative;
-    display: inline-flex;
-    flex: 0 0 42px;
-    width: 42px;
-    height: 18px;
+.tempo-bpm-input {
+    width: 52px;
 }
-.tempo-meter-denominator-shell::after {
-    content: '';
-    position: absolute;
-    top: 50%;
-    right: 4px;
-    width: 5px;
-    height: 5px;
-    border-right: 1px solid var(--body);
-    border-bottom: 1px solid var(--body);
-    pointer-events: none;
-    transform: translateY(-70%) rotate(45deg);
-}
-.tempo-meter-denominator {
-    width: 42px;
-    padding: 0 15px 0 3px;
-    appearance: none;
-    -webkit-appearance: none;
-    text-align: center;
-    text-align-last: center;
-}
-.tempo-compact-separator { color: var(--mute); }
 .tempo-compact-action {
     min-height: 18px;
     height: 18px;
@@ -1094,7 +1150,10 @@ button:disabled { opacity: .4; }
     outline: 0;
 }
 .single-beat,
-.tempo-segment-summary { color: var(--body); white-space: nowrap; }
+.tempo-segment-summary {
+    color: var(--body);
+    white-space: nowrap;
+}
 .tempo-lane-boundary {
     position: absolute;
     z-index: 5;
@@ -1112,8 +1171,13 @@ button:disabled { opacity: .4; }
     cursor: ew-resize;
 }
 .tempo-lane-boundary:hover,
-.tempo-lane-boundary:focus-visible { color: var(--accent-bright); background: transparent; }
-.tempo-lane-boundary--fixed { pointer-events: none; }
+.tempo-lane-boundary:focus-visible {
+    color: var(--accent-bright);
+    background: transparent;
+}
+.tempo-lane-boundary--fixed {
+    pointer-events: none;
+}
 .boundary-caret {
     position: absolute;
     top: 0;
@@ -1133,8 +1197,12 @@ button:disabled { opacity: .4; }
     white-space: nowrap;
     transform: translateX(-50%);
 }
-.tempo-lane-boundary--start .boundary-time { transform: translateX(2px); }
-.tempo-lane-boundary--end .boundary-time { transform: translateX(calc(-100% - 2px)); }
+.tempo-lane-boundary--start .boundary-time {
+    transform: translateX(2px);
+}
+.tempo-lane-boundary--end .boundary-time {
+    transform: translateX(calc(-100% - 2px));
+}
 .tempo-measure {
     position: absolute;
     left: -100000px;
@@ -1147,14 +1215,36 @@ button:disabled { opacity: .4; }
     width: max-content;
     padding-inline: 4px;
 }
-.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
 @media (max-width: 900px) {
-    .timeline-heading { align-items: flex-start; flex-wrap: wrap; }
-    .timeline-titleline { flex-wrap: wrap; }
-    .timeline-time-column { --editor-timeline-stage-height: 72px; }
-    .editor-timeline-panel { overflow-x: auto; }
+    .timeline-heading {
+        align-items: flex-start;
+        flex-wrap: wrap;
+    }
+    .timeline-titleline {
+        flex-wrap: wrap;
+    }
+    .timeline-time-column {
+        --editor-timeline-stage-height: 72px;
+    }
+    .editor-timeline-panel {
+        overflow-x: auto;
+    }
 }
 @media (prefers-reduced-motion: reduce) {
-    * { scroll-behavior: auto !important; transition: none !important; }
+    * {
+        scroll-behavior: auto !important;
+        transition: none !important;
+    }
 }
 </style>

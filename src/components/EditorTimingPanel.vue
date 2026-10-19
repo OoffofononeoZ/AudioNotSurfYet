@@ -19,10 +19,7 @@
                         :data-testid="`timing-select-${index}`"
                         @click="emit('select', segment.id)">
                         <span>{{ timestamp(segment.startSeconds) }}</span
-                        ><span>{{ segment.mode === 'metered' ? `${segment.bpm ?? '—'} BPM` : '单拍' }}</span
-                        ><span>{{
-                            segment.mode === 'metered' ? `${segment.meter.numerator}/${segment.meter.denominator}` : '—'
-                        }}</span>
+                        ><span>{{ segment.mode === 'metered' ? `${segment.bpm ?? '—'} BPM` : '单拍' }}</span>
                     </button>
                     <button
                         type="button"
@@ -49,15 +46,6 @@
                 <h3>当前区间</h3>
                 <span>{{ selectedIndex + 1 }} / {{ project.tempoMap.length }}</span>
             </header>
-            <div class="beat-phase" aria-label="当前区间节拍位置">
-                <i
-                    v-for="beat in beatCount"
-                    :key="beat"
-                    :class="{ active: phase === beat - 1, downbeat: beat === 1 }" />
-                <span>{{
-                    selected.mode === 'metered' && selected.bpm !== null ? `${selected.bpm} BPM` : '尚无节拍网格'
-                }}</span>
-            </div>
             <label class="timing-field"
                 ><span>起点（毫秒）</span
                 ><AppNumberInput
@@ -78,28 +66,8 @@
                         placeholder="100"
                         @update:model-value="setBpm"
                 /></label>
-                <div class="timing-field">
-                    <span>拍号</span>
-                    <div class="meter-fields">
-                        <AppNumberInput
-                            :model-value="selected.meter.numerator"
-                            label="辅助拍号分子"
-                            :min="1"
-                            :max="32"
-                            @update:model-value="
-                                setMeter($event, selected.mode === 'metered' ? selected.meter.denominator : 4)
-                            " /><span>/</span
-                        ><AppSelect
-                            :model-value="selected.meter.denominator"
-                            label="辅助拍号分母"
-                            :options="denominators"
-                            @update:model-value="
-                                setMeter(selected.mode === 'metered' ? selected.meter.numerator : 4, Number($event))
-                            " />
-                    </div>
-                </div>
             </template>
-            <button v-else type="button" @click="restoreMetered">设置为 100 BPM · 4/4</button>
+            <button v-else type="button" @click="restoreMetered">设置为 100 BPM</button>
         </aside>
         <div class="tap-controls">
             <h3>点按节拍</h3>
@@ -123,11 +91,9 @@
 </template>
 <script setup lang="ts">
 import { computed, onBeforeUnmount, ref, watch } from 'vue';
-import AppSelect from './controls/AppSelect.vue';
 import AppNumberInput from './controls/AppNumberInput.vue';
 import {
     applyBpmInput,
-    applyMeterInput,
     insertTempoBoundary,
     moveTempoBoundary,
     removeTempoBoundary,
@@ -135,7 +101,7 @@ import {
 } from '../editor/tempoMap';
 import { normalizeEditorSeconds } from '../editor/projectCodec';
 import { TapTempoEstimator } from '../editor/tapTempo';
-import type { EditorProjectV1, MeterDenominator, TempoSegmentV1 } from '../editor/types';
+import type { EditorProjectV1, TempoSegmentV1 } from '../editor/types';
 import type { PlaybackSnapshot } from '../types/audio';
 const props = defineProps<{ project: EditorProjectV1; playback: PlaybackSnapshot; selectedId: string | null }>();
 const emit = defineEmits<{
@@ -150,16 +116,6 @@ const selectedIndex = computed(() =>
     ),
 );
 const selected = computed(() => props.project.tempoMap[selectedIndex.value]!);
-const denominators = [1, 2, 4, 8, 16, 32].map(value => ({ value, label: String(value) }));
-const beatCount = computed(() => (selected.value.mode === 'metered' ? selected.value.meter.numerator : 1));
-const phase = computed(() => {
-    const segment = selected.value,
-        time = props.playback.currentTimeSeconds - segment.startSeconds;
-    const end = props.project.tempoMap[selectedIndex.value + 1]?.startSeconds ?? props.project.track.durationSeconds;
-    return segment.mode === 'metered' && segment.bpm !== null && time >= 0 && props.playback.currentTimeSeconds < end
-        ? Math.floor(time / (60 / segment.bpm)) % segment.meter.numerator
-        : -1;
-});
 const message = ref(''),
     failed = ref(false);
 const estimator = new TapTempoEstimator(),
@@ -239,14 +195,6 @@ function setBpm(value: number) {
     }
     replace(result.segment, 'BPM 已保存，已有标记时间保持不变。');
 }
-function setMeter(numerator: number, denominator: number) {
-    const result = applyMeterInput(selected.value, numerator, denominator as MeterDenominator);
-    if (!result.ok) {
-        fail(result.message);
-        return;
-    }
-    replace(result.segment, '拍号已保存。');
-}
 function restoreMetered() {
     replace(
         {
@@ -257,7 +205,7 @@ function restoreMetered() {
             bpmSource: 'user',
             meter: { numerator: 4, denominator: 4 },
         },
-        '已设置为 100 BPM · 4/4。',
+        '已设置为 100 BPM。',
     );
 }
 function applyTap() {
@@ -336,7 +284,7 @@ header > span {
 }
 .timing-select {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 40px;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     min-width: 0;
     gap: 8px;
     flex: 1;
@@ -374,43 +322,6 @@ footer {
 .timing-field :deep(.app-select) {
     width: 150px;
     font-size: 12px;
-}
-.meter-fields {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    width: 150px;
-}
-.meter-fields :deep(.app-number-input),
-.meter-fields :deep(.app-select) {
-    width: 64px;
-}
-.beat-phase {
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 4px;
-    padding: 14px;
-    min-height: 16px;
-}
-.beat-phase i {
-    width: 7px;
-    height: 7px;
-    border-radius: 50%;
-    background: var(--divider);
-}
-.beat-phase i.active {
-    background: var(--accent-soft);
-    box-shadow: 0 0 8px #86edb54d;
-}
-.beat-phase i.downbeat {
-    width: 10px;
-    height: 10px;
-}
-.beat-phase span {
-    margin-left: auto;
-    font-size: 11px;
-    color: var(--muted);
 }
 .tap-controls {
     display: flex;
