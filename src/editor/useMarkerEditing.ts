@@ -26,7 +26,7 @@ interface Pending extends Row {
 }
 type MarkerEvent = PointEventV1 | RangeEventV1;
 interface Drag extends Row {
-    kind: 'create' | 'event' | 'endpoint' | 'select' | 'block';
+    kind: 'create' | 'event' | 'endpoint' | 'select' | 'block' | 'delete';
     element: HTMLElement;
     pointerId: number;
     startX: number;
@@ -95,6 +95,7 @@ export function useMarkerEditing(
         drag.value = null;
         preview.value = null;
         blocks.preview.value = null;
+        blocks.deletion.value = null;
         if (previous?.element.hasPointerCapture(previous.pointerId))
             previous.element.releasePointerCapture(previous.pointerId);
     }
@@ -103,11 +104,14 @@ export function useMarkerEditing(
         stop();
     }
     function escape() {
+        const deleting = drag.value?.kind === 'delete';
         cancel();
         pending.value = null;
         menu.value = null;
-        if (blocks.selection.value) blocks.clear();
-        else blocks.mode.value = false;
+        if (!deleting) {
+            if (blocks.selection.value) blocks.clear();
+            else blocks.mode.value = false;
+        }
         report('已取消。');
     }
     function clear() {
@@ -168,7 +172,8 @@ export function useMarkerEditing(
         }
     }
     function down(event: PointerEvent, row: Row) {
-        if (event.button !== 0 || !enabled() || drag.value) return;
+        const deleting = event.button === 2 && blocks.mode.value;
+        if ((!deleting && event.button !== 0) || !enabled() || drag.value) return;
         const element = event.currentTarget as HTMLElement,
             raw = at(event, element);
         if (!markerCanEditAt(view(), raw)) return;
@@ -181,7 +186,8 @@ export function useMarkerEditing(
         if (snapped) candidate.value = { ...row, timeSeconds: snapped.timeSeconds };
         let kind: Drag['kind'] = 'create';
         const selection = blocks.selection.value;
-        if (blocks.mode.value) {
+        if (deleting) kind = 'delete';
+        else if (blocks.mode.value) {
             kind =
                 same(selection, row) && raw >= selection!.startSeconds && raw <= selection!.endSeconds
                     ? 'block'
@@ -261,6 +267,10 @@ export function useMarkerEditing(
         }
         if (Math.abs(event.clientX - state.startX) >= 4) state.moved = true;
         if (!state.moved) return;
+        if (state.kind === 'delete') {
+            attempt(() => blocks.selectDeletion(state.laneId, state.innerClassId, state.rawStart, raw));
+            return;
+        }
         if (state.kind === 'select') {
             attempt(() => blocks.select(state.laneId, state.innerClassId, state.rawStart, raw));
             return;
@@ -274,13 +284,17 @@ export function useMarkerEditing(
     }
     function up(event: PointerEvent) {
         const state = drag.value;
-        if (!state || state.pointerId !== event.pointerId) return;
+        if (!state || state.pointerId !== event.pointerId || event.button !== (state.kind === 'delete' ? 2 : 0)) return;
         const result = preview.value,
-            blockPreview = blocks.preview.value;
+            blockPreview = blocks.preview.value,
+            deletion = blocks.deletion.value;
         stop();
         if (!enabled() || fingerprint() !== state.source) return;
         attempt(() => {
-            if (state.kind === 'create' && !state.moved && same(candidate.value, state))
+            if (state.kind === 'delete' && state.moved && deletion) {
+                blocks.remove(deletion);
+                if (selected.value && deletion.eventIds?.includes(selected.value)) selected.value = null;
+            } else if (state.kind === 'create' && !state.moved && same(candidate.value, state))
                 create(state, candidate.value!.timeSeconds, state.element.clientWidth);
             else if (state.moved && result?.error) report(result.error);
             else if (state.moved && state.kind === 'block' && blockPreview)
@@ -305,6 +319,7 @@ export function useMarkerEditing(
     }
     function context(event: MouseEvent, row: Row) {
         event.preventDefault();
+        if (blocks.mode.value) return;
         const element = event.currentTarget as HTMLElement,
             time = at(event, element);
         if (time < 0 || time > view().durationSeconds) return;
