@@ -21,7 +21,7 @@ AudioNotSurfYet 是 Vue / TypeScript / Vite 浏览器音频工作台；当前目
 | --- | --- |
 | 应用外壳与首页 | DEC-076：可收起侧边栏、窄屏隐藏导航和歌曲详情首页；布局及接口见 [应用外壳契约](app-shell.md)。 |
 | Analyzer | DEC-077：单列、FIFO 常驻区、可调高度与图表内滚轮缩放，见 [当前列表契约](analyzer-list.md)。新增首项 [Wallpaper Engine 风格频谱（近似）](wallpaper-spectrum.md)，旧 Analyzer 工作区清空，独立草稿保留。M1–M14 readiness 与 canonical 继续绑定历史候选。 |
-| Editor | DEC-078 的[公共框架](editor-workspace.md)统一顶栏、常驻 MusicBar 与草稿／换歌保护；[标记工作区](editor-marking.md)现为独立波形、左侧节拍栏及 15% 固定播放线轨道，1–10 秒跨度、播放只读、暂停后右侧编辑，保留批量与跨窗口范围创建。E1–E9 canonical 与适用人工门禁继续绑定历史候选；原 readiness 候选为 `pre-E10`。 |
+| Editor | DEC-078 的[公共框架](editor-workspace.md)统一顶栏、常驻 MusicBar 与草稿／换歌保护；[标记工作区](editor-marking.md)使用独立波形、左侧节拍栏及 15% 固定播放线轨道，1–10 秒跨度。DEC-085 开放播放中按分类行 `1–9、0` 点按／按住录入并吸附当前细分；鼠标与管理仍须暂停，保留批量与跨窗口范围创建。E1–E9 canonical 与适用人工门禁继续绑定历史候选；原 readiness 候选为 `pre-E10`。 |
 | Visualizer | DEC-084：当前使用 [Project V4](../architecture/visualizer/project-format-v4.md)分组预设、共同处理参数与[JSON 资源包过渡版](../architecture/visualizer/resource-packages-v1.md)，内置请求/磁盘导入与独立本地资源库，工程内嵌定义；旧版工程不迁移，旧草稿不提示。DEC-081 的[离线确定性导出](visualizer-offline-export.md)和四档实际能力查询继续有效。当前功能验证不等同 readiness，V1–V6 canonical 继续绑定历史候选。DEC-082 的新增内容输入校验与[具体合同审批](../architecture/visualizer/content-generation.md)继续有效。 |
 | FT 与处理链 | P0-D 已完成；当前 FT 功能及汇总听感/长曲耗时按 DEC-074 接受。四原图与官方 ORT JSEP 的历史双浏览器数值门禁保留；完整 P1 正式关闭仍有独立证据缺口。 |
 | Editor FT 接入 | 本轮功能收尾完成：四轨/WAV、缓存恢复、清理、取消/换歌/离页及原编辑回归，当前全量 runner 9/9，92 项非浏览器、Chrome/Edge 各 20/20。证据为工作树不变的 provisional，不冒充 clean canonical；完整 P2 及 P3–P6 独立，后者仍 `Planned`。 |
