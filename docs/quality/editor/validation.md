@@ -19,7 +19,7 @@
 | 性能/资源 | 约15分钟、20 lanes、每 lane≤8 classes、10,000 point/range：反馈≤100ms，无 Editor/分析归因任务>50ms；仅可见事件 DOM，20 次生命周期不单调累积资源 |
 | 可访问性 | 390/1024/1280/1920、DPR1/2、键盘、命名焦点、reduced motion、共享滚动；pointercancel/lostcapture/blur/离页清理临时态，console/pageerror 无新异常 |
 
-布局尺寸、播放线15%、1–10秒 marker span、当前行高/小节模式及数字录入细节只在现行交互契约维护，不复制旧 E7/E8 的失效排版令牌。
+布局尺寸、播放线15%、1–10秒 marker span、当前行高/连续时间选择及数字录入细节只在现行交互契约维护，不复制旧 E7/E8 的失效排版令牌。
 
 ## 验证入口与证据
 

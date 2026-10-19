@@ -2,9 +2,9 @@ import { ref, shallowRef } from 'vue';
 import { assertMarkerBlockEditable, editableMarkerBlock, type MarkerTimeView } from './markerTimeView';
 import {
     copyMarkerBlockAfter,
-    markerMeasureAtTime,
+    markerGridSpanAtTime,
     moveMarkerBlock,
-    selectMarkerBlockByMeasures,
+    selectMarkerBlockByTime,
     type MarkerBlockSelection,
 } from './markerBlockOperations';
 import type { EditorProjectV1 } from './types';
@@ -25,7 +25,7 @@ export function useMarkerBlocks(
         if (!view().editable) return;
         selection.value = editableMarkerBlock(
             project(),
-            selectMarkerBlockByMeasures(project(), laneId, innerClassId, anchor, extent),
+            selectMarkerBlockByTime(project(), laneId, innerClassId, anchor, extent, setting()),
             view(),
         );
         preview.value = null;
@@ -64,15 +64,22 @@ export function useMarkerBlocks(
             const cell = movePointCell(current.startSeconds, direction, project(), width, setting());
             if (cell) move(cell.timeSeconds, true);
         } else {
-            const adjacent = markerMeasureAtTime(
+            const adjacent = markerGridSpanAtTime(
                 project(),
                 direction < 0
-                    ? Math.max(Math.max(0, view().startSeconds), current.startSeconds - 1e-6)
-                    : current.endSeconds + 1e-6,
+                    ? (movePointCell(current.startSeconds, -1, project(), width, setting())?.timeSeconds ??
+                          current.startSeconds)
+                    : current.endSeconds,
+                setting(),
             );
             const start = direction < 0 ? Math.min(current.startSeconds, adjacent.startSeconds) : current.startSeconds;
             const end = direction > 0 ? Math.max(current.endSeconds, adjacent.endSeconds) : current.endSeconds;
-            select(current.laneId, current.innerClassId, Math.max(Math.max(0, view().startSeconds), start), end - 1e-6);
+            select(
+                current.laneId,
+                current.innerClassId,
+                Math.max(Math.max(0, view().startSeconds), start),
+                movePointCell(end, -1, project(), width, setting())?.timeSeconds ?? start,
+            );
         }
         return true;
     }
@@ -83,7 +90,7 @@ export function useMarkerBlocks(
     function toggle() {
         mode.value = !mode.value;
         clear();
-        report(mode.value ? '区间操作：左键拖空白选小节，拖选区移动；Ctrl/Cmd+C 向后复制。' : '已关闭区间操作。');
+        report(mode.value ? '区间操作：左键拖空白选连续标记，拖选区移动；Ctrl/Cmd+C 向后复制。' : '已关闭区间操作。');
     }
     return { mode, selection, preview, select, move, key, clear, toggle };
 }

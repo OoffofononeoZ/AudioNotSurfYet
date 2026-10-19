@@ -13,7 +13,7 @@ import {
 import { EditorDraftRepository } from '../../src/editor/editorDraftRepository';
 import { createInitialEditorProject } from '../../src/editor/projectCodec';
 import { createPointLane, createPointEvent } from '../../src/editor/pointAnnotations';
-import { selectMarkerBlockByMeasures } from '../../src/editor/markerBlockOperations';
+import { selectMarkerBlockByTime } from '../../src/editor/markerBlockOperations';
 
 function project() {
     const value = createInitialEditorProject({
@@ -80,7 +80,7 @@ test('crossing ranges remain reachable and new block selections include visible 
         value = createPointEvent(value, lane.id, lane.innerClasses[0]!.id, time, () => `${time}`).project;
     const selection = editableMarkerBlock(
         value,
-        selectMarkerBlockByMeasures(value, lane.id, lane.innerClasses[0]!.id, 1),
+        selectMarkerBlockByTime(value, lane.id, lane.innerClasses[0]!.id, 0.5, 1.5),
         view,
     );
     expect(selection.eventIds).toEqual(['0.5', '1', '1.5']);

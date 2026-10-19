@@ -183,7 +183,7 @@ test('left drag selects bars, copies and moves atomically; dragging freezes zoom
     await page.keyboard.press('Control+c');
     await expect(page.locator('[data-testid^="point-marker-"]')).toHaveCount(4);
     await page.keyboard.press('Alt+ArrowRight');
-    await expect(page.locator('[data-testid^="point-marker-"][data-time-seconds="2.625"]')).toHaveCount(1);
+    await expect(page.locator('[data-testid^="point-marker-"][data-time-seconds="2.375"]')).toHaveCount(1);
     await page.getByTestId('toggle-block-mode').click();
     const marker = page.locator('[data-testid^="point-marker-"][data-time-seconds="0.5"]');
     const before = await page.getByTestId('marker-span').textContent(),
