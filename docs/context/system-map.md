@@ -119,6 +119,7 @@ showOpenFilePicker → FileSystemFileHandle → File
 - `EditorTimeline` 用波形独立 `workspace.viewport` 驱动 waveform、grid、cursor 与 boundary；首次／重置为全曲，保留已有保存范围、滚轮锚点、右键 pan、seek 与快捷键，不随 BPM 自动改窗口。左侧约 280px 节拍栏与默认收起的三块 BPM 面板复用现有 tempo/Tap 算法。
 - tempo map 支持 metered/single-beat、20–300 小数 BPM、拍号、继承式 boundary 和内部 onset/autocorrelation 估计；低置信度或 stale 结果不写入工程。
 - `EditorPointWorkspace` 装配只读 `MarkerTimeView`、统一点／范围轨道和叠加层；轨道直接跟随播放快照，默认 10 秒、1–10 秒跨度，固定 15% 播放线与歌曲边界留白。动态起点不入工程，跨度按 hash 保存 preferences。行与事件只在可见范围绘制，轨道与 overlay 共享合并 RAF。
+- `EditorMarkerRuler` 拥有拖动刻度带的输入与捕获生命周期，`MarkerRulerScrubber` 按即时 engine 秒数及鼠标增量合并 seek，最多一个在途请求和一个待处理位移，不创建播放时钟。原曲／分轨共用，播放状态和倍速由共享 transport 保持；外部跳转、变速、换歌、切工作区及离页清理待处理输入。
 - point 命令固定微秒唯一性，使用 osu 式显式细分与居中彩色刻线、single-beat 整段一格及分类迁移／明确删除；缩放只稀疏网格，不改变吸附。轨道右键 marker 删除，空白打开 body 级 seek／播放菜单，不平移；波形继续独立 pan／菜单。
 - range 命令使用微秒规范化半开 `[start,end)`；同 lane/inner class 真重叠拒绝、相邻允许，跨分类可并存。两次点击起点可跨同歌导航与播放保留，暂停后选择终点；显式取消／Esc、所属分类删除、切页签、工程身份变化与离页清理。端点 pointer／keyboard 调整及拖动回滚复用原校验。
 - DEC-085 由 `KeyboardMarkerRecorder`／`useKeyboardMarkerRecording` 独立管理播放中的分类行数字键点按／按住录入；即时 engine 快照经 service 只读入口读取，跳转前取消，暂停／曲终同步收尾，最新 controller 工程合并后防抖保存。鼠标仍须暂停，暂停后可编辑整条可见轨道；左侧遮罩和15%播放线样式保留。`useMarkerEditing` 管理拖动／候选／鼠标待完成范围，`useMarkerBlocks` 管理连续时间批量，源身份变化或 seek／变速／播放取消拖动。`EditorMarkerLane` 拥有 224/160px 管理栏、36px 组标题、48px 分类行、会话折叠与确认删除，轨道列表独立滚动；波形与轨道横向滚动解耦。

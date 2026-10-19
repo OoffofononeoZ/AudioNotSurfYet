@@ -141,7 +141,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, nextTick, onBeforeUnmount, ref, shallowRef, watch } from 'vue';
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, shallowRef, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { ElMessage } from 'element-plus';
 import { useAudioSessionService } from '../audio/audioSessionService';
@@ -427,7 +427,9 @@ const cancelConflict = async () => {
 const clearInvalidDraft = () => void controller.clearInvalidDraftAndCreate();
 const updateProject = (project: EditorProjectV1, immediate: boolean) => controller.updateProject(project, immediate);
 
+onMounted(() => document.body.classList.add('editor-text-selection-disabled'));
 onBeforeUnmount(() => {
+    document.body.classList.remove('editor-text-selection-disabled');
     cursorRequestRevision += 1;
     if (cursorTimer) clearTimeout(cursorTimer);
     unsubscribe();
@@ -436,6 +438,16 @@ onBeforeUnmount(() => {
 </script>
 
 <style scoped>
+:global(body.editor-text-selection-disabled),
+:global(body.editor-text-selection-disabled *) {
+    user-select: none;
+}
+:global(body.editor-text-selection-disabled input),
+:global(body.editor-text-selection-disabled textarea),
+:global(body.editor-text-selection-disabled [contenteditable]:not([contenteditable='false'])),
+:global(body.editor-text-selection-disabled [contenteditable]:not([contenteditable='false']) *) {
+    user-select: text;
+}
 .editor-page {
     --editor-control-height: 30px;
     --editor-control-radius: 4px;

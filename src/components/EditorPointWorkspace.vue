@@ -52,7 +52,11 @@
             @action="addLane"
             @close="addMenu = false" />
         <div class="marker-scroll app-scrollbar" @wheel="wheel">
-            <EditorMarkerRuler :view="view" />
+            <EditorMarkerRuler
+                :view="view"
+                :active="active !== false"
+                :track-id="playback.trackId"
+                @dragging="rulerDragging = $event" />
             <div v-if="!project.lanes.length" class="empty-markers">还没有标记轨道，点击“＋轨道”开始。</div>
             <EditorMarkerLane
                 v-for="lane in project.lanes"
@@ -145,6 +149,7 @@ const {
 );
 const editable = computed(() => props.active !== false && view.value.editable);
 const message = ref(''),
+    rulerDragging = ref(false),
     addMenu = ref(false),
     addButton = ref<HTMLButtonElement | null>(null);
 const recording = useKeyboardMarkerRecording({
@@ -187,7 +192,7 @@ function wheel(event: WheelEvent) {
     )
         return;
     event.preventDefault();
-    if (!editing.drag.value) zoom(event.deltaY);
+    if (!editing.drag.value && !rulerDragging.value) zoom(event.deltaY);
 }
 function navigateMenu(action: string) {
     const time = editing.menu.value?.time;
