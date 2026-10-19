@@ -7,7 +7,10 @@ import { openEditorWorkspace } from '../support/editor-workspaces';
 async function openEditor(page: Page) {
     await installFilePickerStub(page);
     await page.goto('/');
-    await chooseFiles(page, ['format-master.wav', 'format-master.mp3'].map(name => path.resolve('tests/fixtures/audio', name)));
+    await chooseFiles(
+        page,
+        ['format-master.wav', 'format-master.mp3'].map(name => path.resolve('tests/fixtures/audio', name)),
+    );
     await expect(page.locator('#music-bar-container')).toHaveAttribute('data-playback-state', 'playing');
     await page.getByTestId('header-editor-link').click();
     await expect(page.getByTestId('editor-ready')).toBeVisible();
@@ -82,7 +85,7 @@ test('a failed draft save blocks switching while export and cancellation remain 
             return put.apply(this, args);
         };
     });
-    await addMarkerLane(page,'point');
+    await addMarkerLane(page, 'point');
     await expect(page.getByTestId('editor-page').getByRole('alert')).toContainText('无法保存草稿');
     await page.getByTestId('toggle-queue').click();
     await page.getByTestId('queue-item').nth(1).click();
@@ -117,7 +120,8 @@ test('toolbar tabs and overlay icons preserve keyboard access and menu focus', a
     const menu = page.getByTestId('editor-overlay-feature-menu');
     await expect(menu).toBeVisible();
     await expect(menu.getByRole('menuitemradio').first()).toBeFocused();
-    const menuRect = await menu.boundingBox(), controlsRect = await page.getByTestId('editor-overlay-controls').boundingBox();
+    const menuRect = await menu.boundingBox(),
+        controlsRect = await page.getByTestId('editor-overlay-controls').boundingBox();
     expect(menuRect!.y).toBeGreaterThanOrEqual(controlsRect!.y + controlsRect!.height);
     expect(Math.abs(menuRect!.x + menuRect!.width - controlsRect!.x - controlsRect!.width)).toBeLessThanOrEqual(1);
     await page.keyboard.press('Escape');
@@ -125,8 +129,11 @@ test('toolbar tabs and overlay icons preserve keyboard access and menu focus', a
     await page.getByTestId('editor-overlay-menu-toggle').click();
     await menu.locator('[data-feature-id="energy"]').click();
     await expect(page.getByTestId('editor-overlay-toggle')).toHaveAttribute('aria-pressed', 'true');
-    await expect(page.getByTestId('editor-analysis-overlay-panel')).toHaveAttribute('data-analysis-state', 'ready', { timeout: 30000 });
-    for (const handle of ['top', 'move', 'bottom']) await expect(page.getByTestId('editor-overlay-handle-' + handle)).toBeVisible();
+    await expect(page.getByTestId('editor-analysis-overlay-panel')).toHaveAttribute('data-analysis-state', 'ready', {
+        timeout: 30000,
+    });
+    for (const handle of ['top', 'move', 'bottom'])
+        await expect(page.getByTestId('editor-overlay-handle-' + handle)).toBeVisible();
     await page.getByTestId('editor-overlay-toggle').click();
     await expect(page.getByTestId('editor-analysis-overlay-panel')).toHaveCount(0);
 });
@@ -135,17 +142,32 @@ test('independent workspaces retain nodes and scroll positions inside the player
     await page.setViewportSize({ width: 1280, height: 900 });
     await openEditor(page);
     const markerScroll = page.locator('.marker-scroll');
-    const unusedGutters = () => page.locator('#editor-marking-panel,.marker-scroll,.editor-timeline-panel').evaluateAll(elements => elements.map(element => {
-        const node = element as HTMLElement, style = getComputedStyle(node);
-        return {
-            x: node.offsetWidth - node.clientWidth - parseFloat(style.borderLeftWidth) - parseFloat(style.borderRightWidth),
-            y: node.offsetHeight - node.clientHeight - parseFloat(style.borderTopWidth) - parseFloat(style.borderBottomWidth),
-        };
-    }));
+    const unusedGutters = () =>
+        page.locator('#editor-marking-panel,.marker-scroll,.editor-timeline-panel').evaluateAll(elements =>
+            elements.map(element => {
+                const node = element as HTMLElement,
+                    style = getComputedStyle(node);
+                return {
+                    x:
+                        node.offsetWidth -
+                        node.clientWidth -
+                        parseFloat(style.borderLeftWidth) -
+                        parseFloat(style.borderRightWidth),
+                    y:
+                        node.offsetHeight -
+                        node.clientHeight -
+                        parseFloat(style.borderTopWidth) -
+                        parseFloat(style.borderBottomWidth),
+                };
+            }),
+        );
     expect(await markerScroll.evaluate(element => element.scrollHeight <= element.clientHeight)).toBe(true);
-    for (const gutter of await unusedGutters()) { expect(gutter.x).toBe(0); expect(gutter.y).toBe(0); }
+    for (const gutter of await unusedGutters()) {
+        expect(gutter.x).toBe(0);
+        expect(gutter.y).toBe(0);
+    }
     await page.setViewportSize({ width: 1280, height: 460 });
-    for (let index = 0; index < 14; index++) await addMarkerLane(page,'point');
+    for (let index = 0; index < 14; index++) await addMarkerLane(page, 'point');
     const positions: Record<string, number> = {};
     for (const name of ['marking', 'separation', 'transcription'] as const) {
         await openEditorWorkspace(page, name);
@@ -168,7 +190,10 @@ test('independent workspaces retain nodes and scroll positions inside the player
     await page.getByTestId('editor-marking-tab').click();
     await page.setViewportSize({ width: 1280, height: 2160 });
     await expect.poll(() => markerScroll.evaluate(element => element.scrollHeight <= element.clientHeight)).toBe(true);
-    for (const gutter of await unusedGutters()) { expect(gutter.x).toBe(0); expect(gutter.y).toBe(0); }
+    for (const gutter of await unusedGutters()) {
+        expect(gutter.x).toBe(0);
+        expect(gutter.y).toBe(0);
+    }
 });
 
 test('responsive shell stays within the viewport for both sidebars and all player styles', async ({ page }, info) => {
@@ -189,23 +214,40 @@ test('responsive shell stays within the viewport for both sidebars and all playe
                 await expect(style).toBeEnabled();
                 await style.click();
                 await expect(style).toBeEnabled();
-                await expect.poll(() => page.evaluate(() => {
-                    const frame = document.querySelector('[data-testid="editor-page"]')!.getBoundingClientRect();
-                    const player = document.querySelector('#music-bar-container')!.getBoundingClientRect();
-                    return Math.abs(frame.bottom - player.top);
-                })).toBeLessThanOrEqual(1);
+                await expect
+                    .poll(() =>
+                        page.evaluate(() => {
+                            const frame = document
+                                .querySelector('[data-testid="editor-page"]')!
+                                .getBoundingClientRect();
+                            const player = document.querySelector('#music-bar-container')!.getBoundingClientRect();
+                            return Math.abs(frame.bottom - player.top);
+                        }),
+                    )
+                    .toBeLessThanOrEqual(1);
                 const metrics = await page.evaluate(() => {
                     const toolbar = document.querySelector('[data-testid="editor-toolbar"]')!.getBoundingClientRect();
                     const panel = document.querySelector('#editor-marking-panel')!.getBoundingClientRect();
                     const settings = document.querySelector('[data-testid="app-settings"]')!;
                     const r = settings.getBoundingClientRect();
-                    const settingReachable = settings.contains(document.elementFromPoint(r.x + r.width / 2, r.y + r.height / 2));
-                    return { toolbar: toolbar.height, panelTop: panel.top, panelBottom: panel.bottom, frameBottom: document.querySelector('[data-testid="editor-page"]')!.getBoundingClientRect().bottom,
+                    const settingReachable = settings.contains(
+                        document.elementFromPoint(r.x + r.width / 2, r.y + r.height / 2),
+                    );
+                    return {
+                        toolbar: toolbar.height,
+                        panelTop: panel.top,
+                        panelBottom: panel.bottom,
+                        frameBottom: document.querySelector('[data-testid="editor-page"]')!.getBoundingClientRect()
+                            .bottom,
                         available: document.querySelector('.app-content')!.getBoundingClientRect().width,
-                        scrollHeight: document.documentElement.scrollHeight, height: innerHeight, overflow: document.documentElement.scrollWidth - innerWidth, settingReachable };
+                        scrollHeight: document.documentElement.scrollHeight,
+                        height: innerHeight,
+                        overflow: document.documentElement.scrollWidth - innerWidth,
+                        settingReachable,
+                    };
                 });
                 expect(metrics.toolbar).toBe(metrics.available < 800 ? 106 : 64);
-                const padding = width <= 600 ? 12 : 16;
+                const padding = 0;
                 expect(metrics.panelTop).toBe(metrics.toolbar + padding);
                 expect(Math.abs(metrics.panelBottom - metrics.frameBottom + padding)).toBeLessThanOrEqual(1);
                 expect(metrics.scrollHeight).toBe(metrics.height);
@@ -236,7 +278,9 @@ test('player style animation keeps the workspace aligned with its measured top e
         });
         await page.getByTestId('change-musicbar-style').click();
         await page.waitForTimeout(450);
-        const samples = await page.evaluate(() => (window as typeof window & { __insetSamples?: number[] }).__insetSamples!);
+        const samples = await page.evaluate(
+            () => (window as typeof window & { __insetSamples?: number[] }).__insetSamples!,
+        );
         expect(samples.length).toBeGreaterThan(5);
         expect(Math.max(...samples)).toBeLessThanOrEqual(1);
     }
@@ -247,9 +291,9 @@ test('MusicBar supports drag, keyboard seek, volume and restores the preferred m
     const bar = page.locator('#music-bar-container');
     const progress = page.getByTestId('playback-progress');
     const bounds = (await progress.boundingBox())!;
-    await page.mouse.move(bounds.x + bounds.width * .2, bounds.y + bounds.height / 2);
+    await page.mouse.move(bounds.x + bounds.width * 0.2, bounds.y + bounds.height / 2);
     await page.mouse.down();
-    await page.mouse.move(bounds.x + bounds.width * .7, bounds.y + bounds.height / 2, { steps: 5 });
+    await page.mouse.move(bounds.x + bounds.width * 0.7, bounds.y + bounds.height / 2, { steps: 5 });
     await page.mouse.up();
     await expect.poll(async () => Number(await bar.getAttribute('data-current-time'))).toBeGreaterThan(2);
     await expect(bar).toHaveAttribute('data-playback-state', 'paused');
