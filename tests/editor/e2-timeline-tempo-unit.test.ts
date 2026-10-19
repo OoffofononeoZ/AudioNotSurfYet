@@ -94,6 +94,9 @@ describe('Editor E2 timeline and tempo', () => {
             bpm: 120,
         });
         expect(moveTempoBoundary(inserted, 'tempo-2', -4, 10)[1]!.startSeconds).toBe(0.000001);
+        const free = insertTempoBoundary(baseTempo(), 1.0300004, () => 'free');
+        expect(free[1]!.startSeconds).toBe(1.03);
+        expect(moveTempoBoundary(free, 'free', 1.031, 10)[1]!.startSeconds).toBe(1.031);
     });
 
     test('validates decimal BPM, single-beat and meter boundaries', () => {
