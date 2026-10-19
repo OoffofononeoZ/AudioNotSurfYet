@@ -12,5 +12,6 @@
 | [scripts/lib/code-size-policy.mjs](../../scripts/lib/code-size-policy.mjs) | [scripts/lib/repository.mjs](../../scripts/lib/repository.mjs) |
 | [scripts/lib/repository.mjs](../../scripts/lib/repository.mjs) | — |
 | [scripts/lib/source-map.mjs](../../scripts/lib/source-map.mjs) | [scripts/lib/repository.mjs](../../scripts/lib/repository.mjs) |
-| [scripts/visualizer-resource-package.mjs](../../scripts/visualizer-resource-package.mjs) | — |
+| [scripts/lib/visualizer-resource-v2.mjs](../../scripts/lib/visualizer-resource-v2.mjs) | — |
+| [scripts/visualizer-resource-package.mjs](../../scripts/visualizer-resource-package.mjs) | [scripts/lib/visualizer-resource-v2.mjs](../../scripts/lib/visualizer-resource-v2.mjs) |
 | [skills/visualizer-content-generator/scripts/validate-content-brief.mjs](../../skills/visualizer-content-generator/scripts/validate-content-brief.mjs) | — |

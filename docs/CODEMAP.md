@@ -19,11 +19,11 @@
 | 特征分析与 Worker | 20 | [模块地图](codemap/analysis.md) |
 | Editor 领域与工程 | 31 | [模块地图](codemap/editor.md) |
 | FT 分离与处理 | 16 | [模块地图](codemap/processing.md) |
-| Visualizer、场景与录制 | 54 | [模块地图](codemap/visualizer.md) |
+| Visualizer、场景与录制 | 56 | [模块地图](codemap/visualizer.md) |
 | 页面、布局与组件 | 58 | [模块地图](codemap/ui.md) |
 | 应用入口、状态与共享模块 | 31 | [模块地图](codemap/shared.md) |
-| 仓库工具 | 8 | [模块地图](codemap/tooling.md) |
-| 验证 | 255 | [模块地图](codemap/tests.md) |
+| 仓库工具 | 9 | [模块地图](codemap/tooling.md) |
+| 验证 | 257 | [模块地图](codemap/tests.md) |
 
 ## 规范与资料入口
 
