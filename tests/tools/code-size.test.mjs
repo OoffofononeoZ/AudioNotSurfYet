@@ -140,7 +140,7 @@ test('repository inspection enforces root config and CSS size without changing d
     const root = fixture(t, {
         'vite.config.ts': '// config\n'.repeat(2001),
         'src/style.css': '/* rule */\n'.repeat(1301),
-        'docs/long.md': 'text\n'.repeat(301),
+        'docs/long.md': 'text\n'.repeat(501),
     });
     installProjectSkills(root);
     generateMaps(root);

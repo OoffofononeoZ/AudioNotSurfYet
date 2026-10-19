@@ -85,7 +85,7 @@ test('scale hints do not fail validation and exclude generated and vendor code',
         'src/large.ts': longSource,
         'src/vendor/copied.ts': longSource,
         'src/schema.generated.ts': longSource,
-        'docs/long.md': 'details\n'.repeat(301),
+        'docs/long.md': 'details\n'.repeat(501),
     });
     installProjectSkills(root);
     generateMaps(root);

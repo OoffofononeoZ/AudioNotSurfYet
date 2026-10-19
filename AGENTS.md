@@ -26,7 +26,7 @@ AudioNotSurfYet 是 Vue / TypeScript / Vite 浏览器音频工作台，包含播
 - [上下文入口](docs/context/index.md) 保存当前状态、契约、决策和未解决问题；人工 [system map](docs/context/system-map.md) 解释职责与设计原因。
 - 按任务更新实际受影响的文档，长期用户约束写回本指南或对应规范。既有 product、architecture、delivery、quality 等目录和历史证据继续保存；不要求新任务铺开阶段文件、空目录或统一元数据。
 - 高影响行为变化前或同时记录相关设计与接口决定。文档与代码或用户当前指令冲突时先核实，区分事实、推断、建议和待确认事项。
-- AGENTS.md、根 README、SKILL.md 约 150 行，普通说明约 300 行时审阅职责；只是整理提示，不自动截断或删除。
+- 手写 Markdown 文档（含 AGENTS.md、README、SKILL.md）建议不超过 500 行，超过 500 行提示，800 行及以上由 `repo:check` / `test:docs` 阻断并禁止提交。须精简冗余文字，不靠合并段落或压缩排版凑行数；若可能丢失关键契约、决策、证据或批准信息，汇报并停止提交，不截断、擅删或豁免。自动生成的代码地图不计入手写文档规模。
 
 ## Working Rules
 
