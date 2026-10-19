@@ -75,10 +75,7 @@ export interface VisualizerRendererHostOptions {
     readonly createScene: (host: VisualizerSceneHost) => VisualizerScene;
     readonly readFrame: () => VisualizerRenderFrame | null;
     readonly resolveValuesAt: (timeSeconds: number) => VisualizerResolvedParameterMap;
-    readonly onFrame: (
-        values: VisualizerResolvedParameterMap,
-        snapshot: VisualizerSceneFrameSnapshot,
-    ) => void;
+    readonly onFrame: (values: VisualizerResolvedParameterMap, snapshot: VisualizerSceneFrameSnapshot) => void;
     readonly onStatus: (status: VisualizerRendererStatus) => void;
     readonly createRenderer?: (canvas: HTMLCanvasElement) => VisualizerRenderer;
     readonly requestAnimationFrame?: (callback: FrameRequestCallback) => number;
@@ -89,14 +86,12 @@ export interface VisualizerExportSurfaceLease {
     readonly canvas: HTMLCanvasElement;
     readonly width: number;
     readonly height: number;
-    renderAtTime(timeSeconds: number): void;
+    renderAtTime(timeSeconds: number): Promise<void>;
     release(): void;
 }
 
 let nextHostId = 1;
-const developmentBuild = (
-    import.meta as ImportMeta & { env?: { DEV?: boolean } }
-).env?.DEV === true;
+const developmentBuild = (import.meta as ImportMeta & { env?: { DEV?: boolean } }).env?.DEV === true;
 
 const defaultRenderer = (canvas: HTMLCanvasElement): VisualizerRenderer =>
     new THREE.WebGLRenderer({
@@ -128,15 +123,20 @@ export class VisualizerRendererHost implements VisualizerSceneHost {
     private renderBlocked = false;
     private failNextRender = false;
     private sampleCenterOnNextFrame = false;
+    private renderGeneration = 0;
+    private preparation: symbol | null = null;
+    private pendingPreview = false;
+
+    invalidateFrame(): void {
+        this.renderGeneration++;
+    }
 
     constructor(options: VisualizerRendererHostOptions) {
         this.options = options;
         this.canvas = options.canvas;
         this.renderer = (options.createRenderer ?? defaultRenderer)(this.canvas);
-        this.requestAnimationFrameImpl = options.requestAnimationFrame
-            ?? window.requestAnimationFrame.bind(window);
-        this.cancelAnimationFrameImpl = options.cancelAnimationFrame
-            ?? window.cancelAnimationFrame.bind(window);
+        this.requestAnimationFrameImpl = options.requestAnimationFrame ?? window.requestAnimationFrame.bind(window);
+        this.cancelAnimationFrameImpl = options.cancelAnimationFrame ?? window.cancelAnimationFrame.bind(window);
         visualizerRendererDiagnostics.activeHosts += 1;
         visualizerRendererDiagnostics.activeRenderers += 1;
         this.canvas.dataset.rendererHostId = this.id;
@@ -173,10 +173,7 @@ export class VisualizerRendererHost implements VisualizerSceneHost {
         this.requestFrame();
     }
 
-    acquireExportSurface(
-        width: number,
-        height: number,
-    ): VisualizerExportSurfaceLease {
+    acquireExportSurface(width: number, height: number): VisualizerExportSurfaceLease {
         if (this.disposed) throw new Error('Visualizer renderer host 已释放。');
         if (this.contextLost) throw new Error('WebGL 上下文尚未恢复。');
         if (this.renderBlocked) throw new Error('Visualizer 场景需要重试后才能导出。');
@@ -200,11 +197,12 @@ export class VisualizerRendererHost implements VisualizerSceneHost {
             canvas: this.canvas,
             width: exportWidth,
             height: exportHeight,
-            renderAtTime: timeSeconds => {
-                if (released || this.exportToken !== token || this.disposed || this.contextLost || this.renderBlocked) throw new Error('导出渲染租约已失效。');
+            renderAtTime: async timeSeconds => {
+                if (released || this.exportToken !== token || this.disposed || this.contextLost || this.renderBlocked)
+                    throw new Error('导出渲染租约已失效。');
                 const frame = this.options.readFrame();
                 if (!frame) throw new Error('导出工程身份已失效。');
-                this.renderCurrentFrame({ ...frame, timeSeconds });
+                await this.renderCurrentFrame({ ...frame, timeSeconds });
             },
             release: () => {
                 if (released) return;
@@ -226,9 +224,7 @@ export class VisualizerRendererHost implements VisualizerSceneHost {
                 } catch (error) {
                     this.options.onStatus({
                         state: 'error',
-                        message: error instanceof Error
-                            ? error.message
-                            : '导出画布恢复失败。',
+                        message: error instanceof Error ? error.message : '导出画布恢复失败。',
                     });
                 }
             },
@@ -236,13 +232,8 @@ export class VisualizerRendererHost implements VisualizerSceneHost {
     }
 
     requestFrame(): void {
-        if (
-            this.disposed
-            || this.contextLost
-            || this.renderBlocked
-            || this.exportToken
-            || this.frameHandle !== null
-        ) return;
+        if (this.disposed || this.contextLost || this.renderBlocked || this.exportToken || this.frameHandle !== null)
+            return;
         this.frameHandle = this.requestAnimationFrameImpl(this.draw);
         visualizerRendererDiagnostics.activeVisualAnimationFrames += 1;
     }
@@ -362,10 +353,10 @@ export class VisualizerRendererHost implements VisualizerSceneHost {
     private readonly draw: FrameRequestCallback = () => {
         this.frameHandle = null;
         visualizerRendererDiagnostics.activeVisualAnimationFrames -= 1;
-        this.renderCurrentFrame();
+        void this.renderCurrentFrame();
     };
 
-    private renderCurrentFrame(override?: VisualizerRenderFrame): void {
+    private renderCurrentFrame(override?: VisualizerRenderFrame): void | Promise<void> {
         if (this.disposed || this.contextLost || this.renderBlocked) return;
         if (this.exportToken && !override) return;
         const frame = override ?? this.options.readFrame();
@@ -374,52 +365,16 @@ export class VisualizerRendererHost implements VisualizerSceneHost {
             return;
         }
         if (frame.playbackState === 'playing' && !this.exportToken) this.requestFrame();
-        try {
-            const scene = this.ensureScene(frame);
-            if (this.failNextRender) {
-                this.failNextRender = false;
-                throw new Error('场景错误恢复测试。');
+        if (this.preparation) {
+            if (override) return Promise.reject(Error('上一帧算法计算尚未结束。'));
+            this.pendingPreview = true;
+            return;
+        }
+        const failed = (error: unknown) => {
+            if (this.disposed || generation !== this.renderGeneration) {
+                if (override) throw error;
+                return;
             }
-            const values = this.options.resolveValuesAt(frame.timeSeconds);
-            visualizerRendererDiagnostics.targetResolveCount += 1;
-            const renderStartedAt = performance.now();
-            const snapshot = scene.render({
-                timeSeconds: frame.timeSeconds,
-                values,
-                bindingRevision: frame.bindingRevision,
-            });
-            visualizerRendererDiagnostics.maxFrameDurationMs = Math.max(
-                visualizerRendererDiagnostics.maxFrameDurationMs,
-                performance.now() - renderStartedAt,
-            );
-            if (this.sampleCenterOnNextFrame) {
-                this.sampleCenterOnNextFrame = false;
-                const context = this.renderer.getContext?.();
-                if (context) {
-                    const pixel = new Uint8Array(4);
-                    context.readPixels(
-                        Math.floor(this.canvas.width / 2),
-                        Math.floor(this.canvas.height / 2),
-                        1,
-                        1,
-                        context.RGBA,
-                        context.UNSIGNED_BYTE,
-                        pixel,
-                    );
-                    this.canvas.dataset.centerPixel = [...pixel].join(',');
-                }
-            }
-            visualizerRendererDiagnostics.lastFrameHash = snapshot.hash;
-            visualizerRendererDiagnostics.lastSongTimeSeconds = frame.timeSeconds;
-            visualizerRendererDiagnostics.lastFrameAtMs = performance.now();
-            visualizerRendererDiagnostics.renderedFrames += 1;
-            this.canvas.dataset.frameStateHash = snapshot.hash;
-            this.canvas.dataset.frameTime = frame.timeSeconds.toFixed(6);
-            this.canvas.dataset.bindingRevision = frame.bindingRevision.toString();
-            this.canvas.dataset.webglContextState = 'ready';
-            this.options.onFrame(values, snapshot);
-            this.options.onStatus({ state: scene.kind === 'neutral' ? 'neutral' : 'ready' });
-        } catch (error) {
             this.cancelPendingFrame();
             this.renderBlocked = true;
             this.options.onStatus({
@@ -427,10 +382,95 @@ export class VisualizerRendererHost implements VisualizerSceneHost {
                 message: error instanceof Error ? error.message : '场景渲染失败。',
             });
             if (override) throw error;
+        };
+        let generation = this.renderGeneration;
+        try {
+            const scene = this.ensureScene(frame);
+            generation = this.renderGeneration;
+            if (this.failNextRender) {
+                this.failNextRender = false;
+                throw new Error('场景错误恢复测试。');
+            }
+            const values = this.options.resolveValuesAt(frame.timeSeconds);
+            visualizerRendererDiagnostics.targetResolveCount += 1;
+            const renderStartedAt = performance.now();
+            const input = {
+                timeSeconds: frame.timeSeconds,
+                values,
+                bindingRevision: frame.bindingRevision,
+            };
+            const draw = () => {
+                if (generation !== this.renderGeneration || this.disposed || this.contextLost || scene !== this.scene) {
+                    if (override) throw Error('导出帧身份已失效。');
+                    return;
+                }
+                const current = this.options.readFrame();
+                if (
+                    !current ||
+                    current.trackIdentity !== frame.trackIdentity ||
+                    current.bindingRevision !== frame.bindingRevision ||
+                    current.seed !== frame.seed
+                ) {
+                    if (override) throw Error('导出帧身份已失效。');
+                    return;
+                }
+                const snapshot = scene.render(input);
+                visualizerRendererDiagnostics.maxFrameDurationMs = Math.max(
+                    visualizerRendererDiagnostics.maxFrameDurationMs,
+                    performance.now() - renderStartedAt,
+                );
+                if (this.sampleCenterOnNextFrame) {
+                    this.sampleCenterOnNextFrame = false;
+                    const context = this.renderer.getContext?.();
+                    if (context) {
+                        const pixel = new Uint8Array(4);
+                        context.readPixels(
+                            Math.floor(this.canvas.width / 2),
+                            Math.floor(this.canvas.height / 2),
+                            1,
+                            1,
+                            context.RGBA,
+                            context.UNSIGNED_BYTE,
+                            pixel,
+                        );
+                        this.canvas.dataset.centerPixel = [...pixel].join(',');
+                    }
+                }
+                visualizerRendererDiagnostics.lastFrameHash = snapshot.hash;
+                visualizerRendererDiagnostics.lastSongTimeSeconds = frame.timeSeconds;
+                visualizerRendererDiagnostics.lastFrameAtMs = performance.now();
+                visualizerRendererDiagnostics.renderedFrames += 1;
+                this.canvas.dataset.frameStateHash = snapshot.hash;
+                this.canvas.dataset.frameTime = frame.timeSeconds.toFixed(6);
+                this.canvas.dataset.bindingRevision = frame.bindingRevision.toString();
+                this.canvas.dataset.webglContextState = 'ready';
+                this.options.onFrame(values, snapshot);
+                this.options.onStatus({ state: scene.kind === 'neutral' ? 'neutral' : 'ready' });
+            };
+            if (scene.prepare) {
+                const token = Symbol('frame preparation');
+                this.preparation = token;
+                return scene
+                    .prepare(input)
+                    .then(draw)
+                    .catch(failed)
+                    .finally(() => {
+                        if (this.preparation !== token) return;
+                        this.preparation = null;
+                        if (this.pendingPreview && !this.disposed) {
+                            this.pendingPreview = false;
+                            this.requestFrame();
+                        }
+                    });
+            }
+            draw();
+        } catch (error) {
+            failed(error);
         }
     }
 
     private applySize(width: number, height: number, dpr: number): void {
+        this.invalidateFrame();
         this.width = width;
         this.height = height;
         this.dpr = dpr;
@@ -441,10 +481,7 @@ export class VisualizerRendererHost implements VisualizerSceneHost {
     }
 
     private ensureScene(frame: VisualizerRenderFrame): VisualizerScene {
-        const nextKey = [
-            frame.trackIdentity,
-            frame.seed,
-        ].join(':');
+        const nextKey = [frame.trackIdentity, frame.seed].join(':');
         if (this.scene && this.sceneKey === nextKey) return this.scene;
         this.disposeScene();
         this.scene = this.options.createScene(this);
@@ -455,6 +492,8 @@ export class VisualizerRendererHost implements VisualizerSceneHost {
     }
 
     private disposeScene(): void {
+        this.invalidateFrame();
+        this.preparation = null;
         if (!this.scene) return;
         const scene = this.scene;
         scene.dispose();
