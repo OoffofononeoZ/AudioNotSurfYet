@@ -97,9 +97,9 @@ idle + drag start/end handle
 
 默认收起的 BPM 面板由标题与独立 chevron 展开，保留键盘与 aria-expanded；选择与时间条边界联动，不随播放自动切换编辑对象。输入复用公共控件；bpm测算只用 performance.now 的点按间隔，第二次起平均全部保留间隔，最多128间隔，4秒空闲重置。播放、倍速、seek 和区间选择不改变结果，仅显式应用后修改当时选中区间；面板卸载清理状态和定时器。
 
-- 初始 project 有歌曲开始/结束固定边界；结束前显示 add handle。单击 add handle 时优先使用播放 cursor，否则使用 viewport 中点；拖动后在 snapped 时间插入内部 boundary。
+- 初始 project 有歌曲开始/结束固定边界；结束前显示 add handle。单击 add handle 时优先使用播放 cursor，否则使用 viewport 中点；新增与调整位置均使用连续歌曲时间。
 - 相邻 beat 固定为 `60 / BPM` 秒，当前细分决定每拍等分数；拍号不再参与网格生成。Project V1 的 meter 字段继续按原值保存，新建仍使用现有默认值，不迁移工程格式。
-- 前一 segment 有合法 metered BPM 时，新增或移动 boundary 按当前选定 subdivision 吸附；BPM 为空或 segment 为 single-beat 时，没有 beat 网格，使用 `xToTime()` 后的微秒规范化原始时间。
+- BPM boundary 新增、拖动及时间输入均不吸附节拍，鼠标时间按微秒规范化；左右键按 1ms 微调，Shift+左右按 10ms，与 BPM、细分及缩放无关。轨道标记继续使用当前细分吸附。
 - 新 segment 继承前一 segment 的 metered/single-beat 值。内部 boundary 可水平拖动但不可跨越相邻 boundary；右键或焦点状态 Delete/Backspace 删除目标 segment，前一 segment 向右延伸。0 秒首 boundary 与歌曲结束边界固定且不可删除。
 - 初始 metered segment 为 4/4、`bpm: null`、source unset；输入框显示 `bpm: 100` placeholder。只有一个 segment、仍为空且未被用户编辑时，才允许可靠 tempo estimate 填值。
 - 输入 20–300 进入/保持 metered；输入 `0 <= value < 20` 规范为 single-beat并隐藏 meter；无效输入不提交。切回 metered 需要显式选择 metered 并输入合法 BPM，不从旧 single-beat 数值猜测。

@@ -180,6 +180,7 @@
                         @pointermove.stop="moveBoundaryDrag"
                         @pointerup.stop="endBoundaryDrag"
                         @pointercancel.stop="cancelBoundaryDrag"
+                        @lostpointercapture.stop="cancelBoundaryDrag"
                         @keydown="onBoundaryKeydown($event, segment.id)">
                         <span class="boundary-caret" aria-hidden="true">^</span>
                         <span class="boundary-time">{{ formatTime(segment.startSeconds) }}</span>
@@ -223,7 +224,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue';
+import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, shallowRef, watch } from 'vue';
 import type { AnalysisCoordinatorSnapshot, AnalysisSeries } from '../analysis/types';
 import { visibleSampleRange, waveformEnvelopeAt } from '../analysis/rendererData';
 import { useAudioSessionService } from '../audio/audioSessionService';
@@ -234,6 +235,7 @@ import EditorBeatDivisorControl from './EditorBeatDivisorControl.vue';
 import EditorTimingPanel from './EditorTimingPanel.vue';
 import { useEditorViewport } from '../editor/useEditorViewport';
 import { useEditorGrid } from '../editor/useEditorGrid';
+import { normalizeEditorSeconds } from '../editor/projectCodec';
 import { divisorColour, divisorHeight } from '../editor/beatSnap';
 import type { PersistedTimelineViewport } from '../types/session';
 import { EDITOR_CONTEXT_PAN_THRESHOLD_PX } from '../editor/editorConfig';
@@ -244,7 +246,6 @@ import {
     moveTempoBoundary,
     removeTempoBoundary,
     resolveTempoSegmentPresentation,
-    segmentAtTime,
     segmentEndSeconds,
 } from '../editor/tempoMap';
 import {
@@ -273,7 +274,7 @@ const emit = defineEmits<{
 }>();
 
 const audioSession = useAudioSessionService();
-const { setting: beatSnap, generateTempoGrid, snapEditorTime } = useEditorGrid();
+const { setting: beatSnap, generateTempoGrid } = useEditorGrid();
 const stage = ref<HTMLDivElement | null>(null);
 const tempoStage = ref<HTMLDivElement | null>(null);
 const fullMeasure = ref<HTMLElement | null>(null);
@@ -616,7 +617,7 @@ const preferredBoundaryTime = () => {
         Number.isFinite(cursor) && cursor > 0 && cursor < durationSeconds.value
             ? cursor
             : (viewport.value.startSeconds + viewport.value.endSeconds) / 2;
-    return snapEditorTime(raw, props.project.tempoMap, viewport.value, size.width, durationSeconds.value);
+    return normalizeEditorSeconds(raw);
 };
 const insertBoundaryAtPreferredTime = () => {
     const tempoMap = insertTempoBoundary(props.project.tempoMap, preferredBoundaryTime(), createId);
@@ -641,38 +642,60 @@ const removeBoundary = (id: string) => {
     void nextTick(() => tempoStage.value?.focus());
 };
 
-const boundaryDrag = ref<{ id: string; pointerId: number; original: TempoSegmentV1[] } | null>(null);
+const boundaryDrag = shallowRef<{
+    id: string;
+    pointerId: number;
+    element: HTMLElement;
+    original: TempoSegmentV1[];
+} | null>(null);
 const beginBoundaryDrag = (event: PointerEvent, id: string) => {
     selectedTempoId.value = id;
     if (event.button !== 0) return;
+    event.preventDefault();
+    const element = event.currentTarget as HTMLElement;
+    element.focus({ preventScroll: true });
     boundaryDrag.value = {
         id,
         pointerId: event.pointerId,
+        element,
         original: props.project.tempoMap.map(cloneTempoSegment),
     };
-    (event.currentTarget as HTMLElement).setPointerCapture(event.pointerId);
+    element.setPointerCapture(event.pointerId);
 };
 const moveBoundaryDrag = (event: PointerEvent) => {
     const drag = boundaryDrag.value;
     if (!drag || drag.pointerId !== event.pointerId) return;
     const { x } = canvasPoint(event);
     const raw = editorXToTime(x, viewport.value, size.width);
-    const snapped = snapEditorTime(raw, props.project.tempoMap, viewport.value, size.width, durationSeconds.value);
-    const tempoMap = moveTempoBoundary(props.project.tempoMap, drag.id, snapped, durationSeconds.value);
+    const tempoMap = moveTempoBoundary(props.project.tempoMap, drag.id, raw, durationSeconds.value);
     emit('updateProject', { ...props.project, tempoMap }, false);
 };
 const endBoundaryDrag = () => {
-    if (!boundaryDrag.value) return;
+    const drag = boundaryDrag.value;
+    if (!drag) return;
     boundaryDrag.value = null;
+    if (drag.element.hasPointerCapture(drag.pointerId)) drag.element.releasePointerCapture(drag.pointerId);
     emit('updateProject', props.project, true);
 };
 const cancelBoundaryDrag = () => {
     const drag = boundaryDrag.value;
     if (!drag) return;
     boundaryDrag.value = null;
+    if (drag.element.hasPointerCapture(drag.pointerId)) drag.element.releasePointerCapture(drag.pointerId);
     emit('updateProject', { ...props.project, tempoMap: drag.original }, true);
 };
+const cancelBoundaryOnEscape = (event: KeyboardEvent) => {
+    if (event.key === 'Escape' && boundaryDrag.value) {
+        event.preventDefault();
+        cancelBoundaryDrag();
+    }
+};
 const onBoundaryKeydown = (event: KeyboardEvent, id: string) => {
+    if (event.key === 'Escape') {
+        event.preventDefault();
+        cancelBoundaryDrag();
+        return;
+    }
     if (event.key === 'Delete' || event.key === 'Backspace') {
         event.preventDefault();
         removeBoundary(id);
@@ -682,11 +705,7 @@ const onBoundaryKeydown = (event: KeyboardEvent, id: string) => {
     event.preventDefault();
     const segment = props.project.tempoMap.find(entry => entry.id === id);
     if (!segment) return;
-    const active = segmentAtTime(props.project.tempoMap, segment.startSeconds - 1e-6);
-    const step =
-        active.mode === 'metered' && active.bpm !== null
-            ? 60 / active.bpm / beatSnap.value.divisor
-            : (viewport.value.endSeconds - viewport.value.startSeconds) * (event.shiftKey ? 0.05 : 0.01);
+    const step = event.shiftKey ? 0.01 : 0.001;
     const direction = event.key === 'ArrowLeft' ? -1 : 1;
     emit(
         'updateProject',
@@ -822,11 +841,15 @@ onMounted(() => {
     if (stage.value) resizeObserver.observe(stage.value);
     void nextTick(measurePresentationWidths);
     window.addEventListener('blur', clearPointer);
+    window.addEventListener('blur', cancelBoundaryDrag);
+    window.addEventListener('keydown', cancelBoundaryOnEscape);
 });
 
 onBeforeUnmount(() => {
     resizeObserver?.disconnect();
     window.removeEventListener('blur', clearPointer);
+    window.removeEventListener('blur', cancelBoundaryDrag);
+    window.removeEventListener('keydown', cancelBoundaryOnEscape);
 });
 </script>
 
