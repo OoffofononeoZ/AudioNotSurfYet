@@ -70,7 +70,7 @@ M3–M14 不建设 CI。下列命令当前均为本地门禁；正式证据要�
 | `npm run test:e5:integration` | point/range JSON 与草稿 round-trip、无效导入隔离、tempo 秒数稳定与稳定 ID |
 | `npm run test:e6:unit` | 确定性 15 分钟/20 lane/160 分类/10,000 事件拓扑、唯一 ID、范围边界和可见事件过滤 |
 | `npm run test:e6:integration` | 10,000 事件 JSON 与 IndexedDB round-trip、重叠工程原子拒绝和 durable draft 保留 |
-| `npm run test:docs` | 生命周期 frontmatter、内部链接和 21 项特征计数 |
+| `npm run test:docs` | 只读检查 Markdown 内部链接与规模；手写文档 >500 行提示、≥800 行失败，不强制生命周期元数据 |
 | `npm run test:harness` | 证明 deliberate failure 会非零退出 |
 | `npm run test:skill:visualizer-content-generator` | 校验 VisualizerContentBriefV1 静态/动态元素、复用/新增预设、时间/目标关系、非法输入和只读 CLI；具体合同仍须 owner 批准 |
 | `npm run test:e2e` | 稳定 Chrome 的全部当前 E2E |

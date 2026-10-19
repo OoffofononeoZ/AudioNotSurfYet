@@ -14,6 +14,27 @@ import { CODE_SIZE_EXCEPTIONS, inspectCodeSize, validateCodeSizeExceptions } fro
 import { MARKER as MAP_MARKER, staleMaps } from './codemap.mjs';
 import { installProjectSkills } from './install-project-skills.mjs';
 
+export const DOCUMENT_SIZE_LIMITS = Object.freeze({ recommended: 500, prohibited: 800 });
+
+export function inspectDocumentSize(file, text) {
+    const errors = [],
+        warnings = [];
+    const generatedMap =
+        (file === 'docs/CODEMAP.md' || /^docs\/codemap\/[^/]+\.md$/.test(file)) && text.startsWith(MAP_MARKER);
+    if (generatedMap) return { errors, warnings };
+    const lines = lineCount(text);
+    if (lines >= DOCUMENT_SIZE_LIMITS.prohibited) {
+        errors.push(
+            `${file}：${lines} 行，达到 ${DOCUMENT_SIZE_LIMITS.prohibited} 行禁止提交阈值；须精简文字，不能通过压行规避。若可能丢失关键信息，须汇报并停止提交。`,
+        );
+    } else if (lines > DOCUMENT_SIZE_LIMITS.recommended) {
+        warnings.push(
+            `${file}：${lines} 行，超过 ${DOCUMENT_SIZE_LIMITS.recommended} 行建议值；请审阅冗余并精简文字，保留关键信息与正常排版。`,
+        );
+    }
+    return { errors, warnings };
+}
+
 function prose(text) {
     const output = [];
     let fence;
@@ -41,11 +62,16 @@ export function localLinks(text) {
 }
 
 export function inspectDocuments(root, files = listFiles(root)) {
-    const errors = [];
+    const errors = [],
+        warnings = [];
     let count = 0;
     for (const file of files.filter(file => file.endsWith('.md'))) {
         count++;
-        for (const target of localLinks(readText(root, file))) {
+        const text = readText(root, file);
+        const size = inspectDocumentSize(file, text);
+        errors.push(...size.errors);
+        warnings.push(...size.warnings);
+        for (const target of localLinks(text)) {
             try {
                 const decoded = decodeURIComponent(target.split(/[?#]/)[0]);
                 if (!decoded) continue;
@@ -56,13 +82,12 @@ export function inspectDocuments(root, files = listFiles(root)) {
             }
         }
     }
-    return { errors, count };
+    return { errors, warnings, count };
 }
 
 export function inspectRepository(root, { codeSizeExceptions = CODE_SIZE_EXCEPTIONS } = {}) {
     const files = listFiles(root);
-    const { errors } = inspectDocuments(root, files);
-    const warnings = [];
+    const { errors, warnings } = inspectDocuments(root, files);
     const agentText = files.includes('AGENTS.md') ? readText(root, 'AGENTS.md') : '';
     const skills = files.filter(file => /^skills\/[^/]+\/SKILL\.md$/.test(file));
     if (!agentText) errors.push('缺少 AGENTS.md');
@@ -77,10 +102,6 @@ export function inspectRepository(root, { codeSizeExceptions = CODE_SIZE_EXCEPTI
             const size = inspectCodeSize(file, lines, codeSizeExceptions);
             errors.push(...size.errors);
             warnings.push(...size.warnings);
-        }
-        if (isMarkdown && !text.startsWith(MAP_MARKER)) {
-            const limit = ['AGENTS.md', 'README.md'].includes(file) || file.endsWith('/SKILL.md') ? 150 : 300;
-            if (lines > limit) warnings.push(`${file}：${lines} 行，超过 ${limit} 行整理提示。`);
         }
         if (!skills.includes(file)) continue;
         try {
