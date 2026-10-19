@@ -28,7 +28,7 @@ upstream_docs:
 - snap 只发生在创建或拖动确认时。viewport、zoom 或 tempo 修改不会自动重写已有事件秒数。
 - 播放期间开放下节的数字键录入，鼠标编辑与名称／分类管理仍须暂停。暂停后整条可见轨道的有效歌曲时间均可创建、移动、调整端点、删除及批量操作；不以播放线为界。15% 播放线和左侧遮罩样式保留，遮罩不拦截操作；歌曲首尾之外的留白不可创建标记，无合法刻度时不创建。
 - 仅轨道时间绘图区接管普通滚轮，每次约 1.12 倍，管理栏保持纵向滚动，Ctrl／Meta 保留浏览器行为；拖动时冻结缩放，seek／播放／源身份变化取消未提交拖动。
-- 区间模式左键拖空白选择小节、拖选区移动；Shift+左右分别向左右扩选，Alt+左右按当前细分移动，Ctrl／Cmd+C 向后复制。Esc 先清选区，再退出模式；输入控件保留自身键盘行为。
+- 区间模式仅操作起始 lane/class：左键拖空白选择连续细分格，包含首尾格，点按时间命中、范围有实际相交即整项加入；选区扩展至包含范围完整端点并冻结 eventIds，不吸纳扩展区域的额外标记。拖选区移动；Shift+左右按一格向对应侧扩选，Alt+左右按当前细分移动，Ctrl／Cmd+C 按完整选区跨度向后复制并保留间隔。无可用网格不提交，冲突整批拒绝。Esc 先清选区，再退出模式；输入控件保留自身键盘行为。
 - point marker 为居中实心短键，range 主体为同高长条；按钮、短键图形和候选框以事件时间 X 为中心，任意视口、zoom、pan 与 DPR 下误差不超过 `1 CSS px`，图形 Y 也以按钮中心为准。
 
 ## 数字键实时录入（DEC-085）
@@ -178,6 +178,6 @@ idle + drag start/end handle
 
 DEC-052 实现 commit `13614673bbf4d824f2ee109d36e04de6b3f8aabd` 的 Chrome/Edge revised canonical 已验证零间隙、12px 向上 guide、单滚动、三级展示、删除与刷新恢复；`project-owner` 于 2026-09-04 批准适用人工门禁，evidence 为 `approved`。
 
-2026-09-04，owner 进一步批准 DEC-057/ADR-0022：区间模式默认关闭；右拖只选择起始 lane/class；Cmd/Ctrl+C 立即向后复制；左拖吸附当前网格；所有冲突整批拒绝。键盘路径使用 Enter/Space 选择当前小节、Shift+左右扩展、Alt/Option+左右移动、Escape 清理；editable control 不拦截快捷键。站内未导出离页改用深色原生 dialog，浏览器原生 `beforeunload` 保持。
+2026-09-04，owner 批准 DEC-057/ADR-0022 的单轨/单分类原子批量和站内深色离页 dialog；浏览器原生 beforeunload 保持。原按小节选择的手势由当前连续细分格方案替代，保留复制/移动、冲突整批拒绝、可编辑控件键盘保护和取消语义。
 
 2026-09-03，owner 以 E8 实施指令批准同歌曲自动重试、异歌显式切换、`88px/72px` 时间轴与 point 中心对齐契约。implementation commit `84d9435cc6e8d1edb0932ff1b8dcd1b84dff32b5` 的 25/25 clean canonical 通过，owner 随后批准 evidence 与人工门禁，E8 关闭。

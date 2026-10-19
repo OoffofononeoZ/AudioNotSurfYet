@@ -78,16 +78,7 @@ export function editableMarkerBlock(
     selection: MarkerBlockSelection,
     view: MarkerTimeView,
 ): MarkerBlockSelection {
-    const lane = project.lanes.find(item => item.id === selection.laneId);
-    const events =
-        lane?.events.filter(
-            event =>
-                event.innerClassId === selection.innerClassId &&
-                markerEventReachable(view, event) &&
-                ('atSeconds' in event
-                    ? event.atSeconds >= selection.startSeconds && event.atSeconds < selection.endSeconds
-                    : event.startSeconds < selection.endSeconds && event.endSeconds > selection.startSeconds),
-        ) ?? [];
+    const events = collectMarkerBlockEvents(project, selection).filter(event => markerEventReachable(view, event));
     return { ...selection, eventIds: events.map(event => event.id) };
 }
 
