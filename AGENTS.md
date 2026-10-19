@@ -49,7 +49,7 @@ AudioNotSurfYet 是 Vue / TypeScript / Vite 浏览器音频工作台，包含播
 - 修改交付前同步 `npm run skills:install`、`npm run codemap`，运行 `npm run repo:check` 和 `git diff --check`；仅生成物改变时与任务一起提交。工具代码变更补 `npm run test:tools`。
 - 只读任务不生成文件、不提交。`skills:check`、`codemap:check`、`repo:check` 和 `test:docs` 是只读检查。
 - 日常验证不自动创建 canonical 或 readiness。正式评审按对应合同记录干净实现 commit、环境和真实 evidence；未运行、失败、人工输入缺失分别如实记录。
-- owner 已授权修改任务完成适用验证后直接本地提交一次，只包含本次改动；不自动推送、发布、切换分支或重写历史。Git 细节见交付 skill。
+- owner 已授权修改任务完成适用验证后直接本地提交；一次任务或计划含多个小目标时，各小目标验证完成后及时分别提交，不能最终一次性全部提交；单一目标可一次提交。只包含对应小目标的改动，不自动推送、发布、切换分支或重写历史。Git 细节见交付 skill。
 
 ## Persistent Authorization and Gaps
 

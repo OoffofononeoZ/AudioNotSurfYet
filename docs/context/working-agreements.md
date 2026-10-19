@@ -16,7 +16,7 @@ next_action: "按当前 skills 与风险验证工作；保留 FT 性能/人工�
 
 DEC-073 批准按任务加载项目 skills、按需维护文档和按风险验证；旧审批事件不构成日常修改的通用阶段前置。当前规则由 [AGENTS.md](../../AGENTS.md) 维护，工具入口见 [README](../../README.md)，专项选择见 [验证策略](../../skills/audiosurf-testing-strategy/SKILL.md)。
 
-owner 已授权修改任务完成适用验证后创建一次本地提交；按 [Git 交付 skill](../../skills/audiosurf-git-task-delivery/SKILL.md) 检查工作树、保留已有修改并仅提交本次内容。推送、发布、切换分支和历史重写不在默认授权内。正式候选审批与重大产品/技术取舍仍由 owner 决定。
+owner 已授权修改任务完成适用验证后本地提交；任务或计划包含多个小目标时，每个小目标验证完成后及时分别提交，不能最终一次性全部提交；单一目标可一次提交。按 [Git 交付 skill](../../skills/audiosurf-git-task-delivery/SKILL.md) 检查工作树、保留已有修改并仅提交对应目标内容。推送、发布、切换分支和历史重写不在默认授权内。正式候选审批与重大产品/技术取舍仍由 owner 决定。
 
 DEC-083 将手写代码规模改为推荐 ≤1000 行、>1300 行警告、>2000 行阻断，极端例外只接受具体文件及上限的 owner 批准。行数按正常完整排版计，不压缩代码规避；本次修改文件渐进使用 Prettier，既有历史文件不批量格式化。Vue 组件拆分是完整功能区域的提取，单独迁出 CSS 或 TS/JS 不算；详见[模块职责](../../skills/audiosurf-file-modularization/SKILL.md)。codemap 保留原功能，结构或引用变化后正常同步。
 
