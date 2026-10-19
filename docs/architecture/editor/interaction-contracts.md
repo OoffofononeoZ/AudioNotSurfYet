@@ -95,7 +95,7 @@ idle + drag start/end handle
 
 ## Tempo Interaction
 
-默认收起的 BPM 面板由标题与独立 chevron 展开，保留键盘与 aria-expanded；选择与时间条边界联动，不随播放自动切换编辑对象。输入复用公共控件；Tap 保留热身／预览／样本算法，仅显式应用后修改区间。完整现行行为见[标记工作区](../../context/editor-marking.md)。
+默认收起的 BPM 面板由标题与独立 chevron 展开，保留键盘与 aria-expanded；选择与时间条边界联动，不随播放自动切换编辑对象。输入复用公共控件；bpm测算只用 performance.now 的点按间隔，第二次起平均全部保留间隔，最多128间隔，4秒空闲重置。播放、倍速、seek 和区间选择不改变结果，仅显式应用后修改当时选中区间；面板卸载清理状态和定时器。
 
 - 初始 project 有歌曲开始/结束固定边界；结束前显示 add handle。单击 add handle 时优先使用播放 cursor，否则使用 viewport 中点；拖动后在 snapped 时间插入内部 boundary。
 - 相邻 beat 固定为 `60 / BPM` 秒，当前细分决定每拍等分数；拍号不再参与网格生成。Project V1 的 meter 字段继续按原值保存，新建仍使用现有默认值，不迁移工程格式。

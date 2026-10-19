@@ -70,13 +70,13 @@
             <button v-else type="button" @click="restoreMetered">设置为 100 BPM</button>
         </aside>
         <div class="tap-controls">
-            <h3>点按节拍</h3>
+            <h3>bpm测算</h3>
             <button type="button" class="tap-button" data-testid="timing-tap" @click="tap" @keydown="tapKey">
-                点按节拍<span>{{ tapped.count ? `${tapped.count} 次` : 'Tap' }}</span>
+                bpm测算<span>{{ tapped.count ? `${tapped.count} 次` : 'Tap' }}</span>
             </button>
             <div class="tap-result">
                 <strong data-testid="timing-tap-preview">{{
-                    tapped.bpm === null ? '点按 8 次后预览' : `${tapped.bpm} BPM`
+                    tapped.bpm === null ? (tapped.count ? '再点按一次开始测算' : '点按开始测算') : `${tapped.bpm} BPM`
                 }}</strong
                 ><span v-if="tapped.bpm !== null && !validTap" class="error">BPM 必须在 20–300 之间</span>
                 <div>
@@ -227,7 +227,6 @@ function applyTap() {
 watch(
     () => [selected.value.id, props.project.projectId],
     () => {
-        resetTap();
         message.value = '';
         failed.value = false;
     },
