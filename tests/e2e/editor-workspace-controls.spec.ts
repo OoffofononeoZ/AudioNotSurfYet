@@ -38,6 +38,36 @@ test('marking has no outer padding, processing retains padding and BPM columns s
     }
 });
 
+test('BPM calculator estimates after two taps, stays independent of playback and applies explicitly', async ({
+    page,
+}) => {
+    await prepareMarkerEditor(page);
+    await page.getByTestId('toggle-editor-timing').click();
+    await expect(page.getByRole('heading', { name: 'bpm测算', exact: true })).toBeVisible();
+    await page.evaluate(() => {
+        const original = performance.now.bind(performance);
+        let time = 10000;
+        performance.now = () => time;
+        try {
+            document.querySelector<HTMLButtonElement>('[data-testid="timing-tap"]')!.click();
+            time += 600;
+            document.querySelector<HTMLButtonElement>('[data-testid="timing-tap"]')!.click();
+        } finally {
+            performance.now = original;
+        }
+    });
+    await expect(page.getByTestId('timing-tap-preview')).toHaveText('100 BPM');
+    await expect(page.getByRole('spinbutton', { name: '辅助 BPM', exact: true })).toHaveValue('120');
+    await page.getByTestId('toggle-playback').click();
+    await expect(page.getByTestId('timing-tap-preview')).toHaveText('100 BPM');
+    await page.getByTestId('toggle-playback').click();
+    await page.getByTestId('timing-apply-tap').click();
+    await expect(page.getByRole('spinbutton', { name: '辅助 BPM', exact: true })).toHaveValue('100');
+    await page.getByTestId('toggle-editor-timing').click();
+    await page.getByTestId('toggle-editor-timing').click();
+    await expect(page.getByTestId('timing-tap-preview')).toHaveText('点按开始测算');
+});
+
 test('BPM controls omit meter without changing the left beat subdivision', async ({ page }) => {
     await prepareMarkerEditor(page);
     await page.getByTestId('toggle-editor-timing').click();
