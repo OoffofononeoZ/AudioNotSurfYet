@@ -7,10 +7,7 @@ import type {
     VisualizerScene,
     VisualizerSceneRenderInput,
 } from '../../src/visualizer/rendererTypes';
-import {
-    VisualizerRendererHost,
-    visualizerRendererDiagnostics,
-} from '../../src/visualizer/visualizerRendererHost';
+import { VisualizerRendererHost, visualizerRendererDiagnostics } from '../../src/visualizer/visualizerRendererHost';
 
 const resolvedEntry: VisualizerResolvedParameter = {
     parameterId: 'intensity',
@@ -26,17 +23,18 @@ const frame = (): VisualizerRenderFrame => ({
     playbackState: 'paused',
 });
 
-const fakeCanvas = (): HTMLCanvasElement => ({
-    dataset: {},
-    addEventListener() {},
-    removeEventListener() {},
-} as unknown as HTMLCanvasElement);
+const fakeCanvas = (): HTMLCanvasElement =>
+    ({
+        dataset: {},
+        addEventListener() {},
+        removeEventListener() {},
+    }) as unknown as HTMLCanvasElement;
 
 const fakeRenderer = (canvas: HTMLCanvasElement): VisualizerRenderer => ({
     domElement: canvas,
-    autoClear:true,
-    clear(){},
-    setRenderTarget(){},
+    autoClear: true,
+    clear() {},
+    setRenderTarget() {},
     setPixelRatio() {},
     setSize() {},
     setClearColor() {},
@@ -55,7 +53,9 @@ const createRafHarness = () => {
             callbacks.set(handle, callback);
             return handle;
         },
-        cancel(handle: number) { callbacks.delete(handle); },
+        cancel(handle: number) {
+            callbacks.delete(handle);
+        },
         flush() {
             const entry = callbacks.entries().next().value as [number, FrameRequestCallback] | undefined;
             if (!entry) throw new Error('No visual animation frame is queued.');
@@ -73,29 +73,75 @@ const registryHarness = (input: {
     throwOnDispose?: () => boolean;
 }) => {
     let sequence = 0;
-    return ():VisualizerScene => {
-        const sceneId='scene-'+ ++sequence;
-        return {kind:'rendered',render(frameInput){if(input.throwOnRender?.())throw Error('fixture render failure');input.onRender?.(sceneId,frameInput);return {hash:sceneId+':'+frameInput.timeSeconds,needsSourcePrompt:false};},resize(){if(input.throwOnResize?.())throw Error('fixture resize failure');},dispose(){if(input.throwOnDispose?.())throw Error('fixture dispose failure');input.onDispose?.(sceneId);}};
+    return (): VisualizerScene => {
+        const sceneId = 'scene-' + ++sequence;
+        return {
+            kind: 'rendered',
+            render(frameInput) {
+                if (input.throwOnRender?.()) throw Error('fixture render failure');
+                input.onRender?.(sceneId, frameInput);
+                return { hash: sceneId + ':' + frameInput.timeSeconds, needsSourcePrompt: false };
+            },
+            resize() {
+                if (input.throwOnResize?.()) throw Error('fixture resize failure');
+            },
+            dispose() {
+                if (input.throwOnDispose?.()) throw Error('fixture dispose failure');
+                input.onDispose?.(sceneId);
+            },
+        };
     };
 };
 
 describe('Visualizer V3 renderer host integration', () => {
-    test('manual export pauses visual RAF, renders explicit timestamps and restores the latest preview size', () => {
-        const raf = createRafHarness(), canvas = fakeCanvas(), rendered: number[] = [];
-        const sizes: number[][] = [], ratios: number[] = [];
-        const host = new VisualizerRendererHost({ canvas, readFrame: () => ({ ...frame(), playbackState: 'playing' }),
-            createScene: registryHarness({ onRender: (_, input) => { rendered.push(input.timeSeconds); } }),
-            resolveValuesAt: () => new Map(), onFrame() {}, onStatus() {},
-            createRenderer: c => ({ ...fakeRenderer(c), setSize: (w, h) => { sizes.push([w, h]); }, setPixelRatio: dpr => { ratios.push(dpr); } }),
-            requestAnimationFrame: cb => raf.request(cb), cancelAnimationFrame: id => raf.cancel(id) });
-        host.resize(640, 360, 2); raf.flush();
+    test('manual export pauses visual RAF, renders explicit timestamps and restores the latest preview size', async () => {
+        const raf = createRafHarness(),
+            canvas = fakeCanvas(),
+            rendered: number[] = [];
+        const sizes: number[][] = [],
+            ratios: number[] = [];
+        const host = new VisualizerRendererHost({
+            canvas,
+            readFrame: () => ({ ...frame(), playbackState: 'playing' }),
+            createScene: registryHarness({
+                onRender: (_, input) => {
+                    rendered.push(input.timeSeconds);
+                },
+            }),
+            resolveValuesAt: () => new Map(),
+            onFrame() {},
+            onStatus() {},
+            createRenderer: c => ({
+                ...fakeRenderer(c),
+                setSize: (w, h) => {
+                    sizes.push([w, h]);
+                },
+                setPixelRatio: dpr => {
+                    ratios.push(dpr);
+                },
+            }),
+            requestAnimationFrame: cb => raf.request(cb),
+            cancelAnimationFrame: id => raf.cancel(id),
+        });
+        host.resize(640, 360, 2);
+        raf.flush();
         const surface = host.acquireExportSurface(1920, 1080);
-        expect(raf.callbacks.size).toBe(0); expect(ratios.at(-1)).toBe(1);
-        host.requestFrame(); host.resize(800, 450, 2); expect(raf.callbacks.size).toBe(0);
-        surface.renderAtTime(0); surface.renderAtTime(1 / 60); surface.renderAtTime(8);
-        expect(rendered.slice(-3)).toEqual([0, 1 / 60, 8]); expect(raf.callbacks.size).toBe(0);
-        surface.release(); expect(sizes.at(-1)).toEqual([800, 450]); expect(ratios.at(-1)).toBe(2);
-        expect(raf.callbacks.size).toBe(1); expect(() => surface.renderAtTime(9)).toThrow(); host.dispose();
+        expect(raf.callbacks.size).toBe(0);
+        expect(ratios.at(-1)).toBe(1);
+        host.requestFrame();
+        host.resize(800, 450, 2);
+        expect(raf.callbacks.size).toBe(0);
+        await surface.renderAtTime(0);
+        await surface.renderAtTime(1 / 60);
+        await surface.renderAtTime(8);
+        expect(rendered.slice(-3)).toEqual([0, 1 / 60, 8]);
+        expect(raf.callbacks.size).toBe(0);
+        surface.release();
+        expect(sizes.at(-1)).toEqual([800, 450]);
+        expect(ratios.at(-1)).toBe(2);
+        expect(raf.callbacks.size).toBe(1);
+        await expect(surface.renderAtTime(9)).rejects.toThrow();
+        host.dispose();
     });
     test('shares one target map, one renderer, and one cancelable visual RAF', () => {
         const initialHosts = visualizerRendererDiagnostics.activeHosts;
@@ -110,18 +156,22 @@ describe('Visualizer V3 renderer host integration', () => {
         const host = new VisualizerRendererHost({
             canvas,
             createScene: registryHarness({
-                onRender: (_sceneId, input) => { renderedMap = input.values; },
+                onRender: (_sceneId, input) => {
+                    renderedMap = input.values;
+                },
             }),
             readFrame: () => currentFrame,
             resolveValuesAt: () => targetMap,
-            onFrame: (values) => { inspectorMap = values; },
+            onFrame: values => {
+                inspectorMap = values;
+            },
             onStatus() {},
-            createRenderer: (target) => {
+            createRenderer: target => {
                 rendererCreateCount += 1;
                 return fakeRenderer(target);
             },
-            requestAnimationFrame: (callback) => raf.request(callback),
-            cancelAnimationFrame: (handle) => raf.cancel(handle),
+            requestAnimationFrame: callback => raf.request(callback),
+            cancelAnimationFrame: handle => raf.cancel(handle),
         });
 
         host.resize(640, 360, 3);
@@ -153,17 +203,17 @@ describe('Visualizer V3 renderer host integration', () => {
         let rendererCreateCount = 0;
         const host = new VisualizerRendererHost({
             canvas,
-            createScene: registryHarness({ onDispose: (sceneId) => disposed.push(sceneId) }),
+            createScene: registryHarness({ onDispose: sceneId => disposed.push(sceneId) }),
             readFrame: () => currentFrame,
             resolveValuesAt: () => new Map(),
             onFrame() {},
             onStatus() {},
-            createRenderer: (target) => {
+            createRenderer: target => {
                 rendererCreateCount += 1;
                 return fakeRenderer(target);
             },
-            requestAnimationFrame: (callback) => raf.request(callback),
-            cancelAnimationFrame: (handle) => raf.cancel(handle),
+            requestAnimationFrame: callback => raf.request(callback),
+            cancelAnimationFrame: handle => raf.cancel(handle),
         });
         host.requestFrame();
         raf.flush();
@@ -192,15 +242,15 @@ describe('Visualizer V3 renderer host integration', () => {
                     fail = false;
                     return value;
                 },
-                onDispose: (sceneId) => disposed.push(sceneId),
+                onDispose: sceneId => disposed.push(sceneId),
             }),
             readFrame: frame,
             resolveValuesAt: () => new Map(),
             onFrame() {},
-            onStatus: (status) => statuses.push(status.state),
+            onStatus: status => statuses.push(status.state),
             createRenderer: fakeRenderer,
-            requestAnimationFrame: (callback) => raf.request(callback),
-            cancelAnimationFrame: (handle) => raf.cancel(handle),
+            requestAnimationFrame: callback => raf.request(callback),
+            cancelAnimationFrame: handle => raf.cancel(handle),
         });
         host.requestFrame();
         raf.flush();
@@ -222,15 +272,15 @@ describe('Visualizer V3 renderer host integration', () => {
             canvas: fakeCanvas(),
             createScene: registryHarness({
                 throwOnResize: () => failResize,
-                onDispose: (sceneId) => disposed.push(sceneId),
+                onDispose: sceneId => disposed.push(sceneId),
             }),
             readFrame: frame,
             resolveValuesAt: () => new Map(),
             onFrame() {},
-            onStatus: (status) => statuses.push(status.state),
+            onStatus: status => statuses.push(status.state),
             createRenderer: fakeRenderer,
-            requestAnimationFrame: (callback) => raf.request(callback),
-            cancelAnimationFrame: (handle) => raf.cancel(handle),
+            requestAnimationFrame: callback => raf.request(callback),
+            cancelAnimationFrame: handle => raf.cancel(handle),
         });
         host.requestFrame();
         raf.flush();
@@ -259,18 +309,18 @@ describe('Visualizer V3 renderer host integration', () => {
                     failDispose = false;
                     return value;
                 },
-                onDispose: (sceneId) => disposed.push(sceneId),
+                onDispose: sceneId => disposed.push(sceneId),
             }),
             readFrame: frame,
             resolveValuesAt: () => new Map(),
             onFrame() {},
-            onStatus: (status) => statuses.push(status.state),
-            createRenderer: (canvas) => {
+            onStatus: status => statuses.push(status.state),
+            createRenderer: canvas => {
                 rendererCreateCount += 1;
                 return fakeRenderer(canvas);
             },
-            requestAnimationFrame: (callback) => raf.request(callback),
-            cancelAnimationFrame: (handle) => raf.cancel(handle),
+            requestAnimationFrame: callback => raf.request(callback),
+            cancelAnimationFrame: handle => raf.cancel(handle),
         });
         host.requestFrame();
         raf.flush();
@@ -284,4 +334,93 @@ describe('Visualizer V3 renderer host integration', () => {
         expect(rendererCreateCount).toBe(1);
         host.dispose();
     });
+});
+
+test('asynchronous frame preparation coalesces requests and cannot draw a stale seek', async () => {
+    const raf = createRafHarness(),
+        canvas = fakeCanvas(),
+        rendered: number[] = [];
+    let current = frame(),
+        release = () => {},
+        started = 0;
+    const scene: VisualizerScene = {
+        kind: 'rendered',
+        resize() {},
+        dispose() {},
+        prepare: () => {
+            started++;
+            return new Promise<void>(resolve => {
+                release = resolve;
+            });
+        },
+        render: input => {
+            rendered.push(input.timeSeconds);
+            return { hash: 'frame', needsSourcePrompt: false };
+        },
+    };
+    const host = new VisualizerRendererHost({
+        canvas,
+        createScene: () => scene,
+        readFrame: () => current,
+        resolveValuesAt: () => new Map(),
+        onFrame() {},
+        onStatus() {},
+        createRenderer: fakeRenderer,
+        requestAnimationFrame: cb => raf.request(cb),
+        cancelAnimationFrame: id => raf.cancel(id),
+    });
+    host.resize(640, 360, 1);
+    raf.flush();
+    host.requestFrame();
+    raf.flush();
+    expect(started).toBe(1);
+    current = { ...current, timeSeconds: 0.25 };
+    host.invalidateFrame();
+    release();
+    await new Promise(resolve => setTimeout(resolve, 0));
+    expect(rendered).toEqual([]);
+    raf.flush();
+    expect(started).toBe(2);
+    release();
+    await new Promise(resolve => setTimeout(resolve, 0));
+    expect(rendered).toEqual([0.25]);
+    host.dispose();
+});
+
+test('manual export waits for the algorithm before resolving its render lease', async () => {
+    const raf = createRafHarness(),
+        canvas = fakeCanvas();
+    let release = () => {},
+        rendered = false;
+    const host = new VisualizerRendererHost({
+        canvas,
+        readFrame: frame,
+        resolveValuesAt: () => new Map(),
+        createScene: () => ({
+            kind: 'rendered',
+            resize() {},
+            dispose() {},
+            prepare: () =>
+                new Promise<void>(resolve => {
+                    release = resolve;
+                }),
+            render: () => {
+                rendered = true;
+                return { hash: 'frame', needsSourcePrompt: false };
+            },
+        }),
+        onFrame() {},
+        onStatus() {},
+        createRenderer: fakeRenderer,
+        requestAnimationFrame: cb => raf.request(cb),
+        cancelAnimationFrame: id => raf.cancel(id),
+    });
+    const surface = host.acquireExportSurface(640, 360);
+    const rendering = surface.renderAtTime(2);
+    expect(rendered).toBe(false);
+    release();
+    await rendering;
+    expect(rendered).toBe(true);
+    surface.release();
+    host.dispose();
 });

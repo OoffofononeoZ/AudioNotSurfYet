@@ -1,12 +1,12 @@
 import type * as THREE from 'three';
 export type SpectrumUnit = 'meyda-amplitude' | 'we-strength' | 'byte-frequency' | 'signed-waveform';
 export interface VisualizerResolvedParameter {
-    parameterId:string;
-    state:'ready'|'loading'|'error';
-    value?:number|string|boolean|number[];
-    message?:string;
-    unit?:SpectrumUnit;
-    channelLayout?:'mono'|'stereo-64'|'stereo-1024';
+    parameterId: string;
+    state: 'ready' | 'loading' | 'error';
+    value?: number | string | boolean | number[];
+    message?: string;
+    unit?: SpectrumUnit;
+    channelLayout?: 'mono' | 'stereo-64' | 'stereo-1024';
 }
 
 export type VisualizerResolvedParameterMap = ReadonlyMap<string, VisualizerResolvedParameter>;
@@ -25,8 +25,8 @@ export interface VisualizerSceneFrameSnapshot {
 export interface VisualizerRenderer {
     readonly domElement: HTMLCanvasElement;
     autoClear: boolean;
-    clear(color?:boolean,depth?:boolean,stencil?:boolean):void;
-    setRenderTarget(target:THREE.WebGLRenderTarget | null):void;
+    clear(color?: boolean, depth?: boolean, stencil?: boolean): void;
+    setRenderTarget(target: THREE.WebGLRenderTarget | null): void;
     setPixelRatio(value: number): void;
     setSize(width: number, height: number, updateStyle?: boolean): void;
     setClearColor(color: THREE.ColorRepresentation, alpha?: number): void;
@@ -44,15 +44,13 @@ export interface VisualizerSceneHost {
 
 export interface VisualizerScene {
     readonly kind: 'rendered' | 'neutral';
+    prepare?(input: VisualizerSceneRenderInput): Promise<void>;
     render(input: VisualizerSceneRenderInput): VisualizerSceneFrameSnapshot;
     resize(width: number, height: number, dpr: number): void;
     dispose(): void;
 }
 
-export type VisualizerSceneFactory = (
-    host: VisualizerSceneHost,
-    seed: number,
-) => VisualizerScene;
+export type VisualizerSceneFactory = (host: VisualizerSceneHost, seed: number) => VisualizerScene;
 
 export interface VisualizerRenderFrame {
     readonly trackIdentity: string;
