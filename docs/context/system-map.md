@@ -1,17 +1,17 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-10-15
+last_reviewed: 2026-10-19
 upstream_docs:
   - "docs/context/index.md"
-next_action: "Editor四轨接入本轮功能验证已收尾，owner接受当前听感与长曲耗时；正式评审独立"
+
 ---
 
 # System Map
 
 ## System Summary
 
-当前系统是 Vue 3 单页应用。MainLayout 创建并提供唯一的 `AudioSessionService`、`AnalysisCoordinator`、`EditorSessionController` 与 `VisualizerSessionController`；服务通过 `AudioEngine` 解码、播放本地文件，并通过三个独立 IndexedDB repository 保存 Analyzer session、Editor 单草稿与 Visualizer 单草稿。Analyzer、Editor 与 Visualizer 已通过互斥 consumer lease 复用同一 coordinator；Visualizer 只把稳定去重后的 0–4 项送入现有 Worker/cache。File、Blob、handle、PCM、Worker 与音频节点均留在 store 外。MusicBar、Editor 与 Visualizer 读取同一播放快照；Editor 与 Visualizer 普通工作区保留 MusicBar；两个工作区的 tokenized route lease 临时使用 repeat-one，录制传输租约优先停止循环。
+当前系统是 Vue 3 单页应用。MainLayout 创建并提供唯一的 `AudioSessionService`、`AnalysisCoordinator`、`EditorSessionController` 与 `VisualizerSessionController`；服务通过 `AudioEngine` 解码、播放本地文件，并通过三个独立 IndexedDB repository 保存 Analyzer session、Editor 单草稿与 Visualizer 单草稿。Analyzer、Editor 与 Visualizer 已通过互斥 consumer lease 复用同一 coordinator；Visualizer 只把稳定去重后的 0–4 项送入现有 Worker/cache。File、Blob、handle、PCM、Worker 与音频节点均留在 store 外。MusicBar、Editor 与 Visualizer 读取同一播放快照；Editor 与 Visualizer 普通工作区保留 MusicBar；两个工作区的 tokenized route lease 临时使用 repeat-one，导出传输租约优先停止循环。
 
 DEC-072另由MainLayout提供唯一`EditorSeparationService`，使用同一AudioEngine原始PCM；Editor增加分离工作区和四轨展示/导出。模型与结果索引使用`processing-p1` IndexedDB，原PCM/planar/WAV使用OPFS；最多一个专用分离Worker，播放及analysis所有权不变。
 
@@ -75,8 +75,8 @@ showOpenFilePicker → FileSystemFileHandle → File
 | Session persistence | 保存/恢复 V1 最近会话、全部句柄和唯一 current Blob/cache | 原生 IndexedDB `SessionRepository` | project-owner | `replaceCurrentAnalysisCache()` 校验 track/hash 并原子替换；unknown schema 不猜测迁移 |
 | Config persistence | 保存 volume、playbackMode、MusicBar style 与桌面 sidebarCollapsed | Pinia、localStorage key `config` | project-owner | sidebarCollapsed 默认 false；volume 为 0–100 |
 | Home visualization | 歌曲详情与共享能量 Three.js 光线背景 | store metadata、service 封面 URL、`rayLength` prop、IntersectionObserver/ResizeObserver、reduced-motion media query | unknown | 常规模式使用 WebGL RAF；reduced motion 只静态渲染；卸载释放 mesh、geometry、material、render list、renderer 与 WebGL context |
-| Analyzer surface | 21项单列行、最多四项FIFO置顶分析、同步区间与精确值 | store、AudioSessionService、AnalysisCoordinator、Canvas 2D | project-owner | 默认原列表、倒序FIFO、40%–满高可调且自然内容封顶；见 [列表契约](analyzer-list.md) |
-| Editor E1–E9 surface | `/editor/:trackId?` 状态、精简 transport、JSON 工程、共享波形/tempo/point/range 时间列、21 项 overlay、`88px/72px` 波形、28px 紧凑 BPM 条、不可用恢复决策与中心对齐 marker | EditorSessionController、AudioSessionService、AnalysisCoordinator、Vue Router、shared Canvas renderer、DOM controls | project-owner | E1–E9 已关闭；E9 revised canonical 与 owner 门禁已批准 |
+| Analyzer surface | 当前注册特征单列、最多四项FIFO置顶与精确值 | AudioSessionService、AnalysisCoordinator、Canvas 2D | project-owner | 当前集合含Wallpaper频谱，界面见[列表](analyzer-list.md) |
+| Editor surface | 标记/FT/自动标记、公共顶栏/MusicBar、独立MarkerTimeView、overlay和数字录入 | EditorSessionController、processing/transcription服务、共享engine/coordinator与Canvas adapter | project-owner | [当前接口](../architecture/editor/interface-contracts.md)，历史readiness不继承 |
 | Editor project and draft | strict JSON V1、歌曲 hash/时长绑定、原生 file gateway、单草稿 autosave 与恢复冲突 | `EditorFormatCodecRegistry`、`EditorDraftRepository`、`audionotsurfyet-editor` V1 | project-owner | 首版只注册 JSON；session database 不变 |
 | Visualizer composition surface | `/visualizer/:trackId?` 分组列表/共同处理参数/元素属性/工程底栏、单视口三栏或抽屉、16:9 单 Canvas、保留 MusicBar、strict Project V4 单草稿、JSON 资源库、离线 WebM 与原生全屏 | `VisualizerSessionController`、`VisualizerResourceLibrary`、`VisualizerRendererHost`、`CompositionResolver/Scene`、playback/analysis leases、Editor snapshot、WebCodecs/OPFS、Fullscreen API | project-owner | V1–V6 evidence 只绑定历史实现；当前自动化与媒体检查见组合工作区 |
 | Experimental charts | 试验性的 Three.js 2D 图和瀑布流 | Vue props、TestLands | unknown | 不视为稳定接口 |
@@ -126,10 +126,6 @@ showOpenFilePicker → FileSystemFileHandle → File
 - `analysisCanvasRenderer` 是 Analyzer card 与 Editor overlay 共用的纯 Canvas adapter；overlay 一次选择当前注册集合中的一项，显式接收轨道 MarkerTimeView、对齐标尺绘图区，保留 DPR backing store、40ms exact cursor 合并和原错误隔离。
 - overlay 通过 Teleport 固定覆盖窗口，灰色背景、全视口 Canvas 与说明穿透到侧边栏/底层标记；只有顶栏右侧图标、临时特征菜单、重试和 top/move/bottom 手柄接收 pointer。bounds 仍为 0.10/0.35、最小 0.12，但相对 viewport；visibility 按歌曲 hash 本地保存，关闭时 active set 只保留 Buffer。
 
-E7 原 44/44 run 只作 `pre-revision`，修订版 46/46 与 E6/E8 的历史身份见 [Editor evidence](../quality/editor/evidence-index.md)，不因其他子系统修改而改写。
-
-E8 引入桌面 `88px`/窄屏 `72px` 波形 stage，以 6px 安全区计算垂直振幅；`Editor.vue` 通过纯恢复决策在同一 URL 歌曲恢复后合并重试，另一首歌曲只提供显式 replace 入口。当前 point 已改为短键，仍以事件 X/Y 中心定位。JSON V1、Editor IndexedDB schema、AudioEngine 与 AudioSessionService 严格身份规则均不变。
-
 ## 当前边界与历史证据
 
 Analyzer 运行态由 `activeFeatureQueue` 管理最多四项 FIFO，顶部倒序显示，原列表按 `FEATURE_IDS` 归位。V1 会话保留 `activeCards`，Analyzer 工作区版本为 2，移除排序字段，旧工作区及分析缓存清空；队列与独立草稿保留。[Wallpaper Engine 风格频谱](wallpaper-spectrum.md)首位注册，独立立体声 DFT 与完整精度 payload 沿用唯一 Worker，Meyda 数值算法不变。
@@ -138,11 +134,11 @@ Analyzer 运行态由 `activeFeatureQueue` 管理最多四项 FIFO，顶部倒�
 
 ## Browser Processing — Editor FT Integration
 
-`src/processing/`提供固定四FT模型/官方ORT JSEP manifest、增量hash、native PCM OPFS staging、单分离Worker/controller、64-tap resampler、滚动overlap-add、30Hz energy/waveform与Float32 WAV。独立harness继续位于`tests/processing/`；DEC-072的生产入口位于现有Editor“音轨分离”，不新增Processor路由，尚未接自动节拍/提案或Visualizer V2。
+`src/processing/`提供固定四FT模型/官方ORT JSEP manifest、增量hash、native PCM OPFS staging、单分离Worker/controller、64-tap resampler、滚动overlap-add、30Hz energy/waveform与Float32 WAV。独立harness继续位于`tests/processing/`；DEC-072的生产入口位于现有Editor“音轨分离”，不新增Processor路由，尚未接P3逐拍/完整提案或处理数据工程扩展。
 
 `EditorSeparationService`串行拥有任务、generation、缓存恢复和导出URL；`EditorStemRepository`校验原PCM、模型/runtime/config、compact metadata与全部artifact checksum后发布/恢复。会话revision只用于当前PCM复制防护，跨刷新使用原descriptor header重验完整hash。用户可配置10GiB上限、显式清理Editor结果/残留或四模型；无自动驱逐和CPU/本地模型备用路径。切工作区保留任务，确认离页/换歌取消，人工工程V1不由分离更新。
 
-四原图已在Chrome/Edge独立harness跑通；Chrome主Editor反馈已完成四轨/WAV及刷新恢复，正式双浏览器接入证据待补。历史失败和P1尚缺性能/人工质量见[P1 evidence](../quality/processing/evidence-index.md)，当前入口验证见[Editor evidence](../quality/processing/editor-integration-evidence.md)；R-046–R-055仍Open。
+四原图已在Chrome/Edge独立harness跑通；当前Editor接入完整provisional runner 9/9，92项非浏览器与Chrome/Edge各20/20已通过，当前听感/长曲耗时按DEC-074接受。完整P1/P2 clean及原生OS等独立缺口仍保留，见[P1 evidence](../quality/processing/evidence-index.md)，当前入口验证见[Editor evidence](../quality/processing/editor-integration-evidence.md)；R-046–R-055仍Open。
 
 ## Editor 试听与有限自动标记（DEC-075）
 

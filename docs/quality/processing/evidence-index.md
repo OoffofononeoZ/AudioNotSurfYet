@@ -3,10 +3,8 @@ status: approved
 owner: "project-owner"
 last_reviewed: 2026-10-12
 upstream_docs:
-  - "docs/quality/processing/eval-plan.md"
-  - "docs/quality/processing/golden-examples.md"
-  - "docs/quality/processing/failure-taxonomy.md"
-  - "docs/delivery/processing/milestone-plan.md"
+  - "docs/quality/processing/validation.md"
+  - "docs/delivery/processing/roadmap.md"
 next_action: "DEC-074接受当前听感与长曲耗时；Editor接入本轮功能收尾，独立正式证据缺口保留"
 ---
 

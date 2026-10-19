@@ -4,9 +4,9 @@ owner: "project-owner"
 last_reviewed: 2026-10-04
 upstream_docs:
   - "docs/architecture/processing/model-artifacts.md"
-  - "docs/delivery/processing/execution-plan.md"
-  - "docs/quality/processing/eval-plan.md"
-next_action: "本轮收尾；下次提醒完整性能16分51.95秒未达标，warning日志候选尚未做长曲重验；P1未关闭"
+  - "docs/delivery/processing/roadmap.md"
+  - "docs/quality/processing/validation.md"
+
 ---
 
 # FT P1 Kernel Configuration
@@ -28,13 +28,13 @@ next_action: "本轮收尾；下次提醒完整性能16分51.95秒未达标，wa
 - 343980-frame segment，overlap=85995、stride=257985，尾部补零。核对 pinned drums `infer.py` 后不增加外部 normalization，其他专用图实际兼容仍须逐个证明。
 - 线性过渡与归一化 overlap-add，仅保留当前窗口及 overlap。参考脚本首采样权重为零；本实现把未覆盖端点权重下限设为 1e-8，防止静默丢失第一采样，不改变时间/frame count。独立恒等与脉冲 oracle 已覆盖 1、完整段、跨段和短尾。
 - 同一拼接数据流写出每轨 planar Float32 和 stereo IEEE Float32 WAV，并生成 30Hz 双声道均方 RMS 的 [-80,0]dBFS UInt16 energy 与 waveform min/max；无增益、裁静音或额外编码程序。
-- P1 预检以 origin usage/quota 保守计算 native PCM、四轨 planar/WAV 和全部模型，默认上限10GiB；不自动驱逐。精确 cache accounting、租约和清理 UI 留在 P2。任务失败只清理其 UUID 目录；五秒不能清理则记录 residual ID。
+- P1 预检以 origin usage/quota 保守计算 native PCM、四轨 planar/WAV 和全部模型，默认上限10GiB；不自动驱逐。当前Editor结果服务提供缓存校验、租约与显式清理，完整P2正式评审另行处理。任务失败只清理其 UUID 目录；五秒不能清理则记录 residual ID。
 - 四轨完整后由当前 controller 检查 job/generation/source/role，再向独立 IDB results 发布 metadata；取消和迟到消息不能替换当前结果。测试专用入口不修改 Editor/Visualizer 工程。
 - controller 在 start 同步报告暂存开始；Worker 无新消息时主线程提供带 `heartbeatSource=controller` 的 elapsed 反馈，保持 phase/completedUnits 不变，不把它当作 Worker 仍在推进的证明。Worker 的实际消息标记为 `worker`。取消后停止反馈；4.5秒仍无终态则终止 Worker，登记 residual ID 并发出唯一 cancel，给五秒门禁保留调度余量；异步清理不能再次发送终态。
 - quota预检依赖estimate，不能保证每次真实写入。写入中QuotaExceededError按quota-exceeded明确报告，abort当前writer、释放session并清理本任务；不驱逐其他缓存或转成CPU重跑。大型验证使用独立普通磁盘profile，原始PCM完整持有且处理后重验hash，隔离profile的临时容量失败独立保留为证据。
 
 ## Validation Boundary
 
-单元/注入成功不证明四个真实模型可运行。2026-10-04 原 Asyncify 构建的双浏览器 session 均报告 `/real_istft/ConstantOfShape` provider 未分配。随后同版本 JSEP + disabled 优化在双浏览器四图实际推断成功，GPU profile 记录 Conv/ConvTranspose；bass/other/vocals parity 通过，drums 最大误差约0.00130，超过0.001门禁，尚不能关闭 P1。长曲与试听仍未通过。R-046–R-055 保持 Open，P2 不开放；后续任何精度修正保留独立失败证据，不降低阈值或增加整图 CPU 重跑。
+有效门槛与样例见[处理链验证](../../quality/processing/validation.md)。原Asyncify provider失败、JSEP drums约0.00130超旧0.001属于历史证据；DEC-071明确批准1.5e-3，当前四原图短段数值门禁通过。模型/runtime/预处理不因文档整理替换，不增加整图CPU备用。
 
-2026-10-04，owner 明确回复“批准 0.0015，继续完整验证（推荐）”。DEC-071 据此批准四专用模型对应 row 短段跨后端 max absolute ≤`1.5e-3`，保留原始模型和官方运行库，继续全部适用验证。上文按原 `1e-3` 的失败属于历史记录；P1 仍 In Progress、P2 Planned、R-046–R-055 Open。详见 [numeric review](../../quality/processing/numeric-review.md)。
+DEC-074接受当前汇总听感与长曲耗时，当前Editor功能已收尾；历史Chrome1011.9541秒超900秒、完整clean候选/原生OS等缺口保持，P3/P6完整链性能与支持范围独立。详情见[numeric review](../../quality/processing/numeric-review.md)、[P1 evidence](../../quality/processing/evidence-index.md)和[当前路线](../../delivery/processing/roadmap.md)。

@@ -18,7 +18,7 @@
 | FT 计算、任务与存储 | `test:p1:unit`、`test:p1:integration` 及 `tests/processing/` 对应切片 |
 | Editor 分离接入 | Vitest 过滤 `tests/processing/editor-*.test.ts`；Playwright 的 `tests/e2e/editor-ft.spec.ts`，按 Chrome/Edge channel 选择 |
 | 内容生成输入校验器 | `test:skill:visualizer-content-generator` |
-| Visualizer V3 组合/输入/离线导出 | `test:visualizer` 或对应文件过滤、`test:e2e:visualizer:chrome` / `test:e2e:visualizer:edge` 中受影响专项；媒体入口见当前离线导出契约 |
+| Visualizer V4 组合/输入/离线导出 | `test:visualizer` 或对应文件过滤、`test:e2e:visualizer:chrome` / `test:e2e:visualizer:edge` 中受影响专项；媒体入口见当前离线导出契约 |
 
 执行前核实当前 package.json 中的精确命令；参数和过滤文件按实际影响选择。日常修复不运行累计 eval 链。正式 canonical/readiness 请求使用现有对应 `eval:*` 命令，继续满足各合同的干净 commit、范围、身份和人工证据要求。
 
@@ -29,7 +29,7 @@
 - Editor：受影响的 tempo/time、吸附、point/range、原子冲突、JSON/草稿及 overlay/geometry；数据保护与恢复修改需邻接失败路径。
 - FT：真实模型身份、输出时间/声道与 WAV、取消/换歌/stale、缓存恢复/清理和 quota 错误；推断、质量或性能结论必须有实际运行与所需试听/测量。
 - 布局：按支持矩阵选窄、常见和宽视口，检查 DOM/canvas 几何、滚动所有权、焦点与控制台。
-- Visualizer：确定性 absolute time/seed、V3 元素/预设展开与参数/目标隔离、资源幂等释放；导出变化补输入准备、手动渲染租约、帧数/PTS、取消/恢复及实际媒体文件，遵循当前[离线导出契约](../../../docs/context/visualizer-offline-export.md)。final hardening 才使用完整测试资源探针，不扩大生产公共接口。
+- Visualizer：确定性 absolute time/seed、V4 资源/分组预设与参数/目标隔离、资源幂等释放；导出变化补输入准备、手动渲染租约、帧数/PTS、取消/恢复及实际媒体文件，遵循当前[离线导出契约](../../../docs/context/visualizer-offline-export.md)。final hardening 才使用完整测试资源探针，不扩大生产公共接口。
 
 浏览器使用合同规定的真实 Chrome/Edge；缺少浏览器、权限或端口时注明未运行，遵守 DEC-055 等既有环境限制。OPFS 不替代原生许可提示。
 

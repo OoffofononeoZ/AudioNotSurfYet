@@ -1,37 +1,20 @@
-# Visualizer 原子元素改版
+# Visualizer 组合工作区
 
-2026-10-18 当前模型升级为 [Project V4](../architecture/visualizer/project-format-v4.md) 与 [JSON 资源包 V1 过渡版](../architecture/visualizer/resource-packages-v1.md)。预设保存为默认折叠的顶层组，组内元素仍独立编辑；共同处理参数采用批量写入并提示单独修改。顶层排序移动整组，组内独立排序，属性栏不再提供全局数字层级。只接收 V4，旧版草稿不提示、不迁移。下方 V3 分阶段批准与测试数量保留历史语境。
+核查日期：2026-10-19。当前[Project V4](../architecture/visualizer/project-format-v4.md)和[JSON资源包过渡版](../architecture/visualizer/resource-packages-v1.md)管理元素、分组预设、共同处理参数和定义快照，接口见[页面契约](../architecture/visualizer/interface-contracts.md)。
 
-2026-10-19 本轮工作树验证：Visualizer 与内容 skill 共 136 项、工具 41 项通过；Chrome/Edge 各 36 个日常场景通过，涵盖资源文件导入/刷新/移除、自包含工程恢复、五个顶层项、共同值差异/重应用、草稿与导出锁、几何/PV 真实输入和原生历史。两预设的四份短 WebM 均为 720p30 VP9、48kHz 双声道 Opus，并经 FFprobe 与 FFmpeg 实际解码检查。桌面与 1024×720 截图已复核；类型、生产构建、格式、哈希、文档与仓库检查通过。Python quick_validate 因本机无已安装 Python 未运行；项目 skill 元数据/发现入口/链接和 Brief CLI 专项已通过。可选本地音乐、完整四档输出矩阵和长曲未运行，不形成新 readiness 或发布结论。
+## 当前布局与模型
 
-2026-10-16 新增几何元素与组合预设的工作见 [几何元素与预设](visualizer-presets.md)。
-
-owner 于 2026-10-15 批准本轮实现计划：以原子元素替代完整场景模板，按以下五个小阶段完成、验证并分别本地提交；不积累为最后一次提交，不自动推送或发布。
-
-## 已批准目标
-
-- 普通工作区保留 MusicBar；顶部仅工程操作和 Settings，左栏为元素列表及添加弹窗，右栏为当前元素属性，中央零 padding 预览，预览下方为输出、Editor 和状态底栏。
-- 首批元素：纯色背景、频谱弦线、频谱点阵、响应圆环、缩放、模糊和淡入淡出。仅原曲 Analyzer、固定值、显式选中的单个 Editor range；分轨分析预留，自动标记和图片不在本轮范围。
-- 效果可引用多个视觉元素或整体合成结果，不引用其他效果；转场跟随标记时段，保持终值，由后开始的转场接管。
-- 新建、草稿、导出使用 strict Project V3；旧 V1/V2 不迁移。旧草稿原文可导出，覆盖需明确选择。V3 取代本轮相关旧场景及兼容约定；尚未实现的 processing V2 扩展不在本轮接入。
-- 保留单 renderer/输出 Canvas/视觉 RAF、绝对歌曲时钟、四种不同特征上限和既有输出支持矩阵。
-- 全屏仅视频及图标控制、时间和进度条，不显示 MusicBar。视频导出与全屏互斥。
-
-## 阶段状态
-
-1. 播放与录制策略：已实现。四种模式偏好保存在 config；工作区租约临时覆盖为 repeat-one，释放恢复偏好。repeat-one 的上一首/下一首从零重播当前歌曲。录制专属传输租约阻止公开 transport/队列修改及歌曲结束后的重播，录制命令使用专属 port。
-2. 元素与 V3 工程：已实现独立模型与测试，页面接入在阶段四完成。ElementRegistry 声明七种元素；V3 严格校验元素、参数、目标、同歌范围引用和全工程四特征上限。新草稿 repository 保留不可读/旧版 envelope 原文，替换前不写入。
-3. 元素组合渲染：已实现独立合成器及确定性弦线状态。三个复用离屏 target 完成视觉层、多目标/整体缩放、两遍模糊与保持终值的转场；没有新 Canvas/renderer/RAF。页面与实际 WebM 回归在阶段四/五接入。
-4. 工作区界面接入及旧模板移除：已接入。普通页恢复 MusicBar，视频悬浮图标、纯视频全屏、元素库/列表/属性及工程底栏完成；旧模板生产实现和专用现行测试退役，历史音频/golden/evidence 保留。
-5. 换歌保护、媒体回归与文档收口：已实现。列表选歌、删除当前歌曲和清空队列先处理当前草稿/录制；取消保留歌曲与工程。连续保存共用串行 drain，失败保留最新修改；旧 entry/Editor IO 在后续请求或离页时失效。空工作区离页不误触发全屏退出。
+- 普通页保留MusicBar；顶部工程/Settings，左侧资源与元素/组列表，右侧选择属性，中央零padding视频，底栏输出/Editor/状态。可用宽度决定三栏或互斥抽屉，页面保持单100dvh与独立滚动。
+- 预设为默认折叠顶层组，顶层移动整组、组内排序；共同处理参数批量写入且提示差异，不提供全局数字layer编辑。13个当前内核及几何预设见[预设说明](visualizer-presets.md)，新增内容先批准具体合同。
+- 效果引用视觉元素或整体，不引用其他效果；显式同歌单range转场保持终值，由后开始转场接管。单renderer/Canvas/视觉RAF、三个复用targets、绝对歌曲时间和四Analyzer特征边界保持。
+- 只接受V4文件；旧草稿不提示、不迁移。损坏/异歌V4草稿、保存失败和换歌取消按当前草稿保护，未来processing扩展不在当前codec中。
+- 全屏只显示同一画面、图标控制/时间/进度，无MusicBar；视频导出与全屏互斥。输出采用[离线导出](visualizer-offline-export.md)，不恢复旧实时capture链。
 
 ## 界面控件
 
-元素列表每行始终显示上移、下移、显示/隐藏和删除操作，并为操作预留固定高度。操作未选中元素不改变当前选择；顶部/底部移动边界、拖拽及录制锁保持原有规则。
+元素列表每行始终显示上移、下移、显示/隐藏和删除操作，并为操作预留固定高度。操作未选中元素不改变当前选择；顶部/底部移动边界、拖拽及导出锁保持原有规则。
 
-2026-10-17 常驻操作专项在 Chrome/Edge 各 1 项通过：未选中操作、移动边界、选中前后行高、长名称、1024×720 抽屉、删除与录制锁。标题与按钮使用独立布局行，避免按钮遮挡标题的点击区域。
-
-输出底栏及元素属性统一使用通用 AppSelect/AppNumberInput。下拉菜单在当前 Chrome/Edge 使用可定制原生 picker，保持键盘选择、取消和焦点，只有内容超过最大高度时显示滚动条且不预留空白轨道；数值输入使用自有步进按钮，提交有限数值并遵守 min/max，录制锁传入全部控件。AnimatedList 的方向键只在列表内获得焦点时处理，Tab 使用正常焦点顺序。
+输出底栏及元素属性统一使用通用 AppSelect/AppNumberInput。下拉菜单在当前 Chrome/Edge 使用可定制原生 picker，保持键盘选择、取消和焦点，只有内容超过最大高度时显示滚动条且不预留空白轨道；数值输入使用自有步进按钮，提交有限数值并遵守 min/max，导出锁传入全部控件。AnimatedList 的方向键只在列表内获得焦点时处理，Tab 使用正常焦点顺序。
 
 输出尺寸、帧率及码率接入[离线确定性导出](visualizer-offline-export.md)。底栏与预检共用实际编码能力查询，四档独立选择，导入设置保留、不自动降档。旧静态禁用表和首录掉帧提示已退役；历史实时录制测量仍见[输出质量说明](visualizer-output.md)。
 
@@ -53,15 +36,13 @@ owner 于 2026-10-15 批准本轮实现计划：以原子元素替代完整场�
 
 属性数值输入的上下按钮、键盘方向键与鼠标滚轮共用步进：从当前输入加减固定步长，按字段精度消除浮点尾数并限制 min/max；时间、频段及映射输入范围不能因步进倒置或合并。手动输入仍沿用原有有限值及工程校验。滚轮悬停即可调整，每个非零垂直事件一步、不加速，范围边界仍消费事件，避免带动属性栏；Ctrl/Meta 与纯横向事件不截获。显式/fieldset 禁用时不调整。只为属性区启用滚轮，输出底栏 Seed 保持原交互。
 
-2026-10-17 数值编辑修订：类型检查与 71 项 Visualizer 单元/集成通过；Chrome/Edge 各 5 个控件场景分批通过，涵盖按钮/键盘/滚轮一致、固定语义精度、边界/关系约束、侧栏滚动、修饰键、草稿恢复与录制锁。测试等待歌曲实际加载并暂停后再核对全屏精确 seek，避免既有异步导入竞争。Seed 未获得悬停调整，但保留浏览器原生聚焦滚轮行为。
-
 MusicBar 右侧由 MusicBarActions/MusicBarIcon 展示，六个按钮统一 32px 点击区、20px 图标及 1.6px 描边；窄屏点击区统一 28px。样式切换使用叠放播放器布局图标，播放模式仍使用顺序/单曲/列表/随机图形；旧右侧 sprite 符号移除，导航与 transport 图标继续保留。
 
 ## Analyzer 输入
 
-Buffer 的 compact payload 只保存时间桶的最小/最大值，不能作为完整波形向量。当前 V3 从已有 AudioEngine 的 decoded copy port 按绝对歌曲时间读取 1024 点帧，沿用 Analyzer 的 512 hop、average-mono、Hanning 窗和尾部补零；不插值两个波形帧，不新增音频上下文或逐帧 Worker 请求。最多缓存 16 帧，按曲目与 decoded revision 隔离，离页/释放租约时清理；缺少完整波形时明确报错，不退回包络。Inspector 和工程校验的 Buffer Bin/范围上限同步为 1024 点。
+Buffer 的 compact payload 只保存时间桶的最小/最大值，不能作为完整波形向量。当前从已有 AudioEngine 的 decoded copy port 按绝对歌曲时间读取 1024 点帧，沿用 Analyzer 的 512 hop、average-mono、Hanning 窗和尾部补零；不插值两个波形帧，不新增音频上下文或逐帧 Worker 请求。最多缓存 16 帧，按曲目与 decoded revision 隔离，离页/释放租约时清理；缺少完整波形时明确报错，不退回包络。Inspector 和工程校验的 Buffer Bin/范围上限同步为 1024 点。
 
-完整向量未配置显式数值变换时，先适配为视觉强度，再交给共用渲染器：Buffer 取绝对值、Chroma 使用非负值，二者的单位幅度换算到既有 128 参考；Power Spectrum 开平方还原振幅；MFCC 取绝对值，避免负系数被直接截成零。Amplitude Spectrum、Loudness specific、Complex magnitude 保留既有参考和维度。标量及 mean/max/peak/bin/band 投影保留原始单位和符号，继续由数值映射控制；Complex phase 的时间插值沿圆周最短路径跨越 ±π。V3 序列化字段和 Analyzer 缓存格式不变，旧 V2 的 Buffer 两端点策略只作为历史记录保留。
+完整向量未配置显式数值变换时，先适配为视觉强度，再交给共用渲染器：Buffer 取绝对值、Chroma 使用非负值，二者的单位幅度换算到既有 128 参考；Power Spectrum 开平方还原振幅；MFCC 取绝对值，避免负系数被直接截成零。Amplitude Spectrum、Loudness specific、Complex magnitude 保留既有参考和维度。标量及 mean/max/peak/bin/band 投影保留原始单位和符号，继续由数值映射控制；Complex phase 的时间插值沿圆周最短路径跨越 ±π。当前V4 strict字段和Analyzer缓存格式以现行契约为准，不使用旧Buffer两端点策略。
 
 ## 播放策略
 
@@ -69,12 +50,8 @@ Buffer 的 compact payload 只保存时间桶的最小/最大值，不能作为�
 
 导出准备、进行及收尾阶段锁定工程；取得独占 transport 后暂停播放并锁定公开播放、seek、换歌、导入与清理命令，音量不锁定。租约在资源清理时释放，恢复仍匹配的播放检查点。普通播放的结束边沿仍仅消费一次，不能由音量等快照重发触发重复结束处理。
 
-## 验证
+## 验证入口与既有反馈
 
-阶段一：播放策略、session、工作区租约及录制单元/集成共 25 项通过。阶段二：V3 模型及共享 codec/binding 相邻回归 30 项、类型检查通过。阶段三：组合渲染、V3、既有 host/录制相邻回归 17 项与类型检查通过；GPU shader 和实际媒体将在页面接入后验证。阶段四：类型及 40 项 Visualizer/播放/输入合同专项通过，Chrome/Edge 各 7 项新界面、GPU 像素、全屏与实际录制回归通过。阶段五：Visualizer/播放/恢复/工作区/输入合同 61 项通过，最终 Chrome/Edge 各 12 项组合工作区专项通过（共 24 项），涵盖换歌、旧草稿、非法导入、取消/context recovery/重复进入资源回收、WebM 保存取消与离页保护；应用外壳及 Editor 相邻浏览器检查共 20 项通过。类型检查与 production build 通过；既有 Browserslist 过期及大 chunk 提示保留。
+按[当前验证](../quality/visualizer/validation.md)选择资源/分组、codec/binding、确定性、几何、资源清理及实际短媒体专项，不执行旧五阶段流水线。
 
-实际媒体：Chrome/Edge 生成的约 3 秒受控 WebM 均为 VP9、1280×720、标称 30 fps，含 48kHz 双声道 Opus；ffprobe 读出有效音视频帧，末帧约为歌曲结尾的 3 秒，包时间严格递增。FFmpeg 按输入 timebase 完整解码通过；这些短片检查不代替长时间帧率/同步预算或 OS 保存人工验收。产物保留于本地忽略目录 artifacts/visualizer-composition/，不提交二进制。
-
-2026-10-16 Analyzer 输入修复：类型检查和 Visualizer/M9/M10 相关 68 项单元及集成通过，其中涵盖全部 21 特征的维度/有限值、Buffer 与 Analyzer 精确帧一致性、尾帧补零、缓存上限、换歌失效和相位环绕。Chrome/Edge 各 1 项专项通过，实际切换七种向量输入，并验证 Buffer 的分段高度、全屏同 Canvas、往返 seek 像素一致和 WebM 生成/保存；专项已加入 test:e2e:visualizer 的两浏览器入口。
-
-本轮不产生正式 canonical/readiness 或发布结论。
+原文2026-10-19的V4功能记录为Visualizer/内容skill136项、工具41项、Chrome/Edge各36场景通过；两预设四份720p30 VP9/48kHz双声道Opus经FFprobe/FFmpeg解码，桌面/1024×720截图已核对。可选用户音乐、完整四档/长曲未运行，Python未安装而quick_validate未跑，项目元数据/Brief CLI已通过。此为既有功能反馈，本次文档整理不重跑或升级为canonical/readiness。旧逐阶段记录由Git查回，本地artifacts/visualizer-composition保留原身份。

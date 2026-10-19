@@ -3,11 +3,10 @@ status: approved
 owner: "project-owner"
 last_reviewed: 2026-10-04
 upstream_docs:
-  - "docs/delivery/processing/acceptance-criteria.md"
-  - "docs/quality/processing/eval-plan.md"
+  - "docs/quality/processing/validation.md"
   - "docs/quality/processing/evidence-index.md"
   - "docs/architecture/processing/model-artifacts.md"
-next_action: "DEC-071 已批准短段 max absolute 1.5e-3；继续原图双浏览器、真实拼接/WAV、取消、试听和十五分钟验证；P1 未完成"
+
 ---
 
 # FT Numerical Gate Review
@@ -26,8 +25,10 @@ DEC-071 只把四个专用模型对应row的短段跨后端最大绝对误差上
 
 理由：当前官方浏览器后端已经能运行，三轨通过，drums超出原阈值约0.00030；保留官方资产和原始模型可避免维护尚未证明有效的图/运行库改写。该批准不是质量已通过的判断，也不是发布豁免。
 
-先同步AC-P102、eval、golden与failure taxonomy的数值标准及决定记录，再以干净候选重跑双浏览器原图、真实拼接/WAV、故障/取消、三首12轨试听和十五分钟性能。R-046–R-055仍Open，任何不可用试听、OOM、错误角色或超时仍阻止关闭。
+数值门槛现集中于[处理链验证](validation.md)。当时要求完整原图/拼接/WAV、故障/取消、试听和长曲验证；后续实际结果与DEC-074功能接受分别见evidence，不把旧“P2不开放”作为当前接入阻断。完整正式证据和后续链性能缺口仍保留，失败事实不改写。
 
 ## Approval Boundary
 
-2026-10-04，owner 明确回复“批准 0.0015，继续完整验证（推荐）”，本文件与此项数值门禁按 DEC-071 获批。此批准不表示试听、WAV、取消、十五分钟性能或 P1 已通过。DEC-069及[milestone plan](../../delivery/processing/milestone-plan.md)保留“新产品/架构/兼容/阈值与发布决定仍需人工确认”；代码和阶段提交的既有授权继续有效。
+2026-10-04，owner 明确回复“批准 0.0015，继续完整验证（推荐）”，本文件与此项数值门禁按 DEC-071 获批。此批准不表示试听、WAV、取消、十五分钟性能或 P1 已通过。DEC-069及[当前路线](../../delivery/processing/roadmap.md)保留“新产品/架构/兼容/阈值与发布决定仍需人工确认”；代码和阶段提交的既有授权继续有效。
+
+当前功能已按DEC-074收尾，新增识别质量与完整正式评审独立；本页只保留原误差测量、阈值变更和理由，不代表本次又运行模型。

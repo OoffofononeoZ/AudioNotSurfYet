@@ -48,7 +48,7 @@
 - 当前是单一前端仓库；未发现后端、数据库、认证、云端媒体库或部署配置。
 - 音频文件由用户通过 `showOpenFilePicker()` 选择；runtime File 保存在 session service，最近队列、文件句柄、唯一 current Blob 与匹配的分析 cache 由 SessionRepository 保存，Pinia `$state` 不持有浏览器资源、PCM 或 typed payload。
 - `configStore` 继续把 `volume` 和 `musicBarSettings.style` 保存到 localStorage；M5 最近会话使用独立 IndexedDB V1，不改变 config schema。
-- Analyzer 21/21 与 Analyzer-only readiness 已由版本化文档和证据确认；Editor E1–E9 与 Visualizer V1–V6 已由 clean canonical 和 owner 批准。Editor 与 Visualizer 整体 readiness 均需独立评审；`/comingsoon` 只是通用占位。
+- Analyzer当前特征与页面行为见页面契约；历史Analyzer-only readiness、Editor E1–E9和Visualizer V1–V6只覆盖原候选，Editor/Visualizer整体readiness仍独立。
 - 原 Editor E9 readiness 候选只作为历史证据，E10/后续 Editor 修改后的当前候选与缺口见对应 readiness 和接入 evidence；不以历史候选冻结日常实现。
 - `testcomp.vue`、`TestLands.vue`、`threeDTable.vue` 和 `MeydaCard.vue` 含试验或占位内容，不应默认视为稳定公共接口。
 

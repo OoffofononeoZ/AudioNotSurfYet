@@ -1,45 +1,17 @@
-# 开放问题与项目差异
+# 开放问题与工程差异
 
-此文件只记录工程事实缺口、仓库漂移和需重新确认的项目约定。产品目标、范围、指标、隐私与 owner 问题记录在 `docs/product/open-questions.md`。
+产品问题见[开放问题](../../../docs/product/open-questions.md)，当前源码入口见[system map](../../../docs/context/system-map.md)。本页只保留仍影响工程判断的缺口。
 
-## 当前工程缺口
+| 事项 | 当前边界与复核条件 |
+| --- | --- |
+| CI | 现有证据为本地运行，未建立正式CI承诺；需要CI/多人合入时另行决定 |
+| 资源 | 历史M11及后续专项有资源循环证据，LightBg释放问题已有修复；所有权/浏览器/renderer变化后仍测当前计数/heap，不把旧通过当永久保证 |
+| readiness | Editor/Visualizer整体评审仍有独立缺口；当前页面已实现，TestLands等仍是试验内容，功能实现不等于产品整体就绪 |
+| 包体/依赖 | 大chunk、旧esbuild advisory和无正式包体预算的历史记录见[readiness](../../../docs/quality/release-readiness.md)；当前依赖状态以实际lockfile/审计为准，不沿用旧“当前macOS/零漏洞”断言 |
+| 原生权限 | OPFS/stub自动化不等于OS picker/权限气泡/文件移动；相关实现或浏览器变动时复核真实流程 |
+| Meyda Flux | 上游x未定义缺陷保留，项目Flux按ADR-0005与独立golden缓解产品，不声称修复依赖 |
+| FT/识别 | 当前汇总听感/耗时按DEC-074接受；新识别质量、原生OS与完整正式候选/后续链性能仍独立，见[processing验证](../../../docs/quality/processing/validation.md) |
 
-| ID | 分类 | 已证实证据 | 影响 | 下一步 |
-| --- | --- | --- | --- | --- |
-| ENG-002 | CI | M3 明确只建立本地门禁，未创建 `.github/workflows` 或其他正式 CI | 构建/测试依赖本地执行 | CI 作为独立后续决策，不阻断 M3 |
-| ENG-003 | 资源释放 | M11 clean canonical 在 Chrome/Edge 各 20 次分析/播放循环保持单 Worker/AudioContext，并在 20 次 Home/Analyzer 路由循环保持 1 个有效 WebGL context 与 2 live RAF；2026-08-26 owner 已为最终人工长会话签字 | 自动化和一次人工签字不能永久替代后续版本的 heap/线程观察 | 资源所有权或浏览器变化时重复自动化与 DevTools 长会话复核 |
-| ENG-005 | 未完成表面 | Editor E1–E9 与 Visualizer V1–V6 已实现并获批准；`threeDTable`/TestLands/testcomp 仍为试验内容 | Editor/Visualizer 整体 readiness 尚无批准证据 | 分别完成独立 release-readiness review；不得把里程碑关闭或试验组件表述为整体产品已就绪 |
-| ENG-006 | 包体积 | 当前构建存在约 1 MB chunk 警告 | 首屏和缓存风险未知 | 先确定性能预算，再决定分包策略 |
-| ENG-007 | 开发依赖审计 | 安全补丁后 `npm audit` 剩余 esbuild 0.27.3 的 1 项 low，影响 Windows 开发服务器任意文件读取 | 当前 macOS 本地门禁不受直接影响，但不能宣称零漏洞 | 不向不受信网络暴露 dev server；上游提供兼容修复后升级并复核 |
-| ENG-008 | 原生文件权限 | M11 clean canonical 已在真实 Edge 通过 OPFS/IndexedDB 恢复、quota 与全量 E2E；M5 Chrome 与 2026-08-26 M11 Edge 原生 picker 签字均已完成 | 原生 granted/prompt/denied 与文件移动仍不能自动化 | 权限实现或浏览器变化时重复原生矩阵；不得把 OPFS 自动化泛化为原生提示完成 |
-| ENG-009 | Meyda feature 缺陷 | 当前 Meyda 5.6.3 对有效输入提取 `spectralFlux` 时抛出 `x is not defined`，M6 golden 已固定该复现 | 上游 extractor 不可用；产品必须使用独立、可审计的语义 | ADR-0005 项目 Flux 的公式/首帧/静音/exact cursor golden 与 M8 canonical 已通过，产品阻断缓解；上游异常事实继续保留 |
+skills/是维护源，.agents/skills为生成入口；按任务读取，更新后skills:install，不再向全局目录安装。本次工作树以实际git状态判断，不把历史任务的一次未提交文件当持续事实。
 
-## 已关闭工程缺口
-
-- ENG-001：2026-07-28 已删除失效的 `test:spectrogram`，建立 Vitest、Playwright、Worker、IndexedDB、fixture、golden、docs 和 deliberate-failure harness；clean-commit canonical run 与 evidence 已获 owner 批准，M3 已关闭。
-- ENG-004：M11 为 `LightBg` 增加 geometry/material/render list/renderer/WebGL context 显式释放，并在 Chrome/Edge 各 20 次路由循环验证 21 created/20 lost、最终只保留当前页面 context。
-
-## 当前仓库漂移
-
-- 2026-07-24 初始检查发现 `components.d.ts` 有未暂存的两行删除；它是用户已有修改，后续构建不得静默覆盖。
-- 本项目 skills 的维护源统一为 `skills/`；`.agents/skills/` 为生成发现入口。名称、描述或已有 UI 元数据变更后同步 `skills:install`，只读检查用 `skills:check`。
-- 项目 skills 不再安装到全局目录。DEC-073 迁移时只移除已核实指向本项目维护源的原全局链接，不覆盖其他文件或目录。
-
-## 历史证据边界
-
-Codex 任务 `019f82bc-0838-7ab3-baba-1a7571992901` 记录过：
-
-- MusicBar 样式切换期间隐藏进度条，矩形进度条改为 CSS 锚定。
-- 空列表禁止跳转，播放/暂停/清空时灯带状态复位。
-- 390、1024、1280 宽度的几何检查和浏览器 console 检查曾通过。
-- MusicList 自定义事件改为 kebab-case。
-
-当前 Git 历史和源码能支持这些改动已经进入代码，但历史浏览器结果不是永久门禁证据；相关代码变化后必须重跑。
-
-## 重新确认触发器
-
-- package scripts、主要依赖、路由、目录职责或状态所有权变化。
-- 新增测试、CI、部署或浏览器支持策略。
-- 音频由本地对象 URL 转向远端 URL、媒体元素或后端处理。
-- 新增第二个真实同类项目，可能需要把本 Skill 抽象为通用项目族。
-- 历史任务结论与当前代码或可复现行为冲突。
+依赖/命令/路由、状态所有权、数据隐私、支持矩阵、CI或发布改变时复核对应契约与用户授权；不恢复旧阶段审批或建立新的过程文档副本。

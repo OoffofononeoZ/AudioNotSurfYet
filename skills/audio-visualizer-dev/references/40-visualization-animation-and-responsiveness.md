@@ -1,34 +1,20 @@
 # 可视化、动画与响应式
 
-## 当前 Visualizer
+当前Visualizer采用[Project V4](../../../docs/architecture/visualizer/project-format-v4.md)、[JSON资源包过渡版](../../../docs/architecture/visualizer/resource-packages-v1.md)与[离线导出](../../../docs/context/visualizer-offline-export.md)。当前实现与约束见[页面接口](../../../docs/architecture/visualizer/interface-contracts.md)，不把历史V1–V6里程碑编号当schemaVersion。
 
-2026-10-18 当前 Visualizer 使用 [Project V4](../../../docs/architecture/visualizer/project-format-v4.md)及[资源包 V1 过渡版](../../../docs/architecture/visualizer/resource-packages-v1.md)：分组预设、批量共同处理参数与子元素差异、内嵌定义快照、内置请求和磁盘导入。绘制算法仍由应用内核提供。CompositionResolver/Scene 与三个复用 render targets 保留单 RendererHost/Canvas/RAF；普通页显示 MusicBar，全屏仅画面与进度。状态见 [组合工作区](../../../docs/context/visualizer-composition.md)。下方 V3–V6 术语为历史里程碑，不等同当前 schemaVersion。
+## 当前绘制边界
 
-## 当前可视化表面
-
-| 组件 | 技术 | 当前职责 |
-| --- | --- | --- |
-| `LightBg.vue` | Three.js + GLSL | 全屏光线 shader；能量通过 Home 改变 `rayLength` |
-| `DotGridBg.vue` | Canvas 2D + RAF | 响应鼠标距离的点阵背景 |
-| `twoDTable.vue` | Three.js | 试验性柱状数据、进度线、缩放和相机跟随 |
-| `MusicBar.vue` | CSS conic-gradient + GSAP | 三种外形/灯带样式、进度和信息跑马灯 |
-| `AnimatedList.vue` | GSAP | 列表进入、选择和滚动可见性动画 |
-
-`threeDTable.vue` 仍是试验表面；`MeydaCard.vue` 已是 Analyzer 21 项 Canvas/DOM renderer 容器。E4 已抽取 `analysisCanvasRenderer` 供 Analyzer card 与 Editor overlay 共用，E5 range 操作保持 overlay pointer-through；E6 已在真实 Chrome/Edge 和 10,000 事件压力下通过并获批准。E7 已把 overlay Teleport 为全视口 fixed Canvas，并在双浏览器验证 viewport backing store、marker-column clip、纵/横滚动与 `0 CSS px` 横轴 geometry，修订版已获 owner 批准。E8 把共享波形 stage 收敛为 `88px/72px`，上下保留 6px，并把 14px point diamond 与 stem 分离；其历史 canonical 与 owner 门禁已批准。E9 以 3px 绿色竖线替代 point candidate box/pin，并要求 waveform/BPM caret/point/range/overlay 继续共享 `<=1 CSS px` 横轴 geometry。ADR-0020 把 BPM 标记收敛为紧贴波形的 28px 条：caret 与波形接缝无间隙，1px guide 仅向上伸入 12px；revised canonical 的最大 boundary 误差为 `0.009375 CSS px`，E8 artifact 和首个 E9 artifact 均不改写。该 revised evidence 与人工门禁已于 2026-09-04 获 owner 批准。
-
-Visualizer V3 已由 DEC-039 固定为中心 Orthogonal Lines，并由 30/30 canonical 与 2026-09-03 owner 人工验收关闭：现有 16:9 Canvas 由唯一 `VisualizerRendererHost` 接管，host 独占一个 Three.js renderer 和一个可取消视觉 RAF。场景使用单全屏 quad/shader、固定 `#020403` 背景；intensity 同时控制中心向两端长度与主线 alpha，thickness 为 CSS px，brightness >1 增强 halo，horizontal/vertical 互不串扰。
-
-V3 scene-local decay 的单位为秒，固定 60Hz 计算 `max(I, previous * exp(-4 * dt / decaySeconds))`，每秒 checkpoint 并按歌曲/template/binding revision 隔离；它不改写 V2 resolved value，也不能使用 RAF delta。播放持续绘制，暂停、seek、参数和 resize 只请求单帧；DPR 上限为 2。V4 已用真实 Cube Swarm 替换中性预览，并保持同一 host/renderer/Canvas 与对称资源释放；34/34 clean canonical 与 owner 视觉验收已通过。
-
-DEC-041 固定 V4 为 64 方块中心频谱环、seed 外围上升方块与三颗分层轨道卫星。中心频谱按 64 个连续 band 的非负最大值和固定 log reference 128 映射；rise/orbit 按 60Hz 从 0 秒积分并每秒 checkpoint。Cube 使用共享 BoxGeometry、两个 MeshStandardMaterial、三个 InstancedMesh、固定灯光和 perspective camera，不使用纹理；context loss 在同 RendererHost/WebGLRenderer 内暂停视觉 RAF、恢复 scene GPU 资源并按当前绝对时间绘制。
-
-V5 recording capture lease 暂时把同一 Canvas backing store 切到严格 preset 与 DPR 1，CSS 尺寸不变；capture 期间 resize 只记住最新 preview size，release 后恢复。capture lease 存续时由 host 的同一个视觉 RAF 保持画布帧节奏，包括 recorder 启动/收尾期间 transport 尚暂停的窗口；下一帧在当前 scene work 前排队，release 后暂停状态只再完成已排队单帧。同步 time-zero 绘制、录制、context abort 或 renderer retry 都不得创建第二 Canvas、renderer 或 RAF。
-
-V6 候选为既有开发诊断追加 `lastSongTimeSeconds` 与 `lastFrameAtMs`，每次成功 scene render 后同步更新；`__VISUALIZER_DIAGNOSTICS__` 与 `__VISUALIZER_V3_DIAGNOSTICS__` 仍指向同一诊断对象。测试专用资源探针只在 Playwright 页面中包装并计数 AudioContext、Worker、RAF、WebGL、MediaStreamTrack、Observer、window/document listener 与 Blob URL，不形成生产公共 API。
+- JSON定义已有kernel的元素与组合，新增绘制算法仍需受控应用代码。新增内容包括纯复用预设，均按visualizer-content-generator先批准具体合同。
+- 预览保持单RendererHost/Canvas/WebGLRenderer/视觉RAF；CompositionResolver/Scene和复用render targets处理元素、效果与范围转场。预设组身份/共同控件不产生独立renderer。
+- 绝对歌曲时间、seed、固定步长/checkpoint决定状态，seek/循环/离线输出同源。弦线历史、native FFT/waveform和绑定准备按当前kernel处理，不能用RAF delta或元素显示名称分派算法。
+- 离线输出取得同一renderer手动租约、严格尺寸/DPR1和frame index时间，WebCodecs/Mediabunny写OPFS；背压不会跳帧。结束释放并恢复预览，不恢复MediaRecorder/capture RAF链路。
+- Analyzer卡与Editor overlay共用analysisCanvasRenderer。overlay用MarkerTimeView和标尺几何，fixed Canvas、DPR、clip与pointer-through按当前[Editor交互](../../../docs/architecture/editor/interaction-contracts.md)，不复制旧波形/marker样式令牌。
+- LightBg/DotGridBg/MusicBar等装饰分别拥有现有Three.js、Canvas或GSAP资源；TestLands/threeDTable/testcomp是试验表面，不成为生产拓扑范本。
+- 数值/几何、确定性hash、媒体/反馈与资源门槛见[Visualizer验证](../../../docs/quality/visualizer/validation.md)，按实际影响挑选专项。
 
 ## RAF 与 Observer
 
-连续播放时间、分析帧值、动画相位和指针坐标留在音频时钟、renderer、RAF 或局部非响应式引用中；只有播放状态、当前选择、可见段落等实际变化的离散事实进入 Vue/Pinia。审查高频 callback 时检查是否每帧写 store、创建数组/对象或触发组件重渲染；必须进入响应式状态的低频值先比较新旧值并明确更新节奏。暂停、隐藏、离页与录制结束后核对不再产生无用更新。
+连续播放时间、分析帧值、动画相位和指针坐标留在音频时钟、renderer、RAF 或局部非响应式引用中；只有播放状态、当前选择、可见段落等实际变化的离散事实进入 Vue/Pinia。审查高频 callback 时检查是否每帧写 store、创建数组/对象或触发组件重渲染；必须进入响应式状态的低频值先比较新旧值并明确更新节奏。暂停、隐藏、离页与导出结束后核对不再产生无用更新。
 
 - 每个持续动画只能有一个可取消的 RAF 句柄；开始前停止旧循环，停止/卸载时清空句柄。
 - `LightBg` 使用 IntersectionObserver 控制可见性，并用 window resize 更新 renderer 尺寸与 shader uniform。
@@ -47,7 +33,7 @@ V6 候选为既有开发诊断追加 `lastSongTimeSeconds` 与 `lastFrameAtMs`�
 - `renderer.dispose()`，并移除 canvas。
 - 清理组件持有的引用，避免可见性切换后重复 renderer。
 
-当前 `twoDTable.vue` 会释放柱体、线材质/几何和 renderer。`LightBg.vue` 的 cleanup 已释放 renderer 并移除 canvas，但未见对 PlaneGeometry 和 ShaderMaterial 的显式 dispose；这是需要在相关改动中复核的资源风险。
+既有背景和试验组件按所属模块释放geometry、material、renderer及context；LightBg的显式释放已有历史修复，相关改动仍核对当前cleanup，不沿用旧“未释放”的判断。
 
 ## Canvas
 

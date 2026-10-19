@@ -17,13 +17,13 @@ owner 于 2026-10-13 批准本页方案并要求实现（DEC-076）。本次是�
 - Analyzer 始终单列，顶部常驻区支持手柄调整高度，原列表独立滚动；见 [Analyzer 列表契约](analyzer-list.md)。侧栏变化重测说明和图表，不重建未转移的活动行或分析消费者。
 - 修改的可见滚动容器使用 `.app-scrollbar`。Sidebar media listener、导航订阅、背景 ResizeObserver 及既有资源按所属模块释放。
 
-Visualizer 当前布局、全屏视频控制及原子组合契约见 [组合工作区](visualizer-composition.md) 和 [Project V3](../architecture/visualizer/project-format-v3.md)。普通工作区按 MusicBar 实际占高留位；全屏不显示 MusicBar。
+Visualizer 当前布局、全屏视频控制及原子组合契约见 [组合工作区](visualizer-composition.md) 和 [Project V4](../architecture/visualizer/project-format-v4.md)。普通工作区按 MusicBar 实际占高留位；全屏不显示 MusicBar。
 
 ## 播放模式
 
 Editor 列表换歌、删除当前歌曲与清空队列先弹出工程保护对话框；导出后仍需明确确认，取消不改变歌曲、播放或任务。确认前必须成功保存草稿，批准仅绑定目标歌曲和当前工程修订、消费一次；清空保留 Editor 单草稿。确认后先释放旧歌曲的分离和自动标记任务，再进入目标歌曲；普通进入与刷新仍执行草稿冲突检查。
 
-MusicBar 提供顺序、单曲循环、列表循环和随机播放图标，默认顺序播放并保存偏好。Editor/Visualizer 租约临时使用单曲循环，释放后恢复用户偏好；模式按钮在工作区锁定。单曲循环下上一首/下一首从零重播当前歌。录制专属传输租约阻止公开播放、seek 和队列修改，音量仍可用。Visualizer 原子元素改版及阶段状态见 [组合工作区](visualizer-composition.md)。
+MusicBar 提供顺序、单曲循环、列表循环和随机播放图标，默认顺序播放并保存偏好。Editor/Visualizer 租约临时使用单曲循环，释放后恢复用户偏好；模式按钮在工作区锁定。单曲循环下上一首/下一首从零重播当前歌。导出专属传输租约阻止公开播放、seek 和队列修改，音量仍可用。Visualizer 原子元素改版及阶段状态见 [组合工作区](visualizer-composition.md)。
 
 ## 首页内容
 

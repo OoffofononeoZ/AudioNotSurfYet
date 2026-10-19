@@ -2,7 +2,7 @@
 
 ## 当前播放与离线分析链路
 
-M5 实现后的已证实链路：
+当前原曲链路如下；分轨试听另见[自动标记/试听契约](../../../docs/architecture/processing/editor-auto-marking.md)：
 
 1. MusicBar 调用 `selectAndImportFiles()`；service 使用 `showOpenFilePicker()` 获取本地 MP3/WAV/FLAC 句柄，不使用隐藏 input fallback。
 2. service 顺序计算 SHA-256，并用 `music-metadata.parseBlob()` 生成可序列化 `TrackRecord`；runtime registry 保存 File、handle 与可选封面对象 URL。
@@ -32,14 +32,14 @@ AudioBufferSourceNode → AnalyserNode → GainNode → audioContext.destination
 
 - service 是 runtime File、封面对象 URL、AudioEngine 订阅、单播放 RAF 和 ended 循环的唯一所有者。
 - store 只保存 TrackRecord、current ID、PlaybackSnapshot 和 energy；`$state` 必须可 JSON 序列化。
-- next/previous 使用循环索引；自然 ended 自动播放下一项。
+- next/previous/ended 按当前顺序、单曲、列表或随机模式处理；Editor/Visualizer lease临时repeat-one，导出transport锁优先，见[应用外壳](../../../docs/context/app-shell.md)。
 - 删除非当前项不影响播放。删除当前项后播放同位置的下一项；没有下一项则使用上一项。
 - 清空进入 `empty`，停止播放、取消 RAF、归零能量并释放全部封面 URL。
 - metadata 失败使用文件名与默认封面继续解码。
 - decode/unsupported 由 MusicBar 监听 snapshot error 并显示 Element Plus 非阻塞消息；队列、下一首和重试仍可用。
-- 音频解码不创建对象 URL；对象 URL 只用于内嵌封面。
+- 原曲解码不创建对象 URL；封面URL由service拥有，分轨/导出URL由对应服务按各自生命周期释放。
 
-Editor E1 已通过 tokenized playback/analysis lease 临时使用 repeat-one并复用现有 service/coordinator；18/18 canonical 与 owner 签字已批准。E2 已通过 Editor consumer 请求唯一 Buffer 与 retained-PCM tempo estimate，并以 generation/hash/config 和用户 revision 丢弃 stale 结果；22/22 clean canonical 与 owner 门禁也已批准。单 engine、单播放 RAF、离页恢复 queue-next 与单 Worker 事实保持不变。
+Editor/Visualizer通过tokenized播放与分析lease复用现有service/coordinator；当前规则见[共享契约](../../../docs/architecture/shared-runtime-contracts.md)，不在skill重复逐阶段通过记录。
 
 ## 最近会话恢复
 
@@ -49,9 +49,9 @@ Editor E1 已通过 tokenized playback/analysis lease 临时使用 repeat-one并
 - IndexedDB quota/事务失败不停止当前内存播放，并发布 `not-persisted`；未知 schema 发布 `unsupported-schema`，只在用户点击后清除旧会话。
 - M6 已接入真实 current analysis payload：初始化恢复完整身份匹配的 cache，partial hit 只把缺失 feature 送入 Worker；持久化失败显示 `not-persisted` 但不停止播放或丢弃内存结果。
 
-## M6 全曲分析
+## 当前全曲分析
 
-- `FeatureRegistry` 穷尽映射 21 项；M6 Worker 仅声明 RMS、Energy、Amplitude Spectrum、Chroma 支持，默认活动集为空且每个 job 最多四个唯一特征。
+- FeatureRegistry穷尽当前FEATURE_IDS，含Wallpaper频谱；M6–M10常量仅是历史子集。默认活动集为空，每job最多四种唯一特征。
 - AudioEngine 通过 descriptor 与 16,384 sample 分块 copy 输出 average-mono PCM；copy 期间 decoded revision 改变时立即视为 stale。
 - module Worker 使用 frame 1024、hop 512、Hanning 和实际 sample rate；同一 frame 的活动项一次 Meyda batch，最多每 32 frame 或约 8ms 发布进度并 yield/cancel。
 - display series 限制为 ≤30 samples/s，通过六类 binary compact payload 存储；decoder 校验 schema、完整身份、维度、量化范围、对齐和尾随字节。

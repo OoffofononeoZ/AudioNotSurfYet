@@ -26,6 +26,7 @@
 - Analyzer、Editor、Visualizer 的 consumer lease 互斥，新 consumer 使旧 lease 失效；旧 token 不改变当前工作区。
 - 保持单个分析 Worker；无活动特征不创建任务。最多四种唯一 Analyzer 特征，native 输入不计入额度。
 - 消息、cache、series 和 exact cursor 匹配歌曲 hash、config hash、generation/request identity；取消与迟到消息不回填新工作区。
+- 取消用于节省资源，完整身份检查才是正确性边界；不能假定取消一定先于结果抵达。
 - 精确游标选择不晚于目标时刻的最后合法 frame，duration 映射末帧；不以绘图量化值替代精确值。快速请求允许合并，过期结果丢弃。
 - spectralFlux 使用项目公式和 golden，不调用有缺陷的 Meyda extractor；首帧和零能量语义见 [ADR-0005](adrs/0005-project-spectral-flux-and-silence-semantics.md)。
 
@@ -40,6 +41,8 @@
 - 新歌曲发布 saving 后，只有最新 command generation 的 ready/not-persisted 可确认结果；cache 发布还须核对 persisted current track/hash。
 
 ## 页面入口与验证
+
+保留的独立设计理由：[单音频所有者](adrs/0001-single-audio-engine-and-session-state.md)、[Worker/身份隔离](adrs/0002-worker-analysis-and-stale-result-isolation.md)、[混合会话恢复](adrs/0003-hybrid-indexeddb-session-recovery.md)、[类型化registry/Canvas](adrs/0004-typed-feature-registry-and-canvas-renderers.md)。旧页面ADR的有效边界已归入下面各页，不再保留互相冲突的布局和阶段要求。
 
 - [Analyzer](analyzer/interface-contracts.md)：队列、分析、绘图和缓存。
 - [Editor](editor/interface-contracts.md)：V1 工程、标记、FT 与自动标记。

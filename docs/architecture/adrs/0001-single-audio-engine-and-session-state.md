@@ -1,19 +1,17 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-08-26
+last_reviewed: 2026-10-19
 upstream_docs:
-  - "docs/product/problem-brief.md"
   - "docs/product/scope.md"
-  - "docs/architecture/system-design.md"
-next_action: "M11 AudioEngine/时钟边界已批准；在 readiness 中保留环境边界"
+  - "docs/context/system-map.md"
 ---
 
 # ADR-0001: Single AudioEngine and Shared Session State
 
 ## Context
 
-当前音频加载与播放集中在 `src/audio/audioLoader.ts`，MusicBar 同时直接提取能量。Analyzer 需要共享播放、跳转和游标；如果每个页面创建自己的 AudioContext 或持有 AudioBuffer，会产生不同步时钟、重复解码和不明确的资源清理责任。
+各页面需要共享播放、跳转和游标；独立AudioContext或各自持有AudioBuffer会产生不同步时钟、重复解码和不明确的清理责任。现有AudioEngine/AudioSessionService集中拥有这些资源。
 
 ## Decision
 
@@ -36,7 +34,7 @@ next_action: "M11 AudioEngine/时钟边界已批准；在 readiness 中保留环
 
 ### Negative
 
-- 需要迁移当前 MusicBar/audioLoader 的职责，并建立回归测试。
+- 集中所有权后需要维护统一命令/快照接口与回归验证。
 - engine 命令与快照必须处理 AudioContext suspended、source 单次使用和竞态。
 
 ## Alternatives

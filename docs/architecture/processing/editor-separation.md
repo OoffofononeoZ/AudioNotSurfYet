@@ -4,14 +4,14 @@ owner: "project-owner"
 last_reviewed: 2026-10-12
 upstream_docs:
   - "docs/product/scope.md"
-  - "docs/architecture/system-design.md"
+  - "docs/context/system-map.md"
   - "docs/architecture/processing/ft-kernel-config.md"
-next_action: "本轮接入及双浏览器功能验证完成；DEC-074接受当前听感/长曲耗时，正式评审独立"
+
 ---
 
 # Editor Four-Stem Separation
 
-DEC-072来源为owner明确要求：暂不考虑运行时间，把当前成功分离的实现接入Editor，授权agent决定页面布局、设计和动效，按阶段本地提交。该指令批准当前Editor接入例外：不等待P1性能及全部人工质量记录收口；不将缺口写成通过，不降低全链900秒目标，不开放自动节拍/提案/V2或发布。本文件细化已授权实现，P1历史与R-046–R-055仍保留。
+DEC-072来源为owner明确要求：暂不考虑运行时间，把当前成功分离的实现接入Editor，授权agent决定页面布局、设计和动效，按阶段本地提交。该指令批准当前Editor接入例外：不等待P1性能及全部人工质量记录收口；不将缺口写成通过，不降低全链900秒目标，不开放P3逐拍/完整提案/处理数据格式扩展或发布。本文件细化已授权实现，P1历史与R-046–R-055仍保留。
 
 ## Workspace and Ownership
 
@@ -19,7 +19,7 @@ DEC-072来源为owner明确要求：暂不考虑运行时间，把当前成功�
 - MainLayout提供单个Editor分离服务，页面组合展示组件；单例串行等待旧任务终态后才允许新任务，generation/source/revision保护覆盖恢复、处理、导出和清理。原Editor V1、人工marker/tempo/overlay、草稿、导入导出不被分离修改。
 - 使用四个原始FT专用模型、固定官方ORT、当前PCM/拼接/WAV配置；生产模型地址使用immutable HTTPS模型表，测试仅由网络拦截提供同字节公开fixture，不加入本地模型或CPU备用路径。dev/build自动准备并校验固定运行资产。
 - 点击显式开始，先告知缺失模型bytes与本地音频隐私。下载和处理分开计时；显示真实phase、对应阶段单位及elapsed，不伪造整体百分比或剩余时间。初始化无可计量单位时使用不定进度；取消/错误后可重试，原曲播放和人工编辑可用。
-- 本次授权设计将Editor双层工具栏收敛为中性深色、10px圆角，仍保持桌面≤84px及紧凑控件；人工时间列/标记主区继续平面分区（≤2px）、88/72px波形、28px BPM条及44px point/range行。分离工作区使用薄荷主操作、四角色色、统一原曲游标、进入/进度动效和窄屏堆叠；键盘左右/Home/End切换工作区，reduced-motion关闭动画。
+- 当前公共框架、顶栏/MusicBar、三页签与标记布局以[Editor工作区](../../context/editor-workspace.md)和[交互契约](../editor/interaction-contracts.md)为准；分离结果保留角色色、共同transport游标、键盘页签与reduced-motion，窄屏独立滚动并使用app-scrollbar。
 
 ## Results and Storage
 
