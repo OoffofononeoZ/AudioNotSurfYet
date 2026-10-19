@@ -21,8 +21,8 @@
 | FT / other | 四专用模型分别取drums/bass/other/vocals对应row；other不称lead | [模型表](../architecture/processing/model-artifacts.md) |
 | 分轨试听 / 自动标记 | 原曲/FT/辅助PCM共用transport；候选人工修正后显式V1应用，不等于P3逐拍 | [自动标记](../architecture/processing/editor-auto-marking.md) |
 | proposal / tempo-derived map | 尚未完成的只读处理提案 / 人工确认小节后派生beat/downbeat，非模型识别 | [未来目标](../architecture/processing/worker-and-project-contracts.md) |
-| VisualizerProjectV4 | 原子元素、顶层items、分组预设及内嵌资源快照；只接受V4 | [Project V4](../architecture/visualizer/project-format-v4.md) |
-| kernel / JSON资源包V1 | 应用内绘制算法 / 定义已有内核参数、默认绑定及组合的过渡版数据包 | [资源契约](../architecture/visualizer/resource-packages-v1.md) |
+| VisualizerProjectV5 | 原子元素、顶层items、分组预设及内嵌算法/Shader/定义快照；只接受V5 | [Project V5](../architecture/visualizer/project-format-v5.md) |
+| algorithm / 可执行资源包V2 | 在隔离Worker执行的算法与参数契约 / 同时包含算法、Shader和组合定义的数据包 | [资源契约](../architecture/visualizer/resource-packages-v2.md) |
 | preset / 共同处理参数 | 持久化预设组 / 通过声明控件批量写子元素并提示差异，无参数继承 | [预设](visualizer-presets.md) |
 | binding / native | constant/Analyzer/native/适用Editor引用及变换；native不占四Analyzer额度 | [页面接口](../architecture/visualizer/interface-contracts.md)、[原生输入](visualizer-native-input.md) |
 | RendererHost / 手动导出租约 | 唯一Canvas/renderer/预览RAF所有者 / 以绝对帧编号独占绘制并恢复预览 | [离线导出](visualizer-offline-export.md) |

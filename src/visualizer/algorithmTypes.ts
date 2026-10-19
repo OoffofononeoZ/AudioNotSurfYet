@@ -1,7 +1,6 @@
 import type { ElementKind } from './compositionTypes';
 import type { SceneParameterDescriptor } from './parameterDescriptor';
-import type { ResourceRef, ElementDefinition, ResourceSnapshot } from './resourceTypes';
-import type { VisualizerProjectV4, VisualizerElement } from './compositionTypes';
+import type { ResourceRef } from './resourceTypes';
 
 export type AlgorithmParameter = Omit<SceneParameterDescriptor, 'label' | 'defaultValue' | 'defaultBinding'>;
 export interface AlgorithmContract {
@@ -24,25 +23,6 @@ export interface AlgorithmDefinition extends ResourceRef {
     source: string;
     programs: Record<string, ShaderProgram>;
 }
-export interface ExecutableElementDefinition extends Omit<ElementDefinition, 'kernelId' | 'kernelVersion'> {
-    algorithm: ResourceRef;
-}
-export interface ExecutableResourceSnapshot extends Omit<ResourceSnapshot, 'elements'> {
-    algorithms: AlgorithmDefinition[];
-    elements: ExecutableElementDefinition[];
-}
-export interface VisualizerResourcePackageV2 extends ExecutableResourceSnapshot {
-    format: 'audiosurf-visualizer-resource';
-    schemaVersion: 2;
-    id: string;
-    version: number;
-}
-export interface VisualizerProjectV5 extends Omit<VisualizerProjectV4, 'schemaVersion' | 'resources' | 'elements'> {
-    schemaVersion: 5;
-    resources: ExecutableResourceSnapshot;
-    elements: Omit<VisualizerElement, 'type' | 'version'>[];
-}
-
 export type UniformValue = number | boolean | string | number[];
 export interface MeshPacket {
     positions: Float32Array;
@@ -56,6 +36,8 @@ export interface DrawPass {
 }
 export interface DrawPacket {
     passes: DrawPass[];
+    /** Viewport-independent state for deterministic timeline diagnostics. */
+    state?: number[];
 }
 export interface AlgorithmValue {
     value: number | boolean | string | number[];

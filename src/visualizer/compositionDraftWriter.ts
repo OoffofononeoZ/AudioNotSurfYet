@@ -1,15 +1,15 @@
 import type { CompositionDraftRepositoryPort } from './compositionDraftRepository';
-import type { VisualizerProjectV4 } from './compositionTypes';
+import type { VisualizerProjectV5 } from './compositionTypes';
 
 export class CompositionDraftWriter {
-    private pending: VisualizerProjectV4 | null = null;
+    private pending: VisualizerProjectV5 | null = null;
     private active: Promise<boolean> | null = null;
     private timer: ReturnType<typeof setTimeout> | null = null;
 
     private repository: CompositionDraftRepositoryPort;
     private notify: (
         state: 'saving' | 'saved' | 'not-persisted',
-        project: VisualizerProjectV4,
+        project: VisualizerProjectV5,
         message?: string,
     ) => void;
 
@@ -22,7 +22,7 @@ export class CompositionDraftWriter {
         return !!(this.pending || this.active);
     }
 
-    queue(project: VisualizerProjectV4) {
+    queue(project: VisualizerProjectV5) {
         this.pending = structuredClone(project);
         if (this.timer) clearTimeout(this.timer);
         this.timer = setTimeout(() => {
@@ -52,7 +52,7 @@ export class CompositionDraftWriter {
             this.pending = null;
             this.notify('saving', project);
             try {
-                await this.repository.replace({ schemaVersion: 4, savedAt: new Date().toISOString(), project });
+                await this.repository.replace({ schemaVersion: 5, savedAt: new Date().toISOString(), project });
             } catch (error) {
                 if (!this.pending) this.pending = project;
                 this.notify('not-persisted', project, (error as Error).message);

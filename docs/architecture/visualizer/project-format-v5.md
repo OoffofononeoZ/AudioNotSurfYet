@@ -1,0 +1,30 @@
+# Visualizer Project V5 与算法快照
+
+2026-10-19，owner 明确选择工程同时携带算法、浏览器原生隔离、新格式替换旧格式，并以“Implement the plan.”批准实施。此决定替代 DEC-084 的 V4/V1 和仅应用内核限制；不升级历史 evidence/readiness。
+
+## 工程数据
+
+- `format:'audiosurf-visualizer'`、`schemaVersion:5`。保留工程 UUID、时间戳、同歌 track、16:9 output、seed 和可选同歌 Editor 快照。
+- `elements` 保存 UUID、精确资源引用、名称、启用状态、派生 layer、时段、bindings 和适用的效果 targets。实例不再重复保存固定 type/version，算法由元素定义的 algorithm 引用解析。
+- `items` 由低到高排列独立元素或预设实例。组包含 UUID、资源引用、名称、显隐、children 和 controls；每个叶元素恰好归属一次。禁止预设嵌套、重复归属、悬空引用和空组。
+- items/children 决定连续 layer；列表反向显示，顶层移动整组，子元素只在组内排序。
+- `resources:{algorithms,elements,presets}` 内嵌完整定义和算法源码、Shader、契约，均以 `{id,version,hash}` 绑定。恢复及渲染不请求商城、不向全局库注册内容；仍要求宿主支持 apiVersion:1 与包所声明的绘图能力。
+- 相同算法去重保存，实例按 UUID 独立创建。重复添加预设产生新组/子 UUID 和本次效果引用。默认绑定与时长适配只在新增时应用。
+
+## 分组及共同处理参数
+
+共同控件保存声明、UUID 目标和最后批量值；实际渲染仍读取子元素 bindings，不使用继承。
+
+- 算法契约限定共同处理字段及输入，元素定义不能扩大权限。当前迁移保留 sensitivity、decay 及原有输入/映射控件，不将颜色、位置、尺寸等样式常量变为共同参数。
+- value 控件批量写常量；binding 写完整 source/transform；transform 只写指定映射或平滑字段。完整候选通过校验后原子替换，子元素仍可独立编辑。
+- 根据负责字段与最后共同值比较，显示差异数量和名称；恢复相同值自动消除差异，再次应用覆盖目标字段。
+- 隐藏组不修改子元素 enabled；分析、历史输入、效果、预检和导出使用同一有效集合。四 Analyzer 特征校验仍包含被禁用内容。
+- 删除子元素清理全工程效果引用及共同控件目标；无目标控件和空组移除。删除组清理其全部叶元素。
+
+## 校验、恢复和输出
+
+strict codec 检查字段、身份/hash、算法 ABI、参数能力、同歌引用、唯一归属和四特征上限；纯解析不执行代码。工程导入和恢复先在隔离运行时初始化候选，成功后激活；失败保留原工程，取消和身份变化阻止迟到提交。
+
+只接收 V5 文件；V1–V4 不迁移。旧草稿视为没有可恢复草稿，不显示旧版导出/覆盖提示。V5 草稿仍写 draft/latest；无效 V5 原文及显式处理、异歌冲突、保存失败与离页保护继续有效，不清空原数据库。
+
+预览与离线输出使用相同算法快照、绝对歌曲时间和 seed。预览合并请求并丢弃失效结果，导出逐帧等待算法和 GPU 绘制后截图；不增加 Canvas/renderer/视觉 RAF。见[资源包](resource-packages-v2.md)与[离线导出](../../context/visualizer-offline-export.md)。

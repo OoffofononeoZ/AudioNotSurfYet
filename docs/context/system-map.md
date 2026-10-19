@@ -15,7 +15,7 @@ upstream_docs:
 
 DEC-072另由MainLayout提供唯一`EditorSeparationService`，使用同一AudioEngine原始PCM；Editor增加分离工作区和四轨展示/导出。模型与结果索引使用`processing-p1` IndexedDB，原PCM/planar/WAV使用OPFS；最多一个专用分离Worker，播放及analysis所有权不变。
 
-Visualizer 当前实现 Project V4、分组预设、共同处理参数、同歌单范围转场和组合 RendererHost；JSON 资源包通过请求或磁盘导入，导入库独立保存到 IndexedDB，工程内嵌定义快照。当前为已有绘制内核驱动的过渡版，不支持外部算法脚本。布局及接口见 [组合工作区](visualizer-composition.md)、[资源包](../architecture/visualizer/resource-packages-v1.md)与 [Project V4](../architecture/visualizer/project-format-v4.md)；新增内容按[内容生成契约](../architecture/visualizer/content-generation.md)先批准具体合同，历史 V1–V6 审批及候选身份保持历史语境。
+Visualizer 当前实现 Project V5、可执行资源包 V2、分组预设及同歌范围转场。项目内目录提供算法/Shader/定义，工程保存完整快照；算法通过无同源权限 iframe 所属 Worker 隔离计算，宿主校验数据后统一绘制。暂时隐藏磁盘资源包入口，不接后端或外部 URL。布局及接口见[组合工作区](visualizer-composition.md)、[资源包](../architecture/visualizer/resource-packages-v2.md)与[Project V5](../architecture/visualizer/project-format-v5.md)；新增内容仍需具体合同，内容生成 skill 本轮未升级，历史 evidence/readiness 不自动继承。
 
 应用导航占位、窄屏隐藏、歌曲详情与内容宽度分界见 [应用外壳契约](app-shell.md)（DEC-076）；旧 canonical 数值与身份继续绑定历史实现。
 
@@ -43,15 +43,15 @@ showOpenFilePicker → FileSystemFileHandle → File
 ```text
 /visualizer/:trackId? → VisualizerSessionController
   ├→ RoutePlaybackLease(repeat-one; export transport locks) → AudioSessionService → AudioEngine
-  ├→ VisualizerProjectV4 ↔ audionotsurfyet-visualizer/draft/latest
-  ├→ JSON packages → ResourceLibrary ↔ independent IndexedDB library/packages
+  ├→ VisualizerProjectV5 ↔ audionotsurfyet-visualizer/draft/latest
+  ├→ project-owned executable packages → ResourceLibrary → available definitions
   ├→ one 16:9 Canvas + element list/inspector + project bottom panel + MusicBar
   ├→ AnalysisConsumerLease(visualizer, deduped 0–4) → AnalysisCoordinator/Worker/cache
   ├→ NativeAudioSource → bounded decoded PCM → offline Web Audio stereo FFT/waveform chunks
   ├→ validated EditorProjectV1 snapshot → exact laneId/eventId range transition
   └→ CompositionResolver(60Hz absolute time + checkpoint)
-       → ElementRegistry → CompositionScene → three reusable render targets
-       → spectral strings(120Hz integration) / dots / rings / solid / geometric atoms / tunnel / stars
+       → embedded algorithm snapshots → opaque-origin Worker → validated DrawPacket
+       → CompositionScene + shared program/geometry → three reusable render targets
        → target/composition effects
        → one VisualizerRendererHost + one Canvas/WebGLRenderer/visual RAF
        ├→ manual export lease → indexed frame times + decoded PCM → WebCodecs/Mediabunny → OPFS WebM File
@@ -78,7 +78,7 @@ showOpenFilePicker → FileSystemFileHandle → File
 | Analyzer surface | 当前注册特征单列、最多四项FIFO置顶与精确值 | AudioSessionService、AnalysisCoordinator、Canvas 2D | project-owner | 当前集合含Wallpaper频谱，界面见[列表](analyzer-list.md) |
 | Editor surface | 标记/FT/自动标记、公共顶栏/MusicBar、独立MarkerTimeView、overlay和数字录入 | EditorSessionController、processing/transcription服务、共享engine/coordinator与Canvas adapter | project-owner | [当前接口](../architecture/editor/interface-contracts.md)，历史readiness不继承 |
 | Editor project and draft | strict JSON V1、歌曲 hash/时长绑定、原生 file gateway、单草稿 autosave 与恢复冲突 | `EditorFormatCodecRegistry`、`EditorDraftRepository`、`audionotsurfyet-editor` V1 | project-owner | 首版只注册 JSON；session database 不变 |
-| Visualizer composition surface | `/visualizer/:trackId?` 分组列表/共同处理参数/元素属性/工程底栏、单视口三栏或抽屉、16:9 单 Canvas、保留 MusicBar、strict Project V4 单草稿、JSON 资源库、离线 WebM 与原生全屏 | `VisualizerSessionController`、`VisualizerResourceLibrary`、`VisualizerRendererHost`、`CompositionResolver/Scene`、playback/analysis leases、Editor snapshot、WebCodecs/OPFS、Fullscreen API | project-owner | V1–V6 evidence 只绑定历史实现；当前自动化与媒体检查见组合工作区 |
+| Visualizer composition surface | `/visualizer/:trackId?` 分组列表/共同处理参数/元素属性/工程底栏、单视口三栏或抽屉、16:9 单 Canvas、保留 MusicBar、strict Project V5 单草稿、JSON 资源库、离线 WebM 与原生全屏 | `VisualizerSessionController`、`VisualizerResourceLibrary`、`VisualizerRendererHost`、`CompositionResolver/Scene`、playback/analysis leases、Editor snapshot、WebCodecs/OPFS、Fullscreen API | project-owner | V1–V6 evidence 只绑定历史实现；当前自动化与媒体检查见组合工作区 |
 | Experimental charts | 试验性的 Three.js 2D 图和瀑布流 | Vue props、TestLands | unknown | 不视为稳定接口 |
 | Event bus | 跨组件事件类型与发送 | mitt singleton | unknown | `settings-open` 无已发现订阅者 |
 

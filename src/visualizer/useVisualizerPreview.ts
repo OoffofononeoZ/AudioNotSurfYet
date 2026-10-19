@@ -7,6 +7,7 @@ import type { CompositionSessionSnapshot } from './compositionTypes';
 import type { VisualizerRendererStatus } from './rendererTypes';
 import { parameterKey } from './compositionEffects';
 import { effectiveElements } from './compositionModel';
+import { validateAlgorithmPrograms } from './validateAlgorithmPrograms';
 export function useVisualizerPreview(
     canvas: Ref<HTMLCanvasElement | null>,
     controller: VisualizerSessionController,
@@ -20,6 +21,7 @@ export function useVisualizerPreview(
     const nativeStatus = ref('idle'),
         nativeMessage = ref('');
     let detachNative: (() => void) | null = null;
+    let detachAlgorithms: (() => void) | null = null;
     const cleanup = () => {
         observer?.disconnect();
         observer = null;
@@ -27,6 +29,8 @@ export function useVisualizerPreview(
         detach = null;
         detachNative?.();
         detachNative = null;
+        detachAlgorithms?.();
+        detachAlgorithms = null;
         host?.dispose();
         host = null;
     };
@@ -84,6 +88,9 @@ export function useVisualizerPreview(
                     },
                 });
                 const target = host;
+                detachAlgorithms = controller.attachAlgorithmValidator(resources =>
+                    validateAlgorithmPrograms(target.renderer, resources),
+                );
                 detach = controller.attachExportTarget({
                     getStatus: () => status.value,
                     acquireExportSurface: (w, h) => target.acquireExportSurface(w, h),
@@ -111,6 +118,14 @@ export function useVisualizerPreview(
             store.playback.currentTimeSeconds,
         ],
         () => host?.requestFrame(),
+    );
+    watch(
+        () => store.playback.currentTimeSeconds,
+        (time, previous) => {
+            if (time < previous || Math.abs(time - previous) > 0.5 || store.playback.state !== 'playing')
+                host?.invalidateFrame();
+        },
+        { flush: 'sync' },
     );
     onBeforeUnmount(cleanup);
     return { status, nativeStatus, nativeMessage, retry: () => host?.retry() };

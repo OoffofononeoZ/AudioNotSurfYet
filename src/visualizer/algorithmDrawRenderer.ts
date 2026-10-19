@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import type { AlgorithmDefinition, DrawPass, ShaderProgram } from './algorithmTypes';
 import type { CompositionRenderPort } from './compositionScene';
+import { resourceHash } from './resourceIdentity';
 interface Surface {
     scene: THREE.Scene;
     camera: THREE.OrthographicCamera;
@@ -13,17 +14,29 @@ export class AlgorithmDrawRenderer {
     private surfaces = new Map<string, Surface>();
     private width = 1;
     private height = 1;
+    private readonly quadGeometry: THREE.PlaneGeometry;
+    private readonly ownsQuad: boolean;
+    private programKeys = new WeakMap<ShaderProgram, string>();
+    constructor(quad?: THREE.PlaneGeometry) {
+        this.quadGeometry = quad ?? new THREE.PlaneGeometry(2, 2);
+        this.ownsQuad = !quad;
+    }
     resize(width: number, height: number) {
         this.width = width;
         this.height = height;
     }
     draw(renderer: CompositionRenderPort, algorithm: AlgorithmDefinition, pass: DrawPass, source?: THREE.Texture) {
-        const key = algorithm.hash + ':' + pass.program;
+        const definition = algorithm.programs[pass.program]!;
+        let key = this.programKeys.get(definition);
+        if (!key) {
+            key = resourceHash(definition);
+            this.programKeys.set(definition, key);
+        }
         let surface = this.surfaces.get(key);
         if (!surface) {
             const program = algorithm.programs[pass.program]!;
             const triangles = program.geometry === 'triangles';
-            const geometry = triangles ? new THREE.BufferGeometry() : new THREE.PlaneGeometry(2, 2);
+            const geometry = triangles ? new THREE.BufferGeometry() : this.quadGeometry;
             if (triangles)
                 for (const [name, size] of [
                     ['position', 3],
@@ -94,22 +107,25 @@ export class AlgorithmDrawRenderer {
         surface.material.uniformsNeedUpdate = true;
         const debug = (renderer as unknown as THREE.WebGLRenderer).debug;
         const previous = debug?.onShaderError;
+        let failed = false;
         if (debug)
             debug.onShaderError = () => {
-                throw Error('资源包 Shader 编译或链接失败。');
+                failed = true;
             };
         try {
             renderer.render(surface.scene, surface.camera);
+            if (failed) throw Error('资源包 Shader 编译或链接失败。');
         } finally {
             if (debug) debug.onShaderError = previous;
         }
     }
     dispose() {
         for (const surface of this.surfaces.values()) {
-            surface.geometry.dispose();
+            if (surface.program.geometry === 'triangles') surface.geometry.dispose();
             surface.material.dispose();
             surface.scene.clear();
         }
         this.surfaces.clear();
+        if (this.ownsQuad) this.quadGeometry.dispose();
     }
 }

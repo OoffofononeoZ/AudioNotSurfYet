@@ -1,6 +1,6 @@
 # Visualizer 几何元素与预设
 
-核查日期：2026-10-19。当前定义存于[预设资源](../../public/visualizer-resources/v1/presets)，[资源包V1过渡版](../architecture/visualizer/resource-packages-v1.md)声明控件/目标，[Project V4](../architecture/visualizer/project-format-v4.md)保存预设组及共同值。不再沿用V3“展开后不保留预设身份”的规则。
+核查日期：2026-10-19。当前作者定义存于[资源目录](../../resources/visualizer)，[资源包V2](../architecture/visualizer/resource-packages-v2.md)封装算法/Shader及控件/目标，[Project V5](../architecture/visualizer/project-format-v5.md)保存预设组、共同值和完整算法快照。13个元素/效果及两预设保持迁移前视觉与输入计算。
 
 ## 几何律动
 
@@ -18,7 +18,7 @@ owner于2026-10-16指定复刻Wallpaper Engine workshop 3093808768的geometric v
 
 ## 分组与共同处理参数
 
-V4把预设保留为默认折叠顶层组，移动整组、组内排序、显隐/删除与effect目标清理按工程契约。共同处理控件仅在声明范围内批量写入；单独修改子元素显示差异，再次应用共同值覆盖目标字段。几何律动两种输入分别声明控件，棱镜航行保留其输入/分镜，不把样式常量混作共同处理参数。
+V5继续把预设保留为默认折叠顶层组，移动整组、组内排序、显隐/删除与effect目标清理按工程契约。共同处理控件仅在声明范围内批量写入；单独修改子元素显示差异，再次应用共同值覆盖目标字段。几何律动两种输入分别声明控件，棱镜航行保留其输入/分镜，不把样式常量混作共同处理参数。
 
 ## 验证
 

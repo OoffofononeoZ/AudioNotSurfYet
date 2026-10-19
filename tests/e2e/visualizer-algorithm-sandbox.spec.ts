@@ -60,45 +60,51 @@ test('new algorithm runs behind an opaque-origin boundary with no DOM, network, 
     expect(report).toBe(21);
 });
 
-test('cancellation terminates an infinite algorithm without blocking the main page', async ({ page }) => {
-    await page.goto('/');
-    const result = await page.evaluate(async () => {
-        const runtimePath = '/src/visualizer/isolatedAlgorithmRuntime.ts',
-            identityPath = '/src/visualizer/resourceIdentity.ts';
-        const { IsolatedAlgorithmRuntime, algorithmRuntimeDiagnostics } = await import(runtimePath);
-        const { resourceHash } = await import(identityPath);
-        const algorithm = {
-            id: 'infinite',
-            version: 1,
-            apiVersion: 1,
-            contract: { kind: 'visual', parameters: [], sharedParameters: [], historyParameters: [] },
-            source: 'export function create() { return { prepareFrame() { while(true) {} } }; }',
-            programs: { draw: { geometry: 'quad', vertex: 'void main(){}', fragment: 'void main(){}', uniforms: {} } },
-        };
-        const runtime = new IsolatedAlgorithmRuntime();
-        await runtime.initialize([{ id: 'instance', algorithm: { ...algorithm, hash: resourceHash(algorithm) } }]);
-        const cancel = new AbortController();
-        const pending = runtime.prepareFrames(
-            [
-                {
-                    id: 'instance',
-                    frame: { time: 0, seed: 1, revision: '1', width: 1, height: 1, range: null, parameters: {} },
+for (const mode of ['cancellation', 'timeout'] as const)
+    test(`${mode} terminates an infinite algorithm without blocking the main page`, async ({ page }) => {
+        await page.goto('/');
+        const result = await page.evaluate(async mode => {
+            const runtimePath = '/src/visualizer/isolatedAlgorithmRuntime.ts',
+                identityPath = '/src/visualizer/resourceIdentity.ts';
+            const { IsolatedAlgorithmRuntime, algorithmRuntimeDiagnostics } = await import(runtimePath);
+            const { resourceHash } = await import(identityPath);
+            const algorithm = {
+                id: 'infinite',
+                version: 1,
+                apiVersion: 1,
+                contract: { kind: 'visual', parameters: [], sharedParameters: [], historyParameters: [] },
+                source: 'export function create() { return { prepareFrame() { while(true) {} } }; }',
+                programs: {
+                    draw: { geometry: 'quad', vertex: 'void main(){}', fragment: 'void main(){}', uniforms: {} },
                 },
-            ],
-            async () => [],
-            cancel.signal,
-        );
-        setTimeout(() => cancel.abort(), 100);
-        try {
-            await pending;
-            return 'unexpected success';
-        } catch {
-            return algorithmRuntimeDiagnostics.activeSandboxes === 0 && algorithmRuntimeDiagnostics.activeTasks === 0
-                ? 'cancelled'
-                : 'leak';
-        } finally {
-            runtime.dispose();
-        }
+            };
+            const runtime = new IsolatedAlgorithmRuntime();
+            await runtime.initialize([{ id: 'instance', algorithm: { ...algorithm, hash: resourceHash(algorithm) } }]);
+            const cancel = new AbortController();
+            const pending = runtime.prepareFrames(
+                [
+                    {
+                        id: 'instance',
+                        frame: { time: 0, seed: 1, revision: '1', width: 1, height: 1, range: null, parameters: {} },
+                    },
+                ],
+                async () => [],
+                cancel.signal,
+            );
+            if (mode === 'cancellation') setTimeout(() => cancel.abort(), 100);
+            try {
+                await pending;
+                return 'unexpected success';
+            } catch (error) {
+                if (mode === 'timeout' && !(error instanceof Error && error.message.includes('算法计算超时')))
+                    throw error;
+                return algorithmRuntimeDiagnostics.activeSandboxes === 0 &&
+                    algorithmRuntimeDiagnostics.activeTasks === 0
+                    ? 'cancelled'
+                    : 'leak';
+            } finally {
+                runtime.dispose();
+            }
+        }, mode);
+        expect(result).toBe('cancelled');
     });
-    expect(result).toBe('cancelled');
-});

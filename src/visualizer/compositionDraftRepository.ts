@@ -18,7 +18,7 @@ const done = (tx: IDBTransaction) =>
         tx.oncomplete = () => resolve();
         tx.onabort = tx.onerror = () => reject(tx.error ?? new Error('草稿事务失败。'));
     });
-/** V4 shares the draft key; older envelopes are intentionally ignored. */
+/** V5 shares the draft key; older envelopes are intentionally ignored. */
 export class CompositionDraftRepository implements CompositionDraftRepositoryPort {
     private database: Promise<IDBDatabase> | null = null;
     private readonly factory: IDBFactory;
@@ -50,7 +50,7 @@ export class CompositionDraftRepository implements CompositionDraftRepositoryPor
         const complete = done(tx);
         const stored = await request(tx.objectStore('draft').get('latest'));
         await complete;
-        if (!stored || stored.envelope?.schemaVersion !== 4) return null;
+        if (!stored || stored.envelope?.schemaVersion !== 5) return null;
         try {
             return { kind: 'current', draft: validateCompositionDraft(stored.envelope) };
         } catch {

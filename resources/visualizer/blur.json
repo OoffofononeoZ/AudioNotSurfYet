@@ -1,0 +1,104 @@
+{
+    "format": "audiosurf-visualizer-resource",
+    "schemaVersion": 2,
+    "id": "blur",
+    "version": 2,
+    "algorithms": [
+        {
+            "id": "blur",
+            "version": 1,
+            "apiVersion": 1,
+            "contract": {
+                "kind": "modifier",
+                "inputParameter": "amount",
+                "parameters": [
+                    {
+                        "id": "amount",
+                        "valueKind": "number",
+                        "allowedSourceKinds": ["constant", "analysis"],
+                        "range": {
+                            "min": 0,
+                            "max": 48,
+                            "integer": false,
+                            "editingPrecision": 2
+                        },
+                        "allowedAnalysisComponents": [
+                            "default",
+                            "total",
+                            "specific",
+                            "real",
+                            "imag",
+                            "magnitude",
+                            "phase"
+                        ],
+                        "allowedAnalysisProjections": ["scalar", "mean", "max", "peak", "bin", "band"]
+                    }
+                ],
+                "sharedParameters": [],
+                "historyParameters": []
+            },
+            "entry": "algorithms/blur.mjs",
+            "includes": [],
+            "programs": {
+                "draw": {
+                    "geometry": "quad",
+                    "vertexFile": "shaders/quad.glsl",
+                    "fragmentFile": "shaders/effect.glsl",
+                    "uniforms": {
+                        "uImage": {
+                            "type": "source"
+                        },
+                        "uOperation": {
+                            "type": "int"
+                        },
+                        "uScale": {
+                            "type": "number"
+                        },
+                        "uOpacity": {
+                            "type": "number"
+                        },
+                        "uBlurStep": {
+                            "type": "vec2"
+                        },
+                        "uFinal": {
+                            "type": "boolean"
+                        }
+                    }
+                }
+            }
+        }
+    ],
+    "elements": [
+        {
+            "id": "blur",
+            "version": 2,
+            "kind": "modifier",
+            "title": "模糊",
+            "icon": "blur",
+            "inputParameter": "amount",
+            "parameters": [
+                {
+                    "id": "amount",
+                    "label": "模糊半径",
+                    "defaultValue": 0,
+                    "valueKind": "number",
+                    "allowedSourceKinds": ["constant", "analysis"],
+                    "range": {
+                        "min": 0,
+                        "max": 48,
+                        "integer": false,
+                        "editingPrecision": 2
+                    },
+                    "allowedAnalysisComponents": ["default", "total", "specific", "real", "imag", "magnitude", "phase"],
+                    "allowedAnalysisProjections": ["scalar", "mean", "max", "peak", "bin", "band"]
+                }
+            ],
+            "algorithm": {
+                "id": "blur",
+                "version": 1,
+                "hash": ""
+            }
+        }
+    ],
+    "presets": []
+}

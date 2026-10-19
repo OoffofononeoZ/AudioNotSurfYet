@@ -20,8 +20,6 @@ export function createDefinitionElement(
 ): VisualizerElement {
     return {
         id: crypto.randomUUID(),
-        type: d.kernelId,
-        version: 1,
         resource: resourceRef(d),
         name: d.title,
         enabled: true,
@@ -43,7 +41,9 @@ export function createDefinitionElement(
 export class ElementRegistry {
     private definitions: ElementDefinition[] = [];
     readonly presets: PresetDefinition[] = [];
+    readonly algorithms: import('./algorithmTypes').AlgorithmDefinition[] = [];
     replace(snapshot: ResourceSnapshot) {
+        this.algorithms.splice(0, this.algorithms.length, ...structuredClone(snapshot.algorithms));
         this.definitions.splice(0, this.definitions.length, ...structuredClone(snapshot.elements));
         this.presets.splice(0, this.presets.length, ...structuredClone(snapshot.presets));
     }

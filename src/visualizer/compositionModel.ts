@@ -3,18 +3,20 @@ import type { RangeEventV1 } from '../editor/types';
 import { elementRegistry, findResource } from './elementRegistry';
 import { mergeResources } from './resourceCodec';
 import type { CompositionItem } from './resourceTypes';
-import type { VisualizerElement, VisualizerProjectV4 } from './compositionTypes';
+import type { VisualizerElement, VisualizerProjectV5 } from './compositionTypes';
 import { resourceKey } from './resourceIdentity';
 
-export const elementDescriptor = (project: VisualizerProjectV4, element: VisualizerElement) =>
+export const elementDescriptor = (project: VisualizerProjectV5, element: VisualizerElement) =>
     findResource(project.resources.elements, element.resource);
+export const elementAlgorithm = (project: VisualizerProjectV5, element: VisualizerElement) =>
+    findResource(project.resources.algorithms, elementDescriptor(project, element).algorithm);
 export const orderedElements = (elements: readonly VisualizerElement[]) =>
     elements
         .map((element, index) => ({ element, index }))
         .sort((a, b) => a.element.layer - b.element.layer || a.index - b.index)
         .map(e => e.element);
-const effectiveCache = new WeakMap<VisualizerProjectV4, VisualizerElement[]>();
-export function effectiveElements(project: VisualizerProjectV4): VisualizerElement[] {
+const effectiveCache = new WeakMap<VisualizerProjectV5, VisualizerElement[]>();
+export function effectiveElements(project: VisualizerProjectV5): VisualizerElement[] {
     let elements = effectiveCache.get(project);
     if (!elements) {
         const hidden = new Set(project.items.flatMap(i => (i.kind === 'preset' && !i.enabled ? i.children : [])));
@@ -23,7 +25,7 @@ export function effectiveElements(project: VisualizerProjectV4): VisualizerEleme
     }
     return elements;
 }
-export function synchronizeLayers(project: VisualizerProjectV4): VisualizerProjectV4 {
+export function synchronizeLayers(project: VisualizerProjectV5): VisualizerProjectV5 {
     const ids = project.items.flatMap(i => (i.kind === 'preset' ? i.children : [i.id])),
         byId = new Map(project.elements.map(e => [e.id, e]));
     return {
@@ -35,16 +37,20 @@ export function synchronizeLayers(project: VisualizerProjectV4): VisualizerProje
         }),
     };
 }
-export function pruneCompositionResources(project: VisualizerProjectV4): VisualizerProjectV4 {
+export function pruneCompositionResources(project: VisualizerProjectV5): VisualizerProjectV5 {
     const presets = new Set(project.items.flatMap(i => (i.kind === 'preset' ? [resourceKey(i.resource)] : [])));
     const definitions = project.resources.presets.filter(p => presets.has(resourceKey(p)));
     const elements = new Set([
         ...project.elements.map(e => resourceKey(e.resource)),
         ...definitions.flatMap(d => d.elements.map(e => resourceKey(e.element))),
     ]);
+    const algorithms = new Set(
+        project.resources.elements.filter(e => elements.has(resourceKey(e))).map(e => resourceKey(e.algorithm)),
+    );
     return {
         ...project,
         resources: {
+            algorithms: project.resources.algorithms.filter(a => algorithms.has(resourceKey(a))),
             elements: project.resources.elements.filter(e => elements.has(resourceKey(e))),
             presets: definitions,
         },
@@ -52,21 +58,24 @@ export function pruneCompositionResources(project: VisualizerProjectV4): Visuali
 }
 /** Explicit authoring helper, also used by fixtures; validation never invents membership or definitions. */
 export function appendStandaloneElements(
-    project: VisualizerProjectV4,
+    project: VisualizerProjectV5,
     elements: VisualizerElement[],
-): VisualizerProjectV4 {
+): VisualizerProjectV5 {
     return synchronizeLayers({
         ...project,
         elements: [...project.elements, ...elements],
         items: [...project.items, ...elements.map(e => ({ kind: 'element' as const, id: e.id }))],
         resources: mergeResources(project.resources, {
+            algorithms: elements.map(e =>
+                findResource(elementRegistry.algorithms, elementRegistry.get(e.resource).algorithm),
+            ),
             elements: elements.map(e => elementRegistry.get(e.resource)),
             presets: [],
         }),
     });
 }
 export function elementRange(
-    project: VisualizerProjectV4,
+    project: VisualizerProjectV5,
     element: VisualizerElement,
 ): Pick<RangeEventV1, 'startSeconds' | 'endSeconds'> | null {
     const t = element.timing;
@@ -75,7 +84,7 @@ export function elementRange(
     const lane = project.editorSnapshot?.project.lanes.find(l => l.id === t.laneId);
     return lane?.eventKind === 'range' ? (lane.events.find(e => e.id === t.eventId) ?? null) : null;
 }
-export function planCompositionFeatures(project: VisualizerProjectV4, includeDisabled = false): FeatureId[] {
+export function planCompositionFeatures(project: VisualizerProjectV5, includeDisabled = false): FeatureId[] {
     const requested = new Set<FeatureId>();
     for (const e of includeDisabled ? project.elements : effectiveElements(project)) {
         if (!e.enabled && !includeDisabled) continue;
@@ -85,7 +94,7 @@ export function planCompositionFeatures(project: VisualizerProjectV4, includeDis
     if (result.length > 4) throw Error('一个工程最多使用四个不同的 Analyzer 特征。');
     return result;
 }
-export function compositionIssues(project: VisualizerProjectV4): string[] {
+export function compositionIssues(project: VisualizerProjectV5): string[] {
     const issues: string[] = [];
     for (const e of effectiveElements(project).filter(e => e.enabled)) {
         if (!elementRange(project, e)) issues.push(e.name + '：请选择范围标记');
@@ -95,7 +104,7 @@ export function compositionIssues(project: VisualizerProjectV4): string[] {
     }
     return issues;
 }
-export function removeCompositionElement(project: VisualizerProjectV4, id: string): VisualizerProjectV4 {
+export function removeCompositionElement(project: VisualizerProjectV5, id: string): VisualizerProjectV5 {
     const result = structuredClone(project),
         group = result.items.find(i => i.kind === 'preset' && i.id === id);
     const removed = new Set(group?.kind === 'preset' ? group.children : [id]);
@@ -116,10 +125,10 @@ export function removeCompositionElement(project: VisualizerProjectV4, id: strin
     return synchronizeLayers(result);
 }
 export function reorderComposition(
-    project: VisualizerProjectV4,
+    project: VisualizerProjectV5,
     topFirstIds: readonly string[],
     parentId?: string,
-): VisualizerProjectV4 {
+): VisualizerProjectV5 {
     const result = structuredClone(project),
         group = parentId ? result.items.find(i => i.id === parentId && i.kind === 'preset') : null;
     if (parentId && group?.kind !== 'preset') throw Error('预设不存在。');

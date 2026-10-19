@@ -1,45 +1,10 @@
-import { createHash } from 'node:crypto';
 import { readFileSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
-import { compileExecutableCatalog } from './lib/visualizer-resource-v2.mjs';
+import { compileExecutableCatalog, canonical, sealExecutablePackages } from './lib/visualizer-resource-v2.mjs';
 
-function canonical(value) {
-    if (value === null || typeof value !== 'object') return JSON.stringify(value);
-    if (Array.isArray(value)) return '[' + value.map(canonical).join(',') + ']';
-    return (
-        '{' +
-        Object.keys(value)
-            .sort()
-            .map(key => JSON.stringify(key) + ':' + canonical(value[key]))
-            .join(',') +
-        '}'
-    );
-}
 export function sealPackage(input) {
-    const pack = structuredClone(input);
-    if (
-        pack?.format !== 'audiosurf-visualizer-resource' ||
-        pack.schemaVersion !== 1 ||
-        !Array.isArray(pack.elements) ||
-        !Array.isArray(pack.presets)
-    )
-        throw Error('Expected a VisualizerResourcePackageV1 JSON file.');
-    const seal = definition => {
-        delete definition.hash;
-        definition.hash = createHash('sha256').update(canonical(definition)).digest('hex');
-    };
-    for (const definition of pack.elements) seal(definition);
-    for (const preset of pack.presets) {
-        for (const child of preset.elements) {
-            const definition = pack.elements.find(
-                e => e.id === child.element.id && e.version === child.element.version,
-            );
-            if (definition) child.element = { id: definition.id, version: definition.version, hash: definition.hash };
-        }
-        seal(preset);
-    }
-    return pack;
+    return sealExecutablePackages([input])[0];
 }
 function main(args) {
     if (args[0] === '--build' || args[0] === '--check-build') {

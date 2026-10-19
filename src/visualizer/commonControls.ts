@@ -1,10 +1,11 @@
-import { kernelContracts } from './kernelContracts';
+import { findResource } from './elementRegistry';
+import type { AlgorithmDefinition } from './algorithmTypes';
 import { canonicalJson } from './resourceIdentity';
 import { validateElementBinding } from './elementBindings';
 import { defaultNumericTransform, compatibleAnalysisFeatures, createDefaultAnalysisBinding } from './bindingDefaults';
 import { invalid, keys, record, text } from './projectValidation';
 import type { CommonControl, CommonValue, ElementDefinition, PresetInstance } from './resourceTypes';
-import type { ElementBinding, VisualizerElement, VisualizerProjectV4 } from './compositionTypes';
+import type { ElementBinding, VisualizerElement, VisualizerProjectV5 } from './compositionTypes';
 import type { VisualizerNumericTransformV1 } from './types';
 
 const transformFields = [
@@ -22,13 +23,14 @@ export function controlBinding(
     binding: ElementBinding,
     value: CommonValue,
     definition: ElementDefinition,
+    algorithms: readonly AlgorithmDefinition[],
 ): ElementBinding {
     const parameter = definition.parameters.find(p => p.id === control.parameterId);
     if (!parameter) return invalid('共同参数不存在。');
-    const kernel = kernelContracts[definition.kernelId];
+    const kernel = findResource(algorithms, definition.algorithm).contract;
     let candidate: unknown;
     if (control.kind === 'value') {
-        if (!['sensitivity', 'decay'].includes(parameter.id) || parameter.valueKind !== 'number')
+        if (!kernel.sharedParameters.includes(parameter.id) || parameter.valueKind !== 'number')
             return invalid('样式参数不能作为预设共同参数。');
         candidate = { parameterId: parameter.id, source: { kind: 'constant', value } };
     } else if (control.kind === 'binding') {
@@ -69,6 +71,7 @@ export function commonValue(control: CommonControl, binding: ElementBinding, def
 export function validateCommonControls(
     input: unknown,
     targets: Map<string, { definition: ElementDefinition; bindings: ElementBinding[] }>,
+    algorithms: readonly AlgorithmDefinition[],
 ): CommonControl[] {
     if (!Array.isArray(input)) return invalid('共同参数必须为列表。');
     const ids = new Set<string>(),
@@ -124,12 +127,12 @@ export function validateCommonControls(
                           compatibleAnalysisFeatures(parameter)[0]!,
                       ) as ElementBinding)
                     : binding;
-            controlBinding(control, probe, control.value, t.definition);
+            controlBinding(control, probe, control.value, t.definition, algorithms);
         }
         return control;
     });
 }
-export function changedControlElements(project: VisualizerProjectV4, control: CommonControl): VisualizerElement[] {
+export function changedControlElements(project: VisualizerProjectV5, control: CommonControl): VisualizerElement[] {
     return control.targets.flatMap(id => {
         const element = project.elements.find(e => e.id === id);
         if (!element) return [];
@@ -146,11 +149,11 @@ export function changedControlElements(project: VisualizerProjectV4, control: Co
     });
 }
 export function applyCommonControl(
-    project: VisualizerProjectV4,
+    project: VisualizerProjectV5,
     preset: PresetInstance,
     id: string,
     value: CommonValue,
-): VisualizerProjectV4 {
+): VisualizerProjectV5 {
     const result = structuredClone(project),
         group = result.items.find(i => i.kind === 'preset' && i.id === preset.id);
     if (group?.kind !== 'preset') return invalid('预设不存在。');
@@ -162,7 +165,9 @@ export function applyCommonControl(
             d => d.hash === e.resource.hash && d.id === e.resource.id && d.version === e.resource.version,
         )!;
         e.bindings = e.bindings.map(b =>
-            b.parameterId === control.parameterId ? controlBinding(control, b, value, definition) : b,
+            b.parameterId === control.parameterId
+                ? controlBinding(control, b, value, definition, project.resources.algorithms)
+                : b,
         );
     }
     control.value = structuredClone(value);

@@ -109,8 +109,8 @@ import AppNumberInput from '../controls/AppNumberInput.vue';
 import VisualizerIcon from './VisualizerIcon.vue';
 import VisualizerParameterField from './VisualizerParameterField.vue';
 import { elementDescriptor, elementRange } from '../../visualizer/compositionModel';
-import type { ElementBinding, VisualizerElement, VisualizerProjectV4 } from '../../visualizer/compositionTypes';
-const props = defineProps<{ project: VisualizerProjectV4; element: VisualizerElement | null; locked: boolean }>();
+import type { ElementBinding, VisualizerElement, VisualizerProjectV5 } from '../../visualizer/compositionTypes';
+const props = defineProps<{ project: VisualizerProjectV5; element: VisualizerElement | null; locked: boolean }>();
 const emit = defineEmits<{ update: [patch: Partial<VisualizerElement>]; binding: [binding: ElementBinding] }>();
 const descriptor = computed(() => (props.element ? elementDescriptor(props.project, props.element) : null));
 const kindLabel = computed(

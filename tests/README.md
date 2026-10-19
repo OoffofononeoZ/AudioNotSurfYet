@@ -99,7 +99,7 @@ Node24.18.0/npm11.x，依赖版本以lockfile为准；浏览器专项使用真�
 | `npm run test:e10:integration` | E10 整批 autosave、刷新、JSON V1 round-trip 与模式外行为隔离 |
 | `npm run test:e2e:e10:chrome` / `test:e2e:e10:edge` | 真实 Chrome/Edge 的紧凑拍号、区间操作 pointer/键盘与深色离页 dialog |
 | `npm run test:e2e:e10` | 顺序执行真实 Chrome 与 Edge 的 E10 专项；环境阻断时只记 unverified |
-| `npm run test:visualizer` | 当前 Project V4资源/分组 strict codec、原子组合/解析/渲染、会话、保存失败与异步失效，以及共享 host/离线导出专项 |
+| `npm run test:visualizer` | 当前 Project V5资源/分组 strict codec、原子组合/解析/渲染、会话、保存失败与异步失效，以及共享 host/离线导出专项 |
 | `npm run test:e2e:visualizer` | Chrome/Edge 当前元素工作区、布局、GPU 像素、全屏、离线编码、换歌/草稿保护、资源释放和保存取消；短 WebM 保留在本地 artifacts/visualizer-composition/ |
 | `npm run test:e2e:visualizer-layout` | 顺序执行 Chrome/Edge 当前原子元素一屏工作台、双侧滚动隔离、compact drawer 与共享 scrollbar 专项 |
 | `npm run test:e2e:edge` | 使用真实 Edge 执行全部 M3–M11 E2E；缺失时明确 blocked |
@@ -162,7 +162,7 @@ Node24.18.0/npm11.x，依赖版本以lockfile为准；浏览器专项使用真�
 - `tests/harness/`：被正常 Vitest 配置排除的 deliberate failure 及其自检。
 - `tests/scripts/`：浏览器检测和 M3–M14、Editor、Visualizer run orchestration。
 - `tests/editor/`：Editor 工程格式、草稿、lease 和 session controller 的里程碑专项测试。
-- `tests/visualizer/`：Project V4资源/分组 codec/引用、确定性元素合成、RendererHost、离线导出状态机与当前生命周期回归。
+- `tests/visualizer/`：Project V5资源/分组 codec/引用、确定性元素合成、RendererHost、离线导出状态机与当前生命周期回归。
 
 受控fixture、DEV bridge与oracle按各领域validation维护；历史逐阶段执行记录从evidence或Git查回，不作为当前UI规则。
 

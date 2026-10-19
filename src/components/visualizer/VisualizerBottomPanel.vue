@@ -144,11 +144,11 @@ import AppSelect from '../controls/AppSelect.vue';
 import AppNumberInput from '../controls/AppNumberInput.vue';
 import { compositionIssues } from '../../visualizer/compositionModel';
 import { useExportCapabilities } from '../../visualizer/useExportCapabilities';
-import type { CompositionSessionSnapshot, VisualizerProjectV4 } from '../../visualizer/compositionTypes';
+import type { CompositionSessionSnapshot, VisualizerProjectV5 } from '../../visualizer/compositionTypes';
 import type { VisualizerResolution, VisualizerFrameRate } from '../../visualizer/types';
 const props = defineProps<{
     snapshot: CompositionSessionSnapshot;
-    project: VisualizerProjectV4;
+    project: VisualizerProjectV5;
     locked: boolean;
     error: string;
 }>();

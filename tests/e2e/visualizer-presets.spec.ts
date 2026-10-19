@@ -3,7 +3,7 @@ import path from 'node:path';
 import { mkdir, writeFile } from 'node:fs/promises';
 import { chooseFiles, installFilePickerStub, savedPickerEntries, queuePickerData } from '../support/file-picker';
 import { installV6ResourceProbe, readV6ResourceProbe } from '../support/v6-resource-probe';
-import type { VisualizerProjectV4 } from '../../src/visualizer/compositionTypes';
+import type { VisualizerProjectV5 } from '../../src/visualizer/compositionTypes';
 import { createOutputSyncWav } from '../support/visualizer-output-sync';
 const audio = path.resolve(import.meta.dirname, '../fixtures/audio/visualizer-v5-avsync-v1.wav');
 async function open(page: Page, file = audio) {
@@ -16,15 +16,16 @@ async function open(page: Page, file = audio) {
     if ((await page.locator('#music-bar-container').getAttribute('data-playback-state')) === 'playing')
         await page.getByTestId('toggle-playback').click();
 }
-async function exported(page: Page): Promise<VisualizerProjectV4> {
+async function exported(page: Page): Promise<VisualizerProjectV5> {
     const count = (await savedPickerEntries(page)).length;
     await page.getByTestId('export-visualizer-project').click();
     await expect.poll(async () => (await savedPickerEntries(page)).length).toBe(count + 1);
     return JSON.parse(Buffer.from((await savedPickerEntries(page)).at(-1)!.base64, 'base64').toString('utf8'));
 }
-async function importProject(page: Page, p: VisualizerProjectV4) {
+async function importProject(page: Page, p: VisualizerProjectV5) {
     await queuePickerData(page, [{ name: 'preset.json', mimeType: 'application/json', text: JSON.stringify(p) }]);
     await page.getByTestId('import-visualizer-project').click();
+    await expect(page.getByTestId('import-visualizer-project')).toHaveAttribute('aria-busy', 'false');
     await expect(page.getByTestId('visualizer-preview-frame')).toHaveAttribute('data-scene-status', 'ready');
 }
 async function expandPresets(page: Page) {
@@ -93,7 +94,7 @@ test('native input lists available Web Audio features, persists changes and seek
     await expect(page.getByTestId('visualizer-preview-canvas')).toHaveAttribute('data-native-input-state', 'ready');
     expect(
         (await exported(page)).elements
-            .find(e => e.type === 'radial-spectrum')!
+            .find(e => e.resource.id === 'radial-spectrum')!
             .bindings.find(b => b.parameterId === 'spectrum')!.source,
     ).toEqual({ kind: 'native', featureId: 'waveform' });
     await source.selectOption('analysis');
@@ -212,7 +213,7 @@ test('market applies the geometric preset, edits it, restores it and renders sil
     await preset(page, 'geometric-0.6');
     await expect(page.locator('.viz-element-row[data-element-id]')).toHaveCount(11);
     const p = await exported(page);
-    expect(p.elements.filter(e => e.type === 'radial-spectrum')).toHaveLength(2);
+    expect(p.elements.filter(e => e.resource.id === 'radial-spectrum')).toHaveLength(2);
     const spectra = p.elements.flatMap(e =>
         e.bindings.filter(b => b.parameterId === 'spectrum').map(b => ({ name: e.name, source: b.source })),
     );

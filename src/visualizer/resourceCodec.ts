@@ -1,4 +1,5 @@
-import { kernelContracts } from './kernelContracts';
+import { validateAlgorithmDefinition } from './algorithmCodec';
+import type { AlgorithmDefinition } from './algorithmTypes';
 import { validateElementBinding, validateElementBindings } from './elementBindings';
 import { commonValue, validateCommonControls } from './commonControls';
 import { canonicalJson, resourceHash, resourceKey, sameResource } from './resourceIdentity';
@@ -9,9 +10,8 @@ import type {
     PresetDefinition,
     ResourceRef,
     ResourceSnapshot,
-    VisualizerResourcePackageV1,
+    VisualizerResourcePackageV2,
 } from './resourceTypes';
-import type { ElementType } from './compositionTypes';
 import { roundEditingValue } from '../utils/numberEditing';
 
 const icons = [
@@ -125,29 +125,21 @@ function parameter(
     }
     return result;
 }
-function elementDefinition(input: unknown): ElementDefinition {
+function elementDefinition(input: unknown, algorithms: AlgorithmDefinition[]): ElementDefinition {
     const v = record(input, '元素定义');
-    keys(
-        v,
-        ['id', 'version', 'hash', 'kernelId', 'kernelVersion', 'kind', 'title', 'icon', 'parameters'],
-        ['inputParameter'],
-    );
+    keys(v, ['id', 'version', 'hash', 'algorithm', 'kind', 'title', 'icon', 'parameters'], ['inputParameter']);
     const ref = identity(v);
-    if (
-        typeof v.kernelId !== 'string' ||
-        !Object.prototype.hasOwnProperty.call(kernelContracts, v.kernelId) ||
-        v.kernelVersion !== 1
-    )
-        return invalid('绘制内核或版本不受支持。');
-    const kernel = kernelContracts[v.kernelId as ElementType];
+    const algorithm = validateResourceRef(v.algorithm),
+        definition = algorithms.find(a => sameResource(a, algorithm));
+    if (!definition) return invalid('绘制算法依赖缺失。');
+    const kernel = definition.contract;
     if (v.kind !== kernel.kind || v.inputParameter !== kernel.inputParameter || !icons.includes(String(v.icon)))
         return invalid('元素种类、输入或图标无效。');
     if (!Array.isArray(v.parameters) || v.parameters.length !== kernel.parameters.length)
         return invalid('元素参数定义不完整。');
     return {
         ...ref,
-        kernelId: v.kernelId as ElementType,
-        kernelVersion: 1,
+        algorithm,
         kind: kernel.kind,
         title: text(v.title, '元素名称'),
         icon: String(v.icon),
@@ -156,9 +148,9 @@ function elementDefinition(input: unknown): ElementDefinition {
     };
 }
 export function mergeResources(...snapshots: ResourceSnapshot[]): ResourceSnapshot {
-    const result: ResourceSnapshot = { elements: [], presets: [] };
-    for (const field of ['elements', 'presets'] as const) {
-        const entries = new Map<string, ElementDefinition | PresetDefinition>();
+    const result: ResourceSnapshot = { algorithms: [], elements: [], presets: [] };
+    for (const field of ['algorithms', 'elements', 'presets'] as const) {
+        const entries = new Map<string, ResourceRef>();
         for (const snapshot of snapshots)
             for (const definition of snapshot[field]) {
                 const key = definition.id + '@' + definition.version,
@@ -167,11 +159,15 @@ export function mergeResources(...snapshots: ResourceSnapshot[]): ResourceSnapsh
                     return invalid('同一资源 ID 与版本对应了不同内容。');
                 entries.set(key, definition);
             }
-        (result[field] as (ElementDefinition | PresetDefinition)[]).push(...entries.values());
+        Object.assign(result, { [field]: [...entries.values()] });
     }
     return result;
 }
-function presetDefinition(input: unknown, elements: ElementDefinition[]): PresetDefinition {
+function presetDefinition(
+    input: unknown,
+    elements: ElementDefinition[],
+    algorithms: AlgorithmDefinition[],
+): PresetDefinition {
     const v = record(input, '预设定义');
     keys(v, ['id', 'version', 'hash', 'title', 'description', 'preview', 'elements', 'controls']);
     const ref = identity(v);
@@ -237,7 +233,7 @@ function presetDefinition(input: unknown, elements: ElementDefinition[]): Preset
                 return invalid('预设内部效果引用无效。');
         }
     }
-    const controls = validateCommonControls(v.controls, targets);
+    const controls = validateCommonControls(v.controls, targets, algorithms);
     for (const control of controls)
         for (const key of control.targets) {
             const t = targets.get(key)!;
@@ -267,27 +263,33 @@ function presetDefinition(input: unknown, elements: ElementDefinition[]): Preset
 }
 export function validateResourceSnapshot(
     input: unknown,
-    base: ResourceSnapshot = { elements: [], presets: [] },
+    base: ResourceSnapshot = { algorithms: [], elements: [], presets: [] },
 ): ResourceSnapshot {
     const v = record(input, '资源快照');
-    keys(v, ['elements', 'presets']);
+    keys(v, ['algorithms', 'elements', 'presets']);
     if (!Array.isArray(v.elements) || !Array.isArray(v.presets)) return invalid('资源定义必须为列表。');
-    const elements = v.elements.map(elementDefinition),
-        all = mergeResources(base, { elements, presets: [] });
-    const presets = v.presets.map(p => presetDefinition(p, all.elements));
-    mergeResources(all, { elements: [], presets });
-    return { elements, presets };
+    if (!Array.isArray(v.algorithms)) return invalid('算法定义必须为列表。');
+    const algorithms = v.algorithms.map(validateAlgorithmDefinition);
+    const combined = mergeResources(base, { algorithms, elements: [], presets: [] });
+    const elements = v.elements.map(e => elementDefinition(e, combined.algorithms));
+    const all = mergeResources(combined, { algorithms: [], elements, presets: [] });
+    const presets = v.presets.map(p => presetDefinition(p, all.elements, all.algorithms));
+    mergeResources(all, { algorithms: [], elements: [], presets });
+    return { algorithms, elements, presets };
 }
-export function validateResourcePackage(input: unknown, base?: ResourceSnapshot): VisualizerResourcePackageV1 {
+export function validateResourcePackage(input: unknown, base?: ResourceSnapshot): VisualizerResourcePackageV2 {
     const v = record(input, '资源包');
-    keys(v, ['format', 'schemaVersion', 'id', 'version', 'elements', 'presets']);
-    if (v.format !== 'audiosurf-visualizer-resource' || v.schemaVersion !== 1)
+    keys(v, ['format', 'schemaVersion', 'id', 'version', 'algorithms', 'elements', 'presets']);
+    if (v.format !== 'audiosurf-visualizer-resource' || v.schemaVersion !== 2)
         return invalid('资源包格式或版本不支持。');
-    const snapshot = validateResourceSnapshot({ elements: v.elements, presets: v.presets }, base);
+    const snapshot = validateResourceSnapshot(
+        { algorithms: v.algorithms, elements: v.elements, presets: v.presets },
+        base,
+    );
     if (!snapshot.elements.length && !snapshot.presets.length) return invalid('资源包不能为空。');
     return {
         format: 'audiosurf-visualizer-resource',
-        schemaVersion: 1,
+        schemaVersion: 2,
         id: name(v.id),
         version: version(v.version),
         ...snapshot,

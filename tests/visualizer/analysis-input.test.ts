@@ -11,7 +11,7 @@ import { CompositionResolver } from '../../src/visualizer/compositionResolver';
 import { createComposition, validateComposition } from '../../src/visualizer/compositionCodec';
 import { elementRegistry } from '../../src/visualizer/elementRegistry';
 import { analysisVectorLength } from '../../src/visualizer/bindingDefaults';
-import { spectrumBands } from '../../src/visualizer/spectralStringsState';
+import { spectrumBands } from '../../resources/visualizer/shared/strings.js';
 
 const track = { contentHash: 'a'.repeat(64), fileName: 'input.wav', durationSeconds: 2, sampleRate: 48000 };
 const series = (

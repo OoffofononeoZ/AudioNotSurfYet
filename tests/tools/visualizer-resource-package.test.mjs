@@ -10,10 +10,19 @@ import { sealPackage } from '../../scripts/visualizer-resource-package.mjs';
 const tool = fileURLToPath(new URL('../../scripts/visualizer-resource-package.mjs', import.meta.url));
 const input = () => ({
     format: 'audiosurf-visualizer-resource',
-    schemaVersion: 1,
+    schemaVersion: 2,
     id: 'example',
     version: 1,
-    elements: [{ id: 'element', version: 1, title: 'sample', hash: 'old' }],
+    algorithms: [{ id: 'algorithm', version: 1, source: 'export function create() {}', hash: 'old' }],
+    elements: [
+        {
+            id: 'element',
+            version: 1,
+            title: 'sample',
+            hash: 'old',
+            algorithm: { id: 'algorithm', version: 1, hash: 'old' },
+        },
+    ],
     presets: [
         { id: 'preset', version: 1, elements: [{ element: { id: 'element', version: 1, hash: 'old' } }], hash: 'old' },
     ],
