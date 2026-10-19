@@ -12,7 +12,7 @@
         tabindex="0"
         role="application"
         :aria-keyshortcuts="shortcut"
-        :aria-label="`${lane.name} 标记区域；${shortcut ? `播放时按 ${shortcut} ${lane.eventKind === 'range' ? '按住录入范围' : '添加点标记'}；` : ''}暂停后在播放线右侧编辑，回车创建，右键标记删除`"
+        :aria-label="`${lane.name} 标记区域；${shortcut ? `播放时按 ${shortcut} ${lane.eventKind === 'range' ? '按住录入范围' : '添加点标记'}；` : ''}暂停后可编辑整条轨道，回车创建，右键标记删除`"
         @focus="editing.focus(row, surface?.clientWidth ?? 0)"
         @keydown="editing.key($event, row)"
         @pointerdown="editing.down($event, row)"
@@ -182,7 +182,7 @@ watch(events, next => {
 });
 const endpointVisible = (time: number) =>
     props.view.editable &&
-    time >= props.view.cursorSeconds &&
+    time >= Math.max(0, props.view.startSeconds) &&
     time <= Math.min(props.view.endSeconds, props.view.durationSeconds);
 function selectEvent(event: PointEventV1 | RangeEventV1) {
     if (markerEventReachable(props.view, event)) props.editing.selected.value = event.id;

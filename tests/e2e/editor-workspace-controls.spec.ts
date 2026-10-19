@@ -1,5 +1,11 @@
 import { expect, test } from '@playwright/test';
-import { prepareMarkerEditor } from '../support/editor-marking';
+import {
+    prepareMarkerEditor,
+    addMarkerLane,
+    clickMarkerTime,
+    markerSurface,
+    seekMarkerEditor,
+} from '../support/editor-marking';
 import { openEditorWorkspace } from '../support/editor-workspaces';
 
 test('marking has no outer padding, processing retains padding and BPM columns share the available width', async ({
@@ -36,6 +42,38 @@ test('marking has no outer padding, processing retains padding and BPM columns s
             await expect(page.locator('.editor-shell')).toHaveCSS('padding', width <= 600 ? '12px' : '16px');
         }
     }
+});
+
+test('paused marker operations work inside the retained left mask', async ({ page }) => {
+    await prepareMarkerEditor(page);
+    await addMarkerLane(page, 'point');
+    await addMarkerLane(page, 'range');
+    await seekMarkerEditor(page, 2);
+    const point = markerSurface(page, 'point'),
+        range = markerSurface(page, 'range');
+    const mask = await point.evaluate(element => getComputedStyle(element, '::before').backgroundColor);
+    expect(mask).not.toBe('rgba(0, 0, 0, 0)');
+    await clickMarkerTime(point, 1.5);
+    const marker = page.locator('[data-testid^="point-marker-"]').first();
+    await marker.focus();
+    await page.keyboard.press('Alt+ArrowLeft');
+    await expect(marker).toHaveAttribute('data-time-seconds', '1.375');
+    await clickMarkerTime(range, 0.75);
+    await clickMarkerTime(range, 1.25);
+    const block = page.locator('[data-testid^="range-marker-"]').first();
+    const start = page.locator('[data-testid^="range-start-handle-"]').first();
+    await start.focus();
+    await page.keyboard.press('ArrowLeft');
+    await expect(block).toHaveAttribute('data-start-seconds', '0.625');
+    await clickMarkerTime(point, 1.375, 'right');
+    await expect(marker).toHaveCount(0);
+    await block.focus();
+    await page.keyboard.press('Delete');
+    await expect(block).toHaveCount(0);
+    await seekMarkerEditor(page, 0);
+    await clickMarkerTime(point, -0.1);
+    await expect(page.locator('[data-testid^="point-marker-"]')).toHaveCount(0);
+    expect(await point.evaluate(element => getComputedStyle(element, '::before').backgroundColor)).toBe(mask);
 });
 
 test('BPM calculator estimates after two taps, stays independent of playback and applies explicitly', async ({

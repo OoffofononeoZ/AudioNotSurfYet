@@ -66,11 +66,10 @@ test('fixed playhead, separate zoom, paused boundary and playback without draft 
     await expect(page.getByTestId('marker-span')).not.toHaveText('10.00 秒');
     await expect(page.getByTestId('editor-viewport-state')).toHaveText(state!);
     await seek(page, 1);
-    await clickTime(page, 'marker', 0.5, 'right');
     const history = page.locator('[data-testid^="point-marker-"][data-time-seconds="0.5"]');
     await history.focus();
     await page.keyboard.press('Delete');
-    await expect(history).toHaveCount(1);
+    await expect(history).toHaveCount(0);
     await clickTime(page, 'marker', 0.6);
     await expect(page.locator('[data-testid^="point-marker-"]')).toHaveCount(2);
     await expect(page.getByTestId('editor-save-state')).toHaveText(/已保存/);

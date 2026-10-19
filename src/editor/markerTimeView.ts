@@ -1,11 +1,12 @@
-import { pointCellAtTime, movePointCell, type PointCell } from './pointAnnotations';
+import { pointCellAtTime, type PointCell } from './pointAnnotations';
 import { DEFAULT_BEAT_SNAP, type EditorBeatSnapSetting } from './beatSnap';
 import { collectMarkerBlockEvents, type MarkerBlockSelection } from './markerBlockOperations';
 import type { EditorProjectV1, PointEventV1, RangeEventV1 } from './types';
 
-export const MARKER_PLAYHEAD_RATIO = .15;
+export const MARKER_PLAYHEAD_RATIO = 0.15;
 export const DEFAULT_MARKER_SPAN = 10;
-export const normalizeMarkerSpan = (span: number): number => Number.isFinite(span) ? Math.min(10, Math.max(1, span)) : DEFAULT_MARKER_SPAN;
+export const normalizeMarkerSpan = (span: number): number =>
+    Number.isFinite(span) ? Math.min(10, Math.max(1, span)) : DEFAULT_MARKER_SPAN;
 
 /** Runtime geometry only. Never persist this moving window in workspace.viewport. */
 export interface MarkerTimeView {
@@ -19,48 +20,94 @@ export interface MarkerTimeView {
     readonly zoom: number;
 }
 
-export function createMarkerTimeView(cursor: number, duration: number, span = DEFAULT_MARKER_SPAN, playing = false): MarkerTimeView {
+export function createMarkerTimeView(
+    cursor: number,
+    duration: number,
+    span = DEFAULT_MARKER_SPAN,
+    playing = false,
+): MarkerTimeView {
     const durationSeconds = Number.isFinite(duration) ? Math.max(0, duration) : 0;
     const cursorSeconds = Math.min(durationSeconds, Math.max(0, Number.isFinite(cursor) ? cursor : 0));
     const spanSeconds = normalizeMarkerSpan(span);
     const startSeconds = cursorSeconds - MARKER_PLAYHEAD_RATIO * spanSeconds;
-    return Object.freeze({ startSeconds, endSeconds: startSeconds + spanSeconds, spanSeconds, cursorSeconds,
-        durationSeconds, playheadRatio: MARKER_PLAYHEAD_RATIO, editable: !playing, zoom: durationSeconds / spanSeconds });
+    return Object.freeze({
+        startSeconds,
+        endSeconds: startSeconds + spanSeconds,
+        spanSeconds,
+        cursorSeconds,
+        durationSeconds,
+        playheadRatio: MARKER_PLAYHEAD_RATIO,
+        editable: !playing,
+        zoom: durationSeconds / spanSeconds,
+    });
 }
 
-export const markerTimeToX = (time: number, view: MarkerTimeView, width: number): number => (time - view.startSeconds) / view.spanSeconds * width;
-export const markerXToTime = (x: number, view: MarkerTimeView, width: number): number => view.startSeconds + (width > 0 ? x / width : 0) * view.spanSeconds;
-export const markerCanEditAt = (view: MarkerTimeView, time: number): boolean => view.editable && Number.isFinite(time)
-    && time >= view.cursorSeconds && time <= view.durationSeconds && time <= view.endSeconds;
-export const markerEventReachable = (view: MarkerTimeView, event: PointEventV1 | RangeEventV1): boolean => view.editable
-    && ('atSeconds' in event ? event.atSeconds >= view.cursorSeconds : event.endSeconds > view.cursorSeconds);
+export const markerTimeToX = (time: number, view: MarkerTimeView, width: number): number =>
+    ((time - view.startSeconds) / view.spanSeconds) * width;
+export const markerXToTime = (x: number, view: MarkerTimeView, width: number): number =>
+    view.startSeconds + (width > 0 ? x / width : 0) * view.spanSeconds;
+export const markerCanEditAt = (view: MarkerTimeView, time: number): boolean =>
+    view.editable &&
+    Number.isFinite(time) &&
+    time >= Math.max(0, view.startSeconds) &&
+    time <= view.durationSeconds &&
+    time <= view.endSeconds;
+export const markerEventReachable = (view: MarkerTimeView, event: PointEventV1 | RangeEventV1): boolean =>
+    view.editable &&
+    ('atSeconds' in event
+        ? event.atSeconds >= Math.max(0, view.startSeconds) &&
+          event.atSeconds <= Math.min(view.durationSeconds, view.endSeconds)
+        : event.endSeconds > Math.max(0, view.startSeconds) && event.startSeconds < view.endSeconds);
 
 /** The pointer must be in the editable area before snapping; never clamp song padding into an event. */
-export function markerCellAtTime(raw: number, project: EditorProjectV1, view: MarkerTimeView, width: number,
-    setting: Readonly<EditorBeatSnapSetting> = DEFAULT_BEAT_SNAP): PointCell | null {
+export function markerCellAtTime(
+    raw: number,
+    project: EditorProjectV1,
+    view: MarkerTimeView,
+    width: number,
+    setting: Readonly<EditorBeatSnapSetting> = DEFAULT_BEAT_SNAP,
+): PointCell | null {
     if (!markerCanEditAt(view, raw)) return null;
-    let cell = pointCellAtTime(raw, project, width, setting);
-    if (cell && cell.timeSeconds < view.cursorSeconds) {
-        const next = movePointCell(cell.timeSeconds, 1, project, width, setting);
-        cell = next && next.timeSeconds > cell.timeSeconds ? next : null;
-    }
+    const cell = pointCellAtTime(raw, project, width, setting);
     return cell && markerCanEditAt(view, cell.timeSeconds) ? cell : null;
 }
 
 /** Freeze explicit event IDs so later commands cannot pull historical events into a selection. */
-export function editableMarkerBlock(project: EditorProjectV1, selection: MarkerBlockSelection, view: MarkerTimeView): MarkerBlockSelection {
+export function editableMarkerBlock(
+    project: EditorProjectV1,
+    selection: MarkerBlockSelection,
+    view: MarkerTimeView,
+): MarkerBlockSelection {
     const lane = project.lanes.find(item => item.id === selection.laneId);
-    const events = lane?.events.filter(event => event.innerClassId === selection.innerClassId && markerEventReachable(view, event)
-        && ('atSeconds' in event ? event.atSeconds >= selection.startSeconds && event.atSeconds < selection.endSeconds
-            : event.startSeconds < selection.endSeconds && event.endSeconds > Math.max(selection.startSeconds, view.cursorSeconds))) ?? [];
+    const events =
+        lane?.events.filter(
+            event =>
+                event.innerClassId === selection.innerClassId &&
+                markerEventReachable(view, event) &&
+                ('atSeconds' in event
+                    ? event.atSeconds >= selection.startSeconds && event.atSeconds < selection.endSeconds
+                    : event.startSeconds < selection.endSeconds && event.endSeconds > selection.startSeconds),
+        ) ?? [];
     return { ...selection, eventIds: events.map(event => event.id) };
 }
 
-export function assertMarkerBlockEditable(project: EditorProjectV1, selection: MarkerBlockSelection, view: MarkerTimeView, offset = 0): void {
+export function assertMarkerBlockEditable(
+    project: EditorProjectV1,
+    selection: MarkerBlockSelection,
+    view: MarkerTimeView,
+    offset = 0,
+): void {
     const events = collectMarkerBlockEvents(project, selection);
-    if (!view.editable || events.some(event => !markerEventReachable(view, event)
-        || ('atSeconds' in event ? event.atSeconds + offset < view.cursorSeconds || event.atSeconds + offset > view.durationSeconds
-            : event.endSeconds + offset <= view.cursorSeconds || event.startSeconds + offset < 0 || event.endSeconds + offset > view.durationSeconds))) {
-        throw new Error('只能在暂停后操作播放线右侧的标记。');
+    if (
+        !view.editable ||
+        events.some(
+            event =>
+                !markerEventReachable(view, event) ||
+                ('atSeconds' in event
+                    ? event.atSeconds + offset < 0 || event.atSeconds + offset > view.durationSeconds
+                    : event.startSeconds + offset < 0 || event.endSeconds + offset > view.durationSeconds),
+        )
+    ) {
+        throw new Error('只能在暂停后操作歌曲范围内的标记。');
     }
 }
