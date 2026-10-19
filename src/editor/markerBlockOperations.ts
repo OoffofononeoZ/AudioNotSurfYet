@@ -135,6 +135,18 @@ export const collectMarkerBlockEvents = (
 export const markerBlockEventCount = (project: EditorProjectV1, selection: MarkerBlockSelection): number =>
     collectMarkerBlockEvents(project, selection).length;
 
+export function deleteMarkerBlock(project: EditorProjectV1, selection: MarkerBlockSelection) {
+    const ids = new Set(collectMarkerBlockEvents(project, selection).map(event => event.id));
+    if (!ids.size) return { project, eventCount: 0 };
+    const lanes = project.lanes.map(lane => {
+        if (lane.id !== selection.laneId) return lane;
+        return lane.eventKind === 'point'
+            ? { ...lane, events: lane.events.filter(event => !ids.has(event.id)) }
+            : { ...lane, events: lane.events.filter(event => !ids.has(event.id)) };
+    });
+    return { project: { ...project, lanes }, eventCount: ids.size };
+}
+
 const assertPointConflicts = (existing: readonly PointEventV1[], candidates: readonly PointEventV1[]) => {
     const occupied = new Set(
         existing.map(event => `${event.innerClassId}\u0000${normalizeEditorSeconds(event.atSeconds)}`),

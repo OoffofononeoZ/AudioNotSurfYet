@@ -6,6 +6,7 @@
 
 | 文件 | 本地静态引用（最多显示 6 项） |
 | --- | --- |
+| [tests/editor/e5-range-annotation.integration.test.ts](../../tests/editor/e5-range-annotation.integration.test.ts) | [src/editor/editorDraftRepository.ts](../../src/editor/editorDraftRepository.ts)、[src/editor/pointAnnotations.ts](../../src/editor/pointAnnotations.ts)、[src/editor/projectCodec.ts](../../src/editor/projectCodec.ts)、[src/editor/rangeAnnotations.ts](../../src/editor/rangeAnnotations.ts)、[src/editor/types.ts](../../src/editor/types.ts) |
 | [tests/editor/e6-hardening-unit.test.ts](../../tests/editor/e6-hardening-unit.test.ts) | [src/editor/pointAnnotations.ts](../../src/editor/pointAnnotations.ts)、[src/editor/rangeAnnotations.ts](../../src/editor/rangeAnnotations.ts)、[src/editor/types.ts](../../src/editor/types.ts)、[tests/support/e6-stress-project.ts](../../tests/support/e6-stress-project.ts) |
 | [tests/editor/e6-hardening.integration.test.ts](../../tests/editor/e6-hardening.integration.test.ts) | [src/editor/editorDraftRepository.ts](../../src/editor/editorDraftRepository.ts)、[src/editor/projectCodec.ts](../../src/editor/projectCodec.ts)、[src/editor/types.ts](../../src/editor/types.ts)、[tests/support/e6-stress-project.ts](../../tests/support/e6-stress-project.ts) |
 | [tests/editor/e7-fullscreen-overlay-unit.test.ts](../../tests/editor/e7-fullscreen-overlay-unit.test.ts) | [src/editor/overlay.ts](../../src/editor/overlay.ts) |
@@ -105,4 +106,3 @@
 | [tests/support/tolerance.ts](../../tests/support/tolerance.ts) | — |
 | [tests/support/v6-resource-probe.ts](../../tests/support/v6-resource-probe.ts) | — |
 | [tests/support/visualizer-audio-timeline.mjs](../../tests/support/visualizer-audio-timeline.mjs) | — |
-| [tests/support/visualizer-media-alignment.mjs](../../tests/support/visualizer-media-alignment.mjs) | — |

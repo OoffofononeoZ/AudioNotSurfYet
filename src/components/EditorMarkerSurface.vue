@@ -26,7 +26,7 @@
         <span
             v-if="block"
             class="marker-block-selection"
-            :class="{ 'is-preview': editing.blocks.preview.value }"
+            :class="{ 'is-preview': editing.blocks.preview.value, 'is-deletion': editing.blocks.deletion.value }"
             :style="intervalStyle(block.startSeconds, block.endSeconds)"
             aria-hidden="true" />
         <span
@@ -141,7 +141,10 @@ const currentCandidate = computed(() =>
     props.editing.same(props.editing.candidate.value, row.value) ? props.editing.candidate.value : null,
 );
 const block = computed(() => {
-    const selection = props.editing.blocks.preview.value ?? props.editing.blocks.selection.value;
+    const selection =
+        props.editing.blocks.deletion.value ??
+        props.editing.blocks.preview.value ??
+        props.editing.blocks.selection.value;
     return props.editing.same(selection, row.value) ? selection : null;
 });
 const pendingPreview = computed(() => {
@@ -302,6 +305,10 @@ function selectEvent(event: PointEventV1 | RangeEventV1) {
 }
 .marker-block-selection.is-preview {
     border-style: dashed;
+}
+.marker-block-selection.is-deletion {
+    background: #ef9b9b33;
+    border-color: #ef9b9bb3;
 }
 .marker-pending-preview {
     position: absolute;

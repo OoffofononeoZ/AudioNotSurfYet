@@ -2,6 +2,7 @@ import { ref, shallowRef } from 'vue';
 import { assertMarkerBlockEditable, editableMarkerBlock, type MarkerTimeView } from './markerTimeView';
 import {
     copyMarkerBlockAfter,
+    deleteMarkerBlock,
     markerGridSpanAtTime,
     moveMarkerBlock,
     selectMarkerBlockByTime,
@@ -20,15 +21,32 @@ export function useMarkerBlocks(
 ) {
     const mode = ref(false),
         selection = shallowRef<MarkerBlockSelection | null>(null),
-        preview = shallowRef<MarkerBlockSelection | null>(null);
-    function select(laneId: string, innerClassId: string, anchor: number, extent = anchor) {
-        if (!view().editable) return;
-        selection.value = editableMarkerBlock(
+        preview = shallowRef<MarkerBlockSelection | null>(null),
+        deletion = shallowRef<MarkerBlockSelection | null>(null);
+    function selectionAt(laneId: string, innerClassId: string, anchor: number, extent = anchor) {
+        return editableMarkerBlock(
             project(),
             selectMarkerBlockByTime(project(), laneId, innerClassId, anchor, extent, setting()),
             view(),
         );
+    }
+    function select(laneId: string, innerClassId: string, anchor: number, extent = anchor) {
+        if (!view().editable) return;
+        selection.value = selectionAt(laneId, innerClassId, anchor, extent);
         preview.value = null;
+    }
+    function selectDeletion(laneId: string, innerClassId: string, anchor: number, extent: number) {
+        deletion.value = null;
+        if (view().editable) deletion.value = selectionAt(laneId, innerClassId, anchor, extent);
+    }
+    function remove(current: MarkerBlockSelection) {
+        assertMarkerBlockEditable(project(), current, view());
+        const result = deleteMarkerBlock(project(), current);
+        if (result.eventCount) {
+            publish(result.project);
+            clear();
+        }
+        report(result.eventCount ? `已删除 ${result.eventCount} 个标记。` : '选区内没有标记。');
     }
     function move(target: number, commit: boolean) {
         if (!selection.value) return;
@@ -86,11 +104,12 @@ export function useMarkerBlocks(
     function clear() {
         selection.value = null;
         preview.value = null;
+        deletion.value = null;
     }
     function toggle() {
         mode.value = !mode.value;
         clear();
-        report(mode.value ? '区间操作：左键拖空白选连续标记，拖选区移动；Ctrl/Cmd+C 向后复制。' : '已关闭区间操作。');
+        report(mode.value ? '区间操作：左键框选及移动，右键框选后松开删除；Ctrl/Cmd+C 向后复制。' : '已关闭区间操作。');
     }
-    return { mode, selection, preview, select, move, key, clear, toggle };
+    return { mode, selection, preview, deletion, select, selectDeletion, remove, move, key, clear, toggle };
 }

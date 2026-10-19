@@ -4,6 +4,7 @@ import { describe, expect, test } from 'vitest';
 import {
     collectMarkerBlockEvents,
     copyMarkerBlockAfter,
+    deleteMarkerBlock,
     markerGridSpanAtTime,
     moveMarkerBlock,
     selectMarkerBlockByTime,
@@ -92,6 +93,20 @@ const allMeteredProject = (): EditorProjectV1 => {
 };
 
 describe('Editor E10 marker block domain', () => {
+    test('deletes frozen IDs in one class atomically and removes intersecting ranges whole', () => {
+        const project = allMeteredProject();
+        const selection = selectMarkerBlockByTime(project, 'point-lane', 'point-main', 0.4, 1.5);
+        (project.lanes[0] as PointLaneV1).events.push({ id: 'late', innerClassId: 'point-main', atSeconds: 1 });
+        const result = deleteMarkerBlock(project, selection);
+        expect(result.eventCount).toBe(2);
+        expect(result.project.lanes[0]!.events.map(event => event.id)).toEqual(['p-edge', 'p-other', 'late']);
+        expect(project.lanes[0]!.events).toHaveLength(5);
+        expect(result.project.lanes[1]).toBe(project.lanes[1]);
+        const ranges = selectMarkerBlockByTime(project, 'range-lane', 'range-main', 1, 2);
+        expect(deleteMarkerBlock(project, ranges).project.lanes[1]!.events).toEqual([]);
+        const empty = { ...selection, eventIds: [] };
+        expect(deleteMarkerBlock(project, empty)).toEqual({ project, eventCount: 0 });
+    });
     test('selects subdivision cells rather than measures and rejects missing endpoint grids', () => {
         const project = createProject();
         expect(markerGridSpanAtTime(project, 0.4)).toEqual({ startSeconds: 0.375, endSeconds: 0.5 });
