@@ -14,6 +14,7 @@
             :class="{
                 'editor-state-shell app-scrollbar': snapshot.state !== 'ready',
                 'editor-notice-shell': snapshot.state === 'draft-conflict',
+                'editor-marking-shell': snapshot.state === 'ready' && workspace === 'marking',
             }"
             :data-testid="snapshot.state === 'ready' ? 'editor-ready' : undefined">
             <section v-if="snapshot.state === 'empty'" class="editor-state" data-testid="editor-empty">
@@ -465,6 +466,9 @@ onBeforeUnmount(() => {
     min-height: 0;
     overflow: auto;
     overscroll-behavior: contain;
+}
+.editor-shell.editor-marking-shell {
+    padding: 0;
 }
 #editor-marking-panel {
     container-type: size;
