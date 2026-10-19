@@ -26,7 +26,7 @@ function newElement(): Intake {
     };
 }
 function brief(elements = [newElement()], kind = 'element'): Intake {
-    return { schemaVersion: 1, kind, intent: 'Add editable visual content', elements };
+    return { schemaVersion: 2, kind, intent: 'Add editable visual content', elements };
 }
 function dynamic(source: Intake = { kind: 'analysis', shape: 'vector' }): Intake {
     return {
@@ -42,7 +42,7 @@ function dynamic(source: Intake = { kind: 'analysis', shape: 'vector' }): Intake
     };
 }
 function preset(): Intake {
-    return brief(
+    const value = brief(
         [
             {
                 key: 'background',
@@ -76,6 +76,10 @@ function preset(): Intake {
         ],
         'preset',
     );
+    for (const e of value.elements) e.resource = { id: e.type, version: 1, hash: 'a'.repeat(64) };
+    return value;
+    for (const e of value.elements) e.resource = { id: e.type, version: 1, hash: 'a'.repeat(64) };
+    return value;
 }
 function paths(value: unknown) {
     const result = validateContentBrief(value);
@@ -97,7 +101,7 @@ afterEach(() => {
     for (const directory of temporaryDirectories.splice(0)) rmSync(directory, { recursive: true, force: true });
 });
 
-describe('VisualizerContentBriefV1', () => {
+describe('VisualizerContentBriefV2', () => {
     it('accepts explicit common processing controls and keeps optional defaults optional', () => {
         const value = preset();
         value.commonControls = [
@@ -150,17 +154,18 @@ describe('VisualizerContentBriefV1', () => {
         });
         expect(value).toEqual(before);
     });
-    it('accepts a reuse-only preset and a preset containing a new element', () => {
+    it('accepts a reuse-only preset and rejects new elements', () => {
         const value = preset();
         expect(validateContentBrief(value)).toMatchObject({
             status: 'READY_FOR_CONTRACT',
             summary: { elementCount: 4, newElementCount: 0 },
         });
         value.elements.push(newElement());
-        expect(validateContentBrief(value)).toMatchObject({
-            status: 'READY_FOR_CONTRACT',
-            summary: { elementCount: 5, newElementCount: 1 },
-        });
+        expect(paths(value)).toContain('$.elements[4].origin');
+        expect(paths({ ...preset(), schemaVersion: 1 })).toContain('$.schemaVersion');
+        const missing = preset();
+        delete missing.elements[0].resource;
+        expect(paths(missing)).toContain('$.elements[0].resource');
     });
     it.each([
         { kind: 'analysis', shape: 'scalar' },
@@ -207,7 +212,7 @@ describe('VisualizerContentBriefV1', () => {
     it('rejects missing intent, new element appearance/structure/motion, empty elements and wrong single-element mode', () => {
         expect(
             paths({
-                schemaVersion: 1,
+                schemaVersion: 2,
                 kind: 'element',
                 elements: [{ key: 'new', type: 'new', origin: 'new', kind: 'visual' }],
             }),
@@ -231,7 +236,7 @@ describe('VisualizerContentBriefV1', () => {
         expect(paths(brief([e]))).toContain('$.elements[0].bindings[0].response');
     });
     it('rejects old briefs and unknown fields at nested boundaries', () => {
-        expect(paths({ schemaVersion: 1, primaryEffect: {} })).toContain('$.primaryEffect');
+        expect(paths({ schemaVersion: 2, primaryEffect: {} })).toContain('$.primaryEffect');
         const value = preset();
         value.extra = true;
         value.elements[0].unexpected = true;
@@ -355,15 +360,15 @@ describe('VisualizerContentBriefV1', () => {
         null,
         [],
         'brief',
-        { schemaVersion: 1, kind: 'preset', intent: 'x', elements: [null] },
-        { schemaVersion: 1, kind: 'preset', intent: 'x', elements: [{ bindings: [null] }] },
+        { schemaVersion: 2, kind: 'preset', intent: 'x', elements: [null] },
+        { schemaVersion: 2, kind: 'preset', intent: 'x', elements: [{ bindings: [null] }] },
     ])('returns errors for malformed shape %j without throwing', value => {
         expect(validateContentBrief(value).status).toBe('INPUT_INCOMPLETE');
     });
 });
 
 describe('content brief CLI', () => {
-    it.each([brief(), { schemaVersion: 1 }])('has no file side effects on success or failure', value => {
+    it.each([brief(), { schemaVersion: 2 }])('has no file side effects on success or failure', value => {
         const directory = temporaryDirectory(),
             input = join(directory, 'brief.json');
         const serialized = JSON.stringify(value);

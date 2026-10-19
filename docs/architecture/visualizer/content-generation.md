@@ -2,22 +2,23 @@
 
 2026-10-18，owner 在规划中选择将旧生成 skill 改名为 `visualizer-content-generator`，并要求**所有新增原子元素和组合预设都先批准具体合同**，随后以“Implement the plan.”批准实施。本轮更新 skill、校验器、测试及入口，不批准任何具体产品内容。
 
-同日 owner 批准 DEC-084 资源包与分组预设改造；2026-10-19 又以 DEC-087 批准可加载算法资源包。当前运行时为 Project V5 与资源包 V2，具体内容审批门禁继续有效。本轮仅迁移既有内容与运行时；按 owner 要求不修改生成元素和预设的 skill，其 V4/V1 输出说明暂不适用于当前格式，不能直接安装。
+同日 owner 批准 DEC-084 资源包与分组预设改造；2026-10-19 又以 DEC-087 批准可加载算法资源包。当前运行时为 Project V5 与资源包 V2，具体内容审批门禁继续有效。2026-10-20，owner 批准升级独立生成 skill 2.0.0、外部文件夹库及既有资源迁移；具体内容合同审批继续保留。
 
 ## 当前模型与适用关系
 
-当前资源目标为 [Project V5](project-format-v5.md) 的元素定义与持久化分组预设，包括 visual、modifier、transition，以及复用已有元素或含新增类型的预设。[资源包 V2](resource-packages-v2.md) 描述编写、算法 ABI、依赖和隔离边界。完整画面描述按该模型拆解；既有内容修正使用 audio-visualizer-dev，新增部分仍先走本契约的输入与具体合同审批。
+当前资源目标为 [Project V5](project-format-v5.md) 的元素定义与持久化分组预设，包括 visual、modifier、transition，以及仅引用已有元素的预设。[资源包 V2](resource-packages-v2.md) 描述编写、算法 ABI、依赖和隔离边界。完整画面描述按该模型拆解；既有内容修正使用 audio-visualizer-dev，新增部分仍先走本契约的输入与具体合同审批。
 
 本契约及 DEC-082 替代 ADR-0021/DEC-056 中的 SceneBriefV1、SceneRegistry、Project V1 注册与旧生成测试步骤。历史批准、V1–V6 canonical/evidence 和 readiness 身份继续保留；两阶段输入/具体合同门禁延续到所有新增元素与预设。位图素材生成、处理分轨、自动标记和独立视频流程规划不属于该生成能力。
 
 ## 输入与批准
 
-- 自然语言规范化为 `VisualizerContentBriefV1`：元素或预设模式、视觉意图、复用/新增元素、所需数据响应、时间和效果目标。允许纯静态元素；只有声明动态驱动时才要求完整响应、向量映射与时间语义。
+- 自然语言规范化为 `VisualizerContentBriefV2`：元素或预设模式、视觉意图、复用/新增元素、所需数据响应、时间和效果目标。允许纯静态元素；只有声明动态驱动时才要求完整响应、向量映射与时间语义。
+- 预设输入只允许已有元素精确引用；缺少元素先单独批准元素合同、生成并验证，再创建预设。禁止预设包夹带元素或算法。
 - 无依赖校验器读取临时 JSON，返回 `INPUT_INCOMPLETE`（exit 2、路径化问题）或 `READY_FOR_CONTRACT`（exit 0）。不写入文件，不兼容旧 brief；结构完整不等于 runtime 可行或批准。
 - 必要意图不完整时询问，不补造用户选择。可选设计在合同提出明确默认值；显式 unbound 与输入缺失分开处理。
 - agent 核对当前 registry/codec/resolver 后展示具体 Content Contract，固定 ID、拆分、参数/default bindings、映射、时序/目标、确定性、资源预算和验收；预设同时固定展开清单、层级、时段与内部引用。展示后标记 `AWAITING_APPROVAL`。
 - 输入不足或合同未批准时，仓库零写入；完整 brief 也不能触发占位源码、合同文档或测试生成。只有展示合同后明确指向它的用户批准才允许实现；视觉、数据、时间、目标或资源要求实质变化须再次批准。
-- 获批合同按需保存至 `content/<element-or-preset>-<id>.md`，记录具体批准来源。没有实际内容批准时不创建合同占位、阶段目录或每内容 readiness 文件。
+- 获批合同按需保存至资源自身的 `source/`，记录具体批准来源。没有实际内容批准时不创建合同占位、阶段目录或每内容 readiness 文件。
 
 ## 实现不变量
 
@@ -31,7 +32,7 @@
 - 复用唯一 RendererHost/Canvas/WebGLRenderer/视觉 RAF、现有 render targets、分析及原生输入服务。自有资源幂等释放，旧任务不得覆盖新身份。新元素不创建独立音频、分析或输出链路。
 - 视频生成遵循 [离线导出](../../context/visualizer-offline-export.md)：同一 renderer 的手动租约、绝对帧时间、输入准备、WebCodecs/OPFS。旧实时录制不是新内容的实现或验证入口。
 
-需要新增 source/value/component/projection、工程版本策略、拓扑、支持矩阵、阈值或不明许可资产时，停止依赖这些变更的生成并请求独立决定。不得新增 legacy fallback、主页面脚本执行或绕过包校验的 Shader 注入；当前资源源限定项目内 catalog，不包含任意地址加载、磁盘资源导入或后端接口。
+需要新增 source/value/component/projection、工程版本策略、拓扑、支持矩阵、阈值或不明许可资产时，停止依赖这些变更的生成并请求独立决定。不得新增 legacy fallback、主页面脚本执行或绕过包校验的 Shader 注入；资源源限定用户选择的只读 assets 文件夹，不包含 ZIP、任意 URL 或后端接口。
 
 ## 验证与交付
 

@@ -127,7 +127,7 @@ export function validateContentBrief(input) {
         '$',
     );
     if (!brief) return incomplete(errors);
-    if (brief.schemaVersion !== 1) issue('$.schemaVersion', 'must equal 1');
+    if (brief.schemaVersion !== 2) issue('$.schemaVersion', 'must equal 2; V1 intake is not supported');
     enumeration(brief.kind, ['element', 'preset'], '$.kind');
     text(brief.intent, '$.intent');
     if (brief.requestedName !== undefined) text(brief.requestedName, '$.requestedName');
@@ -148,6 +148,7 @@ export function validateContentBrief(input) {
             [
                 'key',
                 'origin',
+                'resource',
                 'type',
                 'kind',
                 'appearance',
@@ -163,6 +164,21 @@ export function validateContentBrief(input) {
         name(e.key, `${path}.key`);
         name(e.type, `${path}.type`);
         enumeration(e.origin, ['existing', 'new'], `${path}.origin`);
+        if (brief.kind === 'preset' && e.origin !== 'existing')
+            issue(
+                `${path}.origin`,
+                'presets may only reference existing elements; approve and create missing elements first',
+            );
+        if (e.origin === 'existing') {
+            const ref = object(e.resource, ['id', 'version', 'hash'], `${path}.resource`);
+            if (ref) {
+                if (ref.id !== e.type) issue(`${path}.resource.id`, 'must equal the existing element type');
+                if (!Number.isSafeInteger(ref.version) || ref.version < 1)
+                    issue(`${path}.resource.version`, 'must be a positive safe integer');
+                if (typeof ref.hash !== 'string' || !/^[a-f0-9]{64}$/.test(ref.hash))
+                    issue(`${path}.resource.hash`, 'must be an exact SHA-256');
+            }
+        } else if (e.resource !== undefined) issue(`${path}.resource`, 'new elements do not have an existing identity');
         enumeration(e.kind, ['visual', 'modifier', 'transition'], `${path}.kind`);
         if (typeof e.key === 'string') {
             if (byKey.has(e.key)) issue(`${path}.key`, 'duplicate element key');
