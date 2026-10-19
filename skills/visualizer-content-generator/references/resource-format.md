@@ -1,5 +1,7 @@
 # 外部资源格式与 ABI 1
 
+元素、预设、绑定、共同控件及 Analyzer 能力的完整字段见 [V2 定义与输入](resource-definitions.md)。
+
 ## 目录
 
 assets/elements/<id>/ 和 assets/presets/<id>/ 各包含：

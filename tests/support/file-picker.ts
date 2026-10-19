@@ -1,6 +1,8 @@
 import type { Page } from '@playwright/test';
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
+import { installDirectoryPickerStub, prepareResourceDirectory } from './resource-directory';
+const resourcePages = new WeakSet<Page>();
 
 interface PickerEntry {
     name: string;
@@ -33,15 +35,17 @@ const mimeTypeFor = (filePath: string) => {
     }
 };
 
-export async function installFilePickerStub(page: Page) {
+export async function installFilePickerStub(page: Page, options: { visualizerAssets?: boolean } = {}) {
+    if (options.visualizerAssets) {
+        resourcePages.add(page);
+        await installDirectoryPickerStub(page);
+    }
     const installer = () => {
         const pickerWindow = window as unknown as {
             __audioNotSurfYetPickerQueue?: FileSystemFileHandle[][];
             __audioNotSurfYetSavedPickerEntries?: SavedPickerEntry[];
             showOpenFilePicker?: () => Promise<FileSystemFileHandle[]>;
-            showSaveFilePicker?: (
-                options?: { suggestedName?: string },
-            ) => Promise<FileSystemFileHandle>;
+            showSaveFilePicker?: (options?: { suggestedName?: string }) => Promise<FileSystemFileHandle>;
         };
         pickerWindow.__audioNotSurfYetPickerQueue ??= [];
         pickerWindow.__audioNotSurfYetSavedPickerEntries ??= [];
@@ -52,12 +56,9 @@ export async function installFilePickerStub(page: Page) {
             }
             return next;
         };
-        pickerWindow.showSaveFilePicker = async (options) => {
+        pickerWindow.showSaveFilePicker = async options => {
             const root = await navigator.storage.getDirectory();
-            const directory = await root.getDirectoryHandle(
-                'editor-save-picker',
-                { create: true },
-            );
+            const directory = await root.getDirectoryHandle('editor-save-picker', { create: true });
             const name = options?.suggestedName ?? 'editor-project.json';
             const handle = await directory.getFileHandle(name, { create: true });
             const nativeCreateWritable = handle.createWritable.bind(handle);
@@ -85,39 +86,27 @@ export async function installFilePickerStub(page: Page) {
     await page.evaluate(installer);
 }
 
-export async function queuePickerFiles(
-    page: Page,
-    filePaths: string[],
-) {
+export async function queuePickerFiles(page: Page, filePaths: string[]) {
     const entries: PickerEntry[] = await Promise.all(
-        filePaths.map(async (filePath) => ({
+        filePaths.map(async filePath => ({
             name: path.basename(filePath),
             mimeType: mimeTypeFor(filePath),
             base64: (await readFile(filePath)).toString('base64'),
         })),
     );
-    await page.evaluate(async (pickerEntries) => {
+    await page.evaluate(async pickerEntries => {
         const root = await navigator.storage.getDirectory();
-        const directory = await root.getDirectoryHandle(
-            `picker-${crypto.randomUUID()}`,
-            { create: true },
-        );
+        const directory = await root.getDirectoryHandle(`picker-${crypto.randomUUID()}`, { create: true });
         const handles: FileSystemFileHandle[] = [];
         for (const entry of pickerEntries) {
-            const handle = await directory.getFileHandle(
-                entry.name,
-                { create: true },
-            );
+            const handle = await directory.getFileHandle(entry.name, { create: true });
             const writable = await handle.createWritable();
             const binary = atob(entry.base64);
             const bytes = new Uint8Array(binary.length);
             for (let index = 0; index < binary.length; index += 1) {
                 bytes[index] = binary.charCodeAt(index);
             }
-            await writable.write(new Blob(
-                [bytes],
-                { type: entry.mimeType },
-            ));
+            await writable.write(new Blob([bytes], { type: entry.mimeType }));
             await writable.close();
             handles.push(handle);
         }
@@ -128,27 +117,15 @@ export async function queuePickerFiles(
     }, entries);
 }
 
-export async function queuePickerData(
-    page: Page,
-    entries: PickerDataEntry[],
-) {
-    await page.evaluate(async (pickerEntries) => {
+export async function queuePickerData(page: Page, entries: PickerDataEntry[]) {
+    await page.evaluate(async pickerEntries => {
         const root = await navigator.storage.getDirectory();
-        const directory = await root.getDirectoryHandle(
-            `picker-${crypto.randomUUID()}`,
-            { create: true },
-        );
+        const directory = await root.getDirectoryHandle(`picker-${crypto.randomUUID()}`, { create: true });
         const handles: FileSystemFileHandle[] = [];
         for (const entry of pickerEntries) {
-            const handle = await directory.getFileHandle(
-                entry.name,
-                { create: true },
-            );
+            const handle = await directory.getFileHandle(entry.name, { create: true });
             const writable = await handle.createWritable();
-            await writable.write(new Blob(
-                [entry.text],
-                { type: entry.mimeType },
-            ));
+            await writable.write(new Blob([entry.text], { type: entry.mimeType }));
             await writable.close();
             handles.push(handle);
         }
@@ -159,23 +136,20 @@ export async function queuePickerData(
     }, entries);
 }
 
-export async function chooseFiles(
-    page: Page,
-    filePaths: string[],
-) {
+export async function chooseFiles(page: Page, filePaths: string[]) {
+    if (resourcePages.has(page)) {
+        await prepareResourceDirectory(page);
+        resourcePages.delete(page);
+    }
     await queuePickerFiles(page, filePaths);
     await page.getByTestId('import-audio').click();
 }
 
-export async function savedPickerEntries(
-    page: Page,
-): Promise<SavedPickerEntry[]> {
+export async function savedPickerEntries(page: Page): Promise<SavedPickerEntry[]> {
     return page.evaluate(() => {
         const pickerWindow = window as unknown as {
             __audioNotSurfYetSavedPickerEntries?: SavedPickerEntry[];
         };
-        return structuredClone(
-            pickerWindow.__audioNotSurfYetSavedPickerEntries ?? [],
-        );
+        return structuredClone(pickerWindow.__audioNotSurfYetSavedPickerEntries ?? []);
     });
 }

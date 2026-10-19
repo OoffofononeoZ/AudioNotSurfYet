@@ -1,7 +1,10 @@
 import { readFileSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
-import { compileExecutableCatalog, canonical, sealExecutablePackages } from './lib/visualizer-resource-v2.mjs';
+import { canonical, sealExecutablePackages } from './lib/visualizer-resource-v2.mjs';
+
+import { buildLibrary } from '../skills/visualizer-content-generator/scripts/resource-library.mjs';
+import { visualizerAssetsPath } from './lib/visualizer-assets-path.mjs';
 
 export function sealPackage(input) {
     return sealExecutablePackages([input])[0];
@@ -9,7 +12,7 @@ export function sealPackage(input) {
 function main(args) {
     if (args[0] === '--build' || args[0] === '--check-build') {
         const check = args[0] === '--check-build';
-        compileExecutableCatalog(args[1] ?? 'resources/visualizer', args[2] ?? 'public/visualizer-resources/v2', check);
+        buildLibrary(args[1] ?? visualizerAssetsPath(), check);
         process.stdout.write(`${check ? 'Checked' : 'Built'} executable visualizer resources\n`);
         return;
     }

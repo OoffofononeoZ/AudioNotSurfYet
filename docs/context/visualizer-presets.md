@@ -1,6 +1,6 @@
 # Visualizer 几何元素与预设
 
-核查日期：2026-10-20。当前作者定义存于[资源目录](../../resources/visualizer)，[资源包V2](../architecture/visualizer/resource-packages-v2.md)封装算法/Shader及控件/目标，[Project V5](../architecture/visualizer/project-format-v5.md)保存预设组、共同值和完整算法快照。13个元素/效果及两预设保持迁移前视觉与输入计算。
+核查日期：2026-10-20。当前作者定义存于外部 `WheresYourElements/assets`（可用 `VISUALIZER_ASSETS_DIR` 覆盖测试与封装位置），[资源包V2](../architecture/visualizer/resource-packages-v2.md)封装算法/Shader及控件/目标，[Project V5](../architecture/visualizer/project-format-v5.md)保存预设组、共同值和完整算法快照。13个元素/效果及两预设保持迁移前视觉与输入计算。
 
 两预设的23个子元素均直接复用商城已有定义；形状、数量、颜色、数据来源和分镜差异由参数与时段表达，不另建同效果元素。两预设及所属资源包的内容版本为3，子元素默认名称与其引用定义的商城名称一致，不附加位置或章节名。同名实例仍有独立UUID和参数；只影响新添加的预设，已有工程/草稿的默认名、自定义名与参数不自动更新。包格式仍为V2、工程仍为V5，旧内容版本可凭工程快照与新版共存。
 

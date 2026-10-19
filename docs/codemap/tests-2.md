@@ -6,6 +6,7 @@
 
 | 文件 | 本地静态引用（最多显示 6 项） |
 | --- | --- |
+| [tests/editor/e4-overlay-unit.test.ts](../../tests/editor/e4-overlay-unit.test.ts) | [src/analysis/canvasRenderer.ts](../../src/analysis/canvasRenderer.ts)、[src/analysis/featureRegistry.ts](../../src/analysis/featureRegistry.ts)、[src/analysis/types.ts](../../src/analysis/types.ts)、[src/editor/overlay.ts](../../src/editor/overlay.ts)、[tests/analysis/generate-e4-overlay-golden.ts](../../tests/analysis/generate-e4-overlay-golden.ts)、[tests/support/e4-overlay-fixture.ts](../../tests/support/e4-overlay-fixture.ts) |
 | [tests/editor/e4-overlay.integration.test.ts](../../tests/editor/e4-overlay.integration.test.ts) | [src/analysis/analysisCoordinator.ts](../../src/analysis/analysisCoordinator.ts)、[src/analysis/types.ts](../../src/analysis/types.ts)、[src/audio/audioSessionService.ts](../../src/audio/audioSessionService.ts)、[src/editor/editorDraftRepository.ts](../../src/editor/editorDraftRepository.ts)、[src/editor/editorSessionController.ts](../../src/editor/editorSessionController.ts)、[src/editor/fileIO.ts](../../src/editor/fileIO.ts)、另 4 项，按需核对源码 |
 | [tests/editor/e5-range-annotation-unit.test.ts](../../tests/editor/e5-range-annotation-unit.test.ts) | [src/editor/projectCodec.ts](../../src/editor/projectCodec.ts)、[src/editor/rangeAnnotations.ts](../../src/editor/rangeAnnotations.ts)、[src/editor/types.ts](../../src/editor/types.ts)、[tests/support/e5-range-fixture.ts](../../tests/support/e5-range-fixture.ts) |
 | [tests/editor/e5-range-annotation.integration.test.ts](../../tests/editor/e5-range-annotation.integration.test.ts) | [src/editor/editorDraftRepository.ts](../../src/editor/editorDraftRepository.ts)、[src/editor/pointAnnotations.ts](../../src/editor/pointAnnotations.ts)、[src/editor/projectCodec.ts](../../src/editor/projectCodec.ts)、[src/editor/rangeAnnotations.ts](../../src/editor/rangeAnnotations.ts)、[src/editor/types.ts](../../src/editor/types.ts) |
@@ -89,7 +90,7 @@
 | [tests/scripts/verify-v5-media.mjs](../../tests/scripts/verify-v5-media.mjs) | — |
 | [tests/scripts/verify-v6-media.mjs](../../tests/scripts/verify-v6-media.mjs) | — |
 | [tests/scripts/verify-visualizer-output.mjs](../../tests/scripts/verify-visualizer-output.mjs) | [tests/support/visualizer-audio-timeline.mjs](../../tests/support/visualizer-audio-timeline.mjs)、[tests/support/visualizer-media-alignment.mjs](../../tests/support/visualizer-media-alignment.mjs)、[tests/support/visualizer-video-timeline.mjs](../../tests/support/visualizer-video-timeline.mjs) |
-| [tests/setup-visualizer-resources.ts](../../tests/setup-visualizer-resources.ts) | [src/visualizer/elementRegistry.ts](../../src/visualizer/elementRegistry.ts)、[src/visualizer/resourceCodec.ts](../../src/visualizer/resourceCodec.ts) |
+| [tests/setup-visualizer-resources.ts](../../tests/setup-visualizer-resources.ts) | [src/visualizer/elementRegistry.ts](../../src/visualizer/elementRegistry.ts)、[src/visualizer/resourceCodec.ts](../../src/visualizer/resourceCodec.ts)、[tests/support/visualizer-assets.mjs](../../tests/support/visualizer-assets.mjs) |
 | [tests/skills/visualizer-content-generator.test.ts](../../tests/skills/visualizer-content-generator.test.ts) | [skills/visualizer-content-generator/scripts/validate-content-brief.mjs](../../skills/visualizer-content-generator/scripts/validate-content-brief.mjs) |
 | [tests/support/analyzer-list.ts](../../tests/support/analyzer-list.ts) | [src/analysis/types.ts](../../src/analysis/types.ts) |
 | [tests/support/audio-fixtures.ts](../../tests/support/audio-fixtures.ts) | — |
@@ -100,9 +101,8 @@
 | [tests/support/e6-stress-project.ts](../../tests/support/e6-stress-project.ts) | [src/editor/projectCodec.ts](../../src/editor/projectCodec.ts)、[src/editor/types.ts](../../src/editor/types.ts) |
 | [tests/support/editor-marking.ts](../../tests/support/editor-marking.ts) | [tests/support/file-picker.ts](../../tests/support/file-picker.ts) |
 | [tests/support/editor-workspaces.ts](../../tests/support/editor-workspaces.ts) | — |
-| [tests/support/file-picker.ts](../../tests/support/file-picker.ts) | — |
+| [tests/support/file-picker.ts](../../tests/support/file-picker.ts) | [tests/support/resource-directory.ts](../../tests/support/resource-directory.ts) |
 | [tests/support/m10-structure-fixture.ts](../../tests/support/m10-structure-fixture.ts) | [tests/support/audio-fixtures.ts](../../tests/support/audio-fixtures.ts) |
 | [tests/support/m7-learning-fixture.ts](../../tests/support/m7-learning-fixture.ts) | [tests/support/audio-fixtures.ts](../../tests/support/audio-fixtures.ts)、[tests/support/meyda-golden.ts](../../tests/support/meyda-golden.ts) |
 | [tests/support/m8-scalar-fixture.ts](../../tests/support/m8-scalar-fixture.ts) | [tests/support/audio-fixtures.ts](../../tests/support/audio-fixtures.ts) |
 | [tests/support/m9-vector-fixture.ts](../../tests/support/m9-vector-fixture.ts) | [tests/support/audio-fixtures.ts](../../tests/support/audio-fixtures.ts) |
-| [tests/support/meyda-golden.ts](../../tests/support/meyda-golden.ts) | — |

@@ -54,7 +54,7 @@ test('fifteen-minute offline native input stays responsive, exports fully and ca
     const errors: string[] = [];
     page.on('pageerror', error => errors.push(error.message));
     await page.setViewportSize({ width: 1920, height: 1080 });
-    await installFilePickerStub(page);
+    await installFilePickerStub(page, { visualizerAssets: true });
     await page.goto('/');
     // Reuse the bounded five-second OPFS fixture pattern from the existing E6 fifteen-minute scenario.
     await page.evaluate(async events => {

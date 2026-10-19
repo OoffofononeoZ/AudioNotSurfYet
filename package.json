@@ -9,8 +9,8 @@
         "npm": "11.x"
     },
     "scripts": {
-        "predev": "npm run processing:assets && npm run visualizer:resources",
-        "prebuild": "npm run processing:assets && npm run visualizer:resources",
+        "predev": "npm run processing:assets",
+        "prebuild": "npm run processing:assets",
         "dev": "vite",
         "build": "vue-tsc -b && vite build",
         "preview": "vite preview",

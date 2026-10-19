@@ -300,11 +300,13 @@ import { useVisualizerPreview } from '../visualizer/useVisualizerPreview';
 import { useVisualizerFullscreen } from '../visualizer/useVisualizerFullscreen';
 import { formatSecToTime as formatTime } from '../utils/utils';
 import '../visualizer/workspace.css';
+import { provideResourceLibrary } from '../visualizer/useResourceLibrary';
 const route = useRoute(),
     router = useRouter(),
     controller = useVisualizerSessionController(),
     store = useAudioSessionStore(),
     audioSession = useAudioSessionService();
+provideResourceLibrary((resources, signal) => controller.validateResources(resources, signal));
 const snapshot = shallowRef(controller.getSnapshot()),
     unsubscribe = controller.subscribe(value => (snapshot.value = value));
 const workspace = ref<HTMLElement | null>(null),

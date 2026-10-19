@@ -1,6 +1,6 @@
 # Visualizer 页面接口契约
 
-核查日期：2026-10-19。当前为 Project V5、可执行资源包 V2、隔离算法运行和离线确定性导出。
+核查日期：2026-10-20。当前为 Project V5、可执行资源包 V2、隔离算法运行和离线确定性导出。
 
 ## 路由与所有权
 
@@ -12,9 +12,9 @@
 
 - 数据定义见 [compositionTypes.ts](../../../src/visualizer/compositionTypes.ts)、[resourceTypes.ts](../../../src/visualizer/resourceTypes.ts)和 strict codec；完整契约见 [Project V5](project-format-v5.md)。
 - 只接受 V5。elements 保存一次完整记录，items/children 决定归属与连续图层；预设保留组身份和共同处理控件，批量修改完整校验后原子提交。
-- 工程内嵌算法源码、Shader、定义及精确 hash，恢复不依赖全局库。项目目录、隔离权限和 ABI 见[资源包 V2](resource-packages-v2.md)；纯 codec 不执行代码。候选先初始化、验证后提交；导入期间编辑锁与 aria-busy 保持到完成。
+- 工程内嵌算法源码、Shader、定义及精确 hash，恢复不依赖全局库。外部文件夹、隔离权限和 ABI 见[资源包 V2](resource-packages-v2.md)；纯 codec 不执行代码。候选先初始化、验证后提交；导入期间编辑锁与 aria-busy 保持到完成。
 - V1–V4 工程不迁移，旧草稿视为没有可恢复草稿。无效 V5 草稿保留显式处理入口，同歌/异歌草稿和保存失败继续保护数据。
-- 新增原子元素或组合预设，包括纯复用预设，都先校验 VisualizerContentBriefV1 并批准具体合同，见[内容生成](content-generation.md)。
+- 新增原子元素或组合预设，包括纯复用预设，都先校验 VisualizerContentBriefV2 并批准具体合同，见[内容生成](content-generation.md)。
 
 ## Binding 与确定性
 

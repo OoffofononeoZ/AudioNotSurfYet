@@ -1,6 +1,6 @@
-import { readFileSync } from 'node:fs';
-import { describe, expect, test, vi } from 'vitest';
-import { elementRegistry, ElementRegistry } from '../../src/visualizer/elementRegistry';
+import { resourcePack as read } from '../support/visualizer-assets.mjs';
+import { describe, expect, test } from 'vitest';
+import { elementRegistry } from '../../src/visualizer/elementRegistry';
 import { instantiatePreset } from '../../src/visualizer/compositionPresets';
 import {
     createComposition,
@@ -20,17 +20,10 @@ import {
 import { applyCommonControl, changedControlElements } from '../../src/visualizer/commonControls';
 import { mergeResources, validateResourcePackage } from '../../src/visualizer/resourceCodec';
 import { resourceHash, resourceRef } from '../../src/visualizer/resourceIdentity';
-import { VisualizerResourceLibrary } from '../../src/visualizer/resourceLibrary';
 import type { PresetInstance, VisualizerResourcePackageV2 } from '../../src/visualizer/resourceTypes';
 import type { VisualizerProjectV5 } from '../../src/visualizer/compositionTypes';
 
-const root = new URL('../../public/visualizer-resources/v2/', import.meta.url);
-const read = (path: string) =>
-    JSON.parse(readFileSync(new URL(path.replace(/^(elements|presets)\//, ''), root), 'utf8'));
 const track = { contentHash: 'a'.repeat(64), fileName: 'resources.wav', durationSeconds: 12, sampleRate: 48000 };
-const request = vi.fn(
-    async (url: RequestInfo | URL) => new Response(JSON.stringify(read(String(url).replace('/resources/', '')))),
-) as unknown as typeof fetch;
 const seal = <T extends object>(value: T): T & { hash: string } => ({ ...value, hash: resourceHash(value) });
 function customPack(): VisualizerResourcePackageV2 {
     const definition = seal({
@@ -290,61 +283,5 @@ describe('V5 preset ownership and bulk controls', () => {
         });
         expect(() => validateComposition(result)).not.toThrow();
         expect(p).toEqual(before);
-    });
-});
-
-describe('project-owned executable catalog', () => {
-    test('loads validated packages atomically and embedded projects survive clearing the library', async () => {
-        const registry = new ElementRegistry(),
-            validate = vi.fn(async () => {});
-        const library = new VisualizerResourceLibrary(request, registry, '/resources/', validate);
-        await library.load();
-        expect(library.snapshot().status).toBe('ready');
-        expect(registry.list()).toHaveLength(13);
-        expect(validate).toHaveBeenCalledOnce();
-        const project = addPreset(createComposition(track));
-        const bytes = encodeComposition(project);
-        registry.replace({ algorithms: [], elements: [], presets: [] });
-        expect(decodeComposition(bytes.buffer as ArrayBuffer)).toEqual(project);
-        library.dispose();
-    });
-    test('failed initialization never registers a partial catalog', async () => {
-        const registry = new ElementRegistry();
-        const library = new VisualizerResourceLibrary(request, registry, '/resources/', async () => {
-            throw Error('invalid algorithm module');
-        });
-        await library.load();
-        expect(library.snapshot().status).toBe('error');
-        expect(registry.list()).toEqual([]);
-        library.dispose();
-    });
-    test('request failures retry and late requests cannot repopulate a disposed library', async () => {
-        const registry = new ElementRegistry();
-        let fail = true;
-        const network = vi.fn(async (url: RequestInfo | URL) =>
-            fail ? new Response('', { status: 503 }) : request(url),
-        ) as unknown as typeof fetch;
-        const library = new VisualizerResourceLibrary(network, registry, '/resources/', async () => {});
-        await library.load();
-        expect(library.snapshot().status).toBe('error');
-        fail = false;
-        await library.load();
-        expect(library.snapshot().status).toBe('ready');
-        library.dispose();
-        let resolve!: (response: Response) => void;
-        const delayed = new VisualizerResourceLibrary(
-            () =>
-                new Promise<Response>(yes => {
-                    resolve = yes;
-                }),
-            new ElementRegistry(),
-            '/resources/',
-            async () => {},
-        );
-        const pending = delayed.load();
-        delayed.dispose();
-        resolve(new Response(JSON.stringify(read('catalog.json'))));
-        await pending;
-        expect(delayed.snapshot().elements).toEqual([]);
     });
 });

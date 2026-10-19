@@ -21,7 +21,8 @@
                 :id="item.id"
                 :name="name(item)"
                 :kind="item.kind"
-                :icon="item.kind === 'preset' ? 'layers' : descriptor(item.id).icon"
+                :icon="'layers'"
+                :preview="preview(item.kind === 'preset' ? item.resource : leaf(item.id).resource)"
                 :enabled="enabled(item)"
                 :selected="selection === item.id"
                 :locked="locked"
@@ -58,7 +59,8 @@
                     :key="id"
                     :name="leaf(id).name"
                     kind="element"
-                    :icon="descriptor(id).icon"
+                    :icon="'layers'"
+                    :preview="preview(leaf(id).resource)"
                     :enabled="leaf(id).enabled"
                     :selected="selection === id"
                     :locked="locked"
@@ -80,7 +82,9 @@
 import { computed, ref } from 'vue';
 import VisualizerIcon from './VisualizerIcon.vue';
 import VisualizerCompositionRow from './VisualizerCompositionRow.vue';
-import { elementDescriptor } from '../../visualizer/compositionModel';
+import { useResourceLibrary } from '../../visualizer/useResourceLibrary';
+import { resourceKey } from '../../visualizer/resourceIdentity';
+import type { ResourceRef } from '../../visualizer/resourceTypes';
 import type { VisualizerProjectV5 } from '../../visualizer/compositionTypes';
 import type { CompositionItem } from '../../visualizer/resourceTypes';
 const props = defineProps<{ project: VisualizerProjectV5; selection: string | null; locked: boolean }>();
@@ -95,7 +99,9 @@ const roots = computed(() => [...props.project.items].reverse()),
     expanded = ref(new Set<string>()),
     dragged = ref<{ id: string; parentId?: string } | null>(null);
 const leaf = (id: string) => props.project.elements.find(e => e.id === id)!;
-const descriptor = (id: string) => elementDescriptor(props.project, leaf(id));
+const { state } = useResourceLibrary();
+const preview = (resource: ResourceRef) =>
+    state.value.entries.find(e => resourceKey(e.info.resource) === resourceKey(resource))?.previewUrl;
 const name = (item: CompositionItem) => (item.kind === 'preset' ? item.name : leaf(item.id).name);
 const enabled = (item: CompositionItem) => (item.kind === 'preset' ? item.enabled : leaf(item.id).enabled);
 function toggle(id: string) {

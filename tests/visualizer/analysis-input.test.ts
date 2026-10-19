@@ -1,3 +1,5 @@
+import { sourceModule } from '../support/visualizer-assets.mjs';
+const { spectrumBands } = await import(/* @vite-ignore */ sourceModule('spectral-strings', 'shared/strings.js'));
 import { attachElements } from './resource-fixtures';
 import { describe, expect, test, vi } from 'vitest';
 import { FEATURE_IDS, type AnalysisSeries } from '../../src/analysis/types';
@@ -11,7 +13,6 @@ import { CompositionResolver } from '../../src/visualizer/compositionResolver';
 import { createComposition, validateComposition } from '../../src/visualizer/compositionCodec';
 import { elementRegistry } from '../../src/visualizer/elementRegistry';
 import { analysisVectorLength } from '../../src/visualizer/bindingDefaults';
-import { spectrumBands } from '../../resources/visualizer/shared/strings.js';
 
 const track = { contentHash: 'a'.repeat(64), fileName: 'input.wav', durationSeconds: 2, sampleRate: 48000 };
 const series = (

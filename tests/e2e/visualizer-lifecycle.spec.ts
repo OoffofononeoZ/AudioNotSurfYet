@@ -8,7 +8,7 @@ const second = path.resolve(import.meta.dirname, '../fixtures/audio/format-maste
 const player = (page: Page) => page.locator('#music-bar-container');
 async function setup(page: Page) {
     await page.setViewportSize({ width: 1920, height: 1080 });
-    await installFilePickerStub(page);
+    await installFilePickerStub(page, { visualizerAssets: true });
     await page.goto('/');
     await chooseFiles(page, [audio, second]);
     await expect(player(page)).toHaveAttribute('data-playback-state', 'playing');

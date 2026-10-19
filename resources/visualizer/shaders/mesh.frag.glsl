@@ -1,1 +1,0 @@
-varying vec4 vInk; varying vec2 vEdge; void main(){float aa=max(fwidth(vEdge.x),0.000001);float alpha=vInk.a*(1.0-smoothstep(vEdge.y-aa*.5,vEdge.y+aa*.5,abs(vEdge.x)));gl_FragColor=vec4(vInk.rgb*alpha,alpha);}

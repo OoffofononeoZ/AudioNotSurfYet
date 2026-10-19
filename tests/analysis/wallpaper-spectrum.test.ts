@@ -1,3 +1,5 @@
+import { sourceModule } from '../support/visualizer-assets.mjs';
+const { geometricSpectrum } = await import(/* @vite-ignore */ sourceModule('radial-spectrum', 'shared/geometry.js'));
 import { expect, test } from 'vitest';
 import { BluesteinDFT } from '../../src/analysis/bluestein';
 import {
@@ -13,7 +15,6 @@ import { decodeAnalysisSeries, encodeAnalysisSeries } from '../../src/analysis/c
 import { copyDecodedAudioToMono, speakersToStereo } from '../../src/analysis/pcm';
 import { extractCursorValue, runAnalysisJob } from '../../src/analysis/workerCore';
 import { projectAnalysisSeries } from '../../src/visualizer/analysisProjection';
-import { geometricSpectrum } from '../../resources/visualizer/shared/geometry.js';
 
 const tone = (hz: number, n: number, rate = 48000, gain = 0.2) =>
     Float32Array.from({ length: n }, (_, i) => gain * Math.sin((2 * Math.PI * hz * i) / rate));

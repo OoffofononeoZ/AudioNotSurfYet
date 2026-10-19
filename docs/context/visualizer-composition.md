@@ -1,13 +1,13 @@
 # Visualizer 组合工作区
 
-核查日期：2026-10-19。当前[Project V5](../architecture/visualizer/project-format-v5.md)和[可执行资源包V2](../architecture/visualizer/resource-packages-v2.md)管理元素、算法/Shader、分组预设及共同处理参数，接口见[页面契约](../architecture/visualizer/interface-contracts.md)。
+核查日期：2026-10-20。当前[Project V5](../architecture/visualizer/project-format-v5.md)和[可执行资源包V2](../architecture/visualizer/resource-packages-v2.md)管理元素、算法/Shader、分组预设及共同处理参数，接口见[页面契约](../architecture/visualizer/interface-contracts.md)。
 
 ## 当前布局与模型
 
 - 普通页保留MusicBar；顶部工程/Settings，左侧资源与元素/组列表，右侧选择属性，中央零padding视频，底栏输出/Editor/状态。可用宽度决定三栏或互斥抽屉，页面保持单100dvh与独立滚动。
 - 预设为默认折叠顶层组，顶层移动整组、组内排序；共同处理参数批量写入且提示差异，不提供全局数字layer编辑。13个当前算法及预设见[预设说明](visualizer-presets.md)，新增内容先批准具体合同。
 - 效果引用视觉元素或整体，不引用其他效果；显式同歌单range转场保持终值，由后开始转场接管。单renderer/Canvas/视觉RAF、三个复用targets、绝对歌曲时间和四Analyzer特征边界保持。
-- 只接受V5文件；旧草稿不提示、不迁移。损坏/异歌V5草稿、保存失败和换歌取消按当前草稿保护。商城只加载项目内目录，旧磁盘资源包入口暂时隐藏；工程导入验证期间锁定编辑并标记忙碌，验证成功后原子替换。
+- 只接受V5文件；旧草稿不提示、不迁移。损坏/异歌V5草稿、保存失败和换歌取消按当前草稿保护。商城只读加载用户选择的 assets 文件夹，提供选择/恢复访问/重新加载；未连接库时列表使用通用标记；工程导入验证期间锁定编辑并标记忙碌，验证成功后原子替换。
 - 全屏只显示同一画面、图标控制/时间/进度，无MusicBar；视频导出与全屏互斥。输出采用[离线导出](visualizer-offline-export.md)，不恢复旧实时capture链。
 
 ## 界面控件

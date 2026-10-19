@@ -7,7 +7,7 @@ import type { VisualizerProjectV5 } from '../../src/visualizer/compositionTypes'
 const audio = path.resolve(import.meta.dirname, '../fixtures/audio/visualizer-v5-avsync-v1.wav');
 async function open(page: Page) {
     await page.setViewportSize({ width: 1920, height: 1080 });
-    await installFilePickerStub(page);
+    await installFilePickerStub(page, { visualizerAssets: true });
     await page.goto('/');
     await chooseFiles(page, [audio]);
     await page.getByTestId('header-visualizer-link').click();
