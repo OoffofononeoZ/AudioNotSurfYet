@@ -10,10 +10,11 @@
 | 工程/草稿 | V1 round-trip、未知字段/schema、歌曲 hash/时长、重复 ID、悬空引用、越界/重复 point/重叠 range；完整拒绝保留内存和旧 durable draft |
 | 保存 | 250ms debounce，提交/导入/离页按 controller flush；quota/abort 保留可导出的新工程并显示 not-persisted，不误报 durable success |
 | 时间/几何 | waveform/tempo 与 marker/overlay 两套视图各自内部同秒 x 误差≤1 CSS px；DPR/backing store、首尾留白、zoom/pan/resize/滚动；不把播放帧写入工程 |
-| tempo | 0 起点、有序 segment、20–300 BPM；`0 <= BPM <20` 为 single-beat，非有限/负值/越界拒绝；内部 boundary 删除由前段延伸且不移动事件秒数 |
+| tempo | 0 起点、有序 segment、20–300 BPM；`0 <= BPM <20` 为 single-beat，非有限/负值/越界拒绝；新增/拖动连续、不跟随细分，1ms/Shift10ms微调、取消回滚；内部 boundary 删除由前段延伸且不移动事件秒数 |
 | BPM 估计 | 60/100/128/127.5 fixture 误差≤`max(0.5 BPM,target×1%)`；静音/噪声/歧义 low-confidence；不任意半拍/倍拍归一化，迟到结果不覆盖用户值 |
 | point/range | 分类迁移/删除、点重复、半开范围重叠、端点/整体移动、两次点击范围、批量选择/复制；失败整批原子拒绝，不自动合并或裁剪 |
 | 当前细分 | 常规/三连音/自定义1–64、鼠标/键盘共用；zoom 只影响绘制密度，tempo/zoom 不重写已有事件秒数。暂停时验证遮罩内外的完整操作、首尾留白拒绝与播放数字录入 |
+| 区间删除/时间行 | 右键浅红框选、松开原子删除、冻结IDs/整项范围/分类隔离、短按和取消不删除；时间行左拖前进、连续微调、原曲/分轨与倍速、保持播放状态、请求合并/尾部/首尾/取消和离页，固定15%播放线；Editor禁选普通文字但保留输入选字，离页清理 |
 | 数字实时录入 | `1–9、0`/NumPad、折叠不重编号、repeat 与别名去重、多键范围、短按下一格、暂停/曲终、seek/切源/失焦/隐藏/Esc/输入控件取消；冲突逐项反馈且合并最新工程 |
 | overlay | 全视口 fixed Canvas、时间列 clip、pointer-through、参数/菜单/手柄焦点；开关/切特征/错误重试与保存记忆；不拦截底层标记操作 |
 | 性能/资源 | 约15分钟、20 lanes、每 lane≤8 classes、10,000 point/range：反馈≤100ms，无 Editor/分析归因任务>50ms；仅可见事件 DOM，20 次生命周期不单调累积资源 |

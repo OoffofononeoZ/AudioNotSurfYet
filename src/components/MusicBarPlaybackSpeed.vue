@@ -1,5 +1,5 @@
 <template>
-    <div ref="root" class="playback-speed" @keydown.esc.stop="open = false">
+    <div ref="root" class="playback-speed" @keydown.esc="closeOnEscape">
         <button
             type="button"
             class="speed-trigger"
@@ -51,6 +51,12 @@ function changeRate(event: Event) {
 }
 function closeOutside(event: PointerEvent) {
     if (event.target instanceof Node && !root.value?.contains(event.target)) open.value = false;
+}
+function closeOnEscape(event: KeyboardEvent) {
+    if (!open.value) return;
+    event.preventDefault();
+    event.stopPropagation();
+    open.value = false;
 }
 watch(
     () => props.disabled,
