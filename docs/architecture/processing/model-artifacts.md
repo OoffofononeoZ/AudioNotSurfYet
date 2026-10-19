@@ -3,15 +3,14 @@ status: approved
 owner: "project-owner"
 last_reviewed: 2026-10-04
 upstream_docs:
-  - "docs/architecture/system-design.md"
-  - "docs/architecture/adrs/0024-browser-processing-runtime.md"
-  - "docs/architecture/adrs/0025-audio-processing-pipeline-and-timebase.md"
-next_action: "四原图在同版 JSEP 双浏览器可推断；drums parity 超差，先修正精度，P1 未完成"
+  - "docs/context/system-map.md"
+  - "docs/architecture/processing/worker-and-project-contracts.md"
+
 ---
 
 # FT ONNX Model Artifacts
 
-本文件记录批准采用的模型 artifact 身份和执行边界，供工程师与 delivery 评审使用。以下 SHA-256/size 是 2026-10-04 从发布者 Git LFS 指针核对的元数据；架构批准时未下载权重或运行推断；随后 P1 已核对全部实际 bytes，但四图 session 创建失败，仍不构成推断、质量或性能通过。
+本文件是固定模型身份与许可来源，表格被下载工具和测试读取。实际bytes已核对；旧Asyncify session失败、随后官方JSEP四图/数值通过及当前FT功能接受分别见evidence，不把任何单项通过扩写为完整正式评审通过。
 
 ## Source and Identity
 
@@ -49,6 +48,8 @@ P1 实施配置与实际部署资产见 [FT kernel configuration](ft-kernel-conf
 
 2026-10-04，owner 随浏览器处理修订计划授权本模型契约和 ADR-0024/0025 获批；模型 bytes 校验、运行库锁定与浏览器验证仍是实施前置任务，R-046、R-048、R-049、R-052 保持 Open。
 
-## P1 Actual Checkpoint
+## P1历史Checkpoint
 
 2026-10-04，四文件实际 bytes/size/SHA 与批准表全匹配；ORT 1.30.0 六项实际资产已锁定。clean candidate `9198b37` 的 Chrome/Edge 四图均在 session 创建处失败，具体错误及 DOUBLE 诊断见 [P1 evidence](../../quality/processing/evidence-index.md)。本轮未更改 artifact/model/runtime 身份，未进入真实推断/长曲/试听，相关风险仍 Open。
+
+当前状态：官方ORT JSEP已在Chrome/Edge运行四原图，DEC-071数值门槛为1.5e-3，DEC-074接受当前汇总听感/长曲耗时并收尾Editor功能。历史创建失败未改写；完整P1/P2 clean及OS等缺口见[证据](../../quality/processing/evidence-index.md)和[接入记录](../../quality/processing/editor-integration-evidence.md)。模型表的revision/bytes/hash/许可未改变。

@@ -1,94 +1,31 @@
----
-status: approved
-owner: "project-owner"
-last_reviewed: 2026-10-04
-upstream_docs:
-  - "docs/architecture/system-design.md"
-  - "docs/architecture/interface-contracts.md"
-next_action: "R-046–R-055 风险登记已批准但全部 Open；delivery 覆盖浏览器模型、时间/节拍、quota、取消、覆盖/刷新与 V2 验证"
----
+# 当前风险与复核触发器
 
-# Risk Register
+核查日期：2026-10-19。owner为project-owner。本页保留当前开放/接受风险及仍影响工作的上游限制；已结束阶段的完整风险表由Git的`0bd2a67:docs/architecture/risk-register.md`查回。历史Mitigated不证明最新实现已完成整体评审。
 
-评分：Likelihood/Impact 使用 Low、Medium、High。状态使用 Open、Mitigated、Accepted。
+| ID | 状态 | 风险、边界与复核条件 |
+| --- | --- | --- |
+| R-005 | Accepted | 文件句柄权限不能保证跨会话持续；当前Blob恢复、显式requestPermission和可见状态保持。原生文件/权限实现或浏览器变化时复核 |
+| R-018 | Open | 上传、未定义页面或服务端能力超出当前范围；Visualizer/Editor已实现，旧“等待V0架构”不再适用。新增范围由owner决定 |
+| R-019 | Accepted（历史Analyzer候选） | 大chunk与尚无正式包体预算；M14接受1,300.63kB只绑定原候选W-001。chunk增长、首屏问题或托管/预算确定时复核，不声称当前包体优化完成 |
+| R-020 | Mitigated（产品侧） | Meyda spectralFlux上游x未定义错误仍存在；项目Flux/golden缓解产品。依赖、公式、零值或cache/exact语义变动时复测 |
+| R-025 | Open | E10及后续标记交互、批量/数字录入可能影响DOM/焦点/指针/性能；按最新Editor契约检查≤100ms反馈、无>50ms归因长任务与资源清理，历史批准不自动关闭观察 |
+| R-043 | Open | 新元素/预设的绑定、四特征、确定性、资源、strict V4及离线导出风险；按DEC-082/084批准具体合同和针对性验证，不继承旧Scene生成步骤或整体readiness |
+| R-044 | Open | 小节选择/复制/移动跨轨误选、部分提交、ID/秒数漂移、pointer或离页决策残留；预校验后原子命令、单owner临时态与安全取消，完整正式证据/人工缺口仍独立 |
+| R-045 | Open | 全屏状态/唤醒/播放时间或输出/路由生命周期分叉；以Fullscreen事件为事实源、同Canvas及timer/listener对称释放。旧候选owner视觉确认缺口保留，不将新专项泛化为整体readiness |
+| R-046 | Open | WebGPU/adapter/ORT/四图兼容；固定原图与官方JSEP已有独立harness成功，旧Asyncify创建失败仍保留。runtime/backend/图变化复核实际kernel/parity，不自动CPU或小模型fallback |
+| R-047 | Open | resample/OLA/延迟/长度造成标记或视频漂移；原PCM身份、独立脉冲oracle、44.1/48kHz/尾部≤1sample与WAV/实际媒体检查。模型/config/codec变化重测 |
+| R-048 | Open | immutable模型/ORT资产/许可/缓存漂移；实际bytes/hash已验证，不再称“未下载”。asset/config变化重新校验、checksum错误拒绝发布，公开来源与许可可追溯 |
+| R-049 | Open | 参考机完整分离加节拍性能/内存；历史Chrome分离1011.9541秒>900秒，DEC-074只接受当前功能耗时。Edge普通profile长曲及P3/P6完整链独立，不外推其他设备 |
+| R-050 | Open | 取消/换歌/离页/崩溃后GPU/session/OPFS残留或迟到发布；job/source/generation、防护terminal、五秒清理或residual登记，20次资源检查，保留旧完整结果 |
+| R-051 | Open | 10GiB与origin quota、IDB/OPFS发布和checksum身份；先完整artifact后metadata，写时失败反馈，无自动驱逐。浏览器可能清除origin数据，容量估算不是保证 |
+| R-052 | Open | row错位、单模型冒充四轨、角色/串音/伪影；四模型只取专用row，other不称lead。当前部分串音按DEC-074接受，模型/角色或新质量声明须另行复核 |
+| R-053 | Open | 尚未完成逐拍/局部tempo对静音、空鼓、变化、半速倍速与评分的误导；mix主输入、drums辅助、golden/警告、无可靠结果为空，人工确认meter，不伪造概率/downbeat |
+| R-054 | Open | 尚未完成proposal/apply/tempo刷新可能覆盖用户或使用旧数据；canonical hash/diff、逐项选择、原子替换、保留人工marker/binding，stale输入拒绝输出并要求显式刷新 |
+| R-055 | Open | 有效剩余风险为compact处理数据的尺寸/身份/provenance、tempo-derived downbeat与strict codec；旧V1→V2迁移/双写方案已失效。当前V4尚无processing扩展，后续格式变更须明确批准和独立验证 |
 
-| ID | Risk | Likelihood | Impact | Trigger / Signal | Mitigation and required evidence | Residual / fallback | Owner | Status |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| R-001 | 抽离 AudioEngine 导致 MusicBar 播放、切歌或能量响应回归 | Medium | High | 现有任务失败、重复 AudioContext、暂停后仍有能量 | engine/store 与 Chrome MusicBar 回归已在 M4 clean commit canonical pass，并由 owner 批准 | 未自动化的音频设备差异继续由手工 Chrome/Edge 验证 | project-owner | Mitigated |
-| R-002 | Worker 迟到结果覆盖新歌曲或新卡片 | Medium | High | 快速换歌/换卡时图表身份不一致 | job generation + track/config/feature 身份；stale/cancel 单元、集成与 M11 双浏览器 canonical 通过 | 即使取消不及时，身份检查仍是正确性边界；身份契约变化时复跑 | project-owner | Mitigated |
-| R-003 | 15 分钟频谱造成内存、IPC 或 IndexedDB 膨胀 | High | High | typed array、postMessage、cache 大小持续增长；quota 失败 | 最多 30Hz 聚合、向量量化、只缓存活动特征和当前歌曲、精确值按需提取；M11 canonical 在 Chrome/Edge 重跑 15 分钟四重卡、quota 与 20 次资源循环，M6 cache 仍为 100,941 bytes；2026-08-26 owner 为人工长会话补偿门禁签字 | 缓存失败时不保存，刷新后重算；目标设备外推仍受 EG-005 限制 | project-owner | Mitigated |
-| R-004 | 分析或 Canvas 重绘阻塞主线程 | Medium | High | 输入反馈超过 100ms或分析归因长任务超过 50ms | Meyda/聚合/量化放 Worker；静态/游标分层；M11 canonical 的 Chrome/Edge 15 分钟四重卡反馈最大分别为 17.9ms/17.2ms，分析归因长任务均为 0 | 目标设备范围仍受 EG-005 限制；必要时降低显示采样或可视层细节，不降低精确游标值 | project-owner | Mitigated |
-| R-005 | File System Access 权限跨会话丢失 | High | Medium | `queryPermission()` 返回 prompt/denied | M5 clean-commit canonical 已验证保存当前 Blob、启动只查询、用户点击后 request 和可见三态；Chrome 原生权限人工检查通过；M11 canonical 的 Edge OPFS/IndexedDB 恢复回归与 2026-08-26 owner 原生权限签字均完成 | 未授权歌曲显示恢复访问，不阻断当前 Blob；权限是否持久仍由浏览器决定，因此风险保持 Accepted | project-owner | Accepted |
-| R-006 | 文件移动、替换或内容变化导致错误缓存 | Medium | High | 句柄 `getFile()` 失败或 hash 变化 | M5 canonical 已验证 SHA-256 最终身份、tampered current Blob、missing/changed 和重选 adapter；M6–M11 已验证 cache identity 与刷新恢复；2026-08-26 owner 为 Edge 原生文件移动/重选签字 | track 保留在队列并显示明确恢复状态；浏览器或 identity 契约变化时复跑 | project-owner | Mitigated |
-| R-007 | IndexedDB quota 或事务失败破坏当前会话 | Medium | Medium | Blob/cache put 抛 quota/abort | M5/M6 canonical 已验证原子替换、abort、payload/cache quota；M11 修复切歌持久化竞态，并在 Chrome/Edge 验证 quota 后当前播放与 `not-persisted` | 刷新后需重新授权或重新分析；repository/schema 变化时复跑 | project-owner | Mitigated |
-| R-008 | MP3/WAV/FLAC 解码或采样率在浏览器间不同 | Medium | High | golden fixture 帧数、sample rate 或结果偏差 | 同源短 fixture 记录 provenance/hash；M11 canonical 已在真实 Chrome/Edge 加载三格式、切换、分析并刷新恢复；AnalysisConfig 记录实际 PCM sample rate | 平台新增或浏览器解码器变化时复跑；格式不支持时明确报错 | project-owner | Mitigated |
-| R-009 | 浏览器解码把编码源重采样到输出设备采样率 | Medium | Medium | `AudioBuffer.sampleRate` 与元数据不同 | fixture 验证、缓存身份包含实际 PCM sample rate；M11 Chrome/Edge 三格式分析与恢复通过 | UI 显示传入分析的真实 PCM 采样率；新增平台/格式时复跑 | project-owner | Mitigated |
-| R-010 | 量化让显示数据误导学习者 | Medium | High | 热图与精确结果不一致或小信号消失 | 明确 scale/offset、饱和测试、Worker golden；M6 exact cursor、M7–M10 golden/codec 与 M11 双浏览器 canonical 均通过 | 不适合量化的 total 使用 Float32 payload；codec 变化时复跑 golden | project-owner | Mitigated |
-| R-011 | 21 项输出形态差异导致错误 renderer 或维度 | Medium | High | 新特征展示空白、数组错位或 runtime cast | 穷尽 FeatureId 注册表、shape 类型、golden 与单卡错误隔离；M10 owner 批准 21/21，M11 Chrome/Edge 全矩阵无回归 | 单卡错误边界不影响其他卡和播放；registry/renderer 变化时复跑 | project-owner | Mitigated |
-| R-012 | 游标漂移超过 100ms | Medium | High | 长播放、暂停/seek/切歌后误差增大 | AudioContext 基准时钟；M11 canonical 的 Chrome/Edge 60 秒漂移分别为 3.5ms/4.133ms，seek 最大误差分别为 66.827ms/61.494ms | 暂停时使用快照 offset，页面恢复强制归零；浏览器时钟行为变化时复跑 | project-owner | Mitigated |
-| R-013 | 文件/Worker/Audio/Canvas 资源泄漏 | Medium | High | 多次换歌后内存、线程、节点或 URL 增长 | 显式 dispose；LightBg 释放 mesh/geometry/material/renderer/context；M11 canonical 在 Chrome/Edge 各 20 次 Home/Analyzer 循环均为 WebGL 21 created/20 lost、2 live RAF，M6 回归保持单 Worker/AudioContext；2026-08-26 owner 为人工长会话门禁签字 | 浏览器或资源所有权变化时复跑自动化并重复人工长会话观察 | project-owner | Mitigated |
-| R-014 | 图表只靠颜色或 Canvas 导致键盘/辅助技术不可用 | Medium | High | 键盘任务失败、无焦点或无数据替代 | DOM 控件/说明/精确值、可见焦点、非颜色图例；M11 canonical 在 Chrome/Edge 验证键盘进度/音量/Analyzer seek、核心控制、reduced motion 和四视口；2026-08-26 owner 为辅助技术补偿门禁签字 | 未执行 axe 扫描的事实继续保留；相关 DOM、Canvas 或焦点契约变化时重新人工复核 | project-owner | Mitigated |
-| R-015 | 双浏览器状态被误报 | High | Medium | 只执行 Chromium 或安装检测，没有真实 Edge channel 证据 | M11 runner 固定使用真实 `chrome`/`msedge` channel；clean canonical 的 Edge 全量 M3–M11 为 31/31，并记录产品版本 | 原生权限体验仍由 R-005/EG-006 跟踪；浏览器升级时复跑 | project-owner | Mitigated |
-| R-016 | fixture 来源或许可不可追溯 | Medium | Medium | 二进制无来源/hash | 合成 PCM 由脚本生成；格式 fixture 记录生成命令、编码器版本、许可和 SHA-256；M11 canonical fixture hash 5/5 通过 | 无合规 provenance 的 fixture 不入库 | project-owner | Mitigated |
-| R-017 | 现有 `test:spectrogram` 指向缺失 `test.ts` | High | Medium | 命令无法运行 | M3 已删除失效命令并建立正式 test/eval scripts；M3–M11 canonical 持续执行公开命令 | package scripts 变化时由 docs/harness 回归检测 | project-owner | Mitigated |
-| R-018 | 未定义 Tab 或未来上传需求侵入当前交付 | Medium | Medium | PR 添加未批准空白页、网络数据路径或服务端依赖 | Editor 已交付；Visualizer V0 产品已定义且架构正在评审；上传和其他页面继续由 PROD-013/014 门禁 | Visualizer 不得越过架构门禁；其余未定义能力不得进入 | project-owner | Open |
-| R-019 | bundle 已有约 1MB 警告继续增长 | Medium | Medium | `npm run build` chunk warning 增大 | Worker/renderer 按路由或 feature family 拆分，记录构建体积；M12 canonical 最大 JS chunk 为 1,284.55 kB；避免 Analyzer Three.js；owner 于 2026-08-28 重新审阅并以 W-001 接受当前候选 warning | 仅当前 Analyzer 候选为 Accepted；托管方案或正式包体预算确定、chunk 再增长或首屏问题复现时重新评审 | project-owner | Accepted |
-| R-020 | Meyda 5.6.3 `spectralFlux` 提取器引用未声明变量 `x` | High | High | 固定 previous/current frame 调用抛 `ReferenceError: x is not defined` | ADR-0005 项目 Flux 已实现；公式/首帧/静音/exact cursor golden 与 M8 clean canonical 28/28 通过，保留上游异常事实 | 产品阻断已缓解；Meyda 缺陷未修复，依赖升级时必须重新对照 | project-owner | Mitigated |
-| R-021 | Analyzer sticky、播放器层级、pressed 状态或内层滚动条破坏可用性与视觉一致性 | Medium | Medium | sticky 与 Header 间距过大；歌曲列表被遮挡；Windows Chrome 按钮保持按压外观；表格显示系统默认滚动条 | M8 Slice 0、macOS Chrome 多视口 canonical 与 owner Windows Chrome 人工签字均通过 | 相关交互或样式变化后重新执行多视口自动化与 Windows Chrome 补偿复核 | project-owner | Closed |
-| R-022 | Editor 循环策略、不可用恢复或旧 route cleanup 泄漏到其他页面/歌曲 | Medium | High | 离开后仍 repeat-one、自动重试循环、异歌被静默切换、旧请求覆盖新 route、出现第二 AudioContext/时钟 | ADR-0006 tokenized playback lease + ADR-0018 纯恢复决策与 route generation/signature/in-flight 防护；E8 25/25 canonical 覆盖同歌恢复、异歌显式切换、错误文件和竞态，并获 owner 批准 | lease 失效时强制回到 queue-next；任何自动播放、静默异歌、双 engine/clock 或重试循环仍阻断；route/lease/runtime ownership 变化时重开 | project-owner | Mitigated |
-| R-023 | 草稿覆盖、损坏导入或错误歌曲身份破坏当前工程 | Medium | High | 异歌静默覆盖、未知 schema 被接受、hash/时长不匹配仍应用、quota 后旧草稿丢失 | ADR-0007 strict codec + content hash + 独立原子 draft；E1 18/18 canonical 与 owner 签字覆盖 round-trip、unknown/invalid/hash/quota/abort/跨歌三选项；E5 35/35 canonical 回归 point/range JSON、draft 和 invalid overlap 原子拒绝 | 失败始终保留内存工程与旧 durable draft；schema/import/draft 变化时重开 | project-owner | Mitigated |
-| R-024 | 波形、tempo、事件与 overlay 在 zoom/DPR/resize 下错位 | Medium | High | 同一时间各层 x 差超过 1 CSS px、seek/marker/候选框中心偏移、缩短波形后极值裁切 | ADR-0008/0009/0011 共享 geometry + ADR-0018 `88px/72px`、6px 安全区和 marker 中心不变量；E8 canonical 在四视口、zoom/pan 与 DPR 的最大中心误差为 `0.009375 CSS px`，并获 owner 视觉门禁批准 | 单层不得私有化 viewport；时间轴高度、viewport、Canvas DPR 或 marker 几何变化时重开双浏览器验证 | project-owner | Mitigated |
-| R-025 | 大量事件 DOM、右键状态或键盘路径造成性能/可访问性回归 | Medium | High | 输入反馈 >100ms、遗留 pressed/capture/menu、键盘无法完成核心任务、异歌切换入口无可访问歌曲名或缩短轨道造成控件裁切 | E1–E9 历史性能/辅助技术证据保留；E10 增加单 owner 模式、editable shortcut guard、可见 focus 与对称 pointer cleanup | E10 改变 pointer/keyboard 优先级，故恢复 Open 观察；unit/integration/browser 与 owner review 通过后再缓解 | project-owner | Open |
-| R-026 | BPM 误识别或低置信度被写成用户事实 | Medium | Medium | silence/歧义输入自动填入错误 BPM、用户编辑值被异步结果覆盖 | 同 Worker retained PCM、typed reliable/low-confidence、仅唯一空且未编辑 segment 可写；E2 golden 覆盖 silence、歧义、60/100/128/小数与 stale，22/22 canonical 与 2026-08-27 owner 批准通过 | 低置信度保持空并提示手动输入；算法、阈值或第三方依赖变化时重开 | project-owner | Mitigated |
-| R-027 | Analyzer/Editor 争用 active features、Worker retained PCM 或 current cache | Medium | High | Editor 结果显示到 Analyzer、旧 generation 覆盖、返回 Analyzer 卡片丢失、出现第二 Worker | ADR-0006 consumer lease + existing generation/identity；E4 consumer/renderer 回归；E6 clean canonical 双浏览器各 20 次 Editor/Analyzer/Home 循环保持单 Worker/AudioContext并回归 M6–M11；2026-08-28 owner 批准 | 允许返回 Analyzer 后部分重算，不允许错误 identity 或 workspace 改写；runtime ownership 改变时重开 | project-owner | Mitigated |
-| R-028 | Analyzer 动态瀑布流产生重叠、视觉/DOM 顺序偏离或 Observer/RAF 泄漏 | Medium | High | 21 卡相交、容器高度不足、展开/收起后焦点或 DOM 顺序偏离、路由循环资源单调增长、`ResizeObserver loop` 警告 | M12 的纯最短列、实测高度、container/item Observer 与单 RAF 继续使用；M13 以 21 feature wrapper、按需 body、四视口和反复生命周期重新验证 | M13 canonical 17/17；Chrome/Edge M12 各 3/3，21 wrapper 四视口无重叠，masonry/card Observer 与 RAF 路由后归零 | project-owner | Mitigated |
-| R-029 | 快速展开/收起导致 FIFO、Worker generation、exact request 或持久化状态错序 | Medium | High | 短暂出现第五张展开卡、旧结果回填已收起卡、刷新恢复旧队列、旧 save 把新状态标为 ready | 纯原子 reducer；Coordinator cancel/generation/identity；exact 清理；不可变 snapshot、串行 save 与 revision guard；unit/integration/双浏览器快速序列 | M13 unit 16/16、integration 12/12；双浏览器快速十连切换、刷新前后单 Worker/精确值和 FIFO 年龄恢复通过 | project-owner | Mitigated |
-| R-030 | 21 张稳定卡增加 DOM、布局、Canvas 与 Observer 资源压力 | Medium | High | 首屏过慢、收起卡仍有 Canvas/Observer、Canvas 超过活动 renderer 上限、反复展开或路由后计数增长 | 折叠态只保留语义 DOM；展开才挂载 body/Canvas/内部 Observer；最多四项；资源计数、输入反馈、长任务和 20 次生命周期回归 | M13 双浏览器默认 0 Canvas、活动上限 4/八 Canvas；15 分钟最大反馈 17.5ms、归因长任务 0，资源回归无单调增长 | project-owner | Mitigated |
-| R-031 | 自定义顺序与 DOM/masonry/focus/Canvas 身份错位 | Medium | High | order index、DOM 和视觉输入不同；排序关闭 details、丢焦点或重建 Canvas | 完整 permutation、feature keyed wrapper、drop 时一次提交、无位移动画；M14 unit 24/24 与 Chrome/Edge 各 3/3 验证 DOM/data/masonry 顺序、焦点、details/Canvas identity、reload/切歌/reset 和 FIFO 独立 | 交互、key 或 masonry 输入契约变化时重跑 M14 | project-owner | Mitigated |
-| R-032 | Pointer capture、auto-scroll、popup 或 drag RAF 未清理 | Medium | High | 取消后仍滚动、遗留 capture/ghost/marker、路由循环 RAF 增长、touch 无法恢复滚动 | 单 pointer state、单 drag RAF；pointercancel/lostcapture/Escape/blur/unmount 对称 cleanup；句柄局部 touch-action；M14 双浏览器 threshold/auto-scroll/工作区外/Escape 取消无 console issue，M12/M11 路由资源回归继续通过 | 原生触控设备与未自动制造的 blur/lostcapture 由等价 cleanup 契约和后续人工回归补偿；实现变化时重开 | project-owner | Mitigated |
-| R-033 | featureOrder 损坏或与 queue/viewport 保存交错覆盖最新状态 | Medium | High | 非完整/重复 order 被恢复；旧 save 覆盖新顺序或 FIFO；刷新顺序倒退 | V1 可选字段严格 permutation；缺失只映射默认；全 workspace immutable snapshot、串行写入和 revision guard；M14 integration 19/19 与双浏览器 reload/切歌通过，排序 Worker analyze request 保持 `1 → 1` | schema、repository 或 workspace snapshot 变化时重跑 validator/revision/quota | project-owner | Mitigated |
-| R-034 | Visualizer ended policy 或旧 route lease 泄漏，导致播完切歌、Editor 不循环或离页后策略错误 | Medium | High | Visualizer ended 调用 next、旧 token release 覆盖新 route、出现第二播放时钟 | ADR-0014 通用 token lease；V1/V6 覆盖 Editor repeat-one、Visualizer pause-at-end、快速路由、刷新与 20 次生命周期 | V1 21/21 与 owner 人工门禁已通过；V6 继续回归，失败时回到 queue-next 并报告 | project-owner | Mitigated |
-| R-035 | 第五个特征、重复绑定或 stale 分析扩大 Worker/cache 或污染新模板 | Medium | High | active set >4、同 FeatureId 重算、旧 generation 更新场景 | 绑定 planner 去重并在 Coordinator 前拒绝第五项；generation + template/binding revision；V2 unit/integration/双浏览器验证 | 超限保持原绑定并解释；不能静默丢弃既有特征或创建第二 Worker | project-owner | Mitigated |
-| R-036 | Visualizer 工程、单草稿或 Editor 快照损坏/错歌，导致配置被部分覆盖 | Medium | High | 未知字段/模板被接受、hash/时长不匹配、quota/abort 丢旧草稿 | ADR-0015 strict codec、同歌快照、原子导入与独立 `draft/latest`；V1/V2 fault injection 和原生文件任务 | 失败保留内存工程与旧 durable draft；要求用户显式重新载入/导入 Editor 数据 | project-owner | Mitigated |
-| R-037 | 绑定平滑或场景运动依赖 RAF delta，seek/刷新/录制产生不同画面 | High | High | 同一绝对时间状态 hash 不同、seek 后粒子跳变、录制与预览不一致 | ADR-0016 绝对时间、seed 与可重放 smoothing；V3 固定余辉和 V4 rise/orbit 均使用 60Hz、一秒 checkpoint、歌曲/template/binding revision identity；V3 30/30 与 V4 34/34 clean canonical 的 seek/刷新 hash 通过 | V3 已获 owner 人工批准；V4 自动确定性已通过但审美与最终录制一致性仍由 V4/V5 人工和文件证据覆盖 | project-owner | Mitigated |
-| R-038 | Three.js scene/RAF/geometry/material 在切模板或路由时泄漏 | Medium | High | Canvas/WebGL/RAF 计数单调增长、旧场景仍更新 | 单 RendererHost、单 RAF、scene dispose；V3 clean canonical 已获批准；V4 34/34 clean canonical 的 20 次真实 Cube 切换保持 1 Canvas/host/renderer、scene 42/41、resolve/render 97/97，最大 frame 13.60ms | V3 已获 owner 长会话批准；V4 自动资源证据已通过，V4 owner 人工切换与 V6 双浏览器长会话继续复核 | project-owner | Mitigated |
-| R-039 | WebGL context lost 让预览空白或录制生成不完整文件 | Medium | High | `webglcontextlost`、恢复后参数/时间错位、录制仍显示成功 | V4 同 host preview recovery；V5 clean canonical 在 Chrome/Edge 注入录制中 context loss，均暂停、丢弃半文件、资源归零并由原 host 恢复，loss/restore/failure 为 1/1/0；owner 已批准 context 清理门禁 | 未完成录制绝不进入 ready/save；RendererHost、context 或录制 cleanup 顺序变化时重开 | project-owner | Mitigated |
-| R-040 | MediaRecorder/MIME、origin-clean 或时钟差异导致无音轨、不可回放或音画漂移 | Medium | High | `isTypeSupported` 失败、captureStream SecurityError、ffprobe 缺轨、漂移 >100ms | V5 clean canonical 的 Chrome/Edge 默认 720p30 均生成 VP9+Opus 双轨 WebM；页面静音后 peak RMS `0.766425`，Orthogonal A/V 峰值差为 2ms/3ms，错误和取消不产出半文件；owner 已批准真实回放与原生保存门禁 | optional preset 保持 typed unavailable；codec、浏览器、capture/tap 或保存实现变化时重开 | project-owner | Mitigated |
-| R-041 | 1080p60 实时录制造成掉帧、内存峰值或 Blob 过大 | High | High | selected preset 达不到 fps、分析归因任务 >50ms、Visualizer frame >=60ms、内存/Blob 持续增长、finalize 失败 | 固定 bitrate、录制锁与单 Blob 生命周期；V5 只开放默认 720p30；V6 关闭 MSAA、使用 `motion` hint 并优化等价 Cube 计算，三格式仍要求平均 30fps `±5%`，DEC-048 只容忍最多四帧 packet gap 与 `<60ms` Visualizer 峰值 | V6 clean canonical `V6-2026-09-03T16-33-03-497Z-ef12ce39` 54/54 通过，六个默认文件、900 秒四特征、资源门禁及 owner 长时制作/原生保存回放均已批准；三个 optional preset 继续在资源获取前 typed unavailable | project-owner | Mitigated |
-| R-042 | BPM 视图与波形使用不同模块、滚动或几何，或 boundary 删除/紧凑展示破坏节拍事实与可用性 | Medium | High | 标记条不等于 28px或与波形有间隙；辅助线向下；tempo caret 与波形相差 >1 CSS px；出现双水平滚动；控件换行；删错 segment/首 boundary；事件秒数变化；右键/键盘不可达 | ADR-0019 单 viewport/scroll 与纯删除；ADR-0020 波形时间列内紧凑条、12px 向上辅助线、无框单行编辑；E9 revised 29/29 canonical 和 owner 人工门禁均已通过 | E9 后续产品代码、时间几何、删除语义或滚动所有权变化时重开；不以隐藏控件、修改事件秒数或放宽 JSON validator 规避 | project-owner | Mitigated |
-| R-043 | 生成的 Visualizer 元素/预设违反绑定、确定性、资源或 strict project 契约 | Medium | High | 模糊请求直接改代码；全工程第五特征进入 Worker；目标引用错误；RAF delta/非 seed 随机；未知类型被宽松接受；资源累积；离线导出或 context 恢复失败 | DEC-082/[内容生成契约](visualizer/content-generation.md)的输入完整性与具体合同双门禁，替代 DEC-056/ADR-0021 的旧生成步骤；显式参数/数据/目标、固定时间、V3/组合/GPU/资源/离线媒体针对性检查 | 保持 Open；日常内容验证不关闭整体 readiness，越过 JSON/拓扑/四特征/资产许可边界时独立评审 | project-owner | Open |
-| R-044 | E10 小节批量选择、复制或移动产生跨轨误选、部分提交、ID/秒数漂移、pointer 泄漏或离页决策挂起 | Medium | High | 选择越过起始 lane/class；部分事件被跳过/覆盖；复制复用 ID；移动改 ID；冲突后工程变化；cancel 后提交；route guard Promise 未解析 | ADR-0022 单 owner transient state；纯 command 预校验后一次提交；typed errors；pointercancel/lostcapture/Escape；原生 dialog 安全默认；E10 success/failure/boundary 矩阵 | 完整 E10 canonical 或 owner 补偿 evidence 与人工交互门禁通过后缓解；批量范围、冲突、快捷键或 route dialog 改变时重开 | project-owner | Open |
-| R-045 | Visualizer 原生全屏状态、自动隐藏控制栏或录制/route 生命周期分叉，导致控件不可恢复、播放时间变化或资源泄漏 | Medium | High | fullscreenElement 与按钮不一致；paused 控件消失；底部热区无效；进入/退出改变播放；录制锁后仍停留全屏；timer/listener 残留 | ADR-0023 以 fullscreenchange 为事实源、唯一 2 秒 timer、同 workspace/Canvas/RendererHost/RAF、录制锁主动退出与卸载清理；owner 审阅 FS-G01–FS-G06 | 本轮按 owner 指令不执行自动化，typecheck/build 只证明可运行；owner 交互与视觉确认前保持 Open | project-owner | Open |
-| R-046 | WebGPU/adapter、ORT 算子或四个 FT ONNX 图不兼容，浏览器分离无法启动 | High | High | 缺 navigator.gpu、session create 失败、图 unsupported、实际 kernel 分配与预期不符 | 首切片逐模型 Chrome/Edge session/短段 parity 与后端记录；显式 typed error；不以整图 CPU 或小模型掩盖失败 | 用户可转人工或显式 mix-only 节拍；ORT/图/backend/支持矩阵变化时重开 | project-owner | Open |
-| R-047 | 重采样、分段 overlap-add、滤波延迟或 stem/WAV 长度让标记和视频漂移 | Medium | High | 首尾静音消失、接缝脉冲错位、duration 超界、导出帧数不符 | 原解码 PCM 唯一基准；canonical hash、有界分块；44.1/48kHz/静音/脉冲拼接 golden，尾部最多一 sample 校正与 WAV/A/V 检查 | 模型/重采样/config/codec 改变时复跑；浏览器解码差异以 source identity 隔离 | project-owner | Open |
-| R-048 | 模型下载、revision/hash、ORT JS/WASM assets 或许可证来源漂移，缓存不可复现 | High | High | 半成品被命中、模型 SHA 不符、浮动 main、runtime asset 版本不同、许可缺项 | 四个 immutable artifact/SHA/size；runtime/assets/config 锁定；下载进度/取消/断网/checksum fault；校验后发布与来源 attribution | 本轮只核对发布指针，未下载 bytes 或验证 ORT 版本；任何 artifact/runtime 变化时复核 | project-owner | Open |
-| R-049 | 十五分钟歌曲在 RTX 4060 Laptop 8GB 超过十五分钟或浏览器/GPU 内存耗尽 | High | High | 四模型 + beat 总处理超时、device lost/OOM、主线程长任务、无进度 | 单 session/有界分段/OPFS 流式写；下载另计；参考机 wall-clock、内存/显存与 UI/progress 门禁；失败不静默降级 | fp16weights仍为fp32 compute；2026-10-04完整Chrome分离1011.9541秒，超过900秒；warning日志候选长曲未重验。owner要求本轮收尾并下次提醒，风险仍Open；低于参考机不承诺同等性能 | project-owner | Open |
-| R-050 | 取消、换歌、离页或 Worker 崩溃后残留 GPU/session/临时 OPFS 或迟到结果 | Medium | High | 5 秒后 temp 未清理/登记、session 增长、旧结果发布工程、下载取消仍写完整 entry | job/source/generation 校验；取消 fetch、释放 tensor/session、必要时 terminate 分离 Worker；temp/complete 发布与残留登记；race/resource tests | 浏览器终止时需下次初始化登记清理；不能通过取消删除旧完整模型/结果 | project-owner | Open |
-| R-051 | 10GB 配置与 origin quota 不一致、IDB/OPFS 跨存储失败或 cache identity 不完整 | High | High | 写时 quota exceeded、metadata 指向残缺文件、artifact hash 错、无提示驱逐 | 模型/结果/temp 总量与 navigator.storage estimate；写时异常；checksum、先 artifact 后 metadata 发布；显式列表/清理，无自动 LRU | quota 估算不是保证，浏览器可清除 origin 数据；schema/容量/策略改变时重开 | project-owner | Open |
-| R-052 | 单专用模型冒充四轨，分离质量不足或 other 被误称 lead | High | High | role/row 不符、非对应输出被当完整 stem、人声/鼓泄漏、UI 显示 lead | 四模型按 drums/bass/other/vocals 专用 row 各取一次；reference parity、合成四轨与 owner 歌曲复核；waveform/energy/WAV/provenance | 上游质量不能替代浏览器实测；用户可拒绝/人工映射，模型/角色变化时独立评审 | project-owner | Open |
-| R-053 | TS 逐拍/局部 tempo 在变化 BPM、静音、空鼓轨、半速/倍速或低置信度中误导用户 | High | High | 静音假 beat、变化被拉平、空 drums 删除 mix、算法分数被称概率、伪造 4/4/downbeat | mix 主输入 + drums 辅助；DP/interval/version/config golden；歧义/gap 警告；无可靠 beat 为空；小节起点/BPM/拍号由用户确认 | 复杂曲仍需人工复核；评分/阈值/聚合或自动 meter 能力变化时重开 | project-owner | Open |
-| R-054 | rerun/apply 或 tempo 修改后旧快照覆盖用户数据或驱动画面 | Medium | High | hash 冲突仍写、未选字段变化、rerun 自动刷新、Editor tempo 变化仍使用旧 beat map | 只读 proposal + 逐项 diff/确认 + canonical hash；用户 tempo/marker/binding 保留；显式一起刷新 Editor snapshot 与派生 map；stale preflight；冲突/部分应用测试 | 用户仍需确认替换/刷新，持久化失败保留 dirty/export；apply/刷新/revision 语义变化时重开 | project-owner | Open |
-| R-055 | V1→V2 丢 binding、snapshot 膨胀/失配、派生 downbeat 被当模型事件或长期双写 | Medium | High | 迁移不确定、旧字段变化、V1/V2 草稿并存、工程嵌音频/handle、source/meter provenance 不符 | 纯单向迁移 + V2-only writes；strict codec/size golden；UInt16 compact；不嵌 stem/model/handle；identity、editor-tempo-derived 与 beat resolver 校验 | V2 不降级导出 V1；新工程需要独立 eval，source/schema/codec 改变时复核 | project-owner | Open |
+## 验证与证据规则
 
-## Review Rule
-
-- 每个 delivery 里程碑至少检查与其相关的风险、触发器和验证证据。
-- 风险只有在缓解措施有可复现证据时才能标记 Mitigated。
-- `Accepted` 表示已知平台事实被接受，不表示无需实现降级路径。
-- 新的高影响风险或剩余风险超过已批准范围时，停止进入下一里程碑并由 `project-owner` 决策。
-- Analyzer R-001–R-021 的历史状态继续由 M3–M11 evidence 支持；R-028–R-030 由 M13、R-031–R-033 由 M14 clean canonical 缓解。Editor E8 只重开 R-022、R-024、R-025；E9 以新 R-042 覆盖 tempo lane/delete 变化并回归 R-023–R-026，历史 canonical 与风险证据不改写。
-- `project-owner` 于 2026-09-02 批准 Visualizer V0 架构、R-034–R-041 与 ADR-0014–0017，并开放 V1–V6 execution planning。V1–V6 的可复现证据和 owner 审批现已完成，R-034–R-041 均为 `Mitigated`；整体 readiness 和生产上线仍需独立决策。
-- Visualizer V1 clean canonical `V1-2026-09-02T07-03-26-973Z-fd44c892` 在 commit `fd44c8921a534c22b2362ccffff7ec9e46f3ff02` 上 21/21 通过，并于 2026-09-02 获 owner 人工批准；R-034 据此改为 `Mitigated`。V2 clean canonical `V2-2026-09-02T08-46-21-778Z-769faafe` 26/26 通过并于同日获 owner 批准，R-035、R-036 据此改为 `Mitigated`。V3 clean canonical `V3-2026-09-02T13-32-42-513Z-89be30eb` 在 implementation commit `89be30eb23d4e53d2c38f24e111cd1af7ec0840d` 上 30/30 通过；`project-owner` 于 2026-09-03 批准 canonical、Orthogonal Lines、确定性余辉和单 RendererHost，R-037、R-038 据此改为 `Mitigated` 并开放 V4。V4 clean canonical `V4-2026-09-02T17-47-40-271Z-5c2d24a3` 34/34 通过并于 2026-09-03 获 owner 批准、关闭 V4；它覆盖 R-039 的实时预览恢复，但录制中 context loss 尚未实现，因此 R-039 保持 `Open` 并在 V5 继续验证。
-- V5 clean canonical `V5-2026-09-03T03-49-31-211Z-9b5af09c` 在 implementation commit `9b5af09c5846415a8e5465e710e6095f1e7db310` 上 40/40 通过；默认 720p30 双浏览器、同步、录制中 context abort、命令锁、资源清理与 owner 人工门禁均已批准。R-039/R-040 据此改为 `Mitigated`，R-041 继续交由 V6 的 15 分钟四特征与最终资源门禁。
-- V6 clean canonical `V6-2026-09-03T16-33-03-497Z-ef12ce39` 在 implementation commit `ef12ce397d0b1a054ce797bfa1b9ff5eb5af61cd` 上 54/54 通过；2026-09-04 owner 批准双浏览器制作、保存/回放、长时操作和清理门禁，R-041 据此改为 `Mitigated`。该状态不等于 optional preset 支持或生产上线批准。
-- E8 clean canonical `E8-2026-09-03T04-07-28-904Z-84d9435c` 在 implementation commit `84d9435cc6e8d1edb0932ff1b8dcd1b84dff32b5` 上 25/25 通过；owner 于 2026-09-03 批准 canonical、时间轴密度、恢复语义与 marker 可读性门禁，R-022/R-024/R-025 据此改为 `Mitigated`。
-- E9 revised clean canonical `E9-2026-09-04T03-51-33-088Z-13614673` 在 implementation commit `13614673bbf4d824f2ee109d36e04de6b3f8aabd` 上 29/29 通过；owner 于 2026-09-04 批准紧凑条视觉、共享滚动、删除和标记交互门禁，R-042 据此改为 `Mitigated`。旧 E9 run 继续为 `pre-revision`。
-- 2026-09-04 的 DEC-056/ADR-0021 新增 R-043。当前只交付场景生成 Skill 与门禁，不存在第三个场景实现证据；因此风险保持 `Open`，直到具体场景完成强制矩阵并重新评审 Visualizer readiness。
-- 2026-09-04 的 DEC-057/ADR-0022 打开 E10 并新增 R-044。E10 改变 point/range pointer 与 keyboard 优先级，因此 R-025 从历史 `Mitigated` 恢复为 `Open` 观察；E1–E9 evidence 本身不改写。
-- 2026-09-04 的 DEC-058/ADR-0023 新增 R-045。owner 明确跳过本轮自动化并自行审阅，因此实现即使通过 typecheck/build 也不缓解该风险；V1–V6 已批准资源证据不被反向改写。
-
-- 2026-10-04，owner 批准浏览器处理风险登记；R-046–R-055 全部保持 Open，模型兼容、质量和性能均待实测。
-
-## Processing P1 Observation — 2026-10-04
-
-R-046/R-048 的兼容风险已有实际失败：固定四模型 bytes 全匹配，但 clean candidate `9198b37` 的 Chrome/Edge 均在 `/real_istft/ConstantOfShape` 创建 session 失败，实际图内 value 为 DOUBLE。见 [P1 evidence](../quality/processing/evidence-index.md)。R-046–R-055 仍全部 Open；P1 专项及负向生命周期通过不替代真实推断、parity、试听、性能或集成缓解证据。
+- 按实际改动复核对应风险，不要求普通任务新建阶段计划、风险副本或readiness。只有可复现证据支持且满足相应人工边界，才调整风险状态。
+- 验收阈值和独立oracle见 [Analyzer](../quality/validation.md)、[Editor](../quality/editor/validation.md)、[Visualizer](../quality/visualizer/validation.md)、[processing](../quality/processing/validation.md)。故障注入不等于真实GPU/OS/听感验证。
+- [Analyzer readiness](../quality/release-readiness.md)的W-001–007、[Editor readiness](../quality/editor/release-readiness.md)的W-ED-001–006及[Visualizer readiness](../quality/visualizer/release-readiness.md)各绑定原候选。DEC-074/075不自动关闭完整P1/P2或整体readiness。
+- PROD-015继续阻断生产发布。改变范围、隐私、支持矩阵、性能阈值、工程格式、重要架构或发布决定由owner确认；缺失必要输入只阻断依赖它的工作。

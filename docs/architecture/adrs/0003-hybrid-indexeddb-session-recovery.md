@@ -1,12 +1,11 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-08-26
+last_reviewed: 2026-10-19
 upstream_docs:
   - "docs/product/scope.md"
-  - "docs/architecture/system-design.md"
-  - "docs/architecture/interface-contracts.md"
-next_action: "M11 双浏览器恢复与 Edge 原生权限已批准；在 readiness 中披露权限边界"
+  - "docs/context/system-map.md"
+  - "docs/architecture/shared-runtime-contracts.md"
 ---
 
 # ADR-0003: Hybrid IndexedDB File-Handle and Current-Blob Recovery

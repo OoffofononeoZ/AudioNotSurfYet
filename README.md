@@ -2,6 +2,8 @@
 
 Vue 3 / TypeScript / Vite 浏览器音频工作台。项目状态、技术契约和当前验证缺口见 [上下文入口](docs/context/index.md)，任务规则与 7 个项目 skills 见 [AGENTS.md](AGENTS.md)。
 
+文档按当前页面和领域维护：接口从共享运行时及 Analyzer/Editor/Visualizer 页面进入，验证要求集中在领域 validation。普通任务更新相关专题，过程反馈放在交付中；旧阶段产物已清理，历史由 Git 查回，必要证据与未解决缺口继续保留。
+
 ## 本地运行
 
 使用 Node.js 24.18.0 / npm 11.x，按现有 lockfile 安装依赖。

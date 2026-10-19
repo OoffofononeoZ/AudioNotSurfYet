@@ -4,9 +4,9 @@ owner: "project-owner"
 last_reviewed: 2026-10-19
 upstream_docs:
   - "docs/product/scope.md"
-  - "docs/architecture/system-design.md"
-  - "docs/architecture/interface-contracts.md"
-next_action: "维护当前标记工作区交互；正式 readiness 独立评审"
+  - "docs/context/system-map.md"
+  - "docs/architecture/shared-runtime-contracts.md"
+
 ---
 
 # Editor Interaction Contracts

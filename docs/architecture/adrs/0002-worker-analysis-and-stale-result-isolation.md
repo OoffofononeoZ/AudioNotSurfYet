@@ -1,12 +1,11 @@
 ---
 status: approved
 owner: "project-owner"
-last_reviewed: 2026-08-26
+last_reviewed: 2026-10-19
 upstream_docs:
-  - "docs/product/success-metrics.md"
-  - "docs/architecture/system-design.md"
-  - "docs/architecture/interface-contracts.md"
-next_action: "M11 Worker/generation/资源边界已批准；在 readiness 中保留证据限制"
+  - "docs/product/scope.md"
+  - "docs/context/system-map.md"
+  - "docs/architecture/shared-runtime-contracts.md"
 ---
 
 # ADR-0002: Worker Full-Track Analysis and Stale Result Isolation

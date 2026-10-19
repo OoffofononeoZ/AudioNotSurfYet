@@ -1,117 +1,32 @@
----
-status: approved
-owner: "project-owner"
-last_reviewed: 2026-10-04
-upstream_docs:
-  - "docs/context/index.md"
-next_action: "浏览器处理目标术语已登记；实施后核对 provenance/tempo 刷新与当前代码，fullscreen 仍待 owner 审阅"
----
+# 当前项目术语
 
-# Glossary
+核查日期：2026-10-19。术语对应当前源码，不用历史里程碑名称替代实际接口；入口见[system map](system-map.md)。
 
-| Term | Definition | Why it matters | Related docs |
-| --- | --- | --- | --- |
-| AudioNotSurfYet | 本仓库与计划使用的项目名；`package.json` 当前包名仍为 `audiosurf` | 名称尚未形成单一代码级来源 | [index](index.md) |
-| `AudioEngine` | 独占实时 AudioContext、AudioBuffer、source、Analyser 和 Gain 的播放服务 | 所有页面共享同一播放时钟和资源生命周期 | [ADR-0001](../architecture/adrs/0001-single-audio-engine-and-session-state.md) |
-| `AudioSessionService` | 在 store 外拥有 File、封面 URL、播放命令、ended 循环、generation 和单 RAF 的应用服务 | 把运行时浏览器资源与可序列化事实分开 | [system map](system-map.md) |
-| `audioSessionStore` | 保存 TrackRecord 队列、当前歌曲、PlaybackSnapshot、当前能量和 AnalysisSnapshot 的 Pinia store | 持久化与 UI 只能依赖序列化状态；PCM、Worker 和 compact payload 不进入 `$state` | [interface contracts](../architecture/interface-contracts.md) |
-| MusicBar | 固定在共享布局底部的播放、队列、元数据、进度和能量灯带 UI | 只读取共享状态并发送 session 命令 | [system map](system-map.md) |
-| style 0 | 音频能量驱动 `--coinc-process` 的悬浮灯带样式 | 只在实际播放/分析数据存在时应有能量进度 | [working agreements](working-agreements.md) |
-| style 1 | GSAP 独立循环旋转渐变的悬浮样式 | 动画值不是音频能量，切换时需显式复位 | [working agreements](working-agreements.md) |
-| style 2 | 展开为视口宽矩形的 MusicBar 样式 | 进度条由 CSS 固定在矩形上边 | [working agreements](working-agreements.md) |
-| audio energy | Meyda 从 Analyser 时域浮点数据中提取的 `energy` 特征 | 同时驱动 MusicBar 灯带和 Home 光线长度 | [system map](system-map.md) |
-| `--coinc-process` | MusicBar CSS 圆锥渐变使用的角度变量 | GSAP 与音频循环都可能写入，所有权切换需清楚 | [decision registry](decision-registry.md) |
-| playback offset | AudioEngine 保存的缓冲区秒数位置 | 暂停和 seek 以此为基点，播放时间由 AudioContext `currentTime` 计算 | [system map](system-map.md) |
-| `PlaybackSnapshot` | track、状态、秒数、时长、0–1 音量和 typed error 的可序列化事实 | UI 不从 AudioNode 或 RAF delta 推断播放状态 | [interface contracts](../architecture/interface-contracts.md) |
-| object URL | 浏览器为内嵌封面 Blob 创建的临时 URL | 音频解码不依赖它；封面在删除、清空和 dispose 时成对释放 | [working agreements](working-agreements.md) |
-| `SessionRepository` | 使用原生 IndexedDB V1 保存最近会话、文件句柄、当前 Blob 和当前分析缓存 envelope 的仓储 | 把浏览器持久化资源与 Pinia/播放运行时隔离 | [ADR-0003](../architecture/adrs/0003-hybrid-indexeddb-session-recovery.md) |
-| `PersistedSessionV1` | 带 runtime validation 的最近会话 schema；包含队列、当前歌曲、分析 UI 快照和持久化对象身份 | 未知 schema 不猜测迁移，必须显示可清除错误 | [interface contracts](../architecture/interface-contracts.md) |
-| current Blob | IndexedDB 中固定键保存的唯一当前歌曲 Blob | 保证刷新时当前歌曲无需再次授权即可回到 0 秒 paused；切歌时原子替换旧值 | [system map](system-map.md) |
-| restore state | 每个 TrackRecord 的 `available`、权限、缺失、内容变化、不可持久化或解码失败状态 | 使恢复失败可见且提供恢复访问/重新选择动作 | [interface contracts](../architecture/interface-contracts.md) |
-| content hash | 导入时对编码文件内容顺序计算的 SHA-256 | 恢复/重新选择时作为内容变化的最终身份判断；大小与 lastModified 只作快速信号 | [ADR-0003](../architecture/adrs/0003-hybrid-indexeddb-session-recovery.md) |
-| `FeatureRegistry` | 对 `analyzerData.ts` 21 个 FeatureId 穷尽映射的类型化静态契约，包含 shape、renderer、里程碑、维度和 Worker 支持状态 | 防止特征说明、计算、payload 与渲染器各自维护漂移列表 | [ADR-0004](../architecture/adrs/0004-typed-feature-registry-and-canvas-renderers.md) |
-| `AnalysisConfig` | frame size、hop size、window、MFCC 数、实际 sample rate、mono policy 与 display rate 的不可变配置 | 其规范字符串 SHA-256 是 cache identity 的一部分 | [interface contracts](../architecture/interface-contracts.md) |
-| `AnalysisSeries` | 单一 feature 在完整 track/config identity 下的紧凑 display payload、frame 数和时间步长 | UI 不得把不同歌曲、配置或 feature 的结果混用 | [ADR-0002](../architecture/adrs/0002-worker-analysis-and-stale-result-isolation.md) |
-| generation | AnalysisCoordinator 每次活动特征、歌曲或解码 revision 变化时推进的运行时世代号 | Worker 即使无法立即取消，旧响应也不能改变 store、cache 或后续 UI | [interface contracts](../architecture/interface-contracts.md) |
-| exact cursor | 针对当前秒数所在原始 frame 由 Worker 现场提取的非量化值 | 展示精确值不得以 compact display series 的反量化结果替代 | [eval plan](../quality/eval-plan.md) |
-| cache identity | `schemaVersion + trackId + contentHash + configHash + featureId` 的完整组合 | 只有全部字段匹配才允许 cache hit；partial hit 只计算 misses | [ADR-0002](../architecture/adrs/0002-worker-analysis-and-stale-result-isolation.md) |
-| compact payload | M6 定义的 scalar、frequency vector、category vector、waveform envelope、loudness、complex-derived 六类二进制显示数据 | 限制 postMessage/IndexedDB 体积，并由严格 decoder 拒绝损坏或错身份数据 | [interface contracts](../architecture/interface-contracts.md) |
-| analysis workspace | 有序 `activeFeatureQueue`（0–4 个唯一 feature）和一个持久化 viewport 的共享 Analyzer 状态 | 新工作区默认空队列；数组顺序同时表达活动集合和 FIFO 年龄 | [interface contracts](../architecture/interface-contracts.md) |
-| active feature queue | Analyzer 当前展开的 0–4 个唯一 FeatureId；展开第五项时移除队首并把目标追加到队尾 | 同一次响应式提交保证永不出现五张展开卡；收起再展开才刷新年龄 | [ADR-0012](../architecture/adrs/0012-analyzer-all-cards-fifo-active-analysis.md) |
-| V1 active-cards carrier | `PersistedSessionV1.activeCards` 的兼容保存字段；恢复按旧 slot 排序转为 FIFO，保存按队列索引重建 slot | 不升级 IndexedDB schema 也能恢复旧四槽会话，同时让运行时不再暴露 slot 语义 | [interface contracts](../architecture/interface-contracts.md) |
-| Feature order | V1保留的21项完整唯一数组；Analyzer当前原列表按FEATURE_IDS固定排列 | 旧顺序可读取，Analyzer初始化规范为默认；置顶由FIFO倒序派生 | [当前契约](analyzer-list.md) |
-| Drop edge | pointer target 卡的 `before`/`after` 插入边；由目标矩形上/下半区决定 | drop 才提交，不在拖动中实时重排 DOM | [interface contracts](../architecture/interface-contracts.md) |
-| Reorder action | 无需拖动的 `up`/`down`/`first`/`last` 动作 | click/tap 面板与键盘快捷键共享同一纯 reducer | [ADR-0013](../architecture/adrs/0013-analyzer-accessible-card-reordering.md) |
-| `M7_FEATURE_IDS` | M7 唯一允许选择的 `rms`、`amplitudeSpectrum`、`chroma` 常量集合 | 防止提前暴露 Energy、`spectralFlux` 或其他 M8 特征 | [decision registry](decision-registry.md) |
-| `M8_SCALAR_FEATURE_IDS` | M8 新增的 ZCR、Energy、9 个 spectral scalar 与 2 个 perceptual scalar | 把里程碑新增项与累计可选集合分开验证 | [ADR-0005](../architecture/adrs/0005-project-spectral-flux-and-silence-semantics.md) |
-| `M8_AVAILABLE_FEATURE_IDS` | M7 三项加 M8 十三项的累计 16 项集合 | UI、Worker 和持久化只开放已完成里程碑的 FeatureId | [interface contracts](../architecture/interface-contracts.md) |
-| `M9_FEATURE_IDS` | M9 新增的 `powerSpectrum`、`mfcc`、`buffer` 集合 | 分开验证三种 vector/waveform shape 与累计范围 | [interface contracts](../architecture/interface-contracts.md) |
-| `M9_AVAILABLE_FEATURE_IDS` | M8 十六项加 M9 三项的累计 19 项集合 | 固定 M9 历史边界，不随 M10 开放而改变 | [interface contracts](../architecture/interface-contracts.md) |
-| `M10_FEATURE_IDS` | M10 新增的 `loudness`、`complexSpectrum` 集合 | 分开验证两种结构输出与最终里程碑范围 | [interface contracts](../architecture/interface-contracts.md) |
-| `FEATURE_IDS` | Analyzer 与 Worker 的累计 21 项稳定全集 | 决定全部卡片的 DOM、键盘和读屏顺序；活动队列仍最多四项 | [interface contracts](../architecture/interface-contracts.md) |
-| signed FFT frequency | 1024-bin Complex Spectrum 中 bin 0–512 映射非负频率，513–1023 映射负频率镜像 | 防止把完整复数 FFT 的后半错误标成 0–Nyquist 第二份正频率 | [system design](../architecture/system-design.md) |
-| waveform envelope | Buffer 全曲显示层按时间桶保存的正负 min/max Int16 包络 | 避免缓存全部逐帧 1024 sample，同时 exact cursor 仍返回当前原始 frame | [system design](../architecture/system-design.md) |
-| Spectral Flux v1 | 相邻幅度频谱逐 bin 正向差的 L1 和；第一帧与零能量帧为 0 | 替代 Meyda 5.6.3 有缺陷的 extractor，并由项目 golden 固定语义 | [ADR-0005](../architecture/adrs/0005-project-spectral-flux-and-silence-semantics.md) |
-| shared viewport | 所有活动卡共同读取的 start/end/zoom；cursor 由播放快照实时派生且不持久化 | zoom、pan、click seek 和键盘 seek 在所有卡保持同一时间身份 | [system design](../architecture/system-design.md) |
-| TestLands | `/testlands` 下的试验页面 | 当前不属于已批准产品表面或稳定接口 | [index](index.md) |
-| Visualizer V0 | 围绕当前本地歌曲，把固定值、最多四个 Analyzer 特征和同歌 Editor 事件映射到单一场景模板的音频可视化制作台 | 产品意图、系统设计与 delivery 已批准；V1 只证明工作台基础，不能冒充动态场景已完成 | [scope](../product/scope.md) |
-| Visualizer V0-D | Visualizer V1–V6 的 execution、acceptance、test strategy 与 milestone planning 门禁 | 已于 2026-09-02 获批并关闭；V1–V6 均已完成 | [milestone plan](../delivery/visualizer/milestone-plan.md) |
-| Visualizer V1 workspace foundation | `/visualizer/:trackId?`、pause-at-end route lease、三栏/互斥抽屉、中性 16:9 单 Canvas、strict JSON V1 和独立单草稿 | 21/21 canonical 与人工门禁已批准；不含动态 binding、真实场景或录制 | [Visualizer evidence](../quality/visualizer/evidence-index.md) |
-| Visualizer V2 data binding | 模板参数的 constant、analysis、editor-event 来源，0–4 唯一特征 planner、同歌 Editor snapshot 与 60Hz 绝对时间 resolver | 已实现且 clean canonical 26/26 获 owner 批准；V3 已开放 | [Visualizer V2 eval](../quality/visualizer/v2-eval-plan.md) |
-| Visualizer V3 Orthogonal Lines | 在固定 `#020403` 背景中心用单 quad/shader 绘制横竖正交线；intensity 同时控制长度和 alpha，decay 是 scene-local 确定性余辉 | 30/30 canonical 与 owner 验收已批准，V3 为 Complete | [Visualizer V3 eval](../quality/visualizer/v3-eval-plan.md) |
-| Visualizer V4 Cube Swarm | 64 方块频谱核心环、seed 外围上升方块和三颗固定倾角轨道卫星；rise/orbit 从歌曲 0 秒按 60Hz checkpoint 积分 | DEC-041 与 quality contract 已批准；34/34 clean canonical 和 owner 验收均已通过 | [Visualizer V4 eval](../quality/visualizer/v4-eval-plan.md) |
-| recording tap | AudioEngine 在 Analyser 后、页面 Gain 前创建的唯一 MediaStream 音频分支 | 页面静音不改变导出，release 不影响 destination 播放 | [recording contract](../architecture/visualizer/recording-contract.md) |
-| recording capture lease | 同一 RendererHost 临时把现有 Canvas 切到 preset backing size、同步绘制首帧并在结束后恢复预览的内存 lease | 保持单 Canvas/renderer/RAF并固定录制分辨率 | [recording contract](../architecture/visualizer/recording-contract.md) |
-| ready Blob | MediaRecorder 完整结束并通过 tracks/chunks 校验后唯一保留在内存中的 WebM | 保存取消可重试；新录制或离页前必须显式保存或丢弃 | [Visualizer V5 eval](../quality/visualizer/v5-eval-plan.md) |
-| display intensity | V2 resolved intensity 经 0–1 裁剪后，再由 V3 60Hz scene-local decay 得到的显示能量 | 只决定对应方向的长度、主线 alpha 与 halo，不回写工程或 V2 resolved value | [binding contracts](../architecture/visualizer/binding-and-scene-contracts.md) |
-| `VisualizerRendererHost` | Visualizer 页面中独占现有 Canvas、单一 Three.js WebGLRenderer 和单一可取消视觉 RAF 的 host | 读取共享 PlaybackSnapshot；播放连续绘制，暂停/seek/参数/resize 单帧；模板切换不重建 host | [ADR-0016](../architecture/adrs/0016-deterministic-scene-registry.md) |
-| unique analysis feature budget | 一个 Visualizer 场景中所有参数去重后的 Analyzer `FeatureId` 集合，首版上限为四 | 固定值和 Editor 事件不计数；多个参数共享同一特征只占一个名额，第五项必须在 Worker 前拒绝 | [open questions](../product/open-questions.md) |
-| scene template | Visualizer 中一次独占输出画布的受控完整场景；首版只有 Orthogonal Lines 与 Cube Swarm | 不是可执行 Vue/JavaScript/shader 插件，也不允许多模板叠加 | [scope](../product/scope.md) |
-| Visualizer fullscreen playback | 对现有 `.visualizer-workspace` 使用浏览器原生 Fullscreen API 的瞬时观看模式 | 只显示同一 16:9 Canvas 与 transport；不持久化、不改变播放状态、不创建第二 renderer/RAF | [ADR-0023](../architecture/adrs/0023-visualizer-fullscreen-playback.md) |
-| `VisualizerProjectV1` | 绑定单首歌曲的 strict JSON 工程，保存输出预设、单模板/version/seed、完整 bindings 和可选 Editor 快照 | 不保存 Analyzer 数组、PCM、cache、renderer 或录制 Blob；未知字段和错歌原子拒绝 | [project format](../architecture/visualizer/project-format-v1.md) |
-| Visualizer binding | 模板 parameter 到 constant、analysis 或 editor-event source 的受控映射，可带有限 projection 与 numeric transform | 禁止任意代码；同一 FeatureId 去重后受四项上限约束 | [binding contracts](../architecture/visualizer/binding-and-scene-contracts.md) |
-| deterministic scene time | 由 project seed、绝对歌曲秒数和版本化算法决定的场景状态，不依赖前一 RAF delta | 保证从头播放、直接 seek、刷新和录制在同一时间得到相同画面 | [ADR-0016](../architecture/adrs/0016-deterministic-scene-registry.md) |
-| route playback lease | Editor/Visualizer 对唯一 AudioSessionService 的 tokenized 临时 ended policy；分别为 repeat-one 与 pause-at-end | 旧 route 无权改变新页面，离页恢复普通 queue-next | [ADR-0014](../architecture/adrs/0014-visualizer-runtime-leases.md) |
-| recording tap | AudioEngine 从 Analyser 到页面 Gain 之前分支出的唯一 MediaStream 音频 lease | 导出保留原歌曲音量，页面 mute/volume 不改变 WebM | [recording contract](../architecture/visualizer/recording-contract.md) |
-| lifecycle document | 带标准状态 frontmatter 的产品、设计、交付、质量、发布或复盘文档 | 下游工作依赖其批准与新鲜度 | [AGENTS.md](../../AGENTS.md) |
-| Analyzer candidate | 由固定实现 commit、canonical run、环境和 artifact hash 共同标识的 Analyzer-only 候选 | 后续文档或 Editor 变化不能反向扩大该候选的证据范围 | [release readiness](../quality/release-readiness.md) |
-| Ready with waivers | 候选没有当前范围内的代码 blocker，但只有在 reviewer 接受列明风险后才可进入发布规划 | 不等于风险已解决，也不等于生产上线授权 | [release readiness](../quality/release-readiness.md) |
-| production launch authorization | 对托管、域名、SPA fallback、回滚和监控均有决定后才形成的上线许可 | 当前 readiness 明确不提供该授权 | [open questions](../product/open-questions.md) |
-| Editor E0 | Editor 的产品意图与架构设计阶段；产品范围、系统设计、接口、风险和 ADR 已于 2026-08-26 获批 | 上游阶段已关闭，当前由已批准 delivery plan 管理 E1–E6 | [scope](../product/scope.md) |
-| Editor E0-D | 已完成的 Editor execution planning 门禁；四份专属 delivery 文档均为 `approved` | E1 已授权编码，但通过仍需自己的 canonical 与 owner evidence | [milestone plan](../delivery/editor/milestone-plan.md) |
-| 逆向制曲 | 对已有歌曲反向记录音符、音色和效果出现时间的标注过程 | 产物是数据工程，不修改 PCM、混音或生成伴奏 | [problem brief](../product/problem-brief.md) |
-| Editor playback lease | E1 已实现的 route-scoped runtime token；临时把当前 track ended 策略切为 repeat-one，只有当前 token 可恢复 queue-next | 防止旧 Editor cleanup 影响新 route，同时保持唯一 AudioEngine | [ADR-0006](../architecture/adrs/0006-editor-runtime-leases.md) |
-| analysis consumer lease | E1 已实现并获批准的 Analyzer/Editor 活动意图 token；只有最新 consumer 可设置 feature、请求 tempo/cursor 或释放 | E4 在单 Coordinator/Worker 内先请求 Buffer，再请求 Buffer + 一个 overlay；快速切换与 stale 结果不能污染 Analyzer workspace | [interface contracts](../architecture/interface-contracts.md) |
-| `EditorProjectV1` | E1 已实现的单曲 JSON 工程 envelope，使用内容 hash、tempo map、有序 lane 和 point/range event | 工程不保存 File/PCM/cache，未知 schema 或歌曲不匹配时拒绝导入 | [project format](../architecture/editor/project-format-v1.md) |
-| Editor draft | E1 已实现的独立 IndexedDB V1 唯一 `draft/latest`；内存先更新，quota/abort 不替换内存工程 | 与 Analyzer session V1 隔离，并实现同歌恢复与异歌覆盖确认 | [ADR-0007](../architecture/adrs/0007-editor-project-and-draft-boundary.md) |
-| lane | Editor 中一个具名 point/range 判别轨道，承载全部展开的 inner class 及其事件 | 名称不是 JSON identity；稳定 ID 与有序数组由 `EditorProjectV1` 固定 | [project format](../architecture/editor/project-format-v1.md) |
-| inner class | lane 内用户可见的细分类，例如音高或效果走向；新 lane 默认含 `default` | 点/范围唯一性与重叠规则以 lane 和 inner class 为作用域 | [scope](../product/scope.md) |
-| point event | E3 已实现的音符/短音色单点标记；秒数以微秒规范化持久化，显示与新建位置按当前网格吸附 | 同 lane、inner class 和规范化时间不得重复；zoom/tempo 变化不改写既有秒数 | [E3 eval plan](../quality/editor/e3-eval-plan.md) |
-| range event | E5 已实现的长音色/效果区间标记；持久化为半开 `[start,end)`，支持两阶段创建、取消、端点调整/回滚、右键/键盘删除与草稿/JSON 恢复 | 同 lane、inner class 不得重叠；相邻允许，不同分类和内部 point 可并存 | [E5 eval plan](../quality/editor/e5-eval-plan.md) |
-| tempo map | 由有序时间边界划分的节拍/拍号区间；一个 beat 固定为 `60/BPM` 秒，numerator 决定小节拍数，denominator 表达 beat 音符单位 | 驱动 measure/beat 线、单拍模式和点/范围事件吸附 | [Editor interactions](../architecture/editor/interaction-contracts.md) |
-| Editor timeline viewport | E2 已实现并保存于工程的 `startSeconds/endSeconds/zoom`；波形、网格、游标和 boundary 共用同一 CSS 时间映射 | 固定 1–64 zoom、指针锚点、pixel/25% pan 与 `<=1 CSS px` 对齐；播放 cursor 不持久化 | [system map](system-map.md) |
-| tempo estimate | E2 Worker 在 retained mono PCM 上以正向频谱差 onset envelope 和归一化 autocorrelation 产生的 reliable/low-confidence 结果 | 只在单一 unset metered segment 且 identity/用户 revision 仍匹配时自动写入；不使用第三方 BPM 包 | [E2 eval plan](../quality/editor/e2-eval-plan.md) |
-| adaptive grid | E3 已实现的 point 候选精度选择：按 12 CSS px 门槛在 1/16、1/8、1/4、1/2 和 1 beat 中取最细可靠单位 | 防止长歌曲缩小时产生视觉上无法精确命中的标记位置；只影响新操作，不重写既有秒数 | [E3 golden examples](../quality/editor/e3-golden-examples.md) |
-| single-beat segment | `0 <= BPM < 20` 输入规范化后的 tempo segment；无内部 beat/measure 和可编辑 meter，整段是一个候选单元 | 区分“整段只有一拍”与普通小数 BPM，不把无意义 BPM 写入工程 | [project format](../architecture/editor/project-format-v1.md) |
-| shared analysis canvas renderer | E4 抽取的纯 Canvas adapter；Analyzer card 与 Editor overlay 使用同一 feature definition、compact series、viewport 和 cursor 绘制契约 | 防止六类 renderer 在两个页面分叉，并允许单层 context/shape 错误隔离 | [ADR-0009](../architecture/adrs/0009-editor-overlay-renderer-boundary.md) |
-| pointer-through overlay | E7 修订的窗口级灰色半透明分析层；背景、全视口 Canvas、说明和空白不接收 pointer，只有复合入口、菜单、重试和三个垂直手柄接收输入 | 让固定浮层覆盖 Header 与工作台而不夺取底层命中 | [ADR-0011](../architecture/adrs/0011-editor-fullscreen-overlay.md) |
-| overlay visibility | 按歌曲 content hash 保存于 Editor preferences 的本地开关；与 JSON V1 中保留的上次 `featureId` 分离 | 同歌刷新恢复打开/关闭；导入工程不携带开关；关闭时 analysis 只保留 Buffer | [ADR-0011](../architecture/adrs/0011-editor-fullscreen-overlay.md) |
-| viewport-visible event DOM | 只为当前时间视口内可见 point/range 创建交互 DOM，全部空格与高密度网格由 Canvas 表达 | 允许 E6 验证 10,000 事件而不把容量门禁变成 schema 硬上限 | [Editor test strategy](../delivery/editor/test-strategy.md) |
-| compact workbench | Editor 固定顶栏、独立滚动工作区、常驻 MusicBar、细分隔线和 44px 轨道行 | 公共框架已替代历史双层工具栏；工程仍为 JSON V1 | [当前框架](editor-workspace.md)、历史 [ADR-0010](../architecture/adrs/0010-editor-compact-workbench.md) |
-| Editor canonical | 某个 E 里程碑在 clean HEAD 上执行的正式 eval run，绑定 commit、环境、日志和 summary hash | provisional 不能替代 canonical；owner 批准后才开放下一个 E 里程碑 | [Editor execution plan](../delivery/editor/execution-plan.md) |
+| 术语 | 当前含义/边界 | 依据 |
+| --- | --- | --- |
+| AudioEngine / AudioSessionService | 唯一播放上下文/时钟与命令编排，runtime资源不进Pinia | [共享契约](../architecture/shared-runtime-contracts.md) |
+| TrackId / content hash | session定位ID / 内容身份；工程按hash匹配，不混用 | [共享契约](../architecture/shared-runtime-contracts.md) |
+| PlaybackSnapshot | engine时钟、播放状态、试听来源/buffering等可序列化事实 | [audio.ts](../../src/types/audio.ts) |
+| route playback lease | 当前token有效，Editor/Visualizer临时repeat-one，释放恢复用户偏好 | [应用外壳](app-shell.md) |
+| analysis consumer lease | Analyzer/Editor/Visualizer互斥复用同Coordinator/Worker | [共享契约](../architecture/shared-runtime-contracts.md) |
+| activeFeatureQueue / activeCards | 当前最多四项FIFO / V1持久化slot carrier；无现行featureOrder字段 | [Analyzer接口](../architecture/analyzer/interface-contracts.md) |
+| FeatureRegistry / FEATURE_IDS | 当前特征shape/单位/renderer/提取来源，包含Wallpaper频谱 | [分析类型](../../src/analysis/types.ts) |
+| AnalysisSeries / exact cursor | ≤30Hz展示payload / 原始frame精确值，后者不用量化显示值 | [Analyzer验证](../quality/validation.md) |
+| generation / revision | 任务和来源的过期防护，取消后仍检查完整身份 | [共享契约](../architecture/shared-runtime-contracts.md) |
+| EditorProjectV1 | JSON V1、规范秒数、tempo、point/range及独立单草稿 | [工程契约](../architecture/editor/project-format-v1.md) |
+| MarkerTimeView | marker/overlay只读独立视图，1–10秒、播放线15%，不改工程viewport | [标记页](editor-marking.md) |
+| tempo / single-beat | BPM/meter派生网格 / 无内部拍网格的单个候选区间；事件秒数不随tempo移动 | [交互契约](../architecture/editor/interaction-contracts.md) |
+| point / range | 同lane/class/time唯一点 / 半开[start,end)范围，同分类不重叠、相邻允许 | [Project V1](../architecture/editor/project-format-v1.md) |
+| 数字实时录入 | 前十分类行1–9/0，在playing下按当前细分吸附，范围按取消/停止规则提交 | [Editor交互](../architecture/editor/interaction-contracts.md#数字键实时录入dec-085) |
+| FT / other | 四专用模型分别取drums/bass/other/vocals对应row；other不称lead | [模型表](../architecture/processing/model-artifacts.md) |
+| 分轨试听 / 自动标记 | 原曲/FT/辅助PCM共用transport；候选人工修正后显式V1应用，不等于P3逐拍 | [自动标记](../architecture/processing/editor-auto-marking.md) |
+| proposal / tempo-derived map | 尚未完成的只读处理提案 / 人工确认小节后派生beat/downbeat，非模型识别 | [未来目标](../architecture/processing/worker-and-project-contracts.md) |
+| VisualizerProjectV4 | 原子元素、顶层items、分组预设及内嵌资源快照；只接受V4 | [Project V4](../architecture/visualizer/project-format-v4.md) |
+| kernel / JSON资源包V1 | 应用内绘制算法 / 定义已有内核参数、默认绑定及组合的过渡版数据包 | [资源契约](../architecture/visualizer/resource-packages-v1.md) |
+| preset / 共同处理参数 | 持久化预设组 / 通过声明控件批量写子元素并提示差异，无参数继承 | [预设](visualizer-presets.md) |
+| binding / native | constant/Analyzer/native/适用Editor引用及变换；native不占四Analyzer额度 | [页面接口](../architecture/visualizer/interface-contracts.md)、[原生输入](visualizer-native-input.md) |
+| RendererHost / 手动导出租约 | 唯一Canvas/renderer/预览RAF所有者 / 以绝对帧编号独占绘制并恢复预览 | [离线导出](visualizer-offline-export.md) |
+| OPFS WebM File | 当前编码完成后的输出文件，保存取消/失败保留重试；不是旧ready Blob链路 | [离线导出](visualizer-offline-export.md) |
+| provisional / canonical / readiness | dirty反馈 / 绑定clean候选与环境的正式证据 / 独立整体评审，不自动继承历史通过 | [测试策略](../../skills/audiosurf-testing-strategy/SKILL.md) |
 
-## Approved Processing Target Terms（尚未实现）
-
-| Term | Definition | Why it matters | Related docs |
-| --- | --- | --- | --- |
-| Processor | 已批准的分离、节拍分析、提案确认工作区；每个阶段显式开始，失败保留人工制作路径 | 目标架构不等于现有运行时已提供能力 | [ADR-0024](../architecture/adrs/0024-browser-processing-runtime.md) |
-| FT specialist / fp16weights | htdemucs_ft 四专用 ONNX 权重；各自只取对应 row，存储压缩但仍 fp32 compute | 一个专用模型不能冒充四轨，文件大小不等于运行显存 | [模型契约](../architecture/processing/model-artifacts.md) |
-| algorithm-score | 内部 TS 自相关/DP 等算法产生的归一化评分，具体定义由 scoreVersion/config 标识 | 不代表神经网络概率或正确率保证 | [Worker 契约](../architecture/processing/worker-and-project-contracts.md) |
-| processing proposal | 只读、可拒绝的自动候选；apply 前须 source/hash 检查和逐项确认 | rerun 不隐式覆盖用户工程 | [ADR-0026](../architecture/adrs/0026-processing-proposals-and-user-ownership.md) |
-| editor-tempo-derived beat map | 用户确认小节起点/BPM/拍号后，从 Editor tempo map 派生的 beat/小节首拍 | 原始检测只有 beat；tempo 改动后需显式一起刷新快照/映射 | [ADR-0027](../architecture/adrs/0027-visualizer-project-v2-processing-bindings.md) |
-| Project V2 / milestone V2 | schemaVersion 2 的新工程，与历史第二个 Visualizer 交付里程碑 V2 分开理解 | 历史 V2 binding evidence 不证明新 JSON schema 已实现 | [V2 工程契约](../architecture/processing/worker-and-project-contracts.md) |
-## Approval Record
-
-`project-owner` 于 2026-08-21 至 2026-08-28 依次批准 Analyzer M7–M12、Analyzer readiness 与 Editor E1–E6。E7 compact workbench 的旧 44/44 run 为 `pre-revision`；全屏浮层修订版 46/46 canonical 于 2026-08-31 获批准并关闭。M13 21 卡/FIFO 计划同日获批，clean canonical 17/17 通过后 Analyzer readiness 已恢复。
-
-2026-10-04，owner 随浏览器架构计划授权登记上述获批目标术语；它们不更新当前 system map 的实现事实。
+历史M/E/V编号仅标识原里程碑/候选，不是当前工程schema。旧Visualizer V1/V2/V3迁移、单SceneRegistry与实时MediaRecorder不再是当前术语或开发入口。

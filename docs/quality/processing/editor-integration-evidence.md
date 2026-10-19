@@ -4,8 +4,8 @@ owner: "project-owner"
 last_reviewed: 2026-10-12
 upstream_docs:
   - "docs/architecture/processing/editor-separation.md"
-  - "docs/delivery/processing/execution-plan.md"
-  - "docs/delivery/processing/test-strategy.md"
+  - "docs/delivery/processing/roadmap.md"
+  - "docs/quality/processing/validation.md"
 next_action: "DEC-074下本轮功能验证与接入收尾完成；完整P1/P2正式评审和原生OS证据独立"
 ---
 

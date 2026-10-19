@@ -4,9 +4,9 @@ owner: "project-owner"
 last_reviewed: 2026-09-04
 upstream_docs:
   - "docs/product/scope.md"
-  - "docs/architecture/system-design.md"
-  - "docs/architecture/interface-contracts.md"
-next_action: "在 Editor release-readiness 中复核 JSON V1 与候选 src identity"
+  - "docs/context/system-map.md"
+  - "docs/architecture/shared-runtime-contracts.md"
+
 ---
 
 # Editor Project Format V1

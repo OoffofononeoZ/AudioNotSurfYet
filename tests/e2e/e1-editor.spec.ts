@@ -1,31 +1,19 @@
-import {
-    expect,
-    test,
-    type Page,
-} from '@playwright/test';
+import { expect, test, type Page } from '@playwright/test';
 import path from 'node:path';
-import {
-    chooseFiles,
-    installFilePickerStub,
-    queuePickerFiles,
-    savedPickerEntries,
-} from '../support/file-picker';
+import { chooseFiles, installFilePickerStub, queuePickerFiles, savedPickerEntries } from '../support/file-picker';
 
 const REPOSITORY_ROOT = path.resolve(import.meta.dirname, '../..');
 const AUDIO_DIRECTORY = path.join(REPOSITORY_ROOT, 'tests/fixtures/audio');
-const AUDIO_FILES = [
-    path.join(AUDIO_DIRECTORY, 'format-master.wav'),
-    path.join(AUDIO_DIRECTORY, 'format-master.mp3'),
-];
+const AUDIO_FILES = [path.join(AUDIO_DIRECTORY, 'format-master.wav'), path.join(AUDIO_DIRECTORY, 'format-master.mp3')];
 
 const captureBrowserIssues = (page: Page): string[] => {
     const issues: string[] = [];
-    page.on('console', (message) => {
+    page.on('console', message => {
         if (['error', 'warning', 'warn'].includes(message.type())) {
             issues.push(`console.${message.type()}: ${message.text()}`);
         }
     });
-    page.on('pageerror', (error) => issues.push(`pageerror: ${error.message}`));
+    page.on('pageerror', error => issues.push(`pageerror: ${error.message}`));
     return issues;
 };
 
@@ -56,13 +44,14 @@ test('opens the current track from Header and preserves the E1 draft on refresh'
     await expect(playbackToggle).toHaveAttribute('aria-label', '暂停');
 
     await page.getByTestId('export-editor-project').click();
-    await expect.poll(async () => (await savedPickerEntries(page)).length)
-        .toBe(1);
+    await expect.poll(async () => (await savedPickerEntries(page)).length).toBe(1);
     const exported = (await savedPickerEntries(page))[0]!;
     expect(exported.name).toBe('format-master.audiosurf-editor.json');
-    const exportedProject = JSON.parse(
-        Buffer.from(exported.base64, 'base64').toString('utf8'),
-    ) as { format: string; schemaVersion: number; track: { contentHash: string } };
+    const exportedProject = JSON.parse(Buffer.from(exported.base64, 'base64').toString('utf8')) as {
+        format: string;
+        schemaVersion: number;
+        track: { contentHash: string };
+    };
     expect(exportedProject).toMatchObject({
         format: 'audiosurf-editor',
         schemaVersion: 1,
@@ -125,19 +114,14 @@ test('keeps invalid project import atomic and exposes recovery for an invalid ro
     await installFilePickerStub(page);
     await page.goto('/');
     await chooseFiles(page, [AUDIO_FILES[0]!]);
-    await expect(page.locator('#music-bar-container')).toHaveAttribute(
-        'data-playback-state',
-        'playing',
-        { timeout: 20_000 },
-    );
+    await expect(page.locator('#music-bar-container')).toHaveAttribute('data-playback-state', 'playing', {
+        timeout: 20_000,
+    });
     await page.getByTestId('header-editor-link').click();
     await expect(page.getByTestId('editor-ready')).toBeVisible({ timeout: 20_000 });
     const title = await page.locator('#music-info-container').textContent();
 
-    const invalidPath = path.join(
-        REPOSITORY_ROOT,
-        'docs/quality/editor/golden-examples.md',
-    );
+    const invalidPath = path.join(REPOSITORY_ROOT, 'tests/fixtures/editor-invalid-project.txt');
     await queuePickerFiles(page, [invalidPath]);
     await page.getByTestId('import-editor-project').click();
     await expect(page.locator('.el-message--error')).toBeVisible();

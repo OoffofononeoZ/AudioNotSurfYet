@@ -3,10 +3,10 @@ status: approved
 owner: "project-owner"
 last_reviewed: 2026-08-21
 upstream_docs:
-  - "docs/architecture/system-design.md"
-  - "docs/architecture/interface-contracts.md"
+  - "docs/context/system-map.md"
+  - "docs/architecture/shared-runtime-contracts.md"
   - "docs/product/scope.md"
-next_action: "M8 Worker/golden/renderer/clean canonical 已获批准；后续里程碑持续回归项目 Flux 并保留上游缺陷事实"
+
 ---
 
 # ADR-0005: Project Spectral Flux and Zero-Energy Scalar Semantics
