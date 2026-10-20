@@ -7,7 +7,7 @@ export function validateMarkerInputs(input: unknown): MarkerInputContract[] {
     const ids = new Set<string>();
     return input.map(raw => {
         const v = record(raw, '标记输入');
-        keys(v, ['id', 'eventKind', 'selectionModes']);
+        keys(v, ['id', 'eventKind', 'selectionModes'], ['categorySelection']);
         const id = text(v.id, '标记输入 ID');
         if (
             !/^[a-zA-Z_][a-zA-Z0-9_.-]*$/.test(id) ||
@@ -24,7 +24,17 @@ export function validateMarkerInputs(input: unknown): MarkerInputContract[] {
             v.selectionModes.some(m => !['single', 'collection'].includes(m))
         )
             return invalid('标记输入类型或选择模式无效。');
-        return { id, eventKind: v.eventKind, selectionModes: [...v.selectionModes] } as MarkerInputContract;
+        if (
+            v.categorySelection !== undefined &&
+            (v.categorySelection !== 'single' || !v.selectionModes.includes('collection'))
+        )
+            return invalid('单分类约束只允许集合输入。');
+        return {
+            id,
+            eventKind: v.eventKind,
+            selectionModes: [...v.selectionModes],
+            ...(v.categorySelection === 'single' ? { categorySelection: 'single' } : {}),
+        } as MarkerInputContract;
     });
 }
 export function validateMarkerDefinitions(
@@ -38,13 +48,19 @@ export function validateMarkerDefinitions(
     if (!Array.isArray(input) || input.length !== contracts.length) return invalid('元素标记输入定义不完整。');
     return contracts.map((contract, index) => {
         const v = record(input[index], '元素标记输入');
-        keys(v, ['id', 'eventKind', 'selectionModes', 'label']);
+        keys(v, ['id', 'eventKind', 'selectionModes', 'label'], ['categorySelection']);
         const entry = validateMarkerInputs([
-            { id: v.id, eventKind: v.eventKind, selectionModes: v.selectionModes },
+            {
+                id: v.id,
+                eventKind: v.eventKind,
+                selectionModes: v.selectionModes,
+                ...(v.categorySelection !== undefined ? { categorySelection: v.categorySelection } : {}),
+            },
         ])[0]!;
         if (
             entry.id !== contract.id ||
             entry.eventKind !== contract.eventKind ||
+            (contract.categorySelection === 'single' && entry.categorySelection !== 'single') ||
             entry.selectionModes.some(m => !contract.selectionModes.includes(m))
         )
             return invalid('元素标记输入超出算法声明。');
@@ -96,6 +112,11 @@ export function validateMarkerBindings(
                 return [descriptor.id, { kind: 'single', laneId, eventId }];
             }
             keys(v, ['kind', 'laneId'], ['innerClassIds']);
+            if (
+                descriptor.categorySelection === 'single' &&
+                (!Array.isArray(v.innerClassIds) || v.innerClassIds.length !== 1)
+            )
+                return invalid('标记输入必须选择一个分类：' + descriptor.label);
             if (
                 v.innerClassIds !== undefined &&
                 (!Array.isArray(v.innerClassIds) ||

@@ -114,6 +114,12 @@ describe('VisualizerContentBriefV2', () => {
             },
         ];
         expect(validateContentBrief(value).status).toBe('READY_FOR_CONTRACT');
+        value.elements[0].markerInputs[0].categorySelection = 'single';
+        expect(validateContentBrief(value).status).toBe('READY_FOR_CONTRACT');
+        value.elements[0].markerInputs[0].selectionModes = ['single'];
+        expect(paths(value)).toContain('$.elements[0].markerInputs[0].categorySelection');
+        value.elements[0].markerInputs[0].selectionModes = ['single', 'collection'];
+        delete value.elements[0].markerInputs[0].categorySelection;
         value.elements[0].markerInputs[0].laneId = 'private-lane';
         expect(paths(value)).toContain('$.elements[0].markerInputs[0].laneId');
         delete value.elements[0].markerInputs[0].laneId;

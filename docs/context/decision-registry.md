@@ -42,6 +42,10 @@
 | DEC-088 / 2026-10-20     | owner 以实施本轮外部资源库计划授权迁移现有 13 元素/两预设到 WheresYourElements/assets、只读目录选择/句柄恢复/刷新、清理内置资源和升级独立 skill 2.0.0；替代 DEC-087 的仅项目内目录及暂不升级 skill 限制。V5 自包含与算法隔离不变，不含 ZIP、外部 Git/历史目录、未来内容合同或发布授权                                           |
 | DEC-089 / 2026-10-20     | owner 要求开放 Editor 标记响应并以“Implement the plan.”批准 ABI 2 markerInputs/timingInput、V5 可选 markerBindings、项目内单点/单范围及轨道分类集合查询；外部包仅声明，初始化无标记权限。仅升级既有 fade，保留插值/终值/重叠语义，其余 14 资源不变；独立 skill 2.1.0 同步到外部，未来新内容仍逐项批准，不含 BPM、识别候选或发布 |
 
+## DEC-090 — 点标记直线测试元素 — 2026-10-20
+
+DEC-090 / 2026-10-20：owner 批准两份点标记直线具体内容合同，并以“Implement the plan.”批准实施：输入限定轨道内一个分类、每点独立叠加、相邻位置至少差 5%、点时刻最亮及 40/60/100ms 包络。新增可选 categorySelection 单分类约束与点查询 includeEnd，保留 ABI 2/V2/V5 及既有输入语义；skill 2.2.0 同步外部。资源放外部 assets，不创建 Git/历史目录，不授权其他新内容或发布。
+
 ## DEC-075 — Editor Audition and Limited Transcription — 2026-10-12
 
 DEC-075新增能力验证曾被自动审批引用DEC-055拒绝，owner随后明确“允许本轮新增能力验证，旧readiness限制保留”：允许本轮模型/试听及回归使用本地端口与Chrome/Edge，含必要沙箱外执行；不将其扩展为旧Editor readiness重跑或发布授权。

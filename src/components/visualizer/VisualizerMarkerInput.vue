@@ -39,6 +39,15 @@
                         @change="changeEvent"
                 /></label>
             </template>
+            <label v-else-if="categorySelection === 'single'" class="viz-field"
+                ><span>分类</span
+                ><AppSelect
+                    :model-value="classId"
+                    :options="classes"
+                    :label="label + '分类'"
+                    :disabled="disabled"
+                    @change="changeClass" />
+            </label>
             <div v-else class="viz-marker-classes">
                 <label class="viz-field"
                     ><span>全部分类</span
@@ -75,6 +84,7 @@ const props = defineProps<{
     label: string;
     eventKind: 'point' | 'range';
     selectionModes: Array<'single' | 'collection'>;
+    categorySelection?: 'single';
     disabled?: boolean;
 }>();
 const emit = defineEmits<{ change: [binding: MarkerBinding] }>();
@@ -87,7 +97,9 @@ watch(
         if (b.kind !== 'unbound') {
             laneId.value = b.laneId;
             mode.value = b.kind;
-        }
+            if (props.categorySelection === 'single' && b.kind === 'collection')
+                classId.value = b.innerClassIds?.[0] ?? '';
+        } else if (props.categorySelection === 'single') classId.value = '';
     },
     { immediate: true },
 );
@@ -101,7 +113,10 @@ const lanes = computed(() => [
         .map(l => ({ value: l.id, label: l.name })) ?? []),
 ]);
 const classes = computed(() => [
-    { value: '', label: '全部分类' },
+    {
+        value: '',
+        label: props.categorySelection === 'single' && mode.value === 'collection' ? '选择一个分类' : '全部分类',
+    },
     ...(lane.value?.innerClasses.map(c => ({ value: c.id, label: c.label })) ?? []),
 ]);
 const singleValue = computed(() => (props.binding.kind === 'single' ? props.binding.eventId : ''));
@@ -129,9 +144,12 @@ const modes = computed(() =>
 );
 function changeMode(value: string | number) {
     mode.value = value as 'single' | 'collection';
+    classId.value = '';
     emit(
         'change',
-        mode.value === 'collection' && lane.value ? { kind: 'collection', laneId: laneId.value } : { kind: 'unbound' },
+        mode.value === 'collection' && lane.value && !props.categorySelection
+            ? { kind: 'collection', laneId: laneId.value }
+            : { kind: 'unbound' },
     );
 }
 function changeLane(value: string | number) {
@@ -139,13 +157,24 @@ function changeLane(value: string | number) {
     classId.value = '';
     emit(
         'change',
-        mode.value === 'collection' && lane.value ? { kind: 'collection', laneId: laneId.value } : { kind: 'unbound' },
+        mode.value === 'collection' && lane.value && !props.categorySelection
+            ? { kind: 'collection', laneId: laneId.value }
+            : { kind: 'unbound' },
     );
 }
 function changeEvent(value: string | number) {
     emit(
         'change',
         value && lane.value ? { kind: 'single', laneId: laneId.value, eventId: String(value) } : { kind: 'unbound' },
+    );
+}
+function changeClass(value: string | number) {
+    classId.value = String(value);
+    emit(
+        'change',
+        classId.value && lane.value
+            ? { kind: 'collection', laneId: laneId.value, innerClassIds: [classId.value] }
+            : { kind: 'unbound' },
     );
 }
 function selectAll(event: Event) {

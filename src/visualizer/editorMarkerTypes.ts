@@ -4,6 +4,7 @@ export interface MarkerInputContract {
     id: string;
     eventKind: 'point' | 'range';
     selectionModes: Array<'single' | 'collection'>;
+    categorySelection?: 'single';
 }
 export interface MarkerInputDefinition extends MarkerInputContract {
     label: string;
@@ -17,6 +18,7 @@ export interface MarkerQuery {
     inputId: string;
     startSeconds?: number;
     endSeconds?: number;
+    includeEnd?: boolean;
     cursor?: string;
 }
 export interface MarkerPage {

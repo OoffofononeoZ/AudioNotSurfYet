@@ -136,74 +136,99 @@ test('marker queries are denied for ABI 1 and undeclared ABI 2 inputs before the
     expect(results).toEqual({ denied: [true, true], reads: 0, tasks: 0, sandboxes: 0 });
 });
 
-test('point/range bindings remain project-local through import, class filtering, restore and short offline export', async ({
-    page,
-}) => {
-    test.setTimeout(60000);
-    await page.setViewportSize({ width: 1920, height: 1080 });
-    await installFilePickerStub(page, { visualizerAssets: true });
-    await page.goto('/');
-    await chooseFiles(page, [path.resolve(import.meta.dirname, '../fixtures/audio/visualizer-v5-avsync-v1.wav')]);
-    await page.getByTestId('header-visualizer-link').click();
-    await expect(page.getByTestId('visualizer-ready')).toBeVisible();
-    async function exported(): Promise<VisualizerProjectV5> {
-        const n = (await savedPickerEntries(page)).length;
-        await page.getByTestId('export-visualizer-project').click();
-        await expect.poll(async () => (await savedPickerEntries(page)).length).toBe(n + 1);
-        return JSON.parse(Buffer.from((await savedPickerEntries(page)).at(-1)!.base64, 'base64').toString('utf8'));
-    }
-    const actual = await exported(),
-        fixture = markerFixture();
-    actual.resources = fixture.project.resources;
-    actual.resources.algorithms[0]!.source = `export function create(){return {async prepareFrame(frame,input){let total=0,cursor;do{const page=await input.markers({inputId:'points',startSeconds:0,endSeconds:3,...(cursor?{cursor}:{})});total+=page.events.length;cursor=page.nextCursor;}while(cursor);const range=(await input.markers({inputId:'ranges'})).events[0];return {passes:[{program:'draw',uniforms:{}}],state:[total,range.startSeconds,range.endSeconds]};}}}`;
-    actual.resources.algorithms[0]!.hash = resourceHash(actual.resources.algorithms[0]!);
-    actual.resources.elements[0]!.algorithm = resourceRef(actual.resources.algorithms[0]!);
-    actual.resources.elements[0]!.hash = resourceHash(actual.resources.elements[0]!);
-    actual.elements = fixture.project.elements;
-    actual.elements[0]!.resource = resourceRef(actual.resources.elements[0]!);
-    actual.elements[0]!.timing = { kind: 'manual', startSeconds: 0, endSeconds: actual.track.durationSeconds };
-    actual.items = fixture.project.items;
-    const editor = createInitialEditorProject({ track: actual.track });
-    editor.lanes = fixture.project.editorSnapshot!.project.lanes;
-    const pointLane = editor.lanes[0]!,
-        rangeLane = editor.lanes[1]!;
-    if (pointLane.eventKind === 'point')
-        pointLane.events = pointLane.events.filter(e => e.atSeconds < actual.track.durationSeconds);
-    if (rangeLane.eventKind === 'range') rangeLane.events = rangeLane.events.slice(0, 2);
-    actual.editorSnapshot = { capturedAt: editor.updatedAt, project: editor };
-    await queuePickerData(page, [
-        { name: 'marker-project.json', mimeType: 'application/json', text: JSON.stringify(actual) },
-    ]);
-    await page.getByTestId('import-visualizer-project').click();
-    await page.getByRole('button', { name: '标记测试', exact: true }).click();
-    await expect(page.getByTestId('visualizer-preview-frame')).toHaveAttribute('data-scene-status', 'ready');
-    await expect(page.getByRole('button', { name: '移除', exact: true })).toHaveCount(0);
-    await page.getByRole('tab', { name: 'Editor 数据', exact: true }).click();
-    await expect(page.getByRole('button', { name: '移除', exact: true })).toBeDisabled();
-    await page.getByLabel('点输入分类 乙', { exact: true }).check();
-    const both = await exported();
-    expect(both.elements[0]!.markerBindings!.points).toMatchObject({
-        innerClassIds: expect.arrayContaining([fixture.classA, fixture.classB]),
+for (const singleCategory of [false, true])
+    test(`point/range bindings ${singleCategory ? 'single-category' : 'multi-category'} remain project-local through import, class filtering, restore and short offline export`, async ({
+        page,
+    }) => {
+        test.setTimeout(60000);
+        await page.setViewportSize({ width: 1920, height: 1080 });
+        await installFilePickerStub(page, { visualizerAssets: true });
+        await page.goto('/');
+        await chooseFiles(page, [path.resolve(import.meta.dirname, '../fixtures/audio/visualizer-v5-avsync-v1.wav')]);
+        await page.getByTestId('header-visualizer-link').click();
+        await expect(page.getByTestId('visualizer-ready')).toBeVisible();
+        async function exported(): Promise<VisualizerProjectV5> {
+            const n = (await savedPickerEntries(page)).length;
+            await page.getByTestId('export-visualizer-project').click();
+            await expect.poll(async () => (await savedPickerEntries(page)).length).toBe(n + 1);
+            return JSON.parse(Buffer.from((await savedPickerEntries(page)).at(-1)!.base64, 'base64').toString('utf8'));
+        }
+        const actual = await exported(),
+            fixture = markerFixture();
+        actual.resources = fixture.project.resources;
+        if (singleCategory) {
+            actual.resources.algorithms[0]!.contract.markerInputs![0]!.categorySelection = 'single';
+            actual.resources.elements[0]!.markerInputs![0]!.categorySelection = 'single';
+        }
+        actual.resources.algorithms[0]!.source = `export function create(){return {async prepareFrame(frame,input){let total=0,cursor;do{const page=await input.markers({inputId:'points',startSeconds:0,endSeconds:3,...(cursor?{cursor}:{})});total+=page.events.length;cursor=page.nextCursor;}while(cursor);const range=(await input.markers({inputId:'ranges'})).events[0];return {passes:[{program:'draw',uniforms:{}}],state:[total,range.startSeconds,range.endSeconds]};}}}`;
+        actual.resources.algorithms[0]!.hash = resourceHash(actual.resources.algorithms[0]!);
+        actual.resources.elements[0]!.algorithm = resourceRef(actual.resources.algorithms[0]!);
+        actual.resources.elements[0]!.hash = resourceHash(actual.resources.elements[0]!);
+        actual.elements = fixture.project.elements;
+        actual.elements[0]!.resource = resourceRef(actual.resources.elements[0]!);
+        actual.elements[0]!.timing = { kind: 'manual', startSeconds: 0, endSeconds: actual.track.durationSeconds };
+        actual.items = fixture.project.items;
+        const editor = createInitialEditorProject({ track: actual.track });
+        editor.lanes = fixture.project.editorSnapshot!.project.lanes;
+        const pointLane = editor.lanes[0]!,
+            rangeLane = editor.lanes[1]!;
+        if (pointLane.eventKind === 'point')
+            pointLane.events = pointLane.events.filter(e => e.atSeconds < actual.track.durationSeconds);
+        if (rangeLane.eventKind === 'range') rangeLane.events = rangeLane.events.slice(0, 2);
+        actual.editorSnapshot = { capturedAt: editor.updatedAt, project: editor };
+        await queuePickerData(page, [
+            { name: 'marker-project.json', mimeType: 'application/json', text: JSON.stringify(actual) },
+        ]);
+        await page.getByTestId('import-visualizer-project').click();
+        await page.getByRole('button', { name: '标记测试', exact: true }).click();
+        await expect(page.getByTestId('visualizer-preview-frame')).toHaveAttribute('data-scene-status', 'ready');
+        await expect(page.getByRole('button', { name: '移除', exact: true })).toHaveCount(0);
+        await page.getByRole('tab', { name: 'Editor 数据', exact: true }).click();
+        await expect(page.getByRole('button', { name: '移除', exact: true })).toBeDisabled();
+        if (singleCategory) {
+            await expect(page.getByLabel('点输入全部分类', { exact: true })).toHaveCount(0);
+            await expect(page.getByLabel('点输入分类', { exact: true })).toHaveValue(fixture.classA);
+            await page.getByLabel('点输入轨道', { exact: true }).selectOption(fixture.pointLane);
+            await expect(page.getByLabel('点输入分类', { exact: true })).toHaveValue('');
+            await page.getByLabel('点输入分类', { exact: true }).selectOption(fixture.classB);
+        } else await page.getByLabel('点输入分类 乙', { exact: true }).check();
+        const both = await exported();
+        expect(both.elements[0]!.markerBindings!.points).toMatchObject({
+            innerClassIds: singleCategory ? [fixture.classB] : expect.arrayContaining([fixture.classA, fixture.classB]),
+        });
+        if (singleCategory) {
+            const invalid = structuredClone(both);
+            invalid.elements[0]!.markerBindings!.points = {
+                kind: 'collection',
+                laneId: fixture.pointLane,
+                innerClassIds: [fixture.classA, fixture.classB],
+            };
+            await queuePickerData(page, [
+                { name: 'invalid-categories.json', mimeType: 'application/json', text: JSON.stringify(invalid) },
+            ]);
+            await page.getByTestId('import-visualizer-project').click();
+            await expect(page.getByRole('alert')).toContainText('必须选择一个分类');
+            expect((await exported()).elements).toEqual(both.elements);
+        }
+        await page.getByLabel('范围输入轨道', { exact: true }).selectOption(fixture.rangeLane);
+        await expect(page.getByTestId('visualizer-preview-frame')).toHaveAttribute('data-scene-status', 'ready');
+        // Re-select the range after clearing it; marker IDs never come from library defaults.
+        await page.getByLabel('范围输入', { exact: true }).selectOption(editor.lanes[1]!.events[1]!.id);
+        await expect(page.getByText('已保存', { exact: true })).toBeVisible();
+        const before = await exported();
+        await page.reload();
+        await expect(page.getByTestId('visualizer-ready')).toBeVisible();
+        await expect(page.getByTestId('visualizer-preview-frame')).toHaveAttribute('data-scene-status', 'ready');
+        expect((await exported()).elements).toEqual(before.elements);
+        await page.getByTestId('visualizer-preview-frame').hover();
+        await page.getByTestId('start-visualizer-export').click();
+        await expect(page.locator('[data-export-status=ready]')).toBeVisible({ timeout: 30000 });
+        await page.getByTestId('save-visualizer-export').click();
+        await expect
+            .poll(async () =>
+                (await savedPickerEntries(page)).some(
+                    e => e.name.endsWith('.webm') && Buffer.from(e.base64, 'base64').length > 1000,
+                ),
+            )
+            .toBe(true);
     });
-    await page.getByLabel('范围输入轨道', { exact: true }).selectOption(fixture.rangeLane);
-    await expect(page.getByTestId('visualizer-preview-frame')).toHaveAttribute('data-scene-status', 'ready');
-    // Re-select the range after clearing it; marker IDs never come from library defaults.
-    await page.getByLabel('范围输入', { exact: true }).selectOption(editor.lanes[1]!.events[1]!.id);
-    await expect(page.getByText('已保存', { exact: true })).toBeVisible();
-    const before = await exported();
-    await page.reload();
-    await expect(page.getByTestId('visualizer-ready')).toBeVisible();
-    await expect(page.getByTestId('visualizer-preview-frame')).toHaveAttribute('data-scene-status', 'ready');
-    expect((await exported()).elements).toEqual(before.elements);
-    await page.getByTestId('visualizer-preview-frame').hover();
-    await page.getByTestId('start-visualizer-export').click();
-    await expect(page.locator('[data-export-status=ready]')).toBeVisible({ timeout: 30000 });
-    await page.getByTestId('save-visualizer-export').click();
-    await expect
-        .poll(async () =>
-            (await savedPickerEntries(page)).some(
-                e => e.name.endsWith('.webm') && Buffer.from(e.base64, 'base64').length > 1000,
-            ),
-        )
-        .toBe(true);
-});

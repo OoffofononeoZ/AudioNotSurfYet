@@ -46,6 +46,8 @@ response 只包含必填 `lowOrInactive`、`highOrActive` 和向量必填 `vecto
 
 Editor point/range 不作为上述参数 source；通过独立 markerInputs 声明，由工程实例绑定并通过 ABI 2 查询。Brief 不接收真实轨道/分类/事件 ID。详见 [标记输入](editor-marker-inputs.md)。转场时间与效果目标独立于 binding：
 
+markerInputs 可选 `categorySelection:'single'`，仅当 selectionModes 包含 collection 时允许，用于要求用户只选轨道中的一个分类；缺省仍允许现有分类集合。具体合同应明确此约束，不能在生成时扩宽输入范围。
+
 | 字段                           | 允许值                                                                                                                         |
 | ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------ |
 | 普通 visual/modifier 的 timing | `{kind:'manual',description:'整曲或用户要求的时段'}`                                                                           |

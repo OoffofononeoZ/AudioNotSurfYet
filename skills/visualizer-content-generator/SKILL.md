@@ -1,7 +1,7 @@
 ---
 name: visualizer-content-generator
 description: 编写外部 V2 算法元素包与仅引用已有元素的预设；先校验 VisualizerContentBriefV2，再批准具体 Content Contract，获批后封装和验证。
-version: 2.1.0
+version: 2.2.0
 ---
 
 # Visualizer 内容生成

@@ -27,6 +27,8 @@ DEC-089 在 V5 中增加按输入 ID 保存的 markerBindings：unbound、单个
 
 启用但未配置的输入阻止导出；存在的空集合合法，缺失轨道/分类/事件则拒绝候选。重新载入或导入 Editor 快照先验证全部引用再原子替换，不按同名重绑；快照仍被任意元素引用时禁止移除，包含禁用元素。
 
+DEC-090 的可选 categorySelection:'single' 将 collection 绑定收窄为恰好一个 innerClassId；V5 绑定结构不变，既有资源省略此字段时保持多分类能力。点集合可显式 includeEnd 读取右端点，默认半开语义及范围查询保持；完整查询规则见[标记契约](../../../skills/visualizer-content-generator/references/editor-marker-inputs.md)。
+
 strict codec 检查字段、身份/hash、算法 ABI、参数能力、同歌引用、唯一归属和四特征上限；纯解析不执行代码。工程导入和恢复先在隔离运行时初始化候选，成功后激活；失败保留原工程，取消和身份变化阻止迟到提交。
 
 只接收 V5 文件；V1–V4 不迁移。旧草稿视为没有可恢复草稿，不显示旧版导出/覆盖提示。V5 草稿仍写 draft/latest；无效 V5 原文及显式处理、异歌冲突、保存失败与离页保护继续有效，不清空原数据库。

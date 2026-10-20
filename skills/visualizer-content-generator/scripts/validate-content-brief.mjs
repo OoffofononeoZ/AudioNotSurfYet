@@ -191,7 +191,11 @@ export function validateContentBrief(input) {
         const markerById = new Map();
         markerInputs.forEach((raw, i) => {
             const inputPath = `${path}.markerInputs[${i}]`,
-                m = object(raw, ['id', 'eventKind', 'selectionModes', 'purpose', 'response'], inputPath);
+                m = object(
+                    raw,
+                    ['id', 'eventKind', 'selectionModes', 'categorySelection', 'purpose', 'response'],
+                    inputPath,
+                );
             if (!m) return;
             name(m.id, `${inputPath}.id`);
             if (markerById.has(m.id)) issue(`${inputPath}.id`, 'duplicate marker input ID');
@@ -203,6 +207,11 @@ export function validateContentBrief(input) {
             modes.forEach((mode, j) =>
                 enumeration(mode, ['single', 'collection'], `${inputPath}.selectionModes[${j}]`),
             );
+            if (
+                m.categorySelection !== undefined &&
+                (m.categorySelection !== 'single' || !modes.includes('collection'))
+            )
+                issue(`${inputPath}.categorySelection`, 'single requires a collection input');
             text(m.purpose, `${inputPath}.purpose`);
             text(m.response, `${inputPath}.response`);
         });
