@@ -1,6 +1,6 @@
 interface:
     display_name: 'Visualizer Content Generator'
     short_description: '先审批具体合同，再生成外部 V2 算法元素和仅复用已有元素的预设'
-    default_prompt: 'Use $visualizer-content-generator v2.0.0 to validate VisualizerContentBriefV2 and present a concrete contract for approval before creating an external V2 resource folder. Presets reference existing elements only. Use the included standalone packaging tools.'
+    default_prompt: 'Use $visualizer-content-generator v2.1.0 to validate VisualizerContentBriefV2 and present a concrete contract for approval before creating an external V2 resource folder. Presets reference existing elements only. Use ABI 2 for declared Editor point/range inputs. Actual marker data is available only to user-bound project instances. Use the included standalone packaging tools.'
 policy:
     allow_implicit_invocation: true

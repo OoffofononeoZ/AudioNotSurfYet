@@ -78,6 +78,41 @@ function harness() {
     return { p, values, scene, port, calls, targets, releases: () => releases };
 }
 describe('composition rendering', () => {
+    test('marker-driven fade preserves linear/smooth interpolation and held endpoints independently of frame.range', async () => {
+        const definition = elementRegistry.get('fade');
+        const instance = await createTestAlgorithm(
+            elementRegistry.algorithms.find(a => a.hash === definition.algorithm.hash)!,
+        );
+        try {
+            for (const smooth of [false, true])
+                for (const time of [0, 1, 1.2, 1.5, 1.8, 2, 3]) {
+                    const packet = await instance.prepareFrame(
+                        {
+                            time,
+                            seed: 1,
+                            revision: '1',
+                            width: 640,
+                            height: 360,
+                            range: { startSeconds: 0, endSeconds: 10 },
+                            parameters: { from: { value: 0.9 }, to: { value: 0.2 }, smooth: { value: smooth } },
+                        },
+                        {
+                            history: async () => [],
+                            markers: async () => ({
+                                eventKind: 'range',
+                                events: [{ id: 'range', innerClassId: 'class', startSeconds: 1, endSeconds: 2 }],
+                                nextCursor: null,
+                            }),
+                        },
+                    );
+                    const linear = Math.max(0, Math.min(1, time - 1)),
+                        progress = smooth ? linear * linear * (3 - 2 * linear) : linear;
+                    expect(packet.passes[0]!.uniforms.uOpacity).toBeCloseTo(0.9 + (0.2 - 0.9) * progress, 12);
+                }
+        } finally {
+            instance.dispose?.();
+        }
+    });
     test('removing the last element releases its algorithm runtime before leaving the page', async () => {
         const release = vi.spyOn(AlgorithmRuntimeFixture.prototype, 'dispose');
         const h = harness();
@@ -192,7 +227,14 @@ describe('composition rendering', () => {
                 range: { startSeconds: 1, endSeconds: 2 },
                 parameters: { from: { value: 1 }, to: { value: 0 }, smooth: { value: false } },
             },
-            { history: async () => [] },
+            {
+                history: async () => [],
+                markers: async () => ({
+                    eventKind: 'range',
+                    events: [{ id: 'range', innerClassId: 'class', startSeconds: 1, endSeconds: 2 }],
+                    nextCursor: null,
+                }),
+            },
         );
         expect(packet.passes[0]!.uniforms.uOpacity).toBe(0);
         instance.dispose?.();

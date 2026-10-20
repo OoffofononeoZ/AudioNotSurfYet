@@ -5,10 +5,10 @@
 ## 工程数据
 
 - `format:'audiosurf-visualizer'`、`schemaVersion:5`。保留工程 UUID、时间戳、同歌 track、16:9 output、seed 和可选同歌 Editor 快照。
-- `elements` 保存 UUID、精确资源引用、名称、启用状态、派生 layer、时段、bindings 和适用的效果 targets。实例不再重复保存固定 type/version，算法由元素定义的 algorithm 引用解析。
+- `elements` 保存 UUID、精确资源引用、名称、启用状态、派生 layer、时段、bindings、按声明提供的可选 markerBindings 和适用的效果 targets。实例不再重复保存固定 type/version，算法由元素定义的 algorithm 引用解析。
 - `items` 由低到高排列独立元素或预设实例。组包含 UUID、资源引用、名称、显隐、children 和 controls；每个叶元素恰好归属一次。禁止预设嵌套、重复归属、悬空引用和空组。
 - items/children 决定连续 layer；列表反向显示，顶层移动整组，子元素只在组内排序。
-- `resources:{algorithms,elements,presets}` 内嵌完整定义和算法源码、Shader、契约，均以 `{id,version,hash}` 绑定。恢复及渲染不请求商城、不向全局库注册内容；仍要求宿主支持 apiVersion:1 与包所声明的绘图能力。
+- `resources:{algorithms,elements,presets}` 内嵌完整定义和算法源码、Shader、契约，均以 `{id,version,hash}` 绑定。恢复及渲染不请求商城、不向全局库注册内容；要求宿主支持包声明的 ABI 1/2 与绘图能力。
 - 相同算法去重保存，实例按 UUID 独立创建。重复添加预设产生新组/子 UUID 和本次效果引用。默认绑定与时长适配只在新增时应用。
 
 ## 分组及共同处理参数
@@ -22,6 +22,10 @@
 - 删除子元素清理全工程效果引用及共同控件目标；无目标控件和空组移除。删除组清理其全部叶元素。
 
 ## 校验、恢复和输出
+
+DEC-089 在 V5 中增加按输入 ID 保存的 markerBindings：unbound、单个 laneId/eventId 或单轨道及可选 innerClassIds 集合。只允许声明内的类型/模式，绑定指向内嵌同歌 Editor 快照；库中默认不携带真实引用。转场 timingInput 从既有 editor-range timing 读取，不重复保存。没有新字段的历史 ABI 1 快照继续按原接口渲染，不自动升级资源。
+
+启用但未配置的输入阻止导出；存在的空集合合法，缺失轨道/分类/事件则拒绝候选。重新载入或导入 Editor 快照先验证全部引用再原子替换，不按同名重绑；快照仍被任意元素引用时禁止移除，包含禁用元素。
 
 strict codec 检查字段、身份/hash、算法 ABI、参数能力、同歌引用、唯一归属和四特征上限；纯解析不执行代码。工程导入和恢复先在隔离运行时初始化候选，成功后激活；失败保留原工程，取消和身份变化阻止迟到提交。
 

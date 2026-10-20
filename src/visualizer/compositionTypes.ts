@@ -10,6 +10,7 @@ import type {
 } from './types';
 import type { NativeInputFeature } from './nativeAudioAnalysis';
 import type { CompositionItem, ResourceRef, ResourceSnapshot } from './resourceTypes';
+import type { MarkerBindings } from './editorMarkerTypes';
 
 export type ElementKind = 'visual' | 'modifier' | 'transition';
 export type ElementTiming =
@@ -31,6 +32,7 @@ export interface VisualizerElement {
     layer: number;
     timing: ElementTiming;
     bindings: ElementBinding[];
+    markerBindings?: MarkerBindings;
     targets?: EffectTargets;
 }
 export interface VisualizerProjectV5 {

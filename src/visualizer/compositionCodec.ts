@@ -2,6 +2,7 @@ import { validateEditorProjectV1 } from '../editor/projectCodec';
 import type { EditorTrackIdentityV1 } from '../editor/types';
 import { elementDescriptor } from './compositionModel';
 import { validateElementBindings } from './elementBindings';
+import { validateMarkerBindings } from './editorMarkerValidation';
 import { validateResourceRef, validateResourceSnapshot } from './resourceCodec';
 import { sameResource } from './resourceIdentity';
 import { validateCompositionItems } from './compositionStructure';
@@ -58,7 +59,7 @@ function timing(input: unknown, transition: boolean, project: VisualizerProjectV
 }
 function element(input: unknown, project: VisualizerProjectV5): VisualizerElement {
     const v = record(input, 'element');
-    keys(v, ['id', 'resource', 'name', 'enabled', 'layer', 'timing', 'bindings'], ['targets']);
+    keys(v, ['id', 'resource', 'name', 'enabled', 'layer', 'timing', 'bindings'], ['targets', 'markerBindings']);
     const resource = validateResourceRef(v.resource);
     const descriptor = project.resources.elements.find(d => sameResource(d, resource));
     if (!descriptor) return invalid('元素定义缺失。');
@@ -66,6 +67,13 @@ function element(input: unknown, project: VisualizerProjectV5): VisualizerElemen
     const layer = integer(v.layer, 'layer');
     if (!Number.isSafeInteger(layer)) return invalid('层级必须为安全整数。');
     const bindings = validateElementBindings(v.bindings, descriptor.parameters);
+    const algorithm = project.resources.algorithms.find(a => sameResource(a, descriptor.algorithm))!;
+    const markerBindings = validateMarkerBindings(
+        v.markerBindings,
+        descriptor.markerInputs,
+        algorithm.contract.timingInput,
+        project.editorSnapshot?.project,
+    );
     let targets: EffectTargets | undefined;
     if (descriptor.kind === 'visual') {
         if (v.targets !== undefined) return invalid('视觉元素不能引用效果目标。');
@@ -90,6 +98,7 @@ function element(input: unknown, project: VisualizerProjectV5): VisualizerElemen
         layer,
         timing: timing(v.timing, descriptor.kind === 'transition', project),
         bindings,
+        ...(markerBindings ? { markerBindings } : {}),
         ...(targets ? { targets } : {}),
     };
 }

@@ -537,6 +537,14 @@ export class VisualizerSessionController {
     removeEditorSnapshot() {
         const p = this.snapshot.project;
         if (!p) return;
+        if (
+            p.elements.some(
+                e =>
+                    e.timing.kind === 'editor-range' ||
+                    Object.values(e.markerBindings ?? {}).some(b => b.kind !== 'unbound'),
+            )
+        )
+            throw Error('Editor 快照仍被元素引用，请先解除标记绑定。');
         const next = structuredClone(p);
         delete next.editorSnapshot;
         this.updateProject(next);

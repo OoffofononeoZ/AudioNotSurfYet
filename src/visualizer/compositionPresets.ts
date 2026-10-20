@@ -17,6 +17,7 @@ export function instantiatePreset(id: string | ResourceRef, duration: number, st
             enabled: e.enabled,
             layer: startLayer + index,
             bindings: structuredClone(e.bindings),
+            ...(e.markerBindings ? { markerBindings: structuredClone(e.markerBindings) } : {}),
             timing:
                 e.timing.kind === 'relative'
                     ? { kind: 'manual', startSeconds: duration * e.timing.start, endSeconds: duration * e.timing.end }

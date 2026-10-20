@@ -99,6 +99,8 @@ export function compositionIssues(project: VisualizerProjectV5): string[] {
     for (const e of effectiveElements(project).filter(e => e.enabled)) {
         if (!elementRange(project, e)) issues.push(e.name + '：请选择范围标记');
         if (e.bindings.some(b => b.source.kind === 'unbound')) issues.push(e.name + '：输入未配置');
+        if (Object.values(e.markerBindings ?? {}).some(b => b.kind === 'unbound'))
+            issues.push(e.name + '：标记输入未配置');
         if (elementDescriptor(project, e).kind !== 'visual' && e.targets?.kind === 'elements' && !e.targets.ids.length)
             issues.push(e.name + '：请选择影响对象');
     }

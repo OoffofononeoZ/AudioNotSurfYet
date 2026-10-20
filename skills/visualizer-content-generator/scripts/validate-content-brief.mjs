@@ -149,6 +149,8 @@ export function validateContentBrief(input) {
                 'key',
                 'origin',
                 'resource',
+                'markerInputs',
+                'timingInput',
                 'type',
                 'kind',
                 'appearance',
@@ -185,6 +187,35 @@ export function validateContentBrief(input) {
             else byKey.set(e.key, e);
         }
         if (e.origin === 'new') newElementCount++;
+        const markerInputs = e.markerInputs === undefined ? [] : (array(e.markerInputs, `${path}.markerInputs`) ?? []);
+        const markerById = new Map();
+        markerInputs.forEach((raw, i) => {
+            const inputPath = `${path}.markerInputs[${i}]`,
+                m = object(raw, ['id', 'eventKind', 'selectionModes', 'purpose', 'response'], inputPath);
+            if (!m) return;
+            name(m.id, `${inputPath}.id`);
+            if (markerById.has(m.id)) issue(`${inputPath}.id`, 'duplicate marker input ID');
+            markerById.set(m.id, m);
+            enumeration(m.eventKind, ['point', 'range'], `${inputPath}.eventKind`);
+            const modes = array(m.selectionModes, `${inputPath}.selectionModes`) ?? [];
+            if (!modes.length || new Set(modes).size !== modes.length)
+                issue(`${inputPath}.selectionModes`, 'must be a nonempty unique selection mode list');
+            modes.forEach((mode, j) =>
+                enumeration(mode, ['single', 'collection'], `${inputPath}.selectionModes[${j}]`),
+            );
+            text(m.purpose, `${inputPath}.purpose`);
+            text(m.response, `${inputPath}.response`);
+        });
+        if (e.timingInput !== undefined) {
+            const marker = markerById.get(e.timingInput);
+            if (
+                e.kind !== 'transition' ||
+                marker?.eventKind !== 'range' ||
+                marker.selectionModes?.length !== 1 ||
+                marker.selectionModes[0] !== 'single'
+            )
+                issue(`${path}.timingInput`, 'must reference a declared single-range input on a transition');
+        }
         for (const key of ['appearance', 'spatialStructure', 'motion']) {
             if (e.origin === 'new' || e[key] !== undefined) text(e[key], `${path}.${key}`);
         }

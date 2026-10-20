@@ -924,6 +924,88 @@ var resourceRef = ({ id, version: version2, hash }) => ({ id, version: version2,
 var resourceKey = (ref) => `${ref.id}@${ref.version}:${ref.hash}`;
 var sameResource = (a, b) => resourceKey(a) === resourceKey(b);
 
+// src/visualizer/editorMarkerValidation.ts
+function validateMarkerInputs(input) {
+  if (!Array.isArray(input) || !input.length) return invalid("\u6807\u8BB0\u8F93\u5165\u58F0\u660E\u5FC5\u987B\u4E3A\u975E\u7A7A\u5217\u8868\u3002");
+  const ids = /* @__PURE__ */ new Set();
+  return input.map((raw) => {
+    const v = record(raw, "\u6807\u8BB0\u8F93\u5165");
+    keys(v, ["id", "eventKind", "selectionModes"]);
+    const id = text(v.id, "\u6807\u8BB0\u8F93\u5165 ID");
+    if (!/^[a-zA-Z_][a-zA-Z0-9_.-]*$/.test(id) || ["__proto__", "prototype", "constructor"].includes(id) || ids.has(id))
+      return invalid("\u6807\u8BB0\u8F93\u5165 ID \u65E0\u6548\u6216\u91CD\u590D\u3002");
+    ids.add(id);
+    if (!["point", "range"].includes(String(v.eventKind)) || !Array.isArray(v.selectionModes) || !v.selectionModes.length || new Set(v.selectionModes).size !== v.selectionModes.length || v.selectionModes.some((m) => !["single", "collection"].includes(m)))
+      return invalid("\u6807\u8BB0\u8F93\u5165\u7C7B\u578B\u6216\u9009\u62E9\u6A21\u5F0F\u65E0\u6548\u3002");
+    return { id, eventKind: v.eventKind, selectionModes: [...v.selectionModes] };
+  });
+}
+function validateMarkerDefinitions(input, contracts) {
+  if (!contracts) {
+    if (input !== void 0) invalid("\u7B97\u6CD5\u672A\u58F0\u660E\u6807\u8BB0\u8F93\u5165\u3002");
+    return void 0;
+  }
+  if (!Array.isArray(input) || input.length !== contracts.length) return invalid("\u5143\u7D20\u6807\u8BB0\u8F93\u5165\u5B9A\u4E49\u4E0D\u5B8C\u6574\u3002");
+  return contracts.map((contract, index) => {
+    const v = record(input[index], "\u5143\u7D20\u6807\u8BB0\u8F93\u5165");
+    keys(v, ["id", "eventKind", "selectionModes", "label"]);
+    const entry = validateMarkerInputs([
+      { id: v.id, eventKind: v.eventKind, selectionModes: v.selectionModes }
+    ])[0];
+    if (entry.id !== contract.id || entry.eventKind !== contract.eventKind || entry.selectionModes.some((m) => !contract.selectionModes.includes(m)))
+      return invalid("\u5143\u7D20\u6807\u8BB0\u8F93\u5165\u8D85\u51FA\u7B97\u6CD5\u58F0\u660E\u3002");
+    return { ...entry, label: text(v.label, "\u6807\u8BB0\u8F93\u5165\u6807\u7B7E") };
+  });
+}
+function defaultMarkerBindings(inputs, timingInput) {
+  const selected = inputs?.filter((i) => i.id !== timingInput) ?? [];
+  return selected.length ? Object.fromEntries(selected.map((i) => [i.id, { kind: "unbound" }])) : void 0;
+}
+function validateMarkerBindings(input, inputs, timingInput, editor, packageOnly = false) {
+  const selected = inputs?.filter((i) => i.id !== timingInput) ?? [];
+  if (!selected.length) {
+    if (input !== void 0) invalid("\u6B64\u5143\u7D20\u4E0D\u63A5\u53D7\u72EC\u7ACB\u6807\u8BB0\u7ED1\u5B9A\u3002");
+    return void 0;
+  }
+  const value = record(input, "\u6807\u8BB0\u7ED1\u5B9A");
+  keys(
+    value,
+    selected.map((i) => i.id)
+  );
+  return Object.fromEntries(
+    selected.map((descriptor) => {
+      const v = record(value[descriptor.id], "\u6807\u8BB0\u7ED1\u5B9A");
+      if (v.kind === "unbound") {
+        keys(v, ["kind"]);
+        return [descriptor.id, { kind: "unbound" }];
+      }
+      if (packageOnly) return invalid("\u8D44\u6E90\u5305\u4E0D\u80FD\u4FDD\u5B58\u5B9E\u9645\u5DE5\u7A0B\u7684\u6807\u8BB0\u5F15\u7528\u3002");
+      if (!descriptor.selectionModes.includes(v.kind))
+        return invalid("\u6807\u8BB0\u9009\u62E9\u6A21\u5F0F\u4E0D\u53D7\u652F\u6301\u3002");
+      const laneId = text(v.laneId, "\u6807\u8BB0\u8F68\u9053"), lane = editor?.lanes.find((l) => l.id === laneId);
+      if (!lane || lane.eventKind !== descriptor.eventKind)
+        return invalid("\u6807\u8BB0\u8F68\u9053\u7F3A\u5931\u6216\u7C7B\u578B\u4E0D\u5339\u914D\uFF1A" + descriptor.label);
+      if (v.kind === "single") {
+        keys(v, ["kind", "laneId", "eventId"]);
+        const eventId = text(v.eventId, "\u6807\u8BB0 ID");
+        if (!lane.events.some((e) => e.id === eventId)) return invalid("\u6240\u9009\u6807\u8BB0\u5DF2\u5931\u6548\uFF1A" + descriptor.label);
+        return [descriptor.id, { kind: "single", laneId, eventId }];
+      }
+      keys(v, ["kind", "laneId"], ["innerClassIds"]);
+      if (v.innerClassIds !== void 0 && (!Array.isArray(v.innerClassIds) || !v.innerClassIds.length || new Set(v.innerClassIds).size !== v.innerClassIds.length || v.innerClassIds.some((id) => !lane.innerClasses.some((c) => c.id === id))))
+        return invalid("\u6240\u9009\u6807\u8BB0\u5206\u7C7B\u5DF2\u5931\u6548\uFF1A" + descriptor.label);
+      return [
+        descriptor.id,
+        {
+          kind: "collection",
+          laneId,
+          ...v.innerClassIds !== void 0 ? { innerClassIds: [...v.innerClassIds] } : {}
+        }
+      ];
+    })
+  );
+}
+
 // src/visualizer/algorithmCodec.ts
 var identifier = (value) => {
   const id = text(value, "\u7B97\u6CD5\u6807\u8BC6");
@@ -973,9 +1055,13 @@ function parameter(input) {
     list(v.allowedAnalysisProjections, ["scalar", "mean", "max", "peak", "bin", "band", "full"]);
   return structuredClone(v);
 }
-function validateAlgorithmContract(input) {
+function validateAlgorithmContract(input, apiVersion = 1) {
   const v = record(input, "\u7B97\u6CD5\u5951\u7EA6");
-  keys(v, ["kind", "parameters", "sharedParameters", "historyParameters"], ["inputParameter"]);
+  keys(
+    v,
+    ["kind", "parameters", "sharedParameters", "historyParameters"],
+    apiVersion === 2 ? ["inputParameter", "markerInputs", "timingInput"] : ["inputParameter"]
+  );
   if (!["visual", "modifier", "transition"].includes(String(v.kind)) || !Array.isArray(v.parameters))
     return invalid("\u7B97\u6CD5\u79CD\u7C7B\u6216\u53C2\u6570\u65E0\u6548\u3002");
   const parameters = v.parameters.map(parameter), ids = parameters.map((p) => p.id);
@@ -984,12 +1070,22 @@ function validateAlgorithmContract(input) {
   const sharedParameters = list(v.sharedParameters, ids), historyParameters = list(v.historyParameters, ids);
   if (sharedParameters.some((id) => parameters.find((p) => p.id === id)?.valueKind !== "number"))
     invalid("\u5171\u540C\u5904\u7406\u53C2\u6570\u5FC5\u987B\u4E3A\u6570\u503C\u3002");
+  const markerInputs = apiVersion === 2 ? validateMarkerInputs(v.markerInputs) : void 0;
+  let timingInput;
+  if (v.timingInput !== void 0) {
+    timingInput = identifier(v.timingInput);
+    const marker = markerInputs?.find((i) => i.id === timingInput);
+    if (v.kind !== "transition" || !marker || marker.eventKind !== "range" || marker.selectionModes.length !== 1 || marker.selectionModes[0] !== "single")
+      invalid("\u8F6C\u573A\u65F6\u95F4\u8F93\u5165\u5FC5\u987B\u58F0\u660E\u5355\u4E2A\u8303\u56F4\u3002");
+  }
   return {
     kind: v.kind,
     parameters,
     sharedParameters,
     historyParameters,
-    ...v.inputParameter !== void 0 ? { inputParameter: String(v.inputParameter) } : {}
+    ...v.inputParameter !== void 0 ? { inputParameter: String(v.inputParameter) } : {},
+    ...markerInputs ? { markerInputs } : {},
+    ...timingInput ? { timingInput } : {}
   };
 }
 function validateShaderProgram(input) {
@@ -1017,14 +1113,22 @@ function validateAlgorithmDefinition(input) {
   keys(v, ["id", "version", "hash", "apiVersion", "contract", "source", "programs"]);
   const id = text(v.id, "\u7B97\u6CD5 ID"), version2 = integer(v.version, "\u7B97\u6CD5\u7248\u672C");
   if (!/^[a-z0-9][a-z0-9._-]*$/.test(id) || version2 < 1 || !Number.isSafeInteger(version2)) invalid("\u7B97\u6CD5\u8EAB\u4EFD\u65E0\u6548\u3002");
-  if (v.apiVersion !== 1) invalid("\u7B97\u6CD5 ABI \u4E0D\u53D7\u652F\u6301\u3002");
+  if (v.apiVersion !== 1 && v.apiVersion !== 2) invalid("\u7B97\u6CD5 ABI \u4E0D\u53D7\u652F\u6301\u3002");
   if (typeof v.hash !== "string" || !/^[a-f0-9]{64}$/.test(v.hash) || resourceHash(v) !== v.hash)
     invalid("\u7B97\u6CD5\u5185\u5BB9\u4E0E SHA-256 \u4E0D\u5339\u914D\u3002");
-  const contract = validateAlgorithmContract(v.contract), programs = {};
+  const contract = validateAlgorithmContract(v.contract, v.apiVersion), programs = {};
   for (const [name2, program] of Object.entries(record(v.programs, "programs")))
     Object.defineProperty(programs, identifier(name2), { value: validateShaderProgram(program), enumerable: true });
   if (!Object.keys(programs).length) invalid("\u7B97\u6CD5\u7F3A\u5C11 Shader\u3002");
-  return { id, version: version2, hash: String(v.hash), apiVersion: 1, contract, source: text(v.source, "\u7B97\u6CD5\u6E90\u7801"), programs };
+  return {
+    id,
+    version: version2,
+    hash: String(v.hash),
+    apiVersion: v.apiVersion,
+    contract,
+    source: text(v.source, "\u7B97\u6CD5\u6E90\u7801"),
+    programs
+  };
 }
 
 // src/visualizer/elementBindings.ts
@@ -1062,7 +1166,8 @@ function findResource(entries, id) {
   if (!found) throw Error("\u8D44\u6E90\u4E0D\u5B58\u5728\u6216\u7248\u672C\u7F3A\u5931\uFF1A" + (typeof id === "string" ? id : resourceKey(id)));
   return found;
 }
-function createDefinitionElement(d, durationSeconds, layer) {
+function createDefinitionElement(d, durationSeconds, layer, timingInput) {
+  const markerBindings = defaultMarkerBindings(d.markerInputs, timingInput);
   return {
     id: crypto.randomUUID(),
     resource: resourceRef(d),
@@ -1074,6 +1179,7 @@ function createDefinitionElement(d, durationSeconds, layer) {
       parameterId: p.id,
       ...p.defaultBinding ? structuredClone(p.defaultBinding) : { source: { kind: "constant", value: structuredClone(p.defaultValue) } }
     })),
+    ...markerBindings ? { markerBindings } : {},
     ...d.kind === "visual" ? {} : { targets: { kind: "composition" } }
   };
 }
@@ -1093,7 +1199,8 @@ var ElementRegistry = class {
     return findResource(this.definitions, id);
   }
   create(id, duration, layer) {
-    return createDefinitionElement(this.get(id), duration, layer);
+    const definition = this.get(id), algorithm = findResource(this.algorithms, definition.algorithm);
+    return createDefinitionElement(definition, duration, layer, algorithm.contract.timingInput);
   }
 };
 var elementRegistry = new ElementRegistry();
@@ -1370,7 +1477,11 @@ function parameter2(input, contract) {
 }
 function elementDefinition(input, algorithms) {
   const v = record(input, "\u5143\u7D20\u5B9A\u4E49");
-  keys(v, ["id", "version", "hash", "algorithm", "kind", "title", "icon", "parameters"], ["inputParameter"]);
+  keys(
+    v,
+    ["id", "version", "hash", "algorithm", "kind", "title", "icon", "parameters"],
+    ["inputParameter", "markerInputs"]
+  );
   const ref = identity(v);
   const algorithm = validateResourceRef(v.algorithm), definition = algorithms.find((a) => sameResource(a, algorithm));
   if (!definition) return invalid("\u7ED8\u5236\u7B97\u6CD5\u4F9D\u8D56\u7F3A\u5931\u3002");
@@ -1379,6 +1490,7 @@ function elementDefinition(input, algorithms) {
     return invalid("\u5143\u7D20\u79CD\u7C7B\u3001\u8F93\u5165\u6216\u56FE\u6807\u65E0\u6548\u3002");
   if (!Array.isArray(v.parameters) || v.parameters.length !== kernel.parameters.length)
     return invalid("\u5143\u7D20\u53C2\u6570\u5B9A\u4E49\u4E0D\u5B8C\u6574\u3002");
+  const markerInputs = validateMarkerDefinitions(v.markerInputs, kernel.markerInputs);
   return {
     ...ref,
     algorithm,
@@ -1386,7 +1498,8 @@ function elementDefinition(input, algorithms) {
     title: text(v.title, "\u5143\u7D20\u540D\u79F0"),
     icon: String(v.icon),
     ...kernel.inputParameter ? { inputParameter: kernel.inputParameter } : {},
-    parameters: kernel.parameters.map((p, i) => parameter2(v.parameters[i], p))
+    parameters: kernel.parameters.map((p, i) => parameter2(v.parameters[i], p)),
+    ...markerInputs ? { markerInputs } : {}
   };
 }
 function mergeResources(...snapshots) {
@@ -1413,11 +1526,18 @@ function presetDefinition(input, elements, algorithms) {
   const targets = /* @__PURE__ */ new Map();
   const templates = v.elements.map((input2) => {
     const e = record(input2, "\u9884\u8BBE\u5B50\u5143\u7D20");
-    keys(e, ["key", "element", "name", "enabled", "bindings", "timing"], ["targets"]);
+    keys(e, ["key", "element", "name", "enabled", "bindings", "timing"], ["targets", "markerBindings"]);
     const key = name(e.key), element = validateResourceRef(e.element), definition = elements.find((d) => sameResource(d, element));
     if (!definition) return invalid("\u9884\u8BBE\u7F3A\u5C11\u7CBE\u786E\u7248\u672C\u7684\u5143\u7D20\u4F9D\u8D56\uFF1A" + resourceKey(element));
     if (targets.has(key) || typeof e.enabled !== "boolean") return invalid("\u9884\u8BBE\u5B50\u5143\u7D20 key \u6216\u542F\u7528\u72B6\u6001\u65E0\u6548\u3002");
     const bindings = validateElementBindings(e.bindings, definition.parameters);
+    const markerBindings = validateMarkerBindings(
+      e.markerBindings,
+      definition.markerInputs,
+      algorithms.find((a) => sameResource(a, definition.algorithm)).contract.timingInput,
+      void 0,
+      true
+    );
     for (const [index, binding] of bindings.entries())
       if (binding.source.kind === "constant")
         assertDefaultPrecision(binding.source.value, definition.parameters[index]);
@@ -1437,6 +1557,7 @@ function presetDefinition(input, elements, algorithms) {
       name: text(e.name, "\u5B50\u5143\u7D20\u540D\u79F0"),
       enabled: e.enabled,
       bindings,
+      ...markerBindings ? { markerBindings } : {},
       timing: structuredClone(t),
       ...e.targets !== void 0 ? { targets: structuredClone(e.targets) } : {}
     };

@@ -61,7 +61,9 @@
             </fieldset>
             <div v-else-if="tab === 'editor'" class="viz-bottom-editor">
                 <span>{{
-                    project.editorSnapshot ? '已载入同歌快照 · ' + rangeCount + ' 个范围标记' : '未载入 Editor 数据'
+                    project.editorSnapshot
+                        ? '已载入同歌快照 · ' + pointCount + ' 个点标记 / ' + rangeCount + ' 个范围标记'
+                        : '未载入 Editor 数据'
                 }}</span>
                 <div class="viz-inline-actions">
                     <button type="button" :disabled="locked" @click="$emit('reload-editor')">重新载入草稿</button
@@ -192,6 +194,13 @@ const exportLabel = computed(
         })[props.snapshot.export.status],
 );
 const issues = computed(() => compositionIssues(props.project));
+const pointCount = computed(
+    () =>
+        props.project.editorSnapshot?.project.lanes.reduce(
+            (n, l) => n + (l.eventKind === 'point' ? l.events.length : 0),
+            0,
+        ) ?? 0,
+);
 const rangeCount = computed(
     () =>
         props.project.editorSnapshot?.project.lanes.reduce(
@@ -199,7 +208,11 @@ const rangeCount = computed(
             0,
         ) ?? 0,
 );
-const editorInUse = computed(() => props.project.elements.some(e => e.timing.kind === 'editor-range'));
+const editorInUse = computed(() =>
+    props.project.elements.some(
+        e => e.timing.kind === 'editor-range' || Object.values(e.markerBindings ?? {}).some(b => b.kind !== 'unbound'),
+    ),
+);
 watch(
     () => [props.error, props.snapshot.export.status, props.snapshot.persistence],
     () => {

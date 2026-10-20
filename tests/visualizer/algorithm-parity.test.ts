@@ -32,7 +32,12 @@ test('resource geometry retains the pre-migration vertex, color and antialiasing
             algorithm = findResource(elementRegistry.algorithms, definition.algorithm);
         const instance = await createTestAlgorithm(algorithm);
         for (const expected of golden.geometry[id]) {
-            const packet = await instance.prepareFrame(frame(id, expected.time), { history: async () => [] });
+            const packet = await instance.prepareFrame(frame(id, expected.time), {
+                history: async () => [],
+                markers: async () => {
+                    throw Error('ABI 1 fixture does not query markers');
+                },
+            });
             const mesh = packet.passes[0]!.mesh!;
             expect(mesh.positions.length / 3).toBe(expected.count);
             expect(hash(mesh.positions, mesh.colors, mesh.edges)).toBe(expected.hash);
@@ -49,7 +54,12 @@ test('resource string integration retains pre-migration history across chunk bou
             value: golden.spectrum,
         }));
     for (const expected of [...golden.strings, golden.strings[1], golden.strings[2]]) {
-        const packet = await instance.prepareFrame(frame('spectral-strings', expected.time), { history });
+        const packet = await instance.prepareFrame(frame('spectral-strings', expected.time), {
+            history,
+            markers: async () => {
+                throw Error('ABI 1 fixture does not query markers');
+            },
+        });
         expect(hash(Float32Array.from(packet.passes[0]!.uniforms.uMotion as number[]))).toBe(expected.hash);
     }
     instance.dispose?.();

@@ -11,12 +11,13 @@
 5. seed、绝对时间、状态重建、固定步进/checkpoint identity、同时间确定性判据。
 6. 几何与每帧工作量、特征并集、dispose/resize/context recovery、离线逐帧输入与实际验证范围。
 7. 预设仅引用已验证元素，固定依赖、子项/绑定/顺序/相对时段/内部目标及共同控件字段/目标/默认值。缺少元素先完成独立元素合同及验证。
+8. 标记驱动内容固定 markerInputs 的点/范围类型、单个/集合模式、时间窗口、分类语义、空集合表现及确定性；只声明输入能力，不读取或嵌入真实用户标记。转场 timingInput 与既有范围选择共用引用。
 
 展示后输出 AWAITING_APPROVAL；批准前不写入。视觉、数据、时间、目标或资源需求实质变化须重新批准。
 
 ## 参数与组合
 
-类型限 number/boolean/color/vector。来源限声明允许的 constant/analysis/native 或明确 unbound；启用的未配置内容阻止导出，不能以空绑定掩盖缺失意图。新增默认常量遵守 editingPrecision，已有工程和歌曲时长不量化、不改绑。
+参数类型限 number/boolean/color/vector。参数来源限声明允许的 constant/analysis/native 或明确 unbound；Editor 标记为独立 ABI 2 输入，不伪装成音频分析数值或恢复旧 editor-event 来源。启用的未配置内容阻止导出，合法空集合不是未配置。新增默认常量遵守 editingPrecision，已有工程和歌曲时长不量化、不改绑。
 
 全工程最多四种 Analyzer 特征，包含禁用元素；预设加入检查并集，不自动禁用原内容。完整向量、投影标量、原生 byte 频谱和有符号波形分别处理单位；具体 FeatureId 从实际宿主能力确认，不猜测新名称。
 

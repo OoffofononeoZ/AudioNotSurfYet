@@ -424,3 +424,44 @@ test('manual export waits for the algorithm before resolving its render lease', 
     surface.release();
     host.dispose();
 });
+
+test('an expired marker read cannot block the renderer after a binding revision changes', async () => {
+    const raf = createRafHarness(),
+        statuses: string[] = [];
+    let current = frame(),
+        rejectOld!: (reason: Error) => void,
+        first = true;
+    const host = new VisualizerRendererHost({
+        canvas: fakeCanvas(),
+        readFrame: () => current,
+        resolveValuesAt: () => new Map(),
+        createScene: () => ({
+            kind: 'rendered',
+            resize() {},
+            dispose() {},
+            prepare: () => {
+                if (!first) return Promise.resolve();
+                first = false;
+                return new Promise<void>((_yes, no) => (rejectOld = no));
+            },
+            render: () => ({ hash: 'latest', needsSourcePrompt: false }),
+        }),
+        onFrame() {},
+        onStatus: s => statuses.push(s.state),
+        createRenderer: fakeRenderer,
+        requestAnimationFrame: cb => raf.request(cb),
+        cancelAnimationFrame: id => raf.cancel(id),
+    });
+    host.resize(640, 360, 1);
+    raf.flush();
+    current = { ...current, bindingRevision: current.bindingRevision + 1 };
+    host.requestFrame();
+    raf.flush();
+    rejectOld(Error('标记查询所属工程已失效。'));
+    await new Promise(resolve => setTimeout(resolve, 0));
+    expect(statuses).not.toContain('error');
+    raf.flush();
+    await new Promise(resolve => setTimeout(resolve, 0));
+    expect(statuses.at(-1)).toBe('ready');
+    host.dispose();
+});
