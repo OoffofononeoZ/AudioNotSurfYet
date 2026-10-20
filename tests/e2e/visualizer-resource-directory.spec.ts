@@ -16,13 +16,13 @@ test('first selection is explicit, cancellation keeps it empty, all external pre
     await page.getByTestId('header-visualizer-link').click();
     await expect(page.getByTestId('visualizer-ready')).toBeVisible();
     await page.getByTestId('add-visualizer-element').click();
-    await expect(page.getByText('请选择 WheresYourElements/assets 文件夹')).toBeVisible();
+    await expect(page.getByText('连接本地资源库', { exact: true })).toBeVisible();
     await expect(page.locator('[data-resource-id]')).toHaveCount(0);
     await page.evaluate(() => sessionStorage.setItem('resource-picker-cancel', 'true'));
-    await page.getByRole('button', { name: '选择文件夹', exact: true }).click();
-    await expect(page.getByText('请选择 WheresYourElements/assets 文件夹')).toBeVisible();
+    await page.getByRole('button', { name: '加载资源库', exact: true }).click();
+    await expect(page.getByText('连接本地资源库', { exact: true })).toBeVisible();
     await page.evaluate(() => sessionStorage.removeItem('resource-picker-cancel'));
-    await page.getByRole('button', { name: '选择文件夹', exact: true }).click();
+    await page.getByRole('button', { name: '加载资源库', exact: true }).click();
     await expect(page.locator('[data-resource-id]')).toHaveCount(elementCount);
     expect(
         await page
@@ -43,7 +43,7 @@ test('first selection is explicit, cancellation keeps it empty, all external pre
                 nodes.every(n => (n as HTMLImageElement).complete && (n as HTMLImageElement).naturalWidth > 0),
             ),
     ).toBe(true);
-    await page.getByRole('button', { name: '全部', exact: true }).click();
+    await page.getByRole('button', { name: '元素', exact: true }).click();
     for (const [index, id] of ids.entries()) {
         if (index) await page.getByTestId('add-visualizer-element').click();
         await page.locator(`[data-resource-id="${id}"]`).click();

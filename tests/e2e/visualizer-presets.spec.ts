@@ -115,7 +115,7 @@ test('native input lists available Web Audio features, persists changes and seek
     await selectElement(page, 'radial-spectrum');
     await expect(source).toHaveValue('native');
     await page.getByTestId('add-visualizer-element').click();
-    await page.getByRole('button', { name: '全部', exact: true }).click();
+    await page.getByRole('button', { name: '元素', exact: true }).click();
     await page.locator('[data-element-type="spectral-strings"]').click();
     await source.selectOption('native');
     await expect(feature).toHaveValue('frequency');
@@ -266,7 +266,7 @@ test('market applies the geometric preset, edits it, restores it and renders sil
     await expect(page.locator('.viz-element-row[data-element-id]')).toHaveCount(11);
     await page.getByTestId('add-visualizer-element').click();
     await page.getByRole('button', { name: '预设', exact: true }).click();
-    await page.getByLabel('搜索元素').fill('没有的预设');
+    await page.getByLabel('搜索资源').fill('没有的预设');
     await expect(page.getByText('没有匹配的预设')).toBeVisible();
     await page.keyboard.press('Escape');
     expect(errors).toEqual([]);

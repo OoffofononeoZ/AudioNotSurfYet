@@ -25,7 +25,7 @@ async function addPreset(page: Page, id: string) {
 }
 async function add(page: Page, type: string) {
     await page.getByTestId('add-visualizer-element').click();
-    await page.getByRole('button', { name: '全部', exact: true }).click();
+    await page.getByRole('button', { name: '元素', exact: true }).click();
     await page.locator(`[data-element-type="${type}"]`).click();
 }
 async function exported(page: Page): Promise<VisualizerProjectV5> {
