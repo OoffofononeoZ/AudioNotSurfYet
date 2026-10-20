@@ -16,6 +16,7 @@ owner 于 2026-10-13 批准本页方案并要求实现（DEC-076）。本次是�
 - `.app-content` 是命名为 `app-workspace` 的宽度容器。Visualizer 在可用内容宽度 `<1280px` 时使用既有互斥抽屉，其他情况三栏；支持的 `>=1024px` 浏览器视口仍保持单个 `100dvh`，`<1024px` 仍不承诺移动端工作区支持。
 - Analyzer 始终单列，顶部常驻区支持手柄调整高度，原列表独立滚动；见 [Analyzer 列表契约](analyzer-list.md)。侧栏变化重测说明和图表，不重建未转移的活动行或分析消费者。
 - 修改的可见滚动容器使用 `.app-scrollbar`。Sidebar media listener、导航订阅、背景 ResizeObserver 及既有资源按所属模块释放。
+- 按钮、导航、时间轴和进度条聚焦时不额外绘制 outline 外框，统一由 `src/style.css` 覆盖组件的 `:focus-visible` 及进度条 `:focus-within` 外框。控件仍可聚焦并使用原有键盘操作；文本和数值输入、选择框等编辑控件沿用各自输入状态。
 
 Visualizer 当前布局、全屏视频控制及原子组合契约见 [组合工作区](visualizer-composition.md) 和 [Project V5](../architecture/visualizer/project-format-v5.md)。普通工作区按 MusicBar 实际占高留位；全屏不显示 MusicBar。
 
