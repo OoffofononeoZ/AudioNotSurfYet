@@ -6,6 +6,7 @@
 
 | 文件 | 本地静态引用（最多显示 6 项） |
 | --- | --- |
+| [tests/editor/e2-timeline-tempo.integration.test.ts](../../tests/editor/e2-timeline-tempo.integration.test.ts) | [src/analysis/config.ts](../../src/analysis/config.ts)、[src/analysis/workerCore.ts](../../src/analysis/workerCore.ts)、[src/editor/projectCodec.ts](../../src/editor/projectCodec.ts)、[src/editor/tempoMap.ts](../../src/editor/tempoMap.ts)、[tests/support/audio-fixtures.ts](../../tests/support/audio-fixtures.ts)、[tests/support/e2-tempo-fixture.ts](../../tests/support/e2-tempo-fixture.ts) |
 | [tests/editor/e3-point-annotation-unit.test.ts](../../tests/editor/e3-point-annotation-unit.test.ts) | [src/editor/pointAnnotations.ts](../../src/editor/pointAnnotations.ts)、[src/editor/projectCodec.ts](../../src/editor/projectCodec.ts)、[src/editor/types.ts](../../src/editor/types.ts)、[tests/support/e3-point-fixture.ts](../../tests/support/e3-point-fixture.ts) |
 | [tests/editor/e3-point-annotation.integration.test.ts](../../tests/editor/e3-point-annotation.integration.test.ts) | [src/editor/editorDraftRepository.ts](../../src/editor/editorDraftRepository.ts)、[src/editor/pointAnnotations.ts](../../src/editor/pointAnnotations.ts)、[src/editor/projectCodec.ts](../../src/editor/projectCodec.ts)、[src/editor/types.ts](../../src/editor/types.ts) |
 | [tests/editor/e4-overlay-unit.test.ts](../../tests/editor/e4-overlay-unit.test.ts) | [src/analysis/canvasRenderer.ts](../../src/analysis/canvasRenderer.ts)、[src/analysis/featureRegistry.ts](../../src/analysis/featureRegistry.ts)、[src/analysis/types.ts](../../src/analysis/types.ts)、[src/editor/overlay.ts](../../src/editor/overlay.ts)、[tests/analysis/generate-e4-overlay-golden.ts](../../tests/analysis/generate-e4-overlay-golden.ts)、[tests/support/e4-overlay-fixture.ts](../../tests/support/e4-overlay-fixture.ts) |
@@ -105,4 +106,3 @@
 | [tests/support/editor-workspaces.ts](../../tests/support/editor-workspaces.ts) | — |
 | [tests/support/file-picker.ts](../../tests/support/file-picker.ts) | [tests/support/resource-directory.ts](../../tests/support/resource-directory.ts) |
 | [tests/support/m10-structure-fixture.ts](../../tests/support/m10-structure-fixture.ts) | [tests/support/audio-fixtures.ts](../../tests/support/audio-fixtures.ts) |
-| [tests/support/m7-learning-fixture.ts](../../tests/support/m7-learning-fixture.ts) | [tests/support/audio-fixtures.ts](../../tests/support/audio-fixtures.ts)、[tests/support/meyda-golden.ts](../../tests/support/meyda-golden.ts) |

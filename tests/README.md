@@ -211,8 +211,10 @@ Node24.18.0/npm11.x，依赖版本以lockfile为准；浏览器专项使用真�
 
 ## 外部 Visualizer 资源
 
-资源专项从默认 `C:\Users\Ryan\Desktop\WheresYourElements\assets` 读取，使用 `$env:VISUALIZER_ASSETS_DIR = "<assets>"` 覆盖。`npm run visualizer:resources:check` 校验 15 个资源的源码封装与哈希；`npm run test:visualizer` 运行领域测试。缺少库时 Vitest 仅排除依赖资源的专项并明确提示，其他领域和纯逻辑测试照常运行。
+资源专项从默认 `C:\Users\Ryan\Desktop\WheresYourElements\assets` 读取，使用 `$env:VISUALIZER_ASSETS_DIR = "<assets>"` 覆盖。`npm run visualizer:resources:check` 校验 17 个资源的源码封装与哈希；`npm run test:visualizer` 运行领域测试。缺少库时 Vitest 仅排除依赖资源的专项并明确提示，其他领域和纯逻辑测试照常运行。
 
 `tests/visualizer/editor-markers.test.ts` 使用独立夹具验证 ABI 2 声明/查询与 V5 标记绑定，不依赖外部库。`tests/e2e/visualizer-editor-markers.spec.ts` 验证真实 Worker 权限、项目内选择/分类、恢复与短离线导出；配合 composition/sandbox 专项在 Chrome/Edge 执行。
+
+`tests/visualizer/point-lines.test.ts` 从外部读取两种已批准直线元素，验证默认值、单分类、40/60/100ms 包络、5% 间距、分页及顶点分批。`tests/e2e/visualizer-point-lines.spec.ts` 检查真实 GPU 的全长、渐显、分类隔离、曲尾、密集批次及断库恢复/短导出；不把新增源码复制回应用测试夹具，既有几何 golden 保持不变。
 
 `npx playwright test tests/e2e/visualizer-resource-directory.spec.ts tests/e2e/visualizer-resources.spec.ts --project=chrome --project=edge --workers=1` 覆盖目录/预览/恢复、损坏刷新与 V5 独立恢复及短离线输出。测试用真实 OPFS 句柄和 IndexedDB structured clone，picker/许可为替身；它不证明原生 OS 文件夹选择和磁盘授权 UI。原生人工检查需实际选择 assets、拒绝/恢复访问、关闭重开浏览器，并检查外部文件未被应用改写。

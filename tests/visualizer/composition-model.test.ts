@@ -27,7 +27,11 @@ describe('V5 composition project', () => {
         attachElements(p);
         const bytes = encodeComposition(p);
         expect(decodeComposition(bytes.buffer as ArrayBuffer)).toEqual(p);
-        expect(compositionIssues(p)).toEqual(['淡入淡出：请选择范围标记']);
+        expect(compositionIssues(p)).toEqual([
+            '淡入淡出：请选择范围标记',
+            '点标记横线（测试）：标记输入未配置',
+            '点标记竖线（测试）：标记输入未配置',
+        ]);
     });
     test('strictly rejects old formats, extra fields, invalid targets and nonfinite values', () => {
         const p = project();

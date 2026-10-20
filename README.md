@@ -19,23 +19,23 @@ Editor 分轨试听与有限乐器自动标记已按 [DEC-075 契约](docs/archi
 
 Visualizer 使用[离线确定性导出](docs/context/visualizer-offline-export.md)生成 WebM，支持 720p/1080p 与 30/60fps，按帧生成并显示进度；预览播放速度不决定输出视频时长。相关依赖许可见[第三方声明](THIRD_PARTY_NOTICES.md)。
 
-Visualizer 使用[可执行资源包 V2](docs/architecture/visualizer/resource-packages-v2.md)。在“添加元素”中选择 `C:\Users\Ryan\Desktop\WheresYourElements\assets`，只读加载外部 13 个元素和两套预设；授权有效时自动恢复，失效时点击“恢复访问”，外部更改后点击“重新加载”。应用不保存或打包资源库，V5 工程及草稿内嵌完整快照，离线恢复与导出不依赖资源库。生成 skill 2.0.0 维护于 `skills/visualizer-content-generator/`，独立副本在 `WheresYourElements/skill/visualizer-content-generator/`。
+Visualizer 使用[可执行资源包 V2](docs/architecture/visualizer/resource-packages-v2.md)。在“添加元素”中选择 `C:\Users\Ryan\Desktop\WheresYourElements\assets`，只读加载外部 15 个元素和两套预设；授权有效时自动恢复，失效时点击“恢复访问”，外部更改后点击“重新加载”。应用不保存或打包资源库，V5 工程及草稿内嵌完整快照，离线恢复与导出不依赖资源库。生成 skill 2.2.0 维护于 `skills/visualizer-content-generator/`，独立副本在 `WheresYourElements/skill/visualizer-content-generator/`。
 
 `npm run visualizer:resources` 封装外部库，`npm run visualizer:resources:check` 只读核对；两者及资源专项使用 `VISUALIZER_ASSETS_DIR` 覆盖默认位置。dev/build 不调用封装器，资源缺失不阻断应用构建或无关测试。
 
 ## 项目工具
 
-| 命令 | 用途 |
-| --- | --- |
-| `npm run skills:install` | 从 skills/ 同步 .agents/skills/ 入口及已有 UI 元数据 |
-| `npm run skills:check` | 只读检查发现入口是否一致 |
-| `npm run codemap` | 生成 [CODEMAP](docs/CODEMAP.md) 和按子系统分页的地图 |
-| `npm run codemap:check` | 只读检查地图缺失、过期和废弃生成页 |
-| `npm run repo:check` | 只读检查链接、Skill 元数据/入口、地图及规模；代码 >1300 行警告、未获批准 >2000 行失败；手写 Markdown >500 行提示、≥800 行失败 |
-| `npm run format -- <file...>` | 用锁定的 Prettier 格式化明确文件，渐进应用，不默认全仓运行 |
-| `npm run format:check -- <file...>` | 只读检查明确文件的格式 |
-| `npm run test:docs` | 只读核对本地 Markdown 引用和规模，>500 行提示、≥800 行失败；不强制生命周期元数据或阶段批准 |
-| `npm run test:tools` | 在一次性 fixture 仓库验证工具行为 |
+| 命令                                | 用途                                                                                                                          |
+| ----------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| `npm run skills:install`            | 从 skills/ 同步 .agents/skills/ 入口及已有 UI 元数据                                                                          |
+| `npm run skills:check`              | 只读检查发现入口是否一致                                                                                                      |
+| `npm run codemap`                   | 生成 [CODEMAP](docs/CODEMAP.md) 和按子系统分页的地图                                                                          |
+| `npm run codemap:check`             | 只读检查地图缺失、过期和废弃生成页                                                                                            |
+| `npm run repo:check`                | 只读检查链接、Skill 元数据/入口、地图及规模；代码 >1300 行警告、未获批准 >2000 行失败；手写 Markdown >500 行提示、≥800 行失败 |
+| `npm run format -- <file...>`       | 用锁定的 Prettier 格式化明确文件，渐进应用，不默认全仓运行                                                                    |
+| `npm run format:check -- <file...>` | 只读检查明确文件的格式                                                                                                        |
+| `npm run test:docs`                 | 只读核对本地 Markdown 引用和规模，>500 行提示、≥800 行失败；不强制生命周期元数据或阶段批准                                    |
+| `npm run test:tools`                | 在一次性 fixture 仓库验证工具行为                                                                                             |
 
 维护源只在 skills/，生成入口与地图不手改；交付时随相关修改同步并一起提交。工具拒绝覆盖手写目标，显式排除 trash/、依赖和构建/测试产物。代码地图只表示有限静态引用；职责与设计原因见 [system map](docs/context/system-map.md)。
 
