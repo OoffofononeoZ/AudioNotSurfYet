@@ -16,6 +16,7 @@ import AppSettingsButton from '../components/AppSettingsButton.vue';
 import MusicBar from '../components/MusicBar.vue';
 import { AudioSessionService, audioSessionServiceKey } from '../audio/audioSessionService';
 import { AudioEngine } from '../audio/audioEngine';
+import { usePlaybackKeyboard } from '../audio/usePlaybackKeyboard';
 import { AnalysisCoordinator, analysisCoordinatorKey } from '../analysis/analysisCoordinator';
 import { isFeatureId, type FeatureId } from '../analysis/types';
 import { SessionRepository } from '../persistence/sessionRepository';
@@ -44,6 +45,7 @@ const audioSession = new AudioSessionService(audioSessionStore, {
     engine: audioEngine,
     repository: sessionRepository,
 });
+usePlaybackKeyboard(audioSession);
 const analysisCoordinator = new AnalysisCoordinator(audioEngine, sessionRepository, audioSessionStore);
 audioSession.setVolume(configStore.volume);
 void audioSession.setPlaybackRate(configStore.playbackRate);

@@ -357,6 +357,7 @@ describe('AudioSessionService', () => {
         const lease = service.acquireExportTransport('track-1');
         const loads = engine.loadIds.length;
         service.pause();
+        await service.togglePlayback();
         await service.seek(3);
         await service.next();
         await service.playTrack('track-2');
