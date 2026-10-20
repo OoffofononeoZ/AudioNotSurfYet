@@ -16,6 +16,16 @@
                     {{ item.label }}
                 </button>
             </div>
+            <div class="viz-bottom-status app-scrollbar" role="status" aria-label="工程状态" tabindex="0">
+                <span :data-analysis-status="snapshot.bindingRuntime.analysisState"
+                    >分析 {{ analysisLabel }} · {{ Math.round(snapshot.bindingRuntime.analysisProgress * 100) }}% ·
+                    {{ snapshot.bindingRuntime.activeFeatureIds.length }}/4</span
+                >
+                <span :data-export-status="snapshot.export.status">{{ exportLabel }}</span>
+                <span v-if="snapshot.export.status === 'exporting'"
+                    >{{ snapshot.export.framesDone }} / {{ snapshot.export.totalFrames }} 帧</span
+                >
+            </div>
             <span class="viz-save-state" :data-state="snapshot.persistence" aria-live="polite">{{
                 persistenceLabel
             }}</span
@@ -77,54 +87,36 @@
                 </div>
             </div>
             <div v-else class="viz-status-lines" aria-live="polite">
-                <div>
-                    <span>分析</span
-                    ><span
-                        >{{ analysisLabel }} · {{ Math.round(snapshot.bindingRuntime.analysisProgress * 100) }}% ·
-                        {{ snapshot.bindingRuntime.activeFeatureIds.length }}/4</span
-                    ><button
-                        v-if="snapshot.bindingRuntime.analysisState === 'error'"
-                        type="button"
-                        :disabled="locked"
-                        @click="$emit('retry-analysis')">
-                        重试
-                    </button>
+                <div v-if="snapshot.bindingRuntime.analysisState === 'error'" class="viz-inline-actions">
+                    <button type="button" :disabled="locked" @click="$emit('retry-analysis')">重试分析</button>
                 </div>
                 <progress
                     v-if="snapshot.bindingRuntime.analysisState === 'loading'"
+                    aria-label="分析进度"
                     max="1"
                     :value="snapshot.bindingRuntime.analysisProgress" />
                 <p v-if="snapshot.bindingRuntime.analysisMessage" class="viz-error">
                     {{ snapshot.bindingRuntime.analysisMessage }}
                 </p>
                 <p v-for="issue in issues" :key="issue" class="viz-error">{{ issue }}</p>
-                <div :data-export-status="snapshot.export.status">
-                    <span>{{ exportLabel }}</span>
-                    <div class="viz-inline-actions">
-                        <template v-if="snapshot.export.status === 'ready'"
-                            ><button type="button" data-testid="save-visualizer-export" @click="$emit('save-export')">
-                                保存 WebM</button
-                            ><button
-                                type="button"
-                                data-testid="discard-visualizer-export"
-                                @click="$emit('discard-export')">
-                                丢弃
-                            </button></template
-                        ><button v-if="snapshot.export.status === 'error'" type="button" @click="$emit('reset-export')">
-                            清除错误
-                        </button>
-                    </div>
+                <div v-if="['ready', 'error'].includes(snapshot.export.status)" class="viz-inline-actions">
+                    <template v-if="snapshot.export.status === 'ready'"
+                        ><button type="button" data-testid="save-visualizer-export" @click="$emit('save-export')">
+                            保存 WebM</button
+                        ><button type="button" data-testid="discard-visualizer-export" @click="$emit('discard-export')">
+                            丢弃
+                        </button></template
+                    ><button v-if="snapshot.export.status === 'error'" type="button" @click="$emit('reset-export')">
+                        清除错误
+                    </button>
                 </div>
                 <p v-if="snapshot.export.status === 'error'" class="viz-error">{{ snapshot.export.message }}</p>
+                <progress
+                    v-if="snapshot.export.status === 'exporting'"
+                    aria-label="视频导出进度"
+                    :max="snapshot.export.totalFrames"
+                    :value="snapshot.export.framesDone" />
             </div>
-            <progress
-                v-if="snapshot.export.status === 'exporting'"
-                aria-label="视频导出进度"
-                :max="snapshot.export.totalFrames"
-                :value="snapshot.export.framesDone" />
-            <span v-if="snapshot.export.status === 'exporting'"
-                >{{ snapshot.export.framesDone }} / {{ snapshot.export.totalFrames }} 帧</span
-            >
             <p v-if="tab === 'output' && !outputAvailability" class="viz-muted" role="status">正在检查离线导出能力…</p>
             <p
                 v-else-if="tab === 'output' && outputAvailability && !outputAvailability.available"
@@ -214,9 +206,19 @@ const editorInUse = computed(() =>
     ),
 );
 watch(
-    () => [props.error, props.snapshot.export.status, props.snapshot.persistence],
-    () => {
-        if (props.error || props.snapshot.export.status !== 'idle' || props.snapshot.persistence === 'not-persisted') {
+    [
+        () => props.error || props.snapshot.message,
+        () => props.snapshot.export.status,
+        () => props.snapshot.persistence,
+        () => props.snapshot.bindingRuntime.analysisState,
+    ],
+    ([error, status, persistence, analysis], previous) => {
+        if (
+            (error && error !== previous[0]) ||
+            (['ready', 'error'].includes(status) && status !== previous[1]) ||
+            (persistence === 'not-persisted' && persistence !== previous[2]) ||
+            (analysis === 'error' && analysis !== previous[3])
+        ) {
             tab.value = 'status';
             collapsed.value = false;
         }
