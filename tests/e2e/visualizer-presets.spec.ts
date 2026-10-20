@@ -315,7 +315,7 @@ for (const id of ['geometric-0.6', 'prismatic-voyage'])
         await expect(page.getByTestId('visualizer-ready')).toBeVisible();
         await expandPresets(page);
         await page.getByRole('tab', { name: '状态', exact: true }).click();
-        await expect(page.locator('.viz-status-lines')).toContainText('已就绪');
+        await expect(page.locator('.viz-bottom-status')).toContainText('已就绪');
         await page.getByTestId('visualizer-preview-frame').hover();
         await page.getByTestId('start-visualizer-export').click();
         await expect(page.getByTestId('add-visualizer-element')).toBeDisabled();
@@ -425,7 +425,7 @@ test('optional local music visual review captures both presets at two song secti
         await importProject(page, empty);
         await preset(page, id);
         await page.getByRole('tab', { name: '状态', exact: true }).click();
-        await expect(page.locator('.viz-status-lines')).toContainText('已就绪', { timeout: 60000 });
+        await expect(page.locator('.viz-bottom-status')).toContainText('已就绪', { timeout: 60000 });
         await page.getByTestId('visualizer-preview-frame').hover();
         await page.getByTestId('visualizer-fullscreen-toggle').click();
         const seek = page.getByTestId('visualizer-seek');
@@ -460,7 +460,7 @@ test('optional local music visual review captures both presets at two song secti
                     if (b.parameterId === 'spectrum')
                         b.source = { kind: 'analysis', featureId: 'amplitudeSpectrum', projection: { kind: 'full' } };
             await importProject(page, analyzer);
-            await expect(page.locator('.viz-status-lines')).toContainText('已就绪', { timeout: 60000 });
+            await expect(page.locator('.viz-bottom-status')).toContainText('已就绪', { timeout: 60000 });
             await page.getByTestId('visualizer-preview-frame').hover();
             await page.getByTestId('visualizer-fullscreen-toggle').click();
             for (const portion of [0.2, 0.65]) {

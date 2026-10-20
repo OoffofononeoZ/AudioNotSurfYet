@@ -227,7 +227,7 @@ test('group edits lock during a short deterministic offline export on the same r
     await open(page);
     await addPreset(page, 'geometric-0.6');
     await page.getByRole('tab', { name: '状态', exact: true }).click();
-    await expect(page.locator('.viz-status-lines')).toContainText('已就绪');
+    await expect(page.locator('.viz-bottom-status')).toContainText('已就绪');
     const canvas = page.getByTestId('visualizer-preview-canvas'),
         host = await canvas.getAttribute('data-renderer-host-id');
     await page.getByTestId('visualizer-preview-frame').hover();

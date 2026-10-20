@@ -175,7 +175,7 @@ for (const resolution of ['720p', '1080p'] as const)
                         project.output = { aspectRatio: '16:9', resolution, frameRate };
                         await importProject(page, project);
                         await page.getByRole('tab', { name: '状态', exact: true }).click();
-                        await expect(page.locator('.viz-status-lines')).toContainText('已就绪');
+                        await expect(page.locator('.viz-bottom-status')).toContainText('已就绪');
                     }
                     await page.getByRole('slider', { name: '音量', exact: true }).press('Home');
                     await page.evaluate(async () => {
