@@ -96,6 +96,7 @@
                 :label="input.label"
                 :event-kind="input.eventKind"
                 :selection-modes="input.selectionModes"
+                :category-selection="input.categorySelection"
                 :disabled="locked"
                 @change="markerBindingChanged(input.id, $event)" />
         </section>

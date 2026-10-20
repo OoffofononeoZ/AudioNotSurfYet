@@ -930,14 +930,21 @@ function validateMarkerInputs(input) {
   const ids = /* @__PURE__ */ new Set();
   return input.map((raw) => {
     const v = record(raw, "\u6807\u8BB0\u8F93\u5165");
-    keys(v, ["id", "eventKind", "selectionModes"]);
+    keys(v, ["id", "eventKind", "selectionModes"], ["categorySelection"]);
     const id = text(v.id, "\u6807\u8BB0\u8F93\u5165 ID");
     if (!/^[a-zA-Z_][a-zA-Z0-9_.-]*$/.test(id) || ["__proto__", "prototype", "constructor"].includes(id) || ids.has(id))
       return invalid("\u6807\u8BB0\u8F93\u5165 ID \u65E0\u6548\u6216\u91CD\u590D\u3002");
     ids.add(id);
     if (!["point", "range"].includes(String(v.eventKind)) || !Array.isArray(v.selectionModes) || !v.selectionModes.length || new Set(v.selectionModes).size !== v.selectionModes.length || v.selectionModes.some((m) => !["single", "collection"].includes(m)))
       return invalid("\u6807\u8BB0\u8F93\u5165\u7C7B\u578B\u6216\u9009\u62E9\u6A21\u5F0F\u65E0\u6548\u3002");
-    return { id, eventKind: v.eventKind, selectionModes: [...v.selectionModes] };
+    if (v.categorySelection !== void 0 && (v.categorySelection !== "single" || !v.selectionModes.includes("collection")))
+      return invalid("\u5355\u5206\u7C7B\u7EA6\u675F\u53EA\u5141\u8BB8\u96C6\u5408\u8F93\u5165\u3002");
+    return {
+      id,
+      eventKind: v.eventKind,
+      selectionModes: [...v.selectionModes],
+      ...v.categorySelection === "single" ? { categorySelection: "single" } : {}
+    };
   });
 }
 function validateMarkerDefinitions(input, contracts) {
@@ -948,11 +955,16 @@ function validateMarkerDefinitions(input, contracts) {
   if (!Array.isArray(input) || input.length !== contracts.length) return invalid("\u5143\u7D20\u6807\u8BB0\u8F93\u5165\u5B9A\u4E49\u4E0D\u5B8C\u6574\u3002");
   return contracts.map((contract, index) => {
     const v = record(input[index], "\u5143\u7D20\u6807\u8BB0\u8F93\u5165");
-    keys(v, ["id", "eventKind", "selectionModes", "label"]);
+    keys(v, ["id", "eventKind", "selectionModes", "label"], ["categorySelection"]);
     const entry = validateMarkerInputs([
-      { id: v.id, eventKind: v.eventKind, selectionModes: v.selectionModes }
+      {
+        id: v.id,
+        eventKind: v.eventKind,
+        selectionModes: v.selectionModes,
+        ...v.categorySelection !== void 0 ? { categorySelection: v.categorySelection } : {}
+      }
     ])[0];
-    if (entry.id !== contract.id || entry.eventKind !== contract.eventKind || entry.selectionModes.some((m) => !contract.selectionModes.includes(m)))
+    if (entry.id !== contract.id || entry.eventKind !== contract.eventKind || contract.categorySelection === "single" && entry.categorySelection !== "single" || entry.selectionModes.some((m) => !contract.selectionModes.includes(m)))
       return invalid("\u5143\u7D20\u6807\u8BB0\u8F93\u5165\u8D85\u51FA\u7B97\u6CD5\u58F0\u660E\u3002");
     return { ...entry, label: text(v.label, "\u6807\u8BB0\u8F93\u5165\u6807\u7B7E") };
   });
@@ -992,6 +1004,8 @@ function validateMarkerBindings(input, inputs, timingInput, editor, packageOnly 
         return [descriptor.id, { kind: "single", laneId, eventId }];
       }
       keys(v, ["kind", "laneId"], ["innerClassIds"]);
+      if (descriptor.categorySelection === "single" && (!Array.isArray(v.innerClassIds) || v.innerClassIds.length !== 1))
+        return invalid("\u6807\u8BB0\u8F93\u5165\u5FC5\u987B\u9009\u62E9\u4E00\u4E2A\u5206\u7C7B\uFF1A" + descriptor.label);
       if (v.innerClassIds !== void 0 && (!Array.isArray(v.innerClassIds) || !v.innerClassIds.length || new Set(v.innerClassIds).size !== v.innerClassIds.length || v.innerClassIds.some((id) => !lane.innerClasses.some((c) => c.id === id))))
         return invalid("\u6240\u9009\u6807\u8BB0\u5206\u7C7B\u5DF2\u5931\u6548\uFF1A" + descriptor.label);
       return [

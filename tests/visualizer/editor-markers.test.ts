@@ -7,6 +7,91 @@ import { validateResourcePackage, validateResourceSnapshot } from '../../src/vis
 import { resourceHash } from '../../src/visualizer/resourceIdentity';
 import { compositionIssues } from '../../src/visualizer/compositionModel';
 import { defaultMarkerBindings } from '../../src/visualizer/editorMarkerValidation';
+import { resourceRef } from '../../src/visualizer/resourceIdentity';
+import type { MarkerQuery } from '../../src/visualizer/editorMarkerTypes';
+
+test('single-category grants can narrow a collection but cannot be widened, omitted or bound to multiple categories', async () => {
+    const { project, pointLane, classA, classB } = markerFixture();
+    const algorithm = project.resources.algorithms[0]!,
+        definition = project.resources.elements[0]!,
+        element = project.elements[0]!;
+    definition.markerInputs![0]!.categorySelection = 'single';
+    definition.hash = resourceHash(definition);
+    element.resource = resourceRef(definition);
+    expect(validateComposition(project).resources.elements[0]!.markerInputs![0]!.categorySelection).toBe('single');
+    algorithm.contract.markerInputs![0]!.categorySelection = 'single';
+    algorithm.hash = resourceHash(algorithm);
+    definition.algorithm = resourceRef(algorithm);
+    definition.hash = resourceHash(definition);
+    element.resource = resourceRef(definition);
+    expect(decodeComposition(encodeComposition(validateComposition(project)).buffer as ArrayBuffer)).toEqual(project);
+    for (const innerClassIds of [undefined, [], [classA, classB]]) {
+        const bad = structuredClone(project);
+        bad.elements[0]!.markerBindings!.points = {
+            kind: 'collection',
+            laneId: pointLane,
+            ...(innerClassIds ? { innerClassIds } : {}),
+        };
+        expect(() => validateComposition(bad)).toThrow(/一个分类/);
+        await expect(
+            createEditorMarkerReader(bad, () => true)(element.id, {
+                inputId: 'points',
+                startSeconds: 0,
+                endSeconds: 1,
+            }),
+        ).rejects.toThrow(/一个分类/);
+    }
+    const widened = structuredClone(project.resources);
+    delete widened.elements[0]!.markerInputs![0]!.categorySelection;
+    widened.elements[0]!.hash = resourceHash(widened.elements[0]!);
+    expect(() => validateResourceSnapshot(widened)).toThrow(/超出/);
+    const malformed = structuredClone(algorithm);
+    malformed.contract.markerInputs![0]!.selectionModes = ['single'];
+    malformed.hash = resourceHash(malformed);
+    expect(() => validateAlgorithmDefinition(malformed)).toThrow(/集合/);
+});
+
+test('point collections optionally include the right endpoint and cursors bind this option; other query kinds reject it', async () => {
+    const { project, element, classA } = markerFixture();
+    const lane = project.editorSnapshot!.project.lanes[0]!;
+    if (lane.eventKind !== 'point') throw Error('Expected point fixture');
+    lane.events.push({ id: crypto.randomUUID(), innerClassId: classA, atSeconds: 12 });
+    const read = createEditorMarkerReader(project, () => true);
+    expect((await read(element.id, { inputId: 'points', startSeconds: 11, endSeconds: 12 })).events).toEqual([]);
+    expect(
+        (await read(element.id, { inputId: 'points', startSeconds: 11, endSeconds: 12, includeEnd: true })).events,
+    ).toEqual([lane.events.at(-1)]);
+    const page = await read(element.id, { inputId: 'points', startSeconds: 0, endSeconds: 12, includeEnd: true });
+    await expect(
+        read(element.id, { inputId: 'points', startSeconds: 0, endSeconds: 12, cursor: page.nextCursor! }),
+    ).rejects.toThrow(/游标/);
+    const last = await read(element.id, {
+        inputId: 'points',
+        startSeconds: 0,
+        endSeconds: 12,
+        includeEnd: true,
+        cursor: page.nextCursor!,
+    });
+    expect(last.events).toHaveLength(50);
+    expect(last.events.at(-1)).toEqual(lane.events.at(-1));
+    for (const query of [
+        { inputId: 'points', startSeconds: 0, endSeconds: 1, includeEnd: 'yes' },
+        { inputId: 'ranges', includeEnd: true },
+    ])
+        await expect(read(element.id, query as MarkerQuery)).rejects.toThrow();
+    project.elements[0]!.markerBindings!.ranges = {
+        kind: 'collection',
+        laneId: project.editorSnapshot!.project.lanes[1]!.id,
+    };
+    await expect(
+        createEditorMarkerReader(project, () => true)(element.id, {
+            inputId: 'ranges',
+            startSeconds: 0,
+            endSeconds: 1,
+            includeEnd: false,
+        }),
+    ).rejects.toThrow(/仅允许点集合/);
+});
 
 test('ABI 2 explicitly declares marker inputs and ABI 1 cannot request them', () => {
     const { algorithm } = markerFixture();

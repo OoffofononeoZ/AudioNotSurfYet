@@ -40,6 +40,12 @@ export function createEditorMarkerReader(project: VisualizerProjectV5, isCurrent
         const lane = project.editorSnapshot?.project.lanes.find(l => l.id === binding.laneId);
         if (!lane || lane.eventKind !== input.eventKind || !input.selectionModes.includes(binding.kind))
             throw Error('标记输入引用已失效。');
+        if (
+            input.categorySelection === 'single' &&
+            binding.kind === 'collection' &&
+            binding.innerClassIds?.length !== 1
+        )
+            throw Error('标记输入必须选择一个分类。');
         const owner = elementId + ':' + inputId;
         let index = indexes.get(owner);
         if (!index) {
@@ -75,14 +81,19 @@ export function createEditorMarkerReader(project: VisualizerProjectV5, isCurrent
             if (events.length !== 1) throw Error('所选标记已失效。');
             page = { eventKind: input.eventKind, events: structuredClone(events), nextCursor: null };
         } else {
-            keys(raw, ['inputId', 'startSeconds', 'endSeconds'], ['cursor']);
+            keys(raw, ['inputId', 'startSeconds', 'endSeconds'], ['cursor', 'includeEnd']);
+            if (raw.includeEnd !== undefined && (input.eventKind !== 'point' || typeof raw.includeEnd !== 'boolean'))
+                throw Error('includeEnd 仅允许点集合使用布尔值。');
+            const includeEnd = raw.includeEnd === true;
             const from = finite(raw.startSeconds, '查询起点'),
                 to = finite(raw.endSeconds, '查询终点');
             if (from < 0 || to <= from || to > project.track.durationSeconds) throw Error('标记查询时间窗口越界。');
             const lower = firstIndex(events.length, i =>
                 input.eventKind === 'point' ? start(events[i]!) < from : maxEnds[i]! <= from,
             );
-            const upper = firstIndex(events.length, i => start(events[i]!) < to);
+            const upper = firstIndex(events.length, i =>
+                includeEnd ? start(events[i]!) <= to : start(events[i]!) < to,
+            );
             let offset = lower;
             if (raw.cursor !== undefined) {
                 let cursor: unknown;
@@ -93,17 +104,18 @@ export function createEditorMarkerReader(project: VisualizerProjectV5, isCurrent
                 }
                 if (
                     !Array.isArray(cursor) ||
-                    cursor.length !== 5 ||
+                    cursor.length !== 6 ||
                     cursor[0] !== scope ||
                     cursor[1] !== owner ||
                     cursor[2] !== from ||
                     cursor[3] !== to ||
-                    !Number.isSafeInteger(cursor[4]) ||
-                    cursor[4] < lower ||
-                    cursor[4] > upper
+                    cursor[4] !== includeEnd ||
+                    !Number.isSafeInteger(cursor[5]) ||
+                    cursor[5] < lower ||
+                    cursor[5] > upper
                 )
                     throw Error('标记查询游标不属于当前输入与窗口。');
-                offset = cursor[4];
+                offset = cursor[5];
             }
             const selected: Array<PointEventV1 | RangeEventV1> = [];
             let next: number | null = null;
@@ -119,7 +131,7 @@ export function createEditorMarkerReader(project: VisualizerProjectV5, isCurrent
             page = {
                 eventKind: input.eventKind,
                 events: structuredClone(selected),
-                nextCursor: next !== null ? btoa(JSON.stringify([scope, owner, from, to, next])) : null,
+                nextCursor: next !== null ? btoa(JSON.stringify([scope, owner, from, to, includeEnd, next])) : null,
             };
         }
         await Promise.resolve();
