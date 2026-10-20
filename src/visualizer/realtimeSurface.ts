@@ -19,6 +19,7 @@ export class RealtimeSurface {
     private pausedDuration = 0;
     private observer: ResizeObserver;
     private style: RealtimeStyleV1;
+    private fps: number;
     readNative: (() => NativeAudioFrame | null) | null = null;
     constructor(
         canvas: HTMLCanvasElement,
@@ -26,8 +27,10 @@ export class RealtimeSurface {
         onStatus: (status: VisualizerRendererStatus) => void,
     ) {
         this.style = style;
+        this.fps = style.frameRate;
         const model = realtimeRenderModel(style);
         this.host = new VisualizerRendererHost({
+            maxFrameRate: () => this.fps,
             canvas,
             createScene: surface => {
                 validateAlgorithmPrograms(surface.renderer, style.resources);
@@ -100,6 +103,9 @@ export class RealtimeSurface {
     }
     retry() {
         this.host.retry();
+    }
+    setFrameRate(fps: number) {
+        this.fps = fps > 0 ? Math.min(this.style.frameRate, fps) : this.style.frameRate;
     }
     dispose() {
         this.observer.disconnect();

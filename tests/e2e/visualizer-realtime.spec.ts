@@ -35,13 +35,25 @@ test('current composition applies to home, survives refresh and maintains one re
     await expect.poll(async () => Number(await canvas.getAttribute('data-realtime-input-peak'))).toBeGreaterThan(0);
     await expect.poll(() => canvas.getAttribute('data-frame-time')).not.toBe('0.000000');
     await page.screenshot({ path: 'artifacts/visualizer-composition/realtime-home.png' });
-    for (let i = 0; i < 3; i++) {
+    for (let i = 0; i < 20; i++) {
         await page.getByRole('button', { name: '详情', exact: true }).click();
         await expect(canvas).toHaveCount(0);
+        await expect
+            .poll(() =>
+                page.evaluate(
+                    async modulePath => (await import(modulePath)).realtimeAudioDiagnostics.activeTaps,
+                    '/src/audio/realtimeAudioTap.ts',
+                ),
+            )
+            .toBe(0);
         await page.getByRole('button', { name: '可视化', exact: true }).click();
         await expect(canvas).toHaveAttribute('data-webgl-context-state', 'ready');
     }
     expect(await page.evaluate(() => (window as any).__VISUALIZER_DIAGNOSTICS__.activeRenderers)).toBe(1);
+    await canvas.dispatchEvent('visualizer-scene-error-test');
+    await expect(page.getByRole('alert')).toContainText('错误恢复测试');
+    await page.getByRole('button', { name: '重试', exact: true }).click();
+    await expect(page.locator('[data-realtime-state]')).toHaveAttribute('data-realtime-state', 'ready');
     expect(errors).toEqual([]);
 });
 test('local display page has full viewport canvas, native fullscreen and recoverable missing style', async ({

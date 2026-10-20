@@ -1,5 +1,9 @@
 # 第三方声明
 
+## Three.js 0.183.2
+
+共享 Visualizer 与独立 Wallpaper Engine 运行包使用 Three.js，采用 MIT 许可。壁纸导出目录的 THIRD_PARTY_LICENSES.txt 随包包含安装版本的完整许可文本；构建从 node_modules/three/LICENSE 复制，不依赖远程服务。
+
 ## Mediabunny 1.61.6
 
 Copyright (c) 2026-present, Vanilagy and contributors.

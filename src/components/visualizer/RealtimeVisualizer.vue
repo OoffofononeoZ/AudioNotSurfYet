@@ -8,7 +8,7 @@
     </div>
 </template>
 <script setup lang="ts">
-import { ref, watch, onBeforeUnmount } from 'vue';
+import { computed, ref, watch, onBeforeUnmount } from 'vue';
 import { RealtimeStyleRepository } from '../../visualizer/realtimeStyleRepository';
 import { RealtimeSurface } from '../../visualizer/realtimeSurface';
 import { RealtimeBrowserSession, useRealtimeBrowserDependencies } from '../../visualizer/realtimeBrowserSession';
@@ -16,8 +16,10 @@ const props = defineProps<{ styleId: string }>();
 const dependencies = useRealtimeBrowserDependencies(),
     repository = new RealtimeStyleRepository();
 const canvas = ref<HTMLCanvasElement | null>(null),
-    error = ref(''),
+    inputError = ref(''),
+    renderError = ref(''),
     status = ref('loading');
+const error = computed(() => inputError.value || renderError.value);
 let surface: RealtimeSurface | null = null,
     session: RealtimeBrowserSession | null = null,
     generation = 0,
@@ -31,7 +33,8 @@ function cleanup() {
 async function load() {
     const token = ++generation;
     cleanup();
-    error.value = '';
+    inputError.value = '';
+    renderError.value = '';
     status.value = 'loading';
     if (!canvas.value) return;
     try {
@@ -41,20 +44,22 @@ async function load() {
         surface = new RealtimeSurface(canvas.value, style, value => {
             if (token !== generation || disposed) return;
             status.value = value.state;
-            if (value.state === 'error') error.value = value.message ?? '实时渲染失败。';
+            if (value.state === 'error') renderError.value = value.message ?? '实时渲染失败。';
+            else if (value.state === 'ready') renderError.value = '';
         });
         session = new RealtimeBrowserSession(dependencies, surface, style, message => {
-            if (token === generation && !disposed) error.value = message;
+            if (token === generation && !disposed) inputError.value = message;
         });
     } catch (e) {
         if (token === generation && !disposed) {
             cleanup();
-            error.value = (e as Error).message;
+            renderError.value = (e as Error).message;
         }
     }
 }
 function retry() {
-    error.value = '';
+    inputError.value = '';
+    renderError.value = '';
     if (session) session.retry();
     else void load();
 }

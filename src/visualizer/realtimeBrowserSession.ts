@@ -63,6 +63,7 @@ export class RealtimeBrowserSession {
             Math.abs(value.currentTimeSeconds - old.currentTimeSeconds) > 0.5;
         if (discontinuity) {
             this.failed = false;
+            this.onError('');
             this.stop();
             void this.start(value);
         }

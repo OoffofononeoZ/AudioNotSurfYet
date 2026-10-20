@@ -53,8 +53,14 @@ function release(event: FocusEvent) {
     held = false;
     reveal();
 }
-onMounted(reveal);
-onBeforeUnmount(clear);
+onMounted(() => {
+    reveal();
+    document.addEventListener('keydown', reveal);
+});
+onBeforeUnmount(() => {
+    clear();
+    document.removeEventListener('keydown', reveal);
+});
 </script>
 <style scoped>
 .visualizer-display {

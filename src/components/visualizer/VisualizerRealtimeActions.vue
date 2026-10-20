@@ -27,7 +27,26 @@
                 @click="save('page')">
                 生成展示地址
             </button>
+            <button
+                type="button"
+                :disabled="busy || !capability?.wallpaper || !name.trim()"
+                data-testid="prepare-wallpaper-export"
+                @click="prepareWallpaper">
+                导出 Wallpaper Engine
+            </button>
         </div>
+        <ul v-if="capability?.browser && !capability.wallpaper" class="app-scrollbar">
+            <li v-for="issue in capability.wallpaperIssues" :key="issue">{{ issue }}</li>
+        </ul>
+        <button
+            v-if="wallpaperFiles"
+            type="button"
+            :disabled="busy"
+            data-testid="save-wallpaper-directory"
+            @click="saveWallpaper">
+            选择目录并保存壁纸
+        </button>
+        <p v-if="wallpaperMessage" role="status">{{ wallpaperMessage }}</p>
         <p v-if="busy" role="status">正在验证并保存样式</p>
         <div v-if="address">
             <label
@@ -50,6 +69,9 @@ import { createRealtimeStyle } from '../../visualizer/realtimeStyle';
 import { RealtimeStyleRepository } from '../../visualizer/realtimeStyleRepository';
 import { validateRealtimeCandidate } from '../../visualizer/validateRealtimeCandidate';
 import { useConfigstore } from '../../stores/configStore';
+import { prepareWallpaperFiles, type WallpaperExportFile } from '../../visualizer/wallpaperExport';
+import { WallpaperDirectoryWriter, WallpaperDirectoryCleanupError } from '../../visualizer/wallpaperDirectoryWriter';
+import { ElMessage } from 'element-plus';
 const props = defineProps<{ project: VisualizerProjectV5 | null; locked: boolean }>();
 const router = useRouter(),
     config = useConfigstore(),
@@ -60,12 +82,16 @@ const dialog = ref<HTMLDialogElement | null>(null),
     busy = ref(false),
     displayPath = ref('');
 const address = computed(() => (displayPath.value ? new URL(displayPath.value, location.origin).href : ''));
+const wallpaperFiles = ref<WallpaperExportFile[] | null>(null),
+    wallpaperMessage = ref('');
 const capability = computed(() => (props.project ? inspectRealtimeProject(props.project) : null));
 let task: AbortController | null = null,
     disposed = false;
 function open() {
     error.value = '';
     displayPath.value = '';
+    wallpaperFiles.value = null;
+    wallpaperMessage.value = '';
     dialog.value?.showModal();
 }
 function close() {
@@ -81,8 +107,55 @@ watch(
         task = null;
         busy.value = false;
         displayPath.value = '';
+        wallpaperFiles.value = null;
+        wallpaperMessage.value = '';
     },
 );
+watch(name, () => {
+    wallpaperFiles.value = null;
+    wallpaperMessage.value = '';
+});
+async function prepareWallpaper() {
+    if (!props.project || busy.value || !capability.value?.wallpaper) return;
+    const owner = new AbortController();
+    task = owner;
+    busy.value = true;
+    error.value = '';
+    try {
+        const style = createRealtimeStyle(props.project, name.value);
+        await validateRealtimeCandidate(style, owner.signal);
+        const files = await prepareWallpaperFiles(style, owner.signal);
+        if (task === owner && !disposed) wallpaperFiles.value = files;
+    } catch (e) {
+        if (task === owner && !owner.signal.aborted && !disposed) error.value = (e as Error).message;
+    } finally {
+        if (task === owner) {
+            task = null;
+            busy.value = false;
+        }
+    }
+}
+async function saveWallpaper() {
+    if (!wallpaperFiles.value || busy.value) return;
+    const owner = new AbortController();
+    task = owner;
+    busy.value = true;
+    error.value = '';
+    wallpaperMessage.value = '';
+    try {
+        const result = await new WallpaperDirectoryWriter().save(wallpaperFiles.value, owner.signal);
+        if (task === owner && !disposed && result.status === 'saved')
+            wallpaperMessage.value = `已导出 ${result.folderName}，将目录中的 index.html 导入 Wallpaper Engine。`;
+    } catch (e) {
+        if (e instanceof WallpaperDirectoryCleanupError) ElMessage.error(e.message);
+        if (task === owner && !disposed) error.value = (e as Error).message;
+    } finally {
+        if (task === owner) {
+            task = null;
+            busy.value = false;
+        }
+    }
+}
 async function save(target: 'home' | 'page') {
     if (!props.project || busy.value || props.locked) return;
     const owner = new AbortController();

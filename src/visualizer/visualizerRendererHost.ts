@@ -71,6 +71,7 @@ declare global {
 }
 
 export interface VisualizerRendererHostOptions {
+    readonly maxFrameRate?: () => number;
     readonly canvas: HTMLCanvasElement;
     readonly createScene: (host: VisualizerSceneHost) => VisualizerScene;
     readonly readFrame: () => VisualizerRenderFrame | null;
@@ -126,6 +127,7 @@ export class VisualizerRendererHost implements VisualizerSceneHost {
     private renderGeneration = 0;
     private preparation: symbol | null = null;
     private pendingPreview = false;
+    private lastPreviewAt = -Infinity;
 
     invalidateFrame(): void {
         this.renderGeneration++;
@@ -353,6 +355,13 @@ export class VisualizerRendererHost implements VisualizerSceneHost {
     private readonly draw: FrameRequestCallback = () => {
         this.frameHandle = null;
         visualizerRendererDiagnostics.activeVisualAnimationFrames -= 1;
+        const fps = this.options.maxFrameRate?.() ?? 0,
+            now = performance.now();
+        if (fps > 0 && now - this.lastPreviewAt < 1000 / fps - 0.5) {
+            this.requestFrame();
+            return;
+        }
+        this.lastPreviewAt = now;
         void this.renderCurrentFrame();
     };
 

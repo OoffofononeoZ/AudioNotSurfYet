@@ -13,11 +13,13 @@ npm ci
 npm run dev
 ```
 
-`predev` / `prebuild` 会准备已锁定的 processing runtime assets；模型与大型本地产物遵守忽略规则。运行前核对对应 [处理契约](docs/architecture/processing/model-artifacts.md)。当前 FT 及 Editor 状态以实际 evidence 为准，不能把启动成功当作质量/性能通过。
+`predev` / `prebuild` 会准备已锁定的 processing runtime assets 和壁纸独立运行包；模型与大型本地产物遵守忽略规则。运行前核对对应 [处理契约](docs/architecture/processing/model-artifacts.md)。当前 FT 及 Editor 状态以实际 evidence 为准，不能把启动成功当作质量/性能通过。
 
 Editor 分轨试听与有限乐器自动标记已按 [DEC-075 契约](docs/architecture/processing/editor-auto-marking.md) 接入，使用同一播放transport并显式应用V1标记；新增识别质量仍待人工复核，实测误标与边界见 [证据记录](docs/quality/processing/editor-auto-marking-evidence.md)。固定新增模型测试资产使用 `npm run transcription:models`，实际浏览器与单元验证入口见 [自动标记测试](tests/transcription/README.md)。
 
 Visualizer 使用[离线确定性导出](docs/context/visualizer-offline-export.md)生成 WebM，支持 720p/1080p 与 30/60fps，按帧生成并显示进度；预览播放速度不决定输出视频时长。相关依赖许可见[第三方声明](THIRD_PARTY_NOTICES.md)。
+
+Visualizer“实时样式”可将无局部分镜、标记和历史依赖的当前画面应用到首页或保存为本站 `/display/:styleId`；动态输入全部为 WE 频谱时可导出 Wallpaper Engine 项目目录。先准备完整产物，再点击“选择目录并保存壁纸”；新目录的 index.html 可直接导入壁纸编辑器。`npm run wallpaper:runtime` 可独立重建运行包，详见[实时样式](docs/context/visualizer-realtime.md)。
 
 Visualizer 使用[可执行资源包 V2](docs/architecture/visualizer/resource-packages-v2.md)。在“添加元素”中选择 `C:\Users\Ryan\Desktop\WheresYourElements\assets`，只读加载外部 15 个元素和两套预设；授权有效时自动恢复，失效时点击“恢复访问”，外部更改后点击“重新加载”。应用不保存或打包资源库，V5 工程及草稿内嵌完整快照，离线恢复与导出不依赖资源库。生成 skill 2.2.0 维护于 `skills/visualizer-content-generator/`，独立副本在 `WheresYourElements/skill/visualizer-content-generator/`。
 
