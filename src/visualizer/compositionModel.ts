@@ -6,17 +6,17 @@ import type { CompositionItem } from './resourceTypes';
 import type { VisualizerElement, VisualizerProjectV5 } from './compositionTypes';
 import { resourceKey } from './resourceIdentity';
 
-export const elementDescriptor = (project: VisualizerProjectV5, element: VisualizerElement) =>
+export const elementDescriptor = (project: Pick<VisualizerProjectV5, 'resources'>, element: VisualizerElement) =>
     findResource(project.resources.elements, element.resource);
-export const elementAlgorithm = (project: VisualizerProjectV5, element: VisualizerElement) =>
+export const elementAlgorithm = (project: Pick<VisualizerProjectV5, 'resources'>, element: VisualizerElement) =>
     findResource(project.resources.algorithms, elementDescriptor(project, element).algorithm);
 export const orderedElements = (elements: readonly VisualizerElement[]) =>
     elements
         .map((element, index) => ({ element, index }))
         .sort((a, b) => a.element.layer - b.element.layer || a.index - b.index)
         .map(e => e.element);
-const effectiveCache = new WeakMap<VisualizerProjectV5, VisualizerElement[]>();
-export function effectiveElements(project: VisualizerProjectV5): VisualizerElement[] {
+const effectiveCache = new WeakMap<object, VisualizerElement[]>();
+export function effectiveElements(project: Pick<VisualizerProjectV5, 'elements' | 'items'>): VisualizerElement[] {
     let elements = effectiveCache.get(project);
     if (!elements) {
         const hidden = new Set(project.items.flatMap(i => (i.kind === 'preset' && !i.enabled ? i.children : [])));
@@ -75,7 +75,7 @@ export function appendStandaloneElements(
     });
 }
 export function elementRange(
-    project: VisualizerProjectV5,
+    project: Pick<VisualizerProjectV5, 'editorSnapshot'>,
     element: VisualizerElement,
 ): Pick<RangeEventV1, 'startSeconds' | 'endSeconds'> | null {
     const t = element.timing;

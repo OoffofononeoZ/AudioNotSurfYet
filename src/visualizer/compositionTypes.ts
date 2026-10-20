@@ -56,6 +56,12 @@ export interface CompositionDraft {
     project: VisualizerProjectV5;
 }
 
+/** Renderer data shared by song projects and independent realtime styles. */
+export type CompositionRenderModel = Pick<
+    VisualizerProjectV5,
+    'projectId' | 'seed' | 'elements' | 'items' | 'resources' | 'editorSnapshot'
+>;
+
 export interface CompositionSessionSnapshot {
     state: VisualizerSessionState | 'unsupported-draft';
     routeTrackId: string | null;

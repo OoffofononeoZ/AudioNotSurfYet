@@ -1,29 +1,14 @@
 import type { InjectionKey } from 'vue';
 import { inject } from 'vue';
-import type {
-    ReplaceCurrentAnalysisCacheInput,
-    SessionRepositoryPort,
-} from '../persistence/sessionRepository';
+import type { ReplaceCurrentAnalysisCacheInput, SessionRepositoryPort } from '../persistence/sessionRepository';
 import type { useAudioSessionStore } from '../stores/audioSessionStore';
-import type {
-    DecodedAudioDescriptor,
-    PlaybackSnapshot,
-} from '../types/audio';
+import type { DecodedAudioDescriptor, PlaybackSnapshot } from '../types/audio';
 import type { StoredAnalysisCache } from '../types/session';
-import {
-    decodeAnalysisSeries,
-    encodeAnalysisSeries,
-} from './compactCodec';
-import {
-    createAnalysisCacheKey,
-    createAnalysisConfig,
-} from './config';
-import {
-    copyDecodedAudioToMono,
-    type DecodedAudioCopyPort,
-    PcmCopyError,
-} from './pcm';
+import { decodeAnalysisSeries, encodeAnalysisSeries } from './compactCodec';
+import { createAnalysisCacheKey, createAnalysisConfig } from './config';
+import { copyDecodedAudioToMono, type DecodedAudioCopyPort, PcmCopyError } from './pcm';
 import { wallpaperFrameIndex } from './wallpaperSpectrum';
+import type { RealtimeAnalysisLease, RealtimeFeatureFrame } from './realtimeTypes';
 import {
     isFeatureId,
     isSupportedFeatureId,
@@ -46,14 +31,9 @@ interface AnalysisAudioEnginePort extends DecodedAudioCopyPort {
 }
 
 interface AnalysisWorkerPort {
-    onmessage:
-        | ((event: MessageEvent<AnalysisWorkerResponse>) => void)
-        | null;
+    onmessage: ((event: MessageEvent<AnalysisWorkerResponse>) => void) | null;
     onerror: ((event: ErrorEvent) => void) | null;
-    postMessage(
-        message: AnalysisWorkerRequest,
-        transfer?: Transferable[],
-    ): void;
+    postMessage(message: AnalysisWorkerRequest, transfer?: Transferable[]): void;
     terminate(): void;
 }
 
@@ -65,10 +45,7 @@ export interface AnalysisConsumerLease {
     token: string;
     consumer: AnalysisConsumer;
     setActiveFeatures(ids: readonly FeatureId[]): Promise<void>;
-    requestCursorValue(
-        featureId: FeatureId,
-        timeSeconds: number,
-    ): Promise<AnalysisCursorValueResult | null>;
+    requestCursorValue(featureId: FeatureId, timeSeconds: number): Promise<AnalysisCursorValueResult | null>;
     requestTempoEstimate(): Promise<TempoEstimateResult | null>;
     getSeries(featureId: FeatureId): AnalysisSeries | null;
     subscribe(listener: AnalysisListener): () => void;
@@ -84,18 +61,9 @@ export interface AnalysisCoordinatorOptions {
 }
 
 export class AnalysisCoordinatorError extends Error {
-    readonly code:
-        | 'invalid-active-features'
-        | 'unsupported-feature'
-        | 'audio-not-ready';
+    readonly code: 'invalid-active-features' | 'unsupported-feature' | 'audio-not-ready';
 
-    constructor(
-        code:
-            | 'invalid-active-features'
-            | 'unsupported-feature'
-            | 'audio-not-ready',
-        message: string,
-    ) {
+    constructor(code: 'invalid-active-features' | 'unsupported-feature' | 'audio-not-ready', message: string) {
         super(message);
         this.name = 'AnalysisCoordinatorError';
         this.code = code;
@@ -118,9 +86,7 @@ const initialSnapshot = (): AnalysisCoordinatorSnapshot => ({
     staleMessageCount: 0,
 });
 
-const cloneSnapshot = (
-    snapshot: AnalysisCoordinatorSnapshot,
-): AnalysisCoordinatorSnapshot => ({
+const cloneSnapshot = (snapshot: AnalysisCoordinatorSnapshot): AnalysisCoordinatorSnapshot => ({
     ...snapshot,
     activeFeatureIds: [...snapshot.activeFeatureIds],
     readyFeatureIds: [...snapshot.readyFeatureIds],
@@ -169,6 +135,37 @@ export class AnalysisCoordinator {
     } | null = null;
     private snapshot = initialSnapshot();
     private disposed = false;
+    private realtime: { id: string; frame(value: RealtimeFeatureFrame): void; error(message: string): void } | null =
+        null;
+
+    acquireRealtime(
+        port: MessagePort,
+        sampleRate: number,
+        featureIds: FeatureId[],
+        frame: (value: RealtimeFeatureFrame) => void,
+        error: (message: string) => void,
+    ): RealtimeAnalysisLease {
+        if (this.disposed) throw Error('AnalysisCoordinator has been disposed.');
+        this.assertActiveFeatures(featureIds);
+        this.deactivateConsumer();
+        this.activeConsumer = null;
+        const id = crypto.randomUUID();
+        this.realtime = { id, frame, error };
+        this.ensureWorker().postMessage({ kind: 'realtime-start', sessionId: id, sampleRate, featureIds, port }, [
+            port,
+        ]);
+        return {
+            release: () => {
+                if (this.realtime?.id === id) this.releaseRealtime();
+            },
+        };
+    }
+
+    private releaseRealtime() {
+        const current = this.realtime;
+        this.realtime = null;
+        if (current) this.worker?.postMessage({ kind: 'realtime-stop', sessionId: current.id });
+    }
 
     constructor(
         engine: AnalysisAudioEnginePort,
@@ -179,18 +176,15 @@ export class AnalysisCoordinator {
         this.engine = engine;
         this.repository = repository;
         this.store = store;
-        this.workerFactory = options.workerFactory ?? (() =>
-            new Worker(
-                new URL('./analysis.worker.ts', import.meta.url),
-                { type: 'module' },
-            ));
-        this.createJobId =
-            options.createJobId ?? (() => crypto.randomUUID());
+        this.workerFactory =
+            options.workerFactory ??
+            (() => new Worker(new URL('./analysis.worker.ts', import.meta.url), { type: 'module' }));
+        this.createJobId = options.createJobId ?? (() => crypto.randomUUID());
         this.copyYieldControl = options.copyYieldControl;
         this.cursorTimeoutMs = options.cursorTimeoutMs ?? 5_000;
         this.tempoTimeoutMs = options.tempoTimeoutMs ?? 15_000;
         this.store.setAnalysis(this.snapshot);
-        this.unsubscribeEngine = this.engine.subscribe((playback) => {
+        this.unsubscribeEngine = this.engine.subscribe(playback => {
             this.handlePlayback(playback);
         });
     }
@@ -210,13 +204,9 @@ export class AnalysisCoordinator {
         return this.createConsumerLease(active, true);
     }
 
-    getDevelopmentConsumerProxy(
-        consumer: AnalysisConsumer,
-    ): AnalysisConsumerLease | null {
+    getDevelopmentConsumerProxy(consumer: AnalysisConsumer): AnalysisConsumerLease | null {
         const active = this.activeConsumer;
-        return active?.consumer === consumer
-            ? this.createConsumerLease(active, false)
-            : null;
+        return active?.consumer === consumer ? this.createConsumerLease(active, false) : null;
     }
 
     async setActiveFeatures(ids: readonly FeatureId[]): Promise<void> {
@@ -280,25 +270,29 @@ export class AnalysisCoordinator {
         });
     }
 
-    requestCursorValue(
-        featureId: FeatureId,
-        timeSeconds: number,
-    ): Promise<AnalysisCursorValueResult | null> {
+    requestCursorValue(featureId: FeatureId, timeSeconds: number): Promise<AnalysisCursorValueResult | null> {
         if (
-            this.disposed
-            || !this.series.has(featureId)
-            || !this.activeJob
-            || !this.worker
-            || !Number.isFinite(timeSeconds)
+            this.disposed ||
+            !this.series.has(featureId) ||
+            !this.activeJob ||
+            !this.worker ||
+            !Number.isFinite(timeSeconds)
         ) {
             return Promise.resolve(null);
         }
         const spectrum = this.series.get(featureId);
         if (featureId === 'wallpaperEngineSpectrum' && spectrum?.payload.kind === 'stereo-spectrum-f32') {
             const index = wallpaperFrameIndex(timeSeconds, spectrum.sampleCount);
-            return Promise.resolve({ kind: 'cursor-value-result', requestId: this.createJobId(), generation: this.snapshot.generation,
-                trackHash: spectrum.trackHash, configHash: spectrum.configHash, featureId, frameStartSeconds: index * spectrum.sampleStepSeconds,
-                value: Array.from(spectrum.payload.values.subarray(index * 128, (index + 1) * 128)) });
+            return Promise.resolve({
+                kind: 'cursor-value-result',
+                requestId: this.createJobId(),
+                generation: this.snapshot.generation,
+                trackHash: spectrum.trackHash,
+                configHash: spectrum.configHash,
+                featureId,
+                frameStartSeconds: index * spectrum.sampleStepSeconds,
+                value: Array.from(spectrum.payload.values.subarray(index * 128, (index + 1) * 128)),
+            });
         }
         const previous = this.cursorRequests.get(featureId);
         if (previous) {
@@ -306,7 +300,7 @@ export class AnalysisCoordinator {
             previous.resolve(null);
         }
         const requestId = this.createJobId();
-        return new Promise((resolve) => {
+        return new Promise(resolve => {
             const timeout = setTimeout(() => {
                 const current = this.cursorRequests.get(featureId);
                 if (current?.requestId === requestId) {
@@ -331,9 +325,7 @@ export class AnalysisCoordinator {
                     windowingFunction: 'hanning',
                     numberOfMFCCCoefficients: 13,
                     channelMode: 'average-mono',
-                    sampleRate:
-                        this.engine.getDecodedAudioDescriptor()?.sampleRate
-                        ?? 0,
+                    sampleRate: this.engine.getDecodedAudioDescriptor()?.sampleRate ?? 0,
                     configHash: this.activeJob?.configHash ?? '',
                 },
                 featureId,
@@ -344,19 +336,19 @@ export class AnalysisCoordinator {
 
     requestTempoEstimate(): Promise<TempoEstimateResult | null> {
         if (
-            this.disposed
-            || this.activeConsumer?.consumer !== 'editor'
-            || !this.activeJob
-            || !this.worker
-            || this.snapshot.state !== 'ready'
-            || !this.snapshot.trackHash
-            || !this.snapshot.configHash
+            this.disposed ||
+            this.activeConsumer?.consumer !== 'editor' ||
+            !this.activeJob ||
+            !this.worker ||
+            this.snapshot.state !== 'ready' ||
+            !this.snapshot.trackHash ||
+            !this.snapshot.configHash
         ) {
             return Promise.resolve(null);
         }
         this.resolveTempoRequest();
         const requestId = this.createJobId();
-        return new Promise((resolve) => {
+        return new Promise(resolve => {
             const timeout = setTimeout(() => {
                 if (this.tempoRequest?.requestId === requestId) {
                     this.tempoRequest = null;
@@ -391,6 +383,7 @@ export class AnalysisCoordinator {
     async dispose(): Promise<void> {
         if (this.disposed) return;
         this.disposed = true;
+        this.releaseRealtime();
         this.activeConsumer = null;
         this.cancelActiveJob('cancelled');
         this.unsubscribeEngine();
@@ -414,29 +407,22 @@ export class AnalysisCoordinator {
     ): AnalysisConsumerLease {
         let released = false;
         const isCurrent = () =>
-            !released
-            && !this.disposed
-            && this.activeConsumer?.token === identity.token
-            && this.activeConsumer.consumer === identity.consumer;
+            !released &&
+            !this.disposed &&
+            this.activeConsumer?.token === identity.token &&
+            this.activeConsumer.consumer === identity.consumer;
         return {
             token: identity.token,
             consumer: identity.consumer,
-            setActiveFeatures: (ids) =>
-                isCurrent()
-                    ? this.setActiveFeatures(ids)
-                    : Promise.resolve(),
+            setActiveFeatures: ids => (isCurrent() ? this.setActiveFeatures(ids) : Promise.resolve()),
             requestCursorValue: (featureId, timeSeconds) =>
-                isCurrent()
-                    ? this.requestCursorValue(featureId, timeSeconds)
-                    : Promise.resolve(null),
-            requestTempoEstimate: () => isCurrent()
-                ? this.requestTempoEstimate()
-                : Promise.resolve(null),
-            getSeries: (featureId) =>
-                isCurrent() ? this.getSeries(featureId) : null,
-            subscribe: (listener) => this.subscribe((snapshot) => {
-                if (isCurrent()) listener(snapshot);
-            }),
+                isCurrent() ? this.requestCursorValue(featureId, timeSeconds) : Promise.resolve(null),
+            requestTempoEstimate: () => (isCurrent() ? this.requestTempoEstimate() : Promise.resolve(null)),
+            getSeries: featureId => (isCurrent() ? this.getSeries(featureId) : null),
+            subscribe: listener =>
+                this.subscribe(snapshot => {
+                    if (isCurrent()) listener(snapshot);
+                }),
             release: () => {
                 if (!canRelease || released) return;
                 released = true;
@@ -449,6 +435,7 @@ export class AnalysisCoordinator {
     }
 
     private deactivateConsumer(): void {
+        this.releaseRealtime();
         this.cancelActiveJob('cancelled');
         this.series.clear();
         const generation = this.snapshot.generation + 1;
@@ -469,17 +456,14 @@ export class AnalysisCoordinator {
 
     private assertActiveFeatures(ids: readonly FeatureId[]): void {
         if (
-            !Array.isArray(ids)
-            || ids.length > 4
-            || new Set(ids).size !== ids.length
-            || ids.some((id) => !isFeatureId(id))
+            !Array.isArray(ids) ||
+            ids.length > 4 ||
+            new Set(ids).size !== ids.length ||
+            ids.some(id => !isFeatureId(id))
         ) {
-            throw new AnalysisCoordinatorError(
-                'invalid-active-features',
-                'Analysis requires 0–4 unique feature IDs.',
-            );
+            throw new AnalysisCoordinatorError('invalid-active-features', 'Analysis requires 0–4 unique feature IDs.');
         }
-        const unsupported = ids.find((id) => !isSupportedFeatureId(id));
+        const unsupported = ids.find(id => !isSupportedFeatureId(id));
         if (unsupported) {
             throw new AnalysisCoordinatorError(
                 'unsupported-feature',
@@ -488,12 +472,8 @@ export class AnalysisCoordinator {
         }
     }
 
-    private currentIdentity(
-        descriptor: DecodedAudioDescriptor,
-    ): { trackHash: string } | null {
-        const track = this.store.queue.find(
-            (entry) => entry.id === descriptor.trackId,
-        );
+    private currentIdentity(descriptor: DecodedAudioDescriptor): { trackHash: string } | null {
+        const track = this.store.queue.find(entry => entry.id === descriptor.trackId);
         if (!track?.trackHash) return null;
         return { trackHash: track.trackHash };
     }
@@ -501,22 +481,12 @@ export class AnalysisCoordinator {
     private async startCurrentAnalysis(generation: number): Promise<void> {
         const descriptor = this.engine.getDecodedAudioDescriptor();
         if (!descriptor) {
-            this.publishError(
-                generation,
-                'audio-not-ready',
-                'Decoded audio is not ready for analysis.',
-                true,
-            );
+            this.publishError(generation, 'audio-not-ready', 'Decoded audio is not ready for analysis.', true);
             return;
         }
         const identity = this.currentIdentity(descriptor);
         if (!identity) {
-            this.publishError(
-                generation,
-                'audio-not-ready',
-                'Current track hash is not ready for analysis.',
-                true,
-            );
+            this.publishError(generation, 'audio-not-ready', 'Current track hash is not ready for analysis.', true);
             return;
         }
         const config = await createAnalysisConfig(descriptor.sampleRate);
@@ -527,9 +497,7 @@ export class AnalysisCoordinator {
             config.configHash,
             this.snapshot.activeFeatureIds,
         );
-        const misses = this.snapshot.activeFeatureIds.filter(
-            (featureId) => !hits.includes(featureId),
-        );
+        const misses = this.snapshot.activeFeatureIds.filter(featureId => !hits.includes(featureId));
         this.publish({
             ...this.snapshot,
             trackId: descriptor.trackId,
@@ -537,11 +505,7 @@ export class AnalysisCoordinator {
             configHash: config.configHash,
             sampleRate: descriptor.sampleRate,
             readyFeatureIds: [...hits],
-            cacheState: hits.length === 0
-                ? 'miss'
-                : misses.length === 0
-                    ? 'hit'
-                    : 'partial',
+            cacheState: hits.length === 0 ? 'miss' : misses.length === 0 ? 'hit' : 'partial',
         });
         let copied;
         try {
@@ -558,17 +522,12 @@ export class AnalysisCoordinator {
             this.publishError(
                 generation,
                 'audio-not-ready',
-                error instanceof Error
-                    ? error.message
-                    : 'Unable to copy decoded audio.',
+                error instanceof Error ? error.message : 'Unable to copy decoded audio.',
                 true,
             );
             return;
         }
-        if (
-            !this.isCurrentGeneration(generation)
-            || copied.descriptor.revision !== descriptor.revision
-        ) {
+        if (!this.isCurrentGeneration(generation) || copied.descriptor.revision !== descriptor.revision) {
             return;
         }
         const worker = this.ensureWorker();
@@ -597,7 +556,9 @@ export class AnalysisCoordinator {
             featureIds: misses,
             cursorFeatureIds: [...this.snapshot.activeFeatureIds],
             pcm: copied.pcm.buffer as ArrayBuffer,
-            stereoPcm: copied.stereoPcm ? [copied.stereoPcm[0].buffer as ArrayBuffer, copied.stereoPcm[1].buffer as ArrayBuffer] : undefined,
+            stereoPcm: copied.stereoPcm
+                ? [copied.stereoPcm[0].buffer as ArrayBuffer, copied.stereoPcm[1].buffer as ArrayBuffer]
+                : undefined,
             durationSeconds: copied.descriptor.durationSeconds,
         };
         worker.postMessage(request, [request.pcm, ...(request.stereoPcm ?? [])]);
@@ -611,23 +572,17 @@ export class AnalysisCoordinator {
     ): FeatureId[] {
         const cache = this.restoredCache;
         if (
-            !cache
-            || cache.manifest.trackId !== trackId
-            || cache.manifest.trackHash !== trackHash
-            || cache.manifest.configHash !== configHash
+            !cache ||
+            cache.manifest.trackId !== trackId ||
+            cache.manifest.trackHash !== trackHash ||
+            cache.manifest.configHash !== configHash
         ) {
             return [];
         }
-        const payloads = new Map(
-            cache.payloads.map((entry) => [entry.cacheKey, entry.payload]),
-        );
+        const payloads = new Map(cache.payloads.map(entry => [entry.cacheKey, entry.payload]));
         const hits: FeatureId[] = [];
         for (const featureId of featureIds) {
-            const cacheKey = createAnalysisCacheKey(
-                trackHash,
-                configHash,
-                featureId,
-            );
+            const cacheKey = createAnalysisCacheKey(trackHash, configHash, featureId);
             const payload = payloads.get(cacheKey);
             if (!payload) continue;
             try {
@@ -649,11 +604,13 @@ export class AnalysisCoordinator {
     private ensureWorker(): AnalysisWorkerPort {
         if (this.worker) return this.worker;
         const worker = this.workerFactory();
-        worker.onmessage = (event) => {
+        worker.onmessage = event => {
             this.handleWorkerMessage(event.data);
         };
-        worker.onerror = (event) => {
+        worker.onerror = event => {
             if (this.disposed) return;
+            this.realtime?.error(event.message || '实时分析 Worker 失败。');
+            this.releaseRealtime();
             this.publishError(
                 this.snapshot.generation,
                 'worker-failed',
@@ -666,6 +623,16 @@ export class AnalysisCoordinator {
     }
 
     private handleWorkerMessage(message: AnalysisWorkerResponse): void {
+        if (message.kind === 'realtime-frame' || message.kind === 'realtime-error') {
+            const current = this.realtime;
+            if (!current || current.id !== message.sessionId) return;
+            if (message.kind === 'realtime-frame') current.frame(message.frame);
+            else {
+                current.error(message.message);
+                this.releaseRealtime();
+            }
+            return;
+        }
         if (message.kind === 'cursor-value-result') {
             this.handleCursorResult(message);
             return;
@@ -676,10 +643,10 @@ export class AnalysisCoordinator {
         }
         const active = this.activeJob;
         if (
-            !active
-            || message.jobId !== active.jobId
-            || message.generation !== active.generation
-            || active.generation !== this.snapshot.generation
+            !active ||
+            message.jobId !== active.jobId ||
+            message.generation !== active.generation ||
+            active.generation !== this.snapshot.generation
         ) {
             this.publish({
                 ...this.snapshot,
@@ -688,40 +655,29 @@ export class AnalysisCoordinator {
             return;
         }
         if (message.kind === 'progress') {
-            const completedFrames = Math.max(
-                this.snapshot.completedFrames,
-                message.completedFrames,
-            );
-            const totalFrames = Math.max(
-                completedFrames,
-                message.totalFrames,
-            );
+            const completedFrames = Math.max(this.snapshot.completedFrames, message.completedFrames);
+            const totalFrames = Math.max(completedFrames, message.totalFrames);
             this.publish({
                 ...this.snapshot,
                 completedFrames,
                 totalFrames,
-                progress: totalFrames === 0
-                    ? 0
-                    : completedFrames / totalFrames,
+                progress: totalFrames === 0 ? 0 : completedFrames / totalFrames,
             });
             return;
         }
         if (message.kind === 'error') {
-            this.publishError(
-                active.generation,
-                message.code,
-                message.message,
-                message.recoverable,
-            );
+            this.publishError(active.generation, message.code, message.message, message.recoverable);
             return;
         }
         if (
-            message.trackHash !== active.trackHash
-            || message.configHash !== active.configHash
-            || message.series.some((series) =>
-                series.trackHash !== active.trackHash
-                || series.configHash !== active.configHash
-                || !active.requestedFeatureIds.includes(series.featureId))
+            message.trackHash !== active.trackHash ||
+            message.configHash !== active.configHash ||
+            message.series.some(
+                series =>
+                    series.trackHash !== active.trackHash ||
+                    series.configHash !== active.configHash ||
+                    !active.requestedFeatureIds.includes(series.featureId),
+            )
         ) {
             this.publish({
                 ...this.snapshot,
@@ -735,29 +691,22 @@ export class AnalysisCoordinator {
         this.publish({
             ...this.snapshot,
             state: 'ready',
-            readyFeatureIds: this.snapshot.activeFeatureIds.filter(
-                (featureId) => this.series.has(featureId),
-            ),
-            completedFrames: Math.max(
-                this.snapshot.completedFrames,
-                this.snapshot.totalFrames,
-            ),
+            readyFeatureIds: this.snapshot.activeFeatureIds.filter(featureId => this.series.has(featureId)),
+            completedFrames: Math.max(this.snapshot.completedFrames, this.snapshot.totalFrames),
             progress: 1,
             error: undefined,
         });
         void this.persistSeries(active.generation);
     }
 
-    private handleCursorResult(
-        result: AnalysisCursorValueResult,
-    ): void {
+    private handleCursorResult(result: AnalysisCursorValueResult): void {
         const pending = this.cursorRequests.get(result.featureId);
         if (
-            !pending
-            || pending.requestId !== result.requestId
-            || result.generation !== this.snapshot.generation
-            || result.trackHash !== this.snapshot.trackHash
-            || result.configHash !== this.snapshot.configHash
+            !pending ||
+            pending.requestId !== result.requestId ||
+            result.generation !== this.snapshot.generation ||
+            result.trackHash !== this.snapshot.trackHash ||
+            result.configHash !== this.snapshot.configHash
         ) {
             return;
         }
@@ -769,12 +718,12 @@ export class AnalysisCoordinator {
     private handleTempoResult(result: TempoEstimateResult): void {
         const pending = this.tempoRequest;
         if (
-            !pending
-            || pending.requestId !== result.requestId
-            || result.generation !== this.snapshot.generation
-            || result.trackHash !== this.snapshot.trackHash
-            || result.configHash !== this.snapshot.configHash
-            || this.activeConsumer?.consumer !== 'editor'
+            !pending ||
+            pending.requestId !== result.requestId ||
+            result.generation !== this.snapshot.generation ||
+            result.trackHash !== this.snapshot.trackHash ||
+            result.configHash !== this.snapshot.configHash ||
+            this.activeConsumer?.consumer !== 'editor'
         ) {
             return;
         }
@@ -798,22 +747,17 @@ export class AnalysisCoordinator {
             if (!series) continue;
             payloads.push({
                 featureId,
-                cacheKey: createAnalysisCacheKey(
-                    trackHash,
-                    configHash,
-                    featureId,
-                ),
+                cacheKey: createAnalysisCacheKey(trackHash, configHash, featureId),
                 payload: encodeAnalysisSeries(series),
             });
         }
         try {
-            const result =
-                await this.repository.replaceCurrentAnalysisCache({
-                    trackId,
-                    trackHash,
-                    configHash,
-                    payloads,
-                });
+            const result = await this.repository.replaceCurrentAnalysisCache({
+                trackId,
+                trackHash,
+                configHash,
+                payloads,
+            });
             if (!this.isCurrentGeneration(generation)) return;
             if (result === 'stale') {
                 this.publish({
@@ -822,32 +766,30 @@ export class AnalysisCoordinator {
                 });
                 return;
             }
-            const manifest = payloads.length === 0
-                ? null
-                : {
-                    trackId,
-                    trackHash,
-                    configHash,
-                    featureIds: payloads.map((entry) => entry.featureId),
-                    cacheKeys: payloads.map((entry) => entry.cacheKey),
-                };
+            const manifest =
+                payloads.length === 0
+                    ? null
+                    : {
+                          trackId,
+                          trackHash,
+                          configHash,
+                          featureIds: payloads.map(entry => entry.featureId),
+                          cacheKeys: payloads.map(entry => entry.cacheKey),
+                      };
             this.store.setAnalysisCacheManifest(manifest);
-            this.restoredCache = payloads.length === 0
-                ? null
-                : {
-                    manifest: manifest!,
-                    payloads: payloads.map((entry) => ({
-                        cacheKey: entry.cacheKey,
-                        payload: entry.payload,
-                    })),
-                };
+            this.restoredCache =
+                payloads.length === 0
+                    ? null
+                    : {
+                          manifest: manifest!,
+                          payloads: payloads.map(entry => ({
+                              cacheKey: entry.cacheKey,
+                              payload: entry.payload,
+                          })),
+                      };
             this.publish({
                 ...this.snapshot,
-                cacheState: payloads.length === 0
-                    ? 'idle'
-                    : this.snapshot.cacheState === 'hit'
-                        ? 'hit'
-                        : 'persisted',
+                cacheState: payloads.length === 0 ? 'idle' : this.snapshot.cacheState === 'hit' ? 'hit' : 'persisted',
             });
         } catch {
             if (!this.isCurrentGeneration(generation)) return;
@@ -860,19 +802,13 @@ export class AnalysisCoordinator {
 
     private handlePlayback(playback: PlaybackSnapshot): void {
         if (this.disposed) return;
-        if (
-            playback.state === 'empty'
-            || playback.state === 'loading'
-            || playback.state === 'error'
-        ) {
+        if (playback.state === 'empty' || playback.state === 'loading' || playback.state === 'error') {
             this.lastDescriptorRevision = null;
             this.cancelActiveJob('cancelled');
             this.series.clear();
             this.publish({
                 ...this.snapshot,
-                state: this.snapshot.activeFeatureIds.length === 0
-                    ? 'idle'
-                    : 'copying',
+                state: this.snapshot.activeFeatureIds.length === 0 ? 'idle' : 'copying',
                 generation: this.snapshot.generation + 1,
                 trackId: playback.trackId,
                 trackHash: null,
@@ -888,10 +824,7 @@ export class AnalysisCoordinator {
             return;
         }
         const descriptor = this.engine.getDecodedAudioDescriptor();
-        if (
-            !descriptor
-            || descriptor.revision === this.lastDescriptorRevision
-        ) {
+        if (!descriptor || descriptor.revision === this.lastDescriptorRevision) {
             return;
         }
         this.lastDescriptorRevision = descriptor.revision;
@@ -947,12 +880,7 @@ export class AnalysisCoordinator {
         this.tempoRequest = null;
     }
 
-    private publishError(
-        generation: number,
-        code: AnalysisErrorCode,
-        message: string,
-        recoverable: boolean,
-    ): void {
+    private publishError(generation: number, code: AnalysisErrorCode, message: string, recoverable: boolean): void {
         if (!this.isCurrentGeneration(generation)) return;
         this.publish({
             ...this.snapshot,
@@ -977,8 +905,7 @@ export class AnalysisCoordinator {
     }
 }
 
-export const analysisCoordinatorKey: InjectionKey<AnalysisCoordinator> =
-    Symbol('analysis-coordinator');
+export const analysisCoordinatorKey: InjectionKey<AnalysisCoordinator> = Symbol('analysis-coordinator');
 
 export const useAnalysisCoordinator = (): AnalysisCoordinator => {
     const coordinator = inject(analysisCoordinatorKey);

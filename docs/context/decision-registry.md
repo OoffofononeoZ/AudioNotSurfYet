@@ -44,6 +44,8 @@
 
 ## DEC-090 — 点标记直线测试元素 — 2026-10-20
 
+DEC-091 / 2026-10-20：owner 以“Implement the plan.”批准本轮实时预设分类、首页可视化模式、本地 `/display/:styleId` 和 Wallpaper Engine 项目目录导出；完整有效画面保存独立样式快照，实际播放信号在主音量前分析。首轮仅无历史查询元素，整曲时段转常驻，局部分镜/Editor 标记阻止应用；壁纸仅 WE 特征/常量。不改 V5/V2/ABI，不含外部浏览器音源、跨浏览器分享或发布。见[实时样式](visualizer-realtime.md)。
+
 DEC-090 / 2026-10-20：owner 批准两份点标记直线具体内容合同，并以“Implement the plan.”批准实施：输入限定轨道内一个分类、每点独立叠加、相邻位置至少差 5%、点时刻最亮及 40/60/100ms 包络。新增可选 categorySelection 单分类约束与点查询 includeEnd，保留 ABI 2/V2/V5 及既有输入语义；skill 2.2.0 同步外部。资源放外部 assets，不创建 Git/历史目录，不授权其他新内容或发布。
 
 ## DEC-075 — Editor Audition and Limited Transcription — 2026-10-12

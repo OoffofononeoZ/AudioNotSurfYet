@@ -1,6 +1,6 @@
 import { finite, keys, record, text } from './projectValidation';
 import { elementAlgorithm, elementDescriptor } from './compositionModel';
-import type { VisualizerProjectV5 } from './compositionTypes';
+import type { CompositionRenderModel } from './compositionTypes';
 import type { MarkerBinding, MarkerPage, MarkerQuery, MarkerReader } from './editorMarkerTypes';
 import type { PointEventV1, RangeEventV1 } from '../editor/types';
 
@@ -17,7 +17,7 @@ const firstIndex = (length: number, before: (index: number) => boolean) => {
     return low;
 };
 /** Owns an index for exactly one immutable project revision. No source names or unrelated Editor data leave the host. */
-export function createEditorMarkerReader(project: VisualizerProjectV5, isCurrent: () => boolean): MarkerReader {
+export function createEditorMarkerReader(project: CompositionRenderModel, isCurrent: () => boolean): MarkerReader {
     const scope = crypto.randomUUID(),
         indexes = new Map<string, { events: Array<PointEventV1 | RangeEventV1>; maxEnds: number[] }>();
     return async (elementId, query: MarkerQuery) => {
@@ -87,7 +87,8 @@ export function createEditorMarkerReader(project: VisualizerProjectV5, isCurrent
             const includeEnd = raw.includeEnd === true;
             const from = finite(raw.startSeconds, '查询起点'),
                 to = finite(raw.endSeconds, '查询终点');
-            if (from < 0 || to <= from || to > project.track.durationSeconds) throw Error('标记查询时间窗口越界。');
+            if (from < 0 || to <= from || to > (project.editorSnapshot?.project.track.durationSeconds ?? 0))
+                throw Error('标记查询时间窗口越界。');
             const lower = firstIndex(events.length, i =>
                 input.eventKind === 'point' ? start(events[i]!) < from : maxEnds[i]! <= from,
             );
