@@ -10,7 +10,11 @@ export interface RealtimeCapabilities {
     browserIssues: string[];
     wallpaperIssues: string[];
 }
-function inspect(elements: VisualizerElement[], resources: ResourceSnapshot, duration: number): RealtimeCapabilities {
+export function inspectRealtimeContent(
+    elements: VisualizerElement[],
+    resources: ResourceSnapshot,
+    duration: number,
+): RealtimeCapabilities {
     const browserIssues: string[] = [],
         wallpaperIssues: string[] = [];
     const model = { resources };
@@ -52,7 +56,7 @@ function inspect(elements: VisualizerElement[], resources: ResourceSnapshot, dur
     };
 }
 export function inspectRealtimeProject(project: VisualizerProjectV5): RealtimeCapabilities {
-    return inspect(
+    return inspectRealtimeContent(
         effectiveElements(project).filter(e => e.enabled),
         project.resources,
         project.track.durationSeconds,
@@ -72,7 +76,7 @@ export function inspectRealtimePreset(preset: PresetDefinition): RealtimeCapabil
                     : { kind: 'unbound' as const },
         }));
     const definitions = elements.map(e => elementRegistry.get(e.resource));
-    return inspect(
+    return inspectRealtimeContent(
         elements,
         {
             elements: definitions,

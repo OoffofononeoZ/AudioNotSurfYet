@@ -1,10 +1,7 @@
 import type { AnalysisSeries } from '../analysis/types';
 import { wallpaperFrameIndex } from '../analysis/wallpaperSpectrum';
 import { WAVEFORM_FRAME_SIZE } from './waveformSource';
-import type {
-    VisualizerAnalysisComponent,
-    VisualizerAnalysisProjectionV1,
-} from './types';
+import type { VisualizerAnalysisComponent, VisualizerAnalysisProjectionV1 } from './types';
 
 export type VisualizerProjectedValue = number | number[];
 
@@ -13,13 +10,9 @@ const finite = (value: number): number => {
     return value;
 };
 
-const interpolate = (left: number, right: number, ratio: number): number =>
-    finite(left + (right - left) * ratio);
+const interpolate = (left: number, right: number, ratio: number): number => finite(left + (right - left) * ratio);
 
-const sampleIndexes = (
-    series: AnalysisSeries,
-    timeSeconds: number,
-): { left: number; right: number; ratio: number } => {
+const sampleIndexes = (series: AnalysisSeries, timeSeconds: number): { left: number; right: number; ratio: number } => {
     if (series.sampleCount <= 0) throw new Error('分析序列为空。');
     const position = Math.max(0, timeSeconds) / series.sampleStepSeconds;
     const left = Math.min(series.sampleCount - 1, Math.floor(position));
@@ -27,17 +20,10 @@ const sampleIndexes = (
     return { left, right, ratio: Math.max(0, Math.min(1, position - left)) };
 };
 
-const quantized = (
-    value: number,
-    scale: number,
-    offset: number,
-): number => finite(scale === 0 ? offset : offset + value * scale);
+const quantized = (value: number, scale: number, offset: number): number =>
+    finite(scale === 0 ? offset : offset + value * scale);
 
-const frameVector = (
-    series: AnalysisSeries,
-    index: number,
-    component: VisualizerAnalysisComponent,
-): number[] => {
+const frameVector = (series: AnalysisSeries, index: number, component: VisualizerAnalysisComponent): number[] => {
     const payload = series.payload;
     if (payload.kind === 'stereo-spectrum-f32') {
         if (component !== 'default') throw new Error('该特征只支持 default 分量。');
@@ -46,9 +32,8 @@ const frameVector = (
     if (payload.kind === 'frequency-u16' || payload.kind === 'category-u16') {
         if (component !== 'default') throw new Error('该特征只支持 default 分量。');
         const offset = index * payload.width;
-        return Array.from(
-            payload.values.subarray(offset, offset + payload.width),
-            (value) => quantized(value, payload.scale, payload.offset),
+        return Array.from(payload.values.subarray(offset, offset + payload.width), value =>
+            quantized(value, payload.scale, payload.offset),
         );
     }
     if (payload.kind === 'waveform-envelope') {
@@ -58,9 +43,8 @@ const frameVector = (
     if (payload.kind === 'loudness') {
         if (component !== 'specific') throw new Error('Loudness specific 才是向量。');
         const offset = index * payload.bands;
-        return Array.from(
-            payload.specific.subarray(offset, offset + payload.bands),
-            (value) => quantized(value, payload.scale, payload.offset),
+        return Array.from(payload.specific.subarray(offset, offset + payload.bands), value =>
+            quantized(value, payload.scale, payload.offset),
         );
     }
     if (payload.kind === 'complex-derived') {
@@ -75,9 +59,7 @@ const frameVector = (
             const phase = finite(((phases[bin] ?? 0) / 32_767) * Math.PI);
             if (component === 'magnitude') return magnitude;
             if (component === 'phase') return phase;
-            return component === 'real'
-                ? finite(magnitude * Math.cos(phase))
-                : finite(magnitude * Math.sin(phase));
+            return component === 'real' ? finite(magnitude * Math.cos(phase)) : finite(magnitude * Math.sin(phase));
         });
     }
     throw new Error('该分析 payload 不是向量。');
@@ -95,21 +77,14 @@ const sampleRaw = (
         return Array.from(waveform, finite);
     }
     const { left, right, ratio } = sampleIndexes(series, timeSeconds);
-    if (series.payload.kind === 'stereo-spectrum-f32') return frameVector(series, wallpaperFrameIndex(timeSeconds, series.sampleCount), component);
+    if (series.payload.kind === 'stereo-spectrum-f32')
+        return frameVector(series, wallpaperFrameIndex(timeSeconds, series.sampleCount), component);
     if (series.payload.kind === 'scalar-f32') {
         if (component !== 'default') throw new Error('标量只支持 default 分量。');
-        return interpolate(
-            series.payload.values[left] ?? 0,
-            series.payload.values[right] ?? 0,
-            ratio,
-        );
+        return interpolate(series.payload.values[left] ?? 0, series.payload.values[right] ?? 0, ratio);
     }
     if (series.payload.kind === 'loudness' && component === 'total') {
-        return interpolate(
-            series.payload.total[left] ?? 0,
-            series.payload.total[right] ?? 0,
-            ratio,
-        );
+        return interpolate(series.payload.total[left] ?? 0, series.payload.total[right] ?? 0, ratio);
     }
     const leftVector = frameVector(series, left, component);
     const rightVector = frameVector(series, right, component);
@@ -135,6 +110,13 @@ export const projectAnalysisSeries = (
     waveform?: readonly number[] | null,
 ): VisualizerProjectedValue => {
     const raw = sampleRaw(series, component, timeSeconds, waveform);
+    return projectRawValue(raw, projection);
+};
+
+export function projectRawValue(
+    raw: VisualizerProjectedValue,
+    projection: VisualizerAnalysisProjectionV1,
+): VisualizerProjectedValue {
     if (typeof raw === 'number') {
         if (projection.kind !== 'scalar') throw new Error('标量 projection 不匹配。');
         return raw;
@@ -146,9 +128,7 @@ export const projectAnalysisSeries = (
         if (value === undefined) throw new Error('分析 bin 超出向量范围。');
         return finite(value);
     }
-    const values = projection.kind === 'band'
-        ? raw.slice(projection.start, projection.end)
-        : raw;
+    const values = projection.kind === 'band' ? raw.slice(projection.start, projection.end) : raw;
     if (values.length === 0) throw new Error('分析 band 为空。');
     if (projection.kind === 'mean' || projection.kind === 'band') {
         return finite(values.reduce((sum, value) => sum + value, 0) / values.length);
@@ -164,4 +144,4 @@ export const projectAnalysisSeries = (
         return peakIndex / Math.max(1, values.length - 1);
     }
     throw new Error('分析 projection 不受支持。');
-};
+}
