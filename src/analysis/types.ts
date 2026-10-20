@@ -25,7 +25,7 @@ export const FEATURE_IDS = [
     'buffer',
 ] as const;
 
-export type FeatureId = typeof FEATURE_IDS[number];
+export type FeatureId = (typeof FEATURE_IDS)[number];
 export type ConfigHash = string;
 
 export const M6_SUPPORTED_FEATURE_IDS = [
@@ -35,16 +35,11 @@ export const M6_SUPPORTED_FEATURE_IDS = [
     'chroma',
 ] as const satisfies readonly FeatureId[];
 
-export type M6SupportedFeatureId =
-    typeof M6_SUPPORTED_FEATURE_IDS[number];
+export type M6SupportedFeatureId = (typeof M6_SUPPORTED_FEATURE_IDS)[number];
 
-export const M7_FEATURE_IDS = [
-    'rms',
-    'amplitudeSpectrum',
-    'chroma',
-] as const satisfies readonly FeatureId[];
+export const M7_FEATURE_IDS = ['rms', 'amplitudeSpectrum', 'chroma'] as const satisfies readonly FeatureId[];
 
-export type M7FeatureId = typeof M7_FEATURE_IDS[number];
+export type M7FeatureId = (typeof M7_FEATURE_IDS)[number];
 
 export const M8_SCALAR_FEATURE_IDS = [
     'zcr',
@@ -62,43 +57,36 @@ export const M8_SCALAR_FEATURE_IDS = [
     'perceptualSharpness',
 ] as const satisfies readonly FeatureId[];
 
-export type M8ScalarFeatureId = typeof M8_SCALAR_FEATURE_IDS[number];
+export type M8ScalarFeatureId = (typeof M8_SCALAR_FEATURE_IDS)[number];
 
 export const M8_AVAILABLE_FEATURE_IDS = [
     ...M7_FEATURE_IDS,
     ...M8_SCALAR_FEATURE_IDS,
 ] as const satisfies readonly FeatureId[];
 
-export type M8FeatureId = typeof M8_AVAILABLE_FEATURE_IDS[number];
+export type M8FeatureId = (typeof M8_AVAILABLE_FEATURE_IDS)[number];
 
-export const M9_FEATURE_IDS = [
-    'powerSpectrum',
-    'mfcc',
-    'buffer',
-] as const satisfies readonly FeatureId[];
+export const M9_FEATURE_IDS = ['powerSpectrum', 'mfcc', 'buffer'] as const satisfies readonly FeatureId[];
 
-export type M9AddedFeatureId = typeof M9_FEATURE_IDS[number];
+export type M9AddedFeatureId = (typeof M9_FEATURE_IDS)[number];
 
 export const M9_AVAILABLE_FEATURE_IDS = [
     ...M8_AVAILABLE_FEATURE_IDS,
     ...M9_FEATURE_IDS,
 ] as const satisfies readonly FeatureId[];
 
-export type M9FeatureId = typeof M9_AVAILABLE_FEATURE_IDS[number];
+export type M9FeatureId = (typeof M9_AVAILABLE_FEATURE_IDS)[number];
 
-export const M10_FEATURE_IDS = [
-    'loudness',
-    'complexSpectrum',
-] as const satisfies readonly FeatureId[];
+export const M10_FEATURE_IDS = ['loudness', 'complexSpectrum'] as const satisfies readonly FeatureId[];
 
-export type M10AddedFeatureId = typeof M10_FEATURE_IDS[number];
+export type M10AddedFeatureId = (typeof M10_FEATURE_IDS)[number];
 
 export const M10_AVAILABLE_FEATURE_IDS = [
     ...M9_AVAILABLE_FEATURE_IDS,
     ...M10_FEATURE_IDS,
 ] as const satisfies readonly FeatureId[];
 
-export type M10FeatureId = typeof M10_AVAILABLE_FEATURE_IDS[number];
+export type M10FeatureId = (typeof M10_AVAILABLE_FEATURE_IDS)[number];
 
 export interface AnalysisConfig {
     schemaVersion: 1;
@@ -112,12 +100,7 @@ export interface AnalysisConfig {
 }
 
 export type FeatureShape =
-    | 'scalar'
-    | 'frequency-vector'
-    | 'category-vector'
-    | 'waveform'
-    | 'loudness-structure'
-    | 'complex-spectrum';
+    'scalar' | 'frequency-vector' | 'category-vector' | 'waveform' | 'loudness-structure' | 'complex-spectrum';
 
 export type RendererId =
     | 'stereo-spectrum'
@@ -224,10 +207,7 @@ export interface AnalysisSeries {
 }
 
 export type ExactFeatureValue =
-    | number
-    | number[]
-    | { total: number; specific: number[] }
-    | { real: number[]; imag: number[] };
+    number | number[] | { total: number; specific: number[] } | { real: number[]; imag: number[] };
 
 export interface AnalysisJobRequest {
     kind: 'analyze';
@@ -323,42 +303,31 @@ interface TempoEstimateResultBase {
 
 export type TempoEstimateResult =
     | (TempoEstimateResultBase & {
-        state: 'reliable';
-        bpm: number;
-    })
+          state: 'reliable';
+          bpm: number;
+      })
     | (TempoEstimateResultBase & {
-        state: 'low-confidence';
-    });
+          state: 'low-confidence';
+      });
 
 export type AnalysisWorkerRequest =
+    | import('./realtimeTypes').RealtimeAnalysisRequest
     | AnalysisJobRequest
     | AnalysisJobCancel
     | AnalysisCursorValueRequest
     | TempoEstimateRequest;
 
 export type AnalysisWorkerResponse =
+    | import('./realtimeTypes').RealtimeAnalysisResponse
     | AnalysisJobProgress
     | AnalysisJobResult
     | AnalysisJobError
     | AnalysisCursorValueResult
     | TempoEstimateResult;
 
-export type AnalysisCacheState =
-    | 'idle'
-    | 'hit'
-    | 'miss'
-    | 'partial'
-    | 'persisted'
-    | 'not-persisted';
+export type AnalysisCacheState = 'idle' | 'hit' | 'miss' | 'partial' | 'persisted' | 'not-persisted';
 
-export type AnalysisCoordinatorState =
-    | 'idle'
-    | 'copying'
-    | 'analyzing'
-    | 'ready'
-    | 'cancelled'
-    | 'error'
-    | 'disposed';
+export type AnalysisCoordinatorState = 'idle' | 'copying' | 'analyzing' | 'ready' | 'cancelled' | 'error' | 'disposed';
 
 export interface AnalysisCoordinatorSnapshot {
     state: AnalysisCoordinatorState;
@@ -381,31 +350,21 @@ export interface AnalysisCoordinatorSnapshot {
     };
 }
 
-export type AnalysisListener =
-    (snapshot: AnalysisCoordinatorSnapshot) => void;
+export type AnalysisListener = (snapshot: AnalysisCoordinatorSnapshot) => void;
 
 export const isFeatureId = (value: unknown): value is FeatureId =>
-    typeof value === 'string'
-    && (FEATURE_IDS as readonly string[]).includes(value);
+    typeof value === 'string' && (FEATURE_IDS as readonly string[]).includes(value);
 
-export const isM6SupportedFeatureId = (
-    value: FeatureId,
-): value is M6SupportedFeatureId =>
+export const isM6SupportedFeatureId = (value: FeatureId): value is M6SupportedFeatureId =>
     (M6_SUPPORTED_FEATURE_IDS as readonly FeatureId[]).includes(value);
 
-export const isM8FeatureId = (
-    value: FeatureId,
-): value is M8FeatureId =>
+export const isM8FeatureId = (value: FeatureId): value is M8FeatureId =>
     (M8_AVAILABLE_FEATURE_IDS as readonly FeatureId[]).includes(value);
 
-export const isM9FeatureId = (
-    value: FeatureId,
-): value is M9FeatureId =>
+export const isM9FeatureId = (value: FeatureId): value is M9FeatureId =>
     (M9_AVAILABLE_FEATURE_IDS as readonly FeatureId[]).includes(value);
 
-export const isM10FeatureId = (
-    value: FeatureId,
-): value is M10FeatureId =>
+export const isM10FeatureId = (value: FeatureId): value is M10FeatureId =>
     (M10_AVAILABLE_FEATURE_IDS as readonly FeatureId[]).includes(value);
 
 export const isSupportedFeatureId = (value: FeatureId): boolean =>

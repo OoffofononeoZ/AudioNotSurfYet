@@ -2,6 +2,7 @@ import type { DecodedAudioDescriptor, PlaybackError, PlaybackErrorCode, Playback
 import { ChunkedAudition } from './chunkedAudition';
 import type { AuditionSource } from './auditionTypes';
 import { assertPlaybackRate } from './playbackRate';
+import { createRealtimeAudioTap, type RealtimeAudioTapOptions, type RealtimeAudioLease } from './realtimeAudioTap';
 
 type AudioContextFactory = () => AudioContext;
 type SnapshotListener = (snapshot: PlaybackSnapshot) => void;
@@ -39,6 +40,32 @@ const emptySnapshot = (volume: number, playbackRate: number): PlaybackSnapshot =
 });
 
 export class AudioEngine {
+    private readonly realtimeLeases = new Set<RealtimeAudioLease>();
+
+    getRealtimeSampleRate(): number {
+        if (!this.audioContext) throw Error('请先加载音频。');
+        return this.audioContext.sampleRate;
+    }
+
+    async acquireRealtimeInput(options: RealtimeAudioTapOptions): Promise<RealtimeAudioLease> {
+        const context = this.audioContext,
+            source = this.analyserNode;
+        if (!context || !source) throw Error('请先加载音频。');
+        const lease = await createRealtimeAudioTap(context, source, options);
+        if (this.audioContext !== context) {
+            lease.release();
+            throw Error('音频引擎已变化。');
+        }
+        const owned = {
+            ...lease,
+            release: () => {
+                lease.release();
+                this.realtimeLeases.delete(owned);
+            },
+        };
+        this.realtimeLeases.add(owned);
+        return owned;
+    }
     private readonly audioContextFactory: AudioContextFactory;
     private readonly listeners = new Set<SnapshotListener>();
     private audioContext: AudioContext | null = null;
@@ -509,6 +536,7 @@ export class AudioEngine {
     }
 
     async dispose(): Promise<void> {
+        for (const lease of this.realtimeLeases) lease.release();
         ++this.loadGeneration;
         ++this.auditionGeneration;
         ++this.playbackCommandGeneration;

@@ -8,7 +8,7 @@ import { IsolatedAlgorithmRuntime } from './isolatedAlgorithmRuntime';
 import { createEditorMarkerReader } from './editorMarkerReader';
 import type { MarkerReader } from './editorMarkerTypes';
 import type { DrawPacket, AlgorithmFrame, HistorySample } from './algorithmTypes';
-import type { VisualizerElement, VisualizerProjectV5 } from './compositionTypes';
+import type { VisualizerElement, CompositionRenderModel } from './compositionTypes';
 import type { VisualizerScene, VisualizerSceneRenderInput, VisualizerResolvedParameterMap } from './rendererTypes';
 export type CompositionRenderPort = Pick<
     import('./rendererTypes').VisualizerRenderer,
@@ -17,7 +17,8 @@ export type CompositionRenderPort = Pick<
 export type AlgorithmRuntimePort = Pick<IsolatedAlgorithmRuntime, 'initialize' | 'prepareFrames' | 'dispose'>;
 export interface CompositionSceneOptions {
     renderer: CompositionRenderPort;
-    readProject(): VisualizerProjectV5 | null;
+    readProject(): CompositionRenderModel | null;
+    realtime?: boolean;
     resolveAt(time: number): VisualizerResolvedParameterMap;
     runtimeFactory?(): AlgorithmRuntimePort;
 }
@@ -54,7 +55,7 @@ export class CompositionScene implements VisualizerScene {
     private initialization: Promise<void> | null = null;
     private markers: MarkerReader | undefined;
     private packets = new Map<string, DrawPacket>();
-    private prepared: VisualizerProjectV5 | null = null;
+    private prepared: CompositionRenderModel | null = null;
     private needsSourcePrompt = false;
     private width = 1;
     private height = 1;
@@ -79,8 +80,6 @@ export class CompositionScene implements VisualizerScene {
         }
         const signature =
             project.projectId +
-            ':' +
-            project.track.contentHash +
             ':' +
             input.bindingRevision +
             ':' +
@@ -147,7 +146,7 @@ export class CompositionScene implements VisualizerScene {
                             revision: String(input.bindingRevision),
                             width: this.width,
                             height: this.height,
-                            range: elementRange(project, e),
+                            range: this.options.realtime ? null : elementRange(project, e),
                             parameters,
                         },
                     },
@@ -156,6 +155,7 @@ export class CompositionScene implements VisualizerScene {
         const packets = await runtime.prepareFrames(
             frames,
             async (elementId, request) => {
+                if (this.options.realtime) throw Error('实时模式不允许历史输入查询。');
                 const samples: HistorySample[] = [];
                 for (let tick = request.startTick; tick < request.endTick; tick++) {
                     const value = this.options.resolveAt(tick / 60).get(parameterKey(elementId, request.parameterId));
@@ -165,7 +165,7 @@ export class CompositionScene implements VisualizerScene {
                 return samples;
             },
             undefined,
-            this.markers,
+            this.options.realtime ? undefined : this.markers,
         );
         if (this.disposed || runtime !== this.runtime) return;
         this.packets = packets;
@@ -191,7 +191,7 @@ export class CompositionScene implements VisualizerScene {
         else this.clear(target);
         this.options.renderer.render(this.scene, this.camera);
     }
-    private drawElement(project: VisualizerProjectV5, e: VisualizerElement, source?: THREE.WebGLRenderTarget) {
+    private drawElement(project: CompositionRenderModel, e: VisualizerElement, source?: THREE.WebGLRenderTarget) {
         let current = source;
         const algorithm = findResource(project.resources.algorithms, elementDescriptor(project, e).algorithm);
         for (const pass of this.packets.get(e.id)?.passes ?? []) {

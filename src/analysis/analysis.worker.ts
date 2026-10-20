@@ -13,6 +13,7 @@ import type {
     AnalysisWorkerResponse,
     TempoEstimateRequest,
 } from './types';
+import { startRealtimeWorker } from './realtimeWorker';
 
 interface WorkerScope {
     onmessage: ((event: MessageEvent<AnalysisWorkerRequest>) => void) | null;
@@ -26,20 +27,17 @@ let retained: RetainedAnalysisPcm | null = null;
 let queue = Promise.resolve();
 const latestCursorRequest = new Map<string, string>();
 let latestTempoRequestId: string | null = null;
+let live: { id: string; stop(): void } | null = null;
+let pendingLiveId: string | null = null;
 
-const postError = (
-    request: Pick<AnalysisJobRequest, 'jobId' | 'generation'>,
-    error: unknown,
-) => {
+const postError = (request: Pick<AnalysisJobRequest, 'jobId' | 'generation'>, error: unknown) => {
     const known = error instanceof AnalysisWorkerCoreError;
     workerScope.postMessage({
         kind: 'error',
         jobId: request.jobId,
         generation: request.generation,
         code: known ? error.code : 'worker-failed',
-        message: error instanceof Error
-            ? error.message
-            : 'Analysis Worker failed.',
+        message: error instanceof Error ? error.message : 'Analysis Worker failed.',
         recoverable: known ? error.recoverable : true,
     });
 };
@@ -65,16 +63,9 @@ const analyze = async (request: AnalysisJobRequest, token: number) => {
         });
         if (token !== activeToken) return;
         retained = output.retained;
-        workerScope.postMessage(
-            output.result,
-            responseTransferables(output.result),
-        );
+        workerScope.postMessage(output.result, responseTransferables(output.result));
     } catch (error) {
-        if (
-            token !== activeToken
-            && error instanceof AnalysisWorkerCoreError
-            && error.code === 'cancelled'
-        ) {
+        if (token !== activeToken && error instanceof AnalysisWorkerCoreError && error.code === 'cancelled') {
             return;
         }
         postError(request, error);
@@ -84,19 +75,12 @@ const analyze = async (request: AnalysisJobRequest, token: number) => {
 };
 
 const cursorValue = (request: AnalysisCursorValueRequest) => {
-    if (
-        latestCursorRequest.get(request.featureId) !== request.requestId
-        || !retained
-    ) {
+    if (latestCursorRequest.get(request.featureId) !== request.requestId || !retained) {
         return;
     }
     try {
         const result = extractCursorValue(retained, request);
-        if (
-            result
-            && latestCursorRequest.get(request.featureId)
-                === request.requestId
-        ) {
+        if (result && latestCursorRequest.get(request.featureId) === request.requestId) {
             workerScope.postMessage(result);
         }
     } catch {
@@ -120,17 +104,42 @@ const tempoEstimate = (request: TempoEstimateRequest) => {
     }
 };
 
-workerScope.onmessage = (event) => {
+workerScope.onmessage = event => {
     const request = event.data;
     if (!request || typeof request !== 'object') return;
+    if (request.kind === 'realtime-stop') {
+        if (pendingLiveId === request.sessionId) {
+            ++activeToken;
+            pendingLiveId = null;
+        }
+        if (live?.id === request.sessionId) {
+            live.stop();
+            live = null;
+        }
+        return;
+    }
+    if (request.kind === 'realtime-start') {
+        const token = ++activeToken;
+        pendingLiveId = request.sessionId;
+        retained = null;
+        live?.stop();
+        live = null;
+        queue = queue.then(async () => {
+            if (token !== activeToken) {
+                request.port.close();
+                return;
+            }
+            const stop = await startRealtimeWorker(request, message => workerScope.postMessage(message));
+            if (token !== activeToken) stop();
+            else {
+                live = { id: request.sessionId, stop };
+                pendingLiveId = null;
+            }
+        });
+        return;
+    }
     if (request.kind === 'cancel') {
-        if (
-            !activeJob
-            || (
-                activeJob.jobId === request.jobId
-                && activeJob.generation === request.generation
-            )
-        ) {
+        if (!activeJob || (activeJob.jobId === request.jobId && activeJob.generation === request.generation)) {
             activeToken += 1;
         }
         return;
@@ -146,6 +155,9 @@ workerScope.onmessage = (event) => {
         return;
     }
     if (request.kind === 'analyze') {
+        pendingLiveId = null;
+        live?.stop();
+        live = null;
         const token = ++activeToken;
         retained = null;
         latestTempoRequestId = null;

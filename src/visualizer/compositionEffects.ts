@@ -1,7 +1,7 @@
 import { elementRange, orderedElements, effectiveElements, elementDescriptor } from './compositionModel';
-import type { VisualizerElement, VisualizerProjectV5 } from './compositionTypes';
+import type { VisualizerElement, CompositionRenderModel } from './compositionTypes';
 export const parameterKey = (id: string, parameter: string) => id + ':' + parameter;
-export function effectsFor(project: VisualizerProjectV5, target: string | null, time: number): VisualizerElement[] {
+export function effectsFor(project: CompositionRenderModel, target: string | null, time: number): VisualizerElement[] {
     const effects = orderedElements(effectiveElements(project)).filter(
         e =>
             e.enabled &&

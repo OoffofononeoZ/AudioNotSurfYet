@@ -364,7 +364,7 @@ export class VisualizerRendererHost implements VisualizerSceneHost {
             this.options.onStatus({ state: 'idle' });
             return;
         }
-        if (frame.playbackState === 'playing' && !this.exportToken) this.requestFrame();
+        if ((frame.animate ?? frame.playbackState === 'playing') && !this.exportToken) this.requestFrame();
         if (this.preparation) {
             if (override) return Promise.reject(Error('上一帧算法计算尚未结束。'));
             this.pendingPreview = true;

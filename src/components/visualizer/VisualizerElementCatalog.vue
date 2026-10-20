@@ -48,6 +48,14 @@
             {{ state.message }}
         </div>
 
+        <div v-if="category === 'preset'" class="viz-catalog-message">
+            <select v-model="capabilityFilter" aria-label="预设用途">
+                <option value="all">全部</option>
+                <option value="browser">实时可用</option>
+                <option value="wallpaper">壁纸可用</option>
+                <option value="song">歌曲专用</option>
+            </select>
+        </div>
         <div v-if="category === 'preset'" class="viz-catalog-grid app-scrollbar">
             <button
                 v-for="preset in filteredPresets"
@@ -62,7 +70,7 @@
                     }}<small v-if="hasVersions('presets', preset.id)" class="viz-resource-version"
                         >v{{ preset.version }}</small
                     ></span
-                ><small>{{ preset.description }}</small
+                ><small>{{ preset.description }} · {{ capabilityLabel(preset) }}</small
                 ><VisualizerIcon name="add" />
             </button>
             <p v-if="state.status !== 'loading' && !filteredPresets.length">没有匹配的预设</p>
@@ -95,7 +103,8 @@
 import { computed, ref, watch, nextTick } from 'vue';
 import VisualizerIcon from './VisualizerIcon.vue';
 import { useResourceLibrary } from '../../visualizer/useResourceLibrary';
-import type { ResourceRef } from '../../visualizer/resourceTypes';
+import type { ResourceRef, PresetDefinition } from '../../visualizer/resourceTypes';
+import { inspectRealtimePreset } from '../../visualizer/realtimeCapabilities';
 import { resourceKey } from '../../visualizer/resourceIdentity';
 const props = defineProps<{ open: boolean; locked: boolean }>();
 const { library, state } = useResourceLibrary();
@@ -111,13 +120,26 @@ const categories = [
     { id: 'transition', label: '转场' },
     { id: 'preset', label: '预设' },
 ];
+const capabilityFilter = ref('all');
+const capabilities = computed(() => new Map(state.value.presets.map(p => [resourceKey(p), inspectRealtimePreset(p)])));
+const capabilityLabel = (preset: PresetDefinition) => {
+    const c = capabilities.value.get(resourceKey(preset))!;
+    return c.wallpaper ? '实时可用 / 壁纸可用' : c.browser ? '实时可用' : '歌曲专用';
+};
 const filtered = computed(() =>
     state.value.elements.filter(
         e => (category.value === 'all' || e.kind === category.value) && e.title.includes(query.value.trim()),
     ),
 );
 const filteredPresets = computed(() =>
-    state.value.presets.filter(p => (p.title + p.description).includes(query.value.trim())),
+    state.value.presets.filter(p => {
+        const c = capabilities.value.get(resourceKey(p))!;
+        return (
+            (p.title + p.description).includes(query.value.trim()) &&
+            (capabilityFilter.value === 'all' ||
+                (capabilityFilter.value === 'song' ? !c.browser : c[capabilityFilter.value as 'browser' | 'wallpaper']))
+        );
+    }),
 );
 const hasVersions = (kind: 'elements' | 'presets', id: string) => state.value[kind].filter(d => d.id === id).length > 1;
 watch(

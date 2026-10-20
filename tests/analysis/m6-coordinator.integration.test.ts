@@ -117,6 +117,7 @@ class CoreWorker {
             }
             return;
         }
+        if (request.kind !== 'analyze') return;
         this.analyzeRequests.push(request);
         void runAnalysisJob(request, {
             isCancelled: () => this.cancelled.has(request.jobId),

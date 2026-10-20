@@ -53,6 +53,7 @@ export interface VisualizerScene {
 export type VisualizerSceneFactory = (host: VisualizerSceneHost, seed: number) => VisualizerScene;
 
 export interface VisualizerRenderFrame {
+    readonly animate?: boolean;
     readonly trackIdentity: string;
     readonly seed: number;
     readonly timeSeconds: number;
