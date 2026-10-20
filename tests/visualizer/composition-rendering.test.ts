@@ -15,7 +15,7 @@ function harness() {
     const p = createComposition(track);
     p.elements = elementRegistry
         .list()
-        .filter(e => e.id !== 'fade')
+        .filter(e => !e.markerInputs?.length)
         .map((e, i) => elementRegistry.create(e.id, 10, i));
     attachElements(p);
     const values = new Map<

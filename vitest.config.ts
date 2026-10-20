@@ -13,6 +13,7 @@ const externalResourceSuites = [
         'composition-session',
         'geometric-elements',
         'number-editing',
+        'point-lines',
         'native-input',
         'radial-spectrum',
         'resources-v5',

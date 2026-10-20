@@ -2,8 +2,10 @@ import { expect, test } from '@playwright/test';
 import path from 'node:path';
 import { chooseFiles, installFilePickerStub } from '../support/file-picker';
 import { installDirectoryPickerStub, prepareResourceDirectory } from '../support/resource-directory';
+import { resourceRows } from '../support/visualizer-assets.mjs';
+const elementCount = resourceRows().filter(row => row.info.kind !== 'preset').length;
 test.use({ viewport: { width: 1920, height: 1080 } });
-test('first selection is explicit, cancellation keeps it empty, all external previews and 13 elements load', async ({
+test('first selection is explicit, cancellation keeps it empty, all external previews and all configured elements load', async ({
     page,
 }) => {
     await installDirectoryPickerStub(page);
@@ -21,7 +23,7 @@ test('first selection is explicit, cancellation keeps it empty, all external pre
     await expect(page.getByText('请选择 WheresYourElements/assets 文件夹')).toBeVisible();
     await page.evaluate(() => sessionStorage.removeItem('resource-picker-cancel'));
     await page.getByRole('button', { name: '选择文件夹', exact: true }).click();
-    await expect(page.locator('[data-resource-id]')).toHaveCount(13);
+    await expect(page.locator('[data-resource-id]')).toHaveCount(elementCount);
     expect(
         await page
             .locator('[data-resource-id] img')
@@ -46,12 +48,12 @@ test('first selection is explicit, cancellation keeps it empty, all external pre
         if (index) await page.getByTestId('add-visualizer-element').click();
         await page.locator(`[data-resource-id="${id}"]`).click();
     }
-    await expect(page.locator('.viz-root-item')).toHaveCount(13);
-    await expect(page.locator('.viz-element-select img')).toHaveCount(13);
+    await expect(page.locator('.viz-root-item')).toHaveCount(elementCount);
+    await expect(page.locator('.viz-element-select img')).toHaveCount(elementCount);
     await page.reload();
     await expect(page.getByTestId('visualizer-ready')).toBeVisible();
     await page.getByTestId('add-visualizer-element').click();
-    await expect(page.locator('[data-resource-id]')).toHaveCount(13);
+    await expect(page.locator('[data-resource-id]')).toHaveCount(elementCount);
     await page.screenshot({ path: 'artifacts/visualizer-composition/resources/external-directory.png' });
 });
 test('permission recovery and a damaged refresh preserve the usable catalog', async ({ page }) => {
@@ -80,7 +82,7 @@ test('permission recovery and a damaged refresh preserve the usable catalog', as
     await expect(page.getByRole('alert')).toContainText('未获得');
     await page.evaluate(() => sessionStorage.setItem('resource-request', 'granted'));
     await page.getByRole('button', { name: '恢复访问', exact: true }).click();
-    await expect(page.locator('[data-resource-id]')).toHaveCount(13);
+    await expect(page.locator('[data-resource-id]')).toHaveCount(elementCount);
     const before = await page.locator('[data-resource-id] img').first().getAttribute('src');
     await page.evaluate(async () => {
         let dir = await (await navigator.storage.getDirectory()).getDirectoryHandle('visualizer-library-fixture');
@@ -94,7 +96,7 @@ test('permission recovery and a damaged refresh preserve the usable catalog', as
     });
     await page.getByRole('button', { name: '重新加载', exact: true }).click();
     await expect(page.getByRole('alert')).toContainText('依赖');
-    await expect(page.locator('[data-resource-id]')).toHaveCount(13);
+    await expect(page.locator('[data-resource-id]')).toHaveCount(elementCount);
     expect(await page.locator('[data-resource-id] img').first().getAttribute('src')).toBe(before);
     await prepareResourceDirectory(page, false);
     await page.getByRole('button', { name: '重新加载', exact: true }).click();
@@ -134,7 +136,7 @@ test('permission recovery and a damaged refresh preserve the usable catalog', as
         }, variant);
         await page.getByRole('button', { name: '重新加载', exact: true }).click();
         await expect(page.getByRole('alert')).toBeVisible();
-        await expect(page.locator('[data-resource-id]')).toHaveCount(13);
+        await expect(page.locator('[data-resource-id]')).toHaveCount(elementCount);
         expect(await page.locator('[data-resource-id] img').first().getAttribute('src')).toBe(previous);
     }
 });
