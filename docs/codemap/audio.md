@@ -12,3 +12,4 @@
 | [src/audio/chunkedAudition.ts](../../src/audio/chunkedAudition.ts) | [src/audio/auditionTypes.ts](../../src/audio/auditionTypes.ts)、[src/audio/playbackRate.ts](../../src/audio/playbackRate.ts) |
 | [src/audio/playbackPolicy.ts](../../src/audio/playbackPolicy.ts) | — |
 | [src/audio/playbackRate.ts](../../src/audio/playbackRate.ts) | — |
+| [src/audio/usePlaybackKeyboard.ts](../../src/audio/usePlaybackKeyboard.ts) | [src/audio/audioSessionService.ts](../../src/audio/audioSessionService.ts) |

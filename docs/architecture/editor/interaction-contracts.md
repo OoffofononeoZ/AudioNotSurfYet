@@ -62,11 +62,12 @@ Editor 只在 waveform/tempo/event timeline 区域阻止 `contextmenu`、文本�
 idle
   ├─ hover/focus cell → candidate
   ├─ left click candidate → create-if-unique → idle
-  ├─ Enter/Space candidate → create-if-unique → candidate
+  ├─ Enter candidate → create-if-unique → candidate
   └─ focus existing marker + Delete/Backspace → delete → nearest candidate
 ```
 
 - point 创建使用当前 lane、inner class 和 snapped seconds；重复 key 不创建第二项，并提供非破坏性反馈。
+- 空格遵循[全局播放规则](../../context/app-shell.md#播放模式)，聚焦标记、菜单或 BPM 点按按钮时也只切换播放／暂停；原有按钮操作使用 Enter。
 - 可编辑 point 是可聚焦 DOM button；背景空 cell 不生成 DOM。左右键移动候选一个 subdivision，上下键切分类，Home/End 在当前可见歌曲时间范围的两端定位。
 - 右键 point 删除遵循 shared precedence；键盘 Delete/Backspace 是等价路径。
 
