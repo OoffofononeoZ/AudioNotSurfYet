@@ -8,12 +8,10 @@ const TAGGED_AUDIO = path.join(ROOT, 'artifacts/fixtures/home-details.mp3');
 const LONG_AUDIO = path.join(ROOT, 'artifacts/fixtures/home-long-title.mp3');
 const LONG_TITLE = '一首名称很长的歌曲，用来确认完整歌曲信息能够换行显示，而不会挤压导航和播放器。'.repeat(3);
 
-const syncSafe = (value: number) => Buffer.from([
-    (value >> 21) & 127, (value >> 14) & 127, (value >> 7) & 127, value & 127,
-]);
-const frame = (id: string, payload: Buffer) => Buffer.concat([
-    Buffer.from(id), syncSafe(payload.length), Buffer.alloc(2), payload,
-]);
+const syncSafe = (value: number) =>
+    Buffer.from([(value >> 21) & 127, (value >> 14) & 127, (value >> 7) & 127, value & 127]);
+const frame = (id: string, payload: Buffer) =>
+    Buffer.concat([Buffer.from(id), syncSafe(payload.length), Buffer.alloc(2), payload]);
 test.beforeAll(async () => {
     // ID3v2.4 tags exercise the production parser and its artwork URL lifecycle.
     const audio = await readFile(path.join(ROOT, 'tests/fixtures/audio/format-master.mp3'));
@@ -40,7 +38,8 @@ const captureIssues = (page: Page) => {
     });
     return issues;
 };
-const sidebarWidth = (page: Page) => page.locator('#app-sidebar').evaluate(element => element.getBoundingClientRect().width);
+const sidebarWidth = (page: Page) =>
+    page.locator('#app-sidebar').evaluate(element => element.getBoundingClientRect().width);
 
 test('keeps icon-only settings at the top right and rectangular playback above the sidebar', async ({ page }) => {
     const issues = captureIssues(page);
@@ -49,27 +48,35 @@ test('keeps icon-only settings at the top right and rectangular playback above t
     const settings = page.getByTestId('app-settings');
     await expect(settings).toHaveAccessibleName('设置');
     await expect(settings).toHaveText('');
-    expect(await settings.evaluate(element => {
-        const rect = element.getBoundingClientRect();
-        return { top: rect.top, right: innerWidth - rect.right };
-    })).toEqual({ top: 12, right: 12 });
+    expect(
+        await settings.evaluate(element => {
+            const rect = element.getBoundingClientRect();
+            return { top: rect.top, right: innerWidth - rect.right };
+        }),
+    ).toEqual({ top: 12, right: 12 });
     await settings.click();
     await expect(settings).toHaveAttribute('aria-expanded', 'true');
     await page.getByTestId('change-musicbar-style').click();
     await page.getByTestId('change-musicbar-style').click();
     await expect(page.locator('#progress-bar-container')).not.toHaveClass(/progress-bar-hidden/);
     for (const collapsed of [false, true, false]) {
-        if (await page.locator('#app-sidebar').getAttribute('data-collapsed') !== String(collapsed)) {
+        if ((await page.locator('#app-sidebar').getAttribute('data-collapsed')) !== String(collapsed)) {
             await page.getByTestId('sidebar-toggle').click();
         }
-        await expect.poll(() => page.locator('#music-bar').evaluate(element => {
-            const rect = element.getBoundingClientRect();
-            return { left: rect.left, width: rect.width };
-        })).toEqual({ left: 0, width: 1280 });
-        expect(await page.locator('#music-bar').evaluate(element => {
-            const rect = element.getBoundingClientRect();
-            return Boolean(document.elementFromPoint(16, rect.top + rect.height / 2)?.closest('#music-bar'));
-        })).toBe(true);
+        await expect
+            .poll(() =>
+                page.locator('#music-bar').evaluate(element => {
+                    const rect = element.getBoundingClientRect();
+                    return { left: rect.left, width: rect.width };
+                }),
+            )
+            .toEqual({ left: 0, width: 1280 });
+        expect(
+            await page.locator('#music-bar').evaluate(element => {
+                const rect = element.getBoundingClientRect();
+                return Boolean(document.elementFromPoint(16, rect.top + rect.height / 2)?.closest('#music-bar'));
+            }),
+        ).toBe(true);
     }
     expect(issues).toEqual([]);
 });
@@ -82,9 +89,17 @@ test('persists desktop collapse while transport keeps its viewport width', async
     await expect(page.getByTestId('sidebar-home-link')).toHaveAttribute('aria-current', 'page');
     await page.getByTestId('sidebar-toggle').click();
     await expect.poll(() => sidebarWidth(page)).toBe(64);
-    await expect.poll(() => page.locator('.home-rays').evaluate(element =>
-        parseFloat((element.querySelector('canvas') as HTMLCanvasElement).style.width) === element.clientWidth,
-    )).toBe(true);
+    await expect
+        .poll(() =>
+            page
+                .locator('.home-rays')
+                .evaluate(
+                    element =>
+                        parseFloat((element.querySelector('canvas') as HTMLCanvasElement).style.width) ===
+                        element.clientWidth,
+                ),
+        )
+        .toBe(true);
     await expect(page.getByRole('link', { name: 'Analyzer', exact: true })).toHaveAttribute('title', 'Analyzer');
     await page.reload();
     await expect.poll(() => sidebarWidth(page)).toBe(64);
@@ -93,7 +108,7 @@ test('persists desktop collapse while transport keeps its viewport width', async
     for (const width of [1024, 1280, 1920]) {
         await page.setViewportSize({ width, height: 900 });
         for (const collapsed of [true, false]) {
-            if (await page.locator('#app-sidebar').getAttribute('data-collapsed') !== String(collapsed)) {
+            if ((await page.locator('#app-sidebar').getAttribute('data-collapsed')) !== String(collapsed)) {
                 await page.getByTestId('sidebar-toggle').click();
             }
             await expect.poll(() => sidebarWidth(page)).toBe(collapsed ? 64 : 216);
@@ -101,10 +116,14 @@ test('persists desktop collapse while transport keeps its viewport width', async
                 const sidebar = document.querySelector('#app-sidebar')!.getBoundingClientRect();
                 const content = document.querySelector('.app-content')!.getBoundingClientRect();
                 const player = document.querySelector('#music-bar')!.getBoundingClientRect();
-                return { contentLeft: content.left, sidebarRight: sidebar.right,
+                return {
+                    contentLeft: content.left,
+                    sidebarRight: sidebar.right,
                     playerInside: player.left >= 0 && player.right <= innerWidth,
-                    playerLeft: player.left, playerWidth: player.width,
-                    overflow: document.documentElement.scrollWidth - innerWidth };
+                    playerLeft: player.left,
+                    playerWidth: player.width,
+                    overflow: document.documentElement.scrollWidth - innerWidth,
+                };
             });
             expect(geometry.contentLeft).toBe(geometry.sidebarRight);
             expect(geometry.playerInside).toBe(true);
@@ -116,7 +135,9 @@ test('persists desktop collapse while transport keeps its viewport width', async
     expect(issues).toEqual([]);
 });
 
-test('hides narrow navigation and restores focus after dismissal without changing desktop preference', async ({ page }) => {
+test('hides narrow navigation and restores focus after dismissal without changing desktop preference', async ({
+    page,
+}) => {
     const issues = captureIssues(page);
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto('/');
@@ -129,11 +150,16 @@ test('hides narrow navigation and restores focus after dismissal without changin
     expect(await sidebar.evaluate(element => element.matches(':modal'))).toBe(false);
     await expect(page.getByTestId('sidebar-toggle')).toBeFocused();
     const playback = page.getByTestId('toggle-playback');
-    expect(await playback.evaluate(element => {
-        const rect = element.getBoundingClientRect();
-        return Boolean(document.elementFromPoint(rect.x + rect.width / 2, rect.y + rect.height / 2)
-            ?.closest('#music-bar-container'));
-    })).toBe(true);
+    expect(
+        await playback.evaluate(element => {
+            const rect = element.getBoundingClientRect();
+            return Boolean(
+                document
+                    .elementFromPoint(rect.x + rect.width / 2, rect.y + rect.height / 2)
+                    ?.closest('#music-bar-container'),
+            );
+        }),
+    ).toBe(true);
     await playback.focus();
     await expect(playback).toBeFocused();
     await page.keyboard.press('Escape');
@@ -161,7 +187,7 @@ test('shows live metadata and embedded artwork through import, replacement and p
     const cover = page.getByTestId('home-song-cover');
     await expect(title).toHaveText('未选择歌曲');
     await expect(page.getByRole('button', { name: '详情', exact: true })).toHaveAttribute('aria-pressed', 'true');
-    await expect(page.getByRole('button', { name: '待完善', exact: true })).toBeDisabled();
+    await expect(page.getByRole('button', { name: '可视化', exact: true })).toBeEnabled();
     await chooseFiles(page, [TAGGED_AUDIO]);
     await expect(title).toHaveText('测试歌曲');
     await expect(page.locator('.song-metadata')).toContainText('测试艺人');
@@ -199,7 +225,8 @@ test('retains the open narrow menu when Editor navigation is cancelled', async (
     await page.getByTestId('header-editor-link').click();
     await expect(page.getByTestId('editor-ready')).toBeVisible();
     await page.getByTestId('toggle-playback').click();
-    await page.getByTestId('add-marker-lane').click(); await page.getByTestId('add-point-lane').click();
+    await page.getByTestId('add-marker-lane').click();
+    await page.getByTestId('add-point-lane').click();
     await page.getByTestId('sidebar-open').click();
     await page.getByRole('link', { name: 'Analyzer', exact: true }).click();
     await expect(page.getByTestId('editor-leave-dialog')).toBeVisible();
@@ -234,16 +261,31 @@ test('wraps long titles, survives an artwork error and retains usable playback a
         await page.setViewportSize({ width, height: 900 });
         for (const mode of [0, 1, 2]) {
             await expect(page.locator('#music-bar-container')).toHaveClass(new RegExp(`bg-style-${mode}`));
-            await expect.poll(async () => page.evaluate(() => {
-                const sidebarInset = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--app-sidebar-inset'));
-                const player = document.querySelector('#music-bar')!.getBoundingClientRect();
-                const title = document.querySelector('[data-testid="home-song-title"]')!.getBoundingClientRect();
-                const progress = document.querySelector('[data-testid="playback-progress"]')!.getBoundingClientRect();
-                return player.left >= -1 && player.right <= innerWidth + 1
-                    && progress.left >= -1 && progress.right <= innerWidth + 1
-                    && title.left >= sidebarInset - 1 && title.right <= innerWidth + 1
-                    && document.documentElement.scrollWidth <= innerWidth;
-            })).toBe(true);
+            await expect
+                .poll(async () =>
+                    page.evaluate(() => {
+                        const sidebarInset = parseFloat(
+                            getComputedStyle(document.documentElement).getPropertyValue('--app-sidebar-inset'),
+                        );
+                        const player = document.querySelector('#music-bar')!.getBoundingClientRect();
+                        const title = document
+                            .querySelector('[data-testid="home-song-title"]')!
+                            .getBoundingClientRect();
+                        const progress = document
+                            .querySelector('[data-testid="playback-progress"]')!
+                            .getBoundingClientRect();
+                        return (
+                            player.left >= -1 &&
+                            player.right <= innerWidth + 1 &&
+                            progress.left >= -1 &&
+                            progress.right <= innerWidth + 1 &&
+                            title.left >= sidebarInset - 1 &&
+                            title.right <= innerWidth + 1 &&
+                            document.documentElement.scrollWidth <= innerWidth
+                        );
+                    }),
+                )
+                .toBe(true);
             await expect(page.getByTestId('import-audio')).toBeVisible();
             await page.getByTestId('change-musicbar-style').click();
             await expect(page.locator('#progress-bar-container')).not.toHaveClass(/progress-bar-hidden/);
@@ -254,19 +296,35 @@ test('wraps long titles, survives an artwork error and retains usable playback a
 
 test('uses uniform MusicBar action icons and keeps queue keyboard navigation local', async ({ page }) => {
     const issues = captureIssues(page);
-    await installFilePickerStub(page); await page.goto('/');
+    await installFilePickerStub(page);
+    await page.goto('/');
     for (const width of [390, 1024, 1920]) {
         await page.setViewportSize({ width, height: 900 });
         for (const style of [0, 1, 2]) {
             await expect(page.locator('#music-bar-container')).toHaveClass(new RegExp(`bg-style-${style}`));
-            const geometry = await page.locator('.musicbar-action').evaluateAll(buttons => buttons.map(button => {
-                const box = button.getBoundingClientRect(), icon = button.querySelector('svg')!;
-                const glyph = icon.getBoundingClientRect();
-                return { width: box.width, height: box.height, iconWidth: glyph.width, iconHeight: glyph.height,
-                    stroke: icon.getAttribute('stroke-width'), inside: box.left >= 0 && box.right <= innerWidth };
-            }));
+            const geometry = await page.locator('.musicbar-action').evaluateAll(buttons =>
+                buttons.map(button => {
+                    const box = button.getBoundingClientRect(),
+                        icon = button.querySelector('svg')!;
+                    const glyph = icon.getBoundingClientRect();
+                    return {
+                        width: box.width,
+                        height: box.height,
+                        iconWidth: glyph.width,
+                        iconHeight: glyph.height,
+                        stroke: icon.getAttribute('stroke-width'),
+                        inside: box.left >= 0 && box.right <= innerWidth,
+                    };
+                }),
+            );
             expect(geometry).toHaveLength(6);
-            expect(new Set(geometry.map(item => `${item.width}:${item.height}:${item.iconWidth}:${item.iconHeight}:${item.stroke}`)).size).toBe(1);
+            expect(
+                new Set(
+                    geometry.map(
+                        item => `${item.width}:${item.height}:${item.iconWidth}:${item.iconHeight}:${item.stroke}`,
+                    ),
+                ).size,
+            ).toBe(1);
             expect(geometry.every(item => item.inside)).toBe(true);
             await page.getByTestId('change-musicbar-style').click();
             await expect(page.locator('#progress-bar-container')).not.toHaveClass(/progress-bar-hidden/);
@@ -277,22 +335,30 @@ test('uses uniform MusicBar action icons and keeps queue keyboard navigation loc
     const icons = [];
     for (const label of ['顺序播放', '单曲循环', '列表循环', '随机播放']) {
         await expect(mode).toHaveAttribute('aria-label', label);
-        icons.push(await mode.locator('svg').innerHTML()); await mode.click();
+        icons.push(await mode.locator('svg').innerHTML());
+        await mode.click();
     }
     expect(new Set(icons).size).toBe(4);
     const volume = page.getByTestId('volume-control');
-    await volume.focus(); await page.keyboard.press('Home');
+    await volume.focus();
+    await page.keyboard.press('Home');
     await expect(volume).toHaveAttribute('aria-valuenow', '0');
     await expect(page.locator('#music-bar-container')).toHaveAttribute('data-volume', '0');
-    await page.keyboard.press('ArrowUp'); await expect(volume).toHaveAttribute('aria-valuenow', '5');
-    await page.keyboard.press('End'); await expect(volume).toHaveAttribute('aria-valuenow', '100');
+    await page.keyboard.press('ArrowUp');
+    await expect(volume).toHaveAttribute('aria-valuenow', '5');
+    await page.keyboard.press('End');
+    await expect(volume).toHaveAttribute('aria-valuenow', '100');
     expect(await page.getByTestId('change-musicbar-style').locator('svg').innerHTML()).not.toBe(icons[2]);
-    await chooseFiles(page, [path.join(ROOT, 'tests/fixtures/audio/format-master.wav'), path.join(ROOT, 'tests/fixtures/audio/format-master.mp3')]);
+    await chooseFiles(page, [
+        path.join(ROOT, 'tests/fixtures/audio/format-master.wav'),
+        path.join(ROOT, 'tests/fixtures/audio/format-master.mp3'),
+    ]);
     await page.getByTestId('toggle-playback').click();
     await page.getByTestId('toggle-queue').click();
     await expect(page.getByTestId('toggle-queue')).toHaveAttribute('aria-expanded', 'true');
     const rows = page.getByTestId('queue-item');
-    await rows.first().focus(); await page.keyboard.press('ArrowDown');
+    await rows.first().focus();
+    await page.keyboard.press('ArrowDown');
     await expect(rows.nth(1)).toBeFocused();
     const id = await rows.nth(1).getAttribute('data-track-id');
     await page.keyboard.press('Enter');

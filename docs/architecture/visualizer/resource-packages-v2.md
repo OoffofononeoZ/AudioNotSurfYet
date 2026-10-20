@@ -30,7 +30,7 @@ Visualizer 页面统一拥有资源库、任务和预览对象 URL，商城/列�
 
 算法在不授予同源权限的 iframe 所属 Worker 执行；CSP 禁止网络，宿主不在主页面求值算法。Worker 只获得当前工程获准的参数、分块历史输入和已绑定标记，返回 DrawPacket。宿主校验身份、数值、缓冲与目标后，通过现有单 Canvas/WebGLRenderer 绘制。
 
-- 模块导出同步 create 工厂；实例实现 prepareFrame，可选 reset/dispose。帧输入包含绝对歌曲时间、seed、binding revision、输出尺寸、有效时段和已解析参数/单位。
+- 模块导出同步 create 工厂；实例实现 prepareFrame，可选 reset/dispose。工程帧输入包含绝对歌曲时间、seed、binding revision、输出尺寸、有效时段和已解析参数/单位。[实时样式](../../context/visualizer-realtime.md)仅接入无历史/标记/转场依赖的算法，使用单调会话秒、当前参数和 range:null，历史与标记查询明确拒绝；工程 ABI 和离线语义不变。
 - 历史请求只允许 contract.historyParameters 中的参数，固定 60 Hz，每次不超过一秒且不越过目标歌曲时间；宿主提供分块结果，不提供整曲 PCM。当前弦线保持原 60 Hz 输入、120 Hz 积分与逐秒 checkpoint。
 - DEC-089 批准 ABI 2 的 markerInputs/timingInput。外部包只声明点/范围及 single/collection 能力；用户在工程内绑定同歌快照。input.markers 只在当前实例的 prepareFrame 有效，集合按窗口/分类查询并以 256 项分页。完整字段、半开窗口和游标边界见[独立标记契约](../../../skills/visualizer-content-generator/references/editor-marker-inputs.md)。不提供整份 Editor、BPM、候选或音色字段；初始化阶段没有接口。
 - DrawPacket 的 passes 只能引用包内程序；uniform 类型和数组长度按程序声明校验，纹理只能引用当前效果输入。三角网格必须使用有限 Float32 缓冲并遵守顶点容量。

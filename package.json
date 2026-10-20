@@ -9,8 +9,9 @@
         "npm": "11.x"
     },
     "scripts": {
-        "predev": "npm run processing:assets",
-        "prebuild": "npm run processing:assets",
+        "predev": "npm run processing:assets && npm run wallpaper:runtime",
+        "prebuild": "npm run processing:assets && npm run wallpaper:runtime",
+        "wallpaper:runtime": "node scripts/build-wallpaper-runtime.mjs",
         "dev": "vite",
         "build": "vue-tsc -b && vite build",
         "preview": "vite preview",

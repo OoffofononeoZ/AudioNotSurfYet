@@ -217,6 +217,9 @@ const handleArtworkError = (event: Event) => {
     .home-content {
         padding: 14px 24px 104px;
     }
+    .home-visualizer-content {
+        padding: 0 0 96px;
+    }
     .home-display-switch {
         min-height: 36px;
         padding-left: 36px;

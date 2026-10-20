@@ -23,3 +23,15 @@ AudioEngine 按租约创建静音分析旁路，复用唯一 AudioContext。Audi
 Visualizer“实时样式”提供名称、应用到首页和生成展示地址。首页保存 homeDisplayMode/homeStyleId，保留详情切换、导航和播放器。`/display/:styleId` 继续在 MainLayout 内复用服务，隐藏侧栏，画面适应整个视口，播放/返回/全屏控件两秒隐藏，聚焦期间保持。地址限同站点、当前浏览器的本地存储；没有跨标签页播放同步。刷新恢复既有音频会话为暂停，缺失/损坏样式明确报错。
 
 动画以会话单调时间推进，暂停播放按静音输入处理；换歌/seek/变速重置特征与映射平滑，动画时间继续。页面隐藏时暂停实时输入和动画，重新可见时重新采集；离开或切回详情释放全部实时资源。
+
+## Wallpaper Engine 目录
+
+`npm run wallpaper:runtime` 使用独立 Vite IIFE 入口打包共享渲染内核、Three.js 和隔离算法 bootstrap，输出到忽略的 public/wallpaper-runtime；dev/build 自动准备，不包含外部资源库。导出内嵌当前精确算法快照，目录为 index.html、style-data.js、runtime.js、project.json 和 THIRD_PARTY_LICENSES.txt；不依赖项目服务器、CDN 或歌曲文件。
+
+“导出 Wallpaper Engine”先验证样式与准备产物，随后独立“选择目录并保存壁纸”按钮保留原生目录选择所需的用户手势。只创建唯一新子目录，不覆盖现有文件；project.json 最后写入，含 type:web、file:index.html、supportsaudioprocessing:true。取消/失败清理本次目录，清理失败明确报告路径。
+
+运行时在 body 末尾同步注册一次 wallpaperRegisterAudioListener，校验并直接使用左右各 64 项非负有限强度，允许超过 1。只做现有绑定投影/映射，不重复执行项目 WE 近似分析。响应 applyGeneralProperties.fps 和 setPaused，使用单会话时钟与 renderer。API、Shader 或输入失败在壁纸内明确显示错误。
+
+本轮功能验证：最终 Visualizer/音频/分析相关 166 项 Vitest、55 项工具测试和生产构建通过。Chrome/Edge 共 28 场景包含首页/展示、20 次模式切换后的音频旁路释放、目录导出/产物 file:// 离线加载及外壳/离线视频相邻回归。原生 Wallpaper Engine 独立屏外预览成功渲染，约五秒内会话时间持续推进，无 JS/Shader 错误；该预览没有收到宿主音频回调，最小官方监听示例对照也为零回调。真实系统音频响应仍未验证，不将模拟协议或加载成功写成音频验收通过。测试资料仅保存在忽略的 artifacts/visualizer-composition 下，不形成正式 readiness。
+
+生产 preview 另经 Chrome/Edge 两项实时播放检查，确认内嵌 AudioWorklet 可加载；四份 44.1/48kHz 短 WebM 的 VP9/Opus 经 FFmpeg 完整解码。可在先生成测试壁纸目录后运行 `node tests/scripts/verify-wallpaper-host.mjs <wallpaper32.exe>` 复现原生预览检查，`--reference` 使用最小音频监听对照；脚本只打开和关闭自己命名的测试预览，不改变现有桌面壁纸/全局设置。

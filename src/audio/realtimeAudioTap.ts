@@ -12,6 +12,7 @@ export interface RealtimeAudioLease {
     release(): void;
 }
 const modules = new WeakMap<AudioContext, Promise<void>>();
+export const realtimeAudioDiagnostics = { activeTaps: 0, activeWorklets: 0 };
 
 /** Silent analysis branch, owned by AudioEngine and detached without touching audible connections. */
 export async function createRealtimeAudioTap(
@@ -20,12 +21,17 @@ export async function createRealtimeAudioTap(
     options: RealtimeAudioTapOptions,
 ): Promise<RealtimeAudioLease> {
     const nodes: AudioNode[] = [];
+    let counted = false;
     let released = false,
         worklet: AudioWorkletNode | null = null;
     let attached: AudioNode | null = null;
     const release = () => {
         if (released) return;
         released = true;
+        if (counted) {
+            realtimeAudioDiagnostics.activeTaps--;
+            if (worklet) realtimeAudioDiagnostics.activeWorklets--;
+        }
         if (attached) source.disconnect(attached);
         for (const node of nodes) node.disconnect();
         worklet?.port.close();
@@ -80,6 +86,9 @@ export async function createRealtimeAudioTap(
         }
         source.connect(downmix);
         attached = downmix;
+        counted = true;
+        realtimeAudioDiagnostics.activeTaps++;
+        if (worklet) realtimeAudioDiagnostics.activeWorklets++;
         let tick = -1,
             frame: NativeAudioFrame | null = null;
         return {

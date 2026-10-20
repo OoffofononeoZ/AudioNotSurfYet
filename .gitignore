@@ -35,6 +35,7 @@ artifacts/fixtures/
 artifacts/visualizer-composition/
 artifacts/editor-marking/
 public/test_audio
+public/wallpaper-runtime/
 public/processing-runtime/
 public/processing-probe/
 
