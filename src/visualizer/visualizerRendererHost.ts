@@ -371,7 +371,15 @@ export class VisualizerRendererHost implements VisualizerSceneHost {
             return;
         }
         const failed = (error: unknown) => {
-            if (this.disposed || generation !== this.renderGeneration) {
+            const current = this.options.readFrame();
+            if (
+                this.disposed ||
+                generation !== this.renderGeneration ||
+                !current ||
+                current.trackIdentity !== frame.trackIdentity ||
+                current.bindingRevision !== frame.bindingRevision ||
+                current.seed !== frame.seed
+            ) {
                 if (override) throw error;
                 return;
             }

@@ -2,6 +2,7 @@ import type { SceneParameterDescriptor } from './parameterDescriptor';
 import type { VisualizerElement } from './compositionTypes';
 import type { ElementDefinition, PresetDefinition, ResourceRef, ResourceSnapshot } from './resourceTypes';
 import { resourceKey, resourceRef, sameResource } from './resourceIdentity';
+import { defaultMarkerBindings } from './editorMarkerValidation';
 
 export type ElementDescriptor = ElementDefinition;
 export function findResource<T extends ResourceRef>(entries: readonly T[], id: string | ResourceRef): T {
@@ -17,7 +18,9 @@ export function createDefinitionElement(
     d: ElementDefinition,
     durationSeconds: number,
     layer: number,
+    timingInput?: string,
 ): VisualizerElement {
+    const markerBindings = defaultMarkerBindings(d.markerInputs, timingInput);
     return {
         id: crypto.randomUUID(),
         resource: resourceRef(d),
@@ -34,6 +37,7 @@ export function createDefinitionElement(
                 ? structuredClone(p.defaultBinding)
                 : { source: { kind: 'constant' as const, value: structuredClone(p.defaultValue) } }),
         })) as VisualizerElement['bindings'],
+        ...(markerBindings ? { markerBindings } : {}),
         ...(d.kind === 'visual' ? {} : { targets: { kind: 'composition' as const } }),
     };
 }
@@ -54,7 +58,9 @@ export class ElementRegistry {
         return findResource(this.definitions, id);
     }
     create(id: string | ResourceRef, duration: number, layer: number) {
-        return createDefinitionElement(this.get(id), duration, layer);
+        const definition = this.get(id),
+            algorithm = findResource(this.algorithms, definition.algorithm);
+        return createDefinitionElement(definition, duration, layer, algorithm.contract.timingInput);
     }
 }
 export const elementRegistry = new ElementRegistry();

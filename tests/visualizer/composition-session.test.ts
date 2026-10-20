@@ -12,6 +12,7 @@ import { useAudioSessionStore } from '../../src/stores/audioSessionStore';
 import { createComposition } from '../../src/visualizer/compositionCodec';
 import { createInitialEditorProject } from '../../src/editor/projectCodec';
 import type { EditorDraftRepositoryPort } from '../../src/editor/editorDraftRepository';
+import { markerFixture } from './marker-input-fixture';
 
 const track = { contentHash: 'a'.repeat(64), fileName: 'first.wav', durationSeconds: 10, sampleRate: 48000 };
 const deferred = <T>() => {
@@ -76,6 +77,50 @@ function harness(
 }
 
 beforeEach(() => setActivePinia(createPinia()));
+
+test('marker references reject an incompatible Editor refresh atomically and protect even disabled elements', async () => {
+    const fixture = markerFixture(),
+        project = fixture.project;
+    project.track = track;
+    const editor = createInitialEditorProject({ track });
+    editor.lanes = project.editorSnapshot!.project.lanes;
+    project.editorSnapshot = { capturedAt: editor.updatedAt, project: editor };
+    project.elements[0]!.timing = { kind: 'manual', startSeconds: 0, endSeconds: 10 };
+    project.elements[0]!.enabled = false;
+    const editorRepository: EditorDraftRepositoryPort = {
+        restore: vi.fn(async () => null),
+        replace: vi.fn(),
+        close: vi.fn(),
+        clear: vi.fn(),
+        getLeaveWarningEnabled: async () => true,
+        setLeaveWarningEnabled: vi.fn(),
+        getOverlayVisibility: async () => null,
+        setOverlayVisibility: vi.fn(),
+    };
+    const h = harness(
+        { kind: 'current', draft: { schemaVersion: 5, savedAt: project.updatedAt, project } },
+        editorRepository,
+    );
+    await h.controller.enter('first');
+    expect(h.controller.getSnapshot().state).toBe('ready');
+    const before = h.controller.readProject();
+    expect(() => h.controller.removeEditorSnapshot()).toThrow(/仍被元素引用/);
+    const broken = structuredClone(editor);
+    broken.lanes = broken.lanes.filter(l => l.id !== fixture.pointLane);
+    vi.mocked(editorRepository.restore).mockResolvedValue({
+        schemaVersion: 1,
+        savedAt: editor.updatedAt,
+        project: broken,
+    });
+    await expect(h.controller.reloadEditorDraft()).rejects.toThrow(/轨道缺失/);
+    expect(h.controller.readProject()).toBe(before);
+    h.controller.updateElement(project.elements[0]!.id, {
+        markerBindings: { points: { kind: 'unbound' }, ranges: { kind: 'unbound' } },
+    });
+    h.controller.removeEditorSnapshot();
+    expect(h.controller.readProject()!.editorSnapshot).toBeUndefined();
+    await h.controller.dispose();
+});
 
 test('waits for audio restoration and invalidates entry when leaving during that wait', async () => {
     const ready = deferred<void>(),

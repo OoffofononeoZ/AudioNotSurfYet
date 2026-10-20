@@ -1,5 +1,6 @@
 import { finite, integer, invalid, keys, record, text } from './projectValidation';
 import { resourceHash } from './resourceIdentity';
+import { validateMarkerInputs } from './editorMarkerValidation';
 import type {
     AlgorithmContract,
     AlgorithmDefinition,
@@ -59,9 +60,13 @@ function parameter(input: unknown): AlgorithmParameter {
         list(v.allowedAnalysisProjections, ['scalar', 'mean', 'max', 'peak', 'bin', 'band', 'full']);
     return structuredClone(v) as unknown as AlgorithmParameter;
 }
-export function validateAlgorithmContract(input: unknown): AlgorithmContract {
+export function validateAlgorithmContract(input: unknown, apiVersion: 1 | 2 = 1): AlgorithmContract {
     const v = record(input, '算法契约');
-    keys(v, ['kind', 'parameters', 'sharedParameters', 'historyParameters'], ['inputParameter']);
+    keys(
+        v,
+        ['kind', 'parameters', 'sharedParameters', 'historyParameters'],
+        apiVersion === 2 ? ['inputParameter', 'markerInputs', 'timingInput'] : ['inputParameter'],
+    );
     if (!['visual', 'modifier', 'transition'].includes(String(v.kind)) || !Array.isArray(v.parameters))
         return invalid('算法种类或参数无效。');
     const parameters = v.parameters.map(parameter),
@@ -72,12 +77,28 @@ export function validateAlgorithmContract(input: unknown): AlgorithmContract {
         historyParameters = list(v.historyParameters, ids);
     if (sharedParameters.some(id => parameters.find(p => p.id === id)?.valueKind !== 'number'))
         invalid('共同处理参数必须为数值。');
+    const markerInputs = apiVersion === 2 ? validateMarkerInputs(v.markerInputs) : undefined;
+    let timingInput: string | undefined;
+    if (v.timingInput !== undefined) {
+        timingInput = identifier(v.timingInput);
+        const marker = markerInputs?.find(i => i.id === timingInput);
+        if (
+            v.kind !== 'transition' ||
+            !marker ||
+            marker.eventKind !== 'range' ||
+            marker.selectionModes.length !== 1 ||
+            marker.selectionModes[0] !== 'single'
+        )
+            invalid('转场时间输入必须声明单个范围。');
+    }
     return {
         kind: v.kind as AlgorithmContract['kind'],
         parameters,
         sharedParameters,
         historyParameters,
         ...(v.inputParameter !== undefined ? { inputParameter: String(v.inputParameter) } : {}),
+        ...(markerInputs ? { markerInputs } : {}),
+        ...(timingInput ? { timingInput } : {}),
     };
 }
 export function validateShaderProgram(input: unknown): ShaderProgram {
@@ -106,15 +127,23 @@ export function validateAlgorithmDefinition(input: unknown): AlgorithmDefinition
     const id = text(v.id, '算法 ID'),
         version = integer(v.version, '算法版本');
     if (!/^[a-z0-9][a-z0-9._-]*$/.test(id) || version < 1 || !Number.isSafeInteger(version)) invalid('算法身份无效。');
-    if (v.apiVersion !== 1) invalid('算法 ABI 不受支持。');
+    if (v.apiVersion !== 1 && v.apiVersion !== 2) invalid('算法 ABI 不受支持。');
     if (typeof v.hash !== 'string' || !/^[a-f0-9]{64}$/.test(v.hash) || resourceHash(v) !== v.hash)
         invalid('算法内容与 SHA-256 不匹配。');
-    const contract = validateAlgorithmContract(v.contract),
+    const contract = validateAlgorithmContract(v.contract, v.apiVersion as 1 | 2),
         programs: Record<string, ShaderProgram> = {};
     for (const [name, program] of Object.entries(record(v.programs, 'programs')))
         Object.defineProperty(programs, identifier(name), { value: validateShaderProgram(program), enumerable: true });
     if (!Object.keys(programs).length) invalid('算法缺少 Shader。');
-    return { id, version, hash: String(v.hash), apiVersion: 1, contract, source: text(v.source, '算法源码'), programs };
+    return {
+        id,
+        version,
+        hash: String(v.hash),
+        apiVersion: v.apiVersion as 1 | 2,
+        contract,
+        source: text(v.source, '算法源码'),
+        programs,
+    };
 }
 export function validateUniform(value: unknown, type: UniformType, length?: number): void {
     if (type === 'source') {

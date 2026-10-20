@@ -102,6 +102,30 @@ afterEach(() => {
 });
 
 describe('VisualizerContentBriefV2', () => {
+    it('accepts declared point/range capabilities without real project IDs and validates a timing bridge', () => {
+        const value = brief();
+        value.elements[0].markerInputs = [
+            {
+                id: 'notes',
+                eventKind: 'point',
+                selectionModes: ['single', 'collection'],
+                purpose: 'Selected note events',
+                response: 'Deterministic flashes at note times; empty collection draws nothing',
+            },
+        ];
+        expect(validateContentBrief(value).status).toBe('READY_FOR_CONTRACT');
+        value.elements[0].markerInputs[0].laneId = 'private-lane';
+        expect(paths(value)).toContain('$.elements[0].markerInputs[0].laneId');
+        delete value.elements[0].markerInputs[0].laneId;
+        value.elements[0].timingInput = 'notes';
+        expect(paths(value)).toContain('$.elements[0].timingInput');
+        value.elements[0].kind = 'transition';
+        value.elements[0].markerInputs[0].eventKind = 'range';
+        value.elements[0].markerInputs[0].selectionModes = ['single'];
+        expect(validateContentBrief(value).status).toBe('READY_FOR_CONTRACT');
+        delete value.elements[0].markerInputs[0].response;
+        expect(paths(value)).toContain('$.elements[0].markerInputs[0].response');
+    });
     it('accepts explicit common processing controls and keeps optional defaults optional', () => {
         const value = preset();
         value.commonControls = [

@@ -4,18 +4,19 @@
 
 ## 领域覆盖
 
-| 范围 | 验证要求 |
-| --- | --- |
-| 工程/草稿 | V5 strict schema、歌曲 identity、候选完整初始化后原子导入、同歌/异歌/损坏草稿、quota/取消与离页保护；旧 V1–V4 文件拒绝、旧草稿不提示恢复 |
-| 资源 | 外部目录选择/取消、只读权限恢复/拒绝、句柄保存失败、刷新/切换/stale、路径/损坏/哈希/依赖/ABI/预设仅引用限制、模块与 Shader 失败、URL 释放及工程快照独立恢复；无 ZIP 或任意 URL 加载入口 |
-| 算法隔离 | 未注册算法/新参数经完整工程路径绘制；opaque iframe + Worker + CSP 限制 DOM/网络/存储/嵌套 Worker；取消/超时终止，DrawPacket 拒绝非法程序、uniform 和 mesh；主页面仅执行通用 GPU 渲染 |
-| 分组/控件 | 叶元素恰好归属一次、连续 layer、整组移动/隐藏、子项排序/删除、effect 引用清理；共同处理参数完整校验后批量应用，差异提示与重新应用 |
-| Binding | constant/analysis/native/Editor 引用、projection/component/单位/transform、同歌 ID、缺失/未就绪/错误隔离；全工程四种 Analyzer 特征硬上限，不自动清空其他元素 |
-| 确定性 | 相同 seed/绝对时间/配置的 seek、刷新、暂停单帧和导出一致；固定步长/checkpoint 在包内执行，历史由宿主按合同准备，golden hash 采用既定1e-6量化，纯状态比较不依赖 RAF delta；迁移对照旧算法几何缓冲 golden |
-| 预览 | 视觉响应≤50ms、设置反馈≤100ms；约15分钟四重特征压力单帧<60ms，无可归因任务>50ms；旧 canonical 测量只绑定其候选 |
-| 资源/故障 | 单 renderer/Canvas/视觉 RAF，20 次 route/元素/歌曲/导出生命周期不单调累积；context loss、stale/cancel、renderer 与数据错误保持可恢复 |
-| 页面 | 支持≥1024px 工作区内单100dvh，左右独立滚动且阻止 chaining、共享 app-scrollbar；按可用宽度抽屉，16:9、DPR、焦点/键盘/reduced motion |
-| 全屏 | Fullscreen API 状态同步、同 Canvas、letterbox、播放静止2000ms隐藏、底部96px唤醒、暂停常驻、Escape/拒绝/重复点击与卸载；以当前组合工作区为准 |
+| 范围        | 验证要求                                                                                                                                                                                                |
+| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 工程/草稿   | V5 strict schema、歌曲 identity、候选完整初始化后原子导入、同歌/异歌/损坏草稿、quota/取消与离页保护；旧 V1–V4 文件拒绝、旧草稿不提示恢复                                                                |
+| 资源        | 外部目录选择/取消、只读权限恢复/拒绝、句柄保存失败、刷新/切换/stale、路径/损坏/哈希/依赖/ABI/预设仅引用限制、模块与 Shader 失败、URL 释放及工程快照独立恢复；无 ZIP 或任意 URL 加载入口                 |
+| 算法隔离    | 未注册算法/新参数经完整工程路径绘制；opaque iframe + Worker + CSP 限制 DOM/网络/存储/嵌套 Worker；取消/超时终止，DrawPacket 拒绝非法程序、uniform 和 mesh；主页面仅执行通用 GPU 渲染                    |
+| 分组/控件   | 叶元素恰好归属一次、连续 layer、整组移动/隐藏、子项排序/删除、effect 引用清理；共同处理参数完整校验后批量应用，差异提示与重新应用                                                                       |
+| Binding     | constant/analysis/native、projection/component/单位/transform、缺失/未就绪/错误隔离；全工程四种 Analyzer 特征硬上限，不自动清空其他元素                                                                 |
+| Editor 标记 | ABI 1/2 声明权限、外部包无工程引用、单点/范围与分类集合、半开窗口/256 项分页/空集合、过期游标/实例隔离；V5 往返、快照原子刷新及禁用元素移除保护；fade 插值/终值和重叠接管                               |
+| 确定性      | 相同 seed/绝对时间/配置的 seek、刷新、暂停单帧和导出一致；固定步长/checkpoint 在包内执行，历史由宿主按合同准备，golden hash 采用既定1e-6量化，纯状态比较不依赖 RAF delta；迁移对照旧算法几何缓冲 golden |
+| 预览        | 视觉响应≤50ms、设置反馈≤100ms；约15分钟四重特征压力单帧<60ms，无可归因任务>50ms；旧 canonical 测量只绑定其候选                                                                                          |
+| 资源/故障   | 单 renderer/Canvas/视觉 RAF，20 次 route/元素/歌曲/导出生命周期不单调累积；context loss、stale/cancel、renderer 与数据错误保持可恢复                                                                    |
+| 页面        | 支持≥1024px 工作区内单100dvh，左右独立滚动且阻止 chaining、共享 app-scrollbar；按可用宽度抽屉，16:9、DPR、焦点/键盘/reduced motion                                                                      |
+| 全屏        | Fullscreen API 状态同步、同 Canvas、letterbox、播放静止2000ms隐藏、底部96px唤醒、暂停常驻、Escape/拒绝/重复点击与卸载；以当前组合工作区为准                                                             |
 
 ## 离线媒体门槛
 

@@ -5,6 +5,8 @@ import { effectsFor, parameterKey } from './compositionEffects';
 import { findResource } from './elementRegistry';
 import { AlgorithmDrawRenderer } from './algorithmDrawRenderer';
 import { IsolatedAlgorithmRuntime } from './isolatedAlgorithmRuntime';
+import { createEditorMarkerReader } from './editorMarkerReader';
+import type { MarkerReader } from './editorMarkerTypes';
 import type { DrawPacket, AlgorithmFrame, HistorySample } from './algorithmTypes';
 import type { VisualizerElement, VisualizerProjectV5 } from './compositionTypes';
 import type { VisualizerScene, VisualizerSceneRenderInput, VisualizerResolvedParameterMap } from './rendererTypes';
@@ -50,6 +52,7 @@ export class CompositionScene implements VisualizerScene {
     private runtime: AlgorithmRuntimePort | null = null;
     private signature = '';
     private initialization: Promise<void> | null = null;
+    private markers: MarkerReader | undefined;
     private packets = new Map<string, DrawPacket>();
     private prepared: VisualizerProjectV5 | null = null;
     private needsSourcePrompt = false;
@@ -79,11 +82,18 @@ export class CompositionScene implements VisualizerScene {
             ':' +
             project.track.contentHash +
             ':' +
+            input.bindingRevision +
+            ':' +
             project.elements.map(e => e.id + ':' + elementDescriptor(project, e).algorithm.hash).join('|');
         if (signature !== this.signature) {
             this.runtime?.dispose();
             this.signature = signature;
             this.runtime = this.options.runtimeFactory?.() ?? new IsolatedAlgorithmRuntime();
+            const owner = this.runtime;
+            this.markers = createEditorMarkerReader(
+                project,
+                () => !this.disposed && this.runtime === owner && this.options.readProject() === project,
+            );
             this.initialization = this.runtime.initialize(
                 project.elements.map(e => ({
                     id: e.id,
@@ -112,6 +122,10 @@ export class CompositionScene implements VisualizerScene {
         const frames = effectiveElements(project)
             .filter(e => used.has(e.id))
             .flatMap(e => {
+                if (Object.values(e.markerBindings ?? {}).some(b => b.kind === 'unbound')) {
+                    this.needsSourcePrompt = true;
+                    return [];
+                }
                 const parameters: AlgorithmFrame['parameters'] = {};
                 for (const binding of e.bindings) {
                     const value = input.values.get(parameterKey(e.id, binding.parameterId));
@@ -139,15 +153,20 @@ export class CompositionScene implements VisualizerScene {
                     },
                 ];
             });
-        const packets = await runtime.prepareFrames(frames, async (elementId, request) => {
-            const samples: HistorySample[] = [];
-            for (let tick = request.startTick; tick < request.endTick; tick++) {
-                const value = this.options.resolveAt(tick / 60).get(parameterKey(elementId, request.parameterId));
-                if (value?.state !== 'ready' || value.value === undefined) throw Error('算法历史输入尚未就绪。');
-                samples.push({ time: tick / 60, value: value.value, ...(value.unit ? { unit: value.unit } : {}) });
-            }
-            return samples;
-        });
+        const packets = await runtime.prepareFrames(
+            frames,
+            async (elementId, request) => {
+                const samples: HistorySample[] = [];
+                for (let tick = request.startTick; tick < request.endTick; tick++) {
+                    const value = this.options.resolveAt(tick / 60).get(parameterKey(elementId, request.parameterId));
+                    if (value?.state !== 'ready' || value.value === undefined) throw Error('算法历史输入尚未就绪。');
+                    samples.push({ time: tick / 60, value: value.value, ...(value.unit ? { unit: value.unit } : {}) });
+                }
+                return samples;
+            },
+            undefined,
+            this.markers,
+        );
         if (this.disposed || runtime !== this.runtime) return;
         this.packets = packets;
         this.prepared = project;

@@ -2,6 +2,7 @@ import type { ElementBinding, ElementKind, EffectTargets } from './compositionTy
 import type { AlgorithmDefinition } from './algorithmTypes';
 import type { SceneParameterDescriptor } from './parameterDescriptor';
 import type { VisualizerNumericTransformV1 } from './types';
+import type { MarkerBindings, MarkerInputDefinition } from './editorMarkerTypes';
 
 export interface ResourceRef {
     id: string;
@@ -15,6 +16,7 @@ export interface ElementDefinition extends ResourceRef {
     icon: string;
     inputParameter?: string;
     parameters: SceneParameterDescriptor[];
+    markerInputs?: MarkerInputDefinition[];
 }
 export type CommonValue = number | string | boolean | number[] | Omit<ElementBinding, 'parameterId'>;
 export interface CommonControl {
@@ -33,6 +35,7 @@ export interface PresetElementTemplate {
     name: string;
     enabled: boolean;
     bindings: ElementBinding[];
+    markerBindings?: MarkerBindings;
     timing: { kind: 'relative'; start: number; end: number } | { kind: 'unbound' };
     targets?: EffectTargets;
 }

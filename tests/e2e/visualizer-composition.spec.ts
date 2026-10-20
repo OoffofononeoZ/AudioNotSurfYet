@@ -53,7 +53,8 @@ test('adds seven independent elements and configures targets and exact manual FX
     await page.getByRole('tab', { name: 'Editor 数据' }).click();
     await queuePickerData(page, [{ name: 'editor.json', mimeType: 'application/json', text: JSON.stringify(editor) }]);
     await page.getByRole('button', { name: '导入 Editor JSON', exact: true }).click();
-    await page.getByLabel('转场范围标记').selectOption(laneId + ':' + eventId);
+    await page.getByLabel('转场范围标记轨道', { exact: true }).selectOption(laneId);
+    await page.getByLabel('转场范围标记', { exact: true }).selectOption(eventId);
     await page.getByLabel('影响对象范围').selectOption('elements');
     await page.getByLabel('纯色背景', { exact: true }).check();
     await page.getByLabel('频谱点阵', { exact: true }).check();

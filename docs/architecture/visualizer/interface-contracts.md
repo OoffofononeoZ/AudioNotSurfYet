@@ -19,7 +19,8 @@
 ## Binding 与确定性
 
 - constant、Analyzer、native 与适用 Editor 引用按 [types.ts](../../../src/visualizer/types.ts)、[原生输入](../../context/visualizer-native-input.md)和[算法契约](../../../src/visualizer/algorithmTypes.ts)声明单位、映射、平滑与历史准备要求，不按算法名称分派。
-- 全工程最多四种不同 Analyzer 特征，native 不占额度。缺失引用/未准备数据显式反馈，不自动改绑、降档或禁用其他内容绕过校验。
+- ABI 2 的点/范围输入由工程绑定轨道/分类/事件，通过 prepareFrame 内 input.markers 查询；外部包和初始化不读取实际标记。具体字段及分页见[标记契约](../../../skills/visualizer-content-generator/references/editor-marker-inputs.md)。
+- 全工程最多四种不同 Analyzer 特征，native 和标记不占额度。缺失引用/未准备数据显式反馈，不自动改绑、降档或禁用其他内容绕过校验。
 - 绝对歌曲时间、seed 和算法快照决定结果；seek、循环、离线导出同源求值。预览合并在途请求，失效结果不绘制；导出逐帧等待算法与 GPU。诊断 hash 使用与视口无关的参数及状态；画面正确性仍以数值基线和 GPU 像素验证。Editor snapshot 同歌校验，显式替换且完整验证。
 
 ## 导出与验证

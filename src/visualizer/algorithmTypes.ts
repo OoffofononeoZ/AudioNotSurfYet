@@ -1,6 +1,7 @@
 import type { ElementKind } from './compositionTypes';
 import type { SceneParameterDescriptor } from './parameterDescriptor';
 import type { ResourceRef } from './resourceTypes';
+import type { MarkerInputContract, MarkerPage, MarkerQuery } from './editorMarkerTypes';
 
 export type AlgorithmParameter = Omit<SceneParameterDescriptor, 'label' | 'defaultValue' | 'defaultBinding'>;
 export interface AlgorithmContract {
@@ -9,6 +10,8 @@ export interface AlgorithmContract {
     inputParameter?: string;
     sharedParameters: string[];
     historyParameters: string[];
+    markerInputs?: MarkerInputContract[];
+    timingInput?: string;
 }
 export type UniformType = 'number' | 'int' | 'boolean' | 'color' | 'vec2' | 'vec3' | 'array' | 'source';
 export interface ShaderProgram {
@@ -18,7 +21,7 @@ export interface ShaderProgram {
     uniforms: Record<string, { type: UniformType; length?: number }>;
 }
 export interface AlgorithmDefinition extends ResourceRef {
-    apiVersion: 1;
+    apiVersion: 1 | 2;
     contract: AlgorithmContract;
     source: string;
     programs: Record<string, ShaderProgram>;
@@ -65,7 +68,10 @@ export interface HistoryRequest {
 export interface AlgorithmInstance {
     prepareFrame(
         frame: AlgorithmFrame,
-        input: { history(request: HistoryRequest): Promise<HistorySample[]> },
+        input: {
+            history(request: HistoryRequest): Promise<HistorySample[]>;
+            markers(request: MarkerQuery): Promise<MarkerPage>;
+        },
     ): DrawPacket | Promise<DrawPacket>;
     reset?(): void;
     dispose?(): void;

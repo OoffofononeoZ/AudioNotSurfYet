@@ -13,6 +13,7 @@ import type {
     VisualizerResourcePackageV2,
 } from './resourceTypes';
 import { roundEditingValue } from '../utils/numberEditing';
+import { validateMarkerBindings, validateMarkerDefinitions } from './editorMarkerValidation';
 
 const icons = [
     'square',
@@ -127,7 +128,11 @@ function parameter(
 }
 function elementDefinition(input: unknown, algorithms: AlgorithmDefinition[]): ElementDefinition {
     const v = record(input, '元素定义');
-    keys(v, ['id', 'version', 'hash', 'algorithm', 'kind', 'title', 'icon', 'parameters'], ['inputParameter']);
+    keys(
+        v,
+        ['id', 'version', 'hash', 'algorithm', 'kind', 'title', 'icon', 'parameters'],
+        ['inputParameter', 'markerInputs'],
+    );
     const ref = identity(v);
     const algorithm = validateResourceRef(v.algorithm),
         definition = algorithms.find(a => sameResource(a, algorithm));
@@ -137,6 +142,7 @@ function elementDefinition(input: unknown, algorithms: AlgorithmDefinition[]): E
         return invalid('元素种类、输入或图标无效。');
     if (!Array.isArray(v.parameters) || v.parameters.length !== kernel.parameters.length)
         return invalid('元素参数定义不完整。');
+    const markerInputs = validateMarkerDefinitions(v.markerInputs, kernel.markerInputs);
     return {
         ...ref,
         algorithm,
@@ -145,6 +151,7 @@ function elementDefinition(input: unknown, algorithms: AlgorithmDefinition[]): E
         icon: String(v.icon),
         ...(kernel.inputParameter ? { inputParameter: kernel.inputParameter } : {}),
         parameters: kernel.parameters.map((p, i) => parameter((v.parameters as unknown[])[i], p)),
+        ...(markerInputs ? { markerInputs } : {}),
     };
 }
 export function mergeResources(...snapshots: ResourceSnapshot[]): ResourceSnapshot {
@@ -179,13 +186,20 @@ function presetDefinition(
     >();
     const templates = v.elements.map(input => {
         const e = record(input, '预设子元素');
-        keys(e, ['key', 'element', 'name', 'enabled', 'bindings', 'timing'], ['targets']);
+        keys(e, ['key', 'element', 'name', 'enabled', 'bindings', 'timing'], ['targets', 'markerBindings']);
         const key = name(e.key),
             element = validateResourceRef(e.element),
             definition = elements.find(d => sameResource(d, element));
         if (!definition) return invalid('预设缺少精确版本的元素依赖：' + resourceKey(element));
         if (targets.has(key) || typeof e.enabled !== 'boolean') return invalid('预设子元素 key 或启用状态无效。');
         const bindings = validateElementBindings(e.bindings, definition.parameters);
+        const markerBindings = validateMarkerBindings(
+            e.markerBindings,
+            definition.markerInputs,
+            algorithms.find(a => sameResource(a, definition.algorithm))!.contract.timingInput,
+            undefined,
+            true,
+        );
         for (const [index, binding] of bindings.entries())
             if (binding.source.kind === 'constant')
                 assertDefaultPrecision(binding.source.value, definition.parameters[index]!);
@@ -210,6 +224,7 @@ function presetDefinition(
             name: text(e.name, '子元素名称'),
             enabled: e.enabled,
             bindings,
+            ...(markerBindings ? { markerBindings } : {}),
             timing: structuredClone(t),
             ...(e.targets !== undefined ? { targets: structuredClone(e.targets) } : {}),
         };

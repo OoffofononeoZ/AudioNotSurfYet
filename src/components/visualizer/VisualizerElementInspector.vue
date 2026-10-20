@@ -43,15 +43,15 @@
         <section>
             <h3>{{ descriptor.kind === 'transition' ? '转场输入' : '时间范围' }}</h3>
             <template v-if="descriptor.kind === 'transition'"
-                ><label class="viz-field stacked"
-                    ><span>范围标记</span
-                    ><AppSelect
-                        :model-value="markerValue"
-                        label="转场范围标记"
-                        :options="markerOptions"
-                        :disabled="locked"
-                        @change="markerChanged"
-                /></label>
+                ><VisualizerMarkerInput
+                    :key="element.id + ':timing'"
+                    :project="project"
+                    :binding="timingBinding"
+                    label="转场范围标记"
+                    event-kind="range"
+                    :selection-modes="['single']"
+                    :disabled="locked"
+                    @change="markerChanged" />
                 <div v-if="range" class="viz-time-summary">
                     <span>起始 {{ range.startSeconds.toFixed(3) }} s</span
                     ><span>终止 {{ range.endSeconds.toFixed(3) }} s</span>
@@ -87,6 +87,18 @@
                         @change="timeChanged('endSeconds', $event)" /></label
             ></template>
         </section>
+        <section v-for="input in independentMarkerInputs" :key="input.id">
+            <h3>{{ input.label }}</h3>
+            <VisualizerMarkerInput
+                :key="element.id + ':' + input.id"
+                :project="project"
+                :binding="element.markerBindings![input.id]!"
+                :label="input.label"
+                :event-kind="input.eventKind"
+                :selection-modes="input.selectionModes"
+                :disabled="locked"
+                @change="markerBindingChanged(input.id, $event)" />
+        </section>
         <section>
             <h3>{{ descriptor.inputParameter ? '输入与视觉参数' : '视觉参数' }}</h3>
             <VisualizerParameterField
@@ -107,8 +119,10 @@ import { computed } from 'vue';
 import AppSelect from '../controls/AppSelect.vue';
 import AppNumberInput from '../controls/AppNumberInput.vue';
 import VisualizerIcon from './VisualizerIcon.vue';
+import VisualizerMarkerInput from './VisualizerMarkerInput.vue';
+import type { MarkerBinding } from '../../visualizer/editorMarkerTypes';
 import VisualizerParameterField from './VisualizerParameterField.vue';
-import { elementDescriptor, elementRange } from '../../visualizer/compositionModel';
+import { elementDescriptor, elementRange, elementAlgorithm } from '../../visualizer/compositionModel';
 import type { ElementBinding, VisualizerElement, VisualizerProjectV5 } from '../../visualizer/compositionTypes';
 const props = defineProps<{ project: VisualizerProjectV5; element: VisualizerElement | null; locked: boolean }>();
 const emit = defineEmits<{ update: [patch: Partial<VisualizerElement>]; binding: [binding: ElementBinding] }>();
@@ -120,42 +134,37 @@ const range = computed(() => (props.element ? elementRange(props.project, props.
 const visualElements = computed(() =>
     props.project.elements.filter(e => elementDescriptor(props.project, e).kind === 'visual'),
 );
-const rangeLanes = computed(
-    () => props.project.editorSnapshot?.project.lanes.filter(l => l.eventKind === 'range') ?? [],
-);
-const markerValue = computed(() =>
+const timingBinding = computed<MarkerBinding>(() =>
     props.element?.timing.kind === 'editor-range'
-        ? props.element.timing.laneId + ':' + props.element.timing.eventId
-        : '',
+        ? { kind: 'single', laneId: props.element.timing.laneId, eventId: props.element.timing.eventId }
+        : { kind: 'unbound' },
+);
+const independentMarkerInputs = computed(
+    () =>
+        descriptor.value?.markerInputs?.filter(
+            input =>
+                input.id !==
+                (props.element ? elementAlgorithm(props.project, props.element).contract.timingInput : undefined),
+        ) ?? [],
 );
 const targetOptions = [
     { value: 'composition', label: '整个画面' },
     { value: 'elements', label: '指定元素' },
 ];
-const markerOptions = computed(() => [
-    { value: '', label: '选择一个范围标记' },
-    ...rangeLanes.value.flatMap(lane =>
-        lane.events.map(event => ({
-            value: lane.id + ':' + event.id,
-            label:
-                lane.name +
-                ' · ' +
-                (lane.innerClasses.find(c => c.id === event.innerClassId)?.label ?? '') +
-                ' · ' +
-                event.startSeconds.toFixed(2) +
-                '–' +
-                event.endSeconds.toFixed(2) +
-                ' s',
-        })),
-    ),
-]);
 const inputValue = (event: Event) => (event.target as HTMLInputElement).value;
 function timeChanged(key: 'startSeconds' | 'endSeconds', value: number) {
     if (props.element?.timing.kind === 'manual') emit('update', { timing: { ...props.element.timing, [key]: value } });
 }
-function markerChanged(value: string | number) {
-    const [laneId, eventId] = String(value).split(':');
-    emit('update', { timing: laneId && eventId ? { kind: 'editor-range', laneId, eventId } : { kind: 'unbound' } });
+function markerChanged(binding: MarkerBinding) {
+    emit('update', {
+        timing:
+            binding.kind === 'single'
+                ? { kind: 'editor-range', laneId: binding.laneId, eventId: binding.eventId }
+                : { kind: 'unbound' },
+    });
+}
+function markerBindingChanged(id: string, binding: MarkerBinding) {
+    emit('update', { markerBindings: { ...props.element!.markerBindings, [id]: binding } });
 }
 function targetKindChanged(value: string | number) {
     emit('update', { targets: value === 'composition' ? { kind: 'composition' } : { kind: 'elements', ids: [] } });

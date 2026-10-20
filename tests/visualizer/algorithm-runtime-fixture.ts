@@ -1,5 +1,6 @@
 import type { AlgorithmDefinition, AlgorithmInstance, DrawPacket } from '../../src/visualizer/algorithmTypes';
 import type { AlgorithmRuntimePort } from '../../src/visualizer/compositionScene';
+import type { MarkerReader } from '../../src/visualizer/editorMarkerTypes';
 import type { RuntimeElement, RuntimeFrame, HistoryReader } from '../../src/visualizer/isolatedAlgorithmRuntime';
 import { validateDrawPacket } from '../../src/visualizer/drawPacket';
 
@@ -15,11 +16,17 @@ export class AlgorithmRuntimeFixture implements AlgorithmRuntimePort {
         for (const e of elements)
             this.instances.set(e.id, { algorithm: e.algorithm, instance: await createTestAlgorithm(e.algorithm) });
     }
-    async prepareFrames(frames: RuntimeFrame[], history: HistoryReader) {
+    async prepareFrames(frames: RuntimeFrame[], history: HistoryReader, _signal?: AbortSignal, markers?: MarkerReader) {
         const result = new Map<string, DrawPacket>();
         for (const e of frames) {
             const { algorithm, instance } = this.instances.get(e.id)!;
-            const packet = await instance.prepareFrame(e.frame, { history: request => history(e.id, request) });
+            const packet = await instance.prepareFrame(e.frame, {
+                history: request => history(e.id, request),
+                markers: request => {
+                    if (!markers) throw Error('No marker reader');
+                    return markers(e.id, request);
+                },
+            });
             result.set(e.id, validateDrawPacket(packet, algorithm));
         }
         return result;

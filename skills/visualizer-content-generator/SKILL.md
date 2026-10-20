@@ -1,12 +1,12 @@
 ---
 name: visualizer-content-generator
 description: 编写外部 V2 算法元素包与仅引用已有元素的预设；先校验 VisualizerContentBriefV2，再批准具体 Content Contract，获批后封装和验证。
-version: 2.0.0
+version: 2.1.0
 ---
 
 # Visualizer 内容生成
 
-本 skill 独立运行，不依赖应用仓库。资源位于用户指定的 assets 文件夹：elements/<id>/、presets/<id>/。输出 V2 运行包，工程和草稿仍为 V5 自包含快照。不生成 ZIP、Git 仓库或历史版本目录。
+本 skill 独立运行，不依赖应用仓库。资源位于用户指定的 assets 文件夹：elements/<id>/、presets/<id>/。输出 V2 运行包，工程和草稿仍为 V5 自包含快照。已有算法使用 ABI 1；声明标记输入的算法使用 ABI 2。不生成 ZIP、Git 仓库或历史版本目录。
 
 ## 工作流
 
@@ -21,7 +21,8 @@ version: 2.0.0
 
 ## 边界
 
-- 全工程最多四种不同 Analyzer 特征，包含禁用元素；native 不计额度。来源仅 constant/analysis/native 或明确 unbound。Editor range 是转场时间，不是参数来源。
+- 全工程最多四种不同 Analyzer 特征，包含禁用元素；native 和 Editor 标记不计额度。参数来源为 constant/analysis/native 或明确 unbound；Editor 点/范围通过独立的 [标记输入](references/editor-marker-inputs.md) 提供，不恢复旧 editor-event 参数来源。
+- 外部包只声明标记类型和选择范围，不保存真实轨道、分类或事件引用。加入工程并由用户绑定后，实例才能查询该工程快照中的获准数据；目录校验和初始化阶段不能读取标记。只使用已应用的点/范围，不接 BPM、识别候选或推测的音色字段。
 - 算法只在宿主隔离 Worker 运行并返回受控 DrawPacket，不在主页面求值，不创建 Canvas/Renderer/RAF/AudioContext/Worker、网络或存储旁路。宿主统一输入、合成和离线逐帧导出。
 - 扩展 ABI、输入能力、工程格式、拓扑、支持矩阵、性能预算/阈值或不明许可资产，先请求独立决定；不得以 fallback 绕过失败。
 - V5 快照内嵌算法、Shader、元素及预设。资源更新不得重绑、量化或覆盖既有工程。

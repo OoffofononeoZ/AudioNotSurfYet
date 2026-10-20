@@ -4,6 +4,7 @@ import { sandboxBridge } from './algorithmSandboxBridge';
 import { validateAlgorithmDefinition } from './algorithmCodec';
 import { validateDrawPacket } from './drawPacket';
 import type { AlgorithmDefinition, AlgorithmFrame, DrawPacket, HistoryRequest, HistorySample } from './algorithmTypes';
+import type { MarkerReader, MarkerQuery } from './editorMarkerTypes';
 
 export interface RuntimeElement {
     id: string;
@@ -22,6 +23,7 @@ interface Pending {
     started: number;
     frames?: RuntimeFrame[];
     history?: HistoryReader;
+    markers?: MarkerReader;
     reading?: boolean;
 }
 export const algorithmRuntimeDiagnostics = { activeSandboxes: 0, activeTasks: 0 };
@@ -101,13 +103,14 @@ export class IsolatedAlgorithmRuntime {
         frames: RuntimeFrame[],
         history: HistoryReader,
         signal?: AbortSignal,
+        markers?: MarkerReader,
     ): Promise<Map<string, DrawPacket>> {
         await this.connected;
         signal?.throwIfAborted();
         const abort = () => this.fail(Error('算法计算已取消。'));
         signal?.addEventListener('abort', abort, { once: true });
         try {
-            const raw = await this.request({ kind: 'frame', frames }, frames, history);
+            const raw = await this.request({ kind: 'frame', frames }, frames, history, markers);
             if (!Array.isArray(raw) || raw.length !== frames.length) throw Error('算法返回的帧数量无效。');
             const packets = new Map<string, DrawPacket>();
             for (const [index, entry] of raw.entries()) {
@@ -119,7 +122,7 @@ export class IsolatedAlgorithmRuntime {
             signal?.removeEventListener('abort', abort);
         }
     }
-    private request(message: object, frames?: RuntimeFrame[], history?: HistoryReader) {
+    private request(message: object, frames?: RuntimeFrame[], history?: HistoryReader, markers?: MarkerReader) {
         if (this.disposed || !this.port) return Promise.reject(Error('算法运行时已释放。'));
         const id = ++this.sequence;
         return new Promise<unknown>((resolve, reject) => {
@@ -128,6 +131,7 @@ export class IsolatedAlgorithmRuntime {
                 reject,
                 frames,
                 history,
+                markers,
                 remaining: this.timeoutMs,
                 started: performance.now(),
                 timer: setTimeout(() => this.fail(Error('算法计算超时。')), this.timeoutMs),
@@ -145,7 +149,7 @@ export class IsolatedAlgorithmRuntime {
         result?: unknown;
         readId?: number;
         elementId?: string;
-        request?: HistoryRequest;
+        request?: HistoryRequest | MarkerQuery;
     }) {
         if (this.disposed) return;
         if (message.fatal) {
@@ -154,29 +158,41 @@ export class IsolatedAlgorithmRuntime {
         }
         const task = this.pending.get(message.id!);
         if (!task) return;
-        if (message.kind === 'history') {
+        if (message.kind === 'history' || message.kind === 'markers') {
             try {
-                const request = message.request!,
-                    frame = task.frames?.find(f => f.id === message.elementId);
+                const frame = task.frames?.find(f => f.id === message.elementId);
                 const algorithm = this.elements.get(message.elementId!);
+                if (task.reading || !frame || !algorithm) throw Error('算法输入请求不属于当前帧。');
+                const historyRequest = message.request as HistoryRequest;
                 if (
-                    task.reading ||
-                    !frame ||
-                    !algorithm ||
-                    !task.history ||
-                    !algorithm.contract.historyParameters.includes(request.parameterId) ||
-                    !Number.isInteger(request.startTick) ||
-                    !Number.isInteger(request.endTick) ||
-                    request.startTick < 0 ||
-                    request.endTick < request.startTick ||
-                    request.endTick - request.startTick > 60 ||
-                    request.endTick > Math.floor(frame.frame.time * 60 + 1e-8)
+                    message.kind === 'history' &&
+                    (!historyRequest ||
+                        !task.history ||
+                        !algorithm.contract.historyParameters.includes(historyRequest.parameterId) ||
+                        !Number.isInteger(historyRequest.startTick) ||
+                        !Number.isInteger(historyRequest.endTick) ||
+                        historyRequest.startTick < 0 ||
+                        historyRequest.endTick < historyRequest.startTick ||
+                        historyRequest.endTick - historyRequest.startTick > 60 ||
+                        historyRequest.endTick > Math.floor(frame.frame.time * 60 + 1e-8))
                 )
                     throw Error('算法历史输入请求越界。');
+                const markerQuery = message.request as MarkerQuery;
+                if (
+                    message.kind === 'markers' &&
+                    (!task.markers ||
+                        algorithm.apiVersion !== 2 ||
+                        !markerQuery ||
+                        !algorithm.contract.markerInputs?.some(i => i.id === markerQuery.inputId))
+                )
+                    throw Error('算法标记输入未授权。');
                 clearTimeout(task.timer);
                 task.reading = true;
                 task.remaining -= performance.now() - task.started;
-                const samples = await task.history(message.elementId!, request);
+                const result =
+                    message.kind === 'history'
+                        ? await task.history!(message.elementId!, historyRequest)
+                        : await task.markers!(message.elementId!, markerQuery);
                 if (this.disposed || !this.pending.has(message.id!)) return;
                 if (task.remaining <= 0) {
                     this.fail(Error('算法计算超时。'));
@@ -185,7 +201,11 @@ export class IsolatedAlgorithmRuntime {
                 task.started = performance.now();
                 task.reading = false;
                 task.timer = setTimeout(() => this.fail(Error('算法计算超时。')), task.remaining);
-                this.port?.postMessage({ kind: 'history-result', readId: message.readId, samples });
+                this.port?.postMessage(
+                    message.kind === 'history'
+                        ? { kind: 'history-result', readId: message.readId, samples: result }
+                        : { kind: 'markers-result', readId: message.readId, page: result },
+                );
             } catch (error) {
                 this.fail(error instanceof Error ? error : Error(String(error)));
             }

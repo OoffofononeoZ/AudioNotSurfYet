@@ -10,144 +10,144 @@ Node24.18.0/npm11.x，依赖版本以lockfile为准；浏览器专项使用真�
 
 ## 命令
 
-| 命令 | 作用 |
-| --- | --- |
-| `npm run typecheck` | 运行 `vue-tsc -b` |
-| `npm run test:tools` | 仓库工具、代码规模边界/批准例外、格式化样例、失败与只读行为；使用临时 fixture，不批量修改产品代码 |
-| `npm run format:check -- <file...>` | 只读检查本次明确修改的手写代码格式；不检查全仓历史文件 |
-| `npm run transcription:models` | 下载／校验 DEC-075 的 ADT_STR、Basic Pitch、六轨辅助公开模型；单元与真实浏览器命令见 [自动标记验证](transcription/README.md) |
+| 命令                                                    | 作用                                                                                                                                                              |
+| ------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `npm run typecheck`                                     | 运行 `vue-tsc -b`                                                                                                                                                 |
+| `npm run test:tools`                                    | 仓库工具、代码规模边界/批准例外、格式化样例、失败与只读行为；使用临时 fixture，不批量修改产品代码                                                                 |
+| `npm run format:check -- <file...>`                     | 只读检查本次明确修改的手写代码格式；不检查全仓历史文件                                                                                                            |
+| `npm run transcription:models`                          | 下载／校验 DEC-075 的 ADT_STR、Basic Pitch、六轨辅助公开模型；单元与真实浏览器命令见 [自动标记验证](transcription/README.md)                                      |
 | `npm run eval:editor-ft` / `eval:editor-ft:provisional` | DEC-072 Editor FT 接入：docs/assets/四图bytes/types/build、处理与Editor专项、Chrome/Edge真实四轨及E7–E10相关回归；保存candidate、截图/WAV身份和已知缺口，不关闭P1 |
-| `npm test` | 执行全部非 E2E Vitest 测试 |
-| `npm run test:unit` | PCM、容差和 isolated IndexedDB |
-| `npm run test:worker` | Worker transfer、cancel 和 error harness |
-| `npm run test:analysis` | direct-Meyda 首批 golden |
-| `npm run test:fixtures` | manifest、SHA-256、字节数和 ffprobe |
-| `npm run test:m4:unit` | AudioEngine 的 load/play/pause/seek/ended/stale/error/unload/dispose |
-| `npm run test:m4:integration` | session/store 的队列、竞态、ended、删除、清空、metadata、RAF 与 URL |
-| `npm run test:m5:unit` | PersistedSessionV1 validator、SHA-256、IndexedDB 原子 current Blob/cache、abort、删除与清空 |
-| `npm run test:m5:integration` | Blob 优先、0 秒 paused、权限顺序、显式 request、missing/changed、quota 和取消 |
-| `npm run test:m6:unit` | 21 项 registry、config hash、PCM/frame、聚合/量化、六类 compact codec 与损坏数据拒绝 |
-| `npm run test:m6:worker` | 产品 workerCore 的 0/1/4 项、非法请求、yield/progress/cancel、错误与 exact cursor |
-| `npm run test:m6:integration` | AnalysisCoordinator、partial cache、stale generation、quota 与 current Blob 原子持久化 |
-| `npm run test:m7:unit` | viewport/zoom anchor/x↔time、renderer 数据变换、工作区不变量和 L1/L2/L3 版本化 golden |
-| `npm run test:m7:integration` | 默认/已保存空工作区、卡片/viewport 持久化和 quota 后内存继续可用 |
-| `npm run test:m8:unit` | 13 项 registry、12 项 direct Meyda、项目 Flux、静音/非有限值和 scalar axis/golden |
-| `npm run test:m8:integration` | 四 scalar Worker、Flux exact cursor、四卡持久化、quota 和 13 项有限值回归 |
-| `npm run test:m9:unit` | 三项 registry、direct Meyda、Power 平方关系、MFCC signed 量化、Buffer envelope/尾帧与 golden |
-| `npm run test:m9:integration` | 四种混合 shape、cache codec、exact cursor、stale/cancel/quota 与四张累计卡回归 |
-| `npm run test:m10:unit` | 21 项集合、direct Meyda、24/1024 维、零值、相位关系、结构 codec 与按固定容差校验的 golden |
-| `npm run test:m10:integration` | Loudness/Complex 混合 shape、cache round-trip、exact cursor、stale/cancel/quota 与四卡持久化 |
-| `npm run test:m12:unit` | Analyzer 置顶区高度上下限、短内容优先和用户比例裁剪 |
-| `npm run test:m13:unit` | FIFO reducer、0–4 项、第五项淘汰、重开年龄、唯一性、置顶高度模型与 V1 adapter |
-| `npm run test:m13:integration` | V1 双向兼容、串行 workspace 保存、revision guard、quota 与 M13 Coordinator cache/generation |
-| `npm run test:e1:unit` | Editor JSON V1 初始工程、canonical round-trip、微秒规范化与 strict validator |
-| `npm run test:e1:integration` | playback/analysis lease、独立 IndexedDB、同/异歌草稿、原子导入和 quota 后内存保留 |
-| `npm run test:e2:unit` | Editor viewport/geometry、Tempo map、拍号/single-beat、BPM onset/autocorrelation 与 golden |
-| `npm run test:e2:integration` | Buffer retained PCM、tempo identity/stale、JSON viewport/tempo round-trip 与 coordinator 回归 |
-| `npm run test:e3:unit` | Editor point lane/class 命令、迁移冲突、微秒唯一性、显式细分吸附与可见事件过滤 |
-| `npm run test:e3:integration` | point/range JSON 兼容、独立草稿恢复、tempo 秒数稳定与 viewport-visible 模型 |
-| `npm run test:e4:unit` | Editor 历史 21 项 golden、当前 overlay registry、六类纯 Canvas renderer、bounds、Buffer 去重与 exact summary |
-| `npm run test:e4:integration` | Buffer-first consumer、快速换特征、错误重试、Analyzer 隔离与 overlay 草稿恢复 |
-| `npm run test:e5:unit` | Editor range lane/class、半开重叠、最短网格、端点更新、迁移冲突与可见范围过滤 |
-| `npm run test:e5:integration` | point/range JSON 与草稿 round-trip、无效导入隔离、tempo 秒数稳定与稳定 ID |
-| `npm run test:e6:unit` | 确定性 15 分钟/20 lane/160 分类/10,000 事件拓扑、唯一 ID、范围边界和可见事件过滤 |
-| `npm run test:e6:integration` | 10,000 事件 JSON 与 IndexedDB round-trip、重叠工程原子拒绝和 durable draft 保留 |
-| `npm run test:docs` | 只读检查 Markdown 内部链接与规模；手写文档 >500 行提示、≥800 行失败，不强制生命周期元数据 |
-| `npm run test:harness` | 证明 deliberate failure 会非零退出 |
-| `npm run test:skill:visualizer-content-generator` | 校验 VisualizerContentBriefV1 静态/动态元素、复用/新增预设、时间/目标关系、非法输入和只读 CLI；具体合同仍须 owner 批准 |
-| `npm run test:e2e` | 稳定 Chrome 的全部当前 E2E |
-| `npm run test:e2e:m3` | M3 应用、Worker、IndexedDB 和三格式 smoke |
-| `npm run test:e2e:m4` | M4 播放/队列/错误/资源回归及 60 秒计时 |
-| `npm run test:e2e:m5` | Chrome 真实 IndexedDB/OPFS handle 的导入、刷新、current Blob、未知 schema 与清空 |
-| `npm run test:e2e:m6` | Chrome 真实 module Worker、cache refresh、exact cursor、20 次资源循环和 15 分钟性能/取消 |
-| `npm run test:e2e:m7` | Chrome 21 固定卡/FIFO 兼容回归、共享 zoom/cursor、点击/键盘 seek、30Hz 合并、刷新恢复、DPR/视口与单卡错误隔离 |
-| `npm run test:e2e:m8` | Chrome 390/1024/1280/1920、四卡/16 项、UI hardening、13 项 scalar renderer 与刷新恢复 |
-| `npm run test:e2e:m9` | Chrome Header 路由样式、四卡/19 项、Power/MFCC/Buffer renderer 与刷新恢复 |
-| `npm run test:e2e:m10` | Chrome 四卡/21 项、Loudness/Complex renderer、完整 1024 bins、刷新恢复与 15 分钟四重卡性能 |
-| `npm run test:e2e:m11:chrome` | Chrome 三格式/分析/恢复、键盘/焦点/reduced motion、多视口、quota 和 20 次 WebGL/RAF 生命周期 |
-| `npm run test:e2e:m11:edge` | 使用真实 Edge 执行 M11 专项 hardening 场景 |
-| `npm run test:e2e:m11` | 顺序执行真实 Chrome 与 Edge 的 M11 专项场景 |
-| `npm run test:e2e:m12:chrome` | Chrome 执行 Analyzer 单列行、说明折叠、renderer 隔离和 Observer 清理 |
-| `npm run test:e2e:m12:edge` | 使用真实 Edge 执行同一 Analyzer 单列/说明/资源专项套件 |
-| `npm run test:e2e:m12` | 顺序执行真实 Chrome 与 Edge 的 Analyzer 单列/说明/资源专项套件 |
-| `npm run test:e2e:m13:chrome` | Chrome 执行 21 卡、懒挂载、FIFO、快速切换、V1 恢复和四视口专项 |
-| `npm run test:e2e:m13:edge` | 使用真实 Edge 执行同一 M13 全卡/FIFO 专项套件 |
-| `npm run test:e2e:m13` | 顺序执行真实 Chrome 与 Edge 的 M13 专项套件 |
-| `npm run test:e2e:e1` | Chrome Header/播放列表入口、“去编辑”、MusicBar 显隐、JSON picker、草稿冲突和刷新恢复 |
-| `npm run test:e2e:e2` | Chrome 波形、seek、wheel/right-pan/menu、tempo boundary、输入边界、恢复与多视口 geometry |
-| `npm run test:e2e:e3` | Chrome point lane/class、鼠标/键盘/右键标记、迁移对话框、可见 DOM、range 身份兼容与多视口 geometry |
-| `npm run test:e2e:e4` | Chrome 当前注册特征单选 overlay、六类 renderer、三手柄、pointer-through、错误隔离与多视口 geometry |
-| `npm run test:e2e:e5` | Chrome range 创建/预览/取消/端点/重叠/迁移、右键、键盘、overlay 穿透、恢复与多视口 geometry |
-| `npm run test:e2e:e6:chrome` | Chrome 三格式、工程失败隔离、10,000 事件、反馈/长任务、虚拟化、无障碍与 20 次资源循环 |
-| `npm run test:e2e:e6:edge` | 使用真实 Edge 执行同一 E6 最终加固套件 |
-| `npm run test:e2e:e6` | 顺序执行真实 Chrome 与 Edge 的 E6 最终加固套件 |
-| `npm run test:e2e:e7:chrome` | Chrome 执行双层工具栏、平面分区、30/44/152/144/88px 当前密度与多视口功能回归；E7 历史 176px 证据不改写 |
-| `npm run test:e2e:e7:edge` | 使用真实 Edge 执行同一 E7 紧凑工作台套件 |
-| `npm run test:e2e:e7` | 顺序执行真实 Chrome 与 Edge 的 E7 紧凑工作台套件 |
-| `npm run test:e7:unit` | E7 visibility/default/menu/active-set 纯逻辑 |
-| `npm run test:e7:integration` | E7 preference、刷新/导入、analysis 收敛与写失败 |
-| `npm run test:e8:unit` | E8 时间轴垂直几何与 unavailable recovery 纯决策 |
-| `npm run test:e8:integration` | E8 同歌恢复、route generation 与草稿原子性 |
-| `npm run test:e2e:e8:chrome` | 使用真实 Chrome 执行 E8 四视口、同/异歌恢复与 marker 中心套件 |
-| `npm run test:e2e:e8:edge` | 使用真实 Edge 执行同一 E8 可用性套件 |
-| `npm run test:e2e:e8` | 顺序执行真实 Chrome 与 Edge 的 E8 可用性套件 |
-| `npm run test:e9:unit` | E9 tempo boundary 删除、前段延伸、紧凑三级展示和 shared geometry |
-| `npm run test:e9:integration` | E9 JSON V1/autosave、event seconds、stale estimate 与 keyed draft/error cleanup |
-| `npm run test:e2e:e9:chrome` / `test:e2e:e9:edge` | 真实 Chrome/Edge 的 28px 合并 BPM 条、向上 guide、11px 无框输入、共享滚动、右键/键盘和 marker/category/divider 几何 |
-| `npm run test:e2e:e9` | 顺序执行真实 Chrome 与 Edge 的 E9 专项 |
-| `npm run test:e10:unit` | E10 measure selection、半开收集、连续复制、ID 与原子冲突纯逻辑 |
-| `npm run test:e10:integration` | E10 整批 autosave、刷新、JSON V1 round-trip 与模式外行为隔离 |
-| `npm run test:e2e:e10:chrome` / `test:e2e:e10:edge` | 真实 Chrome/Edge 的紧凑拍号、区间操作 pointer/键盘与深色离页 dialog |
-| `npm run test:e2e:e10` | 顺序执行真实 Chrome 与 Edge 的 E10 专项；环境阻断时只记 unverified |
-| `npm run test:visualizer` | 当前 Project V5资源/分组 strict codec、原子组合/解析/渲染、会话、保存失败与异步失效，以及共享 host/离线导出专项 |
-| `npm run test:e2e:visualizer` | Chrome/Edge 当前元素工作区、布局、GPU 像素、全屏、离线编码、换歌/草稿保护、资源释放和保存取消；短 WebM 保留在本地 artifacts/visualizer-composition/ |
-| `npm run test:e2e:visualizer-layout` | 顺序执行 Chrome/Edge 当前原子元素一屏工作台、双侧滚动隔离、compact drawer 与共享 scrollbar 专项 |
-| `npm run test:e2e:edge` | 使用真实 Edge 执行全部 M3–M11 E2E；缺失时明确 blocked |
-| `npm run build` | TypeScript project build 和 Vite production build |
-| `npm run eval:m3:provisional` | 在未提交工作树生成本地 provisional run |
-| `npm run eval:m3` | 只允许在干净 commit 上生成 canonical M3 run |
-| `npm run eval:m4:provisional` | M3 回归 + M4 suite 的 dirty-worktree provisional run |
-| `npm run eval:m4` | 只允许在干净 commit 上执行 M3 回归 + M4 suite 并生成 canonical run |
-| `npm run eval:m5:provisional` | M3/M4 回归 + M5 repository/recovery/Chrome suite 的 dirty-worktree provisional run |
-| `npm run eval:m5` | 只允许在干净 commit 上执行 M3–M5 suite 并生成 canonical run |
-| `npm run eval:m6:provisional` | 在 dirty worktree 执行 M3–M6 回归并生成本地实现反馈 |
-| `npm run eval:m6` | 只允许在干净 commit 上执行 M3–M6 suite 并生成可登记的 canonical run |
-| `npm run eval:m7:provisional` | 在 dirty worktree 执行 M3–M7 回归并生成本地实现反馈 |
-| `npm run eval:m7` | 只允许在干净 commit 上执行 M3–M7 suite 并生成可登记的 canonical run |
-| `npm run eval:m8:provisional` | 在 dirty worktree 执行 M3–M8 的 28 步回归并生成实现反馈 |
-| `npm run eval:m8` | 只允许在干净 commit 上执行 M3–M8 28 步 suite 并生成 canonical run |
-| `npm run eval:m9:provisional` | 在 dirty worktree 执行 M3–M9 的 32 步回归并生成实现反馈 |
-| `npm run eval:m9` | 只允许在干净 commit 上执行 M3–M9 32 步 suite 并生成 canonical run |
-| `npm run eval:m10:provisional` | 在 dirty worktree 执行 M3–M10 的 36 步回归并生成实现反馈 |
-| `npm run eval:m10` | 只允许在干净 commit 上执行 M3–M10 36 步 suite 并生成 canonical run |
-| `npm run eval:m11:provisional` | 在 dirty worktree 执行 M3–M11 的 38 步双浏览器回归并生成实现反馈 |
-| `npm run eval:m11` | 只允许在干净 commit 上执行 M3–M11 38 步双浏览器 suite 并生成 canonical run |
-| `npm run eval:m12:provisional` | 在 dirty worktree 执行 M12 unit/双浏览器与 M7–M11 相邻回归的 12 步实现反馈 |
-| `npm run eval:m12` | 只允许在干净 commit 上执行 M12 12 步 suite 并生成 canonical run |
-| `npm run eval:m13:provisional` | 在 dirty worktree 执行 M13 与 M7–M12、Editor E7、双浏览器及构建的 17 步实现反馈 |
-| `npm run eval:m13` | 只允许在干净 commit 上执行 M13 17 步 suite 并生成 canonical run |
-| `npm run eval:e1:provisional` | 在 dirty worktree 执行 E1 与 M3/M4/M6/M11 相邻回归并生成实现反馈 |
-| `npm run eval:e1` | 只允许在干净 commit 上执行 18 步 E1 canonical suite 并生成可登记证据 |
-| `npm run eval:e2:provisional` | 在 dirty worktree 执行 E2 与 E1/M3/M4/M6/M11 相邻回归并生成反馈 |
-| `npm run eval:e2` | 只允许在干净 commit 上执行 E2 canonical suite 并生成可登记证据 |
-| `npm run eval:e3:provisional` | 在 dirty worktree 执行 E3 与 E1/E2/M3/M4/M6/M11 相邻回归并生成反馈 |
-| `npm run eval:e3` | 只允许在干净 commit 上执行 E3 canonical suite 并生成可登记证据 |
-| `npm run eval:e4:provisional` | 在 dirty worktree 执行 E4 与 E1–E3/Analyzer renderer 相邻回归并生成反馈 |
-| `npm run eval:e4` | 只允许在干净 commit 上执行 31 步 E4 canonical suite 并生成可登记证据 |
-| `npm run eval:e5:provisional` | 在 dirty worktree 执行 E5 与 E1–E4/Analyzer 相邻回归并生成反馈 |
-| `npm run eval:e5` | 只允许在干净 commit 上执行 35 步 E5 canonical suite 并生成可登记证据 |
-| `npm run eval:e6:provisional` | 在 dirty worktree 执行 40 步 E6 双浏览器最终回归并生成实现反馈 |
-| `npm run eval:e6` | 只允许在干净 commit 上执行 40 步 E6 canonical suite 并生成可登记证据 |
-| `npm run eval:e7:provisional` | 在 dirty worktree 执行 46 步 E7 全屏浮层、密度、E6 基线和 M12 双浏览器回归 |
-| `npm run eval:e7` | 只允许在干净 commit 上执行 46 步 E7 canonical suite 并生成可登记证据 |
-| `npm run eval:e8:provisional` | 在 dirty worktree 执行 25 步 E8 与 E1/E2/E3/E7、M5、双浏览器及静态回归，只生成 scoped artifact |
-| `npm run eval:e8` | 只允许在干净 E8 implementation commit 上执行 25 步 canonical suite；dirty worktree 必须拒绝 |
-| `npm run eval:e9:provisional` | 在 dirty worktree 执行 E8 25 步基线加 E9 四专项的 29 步实现反馈 |
-| `npm run eval:e9` | 只允许在干净 E9 implementation commit 上执行 29 步 canonical suite；DEC-052 revised canonical 已 29/29 |
-| `npm run eval:e10:provisional` | 在 dirty worktree 执行 E9 29 步基线加 E10 四专项的 33 步实现反馈 |
-| `npm run eval:e10` | 只允许在干净 E10 implementation commit 上执行 33 步 canonical suite；浏览器未验证时不得登记通过 |
-| `npm run eval:editor-readiness:provisional` | 在 dirty worktree 对固定 E9 runtime candidate 执行 24 步针对性 readiness 审计；只生成本地反馈 |
-| `npm run eval:editor-readiness` | 只允许从 clean HEAD 执行 24 步 E4–E9/双浏览器/静态门禁，并要求相对 E9 implementation 的 `src/` 无漂移 |
+| `npm test`                                              | 执行全部非 E2E Vitest 测试                                                                                                                                        |
+| `npm run test:unit`                                     | PCM、容差和 isolated IndexedDB                                                                                                                                    |
+| `npm run test:worker`                                   | Worker transfer、cancel 和 error harness                                                                                                                          |
+| `npm run test:analysis`                                 | direct-Meyda 首批 golden                                                                                                                                          |
+| `npm run test:fixtures`                                 | manifest、SHA-256、字节数和 ffprobe                                                                                                                               |
+| `npm run test:m4:unit`                                  | AudioEngine 的 load/play/pause/seek/ended/stale/error/unload/dispose                                                                                              |
+| `npm run test:m4:integration`                           | session/store 的队列、竞态、ended、删除、清空、metadata、RAF 与 URL                                                                                               |
+| `npm run test:m5:unit`                                  | PersistedSessionV1 validator、SHA-256、IndexedDB 原子 current Blob/cache、abort、删除与清空                                                                       |
+| `npm run test:m5:integration`                           | Blob 优先、0 秒 paused、权限顺序、显式 request、missing/changed、quota 和取消                                                                                     |
+| `npm run test:m6:unit`                                  | 21 项 registry、config hash、PCM/frame、聚合/量化、六类 compact codec 与损坏数据拒绝                                                                              |
+| `npm run test:m6:worker`                                | 产品 workerCore 的 0/1/4 项、非法请求、yield/progress/cancel、错误与 exact cursor                                                                                 |
+| `npm run test:m6:integration`                           | AnalysisCoordinator、partial cache、stale generation、quota 与 current Blob 原子持久化                                                                            |
+| `npm run test:m7:unit`                                  | viewport/zoom anchor/x↔time、renderer 数据变换、工作区不变量和 L1/L2/L3 版本化 golden                                                                             |
+| `npm run test:m7:integration`                           | 默认/已保存空工作区、卡片/viewport 持久化和 quota 后内存继续可用                                                                                                  |
+| `npm run test:m8:unit`                                  | 13 项 registry、12 项 direct Meyda、项目 Flux、静音/非有限值和 scalar axis/golden                                                                                 |
+| `npm run test:m8:integration`                           | 四 scalar Worker、Flux exact cursor、四卡持久化、quota 和 13 项有限值回归                                                                                         |
+| `npm run test:m9:unit`                                  | 三项 registry、direct Meyda、Power 平方关系、MFCC signed 量化、Buffer envelope/尾帧与 golden                                                                      |
+| `npm run test:m9:integration`                           | 四种混合 shape、cache codec、exact cursor、stale/cancel/quota 与四张累计卡回归                                                                                    |
+| `npm run test:m10:unit`                                 | 21 项集合、direct Meyda、24/1024 维、零值、相位关系、结构 codec 与按固定容差校验的 golden                                                                         |
+| `npm run test:m10:integration`                          | Loudness/Complex 混合 shape、cache round-trip、exact cursor、stale/cancel/quota 与四卡持久化                                                                      |
+| `npm run test:m12:unit`                                 | Analyzer 置顶区高度上下限、短内容优先和用户比例裁剪                                                                                                               |
+| `npm run test:m13:unit`                                 | FIFO reducer、0–4 项、第五项淘汰、重开年龄、唯一性、置顶高度模型与 V1 adapter                                                                                     |
+| `npm run test:m13:integration`                          | V1 双向兼容、串行 workspace 保存、revision guard、quota 与 M13 Coordinator cache/generation                                                                       |
+| `npm run test:e1:unit`                                  | Editor JSON V1 初始工程、canonical round-trip、微秒规范化与 strict validator                                                                                      |
+| `npm run test:e1:integration`                           | playback/analysis lease、独立 IndexedDB、同/异歌草稿、原子导入和 quota 后内存保留                                                                                 |
+| `npm run test:e2:unit`                                  | Editor viewport/geometry、Tempo map、拍号/single-beat、BPM onset/autocorrelation 与 golden                                                                        |
+| `npm run test:e2:integration`                           | Buffer retained PCM、tempo identity/stale、JSON viewport/tempo round-trip 与 coordinator 回归                                                                     |
+| `npm run test:e3:unit`                                  | Editor point lane/class 命令、迁移冲突、微秒唯一性、显式细分吸附与可见事件过滤                                                                                    |
+| `npm run test:e3:integration`                           | point/range JSON 兼容、独立草稿恢复、tempo 秒数稳定与 viewport-visible 模型                                                                                       |
+| `npm run test:e4:unit`                                  | Editor 历史 21 项 golden、当前 overlay registry、六类纯 Canvas renderer、bounds、Buffer 去重与 exact summary                                                      |
+| `npm run test:e4:integration`                           | Buffer-first consumer、快速换特征、错误重试、Analyzer 隔离与 overlay 草稿恢复                                                                                     |
+| `npm run test:e5:unit`                                  | Editor range lane/class、半开重叠、最短网格、端点更新、迁移冲突与可见范围过滤                                                                                     |
+| `npm run test:e5:integration`                           | point/range JSON 与草稿 round-trip、无效导入隔离、tempo 秒数稳定与稳定 ID                                                                                         |
+| `npm run test:e6:unit`                                  | 确定性 15 分钟/20 lane/160 分类/10,000 事件拓扑、唯一 ID、范围边界和可见事件过滤                                                                                  |
+| `npm run test:e6:integration`                           | 10,000 事件 JSON 与 IndexedDB round-trip、重叠工程原子拒绝和 durable draft 保留                                                                                   |
+| `npm run test:docs`                                     | 只读检查 Markdown 内部链接与规模；手写文档 >500 行提示、≥800 行失败，不强制生命周期元数据                                                                         |
+| `npm run test:harness`                                  | 证明 deliberate failure 会非零退出                                                                                                                                |
+| `npm run test:skill:visualizer-content-generator`       | 校验 VisualizerContentBriefV1 静态/动态元素、复用/新增预设、时间/目标关系、非法输入和只读 CLI；具体合同仍须 owner 批准                                            |
+| `npm run test:e2e`                                      | 稳定 Chrome 的全部当前 E2E                                                                                                                                        |
+| `npm run test:e2e:m3`                                   | M3 应用、Worker、IndexedDB 和三格式 smoke                                                                                                                         |
+| `npm run test:e2e:m4`                                   | M4 播放/队列/错误/资源回归及 60 秒计时                                                                                                                            |
+| `npm run test:e2e:m5`                                   | Chrome 真实 IndexedDB/OPFS handle 的导入、刷新、current Blob、未知 schema 与清空                                                                                  |
+| `npm run test:e2e:m6`                                   | Chrome 真实 module Worker、cache refresh、exact cursor、20 次资源循环和 15 分钟性能/取消                                                                          |
+| `npm run test:e2e:m7`                                   | Chrome 21 固定卡/FIFO 兼容回归、共享 zoom/cursor、点击/键盘 seek、30Hz 合并、刷新恢复、DPR/视口与单卡错误隔离                                                     |
+| `npm run test:e2e:m8`                                   | Chrome 390/1024/1280/1920、四卡/16 项、UI hardening、13 项 scalar renderer 与刷新恢复                                                                             |
+| `npm run test:e2e:m9`                                   | Chrome Header 路由样式、四卡/19 项、Power/MFCC/Buffer renderer 与刷新恢复                                                                                         |
+| `npm run test:e2e:m10`                                  | Chrome 四卡/21 项、Loudness/Complex renderer、完整 1024 bins、刷新恢复与 15 分钟四重卡性能                                                                        |
+| `npm run test:e2e:m11:chrome`                           | Chrome 三格式/分析/恢复、键盘/焦点/reduced motion、多视口、quota 和 20 次 WebGL/RAF 生命周期                                                                      |
+| `npm run test:e2e:m11:edge`                             | 使用真实 Edge 执行 M11 专项 hardening 场景                                                                                                                        |
+| `npm run test:e2e:m11`                                  | 顺序执行真实 Chrome 与 Edge 的 M11 专项场景                                                                                                                       |
+| `npm run test:e2e:m12:chrome`                           | Chrome 执行 Analyzer 单列行、说明折叠、renderer 隔离和 Observer 清理                                                                                              |
+| `npm run test:e2e:m12:edge`                             | 使用真实 Edge 执行同一 Analyzer 单列/说明/资源专项套件                                                                                                            |
+| `npm run test:e2e:m12`                                  | 顺序执行真实 Chrome 与 Edge 的 Analyzer 单列/说明/资源专项套件                                                                                                    |
+| `npm run test:e2e:m13:chrome`                           | Chrome 执行 21 卡、懒挂载、FIFO、快速切换、V1 恢复和四视口专项                                                                                                    |
+| `npm run test:e2e:m13:edge`                             | 使用真实 Edge 执行同一 M13 全卡/FIFO 专项套件                                                                                                                     |
+| `npm run test:e2e:m13`                                  | 顺序执行真实 Chrome 与 Edge 的 M13 专项套件                                                                                                                       |
+| `npm run test:e2e:e1`                                   | Chrome Header/播放列表入口、“去编辑”、MusicBar 显隐、JSON picker、草稿冲突和刷新恢复                                                                              |
+| `npm run test:e2e:e2`                                   | Chrome 波形、seek、wheel/right-pan/menu、tempo boundary、输入边界、恢复与多视口 geometry                                                                          |
+| `npm run test:e2e:e3`                                   | Chrome point lane/class、鼠标/键盘/右键标记、迁移对话框、可见 DOM、range 身份兼容与多视口 geometry                                                                |
+| `npm run test:e2e:e4`                                   | Chrome 当前注册特征单选 overlay、六类 renderer、三手柄、pointer-through、错误隔离与多视口 geometry                                                                |
+| `npm run test:e2e:e5`                                   | Chrome range 创建/预览/取消/端点/重叠/迁移、右键、键盘、overlay 穿透、恢复与多视口 geometry                                                                       |
+| `npm run test:e2e:e6:chrome`                            | Chrome 三格式、工程失败隔离、10,000 事件、反馈/长任务、虚拟化、无障碍与 20 次资源循环                                                                             |
+| `npm run test:e2e:e6:edge`                              | 使用真实 Edge 执行同一 E6 最终加固套件                                                                                                                            |
+| `npm run test:e2e:e6`                                   | 顺序执行真实 Chrome 与 Edge 的 E6 最终加固套件                                                                                                                    |
+| `npm run test:e2e:e7:chrome`                            | Chrome 执行双层工具栏、平面分区、30/44/152/144/88px 当前密度与多视口功能回归；E7 历史 176px 证据不改写                                                            |
+| `npm run test:e2e:e7:edge`                              | 使用真实 Edge 执行同一 E7 紧凑工作台套件                                                                                                                          |
+| `npm run test:e2e:e7`                                   | 顺序执行真实 Chrome 与 Edge 的 E7 紧凑工作台套件                                                                                                                  |
+| `npm run test:e7:unit`                                  | E7 visibility/default/menu/active-set 纯逻辑                                                                                                                      |
+| `npm run test:e7:integration`                           | E7 preference、刷新/导入、analysis 收敛与写失败                                                                                                                   |
+| `npm run test:e8:unit`                                  | E8 时间轴垂直几何与 unavailable recovery 纯决策                                                                                                                   |
+| `npm run test:e8:integration`                           | E8 同歌恢复、route generation 与草稿原子性                                                                                                                        |
+| `npm run test:e2e:e8:chrome`                            | 使用真实 Chrome 执行 E8 四视口、同/异歌恢复与 marker 中心套件                                                                                                     |
+| `npm run test:e2e:e8:edge`                              | 使用真实 Edge 执行同一 E8 可用性套件                                                                                                                              |
+| `npm run test:e2e:e8`                                   | 顺序执行真实 Chrome 与 Edge 的 E8 可用性套件                                                                                                                      |
+| `npm run test:e9:unit`                                  | E9 tempo boundary 删除、前段延伸、紧凑三级展示和 shared geometry                                                                                                  |
+| `npm run test:e9:integration`                           | E9 JSON V1/autosave、event seconds、stale estimate 与 keyed draft/error cleanup                                                                                   |
+| `npm run test:e2e:e9:chrome` / `test:e2e:e9:edge`       | 真实 Chrome/Edge 的 28px 合并 BPM 条、向上 guide、11px 无框输入、共享滚动、右键/键盘和 marker/category/divider 几何                                               |
+| `npm run test:e2e:e9`                                   | 顺序执行真实 Chrome 与 Edge 的 E9 专项                                                                                                                            |
+| `npm run test:e10:unit`                                 | E10 measure selection、半开收集、连续复制、ID 与原子冲突纯逻辑                                                                                                    |
+| `npm run test:e10:integration`                          | E10 整批 autosave、刷新、JSON V1 round-trip 与模式外行为隔离                                                                                                      |
+| `npm run test:e2e:e10:chrome` / `test:e2e:e10:edge`     | 真实 Chrome/Edge 的紧凑拍号、区间操作 pointer/键盘与深色离页 dialog                                                                                               |
+| `npm run test:e2e:e10`                                  | 顺序执行真实 Chrome 与 Edge 的 E10 专项；环境阻断时只记 unverified                                                                                                |
+| `npm run test:visualizer`                               | 当前 Project V5资源/分组 strict codec、原子组合/解析/渲染、会话、保存失败与异步失效，以及共享 host/离线导出专项                                                   |
+| `npm run test:e2e:visualizer`                           | Chrome/Edge 当前元素工作区、布局、GPU 像素、全屏、离线编码、换歌/草稿保护、资源释放和保存取消；短 WebM 保留在本地 artifacts/visualizer-composition/               |
+| `npm run test:e2e:visualizer-layout`                    | 顺序执行 Chrome/Edge 当前原子元素一屏工作台、双侧滚动隔离、compact drawer 与共享 scrollbar 专项                                                                   |
+| `npm run test:e2e:edge`                                 | 使用真实 Edge 执行全部 M3–M11 E2E；缺失时明确 blocked                                                                                                             |
+| `npm run build`                                         | TypeScript project build 和 Vite production build                                                                                                                 |
+| `npm run eval:m3:provisional`                           | 在未提交工作树生成本地 provisional run                                                                                                                            |
+| `npm run eval:m3`                                       | 只允许在干净 commit 上生成 canonical M3 run                                                                                                                       |
+| `npm run eval:m4:provisional`                           | M3 回归 + M4 suite 的 dirty-worktree provisional run                                                                                                              |
+| `npm run eval:m4`                                       | 只允许在干净 commit 上执行 M3 回归 + M4 suite 并生成 canonical run                                                                                                |
+| `npm run eval:m5:provisional`                           | M3/M4 回归 + M5 repository/recovery/Chrome suite 的 dirty-worktree provisional run                                                                                |
+| `npm run eval:m5`                                       | 只允许在干净 commit 上执行 M3–M5 suite 并生成 canonical run                                                                                                       |
+| `npm run eval:m6:provisional`                           | 在 dirty worktree 执行 M3–M6 回归并生成本地实现反馈                                                                                                               |
+| `npm run eval:m6`                                       | 只允许在干净 commit 上执行 M3–M6 suite 并生成可登记的 canonical run                                                                                               |
+| `npm run eval:m7:provisional`                           | 在 dirty worktree 执行 M3–M7 回归并生成本地实现反馈                                                                                                               |
+| `npm run eval:m7`                                       | 只允许在干净 commit 上执行 M3–M7 suite 并生成可登记的 canonical run                                                                                               |
+| `npm run eval:m8:provisional`                           | 在 dirty worktree 执行 M3–M8 的 28 步回归并生成实现反馈                                                                                                           |
+| `npm run eval:m8`                                       | 只允许在干净 commit 上执行 M3–M8 28 步 suite 并生成 canonical run                                                                                                 |
+| `npm run eval:m9:provisional`                           | 在 dirty worktree 执行 M3–M9 的 32 步回归并生成实现反馈                                                                                                           |
+| `npm run eval:m9`                                       | 只允许在干净 commit 上执行 M3–M9 32 步 suite 并生成 canonical run                                                                                                 |
+| `npm run eval:m10:provisional`                          | 在 dirty worktree 执行 M3–M10 的 36 步回归并生成实现反馈                                                                                                          |
+| `npm run eval:m10`                                      | 只允许在干净 commit 上执行 M3–M10 36 步 suite 并生成 canonical run                                                                                                |
+| `npm run eval:m11:provisional`                          | 在 dirty worktree 执行 M3–M11 的 38 步双浏览器回归并生成实现反馈                                                                                                  |
+| `npm run eval:m11`                                      | 只允许在干净 commit 上执行 M3–M11 38 步双浏览器 suite 并生成 canonical run                                                                                        |
+| `npm run eval:m12:provisional`                          | 在 dirty worktree 执行 M12 unit/双浏览器与 M7–M11 相邻回归的 12 步实现反馈                                                                                        |
+| `npm run eval:m12`                                      | 只允许在干净 commit 上执行 M12 12 步 suite 并生成 canonical run                                                                                                   |
+| `npm run eval:m13:provisional`                          | 在 dirty worktree 执行 M13 与 M7–M12、Editor E7、双浏览器及构建的 17 步实现反馈                                                                                   |
+| `npm run eval:m13`                                      | 只允许在干净 commit 上执行 M13 17 步 suite 并生成 canonical run                                                                                                   |
+| `npm run eval:e1:provisional`                           | 在 dirty worktree 执行 E1 与 M3/M4/M6/M11 相邻回归并生成实现反馈                                                                                                  |
+| `npm run eval:e1`                                       | 只允许在干净 commit 上执行 18 步 E1 canonical suite 并生成可登记证据                                                                                              |
+| `npm run eval:e2:provisional`                           | 在 dirty worktree 执行 E2 与 E1/M3/M4/M6/M11 相邻回归并生成反馈                                                                                                   |
+| `npm run eval:e2`                                       | 只允许在干净 commit 上执行 E2 canonical suite 并生成可登记证据                                                                                                    |
+| `npm run eval:e3:provisional`                           | 在 dirty worktree 执行 E3 与 E1/E2/M3/M4/M6/M11 相邻回归并生成反馈                                                                                                |
+| `npm run eval:e3`                                       | 只允许在干净 commit 上执行 E3 canonical suite 并生成可登记证据                                                                                                    |
+| `npm run eval:e4:provisional`                           | 在 dirty worktree 执行 E4 与 E1–E3/Analyzer renderer 相邻回归并生成反馈                                                                                           |
+| `npm run eval:e4`                                       | 只允许在干净 commit 上执行 31 步 E4 canonical suite 并生成可登记证据                                                                                              |
+| `npm run eval:e5:provisional`                           | 在 dirty worktree 执行 E5 与 E1–E4/Analyzer 相邻回归并生成反馈                                                                                                    |
+| `npm run eval:e5`                                       | 只允许在干净 commit 上执行 35 步 E5 canonical suite 并生成可登记证据                                                                                              |
+| `npm run eval:e6:provisional`                           | 在 dirty worktree 执行 40 步 E6 双浏览器最终回归并生成实现反馈                                                                                                    |
+| `npm run eval:e6`                                       | 只允许在干净 commit 上执行 40 步 E6 canonical suite 并生成可登记证据                                                                                              |
+| `npm run eval:e7:provisional`                           | 在 dirty worktree 执行 46 步 E7 全屏浮层、密度、E6 基线和 M12 双浏览器回归                                                                                        |
+| `npm run eval:e7`                                       | 只允许在干净 commit 上执行 46 步 E7 canonical suite 并生成可登记证据                                                                                              |
+| `npm run eval:e8:provisional`                           | 在 dirty worktree 执行 25 步 E8 与 E1/E2/E3/E7、M5、双浏览器及静态回归，只生成 scoped artifact                                                                    |
+| `npm run eval:e8`                                       | 只允许在干净 E8 implementation commit 上执行 25 步 canonical suite；dirty worktree 必须拒绝                                                                       |
+| `npm run eval:e9:provisional`                           | 在 dirty worktree 执行 E8 25 步基线加 E9 四专项的 29 步实现反馈                                                                                                   |
+| `npm run eval:e9`                                       | 只允许在干净 E9 implementation commit 上执行 29 步 canonical suite；DEC-052 revised canonical 已 29/29                                                            |
+| `npm run eval:e10:provisional`                          | 在 dirty worktree 执行 E9 29 步基线加 E10 四专项的 33 步实现反馈                                                                                                  |
+| `npm run eval:e10`                                      | 只允许在干净 E10 implementation commit 上执行 33 步 canonical suite；浏览器未验证时不得登记通过                                                                   |
+| `npm run eval:editor-readiness:provisional`             | 在 dirty worktree 对固定 E9 runtime candidate 执行 24 步针对性 readiness 审计；只生成本地反馈                                                                     |
+| `npm run eval:editor-readiness`                         | 只允许从 clean HEAD 执行 24 步 E4–E9/双浏览器/静态门禁，并要求相对 E9 implementation 的 `src/` 无漂移                                                             |
 
 ## 目录职责
 
@@ -212,5 +212,7 @@ Node24.18.0/npm11.x，依赖版本以lockfile为准；浏览器专项使用真�
 ## 外部 Visualizer 资源
 
 资源专项从默认 `C:\Users\Ryan\Desktop\WheresYourElements\assets` 读取，使用 `$env:VISUALIZER_ASSETS_DIR = "<assets>"` 覆盖。`npm run visualizer:resources:check` 校验 15 个资源的源码封装与哈希；`npm run test:visualizer` 运行领域测试。缺少库时 Vitest 仅排除依赖资源的专项并明确提示，其他领域和纯逻辑测试照常运行。
+
+`tests/visualizer/editor-markers.test.ts` 使用独立夹具验证 ABI 2 声明/查询与 V5 标记绑定，不依赖外部库。`tests/e2e/visualizer-editor-markers.spec.ts` 验证真实 Worker 权限、项目内选择/分类、恢复与短离线导出；配合 composition/sandbox 专项在 Chrome/Edge 执行。
 
 `npx playwright test tests/e2e/visualizer-resource-directory.spec.ts tests/e2e/visualizer-resources.spec.ts --project=chrome --project=edge --workers=1` 覆盖目录/预览/恢复、损坏刷新与 V5 独立恢复及短离线输出。测试用真实 OPFS 句柄和 IndexedDB structured clone，picker/许可为替身；它不证明原生 OS 文件夹选择和磁盘授权 UI。原生人工检查需实际选择 assets、拒绝/恢复访问、关闭重开浏览器，并检查外部文件未被应用改写。

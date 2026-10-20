@@ -4,7 +4,7 @@
 
 ## ElementDefinition
 
-必填 id、version、hash、algorithm（精确算法引用）、kind、title、icon、parameters；可选 inputParameter 须与算法契约相同。kind 为 visual/modifier/transition。
+必填 id、version、hash、algorithm（精确算法引用）、kind、title、icon、parameters；可选 inputParameter 须与算法契约相同。kind 为 visual/modifier/transition。算法声明 markerInputs 时元素须按相同顺序提供同名、同类型、可收窄模式的声明及 label；字段见[标记输入](editor-marker-inputs.md)。
 
 icon 保留现有格式枚举：square、strings、dots、rings、radial、orbit、wireform、arcs、tunnel、stars、scale、blur、fade。独立预览由 resource-info.previewPath 提供，不把新图形写进应用图标表。
 
@@ -14,12 +14,12 @@ parameters 顺序及数量必须与算法契约一致。每项含 id、label、v
 
 每个参数恰有一项 `{parameterId,source,transform?}`，顺序与 descriptor 一致。
 
-| source | 字段与限制 |
-| --- | --- |
-| constant | `{kind:'constant',value}`；类型和范围符合 descriptor |
-| analysis | `{kind:'analysis',featureId,component?,projection}`；descriptor 必须允许 analysis |
-| native | `{kind:'native',featureId:'frequency'或'waveform'}`；仅允许 native 的 vector 参数，不带 transform |
-| unbound | `{kind:'unbound'}`；仅允许 analysis 的参数，不带 transform，启用时阻止导出 |
+| source   | 字段与限制                                                                                        |
+| -------- | ------------------------------------------------------------------------------------------------- |
+| constant | `{kind:'constant',value}`；类型和范围符合 descriptor                                              |
+| analysis | `{kind:'analysis',featureId,component?,projection}`；descriptor 必须允许 analysis                 |
+| native   | `{kind:'native',featureId:'frequency'或'waveform'}`；仅允许 native 的 vector 参数，不带 transform |
+| unbound  | `{kind:'unbound'}`；仅允许 analysis 的参数，不带 transform，启用时阻止导出                        |
 
 projection 为 `{kind:'scalar'}`、`{kind:'full'}`、`{kind:'mean'或'max'或'peak'}`、`{kind:'bin',index}` 或 `{kind:'band',start,end}`。索引、维度及 component 必须适配特征和 descriptor；标量特征用 scalar，向量输入用 full 或获准的标量投影。
 
@@ -36,6 +36,7 @@ transform 适用于 number 参数或 full analysis 向量，完整字段为 inpu
 - key：本预设内唯一 ID；element：已存在元素的精确引用。
 - name、enabled：非空名称和布尔值。
 - bindings：完整参数绑定，遵守 descriptor 顺序、默认精度和四特征预算。
+- markerBindings：声明独立标记输入时必填，每个输入 ID 对应 `{kind:'unbound'}`；timingInput 不重复保存。模板不包含实际工程引用。
 - timing：普通子项为 `{kind:'relative',start,end}`，满足 `0 ≤ start < end ≤ 1`；转场必须 `{kind:'unbound'}`，添加后由用户选择实际范围。
 - targets：visual 禁止；效果必填 `{kind:'composition'}` 或 `{kind:'elements',ids:[子项key]}`，仅引用本预设的视觉项。空 ids 是明确待选状态，启用时阻止导出。
 

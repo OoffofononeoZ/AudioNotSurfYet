@@ -60,6 +60,7 @@ declare module 'vue' {
     VisualizerElementInspector: typeof import('./src/components/visualizer/VisualizerElementInspector.vue')['default']
     VisualizerElementList: typeof import('./src/components/visualizer/VisualizerElementList.vue')['default']
     VisualizerIcon: typeof import('./src/components/visualizer/VisualizerIcon.vue')['default']
+    VisualizerMarkerInput: typeof import('./src/components/visualizer/VisualizerMarkerInput.vue')['default']
     VisualizerParameterField: typeof import('./src/components/visualizer/VisualizerParameterField.vue')['default']
     VisualizerPresetInspector: typeof import('./src/components/visualizer/VisualizerPresetInspector.vue')['default']
   }
