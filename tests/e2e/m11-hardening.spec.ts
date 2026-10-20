@@ -93,13 +93,13 @@ test('keeps keyboard, focus, reduced motion and responsive geometry usable', asy
     await expect(musicBar).toHaveAttribute('data-playback-state', 'paused');
     const focusStyle = await playbackButton.evaluate(element => ({
         outlineStyle: getComputedStyle(element).outlineStyle,
-        outlineWidth: getComputedStyle(element).outlineWidth,
     }));
-    expect(focusStyle.outlineStyle).not.toBe('none');
-    expect(focusStyle.outlineWidth).not.toBe('0px');
+    expect(focusStyle.outlineStyle).toBe('none');
+    await expect(playbackButton).toBeFocused();
 
     const progress = page.getByTestId('playback-progress');
     await progress.focus();
+    await expect(progress).toHaveCSS('outline-style', 'none');
     await page.keyboard.press('End');
     await expect.poll(async () => Number(await musicBar.getAttribute('data-current-time'))).toBeGreaterThan(3.5);
     await page.keyboard.press('Home');
@@ -117,6 +117,9 @@ test('keeps keyboard, focus, reduced motion and responsive geometry usable', asy
     await expect(musicBar).toHaveAttribute('data-volume', '1');
     await expect(volumeControl).toHaveAttribute('aria-valuetext', '100%');
 
+    const analyzerLink = page.getByRole('link', { name: 'Analyzer', exact: true });
+    await analyzerLink.focus();
+    await expect(analyzerLink).toHaveCSS('outline-style', 'none');
     await page.getByRole('link', { name: 'Analyzer' }).click();
     await page.locator('[data-feature-id="rms"]').getByRole('button', { name: '展开分析' }).click();
     await expect(page.locator('[data-feature-id="rms"] .plot-message')).toHaveCount(0, { timeout: 45_000 });
