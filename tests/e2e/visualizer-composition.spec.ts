@@ -16,7 +16,7 @@ async function open(page: Page) {
 async function add(page: Page, type: string) {
     await page.getByTestId('add-visualizer-element').click();
     await page.locator('[data-element-type="' + type + '"]').click();
-    await expect(page.getByRole('dialog', { name: '添加元素' })).not.toBeVisible();
+    await expect(page.getByRole('dialog', { name: '资源商城' })).not.toBeVisible();
 }
 async function exported(page: Page): Promise<VisualizerProjectV5> {
     const previous = (await savedPickerEntries(page)).length;

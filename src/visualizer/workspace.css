@@ -519,7 +519,6 @@
 .viz-workspace:has(.viz-bottom.collapsed) {
     --viz-bottom-height: 36px;
 }
-.viz-catalog,
 .viz-leave-dialog {
     color: var(--ink);
     background: #0a120e;
@@ -527,114 +526,9 @@
     border-radius: 10px;
     box-shadow: 0 24px 90px #0009;
 }
-.viz-catalog::backdrop,
 .viz-leave-dialog::backdrop {
     background: rgba(0, 0, 0, 0.65);
     backdrop-filter: blur(5px);
-}
-.viz-catalog {
-    width: min(780px, calc(100vw - 48px));
-    max-height: min(650px, calc(100dvh - 80px));
-    padding: 0;
-}
-.viz-catalog header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 20px 24px 10px;
-}
-.viz-catalog h2 {
-    font-size: 17px;
-    font-weight: 500;
-    margin: 0;
-}
-.viz-catalog-filters {
-    display: flex;
-    justify-content: space-between;
-    gap: 16px;
-    padding: 10px 24px 18px;
-    border-bottom: 1px solid var(--divider);
-}
-.viz-catalog-filters > div {
-    display: flex;
-    gap: 4px;
-}
-.viz-catalog-filters button {
-    border: 0;
-    border-radius: 4px;
-    background: transparent;
-    padding: 6px 10px;
-    font-size: 12px;
-    color: var(--muted);
-    cursor: pointer;
-}
-.viz-catalog-filters button[aria-pressed='true'] {
-    color: var(--ink);
-    background: #17251d;
-}
-.viz-catalog-filters input {
-    width: 160px;
-    min-width: 0;
-    border: 1px solid var(--divider);
-    border-radius: 5px;
-    padding: 6px 10px;
-    background: #050b07;
-    color: var(--ink);
-    font-size: 12px;
-}
-.viz-catalog-grid {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 14px;
-    padding: 24px;
-    max-height: 440px;
-    overflow: auto;
-    overscroll-behavior: contain;
-}
-.viz-catalog-card {
-    min-width: 0;
-    display: grid;
-    grid-template-columns: 1fr 18px;
-    align-items: center;
-    gap: 12px;
-    border: 1px solid var(--divider);
-    border-radius: 6px;
-    padding: 0 12px 13px;
-    color: var(--body);
-    background: #0a1510;
-    text-align: left;
-    font-size: 12px;
-    cursor: pointer;
-    overflow: hidden;
-}
-.viz-catalog-card:hover {
-    border-color: var(--accent-soft);
-}
-.viz-catalog-card > svg {
-    width: 15px;
-    height: 15px;
-    color: var(--muted);
-}
-.viz-catalog-preview {
-    grid-column: 1/-1;
-    height: 102px;
-    margin: 0 -12px;
-    display: grid;
-    place-items: center;
-    background: radial-gradient(ellipse at center, #13271c 0, #030805 80%);
-}
-.viz-catalog-preview svg {
-    width: 70px;
-    height: 70px;
-    color: #c5e9d3;
-    opacity: 0.9;
-    stroke-width: 0.5;
-}
-.viz-catalog-preview.dots svg {
-    stroke-width: 2;
-}
-.viz-catalog-preview.blur {
-    filter: blur(0.7px);
 }
 .viz-leave-dialog {
     max-width: 440px;
@@ -649,8 +543,7 @@
     font-size: 13px;
     margin: 0 0 18px;
 }
-.visualizer-page :is(button, input, select, summary):focus-visible,
-.viz-catalog :is(button, input):focus-visible {
+.visualizer-page :is(button, input, select, summary):focus-visible {
     outline: 2px solid var(--accent-soft);
     outline-offset: 2px;
 }

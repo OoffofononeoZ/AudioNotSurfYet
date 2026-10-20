@@ -6,6 +6,7 @@
 
 | 文件 | 本地静态引用（最多显示 6 项） |
 | --- | --- |
+| [tests/support/e3-point-fixture.ts](../../tests/support/e3-point-fixture.ts) | [tests/support/audio-fixtures.ts](../../tests/support/audio-fixtures.ts)、[tests/support/e2-tempo-fixture.ts](../../tests/support/e2-tempo-fixture.ts)、[tests/support/m7-learning-fixture.ts](../../tests/support/m7-learning-fixture.ts) |
 | [tests/support/e4-overlay-fixture.ts](../../tests/support/e4-overlay-fixture.ts) | [src/analysis/types.ts](../../src/analysis/types.ts)、[tests/support/audio-fixtures.ts](../../tests/support/audio-fixtures.ts)、[tests/support/e3-point-fixture.ts](../../tests/support/e3-point-fixture.ts) |
 | [tests/support/e5-range-fixture.ts](../../tests/support/e5-range-fixture.ts) | [tests/support/audio-fixtures.ts](../../tests/support/audio-fixtures.ts)、[tests/support/e2-tempo-fixture.ts](../../tests/support/e2-tempo-fixture.ts)、[tests/support/m7-learning-fixture.ts](../../tests/support/m7-learning-fixture.ts) |
 | [tests/support/e6-stress-project.ts](../../tests/support/e6-stress-project.ts) | [src/editor/projectCodec.ts](../../src/editor/projectCodec.ts)、[src/editor/types.ts](../../src/editor/types.ts) |

@@ -6,7 +6,7 @@
 
 必填 id、version、hash、algorithm（精确算法引用）、kind、title、icon、parameters；可选 inputParameter 须与算法契约相同。kind 为 visual/modifier/transition。算法声明 markerInputs 时元素须按相同顺序提供同名、同类型、可收窄模式的声明及 label；字段见[标记输入](editor-marker-inputs.md)。
 
-icon 保留现有格式枚举：square、strings、dots、rings、radial、orbit、wireform、arcs、tunnel、stars、scale、blur、fade。独立预览由 resource-info.previewPath 提供，不把新图形写进应用图标表。
+icon 保留现有格式枚举：square、strings、dots、rings、radial、orbit、wireform、arcs、tunnel、stars、scale、blur、fade。独立封面使用资源内图片，previewPath 可选，查找与默认图片见[资源格式](resource-format.md)；不把新图形写进应用图标表。
 
 parameters 顺序及数量必须与算法契约一致。每项含 id、label、valueKind、defaultValue、allowedSourceKinds，可有 range、vectorElementRange、allowEmptyVector、allowedAnalysisComponents、allowedAnalysisProjections、defaultBinding。数值范围为 `{min,max,integer?,editingPrecision?}`。元素只能收窄算法能力；defaultBinding 是移除 parameterId 的绑定对象。
 

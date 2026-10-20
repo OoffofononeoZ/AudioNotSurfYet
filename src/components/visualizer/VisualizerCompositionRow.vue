@@ -27,7 +27,7 @@
                 :aria-pressed="selected"
                 :disabled="locked"
                 @click="$emit('select')">
-                <img v-if="preview" :src="preview" alt="" /><VisualizerIcon v-else :name="icon" /><span>{{
+                <VisualizerResourceCover v-if="preview" :src="preview" /><VisualizerIcon v-else :name="icon" /><span>{{
                     name
                 }}</span>
             </button>
@@ -74,6 +74,7 @@
 </template>
 <script setup lang="ts">
 import VisualizerIcon from './VisualizerIcon.vue';
+import VisualizerResourceCover from './VisualizerResourceCover.vue';
 defineProps<{
     id: string;
     name: string;

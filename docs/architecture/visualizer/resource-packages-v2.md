@@ -22,7 +22,7 @@ DEC-087 批准 V2 算法包、V5 自包含工程及原生隔离。2026-10-20 的
 
 ## 目录加载与所有权
 
-“添加元素”首次提示选择 assets，由“选择文件夹”调用 `showDirectoryPicker({mode:'read'})`。独立 `audionotsurfyet-resource-directory` IndexedDB 仅保存目录句柄，不复制资源库。进入页面只 `queryPermission`，授权有效时自动恢复；失效时由可见“恢复访问”按钮 `requestPermission`。权限语义依据 [Chrome File System Access 说明](https://developer.chrome.com/docs/capabilities/web-apis/file-system-access)。
+“添加元素”打开资源商城，首次由“加载资源库”、连接后由“更换文件夹”调用 `showDirectoryPicker({mode:'read'})`。独立 `audionotsurfyet-resource-directory` IndexedDB 仅保存目录句柄，不复制资源库。进入页面只 `queryPermission`，授权有效时自动恢复；失效时由可见“恢复访问”按钮 `requestPermission`。权限语义依据 [Chrome File System Access 说明](https://developer.chrome.com/docs/capabilities/web-apis/file-system-access)。
 
 读取信息、预览、运行包及源码入口存在性，校验路径、身份/依赖、重复项、预设组成及算法/Shader 初始化，整体通过才替换可添加库。取消、失败、迟到结果及离页不得覆盖当前可用库；句柄保存失败只提示下次需重新选择。“重新加载”读取外部新增/修改，失败保留当前库；浏览器不写外部文件。
 
