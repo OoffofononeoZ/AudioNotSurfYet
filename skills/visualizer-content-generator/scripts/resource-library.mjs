@@ -74,7 +74,7 @@ export function buildLibrary(root, check = false) {
                 info.resource?.id !== entry.name ||
                 !Number.isSafeInteger(info.order) ||
                 info.order < 0 ||
-                !['title', 'description', 'creator', 'createdAt', 'previewPath', 'sourceEntry', 'packagePath'].every(
+                !['title', 'description', 'creator', 'createdAt', 'sourceEntry', 'packagePath'].every(
                     k => typeof info[k] === 'string' && info[k].trim(),
                 ) ||
                 !/^\d{4}-\d\d-\d\dT.*(?:Z|[+-]\d\d:\d\d)$/.test(info.createdAt) ||
@@ -83,9 +83,14 @@ export function buildLibrary(root, check = false) {
                 !Array.isArray(info.dependencies)
             )
                 throw Error('Invalid resource-info: ' + dir);
-            const svg = readFileSync(contained(dir, info.previewPath), 'utf8');
-            if (!/<svg[\s>]/i.test(svg) || /<\s*(?:script|foreignObject)|\bon\w+\s*=|(?:href|url)\s*[=(]/i.test(svg))
-                throw Error('Preview must be a standalone SVG');
+            // Covers are optional. Validate containment, but do not gate runtime packages on artwork.
+            if (info.previewPath !== undefined) {
+                try {
+                    contained(dir, info.previewPath, true);
+                } catch (error) {
+                    if (error.code !== 'ENOENT') throw error;
+                }
+            }
             // Verify the output exists inside the resource before any overwrite.
             const output = contained(dir, info.packagePath, !check);
             rows.push({ dir, info, infoFile, output, category, pack: authorPackage(dir, info) });

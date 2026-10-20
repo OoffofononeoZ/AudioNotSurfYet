@@ -38,6 +38,22 @@ test(
             buildLibrary(root, true);
             assert.equal(readFileSync(file, 'utf8'), sealed);
             assert.equal(JSON.parse(sealed).createdAt, info.createdAt);
+            const identity = JSON.parse(sealed).resource;
+            for (const previewPath of [undefined, 'cover.png', 'preview.webp', 'images/missing.jpeg']) {
+                const changed = { ...JSON.parse(sealed), previewPath };
+                writeFileSync(file, JSON.stringify(changed));
+                const before = readFileSync(file, 'utf8');
+                buildLibrary(root, true);
+                assert.equal(readFileSync(file, 'utf8'), before);
+                assert.deepEqual(JSON.parse(before).resource, identity);
+                assert.equal(JSON.parse(before).createdAt, info.createdAt);
+            }
+            writeFileSync(join(dir, 'cover.png'), Buffer.from([137, 80, 78, 71]));
+            writeFileSync(file, JSON.stringify({ ...JSON.parse(sealed), previewPath: 'cover.png' }));
+            buildLibrary(root, true);
+            writeFileSync(file, JSON.stringify({ ...JSON.parse(sealed), previewPath: '../outside.png' }));
+            assert.throws(() => buildLibrary(root, true), /Invalid relative/);
+            writeFileSync(file, sealed);
             writeFileSync(join(dir, 'source/algorithms/solid.mjs'), 'export function create() { return {}; }');
             assert.throws(() => buildLibrary(root, true), /Stale/);
             writeFileSync(file, JSON.stringify({ ...JSON.parse(sealed), sourceEntry: '../escape.json' }));

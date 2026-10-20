@@ -6,10 +6,12 @@
 
 assets/elements/<id>/ 和 assets/presets/<id>/ 各包含：
 
-- resource-info.json：schemaVersion:1、resource:{id,version,hash}、kind（visual/modifier/transition/preset）、title、description、creator、createdAt（ISO 8601）、previewPath、sourceEntry、packagePath、dependencies（元素精确引用数组）、order（非负安全整数）。
-- preview.svg：独立 SVG，禁止脚本和外部链接/嵌入。
+- resource-info.json：schemaVersion:1、resource:{id,version,hash}、kind（visual/modifier/transition/preset）、title、description、creator、createdAt（ISO 8601）、previewPath（可选）、sourceEntry、packagePath、dependencies（元素精确引用数组）、order（非负安全整数）。
+- 可选封面：PNG、JPEG、WebP 或独立 SVG；推荐准确表达素材视觉效果，不强制制作。SVG 禁止脚本和外部链接/嵌入。
 - source/resource.json：V2 作者定义。算法 entry、可选 includes、programs 的 vertexFile/fragmentFile 都相对资源根，位于自身 source/ 内。禁止绝对路径、反斜线、点段及链接逃逸。
 - resource-package.json：format:audiosurf-visualizer-resource、schemaVersion:2、id、version、algorithms、elements、presets。运行包内嵌算法/Shader 文本。
+
+封面优先使用安全的 previewPath（可指向自身子目录）；未指定或不可用时，只在资源根目录按 cover.*、preview.*、其余文件名顺序寻找可用图片。缺失或损坏封面不阻断合法资源；宿主使用播放器同一张 /default_cover.png。封面不参与运行包身份，工具不生成或改写图片。
 
 元素文件夹恰有一个元素，携带自身直接引用的算法，无预设，dependencies 为空。预设文件夹恰有一个预设，algorithms/elements 为空；dependencies 恰为去重的子项元素精确引用。封装顺序算法→元素→预设，更新 hash/ref/info，不修改 createdAt。迁移已有资源时必须保留原运行包身份和参数。
 

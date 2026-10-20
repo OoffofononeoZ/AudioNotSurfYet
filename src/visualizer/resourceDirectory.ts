@@ -7,6 +7,9 @@ import {
 } from './resourceCodec';
 import { resourceKey, sameResource } from './resourceIdentity';
 import type { ResourceRef, ResourceSnapshot } from './resourceTypes';
+import { resourceFile as fileAt, resourcePath, type ResourceDirectoryHandle } from './resourceFiles';
+import { readResourcePreview } from './resourcePreview';
+export { resourcePath, type ResourceDirectoryHandle } from './resourceFiles';
 
 export interface ResourceInfo {
     schemaVersion: 1;
@@ -16,43 +19,35 @@ export interface ResourceInfo {
     description: string;
     creator: string;
     createdAt: string;
-    previewPath: string;
+    previewPath?: string;
     sourceEntry: string;
     packagePath: string;
     dependencies: ResourceRef[];
     order: number;
 }
-export type ResourceDirectoryHandle = FileSystemDirectoryHandle & {
-    entries(): AsyncIterableIterator<[string, FileSystemHandle]>;
-    queryPermission(options: { mode: 'read' }): Promise<PermissionState>;
-    requestPermission(options: { mode: 'read' }): Promise<PermissionState>;
-};
 export interface DirectoryCandidate {
     resources: ResourceSnapshot;
-    entries: Array<{ info: ResourceInfo; preview: Blob }>;
-}
-export function resourcePath(input: unknown): string {
-    const path = text(input, '资源路径');
-    if (/[\\:%?#\x00-\x1f]/.test(path) || path.split('/').some(s => !s || s === '.' || s === '..'))
-        throw Error('资源路径必须位于自身文件夹内。');
-    return path;
+    entries: Array<{ info: ResourceInfo; preview: Blob | null }>;
 }
 export function validateResourceInfo(input: unknown): ResourceInfo {
     const v = record(input, '资源信息');
-    keys(v, [
-        'schemaVersion',
-        'resource',
-        'kind',
-        'title',
-        'description',
-        'creator',
-        'createdAt',
-        'previewPath',
-        'sourceEntry',
-        'packagePath',
-        'dependencies',
-        'order',
-    ]);
+    keys(
+        v,
+        [
+            'schemaVersion',
+            'resource',
+            'kind',
+            'title',
+            'description',
+            'creator',
+            'createdAt',
+            'sourceEntry',
+            'packagePath',
+            'dependencies',
+            'order',
+        ],
+        ['previewPath'],
+    );
     if (v.schemaVersion !== 1 || !['visual', 'modifier', 'transition', 'preset'].includes(String(v.kind)))
         throw Error('资源信息版本或类型无效。');
     const resource = validateResourceRef(v.resource);
@@ -62,9 +57,9 @@ export function validateResourceInfo(input: unknown): ResourceInfo {
         !Number.isFinite(Date.parse(String(v.createdAt)))
     )
         throw Error('资源创建时间无效。');
-    for (const key of ['previewPath', 'sourceEntry', 'packagePath']) resourcePath(v[key]);
-    if (!String(v.sourceEntry).startsWith('source/') || !String(v.previewPath).endsWith('.svg'))
-        throw Error('资源源码入口或预览路径无效。');
+    for (const key of ['sourceEntry', 'packagePath']) resourcePath(v[key]);
+    if (v.previewPath !== undefined) resourcePath(v.previewPath);
+    if (!String(v.sourceEntry).startsWith('source/')) throw Error('资源源码入口或预览路径无效。');
     const order = integer(v.order, '显示顺序');
     if (!Number.isSafeInteger(order) || order < 0 || !Array.isArray(v.dependencies))
         throw Error('资源依赖或显示顺序无效。');
@@ -72,50 +67,12 @@ export function validateResourceInfo(input: unknown): ResourceInfo {
     if (new Set(dependencies.map(resourceKey)).size !== dependencies.length) throw Error('资源依赖重复。');
     return { ...v, resource, dependencies, order } as unknown as ResourceInfo;
 }
-async function fileAt(root: FileSystemDirectoryHandle, path: string, signal: AbortSignal) {
-    const parts = resourcePath(path).split('/');
-    let dir = root;
-    for (const part of parts.slice(0, -1)) {
-        signal.throwIfAborted();
-        dir = await dir.getDirectoryHandle(part);
-    }
-    signal.throwIfAborted();
-    const file = await (await dir.getFileHandle(parts[parts.length - 1]!)).getFile();
-    signal.throwIfAborted();
-    return file;
-}
-function previewSvg(source: string): Blob {
-    const doc = new DOMParser().parseFromString(source, 'image/svg+xml');
-    if (doc.querySelector('parsererror') || doc.documentElement.localName !== 'svg')
-        throw Error('资源预览不是有效 SVG。');
-    const allowed = new Set([
-        'svg',
-        'g',
-        'path',
-        'rect',
-        'circle',
-        'ellipse',
-        'line',
-        'polyline',
-        'polygon',
-        'title',
-        'desc',
-    ]);
-    for (const node of [doc.documentElement, ...doc.documentElement.querySelectorAll('*')]) {
-        if (node.namespaceURI !== 'http://www.w3.org/2000/svg' || !allowed.has(node.localName))
-            throw Error('预览必须是独立 SVG 图形。');
-        for (const attr of node.attributes)
-            if (/^on|href|style/i.test(attr.name) || /url\s*\(/i.test(attr.value))
-                throw Error('预览不允许脚本或外部引用。');
-    }
-    return new Blob([source], { type: 'image/svg+xml' });
-}
 /** Reads a complete candidate; never mutates the live registry or external files. */
 export async function readResourceDirectory(
     root: ResourceDirectoryHandle,
     signal: AbortSignal,
 ): Promise<DirectoryCandidate> {
-    const rows: Array<{ info: ResourceInfo; preview: Blob; raw: Record<string, unknown> }> = [];
+    const rows: Array<{ info: ResourceInfo; preview: Blob | null; raw: Record<string, unknown> }> = [];
     for (const category of ['elements', 'presets']) {
         signal.throwIfAborted();
         const folder = (await root.getDirectoryHandle(category)) as ResourceDirectoryHandle;
@@ -132,7 +89,7 @@ export async function readResourceDirectory(
             // Prove source entry exists, but do not copy or execute editable source.
             await fileAt(dir, info.sourceEntry, signal);
             const raw = record(JSON.parse(await (await fileAt(dir, info.packagePath, signal)).text()), '资源包');
-            const preview = previewSvg(await (await fileAt(dir, info.previewPath, signal)).text());
+            const preview = await readResourcePreview(dir, info.previewPath, signal);
             rows.push({ info, raw, preview });
         }
     }
