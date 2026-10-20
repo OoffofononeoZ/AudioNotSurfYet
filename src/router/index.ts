@@ -6,6 +6,7 @@ import ComingSoon from '../views/ComingSoon.vue';
 import Analyzer from '../views/Analyzer.vue';
 import Editor from '../views/Editor.vue';
 import Visualizer from '../views/Visualizer.vue';
+import VisualizerDisplay from '../views/VisualizerDisplay.vue';
 
 const router = createRouter({
     history: createWebHistory(),
@@ -14,6 +15,12 @@ const router = createRouter({
             path: '',
             component: MainLayout,
             children: [
+                {
+                    path: 'display/:styleId',
+                    name: 'visualizer-display',
+                    component: VisualizerDisplay,
+                    meta: { presentation: true },
+                },
                 {
                     path: '',
                     component: Home,
@@ -41,7 +48,7 @@ const router = createRouter({
                     component: TestLands,
                 },
             ],
-        }
+        },
     ],
 });
 

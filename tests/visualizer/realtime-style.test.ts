@@ -1,0 +1,58 @@
+import { test, expect } from 'vitest';
+import { indexedDB } from 'fake-indexeddb';
+import { createComposition } from '../../src/visualizer/compositionCodec';
+import { appendStandaloneElements } from '../../src/visualizer/compositionModel';
+import { elementRegistry } from '../../src/visualizer/elementRegistry';
+import { createRealtimeStyle, validateRealtimeStyle } from '../../src/visualizer/realtimeStyle';
+import { RealtimeStyleRepository } from '../../src/visualizer/realtimeStyleRepository';
+import { RealtimeResolver } from '../../src/visualizer/realtimeResolver';
+import { parameterKey } from '../../src/visualizer/compositionEffects';
+const track = { contentHash: 'a'.repeat(64), fileName: 'private-song.wav', durationSeconds: 10, sampleRate: 48000 };
+function style() {
+    const p = appendStandaloneElements(createComposition(track), [
+        elementRegistry.create('radial-spectrum', 10, 0),
+        elementRegistry.create('blur', 10, 1),
+    ]);
+    return createRealtimeStyle(p, '测试实时样式');
+}
+test('styles are independent snapshots without song, timing, editor or catalog dependencies', () => {
+    const s = style();
+    expect(validateRealtimeStyle(JSON.parse(JSON.stringify(s)))).toEqual(s);
+    expect(JSON.stringify(s)).not.toContain('private-song.wav');
+    expect(s).not.toHaveProperty('track');
+    expect(s.elements[0]).not.toHaveProperty('timing');
+    expect(s.resources.presets).toEqual([]);
+    expect(() => validateRealtimeStyle({ ...s, track })).toThrow();
+    const invalid = structuredClone(s);
+    invalid.elements[1]!.targets = { kind: 'elements', ids: ['missing'] };
+    expect(() => validateRealtimeStyle(invalid)).toThrow(/目标/);
+    invalid.elements[0]!.resource.hash = 'f'.repeat(64);
+    expect(() => validateRealtimeStyle(invalid)).toThrow();
+});
+test('local snapshots survive repository reopening and cannot overwrite an existing address', async () => {
+    const name = 'realtime-' + crypto.randomUUID(),
+        s = style();
+    const a = new RealtimeStyleRepository(indexedDB, name);
+    await a.save(s);
+    await expect(a.save({ ...s, name: 'replacement' })).rejects.toBeDefined();
+    a.close();
+    const b = new RealtimeStyleRepository(indexedDB, name);
+    expect(await b.read(s.id)).toEqual(s);
+    expect(await b.read('missing')).toBeNull();
+    b.close();
+});
+test('WE realtime projection preserves stereo slots, strength above one and numeric mapping', () => {
+    const s = style(),
+        e = s.elements[0]!,
+        b = e.bindings.find(b => b.parameterId === 'spectrum')!;
+    b.source = { kind: 'analysis', featureId: 'wallpaperEngineSpectrum', projection: { kind: 'full' } };
+    const values = Array.from({ length: 128 }, (_, i) => i / 20);
+    expect(
+        new RealtimeResolver()
+            .resolve(s, 1, { wallpaperEngineSpectrum: values }, null)
+            .get(parameterKey(e.id, 'spectrum')),
+    ).toMatchObject({ value: values, unit: 'we-strength', channelLayout: 'stereo-64' });
+    expect(new RealtimeResolver().resolve(s, 1, {}, null).get(parameterKey(e.id, 'spectrum'))!.value).toEqual(
+        Array(128).fill(0),
+    );
+});

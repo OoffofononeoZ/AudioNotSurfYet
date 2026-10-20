@@ -47,6 +47,7 @@ declare module 'vue' {
     MusicBarIcon: typeof import('./src/components/MusicBarIcon.vue')['default']
     MusicBarPlaybackSpeed: typeof import('./src/components/MusicBarPlaybackSpeed.vue')['default']
     MusicList: typeof import('./src/components/MusicList.vue')['default']
+    RealtimeVisualizer: typeof import('./src/components/visualizer/RealtimeVisualizer.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
     Testcomp: typeof import('./src/components/testcomp.vue')['default']
@@ -63,5 +64,6 @@ declare module 'vue' {
     VisualizerMarkerInput: typeof import('./src/components/visualizer/VisualizerMarkerInput.vue')['default']
     VisualizerParameterField: typeof import('./src/components/visualizer/VisualizerParameterField.vue')['default']
     VisualizerPresetInspector: typeof import('./src/components/visualizer/VisualizerPresetInspector.vue')['default']
+    VisualizerRealtimeActions: typeof import('./src/components/visualizer/VisualizerRealtimeActions.vue')['default']
   }
 }

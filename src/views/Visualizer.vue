@@ -21,6 +21,7 @@
                 @click="run(() => controller.exportProject())">
                 <VisualizerIcon name="export" />
             </button>
+            <VisualizerRealtimeActions :project="snapshot.project" :locked="locked || !usable" />
             <div v-if="usable" class="viz-drawer-controls">
                 <button
                     type="button"
@@ -285,6 +286,7 @@
 import { computed, onBeforeUnmount, ref, shallowRef, watch } from 'vue';
 import { onBeforeRouteLeave, onBeforeRouteUpdate, useRoute, useRouter } from 'vue-router';
 import VisualizerIcon from '../components/visualizer/VisualizerIcon.vue';
+import VisualizerRealtimeActions from '../components/visualizer/VisualizerRealtimeActions.vue';
 import VisualizerElementList from '../components/visualizer/VisualizerElementList.vue';
 import VisualizerElementCatalog from '../components/visualizer/VisualizerElementCatalog.vue';
 import VisualizerElementInspector from '../components/visualizer/VisualizerElementInspector.vue';

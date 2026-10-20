@@ -1,16 +1,18 @@
 <template>
     <div id="main-layout">
-        <AppSidebar />
-        <AppSettingsButton />
-        <div class="app-content">
+        <AppSidebar v-if="!presentation" />
+        <AppSettingsButton v-if="!presentation" />
+        <div class="app-content" :class="{ 'presentation-content': presentation }">
             <router-view />
         </div>
-        <MusicBar :progress="0" />
+        <MusicBar v-if="!presentation" :progress="0" />
     </div>
 </template>
 
 <script setup lang="ts">
-import { onUnmounted, provide, watchEffect } from 'vue';
+import { computed, onUnmounted, provide, watchEffect } from 'vue';
+import { useRoute } from 'vue-router';
+import { realtimeBrowserKey } from '../visualizer/realtimeBrowserSession';
 import AppSidebar from '../components/AppSidebar.vue';
 import AppSettingsButton from '../components/AppSettingsButton.vue';
 import MusicBar from '../components/MusicBar.vue';
@@ -34,6 +36,8 @@ import { EditorProcessingGate } from '../processing/editorProcessingGate';
 import { EditorTranscriptionService, editorTranscriptionServiceKey } from '../transcription/editorTranscriptionService';
 
 const audioSessionStore = useAudioSessionStore();
+const layoutRoute = useRoute();
+const presentation = computed(() => layoutRoute.meta.presentation === true);
 const configStore = useConfigstore();
 const previousSidebarWidth = document.documentElement.style.getPropertyValue('--app-sidebar-width');
 watchEffect(() => {
@@ -55,6 +59,7 @@ const editorProcessingGate = new EditorProcessingGate();
 const editorSeparation = new EditorSeparationService(audioEngine, audioSession, { gate: editorProcessingGate });
 provide(editorSeparationServiceKey, editorSeparation);
 provide(analysisCoordinatorKey, analysisCoordinator);
+provide(realtimeBrowserKey, { engine: audioEngine, audio: audioSession, analysis: analysisCoordinator });
 const editorController = new EditorSessionController({
     audioSession,
     analysisCoordinator,
@@ -198,6 +203,11 @@ onUnmounted(() => {
     transition:
         width 180ms ease,
         margin-left 180ms ease;
+}
+.presentation-content {
+    width: 100%;
+    margin-left: 0;
+    transition: none;
 }
 @media (max-width: 767px) {
     .app-content {
