@@ -9,6 +9,7 @@ import {
     type DirectoryCandidate,
 } from '../../src/visualizer/resourceDirectory';
 import { IndexedDbResourceDirectoryRepository } from '../../src/visualizer/resourceDirectoryRepository';
+import { DEFAULT_RESOURCE_PREVIEW } from '../../src/visualizer/resourcePreview';
 const info = {
     schemaVersion: 1 as const,
     resource: { id: 'sample', version: 1, hash: 'a'.repeat(64) },
@@ -58,6 +59,21 @@ function setup() {
     return { library, repository, registry, read, validate, createUrl, revokeUrl, picker };
 }
 describe('external library task and permission ownership', () => {
+    test('missing covers use the player cover without creating or revoking a static URL', async () => {
+        const s = setup();
+        s.read.mockResolvedValueOnce({ ...candidate(), entries: [{ info, preview: null }] });
+        await s.library.choose();
+        expect(s.library.snapshot()).toMatchObject({
+            status: 'ready',
+            entries: [{ previewUrl: DEFAULT_RESOURCE_PREVIEW }],
+        });
+        expect(s.createUrl).not.toHaveBeenCalled();
+        await s.library.reload();
+        expect(s.revokeUrl).not.toHaveBeenCalled();
+        s.library.dispose();
+        expect(s.revokeUrl).toHaveBeenCalledTimes(1);
+        expect(s.revokeUrl).not.toHaveBeenCalledWith(DEFAULT_RESOURCE_PREVIEW);
+    });
     test('first entry stays unselected, picker cancellation preserves the current usable library', async () => {
         const s = setup();
         await s.library.restore();
@@ -190,6 +206,9 @@ describe('external library task and permission ownership', () => {
 });
 test('resource info rejects path escapes, duplicate dependencies and invalid identity/time/order', () => {
     expect(validateResourceInfo(info)).toEqual(info);
+    const { previewPath: _preview, ...withoutCover } = info;
+    expect(validateResourceInfo(withoutCover)).toEqual(withoutCover);
+    expect(validateResourceInfo({ ...info, previewPath: 'images/cover.webp' }).previewPath).toBe('images/cover.webp');
     for (const path of ['../x', '/absolute', 'a/../x', 'C:/x', 'a\\b', 'x%2fy', 'a//b', './x', 'https://x', 'a?b'])
         expect(() => resourcePath(path)).toThrow();
     for (const bad of [
@@ -197,6 +216,8 @@ test('resource info rejects path escapes, duplicate dependencies and invalid ide
         { order: -1 },
         { schemaVersion: 2 },
         { extra: true },
+        { previewPath: '../cover.png' },
+        { previewPath: '' },
         { resource: { ...info.resource, hash: 'bad' } },
         { dependencies: [info.resource, info.resource] },
     ])

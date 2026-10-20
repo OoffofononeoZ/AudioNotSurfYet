@@ -1,4 +1,4 @@
-import { readFileSync } from 'node:fs';
+import { readFileSync, readdirSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
 import type { Page } from '@playwright/test';
 import { assetsAvailable, resourceRows } from './visualizer-assets.mjs';
@@ -17,12 +17,17 @@ export async function installDirectoryPickerStub(page: Page) {
 /** Real OPFS handles exercise IndexedDB structured cloning; this does not test OS picker permission UI. */
 export async function prepareResourceDirectory(page: Page, persist = true) {
     if (!assetsAvailable) throw Error('Missing external assets; configure VISUALIZER_ASSETS_DIR.');
-    const files = resourceRows().flatMap(({ dir, info }) =>
-        ['resource-info.json', info.previewPath, info.packagePath, info.sourceEntry].map(path => ({
+    const files = resourceRows().flatMap(({ dir, info }) => {
+        const images = readdirSync(dir, { withFileTypes: true })
+            .filter(entry => entry.isFile() && /\.(png|jpe?g|webp|svg)$/i.test(entry.name))
+            .map(entry => entry.name);
+        const paths = new Set(['resource-info.json', info.packagePath, info.sourceEntry, ...images]);
+        if (info.previewPath && existsSync(join(dir, info.previewPath))) paths.add(info.previewPath);
+        return [...paths].map(path => ({
             path: (info.kind === 'preset' ? 'presets' : 'elements') + '/' + info.resource.id + '/' + path,
-            text: readFileSync(join(dir, path), 'utf8'),
-        })),
-    );
+            base64: readFileSync(join(dir, path)).toString('base64'),
+        }));
+    });
     await page.evaluate(
         async ({ files, persist }) => {
             const root = await navigator.storage.getDirectory(),
@@ -34,7 +39,7 @@ export async function prepareResourceDirectory(page: Page, persist = true) {
                 for (const part of parts.slice(0, -1)) dir = await dir.getDirectoryHandle(part, { create: true });
                 const handle = await dir.getFileHandle(parts[parts.length - 1]!, { create: true }),
                     writer = await handle.createWritable();
-                await writer.write(file.text);
+                await writer.write(Uint8Array.from(atob(file.base64), character => character.charCodeAt(0)));
                 await writer.close();
             }
             if (persist)

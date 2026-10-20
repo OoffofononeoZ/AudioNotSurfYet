@@ -1,7 +1,7 @@
 ---
 name: visualizer-content-generator
 description: 编写外部 V2 算法元素包与仅引用已有元素的预设；先校验 VisualizerContentBriefV2，再批准具体 Content Contract，获批后封装和验证。
-version: 2.2.0
+version: 2.3.0
 ---
 
 # Visualizer 内容生成
@@ -15,7 +15,7 @@ version: 2.2.0
 3. 阅读 [内容规则](references/content-rules.md)、[资源格式与 ABI](references/resource-format.md)，核对指定资源库。预设只能精确引用已有元素；缺少元素时先单独提出并批准元素合同，生成、封装并验证元素，再创建引用它的预设。禁止预设包夹带新增元素或算法。
 4. 展示具体 **Content Contract**：ID/版本、视觉及拆分、算法 ABI、参数/default bindings、静态/静音/低/高状态、数据映射/单位、时间/效果目标、seed/确定性、资源预算和验证。预设另固定清单、顺序、时段、内部引用、共同控件字段/目标/默认值/差异行为。可选默认方案须明示。
 5. 输出 AWAITING_APPROVAL，等待明确指向刚展示合同的批准。批准前不得写合同、源码或测试。批准 skill、迁移或实施计划不代表批准任何未来具体内容；合同实质变化须重新批准。
-6. 获批后在资源 source/ 保存轻量合同及批准来源。每个资源包含 resource-info.json、preview.svg、source/ 和 resource-package.json。创建者默认 default；创建时间用实际 ISO 8601 时间，重新封装不重置。
+6. 获批后在资源 source/ 保存轻量合同及批准来源。每个资源包含 resource-info.json、source/ 和 resource-package.json；封面可选，推荐使用准确表达素材效果的 PNG/JPEG/WebP 或独立 SVG，不强制生成截图。封面查找与默认图片见资源格式。创建者默认 default；创建时间用实际 ISO 8601 时间，重新封装不重置。
 7. 在 skill 目录按 lockfile 运行 `npm ci`，再执行 `node <skill>/scripts/resource-library.mjs --build <assets>` 和 `--check <assets>`。源码与 Shader 必须位于自身文件夹内，不依赖其他元素的辅助代码。
 8. 按 [验证矩阵](references/test-matrix.md) 检查实际内容。封装不证明算法初始化、GPU、视觉或导出通过。如实报告通过/失败/未运行与必要人工输入，不自动发布或生成 readiness 结论。
 

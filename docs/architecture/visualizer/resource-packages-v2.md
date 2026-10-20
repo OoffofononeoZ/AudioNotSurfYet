@@ -8,13 +8,15 @@ DEC-087 批准 V2 算法包、V5 自包含工程及原生隔离。2026-10-20 的
 - AlgorithmDefinition 包含 apiVersion:1 或 2、contract、source 和 programs。ABI 1 保留历史参数/历史帧接口；ABI 2 新增工程内标记声明。programs 保存具名 Shader、几何类型和 uniform 类型。
 - source 为自包含 ES Module，导出 create 工厂；源码、Shader、契约共同参与规范化 JSON SHA-256。哈希用于身份，不是作者认证。校验和解析不执行源码。
 - 作者文件独立维护 JS、Shader 和 JSON，封装器把文本内嵌进生成包。输入路径限制在作者目录内，模块禁止外部导入，跨包引用按算法→元素→预设顺序封装。
-- [Project V5](project-format-v5.md)保存元素、预设和算法快照，恢复不依赖商城目录。旧 V4/V1 不迁移；生成 skill 2.2.0 使用 VisualizerContentBriefV2，不兼容旧输入。
+- [Project V5](project-format-v5.md)保存元素、预设和算法快照，恢复不依赖商城目录。旧 V4/V1 不迁移；生成 skill 2.3.0 使用 VisualizerContentBriefV2，不兼容旧输入。
 
 ## 外部文件夹与封装
 
-默认库为 `C:\Users\Ryan\Desktop\WheresYourElements\assets`。元素放 `elements/<id>/`，预设放 `presets/<id>/`，各包含 `resource-info.json`、`preview.svg`、`source/`、`resource-package.json`。完整信息格式见独立 skill 的[资源格式与 ABI](../../../skills/visualizer-content-generator/references/resource-format.md)。
+默认库为 `C:\Users\Ryan\Desktop\WheresYourElements\assets`。元素放 `elements/<id>/`，预设放 `presets/<id>/`，各包含 `resource-info.json`、`source/`、`resource-package.json` 及可选封面。完整信息格式见独立 skill 的[资源格式与 ABI](../../../skills/visualizer-content-generator/references/resource-format.md)。
 
-信息 schemaVersion:1，含精确 resource、kind、title、description、creator、createdAt、previewPath、sourceEntry、packagePath、dependencies 和 order。creator 默认 default；createdAt 是实际创建时间，重新封装不重置。路径相对自身资源根，不接受点段、绝对路径或跨资源依赖。元素包含完整辅助源码及 Shader；预设包只含组合定义，不含算法或元素，dependencies 恰为已有元素的去重精确引用。
+信息 schemaVersion:1，含精确 resource、kind、title、description、creator、createdAt、可选 previewPath、sourceEntry、packagePath、dependencies 和 order。creator 默认 default；createdAt 是实际创建时间，重新封装不重置。路径相对自身资源根，不接受点段、绝对路径或跨资源依赖。元素包含完整辅助源码及 Shader；预设包只含组合定义，不含算法或元素，dependencies 恰为已有元素的去重精确引用。
+
+封面接受 PNG/JPEG/WebP 及经过独立图形校验的 SVG。优先读取 previewPath，再按资源根目录的 cover.*、preview.*、其余文件名寻找可解码图片；缺失或损坏时使用共享 /default_cover.png，不阻断合法运行包。封面不参与资源身份；取消、权限及路径错误仍正常失败。
 
 `npm run visualizer:resources` 封装外部库，`npm run visualizer:resources:check` 只读核对，`VISUALIZER_ASSETS_DIR` 覆盖默认位置。独立 skill 可运行 `node <skill>/scripts/resource-library.mjs --build|--check <assets>`。dev/build 不执行封装、不复制外部库；仓库不保存资源库的源码、运行包和专用预览。
 

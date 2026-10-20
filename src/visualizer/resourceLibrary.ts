@@ -8,6 +8,7 @@ import {
 } from './resourceDirectory';
 import { IndexedDbResourceDirectoryRepository, type ResourceDirectoryRepository } from './resourceDirectoryRepository';
 import type { ResourceSnapshot } from './resourceTypes';
+import { DEFAULT_RESOURCE_PREVIEW } from './resourcePreview';
 
 export interface ResourceLibraryState extends ResourceSnapshot {
     status: 'idle' | 'loading' | 'ready' | 'error' | 'permission';
@@ -186,7 +187,9 @@ export class VisualizerResourceLibrary {
             for (const entry of candidate.entries)
                 entries.push({
                     info: entry.info,
-                    previewUrl: (this.options.createUrl ?? URL.createObjectURL)(entry.preview),
+                    previewUrl: entry.preview
+                        ? (this.options.createUrl ?? URL.createObjectURL)(entry.preview)
+                        : DEFAULT_RESOURCE_PREVIEW,
                 });
         } catch (error) {
             this.release(entries);
@@ -212,7 +215,9 @@ export class VisualizerResourceLibrary {
         }
     }
     private release(entries: ResourceLibraryState['entries']) {
-        for (const e of entries) (this.options.revokeUrl ?? URL.revokeObjectURL)(e.previewUrl);
+        for (const e of entries)
+            if (e.previewUrl !== DEFAULT_RESOURCE_PREVIEW)
+                (this.options.revokeUrl ?? URL.revokeObjectURL)(e.previewUrl);
     }
     dispose() {
         this.disposed = true;

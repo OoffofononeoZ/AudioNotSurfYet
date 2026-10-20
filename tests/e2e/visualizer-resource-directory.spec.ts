@@ -102,7 +102,7 @@ test('permission recovery and a damaged refresh preserve the usable catalog', as
     await page.getByRole('button', { name: '重新加载', exact: true }).click();
     await expect(page.getByRole('alert')).toHaveCount(0);
     await expect.poll(() => page.locator('[data-resource-id] img').first().getAttribute('src')).not.toBe(before);
-    for (const variant of ['path', 'identity', 'preset-elements', 'missing-file']) {
+    for (const variant of ['path', 'identity', 'preset-elements', 'missing-source']) {
         await prepareResourceDirectory(page, false);
         const previous = await page.locator('[data-resource-id] img').first().getAttribute('src');
         await page.evaluate(async variant => {
@@ -119,7 +119,10 @@ test('permission recovery and a damaged refresh preserve the usable catalog', as
             if (variant === 'path')
                 await update('resource-info.json', v => (v.sourceEntry = 'source/../../outside.json'));
             if (variant === 'identity') await update('resource-info.json', v => (v.resource.hash = '0'.repeat(64)));
-            if (variant === 'missing-file') await dir.removeEntry('preview.svg');
+            if (variant === 'missing-source') {
+                const source = await dir.getDirectoryHandle('source');
+                await source.removeEntry('resource.json');
+            }
             if (variant === 'preset-elements') {
                 let solid = await (
                     await navigator.storage.getDirectory()
@@ -138,5 +141,79 @@ test('permission recovery and a damaged refresh preserve the usable catalog', as
         await expect(page.getByRole('alert')).toBeVisible();
         await expect(page.locator('[data-resource-id]')).toHaveCount(elementCount);
         expect(await page.locator('[data-resource-id] img').first().getAttribute('src')).toBe(previous);
+    }
+});
+
+test('bitmap covers, automatic discovery and missing or corrupt artwork preserve valid resources', async ({ page }) => {
+    await installFilePickerStub(page, { visualizerAssets: true });
+    await page.goto('/');
+    await chooseFiles(page, [path.resolve(import.meta.dirname, '../fixtures/audio/visualizer-v5-avsync-v1.wav')]);
+    await page.getByTestId('header-visualizer-link').click();
+    await page.getByTestId('add-visualizer-element').click();
+    await expect(page.locator('[data-resource-id]')).toHaveCount(elementCount);
+    const cover = page.locator('[data-resource-id="solid"] img');
+    for (const variant of ['png', 'jpeg', 'webp', 'discover', 'missing', 'corrupt', 'unsafe-svg']) {
+        const before = await cover.getAttribute('src');
+        await page.evaluate(async variant => {
+            let dir = await (await navigator.storage.getDirectory()).getDirectoryHandle('visualizer-library-fixture');
+            for (const name of ['assets', 'elements', 'solid']) dir = await dir.getDirectoryHandle(name);
+            const handle = dir as FileSystemDirectoryHandle & {
+                entries(): AsyncIterableIterator<[string, FileSystemHandle]>;
+            };
+            for await (const [name, file] of handle.entries())
+                if (file.kind === 'file' && /\.(svg|png|jpe?g|webp)$/i.test(name)) await dir.removeEntry(name);
+            const write = async (name: string, value: Blob | string) => {
+                const writer = await (await dir.getFileHandle(name, { create: true })).createWritable();
+                await writer.write(value);
+                await writer.close();
+            };
+            const infoFile = await dir.getFileHandle('resource-info.json');
+            const info = JSON.parse(await (await infoFile.getFile()).text());
+            info.previewPath = 'artwork.' + variant;
+            if (['png', 'jpeg', 'webp', 'discover'].includes(variant)) {
+                const canvas = document.createElement('canvas');
+                canvas.width = 96;
+                canvas.height = 54;
+                const context = canvas.getContext('2d')!;
+                context.fillStyle = '#34d399';
+                context.fillRect(0, 0, 96, 54);
+                const mime = variant === 'discover' ? 'image/png' : 'image/' + variant;
+                const blob = await new Promise<Blob>(resolve => canvas.toBlob(value => resolve(value!), mime));
+                if (variant === 'discover') {
+                    delete info.previewPath;
+                    await write('cover.png', blob);
+                    await write('a.png', 'invalid');
+                } else await write(info.previewPath, blob);
+            }
+            if (variant === 'corrupt') {
+                info.previewPath = 'cover.png';
+                await write('cover.png', 'broken image');
+            }
+            if (variant === 'unsafe-svg') {
+                info.previewPath = 'cover.svg';
+                await write('cover.svg', '<svg xmlns="http://www.w3.org/2000/svg"><script>alert(1)</script></svg>');
+            }
+            await write('resource-info.json', JSON.stringify(info));
+        }, variant);
+        await page.getByRole('button', { name: '重新加载', exact: true }).click();
+        await expect(page.getByRole('alert')).toHaveCount(0);
+        await expect(page.locator('[data-resource-id]')).toHaveCount(elementCount);
+        if (['missing', 'corrupt', 'unsafe-svg'].includes(variant)) {
+            await expect(cover).toHaveAttribute('src', '/default_cover.png');
+        } else {
+            await expect.poll(() => cover.getAttribute('src')).not.toBe(before);
+            expect(
+                await cover.evaluate(async image =>
+                    (await fetch((image as HTMLImageElement).src)).headers.get('content-type'),
+                ),
+            ).toBe(variant === 'discover' ? 'image/png' : 'image/' + variant);
+        }
+        await expect
+            .poll(() =>
+                cover.evaluate(
+                    image => (image as HTMLImageElement).complete && (image as HTMLImageElement).naturalWidth > 0,
+                ),
+            )
+            .toBe(true);
     }
 });
