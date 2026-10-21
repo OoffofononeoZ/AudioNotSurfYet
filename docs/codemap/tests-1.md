@@ -52,6 +52,7 @@
 | [tests/e2e/e7-editor-compact.spec.ts](../../tests/e2e/e7-editor-compact.spec.ts) | [src/analysis/types.ts](../../src/analysis/types.ts)、[tests/support/editor-marking.ts](../../tests/support/editor-marking.ts) |
 | [tests/e2e/e8-editor-usability.spec.ts](../../tests/e2e/e8-editor-usability.spec.ts) | [tests/support/editor-marking.ts](../../tests/support/editor-marking.ts)、[tests/support/file-picker.ts](../../tests/support/file-picker.ts) |
 | [tests/e2e/e9-editor-tempo-lane.spec.ts](../../tests/e2e/e9-editor-tempo-lane.spec.ts) | [tests/support/editor-marking.ts](../../tests/support/editor-marking.ts) |
+| [tests/e2e/editor-analysis-detail.spec.ts](../../tests/e2e/editor-analysis-detail.spec.ts) | [tests/support/editor-marking.ts](../../tests/support/editor-marking.ts) |
 | [tests/e2e/editor-block-delete.spec.ts](../../tests/e2e/editor-block-delete.spec.ts) | [tests/support/editor-marking.ts](../../tests/support/editor-marking.ts) |
 | [tests/e2e/editor-continuous-timing.spec.ts](../../tests/e2e/editor-continuous-timing.spec.ts) | [tests/support/editor-marking.ts](../../tests/support/editor-marking.ts) |
 | [tests/e2e/editor-experiments.spec.ts](../../tests/e2e/editor-experiments.spec.ts) | [tests/support/file-picker.ts](../../tests/support/file-picker.ts) |
@@ -105,4 +106,3 @@
 | [tests/e2e/visualizer-point-lines.spec.ts](../../tests/e2e/visualizer-point-lines.spec.ts) | [src/editor/projectCodec.ts](../../src/editor/projectCodec.ts)、[src/visualizer/compositionTypes.ts](../../src/visualizer/compositionTypes.ts)、[src/visualizer/elementRegistry.ts](../../src/visualizer/elementRegistry.ts)、[tests/support/file-picker.ts](../../tests/support/file-picker.ts)、[tests/support/visualizer-assets.mjs](../../tests/support/visualizer-assets.mjs) |
 | [tests/e2e/visualizer-presets.spec.ts](../../tests/e2e/visualizer-presets.spec.ts) | [src/visualizer/compositionTypes.ts](../../src/visualizer/compositionTypes.ts)、[tests/support/file-picker.ts](../../tests/support/file-picker.ts)、[tests/support/v6-resource-probe.ts](../../tests/support/v6-resource-probe.ts)、[tests/support/visualizer-output-sync.ts](../../tests/support/visualizer-output-sync.ts) |
 | [tests/e2e/visualizer-realtime-production.spec.ts](../../tests/e2e/visualizer-realtime-production.spec.ts) | [tests/support/file-picker.ts](../../tests/support/file-picker.ts) |
-| [tests/e2e/visualizer-realtime.spec.ts](../../tests/e2e/visualizer-realtime.spec.ts) | [tests/support/file-picker.ts](../../tests/support/file-picker.ts) |

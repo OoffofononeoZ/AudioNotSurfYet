@@ -8,12 +8,9 @@ import {
     waveformEnvelopeAt,
 } from './rendererData';
 import { timeToCanvasX } from './timelineViewport';
+import { plotColumns, plotTimeX, sampleTime } from './renderGeometry';
 import { drawWallpaperHeatmap, drawWallpaperCursor } from './wallpaperCanvas';
-import type {
-    AnalysisCursorValueResult,
-    AnalysisSeries,
-    FeatureDefinition,
-} from './types';
+import type { AnalysisCursorValueResult, AnalysisSeries, FeatureDefinition } from './types';
 import type { PersistedTimelineViewport } from '../types/session';
 
 export interface EditorRenderRequest {
@@ -23,13 +20,11 @@ export interface EditorRenderRequest {
     widthCssPixels: number;
     heightCssPixels: number;
     devicePixelRatio: number;
+    durationSeconds?: number;
 }
 
 export interface EditorRendererAdapter {
-    drawStatic(
-        request: EditorRenderRequest,
-        target: CanvasRenderingContext2D,
-    ): void;
+    drawStatic(request: EditorRenderRequest, target: CanvasRenderingContext2D): void;
     drawCursor(
         request: EditorRenderRequest,
         cursorSeconds: number,
@@ -46,9 +41,7 @@ export const prepareCanvasSurface = (
 ): CanvasRenderingContext2D => {
     const width = Math.max(1, Math.round(widthCssPixels));
     const height = Math.max(1, Math.round(heightCssPixels));
-    const dpr = Math.max(1, Number.isFinite(devicePixelRatio)
-        ? devicePixelRatio
-        : 1);
+    const dpr = Math.max(1, Number.isFinite(devicePixelRatio) ? devicePixelRatio : 1);
     canvas.width = Math.max(1, Math.round(width * dpr));
     canvas.height = Math.max(1, Math.round(height * dpr));
     canvas.style.width = `${width}px`;
@@ -65,24 +58,20 @@ const size = (request: EditorRenderRequest) => ({
     height: Math.max(1, Math.round(request.heightCssPixels)),
 });
 
-const drawGrid = (
-    context: CanvasRenderingContext2D,
-    width: number,
-    height: number,
-) => {
+const drawGrid = (context: CanvasRenderingContext2D, width: number, height: number) => {
     context.fillStyle = '#07100c';
     context.fillRect(0, 0, width, height);
     context.strokeStyle = 'rgba(104, 255, 167, 0.12)';
     context.lineWidth = 1;
     for (let index = 1; index < 5; index += 1) {
-        const x = Math.round(width * index / 5) + 0.5;
+        const x = Math.round((width * index) / 5) + 0.5;
         context.beginPath();
         context.moveTo(x, 0);
         context.lineTo(x, height);
         context.stroke();
     }
     for (let index = 1; index < 4; index += 1) {
-        const y = Math.round(height * index / 4) + 0.5;
+        const y = Math.round((height * index) / 4) + 0.5;
         context.beginPath();
         context.moveTo(0, y);
         context.lineTo(width, y);
@@ -90,23 +79,16 @@ const drawGrid = (
     }
 };
 
-const drawScalar = (
-    request: EditorRenderRequest,
-    context: CanvasRenderingContext2D,
-) => {
+const drawScalar = (request: EditorRenderRequest, context: CanvasRenderingContext2D) => {
     const series = request.series;
     if (!series || series.payload.kind !== 'scalar-f32') {
         throw new Error('标量数据形态与 renderer 不匹配。');
     }
     const { width, height } = size(request);
     const range = visibleSampleRange(series, request.viewport);
-    const values = series.payload.values.subarray(
-        range.startIndex,
-        range.endIndex,
-    );
+    const values = series.payload.values.subarray(range.startIndex, range.endIndex);
     const domain = scalarPlotDomain(values, request.feature.range);
-    const toY = (value: number) => height - 6
-        - (value - domain.min) / (domain.max - domain.min) * (height - 12);
+    const toY = (value: number) => height - 6 - ((value - domain.min) / (domain.max - domain.min)) * (height - 12);
     if (request.feature.range.signed) {
         context.strokeStyle = 'rgba(248, 255, 135, 0.45)';
         context.beginPath();
@@ -119,11 +101,7 @@ const drawScalar = (
     context.beginPath();
     values.forEach((value, localIndex) => {
         const sampleIndex = range.startIndex + localIndex;
-        const x = timeToCanvasX(
-            sampleIndex * series.sampleStepSeconds,
-            request.viewport,
-            width,
-        );
+        const x = plotTimeX(sampleTime(series, sampleIndex), request.viewport, width);
         const y = toY(value);
         if (localIndex === 0) context.moveTo(x, y);
         else context.lineTo(x, y);
@@ -132,40 +110,25 @@ const drawScalar = (
 };
 
 const heatColor = (value: number, maximum: number): string => {
-    const intensity = maximum <= 0
-        ? 0
-        : Math.sqrt(Math.max(0, value) / maximum);
+    const intensity = maximum <= 0 ? 0 : Math.sqrt(Math.max(0, value) / maximum);
     return `hsl(${155 - intensity * 80} 90% ${8 + intensity * 62}%)`;
 };
 
 const signedHeatColor = (value: number, maximum: number): string => {
     const intensity = Math.sqrt(Math.min(1, Math.abs(value) / maximum));
-    return value < 0
-        ? `hsl(265 82% ${8 + intensity * 58}%)`
-        : `hsl(145 88% ${8 + intensity * 60}%)`;
+    return value < 0 ? `hsl(265 82% ${8 + intensity * 58}%)` : `hsl(145 88% ${8 + intensity * 60}%)`;
 };
 
-const drawHeatmap = (
-    request: EditorRenderRequest,
-    context: CanvasRenderingContext2D,
-) => {
+const drawHeatmap = (request: EditorRenderRequest, context: CanvasRenderingContext2D) => {
     const series = request.series;
-    if (
-        !series
-        || (series.payload.kind !== 'frequency-u16'
-            && series.payload.kind !== 'category-u16')
-    ) {
+    if (!series || (series.payload.kind !== 'frequency-u16' && series.payload.kind !== 'category-u16')) {
         throw new Error('向量数据形态与 renderer 不匹配。');
     }
     const { width, height } = size(request);
     const payload = series.payload;
-    const range = visibleSampleRange(series, request.viewport);
     const topHeight = Math.floor(height * 0.7);
-    const sampleCount = Math.max(1, range.endIndex - range.startIndex);
-    const columns = Math.max(1, Math.min(width, sampleCount));
-    const rows = payload.kind === 'category-u16'
-        ? payload.width
-        : Math.min(128, payload.width);
+    const columns = plotColumns(series, request.viewport, width, request.devicePixelRatio, request.durationSeconds);
+    const rows = payload.kind === 'category-u16' ? payload.width : Math.min(128, payload.width);
     const signed = request.feature.id === 'mfcc';
     let maximum = 0;
     for (const encoded of payload.values) {
@@ -173,32 +136,20 @@ const drawHeatmap = (
         maximum = Math.max(maximum, signed ? Math.abs(value) : value);
     }
     maximum = Math.max(maximum, 0.000001);
-    for (let column = 0; column < columns; column += 1) {
-        const sampleIndex = Math.min(
-            Math.max(range.startIndex, range.endIndex - 1),
-            range.startIndex + Math.floor(column * sampleCount / columns),
-        );
+    for (const column of columns) {
+        const sampleIndex = column.startIndex;
         const values = vectorAt(payload, sampleIndex);
-        const x0 = Math.floor(column * width / columns);
-        const x1 = Math.ceil((column + 1) * width / columns);
+        const x0 = column.left;
+        const x1 = column.right;
         for (let row = 0; row < rows; row += 1) {
-            const bin = payload.kind === 'category-u16'
-                ? row
-                : Math.min(
-                    payload.width - 1,
-                    Math.floor(row * payload.width / rows),
-                );
+            const bin =
+                payload.kind === 'category-u16'
+                    ? row
+                    : Math.min(payload.width - 1, Math.floor((row * payload.width) / rows));
             const value = values[bin] ?? 0;
-            context.fillStyle = signed
-                ? signedHeatColor(value, maximum)
-                : heatColor(value, maximum);
-            const y = topHeight - Math.ceil((row + 1) * topHeight / rows);
-            context.fillRect(
-                x0,
-                y,
-                Math.max(1, x1 - x0),
-                Math.ceil(topHeight / rows) + 1,
-            );
+            context.fillStyle = signed ? signedHeatColor(value, maximum) : heatColor(value, maximum);
+            const y = topHeight - Math.ceil(((row + 1) * topHeight) / rows);
+            context.fillRect(x0, y, x1 - x0, Math.ceil(topHeight / rows) + 1);
         }
     }
     context.strokeStyle = 'rgba(132, 255, 185, 0.35)';
@@ -208,18 +159,13 @@ const drawHeatmap = (
     context.stroke();
 };
 
-const drawWaveform = (
-    request: EditorRenderRequest,
-    context: CanvasRenderingContext2D,
-) => {
+const drawWaveform = (request: EditorRenderRequest, context: CanvasRenderingContext2D) => {
     const series = request.series;
     if (!series || series.payload.kind !== 'waveform-envelope') {
         throw new Error('波形数据形态与 renderer 不匹配。');
     }
     const { width, height } = size(request);
-    const range = visibleSampleRange(series, request.viewport);
-    const sampleCount = Math.max(1, range.endIndex - range.startIndex);
-    const columns = Math.max(1, Math.min(width, sampleCount));
+    const columns = plotColumns(series, request.viewport, width, request.devicePixelRatio, request.durationSeconds);
     const toY = (value: number) => height / 2 - value * (height / 2 - 7);
     context.strokeStyle = 'rgba(248, 255, 135, 0.45)';
     context.beginPath();
@@ -228,13 +174,11 @@ const drawWaveform = (
     context.stroke();
     context.strokeStyle = '#7dffb3';
     context.lineWidth = 1.5;
-    for (let column = 0; column < columns; column += 1) {
-        const sampleIndex = Math.min(
-            Math.max(range.startIndex, range.endIndex - 1),
-            range.startIndex + Math.floor(column * sampleCount / columns),
-        );
+    for (const column of columns) {
+        const sampleIndex = column.startIndex;
         const envelope = waveformEnvelopeAt(series.payload, sampleIndex);
-        const x = column / Math.max(1, columns - 1) * width;
+        const x = (column.left + column.right) / 2;
+        context.lineWidth = column.right - column.left;
         context.beginPath();
         context.moveTo(x, toY(envelope.max));
         context.lineTo(x, toY(envelope.min));
@@ -242,10 +186,7 @@ const drawWaveform = (
     }
 };
 
-const drawLoudness = (
-    request: EditorRenderRequest,
-    context: CanvasRenderingContext2D,
-) => {
+const drawLoudness = (request: EditorRenderRequest, context: CanvasRenderingContext2D) => {
     const series = request.series;
     if (!series || series.payload.kind !== 'loudness') {
         throw new Error('响度数据形态与 renderer 不匹配。');
@@ -254,49 +195,34 @@ const drawLoudness = (
     const payload = series.payload;
     const range = visibleSampleRange(series, request.viewport);
     const heatmapHeight = Math.floor(height * 0.68);
-    const sampleCount = Math.max(1, range.endIndex - range.startIndex);
-    const columns = Math.max(1, Math.min(width, sampleCount));
+    const columns = plotColumns(series, request.viewport, width, request.devicePixelRatio, request.durationSeconds);
     let maximum = 0;
     for (const value of payload.specific) {
         maximum = Math.max(maximum, value * payload.scale + payload.offset);
     }
     maximum = Math.max(maximum, 0.000001);
-    for (let column = 0; column < columns; column += 1) {
-        const sampleIndex = Math.min(
-            Math.max(range.startIndex, range.endIndex - 1),
-            range.startIndex + Math.floor(column * sampleCount / columns),
-        );
+    for (const column of columns) {
+        const sampleIndex = column.startIndex;
         const current = loudnessAt(payload, sampleIndex);
-        const x0 = Math.floor(column * width / columns);
-        const x1 = Math.ceil((column + 1) * width / columns);
+        const x0 = column.left;
+        const x1 = column.right;
         current.specific.forEach((value, band) => {
             context.fillStyle = heatColor(value, maximum);
-            const y = heatmapHeight
-                - Math.ceil((band + 1) * heatmapHeight / payload.bands);
-            context.fillRect(
-                x0,
-                y,
-                Math.max(1, x1 - x0),
-                Math.ceil(heatmapHeight / payload.bands) + 1,
-            );
+            const y = heatmapHeight - Math.ceil(((band + 1) * heatmapHeight) / payload.bands);
+            context.fillRect(x0, y, x1 - x0, Math.ceil(heatmapHeight / payload.bands) + 1);
         });
     }
     const totals = payload.total.subarray(range.startIndex, range.endIndex);
     const domain = scalarPlotDomain(totals, { min: 0 });
     const top = heatmapHeight + 8;
     const bottom = height - 7;
-    const toY = (value: number) => bottom
-        - (value - domain.min) / (domain.max - domain.min) * (bottom - top);
+    const toY = (value: number) => bottom - ((value - domain.min) / (domain.max - domain.min)) * (bottom - top);
     context.strokeStyle = '#7dffb3';
     context.lineWidth = 2;
     context.beginPath();
     totals.forEach((value, localIndex) => {
         const sampleIndex = range.startIndex + localIndex;
-        const x = timeToCanvasX(
-            sampleIndex * series.sampleStepSeconds,
-            request.viewport,
-            width,
-        );
+        const x = plotTimeX(sampleTime(series, sampleIndex), request.viewport, width);
         if (localIndex === 0) context.moveTo(x, toY(value));
         else context.lineTo(x, toY(value));
     });
@@ -308,7 +234,7 @@ const drawLoudness = (
 };
 
 const phaseRgb = (phase: number): [number, number, number] => {
-    const hue = ((phase / (Math.PI * 2)) + 1) % 1 * 6;
+    const hue = ((phase / (Math.PI * 2) + 1) % 1) * 6;
     const sector = Math.floor(hue);
     const fraction = hue - sector;
     const high = 232;
@@ -316,28 +242,31 @@ const phaseRgb = (phase: number): [number, number, number] => {
     const rising = Math.round(low + (high - low) * fraction);
     const falling = Math.round(high - (high - low) * fraction);
     switch (sector) {
-        case 0: return [high, rising, low];
-        case 1: return [falling, high, low];
-        case 2: return [low, high, rising];
-        case 3: return [low, falling, high];
-        case 4: return [rising, low, high];
-        default: return [high, low, falling];
+        case 0:
+            return [high, rising, low];
+        case 1:
+            return [falling, high, low];
+        case 2:
+            return [low, high, rising];
+        case 3:
+            return [low, falling, high];
+        case 4:
+            return [rising, low, high];
+        default:
+            return [high, low, falling];
     }
 };
 
-const drawComplex = (
-    request: EditorRenderRequest,
-    context: CanvasRenderingContext2D,
-) => {
+const drawComplex = (request: EditorRenderRequest, context: CanvasRenderingContext2D) => {
     const series = request.series;
     if (!series || series.payload.kind !== 'complex-derived') {
         throw new Error('复频谱数据形态与 renderer 不匹配。');
     }
     const { width, height } = size(request);
     const payload = series.payload;
-    const range = visibleSampleRange(series, request.viewport);
-    const sampleCount = Math.max(1, range.endIndex - range.startIndex);
-    const columns = Math.max(1, Math.min(width, sampleCount));
+    const geometry = plotColumns(series, request.viewport, width, request.devicePixelRatio, request.durationSeconds);
+    const columns = geometry.length;
+    if (!columns) return;
     const bins = payload.bins;
     const magnitudeImage = new ImageData(columns, bins);
     const phaseImage = new ImageData(columns, bins);
@@ -347,16 +276,12 @@ const drawComplex = (
     }
     maximum = Math.max(maximum, 0.000001);
     for (let column = 0; column < columns; column += 1) {
-        const sampleIndex = Math.min(
-            Math.max(range.startIndex, range.endIndex - 1),
-            range.startIndex + Math.floor(column * sampleCount / columns),
-        );
+        const sampleIndex = geometry[column]!.startIndex;
         const sourceOffset = sampleIndex * bins;
         for (let bin = 0; bin < bins; bin += 1) {
             const sourceIndex = sourceOffset + bin;
             const target = ((bins - 1 - bin) * columns + column) * 4;
-            const magnitude = (payload.magnitude[sourceIndex] ?? 0)
-                * payload.magnitudeScale;
+            const magnitude = (payload.magnitude[sourceIndex] ?? 0) * payload.magnitudeScale;
             const intensity = Math.sqrt(magnitude / maximum);
             magnitudeImage.data[target] = Math.round(7 + intensity * 118);
             magnitudeImage.data[target + 1] = Math.round(16 + intensity * 239);
@@ -367,10 +292,7 @@ const drawComplex = (
                 phaseImage.data[target + 1] = 20;
                 phaseImage.data[target + 2] = 16;
             } else {
-                const phase = Math.max(
-                    -1,
-                    Math.min(1, (payload.phase[sourceIndex] ?? 0) / 32_767),
-                ) * Math.PI;
+                const phase = Math.max(-1, Math.min(1, (payload.phase[sourceIndex] ?? 0) / 32_767)) * Math.PI;
                 const [red, green, blue] = phaseRgb(phase);
                 phaseImage.data[target] = red;
                 phaseImage.data[target + 1] = green;
@@ -387,9 +309,23 @@ const drawComplex = (
     const divider = Math.floor(height / 2);
     context.imageSmoothingEnabled = false;
     sourceContext.putImageData(magnitudeImage, 0, 0);
-    context.drawImage(source, 0, 0, width, divider - 2);
+    geometry.forEach((column, index) =>
+        context.drawImage(source, index, 0, 1, bins, column.left, 0, column.right - column.left, divider - 2),
+    );
     sourceContext.putImageData(phaseImage, 0, 0);
-    context.drawImage(source, 0, divider + 2, width, height - divider - 2);
+    geometry.forEach((column, index) =>
+        context.drawImage(
+            source,
+            index,
+            0,
+            1,
+            bins,
+            column.left,
+            divider + 2,
+            column.right - column.left,
+            height - divider - 2,
+        ),
+    );
     context.strokeStyle = 'rgba(132, 255, 185, 0.45)';
     context.beginPath();
     context.moveTo(0, divider + 0.5);
@@ -401,9 +337,8 @@ const drawComplex = (
     context.fillText('Phase · −π…π', 8, divider + 17);
 };
 
-const exactVector = (
-    exactValue: AnalysisCursorValueResult | null,
-): number[] => Array.isArray(exactValue?.value) ? exactValue.value : [];
+const exactVector = (exactValue: AnalysisCursorValueResult | null): number[] =>
+    Array.isArray(exactValue?.value) ? exactValue.value : [];
 
 const cursorVector = (
     request: EditorRenderRequest,
@@ -413,15 +348,8 @@ const cursorVector = (
     const exact = exactVector(exactValue);
     if (exact.length > 0) return exact;
     const series = request.series;
-    if (
-        !series
-        || (series.payload.kind !== 'frequency-u16'
-            && series.payload.kind !== 'category-u16')
-    ) return [];
-    return vectorAt(
-        series.payload,
-        cursorSampleIndex(series, cursorSeconds),
-    );
+    if (!series || (series.payload.kind !== 'frequency-u16' && series.payload.kind !== 'category-u16')) return [];
+    return vectorAt(series.payload, cursorSampleIndex(series, cursorSeconds));
 };
 
 const drawLoudnessCursor = (
@@ -432,12 +360,13 @@ const drawLoudnessCursor = (
 ) => {
     const value = exactValue?.value;
     if (
-        !value
-        || Array.isArray(value)
-        || typeof value === 'number'
-        || !('specific' in value)
-        || value.specific.length !== 24
-    ) return;
+        !value ||
+        Array.isArray(value) ||
+        typeof value === 'number' ||
+        !('specific' in value) ||
+        value.specific.length !== 24
+    )
+        return;
     const panelWidth = Math.min(190, Math.max(120, width * 0.28));
     const left = width - panelWidth;
     const panelHeight = Math.floor(height * 0.68);
@@ -446,7 +375,7 @@ const drawLoudnessCursor = (
     context.fillRect(left, 0, panelWidth, panelHeight);
     const rowHeight = panelHeight / value.specific.length;
     value.specific.forEach((entry, index) => {
-        const barWidth = Math.max(1, entry / maximum * (panelWidth - 34));
+        const barWidth = Math.max(1, (entry / maximum) * (panelWidth - 34));
         const y = panelHeight - (index + 1) * rowHeight;
         context.fillStyle = '#7dffb3';
         context.fillRect(left + 30, y + 1, barWidth, Math.max(1, rowHeight - 2));
@@ -468,7 +397,7 @@ const drawBufferCursor = (
     context.strokeStyle = '#7dffb3';
     context.beginPath();
     values.forEach((value, index) => {
-        const x = index / Math.max(1, values.length - 1) * width;
+        const x = (index / Math.max(1, values.length - 1)) * width;
         const y = baseline - Math.max(-1, Math.min(1, value)) * amplitude;
         if (index === 0) context.moveTo(x, y);
         else context.lineTo(x, y);
@@ -488,7 +417,7 @@ const drawMfccCursor = (
     const maximum = signedVectorMaximum(values);
     const barWidth = width / Math.max(1, values.length);
     values.forEach((value, index) => {
-        const barHeight = Math.abs(value) / maximum * (bottom - top) / 2;
+        const barHeight = ((Math.abs(value) / maximum) * (bottom - top)) / 2;
         context.fillStyle = value < 0 ? '#b58cff' : '#7dffb3';
         context.fillRect(
             index * barWidth + 1,
@@ -504,13 +433,36 @@ export const analysisCanvasRenderer: EditorRendererAdapter = {
         const { width, height } = size(request);
         drawGrid(context, width, height);
         if (!request.series) return;
-        if (request.feature.id === 'wallpaperEngineSpectrum') { drawWallpaperHeatmap(request, context); return; }
-        switch (request.feature.outputShape) {
-            case 'scalar': drawScalar(request, context); break;
-            case 'waveform': drawWaveform(request, context); break;
-            case 'loudness-structure': drawLoudness(request, context); break;
-            case 'complex-spectrum': drawComplex(request, context); break;
-            default: drawHeatmap(request, context);
+        const left = Math.max(0, plotTimeX(0, request.viewport, width));
+        const right = Math.min(width, plotTimeX(request.durationSeconds ?? Infinity, request.viewport, width));
+        if (right <= left) return;
+        context.save();
+        context.beginPath();
+        context.rect(left, 0, right - left, height);
+        context.clip();
+        try {
+            if (request.feature.id === 'wallpaperEngineSpectrum') {
+                drawWallpaperHeatmap(request, context);
+                return;
+            }
+            switch (request.feature.outputShape) {
+                case 'scalar':
+                    drawScalar(request, context);
+                    break;
+                case 'waveform':
+                    drawWaveform(request, context);
+                    break;
+                case 'loudness-structure':
+                    drawLoudness(request, context);
+                    break;
+                case 'complex-spectrum':
+                    drawComplex(request, context);
+                    break;
+                default:
+                    drawHeatmap(request, context);
+            }
+        } finally {
+            context.restore();
         }
     },
     drawCursor(request, cursorSeconds, exactValue, context) {
@@ -523,7 +475,10 @@ export const analysisCanvasRenderer: EditorRendererAdapter = {
         context.lineTo(x + 0.5, height);
         context.stroke();
         if (request.feature.outputShape === 'scalar') return;
-        if (request.feature.id === 'wallpaperEngineSpectrum') { drawWallpaperCursor(request, cursorSeconds, exactValue, context); return; }
+        if (request.feature.id === 'wallpaperEngineSpectrum') {
+            drawWallpaperCursor(request, cursorSeconds, exactValue, context);
+            return;
+        }
         if (request.feature.id === 'loudness') {
             drawLoudnessCursor(context, width, height, exactValue);
             return;
@@ -545,14 +500,9 @@ export const analysisCanvasRenderer: EditorRendererAdapter = {
         if (request.feature.id === 'chroma') {
             const barWidth = width / values.length;
             values.forEach((value, index) => {
-                const barHeight = chartHeight * Math.max(0, value) / maximum;
+                const barHeight = (chartHeight * Math.max(0, value)) / maximum;
                 context.fillStyle = '#7dffb3';
-                context.fillRect(
-                    index * barWidth + 1,
-                    height - barHeight - 3,
-                    Math.max(1, barWidth - 2),
-                    barHeight,
-                );
+                context.fillRect(index * barWidth + 1, height - barHeight - 3, Math.max(1, barWidth - 2), barHeight);
             });
             return;
         }
@@ -560,10 +510,8 @@ export const analysisCanvasRenderer: EditorRendererAdapter = {
         context.lineWidth = 1.5;
         context.beginPath();
         values.forEach((value, index) => {
-            const px = values.length <= 1
-                ? 0
-                : index / (values.length - 1) * width;
-            const py = height - 3 - Math.max(0, value) / maximum * chartHeight;
+            const px = values.length <= 1 ? 0 : (index / (values.length - 1)) * width;
+            const py = height - 3 - (Math.max(0, value) / maximum) * chartHeight;
             if (index === 0) context.moveTo(px, py);
             else context.lineTo(px, py);
         });
