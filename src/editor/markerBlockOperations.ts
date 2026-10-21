@@ -3,7 +3,7 @@ import { normalizeEditorSeconds } from './projectCodec';
 import { rangesOverlap } from './rangeAnnotations';
 import { nextRangeCell } from './rangeAnnotations';
 import { DEFAULT_BEAT_SNAP, type EditorBeatSnapSetting } from './beatSnap';
-import type { EditorLaneV1, EditorProjectV1, PointEventV1, RangeEventV1 } from './types';
+import type { EditorLaneV1, EditorProjectV2, PointEventV1, RangeEventV1 } from './types';
 
 export interface MarkerBlockSelection {
     laneId: string;
@@ -14,7 +14,7 @@ export interface MarkerBlockSelection {
 }
 
 export interface MarkerBlockResult {
-    project: EditorProjectV1;
+    project: EditorProjectV2;
     selection: MarkerBlockSelection;
     eventCount: number;
 }
@@ -41,7 +41,7 @@ export class MarkerBlockError extends Error {
 }
 
 const selectedLane = (
-    project: EditorProjectV1,
+    project: EditorProjectV2,
     selection: Pick<MarkerBlockSelection, 'laneId' | 'innerClassId'>,
 ): EditorLaneV1 => {
     const lane = project.lanes.find(entry => entry.id === selection.laneId);
@@ -54,7 +54,7 @@ const selectedLane = (
     return lane;
 };
 
-const normalizedSelection = (project: EditorProjectV1, selection: MarkerBlockSelection): MarkerBlockSelection => {
+const normalizedSelection = (project: EditorProjectV2, selection: MarkerBlockSelection): MarkerBlockSelection => {
     selectedLane(project, selection);
     const startSeconds = normalizeEditorSeconds(selection.startSeconds);
     const endSeconds = normalizeEditorSeconds(selection.endSeconds);
@@ -65,7 +65,7 @@ const normalizedSelection = (project: EditorProjectV1, selection: MarkerBlockSel
 };
 
 export const markerGridSpanAtTime = (
-    project: EditorProjectV1,
+    project: EditorProjectV2,
     time: number,
     setting: EditorBeatSnapSetting = DEFAULT_BEAT_SNAP,
 ) => {
@@ -79,7 +79,7 @@ export const markerGridSpanAtTime = (
 };
 
 export const selectMarkerBlockByTime = (
-    project: EditorProjectV1,
+    project: EditorProjectV2,
     laneId: string,
     innerClassId: string,
     anchorSeconds: number,
@@ -106,7 +106,7 @@ export const selectMarkerBlockByTime = (
 };
 
 export const collectMarkerBlockEvents = (
-    project: EditorProjectV1,
+    project: EditorProjectV2,
     selectionInput: MarkerBlockSelection,
 ): Array<PointEventV1 | RangeEventV1> => {
     const selection = normalizedSelection(project, selectionInput);
@@ -132,10 +132,10 @@ export const collectMarkerBlockEvents = (
           );
 };
 
-export const markerBlockEventCount = (project: EditorProjectV1, selection: MarkerBlockSelection): number =>
+export const markerBlockEventCount = (project: EditorProjectV2, selection: MarkerBlockSelection): number =>
     collectMarkerBlockEvents(project, selection).length;
 
-export function deleteMarkerBlock(project: EditorProjectV1, selection: MarkerBlockSelection) {
+export function deleteMarkerBlock(project: EditorProjectV2, selection: MarkerBlockSelection) {
     const ids = new Set(collectMarkerBlockEvents(project, selection).map(event => event.id));
     if (!ids.size) return { project, eventCount: 0 };
     const lanes = project.lanes.map(lane => {
@@ -190,7 +190,7 @@ const assertRangeConflicts = (existing: readonly RangeEventV1[], candidates: rea
 };
 
 const shiftedSelection = (
-    project: EditorProjectV1,
+    project: EditorProjectV2,
     selection: MarkerBlockSelection,
     targetStartSeconds: number,
 ): { selection: MarkerBlockSelection; offsetSeconds: number } => {
@@ -212,7 +212,7 @@ const shiftedSelection = (
 };
 
 export const copyMarkerBlockAfter = (
-    project: EditorProjectV1,
+    project: EditorProjectV2,
     selectionInput: MarkerBlockSelection,
     createId: () => string = () => crypto.randomUUID(),
 ): MarkerBlockResult => {
@@ -273,7 +273,7 @@ export const copyMarkerBlockAfter = (
 };
 
 export const moveMarkerBlock = (
-    project: EditorProjectV1,
+    project: EditorProjectV2,
     selectionInput: MarkerBlockSelection,
     targetStartSeconds: number,
 ): MarkerBlockResult => {

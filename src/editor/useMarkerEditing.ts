@@ -12,7 +12,7 @@ import {
 import { useMarkerBlocks } from './useMarkerBlocks';
 import { normalizeEditorSeconds } from './projectCodec';
 import type { EditorBeatSnapSetting } from './beatSnap';
-import type { EditorProjectV1, PointEventV1, RangeEventV1 } from './types';
+import type { EditorProjectV2, PointEventV1, RangeEventV1 } from './types';
 
 interface Row {
     laneId: string;
@@ -38,16 +38,16 @@ interface Drag extends Row {
     original?: number;
 }
 interface Preview {
-    project: EditorProjectV1 | null;
+    project: EditorProjectV2 | null;
     error: string;
 }
 
 export function useMarkerEditing(
-    project: () => EditorProjectV1,
+    project: () => EditorProjectV2,
     view: () => MarkerTimeView,
     active: () => boolean,
     setting: () => EditorBeatSnapSetting,
-    publish: (project: EditorProjectV1) => void,
+    publish: (project: EditorProjectV2) => void,
     report: (text: string) => void,
 ) {
     const candidate = shallowRef<Candidate | null>(null),
@@ -213,7 +213,7 @@ export function useMarkerEditing(
         };
         element.setPointerCapture(event.pointerId);
     }
-    function movedProject(state: Drag, raw: number): EditorProjectV1 | null {
+    function movedProject(state: Drag, raw: number): EditorProjectV2 | null {
         const value = state.eventId ? item(state, state.eventId) : null;
         if (state.kind === 'event' && value) {
             if (!markerCanEditAt(view(), raw)) throw new Error('只能在歌曲范围内操作。');

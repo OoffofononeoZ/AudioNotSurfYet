@@ -54,7 +54,7 @@ test('opens the current track from Header and preserves the E1 draft on refresh'
     };
     expect(exportedProject).toMatchObject({
         format: 'audiosurf-editor',
-        schemaVersion: 1,
+        schemaVersion: 2,
         track: { contentHash: expect.stringMatching(/^[a-f\d]{64}$/) },
     });
 

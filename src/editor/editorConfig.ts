@@ -1,5 +1,5 @@
-export const EDITOR_MIN_METERED_BPM = 20;
-export const EDITOR_MAX_BPM = 300;
+export const EDITOR_MIN_METERED_BPM = 10;
+export const EDITOR_MAX_BPM = 1200;
 export const EDITOR_MIN_SUBDIVISION_WIDTH_PX = 12;
 export const EDITOR_CONTEXT_PAN_THRESHOLD_PX = 4;
 export const EDITOR_ZOOM_MIN = 1;

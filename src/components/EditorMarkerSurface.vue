@@ -109,9 +109,9 @@ import type { MarkerDrawing } from '../editor/markerDrawing';
 import { pointCellAtTime } from '../editor/pointAnnotations';
 import { nextRangeCell } from '../editor/rangeAnnotations';
 import type { EditorBeatSnapSetting } from '../editor/beatSnap';
-import type { EditorLaneV1, EditorProjectV1, PointEventV1, RangeEventV1 } from '../editor/types';
+import type { EditorLaneV1, EditorProjectV2, PointEventV1, RangeEventV1 } from '../editor/types';
 const props = defineProps<{
-    project: EditorProjectV1;
+    project: EditorProjectV2;
     lane: EditorLaneV1;
     innerClassId: string;
     view: MarkerTimeView;

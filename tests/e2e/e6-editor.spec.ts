@@ -2,7 +2,7 @@ import { expect, test, type Page } from '@playwright/test';
 import path from 'node:path';
 import { visiblePointEvents } from '../../src/editor/pointAnnotations';
 import { visibleRangeEvents } from '../../src/editor/rangeAnnotations';
-import type { EditorProjectV1 } from '../../src/editor/types';
+import type { EditorProjectV2 } from '../../src/editor/types';
 import { createMarkerTimeView } from '../../src/editor/markerTimeView';
 import { addMarkerLane } from '../support/editor-marking';
 import {
@@ -36,7 +36,7 @@ const browserIdentity = (page: Page) =>
 const decodeSavedProject = async (page: Page, index = 0) => {
     const entry = (await savedPickerEntries(page))[index];
     expect(entry).toBeTruthy();
-    return JSON.parse(Buffer.from(entry!.base64, 'base64').toString('utf8')) as EditorProjectV1;
+    return JSON.parse(Buffer.from(entry!.base64, 'base64').toString('utf8')) as EditorProjectV2;
 };
 
 const openCurrentEditor = async (page: Page) => {
@@ -97,7 +97,7 @@ const createFifteenMinuteFixture = async (page: Page) => {
     });
 };
 
-const expectedVisibleCounts = (project: EditorProjectV1) => {
+const expectedVisibleCounts = (project: EditorProjectV2) => {
     const view = createMarkerTimeView(0, project.track.durationSeconds);
     let points = 0;
     let ranges = 0;

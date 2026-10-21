@@ -1,5 +1,5 @@
 import type { VisualizerExportState } from './exportTypes';
-import type { EditorProjectV1, EditorTrackIdentityV1 } from '../editor/types';
+import type { EditorProjectV2, EditorTrackIdentityV1 } from '../editor/types';
 import type {
     VisualizerParameterBindingV1,
     VisualizerResolution,
@@ -48,7 +48,7 @@ export interface VisualizerProjectV5 {
     /** Each leaf is owned exactly once; sibling order determines render layers. */
     items: CompositionItem[];
     resources: ResourceSnapshot;
-    editorSnapshot?: { capturedAt: string; project: EditorProjectV1 };
+    editorSnapshot?: { capturedAt: string; project: EditorProjectV2 };
 }
 export interface CompositionDraft {
     schemaVersion: 5;

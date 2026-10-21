@@ -1,7 +1,7 @@
 import { pointCellAtTime, type PointCell } from './pointAnnotations';
 import { DEFAULT_BEAT_SNAP, type EditorBeatSnapSetting } from './beatSnap';
 import { collectMarkerBlockEvents, type MarkerBlockSelection } from './markerBlockOperations';
-import type { EditorProjectV1, PointEventV1, RangeEventV1 } from './types';
+import type { EditorProjectV2, PointEventV1, RangeEventV1 } from './types';
 
 export const MARKER_PLAYHEAD_RATIO = 0.15;
 export const DEFAULT_MARKER_SPAN = 10;
@@ -62,7 +62,7 @@ export const markerEventReachable = (view: MarkerTimeView, event: PointEventV1 |
 /** The pointer must be in the editable area before snapping; never clamp song padding into an event. */
 export function markerCellAtTime(
     raw: number,
-    project: EditorProjectV1,
+    project: EditorProjectV2,
     view: MarkerTimeView,
     width: number,
     setting: Readonly<EditorBeatSnapSetting> = DEFAULT_BEAT_SNAP,
@@ -74,7 +74,7 @@ export function markerCellAtTime(
 
 /** Freeze explicit event IDs so later commands cannot pull historical events into a selection. */
 export function editableMarkerBlock(
-    project: EditorProjectV1,
+    project: EditorProjectV2,
     selection: MarkerBlockSelection,
     view: MarkerTimeView,
 ): MarkerBlockSelection {
@@ -83,7 +83,7 @@ export function editableMarkerBlock(
 }
 
 export function assertMarkerBlockEditable(
-    project: EditorProjectV1,
+    project: EditorProjectV2,
     selection: MarkerBlockSelection,
     view: MarkerTimeView,
     offset = 0,

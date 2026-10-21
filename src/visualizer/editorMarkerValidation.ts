@@ -1,5 +1,5 @@
 import { invalid, keys, record, text } from './projectValidation';
-import type { EditorProjectV1 } from '../editor/types';
+import type { EditorProjectV2 } from '../editor/types';
 import type { MarkerBindings, MarkerInputContract, MarkerInputDefinition } from './editorMarkerTypes';
 
 export function validateMarkerInputs(input: unknown): MarkerInputContract[] {
@@ -78,7 +78,7 @@ export function validateMarkerBindings(
     input: unknown,
     inputs: MarkerInputDefinition[] | undefined,
     timingInput: string | undefined,
-    editor?: EditorProjectV1,
+    editor?: EditorProjectV2,
     packageOnly = false,
 ): MarkerBindings | undefined {
     const selected = inputs?.filter(i => i.id !== timingInput) ?? [];

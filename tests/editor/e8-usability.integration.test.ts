@@ -6,7 +6,7 @@ import type { EditorDraftRepositoryPort } from '../../src/editor/editorDraftRepo
 import { EditorSessionController } from '../../src/editor/editorSessionController';
 import type { EditorFileGateway } from '../../src/editor/fileIO';
 import { resolveEditorUnavailableRecovery } from '../../src/editor/routeRecovery';
-import type { EditorDraftEnvelopeV1 } from '../../src/editor/types';
+import type { EditorDraftEnvelopeV2 } from '../../src/editor/types';
 import { useAudioSessionStore } from '../../src/stores/audioSessionStore';
 import type { DecodedAudioDescriptor, TrackRecord } from '../../src/types/audio';
 
@@ -25,13 +25,13 @@ const track = (id: string, hash: string): TrackRecord => ({
 });
 
 class MemoryRepository implements EditorDraftRepositoryPort {
-    envelope: EditorDraftEnvelopeV1 | null = null;
+    envelope: EditorDraftEnvelopeV2 | null = null;
     replaceCount = 0;
 
     async restore() {
         return this.envelope ? structuredClone(this.envelope) : null;
     }
-    async replace(value: EditorDraftEnvelopeV1) {
+    async replace(value: EditorDraftEnvelopeV2) {
         this.replaceCount += 1;
         this.envelope = structuredClone(value);
     }

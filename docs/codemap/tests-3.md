@@ -6,6 +6,7 @@
 
 | 文件 | 本地静态引用（最多显示 6 项） |
 | --- | --- |
+| [tests/support/analyzer-list.ts](../../tests/support/analyzer-list.ts) | [src/analysis/types.ts](../../src/analysis/types.ts) |
 | [tests/support/audio-fixtures.ts](../../tests/support/audio-fixtures.ts) | — |
 | [tests/support/e2-tempo-fixture.ts](../../tests/support/e2-tempo-fixture.ts) | [tests/support/audio-fixtures.ts](../../tests/support/audio-fixtures.ts)、[tests/support/m7-learning-fixture.ts](../../tests/support/m7-learning-fixture.ts) |
 | [tests/support/e3-point-fixture.ts](../../tests/support/e3-point-fixture.ts) | [tests/support/audio-fixtures.ts](../../tests/support/audio-fixtures.ts)、[tests/support/e2-tempo-fixture.ts](../../tests/support/e2-tempo-fixture.ts)、[tests/support/m7-learning-fixture.ts](../../tests/support/m7-learning-fixture.ts) |

@@ -9,7 +9,7 @@ import { createInitialEditorProject } from '../../src/editor/projectCodec';
 import { addPointInnerClass, createPointEvent, createPointLane } from '../../src/editor/pointAnnotations';
 import { createRangeEvent, createRangeLane } from '../../src/editor/rangeAnnotations';
 import type { PlaybackSnapshot } from '../../src/types/audio';
-import type { EditorProjectV1, PointLaneV1, RangeLaneV1 } from '../../src/editor/types';
+import type { EditorProjectV2, PointLaneV1, RangeLaneV1 } from '../../src/editor/types';
 
 function harness(kinds: ('point' | 'range')[] = ['point', 'range']) {
     let project = createInitialEditorProject({
@@ -19,6 +19,7 @@ function harness(kinds: ('point' | 'range')[] = ['point', 'range']) {
         {
             id: 'tempo',
             mode: 'metered',
+            beatOriginSeconds: 0,
             startSeconds: 0,
             bpm: 120,
             bpmSource: 'user',
@@ -70,7 +71,7 @@ function harness(kinds: ('point' | 'range')[] = ['point', 'range']) {
         get writes() {
             return writes;
         },
-        setProject(value: EditorProjectV1) {
+        setProject(value: EditorProjectV2) {
             project = value;
         },
         setActive(value: boolean) {
@@ -228,6 +229,7 @@ describe('keyboard marker recording', () => {
                     id: 'slow',
                     startSeconds: 2,
                     mode: 'metered',
+                    beatOriginSeconds: 2,
                     bpm: 60,
                     bpmSource: 'user',
                     meter: { numerator: 3, denominator: 4 },
@@ -251,6 +253,7 @@ describe('keyboard marker recording', () => {
                     id: 'unset',
                     startSeconds: 0,
                     mode: 'metered',
+                    beatOriginSeconds: 0,
                     bpm: null,
                     bpmSource: 'unset',
                     meter: { numerator: 4, denominator: 4 },

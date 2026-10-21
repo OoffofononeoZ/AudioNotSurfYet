@@ -189,7 +189,7 @@
                     <div class="tempo-measure" aria-hidden="true">
                         <span ref="fullMeasure" class="tempo-segment-content tempo-segment-full">
                             <label class="tempo-compact-field">
-                                <input class="tempo-compact-control tempo-bpm-input" value="300.000" />
+                                <input class="tempo-compact-control tempo-bpm-input" value="1200.000" />
                                 <span>BPM</span>
                             </label>
                         </span>
@@ -257,12 +257,12 @@ import {
     panEditorViewportByRatio,
     zoomEditorViewportAtX,
 } from '../editor/timeline';
-import type { EditorProjectV1, TempoSegmentV1 } from '../editor/types';
+import type { EditorProjectV2, TempoSegmentV2 } from '../editor/types';
 import type { EditorSessionSnapshot } from '../editor/types';
 
 const props = defineProps<{
     active?: boolean;
-    project: EditorProjectV1;
+    project: EditorProjectV2;
     playback: PlaybackSnapshot;
     analysis: AnalysisCoordinatorSnapshot;
     bufferSeries: AnalysisSeries | null;
@@ -270,7 +270,7 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-    updateProject: [project: EditorProjectV1, immediate: boolean];
+    updateProject: [project: EditorProjectV2, immediate: boolean];
 }>();
 
 const audioSession = useAudioSessionService();
@@ -547,14 +547,14 @@ const segmentPresentation = (index: number) =>
         presentationWidths.full,
         presentationWidths.summary,
     );
-const segmentSummary = (segment: TempoSegmentV1) =>
+const segmentSummary = (segment: TempoSegmentV2) =>
     segment.mode === 'single-beat' ? '单拍' : `${segment.bpm ?? '—'} BPM`;
 const measurePresentationWidths = () => {
     presentationWidths.full = Math.ceil(fullMeasure.value?.scrollWidth ?? 100);
     presentationWidths.summary = Math.ceil(summaryMeasure.value?.scrollWidth ?? 112);
 };
 
-const replaceTempoSegment = (next: TempoSegmentV1) => {
+const replaceTempoSegment = (next: TempoSegmentV2) => {
     emit(
         'updateProject',
         {
@@ -594,19 +594,21 @@ const restoreMetered = (id: string) => {
         id,
         startSeconds: segment.startSeconds,
         mode: 'metered',
+        beatOriginSeconds: segment.startSeconds,
         bpm: 100,
         bpmSource: 'user',
         meter: { numerator: 4, denominator: 4 },
     });
     tempoLiveMessage.value = '区间已切回 100 BPM。';
 };
-const sourceLabel = (source: 'unset' | 'estimated' | 'user') =>
+const sourceLabel = (source: 'unset' | 'estimated' | 'user' | 'imported') =>
     ({
         unset: '等待输入或自动估计',
         estimated: '自动估计',
         user: '用户输入',
+        imported: '谱面导入',
     })[source];
-const segmentAccessibleLabel = (segment: TempoSegmentV1, index: number) =>
+const segmentAccessibleLabel = (segment: TempoSegmentV2, index: number) =>
     segment.mode === 'single-beat'
         ? `区间 ${index + 1}，单拍`
         : `区间 ${index + 1}，${segment.bpm ?? '未设置'} BPM，${sourceLabel(segment.bpmSource)}`;
@@ -646,7 +648,7 @@ const boundaryDrag = shallowRef<{
     id: string;
     pointerId: number;
     element: HTMLElement;
-    original: TempoSegmentV1[];
+    original: TempoSegmentV2[];
 } | null>(null);
 const beginBoundaryDrag = (event: PointerEvent, id: string) => {
     selectedTempoId.value = id;

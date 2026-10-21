@@ -3,12 +3,12 @@ import { generateTempoGrid } from './tempoMap';
 import { divisorColour, divisorHeight, type EditorBeatSnapSetting } from './beatSnap';
 import { markerTimeToX, type MarkerTimeView } from './markerTimeView';
 import type { MarkerDrawing } from './markerDrawing';
-import type { EditorProjectV1 } from './types';
+import type { EditorProjectV2 } from './types';
 
 export function useMarkerSurfaceDrawing(
     element: Ref<HTMLElement | null>,
     canvas: Ref<HTMLCanvasElement | null>,
-    project: () => EditorProjectV1,
+    project: () => EditorProjectV2,
     view: () => MarkerTimeView,
     setting: () => EditorBeatSnapSetting,
     drawing: MarkerDrawing,

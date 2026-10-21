@@ -6,7 +6,7 @@
 
 - Home/MusicBar提供本地歌曲队列、metadata/封面、播放/seek/音量和四种播放模式；共享歌曲、音频时钟和最近会话恢复。
 - Analyzer展示当前注册特征及Wallpaper风格频谱，单列原列表与最多四项FIFO常驻区，共享时间/精确值；owner指定的专业说明完整保留。
-- Editor提供tempo/point/range、独立marker时间视图、overlay、草稿/换歌保护、播放数字录入、FT四轨/试听、有限乐器自动标记和显式人工修正/应用；工程仍为V1。
+- Editor提供tempo/point/range、独立marker时间视图、overlay、草稿/换歌保护、播放数字录入、FT四轨/试听、有限乐器自动标记和显式人工修正/应用；工程写入V2并显式迁移V1。
 - Visualizer采用V4原子元素、分组预设、共同处理参数、JSON资源包过渡版、本地资源库、原生输入与离线WebM导出。新增元素/预设先批准具体内容合同。
 - 原有自动处理路线尚未完成的逐拍/局部tempo、只读提案和处理数据映射见[剩余路线](../delivery/processing/roadmap.md)。已批准目标、已实现与已验证分别记录。
 

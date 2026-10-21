@@ -17,15 +17,16 @@ import {
     moveTempoBoundary,
     snapEditorTime,
 } from '../../src/editor/tempoMap';
-import type { TempoSegmentV1 } from '../../src/editor/types';
+import type { TempoSegmentV2 } from '../../src/editor/types';
 import { SAMPLE_RATE } from '../support/audio-fixtures';
 import { E2_TEMPO_CASES } from '../support/e2-tempo-fixture';
 
-const baseTempo = (): TempoSegmentV1[] => [
+const baseTempo = (): TempoSegmentV2[] => [
     {
         id: 'tempo-1',
         startSeconds: 0,
         mode: 'metered',
+        beatOriginSeconds: 0,
         bpm: 120,
         bpmSource: 'user',
         meter: { numerator: 4, denominator: 4 },
@@ -47,11 +48,12 @@ describe('Editor E2 timeline and tempo', () => {
     });
 
     test('uses 60/BPM beat spacing independently of meter denominator', () => {
-        const tempo: TempoSegmentV1[] = [
+        const tempo: TempoSegmentV2[] = [
             {
                 id: 'seven-eight',
                 startSeconds: 0,
                 mode: 'metered',
+                beatOriginSeconds: 0,
                 bpm: 127.5,
                 bpmSource: 'user',
                 meter: { numerator: 7, denominator: 8 },
@@ -63,8 +65,15 @@ describe('Editor E2 timeline and tempo', () => {
         expect(lines[1]!.timeSeconds - lines[0]!.timeSeconds).toBeCloseTo(beatSecondsFor(127.5), 6);
         expect(lines[0]!.kind).toBe('beat');
         expect(lines[7]!.kind).toBe('beat');
-        const changedMeter: TempoSegmentV1[] = [
-            { ...tempo[0]!, mode: 'metered', bpm: 127.5, bpmSource: 'user', meter: { numerator: 3, denominator: 4 } },
+        const changedMeter: TempoSegmentV2[] = [
+            {
+                ...tempo[0]!,
+                mode: 'metered',
+                beatOriginSeconds: tempo[0]!.startSeconds,
+                bpm: 127.5,
+                bpmSource: 'user',
+                meter: { numerator: 3, denominator: 4 },
+            },
         ];
         expect(generateTempoGrid(changedMeter, 8, { startSeconds: 0, endSeconds: 8, zoom: 1 })).toEqual(
             generateTempoGrid(tempo, 8, { startSeconds: 0, endSeconds: 8, zoom: 1 }),
@@ -75,11 +84,12 @@ describe('Editor E2 timeline and tempo', () => {
         const viewport = { startSeconds: 0, endSeconds: 10, zoom: 1 };
         const snapped = snapEditorTime(1.03, baseTempo(), viewport, 1_600, 10);
         expect(snapped).toBe(1);
-        const noBpm: TempoSegmentV1[] = [
+        const noBpm: TempoSegmentV2[] = [
             {
                 id: 'unset',
                 startSeconds: 0,
                 mode: 'metered',
+                beatOriginSeconds: 0,
                 bpm: null,
                 bpmSource: 'unset',
                 meter: { numerator: 4, denominator: 4 },
@@ -91,6 +101,7 @@ describe('Editor E2 timeline and tempo', () => {
             id: 'tempo-2',
             startSeconds: 4,
             mode: 'metered',
+            beatOriginSeconds: 4,
             bpm: 120,
         });
         expect(moveTempoBoundary(inserted, 'tempo-2', -4, 10)[1]!.startSeconds).toBe(0.000001);
@@ -105,12 +116,12 @@ describe('Editor E2 timeline and tempo', () => {
             ok: true,
             segment: { mode: 'metered', bpm: 127.5, bpmSource: 'user' },
         });
-        expect(applyBpmInput(segment, '19.999')).toMatchObject({
+        expect(applyBpmInput(segment, '9.999')).toMatchObject({
             ok: true,
             segment: { mode: 'single-beat' },
         });
         expect(applyBpmInput(segment, '-1')).toMatchObject({ ok: false });
-        expect(applyBpmInput(segment, '301')).toMatchObject({ ok: false });
+        expect(applyBpmInput(segment, '1201')).toMatchObject({ ok: false });
         expect(applyMeterInput(segment, 7, 8)).toMatchObject({
             ok: true,
             segment: { meter: { numerator: 7, denominator: 8 } },

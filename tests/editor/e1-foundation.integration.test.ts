@@ -15,8 +15,8 @@ import {
 } from '../../src/editor/editorDraftRepository';
 import { EditorSessionController } from '../../src/editor/editorSessionController';
 import type { EditorFileGateway } from '../../src/editor/fileIO';
-import { createInitialEditorProject, encodeEditorProjectV1 } from '../../src/editor/projectCodec';
-import type { EditorDraftEnvelopeV1, EditorProjectV1 } from '../../src/editor/types';
+import { createInitialEditorProject, encodeEditorProjectV2 } from '../../src/editor/projectCodec';
+import type { EditorDraftEnvelopeV2, EditorProjectV2 } from '../../src/editor/types';
 import type { SessionRepositoryPort } from '../../src/persistence/sessionRepository';
 import { useAudioSessionStore } from '../../src/stores/audioSessionStore';
 import type { DecodedAudioDescriptor, PlaybackSnapshot, TrackRecord } from '../../src/types/audio';
@@ -38,7 +38,7 @@ const track = (id: string, hash: string): TrackRecord => ({
     restoreState: 'available',
 });
 
-const projectFor = (value: TrackRecord): EditorProjectV1 => {
+const projectFor = (value: TrackRecord): EditorProjectV2 => {
     let id = 0;
     return createInitialEditorProject({
         track: {
@@ -53,7 +53,7 @@ const projectFor = (value: TrackRecord): EditorProjectV1 => {
 };
 
 class MemoryDraftRepository implements EditorDraftRepositoryPort {
-    envelope: EditorDraftEnvelopeV1 | null = null;
+    envelope: EditorDraftEnvelopeV2 | null = null;
     leaveWarning = true;
     failReplace = false;
     replaceCount = 0;
@@ -63,7 +63,7 @@ class MemoryDraftRepository implements EditorDraftRepositoryPort {
         return this.envelope ? structuredClone(this.envelope) : null;
     }
 
-    async replace(envelope: EditorDraftEnvelopeV1) {
+    async replace(envelope: EditorDraftEnvelopeV2) {
         this.replaceCount += 1;
         if (this.failReplace) throw new DOMException('quota', 'QuotaExceededError');
         this.envelope = structuredClone(envelope);
@@ -93,7 +93,7 @@ class MemoryDraftRepository implements EditorDraftRepositoryPort {
 }
 
 const createControllerHarness = (
-    draft: EditorDraftEnvelopeV1 | null = null,
+    draft: EditorDraftEnvelopeV2 | null = null,
     tempoRequest?: Promise<TempoEstimateResult | null>,
 ) => {
     const store = useAudioSessionStore();
@@ -281,6 +281,27 @@ class RepeatEngine implements AudioEnginePort {
 }
 
 describe('Editor E1 foundation integration', () => {
+    test.each([false, true])(
+        'writes a migrated draft through autosave and preserves it on quota failure (%s)',
+        async fail => {
+            const h = createControllerHarness();
+            const previous = { schemaVersion: 2 as const, savedAt: NOW.toISOString(), project: projectFor(h.trackA) };
+            h.repository.envelope = previous;
+            const restored = { ...previous, migratedFromV1: true as const };
+            vi.spyOn(h.repository, 'restore').mockResolvedValue(restored);
+            h.repository.failReplace = fail;
+            await h.controller.enter(h.trackA.id);
+            await h.controller.flush();
+            expect(h.controller.getSnapshot()).toMatchObject({
+                state: 'ready',
+                persistence: fail ? 'not-persisted' : 'saved',
+                project: { schemaVersion: 2 },
+            });
+            expect(h.repository.replaceCount).toBeGreaterThan(0);
+            expect(h.repository.envelope).toEqual(previous);
+            await h.controller.dispose();
+        },
+    );
     beforeEach(() => {
         setActivePinia(createPinia());
     });
@@ -292,7 +313,7 @@ describe('Editor E1 foundation integration', () => {
         await repository.replace(createEditorDraftEnvelope(project, () => NOW));
         await repository.setLeaveWarningEnabled(false);
         expect(await repository.restore()).toEqual({
-            schemaVersion: 1,
+            schemaVersion: 2,
             savedAt: NOW.toISOString(),
             project,
         });
@@ -414,7 +435,7 @@ describe('Editor E1 foundation integration', () => {
 
         const imported = structuredClone(before)!;
         imported.updatedAt = '2026-08-26T01:01:00.000Z';
-        harness.setOpenedBytes(encodeEditorProjectV1(imported));
+        harness.setOpenedBytes(encodeEditorProjectV2(imported));
         await expect(harness.controller.importProject()).resolves.toBe('imported');
         expect(harness.repository.envelope?.project.updatedAt).toBe('2026-08-26T01:01:00.000Z');
         await harness.controller.dispose();
@@ -448,6 +469,7 @@ describe('Editor E1 foundation integration', () => {
             id: project.tempoMap[0]!.id,
             startSeconds: 0,
             mode: 'metered',
+            beatOriginSeconds: 0,
             bpm: 127.5,
             bpmSource: 'user',
             meter: { numerator: 4, denominator: 4 },
