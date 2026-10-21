@@ -209,6 +209,12 @@ Node24.18.0/npm11.x，依赖版本以lockfile为准；浏览器专项使用真�
 
 用户歌曲、私有名称/路径/hash、歌词和许可不明二进制不得入库。fixture许可与来源继续核对；OS原生保存/权限、辅助技术、试听或真实GPU缺口如实记录，不能用stub/注入/合成结果替代。
 
+## Editor 图表细节专项
+
+`npx vitest run tests/worker/window-analysis.test.ts tests/analysis/window-requests.test.ts tests/editor/analysis-window-view.test.ts tests/editor/analysis-render-geometry.test.ts` 覆盖真实帧／PCM 峰值、时间坐标、防抖、预取及 stale／取消。
+
+先运行 `npm run fixtures:e2:golden`，再运行 `npx playwright test tests/e2e/editor-analysis-detail.spec.ts --project=chrome --project=edge --workers=1`，检查图像内容的 15% 对齐、两处波形细化、连续缩放请求合并、播放预取、原生精度限制、高 DPR／响应式、迟到结果和刷新恢复。相邻图表类型与几何回归分别见 `e4-editor.spec.ts`、`editor-marker-redesign.spec.ts`；不据此重开历史 readiness。
+
 ## osu 导入专项
 
 `npx vitest run tests/editor/osu-import.test.ts tests/audio/prepared-local-audio.test.ts` 验证解析、时间映射与音频分阶段提交。先运行 `npm run fixtures:e2:golden` 生成测试 WAV，再运行 `npx playwright test tests/e2e/editor-osu-import.spec.ts --project=chrome --project=edge --workers=1`，验证预览／应用、音频与草稿保护、取消和恢复。构建后可加 `$env:PLAYWRIGHT_PREVIEW = '1'` 在生产包上运行同一专项。

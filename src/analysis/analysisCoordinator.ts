@@ -8,6 +8,8 @@ import { decodeAnalysisSeries, encodeAnalysisSeries } from './compactCodec';
 import { createAnalysisCacheKey, createAnalysisConfig } from './config';
 import { copyDecodedAudioToMono, type DecodedAudioCopyPort, PcmCopyError } from './pcm';
 import { wallpaperFrameIndex } from './wallpaperSpectrum';
+import { AnalysisWindowRequests } from './windowRequests';
+import type { AnalysisWindowInput, AnalysisWindowSeries } from './windowTypes';
 import type { RealtimeAnalysisLease, RealtimeFeatureFrame } from './realtimeTypes';
 import {
     isFeatureId,
@@ -46,6 +48,7 @@ export interface AnalysisConsumerLease {
     consumer: AnalysisConsumer;
     setActiveFeatures(ids: readonly FeatureId[]): Promise<void>;
     requestCursorValue(featureId: FeatureId, timeSeconds: number): Promise<AnalysisCursorValueResult | null>;
+    requestWindowSeries(input: AnalysisWindowInput, signal?: AbortSignal): Promise<AnalysisWindowSeries | null>;
     requestTempoEstimate(): Promise<TempoEstimateResult | null>;
     getSeries(featureId: FeatureId): AnalysisSeries | null;
     subscribe(listener: AnalysisListener): () => void;
@@ -104,6 +107,7 @@ export class AnalysisCoordinator {
     private readonly tempoTimeoutMs: number;
     private readonly listeners = new Set<AnalysisListener>();
     private readonly series = new Map<FeatureId, AnalysisSeries>();
+    private readonly windowRequests = new AnalysisWindowRequests(message => this.worker?.postMessage(message));
     private readonly cursorRequests = new Map<
         FeatureId,
         {
@@ -334,6 +338,30 @@ export class AnalysisCoordinator {
         });
     }
 
+    requestWindowSeries(input: AnalysisWindowInput, signal?: AbortSignal): Promise<AnalysisWindowSeries | null> {
+        if (
+            this.disposed ||
+            this.activeConsumer?.consumer !== 'editor' ||
+            !this.worker ||
+            !this.activeJob ||
+            this.snapshot.state !== 'ready' ||
+            !this.series.has(input.featureId) ||
+            input.featureId === 'wallpaperEngineSpectrum'
+        )
+            return Promise.resolve(null);
+        return this.windowRequests.request(
+            {
+                ...input,
+                kind: 'window-series',
+                requestId: this.createJobId(),
+                generation: this.snapshot.generation,
+                trackHash: this.activeJob.trackHash,
+                configHash: this.activeJob.configHash,
+            },
+            signal,
+        );
+    }
+
     requestTempoEstimate(): Promise<TempoEstimateResult | null> {
         if (
             this.disposed ||
@@ -417,6 +445,8 @@ export class AnalysisCoordinator {
             setActiveFeatures: ids => (isCurrent() ? this.setActiveFeatures(ids) : Promise.resolve()),
             requestCursorValue: (featureId, timeSeconds) =>
                 isCurrent() ? this.requestCursorValue(featureId, timeSeconds) : Promise.resolve(null),
+            requestWindowSeries: (input, signal) =>
+                isCurrent() ? this.requestWindowSeries(input, signal) : Promise.resolve(null),
             requestTempoEstimate: () => (isCurrent() ? this.requestTempoEstimate() : Promise.resolve(null)),
             getSeries: featureId => (isCurrent() ? this.getSeries(featureId) : null),
             subscribe: listener =>
@@ -623,6 +653,10 @@ export class AnalysisCoordinator {
     }
 
     private handleWorkerMessage(message: AnalysisWorkerResponse): void {
+        if (message.kind === 'window-series-result') {
+            this.windowRequests.handle(message);
+            return;
+        }
         if (message.kind === 'realtime-frame' || message.kind === 'realtime-error') {
             const current = this.realtime;
             if (!current || current.id !== message.sessionId) return;
@@ -846,6 +880,7 @@ export class AnalysisCoordinator {
     }
 
     private cancelActiveJob(state: 'cancelled'): void {
+        this.windowRequests.clear();
         const active = this.activeJob;
         if (active && this.worker) {
             this.worker.postMessage({
@@ -882,6 +917,7 @@ export class AnalysisCoordinator {
 
     private publishError(generation: number, code: AnalysisErrorCode, message: string, recoverable: boolean): void {
         if (!this.isCurrentGeneration(generation)) return;
+        this.windowRequests.clear();
         this.publish({
             ...this.snapshot,
             state: 'error',

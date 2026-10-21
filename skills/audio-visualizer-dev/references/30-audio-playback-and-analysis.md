@@ -55,6 +55,7 @@ Editor/Visualizer通过tokenized播放与分析lease复用现有service/coordina
 - AudioEngine 通过 descriptor 与 16,384 sample 分块 copy 输出 average-mono PCM；copy 期间 decoded revision 改变时立即视为 stale。
 - module Worker 使用 frame 1024、hop 512、Hanning 和实际 sample rate；同一 frame 的活动项一次 Meyda batch，最多每 32 frame 或约 8ms 发布进度并 yield/cancel。
 - display series 限制为 ≤30 samples/s，通过六类 binary compact payload 存储；decoder 校验 schema、完整身份、维度、量化范围、对齐和尾随字节。
+- Editor 的短窗口图表另请求运行时 window series：PCM 波形按像素求包络、普通特征保留原生 hop，Wallpaper 维持 30Hz；连续缩放结束 150ms 后补算。窗口数据不进入上述持久化 series，生命周期与所有权见[标记工作区](../../../docs/context/editor-marking.md#图表细节与时间对齐dec-094)。
 - AnalysisCoordinator 以 generation + track/content/config/feature 完整身份隔离 stale 结果，拥有取消、重试、partial cache 合并与 exact cursor。exact cursor 由 Worker 对原始 frame 现场提取，不能使用反量化 display 值。
 - 全 cache hit 使用 0-feature job 只把当前 mono PCM 保留到 Worker，不重复 Meyda 提取；因此刷新命中后 exact cursor 仍可用。默认活动集为空时不复制 PCM、不创建 Worker。
 - 当前 Meyda `spectralFlux` 仍会抛出 `x is not defined`；M6 以 R-020/预期失败测试记录。M8 已按 ADR-0005 使用项目内相邻幅度频谱正向 L1 差，不 patch Meyda；clean canonical 28/28 已缓解产品阻断，但上游缺陷不得表述为已修复。

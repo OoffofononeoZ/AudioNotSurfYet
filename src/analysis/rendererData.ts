@@ -1,5 +1,4 @@
 import type {
-    AnalysisSeries,
     CategoryPayload,
     ComplexPayload,
     FrequencyPayload,
@@ -7,6 +6,7 @@ import type {
     LoudnessPayload,
     WaveformPayload,
 } from './types';
+import type { RenderAnalysisSeries } from './windowTypes';
 import type { PersistedTimelineViewport } from '../types/session';
 import { wallpaperFrameIndex } from './wallpaperSpectrum';
 
@@ -40,14 +40,23 @@ export const scalarPlotDomain = (
     return { min, max };
 };
 
-export const visibleSampleRange = (series: AnalysisSeries, viewport: PersistedTimelineViewport): VisibleSampleRange => {
+export const visibleSampleRange = (
+    series: RenderAnalysisSeries,
+    viewport: PersistedTimelineViewport,
+): VisibleSampleRange => {
     if (series.sampleCount <= 0 || series.sampleStepSeconds <= 0) {
         return { startIndex: 0, endIndex: 0 };
     }
-    const startIndex = Math.max(0, Math.floor(viewport.startSeconds / series.sampleStepSeconds));
+    const startIndex = Math.max(
+        0,
+        Math.floor((viewport.startSeconds - series.startTimeSeconds) / series.sampleStepSeconds),
+    );
     const endIndex = Math.max(
         0,
-        Math.min(series.sampleCount, Math.ceil(viewport.endSeconds / series.sampleStepSeconds) + 1),
+        Math.min(
+            series.sampleCount,
+            Math.ceil((viewport.endSeconds - series.startTimeSeconds) / series.sampleStepSeconds) + 1,
+        ),
     );
     return {
         startIndex: Math.min(startIndex, endIndex),
@@ -55,10 +64,13 @@ export const visibleSampleRange = (series: AnalysisSeries, viewport: PersistedTi
     };
 };
 
-export const cursorSampleIndex = (series: AnalysisSeries, cursorSeconds: number): number => {
+export const cursorSampleIndex = (series: RenderAnalysisSeries, cursorSeconds: number): number => {
     if (series.sampleCount <= 0 || series.sampleStepSeconds <= 0) return 0;
     if (series.featureId === 'wallpaperEngineSpectrum') return wallpaperFrameIndex(cursorSeconds, series.sampleCount);
-    return Math.min(series.sampleCount - 1, Math.max(0, Math.floor(cursorSeconds / series.sampleStepSeconds)));
+    return Math.min(
+        series.sampleCount - 1,
+        Math.max(0, Math.floor((cursorSeconds - series.startTimeSeconds) / series.sampleStepSeconds)),
+    );
 };
 
 export const decodeQuantizedValue = (value: number, scale: number, offset: number): number => value * scale + offset;

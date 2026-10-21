@@ -1,8 +1,8 @@
-import type { AnalysisSeries } from './types';
+import type { RenderAnalysisSeries } from './windowTypes';
 import type { PersistedTimelineViewport } from '../types/session';
 import { visibleSampleRange } from './rendererData';
 
-export const sampleTime = (series: AnalysisSeries, index: number): number =>
+export const sampleTime = (series: RenderAnalysisSeries, index: number): number =>
     series.startTimeSeconds + index * series.sampleStepSeconds;
 
 /** Do not clamp time: clipping must preserve the scale and song padding. */
@@ -18,7 +18,7 @@ export interface PlotColumn {
 
 /** Group adjacent samples only when they are narrower than one display pixel. */
 export function plotColumns(
-    series: AnalysisSeries,
+    series: RenderAnalysisSeries,
     viewport: PersistedTimelineViewport,
     width: number,
     dpr = 1,
@@ -31,7 +31,11 @@ export function plotColumns(
     for (let startIndex = range.startIndex; startIndex < range.endIndex; startIndex += stride) {
         const endIndex = Math.min(range.endIndex, startIndex + stride);
         const start = Math.max(0, viewport.startSeconds, sampleTime(series, startIndex));
-        const end = Math.min(durationSeconds, viewport.endSeconds, sampleTime(series, endIndex));
+        const bucketEnd =
+            endIndex === series.sampleCount && 'endTimeSeconds' in series
+                ? series.endTimeSeconds
+                : sampleTime(series, endIndex);
+        const end = Math.min(durationSeconds, viewport.endSeconds, bucketEnd);
         if (end <= start) continue;
         columns.push({
             startIndex,

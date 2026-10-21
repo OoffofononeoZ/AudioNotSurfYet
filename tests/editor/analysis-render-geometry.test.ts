@@ -1,5 +1,7 @@
 import { afterEach, expect, test, vi } from 'vitest';
 import { plotColumns } from '../../src/analysis/renderGeometry';
+import { waveformPeak } from '../../src/analysis/plotPeaks';
+import { drawWindowRaster } from '../../src/analysis/windowRaster';
 import { visibleSampleRange } from '../../src/analysis/rendererData';
 import { analysisCanvasRenderer } from '../../src/analysis/canvasRenderer';
 import { FEATURE_REGISTRY } from '../../src/analysis/featureRegistry';
@@ -19,6 +21,90 @@ function series(featureId: FeatureId = 'rms'): AnalysisSeries {
     };
 }
 afterEach(() => vi.unstubAllGlobals());
+
+test('a native window raster is reused while its content moves at the real time scale', () => {
+    const uploads = vi.fn(),
+        draws = vi.fn();
+    vi.stubGlobal(
+        'ImageData',
+        class {
+            data: Uint8ClampedArray;
+            width: number;
+            height: number;
+            constructor(width: number, height: number) {
+                this.width = width;
+                this.height = height;
+                this.data = new Uint8ClampedArray(width * height * 4);
+            }
+        },
+    );
+    vi.stubGlobal('document', { createElement: () => ({ getContext: () => ({ putImageData: uploads }) }) });
+    const value = {
+        ...series('amplitudeSpectrum'),
+        startTimeSeconds: 10,
+        endTimeSeconds: 12,
+        payload: {
+            kind: 'frequency-u16' as const,
+            width: 2,
+            values: new Uint16Array([0, 1, 2, 3, 4, 5, 6, 7]),
+            scale: 1,
+            offset: 0,
+        },
+    };
+    const context = { drawImage: draws } as unknown as CanvasRenderingContext2D;
+    drawWindowRaster(value, { startSeconds: 8.5, endSeconds: 18.5, zoom: 1 }, 1000, 0, 100, 2, context);
+    drawWindowRaster(value, { startSeconds: 9, endSeconds: 19, zoom: 1 }, 1000, 0, 100, 2, context);
+    expect(uploads).toHaveBeenCalledOnce();
+    expect(draws.mock.calls[0]!.slice(5, 8)).toEqual([150, 0, 150]);
+    expect(draws.mock.calls[2]!.slice(5, 8)).toEqual([100, 0, 150]);
+});
+
+test('frequency pooling includes unsampled bins and time peaks, and extra pixels reveal more rows', () => {
+    const value = series('amplitudeSpectrum');
+    value.sampleCount = 10;
+    value.sampleStepSeconds = 0.1;
+    const values = new Uint16Array(512 * 10);
+    values[5 * 512 + 3] = 200;
+    value.payload = { kind: 'frequency-u16', width: 512, values, scale: 1, offset: 0 };
+    function draw(dpr: number) {
+        const colors: string[] = [];
+        let style = '';
+        const target = new Proxy(
+            {},
+            {
+                set: (_, name, value) => {
+                    if (name === 'fillStyle') style = value;
+                    return true;
+                },
+                get: (_, name) => () => {
+                    if (name === 'fillRect' && style.startsWith('hsl')) colors.push(style);
+                },
+            },
+        ) as CanvasRenderingContext2D;
+        analysisCanvasRenderer.drawStatic(
+            {
+                feature: FEATURE_REGISTRY.amplitudeSpectrum,
+                series: value,
+                viewport: { startSeconds: 0, endSeconds: 1, zoom: 1 },
+                widthCssPixels: 1,
+                heightCssPixels: 100,
+                devicePixelRatio: dpr,
+                durationSeconds: 1,
+            },
+            target,
+        );
+        expect(colors).toContain('hsl(75 90% 70%)');
+        return colors.length;
+    }
+    expect(draw(2)).toBeGreaterThan(draw(1));
+    expect(
+        waveformPeak(
+            { kind: 'waveform-envelope', min: new Int16Array([0, -9, 0]), max: new Int16Array([0, 0, 7]), scale: 0.1 },
+            0,
+            3,
+        ),
+    ).toEqual({ min: -0.9, max: 0.7000000000000001 });
+});
 
 test('time cells preserve the 15% song-start padding, fixed scale and song-end padding', () => {
     const viewport = { startSeconds: -1.5, endSeconds: 8.5, zoom: 1 };

@@ -53,6 +53,7 @@ const analysisLease = (): AnalysisConsumerLease => ({
     token: crypto.randomUUID(),
     consumer: 'editor',
     setActiveFeatures: async () => undefined,
+    requestWindowSeries: async () => null,
     requestCursorValue: async () => null,
     requestTempoEstimate: async () => null,
     getSeries: () => null,

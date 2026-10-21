@@ -1,21 +1,16 @@
-import {
-    cursorSampleIndex,
-    loudnessAt,
-    scalarPlotDomain,
-    signedVectorMaximum,
-    vectorAt,
-    visibleSampleRange,
-    waveformEnvelopeAt,
-} from './rendererData';
+import { cursorSampleIndex, scalarPlotDomain, signedVectorMaximum, vectorAt, visibleSampleRange } from './rendererData';
 import { timeToCanvasX } from './timelineViewport';
 import { plotColumns, plotTimeX, sampleTime } from './renderGeometry';
+import { payloadMaximum, waveformPeak } from './plotPeaks';
+import { drawWindowRaster } from './windowRaster';
 import { drawWallpaperHeatmap, drawWallpaperCursor } from './wallpaperCanvas';
-import type { AnalysisCursorValueResult, AnalysisSeries, FeatureDefinition } from './types';
+import type { AnalysisCursorValueResult, FeatureDefinition } from './types';
+import type { RenderAnalysisSeries } from './windowTypes';
 import type { PersistedTimelineViewport } from '../types/session';
 
 export interface EditorRenderRequest {
     feature: FeatureDefinition;
-    series: AnalysisSeries | null;
+    series: RenderAnalysisSeries | null;
     viewport: PersistedTimelineViewport;
     widthCssPixels: number;
     heightCssPixels: number;
@@ -127,26 +122,31 @@ const drawHeatmap = (request: EditorRenderRequest, context: CanvasRenderingConte
     const { width, height } = size(request);
     const payload = series.payload;
     const topHeight = Math.floor(height * 0.7);
-    const columns = plotColumns(series, request.viewport, width, request.devicePixelRatio, request.durationSeconds);
-    const rows = payload.kind === 'category-u16' ? payload.width : Math.min(128, payload.width);
+    const columns =
+        'endTimeSeconds' in series
+            ? []
+            : plotColumns(series, request.viewport, width, request.devicePixelRatio, request.durationSeconds);
+    const rows =
+        payload.kind === 'category-u16'
+            ? payload.width
+            : Math.min(payload.width, Math.max(1, Math.floor(topHeight * request.devicePixelRatio)));
     const signed = request.feature.id === 'mfcc';
-    let maximum = 0;
-    for (const encoded of payload.values) {
-        const value = encoded * payload.scale + payload.offset;
-        maximum = Math.max(maximum, signed ? Math.abs(value) : value);
-    }
-    maximum = Math.max(maximum, 0.000001);
-    for (const column of columns) {
-        const sampleIndex = column.startIndex;
-        const values = vectorAt(payload, sampleIndex);
+    const maximum = payloadMaximum(payload);
+    const rasterized =
+        'endTimeSeconds' in series &&
+        drawWindowRaster(series, request.viewport, width, 0, topHeight, request.devicePixelRatio, context, signed);
+    for (const column of rasterized ? [] : columns) {
         const x0 = column.left;
         const x1 = column.right;
         for (let row = 0; row < rows; row += 1) {
-            const bin =
-                payload.kind === 'category-u16'
-                    ? row
-                    : Math.min(payload.width - 1, Math.floor((row * payload.width) / rows));
-            const value = values[bin] ?? 0;
+            const firstBin = Math.floor((row * payload.width) / rows),
+                lastBin = Math.floor(((row + 1) * payload.width) / rows);
+            let value = 0;
+            for (let sample = column.startIndex; sample < column.endIndex; sample++)
+                for (let bin = firstBin; bin < lastBin; bin++) {
+                    const candidate = payload.values[sample * payload.width + bin]! * payload.scale + payload.offset;
+                    if (signed ? Math.abs(candidate) > Math.abs(value) : candidate > value) value = candidate;
+                }
             context.fillStyle = signed ? signedHeatColor(value, maximum) : heatColor(value, maximum);
             const y = topHeight - Math.ceil(((row + 1) * topHeight) / rows);
             context.fillRect(x0, y, x1 - x0, Math.ceil(topHeight / rows) + 1);
@@ -175,8 +175,7 @@ const drawWaveform = (request: EditorRenderRequest, context: CanvasRenderingCont
     context.strokeStyle = '#7dffb3';
     context.lineWidth = 1.5;
     for (const column of columns) {
-        const sampleIndex = column.startIndex;
-        const envelope = waveformEnvelopeAt(series.payload, sampleIndex);
+        const envelope = waveformPeak(series.payload, column.startIndex, column.endIndex);
         const x = (column.left + column.right) / 2;
         context.lineWidth = column.right - column.left;
         context.beginPath();
@@ -195,22 +194,28 @@ const drawLoudness = (request: EditorRenderRequest, context: CanvasRenderingCont
     const payload = series.payload;
     const range = visibleSampleRange(series, request.viewport);
     const heatmapHeight = Math.floor(height * 0.68);
-    const columns = plotColumns(series, request.viewport, width, request.devicePixelRatio, request.durationSeconds);
-    let maximum = 0;
-    for (const value of payload.specific) {
-        maximum = Math.max(maximum, value * payload.scale + payload.offset);
-    }
-    maximum = Math.max(maximum, 0.000001);
-    for (const column of columns) {
-        const sampleIndex = column.startIndex;
-        const current = loudnessAt(payload, sampleIndex);
+    const columns =
+        'endTimeSeconds' in series
+            ? []
+            : plotColumns(series, request.viewport, width, request.devicePixelRatio, request.durationSeconds);
+    const maximum = payloadMaximum(payload);
+    const rasterized =
+        'endTimeSeconds' in series &&
+        drawWindowRaster(series, request.viewport, width, 0, heatmapHeight, request.devicePixelRatio, context);
+    for (const column of rasterized ? [] : columns) {
         const x0 = column.left;
         const x1 = column.right;
-        current.specific.forEach((value, band) => {
+        for (let band = 0; band < payload.bands; band++) {
+            let value = 0;
+            for (let sample = column.startIndex; sample < column.endIndex; sample++)
+                value = Math.max(
+                    value,
+                    payload.specific[sample * payload.bands + band]! * payload.scale + payload.offset,
+                );
             context.fillStyle = heatColor(value, maximum);
             const y = heatmapHeight - Math.ceil(((band + 1) * heatmapHeight) / payload.bands);
             context.fillRect(x0, y, x1 - x0, Math.ceil(heatmapHeight / payload.bands) + 1);
-        });
+        }
     }
     const totals = payload.total.subarray(range.startIndex, range.endIndex);
     const domain = scalarPlotDomain(totals, { min: 0 });
@@ -257,6 +262,19 @@ const phaseRgb = (phase: number): [number, number, number] => {
     }
 };
 
+const drawComplexLabels = (context: CanvasRenderingContext2D, width: number, height: number) => {
+    const divider = Math.floor(height / 2);
+    context.strokeStyle = 'rgba(132, 255, 185, 0.45)';
+    context.beginPath();
+    context.moveTo(0, divider + 0.5);
+    context.lineTo(width, divider + 0.5);
+    context.stroke();
+    context.fillStyle = '#f2fff7';
+    context.font = '11px ui-monospace, monospace';
+    context.fillText('Magnitude · bins 0–1023', 8, 15);
+    context.fillText('Phase · −π…π', 8, divider + 17);
+};
+
 const drawComplex = (request: EditorRenderRequest, context: CanvasRenderingContext2D) => {
     const series = request.series;
     if (!series || series.payload.kind !== 'complex-derived') {
@@ -264,23 +282,43 @@ const drawComplex = (request: EditorRenderRequest, context: CanvasRenderingConte
     }
     const { width, height } = size(request);
     const payload = series.payload;
+    if ('endTimeSeconds' in series) {
+        const divider = Math.floor(height / 2);
+        drawWindowRaster(series, request.viewport, width, 0, divider - 2, request.devicePixelRatio, context);
+        drawWindowRaster(
+            series,
+            request.viewport,
+            width,
+            divider + 2,
+            height - divider - 2,
+            request.devicePixelRatio,
+            context,
+            false,
+            true,
+            divider - 2,
+        );
+        drawComplexLabels(context, width, height);
+        return;
+    }
     const geometry = plotColumns(series, request.viewport, width, request.devicePixelRatio, request.durationSeconds);
     const columns = geometry.length;
     if (!columns) return;
     const bins = payload.bins;
-    const magnitudeImage = new ImageData(columns, bins);
-    const phaseImage = new ImageData(columns, bins);
-    let maximum = 0;
-    for (const value of payload.magnitude) {
-        maximum = Math.max(maximum, value * payload.magnitudeScale);
-    }
-    maximum = Math.max(maximum, 0.000001);
+    const divider = Math.floor(height / 2);
+    const rows = Math.min(bins, Math.max(1, Math.floor((divider - 2) * request.devicePixelRatio)));
+    const magnitudeImage = new ImageData(columns, rows);
+    const phaseImage = new ImageData(columns, rows);
+    const maximum = payloadMaximum(payload);
     for (let column = 0; column < columns; column += 1) {
-        const sampleIndex = geometry[column]!.startIndex;
-        const sourceOffset = sampleIndex * bins;
-        for (let bin = 0; bin < bins; bin += 1) {
-            const sourceIndex = sourceOffset + bin;
-            const target = ((bins - 1 - bin) * columns + column) * 4;
+        const cell = geometry[column]!;
+        for (let row = 0; row < rows; row += 1) {
+            let sourceIndex = cell.startIndex * bins + Math.floor((row * bins) / rows);
+            for (let sample = cell.startIndex; sample < cell.endIndex; sample++)
+                for (let bin = Math.floor((row * bins) / rows); bin < Math.floor(((row + 1) * bins) / rows); bin++) {
+                    const candidate = sample * bins + bin;
+                    if (payload.magnitude[candidate]! > payload.magnitude[sourceIndex]!) sourceIndex = candidate;
+                }
+            const target = ((rows - 1 - row) * columns + column) * 4;
             const magnitude = (payload.magnitude[sourceIndex] ?? 0) * payload.magnitudeScale;
             const intensity = Math.sqrt(magnitude / maximum);
             magnitudeImage.data[target] = Math.round(7 + intensity * 118);
@@ -303,14 +341,13 @@ const drawComplex = (request: EditorRenderRequest, context: CanvasRenderingConte
     }
     const source = document.createElement('canvas');
     source.width = columns;
-    source.height = bins;
+    source.height = rows;
     const sourceContext = source.getContext('2d');
     if (!sourceContext) throw new Error('复频谱离屏 Canvas 不可用。');
-    const divider = Math.floor(height / 2);
     context.imageSmoothingEnabled = false;
     sourceContext.putImageData(magnitudeImage, 0, 0);
     geometry.forEach((column, index) =>
-        context.drawImage(source, index, 0, 1, bins, column.left, 0, column.right - column.left, divider - 2),
+        context.drawImage(source, index, 0, 1, rows, column.left, 0, column.right - column.left, divider - 2),
     );
     sourceContext.putImageData(phaseImage, 0, 0);
     geometry.forEach((column, index) =>
@@ -319,22 +356,14 @@ const drawComplex = (request: EditorRenderRequest, context: CanvasRenderingConte
             index,
             0,
             1,
-            bins,
+            rows,
             column.left,
             divider + 2,
             column.right - column.left,
             height - divider - 2,
         ),
     );
-    context.strokeStyle = 'rgba(132, 255, 185, 0.45)';
-    context.beginPath();
-    context.moveTo(0, divider + 0.5);
-    context.lineTo(width, divider + 0.5);
-    context.stroke();
-    context.fillStyle = '#f2fff7';
-    context.font = '11px ui-monospace, monospace';
-    context.fillText('Magnitude · bins 0–1023', 8, 15);
-    context.fillText('Phase · −π…π', 8, divider + 17);
+    drawComplexLabels(context, width, height);
 };
 
 const exactVector = (exactValue: AnalysisCursorValueResult | null): number[] =>

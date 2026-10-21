@@ -139,6 +139,7 @@ const createControllerHarness = (
             token: `analysis-${consumer}`,
             consumer,
             setActiveFeatures: async () => undefined,
+            requestWindowSeries: async () => null,
             requestCursorValue: async () => null,
             requestTempoEstimate: () => tempoRequest ?? Promise.resolve(null),
             getSeries: () => null,
