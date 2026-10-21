@@ -6,6 +6,7 @@
 
 | 文件 | 本地静态引用（最多显示 6 项） |
 | --- | --- |
+| [tests/e2e/visualizer-wallpaper.spec.ts](../../tests/e2e/visualizer-wallpaper.spec.ts) | [tests/support/file-picker.ts](../../tests/support/file-picker.ts) |
 | [tests/e2e/wallpaper-spectrum.spec.ts](../../tests/e2e/wallpaper-spectrum.spec.ts) | [tests/support/file-picker.ts](../../tests/support/file-picker.ts) |
 | [tests/editor/beat-snap.test.ts](../../tests/editor/beat-snap.test.ts) | [src/editor/beatSnap.ts](../../src/editor/beatSnap.ts)、[src/editor/editorDraftRepository.ts](../../src/editor/editorDraftRepository.ts)、[src/editor/pointAnnotations.ts](../../src/editor/pointAnnotations.ts)、[src/editor/projectCodec.ts](../../src/editor/projectCodec.ts)、[src/editor/tempoMap.ts](../../src/editor/tempoMap.ts) |
 | [tests/editor/e1-foundation.integration.test.ts](../../tests/editor/e1-foundation.integration.test.ts) | [src/analysis/analysisCoordinator.ts](../../src/analysis/analysisCoordinator.ts)、[src/analysis/types.ts](../../src/analysis/types.ts)、[src/audio/audioSessionService.ts](../../src/audio/audioSessionService.ts)、[src/editor/editorDraftRepository.ts](../../src/editor/editorDraftRepository.ts)、[src/editor/editorSessionController.ts](../../src/editor/editorSessionController.ts)、[src/editor/fileIO.ts](../../src/editor/fileIO.ts)、另 5 项，按需核对源码 |
@@ -105,4 +106,3 @@
 | [tests/skills/visualizer-content-generator.test.ts](../../tests/skills/visualizer-content-generator.test.ts) | [skills/visualizer-content-generator/scripts/validate-content-brief.mjs](../../skills/visualizer-content-generator/scripts/validate-content-brief.mjs) |
 | [tests/support/analyzer-list.ts](../../tests/support/analyzer-list.ts) | [src/analysis/types.ts](../../src/analysis/types.ts) |
 | [tests/support/audio-fixtures.ts](../../tests/support/audio-fixtures.ts) | — |
-| [tests/support/e2-tempo-fixture.ts](../../tests/support/e2-tempo-fixture.ts) | [tests/support/audio-fixtures.ts](../../tests/support/audio-fixtures.ts)、[tests/support/m7-learning-fixture.ts](../../tests/support/m7-learning-fixture.ts) |

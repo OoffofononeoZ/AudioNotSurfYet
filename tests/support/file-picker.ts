@@ -22,6 +22,11 @@ interface SavedPickerEntry {
     base64: string;
 }
 
+interface PickerOptions {
+    suggestedName?: string;
+    types?: { accept: Record<string, string[]> }[];
+}
+
 const mimeTypeFor = (filePath: string) => {
     switch (path.extname(filePath).toLowerCase()) {
         case '.mp3':
@@ -44,12 +49,22 @@ export async function installFilePickerStub(page: Page, options: { visualizerAss
         const pickerWindow = window as unknown as {
             __audioNotSurfYetPickerQueue?: FileSystemFileHandle[][];
             __audioNotSurfYetSavedPickerEntries?: SavedPickerEntry[];
-            showOpenFilePicker?: () => Promise<FileSystemFileHandle[]>;
-            showSaveFilePicker?: (options?: { suggestedName?: string }) => Promise<FileSystemFileHandle>;
+            showOpenFilePicker?: (options?: PickerOptions) => Promise<FileSystemFileHandle[]>;
+            showSaveFilePicker?: (options?: PickerOptions) => Promise<FileSystemFileHandle>;
         };
         pickerWindow.__audioNotSurfYetPickerQueue ??= [];
         pickerWindow.__audioNotSurfYetSavedPickerEntries ??= [];
-        pickerWindow.showOpenFilePicker = async () => {
+        const validateOptions = (options?: PickerOptions) => {
+            for (const type of options?.types ?? []) {
+                for (const extension of Object.values(type.accept).flat()) {
+                    if (extension.length > 16 || !/^\.[\p{L}\p{N}+]+$/u.test(extension)) {
+                        throw new TypeError(`Invalid picker extension: ${extension}`);
+                    }
+                }
+            }
+        };
+        pickerWindow.showOpenFilePicker = async options => {
+            validateOptions(options);
             const next = pickerWindow.__audioNotSurfYetPickerQueue?.shift();
             if (!next) {
                 throw new DOMException('Picker cancelled.', 'AbortError');
@@ -57,6 +72,7 @@ export async function installFilePickerStub(page: Page, options: { visualizerAss
             return next;
         };
         pickerWindow.showSaveFilePicker = async options => {
+            validateOptions(options);
             const root = await navigator.storage.getDirectory();
             const directory = await root.getDirectoryHandle('editor-save-picker', { create: true });
             const name = options?.suggestedName ?? 'editor-project.json';

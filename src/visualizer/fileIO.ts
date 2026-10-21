@@ -1,4 +1,7 @@
-export interface VisualizerFileFormat { extension: string; mimeType: string; }
+export interface VisualizerFileFormat {
+    extension: string;
+    mimeType: string;
+}
 
 type WritableFileHandle = FileSystemFileHandle & {
     createWritable(): Promise<FileSystemWritableFileStream>;
@@ -10,36 +13,26 @@ export interface VisualizerOpenedFile {
 }
 export interface VisualizerFileGateway {
     open(codec: VisualizerFileFormat): Promise<VisualizerOpenedFile | null>;
-    save(
-        codec: VisualizerFileFormat,
-        suggestedName: string,
-        bytes: Uint8Array,
-    ): Promise<'saved' | 'cancelled'>;
+    save(codec: VisualizerFileFormat, suggestedName: string, bytes: Uint8Array): Promise<'saved' | 'cancelled'>;
 }
 
 export class VisualizerFileGatewayError extends Error {
     readonly code: 'unsupported' | 'read-failed' | 'write-failed';
 
-    constructor(
-        code: 'unsupported' | 'read-failed' | 'write-failed',
-        message: string,
-    ) {
+    constructor(code: 'unsupported' | 'read-failed' | 'write-failed', message: string) {
         super(message);
         this.name = 'VisualizerFileGatewayError';
         this.code = code;
     }
 }
 
-const isAbortError = (error: unknown): boolean =>
-    error instanceof DOMException && error.name === 'AbortError';
+const isAbortError = (error: unknown): boolean => error instanceof DOMException && error.name === 'AbortError';
 
 export class NativeVisualizerFileGateway implements VisualizerFileGateway {
     async open(codec: VisualizerFileFormat): Promise<VisualizerOpenedFile | null> {
         const picker = (
             window as typeof window & {
-                showOpenFilePicker?: (
-                    options: Record<string, unknown>,
-                ) => Promise<FileSystemFileHandle[]>;
+                showOpenFilePicker?: (options: Record<string, unknown>) => Promise<FileSystemFileHandle[]>;
             }
         ).showOpenFilePicker;
         if (!picker) {
@@ -52,10 +45,12 @@ export class NativeVisualizerFileGateway implements VisualizerFileGateway {
             const handles = await picker({
                 multiple: false,
                 excludeAcceptAllOption: true,
-                types: [{
-                    description: 'AudioNotSurfYet Visualizer JSON',
-                    accept: { [codec.mimeType]: [codec.extension] },
-                }],
+                types: [
+                    {
+                        description: 'AudioNotSurfYet Visualizer JSON',
+                        accept: { [codec.mimeType]: ['.json'] },
+                    },
+                ],
             });
             const handle = handles[0];
             if (!handle) return null;
@@ -70,16 +65,10 @@ export class NativeVisualizerFileGateway implements VisualizerFileGateway {
         }
     }
 
-    async save(
-        codec: VisualizerFileFormat,
-        suggestedName: string,
-        bytes: Uint8Array,
-    ): Promise<'saved' | 'cancelled'> {
+    async save(codec: VisualizerFileFormat, suggestedName: string, bytes: Uint8Array): Promise<'saved' | 'cancelled'> {
         const picker = (
             window as typeof window & {
-                showSaveFilePicker?: (
-                    options: Record<string, unknown>,
-                ) => Promise<WritableFileHandle>;
+                showSaveFilePicker?: (options: Record<string, unknown>) => Promise<WritableFileHandle>;
             }
         ).showSaveFilePicker;
         if (!picker) {
@@ -93,17 +82,16 @@ export class NativeVisualizerFileGateway implements VisualizerFileGateway {
             const handle = await picker({
                 suggestedName,
                 excludeAcceptAllOption: true,
-                types: [{
-                    description: 'AudioNotSurfYet Visualizer JSON',
-                    accept: { [codec.mimeType]: [codec.extension] },
-                }],
+                types: [
+                    {
+                        description: 'AudioNotSurfYet Visualizer JSON',
+                        accept: { [codec.mimeType]: ['.json'] },
+                    },
+                ],
             });
             writable = await handle.createWritable();
             await writable.write(
-                bytes.buffer.slice(
-                    bytes.byteOffset,
-                    bytes.byteOffset + bytes.byteLength,
-                ) as ArrayBuffer,
+                bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength) as ArrayBuffer,
             );
             await writable.close();
             return 'saved';
