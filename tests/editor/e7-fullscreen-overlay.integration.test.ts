@@ -141,6 +141,7 @@ class AnalysisHarness {
             };
             for (const listener of this.listeners) listener(this.snapshot);
         },
+        requestWindowSeries: async () => null,
         requestCursorValue: async () => null,
         requestTempoEstimate: async () => null,
         getSeries: featureId => (featureId === 'buffer' ? this.bufferSeries : null),

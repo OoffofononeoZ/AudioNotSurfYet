@@ -1,30 +1,30 @@
-import { aggregateComplex, aggregateWaveform, aggregateScalars, aggregateVectors, quantizeToUint16 } from './compactCodec';
+import {
+    aggregateComplex,
+    aggregateWaveform,
+    aggregateScalars,
+    aggregateVectors,
+    quantizeToUint16,
+} from './compactCodec';
 import { getFeatureDefinition } from './featureRegistry';
 import type { AnalysisJobRequest, AnalysisSeries, FeatureId, M10FeatureId } from './types';
 import { analysisAggregationFactor } from './frames';
 
 export const buildSeries = (
-    request: AnalysisJobRequest,
+    request: Pick<AnalysisJobRequest, 'trackHash' | 'config'>,
     featureIds: readonly M10FeatureId[],
     scalarFrames: Map<FeatureId, number[]>,
     vectorFrames: Map<FeatureId, number[][]>,
     loudnessFrames: Array<{ total: number; specific: number[] }>,
     complexFrames: Array<{ real: number[]; imag: number[] }>,
+    aggregationFactor?: number,
 ): AnalysisSeries[] => {
-    const factor = analysisAggregationFactor(
-        request.config.sampleRate,
-        request.config.hopSize,
-    );
-    const sampleStepSeconds =
-        factor * request.config.hopSize / request.config.sampleRate;
-    return featureIds.map((featureId) => {
+    const factor = aggregationFactor ?? analysisAggregationFactor(request.config.sampleRate, request.config.hopSize);
+    const sampleStepSeconds = (factor * request.config.hopSize) / request.config.sampleRate;
+    return featureIds.map(featureId => {
         const definition = getFeatureDefinition(featureId);
         const dimensions = definition.dimensions(request.config);
         if (definition.outputShape === 'scalar') {
-            const values = aggregateScalars(
-                scalarFrames.get(featureId) ?? [],
-                factor,
-            );
+            const values = aggregateScalars(scalarFrames.get(featureId) ?? [], factor);
             return {
                 schemaVersion: 1,
                 trackHash: request.trackHash,
@@ -41,10 +41,7 @@ export const buildSeries = (
             };
         }
         if (definition.outputShape === 'waveform') {
-            const values = aggregateWaveform(
-                vectorFrames.get(featureId) ?? [],
-                factor,
-            );
+            const values = aggregateWaveform(vectorFrames.get(featureId) ?? [], factor);
             return {
                 schemaVersion: 1,
                 trackHash: request.trackHash,
@@ -64,11 +61,11 @@ export const buildSeries = (
         }
         if (definition.outputShape === 'loudness-structure') {
             const total = aggregateScalars(
-                loudnessFrames.map((frame) => frame.total),
+                loudnessFrames.map(frame => frame.total),
                 factor,
             );
             const specificValues = aggregateVectors(
-                loudnessFrames.map((frame) => frame.specific),
+                loudnessFrames.map(frame => frame.specific),
                 factor,
                 24,
             );
@@ -121,11 +118,7 @@ export const buildSeries = (
             };
         }
         const width = dimensions[0] ?? 0;
-        const values = aggregateVectors(
-            vectorFrames.get(featureId) ?? [],
-            factor,
-            width,
-        );
+        const values = aggregateVectors(vectorFrames.get(featureId) ?? [], factor, width);
         const quantized = quantizeToUint16(values);
         return {
             schemaVersion: 1,
@@ -137,9 +130,7 @@ export const buildSeries = (
             sampleCount: values.length / width,
             dimensions,
             payload: {
-                kind: featureId === 'chroma' || featureId === 'mfcc'
-                    ? 'category-u16'
-                    : 'frequency-u16',
+                kind: featureId === 'chroma' || featureId === 'mfcc' ? 'category-u16' : 'frequency-u16',
                 values: quantized.values,
                 width,
                 scale: quantized.scale,

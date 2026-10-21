@@ -6,6 +6,8 @@
 
 | 文件 | 本地静态引用（最多显示 6 项） |
 | --- | --- |
+| [tests/scripts/run-v5-eval.mjs](../../tests/scripts/run-v5-eval.mjs) | — |
+| [tests/scripts/run-v6-eval.mjs](../../tests/scripts/run-v6-eval.mjs) | — |
 | [tests/scripts/verify-v5-media.mjs](../../tests/scripts/verify-v5-media.mjs) | — |
 | [tests/scripts/verify-v6-media.mjs](../../tests/scripts/verify-v6-media.mjs) | — |
 | [tests/scripts/verify-visualizer-output.mjs](../../tests/scripts/verify-visualizer-output.mjs) | [tests/support/visualizer-audio-timeline.mjs](../../tests/support/visualizer-audio-timeline.mjs)、[tests/support/visualizer-media-alignment.mjs](../../tests/support/visualizer-media-alignment.mjs)、[tests/support/visualizer-video-timeline.mjs](../../tests/support/visualizer-video-timeline.mjs) |
@@ -101,4 +103,5 @@
 | [tests/worker/m8-worker.test.ts](../../tests/worker/m8-worker.test.ts) | [src/analysis/config.ts](../../src/analysis/config.ts)、[src/analysis/types.ts](../../src/analysis/types.ts)、[src/analysis/workerCore.ts](../../src/analysis/workerCore.ts)、[tests/support/audio-fixtures.ts](../../tests/support/audio-fixtures.ts)、[tests/support/m8-scalar-fixture.ts](../../tests/support/m8-scalar-fixture.ts) |
 | [tests/worker/m9-worker.test.ts](../../tests/worker/m9-worker.test.ts) | [src/analysis/compactCodec.ts](../../src/analysis/compactCodec.ts)、[src/analysis/config.ts](../../src/analysis/config.ts)、[src/analysis/types.ts](../../src/analysis/types.ts)、[src/analysis/workerCore.ts](../../src/analysis/workerCore.ts)、[tests/support/audio-fixtures.ts](../../tests/support/audio-fixtures.ts)、[tests/support/m9-vector-fixture.ts](../../tests/support/m9-vector-fixture.ts) |
 | [tests/worker/probe.worker.mjs](../../tests/worker/probe.worker.mjs) | — |
+| [tests/worker/window-analysis.test.ts](../../tests/worker/window-analysis.test.ts) | [src/analysis/config.ts](../../src/analysis/config.ts)、[src/analysis/renderGeometry.ts](../../src/analysis/renderGeometry.ts)、[src/analysis/rendererData.ts](../../src/analysis/rendererData.ts)、[src/analysis/types.ts](../../src/analysis/types.ts)、[src/analysis/windowAnalysis.ts](../../src/analysis/windowAnalysis.ts)、[src/analysis/windowTypes.ts](../../src/analysis/windowTypes.ts)、另 1 项，按需核对源码 |
 | [tests/worker/worker-harness.test.ts](../../tests/worker/worker-harness.test.ts) | — |

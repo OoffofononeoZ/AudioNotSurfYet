@@ -1,5 +1,10 @@
 <template>
-    <section class="editor-timeline-panel app-scrollbar" aria-label="Editor 时间轴" data-editor-major-region="true">
+    <section
+        class="editor-timeline-panel app-scrollbar"
+        aria-label="Editor 时间轴"
+        data-editor-major-region="true"
+        :data-sample-step="displayBufferSeries?.sampleStepSeconds"
+        :data-detail-pending="bufferDetailPending">
         <div class="timeline-layout-row waveform-row">
             <aside class="beat-control-rail">
                 <h2>节拍标记</h2>
@@ -226,7 +231,9 @@
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, shallowRef, watch } from 'vue';
 import type { AnalysisCoordinatorSnapshot, AnalysisSeries } from '../analysis/types';
-import { visibleSampleRange, waveformEnvelopeAt } from '../analysis/rendererData';
+import { waveformPeak } from '../analysis/plotPeaks';
+import { plotColumns } from '../analysis/renderGeometry';
+import { useAnalysisWindow } from '../editor/useAnalysisWindow';
 import { useAudioSessionService } from '../audio/audioSessionService';
 import type { PlaybackSnapshot } from '../types/audio';
 import EditorIcon from './EditorIcon.vue';
@@ -297,6 +304,16 @@ const viewportController = useEditorViewport(
     (project, immediate) => emit('updateProject', project, immediate),
 );
 const { viewport } = viewportController;
+const { series: displayBufferSeries, pending: bufferDetailPending } = useAnalysisWindow(() => ({
+    series: props.bufferSeries,
+    generation: props.analysis.generation,
+    startSeconds: viewport.value.startSeconds,
+    endSeconds: viewport.value.endSeconds,
+    durationSeconds: props.project.track.durationSeconds,
+    sampleRate: props.analysis.sampleRate ?? props.project.track.sampleRate ?? 0,
+    pixels: size.width * size.dpr,
+    enabled: props.active !== false && props.analysis.state === 'ready',
+}));
 const revealPlayback = () =>
     updateViewport(
         centerEditorViewport(viewport.value, props.project.track.durationSeconds, props.playback.currentTimeSeconds),
@@ -746,20 +763,23 @@ const drawStatic = () => {
     const grid = configureCanvas(gridCanvas.value);
     if (!waveform || !grid || size.width <= 0 || size.height <= 0) return;
     waveform.clearRect(0, 0, size.width, size.height);
-    const series = props.bufferSeries;
+    const series = displayBufferSeries.value;
     if (series?.payload.kind === 'waveform-envelope') {
-        const range = visibleSampleRange(series, viewport.value);
+        const columns = plotColumns(series, viewport.value, size.width, size.dpr, durationSeconds.value);
         const { centerY, amplitude } = editorWaveformVerticalGeometry(size.height);
         waveform.beginPath();
-        for (let index = range.startIndex; index < range.endIndex; index += 1) {
-            const x = editorTimeToX(index * series.sampleStepSeconds, viewport.value, size.width);
-            const value = waveformEnvelopeAt(series.payload, index);
+        for (const column of columns) {
+            const x = (column.left + column.right) / 2;
+            const value = waveformPeak(series.payload, column.startIndex, column.endIndex);
             waveform.moveTo(x, centerY - value.max * amplitude);
             waveform.lineTo(x, centerY - value.min * amplitude);
         }
         waveform.strokeStyle = '#65ffa9';
         waveform.globalAlpha = 0.9;
-        waveform.lineWidth = Math.max(1, size.width / Math.max(1, range.endIndex - range.startIndex));
+        waveform.lineWidth = Math.max(
+            1 / size.dpr,
+            (size.width * series.sampleStepSeconds) / (viewport.value.endSeconds - viewport.value.startSeconds),
+        );
         waveform.stroke();
         waveform.globalAlpha = 1;
     }
@@ -797,7 +817,7 @@ const drawCursor = () => {
 
 watch(
     () => [
-        props.bufferSeries,
+        displayBufferSeries.value,
         props.project.tempoMap,
         props.project.workspace.viewport,
         size.width,

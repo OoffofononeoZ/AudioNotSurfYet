@@ -27,9 +27,10 @@ export function drawWallpaperHeatmap(request: EditorRenderRequest, context: Canv
     for (let channel = 0; channel < 2; channel++) {
         const top = channel * panel;
         for (const column of columns) {
-            const sample = column.startIndex;
             for (let band = 0; band < 64; band++) {
-                const value = payload.values[sample * 128 + channel * 64 + band] ?? 0;
+                let value = 0;
+                for (let sample = column.startIndex; sample < column.endIndex; sample++)
+                    value = Math.max(value, payload.values[sample * 128 + channel * 64 + band] ?? 0);
                 const intensity = Math.sqrt(value / max);
                 context.fillStyle = `hsl(${channel ? 205 - intensity * 30 : 155 - intensity * 70} 90% ${8 + intensity * 62}%)`;
                 context.fillRect(

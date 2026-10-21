@@ -16,6 +16,8 @@
                     :data-feature-id="featureId"
                     :data-analysis-state="analysis.state"
                     :data-renderer-error="overlayError ? 'true' : 'false'"
+                    :data-sample-step="displaySeries?.sampleStepSeconds"
+                    :data-detail-pending="detailPending"
                     data-testid="editor-analysis-overlay-panel">
                     <div class="overlay-copy" aria-live="polite">
                         <strong>{{ definition?.label }}</strong>
@@ -104,6 +106,7 @@
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { analysisCanvasRenderer, type EditorRenderRequest } from '../analysis/canvasRenderer';
+import { useAnalysisWindow } from '../editor/useAnalysisWindow';
 import { FEATURE_REGISTRY } from '../analysis/featureRegistry';
 import EditorIcon from './EditorIcon.vue';
 import type {
@@ -238,13 +241,24 @@ const metrics = () => ({
     dpr: Math.max(1, window.devicePixelRatio || 1),
 });
 
+const { series: displaySeries, pending: detailPending } = useAnalysisWindow(() => ({
+    series: props.series,
+    generation: props.analysis.generation,
+    startSeconds: props.timeView.startSeconds,
+    endSeconds: props.timeView.endSeconds,
+    durationSeconds: props.project.track.durationSeconds,
+    sampleRate: props.analysis.sampleRate ?? props.project.track.sampleRate ?? 0,
+    pixels: plotRect.value.width * Math.max(1, window.devicePixelRatio || 1),
+    enabled: props.overlayOpen && props.analysis.state === 'ready',
+}));
+
 const renderRequest = (): EditorRenderRequest => {
     const feature = definition.value;
     if (!feature) throw new Error('尚未选择叠加特征。');
     const size = metrics();
     return {
         feature,
-        series: props.series,
+        series: displaySeries.value,
         viewport: props.timeView,
         durationSeconds: props.project.track.durationSeconds,
         widthCssPixels: size.plotWidth,
@@ -470,7 +484,7 @@ watch(
     () => [
         props.overlayOpen,
         featureId.value,
-        props.series,
+        displaySeries.value,
         props.timeView,
         bounds.value.topRatio,
         bounds.value.heightRatio,

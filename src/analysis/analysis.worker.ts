@@ -14,6 +14,8 @@ import type {
     TempoEstimateRequest,
 } from './types';
 import { startRealtimeWorker } from './realtimeWorker';
+import { extractWindowSeries } from './windowAnalysis';
+import type { AnalysisWindowRequest } from './windowTypes';
 
 interface WorkerScope {
     onmessage: ((event: MessageEvent<AnalysisWorkerRequest>) => void) | null;
@@ -25,6 +27,60 @@ let activeToken = 0;
 let activeJob: { jobId: string; generation: number } | null = null;
 let retained: RetainedAnalysisPcm | null = null;
 let queue = Promise.resolve();
+const windowJobs = new Map<string, { cancelled: boolean }>();
+
+const windowSeries = (request: AnalysisWindowRequest) => {
+    const job = { cancelled: false },
+        token = activeToken;
+    windowJobs.set(request.requestId, job);
+    queue = queue.then(async () => {
+        try {
+            const source = retained;
+            const series =
+                source && token === activeToken && !job.cancelled
+                    ? await extractWindowSeries(source, request, {
+                          isCancelled: () => job.cancelled || token !== activeToken,
+                      })
+                    : null;
+            if (job.cancelled || token !== activeToken) return;
+            const result = {
+                kind: 'window-series-result' as const,
+                requestId: request.requestId,
+                generation: request.generation,
+                trackHash: request.trackHash,
+                configHash: request.configHash,
+                featureId: request.featureId,
+                series,
+            };
+            workerScope.postMessage(
+                result,
+                series
+                    ? responseTransferables({
+                          kind: 'result',
+                          jobId: request.requestId,
+                          generation: request.generation,
+                          trackHash: request.trackHash,
+                          configHash: request.configHash,
+                          series: [{ ...series, startTimeSeconds: 0 }],
+                      })
+                    : [],
+            );
+        } catch {
+            if (!job.cancelled && token === activeToken)
+                workerScope.postMessage({
+                    kind: 'window-series-result',
+                    requestId: request.requestId,
+                    generation: request.generation,
+                    trackHash: request.trackHash,
+                    configHash: request.configHash,
+                    featureId: request.featureId,
+                    series: null,
+                });
+        } finally {
+            windowJobs.delete(request.requestId);
+        }
+    });
+};
 const latestCursorRequest = new Map<string, string>();
 let latestTempoRequestId: string | null = null;
 let live: { id: string; stop(): void } | null = null;
@@ -107,6 +163,15 @@ const tempoEstimate = (request: TempoEstimateRequest) => {
 workerScope.onmessage = event => {
     const request = event.data;
     if (!request || typeof request !== 'object') return;
+    if (request.kind === 'window-series') {
+        windowSeries(request);
+        return;
+    }
+    if (request.kind === 'cancel-window') {
+        const job = windowJobs.get(request.requestId);
+        if (job) job.cancelled = true;
+        return;
+    }
     if (request.kind === 'realtime-stop') {
         if (pendingLiveId === request.sessionId) {
             ++activeToken;
@@ -146,7 +211,9 @@ workerScope.onmessage = event => {
     }
     if (request.kind === 'cursor-value') {
         latestCursorRequest.set(request.featureId, request.requestId);
-        queue = queue.then(() => cursorValue(request));
+        // Window jobs yield, allowing the exact cursor to use retained PCM immediately.
+        if (retained?.generation === request.generation) cursorValue(request);
+        else queue = queue.then(() => cursorValue(request));
         return;
     }
     if (request.kind === 'tempo-estimate') {

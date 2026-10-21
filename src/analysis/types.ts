@@ -311,6 +311,8 @@ export type TempoEstimateResult =
       });
 
 export type AnalysisWorkerRequest =
+    | import('./windowTypes').AnalysisWindowRequest
+    | import('./windowTypes').AnalysisWindowCancel
     | import('./realtimeTypes').RealtimeAnalysisRequest
     | AnalysisJobRequest
     | AnalysisJobCancel
@@ -318,6 +320,7 @@ export type AnalysisWorkerRequest =
     | TempoEstimateRequest;
 
 export type AnalysisWorkerResponse =
+    | import('./windowTypes').AnalysisWindowResult
     | import('./realtimeTypes').RealtimeAnalysisResponse
     | AnalysisJobProgress
     | AnalysisJobResult

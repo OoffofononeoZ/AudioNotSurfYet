@@ -101,6 +101,7 @@ class AnalysisHarness {
         setActiveFeatures: async ids => {
             this.featureSets.push([...ids]);
         },
+        requestWindowSeries: async () => null,
         requestCursorValue: async () => null,
         requestTempoEstimate: async () => null,
         getSeries: featureId => this.series.get(featureId) ?? null,

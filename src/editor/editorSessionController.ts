@@ -1,6 +1,7 @@
 import type { InjectionKey } from 'vue';
 import { inject } from 'vue';
 import type { AnalysisConsumerLease, AnalysisCoordinator } from '../analysis/analysisCoordinator';
+import type { AnalysisWindowInput, AnalysisWindowSeries } from '../analysis/windowTypes';
 import type {
     AnalysisCursorValueResult,
     AnalysisCoordinatorSnapshot,
@@ -163,6 +164,10 @@ export class EditorSessionController {
     requestAnalysisCursorValue(featureId: FeatureId, timeSeconds: number): Promise<AnalysisCursorValueResult | null> {
         if (!this.snapshot.overlayOpen) return Promise.resolve(null);
         return this.analysisLease?.requestCursorValue(featureId, timeSeconds) ?? Promise.resolve(null);
+    }
+
+    requestAnalysisWindow(input: AnalysisWindowInput, signal?: AbortSignal): Promise<AnalysisWindowSeries | null> {
+        return this.analysisLease?.requestWindowSeries(input, signal) ?? Promise.resolve(null);
     }
 
     retryOverlayAnalysis(): void {
