@@ -19,6 +19,24 @@ async function fixture(): Promise<StemPcmSource> {
     };
 }
 describe('source-scoped stem analysis', () => {
+    it('bounds PCM reads for a fifteen-minute source', async () => {
+        const source = await fixture();
+        source.frames = 44100 * 900;
+        let maxRead = 0;
+        const file = {
+            size: source.frames * 4,
+            slice: (start: number, end: number) => {
+                maxRead = Math.max(maxRead, end - start);
+                return new Blob([new Float32Array((end - start) / 4)]);
+            },
+        } as File;
+        source.left = file;
+        source.right = file;
+        const series = await runStemAnalysis(source, ['energy'], () => false);
+        expect(maxRead).toBeLessThanOrEqual(65536 * 4);
+        expect(series[0]?.sampleCount).toBeGreaterThan(20000);
+        expect(series[0]?.payload.kind === 'scalar-f32' && series[0].payload.values.every(v => v === 0)).toBe(true);
+    }, 60000);
     it('matches the existing full PCM extraction, including stereo wallpaper history', async () => {
         const source = await fixture(),
             left = new Float32Array(await source.left.arrayBuffer()),

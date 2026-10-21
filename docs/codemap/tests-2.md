@@ -6,6 +6,8 @@
 
 | 文件 | 本地静态引用（最多显示 6 项） |
 | --- | --- |
+| [tests/e2e/visualizer-pixels.spec.ts](../../tests/e2e/visualizer-pixels.spec.ts) | [tests/support/file-picker.ts](../../tests/support/file-picker.ts) |
+| [tests/e2e/visualizer-point-lines.spec.ts](../../tests/e2e/visualizer-point-lines.spec.ts) | [src/editor/projectCodec.ts](../../src/editor/projectCodec.ts)、[src/visualizer/compositionTypes.ts](../../src/visualizer/compositionTypes.ts)、[src/visualizer/elementRegistry.ts](../../src/visualizer/elementRegistry.ts)、[tests/support/file-picker.ts](../../tests/support/file-picker.ts)、[tests/support/visualizer-assets.mjs](../../tests/support/visualizer-assets.mjs) |
 | [tests/e2e/visualizer-presets.spec.ts](../../tests/e2e/visualizer-presets.spec.ts) | [src/visualizer/compositionTypes.ts](../../src/visualizer/compositionTypes.ts)、[tests/support/file-picker.ts](../../tests/support/file-picker.ts)、[tests/support/v6-resource-probe.ts](../../tests/support/v6-resource-probe.ts)、[tests/support/visualizer-output-sync.ts](../../tests/support/visualizer-output-sync.ts) |
 | [tests/e2e/visualizer-realtime-production.spec.ts](../../tests/e2e/visualizer-realtime-production.spec.ts) | [tests/support/file-picker.ts](../../tests/support/file-picker.ts) |
 | [tests/e2e/visualizer-realtime.spec.ts](../../tests/e2e/visualizer-realtime.spec.ts) | [tests/support/file-picker.ts](../../tests/support/file-picker.ts) |
@@ -104,5 +106,3 @@
 | [tests/scripts/run-m9-eval.mjs](../../tests/scripts/run-m9-eval.mjs) | — |
 | [tests/scripts/run-p1-eval.mjs](../../tests/scripts/run-p1-eval.mjs) | — |
 | [tests/scripts/run-v1-eval.mjs](../../tests/scripts/run-v1-eval.mjs) | — |
-| [tests/scripts/run-v2-eval.mjs](../../tests/scripts/run-v2-eval.mjs) | — |
-| [tests/scripts/run-v3-eval.mjs](../../tests/scripts/run-v3-eval.mjs) | — |

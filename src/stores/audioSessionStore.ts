@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia';
 import type { PlaybackSnapshot, SessionPersistenceSnapshot, TrackRecord } from '../types/audio';
 import type { AnalysisCoordinatorSnapshot, FeatureId } from '../analysis/types';
+import { cloneSourceWorkspace } from '../analysis/sourceWorkspace';
 import {
     cloneActiveFeatureQueue,
     clonePersistedTimelineViewport,
@@ -83,6 +84,7 @@ export const useAudioSessionStore = defineStore('audio-session', {
             if (workspace) {
                 this.analysisWorkspace = {
                     initialized: true,
+                    ...(workspace.sources ? { sources: cloneSourceWorkspace(workspace.sources) } : {}),
                     activeFeatureQueue: cloneActiveFeatureQueue(workspace.activeFeatureQueue),
                     viewport: clonePersistedTimelineViewport(workspace.viewport),
                 };
@@ -137,6 +139,7 @@ export const useAudioSessionStore = defineStore('audio-session', {
         setAnalysisWorkspace(snapshot: AnalysisWorkspaceSnapshot) {
             this.analysisWorkspace = {
                 initialized: snapshot.initialized,
+                ...(snapshot.sources ? { sources: cloneSourceWorkspace(snapshot.sources) } : {}),
                 activeFeatureQueue: cloneActiveFeatureQueue(snapshot.activeFeatureQueue),
                 viewport: clonePersistedTimelineViewport(snapshot.viewport),
             };

@@ -1,14 +1,6 @@
-import type {
-    RestoreState,
-    TrackId,
-    TrackRecord,
-} from './audio';
-import {
-    FEATURE_IDS,
-    isFeatureId,
-    type ConfigHash,
-    type FeatureId,
-} from '../analysis/types';
+import type { RestoreState, TrackId, TrackRecord } from './audio';
+import { validateSourceWorkspace, type AnalyzerSourceWorkspace } from '../analysis/sourceWorkspace';
+import { FEATURE_IDS, isFeatureId, type ConfigHash, type FeatureId } from '../analysis/types';
 
 export type TrackHash = string;
 export type { ConfigHash, FeatureId };
@@ -41,12 +33,14 @@ export interface TimelineViewport extends PersistedTimelineViewport {
 }
 
 export interface AnalysisWorkspaceSnapshot {
+    sources?: AnalyzerSourceWorkspace;
     initialized: boolean;
     activeFeatureQueue: ActiveFeatureQueue;
     viewport: PersistedTimelineViewport | null;
 }
 
 export interface AnalysisWorkspaceUpdate {
+    sources?: AnalyzerSourceWorkspace;
     activeFeatureQueue: ActiveFeatureQueue;
     viewport: PersistedTimelineViewport | null;
 }
@@ -57,6 +51,7 @@ export interface PersistedSessionV1 {
     queue: TrackRecord[];
     currentTrackId: TrackId | null;
     analyzerWorkspaceVersion?: 2;
+    analysisSources?: AnalyzerSourceWorkspace;
     activeCards: ActiveAnalysisCard[];
     analysisConfig: PersistedAnalysisConfig;
     viewport: PersistedTimelineViewport | null;
@@ -103,14 +98,13 @@ export interface RestoredSessionBundle {
 export type RestoreResult<T> =
     | { ok: true; value: T; source: 'blob' | 'handle' | 'cache' }
     | {
-        ok: false;
-        state: Exclude<RestoreState, 'available'>;
-        recoverable: boolean;
-        detail?: string;
-    };
+          ok: false;
+          state: Exclude<RestoreState, 'available'>;
+          recoverable: boolean;
+          detail?: string;
+      };
 
-export const DEFAULT_PERSISTED_ANALYSIS_CONFIG:
-PersistedAnalysisConfig = {
+export const DEFAULT_PERSISTED_ANALYSIS_CONFIG: PersistedAnalysisConfig = {
     schemaVersion: 1,
     frameSize: 1024,
     hopSize: 512,
@@ -119,59 +113,43 @@ PersistedAnalysisConfig = {
     channelMode: 'average-mono',
 };
 
-export const cloneActiveAnalysisCards = (
-    cards: readonly ActiveAnalysisCard[],
-): ActiveAnalysisCard[] => cards.map((card) => ({ ...card }));
+export const cloneActiveAnalysisCards = (cards: readonly ActiveAnalysisCard[]): ActiveAnalysisCard[] =>
+    cards.map(card => ({ ...card }));
 
-export const cloneActiveFeatureQueue = (
-    featureIds: readonly FeatureId[],
-): ActiveFeatureQueue => [...featureIds];
+export const cloneActiveFeatureQueue = (featureIds: readonly FeatureId[]): ActiveFeatureQueue => [...featureIds];
 
+export const activeCardsToFeatureQueue = (cards: readonly ActiveAnalysisCard[]): ActiveFeatureQueue =>
+    [...cards].sort((left, right) => left.slot - right.slot).map(card => card.featureId);
 
-export const activeCardsToFeatureQueue = (
-    cards: readonly ActiveAnalysisCard[],
-): ActiveFeatureQueue => [...cards]
-    .sort((left, right) => left.slot - right.slot)
-    .map((card) => card.featureId);
-
-export const activeFeatureQueueToCards = (
-    featureIds: readonly FeatureId[],
-): ActiveAnalysisCard[] => featureIds.map((featureId, slot) => ({
-    slot: slot as ActiveAnalysisCard['slot'],
-    featureId,
-}));
+export const activeFeatureQueueToCards = (featureIds: readonly FeatureId[]): ActiveAnalysisCard[] =>
+    featureIds.map((featureId, slot) => ({
+        slot: slot as ActiveAnalysisCard['slot'],
+        featureId,
+    }));
 
 export const clonePersistedTimelineViewport = (
     viewport: PersistedTimelineViewport | null,
-): PersistedTimelineViewport | null =>
-    viewport ? { ...viewport } : null;
+): PersistedTimelineViewport | null => (viewport ? { ...viewport } : null);
 
-export const assertValidAnalysisWorkspace = (
-    workspace: AnalysisWorkspaceUpdate,
-): void => {
+export const assertValidAnalysisWorkspace = (workspace: AnalysisWorkspaceUpdate): void => {
+    if (workspace.sources !== undefined) validateSourceWorkspace(workspace.sources);
     if (
-        !Array.isArray(workspace.activeFeatureQueue)
-        || workspace.activeFeatureQueue.length > 4
-        || workspace.activeFeatureQueue.some((featureId) =>
-            !isFeatureId(featureId))
-        || new Set(workspace.activeFeatureQueue).size
-            !== workspace.activeFeatureQueue.length
+        !Array.isArray(workspace.activeFeatureQueue) ||
+        workspace.activeFeatureQueue.length > 4 ||
+        workspace.activeFeatureQueue.some(featureId => !isFeatureId(featureId)) ||
+        new Set(workspace.activeFeatureQueue).size !== workspace.activeFeatureQueue.length
     ) {
-        throw new TypeError(
-            'Analysis workspace requires 0–4 unique active features.',
-        );
+        throw new TypeError('Analysis workspace requires 0–4 unique active features.');
     }
     const viewport = workspace.viewport;
     if (
-        viewport !== null
-        && (
-            !Number.isFinite(viewport.startSeconds)
-            || !Number.isFinite(viewport.endSeconds)
-            || !Number.isFinite(viewport.zoom)
-            || viewport.startSeconds < 0
-            || viewport.endSeconds <= viewport.startSeconds
-            || viewport.zoom <= 0
-        )
+        viewport !== null &&
+        (!Number.isFinite(viewport.startSeconds) ||
+            !Number.isFinite(viewport.endSeconds) ||
+            !Number.isFinite(viewport.zoom) ||
+            viewport.startSeconds < 0 ||
+            viewport.endSeconds <= viewport.startSeconds ||
+            viewport.zoom <= 0)
     ) {
         throw new TypeError(
             'Analysis workspace viewport must be finite, ordered, non-negative, and positively zoomed.',
@@ -179,20 +157,13 @@ export const assertValidAnalysisWorkspace = (
     }
 };
 
-export const assertValidPersistedActiveCards = (
-    cards: readonly ActiveAnalysisCard[],
-): void => {
+export const assertValidPersistedActiveCards = (cards: readonly ActiveAnalysisCard[]): void => {
     if (
-        cards.length > 4
-        || cards.some((card) =>
-            !card
-            || ![0, 1, 2, 3].includes(card.slot)
-            || !isFeatureId(card.featureId))
-        || new Set(cards.map((card) => card.slot)).size !== cards.length
-        || new Set(cards.map((card) => card.featureId)).size !== cards.length
+        cards.length > 4 ||
+        cards.some(card => !card || ![0, 1, 2, 3].includes(card.slot) || !isFeatureId(card.featureId)) ||
+        new Set(cards.map(card => card.slot)).size !== cards.length ||
+        new Set(cards.map(card => card.featureId)).size !== cards.length
     ) {
-        throw new TypeError(
-            'Persisted analysis cards require 0–4 unique slots and features.',
-        );
+        throw new TypeError('Persisted analysis cards require 0–4 unique slots and features.');
     }
 };

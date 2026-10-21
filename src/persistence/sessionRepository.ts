@@ -11,10 +11,7 @@ import {
     assertValidAnalysisWorkspace,
     assertValidPersistedActiveCards,
 } from '../types/session';
-import {
-    FEATURE_IDS,
-    isFeatureId,
-} from '../analysis/types';
+import { FEATURE_IDS, isFeatureId } from '../analysis/types';
 import { createAnalysisCacheKey } from '../analysis/config';
 
 const DATABASE_NAME = 'audionotsurfyet-session';
@@ -41,39 +38,35 @@ const RESTORE_STATES = new Set([
     'decode-error',
 ]);
 
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-    typeof value === 'object' && value !== null;
+const isRecord = (value: unknown): value is Record<string, unknown> => typeof value === 'object' && value !== null;
 
-const isFiniteNumber = (value: unknown): value is number =>
-    typeof value === 'number' && Number.isFinite(value);
+const isFiniteNumber = (value: unknown): value is number => typeof value === 'number' && Number.isFinite(value);
 
 const isTrackRecord = (value: unknown): boolean => {
     if (!isRecord(value) || !isRecord(value.metadata)) return false;
-    return typeof value.id === 'string'
-        && typeof value.name === 'string'
-        && typeof value.mimeType === 'string'
-        && isFiniteNumber(value.byteSize)
-        && isFiniteNumber(value.lastModified)
-        && (value.durationSeconds === undefined
-            || isFiniteNumber(value.durationSeconds))
-        && (value.encodedSampleRate === undefined
-            || isFiniteNumber(value.encodedSampleRate))
-        && (value.trackHash === undefined
-            || typeof value.trackHash === 'string')
-        && (value.handleKey === undefined
-            || typeof value.handleKey === 'string')
-        && typeof value.restoreState === 'string'
-        && RESTORE_STATES.has(value.restoreState);
+    return (
+        typeof value.id === 'string' &&
+        typeof value.name === 'string' &&
+        typeof value.mimeType === 'string' &&
+        isFiniteNumber(value.byteSize) &&
+        isFiniteNumber(value.lastModified) &&
+        (value.durationSeconds === undefined || isFiniteNumber(value.durationSeconds)) &&
+        (value.encodedSampleRate === undefined || isFiniteNumber(value.encodedSampleRate)) &&
+        (value.trackHash === undefined || typeof value.trackHash === 'string') &&
+        (value.handleKey === undefined || typeof value.handleKey === 'string') &&
+        typeof value.restoreState === 'string' &&
+        RESTORE_STATES.has(value.restoreState)
+    );
 };
 
 const isAnalysisConfig = (value: unknown): boolean =>
-    isRecord(value)
-    && value.schemaVersion === 1
-    && value.frameSize === 1024
-    && value.hopSize === 512
-    && value.windowingFunction === 'hanning'
-    && value.numberOfMFCCCoefficients === 13
-    && value.channelMode === 'average-mono';
+    isRecord(value) &&
+    value.schemaVersion === 1 &&
+    value.frameSize === 1024 &&
+    value.hopSize === 512 &&
+    value.windowingFunction === 'hanning' &&
+    value.numberOfMFCCCoefficients === 13 &&
+    value.channelMode === 'average-mono';
 
 export class UnsupportedSessionSchemaError extends Error {
     readonly schemaVersion: unknown;
@@ -92,9 +85,7 @@ export class InvalidPersistedSessionError extends Error {
     }
 }
 
-export const validatePersistedSessionV1 = (
-    value: unknown,
-): PersistedSessionV1 => {
+export const validatePersistedSessionV1 = (value: unknown): PersistedSessionV1 => {
     if (!isRecord(value)) {
         throw new InvalidPersistedSessionError();
     }
@@ -103,108 +94,106 @@ export const validatePersistedSessionV1 = (
     }
     // Analyzer workspace is disposable. Queue, Blob and handles keep their V1 carrier.
     if (value.analyzerWorkspaceVersion !== 2) {
-        value = { ...value, analyzerWorkspaceVersion: 2, activeCards: [], viewport: null, currentAnalysisCache: undefined };
+        value = {
+            ...value,
+            analyzerWorkspaceVersion: 2,
+            activeCards: [],
+            viewport: null,
+            currentAnalysisCache: undefined,
+        };
     }
     if (!isRecord(value)) throw new InvalidPersistedSessionError();
     if (
-        typeof value.savedAt !== 'string'
-        || !Array.isArray(value.queue)
-        || !value.queue.every(isTrackRecord)
-        || (value.currentTrackId !== null
-            && typeof value.currentTrackId !== 'string')
-        || !Array.isArray(value.activeCards)
-        || !value.activeCards.every((card) =>
-            isRecord(card)
-            && [0, 1, 2, 3].includes(card.slot as number)
-            && typeof card.featureId === 'string'
-            && FEATURE_ID_SET.has(card.featureId))
-        || !isAnalysisConfig(value.analysisConfig)
-        || (value.viewport !== null
-            && (!isRecord(value.viewport)
-                || !isFiniteNumber(value.viewport.startSeconds)
-                || !isFiniteNumber(value.viewport.endSeconds)
-                || !isFiniteNumber(value.viewport.zoom)))
-        || !Array.isArray(value.handles)
-        || !value.handles.every((entry) =>
-            isRecord(entry)
-            && typeof entry.trackId === 'string'
-            && typeof entry.handleKey === 'string')
+        typeof value.savedAt !== 'string' ||
+        !Array.isArray(value.queue) ||
+        !value.queue.every(isTrackRecord) ||
+        (value.currentTrackId !== null && typeof value.currentTrackId !== 'string') ||
+        !Array.isArray(value.activeCards) ||
+        !value.activeCards.every(
+            card =>
+                isRecord(card) &&
+                [0, 1, 2, 3].includes(card.slot as number) &&
+                typeof card.featureId === 'string' &&
+                FEATURE_ID_SET.has(card.featureId),
+        ) ||
+        !isAnalysisConfig(value.analysisConfig) ||
+        (value.viewport !== null &&
+            (!isRecord(value.viewport) ||
+                !isFiniteNumber(value.viewport.startSeconds) ||
+                !isFiniteNumber(value.viewport.endSeconds) ||
+                !isFiniteNumber(value.viewport.zoom))) ||
+        !Array.isArray(value.handles) ||
+        !value.handles.every(
+            entry => isRecord(entry) && typeof entry.trackId === 'string' && typeof entry.handleKey === 'string',
+        )
     ) {
         throw new InvalidPersistedSessionError();
     }
     try {
-        assertValidPersistedActiveCards(
-            value.activeCards as PersistedSessionV1['activeCards'],
-        );
+        assertValidPersistedActiveCards(value.activeCards as PersistedSessionV1['activeCards']);
         assertValidAnalysisWorkspace({
-            activeFeatureQueue: activeCardsToFeatureQueue(
-                value.activeCards as PersistedSessionV1['activeCards'],
-            ),
+            sources: value.analysisSources as PersistedSessionV1['analysisSources'],
+            activeFeatureQueue: activeCardsToFeatureQueue(value.activeCards as PersistedSessionV1['activeCards']),
             viewport: value.viewport as PersistedSessionV1['viewport'],
         });
     } catch {
-        throw new InvalidPersistedSessionError(
-            'Persisted analysis workspace is invalid.',
-        );
+        throw new InvalidPersistedSessionError('Persisted analysis workspace is invalid.');
     }
     if (
-        value.currentBlob !== undefined
-        && (!isRecord(value.currentBlob)
-            || typeof value.currentBlob.trackId !== 'string'
-            || typeof value.currentBlob.blobKey !== 'string'
-            || typeof value.currentBlob.trackHash !== 'string')
+        value.currentBlob !== undefined &&
+        (!isRecord(value.currentBlob) ||
+            typeof value.currentBlob.trackId !== 'string' ||
+            typeof value.currentBlob.blobKey !== 'string' ||
+            typeof value.currentBlob.trackHash !== 'string')
     ) {
-        throw new InvalidPersistedSessionError(
-            'Persisted current Blob identity is invalid.',
-        );
+        throw new InvalidPersistedSessionError('Persisted current Blob identity is invalid.');
     }
     if (
-        value.currentAnalysisCache !== undefined
-        && (!isRecord(value.currentAnalysisCache)
-            || typeof value.currentAnalysisCache.trackId !== 'string'
-            || typeof value.currentAnalysisCache.trackHash !== 'string'
-            || typeof value.currentAnalysisCache.configHash !== 'string'
-            || !Array.isArray(value.currentAnalysisCache.featureIds)
-            || value.currentAnalysisCache.featureIds.length > 4
-            || new Set(value.currentAnalysisCache.featureIds).size
-                !== value.currentAnalysisCache.featureIds.length
-            || !value.currentAnalysisCache.featureIds.every((featureId) =>
-                typeof featureId === 'string'
-                && FEATURE_ID_SET.has(featureId))
-            || !Array.isArray(value.currentAnalysisCache.cacheKeys)
-            || value.currentAnalysisCache.cacheKeys.length
-                !== value.currentAnalysisCache.featureIds.length
-            || new Set(value.currentAnalysisCache.cacheKeys).size
-                !== value.currentAnalysisCache.cacheKeys.length
-            || !value.currentAnalysisCache.cacheKeys.every(
-                (cacheKey) => typeof cacheKey === 'string',
-            )
-            || !value.currentAnalysisCache.featureIds.every(
+        value.currentAnalysisCache !== undefined &&
+        (!isRecord(value.currentAnalysisCache) ||
+            typeof value.currentAnalysisCache.trackId !== 'string' ||
+            typeof value.currentAnalysisCache.trackHash !== 'string' ||
+            typeof value.currentAnalysisCache.configHash !== 'string' ||
+            !Array.isArray(value.currentAnalysisCache.featureIds) ||
+            value.currentAnalysisCache.featureIds.length > 4 ||
+            new Set(value.currentAnalysisCache.featureIds).size !== value.currentAnalysisCache.featureIds.length ||
+            !value.currentAnalysisCache.featureIds.every(
+                featureId => typeof featureId === 'string' && FEATURE_ID_SET.has(featureId),
+            ) ||
+            !Array.isArray(value.currentAnalysisCache.cacheKeys) ||
+            value.currentAnalysisCache.cacheKeys.length !== value.currentAnalysisCache.featureIds.length ||
+            new Set(value.currentAnalysisCache.cacheKeys).size !== value.currentAnalysisCache.cacheKeys.length ||
+            !value.currentAnalysisCache.cacheKeys.every(cacheKey => typeof cacheKey === 'string') ||
+            !value.currentAnalysisCache.featureIds.every(
                 (featureId, index) =>
-                    value.currentAnalysisCache
-                    && isRecord(value.currentAnalysisCache)
-                    && typeof value.currentAnalysisCache.trackHash === 'string'
-                    && typeof value.currentAnalysisCache.configHash === 'string'
-                    && (
-                        value.currentAnalysisCache.cacheKeys as unknown[]
-                    )[index]
-                        === createAnalysisCacheKey(
+                    value.currentAnalysisCache &&
+                    isRecord(value.currentAnalysisCache) &&
+                    typeof value.currentAnalysisCache.trackHash === 'string' &&
+                    typeof value.currentAnalysisCache.configHash === 'string' &&
+                    (value.currentAnalysisCache.cacheKeys as unknown[])[index] ===
+                        createAnalysisCacheKey(
                             value.currentAnalysisCache.trackHash,
                             value.currentAnalysisCache.configHash,
                             featureId as FeatureId,
                         ),
             ))
     ) {
-        throw new InvalidPersistedSessionError(
-            'Persisted analysis cache identity is invalid.',
-        );
+        throw new InvalidPersistedSessionError('Persisted analysis cache identity is invalid.');
     }
     // Return a fresh current-format carrier; unknown workspace metadata is not persisted.
     return {
-        schemaVersion: 1, analyzerWorkspaceVersion: 2, savedAt: value.savedAt,
-        queue: value.queue, currentTrackId: value.currentTrackId, activeCards: value.activeCards,
-        analysisConfig: value.analysisConfig, viewport: value.viewport, handles: value.handles,
-        currentBlob: value.currentBlob, currentAnalysisCache: value.currentAnalysisCache,
+        schemaVersion: 1,
+        analyzerWorkspaceVersion: 2,
+        savedAt: value.savedAt,
+        queue: value.queue,
+        currentTrackId: value.currentTrackId,
+        activeCards: value.activeCards,
+        analysisConfig: value.analysisConfig,
+        viewport: value.viewport,
+        handles: value.handles,
+        currentBlob: value.currentBlob,
+        currentAnalysisCache: value.currentAnalysisCache,
+        analysisSources: value.analysisSources,
     } as PersistedSessionV1;
 };
 
@@ -233,9 +222,7 @@ export interface SessionRepositoryPort {
     restore(): Promise<RestoredSessionBundle | null>;
     saveQueue(input: PersistedQueueInput): Promise<void>;
     replaceCurrent(input: PersistedCurrentInput): Promise<void>;
-    replaceCurrentAnalysisCache(
-        input: ReplaceCurrentAnalysisCacheInput,
-    ): Promise<'stored' | 'stale'>;
+    replaceCurrentAnalysisCache(input: ReplaceCurrentAnalysisCacheInput): Promise<'stored' | 'stale'>;
     removeTrack(trackId: string): Promise<void>;
     clear(): Promise<void>;
 }
@@ -243,32 +230,21 @@ export interface SessionRepositoryPort {
 const requestResult = <T>(request: IDBRequest<T>): Promise<T> =>
     new Promise((resolve, reject) => {
         request.onsuccess = () => resolve(request.result);
-        request.onerror = () => reject(
-            request.error ?? new Error('IndexedDB request failed.'),
-        );
+        request.onerror = () => reject(request.error ?? new Error('IndexedDB request failed.'));
     });
 
 const transactionDone = (transaction: IDBTransaction): Promise<void> =>
     new Promise((resolve, reject) => {
         transaction.oncomplete = () => resolve();
-        transaction.onabort = () => reject(
-            transaction.error ?? new Error('IndexedDB transaction aborted.'),
-        );
-        transaction.onerror = () => reject(
-            transaction.error ?? new Error('IndexedDB transaction failed.'),
-        );
+        transaction.onabort = () => reject(transaction.error ?? new Error('IndexedDB transaction aborted.'));
+        transaction.onerror = () => reject(transaction.error ?? new Error('IndexedDB transaction failed.'));
     });
 
 export class SessionRepository implements SessionRepositoryPort {
     private readonly indexedDb: IDBFactory | undefined;
     private readonly databaseName: string;
     private readonly faultInjector?: (
-        operation:
-            | 'saveQueue'
-            | 'replaceCurrent'
-            | 'replaceCurrentAnalysisCache'
-            | 'removeTrack'
-            | 'clear',
+        operation: 'saveQueue' | 'replaceCurrent' | 'replaceCurrentAnalysisCache' | 'removeTrack' | 'clear',
         transaction: IDBTransaction,
     ) => void;
 
@@ -276,12 +252,7 @@ export class SessionRepository implements SessionRepositoryPort {
         indexedDb?: IDBFactory,
         databaseName = DATABASE_NAME,
         faultInjector?: (
-            operation:
-                | 'saveQueue'
-                | 'replaceCurrent'
-                | 'replaceCurrentAnalysisCache'
-                | 'removeTrack'
-                | 'clear',
+            operation: 'saveQueue' | 'replaceCurrent' | 'replaceCurrentAnalysisCache' | 'removeTrack' | 'clear',
             transaction: IDBTransaction,
         ) => void,
     ) {
@@ -293,35 +264,17 @@ export class SessionRepository implements SessionRepositoryPort {
     async restore(): Promise<RestoredSessionBundle | null> {
         const database = await this.open();
         try {
-            const transaction = database.transaction(
-                Object.values(STORES),
-                'readonly',
-            );
+            const transaction = database.transaction(Object.values(STORES), 'readonly');
             const done = transactionDone(transaction);
-            const sessionRequest = requestResult(
-                transaction.objectStore(STORES.session).get(SESSION_KEY),
+            const sessionRequest = requestResult(transaction.objectStore(STORES.session).get(SESSION_KEY));
+            const handlesRequest = requestResult<StoredHandle[]>(transaction.objectStore(STORES.handles).getAll());
+            const currentBlobRequest = requestResult<StoredCurrentBlob | undefined>(
+                transaction.objectStore(STORES.currentBlob).get(CURRENT_KEY),
             );
-            const handlesRequest = requestResult<StoredHandle[]>(
-                transaction.objectStore(STORES.handles).getAll(),
+            const currentCacheRequest = requestResult<StoredAnalysisCache | undefined>(
+                transaction.objectStore(STORES.currentCache).get(CURRENT_KEY),
             );
-            const currentBlobRequest =
-                requestResult<StoredCurrentBlob | undefined>(
-                    transaction
-                        .objectStore(STORES.currentBlob)
-                        .get(CURRENT_KEY),
-                );
-            const currentCacheRequest =
-                requestResult<StoredAnalysisCache | undefined>(
-                    transaction
-                        .objectStore(STORES.currentCache)
-                        .get(CURRENT_KEY),
-                );
-            const [
-                rawSession,
-                handles,
-                currentBlob,
-                currentAnalysisCache,
-            ] = await Promise.all([
+            const [rawSession, handles, currentBlob, currentAnalysisCache] = await Promise.all([
                 sessionRequest,
                 handlesRequest,
                 currentBlobRequest,
@@ -341,44 +294,34 @@ export class SessionRepository implements SessionRepositoryPort {
             }
             const cacheManifest = session.currentAnalysisCache;
             const validCurrentAnalysisCache =
-                currentAnalysisCache
-                && cacheManifest
-                && currentAnalysisCache.manifest.trackId
-                    === cacheManifest.trackId
-                && currentAnalysisCache.manifest.trackHash
-                    === cacheManifest.trackHash
-                && currentAnalysisCache.manifest.configHash
-                    === cacheManifest.configHash
-                && currentAnalysisCache.manifest.featureIds.length
-                    === cacheManifest.featureIds.length
-                && currentAnalysisCache.manifest.featureIds.every(
+                currentAnalysisCache &&
+                cacheManifest &&
+                currentAnalysisCache.manifest.trackId === cacheManifest.trackId &&
+                currentAnalysisCache.manifest.trackHash === cacheManifest.trackHash &&
+                currentAnalysisCache.manifest.configHash === cacheManifest.configHash &&
+                currentAnalysisCache.manifest.featureIds.length === cacheManifest.featureIds.length &&
+                currentAnalysisCache.manifest.featureIds.every(
                     (featureId, index) =>
-                        featureId === cacheManifest.featureIds[index]
-                        && currentAnalysisCache.manifest.cacheKeys[index]
-                            === cacheManifest.cacheKeys[index],
-                )
-                && currentAnalysisCache.payloads.length
-                    === cacheManifest.cacheKeys.length
-                && currentAnalysisCache.payloads.every(
+                        featureId === cacheManifest.featureIds[index] &&
+                        currentAnalysisCache.manifest.cacheKeys[index] === cacheManifest.cacheKeys[index],
+                ) &&
+                currentAnalysisCache.payloads.length === cacheManifest.cacheKeys.length &&
+                currentAnalysisCache.payloads.every(
                     (payload, index) =>
-                        payload.cacheKey === cacheManifest.cacheKeys[index]
-                        && payload.payload instanceof ArrayBuffer,
+                        payload.cacheKey === cacheManifest.cacheKeys[index] && payload.payload instanceof ArrayBuffer,
                 );
 
             return {
                 session,
                 handles,
                 currentBlob:
-                    currentBlob
-                    && session.currentBlob
-                    && currentBlob.trackId === session.currentBlob.trackId
-                    && currentBlob.trackHash === session.currentBlob.trackHash
+                    currentBlob &&
+                    session.currentBlob &&
+                    currentBlob.trackId === session.currentBlob.trackId &&
+                    currentBlob.trackHash === session.currentBlob.trackHash
                         ? currentBlob
                         : undefined,
-                currentAnalysisCache:
-                    validCurrentAnalysisCache
-                        ? currentAnalysisCache
-                        : undefined,
+                currentAnalysisCache: validCurrentAnalysisCache ? currentAnalysisCache : undefined,
             };
         } finally {
             database.close();
@@ -388,10 +331,7 @@ export class SessionRepository implements SessionRepositoryPort {
     async saveQueue(input: PersistedQueueInput): Promise<void> {
         const database = await this.open();
         try {
-            const transaction = database.transaction(
-                [STORES.session, STORES.handles],
-                'readwrite',
-            );
+            const transaction = database.transaction([STORES.session, STORES.handles], 'readwrite');
             const done = transactionDone(transaction);
             this.writeSessionAndHandles(transaction, input);
             this.injectFault('saveQueue', transaction);
@@ -404,10 +344,7 @@ export class SessionRepository implements SessionRepositoryPort {
     async replaceCurrent(input: PersistedCurrentInput): Promise<void> {
         const database = await this.open();
         try {
-            const transaction = database.transaction(
-                Object.values(STORES),
-                'readwrite',
-            );
+            const transaction = database.transaction(Object.values(STORES), 'readwrite');
             const done = transactionDone(transaction);
             this.writeSessionAndHandles(transaction, input);
             const blobStore = transaction.objectStore(STORES.currentBlob);
@@ -432,34 +369,27 @@ export class SessionRepository implements SessionRepositoryPort {
         }
     }
 
-    async replaceCurrentAnalysisCache(
-        input: ReplaceCurrentAnalysisCacheInput,
-    ): Promise<'stored' | 'stale'> {
-        const featureIds = input.payloads.map((entry) => entry.featureId);
+    async replaceCurrentAnalysisCache(input: ReplaceCurrentAnalysisCacheInput): Promise<'stored' | 'stale'> {
+        const featureIds = input.payloads.map(entry => entry.featureId);
         if (
-            !input.trackId
-            || !input.trackHash
-            || !input.configHash
-            || new Set(featureIds).size !== featureIds.length
-            || featureIds.length > 4
-            || input.payloads.some((entry) =>
-                !isFeatureId(entry.featureId)
-                || entry.cacheKey !== createAnalysisCacheKey(
-                    input.trackHash,
-                    input.configHash,
-                    entry.featureId,
-                )
-                || !(entry.payload instanceof ArrayBuffer))
+            !input.trackId ||
+            !input.trackHash ||
+            !input.configHash ||
+            new Set(featureIds).size !== featureIds.length ||
+            featureIds.length > 4 ||
+            input.payloads.some(
+                entry =>
+                    !isFeatureId(entry.featureId) ||
+                    entry.cacheKey !== createAnalysisCacheKey(input.trackHash, input.configHash, entry.featureId) ||
+                    !(entry.payload instanceof ArrayBuffer),
+            )
         ) {
             throw new TypeError('Analysis cache replacement input is invalid.');
         }
 
         const database = await this.open();
         try {
-            const transaction = database.transaction(
-                [STORES.session, STORES.currentCache],
-                'readwrite',
-            );
+            const transaction = database.transaction([STORES.session, STORES.currentCache], 'readwrite');
             const done = transactionDone(transaction);
             const sessionStore = transaction.objectStore(STORES.session);
             const cacheStore = transaction.objectStore(STORES.currentCache);
@@ -467,16 +397,9 @@ export class SessionRepository implements SessionRepositoryPort {
             let outcome: 'stored' | 'stale' = 'stale';
             sessionRequest.onsuccess = () => {
                 try {
-                    const session = validatePersistedSessionV1(
-                        sessionRequest.result,
-                    );
-                    const currentTrack = session.queue.find(
-                        (track) => track.id === session.currentTrackId,
-                    );
-                    if (
-                        session.currentTrackId !== input.trackId
-                        || currentTrack?.trackHash !== input.trackHash
-                    ) {
+                    const session = validatePersistedSessionV1(sessionRequest.result);
+                    const currentTrack = session.queue.find(track => track.id === session.currentTrackId);
+                    if (session.currentTrackId !== input.trackId || currentTrack?.trackHash !== input.trackHash) {
                         outcome = 'stale';
                         return;
                     }
@@ -492,28 +415,29 @@ export class SessionRepository implements SessionRepositoryPort {
                             trackHash: input.trackHash,
                             configHash: input.configHash,
                             featureIds,
-                            cacheKeys: input.payloads.map(
-                                (entry) => entry.cacheKey,
-                            ),
+                            cacheKeys: input.payloads.map(entry => entry.cacheKey),
                         };
-                        sessionStore.put({
-                            ...session,
-                            savedAt: new Date().toISOString(),
-                            currentAnalysisCache: manifest,
-                        }, SESSION_KEY);
-                        cacheStore.put({
-                            manifest,
-                            payloads: input.payloads.map((entry) => ({
-                                cacheKey: entry.cacheKey,
-                                payload: entry.payload,
-                            })),
-                        } satisfies StoredAnalysisCache, CURRENT_KEY);
+                        sessionStore.put(
+                            {
+                                ...session,
+                                savedAt: new Date().toISOString(),
+                                currentAnalysisCache: manifest,
+                            },
+                            SESSION_KEY,
+                        );
+                        cacheStore.put(
+                            {
+                                manifest,
+                                payloads: input.payloads.map(entry => ({
+                                    cacheKey: entry.cacheKey,
+                                    payload: entry.payload,
+                                })),
+                            } satisfies StoredAnalysisCache,
+                            CURRENT_KEY,
+                        );
                     }
                     outcome = 'stored';
-                    this.injectFault(
-                        'replaceCurrentAnalysisCache',
-                        transaction,
-                    );
+                    this.injectFault('replaceCurrentAnalysisCache', transaction);
                 } catch {
                     transaction.abort();
                 }
@@ -529,27 +453,24 @@ export class SessionRepository implements SessionRepositoryPort {
     async removeTrack(trackId: string): Promise<void> {
         const database = await this.open();
         try {
-            const transaction = database.transaction(
-                [STORES.session, STORES.handles],
-                'readwrite',
-            );
+            const transaction = database.transaction([STORES.session, STORES.handles], 'readwrite');
             const done = transactionDone(transaction);
             const sessionStore = transaction.objectStore(STORES.session);
             const sessionRequest = sessionStore.get(SESSION_KEY);
             sessionRequest.onsuccess = () => {
                 const rawSession = sessionRequest.result;
                 if (isRecord(rawSession) && Array.isArray(rawSession.queue)) {
-                    sessionStore.put({
-                        ...rawSession,
-                        savedAt: new Date().toISOString(),
-                        queue: rawSession.queue.filter((entry) =>
-                            !isRecord(entry) || entry.id !== trackId),
-                        handles: Array.isArray(rawSession.handles)
-                            ? rawSession.handles.filter((entry) =>
-                                !isRecord(entry)
-                                || entry.trackId !== trackId)
-                            : [],
-                    }, SESSION_KEY);
+                    sessionStore.put(
+                        {
+                            ...rawSession,
+                            savedAt: new Date().toISOString(),
+                            queue: rawSession.queue.filter(entry => !isRecord(entry) || entry.id !== trackId),
+                            handles: Array.isArray(rawSession.handles)
+                                ? rawSession.handles.filter(entry => !isRecord(entry) || entry.trackId !== trackId)
+                                : [],
+                        },
+                        SESSION_KEY,
+                    );
                 }
             };
             sessionRequest.onerror = () => transaction.abort();
@@ -564,10 +485,7 @@ export class SessionRepository implements SessionRepositoryPort {
     async clear(): Promise<void> {
         const database = await this.open();
         try {
-            const transaction = database.transaction(
-                Object.values(STORES),
-                'readwrite',
-            );
+            const transaction = database.transaction(Object.values(STORES), 'readwrite');
             const done = transactionDone(transaction);
             for (const storeName of Object.values(STORES)) {
                 transaction.objectStore(storeName).clear();
@@ -579,13 +497,8 @@ export class SessionRepository implements SessionRepositoryPort {
         }
     }
 
-    private writeSessionAndHandles(
-        transaction: IDBTransaction,
-        input: PersistedQueueInput,
-    ) {
-        transaction
-            .objectStore(STORES.session)
-            .put(input.session, SESSION_KEY);
+    private writeSessionAndHandles(transaction: IDBTransaction, input: PersistedQueueInput) {
+        transaction.objectStore(STORES.session).put(input.session, SESSION_KEY);
         const handleStore = transaction.objectStore(STORES.handles);
         handleStore.clear();
         for (const handle of input.handles) {
@@ -594,12 +507,7 @@ export class SessionRepository implements SessionRepositoryPort {
     }
 
     private injectFault(
-        operation:
-            | 'saveQueue'
-            | 'replaceCurrent'
-            | 'replaceCurrentAnalysisCache'
-            | 'removeTrack'
-            | 'clear',
+        operation: 'saveQueue' | 'replaceCurrent' | 'replaceCurrentAnalysisCache' | 'removeTrack' | 'clear',
         transaction: IDBTransaction,
     ) {
         if (!this.faultInjector) return;
@@ -616,10 +524,7 @@ export class SessionRepository implements SessionRepositoryPort {
                 reject(new Error('IndexedDB is unavailable.'));
                 return;
             }
-            const request = this.indexedDb.open(
-                this.databaseName,
-                DATABASE_VERSION,
-            );
+            const request = this.indexedDb.open(this.databaseName, DATABASE_VERSION);
             request.onupgradeneeded = () => {
                 const database = request.result;
                 for (const storeName of Object.values(STORES)) {
@@ -629,12 +534,8 @@ export class SessionRepository implements SessionRepositoryPort {
                 }
             };
             request.onsuccess = () => resolve(request.result);
-            request.onerror = () => reject(
-                request.error ?? new Error('Unable to open IndexedDB.'),
-            );
-            request.onblocked = () => reject(
-                new Error('IndexedDB upgrade is blocked.'),
-            );
+            request.onerror = () => reject(request.error ?? new Error('Unable to open IndexedDB.'));
+            request.onblocked = () => reject(new Error('IndexedDB upgrade is blocked.'));
         });
     }
 }

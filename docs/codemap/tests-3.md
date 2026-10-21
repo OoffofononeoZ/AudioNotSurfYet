@@ -6,6 +6,8 @@
 
 | 文件 | 本地静态引用（最多显示 6 项） |
 | --- | --- |
+| [tests/scripts/run-v2-eval.mjs](../../tests/scripts/run-v2-eval.mjs) | — |
+| [tests/scripts/run-v3-eval.mjs](../../tests/scripts/run-v3-eval.mjs) | — |
 | [tests/scripts/run-v4-eval.mjs](../../tests/scripts/run-v4-eval.mjs) | — |
 | [tests/scripts/run-v5-eval.mjs](../../tests/scripts/run-v5-eval.mjs) | — |
 | [tests/scripts/run-v6-eval.mjs](../../tests/scripts/run-v6-eval.mjs) | — |
@@ -32,6 +34,7 @@
 | [tests/support/meyda-golden.ts](../../tests/support/meyda-golden.ts) | — |
 | [tests/support/osu-fixture.ts](../../tests/support/osu-fixture.ts) | — |
 | [tests/support/resource-directory.ts](../../tests/support/resource-directory.ts) | [tests/support/visualizer-assets.mjs](../../tests/support/visualizer-assets.mjs) |
+| [tests/support/stem-analysis.ts](../../tests/support/stem-analysis.ts) | [src/analysis/pcm.ts](../../src/analysis/pcm.ts)、[src/processing/editorSeparationService.ts](../../src/processing/editorSeparationService.ts)、[src/processing/kernel.ts](../../src/processing/kernel.ts) |
 | [tests/support/tolerance.ts](../../tests/support/tolerance.ts) | — |
 | [tests/support/v6-resource-probe.ts](../../tests/support/v6-resource-probe.ts) | — |
 | [tests/support/visualizer-assets.mjs](../../tests/support/visualizer-assets.mjs) | [scripts/lib/visualizer-assets-path.mjs](../../scripts/lib/visualizer-assets-path.mjs) |
@@ -103,6 +106,3 @@
 | [tests/worker/m6-worker.test.ts](../../tests/worker/m6-worker.test.ts) | [src/analysis/config.ts](../../src/analysis/config.ts)、[src/analysis/types.ts](../../src/analysis/types.ts)、[src/analysis/workerCore.ts](../../src/analysis/workerCore.ts)、[tests/support/audio-fixtures.ts](../../tests/support/audio-fixtures.ts) |
 | [tests/worker/m8-worker.test.ts](../../tests/worker/m8-worker.test.ts) | [src/analysis/config.ts](../../src/analysis/config.ts)、[src/analysis/types.ts](../../src/analysis/types.ts)、[src/analysis/workerCore.ts](../../src/analysis/workerCore.ts)、[tests/support/audio-fixtures.ts](../../tests/support/audio-fixtures.ts)、[tests/support/m8-scalar-fixture.ts](../../tests/support/m8-scalar-fixture.ts) |
 | [tests/worker/m9-worker.test.ts](../../tests/worker/m9-worker.test.ts) | [src/analysis/compactCodec.ts](../../src/analysis/compactCodec.ts)、[src/analysis/config.ts](../../src/analysis/config.ts)、[src/analysis/types.ts](../../src/analysis/types.ts)、[src/analysis/workerCore.ts](../../src/analysis/workerCore.ts)、[tests/support/audio-fixtures.ts](../../tests/support/audio-fixtures.ts)、[tests/support/m9-vector-fixture.ts](../../tests/support/m9-vector-fixture.ts) |
-| [tests/worker/probe.worker.mjs](../../tests/worker/probe.worker.mjs) | — |
-| [tests/worker/window-analysis.test.ts](../../tests/worker/window-analysis.test.ts) | [src/analysis/config.ts](../../src/analysis/config.ts)、[src/analysis/renderGeometry.ts](../../src/analysis/renderGeometry.ts)、[src/analysis/rendererData.ts](../../src/analysis/rendererData.ts)、[src/analysis/types.ts](../../src/analysis/types.ts)、[src/analysis/windowAnalysis.ts](../../src/analysis/windowAnalysis.ts)、[src/analysis/windowTypes.ts](../../src/analysis/windowTypes.ts)、另 1 项，按需核对源码 |
-| [tests/worker/worker-harness.test.ts](../../tests/worker/worker-harness.test.ts) | — |

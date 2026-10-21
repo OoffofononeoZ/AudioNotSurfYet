@@ -20,9 +20,10 @@
                     :data-detail-pending="detailPending"
                     data-testid="editor-analysis-overlay-panel">
                     <div class="overlay-copy" aria-live="polite">
-                        <strong>{{ definition?.label }}</strong>
+                        <strong>{{ project.workspace.overlay.stemRole ?? '原曲' }} · {{ definition?.label }}</strong>
                         <span data-testid="editor-overlay-exact-summary">{{ exactSummary }}</span>
                         <span v-if="analysis.state !== 'ready'">{{ stateLabel }}</span>
+                        <span v-if="analysis.cacheState === 'not-persisted'">当前分析缓存未持久化</span>
                     </div>
 
                     <div v-if="overlayError" class="overlay-error" role="alert">
@@ -81,21 +82,13 @@
                         v-if="menuOpen"
                         id="editor-overlay-feature-menu"
                         class="overlay-feature-menu app-scrollbar"
-                        role="menu"
+                        role="group"
                         aria-label="选择声音特征"
                         data-testid="editor-overlay-feature-menu">
-                        <button
-                            v-for="option in featureOptions"
-                            :key="option.id"
-                            type="button"
-                            role="menuitemradio"
-                            :aria-checked="featureId === option.id"
-                            :data-feature-id="option.id"
-                            @click="selectFeature(option.id)"
-                            @keydown="onMenuItemKeydown">
-                            <span>{{ option.label }}</span>
-                            <span v-if="featureId === option.id" aria-hidden="true">●</span>
-                        </button>
+                        <AnalysisSourceCascader
+                            :feature-id="featureId"
+                            :stem-role="project.workspace.overlay.stemRole"
+                            @select="selectFeature" />
                     </div>
                 </div>
             </Teleport>
@@ -109,13 +102,9 @@ import { analysisCanvasRenderer, type EditorRenderRequest } from '../analysis/ca
 import { useAnalysisWindow } from '../editor/useAnalysisWindow';
 import { FEATURE_REGISTRY } from '../analysis/featureRegistry';
 import EditorIcon from './EditorIcon.vue';
-import type {
-    AnalysisCoordinatorSnapshot,
-    AnalysisCursorValueResult,
-    AnalysisSeries,
-    FeatureId,
-} from '../analysis/types';
-import { FEATURE_IDS } from '../analysis/types';
+import AnalysisSourceCascader from './AnalysisSourceCascader.vue';
+import type { AnalysisInput } from '../analysis/sources';
+import type { AnalysisCoordinatorSnapshot, AnalysisCursorValueResult, AnalysisSeries } from '../analysis/types';
 import {
     EDITOR_OVERLAY_KEYBOARD_COARSE_STEP,
     EDITOR_OVERLAY_KEYBOARD_STEP,
@@ -144,7 +133,7 @@ const props = defineProps<{
 const emit = defineEmits<{
     updateProject: [project: EditorProjectV2, immediate: boolean];
     toggle: [enabled: boolean];
-    selectFeature: [featureId: FeatureId];
+    selectFeature: [input: AnalysisInput];
     retry: [];
 }>();
 
@@ -166,10 +155,6 @@ let disposed = false;
 
 const featureId = computed(() => props.project.workspace.overlay.featureId);
 const definition = computed(() => (featureId.value ? FEATURE_REGISTRY[featureId.value] : null));
-const featureOptions = FEATURE_IDS.map(id => ({
-    id,
-    label: FEATURE_REGISTRY[id].label,
-}));
 const bounds = computed(() => normalizeEditorOverlayBounds(props.project.workspace.overlay));
 const exactSummary = computed(() =>
     featureId.value ? editorOverlayExactSummary(featureId.value, props.exactValue) : '',
@@ -242,6 +227,7 @@ const metrics = () => ({
 });
 
 const { series: displaySeries, pending: detailPending } = useAnalysisWindow(() => ({
+    stemRole: props.project.workspace.overlay.stemRole,
     series: props.series,
     generation: props.analysis.generation,
     startSeconds: props.timeView.startSeconds,
@@ -345,7 +331,7 @@ const applyBounds = (next: EditorOverlayBounds, immediate: boolean) => {
 
 const focusFirstMenuItem = () =>
     void nextTick(() => {
-        controls.value?.querySelector<HTMLButtonElement>('[role="menuitemradio"]')?.focus();
+        controls.value?.querySelector<HTMLElement>('.el-cascader-node')?.focus();
     });
 
 const openMenu = () => {
@@ -371,25 +357,10 @@ const toggleMenu = () => {
     if (menuOpen.value) focusFirstMenuItem();
 };
 
-const selectFeature = (value: FeatureId) => {
+const selectFeature = (value: AnalysisInput) => {
     emit('selectFeature', value);
     menuOpen.value = false;
     void nextTick(() => toggleButton.value?.focus());
-};
-
-const onMenuItemKeydown = (event: KeyboardEvent) => {
-    if (!['ArrowDown', 'ArrowUp', 'Home', 'End'].includes(event.key)) return;
-    event.preventDefault();
-    const items = Array.from(controls.value?.querySelectorAll<HTMLButtonElement>('[role="menuitemradio"]') ?? []);
-    if (items.length === 0) return;
-    const current = Math.max(0, items.indexOf(event.currentTarget as HTMLButtonElement));
-    const next =
-        event.key === 'Home'
-            ? 0
-            : event.key === 'End'
-              ? items.length - 1
-              : (current + (event.key === 'ArrowDown' ? 1 : -1) + items.length) % items.length;
-    items[next]?.focus();
 };
 
 interface DragState {
@@ -581,7 +552,7 @@ onBeforeUnmount(() => {
     top: 100%;
     right: 0;
     display: grid;
-    width: min(272px, calc(100vw - 24px));
+    width: min(480px, calc(100vw - 24px));
     max-height: min(520px, calc(100dvh - var(--app-player-inset, 80px) - 64px));
     margin-top: 6px;
     overflow-y: auto;

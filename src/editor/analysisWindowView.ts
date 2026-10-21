@@ -3,6 +3,7 @@ import type { AnalysisWindowInput, AnalysisWindowSeries } from '../analysis/wind
 
 export const ANALYSIS_ZOOM_SETTLE_MS = 150;
 export interface AnalysisWindowViewInput {
+    stemRole?: import('../processing/modelManifest').StemRole;
     series: AnalysisSeries | null;
     generation: number;
     startSeconds: number;
@@ -58,6 +59,7 @@ export class EditorAnalysisWindowView {
         const scopeChanged =
             !previous ||
             previous.series !== input.series ||
+            previous.stemRole !== input.stemRole ||
             previous.generation !== input.generation ||
             previous.enabled !== input.enabled;
         const zoomed =
@@ -145,6 +147,7 @@ export class EditorAnalysisWindowView {
         this.abort = abort;
         this.changed(this.cache, true);
         this.requested = {
+            stemRole: input.stemRole,
             featureId: input.series!.featureId,
             startSeconds: Math.max(0, input.startSeconds - span),
             endSeconds: Math.min(input.durationSeconds, input.endSeconds + span),

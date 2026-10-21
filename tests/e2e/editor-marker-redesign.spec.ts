@@ -244,6 +244,7 @@ test('overlay aligns to marker geometry, row grid and playhead stay within one C
     await addLane(page, 'point');
     await addLane(page, 'range');
     await page.getByTestId('editor-overlay-menu-toggle').click();
+    await page.getByTestId('editor-overlay-feature-menu').locator('[data-source="original"]').click();
     await page.getByTestId('editor-overlay-feature-menu').locator('[data-feature-id="rms"]').click();
     const overlay = page.getByTestId('editor-analysis-overlay-panel');
     await expect(overlay).toHaveAttribute('data-analysis-state', 'ready', { timeout: 30000 });

@@ -1,5 +1,7 @@
 # Editor 标记工作区
 
+叠加层选择使用“来源 → 特征”单选 Cascader。原曲保留完整特征列表，已验证四轨只提供 energy、amplitudeSpectrum、buffer、wallpaperEngineSpectrum；顶部绿色波形始终来自原曲。Editor V2 的 overlay 可选 stemRole 保存角色，省略即原曲，窗口与精确游标按该角色读取。分离结果缺失时保留引用并提示完成分离，不用原曲图表替代；关闭叠加层释放其来源请求。来源切换不改变试听、标记或播放时钟。
+
 核查日期：2026-10-21。当前[页面接口](../architecture/editor/interface-contracts.md)、[交互契约](../architecture/editor/interaction-contracts.md)和[公共工作区](editor-workspace.md)为事实来源；旧共享视口/小节窗口/右键平移和“播放完全只读”规定已删除。
 
 ## 2026-10-19 数字键实时录入
