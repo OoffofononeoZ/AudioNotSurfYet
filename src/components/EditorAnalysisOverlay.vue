@@ -246,6 +246,7 @@ const renderRequest = (): EditorRenderRequest => {
         feature,
         series: props.series,
         viewport: props.timeView,
+        durationSeconds: props.project.track.durationSeconds,
         widthCssPixels: size.plotWidth,
         heightCssPixels: size.panelHeight,
         devicePixelRatio: size.dpr,

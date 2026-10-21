@@ -24,6 +24,7 @@ upstream_docs:
 
 - 波形／tempo 使用工程 `workspace.viewport`，首次／重置为全曲并恢复已有保存范围，不随 BPM 改窗口。point/range、吸附、移动、批量与 overlay 显式读取只读 `MarkerTimeView`，默认 10 秒、1–10 秒跨度；起点为播放时间减跨度的 15%，播放线固定绘图区 15%，首尾以不可编辑留白补足。动态起点不入 JSON V2；跨度按歌曲 hash 存现有 preferences。
 - 唯一时间来源是已有 PlaybackSnapshot，播放帧不改工程／不保存草稿。Canvas backing store 为 CSS 尺寸乘 DPR，绘制使用 CSS pixel；波形／tempo 及轨道／overlay 两套视图分别内部共线，误差不超过 1 CSS px。只绘制可见行和事件，轨道／overlay 合并 RAF 请求。
+- 叠加图按样本的真实时间单元计算横坐标及宽度，曲首／曲尾留白与轨道一致，不将剩余可见数据铺满绘图区。0 秒播放位置对应 15%，播放、暂停和 seek 沿用同一比例；内容对齐检查覆盖图像本身，不仅比较容器边界。
 - metered segment 仅根据 BPM 和当前细分生成 beat/subdivision，不再区分小节。single-beat segment 不画内部线，并把整个 segment 作为一个候选单元。
 - 2026-10-17 标记改版采用显式 subdivision：常规 `[1,2,4,8,16]`、三连音 `[1,3,6,12]`、自定义 1–64 的因数预设。默认每拍四等分；hover、pointer、端点与键盘共享同一设置。缩放不改变吸附粒度，只减少过密次级线绘制，分隔颜色和层级沿用 osu。
 - snap 只发生在创建或拖动确认时。viewport、zoom 或 tempo 修改不会自动重写已有事件秒数。

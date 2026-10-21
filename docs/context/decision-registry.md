@@ -63,3 +63,7 @@ DEC-074只接受当前功能与汇总听感/长曲时间。第三首没有精确
 ## DEC-093 — osu 导入与 Editor V2 — 2026-10-21
 
 owner 选择 10–1200 BPM、V1 显式迁移、包内原音频、追加新轨道及可选书签／休息／Kiai，并以“Implement the plan.”批准实施。V2 增加独立节拍锚点与 imported 来源；V1 工程、草稿及 Visualizer V5 内嵌快照按明确规则转换。首轮 v14 标准／太鼓／mania，原工程与换歌保护保留，三个小目标分别验证及本地提交；不含 catch、其他版本、发布或正式 readiness。当前格式见 [V2](../architecture/editor/project-format-v2.md)。
+
+## DEC-094 — Editor 图表精度与时间对齐 — 2026-10-21
+
+owner 确认上方图为顶部绿色波形，并以“Implement the plan.”批准叠加层按真实时间对齐轨道、曲首／曲尾保留留白，以及按可见窗口补充 PCM 波形和未聚合分析帧。播放及暂停均自动更新；连续缩放时现有图跟随，结束 150ms 后补算。保留既有特征参数与 Wallpaper 原生 30Hz，不改工程或持久化分析格式；复用既有 Worker／播放时钟、按窗口缓存并取消旧请求。按对齐及自适应细节两个小目标分别验证和本地提交，不重开正式 readiness。

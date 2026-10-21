@@ -1,9 +1,17 @@
 <template>
-    <div ref="plotElement" class="plot" :class="{ 'plot-structured': isStructuredFeature }"
-        :data-zoom="viewport.zoom" :data-start="viewport.startSeconds" :data-end="viewport.endSeconds"
-        role="application" tabindex="0"
+    <div
+        ref="plotElement"
+        class="plot"
+        :class="{ 'plot-structured': isStructuredFeature }"
+        :data-zoom="viewport.zoom"
+        :data-start="viewport.startSeconds"
+        :data-end="viewport.endSeconds"
+        role="application"
+        tabindex="0"
         :aria-label="definition.label + ' 分析图表。滚轮缩放，点击或使用方向键定位播放游标。'"
-        @click="handlePlotClick" @keydown="handlePlotKeydown" @wheel="handlePlotWheel">
+        @click="handlePlotClick"
+        @keydown="handlePlotKeydown"
+        @wheel="handlePlotWheel">
         <canvas ref="staticCanvas" aria-hidden="true"></canvas>
         <canvas ref="cursorCanvas" aria-hidden="true"></canvas>
         <div v-if="!series && !rendererError" class="plot-message">
@@ -40,7 +48,12 @@ const emit = defineEmits<{
     zoom: [factor: number, anchorSeconds: number];
 }>();
 const definition = computed(() => FEATURE_REGISTRY[props.featureId]);
-const isStructuredFeature = computed(() => props.featureId === 'wallpaperEngineSpectrum' || props.featureId === 'loudness' || props.featureId === 'complexSpectrum');
+const isStructuredFeature = computed(
+    () =>
+        props.featureId === 'wallpaperEngineSpectrum' ||
+        props.featureId === 'loudness' ||
+        props.featureId === 'complexSpectrum',
+);
 const staticCanvas = ref<HTMLCanvasElement | null>(null);
 const cursorCanvas = ref<HTMLCanvasElement | null>(null);
 const plotElement = ref<HTMLElement | null>(null);
@@ -54,16 +67,16 @@ const handlePlotWheel = (event: WheelEvent) => {
     if (!rect?.width || (event.target as HTMLElement).closest('button')) return;
     event.preventDefault();
     event.stopPropagation();
-    emit('zoom', event.deltaY < 0 ? 1.12 : 1 / 1.12,
-        canvasXToTime(event.clientX - rect.left, props.viewport, rect.width));
+    emit(
+        'zoom',
+        event.deltaY < 0 ? 1.12 : 1 / 1.12,
+        canvasXToTime(event.clientX - rect.left, props.viewport, rect.width),
+    );
 };
 const handlePlotClick = (event: MouseEvent) => {
     const rect = plotElement.value?.getBoundingClientRect();
     if (!rect) return;
-    emit(
-        'seek',
-        canvasXToTime(event.clientX - rect.left, props.viewport, rect.width),
-    );
+    emit('seek', canvasXToTime(event.clientX - rect.left, props.viewport, rect.width));
 };
 
 const handlePlotKeydown = (event: KeyboardEvent) => {
@@ -99,6 +112,7 @@ const renderRequest = (): EditorRenderRequest => {
         feature: definition.value,
         series: props.series,
         viewport: props.viewport,
+        durationSeconds: props.durationSeconds,
         widthCssPixels: metrics.width,
         heightCssPixels: metrics.height,
         devicePixelRatio: metrics.dpr,
@@ -107,32 +121,19 @@ const renderRequest = (): EditorRenderRequest => {
 
 const prepareCanvas = (canvas: HTMLCanvasElement) => {
     const metrics = canvasMetrics();
-    return prepareCanvasSurface(
-        canvas,
-        metrics.width,
-        metrics.height,
-        metrics.dpr,
-    );
+    return prepareCanvasSurface(canvas, metrics.width, metrics.height, metrics.dpr);
 };
 
 const drawStatic = () => {
     const canvas = staticCanvas.value;
     if (!canvas) return;
-    analysisCanvasRenderer.drawStatic(
-        renderRequest(),
-        prepareCanvas(canvas),
-    );
+    analysisCanvasRenderer.drawStatic(renderRequest(), prepareCanvas(canvas));
 };
 
 const drawCursor = () => {
     const canvas = cursorCanvas.value;
     if (!canvas) return;
-    analysisCanvasRenderer.drawCursor(
-        renderRequest(),
-        props.cursorSeconds,
-        props.exactValue,
-        prepareCanvas(canvas),
-    );
+    analysisCanvasRenderer.drawCursor(renderRequest(), props.cursorSeconds, props.exactValue, prepareCanvas(canvas));
 };
 
 const render = async () => {
@@ -143,9 +144,7 @@ const render = async () => {
         drawCursor();
         rendererError.value = null;
     } catch (error) {
-        rendererError.value = error instanceof Error
-            ? error.message
-            : '此卡 renderer 出错。';
+        rendererError.value = error instanceof Error ? error.message : '此卡 renderer 出错。';
     }
 };
 
@@ -175,14 +174,11 @@ watch(
         try {
             drawCursor();
         } catch (error) {
-            rendererError.value = error instanceof Error
-                ? error.message
-                : '游标层 renderer 出错。';
+            rendererError.value = error instanceof Error ? error.message : '游标层 renderer 出错。';
         }
     },
     { deep: false },
 );
-
 
 let disposed = false;
 onMounted(async () => {
@@ -197,7 +193,6 @@ onBeforeUnmount(() => {
     resizeObserver?.disconnect();
     resizeObserver = null;
 });
-
 </script>
 
 <style scoped>
@@ -237,9 +232,20 @@ onBeforeUnmount(() => {
     color: var(--error);
 }
 
-
-.plot:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-button { color: var(--ink); background: var(--surface-1); border: 1px solid var(--hairline);
-    border-radius: 6px; padding: 6px 9px; cursor: pointer; }
-button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.plot:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+}
+button {
+    color: var(--ink);
+    background: var(--surface-1);
+    border: 1px solid var(--hairline);
+    border-radius: 6px;
+    padding: 6px 9px;
+    cursor: pointer;
+}
+button:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+}
 </style>
