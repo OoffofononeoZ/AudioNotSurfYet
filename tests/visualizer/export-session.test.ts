@@ -6,7 +6,10 @@ import type { OfflineExportOptions } from '../../src/visualizer/offlineExport';
 import type { VisualizerExportState } from '../../src/visualizer/exportTypes';
 import { visualizerRendererDiagnostics } from '../../src/visualizer/visualizerRendererHost';
 
-function harness(run?: (options: OfflineExportOptions) => Promise<File>) {
+function harness(
+    run?: (options: OfflineExportOptions) => Promise<File>,
+    bindingRuntime: Partial<import('../../src/visualizer/types').VisualizerBindingRuntimeSnapshot> = {},
+) {
     const project = createComposition({
         contentHash: 'a'.repeat(64),
         fileName: 'export.wav',
@@ -66,6 +69,7 @@ function harness(run?: (options: OfflineExportOptions) => Promise<File>) {
                 analysisState: 'idle',
                 analysisProgress: 0,
                 editorSnapshotSource: 'none',
+                ...bindingRuntime,
             },
         }),
         prepareFrame,
@@ -225,3 +229,16 @@ test('each new job resets progress rather than reporting the preceding completed
     await task;
     await h.session.discard();
 });
+test.each(['loading', 'error', 'ready'] as const)(
+    'unresolved stem-only input cannot export in %s state',
+    async analysisState => {
+        const h = harness(undefined, {
+            analysisState,
+            activeInputs: [{ featureId: 'buffer', stemRole: 'bass' }],
+            readyInputs: [],
+        });
+        await h.session.start();
+        expect(h.session.getState()).toMatchObject({ status: 'error', code: 'analysis-not-ready' });
+        expect(h.createArtifact).not.toHaveBeenCalled();
+    },
+);

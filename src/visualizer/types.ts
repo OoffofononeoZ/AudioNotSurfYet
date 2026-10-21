@@ -3,14 +3,7 @@ import type { FeatureId } from '../analysis/types';
 export type VisualizerResolution = '720p' | '1080p';
 export type VisualizerFrameRate = 30 | 60;
 
-export type VisualizerAnalysisComponent =
-    | 'default'
-    | 'total'
-    | 'specific'
-    | 'real'
-    | 'imag'
-    | 'magnitude'
-    | 'phase';
+export type VisualizerAnalysisComponent = 'default' | 'total' | 'specific' | 'real' | 'imag' | 'magnitude' | 'phase';
 
 export type VisualizerAnalysisProjectionV1 =
     | { kind: 'scalar' }
@@ -22,11 +15,12 @@ export type VisualizerAnalysisProjectionV1 =
 export type VisualizerBindingSourceV1 =
     | { kind: 'constant'; value: number | string | boolean | number[] }
     | {
-        kind: 'analysis';
-        featureId: FeatureId;
-        component?: VisualizerAnalysisComponent;
-        projection: VisualizerAnalysisProjectionV1;
-    }
+          kind: 'analysis';
+          stemRole?: import('../processing/modelManifest').StemRole;
+          featureId: FeatureId;
+          component?: VisualizerAnalysisComponent;
+          projection: VisualizerAnalysisProjectionV1;
+      }
     | { kind: 'editor-event'; laneId: string; innerClassId?: string };
 
 export interface VisualizerNumericTransformV1 {
@@ -51,27 +45,15 @@ export interface VisualizerTrackValidationContext {
     sampleRate: number;
 }
 
-export type VisualizerPersistenceState =
-    | 'clean'
-    | 'saving'
-    | 'saved'
-    | 'not-persisted';
+export type VisualizerPersistenceState = 'clean' | 'saving' | 'saved' | 'not-persisted';
 
-export type VisualizerSessionState =
-    | 'empty'
-    | 'loading'
-    | 'ready'
-    | 'draft-conflict'
-    | 'unavailable'
-    | 'not-persisted';
+export type VisualizerSessionState = 'empty' | 'loading' | 'ready' | 'draft-conflict' | 'unavailable' | 'not-persisted';
 
-export type VisualizerEditorSnapshotSource =
-    | 'none'
-    | 'project'
-    | 'draft'
-    | 'imported';
+export type VisualizerEditorSnapshotSource = 'none' | 'project' | 'draft' | 'imported';
 
 export interface VisualizerBindingRuntimeSnapshot {
+    activeInputs?: import('../analysis/sources').AnalysisInput[];
+    readyInputs?: import('../analysis/sources').AnalysisInput[];
     bindingRevision: number;
     activeFeatureIds: FeatureId[];
     readyFeatureIds: FeatureId[];

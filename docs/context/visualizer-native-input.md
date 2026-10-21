@@ -4,10 +4,14 @@ owner 于本轮几何壁纸复刻修正中明确授权：频谱输入增加“�
 
 ## 来源与工程
 
-- 在频谱视觉元素的“频谱输入数据来源”中可选固定值、Analyzer、原生输入。原生特征为“频谱（立体声）”和“时域波形”；选择来源时同步切换特征列表，不保留无效的 Meyda featureId。
+- 在频谱视觉元素的“频谱输入数据来源”中可选固定值、analyzer（原曲）、原生输入；四轨完成并校验后另提供 analyzer（drums/bass/other/vocals）。原生特征为“频谱（立体声）”和“时域波形”；选择来源时同步切换特征列表，不保留无效的 Meyda featureId。
 - 支持弦线、点阵、环形频谱、轨道几何体、旋转线框、弧簇、光轨隧道和星尘。弦线就绪前准备到当前歌曲时间的完整原生积分输入，不以当前原生帧或零值填补历史。
 - 当前 Project V5 binding 的 source 联合类型包含 `{kind:'native',featureId:'frequency'|'waveform'}`，只允许算法合同声明的向量输入；native 没有 component/projection/transform。旧版工程不迁移。
 - 原生输入不占用 Analyzer 的四项特征额度，不请求 Meyda Worker/cache。元素可在属性中显式切换允许的来源。“几何律动”默认绑定 [Wallpaper Engine 风格近似特征](wallpaper-spectrum.md)，占一项 Analyzer 额度。
+
+四轨分析与原生输入分开：V5 的 analysis source 可选 stemRole，省略即原曲；仅用于算法合同允许的向量频谱输入，特征为四轨集合与参数能力的交集（完整幅度谱、buffer、Wallpaper 频谱）。元素可混用来源，每个来源独立最多四种特征，同来源同特征共享计算；禁用内容仍参与工程额度校验，运行时只请求有效元素。来源引用写入工程和草稿，不携带 PCM。缺失结果保留引用并提示分离，预览与导出不替换为原曲或零数组，导出必须全部就绪；实时样式／Wallpaper 输出拒绝分轨引用。
+
+分轨 buffer 的完整 1024 样本沿用平均双声道与 Hanning。每角色只缓存十六帧和一个有界 PCM chunk；当前帧、算法历史回调与离线导出逐时刻等待同一读取器。历史读取不改变绑定 revision，不建立额外 renderer、视觉 RAF 或 AudioContext。清理／重跑／换歌等待读取和派生缓存写入释放，迟到结果不发布。
 
 ## Web Audio 与时间
 

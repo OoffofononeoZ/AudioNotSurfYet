@@ -47,6 +47,7 @@ export function useVisualizerPreview(
                             renderer: surface.renderer as CompositionRenderPort,
                             readProject: () => controller.readProject(),
                             resolveAt: t => controller.resolveValuesAt(t),
+                            prepareAt: t => controller.prepareValuesAt(t),
                         }),
                     readFrame: () => {
                         const p = controller.readProject();

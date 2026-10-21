@@ -552,7 +552,7 @@ onBeforeUnmount(() => {
     top: 100%;
     right: 0;
     display: grid;
-    width: min(480px, calc(100vw - 24px));
+    width: min(480px, calc(100vw - 72px));
     max-height: min(520px, calc(100dvh - var(--app-player-inset, 80px) - 64px));
     margin-top: 6px;
     overflow-y: auto;

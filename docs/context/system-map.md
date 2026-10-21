@@ -11,7 +11,7 @@ upstream_docs:
 
 ## System Summary
 
-当前系统是 Vue 3 单页应用。MainLayout 创建并提供唯一的 `AudioSessionService`、`AnalysisCoordinator`、`EditorSessionController` 与 `VisualizerSessionController`；服务通过 `AudioEngine` 解码、播放本地文件，并通过三个独立 IndexedDB repository 保存 Analyzer session、Editor 单草稿与 Visualizer 单草稿。Analyzer、Editor 与 Visualizer 已通过互斥 consumer lease 复用同一 coordinator；Visualizer 只把稳定去重后的 0–4 项送入现有 Worker/cache。File、Blob、handle、PCM、Worker 与音频节点均留在 store 外。MusicBar、Editor 与 Visualizer 读取同一播放快照；Editor 与 Visualizer 普通工作区保留 MusicBar；两个工作区的 tokenized route lease 临时使用 repeat-one，导出传输租约优先停止循环。
+当前系统是 Vue 3 单页应用。MainLayout 创建并提供唯一的 `AudioSessionService`、`AnalysisCoordinator`、`EditorSessionController` 与 `VisualizerSessionController`；服务通过 `AudioEngine` 解码、播放本地文件，并通过三个独立 IndexedDB repository 保存 Analyzer session、Editor 单草稿与 Visualizer 单草稿。Analyzer、Editor 与 Visualizer 已通过互斥 consumer lease 复用同一 coordinator；原曲与已验证四轨按来源去重、每来源最多四项，复用同一分析 Worker。File、Blob、handle、PCM、Worker 与音频节点均留在 store 外。MusicBar、Editor 与 Visualizer 读取同一播放快照；Editor 与 Visualizer 普通工作区保留 MusicBar；两个工作区的 tokenized route lease 临时使用 repeat-one，导出传输租约优先停止循环。
 
 DEC-072另由MainLayout提供唯一`EditorSeparationService`，使用同一AudioEngine原始PCM；Editor增加分离工作区和四轨展示/导出。模型与结果索引使用`processing-p1` IndexedDB，原PCM/planar/WAV使用OPFS；最多一个专用分离Worker，播放及analysis所有权不变。
 
@@ -75,7 +75,7 @@ showOpenFilePicker → FileSystemFileHandle → File
 | Session persistence | 保存/恢复 V1 最近会话、全部句柄和唯一 current Blob/cache | 原生 IndexedDB `SessionRepository` | project-owner | `replaceCurrentAnalysisCache()` 校验 track/hash 并原子替换；unknown schema 不猜测迁移 |
 | Config persistence | 保存 volume、playbackRate、playbackMode、MusicBar style 与桌面 sidebarCollapsed | Pinia、localStorage key `config` | project-owner | sidebarCollapsed 默认 false；volume 为 0–100；playbackRate 为 0.1–2，默认 1 |
 | Home visualization | 歌曲详情与共享能量 Three.js 光线背景 | store metadata、service 封面 URL、`rayLength` prop、IntersectionObserver/ResizeObserver、reduced-motion media query | unknown | 常规模式使用 WebGL RAF；reduced motion 只静态渲染；卸载释放 mesh、geometry、material、render list、renderer 与 WebGL context |
-| Analyzer surface | 当前注册特征单列、最多四项FIFO置顶与精确值 | AudioSessionService、AnalysisCoordinator、Canvas 2D | project-owner | 当前集合含Wallpaper频谱，界面见[列表](analyzer-list.md) |
+| Analyzer surface | 原曲／四轨切换、单列、每来源最多四项FIFO与精确值 | AudioSessionService、AnalysisCoordinator、Canvas 2D | project-owner | 分轨仅四项，只分析当前来源，见[列表](analyzer-list.md) |
 | Editor surface | 标记/FT/自动标记、公共顶栏/MusicBar、独立MarkerTimeView、overlay和数字录入 | EditorSessionController、processing/transcription服务、共享engine/coordinator与Canvas adapter | project-owner | [当前接口](../architecture/editor/interface-contracts.md)，历史readiness不继承 |
 | Editor project and draft | strict JSON V2（显式迁移 V1）、歌曲 hash/时长绑定、原生 file gateway、单草稿 autosave 与恢复冲突 | `EditorFormatCodecRegistry`、`EditorDraftRepository`、`audionotsurfyet-editor` V1 | project-owner | 首版只注册 JSON；session database 不变 |
 | Visualizer composition surface | `/visualizer/:trackId?` 分组列表/共同处理参数/元素属性/工程底栏、单视口三栏或抽屉、16:9 单 Canvas、保留 MusicBar、strict Project V5 单草稿、JSON 资源库、离线 WebM 与原生全屏 | `VisualizerSessionController`、`VisualizerResourceLibrary`、`VisualizerRendererHost`、`CompositionResolver/Scene`、playback/analysis leases、Editor snapshot、WebCodecs/OPFS、Fullscreen API | project-owner | V1–V6 evidence 只绑定历史实现；当前自动化与媒体检查见组合工作区 |
@@ -114,7 +114,7 @@ showOpenFilePicker → FileSystemFileHandle → File
 以下为 Editor 当前实现；E1–E9 历史基线及后续修订的证据身份分别保存，当前内部标记交互见[标记工作区](editor-marking.md)，E10 与 FT 接入状态见[上下文入口](index.md)。
 
 - `/editor/:trackId?` 由 route-generation `EditorSessionController` 编排；侧边栏使用当前歌曲，播放列表“去编辑”先播放指定歌曲。
-- tokenized playback lease 隔离 repeat-one；analysis consumer lease 只允许 Analyzer/Editor 最新 token 生效。Editor 先激活 `buffer` 完成 waveform/tempo，再激活 `buffer + selected overlay`；选择 Buffer 时去重，快速切换与旧 generation 以最后选择为准。
+- tokenized playback lease 隔离 repeat-one；analysis consumer lease 只允许最新 token 生效。Editor 先激活原曲 `buffer` 完成 waveform/tempo，再按来源激活叠加层；同来源 Buffer 去重，分轨 Buffer 与原曲顶部波形独立，快速切换与旧 generation 以最后选择为准。
 - `EditorProjectV2`、strict JSON V2 codec、V1 显式转换、原生 picker gateway 和独立 `audionotsurfyet-editor` V1 单草稿已实现；内存工程优先，quota 发布 `not-persisted`。
 - `EditorTimeline` 用波形独立 `workspace.viewport` 驱动 waveform、grid、cursor 与 boundary；首次／重置为全曲，保留已有保存范围、滚轮锚点、右键 pan、seek 与快捷键，不随 BPM 自动改窗口。左侧约 280px 节拍栏与默认收起的三块 BPM 面板复用现有 tempo/Tap 算法。
 - tempo map 支持 metered/single-beat、10–1200 小数 BPM、独立节拍锚点（自动识别仍为20–300）、拍号、继承式 boundary 和内部 onset/autocorrelation 估计；低置信度或 stale 结果不写入工程。
@@ -129,7 +129,7 @@ showOpenFilePicker → FileSystemFileHandle → File
 
 ## 当前边界与历史证据
 
-Analyzer 运行态由 `activeFeatureQueue` 管理最多四项 FIFO，顶部倒序显示，原列表按 `FEATURE_IDS` 归位。V1 会话保留 `activeCards`，Analyzer 工作区版本为 2，移除排序字段，旧工作区及分析缓存清空；队列与独立草稿保留。[Wallpaper Engine 风格频谱](wallpaper-spectrum.md)首位注册，独立立体声 DFT 与完整精度 payload 沿用唯一 Worker，Meyda 数值算法不变。
+Analyzer 原曲运行态由 `activeFeatureQueue` 管理最多四项 FIFO，顶部倒序显示，原列表按 `FEATURE_IDS` 归位；四轨独立队列与所选来源由会话可选 `analysisSources` 保存，复用时间视口。V1 会话保留原曲 `activeCards`，Analyzer 工作区版本仍为 2，旧工作区及分析缓存清空规则不变。[Wallpaper Engine 风格频谱](wallpaper-spectrum.md)首位注册，立体声 DFT 与完整精度 payload 沿用唯一 Worker，Meyda 数值算法不变。
 
 批准原文与替代关系查 [decision registry](decision-registry.md)，canonical 身份、hash 和人工门禁分别查 [Analyzer evidence](../quality/evidence-index.md)、[Editor evidence](../quality/editor/evidence-index.md) 与 [Visualizer evidence](../quality/visualizer/evidence-index.md)。当前里程碑、候选与未解决缺口见 [上下文入口](index.md)；本页维护职责和数据流，历史通过不证明当前代码已获整体 readiness 或上线授权。
 

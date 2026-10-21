@@ -21,6 +21,7 @@
                 <button v-if="analysis.error?.recoverable" type="button" @click="retryAnalysis">重试分析</button>
             </div>
             <p v-if="analysis.error" class="analysis-error" role="alert">{{ analysis.error.message }}</p>
+            <p v-if="sourceNotice" class="analysis-error" role="status">{{ sourceNotice }}</p>
             <div :ref="setWorkspace" class="analyzer-workspace" data-testid="analyzer-workspace">
                 <section
                     v-show="activeFeatureQueue.length > 0"
@@ -135,6 +136,7 @@ let zoomFrame: number | null = null;
 let zoomTrackId: string | null = null;
 const { available: stemsAvailable, snapshot: separation } = useStemAvailability();
 const selectedSource = computed<AnalysisSource>(() => sessionStore.analysisWorkspace.sources?.selected ?? 'original');
+const sourceNotice = ref('');
 const stemRole = computed(() => (selectedSource.value === 'original' ? undefined : selectedSource.value));
 const sourceOptions = computed(() => ['original', ...(stemsAvailable.value ? FT_ROLES : [])] as AnalysisSource[]);
 const availableFeatures = computed<readonly FeatureId[]>(() => (stemRole.value ? STEM_FEATURE_IDS : FEATURE_IDS));
@@ -309,6 +311,7 @@ const retryAnalysis = async () => {
 };
 const selectSource = async (source: AnalysisSource) => {
     if (source === selectedSource.value || (source !== 'original' && !stemsAvailable.value)) return;
+    sourceNotice.value = '';
     flushZoom();
     for (const id of Object.keys(exactValues) as FeatureId[]) delete exactValues[id];
     await audioSession.updateAnalysisWorkspace({
@@ -326,8 +329,10 @@ const selectSource = async (source: AnalysisSource) => {
 watch(
     () => [stemsAvailable.value, separation.value.status, sessionStore.currentTrackId],
     () => {
-        if (stemRole.value && !stemsAvailable.value && !['restoring', 'idle'].includes(separation.value.status))
+        if (stemRole.value && !stemsAvailable.value && !['restoring', 'idle'].includes(separation.value.status)) {
             void selectSource('original');
+            sourceNotice.value = '分离结果暂不可用，已切回原曲。';
+        }
     },
 );
 

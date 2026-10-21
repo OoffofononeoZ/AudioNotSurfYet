@@ -5,6 +5,7 @@ import type { AudioSessionService, RoutePlaybackLease } from '../audio/audioSess
 import type { useAudioSessionStore } from '../stores/audioSessionStore';
 import type { AnalysisConsumerLease, AnalysisCoordinator } from '../analysis/analysisCoordinator';
 import type { AnalysisCoordinatorSnapshot } from '../analysis/types';
+import { analysisInputKey, type AnalysisInput } from '../analysis/sources';
 import type { DecodedAudioCopyPort } from '../analysis/pcm';
 import { VisualizerWaveformSource } from './waveformSource';
 import { NativeAudioSource } from './nativeAudioSource';
@@ -24,6 +25,7 @@ import type { CompositionDraftRepositoryPort } from './compositionDraftRepositor
 import {
     compositionIssues,
     planCompositionFeatures,
+    planCompositionInputs,
     removeCompositionElement,
     reorderComposition,
     appendStandaloneElements,
@@ -230,6 +232,8 @@ export class VisualizerSessionController {
         return this.exporter.getReadyFileForDiagnostics();
     }
     private async prepareExportFrame(time: number, signal: AbortSignal) {
+        signal.throwIfAborted();
+        await this.prepareValuesAt(time);
         signal.throwIfAborted();
         const project = this.snapshot.project,
             trackId = this.snapshot.activeTrackId;
@@ -501,8 +505,13 @@ export class VisualizerSessionController {
         const result = this.resolver.resolve(
             project,
             Math.max(0, time),
-            id => this.analysisLease?.getSeries(id) ?? null,
-            at => (trackId ? (this.waveform?.read(trackId, at) ?? null) : null),
+            (id, role) => this.analysisLease?.getSeries(id, role) ?? null,
+            (at, role) =>
+                role
+                    ? (this.analysisLease?.readStemWaveform(role, at) ?? null)
+                    : trackId
+                      ? (this.waveform?.read(trackId, at) ?? null)
+                      : null,
             (feature, at, history) =>
                 trackId
                     ? ((history
@@ -514,6 +523,21 @@ export class VisualizerSessionController {
         for (const [id, values] of result)
             for (const [parameter, value] of values) flat.set(parameterKey(id, parameter), value);
         return flat;
+    }
+    async prepareValuesAt(time: number): Promise<void> {
+        const project = this.snapshot.project,
+            lease = this.analysisLease,
+            generation = this.generation;
+        if (!project || !lease) return;
+        const roles = new Set(
+            planCompositionInputs(project)
+                .filter(input => input.stemRole && input.featureId === 'buffer')
+                .map(input => input.stemRole!),
+        );
+        if ([...roles].some(role => lease.getSourceSnapshot(role).state !== 'ready')) return;
+        await Promise.all([...roles].map(role => lease.prepareStemWaveform(role, time)));
+        if (generation !== this.generation || project !== this.snapshot.project || lease !== this.analysisLease)
+            throw Error('分轨输入准备已取消。');
     }
     async reloadEditorDraft() {
         this.assertUnlocked();
@@ -616,9 +640,11 @@ export class VisualizerSessionController {
     async overwriteConflictingDraft() {
         if (this.snapshot.activeTrackId) await this.enter(this.snapshot.activeTrackId, true);
     }
-    retryAnalysis() {
-        const features = this.snapshot.bindingRuntime.activeFeatureIds;
-        return this.analysisLease?.setActiveFeatures(features);
+    async retryAnalysis() {
+        const project = this.snapshot.project;
+        if (!project || !this.analysisLease) return;
+        await this.analysisLease.setActiveInputs([]);
+        await this.analysisLease.setActiveInputs(planCompositionInputs(project));
     }
     retryNativeInput() {
         this.assertUnlocked();
@@ -647,17 +673,26 @@ export class VisualizerSessionController {
                 ),
         );
         if (!this.options.analysisCoordinator) return;
-        const ids = planCompositionFeatures(project),
-            previous = this.snapshot.bindingRuntime.activeFeatureIds;
-        const changed = ids.join('|') !== previous.join('|');
+        const inputs = planCompositionInputs(project),
+            ids = planCompositionFeatures(project),
+            previous =
+                this.snapshot.bindingRuntime.activeInputs ??
+                this.snapshot.bindingRuntime.activeFeatureIds.map(featureId => ({ featureId }));
+        const changed = inputs.map(analysisInputKey).join('|') !== previous.map(analysisInputKey).join('|');
         this.publish({
             ...this.snapshot,
             bindingRuntime: {
                 ...this.snapshot.bindingRuntime,
                 activeFeatureIds: ids,
+                activeInputs: inputs,
+                readyInputs: changed ? [] : this.snapshot.bindingRuntime.readyInputs,
                 readyFeatureIds: changed ? [] : this.snapshot.bindingRuntime.readyFeatureIds,
-                analysisState: ids.length ? (changed ? 'loading' : this.snapshot.bindingRuntime.analysisState) : 'idle',
-                analysisProgress: ids.length ? this.snapshot.bindingRuntime.analysisProgress : 0,
+                analysisState: inputs.length
+                    ? changed
+                        ? 'loading'
+                        : this.snapshot.bindingRuntime.analysisState
+                    : 'idle',
+                analysisProgress: inputs.length ? this.snapshot.bindingRuntime.analysisProgress : 0,
             },
         });
         const acquired = !this.analysisLease;
@@ -668,7 +703,7 @@ export class VisualizerSessionController {
         if (changed || acquired) {
             const generation = this.generation,
                 revision = this.snapshot.bindingRuntime.bindingRevision;
-            void this.analysisLease.setActiveFeatures(ids).catch(error => {
+            void this.analysisLease.setActiveInputs(inputs).catch(error => {
                 if (
                     generation === this.generation &&
                     revision === this.snapshot.bindingRuntime.bindingRevision &&
@@ -692,16 +727,28 @@ export class VisualizerSessionController {
             (s.trackHash && s.trackHash !== this.snapshot.project.track.contentHash)
         )
             return;
-        const r = this.snapshot.bindingRuntime,
-            ready = s.readyFeatureIds.filter(id => r.activeFeatureIds.includes(id));
-        const state = !r.activeFeatureIds.length
+        const r = this.snapshot.bindingRuntime;
+        const inputs: AnalysisInput[] = r.activeInputs ?? r.activeFeatureIds.map(featureId => ({ featureId }));
+        const sourceStates = [...new Set(inputs.map(input => input.stemRole))].map(role =>
+            role ? this.analysisLease!.getSourceSnapshot(role) : s,
+        );
+        const readyInputs = inputs.filter(input => {
+            const snapshot = input.stemRole ? this.analysisLease!.getSourceSnapshot(input.stemRole) : s;
+            return snapshot.state === 'ready' && snapshot.readyFeatureIds.includes(input.featureId);
+        });
+        const ready = readyInputs.filter(input => !input.stemRole).map(input => input.featureId);
+        const error = sourceStates.find(snapshot => snapshot.error)?.error;
+        const state = !inputs.length
             ? 'idle'
-            : s.error
+            : error
               ? 'error'
-              : ready.length === r.activeFeatureIds.length && s.state === 'ready'
+              : readyInputs.length === inputs.length
                 ? 'ready'
                 : 'loading';
-        const changed = state !== r.analysisState || ready.join('|') !== r.readyFeatureIds.join('|');
+        const changed =
+            state !== r.analysisState ||
+            readyInputs.map(analysisInputKey).join('|') !==
+                (r.readyInputs ?? r.readyFeatureIds.map(featureId => ({ featureId }))).map(analysisInputKey).join('|');
         if (changed) this.resolver.reset();
         this.publish({
             ...this.snapshot,
@@ -709,11 +756,19 @@ export class VisualizerSessionController {
                 ...r,
                 bindingRevision: r.bindingRevision + (changed ? 1 : 0),
                 readyFeatureIds: ready,
+                readyInputs,
                 analysisState: state,
-                analysisProgress: s.progress,
-                analysisMessage: s.error?.message,
+                analysisProgress: sourceStates.length
+                    ? sourceStates.reduce((sum, snapshot) => sum + snapshot.progress, 0) / sourceStates.length
+                    : 0,
+                analysisMessage:
+                    error?.message ??
+                    (sourceStates.some(snapshot => snapshot.cacheState === 'not-persisted')
+                        ? '当前分析缓存未持久化。'
+                        : undefined),
             },
         });
+        for (const listener of this.nativeListeners) listener();
     }
     async flush() {
         const success = await this.writer.flush();

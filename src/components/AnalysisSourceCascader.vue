@@ -2,9 +2,12 @@
     <div ref="root" class="analysis-source-cascader" data-testid="analysis-source-cascader">
         <el-cascader-panel :model-value="path" :options="options" :border="false" @change="select">
             <template #default="{ data }"
-                ><span :data-feature-id="data.featureId" :data-source="data.children ? data.value : undefined">{{
-                    data.label
-                }}</span></template
+                ><span
+                    :data-feature-id="data.featureId"
+                    :data-source="data.children ? data.value : undefined"
+                    :title="data.description ?? data.label"
+                    >{{ data.label }}</span
+                ></template
             >
         </el-cascader-panel>
     </div>
@@ -29,7 +32,8 @@ const options = computed(() => [
     ...(available.value
         ? FT_ROLES.map(role => ({
               value: role,
-              label: `${role}（${STEM_PRESENTATION[role].label}）`,
+              label: role,
+              description: `${role}（${STEM_PRESENTATION[role].label}）`,
               children: children(STEM_FEATURE_IDS),
           }))
         : props.stemRole
@@ -69,8 +73,10 @@ onUpdated(scrollbars);
 .analysis-source-cascader :deep(.el-cascader-menu) {
     min-width: 0;
     flex: 1;
-    max-width: 60%;
     color: var(--ink);
+}
+.analysis-source-cascader :deep(.el-cascader-menu:first-child) {
+    flex: 0 0 110px;
 }
 .analysis-source-cascader :deep(.el-cascader-menu__wrap) {
     height: min(420px, calc(100dvh - var(--app-player-inset, 80px) - 90px));
