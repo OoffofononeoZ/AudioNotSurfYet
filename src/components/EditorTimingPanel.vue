@@ -66,6 +66,14 @@
                         placeholder="100"
                         @update:model-value="setBpm"
                 /></label>
+                <label class="timing-field"
+                    ><span>节拍起点（秒）</span
+                    ><AppNumberInput
+                        :model-value="selected.beatOriginSeconds"
+                        label="节拍起点（秒）"
+                        :step="0.001"
+                        @update:model-value="setBeatOrigin"
+                /></label>
             </template>
             <button v-else type="button" @click="restoreMetered">设置为 100 BPM</button>
         </aside>
@@ -78,7 +86,7 @@
                 <strong data-testid="timing-tap-preview">{{
                     tapped.bpm === null ? (tapped.count ? '再点按一次开始测算' : '点按开始测算') : `${tapped.bpm} BPM`
                 }}</strong
-                ><span v-if="tapped.bpm !== null && !validTap" class="error">BPM 必须在 20–300 之间</span>
+                ><span v-if="tapped.bpm !== null && !validTap" class="error">BPM 必须在 10–1200 之间</span>
                 <div>
                     <button type="button" data-testid="timing-apply-tap" :disabled="!validTap" @click="applyTap">
                         应用到当前区间</button
@@ -101,13 +109,14 @@ import {
 } from '../editor/tempoMap';
 import { normalizeEditorSeconds } from '../editor/projectCodec';
 import { TapTempoEstimator } from '../editor/tapTempo';
-import type { EditorProjectV1, TempoSegmentV1 } from '../editor/types';
+import { EDITOR_MIN_METERED_BPM, EDITOR_MAX_BPM } from '../editor/editorConfig';
+import type { EditorProjectV2, TempoSegmentV2 } from '../editor/types';
 import type { PlaybackSnapshot } from '../types/audio';
-const props = defineProps<{ project: EditorProjectV1; playback: PlaybackSnapshot; selectedId: string | null }>();
+const props = defineProps<{ project: EditorProjectV2; playback: PlaybackSnapshot; selectedId: string | null }>();
 const emit = defineEmits<{
     select: [id: string];
     seek: [seconds: number];
-    updateProject: [project: EditorProjectV1, immediate: boolean];
+    updateProject: [project: EditorProjectV2, immediate: boolean];
 }>();
 const selectedIndex = computed(() =>
     Math.max(
@@ -120,7 +129,9 @@ const message = ref(''),
     failed = ref(false);
 const estimator = new TapTempoEstimator(),
     tapped = ref<{ count: number; bpm: number | null }>({ count: 0, bpm: null });
-const validTap = computed(() => tapped.value.bpm !== null && tapped.value.bpm >= 20 && tapped.value.bpm <= 300);
+const validTap = computed(
+    () => tapped.value.bpm !== null && tapped.value.bpm >= EDITOR_MIN_METERED_BPM && tapped.value.bpm <= EDITOR_MAX_BPM,
+);
 let timer: ReturnType<typeof setTimeout> | null = null;
 function resetTap() {
     if (timer) clearTimeout(timer);
@@ -139,12 +150,12 @@ function tapKey(event: KeyboardEvent) {
     if (!event.repeat) tap();
 }
 const timestamp = (time: number) => `${Math.floor(time / 60)}:${(time % 60).toFixed(3).padStart(6, '0')}`;
-function publish(tempoMap: TempoSegmentV1[], text: string) {
+function publish(tempoMap: TempoSegmentV2[], text: string) {
     emit('updateProject', { ...props.project, tempoMap }, true);
     failed.value = false;
     message.value = text;
 }
-function replace(segment: TempoSegmentV1, text: string) {
+function replace(segment: TempoSegmentV2, text: string) {
     publish(
         props.project.tempoMap.map(item => (item.id === segment.id ? segment : item)),
         text,
@@ -201,11 +212,19 @@ function restoreMetered() {
             id: selected.value.id,
             startSeconds: selected.value.startSeconds,
             mode: 'metered',
+            beatOriginSeconds: selected.value.startSeconds,
             bpm: 100,
             bpmSource: 'user',
             meter: { numerator: 4, denominator: 4 },
         },
         '已设置为 100 BPM。',
+    );
+}
+function setBeatOrigin(value: number) {
+    if (selected.value.mode !== 'metered' || !Number.isFinite(value)) return;
+    replace(
+        { ...selected.value, beatOriginSeconds: normalizeEditorSeconds(value) },
+        '节拍起点已保存，已有标记时间保持不变。',
     );
 }
 function applyTap() {
@@ -217,6 +236,7 @@ function applyTap() {
                   id: selected.value.id,
                   startSeconds: selected.value.startSeconds,
                   mode: 'metered' as const,
+                  beatOriginSeconds: selected.value.startSeconds,
                   bpm: null,
                   bpmSource: 'unset' as const,
                   meter: { numerator: 4, denominator: 4 as const },

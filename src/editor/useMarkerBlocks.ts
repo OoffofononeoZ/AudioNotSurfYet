@@ -8,15 +8,15 @@ import {
     selectMarkerBlockByTime,
     type MarkerBlockSelection,
 } from './markerBlockOperations';
-import type { EditorProjectV1 } from './types';
+import type { EditorProjectV2 } from './types';
 import type { EditorBeatSnapSetting } from './beatSnap';
 import { movePointCell } from './pointAnnotations';
 
 export function useMarkerBlocks(
-    project: () => EditorProjectV1,
+    project: () => EditorProjectV2,
     view: () => MarkerTimeView,
     setting: () => EditorBeatSnapSetting,
-    publish: (value: EditorProjectV1) => void,
+    publish: (value: EditorProjectV2) => void,
     report: (text: string) => void,
 ) {
     const mode = ref(false),

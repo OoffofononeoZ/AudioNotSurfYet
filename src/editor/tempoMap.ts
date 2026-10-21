@@ -2,7 +2,7 @@ import type { PersistedTimelineViewport } from '../types/session';
 import { EDITOR_MAX_BPM, EDITOR_MIN_METERED_BPM, EDITOR_MIN_SUBDIVISION_WIDTH_PX } from './editorConfig';
 import { normalizeEditorSeconds } from './projectCodec';
 import { DEFAULT_BEAT_SNAP, divisorForIndex, type EditorBeatSnapSetting } from './beatSnap';
-import type { MeterDenominator, MeteredTempoSegmentV1, TempoSegmentV1 } from './types';
+import type { MeterDenominator, MeteredTempoSegmentV2, TempoSegmentV2 } from './types';
 
 export type EditorGridLineKind = 'beat' | 'subdivision';
 
@@ -13,14 +13,14 @@ export interface EditorGridLine {
     divisor: number;
 }
 
-export const cloneTempoSegment = (segment: TempoSegmentV1): TempoSegmentV1 =>
+export const cloneTempoSegment = (segment: TempoSegmentV2): TempoSegmentV2 =>
     segment.mode === 'metered' ? { ...segment, meter: { ...segment.meter } } : { ...segment };
 
 export type EditorSubdivision = 1 | 2 | 4 | 8 | 16;
 
 export const beatSecondsFor = (bpm: number): number => 60 / bpm;
 
-export const segmentAtTime = (tempoMap: readonly TempoSegmentV1[], timeSeconds: number): TempoSegmentV1 => {
+export const segmentAtTime = (tempoMap: readonly TempoSegmentV2[], timeSeconds: number): TempoSegmentV2 => {
     let active = tempoMap[0]!;
     for (const segment of tempoMap) {
         if (segment.startSeconds > timeSeconds) break;
@@ -30,7 +30,7 @@ export const segmentAtTime = (tempoMap: readonly TempoSegmentV1[], timeSeconds: 
 };
 
 export const segmentEndSeconds = (
-    tempoMap: readonly TempoSegmentV1[],
+    tempoMap: readonly TempoSegmentV2[],
     index: number,
     durationSeconds: number,
 ): number => tempoMap[index + 1]?.startSeconds ?? durationSeconds;
@@ -51,7 +51,7 @@ export const selectVisibleSubdivision = (
 
 export const snapEditorTime = (
     rawSeconds: number,
-    tempoMap: readonly TempoSegmentV1[],
+    tempoMap: readonly TempoSegmentV2[],
     _viewport: PersistedTimelineViewport,
     _width: number,
     durationSeconds: number,
@@ -70,13 +70,13 @@ export const snapEditorTime = (
     return normalizeEditorSeconds(
         Math.max(
             segment.startSeconds,
-            Math.min(end, segment.startSeconds + Math.round((clamped - segment.startSeconds) / step) * step),
+            Math.min(end, segment.beatOriginSeconds + Math.round((clamped - segment.beatOriginSeconds) / step) * step),
         ),
     );
 };
 
 export const generateTempoGrid = (
-    tempoMap: readonly TempoSegmentV1[],
+    tempoMap: readonly TempoSegmentV2[],
     durationSeconds: number,
     viewport: PersistedTimelineViewport,
     setting: Readonly<EditorBeatSnapSetting> = DEFAULT_BEAT_SNAP,
@@ -94,10 +94,12 @@ export const generateTempoGrid = (
                 value => setting.divisor % value === 0 && pixelsPerBeat / value >= 4,
             ) ?? 1;
         const step = beatSeconds / displayDivisor;
-        const firstBeat = Math.max(0, Math.ceil((viewport.startSeconds - segment.startSeconds) / step));
-        const lastBeat = Math.floor((Math.min(viewport.endSeconds, end) - segment.startSeconds) / step);
+        const firstBeat = Math.ceil(
+            (Math.max(viewport.startSeconds, segment.startSeconds) - segment.beatOriginSeconds) / step,
+        );
+        const lastBeat = Math.floor((Math.min(viewport.endSeconds, end) - segment.beatOriginSeconds) / step);
         for (let beatIndex = firstBeat; beatIndex <= lastBeat; beatIndex += 1) {
-            const timeSeconds = normalizeEditorSeconds(segment.startSeconds + beatIndex * step);
+            const timeSeconds = normalizeEditorSeconds(segment.beatOriginSeconds + beatIndex * step);
             if (timeSeconds >= end && segmentIndex < tempoMap.length - 1) continue;
             lines.push({
                 timeSeconds,
@@ -111,41 +113,55 @@ export const generateTempoGrid = (
 };
 
 export const insertTempoBoundary = (
-    tempoMap: readonly TempoSegmentV1[],
+    tempoMap: readonly TempoSegmentV2[],
     startSeconds: number,
     createId: () => string,
-): TempoSegmentV1[] => {
+): TempoSegmentV2[] => {
     const seconds = normalizeEditorSeconds(startSeconds);
     if (seconds <= 0 || tempoMap.some(segment => segment.startSeconds === seconds)) return [...tempoMap];
     const inherited = segmentAtTime(tempoMap, seconds);
-    const inserted: TempoSegmentV1 =
+    const inserted: TempoSegmentV2 =
         inherited.mode === 'metered'
             ? {
-                  ...cloneTempoSegment(inherited),
+                  ...inherited,
+                  meter: { ...inherited.meter },
                   id: createId(),
                   startSeconds: seconds,
+                  beatOriginSeconds: seconds,
               }
             : { id: createId(), startSeconds: seconds, mode: 'single-beat' };
     return [...tempoMap, inserted].sort((left, right) => left.startSeconds - right.startSeconds);
 };
 
 export const moveTempoBoundary = (
-    tempoMap: readonly TempoSegmentV1[],
+    tempoMap: readonly TempoSegmentV2[],
     id: string,
     startSeconds: number,
     durationSeconds: number,
-): TempoSegmentV1[] => {
+): TempoSegmentV2[] => {
     const index = tempoMap.findIndex(segment => segment.id === id);
     if (index <= 0) return [...tempoMap];
     const minimum = (tempoMap[index - 1]?.startSeconds ?? 0) + 1e-6;
     const maximum = (tempoMap[index + 1]?.startSeconds ?? durationSeconds) - 1e-6;
     const seconds = normalizeEditorSeconds(Math.max(minimum, Math.min(maximum, startSeconds)));
     return tempoMap.map(segment =>
-        segment.id === id ? { ...segment, startSeconds: seconds } : cloneTempoSegment(segment),
+        segment.id === id
+            ? {
+                  ...segment,
+                  startSeconds: seconds,
+                  ...(segment.mode === 'metered'
+                      ? {
+                            beatOriginSeconds: normalizeEditorSeconds(
+                                segment.beatOriginSeconds + seconds - segment.startSeconds,
+                            ),
+                        }
+                      : {}),
+              }
+            : cloneTempoSegment(segment),
     );
 };
 
-export const removeTempoBoundary = (tempoMap: readonly TempoSegmentV1[], id: string): TempoSegmentV1[] => {
+export const removeTempoBoundary = (tempoMap: readonly TempoSegmentV2[], id: string): TempoSegmentV2[] => {
     const index = tempoMap.findIndex(segment => segment.id === id);
     if (index <= 0) return tempoMap.map(cloneTempoSegment);
     return tempoMap.filter(segment => segment.id !== id).map(cloneTempoSegment);
@@ -168,12 +184,12 @@ export const resolveTempoSegmentPresentation = (
     return 'hidden';
 };
 
-export type TempoInputResult = { ok: true; segment: TempoSegmentV1 } | { ok: false; message: string };
+export type TempoInputResult = { ok: true; segment: TempoSegmentV2 } | { ok: false; message: string };
 
-export const applyBpmInput = (segment: TempoSegmentV1, input: string): TempoInputResult => {
+export const applyBpmInput = (segment: TempoSegmentV2, input: string): TempoInputResult => {
     const value = Number(input.trim());
     if (input.trim() === '' || !Number.isFinite(value) || value < 0) {
-        return { ok: false, message: 'BPM 必须是 0–300 的数字。' };
+        return { ok: false, message: 'BPM 必须是 0–1200 的数字。' };
     }
     if (value > EDITOR_MAX_BPM) {
         return { ok: false, message: `BPM 不得高于 ${EDITOR_MAX_BPM}。` };
@@ -195,6 +211,7 @@ export const applyBpmInput = (segment: TempoSegmentV1, input: string): TempoInpu
             id: segment.id,
             startSeconds: segment.startSeconds,
             mode: 'metered',
+            beatOriginSeconds: segment.mode === 'metered' ? segment.beatOriginSeconds : segment.startSeconds,
             bpm: value,
             bpmSource: 'user',
             meter,
@@ -202,7 +219,7 @@ export const applyBpmInput = (segment: TempoSegmentV1, input: string): TempoInpu
     };
 };
 
-export const applyMeterInput = (segment: TempoSegmentV1, numerator: number, denominator: number): TempoInputResult => {
+export const applyMeterInput = (segment: TempoSegmentV2, numerator: number, denominator: number): TempoInputResult => {
     if (segment.mode !== 'metered') {
         return { ok: false, message: '单拍区间不能修改拍号。' };
     }
@@ -224,7 +241,7 @@ export const applyMeterInput = (segment: TempoSegmentV1, numerator: number, deno
     };
 };
 
-export const useEstimatedBpm = (segment: TempoSegmentV1, bpm: number): MeteredTempoSegmentV1 | null => {
+export const useEstimatedBpm = (segment: TempoSegmentV2, bpm: number): MeteredTempoSegmentV2 | null => {
     if (
         segment.mode !== 'metered' ||
         segment.bpm !== null ||

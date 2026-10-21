@@ -1,24 +1,13 @@
 import 'fake-indexeddb/auto';
 import { describe, expect, test } from 'vitest';
-import {
-    createEditorDraftEnvelope,
-    EditorDraftRepository,
-} from '../../src/editor/editorDraftRepository';
-import {
-    createInitialEditorProject,
-    decodeEditorProjectV1,
-    encodeEditorProjectV1,
-} from '../../src/editor/projectCodec';
+import { createEditorDraftEnvelope, EditorDraftRepository } from '../../src/editor/editorDraftRepository';
+import { createInitialEditorProject, decodeEditorProject, encodeEditorProjectV2 } from '../../src/editor/projectCodec';
 import { createPointEvent, createPointLane } from '../../src/editor/pointAnnotations';
 import { createRangeEvent, createRangeLane } from '../../src/editor/rangeAnnotations';
 import { removeTempoBoundary } from '../../src/editor/tempoMap';
-import type {
-    EditorProjectV1,
-    PointLaneV1,
-    RangeLaneV1,
-} from '../../src/editor/types';
+import type { EditorProjectV2, PointLaneV1, RangeLaneV1 } from '../../src/editor/types';
 
-const projectWithTempoAnnotations = (): EditorProjectV1 => {
+const projectWithTempoAnnotations = (): EditorProjectV2 => {
     let sequence = 0;
     let project = createInitialEditorProject({
         track: {
@@ -34,6 +23,7 @@ const projectWithTempoAnnotations = (): EditorProjectV1 => {
         {
             ...project.tempoMap[0]!,
             mode: 'metered',
+            beatOriginSeconds: project.tempoMap[0]!.startSeconds,
             bpm: 100,
             bpmSource: 'user',
             meter: { numerator: 4, denominator: 4 },
@@ -42,6 +32,7 @@ const projectWithTempoAnnotations = (): EditorProjectV1 => {
             id: 'tempo-middle',
             startSeconds: 4,
             mode: 'metered',
+            beatOriginSeconds: 4,
             bpm: 128,
             bpmSource: 'user',
             meter: { numerator: 7, denominator: 8 },
@@ -54,53 +45,35 @@ const projectWithTempoAnnotations = (): EditorProjectV1 => {
     })();
     project = createPointLane(project, pointIds);
     const lane = project.lanes[0] as PointLaneV1;
-    project = createPointEvent(
-        project,
-        lane.id,
-        lane.innerClasses[0]!.id,
-        6.25,
-        () => 'point-event',
-    ).project;
+    project = createPointEvent(project, lane.id, lane.innerClasses[0]!.id, 6.25, () => 'point-event').project;
     const rangeIds = (() => {
         const ids = ['range-lane', 'range-default'];
         return () => ids.shift() ?? crypto.randomUUID();
     })();
     project = createRangeLane(project, rangeIds);
     const rangeLane = project.lanes[1] as RangeLaneV1;
-    return createRangeEvent(
-        project,
-        rangeLane.id,
-        rangeLane.innerClasses[0]!.id,
-        9.125,
-        10.75,
-        () => 'range-event',
-    ).project;
+    return createRangeEvent(project, rangeLane.id, rangeLane.innerClasses[0]!.id, 9.125, 10.75, () => 'range-event')
+        .project;
 };
 
 describe('Editor E9 persistence integration', () => {
-    test('round-trips a deleted boundary in JSON V1 without moving events', () => {
+    test('round-trips a deleted boundary in JSON V2 without moving events', () => {
         const original = projectWithTempoAnnotations();
         const lane = original.lanes[0] as PointLaneV1;
-        const eventSeconds = lane.events.map((event) => event.atSeconds);
+        const eventSeconds = lane.events.map(event => event.atSeconds);
         const rangeLane = original.lanes[1] as RangeLaneV1;
-        const rangeSeconds = rangeLane.events.map((event) => [
-            event.startSeconds,
-            event.endSeconds,
-        ]);
+        const rangeSeconds = rangeLane.events.map(event => [event.startSeconds, event.endSeconds]);
         const candidate = {
             ...original,
             tempoMap: removeTempoBoundary(original.tempoMap, 'tempo-middle'),
         };
-        const decoded = decodeEditorProjectV1(encodeEditorProjectV1(candidate));
-        expect(decoded.tempoMap.map((segment) => segment.id))
-            .toEqual([original.tempoMap[0]!.id, 'tempo-last']);
-        expect((decoded.lanes[0] as PointLaneV1).events.map((event) => event.atSeconds))
-            .toEqual(eventSeconds);
-        expect((decoded.lanes[1] as RangeLaneV1).events.map((event) => [
-            event.startSeconds,
-            event.endSeconds,
-        ])).toEqual(rangeSeconds);
-        expect(decoded.schemaVersion).toBe(1);
+        const decoded = decodeEditorProject(encodeEditorProjectV2(candidate));
+        expect(decoded.tempoMap.map(segment => segment.id)).toEqual([original.tempoMap[0]!.id, 'tempo-last']);
+        expect((decoded.lanes[0] as PointLaneV1).events.map(event => event.atSeconds)).toEqual(eventSeconds);
+        expect((decoded.lanes[1] as RangeLaneV1).events.map(event => [event.startSeconds, event.endSeconds])).toEqual(
+            rangeSeconds,
+        );
+        expect(decoded.schemaVersion).toBe(2);
     });
 
     test('persists the latest deleted map atomically in the existing single draft', async () => {
@@ -113,16 +86,14 @@ describe('Editor E9 persistence integration', () => {
             ...original,
             tempoMap: removeTempoBoundary(original.tempoMap, 'tempo-middle'),
         };
-        await repository.replace(createEditorDraftEnvelope(
-            candidate,
-            () => new Date('2026-09-04T00:00:01.000Z'),
-        ));
+        await repository.replace(createEditorDraftEnvelope(candidate, () => new Date('2026-09-04T00:00:01.000Z')));
         const restored = await repository.restore();
         expect(restored?.project.tempoMap).toEqual(candidate.tempoMap);
-        expect((restored?.project.lanes[0] as PointLaneV1).events[0]?.atSeconds)
-            .toBe(6.25);
-        expect((restored?.project.lanes[1] as RangeLaneV1).events[0])
-            .toMatchObject({ startSeconds: 9.125, endSeconds: 10.75 });
+        expect((restored?.project.lanes[0] as PointLaneV1).events[0]?.atSeconds).toBe(6.25);
+        expect((restored?.project.lanes[1] as RangeLaneV1).events[0]).toMatchObject({
+            startSeconds: 9.125,
+            endSeconds: 10.75,
+        });
         repository.close();
     });
 });

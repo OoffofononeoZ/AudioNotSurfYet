@@ -1,20 +1,14 @@
 import 'fake-indexeddb/auto';
 import { createPinia, setActivePinia } from 'pinia';
 import { beforeEach, describe, expect, test } from 'vitest';
-import type {
-    AnalysisConsumerLease,
-    AnalysisCoordinator,
-} from '../../src/analysis/analysisCoordinator';
+import type { AnalysisConsumerLease, AnalysisCoordinator } from '../../src/analysis/analysisCoordinator';
 import type {
     AnalysisCoordinatorSnapshot,
     AnalysisListener,
     AnalysisSeries,
     FeatureId,
 } from '../../src/analysis/types';
-import type {
-    AudioSessionService,
-    RoutePlaybackLease,
-} from '../../src/audio/audioSessionService';
+import type { AudioSessionService, RoutePlaybackLease } from '../../src/audio/audioSessionService';
 import {
     EditorDraftRepository,
     createEditorDraftEnvelope,
@@ -22,14 +16,8 @@ import {
 } from '../../src/editor/editorDraftRepository';
 import { EditorSessionController } from '../../src/editor/editorSessionController';
 import type { EditorFileGateway } from '../../src/editor/fileIO';
-import {
-    createInitialEditorProject,
-    encodeEditorProjectV1,
-} from '../../src/editor/projectCodec';
-import type {
-    EditorDraftEnvelopeV1,
-    EditorProjectV1,
-} from '../../src/editor/types';
+import { createInitialEditorProject, encodeEditorProjectV2 } from '../../src/editor/projectCodec';
+import type { EditorDraftEnvelopeV2, EditorProjectV2 } from '../../src/editor/types';
 import { useAudioSessionStore } from '../../src/stores/audioSessionStore';
 import type { TrackRecord } from '../../src/types/audio';
 
@@ -50,7 +38,7 @@ const track: TrackRecord = {
     restoreState: 'available',
 };
 
-const project = (featureId: FeatureId | null): EditorProjectV1 => {
+const project = (featureId: FeatureId | null): EditorProjectV2 => {
     let id = 0;
     const value = createInitialEditorProject({
         track: {
@@ -66,6 +54,7 @@ const project = (featureId: FeatureId | null): EditorProjectV1 => {
         id: value.tempoMap[0]!.id,
         startSeconds: 0,
         mode: 'metered',
+        beatOriginSeconds: 0,
         bpm: 100,
         bpmSource: 'user',
         meter: { numerator: 4, denominator: 4 },
@@ -75,25 +64,29 @@ const project = (featureId: FeatureId | null): EditorProjectV1 => {
 };
 
 class MemoryRepository implements EditorDraftRepositoryPort {
-    envelope: EditorDraftEnvelopeV1 | null;
+    envelope: EditorDraftEnvelopeV2 | null;
     overlayVisibility: { contentHash: string; enabled: boolean } | null = null;
     failVisibilityWrite = false;
 
-    constructor(value: EditorProjectV1) {
+    constructor(value: EditorProjectV2) {
         this.envelope = createEditorDraftEnvelope(value, () => NOW);
     }
 
-    async restore() { return structuredClone(this.envelope); }
-    async replace(value: EditorDraftEnvelopeV1) {
+    async restore() {
+        return structuredClone(this.envelope);
+    }
+    async replace(value: EditorDraftEnvelopeV2) {
         this.envelope = structuredClone(value);
     }
-    async clear() { this.envelope = null; }
-    async getLeaveWarningEnabled() { return true; }
+    async clear() {
+        this.envelope = null;
+    }
+    async getLeaveWarningEnabled() {
+        return true;
+    }
     async setLeaveWarningEnabled() {}
     async getOverlayVisibility(contentHash: string) {
-        return this.overlayVisibility?.contentHash === contentHash
-            ? this.overlayVisibility.enabled
-            : null;
+        return this.overlayVisibility?.contentHash === contentHash ? this.overlayVisibility.enabled : null;
     }
     async setOverlayVisibility(contentHash: string, enabled: boolean) {
         if (this.failVisibilityWrite) throw new Error('preference quota');
@@ -140,7 +133,7 @@ class AnalysisHarness {
     readonly lease: AnalysisConsumerLease = {
         token: 'e7-analysis',
         consumer: 'editor',
-        setActiveFeatures: async (featureIds) => {
+        setActiveFeatures: async featureIds => {
             this.featureSets.push([...featureIds]);
             this.snapshot = {
                 ...this.snapshot,
@@ -150,10 +143,8 @@ class AnalysisHarness {
         },
         requestCursorValue: async () => null,
         requestTempoEstimate: async () => null,
-        getSeries: (featureId) => featureId === 'buffer'
-            ? this.bufferSeries
-            : null,
-        subscribe: (listener) => {
+        getSeries: featureId => (featureId === 'buffer' ? this.bufferSeries : null),
+        subscribe: listener => {
             this.listeners.add(listener);
             listener(this.snapshot);
             return () => this.listeners.delete(listener);
@@ -185,16 +176,14 @@ const settle = async () => {
     await Promise.resolve();
 };
 
-const createHarness = (value: EditorProjectV1) => {
+const createHarness = (value: EditorProjectV2) => {
     const store = useAudioSessionStore();
     store.appendTracks([track]);
     const repository = new MemoryRepository(value);
     const analysis = new AnalysisHarness();
     let openedBytes: ArrayBuffer | null = null;
     const fileGateway: EditorFileGateway = {
-        open: async () => openedBytes
-            ? { name: 'editor-e7.audiosurf-editor.json', bytes: openedBytes }
-            : null,
+        open: async () => (openedBytes ? { name: 'editor-e7.audiosurf-editor.json', bytes: openedBytes } : null),
         save: async () => 'saved',
     };
     const controller = new EditorSessionController({
@@ -228,12 +217,9 @@ const createHarness = (value: EditorProjectV1) => {
         analysis,
         controller,
         repository,
-        setOpenedProject: (candidate: EditorProjectV1) => {
-            const bytes = encodeEditorProjectV1(candidate);
-            openedBytes = bytes.buffer.slice(
-                bytes.byteOffset,
-                bytes.byteOffset + bytes.byteLength,
-            ) as ArrayBuffer;
+        setOpenedProject: (candidate: EditorProjectV2) => {
+            const bytes = encodeEditorProjectV2(candidate);
+            openedBytes = bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength) as ArrayBuffer;
         },
     };
 };

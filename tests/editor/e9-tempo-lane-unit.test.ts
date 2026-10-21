@@ -1,15 +1,12 @@
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { describe, expect, test } from 'vitest';
-import {
-    removeTempoBoundary,
-    resolveTempoSegmentPresentation,
-} from '../../src/editor/tempoMap';
+import { removeTempoBoundary, resolveTempoSegmentPresentation } from '../../src/editor/tempoMap';
 import { editorTimeToX } from '../../src/editor/timeline';
-import type { TempoSegmentV1 } from '../../src/editor/types';
+import type { TempoSegmentV2 } from '../../src/editor/types';
 
 interface Golden {
-    tempoMap: TempoSegmentV1[];
+    tempoMap: TempoSegmentV2[];
     durationSeconds: number;
     compactGeometry: {
         stripHeight: number;
@@ -27,15 +24,14 @@ interface Golden {
     }>;
 }
 
-const golden = JSON.parse(readFileSync(path.resolve(
-    import.meta.dirname,
-    '../analysis/golden/editor-e9-tempo-lane.v1.json',
-), 'utf8')) as Golden;
+const golden = JSON.parse(
+    readFileSync(path.resolve(import.meta.dirname, '../analysis/golden/editor-e9-tempo-lane.v1.json'), 'utf8'),
+) as Golden;
 
 describe('Editor E9 tempo lane domain', () => {
     test('removes an internal segment and lets the preceding segment extend', () => {
         const result = removeTempoBoundary(golden.tempoMap, 'tempo-40');
-        expect(result.map((segment) => segment.id)).toEqual(['tempo-0', 'tempo-57']);
+        expect(result.map(segment => segment.id)).toEqual(['tempo-0', 'tempo-57']);
         expect(result[0]).toEqual(golden.tempoMap[0]);
         expect(result[1]).toEqual(golden.tempoMap[2]);
         expect(result[0]).not.toBe(golden.tempoMap[0]);
@@ -58,8 +54,7 @@ describe('Editor E9 tempo lane domain', () => {
     test.each(golden.presentationCases)(
         'selects compact $expected at $available CSS px without a viewport breakpoint',
         ({ available, full, summary, expected }) => {
-            expect(resolveTempoSegmentPresentation(available, full, summary))
-                .toBe(expected);
+            expect(resolveTempoSegmentPresentation(available, full, summary)).toBe(expected);
         },
     );
 

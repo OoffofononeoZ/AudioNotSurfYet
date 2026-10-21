@@ -112,7 +112,7 @@ import type { KeyboardRecordingHost } from '../editor/keyboardMarkerRecording';
 import { createMarkerDrawing } from '../editor/markerDrawing';
 import { createPointLane } from '../editor/pointAnnotations';
 import { createRangeLane } from '../editor/rangeAnnotations';
-import type { EditorProjectV1 } from '../editor/types';
+import type { EditorProjectV2 } from '../editor/types';
 import type { PlaybackSnapshot } from '../types/audio';
 import type {
     AnalysisCoordinatorSnapshot,
@@ -123,7 +123,7 @@ import type {
 const props = defineProps<{
     active?: boolean;
     recordingHost: KeyboardRecordingHost;
-    project: EditorProjectV1;
+    project: EditorProjectV2;
     playback: PlaybackSnapshot;
     analysis: AnalysisCoordinatorSnapshot;
     overlaySeries: AnalysisSeries | null;
@@ -131,7 +131,7 @@ const props = defineProps<{
     overlayOpen: boolean;
 }>();
 const emit = defineEmits<{
-    updateProject: [project: EditorProjectV1, immediate: boolean];
+    updateProject: [project: EditorProjectV2, immediate: boolean];
     retryOverlay: [];
     toggleOverlay: [enabled: boolean];
     selectOverlayFeature: [featureId: FeatureId];
@@ -165,7 +165,7 @@ const trackOptions = [
     { id: 'point', label: '点标记', testId: 'add-point-lane' },
     { id: 'range', label: '范围标记', testId: 'add-range-lane' },
 ];
-function applyProject(value: EditorProjectV1) {
+function applyProject(value: EditorProjectV2) {
     if (editable.value) emit('updateProject', value, true);
 }
 const editing = useMarkerEditing(

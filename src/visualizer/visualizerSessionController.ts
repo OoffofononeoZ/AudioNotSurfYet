@@ -10,7 +10,7 @@ import { VisualizerWaveformSource } from './waveformSource';
 import { NativeAudioSource } from './nativeAudioSource';
 import type { EditorDraftRepositoryPort } from '../editor/editorDraftRepository';
 import type { EditorFileGateway } from '../editor/fileIO';
-import { EditorFormatCodecRegistry, validateEditorProjectV1 } from '../editor/projectCodec';
+import { EditorFormatCodecRegistry, readEditorProject } from '../editor/projectCodec';
 import {
     createComposition,
     validateComposition,
@@ -528,7 +528,7 @@ export class VisualizerSessionController {
         this.assertUnlocked();
         const generation = this.generation,
             io = ++this.editorIoGeneration;
-        const codec = new EditorFormatCodecRegistry().get('json-v1');
+        const codec = new EditorFormatCodecRegistry().get('json-v2');
         const opened = await this.options.editorFileGateway?.open(codec);
         if (!opened || generation !== this.generation || io !== this.editorIoGeneration || this.disposed) return;
         const context = this.context();
@@ -539,7 +539,7 @@ export class VisualizerSessionController {
         const context = this.context(),
             p = this.snapshot.project;
         if (!context || !p) return;
-        const project = validateEditorProjectV1(input, context);
+        const project = readEditorProject(input, context);
         this.updateProject({ ...p, editorSnapshot: { capturedAt, project } });
         this.publish({
             ...this.snapshot,

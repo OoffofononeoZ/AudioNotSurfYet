@@ -14,27 +14,26 @@ export interface EditorTrackIdentityV1 {
     sampleRate?: number;
 }
 
-export interface MeteredTempoSegmentV1 {
+export interface MeteredTempoSegmentV2 {
     id: EditorId;
     startSeconds: EditorSeconds;
     mode: 'metered';
+    beatOriginSeconds: EditorSeconds;
     bpm: number | null;
-    bpmSource: 'unset' | 'estimated' | 'user';
+    bpmSource: 'unset' | 'estimated' | 'user' | 'imported';
     meter: {
         numerator: number;
         denominator: MeterDenominator;
     };
 }
 
-export interface SingleBeatTempoSegmentV1 {
+export interface SingleBeatTempoSegmentV2 {
     id: EditorId;
     startSeconds: EditorSeconds;
     mode: 'single-beat';
 }
 
-export type TempoSegmentV1 =
-    | MeteredTempoSegmentV1
-    | SingleBeatTempoSegmentV1;
+export type TempoSegmentV2 = MeteredTempoSegmentV2 | SingleBeatTempoSegmentV2;
 
 export interface InnerClassV1 {
     id: EditorId;
@@ -72,14 +71,14 @@ export interface RangeLaneV1 {
 
 export type EditorLaneV1 = PointLaneV1 | RangeLaneV1;
 
-export interface EditorProjectV1 {
+export interface EditorProjectV2 {
     format: 'audiosurf-editor';
-    schemaVersion: 1;
+    schemaVersion: 2;
     projectId: EditorId;
     createdAt: string;
     updatedAt: string;
     track: EditorTrackIdentityV1;
-    tempoMap: TempoSegmentV1[];
+    tempoMap: TempoSegmentV2[];
     lanes: EditorLaneV1[];
     workspace: {
         viewport: PersistedTimelineViewport;
@@ -91,10 +90,10 @@ export interface EditorProjectV1 {
     };
 }
 
-export interface EditorDraftEnvelopeV1 {
-    schemaVersion: 1;
+export interface EditorDraftEnvelopeV2 {
+    schemaVersion: 2;
     savedAt: string;
-    project: EditorProjectV1;
+    project: EditorProjectV2;
 }
 
 export interface EditorTrackValidationContext {
@@ -109,35 +108,20 @@ export interface CreateEditorProjectInput {
     now?: () => Date;
 }
 
-export type EditorPersistenceState =
-    | 'clean'
-    | 'saving'
-    | 'saved'
-    | 'not-persisted';
+export type EditorPersistenceState = 'clean' | 'saving' | 'saved' | 'not-persisted';
 
-export type EditorSessionState =
-    | 'empty'
-    | 'loading'
-    | 'ready'
-    | 'draft-conflict'
-    | 'unavailable'
-    | 'draft-error';
+export type EditorSessionState = 'empty' | 'loading' | 'ready' | 'draft-conflict' | 'unavailable' | 'draft-error';
 
 export interface EditorSessionSnapshot {
     state: EditorSessionState;
     routeTrackId: string | null;
     activeTrackId: string | null;
-    project: EditorProjectV1 | null;
-    conflictingDraft: EditorDraftEnvelopeV1 | null;
+    project: EditorProjectV2 | null;
+    conflictingDraft: EditorDraftEnvelopeV2 | null;
     persistence: EditorPersistenceState;
     restoredFromDraft: boolean;
     overlayOpen: boolean;
-    tempoEstimateState?:
-        | 'idle'
-        | 'estimating'
-        | 'reliable'
-        | 'low-confidence'
-        | 'unavailable';
+    tempoEstimateState?: 'idle' | 'estimating' | 'reliable' | 'low-confidence' | 'unavailable';
     tempoEstimateConfidence?: number;
     message?: string;
 }

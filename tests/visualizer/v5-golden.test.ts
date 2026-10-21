@@ -1,8 +1,8 @@
 import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { describe, expect, test } from 'vitest';
-import { validateEditorProjectV1 } from '../../src/editor/projectCodec';
-import type { EditorProjectV1 } from '../../src/editor/types';
+import { readEditorProject } from '../../src/editor/projectCodec';
+import type { EditorProjectV2 } from '../../src/editor/types';
 import {
     SAMPLE_RATE,
     VISUALIZER_V5_DURATION_SECONDS,
@@ -10,10 +10,9 @@ import {
     sha256Float32,
 } from '../support/audio-fixtures';
 
-const golden = JSON.parse(readFileSync(
-    new URL('../analysis/golden/visualizer-v5-recording.v1.json', import.meta.url),
-    'utf8',
-)) as {
+const golden = JSON.parse(
+    readFileSync(new URL('../analysis/golden/visualizer-v5-recording.v1.json', import.meta.url), 'utf8'),
+) as {
     schemaVersion: number;
     generatorVersion: string;
     fixture: string;
@@ -26,7 +25,7 @@ const golden = JSON.parse(readFileSync(
         durationSeconds: number;
         maximumAllowedSyncErrorSeconds: number;
     };
-    editorProject: EditorProjectV1;
+    editorProject: EditorProjectV2;
     orthogonalBindings: Array<{
         parameterId: string;
         source: { kind: string; laneId: string; innerClassId: string };
@@ -47,7 +46,7 @@ describe('Visualizer V5 versioned recording golden', () => {
         expect(sha256Float32(createVisualizerV5AvSyncFixture())).toMatch(/^[a-f0-9]{64}$/);
         expect(SAMPLE_RATE).toBe(golden.sampleRate);
         expect(VISUALIZER_V5_DURATION_SECONDS).toBe(golden.durationSeconds);
-        const editor = validateEditorProjectV1(golden.editorProject, {
+        const editor = readEditorProject(golden.editorProject, {
             contentHash: golden.wavSha256,
             durationSeconds: 3,
             sampleRate: 48_000,

@@ -8,7 +8,7 @@ import {
     type KeyboardRangeRecording,
     type KeyboardRecordingHost,
 } from './keyboardMarkerRecording';
-import type { EditorProjectV1 } from './types';
+import type { EditorProjectV2 } from './types';
 
 const blockedSelector =
     'input,textarea,select,[contenteditable]:not([contenteditable="false"]),[role="textbox"],[role="combobox"],[role="spinbutton"],[role="slider"],[role="menu"],dialog[open],[role="dialog"]';
@@ -23,7 +23,7 @@ export function keyboardRecordingBlocked(target: EventTarget | null): boolean {
 export function useKeyboardMarkerRecording(options: {
     host: KeyboardRecordingHost;
     audio: AudioSessionService;
-    project(): EditorProjectV1;
+    project(): EditorProjectV2;
     active(): boolean;
     setting(): EditorBeatSnapSetting;
     report(message: string): void;

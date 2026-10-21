@@ -1,31 +1,19 @@
 import 'fake-indexeddb/auto';
 import { createPinia, setActivePinia } from 'pinia';
 import { beforeEach, describe, expect, test } from 'vitest';
-import type {
-    AnalysisConsumerLease,
-    AnalysisCoordinator,
-} from '../../src/analysis/analysisCoordinator';
+import type { AnalysisConsumerLease, AnalysisCoordinator } from '../../src/analysis/analysisCoordinator';
 import type {
     AnalysisCoordinatorSnapshot,
     AnalysisListener,
     AnalysisSeries,
     FeatureId,
 } from '../../src/analysis/types';
-import type {
-    AudioSessionService,
-    RoutePlaybackLease,
-} from '../../src/audio/audioSessionService';
-import {
-    createEditorDraftEnvelope,
-    type EditorDraftRepositoryPort,
-} from '../../src/editor/editorDraftRepository';
+import type { AudioSessionService, RoutePlaybackLease } from '../../src/audio/audioSessionService';
+import { createEditorDraftEnvelope, type EditorDraftRepositoryPort } from '../../src/editor/editorDraftRepository';
 import { EditorSessionController } from '../../src/editor/editorSessionController';
 import type { EditorFileGateway } from '../../src/editor/fileIO';
 import { createInitialEditorProject } from '../../src/editor/projectCodec';
-import type {
-    EditorDraftEnvelopeV1,
-    EditorProjectV1,
-} from '../../src/editor/types';
+import type { EditorDraftEnvelopeV2, EditorProjectV2 } from '../../src/editor/types';
 import { useAudioSessionStore } from '../../src/stores/audioSessionStore';
 import type { TrackRecord } from '../../src/types/audio';
 
@@ -63,17 +51,23 @@ const bufferSeries: AnalysisSeries = {
 };
 
 class MemoryRepository implements EditorDraftRepositoryPort {
-    envelope: EditorDraftEnvelopeV1 | null = null;
+    envelope: EditorDraftEnvelopeV2 | null = null;
     overlayVisibility: { contentHash: string; enabled: boolean } | null = null;
-    async restore() { return this.envelope; }
-    async replace(value: EditorDraftEnvelopeV1) { this.envelope = structuredClone(value); }
-    async clear() { this.envelope = null; }
-    async getLeaveWarningEnabled() { return true; }
+    async restore() {
+        return this.envelope;
+    }
+    async replace(value: EditorDraftEnvelopeV2) {
+        this.envelope = structuredClone(value);
+    }
+    async clear() {
+        this.envelope = null;
+    }
+    async getLeaveWarningEnabled() {
+        return true;
+    }
     async setLeaveWarningEnabled() {}
     async getOverlayVisibility(contentHash: string) {
-        return this.overlayVisibility?.contentHash === contentHash
-            ? this.overlayVisibility.enabled
-            : null;
+        return this.overlayVisibility?.contentHash === contentHash ? this.overlayVisibility.enabled : null;
     }
     async setOverlayVisibility(contentHash: string, enabled: boolean) {
         this.overlayVisibility = { contentHash, enabled };
@@ -104,13 +98,13 @@ class AnalysisHarness {
     readonly lease: AnalysisConsumerLease = {
         token: 'e4-lease',
         consumer: 'editor',
-        setActiveFeatures: async (ids) => {
+        setActiveFeatures: async ids => {
             this.featureSets.push([...ids]);
         },
         requestCursorValue: async () => null,
         requestTempoEstimate: async () => null,
-        getSeries: (featureId) => this.series.get(featureId) ?? null,
-        subscribe: (listener) => {
+        getSeries: featureId => this.series.get(featureId) ?? null,
+        subscribe: listener => {
             this.listeners.add(listener);
             listener(this.snapshot);
             return () => this.listeners.delete(listener);
@@ -124,7 +118,7 @@ class AnalysisHarness {
     }
 }
 
-const project = (overlay: FeatureId | null): EditorProjectV1 => {
+const project = (overlay: FeatureId | null): EditorProjectV2 => {
     let id = 0;
     const value = createInitialEditorProject({
         track: {
@@ -140,6 +134,7 @@ const project = (overlay: FeatureId | null): EditorProjectV1 => {
         id: value.tempoMap[0]!.id,
         startSeconds: 0,
         mode: 'metered',
+        beatOriginSeconds: 0,
         bpm: 100,
         bpmSource: 'user',
         meter: { numerator: 4, denominator: 4 },
@@ -148,7 +143,7 @@ const project = (overlay: FeatureId | null): EditorProjectV1 => {
     return value;
 };
 
-const createHarness = (restored: EditorProjectV1) => {
+const createHarness = (restored: EditorProjectV2) => {
     const store = useAudioSessionStore();
     store.appendTracks([track]);
     const repository = new MemoryRepository();
@@ -199,9 +194,7 @@ describe('Editor E4 overlay integration', () => {
 
     test('activates Buffer first, then the restored single overlay feature', async () => {
         const harness = createHarness(project('chroma'));
-        const analyzerWorkspace = JSON.parse(JSON.stringify(
-            harness.store.analysisWorkspace,
-        ));
+        const analyzerWorkspace = JSON.parse(JSON.stringify(harness.store.analysisWorkspace));
         await harness.controller.enter(track.id);
         expect(harness.analysis.featureSets).toEqual([['buffer']]);
         harness.analysis.emit({
@@ -219,8 +212,7 @@ describe('Editor E4 overlay integration', () => {
         });
         await settle();
         expect(harness.analysis.featureSets.at(-1)).toEqual(['buffer', 'chroma']);
-        expect(JSON.parse(JSON.stringify(harness.store.analysisWorkspace)))
-            .toEqual(analyzerWorkspace);
+        expect(JSON.parse(JSON.stringify(harness.store.analysisWorkspace))).toEqual(analyzerWorkspace);
         await harness.controller.dispose();
     });
 
@@ -248,8 +240,7 @@ describe('Editor E4 overlay integration', () => {
         harness.analysis.emit({ state: 'error', readyFeatureIds: [] });
         expect(harness.controller.getAnalysisSeries('buffer')).toEqual(bufferSeries);
         await harness.controller.flush();
-        expect(harness.repository.envelope?.project.workspace.overlay.featureId)
-            .toBe('mfcc');
+        expect(harness.repository.envelope?.project.workspace.overlay.featureId).toBe('mfcc');
         await harness.controller.dispose();
     });
 

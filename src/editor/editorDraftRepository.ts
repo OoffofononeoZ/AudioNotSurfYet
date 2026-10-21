@@ -1,10 +1,7 @@
-import { validateEditorProjectV1 } from './projectCodec';
+import { readEditorProject, validateEditorProjectV2 } from './projectCodec';
 import { validateBeatSnap, type EditorBeatSnapSetting } from './beatSnap';
 import { normalizeMarkerSpan } from './markerTimeView';
-import type {
-    EditorDraftEnvelopeV1,
-    EditorProjectV1,
-} from './types';
+import type { EditorDraftEnvelopeV2, EditorProjectV2 } from './types';
 
 export const EDITOR_DATABASE_NAME = 'audionotsurfyet-editor';
 export const EDITOR_DATABASE_VERSION = 1;
@@ -19,7 +16,7 @@ const STORES = {
 
 interface StoredDraftRecord {
     key: typeof EDITOR_DRAFT_KEY;
-    envelope: EditorDraftEnvelopeV1;
+    envelope: EditorDraftEnvelopeV2;
 }
 
 interface StoredLeaveWarningPreferenceRecord {
@@ -35,9 +32,13 @@ interface StoredOverlayVisibilityPreferenceRecord {
     };
 }
 
+export interface EditorRestoredDraft extends EditorDraftEnvelopeV2 {
+    migratedFromV1?: true;
+}
+
 export interface EditorDraftRepositoryPort {
-    restore(): Promise<EditorDraftEnvelopeV1 | null>;
-    replace(envelope: EditorDraftEnvelopeV1): Promise<void>;
+    restore(): Promise<EditorRestoredDraft | null>;
+    replace(envelope: EditorDraftEnvelopeV2): Promise<void>;
     clear(): Promise<void>;
     getLeaveWarningEnabled(): Promise<boolean>;
     setLeaveWarningEnabled(enabled: boolean): Promise<void>;
@@ -56,48 +57,42 @@ export class InvalidEditorDraftError extends Error {
 const isRecord = (value: unknown): value is Record<string, unknown> =>
     typeof value === 'object' && value !== null && !Array.isArray(value);
 
-const validateDraftEnvelope = (value: unknown): EditorDraftEnvelopeV1 => {
+const validateDraftEnvelope = (value: unknown): EditorDraftEnvelopeV2 => {
     if (!isRecord(value)) throw new InvalidEditorDraftError();
     const keys = Object.keys(value);
     if (
-        keys.length !== 3
-        || !keys.includes('schemaVersion')
-        || !keys.includes('savedAt')
-        || !keys.includes('project')
-        || value.schemaVersion !== 1
-        || typeof value.savedAt !== 'string'
-        || !Number.isFinite(Date.parse(value.savedAt))
+        keys.length !== 3 ||
+        !keys.includes('schemaVersion') ||
+        !keys.includes('savedAt') ||
+        !keys.includes('project') ||
+        (value.schemaVersion !== 1 && value.schemaVersion !== 2) ||
+        typeof value.savedAt !== 'string' ||
+        !Number.isFinite(Date.parse(value.savedAt))
     ) {
         throw new InvalidEditorDraftError();
     }
-    let project: EditorProjectV1;
+    let project: EditorProjectV2;
     try {
-        project = validateEditorProjectV1(value.project);
+        if (!isRecord(value.project) || value.project.schemaVersion !== value.schemaVersion)
+            throw new InvalidEditorDraftError();
+        project = readEditorProject(value.project);
     } catch (error) {
-        throw new InvalidEditorDraftError(
-            error instanceof Error ? error.message : undefined,
-        );
+        throw new InvalidEditorDraftError(error instanceof Error ? error.message : undefined);
     }
-    return { schemaVersion: 1, savedAt: value.savedAt, project };
+    return { schemaVersion: 2, savedAt: value.savedAt, project };
 };
 
 const requestResult = <T>(request: IDBRequest<T>): Promise<T> =>
     new Promise((resolve, reject) => {
         request.onsuccess = () => resolve(request.result);
-        request.onerror = () => reject(
-            request.error ?? new Error('IndexedDB request failed.'),
-        );
+        request.onerror = () => reject(request.error ?? new Error('IndexedDB request failed.'));
     });
 
 const transactionDone = (transaction: IDBTransaction): Promise<void> =>
     new Promise((resolve, reject) => {
         transaction.oncomplete = () => resolve();
-        transaction.onabort = () => reject(
-            transaction.error ?? new Error('IndexedDB transaction aborted.'),
-        );
-        transaction.onerror = () => reject(
-            transaction.error ?? new Error('IndexedDB transaction failed.'),
-        );
+        transaction.onabort = () => reject(transaction.error ?? new Error('IndexedDB transaction aborted.'));
+        transaction.onerror = () => reject(transaction.error ?? new Error('IndexedDB transaction failed.'));
     });
 
 export interface EditorDraftRepositoryOptions {
@@ -115,17 +110,23 @@ export class EditorDraftRepository implements EditorDraftRepositoryPort {
         this.databaseName = options.databaseName ?? EDITOR_DATABASE_NAME;
     }
 
-    async restore(): Promise<EditorDraftEnvelopeV1 | null> {
+    async restore(): Promise<EditorRestoredDraft | null> {
         const database = await this.open();
         const transaction = database.transaction(STORES.draft, 'readonly');
-        const record = await requestResult(
-            transaction.objectStore(STORES.draft).get(EDITOR_DRAFT_KEY),
-        ) as StoredDraftRecord | undefined;
+        const record = (await requestResult(transaction.objectStore(STORES.draft).get(EDITOR_DRAFT_KEY))) as
+            StoredDraftRecord | undefined;
         await transactionDone(transaction);
-        return record ? validateDraftEnvelope(record.envelope) : null;
+        if (!record) return null;
+        const envelope = validateDraftEnvelope(record.envelope);
+        return {
+            ...envelope,
+            ...((record.envelope as unknown as { schemaVersion: number }).schemaVersion === 1
+                ? { migratedFromV1: true as const }
+                : {}),
+        };
     }
 
-    async replace(envelope: EditorDraftEnvelopeV1): Promise<void> {
+    async replace(envelope: EditorDraftEnvelopeV2): Promise<void> {
         const normalized = validateDraftEnvelope(envelope);
         const database = await this.open();
         const transaction = database.transaction(STORES.draft, 'readwrite');
@@ -146,11 +147,9 @@ export class EditorDraftRepository implements EditorDraftRepositoryPort {
     async getLeaveWarningEnabled(): Promise<boolean> {
         const database = await this.open();
         const transaction = database.transaction(STORES.preferences, 'readonly');
-        const record = await requestResult(
-            transaction.objectStore(STORES.preferences).get(
-                EDITOR_LEAVE_WARNING_KEY,
-            ),
-        ) as StoredLeaveWarningPreferenceRecord | undefined;
+        const record = (await requestResult(
+            transaction.objectStore(STORES.preferences).get(EDITOR_LEAVE_WARNING_KEY),
+        )) as StoredLeaveWarningPreferenceRecord | undefined;
         await transactionDone(transaction);
         return record?.value ?? true;
     }
@@ -158,7 +157,9 @@ export class EditorDraftRepository implements EditorDraftRepositoryPort {
     async getBeatSnap(contentHash: string): Promise<EditorBeatSnapSetting | null> {
         const database = await this.open();
         const transaction = database.transaction(STORES.preferences, 'readonly');
-        const record = await requestResult(transaction.objectStore(STORES.preferences).get(`beat-snap:${contentHash}`)) as { value: unknown } | undefined;
+        const record = (await requestResult(
+            transaction.objectStore(STORES.preferences).get(`beat-snap:${contentHash}`),
+        )) as { value: unknown } | undefined;
         await transactionDone(transaction);
         return record ? validateBeatSnap(record.value) : null;
     }
@@ -166,14 +167,18 @@ export class EditorDraftRepository implements EditorDraftRepositoryPort {
     async setBeatSnap(contentHash: string, setting: EditorBeatSnapSetting): Promise<void> {
         const database = await this.open();
         const transaction = database.transaction(STORES.preferences, 'readwrite');
-        transaction.objectStore(STORES.preferences).put({ key: `beat-snap:${contentHash}`, value: validateBeatSnap(setting) });
+        transaction
+            .objectStore(STORES.preferences)
+            .put({ key: `beat-snap:${contentHash}`, value: validateBeatSnap(setting) });
         await transactionDone(transaction);
     }
 
     async getMarkerSpan(contentHash: string): Promise<number | null> {
         const database = await this.open();
         const transaction = database.transaction(STORES.preferences, 'readonly');
-        const record = await requestResult(transaction.objectStore(STORES.preferences).get(`marker-span:${contentHash}`)) as { value: unknown } | undefined;
+        const record = (await requestResult(
+            transaction.objectStore(STORES.preferences).get(`marker-span:${contentHash}`),
+        )) as { value: unknown } | undefined;
         await transactionDone(transaction);
         return typeof record?.value === 'number' ? normalizeMarkerSpan(record.value) : null;
     }
@@ -181,7 +186,9 @@ export class EditorDraftRepository implements EditorDraftRepositoryPort {
     async setMarkerSpan(contentHash: string, span: number): Promise<void> {
         const database = await this.open();
         const transaction = database.transaction(STORES.preferences, 'readwrite');
-        transaction.objectStore(STORES.preferences).put({ key: `marker-span:${contentHash}`, value: normalizeMarkerSpan(span) });
+        transaction
+            .objectStore(STORES.preferences)
+            .put({ key: `marker-span:${contentHash}`, value: normalizeMarkerSpan(span) });
         await transactionDone(transaction);
     }
 
@@ -198,25 +205,21 @@ export class EditorDraftRepository implements EditorDraftRepositoryPort {
     async getOverlayVisibility(contentHash: string): Promise<boolean | null> {
         const database = await this.open();
         const transaction = database.transaction(STORES.preferences, 'readonly');
-        const record = await requestResult(
-            transaction.objectStore(STORES.preferences).get(
-                EDITOR_OVERLAY_VISIBILITY_KEY,
-            ),
-        ) as StoredOverlayVisibilityPreferenceRecord | undefined;
+        const record = (await requestResult(
+            transaction.objectStore(STORES.preferences).get(EDITOR_OVERLAY_VISIBILITY_KEY),
+        )) as StoredOverlayVisibilityPreferenceRecord | undefined;
         await transactionDone(transaction);
         if (
-            !record
-            || !record.value
-            || record.value.contentHash !== contentHash
-            || typeof record.value.enabled !== 'boolean'
-        ) return null;
+            !record ||
+            !record.value ||
+            record.value.contentHash !== contentHash ||
+            typeof record.value.enabled !== 'boolean'
+        )
+            return null;
         return record.value.enabled;
     }
 
-    async setOverlayVisibility(
-        contentHash: string,
-        enabled: boolean,
-    ): Promise<void> {
+    async setOverlayVisibility(contentHash: string, enabled: boolean): Promise<void> {
         const database = await this.open();
         const transaction = database.transaction(STORES.preferences, 'readwrite');
         transaction.objectStore(STORES.preferences).put({
@@ -227,17 +230,14 @@ export class EditorDraftRepository implements EditorDraftRepositoryPort {
     }
 
     close(): void {
-        void this.databasePromise?.then((database) => database.close());
+        void this.databasePromise?.then(database => database.close());
         this.databasePromise = null;
     }
 
     private open(): Promise<IDBDatabase> {
         if (this.databasePromise) return this.databasePromise;
         this.databasePromise = new Promise((resolve, reject) => {
-            const request = this.indexedDB.open(
-                this.databaseName,
-                EDITOR_DATABASE_VERSION,
-            );
+            const request = this.indexedDB.open(this.databaseName, EDITOR_DATABASE_VERSION);
             request.onupgradeneeded = () => {
                 const database = request.result;
                 if (!database.objectStoreNames.contains(STORES.draft)) {
@@ -248,22 +248,18 @@ export class EditorDraftRepository implements EditorDraftRepositoryPort {
                 }
             };
             request.onsuccess = () => resolve(request.result);
-            request.onerror = () => reject(
-                request.error ?? new Error('Unable to open Editor database.'),
-            );
-            request.onblocked = () => reject(
-                new Error('Editor database upgrade is blocked.'),
-            );
+            request.onerror = () => reject(request.error ?? new Error('Unable to open Editor database.'));
+            request.onblocked = () => reject(new Error('Editor database upgrade is blocked.'));
         });
         return this.databasePromise;
     }
 }
 
 export const createEditorDraftEnvelope = (
-    project: EditorProjectV1,
+    project: EditorProjectV2,
     now: () => Date = () => new Date(),
-): EditorDraftEnvelopeV1 => ({
-    schemaVersion: 1,
+): EditorDraftEnvelopeV2 => ({
+    schemaVersion: 2,
     savedAt: now().toISOString(),
-    project: validateEditorProjectV1(project),
+    project: validateEditorProjectV2(project),
 });

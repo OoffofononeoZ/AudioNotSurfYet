@@ -1,9 +1,6 @@
 import type { InjectionKey } from 'vue';
 import { inject } from 'vue';
-import type {
-    AnalysisConsumerLease,
-    AnalysisCoordinator,
-} from '../analysis/analysisCoordinator';
+import type { AnalysisConsumerLease, AnalysisCoordinator } from '../analysis/analysisCoordinator';
 import type {
     AnalysisCursorValueResult,
     AnalysisCoordinatorSnapshot,
@@ -12,33 +9,20 @@ import type {
     FeatureId,
     TempoEstimateResult,
 } from '../analysis/types';
-import type {
-    AudioSessionService,
-    RoutePlaybackLease,
-} from '../audio/audioSessionService';
+import type { AudioSessionService, RoutePlaybackLease } from '../audio/audioSessionService';
 import type { useAudioSessionStore } from '../stores/audioSessionStore';
-import type { EditorDraftRepositoryPort } from './editorDraftRepository';
-import {
-    EditorFormatCodecRegistry,
-    createInitialEditorProject,
-    validateEditorProjectV1,
-} from './projectCodec';
-import {
-    editorProjectFileName,
-    type EditorFileGateway,
-} from './fileIO';
+import type { EditorDraftRepositoryPort, EditorRestoredDraft } from './editorDraftRepository';
+import { EditorFormatCodecRegistry, createInitialEditorProject, validateEditorProjectV2 } from './projectCodec';
+import { editorProjectFileName, type EditorFileGateway } from './fileIO';
 import type {
-    EditorDraftEnvelopeV1,
-    EditorProjectV1,
+    EditorDraftEnvelopeV2,
+    EditorProjectV2,
     EditorSessionSnapshot,
     EditorTrackValidationContext,
 } from './types';
 import { useEstimatedBpm } from './tempoMap';
 import { EditorTrackChangeApproval } from './trackChangeApproval';
-import {
-    editorOverlayFeatureIds,
-    resolveEditorOverlayOpen,
-} from './overlay';
+import { editorOverlayFeatureIds, resolveEditorOverlayOpen } from './overlay';
 
 type AudioSessionStore = ReturnType<typeof useAudioSessionStore>;
 type EditorSessionListener = (snapshot: EditorSessionSnapshot) => void;
@@ -55,21 +39,16 @@ const initialSnapshot = (): EditorSessionSnapshot => ({
     tempoEstimateState: 'idle',
 });
 
-const cloneProject = (project: EditorProjectV1): EditorProjectV1 =>
-    structuredClone(project);
+const cloneProject = (project: EditorProjectV2): EditorProjectV2 => structuredClone(project);
 
-const listenerSnapshot = (
-    snapshot: EditorSessionSnapshot,
-): EditorSessionSnapshot => ({
+const listenerSnapshot = (snapshot: EditorSessionSnapshot): EditorSessionSnapshot => ({
     ...snapshot,
     project: snapshot.project,
     conflictingDraft: snapshot.conflictingDraft,
 });
 
-const cloneEnvelope = (
-    envelope: EditorDraftEnvelopeV1,
-): EditorDraftEnvelopeV1 => ({
-    schemaVersion: 1,
+const cloneEnvelope = (envelope: EditorDraftEnvelopeV2): EditorDraftEnvelopeV2 => ({
+    schemaVersion: 2,
     savedAt: envelope.savedAt,
     project: cloneProject(envelope.project),
 });
@@ -77,16 +56,11 @@ const cloneEnvelope = (
 const cloneSnapshot = (snapshot: EditorSessionSnapshot): EditorSessionSnapshot => ({
     ...snapshot,
     project: snapshot.project ? cloneProject(snapshot.project) : null,
-    conflictingDraft: snapshot.conflictingDraft
-        ? cloneEnvelope(snapshot.conflictingDraft)
-        : null,
+    conflictingDraft: snapshot.conflictingDraft ? cloneEnvelope(snapshot.conflictingDraft) : null,
 });
 
-const sameFeatureIds = (
-    left: readonly FeatureId[],
-    right: readonly FeatureId[],
-): boolean => left.length === right.length
-    && left.every((featureId, index) => featureId === right[index]);
+const sameFeatureIds = (left: readonly FeatureId[], right: readonly FeatureId[]): boolean =>
+    left.length === right.length && left.every((featureId, index) => featureId === right[index]);
 
 export interface EditorSessionControllerOptions {
     audioSession: AudioSessionService;
@@ -97,17 +71,12 @@ export interface EditorSessionControllerOptions {
     codecs?: EditorFormatCodecRegistry;
     now?: () => Date;
     createId?: () => string;
-    setTimer?: (
-        handler: () => void,
-        timeout: number,
-    ) => ReturnType<typeof setTimeout>;
+    setTimer?: (handler: () => void, timeout: number) => ReturnType<typeof setTimeout>;
     clearTimer?: (handle: ReturnType<typeof setTimeout>) => void;
     windowTarget?: Pick<Window, 'addEventListener' | 'removeEventListener'>;
 }
 
-export type DraftConflictResolution =
-    | { kind: 'restored-old'; trackId: string }
-    | { kind: 'fallback' };
+export type DraftConflictResolution = { kind: 'restored-old'; trackId: string } | { kind: 'fallback' };
 
 export class EditorSessionController {
     private readonly audioSession: AudioSessionService;
@@ -118,17 +87,9 @@ export class EditorSessionController {
     private readonly codecs: EditorFormatCodecRegistry;
     private readonly now: () => Date;
     private readonly createId: () => string;
-    private readonly setTimer: (
-        handler: () => void,
-        timeout: number,
-    ) => ReturnType<typeof setTimeout>;
-    private readonly clearTimer: (
-        handle: ReturnType<typeof setTimeout>,
-    ) => void;
-    private readonly windowTarget?: Pick<
-        Window,
-        'addEventListener' | 'removeEventListener'
-    >;
+    private readonly setTimer: (handler: () => void, timeout: number) => ReturnType<typeof setTimeout>;
+    private readonly clearTimer: (handle: ReturnType<typeof setTimeout>) => void;
+    private readonly windowTarget?: Pick<Window, 'addEventListener' | 'removeEventListener'>;
     private readonly listeners = new Set<EditorSessionListener>();
     private readonly analysisListeners = new Set<AnalysisListener>();
     private snapshot = initialSnapshot();
@@ -142,7 +103,7 @@ export class EditorSessionController {
     private lastReadyBufferSeries: AnalysisSeries | null = null;
     private routeGeneration = 0;
     private saveTimer: ReturnType<typeof setTimeout> | null = null;
-    private pendingProject: EditorProjectV1 | null = null;
+    private pendingProject: EditorProjectV2 | null = null;
     private saveInFlight: Promise<void> | null = null;
     private beforeUnloadRegistered = false;
     private disposed = false;
@@ -161,18 +122,18 @@ export class EditorSessionController {
         this.codecs = options.codecs ?? new EditorFormatCodecRegistry();
         this.now = options.now ?? (() => new Date());
         this.createId = options.createId ?? (() => crypto.randomUUID());
-        this.setTimer = options.setTimer
-            ?? ((handler, timeout) => setTimeout(handler, timeout));
-        this.clearTimer = options.clearTimer
-            ?? ((handle) => clearTimeout(handle));
-        this.windowTarget = options.windowTarget
-            ?? (typeof window === 'undefined' ? undefined : window);
+        this.setTimer = options.setTimer ?? ((handler, timeout) => setTimeout(handler, timeout));
+        this.clearTimer = options.clearTimer ?? (handle => clearTimeout(handle));
+        this.windowTarget = options.windowTarget ?? (typeof window === 'undefined' ? undefined : window);
         this.analysisSnapshot = this.analysisCoordinator.getSnapshot();
-        void this.repository.getLeaveWarningEnabled().then((enabled) => {
-            if (!this.disposed) this.leaveWarningEnabled = enabled;
-        }).catch(() => {
-            // Preference failure does not block the project editor.
-        });
+        void this.repository
+            .getLeaveWarningEnabled()
+            .then(enabled => {
+                if (!this.disposed) this.leaveWarningEnabled = enabled;
+            })
+            .catch(() => {
+                // Preference failure does not block the project editor.
+            });
     }
 
     getSnapshot(): EditorSessionSnapshot {
@@ -196,17 +157,12 @@ export class EditorSessionController {
     }
 
     getAnalysisSeries(featureId: FeatureId): AnalysisSeries | null {
-        return this.analysisLease?.getSeries(featureId)
-            ?? (featureId === 'buffer' ? this.lastReadyBufferSeries : null);
+        return this.analysisLease?.getSeries(featureId) ?? (featureId === 'buffer' ? this.lastReadyBufferSeries : null);
     }
 
-    requestAnalysisCursorValue(
-        featureId: FeatureId,
-        timeSeconds: number,
-    ): Promise<AnalysisCursorValueResult | null> {
+    requestAnalysisCursorValue(featureId: FeatureId, timeSeconds: number): Promise<AnalysisCursorValueResult | null> {
         if (!this.snapshot.overlayOpen) return Promise.resolve(null);
-        return this.analysisLease?.requestCursorValue(featureId, timeSeconds)
-            ?? Promise.resolve(null);
+        return this.analysisLease?.requestCursorValue(featureId, timeSeconds) ?? Promise.resolve(null);
     }
 
     retryOverlayAnalysis(): void {
@@ -217,8 +173,7 @@ export class EditorSessionController {
     setOverlayOpen(enabled: boolean): void {
         const project = this.snapshot.project;
         if (this.snapshot.state !== 'ready' || !project) return;
-        const overlayOpen = enabled
-            && project.workspace.overlay.featureId !== null;
+        const overlayOpen = enabled && project.workspace.overlay.featureId !== null;
         if (overlayOpen === this.snapshot.overlayOpen) return;
         this.publish({
             ...this.snapshot,
@@ -233,16 +188,19 @@ export class EditorSessionController {
         const project = this.snapshot.project;
         if (this.snapshot.state !== 'ready' || !project) return;
         const wasOpen = this.snapshot.overlayOpen;
-        this.updateProject({
-            ...project,
-            workspace: {
-                ...project.workspace,
-                overlay: {
-                    ...project.workspace.overlay,
-                    featureId,
+        this.updateProject(
+            {
+                ...project,
+                workspace: {
+                    ...project.workspace,
+                    overlay: {
+                        ...project.workspace.overlay,
+                        featureId,
+                    },
                 },
             },
-        }, true);
+            true,
+        );
         if (!wasOpen) {
             this.publish({
                 ...this.snapshot,
@@ -255,13 +213,11 @@ export class EditorSessionController {
     }
 
     requestTempoEstimate(): Promise<TempoEstimateResult | null> {
-        return this.analysisLease?.requestTempoEstimate()
-            ?? Promise.resolve(null);
+        return this.analysisLease?.requestTempoEstimate() ?? Promise.resolve(null);
     }
 
     hasActivePlaybackLease(): boolean {
-        return this.playbackLease !== null
-            && this.snapshot.activeTrackId !== null;
+        return this.playbackLease !== null && this.snapshot.activeTrackId !== null;
     }
 
     hasPendingWrite(): boolean {
@@ -320,7 +276,7 @@ export class EditorSessionController {
             state: 'loading',
             routeTrackId: trackId,
         });
-        const track = this.store.queue.find((entry) => entry.id === trackId);
+        const track = this.store.queue.find(entry => entry.id === trackId);
         if (!track?.trackHash) {
             this.publishUnavailable(trackId, '找不到该歌曲，或歌曲内容身份尚未就绪。');
             return;
@@ -338,7 +294,7 @@ export class EditorSessionController {
             this.analysisLease = this.analysisCoordinator.acquireConsumer('editor');
             const context = this.trackContext(trackId);
             if (!context) throw new Error('歌曲解码信息不可用。');
-            let draft: EditorDraftEnvelopeV1 | null;
+            let draft: EditorRestoredDraft | null;
             try {
                 draft = await this.repository.restore();
             } catch (error) {
@@ -347,9 +303,7 @@ export class EditorSessionController {
                     ...this.snapshot,
                     state: 'draft-error',
                     activeTrackId: trackId,
-                    message: error instanceof Error
-                        ? `草稿无法读取：${error.message}`
-                        : '草稿无法读取。',
+                    message: error instanceof Error ? `草稿无法读取：${error.message}` : '草稿无法读取。',
                 });
                 return;
             }
@@ -366,7 +320,7 @@ export class EditorSessionController {
                 return;
             }
             if (draft) {
-                const project = validateEditorProjectV1(draft.project, context);
+                const project = validateEditorProjectV2(draft.project, context);
                 const visibility = await this.loadOverlayVisibility(project);
                 if (generation !== this.routeGeneration || this.disposed) return;
                 this.overlayVisibilityPersistFailed = visibility.failed;
@@ -377,11 +331,10 @@ export class EditorSessionController {
                     true,
                     visibility.failed ? 'not-persisted' : 'saved',
                     visibility.overlayOpen,
-                    visibility.failed
-                        ? '叠加层显示偏好无法读取；当前工程仍可继续使用。'
-                        : undefined,
+                    visibility.failed ? '叠加层显示偏好无法读取；当前工程仍可继续使用。' : undefined,
                 );
                 this.startEditorAnalysis(generation);
+                if (draft.migratedFromV1) this.queueSave(project, true);
                 return;
             }
             const project = this.createProject(trackId);
@@ -395,27 +348,19 @@ export class EditorSessionController {
                 false,
                 visibility.failed ? 'not-persisted' : 'clean',
                 visibility.overlayOpen,
-                visibility.failed
-                    ? '叠加层显示偏好无法读取；当前工程仍可继续使用。'
-                    : undefined,
+                visibility.failed ? '叠加层显示偏好无法读取；当前工程仍可继续使用。' : undefined,
             );
             this.queueSave(project, true);
             this.startEditorAnalysis(generation);
         } catch (error) {
             if (generation !== this.routeGeneration || this.disposed) return;
             this.releaseLeases();
-            this.publishUnavailable(
-                trackId,
-                error instanceof Error ? error.message : '歌曲当前不可编辑。',
-            );
+            this.publishUnavailable(trackId, error instanceof Error ? error.message : '歌曲当前不可编辑。');
         }
     }
 
     async overwriteConflictingDraft(): Promise<void> {
-        if (
-            this.snapshot.state !== 'draft-conflict'
-            || !this.snapshot.activeTrackId
-        ) return;
+        if (this.snapshot.state !== 'draft-conflict' || !this.snapshot.activeTrackId) return;
         const trackId = this.snapshot.activeTrackId;
         const project = this.createProject(trackId);
         this.hasUnexportedChanges = false;
@@ -434,15 +379,10 @@ export class EditorSessionController {
     async cancelConflictingEntry(): Promise<DraftConflictResolution> {
         const draft = this.snapshot.conflictingDraft;
         if (!draft) return { kind: 'fallback' };
-        const previous = this.store.queue.find(
-            (track) => track.trackHash === draft.project.track.contentHash,
-        );
+        const previous = this.store.queue.find(track => track.trackHash === draft.project.track.contentHash);
         if (!previous) {
             this.releaseLeases();
-            this.publishUnavailable(
-                this.snapshot.routeTrackId ?? '',
-                '旧草稿对应歌曲已不在播放列表中，草稿已保留。',
-            );
+            this.publishUnavailable(this.snapshot.routeTrackId ?? '', '旧草稿对应歌曲已不在播放列表中，草稿已保留。');
             return { kind: 'fallback' };
         }
         const generation = ++this.routeGeneration;
@@ -460,7 +400,7 @@ export class EditorSessionController {
             this.analysisLease = this.analysisCoordinator.acquireConsumer('editor');
             const context = this.trackContext(previous.id);
             if (!context) throw new Error('旧歌曲无法恢复解码信息。');
-            const project = validateEditorProjectV1(draft.project, context);
+            const project = validateEditorProjectV2(draft.project, context);
             const visibility = await this.loadOverlayVisibility(project);
             if (generation !== this.routeGeneration || this.disposed) {
                 playbackLease.release();
@@ -474,18 +414,13 @@ export class EditorSessionController {
                 true,
                 visibility.failed ? 'not-persisted' : 'saved',
                 visibility.overlayOpen,
-                visibility.failed
-                    ? '叠加层显示偏好无法读取；当前工程仍可继续使用。'
-                    : undefined,
+                visibility.failed ? '叠加层显示偏好无法读取；当前工程仍可继续使用。' : undefined,
             );
             this.startEditorAnalysis(generation);
             return { kind: 'restored-old', trackId: previous.id };
         } catch {
             this.releaseLeases();
-            this.publishUnavailable(
-                previous.id,
-                '旧歌曲当前无法恢复，草稿已保留。',
-            );
+            this.publishUnavailable(previous.id, '旧歌曲当前无法恢复，草稿已保留。');
             return { kind: 'fallback' };
         }
     }
@@ -511,7 +446,7 @@ export class EditorSessionController {
         this.startEditorAnalysis(this.routeGeneration);
     }
 
-    async importProject(codecId = 'json-v1'): Promise<'imported' | 'cancelled'> {
+    async importProject(codecId = 'json-v2'): Promise<'imported' | 'cancelled'> {
         const trackId = this.snapshot.activeTrackId;
         const context = trackId ? this.trackContext(trackId) : null;
         if (!trackId || !context || this.snapshot.state !== 'ready') {
@@ -525,8 +460,7 @@ export class EditorSessionController {
         this.publish({
             ...this.snapshot,
             project: candidate,
-            overlayOpen: this.snapshot.overlayOpen
-                && candidate.workspace.overlay.featureId !== null,
+            overlayOpen: this.snapshot.overlayOpen && candidate.workspace.overlay.featureId !== null,
             persistence: 'saving',
             message: undefined,
         });
@@ -536,7 +470,7 @@ export class EditorSessionController {
         return 'imported';
     }
 
-    async exportProject(codecId = 'json-v1'): Promise<'saved' | 'cancelled'> {
+    async exportProject(codecId = 'json-v2'): Promise<'saved' | 'cancelled'> {
         const project = this.snapshot.project;
         if (!project) return 'cancelled';
         const result = await this.exportProjectValue(project, codecId);
@@ -544,25 +478,22 @@ export class EditorSessionController {
         return result;
     }
 
-    updateProject(project: EditorProjectV1, immediate = false): void {
-        const context = this.snapshot.activeTrackId
-            ? this.trackContext(this.snapshot.activeTrackId)
-            : null;
+    updateProject(project: EditorProjectV2, immediate = false): void {
+        const context = this.snapshot.activeTrackId ? this.trackContext(this.snapshot.activeTrackId) : null;
         if (!context || this.snapshot.state !== 'ready') return;
-        const tempoChanged = JSON.stringify(project.tempoMap)
-            !== JSON.stringify(this.snapshot.project?.tempoMap ?? []);
-        const overlayChanged = project.workspace.overlay.featureId
-            !== this.snapshot.project?.workspace.overlay.featureId;
+        const tempoChanged = JSON.stringify(project.tempoMap) !== JSON.stringify(this.snapshot.project?.tempoMap ?? []);
+        const overlayChanged =
+            project.workspace.overlay.featureId !== this.snapshot.project?.workspace.overlay.featureId;
         if (tempoChanged) {
             this.tempoRequestRevision += 1;
         }
         const durationTolerance = Math.max(1e-6, 1 / context.sampleRate);
         if (
-            project.track.contentHash !== context.contentHash
-            || Math.abs(project.track.durationSeconds - context.durationSeconds)
-                > durationTolerance
-        ) return;
-        const candidate: EditorProjectV1 = {
+            project.track.contentHash !== context.contentHash ||
+            Math.abs(project.track.durationSeconds - context.durationSeconds) > durationTolerance
+        )
+            return;
+        const candidate: EditorProjectV2 = {
             ...project,
             updatedAt: this.now().toISOString(),
         };
@@ -570,16 +501,16 @@ export class EditorSessionController {
         this.publish({
             ...this.snapshot,
             project: candidate,
-            overlayOpen: overlayChanged
-                && candidate.workspace.overlay.featureId === null
-                ? false
-                : this.snapshot.overlayOpen,
+            overlayOpen:
+                overlayChanged && candidate.workspace.overlay.featureId === null ? false : this.snapshot.overlayOpen,
             persistence: 'saving',
             message: undefined,
-            ...(tempoChanged ? {
-                tempoEstimateState: 'idle' as const,
-                tempoEstimateConfidence: undefined,
-            } : {}),
+            ...(tempoChanged
+                ? {
+                      tempoEstimateState: 'idle' as const,
+                      tempoEstimateConfidence: undefined,
+                  }
+                : {}),
         });
         this.queueSave(candidate, immediate);
         if (overlayChanged) void this.syncOverlayAnalysis();
@@ -598,30 +529,32 @@ export class EditorSessionController {
         const project = this.pendingProject;
         this.pendingProject = null;
         this.publish({ ...this.snapshot, persistence: 'saving' });
-        this.saveInFlight = this.repository.replace({
-            schemaVersion: 1,
-            savedAt: this.now().toISOString(),
-            project,
-        }).then(() => {
-            this.publish({
-                ...this.snapshot,
-                persistence: this.overlayVisibilityPersistFailed
-                    ? 'not-persisted'
-                    : 'saved',
-                message: this.overlayVisibilityPersistFailed
-                    ? '叠加层显示偏好无法保存；当前工程和页面状态仍可继续使用。'
-                    : undefined,
+        this.saveInFlight = this.repository
+            .replace({
+                schemaVersion: 2,
+                savedAt: this.now().toISOString(),
+                project,
+            })
+            .then(() => {
+                this.publish({
+                    ...this.snapshot,
+                    persistence: this.overlayVisibilityPersistFailed ? 'not-persisted' : 'saved',
+                    message: this.overlayVisibilityPersistFailed
+                        ? '叠加层显示偏好无法保存；当前工程和页面状态仍可继续使用。'
+                        : undefined,
+                });
+            })
+            .catch(() => {
+                this.publish({
+                    ...this.snapshot,
+                    persistence: 'not-persisted',
+                    message: '当前工程仍在内存中，但无法保存草稿。',
+                });
+            })
+            .finally(() => {
+                this.saveInFlight = null;
+                this.syncBeforeUnload();
             });
-        }).catch(() => {
-            this.publish({
-                ...this.snapshot,
-                persistence: 'not-persisted',
-                message: '当前工程仍在内存中，但无法保存草稿。',
-            });
-        }).finally(() => {
-            this.saveInFlight = null;
-            this.syncBeforeUnload();
-        });
         this.syncBeforeUnload();
         await this.saveInFlight;
         if (this.pendingProject) await this.flush();
@@ -647,8 +580,8 @@ export class EditorSessionController {
         this.analysisListeners.clear();
     }
 
-    private createProject(trackId: string): EditorProjectV1 {
-        const track = this.store.queue.find((entry) => entry.id === trackId);
+    private createProject(trackId: string): EditorProjectV2 {
+        const track = this.store.queue.find(entry => entry.id === trackId);
         const descriptor = this.audioSession.getDecodedTrackDescriptor(trackId);
         if (!track?.trackHash || !descriptor) {
             throw new Error('歌曲内容身份或解码信息不可用。');
@@ -668,60 +601,51 @@ export class EditorSessionController {
     }
 
     private trackContext(trackId: string): EditorTrackValidationContext | null {
-        const track = this.store.queue.find((entry) => entry.id === trackId);
+        const track = this.store.queue.find(entry => entry.id === trackId);
         const descriptor = this.audioSession.getDecodedTrackDescriptor(trackId);
         return track?.trackHash && descriptor
             ? {
-                contentHash: track.trackHash,
-                durationSeconds: descriptor.durationSeconds,
-                sampleRate: descriptor.sampleRate,
-            }
+                  contentHash: track.trackHash,
+                  durationSeconds: descriptor.durationSeconds,
+                  sampleRate: descriptor.sampleRate,
+              }
             : null;
     }
 
-    private async loadOverlayVisibility(project: EditorProjectV1): Promise<{
+    private async loadOverlayVisibility(project: EditorProjectV2): Promise<{
         overlayOpen: boolean;
         failed: boolean;
     }> {
         try {
-            const stored = await this.repository.getOverlayVisibility(
-                project.track.contentHash,
-            );
+            const stored = await this.repository.getOverlayVisibility(project.track.contentHash);
             return {
-                overlayOpen: resolveEditorOverlayOpen(
-                    project.workspace.overlay.featureId,
-                    stored,
-                ),
+                overlayOpen: resolveEditorOverlayOpen(project.workspace.overlay.featureId, stored),
                 failed: false,
             };
         } catch {
             return {
-                overlayOpen: resolveEditorOverlayOpen(
-                    project.workspace.overlay.featureId,
-                    null,
-                ),
+                overlayOpen: resolveEditorOverlayOpen(project.workspace.overlay.featureId, null),
                 failed: true,
             };
         }
     }
 
-    private async persistOverlayVisibility(
-        contentHash: string,
-        enabled: boolean,
-    ): Promise<void> {
+    private async persistOverlayVisibility(contentHash: string, enabled: boolean): Promise<void> {
         const revision = ++this.overlayVisibilityWriteRevision;
         try {
             await this.repository.setOverlayVisibility(contentHash, enabled);
             if (
-                revision !== this.overlayVisibilityWriteRevision
-                || this.snapshot.project?.track.contentHash !== contentHash
-            ) return;
+                revision !== this.overlayVisibilityWriteRevision ||
+                this.snapshot.project?.track.contentHash !== contentHash
+            )
+                return;
             this.overlayVisibilityPersistFailed = false;
         } catch {
             if (
-                revision !== this.overlayVisibilityWriteRevision
-                || this.snapshot.project?.track.contentHash !== contentHash
-            ) return;
+                revision !== this.overlayVisibilityWriteRevision ||
+                this.snapshot.project?.track.contentHash !== contentHash
+            )
+                return;
             this.overlayVisibilityPersistFailed = true;
             this.publish({
                 ...this.snapshot,
@@ -731,7 +655,7 @@ export class EditorSessionController {
         }
     }
 
-    private queueSave(project: EditorProjectV1, immediate: boolean): void {
+    private queueSave(project: EditorProjectV2, immediate: boolean): void {
         this.pendingProject = project;
         if (this.saveTimer) this.clearTimer(this.saveTimer);
         this.saveTimer = null;
@@ -749,22 +673,15 @@ export class EditorSessionController {
         }
     }
 
-    private async exportProjectValue(
-        project: EditorProjectV1,
-        codecId = 'json-v1',
-    ): Promise<'saved' | 'cancelled'> {
+    private async exportProjectValue(project: EditorProjectV2, codecId = 'json-v2'): Promise<'saved' | 'cancelled'> {
         const codec = this.codecs.get(codecId);
         const bytes = codec.encode(project);
-        return this.fileGateway.save(
-            codec,
-            editorProjectFileName(project.track.fileName, codec),
-            bytes,
-        );
+        return this.fileGateway.save(codec, editorProjectFileName(project.track.fileName, codec), bytes);
     }
 
     private publishReady(
         trackId: string,
-        project: EditorProjectV1,
+        project: EditorProjectV2,
         restoredFromDraft: boolean,
         persistence: EditorSessionSnapshot['persistence'],
         overlayOpen: boolean,
@@ -809,33 +726,31 @@ export class EditorSessionController {
         const lease = this.analysisLease;
         if (!lease) return;
         this.unsubscribeAnalysis?.();
-        this.unsubscribeAnalysis = lease.subscribe((snapshot) => {
+        this.unsubscribeAnalysis = lease.subscribe(snapshot => {
             this.analysisSnapshot = snapshot;
             if (snapshot.readyFeatureIds.includes('buffer')) {
-                this.lastReadyBufferSeries = lease.getSeries('buffer')
-                    ?? this.lastReadyBufferSeries;
+                this.lastReadyBufferSeries = lease.getSeries('buffer') ?? this.lastReadyBufferSeries;
             }
             const next = structuredClone(snapshot);
             for (const listener of this.analysisListeners) listener(next);
             if (
-                snapshot.state === 'ready'
-                && snapshot.readyFeatureIds.includes('buffer')
-                && snapshot.activeFeatureIds.length === 1
-                && snapshot.activeFeatureIds[0] === 'buffer'
-                && this.baseAnalysisHandledForRoute !== routeGeneration
+                snapshot.state === 'ready' &&
+                snapshot.readyFeatureIds.includes('buffer') &&
+                snapshot.activeFeatureIds.length === 1 &&
+                snapshot.activeFeatureIds[0] === 'buffer' &&
+                this.baseAnalysisHandledForRoute !== routeGeneration
             ) {
                 this.baseAnalysisHandledForRoute = routeGeneration;
                 void this.finishBaseAnalysis(routeGeneration);
                 return;
             }
             if (
-                this.overlayActivationReady
-                && snapshot.state === 'ready'
-                && !sameFeatureIds(
+                this.overlayActivationReady &&
+                snapshot.state === 'ready' &&
+                !sameFeatureIds(
                     snapshot.activeFeatureIds,
                     editorOverlayFeatureIds(
-                        this.snapshot.project?.workspace.overlay.featureId
-                            ?? null,
+                        this.snapshot.project?.workspace.overlay.featureId ?? null,
                         this.snapshot.overlayOpen,
                     ),
                 )
@@ -863,41 +778,27 @@ export class EditorSessionController {
     private async syncOverlayAnalysis(force = false): Promise<void> {
         const lease = this.analysisLease;
         const featureId = this.snapshot.project?.workspace.overlay.featureId ?? null;
-        if (
-            !lease
-            || this.snapshot.state !== 'ready'
-            || !this.overlayActivationReady
-        ) return;
+        if (!lease || this.snapshot.state !== 'ready' || !this.overlayActivationReady) return;
         if (featureId && featureId !== 'buffer' && !this.lastReadyBufferSeries) {
             return;
         }
-        const activeFeatureIds = editorOverlayFeatureIds(
-            featureId,
-            this.snapshot.overlayOpen,
-        );
-        if (
-            !force
-            && sameFeatureIds(
-                this.analysisSnapshot.activeFeatureIds,
-                activeFeatureIds,
-            )
-        ) return;
+        const activeFeatureIds = editorOverlayFeatureIds(featureId, this.snapshot.overlayOpen);
+        if (!force && sameFeatureIds(this.analysisSnapshot.activeFeatureIds, activeFeatureIds)) return;
         await lease.setActiveFeatures(activeFeatureIds);
     }
 
-    private async runAutomaticTempoEstimate(
-        routeGeneration: number,
-    ): Promise<void> {
+    private async runAutomaticTempoEstimate(routeGeneration: number): Promise<void> {
         const project = this.snapshot.project;
         const segment = project?.tempoMap[0];
         if (
-            !project
-            || this.trackChangeApproval.hasPending(project)
-            || project.tempoMap.length !== 1
-            || segment?.mode !== 'metered'
-            || segment.bpm !== null
-            || segment.bpmSource !== 'unset'
-        ) return;
+            !project ||
+            this.trackChangeApproval.hasPending(project) ||
+            project.tempoMap.length !== 1 ||
+            segment?.mode !== 'metered' ||
+            segment.bpm !== null ||
+            segment.bpmSource !== 'unset'
+        )
+            return;
         const requestRevision = ++this.tempoRequestRevision;
         this.publish({
             ...this.snapshot,
@@ -905,11 +806,8 @@ export class EditorSessionController {
             tempoEstimateConfidence: undefined,
         });
         const result = await this.requestTempoEstimate();
-        if (
-            this.disposed
-            || routeGeneration !== this.routeGeneration
-            || requestRevision !== this.tempoRequestRevision
-        ) return;
+        if (this.disposed || routeGeneration !== this.routeGeneration || requestRevision !== this.tempoRequestRevision)
+            return;
         if (!result) {
             this.publish({ ...this.snapshot, tempoEstimateState: 'unavailable' });
             return;
@@ -927,11 +825,14 @@ export class EditorSessionController {
         if (!current || !currentSegment || current.tempoMap.length !== 1) return;
         const estimated = useEstimatedBpm(currentSegment, result.bpm);
         if (!estimated) return;
-        const candidate = validateEditorProjectV1({
-            ...current,
-            updatedAt: this.now().toISOString(),
-            tempoMap: [estimated],
-        }, this.trackContext(this.snapshot.activeTrackId ?? '') ?? undefined);
+        const candidate = validateEditorProjectV2(
+            {
+                ...current,
+                updatedAt: this.now().toISOString(),
+                tempoMap: [estimated],
+            },
+            this.trackContext(this.snapshot.activeTrackId ?? '') ?? undefined,
+        );
         this.publish({
             ...this.snapshot,
             project: candidate,
@@ -957,10 +858,7 @@ export class EditorSessionController {
 
     private syncBeforeUnload(): void {
         if (this.hasPendingWrite() && !this.beforeUnloadRegistered) {
-            this.windowTarget?.addEventListener(
-                'beforeunload',
-                this.handleBeforeUnload as EventListener,
-            );
+            this.windowTarget?.addEventListener('beforeunload', this.handleBeforeUnload as EventListener);
             this.beforeUnloadRegistered = true;
         } else if (!this.hasPendingWrite()) {
             this.removeBeforeUnload();
@@ -969,16 +867,12 @@ export class EditorSessionController {
 
     private removeBeforeUnload(): void {
         if (!this.beforeUnloadRegistered) return;
-        this.windowTarget?.removeEventListener(
-            'beforeunload',
-            this.handleBeforeUnload as EventListener,
-        );
+        this.windowTarget?.removeEventListener('beforeunload', this.handleBeforeUnload as EventListener);
         this.beforeUnloadRegistered = false;
     }
 }
 
-export const editorSessionControllerKey: InjectionKey<EditorSessionController> =
-    Symbol('editor-session-controller');
+export const editorSessionControllerKey: InjectionKey<EditorSessionController> = Symbol('editor-session-controller');
 
 export const useEditorSessionController = (): EditorSessionController => {
     const controller = inject(editorSessionControllerKey);

@@ -1,14 +1,7 @@
 import { describe, expect, test } from 'vitest';
 import { createAnalysisConfig } from '../../src/analysis/config';
-import {
-    extractTempoEstimate,
-    runAnalysisJob,
-} from '../../src/analysis/workerCore';
-import {
-    createInitialEditorProject,
-    decodeEditorProjectV1,
-    encodeEditorProjectV1,
-} from '../../src/editor/projectCodec';
+import { extractTempoEstimate, runAnalysisJob } from '../../src/analysis/workerCore';
+import { createInitialEditorProject, decodeEditorProject, encodeEditorProjectV2 } from '../../src/editor/projectCodec';
 import { insertTempoBoundary } from '../../src/editor/tempoMap';
 import { SAMPLE_RATE } from '../support/audio-fixtures';
 import { createClickTrack } from '../support/e2-tempo-fixture';
@@ -45,13 +38,15 @@ describe('Editor E2 analysis and persistence integration', () => {
             trackHash: 'e2-track',
             configHash: config.configHash,
         });
-        expect(extractTempoEstimate(output.retained, {
-            kind: 'tempo-estimate',
-            requestId: 'stale',
-            generation: 1,
-            trackHash: 'e2-track',
-            configHash: config.configHash,
-        })).toBeNull();
+        expect(
+            extractTempoEstimate(output.retained, {
+                kind: 'tempo-estimate',
+                requestId: 'stale',
+                generation: 1,
+                trackHash: 'e2-track',
+                configHash: config.configHash,
+            }),
+        ).toBeNull();
     }, 30_000);
 
     test('round-trips viewport and inherited tempo segments through JSON V1', () => {
@@ -71,17 +66,13 @@ describe('Editor E2 analysis and persistence integration', () => {
         project.tempoMap[0] = {
             ...project.tempoMap[0]!,
             mode: 'metered',
+            beatOriginSeconds: project.tempoMap[0]!.startSeconds,
             bpm: 100,
             bpmSource: 'estimated',
             meter: { numerator: 4, denominator: 4 },
         };
-        project.tempoMap = insertTempoBoundary(
-            project.tempoMap,
-            6,
-            () => 'e2-boundary',
-        );
+        project.tempoMap = insertTempoBoundary(project.tempoMap, 6, () => 'e2-boundary');
         project.workspace.viewport = { startSeconds: 3, endSeconds: 9, zoom: 2 };
-        expect(decodeEditorProjectV1(encodeEditorProjectV1(project)))
-            .toEqual(project);
+        expect(decodeEditorProject(encodeEditorProjectV2(project))).toEqual(project);
     });
 });

@@ -22,7 +22,7 @@ upstream_docs:
 
 ## Geometry and Grid
 
-- 波形／tempo 使用工程 `workspace.viewport`，首次／重置为全曲并恢复已有保存范围，不随 BPM 改窗口。point/range、吸附、移动、批量与 overlay 显式读取只读 `MarkerTimeView`，默认 10 秒、1–10 秒跨度；起点为播放时间减跨度的 15%，播放线固定绘图区 15%，首尾以不可编辑留白补足。动态起点不入 JSON V1；跨度按歌曲 hash 存现有 preferences。
+- 波形／tempo 使用工程 `workspace.viewport`，首次／重置为全曲并恢复已有保存范围，不随 BPM 改窗口。point/range、吸附、移动、批量与 overlay 显式读取只读 `MarkerTimeView`，默认 10 秒、1–10 秒跨度；起点为播放时间减跨度的 15%，播放线固定绘图区 15%，首尾以不可编辑留白补足。动态起点不入 JSON V2；跨度按歌曲 hash 存现有 preferences。
 - 唯一时间来源是已有 PlaybackSnapshot，播放帧不改工程／不保存草稿。Canvas backing store 为 CSS 尺寸乘 DPR，绘制使用 CSS pixel；波形／tempo 及轨道／overlay 两套视图分别内部共线，误差不超过 1 CSS px。只绘制可见行和事件，轨道／overlay 合并 RAF 请求。
 - metered segment 仅根据 BPM 和当前细分生成 beat/subdivision，不再区分小节。single-beat segment 不画内部线，并把整个 segment 作为一个候选单元。
 - 2026-10-17 标记改版采用显式 subdivision：常规 `[1,2,4,8,16]`、三连音 `[1,3,6,12]`、自定义 1–64 的因数预设。默认每拍四等分；hover、pointer、端点与键盘共享同一设置。缩放不改变吸附粒度，只减少过密次级线绘制，分隔颜色和层级沿用 osu。
@@ -41,7 +41,7 @@ upstream_docs:
 - `AudioSessionService.getPlaybackSnapshot()` 直接读取既有 engine 的即时 PlaybackSnapshot；复用当前节拍细分、tempo 区间／single-beat 候选及微秒规范化。无 BPM 且没有候选时拒绝并提示，不写原始时间。数字录入和暂停编辑均可吸附到播放线左侧最近刻度。
 - 正常松键的端点分别吸附，终点不足起点之后一格时补到下一格；歌曲范围内无合法下一格则拒绝。暂停／曲终以停止快照吸附终点，不足一格不创建；曲终同步处理先于自动循环。收尾后持续按住不再次录入，须松开再按。
 - seek、变速、重启、恢复位置或试听源切换通过 `subscribePlaybackDiscontinuity(listener)` 在变更前取消；订阅返回清理函数。换歌／工程、tempo／细分／编号变化、非播放状态、切页签、失焦、页面隐藏、Esc、进入输入控件／菜单／模态框与离页也取消未提交范围；鼠标拖动在同一通知中清理，试听 buffering 期间保持只读。
-- 录入 preview 只属运行时，独立于鼠标两次点击的待完成范围。确认时从 controller 最新工程应用既有点重复／范围半开重叠校验；多范围停止一次累计提交，各项冲突独立反馈，沿用 250ms 草稿防抖。播放帧与按住期间不写工程，不改变 JSON V1。
+- 录入 preview 只属运行时，独立于鼠标两次点击的待完成范围。确认时从 controller 最新工程应用既有点重复／范围半开重叠校验；多范围停止一次累计提交，各项冲突独立反馈，沿用 250ms 草稿防抖。播放帧与按住期间不写工程，不改变 JSON V2。
 - 输入控件、可编辑文本、菜单和模态框保留键盘行为；输入法组合输入及带 Shift／Ctrl／Alt／Meta 的数字键不触发。分类行提供键位提示，录入状态不抢焦点；所有键盘／播放订阅和观察器离页释放，不新增播放时钟或 RAF 循环。
 
 ## Shared Pointer Precedence
@@ -102,11 +102,11 @@ idle + drag start/end handle
 默认收起的 BPM 面板由标题与独立 chevron 展开，保留键盘与 aria-expanded；选择与时间条边界联动，不随播放自动切换编辑对象。输入复用公共控件；bpm测算只用 performance.now 的点按间隔，第二次起平均全部保留间隔，最多128间隔，4秒空闲重置。播放、倍速、seek 和区间选择不改变结果，仅显式应用后修改当时选中区间；面板卸载清理状态和定时器。
 
 - 初始 project 有歌曲开始/结束固定边界；结束前显示 add handle。单击 add handle 时优先使用播放 cursor，否则使用 viewport 中点；新增与调整位置均使用连续歌曲时间。
-- 相邻 beat 固定为 `60 / BPM` 秒，当前细分决定每拍等分数；拍号不再参与网格生成。Project V1 的 meter 字段继续按原值保存，新建仍使用现有默认值，不迁移工程格式。
+- 相邻 beat 固定为 `60 / BPM` 秒，当前细分决定每拍等分数；拍号不再参与网格生成。Project V2 的 meter 字段继续按原值保存；独立节拍锚点及 V1 显式迁移见 [V2](project-format-v2.md)。
 - BPM boundary 新增、拖动及时间输入均不吸附节拍，鼠标时间按微秒规范化；左右键按 1ms 微调，Shift+左右按 10ms，与 BPM、细分及缩放无关。轨道标记继续使用当前细分吸附。
-- 新 segment 继承前一 segment 的 metered/single-beat 值。内部 boundary 可水平拖动但不可跨越相邻 boundary；右键或焦点状态 Delete/Backspace 删除目标 segment，前一 segment 向右延伸。0 秒首 boundary 与歌曲结束边界固定且不可删除。
+- 新 segment 继承前一 segment 的 metered/single-beat 值并锚定新增位置；移动边界同步平移该段节拍锚点。内部 boundary 可水平拖动但不可跨越相邻 boundary；右键或焦点状态 Delete/Backspace 删除目标 segment，前一 segment 向右延伸。0 秒首 boundary 与歌曲结束边界固定且不可删除。
 - 初始 metered segment 为 4/4、`bpm: null`、source unset；输入框显示 `bpm: 100` placeholder。只有一个 segment、仍为空且未被用户编辑时，才允许可靠 tempo estimate 填值。
-- 输入 20–300 进入/保持 metered；输入 `0 <= value < 20` 规范为 single-beat并隐藏 meter；无效输入不提交。切回 metered 需要显式选择 metered 并输入合法 BPM，不从旧 single-beat 数值猜测。
+- 输入 10–1200 进入/保持 metered；输入 `0 <= value < 10` 规范为 single-beat并隐藏 meter；无效输入不提交。切回 metered 需要显式选择 metered 并输入合法 BPM，不从旧 single-beat 数值猜测。
 - 修改 tempo 只重绘网格与改变后续 snap；现有 point/range 秒数不移动。
 - 移除小节显示范围及自动窗口规则；点与范围主体支持同分类单项拖动及 Alt+左右微移，范围保持长度；预览不入草稿，确认时复核边界／源身份／冲突，取消保持原值。
 - tempo boundary 不再覆盖波形 stage；紧凑 BPM 标记条是波形时间列的一部分，使用同一 viewport 和唯一水平滚动容器，不带独立左 rail、标签或模块边框。标记条固定 28px 并与波形零间隙相接。
@@ -126,7 +126,7 @@ idle + drag start/end handle
 - Vue `Teleport` 把 overlay root 挂到 `body`，root 使用 `position: fixed; inset: 0` 并以 `rgba(132, 136, 135, 0.28)` 覆盖整个视口。纵向页面滚动不得移动 root、Canvas、图形、入口或手柄。
 - 顶栏右侧叠加图标用 `aria-pressed` 直接开关；相邻特征图标以 `aria-haspopup/aria-expanded` 临时展开当前注册集合的单选菜单。首次没有 `featureId` 时开关打开菜单并聚焦第一项；选择后立即开启/切换并收起。
 - `Esc`、外部点击和 route leave 只关闭菜单。关闭 overlay 不清空工程的 `featureId`，但 exact cursor、renderer 和 feature analysis 停止，active set 只保留 `buffer`。
-- visibility 按歌曲 hash 保存在本地 preferences，JSON V1 不携带它；旧草稿有 feature 且无偏好时默认打开，新工程无 feature 时默认关闭，hash 不匹配记录忽略。
+- visibility 按歌曲 hash 保存在本地 preferences，JSON V2 不携带它；旧草稿有 feature 且无偏好时默认打开，新工程无 feature 时默认关闭，hash 不匹配记录忽略。
 - overlay `topRatio`/`heightRatio` 限制在 `[0,1]`，且 `top + height <= 1`，现在相对浏览器视口解释。top handle 调整上边界，middle handle 移动整体，bottom handle 调整下边界；最小高度由 delivery 的可用性测试固定。
 - 三个手柄支持 pointer capture 和键盘细调/粗调；focus visible。reduced motion 下关闭位置过渡，但不改变结果。
 - 复合入口、菜单、错误重试和三个手柄使用 `pointer-events: auto`；全屏背景、Canvas、标题/说明、图例和空白使用 `pointer-events: none`，所以 Header 与底层 point/range 命中保持原坐标。
@@ -170,13 +170,13 @@ idle + drag start/end handle
 
 ## Approval
 
-2026-10-18 owner 明确要求实施“Editor 标记编辑重设计”四阶段计划，批准上述独立时间视图、暂停与操作位置规则、三层布局及批量手势替换旧共享视口／小节窗口／轨道右键 pan。JSON V1、秒数与处理工作区边界不变；以下批准记录及 canonical 身份保留为历史版本，不据此宣称新 readiness。
+2026-10-18 owner 明确要求实施“Editor 标记编辑重设计”四阶段计划，批准上述独立时间视图、暂停与操作位置规则、三层布局及批量手势替换旧共享视口／小节窗口／轨道右键 pan。JSON V2、秒数与处理工作区边界不变；以下批准记录及 canonical 身份保留为历史版本，不据此宣称新 readiness。
 
 本交互契约于 2026-08-26 随 Editor system design 创建，并由 `project-owner` 随后批准进入 E1–E6 execution planning。Delivery 必须把上述成功、失败、边界和异常路径映射到可执行验收；delivery 获批前不得实现。
 
-同日，owner 在开放 E2 时进一步确认：一个 beat 固定为 `60/BPM` 秒，拍号分母只表达音符单位；无合法 metered BPM 时 tempo boundary 按微秒规范化原始时间定位。该澄清登记为 DEC-026，不改变 JSON V1 或 ADR-0008 的秒数事实。
+同日，owner 在开放 E2 时进一步确认：一个 beat 固定为 `60/BPM` 秒，拍号分母只表达音符单位；无合法 metered BPM 时 tempo boundary 按微秒规范化原始时间定位。该澄清登记为 DEC-026，不改变 JSON V2 或 ADR-0008 的秒数事实。
 
-2026-09-04，owner 以 E9 完整实施指令批准 ADR-0019：tempo boundary 与区间编辑移入专用 BPM 轨道；删除内部 boundary 时前段向右延伸；区间展示按单行可用宽度在完整、摘要、隐藏间切换。该修订不改变秒数事实或 JSON V1。
+2026-09-04，owner 以 E9 完整实施指令批准 ADR-0019：tempo boundary 与区间编辑移入专用 BPM 轨道；删除内部 boundary 时前段向右延伸；区间展示按单行可用宽度在完整、摘要、隐藏间切换。该修订不改变秒数事实或 JSON V2。
 
 同日，owner 在首个 E9 候选复核后批准 ADR-0020：删除独立 66px tempo row，把 28px BPM 标记条并入波形时间列；caret/辅助线只向上指向波形，重复左侧标签移除，直接编辑改为 11px 无框紧凑控件。ADR-0019 的删除、继承、共享滚动和秒数事实继续有效。
 

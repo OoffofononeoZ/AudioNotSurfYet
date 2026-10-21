@@ -163,7 +163,7 @@ import EditorTrackChangeDialog from '../components/EditorTrackChangeDialog.vue';
 import { useEditorTrackNavigation } from '../editor/useEditorTrackNavigation';
 import { useEditorSeparationService } from '../processing/editorSeparationService';
 import type { AnalysisCursorValueResult, FeatureId } from '../analysis/types';
-import type { EditorProjectV1 } from '../editor/types';
+import type { EditorProjectV2 } from '../editor/types';
 import type { KeyboardRecordingHost } from '../editor/keyboardMarkerRecording';
 
 const route = useRoute();
@@ -385,7 +385,7 @@ const importProject = async () => {
     keyboardRecordingRevision.value += 1;
     keyboardImportPending.value = true;
     try {
-        const result = await controller.importProject('json-v1');
+        const result = await controller.importProject('json-v2');
         if (result === 'imported') ElMessage.success('工程已导入并写入本地草稿。');
     } catch (error) {
         ElMessage.error(error instanceof Error ? error.message : '工程导入失败。');
@@ -396,7 +396,7 @@ const importProject = async () => {
 
 const exportProject = async () => {
     try {
-        const result = await controller.exportProject('json-v1');
+        const result = await controller.exportProject('json-v2');
         if (result === 'saved') ElMessage.success('工程已导出。');
     } catch (error) {
         ElMessage.error(error instanceof Error ? error.message : '工程导出失败。');
@@ -425,7 +425,7 @@ const cancelConflict = async () => {
 };
 
 const clearInvalidDraft = () => void controller.clearInvalidDraftAndCreate();
-const updateProject = (project: EditorProjectV1, immediate: boolean) => controller.updateProject(project, immediate);
+const updateProject = (project: EditorProjectV2, immediate: boolean) => controller.updateProject(project, immediate);
 
 onMounted(() => document.body.classList.add('editor-text-selection-disabled'));
 onBeforeUnmount(() => {

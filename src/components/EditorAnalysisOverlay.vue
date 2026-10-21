@@ -4,8 +4,7 @@
             class="analysis-overlay-host"
             :data-open="overlayOpen && featureId ? 'true' : 'false'"
             data-testid="editor-analysis-overlay-host"
-            aria-label="Editor 分析叠加层"
-        >
+            aria-label="Editor 分析叠加层">
             <template v-if="overlayOpen && featureId">
                 <div class="overlay-backdrop" data-testid="editor-overlay-backdrop" aria-hidden="true" />
                 <canvas ref="staticCanvas" class="overlay-canvas static" aria-hidden="true" />
@@ -17,8 +16,7 @@
                     :data-feature-id="featureId"
                     :data-analysis-state="analysis.state"
                     :data-renderer-error="overlayError ? 'true' : 'false'"
-                    data-testid="editor-analysis-overlay-panel"
-                >
+                    data-testid="editor-analysis-overlay-panel">
                     <div class="overlay-copy" aria-live="polite">
                         <strong>{{ definition?.label }}</strong>
                         <span data-testid="editor-overlay-exact-summary">{{ exactSummary }}</span>
@@ -27,9 +25,7 @@
 
                     <div v-if="overlayError" class="overlay-error" role="alert">
                         <span>{{ overlayError }}</span>
-                        <button type="button" data-testid="editor-overlay-retry" @click="retry">
-                            重试
-                        </button>
+                        <button type="button" data-testid="editor-overlay-retry" @click="retry">重试</button>
                     </div>
 
                     <button
@@ -45,84 +41,69 @@
                         @pointerup="finishHandleDrag"
                         @pointercancel="cancelHandleDrag"
                         @lostpointercapture="cancelHandleDrag"
-                        @keydown="handleKeydown($event, handle.id)"
-                    >
+                        @keydown="handleKeydown($event, handle.id)">
                         <span aria-hidden="true">↕</span>
                     </button>
                 </section>
             </template>
 
             <Teleport to="body">
-            <div ref="controls" class="overlay-controls" data-testid="editor-overlay-controls">
-                <div class="overlay-toggle-group">
-                    <button
-                        ref="toggleButton"
-                        type="button"
-                        class="editor-icon-button overlay-toggle"
-                        :aria-label="overlayOpen ? '关闭叠加层' : '打开叠加层'"
-                        :title="overlayOpen ? '关闭叠加层' : '打开叠加层'"
-                        :aria-pressed="overlayOpen"
-                        data-testid="editor-overlay-toggle"
-                        @click="toggleOverlay"
-                    >
-                        <EditorIcon name="overlay" />
-                    </button>
-                    <button
-                        type="button"
-                        class="editor-icon-button overlay-menu-toggle"
-                        aria-label="选择叠加特征"
-                        title="选择叠加特征"
-                        aria-haspopup="menu"
-                        :aria-expanded="menuOpen"
-                        aria-controls="editor-overlay-feature-menu"
-                        data-testid="editor-overlay-menu-toggle"
-                        @click="toggleMenu"
-                    >
-                        <EditorIcon name="features" />
-                    </button>
-                </div>
+                <div ref="controls" class="overlay-controls" data-testid="editor-overlay-controls">
+                    <div class="overlay-toggle-group">
+                        <button
+                            ref="toggleButton"
+                            type="button"
+                            class="editor-icon-button overlay-toggle"
+                            :aria-label="overlayOpen ? '关闭叠加层' : '打开叠加层'"
+                            :title="overlayOpen ? '关闭叠加层' : '打开叠加层'"
+                            :aria-pressed="overlayOpen"
+                            data-testid="editor-overlay-toggle"
+                            @click="toggleOverlay">
+                            <EditorIcon name="overlay" />
+                        </button>
+                        <button
+                            type="button"
+                            class="editor-icon-button overlay-menu-toggle"
+                            aria-label="选择叠加特征"
+                            title="选择叠加特征"
+                            aria-haspopup="menu"
+                            :aria-expanded="menuOpen"
+                            aria-controls="editor-overlay-feature-menu"
+                            data-testid="editor-overlay-menu-toggle"
+                            @click="toggleMenu">
+                            <EditorIcon name="features" />
+                        </button>
+                    </div>
 
-                <div
-                    v-if="menuOpen"
-                    id="editor-overlay-feature-menu"
-                    class="overlay-feature-menu app-scrollbar"
-                    role="menu"
-                    aria-label="选择声音特征"
-                    data-testid="editor-overlay-feature-menu"
-                >
-                    <button
-                        v-for="option in featureOptions"
-                        :key="option.id"
-                        type="button"
-                        role="menuitemradio"
-                        :aria-checked="featureId === option.id"
-                        :data-feature-id="option.id"
-                        @click="selectFeature(option.id)"
-                        @keydown="onMenuItemKeydown"
-                    >
-                        <span>{{ option.label }}</span>
-                        <span v-if="featureId === option.id" aria-hidden="true">●</span>
-                    </button>
+                    <div
+                        v-if="menuOpen"
+                        id="editor-overlay-feature-menu"
+                        class="overlay-feature-menu app-scrollbar"
+                        role="menu"
+                        aria-label="选择声音特征"
+                        data-testid="editor-overlay-feature-menu">
+                        <button
+                            v-for="option in featureOptions"
+                            :key="option.id"
+                            type="button"
+                            role="menuitemradio"
+                            :aria-checked="featureId === option.id"
+                            :data-feature-id="option.id"
+                            @click="selectFeature(option.id)"
+                            @keydown="onMenuItemKeydown">
+                            <span>{{ option.label }}</span>
+                            <span v-if="featureId === option.id" aria-hidden="true">●</span>
+                        </button>
+                    </div>
                 </div>
-            </div>
             </Teleport>
         </div>
     </Teleport>
 </template>
 
 <script setup lang="ts">
-import {
-    computed,
-    nextTick,
-    onBeforeUnmount,
-    onMounted,
-    ref,
-    watch,
-} from 'vue';
-import {
-    analysisCanvasRenderer,
-    type EditorRenderRequest,
-} from '../analysis/canvasRenderer';
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
+import { analysisCanvasRenderer, type EditorRenderRequest } from '../analysis/canvasRenderer';
 import { FEATURE_REGISTRY } from '../analysis/featureRegistry';
 import EditorIcon from './EditorIcon.vue';
 import type {
@@ -141,13 +122,13 @@ import {
     type EditorOverlayBounds,
     type EditorOverlayHandle,
 } from '../editor/overlay';
-import type { EditorProjectV1 } from '../editor/types';
+import type { EditorProjectV2 } from '../editor/types';
 import type { PlaybackSnapshot } from '../types/audio';
 import type { MarkerTimeView } from '../editor/markerTimeView';
 import type { MarkerDrawing } from '../editor/markerDrawing';
 
 const props = defineProps<{
-    project: EditorProjectV1;
+    project: EditorProjectV2;
     timeView: MarkerTimeView;
     drawing: MarkerDrawing;
     playback: PlaybackSnapshot;
@@ -158,7 +139,7 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-    updateProject: [project: EditorProjectV1, immediate: boolean];
+    updateProject: [project: EditorProjectV2, immediate: boolean];
     toggle: [enabled: boolean];
     selectFeature: [featureId: FeatureId];
     retry: [];
@@ -181,39 +162,36 @@ let resizeObserver: ResizeObserver | null = null;
 let disposed = false;
 
 const featureId = computed(() => props.project.workspace.overlay.featureId);
-const definition = computed(() => featureId.value
-    ? FEATURE_REGISTRY[featureId.value]
-    : null);
-const featureOptions = FEATURE_IDS.map((id) => ({
+const definition = computed(() => (featureId.value ? FEATURE_REGISTRY[featureId.value] : null));
+const featureOptions = FEATURE_IDS.map(id => ({
     id,
     label: FEATURE_REGISTRY[id].label,
 }));
-const bounds = computed(() => normalizeEditorOverlayBounds(
-    props.project.workspace.overlay,
-));
-const exactSummary = computed(() => featureId.value
-    ? editorOverlayExactSummary(featureId.value, props.exactValue)
-    : '');
-const stateLabel = computed(() => ({
-    idle: '等待分析',
-    copying: '正在准备音频',
-    analyzing: `分析中 ${Math.round(props.analysis.progress * 100)}%`,
-    ready: '分析就绪',
-    cancelled: '分析已取消',
-    error: props.analysis.error?.message ?? '分析失败',
-    disposed: '分析已释放',
-})[props.analysis.state]);
-const overlayError = computed(() => rendererError.value
-    ?? (props.analysis.state === 'error'
-        ? props.analysis.error?.message ?? '叠加分析失败。'
-        : null));
+const bounds = computed(() => normalizeEditorOverlayBounds(props.project.workspace.overlay));
+const exactSummary = computed(() =>
+    featureId.value ? editorOverlayExactSummary(featureId.value, props.exactValue) : '',
+);
+const stateLabel = computed(
+    () =>
+        ({
+            idle: '等待分析',
+            copying: '正在准备音频',
+            analyzing: `分析中 ${Math.round(props.analysis.progress * 100)}%`,
+            ready: '分析就绪',
+            cancelled: '分析已取消',
+            error: props.analysis.error?.message ?? '分析失败',
+            disposed: '分析已释放',
+        })[props.analysis.state],
+);
+const overlayError = computed(
+    () =>
+        rendererError.value ??
+        (props.analysis.state === 'error' ? (props.analysis.error?.message ?? '叠加分析失败。') : null),
+);
 const panelStyle = computed(() => {
     const viewportWidth = Math.max(1, window.innerWidth);
     const left = Math.max(0, plotRect.value.left);
-    const right = Math.min(
-        viewportWidth,
-        plotRect.value.left + plotRect.value.width,
-    );
+    const right = Math.min(viewportWidth, plotRect.value.left + plotRect.value.width);
     return {
         left: `${left}px`,
         top: `${bounds.value.topRatio * 100}vh`,
@@ -236,9 +214,9 @@ const geometryTargets = () => {
 const measurePlot = () => {
     const targets = geometryTargets();
     if (targets.length === 0) return;
-    const rects = targets.map((target) => target.getBoundingClientRect());
-    const left = Math.min(...rects.map((rect) => rect.left));
-    const right = Math.max(...rects.map((rect) => rect.right));
+    const rects = targets.map(target => target.getBoundingClientRect());
+    const left = Math.min(...rects.map(rect => rect.left));
+    const right = Math.max(...rects.map(rect => rect.right));
     plotRect.value = {
         left,
         width: Math.max(1, right - left),
@@ -248,7 +226,7 @@ const measurePlot = () => {
 const observeGeometryTargets = () => {
     if (!resizeObserver) return;
     resizeObserver.disconnect();
-    geometryTargets().forEach((target) => resizeObserver?.observe(target));
+    geometryTargets().forEach(target => resizeObserver?.observe(target));
 };
 
 const metrics = () => ({
@@ -274,10 +252,7 @@ const renderRequest = (): EditorRenderRequest => {
     };
 };
 
-const drawLayer = (
-    canvas: HTMLCanvasElement,
-    draw: (target: CanvasRenderingContext2D) => void,
-) => {
+const drawLayer = (canvas: HTMLCanvasElement, draw: (target: CanvasRenderingContext2D) => void) => {
     const size = metrics();
     const backingWidth = Math.max(1, Math.round(size.viewportWidth * size.dpr));
     const backingHeight = Math.max(1, Math.round(size.viewportHeight * size.dpr));
@@ -302,7 +277,7 @@ const drawLayer = (
 const drawStatic = () => {
     if (!props.overlayOpen || !featureId.value || !staticCanvas.value) return;
     const request = renderRequest();
-    drawLayer(staticCanvas.value, (target) => {
+    drawLayer(staticCanvas.value, target => {
         analysisCanvasRenderer.drawStatic(request, target);
     });
 };
@@ -310,13 +285,8 @@ const drawStatic = () => {
 const drawCursor = () => {
     if (!props.overlayOpen || !featureId.value || !cursorCanvas.value) return;
     const request = renderRequest();
-    drawLayer(cursorCanvas.value, (target) => {
-        analysisCanvasRenderer.drawCursor(
-            request,
-            props.playback.currentTimeSeconds,
-            props.exactValue,
-            target,
-        );
+    drawLayer(cursorCanvas.value, target => {
+        analysisCanvasRenderer.drawCursor(request, props.playback.currentTimeSeconds, props.exactValue, target);
     });
 };
 
@@ -330,32 +300,38 @@ const render = async () => {
         drawCursor();
         rendererError.value = null;
     } catch (error) {
-        rendererError.value = error instanceof Error
-            ? error.message
-            : '叠加层 renderer 出错。';
+        rendererError.value = error instanceof Error ? error.message : '叠加层 renderer 出错。';
     }
 };
 
-const renderFrame = () => { void render(); };
-const scheduleGeometryRender = () => { props.drawing.request(renderFrame); };
-
-const applyBounds = (next: EditorOverlayBounds, immediate: boolean) => {
-    emit('updateProject', {
-        ...props.project,
-        workspace: {
-            ...props.project.workspace,
-            overlay: {
-                ...props.project.workspace.overlay,
-                ...normalizeEditorOverlayBounds(next),
-            },
-        },
-    }, immediate);
+const renderFrame = () => {
+    void render();
+};
+const scheduleGeometryRender = () => {
+    props.drawing.request(renderFrame);
 };
 
-const focusFirstMenuItem = () => void nextTick(() => {
-    controls.value?.querySelector<HTMLButtonElement>('[role="menuitemradio"]')
-        ?.focus();
-});
+const applyBounds = (next: EditorOverlayBounds, immediate: boolean) => {
+    emit(
+        'updateProject',
+        {
+            ...props.project,
+            workspace: {
+                ...props.project.workspace,
+                overlay: {
+                    ...props.project.workspace.overlay,
+                    ...normalizeEditorOverlayBounds(next),
+                },
+            },
+        },
+        immediate,
+    );
+};
+
+const focusFirstMenuItem = () =>
+    void nextTick(() => {
+        controls.value?.querySelector<HTMLButtonElement>('[role="menuitemradio"]')?.focus();
+    });
 
 const openMenu = () => {
     menuOpen.value = true;
@@ -389,19 +365,15 @@ const selectFeature = (value: FeatureId) => {
 const onMenuItemKeydown = (event: KeyboardEvent) => {
     if (!['ArrowDown', 'ArrowUp', 'Home', 'End'].includes(event.key)) return;
     event.preventDefault();
-    const items = Array.from(
-        controls.value?.querySelectorAll<HTMLButtonElement>(
-            '[role="menuitemradio"]',
-        ) ?? [],
-    );
+    const items = Array.from(controls.value?.querySelectorAll<HTMLButtonElement>('[role="menuitemradio"]') ?? []);
     if (items.length === 0) return;
     const current = Math.max(0, items.indexOf(event.currentTarget as HTMLButtonElement));
-    const next = event.key === 'Home'
-        ? 0
-        : event.key === 'End'
-            ? items.length - 1
-            : (current + (event.key === 'ArrowDown' ? 1 : -1) + items.length)
-                % items.length;
+    const next =
+        event.key === 'Home'
+            ? 0
+            : event.key === 'End'
+              ? items.length - 1
+              : (current + (event.key === 'ArrowDown' ? 1 : -1) + items.length) % items.length;
     items[next]?.focus();
 };
 
@@ -470,14 +442,8 @@ const handleKeydown = (event: KeyboardEvent, handle: EditorOverlayHandle) => {
     }
     if (event.key !== 'ArrowUp' && event.key !== 'ArrowDown') return;
     event.preventDefault();
-    const step = event.shiftKey
-        ? EDITOR_OVERLAY_KEYBOARD_COARSE_STEP
-        : EDITOR_OVERLAY_KEYBOARD_STEP;
-    applyBounds(moveEditorOverlayHandle(
-        bounds.value,
-        handle,
-        event.key === 'ArrowUp' ? -step : step,
-    ), true);
+    const step = event.shiftKey ? EDITOR_OVERLAY_KEYBOARD_COARSE_STEP : EDITOR_OVERLAY_KEYBOARD_STEP;
+    applyBounds(moveEditorOverlayHandle(bounds.value, handle, event.key === 'ArrowUp' ? -step : step), true);
 };
 
 const retry = () => {
@@ -511,10 +477,11 @@ watch(
         renderRevision.value,
         props.project.lanes.length,
     ],
-    () => void nextTick(() => {
-        observeGeometryTargets();
-        scheduleGeometryRender();
-    }),
+    () =>
+        void nextTick(() => {
+            observeGeometryTargets();
+            scheduleGeometryRender();
+        }),
     { deep: true },
 );
 watch(
@@ -523,9 +490,12 @@ watch(
         scheduleGeometryRender();
     },
 );
-watch(() => props.overlayOpen, (open) => {
-    if (!open) rendererError.value = null;
-});
+watch(
+    () => props.overlayOpen,
+    open => {
+        if (!open) rendererError.value = null;
+    },
+);
 
 onMounted(() => {
     resizeObserver = new ResizeObserver(scheduleGeometryRender);
@@ -561,7 +531,12 @@ onBeforeUnmount(() => {
     height: 100dvh;
     pointer-events: none;
 }
-.overlay-backdrop { position: absolute; inset: 0; background: var(--overlay-backdrop); pointer-events: none; }
+.overlay-backdrop {
+    position: absolute;
+    inset: 0;
+    background: var(--overlay-backdrop);
+    pointer-events: none;
+}
 .analysis-overlay-panel {
     position: absolute;
     z-index: 82;
@@ -570,11 +545,22 @@ onBeforeUnmount(() => {
     border-bottom: 1px solid var(--overlay-divider);
     border-radius: 0;
     background: transparent;
-    transition: top 120ms ease, height 120ms ease;
+    transition:
+        top 120ms ease,
+        height 120ms ease;
     pointer-events: none;
 }
-.overlay-controls { position: fixed; z-index: 86; top: 15px; right: 60px; pointer-events: auto; }
-.overlay-toggle-group { display: flex; gap: 4px; }
+.overlay-controls {
+    position: fixed;
+    z-index: 86;
+    top: 15px;
+    right: 60px;
+    pointer-events: auto;
+}
+.overlay-toggle-group {
+    display: flex;
+    gap: 4px;
+}
 .overlay-feature-menu {
     position: absolute;
     top: 100%;
@@ -588,26 +574,110 @@ onBeforeUnmount(() => {
     border-radius: 8px;
     padding: 4px;
     background: var(--overlay-menu);
-    box-shadow: 0 12px 36px rgba(0, 0, 0, .48);
+    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.48);
 }
-.overlay-feature-menu button { display: flex; justify-content: space-between; min-height: 30px; border: 0; border-radius: 4px; padding: 5px 8px; color: var(--ink); background: transparent; text-align: left; }
+.overlay-feature-menu button {
+    display: flex;
+    justify-content: space-between;
+    min-height: 30px;
+    border: 0;
+    border-radius: 4px;
+    padding: 5px 8px;
+    color: var(--ink);
+    background: transparent;
+    text-align: left;
+}
 .overlay-feature-menu button:hover,
-.overlay-feature-menu button[aria-checked="true"] { background: var(--marker-fill); }
+.overlay-feature-menu button[aria-checked='true'] {
+    background: var(--marker-fill);
+}
 .overlay-toggle:focus-visible,
 .overlay-menu-toggle:focus-visible,
 .overlay-feature-menu button:focus-visible,
 .overlay-handle:focus-visible,
-.overlay-error button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-.overlay-canvas { position: fixed; z-index: 81; inset: 0; width: 100vw; height: 100dvh; pointer-events: none; }
-.overlay-canvas.static { opacity: .72; }
-.overlay-canvas.cursor { opacity: .9; }
-.overlay-copy { position: absolute; z-index: 83; right: 9px; top: 7px; display: grid; justify-items: end; max-width: 46%; color: var(--overlay-copy); font: .68rem ui-monospace, monospace; text-shadow: 0 1px 2px #000; pointer-events: none; }
-.overlay-copy strong { color: var(--ink-strong); }
-.overlay-error { position: absolute; z-index: 84; inset: 8px 8px auto 52px; display: flex; justify-content: flex-end; align-items: center; gap: 8px; color: var(--error); pointer-events: none; }
-.overlay-error button { min-height: 30px; border: 1px solid var(--error); border-radius: 4px; color: var(--ink-strong); background: var(--error-surface); pointer-events: auto; }
-.overlay-handle { position: absolute; z-index: 85; left: 0; width: 34px; height: 26px; padding: 0; border: 1px solid var(--overlay-hairline-strong); border-radius: 4px; color: var(--ink); background: var(--overlay-panel-strong); cursor: ns-resize; pointer-events: auto; touch-action: none; }
-.overlay-handle.top { top: -13px; }
-.overlay-handle.move { top: 50%; transform: translateY(-50%); }
-.overlay-handle.bottom { bottom: -13px; }
-@media (prefers-reduced-motion: reduce) { .analysis-overlay-panel { transition: none; } }
+.overlay-error button:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+}
+.overlay-canvas {
+    position: fixed;
+    z-index: 81;
+    inset: 0;
+    width: 100vw;
+    height: 100dvh;
+    pointer-events: none;
+}
+.overlay-canvas.static {
+    opacity: 0.72;
+}
+.overlay-canvas.cursor {
+    opacity: 0.9;
+}
+.overlay-copy {
+    position: absolute;
+    z-index: 83;
+    right: 9px;
+    top: 7px;
+    display: grid;
+    justify-items: end;
+    max-width: 46%;
+    color: var(--overlay-copy);
+    font:
+        0.68rem ui-monospace,
+        monospace;
+    text-shadow: 0 1px 2px #000;
+    pointer-events: none;
+}
+.overlay-copy strong {
+    color: var(--ink-strong);
+}
+.overlay-error {
+    position: absolute;
+    z-index: 84;
+    inset: 8px 8px auto 52px;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 8px;
+    color: var(--error);
+    pointer-events: none;
+}
+.overlay-error button {
+    min-height: 30px;
+    border: 1px solid var(--error);
+    border-radius: 4px;
+    color: var(--ink-strong);
+    background: var(--error-surface);
+    pointer-events: auto;
+}
+.overlay-handle {
+    position: absolute;
+    z-index: 85;
+    left: 0;
+    width: 34px;
+    height: 26px;
+    padding: 0;
+    border: 1px solid var(--overlay-hairline-strong);
+    border-radius: 4px;
+    color: var(--ink);
+    background: var(--overlay-panel-strong);
+    cursor: ns-resize;
+    pointer-events: auto;
+    touch-action: none;
+}
+.overlay-handle.top {
+    top: -13px;
+}
+.overlay-handle.move {
+    top: 50%;
+    transform: translateY(-50%);
+}
+.overlay-handle.bottom {
+    bottom: -13px;
+}
+@media (prefers-reduced-motion: reduce) {
+    .analysis-overlay-panel {
+        transition: none;
+    }
+}
 </style>

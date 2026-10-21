@@ -10,8 +10,8 @@
 
 ## 工程、时间与编辑
 
-- EditorProjectV1 是当前唯一写入格式；完整验证歌曲 identity、秒数、tempo、point/range union 和引用后原子替换。失败保留内存与 durable draft。
-- JSON、canonical seconds、严格 validator 与独立 draft DB 见 [Project V1](project-format-v1.md)，实现为 [projectCodec.ts](../../../src/editor/projectCodec.ts)和 [editorDraftRepository.ts](../../../src/editor/editorDraftRepository.ts)。
+- EditorProjectV2 是当前唯一写入格式；完整验证歌曲 identity、秒数、tempo、point/range union 和引用后原子替换。失败保留内存与 durable draft。
+- JSON、canonical seconds、严格 validator 与独立 draft DB 见 [Project V2](project-format-v2.md)，实现为 [projectCodec.ts](../../../src/editor/projectCodec.ts)和 [editorDraftRepository.ts](../../../src/editor/editorDraftRepository.ts)。
 - tempo/grid、single-beat、吸附、point/range、连续时间批量、overlay 与数字实时录入统一按[交互契约](interaction-contracts.md)；页面行为见[标记工作区](../../context/editor-marking.md)。
 - waveform/tempo 使用工程 viewport；marker/overlay 使用独立只读 MarkerTimeView。播放读取 engine 快照，不逐帧改工程或保存草稿；zoom、BPM 和几何不重写事件秒数。
 - seconds保存事件事实，tempo只派生网格，避免用户改BPM时移动标记。独立单草稿隔离公共会话DB；共享纯Canvas adapter保持提取/解码单一来源，overlay失败不破坏人工编辑。
@@ -19,7 +19,7 @@
 
 ## 分离与自动标记
 
-- FT 与有限乐器自动标记在 Editor 内共用一个处理槽位；原曲/四轨共用 transport，保留人工标记和显式 V1 原子应用。
+- FT 与有限乐器自动标记在 Editor 内共用一个处理槽位；原曲/四轨共用 transport，保留人工标记和显式 V2 原子应用。
 - 模型、PCM、缓存、结果身份和清理见 [FT 接入](../processing/editor-separation.md)、[自动标记](../processing/editor-auto-marking.md)、[模型身份](../processing/model-artifacts.md)。候选经显式确认应用，不自动覆盖人工工程。
 - 当前 FT 听感/长曲耗时按 DEC-074 接受；新增识别质量仍待 owner 复核，完整 P1/P2 正式证据及后续路线不因此关闭。
 

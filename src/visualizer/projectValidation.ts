@@ -1,6 +1,6 @@
 import { FEATURE_REGISTRY } from '../analysis/featureRegistry';
 import { isFeatureId, type FeatureId } from '../analysis/types';
-import { validateEditorProjectV1 } from '../editor/projectCodec';
+import { validateEditorProjectV2 } from '../editor/projectCodec';
 import type { EditorTrackIdentityV1 } from '../editor/types';
 import type { SceneNumericRange, SceneParameterDescriptor } from './parameterDescriptor';
 import type {
@@ -16,16 +16,18 @@ const HASH_PATTERN = /^[a-f\d]{64}$/i;
 export const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const MICROSECOND = 1e-6;
 const COMPONENTS = new Set<VisualizerAnalysisComponent>([
-    'default', 'total', 'specific', 'real', 'imag', 'magnitude', 'phase',
+    'default',
+    'total',
+    'specific',
+    'real',
+    'imag',
+    'magnitude',
+    'phase',
 ]);
 type UnknownRecord = Record<string, unknown>;
 
 export type VisualizerProjectValidationCode =
-    | 'parse-failed'
-    | 'invalid-schema'
-    | 'unsupported-schema'
-    | 'track-mismatch'
-    | 'analysis-feature-limit';
+    'parse-failed' | 'invalid-schema' | 'unsupported-schema' | 'track-mismatch' | 'analysis-feature-limit';
 
 export class VisualizerProjectValidationError extends Error {
     readonly code: VisualizerProjectValidationCode;
@@ -79,11 +81,7 @@ export const integer = (value: unknown, path: string): number => {
     return result;
 };
 
-const assertInRange = (
-    value: number,
-    range: SceneNumericRange,
-    path: string,
-): void => {
+const assertInRange = (value: number, range: SceneNumericRange, path: string): void => {
     if (value < range.min || value > range.max) {
         invalid(`${path} must be between ${range.min} and ${range.max}.`);
     }
@@ -105,19 +103,13 @@ export const iso = (value: unknown, path: string): string => {
     return result;
 };
 
-export const canonicalTrack = (
-    input: unknown,
-    context?: VisualizerTrackValidationContext,
-): EditorTrackIdentityV1 => {
+export const canonicalTrack = (input: unknown, context?: VisualizerTrackValidationContext): EditorTrackIdentityV1 => {
     const value = record(input, 'project.track');
-    keys(value, ['contentHash', 'fileName', 'durationSeconds'], [
-        'title', 'artist', 'sampleRate',
-    ], 'project.track');
+    keys(value, ['contentHash', 'fileName', 'durationSeconds'], ['title', 'artist', 'sampleRate'], 'project.track');
     const contentHash = text(value.contentHash, 'project.track.contentHash');
     if (!HASH_PATTERN.test(contentHash)) invalid('project.track.contentHash is not SHA-256.');
-    const durationSeconds = Math.round(
-        finite(value.durationSeconds, 'project.track.durationSeconds') * 1_000_000,
-    ) / 1_000_000;
+    const durationSeconds =
+        Math.round(finite(value.durationSeconds, 'project.track.durationSeconds') * 1_000_000) / 1_000_000;
     if (durationSeconds <= 0) invalid('project.track.durationSeconds must be positive.');
     let sampleRate: number | undefined;
     if (value.sampleRate !== undefined) {
@@ -127,9 +119,9 @@ export const canonicalTrack = (
     if (context) {
         const tolerance = Math.max(MICROSECOND, 1 / context.sampleRate);
         if (
-            contentHash !== context.contentHash
-            || Math.abs(durationSeconds - context.durationSeconds) > tolerance
-            || (sampleRate !== undefined && sampleRate !== context.sampleRate)
+            contentHash !== context.contentHash ||
+            Math.abs(durationSeconds - context.durationSeconds) > tolerance ||
+            (sampleRate !== undefined && sampleRate !== context.sampleRate)
         ) {
             throw new VisualizerProjectValidationError(
                 'track-mismatch',
@@ -185,10 +177,7 @@ const canonicalConstant = (
     });
 };
 
-const canonicalProjection = (
-    input: unknown,
-    path: string,
-): VisualizerAnalysisProjectionV1 => {
+const canonicalProjection = (input: unknown, path: string): VisualizerAnalysisProjectionV1 => {
     const value = record(input, path);
     const kind = value.kind;
     if (['scalar', 'full', 'mean', 'max', 'peak'].includes(String(kind))) {
@@ -265,16 +254,14 @@ const assertProjectionCompatible = (
     }
 };
 
-const canonicalTransform = (
-    input: unknown,
-    path: string,
-    fullVector: boolean,
-): VisualizerNumericTransformV1 => {
+const canonicalTransform = (input: unknown, path: string, fullVector: boolean): VisualizerNumericTransformV1 => {
     const value = record(input, path);
-    keys(value, [
-        'inputMin', 'inputMax', 'outputMin', 'outputMax', 'clamp', 'invert',
-        'attackSeconds', 'releaseSeconds',
-    ], [], path);
+    keys(
+        value,
+        ['inputMin', 'inputMax', 'outputMin', 'outputMax', 'clamp', 'invert', 'attackSeconds', 'releaseSeconds'],
+        [],
+        path,
+    );
     const result: VisualizerNumericTransformV1 = {
         inputMin: finite(value.inputMin, `${path}.inputMin`),
         inputMax: finite(value.inputMax, `${path}.inputMax`),
@@ -301,7 +288,7 @@ const canonicalTransform = (
 export const canonicalBinding = (
     input: unknown,
     parameter: SceneParameterDescriptor,
-    editorProject: ReturnType<typeof validateEditorProjectV1> | undefined,
+    editorProject: ReturnType<typeof validateEditorProjectV2> | undefined,
     path: string,
 ): VisualizerParameterBindingV1 => {
     const value = record(input, path);
@@ -311,10 +298,8 @@ export const canonicalBinding = (
     }
     const sourceValue = record(value.source, `${path}.source`);
     if (
-        typeof sourceValue.kind !== 'string'
-        || !parameter.allowedSourceKinds.includes(
-            sourceValue.kind as 'constant' | 'analysis' | 'editor-event',
-        )
+        typeof sourceValue.kind !== 'string' ||
+        !parameter.allowedSourceKinds.includes(sourceValue.kind as 'constant' | 'analysis' | 'editor-event')
     ) {
         invalid(`${path}.source.kind is not allowed for ${parameter.id}.`);
     }
@@ -333,27 +318,18 @@ export const canonicalBinding = (
         const rawFeatureId = sourceValue.featureId;
         if (!isFeatureId(rawFeatureId)) invalid(`${path}.source.featureId is invalid.`);
         const featureId: FeatureId = rawFeatureId as FeatureId;
-        const component = sourceValue.component === undefined
-            ? 'default'
-            : sourceValue.component;
+        const component = sourceValue.component === undefined ? 'default' : sourceValue.component;
         if (typeof component !== 'string' || !COMPONENTS.has(component as VisualizerAnalysisComponent)) {
             invalid(`${path}.source.component is invalid.`);
         }
         const projection = canonicalProjection(sourceValue.projection, `${path}.source.projection`);
-        if (!parameter.allowedAnalysisComponents?.includes(
-            component as VisualizerAnalysisComponent,
-        )) {
+        if (!parameter.allowedAnalysisComponents?.includes(component as VisualizerAnalysisComponent)) {
             invalid(`${path}.source.component is not allowed for ${parameter.id}.`);
         }
         if (!parameter.allowedAnalysisProjections?.includes(projection.kind)) {
             invalid(`${path}.source.projection is not allowed for ${parameter.id}.`);
         }
-        assertProjectionCompatible(
-            featureId,
-            component as VisualizerAnalysisComponent,
-            projection,
-            parameter,
-        );
+        assertProjectionCompatible(featureId, component as VisualizerAnalysisComponent, projection, parameter);
         source = {
             kind: 'analysis',
             featureId,
@@ -366,12 +342,12 @@ export const canonicalBinding = (
         }
         keys(sourceValue, ['kind', 'laneId'], ['innerClassId'], `${path}.source`);
         const laneId = text(sourceValue.laneId, `${path}.source.laneId`);
-        const lane = editorProject?.lanes.find((entry) => entry.id === laneId);
+        const lane = editorProject?.lanes.find(entry => entry.id === laneId);
         if (!lane) return invalid(`${path}.source.laneId is not present in the Editor snapshot.`);
         let innerClassId: string | undefined;
         if (sourceValue.innerClassId !== undefined) {
             innerClassId = text(sourceValue.innerClassId, `${path}.source.innerClassId`);
-            if (!lane.innerClasses.some((entry) => entry.id === innerClassId)) {
+            if (!lane.innerClasses.some(entry => entry.id === innerClassId)) {
                 invalid(`${path}.source.innerClassId is not present in the lane.`);
             }
         }
@@ -379,19 +355,22 @@ export const canonicalBinding = (
     } else {
         return invalid(`${path}.source.kind is invalid.`);
     }
-    const transform = value.transform === undefined
-        ? undefined
-        : canonicalTransform(
-            value.transform,
-            `${path}.transform`,
-            source.kind === 'analysis' && source.projection.kind === 'full',
-        );
-    if (transform && parameter.valueKind !== 'number' && !(source.kind === 'analysis' && source.projection.kind === 'full')) {
+    const transform =
+        value.transform === undefined
+            ? undefined
+            : canonicalTransform(
+                  value.transform,
+                  `${path}.transform`,
+                  source.kind === 'analysis' && source.projection.kind === 'full',
+              );
+    if (
+        transform &&
+        parameter.valueKind !== 'number' &&
+        !(source.kind === 'analysis' && source.projection.kind === 'full')
+    ) {
         invalid(`${path}.transform is only valid for numeric bindings.`);
     }
-    const outputRange = parameter.valueKind === 'number'
-        ? parameter.range
-        : parameter.vectorElementRange;
+    const outputRange = parameter.valueKind === 'number' ? parameter.range : parameter.vectorElementRange;
     if (transform && outputRange) {
         assertInRange(transform.outputMin, outputRange, `${path}.transform.outputMin`);
         assertInRange(transform.outputMax, outputRange, `${path}.transform.outputMax`);

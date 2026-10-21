@@ -1,10 +1,15 @@
 import { computed } from 'vue';
 import { normalizeEditorViewport } from './timeline';
-import type { EditorProjectV1 } from './types';
+import type { EditorProjectV2 } from './types';
 import type { PersistedTimelineViewport } from '../types/session';
 
-export function useEditorViewport(project: () => EditorProjectV1, publish: (project: EditorProjectV1, immediate: boolean) => void) {
-    const viewport = computed(() => normalizeEditorViewport(project().workspace.viewport, project().track.durationSeconds));
+export function useEditorViewport(
+    project: () => EditorProjectV2,
+    publish: (project: EditorProjectV2, immediate: boolean) => void,
+) {
+    const viewport = computed(() =>
+        normalizeEditorViewport(project().workspace.viewport, project().track.durationSeconds),
+    );
     function update(next: PersistedTimelineViewport, immediate: boolean) {
         publish({ ...project(), workspace: { ...project().workspace, viewport: next } }, immediate);
     }

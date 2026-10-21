@@ -2,7 +2,7 @@ import type { PlaybackSnapshot } from '../types/audio';
 import type { EditorBeatSnapSetting } from './beatSnap';
 import { createPointEvent, pointCellAtTime } from './pointAnnotations';
 import { createRangeEvent, nextRangeCell } from './rangeAnnotations';
-import type { EditorProjectV1 } from './types';
+import type { EditorProjectV2 } from './types';
 
 export interface KeyboardMarkerTarget {
     key: string;
@@ -13,13 +13,13 @@ export interface KeyboardMarkerTarget {
 
 export interface KeyboardRecordingContext {
     trackId: string;
-    project: EditorProjectV1;
+    project: EditorProjectV2;
     revision: number;
 }
 
 export interface KeyboardRecordingHost {
     getContext(): KeyboardRecordingContext | null;
-    publish(project: EditorProjectV1): void;
+    publish(project: EditorProjectV2): void;
 }
 
 export interface KeyboardRangeRecording extends KeyboardMarkerTarget {
@@ -28,7 +28,7 @@ export interface KeyboardRangeRecording extends KeyboardMarkerTarget {
     signature: string;
 }
 
-export function keyboardMarkerTargets(project: EditorProjectV1): KeyboardMarkerTarget[] {
+export function keyboardMarkerTargets(project: EditorProjectV2): KeyboardMarkerTarget[] {
     return project.lanes
         .flatMap(lane =>
             lane.innerClasses.map(category => ({

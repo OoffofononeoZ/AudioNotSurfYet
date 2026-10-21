@@ -172,7 +172,7 @@ test('marker references reject an incompatible Editor refresh atomically and pro
     const broken = structuredClone(editor);
     broken.lanes = broken.lanes.filter(l => l.id !== fixture.pointLane);
     vi.mocked(editorRepository.restore).mockResolvedValue({
-        schemaVersion: 1,
+        schemaVersion: 2,
         savedAt: editor.updatedAt,
         project: broken,
     });
@@ -295,7 +295,7 @@ test('Editor refresh is atomic and only the latest request can replace its snaps
     const old = deferred<Awaited<ReturnType<EditorDraftRepositoryPort['restore']>>>();
     vi.mocked(editorRepository.restore).mockReturnValueOnce(old.promise);
     const first = h.controller.reloadEditorDraft();
-    const current = { schemaVersion: 1 as const, savedAt: new Date().toISOString(), project: editor };
+    const current = { schemaVersion: 2 as const, savedAt: new Date().toISOString(), project: editor };
     vi.mocked(editorRepository.restore).mockResolvedValueOnce(current);
     await h.controller.reloadEditorDraft();
     const before = h.controller.getSnapshot().project;

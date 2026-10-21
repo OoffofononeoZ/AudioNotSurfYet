@@ -1,4 +1,4 @@
-import { validateEditorProjectV1 } from '../editor/projectCodec';
+import { readEditorProject } from '../editor/projectCodec';
 import type { EditorTrackIdentityV1 } from '../editor/types';
 import { elementDescriptor } from './compositionModel';
 import { validateElementBindings } from './elementBindings';
@@ -157,7 +157,7 @@ export function validateComposition(input: unknown, context?: VisualizerTrackVal
     if (v.editorSnapshot !== undefined) {
         const s = record(v.editorSnapshot, 'editorSnapshot');
         keys(s, ['capturedAt', 'project']);
-        const editor = validateEditorProjectV1(s.project, {
+        const editor = readEditorProject(s.project, {
             contentHash: track.contentHash,
             durationSeconds: track.durationSeconds,
             sampleRate: track.sampleRate ?? context?.sampleRate ?? 48000,

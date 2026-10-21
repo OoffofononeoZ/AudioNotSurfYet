@@ -1,33 +1,28 @@
+import { EDITOR_MIN_METERED_BPM, EDITOR_MAX_BPM } from './editorConfig';
 import { isFeatureId } from '../analysis/types';
 import type {
     CreateEditorProjectInput,
     EditorLaneV1,
-    EditorProjectV1,
+    EditorProjectV2,
     EditorTrackValidationContext,
     MeterDenominator,
-    TempoSegmentV1,
+    MeteredTempoSegmentV2,
+    TempoSegmentV2,
 } from './types';
 
 const MICROSECOND = 1e-6;
 const HASH_PATTERN = /^[a-f\d]{64}$/i;
 const METER_DENOMINATORS = new Set<number>([1, 2, 4, 8, 16, 32]);
-const BPM_SOURCES = new Set(['unset', 'estimated', 'user']);
+const BPM_SOURCES = new Set(['unset', 'estimated', 'user', 'imported']);
 
 type UnknownRecord = Record<string, unknown>;
 
-export type EditorProjectValidationCode =
-    | 'parse-failed'
-    | 'invalid-schema'
-    | 'unsupported-schema'
-    | 'track-mismatch';
+export type EditorProjectValidationCode = 'parse-failed' | 'invalid-schema' | 'unsupported-schema' | 'track-mismatch';
 
 export class EditorProjectValidationError extends Error {
     readonly code: EditorProjectValidationCode;
 
-    constructor(
-        code: EditorProjectValidationCode,
-        message: string,
-    ) {
+    constructor(code: EditorProjectValidationCode, message: string) {
         super(message);
         this.name = 'EditorProjectValidationError';
         this.code = code;
@@ -79,7 +74,9 @@ const text = (value: unknown, path: string, trim = false): string => {
 
 export const normalizeEditorSeconds = (value: number): number => {
     if (!Number.isFinite(value)) invalid('Editor seconds must be finite.');
-    return Math.round(value * 1_000_000) / 1_000_000;
+    const microseconds = Math.round(value * 1_000_000);
+    if (!Number.isSafeInteger(microseconds)) invalid('Editor seconds exceed microsecond precision.');
+    return microseconds / 1_000_000;
 };
 
 const isoTimestamp = (value: unknown, path: string): string => {
@@ -100,16 +97,14 @@ const canonicalTempo = (
     ids: Set<string>,
     duration: number,
     index: number,
-): TempoSegmentV1 => {
+    version: 1 | 2,
+): TempoSegmentV2 => {
     const path = `tempoMap[${index}]`;
     const value = assertRecord(input, path);
     const mode = value.mode;
     const id = registerId(ids, value.id, `${path}.id`);
-    const startSeconds = normalizeEditorSeconds(finite(
-        value.startSeconds,
-        `${path}.startSeconds`,
-    ));
-    if (startSeconds < 0 || startSeconds >= duration && index > 0) {
+    const startSeconds = normalizeEditorSeconds(finite(value.startSeconds, `${path}.startSeconds`));
+    if (startSeconds < 0 || (startSeconds >= duration && index > 0)) {
         invalid(`${path}.startSeconds is outside the track.`);
     }
     if (mode === 'single-beat') {
@@ -117,36 +112,30 @@ const canonicalTempo = (
         return { id, startSeconds, mode: 'single-beat' };
     }
     if (mode !== 'metered') invalid(`${path}.mode is invalid.`);
-    assertKeys(value, [
-        'id',
-        'startSeconds',
-        'mode',
-        'bpm',
-        'bpmSource',
-        'meter',
-    ], [], path);
+    assertKeys(
+        value,
+        ['id', 'startSeconds', 'mode', 'bpm', 'bpmSource', 'meter', ...(version === 2 ? ['beatOriginSeconds'] : [])],
+        [],
+        path,
+    );
     const bpmSource = value.bpmSource;
-    if (typeof bpmSource !== 'string' || !BPM_SOURCES.has(bpmSource)) {
+    if (typeof bpmSource !== 'string' || !BPM_SOURCES.has(bpmSource) || (version === 1 && bpmSource === 'imported')) {
         invalid(`${path}.bpmSource is invalid.`);
     }
     let bpm: number | null = null;
     if (value.bpm !== null) {
         bpm = finite(value.bpm, `${path}.bpm`);
-        if (bpm < 20 || bpm > 300) invalid(`${path}.bpm is outside 20–300.`);
+        const min = version === 1 ? 20 : EDITOR_MIN_METERED_BPM;
+        const max = version === 1 ? 300 : EDITOR_MAX_BPM;
+        if (bpm < min || bpm > max) invalid(`${path}.bpm is outside ${min}–${max}.`);
     }
-    if (
-        (bpm === null && bpmSource !== 'unset')
-        || (bpm !== null && bpmSource === 'unset')
-    ) {
+    if ((bpm === null && bpmSource !== 'unset') || (bpm !== null && bpmSource === 'unset')) {
         invalid(`${path}.bpm and bpmSource disagree.`);
     }
     const meter = assertRecord(value.meter, `${path}.meter`);
     assertKeys(meter, ['numerator', 'denominator'], [], `${path}.meter`);
     const numerator = finite(meter.numerator, `${path}.meter.numerator`);
-    const denominator = finite(
-        meter.denominator,
-        `${path}.meter.denominator`,
-    );
+    const denominator = finite(meter.denominator, `${path}.meter.denominator`);
     if (!Number.isInteger(numerator) || numerator < 1 || numerator > 32) {
         invalid(`${path}.meter.numerator is invalid.`);
     }
@@ -157,8 +146,12 @@ const canonicalTempo = (
         id,
         startSeconds,
         mode: 'metered',
+        beatOriginSeconds:
+            version === 1
+                ? startSeconds
+                : normalizeEditorSeconds(finite(value.beatOriginSeconds, `${path}.beatOriginSeconds`)),
         bpm,
-        bpmSource: bpmSource as 'unset' | 'estimated' | 'user',
+        bpmSource: bpmSource as MeteredTempoSegmentV2['bpmSource'],
         meter: {
             numerator,
             denominator: denominator as MeterDenominator,
@@ -166,12 +159,7 @@ const canonicalTempo = (
     };
 };
 
-const canonicalLane = (
-    input: unknown,
-    ids: Set<string>,
-    duration: number,
-    laneIndex: number,
-): EditorLaneV1 => {
+const canonicalLane = (input: unknown, ids: Set<string>, duration: number, laneIndex: number): EditorLaneV1 => {
     const path = `lanes[${laneIndex}]`;
     const value = assertRecord(input, path);
     assertKeys(value, ['id', 'name', 'eventKind', 'innerClasses', 'events'], [], path);
@@ -190,72 +178,55 @@ const canonicalLane = (
             label: text(inner.label, `${innerPath}.label`, true),
         };
     });
-    const innerIds = new Set(innerClasses.map((entry) => entry.id));
+    const innerIds = new Set(innerClasses.map(entry => entry.id));
     if (!Array.isArray(value.events)) invalid(`${path}.events must be an array.`);
 
     if (value.eventKind === 'point') {
         const uniqueness = new Set<string>();
         const rawEvents = value.events as unknown[];
-        const events = rawEvents.map((entry, index) => {
-            const eventPath = `${path}.events[${index}]`;
-            const event = assertRecord(entry, eventPath);
-            assertKeys(event, ['id', 'innerClassId', 'atSeconds'], [], eventPath);
-            const eventId = registerId(ids, event.id, `${eventPath}.id`);
-            const innerClassId = text(
-                event.innerClassId,
-                `${eventPath}.innerClassId`,
-                true,
-            );
-            if (!innerIds.has(innerClassId)) invalid(`${eventPath} has a dangling inner class.`);
-            const atSeconds = normalizeEditorSeconds(finite(
-                event.atSeconds,
-                `${eventPath}.atSeconds`,
-            ));
-            if (atSeconds < 0 || atSeconds > duration) {
-                invalid(`${eventPath}.atSeconds is outside the track.`);
-            }
-            const key = `${innerClassId}\0${atSeconds}`;
-            if (uniqueness.has(key)) invalid(`${eventPath} duplicates a point.`);
-            uniqueness.add(key);
-            return { id: eventId, innerClassId, atSeconds };
-        }).sort((left, right) =>
-            left.atSeconds - right.atSeconds || left.id.localeCompare(right.id));
+        const events = rawEvents
+            .map((entry, index) => {
+                const eventPath = `${path}.events[${index}]`;
+                const event = assertRecord(entry, eventPath);
+                assertKeys(event, ['id', 'innerClassId', 'atSeconds'], [], eventPath);
+                const eventId = registerId(ids, event.id, `${eventPath}.id`);
+                const innerClassId = text(event.innerClassId, `${eventPath}.innerClassId`, true);
+                if (!innerIds.has(innerClassId)) invalid(`${eventPath} has a dangling inner class.`);
+                const atSeconds = normalizeEditorSeconds(finite(event.atSeconds, `${eventPath}.atSeconds`));
+                if (atSeconds < 0 || atSeconds > duration) {
+                    invalid(`${eventPath}.atSeconds is outside the track.`);
+                }
+                const key = `${innerClassId}\0${atSeconds}`;
+                if (uniqueness.has(key)) invalid(`${eventPath} duplicates a point.`);
+                uniqueness.add(key);
+                return { id: eventId, innerClassId, atSeconds };
+            })
+            .sort((left, right) => left.atSeconds - right.atSeconds || left.id.localeCompare(right.id));
         return { id, name, eventKind: 'point', innerClasses, events };
     }
     if (value.eventKind !== 'range') invalid(`${path}.eventKind is invalid.`);
     const rawEvents = value.events as unknown[];
-    const events = rawEvents.map((entry, index) => {
-        const eventPath = `${path}.events[${index}]`;
-        const event = assertRecord(entry, eventPath);
-        assertKeys(event, [
-            'id',
-            'innerClassId',
-            'startSeconds',
-            'endSeconds',
-        ], [], eventPath);
-        const eventId = registerId(ids, event.id, `${eventPath}.id`);
-        const innerClassId = text(
-            event.innerClassId,
-            `${eventPath}.innerClassId`,
-            true,
+    const events = rawEvents
+        .map((entry, index) => {
+            const eventPath = `${path}.events[${index}]`;
+            const event = assertRecord(entry, eventPath);
+            assertKeys(event, ['id', 'innerClassId', 'startSeconds', 'endSeconds'], [], eventPath);
+            const eventId = registerId(ids, event.id, `${eventPath}.id`);
+            const innerClassId = text(event.innerClassId, `${eventPath}.innerClassId`, true);
+            if (!innerIds.has(innerClassId)) invalid(`${eventPath} has a dangling inner class.`);
+            const startSeconds = normalizeEditorSeconds(finite(event.startSeconds, `${eventPath}.startSeconds`));
+            const endSeconds = normalizeEditorSeconds(finite(event.endSeconds, `${eventPath}.endSeconds`));
+            if (startSeconds < 0 || endSeconds > duration || startSeconds >= endSeconds) {
+                invalid(`${eventPath} is outside the track or collapsed.`);
+            }
+            return { id: eventId, innerClassId, startSeconds, endSeconds };
+        })
+        .sort(
+            (left, right) =>
+                left.startSeconds - right.startSeconds ||
+                left.endSeconds - right.endSeconds ||
+                left.id.localeCompare(right.id),
         );
-        if (!innerIds.has(innerClassId)) invalid(`${eventPath} has a dangling inner class.`);
-        const startSeconds = normalizeEditorSeconds(finite(
-            event.startSeconds,
-            `${eventPath}.startSeconds`,
-        ));
-        const endSeconds = normalizeEditorSeconds(finite(
-            event.endSeconds,
-            `${eventPath}.endSeconds`,
-        ));
-        if (startSeconds < 0 || endSeconds > duration || startSeconds >= endSeconds) {
-            invalid(`${eventPath} is outside the track or collapsed.`);
-        }
-        return { id: eventId, innerClassId, startSeconds, endSeconds };
-    }).sort((left, right) =>
-        left.startSeconds - right.startSeconds
-        || left.endSeconds - right.endSeconds
-        || left.id.localeCompare(right.id));
     const byInnerClass = new Map<string, typeof events>();
     for (const event of events) {
         const group = byInnerClass.get(event.innerClassId) ?? [];
@@ -269,13 +240,14 @@ const canonicalLane = (
     return { id, name, eventKind: 'range', innerClasses, events };
 };
 
-export const validateEditorProjectV1 = (
+const canonicalProject = (
     input: unknown,
-    trackContext?: EditorTrackValidationContext,
-): EditorProjectV1 => {
+    trackContext: EditorTrackValidationContext | undefined,
+    version: 1 | 2,
+): EditorProjectV2 => {
     const value = assertRecord(input, 'project');
-    if (value.format !== 'audiosurf-editor' || value.schemaVersion !== 1) {
-        if (value.schemaVersion !== 1) {
+    if (value.format !== 'audiosurf-editor' || value.schemaVersion !== version) {
+        if (value.schemaVersion !== version) {
             throw new EditorProjectValidationError(
                 'unsupported-schema',
                 `Unsupported Editor schema: ${String(value.schemaVersion)}.`,
@@ -283,17 +255,12 @@ export const validateEditorProjectV1 = (
         }
         invalid('Editor project format is invalid.');
     }
-    assertKeys(value, [
-        'format',
-        'schemaVersion',
-        'projectId',
-        'createdAt',
-        'updatedAt',
-        'track',
-        'tempoMap',
-        'lanes',
-        'workspace',
-    ], [], 'project');
+    assertKeys(
+        value,
+        ['format', 'schemaVersion', 'projectId', 'createdAt', 'updatedAt', 'track', 'tempoMap', 'lanes', 'workspace'],
+        [],
+        'project',
+    );
     const ids = new Set<string>();
     const projectId = registerId(ids, value.projectId, 'project.projectId');
     const createdAt = isoTimestamp(value.createdAt, 'project.createdAt');
@@ -302,17 +269,15 @@ export const validateEditorProjectV1 = (
         invalid('project.updatedAt precedes createdAt.');
     }
     const track = assertRecord(value.track, 'project.track');
-    assertKeys(track, [
-        'contentHash',
-        'fileName',
-        'durationSeconds',
-    ], ['title', 'artist', 'sampleRate'], 'project.track');
+    assertKeys(
+        track,
+        ['contentHash', 'fileName', 'durationSeconds'],
+        ['title', 'artist', 'sampleRate'],
+        'project.track',
+    );
     const contentHash = text(track.contentHash, 'project.track.contentHash');
     if (!HASH_PATTERN.test(contentHash)) invalid('project.track.contentHash is not SHA-256.');
-    const durationSeconds = normalizeEditorSeconds(finite(
-        track.durationSeconds,
-        'project.track.durationSeconds',
-    ));
+    const durationSeconds = normalizeEditorSeconds(finite(track.durationSeconds, 'project.track.durationSeconds'));
     if (durationSeconds <= 0) invalid('project.track.durationSeconds must be positive.');
     let sampleRate: number | undefined;
     if (track.sampleRate !== undefined) {
@@ -324,21 +289,18 @@ export const validateEditorProjectV1 = (
     if (trackContext) {
         const tolerance = Math.max(MICROSECOND, 1 / trackContext.sampleRate);
         if (
-            contentHash !== trackContext.contentHash
-            || Math.abs(durationSeconds - trackContext.durationSeconds) > tolerance
+            contentHash !== trackContext.contentHash ||
+            Math.abs(durationSeconds - trackContext.durationSeconds) > tolerance
         ) {
-            throw new EditorProjectValidationError(
-                'track-mismatch',
-                'Editor project belongs to another track.',
-            );
+            throw new EditorProjectValidationError('track-mismatch', 'Editor project belongs to another track.');
         }
     }
     if (!Array.isArray(value.tempoMap) || value.tempoMap.length === 0) {
         invalid('project.tempoMap must not be empty.');
     }
     const rawTempoMap = value.tempoMap as unknown[];
-    const tempoMap = rawTempoMap.map((entry, index) =>
-        canonicalTempo(entry, ids, durationSeconds, index))
+    const tempoMap = rawTempoMap
+        .map((entry, index) => canonicalTempo(entry, ids, durationSeconds, index, version))
         .sort((left, right) => left.startSeconds - right.startSeconds);
     if (Math.abs(tempoMap[0]!.startSeconds) > MICROSECOND) {
         invalid('project.tempoMap must start at zero.');
@@ -350,20 +312,15 @@ export const validateEditorProjectV1 = (
     }
     if (!Array.isArray(value.lanes)) invalid('project.lanes must be an array.');
     const rawLanes = value.lanes as unknown[];
-    const lanes = rawLanes.map((entry, index) =>
-        canonicalLane(entry, ids, durationSeconds, index));
+    const lanes = rawLanes.map((entry, index) => canonicalLane(entry, ids, durationSeconds, index));
     const workspace = assertRecord(value.workspace, 'project.workspace');
     assertKeys(workspace, ['viewport', 'overlay'], [], 'project.workspace');
     const viewport = assertRecord(workspace.viewport, 'project.workspace.viewport');
     assertKeys(viewport, ['startSeconds', 'endSeconds', 'zoom'], [], 'project.workspace.viewport');
-    const startSeconds = normalizeEditorSeconds(finite(
-        viewport.startSeconds,
-        'project.workspace.viewport.startSeconds',
-    ));
-    const endSeconds = normalizeEditorSeconds(finite(
-        viewport.endSeconds,
-        'project.workspace.viewport.endSeconds',
-    ));
+    const startSeconds = normalizeEditorSeconds(
+        finite(viewport.startSeconds, 'project.workspace.viewport.startSeconds'),
+    );
+    const endSeconds = normalizeEditorSeconds(finite(viewport.endSeconds, 'project.workspace.viewport.endSeconds'));
     const zoom = finite(viewport.zoom, 'project.workspace.viewport.zoom');
     if (startSeconds < 0 || startSeconds >= endSeconds || endSeconds > durationSeconds || zoom <= 0) {
         invalid('project.workspace.viewport is invalid.');
@@ -375,34 +332,27 @@ export const validateEditorProjectV1 = (
         invalid('project.workspace.overlay.featureId is invalid.');
     }
     const topRatio = finite(overlay.topRatio, 'project.workspace.overlay.topRatio');
-    const heightRatio = finite(
-        overlay.heightRatio,
-        'project.workspace.overlay.heightRatio',
-    );
+    const heightRatio = finite(overlay.heightRatio, 'project.workspace.overlay.heightRatio');
     if (
-        topRatio < 0
-        || topRatio >= 1
-        || heightRatio <= 0
-        || heightRatio > 1
-        || topRatio + heightRatio > 1 + Number.EPSILON
+        topRatio < 0 ||
+        topRatio >= 1 ||
+        heightRatio <= 0 ||
+        heightRatio > 1 ||
+        topRatio + heightRatio > 1 + Number.EPSILON
     ) {
         invalid('project.workspace.overlay bounds are invalid.');
     }
     return {
         format: 'audiosurf-editor',
-        schemaVersion: 1,
+        schemaVersion: 2,
         projectId,
         createdAt,
         updatedAt,
         track: {
             contentHash,
             fileName: text(track.fileName, 'project.track.fileName', true),
-            ...(track.title === undefined
-                ? {}
-                : { title: text(track.title, 'project.track.title') }),
-            ...(track.artist === undefined
-                ? {}
-                : { artist: text(track.artist, 'project.track.artist') }),
+            ...(track.title === undefined ? {} : { title: text(track.title, 'project.track.title') }),
+            ...(track.artist === undefined ? {} : { artist: text(track.artist, 'project.track.artist') }),
             durationSeconds,
             ...(sampleRate === undefined ? {} : { sampleRate }),
         },
@@ -411,7 +361,7 @@ export const validateEditorProjectV1 = (
         workspace: {
             viewport: { startSeconds, endSeconds, zoom },
             overlay: {
-                featureId: featureId as EditorProjectV1['workspace']['overlay']['featureId'],
+                featureId: featureId as EditorProjectV2['workspace']['overlay']['featureId'],
                 topRatio,
                 heightRatio,
             },
@@ -419,20 +369,25 @@ export const validateEditorProjectV1 = (
     };
 };
 
-export const encodeEditorProjectV1 = (project: EditorProjectV1): Uint8Array =>
-    new TextEncoder().encode(
-        `${JSON.stringify(validateEditorProjectV1(project), null, 2)}\n`,
-    );
+export const validateEditorProjectV2 = (input: unknown, context?: EditorTrackValidationContext): EditorProjectV2 =>
+    canonicalProject(input, context, 2);
 
-export const decodeEditorProjectV1 = (
+/** The only supported legacy conversion: strict V1 validation followed by explicit V2 timing anchors. */
+export const readEditorProject = (input: unknown, context?: EditorTrackValidationContext): EditorProjectV2 => {
+    const value = assertRecord(input, 'project');
+    return canonicalProject(value, context, value.schemaVersion === 1 ? 1 : 2);
+};
+
+export const encodeEditorProjectV2 = (project: EditorProjectV2): Uint8Array =>
+    new TextEncoder().encode(`${JSON.stringify(validateEditorProjectV2(project), null, 2)}\n`);
+
+export const decodeEditorProject = (
     input: ArrayBuffer | Uint8Array | string,
     context?: EditorTrackValidationContext,
-): EditorProjectV1 => {
+): EditorProjectV2 => {
     let parsed: unknown;
     try {
-        const source = typeof input === 'string'
-            ? input
-            : new TextDecoder('utf-8', { fatal: true }).decode(input);
+        const source = typeof input === 'string' ? input : new TextDecoder('utf-8', { fatal: true }).decode(input);
         parsed = JSON.parse(source) as unknown;
     } catch (error) {
         throw new EditorProjectValidationError(
@@ -440,30 +395,33 @@ export const decodeEditorProjectV1 = (
             error instanceof Error ? error.message : 'Editor JSON parse failed.',
         );
     }
-    return validateEditorProjectV1(parsed, context);
+    return readEditorProject(parsed, context);
 };
 
 export const createInitialEditorProject = ({
     track,
     createId = () => crypto.randomUUID(),
     now = () => new Date(),
-}: CreateEditorProjectInput): EditorProjectV1 => {
+}: CreateEditorProjectInput): EditorProjectV2 => {
     const timestamp = now().toISOString();
-    return validateEditorProjectV1({
+    return validateEditorProjectV2({
         format: 'audiosurf-editor',
-        schemaVersion: 1,
+        schemaVersion: 2,
         projectId: createId(),
         createdAt: timestamp,
         updatedAt: timestamp,
         track,
-        tempoMap: [{
-            id: createId(),
-            startSeconds: 0,
-            mode: 'metered',
-            bpm: null,
-            bpmSource: 'unset',
-            meter: { numerator: 4, denominator: 4 },
-        }],
+        tempoMap: [
+            {
+                id: createId(),
+                startSeconds: 0,
+                mode: 'metered',
+                beatOriginSeconds: 0,
+                bpm: null,
+                bpmSource: 'unset',
+                meter: { numerator: 4, denominator: 4 },
+            },
+        ],
         lanes: [],
         workspace: {
             viewport: {
@@ -473,7 +431,7 @@ export const createInitialEditorProject = ({
             },
             overlay: {
                 featureId: null,
-                topRatio: 0.10,
+                topRatio: 0.1,
                 heightRatio: 0.35,
             },
         },
@@ -481,21 +439,18 @@ export const createInitialEditorProject = ({
 };
 
 export interface EditorFormatCodec {
-    id: 'json-v1';
+    id: 'json-v2';
     label: 'JSON';
     extension: '.audiosurf-editor.json';
     mimeType: 'application/json';
-    encode(project: EditorProjectV1): Uint8Array;
-    decode(
-        input: ArrayBuffer | Uint8Array | string,
-        context?: EditorTrackValidationContext,
-    ): EditorProjectV1;
+    encode(project: EditorProjectV2): Uint8Array;
+    decode(input: ArrayBuffer | Uint8Array | string, context?: EditorTrackValidationContext): EditorProjectV2;
 }
 
 export class EditorFormatCodecRegistry {
     private readonly codecs = new Map<string, EditorFormatCodec>();
 
-    constructor(codecs: readonly EditorFormatCodec[] = [JSON_V1_CODEC]) {
+    constructor(codecs: readonly EditorFormatCodec[] = [JSON_V2_CODEC]) {
         for (const codec of codecs) {
             if (this.codecs.has(codec.id)) throw new Error(`Duplicate codec: ${codec.id}`);
             this.codecs.set(codec.id, codec);
@@ -513,11 +468,11 @@ export class EditorFormatCodecRegistry {
     }
 }
 
-export const JSON_V1_CODEC: EditorFormatCodec = {
-    id: 'json-v1',
+export const JSON_V2_CODEC: EditorFormatCodec = {
+    id: 'json-v2',
     label: 'JSON',
     extension: '.audiosurf-editor.json',
     mimeType: 'application/json',
-    encode: encodeEditorProjectV1,
-    decode: decodeEditorProjectV1,
+    encode: encodeEditorProjectV2,
+    decode: decodeEditorProject,
 };

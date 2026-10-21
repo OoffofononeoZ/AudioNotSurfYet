@@ -7,18 +7,11 @@ import {
     moveMarkerBlock,
     type MarkerBlockSelection,
 } from '../../src/editor/markerBlockOperations';
-import {
-    createEditorDraftEnvelope,
-    EditorDraftRepository,
-} from '../../src/editor/editorDraftRepository';
-import {
-    createInitialEditorProject,
-    decodeEditorProjectV1,
-    encodeEditorProjectV1,
-} from '../../src/editor/projectCodec';
-import type { EditorProjectV1, PointLaneV1, RangeLaneV1 } from '../../src/editor/types';
+import { createEditorDraftEnvelope, EditorDraftRepository } from '../../src/editor/editorDraftRepository';
+import { createInitialEditorProject, decodeEditorProject, encodeEditorProjectV2 } from '../../src/editor/projectCodec';
+import type { EditorProjectV2, PointLaneV1, RangeLaneV1 } from '../../src/editor/types';
 
-const projectFixture = (): EditorProjectV1 => {
+const projectFixture = (): EditorProjectV2 => {
     const project = createInitialEditorProject({
         track: {
             contentHash: 'b'.repeat(64),
@@ -34,64 +27,77 @@ const projectFixture = (): EditorProjectV1 => {
     });
     return {
         ...project,
-        tempoMap: [{
-            id: 'tempo',
-            startSeconds: 0,
-            mode: 'metered',
-            bpm: 120,
-            bpmSource: 'user',
-            meter: { numerator: 4, denominator: 4 },
-        }],
-        lanes: [{
-            id: 'point-lane',
-            name: 'Points',
-            eventKind: 'point',
-            innerClasses: [{ id: 'point-main', label: 'main' }],
-            events: [
-                { id: 'point-a', innerClassId: 'point-main', atSeconds: 0.5 },
-                { id: 'point-b', innerClassId: 'point-main', atSeconds: 1.5 },
-            ],
-        }, {
-            id: 'range-lane',
-            name: 'Ranges',
-            eventKind: 'range',
-            innerClasses: [{ id: 'range-main', label: 'main' }],
-            events: [{
-                id: 'range-a',
-                innerClassId: 'range-main',
-                startSeconds: 4.25,
-                endSeconds: 5.25,
-            }],
-        }],
+        tempoMap: [
+            {
+                id: 'tempo',
+                startSeconds: 0,
+                mode: 'metered',
+                beatOriginSeconds: 0,
+                bpm: 120,
+                bpmSource: 'user',
+                meter: { numerator: 4, denominator: 4 },
+            },
+        ],
+        lanes: [
+            {
+                id: 'point-lane',
+                name: 'Points',
+                eventKind: 'point',
+                innerClasses: [{ id: 'point-main', label: 'main' }],
+                events: [
+                    { id: 'point-a', innerClassId: 'point-main', atSeconds: 0.5 },
+                    { id: 'point-b', innerClassId: 'point-main', atSeconds: 1.5 },
+                ],
+            },
+            {
+                id: 'range-lane',
+                name: 'Ranges',
+                eventKind: 'range',
+                innerClasses: [{ id: 'range-main', label: 'main' }],
+                events: [
+                    {
+                        id: 'range-a',
+                        innerClassId: 'range-main',
+                        startSeconds: 4.25,
+                        endSeconds: 5.25,
+                    },
+                ],
+            },
+        ],
     };
 };
 
 describe('Editor E10 marker block integration', () => {
-    test('applies a copy as one project update and restores it through the single JSON V1 draft', async () => {
+    test('applies a copy as one project update and restores it through the single JSON V2 draft', async () => {
         const repository = new EditorDraftRepository({
             indexedDB,
             databaseName: `e10-${crypto.randomUUID()}`,
         });
-        const update = vi.fn(async (project: EditorProjectV1) => {
-            await repository.replace(createEditorDraftEnvelope(
-                project,
-                () => new Date('2026-09-04T09:00:01.000Z'),
-            ));
+        const update = vi.fn(async (project: EditorProjectV2) => {
+            await repository.replace(createEditorDraftEnvelope(project, () => new Date('2026-09-04T09:00:01.000Z')));
         });
         let id = 0;
-        const result = copyMarkerBlockAfter(projectFixture(), {
-            laneId: 'point-lane',
-            innerClassId: 'point-main',
-            startSeconds: 0,
-            endSeconds: 2,
-        }, () => `copy-${++id}`);
+        const result = copyMarkerBlockAfter(
+            projectFixture(),
+            {
+                laneId: 'point-lane',
+                innerClassId: 'point-main',
+                startSeconds: 0,
+                endSeconds: 2,
+            },
+            () => `copy-${++id}`,
+        );
         await update(result.project);
         expect(update).toHaveBeenCalledTimes(1);
         const restored = await repository.restore();
-        expect(restored?.project.schemaVersion).toBe(1);
-        expect((restored?.project.lanes[0] as PointLaneV1).events.map((event) => event.id))
-            .toEqual(['point-a', 'point-b', 'copy-1', 'copy-2']);
-        expect(encodeEditorProjectV1(restored!.project)).not.toContain('blockMode');
+        expect(restored?.project.schemaVersion).toBe(2);
+        expect((restored?.project.lanes[0] as PointLaneV1).events.map(event => event.id)).toEqual([
+            'point-a',
+            'point-b',
+            'copy-1',
+            'copy-2',
+        ]);
+        expect(encodeEditorProjectV2(restored!.project)).not.toContain('blockMode');
         repository.close();
     });
 
@@ -104,46 +110,56 @@ describe('Editor E10 marker block integration', () => {
             endSeconds: 6,
         };
         const result = moveMarkerBlock(source, selection, 8);
-        const decoded = decodeEditorProjectV1(encodeEditorProjectV1(result.project));
-        expect(decoded.schemaVersion).toBe(1);
-        expect((decoded.lanes[1] as RangeLaneV1).events).toEqual([{
-            id: 'range-a',
-            innerClassId: 'range-main',
-            startSeconds: 8.25,
-            endSeconds: 9.25,
-        }]);
+        const decoded = decodeEditorProject(encodeEditorProjectV2(result.project));
+        expect(decoded.schemaVersion).toBe(2);
+        expect((decoded.lanes[1] as RangeLaneV1).events).toEqual([
+            {
+                id: 'range-a',
+                innerClassId: 'range-main',
+                startSeconds: 8.25,
+                endSeconds: 9.25,
+            },
+        ]);
         expect(result.selection).toMatchObject({ startSeconds: 8, endSeconds: 10 });
     });
 
     test('keeps serialized project bytes stable after an atomic conflict rejection', () => {
         const source = projectFixture();
         const lane = source.lanes[0] as PointLaneV1;
-        const project: EditorProjectV1 = {
+        const project: EditorProjectV2 = {
             ...source,
-            lanes: [{
-                ...lane,
-                events: [...lane.events, {
-                    id: 'occupied',
-                    innerClassId: 'point-main',
-                    atSeconds: 2.5,
-                }],
-            }, source.lanes[1]!],
+            lanes: [
+                {
+                    ...lane,
+                    events: [
+                        ...lane.events,
+                        {
+                            id: 'occupied',
+                            innerClassId: 'point-main',
+                            atSeconds: 2.5,
+                        },
+                    ],
+                },
+                source.lanes[1]!,
+            ],
         };
-        const before = encodeEditorProjectV1(project);
-        expect(() => copyMarkerBlockAfter(project, {
-            laneId: 'point-lane',
-            innerClassId: 'point-main',
-            startSeconds: 0,
-            endSeconds: 2,
-        })).toThrowError(expect.objectContaining({ code: 'point-conflict' }));
-        expect(encodeEditorProjectV1(project)).toEqual(before);
+        const before = encodeEditorProjectV2(project);
+        expect(() =>
+            copyMarkerBlockAfter(project, {
+                laneId: 'point-lane',
+                innerClassId: 'point-main',
+                startSeconds: 0,
+                endSeconds: 2,
+            }),
+        ).toThrowError(expect.objectContaining({ code: 'point-conflict' }));
+        expect(encodeEditorProjectV2(project)).toEqual(before);
     });
 
     test('uses a native themed dialog while retaining the route guard and beforeunload controller path', () => {
-        const source = readFileSync(path.resolve(
-            import.meta.dirname,
-            '../../src/components/EditorLeaveGuard.vue',
-        ), 'utf8');
+        const source = readFileSync(
+            path.resolve(import.meta.dirname, '../../src/components/EditorLeaveGuard.vue'),
+            'utf8',
+        );
         expect(source).toContain('<dialog');
         expect(source).toContain('dialog.showModal()');
         expect(source).toContain('onBeforeRouteLeave');

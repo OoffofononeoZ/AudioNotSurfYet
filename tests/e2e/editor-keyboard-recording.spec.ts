@@ -1,9 +1,9 @@
 import { expect, test, type Page } from '@playwright/test';
 import { addMarkerLane, prepareMarkerEditor, seekMarkerEditor } from '../support/editor-marking';
-import type { EditorProjectV1, PointEventV1, RangeEventV1 } from '../../src/editor/types';
+import type { EditorProjectV2, PointEventV1, RangeEventV1 } from '../../src/editor/types';
 import { queuePickerData } from '../support/file-picker';
 
-async function draft(page: Page): Promise<EditorProjectV1> {
+async function draft(page: Page): Promise<EditorProjectV2> {
     return page.evaluate(
         () =>
             new Promise((resolve, reject) => {
@@ -245,7 +245,9 @@ test('leaving cancels held ranges and repeated route entry releases keyboard lis
             callback: EventListenerOrEventListenerObject,
             options?: boolean | AddEventListenerOptions,
         ) => {
-            if (type === 'keyup') callbacks.add(callback);
+            // The shared transport owns a separate capture listener; count only marker recording.
+            if (type === 'keyup' && options !== true && !(typeof options === 'object' && options.capture))
+                callbacks.add(callback);
             add(type, callback, options);
         }) as typeof window.addEventListener;
         window.removeEventListener = ((
@@ -253,7 +255,8 @@ test('leaving cancels held ranges and repeated route entry releases keyboard lis
             callback: EventListenerOrEventListenerObject,
             options?: boolean | EventListenerOptions,
         ) => {
-            if (type === 'keyup') callbacks.delete(callback);
+            if (type === 'keyup' && options !== true && !(typeof options === 'object' && options.capture))
+                callbacks.delete(callback);
             remove(type, callback, options);
         }) as typeof window.removeEventListener;
         Object.defineProperty(window, '__recordingKeyupListeners', { get: () => callbacks.size });

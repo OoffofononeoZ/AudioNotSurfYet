@@ -10,11 +10,11 @@ import {
     selectMarkerBlockByTime,
 } from '../../src/editor/markerBlockOperations';
 import { createInitialEditorProject } from '../../src/editor/projectCodec';
-import type { EditorProjectV1, PointLaneV1, RangeLaneV1, TempoSegmentV1 } from '../../src/editor/types';
+import type { EditorProjectV2, PointLaneV1, RangeLaneV1, TempoSegmentV2 } from '../../src/editor/types';
 
 interface Golden {
     durationSeconds: number;
-    tempoMap: TempoSegmentV1[];
+    tempoMap: TempoSegmentV2[];
     measureCases: Array<{
         timeSeconds: number;
         startSeconds: number;
@@ -28,7 +28,7 @@ const golden = JSON.parse(
     readFileSync(path.resolve(import.meta.dirname, '../analysis/golden/editor-e10-marker-block.v1.json'), 'utf8'),
 ) as Golden;
 
-const createProject = (): EditorProjectV1 => {
+const createProject = (): EditorProjectV2 => {
     const project = createInitialEditorProject({
         track: {
             contentHash: 'a'.repeat(64),
@@ -44,7 +44,9 @@ const createProject = (): EditorProjectV1 => {
     });
     return {
         ...project,
-        tempoMap: golden.tempoMap,
+        tempoMap: golden.tempoMap.map(segment =>
+            segment.mode === 'metered' ? { ...segment, beatOriginSeconds: segment.startSeconds } : segment,
+        ),
         lanes: [
             {
                 id: 'point-lane',
@@ -75,7 +77,7 @@ const createProject = (): EditorProjectV1 => {
     };
 };
 
-const allMeteredProject = (): EditorProjectV1 => {
+const allMeteredProject = (): EditorProjectV2 => {
     const project = createProject();
     return {
         ...project,
@@ -84,6 +86,7 @@ const allMeteredProject = (): EditorProjectV1 => {
                 id: 'tempo-all',
                 startSeconds: 0,
                 mode: 'metered',
+                beatOriginSeconds: 0,
                 bpm: 120,
                 bpmSource: 'user',
                 meter: { numerator: 4, denominator: 4 },
@@ -206,7 +209,7 @@ describe('Editor E10 marker block domain', () => {
     test('rejects point conflicts, range overlap and song-end overflow without mutation', () => {
         const base = allMeteredProject();
         const pointLane = base.lanes[0] as PointLaneV1;
-        const pointConflict: EditorProjectV1 = {
+        const pointConflict: EditorProjectV2 = {
             ...base,
             lanes: [
                 {
@@ -240,7 +243,7 @@ describe('Editor E10 marker block domain', () => {
         expect((pointConflict.lanes[0] as PointLaneV1).events.at(-1)?.id).toBe('occupied');
 
         const rangeLane = base.lanes[1] as RangeLaneV1;
-        const rangeConflict: EditorProjectV1 = {
+        const rangeConflict: EditorProjectV2 = {
             ...base,
             lanes: [
                 base.lanes[0]!,

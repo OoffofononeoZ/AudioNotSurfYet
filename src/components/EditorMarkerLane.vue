@@ -133,14 +133,14 @@ import {
     renameRangeInnerClass,
     renameRangeLane,
 } from '../editor/rangeAnnotations';
-import type { EditorLaneV1, EditorProjectV1 } from '../editor/types';
+import type { EditorLaneV1, EditorProjectV2 } from '../editor/types';
 import type { MarkerTimeView } from '../editor/markerTimeView';
 import type { EditorBeatSnapSetting } from '../editor/beatSnap';
 import type { MarkerEditing } from '../editor/useMarkerEditing';
 import type { MarkerDrawing } from '../editor/markerDrawing';
 import type { KeyboardMarkerTarget, KeyboardRangeRecording } from '../editor/keyboardMarkerRecording';
 const props = defineProps<{
-    project: EditorProjectV1;
+    project: EditorProjectV2;
     lane: EditorLaneV1;
     view: MarkerTimeView;
     editable: boolean;
@@ -154,17 +154,17 @@ const shortcut = (id: string) =>
     props.keyboardTargets.find(row => row.laneId === props.lane.id && row.innerClassId === id)?.key;
 const recordingStart = (id: string) =>
     props.keyboardPending.find(row => row.laneId === props.lane.id && row.innerClassId === id)?.startSeconds;
-const emit = defineEmits<{ updateProject: [project: EditorProjectV1]; status: [message: string] }>();
+const emit = defineEmits<{ updateProject: [project: EditorProjectV2]; status: [message: string] }>();
 const collapsed = ref(false),
     dialog = ref<HTMLDialogElement | null>(null),
     error = ref('');
 const removal = ref<{ id: string; label: string; count: number; target: string } | null>(null);
 const targets = computed(() => props.lane.innerClasses.filter(category => category.id !== removal.value?.id));
 let returnFocus: HTMLElement | null = null;
-function publish(value: EditorProjectV1) {
+function publish(value: EditorProjectV2) {
     if (props.editable) emit('updateProject', value);
 }
-function mutate(job: () => EditorProjectV1): boolean {
+function mutate(job: () => EditorProjectV2): boolean {
     if (!props.editable) return false;
     try {
         publish(job());
