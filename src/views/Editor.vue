@@ -2,10 +2,18 @@
     <main class="editor-page" data-testid="editor-page">
         <EditorToolbar
             :ready="snapshot.state === 'ready'"
+            :can-import-osu="snapshot.state === 'ready' || snapshot.state === 'empty'"
             v-model:workspace="workspace"
             :persistence="snapshot.persistence"
             @import="importProject"
+            @import-osu="openOsuImport"
             @export="exportProject" />
+        <EditorOsuImportDialog
+            v-if="osuImportOpen"
+            :project="snapshot.project"
+            :track-id="snapshot.activeTrackId"
+            :apply="trackNavigation.applyImport"
+            @close="closeOsuImport" />
         <p v-if="snapshot.state === 'ready' && snapshot.message" role="alert" class="editor-error">
             {{ snapshot.message }}
         </p>
@@ -146,6 +154,7 @@ import { useRoute, useRouter } from 'vue-router';
 import { ElMessage } from 'element-plus';
 import { useAudioSessionService } from '../audio/audioSessionService';
 import EditorToolbar from '../components/EditorToolbar.vue';
+import EditorOsuImportDialog from '../components/EditorOsuImportDialog.vue';
 import EditorLeaveGuard from '../components/EditorLeaveGuard.vue';
 import EditorDraftNotice from '../components/EditorDraftNotice.vue';
 import EditorExperimentNotice from '../components/EditorExperimentNotice.vue';
@@ -173,6 +182,16 @@ const sessionStore = useAudioSessionStore();
 const controller = useEditorSessionController();
 const keyboardRecordingRevision = ref(0);
 const keyboardImportPending = ref(false);
+const osuImportOpen = ref(false);
+function closeOsuImport() {
+    osuImportOpen.value = false;
+    keyboardImportPending.value = false;
+}
+function openOsuImport() {
+    keyboardRecordingRevision.value++;
+    keyboardImportPending.value = true;
+    osuImportOpen.value = true;
+}
 const keyboardRecordingHost: KeyboardRecordingHost = {
     getContext() {
         const current = controller.getSnapshot();

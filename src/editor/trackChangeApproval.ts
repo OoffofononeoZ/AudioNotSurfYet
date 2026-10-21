@@ -2,9 +2,9 @@ import type { EditorProjectV2 } from './types';
 
 /** A runtime-only approval bound to one destination and the exact source revision. */
 export class EditorTrackChangeApproval {
-    private pending: { token: symbol; target: string | null; project: EditorProjectV2 } | null = null;
+    private pending: { token: symbol; target: string | null; project: EditorProjectV2 | null } | null = null;
 
-    issue(target: string | null, project: EditorProjectV2): symbol {
+    issue(target: string | null, project: EditorProjectV2 | null): symbol {
         const token = Symbol('editor-track-change');
         this.pending = { token, target, project };
         return token;

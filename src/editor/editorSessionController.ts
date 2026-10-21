@@ -241,9 +241,18 @@ export class EditorSessionController {
         }
     }
 
-    async approveTrackChange(targetTrackId: string | null): Promise<symbol | null> {
+    async approveTrackChange(
+        targetTrackId: string | null,
+        detachedDraft?: EditorDraftEnvelopeV2,
+    ): Promise<symbol | null> {
         const project = this.snapshot.project;
         this.trackChangeApproval.clear();
+        if (!project && detachedDraft) {
+            const current = await this.repository.restore();
+            if (this.snapshot.project || JSON.stringify(current?.project) !== JSON.stringify(detachedDraft.project))
+                return null;
+            return this.trackChangeApproval.issue(targetTrackId, null);
+        }
         if (!project || this.snapshot.state !== 'ready') return null;
         // Retry a failed draft write before allowing its single slot to be replaced.
         if (this.snapshot.persistence === 'not-persisted') this.queueSave(project, true);
@@ -258,7 +267,7 @@ export class EditorSessionController {
         return this.trackChangeApproval.valid(token, target, this.snapshot.project);
     }
 
-    async enter(trackId: string | null, approval?: symbol): Promise<void> {
+    async enter(trackId: string | null, approval?: symbol, imported?: EditorProjectV2): Promise<void> {
         const generation = ++this.routeGeneration;
         await this.flush();
         if (generation !== this.routeGeneration || this.disposed) return;
@@ -294,6 +303,15 @@ export class EditorSessionController {
             this.analysisLease = this.analysisCoordinator.acquireConsumer('editor');
             const context = this.trackContext(trackId);
             if (!context) throw new Error('歌曲解码信息不可用。');
+            if (imported) {
+                const project = validateEditorProjectV2(imported, context);
+                this.hasUnexportedChanges = true;
+                this.publishReady(trackId, project, false, 'saving', false);
+                this.queueSave(project, true);
+                this.startEditorAnalysis(generation);
+                await this.flush();
+                return;
+            }
             let draft: EditorRestoredDraft | null;
             try {
                 draft = await this.repository.restore();
@@ -468,6 +486,29 @@ export class EditorSessionController {
         await this.flush();
         this.restartEditorAnalysis();
         return 'imported';
+    }
+
+    isCurrentProject(project: EditorProjectV2 | null): boolean {
+        return this.snapshot.project === project;
+    }
+
+    readImportDraft(): Promise<EditorRestoredDraft | null> {
+        return this.repository.restore();
+    }
+
+    exportImportDraft(draft: EditorDraftEnvelopeV2): Promise<'saved' | 'cancelled'> {
+        return this.exportProjectValue(draft.project);
+    }
+
+    async applyImportedProject(project: EditorProjectV2, expected: EditorProjectV2): Promise<void> {
+        if (!this.isCurrentProject(expected)) throw new Error('工程已变化，请重新预览谱面。');
+        const trackId = this.snapshot.activeTrackId;
+        const context = trackId ? this.trackContext(trackId) : null;
+        if (!context) throw new Error('歌曲当前不可编辑。');
+        const candidate = validateEditorProjectV2(project, context);
+        this.tempoRequestRevision++;
+        this.updateProject(candidate, true);
+        await this.flush();
     }
 
     async exportProject(codecId = 'json-v2'): Promise<'saved' | 'cancelled'> {

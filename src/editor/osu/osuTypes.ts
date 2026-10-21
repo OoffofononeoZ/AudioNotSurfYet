@@ -1,3 +1,14 @@
+import type { PreparedLocalAudio } from '../../audio/preparedAudio';
+import type { EditorDraftEnvelopeV2, EditorProjectV2 } from '../types';
+
+export interface OsuImportApplication {
+    project: EditorProjectV2;
+    expectedProject: EditorProjectV2 | null;
+    draft: EditorDraftEnvelopeV2 | null;
+    audio: PreparedLocalAudio | null;
+    trackId: string;
+}
+
 export class OsuImportError extends Error {
     constructor(message: string) {
         super(message);

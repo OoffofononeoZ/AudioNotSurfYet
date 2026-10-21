@@ -33,6 +33,7 @@ declare module 'vue' {
     EditorMarkerLane: typeof import('./src/components/EditorMarkerLane.vue')['default']
     EditorMarkerRuler: typeof import('./src/components/EditorMarkerRuler.vue')['default']
     EditorMarkerSurface: typeof import('./src/components/EditorMarkerSurface.vue')['default']
+    EditorOsuImportDialog: typeof import('./src/components/EditorOsuImportDialog.vue')['default']
     EditorPointWorkspace: typeof import('./src/components/EditorPointWorkspace.vue')['default']
     EditorSeparationWorkspace: typeof import('./src/components/EditorSeparationWorkspace.vue')['default']
     EditorTimeline: typeof import('./src/components/EditorTimeline.vue')['default']

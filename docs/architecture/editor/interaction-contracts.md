@@ -170,13 +170,13 @@ idle + drag start/end handle
 
 ## Approval
 
-2026-10-18 owner 明确要求实施“Editor 标记编辑重设计”四阶段计划，批准上述独立时间视图、暂停与操作位置规则、三层布局及批量手势替换旧共享视口／小节窗口／轨道右键 pan。JSON V2、秒数与处理工作区边界不变；以下批准记录及 canonical 身份保留为历史版本，不据此宣称新 readiness。
+2026-10-18 owner 明确要求实施“Editor 标记编辑重设计”四阶段计划，批准上述独立时间视图、暂停与操作位置规则、三层布局及批量手势替换旧共享视口／小节窗口／轨道右键 pan。JSON V1、秒数与处理工作区边界不变；以下批准记录及 canonical 身份保留为历史版本，不据此宣称新 readiness。
 
 本交互契约于 2026-08-26 随 Editor system design 创建，并由 `project-owner` 随后批准进入 E1–E6 execution planning。Delivery 必须把上述成功、失败、边界和异常路径映射到可执行验收；delivery 获批前不得实现。
 
-同日，owner 在开放 E2 时进一步确认：一个 beat 固定为 `60/BPM` 秒，拍号分母只表达音符单位；无合法 metered BPM 时 tempo boundary 按微秒规范化原始时间定位。该澄清登记为 DEC-026，不改变 JSON V2 或 ADR-0008 的秒数事实。
+同日，owner 在开放 E2 时进一步确认：一个 beat 固定为 `60/BPM` 秒，拍号分母只表达音符单位；无合法 metered BPM 时 tempo boundary 按微秒规范化原始时间定位。该澄清登记为 DEC-026，不改变 JSON V1 或 ADR-0008 的秒数事实。
 
-2026-09-04，owner 以 E9 完整实施指令批准 ADR-0019：tempo boundary 与区间编辑移入专用 BPM 轨道；删除内部 boundary 时前段向右延伸；区间展示按单行可用宽度在完整、摘要、隐藏间切换。该修订不改变秒数事实或 JSON V2。
+2026-09-04，owner 以 E9 完整实施指令批准 ADR-0019：tempo boundary 与区间编辑移入专用 BPM 轨道；删除内部 boundary 时前段向右延伸；区间展示按单行可用宽度在完整、摘要、隐藏间切换。该修订不改变秒数事实或 JSON V1。
 
 同日，owner 在首个 E9 候选复核后批准 ADR-0020：删除独立 66px tempo row，把 28px BPM 标记条并入波形时间列；caret/辅助线只向上指向波形，重复左侧标签移除，直接编辑改为 11px 无框紧凑控件。ADR-0019 的删除、继承、共享滚动和秒数事实继续有效。
 
