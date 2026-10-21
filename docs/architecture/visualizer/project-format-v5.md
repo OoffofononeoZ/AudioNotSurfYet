@@ -5,6 +5,7 @@
 ## 工程数据
 
 - `format:'audiosurf-visualizer'`、`schemaVersion:5`。保留工程 UUID、时间戳、同歌 track、16:9 output、seed 和可选同歌 Editor 快照。
+- DEC-092：seed 接受 0–4294967295 的整数或 null。底栏可直接删除输入或清空；null 保存为自动随机，每次成功打开/导入工程或从数字切换为空值时生成运行时种子。新工程仍默认填写随机整数；已有数字工程保持原效果。含 null 的工程需支持此扩展的新版读取，不降级或迁移旧格式。
 - `elements` 保存 UUID、精确资源引用、名称、启用状态、派生 layer、时段、bindings、按声明提供的可选 markerBindings 和适用的效果 targets。实例不再重复保存固定 type/version，算法由元素定义的 algorithm 引用解析。
 - `items` 由低到高排列独立元素或预设实例。组包含 UUID、资源引用、名称、显隐、children 和 controls；每个叶元素恰好归属一次。禁止预设嵌套、重复归属、悬空引用和空组。
 - items/children 决定连续 layer；列表反向显示，顶层移动整组，子元素只在组内排序。
@@ -33,4 +34,4 @@ strict codec 检查字段、身份/hash、算法 ABI、参数能力、同歌引�
 
 只接收 V5 文件；V1–V4 不迁移。旧草稿视为没有可恢复草稿，不显示旧版导出/覆盖提示。V5 草稿仍写 draft/latest；无效 V5 原文及显式处理、异歌冲突、保存失败与离页保护继续有效，不清空原数据库。
 
-预览与离线输出使用相同算法快照、绝对歌曲时间和 seed。预览合并请求并丢弃失效结果，导出逐帧等待算法和 GPU 绘制后截图；不增加 Canvas/renderer/视觉 RAF。见[资源包](resource-packages-v2.md)与[离线导出](../../context/visualizer-offline-export.md)。
+预览与离线输出使用相同算法快照、绝对歌曲时间和运行时数字 seed。自动种子由工程会话持有，不写入工程或草稿；参数修改、seek/循环、尺寸变化、场景重建、context 恢复及导出不重新生成。无效、取消或过期导入不改变当前种子。预览合并请求并丢弃失效结果，导出逐帧等待算法和 GPU 绘制后截图；不增加 Canvas/renderer/视觉 RAF。见[资源包](resource-packages-v2.md)与[离线导出](../../context/visualizer-offline-export.md)。

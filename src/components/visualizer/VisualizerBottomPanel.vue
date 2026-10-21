@@ -58,16 +58,31 @@
                         :disabled="locked"
                         @change="setFrameRate"
                 /></label>
-                <label class="viz-field"
-                    ><span>Seed</span
-                    ><AppNumberInput
-                        :model-value="project.seed"
-                        :min="0"
-                        :max="4294967295"
-                        label="确定性 Seed"
-                        :disabled="locked"
-                        @change="$emit('seed', $event)"
-                /></label>
+                <div class="flex min-w-0 items-center gap-2">
+                    <label class="viz-field min-w-0 flex-1"
+                        ><span>Seed</span
+                        ><AppNumberInput
+                            :model-value="project.seed ?? 0"
+                            :empty="project.seed === null"
+                            allow-empty
+                            placeholder="自动随机"
+                            :min="0"
+                            :max="4294967295"
+                            label="确定性 Seed"
+                            :disabled="locked"
+                            @change="$emit('seed', $event)"
+                            @clear="$emit('seed', null)"
+                    /></label>
+                    <button
+                        type="button"
+                        class="viz-icon-button small"
+                        aria-label="清空 Seed"
+                        title="清空 Seed"
+                        :disabled="locked || project.seed === null"
+                        @click="$emit('seed', null)">
+                        <VisualizerIcon name="close" />
+                    </button>
+                </div>
             </fieldset>
             <div v-else-if="tab === 'editor'" class="viz-bottom-editor">
                 <span>{{
@@ -148,7 +163,7 @@ const props = defineProps<{
 }>();
 const emit = defineEmits<{
     output: [resolution: VisualizerResolution, frameRate: VisualizerFrameRate];
-    seed: [seed: number];
+    seed: [seed: number | null];
     'reload-editor': [];
     'import-editor': [];
     'remove-editor': [];

@@ -19,6 +19,7 @@ import {
     UUID_PATTERN,
     VisualizerProjectValidationError,
 } from './projectValidation';
+import { validateSeed } from './seed';
 import type {
     ElementTiming,
     EffectTargets,
@@ -136,8 +137,7 @@ export function validateComposition(input: unknown, context?: VisualizerTrackVal
         (o.frameRate !== 30 && o.frameRate !== 60)
     )
         return invalid('输出预设无效。');
-    const seed = integer(v.seed, 'seed');
-    if (seed < 0 || seed > 0xffffffff) return invalid('Seed 超出范围。');
+    const seed = validateSeed(v.seed);
     const createdAt = iso(v.createdAt, 'createdAt'),
         updatedAt = iso(v.updatedAt, 'updatedAt');
     if (Date.parse(updatedAt) < Date.parse(createdAt)) return invalid('更新时间早于创建时间。');

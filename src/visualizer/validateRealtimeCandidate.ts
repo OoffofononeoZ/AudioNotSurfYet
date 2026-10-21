@@ -3,11 +3,13 @@ import { IsolatedAlgorithmRuntime } from './isolatedAlgorithmRuntime';
 import { RealtimeResolver } from './realtimeResolver';
 import { findResource } from './elementRegistry';
 import { parameterKey } from './compositionEffects';
+import { resolveSessionSeed } from './seed';
 
 /** Validate executable frame-only behavior before publishing a local snapshot. */
 export async function validateRealtimeCandidate(style: RealtimeStyleV1, signal?: AbortSignal) {
     signal?.throwIfAborted();
     const runtime = new IsolatedAlgorithmRuntime();
+    const seed = resolveSessionSeed(style.seed);
     const abort = () => runtime.dispose(Error('实时样式验证已取消。'));
     signal?.addEventListener('abort', abort, { once: true });
     try {
@@ -26,7 +28,7 @@ export async function validateRealtimeCandidate(style: RealtimeStyleV1, signal?:
                 id: e.id,
                 frame: {
                     time: 0,
-                    seed: style.seed,
+                    seed,
                     revision: '0',
                     width: 1920,
                     height: 1080,

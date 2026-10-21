@@ -53,7 +53,7 @@ export function useVisualizerPreview(
                         return p
                             ? {
                                   trackIdentity: p.track.contentHash,
-                                  seed: p.seed,
+                                  seed: controller.readRenderSeed(),
                                   timeSeconds: store.playback.currentTimeSeconds,
                                   bindingRevision: snapshot.value.bindingRuntime.bindingRevision,
                                   playbackState: store.playback.state,

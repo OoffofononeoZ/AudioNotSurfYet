@@ -86,11 +86,12 @@ test('shared selects and number steppers keep keyboard, bounds and recording loc
     await expect(seed).toHaveValue('2');
     await seed.fill('');
     await seed.press('Enter');
-    await expect(seed).toHaveValue('2');
+    await expect(seed).toHaveValue('');
+    await expect(seed).toHaveAttribute('placeholder', '自动随机');
     await fps.focus();
     await seed.hover();
     await page.mouse.wheel(0, -100);
-    await expect(seed).toHaveValue('2');
+    await expect(seed).toHaveValue('');
     await page.getByTestId('add-visualizer-element').click();
     await page.locator('[data-element-type=solid]').click();
     const opacity = page.getByRole('spinbutton', { name: '透明度', exact: true });

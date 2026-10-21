@@ -1,4 +1,4 @@
-import { beforeEach, expect, test, vi } from 'vitest';
+import { afterEach, beforeEach, expect, test, vi } from 'vitest';
 import { createPinia, setActivePinia } from 'pinia';
 import { VisualizerSessionController } from '../../src/visualizer/visualizerSessionController';
 import { CompositionDraftWriter } from '../../src/visualizer/compositionDraftWriter';
@@ -77,6 +77,70 @@ function harness(
 }
 
 beforeEach(() => setActivePinia(createPinia()));
+afterEach(() => vi.restoreAllMocks());
+
+test('automatic seeds survive edits and persistence but reroll on clear, accepted import and reopening', async () => {
+    const project = { ...createComposition(track), seed: null };
+    let next = 100;
+    const random = vi.spyOn(crypto, 'getRandomValues').mockImplementation(array => {
+        (array as Uint32Array)[0] = next++;
+        return array;
+    });
+    const h = harness({ kind: 'current', draft: { schemaVersion: 5, savedAt: project.updatedAt, project } });
+    await h.controller.enter('first');
+    expect(h.controller.readRenderSeed()).toBe(100);
+    h.controller.updateOutput('1080p', 30);
+    await h.controller.flush();
+    expect(h.controller.readRenderSeed()).toBe(100);
+    expect(vi.mocked(h.repository.replace).mock.lastCall![0].project.seed).toBeNull();
+    await h.controller.exportProject();
+    expect(JSON.parse(new TextDecoder().decode(vi.mocked(h.fileGateway.save).mock.lastCall![2])).seed).toBeNull();
+    expect(h.controller.readRenderSeed()).toBe(100);
+    h.controller.updateProject({ ...h.controller.readProject()!, seed: 0 });
+    expect(h.controller.readRenderSeed()).toBe(0);
+    h.controller.updateProject({ ...h.controller.readProject()!, seed: null });
+    expect(h.controller.readRenderSeed()).toBe(101);
+    vi.mocked(h.fileGateway.open).mockResolvedValue({
+        name: 'cancel.json',
+        bytes: new TextEncoder().encode('{}').buffer,
+    });
+    await expect(h.controller.importProject()).rejects.toThrow();
+    expect(h.controller.readRenderSeed()).toBe(101);
+    vi.mocked(h.fileGateway.open).mockResolvedValue(null);
+    expect(await h.controller.importProject()).toBe('cancelled');
+    expect(h.controller.readRenderSeed()).toBe(101);
+    vi.mocked(h.fileGateway.open).mockResolvedValue({
+        name: 'auto.json',
+        bytes: new TextEncoder().encode(JSON.stringify(h.controller.readProject())).buffer,
+    });
+    expect(await h.controller.importProject()).toBe('imported');
+    expect(h.controller.readRenderSeed()).toBe(102);
+    await h.controller.leave();
+    await h.controller.enter('first');
+    expect(h.controller.readRenderSeed()).toBe(103);
+    expect(h.controller.readProject()!.seed).toBeNull();
+    expect(random).toHaveBeenCalledTimes(4);
+    await h.controller.dispose();
+});
+
+test('stale or invalid automatic-seed imports never reroll an active session', async () => {
+    const h = harness();
+    await h.controller.enter('first');
+    h.controller.updateProject({ ...h.controller.readProject()!, seed: null });
+    const seed = h.controller.readRenderSeed();
+    const pending = deferred<Awaited<ReturnType<VisualizerFileGateway['open']>>>();
+    vi.mocked(h.fileGateway.open).mockReturnValueOnce(pending.promise);
+    const oldProject = structuredClone(h.controller.readProject()!);
+    const importing = h.controller.importProject();
+    vi.mocked(h.fileGateway.open).mockResolvedValueOnce(null);
+    await h.controller.importProject();
+    pending.resolve({ name: 'late.json', bytes: new TextEncoder().encode(JSON.stringify(oldProject)).buffer });
+    expect(await importing).toBe('cancelled');
+    expect(h.controller.readRenderSeed()).toBe(seed);
+    expect(() => h.controller.updateProject({ ...oldProject, seed: 1.5 })).toThrow();
+    expect(h.controller.readRenderSeed()).toBe(seed);
+    await h.controller.dispose();
+});
 
 test('marker references reject an incompatible Editor refresh atomically and protect even disabled elements', async () => {
     const fixture = markerFixture(),

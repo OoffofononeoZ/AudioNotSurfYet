@@ -12,6 +12,7 @@ export interface VisualizerResolvedParameter {
 export type VisualizerResolvedParameterMap = ReadonlyMap<string, VisualizerResolvedParameter>;
 
 export interface VisualizerSceneRenderInput {
+    readonly seed: number;
     readonly timeSeconds: number;
     readonly values: VisualizerResolvedParameterMap;
     readonly bindingRevision: number;
