@@ -85,7 +85,7 @@
                         :recording-host="keyboardRecordingHost"
                         :project="snapshot.project"
                         :playback="playback"
-                        :analysis="analysisSnapshot"
+                        :analysis="overlayAnalysis"
                         :overlay-series="overlaySeries"
                         :overlay-exact-value="overlayExactValue"
                         :overlay-open="snapshot.overlayOpen"
@@ -231,11 +231,17 @@ const bufferSeries = computed(() => {
     return controller.getAnalysisSeries('buffer');
 });
 const overlayFeatureId = computed<FeatureId | null>(() => snapshot.value.project?.workspace.overlay.featureId ?? null);
+const overlayRole = computed(() => snapshot.value.project?.workspace.overlay.stemRole);
+const overlayAnalysis = computed(() => {
+    void analysisSnapshot.value;
+    void overlayRole.value;
+    return controller.getOverlayAnalysisSnapshot();
+});
 const overlaySeries = computed(() => {
     void analysisSnapshot.value.generation;
     void analysisSnapshot.value.readyFeatureIds;
     return snapshot.value.overlayOpen && overlayFeatureId.value
-        ? controller.getAnalysisSeries(overlayFeatureId.value)
+        ? controller.getAnalysisSeries(overlayFeatureId.value, overlayRole.value)
         : null;
 });
 const overlayExactValue = ref<AnalysisCursorValueResult | null>(null);
@@ -292,21 +298,23 @@ const performOverlayCursorRequest = async () => {
         !snapshot.value.overlayOpen ||
         snapshot.value.state !== 'ready' ||
         !featureId ||
-        analysisSnapshot.value.state !== 'ready' ||
-        !analysisSnapshot.value.readyFeatureIds.includes(featureId)
+        overlayAnalysis.value.state !== 'ready' ||
+        !overlayAnalysis.value.readyFeatureIds.includes(featureId)
     ) {
         overlayExactValue.value = null;
         return;
     }
     lastCursorRequestAt = performance.now();
     const revision = ++cursorRequestRevision;
-    const generation = analysisSnapshot.value.generation;
+    const generation = overlayAnalysis.value.generation;
+    const source = overlayRole.value;
     const result = await controller.requestAnalysisCursorValue(featureId, playback.value.currentTimeSeconds);
     if (
         revision === cursorRequestRevision &&
         snapshot.value.overlayOpen &&
         featureId === overlayFeatureId.value &&
-        generation === analysisSnapshot.value.generation
+        generation === overlayAnalysis.value.generation &&
+        source === overlayRole.value
     ) {
         overlayExactValue.value = result;
     }
@@ -373,9 +381,10 @@ watch(
 watch(
     () => [
         overlayFeatureId.value,
+        overlayRole.value,
         snapshot.value.overlayOpen,
-        analysisSnapshot.value.generation,
-        analysisSnapshot.value.state,
+        overlayAnalysis.value.generation,
+        overlayAnalysis.value.state,
     ],
     () => {
         cursorRequestRevision += 1;

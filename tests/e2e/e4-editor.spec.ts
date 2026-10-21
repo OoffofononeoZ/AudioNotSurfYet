@@ -1,27 +1,21 @@
 import { addMarkerLane } from '../support/editor-marking';
+import { chooseOverlay } from '../support/stem-analysis';
 import { expect, test, type Page } from '@playwright/test';
 import path from 'node:path';
 import { FEATURE_IDS } from '../../src/analysis/types';
-import {
-    chooseFiles,
-    installFilePickerStub,
-} from '../support/file-picker';
+import { chooseFiles, installFilePickerStub } from '../support/file-picker';
 
 const ROOT = path.resolve(import.meta.dirname, '../..');
-const FIXTURE = path.join(
-    ROOT,
-    'artifacts/fixtures/editor-e4-overlay-v1.wav',
-);
+const FIXTURE = path.join(ROOT, 'artifacts/fixtures/editor-e4-overlay-v1.wav');
 
 const issuesFor = (page: Page): string[] => {
     const issues: string[] = [];
-    page.on('console', (message) => {
+    page.on('console', message => {
         if (['error', 'warning', 'warn'].includes(message.type())) {
             issues.push(`console.${message.type()}: ${message.text()}`);
         }
     });
-    page.on('pageerror', (error) =>
-        issues.push(`pageerror: ${error.stack ?? error.message}`));
+    page.on('pageerror', error => issues.push(`pageerror: ${error.stack ?? error.message}`));
     return issues;
 };
 
@@ -29,34 +23,29 @@ const openE4 = async (page: Page) => {
     await installFilePickerStub(page);
     await page.goto('/');
     await chooseFiles(page, [FIXTURE]);
-    await expect(page.locator('#music-bar-container')).toHaveAttribute(
-        'data-playback-state',
-        'playing',
-        { timeout: 20_000 },
-    );
+    await expect(page.locator('#music-bar-container')).toHaveAttribute('data-playback-state', 'playing', {
+        timeout: 20_000,
+    });
     await page.getByTestId('header-editor-link').click();
     await expect(page.getByTestId('editor-ready')).toBeVisible({ timeout: 20_000 });
     await expect(page.getByTestId('editor-buffer-state')).toHaveText('波形已就绪', {
         timeout: 30_000,
     });
-    await page.getByTestId('toggle-playback').click(); await page.getByTestId('editor-timeline').press('Home');
-    await addMarkerLane(page,'point');
+    await page.getByTestId('toggle-playback').click();
+    await page.getByTestId('editor-timeline').press('Home');
+    await addMarkerLane(page, 'point');
     await expect(page.locator('article[data-testid^="point-lane-"]')).toHaveCount(1);
 };
 
 const selectOverlay = async (page: Page, featureId: string) => {
-    await page.getByTestId('editor-overlay-menu-toggle').click();
-    await page.getByTestId('editor-overlay-feature-menu')
-        .locator(`[data-feature-id="${featureId}"]`)
-        .click();
+    await chooseOverlay(page, featureId);
     const panel = page.getByTestId('editor-analysis-overlay-panel');
     await expect(panel).toHaveAttribute('data-feature-id', featureId);
     await expect(panel).toHaveAttribute('data-analysis-state', 'ready', {
         timeout: 30_000,
     });
     await expect(panel).toHaveAttribute('data-renderer-error', 'false');
-    await expect(page.getByTestId('editor-overlay-exact-summary'))
-        .not.toHaveText('等待精确值', { timeout: 10_000 });
+    await expect(page.getByTestId('editor-overlay-exact-summary')).not.toHaveText('等待精确值', { timeout: 10_000 });
 };
 
 test('offers every registered feature and renders every shared renderer family', async ({ page }) => {
@@ -64,23 +53,15 @@ test('offers every registered feature and renders every shared renderer family',
     const issues = issuesFor(page);
     await openE4(page);
     await page.getByTestId('editor-overlay-menu-toggle').click();
-    const options = page.getByTestId('editor-overlay-feature-menu')
-        .locator('[role="menuitemradio"]');
+    const options = page.getByTestId('editor-overlay-feature-menu').locator('[data-feature-id]');
+    await page.getByTestId('editor-overlay-feature-menu').locator('[data-source="original"]').click();
     await expect(options).toHaveCount(FEATURE_IDS.length);
-    expect(await options.evaluateAll((entries) => entries.map(
-        (entry) => entry.getAttribute('data-feature-id'),
-    ))).toEqual([...FEATURE_IDS]);
+    expect(await options.evaluateAll(entries => entries.map(entry => entry.getAttribute('data-feature-id')))).toEqual([
+        ...FEATURE_IDS,
+    ]);
     await page.keyboard.press('Escape');
 
-    for (const featureId of [
-        'rms',
-        'amplitudeSpectrum',
-        'chroma',
-        'mfcc',
-        'buffer',
-        'loudness',
-        'complexSpectrum',
-    ]) {
+    for (const featureId of ['rms', 'amplitudeSpectrum', 'chroma', 'mfcc', 'buffer', 'loudness', 'complexSpectrum']) {
         await selectOverlay(page, featureId);
     }
     expect(issues).toEqual([]);
@@ -122,9 +103,11 @@ test('keeps overlay geometry aligned and passes pointer input to point cells', a
         surfaceBounds!.y + surfaceBounds!.height * 0.62,
     );
     await expect(page.locator('.marker-point')).toHaveCount(1);
-    const feedbackMs = await page.evaluate(() =>
-        (window as typeof window & { __e4Feedback?: { value: number | null } })
-            .__e4Feedback?.value ?? Number.POSITIVE_INFINITY);
+    const feedbackMs = await page.evaluate(
+        () =>
+            (window as typeof window & { __e4Feedback?: { value: number | null } }).__e4Feedback?.value ??
+            Number.POSITIVE_INFINITY,
+    );
     expect(feedbackMs).toBeLessThanOrEqual(100);
     console.log(JSON.stringify({ metric: 'e4-input-feedback-ms', value: feedbackMs }));
     expect(issues).toEqual([]);
@@ -137,11 +120,12 @@ test('adjusts all handles with keyboard and pointer and restores persisted bound
     await openE4(page);
     await selectOverlay(page, 'chroma');
     const panel = page.getByTestId('editor-analysis-overlay-panel');
-    const readBounds = () => panel.evaluate((element) => ({
-        top: Number.parseFloat((element as HTMLElement).style.top) / 100,
-        height: Number.parseFloat((element as HTMLElement).style.height) / 100,
-        transition: getComputedStyle(element).transitionDuration,
-    }));
+    const readBounds = () =>
+        panel.evaluate(element => ({
+            top: Number.parseFloat((element as HTMLElement).style.top) / 100,
+            height: Number.parseFloat((element as HTMLElement).style.height) / 100,
+            transition: getComputedStyle(element).transitionDuration,
+        }));
     const initial = await readBounds();
     expect(initial.top).toBeCloseTo(0.1);
     expect(initial.height).toBeCloseTo(0.35);
@@ -161,25 +145,20 @@ test('adjusts all handles with keyboard and pointer and restores persisted bound
     const handle = page.getByTestId('editor-overlay-handle-bottom');
     const handleBounds = await handle.boundingBox();
     expect(handleBounds).toBeTruthy();
-    await page.mouse.move(
-        handleBounds!.x + handleBounds!.width / 2,
-        handleBounds!.y + handleBounds!.height / 2,
-    );
+    await page.mouse.move(handleBounds!.x + handleBounds!.width / 2, handleBounds!.y + handleBounds!.height / 2);
     await page.mouse.down();
-    await page.mouse.move(
-        handleBounds!.x + handleBounds!.width / 2,
-        handleBounds!.y + handleBounds!.height / 2 + 24,
-        { steps: 4 },
-    );
+    await page.mouse.move(handleBounds!.x + handleBounds!.width / 2, handleBounds!.y + handleBounds!.height / 2 + 24, {
+        steps: 4,
+    });
     await page.mouse.up();
     const pointer = await readBounds();
     expect(pointer.height).toBeGreaterThan(keyboard.height);
 
     await page.reload();
-    await expect(page.getByTestId('editor-analysis-overlay-panel'))
-        .toHaveAttribute('data-feature-id', 'chroma', { timeout: 20_000 });
-    await expect(page.getByTestId('editor-overlay-toggle'))
-        .toHaveAttribute('aria-pressed', 'true');
+    await expect(page.getByTestId('editor-analysis-overlay-panel')).toHaveAttribute('data-feature-id', 'chroma', {
+        timeout: 20_000,
+    });
+    await expect(page.getByTestId('editor-overlay-toggle')).toHaveAttribute('aria-pressed', 'true');
     const restored = await readBounds();
     expect(restored.top).toBeCloseTo(pointer.top, 3);
     expect(restored.height).toBeCloseTo(pointer.height, 3);
@@ -194,20 +173,16 @@ test('isolates an overlay Canvas failure from Buffer and point editing', async (
     await page.evaluate(() => {
         const prototype = HTMLCanvasElement.prototype;
         const original = prototype.getContext;
-        (window as typeof window & { __restoreE4Canvas?: () => void })
-            .__restoreE4Canvas = () => { prototype.getContext = original; };
-        prototype.getContext = function (
-            this: HTMLCanvasElement,
-            ...args: Parameters<typeof original>
-        ) {
+        (window as typeof window & { __restoreE4Canvas?: () => void }).__restoreE4Canvas = () => {
+            prototype.getContext = original;
+        };
+        prototype.getContext = function (this: HTMLCanvasElement, ...args: Parameters<typeof original>) {
             if (this.classList.contains('overlay-canvas')) return null;
             return original.apply(this, args) as ReturnType<typeof original>;
         } as typeof original;
     });
     await page.getByTestId('editor-overlay-menu-toggle').click();
-    await page.getByTestId('editor-overlay-feature-menu')
-        .locator('[data-feature-id="mfcc"]')
-        .click();
+    await page.getByTestId('editor-overlay-feature-menu').locator('[data-feature-id="mfcc"]').click();
     await expect(page.getByTestId('editor-overlay-retry')).toBeVisible({ timeout: 30_000 });
     await expect(page.getByTestId('editor-buffer-state')).toHaveText('波形已就绪');
     const surface = page.locator('[data-testid^="marker-surface-"]').first();
@@ -219,14 +194,10 @@ test('isolates an overlay Canvas failure from Buffer and point editing', async (
     );
     await expect(page.locator('.marker-point')).toHaveCount(1);
     await page.evaluate(() => {
-        (window as typeof window & { __restoreE4Canvas?: () => void })
-            .__restoreE4Canvas?.();
-        document.querySelector<HTMLButtonElement>(
-            '[data-testid="editor-overlay-retry"]',
-        )?.click();
+        (window as typeof window & { __restoreE4Canvas?: () => void }).__restoreE4Canvas?.();
+        document.querySelector<HTMLButtonElement>('[data-testid="editor-overlay-retry"]')?.click();
     });
-    await expect(page.getByTestId('editor-analysis-overlay-panel'))
-        .toHaveAttribute('data-renderer-error', 'false');
+    await expect(page.getByTestId('editor-analysis-overlay-panel')).toHaveAttribute('data-renderer-error', 'false');
     expect(issues).toEqual([]);
 });
 

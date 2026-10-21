@@ -234,7 +234,7 @@ export class AnalysisCoordinator {
         return active?.consumer === consumer ? this.createConsumerLease(active, false) : null;
     }
 
-    async setActiveFeatures(ids: readonly FeatureId[]): Promise<void> {
+    async setActiveFeatures(ids: readonly FeatureId[], preserveCache = false): Promise<void> {
         this.assertActiveFeatures(ids);
         this.cancelActiveJob('cancelled');
         const generation = this.snapshot.generation + 1;
@@ -253,7 +253,7 @@ export class AnalysisCoordinator {
             error: undefined,
         });
         if (ids.length === 0) {
-            await this.persistSeries(generation);
+            if (!preserveCache) await this.persistSeries(generation);
             return;
         }
         await this.startCurrentAnalysis(generation);
@@ -489,7 +489,7 @@ export class AnalysisCoordinator {
                 this.assertActiveFeatures(originals);
                 this.stems?.setRequests(inputs);
                 if (originals.join('|') !== this.snapshot.activeFeatureIds.join('|') || this.snapshot.state === 'error')
-                    await this.setActiveFeatures(originals);
+                    await this.setActiveFeatures(originals, originals.length === 0);
             },
             getSourceSnapshot: role =>
                 role

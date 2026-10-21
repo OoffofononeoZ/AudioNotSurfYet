@@ -30,6 +30,7 @@ test('both waveforms refine automatically and continuous zoom only requests its 
     const wave = page.locator('.editor-timeline-panel');
     await expect.poll(async () => Number(await wave.getAttribute('data-sample-step')) || Infinity).toBeLessThan(0.04);
     await page.getByTestId('editor-overlay-menu-toggle').click();
+    await page.getByTestId('editor-overlay-feature-menu').locator('[data-source="original"]').click();
     await page.locator('[data-feature-id="buffer"]').click();
     const panel = page.getByTestId('editor-analysis-overlay-panel');
     await expect.poll(async () => Number(await panel.getAttribute('data-sample-step')) || Infinity).toBeLessThan(0.04);
@@ -84,6 +85,7 @@ test('high-DPR responsive plots keep alignment and late detail cannot survive le
         await prepareMarkerEditor(page);
         await addMarkerLane(page, 'point');
         await page.getByTestId('editor-overlay-menu-toggle').click();
+        await page.getByTestId('editor-overlay-feature-menu').locator('[data-source="original"]').click();
         await page.locator('[data-feature-id="amplitudeSpectrum"]').click();
         const panel = page.getByTestId('editor-analysis-overlay-panel');
         for (const width of [1440, 1024, 390]) {
@@ -149,6 +151,7 @@ test('native feature precision stays bounded and playing windows prefetch instea
             ruler.dispatchEvent(new WheelEvent('wheel', { bubbles: true, cancelable: true, deltaY: -100 }));
     });
     await page.getByTestId('editor-overlay-menu-toggle').click();
+    await page.getByTestId('editor-overlay-feature-menu').locator('[data-source="original"]').click();
     await page.locator('[data-feature-id="amplitudeSpectrum"]').click();
     const panel = page.getByTestId('editor-analysis-overlay-panel');
     await expect.poll(async () => Number(await panel.getAttribute('data-sample-step'))).toBeCloseTo(512 / 48000, 7);
@@ -187,6 +190,7 @@ test('frequency image content preserves song padding and moves at the marker tim
     await prepareMarkerEditor(page);
     await addMarkerLane(page, 'point');
     await page.getByTestId('editor-overlay-menu-toggle').click();
+    await page.getByTestId('editor-overlay-feature-menu').locator('[data-source="original"]').click();
     await page.locator('[data-feature-id="amplitudeSpectrum"]').click();
     const panel = page.getByTestId('editor-analysis-overlay-panel');
     await expect(panel).toHaveAttribute('data-analysis-state', 'ready');

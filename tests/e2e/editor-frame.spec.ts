@@ -119,7 +119,7 @@ test('toolbar tabs and overlay icons preserve keyboard access and menu focus', a
     await page.getByTestId('editor-overlay-toggle').click();
     const menu = page.getByTestId('editor-overlay-feature-menu');
     await expect(menu).toBeVisible();
-    await expect(menu.getByRole('menuitemradio').first()).toBeFocused();
+    await expect(menu.getByRole('menuitem').first()).toBeFocused();
     const menuRect = await menu.boundingBox(),
         controlsRect = await page.getByTestId('editor-overlay-controls').boundingBox();
     expect(menuRect!.y).toBeGreaterThanOrEqual(controlsRect!.y + controlsRect!.height);
@@ -127,6 +127,7 @@ test('toolbar tabs and overlay icons preserve keyboard access and menu focus', a
     await page.keyboard.press('Escape');
     await expect(page.getByTestId('editor-overlay-toggle')).toBeFocused();
     await page.getByTestId('editor-overlay-menu-toggle').click();
+    await menu.locator('[data-source="original"]').click();
     await menu.locator('[data-feature-id="energy"]').click();
     await expect(page.getByTestId('editor-overlay-toggle')).toHaveAttribute('aria-pressed', 'true');
     await expect(page.getByTestId('editor-analysis-overlay-panel')).toHaveAttribute('data-analysis-state', 'ready', {

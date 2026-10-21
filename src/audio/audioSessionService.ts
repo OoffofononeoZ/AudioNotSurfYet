@@ -3,6 +3,7 @@ import { inject, shallowReactive } from 'vue';
 import Meyda from 'meyda';
 import { parseBlob } from 'music-metadata';
 import { AudioEngine, AudioTransportError, type AudioPlaybackCheckpoint } from './audioEngine';
+import { cloneSourceWorkspace } from '../analysis/sourceWorkspace';
 import {
     InvalidPersistedSessionError,
     SessionRepository,
@@ -289,6 +290,7 @@ export class AudioSessionService {
             this.engine.getSnapshot().volume,
             {
                 activeFeatureQueue: activeCardsToFeatureQueue(restored.session.activeCards),
+                sources: restored.session.analysisSources,
 
                 viewport: restored.session.viewport,
             },
@@ -800,6 +802,7 @@ export class AudioSessionService {
         assertValidAnalysisWorkspace(workspace);
         const snapshot = {
             activeFeatureQueue: cloneActiveFeatureQueue(workspace.activeFeatureQueue),
+            sources: cloneSourceWorkspace(workspace.sources ?? this.store.analysisWorkspace.sources),
 
             viewport: clonePersistedTimelineViewport(workspace.viewport),
         };
@@ -1285,6 +1288,7 @@ export class AudioSessionService {
             })),
             currentTrackId: this.store.currentTrackId,
             activeCards: activeFeatureQueueToCards(this.store.analysisWorkspace.activeFeatureQueue),
+            analysisSources: cloneSourceWorkspace(this.store.analysisWorkspace.sources),
 
             analysisConfig: {
                 ...DEFAULT_PERSISTED_ANALYSIS_CONFIG,

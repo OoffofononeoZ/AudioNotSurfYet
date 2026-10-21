@@ -11,6 +11,7 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
+    AnalysisSourceCascader: typeof import('./src/components/AnalysisSourceCascader.vue')['default']
     AnalyzerFeatureDescription: typeof import('./src/components/AnalyzerFeatureDescription.vue')['default']
     AnalyzerFeatureValues: typeof import('./src/components/AnalyzerFeatureValues.vue')['default']
     AnalyzerPlot: typeof import('./src/components/AnalyzerPlot.vue')['default']
@@ -41,6 +42,7 @@ declare module 'vue' {
     EditorToolbar: typeof import('./src/components/EditorToolbar.vue')['default']
     EditorTrackChangeDialog: typeof import('./src/components/EditorTrackChangeDialog.vue')['default']
     EditorTranscriptionWorkspace: typeof import('./src/components/EditorTranscriptionWorkspace.vue')['default']
+    ElCascaderPanel: typeof import('element-plus/es')['ElCascaderPanel']
     LightBg: typeof import('./src/components/LightBg.vue')['default']
     MeydaCard: typeof import('./src/components/MeydaCard.vue')['default']
     MusicBar: typeof import('./src/components/MusicBar.vue')['default']

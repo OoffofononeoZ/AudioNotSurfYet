@@ -114,12 +114,7 @@ import { createPointLane } from '../editor/pointAnnotations';
 import { createRangeLane } from '../editor/rangeAnnotations';
 import type { EditorProjectV2 } from '../editor/types';
 import type { PlaybackSnapshot } from '../types/audio';
-import type {
-    AnalysisCoordinatorSnapshot,
-    AnalysisCursorValueResult,
-    AnalysisSeries,
-    FeatureId,
-} from '../analysis/types';
+import type { AnalysisCoordinatorSnapshot, AnalysisCursorValueResult, AnalysisSeries } from '../analysis/types';
 const props = defineProps<{
     active?: boolean;
     recordingHost: KeyboardRecordingHost;
@@ -134,7 +129,7 @@ const emit = defineEmits<{
     updateProject: [project: EditorProjectV2, immediate: boolean];
     retryOverlay: [];
     toggleOverlay: [enabled: boolean];
-    selectOverlayFeature: [featureId: FeatureId];
+    selectOverlayFeature: [input: import('../analysis/sources').AnalysisInput];
 }>();
 const audioSession = useAudioSessionService();
 const { setting } = useEditorGrid();

@@ -83,6 +83,7 @@ export interface EditorProjectV2 {
     workspace: {
         viewport: PersistedTimelineViewport;
         overlay: {
+            stemRole?: import('../processing/modelManifest').StemRole;
             featureId: FeatureId | null;
             topRatio: number;
             heightRatio: number;

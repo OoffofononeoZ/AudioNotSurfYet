@@ -1,5 +1,6 @@
 import { EDITOR_MIN_METERED_BPM, EDITOR_MAX_BPM } from './editorConfig';
 import { isFeatureId } from '../analysis/types';
+import { isStemRole, isStemFeature } from '../analysis/sources';
 import type {
     CreateEditorProjectInput,
     EditorLaneV1,
@@ -326,8 +327,15 @@ const canonicalProject = (
         invalid('project.workspace.viewport is invalid.');
     }
     const overlay = assertRecord(workspace.overlay, 'project.workspace.overlay');
-    assertKeys(overlay, ['featureId', 'topRatio', 'heightRatio'], [], 'project.workspace.overlay');
+    assertKeys(
+        overlay,
+        ['featureId', 'topRatio', 'heightRatio'],
+        version === 2 ? ['stemRole'] : [],
+        'project.workspace.overlay',
+    );
     const featureId = overlay.featureId;
+    if (overlay.stemRole !== undefined && (!isStemRole(overlay.stemRole) || !isStemFeature(featureId)))
+        invalid('project.workspace.overlay.stemRole is invalid.');
     if (featureId !== null && !isFeatureId(featureId)) {
         invalid('project.workspace.overlay.featureId is invalid.');
     }
@@ -362,6 +370,9 @@ const canonicalProject = (
             viewport: { startSeconds, endSeconds, zoom },
             overlay: {
                 featureId: featureId as EditorProjectV2['workspace']['overlay']['featureId'],
+                ...(overlay.stemRole === undefined
+                    ? {}
+                    : { stemRole: overlay.stemRole as import('../processing/modelManifest').StemRole }),
                 topRatio,
                 heightRatio,
             },

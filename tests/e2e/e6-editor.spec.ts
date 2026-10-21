@@ -395,6 +395,7 @@ test('keeps a deterministic 10,000-event project virtualized and responsive', as
         timeout: 120_000,
     });
     await page.getByTestId('editor-overlay-menu-toggle').click();
+    await page.getByTestId('editor-overlay-feature-menu').locator('[data-source="original"]').click();
     await page.getByTestId('editor-overlay-feature-menu').locator('[data-feature-id="rms"]').click();
     await expect(page.getByTestId('editor-analysis-overlay-panel')).toHaveAttribute('data-analysis-state', 'ready', {
         timeout: 120_000,
@@ -466,6 +467,7 @@ test('keeps a deterministic 10,000-event project virtualized and responsive', as
     feedback.range = await readFeedback(page, 'range');
 
     await page.getByTestId('editor-overlay-menu-toggle').click();
+    await page.getByTestId('editor-overlay-feature-menu').locator('[data-source="original"]').click();
     await observeInputToMutation(
         page,
         '[data-feature-id="chroma"]',
