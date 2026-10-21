@@ -11,6 +11,10 @@ import { wallpaperFrameIndex } from './wallpaperSpectrum';
 import { AnalysisWindowRequests } from './windowRequests';
 import type { AnalysisWindowInput, AnalysisWindowSeries } from './windowTypes';
 import type { RealtimeAnalysisLease, RealtimeFeatureFrame } from './realtimeTypes';
+import { StemAnalysisRuntime } from './stemAnalysisRuntime';
+import { validateAnalysisInputs, type AnalysisInput } from './sources';
+import type { StemRole } from '../processing/modelManifest';
+import type { EditorSeparationService } from '../processing/editorSeparationService';
 import {
     isFeatureId,
     isSupportedFeatureId,
@@ -47,10 +51,16 @@ export interface AnalysisConsumerLease {
     token: string;
     consumer: AnalysisConsumer;
     setActiveFeatures(ids: readonly FeatureId[]): Promise<void>;
-    requestCursorValue(featureId: FeatureId, timeSeconds: number): Promise<AnalysisCursorValueResult | null>;
+    setActiveInputs(inputs: readonly AnalysisInput[]): Promise<void>;
+    getSourceSnapshot(stemRole?: StemRole): AnalysisCoordinatorSnapshot;
+    requestCursorValue(
+        featureId: FeatureId,
+        timeSeconds: number,
+        stemRole?: StemRole,
+    ): Promise<AnalysisCursorValueResult | null>;
     requestWindowSeries(input: AnalysisWindowInput, signal?: AbortSignal): Promise<AnalysisWindowSeries | null>;
     requestTempoEstimate(): Promise<TempoEstimateResult | null>;
-    getSeries(featureId: FeatureId): AnalysisSeries | null;
+    getSeries(featureId: FeatureId, stemRole?: StemRole): AnalysisSeries | null;
     subscribe(listener: AnalysisListener): () => void;
     release(): void;
 }
@@ -97,6 +107,17 @@ const cloneSnapshot = (snapshot: AnalysisCoordinatorSnapshot): AnalysisCoordinat
 });
 
 export class AnalysisCoordinator {
+    private stems: StemAnalysisRuntime | null = null;
+    configureStemSources(service: EditorSeparationService): void {
+        this.stems = new StemAnalysisRuntime(
+            service,
+            () => this.store.queue.find(t => t.id === this.store.currentTrackId)?.trackHash ?? null,
+            request => this.ensureWorker().postMessage(request),
+            () => {
+                for (const listener of this.listeners) listener(this.getSnapshot());
+            },
+        );
+    }
     private readonly engine: AnalysisAudioEnginePort;
     private readonly repository: SessionRepositoryPort;
     private readonly store: AudioSessionStore;
@@ -274,7 +295,17 @@ export class AnalysisCoordinator {
         });
     }
 
-    requestCursorValue(featureId: FeatureId, timeSeconds: number): Promise<AnalysisCursorValueResult | null> {
+    requestCursorValue(
+        featureId: FeatureId,
+        timeSeconds: number,
+        stemRole?: StemRole,
+    ): Promise<AnalysisCursorValueResult | null> {
+        if (stemRole)
+            return (
+                this.stems
+                    ?.read(stemRole, featureId, timeSeconds)
+                    .then(value => (value && 'kind' in value ? value : null)) ?? Promise.resolve(null)
+            );
         if (
             this.disposed ||
             !this.series.has(featureId) ||
@@ -339,6 +370,12 @@ export class AnalysisCoordinator {
     }
 
     requestWindowSeries(input: AnalysisWindowInput, signal?: AbortSignal): Promise<AnalysisWindowSeries | null> {
+        if (input.stemRole)
+            return (
+                this.stems
+                    ?.read(input.stemRole, input.featureId, input.startSeconds, input, signal)
+                    .then(value => (value && !('kind' in value) ? value : null)) ?? Promise.resolve(null)
+            );
         if (
             this.disposed ||
             this.activeConsumer?.consumer !== 'editor' ||
@@ -394,7 +431,8 @@ export class AnalysisCoordinator {
         });
     }
 
-    getSeries(featureId: FeatureId): AnalysisSeries | null {
+    getSeries(featureId: FeatureId, stemRole?: StemRole): AnalysisSeries | null {
+        if (stemRole) return this.stems?.getSeries(stemRole, featureId) ?? null;
         return this.series.get(featureId) ?? null;
     }
 
@@ -411,6 +449,7 @@ export class AnalysisCoordinator {
     async dispose(): Promise<void> {
         if (this.disposed) return;
         this.disposed = true;
+        await this.stems?.dispose();
         this.releaseRealtime();
         this.activeConsumer = null;
         this.cancelActiveJob('cancelled');
@@ -443,12 +482,29 @@ export class AnalysisCoordinator {
             token: identity.token,
             consumer: identity.consumer,
             setActiveFeatures: ids => (isCurrent() ? this.setActiveFeatures(ids) : Promise.resolve()),
-            requestCursorValue: (featureId, timeSeconds) =>
-                isCurrent() ? this.requestCursorValue(featureId, timeSeconds) : Promise.resolve(null),
+            setActiveInputs: async inputs => {
+                if (!isCurrent()) return;
+                validateAnalysisInputs(inputs);
+                const originals = [...new Set(inputs.filter(i => !i.stemRole).map(i => i.featureId))];
+                this.assertActiveFeatures(originals);
+                this.stems?.setRequests(inputs);
+                if (originals.join('|') !== this.snapshot.activeFeatureIds.join('|') || this.snapshot.state === 'error')
+                    await this.setActiveFeatures(originals);
+            },
+            getSourceSnapshot: role =>
+                role
+                    ? (this.stems?.getSnapshot(role) ?? {
+                          ...initialSnapshot(),
+                          state: 'error',
+                          error: { code: 'audio-not-ready', message: '需完成音频分离。', recoverable: true },
+                      })
+                    : this.getSnapshot(),
+            requestCursorValue: (featureId, timeSeconds, role) =>
+                isCurrent() ? this.requestCursorValue(featureId, timeSeconds, role) : Promise.resolve(null),
             requestWindowSeries: (input, signal) =>
                 isCurrent() ? this.requestWindowSeries(input, signal) : Promise.resolve(null),
             requestTempoEstimate: () => (isCurrent() ? this.requestTempoEstimate() : Promise.resolve(null)),
-            getSeries: featureId => (isCurrent() ? this.getSeries(featureId) : null),
+            getSeries: (featureId, role) => (isCurrent() ? this.getSeries(featureId, role) : null),
             subscribe: listener =>
                 this.subscribe(snapshot => {
                     if (isCurrent()) listener(snapshot);
@@ -465,6 +521,7 @@ export class AnalysisCoordinator {
     }
 
     private deactivateConsumer(): void {
+        this.stems?.clear();
         this.releaseRealtime();
         this.cancelActiveJob('cancelled');
         this.series.clear();
@@ -639,6 +696,7 @@ export class AnalysisCoordinator {
         };
         worker.onerror = event => {
             if (this.disposed) return;
+            this.stems?.workerFailed(event.message || '分轨分析 Worker 失败。');
             this.realtime?.error(event.message || '实时分析 Worker 失败。');
             this.releaseRealtime();
             this.publishError(
@@ -653,6 +711,16 @@ export class AnalysisCoordinator {
     }
 
     private handleWorkerMessage(message: AnalysisWorkerResponse): void {
+        if (
+            message.kind === 'stem-progress' ||
+            message.kind === 'stem-result' ||
+            message.kind === 'stem-value' ||
+            message.kind === 'stem-error' ||
+            message.kind === 'stem-cleared'
+        ) {
+            this.stems?.handle(message);
+            return;
+        }
         if (message.kind === 'window-series-result') {
             this.windowRequests.handle(message);
             return;

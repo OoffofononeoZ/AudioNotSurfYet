@@ -26,7 +26,7 @@
 入口：[analysisCoordinator.ts](../../src/analysis/analysisCoordinator.ts)、[分析类型](../../src/analysis/types.ts)、[Worker](../../src/analysis/analysis.worker.ts)。
 
 - Analyzer、Editor、Visualizer 的 consumer lease 互斥，新 consumer 使旧 lease 失效；旧 token 不改变当前工作区。
-- 保持单个分析 Worker；无活动特征不创建任务。最多四种唯一 Analyzer 特征，native 输入不计入额度。
+- 保持单个分析 Worker；无活动特征不创建任务。每个来源最多四种唯一特征，native 输入不计入额度。原曲和 drums/bass/other/vocals 以来源与特征共同标识；四轨只允许 energy、amplitudeSpectrum、buffer、wallpaperEngineSpectrum。分轨通过同一 Worker 串行计算，有界读取已校验的 OPFS PCM，精确游标与窗口也按来源隔离。
 - 消息、cache、series 和 exact cursor 匹配歌曲 hash、config hash、generation/request identity；取消与迟到消息不回填新工作区。
 - Editor lease 提供可取消的 `requestWindowSeries`，从 Worker 保留的 PCM 返回带真实起始时间的运行时窗口序列；类型见 [windowTypes](../../src/analysis/windowTypes.ts)。它与持久化 `AnalysisSeries` 区分，不进入分析缓存编码；窗口任务分批让出执行，精确游标优先。视图拥有单窗口缓存及缩放防抖，详见 [标记工作区](../context/editor-marking.md#图表细节与时间对齐dec-094)。
 - 取消用于节省资源，完整身份检查才是正确性边界；不能假定取消一定先于结果抵达。
