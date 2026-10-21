@@ -81,6 +81,8 @@ export class CompositionScene implements VisualizerScene {
         const signature =
             project.projectId +
             ':' +
+            input.seed +
+            ':' +
             input.bindingRevision +
             ':' +
             project.elements.map(e => e.id + ':' + elementDescriptor(project, e).algorithm.hash).join('|');
@@ -142,7 +144,7 @@ export class CompositionScene implements VisualizerScene {
                         id: e.id,
                         frame: {
                             time: input.timeSeconds,
-                            seed: project.seed,
+                            seed: input.seed,
                             revision: String(input.bindingRevision),
                             width: this.width,
                             height: this.height,
@@ -210,7 +212,7 @@ export class CompositionScene implements VisualizerScene {
         const renderer = this.options.renderer,
             previousAutoClear = renderer.autoClear;
         renderer.autoClear = false;
-        const hashes = [String(project.seed), input.timeSeconds.toFixed(6)];
+        const hashes = [String(input.seed), input.timeSeconds.toFixed(6)];
         try {
             this.clear(this.accumulation);
             for (const e of orderedElements(effectiveElements(project))) {

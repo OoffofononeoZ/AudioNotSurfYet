@@ -412,6 +412,7 @@ export class VisualizerRendererHost implements VisualizerSceneHost {
             visualizerRendererDiagnostics.targetResolveCount += 1;
             const renderStartedAt = performance.now();
             const input = {
+                seed: frame.seed,
                 timeSeconds: frame.timeSeconds,
                 values,
                 bindingRevision: frame.bindingRevision,

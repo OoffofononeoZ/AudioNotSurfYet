@@ -18,6 +18,7 @@ test('exports a complete directory and executes the production runtime offline w
     await page.getByTestId('add-visualizer-element').click();
     await page.locator('[data-resource-id="radial-spectrum"]').click();
     await page.getByRole('combobox', { name: '频谱输入分析特征', exact: true }).selectOption('wallpaperEngineSpectrum');
+    await page.getByRole('button', { name: '清空 Seed', exact: true }).click();
     await page.getByTestId('realtime-style-actions').click();
     await page.getByTestId('prepare-wallpaper-export').click();
     await expect(page.getByTestId('save-wallpaper-directory')).toBeVisible();
@@ -39,6 +40,7 @@ test('exports a complete directory and executes the production runtime offline w
     expect(exported.map(f => f.name).sort()).toEqual(
         ['THIRD_PARTY_LICENSES.txt', 'index.html', 'project.json', 'runtime.js', 'style-data.js'].sort(),
     );
+    expect(exported.find(f => f.name === 'style-data.js')!.content).toContain('"seed":null');
     const root = path.resolve('artifacts/visualizer-composition/wallpaper-' + info.project.name);
     await mkdir(root, { recursive: true });
     for (const file of exported) await writeFile(path.join(root, file.name), file.content);

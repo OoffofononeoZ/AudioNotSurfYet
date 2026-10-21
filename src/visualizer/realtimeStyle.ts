@@ -6,6 +6,7 @@ import { resourceKey, sameResource } from './resourceIdentity';
 import { inspectRealtimeProject, inspectRealtimeContent } from './realtimeCapabilities';
 import { validateElementBindings } from './elementBindings';
 import { record, keys, text, integer, iso, invalid, UUID_PATTERN } from './projectValidation';
+import { validateSeed } from './seed';
 
 export type RealtimeStyleElement = Omit<VisualizerElement, 'enabled' | 'timing' | 'markerBindings'>;
 export interface RealtimeStyleV1 {
@@ -14,7 +15,7 @@ export interface RealtimeStyleV1 {
     id: string;
     name: string;
     createdAt: string;
-    seed: number;
+    seed: number | null;
     frameRate: 30 | 60;
     elements: RealtimeStyleElement[];
     resources: ResourceSnapshot;
@@ -71,14 +72,8 @@ export function validateRealtimeStyle(input: unknown): RealtimeStyleV1 {
     if (v.format !== 'audiosurf-realtime-style' || v.schemaVersion !== 1 || !UUID_PATTERN.test(text(v.id, 'id')))
         return invalid('实时样式格式无效。');
     const resources = validateResourceSnapshot(v.resources),
-        seed = integer(v.seed, 'seed');
-    if (
-        seed < 0 ||
-        seed > 0xffffffff ||
-        (v.frameRate !== 30 && v.frameRate !== 60) ||
-        !Array.isArray(v.elements) ||
-        resources.presets.length
-    )
+        seed = validateSeed(v.seed);
+    if ((v.frameRate !== 30 && v.frameRate !== 60) || !Array.isArray(v.elements) || resources.presets.length)
         return invalid('实时样式参数无效。');
     const elements = v.elements.map((input, layer): RealtimeStyleElement => {
         const e = record(input, '元素');

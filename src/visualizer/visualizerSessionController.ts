@@ -1,4 +1,5 @@
 import { validateRuntimeSnapshot } from './validateRuntimeSnapshot';
+import { resolveSessionSeed } from './seed';
 import { inject, type InjectionKey } from 'vue';
 import type { AudioSessionService, RoutePlaybackLease } from '../audio/audioSessionService';
 import type { useAudioSessionStore } from '../stores/audioSessionStore';
@@ -96,6 +97,7 @@ export class VisualizerExportLockedError extends Error {
 export class VisualizerSessionController {
     private options: VisualizerSessionControllerOptions;
     private snapshot = initial();
+    private renderSeed = 0;
     private listeners = new Set<(snapshot: CompositionSessionSnapshot) => void>();
     private nativeListeners = new Set<() => void>();
     private playbackLease: RoutePlaybackLease | null = null;
@@ -157,6 +159,9 @@ export class VisualizerSessionController {
     }
     readProject() {
         return this.snapshot.project;
+    }
+    readRenderSeed() {
+        return this.renderSeed;
     }
     subscribe(listener: (snapshot: CompositionSessionSnapshot) => void) {
         this.listeners.add(listener);
@@ -361,6 +366,7 @@ export class VisualizerSessionController {
             this.algorithmTask = algorithmTask;
             await this.validateResources(project.resources, algorithmTask.signal);
             if (generation !== this.generation || this.disposed || algorithmTask.signal.aborted) return;
+            this.renderSeed = resolveSessionSeed(project.seed);
             this.publish({
                 ...this.snapshot,
                 state: 'ready',
@@ -387,7 +393,7 @@ export class VisualizerSessionController {
             });
         }
     }
-    updateProject(input: VisualizerProjectV5) {
+    updateProject(input: VisualizerProjectV5, options: { resetSeed?: boolean } = {}) {
         this.assertUnlocked();
         const context = this.context();
         if (!context || !this.snapshot.project) return;
@@ -395,6 +401,12 @@ export class VisualizerSessionController {
             pruneCompositionResources({ ...input, updatedAt: new Date().toISOString() }),
             context,
         );
+        if (
+            options.resetSeed ||
+            project.projectId !== this.snapshot.project.projectId ||
+            project.seed !== this.snapshot.project.seed
+        )
+            this.renderSeed = resolveSessionSeed(project.seed);
         this.resolver.reset();
         this.publish({
             ...this.snapshot,
@@ -571,7 +583,7 @@ export class VisualizerSessionController {
             this.snapshot.project !== previous
         )
             return 'cancelled';
-        this.updateProject(project);
+        this.updateProject(project, { resetSeed: true });
         await this.flush();
         return 'imported';
     }

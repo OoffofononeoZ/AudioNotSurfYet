@@ -78,6 +78,27 @@ function harness() {
     return { p, values, scene, port, calls, targets, releases: () => releases };
 }
 describe('composition rendering', () => {
+    test('automatic projects pass the resolved numeric seed to algorithms', async () => {
+        const h = harness();
+        h.p.seed = null;
+        const prepare = vi.spyOn(AlgorithmRuntimeFixture.prototype, 'prepareFrames');
+        try {
+            const input = { seed: 12345, timeSeconds: 1, values: h.values, bindingRevision: 1 };
+            await h.scene.prepare(input);
+            const hash = h.scene.render(input).hash;
+            expect(prepare.mock.lastCall![0].every(e => e.frame.seed === 12345)).toBe(true);
+            h.scene.resize(1280, 720, 1);
+            await h.scene.prepare(input);
+            expect(h.scene.render(input).hash).toBe(hash);
+            await h.scene.prepare({ ...input, seed: 54321 });
+            expect(prepare.mock.lastCall![0].every(e => e.frame.seed === 54321)).toBe(true);
+            expect(h.scene.render({ ...input, seed: 54321 }).hash).not.toBe(hash);
+            expect(h.p.seed).toBeNull();
+        } finally {
+            h.scene.dispose();
+            prepare.mockRestore();
+        }
+    });
     test('marker-driven fade preserves linear/smooth interpolation and held endpoints independently of frame.range', async () => {
         const definition = elementRegistry.get('fade');
         const instance = await createTestAlgorithm(
@@ -117,7 +138,7 @@ describe('composition rendering', () => {
         const release = vi.spyOn(AlgorithmRuntimeFixture.prototype, 'dispose');
         const h = harness();
         try {
-            const input = { timeSeconds: 1, values: h.values, bindingRevision: 1 };
+            const input = { seed: h.p.seed!, timeSeconds: 1, values: h.values, bindingRevision: 1 };
             await h.scene.prepare(input);
             h.p.elements = [];
             await h.scene.prepare(input);
@@ -134,8 +155,8 @@ describe('composition rendering', () => {
         const h = harness();
         const blur = h.p.elements.find(e => e.resource.id === 'blur')!;
         h.values.set(parameterKey(blur.id, 'amount'), { parameterId: 'amount', state: 'ready', value: 8 });
-        await h.scene.prepare({ timeSeconds: 1, values: h.values, bindingRevision: 1 });
-        h.scene.render({ timeSeconds: 1, values: h.values, bindingRevision: 1 });
+        await h.scene.prepare({ seed: h.p.seed!, timeSeconds: 1, values: h.values, bindingRevision: 1 });
+        h.scene.render({ seed: h.p.seed!, timeSeconds: 1, values: h.values, bindingRevision: 1 });
         expect(h.targets.size).toBe(3);
         expect(h.calls.filter(c => c.blend && c.copy)).toHaveLength(
             h.p.elements.filter(e => elementRegistry.get(e.resource.id).kind === 'visual').length,
@@ -150,7 +171,7 @@ describe('composition rendering', () => {
     test('direct seek and sequential rendering produce the same frame state', async () => {
         const h = harness();
         const at = async (time: number) => {
-            const input = { timeSeconds: time, values: h.values, bindingRevision: 1 };
+            const input = { seed: h.p.seed!, timeSeconds: time, values: h.values, bindingRevision: 1 };
             await h.scene.prepare(input);
             return h.scene.render(input).hash;
         };
@@ -166,8 +187,11 @@ describe('composition rendering', () => {
         attachElements(direct.p);
         direct.values.clear();
         for (const [key, value] of h.values) direct.values.set(key, value);
-        await direct.scene.prepare({ timeSeconds: 3, values: direct.values, bindingRevision: 1 });
-        expect(direct.scene.render({ timeSeconds: 3, values: direct.values, bindingRevision: 1 }).hash).toBe(expected);
+        await direct.scene.prepare({ seed: direct.p.seed!, timeSeconds: 3, values: direct.values, bindingRevision: 1 });
+        expect(
+            direct.scene.render({ seed: direct.p.seed!, timeSeconds: 3, values: direct.values, bindingRevision: 1 })
+                .hash,
+        ).toBe(expected);
         direct.scene.dispose();
     });
     test('fixed string integration remains deterministic across backward seeks', () => {

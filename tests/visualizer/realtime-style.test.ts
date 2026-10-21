@@ -8,13 +8,20 @@ import { RealtimeStyleRepository } from '../../src/visualizer/realtimeStyleRepos
 import { RealtimeResolver } from '../../src/visualizer/realtimeResolver';
 import { parameterKey } from '../../src/visualizer/compositionEffects';
 const track = { contentHash: 'a'.repeat(64), fileName: 'private-song.wav', durationSeconds: 10, sampleRate: 48000 };
-function style() {
+function style(seed?: number | null) {
     const p = appendStandaloneElements(createComposition(track), [
         elementRegistry.create('radial-spectrum', 10, 0),
         elementRegistry.create('blur', 10, 1),
     ]);
+    if (seed !== undefined) p.seed = seed;
     return createRealtimeStyle(p, '测试实时样式');
 }
+test.each([null, 0, 42, 0xffffffff])('realtime snapshots preserve seed %s', seed => {
+    const s = style(seed);
+    expect(s.seed).toBe(seed);
+    expect(validateRealtimeStyle(JSON.parse(JSON.stringify(s))).seed).toBe(seed);
+});
+
 test('styles are independent snapshots without song, timing, editor or catalog dependencies', () => {
     const s = style();
     expect(validateRealtimeStyle(JSON.parse(JSON.stringify(s)))).toEqual(s);
@@ -31,7 +38,7 @@ test('styles are independent snapshots without song, timing, editor or catalog d
 });
 test('local snapshots survive repository reopening and cannot overwrite an existing address', async () => {
     const name = 'realtime-' + crypto.randomUUID(),
-        s = style();
+        s = style(null);
     const a = new RealtimeStyleRepository(indexedDB, name);
     await a.save(s);
     await expect(a.save({ ...s, name: 'replacement' })).rejects.toBeDefined();

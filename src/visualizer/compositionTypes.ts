@@ -43,7 +43,7 @@ export interface VisualizerProjectV5 {
     updatedAt: string;
     track: EditorTrackIdentityV1;
     output: { aspectRatio: '16:9'; resolution: VisualizerResolution; frameRate: VisualizerFrameRate };
-    seed: number;
+    seed: number | null;
     elements: VisualizerElement[];
     /** Each leaf is owned exactly once; sibling order determines render layers. */
     items: CompositionItem[];
