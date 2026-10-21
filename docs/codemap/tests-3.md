@@ -6,6 +6,8 @@
 
 | 文件 | 本地静态引用（最多显示 6 项） |
 | --- | --- |
+| [tests/setup-visualizer-resources.ts](../../tests/setup-visualizer-resources.ts) | [src/visualizer/elementRegistry.ts](../../src/visualizer/elementRegistry.ts)、[src/visualizer/resourceCodec.ts](../../src/visualizer/resourceCodec.ts)、[tests/support/visualizer-assets.mjs](../../tests/support/visualizer-assets.mjs) |
+| [tests/skills/visualizer-content-generator.test.ts](../../tests/skills/visualizer-content-generator.test.ts) | [skills/visualizer-content-generator/scripts/validate-content-brief.mjs](../../skills/visualizer-content-generator/scripts/validate-content-brief.mjs) |
 | [tests/support/analyzer-list.ts](../../tests/support/analyzer-list.ts) | [src/analysis/types.ts](../../src/analysis/types.ts) |
 | [tests/support/audio-fixtures.ts](../../tests/support/audio-fixtures.ts) | — |
 | [tests/support/e2-tempo-fixture.ts](../../tests/support/e2-tempo-fixture.ts) | [tests/support/audio-fixtures.ts](../../tests/support/audio-fixtures.ts)、[tests/support/m7-learning-fixture.ts](../../tests/support/m7-learning-fixture.ts) |
@@ -21,6 +23,7 @@
 | [tests/support/m8-scalar-fixture.ts](../../tests/support/m8-scalar-fixture.ts) | [tests/support/audio-fixtures.ts](../../tests/support/audio-fixtures.ts) |
 | [tests/support/m9-vector-fixture.ts](../../tests/support/m9-vector-fixture.ts) | [tests/support/audio-fixtures.ts](../../tests/support/audio-fixtures.ts) |
 | [tests/support/meyda-golden.ts](../../tests/support/meyda-golden.ts) | — |
+| [tests/support/osu-fixture.ts](../../tests/support/osu-fixture.ts) | — |
 | [tests/support/resource-directory.ts](../../tests/support/resource-directory.ts) | [tests/support/visualizer-assets.mjs](../../tests/support/visualizer-assets.mjs) |
 | [tests/support/tolerance.ts](../../tests/support/tolerance.ts) | — |
 | [tests/support/v6-resource-probe.ts](../../tests/support/v6-resource-probe.ts) | — |

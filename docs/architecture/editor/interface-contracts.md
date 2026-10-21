@@ -19,6 +19,8 @@
 
 ## 分离与自动标记
 
+osu 单向谱面转换、物件映射和定时范围见 [osu 导入](osu-import.md)；源文件与音频留在运行时，候选复用 V2 validator。
+
 - FT 与有限乐器自动标记在 Editor 内共用一个处理槽位；原曲/四轨共用 transport，保留人工标记和显式 V2 原子应用。
 - 模型、PCM、缓存、结果身份和清理见 [FT 接入](../processing/editor-separation.md)、[自动标记](../processing/editor-auto-marking.md)、[模型身份](../processing/model-artifacts.md)。候选经显式确认应用，不自动覆盖人工工程。
 - 当前 FT 听感/长曲耗时按 DEC-074 接受；新增识别质量仍待 owner 复核，完整 P1/P2 正式证据及后续路线不因此关闭。
