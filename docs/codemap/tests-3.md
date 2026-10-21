@@ -6,6 +6,8 @@
 
 | 文件 | 本地静态引用（最多显示 6 项） |
 | --- | --- |
+| [tests/scripts/verify-visualizer-output.mjs](../../tests/scripts/verify-visualizer-output.mjs) | [tests/support/visualizer-audio-timeline.mjs](../../tests/support/visualizer-audio-timeline.mjs)、[tests/support/visualizer-media-alignment.mjs](../../tests/support/visualizer-media-alignment.mjs)、[tests/support/visualizer-video-timeline.mjs](../../tests/support/visualizer-video-timeline.mjs) |
+| [tests/scripts/verify-wallpaper-host.mjs](../../tests/scripts/verify-wallpaper-host.mjs) | — |
 | [tests/setup-visualizer-resources.ts](../../tests/setup-visualizer-resources.ts) | [src/visualizer/elementRegistry.ts](../../src/visualizer/elementRegistry.ts)、[src/visualizer/resourceCodec.ts](../../src/visualizer/resourceCodec.ts)、[tests/support/visualizer-assets.mjs](../../tests/support/visualizer-assets.mjs) |
 | [tests/skills/visualizer-content-generator.test.ts](../../tests/skills/visualizer-content-generator.test.ts) | [skills/visualizer-content-generator/scripts/validate-content-brief.mjs](../../skills/visualizer-content-generator/scripts/validate-content-brief.mjs) |
 | [tests/support/analyzer-list.ts](../../tests/support/analyzer-list.ts) | [src/analysis/types.ts](../../src/analysis/types.ts) |

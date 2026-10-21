@@ -27,6 +27,7 @@ import {
 } from '../types/session';
 import { PlaybackPolicy, type PlaybackMode } from './playbackPolicy';
 import { assertPlaybackRate } from './playbackRate';
+import type { AudioPreparationPort, PreparedDecodedAudio, PreparedLocalAudio } from './preparedAudio';
 
 export interface TrackNavigation {
     select(trackId: string): Promise<void>;
@@ -109,7 +110,7 @@ export class RoutePlaybackUnavailableError extends Error {
     }
 }
 
-export interface AudioEnginePort {
+export interface AudioEnginePort extends AudioPreparationPort {
     load(input: { trackId: string; encodedAudio: ArrayBuffer }): Promise<'loaded' | 'stale'>;
     play(): Promise<void>;
     pause(): void;
@@ -199,6 +200,10 @@ export class AudioSessionService {
     private readonly playbackDiscontinuityListeners = new Set<() => void>();
     private commandGeneration = 0;
     private importGeneration = 0;
+    private readonly preparedLocalAudio = new Map<
+        symbol,
+        { input: LocalAudioInput; track: TrackRecord; decoded: PreparedDecodedAudio | null; generation: number }
+    >();
     private frameHandle: number | null = null;
     private activeRoutePlayback: {
         token: string;
@@ -379,6 +384,98 @@ export class AudioSessionService {
         }
         await this.importFiles(inputs);
         return 'imported';
+    }
+
+    async prepareLocalAudio(input: LocalAudioInput, signal?: AbortSignal): Promise<PreparedLocalAudio> {
+        const generation = this.commandGeneration;
+        if (this.disposed || this.exportTransportToken || signal?.aborted)
+            throw new DOMException('音频准备已取消。', 'AbortError');
+        const [hash, metadata] = await Promise.all([
+            this.hashFile(input.file),
+            this.parseMetadata(input.file).catch(() => null),
+        ]);
+        const stale = () =>
+            this.disposed || signal?.aborted || generation !== this.commandGeneration || !!this.exportTransportToken;
+        if (stale()) throw new DOMException('音频准备已失效。', 'AbortError');
+        const current = this.getTrack(this.store.currentTrackId);
+        const descriptor = this.engine.getDecodedAudioDescriptor();
+        const existing = current?.trackHash === hash && descriptor?.trackId === current.id ? descriptor : null;
+        let decoded: PreparedDecodedAudio | DecodedAudioDescriptor;
+        if (existing) decoded = existing;
+        else {
+            const bytes = await input.file.arrayBuffer();
+            if (stale()) throw new DOMException('音频准备已失效。', 'AbortError');
+            decoded = await this.engine.prepareEncodedAudio(bytes, signal);
+        }
+        const pending = existing ? null : (decoded as PreparedDecodedAudio);
+        if (stale()) {
+            if (pending) this.engine.discardPreparedAudio(pending.token);
+            throw new DOMException('音频准备已失效。', 'AbortError');
+        }
+        const track: TrackRecord =
+            existing && current
+                ? { ...current, metadata: { ...current.metadata } }
+                : {
+                      id: this.createTrackId(),
+                      name: input.file.name,
+                      mimeType: input.file.type || 'application/octet-stream',
+                      byteSize: input.file.size,
+                      lastModified: input.file.lastModified,
+                      durationSeconds: decoded.durationSeconds,
+                      encodedSampleRate: decoded.sampleRate,
+                      metadata: {
+                          title: metadata?.common.title || input.file.name,
+                          artist: metadata?.common.artist,
+                          album: metadata?.common.album,
+                      },
+                      trackHash: hash,
+                      restoreState: 'available',
+                  };
+        if (!existing && input.handle) track.handleKey = `handle:${track.id}`;
+        const token = Symbol('prepared-local-audio');
+        this.preparedLocalAudio.set(token, { input, track, decoded: pending, generation });
+        return {
+            token,
+            track,
+            descriptor: {
+                durationSeconds: decoded.durationSeconds,
+                sampleRate: decoded.sampleRate,
+                length: decoded.length,
+                channelCount: decoded.channelCount,
+            },
+        };
+    }
+
+    discardPreparedLocalAudio(token: symbol): void {
+        const pending = this.preparedLocalAudio.get(token);
+        if (pending?.decoded) this.engine.discardPreparedAudio(pending.decoded.token);
+        this.preparedLocalAudio.delete(token);
+    }
+
+    commitPreparedLocalAudio(token: symbol): string {
+        const pending = this.preparedLocalAudio.get(token);
+        if (
+            !pending ||
+            this.disposed ||
+            this.exportTransportToken ||
+            pending.generation !== this.commandGeneration ||
+            (pending.decoded && !this.engine.hasPreparedAudio(pending.decoded.token))
+        )
+            throw new Error('准备中的歌曲已失效，请重新预览。');
+        this.preparedLocalAudio.delete(token);
+        if (!pending.decoded) return pending.track.id;
+        const generation = ++this.commandGeneration;
+        this.notifyPlaybackDiscontinuity();
+        this.runtimeTracks.set(pending.track.id, {
+            file: pending.input.file,
+            handle: pending.input.handle as PermissionedFileHandle | undefined,
+        });
+        this.store.appendTracks([pending.track]);
+        this.store.setCurrentTrack(pending.track.id);
+        this.store.setEnergy(0);
+        this.engine.commitPreparedAudio(pending.decoded.token, pending.track.id);
+        void this.persistCurrent(pending.track.id, pending.input.file, generation);
+        return pending.track.id;
     }
 
     async importFiles(inputs: LocalAudioInput[]): Promise<void> {
@@ -919,6 +1016,7 @@ export class AudioSessionService {
     async dispose(): Promise<void> {
         if (this.disposed) return;
         this.disposed = true;
+        for (const token of this.preparedLocalAudio.keys()) this.discardPreparedLocalAudio(token);
         ++this.workspaceSaveRevision;
         this.activeRoutePlayback = null;
         this.trackNavigation = null;

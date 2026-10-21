@@ -209,6 +209,12 @@ Node24.18.0/npm11.x，依赖版本以lockfile为准；浏览器专项使用真�
 
 用户歌曲、私有名称/路径/hash、歌词和许可不明二进制不得入库。fixture许可与来源继续核对；OS原生保存/权限、辅助技术、试听或真实GPU缺口如实记录，不能用stub/注入/合成结果替代。
 
+## osu 导入专项
+
+`npx vitest run tests/editor/osu-import.test.ts tests/audio/prepared-local-audio.test.ts` 验证解析、时间映射与音频分阶段提交。先运行 `npm run fixtures:e2:golden` 生成测试 WAV，再运行 `npx playwright test tests/e2e/editor-osu-import.spec.ts --project=chrome --project=edge --workers=1`，验证预览／应用、音频与草稿保护、取消和恢复。构建后可加 `$env:PLAYWRIGHT_PREVIEW = '1'` 在生产包上运行同一专项。
+
+设置 `$env:OSU_REFERENCE_ROOT = "<参考谱面根目录>"` 后，`npx vitest run tests/editor/osu-reference.test.ts` 遍历子目录中的 `.osu`／`.osz`，浏览器专项额外启用真实变速 mania 样本。外部谱面、音频和截图仅本地使用，不进入 fixture；没有环境变量时明确跳过依赖外部数据的用例。支持范围见 [osu 导入](../docs/architecture/editor/osu-import.md)。
+
 ## 外部 Visualizer 资源
 
 资源专项从默认 `C:\Users\Ryan\Desktop\WheresYourElements\assets` 读取，使用 `$env:VISUALIZER_ASSETS_DIR = "<assets>"` 覆盖。`npm run visualizer:resources:check` 校验 17 个资源的源码封装与哈希；`npm run test:visualizer` 运行领域测试。缺少库时 Vitest 仅排除依赖资源的专项并明确提示，其他领域和纯逻辑测试照常运行。

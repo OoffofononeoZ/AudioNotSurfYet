@@ -6,7 +6,10 @@ import { addMarkerLane } from '../support/editor-marking';
 async function open(page: Page) {
     await installFilePickerStub(page);
     await page.goto('/');
-    await chooseFiles(page, ['format-master.wav', 'format-master.mp3'].map(name => path.resolve('tests/fixtures/audio', name)));
+    await chooseFiles(
+        page,
+        ['format-master.wav', 'format-master.mp3'].map(name => path.resolve('tests/fixtures/audio', name)),
+    );
     await expect(page.locator('#music-bar-container')).toHaveAttribute('data-playback-state', 'playing');
     await page.getByTestId('header-editor-link').click();
     await expect(page.getByTestId('editor-ready')).toBeVisible();
@@ -15,10 +18,13 @@ async function open(page: Page) {
 
 test('tabs and cancelled selection retain a running task; confirmed selection releases it', async ({ page }) => {
     const requests: Route[] = [];
-    await page.route('https://huggingface.co/StemSplitio/**', route => { requests.push(route); });
+    await page.route('https://huggingface.co/StemSplitio/**', route => {
+        requests.push(route);
+    });
     await open(page);
     const original = await page.locator('#music-bar-container').getAttribute('data-current-track-id');
     await page.getByTestId('editor-separation-tab').click();
+    await page.getByRole('button', { name: '了解，继续', exact: true }).click();
     await page.getByTestId('editor-separate-start').click();
     await expect.poll(() => requests.length).toBe(1);
     await expect(page.getByTestId('editor-separation')).toHaveAttribute('data-state', 'running');
@@ -43,7 +49,7 @@ test('tabs and cancelled selection retain a running task; confirmed selection re
 
 test('deleting the final current song enters empty state and preserves its Editor draft', async ({ page }) => {
     await open(page);
-    await addMarkerLane(page,'point');
+    await addMarkerLane(page, 'point');
     await expect(page.getByTestId('editor-save-state')).toHaveAttribute('data-state', 'saved');
     await page.getByTestId('toggle-queue').click();
     await expect(page.locator('.music-list-container')).toHaveCSS('transform', 'matrix(1, 0, 0, 1, 0, 0)');
@@ -64,7 +70,11 @@ test('deleting the final current song enters empty state and preserves its Edito
         const url = '/src/editor/editorDraftRepository.ts';
         const { EditorDraftRepository } = await import(url);
         const repository = new EditorDraftRepository();
-        try { return (await repository.restore())?.project.lanes.length; } finally { repository.close(); }
+        try {
+            return (await repository.restore())?.project.lanes.length;
+        } finally {
+            repository.close();
+        }
     });
     expect(laneCount).toBe(1);
 });

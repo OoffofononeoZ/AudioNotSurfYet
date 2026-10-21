@@ -34,6 +34,7 @@ artifacts/app-shell/
 artifacts/fixtures/
 artifacts/visualizer-composition/
 artifacts/editor-marking/
+artifacts/osu-build-temp/
 public/test_audio
 public/wallpaper-runtime/
 public/processing-runtime/

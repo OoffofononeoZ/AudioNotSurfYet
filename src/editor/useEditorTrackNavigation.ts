@@ -3,6 +3,8 @@ import { onBeforeRouteUpdate, type Router } from 'vue-router';
 import type { AudioSessionService } from '../audio/audioSessionService';
 import type { EditorSeparationService } from '../processing/editorSeparationService';
 import type { EditorSessionController } from './editorSessionController';
+import type { EditorDraftEnvelopeV2 } from './types';
+import type { OsuImportApplication } from './osu/osuTypes';
 
 export interface EditorTrackChangeDecision {
     target: string | null;
@@ -25,6 +27,8 @@ export function useEditorTrackNavigation(
     let entryRevision = 0;
     let disposed = false;
     let preparing = false;
+    let detachedDraft: EditorDraftEnvelopeV2 | undefined;
+    let importingTrack: string | null = null;
 
     function cancel() {
         if (decision.value?.busy) return;
@@ -39,10 +43,14 @@ export function useEditorTrackNavigation(
         if (!current || current.busy) return;
         decision.value = { ...current, busy: true, error: '' };
         try {
-            const token = await controller.approveTrackChange(current.target);
+            const token = await controller.approveTrackChange(current.target, detachedDraft);
             if (disposed) return;
             if (!token) {
-                decision.value = { ...current, busy: false, error: '当前草稿尚未保存或工程已改变。请重试，也可以导出工程或取消。' };
+                decision.value = {
+                    ...current,
+                    busy: false,
+                    error: '当前草稿尚未保存或工程已改变。请重试，也可以导出工程或取消。',
+                };
                 return;
             }
             approval = token;
@@ -50,7 +58,12 @@ export function useEditorTrackNavigation(
             resolveDecision = null;
             resolve?.(true);
         } catch (error) {
-            if (!disposed) decision.value = { ...current, busy: false, error: error instanceof Error ? error.message : '草稿保存失败。' };
+            if (!disposed)
+                decision.value = {
+                    ...current,
+                    busy: false,
+                    error: error instanceof Error ? error.message : '草稿保存失败。',
+                };
         }
     }
 
@@ -59,25 +72,37 @@ export function useEditorTrackNavigation(
         if (!current || current.busy) return;
         decision.value = { ...current, busy: true, error: '' };
         try {
-            const result = await controller.exportProject();
-            if (!disposed) decision.value = { ...current, busy: false, exported: result === 'saved' || current.exported };
+            const result = detachedDraft
+                ? await controller.exportImportDraft(detachedDraft)
+                : await controller.exportProject();
+            if (!disposed)
+                decision.value = { ...current, busy: false, exported: result === 'saved' || current.exported };
         } catch (error) {
-            if (!disposed) decision.value = { ...current, busy: false, error: error instanceof Error ? error.message : '工程导出失败。' };
+            if (!disposed)
+                decision.value = {
+                    ...current,
+                    busy: false,
+                    error: error instanceof Error ? error.message : '工程导出失败。',
+                };
         }
     }
 
-    async function prepare(target: string | null): Promise<boolean> {
+    async function prepare(target: string | null, importDraft?: EditorDraftEnvelopeV2): Promise<boolean> {
+        if (importingTrack) return importingTrack === target;
         if (disposed || preparing) return false;
         const current = controller.getSnapshot();
         // Cancelling an entry conflict has already restored this song and its leases.
         if (target && current.activeTrackId === target && current.state === 'ready') return true;
         preparing = true;
+        detachedDraft = importDraft;
         try {
             if (!controller.isTrackChangeApproved(approval, target)) {
                 approval = undefined;
-                if (controller.getSnapshot().project) {
+                if (controller.getSnapshot().project || importDraft) {
                     decision.value = { target, busy: false, exported: false, error: '' };
-                    const allowed = await new Promise<boolean>(resolve => { resolveDecision = resolve; });
+                    const allowed = await new Promise<boolean>(resolve => {
+                        resolveDecision = resolve;
+                    });
                     if (!allowed || disposed) return false;
                 }
             }
@@ -86,11 +111,13 @@ export function useEditorTrackNavigation(
             return !disposed;
         } finally {
             preparing = false;
+            detachedDraft = undefined;
             if (!resolveDecision) decision.value = null;
         }
     }
 
     async function enter(trackId: string | null) {
+        if (importingTrack) return;
         const revision = ++entryRevision;
         const token = approval;
         approval = undefined;
@@ -100,6 +127,45 @@ export function useEditorTrackNavigation(
         if (trackId && requestedPlayTarget === trackId && controller.getSnapshot().state === 'ready') {
             requestedPlayTarget = null;
             await audio.play();
+        }
+    }
+
+    async function applyImport(intent: OsuImportApplication): Promise<boolean> {
+        if (!controller.isCurrentProject(intent.expectedProject)) throw new Error('工程已变化，请重新预览谱面。');
+        const current = controller.getSnapshot();
+        if (current.state === 'ready' && current.activeTrackId === intent.trackId && intent.expectedProject) {
+            audio.pause();
+            if (intent.audio) audio.commitPreparedLocalAudio(intent.audio.token);
+            await controller.applyImportedProject(intent.project, intent.expectedProject);
+            return true;
+        }
+        if (!intent.audio) throw new Error('缺少已准备的源音频。');
+        if (!intent.expectedProject) {
+            const latest = await controller.readImportDraft();
+            if (JSON.stringify(latest?.project ?? null) !== JSON.stringify(intent.draft?.project ?? null))
+                throw new Error('本地草稿已变化，请重新预览。');
+        }
+        const guardDraft =
+            intent.draft && intent.draft.project.track.contentHash !== intent.project.track.contentHash
+                ? intent.draft
+                : undefined;
+        if (!(await prepare(intent.trackId, guardDraft))) return false;
+        if (disposed || !controller.isCurrentProject(intent.expectedProject))
+            throw new Error('导入已失效，请重新预览。');
+        const token = approval;
+        approval = undefined;
+        importingTrack = intent.trackId;
+        try {
+            audio.commitPreparedLocalAudio(intent.audio.token);
+            await controller.enter(intent.trackId, token, intent.project);
+            if (disposed) return false;
+            const applied = controller.getSnapshot();
+            if (applied.state !== 'ready' || applied.project?.projectId !== intent.project.projectId)
+                throw new Error(applied.message || '谱面无法应用。');
+            await router.replace({ name: 'editor', params: { trackId: intent.trackId } });
+            return true;
+        } finally {
+            importingTrack = null;
         }
     }
 
@@ -124,5 +190,5 @@ export function useEditorTrackNavigation(
         resolveDecision?.(false);
         resolveDecision = null;
     });
-    return { decision, confirm, cancel, exportCurrent, enter };
+    return { decision, confirm, cancel, exportCurrent, enter, applyImport };
 }

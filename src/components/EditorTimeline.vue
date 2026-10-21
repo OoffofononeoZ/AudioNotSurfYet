@@ -350,21 +350,24 @@ const bufferStateLabel = computed(() => {
     if (props.analysis.state === 'error') return '波形不可用，Tempo 仍可手动编辑';
     return '正在准备波形…';
 });
-const estimateStateLabel = computed(
-    () =>
-        ({
+const estimateStateLabel = computed(() => {
+    if (props.project.tempoMap.some(segment => segment.mode === 'metered' && segment.bpmSource === 'imported'))
+        return 'BPM 已从谱面导入';
+    return (
+        {
             idle: 'BPM 等待估计',
             estimating: '正在估计 BPM…',
             reliable: `BPM 已自动填入${props.project.tempoMap[0]?.mode === 'metered' ? `：${props.project.tempoMap[0].bpm}` : ''}`,
             'low-confidence': 'BPM 置信度不足，请手动输入',
             unavailable: 'BPM 自动估计不可用，请手动输入',
-        })[
+        }[
             props.tempoEstimateState ??
                 (props.project.tempoMap[0]?.mode === 'metered' && props.project.tempoMap[0].bpmSource === 'estimated'
                     ? 'reliable'
                     : 'idle')
-        ] ?? 'BPM 可手动输入',
-);
+        ] ?? 'BPM 可手动输入'
+    );
+});
 
 const formatTime = (seconds: number): string => {
     const safe = Math.max(0, Number.isFinite(seconds) ? seconds : 0);

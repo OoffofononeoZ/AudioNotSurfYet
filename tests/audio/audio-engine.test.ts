@@ -130,6 +130,49 @@ class FakeAudioContext {
 const bytes = () => new Uint8Array([1, 2, 3]).buffer;
 
 describe('AudioEngine', () => {
+    test('prepares another decoded buffer without replacing playback, then commits or discards it', async () => {
+        const context = new FakeAudioContext();
+        const engine = new AudioEngine({ audioContextFactory: () => context as unknown as AudioContext });
+        await engine.load({ trackId: 'original', encodedAudio: bytes() });
+        await engine.play();
+        context.currentTime = 2;
+        const before = engine.getSnapshot(),
+            revision = engine.getDecodedAudioDescriptor()!.revision;
+        const prepared = await engine.prepareEncodedAudio(bytes());
+        expect(engine.getSnapshot()).toEqual(before);
+        expect(engine.getDecodedAudioDescriptor()!.revision).toBe(revision);
+        expect(context.sources).toHaveLength(1);
+        expect(engine.hasPreparedAudio(prepared.token)).toBe(true);
+        engine.discardPreparedAudio(prepared.token);
+        expect(() => engine.commitPreparedAudio(prepared.token, 'other')).toThrow();
+        expect(engine.getSnapshot()).toEqual(before);
+        const next = await engine.prepareEncodedAudio(bytes());
+        engine.commitPreparedAudio(next.token, 'other');
+        expect(engine.getSnapshot()).toMatchObject({ trackId: 'other', state: 'paused', currentTimeSeconds: 0 });
+        expect(engine.getDecodedAudioDescriptor()!.revision).toBeGreaterThan(revision);
+        expect(engine.hasPreparedAudio(next.token)).toBe(false);
+        await engine.dispose();
+    });
+    test('rejects late preparation on abort, song change or engine disposal', async () => {
+        for (const action of ['abort', 'load', 'dispose'] as const) {
+            const context = new FakeAudioContext();
+            const engine = new AudioEngine({ audioContextFactory: () => context as unknown as AudioContext });
+            await engine.load({ trackId: 'original', encodedAudio: bytes() });
+            const controlled = deferred<AudioBuffer>();
+            context.decodeQueue.push(controlled);
+            const abort = new AbortController();
+            const prepared = engine.prepareEncodedAudio(bytes(), abort.signal);
+            const rejected = expect(prepared).rejects.toMatchObject({ name: 'AbortError' });
+            if (action === 'abort') abort.abort();
+            else if (action === 'load') await engine.load({ trackId: 'new', encodedAudio: bytes() });
+            else await engine.dispose();
+            controlled.resolve(new FakeAudioBuffer() as unknown as AudioBuffer);
+            await rejected;
+            if (action === 'abort') expect(engine.getSnapshot().trackId).toBe('original');
+            if (action === 'load') expect(engine.getSnapshot().trackId).toBe('new');
+            await engine.dispose();
+        }
+    });
     test('changes native rate without jumping source time and restores rate with the export checkpoint', async () => {
         const context = new FakeAudioContext();
         const engine = new AudioEngine({ audioContextFactory: () => context as unknown as AudioContext });

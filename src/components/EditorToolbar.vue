@@ -4,6 +4,16 @@
             <button
                 type="button"
                 class="editor-icon-button"
+                :disabled="!canImportOsu"
+                aria-label="导入 osu 谱面"
+                title="导入 osu 谱面"
+                data-testid="import-osu-beatmap"
+                @click="emit('importOsu')">
+                <span>osu</span>
+            </button>
+            <button
+                type="button"
+                class="editor-icon-button"
                 :disabled="!ready"
                 aria-label="导入工程（JSON V2）"
                 title="导入工程（JSON V2）"
@@ -58,10 +68,11 @@ import EditorIcon from './EditorIcon.vue';
 type Workspace = 'marking' | 'separation' | 'transcription';
 const props = defineProps<{
     ready: boolean;
+    canImportOsu: boolean;
     workspace: Workspace;
     persistence: EditorSessionSnapshot['persistence'];
 }>();
-const emit = defineEmits<{ 'update:workspace': [workspace: Workspace]; import: []; export: [] }>();
+const emit = defineEmits<{ 'update:workspace': [workspace: Workspace]; import: []; export: []; importOsu: [] }>();
 const tabs = [
     { id: 'marking', label: '标记编辑' },
     { id: 'separation', label: '音轨分离' },

@@ -6,6 +6,17 @@ import { useAudioSessionStore } from '../../src/stores/audioSessionStore';
 import type { PlaybackSnapshot } from '../../src/types/audio';
 
 class FakeEngine implements AudioEnginePort {
+    async prepareEncodedAudio(): Promise<never> {
+        throw Error('Audio preparation is not used by this fixture.');
+    }
+    hasPreparedAudio() {
+        return false;
+    }
+    commitPreparedAudio() {
+        throw Error('Audio preparation is not used by this fixture.');
+    }
+    discardPreparedAudio() {}
+
     async setAuditionSource() {}
     setAuditionMuted() {}
     snapshot: PlaybackSnapshot = {

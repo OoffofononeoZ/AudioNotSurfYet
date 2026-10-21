@@ -6,6 +6,8 @@
 
 | 文件 | 本地静态引用（最多显示 6 项） |
 | --- | --- |
+| [tests/e2e/visualizer-resource-directory.spec.ts](../../tests/e2e/visualizer-resource-directory.spec.ts) | [tests/support/file-picker.ts](../../tests/support/file-picker.ts)、[tests/support/resource-directory.ts](../../tests/support/resource-directory.ts)、[tests/support/visualizer-assets.mjs](../../tests/support/visualizer-assets.mjs) |
+| [tests/e2e/visualizer-resources.spec.ts](../../tests/e2e/visualizer-resources.spec.ts) | [src/visualizer/algorithmTypes.ts](../../src/visualizer/algorithmTypes.ts)、[src/visualizer/compositionTypes.ts](../../src/visualizer/compositionTypes.ts)、[src/visualizer/resourceIdentity.ts](../../src/visualizer/resourceIdentity.ts)、[src/visualizer/resourceTypes.ts](../../src/visualizer/resourceTypes.ts)、[tests/support/file-picker.ts](../../tests/support/file-picker.ts) |
 | [tests/e2e/visualizer-seed.spec.ts](../../tests/e2e/visualizer-seed.spec.ts) | [tests/support/file-picker.ts](../../tests/support/file-picker.ts) |
 | [tests/e2e/visualizer-wallpaper.spec.ts](../../tests/e2e/visualizer-wallpaper.spec.ts) | [tests/support/file-picker.ts](../../tests/support/file-picker.ts) |
 | [tests/e2e/wallpaper-spectrum.spec.ts](../../tests/e2e/wallpaper-spectrum.spec.ts) | [tests/support/file-picker.ts](../../tests/support/file-picker.ts) |
@@ -104,5 +106,3 @@
 | [tests/scripts/run-v6-eval.mjs](../../tests/scripts/run-v6-eval.mjs) | — |
 | [tests/scripts/verify-v5-media.mjs](../../tests/scripts/verify-v5-media.mjs) | — |
 | [tests/scripts/verify-v6-media.mjs](../../tests/scripts/verify-v6-media.mjs) | — |
-| [tests/scripts/verify-visualizer-output.mjs](../../tests/scripts/verify-visualizer-output.mjs) | [tests/support/visualizer-audio-timeline.mjs](../../tests/support/visualizer-audio-timeline.mjs)、[tests/support/visualizer-media-alignment.mjs](../../tests/support/visualizer-media-alignment.mjs)、[tests/support/visualizer-video-timeline.mjs](../../tests/support/visualizer-video-timeline.mjs) |
-| [tests/scripts/verify-wallpaper-host.mjs](../../tests/scripts/verify-wallpaper-host.mjs) | — |

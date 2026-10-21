@@ -2,6 +2,7 @@ import type { DecodedAudioDescriptor, PlaybackError, PlaybackErrorCode, Playback
 import { ChunkedAudition } from './chunkedAudition';
 import type { AuditionSource } from './auditionTypes';
 import { assertPlaybackRate } from './playbackRate';
+import type { PreparedDecodedAudio } from './preparedAudio';
 import { createRealtimeAudioTap, type RealtimeAudioTapOptions, type RealtimeAudioLease } from './realtimeAudioTap';
 
 type AudioContextFactory = () => AudioContext;
@@ -80,6 +81,7 @@ export class AudioEngine {
     private playbackRate = 1;
     private loadGeneration = 0;
     private decodedRevision = 0;
+    private readonly preparedAudio = new Map<symbol, AudioBuffer>();
     private snapshot: PlaybackSnapshot = emptySnapshot(this.volume, this.playbackRate);
     private audition: ChunkedAudition | null = null;
     private auditionSource: AuditionSource | null = null;
@@ -93,7 +95,48 @@ export class AudioEngine {
         this.audioContextFactory = options.audioContextFactory ?? (() => new AudioContext());
     }
 
+    async prepareEncodedAudio(bytes: ArrayBuffer, signal?: AbortSignal): Promise<PreparedDecodedAudio> {
+        const generation = this.loadGeneration;
+        if (signal?.aborted) throw new DOMException('音频准备已取消。', 'AbortError');
+        const context = this.ensureGraph();
+        const buffer = await context.decodeAudioData(bytes.slice(0));
+        if (signal?.aborted || generation !== this.loadGeneration || context !== this.audioContext)
+            throw new DOMException('音频准备已失效。', 'AbortError');
+        const token = Symbol('prepared-audio');
+        this.preparedAudio.set(token, buffer);
+        return {
+            token,
+            durationSeconds: buffer.duration,
+            sampleRate: buffer.sampleRate,
+            length: buffer.length,
+            channelCount: buffer.numberOfChannels,
+        };
+    }
+
+    hasPreparedAudio(token: symbol): boolean {
+        return this.preparedAudio.has(token);
+    }
+
+    discardPreparedAudio(token: symbol): void {
+        this.preparedAudio.delete(token);
+    }
+
+    commitPreparedAudio(token: symbol, trackId: string): void {
+        const buffer = this.preparedAudio.get(token);
+        if (!buffer) throw new AudioTransportError('transport-unavailable', '准备中的音频已失效。');
+        this.unload();
+        this.buffer = buffer;
+        this.publish({
+            trackId,
+            state: 'paused',
+            currentTimeSeconds: 0,
+            durationSeconds: buffer.duration,
+            volume: this.volume,
+        });
+    }
+
     async load(input: { trackId: string; encodedAudio: ArrayBuffer }): Promise<'loaded' | 'stale'> {
+        this.preparedAudio.clear();
         const generation = ++this.loadGeneration;
         ++this.auditionGeneration;
         ++this.playbackCommandGeneration;
@@ -521,6 +564,7 @@ export class AudioEngine {
     }
 
     unload(): void {
+        this.preparedAudio.clear();
         ++this.loadGeneration;
         ++this.auditionGeneration;
         ++this.playbackCommandGeneration;
@@ -536,6 +580,7 @@ export class AudioEngine {
     }
 
     async dispose(): Promise<void> {
+        this.preparedAudio.clear();
         for (const lease of this.realtimeLeases) lease.release();
         ++this.loadGeneration;
         ++this.auditionGeneration;
