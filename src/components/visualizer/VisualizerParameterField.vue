@@ -3,7 +3,7 @@
         <label v-if="dynamic" class="viz-field"
             ><span>{{ parameter.label }}</span
             ><AppSelect
-                :model-value="binding.source.kind"
+                :model-value="analysis?.stemRole ?? binding.source.kind"
                 :label="parameter.label + '数据来源'"
                 :options="sourceOptions"
                 :disabled="disabled"
@@ -148,6 +148,9 @@ import {
     defaultNumericTransform,
 } from '../../visualizer/bindingDefaults';
 import { nativeInputFeatures, type NativeInputFeature } from '../../visualizer/nativeAudioAnalysis';
+import { isStemRole, isStemFeature } from '../../analysis/sources';
+import { useStemAvailability } from '../../analysis/useStemAvailability';
+import { FT_ROLES, type StemRole } from '../../processing/modelManifest';
 const props = defineProps<{
     parameter: SceneParameterDescriptor;
     binding: ElementBinding;
@@ -160,7 +163,10 @@ const emit = defineEmits<{ change: [binding: ElementBinding] }>();
 const dynamic = computed(() => props.parameter.allowedSourceKinds.includes('analysis'));
 const analysis = computed(() => (props.binding.source.kind === 'analysis' ? props.binding.source : null));
 const native = computed(() => (props.binding.source.kind === 'native' ? props.binding.source : null));
-const features = computed(() => compatibleAnalysisFeatures(props.parameter));
+const { available: stemsAvailable } = useStemAvailability();
+const features = computed(() =>
+    compatibleAnalysisFeatures(props.parameter).filter(id => !analysis.value?.stemRole || isStemFeature(id)),
+);
 const components = computed(() =>
     analysis.value
         ? analysisComponentsForFeature(analysis.value.featureId).filter(c =>
@@ -222,9 +228,19 @@ const projectionLabels: Record<string, string> = {
 };
 const sourceOptions = computed(() => [
     { value: 'constant', label: '固定值' },
-    { value: 'analysis', label: 'Analyzer' },
+    { value: 'analysis', label: 'analyzer（原曲）' },
     ...(props.parameter.allowedSourceKinds.includes('native') ? [{ value: 'native', label: '原生输入' }] : []),
-    { value: 'stem-analysis', label: '分轨 Analyzer（未接入）', disabled: true },
+    ...(stemsAvailable.value && props.parameter.valueKind === 'vector'
+        ? FT_ROLES.map(role => ({ value: role, label: `analyzer（${role}）` }))
+        : analysis.value?.stemRole
+          ? [
+                {
+                    value: analysis.value.stemRole,
+                    label: `analyzer（${analysis.value.stemRole}，需完成音频分离）`,
+                    disabled: true,
+                },
+            ]
+          : []),
     ...(props.binding.source.kind === 'unbound' ? [{ value: 'unbound', label: '未配置' }] : []),
 ]);
 const featureOptions = computed(() =>
@@ -243,16 +259,30 @@ function featureDisabled(id: FeatureId) {
                     (props.affectedElementIds ?? [props.elementId]).includes(e.id) &&
                     b.parameterId === props.parameter.id
                 ) &&
-                b.source.kind === 'analysis'
+                b.source.kind === 'analysis' &&
+                b.source.stemRole === analysis.value?.stemRole
             )
                 ids.add(b.source.featureId);
     ids.add(id);
     return ids.size > 4;
 }
-function defaultBinding(id: FeatureId) {
-    return createDefaultAnalysisBinding(props.parameter, id) as ElementBinding;
+function defaultBinding(id: FeatureId, role: StemRole | null | undefined = analysis.value?.stemRole) {
+    const binding = createDefaultAnalysisBinding(props.parameter, id);
+    return { ...binding, source: { ...binding.source, ...(role ? { stemRole: role } : {}) } } as ElementBinding;
 }
 function sourceChanged(value: string | number) {
+    if (isStemRole(value)) {
+        const compatible = compatibleAnalysisFeatures(props.parameter).filter(isStemFeature);
+        const current = analysis.value?.featureId;
+        const feature =
+            current && compatible.includes(current as (typeof compatible)[number])
+                ? current
+                : compatible.includes('wallpaperEngineSpectrum')
+                  ? 'wallpaperEngineSpectrum'
+                  : compatible[0];
+        if (feature && stemsAvailable.value) emit('change', defaultBinding(feature, value));
+        return;
+    }
     if (value === 'constant')
         emit('change', {
             parameterId: props.parameter.id,
@@ -263,6 +293,10 @@ function sourceChanged(value: string | number) {
         });
     else if (value === 'native') nativeFeatureChanged('frequency');
     else if (value === 'analysis') {
+        if (analysis.value && compatibleAnalysisFeatures(props.parameter).includes(analysis.value.featureId)) {
+            emit('change', defaultBinding(analysis.value.featureId, null));
+            return;
+        }
         const feature = features.value.includes('energy') ? 'energy' : features.value[0];
         if (feature)
             emit(
@@ -272,7 +306,7 @@ function sourceChanged(value: string | number) {
                           parameterId: props.parameter.id,
                           ...structuredClone(props.parameter.defaultBinding),
                       } as ElementBinding)
-                    : defaultBinding(feature),
+                    : defaultBinding(feature, null),
             );
     }
 }

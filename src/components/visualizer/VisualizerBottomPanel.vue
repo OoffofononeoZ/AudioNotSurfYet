@@ -19,7 +19,7 @@
             <div class="viz-bottom-status app-scrollbar" role="status" aria-label="工程状态" tabindex="0">
                 <span :data-analysis-status="snapshot.bindingRuntime.analysisState"
                     >分析 {{ analysisLabel }} · {{ Math.round(snapshot.bindingRuntime.analysisProgress * 100) }}% ·
-                    {{ snapshot.bindingRuntime.activeFeatureIds.length }}/4</span
+                    {{ sourceCounts }}</span
                 >
                 <span :data-export-status="snapshot.export.status">{{ exportLabel }}</span>
                 <span v-if="snapshot.export.status === 'exporting'"
@@ -189,6 +189,16 @@ const analysisLabel = computed(
             props.snapshot.bindingRuntime.analysisState
         ],
 );
+const sourceCounts = computed(() => {
+    const inputs = props.snapshot.bindingRuntime.activeInputs;
+    if (!inputs?.some(input => input.stemRole)) return `${props.snapshot.bindingRuntime.activeFeatureIds.length}/4`;
+    const counts = new Map<string, number>();
+    for (const input of inputs) {
+        const label = input.stemRole ?? '原曲';
+        counts.set(label, (counts.get(label) ?? 0) + 1);
+    }
+    return [...counts].map(([label, count]) => `${label} ${count}/4`).join(' · ');
+});
 const exportLabel = computed(
     () =>
         ({

@@ -16,8 +16,11 @@ export class CompositionResolver {
     resolve(
         project: VisualizerProjectV5,
         time: number,
-        getSeries: (id: FeatureId) => AnalysisSeries | null,
-        getWaveform?: (time: number) => readonly number[] | null,
+        getSeries: (id: FeatureId, stemRole?: import('../processing/modelManifest').StemRole) => AnalysisSeries | null,
+        getWaveform?: (
+            time: number,
+            stemRole?: import('../processing/modelManifest').StemRole,
+        ) => readonly number[] | null,
         getNative?: (feature: NativeInputFeature, time: number, history: boolean) => number[] | null,
     ): ResolvedComposition {
         const result = new Map<string, Map<string, VisualizerResolvedParameter>>();
@@ -61,7 +64,7 @@ export class CompositionResolver {
                         continue;
                     }
                     const source = binding.source;
-                    const series = getSeries(source.featureId);
+                    const series = getSeries(source.featureId, source.stemRole);
                     if (!series || series.trackHash !== project.track.contentHash) {
                         values.set(parameterId, { parameterId, state: 'loading', message: '等待分析数据' });
                         continue;
@@ -72,7 +75,7 @@ export class CompositionResolver {
                             source.component ?? 'default',
                             source.projection,
                             at,
-                            source.featureId === 'buffer' ? getWaveform?.(at) : undefined,
+                            source.featureId === 'buffer' ? getWaveform?.(at, source.stemRole) : undefined,
                         );
                     const raw = sample(time);
                     let value: number | number[];

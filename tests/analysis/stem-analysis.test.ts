@@ -3,6 +3,7 @@ import { createAnalysisConfig } from '../../src/analysis/config';
 import { runAnalysisJob } from '../../src/analysis/workerCore';
 import { runStemAnalysis, readStemCursor, readStemWindow } from '../../src/analysis/stemWorkerCore';
 import { validateAnalysisInputs, analysisInputKey, STEM_FEATURE_IDS } from '../../src/analysis/sources';
+import { StemWaveformFrames } from '../../src/analysis/stemWaveformFrames';
 import type { StemPcmSource } from '../../src/analysis/stemProtocol';
 
 async function fixture(): Promise<StemPcmSource> {
@@ -70,6 +71,15 @@ describe('source-scoped stem analysis', () => {
         expect(window?.sampleStepSeconds).toBe(1 / 44100);
         expect(window?.startTimeSeconds).toBeLessThanOrEqual(0.03);
         await expect(runStemAnalysis(source, ['energy'], () => true)).rejects.toThrow('取消');
+    });
+    it('prepares exact complete waveform frames through arbitrary history access', async () => {
+        const source = await fixture(),
+            frames = new StemWaveformFrames(source, () => false);
+        for (const time of [0.1, 0, 0.08, 0.03]) {
+            await frames.prepare(time);
+            const expected = await readStemCursor(source, 'buffer', time, 1, 'cursor', () => false);
+            expect(frames.read(time)).toEqual(expected?.value);
+        }
     });
     it('separates same-name features and limits each source independently', () => {
         expect(analysisInputKey({ featureId: 'energy', stemRole: 'drums' })).not.toBe(

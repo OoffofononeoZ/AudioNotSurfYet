@@ -35,6 +35,8 @@ artifacts/fixtures/
 artifacts/visualizer-composition/
 artifacts/editor-marking/
 artifacts/osu-build-temp/
+artifacts/stem-analysis/
+artifacts/stem-build-temp/
 public/test_audio
 public/wallpaper-runtime/
 public/processing-runtime/

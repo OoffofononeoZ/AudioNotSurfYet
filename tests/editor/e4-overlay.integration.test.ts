@@ -98,6 +98,8 @@ class AnalysisHarness {
     readonly lease: AnalysisConsumerLease = {
         token: 'e4-lease',
         consumer: 'editor',
+        readStemWaveform: () => null,
+        prepareStemWaveform: async () => undefined,
         setActiveInputs: async inputs =>
             this.lease.setActiveFeatures(inputs.filter(i => !i.stemRole).map(i => i.featureId)),
         getSourceSnapshot: () => this.snapshot,

@@ -5,6 +5,7 @@ import { hashBytes } from '../processing/sha256';
 import { createAnalysisConfig } from './config';
 import { encodeAnalysisSeries, decodeAnalysisSeries } from './compactCodec';
 import { wallpaperFrameIndex } from './wallpaperSpectrum';
+import { StemWaveformFrames } from './stemWaveformFrames';
 import type { AnalysisInput } from './sources';
 import type { StemPcmSource, StemWorkerRequest, StemWorkerResponse } from './stemProtocol';
 import type { AnalysisCoordinatorSnapshot, AnalysisCursorValueResult, AnalysisSeries, FeatureId } from './types';
@@ -37,6 +38,7 @@ export class StemAnalysisRuntime {
     private epoch = 0;
     private requests: AnalysisInput[] = [];
     private states = new Map<StemRole, SourceState>();
+    private waveforms = new Map<StemRole, StemWaveformFrames>();
     private pending = new Map<
         string,
         {
@@ -51,12 +53,12 @@ export class StemAnalysisRuntime {
     private unregister: () => void;
     private operations = new Set<Promise<unknown>>();
     private service: EditorSeparationService;
-    private trackHash: () => string | null;
+    private trackHash: () => { id: string; hash: string } | null;
     private post: (request: StemWorkerRequest) => void;
     private changed: () => void;
     constructor(
         service: EditorSeparationService,
-        trackHash: () => string | null,
+        trackHash: () => { id: string; hash: string } | null,
         post: (request: StemWorkerRequest) => void,
         changed: () => void,
     ) {
@@ -66,7 +68,7 @@ export class StemAnalysisRuntime {
         this.changed = changed;
         this.unsubscribe = service.subscribe(() => {
             const state = service.getSnapshot(),
-                key = state.status === 'ready' && state.result ? state.result.source.directory : '';
+                key = JSON.stringify([state.trackId, state.status, state.result?.source.directory ?? null]);
             if (key !== this.resultKey) {
                 this.resultKey = key;
                 this.restart();
@@ -91,7 +93,13 @@ export class StemAnalysisRuntime {
         const cleanup = this.invalidate();
         const epoch = this.epoch,
             state = this.service.getSnapshot(),
-            trackHash = this.trackHash();
+            track = this.trackHash(),
+            trackHash = track?.hash ?? null;
+        const available =
+            state.status === 'ready' &&
+            !!state.result &&
+            state.trackId === track?.id &&
+            state.result.source.descriptor.trackId === track?.id;
         if (!this.requests.length) return;
         const groups = new Map<StemRole, FeatureId[]>();
         for (const input of this.requests) {
@@ -105,11 +113,11 @@ export class StemAnalysisRuntime {
                 series: new Map(),
                 snapshot: {
                     ...empty(epoch),
-                    state: state.status === 'ready' ? 'copying' : 'error',
-                    trackId: state.trackId,
+                    state: available ? 'copying' : 'error',
+                    trackId: track?.id ?? null,
                     trackHash,
                     activeFeatureIds: ids,
-                    ...(state.status === 'ready'
+                    ...(available
                         ? {}
                         : {
                               error: {
@@ -121,7 +129,7 @@ export class StemAnalysisRuntime {
                 },
             });
         this.changed();
-        if (state.status !== 'ready' || !state.result || !trackHash) return;
+        if (!available || !state.result || !trackHash) return;
         const result = state.result;
         const operation = (async () => {
             await cleanup;
@@ -208,7 +216,7 @@ export class StemAnalysisRuntime {
     }
     private track(operation: Promise<unknown>) {
         this.operations.add(operation);
-        void operation.finally(() => this.operations.delete(operation));
+        void operation.finally(() => this.operations.delete(operation)).catch(() => {});
     }
     handle(message: StemWorkerResponse) {
         if (message.kind === 'stem-cleared') {
@@ -340,6 +348,7 @@ export class StemAnalysisRuntime {
         const hadWork = this.states.size > 0,
             epoch = ++this.epoch;
         this.states.clear();
+        this.waveforms.clear();
         for (const id of this.pending.keys()) this.resolve(id, null);
         // Capture current I/O only; a newly scheduled activation waits for this cleanup.
         const operations = [...this.operations];
@@ -357,6 +366,32 @@ export class StemAnalysisRuntime {
     clear() {
         this.requests = [];
         void this.invalidate();
+    }
+    private waveform(role: StemRole) {
+        const state = this.states.get(role);
+        if (!state?.source || state.snapshot.state !== 'ready' || !state.series.has('buffer'))
+            throw Error('分轨完整波形尚未就绪，请先完成分离与分析。');
+        let frames = this.waveforms.get(role);
+        if (!frames) {
+            const epoch = this.epoch;
+            frames = new StemWaveformFrames(state.source, () => epoch !== this.epoch);
+            this.waveforms.set(role, frames);
+        }
+        return frames;
+    }
+    readWaveform(role: StemRole, time: number): readonly number[] | null {
+        const frames = this.waveform(role),
+            value = frames.read(time);
+        if (!value)
+            void this.prepareWaveform(role, time)
+                .then(() => this.changed())
+                .catch(() => {});
+        return value;
+    }
+    async prepareWaveform(role: StemRole, time: number): Promise<void> {
+        const operation = this.waveform(role).prepare(time);
+        this.track(operation);
+        await operation;
     }
     workerFailed(message: string) {
         for (const resolve of this.clearWaiters.values()) resolve();

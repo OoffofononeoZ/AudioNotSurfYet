@@ -140,6 +140,7 @@
                                 aria-label="导出视频"
                                 title="导出视频"
                                 data-testid="start-visualizer-export"
+                                :disabled="!['idle', 'ready'].includes(snapshot.bindingRuntime.analysisState)"
                                 @click="startExport">
                                 <VisualizerIcon name="export" /></button
                             ><button

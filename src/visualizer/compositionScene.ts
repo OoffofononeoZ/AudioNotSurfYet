@@ -20,6 +20,7 @@ export interface CompositionSceneOptions {
     readProject(): CompositionRenderModel | null;
     realtime?: boolean;
     resolveAt(time: number): VisualizerResolvedParameterMap;
+    prepareAt?(time: number): Promise<void>;
     runtimeFactory?(): AlgorithmRuntimePort;
 }
 const hashText = (text: string) => {
@@ -67,6 +68,9 @@ export class CompositionScene implements VisualizerScene {
     }
     async prepare(input: VisualizerSceneRenderInput) {
         if (this.disposed) throw Error('元素合成器已释放。');
+        await this.options.prepareAt?.(input.timeSeconds);
+        if (this.disposed) return;
+        const values = this.options.prepareAt ? this.options.resolveAt(input.timeSeconds) : input.values;
         const project = this.options.readProject();
         this.packets.clear();
         this.needsSourcePrompt = false;
@@ -129,7 +133,7 @@ export class CompositionScene implements VisualizerScene {
                 }
                 const parameters: AlgorithmFrame['parameters'] = {};
                 for (const binding of e.bindings) {
-                    const value = input.values.get(parameterKey(e.id, binding.parameterId));
+                    const value = values.get(parameterKey(e.id, binding.parameterId));
                     if (value?.state !== 'ready' || value.value === undefined) {
                         this.needsSourcePrompt = true;
                         return [];
@@ -160,6 +164,7 @@ export class CompositionScene implements VisualizerScene {
                 if (this.options.realtime) throw Error('实时模式不允许历史输入查询。');
                 const samples: HistorySample[] = [];
                 for (let tick = request.startTick; tick < request.endTick; tick++) {
+                    await this.options.prepareAt?.(tick / 60);
                     const value = this.options.resolveAt(tick / 60).get(parameterKey(elementId, request.parameterId));
                     if (value?.state !== 'ready' || value.value === undefined) throw Error('算法历史输入尚未就绪。');
                     samples.push({ time: tick / 60, value: value.value, ...(value.unit ? { unit: value.unit } : {}) });

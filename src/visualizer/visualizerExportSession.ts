@@ -148,9 +148,16 @@ export class VisualizerExportSession {
             const descriptor = (expectedAudio = { ...currentAudio });
             const bindings = context.bindingRuntime;
             if (
-                bindings.activeFeatureIds.length &&
+                (bindings.activeInputs?.length ?? bindings.activeFeatureIds.length) &&
                 (bindings.analysisState !== 'ready' ||
-                    bindings.activeFeatureIds.some(id => !bindings.readyFeatureIds.includes(id)))
+                    (bindings.activeInputs
+                        ? bindings.activeInputs.some(
+                              input =>
+                                  !bindings.readyInputs?.some(
+                                      ready => ready.featureId === input.featureId && ready.stemRole === input.stemRole,
+                                  ),
+                          )
+                        : bindings.activeFeatureIds.some(id => !bindings.readyFeatureIds.includes(id))))
             )
                 throw new VisualizerExportError('analysis-not-ready', '活动分析尚未全部就绪。');
             if (context.configurationIssues.length)

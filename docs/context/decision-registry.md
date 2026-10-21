@@ -67,3 +67,7 @@ owner 选择 10–1200 BPM、V1 显式迁移、包内原音频、追加新轨道
 ## DEC-094 — Editor 图表精度与时间对齐 — 2026-10-21
 
 owner 确认上方图为顶部绿色波形，并以“Implement the plan.”批准叠加层按真实时间对齐轨道、曲首／曲尾保留留白，以及按可见窗口补充 PCM 波形和未聚合分析帧。播放及暂停均自动更新；连续缩放时现有图跟随，结束 150ms 后补算。保留既有特征参数与 Wallpaper 原生 30Hz，不改工程或持久化分析格式；复用既有 Worker／播放时钟、按窗口缓存并取消旧请求。按对齐及自适应细节两个小目标分别验证和本地提交，不重开正式 readiness。
+
+## DEC-095 — 四轨特征与来源选择 — 2026-10-22
+
+owner 以“Implement the plan.”批准四轨 energy、幅度谱、buffer、Wallpaper 频谱接入。Analyzer 顶部切换来源，各来源独立最多四项 FIFO，只分析当前来源置顶项；Editor 叠加层改为来源／特征 Cascader，顶部波形保持原曲。Visualizer 频谱输入可混用原曲与四角色，各来源最多四种特征，原选项称 analyzer（原曲）。来源切换只改变展示，三处独立，共用绝对时间。Editor V2／Visualizer V5 以可选 stemRole 保存来源引用，Analyzer 会话保存来源队列；单分析 Worker、有界 PCM、完整身份、取消及缓存容量边界保留。分离完成并校验后开放入口，缺失引用不回退；不含新原子元素／预设、实时分轨、推送或发布。当前契约见[Analyzer](analyzer-list.md)、[Editor](editor-marking.md)、[Visualizer 输入](visualizer-native-input.md)。

@@ -6,6 +6,7 @@ import type { SeparationResult } from '../../src/processing/kernel';
 /** Synthetic distinct-role PCM, published and restored through the real checksum repository. */
 export async function captureSeparation(page: Page) {
     await page.addInitScript(async () => {
+        if (window.top !== window) return;
         const url = '/src/processing/editorSeparationService.ts';
         const { EditorSeparationService } = await import(url);
         const bind = EditorSeparationService.prototype.bind;

@@ -38,6 +38,8 @@ export function inspectRealtimeContent(
         )
             browserIssues.push(label + '需要覆盖完整歌曲，局部分镜不能转为常驻。');
         for (const b of e.bindings) {
+            if (b.source.kind === 'analysis' && b.source.stemRole)
+                browserIssues.push(label + '分轨来源仅用于歌曲工程。');
             if (b.source.kind === 'unbound') browserIssues.push(label + '输入未配置。');
             if (b.source.kind === 'analysis' && !isSupportedFeatureId(b.source.featureId))
                 browserIssues.push(label + '特征不支持实时分析。');

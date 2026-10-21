@@ -1,4 +1,5 @@
 import { FEATURE_REGISTRY } from '../analysis/featureRegistry';
+import { isStemRole, isStemFeature } from '../analysis/sources';
 import { isFeatureId, type FeatureId } from '../analysis/types';
 import { validateEditorProjectV2 } from '../editor/projectCodec';
 import type { EditorTrackIdentityV1 } from '../editor/types';
@@ -314,10 +315,15 @@ export const canonicalBinding = (
         if (!['number', 'vector'].includes(parameter.valueKind)) {
             invalid(`${path} parameter cannot use analysis data.`);
         }
-        keys(sourceValue, ['kind', 'featureId', 'projection'], ['component'], `${path}.source`);
+        keys(sourceValue, ['kind', 'featureId', 'projection'], ['component', 'stemRole'], `${path}.source`);
         const rawFeatureId = sourceValue.featureId;
         if (!isFeatureId(rawFeatureId)) invalid(`${path}.source.featureId is invalid.`);
         const featureId: FeatureId = rawFeatureId as FeatureId;
+        if (
+            sourceValue.stemRole !== undefined &&
+            (!isStemRole(sourceValue.stemRole) || !isStemFeature(featureId) || parameter.valueKind !== 'vector')
+        )
+            invalid(`${path}.source.stemRole requires a compatible spectrum input.`);
         const component = sourceValue.component === undefined ? 'default' : sourceValue.component;
         if (typeof component !== 'string' || !COMPONENTS.has(component as VisualizerAnalysisComponent)) {
             invalid(`${path}.source.component is invalid.`);
@@ -333,6 +339,9 @@ export const canonicalBinding = (
         source = {
             kind: 'analysis',
             featureId,
+            ...(sourceValue.stemRole === undefined
+                ? {}
+                : { stemRole: sourceValue.stemRole as import('../processing/modelManifest').StemRole }),
             ...(sourceValue.component === undefined ? {} : { component: component as VisualizerAnalysisComponent }),
             projection,
         };

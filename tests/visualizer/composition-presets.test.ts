@@ -11,18 +11,22 @@ test('presets expand to editable strict V5 elements with independent identities'
         expect(p.elements[0]!.layer).toBe(3);
         attachElements(p);
         expect(compositionIssues(p)).toEqual([]);
-        expect(planCompositionFeatures(p)).toEqual(
-            preset.id === 'geometric-0.6' ? ['wallpaperEngineSpectrum', 'amplitudeSpectrum'] : ['amplitudeSpectrum'],
-        );
+        const expectedFeatures = {
+            'geometric-0.6': ['wallpaperEngineSpectrum', 'amplitudeSpectrum'],
+            'prismatic-voyage': ['amplitudeSpectrum'],
+            'fy-helios-cathedral': ['energy', 'amplitudeSpectrum'],
+        };
+        if (preset.id in expectedFeatures)
+            expect(planCompositionFeatures(p)).toEqual(expectedFeatures[preset.id as keyof typeof expectedFeatures]);
         attachElements(p);
         const bytes = encodeComposition(p);
         expect(decodeComposition(bytes.buffer as ArrayBuffer)).toEqual(p);
         const second = createPresetElements(preset.id, track.durationSeconds, p.elements.length + 3);
         expect(new Set([...p.elements, ...second].map(e => e.id)).size).toBe(p.elements.length + second.length);
-        for (const e of p.elements.filter(e => e.resource.id !== 'solid'))
+        for (const e of p.elements.filter(e => e.bindings.some(binding => binding.parameterId === 'sensitivity')))
             expect(e.bindings.find(b => b.parameterId === 'sensitivity')?.source).toEqual({
                 kind: 'constant',
-                value: 0.6,
+                value: preset.id === 'fy-helios-cathedral' ? 0.9 : 0.6,
             });
     }
 });

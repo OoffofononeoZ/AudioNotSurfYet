@@ -94,7 +94,7 @@ describe('V5 composition project', () => {
             p.elements.push(e);
         }
         attachElements(p);
-        expect(() => validateComposition(p)).toThrow(/四个/);
+        expect(() => validateComposition(p)).toThrow(/每个来源.*四种/);
     });
     test('ignores old drafts without a conflict prompt and writes V5', async () => {
         const name = 'composition-' + crypto.randomUUID();

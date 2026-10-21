@@ -1,4 +1,6 @@
 import { FEATURE_IDS, type FeatureId } from '../analysis/types';
+import { analysisInputKey, validateAnalysisInputs, type AnalysisInput } from '../analysis/sources';
+import { FT_ROLES } from '../processing/modelManifest';
 import type { RangeEventV1 } from '../editor/types';
 import { elementRegistry, findResource } from './elementRegistry';
 import { mergeResources } from './resourceCodec';
@@ -85,13 +87,30 @@ export function elementRange(
     return lane?.eventKind === 'range' ? (lane.events.find(e => e.id === t.eventId) ?? null) : null;
 }
 export function planCompositionFeatures(project: VisualizerProjectV5, includeDisabled = false): FeatureId[] {
-    const requested = new Set<FeatureId>();
+    return planCompositionInputs(project, includeDisabled)
+        .filter(input => !input.stemRole)
+        .map(input => input.featureId);
+}
+export function planCompositionInputs(project: VisualizerProjectV5, includeDisabled = false): AnalysisInput[] {
+    const requested = new Map<string, AnalysisInput>();
     for (const e of includeDisabled ? project.elements : effectiveElements(project)) {
         if (!e.enabled && !includeDisabled) continue;
-        for (const b of e.bindings) if (b.source.kind === 'analysis') requested.add(b.source.featureId);
+        for (const b of e.bindings)
+            if (b.source.kind === 'analysis') {
+                const input = {
+                    featureId: b.source.featureId,
+                    ...(b.source.stemRole ? { stemRole: b.source.stemRole } : {}),
+                };
+                requested.set(analysisInputKey(input), input);
+            }
     }
-    const result = FEATURE_IDS.filter(id => requested.has(id));
-    if (result.length > 4) throw Error('一个工程最多使用四个不同的 Analyzer 特征。');
+    const result = [undefined, ...FT_ROLES].flatMap(stemRole =>
+        FEATURE_IDS.flatMap(featureId => {
+            const input = requested.get(analysisInputKey({ featureId, stemRole }));
+            return input ? [input] : [];
+        }),
+    );
+    validateAnalysisInputs(result);
     return result;
 }
 export function compositionIssues(project: VisualizerProjectV5): string[] {

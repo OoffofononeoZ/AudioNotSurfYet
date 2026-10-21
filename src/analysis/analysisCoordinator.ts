@@ -53,6 +53,8 @@ export interface AnalysisConsumerLease {
     setActiveFeatures(ids: readonly FeatureId[]): Promise<void>;
     setActiveInputs(inputs: readonly AnalysisInput[]): Promise<void>;
     getSourceSnapshot(stemRole?: StemRole): AnalysisCoordinatorSnapshot;
+    readStemWaveform(stemRole: StemRole, time: number): readonly number[] | null;
+    prepareStemWaveform(stemRole: StemRole, time: number): Promise<void>;
     requestCursorValue(
         featureId: FeatureId,
         timeSeconds: number,
@@ -111,7 +113,10 @@ export class AnalysisCoordinator {
     configureStemSources(service: EditorSeparationService): void {
         this.stems = new StemAnalysisRuntime(
             service,
-            () => this.store.queue.find(t => t.id === this.store.currentTrackId)?.trackHash ?? null,
+            () => {
+                const track = this.store.queue.find(t => t.id === this.store.currentTrackId);
+                return track?.trackHash ? { id: track.id, hash: track.trackHash } : null;
+            },
             request => this.ensureWorker().postMessage(request),
             () => {
                 for (const listener of this.listeners) listener(this.getSnapshot());
@@ -481,6 +486,11 @@ export class AnalysisCoordinator {
         return {
             token: identity.token,
             consumer: identity.consumer,
+            readStemWaveform: (role, time) => (isCurrent() ? (this.stems?.readWaveform(role, time) ?? null) : null),
+            prepareStemWaveform: (role, time) =>
+                isCurrent() && this.stems
+                    ? this.stems.prepareWaveform(role, time)
+                    : Promise.reject(Error('分轨输入已失效。')),
             setActiveFeatures: ids => (isCurrent() ? this.setActiveFeatures(ids) : Promise.resolve()),
             setActiveInputs: async inputs => {
                 if (!isCurrent()) return;
@@ -695,8 +705,8 @@ export class AnalysisCoordinator {
             this.handleWorkerMessage(event.data);
         };
         worker.onerror = event => {
-            if (this.disposed) return;
             this.stems?.workerFailed(event.message || '分轨分析 Worker 失败。');
+            if (this.disposed) return;
             this.realtime?.error(event.message || '实时分析 Worker 失败。');
             this.releaseRealtime();
             this.publishError(

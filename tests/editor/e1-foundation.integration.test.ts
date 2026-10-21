@@ -138,6 +138,8 @@ const createControllerHarness = (
         acquireConsumer: (consumer: 'editor'): AnalysisConsumerLease => ({
             token: `analysis-${consumer}`,
             consumer,
+            readStemWaveform: () => null,
+            prepareStemWaveform: async () => undefined,
             setActiveInputs: async () => undefined,
             getSourceSnapshot: () =>
                 analysisCoordinator.getSnapshot() as import('../../src/analysis/types').AnalysisCoordinatorSnapshot,
