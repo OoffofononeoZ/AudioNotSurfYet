@@ -16,6 +16,7 @@ import type {
 import { startRealtimeWorker } from './realtimeWorker';
 import { extractWindowSeries } from './windowAnalysis';
 import type { AnalysisWindowRequest } from './windowTypes';
+import { createStemWorker } from './stemWorker';
 
 interface WorkerScope {
     onmessage: ((event: MessageEvent<AnalysisWorkerRequest>) => void) | null;
@@ -27,6 +28,12 @@ let activeToken = 0;
 let activeJob: { jobId: string; generation: number } | null = null;
 let retained: RetainedAnalysisPcm | null = null;
 let queue = Promise.resolve();
+const stemWorker = createStemWorker(
+    message => workerScope.postMessage(message),
+    run => {
+        queue = queue.then(run);
+    },
+);
 const windowJobs = new Map<string, { cancelled: boolean }>();
 
 const windowSeries = (request: AnalysisWindowRequest) => {
@@ -163,6 +170,10 @@ const tempoEstimate = (request: TempoEstimateRequest) => {
 workerScope.onmessage = event => {
     const request = event.data;
     if (!request || typeof request !== 'object') return;
+    if (request.kind === 'stem-analyze' || request.kind === 'stem-read' || request.kind === 'stem-clear') {
+        stemWorker(request);
+        return;
+    }
     if (request.kind === 'window-series') {
         windowSeries(request);
         return;

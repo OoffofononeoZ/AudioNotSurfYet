@@ -10,7 +10,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onUnmounted, provide, watchEffect } from 'vue';
+import { computed, onUnmounted, provide, watch, watchEffect } from 'vue';
 import { useRoute } from 'vue-router';
 import { realtimeBrowserKey } from '../visualizer/realtimeBrowserSession';
 import AppSidebar from '../components/AppSidebar.vue';
@@ -57,6 +57,20 @@ watchEffect(() => audioSession.setPreferredPlaybackMode(configStore.playbackMode
 provide(audioSessionServiceKey, audioSession);
 const editorProcessingGate = new EditorProcessingGate();
 const editorSeparation = new EditorSeparationService(audioEngine, audioSession, { gate: editorProcessingGate });
+analysisCoordinator.configureStemSources(editorSeparation);
+watch(
+    () => [layoutRoute.path, audioSessionStore.currentTrackId, audioSessionStore.playback.state],
+    () => {
+        const state = audioSessionStore.playback;
+        if (
+            /^\/(analyzer|editor|visualizer)(\/|$)/.test(layoutRoute.path) &&
+            ['paused', 'playing', 'ended'].includes(state.state) &&
+            state.trackId
+        )
+            void editorSeparation.bind(state.trackId);
+    },
+    { flush: 'post', immediate: true },
+);
 provide(editorSeparationServiceKey, editorSeparation);
 provide(analysisCoordinatorKey, analysisCoordinator);
 provide(realtimeBrowserKey, { engine: audioEngine, audio: audioSession, analysis: analysisCoordinator });

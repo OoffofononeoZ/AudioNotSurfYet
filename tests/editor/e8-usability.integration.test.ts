@@ -52,6 +52,9 @@ class MemoryRepository implements EditorDraftRepositoryPort {
 const analysisLease = (): AnalysisConsumerLease => ({
     token: crypto.randomUUID(),
     consumer: 'editor',
+    setActiveInputs: async () => undefined,
+    getSourceSnapshot: () =>
+        analysisCoordinator.getSnapshot() as import('../../src/analysis/types').AnalysisCoordinatorSnapshot,
     setActiveFeatures: async () => undefined,
     requestWindowSeries: async () => null,
     requestCursorValue: async () => null,

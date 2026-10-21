@@ -98,6 +98,9 @@ class AnalysisHarness {
     readonly lease: AnalysisConsumerLease = {
         token: 'e4-lease',
         consumer: 'editor',
+        setActiveInputs: async inputs =>
+            this.lease.setActiveFeatures(inputs.filter(i => !i.stemRole).map(i => i.featureId)),
+        getSourceSnapshot: () => this.snapshot,
         setActiveFeatures: async ids => {
             this.featureSets.push([...ids]);
         },

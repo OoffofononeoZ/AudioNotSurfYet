@@ -311,6 +311,7 @@ export type TempoEstimateResult =
       });
 
 export type AnalysisWorkerRequest =
+    | import('./stemProtocol').StemWorkerRequest
     | import('./windowTypes').AnalysisWindowRequest
     | import('./windowTypes').AnalysisWindowCancel
     | import('./realtimeTypes').RealtimeAnalysisRequest
@@ -320,6 +321,7 @@ export type AnalysisWorkerRequest =
     | TempoEstimateRequest;
 
 export type AnalysisWorkerResponse =
+    | import('./stemProtocol').StemWorkerResponse
     | import('./windowTypes').AnalysisWindowResult
     | import('./realtimeTypes').RealtimeAnalysisResponse
     | AnalysisJobProgress

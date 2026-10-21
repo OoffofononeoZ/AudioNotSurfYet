@@ -9,6 +9,7 @@ export interface AnalysisWindowSeries extends Omit<AnalysisSeries, 'startTimeSec
 export type RenderAnalysisSeries = AnalysisSeries | AnalysisWindowSeries;
 
 export interface AnalysisWindowInput {
+    stemRole?: import('../processing/modelManifest').StemRole;
     featureId: FeatureId;
     startSeconds: number;
     endSeconds: number;
