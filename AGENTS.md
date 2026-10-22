@@ -9,10 +9,11 @@
 | `audiosurf-codebase-navigation` | 定位入口、职责、引用与调用方 | [SKILL.md](skills/audiosurf-codebase-navigation/SKILL.md) |
 | `audiosurf-file-modularization` | 新增、重构或评审模块职责 | [SKILL.md](skills/audiosurf-file-modularization/SKILL.md) |
 | `audio-visualizer-dev` | 界面、播放、分析、Editor、FT、Visualizer 与导出的开发和诊断 | [SKILL.md](skills/audio-visualizer-dev/SKILL.md) |
-| `visualizer-content-generator` | 新增原子元素和组合预设 | [SKILL.md](skills/visualizer-content-generator/SKILL.md) |
 | `audiosurf-testing-strategy` | 选择验证、判断证据与验证缺口 | [SKILL.md](skills/audiosurf-testing-strategy/SKILL.md) |
 | `audiosurf-git-task-delivery` | 修改任务开始及验证后的本地交付 | [SKILL.md](skills/audiosurf-git-task-delivery/SKILL.md) |
 | `audiosurf-docs-maintenance` | 更新、清理、压缩或拆分相关文档 | [SKILL.md](skills/audiosurf-docs-maintenance/SKILL.md) |
+
+内容生成仅使用外部 `C:\Users\Ryan\Desktop\WheresYourElements\skill\visualizer-content-generator\SKILL.md`，项目不保留副本或发现包装。生成请求默认自主完成，开放创意自行设计；明确需求缺少关键条件或冲突时再询问。新资源正常交付至少附一张实际展示图。工具通过 `VISUALIZER_SKILL_DIR` 可指定其他外部 skill 目录。
 
 ## 文档入口
 

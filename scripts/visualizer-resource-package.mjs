@@ -3,15 +3,16 @@ import { resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { canonical, sealExecutablePackages } from './lib/visualizer-resource-v2.mjs';
 
-import { buildLibrary } from '../skills/visualizer-content-generator/scripts/resource-library.mjs';
+import { loadVisualizerLibraryTool } from './lib/visualizer-skill-path.mjs';
 import { visualizerAssetsPath } from './lib/visualizer-assets-path.mjs';
 
 export function sealPackage(input) {
     return sealExecutablePackages([input])[0];
 }
-function main(args) {
+async function main(args) {
     if (args[0] === '--build' || args[0] === '--check-build') {
         const check = args[0] === '--check-build';
+        const { buildLibrary } = await loadVisualizerLibraryTool();
         buildLibrary(args[1] ?? visualizerAssetsPath(), check);
         process.stdout.write(`${check ? 'Checked' : 'Built'} executable visualizer resources\n`);
         return;
@@ -31,7 +32,7 @@ function main(args) {
 }
 if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href) {
     try {
-        main(process.argv.slice(2));
+        await main(process.argv.slice(2));
     } catch (error) {
         process.stderr.write(`${error.message}\n`);
         process.exitCode = 1;

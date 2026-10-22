@@ -4,7 +4,7 @@
 
 ## 当前绘制边界
 
-- JSON定义已有kernel的元素与组合，新增绘制算法仍需受控应用代码。新增内容包括纯复用预设，均按visualizer-content-generator先批准具体合同。
+- V2资源包携带隔离算法与绘图程序，符合已有ABI的新算法无需增加宿主分派。新增内容包括纯复用预设，使用根AGENTS指向的外部visualizer-content-generator自主设计生成，不另设内容批准门禁。
 - 预览保持单RendererHost/Canvas/WebGLRenderer/视觉RAF；CompositionResolver/Scene和复用render targets处理元素、效果与范围转场。预设组身份/共同控件不产生独立renderer。
 - 绝对歌曲时间、seed、固定步长/checkpoint决定状态，seek/循环/离线输出同源。弦线历史、native FFT/waveform和绑定准备按当前kernel处理，不能用RAF delta或元素显示名称分派算法。
 - 离线输出取得同一renderer手动租约、严格尺寸/DPR1和frame index时间，WebCodecs/Mediabunny写OPFS；背压不会跳帧。结束释放并恢复预览，不恢复MediaRecorder/capture RAF链路。

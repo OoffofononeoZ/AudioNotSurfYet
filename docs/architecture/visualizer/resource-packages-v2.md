@@ -12,7 +12,7 @@ DEC-087 批准 V2 算法包、V5 自包含工程及原生隔离。2026-10-20 的
 
 ## 外部文件夹与封装
 
-默认库为 `C:\Users\Ryan\Desktop\WheresYourElements\assets`。元素放 `elements/<id>/`，预设放 `presets/<id>/`，各包含 `resource-info.json`、`source/`、`resource-package.json` 及可选封面。完整信息格式见独立 skill 的[资源格式与 ABI](../../../skills/visualizer-content-generator/references/resource-format.md)。
+默认库为 `C:\Users\Ryan\Desktop\WheresYourElements\assets`。元素放 `elements/<id>/`，预设放 `presets/<id>/`，各包含 `resource-info.json`、`source/`、`resource-package.json` 及封面。格式和加载允许封面缺失；正常生成交付须附至少一张实际展示图并填写 previewPath。完整编写说明见根 AGENTS 指向的外部 skill 的资源格式与 ABI 参考。
 
 信息 schemaVersion:1，含精确 resource、kind、title、description、creator、createdAt、可选 previewPath、sourceEntry、packagePath、dependencies 和 order。creator 默认 default；createdAt 是实际创建时间，重新封装不重置。路径相对自身资源根，不接受点段、绝对路径或跨资源依赖。元素包含完整辅助源码及 Shader；预设包只含组合定义，不含算法或元素，dependencies 恰为已有元素的去重精确引用。
 
@@ -34,11 +34,11 @@ Visualizer 页面统一拥有资源库、任务和预览对象 URL，商城/列�
 
 - 模块导出同步 create 工厂；实例实现 prepareFrame，可选 reset/dispose。工程帧输入包含绝对歌曲时间、seed、binding revision、输出尺寸、有效时段和已解析参数/单位。[实时样式](../../context/visualizer-realtime.md)仅接入无历史/标记/转场依赖的算法，使用单调会话秒、当前参数和 range:null，历史与标记查询明确拒绝；工程 ABI 和离线语义不变。
 - 历史请求只允许 contract.historyParameters 中的参数，固定 60 Hz，每次不超过一秒且不越过目标歌曲时间；宿主提供分块结果，不提供整曲 PCM。当前弦线保持原 60 Hz 输入、120 Hz 积分与逐秒 checkpoint。
-- DEC-089 批准 ABI 2 的 markerInputs/timingInput。外部包只声明点/范围及 single/collection 能力；用户在工程内绑定同歌快照。input.markers 只在当前实例的 prepareFrame 有效，集合按窗口/分类查询并以 256 项分页。完整字段、半开窗口和游标边界见[独立标记契约](../../../skills/visualizer-content-generator/references/editor-marker-inputs.md)。不提供整份 Editor、BPM、候选或音色字段；初始化阶段没有接口。
+- DEC-089 批准 ABI 2 的 markerInputs/timingInput。外部包只声明点/范围及 single/collection 能力；用户在工程内绑定同歌快照。input.markers 只在当前实例的 prepareFrame 有效，集合按窗口/分类查询并以 256 项分页。完整字段见[标记类型](../../../src/visualizer/editorMarkerTypes.ts)，半开窗口和游标边界见[标记读取](../../../src/visualizer/editorMarkerReader.ts)及外部 skill 的标记输入参考。不提供整份 Editor、BPM、候选或音色字段；初始化阶段没有接口。
 - DrawPacket 的 passes 只能引用包内程序；uniform 类型和数组长度按程序声明校验，纹理只能引用当前效果输入。三角网格必须使用有限 Float32 缓冲并遵守顶点容量。
 - 算法不能访问 DOM、网络或应用存储，Worker/OffscreenCanvas 等旁路在运行前关闭。只有可信 bootstrap 持有消息传输；每帧回调结束即撤销，不能借用其他实例的输入。算法源码只通过消息进入隔离 Worker，不插入主页面或桥接 HTML。
 - GPU 材质/几何按程序内容复用，合成器只管理图层、目标及转场仲裁，不按算法 ID 分派。算法实例和历史缓存按叶 UUID 独立。
 
 预览保留单在途任务和最新待办，跳转/绑定/身份变化使旧结果失效；离线导出逐帧等待计算与绘制，不跳帧。实例按 UUID 隔离，历史输入和 checkpoint 保持确定性。原生方案不承诺硬性 JS 内存或 GPU 时间配额；沿用 65,536 顶点容量，算法计算等待累计超过 10 秒中止，宿主输入准备单独计时。
 
-资源缺失、初始化、计算超时、Shader 编译、context loss 或取消均明确失败并释放对应运行资源，不降档或回退旧算法。新增内容仍需具体内容合同；本页不授予新增视觉内容或发布授权。
+资源缺失、初始化、计算超时、Shader 编译、context loss 或取消均明确失败并释放对应运行资源，不降档或回退旧算法。新增内容按[内容生成](content-generation.md)默认自主完成并附实际展示图，缺图/坏图的加载容错不变；架构、许可和发布边界独立。

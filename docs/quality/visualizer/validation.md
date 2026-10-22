@@ -29,7 +29,7 @@
 
 ## 新内容与正式评审
 
-新增元素/预设按[内容生成 skill](../../../skills/visualizer-content-generator/SKILL.md)先校验 brief、再批准具体合同，包含纯复用预设；未获具体批准不生成。按实际算法/组合风险选映射、golden、资源、浏览器和短导出，不为每个内容建立里程碑或 readiness。
+新增元素/预设使用根 AGENTS 指向的外部 skill，完整 brief 校验后默认自主生成，包含纯复用预设；明确需求缺少阻塞性条件时再询问。正常交付至少附一张实际展示图并核对 previewPath，不能用共享默认封面代替；工具缺图/坏图容错不变。按实际算法/组合风险选映射、golden、资源、浏览器和短导出，不为每个内容建立里程碑或 readiness。
 
 OS 原生保存/取消/覆盖、最终构图、辅助技术和长时操作需要适用人工记录。历史 V1–V6 canonical、媒体 hash 与批准保存在 [evidence](evidence-index.md)，未关闭的视觉/全屏及上线边界见 [readiness](release-readiness.md)。正式评审另行绑定当前 clean candidate，历史通过不自动继承。
 

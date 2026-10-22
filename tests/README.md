@@ -54,7 +54,7 @@ Node24.18.0/npm11.x，依赖版本以lockfile为准；浏览器专项使用真�
 | `npm run test:e6:integration`                           | 10,000 事件 JSON 与 IndexedDB round-trip、重叠工程原子拒绝和 durable draft 保留                                                                                   |
 | `npm run test:docs`                                     | 只读检查 Markdown 内部链接与规模；手写文档 >500 行提示、≥800 行失败，不强制生命周期元数据                                                                         |
 | `npm run test:harness`                                  | 证明 deliberate failure 会非零退出                                                                                                                                |
-| `npm run test:skill:visualizer-content-generator`       | 校验 VisualizerContentBriefV1 静态/动态元素、复用/新增预设、时间/目标关系、非法输入和只读 CLI；具体合同仍须 owner 批准                                            |
+| `npm run test:skill:visualizer-content-generator` | 转调外部 skill 的 Brief V2 与封装测试；生成默认自主执行，正常交付附实际展示图 |
 | `npm run test:e2e`                                      | 稳定 Chrome 的全部当前 E2E                                                                                                                                        |
 | `npm run test:e2e:m3`                                   | M3 应用、Worker、IndexedDB 和三格式 smoke                                                                                                                         |
 | `npm run test:e2e:m4`                                   | M4 播放/队列/错误/资源回归及 60 秒计时                                                                                                                            |
@@ -230,3 +230,6 @@ Node24.18.0/npm11.x，依赖版本以lockfile为准；浏览器专项使用真�
 `tests/visualizer/point-lines.test.ts` 从外部读取两种已批准直线元素，验证默认值、单分类、40/60/100ms 包络、5% 间距、分页及顶点分批。`tests/e2e/visualizer-point-lines.spec.ts` 检查真实 GPU 的全长、渐显、分类隔离、曲尾、密集批次及断库恢复/短导出；不把新增源码复制回应用测试夹具，既有几何 golden 保持不变。
 
 `npx playwright test tests/e2e/visualizer-resource-directory.spec.ts tests/e2e/visualizer-resources.spec.ts --project=chrome --project=edge --workers=1` 覆盖目录/预览/恢复、损坏刷新与 V5 独立恢复及短离线输出。测试用真实 OPFS 句柄和 IndexedDB structured clone，picker/许可为替身；它不证明原生 OS 文件夹选择和磁盘授权 UI。原生人工检查需实际选择 assets、拒绝/恢复访问、关闭重开浏览器，并检查外部文件未被应用改写。
+
+
+内容生成 skill 与专属测试仅在外部 `WheresYourElements/skill/visualizer-content-generator/` 维护。`VISUALIZER_SKILL_DIR` 可覆盖位置；上述 skill 测试及 `visualizer:resources` 命令按需加载外部脚本，缺失时明确报错，不阻断无关测试或普通应用构建。先在外部 skill 目录按其 lockfile 安装测试依赖，项目不保留 skill 副本。

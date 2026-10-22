@@ -12,7 +12,7 @@
 | Analyzer接口/列表/特征 | [页面接口](../architecture/analyzer/interface-contracts.md)、[当前列表](analyzer-list.md)、[Wallpaper频谱](wallpaper-spectrum.md) |
 | Editor工程/交互/页面框架 | [页面接口](../architecture/editor/interface-contracts.md)、[Project V2](../architecture/editor/project-format-v2.md)、[osu 导入](../architecture/editor/osu-import.md)、[交互](../architecture/editor/interaction-contracts.md)、[工作区](editor-workspace.md)、[标记页](editor-marking.md) |
 | Visualizer工程/资源/组合/视频 | [页面接口](../architecture/visualizer/interface-contracts.md)、[Project V5](../architecture/visualizer/project-format-v5.md)、[资源包](../architecture/visualizer/resource-packages-v2.md)、[组合](visualizer-composition.md)、[预设](visualizer-presets.md)、[原生输入](visualizer-native-input.md)、[离线导出](visualizer-offline-export.md)、[实时样式](visualizer-realtime.md) |
-| 新增原子元素/预设 | [内容合同](../architecture/visualizer/content-generation.md)、[生成skill](../../skills/visualizer-content-generator/SKILL.md)；具体内容先获批 |
+| 新增原子元素/预设 | [内容生成](../architecture/visualizer/content-generation.md)及根AGENTS指向的外部skill；默认自主生成并附实际展示图 |
 | FT、试听、自动标记 | [FT接入](../architecture/processing/editor-separation.md)、[自动标记](../architecture/processing/editor-auto-marking.md)、[模型身份](../architecture/processing/model-artifacts.md)、[FT配置](../architecture/processing/ft-kernel-config.md) |
 | 后续处理路线/提案 | [路线](../delivery/processing/roadmap.md)、[运行时与未来目标](../architecture/processing/worker-and-project-contracts.md) |
 | 产品范围、风险与授权 | [范围/成功标准](../product/scope.md)、[开放问题](../product/open-questions.md)、[风险](../architecture/risk-register.md)、[决策](decision-registry.md) |
@@ -20,7 +20,7 @@
 
 ## 当前状态与独立缺口
 
-- 当前Analyzer为单列/FIFO及Wallpaper频谱；Editor使用独立marker视图、数字实时录入、FT和有限自动标记；Visualizer使用V5工程、V2可执行算法资源包与离线WebM。源码与当前页面契约解释实际行为；外部 assets 文件夹提供资源，内容生成 skill 2.0.0 使用 BriefV2 和独立封装工具。
+- 当前Analyzer为单列/FIFO及Wallpaper频谱；Editor使用独立marker视图、数字实时录入、FT和有限自动标记；Visualizer使用V5工程、V2可执行算法资源包与离线WebM。源码与当前页面契约解释实际行为；外部 assets 文件夹提供资源，内容生成 skill 2.4.0 仅在外部维护，使用 BriefV2 和独立封装工具，默认自主生成并要求实际展示图。
 - DEC-074接受当前FT听感/部分串音和长曲耗时，本轮功能已收尾；Chrome历史1011.9541秒超过900秒仍保留。完整P1/P2 clean evidence、Edge普通profile长曲与原生OS操作不由此补齐。
 - 新增识别质量待owner复核。P3逐拍/局部tempo、完整提案/应用和处理数据工程扩展未完成；最新V4-only已替代旧V2迁移计划，自动标记不等于P3。
 - Editor整体readiness保持pre-E10/DEC-055 owner-review；DEC-075另行授权新增能力和回归使用本地端口/Chrome/Edge，不重开旧readiness自动化。
