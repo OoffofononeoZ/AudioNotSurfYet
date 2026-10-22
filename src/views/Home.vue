@@ -95,7 +95,7 @@ const handleArtworkError = (event: Event) => {
 }
 .home-visualizer-content .home-display-switch {
     position: absolute;
-    top: 0;
+    top: 24px;
     left: 0;
     right: 0;
     z-index: 2;
@@ -218,6 +218,9 @@ const handleArtworkError = (event: Event) => {
 @media (max-width: 767px) {
     .home-content {
         padding: 14px 24px 104px;
+    }
+    .home-visualizer-content .home-display-switch {
+        top: 14px;
     }
     .home-display-switch {
         min-height: 36px;
