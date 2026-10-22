@@ -2,7 +2,7 @@
     <div
         role="listitem"
         class="viz-element-row"
-        :class="{ selected, muted: !enabled }"
+        :class="{ selected, muted: !enabled, nested }"
         :draggable="!locked"
         :data-element-id="kind === 'element' ? id : undefined"
         :data-preset-instance-id="kind === 'preset' ? id : undefined"
@@ -87,6 +87,7 @@ defineProps<{
     first: boolean;
     last: boolean;
     expanded?: boolean;
+    nested?: boolean;
 }>();
 defineEmits<{
     select: [];
@@ -115,5 +116,8 @@ defineEmits<{
 .viz-item-title .viz-element-select {
     flex: 1;
     min-width: 0;
+}
+.nested .viz-element-select {
+    padding-left: 22px;
 }
 </style>
