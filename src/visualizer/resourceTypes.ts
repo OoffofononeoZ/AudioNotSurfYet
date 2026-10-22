@@ -1,3 +1,4 @@
+import type { MediaInputDefinition, MediaBindings } from './mediaTypes';
 import type { ElementBinding, ElementKind, EffectTargets } from './compositionTypes';
 import type { AlgorithmDefinition } from './algorithmTypes';
 import type { SceneParameterDescriptor } from './parameterDescriptor';
@@ -19,6 +20,7 @@ export interface ElementDefinition extends ResourceRef {
     inputParameter?: string;
     parameters: SceneParameterDescriptor[];
     markerInputs?: MarkerInputDefinition[];
+    mediaInputs?: MediaInputDefinition[];
 }
 export type CommonValue = number | string | boolean | number[] | Omit<ElementBinding, 'parameterId'>;
 export interface CommonControl {
@@ -38,6 +40,7 @@ export interface PresetElementTemplate {
     enabled: boolean;
     bindings: ElementBinding[];
     markerBindings?: MarkerBindings;
+    mediaBindings?: MediaBindings;
     timing: { kind: 'relative'; start: number; end: number } | { kind: 'unbound' };
     targets?: EffectTargets;
 }

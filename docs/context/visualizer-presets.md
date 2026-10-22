@@ -41,3 +41,7 @@ V5继续把预设保留为默认折叠顶层组，移动整组、组内排序、
 按[当前Visualizer验证](../quality/visualizer/validation.md)核对重复添加/UUID、共同值/差异、导入/草稿、自包含资源、两种默认频谱、静音/真实输入、四段构图、同时间seek与短WebM/context/离页资源。
 
 既有记录：2026-10-17默认绑定修订单元3项与Chrome/Edge各3项通过；两预设四份短WebM经FFprobe/严格递增PTS及FFmpeg解码，1280×720 VP9、48kHz双声道Opus。V4分组/资源回归摘要见[组合工作区](visualizer-composition.md)。本地用户音乐截图/媒体留在忽略目录，不提交歌曲，不形成新canonical/readiness。旧展开工厂与逐阶段反馈由Git查回。
+
+## Circular Visualizer
+
+外部库新增 circular-visualizer-893418273 及七个独立元素：可变背景、扩散粒子、纵深粒子、环形音乐 bar、外层圆、中心圆／Logo、前景图片。默认黑白构图、128根频谱、Responsiveness=50；纵深粒子与前景图默认禁用。共同响应控件批量作用于五个音频元素。图片／轮播／视频及 Logo 的宿主输入见[媒体输入](visualizer-media.md)，预设不内嵌用户文件。

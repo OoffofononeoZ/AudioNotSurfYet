@@ -1,3 +1,5 @@
+import { CompositionMediaHost } from './mediaHost';
+import { realtimeRenderModel } from './realtimeStyle';
 import type { RealtimeStyleV1 } from './realtimeStyle';
 import { IsolatedAlgorithmRuntime } from './isolatedAlgorithmRuntime';
 import { RealtimeResolver } from './realtimeResolver';
@@ -9,8 +11,12 @@ import { ElementSeedSession } from './seed';
 export async function validateRealtimeCandidate(style: RealtimeStyleV1, signal?: AbortSignal) {
     signal?.throwIfAborted();
     const runtime = new IsolatedAlgorithmRuntime();
+    const media = new CompositionMediaHost();
     const elementSeeds = new ElementSeedSession().sync(style.elements, true);
-    const abort = () => runtime.dispose(Error('实时样式验证已取消。'));
+    const abort = () => {
+        runtime.dispose(Error('实时样式验证已取消。'));
+        media.dispose();
+    };
     signal?.addEventListener('abort', abort, { once: true });
     try {
         await runtime.initialize(
@@ -23,11 +29,15 @@ export async function validateRealtimeCandidate(style: RealtimeStyleV1, signal?:
             })),
         );
         const values = new RealtimeResolver().resolve(style, 0, {}, null);
+        const model = realtimeRenderModel(style);
+        const mediaFrames = await media.prepare(model, model.elements, 0, true, true);
         await runtime.prepareFrames(
             style.elements.map(e => ({
                 id: e.id,
                 frame: {
                     time: 0,
+                    mode: 'realtime',
+                    media: mediaFrames.get(e.id),
                     seed: elementSeeds.get(e.id) ?? 0,
                     revision: '0',
                     width: 1920,
@@ -49,6 +59,7 @@ export async function validateRealtimeCandidate(style: RealtimeStyleV1, signal?:
         signal?.throwIfAborted();
     } finally {
         signal?.removeEventListener('abort', abort);
+        media.dispose();
         runtime.dispose();
     }
 }

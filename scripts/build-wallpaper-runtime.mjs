@@ -31,5 +31,10 @@ await build({
     },
 });
 const license = await readFile(path.join(root, 'node_modules/three/LICENSE'), 'utf8');
-await writeFile(path.join(output, 'THIRD_PARTY_LICENSES.txt'), `Three.js\n${license}`, 'utf8');
+const mediaLicense = await readFile(path.join(root, 'node_modules/mediabunny/LICENSE'), 'utf8');
+await writeFile(
+    path.join(output, 'THIRD_PARTY_LICENSES.txt'),
+    `Three.js\n${license}\nMediabunny\n${mediaLicense}`,
+    'utf8',
+);
 console.log('壁纸运行包已生成：public/wallpaper-runtime');

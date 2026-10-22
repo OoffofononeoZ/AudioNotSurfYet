@@ -1,3 +1,4 @@
+import { validateMediaDefinitions, validateMediaBindings } from './mediaCodec';
 import { validateAlgorithmDefinition } from './algorithmCodec';
 import type { AlgorithmDefinition } from './algorithmTypes';
 import { validateElementBinding, validateElementBindings } from './elementBindings';
@@ -131,7 +132,7 @@ function elementDefinition(input: unknown, algorithms: AlgorithmDefinition[]): E
     keys(
         v,
         ['id', 'version', 'hash', 'algorithm', 'kind', 'title', 'icon', 'parameters'],
-        ['inputParameter', 'markerInputs', 'usesSeed'],
+        ['inputParameter', 'markerInputs', 'usesSeed', 'mediaInputs'],
     );
     const ref = identity(v);
     if (v.usesSeed !== undefined && v.usesSeed !== true) return invalid('Seed 能力声明必须为 true 或省略。');
@@ -143,6 +144,7 @@ function elementDefinition(input: unknown, algorithms: AlgorithmDefinition[]): E
         return invalid('元素种类、输入或图标无效。');
     if (!Array.isArray(v.parameters) || v.parameters.length !== kernel.parameters.length)
         return invalid('元素参数定义不完整。');
+    const mediaInputs = validateMediaDefinitions(v.mediaInputs, kernel.mediaInputs);
     const markerInputs = validateMarkerDefinitions(v.markerInputs, kernel.markerInputs);
     return {
         ...ref,
@@ -154,6 +156,7 @@ function elementDefinition(input: unknown, algorithms: AlgorithmDefinition[]): E
         ...(kernel.inputParameter ? { inputParameter: kernel.inputParameter } : {}),
         parameters: kernel.parameters.map((p, i) => parameter((v.parameters as unknown[])[i], p)),
         ...(markerInputs ? { markerInputs } : {}),
+        ...(mediaInputs ? { mediaInputs } : {}),
     };
 }
 export function mergeResources(...snapshots: ResourceSnapshot[]): ResourceSnapshot {
@@ -188,13 +191,18 @@ function presetDefinition(
     >();
     const templates = v.elements.map(input => {
         const e = record(input, '预设子元素');
-        keys(e, ['key', 'element', 'name', 'enabled', 'bindings', 'timing'], ['targets', 'markerBindings']);
+        keys(
+            e,
+            ['key', 'element', 'name', 'enabled', 'bindings', 'timing'],
+            ['targets', 'markerBindings', 'mediaBindings'],
+        );
         const key = name(e.key),
             element = validateResourceRef(e.element),
             definition = elements.find(d => sameResource(d, element));
         if (!definition) return invalid('预设缺少精确版本的元素依赖：' + resourceKey(element));
         if (targets.has(key) || typeof e.enabled !== 'boolean') return invalid('预设子元素 key 或启用状态无效。');
         const bindings = validateElementBindings(e.bindings, definition.parameters);
+        const mediaBindings = validateMediaBindings(e.mediaBindings, definition.mediaInputs, [], true);
         const markerBindings = validateMarkerBindings(
             e.markerBindings,
             definition.markerInputs,
@@ -227,6 +235,7 @@ function presetDefinition(
             enabled: e.enabled,
             bindings,
             ...(markerBindings ? { markerBindings } : {}),
+            ...(mediaBindings ? { mediaBindings } : {}),
             timing: structuredClone(t),
             ...(e.targets !== undefined ? { targets: structuredClone(e.targets) } : {}),
         };

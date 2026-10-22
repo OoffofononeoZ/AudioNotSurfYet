@@ -97,6 +97,29 @@ export class VisualizerExportLockedError extends Error {
     }
 }
 export class VisualizerSessionController {
+    updateMedia(payload: {
+        elementId: string;
+        inputId: string;
+        binding: import('./mediaTypes').MediaBinding;
+        assets: import('./mediaTypes').MediaAsset[];
+    }) {
+        this.assertUnlocked();
+        const project = this.snapshot.project,
+            element = project?.elements.find(e => e.id === payload.elementId);
+        if (!project || !element) return;
+        const mediaAssets = [
+            ...new Map([...(project.mediaAssets ?? []), ...payload.assets].map(a => [a.id, a])).values(),
+        ];
+        this.updateProject({
+            ...project,
+            mediaAssets,
+            elements: project.elements.map(e =>
+                e.id === element.id
+                    ? { ...e, mediaBindings: { ...e.mediaBindings, [payload.inputId]: payload.binding } }
+                    : e,
+            ),
+        });
+    }
     private options: VisualizerSessionControllerOptions;
     private snapshot = initial();
     private seeds = new ElementSeedSession();

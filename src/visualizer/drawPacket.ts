@@ -15,8 +15,10 @@ export function validateDrawPacket(input: unknown, algorithm: AlgorithmDefinitio
         if (!program) return invalid('绘图引用了未声明的 Shader。');
         const uniforms = record(p.uniforms, 'uniforms');
         keys(uniforms, Object.keys(program.uniforms));
-        for (const [name, type] of Object.entries(program.uniforms))
+        for (const [name, type] of Object.entries(program.uniforms)) {
             validateUniform(uniforms[name], type.type, type.length);
+            if (type.type === 'media' && uniforms[name] !== type.inputId) invalid('媒体纹理引用未获授权。');
+        }
         if (program.geometry === 'triangles') {
             const mesh = record(p.mesh, 'mesh');
             keys(mesh, ['positions', 'colors', 'edges']);

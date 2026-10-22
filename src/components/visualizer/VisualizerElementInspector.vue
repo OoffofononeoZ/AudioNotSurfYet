@@ -128,6 +128,15 @@
                 :disabled="locked"
                 @change="markerBindingChanged(input.id, $event)" />
         </section>
+        <VisualizerMediaInput
+            v-for="input in descriptor.mediaInputs ?? []"
+            :key="element.id + ':' + input.id"
+            :element-id="element.id"
+            :definition="input"
+            :binding="element.mediaBindings![input.id]!"
+            :assets="project.mediaAssets ?? []"
+            :disabled="locked"
+            @change="$emit('media', $event)" />
         <section>
             <h3>{{ descriptor.inputParameter ? '输入与视觉参数' : '视觉参数' }}</h3>
             <VisualizerParameterField
@@ -144,6 +153,8 @@
     <div v-else class="viz-inspector-empty"><VisualizerIcon name="sliders" /><span>选择一个元素</span></div>
 </template>
 <script setup lang="ts">
+import VisualizerMediaInput from './VisualizerMediaInput.vue';
+import type { MediaAsset, MediaBinding } from '../../visualizer/mediaTypes';
 import { computed } from 'vue';
 import AppSelect from '../controls/AppSelect.vue';
 import AppNumberInput from '../controls/AppNumberInput.vue';
@@ -154,7 +165,11 @@ import VisualizerParameterField from './VisualizerParameterField.vue';
 import { elementDescriptor, elementRange, elementAlgorithm } from '../../visualizer/compositionModel';
 import type { ElementBinding, VisualizerElement, VisualizerProjectV5 } from '../../visualizer/compositionTypes';
 const props = defineProps<{ project: VisualizerProjectV5; element: VisualizerElement | null; locked: boolean }>();
-const emit = defineEmits<{ update: [patch: Partial<VisualizerElement>]; binding: [binding: ElementBinding] }>();
+const emit = defineEmits<{
+    update: [patch: Partial<VisualizerElement>];
+    binding: [binding: ElementBinding];
+    media: [payload: { elementId: string; inputId: string; binding: MediaBinding; assets: MediaAsset[] }];
+}>();
 const descriptor = computed(() => (props.element ? elementDescriptor(props.project, props.element) : null));
 const kindLabel = computed(
     () => ({ visual: '视觉元素', modifier: '影响效果', transition: '转场' })[descriptor.value?.kind ?? 'visual'],

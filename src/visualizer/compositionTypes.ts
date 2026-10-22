@@ -1,3 +1,4 @@
+import type { MediaAsset, MediaBindings } from './mediaTypes';
 import type { VisualizerExportState } from './exportTypes';
 import type { EditorProjectV2, EditorTrackIdentityV1 } from '../editor/types';
 import type {
@@ -34,6 +35,7 @@ export interface VisualizerElement {
     timing: ElementTiming;
     bindings: ElementBinding[];
     markerBindings?: MarkerBindings;
+    mediaBindings?: MediaBindings;
     targets?: EffectTargets;
 }
 export interface VisualizerProjectV5 {
@@ -48,6 +50,7 @@ export interface VisualizerProjectV5 {
     /** Each leaf is owned exactly once; sibling order determines render layers. */
     items: CompositionItem[];
     resources: ResourceSnapshot;
+    mediaAssets?: MediaAsset[];
     editorSnapshot?: { capturedAt: string; project: EditorProjectV2 };
 }
 export interface CompositionDraft {
@@ -59,7 +62,7 @@ export interface CompositionDraft {
 /** Renderer data shared by song projects and independent realtime styles. */
 export type CompositionRenderModel = Pick<
     VisualizerProjectV5,
-    'projectId' | 'elements' | 'items' | 'resources' | 'editorSnapshot'
+    'projectId' | 'elements' | 'items' | 'resources' | 'editorSnapshot' | 'mediaAssets'
 >;
 
 export interface CompositionSessionSnapshot {

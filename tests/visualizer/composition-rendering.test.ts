@@ -31,9 +31,11 @@ function harness() {
                 value:
                     b.source.kind === 'constant'
                         ? b.source.value
-                        : b.parameterId === 'spectrum'
-                          ? Array(512).fill(40)
-                          : 1.1,
+                        : b.source.kind === 'analysis' && b.source.featureId === 'wallpaperEngineSpectrum'
+                          ? Array(128).fill(0.2)
+                          : b.parameterId === 'spectrum'
+                            ? Array(512).fill(40)
+                            : 1.1,
             });
     const calls: Array<{
         target: THREE.WebGLRenderTarget | null;

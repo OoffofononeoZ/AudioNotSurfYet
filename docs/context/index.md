@@ -11,7 +11,7 @@
 | Home、MusicBar、侧栏与响应式布局 | [应用外壳](app-shell.md) |
 | Analyzer接口/列表/特征 | [页面接口](../architecture/analyzer/interface-contracts.md)、[当前列表](analyzer-list.md)、[Wallpaper频谱](wallpaper-spectrum.md) |
 | Editor工程/交互/页面框架 | [页面接口](../architecture/editor/interface-contracts.md)、[Project V2](../architecture/editor/project-format-v2.md)、[osu 导入](../architecture/editor/osu-import.md)、[交互](../architecture/editor/interaction-contracts.md)、[工作区](editor-workspace.md)、[标记页](editor-marking.md) |
-| Visualizer工程/资源/组合/视频 | [页面接口](../architecture/visualizer/interface-contracts.md)、[Project V5](../architecture/visualizer/project-format-v5.md)、[资源包](../architecture/visualizer/resource-packages-v2.md)、[组合](visualizer-composition.md)、[预设](visualizer-presets.md)、[原生输入](visualizer-native-input.md)、[离线导出](visualizer-offline-export.md)、[实时样式](visualizer-realtime.md) |
+| Visualizer工程/资源/组合/视频 | [页面接口](../architecture/visualizer/interface-contracts.md)、[Project V5](../architecture/visualizer/project-format-v5.md)、[资源包](../architecture/visualizer/resource-packages-v2.md)、[组合](visualizer-composition.md)、[预设](visualizer-presets.md)、[原生输入](visualizer-native-input.md)、[离线导出](visualizer-offline-export.md)、[实时样式](visualizer-realtime.md)、[媒体输入](visualizer-media.md) |
 | 新增原子元素/预设 | [内容生成](../architecture/visualizer/content-generation.md)及根AGENTS指向的外部skill；默认自主生成并附实际展示图 |
 | FT、试听、自动标记 | [FT接入](../architecture/processing/editor-separation.md)、[自动标记](../architecture/processing/editor-auto-marking.md)、[模型身份](../architecture/processing/model-artifacts.md)、[FT配置](../architecture/processing/ft-kernel-config.md) |
 | 后续处理路线/提案 | [路线](../delivery/processing/roadmap.md)、[运行时与未来目标](../architecture/processing/worker-and-project-contracts.md) |

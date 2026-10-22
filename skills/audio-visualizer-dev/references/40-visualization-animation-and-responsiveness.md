@@ -1,6 +1,6 @@
 # 可视化、动画与响应式
 
-当前Visualizer采用[Project V4](../../../docs/architecture/visualizer/project-format-v4.md)、[JSON资源包过渡版](../../../docs/architecture/visualizer/resource-packages-v1.md)与[离线导出](../../../docs/context/visualizer-offline-export.md)。当前实现与约束见[页面接口](../../../docs/architecture/visualizer/interface-contracts.md)，不把历史V1–V6里程碑编号当schemaVersion。
+当前Visualizer采用[Project V5](../../../docs/architecture/visualizer/project-format-v5.md)、[V2算法资源包](../../../docs/architecture/visualizer/resource-packages-v2.md)与[离线导出](../../../docs/context/visualizer-offline-export.md)。当前实现与约束见[页面接口](../../../docs/architecture/visualizer/interface-contracts.md)，不把历史V1–V6里程碑编号当schemaVersion。
 
 ## 当前绘制边界
 
@@ -66,3 +66,7 @@
 - 检查控制台 error/warn，以及 RAF/renderer/canvas 是否重复累积。
 
 历史任务曾在 390、1024、1280 宽度验证 MusicBar 矩形进度条，但这只是历史证据；后续相关改动仍需重新验证。
+
+## 媒体输入与 ABI 3
+
+图片、轮播和视频由宿主管理素材、解码、纹理与释放，算法只收元数据并返回声明内的 media uniform。资源包／工程／实时样式仍自包含；歌曲与实时分别采用时间轴解码和原生静音视频，保持单渲染器。接口、模式和失败行为见[媒体输入](../../../docs/context/visualizer-media.md)，不得把素材读取移入算法 Worker。

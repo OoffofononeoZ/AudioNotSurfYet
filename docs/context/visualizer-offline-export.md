@@ -48,3 +48,7 @@ OPFS `visualizer-export` 下每个 UUID 文件持有独立 Web Lock，生成中�
 复现短矩阵时设置 `VISUALIZER_OUTPUT_MATRIX=1`、`VISUALIZER_OUTPUT_RUN=offline-matrix`，运行 `visualizer-output.spec.ts` 的 Chrome/Edge 专项，再执行 `node tests/scripts/verify-visualizer-output.mjs offline-matrix --all`。长曲设置 `VISUALIZER_EXPORT_LONG=1`，运行 `visualizer-offline-long.spec.ts` 的双浏览器专项，再执行 `node tests/scripts/verify-visualizer-output.mjs offline-long --files-only`。原始视频、capture 与版本化 measurement 保存在本地忽略目录 `artifacts/visualizer-composition/output/`，不加入仓库。
 
 确定性指时间轴、帧求值和音轨同步，不要求不同设备/编码器产生逐字节相同的文件，也不承诺导出快于实时。上述为阶段实现与工作树的功能证据，不标记正式 canonical；OPFS 自动化不代替原生 OS picker 人工验收，不改变历史 readiness 或发布边界。
+
+## ABI 3 媒体扩展
+
+2026-10-22 的 Circular Visualizer 计划增加受控媒体输入和显式执行模式，保留现有格式版本与旧资源身份；新增媒体链路及 ABI 3 的实时因果分支见[媒体输入](visualizer-media.md)。原有仅 ABI 1/2 或无媒体内容的约束继续适用其原范围。

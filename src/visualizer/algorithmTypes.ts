@@ -1,3 +1,4 @@
+import type { MediaInputContract, MediaFrame } from './mediaTypes';
 import type { ElementKind } from './compositionTypes';
 import type { SceneParameterDescriptor } from './parameterDescriptor';
 import type { ResourceRef } from './resourceTypes';
@@ -12,16 +13,18 @@ export interface AlgorithmContract {
     historyParameters: string[];
     markerInputs?: MarkerInputContract[];
     timingInput?: string;
+    mediaInputs?: MediaInputContract[];
+    executionModes?: ('timeline' | 'realtime')[];
 }
-export type UniformType = 'number' | 'int' | 'boolean' | 'color' | 'vec2' | 'vec3' | 'array' | 'source';
+export type UniformType = 'number' | 'int' | 'boolean' | 'color' | 'vec2' | 'vec3' | 'array' | 'source' | 'media';
 export interface ShaderProgram {
     vertex: string;
     fragment: string;
     geometry: 'quad' | 'triangles';
-    uniforms: Record<string, { type: UniformType; length?: number }>;
+    uniforms: Record<string, { type: UniformType; length?: number; inputId?: string; slot?: 'current' | 'next' }>;
 }
 export interface AlgorithmDefinition extends ResourceRef {
-    apiVersion: 1 | 2;
+    apiVersion: 1 | 2 | 3;
     contract: AlgorithmContract;
     source: string;
     programs: Record<string, ShaderProgram>;
@@ -47,6 +50,8 @@ export interface AlgorithmValue {
     unit?: string;
 }
 export interface AlgorithmFrame {
+    mode?: 'timeline' | 'realtime';
+    media?: MediaFrame;
     time: number;
     seed: number;
     revision: string;

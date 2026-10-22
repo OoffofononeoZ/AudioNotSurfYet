@@ -168,6 +168,7 @@ export class IsolatedAlgorithmRuntime {
                     message.kind === 'history' &&
                     (!historyRequest ||
                         !task.history ||
+                        frame.frame.mode === 'realtime' ||
                         !algorithm.contract.historyParameters.includes(historyRequest.parameterId) ||
                         !Number.isInteger(historyRequest.startTick) ||
                         !Number.isInteger(historyRequest.endTick) ||
@@ -181,7 +182,7 @@ export class IsolatedAlgorithmRuntime {
                 if (
                     message.kind === 'markers' &&
                     (!task.markers ||
-                        algorithm.apiVersion !== 2 ||
+                        algorithm.apiVersion < 2 ||
                         !markerQuery ||
                         !algorithm.contract.markerInputs?.some(i => i.id === markerQuery.inputId))
                 )

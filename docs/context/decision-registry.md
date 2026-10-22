@@ -81,3 +81,7 @@ owner 明确取消 SKILL.md 和 content-rules 的强制内容批准，并以“I
 ## DEC-097 — 支持随机效果的元素独立 Seed — 2026-10-22
 
 owner 将位置更正为右侧属性，选择新元素默认留空、旧数据一次性迁移，并明确仅迁移现有 Seed 作用、不为其他 Shader 噪声新增控制；以“Implement the plan.”批准修订方案。删除工程/样式顶层 Seed，元素以 usesSeed:true 声明能力，实例独立保存数字或空值；外部声明、版本、引用及封装器同步，算法/Shader 和 ABI 不变。旧已知快照按精确算法身份迁移，只向支持元素复制旧值；未知或混合结构不猜测，失败保留原文。V5/V1 版本保留，取代 DEC-092 全局 Seed 行为，不含推送、发布或正式 readiness。
+
+## DEC-098 — Circular Visualizer 与媒体输入 — 2026-10-22
+
+owner 要求复刻本地 893418273 壁纸并至少拆分粒子、可变背景、中心圆与音乐 bar，默认 responsiveness=50；补充要求图片／视频及同步宿主和外部 skill，选择全部既有使用场景与自包含 JSON，并以“Implement the plan.”批准七元素、ABI 3、可选媒体字段、受控宿主纹理、双模式响应和两仓库同步。保留 V2/V5/V1 与 ABI 1/2 行为，不含推送、发布或正式 readiness。见[媒体输入](visualizer-media.md)。
