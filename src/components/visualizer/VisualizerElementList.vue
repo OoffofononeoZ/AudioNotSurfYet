@@ -12,10 +12,7 @@
             <VisualizerIcon name="add" />
         </button>
     </div>
-    <div
-        class="viz-element-items app-scrollbar divide-y [&>*]:border-t-[var(--divider)]"
-        role="list"
-        aria-label="可视化元素">
+    <div class="viz-element-items app-scrollbar" role="list" aria-label="可视化元素">
         <div v-for="(item, index) in roots" :key="item.id" class="viz-root-item" :data-root-item-id="item.id">
             <VisualizerCompositionRow
                 :id="item.id"
@@ -50,7 +47,7 @@
                 @dragend="dragged = null" />
             <div
                 v-if="item.kind === 'preset' && expanded.has(item.id)"
-                class="viz-preset-children divide-y border-t border-t-[var(--divider)] [&>*]:border-t-[var(--divider)]"
+                class="viz-preset-children"
                 role="list"
                 :aria-label="item.name + '内部元素'">
                 <VisualizerCompositionRow
@@ -59,6 +56,7 @@
                     :key="id"
                     :name="leaf(id).name"
                     kind="element"
+                    nested
                     :icon="'layers'"
                     :preview="preview(leaf(id).resource)"
                     :enabled="leaf(id).enabled"
@@ -132,7 +130,20 @@ function drop(ids: string[], target: string, parentId?: string) {
 </script>
 <style scoped>
 .viz-preset-children {
-    margin: 4px 0 8px 14px;
-    box-shadow: inset 1px 0 #35473c;
+    position: relative;
+    margin: 0;
+    padding: 0;
+    background: #0002;
+}
+.viz-preset-children::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 1px;
+    left: 12px;
+    width: 1px;
+    background: var(--divider);
+    pointer-events: none;
+    z-index: 1;
 }
 </style>

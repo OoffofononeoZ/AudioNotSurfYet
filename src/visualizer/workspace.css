@@ -98,11 +98,12 @@
     min-height: 0;
     overflow: auto;
     overscroll-behavior: contain;
-    padding: 6px 0;
+    padding: 0;
 }
 .viz-element-row {
     position: relative;
     border-left: 2px solid transparent;
+    border-bottom: 1px solid var(--divider);
 }
 .viz-element-row.selected {
     background: rgba(134, 237, 181, 0.065);

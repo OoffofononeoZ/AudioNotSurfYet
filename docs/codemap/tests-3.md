@@ -6,6 +6,7 @@
 
 | 文件 | 本地静态引用（最多显示 6 项） |
 | --- | --- |
+| [tests/scripts/run-m9-eval.mjs](../../tests/scripts/run-m9-eval.mjs) | — |
 | [tests/scripts/run-p1-eval.mjs](../../tests/scripts/run-p1-eval.mjs) | — |
 | [tests/scripts/run-v1-eval.mjs](../../tests/scripts/run-v1-eval.mjs) | — |
 | [tests/scripts/run-v2-eval.mjs](../../tests/scripts/run-v2-eval.mjs) | — |
@@ -105,4 +106,3 @@
 | [tests/visualizer/wallpaper-export.test.ts](../../tests/visualizer/wallpaper-export.test.ts) | [src/visualizer/compositionCodec.ts](../../src/visualizer/compositionCodec.ts)、[src/visualizer/compositionModel.ts](../../src/visualizer/compositionModel.ts)、[src/visualizer/elementRegistry.ts](../../src/visualizer/elementRegistry.ts)、[src/visualizer/realtimeStyle.ts](../../src/visualizer/realtimeStyle.ts)、[src/visualizer/wallpaperDirectoryWriter.ts](../../src/visualizer/wallpaperDirectoryWriter.ts)、[src/visualizer/wallpaperExport.ts](../../src/visualizer/wallpaperExport.ts)、另 1 项，按需核对源码 |
 | [tests/visualizer/waveform-source.test.ts](../../tests/visualizer/waveform-source.test.ts) | [src/analysis/config.ts](../../src/analysis/config.ts)、[src/analysis/frames.ts](../../src/analysis/frames.ts)、[src/analysis/meydaAdapter.ts](../../src/analysis/meydaAdapter.ts)、[src/analysis/pcm.ts](../../src/analysis/pcm.ts)、[src/visualizer/waveformSource.ts](../../src/visualizer/waveformSource.ts) |
 | [tests/worker/m10-worker.test.ts](../../tests/worker/m10-worker.test.ts) | [src/analysis/compactCodec.ts](../../src/analysis/compactCodec.ts)、[src/analysis/config.ts](../../src/analysis/config.ts)、[src/analysis/types.ts](../../src/analysis/types.ts)、[src/analysis/workerCore.ts](../../src/analysis/workerCore.ts)、[tests/support/audio-fixtures.ts](../../tests/support/audio-fixtures.ts) |
-| [tests/worker/m6-worker.test.ts](../../tests/worker/m6-worker.test.ts) | [src/analysis/config.ts](../../src/analysis/config.ts)、[src/analysis/types.ts](../../src/analysis/types.ts)、[src/analysis/workerCore.ts](../../src/analysis/workerCore.ts)、[tests/support/audio-fixtures.ts](../../tests/support/audio-fixtures.ts) |
