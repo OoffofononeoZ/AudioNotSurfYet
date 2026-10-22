@@ -100,51 +100,6 @@
     overscroll-behavior: contain;
     padding: 0;
 }
-.viz-element-row {
-    position: relative;
-    border-left: 2px solid transparent;
-    border-bottom: 1px solid var(--divider);
-}
-.viz-element-row.selected {
-    background: rgba(134, 237, 181, 0.065);
-    border-left-color: var(--accent-soft);
-}
-.viz-element-row.muted .viz-element-select {
-    opacity: 0.45;
-}
-.viz-element-select {
-    border: 0;
-    border-radius: 0;
-    background: transparent;
-    color: var(--body);
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    width: 100%;
-    min-height: 40px;
-    padding: 10px 14px 4px;
-    text-align: left;
-    font-size: 12px;
-    cursor: pointer;
-}
-.viz-element-select svg {
-    width: 18px;
-    height: 18px;
-    flex: none;
-}
-.viz-element-select span {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-.viz-element-row.selected .viz-element-select {
-    color: var(--ink);
-}
-.viz-row-actions {
-    display: flex;
-    gap: 4px;
-    padding: 0 0 4px 38px;
-}
 .viz-list-empty,
 .viz-inspector-empty {
     display: flex;
