@@ -30,6 +30,8 @@ Visualizer 页面统一拥有资源库、任务和预览对象 URL，商城/列�
 
 ## 隔离与帧契约
 
+元素定义可声明 `usesSeed:true`，表示该元素支持的实际画面（含可选随机分支）会使用 `frame.seed`；不使用时省略，不接受 false。能力声明参与元素 hash，更新必须提升元素版本并同步预设精确引用。共享源码出现 seed 不证明该元素的绘制分支使用 Seed；未接入 Seed 的 Shader 噪声也不声明。外部封装器与应用使用同一严格校验。
+
 算法在不授予同源权限的 iframe 所属 Worker 执行；CSP 禁止网络，宿主不在主页面求值算法。Worker 只获得当前工程获准的参数、分块历史输入和已绑定标记，返回 DrawPacket。宿主校验身份、数值、缓冲与目标后，通过现有单 Canvas/WebGLRenderer 绘制。
 
 - 模块导出同步 create 工厂；实例实现 prepareFrame，可选 reset/dispose。工程帧输入包含绝对歌曲时间、seed、binding revision、输出尺寸、有效时段和已解析参数/单位。[实时样式](../../context/visualizer-realtime.md)仅接入无历史/标记/转场依赖的算法，使用单调会话秒、当前参数和 range:null，历史与标记查询明确拒绝；工程 ABI 和离线语义不变。

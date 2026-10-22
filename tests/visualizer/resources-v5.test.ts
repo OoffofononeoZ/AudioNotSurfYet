@@ -119,7 +119,10 @@ describe('V5 preset ownership and bulk controls', () => {
             const restored = decodeComposition(encoded.buffer as ArrayBuffer);
             const added = addPreset(restored, id);
             expect(added.elements.slice(0, saved.elements.length)).toEqual(saved.elements);
-            expect(added.resources.presets.map(p => p.version)).toEqual([2, 3]);
+            expect(added.resources.presets.map(p => p.version)).toEqual([
+                2,
+                elementRegistry.presets.find(p => p.id === id)!.version,
+            ]);
             const fresh = added.elements.slice(saved.elements.length);
             for (const element of fresh) expect(element.name).toBe(elementRegistry.get(element.resource).title);
             expect(new Set(added.elements.map(e => e.id)).size).toBe(added.elements.length);

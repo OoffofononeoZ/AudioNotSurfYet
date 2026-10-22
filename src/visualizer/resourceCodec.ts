@@ -131,9 +131,10 @@ function elementDefinition(input: unknown, algorithms: AlgorithmDefinition[]): E
     keys(
         v,
         ['id', 'version', 'hash', 'algorithm', 'kind', 'title', 'icon', 'parameters'],
-        ['inputParameter', 'markerInputs'],
+        ['inputParameter', 'markerInputs', 'usesSeed'],
     );
     const ref = identity(v);
+    if (v.usesSeed !== undefined && v.usesSeed !== true) return invalid('Seed 能力声明必须为 true 或省略。');
     const algorithm = validateResourceRef(v.algorithm),
         definition = algorithms.find(a => sameResource(a, algorithm));
     if (!definition) return invalid('绘制算法依赖缺失。');
@@ -146,6 +147,7 @@ function elementDefinition(input: unknown, algorithms: AlgorithmDefinition[]): E
     return {
         ...ref,
         algorithm,
+        ...(v.usesSeed === true ? { usesSeed: true as const } : {}),
         kind: kernel.kind,
         title: text(v.title, '元素名称'),
         icon: String(v.icon),
