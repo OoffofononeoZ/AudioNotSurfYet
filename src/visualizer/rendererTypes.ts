@@ -12,7 +12,7 @@ export interface VisualizerResolvedParameter {
 export type VisualizerResolvedParameterMap = ReadonlyMap<string, VisualizerResolvedParameter>;
 
 export interface VisualizerSceneRenderInput {
-    readonly seed: number;
+    readonly elementSeeds: ReadonlyMap<string, number>;
     readonly timeSeconds: number;
     readonly values: VisualizerResolvedParameterMap;
     readonly bindingRevision: number;
@@ -51,12 +51,12 @@ export interface VisualizerScene {
     dispose(): void;
 }
 
-export type VisualizerSceneFactory = (host: VisualizerSceneHost, seed: number) => VisualizerScene;
+export type VisualizerSceneFactory = (host: VisualizerSceneHost) => VisualizerScene;
 
 export interface VisualizerRenderFrame {
     readonly animate?: boolean;
     readonly trackIdentity: string;
-    readonly seed: number;
+    readonly elementSeeds: ReadonlyMap<string, number>;
     readonly timeSeconds: number;
     readonly bindingRevision: number;
     readonly playbackState: 'empty' | 'loading' | 'buffering' | 'paused' | 'playing' | 'ended' | 'error';

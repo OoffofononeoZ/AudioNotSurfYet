@@ -54,7 +54,7 @@ export function useVisualizerPreview(
                         return p
                             ? {
                                   trackIdentity: p.track.contentHash,
-                                  seed: controller.readRenderSeed(),
+                                  elementSeeds: controller.readRenderSeeds(),
                                   timeSeconds: store.playback.currentTimeSeconds,
                                   bindingRevision: snapshot.value.bindingRuntime.bindingRevision,
                                   playbackState: store.playback.state,
@@ -112,12 +112,7 @@ export function useVisualizerPreview(
         { flush: 'post' },
     );
     watch(
-        () => [
-            snapshot.value.bindingRuntime.bindingRevision,
-            snapshot.value.project?.seed,
-            store.playback.state,
-            store.playback.currentTimeSeconds,
-        ],
+        () => [snapshot.value.bindingRuntime.bindingRevision, store.playback.state, store.playback.currentTimeSeconds],
         () => host?.requestFrame(),
     );
     watch(

@@ -29,6 +29,7 @@ export interface VisualizerElement {
     resource: ResourceRef;
     name: string;
     enabled: boolean;
+    seed?: number | null;
     layer: number;
     timing: ElementTiming;
     bindings: ElementBinding[];
@@ -43,7 +44,6 @@ export interface VisualizerProjectV5 {
     updatedAt: string;
     track: EditorTrackIdentityV1;
     output: { aspectRatio: '16:9'; resolution: VisualizerResolution; frameRate: VisualizerFrameRate };
-    seed: number | null;
     elements: VisualizerElement[];
     /** Each leaf is owned exactly once; sibling order determines render layers. */
     items: CompositionItem[];
@@ -59,7 +59,7 @@ export interface CompositionDraft {
 /** Renderer data shared by song projects and independent realtime styles. */
 export type CompositionRenderModel = Pick<
     VisualizerProjectV5,
-    'projectId' | 'seed' | 'elements' | 'items' | 'resources' | 'editorSnapshot'
+    'projectId' | 'elements' | 'items' | 'resources' | 'editorSnapshot'
 >;
 
 export interface CompositionSessionSnapshot {

@@ -6,7 +6,8 @@ import { resourceKey, sameResource } from './resourceIdentity';
 import { inspectRealtimeProject, inspectRealtimeContent } from './realtimeCapabilities';
 import { validateElementBindings } from './elementBindings';
 import { record, keys, text, integer, iso, invalid, UUID_PATTERN } from './projectValidation';
-import { validateSeed } from './seed';
+import { elementSeedField } from './seed';
+import { migrateLegacySeeds } from './seedMigration';
 
 export type RealtimeStyleElement = Omit<VisualizerElement, 'enabled' | 'timing' | 'markerBindings'>;
 export interface RealtimeStyleV1 {
@@ -15,7 +16,6 @@ export interface RealtimeStyleV1 {
     id: string;
     name: string;
     createdAt: string;
-    seed: number | null;
     frameRate: 30 | 60;
     elements: RealtimeStyleElement[];
     resources: ResourceSnapshot;
@@ -26,7 +26,6 @@ export function realtimeRenderModel(
 ): CompositionRenderModel {
     return {
         projectId: style.id,
-        seed: style.seed,
         resources: style.resources,
         items: style.elements.map(e => ({ kind: 'element', id: e.id })),
         elements: style.elements.map(e => ({
@@ -50,7 +49,6 @@ export function createRealtimeStyle(project: VisualizerProjectV5, name: string):
         id: crypto.randomUUID(),
         name: name.trim(),
         createdAt: new Date().toISOString(),
-        seed: project.seed,
         frameRate: project.output.frameRate,
         elements: active.map(({ enabled: _enabled, timing: _timing, markerBindings: _markers, ...e }, layer) => ({
             ...e,
@@ -67,17 +65,16 @@ export function createRealtimeStyle(project: VisualizerProjectV5, name: string):
     });
 }
 export function validateRealtimeStyle(input: unknown): RealtimeStyleV1 {
-    const v = record(input, '实时样式');
-    keys(v, ['format', 'schemaVersion', 'id', 'name', 'createdAt', 'seed', 'frameRate', 'elements', 'resources']);
+    const v = record(migrateLegacySeeds(input), '实时样式');
+    keys(v, ['format', 'schemaVersion', 'id', 'name', 'createdAt', 'frameRate', 'elements', 'resources']);
     if (v.format !== 'audiosurf-realtime-style' || v.schemaVersion !== 1 || !UUID_PATTERN.test(text(v.id, 'id')))
         return invalid('实时样式格式无效。');
-    const resources = validateResourceSnapshot(v.resources),
-        seed = validateSeed(v.seed);
+    const resources = validateResourceSnapshot(v.resources);
     if ((v.frameRate !== 30 && v.frameRate !== 60) || !Array.isArray(v.elements) || resources.presets.length)
         return invalid('实时样式参数无效。');
     const elements = v.elements.map((input, layer): RealtimeStyleElement => {
         const e = record(input, '元素');
-        keys(e, ['id', 'resource', 'name', 'layer', 'bindings'], ['targets']);
+        keys(e, ['id', 'resource', 'name', 'layer', 'bindings'], ['targets', 'seed']);
         if (!UUID_PATTERN.test(text(e.id, 'id')) || integer(e.layer, 'layer') !== layer)
             return invalid('实时元素身份或顺序无效。');
         const resource = validateResourceRef(e.resource),
@@ -87,6 +84,7 @@ export function validateRealtimeStyle(input: unknown): RealtimeStyleV1 {
             id: String(e.id),
             resource,
             name: text(e.name, 'name'),
+            ...elementSeedField(e.seed, definition.usesSeed),
             layer,
             bindings: validateElementBindings(e.bindings, definition.parameters),
             ...(e.targets === undefined ? {} : { targets: structuredClone(e.targets) as VisualizerElement['targets'] }),
@@ -99,7 +97,6 @@ export function validateRealtimeStyle(input: unknown): RealtimeStyleV1 {
         id: String(v.id),
         name: text(v.name, 'name'),
         createdAt: iso(v.createdAt, 'createdAt'),
-        seed,
         frameRate: v.frameRate,
         elements,
         resources,

@@ -21,7 +21,7 @@
 - constant、Analyzer、native 与适用 Editor 引用按 [types.ts](../../../src/visualizer/types.ts)、[原生输入](../../context/visualizer-native-input.md)和[算法契约](../../../src/visualizer/algorithmTypes.ts)声明单位、映射、平滑与历史准备要求，不按算法名称分派。
 - ABI 2 的点/范围输入由工程绑定轨道/分类/事件，通过 prepareFrame 内 input.markers 查询；外部包和初始化不读取实际标记。具体字段见[标记类型](../../../src/visualizer/editorMarkerTypes.ts)，分页规则见[标记读取](../../../src/visualizer/editorMarkerReader.ts)及外部 skill 的标记输入参考。
 - 全工程最多四种不同 Analyzer 特征，native 和标记不占额度。缺失引用/未准备数据显式反馈，不自动改绑、降档或禁用其他内容绕过校验。
-- 绝对歌曲时间、运行时数字 seed 和算法快照决定结果；工程 seed 可为空，自动随机的会话生命周期见 [V5](project-format-v5.md)。RendererHost 向场景传入当次数字 seed，算法帧和诊断 hash 使用相同值；seek、循环、离线导出同源求值。预览合并在途请求，失效结果不绘制；导出逐帧等待算法与 GPU。诊断 hash 使用与视口无关的参数及状态；画面正确性仍以数值基线和 GPU 像素验证。Editor snapshot 同歌校验，显式替换且完整验证。
+- 绝对歌曲时间、逐元素数字 seed 和算法快照决定结果；仅支持 Seed 的元素显示右侧属性并保存可空值，会话及显式旧数据迁移见 [V5](project-format-v5.md)。RendererHost 向场景传入只读元素种子快照，算法帧和诊断 hash 使用相同值；seek、循环、离线导出同源求值。预览合并在途请求，失效结果不绘制；导出逐帧等待算法与 GPU。诊断 hash 使用与视口无关的参数及状态；画面正确性仍以数值基线和 GPU 像素验证。Editor snapshot 同歌校验，显式替换且完整验证。
 
 ## 导出与验证
 

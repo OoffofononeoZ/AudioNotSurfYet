@@ -116,7 +116,7 @@ test('fifteen-minute offline native input stays responsive, exports fully and ca
     const project = JSON.parse(
         Buffer.from((await savedPickerEntries(page)).at(-1)!.base64, 'base64').toString(),
     ) as VisualizerProjectV5;
-    project.seed = 1234567;
+    for (const e of project.elements) if (e.seed !== undefined) e.seed = 1234567;
     project.output = { aspectRatio: '16:9', resolution: '1080p', frameRate: 60 };
     const background = elementRegistry.create('solid', 900, 0);
     background.bindings.find(b => b.parameterId === 'color')!.source = { kind: 'constant', value: '#000000' };

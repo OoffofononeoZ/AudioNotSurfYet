@@ -9,6 +9,8 @@ import type {
 import type { AudioSessionService } from '../../src/audio/audioSessionService';
 import type { VisualizerFileGateway } from '../../src/visualizer/fileIO';
 import { useAudioSessionStore } from '../../src/stores/audioSessionStore';
+import { elementRegistry } from '../../src/visualizer/elementRegistry';
+import { appendStandaloneElements } from '../../src/visualizer/compositionModel';
 import { createComposition } from '../../src/visualizer/compositionCodec';
 import { createInitialEditorProject } from '../../src/editor/projectCodec';
 import type { EditorDraftRepositoryPort } from '../../src/editor/editorDraftRepository';
@@ -80,7 +82,8 @@ beforeEach(() => setActivePinia(createPinia()));
 afterEach(() => vi.restoreAllMocks());
 
 test('automatic seeds survive edits and persistence but reroll on clear, accepted import and reopening', async () => {
-    const project = { ...createComposition(track), seed: null };
+    const project = appendStandaloneElements(createComposition(track), [elementRegistry.create('starfield', 10, 0)]);
+    const id = project.elements[0]!.id;
     let next = 100;
     const random = vi.spyOn(crypto, 'getRandomValues').mockImplementation(array => {
         (array as Uint32Array)[0] = next++;
@@ -88,37 +91,39 @@ test('automatic seeds survive edits and persistence but reroll on clear, accepte
     });
     const h = harness({ kind: 'current', draft: { schemaVersion: 5, savedAt: project.updatedAt, project } });
     await h.controller.enter('first');
-    expect(h.controller.readRenderSeed()).toBe(100);
+    expect(h.controller.readRenderSeeds().get(id)).toBe(100);
     h.controller.updateOutput('1080p', 30);
     await h.controller.flush();
-    expect(h.controller.readRenderSeed()).toBe(100);
-    expect(vi.mocked(h.repository.replace).mock.lastCall![0].project.seed).toBeNull();
+    expect(h.controller.readRenderSeeds().get(id)).toBe(100);
+    expect(vi.mocked(h.repository.replace).mock.lastCall![0].project.elements[0]!.seed).toBeNull();
     await h.controller.exportProject();
-    expect(JSON.parse(new TextDecoder().decode(vi.mocked(h.fileGateway.save).mock.lastCall![2])).seed).toBeNull();
-    expect(h.controller.readRenderSeed()).toBe(100);
-    h.controller.updateProject({ ...h.controller.readProject()!, seed: 0 });
-    expect(h.controller.readRenderSeed()).toBe(0);
-    h.controller.updateProject({ ...h.controller.readProject()!, seed: null });
-    expect(h.controller.readRenderSeed()).toBe(101);
+    expect(
+        JSON.parse(new TextDecoder().decode(vi.mocked(h.fileGateway.save).mock.lastCall![2])).elements[0].seed,
+    ).toBeNull();
+    expect(h.controller.readRenderSeeds().get(id)).toBe(100);
+    h.controller.updateElement(id, { seed: 0 });
+    expect(h.controller.readRenderSeeds().get(id)).toBe(0);
+    h.controller.updateElement(id, { seed: null });
+    expect(h.controller.readRenderSeeds().get(id)).toBe(101);
     vi.mocked(h.fileGateway.open).mockResolvedValue({
         name: 'cancel.json',
         bytes: new TextEncoder().encode('{}').buffer,
     });
     await expect(h.controller.importProject()).rejects.toThrow();
-    expect(h.controller.readRenderSeed()).toBe(101);
+    expect(h.controller.readRenderSeeds().get(id)).toBe(101);
     vi.mocked(h.fileGateway.open).mockResolvedValue(null);
     expect(await h.controller.importProject()).toBe('cancelled');
-    expect(h.controller.readRenderSeed()).toBe(101);
+    expect(h.controller.readRenderSeeds().get(id)).toBe(101);
     vi.mocked(h.fileGateway.open).mockResolvedValue({
         name: 'auto.json',
         bytes: new TextEncoder().encode(JSON.stringify(h.controller.readProject())).buffer,
     });
     expect(await h.controller.importProject()).toBe('imported');
-    expect(h.controller.readRenderSeed()).toBe(102);
+    expect(h.controller.readRenderSeeds().get(id)).toBe(102);
     await h.controller.leave();
     await h.controller.enter('first');
-    expect(h.controller.readRenderSeed()).toBe(103);
-    expect(h.controller.readProject()!.seed).toBeNull();
+    expect(h.controller.readRenderSeeds().get(id)).toBe(103);
+    expect(h.controller.readProject()!.elements[0]!.seed).toBeNull();
     expect(random).toHaveBeenCalledTimes(4);
     await h.controller.dispose();
 });
@@ -126,8 +131,8 @@ test('automatic seeds survive edits and persistence but reroll on clear, accepte
 test('stale or invalid automatic-seed imports never reroll an active session', async () => {
     const h = harness();
     await h.controller.enter('first');
-    h.controller.updateProject({ ...h.controller.readProject()!, seed: null });
-    const seed = h.controller.readRenderSeed();
+    const id = h.controller.addElement('starfield')!;
+    const seed = h.controller.readRenderSeeds().get(id);
     const pending = deferred<Awaited<ReturnType<VisualizerFileGateway['open']>>>();
     vi.mocked(h.fileGateway.open).mockReturnValueOnce(pending.promise);
     const oldProject = structuredClone(h.controller.readProject()!);
@@ -136,9 +141,33 @@ test('stale or invalid automatic-seed imports never reroll an active session', a
     await h.controller.importProject();
     pending.resolve({ name: 'late.json', bytes: new TextEncoder().encode(JSON.stringify(oldProject)).buffer });
     expect(await importing).toBe('cancelled');
-    expect(h.controller.readRenderSeed()).toBe(seed);
-    expect(() => h.controller.updateProject({ ...oldProject, seed: 1.5 })).toThrow();
-    expect(h.controller.readRenderSeed()).toBe(seed);
+    expect(h.controller.readRenderSeeds().get(id)).toBe(seed);
+    expect(() => h.controller.updateElement(id, { seed: 1.5 })).toThrow();
+    expect(h.controller.readRenderSeeds().get(id)).toBe(seed);
+    await h.controller.dispose();
+});
+
+test('migrated drafts are saved once after activation and stay untouched on a different song', async () => {
+    const project = appendStandaloneElements(createComposition(track), [elementRegistry.create('starfield', 10, 0)]);
+    project.elements[0]!.seed = 17;
+    const h = harness({
+        kind: 'current',
+        draft: { schemaVersion: 5, savedAt: project.updatedAt, project },
+        needsSave: true,
+    });
+    await h.controller.enter('second');
+    expect(h.controller.getSnapshot().state).toBe('draft-conflict');
+    await h.controller.flush();
+    expect(h.repository.replace).not.toHaveBeenCalled();
+    await h.controller.enter('first');
+    expect(h.controller.getSnapshot().state).toBe('ready');
+    expect(h.controller.readRenderSeeds().get(project.elements[0]!.id)).toBe(17);
+    await h.controller.flush();
+    expect(h.repository.replace).toHaveBeenCalledOnce();
+    expect(vi.mocked(h.repository.replace).mock.lastCall![0].project).toEqual(project);
+    await h.controller.enter('first');
+    await h.controller.flush();
+    expect(h.repository.replace).toHaveBeenCalledOnce();
     await h.controller.dispose();
 });
 
@@ -357,14 +386,14 @@ test('concurrent flush callers all await the latest queued write, with no overla
     const a = writer.flush();
     await vi.waitFor(() => expect(replace).toHaveBeenCalledOnce());
     const latest = createComposition(track);
-    latest.seed = 42;
+    latest.output.resolution = '1080p';
     writer.queue(latest);
     const b = writer.flush();
     expect(a).toBe(b);
     first.resolve();
     await vi.waitFor(() => expect(replace).toHaveBeenCalledTimes(2));
     expect(writer.hasPending()).toBe(true);
-    expect(replace.mock.lastCall?.[0].project.seed).toBe(42);
+    expect(replace.mock.lastCall?.[0].project.output.resolution).toBe('1080p');
     last.resolve();
     expect(await Promise.all([a, b])).toEqual([true, true]);
     expect(writer.hasPending()).toBe(false);
@@ -378,11 +407,11 @@ test('a failed write retains a newer pending revision for retry', async () => {
     const flush = writer.flush();
     await vi.waitFor(() => expect(replace).toHaveBeenCalledOnce());
     const latest = createComposition(track);
-    latest.seed = 99;
+    latest.output.frameRate = 60;
     writer.queue(latest);
     pending.reject(new Error('disk full'));
     expect(await flush).toBe(false);
     expect(writer.hasPending()).toBe(true);
     expect(await writer.flush()).toBe(true);
-    expect(replace.mock.lastCall?.[0].project.seed).toBe(99);
+    expect(replace.mock.lastCall?.[0].project.output.frameRate).toBe(60);
 });

@@ -1,8 +1,9 @@
 import { validateCompositionDraft } from './compositionCodec';
 import type { CompositionDraft } from './compositionTypes';
+import { hasLegacySeed } from './seedMigration';
 
 export type RestoredComposition =
-    { kind: 'current'; draft: CompositionDraft } | { kind: 'unsupported'; raw: unknown } | null;
+    { kind: 'current'; draft: CompositionDraft; needsSave?: true } | { kind: 'unsupported'; raw: unknown } | null;
 export interface CompositionDraftRepositoryPort {
     restore(): Promise<RestoredComposition>;
     replace(draft: CompositionDraft): Promise<void>;
@@ -52,7 +53,11 @@ export class CompositionDraftRepository implements CompositionDraftRepositoryPor
         await complete;
         if (!stored || stored.envelope?.schemaVersion !== 5) return null;
         try {
-            return { kind: 'current', draft: validateCompositionDraft(stored.envelope) };
+            return {
+                kind: 'current',
+                draft: validateCompositionDraft(stored.envelope),
+                ...(hasLegacySeed(stored.envelope.project) ? { needsSave: true as const } : {}),
+            };
         } catch {
             return { kind: 'unsupported', raw: structuredClone(stored.envelope) };
         }

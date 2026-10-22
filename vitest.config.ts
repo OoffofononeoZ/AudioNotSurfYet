@@ -17,6 +17,8 @@ const externalResourceSuites = [
         'native-input',
         'radial-spectrum',
         'resources-v5',
+        'seed-capabilities',
+        'seed-migration',
     ].map(name => `tests/visualizer/${name}.test.ts`),
 ];
 if (!assetsAvailable)

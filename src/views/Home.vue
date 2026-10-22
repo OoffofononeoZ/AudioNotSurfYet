@@ -99,6 +99,10 @@ const handleArtworkError = (event: Event) => {
     left: 0;
     right: 0;
     z-index: 2;
+    pointer-events: none;
+}
+.home-visualizer-content .home-display-switch button {
+    pointer-events: auto;
 }
 .home-visualizer-content .home-realtime {
     position: absolute;

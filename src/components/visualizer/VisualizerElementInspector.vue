@@ -17,6 +17,34 @@
                     aria-label="元素名称"
                     @change="$emit('update', { name: inputValue($event) })"
             /></label>
+            <div v-if="descriptor.usesSeed" class="viz-field">
+                <span>Seed</span>
+                <div class="flex items-center gap-1">
+                    <AppNumberInput
+                        :key="element.id + ':seed'"
+                        :model-value="element.seed ?? 0"
+                        :empty="element.seed === null"
+                        allow-empty
+                        placeholder="自动随机"
+                        :min="0"
+                        :max="4294967295"
+                        :editing-precision="0"
+                        wheel-enabled
+                        label="元素 Seed"
+                        :disabled="locked"
+                        @change="$emit('update', { seed: $event })"
+                        @clear="$emit('update', { seed: null })" />
+                    <button
+                        type="button"
+                        class="viz-icon-button small"
+                        aria-label="清空元素 Seed"
+                        title="清空 Seed"
+                        :disabled="locked || element.seed === null"
+                        @click="$emit('update', { seed: null })">
+                        <VisualizerIcon name="close" />
+                    </button>
+                </div>
+            </div>
         </section>
         <section v-if="element.targets">
             <h3>影响对象</h3>

@@ -6,7 +6,7 @@ import { VisualizerRendererHost } from './visualizerRendererHost';
 import { realtimeRenderModel, type RealtimeStyleV1 } from './realtimeStyle';
 import { RealtimeResolver } from './realtimeResolver';
 import { validateAlgorithmPrograms } from './validateAlgorithmPrograms';
-import { resolveSessionSeed } from './seed';
+import { ElementSeedSession } from './seed';
 
 /** Shared browser / Wallpaper Engine surface. Audio acquisition remains with its host. */
 export class RealtimeSurface {
@@ -29,7 +29,7 @@ export class RealtimeSurface {
     ) {
         this.style = style;
         this.fps = style.frameRate;
-        const seed = resolveSessionSeed(style.seed);
+        const elementSeeds = new ElementSeedSession().sync(style.elements, true);
         const model = realtimeRenderModel(style);
         this.host = new VisualizerRendererHost({
             maxFrameRate: () => this.fps,
@@ -45,7 +45,7 @@ export class RealtimeSurface {
             },
             readFrame: () => ({
                 trackIdentity: style.id,
-                seed,
+                elementSeeds,
                 timeSeconds: this.time(),
                 bindingRevision: this.revision,
                 playbackState: 'paused',

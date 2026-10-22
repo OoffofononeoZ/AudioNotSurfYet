@@ -6,6 +6,7 @@
 
 | 文件 | 本地静态引用（最多显示 6 项） |
 | --- | --- |
+| [tests/visualizer/waveform-source.test.ts](../../tests/visualizer/waveform-source.test.ts) | [src/analysis/config.ts](../../src/analysis/config.ts)、[src/analysis/frames.ts](../../src/analysis/frames.ts)、[src/analysis/meydaAdapter.ts](../../src/analysis/meydaAdapter.ts)、[src/analysis/pcm.ts](../../src/analysis/pcm.ts)、[src/visualizer/waveformSource.ts](../../src/visualizer/waveformSource.ts) |
 | [tests/worker/m10-worker.test.ts](../../tests/worker/m10-worker.test.ts) | [src/analysis/compactCodec.ts](../../src/analysis/compactCodec.ts)、[src/analysis/config.ts](../../src/analysis/config.ts)、[src/analysis/types.ts](../../src/analysis/types.ts)、[src/analysis/workerCore.ts](../../src/analysis/workerCore.ts)、[tests/support/audio-fixtures.ts](../../tests/support/audio-fixtures.ts) |
 | [tests/worker/m6-worker.test.ts](../../tests/worker/m6-worker.test.ts) | [src/analysis/config.ts](../../src/analysis/config.ts)、[src/analysis/types.ts](../../src/analysis/types.ts)、[src/analysis/workerCore.ts](../../src/analysis/workerCore.ts)、[tests/support/audio-fixtures.ts](../../tests/support/audio-fixtures.ts) |
 | [tests/worker/m8-worker.test.ts](../../tests/worker/m8-worker.test.ts) | [src/analysis/config.ts](../../src/analysis/config.ts)、[src/analysis/types.ts](../../src/analysis/types.ts)、[src/analysis/workerCore.ts](../../src/analysis/workerCore.ts)、[tests/support/audio-fixtures.ts](../../tests/support/audio-fixtures.ts)、[tests/support/m8-scalar-fixture.ts](../../tests/support/m8-scalar-fixture.ts) |

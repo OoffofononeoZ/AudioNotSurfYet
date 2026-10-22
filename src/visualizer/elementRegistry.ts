@@ -26,6 +26,7 @@ export function createDefinitionElement(
         resource: resourceRef(d),
         name: d.title,
         enabled: true,
+        ...(d.usesSeed ? { seed: null } : {}),
         layer,
         timing:
             d.kind === 'transition'

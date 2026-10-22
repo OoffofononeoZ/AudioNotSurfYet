@@ -85,7 +85,10 @@ export class CompositionScene implements VisualizerScene {
         const signature =
             project.projectId +
             ':' +
-            input.seed +
+            [...input.elementSeeds]
+                .map(([id, seed]) => id + ':' + seed)
+                .sort()
+                .join('|') +
             ':' +
             input.bindingRevision +
             ':' +
@@ -132,6 +135,9 @@ export class CompositionScene implements VisualizerScene {
                     return [];
                 }
                 const parameters: AlgorithmFrame['parameters'] = {};
+                const seed = input.elementSeeds.get(e.id);
+                if (elementDescriptor(project, e).usesSeed && seed === undefined)
+                    throw Error('元素运行时 Seed 尚未初始化。');
                 for (const binding of e.bindings) {
                     const value = values.get(parameterKey(e.id, binding.parameterId));
                     if (value?.state !== 'ready' || value.value === undefined) {
@@ -148,7 +154,7 @@ export class CompositionScene implements VisualizerScene {
                         id: e.id,
                         frame: {
                             time: input.timeSeconds,
-                            seed: input.seed,
+                            seed: seed ?? 0,
                             revision: String(input.bindingRevision),
                             width: this.width,
                             height: this.height,
@@ -217,7 +223,10 @@ export class CompositionScene implements VisualizerScene {
         const renderer = this.options.renderer,
             previousAutoClear = renderer.autoClear;
         renderer.autoClear = false;
-        const hashes = [String(input.seed), input.timeSeconds.toFixed(6)];
+        const hashes = [
+            input.timeSeconds.toFixed(6),
+            ...[...input.elementSeeds].map(([id, seed]) => id + ':' + seed).sort(),
+        ];
         try {
             this.clear(this.accumulation);
             for (const e of orderedElements(effectiveElements(project))) {

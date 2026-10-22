@@ -114,7 +114,9 @@ describe.skipIf(!available)('approved single-category point-line resources', () 
         test(id + ' has exact defaults and only accepts a project-bound point category', async () => {
             const definition = elementRegistry.get(id),
                 unbound = elementRegistry.create(id, 4, 0);
-            expect(definition.version).toBe(1);
+            expect(definition.version).toBe(2);
+            expect(definition.usesSeed).toBe(true);
+            expect(unbound.seed).toBeNull();
             expect(definition.markerInputs).toEqual([
                 {
                     id: 'points',

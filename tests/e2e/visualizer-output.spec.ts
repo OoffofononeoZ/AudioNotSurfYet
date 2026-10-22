@@ -142,7 +142,7 @@ for (const resolution of ['720p', '1080p'] as const)
                 let page = await context.newPage();
                 await open(page, syncFile);
                 let project = await exported(page);
-                project.seed = 1234567;
+                for (const e of project.elements) if (e.seed !== undefined) e.seed = 1234567;
                 project.output = { aspectRatio: '16:9', resolution, frameRate };
                 const background = elementRegistry.create('solid', project.track.durationSeconds, 0);
                 background.bindings.find(b => b.parameterId === 'color')!.source = {
@@ -171,7 +171,7 @@ for (const resolution of ['720p', '1080p'] as const)
                         await page.getByRole('button', { name: '预设', exact: true }).click();
                         await page.locator('[data-preset-id="geometric-0.6"]').click();
                         project = await exported(page);
-                        project.seed = 1234567;
+                        for (const e of project.elements) if (e.seed !== undefined) e.seed = 1234567;
                         project.output = { aspectRatio: '16:9', resolution, frameRate };
                         await importProject(page, project);
                         await page.getByRole('tab', { name: '状态', exact: true }).click();
