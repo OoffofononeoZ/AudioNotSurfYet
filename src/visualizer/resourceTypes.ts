@@ -11,6 +11,8 @@ export interface ResourceRef {
 }
 export interface ElementDefinition extends ResourceRef {
     algorithm: ResourceRef;
+    /** Declared only when frame.seed can change a supported visual effect. */
+    usesSeed?: true;
     kind: ElementKind;
     title: string;
     icon: string;
