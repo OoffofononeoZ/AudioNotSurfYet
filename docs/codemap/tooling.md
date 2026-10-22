@@ -15,7 +15,6 @@
 | [scripts/lib/source-map.mjs](../../scripts/lib/source-map.mjs) | [scripts/lib/repository.mjs](../../scripts/lib/repository.mjs) |
 | [scripts/lib/visualizer-assets-path.mjs](../../scripts/lib/visualizer-assets-path.mjs) | — |
 | [scripts/lib/visualizer-resource-v2.mjs](../../scripts/lib/visualizer-resource-v2.mjs) | — |
-| [scripts/visualizer-resource-package.mjs](../../scripts/visualizer-resource-package.mjs) | [scripts/lib/visualizer-assets-path.mjs](../../scripts/lib/visualizer-assets-path.mjs)、[scripts/lib/visualizer-resource-v2.mjs](../../scripts/lib/visualizer-resource-v2.mjs)、[skills/visualizer-content-generator/scripts/resource-library.mjs](../../skills/visualizer-content-generator/scripts/resource-library.mjs) |
-| [skills/visualizer-content-generator/scripts/lib/package-core.mjs](../../skills/visualizer-content-generator/scripts/lib/package-core.mjs) | — |
-| [skills/visualizer-content-generator/scripts/resource-library.mjs](../../skills/visualizer-content-generator/scripts/resource-library.mjs) | [skills/visualizer-content-generator/scripts/lib/package-core.mjs](../../skills/visualizer-content-generator/scripts/lib/package-core.mjs) |
-| [skills/visualizer-content-generator/scripts/validate-content-brief.mjs](../../skills/visualizer-content-generator/scripts/validate-content-brief.mjs) | — |
+| [scripts/lib/visualizer-skill-path.mjs](../../scripts/lib/visualizer-skill-path.mjs) | — |
+| [scripts/test-visualizer-skill.mjs](../../scripts/test-visualizer-skill.mjs) | [scripts/lib/visualizer-skill-path.mjs](../../scripts/lib/visualizer-skill-path.mjs) |
+| [scripts/visualizer-resource-package.mjs](../../scripts/visualizer-resource-package.mjs) | [scripts/lib/visualizer-assets-path.mjs](../../scripts/lib/visualizer-assets-path.mjs)、[scripts/lib/visualizer-resource-v2.mjs](../../scripts/lib/visualizer-resource-v2.mjs)、[scripts/lib/visualizer-skill-path.mjs](../../scripts/lib/visualizer-skill-path.mjs) |

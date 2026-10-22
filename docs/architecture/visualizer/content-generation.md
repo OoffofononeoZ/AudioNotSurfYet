@@ -1,25 +1,25 @@
 # Visualizer 原子内容生成契约
 
-2026-10-18，owner 在规划中选择将旧生成 skill 改名为 `visualizer-content-generator`，并要求**所有新增原子元素和组合预设都先批准具体合同**，随后以“Implement the plan.”批准实施。本轮更新 skill、校验器、测试及入口，不批准任何具体产品内容。
+2026-10-22，owner 明确取消新增元素和预设的强制内容审批：生成请求默认自主完成，开放创意由 agent 定案；明确需求只有关键条件缺失、冲突或无法实现时才进一步询问。正常生成交付必须附至少一张实际展示图。此决定替代 DEC-082 及后续沿用的具体内容合同批准门禁，历史批准事实保留。
 
-同日 owner 批准 DEC-084 资源包与分组预设改造；2026-10-19 又以 DEC-087 批准可加载算法资源包。当前运行时为 Project V5 与资源包 V2。2026-10-20，DEC-088 批准独立 skill 和外部文件夹；DEC-089 开放工程内点/范围标记及 skill 2.1.0，仅升级既有 fade。未来具体内容合同审批继续保留。
+当前运行时为 Project V5 与资源包 V2，保留 ABI 1/2 和已有标记输入边界。生成 skill 2.4.0 仅维护于外部 `WheresYourElements/skill/visualizer-content-generator/`，项目不保留副本或发现包装；工具可用 `VISUALIZER_SKILL_DIR` 覆盖位置。外部仓库允许正常 Git 工作流，不自动推送或发布。
 
 ## 当前模型与适用关系
 
-当前资源目标为 [Project V5](project-format-v5.md) 的元素定义与持久化分组预设，包括 visual、modifier、transition，以及仅引用已有元素的预设。[资源包 V2](resource-packages-v2.md) 描述编写、算法 ABI、依赖和隔离边界。完整画面描述按该模型拆解；既有内容修正使用 audio-visualizer-dev，新增部分仍先走本契约的输入与具体合同审批。
+当前资源目标为 [Project V5](project-format-v5.md) 的元素定义与持久化分组预设，包括 visual、modifier、transition，以及仅引用已有元素的预设。[资源包 V2](resource-packages-v2.md) 描述编写、算法 ABI、依赖和隔离边界。完整画面描述按该模型拆解；既有内容修正使用 audio-visualizer-dev，新增部分使用外部生成 skill。
 
-本契约及 DEC-082 替代 ADR-0021/DEC-056 中的 SceneBriefV1、SceneRegistry、Project V1 注册与旧生成测试步骤。历史批准、V1–V6 canonical/evidence 和 readiness 身份继续保留；两阶段输入/具体合同门禁延续到所有新增元素与预设。位图素材生成、处理分轨、自动标记和独立视频流程规划不属于该生成能力。
+本契约保留对旧 SceneBriefV1、SceneRegistry 和 Project V1 注册流程的替代关系。历史批准、V1–V6 canonical/evidence 和 readiness 身份继续保留。展示图片是资源交付的一部分；处理分轨、自动标记和独立视频流程规划不属于该生成能力。
 
-## 输入与批准
+## 输入与生成
 
 - 自然语言规范化为 `VisualizerContentBriefV2`：元素或预设模式、视觉意图、复用/新增元素、所需数据响应、时间和效果目标。允许纯静态元素；只有声明动态驱动时才要求完整响应、向量映射与时间语义。
 - 标记驱动元素额外声明 markerInputs 的类型、单个/集合模式、purpose 与 response；转场可声明 timingInput。Brief 不保存实际工程轨道/分类/事件 ID，具体合同固定空集合行为、分页、seek/离线确定性。
-- 预设输入只允许已有元素精确引用；缺少元素先单独批准元素合同、生成并验证，再创建预设。禁止预设包夹带元素或算法。
-- 无依赖校验器读取临时 JSON，返回 `INPUT_INCOMPLETE`（exit 2、路径化问题）或 `READY_FOR_CONTRACT`（exit 0）。不写入文件，不兼容旧 brief；结构完整不等于 runtime 可行或批准。
-- 必要意图不完整时询问，不补造用户选择。可选设计在合同提出明确默认值；显式 unbound 与输入缺失分开处理。
-- agent 核对当前 registry/codec/resolver 后展示具体 Content Contract，固定 ID、拆分、参数/default bindings、映射、时序/目标、确定性、资源预算和验收；预设同时固定展开清单、层级、时段与内部引用。展示后标记 `AWAITING_APPROVAL`。
-- 输入不足或合同未批准时，仓库零写入；完整 brief 也不能触发占位源码、合同文档或测试生成。只有展示合同后明确指向它的用户批准才允许实现；视觉、数据、时间、目标或资源要求实质变化须再次批准。
-- 获批合同按需保存至资源自身的 `source/`，记录具体批准来源。没有实际内容批准时不创建合同占位、阶段目录或每内容 readiness 文件。
+- 预设输入只允许已有元素精确引用；缺少元素先生成并验证独立元素，再创建预设，不另设内容审批。禁止预设包夹带元素或算法。
+- 无依赖校验器读取临时 JSON，返回 `INPUT_INCOMPLETE`（exit 2、路径化问题）或 `READY_FOR_CONTRACT`（exit 0）。CLI 状态名和只读行为不变；结构完整可继续生成，不是审批关卡，也不等于 runtime 验证通过。
+- 开放需求自行补齐设计并区分用户要求与自主选择；明确需求仅在阻塞性的必要信息不足或冲突时询问。校验缺项先补齐可自主决定的字段，不把每个缺项都转成用户问题；显式 unbound 与输入缺失分开处理。
+- agent 核对能力后简要说明选定方案并继续实现，不输出等待批准状态。Content Contract 是记录 ID、拆分、参数、时序、目标、确定性、预算和验证的设计说明；请求范围内的内容调整不要求重新批准。
+- 设计记录按需保存至资源的 `source/`，记录用户要求和自主设计，不伪造批准来源，不生成阶段占位或每内容 readiness 文件。
+- 每个新元素或预设正常交付至少附一张可打开、表达实际效果的 PNG/JPEG/WebP 或独立 SVG，并填写 previewPath；可以是示意图，不强制截图。交付前打开核对，共享默认封面不能代替展示图。工具和宿主的缺图/坏图容错保持，不新增强制图片检查。
 
 ## 实现不变量
 
@@ -37,6 +37,6 @@
 
 ## 验证与交付
 
-具体输入结构与命令见 [输入契约](../../../skills/visualizer-content-generator/references/input-contract.md)，实现规则与按影响选择的验证见 [生成 skill](../../../skills/visualizer-content-generator/SKILL.md)。校验器测试证明输入与 CLI 行为，不能单独证明 agent 的审批或 runtime 实现符合要求。
+具体输入、格式与工具见根 [AGENTS](../../../AGENTS.md) 指向的外部 skill。Skill 自身测试在外部仓库运行，项目命令 `npm run test:skill:visualizer-content-generator` 按需转调。校验器测试证明结构与 CLI 行为，不单独证明工作流、视觉或 runtime 正确。
 
 内容验证按实际变化选择 V5 往返、资源包校验与隔离执行、分组/引用隔离、共同参数差异、数据映射、确定性、GPU、生命周期和短离线媒体检查；不默认累计历史评审或长曲矩阵。适用阈值保持，未运行/失败如实记录。仅修改 skill 时无需应用构建或产品浏览器回归；资源加载或产品行为变化选择对应验证。完成后按项目交付规则本地提交，不推送、不发布、不产生 readiness 结论。

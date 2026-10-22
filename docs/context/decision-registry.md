@@ -33,7 +33,7 @@
 | DEC-079 / 2026-10-17     | Wallpaper Engine风格近似频谱首位注册，独立立体声DFT、平滑与单位，不冒称官方实现；原子组合工程沿用后续DEC-084，见[频谱](wallpaper-spectrum.md)                                                                                                                                                                                   |
 | DEC-080 / 2026-10-17     | 历史实时输出曾按源事件/时长另行开放档位；原fps/packet-gap失败不改写，测量保存在[输出说明](visualizer-output.md)，当前链路按DEC-081                                                                                                                                                                                              |
 | DEC-081 / 2026-10-17     | owner明确离线确定性导出替代实时录制：同renderer、固定帧/PCM、WebCodecs/Mediabunny/OPFS；保留真实媒体与同步阈值，见[离线导出](visualizer-offline-export.md)                                                                                                                                                                      |
-| DEC-082 / 2026-10-18     | 新增原子元素和预设（含纯复用）先校验brief并批准具体合同，visualizer-content-generator替代旧SceneBrief/注册步骤；见[内容合同](../architecture/visualizer/content-generation.md)                                                                                                                                                  |
+| DEC-082 / 2026-10-18     | 当时要求新增元素/预设先批准具体合同；该审批已由DEC-096替代，visualizer-content-generator替代旧SceneBrief/注册步骤；见[内容合同](../architecture/visualizer/content-generation.md)                                                                                                                                                  |
 | DEC-083 / 2026-10-18     | 手写代码建议≤1000、>1300警告、>2000阻断；禁止压行、按完整功能区域拆Vue、Prettier渐进显式文件格式化；见[模块skill](../../skills/audiosurf-file-modularization/SKILL.md)                                                                                                                                                          |
 | DEC-084 / 2026-10-18     | 分组预设、共同处理参数及旧草稿不提示保持；V4/V1和仅应用内核限制由DEC-087替代                                                                                                                                                                                                                                                    |
 | DEC-085 / 2026-10-19     | owner批准按分类行1–9/0播放录入点/范围、当前细分吸附和取消/停止规则；工程V1及鼠标暂停限制不变，见[Editor交互](../architecture/editor/interaction-contracts.md#数字键实时录入dec-085)                                                                                                                                             |
@@ -58,7 +58,7 @@ DEC-075新增能力验证曾被自动审批引用DEC-055拒绝，owner随后明�
 
 DEC-074只接受当前功能与汇总听感/长曲时间。第三首没有精确秒数、未提供逐曲逐轨12行或完整OS保存/取消/回放记录，不补造。Chrome十五分钟1011.9541秒超900秒和完整P1/P2 clean缺口保留；P3/P6完整链指标、支持范围和生产发布独立。
 
-多目标任务按小目标分别验证、本地提交，不推送/发布/重写历史。普通工作不生成阶段三件套、canonical或readiness；重大技术取舍和具体内容合同继续遵守相应批准边界。
+多目标任务按小目标分别验证、本地提交，不推送/发布/重写历史。普通工作不生成阶段三件套、canonical或readiness；重大技术取舍遵守相应批准边界，具体内容审批已由 DEC-096 替代为自主生成。
 
 ## DEC-093 — osu 导入与 Editor V2 — 2026-10-21
 
@@ -71,3 +71,7 @@ owner 确认上方图为顶部绿色波形，并以“Implement the plan.”批�
 ## DEC-095 — 四轨特征与来源选择 — 2026-10-22
 
 owner 以“Implement the plan.”批准四轨 energy、幅度谱、buffer、Wallpaper 频谱接入。Analyzer 顶部切换来源，各来源独立最多四项 FIFO，只分析当前来源置顶项；Editor 叠加层改为来源／特征 Cascader，顶部波形保持原曲。Visualizer 频谱输入可混用原曲与四角色，各来源最多四种特征，原选项称 analyzer（原曲）。来源切换只改变展示，三处独立，共用绝对时间。Editor V2／Visualizer V5 以可选 stemRole 保存来源引用，Analyzer 会话保存来源队列；单分析 Worker、有界 PCM、完整身份、取消及缓存容量边界保留。分离完成并校验后开放入口，缺失引用不回退；不含新原子元素／预设、实时分轨、推送或发布。当前契约见[Analyzer](analyzer-list.md)、[Editor](editor-marking.md)、[Visualizer 输入](visualizer-native-input.md)。
+
+## DEC-096 — 外部内容生成自主执行 — 2026-10-22
+
+owner 明确取消 SKILL.md 和 content-rules 的强制内容批准，并以“Implement the plan.”批准本轮调整。开放创意自主设计生成，明确需求仅在关键条件不足、冲突或无法实现时询问；Content Contract 改为设计记录，替代 DEC-082 及 DEC-088/089/090 后续沿用的具体内容审批门禁，历史已批准内容不改写。预设仍仅组合已有元素，缺失时先生成并验证元素。正常交付至少一张实际展示图且填写 previewPath；owner 选择仅修改 skill 要求，封装与图片容错不变。允许外部仓库正常 Git 管理，skill 2.4.0 仅保留于 WheresYourElements/skill，删除项目维护及发现副本。ABI、工程格式、隐私、许可、支持范围和发布等独立边界不扩张。

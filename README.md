@@ -1,6 +1,6 @@
 # AudioNotSurfYet
 
-Vue 3 / TypeScript / Vite 浏览器音频工作台。项目状态、技术契约和当前验证缺口见 [上下文入口](docs/context/index.md)，任务规则与 7 个项目 skills 见 [AGENTS.md](AGENTS.md)。
+Vue 3 / TypeScript / Vite 浏览器音频工作台。项目状态、技术契约和当前验证缺口见 [上下文入口](docs/context/index.md)，任务规则与 6 个项目 skills 见 [AGENTS.md](AGENTS.md)。
 
 文档按当前页面和领域维护：接口从共享运行时及 Analyzer/Editor/Visualizer 页面进入，验证要求集中在领域 validation。普通任务更新相关专题，过程反馈放在交付中；旧阶段产物已清理，历史由 Git 查回，必要证据与未解决缺口继续保留。
 
@@ -21,7 +21,7 @@ Visualizer 使用[离线确定性导出](docs/context/visualizer-offline-export.
 
 Visualizer“实时样式”可将无局部分镜、标记和历史依赖的当前画面应用到首页或保存为本站 `/display/:styleId`；动态输入全部为 WE 频谱时可导出 Wallpaper Engine 项目目录。先准备完整产物，再点击“选择目录并保存壁纸”；新目录的 index.html 可直接导入壁纸编辑器。`npm run wallpaper:runtime` 可独立重建运行包，详见[实时样式](docs/context/visualizer-realtime.md)。
 
-Visualizer 使用[可执行资源包 V2](docs/architecture/visualizer/resource-packages-v2.md)。在“添加元素”中选择 `C:\Users\Ryan\Desktop\WheresYourElements\assets`，只读加载外部 15 个元素和两套预设；授权有效时自动恢复，失效时点击“恢复访问”，外部更改后点击“重新加载”。应用不保存或打包资源库，V5 工程及草稿内嵌完整快照，离线恢复与导出不依赖资源库。生成 skill 2.2.0 维护于 `skills/visualizer-content-generator/`，独立副本在 `WheresYourElements/skill/visualizer-content-generator/`。
+Visualizer 使用[可执行资源包 V2](docs/architecture/visualizer/resource-packages-v2.md)。在“添加元素”中选择 `C:\Users\Ryan\Desktop\WheresYourElements\assets`，只读加载外部资源；授权有效时自动恢复，失效时点击“恢复访问”，外部更改后点击“重新加载”。应用不保存或打包资源库，V5 工程及草稿内嵌完整快照，离线恢复与导出不依赖资源库。生成 skill 2.4.0 仅维护于 `WheresYourElements/skill/visualizer-content-generator/`，可用 `VISUALIZER_SKILL_DIR` 指定其他外部位置；生成和测试命令按需加载，普通应用启动和构建不依赖该 skill。生成默认自主完成，开放创意自行设计，正常交付至少附一张实际展示图。
 
 `npm run visualizer:resources` 封装外部库，`npm run visualizer:resources:check` 只读核对；两者及资源专项使用 `VISUALIZER_ASSETS_DIR` 覆盖默认位置。dev/build 不调用封装器，资源缺失不阻断应用构建或无关测试。
 
