@@ -111,6 +111,7 @@ export class VisualizerRendererHost implements VisualizerSceneHost {
     private readonly cancelAnimationFrameImpl: (handle: number) => void;
     private scene: VisualizerScene | null = null;
     private sceneKey = '';
+    private sceneSeeds: ReadonlyMap<string, number> | null = null;
     private frameHandle: number | null = null;
     private width = 1;
     private height = 1;
@@ -387,7 +388,7 @@ export class VisualizerRendererHost implements VisualizerSceneHost {
                 !current ||
                 current.trackIdentity !== frame.trackIdentity ||
                 current.bindingRevision !== frame.bindingRevision ||
-                current.seed !== frame.seed
+                current.elementSeeds !== frame.elementSeeds
             ) {
                 if (override) throw error;
                 return;
@@ -412,7 +413,7 @@ export class VisualizerRendererHost implements VisualizerSceneHost {
             visualizerRendererDiagnostics.targetResolveCount += 1;
             const renderStartedAt = performance.now();
             const input = {
-                seed: frame.seed,
+                elementSeeds: frame.elementSeeds,
                 timeSeconds: frame.timeSeconds,
                 values,
                 bindingRevision: frame.bindingRevision,
@@ -427,7 +428,7 @@ export class VisualizerRendererHost implements VisualizerSceneHost {
                     !current ||
                     current.trackIdentity !== frame.trackIdentity ||
                     current.bindingRevision !== frame.bindingRevision ||
-                    current.seed !== frame.seed
+                    current.elementSeeds !== frame.elementSeeds
                 ) {
                     if (override) throw Error('导出帧身份已失效。');
                     return;
@@ -499,11 +500,12 @@ export class VisualizerRendererHost implements VisualizerSceneHost {
     }
 
     private ensureScene(frame: VisualizerRenderFrame): VisualizerScene {
-        const nextKey = [frame.trackIdentity, frame.seed].join(':');
-        if (this.scene && this.sceneKey === nextKey) return this.scene;
+        const nextKey = frame.trackIdentity;
+        if (this.scene && this.sceneKey === nextKey && this.sceneSeeds === frame.elementSeeds) return this.scene;
         this.disposeScene();
         this.scene = this.options.createScene(this);
         this.sceneKey = nextKey;
+        this.sceneSeeds = frame.elementSeeds;
         this.scene.resize(this.width, this.height, this.dpr);
         visualizerRendererDiagnostics.scenesCreated += 1;
         return this.scene;
@@ -517,6 +519,7 @@ export class VisualizerRendererHost implements VisualizerSceneHost {
         scene.dispose();
         this.scene = null;
         this.sceneKey = '';
+        this.sceneSeeds = null;
         visualizerRendererDiagnostics.scenesDisposed += 1;
     }
 }

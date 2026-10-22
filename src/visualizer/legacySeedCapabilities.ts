@@ -1,0 +1,22 @@
+// Audited pre-element-seed algorithm identities. Used exclusively by the explicit legacy input migration.
+export const legacySeedCapabilities: Readonly<Record<string, boolean>> = {
+    'arc-lattice@1:4e181dc17483db873296436867083281f7f5f61064c1fcde7a7ca56932db8f29': false,
+    'blur@1:3f0b950cc91e0375c195908f04b7a9170c0a590c63e308e7fdfb3315f801d089': false,
+    'fade@2:66dd53a71ef9654cbb439476a3f28287b9bc7ff32c20a59a36f4d93d472b2da0': false,
+    'fy-corona-cathedral@1:46e3502ce3d0ac3509380fb5f05643ee1d5e64f32c1616a7eb83b69ea1295ebe': false,
+    'fy-corona-veil@1:e8f753e4321ec979007ee837d4f4a2122aa9b54c035c8f3da43f54812ea2c91d': false,
+    'fy-ember-choir@1:21df0b8e0c868fd3b9436691611b6b5eb918a80c4db36239f033c19ff3de6e5d': true,
+    'fy-solar-grade@1:98d31157fc4600ccddc230fae37d6ff3449ec685e41dccf8fe85a0731fc73c44': false,
+    'light-tunnel@1:39a51a8c565df6231359995ab54672b818c1a6a9ac163a7d764762b73dc3d434': false,
+    'orbit-solids@1:138665ccbdfe9b47659b5dbf327e399c93059caa813d8b5544111f9bb22e9dc5': true,
+    'point-line-horizontal@1:634dd2b0fbc3a5731ac731eb813f84ff4f2fa0a79f846c688dfce21a93431e86': true,
+    'point-line-vertical@1:7624fed8a73270c7523fc3bb78c7fe60a5c5aac24b0d3980592285eec0cb504c': true,
+    'radial-spectrum@1:6920a736c38db62359a576f1cf3b340069345796b4c85e5d4b67bf2952b7051f': true,
+    'reactive-rings@1:c584df87ca1a1a26c365535e2d28f8f3989541c32e810cd10ee4314e716d6feb': false,
+    'scale@1:ead8de4205177d728fc8b7468e308a9357104f915df6131e3ae45457ba28561b': false,
+    'solid@1:dd11a57d7c109ee55853d946d4f75adb59aac045e61363f8b86aab0256deca71': false,
+    'spectral-dots@1:f31e13da80815df1cf681165c6c09f878a2549b94bfc455dc44e6e376e0783b9': false,
+    'spectral-strings@1:d0b4f2cf2c03fa8fdceda0bb15694c71f326afba15b7d29c3d0d11a2a2fceca3': true,
+    'starfield@1:1f6c6faada7610d05fe3952188961ae8b6d2b4fd8585c3826894f22571cc5cad': true,
+    'wireform@1:00329eb84a35b7b4b72c6ae546dd947978b4ca8be4667e26c95975080e0d98f4': true,
+};

@@ -172,7 +172,6 @@
                     :locked="locked"
                     :error="actionError || fullscreen.error.value"
                     @output="(r, f) => run(() => controller.updateOutput(r, f))"
-                    @seed="seed => run(() => controller.updateProject({ ...snapshot.project!, seed }))"
                     @reload-editor="run(() => controller.reloadEditorDraft())"
                     @import-editor="run(() => controller.importEditorProject())"
                     @remove-editor="run(() => controller.removeEditorSnapshot())"

@@ -15,9 +15,10 @@ const resolvedEntry: VisualizerResolvedParameter = {
     value: 0.5,
 };
 
+const defaultSeeds = new Map([['element', 7]]);
 const frame = (): VisualizerRenderFrame => ({
     trackIdentity: 'v3-track-hash',
-    seed: 7,
+    elementSeeds: defaultSeeds,
     timeSeconds: 1.25,
     bindingRevision: 3,
     playbackState: 'paused',
@@ -218,7 +219,7 @@ describe('Visualizer V3 renderer host integration', () => {
         host.requestFrame();
         raf.flush();
         const hostId = host.id;
-        currentFrame = { ...currentFrame, seed: 8 };
+        currentFrame = { ...currentFrame, elementSeeds: new Map([['element', 8]]) };
         host.requestFrame();
         raf.flush();
         expect(disposed).toEqual(['scene-1']);

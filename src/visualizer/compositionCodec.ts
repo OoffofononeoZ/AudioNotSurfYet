@@ -19,7 +19,8 @@ import {
     UUID_PATTERN,
     VisualizerProjectValidationError,
 } from './projectValidation';
-import { validateSeed } from './seed';
+import { elementSeedField } from './seed';
+import { migrateLegacySeeds } from './seedMigration';
 import type {
     ElementTiming,
     EffectTargets,
@@ -60,7 +61,11 @@ function timing(input: unknown, transition: boolean, project: VisualizerProjectV
 }
 function element(input: unknown, project: VisualizerProjectV5): VisualizerElement {
     const v = record(input, 'element');
-    keys(v, ['id', 'resource', 'name', 'enabled', 'layer', 'timing', 'bindings'], ['targets', 'markerBindings']);
+    keys(
+        v,
+        ['id', 'resource', 'name', 'enabled', 'layer', 'timing', 'bindings'],
+        ['targets', 'markerBindings', 'seed'],
+    );
     const resource = validateResourceRef(v.resource);
     const descriptor = project.resources.elements.find(d => sameResource(d, resource));
     if (!descriptor) return invalid('元素定义缺失。');
@@ -96,6 +101,7 @@ function element(input: unknown, project: VisualizerProjectV5): VisualizerElemen
         resource,
         name: text(v.name, 'name'),
         enabled: v.enabled,
+        ...elementSeedField(v.seed, descriptor.usesSeed),
         layer,
         timing: timing(v.timing, descriptor.kind === 'transition', project),
         bindings,
@@ -104,7 +110,7 @@ function element(input: unknown, project: VisualizerProjectV5): VisualizerElemen
     };
 }
 export function validateComposition(input: unknown, context?: VisualizerTrackValidationContext): VisualizerProjectV5 {
-    const v = record(input, 'project');
+    const v = record(migrateLegacySeeds(input), 'project');
     if (v.schemaVersion !== 5)
         throw new VisualizerProjectValidationError(
             'unsupported-schema',
@@ -120,7 +126,6 @@ export function validateComposition(input: unknown, context?: VisualizerTrackVal
             'updatedAt',
             'track',
             'output',
-            'seed',
             'elements',
             'items',
             'resources',
@@ -137,7 +142,6 @@ export function validateComposition(input: unknown, context?: VisualizerTrackVal
         (o.frameRate !== 30 && o.frameRate !== 60)
     )
         return invalid('输出预设无效。');
-    const seed = validateSeed(v.seed);
     const createdAt = iso(v.createdAt, 'createdAt'),
         updatedAt = iso(v.updatedAt, 'updatedAt');
     if (Date.parse(updatedAt) < Date.parse(createdAt)) return invalid('更新时间早于创建时间。');
@@ -149,7 +153,6 @@ export function validateComposition(input: unknown, context?: VisualizerTrackVal
         updatedAt,
         track,
         output: { aspectRatio: '16:9', resolution: o.resolution as '720p' | '1080p', frameRate: o.frameRate },
-        seed,
         elements: [],
         items: [],
         resources: validateResourceSnapshot(v.resources),
@@ -193,7 +196,6 @@ export const createComposition = (track: EditorTrackIdentityV1): VisualizerProje
         updatedAt: now,
         track,
         output: { aspectRatio: '16:9', resolution: '720p', frameRate: 30 },
-        seed: crypto.getRandomValues(new Uint32Array(1))[0],
         elements: [],
         items: [],
         resources: { algorithms: [], elements: [], presets: [] },

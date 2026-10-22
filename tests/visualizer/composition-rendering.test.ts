@@ -8,6 +8,7 @@ import { createComposition, validateComposition } from '../../src/visualizer/com
 import { createInitialEditorProject } from '../../src/editor/projectCodec';
 import { CompositionScene, type CompositionRenderPort } from '../../src/visualizer/compositionScene';
 import { elementRegistry } from '../../src/visualizer/elementRegistry';
+import { ElementSeedSession } from '../../src/visualizer/seed';
 import { effectsFor, parameterKey } from '../../src/visualizer/compositionEffects';
 
 const track = { contentHash: 'a'.repeat(64), fileName: 'render.wav', durationSeconds: 10, sampleRate: 48000 };
@@ -74,26 +75,38 @@ function harness() {
         resolveAt: () => values,
         runtimeFactory: () => new AlgorithmRuntimeFixture(),
     });
+    const seeds = new ElementSeedSession();
     scene.resize(640, 360, 2);
-    return { p, values, scene, port, calls, targets, releases: () => releases };
+    return {
+        p,
+        values,
+        scene,
+        port,
+        calls,
+        targets,
+        seedValues: () => seeds.sync(p.elements),
+        releases: () => releases,
+    };
 }
 describe('composition rendering', () => {
     test('automatic projects pass the resolved numeric seed to algorithms', async () => {
         const h = harness();
-        h.p.seed = null;
+        const seeded = h.p.elements.filter(e => e.seed !== undefined);
+        const elementSeeds = new Map(seeded.map(e => [e.id, 12345]));
+        const changed = new Map(seeded.map(e => [e.id, 54321]));
         const prepare = vi.spyOn(AlgorithmRuntimeFixture.prototype, 'prepareFrames');
         try {
-            const input = { seed: 12345, timeSeconds: 1, values: h.values, bindingRevision: 1 };
+            const input = { elementSeeds, timeSeconds: 1, values: h.values, bindingRevision: 1 };
             await h.scene.prepare(input);
             const hash = h.scene.render(input).hash;
-            expect(prepare.mock.lastCall![0].every(e => e.frame.seed === 12345)).toBe(true);
+            expect(prepare.mock.lastCall![0].every(e => (elementSeeds.get(e.id) ?? 0) === e.frame.seed)).toBe(true);
             h.scene.resize(1280, 720, 1);
             await h.scene.prepare(input);
             expect(h.scene.render(input).hash).toBe(hash);
-            await h.scene.prepare({ ...input, seed: 54321 });
-            expect(prepare.mock.lastCall![0].every(e => e.frame.seed === 54321)).toBe(true);
-            expect(h.scene.render({ ...input, seed: 54321 }).hash).not.toBe(hash);
-            expect(h.p.seed).toBeNull();
+            await h.scene.prepare({ ...input, elementSeeds: changed });
+            expect(prepare.mock.lastCall![0].every(e => (changed.get(e.id) ?? 0) === e.frame.seed)).toBe(true);
+            expect(h.scene.render({ ...input, elementSeeds: changed }).hash).not.toBe(hash);
+            expect(h.p).not.toHaveProperty('seed');
         } finally {
             h.scene.dispose();
             prepare.mockRestore();
@@ -138,7 +151,7 @@ describe('composition rendering', () => {
         const release = vi.spyOn(AlgorithmRuntimeFixture.prototype, 'dispose');
         const h = harness();
         try {
-            const input = { seed: h.p.seed!, timeSeconds: 1, values: h.values, bindingRevision: 1 };
+            const input = { elementSeeds: h.seedValues(), timeSeconds: 1, values: h.values, bindingRevision: 1 };
             await h.scene.prepare(input);
             h.p.elements = [];
             await h.scene.prepare(input);
@@ -155,8 +168,8 @@ describe('composition rendering', () => {
         const h = harness();
         const blur = h.p.elements.find(e => e.resource.id === 'blur')!;
         h.values.set(parameterKey(blur.id, 'amount'), { parameterId: 'amount', state: 'ready', value: 8 });
-        await h.scene.prepare({ seed: h.p.seed!, timeSeconds: 1, values: h.values, bindingRevision: 1 });
-        h.scene.render({ seed: h.p.seed!, timeSeconds: 1, values: h.values, bindingRevision: 1 });
+        await h.scene.prepare({ elementSeeds: h.seedValues(), timeSeconds: 1, values: h.values, bindingRevision: 1 });
+        h.scene.render({ elementSeeds: h.seedValues(), timeSeconds: 1, values: h.values, bindingRevision: 1 });
         expect(h.targets.size).toBe(3);
         expect(h.calls.filter(c => c.blend && c.copy)).toHaveLength(
             h.p.elements.filter(e => elementRegistry.get(e.resource.id).kind === 'visual').length,
@@ -171,7 +184,7 @@ describe('composition rendering', () => {
     test('direct seek and sequential rendering produce the same frame state', async () => {
         const h = harness();
         const at = async (time: number) => {
-            const input = { seed: h.p.seed!, timeSeconds: time, values: h.values, bindingRevision: 1 };
+            const input = { elementSeeds: h.seedValues(), timeSeconds: time, values: h.values, bindingRevision: 1 };
             await h.scene.prepare(input);
             return h.scene.render(input).hash;
         };
@@ -182,15 +195,23 @@ describe('composition rendering', () => {
         h.scene.dispose();
         const direct = harness();
         direct.p.projectId = h.p.projectId;
-        direct.p.seed = h.p.seed;
         direct.p.elements = h.p.elements;
         attachElements(direct.p);
         direct.values.clear();
         for (const [key, value] of h.values) direct.values.set(key, value);
-        await direct.scene.prepare({ seed: direct.p.seed!, timeSeconds: 3, values: direct.values, bindingRevision: 1 });
+        await direct.scene.prepare({
+            elementSeeds: h.seedValues(),
+            timeSeconds: 3,
+            values: direct.values,
+            bindingRevision: 1,
+        });
         expect(
-            direct.scene.render({ seed: direct.p.seed!, timeSeconds: 3, values: direct.values, bindingRevision: 1 })
-                .hash,
+            direct.scene.render({
+                elementSeeds: h.seedValues(),
+                timeSeconds: 3,
+                values: direct.values,
+                bindingRevision: 1,
+            }).hash,
         ).toBe(expected);
         direct.scene.dispose();
     });

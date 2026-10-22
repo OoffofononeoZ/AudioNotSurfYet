@@ -4,8 +4,8 @@
 
 ## 工程数据
 
-- `format:'audiosurf-visualizer'`、`schemaVersion:5`。保留工程 UUID、时间戳、同歌 track、16:9 output、seed 和可选同歌 Editor 快照。
-- DEC-092：seed 接受 0–4294967295 的整数或 null。底栏可直接删除输入或清空；null 保存为自动随机，每次成功打开/导入工程或从数字切换为空值时生成运行时种子。新工程仍默认填写随机整数；已有数字工程保持原效果。含 null 的工程需支持此扩展的新版读取，不降级或迁移旧格式。
+- `format:'audiosurf-visualizer'`、`schemaVersion:5`。保留工程 UUID、时间戳、同歌 track、16:9 output 和可选同歌 Editor 快照；不再保存工程级 seed。
+- DEC-097 替代 DEC-092 的全局 Seed：仅资源声明 `usesSeed:true` 的元素实例保存 `seed`，值为 0–4294967295 的整数或 null，其他实例省略。右侧元素属性可编辑或清空，新添加元素及预设子元素默认 null，表示每次打开独立随机。只覆盖既有 Seed 能改变实际画面的效果，不为其他 Shader 噪声新增控制。
 - `elements` 保存 UUID、精确资源引用、名称、启用状态、派生 layer、时段、bindings、按声明提供的可选 markerBindings 和适用的效果 targets。实例不再重复保存固定 type/version，算法由元素定义的 algorithm 引用解析。
 - `items` 由低到高排列独立元素或预设实例。组包含 UUID、资源引用、名称、显隐、children 和 controls；每个叶元素恰好归属一次。禁止预设嵌套、重复归属、悬空引用和空组。
 - items/children 决定连续 layer；列表反向显示，顶层移动整组，子元素只在组内排序。
@@ -34,4 +34,6 @@ strict codec 检查字段、身份/hash、算法 ABI、参数能力、同歌引�
 
 只接收 V5 文件；V1–V4 不迁移。旧草稿视为没有可恢复草稿，不显示旧版导出/覆盖提示。V5 草稿仍写 draft/latest；无效 V5 原文及显式处理、异歌冲突、保存失败与离页保护继续有效，不清空原数据库。
 
-预览与离线输出使用相同算法快照、绝对歌曲时间和运行时数字 seed。自动种子由工程会话持有，不写入工程或草稿；参数修改、seek/循环、尺寸变化、场景重建、context 恢复及导出不重新生成。无效、取消或过期导入不改变当前种子。预览合并请求并丢弃失效结果，导出逐帧等待算法和 GPU 绘制后截图；不增加 Canvas/renderer/视觉 RAF。见[资源包](resource-packages-v2.md)与[离线导出](../../context/visualizer-offline-export.md)。
+旧 V5 的顶层 Seed 在输入边界一次性迁移：只复制给支持 Seed 的元素，然后删除顶层字段。未声明能力的内嵌资源按已审阅算法的精确身份补标记，并更新必要版本、引用及 hash，不替换算法源码或其他参数；无法确认的旧自定义资源和混合结构明确拒绝。文件原件不改写；草稿成功激活后走正常保存链，失败保留原文。V1–V4 的原有不迁移边界不变。
+
+预览与离线输出使用相同算法快照、绝对歌曲时间和逐元素数字 seed。会话按 UUID 管理空值的运行时种子；修改或清空一个元素不使其他元素重新随机，排序、隐藏、普通参数修改、seek/循环、尺寸变化、场景/context 恢复及导出均保留当次值。成功重新打开/导入重建会话，失败、取消或过期请求不改变当前值。渲染帧传递只读种子快照用于缓存与失效判定；未声明的元素不生成种子，ABI 数字字段仅传 0 占位。见[资源包](resource-packages-v2.md)与[离线导出](../../context/visualizer-offline-export.md)。

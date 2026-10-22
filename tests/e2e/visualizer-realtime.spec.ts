@@ -13,8 +13,6 @@ async function openPreset(page: Page, id = 'geometric-0.6') {
     await page.getByRole('button', { name: '预设', exact: true }).click();
     await page.locator(`[data-preset-id="${id}"]`).click();
     await expect(page.getByTestId('visualizer-preview-frame')).toHaveAttribute('data-scene-status', 'ready');
-    await page.getByRole('button', { name: '清空 Seed', exact: true }).click();
-    await expect(page.getByRole('spinbutton', { name: '确定性 Seed', exact: true })).toHaveValue('');
     await page.getByTestId('realtime-style-actions').click();
 }
 test('current composition applies to home, survives refresh and maintains one renderer through mode switches', async ({

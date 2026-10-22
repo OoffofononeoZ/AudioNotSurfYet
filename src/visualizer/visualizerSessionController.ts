@@ -1,5 +1,5 @@
 import { validateRuntimeSnapshot } from './validateRuntimeSnapshot';
-import { resolveSessionSeed } from './seed';
+import { ElementSeedSession } from './seed';
 import { inject, type InjectionKey } from 'vue';
 import type { AudioSessionService, RoutePlaybackLease } from '../audio/audioSessionService';
 import type { useAudioSessionStore } from '../stores/audioSessionStore';
@@ -99,7 +99,7 @@ export class VisualizerExportLockedError extends Error {
 export class VisualizerSessionController {
     private options: VisualizerSessionControllerOptions;
     private snapshot = initial();
-    private renderSeed = 0;
+    private seeds = new ElementSeedSession();
     private listeners = new Set<(snapshot: CompositionSessionSnapshot) => void>();
     private nativeListeners = new Set<() => void>();
     private playbackLease: RoutePlaybackLease | null = null;
@@ -162,8 +162,8 @@ export class VisualizerSessionController {
     readProject() {
         return this.snapshot.project;
     }
-    readRenderSeed() {
-        return this.renderSeed;
+    readRenderSeeds() {
+        return this.seeds.values;
     }
     subscribe(listener: (snapshot: CompositionSessionSnapshot) => void) {
         this.listeners.add(listener);
@@ -370,12 +370,12 @@ export class VisualizerSessionController {
             this.algorithmTask = algorithmTask;
             await this.validateResources(project.resources, algorithmTask.signal);
             if (generation !== this.generation || this.disposed || algorithmTask.signal.aborted) return;
-            this.renderSeed = resolveSessionSeed(project.seed);
+            this.seeds.sync(project.elements, true);
             this.publish({
                 ...this.snapshot,
                 state: 'ready',
                 project,
-                persistence: restored?.kind === 'current' && !overwrite ? 'saved' : 'saving',
+                persistence: restored?.kind === 'current' && !overwrite && !restored.needsSave ? 'saved' : 'saving',
                 restoredFromDraft: restored?.kind === 'current' && !overwrite,
                 bindingRuntime: {
                     ...initial().bindingRuntime,
@@ -384,7 +384,8 @@ export class VisualizerSessionController {
                 },
             });
             this.activateAnalysis();
-            if (overwrite || !restored) this.writer.queue(project);
+            if (overwrite || !restored || (restored.kind === 'current' && restored.needsSave))
+                this.writer.queue(project);
             this.syncBeforeUnload();
         } catch (error) {
             if (generation !== this.generation || this.disposed) return;
@@ -405,12 +406,7 @@ export class VisualizerSessionController {
             pruneCompositionResources({ ...input, updatedAt: new Date().toISOString() }),
             context,
         );
-        if (
-            options.resetSeed ||
-            project.projectId !== this.snapshot.project.projectId ||
-            project.seed !== this.snapshot.project.seed
-        )
-            this.renderSeed = resolveSessionSeed(project.seed);
+        this.seeds.sync(project.elements, options.resetSeed || project.projectId !== this.snapshot.project.projectId);
         this.resolver.reset();
         this.publish({
             ...this.snapshot,
@@ -776,6 +772,7 @@ export class VisualizerSessionController {
         return success;
     }
     private releaseLeases() {
+        this.seeds.clear();
         this.unsubscribeAnalysis?.();
         this.unsubscribeAnalysis = null;
         this.analysisLease?.release();

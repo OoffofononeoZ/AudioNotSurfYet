@@ -18,7 +18,7 @@ test('exports a complete directory and executes the production runtime offline w
     await page.getByTestId('add-visualizer-element').click();
     await page.locator('[data-resource-id="radial-spectrum"]').click();
     await page.getByRole('combobox', { name: '频谱输入分析特征', exact: true }).selectOption('wallpaperEngineSpectrum');
-    await page.getByRole('button', { name: '清空 Seed', exact: true }).click();
+    await expect(page.getByRole('spinbutton', { name: '元素 Seed', exact: true })).toHaveValue('');
     await page.getByTestId('realtime-style-actions').click();
     await page.getByTestId('prepare-wallpaper-export').click();
     await expect(page.getByTestId('save-wallpaper-directory')).toBeVisible();

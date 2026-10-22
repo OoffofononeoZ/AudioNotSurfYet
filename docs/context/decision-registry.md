@@ -44,6 +44,8 @@
 
 ## DEC-092 — 空 Seed 自动随机 — 2026-10-21
 
+工程级 Seed 已由 DEC-097 的逐元素 Seed 替代；本条保留原批准来源，文件选择器修复仍有效。
+
 owner 选择工程每次打开自动随机、同次预览/seek/导出一致，并要求首页、展示页和壁纸也保留自动随机；随后以“Implement the plan.”批准实施。V5/RealtimeStyleV1 的 seed 扩展为 uint32 或 null，保留版本；运行时解析为数字，不改资源 ABI 或外部元素。文件选择器改用合法 .json 过滤，完整导出文件名保留。见 [V5](../architecture/visualizer/project-format-v5.md)与[实时样式](visualizer-realtime.md)，不含发布或旧 readiness 重跑。
 
 ## DEC-090 — 点标记直线测试元素 — 2026-10-20
@@ -75,3 +77,7 @@ owner 以“Implement the plan.”批准四轨 energy、幅度谱、buffer、Wal
 ## DEC-096 — 外部内容生成自主执行 — 2026-10-22
 
 owner 明确取消 SKILL.md 和 content-rules 的强制内容批准，并以“Implement the plan.”批准本轮调整。开放创意自主设计生成，明确需求仅在关键条件不足、冲突或无法实现时询问；Content Contract 改为设计记录，替代 DEC-082 及 DEC-088/089/090 后续沿用的具体内容审批门禁，历史已批准内容不改写。预设仍仅组合已有元素，缺失时先生成并验证元素。正常交付至少一张实际展示图且填写 previewPath；owner 选择仅修改 skill 要求，封装与图片容错不变。允许外部仓库正常 Git 管理，skill 2.4.0 仅保留于 WheresYourElements/skill，删除项目维护及发现副本。ABI、工程格式、隐私、许可、支持范围和发布等独立边界不扩张。
+
+## DEC-097 — 支持随机效果的元素独立 Seed — 2026-10-22
+
+owner 将位置更正为右侧属性，选择新元素默认留空、旧数据一次性迁移，并明确仅迁移现有 Seed 作用、不为其他 Shader 噪声新增控制；以“Implement the plan.”批准修订方案。删除工程/样式顶层 Seed，元素以 usesSeed:true 声明能力，实例独立保存数字或空值；外部声明、版本、引用及封装器同步，算法/Shader 和 ABI 不变。旧已知快照按精确算法身份迁移，只向支持元素复制旧值；未知或混合结构不猜测，失败保留原文。V5/V1 版本保留，取代 DEC-092 全局 Seed 行为，不含推送、发布或正式 readiness。

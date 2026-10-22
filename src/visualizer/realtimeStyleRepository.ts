@@ -1,4 +1,5 @@
 import { validateRealtimeStyle, type RealtimeStyleV1 } from './realtimeStyle';
+import { hasLegacySeed } from './seedMigration';
 
 /** Immutable, independent snapshots. Song drafts and resource-directory permissions are untouched. */
 export class RealtimeStyleRepository {
@@ -35,17 +36,24 @@ export class RealtimeStyleRepository {
     }
     async read(id: string): Promise<RealtimeStyleV1 | null> {
         const db = await this.open();
-        const input = await new Promise<unknown>((resolve, reject) => {
-            const tx = db.transaction('styles', 'readonly'),
+        return new Promise<RealtimeStyleV1 | null>((resolve, reject) => {
+            const tx = db.transaction('styles', 'readwrite'),
                 request = tx.objectStore('styles').get(id);
-            let value: unknown;
+            let value: RealtimeStyleV1 | null = null;
+            let failure: unknown;
             request.onsuccess = () => {
-                value = request.result;
+                try {
+                    if (request.result === undefined) return;
+                    value = validateRealtimeStyle(request.result);
+                    if (hasLegacySeed(request.result)) tx.objectStore('styles').put(value);
+                } catch (error) {
+                    failure = error;
+                    tx.abort();
+                }
             };
             tx.oncomplete = () => resolve(value);
-            tx.onabort = tx.onerror = () => reject(tx.error ?? Error('读取实时样式失败。'));
+            tx.onabort = tx.onerror = () => reject(failure ?? tx.error ?? Error('读取实时样式失败。'));
         });
-        return input === undefined ? null : validateRealtimeStyle(input);
     }
     close() {
         void this.database?.then(db => db.close()).catch(() => {});

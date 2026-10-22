@@ -13,13 +13,15 @@ function style(seed?: number | null) {
         elementRegistry.create('radial-spectrum', 10, 0),
         elementRegistry.create('blur', 10, 1),
     ]);
-    if (seed !== undefined) p.seed = seed;
+    if (seed !== undefined) p.elements[0]!.seed = seed;
     return createRealtimeStyle(p, '测试实时样式');
 }
 test.each([null, 0, 42, 0xffffffff])('realtime snapshots preserve seed %s', seed => {
     const s = style(seed);
-    expect(s.seed).toBe(seed);
-    expect(validateRealtimeStyle(JSON.parse(JSON.stringify(s))).seed).toBe(seed);
+    expect(s).not.toHaveProperty('seed');
+    expect(s.elements[0]!.seed).toBe(seed);
+    expect(s.elements[1]).not.toHaveProperty('seed');
+    expect(validateRealtimeStyle(JSON.parse(JSON.stringify(s))).elements[0]!.seed).toBe(seed);
 });
 
 test('styles are independent snapshots without song, timing, editor or catalog dependencies', () => {

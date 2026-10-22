@@ -15,6 +15,7 @@ export function instantiatePreset(id: string | ResourceRef, duration: number, st
             resource: resourceRef(d),
             name: e.name,
             enabled: e.enabled,
+            ...(d.usesSeed ? { seed: null } : {}),
             layer: startLayer + index,
             bindings: structuredClone(e.bindings),
             ...(e.markerBindings ? { markerBindings: structuredClone(e.markerBindings) } : {}),

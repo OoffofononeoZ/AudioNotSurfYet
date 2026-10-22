@@ -239,7 +239,7 @@ test('market applies the geometric preset, edits it, restores it and renders sil
     expect(added.map(e => e.bindings)).toEqual(p.elements.map(e => e.bindings));
     const canvas = page.getByTestId('visualizer-preview-canvas');
     const host = await canvas.getAttribute('data-renderer-host-id');
-    p.seed = 314159;
+    for (const e of p.elements) if (e.seed !== undefined) e.seed = 314159;
     for (const e of p.elements)
         for (const b of e.bindings) if (b.parameterId === 'spectrum') b.source = { kind: 'constant', value: [] };
     await importProject(page, p);
@@ -343,7 +343,7 @@ test('PV preset renders four distinct chapters, seeks deterministically and reus
     await preset(page, 'prismatic-voyage');
     await expect(page.locator('.viz-element-row[data-element-id]')).toHaveCount(12);
     const p = await exported(page);
-    p.seed = 314159;
+    for (const e of p.elements) if (e.seed !== undefined) e.seed = 314159;
     for (const e of p.elements)
         for (const b of e.bindings)
             if (b.parameterId === 'spectrum')
