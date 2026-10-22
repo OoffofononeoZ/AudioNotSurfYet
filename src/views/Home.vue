@@ -88,19 +88,21 @@ const handleArtworkError = (event: Event) => {
     background: var(--canvas);
     font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
 }
-.home-visualizer-content {
-    padding: 0 0 96px;
+.home-content.home-visualizer-content {
+    padding: 0;
     overflow: hidden;
     background: #000;
 }
 .home-visualizer-content .home-display-switch {
-    position: relative;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
     z-index: 2;
-    background: #111b15;
 }
-.home-realtime {
-    flex: 1;
-    min-height: 0;
+.home-visualizer-content .home-realtime {
+    position: absolute;
+    inset: 0;
 }
 .home-rays {
     position: absolute;
@@ -216,9 +218,6 @@ const handleArtworkError = (event: Event) => {
 @media (max-width: 767px) {
     .home-content {
         padding: 14px 24px 104px;
-    }
-    .home-visualizer-content {
-        padding: 0 0 96px;
     }
     .home-display-switch {
         min-height: 36px;
