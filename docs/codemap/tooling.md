@@ -16,5 +16,6 @@
 | [scripts/lib/visualizer-assets-path.mjs](../../scripts/lib/visualizer-assets-path.mjs) | — |
 | [scripts/lib/visualizer-resource-v2.mjs](../../scripts/lib/visualizer-resource-v2.mjs) | — |
 | [scripts/lib/visualizer-skill-path.mjs](../../scripts/lib/visualizer-skill-path.mjs) | — |
+| [scripts/sync-visualizer-skill-codec.mjs](../../scripts/sync-visualizer-skill-codec.mjs) | [scripts/lib/visualizer-skill-path.mjs](../../scripts/lib/visualizer-skill-path.mjs) |
 | [scripts/test-visualizer-skill.mjs](../../scripts/test-visualizer-skill.mjs) | [scripts/lib/visualizer-skill-path.mjs](../../scripts/lib/visualizer-skill-path.mjs) |
 | [scripts/visualizer-resource-package.mjs](../../scripts/visualizer-resource-package.mjs) | [scripts/lib/visualizer-assets-path.mjs](../../scripts/lib/visualizer-assets-path.mjs)、[scripts/lib/visualizer-resource-v2.mjs](../../scripts/lib/visualizer-resource-v2.mjs)、[scripts/lib/visualizer-skill-path.mjs](../../scripts/lib/visualizer-skill-path.mjs) |

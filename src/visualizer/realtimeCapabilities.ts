@@ -23,7 +23,13 @@ export function inspectRealtimeContent(
     for (const e of elements) {
         const algorithm = elementAlgorithm(model, e),
             label = e.name + '：';
-        if (algorithm.contract.historyParameters.length) browserIssues.push(label + '需要历史输入，暂不支持实时模式。');
+        if (algorithm.apiVersion === 3 && !algorithm.contract.executionModes?.includes('realtime'))
+            browserIssues.push(label + '不支持实时执行。');
+        if (
+            algorithm.contract.historyParameters.length &&
+            !(algorithm.apiVersion === 3 && algorithm.contract.executionModes?.includes('realtime'))
+        )
+            browserIssues.push(label + '需要历史输入，暂不支持实时模式。');
         if (
             algorithm.contract.markerInputs?.length ||
             algorithm.contract.timingInput ||

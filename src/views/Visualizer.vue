@@ -213,6 +213,7 @@
                     :project="snapshot.project"
                     :element="selectedElement"
                     :locked="locked"
+                    @media="payload => run(() => controller.updateMedia(payload))"
                     @update="
                         patch =>
                             run(() => {

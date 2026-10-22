@@ -1,3 +1,4 @@
+import { validateMediaInputs } from './mediaCodec';
 import { finite, integer, invalid, keys, record, text } from './projectValidation';
 import { resourceHash } from './resourceIdentity';
 import { validateMarkerInputs } from './editorMarkerValidation';
@@ -60,12 +61,16 @@ function parameter(input: unknown): AlgorithmParameter {
         list(v.allowedAnalysisProjections, ['scalar', 'mean', 'max', 'peak', 'bin', 'band', 'full']);
     return structuredClone(v) as unknown as AlgorithmParameter;
 }
-export function validateAlgorithmContract(input: unknown, apiVersion: 1 | 2 = 1): AlgorithmContract {
+export function validateAlgorithmContract(input: unknown, apiVersion: 1 | 2 | 3 = 1): AlgorithmContract {
     const v = record(input, '算法契约');
     keys(
         v,
         ['kind', 'parameters', 'sharedParameters', 'historyParameters'],
-        apiVersion === 2 ? ['inputParameter', 'markerInputs', 'timingInput'] : ['inputParameter'],
+        apiVersion === 3
+            ? ['inputParameter', 'markerInputs', 'timingInput', 'mediaInputs', 'executionModes']
+            : apiVersion === 2
+              ? ['inputParameter', 'markerInputs', 'timingInput']
+              : ['inputParameter'],
     );
     if (!['visual', 'modifier', 'transition'].includes(String(v.kind)) || !Array.isArray(v.parameters))
         return invalid('算法种类或参数无效。');
@@ -77,7 +82,16 @@ export function validateAlgorithmContract(input: unknown, apiVersion: 1 | 2 = 1)
         historyParameters = list(v.historyParameters, ids);
     if (sharedParameters.some(id => parameters.find(p => p.id === id)?.valueKind !== 'number'))
         invalid('共同处理参数必须为数值。');
-    const markerInputs = apiVersion === 2 ? validateMarkerInputs(v.markerInputs) : undefined;
+    const markerInputs =
+        apiVersion === 2 || (apiVersion === 3 && v.markerInputs !== undefined)
+            ? validateMarkerInputs(v.markerInputs)
+            : undefined;
+    const mediaInputs = apiVersion === 3 ? validateMediaInputs(v.mediaInputs) : undefined;
+    const executionModes =
+        apiVersion === 3
+            ? (list(v.executionModes, ['timeline', 'realtime']) as ('timeline' | 'realtime')[])
+            : undefined;
+    if (executionModes && !executionModes.length) invalid('ABI 3 必须声明执行模式。');
     let timingInput: string | undefined;
     if (v.timingInput !== undefined) {
         timingInput = identifier(v.timingInput);
@@ -99,6 +113,8 @@ export function validateAlgorithmContract(input: unknown, apiVersion: 1 | 2 = 1)
         ...(v.inputParameter !== undefined ? { inputParameter: String(v.inputParameter) } : {}),
         ...(markerInputs ? { markerInputs } : {}),
         ...(timingInput ? { timingInput } : {}),
+        ...(mediaInputs ? { mediaInputs } : {}),
+        ...(executionModes ? { executionModes } : {}),
     };
 }
 export function validateShaderProgram(input: unknown): ShaderProgram {
@@ -111,9 +127,13 @@ export function validateShaderProgram(input: unknown): ShaderProgram {
     for (const [name, raw] of Object.entries(uniforms)) {
         identifier(name);
         const u = record(raw, 'uniform');
-        keys(u, ['type'], ['length']);
-        if (!['number', 'int', 'boolean', 'color', 'vec2', 'vec3', 'array', 'source'].includes(String(u.type)))
+        keys(u, ['type'], ['length', 'inputId', 'slot']);
+        if (!['number', 'int', 'boolean', 'color', 'vec2', 'vec3', 'array', 'source', 'media'].includes(String(u.type)))
             invalid('uniform 类型无效。');
+        if (u.type === 'media') {
+            identifier(u.inputId);
+            if (!['current', 'next'].includes(String(u.slot))) invalid('媒体纹理 slot 无效。');
+        } else if (u.inputId !== undefined || u.slot !== undefined) invalid('仅媒体纹理声明媒体输入。');
         if (u.type === 'array') {
             const length = integer(u.length, 'uniform length');
             if (length < 1 || length > 65536) invalid('uniform 数组长度无效。');
@@ -127,25 +147,33 @@ export function validateAlgorithmDefinition(input: unknown): AlgorithmDefinition
     const id = text(v.id, '算法 ID'),
         version = integer(v.version, '算法版本');
     if (!/^[a-z0-9][a-z0-9._-]*$/.test(id) || version < 1 || !Number.isSafeInteger(version)) invalid('算法身份无效。');
-    if (v.apiVersion !== 1 && v.apiVersion !== 2) invalid('算法 ABI 不受支持。');
+    if (v.apiVersion !== 1 && v.apiVersion !== 2 && v.apiVersion !== 3) invalid('算法 ABI 不受支持。');
     if (typeof v.hash !== 'string' || !/^[a-f0-9]{64}$/.test(v.hash) || resourceHash(v) !== v.hash)
         invalid('算法内容与 SHA-256 不匹配。');
-    const contract = validateAlgorithmContract(v.contract, v.apiVersion as 1 | 2),
+    const contract = validateAlgorithmContract(v.contract, v.apiVersion as 1 | 2 | 3),
         programs: Record<string, ShaderProgram> = {};
     for (const [name, program] of Object.entries(record(v.programs, 'programs')))
         Object.defineProperty(programs, identifier(name), { value: validateShaderProgram(program), enumerable: true });
+    for (const program of Object.values(programs))
+        for (const u of Object.values(program.uniforms))
+            if (u.type === 'media' && (v.apiVersion !== 3 || !contract.mediaInputs?.some(i => i.id === u.inputId)))
+                invalid('媒体纹理未获声明授权。');
     if (!Object.keys(programs).length) invalid('算法缺少 Shader。');
     return {
         id,
         version,
         hash: String(v.hash),
-        apiVersion: v.apiVersion as 1 | 2,
+        apiVersion: v.apiVersion as 1 | 2 | 3,
         contract,
         source: text(v.source, '算法源码'),
         programs,
     };
 }
 export function validateUniform(value: unknown, type: UniformType, length?: number): void {
+    if (type === 'media') {
+        identifier(value);
+        return;
+    }
     if (type === 'source') {
         if (value !== 'source') invalid('纹理只能引用当前效果输入。');
         return;

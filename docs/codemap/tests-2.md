@@ -6,6 +6,7 @@
 
 | 文件 | 本地静态引用（最多显示 6 项） |
 | --- | --- |
+| [tests/e2e/visualizer-offline-core.spec.ts](../../tests/e2e/visualizer-offline-core.spec.ts) | — |
 | [tests/e2e/visualizer-offline-long.spec.ts](../../tests/e2e/visualizer-offline-long.spec.ts) | [src/visualizer/compositionModel.ts](../../src/visualizer/compositionModel.ts)、[src/visualizer/compositionTypes.ts](../../src/visualizer/compositionTypes.ts)、[src/visualizer/elementRegistry.ts](../../src/visualizer/elementRegistry.ts)、[tests/processing/systemSampler.ts](../../tests/processing/systemSampler.ts)、[tests/setup-visualizer-resources.ts](../../tests/setup-visualizer-resources.ts)、[tests/support/file-picker.ts](../../tests/support/file-picker.ts) |
 | [tests/e2e/visualizer-output.spec.ts](../../tests/e2e/visualizer-output.spec.ts) | [src/visualizer/compositionModel.ts](../../src/visualizer/compositionModel.ts)、[src/visualizer/compositionTypes.ts](../../src/visualizer/compositionTypes.ts)、[src/visualizer/elementRegistry.ts](../../src/visualizer/elementRegistry.ts)、[src/visualizer/exportPresets.ts](../../src/visualizer/exportPresets.ts)、[tests/setup-visualizer-resources.ts](../../tests/setup-visualizer-resources.ts)、[tests/support/file-picker.ts](../../tests/support/file-picker.ts)、另 1 项，按需核对源码 |
 | [tests/e2e/visualizer-pixels.spec.ts](../../tests/e2e/visualizer-pixels.spec.ts) | [tests/support/file-picker.ts](../../tests/support/file-picker.ts) |
@@ -105,4 +106,3 @@
 | [tests/scripts/run-m5-eval.mjs](../../tests/scripts/run-m5-eval.mjs) | — |
 | [tests/scripts/run-m6-eval.mjs](../../tests/scripts/run-m6-eval.mjs) | — |
 | [tests/scripts/run-m7-eval.mjs](../../tests/scripts/run-m7-eval.mjs) | — |
-| [tests/scripts/run-m8-eval.mjs](../../tests/scripts/run-m8-eval.mjs) | — |

@@ -1,3 +1,4 @@
+import { referencedMedia } from './mediaCodec';
 import { FEATURE_IDS, type FeatureId } from '../analysis/types';
 import { analysisInputKey, validateAnalysisInputs, type AnalysisInput } from '../analysis/sources';
 import { FT_ROLES } from '../processing/modelManifest';
@@ -51,6 +52,7 @@ export function pruneCompositionResources(project: VisualizerProjectV5): Visuali
     );
     return {
         ...project,
+        ...(project.mediaAssets ? { mediaAssets: referencedMedia(project.elements, project.mediaAssets) } : {}),
         resources: {
             algorithms: project.resources.algorithms.filter(a => algorithms.has(resourceKey(a))),
             elements: project.resources.elements.filter(e => elements.has(resourceKey(e))),

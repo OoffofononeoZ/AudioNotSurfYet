@@ -233,3 +233,7 @@ Node24.18.0/npm11.x，依赖版本以lockfile为准；浏览器专项使用真�
 
 
 内容生成 skill 与专属测试仅在外部 `WheresYourElements/skill/visualizer-content-generator/` 维护。`VISUALIZER_SKILL_DIR` 可覆盖位置；上述 skill 测试及 `visualizer:resources` 命令按需加载外部脚本，缺失时明确报错，不阻断无关测试或普通应用构建。先在外部 skill 目录按其 lockfile 安装测试依赖，项目不保留 skill 副本。
+
+## Circular Visualizer 媒体专项
+
+运行 `npx playwright test tests/e2e/visualizer-circular.spec.ts --project=chrome --project=edge --workers=1`，覆盖独立元素、原版响应平滑、媒体导入和轮播、JSON／实时样式、四档离线视频及 file:// 壁纸。受控 PNG/WebP/JPEG、VP9 WebM 与 H.264 MP4 位于 tests/fixtures/visualizer-media；不含用户素材。输出保存在忽略的 artifacts/visualizer-composition/circular。单元测试见 media-contract.test.ts。外部 codec 用 visualizer:skill-codec:check 核对。

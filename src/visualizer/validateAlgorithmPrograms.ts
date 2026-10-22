@@ -17,19 +17,21 @@ export function validateAlgorithmPrograms(renderer: VisualizerRenderer, resource
                 const uniforms: Record<string, UniformValue> = {};
                 for (const [id, spec] of Object.entries(program.uniforms)) {
                     uniforms[id] =
-                        spec.type === 'source'
-                            ? 'source'
-                            : spec.type === 'color'
-                              ? '#000000'
-                              : spec.type === 'boolean'
-                                ? false
-                                : spec.type === 'vec2'
-                                  ? [0, 0]
-                                  : spec.type === 'vec3'
-                                    ? [0, 0, 0]
-                                    : spec.type === 'array'
-                                      ? Array(spec.length).fill(0)
-                                      : 0;
+                        spec.type === 'media'
+                            ? spec.inputId!
+                            : spec.type === 'source'
+                              ? 'source'
+                              : spec.type === 'color'
+                                ? '#000000'
+                                : spec.type === 'boolean'
+                                  ? false
+                                  : spec.type === 'vec2'
+                                    ? [0, 0]
+                                    : spec.type === 'vec3'
+                                      ? [0, 0, 0]
+                                      : spec.type === 'array'
+                                        ? Array(spec.length).fill(0)
+                                        : 0;
                 }
                 const pass: DrawPass = {
                     program: name,

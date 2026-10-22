@@ -2,6 +2,7 @@ import type { SceneParameterDescriptor } from './parameterDescriptor';
 import type { VisualizerElement } from './compositionTypes';
 import type { ElementDefinition, PresetDefinition, ResourceRef, ResourceSnapshot } from './resourceTypes';
 import { resourceKey, resourceRef, sameResource } from './resourceIdentity';
+import { defaultMediaBindings } from './mediaCodec';
 import { defaultMarkerBindings } from './editorMarkerValidation';
 
 export type ElementDescriptor = ElementDefinition;
@@ -39,6 +40,7 @@ export function createDefinitionElement(
                 : { source: { kind: 'constant' as const, value: structuredClone(p.defaultValue) } }),
         })) as VisualizerElement['bindings'],
         ...(markerBindings ? { markerBindings } : {}),
+        ...(d.mediaInputs ? { mediaBindings: defaultMediaBindings(d.mediaInputs) } : {}),
         ...(d.kind === 'visual' ? {} : { targets: { kind: 'composition' as const } }),
     };
 }

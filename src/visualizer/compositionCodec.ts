@@ -1,3 +1,4 @@
+import { validateMediaAssets, validateMediaBindings } from './mediaCodec';
 import { readEditorProject } from '../editor/projectCodec';
 import type { EditorTrackIdentityV1 } from '../editor/types';
 import { elementDescriptor } from './compositionModel';
@@ -64,7 +65,7 @@ function element(input: unknown, project: VisualizerProjectV5): VisualizerElemen
     keys(
         v,
         ['id', 'resource', 'name', 'enabled', 'layer', 'timing', 'bindings'],
-        ['targets', 'markerBindings', 'seed'],
+        ['targets', 'markerBindings', 'seed', 'mediaBindings'],
     );
     const resource = validateResourceRef(v.resource);
     const descriptor = project.resources.elements.find(d => sameResource(d, resource));
@@ -73,6 +74,7 @@ function element(input: unknown, project: VisualizerProjectV5): VisualizerElemen
     const layer = integer(v.layer, 'layer');
     if (!Number.isSafeInteger(layer)) return invalid('层级必须为安全整数。');
     const bindings = validateElementBindings(v.bindings, descriptor.parameters);
+    const mediaBindings = validateMediaBindings(v.mediaBindings, descriptor.mediaInputs, project.mediaAssets);
     const algorithm = project.resources.algorithms.find(a => sameResource(a, descriptor.algorithm))!;
     const markerBindings = validateMarkerBindings(
         v.markerBindings,
@@ -106,6 +108,7 @@ function element(input: unknown, project: VisualizerProjectV5): VisualizerElemen
         timing: timing(v.timing, descriptor.kind === 'transition', project),
         bindings,
         ...(markerBindings ? { markerBindings } : {}),
+        ...(mediaBindings ? { mediaBindings } : {}),
         ...(targets ? { targets } : {}),
     };
 }
@@ -130,7 +133,7 @@ export function validateComposition(input: unknown, context?: VisualizerTrackVal
             'items',
             'resources',
         ],
-        ['editorSnapshot'],
+        ['editorSnapshot', 'mediaAssets'],
     );
     if (v.format !== 'audiosurf-visualizer') return invalid('工程格式无效。');
     const track = canonicalTrack(v.track, context);
@@ -156,6 +159,7 @@ export function validateComposition(input: unknown, context?: VisualizerTrackVal
         elements: [],
         items: [],
         resources: validateResourceSnapshot(v.resources),
+        ...(v.mediaAssets === undefined ? {} : { mediaAssets: validateMediaAssets(v.mediaAssets) }),
     };
     if (v.editorSnapshot !== undefined) {
         const s = record(v.editorSnapshot, 'editorSnapshot');

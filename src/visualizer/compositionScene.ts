@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { CompositionMediaHost } from './mediaHost';
 import { quadVertex, compositeFragment } from './compositionShaders';
 import { elementRange, orderedElements, effectiveElements, elementDescriptor } from './compositionModel';
 import { effectsFor, parameterKey } from './compositionEffects';
@@ -51,6 +52,7 @@ export class CompositionScene implements VisualizerScene {
     ];
     private accumulation = new THREE.WebGLRenderTarget(1, 1, { depthBuffer: false });
     private gpu = new AlgorithmDrawRenderer(this.geometry);
+    private media = new CompositionMediaHost();
     private runtime: AlgorithmRuntimePort | null = null;
     private signature = '';
     private initialization: Promise<void> | null = null;
@@ -75,6 +77,8 @@ export class CompositionScene implements VisualizerScene {
         this.packets.clear();
         this.needsSourcePrompt = false;
         if (!project || !project.elements.length) {
+            this.media.dispose();
+            this.media = new CompositionMediaHost();
             this.runtime?.dispose();
             this.runtime = null;
             this.signature = '';
@@ -127,6 +131,22 @@ export class CompositionScene implements VisualizerScene {
             for (const effect of effectsFor(project, e.id, input.timeSeconds)) used.add(effect.id);
         }
         for (const e of effectsFor(project, null, input.timeSeconds)) used.add(e.id);
+        for (const e of effectiveElements(project).filter(e => used.has(e.id))) {
+            const a = findResource(project.resources.algorithms, elementDescriptor(project, e).algorithm);
+            if (
+                a.apiVersion === 3 &&
+                !a.contract.executionModes?.includes(this.options.realtime ? 'realtime' : 'timeline')
+            )
+                throw Error('元素不支持当前执行模式。');
+        }
+        const mediaFrames = await this.media.prepare(
+            project,
+            effectiveElements(project).filter(e => used.has(e.id)),
+            input.timeSeconds,
+            !!this.options.realtime,
+            input.animate === false,
+        );
+        if (this.disposed || runtime !== this.runtime || project !== this.options.readProject()) return;
         const frames = effectiveElements(project)
             .filter(e => used.has(e.id))
             .flatMap(e => {
@@ -160,6 +180,13 @@ export class CompositionScene implements VisualizerScene {
                             height: this.height,
                             range: this.options.realtime ? null : elementRange(project, e),
                             parameters,
+                            ...(findResource(project.resources.algorithms, elementDescriptor(project, e).algorithm)
+                                .apiVersion === 3
+                                ? {
+                                      mode: this.options.realtime ? ('realtime' as const) : ('timeline' as const),
+                                      media: mediaFrames.get(e.id),
+                                  }
+                                : {}),
                         },
                     },
                 ];
@@ -210,7 +237,9 @@ export class CompositionScene implements VisualizerScene {
         for (const pass of this.packets.get(e.id)?.passes ?? []) {
             const target = current === this.targets[0] ? this.targets[1]! : this.targets[0]!;
             this.clear(target);
-            this.gpu.draw(this.options.renderer, algorithm, pass, current?.texture);
+            this.gpu.draw(this.options.renderer, algorithm, pass, current?.texture, (inputId, slot) =>
+                this.media.texture(e.id, inputId, slot),
+            );
             current = target;
         }
         return current;
@@ -257,6 +286,7 @@ export class CompositionScene implements VisualizerScene {
                     elementDescriptor(project, element).algorithm.hash,
                     JSON.stringify(element.bindings.map(b => input.values.get(parameterKey(id, b.parameterId))?.value)),
                     JSON.stringify(packet.state ?? []),
+                    ...(element.mediaBindings ? [JSON.stringify(element.mediaBindings)] : []),
                 );
             }
             return { hash: hashText(hashes.join('|')), needsSourcePrompt: this.needsSourcePrompt };
@@ -276,6 +306,7 @@ export class CompositionScene implements VisualizerScene {
         this.disposed = true;
         this.runtime?.dispose();
         this.runtime = null;
+        this.media.dispose();
         this.gpu.dispose();
         this.geometry.dispose();
         this.material.dispose();

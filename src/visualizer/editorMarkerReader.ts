@@ -29,7 +29,7 @@ export function createEditorMarkerReader(project: CompositionRenderModel, isCurr
         const algorithm = elementAlgorithm(project, element),
             descriptor = elementDescriptor(project, element);
         const input = descriptor.markerInputs?.find(i => i.id === inputId);
-        if (algorithm.apiVersion !== 2 || !input) throw Error('算法未声明此标记输入。');
+        if (algorithm.apiVersion < 2 || !input) throw Error('算法未声明此标记输入。');
         const binding: MarkerBinding | undefined =
             algorithm.contract.timingInput === inputId
                 ? element.timing.kind === 'editor-range'

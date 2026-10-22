@@ -40,3 +40,7 @@
 具体输入、格式与工具见根 [AGENTS](../../../AGENTS.md) 指向的外部 skill。Skill 自身测试在外部仓库运行，项目命令 `npm run test:skill:visualizer-content-generator` 按需转调。校验器测试证明结构与 CLI 行为，不单独证明工作流、视觉或 runtime 正确。
 
 内容验证按实际变化选择 V5 往返、资源包校验与隔离执行、分组/引用隔离、共同参数差异、数据映射、确定性、GPU、生命周期和短离线媒体检查；不默认累计历史评审或长曲矩阵。适用阈值保持，未运行/失败如实记录。仅修改 skill 时无需应用构建或产品浏览器回归；资源加载或产品行为变化选择对应验证。完成后按项目交付规则本地提交，不推送、不发布、不产生 readiness 结论。
+
+## 媒体内容生成
+
+独立 skill 2.5.0 支持 ABI 3 的媒体输入和显式执行模式；宿主 codec 与外部快照通过 visualizer:skill-codec 同步并只读核对。元素先独立封装验证，再创建精确引用的预设；媒体默认为 none。具体字段见外部 skill 的 media-inputs 参考与[宿主媒体契约](../../context/visualizer-media.md)。

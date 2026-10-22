@@ -417,6 +417,7 @@ export class VisualizerRendererHost implements VisualizerSceneHost {
                 timeSeconds: frame.timeSeconds,
                 values,
                 bindingRevision: frame.bindingRevision,
+                animate: frame.animate ?? frame.playbackState === 'playing',
             };
             const draw = () => {
                 if (generation !== this.renderGeneration || this.disposed || this.contextLost || scene !== this.scene) {

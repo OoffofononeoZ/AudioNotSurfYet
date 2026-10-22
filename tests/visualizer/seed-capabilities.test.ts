@@ -4,6 +4,8 @@ import { validateResourceSnapshot } from '../../src/visualizer/resourceCodec';
 import { resourceHash } from '../../src/visualizer/resourceIdentity';
 
 const seeded = [
+    'circular-particles',
+    'circular-depth',
     'spectral-strings',
     'starfield',
     'radial-spectrum',
@@ -23,6 +25,11 @@ test('only elements with existing seed-driven effects declare the capability', (
             .sort(),
     ).toEqual(seeded);
     for (const id of [
+        'circular-background',
+        'circular-bars',
+        'circular-outer',
+        'circular-center',
+        'circular-foreground',
         'solid',
         'spectral-dots',
         'reactive-rings',
