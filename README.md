@@ -6,7 +6,7 @@ Vue 3 / TypeScript / Vite 浏览器音频工作台。项目状态、技术契约
 
 ## 本地运行
 
-使用 Node.js 24.18.0 / npm 11.x，按现有 lockfile 安装依赖。
+使用 Node.js 24.22.1 / npm 11.x，按现有 lockfile 安装依赖。
 
 ```powershell
 npm ci

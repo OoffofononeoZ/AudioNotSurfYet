@@ -35,6 +35,6 @@
 
 ## 本地事实与风险
 
-Node.js 24.18.0 / npm 11.x；目前证据只声明本地环境，没有正式 CI。fixture/golden 使用现有 Node 原生 type stripping；build 可能更新 auto-imports.d.ts / components.d.ts，应保留用户原有差异。现有大 chunk warning 作为风险报告；不无依据分包。
+Node.js 24.22.1 / npm 11.x；目前证据只声明本地环境，没有正式 CI。fixture/golden 使用现有 Node 原生 type stripping；build 可能更新 auto-imports.d.ts / components.d.ts，应保留用户原有差异。现有大 chunk warning 作为风险报告；不无依据分包。
 
 调试先复现，再缩小到状态、DOM、音频节点或渲染循环，核对原始路径和相邻失败/边界。真实结果与未验证项按当前证据报告，不复制历史 run 当作本次验证。
