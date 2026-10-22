@@ -6,6 +6,7 @@
 
 | 文件 | 本地静态引用（最多显示 6 项） |
 | --- | --- |
+| [tests/scripts/run-m7-eval.mjs](../../tests/scripts/run-m7-eval.mjs) | — |
 | [tests/scripts/run-m8-eval.mjs](../../tests/scripts/run-m8-eval.mjs) | — |
 | [tests/scripts/run-m9-eval.mjs](../../tests/scripts/run-m9-eval.mjs) | — |
 | [tests/scripts/run-p1-eval.mjs](../../tests/scripts/run-p1-eval.mjs) | — |
@@ -105,4 +106,3 @@
 | [tests/visualizer/seed-migration.test.ts](../../tests/visualizer/seed-migration.test.ts) | [src/visualizer/compositionCodec.ts](../../src/visualizer/compositionCodec.ts)、[src/visualizer/compositionDraftRepository.ts](../../src/visualizer/compositionDraftRepository.ts)、[src/visualizer/compositionModel.ts](../../src/visualizer/compositionModel.ts)、[src/visualizer/compositionPresets.ts](../../src/visualizer/compositionPresets.ts)、[src/visualizer/elementRegistry.ts](../../src/visualizer/elementRegistry.ts)、[src/visualizer/realtimeStyle.ts](../../src/visualizer/realtimeStyle.ts)、另 3 项，按需核对源码 |
 | [tests/visualizer/seed.test.ts](../../tests/visualizer/seed.test.ts) | [src/visualizer/seed.ts](../../src/visualizer/seed.ts) |
 | [tests/visualizer/stem-input.test.ts](../../tests/visualizer/stem-input.test.ts) | [src/analysis/types.ts](../../src/analysis/types.ts)、[src/visualizer/compositionCodec.ts](../../src/visualizer/compositionCodec.ts)、[src/visualizer/compositionModel.ts](../../src/visualizer/compositionModel.ts)、[src/visualizer/compositionResolver.ts](../../src/visualizer/compositionResolver.ts)、[src/visualizer/elementRegistry.ts](../../src/visualizer/elementRegistry.ts)、[src/visualizer/realtimeCapabilities.ts](../../src/visualizer/realtimeCapabilities.ts)、另 1 项，按需核对源码 |
-| [tests/visualizer/v3-renderer.integration.test.ts](../../tests/visualizer/v3-renderer.integration.test.ts) | [src/visualizer/rendererTypes.ts](../../src/visualizer/rendererTypes.ts)、[src/visualizer/visualizerRendererHost.ts](../../src/visualizer/visualizerRendererHost.ts) |

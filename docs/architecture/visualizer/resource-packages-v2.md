@@ -16,7 +16,9 @@ DEC-087 批准 V2 算法包、V5 自包含工程及原生隔离。2026-10-20 的
 
 信息 schemaVersion:1，含精确 resource、kind、title、description、creator、createdAt、可选 previewPath、sourceEntry、packagePath、dependencies 和 order。creator 默认 default；createdAt 是实际创建时间，重新封装不重置。路径相对自身资源根，不接受点段、绝对路径或跨资源依赖。元素包含完整辅助源码及 Shader；预设包只含组合定义，不含算法或元素，dependencies 恰为已有元素的去重精确引用。
 
-封面接受 PNG/JPEG/WebP 及经过独立图形校验的 SVG。优先读取 previewPath，再按资源根目录的 cover.*、preview.*、其余文件名寻找可解码图片；缺失或损坏时使用共享 /default_cover.png，不阻断合法运行包。封面不参与资源身份；取消、权限及路径错误仍正常失败。
+SVG 与 PNG/JPEG/WebP 一样属于正常展示图片资源，扩展名不区分大小写。独立 SVG 支持基础图形、文字、defs、渐变、裁剪/蒙版和静态滤镜；url(#id) 和 href="#id" 只能引用同一 SVG 内已存在的定义。拒绝脚本、事件、style/CSS、外部引用/嵌入及 DTD/处理指令；SVG 以 image/svg+xml 解码，通过 Blob URL 在 img 中显示。
+
+优先读取 previewPath（例如 preview.svg 或 images/cover.svg，相对资源自身根目录，使用 / 分隔），再按资源根目录的 cover.*、preview.*、其余文件名寻找可解码图片；缺失或损坏时使用共享 /default_cover.png，不阻断合法运行包。封面不参与资源身份；取消、权限及路径错误仍正常失败。
 
 `npm run visualizer:resources` 封装外部库，`npm run visualizer:resources:check` 只读核对，`VISUALIZER_ASSETS_DIR` 覆盖默认位置。独立 skill 可运行 `node <skill>/scripts/resource-library.mjs --build|--check <assets>`。dev/build 不执行封装、不复制外部库；仓库不保存资源库的源码、运行包和专用预览。
 
