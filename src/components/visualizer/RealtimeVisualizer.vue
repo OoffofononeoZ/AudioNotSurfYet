@@ -4,7 +4,9 @@
         <div v-if="error" class="realtime-message" role="alert">
             {{ error }} <button type="button" @click="retry">重试</button>
         </div>
-        <div v-else-if="status === 'loading'" class="realtime-message" role="status">正在准备实时样式</div>
+        <div v-else-if="status === 'loading'" class="realtime-message realtime-loading" role="status">
+            正在准备实时样式
+        </div>
     </div>
 </template>
 <script setup lang="ts">
@@ -97,5 +99,15 @@ canvas {
 .realtime-message button {
     margin-left: 12px;
     text-decoration: underline;
+}
+.realtime-loading {
+    top: 64px;
+    left: 50%;
+    right: auto;
+    width: max-content;
+    max-width: calc(100% - 48px);
+    transform: translateX(-50%);
+    background: var(--surface-player);
+    box-shadow: 0 8px 24px rgb(0 0 0 / 25%);
 }
 </style>
