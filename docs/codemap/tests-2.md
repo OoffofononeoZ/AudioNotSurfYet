@@ -15,6 +15,7 @@
 | [tests/e2e/visualizer-realtime-production.spec.ts](../../tests/e2e/visualizer-realtime-production.spec.ts) | [tests/support/file-picker.ts](../../tests/support/file-picker.ts) |
 | [tests/e2e/visualizer-realtime.spec.ts](../../tests/e2e/visualizer-realtime.spec.ts) | [tests/support/file-picker.ts](../../tests/support/file-picker.ts) |
 | [tests/e2e/visualizer-resource-directory.spec.ts](../../tests/e2e/visualizer-resource-directory.spec.ts) | [tests/support/file-picker.ts](../../tests/support/file-picker.ts)、[tests/support/resource-directory.ts](../../tests/support/resource-directory.ts)、[tests/support/visualizer-assets.mjs](../../tests/support/visualizer-assets.mjs) |
+| [tests/e2e/visualizer-resource-preview.spec.ts](../../tests/e2e/visualizer-resource-preview.spec.ts) | [tests/support/file-picker.ts](../../tests/support/file-picker.ts)、[tests/support/visualizer-assets.mjs](../../tests/support/visualizer-assets.mjs) |
 | [tests/e2e/visualizer-resources.spec.ts](../../tests/e2e/visualizer-resources.spec.ts) | [src/visualizer/algorithmTypes.ts](../../src/visualizer/algorithmTypes.ts)、[src/visualizer/compositionTypes.ts](../../src/visualizer/compositionTypes.ts)、[src/visualizer/resourceIdentity.ts](../../src/visualizer/resourceIdentity.ts)、[src/visualizer/resourceTypes.ts](../../src/visualizer/resourceTypes.ts)、[tests/support/file-picker.ts](../../tests/support/file-picker.ts) |
 | [tests/e2e/visualizer-seed.spec.ts](../../tests/e2e/visualizer-seed.spec.ts) | [tests/support/file-picker.ts](../../tests/support/file-picker.ts) |
 | [tests/e2e/visualizer-stem-input.spec.ts](../../tests/e2e/visualizer-stem-input.spec.ts) | [src/visualizer/visualizerSessionController.ts](../../src/visualizer/visualizerSessionController.ts)、[tests/support/editor-marking.ts](../../tests/support/editor-marking.ts)、[tests/support/file-picker.ts](../../tests/support/file-picker.ts)、[tests/support/stem-analysis.ts](../../tests/support/stem-analysis.ts) |
@@ -105,4 +106,3 @@
 | [tests/scripts/run-m4-eval.mjs](../../tests/scripts/run-m4-eval.mjs) | — |
 | [tests/scripts/run-m5-eval.mjs](../../tests/scripts/run-m5-eval.mjs) | — |
 | [tests/scripts/run-m6-eval.mjs](../../tests/scripts/run-m6-eval.mjs) | — |
-| [tests/scripts/run-m7-eval.mjs](../../tests/scripts/run-m7-eval.mjs) | — |

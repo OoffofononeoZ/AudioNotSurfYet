@@ -13,11 +13,18 @@ export const isResourceImage = (path: string) =>
 
 function previewSvg(source: string): Blob {
     const doc = new DOMParser().parseFromString(source, 'image/svg+xml');
-    if (doc.querySelector('parsererror') || doc.documentElement.localName !== 'svg')
+    if (
+        doc.querySelector('parsererror') ||
+        doc.documentElement.localName !== 'svg' ||
+        doc.doctype ||
+        doc.createTreeWalker(doc, NodeFilter.SHOW_PROCESSING_INSTRUCTION).nextNode()
+    )
         throw Error('资源预览不是有效 SVG。');
+    // Static SVG artwork includes paint servers, filters and text, not just primitive shapes.
     const allowed = new Set([
         'svg',
         'g',
+        'defs',
         'path',
         'rect',
         'circle',
@@ -27,13 +34,60 @@ function previewSvg(source: string): Blob {
         'polygon',
         'title',
         'desc',
+        'text',
+        'tspan',
+        'textPath',
+        'use',
+        'linearGradient',
+        'radialGradient',
+        'stop',
+        'clipPath',
+        'mask',
+        'pattern',
+        'marker',
+        'filter',
+        'feBlend',
+        'feColorMatrix',
+        'feComponentTransfer',
+        'feComposite',
+        'feConvolveMatrix',
+        'feDiffuseLighting',
+        'feDisplacementMap',
+        'feDistantLight',
+        'feDropShadow',
+        'feFlood',
+        'feFuncA',
+        'feFuncB',
+        'feFuncG',
+        'feFuncR',
+        'feGaussianBlur',
+        'feMerge',
+        'feMergeNode',
+        'feMorphology',
+        'feOffset',
+        'fePointLight',
+        'feSpecularLighting',
+        'feSpotLight',
+        'feTile',
+        'feTurbulence',
     ]);
+    const localReference = (value: string) => /^#[^\s"'()\\<>]+$/.test(value) && !!doc.getElementById(value.slice(1));
     for (const node of [doc.documentElement, ...doc.documentElement.querySelectorAll('*')]) {
         if (node.namespaceURI !== 'http://www.w3.org/2000/svg' || !allowed.has(node.localName))
             throw Error('预览必须是独立 SVG 图形。');
-        for (const attr of node.attributes)
-            if (/^on|href|style/i.test(attr.name) || /url\s*\(/i.test(attr.value))
+        for (const attr of node.attributes) {
+            // Keep CSS out of the document; escaped/commented CSS URLs must not bypass reference checks.
+            if (/^on|^style$|^base$/i.test(attr.localName) || /\\|\/\*/.test(attr.value))
                 throw Error('预览不允许脚本或外部引用。');
+            if (attr.localName === 'href' && !localReference(attr.value))
+                throw Error('预览只允许引用 SVG 内已有的图形。');
+            const remainder = attr.value.replace(/url\s*\(([^)]*)\)/gi, (_url, target: string) => {
+                const reference = target.trim().replace(/^(["'])(.*)\1$/, '$2');
+                if (!localReference(reference)) throw Error('预览只允许引用 SVG 内已有的图形。');
+                return '';
+            });
+            if (/url\s*\(/i.test(remainder)) throw Error('预览的图形引用无效。');
+        }
     }
     return new Blob([source], { type: 'image/svg+xml' });
 }
