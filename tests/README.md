@@ -2,7 +2,7 @@
 
 按实际改动选择检查，不把可用命令表作为默认执行清单。当前领域验收集中在[Analyzer](../docs/quality/validation.md)、[Editor](../docs/quality/editor/validation.md)、[Visualizer](../docs/quality/visualizer/validation.md)与[processing](../docs/quality/processing/validation.md)，任务选择见[验证skill](../skills/audiosurf-testing-strategy/SKILL.md)。
 
-Node24.18.0/npm11.x，依赖版本以lockfile为准；浏览器专项使用真实已安装Chrome/Edge。历史M/E/V的环境、批准和失效候选只查evidence/readiness，不作为当前环境或产品状态。普通任务不执行累计eval、不生成阶段文档。
+Node24.22.1/npm11.x，依赖版本以lockfile为准；浏览器专项使用真实已安装Chrome/Edge。历史M/E/V的环境、批准和失效候选只查evidence/readiness，不作为当前环境或产品状态。普通任务不执行累计eval、不生成阶段文档。
 
 手写文档建议≤500行，>500提示、≥800阻断，保留正常排版和关键信息。代码按明确文件渐进format/format:check，不批量格式化。
 
@@ -178,7 +178,7 @@ Node24.18.0/npm11.x，依赖版本以lockfile为准；浏览器专项使用真�
 
 ## Fixture 重建
 
-1. 使用 Node 24.18.0。
+1. 使用 Node 24.22.1。
 2. 安装 FFmpeg 8.1.2，并确认存在 `pcm_s16le`、`libmp3lame` 和 `flac` encoder。
 3. 运行 `npm run fixtures:generate`。
 4. 运行 `npm run test:fixtures`，确认 manifest 中的 SHA-256 和实际文件一致。
