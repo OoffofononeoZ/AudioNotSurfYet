@@ -58,6 +58,27 @@
                         :disabled="locked"
                         @change="setFrameRate"
                 /></label>
+                <div class="col-span-2 mt-1 min-w-0">
+                    <label class="viz-field"
+                        ><span>音画同步补偿</span>
+                        <div class="flex items-center gap-2">
+                            <AppNumberInput
+                                :model-value="project.output.audioVideoOffsetMs"
+                                label="音画同步补偿"
+                                aria-describedby="viz-sync-offset-hint"
+                                :min="AUDIO_VIDEO_OFFSET_MS.min"
+                                :max="AUDIO_VIDEO_OFFSET_MS.max"
+                                :step="AUDIO_VIDEO_OFFSET_MS.step"
+                                snap-to-step
+                                :disabled="locked"
+                                @change="setAudioVideoOffset" />
+                            <span>ms</span>
+                        </div>
+                    </label>
+                    <small id="viz-sync-offset-hint" class="viz-muted block mt-1 text-[10px]">
+                        推荐调整范围是0-120ms · 负值表示音频提前，正值表示音频延后
+                    </small>
+                </div>
             </fieldset>
             <div v-else-if="tab === 'editor'" class="viz-bottom-editor">
                 <span>{{
@@ -125,6 +146,8 @@
 import { computed, ref, watch } from 'vue';
 import VisualizerIcon from './VisualizerIcon.vue';
 import AppSelect from '../controls/AppSelect.vue';
+import AppNumberInput from '../controls/AppNumberInput.vue';
+import { AUDIO_VIDEO_OFFSET_MS } from '../../visualizer/exportTypes';
 import { compositionIssues } from '../../visualizer/compositionModel';
 import { useExportCapabilities } from '../../visualizer/useExportCapabilities';
 import type { CompositionSessionSnapshot, VisualizerProjectV5 } from '../../visualizer/compositionTypes';
@@ -136,7 +159,7 @@ const props = defineProps<{
     error: string;
 }>();
 const emit = defineEmits<{
-    output: [resolution: VisualizerResolution, frameRate: VisualizerFrameRate];
+    output: [resolution: VisualizerResolution, frameRate: VisualizerFrameRate, audioVideoOffsetMs: number];
     'reload-editor': [];
     'import-editor': [];
     'remove-editor': [];
@@ -242,9 +265,22 @@ function availableFrameRates(resolution: VisualizerResolution) {
     return ([30, 60] as const).filter(fps => capability(resolution, fps)?.available);
 }
 function setResolution(value: string | number) {
-    emit('output', value as VisualizerResolution, props.project.output.frameRate);
+    emit(
+        'output',
+        value as VisualizerResolution,
+        props.project.output.frameRate,
+        props.project.output.audioVideoOffsetMs,
+    );
 }
 function setFrameRate(value: string | number) {
-    emit('output', props.project.output.resolution, Number(value) as VisualizerFrameRate);
+    emit(
+        'output',
+        props.project.output.resolution,
+        Number(value) as VisualizerFrameRate,
+        props.project.output.audioVideoOffsetMs,
+    );
+}
+function setAudioVideoOffset(value: number) {
+    emit('output', props.project.output.resolution, props.project.output.frameRate, value);
 }
 </script>

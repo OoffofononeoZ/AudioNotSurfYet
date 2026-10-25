@@ -81,6 +81,24 @@ function harness(
 beforeEach(() => setActivePinia(createPinia()));
 afterEach(() => vi.restoreAllMocks());
 
+test('output edits preserve sync compensation through persistence and reopening', async () => {
+    const h = harness();
+    await h.controller.enter('first');
+    h.controller.updateOutput('720p', 30, -120);
+    h.controller.updateOutput('1080p', 60);
+    await h.controller.flush();
+    expect(vi.mocked(h.repository.replace).mock.lastCall![0].project.output).toEqual({
+        aspectRatio: '16:9',
+        resolution: '1080p',
+        frameRate: 60,
+        audioVideoOffsetMs: -120,
+    });
+    await h.controller.leave();
+    await h.controller.enter('first');
+    expect(h.controller.readProject()!.output.audioVideoOffsetMs).toBe(-120);
+    await h.controller.dispose();
+});
+
 test('automatic seeds survive edits and persistence but reroll on clear, accepted import and reopening', async () => {
     const project = appendStandaloneElements(createComposition(track), [elementRegistry.create('starfield', 10, 0)]);
     const id = project.elements[0]!.id;

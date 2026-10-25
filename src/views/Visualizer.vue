@@ -171,7 +171,7 @@
                     :project="snapshot.project"
                     :locked="locked"
                     :error="actionError || fullscreen.error.value"
-                    @output="(r, f) => run(() => controller.updateOutput(r, f))"
+                    @output="(r, f, offset) => run(() => controller.updateOutput(r, f, offset))"
                     @reload-editor="run(() => controller.reloadEditorDraft())"
                     @import-editor="run(() => controller.importEditorProject())"
                     @remove-editor="run(() => controller.removeEditorSnapshot())"

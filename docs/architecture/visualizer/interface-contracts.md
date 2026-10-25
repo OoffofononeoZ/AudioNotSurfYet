@@ -28,5 +28,6 @@
 视频输出见[离线导出](../../context/visualizer-offline-export.md)：解码 PCM、indexed frame times、同 renderer 手动租约、WebCodecs/Mediabunny 与 OPFS WebM File。独立实时样式和本站展示地址按[实时样式](../../context/visualizer-realtime.md)使用独立快照与会话时间，预设库显示由合同/绑定/时段计算的用途分类。
 
 - export transport 锁定歌曲/播放/seek，取消或失败释放编码器、帧、文件和租约。四档能力按实际编码配置查询，保留帧数、PTS、同步和时长阈值。
+- 下侧栏“输出”提供工程级音画同步补偿（默认 0ms、-500～1000ms、步长 10ms），导出锁期间禁用。负值音频提前、正值延后，保留完整音频并延长输出，首尾使用静音和停帧；只改变离线输出，具体字段及缺省规则见 [V5](project-format-v5.md)。
 - 类型见 [exportTypes.ts](../../../src/visualizer/exportTypes.ts)；MediaRecorder/tap/ready Blob 已退出现行接口。
 - [历史 evidence](../../quality/visualizer/evidence-index.md)和 [readiness](../../quality/visualizer/release-readiness.md)只证明原候选，不证明 V5、可执行资源包与离线输出整体就绪。

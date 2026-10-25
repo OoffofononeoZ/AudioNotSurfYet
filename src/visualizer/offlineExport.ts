@@ -10,6 +10,7 @@ export interface OfflineExportOptions {
     source: DecodedAudioCopyPort;
     descriptor: DecodedAudioDescriptor;
     preset: VisualizerExportPreset;
+    audioVideoOffsetMs: number;
     codec: ExportVideoCodec;
     canvas: HTMLCanvasElement;
     artifact: ExportArtifact;
@@ -27,7 +28,7 @@ export async function runOfflineExport(options: OfflineExportOptions): Promise<F
     const { Output, WebMOutputFormat, StreamTarget, CanvasSource, AudioSampleSource, AudioSample, Quality } =
         await import('mediabunny');
     checkExportCancelled(signal);
-    const timeline = exportTimeline(descriptor, preset.frameRate);
+    const timeline = exportTimeline(descriptor, preset.frameRate, options.audioVideoOffsetMs);
     const output = new Output({
         format: new WebMOutputFormat({ appendOnly: false }),
         target: new StreamTarget(artifact.writable, { chunked: true, chunkSize: 1024 * 1024 }),
@@ -67,7 +68,7 @@ export async function runOfflineExport(options: OfflineExportOptions): Promise<F
         for (let second = 0; second < Math.ceil(timeline.durationSeconds); second++) {
             check();
             const frameEnd = Math.min(timeline.totalFrames, (second + 1) * preset.frameRate);
-            const sampleEnd = Math.min(descriptor.length, Math.round((second + 1) * descriptor.sampleRate));
+            const sampleEnd = Math.min(timeline.totalAudioSamples, Math.round((second + 1) * descriptor.sampleRate));
             const work = [
                 (async () => {
                     while (frameIndex < frameEnd) {
@@ -86,8 +87,16 @@ export async function runOfflineExport(options: OfflineExportOptions): Promise<F
                     }
                 })(),
                 (async () => {
+                    if (sampleStart === sampleEnd) return;
                     const sample = new AudioSample(
-                        exportAudioChunk(source, descriptor, sampleStart, sampleEnd - sampleStart),
+                        exportAudioChunk(
+                            source,
+                            descriptor,
+                            sampleStart,
+                            sampleEnd - sampleStart,
+                            timeline.audioStartSample,
+                            timeline.totalAudioSamples,
+                        ),
                     );
                     try {
                         await audio.add(sample);

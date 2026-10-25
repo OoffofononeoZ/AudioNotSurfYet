@@ -190,6 +190,7 @@ export class VisualizerExportSession {
                 source: source!,
                 descriptor,
                 preset,
+                audioVideoOffsetMs: project.output.audioVideoOffsetMs,
                 codec: capability.codec,
                 canvas: surface.canvas,
                 artifact,

@@ -5,6 +5,7 @@
 ## 工程数据
 
 - `format:'audiosurf-visualizer'`、`schemaVersion:5`。保留工程 UUID、时间戳、同歌 track、16:9 output 和可选同歌 Editor 快照；不再保存工程级 seed。
+- DEC-099 在 `output` 增加 `audioVideoOffsetMs`：-500～1000 的整数且必须为 10 的倍数，默认 0。输入 V5 文件/草稿可省略，codec 统一补 0；新保存文件明确写入。null、字符串、非有限值、越界和非步长值拒绝导入，失败保留原工程。该值仅补偿离线视频，随工程保存，输出档位切换保留；完整音频、首尾静音与停帧规则见[离线导出](../../context/visualizer-offline-export.md)。
 - DEC-097 替代 DEC-092 的全局 Seed：仅资源声明 `usesSeed:true` 的元素实例保存 `seed`，值为 0–4294967295 的整数或 null，其他实例省略。右侧元素属性可编辑或清空，新添加元素及预设子元素默认 null，表示每次打开独立随机。只覆盖既有 Seed 能改变实际画面的效果，不为其他 Shader 噪声新增控制。
 - `elements` 保存 UUID、精确资源引用、名称、启用状态、派生 layer、时段、bindings、按声明提供的可选 markerBindings／mediaBindings 和适用的效果 targets。实例不再重复保存固定 type/version，算法由元素定义的 algorithm 引用解析。
 - `items` 由低到高排列独立元素或预设实例。组包含 UUID、资源引用、名称、显隐、children 和 controls；每个叶元素恰好归属一次。禁止预设嵌套、重复归属、悬空引用和空组。

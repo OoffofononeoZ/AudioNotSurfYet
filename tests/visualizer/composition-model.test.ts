@@ -20,6 +20,23 @@ const track = { contentHash: 'a'.repeat(64), fileName: 'composition.wav', durati
 const project = () => createComposition(track);
 
 describe('V5 composition project', () => {
+    test('normalizes omitted V5 sync compensation and round trips explicit values', () => {
+        const p = project();
+        expect(p.output.audioVideoOffsetMs).toBe(0);
+        const { audioVideoOffsetMs, ...oldOutput } = p.output;
+        expect(validateComposition({ ...p, output: oldOutput }).output.audioVideoOffsetMs).toBe(0);
+        for (const offset of [-500, -120, -10, 0, 10, 120, 1000]) {
+            p.output.audioVideoOffsetMs = offset;
+            expect(decodeComposition(encodeComposition(p).buffer as ArrayBuffer).output.audioVideoOffsetMs).toBe(
+                offset,
+            );
+        }
+        for (const offset of [-510, 1010, 15, 0.5, NaN, Infinity, '120', null]) {
+            expect(() => validateComposition({ ...p, output: { ...p.output, audioVideoOffsetMs: offset } })).toThrow(
+                /音画同步补偿/,
+            );
+        }
+    });
     test('starts empty and round trips every registered element', () => {
         const p = project();
         expect(p.elements).toEqual([]);

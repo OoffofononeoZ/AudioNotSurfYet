@@ -135,6 +135,15 @@ test('offline session locks, renders explicit time, restores playback, and saves
     expect(h.session.getState().status).toBe('idle');
 });
 
+test('captures the project sync compensation for offline export', async () => {
+    const run = vi.fn(async (_options: OfflineExportOptions) => new File(['encoded'], 'sync.webm'));
+    const h = harness(run);
+    h.project.output.audioVideoOffsetMs = -120;
+    await h.session.start();
+    expect(run.mock.calls[0]![0].audioVideoOffsetMs).toBe(-120);
+    await h.session.dispose();
+});
+
 test('unsupported capability fails before acquiring transport, surface or file', async () => {
     const h = harness();
     h.probe.mockResolvedValue({ available: false, codec: null as unknown as 'vp9', reason: null });

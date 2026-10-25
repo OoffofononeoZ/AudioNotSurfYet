@@ -45,7 +45,12 @@ export interface VisualizerProjectV5 {
     createdAt: string;
     updatedAt: string;
     track: EditorTrackIdentityV1;
-    output: { aspectRatio: '16:9'; resolution: VisualizerResolution; frameRate: VisualizerFrameRate };
+    output: {
+        aspectRatio: '16:9';
+        resolution: VisualizerResolution;
+        frameRate: VisualizerFrameRate;
+        audioVideoOffsetMs: number;
+    };
     elements: VisualizerElement[];
     /** Each leaf is owned exactly once; sibling order determines render layers. */
     items: CompositionItem[];

@@ -22,6 +22,7 @@ import {
 } from './projectValidation';
 import { elementSeedField } from './seed';
 import { migrateLegacySeeds } from './seedMigration';
+import { isAudioVideoOffsetMs } from './exportTypes';
 import type {
     ElementTiming,
     EffectTargets,
@@ -138,7 +139,9 @@ export function validateComposition(input: unknown, context?: VisualizerTrackVal
     if (v.format !== 'audiosurf-visualizer') return invalid('工程格式无效。');
     const track = canonicalTrack(v.track, context);
     const o = record(v.output, 'output');
-    keys(o, ['aspectRatio', 'resolution', 'frameRate']);
+    keys(o, ['aspectRatio', 'resolution', 'frameRate'], ['audioVideoOffsetMs']);
+    const audioVideoOffsetMs = o.audioVideoOffsetMs === undefined ? 0 : o.audioVideoOffsetMs;
+    if (!isAudioVideoOffsetMs(audioVideoOffsetMs)) return invalid('音画同步补偿必须为 -500～1000ms 内的 10ms 整数倍。');
     if (
         o.aspectRatio !== '16:9' ||
         !['720p', '1080p'].includes(String(o.resolution)) ||
@@ -155,7 +158,12 @@ export function validateComposition(input: unknown, context?: VisualizerTrackVal
         createdAt,
         updatedAt,
         track,
-        output: { aspectRatio: '16:9', resolution: o.resolution as '720p' | '1080p', frameRate: o.frameRate },
+        output: {
+            aspectRatio: '16:9',
+            resolution: o.resolution as '720p' | '1080p',
+            frameRate: o.frameRate,
+            audioVideoOffsetMs,
+        },
         elements: [],
         items: [],
         resources: validateResourceSnapshot(v.resources),
@@ -199,7 +207,7 @@ export const createComposition = (track: EditorTrackIdentityV1): VisualizerProje
         createdAt: now,
         updatedAt: now,
         track,
-        output: { aspectRatio: '16:9', resolution: '720p', frameRate: 30 },
+        output: { aspectRatio: '16:9', resolution: '720p', frameRate: 30, audioVideoOffsetMs: 0 },
         elements: [],
         items: [],
         resources: { algorithms: [], elements: [], presets: [] },

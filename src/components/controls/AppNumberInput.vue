@@ -49,6 +49,7 @@ const props = withDefaults(
         min?: number;
         max?: number;
         step?: number;
+        snapToStep?: boolean;
         disabled?: boolean;
         editingPrecision?: number;
         wheelEnabled?: boolean;
@@ -87,7 +88,8 @@ function commit() {
         field.value = String(props.modelValue);
         return;
     }
-    const bounded = Math.max(props.min, Math.min(props.max, value));
+    const snapped = props.snapToStep ? Math.round(value / props.step) * props.step : value;
+    const bounded = Math.max(props.min, Math.min(props.max, snapped));
     field.value = String(bounded);
     if (!props.empty && bounded === props.modelValue) return;
     emit('update:modelValue', bounded);

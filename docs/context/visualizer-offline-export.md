@@ -4,7 +4,8 @@ owner 于 2026-10-17 明确要求「不再使用实时录制，替换为离线�
 
 ## 时间、画面和音频
 
-- 总时长 `D = decoded.length / decoded.sampleRate`；帧数 `ceil(D × fps)`，第 i 帧按 `i/fps` 求值。微秒时间戳直接计算，不累加 RAF 间隔或读取实时 AudioContext 时间。最后输入帧时长截到 D；容器或编码器的帧时长量化/Opus padding 仍须通过实际媒体门槛。
+- 原曲时长 `D = decoded.length / decoded.sampleRate`，补偿秒数 `c = output.audioVideoOffsetMs / 1000`；输出总时长 `T = D + abs(c)`、帧数 `ceil(T × fps)`。第 i 帧输出时间为 `i/fps`，场景时间扣除 `max(-c, 0)` 并限制在原视频首帧与最后有效帧之间。微秒时间戳直接计算，不累加 RAF 间隔或读取实时 AudioContext 时间；最后输入帧时长截到 T。0ms 保持原时间轴；容器量化/Opus padding 仍须通过实际媒体门槛。
+- 下侧栏“输出”的“音画同步补偿”默认 0ms、范围 -500～1000ms、步长 10ms，标注“推荐调整范围是0-120ms”。负值表示音频提前：画面开头停留首帧、音频结束后补静音；正值表示音频延后：音频开头补静音、画面结尾停留最后有效帧。完整保留原曲 PCM，音频起点按 `max(c, 0)` 就近取整到源样本，首尾填零；不改变页面预览、Editor 标记或算法的歌曲时间基准。工程保存规则见 [V5](../architecture/visualizer/project-format-v5.md)。
 - 导出租约取消预览 RAF、重置场景并以输出尺寸/DPR 1 绘制。每帧先准备 Analyzer/原生输入及合同声明的历史，await 隔离算法返回 DrawPacket，再同步绘制和截图；编码等待或让出主线程不会跳过任何帧。预览与导出复用一个 Canvas 和 WebGLRenderer。取消、尺寸或身份变化使未完成帧失效，迟到包不得绘制。
 - 从已解码 PCM 每次最多复制一秒，复用 speakers 双声道下混，连续重采样到 48kHz、编码双声道 Opus。页面音量不影响导出，不读取麦克风、系统播放或实时录制 tap。
 - 使用固定 `mediabunny@1.61.6`，VP9 优先、VP8 次选，质量编码模式。音视频按最多一秒窗口交错输入，等待编码/写入背压；不缓存全部视频帧或额外复制整曲 PCM。依赖许可见 [第三方声明](../../THIRD_PARTY_NOTICES.md)。
@@ -46,6 +47,8 @@ OPFS `visualizer-export` 下每个 UUID 文件持有独立 Web Lock，生成中�
 页面响应/heap 每两秒采样，系统内存按约一秒采样。Chrome/Edge 运行期间分别观察到浏览器工作集峰值 1781.1/1664.9MiB、private bytes 峰值 1888.7/1816.9MiB、设备 GPU 显存峰值 2525/2537MiB。浏览器计数聚合本机所有 Chrome/Edge 进程并可能重复计算共享工作集，GPU 为设备整体；JS heap 不包含原生/GPU 内存。这些是本机观测值，不是独占进程归因、内存上限或新性能承诺。首次长曲运行在已编码完毕后的测试端大文件复制触发默认 5 秒等待超时；将测试保存等待改为 120 秒后，两浏览器重跑通过，未据此修改产品保存实现。
 
 复现短矩阵时设置 `VISUALIZER_OUTPUT_MATRIX=1`、`VISUALIZER_OUTPUT_RUN=offline-matrix`，运行 `visualizer-output.spec.ts` 的 Chrome/Edge 专项，再执行 `node tests/scripts/verify-visualizer-output.mjs offline-matrix --all`。长曲设置 `VISUALIZER_EXPORT_LONG=1`，运行 `visualizer-offline-long.spec.ts` 的双浏览器专项，再执行 `node tests/scripts/verify-visualizer-output.mjs offline-long --files-only`。原始视频、capture 与版本化 measurement 保存在本地忽略目录 `artifacts/visualizer-composition/output/`，不加入仓库。
+
+音画补偿专项在 `visualizer-output.spec.ts` 常规运行中覆盖 -500、-120、0、120、1000ms，产物前缀 `sync-offset`。执行 `node tests/scripts/verify-visualizer-output.mjs sync-offset --files-only` 逐帧解码测量；`offline-sync-v4` 按原时长加补偿绝对值检查时长/帧数，按各自起点匹配声音与白闪，扣除有意补偿后沿用 100ms 同步及 250ms 时长预算。历史 v3 测量保持原身份与范围。
 
 确定性指时间轴、帧求值和音轨同步，不要求不同设备/编码器产生逐字节相同的文件，也不承诺导出快于实时。上述为阶段实现与工作树的功能证据，不标记正式 canonical；OPFS 自动化不代替原生 OS picker 人工验收，不改变历史 readiness 或发布边界。
 

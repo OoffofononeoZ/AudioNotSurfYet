@@ -85,3 +85,7 @@ owner 将位置更正为右侧属性，选择新元素默认留空、旧数据�
 ## DEC-098 — Circular Visualizer 与媒体输入 — 2026-10-22
 
 owner 要求复刻本地 893418273 壁纸并至少拆分粒子、可变背景、中心圆与音乐 bar，默认 responsiveness=50；补充要求图片／视频及同步宿主和外部 skill，选择全部既有使用场景与自包含 JSON，并以“Implement the plan.”批准七元素、ABI 3、可选媒体字段、受控宿主纹理、双模式响应和两仓库同步。保留 V2/V5/V1 与 ABI 1/2 行为，不含推送、发布或正式 readiness。见[媒体输入](visualizer-media.md)。
+
+## DEC-099 — 导出音画同步补偿 — 2026-10-25
+
+owner 要求下侧栏“输出”增加“音画同步补偿”，范围 -500～1000ms、步长 10ms，负值音频提前、正值延后，标注“推荐调整范围是0-120ms”；明确选择保留完整音频、延长视频并停留首尾帧，以及随工程保存、扩展 V5 缺字段补 0，并以“Implement the plan.”批准实施。默认 0ms，仅作用于离线导出；保留原曲 PCM、固定输出帧率和既有同步误差阈值，不改 Editor/预览时间基准、资源 ABI 或发布边界。见 [V5](../architecture/visualizer/project-format-v5.md)和[离线导出](visualizer-offline-export.md)。

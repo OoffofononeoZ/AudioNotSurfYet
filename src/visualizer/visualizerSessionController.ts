@@ -513,9 +513,18 @@ export class VisualizerSessionController {
     reorderElements(ids: string[], parentId?: string) {
         if (this.snapshot.project) this.updateProject(reorderComposition(this.snapshot.project, ids, parentId));
     }
-    updateOutput(resolution: VisualizerResolution, frameRate: VisualizerFrameRate) {
+    updateOutput(resolution: VisualizerResolution, frameRate: VisualizerFrameRate, audioVideoOffsetMs?: number) {
         const p = this.snapshot.project;
-        if (p) this.updateProject({ ...p, output: { aspectRatio: '16:9', resolution, frameRate } });
+        if (p)
+            this.updateProject({
+                ...p,
+                output: {
+                    ...p.output,
+                    resolution,
+                    frameRate,
+                    audioVideoOffsetMs: audioVideoOffsetMs ?? p.output.audioVideoOffsetMs,
+                },
+            });
     }
     resolveValuesAt(time: number): VisualizerResolvedParameterMap {
         const project = this.snapshot.project;

@@ -41,7 +41,7 @@ test('output settings preserve imported profiles and independently select all fo
     const fps = page.getByRole('combobox', { name: '输出帧率', exact: true });
     await expect(fps.locator('option[value="60"]')).not.toHaveAttribute('disabled', '');
     const project = await exported(page);
-    project.output = { aspectRatio: '16:9', resolution: '1080p', frameRate: 30 };
+    project.output = { aspectRatio: '16:9', resolution: '1080p', frameRate: 30, audioVideoOffsetMs: 120 };
     await importProject(page, project);
     await expect(page.getByText('已保存', { exact: true })).toBeVisible();
     await page.reload();
@@ -53,7 +53,12 @@ test('output settings preserve imported profiles and independently select all fo
         for (const f of ['30', '60']) {
             await resolution.selectOption(r);
             await fps.selectOption(f);
-            expect((await exported(page)).output).toEqual({ aspectRatio: '16:9', resolution: r, frameRate: Number(f) });
+            expect((await exported(page)).output).toEqual({
+                aspectRatio: '16:9',
+                resolution: r,
+                frameRate: Number(f),
+                audioVideoOffsetMs: 120,
+            });
         }
     await resolution.selectOption('720p');
     await expect(fps).toHaveValue('60');
@@ -81,6 +86,125 @@ test('unsupported offline encoding fails before taking playback or render owners
     await expect(page.locator('#music-bar-container')).toHaveAttribute('data-export-locked', 'false');
     await expect(page.locator('#music-bar-container')).toHaveAttribute('data-current-time', before!);
 });
+
+test('sync compensation snaps input, restores V5 drafts and locks during export', async ({ page }, info) => {
+    const errors: string[] = [];
+    page.on('pageerror', error => errors.push(error.message));
+    await open(page);
+    const input = page.getByRole('spinbutton', { name: '音画同步补偿', exact: true });
+    await expect(input).toHaveValue('0');
+    await expect(input).toHaveAttribute('min', '-500');
+    await expect(input).toHaveAttribute('max', '1000');
+    await expect(input).toHaveAttribute('step', '10');
+    await expect(page.locator('#viz-sync-offset-hint')).toContainText('推荐调整范围是0-120ms');
+    for (const [typed, expected] of [
+        ['-900', '-500'],
+        ['1200', '1000'],
+        ['113', '110'],
+        ['114', '110'],
+        ['-113', '-110'],
+    ]) {
+        await input.fill(typed!);
+        await input.press('Enter');
+        await expect(input).toHaveValue(expected!);
+    }
+    await input.press('ArrowUp');
+    await expect(input).toHaveValue('-100');
+    await input.press('ArrowDown');
+    await expect(input).toHaveValue('-110');
+    expect((await exported(page)).output.audioVideoOffsetMs).toBe(-110);
+    await expect(page.getByText('已保存', { exact: true })).toBeVisible();
+    await page.reload();
+    await expect(page.getByTestId('visualizer-ready')).toBeVisible();
+    await expect(input).toHaveValue('-110');
+    const legacy = JSON.parse(JSON.stringify(await exported(page)));
+    delete legacy.output.audioVideoOffsetMs;
+    await importProject(page, legacy);
+    await expect(input).toHaveValue('0');
+    await input.fill('120');
+    await input.press('Enter');
+    await mkdir('artifacts/visualizer-composition', { recursive: true });
+    for (const width of [1024, 1920]) {
+        await page.setViewportSize({ width, height: width === 1024 ? 720 : 1080 });
+        await input.scrollIntoViewIfNeeded();
+        await expect(input).toBeInViewport();
+        const hintInsidePanel = await page.locator('#viz-sync-offset-hint').evaluate(element => {
+            const hint = element.getBoundingClientRect();
+            const panel = element.closest('[role=tabpanel]')!.getBoundingClientRect();
+            return hint.top >= panel.top && hint.bottom <= panel.bottom;
+        });
+        expect(hintInsidePanel).toBe(true);
+        const overflow = await page.evaluate(() => document.documentElement.scrollWidth > innerWidth);
+        expect(overflow).toBe(false);
+        await page.screenshot({
+            path: `artifacts/visualizer-composition/sync-compensation-${info.project.name}-${width}.png`,
+        });
+    }
+    const position = await page.locator('#music-bar-container').getAttribute('data-current-time');
+    await page.getByTestId('visualizer-preview-frame').hover();
+    await page.getByTestId('start-visualizer-export').click();
+    await expect(input).toBeDisabled();
+    await page.getByTestId('cancel-visualizer-export').click();
+    await expect(input).toBeEnabled();
+    await expect(page.locator('#music-bar-container')).toHaveAttribute('data-current-time', position!);
+    expect((await exported(page)).output.audioVideoOffsetMs).toBe(120);
+    expect(errors).toEqual([]);
+});
+
+for (const offset of [-500, -120, 0, 120, 1000]) {
+    test(`sync compensation ${offset}ms preserves full audio in encoded WebM`, async ({ page }, info) => {
+        test.setTimeout(120000);
+        await mkdir(root, { recursive: true });
+        const audioFile = path.resolve(root, 'compensation-sync.wav');
+        await writeFile(audioFile, createOutputSyncWav());
+        await open(page, audioFile);
+        let project = await exported(page);
+        project.output.audioVideoOffsetMs = offset;
+        const background = elementRegistry.create('solid', project.track.durationSeconds, 0);
+        background.bindings.find(b => b.parameterId === 'color')!.source = { kind: 'constant', value: '#000000' };
+        const flashes = OUTPUT_SYNC_EVENTS.map((time, i) => {
+            const flash = elementRegistry.create('solid', project.track.durationSeconds, i + 1);
+            flash.bindings.find(b => b.parameterId === 'color')!.source = { kind: 'constant', value: '#ffffff' };
+            flash.timing = { kind: 'manual', startSeconds: time, endSeconds: time + OUTPUT_SYNC_FLASH_SECONDS };
+            return flash;
+        });
+        project = appendStandaloneElements(project, [background, ...flashes]);
+        await importProject(page, project);
+        await page.getByRole('slider', { name: '音量', exact: true }).press('Home');
+        const position = await page.locator('#music-bar-container').getAttribute('data-current-time');
+        await page.getByTestId('visualizer-preview-frame').hover();
+        await page.getByTestId('start-visualizer-export').click();
+        await expect(page.locator('[data-export-status=ready]')).toBeVisible({ timeout: 90000 });
+        const frames = await page.evaluate(() => window.__VISUALIZER_DIAGNOSTICS__?.exportFramesDone);
+        expect(frames).toBe(
+            Math.ceil((project.track.durationSeconds + Math.abs(offset) / 1000) * project.output.frameRate),
+        );
+        await expect(page.locator('#music-bar-container')).toHaveAttribute('data-current-time', position!);
+        await page.getByTestId('save-visualizer-export').click();
+        await expect(page.locator('[data-export-status=idle]')).toBeVisible();
+        const saved = (await savedPickerEntries(page)).filter(e => e.name.endsWith('.webm')).at(-1)!;
+        const file = `${root}/sync-offset-${info.project.name}-${offset}.webm`;
+        await writeFile(file, Buffer.from(saved.base64, 'base64'));
+        await writeFile(
+            file + '.capture.json',
+            JSON.stringify(
+                {
+                    mode: 'offline',
+                    browser: info.project.name,
+                    browserVersion: page.context().browser()!.version(),
+                    kind: 'sync',
+                    sourceDurationSeconds: project.track.durationSeconds,
+                    audioVideoOffsetMs: offset,
+                    preset: getVisualizerExportPreset(project.output.resolution, project.output.frameRate),
+                    syncEventsSeconds: OUTPUT_SYNC_EVENTS,
+                    syncFlashSeconds: OUTPUT_SYNC_FLASH_SECONDS,
+                },
+                null,
+                2,
+            ) + '\n',
+        );
+    });
+}
 
 async function installProbe(context: BrowserContext) {
     await context.addInitScript(() => {
@@ -143,7 +267,7 @@ for (const resolution of ['720p', '1080p'] as const)
                 await open(page, syncFile);
                 let project = await exported(page);
                 for (const e of project.elements) if (e.seed !== undefined) e.seed = 1234567;
-                project.output = { aspectRatio: '16:9', resolution, frameRate };
+                project.output = { aspectRatio: '16:9', resolution, frameRate, audioVideoOffsetMs: 0 };
                 const background = elementRegistry.create('solid', project.track.durationSeconds, 0);
                 background.bindings.find(b => b.parameterId === 'color')!.source = {
                     kind: 'constant',
@@ -172,7 +296,7 @@ for (const resolution of ['720p', '1080p'] as const)
                         await page.locator('[data-preset-id="geometric-0.6"]').click();
                         project = await exported(page);
                         for (const e of project.elements) if (e.seed !== undefined) e.seed = 1234567;
-                        project.output = { aspectRatio: '16:9', resolution, frameRate };
+                        project.output = { aspectRatio: '16:9', resolution, frameRate, audioVideoOffsetMs: 0 };
                         await importProject(page, project);
                         await page.getByRole('tab', { name: '状态', exact: true }).click();
                         await expect(page.locator('.viz-bottom-status')).toContainText('已就绪');

@@ -277,7 +277,7 @@ test('circular preset and video background export all four offline profiles', as
     await fs.mkdir(artifact, { recursive: true });
     for (const resolution of ['720p', '1080p'] as const)
         for (const frameRate of [30, 60] as const) {
-            p.output = { aspectRatio: '16:9', resolution, frameRate };
+            p.output = { aspectRatio: '16:9', resolution, frameRate, audioVideoOffsetMs: 0 };
             await load(page, p);
             await page.getByTestId('visualizer-preview-frame').hover();
             await page.getByTestId('start-visualizer-export').click();
