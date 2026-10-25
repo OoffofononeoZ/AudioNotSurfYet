@@ -4,6 +4,8 @@
 
 命令定义以根 package.json 为准，完整 runner 与历史结果见 [tests README](../../../tests/README.md)。这里只提供任务选择，不能把可用命令表当作默认执行清单。
 
+读取文档、skill 和引用文本时必须显式指定 UTF-8 参数，例如 `Get-Content -Encoding UTF8`、`rg --encoding utf-8`；仅列文件名无需编码参数。
+
 | 用途 | 命令 |
 | --- | --- |
 | 项目入口与地图 | `skills:install` / `skills:check`、`codemap` / `codemap:check` |

@@ -2,6 +2,19 @@
 
 本文件提供 skill、文档入口和通用工程规则。按任务读取相关内容，不默认加载全部资料。
 
+## 文档与 Skill 读取编码
+
+读取或检索文档、`AGENTS.md`、`SKILL.md` 及其引用文本（含外部 skill）时，每次命令或 API 调用必须显式指定 UTF-8 编码参数。
+
+| 方式 | 显式参数示例 |
+| --- | --- |
+| PowerShell | `Get-Content -LiteralPath <path> -Encoding UTF8` |
+| 内容检索 | `rg --encoding utf-8 ...` |
+| Python | `Path(path).read_text(encoding="utf-8")` |
+| Node.js | `readFile(path, "utf8")`；读取 bytes 后使用 `new TextDecoder("utf-8", { fatal: true })` 也符合要求 |
+
+工具不支持编码参数时，改用支持显式编码的本地读取方式，不虚构参数。不得依赖系统默认编码，或仅设置终端/控制台编码代替每次读取的参数。仅列举目录或文件名（如 `rg --files`）无需编码参数。
+
 ## 项目 Skills
 
 | Skill | 何时读取 | 入口 |
@@ -31,7 +44,7 @@
 - 使用中文维护项目指南与 skills，代码标识和命令保留原文。
 - 修改前检查工作树、分支和暂存区，保留用户已有修改。核对相关源码、调用方与契约，优先复用现有能力。
 - `trash/` 仅为本地旧资料留存区；不得读取、搜索、索引或引用内容。只有用户明确要求恢复或查看指定内容时才可访问；普通删除不默认移入该目录。
-- 搜索优先 `rg` / `rg --files`，显式排除 `trash/`、依赖和构建/测试产物。
+- 搜索优先 `rg --encoding utf-8` / `rg --files`，显式排除 `trash/`、依赖和构建/测试产物。
 - 运行环境和命令以 `package.json`、项目配置及 README 为准，使用现有 lockfile。
 - 项目 skill 的维护源为 `skills/`，`.agents/skills/` 是生成的发现入口；入口和代码地图由工具同步，不直接编辑生成文件。
 - 规模、职责拆分和格式按模块职责 skill 执行；按明确文件渐进格式化，不修改无关内容，不压缩排版规避检查。文档整理与信息保留按文档维护 skill 执行。

@@ -5,6 +5,8 @@ description: "AudioNotSurfYet 修改任务开始和完成交付时使用；保�
 
 # 修改任务与本地交付
 
+读取文档、`AGENTS.md`、`SKILL.md` 及其引用文本时，命令或 API 必须显式指定 UTF-8 编码参数；PowerShell 使用 `Get-Content -Encoding UTF8`，内容检索使用 `rg --encoding utf-8`。工具不支持时换用支持显式编码的读取方式，不能依赖默认编码或控制台设置；仅列文件名无需编码参数。
+
 owner 已授权修改任务按小目标完成适用验证后本地提交，无需再次确认；不包含推送、部署、发布、切换分支或历史重写。
 
 ## 开始

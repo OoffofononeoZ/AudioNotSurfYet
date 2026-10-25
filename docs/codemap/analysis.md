@@ -2,6 +2,8 @@
 
 # 特征分析与 Worker
 
+读取地图、关联文档和 skill 时必须显式指定 UTF-8 参数，例如 `Get-Content -Encoding UTF8`、`rg --encoding utf-8`；仅列文件名无需编码参数。
+
 只列可识别的本地文件引用；不是完整调用图。
 
 | 文件 | 本地静态引用（最多显示 6 项） |

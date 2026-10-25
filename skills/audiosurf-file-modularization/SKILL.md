@@ -5,6 +5,8 @@ description: "新增、重构或评审 AudioNotSurfYet 代码职责与格式时�
 
 # 模块职责
 
+读取文档、`AGENTS.md`、`SKILL.md` 及其引用文本时，命令或 API 必须显式指定 UTF-8 编码参数；PowerShell 使用 `Get-Content -Encoding UTF8`，内容检索使用 `rg --encoding utf-8`。工具不支持时换用支持显式编码的读取方式，不能依赖默认编码或控制台设置；仅列文件名无需编码参数。
+
 ## 规模与格式
 
 手写代码文件推荐不超过 1000 行。1001–1300 行结合职责审阅，不自动警告或强制拆分；1301–2000 行由 `repo:check` 警告；超过 2000 行阻断检查。第三方、生成文件、锁文件与产物除外。手写 Markdown 建议 ≤500 行，>500 行提示、≥800 行禁止提交；文字精简与信息保留按[文档维护 skill](../audiosurf-docs-maintenance/SKILL.md)执行。

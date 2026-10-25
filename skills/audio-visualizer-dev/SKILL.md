@@ -5,6 +5,8 @@ description: "开发、诊断或评审 AudioNotSurfYet 的 Vue 界面、播放�
 
 # Audio Visualizer Dev
 
+读取文档、`AGENTS.md`、`SKILL.md` 及其引用文本时，命令或 API 必须显式指定 UTF-8 编码参数；PowerShell 使用 `Get-Content -Encoding UTF8`，内容检索使用 `rg --encoding utf-8`。工具不支持时换用支持显式编码的读取方式，不能依赖默认编码或控制台设置；仅列文件名无需编码参数。
+
 确认目标包含 `src/audio/audioEngine.ts`、`src/audio/audioSessionService.ts` 和 `src/components/MusicBar.vue`。读取根 AGENTS.md 与任务相关源码；跨模块定位、拆分、验证和交付分别按项目对应 skill 处理，不默认加载全部。
 
 ## 按领域读取

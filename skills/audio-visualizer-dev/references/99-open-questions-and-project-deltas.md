@@ -12,6 +12,6 @@
 | Meyda Flux | 上游x未定义缺陷保留，项目Flux按ADR-0005与独立golden缓解产品，不声称修复依赖 |
 | FT/识别 | 当前汇总听感/耗时按DEC-074接受；新识别质量、原生OS与完整正式候选/后续链性能仍独立，见[processing验证](../../../docs/quality/processing/validation.md) |
 
-skills/是维护源，.agents/skills为生成入口；按任务读取，更新后skills:install，不再向全局目录安装。本次工作树以实际git状态判断，不把历史任务的一次未提交文件当持续事实。
+skills/是维护源，.agents/skills为生成入口；按任务读取，读取文档、skill及引用文本必须显式指定UTF-8参数（如`Get-Content -Encoding UTF8`、`rg --encoding utf-8`），更新后skills:install，不再向全局目录安装。本次工作树以实际git状态判断，不把历史任务的一次未提交文件当持续事实。
 
 依赖/命令/路由、状态所有权、数据隐私、支持矩阵、CI或发布改变时复核对应契约与用户授权；不恢复旧阶段审批或建立新的过程文档副本。

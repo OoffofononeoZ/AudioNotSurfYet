@@ -2,6 +2,8 @@
 
 核查日期：2026-10-19。AudioNotSurfYet是Vue/TypeScript/Vite本地音频工作台，目标为自动优先、可人工修正及完整手动完成视频制作。
 
+读取本入口、关联文档和 skill 时必须显式指定 UTF-8 编码参数，例如 `Get-Content -Encoding UTF8`、`rg --encoding utf-8`；完整规则见[AGENTS](../../AGENTS.md#文档与-skill-读取编码)。
+
 ## 从任务进入
 
 | 任务 | 当前入口 |

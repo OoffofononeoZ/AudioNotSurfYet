@@ -4,6 +4,8 @@ Vue 3 / TypeScript / Vite 浏览器音频工作台。项目状态、技术契约
 
 文档按当前页面和领域维护：接口从共享运行时及 Analyzer/Editor/Visualizer 页面进入，验证要求集中在领域 validation。普通任务更新相关专题，过程反馈放在交付中；旧阶段产物已清理，历史由 Git 查回，必要证据与未解决缺口继续保留。
 
+读取文档、skill 及其引用文本时必须显式指定 UTF-8 编码参数，例如 `Get-Content -Encoding UTF8`、`rg --encoding utf-8`；完整规则见 [AGENTS](AGENTS.md#文档与-skill-读取编码)。
+
 ## 本地运行
 
 使用 Node.js 24.22.1 / npm 11.x，按现有 lockfile 安装依赖。

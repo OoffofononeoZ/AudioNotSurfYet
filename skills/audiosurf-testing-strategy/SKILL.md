@@ -5,11 +5,13 @@ description: "AudioNotSurfYet 修改后选择必要验证或判断证据时使�
 
 # 验证策略
 
+读取文档、`AGENTS.md`、`SKILL.md` 及其引用文本时，命令或 API 必须显式指定 UTF-8 编码参数；PowerShell 使用 `Get-Content -Encoding UTF8`，内容检索使用 `rg --encoding utf-8`。工具不支持时换用支持显式编码的读取方式，不能依赖默认编码或控制台设置；仅列文件名无需编码参数。
+
 按实际行为与影响选择最小必要验证。当前入口见 [命令与领域检查](references/commands-and-domain-checks.md)，详细 runner 见 [tests README](../../tests/README.md)。普通修改不自动创建正式 evidence。
 
 | 改动 | 验证选择 |
 | --- | --- |
-| 文档或 skill | 元数据、入口、链接、命令与授权边界；手写 Markdown >500 行提示、≥800 行阻断。文字精简需审阅信息保留；不默认运行产品测试或构建 |
+| 文档或 skill | 元数据、入口、链接、命令与授权边界，读取指示及示例中的显式 UTF-8 参数；手写 Markdown >500 行提示、≥800 行阻断。文字精简需审阅信息保留；不默认运行产品测试或构建 |
 | 仓库工具 | `test:tools` 覆盖输出、过期检测、规模边界/批准例外、失败与只读行为；修改的手写代码按显式文件运行 `format:check` |
 | 时间、codec、validator、状态或数值逻辑 | 类型检查及相关单元/集成，覆盖适用边界和已发现问题 |
 | UI、交互或布局 | 真实浏览器复现目标操作与相邻异常，核对状态、几何、焦点和控制台 |

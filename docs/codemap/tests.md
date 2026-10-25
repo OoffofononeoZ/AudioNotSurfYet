@@ -2,6 +2,8 @@
 
 # 验证
 
+读取地图、关联文档和 skill 时必须显式指定 UTF-8 参数，例如 `Get-Content -Encoding UTF8`、`rg --encoding utf-8`；仅列文件名无需编码参数。
+
 按需读取，每页最多 100 个文件。
 
 - [第 1 页](tests-1.md)
