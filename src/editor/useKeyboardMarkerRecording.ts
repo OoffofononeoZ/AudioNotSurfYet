@@ -26,6 +26,7 @@ export function useKeyboardMarkerRecording(options: {
     project(): EditorProjectV2;
     active(): boolean;
     setting(): EditorBeatSnapSetting;
+    compensationCells(): number;
     report(message: string): void;
 }) {
     const pending = shallowRef<readonly KeyboardRangeRecording[]>([]);
@@ -34,6 +35,7 @@ export function useKeyboardMarkerRecording(options: {
         active: options.active,
         playback: () => options.audio.getPlaybackSnapshot(),
         setting: options.setting,
+        compensationCells: options.compensationCells,
         report: options.report,
         changed: value => (pending.value = value),
     });
@@ -76,6 +78,7 @@ export function useKeyboardMarkerRecording(options: {
             keyboardRecordingSignature(
                 { trackId: '', project: options.project(), revision: options.host.getContext()?.revision ?? 0 },
                 options.setting(),
+                options.compensationCells(),
             ),
         ],
         () => recorder.reconcile(),
@@ -113,5 +116,5 @@ export function useKeyboardMarkerRecording(options: {
         observer?.disconnect();
         recorder.cancel(true);
     });
-    return { pending, targets };
+    return { pending, targets, cancel: () => recorder.cancel() };
 }

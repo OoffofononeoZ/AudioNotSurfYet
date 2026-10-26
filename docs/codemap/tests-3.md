@@ -8,6 +8,8 @@
 
 | 文件 | 本地静态引用（最多显示 6 项） |
 | --- | --- |
+| [tests/scripts/run-m3-eval.mjs](../../tests/scripts/run-m3-eval.mjs) | — |
+| [tests/scripts/run-m4-eval.mjs](../../tests/scripts/run-m4-eval.mjs) | — |
 | [tests/scripts/run-m5-eval.mjs](../../tests/scripts/run-m5-eval.mjs) | — |
 | [tests/scripts/run-m6-eval.mjs](../../tests/scripts/run-m6-eval.mjs) | — |
 | [tests/scripts/run-m7-eval.mjs](../../tests/scripts/run-m7-eval.mjs) | — |
@@ -106,5 +108,3 @@
 | [tests/visualizer/realtime-capabilities.test.ts](../../tests/visualizer/realtime-capabilities.test.ts) | [src/visualizer/compositionCodec.ts](../../src/visualizer/compositionCodec.ts)、[src/visualizer/compositionModel.ts](../../src/visualizer/compositionModel.ts)、[src/visualizer/compositionPresets.ts](../../src/visualizer/compositionPresets.ts)、[src/visualizer/elementRegistry.ts](../../src/visualizer/elementRegistry.ts)、[src/visualizer/realtimeCapabilities.ts](../../src/visualizer/realtimeCapabilities.ts) |
 | [tests/visualizer/realtime-style.test.ts](../../tests/visualizer/realtime-style.test.ts) | [src/visualizer/compositionCodec.ts](../../src/visualizer/compositionCodec.ts)、[src/visualizer/compositionEffects.ts](../../src/visualizer/compositionEffects.ts)、[src/visualizer/compositionModel.ts](../../src/visualizer/compositionModel.ts)、[src/visualizer/elementRegistry.ts](../../src/visualizer/elementRegistry.ts)、[src/visualizer/realtimeResolver.ts](../../src/visualizer/realtimeResolver.ts)、[src/visualizer/realtimeStyle.ts](../../src/visualizer/realtimeStyle.ts)、另 1 项，按需核对源码 |
 | [tests/visualizer/resource-directory.test.ts](../../tests/visualizer/resource-directory.test.ts) | [src/visualizer/elementRegistry.ts](../../src/visualizer/elementRegistry.ts)、[src/visualizer/resourceDirectory.ts](../../src/visualizer/resourceDirectory.ts)、[src/visualizer/resourceDirectoryRepository.ts](../../src/visualizer/resourceDirectoryRepository.ts)、[src/visualizer/resourceLibrary.ts](../../src/visualizer/resourceLibrary.ts)、[src/visualizer/resourcePreview.ts](../../src/visualizer/resourcePreview.ts) |
-| [tests/visualizer/resource-fixtures.ts](../../tests/visualizer/resource-fixtures.ts) | [src/visualizer/compositionModel.ts](../../src/visualizer/compositionModel.ts)、[src/visualizer/compositionTypes.ts](../../src/visualizer/compositionTypes.ts) |
-| [tests/visualizer/resource-preview.test.ts](../../tests/visualizer/resource-preview.test.ts) | [src/visualizer/resourceFiles.ts](../../src/visualizer/resourceFiles.ts)、[src/visualizer/resourcePreview.ts](../../src/visualizer/resourcePreview.ts) |

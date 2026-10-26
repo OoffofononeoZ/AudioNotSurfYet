@@ -38,13 +38,15 @@ function harness(kinds: ('point' | 'range')[] = ['point', 'range']) {
     let active = true,
         pending: readonly KeyboardRangeRecording[] = [],
         writes = 0,
-        revision = 0;
+        revision = 0,
+        compensation = 0;
     const setting = { ...DEFAULT_BEAT_SNAP },
         messages: string[] = [];
     const recorder = new KeyboardMarkerRecorder({
         getContext: () => ({ trackId: 'song', project, revision }),
         active: () => active,
         setting: () => setting,
+        compensationCells: () => compensation,
         playback: () => snapshot,
         publish: value => {
             project = value;
@@ -57,6 +59,10 @@ function harness(kinds: ('point' | 'range')[] = ['point', 'range']) {
         recorder,
         setting,
         messages,
+        compensate(value: number) {
+            compensation = value;
+            recorder.reconcile();
+        },
         replaceSameProject() {
             project = structuredClone(project);
             revision += 1;
@@ -89,6 +95,71 @@ function harness(kinds: ('point' | 'range')[] = ['point', 'range']) {
 }
 
 describe('keyboard marker recording', () => {
+    test('compensates snapped point and range endpoints without changing project settings', () => {
+        const h = harness();
+        h.compensate(2);
+        h.recorder.down('1', 'Digit1');
+        h.recorder.up('Digit1');
+        expect((h.project.lanes[0] as PointLaneV1).events[0]!.atSeconds).toBe(0.75);
+        h.recorder.down('2', 'Digit2');
+        expect(h.pending[0]!.startSeconds).toBe(0.75);
+        h.time(1.44);
+        h.recorder.up('Digit2');
+        expect((h.project.lanes[1] as RangeLaneV1).events[0]).toMatchObject({ startSeconds: 0.75, endSeconds: 1.25 });
+        h.time(2.01);
+        h.recorder.down('2', 'Digit2');
+        h.time(2.02);
+        h.recorder.up('Digit2');
+        expect((h.project.lanes[1] as RangeLaneV1).events[1]).toMatchObject({ startSeconds: 1.75, endSeconds: 1.875 });
+        expect(Object.keys(h.project.workspace)).toEqual(['viewport', 'overlay']);
+    });
+    test('compensated pause keeps short-range refusal and changing compensation cancels pending holds', () => {
+        const h = harness(['range']);
+        h.compensate(1);
+        h.time(1.01);
+        h.recorder.down('1', 'Digit1');
+        h.time(1.02);
+        h.state('paused');
+        expect(h.writes).toBe(0);
+        expect(h.messages.at(-1)).toContain('不足一格');
+        h.recorder.up('Digit1');
+        h.state('playing');
+        h.time(2);
+        h.recorder.down('1', 'Digit1');
+        h.compensate(2);
+        h.time(3);
+        h.recorder.up('Digit1');
+        expect(h.writes).toBe(0);
+        expect(h.pending).toEqual([]);
+    });
+    test('compensation refuses underflow and counts cells correctly across a tempo change', () => {
+        const h = harness(['point']);
+        h.compensate(20);
+        h.recorder.down('1', 'Digit1');
+        h.recorder.up('Digit1');
+        expect(h.writes).toBe(0);
+        expect(h.messages.at(-1)).toContain('歌曲范围');
+        h.compensate(2);
+        h.setProject({
+            ...h.project,
+            tempoMap: [
+                h.project.tempoMap[0]!,
+                {
+                    id: 'slow-comp',
+                    startSeconds: 2,
+                    mode: 'metered',
+                    beatOriginSeconds: 2,
+                    bpm: 60,
+                    bpmSource: 'user',
+                    meter: { numerator: 4, denominator: 4 },
+                },
+            ],
+        });
+        h.time(2.25);
+        h.recorder.down('1', 'Digit1');
+        h.recorder.up('Digit1');
+        expect((h.project.lanes[0] as PointLaneV1).events[0]!.atSeconds).toBe(1.875);
+    });
     test('numbers classification rows in mixed project order, caps at ten and recomputes after deletion', () => {
         const h = harness(['range', 'point']);
         let project = h.project;

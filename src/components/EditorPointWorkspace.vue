@@ -25,6 +25,12 @@
                 @click="toggleBlock">
                 区间操作
             </button>
+            <EditorMarkerCompensation
+                :model-value="compensationCells"
+                :active="active !== false"
+                :project-id="project.projectId"
+                @opening="recording.cancel"
+                @update:model-value="emit('update:compensationCells', $event)" />
             <span v-if="!view.editable" class="pause-status" data-testid="marker-playback-status"
                 >播放中可用数字键录入，鼠标编辑请暂停</span
             >
@@ -103,6 +109,7 @@ import EditorMarkerLane from './EditorMarkerLane.vue';
 import EditorMarkerRuler from './EditorMarkerRuler.vue';
 import EditorAnalysisOverlay from './EditorAnalysisOverlay.vue';
 import EditorContextMenu from './EditorContextMenu.vue';
+import EditorMarkerCompensation from './EditorMarkerCompensation.vue';
 import { useAudioSessionService } from '../audio/audioSessionService';
 import { useEditorGrid } from '../editor/useEditorGrid';
 import { useMarkerTimeView } from '../editor/useMarkerTimeView';
@@ -118,6 +125,7 @@ import type { AnalysisCoordinatorSnapshot, AnalysisCursorValueResult, AnalysisSe
 const props = defineProps<{
     active?: boolean;
     recordingHost: KeyboardRecordingHost;
+    compensationCells: number;
     project: EditorProjectV2;
     playback: PlaybackSnapshot;
     analysis: AnalysisCoordinatorSnapshot;
@@ -127,6 +135,7 @@ const props = defineProps<{
 }>();
 const emit = defineEmits<{
     updateProject: [project: EditorProjectV2, immediate: boolean];
+    'update:compensationCells': [value: number];
     retryOverlay: [];
     toggleOverlay: [enabled: boolean];
     selectOverlayFeature: [input: import('../analysis/sources').AnalysisInput];
@@ -153,6 +162,7 @@ const recording = useKeyboardMarkerRecording({
     project: () => props.project,
     active: () => props.active !== false,
     setting: () => setting.value,
+    compensationCells: () => props.compensationCells,
     report: value => (message.value = value),
 });
 const drawing = createMarkerDrawing();

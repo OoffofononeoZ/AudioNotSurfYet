@@ -3,6 +3,7 @@ import type { EditorBeatSnapSetting } from './beatSnap';
 import { createPointEvent, pointCellAtTime } from './pointAnnotations';
 import { createRangeEvent, nextRangeCell } from './rangeAnnotations';
 import type { EditorProjectV2 } from './types';
+import { assertMarkerCellCount, createMarkerGridOffset } from './markerGridOffset';
 
 export interface KeyboardMarkerTarget {
     key: string;
@@ -41,7 +42,11 @@ export function keyboardMarkerTargets(project: EditorProjectV2): KeyboardMarkerT
         .map((row, index) => ({ ...row, key: String((index + 1) % 10) }));
 }
 
-export function keyboardRecordingSignature(context: KeyboardRecordingContext, setting: EditorBeatSnapSetting): string {
+export function keyboardRecordingSignature(
+    context: KeyboardRecordingContext,
+    setting: EditorBeatSnapSetting,
+    compensationCells: number,
+): string {
     return JSON.stringify([
         context.trackId,
         context.revision,
@@ -50,6 +55,7 @@ export function keyboardRecordingSignature(context: KeyboardRecordingContext, se
         context.project.tempoMap,
         keyboardMarkerTargets(context.project),
         setting,
+        compensationCells,
     ]);
 }
 
@@ -57,6 +63,7 @@ interface RecorderOptions extends KeyboardRecordingHost {
     active(): boolean;
     playback(): PlaybackSnapshot;
     setting(): EditorBeatSnapSetting;
+    compensationCells(): number;
     report(message: string): void;
     changed(pending: readonly KeyboardRangeRecording[]): void;
 }
@@ -92,7 +99,9 @@ export class KeyboardMarkerRecorder {
         if (
             !context ||
             [...this.pending.values()].some(
-                range => range.signature !== keyboardRecordingSignature(context, this.options.setting()),
+                range =>
+                    range.signature !==
+                    keyboardRecordingSignature(context, this.options.setting(), this.options.compensationCells()),
             )
         )
             this.cancel();
@@ -113,23 +122,28 @@ export class KeyboardMarkerRecorder {
             this.options.report('当前区间没有可用节拍，请先设置 BPM。');
             return true;
         }
-        if (target.eventKind === 'range') {
-            this.pending.set(key, {
-                ...target,
-                code,
-                startSeconds: cell.timeSeconds,
-                signature: keyboardRecordingSignature(context, this.options.setting()),
-            });
-            this.changed();
-        } else {
-            try {
+        try {
+            const count = this.options.compensationCells();
+            assertMarkerCellCount(count);
+            const time = count
+                ? createMarkerGridOffset(context.project, this.options.setting()).shift(cell.timeSeconds, -count)
+                : cell.timeSeconds;
+            if (target.eventKind === 'range') {
+                this.pending.set(key, {
+                    ...target,
+                    code,
+                    startSeconds: time,
+                    signature: keyboardRecordingSignature(context, this.options.setting(), count),
+                });
+                this.changed();
+            } else {
                 this.options.publish(
-                    createPointEvent(context.project, target.laneId, target.innerClassId, cell.timeSeconds).project,
+                    createPointEvent(context.project, target.laneId, target.innerClassId, time).project,
                 );
-                this.options.report(`已添加 ${cell.timeSeconds.toFixed(3)} 秒标记。`);
-            } catch (error) {
-                this.options.report(this.errorMessage(error));
+                this.options.report(`已添加 ${time.toFixed(3)} 秒标记。`);
             }
+        } catch (error) {
+            this.options.report(this.errorMessage(error));
         }
         return true;
     }
@@ -161,7 +175,8 @@ export class KeyboardMarkerRecorder {
         const context = this.context(snapshot);
         if (!context || !['playing', 'paused', 'ended'].includes(snapshot.state)) return;
         const setting = this.options.setting();
-        const signature = keyboardRecordingSignature(context, setting);
+        const count = this.options.compensationCells();
+        const signature = keyboardRecordingSignature(context, setting, count);
         let project = context.project,
             created = 0;
         const errors: string[] = [];
@@ -169,7 +184,11 @@ export class KeyboardMarkerRecorder {
             if (range.signature !== signature) continue;
             try {
                 const cell = pointCellAtTime(snapshot.currentTimeSeconds, project, 1, setting);
-                const minimum = nextRangeCell(range.startSeconds, project, 1, setting)?.timeSeconds;
+                assertMarkerCellCount(count);
+                const grid = count ? createMarkerGridOffset(project, setting) : null;
+                const minimum = grid
+                    ? grid.shift(range.startSeconds, 1)
+                    : nextRangeCell(range.startSeconds, project, 1, setting)?.timeSeconds;
                 if (
                     !cell ||
                     minimum === undefined ||
@@ -177,7 +196,8 @@ export class KeyboardMarkerRecorder {
                     minimum > project.track.durationSeconds
                 )
                     throw new Error('没有歌曲范围内的合法终点，未创建范围。');
-                const end = extend ? Math.max(cell.timeSeconds, minimum) : cell.timeSeconds;
+                const compensated = grid ? grid.shift(cell.timeSeconds, -count) : cell.timeSeconds;
+                const end = extend ? Math.max(compensated, minimum) : compensated;
                 if (end < minimum) throw new Error('范围不足一格，未创建。');
                 project = createRangeEvent(
                     project,

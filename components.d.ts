@@ -31,6 +31,7 @@ declare module 'vue' {
     EditorIcon: typeof import('./src/components/EditorIcon.vue')['default']
     EditorLaneDeleteButton: typeof import('./src/components/EditorLaneDeleteButton.vue')['default']
     EditorLeaveGuard: typeof import('./src/components/EditorLeaveGuard.vue')['default']
+    EditorMarkerCompensation: typeof import('./src/components/EditorMarkerCompensation.vue')['default']
     EditorMarkerLane: typeof import('./src/components/EditorMarkerLane.vue')['default']
     EditorMarkerRuler: typeof import('./src/components/EditorMarkerRuler.vue')['default']
     EditorMarkerSurface: typeof import('./src/components/EditorMarkerSurface.vue')['default']

@@ -81,6 +81,7 @@
                         @update-project="updateProject" />
 
                     <EditorPointWorkspace
+                        v-model:compensation-cells="markerCompensationCells"
                         :active="workspace === 'marking'"
                         :recording-host="keyboardRecordingHost"
                         :project="snapshot.project"
@@ -181,6 +182,7 @@ const audioSession = useAudioSessionService();
 const sessionStore = useAudioSessionStore();
 const controller = useEditorSessionController();
 const keyboardRecordingRevision = ref(0);
+const markerCompensationCells = ref(0);
 const keyboardImportPending = ref(false);
 const osuImportOpen = ref(false);
 function closeOsuImport() {
