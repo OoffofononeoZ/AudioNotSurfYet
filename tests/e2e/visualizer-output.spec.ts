@@ -131,7 +131,14 @@ test('sync compensation snaps input, restores V5 drafts and locks during export'
         const hintInsidePanel = await page.locator('#viz-sync-offset-hint').evaluate(element => {
             const hint = element.getBoundingClientRect();
             const panel = element.closest('[role=tabpanel]')!.getBoundingClientRect();
-            return hint.top >= panel.top && hint.bottom <= panel.bottom;
+            const input = element.closest('label')!.querySelector('input')!.getBoundingClientRect();
+            return (
+                hint.top >= panel.top &&
+                hint.bottom <= panel.bottom &&
+                hint.left >= panel.left &&
+                hint.right < input.left &&
+                Math.abs((hint.top + hint.bottom - input.top - input.bottom) / 2) < 6
+            );
         });
         expect(hintInsidePanel).toBe(true);
         const overflow = await page.evaluate(() => document.documentElement.scrollWidth > innerWidth);

@@ -60,7 +60,11 @@
                 /></label>
                 <div class="col-span-2 mt-1 min-w-0">
                     <label class="viz-field"
-                        ><span>音画同步补偿</span>
+                        ><span class="whitespace-nowrap"
+                            >音画同步补偿<small id="viz-sync-offset-hint" class="viz-muted ml-1 text-[10px]"
+                                >（推荐调整范围是0-120ms · 负值表示音频提前，正值表示音频延后）</small
+                            ></span
+                        >
                         <div class="flex items-center gap-2">
                             <AppNumberInput
                                 :model-value="project.output.audioVideoOffsetMs"
@@ -75,9 +79,6 @@
                             <span>ms</span>
                         </div>
                     </label>
-                    <small id="viz-sync-offset-hint" class="viz-muted block mt-1 text-[10px]">
-                        推荐调整范围是0-120ms · 负值表示音频提前，正值表示音频延后
-                    </small>
                 </div>
             </fieldset>
             <div v-else-if="tab === 'editor'" class="viz-bottom-editor">
