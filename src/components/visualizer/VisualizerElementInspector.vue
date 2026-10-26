@@ -46,6 +46,14 @@
                 </div>
             </div>
         </section>
+        <VisualizerTransform3d
+            v-if="descriptor.scene3dDefaults && element.transform3d"
+            :transform="element.transform3d"
+            :scene-id="currentScene!.id"
+            :scenes="availableScenes"
+            :disabled="locked"
+            @change="$emit('update', { transform3d: $event })"
+            @move="$emit('move-scene', $event)" />
         <section v-if="element.targets">
             <h3>影响对象</h3>
             <label class="viz-field"
@@ -57,15 +65,15 @@
                     :options="targetOptions"
                     @change="targetKindChanged"
             /></label>
-            <div v-if="element.targets.kind === 'elements'" class="viz-targets">
-                <label v-for="target in visualElements" :key="target.id" class="viz-field"
+            <div v-if="element.targets.kind !== 'composition'" class="viz-targets">
+                <label v-for="target in effectTargets" :key="target.id" class="viz-field"
                     ><span>{{ target.name }}</span
                     ><input
                         type="checkbox"
                         :checked="element.targets.ids.includes(target.id)"
                         @change="targetChanged(target.id, $event)"
                 /></label>
-                <p v-if="!visualElements.length" class="viz-muted">先添加视觉元素</p>
+                <p v-if="!effectTargets.length" class="viz-muted">先添加视觉元素</p>
             </div>
         </section>
         <section>
@@ -153,6 +161,9 @@
     <div v-else class="viz-inspector-empty"><VisualizerIcon name="sliders" /><span>选择一个元素</span></div>
 </template>
 <script setup lang="ts">
+import VisualizerTransform3d from './VisualizerTransform3d.vue';
+import { elementScene, sceneGroups } from '../../visualizer/scene3dModel';
+import { movableScenes } from '../../visualizer/scene3dActions';
 import VisualizerMediaInput from './VisualizerMediaInput.vue';
 import type { MediaAsset, MediaBinding } from '../../visualizer/mediaTypes';
 import { computed } from 'vue';
@@ -166,6 +177,7 @@ import { elementDescriptor, elementRange, elementAlgorithm } from '../../visuali
 import type { ElementBinding, VisualizerElement, VisualizerProjectV6 } from '../../visualizer/compositionTypes';
 const props = defineProps<{ project: VisualizerProjectV6; element: VisualizerElement | null; locked: boolean }>();
 const emit = defineEmits<{
+    'move-scene': [sceneId: string | null];
     update: [patch: Partial<VisualizerElement>];
     binding: [binding: ElementBinding];
     media: [payload: { elementId: string; inputId: string; binding: MediaBinding; assets: MediaAsset[] }];
@@ -176,7 +188,16 @@ const kindLabel = computed(
 );
 const range = computed(() => (props.element ? elementRange(props.project, props.element) : null));
 const visualElements = computed(() =>
-    props.project.elements.filter(e => elementDescriptor(props.project, e).kind === 'visual'),
+    props.project.elements.filter(
+        e =>
+            elementDescriptor(props.project, e).kind === 'visual' &&
+            !elementDescriptor(props.project, e).scene3dDefaults,
+    ),
+);
+const currentScene = computed(() => (props.element ? elementScene(props.project, props.element.id) : undefined));
+const availableScenes = computed(() => (props.element ? movableScenes(props.project, props.element.id) : []));
+const effectTargets = computed(() =>
+    props.element?.targets?.kind === 'scenes3d' ? sceneGroups(props.project) : visualElements.value,
 );
 const timingBinding = computed<MarkerBinding>(() =>
     props.element?.timing.kind === 'editor-range'
@@ -194,6 +215,7 @@ const independentMarkerInputs = computed(
 const targetOptions = [
     { value: 'composition', label: '整个画面' },
     { value: 'elements', label: '指定元素' },
+    { value: 'scenes3d', label: '指定三维场景' },
 ];
 const inputValue = (event: Event) => (event.target as HTMLInputElement).value;
 function timeChanged(key: 'startSeconds' | 'endSeconds', value: number) {
@@ -211,14 +233,19 @@ function markerBindingChanged(id: string, binding: MarkerBinding) {
     emit('update', { markerBindings: { ...props.element!.markerBindings, [id]: binding } });
 }
 function targetKindChanged(value: string | number) {
-    emit('update', { targets: value === 'composition' ? { kind: 'composition' } : { kind: 'elements', ids: [] } });
+    emit('update', {
+        targets:
+            value === 'composition'
+                ? { kind: 'composition' }
+                : { kind: value === 'scenes3d' ? 'scenes3d' : 'elements', ids: [] },
+    });
 }
 function targetChanged(id: string, event: Event) {
-    if (props.element?.targets?.kind !== 'elements') return;
+    if (!props.element?.targets || props.element.targets.kind === 'composition') return;
     const checked = (event.target as HTMLInputElement).checked;
     emit('update', {
         targets: {
-            kind: 'elements',
+            kind: props.element.targets.kind,
             ids: checked ? [...props.element.targets.ids, id] : props.element.targets.ids.filter(item => item !== id),
         },
     });

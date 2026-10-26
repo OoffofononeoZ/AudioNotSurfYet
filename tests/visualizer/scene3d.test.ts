@@ -14,6 +14,10 @@ import { sceneGroups } from '../../src/visualizer/scene3dModel';
 import { createRealtimeStyle, validateRealtimeStyle, realtimeRenderModel } from '../../src/visualizer/realtimeStyle';
 import { effectiveElements, removeCompositionElement, reorderComposition } from '../../src/visualizer/compositionModel';
 import { worldFragment } from '../../src/visualizer/worldDrawState';
+import { moveWorldElement, updateScene3d } from '../../src/visualizer/scene3dActions';
+import { preparePresetExport } from '../../src/visualizer/presetExport';
+import { instantiatePreset } from '../../src/visualizer/compositionPresets';
+import { elementRegistry } from '../../src/visualizer/elementRegistry';
 
 test('camera tracks use independent seconds, interpolation, looping and last-frame hold', () => {
     const c = validateSceneCamera({
@@ -103,4 +107,40 @@ test('ABI 4 requires world geometry and owns opaque/cutout output semantics', ()
     a.programs.mesh!.geometry = 'quad';
     a.hash = resourceHash(a);
     expect(() => validateAlgorithmDefinition(a)).toThrow();
+});
+
+test('moving a world member preserves transforms and independent cameras; exported presets remap scenes', () => {
+    const p = scene3dFixture(),
+        original = sceneGroups(p)[0]!;
+    const split = validateComposition(moveWorldElement(p, p.elements[0]!.id, null));
+    expect(sceneGroups(split)).toHaveLength(2);
+    const joined = validateComposition(moveWorldElement(split, p.elements[0]!.id, original.id));
+    expect(sceneGroups(joined)).toHaveLength(1);
+    const changed = validateComposition(
+        updateScene3d(joined, original.id, { camera: { ...original.camera, fov: 65 } }),
+    );
+    expect(sceneGroups(p)[0]!.camera.fov).toBe(50);
+    const exported = preparePresetExport(
+        changed,
+        { title: '共享镜头', description: '两元素', creator: 'default' },
+        new Blob(['image'], { type: 'image/png' }),
+    );
+    const preset = exported.package.presets[0]!;
+    expect(preset.scenes3d![0]!.camera.fov).toBe(65);
+    expect(preset.scenes3d![0]!.children).toEqual(['element-0', 'element-1']);
+    const previous = {
+        algorithms: structuredClone(elementRegistry.algorithms),
+        elements: structuredClone(elementRegistry.list()),
+        presets: structuredClone(elementRegistry.presets),
+    };
+    try {
+        elementRegistry.replace({ ...changed.resources, presets: [preset] });
+        const a = instantiatePreset(preset.id, 20),
+            b = instantiatePreset(preset.id, 20);
+        expect(a.group.scenes3d![0]!.id).not.toBe(b.group.scenes3d![0]!.id);
+        expect(a.group.scenes3d![0]!.children).toEqual(a.elements.map(e => e.id));
+        expect(a.group.scenes3d![0]!.camera.fov).toBe(65);
+    } finally {
+        elementRegistry.replace(previous);
+    }
 });

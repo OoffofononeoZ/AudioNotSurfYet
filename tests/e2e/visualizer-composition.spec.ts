@@ -37,7 +37,7 @@ test('adds seven independent elements and configures targets and exact manual FX
         await add(page, type);
     await expect(page.locator('.viz-element-row')).toHaveCount(7);
     const p = await exported(page);
-    expect(p.schemaVersion).toBe(5);
+    expect(p.schemaVersion).toBe(6);
     expect(p.elements).toHaveLength(7);
     const editor = createInitialEditorProject({ track: p.track }),
         laneId = crypto.randomUUID(),

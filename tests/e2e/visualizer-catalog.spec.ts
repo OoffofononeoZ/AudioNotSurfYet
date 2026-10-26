@@ -65,10 +65,12 @@ test('metadata, single rows and empty results retain the catalog height and inde
     await page.screenshot({ path: `artifacts/visualizer-composition/catalog/single-${info.project.name}.png` });
     await page.getByLabel('搜索资源').fill('does-not-exist');
     await expect(page.getByText('没有匹配的元素', { exact: true })).toBeVisible();
-    expect(await geometry(page)).toMatchObject({ height: initial.height, bodyOverflow: false, gutter: 0 });
+    expect(await geometry(page)).toMatchObject({ height: initial.height, outerOverflow: 0, horizontalOverflow: 0 });
     await page.getByRole('button', { name: '清除筛选', exact: true }).click();
     await page.getByRole('button', { name: '预设', exact: true }).click();
-    await expect(page.locator('[data-preset-id]')).toHaveCount(2);
+    await expect(page.locator('[data-preset-id]')).toHaveCount(
+        resourceRows().filter(row => row.info.kind === 'preset').length,
+    );
     for (const row of resourceRows().filter(row => row.info.kind === 'preset'))
         await expect(page.locator(`[data-preset-id="${row.info.resource.id}"] time`)).toHaveAttribute(
             'datetime',
@@ -83,7 +85,7 @@ test('metadata, single rows and empty results retain the catalog height and inde
     await expect(page.getByRole('button', { name: '全部', exact: true })).toHaveAttribute('aria-pressed', 'true');
     await page.getByRole('button', { name: '预设', exact: true }).click();
     await expect(page.getByLabel('预设用途')).toHaveValue('all');
-    expect(await geometry(page)).toMatchObject({ height: initial.height, bodyOverflow: false, gutter: 0 });
+    expect(await geometry(page)).toMatchObject({ height: initial.height, outerOverflow: 0, horizontalOverflow: 0 });
     await page.screenshot({ path: `artifacts/visualizer-composition/catalog/presets-${info.project.name}.png` });
 
     for (const [width, height, columns] of [

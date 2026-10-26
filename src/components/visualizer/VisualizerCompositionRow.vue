@@ -2,9 +2,10 @@
     <div
         role="listitem"
         class="viz-element-row"
-        :class="{ selected, muted: !enabled, nested, preset: kind === 'preset', locked }"
+        :class="{ selected, muted: !enabled, nested, preset: kind !== 'element', locked }"
         :draggable="!locked"
         :data-element-id="kind === 'element' ? id : undefined"
+        :data-scene-instance-id="kind === 'scene3d' ? id : undefined"
         :data-preset-instance-id="kind === 'preset' ? id : undefined"
         @pointerdown.capture="pointerDown"
         @dragstart="startDrag"
@@ -19,7 +20,7 @@
             <span class="viz-row-name" :title="name">{{ name }}</span>
         </button>
         <button
-            v-if="kind === 'preset'"
+            v-if="kind !== 'element'"
             type="button"
             class="viz-icon-button small viz-row-expand"
             :aria-label="(expanded ? '折叠' : '展开') + name"
@@ -33,7 +34,9 @@
                 type="button"
                 class="viz-icon-button small"
                 :disabled="locked"
-                :aria-label="(enabled ? '隐藏' : '显示') + (kind === 'preset' ? '预设' : '元素')"
+                :aria-label="
+                    (enabled ? '隐藏' : '显示') + (kind === 'preset' ? '预设' : kind === 'scene3d' ? '场景' : '元素')
+                "
                 :title="enabled ? '隐藏' : '显示'"
                 @click.stop="$emit('visibility', !enabled)">
                 <VisualizerIcon :name="enabled ? 'eye' : 'hidden'" />
@@ -42,7 +45,7 @@
                 type="button"
                 class="viz-icon-button small"
                 :disabled="locked || first"
-                :aria-label="kind === 'preset' ? '上移预设' : '上移元素'"
+                :aria-label="kind === 'preset' ? '上移预设' : kind === 'scene3d' ? '上移场景' : '上移元素'"
                 title="上移"
                 @click.stop="$emit('move', -1)">
                 <VisualizerIcon name="up" />
@@ -51,7 +54,7 @@
                 type="button"
                 class="viz-icon-button small viz-row-remove"
                 :disabled="locked"
-                :aria-label="kind === 'preset' ? '删除预设' : '删除元素'"
+                :aria-label="kind === 'preset' ? '删除预设' : kind === 'scene3d' ? '删除场景' : '删除元素'"
                 title="删除"
                 @click.stop="$emit('remove')">
                 <VisualizerIcon name="trash" />
@@ -60,7 +63,7 @@
                 type="button"
                 class="viz-icon-button small"
                 :disabled="locked || last"
-                :aria-label="kind === 'preset' ? '下移预设' : '下移元素'"
+                :aria-label="kind === 'preset' ? '下移预设' : kind === 'scene3d' ? '下移场景' : '下移元素'"
                 title="下移"
                 @click.stop="$emit('move', 1)">
                 <VisualizerIcon name="down" />
@@ -189,6 +192,12 @@ onBeforeUnmount(() => {
 }
 .nested .viz-element-select {
     padding-left: 24px;
+}
+.nested.preset .viz-element-select {
+    padding-left: 48px;
+}
+.nested.preset .viz-row-expand {
+    left: 20px;
 }
 .selected .viz-element-select {
     color: var(--ink);

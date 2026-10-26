@@ -59,8 +59,10 @@ declare module 'vue' {
     ThreeDTable: typeof import('./src/components/ThreeDTable.vue')['default']
     TwoDTable: typeof import('./src/components/TwoDTable.vue')['default']
     VisualizerBottomPanel: typeof import('./src/components/visualizer/VisualizerBottomPanel.vue')['default']
+    VisualizerCameraInspector: typeof import('./src/components/visualizer/VisualizerCameraInspector.vue')['default']
     VisualizerCatalogCard: typeof import('./src/components/visualizer/VisualizerCatalogCard.vue')['default']
     VisualizerCommonControlField: typeof import('./src/components/visualizer/VisualizerCommonControlField.vue')['default']
+    VisualizerCompositionBranch: typeof import('./src/components/visualizer/VisualizerCompositionBranch.vue')['default']
     VisualizerCompositionRow: typeof import('./src/components/visualizer/VisualizerCompositionRow.vue')['default']
     VisualizerDraftNotice: typeof import('./src/components/visualizer/VisualizerDraftNotice.vue')['default']
     VisualizerElementCatalog: typeof import('./src/components/visualizer/VisualizerElementCatalog.vue')['default']
@@ -76,5 +78,7 @@ declare module 'vue' {
     VisualizerPresetInspector: typeof import('./src/components/visualizer/VisualizerPresetInspector.vue')['default']
     VisualizerRealtimeActions: typeof import('./src/components/visualizer/VisualizerRealtimeActions.vue')['default']
     VisualizerResourceCover: typeof import('./src/components/visualizer/VisualizerResourceCover.vue')['default']
+    VisualizerTransform3d: typeof import('./src/components/visualizer/VisualizerTransform3d.vue')['default']
+    VisualizerVector3Field: typeof import('./src/components/visualizer/VisualizerVector3Field.vue')['default']
   }
 }

@@ -193,8 +193,14 @@
                     aria-label="关闭元素属性"
                     @click="drawer = null">
                     <VisualizerIcon name="close" /></button
-                ><VisualizerPresetInspector
-                    v-if="selectedPreset"
+                ><VisualizerCameraInspector
+                    v-if="selectedScene"
+                    :scene="selectedScene"
+                    :duration="snapshot.project.track.durationSeconds"
+                    :locked="locked"
+                    @update="patch => run(() => controller.updateScene3d(selectedScene!.id, patch))" />
+                <VisualizerPresetInspector
+                    v-else-if="selectedPreset"
                     :project="snapshot.project"
                     :preset="selectedPreset"
                     :locked="locked"
@@ -213,6 +219,7 @@
                     v-else
                     :project="snapshot.project"
                     :element="selectedElement"
+                    @move-scene="target => run(() => selection && controller.moveToScene3d(selection, target))"
                     :locked="locked"
                     @media="payload => run(() => controller.updateMedia(payload))"
                     @update="
@@ -291,6 +298,8 @@
     </main>
 </template>
 <script setup lang="ts">
+import VisualizerCameraInspector from '../components/visualizer/VisualizerCameraInspector.vue';
+import { findScene3d } from '../visualizer/scene3dModel';
 import { computed, onBeforeUnmount, ref, shallowRef, watch } from 'vue';
 import { onBeforeRouteLeave, onBeforeRouteUpdate, useRoute, useRouter } from 'vue-router';
 import VisualizerIcon from '../components/visualizer/VisualizerIcon.vue';
@@ -332,6 +341,9 @@ const locked = computed(
     () => importBusy.value || ['preparing', 'exporting', 'finalizing'].includes(snapshot.value.export.status),
 );
 const usable = computed(() => ['ready', 'not-persisted'].includes(snapshot.value.state));
+const selectedScene = computed(() =>
+    snapshot.value.project && selection.value ? (findScene3d(snapshot.value.project, selection.value) ?? null) : null,
+);
 const selectedElement = computed(() => snapshot.value.project?.elements.find(e => e.id === selection.value) ?? null);
 const selectedPreset = computed(() => {
     const item = snapshot.value.project?.items.find(i => i.kind === 'preset' && i.id === selection.value);
@@ -372,7 +384,7 @@ function selectElement(id: string) {
     drawer.value = drawer.value === 'elements' ? 'inspector' : drawer.value;
 }
 async function addElement(type: string) {
-    const id = await run(() => controller.addElement(type));
+    const id = await run(() => controller.addElement(type, selectedScene.value?.id));
     if (typeof id === 'string') {
         selection.value = id;
         catalogOpen.value = false;
@@ -419,7 +431,7 @@ watch(
 watch(
     () => snapshot.value.project,
     (project, previous) => {
-        if (!selection.value || selectedElement.value || selectedPreset.value) return;
+        if (!selection.value || selectedElement.value || selectedPreset.value || selectedScene.value) return;
         const parent = previous?.items.find(i => i.kind === 'preset' && i.children.includes(selection.value!));
         selection.value = parent && project?.items.some(i => i.id === parent.id) ? parent.id : null;
     },

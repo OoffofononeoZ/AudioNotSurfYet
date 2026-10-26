@@ -1,3 +1,6 @@
+import { updateScene3d as patchScene3d, moveWorldElement } from './scene3dActions';
+import { findScene3d, elementScene } from './scene3dModel';
+import type { Scene3dItem } from './scene3dTypes';
 import { validateRuntimeSnapshot } from './validateRuntimeSnapshot';
 import { ElementSeedSession } from './seed';
 import { inject, type InjectionKey } from 'vue';
@@ -467,12 +470,27 @@ export class VisualizerSessionController {
         this.activateAnalysis();
         this.syncBeforeUnload();
     }
-    addElement(type: string) {
+    addElement(type: string, sceneId?: string) {
         this.assertUnlocked();
         const project = this.snapshot.project;
         if (!project) return null;
         const element = elementRegistry.create(type, project.track.durationSeconds, project.elements.length);
-        this.updateProject(appendStandaloneElements(project, [element]));
+        let next = appendStandaloneElements(project, [element]);
+        const target = sceneId ? findScene3d(next, sceneId) : undefined;
+        const source = elementScene(next, element.id);
+        if (source && target && source.id !== target.id) {
+            next.items = next.items.filter(i => i.id !== source.id);
+            const owner = next.items.find(i => i.kind === 'preset' && i.scenes3d?.some(s => s.id === target.id));
+            if (owner?.kind === 'preset')
+                owner.children.splice(
+                    owner.children.indexOf(target.children[target.children.length - 1]!) + 1,
+                    0,
+                    element.id,
+                );
+            target.children.push(element.id);
+            next = synchronizeLayers(next);
+        }
+        this.updateProject(next);
         return element.id;
     }
     addPreset(id: CompositionPresetId) {
@@ -515,9 +533,19 @@ export class VisualizerSessionController {
                 items: p.items.map(i => (i.kind === 'preset' && i.id === id ? { ...i, ...patch } : i)),
             });
     }
+    updateScene3d(
+        id: string,
+        patch: Partial<Pick<Scene3dItem, 'name' | 'enabled' | 'camera' | 'startSeconds' | 'endSeconds'>>,
+    ) {
+        if (this.snapshot.project) this.updateProject(patchScene3d(this.snapshot.project, id, patch));
+    }
+    moveToScene3d(elementId: string, targetId: string | null) {
+        if (this.snapshot.project) this.updateProject(moveWorldElement(this.snapshot.project, elementId, targetId));
+    }
     updateVisibility(id: string, enabled: boolean) {
         const p = this.snapshot.project;
-        if (p?.items.some(i => i.kind === 'preset' && i.id === id)) this.updatePreset(id, { enabled });
+        if (p && findScene3d(p, id)) this.updateScene3d(id, { enabled });
+        else if (p?.items.some(i => i.kind === 'preset' && i.id === id)) this.updatePreset(id, { enabled });
         else this.updateElement(id, { enabled });
     }
     updateCommonControl(id: string, controlId: string, value: CommonValue) {
