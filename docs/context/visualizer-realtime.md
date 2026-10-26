@@ -26,6 +26,8 @@ Visualizer“实时样式”提供名称、应用到首页和生成展示地址�
 
 动画以会话单调时间推进，暂停播放按静音输入处理；换歌/seek/变速重置特征与映射平滑，动画时间继续。页面隐藏时暂停实时输入和动画，重新可见时重新采集；离开或切回详情释放全部实时资源。
 
+首页与 `/display/:styleId` 按显示器刷新率渲染，渲染上限不再取自样式的 `frameRate`；该字段保留为 Wallpaper Engine 目标帧率和导出默认值，壁纸宿主仍以 `applyGeneralProperties.fps` 与样式值取较小者。
+
 ## Wallpaper Engine 目录
 
 `npm run wallpaper:runtime` 使用独立 Vite IIFE 入口打包共享渲染内核、Three.js 和隔离算法 bootstrap，输出到忽略的 public/wallpaper-runtime；dev/build 自动准备，不包含外部资源库。导出内嵌当前精确算法快照，目录为 index.html、style-data.js、runtime.js、project.json 和 THIRD_PARTY_LICENSES.txt；不依赖项目服务器、CDN 或歌曲文件。

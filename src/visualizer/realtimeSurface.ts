@@ -20,7 +20,8 @@ export class RealtimeSurface {
     private pausedDuration = 0;
     private observer: ResizeObserver;
     private style: RealtimeStyleV1;
-    private fps: number;
+    /** 0 follows the display refresh rate; Wallpaper Engine passes its own host frame rate. */
+    private fps = 0;
     readNative: (() => NativeAudioFrame | null) | null = null;
     constructor(
         canvas: HTMLCanvasElement,
@@ -28,7 +29,6 @@ export class RealtimeSurface {
         onStatus: (status: VisualizerRendererStatus) => void,
     ) {
         this.style = style;
-        this.fps = style.frameRate;
         const elementSeeds = new ElementSeedSession().sync(style.elements, true);
         const model = realtimeRenderModel(style);
         this.host = new VisualizerRendererHost({
