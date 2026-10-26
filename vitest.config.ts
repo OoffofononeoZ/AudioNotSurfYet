@@ -6,6 +6,7 @@ const externalResourceSuites = [
     'tests/analysis/wallpaper-spectrum.test.ts',
     ...[
         'algorithm-parity',
+        'algorithm-editing',
         'analysis-input',
         'composition-model',
         'composition-presets',

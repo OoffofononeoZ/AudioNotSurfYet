@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { FrameSupersededError } from './framePreparation';
 import type {
     VisualizerRenderFrame,
     VisualizerRenderer,
@@ -381,6 +382,10 @@ export class VisualizerRendererHost implements VisualizerSceneHost {
             return;
         }
         const failed = (error: unknown) => {
+            if (error instanceof FrameSupersededError && !override) {
+                this.pendingPreview = true;
+                return;
+            }
             const current = this.options.readFrame();
             if (
                 this.disposed ||
@@ -413,6 +418,19 @@ export class VisualizerRendererHost implements VisualizerSceneHost {
             visualizerRendererDiagnostics.targetResolveCount += 1;
             const renderStartedAt = performance.now();
             const input = {
+                isCurrent: () => {
+                    const current = this.options.readFrame();
+                    return (
+                        !this.disposed &&
+                        !this.contextLost &&
+                        generation === this.renderGeneration &&
+                        scene === this.scene &&
+                        !!current &&
+                        current.trackIdentity === frame.trackIdentity &&
+                        current.bindingRevision === frame.bindingRevision &&
+                        current.elementSeeds === frame.elementSeeds
+                    );
+                },
                 elementSeeds: frame.elementSeeds,
                 timeSeconds: frame.timeSeconds,
                 values,

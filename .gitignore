@@ -33,6 +33,7 @@ artifacts/browser-profiles/
 artifacts/app-shell/
 artifacts/fixtures/
 artifacts/visualizer-composition/
+artifacts/visualizer-parameter-history/
 artifacts/editor-marking/
 artifacts/osu-build-temp/
 artifacts/stem-analysis/

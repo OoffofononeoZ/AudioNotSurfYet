@@ -7,6 +7,8 @@ import { findResource } from './elementRegistry';
 import { AlgorithmDrawRenderer } from './algorithmDrawRenderer';
 import { IsolatedAlgorithmRuntime } from './isolatedAlgorithmRuntime';
 import { createEditorMarkerReader } from './editorMarkerReader';
+import { AlgorithmFrameRevisions, stateParameterIds } from './algorithmFrameRevision';
+import { FrameSupersededError } from './framePreparation';
 import type { MarkerReader } from './editorMarkerTypes';
 import type { DrawPacket, AlgorithmFrame, HistorySample } from './algorithmTypes';
 import type { VisualizerElement, CompositionRenderModel } from './compositionTypes';
@@ -22,6 +24,7 @@ export interface CompositionSceneOptions {
     realtime?: boolean;
     resolveAt(time: number): VisualizerResolvedParameterMap;
     prepareAt?(time: number): Promise<void>;
+    readInputIdentity?(element: VisualizerElement, parameterIds: readonly string[]): string;
     runtimeFactory?(): AlgorithmRuntimePort;
 }
 const hashText = (text: string) => {
@@ -64,6 +67,7 @@ export class CompositionScene implements VisualizerScene {
     private width = 1;
     private height = 1;
     private disposed = false;
+    private revisions = new AlgorithmFrameRevisions();
     constructor(options: CompositionSceneOptions) {
         this.options = options;
         this.quad.frustumCulled = false;
@@ -71,10 +75,19 @@ export class CompositionScene implements VisualizerScene {
     }
     async prepare(input: VisualizerSceneRenderInput) {
         if (this.disposed) throw Error('元素合成器已释放。');
-        await this.options.prepareAt?.(input.timeSeconds);
-        if (this.disposed) return;
-        const values = this.options.prepareAt ? this.options.resolveAt(input.timeSeconds) : input.values;
         const project = this.options.readProject();
+        const sources: Array<{ element: VisualizerElement; ids: string[]; identity: string }> = [];
+        const assertCurrent = () => {
+            if (this.disposed || this.options.readProject() !== project || input.isCurrent?.() === false)
+                throw new FrameSupersededError();
+            if (
+                sources.some(source => this.options.readInputIdentity?.(source.element, source.ids) !== source.identity)
+            )
+                throw new FrameSupersededError();
+        };
+        await this.options.prepareAt?.(input.timeSeconds);
+        assertCurrent();
+        const values = this.options.prepareAt ? this.options.resolveAt(input.timeSeconds) : input.values;
         this.packets.clear();
         this.needsSourcePrompt = false;
         if (!project || !project.elements.length) {
@@ -121,7 +134,9 @@ export class CompositionScene implements VisualizerScene {
         }
         const runtime = this.runtime!;
         await this.initialization;
-        if (this.disposed || runtime !== this.runtime) return;
+        assertCurrent();
+        if (runtime !== this.runtime) throw new FrameSupersededError();
+        this.revisions.retain(project.elements.map(e => e.id));
         const used = new Set<string>();
         for (const e of effectiveElements(project)) {
             const range = elementRange(project, e);
@@ -152,7 +167,8 @@ export class CompositionScene implements VisualizerScene {
             !!this.options.realtime,
             input.animate === false,
         );
-        if (this.disposed || runtime !== this.runtime || project !== this.options.readProject()) return;
+        assertCurrent();
+        if (runtime !== this.runtime) throw new FrameSupersededError();
         const frames = effectiveElements(project)
             .filter(e => used.has(e.id))
             .flatMap(e => {
@@ -175,13 +191,22 @@ export class CompositionScene implements VisualizerScene {
                         ...(value.unit ? { unit: value.unit } : {}),
                     };
                 }
+                const ids = stateParameterIds(
+                    findResource(project.resources.algorithms, elementDescriptor(project, e).algorithm).contract,
+                );
+                const identity = this.options.readInputIdentity?.(e, ids);
+                if (identity !== undefined) sources.push({ element: e, ids, identity });
                 return [
                     {
                         id: e.id,
                         frame: {
                             time: input.timeSeconds,
                             seed: seed ?? 0,
-                            revision: String(input.bindingRevision),
+                            revision: this.revisions.resolve(
+                                project,
+                                e,
+                                identity ?? (this.options.realtime ? String(input.bindingRevision) : ''),
+                            ),
                             width: this.width,
                             height: this.height,
                             range: this.options.realtime ? null : elementRange(project, e),
@@ -200,10 +225,12 @@ export class CompositionScene implements VisualizerScene {
         const packets = await runtime.prepareFrames(
             frames,
             async (elementId, request) => {
+                assertCurrent();
                 if (this.options.realtime) throw Error('实时模式不允许历史输入查询。');
                 const samples: HistorySample[] = [];
                 for (let tick = request.startTick; tick < request.endTick; tick++) {
                     await this.options.prepareAt?.(tick / 60);
+                    assertCurrent();
                     const value = this.options.resolveAt(tick / 60).get(parameterKey(elementId, request.parameterId));
                     if (value?.state !== 'ready' || value.value === undefined) throw Error('算法历史输入尚未就绪。');
                     samples.push({ time: tick / 60, value: value.value, ...(value.unit ? { unit: value.unit } : {}) });
@@ -211,9 +238,17 @@ export class CompositionScene implements VisualizerScene {
                 return samples;
             },
             undefined,
-            this.options.realtime ? undefined : this.markers,
+            this.options.realtime
+                ? undefined
+                : async (elementId, query) => {
+                      assertCurrent();
+                      const page = await this.markers!(elementId, query);
+                      assertCurrent();
+                      return page;
+                  },
         );
-        if (this.disposed || runtime !== this.runtime) return;
+        assertCurrent();
+        if (runtime !== this.runtime) throw new FrameSupersededError();
         this.packets = packets;
         this.prepared = project;
     }

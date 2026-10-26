@@ -3,6 +3,7 @@ import workerSource from './algorithmWorker.js?raw';
 import { sandboxBridge } from './algorithmSandboxBridge';
 import { validateAlgorithmDefinition } from './algorithmCodec';
 import { validateDrawPacket } from './drawPacket';
+import { FrameSupersededError } from './framePreparation';
 import type { AlgorithmDefinition, AlgorithmFrame, DrawPacket, HistoryRequest, HistorySample } from './algorithmTypes';
 import type { MarkerReader, MarkerQuery } from './editorMarkerTypes';
 
@@ -25,6 +26,7 @@ interface Pending {
     history?: HistoryReader;
     markers?: MarkerReader;
     reading?: boolean;
+    inputError?: FrameSupersededError;
 }
 export const algorithmRuntimeDiagnostics = { activeSandboxes: 0, activeTasks: 0 };
 
@@ -208,6 +210,18 @@ export class IsolatedAlgorithmRuntime {
                         : { kind: 'markers-result', readId: message.readId, page: result },
                 );
             } catch (error) {
+                if (error instanceof FrameSupersededError && !this.disposed && this.pending.has(message.id!)) {
+                    task.inputError = error;
+                    task.started = performance.now();
+                    task.reading = false;
+                    task.timer = setTimeout(() => this.fail(Error('算法计算超时。')), Math.max(0, task.remaining));
+                    this.port?.postMessage({
+                        kind: message.kind === 'history' ? 'history-result' : 'markers-result',
+                        readId: message.readId,
+                        error: error.message,
+                    });
+                    return;
+                }
                 this.fail(error instanceof Error ? error : Error(String(error)));
             }
             return;
@@ -215,7 +229,8 @@ export class IsolatedAlgorithmRuntime {
         clearTimeout(task.timer);
         this.pending.delete(message.id!);
         algorithmRuntimeDiagnostics.activeTasks--;
-        if (message.error) task.reject(Error(message.error));
+        if (task.inputError) task.reject(task.inputError);
+        else if (message.error) task.reject(Error(message.error));
         else task.resolve(message.result);
     }
     private fail(error: Error) {

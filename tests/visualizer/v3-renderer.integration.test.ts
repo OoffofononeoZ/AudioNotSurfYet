@@ -8,6 +8,7 @@ import type {
     VisualizerSceneRenderInput,
 } from '../../src/visualizer/rendererTypes';
 import { VisualizerRendererHost, visualizerRendererDiagnostics } from '../../src/visualizer/visualizerRendererHost';
+import { FrameSupersededError } from '../../src/visualizer/framePreparation';
 
 const resolvedEntry: VisualizerResolvedParameter = {
     parameterId: 'intensity',
@@ -465,4 +466,43 @@ test('an expired marker read cannot block the renderer after a binding revision 
     await new Promise(resolve => setTimeout(resolve, 0));
     expect(statuses.at(-1)).toBe('ready');
     host.dispose();
+});
+
+test('an input replacement schedules the latest paused frame even without a UI revision change', async () => {
+    const raf = createRafHarness(),
+        statuses: string[] = [];
+    let first = true;
+    const host = new VisualizerRendererHost({
+        canvas: fakeCanvas(),
+        readFrame: frame,
+        resolveValuesAt: () => new Map(),
+        createScene: () => ({
+            kind: 'rendered',
+            resize() {},
+            dispose() {},
+            async prepare() {
+                if (first) {
+                    first = false;
+                    throw new FrameSupersededError();
+                }
+            },
+            render: () => ({ hash: 'replacement', needsSourcePrompt: false }),
+        }),
+        onFrame() {},
+        onStatus: value => statuses.push(value.state),
+        createRenderer: fakeRenderer,
+        requestAnimationFrame: cb => raf.request(cb),
+        cancelAnimationFrame: id => raf.cancel(id),
+    });
+    try {
+        host.resize(640, 360, 1);
+        raf.flush();
+        await new Promise(resolve => setTimeout(resolve, 0));
+        expect(statuses).not.toContain('error');
+        raf.flush();
+        await new Promise(resolve => setTimeout(resolve, 0));
+        expect(statuses.at(-1)).toBe('ready');
+    } finally {
+        host.dispose();
+    }
 });

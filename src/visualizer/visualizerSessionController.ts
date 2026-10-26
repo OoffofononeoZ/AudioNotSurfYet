@@ -125,6 +125,9 @@ export class VisualizerSessionController {
     private seeds = new ElementSeedSession();
     private listeners = new Set<(snapshot: CompositionSessionSnapshot) => void>();
     private nativeListeners = new Set<() => void>();
+    private inputIdentities = new WeakMap<object, number>();
+    private inputSequence = 0;
+    private nativeRevision = 0;
     private playbackLease: RoutePlaybackLease | null = null;
     private analysisLease: AnalysisConsumerLease | null = null;
     private unsubscribeAnalysis: (() => void) | null = null;
@@ -187,6 +190,21 @@ export class VisualizerSessionController {
     }
     readRenderSeeds() {
         return this.seeds.values;
+    }
+    readAlgorithmInputIdentity(element: VisualizerElement, parameterIds: readonly string[]): string {
+        const decoded = this.options.decodedAudio?.getDecodedAudioDescriptor();
+        return element.bindings
+            .filter(b => parameterIds.includes(b.parameterId))
+            .map(binding => {
+                const source = binding.source;
+                if (source.kind === 'native')
+                    return `${binding.parameterId}:native:${decoded?.revision}:${this.nativeRevision}`;
+                if (source.kind !== 'analysis') return '';
+                const series = this.analysisLease?.getSeries(source.featureId, source.stemRole);
+                if (series && !this.inputIdentities.has(series)) this.inputIdentities.set(series, ++this.inputSequence);
+                return `${binding.parameterId}:${series ? this.inputIdentities.get(series) : 'pending'}:${source.featureId === 'buffer' ? decoded?.revision : ''}`;
+            })
+            .join('|');
     }
     subscribe(listener: (snapshot: CompositionSessionSnapshot) => void) {
         this.listeners.add(listener);
@@ -685,6 +703,7 @@ export class VisualizerSessionController {
     }
     retryNativeInput() {
         this.assertUnlocked();
+        this.nativeRevision++;
         this.native?.reset();
         this.publish({
             ...this.snapshot,

@@ -67,10 +67,10 @@ export function validateAlgorithmContract(input: unknown, apiVersion: 1 | 2 | 3 
         v,
         ['kind', 'parameters', 'sharedParameters', 'historyParameters'],
         apiVersion === 3
-            ? ['inputParameter', 'markerInputs', 'timingInput', 'mediaInputs', 'executionModes']
+            ? ['inputParameter', 'markerInputs', 'timingInput', 'mediaInputs', 'executionModes', 'stateParameters']
             : apiVersion === 2
-              ? ['inputParameter', 'markerInputs', 'timingInput']
-              : ['inputParameter'],
+              ? ['inputParameter', 'markerInputs', 'timingInput', 'stateParameters']
+              : ['inputParameter', 'stateParameters'],
     );
     if (!['visual', 'modifier', 'transition'].includes(String(v.kind)) || !Array.isArray(v.parameters))
         return invalid('算法种类或参数无效。');
@@ -80,6 +80,7 @@ export function validateAlgorithmContract(input: unknown, apiVersion: 1 | 2 | 3 
     if (v.inputParameter !== undefined && !ids.includes(identifier(v.inputParameter))) invalid('算法输入参数不存在。');
     const sharedParameters = list(v.sharedParameters, ids),
         historyParameters = list(v.historyParameters, ids);
+    const stateParameters = v.stateParameters === undefined ? undefined : list(v.stateParameters, ids);
     if (sharedParameters.some(id => parameters.find(p => p.id === id)?.valueKind !== 'number'))
         invalid('共同处理参数必须为数值。');
     const markerInputs =
@@ -110,6 +111,7 @@ export function validateAlgorithmContract(input: unknown, apiVersion: 1 | 2 | 3 
         parameters,
         sharedParameters,
         historyParameters,
+        ...(stateParameters ? { stateParameters } : {}),
         ...(v.inputParameter !== undefined ? { inputParameter: String(v.inputParameter) } : {}),
         ...(markerInputs ? { markerInputs } : {}),
         ...(timingInput ? { timingInput } : {}),

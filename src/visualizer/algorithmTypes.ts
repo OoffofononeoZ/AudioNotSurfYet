@@ -11,6 +11,8 @@ export interface AlgorithmContract {
     inputParameter?: string;
     sharedParameters: string[];
     historyParameters: string[];
+    /** Additional parameters whose configuration changes invalidate accumulated state. Omitted means all parameters. */
+    stateParameters?: string[];
     markerInputs?: MarkerInputContract[];
     timingInput?: string;
     mediaInputs?: MediaInputContract[];

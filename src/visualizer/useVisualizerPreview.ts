@@ -51,6 +51,7 @@ export function useVisualizerPreview(
                             readProject: () => controller.readProject(),
                             resolveAt: t => controller.resolveValuesAt(t),
                             prepareAt: t => controller.prepareValuesAt(t),
+                            readInputIdentity: (element, ids) => controller.readAlgorithmInputIdentity(element, ids),
                         }),
                     readFrame: () => {
                         const p = controller.readProject();
