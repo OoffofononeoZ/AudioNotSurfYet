@@ -1,16 +1,28 @@
 <template>
     <div class="viz-panel-heading">
         <h2>元素</h2>
-        <button
-            class="viz-icon-button"
-            type="button"
-            aria-label="添加元素"
-            title="添加元素"
-            :disabled="locked"
-            data-testid="add-visualizer-element"
-            @click="$emit('add')">
-            <VisualizerIcon name="add" />
-        </button>
+        <div class="flex items-center">
+            <button
+                class="viz-icon-button"
+                type="button"
+                aria-label="导出预设"
+                title="导出预设"
+                :disabled="locked || !project.elements.length"
+                data-testid="export-visualizer-preset"
+                @click="$emit('export-preset')">
+                <VisualizerIcon name="export" />
+            </button>
+            <button
+                class="viz-icon-button"
+                type="button"
+                aria-label="添加元素"
+                title="添加元素"
+                :disabled="locked"
+                data-testid="add-visualizer-element"
+                @click="$emit('add')">
+                <VisualizerIcon name="add" />
+            </button>
+        </div>
     </div>
     <div class="viz-element-items app-scrollbar" role="list" aria-label="可视化元素">
         <div v-for="(item, index) in roots" :key="item.id" class="viz-root-item" :data-root-item-id="item.id">
@@ -88,6 +100,7 @@ import type { CompositionItem } from '../../visualizer/resourceTypes';
 const props = defineProps<{ project: VisualizerProjectV5; selection: string | null; locked: boolean }>();
 const emit = defineEmits<{
     add: [];
+    'export-preset': [];
     select: [id: string];
     visibility: [id: string, enabled: boolean];
     remove: [id: string];

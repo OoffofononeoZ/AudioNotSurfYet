@@ -18,6 +18,8 @@
 
 ## Binding 与确定性
 
+元素列表提供“导出预设”，使用实时样式浏览器资格筛选并保留当前有效配置，可填写展示信息和封面；显式授权后仅新增当前资源库的 presets 子目录，刷新后可添加。依赖、媒体、Seed 和失败清理规则见[用户预设导出](../../context/visualizer-presets.md#用户预设导出dec-100)。
+
 - constant、Analyzer、native 与适用 Editor 引用按 [types.ts](../../../src/visualizer/types.ts)、[原生输入](../../context/visualizer-native-input.md)和[算法契约](../../../src/visualizer/algorithmTypes.ts)声明单位、映射、平滑与历史准备要求，不按算法名称分派。
 - ABI 2 的点/范围输入由工程绑定轨道/分类/事件，通过 prepareFrame 内 input.markers 查询；外部包和初始化不读取实际标记。具体字段见[标记类型](../../../src/visualizer/editorMarkerTypes.ts)，分页规则见[标记读取](../../../src/visualizer/editorMarkerReader.ts)及外部 skill 的标记输入参考。
 - 全工程最多四种不同 Analyzer 特征，native 和标记不占额度。缺失引用/未准备数据显式反馈，不自动改绑、降档或禁用其他内容绕过校验。

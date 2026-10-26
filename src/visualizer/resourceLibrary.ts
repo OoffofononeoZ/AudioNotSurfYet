@@ -62,6 +62,12 @@ export class VisualizerResourceLibrary {
     snapshot() {
         return structuredClone(this.state);
     }
+    /** The export action requests write permission only after an explicit save click. */
+    exportDirectory(): ResourceDirectoryHandle {
+        if (this.disposed || !this.active || this.state.status !== 'ready')
+            throw Error('请先在资源商城加载可用的资源库。');
+        return this.active;
+    }
     private publish(state: ResourceLibraryState) {
         this.state = state;
         if (state.status !== 'loading') this.settled = state;

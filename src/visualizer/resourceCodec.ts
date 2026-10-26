@@ -1,4 +1,5 @@
-import { validateMediaDefinitions, validateMediaBindings } from './mediaCodec';
+import { validateMediaDefinitions, validateMediaBindings, validateMediaAssets } from './mediaCodec';
+import { elementSeedField } from './seed';
 import { validateAlgorithmDefinition } from './algorithmCodec';
 import type { AlgorithmDefinition } from './algorithmTypes';
 import { validateElementBinding, validateElementBindings } from './elementBindings';
@@ -181,8 +182,9 @@ function presetDefinition(
     algorithms: AlgorithmDefinition[],
 ): PresetDefinition {
     const v = record(input, '预设定义');
-    keys(v, ['id', 'version', 'hash', 'title', 'description', 'preview', 'elements', 'controls']);
+    keys(v, ['id', 'version', 'hash', 'title', 'description', 'preview', 'elements', 'controls'], ['mediaAssets']);
     const ref = identity(v);
+    const mediaAssets = validateMediaAssets(v.mediaAssets);
     if (!['geometric', 'cinematic'].includes(String(v.preview))) return invalid('预设预览类型无效。');
     if (!Array.isArray(v.elements) || !v.elements.length) return invalid('预设至少包含一个元素。');
     const targets = new Map<
@@ -194,7 +196,7 @@ function presetDefinition(
         keys(
             e,
             ['key', 'element', 'name', 'enabled', 'bindings', 'timing'],
-            ['targets', 'markerBindings', 'mediaBindings'],
+            ['targets', 'markerBindings', 'mediaBindings', 'seed'],
         );
         const key = name(e.key),
             element = validateResourceRef(e.element),
@@ -202,7 +204,7 @@ function presetDefinition(
         if (!definition) return invalid('预设缺少精确版本的元素依赖：' + resourceKey(element));
         if (targets.has(key) || typeof e.enabled !== 'boolean') return invalid('预设子元素 key 或启用状态无效。');
         const bindings = validateElementBindings(e.bindings, definition.parameters);
-        const mediaBindings = validateMediaBindings(e.mediaBindings, definition.mediaInputs, [], true);
+        const mediaBindings = validateMediaBindings(e.mediaBindings, definition.mediaInputs, mediaAssets ?? []);
         const markerBindings = validateMarkerBindings(
             e.markerBindings,
             definition.markerInputs,
@@ -233,6 +235,7 @@ function presetDefinition(
             element,
             name: text(e.name, '子元素名称'),
             enabled: e.enabled,
+            ...(e.seed === undefined ? {} : elementSeedField(e.seed, definition.usesSeed)),
             bindings,
             ...(markerBindings ? { markerBindings } : {}),
             ...(mediaBindings ? { mediaBindings } : {}),
@@ -285,6 +288,7 @@ function presetDefinition(
         preview: v.preview as PresetDefinition['preview'],
         elements: templates,
         controls,
+        ...(mediaAssets ? { mediaAssets } : {}),
     };
 }
 export function validateResourceSnapshot(

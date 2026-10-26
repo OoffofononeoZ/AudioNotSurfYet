@@ -6,7 +6,7 @@
 
 ABI 3 继承 ABI 2，增加 executionModes（timeline/realtime）和 mediaInputs。元素提供同序输入定义及标签，可收窄类型与多选能力。媒体独立于 number/boolean/color/vector 参数与音频 binding，不计 Analyzer 特征数。
 
-实例 mediaBindings 对每个声明的输入恰有一项：none 表示明确无素材；media 保存素材 ID 列表、fit、intervalSeconds、crossfadeSeconds。多选仅用于图片轮播，单个视频循环；外部预设只保存 none，不包含用户文件。工程／实时样式的可选 mediaAssets 表以原始字节 SHA-256 去重，保存名称、MIME 与 Base64；哈希和引用在恢复时校验。支持 PNG/JPEG/WebP 与 MP4/WebM，实际编码须通过解码检查。
+实例 mediaBindings 对每个声明的输入恰有一项：none 表示明确无素材；media 保存素材 ID 列表、fit、intervalSeconds、crossfadeSeconds。多选仅用于图片轮播，单个视频循环；普通生成预设仍保存 none。DEC-100 的用户预设导出可在预设可选 mediaAssets 表中内嵌已选择素材，绑定只能引用自身素材表，添加时合并到工程。工程／实时样式及用户预设素材表以原始字节 SHA-256 去重，保存名称、MIME 与 Base64；哈希和引用在恢复时校验。支持 PNG/JPEG/WebP 与 MP4/WebM，实际编码须通过解码检查。
 
 算法 Worker 只收到 mode 与媒体可用性、尺寸、淡化比例、填充方式等元数据。Shader media uniform 静态声明 inputId 和 current/next slot，DrawPacket 必须返回相同输入 ID。宿主解析纹理，算法不得接触文件、URL、解码器、DOM 或像素。目录与算法初始化不读取用户媒体。
 

@@ -22,7 +22,10 @@ export function useVisualizerPreview(
         nativeMessage = ref('');
     let detachNative: (() => void) | null = null;
     let detachAlgorithms: (() => void) | null = null;
+    let finishCapture: ((blob: Blob | null, error?: unknown) => void) | null = null;
+    let captureStarted = false;
     const cleanup = () => {
+        finishCapture?.(null, new DOMException('预览已离开页面。', 'AbortError'));
         observer?.disconnect();
         observer = null;
         detach?.();
@@ -82,10 +85,24 @@ export function useVisualizerPreview(
                                 : 'idle';
                         nativeMessage.value = inputs.find(v => v?.state === 'error')?.message ?? '';
                         element.dataset.nativeInputState = nativeStatus.value;
+                        if (finishCapture && !captureStarted) {
+                            captureStarted = true;
+                            const finish = finishCapture;
+                            if ([...values.values()].some(value => value.state !== 'ready'))
+                                finish(null, Error('预览输入尚未就绪，请稍后重新截取。'));
+                            else
+                                try {
+                                    element.toBlob(blob => finish(blob), 'image/png');
+                                } catch (error) {
+                                    finish(null, error);
+                                }
+                        }
                     },
                     onStatus: value => {
                         status.value = value;
                         controller.notifyRendererStatus(value);
+                        if (['error', 'recovering'].includes(value.state))
+                            finishCapture?.(null, Error(value.message ?? '预览不可用。'));
                     },
                 });
                 const target = host;
@@ -124,5 +141,30 @@ export function useVisualizerPreview(
         { flush: 'sync' },
     );
     onBeforeUnmount(cleanup);
-    return { status, nativeStatus, nativeMessage, retry: () => host?.retry() };
+    watch(
+        () => `${snapshot.value.project?.projectId}:${snapshot.value.project?.updatedAt}`,
+        () => finishCapture?.(null, new DOMException('工程已变化。', 'AbortError')),
+    );
+    function capture(signal: AbortSignal): Promise<Blob> {
+        signal.throwIfAborted();
+        if (!host || ['error', 'recovering'].includes(status.value.state))
+            return Promise.reject(Error('预览尚未就绪。'));
+        finishCapture?.(null, new DOMException('截图已被替代。', 'AbortError'));
+        return new Promise((resolve, reject) => {
+            const abort = () => finish(null, signal.reason);
+            const finish = (blob: Blob | null, error?: unknown) => {
+                if (finishCapture !== finish) return;
+                finishCapture = null;
+                signal.removeEventListener('abort', abort);
+                if (error) reject(error);
+                else if (blob?.size) resolve(blob);
+                else reject(Error('无法截取预览封面。'));
+            };
+            finishCapture = finish;
+            captureStarted = false;
+            signal.addEventListener('abort', abort, { once: true });
+            host!.requestFrame();
+        });
+    }
+    return { status, nativeStatus, nativeMessage, retry: () => host?.retry(), capture };
 }

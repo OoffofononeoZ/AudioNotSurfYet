@@ -15,7 +15,7 @@ export function instantiatePreset(id: string | ResourceRef, duration: number, st
             resource: resourceRef(d),
             name: e.name,
             enabled: e.enabled,
-            ...(d.usesSeed ? { seed: null } : {}),
+            ...(d.usesSeed ? { seed: e.seed ?? null } : {}),
             layer: startLayer + index,
             bindings: structuredClone(e.bindings),
             ...(e.markerBindings ? { markerBindings: structuredClone(e.markerBindings) } : {}),
@@ -66,7 +66,7 @@ export function instantiatePreset(id: string | ResourceRef, duration: number, st
         ],
         presets: [definition],
     };
-    return { group, elements, resources };
+    return { group, elements, resources, mediaAssets: definition.mediaAssets ?? [] };
 }
 export function createPresetElements(id: CompositionPresetId, duration: number, startLayer = 0): VisualizerElement[] {
     return instantiatePreset(id, duration, startLayer).elements;

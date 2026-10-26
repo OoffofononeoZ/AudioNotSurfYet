@@ -470,6 +470,15 @@ export class VisualizerSessionController {
                 elements: [...p.elements, ...added.elements],
                 items: [...p.items, added.group],
                 resources: mergeResources(p.resources, added.resources),
+                ...(added.mediaAssets.length
+                    ? {
+                          mediaAssets: [
+                              ...new Map(
+                                  [...(p.mediaAssets ?? []), ...added.mediaAssets].map(asset => [asset.id, asset]),
+                              ).values(),
+                          ],
+                      }
+                    : {}),
             }),
         );
         return added.group.id;

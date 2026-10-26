@@ -67,6 +67,7 @@
                     :kind-label="card.kindLabel"
                     :preview-url="card.previewUrl"
                     :created-at="card.createdAt"
+                    :creator="metadata.get(card.key)?.info.creator"
                     :version="card.version"
                     :locked="locked"
                     :data-resource-id="card.preset ? undefined : card.id"

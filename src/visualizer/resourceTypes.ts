@@ -1,4 +1,4 @@
-import type { MediaInputDefinition, MediaBindings } from './mediaTypes';
+import type { MediaInputDefinition, MediaBindings, MediaAsset } from './mediaTypes';
 import type { ElementBinding, ElementKind, EffectTargets } from './compositionTypes';
 import type { AlgorithmDefinition } from './algorithmTypes';
 import type { SceneParameterDescriptor } from './parameterDescriptor';
@@ -38,6 +38,7 @@ export interface PresetElementTemplate {
     element: ResourceRef;
     name: string;
     enabled: boolean;
+    seed?: number | null;
     bindings: ElementBinding[];
     markerBindings?: MarkerBindings;
     mediaBindings?: MediaBindings;
@@ -50,6 +51,7 @@ export interface PresetDefinition extends ResourceRef {
     preview: 'geometric' | 'cinematic';
     elements: PresetElementTemplate[];
     controls: CommonControl[];
+    mediaAssets?: MediaAsset[];
 }
 export interface ResourceSnapshot {
     algorithms: AlgorithmDefinition[];

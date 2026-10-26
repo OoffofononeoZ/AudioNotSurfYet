@@ -64,6 +64,7 @@
                     :selection="selection"
                     :locked="locked"
                     @add="catalogOpen = true"
+                    @export-preset="presetExportOpen = true"
                     @select="selectElement"
                     @visibility="(id, enabled) => run(() => controller.updateVisibility(id, enabled))"
                     @remove="id => run(() => controller.removeElement(id))"
@@ -245,6 +246,12 @@
             >
             <p v-if="actionError" class="viz-error" role="alert">{{ actionError }}</p>
         </section>
+        <VisualizerPresetExportDialog
+            :open="presetExportOpen"
+            :project="snapshot.project"
+            :locked="locked || !usable"
+            :capture-cover="preview.capture"
+            @close="presetExportOpen = false" />
         <VisualizerElementCatalog
             :open="catalogOpen"
             :locked="locked"
@@ -290,6 +297,7 @@ import VisualizerIcon from '../components/visualizer/VisualizerIcon.vue';
 import VisualizerRealtimeActions from '../components/visualizer/VisualizerRealtimeActions.vue';
 import VisualizerElementList from '../components/visualizer/VisualizerElementList.vue';
 import VisualizerElementCatalog from '../components/visualizer/VisualizerElementCatalog.vue';
+import VisualizerPresetExportDialog from '../components/visualizer/VisualizerPresetExportDialog.vue';
 import VisualizerElementInspector from '../components/visualizer/VisualizerElementInspector.vue';
 import VisualizerBottomPanel from '../components/visualizer/VisualizerBottomPanel.vue';
 import VisualizerPresetInspector from '../components/visualizer/VisualizerPresetInspector.vue';
@@ -315,6 +323,7 @@ const snapshot = shallowRef(controller.getSnapshot()),
 const workspace = ref<HTMLElement | null>(null),
     canvas = ref<HTMLCanvasElement | null>(null),
     catalogOpen = ref(false),
+    presetExportOpen = ref(false),
     selection = ref<string | null>(null),
     drawer = ref<'elements' | 'inspector' | null>(null),
     actionError = ref(''),

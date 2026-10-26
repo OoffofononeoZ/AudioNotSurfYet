@@ -69,6 +69,7 @@ declare module 'vue' {
     VisualizerMarkerInput: typeof import('./src/components/visualizer/VisualizerMarkerInput.vue')['default']
     VisualizerMediaInput: typeof import('./src/components/visualizer/VisualizerMediaInput.vue')['default']
     VisualizerParameterField: typeof import('./src/components/visualizer/VisualizerParameterField.vue')['default']
+    VisualizerPresetExportDialog: typeof import('./src/components/visualizer/VisualizerPresetExportDialog.vue')['default']
     VisualizerPresetInspector: typeof import('./src/components/visualizer/VisualizerPresetInspector.vue')['default']
     VisualizerRealtimeActions: typeof import('./src/components/visualizer/VisualizerRealtimeActions.vue')['default']
     VisualizerResourceCover: typeof import('./src/components/visualizer/VisualizerResourceCover.vue')['default']

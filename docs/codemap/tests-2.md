@@ -13,6 +13,7 @@
 | [tests/e2e/visualizer-output.spec.ts](../../tests/e2e/visualizer-output.spec.ts) | [src/visualizer/compositionModel.ts](../../src/visualizer/compositionModel.ts)、[src/visualizer/compositionTypes.ts](../../src/visualizer/compositionTypes.ts)、[src/visualizer/elementRegistry.ts](../../src/visualizer/elementRegistry.ts)、[src/visualizer/exportPresets.ts](../../src/visualizer/exportPresets.ts)、[tests/setup-visualizer-resources.ts](../../tests/setup-visualizer-resources.ts)、[tests/support/file-picker.ts](../../tests/support/file-picker.ts)、另 1 项，按需核对源码 |
 | [tests/e2e/visualizer-pixels.spec.ts](../../tests/e2e/visualizer-pixels.spec.ts) | [tests/support/file-picker.ts](../../tests/support/file-picker.ts) |
 | [tests/e2e/visualizer-point-lines.spec.ts](../../tests/e2e/visualizer-point-lines.spec.ts) | [src/editor/projectCodec.ts](../../src/editor/projectCodec.ts)、[src/visualizer/compositionTypes.ts](../../src/visualizer/compositionTypes.ts)、[src/visualizer/elementRegistry.ts](../../src/visualizer/elementRegistry.ts)、[tests/support/file-picker.ts](../../tests/support/file-picker.ts)、[tests/support/visualizer-assets.mjs](../../tests/support/visualizer-assets.mjs) |
+| [tests/e2e/visualizer-preset-export.spec.ts](../../tests/e2e/visualizer-preset-export.spec.ts) | [src/visualizer/compositionTypes.ts](../../src/visualizer/compositionTypes.ts)、[tests/setup-visualizer-resources.ts](../../tests/setup-visualizer-resources.ts)、[tests/support/file-picker.ts](../../tests/support/file-picker.ts) |
 | [tests/e2e/visualizer-presets.spec.ts](../../tests/e2e/visualizer-presets.spec.ts) | [src/visualizer/compositionTypes.ts](../../src/visualizer/compositionTypes.ts)、[tests/support/file-picker.ts](../../tests/support/file-picker.ts)、[tests/support/v6-resource-probe.ts](../../tests/support/v6-resource-probe.ts)、[tests/support/visualizer-output-sync.ts](../../tests/support/visualizer-output-sync.ts) |
 | [tests/e2e/visualizer-realtime-production.spec.ts](../../tests/e2e/visualizer-realtime-production.spec.ts) | [tests/support/file-picker.ts](../../tests/support/file-picker.ts) |
 | [tests/e2e/visualizer-realtime.spec.ts](../../tests/e2e/visualizer-realtime.spec.ts) | [tests/support/file-picker.ts](../../tests/support/file-picker.ts) |
@@ -107,4 +108,3 @@
 | [tests/scripts/run-m3-eval.mjs](../../tests/scripts/run-m3-eval.mjs) | — |
 | [tests/scripts/run-m4-eval.mjs](../../tests/scripts/run-m4-eval.mjs) | — |
 | [tests/scripts/run-m5-eval.mjs](../../tests/scripts/run-m5-eval.mjs) | — |
-| [tests/scripts/run-m6-eval.mjs](../../tests/scripts/run-m6-eval.mjs) | — |

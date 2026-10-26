@@ -15,6 +15,7 @@ const externalResourceSuites = [
         'number-editing',
         'point-lines',
         'native-input',
+        'preset-export',
         'radial-spectrum',
         'resources-v5',
         'seed-capabilities',

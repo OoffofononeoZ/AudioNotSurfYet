@@ -18,7 +18,9 @@
             </span>
             <span v-if="description && description !== title" class="catalog-description">{{ description }}</span>
             <span class="catalog-card-meta">
-                <span class="catalog-creator" aria-label="创建者 default"><VisualizerIcon name="user" />default</span>
+                <span class="catalog-creator" :aria-label="'创建者 ' + (creator || 'default')"
+                    ><VisualizerIcon name="user" />{{ creator || 'default' }}</span
+                >
                 <time v-if="createdAt" :datetime="createdAt" :title="fullDate" :aria-label="'创建时间 ' + date">{{
                     date
                 }}</time>
@@ -37,6 +39,7 @@ const props = defineProps<{
     kindLabel: string;
     previewUrl?: string;
     createdAt?: string;
+    creator?: string;
     version?: number;
     locked: boolean;
 }>();

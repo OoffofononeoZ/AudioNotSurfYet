@@ -1,7 +1,7 @@
 export type ResourceDirectoryHandle = FileSystemDirectoryHandle & {
     entries(): AsyncIterableIterator<[string, FileSystemHandle]>;
-    queryPermission(options: { mode: 'read' }): Promise<PermissionState>;
-    requestPermission(options: { mode: 'read' }): Promise<PermissionState>;
+    queryPermission(options: { mode: 'read' | 'readwrite' }): Promise<PermissionState>;
+    requestPermission(options: { mode: 'read' | 'readwrite' }): Promise<PermissionState>;
 };
 
 export function resourcePath(input: unknown): string {
