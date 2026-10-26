@@ -287,3 +287,88 @@ describe('composition rendering', () => {
         instance.dispose?.();
     });
 });
+describe('composition algorithm runtime lifetime', () => {
+    function lifetimeHarness() {
+        const p = createComposition(track);
+        p.elements = ['solid', 'radial-spectrum'].map((id, layer) => elementRegistry.create(id, 10, layer));
+        attachElements(p);
+        const values = new Map<
+            string,
+            { parameterId: string; state: 'ready'; value: number | string | boolean | number[] }
+        >();
+        const writeValues = (spectrum: number[]) => {
+            values.clear();
+            for (const e of p.elements)
+                for (const b of e.bindings)
+                    values.set(parameterKey(e.id, b.parameterId), {
+                        parameterId: b.parameterId,
+                        state: 'ready',
+                        value:
+                            b.source.kind === 'constant'
+                                ? b.source.value
+                                : b.parameterId === 'spectrum'
+                                  ? spectrum
+                                  : 0.5,
+                    });
+        };
+        writeValues(Array(128).fill(0.2));
+        const renderer: CompositionRenderPort = {
+            autoClear: true,
+            setClearColor: () => renderer as never,
+            clear() {},
+            setRenderTarget() {},
+            render() {},
+        };
+        const runtimes: AlgorithmRuntimeFixture[] = [];
+        const scene = new CompositionScene({
+            renderer,
+            readProject: () => p,
+            resolveAt: () => values,
+            runtimeFactory: () => {
+                const runtime = new AlgorithmRuntimeFixture();
+                runtimes.push(runtime);
+                return runtime;
+            },
+        });
+        const seeds = new ElementSeedSession();
+        scene.resize(320, 180, 1);
+        const input = (bindingRevision: number, timeSeconds = 1) => ({
+            elementSeeds: seeds.sync(p.elements),
+            timeSeconds,
+            values,
+            bindingRevision,
+        });
+        return { p, scene, runtimes, writeValues, input };
+    }
+    test('parameter edits keep the running algorithm runtime', async () => {
+        const h = lifetimeHarness();
+        try {
+            await h.scene.prepare(h.input(1));
+            expect(h.runtimes).toHaveLength(1);
+            const dispose = vi.spyOn(h.runtimes[0]!, 'dispose');
+            h.writeValues(Array(128).fill(0.9));
+            await h.scene.prepare(h.input(2));
+            await h.scene.prepare(h.input(3, 1.5));
+            expect(h.runtimes).toHaveLength(1);
+            expect(dispose).not.toHaveBeenCalled();
+        } finally {
+            h.scene.dispose();
+        }
+    });
+    test('structural edits still recreate the algorithm runtime', async () => {
+        const h = lifetimeHarness();
+        try {
+            await h.scene.prepare(h.input(1));
+            expect(h.runtimes).toHaveLength(1);
+            const dispose = vi.spyOn(h.runtimes[0]!, 'dispose');
+            h.p.elements = [...h.p.elements, elementRegistry.create('solid', 10, 2)];
+            attachElements(h.p);
+            h.writeValues(Array(128).fill(0.2));
+            await h.scene.prepare(h.input(2));
+            expect(dispose).toHaveBeenCalledTimes(1);
+            expect(h.runtimes).toHaveLength(2);
+        } finally {
+            h.scene.dispose();
+        }
+    });
+});

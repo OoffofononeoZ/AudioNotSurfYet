@@ -54,8 +54,9 @@ export class CompositionScene implements VisualizerScene {
     private gpu = new AlgorithmDrawRenderer(this.geometry);
     private media = new CompositionMediaHost();
     private runtime: AlgorithmRuntimePort | null = null;
-    private signature = '';
+    private runtimeSignature = '';
     private initialization: Promise<void> | null = null;
+    private markerProject: CompositionRenderModel | null = null;
     private markers: MarkerReader | undefined;
     private packets = new Map<string, DrawPacket>();
     private prepared: CompositionRenderModel | null = null;
@@ -81,11 +82,14 @@ export class CompositionScene implements VisualizerScene {
             this.media = new CompositionMediaHost();
             this.runtime?.dispose();
             this.runtime = null;
-            this.signature = '';
+            this.runtimeSignature = '';
+            this.markerProject = null;
+            this.markers = undefined;
             this.initialization = null;
             this.prepared = project;
             return;
         }
+        // Parameter values travel inside every prepared frame, so only structural changes may rebuild the sandbox.
         const signature =
             project.projectId +
             ':' +
@@ -94,24 +98,26 @@ export class CompositionScene implements VisualizerScene {
                 .sort()
                 .join('|') +
             ':' +
-            input.bindingRevision +
-            ':' +
             project.elements.map(e => e.id + ':' + elementDescriptor(project, e).algorithm.hash).join('|');
-        if (signature !== this.signature) {
+        if (signature !== this.runtimeSignature) {
             this.runtime?.dispose();
-            this.signature = signature;
+            this.runtimeSignature = signature;
             this.runtime = this.options.runtimeFactory?.() ?? new IsolatedAlgorithmRuntime();
-            const owner = this.runtime;
-            this.markers = createEditorMarkerReader(
-                project,
-                () => !this.disposed && this.runtime === owner && this.options.readProject() === project,
-            );
             this.initialization = this.runtime.initialize(
                 project.elements.map(e => ({
                     id: e.id,
                     algorithm: findResource(project.resources.algorithms, elementDescriptor(project, e).algorithm),
                 })),
             );
+        }
+        // A marker index belongs to one immutable project revision; rebuild only that index when the revision changes.
+        if (this.markerProject !== project) {
+            const reader = createEditorMarkerReader(
+                project,
+                () => !this.disposed && this.markers === reader && this.options.readProject() === project,
+            );
+            this.markerProject = project;
+            this.markers = reader;
         }
         const runtime = this.runtime!;
         await this.initialization;
