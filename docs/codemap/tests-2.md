@@ -25,6 +25,7 @@
 | [tests/e2e/visualizer-resource-preview.spec.ts](../../tests/e2e/visualizer-resource-preview.spec.ts) | [tests/support/file-picker.ts](../../tests/support/file-picker.ts)、[tests/support/visualizer-assets.mjs](../../tests/support/visualizer-assets.mjs) |
 | [tests/e2e/visualizer-resources.spec.ts](../../tests/e2e/visualizer-resources.spec.ts) | [src/visualizer/algorithmTypes.ts](../../src/visualizer/algorithmTypes.ts)、[src/visualizer/compositionTypes.ts](../../src/visualizer/compositionTypes.ts)、[src/visualizer/resourceIdentity.ts](../../src/visualizer/resourceIdentity.ts)、[src/visualizer/resourceTypes.ts](../../src/visualizer/resourceTypes.ts)、[tests/support/file-picker.ts](../../tests/support/file-picker.ts) |
 | [tests/e2e/visualizer-scene3d-editor.spec.ts](../../tests/e2e/visualizer-scene3d-editor.spec.ts) | [src/visualizer/compositionTypes.ts](../../src/visualizer/compositionTypes.ts)、[tests/support/file-picker.ts](../../tests/support/file-picker.ts)、[tests/support/scene3d-fixture.ts](../../tests/support/scene3d-fixture.ts) |
+| [tests/e2e/visualizer-scene3d-output.spec.ts](../../tests/e2e/visualizer-scene3d-output.spec.ts) | [tests/support/file-picker.ts](../../tests/support/file-picker.ts) |
 | [tests/e2e/visualizer-scene3d.spec.ts](../../tests/e2e/visualizer-scene3d.spec.ts) | — |
 | [tests/e2e/visualizer-seed.spec.ts](../../tests/e2e/visualizer-seed.spec.ts) | [tests/support/file-picker.ts](../../tests/support/file-picker.ts) |
 | [tests/e2e/visualizer-stem-input.spec.ts](../../tests/e2e/visualizer-stem-input.spec.ts) | [src/visualizer/visualizerSessionController.ts](../../src/visualizer/visualizerSessionController.ts)、[tests/support/editor-marking.ts](../../tests/support/editor-marking.ts)、[tests/support/file-picker.ts](../../tests/support/file-picker.ts)、[tests/support/stem-analysis.ts](../../tests/support/stem-analysis.ts) |
@@ -107,4 +108,3 @@
 | [tests/scripts/run-e9-eval.mjs](../../tests/scripts/run-e9-eval.mjs) | — |
 | [tests/scripts/run-edge.mjs](../../tests/scripts/run-edge.mjs) | — |
 | [tests/scripts/run-editor-ft-eval.mjs](../../tests/scripts/run-editor-ft-eval.mjs) | — |
-| [tests/scripts/run-editor-readiness-eval.mjs](../../tests/scripts/run-editor-readiness-eval.mjs) | — |

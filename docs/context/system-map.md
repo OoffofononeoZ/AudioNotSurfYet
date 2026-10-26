@@ -1,10 +1,9 @@
 ---
 status: approved
-owner: "project-owner"
+owner: 'project-owner'
 last_reviewed: 2026-10-19
 upstream_docs:
-  - "docs/context/index.md"
-
+    - 'docs/context/index.md'
 ---
 
 # System Map
@@ -15,7 +14,7 @@ upstream_docs:
 
 DEC-072另由MainLayout提供唯一`EditorSeparationService`，使用同一AudioEngine原始PCM；Editor增加分离工作区和四轨展示/导出。模型与结果索引使用`processing-p1` IndexedDB，原PCM/planar/WAV使用OPFS；最多一个专用分离Worker，播放及analysis所有权不变。
 
-Visualizer 当前实现 Project V5、可执行资源包 V2、分组预设及同歌范围转场。用户选择的只读外部 assets 文件夹提供算法/Shader/定义，工程保存完整快照；算法通过无同源权限 iframe 所属 Worker 隔离计算，宿主校验数据后统一绘制。Visualizer 页面拥有独立资源库实例、目录句柄任务和共享预览 URL；独立 IndexedDB 仅记住目录句柄。离页取消任务并释放预览，不接 ZIP、后端或外部 URL。布局及接口见[组合工作区](visualizer-composition.md)、[资源包](../architecture/visualizer/resource-packages-v2.md)与[Project V5](../architecture/visualizer/project-format-v5.md)；外部内容生成 skill 2.4.0 默认自主生成并要求实际展示图，项目不保留副本或内容审批门禁，历史 evidence/readiness 不自动继承。
+Visualizer 当前实现 Project V6、可执行资源包 V2、分组预设及同歌范围转场。用户选择的只读外部 assets 文件夹提供算法/Shader/定义，工程保存完整快照；算法通过无同源权限 iframe 所属 Worker 隔离计算，宿主校验数据后统一绘制。Visualizer 页面拥有独立资源库实例、目录句柄任务和共享预览 URL；独立 IndexedDB 仅记住目录句柄。离页取消任务并释放预览，不接 ZIP、后端或外部 URL。布局及接口见[组合工作区](visualizer-composition.md)、[资源包](../architecture/visualizer/resource-packages-v2.md)与[Project V6](../architecture/visualizer/project-format-v5.md)；外部内容生成 skill 2.6.0 默认自主生成并要求实际展示图，项目不保留副本或内容审批门禁，历史 evidence/readiness 不自动继承。
 
 应用导航占位、窄屏隐藏、歌曲详情与内容宽度分界见 [应用外壳契约](app-shell.md)（DEC-076）；旧 canonical 数值与身份继续绑定历史实现。
 
@@ -43,7 +42,7 @@ showOpenFilePicker → FileSystemFileHandle → File
 ```text
 /visualizer/:trackId? → VisualizerSessionController
   ├→ RoutePlaybackLease(repeat-one; export transport locks) → AudioSessionService → AudioEngine
-  ├→ VisualizerProjectV5 ↔ audionotsurfyet-visualizer/draft/latest
+  ├→ VisualizerProjectV6 ↔ audionotsurfyet-visualizer/draft/latest
   ├→ project-owned executable packages → ResourceLibrary → available definitions
   ├→ one 16:9 Canvas + element list/inspector + project bottom panel + MusicBar
   ├→ AnalysisConsumerLease(visualizer, deduped 0–4) → AnalysisCoordinator/Worker/cache
@@ -51,7 +50,7 @@ showOpenFilePicker → FileSystemFileHandle → File
   ├→ validated EditorProjectV2 snapshot → exact laneId/eventId range transition
   └→ CompositionResolver(60Hz absolute time + checkpoint)
        → embedded algorithm snapshots → opaque-origin Worker → validated DrawPacket
-       → CompositionScene + shared program/geometry → three reusable render targets
+       → CompositionScene + shared program/geometry → three 2D targets + one shared-depth 3D target
        → target/composition effects
        → one VisualizerRendererHost + one Canvas/WebGLRenderer/visual RAF
        ├→ manual export lease → indexed frame times + decoded PCM → WebCodecs/Mediabunny → OPFS WebM File
@@ -60,40 +59,42 @@ showOpenFilePicker → FileSystemFileHandle → File
 
 当前边界：Editor 数据只在进入/显式 reload 时快照；analysis 第五项在 Coordinator 前拒绝；页面音量和试听速度不影响导出音轨；不支持的编码配置明确失败。导出暂停播放并独占现有 renderer，按帧编号推进，不依赖播放时钟。直接列表换歌在改变歌曲前处理单草稿覆盖与未处理 WebM；取消保留原歌曲和工程。
 
+场景容器、camera 求值与共享深度由 CompositionScene 管理，资源和工程保存完整配置，见[三维场景](../architecture/visualizer/scene3d.md)。
+
 ## Subsystems
 
-| Subsystem | Purpose | Interfaces | Owner | Notes |
-| --- | --- | --- | --- | --- |
-| App shell and routing | 组合 AppSidebar、右上角齿轮、内容容器与独立 MusicBar，并拥有 session service 生命周期 | Vue Router、provide/inject | project-owner | `createWebHistory()`；MainLayout 卸载时 dispose |
-| MusicBar and queue UI | 文件选择、队列命令、进度、三种样式和错误消息 | AudioSessionService commands、audioSessionStore、MusicList events | project-owner | 不持有 File、AudioContext、播放 RAF 或队列事实 |
-| AudioSessionService | 元数据、runtime File/封面、竞态、ended 循环、单 RAF、工作区持久化与资源释放 | File/工作区输入；TrackRecord/PlaybackSnapshot/energy 输出 | project-owner | 工作区先更新内存，保存失败发布 not-persisted |
-| AudioEngine | 单一 AudioContext、解码、播放、暂停、seek、变速、音量和时域数据 | ArrayBuffer 输入；PlaybackSnapshot/Float32Array 输出 | project-owner | AudioContext 与节点延迟创建；AudioContext 时钟为事实来源 |
-| AnalysisCoordinator | 校验 0–4 活动特征、管理 generation/job/cache identity、合并 cache hit/miss、取消/重试和精确游标请求 | AudioEngine PCM copy、module Worker、SessionRepository、Pinia snapshot | project-owner | 默认活动集为空；完整身份不匹配或旧 generation 一律丢弃 |
-| Analysis Worker | 固定 frame/hop/window 下批量提取累计 21 项特征，聚合、量化、编码并响应 exact cursor | typed Worker request/response、transferable PCM/ArrayBuffer | project-owner | 每批最多 32 frame 或约 8ms yield；同帧一次 Meyda batch；Flux 复用相邻幅度频谱 |
-| FeatureRegistry and codec | 21 项穷尽静态契约、六类紧凑 payload 与严格二进制 decoder | `FeatureId`、`FeatureDefinition`、`StoredAnalysisCache` | project-owner | Loudness 使用 total Float32 + 24 bands U16；Complex 使用 magnitude U16 + phase Int16；schema 保持 V1 |
-| Audio session state | 保存队列、当前 track、播放快照、能量、analysis 与 workspace snapshot | Pinia `audioSessionStore` | project-owner | `$state` 可 JSON 序列化，不含浏览器资源实例或 typed-array payload |
-| Session persistence | 保存/恢复 V1 最近会话、全部句柄和唯一 current Blob/cache | 原生 IndexedDB `SessionRepository` | project-owner | `replaceCurrentAnalysisCache()` 校验 track/hash 并原子替换；unknown schema 不猜测迁移 |
-| Config persistence | 保存 volume、playbackRate、playbackMode、MusicBar style 与桌面 sidebarCollapsed | Pinia、localStorage key `config` | project-owner | sidebarCollapsed 默认 false；volume 为 0–100；playbackRate 为 0.1–2，默认 1 |
-| Home visualization | 歌曲详情与共享能量 Three.js 光线背景 | store metadata、service 封面 URL、`rayLength` prop、IntersectionObserver/ResizeObserver、reduced-motion media query | unknown | 常规模式使用 WebGL RAF；reduced motion 只静态渲染；卸载释放 mesh、geometry、material、render list、renderer 与 WebGL context |
-| Analyzer surface | 原曲／四轨切换、单列、每来源最多四项FIFO与精确值 | AudioSessionService、AnalysisCoordinator、Canvas 2D | project-owner | 分轨仅四项，只分析当前来源，见[列表](analyzer-list.md) |
-| Editor surface | 标记/FT/自动标记、公共顶栏/MusicBar、独立MarkerTimeView、overlay和数字录入 | EditorSessionController、processing/transcription服务、共享engine/coordinator与Canvas adapter | project-owner | [当前接口](../architecture/editor/interface-contracts.md)，历史readiness不继承 |
-| Editor project and draft | strict JSON V2（显式迁移 V1）、歌曲 hash/时长绑定、原生 file gateway、单草稿 autosave 与恢复冲突 | `EditorFormatCodecRegistry`、`EditorDraftRepository`、`audionotsurfyet-editor` V1 | project-owner | 首版只注册 JSON；session database 不变 |
-| Visualizer composition surface | `/visualizer/:trackId?` 分组列表/共同处理参数/元素属性/工程底栏、单视口三栏或抽屉、16:9 单 Canvas、保留 MusicBar、strict Project V5 单草稿、JSON 资源库、离线 WebM 与原生全屏 | `VisualizerSessionController`、`VisualizerResourceLibrary`、`VisualizerRendererHost`、`CompositionResolver/Scene`、playback/analysis leases、Editor snapshot、WebCodecs/OPFS、Fullscreen API | project-owner | V1–V6 evidence 只绑定历史实现；当前自动化与媒体检查见组合工作区 |
-| Experimental charts | 试验性的 Three.js 2D 图和瀑布流 | Vue props、TestLands | unknown | 不视为稳定接口 |
-| Event bus | 跨组件事件类型与发送 | mitt singleton | unknown | `settings-open` 无已发现订阅者 |
+| Subsystem                      | Purpose                                                                                                                                                                       | Interfaces                                                                                                                                                                                   | Owner         | Notes                                                                                                                        |
+| ------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| App shell and routing          | 组合 AppSidebar、右上角齿轮、内容容器与独立 MusicBar，并拥有 session service 生命周期                                                                                         | Vue Router、provide/inject                                                                                                                                                                   | project-owner | `createWebHistory()`；MainLayout 卸载时 dispose                                                                              |
+| MusicBar and queue UI          | 文件选择、队列命令、进度、三种样式和错误消息                                                                                                                                  | AudioSessionService commands、audioSessionStore、MusicList events                                                                                                                            | project-owner | 不持有 File、AudioContext、播放 RAF 或队列事实                                                                               |
+| AudioSessionService            | 元数据、runtime File/封面、竞态、ended 循环、单 RAF、工作区持久化与资源释放                                                                                                   | File/工作区输入；TrackRecord/PlaybackSnapshot/energy 输出                                                                                                                                    | project-owner | 工作区先更新内存，保存失败发布 not-persisted                                                                                 |
+| AudioEngine                    | 单一 AudioContext、解码、播放、暂停、seek、变速、音量和时域数据                                                                                                               | ArrayBuffer 输入；PlaybackSnapshot/Float32Array 输出                                                                                                                                         | project-owner | AudioContext 与节点延迟创建；AudioContext 时钟为事实来源                                                                     |
+| AnalysisCoordinator            | 校验 0–4 活动特征、管理 generation/job/cache identity、合并 cache hit/miss、取消/重试和精确游标请求                                                                           | AudioEngine PCM copy、module Worker、SessionRepository、Pinia snapshot                                                                                                                       | project-owner | 默认活动集为空；完整身份不匹配或旧 generation 一律丢弃                                                                       |
+| Analysis Worker                | 固定 frame/hop/window 下批量提取累计 21 项特征，聚合、量化、编码并响应 exact cursor                                                                                           | typed Worker request/response、transferable PCM/ArrayBuffer                                                                                                                                  | project-owner | 每批最多 32 frame 或约 8ms yield；同帧一次 Meyda batch；Flux 复用相邻幅度频谱                                                |
+| FeatureRegistry and codec      | 21 项穷尽静态契约、六类紧凑 payload 与严格二进制 decoder                                                                                                                      | `FeatureId`、`FeatureDefinition`、`StoredAnalysisCache`                                                                                                                                      | project-owner | Loudness 使用 total Float32 + 24 bands U16；Complex 使用 magnitude U16 + phase Int16；schema 保持 V1                         |
+| Audio session state            | 保存队列、当前 track、播放快照、能量、analysis 与 workspace snapshot                                                                                                          | Pinia `audioSessionStore`                                                                                                                                                                    | project-owner | `$state` 可 JSON 序列化，不含浏览器资源实例或 typed-array payload                                                            |
+| Session persistence            | 保存/恢复 V1 最近会话、全部句柄和唯一 current Blob/cache                                                                                                                      | 原生 IndexedDB `SessionRepository`                                                                                                                                                           | project-owner | `replaceCurrentAnalysisCache()` 校验 track/hash 并原子替换；unknown schema 不猜测迁移                                        |
+| Config persistence             | 保存 volume、playbackRate、playbackMode、MusicBar style 与桌面 sidebarCollapsed                                                                                               | Pinia、localStorage key `config`                                                                                                                                                             | project-owner | sidebarCollapsed 默认 false；volume 为 0–100；playbackRate 为 0.1–2，默认 1                                                  |
+| Home visualization             | 歌曲详情与共享能量 Three.js 光线背景                                                                                                                                          | store metadata、service 封面 URL、`rayLength` prop、IntersectionObserver/ResizeObserver、reduced-motion media query                                                                          | unknown       | 常规模式使用 WebGL RAF；reduced motion 只静态渲染；卸载释放 mesh、geometry、material、render list、renderer 与 WebGL context |
+| Analyzer surface               | 原曲／四轨切换、单列、每来源最多四项FIFO与精确值                                                                                                                              | AudioSessionService、AnalysisCoordinator、Canvas 2D                                                                                                                                          | project-owner | 分轨仅四项，只分析当前来源，见[列表](analyzer-list.md)                                                                       |
+| Editor surface                 | 标记/FT/自动标记、公共顶栏/MusicBar、独立MarkerTimeView、overlay和数字录入                                                                                                    | EditorSessionController、processing/transcription服务、共享engine/coordinator与Canvas adapter                                                                                                | project-owner | [当前接口](../architecture/editor/interface-contracts.md)，历史readiness不继承                                               |
+| Editor project and draft       | strict JSON V2（显式迁移 V1）、歌曲 hash/时长绑定、原生 file gateway、单草稿 autosave 与恢复冲突                                                                              | `EditorFormatCodecRegistry`、`EditorDraftRepository`、`audionotsurfyet-editor` V1                                                                                                            | project-owner | 首版只注册 JSON；session database 不变                                                                                       |
+| Visualizer composition surface | `/visualizer/:trackId?` 分组列表/共同处理参数/元素属性/工程底栏、单视口三栏或抽屉、16:9 单 Canvas、保留 MusicBar、strict Project V6 单草稿、JSON 资源库、离线 WebM 与原生全屏 | `VisualizerSessionController`、`VisualizerResourceLibrary`、`VisualizerRendererHost`、`CompositionResolver/Scene`、playback/analysis leases、Editor snapshot、WebCodecs/OPFS、Fullscreen API | project-owner | V1–V6 evidence 只绑定历史实现；当前自动化与媒体检查见组合工作区                                                              |
+| Experimental charts            | 试验性的 Three.js 2D 图和瀑布流                                                                                                                                               | Vue props、TestLands                                                                                                                                                                         | unknown       | 不视为稳定接口                                                                                                               |
+| Event bus                      | 跨组件事件类型与发送                                                                                                                                                          | mitt singleton                                                                                                                                                                               | unknown       | `settings-open` 无已发现订阅者                                                                                               |
 
 ## External Dependencies
 
-| Dependency | Why it exists | Failure impact | Replacement or fallback |
-| --- | --- | --- | --- |
-| Browser Web Audio API | 解码、播放和分析本地音频 | 核心播放与能量链路不可用 | 未定义 |
-| WebGL / Three.js | Home 光线、Visualizer 单 RendererHost/组合 shader 和试验图表 | Visualizer 场景进入可重试错误层，其他 WebGL 表面不可用 | Visualizer 保留 transport、工程、元素属性和草稿操作；无 2D 视觉 fallback |
-| Canvas 2D | Analyzer 静态数据层、游标层与点阵背景 | 单卡 renderer 可降级 | DOM 保留标题、参数、图例、精确值和重试语义 |
-| localStorage | 恢复音量和样式 | 配置回到默认或写入失败 | 未定义 |
-| IndexedDB | 最近会话、句柄、当前 Blob/cache 的本地持久化 | 刷新后无法自动恢复 | 当前页面继续使用并显示 not-persisted/restore-error |
-| File System Access API | 用户选择文件与显式恢复权限 | 无法导入或恢复非当前文件 | 支持范围内不回退到隐藏 input；提示使用最新版 Chrome/Edge |
-| `music-metadata` | 解析本地音频标签与封面 | 元数据和封面缺失；播放能否继续需验证 | 当前有 unknown/default cover 显示 |
-| Meyda | 从实时时域数据提取 energy，并在 Worker 提取批准的离线特征 | 音频响应可视化或分析不可用 | Worker 错误可重试且不停止播放；`spectralFlux` 由 ADR-0005 项目实现，上游缺陷仍见 R-020 |
+| Dependency             | Why it exists                                                | Failure impact                                         | Replacement or fallback                                                                |
+| ---------------------- | ------------------------------------------------------------ | ------------------------------------------------------ | -------------------------------------------------------------------------------------- |
+| Browser Web Audio API  | 解码、播放和分析本地音频                                     | 核心播放与能量链路不可用                               | 未定义                                                                                 |
+| WebGL / Three.js       | Home 光线、Visualizer 单 RendererHost/组合 shader 和试验图表 | Visualizer 场景进入可重试错误层，其他 WebGL 表面不可用 | Visualizer 保留 transport、工程、元素属性和草稿操作；无 2D 视觉 fallback               |
+| Canvas 2D              | Analyzer 静态数据层、游标层与点阵背景                        | 单卡 renderer 可降级                                   | DOM 保留标题、参数、图例、精确值和重试语义                                             |
+| localStorage           | 恢复音量和样式                                               | 配置回到默认或写入失败                                 | 未定义                                                                                 |
+| IndexedDB              | 最近会话、句柄、当前 Blob/cache 的本地持久化                 | 刷新后无法自动恢复                                     | 当前页面继续使用并显示 not-persisted/restore-error                                     |
+| File System Access API | 用户选择文件与显式恢复权限                                   | 无法导入或恢复非当前文件                               | 支持范围内不回退到隐藏 input；提示使用最新版 Chrome/Edge                               |
+| `music-metadata`       | 解析本地音频标签与封面                                       | 元数据和封面缺失；播放能否继续需验证                   | 当前有 unknown/default cover 显示                                                      |
+| Meyda                  | 从实时时域数据提取 energy，并在 Worker 提取批准的离线特征    | 音频响应可视化或分析不可用                             | Worker 错误可重试且不停止播放；`spectralFlux` 由 ADR-0005 项目实现，上游缺陷仍见 R-020 |
 
 ## Known Seams
 

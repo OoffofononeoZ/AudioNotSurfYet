@@ -18,6 +18,7 @@ import { validateSceneCamera, validateTransform3d, validateScene3d } from './sce
 import type { PresetScene3d } from './scene3dTypes';
 import { roundEditingValue } from '../utils/numberEditing';
 import { validateMarkerBindings, validateMarkerDefinitions } from './editorMarkerValidation';
+export { validateSceneCamera, validateTransform3d, validateScene3d } from './scene3dCodec';
 
 const icons = [
     'square',
@@ -215,6 +216,7 @@ function presetDefinition(
             element = validateResourceRef(e.element),
             definition = elements.find(d => sameResource(d, element));
         if (!definition) return invalid('预设缺少精确版本的元素依赖：' + resourceKey(element));
+        if (e.transform3d !== undefined && !definition.scene3dDefaults) invalid('二维元素不能保存三维变换。');
         if (targets.has(key) || typeof e.enabled !== 'boolean') return invalid('预设子元素 key 或启用状态无效。');
         const bindings = validateElementBindings(e.bindings, definition.parameters);
         const mediaBindings = validateMediaBindings(e.mediaBindings, definition.mediaInputs, mediaAssets ?? []);

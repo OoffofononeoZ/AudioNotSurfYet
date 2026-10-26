@@ -16,7 +16,7 @@ function harness() {
     const p = createComposition(track);
     p.elements = elementRegistry
         .list()
-        .filter(e => !e.markerInputs?.length)
+        .filter(e => !e.markerInputs?.length && !e.scene3dDefaults)
         .map((e, i) => elementRegistry.create(e.id, 10, i));
     attachElements(p);
     const values = new Map<

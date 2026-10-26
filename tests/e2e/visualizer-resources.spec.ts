@@ -62,7 +62,7 @@ test('two presets and three leaves form five roots; shared values, child differe
     for (const type of ['solid', 'blur', 'spectral-dots']) await add(page, type);
     await expect(page.locator('.viz-root-item')).toHaveCount(5);
     const p = await exported(page);
-    expect(p.schemaVersion).toBe(5);
+    expect(p.schemaVersion).toBe(6);
     expect(p.items).toHaveLength(5);
     expect(p.resources.presets).toHaveLength(2);
     for (const element of p.elements) {
@@ -102,7 +102,7 @@ test('embedded algorithms restore and export while the project catalog is unavai
     await open(page);
     await addPreset(page, 'geometric-0.6');
     const project = await exported(page);
-    expect(project.schemaVersion).toBe(5);
+    expect(project.schemaVersion).toBe(6);
     expect(project.resources.algorithms.length).toBeGreaterThan(0);
     await expect(page.getByText('已保存', { exact: true })).toBeVisible();
     await page.evaluate(async () => {
@@ -118,7 +118,7 @@ test('embedded algorithms restore and export while the project catalog is unavai
     expect((await exported(page)).resources).toEqual(project.resources);
 });
 
-test('an unregistered algorithm and parameter render through the complete V5 import path', async ({ page }) => {
+test('an unregistered algorithm and parameter render through the complete V6 import path', async ({ page }) => {
     await open(page);
     const project = await exported(page);
     const algorithm: AlgorithmDefinition = {

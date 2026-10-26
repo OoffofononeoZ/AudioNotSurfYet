@@ -180,6 +180,8 @@ export function validateAlgorithmDefinition(input: unknown): AlgorithmDefinition
                 invalid('媒体纹理未获声明授权。');
     for (const p of Object.values(programs)) {
         if (v.apiVersion === 4 && (p.geometry !== 'triangles' || !p.alphaMode)) invalid('三维场景配置无效。');
+        if (v.apiVersion === 4 && Object.values(p.uniforms).some(u => u.type === 'source'))
+            invalid('世界空间元素不能读取二维效果输入。');
         if (v.apiVersion !== 4 && (p.alphaMode !== undefined || p.alphaCutoff !== undefined))
             invalid('三维场景配置无效。');
     }

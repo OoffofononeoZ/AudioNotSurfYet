@@ -8,6 +8,7 @@
 
 | 文件 | 本地静态引用（最多显示 6 项） |
 | --- | --- |
+| [tests/scripts/run-editor-readiness-eval.mjs](../../tests/scripts/run-editor-readiness-eval.mjs) | — |
 | [tests/scripts/run-m10-eval.mjs](../../tests/scripts/run-m10-eval.mjs) | — |
 | [tests/scripts/run-m11-eval.mjs](../../tests/scripts/run-m11-eval.mjs) | — |
 | [tests/scripts/run-m12-eval.mjs](../../tests/scripts/run-m12-eval.mjs) | — |
@@ -107,4 +108,3 @@
 | [tests/visualizer/marker-input-fixture.ts](../../tests/visualizer/marker-input-fixture.ts) | [src/editor/projectCodec.ts](../../src/editor/projectCodec.ts)、[src/visualizer/algorithmTypes.ts](../../src/visualizer/algorithmTypes.ts)、[src/visualizer/compositionCodec.ts](../../src/visualizer/compositionCodec.ts)、[src/visualizer/elementRegistry.ts](../../src/visualizer/elementRegistry.ts)、[src/visualizer/resourceIdentity.ts](../../src/visualizer/resourceIdentity.ts)、[src/visualizer/resourceTypes.ts](../../src/visualizer/resourceTypes.ts) |
 | [tests/visualizer/media-contract.test.ts](../../tests/visualizer/media-contract.test.ts) | [src/processing/sha256.ts](../../src/processing/sha256.ts)、[src/visualizer/algorithmCodec.ts](../../src/visualizer/algorithmCodec.ts)、[src/visualizer/algorithmTypes.ts](../../src/visualizer/algorithmTypes.ts)、[src/visualizer/compositionCodec.ts](../../src/visualizer/compositionCodec.ts)、[src/visualizer/drawPacket.ts](../../src/visualizer/drawPacket.ts)、[src/visualizer/elementRegistry.ts](../../src/visualizer/elementRegistry.ts)、另 7 项，按需核对源码 |
 | [tests/visualizer/native-input.test.ts](../../tests/visualizer/native-input.test.ts) | [src/visualizer/compositionCodec.ts](../../src/visualizer/compositionCodec.ts)、[src/visualizer/compositionPresets.ts](../../src/visualizer/compositionPresets.ts)、[src/visualizer/compositionResolver.ts](../../src/visualizer/compositionResolver.ts)、[src/visualizer/nativeAudioAnalysis.ts](../../src/visualizer/nativeAudioAnalysis.ts)、[src/visualizer/nativeAudioSource.ts](../../src/visualizer/nativeAudioSource.ts)、[tests/support/visualizer-assets.mjs](../../tests/support/visualizer-assets.mjs)、另 1 项，按需核对源码 |
-| [tests/visualizer/number-editing.test.ts](../../tests/visualizer/number-editing.test.ts) | [src/utils/numberEditing.ts](../../src/utils/numberEditing.ts)、[src/visualizer/compositionCodec.ts](../../src/visualizer/compositionCodec.ts)、[src/visualizer/compositionPresets.ts](../../src/visualizer/compositionPresets.ts)、[src/visualizer/elementRegistry.ts](../../src/visualizer/elementRegistry.ts)、[tests/visualizer/resource-fixtures.ts](../../tests/visualizer/resource-fixtures.ts) |

@@ -8,7 +8,7 @@ DEC-087 批准 V2 算法包、V5 自包含工程及原生隔离。2026-10-20 的
 - AlgorithmDefinition 包含 apiVersion:1、2 或 3、contract、source 和 programs。ABI 1 保留历史参数/历史帧接口；ABI 2 新增工程内标记声明。programs 保存具名 Shader、几何类型和 uniform 类型。
 - source 为自包含 ES Module，导出 create 工厂；源码、Shader、契约共同参与规范化 JSON SHA-256。哈希用于身份，不是作者认证。校验和解析不执行源码。
 - 作者文件独立维护 JS、Shader 和 JSON，封装器把文本内嵌进生成包。输入路径限制在作者目录内，模块禁止外部导入，跨包引用按算法→元素→预设顺序封装。
-- [Project V5](project-format-v5.md)保存元素、预设和算法快照，恢复不依赖商城目录。旧 V4/V1 不迁移；生成 skill 2.5.0 使用 VisualizerContentBriefV2，不兼容旧输入。
+- [Project V6](project-format-v5.md)保存元素、预设和算法快照，恢复不依赖商城目录。旧 V4/V1 不迁移；生成 skill 2.6.0 使用 VisualizerContentBriefV2，不兼容旧输入。
 
 ## 外部文件夹与封装
 
@@ -20,7 +20,7 @@ DEC-100 允许宿主把当前实时可用画面导出为预设：V2 子项可保
 
 SVG 与 PNG/JPEG/WebP 一样属于正常展示图片资源，扩展名不区分大小写。独立 SVG 支持基础图形、文字、defs、渐变、裁剪/蒙版和静态滤镜；url(#id) 和 href="#id" 只能引用同一 SVG 内已存在的定义。拒绝脚本、事件、style/CSS、外部引用/嵌入及 DTD/处理指令；SVG 以 image/svg+xml 解码，通过 Blob URL 在 img 中显示。
 
-优先读取 previewPath（例如 preview.svg 或 images/cover.svg，相对资源自身根目录，使用 / 分隔），再按资源根目录的 cover.*、preview.*、其余文件名寻找可解码图片；缺失或损坏时使用共享 /default_cover.png，不阻断合法运行包。封面不参与资源身份；取消、权限及路径错误仍正常失败。
+优先读取 previewPath（例如 preview.svg 或 images/cover.svg，相对资源自身根目录，使用 / 分隔），再按资源根目录的 cover._、preview._、其余文件名寻找可解码图片；缺失或损坏时使用共享 /default_cover.png，不阻断合法运行包。封面不参与资源身份；取消、权限及路径错误仍正常失败。
 
 `npm run visualizer:resources` 封装外部库，`npm run visualizer:resources:check` 只读核对，`VISUALIZER_ASSETS_DIR` 覆盖默认位置。独立 skill 可运行 `node <skill>/scripts/resource-library.mjs --build|--check <assets>`。dev/build 不执行封装、不复制外部库；仓库不保存资源库的源码、运行包和专用预览。
 
@@ -53,10 +53,14 @@ Visualizer 页面统一拥有资源库、任务和预览对象 URL，商城/列�
 
 AlgorithmContract 可选 `stateParameters:string[]` 声明影响累计状态的参数，列表可为空、必须去重且引用已声明参数；宿主自动并入 historyParameters。省略时保留已有资源按全部参数配置失效的语义，不改变旧资源 hash。新资源的颜色、透明度等纯绘制参数不声明；阻尼、平滑及粒子累计参数必须声明。算法自身缓存键仍须包含实际状态参数值、seed 及影响状态的模式／时段。
 
-每帧绑定明确工程和输入身份，历史／标记查询前后检查有效性；过期输入只结束该帧，Worker 完成拒绝后继续处理最新待办，不释放沙箱。真实输入错误、越权查询、算法超时仍明确失败。资源更新提升算法／元素版本并同步预设精确引用，已有工程内嵌快照不自动替换。V5/V2/ABI 版本、隔离权限及单渲染器边界保留。
+每帧绑定明确工程和输入身份，历史／标记查询前后检查有效性；过期输入只结束该帧，Worker 完成拒绝后继续处理最新待办，不释放沙箱。真实输入错误、越权查询、算法超时仍明确失败。资源更新提升算法／元素版本并同步预设精确引用，已有工程内嵌快照不自动替换。V6 工程、V2 资源包、既有 ABI 行为、隔离权限及单渲染器边界保持。
 
 资源缺失、初始化、计算超时、Shader 编译、context loss 或取消均明确失败并释放对应运行资源，不降档或回退旧算法。新增内容按[内容生成](content-generation.md)默认自主完成并附实际展示图，缺图/坏图的加载容错不变；架构、许可和发布边界独立。
 
 ## ABI 3 媒体扩展
 
 2026-10-22 的 Circular Visualizer 计划增加受控媒体输入和显式执行模式，保留现有格式版本与旧资源身份；新增媒体链路及 ABI 3 的实时因果分支见[媒体输入](../../context/visualizer-media.md)。原有仅 ABI 1/2 或无媒体内容的约束继续适用其原范围。
+
+## ABI 4 三维场景
+
+世界元素使用 renderSpace:world、scene3dDefaults.camera 和 triangles，fragment 返回 vec4 shade()。宿主统一模型变换、镜头和 opaque/mask 深度绘制；预设 scenes3d 保存共享关系和完整轨迹。定义及边界见[三维场景](scene3d.md)。资源包仍为 V2，既有 ABI 1–3 资源身份不变。

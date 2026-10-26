@@ -1,6 +1,6 @@
 # Visualizer 验证
 
-核查日期：2026-10-19。当前事实以[页面接口](../../architecture/visualizer/interface-contracts.md)、[Project V5](../../architecture/visualizer/project-format-v5.md)、[资源包](../../architecture/visualizer/resource-packages-v2.md)和[离线导出](../../context/visualizer-offline-export.md)为准。
+核查日期：2026-10-19。当前事实以[页面接口](../../architecture/visualizer/interface-contracts.md)、[Project V6](../../architecture/visualizer/project-format-v5.md)、[资源包](../../architecture/visualizer/resource-packages-v2.md)和[离线导出](../../context/visualizer-offline-export.md)为准。
 
 ## 领域覆盖
 
@@ -11,7 +11,7 @@
 | 算法隔离    | 未注册算法/新参数经完整工程路径绘制；opaque iframe + Worker + CSP 限制 DOM/网络/存储/嵌套 Worker；取消/超时终止，DrawPacket 拒绝非法程序、uniform 和 mesh；主页面仅执行通用 GPU 渲染                    |
 | 分组/控件   | 叶元素恰好归属一次、连续 layer、整组移动/隐藏、子项排序/删除、effect 引用清理；共同处理参数完整校验后批量应用，差异提示与重新应用                                                                       |
 | Binding     | constant/analysis/native、projection/component/单位/transform、缺失/未就绪/错误隔离；全工程四种 Analyzer 特征硬上限，不自动清空其他元素                                                                 |
-| Editor 标记 | ABI 1/2 声明权限、外部包无工程引用、单点/范围与分类集合、半开窗口/256 项分页/空集合、过期游标/实例隔离；V5 往返、快照原子刷新及禁用元素移除保护；fade 插值/终值和重叠接管                               |
+| Editor 标记 | ABI 1/2 声明权限、外部包无工程引用、单点/范围与分类集合、半开窗口/256 项分页/空集合、过期游标/实例隔离；V6 往返、快照原子刷新及禁用元素移除保护；fade 插值/终值和重叠接管                               |
 | 确定性      | 相同 seed/绝对时间/配置的 seek、刷新、暂停单帧和导出一致；固定步长/checkpoint 在包内执行，历史由宿主按合同准备，golden hash 采用既定1e-6量化，纯状态比较不依赖 RAF delta；迁移对照旧算法几何缓冲 golden |
 | 预览        | 视觉响应≤50ms、设置反馈≤100ms；约15分钟四重特征压力单帧<60ms，无可归因任务>50ms；旧 canonical 测量只绑定其候选                                                                                          |
 | 资源/故障   | 单 renderer/Canvas/视觉 RAF，20 次 route/元素/歌曲/导出生命周期不单调累积；context loss、stale/cancel、renderer 与数据错误保持可恢复                                                                    |
@@ -40,3 +40,11 @@ OS 原生保存/取消/覆盖、最终构图、辅助技术和长时操作需要
 Chrome/Edge 常规专项各 40 项通过、5 项按配置跳过，覆盖未注册算法与新参数的完整工程导入/GPU 像素、模块/Shader 错误保留原工程、opaque 隔离权限、死循环取消与 10 秒超时、分组、草稿独立恢复及原生历史离线导出。六份 720p30 VP9/48kHz 双声道 Opus 完整解码通过：两预设各浏览器各 90 帧，原生弦线各 360 帧，逐帧 PTS 与源时长检查通过；预设截图已查看。原始媒体及检查记录保留在忽略目录 `artifacts/visualizer-composition/`。
 
 生产构建及基于 preview 的 Chrome/Edge 六项回归通过，覆盖 catalog 初始化、分组恢复、商城不可用时的算法快照恢复及短导出；首次构建的 Windows 系统临时文件清理权限错误通过本次进程使用项目内临时目录解决，既有 Browserslist/大 chunk 提示保留。本轮不重跑完整四档矩阵、十五分钟或可选用户音乐评审，不将旧测量继承为本次性能/同步或正式 readiness 通过。
+
+## 三维场景验证
+
+三维场景按[场景契约](../../architecture/visualizer/scene3d.md)覆盖：共享只读 camera、反向绘制顺序/多 pass 的深度、mask 孔洞、场景深度隔离、关键帧循环与 seek、resize/释放、V5/V1 迁移、场景成员归属和预设引用重映射，以及实际视频与 file:// 壁纸运行包。旧二维图层与原资源算法保持回归，不据此扩张正式 readiness。
+
+2026-10-27：227 项领域测试、57 项工具测试、独立 skill 的 45 项 Brief 测试和 1 项封装测试通过；32 个外部资源校验通过，原有 258 个文件哈希未变。Chrome/Edge 回归覆盖编辑与恢复、资源目录、首页/展示页、共享深度和离线壁纸；生产 preview 的首页与预设/视频输出六项通过。两份 720p30 VP9/Opus 短视频完整解码通过，界面截图已核对。类型、生产构建、格式、文档和仓库检查通过。
+
+三维示例未在原生 Wallpaper Engine 宿主内验收；file:// 和模拟回调只证明离线运行包链路。Python 未安装，独立 quick_validate 未运行，已核对 skill 元数据、YAML、本地链接和文档规模。未重跑完整四档长曲、性能压力或正式 readiness。

@@ -64,15 +64,19 @@ export function inspectRealtimeContent(
     };
 }
 export function inspectRealtimeProject(project: VisualizerProjectV6): RealtimeCapabilities {
-    const result = inspectRealtimeContent(
-        effectiveElements(project).filter(e => e.enabled),
-        project.resources,
-        project.track.durationSeconds,
-    );
+    const active = effectiveElements(project).filter(e => e.enabled);
+    const result = inspectRealtimeContent(active, project.resources, project.track.durationSeconds);
     const scenes = project.items.flatMap(i =>
         i.kind === 'scene3d' ? [i] : i.kind === 'preset' ? (i.scenes3d ?? []) : [],
     );
-    if (scenes.some(s => s.enabled && (s.startSeconds !== 0 || s.endSeconds !== project.track.durationSeconds))) {
+    if (
+        scenes.some(
+            s =>
+                s.enabled &&
+                s.children.some(id => active.some(e => e.id === id)) &&
+                (s.startSeconds !== 0 || s.endSeconds !== project.track.durationSeconds),
+        )
+    ) {
         result.browser = result.wallpaper = false;
         result.browserIssues.push('三维场景需要覆盖完整歌曲。');
         result.wallpaperIssues.push('三维场景需要覆盖完整歌曲。');
@@ -80,8 +84,9 @@ export function inspectRealtimeProject(project: VisualizerProjectV6): RealtimeCa
     return result;
 }
 export function inspectRealtimePreset(preset: PresetDefinition): RealtimeCapabilities {
+    const disabled = new Set(preset.scenes3d?.filter(s => !s.enabled).flatMap(s => s.children));
     const elements = preset.elements
-        .filter(e => e.enabled)
+        .filter(e => e.enabled && !disabled.has(e.key))
         .map((e, layer) => ({
             ...e,
             id: e.key,
@@ -93,7 +98,7 @@ export function inspectRealtimePreset(preset: PresetDefinition): RealtimeCapabil
                     : { kind: 'unbound' as const },
         }));
     const definitions = elements.map(e => elementRegistry.get(e.resource));
-    return inspectRealtimeContent(
+    const result = inspectRealtimeContent(
         elements,
         {
             elements: definitions,
@@ -102,4 +107,17 @@ export function inspectRealtimePreset(preset: PresetDefinition): RealtimeCapabil
         },
         1,
     );
+    if (
+        preset.scenes3d?.some(
+            s =>
+                s.enabled &&
+                s.children.some(key => elements.some(e => e.key === key)) &&
+                (s.start !== 0 || s.end !== 1),
+        )
+    ) {
+        result.browser = result.wallpaper = false;
+        result.browserIssues.push('三维场景需要覆盖完整歌曲。');
+        result.wallpaperIssues.push('三维场景需要覆盖完整歌曲。');
+    }
+    return result;
 }

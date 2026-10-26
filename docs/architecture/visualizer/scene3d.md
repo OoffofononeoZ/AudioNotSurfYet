@@ -16,11 +16,15 @@ DEC-104：资源声明场景、工程保存实例、宿主统一执行。Project
 
 歌曲镜头使用绝对歌曲时间减场景起点；实时镜头从会话零时刻推进。轨迹保持独立秒数，不按歌曲长度缩放；循环取模，不循环则末帧停留。每帧只解析一次场景镜头，成员读取相同的只读 CameraFrame（含视图和投影矩阵）；Worker 内冻结镜头数据，不能通过修改共享输入影响其他元素。轨迹中途出现退化方向也明确失败，不回退固定镜头。
 
-## ABI 4 绘制
+## 编辑
 
 场景行可展开选择成员，属性区提供名称、起止时间、镜头位置/目标/up、裁剪范围与关键帧表。轨迹首末时间由时长固定，中间关键帧可添加或删除；改时长同比调整关键帧时间。成员属性提供模型变换及“所属三维场景”，只允许在同一预设或顶层内移入其他场景，也可新建独立场景；空场景删除。选中场景后添加世界元素直接加入该场景，原预设共同控件、二维列表和导出锁保持。
 
+## ABI 4 绘制
+
 算法继承 ABI 3 的输入、媒体、标记及 executionModes 能力，contract 必须为 visual 且 renderSpace:'world'。DrawPacket 使用 triangles，不提前投影或清零 z；单 mesh 保持 65,536 顶点容量和有限 Float32 缓冲限制。顶点 Shader 使用宿主的 projectionMatrix/modelViewMatrix。
+
+世界元素没有二维效果输入，不接受 source uniform；已声明的 media uniform 仍可用于纹理采样。
 
 世界 fragment 定义 `vec4 shade()` 返回直通 RGBA，不定义 main。程序必须声明 alphaMode:'opaque' 或 'mask'；mask 可声明 [0,1] 的 alphaCutoff，默认 0.5。宿主生成 main：裁剪模式先 discard 低 alpha 像素，存活像素输出 alpha=1；不透明模式不以 alpha 丢弃。材质开启深度测试及写入。首轮不支持半透明混合、阴影、PBR、模型加载或新的几何属性。
 

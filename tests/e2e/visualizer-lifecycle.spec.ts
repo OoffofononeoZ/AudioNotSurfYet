@@ -80,7 +80,7 @@ test('playlist switch asks before replacing a draft; cancellation preserves song
     await expect(page.getByTestId('playback-mode')).toHaveAttribute('aria-label', /随机/);
 });
 
-test('old drafts are ignored without prompting and replaced by a V5 draft', async ({ page }) => {
+test('old drafts are ignored without prompting and replaced by a V6 draft', async ({ page }) => {
     await setup(page);
     await page.evaluate(async () => {
         const db = await new Promise<IDBDatabase>((resolve, reject) => {
@@ -98,7 +98,7 @@ test('old drafts are ignored without prompting and replaced by a V5 draft', asyn
     });
     await enter(page);
     await expect(page.getByTestId('visualizer-unsupported-draft')).toHaveCount(0);
-    await expect.poll(async () => (await draft(page))?.schemaVersion).toBe(5);
+    await expect.poll(async () => (await draft(page))?.schemaVersion).toBe(6);
     expect((await draft(page)).project.items).toEqual([]);
 });
 

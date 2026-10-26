@@ -156,7 +156,7 @@ test('shared scene depth handles reversed submission, multiple passes, cutout an
     for (const mode of ['mask', 'separate']) expect(result[mode]).toEqual([0, 0, 255, 255]);
 });
 
-test('camera pose and GPU result are deterministic after arbitrary seeks and resizing', async ({ page }) => {
+test('camera pose and diagnostic state are deterministic after seeks and aspect changes', async ({ page }) => {
     await page.goto('/');
     const result = await page.evaluate(async () => {
         const fixturePath = '/tests/support/scene3d-fixture.ts',
@@ -197,14 +197,18 @@ test('camera pose and GPU result are deterministic after arbitrary seeks and res
                 await scene.prepare(input);
                 frames.push(scene.render(input).hash);
             }
-            scene.resize(640, 360, 1);
+            scene.resize(640, 480, 1);
             const input = { elementSeeds: new Map(), timeSeconds: 4, values: new Map(), bindingRevision: 0 };
             await scene.prepare(input);
-            scene.render(input);
+            const resized = scene.render(input).hash;
+            const pose = (c: any) => ({ ...c, projectionMatrix: undefined });
             return {
                 samePose: captured.every(c => JSON.stringify(c[0]) === JSON.stringify(c[1])),
                 seekSame: frames[0] === frames[3],
-                resizePose: JSON.stringify(captured[0]) === JSON.stringify(captured[4]),
+                resizePose: JSON.stringify(captured[0].map(pose)) === JSON.stringify(captured[4].map(pose)),
+                resizeHash: resized === frames[0],
+                aspectChanged:
+                    JSON.stringify(captured[0][0].projectionMatrix) !== JSON.stringify(captured[4][0].projectionMatrix),
             };
         } finally {
             scene.dispose();
@@ -212,5 +216,5 @@ test('camera pose and GPU result are deterministic after arbitrary seeks and res
             renderer.forceContextLoss();
         }
     });
-    expect(result).toEqual({ samePose: true, seekSame: true, resizePose: true });
+    expect(result).toEqual({ samePose: true, seekSame: true, resizePose: true, resizeHash: true, aspectChanged: true });
 });

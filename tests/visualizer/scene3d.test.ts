@@ -18,6 +18,8 @@ import { moveWorldElement, updateScene3d } from '../../src/visualizer/scene3dAct
 import { preparePresetExport } from '../../src/visualizer/presetExport';
 import { instantiatePreset } from '../../src/visualizer/compositionPresets';
 import { elementRegistry } from '../../src/visualizer/elementRegistry';
+import { inspectRealtimeProject, inspectRealtimePreset } from '../../src/visualizer/realtimeCapabilities';
+import { appendStandaloneElements } from '../../src/visualizer/compositionModel';
 
 test('camera tracks use independent seconds, interpolation, looping and last-frame hold', () => {
     const c = validateSceneCamera({
@@ -51,26 +53,18 @@ test('V6 world geometry, camera and transforms survive independent project and r
     expect(sceneGroups(realtimeRenderModel(style))[0]!.camera).toEqual(sceneGroups(p)[0]!.camera);
 });
 test('explicit V5 and V1 migrations preserve the complete original resource snapshot', () => {
-    const p = scene3dFixture();
-    p.elements = [];
-    p.items = [];
-    p.resources = { algorithms: [], elements: [], presets: [] };
+    const p = appendStandaloneElements(
+        { ...scene3dFixture(), elements: [], items: [], resources: { algorithms: [], elements: [], presets: [] } },
+        [elementRegistry.create('radial-spectrum', 20, 0)],
+    );
     const old = { ...p, schemaVersion: 5 };
     expect(validateComposition(old)).toEqual(p);
     expect(old.schemaVersion).toBe(5);
     expect(validateCompositionDraft({ schemaVersion: 5, savedAt: p.createdAt, project: old }).schemaVersion).toBe(6);
-    const style = {
-        format: 'audiosurf-realtime-style',
-        schemaVersion: 1,
-        id: p.projectId,
-        name: '旧样式',
-        createdAt: p.createdAt,
-        frameRate: 30,
-        elements: [],
-        resources: p.resources,
-    };
-    // Empty styles are rejected by their original content capability boundary as well.
-    expect(() => validateRealtimeStyle(style)).toThrow('视觉元素');
+    const current = createRealtimeStyle(p, '旧样式');
+    const style = { ...current, schemaVersion: 1 };
+    expect(validateRealtimeStyle(style)).toEqual(current);
+    expect(validateRealtimeStyle(style).resources).toEqual(p.resources);
     expect(style.schemaVersion).toBe(1);
 });
 test('world ownership rejects missing, duplicate and screen-space membership', () => {
@@ -104,9 +98,54 @@ test('ABI 4 requires world geometry and owns opaque/cutout output semantics', ()
     expect(validateAlgorithmDefinition(a).programs.mesh!.alphaCutoff).toBe(0.4);
     expect(worldFragment(a.programs.mesh!)).toContain('discard');
     expect(worldFragment(a.programs.mesh!)).toContain('vec4(color.rgb, 1.0)');
+    const source = structuredClone(a);
+    source.programs.mesh!.uniforms.input = { type: 'source' };
+    source.hash = resourceHash(source);
+    expect(() => validateAlgorithmDefinition(source)).toThrow('二维效果输入');
     a.programs.mesh!.geometry = 'quad';
     a.hash = resourceHash(a);
     expect(() => validateAlgorithmDefinition(a)).toThrow();
+});
+
+test('realtime conversion excludes hidden scene targets and classifies partial preset scenes', () => {
+    let p = scene3dFixture();
+    const scene = sceneGroups(p)[0]!;
+    const screen = elementRegistry.create('radial-spectrum', 20, 2);
+    const effect = elementRegistry.create('blur', 20, 3);
+    effect.targets = { kind: 'scenes3d', ids: [scene.id] };
+    p = appendStandaloneElements(p, [screen, effect]);
+    sceneGroups(p)[0]!.enabled = false;
+    sceneGroups(p)[0]!.endSeconds = 10;
+    expect(inspectRealtimeProject(p).browser).toBe(true);
+    const style = createRealtimeStyle(p, '隐藏场景');
+    expect(style.scenes3d).toBeUndefined();
+    expect(style.elements.find(e => e.id === effect.id)!.targets).toEqual({ kind: 'scenes3d', ids: [] });
+    p = updateScene3d(p, scene.id, { enabled: true, endSeconds: 20 });
+    const exported = preparePresetExport(
+        p,
+        { title: '时段', description: '场景范围', creator: 'default' },
+        new Blob(['image'], { type: 'image/png' }),
+    );
+    const preset = exported.package.presets[0]!;
+    preset.scenes3d![0]!.enabled = false;
+    preset.scenes3d![0]!.end = 0.5;
+    const previous = {
+        algorithms: [...elementRegistry.algorithms],
+        elements: [...elementRegistry.list()],
+        presets: [...elementRegistry.presets],
+    };
+    try {
+        elementRegistry.replace({ ...p.resources, presets: [preset] });
+        expect(inspectRealtimePreset(preset).browser).toBe(true);
+        preset.scenes3d![0]!.enabled = true;
+        expect(inspectRealtimePreset(preset).browserIssues).toContain('三维场景需要覆盖完整歌曲。');
+        const instance = instantiatePreset(preset.id, 20);
+        const hidden = { ...p, elements: instance.elements, items: [{ ...instance.group, enabled: false }] };
+        const withScreen = appendStandaloneElements(hidden, [screen]);
+        expect(inspectRealtimeProject(withScreen).browser).toBe(true);
+    } finally {
+        elementRegistry.replace(previous);
+    }
 });
 
 test('moving a world member preserves transforms and independent cameras; exported presets remap scenes', () => {

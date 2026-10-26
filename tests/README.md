@@ -56,7 +56,7 @@ Node24.22.1/npm11.x，依赖版本以lockfile为准；浏览器专项使用真�
 | `npm run test:e6:integration`                           | 10,000 事件 JSON 与 IndexedDB round-trip、重叠工程原子拒绝和 durable draft 保留                                                                                   |
 | `npm run test:docs`                                     | 只读检查 Markdown 内部链接与规模；手写文档 >500 行提示、≥800 行失败，不强制生命周期元数据                                                                         |
 | `npm run test:harness`                                  | 证明 deliberate failure 会非零退出                                                                                                                                |
-| `npm run test:skill:visualizer-content-generator` | 转调外部 skill 的 Brief V2 与封装测试；生成默认自主执行，正常交付附实际展示图 |
+| `npm run test:skill:visualizer-content-generator`       | 转调外部 skill 的 Brief V2 与封装测试；生成默认自主执行，正常交付附实际展示图                                                                                     |
 | `npm run test:e2e`                                      | 稳定 Chrome 的全部当前 E2E                                                                                                                                        |
 | `npm run test:e2e:m3`                                   | M3 应用、Worker、IndexedDB 和三格式 smoke                                                                                                                         |
 | `npm run test:e2e:m4`                                   | M4 播放/队列/错误/资源回归及 60 秒计时                                                                                                                            |
@@ -225,7 +225,7 @@ Node24.22.1/npm11.x，依赖版本以lockfile为准；浏览器专项使用真�
 
 ## 外部 Visualizer 资源
 
-资源专项从默认 `C:\Users\Ryan\Desktop\WheresYourElements\assets` 读取，使用 `$env:VISUALIZER_ASSETS_DIR = "<assets>"` 覆盖。`npm run visualizer:resources:check` 校验 17 个资源的源码封装与哈希；`npm run test:visualizer` 运行领域测试。缺少库时 Vitest 仅排除依赖资源的专项并明确提示，其他领域和纯逻辑测试照常运行。
+资源专项从默认 `C:\Users\Ryan\Desktop\WheresYourElements\assets` 读取，使用 `$env:VISUALIZER_ASSETS_DIR = "<assets>"` 覆盖。`npm run visualizer:resources:check` 校验当前外部资源集合的源码封装与哈希；`npm run test:visualizer` 运行领域测试。缺少库时 Vitest 仅排除依赖资源的专项并明确提示，其他领域和纯逻辑测试照常运行。
 
 `tests/visualizer/editor-markers.test.ts` 使用独立夹具验证 ABI 2 声明/查询与 V5 标记绑定，不依赖外部库。`tests/e2e/visualizer-editor-markers.spec.ts` 验证真实 Worker 权限、项目内选择/分类、恢复与短离线导出；配合 composition/sandbox 专项在 Chrome/Edge 执行。
 
@@ -233,9 +233,10 @@ Node24.22.1/npm11.x，依赖版本以lockfile为准；浏览器专项使用真�
 
 `npx playwright test tests/e2e/visualizer-resource-directory.spec.ts tests/e2e/visualizer-resource-preview.spec.ts tests/e2e/visualizer-resources.spec.ts --project=chrome --project=edge --workers=1` 覆盖目录/预览/恢复、损坏刷新与 V5 独立恢复及短离线输出。SVG 专项核对嵌套路径、自动发现、渐变/滤镜/文字的实际像素、外部库元素/预设封面及脚本/外部引用拒绝。测试用真实 OPFS 句柄和 IndexedDB structured clone，picker/许可为替身；它不证明原生 OS 文件夹选择和磁盘授权 UI。原生人工检查需实际选择 assets、拒绝/恢复访问、关闭重开浏览器，并检查外部文件未被应用改写。
 
-
 内容生成 skill 与专属测试仅在外部 `WheresYourElements/skill/visualizer-content-generator/` 维护。`VISUALIZER_SKILL_DIR` 可覆盖位置；上述 skill 测试及 `visualizer:resources` 命令按需加载外部脚本，缺失时明确报错，不阻断无关测试或普通应用构建。先在外部 skill 目录按其 lockfile 安装测试依赖，项目不保留 skill 副本。
 
 ## Circular Visualizer 媒体专项
 
 运行 `npx playwright test tests/e2e/visualizer-circular.spec.ts --project=chrome --project=edge --workers=1`，覆盖独立元素、原版响应平滑、媒体导入和轮播、JSON／实时样式、四档离线视频及 file:// 壁纸。受控 PNG/WebP/JPEG、VP9 WebM 与 H.264 MP4 位于 tests/fixtures/visualizer-media；不含用户素材。输出保存在忽略的 artifacts/visualizer-composition/circular。单元测试见 media-contract.test.ts。外部 codec 用 visualizer:skill-codec:check 核对。
+
+三维专项：`npx vitest run tests/visualizer/scene3d.test.ts`；`npx playwright test tests/e2e/visualizer-scene3d.spec.ts tests/e2e/visualizer-scene3d-editor.spec.ts tests/e2e/visualizer-scene3d-output.spec.ts --project=chrome --project=edge --workers=1`。覆盖 GPU 深度/裁剪、共享输入只读、关键帧与成员编辑、快照恢复、外部 ABI 4 示例和短视频。`visualizer-wallpaper.spec.ts` 同时验证原频谱和共享镜头示例的生产离线运行包。

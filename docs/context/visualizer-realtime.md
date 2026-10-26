@@ -12,13 +12,13 @@ AudioEngine 按租约创建静音分析旁路，复用唯一 AudioContext。Audi
 
 ## 渲染边界
 
-共享 CompositionRenderModel 不要求歌曲身份。实时模式向算法提供会话秒、当前参数和 `range:null`，拒绝历史和标记查询；V5、资源包 V2、ABI 1/2 的旧行为保持，ABI 3 增加显式模式和媒体元数据。RendererHost 的 animate 可独立于播放状态控制连续动画，仍只有单 Canvas、renderer 和视觉 RAF。
+共享 CompositionRenderModel 不要求歌曲身份。实时模式向算法提供会话秒、当前参数和 `range:null`，拒绝历史和标记查询；V6、资源包 V2、ABI 1/2 的屏幕空间行为保持，ABI 3 增加显式模式和媒体元数据。RendererHost 的 animate 可独立于播放状态控制连续动画，仍只有单 Canvas、renderer 和视觉 RAF。
 
 验证覆盖因果提取/块边界、WE 对照、分类和原渲染/分析邻接回归；后续界面与壁纸验收按实际交付记录，不构成整体 readiness。
 
 ## 本地样式与展示
 
-`RealtimeStyleV1` 使用独立 `audiosurf-realtime-style` / schemaVersion 1，保存有效元素、参数、图层、效果、帧率与算法快照，另可内嵌媒体素材和实例绑定；不含歌曲、分镜、标记或预设作者控件。仅支持 Seed 的元素保存自身 seed，不保存顶层 seed。恢复纯校验资源身份、绑定和引用；保存前另在隔离运行时验证零时刻帧，随后在独立 IndexedDB 中以 add 写入不可变 ID。已生成地址不随原工程编辑而改变。
+`RealtimeStyleV2` 使用独立 `audiosurf-realtime-style` / schemaVersion 2，保存有效元素、参数、图层、效果、帧率与算法快照，另可内嵌媒体素材和实例绑定；不含歌曲、分镜、标记或预设作者控件。仅支持 Seed 的元素保存自身 seed，不保存顶层 seed。恢复纯校验资源身份、绑定和引用；保存前另在隔离运行时验证零时刻帧，随后在独立 IndexedDB 中以 add 写入不可变 ID。已生成地址不随原工程编辑而改变。
 
 DEC-097 替代 DEC-092 的全局 Seed：元素 seed 接受 uint32 或 null，版本号保留。空值原样进入首页/展示页快照和壁纸文件；每次创建会话按元素独立随机，尺寸变化、暂停和重试沿用当次值。校验阶段使用临时种子，不固定保存效果。旧顶层 Seed 按 V5 相同规则显式迁移，样式保留原 ID 原子写回，失败不覆盖原文。已导出的壁纸目录不自动改写。算法 ABI 仍接收数字，未声明元素传 0；算法源码和 Shader 不变。
 
@@ -43,3 +43,7 @@ Visualizer“实时样式”提供名称、应用到首页和生成展示地址�
 ## ABI 3 媒体扩展
 
 2026-10-22 的 Circular Visualizer 计划增加受控媒体输入和显式执行模式，保留现有格式版本与旧资源身份；新增媒体链路及 ABI 3 的实时因果分支见[媒体输入](visualizer-media.md)。原有仅 ABI 1/2 或无媒体内容的约束继续适用其原范围。
+
+## 三维场景
+
+RealtimeStyle V2 保存场景成员、camera 及轨迹，V1 输入显式迁移且保留原算法快照。共享镜头按会话秒推进，首页、展示页和壁纸使用同一渲染链；仅覆盖整曲的有效场景可转换。规则见[三维场景](../architecture/visualizer/scene3d.md)。

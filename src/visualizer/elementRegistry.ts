@@ -4,6 +4,7 @@ import type { ElementDefinition, PresetDefinition, ResourceRef, ResourceSnapshot
 import { resourceKey, resourceRef, sameResource } from './resourceIdentity';
 import { defaultMediaBindings } from './mediaCodec';
 import { defaultMarkerBindings } from './editorMarkerValidation';
+import { defaultTransform3d } from './scene3dTypes';
 
 export type ElementDescriptor = ElementDefinition;
 export function findResource<T extends ResourceRef>(entries: readonly T[], id: string | ResourceRef): T {
@@ -41,6 +42,7 @@ export function createDefinitionElement(
         })) as VisualizerElement['bindings'],
         ...(markerBindings ? { markerBindings } : {}),
         ...(d.mediaInputs ? { mediaBindings: defaultMediaBindings(d.mediaInputs) } : {}),
+        ...(d.scene3dDefaults ? { transform3d: defaultTransform3d() } : {}),
         ...(d.kind === 'visual' ? {} : { targets: { kind: 'composition' as const } }),
     };
 }

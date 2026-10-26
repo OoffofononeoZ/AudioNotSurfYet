@@ -35,7 +35,9 @@ test('first selection is explicit, cancellation keeps it empty, all external pre
         .locator('[data-resource-id]')
         .evaluateAll(nodes => nodes.map(n => n.getAttribute('data-resource-id')!));
     await page.getByRole('button', { name: '预设', exact: true }).click();
-    await expect(page.locator('[data-preset-id]')).toHaveCount(2);
+    await expect(page.locator('[data-preset-id]')).toHaveCount(
+        resourceRows().filter(row => row.info.kind === 'preset').length,
+    );
     expect(
         await page
             .locator('[data-preset-id] img')

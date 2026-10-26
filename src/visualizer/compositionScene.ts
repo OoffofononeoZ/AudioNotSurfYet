@@ -353,11 +353,7 @@ export class CompositionScene implements VisualizerScene {
                     for (const effect of effectsFor(project, scene.id, input.timeSeconds, true))
                         if (this.packets.has(effect.id)) image = this.drawElement(project, effect, image)!;
                     this.copy(image, this.accumulation, true);
-                    hashes.push(
-                        JSON.stringify(scene.camera),
-                        JSON.stringify(this.cameras.get(scene.id)),
-                        ...visible.map(e => JSON.stringify(e.transform3d)),
-                    );
+                    hashes.push(JSON.stringify(scene.camera), ...visible.map(e => JSON.stringify(e.transform3d)));
                     continue;
                 }
                 const e = effective.find(e => e.id === unit.id)!;

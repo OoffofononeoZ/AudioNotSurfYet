@@ -55,6 +55,15 @@ export function createRealtimeStyle(project: VisualizerProjectV6, name: string):
     if (!capability.browser) throw Error(capability.browserIssues.join('\n'));
     const active = effectiveElements(project).filter(e => e.enabled);
     const ids = new Set(active.map(e => e.id));
+    const scenes3d = sceneGroups(project)
+        .filter(s => s.enabled)
+        .flatMap(s => {
+            const children = s.children.filter(id => ids.has(id));
+            return children.length
+                ? [{ ...structuredClone(s), children, startSeconds: 0, endSeconds: Number.MAX_SAFE_INTEGER }]
+                : [];
+        });
+    const sceneIds = new Set(scenes3d.map(s => s.id));
     const used = new Set(active.map(e => resourceKey(e.resource)));
     const elements = project.resources.elements.filter(e => used.has(resourceKey(e)));
     const algorithms = new Set(elements.map(e => resourceKey(e.algorithm)));
@@ -71,16 +80,11 @@ export function createRealtimeStyle(project: VisualizerProjectV6, name: string):
             layer,
             ...(e.targets?.kind === 'elements'
                 ? { targets: { kind: 'elements', ids: e.targets.ids.filter(id => ids.has(id)) } }
-                : {}),
+                : e.targets?.kind === 'scenes3d'
+                  ? { targets: { kind: 'scenes3d', ids: e.targets.ids.filter(id => sceneIds.has(id)) } }
+                  : {}),
         })),
-        scenes3d: sceneGroups(project)
-            .filter(s => s.enabled)
-            .flatMap(s => {
-                const children = s.children.filter(id => ids.has(id));
-                return children.length
-                    ? [{ ...structuredClone(s), children, startSeconds: 0, endSeconds: Number.MAX_SAFE_INTEGER }]
-                    : [];
-            }),
+        ...(scenes3d.length ? { scenes3d } : {}),
         resources: {
             algorithms: project.resources.algorithms.filter(a => algorithms.has(resourceKey(a))),
             elements,

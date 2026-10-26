@@ -1,14 +1,14 @@
 # Visualizer 组合工作区
 
-核查日期：2026-10-20。当前[Project V5](../architecture/visualizer/project-format-v5.md)和[可执行资源包V2](../architecture/visualizer/resource-packages-v2.md)管理元素、算法/Shader、分组预设及共同处理参数，接口见[页面契约](../architecture/visualizer/interface-contracts.md)。
+核查日期：2026-10-27。当前[Project V6](../architecture/visualizer/project-format-v5.md)和[可执行资源包V2](../architecture/visualizer/resource-packages-v2.md)管理元素、算法/Shader、分组预设及共同处理参数，接口见[页面契约](../architecture/visualizer/interface-contracts.md)。
 
 ## 当前布局与模型
 
 - 普通页保留MusicBar；顶部工程/Settings，左侧资源与元素/组列表，右侧选择属性，中央零padding视频，底栏输出/Editor/状态。可用宽度决定三栏或互斥抽屉，页面保持单100dvh与独立滚动。
 - 预设为默认折叠顶层组，顶层移动整组、组内排序；共同处理参数批量写入且提示差异，不提供全局数字layer编辑。既有算法及预设见[预设说明](visualizer-presets.md)，新增内容按外部skill自主生成，正常交付附实际展示图。
-- 效果引用视觉元素或整体，不引用其他效果；显式同歌单range转场保持终值，由后开始转场接管。单renderer/Canvas/视觉RAF、三个复用targets、绝对歌曲时间和四Analyzer特征边界保持。
-- ABI 2 元素可声明点/范围输入，属性区选择轨道、分类和单个事件或集合；绑定只写当前 V5 工程。集合查询按窗口分页，合法空集合可运行；缺失引用拒绝快照替换，启用但未绑定阻止导出。淡入淡出现使用单范围标记接口，插值、终值及重叠接管保持，旧工程仍使用自身算法快照。
-- 只接受V5文件；旧草稿不提示、不迁移。损坏/异歌V5草稿、保存失败和换歌取消按当前草稿保护。商城只读加载用户选择的 assets 文件夹，提供选择/恢复访问/重新加载；未连接库时列表使用通用标记；工程导入验证期间锁定编辑并标记忙碌，验证成功后原子替换。
+- 效果引用视觉元素或整体，不引用其他效果；显式同歌单range转场保持终值，由后开始转场接管。单renderer/Canvas/视觉RAF、二维合成的三个复用targets及三维场景的共享深度target、绝对歌曲时间和四Analyzer特征边界保持。
+- ABI 2 元素可声明点/范围输入，属性区选择轨道、分类和单个事件或集合；绑定只写当前 V6 工程。集合查询按窗口分页，合法空集合可运行；缺失引用拒绝快照替换，启用但未绑定阻止导出。淡入淡出现使用单范围标记接口，插值、终值及重叠接管保持，旧工程仍使用自身算法快照。
+- 当前保存V6文件；V5文件/草稿显式迁移，V1–V4草稿仍不提示、不迁移。损坏/异歌V5/V6草稿、保存失败和换歌取消按当前草稿保护。商城只读加载用户选择的 assets 文件夹，提供选择/恢复访问/重新加载；未连接库时列表使用通用标记；工程导入验证期间锁定编辑并标记忙碌，验证成功后原子替换。
 - 全屏只显示同一画面、图标控制/时间/进度，无MusicBar；视频导出与全屏互斥。输出采用[离线导出](visualizer-offline-export.md)，不恢复旧实时capture链。
 
 ## 界面控件
@@ -51,7 +51,7 @@ MusicBar 右侧由 MusicBarActions/MusicBarIcon 展示，六个按钮统一 32px
 
 Buffer 的 compact payload 只保存时间桶的最小/最大值，不能作为完整波形向量。当前从已有 AudioEngine 的 decoded copy port 按绝对歌曲时间读取 1024 点帧，沿用 Analyzer 的 512 hop、average-mono、Hanning 窗和尾部补零；不插值两个波形帧，不新增音频上下文或逐帧 Worker 请求。最多缓存 16 帧，按曲目与 decoded revision 隔离，离页/释放租约时清理；缺少完整波形时明确报错，不退回包络。Inspector 和工程校验的 Buffer Bin/范围上限同步为 1024 点。
 
-完整向量未配置显式数值变换时，先适配为视觉强度，再交给隔离算法：Buffer 取绝对值、Chroma 使用非负值，二者的单位幅度换算到既有 128 参考；Power Spectrum 开平方还原振幅；MFCC 取绝对值，避免负系数被直接截成零。Amplitude Spectrum、Loudness specific、Complex magnitude 保留既有参考和维度。标量及 mean/max/peak/bin/band 投影保留原始单位和符号，继续由数值映射控制；Complex phase 的时间插值沿圆周最短路径跨越 ±π。当前V5 strict字段和Analyzer缓存格式以现行契约为准，不使用旧Buffer两端点策略。
+完整向量未配置显式数值变换时，先适配为视觉强度，再交给隔离算法：Buffer 取绝对值、Chroma 使用非负值，二者的单位幅度换算到既有 128 参考；Power Spectrum 开平方还原振幅；MFCC 取绝对值，避免负系数被直接截成零。Amplitude Spectrum、Loudness specific、Complex magnitude 保留既有参考和维度。标量及 mean/max/peak/bin/band 投影保留原始单位和符号，继续由数值映射控制；Complex phase 的时间插值沿圆周最短路径跨越 ±π。当前V6 strict字段和Analyzer缓存格式以现行契约为准，不使用旧Buffer两端点策略。
 
 ## 播放策略
 
@@ -64,3 +64,7 @@ Buffer 的 compact payload 只保存时间桶的最小/最大值，不能作为�
 按[当前验证](../quality/visualizer/validation.md)选择资源/分组、codec/binding、确定性、几何、资源清理及实际短媒体专项，不执行旧五阶段流水线。
 
 原文2026-10-19的V4功能记录为Visualizer/内容skill136项、工具41项、Chrome/Edge各36场景通过；两预设四份720p30 VP9/48kHz双声道Opus经FFprobe/FFmpeg解码，桌面/1024×720截图已核对。可选用户音乐、完整四档/长曲未运行，Python未安装而quick_validate未跑，项目元数据/Brief CLI已通过。此为既有功能反馈，本次文档整理不重跑或升级为canonical/readiness。旧逐阶段记录由Git查回，本地artifacts/visualizer-composition保留原身份。
+
+## 三维组合
+
+世界元素通过独立场景或预设内场景参与合成；场景行编辑共享镜头与关键帧，成员编辑模型变换和归属。完整保存、时间与深度规则见[三维场景](../architecture/visualizer/scene3d.md)。
