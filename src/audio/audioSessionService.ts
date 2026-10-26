@@ -37,7 +37,6 @@ export interface TrackNavigation {
 }
 
 export interface ExportTransportLease {
-    pause(): void;
     release(): void;
 }
 
@@ -662,21 +661,18 @@ export class AudioSessionService {
     }
 
     pause(): void {
-        if (this.exportTransportToken) return;
         if (this.disposed) return;
         ++this.transportRevision;
         this.engine.pause();
     }
 
     async play(): Promise<void> {
-        if (this.exportTransportToken) return;
         if (this.disposed) return;
         ++this.transportRevision;
         await this.engine.play();
     }
 
     async togglePlayback(): Promise<void> {
-        if (this.exportTransportToken) return;
         if (this.disposed || this.store.queue.length === 0) return;
         ++this.transportRevision;
 
@@ -714,11 +710,11 @@ export class AudioSessionService {
     }
 
     private async advance(delta: -1 | 1): Promise<void> {
-        if (this.exportTransportToken) return;
         if (this.playbackPolicy.state.effectiveMode === 'repeat-one') {
             await this.restartCurrent();
             return;
         }
+        if (this.exportTransportToken) return;
         const target = this.playbackPolicy.target(
             this.store.queue.map(track => track.id),
             this.store.currentTrackId,
@@ -728,21 +724,16 @@ export class AudioSessionService {
     }
 
     private async restartCurrent(): Promise<void> {
-        if (this.exportTransportToken || !this.store.currentTrackId) return;
+        if (this.disposed || !this.store.currentTrackId) return;
         this.notifyPlaybackDiscontinuity();
         const trackId = this.store.currentTrackId;
         const revision = ++this.transportRevision;
         await this.engine.seek(0);
-        if (
-            this.disposed ||
-            this.exportTransportToken ||
-            revision !== this.transportRevision ||
-            this.store.currentTrackId !== trackId
-        )
-            return;
+        if (this.disposed || revision !== this.transportRevision || this.store.currentTrackId !== trackId) return;
         await this.engine.play();
     }
 
+    /** Protects the decoded source and queue while same-track playback remains available. */
     acquireExportTransport(trackId: string): ExportTransportLease {
         if (this.exportTransportToken || this.pendingQueueCommands > 0 || this.store.currentTrackId !== trackId) {
             throw new AudioTransportError('transport-busy', '播放命令已锁定或歌曲身份失效。');
@@ -750,26 +741,18 @@ export class AudioSessionService {
         const token = Symbol('export-transport');
         this.exportTransportToken = token;
         this.playbackPolicy.state.exportLocked = true;
-        ++this.transportRevision;
         ++this.commandGeneration;
         ++this.importGeneration;
-        const valid = () =>
-            !this.disposed && this.exportTransportToken === token && this.store.currentTrackId === trackId;
         return {
-            pause: () => {
-                if (valid()) this.engine.pause();
-            },
             release: () => {
                 if (this.exportTransportToken !== token) return;
                 this.exportTransportToken = null;
                 this.playbackPolicy.state.exportLocked = false;
-                ++this.transportRevision;
             },
         };
     }
 
     async seek(seconds: number): Promise<void> {
-        if (this.exportTransportToken) return;
         if (this.disposed) return;
         this.notifyPlaybackDiscontinuity();
         ++this.transportRevision;
@@ -834,7 +817,7 @@ export class AudioSessionService {
 
     async setPlaybackRate(rate: number): Promise<void> {
         assertPlaybackRate(rate);
-        if (this.disposed || this.exportTransportToken || rate === this.engine.getSnapshot().playbackRate) return;
+        if (this.disposed || rate === this.engine.getSnapshot().playbackRate) return;
         this.notifyPlaybackDiscontinuity();
         ++this.transportRevision;
         await this.engine.setPlaybackRate(rate);
@@ -1387,7 +1370,7 @@ export class AudioSessionService {
 
         this.stopFrameLoop();
         this.store.setEnergy(0);
-        if (justEnded && this.store.queue.length > 0 && !this.exportTransportToken) {
+        if (justEnded && this.store.queue.length > 0) {
             const lease = this.activeRoutePlayback;
             if (lease && snapshot.trackId === lease.trackId) {
                 if (lease.endedPolicy === 'repeat-one') {

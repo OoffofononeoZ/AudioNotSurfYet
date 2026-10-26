@@ -8,6 +8,7 @@
 
 | 文件 | 本地静态引用（最多显示 6 项） |
 | --- | --- |
+| [tests/e2e/visualizer-export-playback.spec.ts](../../tests/e2e/visualizer-export-playback.spec.ts) | [src/visualizer/compositionModel.ts](../../src/visualizer/compositionModel.ts)、[src/visualizer/compositionTypes.ts](../../src/visualizer/compositionTypes.ts)、[src/visualizer/elementRegistry.ts](../../src/visualizer/elementRegistry.ts)、[src/visualizer/exportPresets.ts](../../src/visualizer/exportPresets.ts)、[src/visualizer/visualizerExportSession.ts](../../src/visualizer/visualizerExportSession.ts)、[src/visualizer/visualizerSessionController.ts](../../src/visualizer/visualizerSessionController.ts)、另 3 项，按需核对源码 |
 | [tests/e2e/visualizer-layout-scroll.spec.ts](../../tests/e2e/visualizer-layout-scroll.spec.ts) | [tests/support/file-picker.ts](../../tests/support/file-picker.ts) |
 | [tests/e2e/visualizer-lifecycle.spec.ts](../../tests/e2e/visualizer-lifecycle.spec.ts) | [tests/support/file-picker.ts](../../tests/support/file-picker.ts)、[tests/support/v6-resource-probe.ts](../../tests/support/v6-resource-probe.ts) |
 | [tests/e2e/visualizer-offline-core.spec.ts](../../tests/e2e/visualizer-offline-core.spec.ts) | — |
@@ -107,4 +108,3 @@
 | [tests/scripts/run-editor-readiness-eval.mjs](../../tests/scripts/run-editor-readiness-eval.mjs) | — |
 | [tests/scripts/run-m10-eval.mjs](../../tests/scripts/run-m10-eval.mjs) | — |
 | [tests/scripts/run-m11-eval.mjs](../../tests/scripts/run-m11-eval.mjs) | — |
-| [tests/scripts/run-m12-eval.mjs](../../tests/scripts/run-m12-eval.mjs) | — |

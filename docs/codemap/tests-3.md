@@ -8,6 +8,7 @@
 
 | 文件 | 本地静态引用（最多显示 6 项） |
 | --- | --- |
+| [tests/scripts/run-m12-eval.mjs](../../tests/scripts/run-m12-eval.mjs) | — |
 | [tests/scripts/run-m13-eval.mjs](../../tests/scripts/run-m13-eval.mjs) | — |
 | [tests/scripts/run-m14-eval.mjs](../../tests/scripts/run-m14-eval.mjs) | — |
 | [tests/scripts/run-m3-eval.mjs](../../tests/scripts/run-m3-eval.mjs) | — |
@@ -107,4 +108,3 @@
 | [tests/visualizer/offline-export-core.test.ts](../../tests/visualizer/offline-export-core.test.ts) | [src/visualizer/exportPresets.ts](../../src/visualizer/exportPresets.ts)、[src/visualizer/offlineExportAudio.ts](../../src/visualizer/offlineExportAudio.ts)、[src/visualizer/offlineExportTimeline.ts](../../src/visualizer/offlineExportTimeline.ts) |
 | [tests/visualizer/point-lines.test.ts](../../tests/visualizer/point-lines.test.ts) | [src/editor/projectCodec.ts](../../src/editor/projectCodec.ts)、[src/visualizer/algorithmTypes.ts](../../src/visualizer/algorithmTypes.ts)、[src/visualizer/compositionCodec.ts](../../src/visualizer/compositionCodec.ts)、[src/visualizer/drawPacket.ts](../../src/visualizer/drawPacket.ts)、[src/visualizer/editorMarkerReader.ts](../../src/visualizer/editorMarkerReader.ts)、[src/visualizer/elementRegistry.ts](../../src/visualizer/elementRegistry.ts)、另 2 项，按需核对源码 |
 | [tests/visualizer/preset-export.test.ts](../../tests/visualizer/preset-export.test.ts) | [src/processing/sha256.ts](../../src/processing/sha256.ts)、[src/visualizer/compositionCodec.ts](../../src/visualizer/compositionCodec.ts)、[src/visualizer/compositionModel.ts](../../src/visualizer/compositionModel.ts)、[src/visualizer/compositionPresets.ts](../../src/visualizer/compositionPresets.ts)、[src/visualizer/elementRegistry.ts](../../src/visualizer/elementRegistry.ts)、[src/visualizer/presetDirectoryWriter.ts](../../src/visualizer/presetDirectoryWriter.ts)、另 4 项，按需核对源码 |
-| [tests/visualizer/radial-spectrum.test.ts](../../tests/visualizer/radial-spectrum.test.ts) | [src/visualizer/compositionEffects.ts](../../src/visualizer/compositionEffects.ts)、[src/visualizer/compositionPresets.ts](../../src/visualizer/compositionPresets.ts)、[src/visualizer/elementRegistry.ts](../../src/visualizer/elementRegistry.ts)、[src/visualizer/rendererTypes.ts](../../src/visualizer/rendererTypes.ts)、[tests/support/visualizer-assets.mjs](../../tests/support/visualizer-assets.mjs) |

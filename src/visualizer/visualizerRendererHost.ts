@@ -135,6 +135,10 @@ export class VisualizerRendererHost implements VisualizerSceneHost {
         this.renderGeneration++;
     }
 
+    invalidatePreviewFrame(): void {
+        if (!this.exportToken) this.invalidateFrame();
+    }
+
     constructor(options: VisualizerRendererHostOptions) {
         this.options = options;
         this.canvas = options.canvas;
@@ -206,7 +210,7 @@ export class VisualizerRendererHost implements VisualizerSceneHost {
                     throw new Error('导出渲染租约已失效。');
                 const frame = this.options.readFrame();
                 if (!frame) throw new Error('导出工程身份已失效。');
-                await this.renderCurrentFrame({ ...frame, timeSeconds });
+                await this.renderCurrentFrame({ ...frame, timeSeconds, playbackState: 'paused', animate: false });
             },
             release: () => {
                 if (released) return;

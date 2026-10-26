@@ -1,4 +1,3 @@
-import type { AudioPlaybackCheckpoint } from '../audio/audioEngine';
 import type { AudioSessionService, ExportTransportLease } from '../audio/audioSessionService';
 import type { DecodedAudioCopyPort } from '../analysis/pcm';
 import type { DecodedAudioDescriptor } from '../types/audio';
@@ -46,7 +45,7 @@ export interface VisualizerExportSessionOptions {
 
 const active = (state: VisualizerExportState) => ['preparing', 'exporting', 'finalizing'].includes(state.status);
 
-/** Owns the exclusive transport, manual renderer lease, export task and ready OPFS file. */
+/** Owns the source lock, manual renderer lease, export task and ready OPFS file. */
 export class VisualizerExportSession {
     private readonly options: VisualizerExportSessionOptions;
     private state: VisualizerExportState = { status: 'idle' };
@@ -55,7 +54,6 @@ export class VisualizerExportSession {
     private task: Promise<void> | null = null;
     private ready: { file: File; artifact: ExportArtifact; name: string } | null = null;
     private saveTask: Promise<'saved' | 'cancelled'> | null = null;
-    private restoreAllowed = true;
     private disposed = false;
 
     constructor(options: VisualizerExportSessionOptions) {
@@ -93,7 +91,6 @@ export class VisualizerExportSession {
             );
     }
     async notifyIdentityChange(): Promise<void> {
-        this.restoreAllowed = false;
         this.abortController?.abort(new VisualizerExportError('identity-changed', '导出期间歌曲或路由身份发生变化。'));
         await this.task;
         await this.discard();
@@ -103,7 +100,6 @@ export class VisualizerExportSession {
         if (this.isLocked()) return Promise.reject(new VisualizerExportError('export-busy', '导出已经在进行。'));
         if (this.ready) return Promise.reject(new VisualizerExportError('output-pending', '请先保存或丢弃当前 WebM。'));
         this.abortController = new AbortController();
-        this.restoreAllowed = true;
         diagnostics.exportFramesDone = 0;
         diagnostics.exportTotalFrames = 0;
         diagnostics.lastExportError = '';
@@ -122,8 +118,7 @@ export class VisualizerExportSession {
     private async perform(signal: AbortSignal): Promise<void> {
         let artifact: ExportArtifact | null = null,
             surface: VisualizerExportSurfaceLease | null = null;
-        let transport: ExportTransportLease | null = null,
-            checkpoint: AudioPlaybackCheckpoint | null = null;
+        let transport: ExportTransportLease | null = null;
         let file: File | null = null,
             failure: unknown,
             fileName = '';
@@ -174,9 +169,7 @@ export class VisualizerExportSession {
                     capability.reason ?? '当前设备不支持所选导出配置。',
                 );
             assertExportAudio(source!, descriptor);
-            checkpoint = this.options.audioSession.capturePlaybackCheckpoint(descriptor.trackId);
             transport = this.options.audioSession.acquireExportTransport(descriptor.trackId);
-            transport.pause();
             surface = target.acquireExportSurface(preset.width, preset.height);
             artifact = await (this.options.createArtifact ?? createExportArtifact)();
             signal.throwIfAborted();
@@ -231,19 +224,6 @@ export class VisualizerExportSession {
             } catch (error) {
                 failure ??= error;
             }
-            const current = source?.getDecodedAudioDescriptor();
-            if (
-                checkpoint &&
-                this.restoreAllowed &&
-                current?.trackId === checkpoint.trackId &&
-                current.revision === expectedAudio?.revision
-            ) {
-                try {
-                    await this.options.audioSession.restorePlaybackCheckpoint(checkpoint);
-                } catch (error) {
-                    failure ??= error;
-                }
-            }
             diagnostics.activeExportJobs--;
         }
         if (!failure && file && source && expectedAudio) {
@@ -283,8 +263,7 @@ export class VisualizerExportSession {
         diagnostics.exportFinalizes++;
         this.setState({ status: 'ready', mimeType: 'video/webm', byteLength: file.size });
     }
-    async cancel(restore = true): Promise<void> {
-        this.restoreAllowed = restore;
+    async cancel(): Promise<void> {
         this.abortController?.abort();
         await this.task;
     }
@@ -321,12 +300,12 @@ export class VisualizerExportSession {
         if (this.state.status === 'error') this.setState({ status: 'idle' });
     }
     async handlePageHide(): Promise<void> {
-        await this.cancel(false);
+        await this.cancel();
         await this.discard();
     }
     async dispose(): Promise<void> {
         if (this.disposed) return;
-        await this.cancel(false);
+        await this.cancel();
         await this.discard();
         this.disposed = true;
         this.target = null;

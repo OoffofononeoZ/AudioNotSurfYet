@@ -203,12 +203,7 @@ const isPlaying = computed(() => ['playing', 'buffering'].includes(playback.valu
 const isLoading = computed(() => playback.value.state === 'loading');
 const audioReady = computed(() => ['paused', 'playing', 'buffering', 'ended'].includes(playback.value.state));
 const canSeek = computed(
-    () =>
-        queue.value.length > 0 &&
-        !exportLocked.value &&
-        audioReady.value &&
-        !isLoading.value &&
-        playback.value.durationSeconds > 0,
+    () => queue.value.length > 0 && audioReady.value && !isLoading.value && playback.value.durationSeconds > 0,
 );
 
 const styleMode = computed(() => configStore.musicBarSettings.style);
@@ -363,7 +358,6 @@ const setVolume = (value: number | number[]) => {
 };
 
 const setPlaybackRate = (rate: number) => {
-    if (exportLocked.value) return;
     configStore.playbackRate = rate;
     void audioSession.setPlaybackRate(rate);
 };
@@ -664,9 +658,6 @@ const handleEditTrack = async (index: number) => {
 </script>
 
 <style scoped>
-#music-bar-container[data-export-locked='true'] [data-testid='toggle-playback'],
-#music-bar-container[data-export-locked='true'] [data-testid='previous-track'],
-#music-bar-container[data-export-locked='true'] [data-testid='next-track'],
 #music-bar-container[data-export-locked='true'] [data-testid='import-audio'] {
     opacity: 0.35;
     cursor: default;

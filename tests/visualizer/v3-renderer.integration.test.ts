@@ -389,14 +389,71 @@ test('asynchronous frame preparation coalesces requests and cannot draw a stale 
     host.dispose();
 });
 
-test('manual export waits for the algorithm before resolving its render lease', async () => {
-    const raf = createRafHarness(),
-        canvas = fakeCanvas();
-    let release = () => {},
+test.each(['seek', 'pause', 'loop'] as const)(
+    'manual export survives a preview %s during asynchronous preparation',
+    async change => {
+        const raf = createRafHarness(),
+            canvas = fakeCanvas();
+        let release = () => {},
+            rendered = false;
+        let current: VisualizerRenderFrame = { ...frame(), timeSeconds: 10, playbackState: 'playing' };
+        const inputs: VisualizerSceneRenderInput[] = [];
+        const host = new VisualizerRendererHost({
+            canvas,
+            readFrame: () => current,
+            resolveValuesAt: () => new Map(),
+            createScene: () => ({
+                kind: 'rendered',
+                resize() {},
+                dispose() {},
+                prepare: () =>
+                    new Promise<void>(resolve => {
+                        release = resolve;
+                    }),
+                render: input => {
+                    rendered = true;
+                    inputs.push(input);
+                    return { hash: 'frame', needsSourcePrompt: false };
+                },
+            }),
+            onFrame() {},
+            onStatus() {},
+            createRenderer: fakeRenderer,
+            requestAnimationFrame: cb => raf.request(cb),
+            cancelAnimationFrame: id => raf.cancel(id),
+        });
+        const surface = host.acquireExportSurface(640, 360);
+        const rendering = surface.renderAtTime(2);
+        expect(rendered).toBe(false);
+        current = {
+            ...current,
+            timeSeconds: change === 'loop' ? 0 : 7,
+            playbackState: change === 'pause' ? 'paused' : 'playing',
+        };
+        host.invalidatePreviewFrame();
+        host.requestFrame();
+        expect(raf.callbacks.size).toBe(0);
+        release();
+        await rendering;
+        expect(rendered).toBe(true);
+        expect(inputs[0]).toMatchObject({ timeSeconds: 2, animate: false });
+        surface.release();
+        raf.flush();
+        release();
+        await new Promise(resolve => setTimeout(resolve, 0));
+        expect(inputs.at(-1)).toMatchObject({ timeSeconds: current.timeSeconds, animate: change !== 'pause' });
+        host.dispose();
+    },
+);
+
+test('source identity changes still reject an asynchronous export frame', async () => {
+    const raf = createRafHarness();
+    let current = frame(),
+        release = () => {},
         rendered = false;
     const host = new VisualizerRendererHost({
-        canvas,
-        readFrame: frame,
+        canvas: fakeCanvas(),
+        readFrame: () => current,
         resolveValuesAt: () => new Map(),
         createScene: () => ({
             kind: 'rendered',
@@ -419,10 +476,10 @@ test('manual export waits for the algorithm before resolving its render lease', 
     });
     const surface = host.acquireExportSurface(640, 360);
     const rendering = surface.renderAtTime(2);
-    expect(rendered).toBe(false);
+    current = { ...current, trackIdentity: 'replacement' };
     release();
-    await rendering;
-    expect(rendered).toBe(true);
+    await expect(rendering).rejects.toThrow('导出帧身份已失效');
+    expect(rendered).toBe(false);
     surface.release();
     host.dispose();
 });

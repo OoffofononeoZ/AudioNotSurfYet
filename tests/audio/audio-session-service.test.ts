@@ -236,7 +236,7 @@ beforeEach(() => {
 });
 
 describe('recording playback observations', () => {
-    test('cancels before rate changes, preserves global rate on song/clear and rejects commands while exporting', async () => {
+    test('notifies before rate changes and preserves the latest global rate through export and song changes', async () => {
         const { service, engine, store } = createHarness();
         await service.importFiles(inputs(createFile('rate-a.wav'), createFile('rate-b.wav')));
         const before: number[] = [];
@@ -246,13 +246,13 @@ describe('recording playback observations', () => {
         expect(store.playback.playbackRate).toBe(2);
         const lease = service.acquireExportTransport(store.currentTrackId!);
         await service.setPlaybackRate(0.5);
-        expect(store.playback.playbackRate).toBe(2);
-        expect(before).toEqual([1]);
+        expect(store.playback.playbackRate).toBe(0.5);
+        expect(before).toEqual([1, 2]);
         lease.release();
         await service.playTrack('track-2');
-        expect(store.playback.playbackRate).toBe(2);
+        expect(store.playback.playbackRate).toBe(0.5);
         await service.clear();
-        expect(store.playback.playbackRate).toBe(2);
+        expect(store.playback.playbackRate).toBe(0.5);
         await expect(service.setPlaybackRate(NaN)).rejects.toThrow(RangeError);
         await service.dispose();
     });
@@ -361,33 +361,39 @@ describe('AudioSessionService', () => {
         await service.dispose();
     });
 
-    test('export transport pauses playback, blocks public commands and prevents end looping', async () => {
+    test('export protects the source and queue while playback, seek, rate and repeat-one remain available', async () => {
         const { engine, service, store } = createHarness();
         await service.importFiles(inputs(createFile('first.wav'), createFile('second.wav')));
         service.setPreferredPlaybackMode('repeat-one');
         const lease = service.acquireExportTransport('track-1');
         const loads = engine.loadIds.length;
+        expect(store.playback.state).toBe('playing');
+        expect(engine.pauseCount).toBe(0);
         service.pause();
+        expect(store.playback.state).toBe('paused');
         await service.togglePlayback();
+        expect(store.playback.state).toBe('playing');
         await service.seek(3);
+        await service.setPlaybackRate(0.5);
         await service.next();
+        await service.previous();
         await service.playTrack('track-2');
         await service.clear();
         await service.deleteTrack('track-1');
-        expect(engine.pauseCount).toBe(0);
-        expect(engine.seekValues).toEqual([]);
+        expect(engine.pauseCount).toBe(1);
+        expect(engine.seekValues).toEqual([3, 0, 0]);
         expect(engine.loadIds.length).toBe(loads);
         expect(store.queue.length).toBe(2);
-        lease.pause();
-        expect(engine.pauseCount).toBe(1);
         engine.finish();
-        await Promise.resolve();
-        expect(engine.seekValues).toEqual([]);
-        expect(store.playback.state).toBe('ended');
+        await vi.waitFor(() => expect(store.playback.state).toBe('playing'));
+        expect(engine.seekValues).toEqual([3, 0, 0, 0]);
+        expect(engine.loadIds.length).toBe(loads);
+        service.pause();
+        await service.seek(1.25);
         lease.release();
         expect(service.playbackPolicy.state.exportLocked).toBe(false);
-        await service.next();
-        expect(store.playback.state).toBe('playing');
+        expect(store.playback).toMatchObject({ state: 'paused', currentTimeSeconds: 1.25, playbackRate: 0.5 });
+        lease.release();
         await service.dispose();
     });
     test('autoplays the first empty-queue import and appends later files without interruption', async () => {

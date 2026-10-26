@@ -137,7 +137,7 @@ export function useVisualizerPreview(
         () => store.playback.currentTimeSeconds,
         (time, previous) => {
             if (time < previous || Math.abs(time - previous) > 0.5 || store.playback.state !== 'playing')
-                host?.invalidateFrame();
+                host?.invalidatePreviewFrame();
         },
         { flush: 'sync' },
     );

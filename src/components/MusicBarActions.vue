@@ -10,7 +10,7 @@
             @click="$emit('mode')">
             <MusicBarIcon :name="mode" />
         </button>
-        <MusicBarPlaybackSpeed :rate="playbackRate" :disabled="exportLocked" @change="$emit('speed', $event)" />
+        <MusicBarPlaybackSpeed :rate="playbackRate" :disabled="false" @change="$emit('speed', $event)" />
         <ElTooltip placement="top" popper-class="musicbar-volume-popover">
             <button
                 type="button"

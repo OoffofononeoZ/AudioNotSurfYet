@@ -109,20 +109,16 @@ function harness(
     };
 }
 
-test('offline session locks, renders explicit time, restores playback, and saves the disk-backed file', async () => {
+test('offline session protects the source without touching playback and saves the disk-backed file', async () => {
     const h = harness(),
         task = h.session.start();
     expect(h.session.isLocked()).toBe(true);
     await task;
-    expect(h.pause).toHaveBeenCalledOnce();
+    expect(h.pause).not.toHaveBeenCalled();
     expect(h.release).toHaveBeenCalledOnce();
     expect(h.surface.renderAtTime).toHaveBeenCalledWith(0);
-    expect(h.restore).toHaveBeenCalledWith({
-        trackId: 'song',
-        state: 'paused',
-        currentTimeSeconds: 1.5,
-        playbackRate: 0.5,
-    });
+    expect(h.audio.capturePlaybackCheckpoint).not.toHaveBeenCalled();
+    expect(h.restore).not.toHaveBeenCalled();
     expect(h.session.getState().status).toBe('ready');
     expect(h.session.getReadyFileForDiagnostics()).toBe(h.file);
     h.save.mockResolvedValueOnce('cancelled');
@@ -179,7 +175,8 @@ test.each(['cancel', 'identity', 'renderer'] as const)(
         expect(h.artifact.discard).toHaveBeenCalledOnce();
         expect(h.surface.release).toHaveBeenCalledOnce();
         expect(h.session.getReadyFileForDiagnostics()).toBeNull();
-        if (reason === 'identity') expect(h.restore).not.toHaveBeenCalled();
+        expect(h.pause).not.toHaveBeenCalled();
+        expect(h.restore).not.toHaveBeenCalled();
     },
 );
 
@@ -192,6 +189,7 @@ test('quota and encoder failure free all leases and preserve a retryable error',
     expect(h.artifact.discard).toHaveBeenCalledOnce();
     expect(h.surface.release).toHaveBeenCalledOnce();
     expect(h.release).toHaveBeenCalledOnce();
+    expect(h.restore).not.toHaveBeenCalled();
     h.session.resetError();
     expect(h.session.getState().status).toBe('idle');
 });
@@ -210,15 +208,15 @@ test('save failures retain output and concurrent save calls share one operation'
     expect(h.artifact.discard).toHaveBeenCalledOnce();
 });
 
-test.each(['encode', 'restore'] as const)(
+test.each(['encode', 'release'] as const)(
     'decoded revision changes during %s cannot promote a late File',
     async phase => {
         const h = harness(async () => {
             if (phase === 'encode') h.descriptor.revision++;
             return h.file;
         });
-        if (phase === 'restore')
-            h.restore.mockImplementationOnce(async () => {
+        if (phase === 'release')
+            h.surface.release.mockImplementationOnce(() => {
                 h.descriptor.revision++;
             });
         await h.session.start();

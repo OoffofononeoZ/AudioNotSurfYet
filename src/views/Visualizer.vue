@@ -119,12 +119,12 @@
                                         formatTime(store.playback.durationSeconds)
                                     "
                                     test-id="visualizer-seek"
-                                    :disabled="locked"
+                                    :disabled="importBusy"
                                     @update:model-value="value => run(() => controller.seek(value))" /><button
                                     type="button"
                                     class="viz-icon-button"
                                     :aria-label="store.playback.state === 'playing' ? '暂停' : '播放'"
-                                    :disabled="locked"
+                                    :disabled="importBusy"
                                     @click="run(() => controller.togglePlayback())">
                                     <VisualizerIcon
                                         :name="store.playback.state === 'playing' ? 'pause' : 'play'" /></button

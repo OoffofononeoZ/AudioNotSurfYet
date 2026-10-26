@@ -316,11 +316,9 @@ export class VisualizerSessionController {
         }
     }
     async togglePlayback() {
-        this.assertUnlocked();
         await this.options.audioSession.togglePlayback();
     }
     async seek(seconds: number) {
-        this.assertUnlocked();
         await this.options.audioSession.seek(seconds);
     }
     private context(trackId = this.snapshot.activeTrackId): VisualizerTrackValidationContext | null {
