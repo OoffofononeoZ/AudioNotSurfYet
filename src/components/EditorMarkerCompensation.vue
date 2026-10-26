@@ -7,6 +7,7 @@
             ref="dialog"
             class="marker-compensation-dialog app-scrollbar"
             aria-labelledby="marker-compensation-title"
+            @keydown.esc.stop
             @cancel.prevent="close">
             <form @submit.prevent="apply">
                 <h3 id="marker-compensation-title">标记补偿</h3>

@@ -2,7 +2,13 @@
 
 叠加层选择使用“来源 → 特征”单选 Cascader。原曲保留完整特征列表，已验证四轨只提供 energy、amplitudeSpectrum、buffer、wallpaperEngineSpectrum；顶部绿色波形始终来自原曲。Editor V2 的 overlay 可选 stemRole 保存角色，省略即原曲，窗口与精确游标按该角色读取。分离结果缺失时保留引用并提示完成分离，不用原曲图表替代；关闭叠加层释放其来源请求。来源切换不改变试听、标记或播放时钟。
 
-核查日期：2026-10-21。当前[页面接口](../architecture/editor/interface-contracts.md)、[交互契约](../architecture/editor/interaction-contracts.md)和[公共工作区](editor-workspace.md)为事实来源；旧共享视口/小节窗口/右键平移和“播放完全只读”规定已删除。
+核查日期：2026-10-26。当前[页面接口](../architecture/editor/interface-contracts.md)、[交互契约](../architecture/editor/interaction-contracts.md)和[公共工作区](editor-workspace.md)为事实来源；旧共享视口/小节窗口/右键平移和“播放完全只读”规定已删除。
+
+## 2026-10-26 整轨移动（DEC-102）
+
+“标记补偿”后提供“轨道操作”，沿用暂停可编辑条件；无标记时禁用。弹窗默认选择首个非空轨道，正整数格数默认 1、步长 1，可前移或后移；覆盖所选轨道所有分类与全部标记，包含折叠和视野外事件。点或范围两端先吸附到当前网格，再按严格相邻刻度移动；跨 BPM 不保证原秒数间隔或范围长度，single-beat 整段计一格。格数采用安全整数，不设业务上限，不枚举整曲网格。
+
+`moveMarkerLane` 一次计算、校验完整候选，任一越界、无可用网格、同分类点重复、范围不足一格或重叠即拒绝整轨；成功保留事件 ID、分类和名称，其他轨道不变，只更新/保存一次。打开弹窗清除拖动、待完成范围及区间选区；工程、细分、播放或工作区变化关闭弹窗并丢弃旧操作。该操作不新增撤销历史，不改变工程格式。
 
 ## 2026-10-19 数字键实时录入
 

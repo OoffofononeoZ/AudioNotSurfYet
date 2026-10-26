@@ -1,27 +1,7 @@
 import { expect, test, type Page } from '@playwright/test';
 import { addMarkerLane, prepareMarkerEditor } from '../support/editor-marking';
-import type { EditorProjectV2, PointLaneV1 } from '../../src/editor/types';
-async function draft(page: Page): Promise<EditorProjectV2> {
-    return page.evaluate(
-        () =>
-            new Promise((resolve, reject) => {
-                const request = indexedDB.open('audionotsurfyet-editor');
-                request.onerror = () => reject(request.error);
-                request.onsuccess = () => {
-                    const db = request.result,
-                        get = db.transaction('draft').objectStore('draft').get('latest');
-                    get.onerror = () => {
-                        db.close();
-                        reject(get.error);
-                    };
-                    get.onsuccess = () => {
-                        db.close();
-                        resolve(get.result?.envelope.project);
-                    };
-                };
-            }),
-    );
-}
+import type { PointLaneV1 } from '../../src/editor/types';
+import { readEditorDraft as draft } from '../support/editor-draft';
 async function compensate(page: Page, cells: string) {
     await page.getByTestId('marker-compensation').click();
     await page.getByRole('spinbutton', { name: '提前格数', exact: true }).fill(cells);

@@ -31,6 +31,13 @@
                 :project-id="project.projectId"
                 @opening="recording.cancel"
                 @update:model-value="emit('update:compensationCells', $event)" />
+            <EditorTrackOperations
+                :project="project"
+                :setting="setting"
+                :editable="editable"
+                @opening="prepareTrackOperation"
+                @update-project="applyProject"
+                @status="message = $event" />
             <span v-if="!view.editable" class="pause-status" data-testid="marker-playback-status"
                 >播放中可用数字键录入，鼠标编辑请暂停</span
             >
@@ -110,6 +117,7 @@ import EditorMarkerRuler from './EditorMarkerRuler.vue';
 import EditorAnalysisOverlay from './EditorAnalysisOverlay.vue';
 import EditorContextMenu from './EditorContextMenu.vue';
 import EditorMarkerCompensation from './EditorMarkerCompensation.vue';
+import EditorTrackOperations from './EditorTrackOperations.vue';
 import { useAudioSessionService } from '../audio/audioSessionService';
 import { useEditorGrid } from '../editor/useEditorGrid';
 import { useMarkerTimeView } from '../editor/useMarkerTimeView';
@@ -188,6 +196,11 @@ function toggleBlock() {
     editing.cancel();
     editing.cancelPending();
     editing.blocks.toggle();
+}
+function prepareTrackOperation() {
+    recording.cancel();
+    editing.clear();
+    addMenu.value = false;
 }
 function wheel(event: WheelEvent) {
     if (

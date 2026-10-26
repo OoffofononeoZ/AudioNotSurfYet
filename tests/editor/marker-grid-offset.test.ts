@@ -65,6 +65,9 @@ test('single-beat intervals count once and unavailable BPM blocks travel in eith
     expect(grid.shift(1.875, 3)).toBe(4.25);
     p.tempoMap[1] = { ...p.tempoMap[0]!, id: 'missing', startSeconds: 2, bpm: null } as (typeof p.tempoMap)[0];
     grid = createMarkerGridOffset(p, DEFAULT_BEAT_SNAP);
+    expect(grid.shift(1.875, 1)).toBe(2);
+    expect(grid.shift(2, -1)).toBe(1.875);
+    expect(() => grid.shift(2, 1)).toThrow(/没有可用网格/);
     expect(() => grid.shift(1.875, 2)).toThrow(/没有可用网格/);
     expect(() => grid.shift(4, -1)).toThrow(/没有可用网格/);
     expect(() => grid.shift(3, 1)).toThrow(/没有可用网格/);

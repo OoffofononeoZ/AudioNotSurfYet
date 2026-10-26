@@ -42,6 +42,7 @@ declare module 'vue' {
     EditorTimingPanel: typeof import('./src/components/EditorTimingPanel.vue')['default']
     EditorToolbar: typeof import('./src/components/EditorToolbar.vue')['default']
     EditorTrackChangeDialog: typeof import('./src/components/EditorTrackChangeDialog.vue')['default']
+    EditorTrackOperations: typeof import('./src/components/EditorTrackOperations.vue')['default']
     EditorTranscriptionWorkspace: typeof import('./src/components/EditorTranscriptionWorkspace.vue')['default']
     ElCascaderPanel: typeof import('element-plus/es')['ElCascaderPanel']
     LightBg: typeof import('./src/components/LightBg.vue')['default']

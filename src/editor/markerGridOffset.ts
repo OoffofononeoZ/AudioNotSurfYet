@@ -68,7 +68,8 @@ export function createMarkerGridOffset(
             if (project.tempoMap[middle]!.startSeconds <= time) low = middle;
             else high = middle - 1;
         }
-        const segment = segments[low];
+        // An unavailable segment's left boundary still belongs to the preceding valid grid.
+        const segment = segments[low] ?? (time === project.tempoMap[low]!.startSeconds ? segments[low - 1] : undefined);
         if (!segment) throw Error('当前位置没有可用网格，请先设置 BPM。');
         return segment;
     }
