@@ -42,8 +42,8 @@ import VisualizerParameterField from './VisualizerParameterField.vue';
 import { changedControlElements } from '../../visualizer/commonControls';
 import { elementDescriptor } from '../../visualizer/compositionModel';
 import type { CommonControl, CommonValue } from '../../visualizer/resourceTypes';
-import type { ElementBinding, VisualizerProjectV5 } from '../../visualizer/compositionTypes';
-const props = defineProps<{ control: CommonControl; project: VisualizerProjectV5; locked: boolean }>();
+import type { ElementBinding, VisualizerProjectV6 } from '../../visualizer/compositionTypes';
+const props = defineProps<{ control: CommonControl; project: VisualizerProjectV6; locked: boolean }>();
 const emit = defineEmits<{ change: [value: CommonValue] }>();
 const first = computed(() => props.project.elements.find(e => e.id === props.control.targets[0])!);
 const parameter = computed(() => ({

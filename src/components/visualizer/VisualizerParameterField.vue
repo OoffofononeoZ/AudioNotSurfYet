@@ -132,7 +132,7 @@ import AppNumberInput from '../controls/AppNumberInput.vue';
 import { FEATURE_REGISTRY } from '../../analysis/featureRegistry';
 import type { FeatureId } from '../../analysis/types';
 import type { SceneParameterDescriptor } from '../../visualizer/parameterDescriptor';
-import type { ElementBinding, VisualizerProjectV5 } from '../../visualizer/compositionTypes';
+import type { ElementBinding, VisualizerProjectV6 } from '../../visualizer/compositionTypes';
 import type {
     VisualizerAnalysisComponent,
     VisualizerAnalysisProjectionV1,
@@ -154,7 +154,7 @@ import { FT_ROLES, type StemRole } from '../../processing/modelManifest';
 const props = defineProps<{
     parameter: SceneParameterDescriptor;
     binding: ElementBinding;
-    project: VisualizerProjectV5;
+    project: VisualizerProjectV6;
     elementId: string;
     disabled?: boolean;
     affectedElementIds?: string[];

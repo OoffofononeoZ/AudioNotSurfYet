@@ -163,8 +163,8 @@ import VisualizerMarkerInput from './VisualizerMarkerInput.vue';
 import type { MarkerBinding } from '../../visualizer/editorMarkerTypes';
 import VisualizerParameterField from './VisualizerParameterField.vue';
 import { elementDescriptor, elementRange, elementAlgorithm } from '../../visualizer/compositionModel';
-import type { ElementBinding, VisualizerElement, VisualizerProjectV5 } from '../../visualizer/compositionTypes';
-const props = defineProps<{ project: VisualizerProjectV5; element: VisualizerElement | null; locked: boolean }>();
+import type { ElementBinding, VisualizerElement, VisualizerProjectV6 } from '../../visualizer/compositionTypes';
+const props = defineProps<{ project: VisualizerProjectV6; element: VisualizerElement | null; locked: boolean }>();
 const emit = defineEmits<{
     update: [patch: Partial<VisualizerElement>];
     binding: [binding: ElementBinding];

@@ -27,7 +27,7 @@
 <script setup lang="ts">
 import VisualizerCommonControlField from './VisualizerCommonControlField.vue';
 import type { CommonValue, PresetInstance } from '../../visualizer/resourceTypes';
-import type { VisualizerProjectV5 } from '../../visualizer/compositionTypes';
-defineProps<{ project: VisualizerProjectV5; preset: PresetInstance; locked: boolean }>();
+import type { VisualizerProjectV6 } from '../../visualizer/compositionTypes';
+defineProps<{ project: VisualizerProjectV6; preset: PresetInstance; locked: boolean }>();
 defineEmits<{ rename: [name: string]; control: [id: string, value: CommonValue] }>();
 </script>

@@ -63,7 +63,7 @@
 <script setup lang="ts">
 import { computed, ref, watch, onBeforeUnmount } from 'vue';
 import { useRouter } from 'vue-router';
-import type { VisualizerProjectV5 } from '../../visualizer/compositionTypes';
+import type { VisualizerProjectV6 } from '../../visualizer/compositionTypes';
 import { inspectRealtimeProject } from '../../visualizer/realtimeCapabilities';
 import { createRealtimeStyle } from '../../visualizer/realtimeStyle';
 import { RealtimeStyleRepository } from '../../visualizer/realtimeStyleRepository';
@@ -72,7 +72,7 @@ import { useConfigstore } from '../../stores/configStore';
 import { prepareWallpaperFiles, type WallpaperExportFile } from '../../visualizer/wallpaperExport';
 import { WallpaperDirectoryWriter, WallpaperDirectoryCleanupError } from '../../visualizer/wallpaperDirectoryWriter';
 import { ElMessage } from 'element-plus';
-const props = defineProps<{ project: VisualizerProjectV5 | null; locked: boolean }>();
+const props = defineProps<{ project: VisualizerProjectV6 | null; locked: boolean }>();
 const router = useRouter(),
     config = useConfigstore(),
     repository = new RealtimeStyleRepository();

@@ -1,7 +1,7 @@
 import type { AudioSessionService, ExportTransportLease } from '../audio/audioSessionService';
 import type { DecodedAudioCopyPort } from '../analysis/pcm';
 import type { DecodedAudioDescriptor } from '../types/audio';
-import type { VisualizerProjectV5 } from './compositionTypes';
+import type { VisualizerProjectV6 } from './compositionTypes';
 import type { VisualizerBindingRuntimeSnapshot, VisualizerSessionState } from './types';
 import type { VisualizerRendererStatus, VisualizerResolvedParameter } from './rendererTypes';
 import type { VisualizerExportSurfaceLease } from './visualizerRendererHost';
@@ -25,7 +25,7 @@ export interface VisualizerExportTarget {
 export interface VisualizerExportContext {
     state: VisualizerSessionState | 'unsupported-draft';
     activeTrackId: string | null;
-    project: VisualizerProjectV5 | null;
+    project: VisualizerProjectV6 | null;
     bindingRuntime: VisualizerBindingRuntimeSnapshot;
     configurationIssues: readonly string[];
 }

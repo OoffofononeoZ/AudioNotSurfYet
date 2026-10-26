@@ -1,10 +1,13 @@
 import * as THREE from 'three';
+import { worldFragment, applyWorldCamera, applyWorldTransform } from './worldDrawState';
+import type { CameraFrame, Transform3d } from './scene3dTypes';
 import type { AlgorithmDefinition, DrawPass, ShaderProgram } from './algorithmTypes';
 import type { CompositionRenderPort } from './compositionScene';
 import { resourceHash } from './resourceIdentity';
 interface Surface {
     scene: THREE.Scene;
-    camera: THREE.OrthographicCamera;
+    camera: THREE.OrthographicCamera | THREE.PerspectiveCamera;
+    mesh: THREE.Mesh;
     material: THREE.ShaderMaterial;
     geometry: THREE.BufferGeometry;
     program: ShaderProgram;
@@ -31,7 +34,9 @@ export class AlgorithmDrawRenderer {
         pass: DrawPass,
         source?: THREE.Texture,
         media?: (inputId: string, slot: 'current' | 'next') => THREE.Texture,
+        world?: { camera: CameraFrame; transform: Transform3d },
     ) {
+        const isWorld = algorithm.contract.renderSpace === 'world';
         const definition = algorithm.programs[pass.program]!;
         let key = this.programKeys.get(definition);
         if (!key) {
@@ -58,23 +63,25 @@ export class AlgorithmDrawRenderer {
             const uniforms = Object.fromEntries(Object.keys(program.uniforms).map(name => [name, { value: null }]));
             const material = new THREE.ShaderMaterial({
                 vertexShader: program.vertex,
-                fragmentShader: program.fragment,
+                fragmentShader: isWorld ? worldFragment(program) : program.fragment,
                 uniforms,
-                transparent: triangles,
-                premultipliedAlpha: triangles,
-                depthTest: false,
-                depthWrite: false,
+                transparent: triangles && !isWorld,
+                premultipliedAlpha: triangles && !isWorld,
+                depthTest: isWorld,
+                depthWrite: isWorld,
                 side: triangles ? THREE.DoubleSide : THREE.FrontSide,
                 toneMapped: false,
             });
-            const camera = triangles
-                ? new THREE.OrthographicCamera(-1, 1, -0.5, 0.5, -1, 1)
-                : new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
+            const camera = isWorld
+                ? new THREE.PerspectiveCamera()
+                : triangles
+                  ? new THREE.OrthographicCamera(-1, 1, -0.5, 0.5, -1, 1)
+                  : new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
             const scene = new THREE.Scene(),
                 mesh = new THREE.Mesh(geometry, material);
             mesh.frustumCulled = false;
             scene.add(mesh);
-            surface = { scene, camera, material, geometry, program };
+            surface = { scene, camera, material, geometry, program, mesh };
             this.surfaces.set(key, surface);
         }
         for (const [name, specification] of Object.entries(surface.program.uniforms)) {
@@ -108,9 +115,16 @@ export class AlgorithmDrawRenderer {
             }
             surface.geometry.setDrawRange(0, pass.mesh.positions.length / 3);
             const aspect = this.width / this.height;
-            surface.camera.left = -aspect / 2;
-            surface.camera.right = aspect / 2;
-            surface.camera.updateProjectionMatrix();
+            if (surface.camera instanceof THREE.OrthographicCamera) {
+                surface.camera.left = -aspect / 2;
+                surface.camera.right = aspect / 2;
+                surface.camera.updateProjectionMatrix();
+            }
+        }
+        if (isWorld) {
+            if (!world || !(surface.camera instanceof THREE.PerspectiveCamera)) throw Error('三维场景配置无效。');
+            applyWorldCamera(surface.camera, world.camera);
+            applyWorldTransform(surface.mesh, world.transform);
         }
         surface.material.uniformsNeedUpdate = true;
         const debug = (renderer as unknown as THREE.WebGLRenderer).debug;

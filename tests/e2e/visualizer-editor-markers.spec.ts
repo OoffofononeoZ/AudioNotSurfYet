@@ -3,7 +3,7 @@ import path from 'node:path';
 import { markerFixture } from '../visualizer/marker-input-fixture';
 import { chooseFiles, installFilePickerStub, queuePickerData, savedPickerEntries } from '../support/file-picker';
 import { resourceHash, resourceRef } from '../../src/visualizer/resourceIdentity';
-import type { VisualizerProjectV5 } from '../../src/visualizer/compositionTypes';
+import type { VisualizerProjectV6 } from '../../src/visualizer/compositionTypes';
 import { createInitialEditorProject } from '../../src/editor/projectCodec';
 
 test('ABI 2 marker transport only serves declared inputs of the active instance and ended frames cannot borrow another instance', async ({
@@ -147,7 +147,7 @@ for (const singleCategory of [false, true])
         await chooseFiles(page, [path.resolve(import.meta.dirname, '../fixtures/audio/visualizer-v5-avsync-v1.wav')]);
         await page.getByTestId('header-visualizer-link').click();
         await expect(page.getByTestId('visualizer-ready')).toBeVisible();
-        async function exported(): Promise<VisualizerProjectV5> {
+        async function exported(): Promise<VisualizerProjectV6> {
             const n = (await savedPickerEntries(page)).length;
             await page.getByTestId('export-visualizer-project').click();
             await expect.poll(async () => (await savedPickerEntries(page)).length).toBe(n + 1);

@@ -75,6 +75,11 @@ listen('message', ({ data }) => {
                     };
                     let packet;
                     try {
+                        if (element.frame.camera) {
+                            for (const value of Object.values(element.frame.camera))
+                                if (Array.isArray(value)) Object.freeze(value);
+                            Object.freeze(element.frame.camera);
+                        }
                         packet = await instance.prepareFrame(element.frame, {
                             history: request => read('history', request),
                             markers: request => read('markers', request),

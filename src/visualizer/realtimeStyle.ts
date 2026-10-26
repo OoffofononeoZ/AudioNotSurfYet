@@ -1,6 +1,6 @@
 import type { MediaAsset } from './mediaTypes';
 import { validateMediaAssets, validateMediaBindings, referencedMedia } from './mediaCodec';
-import type { VisualizerElement, VisualizerProjectV5, CompositionRenderModel } from './compositionTypes';
+import type { VisualizerElement, VisualizerProjectV6, CompositionRenderModel } from './compositionTypes';
 import type { ResourceSnapshot } from './resourceTypes';
 import { validateResourceSnapshot, validateResourceRef } from './resourceCodec';
 import { effectiveElements, elementDescriptor } from './compositionModel';
@@ -9,12 +9,15 @@ import { inspectRealtimeProject, inspectRealtimeContent } from './realtimeCapabi
 import { validateElementBindings } from './elementBindings';
 import { record, keys, text, integer, iso, invalid, UUID_PATTERN } from './projectValidation';
 import { elementSeedField } from './seed';
-import { migrateLegacySeeds } from './seedMigration';
+import { migrateRealtimeStyleV1 } from './compositionMigration';
+import { sceneGroups, sceneUnits, validateSceneOwnership } from './scene3dModel';
+import { validateScene3d, validateTransform3d } from './scene3dCodec';
+import { defaultTransform3d, type Scene3dItem } from './scene3dTypes';
 
 export type RealtimeStyleElement = Omit<VisualizerElement, 'enabled' | 'timing' | 'markerBindings'>;
-export interface RealtimeStyleV1 {
+export interface RealtimeStyleV2 {
     format: 'audiosurf-realtime-style';
-    schemaVersion: 1;
+    schemaVersion: 2;
     id: string;
     name: string;
     createdAt: string;
@@ -22,16 +25,24 @@ export interface RealtimeStyleV1 {
     elements: RealtimeStyleElement[];
     resources: ResourceSnapshot;
     mediaAssets?: MediaAsset[];
+    scenes3d?: Scene3dItem[];
 }
 export function realtimeRenderModel(
-    style: RealtimeStyleV1,
+    style: RealtimeStyleV2,
     endSeconds = Number.MAX_SAFE_INTEGER,
 ): CompositionRenderModel {
     return {
         projectId: style.id,
         resources: style.resources,
         ...(style.mediaAssets ? { mediaAssets: style.mediaAssets } : {}),
-        items: style.elements.map(e => ({ kind: 'element', id: e.id })),
+        items: sceneUnits(
+            style.elements.map(e => e.id),
+            style.scenes3d ?? [],
+        ).map(i =>
+            i.kind === 'scene3d'
+                ? { ...style.scenes3d!.find(s => s.id === i.id)!, endSeconds }
+                : { kind: 'element', id: i.id },
+        ),
         elements: style.elements.map(e => ({
             ...e,
             enabled: true,
@@ -39,7 +50,7 @@ export function realtimeRenderModel(
         })),
     };
 }
-export function createRealtimeStyle(project: VisualizerProjectV5, name: string): RealtimeStyleV1 {
+export function createRealtimeStyle(project: VisualizerProjectV6, name: string): RealtimeStyleV2 {
     const capability = inspectRealtimeProject(project);
     if (!capability.browser) throw Error(capability.browserIssues.join('\n'));
     const active = effectiveElements(project).filter(e => e.enabled);
@@ -49,7 +60,7 @@ export function createRealtimeStyle(project: VisualizerProjectV5, name: string):
     const algorithms = new Set(elements.map(e => resourceKey(e.algorithm)));
     return validateRealtimeStyle({
         format: 'audiosurf-realtime-style',
-        schemaVersion: 1,
+        schemaVersion: 2,
         id: crypto.randomUUID(),
         name: name.trim(),
         createdAt: new Date().toISOString(),
@@ -62,6 +73,14 @@ export function createRealtimeStyle(project: VisualizerProjectV5, name: string):
                 ? { targets: { kind: 'elements', ids: e.targets.ids.filter(id => ids.has(id)) } }
                 : {}),
         })),
+        scenes3d: sceneGroups(project)
+            .filter(s => s.enabled)
+            .flatMap(s => {
+                const children = s.children.filter(id => ids.has(id));
+                return children.length
+                    ? [{ ...structuredClone(s), children, startSeconds: 0, endSeconds: Number.MAX_SAFE_INTEGER }]
+                    : [];
+            }),
         resources: {
             algorithms: project.resources.algorithms.filter(a => algorithms.has(resourceKey(a))),
             elements,
@@ -69,22 +88,22 @@ export function createRealtimeStyle(project: VisualizerProjectV5, name: string):
         },
     });
 }
-export function validateRealtimeStyle(input: unknown): RealtimeStyleV1 {
-    const v = record(migrateLegacySeeds(input), '实时样式');
+export function validateRealtimeStyle(input: unknown): RealtimeStyleV2 {
+    const v = record(migrateRealtimeStyleV1(input), '实时样式');
     keys(
         v,
         ['format', 'schemaVersion', 'id', 'name', 'createdAt', 'frameRate', 'elements', 'resources'],
-        ['mediaAssets'],
+        ['mediaAssets', 'scenes3d'],
     );
     const mediaAssets = validateMediaAssets(v.mediaAssets);
-    if (v.format !== 'audiosurf-realtime-style' || v.schemaVersion !== 1 || !UUID_PATTERN.test(text(v.id, 'id')))
+    if (v.format !== 'audiosurf-realtime-style' || v.schemaVersion !== 2 || !UUID_PATTERN.test(text(v.id, 'id')))
         return invalid('实时样式格式无效。');
     const resources = validateResourceSnapshot(v.resources);
     if ((v.frameRate !== 30 && v.frameRate !== 60) || !Array.isArray(v.elements) || resources.presets.length)
         return invalid('实时样式参数无效。');
     const elements = v.elements.map((input, layer): RealtimeStyleElement => {
         const e = record(input, '元素');
-        keys(e, ['id', 'resource', 'name', 'layer', 'bindings'], ['targets', 'seed', 'mediaBindings']);
+        keys(e, ['id', 'resource', 'name', 'layer', 'bindings'], ['targets', 'seed', 'mediaBindings', 'transform3d']);
         if (!UUID_PATTERN.test(text(e.id, 'id')) || integer(e.layer, 'layer') !== layer)
             return invalid('实时元素身份或顺序无效。');
         const resource = validateResourceRef(e.resource),
@@ -96,6 +115,14 @@ export function validateRealtimeStyle(input: unknown): RealtimeStyleV1 {
             name: text(e.name, 'name'),
             ...elementSeedField(e.seed, definition.usesSeed),
             layer,
+            ...(definition.scene3dDefaults
+                ? {
+                      transform3d:
+                          e.transform3d === undefined ? defaultTransform3d() : validateTransform3d(e.transform3d),
+                  }
+                : e.transform3d === undefined
+                  ? {}
+                  : invalid('二维元素不能保存三维变换。')),
             bindings: validateElementBindings(e.bindings, definition.parameters),
             ...(definition.mediaInputs
                 ? { mediaBindings: validateMediaBindings(e.mediaBindings, definition.mediaInputs, mediaAssets) }
@@ -108,15 +135,33 @@ export function validateRealtimeStyle(input: unknown): RealtimeStyleV1 {
         };
     });
     if (new Set(elements.map(e => e.id)).size !== elements.length) return invalid('实时元素身份重复。');
-    const style: RealtimeStyleV1 = {
+    const scenes3d =
+        v.scenes3d === undefined
+            ? undefined
+            : Array.isArray(v.scenes3d)
+              ? v.scenes3d.map(s => validateScene3d(s) as Scene3dItem)
+              : invalid('实时场景必须为列表。');
+    validateSceneOwnership(
+        scenes3d ?? [],
+        elements.map(e => e.id),
+        id =>
+            !!resources.elements.find(d => sameResource(d, elements.find(e => e.id === id)!.resource))?.scene3dDefaults,
+    );
+    if (
+        new Set(scenes3d?.map(s => s.id)).size !== (scenes3d?.length ?? 0) ||
+        scenes3d?.some(s => elements.some(e => e.id === s.id))
+    )
+        invalid('实时场景 ID 重复。');
+    const style: RealtimeStyleV2 = {
         format: 'audiosurf-realtime-style',
-        schemaVersion: 1,
+        schemaVersion: 2,
         id: String(v.id),
         name: text(v.name, 'name'),
         createdAt: iso(v.createdAt, 'createdAt'),
         frameRate: v.frameRate,
         elements,
         resources,
+        ...(scenes3d ? { scenes3d } : {}),
         ...(mediaAssets ? { mediaAssets } : {}),
     };
     const model = realtimeRenderModel(style, 1),
@@ -140,14 +185,18 @@ export function validateRealtimeStyle(input: unknown): RealtimeStyleV1 {
         else {
             keys(target, ['kind', 'ids']);
             if (
-                target.kind !== 'elements' ||
+                !['elements', 'scenes3d'].includes(String(target.kind)) ||
                 !Array.isArray(target.ids) ||
                 new Set(target.ids).size !== target.ids.length ||
-                target.ids.some(
-                    id =>
-                        !model.elements.some(
-                            item => item.id === id && elementDescriptor(model, item).kind === 'visual',
-                        ),
+                target.ids.some(id =>
+                    target.kind === 'scenes3d'
+                        ? !scenes3d?.some(s => s.id === id)
+                        : !model.elements.some(
+                              item =>
+                                  item.id === id &&
+                                  elementDescriptor(model, item).kind === 'visual' &&
+                                  !resources.elements.find(d => sameResource(d, item.resource))?.scene3dDefaults,
+                          ),
                 )
             )
                 return invalid('实时效果目标无效。');

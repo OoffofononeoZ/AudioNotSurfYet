@@ -3,6 +3,7 @@ import type { ElementKind } from './compositionTypes';
 import type { SceneParameterDescriptor } from './parameterDescriptor';
 import type { ResourceRef } from './resourceTypes';
 import type { MarkerInputContract, MarkerPage, MarkerQuery } from './editorMarkerTypes';
+import type { CameraFrame } from './scene3dTypes';
 
 export type AlgorithmParameter = Omit<SceneParameterDescriptor, 'label' | 'defaultValue' | 'defaultBinding'>;
 export interface AlgorithmContract {
@@ -17,6 +18,7 @@ export interface AlgorithmContract {
     timingInput?: string;
     mediaInputs?: MediaInputContract[];
     executionModes?: ('timeline' | 'realtime')[];
+    renderSpace?: 'world';
 }
 export type UniformType = 'number' | 'int' | 'boolean' | 'color' | 'vec2' | 'vec3' | 'array' | 'source' | 'media';
 export interface ShaderProgram {
@@ -24,9 +26,11 @@ export interface ShaderProgram {
     fragment: string;
     geometry: 'quad' | 'triangles';
     uniforms: Record<string, { type: UniformType; length?: number; inputId?: string; slot?: 'current' | 'next' }>;
+    alphaMode?: 'opaque' | 'mask';
+    alphaCutoff?: number;
 }
 export interface AlgorithmDefinition extends ResourceRef {
-    apiVersion: 1 | 2 | 3;
+    apiVersion: 1 | 2 | 3 | 4;
     contract: AlgorithmContract;
     source: string;
     programs: Record<string, ShaderProgram>;
@@ -61,6 +65,7 @@ export interface AlgorithmFrame {
     height: number;
     range: { startSeconds: number; endSeconds: number } | null;
     parameters: Record<string, AlgorithmValue>;
+    camera?: CameraFrame;
 }
 export interface HistorySample {
     time: number;

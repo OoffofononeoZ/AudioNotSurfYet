@@ -21,13 +21,16 @@ import {
     VisualizerProjectValidationError,
 } from './projectValidation';
 import { elementSeedField } from './seed';
-import { migrateLegacySeeds } from './seedMigration';
+import { migrateCompositionV5 } from './compositionMigration';
+import { validateTransform3d } from './scene3dCodec';
+import { defaultTransform3d } from './scene3dTypes';
+import { sceneGroups } from './scene3dModel';
 import { isAudioVideoOffsetMs } from './exportTypes';
 import type {
     ElementTiming,
     EffectTargets,
     VisualizerElement,
-    VisualizerProjectV5,
+    VisualizerProjectV6,
     CompositionDraft,
 } from './compositionTypes';
 import type { VisualizerTrackValidationContext } from './types';
@@ -37,7 +40,7 @@ const id = (input: unknown) => {
     if (!UUID_PATTERN.test(value)) invalid('元素或工程 ID 无效。');
     return value;
 };
-function timing(input: unknown, transition: boolean, project: VisualizerProjectV5): ElementTiming {
+function timing(input: unknown, transition: boolean, project: VisualizerProjectV6): ElementTiming {
     const value = record(input, 'timing');
     if (transition) {
         if (value.kind === 'unbound') {
@@ -61,12 +64,12 @@ function timing(input: unknown, transition: boolean, project: VisualizerProjectV
         return invalid('元素时间范围超出歌曲。');
     return { kind: 'manual', startSeconds, endSeconds };
 }
-function element(input: unknown, project: VisualizerProjectV5): VisualizerElement {
+function element(input: unknown, project: VisualizerProjectV6): VisualizerElement {
     const v = record(input, 'element');
     keys(
         v,
         ['id', 'resource', 'name', 'enabled', 'layer', 'timing', 'bindings'],
-        ['targets', 'markerBindings', 'seed', 'mediaBindings'],
+        ['targets', 'markerBindings', 'seed', 'mediaBindings', 'transform3d'],
     );
     const resource = validateResourceRef(v.resource);
     const descriptor = project.resources.elements.find(d => sameResource(d, resource));
@@ -93,10 +96,11 @@ function element(input: unknown, project: VisualizerProjectV5): VisualizerElemen
             targets = { kind: 'composition' };
         } else {
             keys(target, ['kind', 'ids']);
-            if (target.kind !== 'elements' || !Array.isArray(target.ids)) return invalid('影响对象无效。');
+            if (!['elements', 'scenes3d'].includes(String(target.kind)) || !Array.isArray(target.ids))
+                return invalid('影响对象无效。');
             const ids = target.ids.map(id);
             if (new Set(ids).size !== ids.length) return invalid('影响对象不能重复。');
-            targets = { kind: 'elements', ids };
+            targets = { kind: target.kind as 'elements' | 'scenes3d', ids };
         }
     }
     return {
@@ -111,11 +115,16 @@ function element(input: unknown, project: VisualizerProjectV5): VisualizerElemen
         ...(markerBindings ? { markerBindings } : {}),
         ...(mediaBindings ? { mediaBindings } : {}),
         ...(targets ? { targets } : {}),
+        ...(algorithm.contract.renderSpace === 'world'
+            ? { transform3d: v.transform3d === undefined ? defaultTransform3d() : validateTransform3d(v.transform3d) }
+            : v.transform3d === undefined
+              ? {}
+              : invalid('三维场景配置无效。')),
     };
 }
-export function validateComposition(input: unknown, context?: VisualizerTrackValidationContext): VisualizerProjectV5 {
-    const v = record(migrateLegacySeeds(input), 'project');
-    if (v.schemaVersion !== 5)
+export function validateComposition(input: unknown, context?: VisualizerTrackValidationContext): VisualizerProjectV6 {
+    const v = record(migrateCompositionV5(input), 'project');
+    if (v.schemaVersion !== 6)
         throw new VisualizerProjectValidationError(
             'unsupported-schema',
             '旧版 Visualizer 工程不兼容，请使用 V5 资源工程。',
@@ -151,9 +160,9 @@ export function validateComposition(input: unknown, context?: VisualizerTrackVal
     const createdAt = iso(v.createdAt, 'createdAt'),
         updatedAt = iso(v.updatedAt, 'updatedAt');
     if (Date.parse(updatedAt) < Date.parse(createdAt)) return invalid('更新时间早于创建时间。');
-    const project: VisualizerProjectV5 = {
+    const project: VisualizerProjectV6 = {
         format: 'audiosurf-visualizer',
-        schemaVersion: 5,
+        schemaVersion: 6,
         projectId: id(v.projectId),
         createdAt,
         updatedAt,
@@ -188,9 +197,19 @@ export function validateComposition(input: unknown, context?: VisualizerTrackVal
         if (e.targets?.kind === 'elements')
             for (const targetId of e.targets.ids) {
                 const target = project.elements.find(e => e.id === targetId);
-                if (!target || elementDescriptor(project, target).kind !== 'visual')
+                if (
+                    !target ||
+                    elementDescriptor(project, target).kind !== 'visual' ||
+                    project.resources.algorithms.find(a =>
+                        sameResource(a, elementDescriptor(project, target).algorithm),
+                    )?.contract.renderSpace === 'world'
+                )
                     return invalid('效果只能引用存在的视觉元素。');
             }
+    const sceneIds = new Set(sceneGroups(project).map(s => s.id));
+    for (const e of project.elements)
+        if (e.targets?.kind === 'scenes3d' && e.targets.ids.some(id => !sceneIds.has(id)))
+            invalid('三维场景配置无效。');
     try {
         planCompositionFeatures(project, true);
     } catch (error) {
@@ -198,11 +217,11 @@ export function validateComposition(input: unknown, context?: VisualizerTrackVal
     }
     return project;
 }
-export const createComposition = (track: EditorTrackIdentityV1): VisualizerProjectV5 => {
+export const createComposition = (track: EditorTrackIdentityV1): VisualizerProjectV6 => {
     const now = new Date().toISOString();
     return validateComposition({
         format: 'audiosurf-visualizer',
-        schemaVersion: 5,
+        schemaVersion: 6,
         projectId: crypto.randomUUID(),
         createdAt: now,
         updatedAt: now,
@@ -213,7 +232,7 @@ export const createComposition = (track: EditorTrackIdentityV1): VisualizerProje
         resources: { algorithms: [], elements: [], presets: [] },
     });
 };
-export const encodeComposition = (project: VisualizerProjectV5) =>
+export const encodeComposition = (project: VisualizerProjectV6) =>
     new TextEncoder().encode(JSON.stringify(validateComposition(project), null, 2) + '\n');
 export const decodeComposition = (bytes: ArrayBuffer, context?: VisualizerTrackValidationContext) => {
     let value: unknown;
@@ -227,8 +246,8 @@ export const decodeComposition = (bytes: ArrayBuffer, context?: VisualizerTrackV
 export function validateCompositionDraft(input: unknown): CompositionDraft {
     const v = record(input, 'draft');
     keys(v, ['schemaVersion', 'savedAt', 'project']);
-    if (v.schemaVersion !== 5) return invalid('草稿版本不兼容。');
-    return { schemaVersion: 5, savedAt: iso(v.savedAt, 'savedAt'), project: validateComposition(v.project) };
+    if (v.schemaVersion !== 5 && v.schemaVersion !== 6) return invalid('草稿版本不兼容。');
+    return { schemaVersion: 6, savedAt: iso(v.savedAt, 'savedAt'), project: validateComposition(v.project) };
 }
 export const compositionFileFormat = {
     id: 'json',

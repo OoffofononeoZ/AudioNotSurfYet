@@ -5,7 +5,7 @@ import path from 'node:path';
 import { appendStandaloneElements } from '../../src/visualizer/compositionModel';
 import { elementRegistry } from '../../src/visualizer/elementRegistry';
 import { getVisualizerExportPreset } from '../../src/visualizer/exportPresets';
-import type { VisualizerProjectV5 } from '../../src/visualizer/compositionTypes';
+import type { VisualizerProjectV6 } from '../../src/visualizer/compositionTypes';
 import type { VisualizerSessionController } from '../../src/visualizer/visualizerSessionController';
 import type { VisualizerExportSessionOptions } from '../../src/visualizer/visualizerExportSession';
 import { chooseFiles, installFilePickerStub, queuePickerData, savedPickerEntries } from '../support/file-picker';
@@ -64,7 +64,7 @@ test('same-track controls and looping preserve deterministic export; finishing a
     await expect(page.getByTestId('visualizer-ready')).toBeVisible();
     await page.getByTestId('export-visualizer-project').click();
     await expect.poll(async () => (await savedPickerEntries(page)).length).toBe(1);
-    let project: VisualizerProjectV5 = JSON.parse(
+    let project: VisualizerProjectV6 = JSON.parse(
         Buffer.from((await savedPickerEntries(page)).at(-1)!.base64, 'base64').toString('utf8'),
     );
     project.output = { aspectRatio: '16:9', resolution: '720p', frameRate: 30, audioVideoOffsetMs: 0 };

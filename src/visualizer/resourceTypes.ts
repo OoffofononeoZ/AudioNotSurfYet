@@ -4,6 +4,7 @@ import type { AlgorithmDefinition } from './algorithmTypes';
 import type { SceneParameterDescriptor } from './parameterDescriptor';
 import type { VisualizerNumericTransformV1 } from './types';
 import type { MarkerBindings, MarkerInputDefinition } from './editorMarkerTypes';
+import type { SceneCamera, Scene3dItem, PresetScene3d, Transform3d } from './scene3dTypes';
 
 export interface ResourceRef {
     id: string;
@@ -21,6 +22,7 @@ export interface ElementDefinition extends ResourceRef {
     parameters: SceneParameterDescriptor[];
     markerInputs?: MarkerInputDefinition[];
     mediaInputs?: MediaInputDefinition[];
+    scene3dDefaults?: { camera: SceneCamera };
 }
 export type CommonValue = number | string | boolean | number[] | Omit<ElementBinding, 'parameterId'>;
 export interface CommonControl {
@@ -44,6 +46,7 @@ export interface PresetElementTemplate {
     mediaBindings?: MediaBindings;
     timing: { kind: 'relative'; start: number; end: number } | { kind: 'unbound' };
     targets?: EffectTargets;
+    transform3d?: Transform3d;
 }
 export interface PresetDefinition extends ResourceRef {
     title: string;
@@ -52,6 +55,7 @@ export interface PresetDefinition extends ResourceRef {
     elements: PresetElementTemplate[];
     controls: CommonControl[];
     mediaAssets?: MediaAsset[];
+    scenes3d?: PresetScene3d[];
 }
 export interface ResourceSnapshot {
     algorithms: AlgorithmDefinition[];
@@ -72,5 +76,6 @@ export interface PresetInstance {
     enabled: boolean;
     children: string[];
     controls: CommonControl[];
+    scenes3d?: Scene3dItem[];
 }
-export type CompositionItem = { kind: 'element'; id: string } | PresetInstance;
+export type CompositionItem = { kind: 'element'; id: string } | PresetInstance | Scene3dItem;

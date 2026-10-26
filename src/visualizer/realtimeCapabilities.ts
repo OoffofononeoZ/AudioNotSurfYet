@@ -1,6 +1,6 @@
 import { isSupportedFeatureId } from '../analysis/types';
 import { effectiveElements, elementAlgorithm, elementDescriptor } from './compositionModel';
-import type { VisualizerProjectV5, VisualizerElement } from './compositionTypes';
+import type { VisualizerProjectV6, VisualizerElement } from './compositionTypes';
 import type { ResourceSnapshot, PresetDefinition } from './resourceTypes';
 import { elementRegistry, findResource } from './elementRegistry';
 
@@ -23,11 +23,11 @@ export function inspectRealtimeContent(
     for (const e of elements) {
         const algorithm = elementAlgorithm(model, e),
             label = e.name + '：';
-        if (algorithm.apiVersion === 3 && !algorithm.contract.executionModes?.includes('realtime'))
+        if (algorithm.apiVersion >= 3 && !algorithm.contract.executionModes?.includes('realtime'))
             browserIssues.push(label + '不支持实时执行。');
         if (
             algorithm.contract.historyParameters.length &&
-            !(algorithm.apiVersion === 3 && algorithm.contract.executionModes?.includes('realtime'))
+            !(algorithm.apiVersion >= 3 && algorithm.contract.executionModes?.includes('realtime'))
         )
             browserIssues.push(label + '需要历史输入，暂不支持实时模式。');
         if (
@@ -63,12 +63,21 @@ export function inspectRealtimeContent(
         wallpaperIssues: [...new Set([...browserIssues, ...wallpaperIssues])],
     };
 }
-export function inspectRealtimeProject(project: VisualizerProjectV5): RealtimeCapabilities {
-    return inspectRealtimeContent(
+export function inspectRealtimeProject(project: VisualizerProjectV6): RealtimeCapabilities {
+    const result = inspectRealtimeContent(
         effectiveElements(project).filter(e => e.enabled),
         project.resources,
         project.track.durationSeconds,
     );
+    const scenes = project.items.flatMap(i =>
+        i.kind === 'scene3d' ? [i] : i.kind === 'preset' ? (i.scenes3d ?? []) : [],
+    );
+    if (scenes.some(s => s.enabled && (s.startSeconds !== 0 || s.endSeconds !== project.track.durationSeconds))) {
+        result.browser = result.wallpaper = false;
+        result.browserIssues.push('三维场景需要覆盖完整歌曲。');
+        result.wallpaperIssues.push('三维场景需要覆盖完整歌曲。');
+    }
+    return result;
 }
 export function inspectRealtimePreset(preset: PresetDefinition): RealtimeCapabilities {
     const elements = preset.elements

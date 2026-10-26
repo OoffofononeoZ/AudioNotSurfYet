@@ -77,9 +77,9 @@
 import { computed, ref, watch } from 'vue';
 import AppSelect from '../controls/AppSelect.vue';
 import type { MarkerBinding } from '../../visualizer/editorMarkerTypes';
-import type { VisualizerProjectV5 } from '../../visualizer/compositionTypes';
+import type { VisualizerProjectV6 } from '../../visualizer/compositionTypes';
 const props = defineProps<{
-    project: VisualizerProjectV5;
+    project: VisualizerProjectV6;
     binding: MarkerBinding;
     label: string;
     eventKind: 'point' | 'range';

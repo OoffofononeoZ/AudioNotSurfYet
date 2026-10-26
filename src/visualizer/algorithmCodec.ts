@@ -61,19 +61,28 @@ function parameter(input: unknown): AlgorithmParameter {
         list(v.allowedAnalysisProjections, ['scalar', 'mean', 'max', 'peak', 'bin', 'band', 'full']);
     return structuredClone(v) as unknown as AlgorithmParameter;
 }
-export function validateAlgorithmContract(input: unknown, apiVersion: 1 | 2 | 3 = 1): AlgorithmContract {
+export function validateAlgorithmContract(input: unknown, apiVersion: 1 | 2 | 3 | 4 = 1): AlgorithmContract {
     const v = record(input, '算法契约');
     keys(
         v,
         ['kind', 'parameters', 'sharedParameters', 'historyParameters'],
-        apiVersion === 3
-            ? ['inputParameter', 'markerInputs', 'timingInput', 'mediaInputs', 'executionModes', 'stateParameters']
+        apiVersion >= 3
+            ? [
+                  'inputParameter',
+                  'markerInputs',
+                  'timingInput',
+                  'mediaInputs',
+                  'executionModes',
+                  'stateParameters',
+                  ...(apiVersion === 4 ? ['renderSpace'] : []),
+              ]
             : apiVersion === 2
               ? ['inputParameter', 'markerInputs', 'timingInput', 'stateParameters']
               : ['inputParameter', 'stateParameters'],
     );
     if (!['visual', 'modifier', 'transition'].includes(String(v.kind)) || !Array.isArray(v.parameters))
         return invalid('算法种类或参数无效。');
+    if (apiVersion === 4 && (v.renderSpace !== 'world' || v.kind !== 'visual')) invalid('三维场景配置无效。');
     const parameters = v.parameters.map(parameter),
         ids = parameters.map(p => p.id);
     if (new Set(ids).size !== ids.length) invalid('算法参数重复。');
@@ -84,14 +93,12 @@ export function validateAlgorithmContract(input: unknown, apiVersion: 1 | 2 | 3 
     if (sharedParameters.some(id => parameters.find(p => p.id === id)?.valueKind !== 'number'))
         invalid('共同处理参数必须为数值。');
     const markerInputs =
-        apiVersion === 2 || (apiVersion === 3 && v.markerInputs !== undefined)
+        apiVersion === 2 || (apiVersion >= 3 && v.markerInputs !== undefined)
             ? validateMarkerInputs(v.markerInputs)
             : undefined;
-    const mediaInputs = apiVersion === 3 ? validateMediaInputs(v.mediaInputs) : undefined;
+    const mediaInputs = apiVersion >= 3 ? validateMediaInputs(v.mediaInputs) : undefined;
     const executionModes =
-        apiVersion === 3
-            ? (list(v.executionModes, ['timeline', 'realtime']) as ('timeline' | 'realtime')[])
-            : undefined;
+        apiVersion >= 3 ? (list(v.executionModes, ['timeline', 'realtime']) as ('timeline' | 'realtime')[]) : undefined;
     if (executionModes && !executionModes.length) invalid('ABI 3 必须声明执行模式。');
     let timingInput: string | undefined;
     if (v.timingInput !== undefined) {
@@ -108,6 +115,7 @@ export function validateAlgorithmContract(input: unknown, apiVersion: 1 | 2 | 3 
     }
     return {
         kind: v.kind as AlgorithmContract['kind'],
+        ...(apiVersion === 4 ? { renderSpace: 'world' as const } : {}),
         parameters,
         sharedParameters,
         historyParameters,
@@ -121,7 +129,13 @@ export function validateAlgorithmContract(input: unknown, apiVersion: 1 | 2 | 3 
 }
 export function validateShaderProgram(input: unknown): ShaderProgram {
     const v = record(input, 'Shader');
-    keys(v, ['vertex', 'fragment', 'geometry', 'uniforms']);
+    keys(v, ['vertex', 'fragment', 'geometry', 'uniforms'], ['alphaMode', 'alphaCutoff']);
+    if (v.alphaMode !== undefined && !['opaque', 'mask'].includes(String(v.alphaMode))) invalid('三维场景配置无效。');
+    if (
+        v.alphaCutoff !== undefined &&
+        (v.alphaMode !== 'mask' || finite(v.alphaCutoff, 'alphaCutoff') < 0 || Number(v.alphaCutoff) > 1)
+    )
+        invalid('三维场景配置无效。');
     text(v.vertex, 'vertex');
     text(v.fragment, 'fragment');
     if (!['quad', 'triangles'].includes(String(v.geometry))) invalid('Shader 几何类型无效。');
@@ -149,23 +163,32 @@ export function validateAlgorithmDefinition(input: unknown): AlgorithmDefinition
     const id = text(v.id, '算法 ID'),
         version = integer(v.version, '算法版本');
     if (!/^[a-z0-9][a-z0-9._-]*$/.test(id) || version < 1 || !Number.isSafeInteger(version)) invalid('算法身份无效。');
-    if (v.apiVersion !== 1 && v.apiVersion !== 2 && v.apiVersion !== 3) invalid('算法 ABI 不受支持。');
+    if (![1, 2, 3, 4].includes(Number(v.apiVersion)) || typeof v.apiVersion !== 'number')
+        invalid('算法 ABI 不受支持。');
     if (typeof v.hash !== 'string' || !/^[a-f0-9]{64}$/.test(v.hash) || resourceHash(v) !== v.hash)
         invalid('算法内容与 SHA-256 不匹配。');
-    const contract = validateAlgorithmContract(v.contract, v.apiVersion as 1 | 2 | 3),
+    const contract = validateAlgorithmContract(v.contract, v.apiVersion as 1 | 2 | 3 | 4),
         programs: Record<string, ShaderProgram> = {};
     for (const [name, program] of Object.entries(record(v.programs, 'programs')))
         Object.defineProperty(programs, identifier(name), { value: validateShaderProgram(program), enumerable: true });
     for (const program of Object.values(programs))
         for (const u of Object.values(program.uniforms))
-            if (u.type === 'media' && (v.apiVersion !== 3 || !contract.mediaInputs?.some(i => i.id === u.inputId)))
+            if (
+                u.type === 'media' &&
+                (Number(v.apiVersion) < 3 || !contract.mediaInputs?.some(i => i.id === u.inputId))
+            )
                 invalid('媒体纹理未获声明授权。');
+    for (const p of Object.values(programs)) {
+        if (v.apiVersion === 4 && (p.geometry !== 'triangles' || !p.alphaMode)) invalid('三维场景配置无效。');
+        if (v.apiVersion !== 4 && (p.alphaMode !== undefined || p.alphaCutoff !== undefined))
+            invalid('三维场景配置无效。');
+    }
     if (!Object.keys(programs).length) invalid('算法缺少 Shader。');
     return {
         id,
         version,
         hash: String(v.hash),
-        apiVersion: v.apiVersion as 1 | 2 | 3,
+        apiVersion: v.apiVersion as 1 | 2 | 3 | 4,
         contract,
         source: text(v.source, '算法源码'),
         programs,

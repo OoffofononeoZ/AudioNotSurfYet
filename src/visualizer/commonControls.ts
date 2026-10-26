@@ -5,7 +5,7 @@ import { validateElementBinding } from './elementBindings';
 import { defaultNumericTransform, compatibleAnalysisFeatures, createDefaultAnalysisBinding } from './bindingDefaults';
 import { invalid, keys, record, text } from './projectValidation';
 import type { CommonControl, CommonValue, ElementDefinition, PresetInstance } from './resourceTypes';
-import type { ElementBinding, VisualizerElement, VisualizerProjectV5 } from './compositionTypes';
+import type { ElementBinding, VisualizerElement, VisualizerProjectV6 } from './compositionTypes';
 import type { VisualizerNumericTransformV1 } from './types';
 
 const transformFields = [
@@ -132,7 +132,7 @@ export function validateCommonControls(
         return control;
     });
 }
-export function changedControlElements(project: VisualizerProjectV5, control: CommonControl): VisualizerElement[] {
+export function changedControlElements(project: VisualizerProjectV6, control: CommonControl): VisualizerElement[] {
     return control.targets.flatMap(id => {
         const element = project.elements.find(e => e.id === id);
         if (!element) return [];
@@ -149,11 +149,11 @@ export function changedControlElements(project: VisualizerProjectV5, control: Co
     });
 }
 export function applyCommonControl(
-    project: VisualizerProjectV5,
+    project: VisualizerProjectV6,
     preset: PresetInstance,
     id: string,
     value: CommonValue,
-): VisualizerProjectV5 {
+): VisualizerProjectV6 {
     const result = structuredClone(project),
         group = result.items.find(i => i.kind === 'preset' && i.id === preset.id);
     if (group?.kind !== 'preset') return invalid('预设不存在。');

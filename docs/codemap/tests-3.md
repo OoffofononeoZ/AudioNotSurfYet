@@ -8,6 +8,7 @@
 
 | 文件 | 本地静态引用（最多显示 6 项） |
 | --- | --- |
+| [tests/scripts/run-m11-eval.mjs](../../tests/scripts/run-m11-eval.mjs) | — |
 | [tests/scripts/run-m12-eval.mjs](../../tests/scripts/run-m12-eval.mjs) | — |
 | [tests/scripts/run-m13-eval.mjs](../../tests/scripts/run-m13-eval.mjs) | — |
 | [tests/scripts/run-m14-eval.mjs](../../tests/scripts/run-m14-eval.mjs) | — |
@@ -48,6 +49,7 @@
 | [tests/support/meyda-golden.ts](../../tests/support/meyda-golden.ts) | — |
 | [tests/support/osu-fixture.ts](../../tests/support/osu-fixture.ts) | — |
 | [tests/support/resource-directory.ts](../../tests/support/resource-directory.ts) | [tests/support/visualizer-assets.mjs](../../tests/support/visualizer-assets.mjs) |
+| [tests/support/scene3d-fixture.ts](../../tests/support/scene3d-fixture.ts) | [src/visualizer/algorithmTypes.ts](../../src/visualizer/algorithmTypes.ts)、[src/visualizer/compositionCodec.ts](../../src/visualizer/compositionCodec.ts)、[src/visualizer/resourceIdentity.ts](../../src/visualizer/resourceIdentity.ts)、[src/visualizer/resourceTypes.ts](../../src/visualizer/resourceTypes.ts)、[src/visualizer/scene3dTypes.ts](../../src/visualizer/scene3dTypes.ts) |
 | [tests/support/stem-analysis.ts](../../tests/support/stem-analysis.ts) | [src/analysis/pcm.ts](../../src/analysis/pcm.ts)、[src/processing/editorSeparationService.ts](../../src/processing/editorSeparationService.ts)、[src/processing/kernel.ts](../../src/processing/kernel.ts) |
 | [tests/support/tolerance.ts](../../tests/support/tolerance.ts) | — |
 | [tests/support/v6-resource-probe.ts](../../tests/support/v6-resource-probe.ts) | — |
@@ -106,5 +108,3 @@
 | [tests/visualizer/native-input.test.ts](../../tests/visualizer/native-input.test.ts) | [src/visualizer/compositionCodec.ts](../../src/visualizer/compositionCodec.ts)、[src/visualizer/compositionPresets.ts](../../src/visualizer/compositionPresets.ts)、[src/visualizer/compositionResolver.ts](../../src/visualizer/compositionResolver.ts)、[src/visualizer/nativeAudioAnalysis.ts](../../src/visualizer/nativeAudioAnalysis.ts)、[src/visualizer/nativeAudioSource.ts](../../src/visualizer/nativeAudioSource.ts)、[tests/support/visualizer-assets.mjs](../../tests/support/visualizer-assets.mjs)、另 1 项，按需核对源码 |
 | [tests/visualizer/number-editing.test.ts](../../tests/visualizer/number-editing.test.ts) | [src/utils/numberEditing.ts](../../src/utils/numberEditing.ts)、[src/visualizer/compositionCodec.ts](../../src/visualizer/compositionCodec.ts)、[src/visualizer/compositionPresets.ts](../../src/visualizer/compositionPresets.ts)、[src/visualizer/elementRegistry.ts](../../src/visualizer/elementRegistry.ts)、[tests/visualizer/resource-fixtures.ts](../../tests/visualizer/resource-fixtures.ts) |
 | [tests/visualizer/offline-export-core.test.ts](../../tests/visualizer/offline-export-core.test.ts) | [src/visualizer/exportPresets.ts](../../src/visualizer/exportPresets.ts)、[src/visualizer/offlineExportAudio.ts](../../src/visualizer/offlineExportAudio.ts)、[src/visualizer/offlineExportTimeline.ts](../../src/visualizer/offlineExportTimeline.ts) |
-| [tests/visualizer/point-lines.test.ts](../../tests/visualizer/point-lines.test.ts) | [src/editor/projectCodec.ts](../../src/editor/projectCodec.ts)、[src/visualizer/algorithmTypes.ts](../../src/visualizer/algorithmTypes.ts)、[src/visualizer/compositionCodec.ts](../../src/visualizer/compositionCodec.ts)、[src/visualizer/drawPacket.ts](../../src/visualizer/drawPacket.ts)、[src/visualizer/editorMarkerReader.ts](../../src/visualizer/editorMarkerReader.ts)、[src/visualizer/elementRegistry.ts](../../src/visualizer/elementRegistry.ts)、另 2 项，按需核对源码 |
-| [tests/visualizer/preset-export.test.ts](../../tests/visualizer/preset-export.test.ts) | [src/processing/sha256.ts](../../src/processing/sha256.ts)、[src/visualizer/compositionCodec.ts](../../src/visualizer/compositionCodec.ts)、[src/visualizer/compositionModel.ts](../../src/visualizer/compositionModel.ts)、[src/visualizer/compositionPresets.ts](../../src/visualizer/compositionPresets.ts)、[src/visualizer/elementRegistry.ts](../../src/visualizer/elementRegistry.ts)、[src/visualizer/presetDirectoryWriter.ts](../../src/visualizer/presetDirectoryWriter.ts)、另 4 项，按需核对源码 |

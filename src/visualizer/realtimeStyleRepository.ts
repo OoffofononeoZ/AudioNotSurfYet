@@ -1,4 +1,4 @@
-import { validateRealtimeStyle, type RealtimeStyleV1 } from './realtimeStyle';
+import { validateRealtimeStyle, type RealtimeStyleV2 } from './realtimeStyle';
 import { hasLegacySeed } from './seedMigration';
 
 /** Immutable, independent snapshots. Song drafts and resource-directory permissions are untouched. */
@@ -24,7 +24,7 @@ export class RealtimeStyleRepository {
             });
         return this.database;
     }
-    async save(style: RealtimeStyleV1) {
+    async save(style: RealtimeStyleV2) {
         const validated = validateRealtimeStyle(style),
             db = await this.open();
         await new Promise<void>((resolve, reject) => {
@@ -34,12 +34,12 @@ export class RealtimeStyleRepository {
             tx.onabort = tx.onerror = () => reject(tx.error ?? Error('保存实时样式失败。'));
         });
     }
-    async read(id: string): Promise<RealtimeStyleV1 | null> {
+    async read(id: string): Promise<RealtimeStyleV2 | null> {
         const db = await this.open();
-        return new Promise<RealtimeStyleV1 | null>((resolve, reject) => {
+        return new Promise<RealtimeStyleV2 | null>((resolve, reject) => {
             const tx = db.transaction('styles', 'readwrite'),
                 request = tx.objectStore('styles').get(id);
-            let value: RealtimeStyleV1 | null = null;
+            let value: RealtimeStyleV2 | null = null;
             let failure: unknown;
             request.onsuccess = () => {
                 try {

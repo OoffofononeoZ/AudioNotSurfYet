@@ -1,4 +1,5 @@
 import { elementRegistry, findResource } from './elementRegistry';
+import type { Scene3dItem } from './scene3dTypes';
 import { resourceRef } from './resourceIdentity';
 import type { VisualizerElement } from './compositionTypes';
 import type { PresetInstance, ResourceRef, ResourceSnapshot } from './resourceTypes';
@@ -7,7 +8,12 @@ export type CompositionPresetId = string;
 export const compositionPresets = elementRegistry.presets;
 export function instantiatePreset(id: string | ResourceRef, duration: number, startLayer = 0) {
     const definition = findResource(compositionPresets, id),
-        ids = new Map(definition.elements.map(e => [e.key, crypto.randomUUID()]));
+        ids = new Map(
+            [...definition.elements.map(e => e.key), ...(definition.scenes3d ?? []).map(s => s.key)].map(key => [
+                key,
+                crypto.randomUUID(),
+            ]),
+        );
     const elements: VisualizerElement[] = definition.elements.map((e, index) => {
         const d = elementRegistry.get(e.element);
         return {
@@ -17,6 +23,7 @@ export function instantiatePreset(id: string | ResourceRef, duration: number, st
             enabled: e.enabled,
             ...(d.usesSeed ? { seed: e.seed ?? null } : {}),
             layer: startLayer + index,
+            ...(e.transform3d ? { transform3d: structuredClone(e.transform3d) } : {}),
             bindings: structuredClone(e.bindings),
             ...(e.markerBindings ? { markerBindings: structuredClone(e.markerBindings) } : {}),
             ...(e.mediaBindings ? { mediaBindings: structuredClone(e.mediaBindings) } : {}),
@@ -29,7 +36,7 @@ export function instantiatePreset(id: string | ResourceRef, duration: number, st
                       targets:
                           e.targets.kind === 'composition'
                               ? { kind: 'composition' as const }
-                              : { kind: 'elements' as const, ids: e.targets.ids.map(key => ids.get(key)!) },
+                              : { kind: e.targets.kind, ids: e.targets.ids.map(key => ids.get(key)!) },
                   }
                 : {}),
         };
@@ -41,6 +48,23 @@ export function instantiatePreset(id: string | ResourceRef, duration: number, st
         name: definition.title,
         enabled: true,
         children: elements.map(e => e.id),
+        ...(definition.scenes3d
+            ? {
+                  scenes3d: definition.scenes3d.map(
+                      s =>
+                          ({
+                              kind: 'scene3d',
+                              id: ids.get(s.key)!,
+                              name: s.name,
+                              enabled: s.enabled,
+                              children: s.children.map(key => ids.get(key)!),
+                              startSeconds: duration * s.start,
+                              endSeconds: duration * s.end,
+                              camera: structuredClone(s.camera),
+                          }) as Scene3dItem,
+                  ),
+              }
+            : {}),
         controls: definition.controls.map(c => ({
             ...structuredClone(c),
             targets: c.targets.map(key => ids.get(key)!),

@@ -107,7 +107,7 @@ test('automatic seeds survive edits and persistence but reroll on clear, accepte
         (array as Uint32Array)[0] = next++;
         return array;
     });
-    const h = harness({ kind: 'current', draft: { schemaVersion: 5, savedAt: project.updatedAt, project } });
+    const h = harness({ kind: 'current', draft: { schemaVersion: 6, savedAt: project.updatedAt, project } });
     await h.controller.enter('first');
     expect(h.controller.readRenderSeeds().get(id)).toBe(100);
     h.controller.updateOutput('1080p', 30);
@@ -170,7 +170,7 @@ test('migrated drafts are saved once after activation and stay untouched on a di
     project.elements[0]!.seed = 17;
     const h = harness({
         kind: 'current',
-        draft: { schemaVersion: 5, savedAt: project.updatedAt, project },
+        draft: { schemaVersion: 6, savedAt: project.updatedAt, project },
         needsSave: true,
     });
     await h.controller.enter('second');
@@ -209,7 +209,7 @@ test('marker references reject an incompatible Editor refresh atomically and pro
         setOverlayVisibility: vi.fn(),
     };
     const h = harness(
-        { kind: 'current', draft: { schemaVersion: 5, savedAt: project.updatedAt, project } },
+        { kind: 'current', draft: { schemaVersion: 6, savedAt: project.updatedAt, project } },
         editorRepository,
     );
     await h.controller.enter('first');
@@ -296,7 +296,7 @@ test('starts empty, restores the same song, and protects the single draft on a d
 });
 
 test('exports invalid V5 draft bytes without writing or replacing them', async () => {
-    const raw = { schemaVersion: 5, project: { arbitrary: 'invalid bytes' } };
+    const raw = { schemaVersion: 6, project: { arbitrary: 'invalid bytes' } };
     const h = harness({ kind: 'unsupported', raw });
     await h.controller.enter('first');
     expect(h.controller.getSnapshot().state).toBe('unsupported-draft');

@@ -148,11 +148,11 @@ import AppNumberInput from '../controls/AppNumberInput.vue';
 import { AUDIO_VIDEO_OFFSET_MS } from '../../visualizer/exportTypes';
 import { compositionIssues } from '../../visualizer/compositionModel';
 import { useExportCapabilities } from '../../visualizer/useExportCapabilities';
-import type { CompositionSessionSnapshot, VisualizerProjectV5 } from '../../visualizer/compositionTypes';
+import type { CompositionSessionSnapshot, VisualizerProjectV6 } from '../../visualizer/compositionTypes';
 import type { VisualizerResolution, VisualizerFrameRate } from '../../visualizer/types';
 const props = defineProps<{
     snapshot: CompositionSessionSnapshot;
-    project: VisualizerProjectV5;
+    project: VisualizerProjectV6;
     locked: boolean;
     error: string;
 }>();

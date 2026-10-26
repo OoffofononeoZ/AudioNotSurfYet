@@ -2,7 +2,7 @@ import { expect, test, type Page } from '@playwright/test';
 import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { chooseFiles, installFilePickerStub, queuePickerData, savedPickerEntries } from '../support/file-picker';
-import type { VisualizerProjectV5 } from '../../src/visualizer/compositionTypes';
+import type { VisualizerProjectV6 } from '../../src/visualizer/compositionTypes';
 
 async function probe(page: Page) {
     return page.evaluate(
@@ -78,7 +78,7 @@ test('later-song property editing keeps history warm and renders the latest valu
     }
     await page.getByTestId('export-visualizer-project').click();
     await expect.poll(async () => (await savedPickerEntries(page)).length).toBe(1);
-    const project: VisualizerProjectV5 = JSON.parse(
+    const project: VisualizerProjectV6 = JSON.parse(
         Buffer.from((await savedPickerEntries(page))[0]!.base64, 'base64').toString('utf8'),
     );
     for (const e of project.elements) {

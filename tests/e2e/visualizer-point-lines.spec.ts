@@ -3,12 +3,12 @@ import path from 'node:path';
 import { mkdir, writeFile } from 'node:fs/promises';
 import { chooseFiles, installFilePickerStub, queuePickerData, savedPickerEntries } from '../support/file-picker';
 import { createInitialEditorProject } from '../../src/editor/projectCodec';
-import type { VisualizerProjectV5 } from '../../src/visualizer/compositionTypes';
+import type { VisualizerProjectV6 } from '../../src/visualizer/compositionTypes';
 import { resourcePack } from '../support/visualizer-assets.mjs';
 import { createDefinitionElement } from '../../src/visualizer/elementRegistry';
 const artifact = 'artifacts/visualizer-composition/point-lines';
 
-async function exported(page: Page): Promise<VisualizerProjectV5> {
+async function exported(page: Page): Promise<VisualizerProjectV6> {
     const count = (await savedPickerEntries(page)).length;
     await page.getByTestId('export-visualizer-project').click();
     await expect.poll(async () => (await savedPickerEntries(page)).length).toBe(count + 1);

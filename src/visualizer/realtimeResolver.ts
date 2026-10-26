@@ -1,6 +1,6 @@
 import type { ExactFeatureValue, FeatureId } from '../analysis/types';
 import type { NativeAudioFrame } from './nativeAudioAnalysis';
-import type { RealtimeStyleV1 } from './realtimeStyle';
+import type { RealtimeStyleV2 } from './realtimeStyle';
 import type { VisualizerResolvedParameterMap } from './rendererTypes';
 import type { VisualizerAnalysisComponent } from './types';
 import { projectRawValue } from './analysisProjection';
@@ -49,7 +49,7 @@ export class RealtimeResolver {
         this.smoothing.clear();
     }
     resolve(
-        style: RealtimeStyleV1,
+        style: RealtimeStyleV2,
         time: number,
         features: Partial<Record<FeatureId, ExactFeatureValue>>,
         native: NativeAudioFrame | null,

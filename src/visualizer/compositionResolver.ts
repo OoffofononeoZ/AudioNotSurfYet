@@ -4,7 +4,7 @@ import { analysisSignal } from './analysisSignal';
 import { ScalarSmoothingResolver, normalizedTarget, outputValue } from './bindingSmoothing';
 import { elementDescriptor, elementAlgorithm, effectiveElements } from './compositionModel';
 import type { VisualizerResolvedParameter } from './rendererTypes';
-import type { VisualizerProjectV5 } from './compositionTypes';
+import type { VisualizerProjectV6 } from './compositionTypes';
 import type { NativeInputFeature } from './nativeAudioAnalysis';
 export type ResolvedComposition = ReadonlyMap<string, ReadonlyMap<string, VisualizerResolvedParameter>>;
 
@@ -14,7 +14,7 @@ export class CompositionResolver {
         this.smoothers.clear();
     }
     resolve(
-        project: VisualizerProjectV5,
+        project: VisualizerProjectV6,
         time: number,
         getSeries: (id: FeatureId, stemRole?: import('../processing/modelManifest').StemRole) => AnalysisSeries | null,
         getWaveform?: (

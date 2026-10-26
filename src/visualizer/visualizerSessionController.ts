@@ -43,7 +43,7 @@ import { parameterKey } from './compositionEffects';
 import type {
     VisualizerElement,
     ElementBinding,
-    VisualizerProjectV5,
+    VisualizerProjectV6,
     CompositionSessionSnapshot,
 } from './compositionTypes';
 import type { VisualizerTrackValidationContext, VisualizerResolution, VisualizerFrameRate } from './types';
@@ -437,7 +437,7 @@ export class VisualizerSessionController {
             });
         }
     }
-    updateProject(input: VisualizerProjectV5, options: { resetSeed?: boolean } = {}) {
+    updateProject(input: VisualizerProjectV6, options: { resetSeed?: boolean } = {}) {
         this.assertUnlocked();
         const context = this.context();
         if (!context || !this.snapshot.project) return;

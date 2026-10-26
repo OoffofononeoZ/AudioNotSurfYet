@@ -1,11 +1,11 @@
-import { validateRealtimeStyle, realtimeRenderModel, type RealtimeStyleV1 } from './realtimeStyle';
+import { validateRealtimeStyle, realtimeRenderModel, type RealtimeStyleV2 } from './realtimeStyle';
 import { inspectRealtimeContent } from './realtimeCapabilities';
 
 export interface WallpaperExportFile {
     name: string;
     content: string;
 }
-export function createWallpaperFiles(input: RealtimeStyleV1, runtime: string, licenses: string): WallpaperExportFile[] {
+export function createWallpaperFiles(input: RealtimeStyleV2, runtime: string, licenses: string): WallpaperExportFile[] {
     const style = validateRealtimeStyle(input),
         model = realtimeRenderModel(style, 1);
     const capabilities = inspectRealtimeContent(model.elements, style.resources, 1);
@@ -41,7 +41,7 @@ export function createWallpaperFiles(input: RealtimeStyleV1, runtime: string, li
         },
     ];
 }
-export async function prepareWallpaperFiles(style: RealtimeStyleV1, signal?: AbortSignal) {
+export async function prepareWallpaperFiles(style: RealtimeStyleV2, signal?: AbortSignal) {
     const files = await Promise.all(
         ['runtime.js', 'THIRD_PARTY_LICENSES.txt'].map(async name => {
             const response = await fetch(`${import.meta.env.BASE_URL}wallpaper-runtime/${name}`, { signal });

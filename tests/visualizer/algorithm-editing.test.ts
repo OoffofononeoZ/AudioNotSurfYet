@@ -8,11 +8,11 @@ import { ElementSeedSession } from '../../src/visualizer/seed';
 import { FrameSupersededError } from '../../src/visualizer/framePreparation';
 import { AlgorithmRuntimeFixture } from './algorithm-runtime-fixture';
 import type { DrawPacket } from '../../src/visualizer/algorithmTypes';
-import type { VisualizerProjectV5 } from '../../src/visualizer/compositionTypes';
+import type { VisualizerProjectV6 } from '../../src/visualizer/compositionTypes';
 import type { VisualizerResolvedParameterMap } from '../../src/visualizer/rendererTypes';
 
 const track = { contentHash: 'a'.repeat(64), fileName: 'editing.wav', durationSeconds: 180, sampleRate: 48000 };
-function harness(initial?: VisualizerProjectV5) {
+function harness(initial?: VisualizerProjectV6) {
     let project =
         initial ??
         appendStandaloneElements(

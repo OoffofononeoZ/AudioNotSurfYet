@@ -3,7 +3,7 @@ import type { NativeAudioFrame } from './nativeAudioAnalysis';
 import type { VisualizerRendererStatus } from './rendererTypes';
 import { CompositionScene, type CompositionRenderPort } from './compositionScene';
 import { VisualizerRendererHost } from './visualizerRendererHost';
-import { realtimeRenderModel, type RealtimeStyleV1 } from './realtimeStyle';
+import { realtimeRenderModel, type RealtimeStyleV2 } from './realtimeStyle';
 import { RealtimeResolver } from './realtimeResolver';
 import { validateAlgorithmPrograms } from './validateAlgorithmPrograms';
 import { ElementSeedSession } from './seed';
@@ -19,13 +19,13 @@ export class RealtimeSurface {
     private pausedAt: number | null = null;
     private pausedDuration = 0;
     private observer: ResizeObserver;
-    private style: RealtimeStyleV1;
+    private style: RealtimeStyleV2;
     /** 0 follows the display refresh rate; Wallpaper Engine passes its own host frame rate. */
     private fps = 0;
     readNative: (() => NativeAudioFrame | null) | null = null;
     constructor(
         canvas: HTMLCanvasElement,
-        style: RealtimeStyleV1,
+        style: RealtimeStyleV2,
         onStatus: (status: VisualizerRendererStatus) => void,
     ) {
         this.style = style;

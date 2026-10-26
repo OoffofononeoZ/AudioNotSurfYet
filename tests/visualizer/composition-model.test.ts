@@ -131,7 +131,7 @@ describe('V5 composition project', () => {
         const repo = new CompositionDraftRepository(indexedDB, name);
         expect(await repo.restore()).toBeNull();
         expect(await repo.restore()).toBeNull();
-        const draft = { schemaVersion: 5 as const, savedAt: new Date().toISOString(), project: project() };
+        const draft = { schemaVersion: 6 as const, savedAt: new Date().toISOString(), project: project() };
         await repo.replace(draft);
         expect(await repo.restore()).toEqual({ kind: 'current', draft });
         repo.close();

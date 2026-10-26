@@ -1,7 +1,11 @@
 import * as THREE from 'three';
+import { sceneGroups, elementScene, renderUnits, findScene3d } from './scene3dModel';
+import { resolveSceneCamera } from './scene3dCamera';
+import { defaultTransform3d } from './scene3dTypes';
+import type { CameraFrame } from './scene3dTypes';
 import { CompositionMediaHost } from './mediaHost';
 import { quadVertex, compositeFragment } from './compositionShaders';
-import { elementRange, orderedElements, effectiveElements, elementDescriptor } from './compositionModel';
+import { elementRange, effectiveElements, elementDescriptor } from './compositionModel';
 import { effectsFor, parameterKey } from './compositionEffects';
 import { findResource } from './elementRegistry';
 import { AlgorithmDrawRenderer } from './algorithmDrawRenderer';
@@ -54,6 +58,8 @@ export class CompositionScene implements VisualizerScene {
         new THREE.WebGLRenderTarget(1, 1, { depthBuffer: false }),
     ];
     private accumulation = new THREE.WebGLRenderTarget(1, 1, { depthBuffer: false });
+    private worldTarget = new THREE.WebGLRenderTarget(1, 1, { depthBuffer: true });
+    private cameras = new Map<string, CameraFrame>();
     private gpu = new AlgorithmDrawRenderer(this.geometry);
     private media = new CompositionMediaHost();
     private runtime: AlgorithmRuntimePort | null = null;
@@ -89,6 +95,7 @@ export class CompositionScene implements VisualizerScene {
         assertCurrent();
         const values = this.options.prepareAt ? this.options.resolveAt(input.timeSeconds) : input.values;
         this.packets.clear();
+        this.cameras.clear();
         this.needsSourcePrompt = false;
         if (!project || !project.elements.length) {
             this.media.dispose();
@@ -150,12 +157,14 @@ export class CompositionScene implements VisualizerScene {
                 continue;
             used.add(e.id);
             for (const effect of effectsFor(project, e.id, input.timeSeconds)) used.add(effect.id);
+            const scene = elementScene(project, e.id);
+            if (scene) for (const effect of effectsFor(project, scene.id, input.timeSeconds, true)) used.add(effect.id);
         }
         for (const e of effectsFor(project, null, input.timeSeconds)) used.add(e.id);
         for (const e of effectiveElements(project).filter(e => used.has(e.id))) {
             const a = findResource(project.resources.algorithms, elementDescriptor(project, e).algorithm);
             if (
-                a.apiVersion === 3 &&
+                a.apiVersion >= 3 &&
                 !a.contract.executionModes?.includes(this.options.realtime ? 'realtime' : 'timeline')
             )
                 throw Error('元素不支持当前执行模式。');
@@ -169,6 +178,11 @@ export class CompositionScene implements VisualizerScene {
         );
         assertCurrent();
         if (runtime !== this.runtime) throw new FrameSupersededError();
+        for (const scene of sceneGroups(project).filter(s => s.enabled && s.children.some(id => used.has(id))))
+            this.cameras.set(
+                scene.id,
+                resolveSceneCamera(scene.camera, input.timeSeconds - scene.startSeconds, this.width, this.height),
+            );
         const frames = effectiveElements(project)
             .filter(e => used.has(e.id))
             .flatMap(e => {
@@ -211,8 +225,9 @@ export class CompositionScene implements VisualizerScene {
                             height: this.height,
                             range: this.options.realtime ? null : elementRange(project, e),
                             parameters,
+                            ...aWorldCamera(project, e, this.cameras),
                             ...(findResource(project.resources.algorithms, elementDescriptor(project, e).algorithm)
-                                .apiVersion === 3
+                                .apiVersion >= 3
                                 ? {
                                       mode: this.options.realtime ? ('realtime' as const) : ('timeline' as const),
                                       media: mediaFrames.get(e.id),
@@ -299,7 +314,53 @@ export class CompositionScene implements VisualizerScene {
         ];
         try {
             this.clear(this.accumulation);
-            for (const e of orderedElements(effectiveElements(project))) {
+            const effective = effectiveElements(project);
+            for (const unit of renderUnits(project)) {
+                if (unit.kind === 'scene3d') {
+                    const scene = findScene3d(project, unit.id)!;
+                    const visible = effective.filter(
+                        e => scene.children.includes(e.id) && e.enabled && this.packets.has(e.id),
+                    );
+                    if (
+                        !visible.length ||
+                        !scene.enabled ||
+                        input.timeSeconds < scene.startSeconds ||
+                        input.timeSeconds > scene.endSeconds
+                    )
+                        continue;
+                    renderer.setRenderTarget(this.worldTarget);
+                    renderer.setClearColor('#000000', 0);
+                    renderer.clear(true, true, false);
+                    for (const e of visible) {
+                        const algorithm = findResource(
+                            project.resources.algorithms,
+                            elementDescriptor(project, e).algorithm,
+                        );
+                        for (const pass of this.packets.get(e.id)!.passes)
+                            this.gpu.draw(
+                                renderer,
+                                algorithm,
+                                pass,
+                                undefined,
+                                (inputId, slot) => this.media.texture(e.id, inputId, slot),
+                                {
+                                    camera: this.cameras.get(scene.id)!,
+                                    transform: e.transform3d ?? defaultTransform3d(),
+                                },
+                            );
+                    }
+                    let image = this.worldTarget;
+                    for (const effect of effectsFor(project, scene.id, input.timeSeconds, true))
+                        if (this.packets.has(effect.id)) image = this.drawElement(project, effect, image)!;
+                    this.copy(image, this.accumulation, true);
+                    hashes.push(
+                        JSON.stringify(scene.camera),
+                        JSON.stringify(this.cameras.get(scene.id)),
+                        ...visible.map(e => JSON.stringify(e.transform3d)),
+                    );
+                    continue;
+                }
+                const e = effective.find(e => e.id === unit.id)!;
                 const range = elementRange(project, e);
                 if (
                     !e.enabled ||
@@ -340,7 +401,8 @@ export class CompositionScene implements VisualizerScene {
         this.width = Math.max(1, Math.round(width * dpr));
         this.height = Math.max(1, Math.round(height * dpr));
         this.gpu.resize(this.width, this.height);
-        for (const target of [...this.targets, this.accumulation]) target.setSize(this.width, this.height);
+        for (const target of [...this.targets, this.accumulation, this.worldTarget])
+            target.setSize(this.width, this.height);
     }
     dispose() {
         if (this.disposed) return;
@@ -352,7 +414,13 @@ export class CompositionScene implements VisualizerScene {
         this.geometry.dispose();
         this.material.dispose();
         this.scene.clear();
-        for (const target of [...this.targets, this.accumulation]) target.dispose();
+        for (const target of [...this.targets, this.accumulation, this.worldTarget]) target.dispose();
         this.packets.clear();
+        this.cameras.clear();
     }
+}
+
+function aWorldCamera(project: CompositionRenderModel, element: VisualizerElement, cameras: Map<string, CameraFrame>) {
+    const scene = elementScene(project, element.id);
+    return scene ? { camera: cameras.get(scene.id)! } : {};
 }

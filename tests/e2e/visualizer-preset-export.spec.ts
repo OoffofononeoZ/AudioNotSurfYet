@@ -3,7 +3,7 @@ import { expect, test, type Page } from '@playwright/test';
 import path from 'node:path';
 import { createHash } from 'node:crypto';
 import { chooseFiles, installFilePickerStub, queuePickerData, savedPickerEntries } from '../support/file-picker';
-import type { VisualizerProjectV5 } from '../../src/visualizer/compositionTypes';
+import type { VisualizerProjectV6 } from '../../src/visualizer/compositionTypes';
 const audio = path.resolve('tests/fixtures/audio/visualizer-v5-avsync-v1.wav');
 test.use({ viewport: { width: 1920, height: 1080 } });
 async function open(page: Page) {
@@ -15,13 +15,13 @@ async function open(page: Page) {
     await page.getByTestId('header-visualizer-link').click();
     await expect(page.getByTestId('visualizer-ready')).toBeVisible();
 }
-async function exported(page: Page): Promise<VisualizerProjectV5> {
+async function exported(page: Page): Promise<VisualizerProjectV6> {
     const count = (await savedPickerEntries(page)).length;
     await page.getByTestId('export-visualizer-project').click();
     await expect.poll(async () => (await savedPickerEntries(page)).length).toBe(count + 1);
     return JSON.parse(Buffer.from((await savedPickerEntries(page)).at(-1)!.base64, 'base64').toString('utf8'));
 }
-async function imported(page: Page, project: VisualizerProjectV5) {
+async function imported(page: Page, project: VisualizerProjectV6) {
     await queuePickerData(page, [
         { name: 'project.json', mimeType: 'application/json', text: JSON.stringify(project) },
     ]);

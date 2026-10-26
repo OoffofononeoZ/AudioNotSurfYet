@@ -12,6 +12,7 @@ import type {
 import type { NativeInputFeature } from './nativeAudioAnalysis';
 import type { CompositionItem, ResourceRef, ResourceSnapshot } from './resourceTypes';
 import type { MarkerBindings } from './editorMarkerTypes';
+import type { Transform3d } from './scene3dTypes';
 
 export type ElementKind = 'visual' | 'modifier' | 'transition';
 export type ElementTiming =
@@ -24,7 +25,7 @@ export type ElementBinding = Omit<VisualizerParameterBindingV1, 'source'> & {
         | { kind: 'unbound' }
         | { kind: 'native'; featureId: NativeInputFeature };
 };
-export type EffectTargets = { kind: 'composition' } | { kind: 'elements'; ids: string[] };
+export type EffectTargets = { kind: 'composition' } | { kind: 'elements' | 'scenes3d'; ids: string[] };
 export interface VisualizerElement {
     id: string;
     resource: ResourceRef;
@@ -37,10 +38,11 @@ export interface VisualizerElement {
     markerBindings?: MarkerBindings;
     mediaBindings?: MediaBindings;
     targets?: EffectTargets;
+    transform3d?: Transform3d;
 }
-export interface VisualizerProjectV5 {
+export interface VisualizerProjectV6 {
     format: 'audiosurf-visualizer';
-    schemaVersion: 5;
+    schemaVersion: 6;
     projectId: string;
     createdAt: string;
     updatedAt: string;
@@ -59,14 +61,14 @@ export interface VisualizerProjectV5 {
     editorSnapshot?: { capturedAt: string; project: EditorProjectV2 };
 }
 export interface CompositionDraft {
-    schemaVersion: 5;
+    schemaVersion: 6;
     savedAt: string;
-    project: VisualizerProjectV5;
+    project: VisualizerProjectV6;
 }
 
 /** Renderer data shared by song projects and independent realtime styles. */
 export type CompositionRenderModel = Pick<
-    VisualizerProjectV5,
+    VisualizerProjectV6,
     'projectId' | 'elements' | 'items' | 'resources' | 'editorSnapshot' | 'mediaAssets'
 >;
 
@@ -74,7 +76,7 @@ export interface CompositionSessionSnapshot {
     state: VisualizerSessionState | 'unsupported-draft';
     routeTrackId: string | null;
     activeTrackId: string | null;
-    project: VisualizerProjectV5 | null;
+    project: VisualizerProjectV6 | null;
     conflictingDraft: CompositionDraft | null;
     unsupportedDraft: unknown;
     persistence: VisualizerPersistenceState;

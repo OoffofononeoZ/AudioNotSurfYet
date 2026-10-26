@@ -1,6 +1,8 @@
+import { elementScene } from './scene3dModel';
+import { resolveSceneCamera } from './scene3dCamera';
 import { CompositionMediaHost } from './mediaHost';
 import { realtimeRenderModel } from './realtimeStyle';
-import type { RealtimeStyleV1 } from './realtimeStyle';
+import type { RealtimeStyleV2 } from './realtimeStyle';
 import { IsolatedAlgorithmRuntime } from './isolatedAlgorithmRuntime';
 import { RealtimeResolver } from './realtimeResolver';
 import { findResource } from './elementRegistry';
@@ -8,7 +10,7 @@ import { parameterKey } from './compositionEffects';
 import { ElementSeedSession } from './seed';
 
 /** Validate executable frame-only behavior before publishing a local snapshot. */
-export async function validateRealtimeCandidate(style: RealtimeStyleV1, signal?: AbortSignal) {
+export async function validateRealtimeCandidate(style: RealtimeStyleV2, signal?: AbortSignal) {
     signal?.throwIfAborted();
     const runtime = new IsolatedAlgorithmRuntime();
     const media = new CompositionMediaHost();
@@ -36,6 +38,9 @@ export async function validateRealtimeCandidate(style: RealtimeStyleV1, signal?:
                 id: e.id,
                 frame: {
                     time: 0,
+                    ...(elementScene(model, e.id)
+                        ? { camera: resolveSceneCamera(elementScene(model, e.id)!.camera, 0, 1920, 1080) }
+                        : {}),
                     mode: 'realtime',
                     media: mediaFrames.get(e.id),
                     seed: elementSeeds.get(e.id) ?? 0,

@@ -3,7 +3,7 @@ import path from 'node:path';
 import { mkdir, writeFile } from 'node:fs/promises';
 import { chooseFiles, installFilePickerStub, savedPickerEntries, queuePickerData } from '../support/file-picker';
 import { installV6ResourceProbe, readV6ResourceProbe } from '../support/v6-resource-probe';
-import type { VisualizerProjectV5 } from '../../src/visualizer/compositionTypes';
+import type { VisualizerProjectV6 } from '../../src/visualizer/compositionTypes';
 import { createOutputSyncWav } from '../support/visualizer-output-sync';
 const audio = path.resolve(import.meta.dirname, '../fixtures/audio/visualizer-v5-avsync-v1.wav');
 async function open(page: Page, file = audio) {
@@ -16,7 +16,7 @@ async function open(page: Page, file = audio) {
     if ((await page.locator('#music-bar-container').getAttribute('data-playback-state')) === 'playing')
         await page.getByTestId('toggle-playback').click();
 }
-async function exported(page: Page): Promise<VisualizerProjectV5> {
+async function exported(page: Page): Promise<VisualizerProjectV6> {
     const count = (await savedPickerEntries(page)).length;
     await page.getByTestId('export-visualizer-project').click();
     await expect.poll(async () => (await savedPickerEntries(page)).length).toBe(count + 1);
@@ -26,7 +26,7 @@ async function selectElement(page: Page, resourceId: string) {
     const element = (await exported(page)).elements.find(e => e.resource.id === resourceId)!;
     await page.locator(`[data-element-id="${element.id}"] .viz-element-select`).click();
 }
-async function importProject(page: Page, p: VisualizerProjectV5) {
+async function importProject(page: Page, p: VisualizerProjectV6) {
     await queuePickerData(page, [{ name: 'preset.json', mimeType: 'application/json', text: JSON.stringify(p) }]);
     await page.getByTestId('import-visualizer-project').click();
     await expect(page.getByTestId('import-visualizer-project')).toHaveAttribute('aria-busy', 'false');

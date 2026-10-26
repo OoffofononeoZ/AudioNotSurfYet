@@ -95,9 +95,9 @@ import VisualizerCompositionRow from './VisualizerCompositionRow.vue';
 import { useResourceLibrary } from '../../visualizer/useResourceLibrary';
 import { resourceKey } from '../../visualizer/resourceIdentity';
 import type { ResourceRef } from '../../visualizer/resourceTypes';
-import type { VisualizerProjectV5 } from '../../visualizer/compositionTypes';
+import type { VisualizerProjectV6 } from '../../visualizer/compositionTypes';
 import type { CompositionItem } from '../../visualizer/resourceTypes';
-const props = defineProps<{ project: VisualizerProjectV5; selection: string | null; locked: boolean }>();
+const props = defineProps<{ project: VisualizerProjectV6; selection: string | null; locked: boolean }>();
 const emit = defineEmits<{
     add: [];
     'export-preset': [];

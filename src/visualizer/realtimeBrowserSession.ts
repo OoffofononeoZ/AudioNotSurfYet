@@ -6,7 +6,7 @@ import type { AnalysisCoordinator } from '../analysis/analysisCoordinator';
 import type { RealtimeAnalysisLease } from '../analysis/realtimeTypes';
 import type { FeatureId } from '../analysis/types';
 import type { PlaybackSnapshot } from '../types/audio';
-import type { RealtimeStyleV1 } from './realtimeStyle';
+import type { RealtimeStyleV2 } from './realtimeStyle';
 import type { NativeInputFeature } from './nativeAudioAnalysis';
 import type { RealtimeSurface } from './realtimeSurface';
 
@@ -31,12 +31,12 @@ export class RealtimeBrowserSession {
     private failed = false;
     private dependencies: RealtimeBrowserDependencies;
     private surface: RealtimeSurface;
-    private style: RealtimeStyleV1;
+    private style: RealtimeStyleV2;
     private onError: (message: string) => void;
     constructor(
         dependencies: RealtimeBrowserDependencies,
         surface: RealtimeSurface,
-        style: RealtimeStyleV1,
+        style: RealtimeStyleV2,
         onError: (message: string) => void,
     ) {
         this.dependencies = dependencies;

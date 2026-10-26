@@ -3,7 +3,7 @@ import path from 'node:path';
 import { mkdir, writeFile } from 'node:fs/promises';
 import { chooseFiles, installFilePickerStub, savedPickerEntries, queuePickerData } from '../support/file-picker';
 import { createInitialEditorProject } from '../../src/editor/projectCodec';
-import type { VisualizerProjectV5 } from '../../src/visualizer/compositionTypes';
+import type { VisualizerProjectV6 } from '../../src/visualizer/compositionTypes';
 const audio = path.resolve(import.meta.dirname, '../fixtures/audio/visualizer-v5-avsync-v1.wav');
 async function open(page: Page) {
     await page.setViewportSize({ width: 1920, height: 1080 });
@@ -18,7 +18,7 @@ async function add(page: Page, type: string) {
     await page.locator('[data-element-type="' + type + '"]').click();
     await expect(page.getByRole('dialog', { name: '资源商城' })).not.toBeVisible();
 }
-async function exported(page: Page): Promise<VisualizerProjectV5> {
+async function exported(page: Page): Promise<VisualizerProjectV6> {
     const previous = (await savedPickerEntries(page)).length;
     await page.getByTestId('export-visualizer-project').click();
     await expect.poll(async () => (await savedPickerEntries(page)).length).toBe(previous + 1);

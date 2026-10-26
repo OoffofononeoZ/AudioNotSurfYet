@@ -21,7 +21,7 @@ import { applyCommonControl, changedControlElements } from '../../src/visualizer
 import { mergeResources, validateResourcePackage } from '../../src/visualizer/resourceCodec';
 import { resourceHash, resourceRef } from '../../src/visualizer/resourceIdentity';
 import type { PresetInstance, VisualizerResourcePackageV2 } from '../../src/visualizer/resourceTypes';
-import type { VisualizerProjectV5 } from '../../src/visualizer/compositionTypes';
+import type { VisualizerProjectV6 } from '../../src/visualizer/compositionTypes';
 
 const track = { contentHash: 'a'.repeat(64), fileName: 'resources.wav', durationSeconds: 12, sampleRate: 48000 };
 const seal = <T extends object>(value: T): T & { hash: string } => ({ ...value, hash: resourceHash(value) });
@@ -41,7 +41,7 @@ function customPack(): VisualizerResourcePackageV2 {
         presets: [],
     };
 }
-function addPreset(p: VisualizerProjectV5, id = 'geometric-0.6') {
+function addPreset(p: VisualizerProjectV6, id = 'geometric-0.6') {
     const added = instantiatePreset(id, p.track.durationSeconds, p.elements.length);
     return synchronizeLayers({
         ...p,
@@ -50,7 +50,7 @@ function addPreset(p: VisualizerProjectV5, id = 'geometric-0.6') {
         resources: mergeResources(p.resources, added.resources),
     });
 }
-const group = (p: VisualizerProjectV5, index = 0) =>
+const group = (p: VisualizerProjectV6, index = 0) =>
     p.items.filter((i): i is PresetInstance => i.kind === 'preset')[index]!;
 
 describe('V5 preset ownership and bulk controls', () => {

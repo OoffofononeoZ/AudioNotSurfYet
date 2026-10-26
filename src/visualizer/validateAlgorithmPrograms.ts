@@ -1,4 +1,6 @@
 import * as THREE from 'three';
+import { resolveSceneCamera } from './scene3dCamera';
+import { defaultCamera, defaultTransform3d } from './scene3dTypes';
 import { AlgorithmDrawRenderer } from './algorithmDrawRenderer';
 import type { VisualizerRenderer } from './rendererTypes';
 import type { ResourceSnapshot } from './resourceTypes';
@@ -46,7 +48,16 @@ export function validateAlgorithmPrograms(renderer: VisualizerRenderer, resource
                           }
                         : {}),
                 };
-                gpu.draw(renderer, algorithm, pass);
+                gpu.draw(
+                    renderer,
+                    algorithm,
+                    pass,
+                    undefined,
+                    undefined,
+                    algorithm.contract.renderSpace === 'world'
+                        ? { camera: resolveSceneCamera(defaultCamera(), 0, 1, 1), transform: defaultTransform3d() }
+                        : undefined,
+                );
             }
     } finally {
         renderer.setRenderTarget(current);

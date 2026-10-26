@@ -2,7 +2,7 @@ import { test, expect, type Page } from '@playwright/test';
 import path from 'node:path';
 import fs from 'node:fs/promises';
 import { chooseFiles, installFilePickerStub, savedPickerEntries, queuePickerData } from '../support/file-picker';
-import type { VisualizerProjectV5 } from '../../src/visualizer/compositionTypes';
+import type { VisualizerProjectV6 } from '../../src/visualizer/compositionTypes';
 import { resourcePack, assetsRoot } from '../support/visualizer-assets.mjs';
 const artifact = 'artifacts/visualizer-composition/circular';
 async function open(page: Page) {
@@ -15,13 +15,13 @@ async function open(page: Page) {
     if ((await page.locator('#music-bar-container').getAttribute('data-playback-state')) === 'playing')
         await page.getByTestId('toggle-playback').click();
 }
-async function exported(page: Page): Promise<VisualizerProjectV5> {
+async function exported(page: Page): Promise<VisualizerProjectV6> {
     const count = (await savedPickerEntries(page)).length;
     await page.getByTestId('export-visualizer-project').click();
     await expect.poll(async () => (await savedPickerEntries(page)).length).toBe(count + 1);
     return JSON.parse(Buffer.from((await savedPickerEntries(page)).at(-1)!.base64, 'base64').toString('utf8'));
 }
-async function load(page: Page, project: VisualizerProjectV5) {
+async function load(page: Page, project: VisualizerProjectV6) {
     await queuePickerData(page, [
         { name: 'circular.json', mimeType: 'application/json', text: JSON.stringify(project) },
     ]);

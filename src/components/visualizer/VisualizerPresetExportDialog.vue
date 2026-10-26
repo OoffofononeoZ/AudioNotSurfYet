@@ -50,7 +50,7 @@
 <script setup lang="ts">
 import { ref, shallowRef, watch, onBeforeUnmount, nextTick } from 'vue';
 import { ElMessage } from 'element-plus';
-import type { VisualizerProjectV5 } from '../../visualizer/compositionTypes';
+import type { VisualizerProjectV6 } from '../../visualizer/compositionTypes';
 import { inspectRealtimeProject } from '../../visualizer/realtimeCapabilities';
 import { createRealtimeStyle } from '../../visualizer/realtimeStyle';
 import { validateRealtimeCandidate } from '../../visualizer/validateRealtimeCandidate';
@@ -59,14 +59,14 @@ import { savePresetDirectory, PresetDirectoryCleanupError } from '../../visualiz
 import { useResourceLibrary } from '../../visualizer/useResourceLibrary';
 const props = defineProps<{
     open: boolean;
-    project: VisualizerProjectV5 | null;
+    project: VisualizerProjectV6 | null;
     locked: boolean;
     captureCover(signal: AbortSignal): Promise<Blob>;
 }>();
 const emit = defineEmits<{ close: [] }>();
 const { library, state } = useResourceLibrary();
 const dialog = ref<HTMLDialogElement | null>(null),
-    source = shallowRef<VisualizerProjectV5 | null>(null);
+    source = shallowRef<VisualizerProjectV6 | null>(null);
 const title = ref('自定义预设'),
     description = ref(''),
     creator = ref('default');

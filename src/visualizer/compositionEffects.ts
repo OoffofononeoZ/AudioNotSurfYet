@@ -1,14 +1,19 @@
 import { elementRange, orderedElements, effectiveElements, elementDescriptor } from './compositionModel';
 import type { VisualizerElement, CompositionRenderModel } from './compositionTypes';
 export const parameterKey = (id: string, parameter: string) => id + ':' + parameter;
-export function effectsFor(project: CompositionRenderModel, target: string | null, time: number): VisualizerElement[] {
+export function effectsFor(
+    project: CompositionRenderModel,
+    target: string | null,
+    time: number,
+    scene = false,
+): VisualizerElement[] {
     const effects = orderedElements(effectiveElements(project)).filter(
         e =>
             e.enabled &&
             elementDescriptor(project, e).kind !== 'visual' &&
             (target === null
                 ? e.targets?.kind === 'composition'
-                : e.targets?.kind === 'elements' && e.targets.ids.includes(target)),
+                : e.targets?.kind === (scene ? 'scenes3d' : 'elements') && e.targets.ids.includes(target)),
     );
     const transitions = effects.filter(
         e => elementDescriptor(project, e).kind === 'transition' && elementRange(project, e),

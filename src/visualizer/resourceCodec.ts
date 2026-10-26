@@ -14,6 +14,8 @@ import type {
     ResourceSnapshot,
     VisualizerResourcePackageV2,
 } from './resourceTypes';
+import { validateSceneCamera, validateTransform3d, validateScene3d } from './scene3dCodec';
+import type { PresetScene3d } from './scene3dTypes';
 import { roundEditingValue } from '../utils/numberEditing';
 import { validateMarkerBindings, validateMarkerDefinitions } from './editorMarkerValidation';
 
@@ -133,7 +135,7 @@ function elementDefinition(input: unknown, algorithms: AlgorithmDefinition[]): E
     keys(
         v,
         ['id', 'version', 'hash', 'algorithm', 'kind', 'title', 'icon', 'parameters'],
-        ['inputParameter', 'markerInputs', 'usesSeed', 'mediaInputs'],
+        ['inputParameter', 'markerInputs', 'usesSeed', 'mediaInputs', 'scene3dDefaults'],
     );
     const ref = identity(v);
     if (v.usesSeed !== undefined && v.usesSeed !== true) return invalid('Seed 能力声明必须为 true 或省略。');
@@ -141,6 +143,12 @@ function elementDefinition(input: unknown, algorithms: AlgorithmDefinition[]): E
         definition = algorithms.find(a => sameResource(a, algorithm));
     if (!definition) return invalid('绘制算法依赖缺失。');
     const kernel = definition.contract;
+    let scene3dDefaults: ElementDefinition['scene3dDefaults'];
+    if (kernel.renderSpace === 'world') {
+        const defaults = record(v.scene3dDefaults, '三维场景配置无效。');
+        keys(defaults, ['camera']);
+        scene3dDefaults = { camera: validateSceneCamera(defaults.camera) };
+    } else if (v.scene3dDefaults !== undefined) invalid('三维场景配置无效。');
     if (v.kind !== kernel.kind || v.inputParameter !== kernel.inputParameter || !icons.includes(String(v.icon)))
         return invalid('元素种类、输入或图标无效。');
     if (!Array.isArray(v.parameters) || v.parameters.length !== kernel.parameters.length)
@@ -152,6 +160,7 @@ function elementDefinition(input: unknown, algorithms: AlgorithmDefinition[]): E
         algorithm,
         ...(v.usesSeed === true ? { usesSeed: true as const } : {}),
         kind: kernel.kind,
+        ...(scene3dDefaults ? { scene3dDefaults } : {}),
         title: text(v.title, '元素名称'),
         icon: String(v.icon),
         ...(kernel.inputParameter ? { inputParameter: kernel.inputParameter } : {}),
@@ -182,7 +191,11 @@ function presetDefinition(
     algorithms: AlgorithmDefinition[],
 ): PresetDefinition {
     const v = record(input, '预设定义');
-    keys(v, ['id', 'version', 'hash', 'title', 'description', 'preview', 'elements', 'controls'], ['mediaAssets']);
+    keys(
+        v,
+        ['id', 'version', 'hash', 'title', 'description', 'preview', 'elements', 'controls'],
+        ['mediaAssets', 'scenes3d'],
+    );
     const ref = identity(v);
     const mediaAssets = validateMediaAssets(v.mediaAssets);
     if (!['geometric', 'cinematic'].includes(String(v.preview))) return invalid('预设预览类型无效。');
@@ -196,7 +209,7 @@ function presetDefinition(
         keys(
             e,
             ['key', 'element', 'name', 'enabled', 'bindings', 'timing'],
-            ['targets', 'markerBindings', 'mediaBindings', 'seed'],
+            ['targets', 'markerBindings', 'mediaBindings', 'seed', 'transform3d'],
         );
         const key = name(e.key),
             element = validateResourceRef(e.element),
@@ -233,6 +246,7 @@ function presetDefinition(
         return {
             key,
             element,
+            ...(e.transform3d === undefined ? {} : { transform3d: validateTransform3d(e.transform3d) }),
             name: text(e.name, '子元素名称'),
             enabled: e.enabled,
             ...(e.seed === undefined ? {} : elementSeedField(e.seed, definition.usesSeed)),
@@ -243,7 +257,28 @@ function presetDefinition(
             ...(e.targets !== undefined ? { targets: structuredClone(e.targets) } : {}),
         };
     }) as PresetDefinition['elements'];
+    const scenes3d =
+        v.scenes3d === undefined
+            ? undefined
+            : Array.isArray(v.scenes3d)
+              ? v.scenes3d.map(s => validateScene3d(s, true) as PresetScene3d)
+              : invalid('三维场景配置无效。');
+    const sceneIds = new Set<string>(),
+        members = new Set<string>();
+    for (const scene of scenes3d ?? []) {
+        if (!/^[a-z0-9][a-z0-9._-]*$/.test(scene.key) || targets.has(scene.key) || sceneIds.has(scene.key))
+            invalid('三维场景配置无效。');
+        sceneIds.add(scene.key);
+        const first = templates.findIndex(t => t.key === scene.children[0]);
+        for (const [i, id] of scene.children.entries()) {
+            const d = targets.get(id)?.definition;
+            if (!d || templates[first + i]?.key !== id || members.has(id) || !d.scene3dDefaults)
+                invalid('三维场景配置无效。');
+            members.add(id);
+        }
+    }
     for (const e of templates) {
+        if (!!targets.get(e.key)!.definition.scene3dDefaults !== members.has(e.key)) invalid('三维场景配置无效。');
         const definition = targets.get(e.key)!.definition;
         if (definition.kind === 'visual') {
             if (e.targets !== undefined) return invalid('视觉元素不能声明效果目标。');
@@ -254,10 +289,14 @@ function presetDefinition(
         else {
             keys(target, ['kind', 'ids']);
             if (
-                target.kind !== 'elements' ||
+                !['elements', 'scenes3d'].includes(String(target.kind)) ||
                 !Array.isArray(target.ids) ||
                 new Set(target.ids).size !== target.ids.length ||
-                target.ids.some(id => targets.get(String(id))?.definition.kind !== 'visual')
+                target.ids.some(id =>
+                    target.kind === 'scenes3d'
+                        ? !sceneIds.has(String(id))
+                        : targets.get(String(id))?.definition.kind !== 'visual' || members.has(String(id)),
+                )
             )
                 return invalid('预设内部效果引用无效。');
         }
@@ -287,6 +326,7 @@ function presetDefinition(
         description: text(v.description, '预设说明'),
         preview: v.preview as PresetDefinition['preview'],
         elements: templates,
+        ...(scenes3d ? { scenes3d } : {}),
         controls,
         ...(mediaAssets ? { mediaAssets } : {}),
     };

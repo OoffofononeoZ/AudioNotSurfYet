@@ -77,7 +77,7 @@ import VisualizerResourceCover from './VisualizerResourceCover.vue';
 const props = defineProps<{
     id: string;
     name: string;
-    kind: 'element' | 'preset';
+    kind: 'element' | 'preset' | 'scene3d';
     icon: string;
     preview?: string;
     enabled: boolean;

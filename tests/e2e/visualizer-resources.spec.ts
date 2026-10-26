@@ -1,7 +1,7 @@
 import { expect, test, type Page } from '@playwright/test';
 import path from 'node:path';
 import { mkdirSync, writeFileSync } from 'node:fs';
-import type { VisualizerProjectV5 } from '../../src/visualizer/compositionTypes';
+import type { VisualizerProjectV6 } from '../../src/visualizer/compositionTypes';
 import { chooseFiles, installFilePickerStub, savedPickerEntries, queuePickerData } from '../support/file-picker';
 import { resourceHash, resourceRef } from '../../src/visualizer/resourceIdentity';
 import type { AlgorithmDefinition } from '../../src/visualizer/algorithmTypes';
@@ -28,7 +28,7 @@ async function add(page: Page, type: string) {
     await page.getByRole('button', { name: '元素', exact: true }).click();
     await page.locator(`[data-element-type="${type}"]`).click();
 }
-async function exported(page: Page): Promise<VisualizerProjectV5> {
+async function exported(page: Page): Promise<VisualizerProjectV6> {
     const count = (await savedPickerEntries(page)).length;
     await page.getByTestId('export-visualizer-project').click();
     await expect.poll(async () => (await savedPickerEntries(page)).length).toBe(count + 1);
@@ -74,7 +74,7 @@ test('two presets and three leaves form five roots; shared values, child differe
     await expect(page.getByRole('button', { name: '光轨隧道', exact: true })).toHaveCount(4);
     const wires = p.elements.filter(e => e.resource.id === 'wireform');
     expect(wires.length).toBeGreaterThan(1);
-    const size = (element: VisualizerProjectV5['elements'][number]) =>
+    const size = (element: VisualizerProjectV6['elements'][number]) =>
         element.bindings.find(b => b.parameterId === 'size')!.source;
     await page.locator(`[data-element-id="${wires[0]!.id}"] .viz-element-select`).click();
     await input(page, '基础尺寸', '0.08');

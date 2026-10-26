@@ -51,12 +51,14 @@ export class CompositionDraftRepository implements CompositionDraftRepositoryPor
         const complete = done(tx);
         const stored = await request(tx.objectStore('draft').get('latest'));
         await complete;
-        if (!stored || stored.envelope?.schemaVersion !== 5) return null;
+        if (!stored || ![5, 6].includes(stored.envelope?.schemaVersion)) return null;
         try {
             return {
                 kind: 'current',
                 draft: validateCompositionDraft(stored.envelope),
-                ...(hasLegacySeed(stored.envelope.project) ? { needsSave: true as const } : {}),
+                ...(hasLegacySeed(stored.envelope.project) || stored.envelope.schemaVersion === 5
+                    ? { needsSave: true as const }
+                    : {}),
             };
         } catch {
             return { kind: 'unsupported', raw: structuredClone(stored.envelope) };
