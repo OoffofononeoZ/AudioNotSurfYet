@@ -3,6 +3,7 @@ import path from 'node:path';
 import { chooseFiles, installFilePickerStub } from '../support/file-picker';
 import type { VisualizerSessionController } from '../../src/visualizer/visualizerSessionController';
 import type { CompositionSessionSnapshot } from '../../src/visualizer/compositionTypes';
+import type { VisualizerExportState } from '../../src/visualizer/exportTypes';
 
 async function open(page: Page) {
     await page.setViewportSize({ width: 1920, height: 1080 });
@@ -74,6 +75,101 @@ async function sameRow(page: Page) {
     expect(geometry.toggleRight).toBeLessThanOrEqual(geometry.rowRight);
     expect(Math.max(...geometry.centers) - Math.min(...geometry.centers)).toBeLessThan(1);
 }
+
+async function exportState(page: Page, value: VisualizerExportState) {
+    await page.getByTestId('visualizer-ready').evaluate(async (node, value) => {
+        const provides = (
+            node as HTMLElement & {
+                __vueParentComponent: { provides: Record<symbol, VisualizerSessionController> };
+            }
+        ).__vueParentComponent.provides;
+        const modulePath = '/src/visualizer/visualizerSessionController.ts';
+        const { visualizerSessionControllerKey } = await import(modulePath);
+        const controller = provides[visualizerSessionControllerKey]!,
+            snapshot = controller.getSnapshot();
+        snapshot.export = value;
+        (controller as unknown as { publish(value: CompositionSessionSnapshot): void }).publish(snapshot);
+    }, value);
+}
+
+test('export progress shows real percentages and accessible phases without overflowing; reduced motion stops animations', async ({
+    page,
+}, info) => {
+    await open(page);
+    const errors: string[] = [];
+    page.on('pageerror', error => errors.push(error.message));
+    await page.getByRole('tab', { name: '状态', exact: true }).click();
+    const progress = page.getByRole('progressbar', { name: '视频导出进度', exact: true });
+    const fill = progress.locator('span');
+    await exportState(page, { status: 'preparing' });
+    await expect(progress).not.toHaveAttribute('aria-valuenow');
+    await expect(progress).toHaveAttribute('aria-valuetext', '准备导出');
+    await page
+        .locator('.viz-bottom')
+        .screenshot({ path: `artifacts/visualizer-composition/export-preparing-${info.project.name}.png` });
+    for (const width of [1920, 1440, 1024]) {
+        await page.setViewportSize({ width, height: 900 });
+        for (const [framesDone, expected] of [
+            [0, '0'],
+            [1234567, '61.7'],
+            [2000000, '100'],
+        ] as const) {
+            await exportState(page, { status: 'exporting', framesDone, totalFrames: 2000000 });
+            await expect(progress).toHaveAttribute('aria-valuenow', expected);
+            await expect(progress).toHaveAttribute('aria-valuetext', Number(expected).toFixed(1) + '%');
+            await expect(progress).toBeInViewport();
+            await sameRow(page);
+            const geometry = await progress.evaluate(node => {
+                const card = node.parentElement!,
+                    panel = card.closest('[role=tabpanel]')!;
+                const a = card.getBoundingClientRect(),
+                    b = panel.getBoundingClientRect();
+                return {
+                    contained: a.left >= b.left && a.right <= b.right,
+                    overflow: card.scrollWidth > card.clientWidth,
+                };
+            });
+            expect(geometry).toEqual({ contained: true, overflow: false });
+            if (framesDone === 1234567) {
+                await expect
+                    .poll(() =>
+                        progress.evaluate(
+                            node =>
+                                node.firstElementChild!.getBoundingClientRect().width /
+                                node.getBoundingClientRect().width,
+                        ),
+                    )
+                    .toBeCloseTo(0.617, 2);
+                await page.locator('.viz-bottom').screenshot({
+                    path: `artifacts/visualizer-composition/export-progress-${info.project.name}-${width}.png`,
+                });
+            }
+        }
+    }
+    await exportState(page, { status: 'exporting', framesDone: 0, totalFrames: 0 });
+    await expect(progress).not.toHaveAttribute('aria-valuenow');
+    await exportState(page, { status: 'exporting', framesDone: -1, totalFrames: 100 });
+    await expect(progress).toHaveAttribute('aria-valuenow', '0');
+    await exportState(page, { status: 'exporting', framesDone: 200, totalFrames: 100 });
+    await expect(progress).toHaveAttribute('aria-valuenow', '100');
+    await exportState(page, { status: 'finalizing' });
+    await expect(progress).not.toHaveAttribute('aria-valuenow');
+    await expect(progress).toHaveAttribute('aria-valuetext', '正在生成 WebM');
+    await page
+        .locator('.viz-bottom')
+        .screenshot({ path: `artifacts/visualizer-composition/export-finalizing-${info.project.name}.png` });
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await expect(fill).toHaveCSS('animation-name', 'none');
+    await exportState(page, { status: 'exporting', framesDone: 1, totalFrames: 2 });
+    await expect(fill).toHaveCSS('transition-property', 'none');
+    await state(page, 'ready');
+    await expect(progress).toHaveCount(0);
+    await expect(page.getByTestId('save-visualizer-export')).toBeVisible();
+    await state(page, 'failure');
+    await expect(progress).toHaveCount(0);
+    await expect(page.getByRole('button', { name: '清除错误', exact: true })).toBeVisible();
+    expect(errors).toEqual([]);
+});
 test('status summaries precede saved state on every tab and while collapsed at supported desktop widths', async ({
     page,
 }, info) => {

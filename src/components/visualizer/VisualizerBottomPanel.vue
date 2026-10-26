@@ -123,11 +123,7 @@
                     </button>
                 </div>
                 <p v-if="snapshot.export.status === 'error'" class="viz-error">{{ snapshot.export.message }}</p>
-                <progress
-                    v-if="snapshot.export.status === 'exporting'"
-                    aria-label="视频导出进度"
-                    :max="snapshot.export.totalFrames"
-                    :value="snapshot.export.framesDone" />
+                <VisualizerExportProgress :state="snapshot.export" />
             </div>
             <p v-if="tab === 'output' && !outputAvailability" class="viz-muted" role="status">正在检查离线导出能力…</p>
             <p
@@ -146,6 +142,7 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue';
 import VisualizerIcon from './VisualizerIcon.vue';
+import VisualizerExportProgress from './VisualizerExportProgress.vue';
 import AppSelect from '../controls/AppSelect.vue';
 import AppNumberInput from '../controls/AppNumberInput.vue';
 import { AUDIO_VIDEO_OFFSET_MS } from '../../visualizer/exportTypes';

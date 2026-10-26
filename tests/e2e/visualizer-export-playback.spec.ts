@@ -57,7 +57,9 @@ test('same-track controls and looping preserve deterministic export; finishing a
     await installFilePickerStub(page, { visualizerAssets: true });
     await page.goto('/');
     await chooseFiles(page, [audioFile]);
+    await expect(page.locator('#music-bar-container')).toHaveAttribute('data-playback-state', 'playing');
     await page.getByTestId('toggle-playback').click();
+    await expect(page.locator('#music-bar-container')).toHaveAttribute('data-playback-state', 'paused');
     await page.getByTestId('header-visualizer-link').click();
     await expect(page.getByTestId('visualizer-ready')).toBeVisible();
     await page.getByTestId('export-visualizer-project').click();
@@ -117,6 +119,10 @@ test('same-track controls and looping preserve deterministic export; finishing a
             await progress.press('ArrowRight');
             await expect(bar).toHaveAttribute('data-current-time', '5');
             await expect(bar).toHaveAttribute('data-playback-rate', '0.5');
+            await page.getByRole('tab', { name: '状态', exact: true }).click();
+            await page
+                .locator('.viz-bottom')
+                .screenshot({ path: `artifacts/visualizer-composition/export-live-${info.project.name}.png` });
         }
         const position = await bar.getAttribute('data-current-time');
         await expect(page.locator('[data-export-status=ready]')).toBeVisible({ timeout: 90000 });

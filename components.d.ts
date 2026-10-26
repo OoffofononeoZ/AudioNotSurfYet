@@ -66,6 +66,7 @@ declare module 'vue' {
     VisualizerElementCatalog: typeof import('./src/components/visualizer/VisualizerElementCatalog.vue')['default']
     VisualizerElementInspector: typeof import('./src/components/visualizer/VisualizerElementInspector.vue')['default']
     VisualizerElementList: typeof import('./src/components/visualizer/VisualizerElementList.vue')['default']
+    VisualizerExportProgress: typeof import('./src/components/visualizer/VisualizerExportProgress.vue')['default']
     VisualizerIcon: typeof import('./src/components/visualizer/VisualizerIcon.vue')['default']
     VisualizerLibraryStatus: typeof import('./src/components/visualizer/VisualizerLibraryStatus.vue')['default']
     VisualizerMarkerInput: typeof import('./src/components/visualizer/VisualizerMarkerInput.vue')['default']
