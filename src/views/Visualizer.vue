@@ -263,7 +263,9 @@
             :open="realtimeOpen"
             :project="snapshot.project"
             :locked="locked || !usable"
-            @close="realtimeOpen = false" />
+            :capture-cover="preview.capture"
+            @close="realtimeOpen = false"
+            @back="exportChoiceOpen = true" />
         <VisualizerPresetExportDialog
             :open="presetExportOpen"
             :project="snapshot.project"

@@ -80,6 +80,7 @@ declare module 'vue' {
     VisualizerPresetExportDialog: typeof import('./src/components/visualizer/VisualizerPresetExportDialog.vue')['default']
     VisualizerPresetInspector: typeof import('./src/components/visualizer/VisualizerPresetInspector.vue')['default']
     VisualizerRealtimeActions: typeof import('./src/components/visualizer/VisualizerRealtimeActions.vue')['default']
+    VisualizerRealtimePreview: typeof import('./src/components/visualizer/VisualizerRealtimePreview.vue')['default']
     VisualizerResourceCover: typeof import('./src/components/visualizer/VisualizerResourceCover.vue')['default']
     VisualizerTransform3d: typeof import('./src/components/visualizer/VisualizerTransform3d.vue')['default']
     VisualizerVector3Field: typeof import('./src/components/visualizer/VisualizerVector3Field.vue')['default']

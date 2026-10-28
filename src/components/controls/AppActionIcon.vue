@@ -24,5 +24,6 @@ const paths: Record<string, string> = {
     wallpaper: 'M3 4h18v16H3zM3 16l6-6 4 4 3-3 5 5M16 8h.01',
     copy: 'M8 8h13v13H8zM16 8V3H3v13h5',
     check: 'm5 12 4 4L19 6',
+    folder: 'M3 7V4h6l3 3h9v13H3zM3 10h18',
 };
 </script>

@@ -8,6 +8,7 @@
 
 | 文件 | 本地静态引用（最多显示 6 项） |
 | --- | --- |
+| [tests/scripts/run-e6-eval.mjs](../../tests/scripts/run-e6-eval.mjs) | — |
 | [tests/scripts/run-e7-eval.mjs](../../tests/scripts/run-e7-eval.mjs) | — |
 | [tests/scripts/run-e8-eval.mjs](../../tests/scripts/run-e8-eval.mjs) | — |
 | [tests/scripts/run-e9-eval.mjs](../../tests/scripts/run-e9-eval.mjs) | — |
@@ -107,4 +108,3 @@
 | [tests/visualizer/analysis-input.test.ts](../../tests/visualizer/analysis-input.test.ts) | [src/analysis/config.ts](../../src/analysis/config.ts)、[src/analysis/frames.ts](../../src/analysis/frames.ts)、[src/analysis/meydaAdapter.ts](../../src/analysis/meydaAdapter.ts)、[src/analysis/types.ts](../../src/analysis/types.ts)、[src/analysis/workerCore.ts](../../src/analysis/workerCore.ts)、[src/visualizer/analysisProjection.ts](../../src/visualizer/analysisProjection.ts)、另 6 项，按需核对源码 |
 | [tests/visualizer/circular-particles.test.ts](../../tests/visualizer/circular-particles.test.ts) | [src/visualizer/drawPacket.ts](../../src/visualizer/drawPacket.ts)、[tests/support/circular-particle-reference.ts](../../tests/support/circular-particle-reference.ts)、[tests/support/visualizer-assets.mjs](../../tests/support/visualizer-assets.mjs)、[tests/visualizer/algorithm-runtime-fixture.ts](../../tests/visualizer/algorithm-runtime-fixture.ts) |
 | [tests/visualizer/composition-model.test.ts](../../tests/visualizer/composition-model.test.ts) | [src/editor/projectCodec.ts](../../src/editor/projectCodec.ts)、[src/visualizer/compositionCodec.ts](../../src/visualizer/compositionCodec.ts)、[src/visualizer/compositionDraftRepository.ts](../../src/visualizer/compositionDraftRepository.ts)、[src/visualizer/compositionModel.ts](../../src/visualizer/compositionModel.ts)、[src/visualizer/elementRegistry.ts](../../src/visualizer/elementRegistry.ts)、[tests/visualizer/resource-fixtures.ts](../../tests/visualizer/resource-fixtures.ts) |
-| [tests/visualizer/composition-presets.test.ts](../../tests/visualizer/composition-presets.test.ts) | [src/visualizer/compositionCodec.ts](../../src/visualizer/compositionCodec.ts)、[src/visualizer/compositionModel.ts](../../src/visualizer/compositionModel.ts)、[src/visualizer/compositionPresets.ts](../../src/visualizer/compositionPresets.ts)、[tests/visualizer/resource-fixtures.ts](../../tests/visualizer/resource-fixtures.ts) |
