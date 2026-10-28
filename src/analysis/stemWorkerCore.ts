@@ -48,6 +48,7 @@ async function meydaSeries(
     first: number,
     last: number,
     factor: number,
+    yieldControl = yieldTask,
 ): Promise<AnalysisSeries[]> {
     const { source } = reader,
         { sampleRate, hopSize, frameSize } = source.config,
@@ -80,7 +81,7 @@ async function meydaSeries(
         if (amplitude) amplitude.set(aggregateVectors(vectors, factor, 512), bucket * 512);
         minimum[bucket] = Number.isFinite(low) ? low : 0;
         maximum[bucket] = Number.isFinite(high) ? high : 0;
-        if (bucket % 8 === 7) await yieldTask();
+        if (bucket % 8 === 7) await yieldControl();
     }
     reader.check();
     const step = (factor * hopSize) / sampleRate,
@@ -101,6 +102,7 @@ export async function runStemAnalysis(
     ids: readonly FeatureId[],
     cancelled: () => boolean,
     progress: (value: number) => void = () => {},
+    yieldControl = yieldTask,
 ): Promise<AnalysisSeries[]> {
     if (
         ids.length > 4 ||
@@ -132,7 +134,7 @@ export async function runStemAnalysis(
             values.set(smoothing.advance(raw), frame * 128);
             if (frame % 32 === 31 || performance.now() - batchStart >= 8) {
                 progress(((frame + 1) / count) * (ids.length > 1 ? 0.5 : 1));
-                await yieldTask();
+                await yieldControl();
                 batchStart = performance.now();
             }
         }
@@ -150,6 +152,7 @@ export async function runStemAnalysis(
                 0,
                 analysisFrameCount(source.frames),
                 analysisAggregationFactor(source.config.sampleRate, 512),
+                yieldControl,
             )),
         );
     reader.check();

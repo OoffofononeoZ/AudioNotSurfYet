@@ -7,13 +7,25 @@ import type { SeparationResult } from '../../src/processing/kernel';
 export async function captureSeparation(page: Page) {
     await page.addInitScript(async () => {
         if (window.top !== window) return;
-        const url = '/src/processing/editorSeparationService.ts';
-        const { EditorSeparationService } = await import(url);
-        const bind = EditorSeparationService.prototype.bind;
-        EditorSeparationService.prototype.bind = function (trackId: string | null) {
-            Reflect.set(window, '__stemTestService', this);
-            return bind.call(this, trackId);
-        };
+        // Inspect the live injection after mount; bare module imports can differ under Vite HMR.
+        const observer = new MutationObserver(() => {
+            const node = document.querySelector(
+                '[data-testid="editor-ready"], [data-testid="visualizer-ready"]',
+            ) as HTMLElement & { __vueParentComponent?: { provides: Record<symbol, EditorSeparationService> } };
+            let provides = node?.__vueParentComponent?.provides;
+            while (provides) {
+                const key = Object.getOwnPropertySymbols(provides).find(
+                    key => key.description === 'EditorSeparationService',
+                );
+                if (key) {
+                    Reflect.set(window, '__stemTestService', provides[key]);
+                    observer.disconnect();
+                    return;
+                }
+                provides = Object.getPrototypeOf(provides);
+            }
+        });
+        observer.observe(document, { childList: true, subtree: true });
         const post = Worker.prototype.postMessage;
         Reflect.set(window, '__stemRequests', []);
         Worker.prototype.postMessage = function (message, ...rest: unknown[]) {
@@ -28,7 +40,20 @@ export async function captureSeparation(page: Page) {
 }
 export async function seedStemResult(page: Page) {
     await page.evaluate(async () => {
-        const service = Reflect.get(window, '__stemTestService') as EditorSeparationService;
+        const node = document.querySelector(
+            '[data-testid="editor-ready"], [data-testid="visualizer-ready"]',
+        ) as HTMLElement & { __vueParentComponent: { provides: Record<symbol, EditorSeparationService> } };
+        let provides = node.__vueParentComponent.provides;
+        let service: EditorSeparationService | undefined;
+        while (provides && !service) {
+            const key = Object.getOwnPropertySymbols(provides).find(
+                key => key.description === 'EditorSeparationService',
+            );
+            if (key) service = provides[key];
+            provides = Object.getPrototypeOf(provides);
+        }
+        if (!service) throw new Error('Injected separation service not found.');
+        Reflect.set(window, '__stemTestService', service);
         const port = (service as unknown as { port: DecodedAudioCopyPort }).port;
         const storageUrl = '/src/processing/storage.ts',
             repoUrl = '/src/processing/editorResultRepository.ts',

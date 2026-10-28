@@ -88,6 +88,7 @@ class AnalysisHarness {
         sampleRate: null,
         activeFeatureIds: [],
         readyFeatureIds: [],
+        pcmState: 'empty',
         completedFrames: 0,
         totalFrames: 0,
         progress: 0,
@@ -198,25 +199,28 @@ const settle = async () => {
 describe('Editor E4 overlay integration', () => {
     beforeEach(() => setActivePinia(createPinia()));
 
-    test('activates Buffer first, then the restored single overlay feature', async () => {
+    test('requests the restored overlay immediately and exposes Buffer while it is still analyzing', async () => {
         const harness = createHarness(project('chroma'));
         const analyzerWorkspace = JSON.parse(JSON.stringify(harness.store.analysisWorkspace));
         await harness.controller.enter(track.id);
-        expect(harness.analysis.featureSets).toEqual([['buffer']]);
+        expect(harness.analysis.featureSets).toEqual([['buffer', 'chroma']]);
         harness.analysis.emit({
-            state: 'ready',
+            state: 'analyzing',
             generation: 1,
             trackId: track.id,
             trackHash: TRACK_HASH,
             configHash: 'e4-config',
             sampleRate: 48_000,
-            activeFeatureIds: ['buffer'],
+            activeFeatureIds: ['buffer', 'chroma'],
             readyFeatureIds: ['buffer'],
+            pcmState: 'ready',
             completedFrames: 1,
             totalFrames: 1,
             progress: 1,
         });
         await settle();
+        expect(harness.controller.getAnalysisSeries('buffer')).toEqual(bufferSeries);
+        expect(harness.analysis.featureSets).toHaveLength(1);
         expect(harness.analysis.featureSets.at(-1)).toEqual(['buffer', 'chroma']);
         expect(JSON.parse(JSON.stringify(harness.store.analysisWorkspace))).toEqual(analyzerWorkspace);
         await harness.controller.dispose();
@@ -230,6 +234,7 @@ describe('Editor E4 overlay integration', () => {
             generation: 1,
             activeFeatureIds: ['buffer'],
             readyFeatureIds: ['buffer'],
+            pcmState: 'ready',
         });
         await settle();
         harness.controller.selectOverlayFeature('buffer');
@@ -258,6 +263,7 @@ describe('Editor E4 overlay integration', () => {
             generation: 1,
             activeFeatureIds: ['buffer'],
             readyFeatureIds: ['buffer'],
+            pcmState: 'ready',
         });
         await settle();
         harness.analysis.emit({
@@ -265,6 +271,7 @@ describe('Editor E4 overlay integration', () => {
             generation: 2,
             activeFeatureIds: ['buffer', 'rms'],
             readyFeatureIds: ['buffer'],
+            pcmState: 'ready',
         });
         harness.controller.selectOverlayFeature('mfcc');
         await settle();
@@ -286,6 +293,7 @@ describe('Editor E4 overlay integration', () => {
             generation: 3,
             activeFeatureIds: ['buffer', 'mfcc'],
             readyFeatureIds: ['buffer'],
+            pcmState: 'ready',
         });
         harness.controller.retryOverlayAnalysis();
         await settle();

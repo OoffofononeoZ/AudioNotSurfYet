@@ -10,6 +10,9 @@ export class AnalysisFeatureCache {
     private active: readonly FeatureId[] = [];
     revision = 0;
     persistedRevision = 0;
+    matchesTrack(trackId: string | null, trackHash: string | undefined): boolean {
+        return this.identity?.trackId === trackId && this.identity?.trackHash === trackHash;
+    }
     matches(identity: { trackId: string; trackHash: string; configHash: string }): boolean {
         return (
             this.identity?.trackId === identity.trackId &&

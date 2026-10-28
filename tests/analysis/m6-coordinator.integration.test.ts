@@ -232,6 +232,53 @@ beforeEach(() => {
 });
 
 describe('AnalysisCoordinator integration', () => {
+    test('keeps a restored current cache while its matching audio is decoded after refresh', async () => {
+        const first = setup();
+        await first.coordinator.setActiveFeatures(['rms']);
+        await vi.waitFor(() => expect(first.coordinator.getSnapshot().cacheState).toBe('persisted'));
+        const input = first.repository.cacheInputs[0]!;
+        const restored = setup();
+        restored.coordinator.setRestoredCache({
+            manifest: {
+                trackId: input.trackId,
+                trackHash: input.trackHash,
+                configHash: input.configHash,
+                featureIds: input.payloads.map(p => p.featureId),
+                cacheKeys: input.payloads.map(p => p.cacheKey),
+            },
+            payloads: input.payloads,
+        });
+        const playback = { ...restored.engine.snapshot };
+        restored.engine.emit({ ...playback, state: 'empty', trackId: null });
+        restored.engine.emit({ ...playback, state: 'loading' });
+        restored.engine.emit({ ...playback, state: 'paused' });
+        await restored.coordinator.setActiveFeatures(['rms']);
+        await vi.waitFor(() => expect(restored.coordinator.getSnapshot().state).toBe('ready'));
+        expect(restored.worker.analyzeRequests[0]?.featureIds).toEqual([]);
+        expect(restored.coordinator.getSnapshot().cacheState).toBe('hit');
+        await first.coordinator.dispose();
+        await restored.coordinator.dispose();
+    });
+    test('keeps an Editor tempo request valid across same-source feature generations', async () => {
+        const harness = setup();
+        const editor = harness.coordinator.acquireConsumer('editor');
+        await editor.setActiveFeatures(['buffer']);
+        await vi.waitFor(() => expect(harness.coordinator.getSnapshot().state).toBe('ready'));
+        let tempo: Extract<AnalysisWorkerRequest, { kind: 'tempo-estimate' }> | null = null;
+        const post = harness.worker.postMessage.bind(harness.worker);
+        harness.worker.postMessage = request => {
+            if (request.kind === 'tempo-estimate') tempo = request;
+            else post(request);
+        };
+        const pending = editor.requestTempoEstimate();
+        await editor.setActiveFeatures(['buffer', 'rms']);
+        await vi.waitFor(() => expect(harness.coordinator.getSnapshot().state).toBe('ready'));
+        const request = tempo as unknown as Extract<AnalysisWorkerRequest, { kind: 'tempo-estimate' }>;
+        const result = extractTempoEstimate({ ...harness.worker.retained!, generation: request.generation }, request)!;
+        harness.worker.onmessage?.({ data: result } as MessageEvent<AnalysisWorkerResponse>);
+        expect(await pending).toEqual(result);
+        await harness.coordinator.dispose();
+    });
     test('retains inactive cached features within four slots without re-analysis or duplicate persistence', async () => {
         const harness = setup();
         await harness.coordinator.setActiveFeatures(['rms', 'energy']);

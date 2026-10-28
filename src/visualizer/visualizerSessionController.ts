@@ -835,7 +835,7 @@ export class VisualizerSessionController {
         );
         const readyInputs = inputs.filter(input => {
             const snapshot = input.stemRole ? this.analysisLease!.getSourceSnapshot(input.stemRole) : s;
-            return snapshot.state === 'ready' && snapshot.readyFeatureIds.includes(input.featureId);
+            return snapshot.readyFeatureIds.includes(input.featureId);
         });
         const ready = readyInputs.filter(input => !input.stemRole).map(input => input.featureId);
         const error = sourceStates.find(snapshot => snapshot.error)?.error;

@@ -1,3 +1,4 @@
+import { yieldAnalysisTask } from './taskScheduler';
 import { runStemAnalysis, readStemCursor, readStemWindow } from './stemWorkerCore';
 import type { StemWorkerRequest, StemWorkerResponse, StemPcmSource } from './stemProtocol';
 import type { AnalysisSeries } from './types';
@@ -5,6 +6,7 @@ import type { AnalysisSeries } from './types';
 export function createStemWorker(
     post: (message: StemWorkerResponse) => void,
     enqueue: (run: () => Promise<void>) => void,
+    yieldControl = yieldAnalysisTask,
 ) {
     let epoch = 0;
     const sources = new Map<string, { source: StemPcmSource; wallpaper?: AnalysisSeries }>();
@@ -40,6 +42,7 @@ export function createStemWorker(
                             if (current())
                                 post({ kind: 'stem-progress', requestId: request.requestId, epoch, role, progress });
                         },
+                        yieldControl,
                     );
                     if (!current()) return;
                     sources.set(role, {

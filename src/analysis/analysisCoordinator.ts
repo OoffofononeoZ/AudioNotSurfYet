@@ -1,5 +1,5 @@
 import type { InjectionKey } from 'vue';
-import { inject } from 'vue';
+import { inject, watch } from 'vue';
 import type { ReplaceCurrentAnalysisCacheInput, SessionRepositoryPort } from '../persistence/sessionRepository';
 import type { useAudioSessionStore } from '../stores/audioSessionStore';
 import type { DecodedAudioDescriptor, PlaybackSnapshot } from '../types/audio';
@@ -87,6 +87,7 @@ export class AnalysisCoordinatorError extends Error {
 }
 
 const initialSnapshot = (): AnalysisCoordinatorSnapshot => ({
+    pcmState: 'empty',
     state: 'idle',
     generation: 0,
     trackId: null,
@@ -144,7 +145,12 @@ export class AnalysisCoordinator {
         }
     >();
     private readonly unsubscribeEngine: () => void;
+    private readonly unsubscribeQueue: () => void;
     private tempoRequest: {
+        started: boolean;
+        refresh(): void;
+        generation: number;
+        token: string;
         requestId: string;
         resolve: (value: TempoEstimateResult | null) => void;
         timeout: ReturnType<typeof setTimeout>;
@@ -152,6 +158,7 @@ export class AnalysisCoordinator {
     private readonly pcmSource = new AnalysisPcmSource();
     private worker: AnalysisWorkerPort | null = null;
     private readonly featureCache = new AnalysisFeatureCache();
+    private restoredCache: StoredAnalysisCache | undefined;
     private cachePersistence: { revision: number; promise: Promise<'stored' | 'stale'> } | null = null;
     private activeJob: {
         jobId: string;
@@ -218,6 +225,16 @@ export class AnalysisCoordinator {
         this.cursorTimeoutMs = options.cursorTimeoutMs ?? 5_000;
         this.tempoTimeoutMs = options.tempoTimeoutMs ?? 15_000;
         this.store.setAnalysis(this.snapshot);
+        this.unsubscribeQueue = watch(
+            () => this.store.queue.length,
+            length => {
+                if (!length) {
+                    this.featureCache.clear();
+                    this.restoredCache = undefined;
+                }
+            },
+            { flush: 'sync' },
+        );
         this.unsubscribeEngine = this.engine.subscribe(playback => {
             this.handlePlayback(playback);
         });
@@ -225,7 +242,7 @@ export class AnalysisCoordinator {
 
     setRestoredCache(cache: StoredAnalysisCache | undefined): void {
         if (this.disposed) return;
-        this.featureCache.restore(cache);
+        this.restoredCache = cache;
     }
 
     acquireConsumer(consumer: AnalysisConsumer): AnalysisConsumerLease {
@@ -245,7 +262,7 @@ export class AnalysisCoordinator {
 
     async setActiveFeatures(ids: readonly FeatureId[], preserveCache = false): Promise<void> {
         this.assertActiveFeatures(ids);
-        this.cancelActiveJob('cancelled');
+        this.cancelActiveJob('cancelled', true);
         const generation = this.snapshot.generation + 1;
         this.series.clear();
         this.publish({
@@ -390,7 +407,7 @@ export class AnalysisCoordinator {
             this.activeConsumer?.consumer !== 'editor' ||
             !this.worker ||
             !this.activeJob ||
-            this.snapshot.state !== 'ready' ||
+            !this.pcmSource.ready ||
             !this.series.has(input.featureId) ||
             input.featureId === 'wallpaperEngineSpectrum'
         )
@@ -414,7 +431,7 @@ export class AnalysisCoordinator {
             this.activeConsumer?.consumer !== 'editor' ||
             !this.activeJob ||
             !this.worker ||
-            this.snapshot.state !== 'ready' ||
+            !this.pcmSource.ready ||
             !this.snapshot.trackHash ||
             !this.snapshot.configHash
         ) {
@@ -423,13 +440,24 @@ export class AnalysisCoordinator {
         this.resolveTempoRequest();
         const requestId = this.createJobId();
         return new Promise(resolve => {
-            const timeout = setTimeout(() => {
-                if (this.tempoRequest?.requestId === requestId) {
-                    this.tempoRequest = null;
-                    resolve(null);
-                }
-            }, this.tempoTimeoutMs);
-            this.tempoRequest = { requestId, resolve, timeout };
+            const expire = () => {
+                if (this.tempoRequest?.requestId === requestId) this.resolveTempoRequest();
+            };
+            const timeout = setTimeout(expire, this.tempoTimeoutMs);
+            this.tempoRequest = {
+                requestId,
+                resolve,
+                timeout,
+                generation: this.snapshot.generation,
+                token: this.activeConsumer!.token,
+                started: false,
+                refresh: () => {
+                    const pending = this.tempoRequest;
+                    if (pending?.requestId !== requestId) return;
+                    clearTimeout(pending.timeout);
+                    pending.timeout = setTimeout(expire, this.tempoTimeoutMs);
+                },
+            };
             this.worker?.postMessage({
                 kind: 'tempo-estimate',
                 requestId,
@@ -463,6 +491,8 @@ export class AnalysisCoordinator {
         this.activeConsumer = null;
         this.cancelActiveJob('cancelled');
         this.unsubscribeEngine();
+        this.unsubscribeQueue();
+        this.restoredCache = undefined;
         this.pcmSource.clear();
         this.worker?.terminate();
         this.worker = null;
@@ -484,6 +514,7 @@ export class AnalysisCoordinator {
         canRelease: boolean,
     ): AnalysisConsumerLease {
         let released = false;
+        let inputRevision = 0;
         const isCurrent = () =>
             !released &&
             !this.disposed &&
@@ -500,12 +531,13 @@ export class AnalysisCoordinator {
             setActiveFeatures: ids => (isCurrent() ? this.setActiveFeatures(ids) : Promise.resolve()),
             setActiveInputs: async inputs => {
                 if (!isCurrent()) return;
+                const revision = ++inputRevision;
                 validateAnalysisInputs(inputs);
                 const originals = [...new Set(inputs.filter(i => !i.stemRole).map(i => i.featureId))];
                 this.assertActiveFeatures(originals);
-                this.stems?.setRequests(inputs);
                 if (originals.join('|') !== this.snapshot.activeFeatureIds.join('|') || this.snapshot.state === 'error')
                     await this.setActiveFeatures(originals, originals.length === 0);
+                if (isCurrent() && revision === inputRevision) this.stems?.setRequests(inputs);
             },
             getSourceSnapshot: role =>
                 role
@@ -689,6 +721,17 @@ export class AnalysisCoordinator {
         configHash: string,
         featureIds: readonly FeatureId[],
     ): FeatureId[] {
+        const restored = this.restoredCache;
+        if (restored) {
+            // Engine unload/loading notifications can precede initialization's decode.
+            if (
+                restored.manifest.trackId === trackId &&
+                restored.manifest.trackHash === trackHash &&
+                restored.manifest.configHash === configHash
+            )
+                this.featureCache.restore(restored);
+            this.restoredCache = undefined;
+        }
         this.featureCache.select({ trackId, trackHash, configHash }, featureIds);
         const hits: FeatureId[] = [];
         for (const featureId of featureIds) {
@@ -724,6 +767,21 @@ export class AnalysisCoordinator {
     }
 
     private handleWorkerMessage(message: AnalysisWorkerResponse): void {
+        if (message.kind === 'tempo-started') {
+            const pending = this.tempoRequest;
+            if (pending?.requestId === message.requestId && pending.generation === message.generation) {
+                pending.started = true;
+                pending.refresh();
+            }
+            return;
+        }
+        if (
+            message.kind === 'stem-progress' &&
+            message.epoch === this.stems?.getSnapshot(message.role).generation &&
+            this.tempoRequest &&
+            !this.tempoRequest.started
+        )
+            this.tempoRequest.refresh();
         if (message.kind === 'source-error') {
             this.pcmSource.fail(message.sourceKey, message.message);
             return;
@@ -778,6 +836,7 @@ export class AnalysisCoordinator {
             return;
         }
         if (message.kind === 'progress') {
+            if (this.tempoRequest && !this.tempoRequest.started) this.tempoRequest.refresh();
             const completedFrames = Math.max(this.snapshot.completedFrames, message.completedFrames);
             const totalFrames = Math.max(completedFrames, message.totalFrames);
             this.publish({
@@ -809,18 +868,22 @@ export class AnalysisCoordinator {
             return;
         }
         for (const series of message.series) {
+            if (this.series.has(series.featureId)) continue;
             this.series.set(series.featureId, series);
             this.featureCache.put(series);
         }
         this.publish({
             ...this.snapshot,
-            state: 'ready',
+            state: message.kind === 'series-ready' ? 'analyzing' : 'ready',
             readyFeatureIds: this.snapshot.activeFeatureIds.filter(featureId => this.series.has(featureId)),
-            completedFrames: Math.max(this.snapshot.completedFrames, this.snapshot.totalFrames),
-            progress: 1,
+            completedFrames:
+                message.kind === 'series-ready'
+                    ? this.snapshot.completedFrames
+                    : Math.max(this.snapshot.completedFrames, this.snapshot.totalFrames),
+            progress: message.kind === 'series-ready' ? this.snapshot.progress : 1,
             error: undefined,
         });
-        void this.persistSeries(active.generation);
+        if (message.kind !== 'series-ready') void this.persistSeries(active.generation);
     }
 
     private handleCursorResult(result: AnalysisCursorValueResult): void {
@@ -844,10 +907,11 @@ export class AnalysisCoordinator {
         if (
             !pending ||
             pending.requestId !== result.requestId ||
-            result.generation !== this.snapshot.generation ||
+            result.generation !== pending.generation ||
             result.trackHash !== this.snapshot.trackHash ||
             result.configHash !== this.snapshot.configHash ||
-            this.activeConsumer?.consumer !== 'editor'
+            this.activeConsumer?.consumer !== 'editor' ||
+            this.activeConsumer.token !== pending.token
         ) {
             return;
         }
@@ -912,7 +976,9 @@ export class AnalysisCoordinator {
         if (this.disposed) return;
         if (playback.state === 'empty' || playback.state === 'loading' || playback.state === 'error') {
             this.lastDescriptorRevision = null;
-            this.featureCache.clear();
+            const track = this.store.queue.find(entry => entry.id === playback.trackId);
+            if (playback.state !== 'loading' || !this.featureCache.matchesTrack(playback.trackId, track?.trackHash))
+                this.featureCache.clear();
             this.pcmSource.clear();
             this.worker?.postMessage({ kind: 'release-source' });
             this.cancelActiveJob('cancelled');
@@ -958,7 +1024,7 @@ export class AnalysisCoordinator {
         }
     }
 
-    private cancelActiveJob(state: 'cancelled'): void {
+    private cancelActiveJob(state: 'cancelled', preserveTempo = false): void {
         this.windowRequests.clear();
         const active = this.activeJob;
         if (active && this.worker) {
@@ -970,7 +1036,7 @@ export class AnalysisCoordinator {
         }
         this.activeJob = null;
         this.resolveAllCursorRequests();
-        this.resolveTempoRequest();
+        if (!preserveTempo) this.resolveTempoRequest();
         if (this.snapshot.state === 'analyzing') {
             this.publish({
                 ...this.snapshot,
@@ -990,6 +1056,7 @@ export class AnalysisCoordinator {
     private resolveTempoRequest(): void {
         if (!this.tempoRequest) return;
         clearTimeout(this.tempoRequest.timeout);
+        this.worker?.postMessage({ kind: 'cancel-tempo', requestId: this.tempoRequest.requestId });
         this.tempoRequest.resolve(null);
         this.tempoRequest = null;
     }
@@ -1013,6 +1080,10 @@ export class AnalysisCoordinator {
     }
 
     private publish(snapshot: AnalysisCoordinatorSnapshot): void {
+        snapshot = {
+            ...snapshot,
+            pcmState: this.pcmSource.ready ? 'ready' : snapshot.state === 'copying' ? 'copying' : 'empty',
+        };
         this.snapshot = cloneSnapshot(snapshot);
         this.store.setAnalysis(this.snapshot);
         const next = this.getSnapshot();

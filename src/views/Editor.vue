@@ -348,7 +348,6 @@ const performOverlayCursorRequest = async () => {
         !snapshot.value.overlayOpen ||
         snapshot.value.state !== 'ready' ||
         !featureId ||
-        overlayAnalysis.value.state !== 'ready' ||
         !overlayAnalysis.value.readyFeatureIds.includes(featureId)
     ) {
         overlayExactValue.value = null;

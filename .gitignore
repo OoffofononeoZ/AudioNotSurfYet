@@ -38,6 +38,7 @@ artifacts/editor-marking/
 artifacts/osu-build-temp/
 artifacts/stem-analysis/
 artifacts/stem-build-temp/
+artifacts/analysis-performance/
 public/test_audio
 public/wallpaper-runtime/
 public/processing-runtime/

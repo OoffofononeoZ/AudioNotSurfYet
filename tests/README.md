@@ -217,6 +217,10 @@ Node24.22.1/npm11.x，依赖版本以lockfile为准；浏览器专项使用真�
 
 先运行 `npm run fixtures:e2:golden`，再运行 `npx playwright test tests/e2e/editor-analysis-detail.spec.ts --project=chrome --project=edge --workers=1`，检查图像内容的 15% 对齐、两处波形细化、连续缩放请求合并、播放预取、原生精度限制、高 DPR／响应式、迟到结果和刷新恢复。相邻图表类型与几何回归分别见 `e4-editor.spec.ts`、`editor-marker-redesign.spec.ts`；不据此重开历史 readiness。
 
+`npx vitest run tests/analysis/pcm-source.test.ts tests/analysis/feature-cache.test.ts tests/analysis/streaming-series.test.ts tests/analysis/priority-tasks.test.ts tests/analysis/m6-coordinator.integration.test.ts` 检查单份 PCM、四项有界缓存、数值一致性、优先调度及同源 BPM 身份。`npx playwright test tests/e2e/analysis-loading.spec.ts --project=chrome --project=edge --workers=1` 在浏览器生成 180 秒 WAV，检查顶部波形先显示、精细窗口先于后台 BPM 返回，以及手动 BPM 不被迟到结果覆盖；`--repeat-each=3` 可采集各浏览器三轮局部耗时，不包含导入/解码。
+
+启动现有 dev server 后，`node tests/scripts/measure-analysis-loading.mjs [baseline-commit]` 隔离比较 Git 基线与当前复制/Worker 计算，Chrome/Edge 各三轮、180 秒 48kHz 双声道、波形及四特征，并对 payload 按字段名排序后逐数组校验 SHA-256。默认基线为 DEC-108 前的 `5e7ae40`，`ANALYSIS_BENCHMARK_URL` 可覆盖默认 5173 地址；结果写入忽略目录 `artifacts/analysis-performance/comparison.json`。基线源码只读，不切分支或工作树，不包含整个页面首屏、解码或实际用户音频，不替代正式性能评审。
+
 ## osu 导入专项
 
 `npx vitest run tests/editor/osu-import.test.ts tests/audio/prepared-local-audio.test.ts` 验证解析、时间映射与音频分阶段提交。先运行 `npm run fixtures:e2:golden` 生成测试 WAV，再运行 `npx playwright test tests/e2e/editor-osu-import.spec.ts --project=chrome --project=edge --workers=1`，验证预览／应用、音频与草稿保护、取消和恢复。构建后可加 `$env:PLAYWRIGHT_PREVIEW = '1'` 在生产包上运行同一专项。

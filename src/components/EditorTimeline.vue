@@ -312,7 +312,7 @@ const { series: displayBufferSeries, pending: bufferDetailPending } = useAnalysi
     durationSeconds: props.project.track.durationSeconds,
     sampleRate: props.analysis.sampleRate ?? props.project.track.sampleRate ?? 0,
     pixels: size.width * size.dpr,
-    enabled: props.active !== false && props.analysis.state === 'ready',
+    enabled: props.active !== false && props.analysis.readyFeatureIds.includes('buffer'),
 }));
 const revealPlayback = () =>
     updateViewport(

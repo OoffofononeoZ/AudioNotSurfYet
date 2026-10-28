@@ -8,14 +8,20 @@ import type { VisualizerSessionController } from '../../src/visualizer/visualize
 async function inspect(page: Page, time: number, seek = false) {
     return page.getByTestId('visualizer-ready').evaluate(
         async (node, { time, seek }) => {
-            const provides = (
+            let provides = (
                 node as HTMLElement & {
                     __vueParentComponent: { provides: Record<symbol, VisualizerSessionController> };
                 }
             ).__vueParentComponent.provides;
-            const url = '/src/visualizer/visualizerSessionController.ts',
-                { visualizerSessionControllerKey } = await import(url),
-                controller = provides[visualizerSessionControllerKey]!;
+            let controller: VisualizerSessionController | undefined;
+            while (provides && !controller) {
+                const key = Object.getOwnPropertySymbols(provides).find(
+                    key => key.description === 'visualizer-session-controller',
+                );
+                if (key) controller = provides[key];
+                provides = Object.getPrototypeOf(provides);
+            }
+            if (!controller) throw new Error('Injected Visualizer controller not found.');
             if (seek) await controller.seek(time);
             await controller.prepareValuesAt(time);
             const values = controller.resolveValuesAt(time);

@@ -12,7 +12,43 @@ import {
 } from '../../src/analysis/meydaAdapter';
 import { buildSeries } from '../../src/analysis/seriesBuilder';
 import { SeriesAccumulator } from '../../src/analysis/seriesAccumulator';
+import { runAnalysisJob } from '../../src/analysis/workerCore';
 import type { FeatureId, M10FeatureId } from '../../src/analysis/types';
+
+test('publishes the waveform before the remaining mixed-feature result and preserves cancellation', async () => {
+    const config = await createAnalysisConfig(48000),
+        pcm = Float32Array.from({ length: 48000 }, (_, i) => Math.sin(i * 0.02));
+    const input = {
+        kind: 'analyze' as const,
+        jobId: 'partial',
+        generation: 1,
+        trackHash: 'song',
+        config,
+        pcm: pcm.buffer,
+        durationSeconds: 1,
+        featureIds: ['buffer', 'mfcc'] as const,
+        cursorFeatureIds: ['buffer', 'mfcc'] as const,
+    };
+    let partial: import('../../src/analysis/types').AnalysisSeries[] = [];
+    const result = await runAnalysisJob(input, {
+        onSeries: series => {
+            partial = series;
+        },
+        yieldControl: async () => {},
+    });
+    expect(partial.map(s => s.featureId)).toEqual(['buffer']);
+    expect(result.result.series[0]).toBe(partial[0]);
+    let cancelled = false;
+    await expect(
+        runAnalysisJob(input, {
+            onSeries: () => {
+                cancelled = true;
+            },
+            isCancelled: () => cancelled,
+            yieldControl: async () => {},
+        }),
+    ).rejects.toMatchObject({ code: 'cancelled' });
+});
 
 test.each([
     ['buffer', 'rms', 'energy', 'zcr'],

@@ -1,7 +1,8 @@
+import { AnalysisPriorityTasks } from './priorityTasks';
 import {
     AnalysisWorkerCoreError,
     extractCursorValue,
-    extractTempoEstimate,
+    extractTempoEstimateAsync,
     responseTransferables,
     runAnalysisJob,
     validateAnalysisJobRequest,
@@ -31,12 +32,13 @@ let activeToken = 0;
 let activeJob: { jobId: string; generation: number } | null = null;
 let retained: RetainedAnalysisPcm | null = null;
 let sourceKey: string | null = null;
-let queue = Promise.resolve();
+const tasks = new AnalysisPriorityTasks();
 const stemWorker = createStemWorker(
     message => workerScope.postMessage(message),
     run => {
-        queue = queue.then(run);
+        tasks.enqueue(run);
     },
+    tasks.checkpoint,
 );
 const windowJobs = new Map<string, { cancelled: boolean }>();
 
@@ -44,13 +46,14 @@ const windowSeries = (request: AnalysisWindowRequest) => {
     const job = { cancelled: false },
         token = activeToken;
     windowJobs.set(request.requestId, job);
-    queue = queue.then(async () => {
+    tasks.enqueue(async () => {
         try {
             const source = retained;
             const series =
                 source && token === activeToken && !job.cancelled
                     ? await extractWindowSeries(source, request, {
                           isCancelled: () => job.cancelled || token !== activeToken,
+                          yieldControl: tasks.checkpoint,
                       })
                     : null;
             if (job.cancelled || token !== activeToken) return;
@@ -90,7 +93,7 @@ const windowSeries = (request: AnalysisWindowRequest) => {
         } finally {
             windowJobs.delete(request.requestId);
         }
-    });
+    }, 2);
 };
 const latestCursorRequest = new Map<string, string>();
 let latestTempoRequestId: string | null = null;
@@ -157,6 +160,18 @@ const analyze = async (request: AnalysisSourceJob, token: number) => {
             },
             {
                 isCancelled: () => token !== activeToken,
+                yieldControl: tasks.checkpoint,
+                onSeries: series => {
+                    if (token === activeToken)
+                        workerScope.postMessage({
+                            kind: 'series-ready',
+                            jobId: request.jobId,
+                            generation: request.generation,
+                            trackHash: request.trackHash,
+                            configHash: source.config.configHash,
+                            series,
+                        });
+                },
                 onProgress: (completedFrames, totalFrames) => {
                     if (token !== activeToken) return;
                     workerScope.postMessage({
@@ -197,11 +212,14 @@ const cursorValue = (request: AnalysisCursorValueRequest) => {
     }
 };
 
-const tempoEstimate = (request: TempoEstimateRequest) => {
+const tempoEstimate = async (request: TempoEstimateRequest) => {
     if (latestTempoRequestId !== request.requestId || !retained) return;
+    const identity = sourceKey;
+    workerScope.postMessage({ kind: 'tempo-started', requestId: request.requestId, generation: request.generation });
     try {
-        const result = extractTempoEstimate(retained, request, {
-            isCancelled: () => latestTempoRequestId !== request.requestId,
+        const result = await extractTempoEstimateAsync(retained, request, {
+            isCancelled: () => latestTempoRequestId !== request.requestId || sourceKey !== identity,
+            yieldControl: tasks.checkpoint,
         });
         if (result && latestTempoRequestId === request.requestId) {
             workerScope.postMessage(result);
@@ -219,7 +237,7 @@ workerScope.onmessage = event => {
         const token = ++activeToken;
         retained = null;
         sourceKey = null;
-        queue = queue.then(() => prepareSource(request, token));
+        tasks.enqueue(() => prepareSource(request, token));
         return;
     }
     if (request.kind === 'release-source') {
@@ -260,7 +278,7 @@ workerScope.onmessage = event => {
         sourceKey = null;
         live?.stop();
         live = null;
-        queue = queue.then(async () => {
+        tasks.enqueue(async () => {
             if (token !== activeToken) {
                 request.port.close();
                 return;
@@ -274,6 +292,10 @@ workerScope.onmessage = event => {
         });
         return;
     }
+    if (request.kind === 'cancel-tempo') {
+        if (latestTempoRequestId === request.requestId) latestTempoRequestId = null;
+        return;
+    }
     if (request.kind === 'cancel') {
         if (!activeJob || (activeJob.jobId === request.jobId && activeJob.generation === request.generation)) {
             activeToken += 1;
@@ -284,12 +306,12 @@ workerScope.onmessage = event => {
         latestCursorRequest.set(request.featureId, request.requestId);
         // Window jobs yield, allowing the exact cursor to use retained PCM immediately.
         if (retained?.generation === request.generation) cursorValue(request);
-        else queue = queue.then(() => cursorValue(request));
+        else tasks.enqueue(async () => cursorValue(request), 3);
         return;
     }
     if (request.kind === 'tempo-estimate') {
         latestTempoRequestId = request.requestId;
-        queue = queue.then(() => tempoEstimate(request));
+        tasks.enqueue(() => tempoEstimate(request), 0);
         return;
     }
     if (request.kind === 'analyze') {
@@ -297,7 +319,6 @@ workerScope.onmessage = event => {
         live?.stop();
         live = null;
         const token = ++activeToken;
-        latestTempoRequestId = null;
-        queue = queue.then(() => analyze(request, token));
+        tasks.enqueue(() => analyze(request, token));
     }
 };

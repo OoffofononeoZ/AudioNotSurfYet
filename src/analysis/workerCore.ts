@@ -3,7 +3,7 @@ import { SeriesAccumulator } from './seriesAccumulator';
 import { validateAnalysisConfig } from './config';
 import { analysisFrameCount, createAnalysisFrame, cursorFrameIndex, frameStartSeconds } from './frames';
 import { exactM10Value, extractM10Frame } from './meydaAdapter';
-import { estimateTempo } from './tempoEstimator';
+import { estimateTempo, estimateTempoAsync } from './tempoEstimator';
 import { analyzeWallpaperSpectrum, wallpaperFrameIndex } from './wallpaperSpectrum';
 import {
     isFeatureId,
@@ -41,6 +41,7 @@ export interface AnalysisWorkerHooks {
     onProgress?: (completedFrames: number, totalFrames: number) => void;
     yieldControl?: () => Promise<void>;
     now?: () => number;
+    onSeries?: (series: AnalysisSeries[]) => void;
 }
 
 export interface RetainedAnalysisPcm {
@@ -125,6 +126,22 @@ export const runAnalysisJob = async (
     retained: RetainedAnalysisPcm;
 }> => {
     await validateAnalysisJobRequest(request);
+    if (request.featureIds.includes('buffer') && request.featureIds.some(id => id !== 'buffer')) {
+        const base = await runAnalysisJob(
+            { ...request, featureIds: ['buffer'] },
+            { ...hooks, onSeries: undefined, onProgress: undefined },
+        );
+        hooks.onSeries?.(base.result.series);
+        if (hooks.isCancelled?.()) throw new AnalysisWorkerCoreError('cancelled', 'Analysis job was cancelled.');
+        const remaining = await runAnalysisJob(
+            { ...request, featureIds: request.featureIds.filter(id => id !== 'buffer') },
+            { ...hooks, onSeries: undefined },
+        );
+        remaining.result.series = request.featureIds.map(id =>
+            (id === 'buffer' ? base.result.series : remaining.result.series).find(s => s.featureId === id)!,
+        );
+        return remaining;
+    }
     const featureIds = request.featureIds.filter(isM10FeatureId);
     const pcm = new Float32Array(request.pcm);
     const totalFrames = analysisFrameCount(pcm.length, request.config.frameSize, request.config.hopSize);
@@ -299,6 +316,32 @@ export const extractTempoEstimate = (
         ? { ...base, state: 'reliable', bpm: estimate.bpm }
         : { ...base, state: 'low-confidence' };
 };
+
+export async function extractTempoEstimateAsync(
+    retained: RetainedAnalysisPcm,
+    request: TempoEstimateRequest,
+    hooks: Pick<AnalysisWorkerHooks, 'isCancelled' | 'yieldControl'> = {},
+): Promise<TempoEstimateResult | null> {
+    if (
+        request.generation !== retained.generation ||
+        request.trackHash !== retained.trackHash ||
+        request.configHash !== retained.config.configHash
+    )
+        return null;
+    const estimate = await estimateTempoAsync(retained.pcm, retained.config, hooks);
+    if (hooks.isCancelled?.()) return null;
+    const base = {
+        kind: 'tempo-estimate-result' as const,
+        requestId: request.requestId,
+        generation: request.generation,
+        trackHash: request.trackHash,
+        configHash: request.configHash,
+        confidence: estimate.confidence,
+    };
+    return estimate.state === 'reliable' && estimate.bpm !== undefined
+        ? { ...base, state: 'reliable', bpm: estimate.bpm }
+        : { ...base, state: 'low-confidence' };
+}
 
 export const responseTransferables = (response: AnalysisWorkerResponse): Transferable[] => {
     if (response.kind !== 'result') return [];

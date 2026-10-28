@@ -8,12 +8,18 @@ import type { VisualizerSessionController } from '../../src/visualizer/visualize
 async function inputAt(page: Page, time: number) {
     const value = await page.getByTestId('visualizer-ready').evaluate(async (node, time) => {
         // Inspect the injected controller in the development app without adding a production debug API.
-        const provides = (
+        let provides = (
             node as HTMLElement & { __vueParentComponent: { provides: Record<symbol, VisualizerSessionController> } }
         ).__vueParentComponent.provides;
-        const controllerPath = '/src/visualizer/visualizerSessionController.ts';
-        const { visualizerSessionControllerKey } = await import(controllerPath);
-        const controller = provides[visualizerSessionControllerKey]!;
+        let controller: VisualizerSessionController | undefined;
+        while (provides && !controller) {
+            const key = Object.getOwnPropertySymbols(provides).find(
+                key => key.description === 'visualizer-session-controller',
+            );
+            if (key) controller = provides[key];
+            provides = Object.getPrototypeOf(provides);
+        }
+        if (!controller) throw new Error('Injected Visualizer controller not found.');
         const element = controller.readProject()!.elements.find(e => e.resource.id === 'spectral-dots')!;
         const value = controller.resolveValuesAt(time).get(element.id + ':spectrum');
         return value;

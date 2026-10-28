@@ -800,15 +800,9 @@ export class EditorSessionController {
             }
             const next = structuredClone(snapshot);
             for (const listener of this.analysisListeners) listener(next);
-            if (
-                snapshot.state === 'ready' &&
-                snapshot.readyFeatureIds.includes('buffer') &&
-                snapshot.activeFeatureIds.length === 1 &&
-                snapshot.activeFeatureIds[0] === 'buffer' &&
-                this.baseAnalysisHandledForRoute !== routeGeneration
-            ) {
+            if (snapshot.readyFeatureIds.includes('buffer') && this.baseAnalysisHandledForRoute !== routeGeneration) {
                 this.baseAnalysisHandledForRoute = routeGeneration;
-                void this.finishBaseAnalysis(routeGeneration);
+                void this.runAutomaticTempoEstimate(routeGeneration);
                 return;
             }
             if (
@@ -827,7 +821,8 @@ export class EditorSessionController {
                 void this.syncOverlayAnalysis();
             }
         });
-        void lease.setActiveFeatures(['buffer']);
+        this.overlayActivationReady = true;
+        void this.syncOverlayAnalysis();
     }
 
     private restartEditorAnalysis(): void {
@@ -837,20 +832,10 @@ export class EditorSessionController {
         this.startEditorAnalysis(this.routeGeneration);
     }
 
-    private async finishBaseAnalysis(routeGeneration: number): Promise<void> {
-        await this.runAutomaticTempoEstimate(routeGeneration);
-        if (routeGeneration !== this.routeGeneration || this.disposed) return;
-        this.overlayActivationReady = true;
-        await this.syncOverlayAnalysis();
-    }
-
     private async syncOverlayAnalysis(force = false): Promise<void> {
         const lease = this.analysisLease;
         const featureId = this.snapshot.project?.workspace.overlay.featureId ?? null;
         if (!lease || this.snapshot.state !== 'ready' || !this.overlayActivationReady) return;
-        if (featureId && featureId !== 'buffer' && !this.lastReadyBufferSeries) {
-            return;
-        }
         const stemRole = this.snapshot.project?.workspace.overlay.stemRole;
         const activeFeatureIds = editorOverlayFeatureIds(stemRole ? null : featureId, this.snapshot.overlayOpen);
         const inputs: import('../analysis/sources').AnalysisInput[] = activeFeatureIds.map(featureId => ({

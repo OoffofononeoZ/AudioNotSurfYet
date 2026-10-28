@@ -235,7 +235,7 @@ const { series: displaySeries, pending: detailPending } = useAnalysisWindow(() =
     durationSeconds: props.project.track.durationSeconds,
     sampleRate: props.analysis.sampleRate ?? props.project.track.sampleRate ?? 0,
     pixels: plotRect.value.width * Math.max(1, window.devicePixelRatio || 1),
-    enabled: props.overlayOpen && props.analysis.state === 'ready',
+    enabled: props.overlayOpen && props.analysis.readyFeatureIds.includes(featureId.value!),
 }));
 
 const renderRequest = (): EditorRenderRequest => {

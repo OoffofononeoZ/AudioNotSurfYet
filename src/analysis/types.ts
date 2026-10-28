@@ -331,17 +331,20 @@ export type AnalysisWorkerRequest =
     | { kind: 'release-source' }
     | AnalysisSourceJob
     | AnalysisJobCancel
+    | { kind: 'cancel-tempo'; requestId: string }
     | AnalysisCursorValueRequest
     | TempoEstimateRequest;
 
 export type AnalysisWorkerResponse =
     | { kind: 'source-ready'; sourceKey: string }
     | { kind: 'source-error'; sourceKey: string; message: string }
+    | { kind: 'tempo-started'; requestId: string; generation: number }
     | import('./stemProtocol').StemWorkerResponse
     | import('./windowTypes').AnalysisWindowResult
     | import('./realtimeTypes').RealtimeAnalysisResponse
     | AnalysisJobProgress
     | AnalysisJobResult
+    | (Omit<AnalysisJobResult, 'kind'> & { kind: 'series-ready' })
     | AnalysisJobError
     | AnalysisCursorValueResult
     | TempoEstimateResult;
@@ -351,6 +354,7 @@ export type AnalysisCacheState = 'idle' | 'hit' | 'miss' | 'partial' | 'persiste
 export type AnalysisCoordinatorState = 'idle' | 'copying' | 'analyzing' | 'ready' | 'cancelled' | 'error' | 'disposed';
 
 export interface AnalysisCoordinatorSnapshot {
+    pcmState: 'empty' | 'copying' | 'ready';
     state: AnalysisCoordinatorState;
     generation: number;
     trackId: string | null;

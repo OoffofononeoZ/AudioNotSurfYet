@@ -8,6 +8,8 @@
 
 | 文件 | 本地静态引用（最多显示 6 项） |
 | --- | --- |
+| [tests/e2e/visualizer-bottom-status.spec.ts](../../tests/e2e/visualizer-bottom-status.spec.ts) | [src/visualizer/compositionTypes.ts](../../src/visualizer/compositionTypes.ts)、[src/visualizer/exportTypes.ts](../../src/visualizer/exportTypes.ts)、[src/visualizer/visualizerSessionController.ts](../../src/visualizer/visualizerSessionController.ts)、[tests/support/file-picker.ts](../../tests/support/file-picker.ts) |
+| [tests/e2e/visualizer-catalog.spec.ts](../../tests/e2e/visualizer-catalog.spec.ts) | [tests/support/file-picker.ts](../../tests/support/file-picker.ts)、[tests/support/resource-directory.ts](../../tests/support/resource-directory.ts)、[tests/support/visualizer-assets.mjs](../../tests/support/visualizer-assets.mjs) |
 | [tests/e2e/visualizer-circular-particles.spec.ts](../../tests/e2e/visualizer-circular-particles.spec.ts) | [src/visualizer/compositionTypes.ts](../../src/visualizer/compositionTypes.ts)、[tests/support/file-picker.ts](../../tests/support/file-picker.ts)、[tests/support/project-actions.ts](../../tests/support/project-actions.ts)、[tests/support/visualizer-assets.mjs](../../tests/support/visualizer-assets.mjs) |
 | [tests/e2e/visualizer-circular.spec.ts](../../tests/e2e/visualizer-circular.spec.ts) | [src/visualizer/compositionTypes.ts](../../src/visualizer/compositionTypes.ts)、[tests/support/file-picker.ts](../../tests/support/file-picker.ts)、[tests/support/project-actions.ts](../../tests/support/project-actions.ts)、[tests/support/visualizer-assets.mjs](../../tests/support/visualizer-assets.mjs) |
 | [tests/e2e/visualizer-composition.spec.ts](../../tests/e2e/visualizer-composition.spec.ts) | [src/editor/projectCodec.ts](../../src/editor/projectCodec.ts)、[src/visualizer/compositionTypes.ts](../../src/visualizer/compositionTypes.ts)、[tests/support/file-picker.ts](../../tests/support/file-picker.ts)、[tests/support/project-actions.ts](../../tests/support/project-actions.ts) |
@@ -106,5 +108,3 @@
 | [tests/processing/systemSampler.ts](../../tests/processing/systemSampler.ts) | — |
 | [tests/processing/unavailable.worker.ts](../../tests/processing/unavailable.worker.ts) | [src/processing/separation.worker.ts](../../src/processing/separation.worker.ts) |
 | [tests/processing/vitePlugin.ts](../../tests/processing/vitePlugin.ts) | — |
-| [tests/scripts/run-e1-eval.mjs](../../tests/scripts/run-e1-eval.mjs) | — |
-| [tests/scripts/run-e10-eval.mjs](../../tests/scripts/run-e10-eval.mjs) | — |

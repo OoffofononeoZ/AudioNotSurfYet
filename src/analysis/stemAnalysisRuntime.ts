@@ -18,6 +18,7 @@ interface SourceState {
     requestId?: string;
 }
 const empty = (generation: number): AnalysisCoordinatorSnapshot => ({
+    pcmState: 'empty',
     state: 'idle',
     generation,
     trackId: null,
@@ -163,6 +164,7 @@ export class StemAnalysisRuntime {
                         right: right!,
                     };
                     current.source = source;
+                    current.snapshot.pcmState = 'ready';
                     current.snapshot.configHash = config.configHash;
                     for (const id of ids) {
                         try {
