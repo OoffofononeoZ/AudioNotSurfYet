@@ -33,7 +33,7 @@
 | DEC-079 / 2026-10-17     | Wallpaper Engine风格近似频谱首位注册，独立立体声DFT、平滑与单位，不冒称官方实现；原子组合工程沿用后续DEC-084，见[频谱](wallpaper-spectrum.md)                                                                                                                                                                                   |
 | DEC-080 / 2026-10-17     | 历史实时输出曾按源事件/时长另行开放档位；原fps/packet-gap失败不改写，测量保存在[输出说明](visualizer-output.md)，当前链路按DEC-081                                                                                                                                                                                              |
 | DEC-081 / 2026-10-17     | owner明确离线确定性导出替代实时录制：同renderer、固定帧/PCM、WebCodecs/Mediabunny/OPFS；保留真实媒体与同步阈值，见[离线导出](visualizer-offline-export.md)                                                                                                                                                                      |
-| DEC-082 / 2026-10-18     | 当时要求新增元素/预设先批准具体合同；该审批已由DEC-096替代，visualizer-content-generator替代旧SceneBrief/注册步骤；见[内容合同](../architecture/visualizer/content-generation.md)                                                                                                                                                  |
+| DEC-082 / 2026-10-18     | 当时要求新增元素/预设先批准具体合同；该审批已由DEC-096替代，visualizer-content-generator替代旧SceneBrief/注册步骤；见[内容合同](../architecture/visualizer/content-generation.md)                                                                                                                                               |
 | DEC-083 / 2026-10-18     | 手写代码建议≤1000、>1300警告、>2000阻断；禁止压行、按完整功能区域拆Vue、Prettier渐进显式文件格式化；见[模块skill](../../skills/audiosurf-file-modularization/SKILL.md)                                                                                                                                                          |
 | DEC-084 / 2026-10-18     | 分组预设、共同处理参数及旧草稿不提示保持；V4/V1和仅应用内核限制由DEC-087替代                                                                                                                                                                                                                                                    |
 | DEC-085 / 2026-10-19     | owner批准按分类行1–9/0播放录入点/范围、当前细分吸附和取消/停止规则；工程V1及鼠标暂停限制不变，见[Editor交互](../architecture/editor/interaction-contracts.md#数字键实时录入dec-085)                                                                                                                                             |
@@ -109,3 +109,7 @@ owner 要求可行时导出保留原播放状态，并优化状态页导出进�
 ## DEC-104 — 共享镜头与深度的三维场景 — 2026-10-26
 
 owner 以“Implement the plan.”批准场景容器、宿主管理共享 camera 和容器内共享深度；镜头定义随资源与工程保存。选定参数/关键帧表、独立轨迹秒数与循环/末帧停留、不透明/透明裁剪。Project V6、RealtimeStyle V2 显式迁移旧数据并保留算法快照，资源包保持 V2，新世界元素使用 ABI 4。固定镜头的既有资源不批量改写，当前新增移动镜头立方体及组合示例。同步外部 skill、codec 与文档，不含半透明排序、模型导入、阴影、PBR 或发布；完整契约见[三维场景](../architecture/visualizer/scene3d.md)。
+
+## DEC-105 — Circular 粒子原版运动还原 — 2026-10-28
+
+owner 要求相关元素尽可能接近原项目，选择固定30fps运动基准、保留当前默认配置、一并恢复纵深淡出，并允许“壁纸预设暂存”同步引用修正版；以“Implement the plan.”批准实施。两个粒子内容版本升至3，纵深按逐粒子共享速度及先绘制后更新的原顺序执行，粒子30Hz模拟与宿主60Hz历史接口分离；尺寸参与淡出历史状态。Circular预设升至3，暂存预设升至2且保留参数与媒体。其他元素、WE近似提取、资源包/ABI/工程格式不变，既有工程及输出不自动更新，不含发布或推送。见[Circular预设](visualizer-presets.md#circular-visualizer)。

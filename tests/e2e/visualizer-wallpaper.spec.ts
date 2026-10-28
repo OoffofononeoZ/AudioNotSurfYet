@@ -4,7 +4,7 @@ import { mkdir, writeFile } from 'node:fs/promises';
 import { pathToFileURL } from 'node:url';
 import { installFilePickerStub, chooseFiles } from '../support/file-picker';
 
-for (const resource of ['radial-spectrum', 'shared-camera-demo'])
+for (const resource of ['radial-spectrum', 'shared-camera-demo', 'circular-particles', 'circular-depth'])
     test(
         'exports ' + resource + ' and executes the production runtime offline with WE callbacks',
         async ({ page }, info) => {
@@ -25,6 +25,8 @@ for (const resource of ['radial-spectrum', 'shared-camera-demo'])
                     .getByRole('combobox', { name: '频谱输入分析特征', exact: true })
                     .selectOption('wallpaperEngineSpectrum');
                 await expect(page.getByRole('spinbutton', { name: '元素 Seed', exact: true })).toHaveValue('');
+            } else if (resource.startsWith('circular-')) {
+                await page.locator(`[data-resource-id="${resource}"]`).click();
             } else {
                 await page.getByRole('button', { name: '预设', exact: true }).click();
                 await page.locator('[data-preset-id="shared-camera-demo"]').click();
@@ -51,11 +53,15 @@ for (const resource of ['radial-spectrum', 'shared-camera-demo'])
                 ['THIRD_PARTY_LICENSES.txt', 'index.html', 'project.json', 'runtime.js', 'style-data.js'].sort(),
             );
             expect(exported.find(f => f.name === 'style-data.js')!.content).toContain(
-                resource === 'radial-spectrum' ? '"seed":null' : '"scenes3d"',
+                resource === 'shared-camera-demo' ? '"scenes3d"' : '"seed":null',
             );
             const root = path.resolve(
                 'artifacts/visualizer-composition/wallpaper-' +
-                    (resource === 'radial-spectrum' ? '' : 'scene3d-') +
+                    (resource === 'radial-spectrum'
+                        ? ''
+                        : resource === 'shared-camera-demo'
+                          ? 'scene3d-'
+                          : resource + '-') +
                     info.project.name,
             );
             await mkdir(root, { recursive: true });
@@ -92,6 +98,9 @@ for (const resource of ['radial-spectrum', 'shared-camera-demo'])
             await page.setViewportSize({ width: 1440, height: 600 });
             await expect.poll(async () => (await canvas.boundingBox())?.width).toBe(1440);
             await expect.poll(() => canvas.getAttribute('data-frame-time')).not.toBe(beforeResize);
+            // The 30 Hz outward emitter needs time to populate the frame at its default density.
+            if (resource === 'circular-particles')
+                await expect.poll(async () => Number(await canvas.getAttribute('data-frame-time'))).toBeGreaterThan(2);
             const screenshot = await page.screenshot({ path: path.join(root, 'preview.png') });
             const visiblePixels = await page.evaluate(async base64 => {
                 const image = new Image();

@@ -8,6 +8,7 @@
 
 | 文件 | 本地静态引用（最多显示 6 项） |
 | --- | --- |
+| [tests/e2e/visualizer-element-list.spec.ts](../../tests/e2e/visualizer-element-list.spec.ts) | [tests/support/file-picker.ts](../../tests/support/file-picker.ts) |
 | [tests/e2e/visualizer-export-playback.spec.ts](../../tests/e2e/visualizer-export-playback.spec.ts) | [src/visualizer/compositionModel.ts](../../src/visualizer/compositionModel.ts)、[src/visualizer/compositionTypes.ts](../../src/visualizer/compositionTypes.ts)、[src/visualizer/elementRegistry.ts](../../src/visualizer/elementRegistry.ts)、[src/visualizer/exportPresets.ts](../../src/visualizer/exportPresets.ts)、[src/visualizer/visualizerExportSession.ts](../../src/visualizer/visualizerExportSession.ts)、[src/visualizer/visualizerSessionController.ts](../../src/visualizer/visualizerSessionController.ts)、另 3 项，按需核对源码 |
 | [tests/e2e/visualizer-layout-scroll.spec.ts](../../tests/e2e/visualizer-layout-scroll.spec.ts) | [tests/support/file-picker.ts](../../tests/support/file-picker.ts) |
 | [tests/e2e/visualizer-lifecycle.spec.ts](../../tests/e2e/visualizer-lifecycle.spec.ts) | [tests/support/file-picker.ts](../../tests/support/file-picker.ts)、[tests/support/v6-resource-probe.ts](../../tests/support/v6-resource-probe.ts) |
@@ -67,6 +68,7 @@
 | [tests/editor/tap-tempo.test.ts](../../tests/editor/tap-tempo.test.ts) | [src/editor/tapTempo.ts](../../src/editor/tapTempo.ts) |
 | [tests/fixtures/fixture-manifest.test.ts](../../tests/fixtures/fixture-manifest.test.ts) | — |
 | [tests/fixtures/generate-fixtures.ts](../../tests/fixtures/generate-fixtures.ts) | [tests/support/audio-fixtures.ts](../../tests/support/audio-fixtures.ts) |
+| [tests/fixtures/visualizer/circular-original-particles.js](../../tests/fixtures/visualizer/circular-original-particles.js) | — |
 | [tests/harness/intentional-failure.test.ts](../../tests/harness/intentional-failure.test.ts) | — |
 | [tests/harness/verify-failure-detection.mjs](../../tests/harness/verify-failure-detection.mjs) | — |
 | [tests/persistence/m6-analysis-cache.test.ts](../../tests/persistence/m6-analysis-cache.test.ts) | [src/analysis/compactCodec.ts](../../src/analysis/compactCodec.ts)、[src/analysis/config.ts](../../src/analysis/config.ts)、[src/analysis/types.ts](../../src/analysis/types.ts)、[src/persistence/sessionRepository.ts](../../src/persistence/sessionRepository.ts)、[src/types/session.ts](../../src/types/session.ts) |
@@ -106,5 +108,3 @@
 | [tests/scripts/run-e7-eval.mjs](../../tests/scripts/run-e7-eval.mjs) | — |
 | [tests/scripts/run-e8-eval.mjs](../../tests/scripts/run-e8-eval.mjs) | — |
 | [tests/scripts/run-e9-eval.mjs](../../tests/scripts/run-e9-eval.mjs) | — |
-| [tests/scripts/run-edge.mjs](../../tests/scripts/run-edge.mjs) | — |
-| [tests/scripts/run-editor-ft-eval.mjs](../../tests/scripts/run-editor-ft-eval.mjs) | — |
