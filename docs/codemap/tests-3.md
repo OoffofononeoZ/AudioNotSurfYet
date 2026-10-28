@@ -8,6 +8,7 @@
 
 | 文件 | 本地静态引用（最多显示 6 项） |
 | --- | --- |
+| [tests/scripts/run-e5-eval.mjs](../../tests/scripts/run-e5-eval.mjs) | — |
 | [tests/scripts/run-e6-eval.mjs](../../tests/scripts/run-e6-eval.mjs) | — |
 | [tests/scripts/run-e7-eval.mjs](../../tests/scripts/run-e7-eval.mjs) | — |
 | [tests/scripts/run-e8-eval.mjs](../../tests/scripts/run-e8-eval.mjs) | — |
@@ -38,6 +39,7 @@
 | [tests/scripts/verify-v6-media.mjs](../../tests/scripts/verify-v6-media.mjs) | — |
 | [tests/scripts/verify-visualizer-output.mjs](../../tests/scripts/verify-visualizer-output.mjs) | [tests/support/visualizer-audio-timeline.mjs](../../tests/support/visualizer-audio-timeline.mjs)、[tests/support/visualizer-media-alignment.mjs](../../tests/support/visualizer-media-alignment.mjs)、[tests/support/visualizer-video-timeline.mjs](../../tests/support/visualizer-video-timeline.mjs) |
 | [tests/scripts/verify-wallpaper-host.mjs](../../tests/scripts/verify-wallpaper-host.mjs) | — |
+| [tests/setup-analysis-scheduler.ts](../../tests/setup-analysis-scheduler.ts) | — |
 | [tests/setup-visualizer-resources.ts](../../tests/setup-visualizer-resources.ts) | [src/visualizer/elementRegistry.ts](../../src/visualizer/elementRegistry.ts)、[src/visualizer/resourceCodec.ts](../../src/visualizer/resourceCodec.ts)、[tests/support/visualizer-assets.mjs](../../tests/support/visualizer-assets.mjs) |
 | [tests/support/analyzer-list.ts](../../tests/support/analyzer-list.ts) | [src/analysis/types.ts](../../src/analysis/types.ts) |
 | [tests/support/audio-fixtures.ts](../../tests/support/audio-fixtures.ts) | — |
@@ -106,5 +108,3 @@
 | [tests/visualizer/algorithm-parity.test.ts](../../tests/visualizer/algorithm-parity.test.ts) | [src/visualizer/algorithmTypes.ts](../../src/visualizer/algorithmTypes.ts)、[src/visualizer/elementRegistry.ts](../../src/visualizer/elementRegistry.ts)、[tests/visualizer/algorithm-runtime-fixture.ts](../../tests/visualizer/algorithm-runtime-fixture.ts) |
 | [tests/visualizer/algorithm-runtime-fixture.ts](../../tests/visualizer/algorithm-runtime-fixture.ts) | [src/visualizer/algorithmTypes.ts](../../src/visualizer/algorithmTypes.ts)、[src/visualizer/compositionScene.ts](../../src/visualizer/compositionScene.ts)、[src/visualizer/drawPacket.ts](../../src/visualizer/drawPacket.ts)、[src/visualizer/editorMarkerTypes.ts](../../src/visualizer/editorMarkerTypes.ts)、[src/visualizer/isolatedAlgorithmRuntime.ts](../../src/visualizer/isolatedAlgorithmRuntime.ts) |
 | [tests/visualizer/analysis-input.test.ts](../../tests/visualizer/analysis-input.test.ts) | [src/analysis/config.ts](../../src/analysis/config.ts)、[src/analysis/frames.ts](../../src/analysis/frames.ts)、[src/analysis/meydaAdapter.ts](../../src/analysis/meydaAdapter.ts)、[src/analysis/types.ts](../../src/analysis/types.ts)、[src/analysis/workerCore.ts](../../src/analysis/workerCore.ts)、[src/visualizer/analysisProjection.ts](../../src/visualizer/analysisProjection.ts)、另 6 项，按需核对源码 |
-| [tests/visualizer/circular-particles.test.ts](../../tests/visualizer/circular-particles.test.ts) | [src/visualizer/drawPacket.ts](../../src/visualizer/drawPacket.ts)、[tests/support/circular-particle-reference.ts](../../tests/support/circular-particle-reference.ts)、[tests/support/visualizer-assets.mjs](../../tests/support/visualizer-assets.mjs)、[tests/visualizer/algorithm-runtime-fixture.ts](../../tests/visualizer/algorithm-runtime-fixture.ts) |
-| [tests/visualizer/composition-model.test.ts](../../tests/visualizer/composition-model.test.ts) | [src/editor/projectCodec.ts](../../src/editor/projectCodec.ts)、[src/visualizer/compositionCodec.ts](../../src/visualizer/compositionCodec.ts)、[src/visualizer/compositionDraftRepository.ts](../../src/visualizer/compositionDraftRepository.ts)、[src/visualizer/compositionModel.ts](../../src/visualizer/compositionModel.ts)、[src/visualizer/elementRegistry.ts](../../src/visualizer/elementRegistry.ts)、[tests/visualizer/resource-fixtures.ts](../../tests/visualizer/resource-fixtures.ts) |

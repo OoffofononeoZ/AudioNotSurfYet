@@ -1,3 +1,4 @@
+import { yieldAnalysisTask } from './taskScheduler';
 import { analysisFrameCount, createAnalysisFrame, frameStartSeconds } from './frames';
 import { exactM10Value } from './meydaAdapter';
 import { buildSeries } from './seriesBuilder';
@@ -29,7 +30,7 @@ export async function extractWindowSeries(
     if (end <= start || hooks.isCancelled?.()) return null;
     const { sampleRate, hopSize } = retained.config;
     const now = hooks.now ?? (() => performance.now());
-    const yieldControl = hooks.yieldControl ?? (() => new Promise<void>(resolve => setTimeout(resolve, 0)));
+    const yieldControl = hooks.yieldControl ?? yieldAnalysisTask;
     let batchStart = now();
     async function checkpoint(index: number) {
         if (index % 32 === 31 || now() - batchStart >= 8) {

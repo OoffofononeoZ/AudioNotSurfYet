@@ -1,3 +1,4 @@
+import { yieldAnalysisTask as yieldTask } from './taskScheduler';
 import { analysisAggregationFactor, analysisFrameCount, cursorFrameIndex } from './frames';
 import { exactM10Value } from './meydaAdapter';
 import { aggregateScalars, aggregateVectors, quantizeToUint16 } from './compactCodec';
@@ -8,7 +9,6 @@ import type { StemPcmSource } from './stemProtocol';
 import type { AnalysisSeries, FeatureId, AnalysisCursorValueResult } from './types';
 import type { AnalysisWindowInput, AnalysisWindowSeries } from './windowTypes';
 
-const yieldTask = () => new Promise<void>(resolve => setTimeout(resolve, 0));
 function base(
     source: StemPcmSource,
     featureId: FeatureId,

@@ -52,8 +52,8 @@ Editor/Visualizer通过tokenized播放与分析lease复用现有service/coordina
 ## 当前全曲分析
 
 - FeatureRegistry穷尽当前FEATURE_IDS，含Wallpaper频谱；M6–M10常量仅是历史子集。默认活动集为空，每job最多四种唯一特征。
-- AudioEngine 通过 descriptor 与 16,384 sample 分块 copy 输出 average-mono PCM；copy 期间 decoded revision 改变时立即视为 stale。
-- module Worker 使用 frame 1024、hop 512、Hanning 和实际 sample rate；同一 frame 的活动项一次 Meyda batch，最多每 32 frame 或约 8ms 发布进度并 yield/cancel。
+- AudioEngine 通过 descriptor 与 16,384 sample 分块 copy 输出 average-mono PCM；copy 按 8ms 时间预算让出，期间 decoded revision 改变时立即视为 stale。
+- module Worker 使用 frame 1024、hop 512、Hanning 和实际 sample rate；同一 frame 的活动项一次 Meyda batch，最多每 32 frame 或约 8ms 发布进度并 yield/cancel。复制、全曲、窗口和分轨通过浏览器 scheduler.yield() 让出，不使用嵌套零延时定时器。
 - display series 限制为 ≤30 samples/s，通过六类 binary compact payload 存储；decoder 校验 schema、完整身份、维度、量化范围、对齐和尾随字节。
 - Editor 的短窗口图表另请求运行时 window series：PCM 波形按像素求包络、普通特征保留原生 hop，Wallpaper 维持 30Hz；连续缩放结束 150ms 后补算。窗口数据不进入上述持久化 series，生命周期与所有权见[标记工作区](../../../docs/context/editor-marking.md#图表细节与时间对齐dec-094)。
 - AnalysisCoordinator 以 generation + track/content/config/feature 完整身份隔离 stale 结果，拥有取消、重试、partial cache 合并与 exact cursor。exact cursor 由 Worker 对原始 frame 现场提取，不能使用反量化 display 值。

@@ -31,7 +31,7 @@ if (!assetsAvailable)
 export default defineConfig({
     test: {
         environment: 'node',
-        setupFiles: ['tests/setup-visualizer-resources.ts'],
+        setupFiles: ['tests/setup-visualizer-resources.ts', 'tests/setup-analysis-scheduler.ts'],
         include: ['tests/**/*.test.ts'],
         exclude: ['tests/harness/intentional-failure.test.ts', ...(!assetsAvailable ? externalResourceSuites : [])],
         testTimeout: 10_000,
