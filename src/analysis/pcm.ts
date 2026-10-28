@@ -55,6 +55,7 @@ export const copyDecodedAudioToMono = async (
         chunkSize?: number;
         yieldControl?: () => Promise<void>;
         stereo?: boolean;
+        copyMono?: boolean;
         isCancelled?: () => boolean;
     } = {},
 ): Promise<{
@@ -71,7 +72,7 @@ export const copyDecodedAudioToMono = async (
         throw new RangeError('PCM copy chunk size must be positive.');
     }
     const yieldControl = options.yieldControl ?? createBudgetYield();
-    const pcm = new Float32Array(descriptor.length);
+    const pcm = new Float32Array(options.copyMono === false ? 0 : descriptor.length);
     const stereoPcm = options.stereo
         ? ([new Float32Array(descriptor.length), new Float32Array(descriptor.length)] as const)
         : undefined;
@@ -95,15 +96,15 @@ export const copyDecodedAudioToMono = async (
                 throw new PcmCopyError('length-mismatch', 'Decoded audio returned an unexpected channel length.');
             }
             if (stereoPcm) channels.push(values);
-            for (let index = 0; index < length; index += 1) {
+            for (let index = 0; options.copyMono !== false && index < length; index += 1) {
                 accumulator[index] = (accumulator[index] ?? 0) + (values[index] ?? 0);
             }
         }
         const divisor = descriptor.channelCount;
-        for (let index = 0; index < length; index += 1) {
+        for (let index = 0; options.copyMono !== false && index < length; index += 1) {
             accumulator[index] = (accumulator[index] ?? 0) / divisor;
         }
-        pcm.set(accumulator, start);
+        if (options.copyMono !== false) pcm.set(accumulator, start);
         if (stereoPcm) {
             const [left, right] = speakersToStereo(channels);
             stereoPcm[0].set(left, start);

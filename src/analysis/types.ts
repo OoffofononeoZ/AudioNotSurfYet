@@ -228,6 +228,18 @@ export interface AnalysisJobCancel {
     generation: number;
 }
 
+/** Wire protocol: PCM ownership is independent of consumer/job generations. */
+export interface AnalysisSourcePrepare {
+    kind: 'prepare-source';
+    sourceKey: string;
+    trackHash: TrackHash;
+    config: AnalysisConfig;
+    pcm: ArrayBuffer;
+    durationSeconds: number;
+}
+
+export type AnalysisSourceJob = Omit<AnalysisJobRequest, 'pcm' | 'config' | 'durationSeconds'> & { sourceKey: string };
+
 export interface AnalysisJobProgress {
     kind: 'progress';
     jobId: string;
@@ -315,12 +327,16 @@ export type AnalysisWorkerRequest =
     | import('./windowTypes').AnalysisWindowRequest
     | import('./windowTypes').AnalysisWindowCancel
     | import('./realtimeTypes').RealtimeAnalysisRequest
-    | AnalysisJobRequest
+    | AnalysisSourcePrepare
+    | { kind: 'release-source' }
+    | AnalysisSourceJob
     | AnalysisJobCancel
     | AnalysisCursorValueRequest
     | TempoEstimateRequest;
 
 export type AnalysisWorkerResponse =
+    | { kind: 'source-ready'; sourceKey: string }
+    | { kind: 'source-error'; sourceKey: string; message: string }
     | import('./stemProtocol').StemWorkerResponse
     | import('./windowTypes').AnalysisWindowResult
     | import('./realtimeTypes').RealtimeAnalysisResponse

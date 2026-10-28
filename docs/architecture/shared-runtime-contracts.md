@@ -30,6 +30,7 @@
 - 消息、cache、series 和 exact cursor 匹配歌曲 hash、config hash、generation/request identity；取消与迟到消息不回填新工作区。
 - Editor lease 提供可取消的 `requestWindowSeries`，从 Worker 保留的 PCM 返回带真实起始时间的运行时窗口序列；类型见 [windowTypes](../../src/analysis/windowTypes.ts)。它与持久化 `AnalysisSeries` 区分，不进入分析缓存编码；窗口任务分批让出执行，精确游标优先。视图拥有单窗口缓存及缩放防抖，详见 [标记工作区](../context/editor-marking.md#图表细节与时间对齐dec-094)。
 - 取消用于节省资源，完整身份检查才是正确性边界；不能假定取消一定先于结果抵达。
+- 原曲 PCM 的准备/确认与特征任务分离，按 track/hash、decoded revision 和 config 标识单一 Worker 来源。同歌切页及活动特征变化复用该来源，旧 lease/job 仍立即失效；换歌、解码版本变化、清空、实时模式及销毁释放。Wallpaper 缺失项按需传递临时 stereo PCM，计算后不保留额外立体声副本。
 - 精确游标选择不晚于目标时刻的最后合法 frame，duration 映射末帧；不以绘图量化值替代精确值。快速请求允许合并，过期结果丢弃。
 - spectralFlux 使用项目公式和 golden，不调用有缺陷的 Meyda extractor；首帧和零能量语义见 [ADR-0005](adrs/0005-project-spectral-flux-and-silence-semantics.md)。
 

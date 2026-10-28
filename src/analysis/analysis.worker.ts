@@ -4,11 +4,14 @@ import {
     extractTempoEstimate,
     responseTransferables,
     runAnalysisJob,
+    validateAnalysisJobRequest,
     type RetainedAnalysisPcm,
 } from './workerCore';
 import type {
     AnalysisCursorValueRequest,
     AnalysisJobRequest,
+    AnalysisSourceJob,
+    AnalysisSourcePrepare,
     AnalysisWorkerRequest,
     AnalysisWorkerResponse,
     TempoEstimateRequest,
@@ -27,6 +30,7 @@ const workerScope = globalThis as unknown as WorkerScope;
 let activeToken = 0;
 let activeJob: { jobId: string; generation: number } | null = null;
 let retained: RetainedAnalysisPcm | null = null;
+let sourceKey: string | null = null;
 let queue = Promise.resolve();
 const stemWorker = createStemWorker(
     message => workerScope.postMessage(message),
@@ -105,27 +109,68 @@ const postError = (request: Pick<AnalysisJobRequest, 'jobId' | 'generation'>, er
     });
 };
 
-const analyze = async (request: AnalysisJobRequest, token: number) => {
+const prepareSource = async (request: AnalysisSourcePrepare, token: number) => {
+    try {
+        await validateAnalysisJobRequest({
+            ...request,
+            kind: 'analyze',
+            jobId: request.sourceKey,
+            generation: 0,
+            featureIds: [],
+            cursorFeatureIds: [],
+        });
+        if (token !== activeToken) return;
+        retained = {
+            generation: 0,
+            trackHash: request.trackHash,
+            config: request.config,
+            pcm: new Float32Array(request.pcm),
+            durationSeconds: request.durationSeconds,
+            featureIds: [],
+        };
+        sourceKey = request.sourceKey;
+        workerScope.postMessage({ kind: 'source-ready', sourceKey });
+    } catch (error) {
+        workerScope.postMessage({
+            kind: 'source-error',
+            sourceKey: request.sourceKey,
+            message: error instanceof Error ? error.message : 'Unable to prepare audio.',
+        });
+    }
+};
+
+const analyze = async (request: AnalysisSourceJob, token: number) => {
     activeJob = {
         jobId: request.jobId,
         generation: request.generation,
     };
     try {
-        const output = await runAnalysisJob(request, {
-            isCancelled: () => token !== activeToken,
-            onProgress: (completedFrames, totalFrames) => {
-                if (token !== activeToken) return;
-                workerScope.postMessage({
-                    kind: 'progress',
-                    jobId: request.jobId,
-                    generation: request.generation,
-                    completedFrames,
-                    totalFrames,
-                });
+        const source = retained;
+        if (!source || sourceKey !== request.sourceKey) throw new Error('Analysis PCM source is unavailable.');
+        retained = { ...source, generation: request.generation, featureIds: request.cursorFeatureIds };
+        const output = await runAnalysisJob(
+            {
+                ...request,
+                config: source.config,
+                pcm: source.pcm.buffer as ArrayBuffer,
+                durationSeconds: source.durationSeconds,
             },
-        });
+            {
+                isCancelled: () => token !== activeToken,
+                onProgress: (completedFrames, totalFrames) => {
+                    if (token !== activeToken) return;
+                    workerScope.postMessage({
+                        kind: 'progress',
+                        jobId: request.jobId,
+                        generation: request.generation,
+                        completedFrames,
+                        totalFrames,
+                    });
+                },
+            },
+        );
         if (token !== activeToken) return;
-        retained = output.retained;
+        retained = { ...output.retained, wallpaperSeries: output.retained.wallpaperSeries ?? source.wallpaperSeries };
         workerScope.postMessage(output.result, responseTransferables(output.result));
     } catch (error) {
         if (token !== activeToken && error instanceof AnalysisWorkerCoreError && error.code === 'cancelled') {
@@ -170,6 +215,20 @@ const tempoEstimate = (request: TempoEstimateRequest) => {
 workerScope.onmessage = event => {
     const request = event.data;
     if (!request || typeof request !== 'object') return;
+    if (request.kind === 'prepare-source') {
+        const token = ++activeToken;
+        retained = null;
+        sourceKey = null;
+        queue = queue.then(() => prepareSource(request, token));
+        return;
+    }
+    if (request.kind === 'release-source') {
+        ++activeToken;
+        retained = null;
+        sourceKey = null;
+        latestTempoRequestId = null;
+        return;
+    }
     if (request.kind === 'stem-analyze' || request.kind === 'stem-read' || request.kind === 'stem-clear') {
         stemWorker(request);
         return;
@@ -198,6 +257,7 @@ workerScope.onmessage = event => {
         const token = ++activeToken;
         pendingLiveId = request.sessionId;
         retained = null;
+        sourceKey = null;
         live?.stop();
         live = null;
         queue = queue.then(async () => {
@@ -237,7 +297,6 @@ workerScope.onmessage = event => {
         live?.stop();
         live = null;
         const token = ++activeToken;
-        retained = null;
         latestTempoRequestId = null;
         queue = queue.then(() => analyze(request, token));
     }

@@ -97,12 +97,27 @@ class FakeRepository implements SessionRepositoryPort {
 class CoreWorker {
     onmessage: ((event: MessageEvent<AnalysisWorkerResponse>) => void) | null = null;
     onerror: ((event: ErrorEvent) => void) | null = null;
-    readonly analyzeRequests: Extract<AnalysisWorkerRequest, { kind: 'analyze' }>[] = [];
+    readonly analyzeRequests: import('../../src/analysis/types').AnalysisJobRequest[] = [];
+    readonly prepareRequests: Extract<AnalysisWorkerRequest, { kind: 'prepare-source' }>[] = [];
+    source: Extract<AnalysisWorkerRequest, { kind: 'prepare-source' }> | null = null;
     readonly cancelled = new Set<string>();
     terminated = false;
     retained: RetainedAnalysisPcm | null = null;
 
     postMessage(request: AnalysisWorkerRequest) {
+        if (request.kind === 'prepare-source') {
+            this.source = request;
+            this.prepareRequests.push(request);
+            this.onmessage?.({
+                data: { kind: 'source-ready', sourceKey: request.sourceKey },
+            } as MessageEvent<AnalysisWorkerResponse>);
+            return;
+        }
+        if (request.kind === 'release-source') {
+            this.source = null;
+            this.retained = null;
+            return;
+        }
         if (request.kind === 'cancel') {
             this.cancelled.add(request.jobId);
             return;
@@ -118,8 +133,14 @@ class CoreWorker {
             return;
         }
         if (request.kind !== 'analyze') return;
-        this.analyzeRequests.push(request);
-        void runAnalysisJob(request, {
+        const input = {
+            ...request,
+            config: this.source!.config,
+            pcm: this.source!.pcm,
+            durationSeconds: this.source!.durationSeconds,
+        };
+        this.analyzeRequests.push(input);
+        void runAnalysisJob(input, {
             isCancelled: () => this.cancelled.has(request.jobId),
             onProgress: (completedFrames, totalFrames) => {
                 this.onmessage?.({
@@ -211,6 +232,24 @@ beforeEach(() => {
 });
 
 describe('AnalysisCoordinator integration', () => {
+    test('reuses one prepared source across feature changes and consumer leases, and releases it on new audio', async () => {
+        const harness = setup();
+        const first = harness.coordinator.acquireConsumer('editor');
+        await first.setActiveFeatures(['buffer']);
+        await vi.waitFor(() => expect(harness.coordinator.getSnapshot().state).toBe('ready'));
+        await first.setActiveFeatures(['buffer', 'rms']);
+        await vi.waitFor(() => expect(harness.coordinator.getSnapshot().state).toBe('ready'));
+        first.release();
+        const second = harness.coordinator.acquireConsumer('visualizer');
+        await second.setActiveFeatures(['rms']);
+        await vi.waitFor(() => expect(harness.coordinator.getSnapshot().state).toBe('ready'));
+        expect(harness.worker.prepareRequests).toHaveLength(1);
+        harness.engine.revision++;
+        harness.engine.emit({ ...harness.engine.snapshot });
+        await vi.waitFor(() => expect(harness.worker.prepareRequests).toHaveLength(2));
+        await vi.waitFor(() => expect(harness.coordinator.getSnapshot().state).toBe('ready'));
+        await harness.coordinator.dispose();
+    });
     test('copies stereo only on a Wallpaper cache miss and restores exact cursors without PCM extraction', async () => {
         const harness = setup({ pcm: createSine(440, 48000) });
         harness.engine.channels = [createSine(440, 48000), createSine(4000, 48000)];
@@ -322,13 +361,19 @@ describe('AnalysisCoordinator integration', () => {
 
     test('drops stale results after an active-feature generation change', async () => {
         const worker = new CoreWorker();
+        const originalPost = worker.postMessage.bind(worker);
         const harness = setup({ worker });
         worker.postMessage = function postMessage(request: AnalysisWorkerRequest) {
             if (request.kind === 'analyze') {
-                this.analyzeRequests.push(request);
+                this.analyzeRequests.push({
+                    ...request,
+                    config: this.source!.config,
+                    pcm: this.source!.pcm,
+                    durationSeconds: this.source!.durationSeconds,
+                });
             } else if (request.kind === 'cancel') {
                 this.cancelled.add(request.jobId);
-            }
+            } else originalPost(request);
         };
         await harness.coordinator.setActiveFeatures(['rms']);
         const staleRequest = worker.analyzeRequests[0]!;

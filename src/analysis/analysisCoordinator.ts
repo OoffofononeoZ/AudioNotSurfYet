@@ -7,6 +7,7 @@ import type { StoredAnalysisCache } from '../types/session';
 import { decodeAnalysisSeries, encodeAnalysisSeries } from './compactCodec';
 import { createAnalysisCacheKey, createAnalysisConfig } from './config';
 import { copyDecodedAudioToMono, type DecodedAudioCopyPort, PcmCopyError } from './pcm';
+import { AnalysisPcmSource } from './pcmSource';
 import { wallpaperFrameIndex } from './wallpaperSpectrum';
 import { AnalysisWindowRequests } from './windowRequests';
 import type { AnalysisWindowInput, AnalysisWindowSeries } from './windowTypes';
@@ -21,7 +22,7 @@ import {
     type AnalysisCoordinatorSnapshot,
     type AnalysisErrorCode,
     type AnalysisCursorValueResult,
-    type AnalysisJobRequest,
+    type AnalysisSourceJob,
     type AnalysisListener,
     type AnalysisSeries,
     type AnalysisWorkerRequest,
@@ -148,6 +149,7 @@ export class AnalysisCoordinator {
         resolve: (value: TempoEstimateResult | null) => void;
         timeout: ReturnType<typeof setTimeout>;
     } | null = null;
+    private readonly pcmSource = new AnalysisPcmSource();
     private worker: AnalysisWorkerPort | null = null;
     private restoredCache: StoredAnalysisCache | null = null;
     private activeJob: {
@@ -181,6 +183,7 @@ export class AnalysisCoordinator {
         this.activeConsumer = null;
         const id = crypto.randomUUID();
         this.realtime = { id, frame, error };
+        this.pcmSource.clear();
         this.ensureWorker().postMessage({ kind: 'realtime-start', sessionId: id, sampleRate, featureIds, port }, [
             port,
         ]);
@@ -459,6 +462,7 @@ export class AnalysisCoordinator {
         this.activeConsumer = null;
         this.cancelActiveJob('cancelled');
         this.unsubscribeEngine();
+        this.pcmSource.clear();
         this.worker?.terminate();
         this.worker = null;
         this.resolveAllCursorRequests();
@@ -604,30 +608,50 @@ export class AnalysisCoordinator {
             readyFeatureIds: [...hits],
             cacheState: hits.length === 0 ? 'miss' : misses.length === 0 ? 'hit' : 'partial',
         });
-        let copied;
+        const worker = this.ensureWorker();
+        const sourceKey = JSON.stringify([
+            descriptor.trackId,
+            identity.trackHash,
+            descriptor.revision,
+            config.configHash,
+        ]);
+        let stereoPcm: readonly [Float32Array, Float32Array] | undefined;
         try {
-            copied = await copyDecodedAudioToMono(this.engine, {
-                yieldControl: this.copyYieldControl,
-                stereo: misses.includes('wallpaperEngineSpectrum'),
-                isCancelled: () => !this.isCurrentGeneration(generation),
-            });
-        } catch (error) {
+            await this.pcmSource.prepare(
+                sourceKey,
+                config,
+                identity.trackHash,
+                this.engine,
+                (message, transfer) => worker.postMessage(message, transfer),
+                this.copyYieldControl,
+            );
             if (!this.isCurrentGeneration(generation)) return;
-            if (error instanceof PcmCopyError && error.code === 'stale') {
-                return;
+            if (misses.includes('wallpaperEngineSpectrum')) {
+                stereoPcm = (
+                    await copyDecodedAudioToMono(this.engine, {
+                        yieldControl: this.copyYieldControl,
+                        stereo: true,
+                        copyMono: false,
+                        isCancelled: () => !this.isCurrentGeneration(generation),
+                    })
+                ).stereoPcm;
             }
+        } catch (error) {
+            if (!this.isCurrentGeneration(generation) || (error instanceof PcmCopyError && error.code === 'stale'))
+                return;
             this.publishError(
                 generation,
                 'audio-not-ready',
-                error instanceof Error ? error.message : 'Unable to copy decoded audio.',
+                error instanceof Error ? error.message : 'Unable to prepare audio.',
                 true,
             );
             return;
         }
-        if (!this.isCurrentGeneration(generation) || copied.descriptor.revision !== descriptor.revision) {
+        if (
+            !this.isCurrentGeneration(generation) ||
+            this.engine.getDecodedAudioDescriptor()?.revision !== descriptor.revision
+        )
             return;
-        }
-        const worker = this.ensureWorker();
         const jobId = this.createJobId();
         this.activeJob = {
             jobId,
@@ -644,21 +668,17 @@ export class AnalysisCoordinator {
             totalFrames: 0,
             progress: misses.length === 0 ? 1 : 0,
         });
-        const request: AnalysisJobRequest = {
+        const request: AnalysisSourceJob = {
             kind: 'analyze',
             jobId,
             generation,
             trackHash: identity.trackHash,
-            config,
+            sourceKey,
             featureIds: misses,
             cursorFeatureIds: [...this.snapshot.activeFeatureIds],
-            pcm: copied.pcm.buffer as ArrayBuffer,
-            stereoPcm: copied.stereoPcm
-                ? [copied.stereoPcm[0].buffer as ArrayBuffer, copied.stereoPcm[1].buffer as ArrayBuffer]
-                : undefined,
-            durationSeconds: copied.descriptor.durationSeconds,
+            stereoPcm: stereoPcm ? [stereoPcm[0].buffer as ArrayBuffer, stereoPcm[1].buffer as ArrayBuffer] : undefined,
         };
-        worker.postMessage(request, [request.pcm, ...(request.stereoPcm ?? [])]);
+        worker.postMessage(request, [...(request.stereoPcm ?? [])]);
     }
 
     private restoreCacheHits(
@@ -705,6 +725,7 @@ export class AnalysisCoordinator {
             this.handleWorkerMessage(event.data);
         };
         worker.onerror = event => {
+            this.pcmSource.clear(new Error(event.message || 'Analysis Worker failed.'));
             this.stems?.workerFailed(event.message || '分轨分析 Worker 失败。');
             if (this.disposed) return;
             this.realtime?.error(event.message || '实时分析 Worker 失败。');
@@ -721,6 +742,14 @@ export class AnalysisCoordinator {
     }
 
     private handleWorkerMessage(message: AnalysisWorkerResponse): void {
+        if (message.kind === 'source-error') {
+            this.pcmSource.fail(message.sourceKey, message.message);
+            return;
+        }
+        if (message.kind === 'source-ready') {
+            this.pcmSource.acknowledge(message.sourceKey);
+            return;
+        }
         if (
             message.kind === 'stem-progress' ||
             message.kind === 'stem-result' ||
@@ -916,6 +945,8 @@ export class AnalysisCoordinator {
         if (this.disposed) return;
         if (playback.state === 'empty' || playback.state === 'loading' || playback.state === 'error') {
             this.lastDescriptorRevision = null;
+            this.pcmSource.clear();
+            this.worker?.postMessage({ kind: 'release-source' });
             this.cancelActiveJob('cancelled');
             this.series.clear();
             this.publish({
@@ -940,6 +971,8 @@ export class AnalysisCoordinator {
             return;
         }
         this.lastDescriptorRevision = descriptor.revision;
+        this.pcmSource.clear();
+        this.worker?.postMessage({ kind: 'release-source' });
         if (this.snapshot.activeFeatureIds.length > 0) {
             this.cancelActiveJob('cancelled');
             const generation = this.snapshot.generation + 1;

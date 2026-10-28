@@ -58,7 +58,7 @@ Editor/Visualizer通过tokenized播放与分析lease复用现有service/coordina
 - 仅含 buffer/rms/energy/zcr 的帧直接按同一 Hanning 规则计算，不准备 FFT。全曲逐桶聚合，仅保留当前桶的原始帧和紧凑输出；分轨同帧多特征也批量提取，数值与原聚合/量化规则相同。
 - Editor 的短窗口图表另请求运行时 window series：PCM 波形按像素求包络、普通特征保留原生 hop，Wallpaper 维持 30Hz；连续缩放结束 150ms 后补算。窗口数据不进入上述持久化 series，生命周期与所有权见[标记工作区](../../../docs/context/editor-marking.md#图表细节与时间对齐dec-094)。
 - AnalysisCoordinator 以 generation + track/content/config/feature 完整身份隔离 stale 结果，拥有取消、重试、partial cache 合并与 exact cursor。exact cursor 由 Worker 对原始 frame 现场提取，不能使用反量化 display 值。
-- 全 cache hit 使用 0-feature job 只把当前 mono PCM 保留到 Worker，不重复 Meyda 提取；因此刷新命中后 exact cursor 仍可用。默认活动集为空时不复制 PCM、不创建 Worker。
+- PCM 以 track/hash、decoded revision 和 config 身份单独准备并等待 Worker 确认；同歌切页/改特征复用单份 mono PCM，job generation 只隔离请求。全 cache hit 的 0-feature job 绑定新的游标身份，不重复复制或 Meyda 提取；刷新才重新准备 PCM。默认活动集为空时不复制 PCM、不创建 Worker；换音频、实时模式及销毁释放原曲来源。
 - 当前 Meyda `spectralFlux` 仍会抛出 `x is not defined`；M6 以 R-020/预期失败测试记录。M8 已按 ADR-0005 使用项目内相邻幅度频谱正向 L1 差，不 patch Meyda；clean canonical 28/28 已缓解产品阻断，但上游缺陷不得表述为已修复。
 
 ## MusicBar 交互边界
