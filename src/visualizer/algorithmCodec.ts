@@ -1,3 +1,4 @@
+import { validateLyricInputs } from './lyricCodec';
 import { validateMediaInputs } from './mediaCodec';
 import { finite, integer, invalid, keys, record, text } from './projectValidation';
 import { resourceHash } from './resourceIdentity';
@@ -61,7 +62,7 @@ function parameter(input: unknown): AlgorithmParameter {
         list(v.allowedAnalysisProjections, ['scalar', 'mean', 'max', 'peak', 'bin', 'band', 'full']);
     return structuredClone(v) as unknown as AlgorithmParameter;
 }
-export function validateAlgorithmContract(input: unknown, apiVersion: 1 | 2 | 3 | 4 = 1): AlgorithmContract {
+export function validateAlgorithmContract(input: unknown, apiVersion: 1 | 2 | 3 | 4 | 5 = 1): AlgorithmContract {
     const v = record(input, '算法契约');
     keys(
         v,
@@ -75,6 +76,7 @@ export function validateAlgorithmContract(input: unknown, apiVersion: 1 | 2 | 3 
                   'executionModes',
                   'stateParameters',
                   ...(apiVersion === 4 ? ['renderSpace'] : []),
+                  ...(apiVersion === 5 ? ['lyricInputs'] : []),
               ]
             : apiVersion === 2
               ? ['inputParameter', 'markerInputs', 'timingInput', 'stateParameters']
@@ -100,6 +102,12 @@ export function validateAlgorithmContract(input: unknown, apiVersion: 1 | 2 | 3 
     const executionModes =
         apiVersion >= 3 ? (list(v.executionModes, ['timeline', 'realtime']) as ('timeline' | 'realtime')[]) : undefined;
     if (executionModes && !executionModes.length) invalid('ABI 3 必须声明执行模式。');
+    const lyricInputs = apiVersion === 5 ? validateLyricInputs(v.lyricInputs) : undefined;
+    if (
+        apiVersion === 5 &&
+        (!lyricInputs || v.kind !== 'visual' || executionModes?.length !== 1 || executionModes[0] !== 'timeline')
+    )
+        invalid('ABI 5 歌词元素必须声明歌词输入并仅支持歌曲模式。');
     let timingInput: string | undefined;
     if (v.timingInput !== undefined) {
         timingInput = identifier(v.timingInput);
@@ -124,6 +132,7 @@ export function validateAlgorithmContract(input: unknown, apiVersion: 1 | 2 | 3 
         ...(markerInputs ? { markerInputs } : {}),
         ...(timingInput ? { timingInput } : {}),
         ...(mediaInputs ? { mediaInputs } : {}),
+        ...(lyricInputs ? { lyricInputs } : {}),
         ...(executionModes ? { executionModes } : {}),
     };
 }
@@ -144,11 +153,18 @@ export function validateShaderProgram(input: unknown): ShaderProgram {
         identifier(name);
         const u = record(raw, 'uniform');
         keys(u, ['type'], ['length', 'inputId', 'slot']);
-        if (!['number', 'int', 'boolean', 'color', 'vec2', 'vec3', 'array', 'source', 'media'].includes(String(u.type)))
+        if (
+            !['number', 'int', 'boolean', 'color', 'vec2', 'vec3', 'array', 'source', 'media', 'lyrics'].includes(
+                String(u.type),
+            )
+        )
             invalid('uniform 类型无效。');
         if (u.type === 'media') {
             identifier(u.inputId);
             if (!['current', 'next'].includes(String(u.slot))) invalid('媒体纹理 slot 无效。');
+        } else if (u.type === 'lyrics') {
+            identifier(u.inputId);
+            if (u.slot !== undefined) invalid('歌词纹理不使用媒体 slot。');
         } else if (u.inputId !== undefined || u.slot !== undefined) invalid('仅媒体纹理声明媒体输入。');
         if (u.type === 'array') {
             const length = integer(u.length, 'uniform length');
@@ -163,11 +179,11 @@ export function validateAlgorithmDefinition(input: unknown): AlgorithmDefinition
     const id = text(v.id, '算法 ID'),
         version = integer(v.version, '算法版本');
     if (!/^[a-z0-9][a-z0-9._-]*$/.test(id) || version < 1 || !Number.isSafeInteger(version)) invalid('算法身份无效。');
-    if (![1, 2, 3, 4].includes(Number(v.apiVersion)) || typeof v.apiVersion !== 'number')
+    if (![1, 2, 3, 4, 5].includes(Number(v.apiVersion)) || typeof v.apiVersion !== 'number')
         invalid('算法 ABI 不受支持。');
     if (typeof v.hash !== 'string' || !/^[a-f0-9]{64}$/.test(v.hash) || resourceHash(v) !== v.hash)
         invalid('算法内容与 SHA-256 不匹配。');
-    const contract = validateAlgorithmContract(v.contract, v.apiVersion as 1 | 2 | 3 | 4),
+    const contract = validateAlgorithmContract(v.contract, v.apiVersion as 1 | 2 | 3 | 4 | 5),
         programs: Record<string, ShaderProgram> = {};
     for (const [name, program] of Object.entries(record(v.programs, 'programs')))
         Object.defineProperty(programs, identifier(name), { value: validateShaderProgram(program), enumerable: true });
@@ -178,7 +194,12 @@ export function validateAlgorithmDefinition(input: unknown): AlgorithmDefinition
                 (Number(v.apiVersion) < 3 || !contract.mediaInputs?.some(i => i.id === u.inputId))
             )
                 invalid('媒体纹理未获声明授权。');
+    for (const program of Object.values(programs))
+        for (const u of Object.values(program.uniforms))
+            if (u.type === 'lyrics' && (v.apiVersion !== 5 || !contract.lyricInputs?.some(i => i.id === u.inputId)))
+                invalid('歌词纹理未获声明授权。');
     for (const p of Object.values(programs)) {
+        if (v.apiVersion === 5 && p.geometry !== 'triangles') invalid('歌词绘制必须使用三角形。');
         if (v.apiVersion === 4 && (p.geometry !== 'triangles' || !p.alphaMode)) invalid('三维场景配置无效。');
         if (v.apiVersion === 4 && Object.values(p.uniforms).some(u => u.type === 'source'))
             invalid('世界空间元素不能读取二维效果输入。');
@@ -190,13 +211,18 @@ export function validateAlgorithmDefinition(input: unknown): AlgorithmDefinition
         id,
         version,
         hash: String(v.hash),
-        apiVersion: v.apiVersion as 1 | 2 | 3 | 4,
+        apiVersion: v.apiVersion as 1 | 2 | 3 | 4 | 5,
         contract,
         source: text(v.source, '算法源码'),
         programs,
     };
 }
 export function validateUniform(value: unknown, type: UniformType, length?: number): void {
+    if (type === 'lyrics') {
+        const page = integer(value, '歌词图集页');
+        if (page < 0 || page >= 4) invalid('歌词图集页无效。');
+        return;
+    }
     if (type === 'media') {
         identifier(value);
         return;

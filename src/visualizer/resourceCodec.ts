@@ -1,3 +1,4 @@
+import { validateLyricDefinitions, validateLyricBindings } from './lyricCodec';
 import { validateMediaDefinitions, validateMediaBindings, validateMediaAssets } from './mediaCodec';
 import { elementSeedField } from './seed';
 import { validateAlgorithmDefinition } from './algorithmCodec';
@@ -136,7 +137,7 @@ function elementDefinition(input: unknown, algorithms: AlgorithmDefinition[]): E
     keys(
         v,
         ['id', 'version', 'hash', 'algorithm', 'kind', 'title', 'icon', 'parameters'],
-        ['inputParameter', 'markerInputs', 'usesSeed', 'mediaInputs', 'scene3dDefaults'],
+        ['inputParameter', 'markerInputs', 'usesSeed', 'mediaInputs', 'scene3dDefaults', 'lyricInputs'],
     );
     const ref = identity(v);
     if (v.usesSeed !== undefined && v.usesSeed !== true) return invalid('Seed 能力声明必须为 true 或省略。');
@@ -155,6 +156,7 @@ function elementDefinition(input: unknown, algorithms: AlgorithmDefinition[]): E
     if (!Array.isArray(v.parameters) || v.parameters.length !== kernel.parameters.length)
         return invalid('元素参数定义不完整。');
     const mediaInputs = validateMediaDefinitions(v.mediaInputs, kernel.mediaInputs);
+    const lyricInputs = validateLyricDefinitions(v.lyricInputs, kernel.lyricInputs);
     const markerInputs = validateMarkerDefinitions(v.markerInputs, kernel.markerInputs);
     return {
         ...ref,
@@ -168,6 +170,7 @@ function elementDefinition(input: unknown, algorithms: AlgorithmDefinition[]): E
         parameters: kernel.parameters.map((p, i) => parameter((v.parameters as unknown[])[i], p)),
         ...(markerInputs ? { markerInputs } : {}),
         ...(mediaInputs ? { mediaInputs } : {}),
+        ...(lyricInputs ? { lyricInputs } : {}),
     };
 }
 export function mergeResources(...snapshots: ResourceSnapshot[]): ResourceSnapshot {
@@ -210,7 +213,7 @@ function presetDefinition(
         keys(
             e,
             ['key', 'element', 'name', 'enabled', 'bindings', 'timing'],
-            ['targets', 'markerBindings', 'mediaBindings', 'seed', 'transform3d'],
+            ['targets', 'markerBindings', 'mediaBindings', 'seed', 'transform3d', 'lyricBindings'],
         );
         const key = name(e.key),
             element = validateResourceRef(e.element),
@@ -219,6 +222,7 @@ function presetDefinition(
         if (e.transform3d !== undefined && !definition.scene3dDefaults) invalid('二维元素不能保存三维变换。');
         if (targets.has(key) || typeof e.enabled !== 'boolean') return invalid('预设子元素 key 或启用状态无效。');
         const bindings = validateElementBindings(e.bindings, definition.parameters);
+        const lyricBindings = validateLyricBindings(e.lyricBindings, definition.lyricInputs, [], true);
         const mediaBindings = validateMediaBindings(e.mediaBindings, definition.mediaInputs, mediaAssets ?? []);
         const markerBindings = validateMarkerBindings(
             e.markerBindings,
@@ -255,6 +259,7 @@ function presetDefinition(
             bindings,
             ...(markerBindings ? { markerBindings } : {}),
             ...(mediaBindings ? { mediaBindings } : {}),
+            ...(lyricBindings ? { lyricBindings } : {}),
             timing: structuredClone(t),
             ...(e.targets !== undefined ? { targets: structuredClone(e.targets) } : {}),
         };

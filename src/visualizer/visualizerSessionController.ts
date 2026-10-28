@@ -100,6 +100,25 @@ export class VisualizerExportLockedError extends Error {
     }
 }
 export class VisualizerSessionController {
+    updateLyrics(payload: {
+        elementId: string;
+        inputId: string;
+        binding: import('./lyricTypes').LyricBinding;
+        assets: import('./lyricTypes').LyricAsset[];
+    }) {
+        this.assertUnlocked();
+        const project = this.snapshot.project;
+        if (!project?.elements.some(e => e.id === payload.elementId)) return;
+        this.updateProject({
+            ...project,
+            lyricAssets: [...new Map([...(project.lyricAssets ?? []), ...payload.assets].map(a => [a.id, a])).values()],
+            elements: project.elements.map(e =>
+                e.id === payload.elementId
+                    ? { ...e, lyricBindings: { ...e.lyricBindings, [payload.inputId]: payload.binding } }
+                    : e,
+            ),
+        });
+    }
     updateMedia(payload: {
         elementId: string;
         inputId: string;

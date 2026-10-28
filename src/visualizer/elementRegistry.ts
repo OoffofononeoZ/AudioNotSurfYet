@@ -1,3 +1,4 @@
+import { defaultLyricBindings } from './lyricCodec';
 import type { SceneParameterDescriptor } from './parameterDescriptor';
 import type { VisualizerElement } from './compositionTypes';
 import type { ElementDefinition, PresetDefinition, ResourceRef, ResourceSnapshot } from './resourceTypes';
@@ -42,6 +43,7 @@ export function createDefinitionElement(
         })) as VisualizerElement['bindings'],
         ...(markerBindings ? { markerBindings } : {}),
         ...(d.mediaInputs ? { mediaBindings: defaultMediaBindings(d.mediaInputs) } : {}),
+        ...(d.lyricInputs ? { lyricBindings: defaultLyricBindings(d.lyricInputs) } : {}),
         ...(d.scene3dDefaults ? { transform3d: defaultTransform3d() } : {}),
         ...(d.kind === 'visual' ? {} : { targets: { kind: 'composition' as const } }),
     };

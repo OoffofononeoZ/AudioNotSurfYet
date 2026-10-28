@@ -12,7 +12,7 @@ DEC-104 增加[三维场景、镜头与深度](scene3d.md)，V5 在输入边界�
 - `elements` 保存 UUID、精确资源引用、名称、启用状态、派生 layer、时段、bindings、按声明提供的可选 markerBindings／mediaBindings 和适用的效果 targets。实例不再重复保存固定 type/version，算法由元素定义的 algorithm 引用解析。
 - `items` 由低到高排列独立元素、scene3d 或预设实例。预设 scenes3d 可组织其连续的世界元素成员。组包含 UUID、资源引用、名称、显隐、children 和 controls；每个叶元素恰好归属一次。禁止预设嵌套、重复归属、悬空引用和空组。
 - items/children 决定连续 layer；列表反向显示，顶层移动整组，子元素只在组内排序。
-- `resources:{algorithms,elements,presets}` 内嵌完整定义和算法源码、Shader、契约，均以 `{id,version,hash}` 绑定。恢复及渲染不请求商城、不向全局库注册内容；要求宿主支持包声明的 ABI 1/2/3/4 与绘图能力。
+- `resources:{algorithms,elements,presets}` 内嵌完整定义和算法源码、Shader、契约，均以 `{id,version,hash}` 绑定。恢复及渲染不请求商城、不向全局库注册内容；要求宿主支持包声明的 ABI 1/2/3/4/5 与绘图能力。
 - 相同算法去重保存，实例按 UUID 独立创建。重复添加预设产生新组/子 UUID 和本次效果引用。默认绑定与时长适配只在新增时应用。
 
 ## 分组及共同处理参数
@@ -44,3 +44,7 @@ strict codec 检查字段、身份/hash、算法 ABI、参数能力、同歌引�
 ## ABI 3 媒体扩展
 
 2026-10-22 的 Circular Visualizer 计划增加受控媒体输入和显式执行模式，保留现有格式版本与旧资源身份；新增媒体链路及 ABI 3 的实时因果分支见[媒体输入](../../context/visualizer-media.md)。原有仅 ABI 1/2 或无媒体内容的约束继续适用其原范围。
+
+## ABI 5 歌词输入
+
+DEC-106 增加可选 lyricAssets 与实例 lyricBindings，保留 V6；旧快照不补字段、不替换资源。原始 UTF-8 LRC 随工程保存，模板仅 unbound，宿主图集不序列化。时间、校验及所有权见[歌词输入](../../context/visualizer-lyrics.md)。

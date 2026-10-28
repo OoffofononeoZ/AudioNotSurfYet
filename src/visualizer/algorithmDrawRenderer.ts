@@ -35,6 +35,7 @@ export class AlgorithmDrawRenderer {
         source?: THREE.Texture,
         media?: (inputId: string, slot: 'current' | 'next') => THREE.Texture,
         world?: { camera: CameraFrame; transform: Transform3d },
+        lyrics?: (inputId: string, page: number) => THREE.Texture,
     ) {
         const isWorld = algorithm.contract.renderSpace === 'world';
         const definition = algorithm.programs[pass.program]!;
@@ -87,19 +88,21 @@ export class AlgorithmDrawRenderer {
         for (const [name, specification] of Object.entries(surface.program.uniforms)) {
             const value = pass.uniforms[name]!;
             surface.material.uniforms[name]!.value =
-                specification.type === 'media'
-                    ? (media?.(specification.inputId!, specification.slot!) ?? null)
-                    : specification.type === 'source'
-                      ? (source ?? null)
-                      : specification.type === 'color'
-                        ? new THREE.Color().setStyle(String(value), THREE.LinearSRGBColorSpace)
-                        : specification.type === 'vec2'
-                          ? new THREE.Vector2(...(value as [number, number]))
-                          : specification.type === 'vec3'
-                            ? new THREE.Vector3(...(value as [number, number, number]))
-                            : specification.type === 'array'
-                              ? new Float32Array(value as number[])
-                              : value;
+                specification.type === 'lyrics'
+                    ? (lyrics?.(specification.inputId!, Number(value)) ?? null)
+                    : specification.type === 'media'
+                      ? (media?.(specification.inputId!, specification.slot!) ?? null)
+                      : specification.type === 'source'
+                        ? (source ?? null)
+                        : specification.type === 'color'
+                          ? new THREE.Color().setStyle(String(value), THREE.LinearSRGBColorSpace)
+                          : specification.type === 'vec2'
+                            ? new THREE.Vector2(...(value as [number, number]))
+                            : specification.type === 'vec3'
+                              ? new THREE.Vector3(...(value as [number, number, number]))
+                              : specification.type === 'array'
+                                ? new Float32Array(value as number[])
+                                : value;
         }
         if (pass.mesh) {
             for (const [name, field] of [

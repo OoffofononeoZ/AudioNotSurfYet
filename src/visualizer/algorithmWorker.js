@@ -80,6 +80,15 @@ listen('message', ({ data }) => {
                                 if (Array.isArray(value)) Object.freeze(value);
                             Object.freeze(element.frame.camera);
                         }
+                        if (element.frame.lyrics) {
+                            const freeze = value => {
+                                if (value && typeof value === 'object') {
+                                    for (const child of Object.values(value)) freeze(child);
+                                    Object.freeze(value);
+                                }
+                            };
+                            freeze(element.frame.lyrics);
+                        }
                         packet = await instance.prepareFrame(element.frame, {
                             history: request => read('history', request),
                             markers: request => read('markers', request),

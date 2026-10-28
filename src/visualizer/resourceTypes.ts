@@ -1,3 +1,4 @@
+import type { LyricInputDefinition, LyricBindings } from './lyricTypes';
 import type { MediaInputDefinition, MediaBindings, MediaAsset } from './mediaTypes';
 import type { ElementBinding, ElementKind, EffectTargets } from './compositionTypes';
 import type { AlgorithmDefinition } from './algorithmTypes';
@@ -22,6 +23,7 @@ export interface ElementDefinition extends ResourceRef {
     parameters: SceneParameterDescriptor[];
     markerInputs?: MarkerInputDefinition[];
     mediaInputs?: MediaInputDefinition[];
+    lyricInputs?: LyricInputDefinition[];
     scene3dDefaults?: { camera: SceneCamera };
 }
 export type CommonValue = number | string | boolean | number[] | Omit<ElementBinding, 'parameterId'>;
@@ -44,6 +46,7 @@ export interface PresetElementTemplate {
     bindings: ElementBinding[];
     markerBindings?: MarkerBindings;
     mediaBindings?: MediaBindings;
+    lyricBindings?: LyricBindings;
     timing: { kind: 'relative'; start: number; end: number } | { kind: 'unbound' };
     targets?: EffectTargets;
     transform3d?: Transform3d;

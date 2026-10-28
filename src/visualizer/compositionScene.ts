@@ -1,3 +1,4 @@
+import { CompositionLyricHost } from './lyricHost';
 import * as THREE from 'three';
 import { sceneGroups, elementScene, renderUnits, findScene3d } from './scene3dModel';
 import { resolveSceneCamera } from './scene3dCamera';
@@ -62,6 +63,7 @@ export class CompositionScene implements VisualizerScene {
     private cameras = new Map<string, CameraFrame>();
     private gpu = new AlgorithmDrawRenderer(this.geometry);
     private media = new CompositionMediaHost();
+    private lyrics = new CompositionLyricHost();
     private runtime: AlgorithmRuntimePort | null = null;
     private runtimeSignature = '';
     private initialization: Promise<void> | null = null;
@@ -100,6 +102,8 @@ export class CompositionScene implements VisualizerScene {
         if (!project || !project.elements.length) {
             this.media.dispose();
             this.media = new CompositionMediaHost();
+            this.lyrics.dispose();
+            this.lyrics = new CompositionLyricHost();
             this.runtime?.dispose();
             this.runtime = null;
             this.runtimeSignature = '';
@@ -169,6 +173,13 @@ export class CompositionScene implements VisualizerScene {
             )
                 throw Error('元素不支持当前执行模式。');
         }
+        const lyricFrames = await this.lyrics.prepare(
+            project,
+            effectiveElements(project).filter(e => used.has(e.id)),
+            input.timeSeconds,
+            () => !this.disposed && this.options.readProject() === project && input.isCurrent?.() !== false,
+        );
+        assertCurrent();
         const mediaFrames = await this.media.prepare(
             project,
             effectiveElements(project).filter(e => used.has(e.id)),
@@ -186,7 +197,10 @@ export class CompositionScene implements VisualizerScene {
         const frames = effectiveElements(project)
             .filter(e => used.has(e.id))
             .flatMap(e => {
-                if (Object.values(e.markerBindings ?? {}).some(b => b.kind === 'unbound')) {
+                if (
+                    Object.values(e.markerBindings ?? {}).some(b => b.kind === 'unbound') ||
+                    Object.values(e.lyricBindings ?? {}).some(b => b.kind === 'unbound')
+                ) {
                     this.needsSourcePrompt = true;
                     return [];
                 }
@@ -226,6 +240,7 @@ export class CompositionScene implements VisualizerScene {
                             range: this.options.realtime ? null : elementRange(project, e),
                             parameters,
                             ...aWorldCamera(project, e, this.cameras),
+                            ...(lyricFrames.has(e.id) ? { lyrics: lyricFrames.get(e.id) } : {}),
                             ...(findResource(project.resources.algorithms, elementDescriptor(project, e).algorithm)
                                 .apiVersion >= 3
                                 ? {
@@ -290,6 +305,21 @@ export class CompositionScene implements VisualizerScene {
     private drawElement(project: CompositionRenderModel, e: VisualizerElement, source?: THREE.WebGLRenderTarget) {
         let current = source;
         const algorithm = findResource(project.resources.algorithms, elementDescriptor(project, e).algorithm);
+        if (algorithm.contract.lyricInputs) {
+            const target = this.targets[0]!;
+            this.clear(target);
+            for (const pass of this.packets.get(e.id)?.passes ?? [])
+                this.gpu.draw(
+                    this.options.renderer,
+                    algorithm,
+                    pass,
+                    undefined,
+                    undefined,
+                    undefined,
+                    (inputId, page) => this.lyrics.texture(e.id, inputId, page),
+                );
+            return target;
+        }
         for (const pass of this.packets.get(e.id)?.passes ?? []) {
             const target = current === this.targets[0] ? this.targets[1]! : this.targets[0]!;
             this.clear(target);
@@ -385,6 +415,7 @@ export class CompositionScene implements VisualizerScene {
                     JSON.stringify(element.bindings.map(b => input.values.get(parameterKey(id, b.parameterId))?.value)),
                     JSON.stringify(packet.state ?? []),
                     ...(element.mediaBindings ? [JSON.stringify(element.mediaBindings)] : []),
+                    ...(element.lyricBindings ? [JSON.stringify(element.lyricBindings)] : []),
                 );
             }
             return { hash: hashText(hashes.join('|')), needsSourcePrompt: this.needsSourcePrompt };
@@ -406,6 +437,7 @@ export class CompositionScene implements VisualizerScene {
         this.runtime?.dispose();
         this.runtime = null;
         this.media.dispose();
+        this.lyrics.dispose();
         this.gpu.dispose();
         this.geometry.dispose();
         this.material.dispose();

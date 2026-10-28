@@ -1,3 +1,4 @@
+import { referencedLyrics } from './lyricCodec';
 import { itemChildren, sceneGroups, elementScene, findScene3d, pruneSceneMembers, sceneUnits } from './scene3dModel';
 import { referencedMedia } from './mediaCodec';
 import { FEATURE_IDS, type FeatureId } from '../analysis/types';
@@ -55,6 +56,7 @@ export function pruneCompositionResources(project: VisualizerProjectV6): Visuali
     return {
         ...project,
         ...(project.mediaAssets ? { mediaAssets: referencedMedia(project.elements, project.mediaAssets) } : {}),
+        ...(project.lyricAssets ? { lyricAssets: referencedLyrics(project.elements, project.lyricAssets) } : {}),
         resources: {
             algorithms: project.resources.algorithms.filter(a => algorithms.has(resourceKey(a))),
             elements: project.resources.elements.filter(e => elements.has(resourceKey(e))),
@@ -146,6 +148,7 @@ export function planCompositionInputs(project: VisualizerProjectV6, includeDisab
 export function compositionIssues(project: VisualizerProjectV6): string[] {
     const issues: string[] = [];
     for (const e of effectiveElements(project).filter(e => e.enabled)) {
+        if (Object.values(e.lyricBindings ?? {}).some(b => b.kind === 'unbound')) issues.push(e.name + '：歌词未配置');
         if (!elementRange(project, e)) issues.push(e.name + '：请选择范围标记');
         if (e.bindings.some(b => b.source.kind === 'unbound')) issues.push(e.name + '：输入未配置');
         if (Object.values(e.markerBindings ?? {}).some(b => b.kind === 'unbound'))

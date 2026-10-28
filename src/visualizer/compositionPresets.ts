@@ -27,6 +27,7 @@ export function instantiatePreset(id: string | ResourceRef, duration: number, st
             bindings: structuredClone(e.bindings),
             ...(e.markerBindings ? { markerBindings: structuredClone(e.markerBindings) } : {}),
             ...(e.mediaBindings ? { mediaBindings: structuredClone(e.mediaBindings) } : {}),
+            ...(e.lyricBindings ? { lyricBindings: structuredClone(e.lyricBindings) } : {}),
             timing:
                 e.timing.kind === 'relative'
                     ? { kind: 'manual', startSeconds: duration * e.timing.start, endSeconds: duration * e.timing.end }

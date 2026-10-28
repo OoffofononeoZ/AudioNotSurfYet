@@ -32,6 +32,7 @@ export class AlgorithmFrameRevisions {
                 .filter(b => parameters.has(b.parameterId))
                 .sort((a, b) => a.parameterId.localeCompare(b.parameterId)),
             markerBindings,
+            lyricBindings: element.lyricBindings,
             lanes: project.editorSnapshot?.project.lanes.filter(l => laneIds.has(l.id)) ?? [],
             sourceIdentity,
         });

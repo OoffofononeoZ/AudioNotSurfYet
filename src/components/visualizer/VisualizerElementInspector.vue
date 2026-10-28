@@ -136,6 +136,15 @@
                 :disabled="locked"
                 @change="markerBindingChanged(input.id, $event)" />
         </section>
+        <VisualizerLyricInput
+            v-for="input in descriptor.lyricInputs ?? []"
+            :key="'lyric-' + input.id"
+            :element-id="element.id"
+            :definition="input"
+            :binding="element.lyricBindings![input.id]!"
+            :assets="project.lyricAssets ?? []"
+            :disabled="locked"
+            @change="$emit('lyrics', $event)" />
         <VisualizerMediaInput
             v-for="input in descriptor.mediaInputs ?? []"
             :key="element.id + ':' + input.id"
@@ -165,6 +174,8 @@ import VisualizerTransform3d from './VisualizerTransform3d.vue';
 import { elementScene, sceneGroups } from '../../visualizer/scene3dModel';
 import { movableScenes } from '../../visualizer/scene3dActions';
 import VisualizerMediaInput from './VisualizerMediaInput.vue';
+import VisualizerLyricInput from './VisualizerLyricInput.vue';
+import type { LyricAsset, LyricBinding } from '../../visualizer/lyricTypes';
 import type { MediaAsset, MediaBinding } from '../../visualizer/mediaTypes';
 import { computed } from 'vue';
 import AppSelect from '../controls/AppSelect.vue';
@@ -180,6 +191,7 @@ const emit = defineEmits<{
     'move-scene': [sceneId: string | null];
     update: [patch: Partial<VisualizerElement>];
     binding: [binding: ElementBinding];
+    lyrics: [payload: { elementId: string; inputId: string; binding: LyricBinding; assets: LyricAsset[] }];
     media: [payload: { elementId: string; inputId: string; binding: MediaBinding; assets: MediaAsset[] }];
 }>();
 const descriptor = computed(() => (props.element ? elementDescriptor(props.project, props.element) : null));

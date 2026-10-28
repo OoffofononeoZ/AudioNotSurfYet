@@ -1,3 +1,4 @@
+import { validateLyricAssets, validateLyricBindings } from './lyricCodec';
 import { validateMediaAssets, validateMediaBindings } from './mediaCodec';
 import { readEditorProject } from '../editor/projectCodec';
 import type { EditorTrackIdentityV1 } from '../editor/types';
@@ -69,7 +70,7 @@ function element(input: unknown, project: VisualizerProjectV6): VisualizerElemen
     keys(
         v,
         ['id', 'resource', 'name', 'enabled', 'layer', 'timing', 'bindings'],
-        ['targets', 'markerBindings', 'seed', 'mediaBindings', 'transform3d'],
+        ['targets', 'markerBindings', 'seed', 'mediaBindings', 'transform3d', 'lyricBindings'],
     );
     const resource = validateResourceRef(v.resource);
     const descriptor = project.resources.elements.find(d => sameResource(d, resource));
@@ -86,6 +87,7 @@ function element(input: unknown, project: VisualizerProjectV6): VisualizerElemen
         algorithm.contract.timingInput,
         project.editorSnapshot?.project,
     );
+    const lyricBindings = validateLyricBindings(v.lyricBindings, descriptor.lyricInputs, project.lyricAssets);
     let targets: EffectTargets | undefined;
     if (descriptor.kind === 'visual') {
         if (v.targets !== undefined) return invalid('视觉元素不能引用效果目标。');
@@ -114,6 +116,7 @@ function element(input: unknown, project: VisualizerProjectV6): VisualizerElemen
         bindings,
         ...(markerBindings ? { markerBindings } : {}),
         ...(mediaBindings ? { mediaBindings } : {}),
+        ...(lyricBindings ? { lyricBindings } : {}),
         ...(targets ? { targets } : {}),
         ...(algorithm.contract.renderSpace === 'world'
             ? { transform3d: v.transform3d === undefined ? defaultTransform3d() : validateTransform3d(v.transform3d) }
@@ -143,7 +146,7 @@ export function validateComposition(input: unknown, context?: VisualizerTrackVal
             'items',
             'resources',
         ],
-        ['editorSnapshot', 'mediaAssets'],
+        ['editorSnapshot', 'mediaAssets', 'lyricAssets'],
     );
     if (v.format !== 'audiosurf-visualizer') return invalid('工程格式无效。');
     const track = canonicalTrack(v.track, context);
@@ -177,6 +180,7 @@ export function validateComposition(input: unknown, context?: VisualizerTrackVal
         items: [],
         resources: validateResourceSnapshot(v.resources),
         ...(v.mediaAssets === undefined ? {} : { mediaAssets: validateMediaAssets(v.mediaAssets) }),
+        ...(v.lyricAssets === undefined ? {} : { lyricAssets: validateLyricAssets(v.lyricAssets) }),
     };
     if (v.editorSnapshot !== undefined) {
         const s = record(v.editorSnapshot, 'editorSnapshot');

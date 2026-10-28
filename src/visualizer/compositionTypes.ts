@@ -1,3 +1,4 @@
+import type { LyricBindings, LyricAsset } from './lyricTypes';
 import type { MediaAsset, MediaBindings } from './mediaTypes';
 import type { VisualizerExportState } from './exportTypes';
 import type { EditorProjectV2, EditorTrackIdentityV1 } from '../editor/types';
@@ -37,6 +38,7 @@ export interface VisualizerElement {
     bindings: ElementBinding[];
     markerBindings?: MarkerBindings;
     mediaBindings?: MediaBindings;
+    lyricBindings?: LyricBindings;
     targets?: EffectTargets;
     transform3d?: Transform3d;
 }
@@ -58,6 +60,7 @@ export interface VisualizerProjectV6 {
     items: CompositionItem[];
     resources: ResourceSnapshot;
     mediaAssets?: MediaAsset[];
+    lyricAssets?: LyricAsset[];
     editorSnapshot?: { capturedAt: string; project: EditorProjectV2 };
 }
 export interface CompositionDraft {
@@ -69,7 +72,7 @@ export interface CompositionDraft {
 /** Renderer data shared by song projects and independent realtime styles. */
 export type CompositionRenderModel = Pick<
     VisualizerProjectV6,
-    'projectId' | 'elements' | 'items' | 'resources' | 'editorSnapshot' | 'mediaAssets'
+    'projectId' | 'elements' | 'items' | 'resources' | 'editorSnapshot' | 'mediaAssets' | 'lyricAssets'
 >;
 
 export interface CompositionSessionSnapshot {

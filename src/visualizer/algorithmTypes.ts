@@ -1,3 +1,4 @@
+import type { LyricInputContract, LyricFrame } from './lyricTypes';
 import type { MediaInputContract, MediaFrame } from './mediaTypes';
 import type { ElementKind } from './compositionTypes';
 import type { SceneParameterDescriptor } from './parameterDescriptor';
@@ -17,10 +18,12 @@ export interface AlgorithmContract {
     markerInputs?: MarkerInputContract[];
     timingInput?: string;
     mediaInputs?: MediaInputContract[];
+    lyricInputs?: LyricInputContract[];
     executionModes?: ('timeline' | 'realtime')[];
     renderSpace?: 'world';
 }
-export type UniformType = 'number' | 'int' | 'boolean' | 'color' | 'vec2' | 'vec3' | 'array' | 'source' | 'media';
+export type UniformType =
+    'number' | 'int' | 'boolean' | 'color' | 'vec2' | 'vec3' | 'array' | 'source' | 'media' | 'lyrics';
 export interface ShaderProgram {
     vertex: string;
     fragment: string;
@@ -30,7 +33,7 @@ export interface ShaderProgram {
     alphaCutoff?: number;
 }
 export interface AlgorithmDefinition extends ResourceRef {
-    apiVersion: 1 | 2 | 3 | 4;
+    apiVersion: 1 | 2 | 3 | 4 | 5;
     contract: AlgorithmContract;
     source: string;
     programs: Record<string, ShaderProgram>;
@@ -58,6 +61,7 @@ export interface AlgorithmValue {
 export interface AlgorithmFrame {
     mode?: 'timeline' | 'realtime';
     media?: MediaFrame;
+    lyrics?: LyricFrame;
     time: number;
     seed: number;
     revision: string;

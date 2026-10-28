@@ -47,6 +47,7 @@ showOpenFilePicker → FileSystemFileHandle → File
   ├→ one 16:9 Canvas + element list/inspector + project bottom panel + MusicBar
   ├→ AnalysisConsumerLease(visualizer, deduped 0–4) → AnalysisCoordinator/Worker/cache
   ├→ NativeAudioSource → bounded decoded PCM → offline Web Audio stereo FFT/waveform chunks
+  ├→ CompositionLyricHost → embedded UTF-8 LRC → bounded cue window + owned glyph atlas → ABI 5
   ├→ validated EditorProjectV2 snapshot → exact laneId/eventId range transition
   └→ CompositionResolver(60Hz absolute time + checkpoint)
        → embedded algorithm snapshots → opaque-origin Worker → validated DrawPacket

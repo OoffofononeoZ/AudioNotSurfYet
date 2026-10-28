@@ -222,6 +222,7 @@
                     @move-scene="target => run(() => selection && controller.moveToScene3d(selection, target))"
                     :locked="locked"
                     @media="payload => run(() => controller.updateMedia(payload))"
+                    @lyrics="payload => run(() => controller.updateLyrics(payload))"
                     @update="
                         patch =>
                             run(() => {

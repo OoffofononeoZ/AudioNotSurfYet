@@ -5,7 +5,7 @@ DEC-087 批准 V2 算法包、V5 自包含工程及原生隔离。2026-10-20 的
 ## 格式基础
 
 - 包仍为 `audiosurf-visualizer-resource`，schemaVersion 为 2，包含 algorithms、elements、presets。算法以精确 `{id,version,hash}` 引用；元素定义引用算法，预设引用元素。
-- AlgorithmDefinition 包含 apiVersion:1、2 或 3、contract、source 和 programs。ABI 1 保留历史参数/历史帧接口；ABI 2 新增工程内标记声明。programs 保存具名 Shader、几何类型和 uniform 类型。
+- AlgorithmDefinition 包含 apiVersion:1、2、3、4 或 5、contract、source 和 programs。ABI 1 保留历史参数/历史帧接口；ABI 2 新增工程内标记声明。programs 保存具名 Shader、几何类型和 uniform 类型。
 - source 为自包含 ES Module，导出 create 工厂；源码、Shader、契约共同参与规范化 JSON SHA-256。哈希用于身份，不是作者认证。校验和解析不执行源码。
 - 作者文件独立维护 JS、Shader 和 JSON，封装器把文本内嵌进生成包。输入路径限制在作者目录内，模块禁止外部导入，跨包引用按算法→元素→预设顺序封装。
 - [Project V6](project-format-v5.md)保存元素、预设和算法快照，恢复不依赖商城目录。旧 V4/V1 不迁移；生成 skill 2.6.0 使用 VisualizerContentBriefV2，不兼容旧输入。
@@ -64,3 +64,7 @@ AlgorithmContract 可选 `stateParameters:string[]` 声明影响累计状态的�
 ## ABI 4 三维场景
 
 世界元素使用 renderSpace:world、scene3dDefaults.camera 和 triangles，fragment 返回 vec4 shade()。宿主统一模型变换、镜头和 opaque/mask 深度绘制；预设 scenes3d 保存共享关系和完整轨迹。定义及边界见[三维场景](scene3d.md)。资源包仍为 V2，既有 ABI 1–3 资源身份不变。
+
+## ABI 5 歌词扩展
+
+DEC-106 增加 timeline-only 的 lyricInputs、只读 cue/token 帧数据及受控 lyrics sampler。宿主负责文件、分词、图集生成与释放，算法负责运动和屏幕三角形。预设模板仅允许 unbound；完整合同见[歌词输入](../../context/visualizer-lyrics.md)。既有 ABI 和资源身份保留。
