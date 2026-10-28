@@ -2,7 +2,7 @@
 
 2026-10-22，owner 明确取消新增元素和预设的强制内容审批：生成请求默认自主完成，开放创意由 agent 定案；明确需求只有关键条件缺失、冲突或无法实现时才进一步询问。正常生成交付必须附至少一张实际展示图。此决定替代 DEC-082 及后续沿用的具体内容合同批准门禁，历史批准事实保留。
 
-当前运行时为 Project V6 与资源包 V2，支持 ABI 1–4 和已有标记输入边界。生成 skill 2.6.0 仅维护于外部 `WheresYourElements/skill/visualizer-content-generator/`，项目不保留副本或发现包装；工具可用 `VISUALIZER_SKILL_DIR` 覆盖位置。外部仓库允许正常 Git 工作流，不自动推送或发布。
+当前运行时为 Project V6 与资源包 V2，支持 ABI 1–5 和已有标记输入边界。生成 skill 2.7.0 仅维护于外部 `WheresYourElements/skill/visualizer-content-generator/`，项目不保留副本或发现包装；工具可用 `VISUALIZER_SKILL_DIR` 覆盖位置。外部仓库允许正常 Git 工作流，不自动推送或发布。
 
 ## 当前模型与适用关系
 
@@ -43,4 +43,6 @@
 
 ## 媒体内容生成
 
-独立 skill 2.6.0 支持 ABI 3 的媒体输入和显式执行模式，以及 ABI 4 的世界空间、共享 camera 和深度；宿主 codec 与外部快照通过 visualizer:skill-codec 同步并只读核对。元素先独立封装验证，再创建精确引用的预设；媒体默认为 none。具体字段见外部 skill 的 media-inputs、scene3d 参考、[宿主媒体契约](../../context/visualizer-media.md)与[三维场景契约](scene3d.md)。
+独立 skill 2.7.0 支持 ABI 3 的媒体输入和显式执行模式，以及 ABI 4 的世界空间、共享 camera 和深度；宿主 codec 与外部快照通过 visualizer:skill-codec 同步并只读核对。元素先独立封装验证，再创建精确引用的预设；媒体默认为 none。具体字段见外部 skill 的 media-inputs、scene3d 参考、[宿主媒体契约](../../context/visualizer-media.md)与[三维场景契约](scene3d.md)。
+
+ABI 5 歌词仅支持歌曲预览与离线视频，宿主负责 LRC 和文字图集，外部元素负责运动与几何；Brief 可声明 lyricInputs，模板仅 unbound。编写前读取外部 lyric-inputs 参考及[宿主歌词合同](../../context/visualizer-lyrics.md)。

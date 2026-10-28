@@ -3,6 +3,7 @@ import { validateLyricAssets } from './lyricCodec';
 import type { LyricBinding } from './lyricTypes';
 export async function importLyricFile(file: File, signal: AbortSignal) {
     signal.throwIfAborted();
+    if (file.size > 2 * 1024 * 1024) throw Error('LRC 文件超过 2MiB。');
     const bytes = new Uint8Array(await file.arrayBuffer());
     signal.throwIfAborted();
     let binary = '';

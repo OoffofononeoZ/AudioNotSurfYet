@@ -14,7 +14,7 @@
 
 ABI 5 必须是 visual、screen triangles、`executionModes:['timeline']`，声明 `contract.lyricInputs:[{id}]`；元素提供同序 `lyricInputs:[{id,label}]`，Shader 通过 `{type:'lyrics',inputId}` 声明 sampler，DrawPacket uniform 为 0–3 的受控图集页号。预设模板只可保存 unbound 歌词输入，现有预设导出筛选仍拒绝该能力。
 
-宿主解析和分词、等待字体、按当前时间窗口栅格化文字图集。Worker 只收到不可变 `frame.lyrics[inputId]`：available、revision、leadSeconds、tailSeconds，以及 cue 的 index/time/end 和 token 的 index/text/time/page/uv/width/height。UV 使用左下原点，宽高以图集像素计。算法不读取文件、创建 Canvas、纹理或访问整份工程。未绑定时目录仍可加载与初始化，预览提示缺输入，启用元素阻止导出。
+宿主解析和分词、等待字体、按当前时间窗口栅格化文字图集。Worker 只收到不可变 `frame.lyrics[inputId]`：available、revision、leadSeconds、tailSeconds，以及 cue 的 index/time/end 和 token 的 index/text/time/page/uv/width/height。UV 使用纹理左下原点；屏幕 triangles 的 Y 轴向下，文字四边形顶边使用 v1、底边使用 v0，宽高以图集像素计。算法不读取文件、创建 Canvas、纹理或访问整份工程。未绑定时目录仍可加载与初始化，预览提示缺输入，启用元素阻止导出。
 
 宿主最多保留每输入 4 张 2048² 图集，按活动窗口去重词组；窗口过大或单词过长明确报错，不静默截断。多页 passes 在一个透明目标内连续混合，随后参与原有图层合成。窗口变更、清除输入、删除、离页和销毁释放纹理；准备过程使用 generation 和当前帧检查，过期任务不得替换图集。
 

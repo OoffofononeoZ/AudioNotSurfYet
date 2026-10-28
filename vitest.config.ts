@@ -13,6 +13,7 @@ const externalResourceSuites = [
         'composition-rendering',
         'composition-session',
         'circular-particles',
+        'lyric-motion',
         'geometric-elements',
         'number-editing',
         'point-lines',

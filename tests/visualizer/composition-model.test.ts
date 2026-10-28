@@ -45,6 +45,7 @@ describe('V5 composition project', () => {
         const bytes = encodeComposition(p);
         expect(decodeComposition(bytes.buffer as ArrayBuffer)).toEqual(p);
         expect(compositionIssues(p)).toEqual([
+            '纵深歌词：歌词未配置',
             '淡入淡出：请选择范围标记',
             '点标记横线（测试）：标记输入未配置',
             '点标记竖线（测试）：标记输入未配置',

@@ -22,7 +22,7 @@
 
 ## 当前状态与独立缺口
 
-- 当前Analyzer为单列/FIFO及Wallpaper频谱；Editor使用独立marker视图、数字实时录入、FT和有限自动标记；Visualizer使用V6工程、V2可执行算法资源包与离线WebM。源码与当前页面契约解释实际行为；外部 assets 文件夹提供资源，内容生成 skill 2.6.0 仅在外部维护，使用 BriefV2 和独立封装工具，默认自主生成并要求实际展示图。
+- 当前Analyzer为单列/FIFO及Wallpaper频谱；Editor使用独立marker视图、数字实时录入、FT和有限自动标记；Visualizer使用V6工程、V2可执行算法资源包与离线WebM。源码与当前页面契约解释实际行为；外部 assets 文件夹提供资源，内容生成 skill 2.7.0 仅在外部维护，使用 BriefV2 和独立封装工具，默认自主生成并要求实际展示图。
 - DEC-074接受当前FT听感/部分串音和长曲耗时，本轮功能已收尾；Chrome历史1011.9541秒超过900秒仍保留。完整P1/P2 clean evidence、Edge普通profile长曲与原生OS操作不由此补齐。
 - 新增识别质量待owner复核。P3逐拍/局部tempo、完整提案/应用和处理数据工程扩展未完成；最新V4-only已替代旧V2迁移计划，自动标记不等于P3。
 - Editor整体readiness保持pre-E10/DEC-055 owner-review；DEC-075另行授权新增能力和回归使用本地端口/Chrome/Edge，不重开旧readiness自动化。

@@ -242,3 +242,7 @@ Node24.22.1/npm11.x，依赖版本以lockfile为准；浏览器专项使用真�
 粒子还原专项：`npx vitest run tests/visualizer/circular-particles.test.ts` 使用保留MIT许可的原版粒子代码独立对照，正常测试不读取D盘原项目。`npx playwright test tests/e2e/visualizer-circular-particles.spec.ts --project=chrome --project=edge --workers=1` 检查真实Worker的30/60fps状态与几何一致、预设默认值、两档短视频及首页/展示恢复；粒子离线壁纸由 `visualizer-wallpaper.spec.ts` 覆盖。媒体留在忽略的 artifacts/visualizer-composition/circular-particles。
 
 三维专项：`npx vitest run tests/visualizer/scene3d.test.ts`；`npx playwright test tests/e2e/visualizer-scene3d.spec.ts tests/e2e/visualizer-scene3d-editor.spec.ts tests/e2e/visualizer-scene3d-output.spec.ts --project=chrome --project=edge --workers=1`。覆盖 GPU 深度/裁剪、共享输入只读、关键帧与成员编辑、快照恢复、外部 ABI 4 示例和短视频。`visualizer-wallpaper.spec.ts` 同时验证原频谱和共享镜头示例的生产离线运行包。
+
+## 歌词与反向纵深粒子
+
+`npx vitest run tests/visualizer/lyrics.test.ts tests/visualizer/lyric-motion.test.ts tests/visualizer/circular-particles.test.ts` 覆盖解析／codec、双向顺序、毫秒锚点、突变低频的单向运动、30/60fps、seek/尺寸与原正向对照。lyrics.test 不依赖外部资源；lyric-motion 从外部包读取算法。`npx playwright test tests/e2e/visualizer-lyric-host.spec.ts tests/e2e/visualizer-lyrics.spec.ts tests/e2e/visualizer-circular-particles.spec.ts --project=chrome --project=edge --workers=1` 验证受控只读输入、图集多页及释放、正向字形像素、文件错误／旧任务、快照断库恢复与短 WebM。文件选择使用浏览器测试上传，不证明 OS picker 权限 UI；用户歌词不进入 fixture。

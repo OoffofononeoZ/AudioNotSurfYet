@@ -63,3 +63,5 @@ Circular Visualizer内容版本升至3；“壁纸预设暂存”升至2，仅�
 ## 共享镜头示例
 
 新增 shared-camera-cube 世界元素和 shared-camera-demo 预设：两个独立立方体以不同模型位置共用十秒循环镜头和深度，预设只精确引用已有元素。原固定镜头资源不改写；scene/camera 的保存及成员重映射见[三维场景](../architecture/visualizer/scene3d.md)。
+
+DEC-106 将纵深粒子升级至4，增加默认关闭的“反向运动”，正向保持 v3；Circular 升至4，暂存预设升至3，仅新增反向关闭绑定及精确依赖，保留其余配置和媒体。新“纵深歌词”单独添加，不进入既有 Circular 预设；详见[歌词输入](visualizer-lyrics.md)。

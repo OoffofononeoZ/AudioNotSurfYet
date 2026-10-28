@@ -6,6 +6,7 @@ import { resourceHash } from '../../src/visualizer/resourceIdentity';
 const seeded = [
     'circular-particles',
     'circular-depth',
+    'circular-depth-lyrics',
     'spectral-strings',
     'starfield',
     'radial-spectrum',

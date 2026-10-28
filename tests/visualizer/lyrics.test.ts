@@ -8,6 +8,11 @@ import { resourceHash } from '../../src/visualizer/resourceIdentity';
 import { compositionIssues, pruneCompositionResources } from '../../src/visualizer/compositionModel';
 import { inspectRealtimeProject } from '../../src/visualizer/realtimeCapabilities';
 import { validateDrawPacket } from '../../src/visualizer/drawPacket';
+import { validateResourceSnapshot } from '../../src/visualizer/resourceCodec';
+import { elementRegistry } from '../../src/visualizer/elementRegistry';
+import { instantiatePreset } from '../../src/visualizer/compositionPresets';
+import { resourceRef } from '../../src/visualizer/resourceIdentity';
+import type { PresetDefinition } from '../../src/visualizer/resourceTypes';
 import { lyricAsset, lyricFixture } from '../support/lyric-fixture';
 
 test('LRC preserves millisecond times, offsets, multiple tags, blank boundaries and stable equal-time order', () => {
@@ -95,4 +100,50 @@ test('project snapshots embed LRC, gate missing input, preserve old formats and 
     const cleared = pruneCompositionResources({ ...p, elements: [], items: [] });
     expect(cleared.lyricAssets).toEqual([]);
     expect(() => validateComposition({ ...p, lyricAssets: [] })).toThrow();
+});
+
+test('library presets instantiate declared unbound lyrics and cannot carry a user lyric binding', () => {
+    const { project, definition } = lyricFixture();
+    const preset: PresetDefinition = {
+        id: 'lyric-preset',
+        version: 1,
+        hash: '',
+        title: '歌词模板',
+        description: '仅声明输入',
+        preview: 'geometric',
+        elements: [
+            {
+                key: 'words',
+                element: resourceRef(definition),
+                name: definition.title,
+                enabled: true,
+                bindings: [],
+                timing: { kind: 'relative', start: 0, end: 1 },
+                lyricBindings: { lyrics: { kind: 'unbound' } },
+            },
+        ],
+        controls: [],
+    };
+    preset.hash = resourceHash(preset);
+    project.resources.presets = [preset];
+    const snapshot = validateResourceSnapshot(project.resources);
+    const previous = {
+        algorithms: [...elementRegistry.algorithms],
+        elements: [...elementRegistry.list()],
+        presets: [...elementRegistry.presets],
+    };
+    try {
+        elementRegistry.replace(snapshot);
+        const created = instantiatePreset(preset.id, 10);
+        expect(created.elements[0]!.lyricBindings).toEqual({ lyrics: { kind: 'unbound' } });
+        const p = validateComposition({ ...project, elements: created.elements, items: [created.group] });
+        expect(compositionIssues(p)).toEqual(['测试歌词：歌词未配置']);
+    } finally {
+        elementRegistry.replace(previous);
+    }
+    preset.elements[0]!.lyricBindings = {
+        lyrics: { kind: 'lyrics', assetId: lyricAsset().id, leadSeconds: 2, tailSeconds: 1.5, offsetSeconds: 0 },
+    };
+    preset.hash = resourceHash(preset);
+    expect(() => validateResourceSnapshot(project.resources)).toThrow();
 });

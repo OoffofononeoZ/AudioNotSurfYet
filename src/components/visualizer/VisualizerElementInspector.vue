@@ -140,6 +140,7 @@
             v-for="input in descriptor.lyricInputs ?? []"
             :key="'lyric-' + input.id"
             :element-id="element.id"
+            :project-revision="project.updatedAt"
             :definition="input"
             :binding="element.lyricBindings![input.id]!"
             :assets="project.lyricAssets ?? []"

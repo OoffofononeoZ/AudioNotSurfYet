@@ -101,7 +101,7 @@ test('updated presets preserve defaults, render both particles and export 30/60 
     const original = await exported(page);
     for (const id of ['particles', 'depth']) {
         const e = original.elements.find(e => e.resource.id === 'circular-' + id)!;
-        expect(e.resource.version).toBe(3);
+        expect(e.resource.version).toBe(id === 'depth' ? 4 : 3);
         for (const [key, expected] of [
             ['responsiveness', 50],
             ['noise', true],

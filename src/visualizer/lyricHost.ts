@@ -27,6 +27,9 @@ export class CompositionLyricHost {
     private release(atlas: Atlas) {
         for (const texture of atlas.textures) {
             texture.dispose();
+            const canvas = texture.image as HTMLCanvasElement;
+            canvas.width = canvas.height = 1;
+            texture.image = null;
             lyricHostDiagnostics.textures--;
         }
     }
@@ -98,7 +101,8 @@ export class CompositionLyricHost {
         isCurrent: () => boolean,
     ): Promise<Map<string, LyricFrame>> {
         const generation = ++this.generation;
-        if (elements.some(e => e.lyricBindings)) await document.fonts.ready;
+        if (elements.some(e => Object.values(e.lyricBindings ?? {}).some(b => b.kind === 'lyrics')))
+            await document.fonts.ready;
         if (this.disposed || generation !== this.generation || !isCurrent()) throw new FrameSupersededError();
         const frames = new Map<string, LyricFrame>(),
             used = new Set<string>(),

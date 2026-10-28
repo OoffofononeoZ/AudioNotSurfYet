@@ -8,6 +8,7 @@
 
 | 文件 | 本地静态引用（最多显示 6 项） |
 | --- | --- |
+| [tests/scripts/run-e8-eval.mjs](../../tests/scripts/run-e8-eval.mjs) | — |
 | [tests/scripts/run-e9-eval.mjs](../../tests/scripts/run-e9-eval.mjs) | — |
 | [tests/scripts/run-edge.mjs](../../tests/scripts/run-edge.mjs) | — |
 | [tests/scripts/run-editor-ft-eval.mjs](../../tests/scripts/run-editor-ft-eval.mjs) | — |
@@ -107,4 +108,3 @@
 | [tests/visualizer/composition-presets.test.ts](../../tests/visualizer/composition-presets.test.ts) | [src/visualizer/compositionCodec.ts](../../src/visualizer/compositionCodec.ts)、[src/visualizer/compositionModel.ts](../../src/visualizer/compositionModel.ts)、[src/visualizer/compositionPresets.ts](../../src/visualizer/compositionPresets.ts)、[tests/visualizer/resource-fixtures.ts](../../tests/visualizer/resource-fixtures.ts) |
 | [tests/visualizer/composition-rendering.test.ts](../../tests/visualizer/composition-rendering.test.ts) | [src/editor/projectCodec.ts](../../src/editor/projectCodec.ts)、[src/visualizer/compositionCodec.ts](../../src/visualizer/compositionCodec.ts)、[src/visualizer/compositionEffects.ts](../../src/visualizer/compositionEffects.ts)、[src/visualizer/compositionScene.ts](../../src/visualizer/compositionScene.ts)、[src/visualizer/elementRegistry.ts](../../src/visualizer/elementRegistry.ts)、[src/visualizer/seed.ts](../../src/visualizer/seed.ts)、另 3 项，按需核对源码 |
 | [tests/visualizer/composition-session.test.ts](../../tests/visualizer/composition-session.test.ts) | [src/audio/audioSessionService.ts](../../src/audio/audioSessionService.ts)、[src/editor/editorDraftRepository.ts](../../src/editor/editorDraftRepository.ts)、[src/editor/projectCodec.ts](../../src/editor/projectCodec.ts)、[src/stores/audioSessionStore.ts](../../src/stores/audioSessionStore.ts)、[src/visualizer/compositionCodec.ts](../../src/visualizer/compositionCodec.ts)、[src/visualizer/compositionDraftRepository.ts](../../src/visualizer/compositionDraftRepository.ts)、另 6 项，按需核对源码 |
-| [tests/visualizer/draw-packet.test.ts](../../tests/visualizer/draw-packet.test.ts) | [src/visualizer/algorithmTypes.ts](../../src/visualizer/algorithmTypes.ts)、[src/visualizer/drawPacket.ts](../../src/visualizer/drawPacket.ts) |

@@ -8,7 +8,7 @@ DEC-087 批准 V2 算法包、V5 自包含工程及原生隔离。2026-10-20 的
 - AlgorithmDefinition 包含 apiVersion:1、2、3、4 或 5、contract、source 和 programs。ABI 1 保留历史参数/历史帧接口；ABI 2 新增工程内标记声明。programs 保存具名 Shader、几何类型和 uniform 类型。
 - source 为自包含 ES Module，导出 create 工厂；源码、Shader、契约共同参与规范化 JSON SHA-256。哈希用于身份，不是作者认证。校验和解析不执行源码。
 - 作者文件独立维护 JS、Shader 和 JSON，封装器把文本内嵌进生成包。输入路径限制在作者目录内，模块禁止外部导入，跨包引用按算法→元素→预设顺序封装。
-- [Project V6](project-format-v5.md)保存元素、预设和算法快照，恢复不依赖商城目录。旧 V4/V1 不迁移；生成 skill 2.6.0 使用 VisualizerContentBriefV2，不兼容旧输入。
+- [Project V6](project-format-v5.md)保存元素、预设和算法快照，恢复不依赖商城目录。旧 V4/V1 不迁移；生成 skill 2.7.0 使用 VisualizerContentBriefV2，不兼容旧输入。
 
 ## 外部文件夹与封装
 

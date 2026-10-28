@@ -43,6 +43,28 @@ const frame = (time: number, p = parameters(), mode: 'timeline' | 'realtime' = '
 });
 const depthParticle = (z = 0.6, id = 0) => ({ x: 0.1, y: 0.1, z, opacity: 1, r: 1, id, born: 0 });
 
+test('reverse depth moves inward, respawns near the viewer, stays finite and retains silence freeze', () => {
+    const api = helpers(),
+        state = api.fresh(-1);
+    state.particles = [depthParticle(0.6)];
+    const p = parameters('depth', { count: { value: 1 }, reverse: { value: true } });
+    for (let tick = 0; tick < 20; tick += 2) {
+        const previous = state.particles[0].z;
+        api.updateState(state, tick, spectrum(3), frame(tick / 60, p), 'depth');
+        expect(state.particles[0].z).toBeGreaterThan(previous);
+        expect(state.particles[0].drawZ).toBe(previous);
+    }
+    state.particles[0].z = 0.999;
+    api.updateState(state, 20, spectrum(3), frame(1 / 3, p), 'depth');
+    expect(state.particles[0]).toMatchObject({ z: 1 / 64, opacity: 0, born: 1 });
+    api.updateState(state, 22, spectrum(3), frame(22 / 60, p), 'depth');
+    expect(state.particles[0].opacity).toBe(0.04);
+    expect([...api.renderCircular(frame(22 / 60, p), state, 'depth').mesh.positions].every(Number.isFinite)).toBe(true);
+    const frozen = structuredClone(state.particles);
+    api.updateState(state, 24, spectrum(0), frame(0.4, p), 'depth');
+    expect(state.particles).toEqual(frozen);
+});
+
 test.each([0, 1, 2, 20, 100, 1000])(
     'depth matches original shared-speed order for %i particles across thresholds',
     count => {

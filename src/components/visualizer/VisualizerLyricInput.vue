@@ -51,6 +51,7 @@ import { importLyricFile } from '../../visualizer/lyricImport';
 import type { LyricAsset, LyricBinding, LyricInputDefinition } from '../../visualizer/lyricTypes';
 const props = defineProps<{
     elementId: string;
+    projectRevision: string;
     definition: LyricInputDefinition;
     binding: LyricBinding;
     assets: LyricAsset[];
@@ -68,7 +69,15 @@ const cancel = () => {
     pending = null;
     busy.value = false;
 };
-watch(() => [props.elementId, props.definition.id, props.binding], cancel);
+watch(
+    [
+        () => props.elementId,
+        () => props.projectRevision,
+        () => props.definition.id,
+        () => JSON.stringify(props.binding),
+    ],
+    cancel,
+);
 onBeforeUnmount(cancel);
 async function select(event: Event) {
     const input = event.target as HTMLInputElement,
