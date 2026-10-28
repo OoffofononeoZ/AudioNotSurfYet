@@ -16,6 +16,8 @@ declare module 'vue' {
     AnalyzerFeatureValues: typeof import('./src/components/AnalyzerFeatureValues.vue')['default']
     AnalyzerPlot: typeof import('./src/components/AnalyzerPlot.vue')['default']
     AnimatedList: typeof import('./src/components/AnimatedList.vue')['default']
+    AppActionChoiceDialog: typeof import('./src/components/controls/AppActionChoiceDialog.vue')['default']
+    AppActionIcon: typeof import('./src/components/controls/AppActionIcon.vue')['default']
     AppNumberInput: typeof import('./src/components/controls/AppNumberInput.vue')['default']
     AppPlaybackProgress: typeof import('./src/components/controls/AppPlaybackProgress.vue')['default']
     AppSelect: typeof import('./src/components/controls/AppSelect.vue')['default']

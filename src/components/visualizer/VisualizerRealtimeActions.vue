@@ -1,7 +1,4 @@
 <template>
-    <button type="button" :disabled="!project || locked" data-testid="realtime-style-actions" @click="open">
-        实时样式
-    </button>
     <dialog ref="dialog" class="realtime-actions" aria-labelledby="realtime-actions-title" @cancel.prevent="close">
         <header>
             <h2 id="realtime-actions-title">实时样式</h2>
@@ -61,7 +58,7 @@
     </dialog>
 </template>
 <script setup lang="ts">
-import { computed, ref, watch, onBeforeUnmount } from 'vue';
+import { computed, ref, watch, onBeforeUnmount, nextTick } from 'vue';
 import { useRouter } from 'vue-router';
 import type { VisualizerProjectV6 } from '../../visualizer/compositionTypes';
 import { inspectRealtimeProject } from '../../visualizer/realtimeCapabilities';
@@ -72,7 +69,8 @@ import { useConfigstore } from '../../stores/configStore';
 import { prepareWallpaperFiles, type WallpaperExportFile } from '../../visualizer/wallpaperExport';
 import { WallpaperDirectoryWriter, WallpaperDirectoryCleanupError } from '../../visualizer/wallpaperDirectoryWriter';
 import { ElMessage } from 'element-plus';
-const props = defineProps<{ project: VisualizerProjectV6 | null; locked: boolean }>();
+const props = defineProps<{ open: boolean; project: VisualizerProjectV6 | null; locked: boolean }>();
+const emit = defineEmits<{ close: [] }>();
 const router = useRouter(),
     config = useConfigstore(),
     repository = new RealtimeStyleRepository();
@@ -99,7 +97,23 @@ function close() {
     task = null;
     busy.value = false;
     dialog.value?.close();
+    emit('close');
 }
+watch(
+    () => props.open,
+    async value => {
+        await nextTick();
+        if (props.open !== value) return;
+        if (value && !dialog.value?.open) open();
+        else if (!value) {
+            task?.abort();
+            task = null;
+            busy.value = false;
+            dialog.value?.close();
+        }
+    },
+    { immediate: true },
+);
 watch(
     () => (props.project ? props.project.projectId + ':' + props.project.updatedAt : ''),
     () => {

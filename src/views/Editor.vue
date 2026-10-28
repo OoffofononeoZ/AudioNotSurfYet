@@ -5,9 +5,14 @@
             :can-import-osu="snapshot.state === 'ready' || snapshot.state === 'empty'"
             v-model:workspace="workspace"
             :persistence="snapshot.persistence"
-            @import="importProject"
-            @import-osu="openOsuImport"
+            @import="openImportChoice"
             @export="exportProject" />
+        <AppActionChoiceDialog
+            :open="importChoiceOpen"
+            title="导入"
+            :options="importChoices"
+            @close="closeImportChoice"
+            @select="chooseImport" />
         <EditorOsuImportDialog
             v-if="osuImportOpen"
             :project="snapshot.project"
@@ -155,6 +160,7 @@ import { useRoute, useRouter } from 'vue-router';
 import { ElMessage } from 'element-plus';
 import { useAudioSessionService } from '../audio/audioSessionService';
 import EditorToolbar from '../components/EditorToolbar.vue';
+import AppActionChoiceDialog from '../components/controls/AppActionChoiceDialog.vue';
 import EditorOsuImportDialog from '../components/EditorOsuImportDialog.vue';
 import EditorLeaveGuard from '../components/EditorLeaveGuard.vue';
 import EditorDraftNotice from '../components/EditorDraftNotice.vue';
@@ -185,6 +191,48 @@ const keyboardRecordingRevision = ref(0);
 const markerCompensationCells = ref(0);
 const keyboardImportPending = ref(false);
 const osuImportOpen = ref(false);
+const importChoiceOpen = ref(false);
+const importChoices = computed(() => [
+    {
+        id: 'project',
+        title: '工程文件',
+        description: '打开已有的 Editor JSON 工程',
+        icon: 'project',
+        testId: 'import-project-file',
+        disabled: snapshot.value.state !== 'ready',
+        reason: '请先选择歌曲',
+    },
+    {
+        id: 'osu',
+        title: 'osu 谱面',
+        description: '从 .osu 或 .osz 导入音符与节拍',
+        icon: 'osu',
+        testId: 'import-osu-beatmap',
+        disabled: !['ready', 'empty'].includes(snapshot.value.state),
+    },
+]);
+function openImportChoice() {
+    if (!['ready', 'empty'].includes(snapshot.value.state)) return;
+    keyboardRecordingRevision.value++;
+    keyboardImportPending.value = true;
+    importChoiceOpen.value = true;
+}
+function closeImportChoice() {
+    importChoiceOpen.value = false;
+    keyboardImportPending.value = false;
+}
+function chooseImport(id: string) {
+    importChoiceOpen.value = false;
+    if (id === 'project' && snapshot.value.state === 'ready') void importProject();
+    else if (id === 'osu' && ['ready', 'empty'].includes(snapshot.value.state)) openOsuImport();
+    else keyboardImportPending.value = false;
+}
+watch(
+    () => route.params.trackId,
+    () => {
+        if (importChoiceOpen.value) closeImportChoice();
+    },
+);
 function closeOsuImport() {
     osuImportOpen.value = false;
     keyboardImportPending.value = false;

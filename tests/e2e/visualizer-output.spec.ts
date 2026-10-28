@@ -1,3 +1,4 @@
+import { chooseVisualizerProjectExport } from '../support/project-actions';
 import '../setup-visualizer-resources';
 import { appendStandaloneElements } from '../../src/visualizer/compositionModel';
 import { chromium, expect, test, type Page, type BrowserContext } from '@playwright/test';
@@ -13,7 +14,7 @@ const root = 'artifacts/visualizer-composition/output';
 const fixture = path.resolve('tests/fixtures/audio/visualizer-v5-avsync-v1.wav');
 async function exported(page: Page): Promise<VisualizerProjectV6> {
     const count = (await savedPickerEntries(page)).length;
-    await page.getByTestId('export-visualizer-project').click();
+    await chooseVisualizerProjectExport(page);
     await expect.poll(async () => (await savedPickerEntries(page)).length).toBe(count + 1);
     return JSON.parse(Buffer.from((await savedPickerEntries(page)).at(-1)!.base64, 'base64').toString('utf8'));
 }

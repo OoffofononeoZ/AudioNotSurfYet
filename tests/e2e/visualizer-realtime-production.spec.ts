@@ -1,3 +1,4 @@
+import { openRealtimeStyleExport } from '../support/project-actions';
 import { test, expect } from '@playwright/test';
 import path from 'node:path';
 import { installFilePickerStub, chooseFiles } from '../support/file-picker';
@@ -16,7 +17,7 @@ for (const preset of ['geometric-0.6', 'shared-camera-demo'])
         await page.getByTestId('add-visualizer-element').click();
         await page.getByRole('button', { name: '预设', exact: true }).click();
         await page.locator(`[data-preset-id="${preset}"]`).click();
-        await page.getByTestId('realtime-style-actions').click();
+        await openRealtimeStyleExport(page);
         await page.getByTestId('apply-home-style').click();
         await expect(page).toHaveURL('/');
         await expect(page.locator('[data-realtime-state]')).toHaveAttribute('data-realtime-state', 'ready');

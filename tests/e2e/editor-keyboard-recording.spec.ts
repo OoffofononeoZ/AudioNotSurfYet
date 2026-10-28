@@ -1,3 +1,4 @@
+import { chooseEditorProjectImport } from '../support/project-actions';
 import { expect, test, type Page } from '@playwright/test';
 import { addMarkerLane, prepareMarkerEditor, seekMarkerEditor } from '../support/editor-marking';
 import type { EditorProjectV2, PointEventV1, RangeEventV1 } from '../../src/editor/types';
@@ -187,7 +188,7 @@ test('seek, Escape, blur, grid changes and workspace changes cancel; inputs and 
             await queuePickerData(page, [
                 { name: 'same-project.json', mimeType: 'application/json', text: JSON.stringify(await draft(page)) },
             ]);
-            await page.getByTestId('import-editor-project').click();
+            await chooseEditorProjectImport(page);
             await page.mouse.move(0, 500);
             await expect(page.getByRole('alert')).toHaveCount(0);
         }

@@ -4,19 +4,9 @@
             <button
                 type="button"
                 class="editor-icon-button"
-                :disabled="!canImportOsu"
-                aria-label="导入 osu 谱面"
-                title="导入 osu 谱面"
-                data-testid="import-osu-beatmap"
-                @click="emit('importOsu')">
-                <span>osu</span>
-            </button>
-            <button
-                type="button"
-                class="editor-icon-button"
-                :disabled="!ready"
-                aria-label="导入工程（JSON V2）"
-                title="导入工程（JSON V2）"
+                :disabled="!ready && !canImportOsu"
+                aria-label="导入"
+                title="导入"
                 data-testid="import-editor-project"
                 @click="emit('import')">
                 <EditorIcon name="import" />
@@ -72,7 +62,7 @@ const props = defineProps<{
     workspace: Workspace;
     persistence: EditorSessionSnapshot['persistence'];
 }>();
-const emit = defineEmits<{ 'update:workspace': [workspace: Workspace]; import: []; export: []; importOsu: [] }>();
+const emit = defineEmits<{ 'update:workspace': [workspace: Workspace]; import: []; export: [] }>();
 const tabs = [
     { id: 'marking', label: '标记编辑' },
     { id: 'separation', label: '音轨分离' },

@@ -1,3 +1,4 @@
+import { chooseEditorProjectImport } from '../support/project-actions';
 import { expect, test, type Page } from '@playwright/test';
 import path from 'node:path';
 import { chooseFiles, installFilePickerStub, queuePickerFiles, savedPickerEntries } from '../support/file-picker';
@@ -123,7 +124,7 @@ test('keeps invalid project import atomic and exposes recovery for an invalid ro
 
     const invalidPath = path.join(REPOSITORY_ROOT, 'tests/fixtures/editor-invalid-project.txt');
     await queuePickerFiles(page, [invalidPath]);
-    await page.getByTestId('import-editor-project').click();
+    await chooseEditorProjectImport(page);
     await expect(page.locator('.el-message--error')).toBeVisible();
     await expect(page.locator('#music-info-container')).toHaveText(title ?? '');
 

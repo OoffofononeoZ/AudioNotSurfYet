@@ -1,3 +1,4 @@
+import { chooseEditorProjectImport } from '../support/project-actions';
 import { expect, test, type Page } from '@playwright/test';
 import path from 'node:path';
 import { visiblePointEvents } from '../../src/editor/pointAnnotations';
@@ -335,7 +336,7 @@ test('hardens the three audio formats and project file failure boundaries', asyn
             text: firstProjectText,
         },
     ]);
-    await page.getByTestId('import-editor-project').click();
+    await chooseEditorProjectImport(page);
     await expect(page.locator('.el-message--error')).toBeVisible();
     await expect(page.locator('#music-info-container')).toHaveText(title ?? '');
     await page.reload();
@@ -378,7 +379,7 @@ test('keeps a deterministic 10,000-event project virtualized and responsive', as
             text: `${JSON.stringify(stressProject, null, 2)}\n`,
         },
     ]);
-    await page.getByTestId('import-editor-project').click();
+    await chooseEditorProjectImport(page);
     await expect(page.locator('.marker-lane')).toHaveCount(20, { timeout: 60000 });
     const firstPointSurface = page.locator('.marker-surface').first();
     await firstPointSurface.scrollIntoViewIfNeeded();

@@ -1,3 +1,4 @@
+import { chooseVisualizerProjectExport } from '../support/project-actions';
 import { expect, test, type Page } from '@playwright/test';
 import path from 'node:path';
 import { mkdir, writeFile } from 'node:fs/promises';
@@ -20,7 +21,7 @@ async function add(page: Page, type: string) {
 }
 async function exported(page: Page): Promise<VisualizerProjectV6> {
     const previous = (await savedPickerEntries(page)).length;
-    await page.getByTestId('export-visualizer-project').click();
+    await chooseVisualizerProjectExport(page);
     await expect.poll(async () => (await savedPickerEntries(page)).length).toBe(previous + 1);
     const entries = await savedPickerEntries(page);
     return JSON.parse(Buffer.from(entries[entries.length - 1]!.base64, 'base64').toString('utf8'));

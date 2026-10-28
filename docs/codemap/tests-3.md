@@ -8,6 +8,7 @@
 
 | 文件 | 本地静态引用（最多显示 6 项） |
 | --- | --- |
+| [tests/scripts/run-e7-eval.mjs](../../tests/scripts/run-e7-eval.mjs) | — |
 | [tests/scripts/run-e8-eval.mjs](../../tests/scripts/run-e8-eval.mjs) | — |
 | [tests/scripts/run-e9-eval.mjs](../../tests/scripts/run-e9-eval.mjs) | — |
 | [tests/scripts/run-edge.mjs](../../tests/scripts/run-edge.mjs) | — |
@@ -56,6 +57,7 @@
 | [tests/support/m9-vector-fixture.ts](../../tests/support/m9-vector-fixture.ts) | [tests/support/audio-fixtures.ts](../../tests/support/audio-fixtures.ts) |
 | [tests/support/meyda-golden.ts](../../tests/support/meyda-golden.ts) | — |
 | [tests/support/osu-fixture.ts](../../tests/support/osu-fixture.ts) | — |
+| [tests/support/project-actions.ts](../../tests/support/project-actions.ts) | — |
 | [tests/support/resource-directory.ts](../../tests/support/resource-directory.ts) | [tests/support/visualizer-assets.mjs](../../tests/support/visualizer-assets.mjs) |
 | [tests/support/scene3d-fixture.ts](../../tests/support/scene3d-fixture.ts) | [src/visualizer/algorithmTypes.ts](../../src/visualizer/algorithmTypes.ts)、[src/visualizer/compositionCodec.ts](../../src/visualizer/compositionCodec.ts)、[src/visualizer/resourceIdentity.ts](../../src/visualizer/resourceIdentity.ts)、[src/visualizer/resourceTypes.ts](../../src/visualizer/resourceTypes.ts)、[src/visualizer/scene3dTypes.ts](../../src/visualizer/scene3dTypes.ts) |
 | [tests/support/stem-analysis.ts](../../tests/support/stem-analysis.ts) | [src/analysis/pcm.ts](../../src/analysis/pcm.ts)、[src/processing/editorSeparationService.ts](../../src/processing/editorSeparationService.ts)、[src/processing/kernel.ts](../../src/processing/kernel.ts) |
@@ -106,5 +108,3 @@
 | [tests/visualizer/circular-particles.test.ts](../../tests/visualizer/circular-particles.test.ts) | [src/visualizer/drawPacket.ts](../../src/visualizer/drawPacket.ts)、[tests/support/circular-particle-reference.ts](../../tests/support/circular-particle-reference.ts)、[tests/support/visualizer-assets.mjs](../../tests/support/visualizer-assets.mjs)、[tests/visualizer/algorithm-runtime-fixture.ts](../../tests/visualizer/algorithm-runtime-fixture.ts) |
 | [tests/visualizer/composition-model.test.ts](../../tests/visualizer/composition-model.test.ts) | [src/editor/projectCodec.ts](../../src/editor/projectCodec.ts)、[src/visualizer/compositionCodec.ts](../../src/visualizer/compositionCodec.ts)、[src/visualizer/compositionDraftRepository.ts](../../src/visualizer/compositionDraftRepository.ts)、[src/visualizer/compositionModel.ts](../../src/visualizer/compositionModel.ts)、[src/visualizer/elementRegistry.ts](../../src/visualizer/elementRegistry.ts)、[tests/visualizer/resource-fixtures.ts](../../tests/visualizer/resource-fixtures.ts) |
 | [tests/visualizer/composition-presets.test.ts](../../tests/visualizer/composition-presets.test.ts) | [src/visualizer/compositionCodec.ts](../../src/visualizer/compositionCodec.ts)、[src/visualizer/compositionModel.ts](../../src/visualizer/compositionModel.ts)、[src/visualizer/compositionPresets.ts](../../src/visualizer/compositionPresets.ts)、[tests/visualizer/resource-fixtures.ts](../../tests/visualizer/resource-fixtures.ts) |
-| [tests/visualizer/composition-rendering.test.ts](../../tests/visualizer/composition-rendering.test.ts) | [src/editor/projectCodec.ts](../../src/editor/projectCodec.ts)、[src/visualizer/compositionCodec.ts](../../src/visualizer/compositionCodec.ts)、[src/visualizer/compositionEffects.ts](../../src/visualizer/compositionEffects.ts)、[src/visualizer/compositionScene.ts](../../src/visualizer/compositionScene.ts)、[src/visualizer/elementRegistry.ts](../../src/visualizer/elementRegistry.ts)、[src/visualizer/seed.ts](../../src/visualizer/seed.ts)、另 3 项，按需核对源码 |
-| [tests/visualizer/composition-session.test.ts](../../tests/visualizer/composition-session.test.ts) | [src/audio/audioSessionService.ts](../../src/audio/audioSessionService.ts)、[src/editor/editorDraftRepository.ts](../../src/editor/editorDraftRepository.ts)、[src/editor/projectCodec.ts](../../src/editor/projectCodec.ts)、[src/stores/audioSessionStore.ts](../../src/stores/audioSessionStore.ts)、[src/visualizer/compositionCodec.ts](../../src/visualizer/compositionCodec.ts)、[src/visualizer/compositionDraftRepository.ts](../../src/visualizer/compositionDraftRepository.ts)、另 6 项，按需核对源码 |

@@ -1,3 +1,4 @@
+import { chooseVisualizerProjectExport } from '../support/project-actions';
 import '../setup-visualizer-resources';
 import { expect, test, type Page } from '@playwright/test';
 import { mkdir, writeFile } from 'node:fs/promises';
@@ -62,7 +63,7 @@ test('same-track controls and looping preserve deterministic export; finishing a
     await expect(page.locator('#music-bar-container')).toHaveAttribute('data-playback-state', 'paused');
     await page.getByTestId('header-visualizer-link').click();
     await expect(page.getByTestId('visualizer-ready')).toBeVisible();
-    await page.getByTestId('export-visualizer-project').click();
+    await chooseVisualizerProjectExport(page);
     await expect.poll(async () => (await savedPickerEntries(page)).length).toBe(1);
     let project: VisualizerProjectV6 = JSON.parse(
         Buffer.from((await savedPickerEntries(page)).at(-1)!.base64, 'base64').toString('utf8'),

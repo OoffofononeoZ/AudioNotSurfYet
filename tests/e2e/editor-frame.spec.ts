@@ -105,7 +105,7 @@ test('toolbar tabs and overlay icons preserve keyboard access and menu focus', a
     const toolbar = page.getByTestId('editor-toolbar');
     await expect(toolbar).toHaveCSS('height', '64px');
     await expect(page.getByRole('combobox', { name: '工程格式' })).toHaveCount(0);
-    await expect(page.getByTestId('import-editor-project')).toHaveAttribute('title', '导入工程（JSON V2）');
+    await expect(page.getByTestId('import-editor-project')).toHaveAttribute('title', '导入');
     await expect(page.getByTestId('editor-playback-toggle')).toHaveCount(0);
     await page.getByTestId('editor-marking-tab').focus();
     await page.keyboard.press('ArrowRight');

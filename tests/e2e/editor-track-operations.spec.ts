@@ -1,3 +1,4 @@
+import { chooseEditorProjectImport } from '../support/project-actions';
 import { expect, test, type Page } from '@playwright/test';
 import {
     addMarkerLane,
@@ -15,7 +16,7 @@ async function importProject(page: Page, project: EditorProjectV2) {
     await queuePickerData(page, [
         { name: 'lane-movement.json', mimeType: 'application/json', text: JSON.stringify(project) },
     ]);
-    await page.getByTestId('import-editor-project').click();
+    await chooseEditorProjectImport(page);
     await expect(page.getByTestId('editor-save-state')).toContainText('已保存');
     await expect.poll(async () => (await readEditorDraft(page)).lanes).toEqual(project.lanes);
 }
@@ -102,6 +103,7 @@ test('a failed move keeps the entire project unchanged; dialogs cancel on grid, 
     await page.getByTestId('editor-marking-tab').click();
     await page.getByTestId('marker-track-operations').click();
     await page.getByTestId('import-editor-project').dispatchEvent('click');
+    await page.getByTestId('import-project-file').click();
     // A cancelled picker does not alter the project or dismiss a valid operation.
     await expect(dialog).toBeVisible();
     await page.keyboard.press('Escape');
@@ -110,6 +112,7 @@ test('a failed move keeps the entire project unchanged; dialogs cancel on grid, 
     await queuePickerData(page, [{ name: 'replacement.json', mimeType: 'application/json', text: JSON.stringify(p) }]);
     await page.getByTestId('marker-track-operations').click();
     await page.getByTestId('import-editor-project').dispatchEvent('click');
+    await page.getByTestId('import-project-file').click();
     await expect(dialog).toBeHidden();
     await expect.poll(async () => (await readEditorDraft(page)).lanes[0]!.name).toBe('替换后的轨道');
 });

@@ -1,3 +1,4 @@
+import { chooseVisualizerProjectExport, openRealtimeStyleExport } from '../support/project-actions';
 import { test, expect, type Page } from '@playwright/test';
 import path from 'node:path';
 import fs from 'node:fs/promises';
@@ -17,7 +18,7 @@ async function open(page: Page) {
 }
 async function exported(page: Page): Promise<VisualizerProjectV6> {
     const count = (await savedPickerEntries(page)).length;
-    await page.getByTestId('export-visualizer-project').click();
+    await chooseVisualizerProjectExport(page);
     await expect.poll(async () => (await savedPickerEntries(page)).length).toBe(count + 1);
     return JSON.parse(Buffer.from((await savedPickerEntries(page)).at(-1)!.base64, 'base64').toString('utf8'));
 }
@@ -221,7 +222,7 @@ test('video backgrounds seek, loop and survive JSON and realtime snapshots', asy
     const p = await exported(page);
     await load(page, p);
     expect((await exported(page)).mediaAssets).toEqual(p.mediaAssets);
-    await page.getByTestId('realtime-style-actions').click();
+    await openRealtimeStyleExport(page);
     await expect(page.getByTestId('create-display-page')).toBeEnabled();
     await page.getByTestId('create-display-page').click();
     await expect(page.getByRole('textbox', { name: '本地展示地址' })).toHaveValue(/display/);
@@ -257,7 +258,7 @@ test('preset defaults and shared responsiveness apply to all five reactive leave
                         65,
             ),
     ).toBe(true);
-    await page.getByTestId('realtime-style-actions').click();
+    await openRealtimeStyleExport(page);
     await expect(page.getByTestId('apply-home-style')).toBeEnabled();
     await page.getByTestId('create-display-page').click();
     await page.getByRole('link', { name: '打开展示页' }).click();
@@ -302,7 +303,7 @@ test('circular media wallpaper exports and runs from a server-free file director
     await page.getByRole('button', { name: '展开Circular Visualizer', exact: true }).click();
     await page.getByRole('button', { name: '可变背景', exact: true }).click();
     await upload(page, ['moving.webm']);
-    await page.getByTestId('realtime-style-actions').click();
+    await openRealtimeStyleExport(page);
     await page.getByTestId('prepare-wallpaper-export').click();
     await expect(page.getByTestId('save-wallpaper-directory')).toBeVisible();
     await page.evaluate(() => {

@@ -1,3 +1,4 @@
+import { chooseVisualizerProjectExport } from '../support/project-actions';
 import { expect, test, type Page } from '@playwright/test';
 import path from 'node:path';
 import { mkdir, writeFile } from 'node:fs/promises';
@@ -6,7 +7,7 @@ import { chooseFiles, installFilePickerStub, savedPickerEntries } from '../suppo
 test.use({ viewport: { width: 1920, height: 1080 } });
 async function exported(page: Page) {
     const count = (await savedPickerEntries(page)).length;
-    await page.getByTestId('export-visualizer-project').click();
+    await chooseVisualizerProjectExport(page);
     await expect.poll(async () => (await savedPickerEntries(page)).length).toBe(count + 1);
     return JSON.parse(Buffer.from((await savedPickerEntries(page)).at(-1)!.base64, 'base64').toString('utf8'));
 }

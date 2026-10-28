@@ -1,3 +1,4 @@
+import { chooseVisualizerProjectExport } from '../support/project-actions';
 import { expect, test, type Page } from '@playwright/test';
 import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
@@ -76,7 +77,7 @@ test('later-song property editing keeps history warm and renders the latest valu
         await page.getByTestId('add-visualizer-element').click();
         await page.locator(`[data-element-type="${id}"]`).click();
     }
-    await page.getByTestId('export-visualizer-project').click();
+    await chooseVisualizerProjectExport(page);
     await expect.poll(async () => (await savedPickerEntries(page)).length).toBe(1);
     const project: VisualizerProjectV6 = JSON.parse(
         Buffer.from((await savedPickerEntries(page))[0]!.base64, 'base64').toString('utf8'),

@@ -1,3 +1,4 @@
+import { chooseVisualizerProjectExport, openRealtimeStyleExport } from '../support/project-actions';
 import { expect, test, type Page } from '@playwright/test';
 import path from 'node:path';
 import { mkdir, writeFile } from 'node:fs/promises';
@@ -71,7 +72,7 @@ test('isolated particle packets retain the same state and geometry at 30 and 60 
 
 async function exported(page: Page): Promise<VisualizerProjectV6> {
     const count = (await savedPickerEntries(page)).length;
-    await page.getByTestId('export-visualizer-project').click();
+    await chooseVisualizerProjectExport(page);
     await expect.poll(async () => (await savedPickerEntries(page)).length).toBe(count + 1);
     return JSON.parse(Buffer.from((await savedPickerEntries(page)).at(-1)!.base64, 'base64').toString('utf8'));
 }
@@ -139,7 +140,7 @@ test('updated presets preserve defaults, render both particles and export 30/60 
         await writeFile(path.join(artifact, `${info.project.name}-${fps}.webm`), Buffer.from(video.base64, 'base64'));
     }
     await page.screenshot({ path: path.join(artifact, `preview-${info.project.name}.png`) });
-    await page.getByTestId('realtime-style-actions').click();
+    await openRealtimeStyleExport(page);
     await page.getByTestId('apply-home-style').click();
     await expect(page).toHaveURL('/');
     await expect(page.locator('[data-realtime-state]')).toHaveAttribute('data-realtime-state', 'ready');
@@ -147,7 +148,7 @@ test('updated presets preserve defaults, render both particles and export 30/60 
     await expect(page.getByTestId('realtime-visualizer-canvas')).toHaveAttribute('data-webgl-context-state', 'ready');
     await page.getByTestId('header-visualizer-link').click();
     await expect(page.getByTestId('visualizer-ready')).toBeVisible();
-    await page.getByTestId('realtime-style-actions').click();
+    await openRealtimeStyleExport(page);
     await page.getByTestId('create-display-page').click();
     await page.getByRole('link', { name: '打开展示页' }).click();
     await expect(page.getByTestId('realtime-visualizer-canvas')).toHaveAttribute('data-webgl-context-state', 'ready');

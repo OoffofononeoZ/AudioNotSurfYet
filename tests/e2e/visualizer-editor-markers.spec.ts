@@ -1,3 +1,4 @@
+import { chooseVisualizerProjectExport } from '../support/project-actions';
 import { expect, test } from '@playwright/test';
 import path from 'node:path';
 import { markerFixture } from '../visualizer/marker-input-fixture';
@@ -149,7 +150,7 @@ for (const singleCategory of [false, true])
         await expect(page.getByTestId('visualizer-ready')).toBeVisible();
         async function exported(): Promise<VisualizerProjectV6> {
             const n = (await savedPickerEntries(page)).length;
-            await page.getByTestId('export-visualizer-project').click();
+            await chooseVisualizerProjectExport(page);
             await expect.poll(async () => (await savedPickerEntries(page)).length).toBe(n + 1);
             return JSON.parse(Buffer.from((await savedPickerEntries(page)).at(-1)!.base64, 'base64').toString('utf8'));
         }

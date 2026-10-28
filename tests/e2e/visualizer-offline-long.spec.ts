@@ -1,3 +1,4 @@
+import { chooseVisualizerProjectExport } from '../support/project-actions';
 import '../setup-visualizer-resources';
 import { appendStandaloneElements } from '../../src/visualizer/compositionModel';
 import { expect, test } from '@playwright/test';
@@ -111,7 +112,7 @@ test('fifteen-minute offline native input stays responsive, exports fully and ca
     await page.getByTestId('toggle-playback').click();
     await page.getByTestId('header-visualizer-link').click();
     await expect(page.getByTestId('visualizer-ready')).toBeVisible();
-    await page.getByTestId('export-visualizer-project').click();
+    await chooseVisualizerProjectExport(page);
     await expect.poll(async () => (await savedPickerEntries(page)).length).toBe(1);
     const project = JSON.parse(
         Buffer.from((await savedPickerEntries(page)).at(-1)!.base64, 'base64').toString(),

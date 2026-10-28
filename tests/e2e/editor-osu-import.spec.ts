@@ -1,3 +1,4 @@
+import { openOsuImport } from '../support/project-actions';
 import { expect, test, type Page } from '@playwright/test';
 import { mkdir, readFile, writeFile, readdir } from 'node:fs/promises';
 import path from 'node:path';
@@ -46,7 +47,7 @@ async function draft(page: Page): Promise<EditorProjectV2> {
     );
 }
 async function openSource(page: Page, source: string | { text: string }) {
-    await page.getByTestId('import-osu-beatmap').click();
+    await openOsuImport(page);
     if (typeof source === 'string') await queuePickerFiles(page, [source]);
     else await queuePickerData(page, [{ name: 'map.osu', mimeType: 'application/octet-stream', text: source.text }]);
     await page.getByTestId('osu-select-source').click();
@@ -142,7 +143,7 @@ test('empty Editor imports an archive directly and returns to a saved paused pro
     expect((await draft(page)).lanes).toHaveLength(3);
     await expect(page.locator('#music-bar-container')).toHaveAttribute('data-playback-state', 'paused');
     await page.screenshot({ path: path.join(directory, 'imported-desktop.png') });
-    await page.getByTestId('import-osu-beatmap').click();
+    await openOsuImport(page);
     await page.setViewportSize({ width: 390, height: 844 });
     await page.screenshot({ path: path.join(directory, 'dialog-narrow.png') });
     await page.getByTestId('osu-cancel').click();
@@ -263,7 +264,7 @@ test('decode failure and cancelling an in-flight preparation preserve the origin
     await page.evaluate(() => Reflect.get(window, '__releaseOsuDecode')());
     await expect(page.getByTestId('osu-import-dialog')).toHaveCount(0);
     expect(await draft(page)).toEqual(before);
-    await page.getByTestId('import-osu-beatmap').click();
+    await openOsuImport(page);
     await expect(page.getByTestId('osu-preview')).toHaveCount(0);
     await page.getByTestId('osu-cancel').click();
 });

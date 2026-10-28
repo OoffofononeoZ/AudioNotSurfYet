@@ -1,3 +1,4 @@
+import { chooseVisualizerProjectExport, openRealtimeStyleExport } from '../support/project-actions';
 import { test, expect, type Page } from '@playwright/test';
 import path from 'node:path';
 import { chooseFiles, installFilePickerStub, savedPickerEntries } from '../support/file-picker';
@@ -41,7 +42,7 @@ for (const target of ['home', 'page'] as const) {
         await page.getByTestId('add-visualizer-element').click();
         await page.locator('[data-resource-id="starfield"]').click();
         await expect(page.getByRole('spinbutton', { name: '元素 Seed', exact: true })).toHaveValue('');
-        await page.getByTestId('realtime-style-actions').click();
+        await openRealtimeStyleExport(page);
         await page.getByTestId(target === 'home' ? 'apply-home-style' : 'create-display-page').click();
         if (target === 'page') await page.getByRole('link', { name: '打开展示页', exact: true }).click();
         const canvas = page.getByTestId('realtime-visualizer-canvas');
@@ -118,7 +119,7 @@ test('only random elements expose independent Seed properties and preserve them 
     await page.getByTestId('playback-progress').press('ArrowRight');
     await page.setViewportSize({ width: 1600, height: 900 });
     await expect.poll(async () => (await seeds(page, a)).length).toBeGreaterThan(0);
-    await page.getByTestId('export-visualizer-project').click();
+    await chooseVisualizerProjectExport(page);
     await expect.poll(async () => (await savedPickerEntries(page)).length).toBe(1);
     const project = JSON.parse(Buffer.from((await savedPickerEntries(page))[0]!.base64, 'base64').toString('utf8'));
     expect(project).not.toHaveProperty('seed');
@@ -166,7 +167,7 @@ test('preset children expose Seed only for their own random effects', async ({ p
     await expect(seed).toHaveCount(0);
     const collapsed = page.locator('.viz-element-items button[aria-expanded=false]');
     while (await collapsed.count()) await collapsed.first().click();
-    await page.getByTestId('export-visualizer-project').click();
+    await chooseVisualizerProjectExport(page);
     await expect.poll(async () => (await savedPickerEntries(page)).length).toBe(1);
     const project = JSON.parse(Buffer.from((await savedPickerEntries(page))[0]!.base64, 'base64').toString('utf8'));
     const select = async (resourceId: string) => {

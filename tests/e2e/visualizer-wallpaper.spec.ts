@@ -1,3 +1,4 @@
+import { openRealtimeStyleExport } from '../support/project-actions';
 import { test, expect } from '@playwright/test';
 import path from 'node:path';
 import { mkdir, writeFile } from 'node:fs/promises';
@@ -31,7 +32,7 @@ for (const resource of ['radial-spectrum', 'shared-camera-demo', 'circular-parti
                 await page.getByRole('button', { name: '预设', exact: true }).click();
                 await page.locator('[data-preset-id="shared-camera-demo"]').click();
             }
-            await page.getByTestId('realtime-style-actions').click();
+            await openRealtimeStyleExport(page);
             await page.getByTestId('prepare-wallpaper-export').click();
             await expect(page.getByTestId('save-wallpaper-directory')).toBeVisible();
             await page.evaluate(() => {

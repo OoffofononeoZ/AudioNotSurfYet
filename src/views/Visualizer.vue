@@ -15,13 +15,12 @@
                 type="button"
                 class="viz-icon-button"
                 :disabled="!usable"
-                aria-label="导出工程"
-                title="导出工程"
+                aria-label="导出"
+                title="导出"
                 data-testid="export-visualizer-project"
-                @click="run(() => controller.exportProject())">
+                @click="exportChoiceOpen = true">
                 <VisualizerIcon name="export" />
             </button>
-            <VisualizerRealtimeActions :project="snapshot.project" :locked="locked || !usable" />
             <div v-if="usable" class="viz-drawer-controls">
                 <button
                     type="button"
@@ -254,6 +253,17 @@
             >
             <p v-if="actionError" class="viz-error" role="alert">{{ actionError }}</p>
         </section>
+        <AppActionChoiceDialog
+            :open="exportChoiceOpen"
+            title="导出"
+            :options="exportChoices"
+            @close="exportChoiceOpen = false"
+            @select="chooseExport" />
+        <VisualizerRealtimeActions
+            :open="realtimeOpen"
+            :project="snapshot.project"
+            :locked="locked || !usable"
+            @close="realtimeOpen = false" />
         <VisualizerPresetExportDialog
             :open="presetExportOpen"
             :project="snapshot.project"
@@ -304,6 +314,7 @@ import { findScene3d } from '../visualizer/scene3dModel';
 import { computed, onBeforeUnmount, ref, shallowRef, watch } from 'vue';
 import { onBeforeRouteLeave, onBeforeRouteUpdate, useRoute, useRouter } from 'vue-router';
 import VisualizerIcon from '../components/visualizer/VisualizerIcon.vue';
+import AppActionChoiceDialog from '../components/controls/AppActionChoiceDialog.vue';
 import VisualizerRealtimeActions from '../components/visualizer/VisualizerRealtimeActions.vue';
 import VisualizerElementList from '../components/visualizer/VisualizerElementList.vue';
 import VisualizerElementCatalog from '../components/visualizer/VisualizerElementCatalog.vue';
@@ -334,6 +345,8 @@ const workspace = ref<HTMLElement | null>(null),
     canvas = ref<HTMLCanvasElement | null>(null),
     catalogOpen = ref(false),
     presetExportOpen = ref(false),
+    exportChoiceOpen = ref(false),
+    realtimeOpen = ref(false),
     selection = ref<string | null>(null),
     drawer = ref<'elements' | 'inspector' | null>(null),
     actionError = ref(''),
@@ -342,6 +355,38 @@ const locked = computed(
     () => importBusy.value || ['preparing', 'exporting', 'finalizing'].includes(snapshot.value.export.status),
 );
 const usable = computed(() => ['ready', 'not-persisted'].includes(snapshot.value.state));
+const exportChoices = computed(() => [
+    {
+        id: 'project',
+        title: '工程文件',
+        description: '保存工程与素材，用于继续编辑',
+        icon: 'project',
+        testId: 'export-project-file',
+        disabled: !usable.value,
+    },
+    {
+        id: 'realtime',
+        title: '实时样式',
+        description: '用于首页、展示页或 Wallpaper Engine',
+        icon: 'style',
+        testId: 'realtime-style-actions',
+        disabled: locked.value || !usable.value,
+        reason: '请等待当前操作完成',
+    },
+]);
+function chooseExport(id: string) {
+    exportChoiceOpen.value = false;
+    if (!usable.value) return;
+    if (id === 'project') void run(() => controller.exportProject());
+    else if (id === 'realtime' && !locked.value) realtimeOpen.value = true;
+}
+watch(
+    () => snapshot.value.project?.projectId,
+    () => {
+        exportChoiceOpen.value = false;
+        realtimeOpen.value = false;
+    },
+);
 const selectedScene = computed(() =>
     snapshot.value.project && selection.value ? (findScene3d(snapshot.value.project, selection.value) ?? null) : null,
 );

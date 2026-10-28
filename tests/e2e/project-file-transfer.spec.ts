@@ -1,3 +1,4 @@
+import { chooseVisualizerProjectExport } from '../support/project-actions';
 import { expect, test } from '@playwright/test';
 import path from 'node:path';
 import { chooseFiles, installFilePickerStub, queuePickerData, savedPickerEntries } from '../support/file-picker';
@@ -23,7 +24,7 @@ test('exports Editor JSON and imports it into Visualizer without changing the fi
     await queuePickerData(page, [{ name: saved.name, mimeType: 'application/json', text }]);
     await page.getByRole('button', { name: '导入 Editor JSON', exact: true }).click();
     await expect(page.getByText(/已载入同歌快照/)).toBeVisible();
-    await page.getByTestId('export-visualizer-project').click();
+    await chooseVisualizerProjectExport(page);
     await expect.poll(async () => (await savedPickerEntries(page)).length).toBe(2);
     const composition = (await savedPickerEntries(page))[1]!;
     expect(composition.name).toBe('format-master.audiosurf-visualizer.json');
