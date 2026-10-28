@@ -1,4 +1,5 @@
 import Meyda from 'meyda';
+import { extractTimeDomainFeatures, isTimeDomainFeature } from './timeDomainFeatures';
 import { getFeatureDefinition } from './featureRegistry';
 import {
     M8_SCALAR_FEATURE_IDS,
@@ -21,12 +22,7 @@ export interface MeydaLoudnessValue {
     specific: number[] | Float32Array;
 }
 
-export type MeydaValue =
-    | number
-    | number[]
-    | Float32Array
-    | MeydaComplexValue
-    | MeydaLoudnessValue;
+export type MeydaValue = number | number[] | Float32Array | MeydaComplexValue | MeydaLoudnessValue;
 
 export type MeydaBatchResult = Partial<Record<FeatureId, MeydaValue>>;
 
@@ -56,6 +52,7 @@ const extractBatch = (
     frame: Float32Array,
     config: AnalysisConfig,
 ): MeydaBatchResult => {
+    if (featureIds.every(isTimeDomainFeature)) return extractTimeDomainFeatures(featureIds, frame);
     configure(config);
     const result = runtime.extract(featureIds, frame);
     if (!result) throw new Error('Meyda returned no analysis result.');
@@ -68,10 +65,7 @@ export const extractM6Features = (
     config: AnalysisConfig,
 ): MeydaBatchResult => extractBatch(featureIds, frame, config);
 
-export const spectralFluxV1 = (
-    currentSpectrum: readonly number[],
-    previousSpectrum?: readonly number[],
-): number => {
+export const spectralFluxV1 = (currentSpectrum: readonly number[], previousSpectrum?: readonly number[]): number => {
     if (!previousSpectrum) return 0;
     if (currentSpectrum.length !== previousSpectrum.length) {
         throw new Error('Spectral Flux spectra must have equal dimensions.');
@@ -88,10 +82,7 @@ export const spectralFluxV1 = (
     return flux;
 };
 
-export const scalarMeydaValue = (
-    result: MeydaBatchResult,
-    featureId: FeatureId,
-): number => {
+export const scalarMeydaValue = (result: MeydaBatchResult, featureId: FeatureId): number => {
     const value = result[featureId];
     if (typeof value !== 'number' || !Number.isFinite(value)) {
         throw new Error(`${featureId} returned an invalid scalar.`);
@@ -101,12 +92,7 @@ export const scalarMeydaValue = (
 
 export const vectorMeydaValue = (
     result: MeydaBatchResult,
-    featureId:
-        | 'amplitudeSpectrum'
-        | 'chroma'
-        | 'powerSpectrum'
-        | 'mfcc'
-        | 'buffer',
+    featureId: 'amplitudeSpectrum' | 'chroma' | 'powerSpectrum' | 'mfcc' | 'buffer',
     width: number,
 ): number[] => {
     const value = result[featureId];
@@ -114,63 +100,51 @@ export const vectorMeydaValue = (
         throw new Error(`${featureId} returned an invalid vector.`);
     }
     const output = Array.from(value);
-    if (
-        output.length !== width
-        || output.some((entry) => !Number.isFinite(entry))
-    ) {
+    if (output.length !== width || output.some(entry => !Number.isFinite(entry))) {
         throw new Error(`${featureId} returned invalid dimensions.`);
     }
     return output;
 };
 
-export const loudnessMeydaValue = (
-    result: MeydaBatchResult,
-): { total: number; specific: number[] } => {
+export const loudnessMeydaValue = (result: MeydaBatchResult): { total: number; specific: number[] } => {
     const value = result.loudness;
     if (
-        !value
-        || typeof value !== 'object'
-        || !('total' in value)
-        || !('specific' in value)
-        || typeof value.total !== 'number'
-        || !Number.isFinite(value.total)
-        || (!(value.specific instanceof Float32Array)
-            && !Array.isArray(value.specific))
+        !value ||
+        typeof value !== 'object' ||
+        !('total' in value) ||
+        !('specific' in value) ||
+        typeof value.total !== 'number' ||
+        !Number.isFinite(value.total) ||
+        (!(value.specific instanceof Float32Array) && !Array.isArray(value.specific))
     ) {
         throw new Error('loudness returned an invalid structure.');
     }
     const specific = Array.from(value.specific);
-    if (
-        specific.length !== 24
-        || specific.some((entry) => !Number.isFinite(entry))
-    ) {
+    if (specific.length !== 24 || specific.some(entry => !Number.isFinite(entry))) {
         throw new Error('loudness returned invalid dimensions.');
     }
     return { total: value.total, specific };
 };
 
-export const complexMeydaValue = (
-    result: MeydaBatchResult,
-    bins: number,
-): { real: number[]; imag: number[] } => {
+export const complexMeydaValue = (result: MeydaBatchResult, bins: number): { real: number[]; imag: number[] } => {
     const value = result.complexSpectrum;
     if (
-        !value
-        || typeof value !== 'object'
-        || !('real' in value)
-        || !('imag' in value)
-        || (!(value.real instanceof Float32Array) && !Array.isArray(value.real))
-        || (!(value.imag instanceof Float32Array) && !Array.isArray(value.imag))
+        !value ||
+        typeof value !== 'object' ||
+        !('real' in value) ||
+        !('imag' in value) ||
+        (!(value.real instanceof Float32Array) && !Array.isArray(value.real)) ||
+        (!(value.imag instanceof Float32Array) && !Array.isArray(value.imag))
     ) {
         throw new Error('complexSpectrum returned an invalid structure.');
     }
     const real = Array.from(value.real);
     const imag = Array.from(value.imag);
     if (
-        real.length !== bins
-        || imag.length !== bins
-        || real.some((entry) => !Number.isFinite(entry))
-        || imag.some((entry) => !Number.isFinite(entry))
+        real.length !== bins ||
+        imag.length !== bins ||
+        real.some(entry => !Number.isFinite(entry)) ||
+        imag.some(entry => !Number.isFinite(entry))
     ) {
         throw new Error('complexSpectrum returned invalid dimensions.');
     }
@@ -193,24 +167,20 @@ const extractSupportedFrame = (
 ): M10FrameExtraction => {
     const requested = new Set<FeatureId>(featureIds);
     const needsFlux = requested.delete('spectralFlux');
-    const needsZeroEnergyPolicy = featureIds.some((featureId) =>
-        (M8_SCALAR_FEATURE_IDS as readonly FeatureId[]).includes(featureId)
-        || featureId === 'loudness'
-        || featureId === 'complexSpectrum');
+    const needsZeroEnergyPolicy = featureIds.some(
+        featureId =>
+            (M8_SCALAR_FEATURE_IDS as readonly FeatureId[]).includes(featureId) ||
+            featureId === 'loudness' ||
+            featureId === 'complexSpectrum',
+    );
     if (needsZeroEnergyPolicy) requested.add('energy');
     if (needsFlux) requested.add('amplitudeSpectrum');
 
     const result = extractBatch([...requested], frame, config);
-    const energy = needsZeroEnergyPolicy
-        ? scalarMeydaValue(result, 'energy')
-        : null;
+    const energy = needsZeroEnergyPolicy ? scalarMeydaValue(result, 'energy') : null;
     const zeroEnergy = energy === 0;
     const amplitudeSpectrum = needsFlux
-        ? vectorMeydaValue(
-            result,
-            'amplitudeSpectrum',
-            config.frameSize / 2,
-        )
+        ? vectorMeydaValue(result, 'amplitudeSpectrum', config.frameSize / 2)
         : undefined;
 
     for (const featureId of featureIds) {
@@ -221,25 +191,17 @@ const extractSupportedFrame = (
                 continue;
             }
             if (featureId === 'spectralFlux') {
-                result[featureId] = spectralFluxV1(
-                    amplitudeSpectrum ?? [],
-                    previousAmplitudeSpectrum,
-                );
+                result[featureId] = spectralFluxV1(amplitudeSpectrum ?? [], previousAmplitudeSpectrum);
             }
             scalarMeydaValue(result, featureId);
         } else if (
-            definition.outputShape === 'frequency-vector'
-            || definition.outputShape === 'category-vector'
-            || definition.outputShape === 'waveform'
+            definition.outputShape === 'frequency-vector' ||
+            definition.outputShape === 'category-vector' ||
+            definition.outputShape === 'waveform'
         ) {
             vectorMeydaValue(
                 result,
-                featureId as
-                    | 'amplitudeSpectrum'
-                    | 'chroma'
-                    | 'powerSpectrum'
-                    | 'mfcc'
-                    | 'buffer',
+                featureId as 'amplitudeSpectrum' | 'chroma' | 'powerSpectrum' | 'mfcc' | 'buffer',
                 definition.dimensions(config)[0] ?? 0,
             );
         } else if (definition.outputShape === 'loudness-structure') {
@@ -269,36 +231,21 @@ export const extractM8Frame = (
     frame: Float32Array,
     config: AnalysisConfig,
     previousAmplitudeSpectrum?: readonly number[],
-): M8FrameExtraction => extractSupportedFrame(
-    featureIds,
-    frame,
-    config,
-    previousAmplitudeSpectrum,
-);
+): M8FrameExtraction => extractSupportedFrame(featureIds, frame, config, previousAmplitudeSpectrum);
 
 export const extractM9Frame = (
     featureIds: readonly M9FeatureId[],
     frame: Float32Array,
     config: AnalysisConfig,
     previousAmplitudeSpectrum?: readonly number[],
-): M9FrameExtraction => extractSupportedFrame(
-    featureIds,
-    frame,
-    config,
-    previousAmplitudeSpectrum,
-);
+): M9FrameExtraction => extractSupportedFrame(featureIds, frame, config, previousAmplitudeSpectrum);
 
 export const extractM10Frame = (
     featureIds: readonly M10FeatureId[],
     frame: Float32Array,
     config: AnalysisConfig,
     previousAmplitudeSpectrum?: readonly number[],
-): M10FrameExtraction => extractSupportedFrame(
-    featureIds,
-    frame,
-    config,
-    previousAmplitudeSpectrum,
-);
+): M10FrameExtraction => extractSupportedFrame(featureIds, frame, config, previousAmplitudeSpectrum);
 
 export const exactValueFromMeyda = (
     featureId: M6SupportedFeatureId,
@@ -315,7 +262,7 @@ export const exactValueFromMeyda = (
     }
     if (value instanceof Float32Array || Array.isArray(value)) {
         const output = Array.from(value);
-        if (output.some((entry) => !Number.isFinite(entry))) {
+        if (output.some(entry => !Number.isFinite(entry))) {
             throw new Error(`${featureId} returned a non-finite vector.`);
         }
         return output;
@@ -331,30 +278,17 @@ export const exactM8Value = (
 ): ExactFeatureValue => {
     let previousAmplitudeSpectrum: number[] | undefined;
     if (featureId === 'spectralFlux' && previousFrame) {
-        const previous = extractM6Features(
-            ['amplitudeSpectrum'],
-            previousFrame,
-            config,
-        );
-        previousAmplitudeSpectrum = vectorMeydaValue(
-            previous,
-            'amplitudeSpectrum',
-            config.frameSize / 2,
-        );
+        const previous = extractM6Features(['amplitudeSpectrum'], previousFrame, config);
+        previousAmplitudeSpectrum = vectorMeydaValue(previous, 'amplitudeSpectrum', config.frameSize / 2);
     }
-    const extracted = extractM8Frame(
-        [featureId],
-        frame,
-        config,
-        previousAmplitudeSpectrum,
-    ).values;
+    const extracted = extractM8Frame([featureId], frame, config, previousAmplitudeSpectrum).values;
     const value = extracted[featureId];
     if (typeof value === 'number') {
         return scalarMeydaValue(extracted, featureId);
     }
     if (value instanceof Float32Array || Array.isArray(value)) {
         const output = Array.from(value);
-        if (output.some((entry) => !Number.isFinite(entry))) {
+        if (output.some(entry => !Number.isFinite(entry))) {
             throw new Error(`${featureId} returned a non-finite vector.`);
         }
         return output;
@@ -370,23 +304,10 @@ export const exactM9Value = (
 ): ExactFeatureValue => {
     let previousAmplitudeSpectrum: number[] | undefined;
     if (featureId === 'spectralFlux' && previousFrame) {
-        const previous = extractM6Features(
-            ['amplitudeSpectrum'],
-            previousFrame,
-            config,
-        );
-        previousAmplitudeSpectrum = vectorMeydaValue(
-            previous,
-            'amplitudeSpectrum',
-            config.frameSize / 2,
-        );
+        const previous = extractM6Features(['amplitudeSpectrum'], previousFrame, config);
+        previousAmplitudeSpectrum = vectorMeydaValue(previous, 'amplitudeSpectrum', config.frameSize / 2);
     }
-    const extracted = extractM9Frame(
-        [featureId],
-        frame,
-        config,
-        previousAmplitudeSpectrum,
-    ).values;
+    const extracted = extractM9Frame([featureId], frame, config, previousAmplitudeSpectrum).values;
     const value = extracted[featureId];
     if (typeof value === 'number') {
         return scalarMeydaValue(extracted, featureId);
@@ -394,12 +315,7 @@ export const exactM9Value = (
     if (value instanceof Float32Array || Array.isArray(value)) {
         return vectorMeydaValue(
             extracted,
-            featureId as
-                | 'amplitudeSpectrum'
-                | 'chroma'
-                | 'powerSpectrum'
-                | 'mfcc'
-                | 'buffer',
+            featureId as 'amplitudeSpectrum' | 'chroma' | 'powerSpectrum' | 'mfcc' | 'buffer',
             getFeatureDefinition(featureId).dimensions(config)[0] ?? 0,
         );
     }
@@ -414,23 +330,10 @@ export const exactM10Value = (
 ): ExactFeatureValue => {
     let previousAmplitudeSpectrum: number[] | undefined;
     if (featureId === 'spectralFlux' && previousFrame) {
-        const previous = extractM6Features(
-            ['amplitudeSpectrum'],
-            previousFrame,
-            config,
-        );
-        previousAmplitudeSpectrum = vectorMeydaValue(
-            previous,
-            'amplitudeSpectrum',
-            config.frameSize / 2,
-        );
+        const previous = extractM6Features(['amplitudeSpectrum'], previousFrame, config);
+        previousAmplitudeSpectrum = vectorMeydaValue(previous, 'amplitudeSpectrum', config.frameSize / 2);
     }
-    const extracted = extractM10Frame(
-        [featureId],
-        frame,
-        config,
-        previousAmplitudeSpectrum,
-    ).values;
+    const extracted = extractM10Frame([featureId], frame, config, previousAmplitudeSpectrum).values;
     if (featureId === 'loudness') return loudnessMeydaValue(extracted);
     if (featureId === 'complexSpectrum') {
         return complexMeydaValue(extracted, config.frameSize);
@@ -442,12 +345,7 @@ export const exactM10Value = (
     if (value instanceof Float32Array || Array.isArray(value)) {
         return vectorMeydaValue(
             extracted,
-            featureId as
-                | 'amplitudeSpectrum'
-                | 'chroma'
-                | 'powerSpectrum'
-                | 'mfcc'
-                | 'buffer',
+            featureId as 'amplitudeSpectrum' | 'chroma' | 'powerSpectrum' | 'mfcc' | 'buffer',
             getFeatureDefinition(featureId).dimensions(config)[0] ?? 0,
         );
     }

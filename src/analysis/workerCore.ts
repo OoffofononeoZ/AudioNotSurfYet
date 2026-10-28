@@ -1,16 +1,8 @@
 import { yieldAnalysisTask } from './taskScheduler';
-import { buildSeries } from './seriesBuilder';
+import { SeriesAccumulator } from './seriesAccumulator';
 import { validateAnalysisConfig } from './config';
 import { analysisFrameCount, createAnalysisFrame, cursorFrameIndex, frameStartSeconds } from './frames';
-import { getFeatureDefinition } from './featureRegistry';
-import {
-    complexMeydaValue,
-    exactM10Value,
-    extractM10Frame,
-    loudnessMeydaValue,
-    scalarMeydaValue,
-    vectorMeydaValue,
-} from './meydaAdapter';
+import { exactM10Value, extractM10Frame } from './meydaAdapter';
 import { estimateTempo } from './tempoEstimator';
 import { analyzeWallpaperSpectrum, wallpaperFrameIndex } from './wallpaperSpectrum';
 import {
@@ -136,18 +128,7 @@ export const runAnalysisJob = async (
     const featureIds = request.featureIds.filter(isM10FeatureId);
     const pcm = new Float32Array(request.pcm);
     const totalFrames = analysisFrameCount(pcm.length, request.config.frameSize, request.config.hopSize);
-    const scalarFrames = new Map<FeatureId, number[]>();
-    const vectorFrames = new Map<FeatureId, number[][]>();
-    const loudnessFrames: Array<{ total: number; specific: number[] }> = [];
-    const complexFrames: Array<{ real: number[]; imag: number[] }> = [];
-    for (const featureId of featureIds) {
-        const shape = getFeatureDefinition(featureId).outputShape;
-        if (shape === 'scalar') {
-            scalarFrames.set(featureId, []);
-        } else if (shape === 'frequency-vector' || shape === 'category-vector' || shape === 'waveform') {
-            vectorFrames.set(featureId, []);
-        }
-    }
+    const accumulators = featureIds.map(id => new SeriesAccumulator(id, request.config, totalFrames));
     const now = hooks.now ?? (() => performance.now());
     const yieldControl = hooks.yieldControl ?? yieldAnalysisTask;
     let batchStartedAt = now();
@@ -184,28 +165,7 @@ export const runAnalysisJob = async (
             if (featureIds.length > 0) {
                 const frame = createAnalysisFrame(pcm, frameIndex, request.config);
                 const extraction = extractM10Frame(featureIds, frame, request.config, previousAmplitudeSpectrum);
-                const extracted = extraction.values;
-                for (const featureId of featureIds) {
-                    const shape = getFeatureDefinition(featureId).outputShape;
-                    if (shape === 'scalar') {
-                        scalarFrames.get(featureId)?.push(scalarMeydaValue(extracted, featureId));
-                    } else if (shape === 'frequency-vector' || shape === 'category-vector' || shape === 'waveform') {
-                        const width = getFeatureDefinition(featureId).dimensions(request.config)[0] ?? 0;
-                        vectorFrames
-                            .get(featureId)
-                            ?.push(
-                                vectorMeydaValue(
-                                    extracted,
-                                    featureId as 'amplitudeSpectrum' | 'chroma' | 'powerSpectrum' | 'mfcc' | 'buffer',
-                                    width,
-                                ),
-                            );
-                    } else if (shape === 'loudness-structure') {
-                        loudnessFrames.push(loudnessMeydaValue(extracted));
-                    } else if (shape === 'complex-spectrum') {
-                        complexFrames.push(complexMeydaValue(extracted, request.config.frameSize));
-                    }
-                }
+                for (const accumulator of accumulators) accumulator.push(extraction.values);
                 if (extraction.amplitudeSpectrum) {
                     previousAmplitudeSpectrum = extraction.amplitudeSpectrum;
                 }
@@ -230,7 +190,7 @@ export const runAnalysisJob = async (
         );
     }
 
-    const series = buildSeries(request, featureIds, scalarFrames, vectorFrames, loudnessFrames, complexFrames);
+    const series = accumulators.map(accumulator => accumulator.finish(request.trackHash));
     if (wallpaperSeries) series.unshift(wallpaperSeries);
     return {
         result: {

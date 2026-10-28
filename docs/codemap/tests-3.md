@@ -8,6 +8,7 @@
 
 | 文件 | 本地静态引用（最多显示 6 项） |
 | --- | --- |
+| [tests/scripts/run-e4-eval.mjs](../../tests/scripts/run-e4-eval.mjs) | — |
 | [tests/scripts/run-e5-eval.mjs](../../tests/scripts/run-e5-eval.mjs) | — |
 | [tests/scripts/run-e6-eval.mjs](../../tests/scripts/run-e6-eval.mjs) | — |
 | [tests/scripts/run-e7-eval.mjs](../../tests/scripts/run-e7-eval.mjs) | — |
@@ -107,4 +108,3 @@
 | [tests/visualizer/algorithm-frame-revision.test.ts](../../tests/visualizer/algorithm-frame-revision.test.ts) | [src/visualizer/algorithmFrameRevision.ts](../../src/visualizer/algorithmFrameRevision.ts)、[src/visualizer/algorithmTypes.ts](../../src/visualizer/algorithmTypes.ts)、[src/visualizer/compositionTypes.ts](../../src/visualizer/compositionTypes.ts) |
 | [tests/visualizer/algorithm-parity.test.ts](../../tests/visualizer/algorithm-parity.test.ts) | [src/visualizer/algorithmTypes.ts](../../src/visualizer/algorithmTypes.ts)、[src/visualizer/elementRegistry.ts](../../src/visualizer/elementRegistry.ts)、[tests/visualizer/algorithm-runtime-fixture.ts](../../tests/visualizer/algorithm-runtime-fixture.ts) |
 | [tests/visualizer/algorithm-runtime-fixture.ts](../../tests/visualizer/algorithm-runtime-fixture.ts) | [src/visualizer/algorithmTypes.ts](../../src/visualizer/algorithmTypes.ts)、[src/visualizer/compositionScene.ts](../../src/visualizer/compositionScene.ts)、[src/visualizer/drawPacket.ts](../../src/visualizer/drawPacket.ts)、[src/visualizer/editorMarkerTypes.ts](../../src/visualizer/editorMarkerTypes.ts)、[src/visualizer/isolatedAlgorithmRuntime.ts](../../src/visualizer/isolatedAlgorithmRuntime.ts) |
-| [tests/visualizer/analysis-input.test.ts](../../tests/visualizer/analysis-input.test.ts) | [src/analysis/config.ts](../../src/analysis/config.ts)、[src/analysis/frames.ts](../../src/analysis/frames.ts)、[src/analysis/meydaAdapter.ts](../../src/analysis/meydaAdapter.ts)、[src/analysis/types.ts](../../src/analysis/types.ts)、[src/analysis/workerCore.ts](../../src/analysis/workerCore.ts)、[src/visualizer/analysisProjection.ts](../../src/visualizer/analysisProjection.ts)、另 6 项，按需核对源码 |

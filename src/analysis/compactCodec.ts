@@ -1,9 +1,4 @@
-import {
-    isFeatureId,
-    type AnalysisSeries,
-    type CompactPayload,
-    type FeatureId,
-} from './types';
+import { isFeatureId, type AnalysisSeries, type CompactPayload, type FeatureId } from './types';
 
 const U16_MAX = 65_535;
 const I16_MAX = 32_767;
@@ -22,10 +17,7 @@ const assertFiniteValues = (values: ArrayLike<number>): void => {
     }
 };
 
-export const quantizeToUint16 = (
-    input: ArrayLike<number>,
-    bounds?: { min: number; max: number },
-): QuantizedValues => {
+export const quantizeToUint16 = (input: ArrayLike<number>, bounds?: { min: number; max: number }): QuantizedValues => {
     if (input.length === 0) {
         return {
             values: new Uint16Array(),
@@ -42,14 +34,12 @@ export const quantizeToUint16 = (
         actualMax = Math.max(actualMax, value);
     }
     if (
-        bounds
-        && (
-            !Number.isFinite(bounds.min)
-            || !Number.isFinite(bounds.max)
-            || bounds.max < bounds.min
-            || actualMin < bounds.min
-            || actualMax > bounds.max
-        )
+        bounds &&
+        (!Number.isFinite(bounds.min) ||
+            !Number.isFinite(bounds.max) ||
+            bounds.max < bounds.min ||
+            actualMin < bounds.min ||
+            actualMax > bounds.max)
     ) {
         throw new RangeError('Values exceed explicit quantization bounds.');
     }
@@ -69,27 +59,18 @@ export const quantizeToUint16 = (
     return { values, scale, offset };
 };
 
-export const dequantizeUint16 = (
-    values: Uint16Array,
-    scale: number,
-    offset: number,
-): Float32Array => {
+export const dequantizeUint16 = (values: Uint16Array, scale: number, offset: number): Float32Array => {
     if (!Number.isFinite(scale) || scale < 0 || !Number.isFinite(offset)) {
         throw new RangeError('Invalid quantization metadata.');
     }
     const result = new Float32Array(values.length);
     for (let index = 0; index < values.length; index += 1) {
-        result[index] = scale === 0
-            ? offset
-            : offset + (values[index] ?? 0) * scale;
+        result[index] = scale === 0 ? offset : offset + (values[index] ?? 0) * scale;
     }
     return result;
 };
 
-export const aggregateScalars = (
-    frames: readonly number[],
-    factor: number,
-): Float32Array => {
+export const aggregateScalars = (frames: readonly number[], factor: number): Float32Array => {
     if (!Number.isInteger(factor) || factor <= 0) {
         throw new RangeError('Aggregation factor must be positive.');
     }
@@ -114,11 +95,11 @@ export const aggregateVectors = (
     width: number,
 ): Float32Array => {
     if (
-        !Number.isInteger(factor)
-        || factor <= 0
-        || !Number.isInteger(width)
-        || width <= 0
-        || frames.some((frame) => frame.length !== width)
+        !Number.isInteger(factor) ||
+        factor <= 0 ||
+        !Number.isInteger(width) ||
+        width <= 0 ||
+        frames.some(frame => frame.length !== width)
     ) {
         throw new RangeError('Invalid vector aggregation input.');
     }
@@ -133,16 +114,13 @@ export const aggregateVectors = (
             assertFiniteValues(frame);
             for (let valueIndex = 0; valueIndex < width; valueIndex += 1) {
                 const outputIndex = bucket * width + valueIndex;
-                output[outputIndex] =
-                    (output[outputIndex] ?? 0)
-                    + (frame[valueIndex] ?? 0);
+                output[outputIndex] = (output[outputIndex] ?? 0) + (frame[valueIndex] ?? 0);
             }
         }
         const divisor = Math.max(1, end - start);
         for (let valueIndex = 0; valueIndex < width; valueIndex += 1) {
             const outputIndex = bucket * width + valueIndex;
-            output[outputIndex] =
-                (output[outputIndex] ?? 0) / divisor;
+            output[outputIndex] = (output[outputIndex] ?? 0) / divisor;
         }
     }
     return output;
@@ -174,11 +152,7 @@ export const aggregateWaveform = (
         }
         minimums[bucket] = Number.isFinite(minimum) ? minimum : 0;
         maximums[bucket] = Number.isFinite(maximum) ? maximum : 0;
-        maximumAbsolute = Math.max(
-            maximumAbsolute,
-            Math.abs(minimums[bucket] ?? 0),
-            Math.abs(maximums[bucket] ?? 0),
-        );
+        maximumAbsolute = Math.max(maximumAbsolute, Math.abs(minimums[bucket] ?? 0), Math.abs(maximums[bucket] ?? 0));
     }
     const scale = maximumAbsolute === 0 ? 0 : maximumAbsolute / I16_MAX;
     const minimum = new Int16Array(bucketCount);
@@ -192,7 +166,7 @@ export const aggregateWaveform = (
     return { min: minimum, max: maximum, scale };
 };
 
-export const aggregateComplex = (
+export const aggregateComplexValues = (
     frames: readonly {
         real: readonly number[];
         imag: readonly number[];
@@ -200,17 +174,15 @@ export const aggregateComplex = (
     factor: number,
     bins: number,
 ): {
-    magnitude: Uint16Array;
-    phase: Int16Array;
-    magnitudeScale: number;
+    magnitudes: Float32Array;
+    phases: Float32Array;
 } => {
     if (
-        !Number.isInteger(factor)
-        || factor <= 0
-        || !Number.isInteger(bins)
-        || bins <= 0
-        || frames.some((frame) =>
-            frame.real.length !== bins || frame.imag.length !== bins)
+        !Number.isInteger(factor) ||
+        factor <= 0 ||
+        !Number.isInteger(bins) ||
+        bins <= 0 ||
+        frames.some(frame => frame.real.length !== bins || frame.imag.length !== bins)
     ) {
         throw new RangeError('Invalid complex aggregation input.');
     }
@@ -239,12 +211,13 @@ export const aggregateComplex = (
             }
             const outputIndex = bucket * bins + bin;
             magnitudes[outputIndex] = magnitude / divisor;
-            phases[outputIndex] = Math.atan2(
-                sine / divisor,
-                cosine / divisor,
-            );
+            phases[outputIndex] = Math.atan2(sine / divisor, cosine / divisor);
         }
     }
+    return { magnitudes, phases };
+};
+
+export const quantizeComplexValues = (magnitudes: Float32Array, phases: Float32Array) => {
     let maximumMagnitude = 0;
     for (const magnitude of magnitudes) {
         maximumMagnitude = Math.max(maximumMagnitude, magnitude);
@@ -255,16 +228,22 @@ export const aggregateComplex = (
     });
     const phase = new Int16Array(phases.length);
     for (let index = 0; index < phases.length; index += 1) {
-        phase[index] = Math.round(
-            Math.max(-1, Math.min(1, (phases[index] ?? 0) / Math.PI))
-            * I16_MAX,
-        );
+        phase[index] = Math.round(Math.max(-1, Math.min(1, (phases[index] ?? 0) / Math.PI)) * I16_MAX);
     }
     return {
         magnitude: quantized.values,
         phase,
         magnitudeScale: quantized.scale,
     };
+};
+
+export const aggregateComplex = (
+    frames: readonly { real: readonly number[]; imag: readonly number[] }[],
+    factor: number,
+    bins: number,
+) => {
+    const values = aggregateComplexValues(frames, factor, bins);
+    return quantizeComplexValues(values.magnitudes, values.phases);
 };
 
 type TypedArrayName = 'f32' | 'u16' | 'i16';
@@ -295,9 +274,7 @@ interface CacheHeader {
     ranges: ByteRange[];
 }
 
-const arrayType = (
-    value: Float32Array | Uint16Array | Int16Array,
-): TypedArrayName => {
+const arrayType = (value: Float32Array | Uint16Array | Int16Array): TypedArrayName => {
     if (value instanceof Float32Array) return 'f32';
     if (value instanceof Uint16Array) return 'u16';
     return 'i16';
@@ -333,10 +310,7 @@ const payloadArrays = (
     }
 };
 
-const headerForSeries = (
-    series: AnalysisSeries,
-    ranges: ByteRange[],
-): CacheHeader => {
+const headerForSeries = (series: AnalysisSeries, ranges: ByteRange[]): CacheHeader => {
     const common = {
         schemaVersion: 1 as const,
         trackHash: series.trackHash,
@@ -379,9 +353,7 @@ const headerForSeries = (
     }
 };
 
-export const encodeAnalysisSeries = (
-    series: AnalysisSeries,
-): ArrayBuffer => {
+export const encodeAnalysisSeries = (series: AnalysisSeries): ArrayBuffer => {
     validateSeriesShape(series);
     const arrays = payloadArrays(series.payload);
     let byteOffset = 0;
@@ -396,9 +368,7 @@ export const encodeAnalysisSeries = (
         byteOffset += value.byteLength;
         return range;
     });
-    const headerBytes = new TextEncoder().encode(
-        JSON.stringify(headerForSeries(series, ranges)),
-    );
+    const headerBytes = new TextEncoder().encode(JSON.stringify(headerForSeries(series, ranges)));
     const result = new ArrayBuffer(4 + headerBytes.length + byteOffset);
     const view = new DataView(result);
     view.setUint32(0, headerBytes.length, true);
@@ -408,36 +378,23 @@ export const encodeAnalysisSeries = (
         const range = ranges[index];
         const array = arrays[index]?.value;
         if (!range || !array) continue;
-        bytes.set(
-            new Uint8Array(
-                array.buffer,
-                array.byteOffset,
-                array.byteLength,
-            ),
-            range.offset,
-        );
+        bytes.set(new Uint8Array(array.buffer, array.byteOffset, array.byteLength), range.offset);
     }
     return result;
 };
 
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-    typeof value === 'object' && value !== null;
+const isRecord = (value: unknown): value is Record<string, unknown> => typeof value === 'object' && value !== null;
 
-const typeBytes = (type: TypedArrayName): number =>
-    type === 'f32' ? Float32Array.BYTES_PER_ELEMENT : 2;
+const typeBytes = (type: TypedArrayName): number => (type === 'f32' ? Float32Array.BYTES_PER_ELEMENT : 2);
 
-const readArray = (
-    data: Uint8Array,
-    range: ByteRange,
-): Float32Array | Uint16Array | Int16Array => {
+const readArray = (data: Uint8Array, range: ByteRange): Float32Array | Uint16Array | Int16Array => {
     const copy = data.slice(range.offset, range.offset + range.byteLength);
     if (range.type === 'f32') return new Float32Array(copy.buffer);
     if (range.type === 'u16') return new Uint16Array(copy.buffer);
     return new Int16Array(copy.buffer);
 };
 
-const finiteMetadata = (value: unknown): value is number =>
-    typeof value === 'number' && Number.isFinite(value);
+const finiteMetadata = (value: unknown): value is number => typeof value === 'number' && Number.isFinite(value);
 
 export const decodeAnalysisSeries = (
     encoded: ArrayBuffer,
@@ -456,39 +413,32 @@ export const decodeAnalysisSeries = (
     }
     let parsed: unknown;
     try {
-        parsed = JSON.parse(
-            new TextDecoder('utf-8', { fatal: true }).decode(
-                new Uint8Array(encoded, 4, headerLength),
-            ),
-        );
+        parsed = JSON.parse(new TextDecoder('utf-8', { fatal: true }).decode(new Uint8Array(encoded, 4, headerLength)));
     } catch {
         throw new Error('Analysis cache header is invalid.');
     }
     if (
-        !isRecord(parsed)
-        || parsed.schemaVersion !== 1
-        || typeof parsed.trackHash !== 'string'
-        || typeof parsed.configHash !== 'string'
-        || !isFeatureId(parsed.featureId)
-        || typeof parsed.payloadKind !== 'string'
-        || !finiteMetadata(parsed.sampleStepSeconds)
-        || parsed.sampleStepSeconds <= 0
-        || !Number.isInteger(parsed.sampleCount)
-        || (parsed.sampleCount as number) < 0
-        || !Array.isArray(parsed.dimensions)
-        || !parsed.dimensions.every((value) =>
-            Number.isInteger(value) && (value as number) > 0)
-        || !Array.isArray(parsed.ranges)
+        !isRecord(parsed) ||
+        parsed.schemaVersion !== 1 ||
+        typeof parsed.trackHash !== 'string' ||
+        typeof parsed.configHash !== 'string' ||
+        !isFeatureId(parsed.featureId) ||
+        typeof parsed.payloadKind !== 'string' ||
+        !finiteMetadata(parsed.sampleStepSeconds) ||
+        parsed.sampleStepSeconds <= 0 ||
+        !Number.isInteger(parsed.sampleCount) ||
+        (parsed.sampleCount as number) < 0 ||
+        !Array.isArray(parsed.dimensions) ||
+        !parsed.dimensions.every(value => Number.isInteger(value) && (value as number) > 0) ||
+        !Array.isArray(parsed.ranges)
     ) {
         throw new Error('Analysis cache header schema is invalid.');
     }
     if (
-        expected
-        && (
-            parsed.trackHash !== expected.trackHash
-            || parsed.configHash !== expected.configHash
-            || parsed.featureId !== expected.featureId
-        )
+        expected &&
+        (parsed.trackHash !== expected.trackHash ||
+            parsed.configHash !== expected.configHash ||
+            parsed.featureId !== expected.featureId)
     ) {
         throw new Error('Analysis cache identity does not match.');
     }
@@ -496,19 +446,16 @@ export const decodeAnalysisSeries = (
     let expectedOffset = 0;
     for (const raw of parsed.ranges) {
         if (
-            !isRecord(raw)
-            || typeof raw.name !== 'string'
-            || !['f32', 'u16', 'i16'].includes(raw.type as string)
-            || !Number.isInteger(raw.offset)
-            || raw.offset !== expectedOffset
-            || !Number.isInteger(raw.length)
-            || (raw.length as number) < 0
-            || !Number.isInteger(raw.byteLength)
-            || raw.byteLength
-                !== (raw.length as number)
-                * typeBytes(raw.type as TypedArrayName)
-            || (raw.offset as number) % typeBytes(raw.type as TypedArrayName)
-                !== 0
+            !isRecord(raw) ||
+            typeof raw.name !== 'string' ||
+            !['f32', 'u16', 'i16'].includes(raw.type as string) ||
+            !Number.isInteger(raw.offset) ||
+            raw.offset !== expectedOffset ||
+            !Number.isInteger(raw.length) ||
+            (raw.length as number) < 0 ||
+            !Number.isInteger(raw.byteLength) ||
+            raw.byteLength !== (raw.length as number) * typeBytes(raw.type as TypedArrayName) ||
+            (raw.offset as number) % typeBytes(raw.type as TypedArrayName) !== 0
         ) {
             throw new Error('Analysis cache byte range is invalid.');
         }
@@ -520,9 +467,7 @@ export const decodeAnalysisSeries = (
     if (expectedOffset !== data.byteLength) {
         throw new Error('Analysis cache contains missing or trailing data.');
     }
-    const byName = new Map(
-        ranges.map((range) => [range.name, readArray(data, range)]),
-    );
+    const byName = new Map(ranges.map(range => [range.name, readArray(data, range)]));
     const payload = decodePayload(parsed as unknown as CacheHeader, byName);
     const series: AnalysisSeries = {
         schemaVersion: 1,
@@ -562,19 +507,11 @@ const decodePayload = (
         case 'scalar-f32':
             return {
                 kind: 'scalar-f32',
-                values: requiredArray(
-                    arrays,
-                    'values',
-                    Float32Array,
-                ),
+                values: requiredArray(arrays, 'values', Float32Array),
             };
         case 'frequency-u16':
         case 'category-u16':
-            if (
-                !Number.isInteger(header.width)
-                || !finiteMetadata(header.scale)
-                || !finiteMetadata(header.offset)
-            ) {
+            if (!Number.isInteger(header.width) || !finiteMetadata(header.scale) || !finiteMetadata(header.offset)) {
                 throw new Error('Quantized cache metadata is invalid.');
             }
             return {
@@ -595,11 +532,7 @@ const decodePayload = (
                 scale: header.scale,
             };
         case 'loudness':
-            if (
-                header.bands !== 24
-                || !finiteMetadata(header.scale)
-                || !finiteMetadata(header.offset)
-            ) {
+            if (header.bands !== 24 || !finiteMetadata(header.scale) || !finiteMetadata(header.offset)) {
                 throw new Error('Loudness cache metadata is invalid.');
             }
             return {
@@ -611,19 +544,12 @@ const decodePayload = (
                 offset: header.offset,
             };
         case 'complex-derived':
-            if (
-                !Number.isInteger(header.bins)
-                || !finiteMetadata(header.magnitudeScale)
-            ) {
+            if (!Number.isInteger(header.bins) || !finiteMetadata(header.magnitudeScale)) {
                 throw new Error('Complex cache metadata is invalid.');
             }
             return {
                 kind: 'complex-derived',
-                magnitude: requiredArray(
-                    arrays,
-                    'magnitude',
-                    Uint16Array,
-                ),
+                magnitude: requiredArray(arrays, 'magnitude', Uint16Array),
                 phase: requiredArray(arrays, 'phase', Int16Array),
                 bins: header.bins as number,
                 magnitudeScale: header.magnitudeScale,
@@ -638,25 +564,32 @@ const dimensionWidth = (dimensions: readonly number[]): number =>
 
 export const validateSeriesShape = (series: AnalysisSeries): void => {
     if (
-        series.schemaVersion !== 1
-        || !isFeatureId(series.featureId)
-        || !Number.isFinite(series.sampleStepSeconds)
-        || series.sampleStepSeconds <= 0
-        || !Number.isInteger(series.sampleCount)
-        || series.sampleCount < 0
-        || series.dimensions.some((value) =>
-            !Number.isInteger(value) || value <= 0)
+        series.schemaVersion !== 1 ||
+        !isFeatureId(series.featureId) ||
+        !Number.isFinite(series.sampleStepSeconds) ||
+        series.sampleStepSeconds <= 0 ||
+        !Number.isInteger(series.sampleCount) ||
+        series.sampleCount < 0 ||
+        series.dimensions.some(value => !Number.isInteger(value) || value <= 0)
     ) {
         throw new Error('Analysis series metadata is invalid.');
     }
     const payload = series.payload;
-    if ((series.featureId === 'wallpaperEngineSpectrum') !== (payload.kind === 'stereo-spectrum-f32')) throw new Error('Stereo spectrum feature/payload mismatch.');
+    if ((series.featureId === 'wallpaperEngineSpectrum') !== (payload.kind === 'stereo-spectrum-f32'))
+        throw new Error('Stereo spectrum feature/payload mismatch.');
     switch (payload.kind) {
         case 'stereo-spectrum-f32':
-            if (payload.width !== 128 || series.dimensions.length !== 1 || series.dimensions[0] !== 128
-                || series.sampleStepSeconds !== 1 / 30 || series.sampleCount <= 0
-                || payload.values.length !== series.sampleCount * 128 || !(payload.values instanceof Float32Array)
-                || payload.values.some(value => !Number.isFinite(value) || value < 0)) throw new Error('Stereo spectrum payload is invalid.');
+            if (
+                payload.width !== 128 ||
+                series.dimensions.length !== 1 ||
+                series.dimensions[0] !== 128 ||
+                series.sampleStepSeconds !== 1 / 30 ||
+                series.sampleCount <= 0 ||
+                payload.values.length !== series.sampleCount * 128 ||
+                !(payload.values instanceof Float32Array) ||
+                payload.values.some(value => !Number.isFinite(value) || value < 0)
+            )
+                throw new Error('Stereo spectrum payload is invalid.');
             break;
         case 'scalar-f32':
             if (payload.values.length !== series.sampleCount) {
@@ -667,33 +600,32 @@ export const validateSeriesShape = (series: AnalysisSeries): void => {
         case 'frequency-u16':
         case 'category-u16':
             if (
-                payload.width !== dimensionWidth(series.dimensions)
-                || payload.values.length
-                    !== series.sampleCount * payload.width
-                || !Number.isFinite(payload.scale)
-                || payload.scale < 0
-                || !Number.isFinite(payload.offset)
+                payload.width !== dimensionWidth(series.dimensions) ||
+                payload.values.length !== series.sampleCount * payload.width ||
+                !Number.isFinite(payload.scale) ||
+                payload.scale < 0 ||
+                !Number.isFinite(payload.offset)
             ) {
                 throw new Error('Vector payload dimensions do not match.');
             }
             break;
         case 'waveform-envelope':
             if (
-                payload.min.length !== series.sampleCount
-                || payload.max.length !== series.sampleCount
-                || !Number.isFinite(payload.scale)
-                || payload.scale < 0
+                payload.min.length !== series.sampleCount ||
+                payload.max.length !== series.sampleCount ||
+                !Number.isFinite(payload.scale) ||
+                payload.scale < 0
             ) {
                 throw new Error('Waveform payload dimensions do not match.');
             }
             break;
         case 'loudness':
             if (
-                payload.total.length !== series.sampleCount
-                || payload.specific.length !== series.sampleCount * 24
-                || !Number.isFinite(payload.scale)
-                || payload.scale < 0
-                || !Number.isFinite(payload.offset)
+                payload.total.length !== series.sampleCount ||
+                payload.specific.length !== series.sampleCount * 24 ||
+                !Number.isFinite(payload.scale) ||
+                payload.scale < 0 ||
+                !Number.isFinite(payload.offset)
             ) {
                 throw new Error('Loudness payload dimensions do not match.');
             }
@@ -701,13 +633,11 @@ export const validateSeriesShape = (series: AnalysisSeries): void => {
             break;
         case 'complex-derived':
             if (
-                payload.bins !== dimensionWidth(series.dimensions) / 2
-                || payload.magnitude.length
-                    !== series.sampleCount * payload.bins
-                || payload.phase.length
-                    !== series.sampleCount * payload.bins
-                || !Number.isFinite(payload.magnitudeScale)
-                || payload.magnitudeScale < 0
+                payload.bins !== dimensionWidth(series.dimensions) / 2 ||
+                payload.magnitude.length !== series.sampleCount * payload.bins ||
+                payload.phase.length !== series.sampleCount * payload.bins ||
+                !Number.isFinite(payload.magnitudeScale) ||
+                payload.magnitudeScale < 0
             ) {
                 throw new Error('Complex payload dimensions do not match.');
             }

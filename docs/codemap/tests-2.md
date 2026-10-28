@@ -8,6 +8,7 @@
 
 | 文件 | 本地静态引用（最多显示 6 项） |
 | --- | --- |
+| [tests/e2e/visualizer-composition.spec.ts](../../tests/e2e/visualizer-composition.spec.ts) | [src/editor/projectCodec.ts](../../src/editor/projectCodec.ts)、[src/visualizer/compositionTypes.ts](../../src/visualizer/compositionTypes.ts)、[tests/support/file-picker.ts](../../tests/support/file-picker.ts)、[tests/support/project-actions.ts](../../tests/support/project-actions.ts) |
 | [tests/e2e/visualizer-controls.spec.ts](../../tests/e2e/visualizer-controls.spec.ts) | [tests/support/file-picker.ts](../../tests/support/file-picker.ts) |
 | [tests/e2e/visualizer-editor-markers.spec.ts](../../tests/e2e/visualizer-editor-markers.spec.ts) | [src/editor/projectCodec.ts](../../src/editor/projectCodec.ts)、[src/visualizer/compositionTypes.ts](../../src/visualizer/compositionTypes.ts)、[src/visualizer/resourceIdentity.ts](../../src/visualizer/resourceIdentity.ts)、[tests/support/file-picker.ts](../../tests/support/file-picker.ts)、[tests/support/project-actions.ts](../../tests/support/project-actions.ts)、[tests/visualizer/marker-input-fixture.ts](../../tests/visualizer/marker-input-fixture.ts) |
 | [tests/e2e/visualizer-element-list.spec.ts](../../tests/e2e/visualizer-element-list.spec.ts) | [tests/support/file-picker.ts](../../tests/support/file-picker.ts) |
@@ -107,4 +108,3 @@
 | [tests/scripts/run-e10-eval.mjs](../../tests/scripts/run-e10-eval.mjs) | — |
 | [tests/scripts/run-e2-eval.mjs](../../tests/scripts/run-e2-eval.mjs) | — |
 | [tests/scripts/run-e3-eval.mjs](../../tests/scripts/run-e3-eval.mjs) | — |
-| [tests/scripts/run-e4-eval.mjs](../../tests/scripts/run-e4-eval.mjs) | — |

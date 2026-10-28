@@ -18,14 +18,14 @@
 | 区域 | 文件数 | 入口 |
 | --- | --- | --- |
 | 音频播放与会话 | 10 | [模块地图](codemap/audio.md) |
-| 特征分析与 Worker | 39 | [模块地图](codemap/analysis.md) |
+| 特征分析与 Worker | 41 | [模块地图](codemap/analysis.md) |
 | Editor 领域与工程 | 42 | [模块地图](codemap/editor.md) |
 | FT 分离与处理 | 16 | [模块地图](codemap/processing.md) |
 | Visualizer、场景与录制 | 96 | [模块地图](codemap/visualizer.md) |
 | 页面、布局与组件 | 79 | [模块地图](codemap/ui.md) |
 | 应用入口、状态与共享模块 | 31 | [模块地图](codemap/shared.md) |
 | 仓库工具 | 13 | [模块地图](codemap/tooling.md) |
-| 验证 | 341 | [模块地图](codemap/tests.md) |
+| 验证 | 342 | [模块地图](codemap/tests.md) |
 
 ## 规范与资料入口
 

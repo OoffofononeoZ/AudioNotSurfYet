@@ -1,6 +1,6 @@
 import { yieldAnalysisTask as yieldTask } from './taskScheduler';
 import { analysisAggregationFactor, analysisFrameCount, cursorFrameIndex } from './frames';
-import { exactM10Value } from './meydaAdapter';
+import { exactM10Value, extractM10Frame, scalarMeydaValue, vectorMeydaValue } from './meydaAdapter';
 import { aggregateScalars, aggregateVectors, quantizeToUint16 } from './compactCodec';
 import { WallpaperBlockTransform, WallpaperSmoothing, wallpaperFrameIndex } from './wallpaperSpectrum';
 import { StemPcmReader } from './stemPcmReader';
@@ -56,6 +56,9 @@ async function meydaSeries(
     const amplitude = ids.includes('amplitudeSpectrum') ? new Float32Array(count * 512) : null;
     const minimum = new Float32Array(count),
         maximum = new Float32Array(count);
+    const features = ids.filter(id => id !== 'wallpaperEngineSpectrum') as (
+        'energy' | 'amplitudeSpectrum' | 'buffer'
+    )[];
     for (let bucket = 0; bucket < count; bucket++) {
         reader.check();
         const scalars: number[] = [],
@@ -64,10 +67,11 @@ async function meydaSeries(
             high = -Infinity;
         for (let index = first + bucket * factor; index < Math.min(last, first + (bucket + 1) * factor); index++) {
             const frame = await reader.mono(index * hopSize, frameSize);
-            if (energy) scalars.push(exactM10Value('energy', frame, source.config) as number);
-            if (amplitude) vectors.push(exactM10Value('amplitudeSpectrum', frame, source.config) as number[]);
+            const extracted = extractM10Frame(features, frame, source.config).values;
+            if (energy) scalars.push(scalarMeydaValue(extracted, 'energy'));
+            if (amplitude) vectors.push(vectorMeydaValue(extracted, 'amplitudeSpectrum', 512));
             if (ids.includes('buffer'))
-                for (const value of exactM10Value('buffer', frame, source.config) as number[]) {
+                for (const value of vectorMeydaValue(extracted, 'buffer', 1024)) {
                     low = Math.min(low, value);
                     high = Math.max(high, value);
                 }
