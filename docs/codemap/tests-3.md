@@ -8,6 +8,7 @@
 
 | 文件 | 本地静态引用（最多显示 6 项） |
 | --- | --- |
+| [tests/scripts/run-e2-eval.mjs](../../tests/scripts/run-e2-eval.mjs) | — |
 | [tests/scripts/run-e3-eval.mjs](../../tests/scripts/run-e3-eval.mjs) | — |
 | [tests/scripts/run-e4-eval.mjs](../../tests/scripts/run-e4-eval.mjs) | — |
 | [tests/scripts/run-e5-eval.mjs](../../tests/scripts/run-e5-eval.mjs) | — |
@@ -107,4 +108,3 @@
 | [tests/visualizer/algorithm-codec.test.ts](../../tests/visualizer/algorithm-codec.test.ts) | [src/visualizer/algorithmCodec.ts](../../src/visualizer/algorithmCodec.ts)、[src/visualizer/resourceIdentity.ts](../../src/visualizer/resourceIdentity.ts) |
 | [tests/visualizer/algorithm-editing.test.ts](../../tests/visualizer/algorithm-editing.test.ts) | [src/visualizer/algorithmTypes.ts](../../src/visualizer/algorithmTypes.ts)、[src/visualizer/compositionCodec.ts](../../src/visualizer/compositionCodec.ts)、[src/visualizer/compositionEffects.ts](../../src/visualizer/compositionEffects.ts)、[src/visualizer/compositionModel.ts](../../src/visualizer/compositionModel.ts)、[src/visualizer/compositionScene.ts](../../src/visualizer/compositionScene.ts)、[src/visualizer/compositionTypes.ts](../../src/visualizer/compositionTypes.ts)、另 5 项，按需核对源码 |
 | [tests/visualizer/algorithm-frame-revision.test.ts](../../tests/visualizer/algorithm-frame-revision.test.ts) | [src/visualizer/algorithmFrameRevision.ts](../../src/visualizer/algorithmFrameRevision.ts)、[src/visualizer/algorithmTypes.ts](../../src/visualizer/algorithmTypes.ts)、[src/visualizer/compositionTypes.ts](../../src/visualizer/compositionTypes.ts) |
-| [tests/visualizer/algorithm-parity.test.ts](../../tests/visualizer/algorithm-parity.test.ts) | [src/visualizer/algorithmTypes.ts](../../src/visualizer/algorithmTypes.ts)、[src/visualizer/elementRegistry.ts](../../src/visualizer/elementRegistry.ts)、[tests/visualizer/algorithm-runtime-fixture.ts](../../tests/visualizer/algorithm-runtime-fixture.ts) |

@@ -4,8 +4,8 @@ import type { ReplaceCurrentAnalysisCacheInput, SessionRepositoryPort } from '..
 import type { useAudioSessionStore } from '../stores/audioSessionStore';
 import type { DecodedAudioDescriptor, PlaybackSnapshot } from '../types/audio';
 import type { StoredAnalysisCache } from '../types/session';
-import { decodeAnalysisSeries, encodeAnalysisSeries } from './compactCodec';
-import { createAnalysisCacheKey, createAnalysisConfig } from './config';
+import { AnalysisFeatureCache } from './featureCache';
+import { createAnalysisConfig } from './config';
 import { copyDecodedAudioToMono, type DecodedAudioCopyPort, PcmCopyError } from './pcm';
 import { AnalysisPcmSource } from './pcmSource';
 import { wallpaperFrameIndex } from './wallpaperSpectrum';
@@ -151,7 +151,8 @@ export class AnalysisCoordinator {
     } | null = null;
     private readonly pcmSource = new AnalysisPcmSource();
     private worker: AnalysisWorkerPort | null = null;
-    private restoredCache: StoredAnalysisCache | null = null;
+    private readonly featureCache = new AnalysisFeatureCache();
+    private cachePersistence: { revision: number; promise: Promise<'stored' | 'stale'> } | null = null;
     private activeJob: {
         jobId: string;
         generation: number;
@@ -224,7 +225,7 @@ export class AnalysisCoordinator {
 
     setRestoredCache(cache: StoredAnalysisCache | undefined): void {
         if (this.disposed) return;
-        this.restoredCache = cache ?? null;
+        this.featureCache.restore(cache);
     }
 
     acquireConsumer(consumer: AnalysisConsumer): AnalysisConsumerLease {
@@ -465,6 +466,7 @@ export class AnalysisCoordinator {
         this.pcmSource.clear();
         this.worker?.terminate();
         this.worker = null;
+        this.featureCache.clear();
         this.resolveAllCursorRequests();
         this.resolveTempoRequest();
         this.series.clear();
@@ -687,33 +689,13 @@ export class AnalysisCoordinator {
         configHash: string,
         featureIds: readonly FeatureId[],
     ): FeatureId[] {
-        const cache = this.restoredCache;
-        if (
-            !cache ||
-            cache.manifest.trackId !== trackId ||
-            cache.manifest.trackHash !== trackHash ||
-            cache.manifest.configHash !== configHash
-        ) {
-            return [];
-        }
-        const payloads = new Map(cache.payloads.map(entry => [entry.cacheKey, entry.payload]));
+        this.featureCache.select({ trackId, trackHash, configHash }, featureIds);
         const hits: FeatureId[] = [];
         for (const featureId of featureIds) {
-            const cacheKey = createAnalysisCacheKey(trackHash, configHash, featureId);
-            const payload = payloads.get(cacheKey);
-            if (!payload) continue;
-            try {
-                const series = decodeAnalysisSeries(payload, {
-                    trackHash,
-                    configHash,
-                    featureId,
-                });
-                this.series.set(featureId, series);
-                hits.push(featureId);
-            } catch {
-                // Corrupt cache entries are treated as misses and replaced
-                // atomically once the current analysis result is ready.
-            }
+            const series = this.featureCache.get(featureId);
+            if (!series) continue;
+            this.series.set(featureId, series);
+            hits.push(featureId);
         }
         return hits;
     }
@@ -828,6 +810,7 @@ export class AnalysisCoordinator {
         }
         for (const series of message.series) {
             this.series.set(series.featureId, series);
+            this.featureCache.put(series);
         }
         this.publish({
             ...this.snapshot,
@@ -882,56 +865,40 @@ export class AnalysisCoordinator {
             this.store.setAnalysisCacheManifest(null);
             return;
         }
-        const payloads: ReplaceCurrentAnalysisCacheInput['payloads'] = [];
-        for (const featureId of this.snapshot.activeFeatureIds) {
-            const series = this.series.get(featureId);
-            if (!series) continue;
-            payloads.push({
-                featureId,
-                cacheKey: createAnalysisCacheKey(trackHash, configHash, featureId),
-                payload: encodeAnalysisSeries(series),
-            });
-        }
+        if (this.featureCache.revision === this.featureCache.persistedRevision) return;
+        const cache = this.featureCache.stored();
+        if (!cache) return;
+        const revision = this.featureCache.revision;
+        const payloads: ReplaceCurrentAnalysisCacheInput['payloads'] = cache.payloads.map(entry => ({
+            ...entry,
+            featureId: cache.manifest.featureIds[cache.manifest.cacheKeys.indexOf(entry.cacheKey)]!,
+        }));
         try {
-            const result = await this.repository.replaceCurrentAnalysisCache({
-                trackId,
-                trackHash,
-                configHash,
-                payloads,
-            });
+            if (this.cachePersistence?.revision !== revision) {
+                const promise = this.repository.replaceCurrentAnalysisCache({
+                    trackId,
+                    trackHash,
+                    configHash,
+                    payloads,
+                });
+                const pending = { revision, promise };
+                this.cachePersistence = pending;
+                void promise
+                    .finally(() => {
+                        if (this.cachePersistence === pending) this.cachePersistence = null;
+                    })
+                    .catch(() => {});
+            }
+            const result = await this.cachePersistence!.promise;
+            if (result !== 'stale' && this.featureCache.matches(cache.manifest))
+                this.featureCache.persistedRevision = Math.max(this.featureCache.persistedRevision, revision);
             if (!this.isCurrentGeneration(generation)) return;
             if (result === 'stale') {
-                this.publish({
-                    ...this.snapshot,
-                    staleMessageCount: this.snapshot.staleMessageCount + 1,
-                });
+                this.publish({ ...this.snapshot, staleMessageCount: this.snapshot.staleMessageCount + 1 });
                 return;
             }
-            const manifest =
-                payloads.length === 0
-                    ? null
-                    : {
-                          trackId,
-                          trackHash,
-                          configHash,
-                          featureIds: payloads.map(entry => entry.featureId),
-                          cacheKeys: payloads.map(entry => entry.cacheKey),
-                      };
-            this.store.setAnalysisCacheManifest(manifest);
-            this.restoredCache =
-                payloads.length === 0
-                    ? null
-                    : {
-                          manifest: manifest!,
-                          payloads: payloads.map(entry => ({
-                              cacheKey: entry.cacheKey,
-                              payload: entry.payload,
-                          })),
-                      };
-            this.publish({
-                ...this.snapshot,
-                cacheState: payloads.length === 0 ? 'idle' : this.snapshot.cacheState === 'hit' ? 'hit' : 'persisted',
-            });
+            this.store.setAnalysisCacheManifest(cache.manifest);
+            this.publish({ ...this.snapshot, cacheState: this.snapshot.cacheState === 'hit' ? 'hit' : 'persisted' });
         } catch {
             if (!this.isCurrentGeneration(generation)) return;
             this.publish({
@@ -945,6 +912,7 @@ export class AnalysisCoordinator {
         if (this.disposed) return;
         if (playback.state === 'empty' || playback.state === 'loading' || playback.state === 'error') {
             this.lastDescriptorRevision = null;
+            this.featureCache.clear();
             this.pcmSource.clear();
             this.worker?.postMessage({ kind: 'release-source' });
             this.cancelActiveJob('cancelled');

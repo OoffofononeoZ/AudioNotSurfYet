@@ -232,6 +232,23 @@ beforeEach(() => {
 });
 
 describe('AnalysisCoordinator integration', () => {
+    test('retains inactive cached features within four slots without re-analysis or duplicate persistence', async () => {
+        const harness = setup();
+        await harness.coordinator.setActiveFeatures(['rms', 'energy']);
+        await vi.waitFor(() => expect(harness.coordinator.getSnapshot().cacheState).toBe('persisted'));
+        const series = harness.coordinator.getSeries('energy');
+        const writes = harness.repository.cacheInputs.length;
+        await harness.coordinator.setActiveFeatures(['buffer']);
+        await vi.waitFor(() => expect(harness.coordinator.getSnapshot().cacheState).toBe('persisted'));
+        expect(harness.repository.cacheInputs.at(-1)?.payloads).toHaveLength(3);
+        await harness.coordinator.setActiveFeatures([]);
+        await harness.coordinator.setActiveFeatures(['energy']);
+        await vi.waitFor(() => expect(harness.coordinator.getSnapshot().state).toBe('ready'));
+        expect(harness.worker.analyzeRequests.at(-1)?.featureIds).toEqual([]);
+        expect(harness.coordinator.getSeries('energy')).toBe(series);
+        expect(harness.repository.cacheInputs).toHaveLength(writes + 1);
+        await harness.coordinator.dispose();
+    });
     test('reuses one prepared source across feature changes and consumer leases, and releases it on new audio', async () => {
         const harness = setup();
         const first = harness.coordinator.acquireConsumer('editor');

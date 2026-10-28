@@ -8,6 +8,7 @@
 
 | 文件 | 本地静态引用（最多显示 6 项） |
 | --- | --- |
+| [tests/analysis/feature-cache.test.ts](../../tests/analysis/feature-cache.test.ts) | [src/analysis/featureCache.ts](../../src/analysis/featureCache.ts)、[src/analysis/types.ts](../../src/analysis/types.ts) |
 | [tests/analysis/generate-e2-tempo-golden.ts](../../tests/analysis/generate-e2-tempo-golden.ts) | [tests/support/e2-tempo-fixture.ts](../../tests/support/e2-tempo-fixture.ts) |
 | [tests/analysis/generate-e3-point-golden.ts](../../tests/analysis/generate-e3-point-golden.ts) | [tests/support/e3-point-fixture.ts](../../tests/support/e3-point-fixture.ts) |
 | [tests/analysis/generate-e4-overlay-golden.ts](../../tests/analysis/generate-e4-overlay-golden.ts) | [tests/support/e4-overlay-fixture.ts](../../tests/support/e4-overlay-fixture.ts) |
@@ -107,4 +108,3 @@
 | [tests/e2e/visualizer-analysis-input.spec.ts](../../tests/e2e/visualizer-analysis-input.spec.ts) | [src/visualizer/visualizerSessionController.ts](../../src/visualizer/visualizerSessionController.ts)、[tests/support/file-picker.ts](../../tests/support/file-picker.ts)、[tests/support/visualizer-assets.mjs](../../tests/support/visualizer-assets.mjs) |
 | [tests/e2e/visualizer-bottom-status.spec.ts](../../tests/e2e/visualizer-bottom-status.spec.ts) | [src/visualizer/compositionTypes.ts](../../src/visualizer/compositionTypes.ts)、[src/visualizer/exportTypes.ts](../../src/visualizer/exportTypes.ts)、[src/visualizer/visualizerSessionController.ts](../../src/visualizer/visualizerSessionController.ts)、[tests/support/file-picker.ts](../../tests/support/file-picker.ts) |
 | [tests/e2e/visualizer-catalog.spec.ts](../../tests/e2e/visualizer-catalog.spec.ts) | [tests/support/file-picker.ts](../../tests/support/file-picker.ts)、[tests/support/resource-directory.ts](../../tests/support/resource-directory.ts)、[tests/support/visualizer-assets.mjs](../../tests/support/visualizer-assets.mjs) |
-| [tests/e2e/visualizer-circular-particles.spec.ts](../../tests/e2e/visualizer-circular-particles.spec.ts) | [src/visualizer/compositionTypes.ts](../../src/visualizer/compositionTypes.ts)、[tests/support/file-picker.ts](../../tests/support/file-picker.ts)、[tests/support/project-actions.ts](../../tests/support/project-actions.ts)、[tests/support/visualizer-assets.mjs](../../tests/support/visualizer-assets.mjs) |
