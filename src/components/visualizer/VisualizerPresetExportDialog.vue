@@ -54,7 +54,7 @@ import type { VisualizerProjectV6 } from '../../visualizer/compositionTypes';
 import { inspectRealtimeProject } from '../../visualizer/realtimeCapabilities';
 import { createRealtimeStyle } from '../../visualizer/realtimeStyle';
 import { validateRealtimeCandidate } from '../../visualizer/validateRealtimeCandidate';
-import { preparePresetExport } from '../../visualizer/presetExport';
+import { createPresetExportValidationProject, preparePresetExport } from '../../visualizer/presetExport';
 import { savePresetDirectory, PresetDirectoryCleanupError } from '../../visualizer/presetDirectoryWriter';
 import { useResourceLibrary } from '../../visualizer/useResourceLibrary';
 const props = defineProps<{
@@ -124,14 +124,15 @@ watch(
         issues.value = [];
         if (!props.project || props.locked) return;
         source.value = structuredClone(props.project);
-        const capability = inspectRealtimeProject(source.value);
+        const validationProject = createPresetExportValidationProject(source.value);
+        const capability = inspectRealtimeProject(validationProject);
         issues.value = capability.browserIssues;
         if (!capability.browser) return;
         const owner = new AbortController();
         task = owner;
         preparing.value = true;
         try {
-            const style = createRealtimeStyle(source.value, title.value);
+            const style = createRealtimeStyle(validationProject, title.value);
             const [blob] = await Promise.all([
                 props.captureCover(owner.signal),
                 validateRealtimeCandidate(style, owner.signal),

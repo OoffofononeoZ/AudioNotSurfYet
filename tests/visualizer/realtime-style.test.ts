@@ -38,6 +38,19 @@ test('styles are independent snapshots without song, timing, editor or catalog d
     invalid.elements[0]!.resource.hash = 'f'.repeat(64);
     expect(() => validateRealtimeStyle(invalid)).toThrow();
 });
+
+test('realtime styles still exclude hidden content and its effect references', () => {
+    const p = appendStandaloneElements(
+        createComposition(track),
+        ['solid', 'starfield', 'blur'].map((id, i) => elementRegistry.create(id, 10, i)),
+    );
+    p.elements[1]!.enabled = false;
+    p.elements[2]!.targets = { kind: 'elements', ids: [p.elements[1]!.id] };
+    const s = createRealtimeStyle(p, '可见内容');
+    expect(s.elements.map(e => e.resource.id)).toEqual(['solid', 'blur']);
+    expect(s.elements[1]!.targets).toEqual({ kind: 'elements', ids: [] });
+    expect(s.resources.elements.some(e => e.id === 'starfield')).toBe(false);
+});
 test('local snapshots survive repository reopening and cannot overwrite an existing address', async () => {
     const name = 'realtime-' + crypto.randomUUID(),
         s = style(null);

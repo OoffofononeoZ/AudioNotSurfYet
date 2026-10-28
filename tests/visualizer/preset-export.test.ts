@@ -19,9 +19,10 @@ function project() {
     );
 }
 
-test('exports active standalone and grouped leaves with exact values, seeds and effect references', () => {
+test('exports visible and hidden standalone and grouped leaves with exact values, seeds and effect references', () => {
     const p = project();
     p.elements[1]!.seed = 123;
+    p.elements[1]!.enabled = false;
     p.elements[2]!.targets = { kind: 'elements', ids: [p.elements[1]!.id] };
     const grouped = instantiatePreset('geometric-0.6', 10, p.elements.length);
     p.elements.push(...grouped.elements);
@@ -34,7 +35,8 @@ test('exports active standalone and grouped leaves with exact values, seeds and 
     const result = preparePresetExport(p, details, cover),
         preset = result.package.presets[0]!;
     expect(p).toEqual(before);
-    expect(preset.elements).toHaveLength(p.elements.length - 1);
+    expect(preset.elements).toHaveLength(p.elements.length);
+    expect(preset.elements.map(e => e.enabled)).toEqual(p.elements.map(e => e.enabled));
     expect(preset.elements[1]!.seed).toBe(123);
     expect(preset.elements[2]!.targets).toEqual({ kind: 'elements', ids: ['element-1'] });
     expect(preset.elements[1]!.bindings).toEqual(p.elements[1]!.bindings);
@@ -54,15 +56,28 @@ test('exports active standalone and grouped leaves with exact values, seeds and 
         ...p,
         items: p.items.map(item => (item.id === grouped.group.id ? { ...grouped.group, enabled: false } : item)),
     };
-    expect(preparePresetExport(hidden, details, cover).package.presets[0]!.elements).toHaveLength(3);
+    const hiddenExport = preparePresetExport(hidden, details, cover).package.presets[0]!;
+    expect(hiddenExport.elements).toHaveLength(p.elements.length);
+    expect(hiddenExport.elements.slice(3).every(e => !e.enabled)).toBe(true);
 });
 
-test('uses realtime browser eligibility and rejects song-only or empty content', () => {
+test.each([true, false])('applies normal eligibility to content with enabled=%s', enabled => {
     const p = project();
+    p.elements[0]!.enabled = enabled;
     p.elements[0]!.timing = { kind: 'manual', startSeconds: 1, endSeconds: 10 };
     expect(() => preparePresetExport(p, details, cover)).toThrow(/局部分镜/);
+    p.elements[0]!.timing = { kind: 'manual', startSeconds: 0, endSeconds: 10 };
+    p.elements[0]!.bindings[0]!.source = { kind: 'unbound' };
+    expect(() => preparePresetExport(p, details, cover)).toThrow(/输入未配置/);
+});
+
+test('allows all-hidden content, but rejects empty content and invalid export details', () => {
+    const p = project();
     p.elements.forEach(e => (e.enabled = false));
-    expect(() => preparePresetExport(p, details, cover)).toThrow(/没有启用/);
+    const before = structuredClone(p);
+    expect(preparePresetExport(p, details, cover).package.presets[0]!.elements.every(e => !e.enabled)).toBe(true);
+    expect(p).toEqual(before);
+    expect(() => preparePresetExport(createComposition(track), details, cover)).toThrow(/视觉元素/);
     expect(() => preparePresetExport(project(), { ...details, title: ' ' }, cover)).toThrow(/名称/);
     expect(() => preparePresetExport(project(), details, new Blob())).toThrow(/封面/);
 });
@@ -84,6 +99,7 @@ test('media and configured seeds survive V2 validation and adding to a different
         intervalSeconds: 7,
         crossfadeSeconds: 0.5,
     };
+    p.elements[0]!.enabled = false;
     const pack = preparePresetExport(p, details, cover).package;
     const preset = validateResourcePackage(pack, p.resources).presets[0]!;
     expect(preset.mediaAssets).toEqual([asset]);
@@ -97,6 +113,7 @@ test('media and configured seeds survive V2 validation and adding to a different
         const added = instantiatePreset(preset, 25);
         expect(added.elements[0]!.timing).toEqual({ kind: 'manual', startSeconds: 0, endSeconds: 25 });
         expect(added.elements[0]!.mediaBindings).toEqual(p.elements[0]!.mediaBindings);
+        expect(added.elements[0]!.enabled).toBe(false);
         expect(added.elements[1]!.seed).toBe(77);
         expect(added.mediaAssets).toEqual([asset]);
         const old = structuredClone(preset);
@@ -232,7 +249,10 @@ test('saved preset is visible through the normal directory reader and existing e
     await expect(savePresetDirectory(root.handle(), prepared, signal)).rejects.toThrow(/已存在/);
 });
 test('permission refusal, missing or mismatched dependencies do not create a preset', async () => {
-    const prepared = preparePresetExport(project(), details, cover);
+    const p = project();
+    p.elements[1]!.enabled = false;
+    const prepared = preparePresetExport(p, details, cover);
+    expect(prepared.info.dependencies.some(e => e.id === 'starfield')).toBe(true);
     for (const kind of ['permission', 'missing', 'mismatch']) {
         const root = await target();
         if (kind === 'permission') root.requestPermission.mockResolvedValue('denied');

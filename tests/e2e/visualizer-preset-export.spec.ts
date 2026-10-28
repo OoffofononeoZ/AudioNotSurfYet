@@ -4,6 +4,7 @@ import path from 'node:path';
 import { createHash } from 'node:crypto';
 import { chooseFiles, installFilePickerStub, queuePickerData, savedPickerEntries } from '../support/file-picker';
 import type { VisualizerProjectV6 } from '../../src/visualizer/compositionTypes';
+import { elementRegistry } from '../../src/visualizer/elementRegistry';
 const audio = path.resolve('tests/fixtures/audio/visualizer-v5-avsync-v1.wav');
 test.use({ viewport: { width: 1920, height: 1080 } });
 async function open(page: Page) {
@@ -35,15 +36,19 @@ async function add(page: Page, id: string, preset = false) {
     await expect(page.getByRole('dialog', { name: '资源商城', exact: true })).not.toBeVisible();
 }
 async function newFolders(page: Page) {
-    return page.evaluate(async () => {
-        let dir = await (await navigator.storage.getDirectory()).getDirectoryHandle('visualizer-library-fixture');
-        for (const name of ['assets', 'presets']) dir = await dir.getDirectoryHandle(name);
-        const ids: string[] = [];
-        for await (const [name] of (dir as any).entries()) if (name.startsWith('user-preset-')) ids.push(name);
-        return ids;
-    });
+    return page.evaluate(
+        async existing => {
+            let dir = await (await navigator.storage.getDirectory()).getDirectoryHandle('visualizer-library-fixture');
+            for (const name of ['assets', 'presets']) dir = await dir.getDirectoryHandle(name);
+            const ids: string[] = [];
+            for await (const [name] of (dir as any).entries())
+                if (name.startsWith('user-preset-') && !existing.includes(name)) ids.push(name);
+            return ids;
+        },
+        elementRegistry.presets.map(p => p.id),
+    );
 }
-test('exports active grouped and standalone configurations, refreshes the catalog and restores media and seeds', async ({
+test('exports visible and hidden grouped and standalone configurations, refreshes the catalog and restores media and seeds', async ({
     page,
 }, info) => {
     const errors: string[] = [];
@@ -100,7 +105,7 @@ test('exports active grouped and standalone configurations, refreshes the catalo
     await page.getByTestId('add-visualizer-element').click();
     await page.getByRole('button', { name: '重新加载', exact: true }).click();
     await page.getByRole('button', { name: '预设', exact: true }).click();
-    const card = page.locator('[data-preset-id^="user-preset-"]');
+    const card = page.locator('[data-preset-id^="user-preset-"]').filter({ hasText: '跨歌曲预设' });
     await expect(card).toContainText('跨歌曲预设');
     await expect(card).toContainText('保留实际配置');
     await expect(card).toContainText('自定义作者');
@@ -113,7 +118,8 @@ test('exports active grouped and standalone configurations, refreshes the catalo
     expect(added.kind).toBe('preset');
     if (added.kind !== 'preset') throw Error('Expected preset');
     const leaves = p.elements.filter(e => added.children.includes(e.id));
-    expect(leaves).toHaveLength(before.elements.length - 1);
+    expect(leaves).toHaveLength(before.elements.length);
+    expect(leaves.map(e => e.enabled)).toEqual(before.elements.map(e => e.enabled));
     expect(leaves.find(e => e.resource.id === 'starfield')!.seed).toBe(321);
     expect(leaves.find(e => e.resource.id === 'circular-background')!.mediaBindings).toEqual(background.mediaBindings);
     expect(p.mediaAssets).toHaveLength(1);
@@ -131,6 +137,14 @@ test('realtime ineligibility and denied write permission leave the resource libr
     p.elements[0]!.enabled = false;
     await imported(page, p);
     await add(page, 'solid');
+    await page.getByTestId('export-visualizer-preset').click();
+    await expect(dialog.getByRole('alert')).toContainText('需要历史输入');
+    await expect(page.getByTestId('save-visualizer-preset')).toBeDisabled();
+    await dialog.getByRole('button', { name: '关闭导出预设' }).click();
+    await page
+        .locator(`.viz-element-row[data-element-id="${p.elements[0]!.id}"]`)
+        .getByRole('button', { name: '删除元素', exact: true })
+        .click();
     await page.evaluate(() =>
         Object.defineProperty(FileSystemHandle.prototype, 'requestPermission', {
             configurable: true,
@@ -147,4 +161,80 @@ test('realtime ineligibility and denied write permission leave the resource libr
     await dialog.getByRole('button', { name: '关闭导出预设' }).click();
     await expect(dialog).not.toBeVisible();
     expect(await newFolders(page)).toEqual([]);
+});
+
+test('Circular export retains all seven elements, hidden settings and re-enable behavior', async ({ page }, info) => {
+    const errors: string[] = [];
+    page.on('pageerror', e => errors.push(e.message));
+    await open(page);
+    await add(page, 'circular-visualizer-893418273', true);
+    await page.getByRole('button', { name: '展开Circular Visualizer', exact: true }).click();
+    const original = await exported(page);
+    const particles = original.elements.find(e => e.resource.id === 'circular-particles')!;
+    const depth = original.elements.find(e => e.resource.id === 'circular-depth')!;
+    await page
+        .locator(`.viz-element-row[data-element-id="${particles.id}"]`)
+        .getByRole('button', { name: '隐藏元素', exact: true })
+        .click();
+    await page
+        .locator(`.viz-element-row[data-element-id="${depth.id}"]`)
+        .getByRole('button', { name: '显示元素', exact: true })
+        .click();
+    const before = await exported(page);
+    expect(before.elements).toHaveLength(7);
+    await page.getByTestId('export-visualizer-preset').click();
+    const dialog = page.getByRole('dialog', { name: '导出预设', exact: true });
+    await expect(page.getByTestId('save-visualizer-preset')).toBeEnabled();
+    await dialog.getByLabel('预设名称', { exact: true }).fill('保留隐藏粒子');
+    await page.getByTestId('save-visualizer-preset').click();
+    await expect(dialog.getByRole('status')).toContainText('请刷新资源商城后添加');
+    await dialog.getByRole('button', { name: '关闭导出预设' }).click();
+    expect(await exported(page)).toEqual(before);
+    await page.getByTestId('add-visualizer-element').click();
+    await page.getByRole('button', { name: '重新加载', exact: true }).click();
+    await page.getByRole('button', { name: '预设', exact: true }).click();
+    await page.locator('[data-preset-id^="user-preset-"]').filter({ hasText: '保留隐藏粒子' }).click();
+    let p = await exported(page);
+    const group = p.items.at(-1)!;
+    if (group.kind !== 'preset') throw Error('Expected preset');
+    const leaves = p.elements.filter(e => group.children.includes(e.id));
+    expect(leaves).toHaveLength(7);
+    for (const [index, leaf] of leaves.entries()) {
+        const source = before.elements[index]!;
+        expect(leaf).toMatchObject({
+            resource: source.resource,
+            name: source.name,
+            enabled: source.enabled,
+            bindings: source.bindings,
+            ...(source.seed === undefined ? {} : { seed: source.seed }),
+            ...(source.mediaBindings ? { mediaBindings: source.mediaBindings } : {}),
+        });
+    }
+    const hidden = leaves.find(e => e.resource.id === 'circular-particles')!;
+    expect(hidden.enabled).toBe(false);
+    expect(leaves.find(e => e.resource.id === 'circular-foreground')!.enabled).toBe(false);
+    await page.getByRole('button', { name: '展开保留隐藏粒子', exact: true }).click();
+    const row = page.locator(`.viz-element-row[data-element-id="${hidden.id}"]`);
+    await row.getByRole('button', { name: '显示元素', exact: true }).click();
+    p = await exported(page);
+    expect(p.elements.find(e => e.id === hidden.id)!.enabled).toBe(true);
+    await expect(page.getByTestId('visualizer-preview-frame')).toHaveAttribute('data-scene-status', 'ready');
+    await page.screenshot({ path: `artifacts/visualizer-composition/preset-hidden-restored-${info.project.name}.png` });
+    expect(errors).toEqual([]);
+});
+
+test('all-hidden content can be exported without changing the preview or original project', async ({ page }) => {
+    await open(page);
+    await add(page, 'solid');
+    const p = await exported(page);
+    p.elements[0]!.enabled = false;
+    await imported(page, p);
+    const before = await exported(page);
+    await page.getByTestId('export-visualizer-preset').click();
+    const dialog = page.getByRole('dialog', { name: '导出预设', exact: true });
+    await expect(page.getByTestId('save-visualizer-preset')).toBeEnabled();
+    await page.getByTestId('save-visualizer-preset').click();
+    await expect(dialog.getByRole('status')).toContainText('请刷新资源商城后添加');
+    await dialog.getByRole('button', { name: '关闭导出预设' }).click();
+    expect(await exported(page)).toEqual(before);
 });

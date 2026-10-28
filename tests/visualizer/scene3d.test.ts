@@ -183,3 +183,35 @@ test('moving a world member preserves transforms and independent cameras; export
         elementRegistry.replace(previous);
     }
 });
+
+test('preset export preserves hidden scene ownership, child visibility, cameras and effect references', () => {
+    let p = scene3dFixture();
+    const scene = sceneGroups(p)[0]!;
+    scene.enabled = false;
+    p.elements[0]!.enabled = false;
+    const effect = elementRegistry.create('blur', 20, 2);
+    effect.targets = { kind: 'scenes3d', ids: [scene.id] };
+    p = appendStandaloneElements(p, [effect]);
+    const before = structuredClone(p);
+    const preset = preparePresetExport(
+        p,
+        { title: '隐藏场景', description: '', creator: '' },
+        new Blob(['png'], { type: 'image/png' }),
+    ).package.presets[0]!;
+    expect(p).toEqual(before);
+    expect(preset.elements.map(e => e.enabled)).toEqual([false, true, true]);
+    expect(preset.scenes3d![0]).toMatchObject({
+        enabled: false,
+        children: ['element-0', 'element-1'],
+        camera: scene.camera,
+    });
+    expect(preset.elements[2]!.targets).toEqual({ kind: 'scenes3d', ids: ['scene-0'] });
+    scene.endSeconds = 10;
+    expect(() =>
+        preparePresetExport(
+            p,
+            { title: '隐藏场景', description: '', creator: '' },
+            new Blob(['png'], { type: 'image/png' }),
+        ),
+    ).toThrow(/三维场景需要覆盖完整歌曲/);
+});

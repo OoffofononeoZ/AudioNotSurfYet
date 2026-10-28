@@ -5,6 +5,7 @@ import { createRealtimeStyle } from './realtimeStyle';
 import { validateResourcePackage } from './resourceCodec';
 import { resourceHash, resourceRef } from './resourceIdentity';
 import { orderedElements } from './compositionModel';
+import { sceneGroups } from './scene3dModel';
 
 export interface PresetExportDetails {
     title: string;
@@ -17,7 +18,26 @@ export interface PreparedPresetExport {
     cover: Blob;
 }
 
-/** Converts the same effective content as realtime styles, without changing the song project. */
+/** Visibility never exempts saved content from the usual realtime export validation. */
+export function createPresetExportValidationProject(project: VisualizerProjectV6): VisualizerProjectV6 {
+    return {
+        ...project,
+        elements: project.elements.map(e => ({ ...e, enabled: true })),
+        items: project.items.map(item =>
+            item.kind === 'preset'
+                ? {
+                      ...item,
+                      enabled: true,
+                      ...(item.scenes3d ? { scenes3d: item.scenes3d.map(s => ({ ...s, enabled: true })) } : {}),
+                  }
+                : item.kind === 'scene3d'
+                  ? { ...item, enabled: true }
+                  : item,
+        ),
+    };
+}
+
+/** Saves all content while preserving visibility separately from the validation snapshot. */
 export function preparePresetExport(
     project: VisualizerProjectV6,
     details: PresetExportDetails,
@@ -29,11 +49,16 @@ export function preparePresetExport(
         cover.type
     ];
     if (!extension || !cover.size) throw Error('请选择有效的 PNG、JPEG 或 WebP 封面。');
-    const style = createRealtimeStyle(project, title);
+    const style = createRealtimeStyle(createPresetExportValidationProject(project), title);
+    const hiddenByPreset = new Set(
+        project.items.flatMap(item => (item.kind === 'preset' && !item.enabled ? item.children : [])),
+    );
+    const visibility = new Map(project.elements.map(e => [e.id, e.enabled && !hiddenByPreset.has(e.id)]));
+    const scenes = new Map(sceneGroups(project).map(s => [s.id, s]));
     const elements = orderedElements(
         style.elements.map(e => ({
             ...e,
-            enabled: true,
+            enabled: visibility.get(e.id)!,
             timing: { kind: 'manual' as const, startSeconds: 0, endSeconds: 1 },
         })),
     );
@@ -51,7 +76,7 @@ export function preparePresetExport(
             key: ids.get(e.id)!,
             element: resourceRef(e.resource),
             name: e.name,
-            enabled: true,
+            enabled: e.enabled,
             ...(e.seed === undefined ? {} : { seed: e.seed }),
             bindings: structuredClone(e.bindings),
             ...(e.transform3d ? { transform3d: structuredClone(e.transform3d) } : {}),
@@ -72,7 +97,7 @@ export function preparePresetExport(
                   scenes3d: style.scenes3d.map(s => ({
                       key: ids.get(s.id)!,
                       name: s.name,
-                      enabled: true,
+                      enabled: scenes.get(s.id)!.enabled,
                       children: s.children.map(id => ids.get(id)!),
                       start: 0,
                       end: 1,
