@@ -11,8 +11,10 @@
 | [scripts/build-wallpaper-runtime.mjs](../../scripts/build-wallpaper-runtime.mjs) | — |
 | [scripts/check-repo.mjs](../../scripts/check-repo.mjs) | [scripts/codemap.mjs](../../scripts/codemap.mjs)、[scripts/install-project-skills.mjs](../../scripts/install-project-skills.mjs)、[scripts/lib/code-size-policy.mjs](../../scripts/lib/code-size-policy.mjs)、[scripts/lib/repository.mjs](../../scripts/lib/repository.mjs) |
 | [scripts/codemap.mjs](../../scripts/codemap.mjs) | [scripts/lib/repository.mjs](../../scripts/lib/repository.mjs)、[scripts/lib/source-map.mjs](../../scripts/lib/source-map.mjs) |
+| [scripts/desktop.mjs](../../scripts/desktop.mjs) | [scripts/lib/desktop-assets.mjs](../../scripts/lib/desktop-assets.mjs) |
 | [scripts/install-project-skills.mjs](../../scripts/install-project-skills.mjs) | [scripts/lib/repository.mjs](../../scripts/lib/repository.mjs) |
 | [scripts/lib/code-size-policy.mjs](../../scripts/lib/code-size-policy.mjs) | [scripts/lib/repository.mjs](../../scripts/lib/repository.mjs) |
+| [scripts/lib/desktop-assets.mjs](../../scripts/lib/desktop-assets.mjs) | — |
 | [scripts/lib/repository.mjs](../../scripts/lib/repository.mjs) | — |
 | [scripts/lib/source-map.mjs](../../scripts/lib/source-map.mjs) | [scripts/lib/repository.mjs](../../scripts/lib/repository.mjs) |
 | [scripts/lib/visualizer-assets-path.mjs](../../scripts/lib/visualizer-assets-path.mjs) | — |

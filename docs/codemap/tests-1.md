@@ -49,6 +49,8 @@
 | [tests/audio/playback-policy.test.ts](../../tests/audio/playback-policy.test.ts) | [src/audio/playbackPolicy.ts](../../src/audio/playbackPolicy.ts) |
 | [tests/audio/prepared-local-audio.test.ts](../../tests/audio/prepared-local-audio.test.ts) | [src/audio/audioSessionService.ts](../../src/audio/audioSessionService.ts)、[src/persistence/sessionRepository.ts](../../src/persistence/sessionRepository.ts)、[src/stores/audioSessionStore.ts](../../src/stores/audioSessionStore.ts)、[src/types/audio.ts](../../src/types/audio.ts) |
 | [tests/audio/realtime-capture.test.ts](../../tests/audio/realtime-capture.test.ts) | — |
+| [tests/desktop/app-resources.test.ts](../../tests/desktop/app-resources.test.ts) | [electron/appResources.ts](../../electron/appResources.ts) |
+| [tests/desktop/smoke.mjs](../../tests/desktop/smoke.mjs) | — |
 | [tests/docs/validate-docs.mjs](../../tests/docs/validate-docs.mjs) | [scripts/check-repo.mjs](../../scripts/check-repo.mjs)、[scripts/lib/repository.mjs](../../scripts/lib/repository.mjs) |
 | [tests/e2e/analysis-loading.spec.ts](../../tests/e2e/analysis-loading.spec.ts) | [tests/support/file-picker.ts](../../tests/support/file-picker.ts) |
 | [tests/e2e/app-shell.spec.ts](../../tests/e2e/app-shell.spec.ts) | [tests/support/file-picker.ts](../../tests/support/file-picker.ts) |
@@ -106,5 +108,3 @@
 | [tests/e2e/stem-analysis.spec.ts](../../tests/e2e/stem-analysis.spec.ts) | [tests/support/editor-marking.ts](../../tests/support/editor-marking.ts)、[tests/support/stem-analysis.ts](../../tests/support/stem-analysis.ts) |
 | [tests/e2e/transcription-models.spec.ts](../../tests/e2e/transcription-models.spec.ts) | [tests/processing/systemSampler.ts](../../tests/processing/systemSampler.ts) |
 | [tests/e2e/transcription-quality.spec.ts](../../tests/e2e/transcription-quality.spec.ts) | [src/transcription/auxiliarySeparation.ts](../../src/transcription/auxiliarySeparation.ts)、[src/transcription/drumTokens.ts](../../src/transcription/drumTokens.ts)、[src/transcription/pitchNotes.ts](../../src/transcription/pitchNotes.ts)、[tests/processing/systemSampler.ts](../../tests/processing/systemSampler.ts)、[tests/transcription/qualityFixtures.ts](../../tests/transcription/qualityFixtures.ts)、[tests/transcription/qualityMetrics.ts](../../tests/transcription/qualityMetrics.ts) |
-| [tests/e2e/visualizer-algorithm-sandbox.spec.ts](../../tests/e2e/visualizer-algorithm-sandbox.spec.ts) | — |
-| [tests/e2e/visualizer-analysis-input.spec.ts](../../tests/e2e/visualizer-analysis-input.spec.ts) | [src/visualizer/visualizerSessionController.ts](../../src/visualizer/visualizerSessionController.ts)、[tests/support/file-picker.ts](../../tests/support/file-picker.ts)、[tests/support/visualizer-assets.mjs](../../tests/support/visualizer-assets.mjs) |

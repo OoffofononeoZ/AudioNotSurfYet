@@ -26,6 +26,7 @@ dist-ssr
 public/audios
 
 # Local test and evaluation artifacts
+artifacts/desktop/
 test-results/
 playwright-report/
 artifacts/evals/

@@ -10,7 +10,7 @@ upstream_docs:
 
 ## System Summary
 
-Web/Electron 双端 Goal 已批准，当前既有运行时仍为网页实现；桌面宿主、平台端口、原生授权及独立存储边界见[双端合同](desktop.md)，按阶段落地，不复制以下共享业务服务。
+Web/Electron 双端 Goal 已批准，D1 的 `electron/` 宿主、独立构建及安全应用协议已接入，渲染端复用网页产物；原生启动阻断尚未解决。平台端口、原生授权及独立存储边界见[双端合同](desktop.md)，按阶段落地，不复制以下共享业务服务。
 
 当前系统是 Vue 3 单页应用。MainLayout 创建并提供唯一的 `AudioSessionService`、`AnalysisCoordinator`、`EditorSessionController` 与 `VisualizerSessionController`；服务通过 `AudioEngine` 解码、播放本地文件，并通过三个独立 IndexedDB repository 保存 Analyzer session、Editor 单草稿与 Visualizer 单草稿。Analyzer、Editor 与 Visualizer 已通过互斥 consumer lease 复用同一 coordinator；原曲与已验证四轨按来源去重、每来源最多四项，复用同一分析 Worker。File、Blob、handle、PCM、Worker 与音频节点均留在 store 外。MusicBar、Editor 与 Visualizer 读取同一播放快照；Editor 与 Visualizer 普通工作区保留 MusicBar；两个工作区的 tokenized route lease 临时使用 repeat-one，导出传输租约优先停止循环。
 

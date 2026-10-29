@@ -8,6 +8,8 @@
 
 | 文件 | 本地静态引用（最多显示 6 项） |
 | --- | --- |
+| [tests/processing/unavailable.worker.ts](../../tests/processing/unavailable.worker.ts) | [src/processing/separation.worker.ts](../../src/processing/separation.worker.ts) |
+| [tests/processing/vitePlugin.ts](../../tests/processing/vitePlugin.ts) | — |
 | [tests/scripts/measure-analysis-loading.mjs](../../tests/scripts/measure-analysis-loading.mjs) | — |
 | [tests/scripts/run-e1-eval.mjs](../../tests/scripts/run-e1-eval.mjs) | — |
 | [tests/scripts/run-e10-eval.mjs](../../tests/scripts/run-e10-eval.mjs) | — |
@@ -78,6 +80,7 @@
 | [tests/support/visualizer-output-sync.ts](../../tests/support/visualizer-output-sync.ts) | — |
 | [tests/support/visualizer-video-timeline.mjs](../../tests/support/visualizer-video-timeline.mjs) | — |
 | [tests/tools/code-size.test.mjs](../../tests/tools/code-size.test.mjs) | [scripts/check-repo.mjs](../../scripts/check-repo.mjs)、[scripts/codemap.mjs](../../scripts/codemap.mjs)、[scripts/install-project-skills.mjs](../../scripts/install-project-skills.mjs)、[scripts/lib/code-size-policy.mjs](../../scripts/lib/code-size-policy.mjs)、[scripts/lib/repository.mjs](../../scripts/lib/repository.mjs)、[tests/tools/fixture.mjs](../../tests/tools/fixture.mjs) |
+| [tests/tools/desktop-assets.test.mjs](../../tests/tools/desktop-assets.test.mjs) | [scripts/lib/desktop-assets.mjs](../../scripts/lib/desktop-assets.mjs)、[tests/tools/fixture.mjs](../../tests/tools/fixture.mjs) |
 | [tests/tools/document-size.test.mjs](../../tests/tools/document-size.test.mjs) | [scripts/check-repo.mjs](../../scripts/check-repo.mjs)、[scripts/codemap.mjs](../../scripts/codemap.mjs)、[scripts/install-project-skills.mjs](../../scripts/install-project-skills.mjs)、[scripts/lib/repository.mjs](../../scripts/lib/repository.mjs)、[tests/tools/fixture.mjs](../../tests/tools/fixture.mjs) |
 | [tests/tools/fixture.mjs](../../tests/tools/fixture.mjs) | [scripts/lib/repository.mjs](../../scripts/lib/repository.mjs) |
 | [tests/tools/formatting.test.mjs](../../tests/tools/formatting.test.mjs) | [scripts/lib/repository.mjs](../../scripts/lib/repository.mjs)、[tests/tools/fixture.mjs](../../tests/tools/fixture.mjs) |
@@ -105,6 +108,3 @@
 | [tests/transcription/result-repository.test.ts](../../tests/transcription/result-repository.test.ts) | [src/processing/dsp.ts](../../src/processing/dsp.ts)、[src/processing/modelManifest.ts](../../src/processing/modelManifest.ts)、[src/processing/sha256.ts](../../src/processing/sha256.ts)、[src/transcription/modelManifest.ts](../../src/transcription/modelManifest.ts)、[src/transcription/resultRepository.ts](../../src/transcription/resultRepository.ts)、[src/transcription/workerProtocol.ts](../../src/transcription/workerProtocol.ts) |
 | [tests/transcription/vitePlugin.ts](../../tests/transcription/vitePlugin.ts) | — |
 | [tests/unit/audio-fixtures.test.ts](../../tests/unit/audio-fixtures.test.ts) | [tests/support/audio-fixtures.ts](../../tests/support/audio-fixtures.ts) |
-| [tests/unit/indexeddb-harness.test.ts](../../tests/unit/indexeddb-harness.test.ts) | — |
-| [tests/unit/project-file-gateways.test.ts](../../tests/unit/project-file-gateways.test.ts) | [src/editor/fileIO.ts](../../src/editor/fileIO.ts)、[src/editor/projectCodec.ts](../../src/editor/projectCodec.ts)、[src/visualizer/compositionCodec.ts](../../src/visualizer/compositionCodec.ts)、[src/visualizer/fileIO.ts](../../src/visualizer/fileIO.ts) |
-| [tests/unit/tolerance.test.ts](../../tests/unit/tolerance.test.ts) | [tests/support/tolerance.ts](../../tests/support/tolerance.ts) |

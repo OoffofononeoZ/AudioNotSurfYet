@@ -6,6 +6,8 @@ import { fileURLToPath } from 'node:url';
 export const ROOT = fileURLToPath(new URL('../../', import.meta.url));
 export const SOURCE_EXTENSIONS = /\.(?:vue|[cm]?js|[jt]sx?|ps1)$/i;
 export const AREAS = [
+    { id: 'desktop', title: 'Electron 桌面宿主', prefix: 'electron/' },
+    { id: 'platform', title: 'Web/Electron 平台端口与适配', prefix: 'src/platform/' },
     { id: 'audio', title: '音频播放与会话', prefix: 'src/audio/' },
     { id: 'analysis', title: '特征分析与 Worker', prefix: 'src/analysis/' },
     { id: 'editor', title: 'Editor 领域与工程', prefix: 'src/editor/' },

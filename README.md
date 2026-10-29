@@ -2,7 +2,7 @@
 
 Vue 3 / TypeScript / Vite 浏览器音频工作台。项目状态、技术契约和当前验证缺口见 [上下文入口](docs/context/index.md)，任务规则与 6 个项目 skills 见 [AGENTS.md](AGENTS.md)。
 
-现有网页端完整保留；Windows x64 Electron 双端实施 Goal 已启动，合同、里程碑和实际验证状态见[双端与桌面实施](docs/context/desktop.md)。桌面尚未完成，以下命令仍为现有网页入口；桌面命令随实现落地补充。
+现有网页端完整保留；Windows x64 Electron 双端实施 Goal 已启动，合同、里程碑和实际验证状态见[双端与桌面实施](docs/context/desktop.md)。已接入桌面宿主和独立构建，运行能力验证尚未通过，不代表完整桌面功能可用。
 
 文档按当前页面和领域维护：接口从共享运行时及 Analyzer/Editor/Visualizer 页面进入，验证要求集中在领域 validation。普通任务更新相关专题，过程反馈放在交付中；旧阶段产物已清理，历史由 Git 查回，必要证据与未解决缺口继续保留。
 
@@ -16,6 +16,8 @@ Vue 3 / TypeScript / Vite 浏览器音频工作台。项目状态、技术契约
 npm ci
 npm run dev
 ```
+
+桌面使用同一 lockfile：`npm run desktop:dev` 启动 Vite 与 Electron；`desktop:build` 生成独立应用目录，`desktop:dir` 生成未封装安装器的 Windows 应用，`desktop:package` 生成本地 NSIS 包，均不发布。产物位于忽略目录 `artifacts/desktop/`，网页 `dev/build/preview` 保留。`desktop:typecheck` 检查宿主，`test:desktop:unit` 检查资源边界，`test:desktop:smoke` 在先构建的应用上使用独立 profile 验证能力与重启恢复；后者当前被 main 之前的原生异常阻断，详见桌面专题。
 
 `predev` / `prebuild` 会准备已锁定的 processing runtime assets 和壁纸独立运行包；模型与大型本地产物遵守忽略规则。运行前核对对应 [处理契约](docs/architecture/processing/model-artifacts.md)。当前 FT 及 Editor 状态以实际 evidence 为准，不能把启动成功当作质量/性能通过。
 

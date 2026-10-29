@@ -10,6 +10,24 @@ import { inspectDocuments, inspectRepository } from '../../scripts/check-repo.mj
 import { fixture, write, bytes, skill } from './fixture.mjs';
 import { installProjectSkills } from '../../scripts/install-project-skills.mjs';
 
+test('desktop host and platform adapters are mapped without indexing desktop artifacts', t => {
+    const root = fixture(t, {
+        'electron/main.ts': 'import "../src/platform/contracts.ts";\n',
+        'src/platform/contracts.ts': 'export {};\n',
+        'artifacts/desktop/app/host/main.cjs': 'module.exports = {};\n',
+    });
+    const records = inspectSources(root, listFiles(root));
+    assert.equal(records.find(record => record.file === 'electron/main.ts').area, 'desktop');
+    assert.equal(records.find(record => record.file === 'src/platform/contracts.ts').area, 'platform');
+    assert.equal(
+        records.some(record => record.file.startsWith('artifacts/')),
+        false,
+    );
+    const maps = buildMaps(root);
+    assert.ok(maps.has('docs/codemap/desktop.md'));
+    assert.ok(maps.has('docs/codemap/platform.md'));
+});
+
 test('Vue and TS imports resolve relative paths, @ alias, re-exports and literal dynamic imports', t => {
     const entries = {
         'src/App.vue':
