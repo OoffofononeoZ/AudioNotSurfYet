@@ -6,6 +6,7 @@
 
 - MainLayout 提供唯一 AudioSessionService、AudioEngine、AnalysisCoordinator 和页面 controller。Home、MusicBar 与工作区读取同一播放状态，不另建播放器或播放 AudioContext。
 - 应用入口创建并提供平台端口，MainLayout 注入 `AudioFileAccess`；共享 service 不探测宿主或调用具体文件 API。`LocalFileReference` 仅提供 kind/name，Web 保留原始句柄载体，Electron 用可序列化 grantId；磁盘路径只在主进程授权记录中，细则与当前验证见[双端合同](../context/desktop.md)。
+- Editor/Visualizer 工程及 WebM 保存经同一 `FileTransferAccess`；平台实现保留原生选择/取消语义。桌面工程读取为一次性授权，读完即释放；原生保存按块确认背压，完整写入后才发布文件，失败/取消清理本次临时文件，目标外部修改不覆盖。窗口退出等待和异常退出遗留清理仍待 D5，不能把文件事务测试当作完整生命周期通过。
 - Pinia 保存可序列化快照。File、Blob、handle、PCM、AudioBuffer、Worker、节点及对象 URL 留在所属运行时服务，并在换源、离页或 dispose 时释放。
 - 音频和工程保留在各端本地；两端数据独立，模型/静态资源请求不授权上传用户音频。处理任务复用原歌曲身份和有界 PCM 读取。
 - 共享 UI、Home、MusicBar、滚动与路由占位见[应用外壳](../context/app-shell.md)，服务装配见 [system map](../context/system-map.md)。

@@ -82,7 +82,7 @@ const editorController = new EditorSessionController({
     analysisCoordinator,
     store: audioSessionStore,
     repository: new EditorDraftRepository(),
-    fileGateway: new NativeEditorFileGateway(),
+    fileGateway: new NativeEditorFileGateway(platform.transfers),
 });
 provide(editorSessionControllerKey, editorController);
 const editorTranscription = new EditorTranscriptionService(
@@ -104,10 +104,10 @@ const visualizerController = new VisualizerSessionController({
     analysisCoordinator,
     store: audioSessionStore,
     repository: new CompositionDraftRepository(),
-    fileGateway: new NativeVisualizerFileGateway(),
-    videoGateway: new NativeVisualizerVideoFileGateway(),
+    fileGateway: new NativeVisualizerFileGateway(platform.transfers),
+    videoGateway: new NativeVisualizerVideoFileGateway(platform.transfers),
     editorRepository: new EditorDraftRepository(),
-    editorFileGateway: new NativeEditorFileGateway(),
+    editorFileGateway: new NativeEditorFileGateway(platform.transfers),
 });
 provide(visualizerSessionControllerKey, visualizerController);
 

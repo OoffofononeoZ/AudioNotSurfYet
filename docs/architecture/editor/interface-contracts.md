@@ -12,6 +12,7 @@
 
 - EditorProjectV2 是当前唯一写入格式；完整验证歌曲 identity、秒数、tempo、point/range union 和引用后原子替换。失败保留内存与 durable draft。
 - JSON、canonical seconds、严格 validator 与独立 draft DB 见 [Project V2](project-format-v2.md)，实现为 [projectCodec.ts](../../../src/editor/projectCodec.ts)和 [editorDraftRepository.ts](../../../src/editor/editorDraftRepository.ts)。
+- 工程文件通过注入的 `FileTransferAccess` 打开/保存，Web 继续浏览器 picker，Electron 使用受限原生接口；JSON 内容与复合扩展名不变。新导入、工程编辑、离页或销毁使旧选择失效；迟到结果不替换工程。导出完成只清除本次实际导出修订的未导出标记，不清除保存期间的新修改。桌面实际验证状态见[双端合同](../../context/desktop.md)。
 - tempo/grid、single-beat、吸附、point/range、连续时间批量、overlay 与数字实时录入统一按[交互契约](interaction-contracts.md)；页面行为见[标记工作区](../../context/editor-marking.md)。
 - waveform/tempo 使用工程 viewport；marker/overlay 使用独立只读 MarkerTimeView。播放读取 engine 快照，不逐帧改工程或保存草稿；zoom、BPM 和几何不重写事件秒数。
 - seconds保存事件事实，tempo只派生网格，避免用户改BPM时移动标记。独立单草稿隔离公共会话DB；共享纯Canvas adapter保持提取/解码单一来源，overlay失败不破坏人工编辑。

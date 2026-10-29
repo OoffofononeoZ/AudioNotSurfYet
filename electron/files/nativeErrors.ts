@@ -3,6 +3,8 @@ import type { NativeFileErrorCode, NativeResult } from '../../src/platform/fileC
 const messages: Record<NativeFileErrorCode, string> = {
     'permission-denied': '未获得该文件或目录的访问权限，请重新选择。',
     'file-missing': '文件或目录已移动或删除，请重新选择。',
+    'file-changed': '保存期间目标文件已变化，请重新选择保存位置。',
+    'cleanup-failed': '保存未完成，临时文件清理失败，请检查选定文件夹中的 .audiosurf-*.tmp。',
     'invalid-request': '文件访问请求无效。',
     'store-invalid': '已保存的文件授权记录无效，请检查应用数据。',
     'io-error': '无法完成本地文件操作。',

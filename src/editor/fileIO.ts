@@ -1,8 +1,7 @@
+import type { FileTransferAccess } from '../platform/transferContracts';
+import { FileTransferUnsupportedError } from '../platform/transferContracts';
+import { BrowserFileTransfers } from '../platform/webFileTransfers';
 import type { EditorFormatCodec } from './projectCodec';
-
-type WritableFileHandle = FileSystemFileHandle & {
-    createWritable(): Promise<FileSystemWritableFileStream>;
-};
 
 export interface EditorOpenedFile {
     name: string;
@@ -10,8 +9,13 @@ export interface EditorOpenedFile {
 }
 
 export interface EditorFileGateway {
-    open(codec: EditorFormatCodec): Promise<EditorOpenedFile | null>;
-    save(codec: EditorFormatCodec, suggestedName: string, bytes: Uint8Array): Promise<'saved' | 'cancelled'>;
+    open(codec: EditorFormatCodec, signal?: AbortSignal): Promise<EditorOpenedFile | null>;
+    save(
+        codec: EditorFormatCodec,
+        suggestedName: string,
+        bytes: Uint8Array,
+        signal?: AbortSignal,
+    ): Promise<'saved' | 'cancelled'>;
 }
 
 export class EditorFileGatewayError extends Error {
@@ -27,81 +31,37 @@ export class EditorFileGatewayError extends Error {
 const isAbortError = (error: unknown): boolean => error instanceof DOMException && error.name === 'AbortError';
 
 export class NativeEditorFileGateway implements EditorFileGateway {
-    async open(codec: EditorFormatCodec): Promise<EditorOpenedFile | null> {
-        const picker = (
-            window as typeof window & {
-                showOpenFilePicker?: (options: Record<string, unknown>) => Promise<FileSystemFileHandle[]>;
-            }
-        ).showOpenFilePicker;
-        if (!picker) {
-            throw new EditorFileGatewayError(
-                'unsupported',
-                '当前浏览器不支持原生工程文件选择，请使用最新版 Chrome 或 Edge。',
-            );
-        }
+    private readonly files: FileTransferAccess;
+    constructor(files: FileTransferAccess = new BrowserFileTransfers()) {
+        this.files = files;
+    }
+    async open(_codec: EditorFormatCodec, signal?: AbortSignal): Promise<EditorOpenedFile | null> {
         try {
-            const handles = await picker({
-                multiple: false,
-                excludeAcceptAllOption: true,
-                types: [
-                    {
-                        description: 'AudioNotSurfYet Editor JSON',
-                        accept: { [codec.mimeType]: ['.json'] },
-                    },
-                ],
-            });
-            const handle = handles[0];
-            if (!handle) return null;
-            const file = await handle.getFile();
-            return { name: file.name, bytes: await file.arrayBuffer() };
+            const file = await this.files.open('editor-project', signal);
+            if (!file) return null;
+            const bytes = await file.arrayBuffer();
+            signal?.throwIfAborted();
+            return { name: file.name, bytes };
         } catch (error) {
             if (isAbortError(error)) return null;
             throw new EditorFileGatewayError(
-                'read-failed',
+                error instanceof FileTransferUnsupportedError ? 'unsupported' : 'read-failed',
                 error instanceof Error ? error.message : '读取工程文件失败。',
             );
         }
     }
-
-    async save(codec: EditorFormatCodec, suggestedName: string, bytes: Uint8Array): Promise<'saved' | 'cancelled'> {
-        const picker = (
-            window as typeof window & {
-                showSaveFilePicker?: (options: Record<string, unknown>) => Promise<WritableFileHandle>;
-            }
-        ).showSaveFilePicker;
-        if (!picker) {
-            throw new EditorFileGatewayError(
-                'unsupported',
-                '当前浏览器不支持原生工程文件保存，请使用最新版 Chrome 或 Edge。',
-            );
-        }
-        let writable: FileSystemWritableFileStream | null = null;
+    async save(
+        _codec: EditorFormatCodec,
+        name: string,
+        bytes: Uint8Array,
+        signal?: AbortSignal,
+    ): Promise<'saved' | 'cancelled'> {
         try {
-            const handle = await picker({
-                suggestedName,
-                excludeAcceptAllOption: true,
-                types: [
-                    {
-                        description: 'AudioNotSurfYet Editor JSON',
-                        accept: { [codec.mimeType]: ['.json'] },
-                    },
-                ],
-            });
-            writable = await handle.createWritable();
-            await writable.write(
-                bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength) as ArrayBuffer,
-            );
-            await writable.close();
-            return 'saved';
+            return await this.files.save('editor-project', name, bytes, signal);
         } catch (error) {
             if (isAbortError(error)) return 'cancelled';
-            try {
-                await writable?.abort?.(error);
-            } catch {
-                // The original write error remains the user-facing cause.
-            }
             throw new EditorFileGatewayError(
-                'write-failed',
+                error instanceof FileTransferUnsupportedError ? 'unsupported' : 'write-failed',
                 error instanceof Error ? error.message : '保存工程文件失败。',
             );
         }

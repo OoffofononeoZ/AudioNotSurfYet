@@ -1,8 +1,8 @@
-type WritableVideoHandle = FileSystemFileHandle & {
-    createWritable(): Promise<FileSystemWritableFileStream>;
-};
+import type { FileTransferAccess } from '../platform/transferContracts';
+import { FileTransferUnsupportedError } from '../platform/transferContracts';
+import { BrowserFileTransfers } from '../platform/webFileTransfers';
 export interface VisualizerVideoFileGateway {
-    save(suggestedName: string, blob: Blob): Promise<'saved' | 'cancelled'>;
+    save(suggestedName: string, blob: Blob, signal?: AbortSignal): Promise<'saved' | 'cancelled'>;
 }
 
 export class VisualizerVideoFileGatewayError extends Error {
@@ -15,50 +15,20 @@ export class VisualizerVideoFileGatewayError extends Error {
     }
 }
 
-const isAbortError = (error: unknown): boolean =>
-    error instanceof DOMException && error.name === 'AbortError';
+const isAbortError = (error: unknown): boolean => error instanceof DOMException && error.name === 'AbortError';
 
 export class NativeVisualizerVideoFileGateway implements VisualizerVideoFileGateway {
-    async save(
-        suggestedName: string,
-        blob: Blob,
-    ): Promise<'saved' | 'cancelled'> {
-        const picker = (
-            window as typeof window & {
-                showSaveFilePicker?: (
-                    options: Record<string, unknown>,
-                ) => Promise<WritableVideoHandle>;
-            }
-        ).showSaveFilePicker;
-        if (!picker) {
-            throw new VisualizerVideoFileGatewayError(
-                'save-unsupported',
-                '当前浏览器不支持原生 WebM 保存，请使用最新版 Chrome 或 Edge。',
-            );
-        }
-        let writable: FileSystemWritableFileStream | null = null;
+    private readonly files: FileTransferAccess;
+    constructor(files: FileTransferAccess = new BrowserFileTransfers()) {
+        this.files = files;
+    }
+    async save(name: string, blob: Blob, signal?: AbortSignal): Promise<'saved' | 'cancelled'> {
         try {
-            const handle = await picker({
-                suggestedName,
-                excludeAcceptAllOption: true,
-                types: [{
-                    description: 'WebM video',
-                    accept: { 'video/webm': ['.webm'] },
-                }],
-            });
-            writable = await handle.createWritable();
-            await writable.write(blob);
-            await writable.close();
-            return 'saved';
+            return await this.files.save('video', name, blob, signal);
         } catch (error) {
             if (isAbortError(error)) return 'cancelled';
-            try {
-                await writable?.abort?.(error);
-            } catch {
-                // Preserve the original save failure.
-            }
             throw new VisualizerVideoFileGatewayError(
-                'save-failed',
+                error instanceof FileTransferUnsupportedError ? 'save-unsupported' : 'save-failed',
                 error instanceof Error ? error.message : '保存 WebM 失败。',
             );
         }

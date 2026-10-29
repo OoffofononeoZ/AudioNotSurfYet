@@ -2,6 +2,7 @@ import { dialog, ipcMain, type BrowserWindow, type IpcMainInvokeEvent } from 'el
 import type { DesktopFileBridge } from '../../src/platform/fileContracts';
 import { nativeResult, NativeFileError } from './nativeErrors';
 import { NativeReadGrants, grantId, grantRelativePath } from './nativeGrants';
+import { requireOwner } from './ownedIpc';
 
 export function registerFileIpc(getWindow: () => BrowserWindow | null, ownerOrigin: string, grants: NativeReadGrants) {
     const channels: string[] = [];
@@ -13,23 +14,44 @@ export function registerFileIpc(getWindow: () => BrowserWindow | null, ownerOrig
         channels.push(channel);
         ipcMain.handle(channel, (event, ...args: unknown[]) =>
             nativeResult(async () => {
-                const owner = getWindow(),
-                    frame = event.senderFrame;
-                if (
-                    !owner ||
-                    owner.isDestroyed() ||
-                    event.sender !== owner.webContents ||
-                    !frame ||
-                    frame.frameToken !== owner.webContents.mainFrame.frameToken ||
-                    frame.origin !== ownerOrigin
-                ) {
-                    throw new NativeFileError('permission-denied');
-                }
+                requireOwner(event, getWindow(), ownerOrigin);
                 return operation(event, ...args);
             }),
         );
     }
 
+    handler('chooseProject', async (_event, purpose) => {
+        if (purpose !== 'editor-project' && purpose !== 'visualizer-project')
+            throw new NativeFileError('invalid-request');
+        const owner = getWindow()!,
+            frameToken = owner.webContents.mainFrame.frameToken;
+        const result = await dialog.showOpenDialog(owner, {
+            title: '选择工程',
+            properties: ['openFile'],
+            filters: [{ name: 'AudioNotSurfYet JSON', extensions: ['json'] }],
+        });
+        if (
+            result.canceled ||
+            !result.filePaths[0] ||
+            owner.isDestroyed() ||
+            owner !== getWindow() ||
+            owner.webContents.mainFrame.frameToken !== frameToken ||
+            owner.webContents.mainFrame.origin !== ownerOrigin
+        )
+            return null;
+        const reference = await grants.selectTransientFile(result.filePaths[0]);
+        if (
+            owner.isDestroyed() ||
+            owner !== getWindow() ||
+            owner.webContents.mainFrame.frameToken !== frameToken ||
+            owner.webContents.mainFrame.origin !== ownerOrigin
+        ) {
+            grants.releaseTransientFile(reference.grantId);
+            return null;
+        }
+        return reference;
+    });
+    handler('releaseProject', async (_event, id) => grants.releaseTransientFile(grantId(id)));
     handler('chooseAudio', async (_event, multiple) => {
         if (typeof multiple !== 'boolean') throw new NativeFileError('invalid-request');
         const owner = getWindow()!;

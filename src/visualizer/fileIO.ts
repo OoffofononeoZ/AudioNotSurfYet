@@ -1,19 +1,23 @@
+import type { FileTransferAccess } from '../platform/transferContracts';
+import { FileTransferUnsupportedError } from '../platform/transferContracts';
+import { BrowserFileTransfers } from '../platform/webFileTransfers';
 export interface VisualizerFileFormat {
     extension: string;
     mimeType: string;
 }
-
-type WritableFileHandle = FileSystemFileHandle & {
-    createWritable(): Promise<FileSystemWritableFileStream>;
-};
 
 export interface VisualizerOpenedFile {
     name: string;
     bytes: ArrayBuffer;
 }
 export interface VisualizerFileGateway {
-    open(codec: VisualizerFileFormat): Promise<VisualizerOpenedFile | null>;
-    save(codec: VisualizerFileFormat, suggestedName: string, bytes: Uint8Array): Promise<'saved' | 'cancelled'>;
+    open(codec: VisualizerFileFormat, signal?: AbortSignal): Promise<VisualizerOpenedFile | null>;
+    save(
+        codec: VisualizerFileFormat,
+        suggestedName: string,
+        bytes: Uint8Array,
+        signal?: AbortSignal,
+    ): Promise<'saved' | 'cancelled'>;
 }
 
 export class VisualizerFileGatewayError extends Error {
@@ -29,82 +33,38 @@ export class VisualizerFileGatewayError extends Error {
 const isAbortError = (error: unknown): boolean => error instanceof DOMException && error.name === 'AbortError';
 
 export class NativeVisualizerFileGateway implements VisualizerFileGateway {
-    async open(codec: VisualizerFileFormat): Promise<VisualizerOpenedFile | null> {
-        const picker = (
-            window as typeof window & {
-                showOpenFilePicker?: (options: Record<string, unknown>) => Promise<FileSystemFileHandle[]>;
-            }
-        ).showOpenFilePicker;
-        if (!picker) {
-            throw new VisualizerFileGatewayError(
-                'unsupported',
-                '当前浏览器不支持原生可视化工程选择，请使用最新版 Chrome 或 Edge。',
-            );
-        }
+    private readonly files: FileTransferAccess;
+    constructor(files: FileTransferAccess = new BrowserFileTransfers()) {
+        this.files = files;
+    }
+    async open(_codec: VisualizerFileFormat, signal?: AbortSignal): Promise<VisualizerOpenedFile | null> {
         try {
-            const handles = await picker({
-                multiple: false,
-                excludeAcceptAllOption: true,
-                types: [
-                    {
-                        description: 'AudioNotSurfYet Visualizer JSON',
-                        accept: { [codec.mimeType]: ['.json'] },
-                    },
-                ],
-            });
-            const handle = handles[0];
-            if (!handle) return null;
-            const file = await handle.getFile();
-            return { name: file.name, bytes: await file.arrayBuffer() };
+            const file = await this.files.open('visualizer-project', signal);
+            if (!file) return null;
+            const bytes = await file.arrayBuffer();
+            signal?.throwIfAborted();
+            return { name: file.name, bytes };
         } catch (error) {
             if (isAbortError(error)) return null;
             throw new VisualizerFileGatewayError(
-                'read-failed',
-                error instanceof Error ? error.message : '读取可视化工程失败。',
+                error instanceof FileTransferUnsupportedError ? 'unsupported' : 'read-failed',
+                error instanceof Error ? error.message : '读取工程文件失败。',
             );
         }
     }
-
-    async save(codec: VisualizerFileFormat, suggestedName: string, bytes: Uint8Array): Promise<'saved' | 'cancelled'> {
-        const picker = (
-            window as typeof window & {
-                showSaveFilePicker?: (options: Record<string, unknown>) => Promise<WritableFileHandle>;
-            }
-        ).showSaveFilePicker;
-        if (!picker) {
-            throw new VisualizerFileGatewayError(
-                'unsupported',
-                '当前浏览器不支持原生可视化工程保存，请使用最新版 Chrome 或 Edge。',
-            );
-        }
-        let writable: FileSystemWritableFileStream | null = null;
+    async save(
+        _codec: VisualizerFileFormat,
+        name: string,
+        bytes: Uint8Array,
+        signal?: AbortSignal,
+    ): Promise<'saved' | 'cancelled'> {
         try {
-            const handle = await picker({
-                suggestedName,
-                excludeAcceptAllOption: true,
-                types: [
-                    {
-                        description: 'AudioNotSurfYet Visualizer JSON',
-                        accept: { [codec.mimeType]: ['.json'] },
-                    },
-                ],
-            });
-            writable = await handle.createWritable();
-            await writable.write(
-                bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength) as ArrayBuffer,
-            );
-            await writable.close();
-            return 'saved';
+            return await this.files.save('visualizer-project', name, bytes, signal);
         } catch (error) {
             if (isAbortError(error)) return 'cancelled';
-            try {
-                await writable?.abort?.(error);
-            } catch {
-                // Preserve the original file write failure.
-            }
             throw new VisualizerFileGatewayError(
-                'write-failed',
-                error instanceof Error ? error.message : '保存可视化工程失败。',
+                error instanceof FileTransferUnsupportedError ? 'unsupported' : 'write-failed',
+                error instanceof Error ? error.message : '保存工程文件失败。',
             );
         }
     }

@@ -103,6 +103,7 @@ export class EditorSessionController {
     private overlayActivationReady = false;
     private lastReadyBufferSeries: AnalysisSeries | null = null;
     private routeGeneration = 0;
+    private fileImportTask: AbortController | null = null;
     private saveTimer: ReturnType<typeof setTimeout> | null = null;
     private pendingProject: EditorProjectV2 | null = null;
     private saveInFlight: Promise<void> | null = null;
@@ -293,6 +294,7 @@ export class EditorSessionController {
     }
 
     async enter(trackId: string | null, approval?: symbol, imported?: EditorProjectV2): Promise<void> {
+        this.cancelFileImport();
         const generation = ++this.routeGeneration;
         await this.flush();
         if (generation !== this.routeGeneration || this.disposed) return;
@@ -496,21 +498,55 @@ export class EditorSessionController {
             return 'cancelled';
         }
         const codec = this.codecs.get(codecId);
-        const opened = await this.fileGateway.open(codec);
-        if (!opened) return 'cancelled';
-        const candidate = codec.decode(opened.bytes, context);
-        this.hasUnexportedChanges = false;
-        this.publish({
-            ...this.snapshot,
-            project: candidate,
-            overlayOpen: this.snapshot.overlayOpen && candidate.workspace.overlay.featureId !== null,
-            persistence: 'saving',
-            message: undefined,
-        });
-        this.queueSave(candidate, true);
-        await this.flush();
-        this.restartEditorAnalysis();
-        return 'imported';
+        this.cancelFileImport();
+        const task = new AbortController(),
+            generation = this.routeGeneration,
+            previous = this.snapshot.project;
+        this.fileImportTask = task;
+        let applied = false;
+        try {
+            const opened = await this.fileGateway.open(codec, task.signal);
+            if (
+                !opened ||
+                task.signal.aborted ||
+                this.disposed ||
+                generation !== this.routeGeneration ||
+                previous !== this.snapshot.project
+            )
+                return 'cancelled';
+            const candidate = codec.decode(opened.bytes, context);
+            this.hasUnexportedChanges = false;
+            this.publish({
+                ...this.snapshot,
+                project: candidate,
+                overlayOpen: this.snapshot.overlayOpen && candidate.workspace.overlay.featureId !== null,
+                persistence: 'saving',
+                message: undefined,
+            });
+            applied = true;
+            this.queueSave(candidate, true);
+            await this.flush();
+            if (!this.disposed && generation === this.routeGeneration && this.snapshot.project === candidate)
+                this.restartEditorAnalysis();
+            return 'imported';
+        } catch (error) {
+            if (
+                !applied &&
+                (task.signal.aborted ||
+                    this.disposed ||
+                    generation !== this.routeGeneration ||
+                    previous !== this.snapshot.project)
+            )
+                return 'cancelled';
+            throw error;
+        } finally {
+            if (this.fileImportTask === task) this.fileImportTask = null;
+        }
+    }
+
+    private cancelFileImport() {
+        this.fileImportTask?.abort();
+        this.fileImportTask = null;
     }
 
     isCurrentProject(project: EditorProjectV2 | null): boolean {
@@ -539,8 +575,17 @@ export class EditorSessionController {
     async exportProject(codecId = 'json-v2'): Promise<'saved' | 'cancelled'> {
         const project = this.snapshot.project;
         if (!project) return 'cancelled';
+        const generation = this.routeGeneration;
         const result = await this.exportProjectValue(project, codecId);
-        if (result === 'saved') this.hasUnexportedChanges = false;
+        if (
+            result === 'saved' &&
+            !this.disposed &&
+            generation === this.routeGeneration &&
+            this.snapshot.project === project
+        ) {
+            this.hasUnexportedChanges = false;
+            this.syncBeforeUnload();
+        }
         return result;
     }
 
@@ -564,6 +609,7 @@ export class EditorSessionController {
             ...project,
             updatedAt: this.now().toISOString(),
         };
+        this.cancelFileImport();
         this.hasUnexportedChanges = true;
         this.publish({
             ...this.snapshot,
@@ -628,6 +674,7 @@ export class EditorSessionController {
     }
 
     async leave(): Promise<void> {
+        this.cancelFileImport();
         this.trackChangeApproval.clear();
         ++this.routeGeneration;
         await this.flush();
@@ -638,6 +685,7 @@ export class EditorSessionController {
     async dispose(): Promise<void> {
         if (this.disposed) return;
         this.disposed = true;
+        this.cancelFileImport();
         ++this.routeGeneration;
         await this.flush();
         this.releaseLeases();

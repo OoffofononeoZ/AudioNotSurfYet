@@ -8,6 +8,9 @@
 
 | 文件 | 本地静态引用（最多显示 6 项） |
 | --- | --- |
+| [tests/e2e/playback-keyboard.spec.ts](../../tests/e2e/playback-keyboard.spec.ts) | [tests/support/file-picker.ts](../../tests/support/file-picker.ts)、[tests/support/visualizer-output-sync.ts](../../tests/support/visualizer-output-sync.ts) |
+| [tests/e2e/playback-speed.spec.ts](../../tests/e2e/playback-speed.spec.ts) | [tests/support/editor-marking.ts](../../tests/support/editor-marking.ts) |
+| [tests/e2e/project-action-dialogs.spec.ts](../../tests/e2e/project-action-dialogs.spec.ts) | [tests/support/file-picker.ts](../../tests/support/file-picker.ts) |
 | [tests/e2e/project-file-transfer.spec.ts](../../tests/e2e/project-file-transfer.spec.ts) | [tests/support/file-picker.ts](../../tests/support/file-picker.ts)、[tests/support/project-actions.ts](../../tests/support/project-actions.ts) |
 | [tests/e2e/stem-analysis.spec.ts](../../tests/e2e/stem-analysis.spec.ts) | [tests/support/editor-marking.ts](../../tests/support/editor-marking.ts)、[tests/support/stem-analysis.ts](../../tests/support/stem-analysis.ts) |
 | [tests/e2e/transcription-models.spec.ts](../../tests/e2e/transcription-models.spec.ts) | [tests/processing/systemSampler.ts](../../tests/processing/systemSampler.ts) |
@@ -105,6 +108,3 @@
 | [tests/processing/p1-model-input.test.ts](../../tests/processing/p1-model-input.test.ts) | [src/processing/dsp.ts](../../src/processing/dsp.ts)、[src/processing/modelInput.ts](../../src/processing/modelInput.ts)、[src/processing/modelManifest.ts](../../src/processing/modelManifest.ts)、[tests/processing/fixture.ts](../../tests/processing/fixture.ts) |
 | [tests/processing/p1-runtime.test.ts](../../tests/processing/p1-runtime.test.ts) | [src/processing/runtime.ts](../../src/processing/runtime.ts) |
 | [tests/processing/p1-storage.test.ts](../../tests/processing/p1-storage.test.ts) | [src/processing/modelCache.ts](../../src/processing/modelCache.ts)、[src/processing/modelManifest.ts](../../src/processing/modelManifest.ts)、[src/processing/storage.ts](../../src/processing/storage.ts)、[tests/processing/fixture.ts](../../tests/processing/fixture.ts) |
-| [tests/processing/persistentFixture.ts](../../tests/processing/persistentFixture.ts) | — |
-| [tests/processing/prepare-assets.mjs](../../tests/processing/prepare-assets.mjs) | — |
-| [tests/processing/prepare-graph-probe.mjs](../../tests/processing/prepare-graph-probe.mjs) | — |

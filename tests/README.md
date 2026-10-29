@@ -16,7 +16,7 @@ Web/Electron 改动先核对[双端阶段和验证要求](../docs/context/deskto
 
 桌面已提供 `npm run desktop:typecheck`、`npm run test:desktop:unit`；先运行 `npm run desktop:build`，再运行 `npm run test:desktop:smoke`；先运行 `desktop:dir`，再运行 `test:desktop:packaged` 检查 ASAR 分发。smoke 使用独立持久化 profile、生产网页产物及应用协议，检查隔离、路由、OPFS 重启恢复、WebGPU、ORT 模块和实际 VP9/VP8/Opus 编码；不等于 FT 推断、封装媒体质量、原生 picker 或安装验收。结果保存在 `artifacts/desktop/`；当前原生启动阻断见桌面专题，不记为通过。工具测试覆盖静态资源白名单，防止复制本地 public/audios、测试音频或额外模型。
 
-`test:desktop:unit` 还覆盖真实临时文件的原生授权保存/恢复/撤销、目录 junction 与路径边界、变更/缺失区分、错误去路径化、模拟 IPC 的窗口/frame/origin 拒绝和双端音频端口。模拟 Electron IPC 不证明真实对话框或原生协议可用；这些独立缺口继续保留。
+`test:desktop:unit` 覆盖真实临时文件的原生授权保存/恢复/撤销、一次性工程授权、目录 junction 与路径边界、变更/缺失区分、错误去路径化、保存事务的完整提交/取消/目标变更、分块背压和双端文件端口；模拟 IPC 检查窗口/frame/origin、用途及参数拒绝。模拟 IPC 不证明真实 OS 对话框或原生协议可用，临时文件事务不证明退出/安装通过；这些独立缺口继续保留。
 
 | 命令                                                    | 作用                                                                                                                                                              |
 | ------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |

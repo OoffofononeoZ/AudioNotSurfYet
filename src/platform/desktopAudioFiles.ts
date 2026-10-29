@@ -10,6 +10,8 @@ export function nativeValue<T>(result: NativeResult<T>): T {
     if (result.ok) return result.value;
     const names = {
         'file-missing': 'NotFoundError',
+        'file-changed': 'NotReadableError',
+        'cleanup-failed': 'InvalidStateError',
         'permission-denied': 'NotAllowedError',
         'invalid-request': 'DataError',
         'store-invalid': 'InvalidStateError',

@@ -58,6 +58,7 @@ function within(root: string, target: string) {
 /** Only main-process user selections may create persistent, read-only grants. */
 export class NativeReadGrants {
     private grants = new Map<string, Grant>();
+    private transient = new Map<string, Grant>();
     private loaded: Promise<void> | null = null;
     private writes: Promise<unknown> = Promise.resolve();
     private readonly storageFile: string;
@@ -151,6 +152,21 @@ export class NativeReadGrants {
         return this.reference(await this.add(selectedPath, 'file'));
     }
 
+    async selectTransientFile(selectedPath: string): Promise<NativeFileReference> {
+        const target = await realpath(selectedPath);
+        if (!(await stat(target)).isFile()) throw new NativeFileError('invalid-request');
+        const entry: Grant = { id: randomUUID(), kind: 'file', path: target, name: path.basename(selectedPath) };
+        this.transient.set(entry.id, entry);
+        return this.reference(entry);
+    }
+    releaseTransientFile(id: string) {
+        grantId(id);
+        this.transient.delete(id);
+    }
+    clearTransientFiles() {
+        this.transient.clear();
+    }
+
     async selectDirectory(selectedPath: string): Promise<NativeDirectoryReference> {
         const entry = await this.add(selectedPath, 'directory');
         return { kind: 'directory', platform: 'electron', grantId: entry.id, name: entry.name };
@@ -163,7 +179,7 @@ export class NativeReadGrants {
     private async get(id: string, kind?: Grant['kind']) {
         grantId(id);
         await this.load();
-        const entry = this.grants.get(id);
+        const entry = this.transient.get(id) ?? this.grants.get(id);
         if (!entry || (kind && kind !== entry.kind)) throw new NativeFileError('permission-denied');
         return entry;
     }
@@ -173,7 +189,7 @@ export class NativeReadGrants {
         await this.load();
         // A missing on-disk file is still an authorized reference. Reading reports
         // file-missing rather than misclassifying it as a permission rejection.
-        return this.grants.has(id) ? 'granted' : 'denied';
+        return this.transient.has(id) || this.grants.has(id) ? 'granted' : 'denied';
     }
 
     async revoke(id: string): Promise<void> {

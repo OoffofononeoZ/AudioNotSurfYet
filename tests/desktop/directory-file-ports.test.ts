@@ -34,6 +34,8 @@ async function nativeSetup() {
     let grants = new NativeReadGrants(store);
     const reference = await grants.selectDirectory(root);
     const bridge = {
+        chooseProject: vi.fn(),
+        releaseProject: vi.fn(),
         chooseAudio: vi.fn(),
         describeFile: vi.fn(),
         chooseResourceDirectory: vi.fn(async () => ({ ok: true as const, value: reference })),

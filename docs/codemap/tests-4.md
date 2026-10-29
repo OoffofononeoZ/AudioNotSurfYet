@@ -8,6 +8,9 @@
 
 | 文件 | 本地静态引用（最多显示 6 项） |
 | --- | --- |
+| [tests/transcription/quality-metrics.test.ts](../../tests/transcription/quality-metrics.test.ts) | [tests/transcription/qualityMetrics.ts](../../tests/transcription/qualityMetrics.ts) |
+| [tests/transcription/quality-probe.worker.ts](../../tests/transcription/quality-probe.worker.ts) | [src/processing/sha256.ts](../../src/processing/sha256.ts)、[src/processing/stemAuditionSource.ts](../../src/processing/stemAuditionSource.ts)、[src/processing/storage.ts](../../src/processing/storage.ts)、[src/transcription/auxiliarySeparation.ts](../../src/transcription/auxiliarySeparation.ts)、[src/transcription/drumModel.ts](../../src/transcription/drumModel.ts)、[src/transcription/modelManifest.ts](../../src/transcription/modelManifest.ts)、另 3 项，按需核对源码 |
+| [tests/transcription/qualityFixtures.ts](../../tests/transcription/qualityFixtures.ts) | — |
 | [tests/transcription/qualityMetrics.ts](../../tests/transcription/qualityMetrics.ts) | — |
 | [tests/transcription/result-repository.test.ts](../../tests/transcription/result-repository.test.ts) | [src/processing/dsp.ts](../../src/processing/dsp.ts)、[src/processing/modelManifest.ts](../../src/processing/modelManifest.ts)、[src/processing/sha256.ts](../../src/processing/sha256.ts)、[src/transcription/modelManifest.ts](../../src/transcription/modelManifest.ts)、[src/transcription/resultRepository.ts](../../src/transcription/resultRepository.ts)、[src/transcription/workerProtocol.ts](../../src/transcription/workerProtocol.ts) |
 | [tests/transcription/vitePlugin.ts](../../tests/transcription/vitePlugin.ts) | — |

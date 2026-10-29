@@ -20,6 +20,24 @@ afterEach(async () => {
 });
 
 describe('native read grants', () => {
+    it('keeps one-shot project selections out of persistent grants and releases them independently', async () => {
+        const selected = path.join(root, 'project.json');
+        await writeFile(selected, '{}', 'utf8');
+        const grants = new NativeReadGrants(store);
+        const persistent = await grants.selectFile(selected),
+            transient = await grants.selectTransientFile(selected);
+        expect(transient.grantId).not.toBe(persistent.grantId);
+        expect((await grants.describe(transient.grantId)).size).toBe(2);
+        expect(JSON.parse(await readFile(store, 'utf8')).grants).toHaveLength(1);
+        grants.releaseTransientFile(persistent.grantId);
+        expect(await grants.permission(persistent.grantId)).toBe('granted');
+        grants.releaseTransientFile(transient.grantId);
+        expect(await grants.permission(transient.grantId)).toBe('denied');
+        const later = await grants.selectTransientFile(selected);
+        expect(await new NativeReadGrants(store).permission(later.grantId)).toBe('denied');
+        grants.clearTransientFiles();
+        expect(await grants.permission(later.grantId)).toBe('denied');
+    });
     it('persists only user-selected files, reuses references, serializes concurrent grants and revokes without deleting files', async () => {
         const first = path.join(root, '本地 音频.wav'),
             second = path.join(root, 'second.mp3');

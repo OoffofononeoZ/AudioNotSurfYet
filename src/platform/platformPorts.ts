@@ -5,23 +5,33 @@ import { DesktopAudioFiles } from './desktopAudioFiles';
 import type { DirectoryFileAccess } from './directoryFiles';
 import { BrowserDirectoryFiles } from './webDirectoryFiles';
 import { DesktopDirectoryFiles } from './desktopDirectoryFiles';
+import type { FileTransferAccess } from './transferContracts';
+import { BrowserFileTransfers } from './webFileTransfers';
+import { DesktopFileTransfers } from './desktopFileTransfers';
 
 export interface PlatformPorts {
     readonly kind: 'web' | 'electron';
     readonly audioFiles: AudioFileAccess;
     readonly directoryFiles: DirectoryFileAccess;
+    readonly transfers: FileTransferAccess;
 }
 
 export function createPlatformPorts(bridge?: DesktopBridge): PlatformPorts {
     if (!bridge)
-        return { kind: 'web', audioFiles: new BrowserAudioFiles(), directoryFiles: new BrowserDirectoryFiles() };
-    if (bridge.platform !== 'electron' || bridge.apiVersion !== 1 || !bridge.files) {
+        return {
+            kind: 'web',
+            audioFiles: new BrowserAudioFiles(),
+            directoryFiles: new BrowserDirectoryFiles(),
+            transfers: new BrowserFileTransfers(),
+        };
+    if (bridge.platform !== 'electron' || bridge.apiVersion !== 1 || !bridge.files || !bridge.saves) {
         throw Error('桌面宿主与应用文件接口不匹配，请重新构建应用。');
     }
     return {
         kind: 'electron',
         audioFiles: new DesktopAudioFiles(bridge.files),
         directoryFiles: new DesktopDirectoryFiles(bridge.files),
+        transfers: new DesktopFileTransfers(bridge.files, bridge.saves),
     };
 }
 

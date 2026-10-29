@@ -202,6 +202,7 @@ const createControllerHarness = (
         playbackReleases,
         analysisReleases,
         savedFiles,
+        fileGateway,
         setOpenedBytes: (bytes: Uint8Array | null) => {
             openedBytes = bytes
                 ? (bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength) as ArrayBuffer)
@@ -458,6 +459,87 @@ describe('Editor E1 foundation integration', () => {
         await expect(harness.controller.importProject()).resolves.toBe('imported');
         expect(harness.repository.envelope?.project.updatedAt).toBe('2026-08-26T01:01:00.000Z');
         await harness.controller.dispose();
+    });
+
+    test.each(['edit', 'leave', 'dispose'])('ignores a delayed project import after %s', async action => {
+        const h = createControllerHarness();
+        await h.controller.enter(h.trackA.id);
+        let finish!: (value: { name: string; bytes: ArrayBuffer }) => void;
+        vi.spyOn(h.fileGateway, 'open').mockImplementationOnce(
+            () =>
+                new Promise(resolve => {
+                    finish = resolve;
+                }),
+        );
+        const importing = h.controller.importProject();
+        if (action === 'edit') {
+            const project = h.controller.getSnapshot().project!;
+            const segment = project.tempoMap[0]!;
+            if (segment.mode !== 'metered') throw Error('Expected metered fixture');
+            segment.bpm = 123;
+            segment.bpmSource = 'user';
+            h.controller.updateProject(project, true);
+            await h.controller.flush();
+        } else if (action === 'leave') await h.controller.leave();
+        else await h.controller.dispose();
+        const expected = h.controller.getSnapshot().project;
+        finish({ name: 'stale.json', bytes: new TextEncoder().encode('{').buffer });
+        expect(await importing).toBe('cancelled');
+        expect(h.controller.getSnapshot().project).toEqual(expected);
+        await h.controller.dispose();
+    });
+
+    test('a newer project choice wins over an older picker result', async () => {
+        const h = createControllerHarness();
+        await h.controller.enter(h.trackA.id);
+        const project = h.controller.getSnapshot().project!;
+        project.updatedAt = '2026-08-26T02:00:00.000Z';
+        let finish!: (value: { name: string; bytes: ArrayBuffer }) => void;
+        vi.spyOn(h.fileGateway, 'open')
+            .mockImplementationOnce(
+                () =>
+                    new Promise(resolve => {
+                        finish = resolve;
+                    }),
+            )
+            .mockResolvedValueOnce({ name: 'new.json', bytes: encodeEditorProjectV2(project).buffer as ArrayBuffer });
+        const old = h.controller.importProject();
+        expect(await h.controller.importProject()).toBe('imported');
+        finish({ name: 'old.json', bytes: new TextEncoder().encode('{').buffer });
+        expect(await old).toBe('cancelled');
+        expect(h.controller.getSnapshot().project?.updatedAt).toBe(project.updatedAt);
+        await h.controller.dispose();
+    });
+
+    test('a delayed export does not clear the leave warning for edits made while saving', async () => {
+        const h = createControllerHarness();
+        await h.controller.enter(h.trackA.id);
+        const first = h.controller.getSnapshot().project!;
+        const firstSegment = first.tempoMap[0]!;
+        if (firstSegment.mode !== 'metered') throw Error('Expected metered fixture');
+        firstSegment.bpm = 111;
+        firstSegment.bpmSource = 'user';
+        h.controller.updateProject(first, true);
+        await h.controller.flush();
+        let finish!: (result: 'saved') => void;
+        vi.spyOn(h.fileGateway, 'save').mockImplementationOnce(
+            () =>
+                new Promise(resolve => {
+                    finish = resolve;
+                }),
+        );
+        const exporting = h.controller.exportProject();
+        const next = h.controller.getSnapshot().project!;
+        const nextSegment = next.tempoMap[0]!;
+        if (nextSegment.mode !== 'metered') throw Error('Expected metered fixture');
+        nextSegment.bpm = 128;
+        h.controller.updateProject(next, true);
+        await h.controller.flush();
+        finish('saved');
+        expect(await exporting).toBe('saved');
+        expect(h.controller.shouldWarnOnLeave()).toBe(true);
+        expect(h.controller.getSnapshot().project?.tempoMap[0]).toMatchObject({ bpm: 128 });
+        await h.controller.dispose();
     });
 
     test('retains the in-memory project when draft persistence fails', async () => {

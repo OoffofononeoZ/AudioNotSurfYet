@@ -3,6 +3,8 @@ import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { NativeReadGrants } from './files/nativeGrants';
 import { registerFileIpc } from './files/fileIpc';
+import { NativeSaves } from './files/nativeSaves';
+import { registerSaveIpc } from './files/saveIpc';
 import { nativeError } from './files/nativeErrors';
 import { resolveNativeRead, type InitiatedFileRequest } from './files/nativeReadRequest';
 import {
@@ -41,6 +43,9 @@ async function createWindow() {
     const ownerOrigin = devOrigin ?? APP_ORIGIN;
     const grants = new NativeReadGrants(path.join(app.getPath('userData'), 'native-read-grants.json'));
     const unregisterFiles = registerFileIpc(() => window, ownerOrigin, grants);
+    const saves = new NativeSaves();
+    const unregisterSaves = registerSaveIpc(() => window, ownerOrigin, saves);
+    app.once('will-quit', unregisterSaves);
     app.once('will-quit', unregisterFiles);
     const desktopSession = session.fromPartition('persist:audiosurf-desktop');
     desktopSession.setPermissionRequestHandler((contents, permission, callback, details) => {
@@ -118,6 +123,18 @@ async function createWindow() {
         }
     });
     window.webContents.on('will-attach-webview', event => event.preventDefault());
+    const abortSaves = () => {
+        void saves.abortAll().catch(error => console.error('Native save cleanup failed', nativeError(error).code));
+    };
+    window.webContents.on('render-process-gone', abortSaves);
+    window.webContents.on('render-process-gone', () => grants.clearTransientFiles());
+    window.webContents.on('did-start-navigation', (_event, _url, _sameDocument, isMainFrame) => {
+        if (isMainFrame) {
+            abortSaves();
+            grants.clearTransientFiles();
+        }
+    });
+    window.once('closed', abortSaves);
     window.webContents.on('will-prevent-unload', event => {
         if (!window) return;
         const result = dialog.showMessageBoxSync(window, {
