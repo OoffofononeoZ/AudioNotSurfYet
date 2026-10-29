@@ -8,6 +8,7 @@
 
 | 文件 | 本地静态引用（最多显示 6 项） |
 | --- | --- |
+| [tests/e2e/p1-ft.spec.ts](../../tests/e2e/p1-ft.spec.ts) | [tests/processing/acceptance.ts](../../tests/processing/acceptance.ts) |
 | [tests/e2e/p1-listening.spec.ts](../../tests/e2e/p1-listening.spec.ts) | [tests/processing/harness.ts](../../tests/processing/harness.ts)、[tests/processing/persistentFixture.ts](../../tests/processing/persistentFixture.ts) |
 | [tests/e2e/p1-performance.spec.ts](../../tests/e2e/p1-performance.spec.ts) | [tests/processing/harness.ts](../../tests/processing/harness.ts)、[tests/processing/persistentFixture.ts](../../tests/processing/persistentFixture.ts)、[tests/processing/systemSampler.ts](../../tests/processing/systemSampler.ts) |
 | [tests/e2e/p1-pipeline.spec.ts](../../tests/e2e/p1-pipeline.spec.ts) | [tests/processing/harness.ts](../../tests/processing/harness.ts) |
@@ -107,4 +108,3 @@
 | [tests/processing/editor-separation-service.test.ts](../../tests/processing/editor-separation-service.test.ts) | [src/analysis/pcm.ts](../../src/analysis/pcm.ts)、[src/processing/editorResultRepository.ts](../../src/processing/editorResultRepository.ts)、[src/processing/editorSeparationService.ts](../../src/processing/editorSeparationService.ts)、[src/processing/kernel.ts](../../src/processing/kernel.ts)、[src/processing/modelManifest.ts](../../src/processing/modelManifest.ts)、[tests/processing/fixture.ts](../../tests/processing/fixture.ts) |
 | [tests/processing/fixture.ts](../../tests/processing/fixture.ts) | [src/analysis/pcm.ts](../../src/analysis/pcm.ts)、[src/processing/modelManifest.ts](../../src/processing/modelManifest.ts) |
 | [tests/processing/harness.ts](../../tests/processing/harness.ts) | [src/audio/audioEngine.ts](../../src/audio/audioEngine.ts)、[src/processing/controller.ts](../../src/processing/controller.ts)、[src/processing/kernel.ts](../../src/processing/kernel.ts)、[src/processing/modelCache.ts](../../src/processing/modelCache.ts)、[src/processing/modelManifest.ts](../../src/processing/modelManifest.ts)、[src/processing/sha256.ts](../../src/processing/sha256.ts)、另 4 项，按需核对源码 |
-| [tests/processing/p1-controller.test.ts](../../tests/processing/p1-controller.test.ts) | [src/processing/controller.ts](../../src/processing/controller.ts)、[src/processing/workerProtocol.ts](../../src/processing/workerProtocol.ts)、[tests/processing/fixture.ts](../../tests/processing/fixture.ts) |

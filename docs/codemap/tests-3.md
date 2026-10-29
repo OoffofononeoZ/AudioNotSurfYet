@@ -8,6 +8,7 @@
 
 | 文件 | 本地静态引用（最多显示 6 项） |
 | --- | --- |
+| [tests/processing/p1-controller.test.ts](../../tests/processing/p1-controller.test.ts) | [src/processing/controller.ts](../../src/processing/controller.ts)、[src/processing/workerProtocol.ts](../../src/processing/workerProtocol.ts)、[tests/processing/fixture.ts](../../tests/processing/fixture.ts) |
 | [tests/processing/p1-dsp.test.ts](../../tests/processing/p1-dsp.test.ts) | [src/processing/dsp.ts](../../src/processing/dsp.ts)、[src/processing/modelManifest.ts](../../src/processing/modelManifest.ts)、[src/processing/sha256.ts](../../src/processing/sha256.ts)、[tests/processing/fixture.ts](../../tests/processing/fixture.ts) |
 | [tests/processing/p1-kernel.test.ts](../../tests/processing/p1-kernel.test.ts) | [src/processing/kernel.ts](../../src/processing/kernel.ts)、[src/processing/modelManifest.ts](../../src/processing/modelManifest.ts)、[tests/processing/fixture.ts](../../tests/processing/fixture.ts) |
 | [tests/processing/p1-model-input.test.ts](../../tests/processing/p1-model-input.test.ts) | [src/processing/dsp.ts](../../src/processing/dsp.ts)、[src/processing/modelInput.ts](../../src/processing/modelInput.ts)、[src/processing/modelManifest.ts](../../src/processing/modelManifest.ts)、[tests/processing/fixture.ts](../../tests/processing/fixture.ts) |
@@ -107,4 +108,3 @@
 | [tests/transcription/candidates.test.ts](../../tests/transcription/candidates.test.ts) | [src/editor/projectCodec.ts](../../src/editor/projectCodec.ts)、[src/transcription/applyCandidates.ts](../../src/transcription/applyCandidates.ts)、[src/transcription/candidateTypes.ts](../../src/transcription/candidateTypes.ts)、[src/transcription/candidates.ts](../../src/transcription/candidates.ts) |
 | [tests/transcription/controller.test.ts](../../tests/transcription/controller.test.ts) | [src/processing/kernel.ts](../../src/processing/kernel.ts)、[src/transcription/candidateTypes.ts](../../src/transcription/candidateTypes.ts)、[src/transcription/controller.ts](../../src/transcription/controller.ts)、[src/transcription/workerProtocol.ts](../../src/transcription/workerProtocol.ts) |
 | [tests/transcription/download-models.mjs](../../tests/transcription/download-models.mjs) | — |
-| [tests/transcription/download-models.ps1](../../tests/transcription/download-models.ps1) | — |

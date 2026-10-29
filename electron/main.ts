@@ -1,4 +1,4 @@
-import { app, BrowserWindow, dialog, net, protocol, session, shell } from 'electron';
+import { app, BrowserWindow, dialog, net, protocol, session, shell, screen } from 'electron';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { NativeReadGrants } from './files/nativeGrants';
@@ -8,6 +8,7 @@ import { registerSaveIpc } from './files/saveIpc';
 import { NativeBundles } from './files/nativeBundles';
 import { registerBundleIpc } from './files/bundleIpc';
 import { nativeError } from './files/nativeErrors';
+import { loadWindowState, windowPlacement, trackWindowState, WINDOW_MINIMUM } from './windowState';
 import { resolveNativeRead, type InitiatedFileRequest } from './files/nativeReadRequest';
 import {
     APP_CSP,
@@ -97,12 +98,17 @@ async function createWindow() {
             });
         }
     });
+    const windowStateFile = path.join(app.getPath('userData'), 'window-state.json');
+    const placement = windowPlacement(
+        loadWindowState(windowStateFile),
+        screen.getPrimaryDisplay().workArea,
+        screen.getAllDisplays().map(display => display.workArea),
+    );
     window = new BrowserWindow({
         title: 'AudioNotSurfYet',
-        width: 1440,
-        height: 960,
-        minWidth: 1024,
-        minHeight: 640,
+        ...placement.bounds,
+        minWidth: WINDOW_MINIMUM.width,
+        minHeight: WINDOW_MINIMUM.height,
         show: false,
         backgroundColor: '#0d1711',
         webPreferences: {
@@ -117,6 +123,7 @@ async function createWindow() {
             backgroundThrottling: false,
         },
     });
+    trackWindowState(window, windowStateFile);
     window.webContents.setWindowOpenHandler(({ url }) => {
         void openExternal(url);
         return { action: 'deny' };
@@ -158,7 +165,11 @@ async function createWindow() {
     window.on('closed', () => {
         window = null;
     });
-    if (!profile) window.once('ready-to-show', () => window?.show());
+    if (!profile)
+        window.once('ready-to-show', () => {
+            if (placement.maximized) window?.maximize();
+            window?.show();
+        });
     await window.loadURL(devUrl ?? `${APP_ORIGIN}/`);
 }
 

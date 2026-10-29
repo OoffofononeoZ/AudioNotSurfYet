@@ -62,6 +62,7 @@
 | [tests/desktop/native-startup-cleanup.test.ts](../../tests/desktop/native-startup-cleanup.test.ts) | [electron/files/nativeBundles.ts](../../electron/files/nativeBundles.ts)、[electron/files/nativeSaves.ts](../../electron/files/nativeSaves.ts) |
 | [tests/desktop/save-ipc.test.ts](../../tests/desktop/save-ipc.test.ts) | [electron/files/nativeSaves.ts](../../electron/files/nativeSaves.ts)、[electron/files/saveIpc.ts](../../electron/files/saveIpc.ts) |
 | [tests/desktop/smoke.mjs](../../tests/desktop/smoke.mjs) | — |
+| [tests/desktop/window-state.test.ts](../../tests/desktop/window-state.test.ts) | [electron/windowState.ts](../../electron/windowState.ts) |
 | [tests/docs/validate-docs.mjs](../../tests/docs/validate-docs.mjs) | [scripts/check-repo.mjs](../../scripts/check-repo.mjs)、[scripts/lib/repository.mjs](../../scripts/lib/repository.mjs) |
 | [tests/e2e/analysis-loading.spec.ts](../../tests/e2e/analysis-loading.spec.ts) | [tests/support/file-picker.ts](../../tests/support/file-picker.ts) |
 | [tests/e2e/app-shell.spec.ts](../../tests/e2e/app-shell.spec.ts) | [tests/support/file-picker.ts](../../tests/support/file-picker.ts) |
@@ -107,4 +108,3 @@
 | [tests/e2e/m8-analyzer.spec.ts](../../tests/e2e/m8-analyzer.spec.ts) | [tests/support/analyzer-list.ts](../../tests/support/analyzer-list.ts)、[tests/support/file-picker.ts](../../tests/support/file-picker.ts)、[tests/support/m7-learning-fixture.ts](../../tests/support/m7-learning-fixture.ts)、[tests/support/m8-scalar-fixture.ts](../../tests/support/m8-scalar-fixture.ts) |
 | [tests/e2e/m9-analyzer.spec.ts](../../tests/e2e/m9-analyzer.spec.ts) | [tests/support/analyzer-list.ts](../../tests/support/analyzer-list.ts)、[tests/support/file-picker.ts](../../tests/support/file-picker.ts)、[tests/support/m7-learning-fixture.ts](../../tests/support/m7-learning-fixture.ts)、[tests/support/m9-vector-fixture.ts](../../tests/support/m9-vector-fixture.ts) |
 | [tests/e2e/p1-contracts.spec.ts](../../tests/e2e/p1-contracts.spec.ts) | — |
-| [tests/e2e/p1-ft.spec.ts](../../tests/e2e/p1-ft.spec.ts) | [tests/processing/acceptance.ts](../../tests/processing/acceptance.ts) |
