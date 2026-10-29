@@ -8,6 +8,9 @@
 
 | 文件 | 本地静态引用（最多显示 6 项） |
 | --- | --- |
+| [tests/e2e/stem-analysis.spec.ts](../../tests/e2e/stem-analysis.spec.ts) | [tests/support/editor-marking.ts](../../tests/support/editor-marking.ts)、[tests/support/stem-analysis.ts](../../tests/support/stem-analysis.ts) |
+| [tests/e2e/transcription-models.spec.ts](../../tests/e2e/transcription-models.spec.ts) | [tests/processing/systemSampler.ts](../../tests/processing/systemSampler.ts) |
+| [tests/e2e/transcription-quality.spec.ts](../../tests/e2e/transcription-quality.spec.ts) | [src/transcription/auxiliarySeparation.ts](../../src/transcription/auxiliarySeparation.ts)、[src/transcription/drumTokens.ts](../../src/transcription/drumTokens.ts)、[src/transcription/pitchNotes.ts](../../src/transcription/pitchNotes.ts)、[tests/processing/systemSampler.ts](../../tests/processing/systemSampler.ts)、[tests/transcription/qualityFixtures.ts](../../tests/transcription/qualityFixtures.ts)、[tests/transcription/qualityMetrics.ts](../../tests/transcription/qualityMetrics.ts) |
 | [tests/e2e/visualizer-algorithm-sandbox.spec.ts](../../tests/e2e/visualizer-algorithm-sandbox.spec.ts) | — |
 | [tests/e2e/visualizer-analysis-input.spec.ts](../../tests/e2e/visualizer-analysis-input.spec.ts) | [src/visualizer/visualizerSessionController.ts](../../src/visualizer/visualizerSessionController.ts)、[tests/support/file-picker.ts](../../tests/support/file-picker.ts)、[tests/support/visualizer-assets.mjs](../../tests/support/visualizer-assets.mjs) |
 | [tests/e2e/visualizer-bottom-status.spec.ts](../../tests/e2e/visualizer-bottom-status.spec.ts) | [src/visualizer/compositionTypes.ts](../../src/visualizer/compositionTypes.ts)、[src/visualizer/exportTypes.ts](../../src/visualizer/exportTypes.ts)、[src/visualizer/visualizerSessionController.ts](../../src/visualizer/visualizerSessionController.ts)、[tests/support/file-picker.ts](../../tests/support/file-picker.ts) |
@@ -105,6 +108,3 @@
 | [tests/processing/prepare-assets.mjs](../../tests/processing/prepare-assets.mjs) | — |
 | [tests/processing/prepare-graph-probe.mjs](../../tests/processing/prepare-graph-probe.mjs) | — |
 | [tests/processing/prepare-probe.mjs](../../tests/processing/prepare-probe.mjs) | — |
-| [tests/processing/runtime-probe.worker.ts](../../tests/processing/runtime-probe.worker.ts) | [src/processing/dsp.ts](../../src/processing/dsp.ts)、[src/processing/modelCache.ts](../../src/processing/modelCache.ts)、[src/processing/modelManifest.ts](../../src/processing/modelManifest.ts)、[src/processing/runtime.ts](../../src/processing/runtime.ts)、[tests/processing/fixture.ts](../../tests/processing/fixture.ts) |
-| [tests/processing/stem-audition-source.test.ts](../../tests/processing/stem-audition-source.test.ts) | [src/processing/stemAuditionSource.ts](../../src/processing/stemAuditionSource.ts) |
-| [tests/processing/systemSampler.ts](../../tests/processing/systemSampler.ts) | — |

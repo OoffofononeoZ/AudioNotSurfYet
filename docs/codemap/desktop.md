@@ -9,5 +9,9 @@
 | 文件 | 本地静态引用（最多显示 6 项） |
 | --- | --- |
 | [electron/appResources.ts](../../electron/appResources.ts) | — |
-| [electron/main.ts](../../electron/main.ts) | [electron/appResources.ts](../../electron/appResources.ts) |
-| [electron/preload.ts](../../electron/preload.ts) | — |
+| [electron/files/fileIpc.ts](../../electron/files/fileIpc.ts) | [electron/files/nativeErrors.ts](../../electron/files/nativeErrors.ts)、[electron/files/nativeGrants.ts](../../electron/files/nativeGrants.ts)、[src/platform/fileContracts.ts](../../src/platform/fileContracts.ts) |
+| [electron/files/nativeErrors.ts](../../electron/files/nativeErrors.ts) | [src/platform/fileContracts.ts](../../src/platform/fileContracts.ts) |
+| [electron/files/nativeGrants.ts](../../electron/files/nativeGrants.ts) | [electron/files/nativeErrors.ts](../../electron/files/nativeErrors.ts)、[src/platform/fileContracts.ts](../../src/platform/fileContracts.ts) |
+| [electron/files/nativeReadRequest.ts](../../electron/files/nativeReadRequest.ts) | [electron/appResources.ts](../../electron/appResources.ts)、[electron/files/nativeErrors.ts](../../electron/files/nativeErrors.ts)、[electron/files/nativeGrants.ts](../../electron/files/nativeGrants.ts) |
+| [electron/main.ts](../../electron/main.ts) | [electron/appResources.ts](../../electron/appResources.ts)、[electron/files/fileIpc.ts](../../electron/files/fileIpc.ts)、[electron/files/nativeErrors.ts](../../electron/files/nativeErrors.ts)、[electron/files/nativeGrants.ts](../../electron/files/nativeGrants.ts)、[electron/files/nativeReadRequest.ts](../../electron/files/nativeReadRequest.ts) |
+| [electron/preload.ts](../../electron/preload.ts) | [src/platform/fileContracts.ts](../../src/platform/fileContracts.ts) |

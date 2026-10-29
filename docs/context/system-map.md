@@ -12,6 +12,8 @@ upstream_docs:
 
 Web/Electron 双端 Goal 已批准，D1 的 `electron/` 宿主、独立构建及安全应用协议已接入，渲染端复用网页产物；原生启动阻断尚未解决。平台端口、原生授权及独立存储边界见[双端合同](desktop.md)，按阶段落地，不复制以下共享业务服务。
 
+D2 已添加主进程只读文件/目录授权、受限 IPC 和文件流端点，以及 `src/platform/` 双端音频文件端口；当前尚未注入页面与队列。Web 原始句柄与桌面 grantId 的运行时引用均留在 Pinia 外；磁盘路径只由主进程授权记录持有，真实运行验证受 D1 原生异常阻断。
+
 当前系统是 Vue 3 单页应用。MainLayout 创建并提供唯一的 `AudioSessionService`、`AnalysisCoordinator`、`EditorSessionController` 与 `VisualizerSessionController`；服务通过 `AudioEngine` 解码、播放本地文件，并通过三个独立 IndexedDB repository 保存 Analyzer session、Editor 单草稿与 Visualizer 单草稿。Analyzer、Editor 与 Visualizer 已通过互斥 consumer lease 复用同一 coordinator；原曲与已验证四轨按来源去重、每来源最多四项，复用同一分析 Worker。File、Blob、handle、PCM、Worker 与音频节点均留在 store 外。MusicBar、Editor 与 Visualizer 读取同一播放快照；Editor 与 Visualizer 普通工作区保留 MusicBar；两个工作区的 tokenized route lease 临时使用 repeat-one，导出传输租约优先停止循环。
 
 DEC-072另由MainLayout提供唯一`EditorSeparationService`，使用同一AudioEngine原始PCM；Editor增加分离工作区和四轨展示/导出。模型与结果索引使用`processing-p1` IndexedDB，原PCM/planar/WAV使用OPFS；最多一个专用分离Worker，播放及analysis所有权不变。

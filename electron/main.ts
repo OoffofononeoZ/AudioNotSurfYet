@@ -1,6 +1,10 @@
 import { app, BrowserWindow, dialog, net, protocol, session, shell } from 'electron';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
+import { NativeReadGrants } from './files/nativeGrants';
+import { registerFileIpc } from './files/fileIpc';
+import { nativeError } from './files/nativeErrors';
+import { resolveNativeRead, type InitiatedFileRequest } from './files/nativeReadRequest';
 import {
     APP_CSP,
     APP_ORIGIN,
@@ -34,6 +38,10 @@ async function openExternal(value: string) {
 }
 
 async function createWindow() {
+    const ownerOrigin = devOrigin ?? APP_ORIGIN;
+    const grants = new NativeReadGrants(path.join(app.getPath('userData'), 'native-read-grants.json'));
+    const unregisterFiles = registerFileIpc(() => window, ownerOrigin, grants);
+    app.once('will-quit', unregisterFiles);
     const desktopSession = session.fromPartition('persist:audiosurf-desktop');
     desktopSession.setPermissionRequestHandler((contents, permission, callback, details) => {
         const ownPage = contents === window?.webContents && details.isMainFrame && trustedUrl(details.requestingUrl);
@@ -47,6 +55,21 @@ async function createWindow() {
         );
     });
     desktopSession.protocol.handle('app', async request => {
+        if (new URL(request.url).pathname.startsWith('/native-files/')) {
+            try {
+                const file = await resolveNativeRead(request as InitiatedFileRequest, grants, ownerOrigin);
+                const response = await net.fetch(pathToFileURL(file).href, { method: request.method });
+                const headers = new Headers(response.headers);
+                headers.set('Access-Control-Allow-Origin', ownerOrigin);
+                headers.set('Content-Type', 'application/octet-stream');
+                headers.set('X-Content-Type-Options', 'nosniff');
+                headers.set('Cache-Control', 'no-store');
+                return new Response(response.body, { status: response.status, headers });
+            } catch (error) {
+                const code = nativeError(error).code;
+                return new Response('File unavailable', { status: code === 'file-missing' ? 404 : 403 });
+            }
+        }
         try {
             const file = await resolveRendererResource(
                 path.join(__dirname, '../renderer'),
