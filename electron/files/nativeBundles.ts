@@ -4,7 +4,7 @@ import path from 'node:path';
 import type { BundleEntry, NativeBundleReference } from '../../src/platform/bundleContracts';
 import { NativeSaves } from './nativeSaves';
 import { grantId } from './nativeGrants';
-import { NativeFileError } from './nativeErrors';
+import { NativeFileError, nativeError } from './nativeErrors';
 import {
     absent,
     bundleEntries,
@@ -37,12 +37,27 @@ interface Bundle {
 }
 export class NativeBundles {
     private bundles = new Map<string, Bundle>();
+    private starting = new Set<Promise<NativeBundleReference>>();
     private generation = 0;
     private disposed = false;
     get revision() {
         return this.generation;
     }
-    async begin(parentPath: string, name: string, kind: BundleKind, input: unknown): Promise<NativeBundleReference> {
+    begin(parentPath: string, name: string, kind: BundleKind, input: unknown): Promise<NativeBundleReference> {
+        const work = this.create(parentPath, name, kind, input);
+        this.starting.add(work);
+        void work.then(
+            () => this.starting.delete(work),
+            () => this.starting.delete(work),
+        );
+        return work;
+    }
+    private async create(
+        parentPath: string,
+        name: string,
+        kind: BundleKind,
+        input: unknown,
+    ): Promise<NativeBundleReference> {
         if (
             this.disposed ||
             (kind !== 'preset' && kind !== 'wallpaper') ||
@@ -78,15 +93,21 @@ export class NativeBundles {
             cleanup: null,
         };
         this.bundles.set(id, bundle);
-        try {
+        const initialization = (async () => {
             if (kind === 'preset') {
                 const source = path.join(temporary, 'source');
                 await mkdir(source);
                 bundle.sourceIdentity = await bundleIdentity(source);
             }
+        })();
+        bundle.operation = initialization;
+        try {
+            await initialization;
+            bundle.operation = null;
             if (this.disposed || generation !== this.generation) throw new NativeFileError('invalid-request');
             return { bundleId: id, folderName: name };
         } catch (error) {
+            bundle.operation = null;
             await this.abort(id);
             throw error;
         }
@@ -195,7 +216,14 @@ export class NativeBundles {
     }
     async abortAll() {
         ++this.generation;
-        const results = await Promise.allSettled([...this.bundles.keys()].map(id => this.abort(id)));
+        const results = await Promise.allSettled([
+            ...[...this.bundles.keys()].map(id => this.abort(id)),
+            ...[...this.starting].map(work =>
+                work.catch(error => {
+                    if (nativeError(error).code === 'cleanup-failed') throw error;
+                }),
+            ),
+        ]);
         if (results.some(result => result.status === 'rejected')) throw new NativeFileError('cleanup-failed');
     }
     async dispose() {

@@ -48,13 +48,24 @@ const unchanged = (a: Identity | null, b: Identity | null) =>
 /** Paths enter only from the main-process save dialog. Renderer owns opaque, one-use IDs. */
 export class NativeSaves {
     private saves = new Map<string, Save>();
+    private starting = new Set<Promise<NativeSaveReference>>();
     private disposed = false;
     private generation = 0;
     get revision() {
         return this.generation;
     }
 
-    async begin(selectedPath: string, size: number): Promise<NativeSaveReference> {
+    begin(selectedPath: string, size: number): Promise<NativeSaveReference> {
+        const work = this.create(selectedPath, size);
+        this.starting.add(work);
+        void work.then(
+            () => this.starting.delete(work),
+            () => this.starting.delete(work),
+        );
+        return work;
+    }
+
+    private async create(selectedPath: string, size: number): Promise<NativeSaveReference> {
         if (this.disposed || !Number.isSafeInteger(size) || size < 0) throw new NativeFileError('invalid-request');
         const generation = this.generation;
         const parent = await realpath(path.dirname(selectedPath));
@@ -211,7 +222,14 @@ export class NativeSaves {
 
     async abortAll(): Promise<void> {
         ++this.generation;
-        const results = await Promise.allSettled([...this.saves.keys()].map(id => this.abort(id)));
+        const results = await Promise.allSettled([
+            ...[...this.saves.keys()].map(id => this.abort(id)),
+            ...[...this.starting].map(work =>
+                work.catch(error => {
+                    if (nativeError(error).code === 'cleanup-failed') throw error;
+                }),
+            ),
+        ]);
         if (results.some(result => result.status === 'rejected')) throw new NativeFileError('cleanup-failed');
     }
     async dispose() {

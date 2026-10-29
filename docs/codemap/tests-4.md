@@ -8,6 +8,7 @@
 
 | 文件 | 本地静态引用（最多显示 6 项） |
 | --- | --- |
+| [tests/transcription/editor-service.test.ts](../../tests/transcription/editor-service.test.ts) | [src/editor/projectCodec.ts](../../src/editor/projectCodec.ts)、[src/editor/types.ts](../../src/editor/types.ts)、[src/processing/editorProcessingGate.ts](../../src/processing/editorProcessingGate.ts)、[src/processing/editorSeparationService.ts](../../src/processing/editorSeparationService.ts)、[src/processing/modelManifest.ts](../../src/processing/modelManifest.ts)、[src/transcription/candidateTypes.ts](../../src/transcription/candidateTypes.ts)、另 3 项，按需核对源码 |
 | [tests/transcription/harness.ts](../../tests/transcription/harness.ts) | — |
 | [tests/transcription/model-probe.worker.ts](../../tests/transcription/model-probe.worker.ts) | [src/processing/dsp.ts](../../src/processing/dsp.ts)、[src/processing/modelManifest.ts](../../src/processing/modelManifest.ts)、[src/processing/sha256.ts](../../src/processing/sha256.ts)、[src/transcription/drumFeatures.ts](../../src/transcription/drumFeatures.ts)、[src/transcription/drumModel.ts](../../src/transcription/drumModel.ts)、[src/transcription/modelManifest.ts](../../src/transcription/modelManifest.ts)、另 2 项，按需核对源码 |
 | [tests/transcription/pitch-notes.test.ts](../../tests/transcription/pitch-notes.test.ts) | [src/transcription/pitchNotes.ts](../../src/transcription/pitchNotes.ts) |

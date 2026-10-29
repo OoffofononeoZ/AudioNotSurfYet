@@ -59,6 +59,7 @@
 | [tests/desktop/native-bundles.test.ts](../../tests/desktop/native-bundles.test.ts) | [electron/files/nativeBundles.ts](../../electron/files/nativeBundles.ts)、[src/platform/bundleContracts.ts](../../src/platform/bundleContracts.ts)、[src/platform/transferContracts.ts](../../src/platform/transferContracts.ts) |
 | [tests/desktop/native-grants.test.ts](../../tests/desktop/native-grants.test.ts) | [electron/files/nativeErrors.ts](../../electron/files/nativeErrors.ts)、[electron/files/nativeGrants.ts](../../electron/files/nativeGrants.ts)、[electron/files/nativeReadRequest.ts](../../electron/files/nativeReadRequest.ts) |
 | [tests/desktop/native-saves.test.ts](../../tests/desktop/native-saves.test.ts) | [electron/files/nativeSaves.ts](../../electron/files/nativeSaves.ts)、[src/platform/transferContracts.ts](../../src/platform/transferContracts.ts) |
+| [tests/desktop/native-startup-cleanup.test.ts](../../tests/desktop/native-startup-cleanup.test.ts) | [electron/files/nativeBundles.ts](../../electron/files/nativeBundles.ts)、[electron/files/nativeSaves.ts](../../electron/files/nativeSaves.ts) |
 | [tests/desktop/save-ipc.test.ts](../../tests/desktop/save-ipc.test.ts) | [electron/files/nativeSaves.ts](../../electron/files/nativeSaves.ts)、[electron/files/saveIpc.ts](../../electron/files/saveIpc.ts) |
 | [tests/desktop/smoke.mjs](../../tests/desktop/smoke.mjs) | — |
 | [tests/docs/validate-docs.mjs](../../tests/docs/validate-docs.mjs) | [scripts/check-repo.mjs](../../scripts/check-repo.mjs)、[scripts/lib/repository.mjs](../../scripts/lib/repository.mjs) |
@@ -107,4 +108,3 @@
 | [tests/e2e/m9-analyzer.spec.ts](../../tests/e2e/m9-analyzer.spec.ts) | [tests/support/analyzer-list.ts](../../tests/support/analyzer-list.ts)、[tests/support/file-picker.ts](../../tests/support/file-picker.ts)、[tests/support/m7-learning-fixture.ts](../../tests/support/m7-learning-fixture.ts)、[tests/support/m9-vector-fixture.ts](../../tests/support/m9-vector-fixture.ts) |
 | [tests/e2e/p1-contracts.spec.ts](../../tests/e2e/p1-contracts.spec.ts) | — |
 | [tests/e2e/p1-ft.spec.ts](../../tests/e2e/p1-ft.spec.ts) | [tests/processing/acceptance.ts](../../tests/processing/acceptance.ts) |
-| [tests/e2e/p1-listening.spec.ts](../../tests/e2e/p1-listening.spec.ts) | [tests/processing/harness.ts](../../tests/processing/harness.ts)、[tests/processing/persistentFixture.ts](../../tests/processing/persistentFixture.ts) |
