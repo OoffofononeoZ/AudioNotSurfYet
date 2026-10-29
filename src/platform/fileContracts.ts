@@ -10,11 +10,14 @@ export interface NativeFileReference extends LocalFileReference {
     readonly relativePath?: string;
 }
 
-export interface NativeDirectoryReference {
+export interface LocalDirectoryReference {
     readonly kind: 'directory';
+    readonly name: string;
+}
+
+export interface NativeDirectoryReference extends LocalDirectoryReference {
     readonly platform: 'electron';
     readonly grantId: string;
-    readonly name: string;
 }
 
 export interface AudioFileAccess {

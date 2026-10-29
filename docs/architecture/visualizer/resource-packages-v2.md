@@ -26,7 +26,9 @@ SVG 与 PNG/JPEG/WebP 一样属于正常展示图片资源，扩展名不区分�
 
 ## 目录加载与所有权
 
-“添加元素”打开资源商城，首次由“加载资源库”、连接后由“更换文件夹”调用 `showDirectoryPicker({mode:'read'})`。独立 `audionotsurfyet-resource-directory` IndexedDB 仅保存目录句柄，不复制资源库。进入页面只 `queryPermission`，授权有效时自动恢复；失效时由可见“恢复访问”按钮 `requestPermission`。权限语义依据 [Chrome File System Access 说明](https://developer.chrome.com/docs/capabilities/web-apis/file-system-access)。
+“添加元素”打开资源商城，首次由“加载资源库”、连接后由“更换文件夹”调用注入的 `DirectoryFileAccess`。Web 继续 `showDirectoryPicker({mode:'read'})`，独立 `audionotsurfyet-resource-directory` IndexedDB 保存原目录句柄；进入页面只查询权限，失效时由可见“恢复访问”按钮申请读取。权限语义依据 [Chrome File System Access 说明](https://developer.chrome.com/docs/capabilities/web-apis/file-system-access)。
+
+Electron 使用原生目录对话框，同一 repository 保存纯数据授权引用；主进程保存路径并约束所有相对读取，renderer 不获得路径或浏览器句柄方法。重启查询已有授权，目录移除明确失败；授权丢失需重新选择目录，不能由 renderer 自行续权。两端均不复制资源库，使用同一校验/候选替换逻辑。当前只读接入已实现，实际原生操作仍受启动异常阻断，桌面预设写入待 D3，见[双端实施状态](../../context/desktop.md)。
 
 读取信息、预览、运行包及源码入口存在性，校验路径、身份/依赖、重复项、预设组成及算法/Shader 初始化，整体通过才替换可添加库。取消、失败、迟到结果及离页不得覆盖当前可用库；句柄保存失败只提示下次需重新选择。“重新加载”读取外部新增/修改，失败保留当前库。加载保持只读；仅用户显式“导出预设”请求当前句柄的写权限，并创建 presets/<唯一新 ID>/，不改写 elements 或已有资源。导出规则见[预设](../../context/visualizer-presets.md)。
 

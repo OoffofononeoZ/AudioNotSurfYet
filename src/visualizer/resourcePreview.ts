@@ -1,4 +1,7 @@
-import { resourceFile, resourcePath, type ResourceDirectoryHandle } from './resourceFiles';
+import { resourceFile, resourcePath } from './resourceFiles';
+import type { LocalDirectoryReference } from '../platform/fileContracts';
+import { joinDirectoryPath, type DirectoryFileAccess } from '../platform/directoryFiles';
+import { browserDirectoryFiles } from '../platform/webDirectoryFiles';
 
 export const DEFAULT_RESOURCE_PREVIEW = '/default_cover.png';
 const imageTypes: Record<string, string> = {
@@ -121,25 +124,26 @@ async function decodeImage(blob: Blob, signal: AbortSignal) {
 
 /** Optional artwork must not hide resource/permission errors or acquire long-lived URLs. */
 export async function readResourcePreview(
-    root: ResourceDirectoryHandle,
+    root: LocalDirectoryReference,
     previewPath: string | undefined,
     signal: AbortSignal,
     decode = decodeImage,
+    files: { access: DirectoryFileAccess; path?: string } = { access: browserDirectoryFiles },
 ): Promise<Blob | null> {
     if (previewPath !== undefined) resourcePath(previewPath);
-    const files: string[] = [];
-    for await (const [name, handle] of root.entries()) {
+    const images: string[] = [];
+    for (const { name, kind } of await files.access.list(root, files.path ?? '', signal)) {
         signal.throwIfAborted();
-        if (handle.kind === 'file' && isResourceImage(name)) files.push(name);
+        if (kind === 'file' && isResourceImage(name)) images.push(name);
     }
     const priority = (path: string) => (/^cover\./i.test(path) ? 0 : /^preview\./i.test(path) ? 1 : 2);
-    files.sort((a, b) => priority(a) - priority(b) || a.localeCompare(b, 'en'));
-    const paths = [...new Set([...(previewPath ? [previewPath] : []), ...files])];
+    images.sort((a, b) => priority(a) - priority(b) || a.localeCompare(b, 'en'));
+    const paths = [...new Set([...(previewPath ? [previewPath] : []), ...images])];
     for (const path of paths) {
         signal.throwIfAborted();
         if (!isResourceImage(path)) continue;
         try {
-            const file = await resourceFile(root, path, signal);
+            const file = await resourceFile(root, joinDirectoryPath(files.path ?? '', path), signal, files.access);
             const type = imageTypes[path.split('.').pop()!.toLowerCase()]!;
             const blob = type === 'image/svg+xml' ? previewSvg(await file.text()) : new Blob([file], { type });
             await decode(blob, signal);

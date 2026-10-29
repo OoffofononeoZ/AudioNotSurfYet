@@ -1,10 +1,11 @@
 import { inject, provide, shallowRef, onMounted, onBeforeUnmount, type InjectionKey, type ShallowRef } from 'vue';
 import { VisualizerResourceLibrary, type ResourceLibraryState } from './resourceLibrary';
 import type { validateRuntimeSnapshot } from './validateRuntimeSnapshot';
+import { usePlatformPorts } from '../platform/platformPorts';
 const key: InjectionKey<{ library: VisualizerResourceLibrary; state: ShallowRef<ResourceLibraryState> }> =
     Symbol('visualizer-resource-library');
 export function provideResourceLibrary(validate: typeof validateRuntimeSnapshot) {
-    const library = new VisualizerResourceLibrary({ validate }),
+    const library = new VisualizerResourceLibrary({ validate, files: usePlatformPorts().directoryFiles }),
         state = shallowRef(library.snapshot());
     const detach = library.subscribe(value => (state.value = value));
     provide(key, { library, state });

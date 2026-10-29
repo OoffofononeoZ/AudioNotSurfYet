@@ -1,4 +1,6 @@
-import { readResourceDirectory, type ResourceDirectoryHandle } from './resourceDirectory';
+import { readResourceDirectory } from './resourceDirectory';
+import type { LocalDirectoryReference } from '../platform/fileContracts';
+import { browserDirectory } from '../platform/webDirectoryFiles';
 import { sameResource, resourceKey } from './resourceIdentity';
 import { validateResourcePackage } from './resourceCodec';
 import type { PreparedPresetExport } from './presetExport';
@@ -7,10 +9,11 @@ export class PresetDirectoryCleanupError extends Error {}
 
 /** Owns only the new presets/<id> directory; existing files and element dependencies stay untouched. */
 export async function savePresetDirectory(
-    root: ResourceDirectoryHandle,
+    reference: LocalDirectoryReference,
     prepared: PreparedPresetExport,
     signal: AbortSignal,
 ) {
+    const root = browserDirectory(reference);
     signal.throwIfAborted();
     // Must be invoked directly by the visible save button, before any asynchronous preparation.
     if ((await root.requestPermission({ mode: 'readwrite' })) !== 'granted')

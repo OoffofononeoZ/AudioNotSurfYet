@@ -8,6 +8,7 @@
 
 | 文件 | 本地静态引用（最多显示 6 项） |
 | --- | --- |
+| [tests/processing/prepare-probe.mjs](../../tests/processing/prepare-probe.mjs) | — |
 | [tests/processing/runtime-probe.worker.ts](../../tests/processing/runtime-probe.worker.ts) | [src/processing/dsp.ts](../../src/processing/dsp.ts)、[src/processing/modelCache.ts](../../src/processing/modelCache.ts)、[src/processing/modelManifest.ts](../../src/processing/modelManifest.ts)、[src/processing/runtime.ts](../../src/processing/runtime.ts)、[tests/processing/fixture.ts](../../tests/processing/fixture.ts) |
 | [tests/processing/stem-audition-source.test.ts](../../tests/processing/stem-audition-source.test.ts) | [src/processing/stemAuditionSource.ts](../../src/processing/stemAuditionSource.ts) |
 | [tests/processing/systemSampler.ts](../../tests/processing/systemSampler.ts) | — |
@@ -107,4 +108,3 @@
 | [tests/transcription/quality-metrics.test.ts](../../tests/transcription/quality-metrics.test.ts) | [tests/transcription/qualityMetrics.ts](../../tests/transcription/qualityMetrics.ts) |
 | [tests/transcription/quality-probe.worker.ts](../../tests/transcription/quality-probe.worker.ts) | [src/processing/sha256.ts](../../src/processing/sha256.ts)、[src/processing/stemAuditionSource.ts](../../src/processing/stemAuditionSource.ts)、[src/processing/storage.ts](../../src/processing/storage.ts)、[src/transcription/auxiliarySeparation.ts](../../src/transcription/auxiliarySeparation.ts)、[src/transcription/drumModel.ts](../../src/transcription/drumModel.ts)、[src/transcription/modelManifest.ts](../../src/transcription/modelManifest.ts)、另 3 项，按需核对源码 |
 | [tests/transcription/qualityFixtures.ts](../../tests/transcription/qualityFixtures.ts) | — |
-| [tests/transcription/qualityMetrics.ts](../../tests/transcription/qualityMetrics.ts) | — |

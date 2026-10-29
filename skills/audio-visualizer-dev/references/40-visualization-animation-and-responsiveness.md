@@ -11,6 +11,7 @@
 - Analyzer卡与Editor overlay共用analysisCanvasRenderer。overlay用MarkerTimeView和标尺几何，fixed Canvas、DPR、clip与pointer-through按当前[Editor交互](../../../docs/architecture/editor/interaction-contracts.md)，不复制旧波形/marker样式令牌。
 - LightBg/DotGridBg/MusicBar等装饰分别拥有现有Three.js、Canvas或GSAP资源；TestLands/threeDTable/testcomp是试验表面，不成为生产拓扑范本。
 - 数值/几何、确定性hash、媒体/反馈与资源门槛见[Visualizer验证](../../../docs/quality/visualizer/validation.md)，按实际影响挑选专项。
+- 外部库通过平台目录端口读取，资源校验/预览不直接调用浏览器句柄；Web 句柄和桌面授权引用的持久化与路径边界见[资源包](../../../docs/architecture/visualizer/resource-packages-v2.md)。更改目录交互时核对双端取消、权限、恢复及 URL 释放；桌面写入与实际验证状态以双端合同为准。
 
 ## RAF 与 Observer
 

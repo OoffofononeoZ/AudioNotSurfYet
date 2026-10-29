@@ -7,7 +7,10 @@ import {
 } from './resourceCodec';
 import { resourceKey, sameResource } from './resourceIdentity';
 import type { ResourceRef, ResourceSnapshot } from './resourceTypes';
-import { resourceFile as fileAt, resourcePath, type ResourceDirectoryHandle } from './resourceFiles';
+import { resourceFile as fileAt, resourcePath } from './resourceFiles';
+import type { LocalDirectoryReference } from '../platform/fileContracts';
+import type { DirectoryFileAccess } from '../platform/directoryFiles';
+import { browserDirectoryFiles } from '../platform/webDirectoryFiles';
 import { readResourcePreview } from './resourcePreview';
 export { resourcePath, type ResourceDirectoryHandle } from './resourceFiles';
 
@@ -69,27 +72,26 @@ export function validateResourceInfo(input: unknown): ResourceInfo {
 }
 /** Reads a complete candidate; never mutates the live registry or external files. */
 export async function readResourceDirectory(
-    root: ResourceDirectoryHandle,
+    root: LocalDirectoryReference,
     signal: AbortSignal,
+    access: DirectoryFileAccess = browserDirectoryFiles,
 ): Promise<DirectoryCandidate> {
     const rows: Array<{ info: ResourceInfo; preview: Blob | null; raw: Record<string, unknown> }> = [];
     for (const category of ['elements', 'presets']) {
         signal.throwIfAborted();
-        const folder = (await root.getDirectoryHandle(category)) as ResourceDirectoryHandle;
-        for await (const [name, handle] of folder.entries()) {
+        for (const { name, kind } of await access.list(root, category, signal)) {
             signal.throwIfAborted();
-            if (handle.kind !== 'directory' || !/^[a-z0-9][a-z0-9._-]*$/.test(name))
+            if (kind !== 'directory' || !/^[a-z0-9][a-z0-9._-]*$/.test(name))
                 throw Error('资源目录包含无效条目：' + name);
-            const dir = handle as ResourceDirectoryHandle;
-            const info = validateResourceInfo(
-                JSON.parse(await (await fileAt(dir, 'resource-info.json', signal)).text()),
-            );
+            const path = category + '/' + name;
+            const read = (file: string) => fileAt(root, path + '/' + resourcePath(file), signal, access);
+            const info = validateResourceInfo(JSON.parse(await (await read('resource-info.json')).text()));
             if (info.resource.id !== name || (info.kind === 'preset') !== (category === 'presets'))
                 throw Error('资源信息与目录身份不匹配。');
             // Prove source entry exists, but do not copy or execute editable source.
-            await fileAt(dir, info.sourceEntry, signal);
-            const raw = record(JSON.parse(await (await fileAt(dir, info.packagePath, signal)).text()), '资源包');
-            const preview = await readResourcePreview(dir, info.previewPath, signal);
+            await read(info.sourceEntry);
+            const raw = record(JSON.parse(await (await read(info.packagePath)).text()), '资源包');
+            const preview = await readResourcePreview(root, info.previewPath, signal, undefined, { access, path });
             rows.push({ info, raw, preview });
         }
     }

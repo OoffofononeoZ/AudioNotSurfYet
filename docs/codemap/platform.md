@@ -9,6 +9,9 @@
 | 文件 | 本地静态引用（最多显示 6 项） |
 | --- | --- |
 | [src/platform/desktopAudioFiles.ts](../../src/platform/desktopAudioFiles.ts) | [src/platform/fileContracts.ts](../../src/platform/fileContracts.ts) |
+| [src/platform/desktopDirectoryFiles.ts](../../src/platform/desktopDirectoryFiles.ts) | [src/platform/desktopAudioFiles.ts](../../src/platform/desktopAudioFiles.ts)、[src/platform/directoryFiles.ts](../../src/platform/directoryFiles.ts)、[src/platform/fileContracts.ts](../../src/platform/fileContracts.ts) |
+| [src/platform/directoryFiles.ts](../../src/platform/directoryFiles.ts) | [src/platform/fileContracts.ts](../../src/platform/fileContracts.ts) |
 | [src/platform/fileContracts.ts](../../src/platform/fileContracts.ts) | — |
-| [src/platform/platformPorts.ts](../../src/platform/platformPorts.ts) | [src/platform/desktopAudioFiles.ts](../../src/platform/desktopAudioFiles.ts)、[src/platform/fileContracts.ts](../../src/platform/fileContracts.ts)、[src/platform/webAudioFiles.ts](../../src/platform/webAudioFiles.ts) |
+| [src/platform/platformPorts.ts](../../src/platform/platformPorts.ts) | [src/platform/desktopAudioFiles.ts](../../src/platform/desktopAudioFiles.ts)、[src/platform/desktopDirectoryFiles.ts](../../src/platform/desktopDirectoryFiles.ts)、[src/platform/directoryFiles.ts](../../src/platform/directoryFiles.ts)、[src/platform/fileContracts.ts](../../src/platform/fileContracts.ts)、[src/platform/webAudioFiles.ts](../../src/platform/webAudioFiles.ts)、[src/platform/webDirectoryFiles.ts](../../src/platform/webDirectoryFiles.ts) |
 | [src/platform/webAudioFiles.ts](../../src/platform/webAudioFiles.ts) | [src/platform/fileContracts.ts](../../src/platform/fileContracts.ts) |
+| [src/platform/webDirectoryFiles.ts](../../src/platform/webDirectoryFiles.ts) | [src/platform/directoryFiles.ts](../../src/platform/directoryFiles.ts)、[src/platform/fileContracts.ts](../../src/platform/fileContracts.ts) |

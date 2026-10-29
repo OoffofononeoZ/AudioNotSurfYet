@@ -8,6 +8,7 @@
 
 | 文件 | 本地静态引用（最多显示 6 项） |
 | --- | --- |
+| [tests/e2e/project-file-transfer.spec.ts](../../tests/e2e/project-file-transfer.spec.ts) | [tests/support/file-picker.ts](../../tests/support/file-picker.ts)、[tests/support/project-actions.ts](../../tests/support/project-actions.ts) |
 | [tests/e2e/stem-analysis.spec.ts](../../tests/e2e/stem-analysis.spec.ts) | [tests/support/editor-marking.ts](../../tests/support/editor-marking.ts)、[tests/support/stem-analysis.ts](../../tests/support/stem-analysis.ts) |
 | [tests/e2e/transcription-models.spec.ts](../../tests/e2e/transcription-models.spec.ts) | [tests/processing/systemSampler.ts](../../tests/processing/systemSampler.ts) |
 | [tests/e2e/transcription-quality.spec.ts](../../tests/e2e/transcription-quality.spec.ts) | [src/transcription/auxiliarySeparation.ts](../../src/transcription/auxiliarySeparation.ts)、[src/transcription/drumTokens.ts](../../src/transcription/drumTokens.ts)、[src/transcription/pitchNotes.ts](../../src/transcription/pitchNotes.ts)、[tests/processing/systemSampler.ts](../../tests/processing/systemSampler.ts)、[tests/transcription/qualityFixtures.ts](../../tests/transcription/qualityFixtures.ts)、[tests/transcription/qualityMetrics.ts](../../tests/transcription/qualityMetrics.ts) |
@@ -107,4 +108,3 @@
 | [tests/processing/persistentFixture.ts](../../tests/processing/persistentFixture.ts) | — |
 | [tests/processing/prepare-assets.mjs](../../tests/processing/prepare-assets.mjs) | — |
 | [tests/processing/prepare-graph-probe.mjs](../../tests/processing/prepare-graph-probe.mjs) | — |
-| [tests/processing/prepare-probe.mjs](../../tests/processing/prepare-probe.mjs) | — |

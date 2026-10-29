@@ -45,8 +45,8 @@
 
 ## 边界
 
-- 当前是单一前端仓库；未发现后端、数据库、认证、云端媒体库或部署配置。
-- 音频文件由用户通过 `showOpenFilePicker()` 选择；runtime File 保存在 session service，最近队列、文件句柄、唯一 current Blob 与匹配的分析 cache 由 SessionRepository 保存，Pinia `$state` 不持有浏览器资源、PCM 或 typed payload。
+- 当前以共享 Vue 前端为主体，新增独立 Electron 宿主；无业务后端、认证或云端媒体库。双端进度与实际验证见[桌面合同](../../../docs/context/desktop.md)。
+- 音频通过注入的 `AudioFileAccess` 选择，Web 使用原生浏览器 picker，Electron 使用受限 preload；runtime File 留在 session service。SessionRepository 保存队列、来源引用、唯一 current Blob 与匹配的分析 cache，Pinia 不持有资源、PCM 或 typed payload。资源目录同样经 `DirectoryFileAccess` 读取，Web 原始句柄不改，桌面路径只在主进程。
 - `configStore` 继续把 `volume` 和 `musicBarSettings.style` 保存到 localStorage；M5 最近会话使用独立 IndexedDB V1，不改变 config schema。
 - Analyzer当前特征与页面行为见页面契约；历史Analyzer-only readiness、Editor E1–E9和Visualizer V1–V6只覆盖原候选，Editor/Visualizer整体readiness仍独立。
 - 原 Editor E9 readiness 候选只作为历史证据，E10/后续 Editor 修改后的当前候选与缺口见对应 readiness 和接入 evidence；不以历史候选冻结日常实现。

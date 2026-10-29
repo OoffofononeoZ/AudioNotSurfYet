@@ -8,6 +8,7 @@
 
 | 文件 | 本地静态引用（最多显示 6 项） |
 | --- | --- |
+| [tests/transcription/qualityMetrics.ts](../../tests/transcription/qualityMetrics.ts) | — |
 | [tests/transcription/result-repository.test.ts](../../tests/transcription/result-repository.test.ts) | [src/processing/dsp.ts](../../src/processing/dsp.ts)、[src/processing/modelManifest.ts](../../src/processing/modelManifest.ts)、[src/processing/sha256.ts](../../src/processing/sha256.ts)、[src/transcription/modelManifest.ts](../../src/transcription/modelManifest.ts)、[src/transcription/resultRepository.ts](../../src/transcription/resultRepository.ts)、[src/transcription/workerProtocol.ts](../../src/transcription/workerProtocol.ts) |
 | [tests/transcription/vitePlugin.ts](../../tests/transcription/vitePlugin.ts) | — |
 | [tests/unit/audio-fixtures.test.ts](../../tests/unit/audio-fixtures.test.ts) | [tests/support/audio-fixtures.ts](../../tests/support/audio-fixtures.ts) |

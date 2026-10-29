@@ -1,14 +1,12 @@
 import { elementRegistry, type ElementRegistry } from './elementRegistry';
 import { validateRuntimeSnapshot } from './validateRuntimeSnapshot';
-import {
-    readResourceDirectory,
-    type DirectoryCandidate,
-    type ResourceDirectoryHandle,
-    type ResourceInfo,
-} from './resourceDirectory';
+import { readResourceDirectory, type DirectoryCandidate, type ResourceInfo } from './resourceDirectory';
 import { IndexedDbResourceDirectoryRepository, type ResourceDirectoryRepository } from './resourceDirectoryRepository';
 import type { ResourceSnapshot } from './resourceTypes';
 import { DEFAULT_RESOURCE_PREVIEW } from './resourcePreview';
+import type { LocalDirectoryReference } from '../platform/fileContracts';
+import type { DirectoryFileAccess } from '../platform/directoryFiles';
+import { browserDirectoryFiles } from '../platform/webDirectoryFiles';
 
 export interface ResourceLibraryState extends ResourceSnapshot {
     status: 'idle' | 'loading' | 'ready' | 'error' | 'permission';
@@ -20,8 +18,9 @@ export interface ResourceLibraryState extends ResourceSnapshot {
 export interface ResourceLibraryOptions {
     registry?: ElementRegistry;
     repository?: ResourceDirectoryRepository;
-    picker?: () => Promise<ResourceDirectoryHandle>;
-    read?: (handle: ResourceDirectoryHandle, signal: AbortSignal) => Promise<DirectoryCandidate>;
+    picker?: () => Promise<LocalDirectoryReference | null>;
+    read?: (handle: LocalDirectoryReference, signal: AbortSignal) => Promise<DirectoryCandidate>;
+    files?: DirectoryFileAccess;
     validate?: typeof validateRuntimeSnapshot;
     createUrl?: (blob: Blob) => string;
     revokeUrl?: (url: string) => void;
@@ -42,15 +41,17 @@ export class VisualizerResourceLibrary {
     private task: AbortController | null = null;
     private generation = 0;
     private disposed = false;
-    private active: ResourceDirectoryHandle | null = null;
-    private pending: ResourceDirectoryHandle | null = null;
+    private active: LocalDirectoryReference | null = null;
+    private pending: LocalDirectoryReference | null = null;
     private writes = Promise.resolve();
     private listeners = new Set<(state: ResourceLibraryState) => void>();
     private registry: ElementRegistry;
     private repository: ResourceDirectoryRepository;
     private options: ResourceLibraryOptions;
+    private files: DirectoryFileAccess;
     constructor(options: ResourceLibraryOptions = {}) {
         this.options = options;
+        this.files = options.files ?? browserDirectoryFiles;
         this.registry = options.registry ?? elementRegistry;
         this.repository = options.repository ?? new IndexedDbResourceDirectoryRepository();
     }
@@ -63,7 +64,7 @@ export class VisualizerResourceLibrary {
         return structuredClone(this.state);
     }
     /** The export action requests write permission only after an explicit save click. */
-    exportDirectory(): ResourceDirectoryHandle {
+    exportDirectory(): LocalDirectoryReference {
         if (this.disposed || !this.active || this.state.status !== 'ready')
             throw Error('请先在资源商城加载可用的资源库。');
         return this.active;
@@ -120,20 +121,12 @@ export class VisualizerResourceLibrary {
         if (this.disposed) return;
         const task = this.begin();
         try {
-            const picker =
-                this.options.picker ??
-                (() => {
-                    const host = window as unknown as {
-                        showDirectoryPicker?: (options: {
-                            id: string;
-                            mode: 'read';
-                        }) => Promise<ResourceDirectoryHandle>;
-                    };
-                    if (!host.showDirectoryPicker) throw Error('当前浏览器不支持选择资源文件夹。');
-                    return host.showDirectoryPicker({ id: 'visualizer-assets', mode: 'read' });
-                });
-            const handle = await picker();
+            const handle = await (this.options.picker?.() ?? this.files.chooseResourceDirectory());
             if (!this.current(task)) return;
+            if (!handle) {
+                this.publish(this.settled);
+                return;
+            }
             this.pending = handle;
             await this.loadHandle(handle, task, true);
         } catch (error) {
@@ -146,7 +139,7 @@ export class VisualizerResourceLibrary {
             handle = this.pending;
         try {
             // Called directly from a visible button; never request permission during restore.
-            if ((await handle.requestPermission({ mode: 'read' })) !== 'granted') {
+            if ((await this.files.requestPermission(handle)) !== 'granted') {
                 if (this.current(task))
                     this.publish({
                         ...this.settled,
@@ -171,8 +164,8 @@ export class VisualizerResourceLibrary {
             this.failure(task, error);
         }
     }
-    private async loadHandle(handle: ResourceDirectoryHandle, task: Task, persist: boolean) {
-        const permission = await handle.queryPermission({ mode: 'read' });
+    private async loadHandle(handle: LocalDirectoryReference, task: Task, persist: boolean) {
+        const permission = await this.files.queryPermission(handle);
         if (!this.current(task)) return;
         if (permission !== 'granted') {
             this.pending = handle;
@@ -184,7 +177,9 @@ export class VisualizerResourceLibrary {
             });
             return;
         }
-        const candidate = await (this.options.read ?? readResourceDirectory)(handle, task.signal);
+        const candidate = await (this.options.read
+            ? this.options.read(handle, task.signal)
+            : readResourceDirectory(handle, task.signal, this.files));
         task.signal.throwIfAborted();
         await (this.options.validate ?? validateRuntimeSnapshot)(candidate.resources, task.signal);
         if (!this.current(task)) return;

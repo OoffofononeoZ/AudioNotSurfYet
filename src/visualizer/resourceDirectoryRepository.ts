@@ -1,7 +1,7 @@
-import type { ResourceDirectoryHandle } from './resourceDirectory';
+import type { LocalDirectoryReference } from '../platform/fileContracts';
 export interface ResourceDirectoryRepository {
-    read(): Promise<ResourceDirectoryHandle | null>;
-    save(handle: ResourceDirectoryHandle): Promise<void>;
+    read(): Promise<LocalDirectoryReference | null>;
+    save(handle: LocalDirectoryReference): Promise<void>;
 }
 /** Owns only the directory handle. No resource packages or previews are persisted here. */
 export class IndexedDbResourceDirectoryRepository implements ResourceDirectoryRepository {
@@ -38,10 +38,10 @@ export class IndexedDbResourceDirectoryRepository implements ResourceDirectoryRe
     }
     async read() {
         return (
-            ((await this.access('readonly', store => store.get('assets'))) as ResourceDirectoryHandle | null) ?? null
+            ((await this.access('readonly', store => store.get('assets'))) as LocalDirectoryReference | null) ?? null
         );
     }
-    async save(handle: ResourceDirectoryHandle) {
+    async save(handle: LocalDirectoryReference) {
         await this.access('readwrite', store => store.put(handle, 'assets'));
     }
 }

@@ -51,6 +51,7 @@
 | [tests/audio/realtime-capture.test.ts](../../tests/audio/realtime-capture.test.ts) | — |
 | [tests/desktop/app-resources.test.ts](../../tests/desktop/app-resources.test.ts) | [electron/appResources.ts](../../electron/appResources.ts) |
 | [tests/desktop/audio-file-ports.test.ts](../../tests/desktop/audio-file-ports.test.ts) | [src/platform/desktopAudioFiles.ts](../../src/platform/desktopAudioFiles.ts)、[src/platform/fileContracts.ts](../../src/platform/fileContracts.ts)、[src/platform/webAudioFiles.ts](../../src/platform/webAudioFiles.ts) |
+| [tests/desktop/directory-file-ports.test.ts](../../tests/desktop/directory-file-ports.test.ts) | [electron/files/nativeErrors.ts](../../electron/files/nativeErrors.ts)、[electron/files/nativeGrants.ts](../../electron/files/nativeGrants.ts)、[src/platform/desktopDirectoryFiles.ts](../../src/platform/desktopDirectoryFiles.ts)、[src/platform/fileContracts.ts](../../src/platform/fileContracts.ts)、[src/platform/webDirectoryFiles.ts](../../src/platform/webDirectoryFiles.ts)、[src/visualizer/elementRegistry.ts](../../src/visualizer/elementRegistry.ts)、另 2 项，按需核对源码 |
 | [tests/desktop/file-ipc.test.ts](../../tests/desktop/file-ipc.test.ts) | [electron/files/fileIpc.ts](../../electron/files/fileIpc.ts)、[electron/files/nativeGrants.ts](../../electron/files/nativeGrants.ts) |
 | [tests/desktop/native-grants.test.ts](../../tests/desktop/native-grants.test.ts) | [electron/files/nativeErrors.ts](../../electron/files/nativeErrors.ts)、[electron/files/nativeGrants.ts](../../electron/files/nativeGrants.ts)、[electron/files/nativeReadRequest.ts](../../electron/files/nativeReadRequest.ts) |
 | [tests/desktop/smoke.mjs](../../tests/desktop/smoke.mjs) | — |
@@ -107,4 +108,3 @@
 | [tests/e2e/playback-keyboard.spec.ts](../../tests/e2e/playback-keyboard.spec.ts) | [tests/support/file-picker.ts](../../tests/support/file-picker.ts)、[tests/support/visualizer-output-sync.ts](../../tests/support/visualizer-output-sync.ts) |
 | [tests/e2e/playback-speed.spec.ts](../../tests/e2e/playback-speed.spec.ts) | [tests/support/editor-marking.ts](../../tests/support/editor-marking.ts) |
 | [tests/e2e/project-action-dialogs.spec.ts](../../tests/e2e/project-action-dialogs.spec.ts) | [tests/support/file-picker.ts](../../tests/support/file-picker.ts) |
-| [tests/e2e/project-file-transfer.spec.ts](../../tests/e2e/project-file-transfer.spec.ts) | [tests/support/file-picker.ts](../../tests/support/file-picker.ts)、[tests/support/project-actions.ts](../../tests/support/project-actions.ts) |

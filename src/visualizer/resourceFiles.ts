@@ -1,8 +1,7 @@
-export type ResourceDirectoryHandle = FileSystemDirectoryHandle & {
-    entries(): AsyncIterableIterator<[string, FileSystemHandle]>;
-    queryPermission(options: { mode: 'read' | 'readwrite' }): Promise<PermissionState>;
-    requestPermission(options: { mode: 'read' | 'readwrite' }): Promise<PermissionState>;
-};
+import type { DirectoryFileAccess } from '../platform/directoryFiles';
+import type { LocalDirectoryReference } from '../platform/fileContracts';
+import { browserDirectoryFiles } from '../platform/webDirectoryFiles';
+export type { BrowserDirectoryHandle as ResourceDirectoryHandle } from '../platform/webDirectoryFiles';
 
 export function resourcePath(input: unknown): string {
     if (typeof input !== 'string' || !input.trim()) throw Error('资源路径不能为空。');
@@ -11,15 +10,11 @@ export function resourcePath(input: unknown): string {
     return input;
 }
 
-export async function resourceFile(root: FileSystemDirectoryHandle, path: string, signal: AbortSignal) {
-    const parts = resourcePath(path).split('/');
-    let dir = root;
-    for (const part of parts.slice(0, -1)) {
-        signal.throwIfAborted();
-        dir = await dir.getDirectoryHandle(part);
-    }
-    signal.throwIfAborted();
-    const file = await (await dir.getFileHandle(parts[parts.length - 1]!)).getFile();
-    signal.throwIfAborted();
-    return file;
+export async function resourceFile(
+    root: LocalDirectoryReference,
+    path: string,
+    signal: AbortSignal,
+    access: DirectoryFileAccess = browserDirectoryFiles,
+) {
+    return access.read(root, resourcePath(path), signal);
 }
