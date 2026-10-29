@@ -64,13 +64,13 @@
                 </ul>
             </section>
             <p v-if="busy" class="task-status" role="status"><span class="action-spinner" />{{ busyLabel }}</p>
-            <section v-if="address" class="result-panel" aria-label="展示地址已生成">
+            <section v-if="displayPath" class="result-panel" :aria-label="displayResultTitle">
                 <div class="result-heading">
                     <AppActionIcon name="check" />
-                    <h3>展示地址已生成</h3>
+                    <h3>{{ displayResultTitle }}</h3>
                     <RouterLink :to="displayPath">打开展示页<AppActionIcon name="right" /></RouterLink>
                 </div>
-                <div class="address-field">
+                <div v-if="address" class="address-field">
                     <input
                         :value="address"
                         readonly
@@ -84,7 +84,7 @@
                         <AppActionIcon :name="copied ? 'check' : 'copy'" />
                     </button>
                 </div>
-                <p>仅在当前浏览器可用，样式保存在本地。</p>
+                <p>{{ canCopyAddress ? '仅在当前浏览器可用，样式保存在本地。' : '样式保存在当前应用中。' }}</p>
                 <p v-if="copyError" role="status">{{ copyError }}</p>
             </section>
             <section v-if="wallpaperFiles" class="result-panel wallpaper-result" aria-label="壁纸导出结果">
@@ -153,7 +153,9 @@ const busyLabel = computed(() =>
             ? '正在保存壁纸…'
             : '正在保存样式…',
 );
-const address = computed(() => (displayPath.value ? new URL(displayPath.value, location.origin).href : ''));
+const canCopyAddress = platform.displayPages.canCopyAddress;
+const displayResultTitle = canCopyAddress ? '展示地址已生成' : '展示页已创建';
+const address = computed(() => (displayPath.value ? platform.displayPages.address(displayPath.value) : null));
 const wallpaperFiles = shallowRef<WallpaperExportFile[] | null>(null),
     wallpaperMessage = ref('');
 const copied = ref(false),
@@ -181,9 +183,9 @@ const destinations = computed(() => [
     {
         id: 'page' as const,
         icon: 'display',
-        title: '展示地址',
+        title: canCopyAddress ? '展示地址' : '展示页',
         description: '生成独立的本地展示页',
-        action: '生成展示地址',
+        action: canCopyAddress ? '生成展示地址' : '创建展示页',
         testId: 'create-display-page',
         available: !!capability.value?.browser,
     },

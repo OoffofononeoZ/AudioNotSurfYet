@@ -14,6 +14,61 @@ async function open(page: Page, resource = 'solid') {
 }
 const modal = (page: Page) => page.locator('.realtime-actions');
 
+// Browser-hosted desktop presentation policy; this is not native Electron evidence.
+test('application display pages open inside the app without an external address or copy action', async ({ page }) => {
+    await open(page);
+    await chooseVisualizerProjectExport(page);
+    await expect.poll(async () => (await savedPickerEntries(page)).length).toBe(1);
+    const project = JSON.parse(Buffer.from((await savedPickerEntries(page))[0]!.base64, 'base64').toString('utf8'));
+    await page.evaluate(async project => {
+        const from = (path: string) => import(/* @vite-ignore */ path);
+        const vue = await from('/node_modules/.vite/deps/vue.js');
+        const { createPinia } = await from('/node_modules/.vite/deps/pinia.js');
+        const { default: Actions } = await from('/src/components/visualizer/VisualizerRealtimeActions.vue');
+        const { default: router } = await from('/src/router/index.ts');
+        const { createPlatformPorts, platformPortsKey } = await from('/src/platform/platformPorts.ts');
+        const { applicationDisplayPages } = await from('/src/platform/displayPages.ts');
+        const cover = await (await fetch('/default_cover.png')).blob();
+        const root = document.createElement('div');
+        root.dataset.testid = 'desktop-display-test';
+        document.body.append(root);
+        const app = vue.createApp({
+            setup: () => () =>
+                vue.h(Actions, {
+                    open: true,
+                    project,
+                    locked: false,
+                    captureCover: async () => cover,
+                }),
+        });
+        app.provide(platformPortsKey, { ...createPlatformPorts(), displayPages: applicationDisplayPages });
+        app.use(createPinia());
+        app.use(router);
+        app.mount(root);
+        (window as any).__displayActions = {
+            unmount: () => {
+                app.unmount();
+                root.remove();
+            },
+        };
+    }, project);
+    const desktop = page.getByTestId('desktop-display-test');
+    await expect(desktop.getByTestId('create-display-page')).toHaveText(/创建展示页/);
+    await desktop.getByTestId('create-display-page').click();
+    await expect(desktop.getByRole('heading', { name: '展示页已创建' })).toBeVisible();
+    await expect(desktop.getByLabel('本地展示地址')).toHaveCount(0);
+    await expect(desktop.getByRole('button', { name: /复制展示地址/ })).toHaveCount(0);
+    await expect(desktop).toContainText('样式保存在当前应用中。');
+    const link = desktop.getByRole('link', { name: '打开展示页' });
+    await expect(link).toHaveAttribute('href', /^\/display\/[0-9a-f-]+$/);
+    const target = await link.getAttribute('href');
+    await link.click();
+    await page.evaluate(() => (window as any).__displayActions.unmount());
+    await expect(page).toHaveURL(new RegExp(target + '$'));
+    await expect(page.getByTestId('visualizer-display')).toBeVisible();
+    await expect(page.getByTestId('realtime-visualizer-canvas')).toHaveAttribute('data-webgl-context-state', 'ready');
+});
+
 test('snapshot, address feedback, copy failures and return navigation share the dialog lifecycle', async ({
     page,
 }, info) => {

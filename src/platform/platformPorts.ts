@@ -11,6 +11,7 @@ import { DesktopFileTransfers } from './desktopFileTransfers';
 import type { DirectoryExportAccess } from './bundleContracts';
 import { BrowserDirectoryExports } from './webDirectoryExports';
 import { DesktopDirectoryExports } from './desktopDirectoryExports';
+import { applicationDisplayPages, browserDisplayPages, type DisplayPageAccess } from './displayPages';
 
 export interface PlatformPorts {
     readonly kind: 'web' | 'electron';
@@ -18,6 +19,7 @@ export interface PlatformPorts {
     readonly directoryFiles: DirectoryFileAccess;
     readonly transfers: FileTransferAccess;
     readonly directoryExports: DirectoryExportAccess;
+    readonly displayPages: DisplayPageAccess;
 }
 
 export function createPlatformPorts(bridge?: DesktopBridge): PlatformPorts {
@@ -28,6 +30,7 @@ export function createPlatformPorts(bridge?: DesktopBridge): PlatformPorts {
             directoryFiles: new BrowserDirectoryFiles(),
             transfers: new BrowserFileTransfers(),
             directoryExports: new BrowserDirectoryExports(),
+            displayPages: browserDisplayPages,
         };
     if (
         bridge.platform !== 'electron' ||
@@ -44,6 +47,7 @@ export function createPlatformPorts(bridge?: DesktopBridge): PlatformPorts {
         directoryFiles: new DesktopDirectoryFiles(bridge.files),
         transfers: new DesktopFileTransfers(bridge.files, bridge.saves),
         directoryExports: new DesktopDirectoryExports(bridge.bundles),
+        displayPages: applicationDisplayPages,
     };
 }
 
