@@ -1,3 +1,5 @@
+import type { LocalFileReference } from '../platform/fileContracts';
+
 export type TrackId = string;
 
 export type RestoreState =
@@ -73,5 +75,5 @@ export interface SessionPersistenceSnapshot {
 
 export interface LocalAudioInput {
     file: File;
-    handle?: FileSystemFileHandle;
+    handle?: LocalFileReference;
 }

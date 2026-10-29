@@ -4,10 +4,10 @@
 
 当前原曲链路如下；分轨试听另见[自动标记/试听契约](../../../docs/architecture/processing/editor-auto-marking.md)：
 
-1. MusicBar 调用 `selectAndImportFiles()`；service 使用 `showOpenFilePicker()` 获取本地 MP3/WAV/FLAC 句柄，不使用隐藏 input fallback。
+1. MusicBar 调用 `selectAndImportFiles()`；service 通过注入的 `AudioFileAccess` 选择/读取 MP3/WAV/FLAC。Web 适配使用 `showOpenFilePicker()`，Electron 适配使用受限 preload 和原生选择器，不使用隐藏 input fallback；实际桌面验证状态见[双端合同](../../../docs/context/desktop.md)。
 2. service 顺序计算 SHA-256，并用 `music-metadata.parseBlob()` 生成可序列化 `TrackRecord`；runtime registry 保存 File、handle 与可选封面对象 URL。
 3. 空队列导入自动播放首项；非空队列导入只追加，不打断当前歌曲。
-4. `SessionRepository` 把最近队列、全部句柄和唯一 current Blob 写入原生 IndexedDB；切歌在同一事务替换 current Blob/cache。
+4. `SessionRepository` 把最近队列、来源引用和唯一 current Blob 写入原生 IndexedDB；Web 原始句柄及 V1 格式保留，桌面引用为纯数据 grantId，真实路径留在主进程。切歌在同一事务替换 current Blob/cache；Web 继续 Blob 恢复，桌面有持久化来源时优先核对磁盘 hash，缺失/变化不播放旧 Blob。
 5. `playTrack()` 先把 current track 与 persistence 状态发布为 `saving`，再读取 File ArrayBuffer；command generation 保证快速切歌最后操作生效，只有当前 generation 的持久化完成/失败可以更新 store。
 6. AudioEngine 发布 `PlaybackSnapshot`；service 的单一 RAF 从 AudioContext 基准刷新时间，并从 Analyser 时域数据提取 Meyda energy。
 7. `audioSessionStore` 把播放、恢复快照与能量提供给 MusicBar 和 Home；MusicBar 不拥有播放事实、浏览器资源或播放 RAF。

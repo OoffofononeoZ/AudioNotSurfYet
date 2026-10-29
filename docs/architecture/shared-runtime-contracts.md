@@ -5,8 +5,9 @@
 ## 所有权与数据边界
 
 - MainLayout 提供唯一 AudioSessionService、AudioEngine、AnalysisCoordinator 和页面 controller。Home、MusicBar 与工作区读取同一播放状态，不另建播放器或播放 AudioContext。
+- 应用入口创建并提供平台端口，MainLayout 注入 `AudioFileAccess`；共享 service 不探测宿主或调用具体文件 API。`LocalFileReference` 仅提供 kind/name，Web 保留原始句柄载体，Electron 用可序列化 grantId；磁盘路径只在主进程授权记录中，细则与当前验证见[双端合同](../context/desktop.md)。
 - Pinia 保存可序列化快照。File、Blob、handle、PCM、AudioBuffer、Worker、节点及对象 URL 留在所属运行时服务，并在换源、离页或 dispose 时释放。
-- 音频和工程保留在浏览器本地；模型/静态资源请求不授权上传用户音频。处理任务复用原歌曲身份和有界 PCM 读取。
+- 音频和工程保留在各端本地；两端数据独立，模型/静态资源请求不授权上传用户音频。处理任务复用原歌曲身份和有界 PCM 读取。
 - 共享 UI、Home、MusicBar、滚动与路由占位见[应用外壳](../context/app-shell.md)，服务装配见 [system map](../context/system-map.md)。
 
 ## 播放与异步身份
@@ -16,6 +17,7 @@
 - 播放秒数来自 engine 音频时钟，裁剪到歌曲范围，不累计 RAF delta。刷新恢复到 0 秒 paused，不隐式播放。
 - `PlaybackSnapshot` 和导出 `AudioPlaybackCheckpoint` 必含 `playbackRate`。全局速度默认 1，支持 0.1–2，原曲、FT 和辅助试听统一使用原生 AudioBufferSource playbackRate，音高随速度变化；时钟按速度换算回原曲秒数，分析、标记、BPM 和工程时间不缩放。修改速度保留当前位置；分块试听中止旧读取并按最新 generation 重排，静音与播放意图保留。
 - 加载、解码、恢复和持久化检查 generation/revision；旧任务、取消或 dispose 后的完成结果不得覆盖新歌曲与新状态。
+- Web 维持 V1 current Blob 恢复及句柄权限流程；Electron 对有持久化来源的歌曲优先检查磁盘内容 hash，缺失/变化/授权丢失不播放旧 Blob。没有持久化来源的内嵌 File 仍可按 Blob 身份恢复。初始化不覆盖用户较新的播放选择，换输入/清空/dispose 取消旧选择与读取结果。
 - Editor/Visualizer 通过 tokenized route lease 临时使用 repeat-one；只有当前 token 的 release 生效，离页恢复用户偏好。导出 transport lease 保护歌曲音源和队列，不阻止同歌播放、seek 与单曲循环。
 - `getPlaybackSnapshot()` 读取 engine 即时快照；`subscribePlaybackDiscontinuity()` 在跳转、重启、变速或试听源切换前通知，返回清理函数。数字录入按 [Editor 交互](editor/interaction-contracts.md)取消未提交范围，鼠标拖动也取消。
 - 导出期间速度控件和公开变速命令可用；离线导出仍按原曲 PCM 和绝对时间推进，不继承试听速度或音高，结束后保留最新速度、位置与播放状态。

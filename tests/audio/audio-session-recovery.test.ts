@@ -1,6 +1,7 @@
 import { createPinia, setActivePinia } from 'pinia';
-import { beforeEach, describe, expect, test } from 'vitest';
-import { AudioSessionService, type AudioEnginePort } from '../../src/audio/audioSessionService';
+import { beforeEach, describe, expect, test, vi } from 'vitest';
+import { AudioSessionService, sha256Blob, type AudioEnginePort } from '../../src/audio/audioSessionService';
+import type { AudioFileAccess, LocalFileReference, NativeFileReference } from '../../src/platform/fileContracts';
 import type {
     PersistedCurrentInput,
     PersistedQueueInput,
@@ -190,7 +191,7 @@ const record = (id: string) => ({
 const restoredBundle = (
     handles: Array<{
         trackId: string;
-        handle: FileSystemFileHandle;
+        handle: LocalFileReference;
     }>,
 ): RestoredSessionBundle => ({
     session: {
@@ -232,6 +233,8 @@ const createService = (
     repository: MemoryRepository,
     options: {
         pickFiles?: () => Promise<FileSystemFileHandle[]>;
+        fileAccess?: AudioFileAccess;
+        hashFile?: (file: Blob) => Promise<string>;
     } = {},
 ) => {
     const store = useAudioSessionStore();
@@ -240,7 +243,8 @@ const createService = (
         engine,
         repository,
         pickFiles: options.pickFiles,
-        hashFile: async file => (file as File).name,
+        fileAccess: options.fileAccess,
+        hashFile: options.hashFile ?? (async file => (file as File).name),
         parseMetadata: async () => ({
             common: {},
             format: { duration: 4, sampleRate: 48_000 },
@@ -394,5 +398,142 @@ describe('AudioSessionService recovery', () => {
         await expect(service.selectAndImportFiles()).resolves.toBe('cancelled');
         expect(store.queue).toHaveLength(0);
         expect(store.persistence.state).toBe('idle');
+    });
+
+    const nativeReference: NativeFileReference = {
+        kind: 'file',
+        platform: 'electron',
+        name: 'track-2.wav',
+        grantId: 'abcdefff-1234-4123-8123-123456789abc',
+    };
+    const nativeAccess = (read: AudioFileAccess['read']): AudioFileAccess => ({
+        restoreFromReferenceFirst: true,
+        choose: async () => [nativeReference],
+        read,
+        queryPermission: async () => 'granted',
+        requestPermission: async () => 'granted',
+    });
+    async function nativeRecovery() {
+        const file = new File(['original-source'], 'track-2.wav', { type: 'audio/wav' });
+        const hash = await sha256Blob(file),
+            bundle = restoredBundle([{ trackId: 'track-2', handle: nativeReference }]);
+        bundle.session.queue = [{ ...record('track-2'), trackHash: hash }];
+        bundle.session.currentBlob!.trackHash = hash;
+        bundle.currentBlob = { trackId: 'track-2', blobKey: 'current', trackHash: hash, blob: file };
+        const repository = new MemoryRepository();
+        repository.restored = bundle;
+        return { file, repository };
+    }
+
+    test('restores a native reference paused and persists its plain descriptor outside Pinia', async () => {
+        const { file, repository } = await nativeRecovery();
+        const read = vi.fn(async () => file);
+        const { service, store, engine } = createService(repository, {
+            fileAccess: nativeAccess(read),
+            hashFile: sha256Blob,
+        });
+        await service.initialize();
+        expect(read).toHaveBeenCalled();
+        expect(engine.playCount).toBe(0);
+        expect(store.playback.state).toBe('paused');
+        expect(store.queue[0].restoreState).toBe('available');
+        expect(structuredClone(repository.saveInputs.at(-1)!.handles[0].handle)).toEqual(nativeReference);
+        expect(JSON.stringify(store.$state)).not.toContain(nativeReference.grantId);
+    });
+
+    test.each(['changed', 'missing', 'reference-lost'])(
+        'does not use the cached Blob when native source is %s',
+        async failure => {
+            const { repository } = await nativeRecovery();
+            if (failure === 'reference-lost') repository.restored!.handles = [];
+            const access = nativeAccess(async () => {
+                if (failure === 'missing') throw new DOMException('source removed', 'NotFoundError');
+                return new File(['changed-source'], 'track-2.wav', { type: 'audio/wav' });
+            });
+            const { service, store, engine } = createService(repository, { fileAccess: access, hashFile: sha256Blob });
+            await service.initialize();
+            expect(store.queue[0].restoreState).toBe(failure === 'changed' ? 'content-changed' : 'file-missing');
+            expect(store.playback.state).toBe('empty');
+            expect(engine.snapshot.trackId).toBeNull();
+        },
+    );
+
+    test('does not restore a late native read after the queue has been cleared', async () => {
+        const { file, repository } = await nativeRecovery();
+        let finish!: (file: File) => void;
+        const read = vi.fn(
+            () =>
+                new Promise<File>(resolve => {
+                    finish = resolve;
+                }),
+        );
+        const { service, store } = createService(repository, { fileAccess: nativeAccess(read), hashFile: sha256Blob });
+        const restoring = service.initialize();
+        await vi.waitFor(() => expect(read).toHaveBeenCalled());
+        await service.clear();
+        finish(file);
+        await restoring;
+        expect(store.queue).toHaveLength(0);
+        expect(store.playback.state).toBe('empty');
+        expect(store.persistence.state).toBe('ready');
+    });
+
+    test('keeps a newer user playback choice while initial native recovery finishes', async () => {
+        const repository = new MemoryRepository();
+        const references = ['track-1', 'track-2', 'track-3'].map(id => ({
+            ...nativeReference,
+            name: `${id}.wav`,
+            grantId: id,
+        }));
+        repository.restored = restoredBundle(
+            references.map((handle, index) => ({ trackId: `track-${index + 1}`, handle })),
+        );
+        let finish!: (file: File) => void;
+        const read = vi.fn((reference: LocalFileReference) =>
+            reference.name === 'track-2.wav'
+                ? new Promise<File>(resolve => {
+                      finish = resolve;
+                  })
+                : Promise.resolve(new File(['audio'], reference.name, { type: 'audio/wav' })),
+        );
+        const { service, store } = createService(repository, { fileAccess: nativeAccess(read) });
+        const restoring = service.initialize();
+        await vi.waitFor(() => expect(read).toHaveBeenCalled());
+        await service.playTrack('track-3');
+        finish(new File(['two'], 'track-2.wav', { type: 'audio/wav' }));
+        await restoring;
+        expect(store.currentTrackId).toBe('track-3');
+        expect(store.playback.trackId).toBe('track-3');
+        expect(store.playback.state).toBe('playing');
+    });
+
+    test('discards a slow file selection when a newer import wins', async () => {
+        const repository = new MemoryRepository();
+        let finish!: (file: File) => void;
+        const read = vi.fn(
+            () =>
+                new Promise<File>(resolve => {
+                    finish = resolve;
+                }),
+        );
+        const { service, store } = createService(repository, { fileAccess: nativeAccess(read) });
+        const selecting = service.selectAndImportFiles();
+        await vi.waitFor(() => expect(read).toHaveBeenCalled());
+        await service.importFiles([{ file: new File(['new'], 'new.wav', { type: 'audio/wav' }) }]);
+        finish(new File(['old'], 'old.wav', { type: 'audio/wav' }));
+        expect(await selecting).toBe('cancelled');
+        expect(store.queue.map(track => track.name)).toEqual(['new.wav']);
+    });
+
+    test('does not disguise an import failure as picker cancellation after the read completes', async () => {
+        const repository = new MemoryRepository();
+        const access = nativeAccess(async () => new File(['audio'], 'song.wav'));
+        const { service } = createService(repository, {
+            fileAccess: access,
+            hashFile: async () => {
+                throw Error('hash unavailable');
+            },
+        });
+        await expect(service.selectAndImportFiles()).rejects.toThrow('hash unavailable');
     });
 });

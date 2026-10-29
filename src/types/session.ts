@@ -1,4 +1,5 @@
 import type { RestoreState, TrackId, TrackRecord } from './audio';
+import type { LocalFileReference } from '../platform/fileContracts';
 import { validateSourceWorkspace, type AnalyzerSourceWorkspace } from '../analysis/sourceWorkspace';
 import { FEATURE_IDS, isFeatureId, type ConfigHash, type FeatureId } from '../analysis/types';
 
@@ -73,7 +74,7 @@ export interface PersistedSessionV1 {
 export interface StoredHandle {
     trackId: TrackId;
     handleKey: string;
-    handle: FileSystemFileHandle;
+    handle: LocalFileReference;
 }
 
 export interface StoredCurrentBlob {

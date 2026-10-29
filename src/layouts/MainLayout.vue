@@ -18,6 +18,7 @@ import AppSettingsButton from '../components/AppSettingsButton.vue';
 import MusicBar from '../components/MusicBar.vue';
 import { AudioSessionService, audioSessionServiceKey } from '../audio/audioSessionService';
 import { AudioEngine } from '../audio/audioEngine';
+import { usePlatformPorts } from '../platform/platformPorts';
 import { usePlaybackKeyboard } from '../audio/usePlaybackKeyboard';
 import { AnalysisCoordinator, analysisCoordinatorKey } from '../analysis/analysisCoordinator';
 import { isFeatureId, type FeatureId } from '../analysis/types';
@@ -44,10 +45,12 @@ watchEffect(() => {
     document.documentElement.style.setProperty('--app-sidebar-width', configStore.sidebarCollapsed ? '64px' : '216px');
 });
 const audioEngine = new AudioEngine();
+const platform = usePlatformPorts();
 const sessionRepository = new SessionRepository();
 const audioSession = new AudioSessionService(audioSessionStore, {
     engine: audioEngine,
     repository: sessionRepository,
+    fileAccess: platform.audioFiles,
 });
 usePlaybackKeyboard(audioSession);
 const analysisCoordinator = new AnalysisCoordinator(audioEngine, sessionRepository, audioSessionStore);

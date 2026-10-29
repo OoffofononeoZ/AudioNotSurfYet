@@ -29,6 +29,8 @@ import {
 import { PlaybackPolicy, type PlaybackMode } from './playbackPolicy';
 import { assertPlaybackRate } from './playbackRate';
 import type { AudioPreparationPort, PreparedDecodedAudio, PreparedLocalAudio } from './preparedAudio';
+import type { AudioFileAccess, LocalFileReference } from '../platform/fileContracts';
+import { BrowserAudioFiles } from '../platform/webAudioFiles';
 
 export interface TrackNavigation {
     select(trackId: string): Promise<void>;
@@ -62,17 +64,12 @@ interface ParsedMetadata {
 }
 
 type MetadataParser = (file: Blob) => Promise<ParsedMetadata>;
-type FilePicker = (options: { multiple: boolean }) => Promise<FileSystemFileHandle[]>;
+type FilePicker = (options: { multiple: boolean }) => Promise<LocalFileReference[]>;
 type FileHasher = (file: Blob) => Promise<string>;
-
-interface PermissionedFileHandle extends FileSystemFileHandle {
-    queryPermission?: (descriptor?: { mode?: 'read' | 'readwrite' }) => Promise<PermissionState>;
-    requestPermission?: (descriptor?: { mode?: 'read' | 'readwrite' }) => Promise<PermissionState>;
-}
 
 interface RuntimeTrack {
     file?: File;
-    handle?: PermissionedFileHandle;
+    handle?: LocalFileReference;
     artworkUrl?: string;
 }
 
@@ -81,6 +78,7 @@ export interface AudioSessionServiceOptions {
     repository?: SessionRepositoryPort;
     parseMetadata?: MetadataParser;
     pickFiles?: FilePicker;
+    fileAccess?: AudioFileAccess;
     hashFile?: FileHasher;
     createObjectURL?: (blob: Blob) => string;
     revokeObjectURL?: (url: string) => void;
@@ -141,31 +139,6 @@ export interface AudioEnginePort extends AudioPreparationPort {
 const defaultRequestFrame: RequestFrame = callback => requestAnimationFrame(callback);
 const defaultCancelFrame: CancelFrame = handle => cancelAnimationFrame(handle);
 
-const defaultPickFiles: FilePicker = async ({ multiple }) => {
-    const picker = (
-        window as unknown as {
-            showOpenFilePicker?: (options: Record<string, unknown>) => Promise<FileSystemFileHandle[]>;
-        }
-    ).showOpenFilePicker;
-    if (!picker) {
-        throw new Error(
-            '当前浏览器或页面环境不支持本地文件句柄，请使用最新版 Chrome/Edge 并通过 HTTPS 或 localhost 访问。',
-        );
-    }
-    return picker({
-        multiple,
-        excludeAcceptAllOption: true,
-        types: [
-            {
-                description: 'Audio files',
-                accept: {
-                    'audio/*': ['.mp3', '.wav', '.flac'],
-                },
-            },
-        ],
-    });
-};
-
 export const sha256Blob: FileHasher = async file => {
     const content = await file.arrayBuffer();
     const digest = await crypto.subtle.digest('SHA-256', content);
@@ -188,6 +161,8 @@ export class AudioSessionService {
     private readonly repository: SessionRepositoryPort;
     private readonly parseMetadata: MetadataParser;
     private readonly pickFiles: FilePicker;
+    private readonly fileAccess: AudioFileAccess;
+    private fileSelection: AbortController | null = null;
     private readonly hashFile: FileHasher;
     private readonly createObjectURL: (blob: Blob) => string;
     private readonly revokeObjectURL: (url: string) => void;
@@ -221,7 +196,8 @@ export class AudioSessionService {
         this.engine = options.engine ?? new AudioEngine();
         this.repository = options.repository ?? new SessionRepository();
         this.parseMetadata = options.parseMetadata ?? (file => parseBlob(file) as Promise<ParsedMetadata>);
-        this.pickFiles = options.pickFiles ?? defaultPickFiles;
+        this.fileAccess = options.fileAccess ?? new BrowserAudioFiles();
+        this.pickFiles = options.pickFiles ?? (options => this.fileAccess.choose(options));
         this.hashFile = options.hashFile ?? sha256Blob;
         this.createObjectURL = options.createObjectURL ?? (blob => URL.createObjectURL(blob));
         this.revokeObjectURL = options.revokeObjectURL ?? (url => URL.revokeObjectURL(url));
@@ -238,7 +214,7 @@ export class AudioSessionService {
     ): Promise<StoredAnalysisCache | undefined> {
         if (this.disposed) return undefined;
         const generation = ++this.importGeneration;
-        ++this.commandGeneration;
+        const commandGeneration = ++this.commandGeneration;
         this.store.setPersistence({ state: 'restoring' });
 
         let restored;
@@ -276,7 +252,7 @@ export class AudioSessionService {
         for (const trackId of [...this.runtimeTracks.keys()]) {
             this.releaseRuntimeTrack(trackId);
         }
-        const handles = new Map(restored.handles.map(entry => [entry.trackId, entry.handle as PermissionedFileHandle]));
+        const handles = new Map(restored.handles.map(entry => [entry.trackId, entry.handle]));
         for (const track of restored.session.queue) {
             this.runtimeTracks.set(track.id, {
                 handle: handles.get(track.id),
@@ -299,20 +275,37 @@ export class AudioSessionService {
         const currentTrackId = restored.session.currentTrackId;
         let currentAvailable = false;
         let currentBlobChanged = false;
-        if (currentTrackId && restored.currentBlob && restored.currentBlob.trackId === currentTrackId) {
+        const requireReference =
+            this.fileAccess.restoreFromReferenceFirst && !!this.getTrack(currentTrackId)?.handleKey;
+        if (
+            !requireReference &&
+            currentTrackId &&
+            restored.currentBlob &&
+            restored.currentBlob.trackId === currentTrackId
+        ) {
             const record = this.getTrack(currentTrackId);
             if (record) {
                 const currentBlobHash = await this.hashFile(restored.currentBlob.blob);
+                if (generation !== this.importGeneration || this.disposed) return;
                 if (currentBlobHash === record.trackHash) {
                     const file = new File([restored.currentBlob.blob], record.name, {
                         type: record.mimeType,
                         lastModified: record.lastModified,
                     });
-                    await this.registerRuntimeFile(currentTrackId, file, handles.get(currentTrackId));
+                    if (
+                        !(await this.registerRuntimeFile(
+                            currentTrackId,
+                            file,
+                            handles.get(currentTrackId),
+                            () => generation === this.importGeneration && !this.disposed,
+                        ))
+                    )
+                        return;
                     this.store.updateTrack(currentTrackId, {
                         restoreState: 'available',
                     });
-                    await this.loadRuntimeTrack(currentTrackId, false);
+                    if (this.commandGeneration === commandGeneration)
+                        await this.loadRuntimeTrack(currentTrackId, false);
                     currentAvailable = true;
                 } else {
                     currentBlobChanged = true;
@@ -325,8 +318,9 @@ export class AudioSessionService {
         if (currentTrackId && !currentAvailable) {
             const currentHandle = this.runtimeTracks.get(currentTrackId)?.handle;
             const available = currentHandle ? await this.hydrateFromHandle(currentTrackId, false) : false;
+            if (generation !== this.importGeneration || this.disposed) return;
             if (available) {
-                await this.loadRuntimeTrack(currentTrackId, false);
+                if (this.commandGeneration === commandGeneration) await this.loadRuntimeTrack(currentTrackId, false);
             } else {
                 if (!currentHandle && !currentBlobChanged) {
                     this.store.updateTrack(currentTrackId, {
@@ -334,14 +328,15 @@ export class AudioSessionService {
                     });
                 }
                 const currentTrack = this.getTrack(currentTrackId);
-                this.store.setPlayback({
-                    trackId: currentTrackId,
-                    state: 'empty',
-                    currentTimeSeconds: 0,
-                    durationSeconds: currentTrack?.durationSeconds ?? 0,
-                    volume: this.engine.getSnapshot().volume,
-                    playbackRate: this.engine.getSnapshot().playbackRate,
-                });
+                if (this.commandGeneration === commandGeneration)
+                    this.store.setPlayback({
+                        trackId: currentTrackId,
+                        state: 'empty',
+                        currentTimeSeconds: 0,
+                        durationSeconds: currentTrack?.durationSeconds ?? 0,
+                        volume: this.engine.getSnapshot().volume,
+                        playbackRate: this.engine.getSnapshot().playbackRate,
+                    });
             }
         }
 
@@ -356,10 +351,14 @@ export class AudioSessionService {
             await this.hydrateFromHandle(trackId, false);
         }
 
+        if (generation !== this.importGeneration || this.disposed) return;
+
         try {
             await this.persistQueue();
+            if (generation !== this.importGeneration || this.disposed) return;
             this.store.setPersistence({ state: 'ready' });
         } catch {
+            if (generation !== this.importGeneration || this.disposed) return;
             this.markPersistenceFailure();
         }
         return restored.currentAnalysisCache;
@@ -368,23 +367,38 @@ export class AudioSessionService {
     async selectAndImportFiles(): Promise<'imported' | 'cancelled'> {
         if (this.exportTransportToken) return 'cancelled';
         if (this.disposed) return 'cancelled';
-        let handles: FileSystemFileHandle[];
+        const task = this.beginFileSelection();
         try {
-            handles = await this.pickFiles({ multiple: true });
+            const handles = await this.pickFiles({ multiple: true });
+            if (task.signal.aborted || this.disposed || this.exportTransportToken || !handles.length)
+                return 'cancelled';
+            const inputs: LocalAudioInput[] = [];
+            for (const handle of handles) {
+                const file = await this.fileAccess.read(handle, task.signal);
+                if (task.signal.aborted || this.disposed || this.exportTransportToken) return 'cancelled';
+                inputs.push({ file, handle });
+            }
+            if (this.fileSelection === task) this.fileSelection = null;
+            await this.importFiles(inputs);
+            return 'imported';
         } catch (error) {
-            if (isAbortError(error)) return 'cancelled';
+            if (isAbortError(error) || task.signal.aborted || this.disposed) return 'cancelled';
             throw error;
+        } finally {
+            if (this.fileSelection === task) this.fileSelection = null;
         }
-        if (handles.length === 0) return 'cancelled';
-        const inputs: LocalAudioInput[] = [];
-        for (const handle of handles) {
-            inputs.push({
-                file: await handle.getFile(),
-                handle,
-            });
-        }
-        await this.importFiles(inputs);
-        return 'imported';
+    }
+
+    private beginFileSelection(): AbortController {
+        this.cancelFileSelection();
+        const task = new AbortController();
+        this.fileSelection = task;
+        return task;
+    }
+
+    private cancelFileSelection() {
+        this.fileSelection?.abort();
+        this.fileSelection = null;
     }
 
     async prepareLocalAudio(input: LocalAudioInput, signal?: AbortSignal): Promise<PreparedLocalAudio> {
@@ -465,11 +479,13 @@ export class AudioSessionService {
             throw new Error('准备中的歌曲已失效，请重新预览。');
         this.preparedLocalAudio.delete(token);
         if (!pending.decoded) return pending.track.id;
+        this.cancelFileSelection();
+        ++this.importGeneration;
         const generation = ++this.commandGeneration;
         this.notifyPlaybackDiscontinuity();
         this.runtimeTracks.set(pending.track.id, {
             file: pending.input.file,
-            handle: pending.input.handle as PermissionedFileHandle | undefined,
+            handle: pending.input.handle,
         });
         this.store.appendTracks([pending.track]);
         this.store.setCurrentTrack(pending.track.id);
@@ -482,6 +498,7 @@ export class AudioSessionService {
     async importFiles(inputs: LocalAudioInput[]): Promise<void> {
         if (this.exportTransportToken) return;
         if (this.disposed || inputs.length === 0) return;
+        this.cancelFileSelection();
 
         const importGeneration = ++this.importGeneration;
         const shouldAutoplay = this.store.queue.length === 0 && !this.activeRoutePlayback && !this.trackNavigation;
@@ -522,7 +539,7 @@ export class AudioSessionService {
             records.push(record);
             this.runtimeTracks.set(trackId, {
                 file,
-                handle: input.handle as PermissionedFileHandle | undefined,
+                handle: input.handle,
                 artworkUrl: this.createArtwork(metadata),
             });
         }
@@ -827,6 +844,7 @@ export class AudioSessionService {
         if (this.exportTransportToken) return;
         if (this.disposed) return;
         const runtime = this.runtimeTracks.get(trackId);
+        const generation = this.importGeneration;
         const handle = runtime?.handle;
         if (!handle) {
             this.store.updateTrack(trackId, {
@@ -837,10 +855,12 @@ export class AudioSessionService {
 
         let permission: PermissionState = 'granted';
         try {
-            permission = handle.requestPermission ? await handle.requestPermission({ mode: 'read' }) : 'granted';
+            permission = await this.fileAccess.requestPermission(handle);
         } catch {
             permission = 'denied';
         }
+        if (this.disposed || this.importGeneration !== generation || this.runtimeTracks.get(trackId) !== runtime)
+            return;
         if (permission !== 'granted') {
             this.store.updateTrack(trackId, {
                 restoreState: 'permission-denied',
@@ -862,38 +882,40 @@ export class AudioSessionService {
         if (this.disposed) return;
         const record = this.getTrack(trackId);
         if (!record?.trackHash) return;
-
-        let handles: FileSystemFileHandle[];
+        const expectedHash = record.trackHash;
+        const task = this.beginFileSelection();
+        const isCurrent = () =>
+            !task.signal.aborted &&
+            !this.disposed &&
+            !this.exportTransportToken &&
+            this.getTrack(trackId)?.trackHash === expectedHash;
         try {
-            handles = await this.pickFiles({ multiple: false });
-        } catch (error) {
-            if (isAbortError(error)) return;
-            throw error;
-        }
-        const handle = handles[0] as PermissionedFileHandle | undefined;
-        if (!handle) return;
-        const file = await handle.getFile();
-        const trackHash = await this.hashFile(file);
-        if (trackHash !== record.trackHash) {
+            const handles = await this.pickFiles({ multiple: false });
+            const handle = handles[0];
+            if (!handle || !isCurrent()) return;
+            const file = await this.fileAccess.read(handle, task.signal);
+            const trackHash = await this.hashFile(file);
+            if (!isCurrent()) return;
+            if (trackHash !== expectedHash) {
+                this.store.updateTrack(trackId, { restoreState: 'content-changed' });
+                return;
+            }
+            if (!(await this.registerRuntimeFile(trackId, file, handle, isCurrent))) return;
             this.store.updateTrack(trackId, {
-                restoreState: 'content-changed',
+                name: file.name || record.name,
+                mimeType: file.type || record.mimeType,
+                byteSize: file.size,
+                lastModified: file.lastModified,
+                handleKey: `handle:${trackId}`,
+                restoreState: 'available',
             });
-            return;
-        }
-
-        await this.registerRuntimeFile(trackId, file, handle);
-        this.store.updateTrack(trackId, {
-            name: file.name || record.name,
-            mimeType: file.type || record.mimeType,
-            byteSize: file.size,
-            lastModified: file.lastModified,
-            handleKey: `handle:${trackId}`,
-            restoreState: 'available',
-        });
-        if (this.store.currentTrackId === trackId) {
-            await this.loadRuntimeTrack(trackId, false);
-        } else {
-            await this.persistQueueSafely();
+            if (this.store.currentTrackId === trackId) await this.loadRuntimeTrack(trackId, false);
+            else await this.persistQueueSafely();
+        } catch (error) {
+            if (isAbortError(error) || task.signal.aborted || this.disposed) return;
+            throw error;
+        } finally {
+            if (this.fileSelection === task) this.fileSelection = null;
         }
     }
 
@@ -1002,6 +1024,7 @@ export class AudioSessionService {
     async dispose(): Promise<void> {
         if (this.disposed) return;
         this.disposed = true;
+        this.cancelFileSelection();
         for (const token of this.preparedLocalAudio.keys()) this.discardPreparedLocalAudio(token);
         ++this.workspaceSaveRevision;
         this.activeRoutePlayback = null;
@@ -1030,9 +1053,15 @@ export class AudioSessionService {
 
     private async loadRuntimeTrack(trackId: string, shouldPlay: boolean): Promise<void> {
         if (this.disposed) return;
-        const runtimeTrack = this.runtimeTracks.get(trackId);
+        let runtimeTrack = this.runtimeTracks.get(trackId);
         const record = this.getTrack(trackId);
         if (!record) return;
+        const generation = ++this.commandGeneration;
+        if (!runtimeTrack?.file && runtimeTrack?.handle) {
+            await this.hydrateFromHandle(trackId, false);
+            if (generation !== this.commandGeneration || this.disposed) return;
+            runtimeTrack = this.runtimeTracks.get(trackId);
+        }
         if (!runtimeTrack?.file) {
             this.store.setCurrentTrack(trackId);
             this.store.setPlayback({
@@ -1046,7 +1075,6 @@ export class AudioSessionService {
             return;
         }
 
-        const generation = ++this.commandGeneration;
         this.notifyPlaybackDiscontinuity();
         this.engine.unload();
         this.store.setCurrentTrack(trackId);
@@ -1118,13 +1146,22 @@ export class AudioSessionService {
             return false;
         }
 
+        const generation = this.importGeneration,
+            expectedHash = record.trackHash;
+        const isCurrent = () =>
+            !this.disposed &&
+            generation === this.importGeneration &&
+            this.runtimeTracks.get(trackId) === runtime &&
+            this.getTrack(trackId)?.trackHash === expectedHash;
+
         if (!permissionAlreadyGranted) {
             let permission: PermissionState;
             try {
-                permission = handle.queryPermission ? await handle.queryPermission({ mode: 'read' }) : 'granted';
+                permission = await this.fileAccess.queryPermission(handle);
             } catch {
                 permission = 'denied';
             }
+            if (!isCurrent()) return false;
             if (permission === 'prompt') {
                 this.store.updateTrack(trackId, {
                     restoreState: 'permission-required',
@@ -1141,8 +1178,9 @@ export class AudioSessionService {
 
         let file: File;
         try {
-            file = await handle.getFile();
+            file = await this.fileAccess.read(handle);
         } catch (error) {
+            if (!isCurrent()) return false;
             this.store.updateTrack(trackId, {
                 restoreState: isMissingFileError(error) ? 'file-missing' : 'permission-denied',
             });
@@ -1150,14 +1188,15 @@ export class AudioSessionService {
         }
 
         const hash = await this.hashFile(file);
-        if (record.trackHash && hash !== record.trackHash) {
+        if (!isCurrent()) return false;
+        if (expectedHash && hash !== expectedHash) {
             this.store.updateTrack(trackId, {
                 restoreState: 'content-changed',
             });
             return false;
         }
 
-        await this.registerRuntimeFile(trackId, file, handle);
+        if (!(await this.registerRuntimeFile(trackId, file, handle, isCurrent))) return false;
         this.store.updateTrack(trackId, {
             mimeType: file.type || record.mimeType,
             byteSize: file.size,
@@ -1169,13 +1208,19 @@ export class AudioSessionService {
         return true;
     }
 
-    private async registerRuntimeFile(trackId: string, file: File, handle?: PermissionedFileHandle) {
+    private async registerRuntimeFile(
+        trackId: string,
+        file: File,
+        handle?: LocalFileReference,
+        isCurrent = () => !this.disposed,
+    ): Promise<boolean> {
         let metadata: ParsedMetadata | null = null;
         try {
             metadata = await this.parseMetadata(file);
         } catch {
             // Existing persisted metadata remains usable.
         }
+        if (!isCurrent()) return false;
         const previous = this.runtimeTracks.get(trackId);
         if (previous?.artworkUrl) {
             this.revokeObjectURL(previous.artworkUrl);
@@ -1185,6 +1230,7 @@ export class AudioSessionService {
             handle: handle ?? previous?.handle,
             artworkUrl: this.createArtwork(metadata),
         });
+        return true;
     }
 
     private createArtwork(metadata: ParsedMetadata | null): string | undefined {
@@ -1452,6 +1498,7 @@ export class AudioSessionService {
     }
 
     private clearRuntimeSession() {
+        this.cancelFileSelection();
         ++this.commandGeneration;
         ++this.importGeneration;
         this.stopFrameLoop();

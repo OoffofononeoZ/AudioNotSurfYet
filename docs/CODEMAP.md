@@ -18,7 +18,7 @@
 | 区域 | 文件数 | 入口 |
 | --- | --- | --- |
 | Electron 桌面宿主 | 7 | [模块地图](codemap/desktop.md) |
-| Web/Electron 平台端口与适配 | 3 | [模块地图](codemap/platform.md) |
+| Web/Electron 平台端口与适配 | 4 | [模块地图](codemap/platform.md) |
 | 音频播放与会话 | 10 | [模块地图](codemap/audio.md) |
 | 特征分析与 Worker | 44 | [模块地图](codemap/analysis.md) |
 | Editor 领域与工程 | 42 | [模块地图](codemap/editor.md) |

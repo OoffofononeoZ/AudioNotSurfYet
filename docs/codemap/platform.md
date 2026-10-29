@@ -10,4 +10,5 @@
 | --- | --- |
 | [src/platform/desktopAudioFiles.ts](../../src/platform/desktopAudioFiles.ts) | [src/platform/fileContracts.ts](../../src/platform/fileContracts.ts) |
 | [src/platform/fileContracts.ts](../../src/platform/fileContracts.ts) | — |
+| [src/platform/platformPorts.ts](../../src/platform/platformPorts.ts) | [src/platform/desktopAudioFiles.ts](../../src/platform/desktopAudioFiles.ts)、[src/platform/fileContracts.ts](../../src/platform/fileContracts.ts)、[src/platform/webAudioFiles.ts](../../src/platform/webAudioFiles.ts) |
 | [src/platform/webAudioFiles.ts](../../src/platform/webAudioFiles.ts) | [src/platform/fileContracts.ts](../../src/platform/fileContracts.ts) |
