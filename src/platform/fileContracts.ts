@@ -1,4 +1,4 @@
-import type { DesktopSaveBridge, ProjectFilePurpose } from './transferContracts';
+import type { DesktopSaveBridge, InputFilePurpose } from './transferContracts';
 
 /** Opaque to domain code. Web persists its existing browser handles unchanged. */
 export interface LocalFileReference {
@@ -24,7 +24,7 @@ export interface NativeDirectoryReference extends LocalDirectoryReference {
 
 export interface AudioFileAccess {
     readonly restoreFromReferenceFirst: boolean;
-    choose(options: { multiple: boolean }): Promise<LocalFileReference[]>;
+    choose(options: { multiple: boolean; purpose?: 'audio' | 'osu-audio' }): Promise<LocalFileReference[]>;
     read(reference: LocalFileReference, signal?: AbortSignal): Promise<File>;
     queryPermission(reference: LocalFileReference): Promise<PermissionState>;
     requestPermission(reference: LocalFileReference): Promise<PermissionState>;
@@ -56,9 +56,9 @@ export interface NativeDirectoryEntry {
 }
 
 export interface DesktopFileBridge {
-    chooseProject(purpose: ProjectFilePurpose): Promise<NativeResult<NativeFileReference | null>>;
-    releaseProject(grantId: string): Promise<NativeResult<void>>;
-    chooseAudio(multiple: boolean): Promise<NativeResult<NativeFileReference[]>>;
+    chooseFiles(purpose: InputFilePurpose, multiple: boolean): Promise<NativeResult<NativeFileReference[]>>;
+    releaseInput(grantId: string): Promise<NativeResult<void>>;
+    chooseAudio(multiple: boolean, purpose?: 'audio' | 'osu-audio'): Promise<NativeResult<NativeFileReference[]>>;
     chooseResourceDirectory(): Promise<NativeResult<NativeDirectoryReference | null>>;
     describeFile(grantId: string): Promise<NativeResult<NativeFileDescriptor>>;
     filePermission(grantId: string): Promise<NativeResult<PermissionState>>;

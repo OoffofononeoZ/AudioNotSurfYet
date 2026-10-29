@@ -1,14 +1,18 @@
 import {
     TRANSFER_FORMATS,
+    INPUT_FORMATS,
     FileTransferUnsupportedError,
     type FileTransferAccess,
-    type ProjectFilePurpose,
+    type InputFilePurpose,
     type TransferPurpose,
 } from './transferContracts';
 
 const aborted = (error: unknown) => error instanceof DOMException && error.name === 'AbortError';
 export class BrowserFileTransfers implements FileTransferAccess {
-    async open(purpose: ProjectFilePurpose, signal?: AbortSignal) {
+    async open(purpose: InputFilePurpose, signal?: AbortSignal) {
+        return (await this.openMany(purpose, false, signal))[0] ?? null;
+    }
+    async openMany(purpose: InputFilePurpose, multiple: boolean, signal?: AbortSignal) {
         const picker = (
             window as typeof window & {
                 showOpenFilePicker?: (options: Record<string, unknown>) => Promise<FileSystemFileHandle[]>;
@@ -19,16 +23,20 @@ export class BrowserFileTransfers implements FileTransferAccess {
         try {
             signal?.throwIfAborted();
             const handles = await picker({
-                multiple: false,
+                multiple,
                 excludeAcceptAllOption: true,
-                types: [TRANSFER_FORMATS[purpose]],
+                types: [INPUT_FORMATS[purpose]],
             });
             signal?.throwIfAborted();
-            const file = handles[0] ? await handles[0].getFile() : null;
+            const files: File[] = [];
+            for (const handle of handles) {
+                signal?.throwIfAborted();
+                files.push(await handle.getFile());
+            }
             signal?.throwIfAborted();
-            return file;
+            return files;
         } catch (error) {
-            if (aborted(error)) return null;
+            if (aborted(error)) return [];
             throw error;
         }
     }

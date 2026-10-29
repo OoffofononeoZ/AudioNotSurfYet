@@ -9,6 +9,7 @@ import { openOsuArchive, type OsuArchive, type OsuArchiveEntry } from './osuArch
 import { applyOsuBeatmap, defaultOsuTempoReplacement } from './osuMarkers';
 import { DEFAULT_OSU_IMPORT_OPTIONS, type OsuImportApplication } from './osuTypes';
 import { pickOsuAudio, pickOsuSource } from './osuFileIO';
+import { usePlatformPorts } from '../../platform/platformPorts';
 
 export function useOsuImport(
     props: {
@@ -20,6 +21,7 @@ export function useOsuImport(
 ) {
     const audio = useAudioSessionService(),
         controller = useEditorSessionController();
+    const platform = usePlatformPorts();
     const entries = shallowRef<OsuArchiveEntry[]>([]),
         selectedIndex = ref(0),
         sourceName = ref('');
@@ -66,7 +68,7 @@ export function useOsuImport(
     async function chooseSource() {
         const request = begin('reading');
         try {
-            const input = await pickOsuSource();
+            const input = await pickOsuSource(platform.transfers, request.signal);
             if (!valid(request.revision)) return;
             if (!input) {
                 phase.value = 'idle';
@@ -121,7 +123,7 @@ export function useOsuImport(
     async function chooseAudio() {
         const request = begin('reading');
         try {
-            const input = await pickOsuAudio();
+            const input = await pickOsuAudio(platform.audioFiles, request.signal);
             if (!valid(request.revision)) return;
             if (input) {
                 audioInput = input;

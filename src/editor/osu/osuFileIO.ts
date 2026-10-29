@@ -1,25 +1,19 @@
 import type { LocalAudioInput } from '../../types/audio';
+import type { FileTransferAccess } from '../../platform/transferContracts';
+import type { AudioFileAccess } from '../../platform/fileContracts';
 
-async function pick(accept: Record<string, string[]>, description: string): Promise<LocalAudioInput | null> {
-    const picker = (
-        window as typeof window & {
-            showOpenFilePicker?: (options: Record<string, unknown>) => Promise<FileSystemFileHandle[]>;
-        }
-    ).showOpenFilePicker;
-    if (!picker) throw new Error('请选择最新版 Chrome 或 Edge，通过 localhost 或 HTTPS 导入文件。');
+export async function pickOsuSource(files: FileTransferAccess, signal?: AbortSignal): Promise<LocalAudioInput | null> {
+    const file = await files.open('osu-source', signal);
+    return file ? { file } : null;
+}
+export async function pickOsuAudio(files: AudioFileAccess, signal?: AbortSignal): Promise<LocalAudioInput | null> {
     try {
-        const handles = await picker({
-            multiple: false,
-            excludeAcceptAllOption: true,
-            types: [{ description, accept }],
-        });
+        const handles = await files.choose({ multiple: false, purpose: 'osu-audio' });
+        signal?.throwIfAborted();
         const handle = handles[0];
-        return handle ? { handle, file: await handle.getFile() } : null;
+        return handle ? { handle, file: await files.read(handle, signal) } : null;
     } catch (error) {
         if (error instanceof DOMException && error.name === 'AbortError') return null;
         throw error;
     }
 }
-
-export const pickOsuSource = () => pick({ 'application/octet-stream': ['.osu', '.osz'] }, 'osu 谱面');
-export const pickOsuAudio = () => pick({ 'audio/*': ['.mp3', '.wav', '.flac', '.ogg', '.m4a'] }, '谱面引用的音频');

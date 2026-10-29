@@ -8,6 +8,7 @@
 
 | 文件 | 本地静态引用（最多显示 6 项） |
 | --- | --- |
+| [tests/processing/p1-storage.test.ts](../../tests/processing/p1-storage.test.ts) | [src/processing/modelCache.ts](../../src/processing/modelCache.ts)、[src/processing/modelManifest.ts](../../src/processing/modelManifest.ts)、[src/processing/storage.ts](../../src/processing/storage.ts)、[tests/processing/fixture.ts](../../tests/processing/fixture.ts) |
 | [tests/processing/persistentFixture.ts](../../tests/processing/persistentFixture.ts) | — |
 | [tests/processing/prepare-assets.mjs](../../tests/processing/prepare-assets.mjs) | — |
 | [tests/processing/prepare-graph-probe.mjs](../../tests/processing/prepare-graph-probe.mjs) | — |
@@ -107,4 +108,3 @@
 | [tests/transcription/harness.ts](../../tests/transcription/harness.ts) | — |
 | [tests/transcription/model-probe.worker.ts](../../tests/transcription/model-probe.worker.ts) | [src/processing/dsp.ts](../../src/processing/dsp.ts)、[src/processing/modelManifest.ts](../../src/processing/modelManifest.ts)、[src/processing/sha256.ts](../../src/processing/sha256.ts)、[src/transcription/drumFeatures.ts](../../src/transcription/drumFeatures.ts)、[src/transcription/drumModel.ts](../../src/transcription/drumModel.ts)、[src/transcription/modelManifest.ts](../../src/transcription/modelManifest.ts)、另 2 项，按需核对源码 |
 | [tests/transcription/pitch-notes.test.ts](../../tests/transcription/pitch-notes.test.ts) | [src/transcription/pitchNotes.ts](../../src/transcription/pitchNotes.ts) |
-| [tests/transcription/preprocessing.test.ts](../../tests/transcription/preprocessing.test.ts) | [src/processing/dsp.ts](../../src/processing/dsp.ts)、[src/transcription/drumFeatures.ts](../../src/transcription/drumFeatures.ts)、[src/transcription/drumTokens.ts](../../src/transcription/drumTokens.ts)、[src/transcription/monoResampler.ts](../../src/transcription/monoResampler.ts) |

@@ -3,12 +3,16 @@
         <h3>{{ definition.label }}</h3>
         <label class="viz-field"
             ><span>素材</span
-            ><input
-                type="file"
+            ><PlatformFileInput
+                :purpose="
+                    definition.kinds.length > 1 ? 'media' : definition.kinds[0] === 'video' ? 'video-media' : 'image'
+                "
+                :selection-key="`${elementId}:${definition.id}:${projectRevision}`"
                 :accept="accept"
                 :multiple="definition.multiple"
                 :disabled="disabled || busy"
-                @change="select"
+                @files="select"
+                @error="message => (error = message)"
         /></label>
         <p v-if="busy" class="viz-muted" role="status">正在读取并验证素材…</p>
         <p v-if="error" role="alert">{{ error }}</p>
@@ -60,6 +64,7 @@
     </section>
 </template>
 <script setup lang="ts">
+import PlatformFileInput from '../platform/PlatformFileInput.vue';
 import { computed, onBeforeUnmount, ref, watch } from 'vue';
 import AppSelect from '../controls/AppSelect.vue';
 import AppNumberInput from '../controls/AppNumberInput.vue';
@@ -67,6 +72,7 @@ import { importMediaFiles } from '../../visualizer/mediaImport';
 import type { MediaAsset, MediaBinding, MediaInputDefinition } from '../../visualizer/mediaTypes';
 const props = defineProps<{
     elementId: string;
+    projectRevision: string;
     definition: MediaInputDefinition;
     binding: MediaBinding;
     assets: MediaAsset[];
@@ -98,7 +104,7 @@ function cancel() {
     pending = null;
     busy.value = false;
 }
-watch(() => [props.elementId, props.disabled], cancel);
+watch(() => [props.elementId, props.disabled, props.definition.id, props.projectRevision], cancel);
 onBeforeUnmount(cancel);
 function patch(value: Partial<Exclude<MediaBinding, { kind: 'none' }>>) {
     if (props.binding.kind === 'media')
@@ -112,10 +118,7 @@ function patch(value: Partial<Exclude<MediaBinding, { kind: 'none' }>>) {
 function clear() {
     emit('change', { elementId: props.elementId, inputId: props.definition.id, binding: { kind: 'none' }, assets: [] });
 }
-async function select(event: Event) {
-    const input = event.target as HTMLInputElement,
-        files = Array.from(input.files ?? []);
-    input.value = '';
+async function select(files: File[]) {
     if (!files.length) return;
     cancel();
     const task = new AbortController();

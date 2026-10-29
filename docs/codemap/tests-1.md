@@ -63,6 +63,7 @@
 | [tests/e2e/app-shell.spec.ts](../../tests/e2e/app-shell.spec.ts) | [tests/support/file-picker.ts](../../tests/support/file-picker.ts) |
 | [tests/e2e/app-smoke.spec.ts](../../tests/e2e/app-smoke.spec.ts) | [tests/support/file-picker.ts](../../tests/support/file-picker.ts) |
 | [tests/e2e/audition-long.spec.ts](../../tests/e2e/audition-long.spec.ts) | [tests/processing/systemSampler.ts](../../tests/processing/systemSampler.ts)、[tests/transcription/auditionHarness.ts](../../tests/transcription/auditionHarness.ts) |
+| [tests/e2e/desktop-file-controls.spec.ts](../../tests/e2e/desktop-file-controls.spec.ts) | — |
 | [tests/e2e/e1-editor.spec.ts](../../tests/e2e/e1-editor.spec.ts) | [tests/support/file-picker.ts](../../tests/support/file-picker.ts)、[tests/support/project-actions.ts](../../tests/support/project-actions.ts) |
 | [tests/e2e/e10-editor-block-editing.spec.ts](../../tests/e2e/e10-editor-block-editing.spec.ts) | [tests/support/editor-marking.ts](../../tests/support/editor-marking.ts) |
 | [tests/e2e/e2-editor.spec.ts](../../tests/e2e/e2-editor.spec.ts) | [tests/support/file-picker.ts](../../tests/support/file-picker.ts) |
@@ -107,4 +108,3 @@
 | [tests/e2e/p1-performance.spec.ts](../../tests/e2e/p1-performance.spec.ts) | [tests/processing/harness.ts](../../tests/processing/harness.ts)、[tests/processing/persistentFixture.ts](../../tests/processing/persistentFixture.ts)、[tests/processing/systemSampler.ts](../../tests/processing/systemSampler.ts) |
 | [tests/e2e/p1-pipeline.spec.ts](../../tests/e2e/p1-pipeline.spec.ts) | [tests/processing/harness.ts](../../tests/processing/harness.ts) |
 | [tests/e2e/p1-runtime.probe.ts](../../tests/e2e/p1-runtime.probe.ts) | — |
-| [tests/e2e/p1-timing.spec.ts](../../tests/e2e/p1-timing.spec.ts) | [tests/processing/harness.ts](../../tests/processing/harness.ts)、[tests/processing/persistentFixture.ts](../../tests/processing/persistentFixture.ts) |

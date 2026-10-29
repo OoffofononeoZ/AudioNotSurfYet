@@ -3,7 +3,13 @@
         <h3>{{ definition.label }}</h3>
         <label class="viz-field"
             ><span>LRC 文件</span
-            ><input type="file" accept=".lrc,text/plain" :disabled="disabled || busy" @change="select"
+            ><PlatformFileInput
+                purpose="lyrics"
+                :selection-key="`${elementId}:${definition.id}:${projectRevision}`"
+                accept=".lrc,text/plain"
+                :disabled="disabled || busy"
+                @files="select"
+                @error="message => (error = message)"
         /></label>
         <p v-if="busy" class="viz-muted" role="status">正在读取歌词…</p>
         <p v-if="error" role="alert">{{ error }}</p>
@@ -45,6 +51,7 @@
     </section>
 </template>
 <script setup lang="ts">
+import PlatformFileInput from '../platform/PlatformFileInput.vue';
 import { computed, onBeforeUnmount, ref, watch } from 'vue';
 import AppNumberInput from '../controls/AppNumberInput.vue';
 import { importLyricFile } from '../../visualizer/lyricImport';
@@ -74,15 +81,14 @@ watch(
         () => props.elementId,
         () => props.projectRevision,
         () => props.definition.id,
+        () => props.disabled,
         () => JSON.stringify(props.binding),
     ],
     cancel,
 );
 onBeforeUnmount(cancel);
-async function select(event: Event) {
-    const input = event.target as HTMLInputElement,
-        file = input.files?.[0];
-    input.value = '';
+async function select(files: File[]) {
+    const file = files[0];
     if (!file) return;
     cancel();
     const task = new AbortController();

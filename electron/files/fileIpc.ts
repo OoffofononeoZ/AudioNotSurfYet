@@ -1,3 +1,4 @@
+import { INPUT_FORMATS } from '../../src/platform/transferContracts';
 import { dialog, ipcMain, type BrowserWindow, type IpcMainInvokeEvent } from 'electron';
 import type { DesktopFileBridge } from '../../src/platform/fileContracts';
 import { nativeResult, NativeFileError } from './nativeErrors';
@@ -20,45 +21,57 @@ export function registerFileIpc(getWindow: () => BrowserWindow | null, ownerOrig
         );
     }
 
-    handler('chooseProject', async (_event, purpose) => {
-        if (purpose !== 'editor-project' && purpose !== 'visualizer-project')
+    handler('chooseFiles', async (_event, purpose, multiple) => {
+        if (typeof purpose !== 'string' || !Object.hasOwn(INPUT_FORMATS, purpose) || typeof multiple !== 'boolean')
             throw new NativeFileError('invalid-request');
         const owner = getWindow()!,
             frameToken = owner.webContents.mainFrame.frameToken;
+        const current = () =>
+            !owner.isDestroyed() &&
+            owner === getWindow() &&
+            owner.webContents.mainFrame.frameToken === frameToken &&
+            owner.webContents.mainFrame.origin === ownerOrigin;
+        const format = INPUT_FORMATS[purpose as keyof typeof INPUT_FORMATS];
         const result = await dialog.showOpenDialog(owner, {
-            title: '选择工程',
-            properties: ['openFile'],
-            filters: [{ name: 'AudioNotSurfYet JSON', extensions: ['json'] }],
+            title: format.description,
+            properties: multiple ? ['openFile', 'multiSelections'] : ['openFile'],
+            filters: [
+                {
+                    name: format.description,
+                    extensions: Object.values(format.accept)
+                        .flat()
+                        .map(ext => ext.slice(1)),
+                },
+            ],
         });
-        if (
-            result.canceled ||
-            !result.filePaths[0] ||
-            owner.isDestroyed() ||
-            owner !== getWindow() ||
-            owner.webContents.mainFrame.frameToken !== frameToken ||
-            owner.webContents.mainFrame.origin !== ownerOrigin
-        )
-            return null;
-        const reference = await grants.selectTransientFile(result.filePaths[0]);
-        if (
-            owner.isDestroyed() ||
-            owner !== getWindow() ||
-            owner.webContents.mainFrame.frameToken !== frameToken ||
-            owner.webContents.mainFrame.origin !== ownerOrigin
-        ) {
-            grants.releaseTransientFile(reference.grantId);
-            return null;
+        if (result.canceled || !current()) return [];
+        const references = [];
+        try {
+            for (const file of result.filePaths) references.push(await grants.selectTransientFile(file));
+            if (!current()) {
+                for (const reference of references) grants.releaseTransientFile(reference.grantId);
+                return [];
+            }
+            return references;
+        } catch (error) {
+            for (const reference of references) grants.releaseTransientFile(reference.grantId);
+            throw error;
         }
-        return reference;
     });
-    handler('releaseProject', async (_event, id) => grants.releaseTransientFile(grantId(id)));
-    handler('chooseAudio', async (_event, multiple) => {
-        if (typeof multiple !== 'boolean') throw new NativeFileError('invalid-request');
+    handler('releaseInput', async (_event, id) => grants.releaseTransientFile(grantId(id)));
+    handler('chooseAudio', async (_event, multiple, purpose = 'audio') => {
+        if (typeof multiple !== 'boolean' || (purpose !== 'audio' && purpose !== 'osu-audio'))
+            throw new NativeFileError('invalid-request');
         const owner = getWindow()!;
         const result = await dialog.showOpenDialog(owner, {
             title: '选择音频',
             properties: multiple ? ['openFile', 'multiSelections'] : ['openFile'],
-            filters: [{ name: 'Audio files', extensions: ['mp3', 'wav', 'flac'] }],
+            filters: [
+                {
+                    name: 'Audio files',
+                    extensions: purpose === 'osu-audio' ? ['mp3', 'wav', 'flac', 'ogg', 'm4a'] : ['mp3', 'wav', 'flac'],
+                },
+            ],
         });
         if (result.canceled || owner.isDestroyed()) return [];
         const references = [];

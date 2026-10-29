@@ -268,6 +268,23 @@ export class EditorSeparationService {
             throw error;
         }
     }
+    async readStemFile(role: StemRole, expectedResult: string, signal: AbortSignal): Promise<Blob> {
+        signal.throwIfAborted();
+        const result = this.state.result,
+            generation = this.generation;
+        if (
+            this.disposed ||
+            !result ||
+            result.source.directory !== expectedResult ||
+            !result.stems.some(stem => stem.role === role)
+        )
+            throw Error('分离结果已变化，请重新选择导出。');
+        const file = await this.repository.wav(result, role);
+        signal.throwIfAborted();
+        if (this.disposed || generation !== this.generation || this.state.result !== result)
+            throw Error('分离结果已变化，请重新选择导出。');
+        return file;
+    }
     async start(): Promise<void> {
         if (this.disposed || !this.state.trackId || busyStatuses.has(this.state.status) || this.operation) return;
         if (!this.isGpuAvailable()) {

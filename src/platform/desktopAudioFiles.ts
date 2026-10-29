@@ -36,8 +36,8 @@ export class DesktopAudioFiles implements AudioFileAccess {
         this.bridge = bridge;
         this.fetchFile = fetchFile;
     }
-    async choose({ multiple }: { multiple: boolean }) {
-        return nativeValue(await this.bridge.chooseAudio(multiple));
+    async choose({ multiple, purpose = 'audio' }: { multiple: boolean; purpose?: 'audio' | 'osu-audio' }) {
+        return nativeValue(await this.bridge.chooseAudio(multiple, purpose));
     }
     async read(reference: LocalFileReference, signal?: AbortSignal) {
         signal?.throwIfAborted();

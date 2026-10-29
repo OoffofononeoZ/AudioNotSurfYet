@@ -30,8 +30,8 @@ function fileBridge() {
         filePermission: vi.fn(),
         listDirectory: vi.fn(),
         describeDirectoryFile: vi.fn(),
-        chooseProject: vi.fn(),
-        releaseProject: vi.fn(async () => ({ ok: true as const, value: undefined })),
+        chooseFiles: vi.fn(),
+        releaseInput: vi.fn<DesktopFileBridge['releaseInput']>(async () => ({ ok: true as const, value: undefined })),
     } satisfies DesktopFileBridge;
 }
 function saveBridge(target: string) {
@@ -116,7 +116,7 @@ test('releases temporary project grants after successful reads and failed reads'
         grantId: 'temporary',
         name: 'project.json',
     };
-    files.chooseProject.mockResolvedValue({ ok: true, value: reference });
+    files.chooseFiles.mockResolvedValue({ ok: true, value: [reference] });
     files.describeFile.mockResolvedValue({
         ok: true,
         value: {
@@ -130,10 +130,41 @@ test('releases temporary project grants after successful reads and failed reads'
     });
     const access = new DesktopFileTransfers(files, bridge, vi.fn(async () => new Response('{}')) as typeof fetch);
     expect(await (await access.open('editor-project'))?.text()).toBe('{}');
-    expect(files.releaseProject).toHaveBeenLastCalledWith(reference.grantId);
+    expect(files.releaseInput).toHaveBeenLastCalledWith(reference.grantId);
     files.describeFile.mockResolvedValueOnce({ ok: false, error: { code: 'file-missing', message: 'missing' } });
     await expect(access.open('editor-project')).rejects.toMatchObject({ name: 'NotFoundError' });
-    expect(files.releaseProject).toHaveBeenCalledTimes(2);
+    expect(files.releaseInput).toHaveBeenCalledTimes(2);
+});
+
+test('multiple native inputs keep selection order and release every grant when a later read fails', async () => {
+    const files = fileBridge(),
+        bridge = saveBridge(path.join(root, 'unused.json'));
+    const references = ['one.png', 'two.webp'].map((name, index) => ({
+        kind: 'file' as const,
+        platform: 'electron' as const,
+        grantId: `temporary-${index}`,
+        name,
+    }));
+    files.chooseFiles.mockResolvedValue({ ok: true, value: references });
+    files.describeFile.mockImplementation(async id => ({
+        ok: true,
+        value: {
+            reference: references.find(ref => ref.grantId === id)!,
+            size: 2,
+            lastModified: 1,
+            mimeType: 'image/png',
+            revision: 'r1',
+            readUrl: `app://audiosurf/native-files/${id}`,
+        },
+    }));
+    const access = new DesktopFileTransfers(files, bridge, vi.fn(async () => new Response('{}')) as typeof fetch);
+    expect((await access.openMany('image', true)).map(file => file.name)).toEqual(['one.png', 'two.webp']);
+    expect(files.chooseFiles).toHaveBeenLastCalledWith('image', true);
+    expect(files.releaseInput.mock.calls.map(([id]) => id)).toEqual(references.map(ref => ref.grantId));
+    files.releaseInput.mockClear();
+    files.describeFile.mockResolvedValueOnce({ ok: false, error: { code: 'file-missing', message: 'missing' } });
+    await expect(access.openMany('image', true)).rejects.toMatchObject({ name: 'NotFoundError' });
+    expect(files.releaseInput.mock.calls.map(([id]) => id)).toEqual(references.map(ref => ref.grantId));
 });
 
 test('browser cancellation after a write aborts the writable without committing it', async () => {

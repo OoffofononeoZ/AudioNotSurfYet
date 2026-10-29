@@ -54,6 +54,8 @@ declare module 'vue' {
     MusicBarIcon: typeof import('./src/components/MusicBarIcon.vue')['default']
     MusicBarPlaybackSpeed: typeof import('./src/components/MusicBarPlaybackSpeed.vue')['default']
     MusicList: typeof import('./src/components/MusicList.vue')['default']
+    PlatformDownload: typeof import('./src/components/platform/PlatformDownload.vue')['default']
+    PlatformFileInput: typeof import('./src/components/platform/PlatformFileInput.vue')['default']
     RealtimeVisualizer: typeof import('./src/components/visualizer/RealtimeVisualizer.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']

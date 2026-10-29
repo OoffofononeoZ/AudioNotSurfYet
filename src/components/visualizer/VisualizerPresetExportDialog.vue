@@ -15,11 +15,13 @@
             <div class="cover-field">
                 <img v-if="coverUrl" :src="coverUrl" alt="预设封面预览" />
                 <label
-                    >更换封面<input
-                        type="file"
+                    >更换封面<PlatformFileInput
+                        purpose="image"
+                        :selection-key="`${open}:${project?.projectId}:${project?.updatedAt}`"
                         accept="image/png,image/jpeg,image/webp"
                         :disabled="busy || preparing"
-                        @change="selectCover"
+                        @files="selectCover"
+                        @error="message => (error = message)"
                 /></label>
             </div>
             <p v-if="preparing" role="status">正在验证预设并截取封面…</p>
@@ -48,6 +50,7 @@
     </dialog>
 </template>
 <script setup lang="ts">
+import PlatformFileInput from '../platform/PlatformFileInput.vue';
 import { ref, shallowRef, watch, onBeforeUnmount, nextTick } from 'vue';
 import { ElMessage } from 'element-plus';
 import type { VisualizerProjectV6 } from '../../visualizer/compositionTypes';
@@ -161,10 +164,8 @@ watch(
     },
 );
 onBeforeUnmount(cancel);
-async function selectCover(event: Event) {
-    const input = event.target as HTMLInputElement,
-        file = input.files?.[0];
-    input.value = '';
+async function selectCover(files: File[]) {
+    const file = files[0];
     if (!file) return;
     coverTask?.abort();
     const owner = new AbortController();

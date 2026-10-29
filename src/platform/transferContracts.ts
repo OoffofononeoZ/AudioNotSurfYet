@@ -7,10 +7,32 @@ export const TRANSFER_FORMATS = {
     wav: { description: 'WAV audio', accept: { 'audio/wav': ['.wav'] } },
 } as const;
 export type TransferPurpose = keyof typeof TRANSFER_FORMATS;
-export type ProjectFilePurpose = 'editor-project' | 'visualizer-project';
+export const INPUT_FORMATS = {
+    'editor-project': TRANSFER_FORMATS['editor-project'],
+    'visualizer-project': TRANSFER_FORMATS['visualizer-project'],
+    'osu-source': { description: 'osu 谱面', accept: { 'application/octet-stream': ['.osu', '.osz'] } },
+    image: {
+        description: '图片',
+        accept: { 'image/png': ['.png'], 'image/jpeg': ['.jpg', '.jpeg'], 'image/webp': ['.webp'] },
+    },
+    'video-media': { description: '视频素材', accept: { 'video/webm': ['.webm'], 'video/mp4': ['.mp4'] } },
+    media: {
+        description: '图片或视频素材',
+        accept: {
+            'image/png': ['.png'],
+            'image/jpeg': ['.jpg', '.jpeg'],
+            'image/webp': ['.webp'],
+            'video/webm': ['.webm'],
+            'video/mp4': ['.mp4'],
+        },
+    },
+    lyrics: { description: 'LRC 歌词', accept: { 'text/plain': ['.lrc'] } },
+} as const;
+export type InputFilePurpose = keyof typeof INPUT_FORMATS;
 
 export interface FileTransferAccess {
-    open(purpose: ProjectFilePurpose, signal?: AbortSignal): Promise<File | null>;
+    open(purpose: InputFilePurpose, signal?: AbortSignal): Promise<File | null>;
+    openMany(purpose: InputFilePurpose, multiple: boolean, signal?: AbortSignal): Promise<File[]>;
     save(
         purpose: TransferPurpose,
         suggestedName: string,

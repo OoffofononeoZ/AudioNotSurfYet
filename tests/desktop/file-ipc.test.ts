@@ -27,17 +27,73 @@ function fixture() {
     const owner = { webContents: contents, isDestroyed: vi.fn(() => false) };
     const describe = vi.fn(async () => ({ name: 'selected file' }));
     const selectFile = vi.fn(async () => ({ grantId: id, kind: 'file', platform: 'electron', name: 'song.wav' }));
+    const selectTransientFile = vi.fn(async () => ({
+        grantId: id,
+        kind: 'file',
+        platform: 'electron',
+        name: 'image.png',
+    }));
+    const releaseTransientFile = vi.fn();
     const cleanup = registerFileIpc(() => owner as unknown as BrowserWindow, 'app://audiosurf', {
         describe,
         selectFile,
+        selectTransientFile,
+        releaseTransientFile,
     } as unknown as NativeReadGrants);
     const event = { sender: contents, senderFrame: frame } as unknown as IpcMainInvokeEvent;
     const invoke = (name: string, sender = event, ...args: unknown[]) =>
         host.handlers.get(`audiosurf:files:${name}`)!(sender, ...args);
-    return { owner, event, describe, selectFile, invoke, cleanup };
+    return { owner, event, describe, selectFile, selectTransientFile, releaseTransientFile, invoke, cleanup };
 }
 
 describe('native file IPC owner boundary', () => {
+    it('limits input types to approved purposes, and releases partial selections on read-grant failure', async () => {
+        const s = fixture();
+        expect(await s.invoke('chooseFiles', s.event, 'arbitrary-path', true)).toMatchObject({
+            ok: false,
+            error: { code: 'invalid-request' },
+        });
+        expect(host.open).not.toHaveBeenCalled();
+        host.open.mockResolvedValueOnce({ canceled: false, filePaths: ['C:/chosen/one.png', 'C:/chosen/two.webp'] });
+        s.selectTransientFile.mockRejectedValueOnce(new Error('failed with private path'));
+        expect(await s.invoke('chooseFiles', s.event, 'image', true)).toMatchObject({
+            ok: false,
+            error: { code: 'io-error' },
+        });
+        host.open.mockResolvedValueOnce({ canceled: false, filePaths: ['C:/chosen/one.png', 'C:/chosen/two.webp'] });
+        s.selectTransientFile
+            .mockResolvedValueOnce({ grantId: id, kind: 'file', platform: 'electron', name: 'one.png' })
+            .mockRejectedValueOnce(Error('failed'));
+        expect(await s.invoke('chooseFiles', s.event, 'image', true)).toMatchObject({ ok: false });
+        expect(s.releaseTransientFile).toHaveBeenCalledWith(id);
+        expect(host.open).toHaveBeenLastCalledWith(
+            s.owner,
+            expect.objectContaining({
+                properties: ['openFile', 'multiSelections'],
+                filters: [{ name: '图片', extensions: ['png', 'jpg', 'jpeg', 'webp'] }],
+            }),
+        );
+    });
+    it('retains extended osu audio sources while keeping ordinary audio filters unchanged', async () => {
+        const s = fixture();
+        host.open.mockResolvedValue({ canceled: false, filePaths: ['C:/chosen/song.ogg'] });
+        expect(await s.invoke('chooseAudio', s.event, false, 'osu-audio')).toMatchObject({
+            ok: true,
+            value: [{ grantId: id }],
+        });
+        expect(s.selectFile).toHaveBeenCalledWith('C:/chosen/song.ogg');
+        expect(host.open).toHaveBeenLastCalledWith(
+            s.owner,
+            expect.objectContaining({
+                filters: [{ name: 'Audio files', extensions: ['mp3', 'wav', 'flac', 'ogg', 'm4a'] }],
+            }),
+        );
+        await s.invoke('chooseAudio', s.event, false);
+        expect(host.open).toHaveBeenLastCalledWith(
+            s.owner,
+            expect.objectContaining({ filters: [{ name: 'Audio files', extensions: ['mp3', 'wav', 'flac'] }] }),
+        );
+    });
     it('rejects other windows, child frames and opaque/foreign origins before any file access', async () => {
         const fixtureState = fixture(),
             { event, invoke, describe } = fixtureState;

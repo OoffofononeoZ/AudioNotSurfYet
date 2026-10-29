@@ -10,6 +10,8 @@ ABI 3 继承 ABI 2，增加 executionModes（timeline/realtime）和 mediaInputs
 
 算法 Worker 只收到 mode 与媒体可用性、尺寸、淡化比例、填充方式等元数据。Shader media uniform 静态声明 inputId 和 current/next slot，DrawPacket 必须返回相同输入 ID。宿主解析纹理，算法不得接触文件、URL、解码器、DOM 或像素。目录与算法初始化不读取用户媒体。
 
+图片、视频、LRC 与预设封面使用集中平台文件控件：Web 保留 HTML 文件上传，Electron 使用限定用途和多选参数的原生对话框。桌面临时引用在读取结束或失败时全部释放；工程/元素身份变化、锁定或卸载使旧选择失效。共享校验与内嵌字节格式不变，实际桌面运行缺口见[双端阶段](desktop.md)。
+
 ## 时间与所有权
 
 歌曲预览与离线视频使用既有 mediabunny@1.61.6 按目标时间解码，每帧等待准备；实时与壁纸使用宿主静音 HTMLVideoElement，按会话时钟对齐。视频音轨不进入导出或分析。歌曲媒体时间相对元素起点，实时媒体时间为会话时间，视频按时长循环。轮播按固定间隔切换，区间末尾交叉淡化；fit 为 cover/contain/initial。

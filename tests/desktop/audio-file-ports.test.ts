@@ -21,8 +21,8 @@ const success = <T>(value: T) => ({ ok: true as const, value });
 
 function bridge() {
     return {
-        chooseProject: vi.fn(),
-        releaseProject: vi.fn(),
+        chooseFiles: vi.fn(),
+        releaseInput: vi.fn(),
         chooseAudio: vi.fn(async () => success([reference])),
         describeFile: vi.fn<DesktopFileBridge['describeFile']>(async () => success(descriptor)),
         filePermission: vi.fn(async () => success('granted' as const)),

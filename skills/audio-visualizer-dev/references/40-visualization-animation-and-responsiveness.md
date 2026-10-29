@@ -12,7 +12,7 @@
 - LightBg/DotGridBg/MusicBar等装饰分别拥有现有Three.js、Canvas或GSAP资源；TestLands/threeDTable/testcomp是试验表面，不成为生产拓扑范本。
 - 数值/几何、确定性hash、媒体/反馈与资源门槛见[Visualizer验证](../../../docs/quality/visualizer/validation.md)，按实际影响挑选专项。
 - 外部库通过平台目录端口读取，资源校验/预览不直接调用浏览器句柄；Web 句柄和桌面授权引用的持久化与路径边界见[资源包](../../../docs/architecture/visualizer/resource-packages-v2.md)。更改目录交互时核对双端取消、权限、恢复及 URL 释放；桌面写入与实际验证状态以双端合同为准。
-- 工程/WebM 通过注入的文件传输端口，codec 与控制器复用；不在组件中增加 Electron 或具体 picker 分支。桌面大文件保持分块确认背压及提交前取消，失败不能覆盖旧输出；更改文件 IO 须检查当前工程修订、退出清理与两端真实操作的验证缺口。
+- 工程/WebM 通过注入的文件端口，codec 与控制器复用；普通业务组件不探测 Electron 或具体 picker。上传/下载差异集中在 `components/platform/` 控件和平台端口，Web 保留已有 HTML 上传与下载语义。桌面大文件保持分块确认背压及提交前取消，失败不能覆盖旧输出；更改文件 IO 须检查当前工程修订、退出清理与两端真实操作缺口。
 
 ## RAF 与 Observer
 

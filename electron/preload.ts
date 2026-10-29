@@ -17,9 +17,9 @@ if (process.isMainFrame) {
             abortSave: id => ipcRenderer.invoke('audiosurf:saves:abortSave', id),
         },
         files: {
-            chooseProject: purpose => ipcRenderer.invoke('audiosurf:files:chooseProject', purpose),
-            releaseProject: id => ipcRenderer.invoke('audiosurf:files:releaseProject', id),
-            chooseAudio: multiple => ipcRenderer.invoke('audiosurf:files:chooseAudio', multiple),
+            chooseFiles: (purpose, multiple) => ipcRenderer.invoke('audiosurf:files:chooseFiles', purpose, multiple),
+            releaseInput: id => ipcRenderer.invoke('audiosurf:files:releaseInput', id),
+            chooseAudio: (multiple, purpose) => ipcRenderer.invoke('audiosurf:files:chooseAudio', multiple, purpose),
             chooseResourceDirectory: () => ipcRenderer.invoke('audiosurf:files:chooseResourceDirectory'),
             describeFile: id => ipcRenderer.invoke('audiosurf:files:describeFile', id),
             filePermission: id => ipcRenderer.invoke('audiosurf:files:filePermission', id),

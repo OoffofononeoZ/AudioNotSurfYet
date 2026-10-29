@@ -7,7 +7,13 @@ interface PermissionedFileHandle extends FileSystemFileHandle {
 
 export class BrowserAudioFiles implements AudioFileAccess {
     readonly restoreFromReferenceFirst = false;
-    async choose({ multiple }: { multiple: boolean }): Promise<LocalFileReference[]> {
+    async choose({
+        multiple,
+        purpose = 'audio',
+    }: {
+        multiple: boolean;
+        purpose?: 'audio' | 'osu-audio';
+    }): Promise<LocalFileReference[]> {
         const picker = (
             window as unknown as {
                 showOpenFilePicker?: (options: Record<string, unknown>) => Promise<FileSystemFileHandle[]>;
@@ -20,7 +26,17 @@ export class BrowserAudioFiles implements AudioFileAccess {
         return picker({
             multiple,
             excludeAcceptAllOption: true,
-            types: [{ description: 'Audio files', accept: { 'audio/*': ['.mp3', '.wav', '.flac'] } }],
+            types: [
+                {
+                    description: 'Audio files',
+                    accept: {
+                        'audio/*':
+                            purpose === 'osu-audio'
+                                ? ['.mp3', '.wav', '.flac', '.ogg', '.m4a']
+                                : ['.mp3', '.wav', '.flac'],
+                    },
+                },
+            ],
         });
     }
     async read(reference: LocalFileReference, signal?: AbortSignal) {

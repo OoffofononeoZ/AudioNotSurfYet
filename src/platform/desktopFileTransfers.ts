@@ -4,7 +4,7 @@ import {
     SAVE_CHUNK_BYTES,
     type DesktopSaveBridge,
     type FileTransferAccess,
-    type ProjectFilePurpose,
+    type InputFilePurpose,
     type TransferPurpose,
 } from './transferContracts';
 
@@ -17,14 +17,23 @@ export class DesktopFileTransfers implements FileTransferAccess {
         this.saves = saves;
         this.reader = new DesktopAudioFiles(files, fetchFile);
     }
-    async open(purpose: ProjectFilePurpose, signal?: AbortSignal) {
+    async open(purpose: InputFilePurpose, signal?: AbortSignal) {
+        return (await this.openMany(purpose, false, signal))[0] ?? null;
+    }
+    async openMany(purpose: InputFilePurpose, multiple: boolean, signal?: AbortSignal) {
         signal?.throwIfAborted();
-        const reference = nativeValue(await this.files.chooseProject(purpose));
-        if (!reference) return null;
+        const references = nativeValue(await this.files.chooseFiles(purpose, multiple));
         try {
-            return await this.reader.read(reference, signal);
+            const files: File[] = [];
+            for (const reference of references) files.push(await this.reader.read(reference, signal));
+            signal?.throwIfAborted();
+            return files;
         } finally {
-            nativeValue(await this.files.releaseProject(reference.grantId));
+            const results = await Promise.allSettled(
+                references.map(reference => this.files.releaseInput(reference.grantId).then(nativeValue)),
+            );
+            const failure = results.find(result => result.status === 'rejected');
+            if (failure?.status === 'rejected') throw failure.reason;
         }
     }
     async save(

@@ -30,6 +30,7 @@ DEC-072来源为owner明确要求：暂不考虑运行时间，把当前成功�
 - 结果恢复需要当前原PCM全量hash、歌曲/采样率/帧数/通道/时长、四模型/运行资产/backend/config身份一致；角色、frame、series与文件size/checksum核对后才展示。decoded revision是当前解码会话的读取防护，刷新后可变化；恢复使用保存结果的descriptor作为hash header，用当前revision分块复制当前PCM，重新验证原完整hash，不用旧revision读取，不修改旧结果身份。复制期间当前descriptor变化仍取消。缺失/损坏拒绝命中，提供重新处理或显式清理；不静默展示旧歌结果。
 - 新任务失败/取消保留旧完整结果；rerun不隐式删除旧缓存。完整artifact校验后才发布Editor索引，索引失败清理本次未发布结果。结果清理/模型清理须用户显式操作；运行或验证中拒绝清理，其他Editor/Visualizer草稿不被删除。崩溃残留Editor目录列为可显式清理项，恢复不自动驱逐。
 - WAV对象URL归服务拥有，切换结果、换歌、离页/dispose逐一撤销；校验hash有界分块与让出任务，组件动画尊重prefers-reduced-motion。新增可见滚动容器复用app-scrollbar。
+- 双端 WAV 导出通过平台控件装配：Web 保留原下载链接；Electron 读取当前完整结果的磁盘支持 Blob，再使用原生保存事务分块写出。读取前后校验结果目录、generation 和取消信号，换源/清理/卸载使旧保存失效。文件编码及缓存格式不变，原生实际保存和退出清理证据仍见[桌面阶段](../../context/desktop.md)。
 
 ## Verification Boundary
 
