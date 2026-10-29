@@ -104,7 +104,7 @@ function cancel() {
     pending = null;
     busy.value = false;
 }
-watch(() => [props.elementId, props.disabled, props.definition.id, props.projectRevision], cancel);
+watch([() => props.elementId, () => props.disabled, () => props.definition.id, () => props.projectRevision], cancel);
 onBeforeUnmount(cancel);
 function patch(value: Partial<Exclude<MediaBinding, { kind: 'none' }>>) {
     if (props.binding.kind === 'media')

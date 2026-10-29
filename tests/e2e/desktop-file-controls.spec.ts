@@ -1,4 +1,64 @@
 import { expect, test } from '@playwright/test';
+import { readFile } from 'node:fs/promises';
+
+test('media import survives a definition refresh but discards a changed project revision', async ({ page }) => {
+    const image = (await readFile('tests/fixtures/visualizer-media/red.png')).toString('base64');
+    await page.goto('/');
+    await page.evaluate(async image => {
+        const from = (path: string) => import(/* @vite-ignore */ path);
+        const vue = await from('/node_modules/.vite/deps/vue.js');
+        const { default: Media } = await from('/src/components/visualizer/VisualizerMediaInput.vue');
+        const { platformPortsKey } = await from('/src/platform/platformPorts.ts');
+        const definition = vue.ref({ id: 'background', label: '测试媒体', kinds: ['image'], multiple: false });
+        const revision = vue.ref('project:1'),
+            changes: unknown[] = [],
+            releases: (() => void)[] = [];
+        const bytes = Uint8Array.from(atob(image), c => c.charCodeAt(0));
+        const root = document.createElement('div');
+        document.body.append(root);
+        const app = vue.createApp({
+            setup: () => () =>
+                vue.h(Media, {
+                    elementId: 'element',
+                    projectRevision: revision.value,
+                    definition: definition.value,
+                    binding: { kind: 'none' },
+                    assets: [],
+                    disabled: false,
+                    onChange: (change: unknown) => changes.push(change),
+                }),
+        });
+        app.provide(platformPortsKey, { kind: 'web' });
+        app.mount(root);
+        (window as any).__mediaControl = {
+            changes,
+            refresh: () => (definition.value = { ...definition.value }),
+            revise: () => (revision.value = 'project:2'),
+            start: async () => {
+                const file = new File([bytes], 'delayed.png', { type: 'image/png' });
+                file.arrayBuffer = () => new Promise(resolve => releases.push(() => resolve(bytes.slice().buffer)));
+                const input = root.querySelector('input')!;
+                Object.defineProperty(input, 'files', { configurable: true, value: [file] });
+                input.dispatchEvent(new Event('change', { bubbles: true }));
+                await vue.nextTick();
+            },
+            finish: (index: number) => releases[index]!(),
+        };
+    }, image);
+    const state = () => page.evaluate(() => (window as any).__mediaControl.changes.length);
+    await page.evaluate(() => (window as any).__mediaControl.start());
+    await page.evaluate(() => (window as any).__mediaControl.refresh());
+    await expect(page.getByRole('status').filter({ hasText: '正在读取并验证素材' })).toBeVisible();
+    await page.evaluate(() => (window as any).__mediaControl.finish(0));
+    await expect.poll(state).toBe(1);
+    await page.evaluate(() => (window as any).__mediaControl.start());
+    await page.evaluate(() => (window as any).__mediaControl.revise());
+    await page.evaluate(() => (window as any).__mediaControl.finish(1));
+    await page.evaluate(() => (window as any).__mediaControl.start());
+    await page.evaluate(() => (window as any).__mediaControl.finish(2));
+    await expect.poll(state).toBe(2);
+    await expect(page.getByRole('alert')).toHaveCount(0);
+});
 
 // Browser-hosted adapter tests. These do not claim Electron or OS dialog coverage.
 test('desktop input control discards a late selection after identity changes and accepts the next selection', async ({

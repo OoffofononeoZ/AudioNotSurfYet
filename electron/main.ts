@@ -5,6 +5,8 @@ import { NativeReadGrants } from './files/nativeGrants';
 import { registerFileIpc } from './files/fileIpc';
 import { NativeSaves } from './files/nativeSaves';
 import { registerSaveIpc } from './files/saveIpc';
+import { NativeBundles } from './files/nativeBundles';
+import { registerBundleIpc } from './files/bundleIpc';
 import { nativeError } from './files/nativeErrors';
 import { resolveNativeRead, type InitiatedFileRequest } from './files/nativeReadRequest';
 import {
@@ -45,6 +47,9 @@ async function createWindow() {
     const unregisterFiles = registerFileIpc(() => window, ownerOrigin, grants);
     const saves = new NativeSaves();
     const unregisterSaves = registerSaveIpc(() => window, ownerOrigin, saves);
+    const bundles = new NativeBundles();
+    const unregisterBundles = registerBundleIpc(() => window, ownerOrigin, grants, bundles);
+    app.once('will-quit', unregisterBundles);
     app.once('will-quit', unregisterSaves);
     app.once('will-quit', unregisterFiles);
     const desktopSession = session.fromPartition('persist:audiosurf-desktop');
@@ -125,6 +130,9 @@ async function createWindow() {
     window.webContents.on('will-attach-webview', event => event.preventDefault());
     const abortSaves = () => {
         void saves.abortAll().catch(error => console.error('Native save cleanup failed', nativeError(error).code));
+        void bundles
+            .abortAll()
+            .catch(error => console.error('Native directory cleanup failed', nativeError(error).code));
     };
     window.webContents.on('render-process-gone', abortSaves);
     window.webContents.on('render-process-gone', () => grants.clearTransientFiles());

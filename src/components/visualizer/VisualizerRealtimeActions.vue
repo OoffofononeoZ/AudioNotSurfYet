@@ -111,6 +111,7 @@
 </template>
 
 <script setup lang="ts">
+import { usePlatformPorts } from '../../platform/platformPorts';
 import { computed, ref, shallowRef, watch, onBeforeUnmount, nextTick } from 'vue';
 import { useRouter } from 'vue-router';
 import type { VisualizerProjectV6 } from '../../visualizer/compositionTypes';
@@ -124,6 +125,7 @@ import { WallpaperDirectoryWriter, WallpaperDirectoryCleanupError } from '../../
 import { ElMessage } from 'element-plus';
 import AppActionIcon from '../controls/AppActionIcon.vue';
 import VisualizerRealtimePreview from './VisualizerRealtimePreview.vue';
+const platform = usePlatformPorts();
 const props = defineProps<{
     open: boolean;
     project: VisualizerProjectV6 | null;
@@ -291,7 +293,10 @@ async function saveWallpaper() {
     const owner = begin('directory');
     wallpaperMessage.value = '';
     try {
-        const result = await new WallpaperDirectoryWriter().save(wallpaperFiles.value, owner.signal);
+        const result = await new WallpaperDirectoryWriter(platform.directoryExports).save(
+            wallpaperFiles.value,
+            owner.signal,
+        );
         if (current(owner) && result.status === 'saved')
             wallpaperMessage.value = `已导出 ${result.folderName}，将目录中的 index.html 导入 Wallpaper Engine。`;
     } catch (e) {

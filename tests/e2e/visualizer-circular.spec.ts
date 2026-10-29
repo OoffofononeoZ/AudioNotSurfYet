@@ -146,6 +146,7 @@ async function imageData(page: Page, testId = 'visualizer-preview-canvas') {
 async function upload(page: Page, names: string[]) {
     const before = await page.getByTestId('visualizer-preview-canvas').getAttribute('data-binding-revision');
     await page.locator('[data-media-input="background"] input[type=file]').setInputFiles(names.map(mediaFile));
+    for (const name of names) await expect(page.locator('[data-media-input="background"]')).toContainText(name);
     await expect
         .poll(() => page.getByTestId('visualizer-preview-canvas').getAttribute('data-binding-revision'))
         .not.toBe(before);

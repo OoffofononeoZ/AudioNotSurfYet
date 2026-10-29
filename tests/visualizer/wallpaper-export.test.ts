@@ -1,3 +1,4 @@
+import { BrowserDirectoryExports } from '../../src/platform/webDirectoryExports';
 import { expect, test, vi } from 'vitest';
 import { createComposition } from '../../src/visualizer/compositionCodec';
 import { appendStandaloneElements } from '../../src/visualizer/compositionModel';
@@ -64,7 +65,11 @@ function directory(options: { failWrite?: boolean; cleanupFailure?: boolean; abo
         },
         removeEntry: remove,
     };
-    return { writer: new WallpaperDirectoryWriter(async () => parent as never), writes, remove };
+    return {
+        writer: new WallpaperDirectoryWriter(new BrowserDirectoryExports(async () => parent as never)),
+        writes,
+        remove,
+    };
 }
 test('writer commits project.json last and leaves existing directories untouched', async () => {
     const d = directory(),
@@ -77,9 +82,11 @@ test('writer commits project.json last and leaves existing directories untouched
     expect(d.remove).not.toHaveBeenCalled();
 });
 test('picker cancellation makes no files; write failures and mid-write cancellation clean only their new directory', async () => {
-    const cancelled = new WallpaperDirectoryWriter(async () => {
-        throw new DOMException('cancel', 'AbortError');
-    });
+    const cancelled = new WallpaperDirectoryWriter(
+        new BrowserDirectoryExports(async () => {
+            throw new DOMException('cancel', 'AbortError');
+        }),
+    );
     expect(await cancelled.save([])).toEqual({ status: 'cancelled' });
     const files = createWallpaperFiles(style(), 'runtime', 'license');
     const failed = directory({ failWrite: true });

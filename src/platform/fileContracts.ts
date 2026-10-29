@@ -1,4 +1,5 @@
 import type { DesktopSaveBridge, InputFilePurpose } from './transferContracts';
+import type { DesktopBundleBridge } from './bundleContracts';
 
 /** Opaque to domain code. Web persists its existing browser handles unchanged. */
 export interface LocalFileReference {
@@ -71,6 +72,7 @@ export interface DesktopBridge {
     readonly apiVersion: 1;
     readonly files: DesktopFileBridge;
     readonly saves: DesktopSaveBridge;
+    readonly bundles: DesktopBundleBridge;
 }
 
 declare global {

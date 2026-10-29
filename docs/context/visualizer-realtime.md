@@ -38,6 +38,8 @@ Visualizer“实时样式”提供名称、应用到首页和生成展示地址�
 
 “导出 Wallpaper Engine”先验证样式与准备产物，随后独立“选择目录并保存壁纸”按钮保留原生目录选择所需的用户手势。只创建唯一新子目录，不覆盖现有文件；project.json 最后写入，含 type:web、file:index.html、supportsaudioprocessing:true。取消/失败清理本次目录，清理失败明确报告路径。
 
+目录写入经注入端口：Web 保留浏览器目录选择，Electron 主进程选择父目录并生成唯一名称，renderer 仅提供五文件内容。桌面按清单分块写入临时目录后整体发布；拒绝既有目录和外部改动，不递归删除外部新增内容。原生运行、退出及安装缺口见[双端实施](desktop.md)，浏览器 file:// 产物验证不替代 Electron 或 Wallpaper Engine 实际宿主验证。
+
 运行时在 body 末尾同步注册一次 wallpaperRegisterAudioListener，校验并直接使用左右各 64 项非负有限强度，允许超过 1。只做现有绑定投影/映射，不重复执行项目 WE 近似分析。响应 applyGeneralProperties.fps 和 setPaused，使用单会话时钟与 renderer。API、Shader 或输入失败在壁纸内明确显示错误。
 
 本轮功能验证：最终 Visualizer/音频/分析相关 166 项 Vitest、55 项工具测试和生产构建通过。Chrome/Edge 共 28 场景包含首页/展示、20 次模式切换后的音频旁路释放、目录导出/产物 file:// 离线加载及外壳/离线视频相邻回归。原生 Wallpaper Engine 独立屏外预览成功渲染，约五秒内会话时间持续推进，无 JS/Shader 错误；该预览没有收到宿主音频回调，最小官方监听示例对照也为零回调。真实系统音频响应仍未验证，不将模拟协议或加载成功写成音频验收通过。测试资料仅保存在忽略的 artifacts/visualizer-composition 下，不形成正式 readiness。

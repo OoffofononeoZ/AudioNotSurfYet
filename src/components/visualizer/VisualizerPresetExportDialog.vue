@@ -50,6 +50,7 @@
     </dialog>
 </template>
 <script setup lang="ts">
+import { usePlatformPorts } from '../../platform/platformPorts';
 import PlatformFileInput from '../platform/PlatformFileInput.vue';
 import { ref, shallowRef, watch, onBeforeUnmount, nextTick } from 'vue';
 import { ElMessage } from 'element-plus';
@@ -60,6 +61,7 @@ import { validateRealtimeCandidate } from '../../visualizer/validateRealtimeCand
 import { createPresetExportValidationProject, preparePresetExport } from '../../visualizer/presetExport';
 import { savePresetDirectory, PresetDirectoryCleanupError } from '../../visualizer/presetDirectoryWriter';
 import { useResourceLibrary } from '../../visualizer/useResourceLibrary';
+const platform = usePlatformPorts();
 const props = defineProps<{
     open: boolean;
     project: VisualizerProjectV6 | null;
@@ -211,7 +213,11 @@ async function save() {
             cover.value,
         );
         const directory = library.exportDirectory();
-        const path = await savePresetDirectory(directory, prepared, owner.signal);
+        const path = await savePresetDirectory(directory, prepared, owner.signal, {
+            files: platform.directoryFiles,
+            exports: platform.directoryExports,
+        });
+        if (!path) return;
         if (task === owner && !owner.signal.aborted)
             message.value = `已保存到 ${directory.name}/${path}。请刷新资源商城后添加。`;
     } catch (e) {

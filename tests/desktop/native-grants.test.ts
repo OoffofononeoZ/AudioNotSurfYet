@@ -108,6 +108,20 @@ describe('native read grants', () => {
             code: 'permission-denied',
         });
     });
+    it('rejects a write destination redirected to another directory inside the selected library', async () => {
+        const library = path.join(root, 'library');
+        await mkdir(path.join(library, 'elements'), { recursive: true });
+        await symlink(
+            path.join(library, 'elements'),
+            path.join(library, 'presets'),
+            process.platform === 'win32' ? 'junction' : 'dir',
+        );
+        const grants = new NativeReadGrants(store),
+            reference = await grants.selectDirectory(library);
+        await expect(grants.resolveDirectory(reference.grantId, 'presets')).rejects.toMatchObject({
+            code: 'permission-denied',
+        });
+    });
 
     it('preserves malformed saved authorization and returns sanitized typed IPC errors', async () => {
         await mkdir(path.dirname(store), { recursive: true });

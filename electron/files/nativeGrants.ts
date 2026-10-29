@@ -251,6 +251,16 @@ export class NativeReadGrants {
         }
     }
 
+    async resolveDirectory(id: string, relativePath: string): Promise<string> {
+        const entry = await this.get(id, 'directory');
+        const target = await this.directoryPath(id, relativePath);
+        // Scoped exports must not follow a presets junction into a different part of the library.
+        if (path.relative(path.join(entry.path, relativePath), target) !== '')
+            throw new NativeFileError('permission-denied');
+        if (!(await stat(target)).isDirectory()) throw new NativeFileError('invalid-request');
+        return target;
+    }
+
     async resolveDirectoryFile(id: string, relativePath: string): Promise<string> {
         const target = await this.directoryPath(id, relativePath);
         if (!(await stat(target)).isFile()) throw new NativeFileError('invalid-request');

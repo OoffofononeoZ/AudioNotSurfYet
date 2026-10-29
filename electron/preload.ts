@@ -6,6 +6,19 @@ if (process.isMainFrame) {
     const bridge: DesktopBridge = {
         platform: 'electron',
         apiVersion: 1,
+        bundles: {
+            beginPreset: (id, name, entries) => ipcRenderer.invoke('audiosurf:bundles:beginPreset', id, name, entries),
+            beginWallpaper: entries => ipcRenderer.invoke('audiosurf:bundles:beginWallpaper', entries),
+            beginFile: id => ipcRenderer.invoke('audiosurf:bundles:beginFile', id),
+            writeFile: (id, chunk) => {
+                if (!(chunk instanceof Uint8Array) || chunk.byteLength < 1 || chunk.byteLength > SAVE_CHUNK_BYTES)
+                    throw Error('保存数据块无效。');
+                return ipcRenderer.invoke('audiosurf:bundles:writeFile', id, chunk);
+            },
+            closeFile: id => ipcRenderer.invoke('audiosurf:bundles:closeFile', id),
+            commit: id => ipcRenderer.invoke('audiosurf:bundles:commit', id),
+            abort: id => ipcRenderer.invoke('audiosurf:bundles:abort', id),
+        },
         saves: {
             beginSave: (purpose, name, size) => ipcRenderer.invoke('audiosurf:saves:beginSave', purpose, name, size),
             writeSave: (id, chunk) => {

@@ -44,6 +44,8 @@ V6继续把预设保留为默认折叠顶层组，移动整组、组内排序、
 
 目标为资源商城当前已加载的资源文件夹。点击保存才申请写权限，先验证元素精确依赖；缺少元素或版本/hash 不一致时列出明细并停止，不补齐或覆盖 elements。仅创建 presets/user-preset-<UUID>/，版本为 1，包含 resource-info.json、source/resource.json、resource-package.json 和封面。信息文件最后写入；取消/失败清理本次目录，清理失败报告路径。刷新商城后展示自定义元数据并可重复添加，既有预设仍按原规则加载。
 
+共享校验通过目录导出端口调用双端实现。Web 请求当前句柄的 readwrite 权限；Electron 由主进程核对只读库授权和真实 presets 路径，再用原生确认授权本次新目录，不接受 renderer 路径或目录联接。桌面在临时目录完成精确清单后整体发布，拒绝既有目标；取消只清理本次所有且未被外部修改的文件。桌面实际操作和退出清理的验证状态见[双端实施](desktop.md)。
+
 V2 可选 Seed 和媒体字段见[资源包](../architecture/visualizer/resource-packages-v2.md)。导出前使用现有实时候选隔离验证；关闭弹窗、配置变化、换歌或离页取消旧任务并释放封面 URL。运行时资源不写入工程或 store。
 
 ## 验证

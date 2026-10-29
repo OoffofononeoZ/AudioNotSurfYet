@@ -12,7 +12,9 @@ upstream_docs:
 
 Web/Electron 双端 Goal 已批准，D1 的 `electron/` 宿主、独立构建及安全应用协议已接入，渲染端复用网页产物；原生启动阻断尚未解决。平台端口、原生授权及独立存储边界见[双端合同](desktop.md)，按阶段落地，不复制以下共享业务服务。
 
-D2 已添加主进程只读文件/目录授权、受限 IPC 和文件流端点。`src/platform/` 在应用入口选择双端音频和目录端口，由 MainLayout 与 Visualizer 注入共享服务；Web 原始句柄与桌面 grantId 的运行时引用均留在 Pinia 外。Web V1 存储保留，桌面音频恢复优先核对磁盘 hash，目录 repository 保存原生授权描述。共享资源读取/预览校验不依赖具体句柄方法，真实原生运行受 D1 异常阻断；桌面写入待 D3。
+D2 已添加主进程只读文件/目录授权、受限 IPC 和文件流端点。`src/platform/` 在应用入口选择双端音频和目录端口，由 MainLayout 与 Visualizer 注入共享服务；Web 原始句柄与桌面 grantId 的运行时引用均留在 Pinia 外。Web V1 存储保留，桌面音频恢复优先核对磁盘 hash，目录 repository 保存原生授权描述。共享资源读取/预览校验不依赖具体句柄方法，真实原生运行受 D1 异常阻断。
+
+D3 的 `FileTransferAccess` 处理工程、媒体、歌词及文件输出，集中平台控件保留 Web 上传/下载语义；`DirectoryExportAccess` 处理预设和壁纸目录，复用共享格式与依赖校验。桌面 `NativeSaves` 分块确认、同目录临时文件发布，`NativeBundles` 约束精确清单并整体发布新目录；只读库写入另经原生确认。主进程管理路径与清理所有权，renderer 不持有任意路径或 Node 能力；宿主退出等待仍待 D5。
 
 当前系统是 Vue 3 单页应用。MainLayout 创建并提供唯一的 `AudioSessionService`、`AnalysisCoordinator`、`EditorSessionController` 与 `VisualizerSessionController`；服务通过 `AudioEngine` 解码、播放本地文件，并通过三个独立 IndexedDB repository 保存 Analyzer session、Editor 单草稿与 Visualizer 单草稿。Analyzer、Editor 与 Visualizer 已通过互斥 consumer lease 复用同一 coordinator；原曲与已验证四轨按来源去重、每来源最多四项，复用同一分析 Worker。File、Blob、handle、PCM、Worker 与音频节点均留在 store 外。MusicBar、Editor 与 Visualizer 读取同一播放快照；Editor 与 Visualizer 普通工作区保留 MusicBar；两个工作区的 tokenized route lease 临时使用 repeat-one，导出传输租约优先停止循环。
 
