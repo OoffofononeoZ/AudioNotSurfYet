@@ -4,8 +4,14 @@ import type { DesktopFileBridge } from '../../src/platform/fileContracts';
 import { nativeResult, NativeFileError } from './nativeErrors';
 import { NativeReadGrants, grantId, grantRelativePath } from './nativeGrants';
 import { requireOwner } from './ownedIpc';
+import { NativeIpcTasks } from './nativeIpcTasks';
 
-export function registerFileIpc(getWindow: () => BrowserWindow | null, ownerOrigin: string, grants: NativeReadGrants) {
+export function registerFileIpc(
+    getWindow: () => BrowserWindow | null,
+    ownerOrigin: string,
+    grants: NativeReadGrants,
+    tasks = new NativeIpcTasks(),
+) {
     const channels: string[] = [];
     function handler<K extends keyof DesktopFileBridge>(
         name: K,
@@ -14,23 +20,31 @@ export function registerFileIpc(getWindow: () => BrowserWindow | null, ownerOrig
         const channel = `audiosurf:files:${name}`;
         channels.push(channel);
         ipcMain.handle(channel, (event, ...args: unknown[]) =>
-            nativeResult(async () => {
-                requireOwner(event, getWindow(), ownerOrigin);
-                return operation(event, ...args);
-            }),
+            nativeResult(() =>
+                tasks.run(async () => {
+                    requireOwner(event, getWindow(), ownerOrigin);
+                    return operation(event, ...args);
+                }),
+            ),
         );
     }
+
+    const lease = (owner: BrowserWindow) => {
+        const token = owner.webContents.mainFrame.frameToken,
+            epoch = tasks.revision;
+        return () =>
+            !owner.isDestroyed() &&
+            owner === getWindow() &&
+            tasks.current(epoch) &&
+            owner.webContents.mainFrame.frameToken === token &&
+            owner.webContents.mainFrame.origin === ownerOrigin;
+    };
 
     handler('chooseFiles', async (_event, purpose, multiple) => {
         if (typeof purpose !== 'string' || !Object.hasOwn(INPUT_FORMATS, purpose) || typeof multiple !== 'boolean')
             throw new NativeFileError('invalid-request');
         const owner = getWindow()!,
-            frameToken = owner.webContents.mainFrame.frameToken;
-        const current = () =>
-            !owner.isDestroyed() &&
-            owner === getWindow() &&
-            owner.webContents.mainFrame.frameToken === frameToken &&
-            owner.webContents.mainFrame.origin === ownerOrigin;
+            current = lease(owner);
         const format = INPUT_FORMATS[purpose as keyof typeof INPUT_FORMATS];
         const result = await dialog.showOpenDialog(owner, {
             title: format.description,
@@ -62,7 +76,8 @@ export function registerFileIpc(getWindow: () => BrowserWindow | null, ownerOrig
     handler('chooseAudio', async (_event, multiple, purpose = 'audio') => {
         if (typeof multiple !== 'boolean' || (purpose !== 'audio' && purpose !== 'osu-audio'))
             throw new NativeFileError('invalid-request');
-        const owner = getWindow()!;
+        const owner = getWindow()!,
+            current = lease(owner);
         const result = await dialog.showOpenDialog(owner, {
             title: '选择音频',
             properties: multiple ? ['openFile', 'multiSelections'] : ['openFile'],
@@ -73,17 +88,21 @@ export function registerFileIpc(getWindow: () => BrowserWindow | null, ownerOrig
                 },
             ],
         });
-        if (result.canceled || owner.isDestroyed()) return [];
+        if (result.canceled || !current()) return [];
         const references = [];
-        for (const file of result.filePaths) references.push(await grants.selectFile(file));
-        return references;
+        for (const file of result.filePaths) {
+            if (!current()) return [];
+            references.push(await grants.selectFile(file));
+        }
+        return current() ? references : [];
     });
     handler('chooseResourceDirectory', async () => {
-        const owner = getWindow()!;
+        const owner = getWindow()!,
+            current = lease(owner);
         const result = await dialog.showOpenDialog(owner, { title: '选择资源库', properties: ['openDirectory'] });
-        return result.canceled || owner.isDestroyed() || !result.filePaths[0]
-            ? null
-            : grants.selectDirectory(result.filePaths[0]);
+        if (result.canceled || !current() || !result.filePaths[0]) return null;
+        const reference = await grants.selectDirectory(result.filePaths[0]);
+        return current() ? reference : null;
     });
     handler('describeFile', async (_event, id) => grants.describe(grantId(id)));
     handler('filePermission', async (_event, id) => grants.permission(grantId(id)));

@@ -6,6 +6,7 @@ import { registerFileIpc } from './files/fileIpc';
 import { NativeSaves } from './files/nativeSaves';
 import { registerSaveIpc } from './files/saveIpc';
 import { NativeBundles } from './files/nativeBundles';
+import { NativeIpcTasks } from './files/nativeIpcTasks';
 import { registerBundleIpc } from './files/bundleIpc';
 import { nativeError } from './files/nativeErrors';
 import { loadWindowState, windowPlacement, trackWindowState, WINDOW_MINIMUM } from './windowState';
@@ -45,11 +46,12 @@ async function openExternal(value: string) {
 async function createWindow() {
     const ownerOrigin = devOrigin ?? APP_ORIGIN;
     const grants = new NativeReadGrants(path.join(app.getPath('userData'), 'native-read-grants.json'));
-    const unregisterFiles = registerFileIpc(() => window, ownerOrigin, grants);
+    const fileTasks = new NativeIpcTasks();
+    const unregisterFiles = registerFileIpc(() => window, ownerOrigin, grants, fileTasks);
     const saves = new NativeSaves();
-    const unregisterSaves = registerSaveIpc(() => window, ownerOrigin, saves);
+    const unregisterSaves = registerSaveIpc(() => window, ownerOrigin, saves, fileTasks);
     const bundles = new NativeBundles();
-    const unregisterBundles = registerBundleIpc(() => window, ownerOrigin, grants, bundles);
+    const unregisterBundles = registerBundleIpc(() => window, ownerOrigin, grants, bundles, fileTasks);
     app.once('will-quit', unregisterBundles);
     app.once('will-quit', unregisterSaves);
     app.once('will-quit', unregisterFiles);
@@ -136,6 +138,7 @@ async function createWindow() {
     });
     window.webContents.on('will-attach-webview', event => event.preventDefault());
     const abortSaves = () => {
+        fileTasks.invalidate();
         void saves.abortAll().catch(error => console.error('Native save cleanup failed', nativeError(error).code));
         void bundles
             .abortAll()

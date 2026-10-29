@@ -67,6 +67,10 @@ export class NativeReadGrants {
     constructor(storageFile: string) {
         this.storageFile = path.resolve(storageFile);
     }
+    async flush() {
+        await this.loaded;
+        await this.writes;
+    }
 
     private load() {
         this.loaded ??= (async () => {

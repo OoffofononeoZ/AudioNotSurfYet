@@ -20,6 +20,19 @@ afterEach(async () => {
 });
 
 describe('native read grants', () => {
+    it('flushes pending serialized selections before shutdown without removing selected locations', async () => {
+        const first = path.join(root, 'first.wav'),
+            second = path.join(root, 'second.wav');
+        await writeFile(first, 'first', 'utf8');
+        await writeFile(second, 'second', 'utf8');
+        const grants = new NativeReadGrants(store);
+        const selections = [grants.selectFile(first), grants.selectFile(second)];
+        await grants.flush();
+        expect(JSON.parse(await readFile(store, 'utf8')).grants).toHaveLength(2);
+        const references = await Promise.all(selections);
+        const restored = new NativeReadGrants(store);
+        for (const reference of references) expect(await restored.permission(reference.grantId)).toBe('granted');
+    });
     it('keeps one-shot project selections out of persistent grants and releases them independently', async () => {
         const selected = path.join(root, 'project.json');
         await writeFile(selected, '{}', 'utf8');

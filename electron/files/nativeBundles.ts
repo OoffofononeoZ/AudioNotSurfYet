@@ -43,6 +43,9 @@ export class NativeBundles {
     get revision() {
         return this.generation;
     }
+    get busy() {
+        return this.bundles.size > 0 || this.starting.size > 0;
+    }
     begin(parentPath: string, name: string, kind: BundleKind, input: unknown): Promise<NativeBundleReference> {
         const work = this.create(parentPath, name, kind, input);
         this.starting.add(work);

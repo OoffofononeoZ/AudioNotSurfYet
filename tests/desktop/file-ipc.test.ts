@@ -2,6 +2,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { BrowserWindow, IpcMainInvokeEvent } from 'electron';
 import { registerFileIpc } from '../../electron/files/fileIpc';
 import type { NativeReadGrants } from '../../electron/files/nativeGrants';
+import { NativeIpcTasks } from '../../electron/files/nativeIpcTasks';
 
 const host = vi.hoisted(() => ({
     handlers: new Map<string, (event: unknown, ...args: unknown[]) => Promise<unknown>>(),
@@ -21,7 +22,7 @@ afterEach(() => {
 });
 
 const id = 'abcdefff-1234-4123-8123-123456789abc';
-function fixture() {
+function fixture(tasks?: NativeIpcTasks) {
     const frame = { frameToken: 'owner-frame', origin: 'app://audiosurf' };
     const contents = { mainFrame: frame };
     const owner = { webContents: contents, isDestroyed: vi.fn(() => false) };
@@ -34,19 +35,65 @@ function fixture() {
         name: 'image.png',
     }));
     const releaseTransientFile = vi.fn();
-    const cleanup = registerFileIpc(() => owner as unknown as BrowserWindow, 'app://audiosurf', {
-        describe,
-        selectFile,
-        selectTransientFile,
-        releaseTransientFile,
-    } as unknown as NativeReadGrants);
+    const selectDirectory = vi.fn(async () => ({
+        grantId: id,
+        kind: 'directory',
+        platform: 'electron',
+        name: 'assets',
+    }));
+    const cleanup = registerFileIpc(
+        () => owner as unknown as BrowserWindow,
+        'app://audiosurf',
+        {
+            describe,
+            selectFile,
+            selectTransientFile,
+            releaseTransientFile,
+            selectDirectory,
+        } as unknown as NativeReadGrants,
+        tasks,
+    );
     const event = { sender: contents, senderFrame: frame } as unknown as IpcMainInvokeEvent;
     const invoke = (name: string, sender = event, ...args: unknown[]) =>
         host.handlers.get(`audiosurf:files:${name}`)!(sender, ...args);
-    return { owner, event, describe, selectFile, selectTransientFile, releaseTransientFile, invoke, cleanup };
+    return {
+        owner,
+        event,
+        describe,
+        selectFile,
+        selectDirectory,
+        selectTransientFile,
+        releaseTransientFile,
+        invoke,
+        cleanup,
+    };
 }
 
 describe('native file IPC owner boundary', () => {
+    it.each(['chooseAudio', 'chooseResourceDirectory'])(
+        'does not apply a late %s dialog after shutdown suspension or navigation',
+        async action => {
+            const tasks = new NativeIpcTasks(),
+                s = fixture(tasks);
+            let finish!: (value: unknown) => void;
+            host.open.mockImplementationOnce(
+                () =>
+                    new Promise(resolve => {
+                        finish = resolve;
+                    }),
+            );
+            const pending = s.invoke(action, s.event, false);
+            expect(tasks.busy).toBe(true);
+            tasks.suspend();
+            tasks.resume();
+            finish({ canceled: false, filePaths: ['C:/chosen/source'] });
+            expect(await pending).toEqual({ ok: true, value: action === 'chooseAudio' ? [] : null });
+            expect(s.selectFile).not.toHaveBeenCalled();
+            expect(s.selectDirectory).not.toHaveBeenCalled();
+            await tasks.drain();
+            expect(tasks.busy).toBe(false);
+        },
+    );
     it('limits input types to approved purposes, and releases partial selections on read-grant failure', async () => {
         const s = fixture();
         expect(await s.invoke('chooseFiles', s.event, 'arbitrary-path', true)).toMatchObject({

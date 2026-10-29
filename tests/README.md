@@ -22,6 +22,8 @@ Web/Electron 改动先核对[双端阶段和验证要求](../docs/context/deskto
 
 `native-startup-cleanup.test.ts` 在真实临时文件系统中延迟路径解析/source 创建，检查销毁等待尚未登记的事务、初始化取消清理及导航后新代事务保留；不依赖固定等待时间，不替代宿主关闭握手。
 
+`native-ipc-tasks.test.ts` 检查暂停新请求、排空旧对话框/操作和清理错误传播；文件 IPC 回归另检查导航/关闭代次失效，授权存储回归检查 flush 后的选定位置可以恢复。模拟对话框不替代真实 Windows 操作。
+
 `window-state.test.ts` 检查负坐标多显示器、显示器移除/缩小、偏好缺失/损坏、普通尺寸/最大化持久化，以及最小化/全屏和事件监听释放；使用真实临时文件和窗口事件替身，实际原生恢复另验。
 
 `tests/e2e/desktop-file-controls.spec.ts` 在真实 Chrome/Edge 内挂载桌面控件适配器，使用注入的端口替身检查迟到选择、换源取消及新旧保存所有权；它是 UI 逻辑证据，不是 Electron 或 OS 选择器证据。上传业务回归沿用 osu、Circular 媒体、歌词、预设和 FT 专项。

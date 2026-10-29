@@ -54,6 +54,9 @@ export class NativeSaves {
     get revision() {
         return this.generation;
     }
+    get busy() {
+        return this.saves.size > 0 || this.starting.size > 0;
+    }
 
     begin(selectedPath: string, size: number): Promise<NativeSaveReference> {
         const work = this.create(selectedPath, size);

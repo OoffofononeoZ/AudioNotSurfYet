@@ -3,8 +3,14 @@ import { TRANSFER_FORMATS, type DesktopSaveBridge } from '../../src/platform/tra
 import { NativeFileError, nativeResult } from './nativeErrors';
 import { requireOwner } from './ownedIpc';
 import type { NativeSaves } from './nativeSaves';
+import { NativeIpcTasks } from './nativeIpcTasks';
 
-export function registerSaveIpc(getWindow: () => BrowserWindow | null, origin: string, saves: NativeSaves) {
+export function registerSaveIpc(
+    getWindow: () => BrowserWindow | null,
+    origin: string,
+    saves: NativeSaves,
+    tasks = new NativeIpcTasks(),
+) {
     const channels: string[] = [];
     let choosing = false;
     function handler<K extends keyof DesktopSaveBridge>(
@@ -14,10 +20,12 @@ export function registerSaveIpc(getWindow: () => BrowserWindow | null, origin: s
         const channel = `audiosurf:saves:${name}`;
         channels.push(channel);
         ipcMain.handle(channel, (event: IpcMainInvokeEvent, ...args: unknown[]) =>
-            nativeResult(async () => {
-                const owner = requireOwner(event, getWindow(), origin);
-                return operation(owner, ...args);
-            }),
+            nativeResult(() =>
+                tasks.run(async () => {
+                    const owner = requireOwner(event, getWindow(), origin);
+                    return operation(owner, ...args);
+                }),
+            ),
         );
     }
     handler('beginSave', async (owner, purpose, name, size) => {
@@ -38,7 +46,8 @@ export function registerSaveIpc(getWindow: () => BrowserWindow | null, origin: s
             throw new NativeFileError('invalid-request');
         const format = TRANSFER_FORMATS[purpose as keyof typeof TRANSFER_FORMATS];
         const revision = saves.revision,
-            frameToken = owner.webContents.mainFrame.frameToken;
+            frameToken = owner.webContents.mainFrame.frameToken,
+            epoch = tasks.revision;
         choosing = true;
         try {
             const result = await dialog.showSaveDialog(owner, {
@@ -58,6 +67,7 @@ export function registerSaveIpc(getWindow: () => BrowserWindow | null, origin: s
                 !result.filePath ||
                 owner.isDestroyed() ||
                 owner !== getWindow() ||
+                !tasks.current(epoch) ||
                 saves.revision !== revision ||
                 owner.webContents.mainFrame.frameToken !== frameToken ||
                 owner.webContents.mainFrame.origin !== origin

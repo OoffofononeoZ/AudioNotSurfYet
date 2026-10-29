@@ -7,12 +7,14 @@ import { requireOwner } from './ownedIpc';
 import { NativeReadGrants, grantId } from './nativeGrants';
 import { NativeBundles } from './nativeBundles';
 import { bundleEntries } from './bundlePaths';
+import { NativeIpcTasks } from './nativeIpcTasks';
 
 export function registerBundleIpc(
     getWindow: () => BrowserWindow | null,
     origin: string,
     grants: NativeReadGrants,
     bundles: NativeBundles,
+    tasks = new NativeIpcTasks(),
 ) {
     const channels: string[] = [];
     let choosing = false;
@@ -23,17 +25,19 @@ export function registerBundleIpc(
         const channel = `audiosurf:bundles:${name}`;
         channels.push(channel);
         ipcMain.handle(channel, (event: IpcMainInvokeEvent, ...args: unknown[]) =>
-            nativeResult(() => operation(requireOwner(event, getWindow(), origin), ...args)),
+            nativeResult(() => tasks.run(() => operation(requireOwner(event, getWindow(), origin), ...args))),
         );
     }
     const lease = (owner: BrowserWindow) => {
         const token = owner.webContents.mainFrame.frameToken,
-            revision = bundles.revision;
+            revision = bundles.revision,
+            epoch = tasks.revision;
         return () =>
             !owner.isDestroyed() &&
             owner === getWindow() &&
             owner.webContents.mainFrame.frameToken === token &&
             owner.webContents.mainFrame.origin === origin &&
+            tasks.current(epoch) &&
             bundles.revision === revision;
     };
     handler('beginPreset', async (owner, id, name, input) => {
