@@ -38,10 +38,12 @@
 | [system map](docs/context/system-map.md) | 模块职责、依赖与设计原因 |
 | [决策登记](docs/context/decision-registry.md) | 已有决定、授权来源及适用边界 |
 | [tests README](tests/README.md) | 测试命令、runner 与测试资料 |
+| [双端与桌面实施](docs/context/desktop.md) | Web/Electron 合同、长期 Goal、阶段状态与验证缺口 |
 
 ## 通用规则
 
 - 使用中文维护项目指南与 skills，代码标识和命令保留原文。
+- 所有修改均须评估网页端和 Electron 桌面端影响。保留网页端；共享能力优先复用，平台差异集中在适配层。共享行为变化完成双端适用验证，仅影响一端时说明另一端不受影响的依据；尚未实现或未验证不能记为支持。双端范围与长期目标见[桌面合同](docs/context/desktop.md)。
 - 修改前检查工作树、分支和暂存区，保留用户已有修改。核对相关源码、调用方与契约，优先复用现有能力。
 - `trash/` 仅为本地旧资料留存区；不得读取、搜索、索引或引用内容。只有用户明确要求恢复或查看指定内容时才可访问；普通删除不默认移入该目录。
 - 搜索优先 `rg --encoding utf-8` / `rg --files`，显式排除 `trash/`、依赖和构建/测试产物。

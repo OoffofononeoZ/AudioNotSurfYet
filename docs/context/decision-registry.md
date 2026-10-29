@@ -4,6 +4,7 @@
 
 ## 持续边界
 
+- DEC-108 / 2026-10-29：owner 以“实施上述计划”批准 Web/Electron 双端长期 Goal；新增 Windows x64、本地原生访问与位置恢复、按需模型缓存、退出保护及未签名本地安装升级验证。保留 Web、工程格式及既有隐私/质量边界；不含其他系统、签名、自动更新、托盘或公开发布。覆盖 DEC-003/006 的浏览器单端范围限制，未扩大云端/部署授权；完整合同与里程碑见[桌面实施](desktop.md)。
 - DEC-003/006：中文文档与skill、代码标识保留原文；本地MP3/WAV/FLAC、桌面Chrome/Edge、安全上下文。上传/云端/移动端/非Chromium和生产部署未获得当前授权。
 - DEC-007/018：数值/时钟/反馈门槛、owner 3/3学习边界及项目Flux保持；Meyda上游错误不伪称修复。见[Analyzer验证](../quality/validation.md)。
 - 单engine/clock、序列化store、Worker/cache/stale和原子草稿理由见[共享运行时](../architecture/shared-runtime-contracts.md)及其链接ADR；最新页面规则优先于旧布局/接口。

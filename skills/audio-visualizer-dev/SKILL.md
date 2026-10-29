@@ -31,6 +31,7 @@ description: "开发、诊断或评审 AudioNotSurfYet 的 Vue 界面、播放�
 
 ## 领域约束
 
+- 每次开发、诊断或评审先评估 Web/Electron 双端影响，按[双端合同](../../docs/context/desktop.md)核对能力与当前阶段；共享播放、处理、渲染和工程逻辑不复制。平台差异通过注入的适配接口处理，组件与领域模块不直接导入 Electron/Node API，不分散探测宿主。共享行为变化验证两端适用场景；桌面未实现或环境不足如实登记，不继承浏览器通过结论。
 - Pinia 只持有可序列化状态；File、AudioBuffer、节点、Worker 和 typed payload 按运行时模块所有权保存与释放。
 - 播放与分析复用现有 service、lease、clock 和 Coordinator。跟踪 source identity、generation/revision、取消与迟到消息，保持换歌后的最后一次操作生效。
 - UI 修改先确认路由、布局容器、定位上下文和目标视口；高频数值/几何更新复用现有 Canvas、RAF 和生命周期模块。

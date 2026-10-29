@@ -14,3 +14,5 @@ description: "定位 AudioNotSurfYet 的代码入口、模块职责、依赖或�
 音频与会话看 `src/audio/`，特征和分析 Worker 看 `src/analysis/`，标记/tempo/工程看 `src/editor/`，FT 与缓存/任务看 `src/processing/`，场景/绑定/录制看 `src/visualizer/`。页面装配与组件在 views/layouts/components；状态和持久化分别在 stores/persistence。
 
 新增 helper 前核对这些目录及相关测试，优先扩展已有单一事实源。只读检查用 `npm run codemap:check`；结构与引用改变后在任务交付时运行 `npm run codemap`。
+
+双端入口与实现进度先看[桌面合同](../../docs/context/desktop.md)：`electron/` 承担主进程、preload 与原生权限，`src/platform/` 承担共享端口及双端适配。定位修改须同时追踪 Web/Electron 调用方、构建入口和相关测试；目录尚未落地时不能按计划推断源码已存在。共享模块不得依赖宿主 API。

@@ -9,6 +9,8 @@ description: "AudioNotSurfYet 修改后选择必要验证或判断证据时使�
 
 按实际行为与影响选择最小必要验证。当前入口见 [命令与领域检查](references/commands-and-domain-checks.md)，详细 runner 见 [tests README](../../tests/README.md)。普通修改不自动创建正式 evidence。
 
+先将改动标为 Web、Electron 或共享影响，核对[双端合同及阶段](../../docs/context/desktop.md)。共享行为变化覆盖真实 Chrome/Edge 与 Electron 的适用场景；单端改动说明另一端不受影响的依赖依据。文档改动不强制运行产品测试；桌面尚未实现、环境不足或原生操作缺失记为未验证，不借用浏览器结果。桌面打包变化检查独立启动、资源加载、IPC 边界及安装产物；自动化不替代原生对话框、安装升级和实际 GPU/媒体证据。
+
 | 改动 | 验证选择 |
 | --- | --- |
 | 文档或 skill | 元数据、入口、链接、命令与授权边界，读取指示及示例中的显式 UTF-8 参数；手写 Markdown >500 行提示、≥800 行阻断。文字精简需审阅信息保留；不默认运行产品测试或构建 |

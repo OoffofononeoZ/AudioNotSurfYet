@@ -2,6 +2,8 @@
 
 Vue 3 / TypeScript / Vite 浏览器音频工作台。项目状态、技术契约和当前验证缺口见 [上下文入口](docs/context/index.md)，任务规则与 6 个项目 skills 见 [AGENTS.md](AGENTS.md)。
 
+现有网页端完整保留；Windows x64 Electron 双端实施 Goal 已启动，合同、里程碑和实际验证状态见[双端与桌面实施](docs/context/desktop.md)。桌面尚未完成，以下命令仍为现有网页入口；桌面命令随实现落地补充。
+
 文档按当前页面和领域维护：接口从共享运行时及 Analyzer/Editor/Visualizer 页面进入，验证要求集中在领域 validation。普通任务更新相关专题，过程反馈放在交付中；旧阶段产物已清理，历史由 Git 查回，必要证据与未解决缺口继续保留。
 
 读取文档、skill 及其引用文本时必须显式指定 UTF-8 编码参数，例如 `Get-Content -Encoding UTF8`、`rg --encoding utf-8`；完整规则见 [AGENTS](AGENTS.md#文档与-skill-读取编码)。
