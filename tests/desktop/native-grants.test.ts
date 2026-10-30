@@ -20,6 +20,16 @@ afterEach(async () => {
 });
 
 describe('native read grants', () => {
+    it('allows shutdown after a rejected selection while preserving the last committed grants', async () => {
+        const selected = path.join(root, 'kept.wav');
+        await writeFile(selected, 'kept', 'utf8');
+        const grants = new NativeReadGrants(store);
+        const reference = await grants.selectFile(selected);
+        await expect(grants.selectFile(path.join(root, 'missing.wav'))).rejects.toBeInstanceOf(Error);
+        await grants.flush();
+        expect(await new NativeReadGrants(store).permission(reference.grantId)).toBe('granted');
+        expect(JSON.parse(await readFile(store, 'utf8')).grants).toHaveLength(1);
+    });
     it('flushes pending serialized selections before shutdown without removing selected locations', async () => {
         const first = path.join(root, 'first.wav'),
             second = path.join(root, 'second.wav');

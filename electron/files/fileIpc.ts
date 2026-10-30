@@ -24,7 +24,7 @@ export function registerFileIpc(
                 tasks.run(async () => {
                     requireOwner(event, getWindow(), ownerOrigin);
                     return operation(event, ...args);
-                }),
+                }, name === 'releaseInput'),
             ),
         );
     }

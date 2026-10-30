@@ -25,7 +25,9 @@ export function registerBundleIpc(
         const channel = `audiosurf:bundles:${name}`;
         channels.push(channel);
         ipcMain.handle(channel, (event: IpcMainInvokeEvent, ...args: unknown[]) =>
-            nativeResult(() => tasks.run(() => operation(requireOwner(event, getWindow(), origin), ...args))),
+            nativeResult(() =>
+                tasks.run(() => operation(requireOwner(event, getWindow(), origin), ...args), name === 'abort'),
+            ),
         );
     }
     const lease = (owner: BrowserWindow) => {

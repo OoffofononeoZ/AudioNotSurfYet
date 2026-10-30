@@ -164,6 +164,45 @@ async function start(s: ReturnType<typeof setup>) {
     await vi.waitFor(() => expect(s.controller.start).toHaveBeenCalled());
     return { work };
 }
+it('flushes a failed correction again before shutdown without rerunning inference or discarding candidates', async () => {
+    const s = setup();
+    await idle(s);
+    const { work } = await start(s);
+    s.finish();
+    await work;
+    vi.mocked(s.repository.saveEdits).mockRejectedValueOnce(Error('quota'));
+    s.service.correct('note', { instrument: 'unknown' });
+    await vi.waitFor(() => expect(s.service.getSnapshot().persistence).toBe('not-persisted'));
+    expect(await s.service.flushEdits()).toBe(true);
+    expect(s.repository.saveEdits).toHaveBeenCalledTimes(2);
+    expect(s.controller.start).toHaveBeenCalledTimes(1);
+    expect(s.service.getSnapshot().bundle?.result.candidates[0]?.instrument).toBe('unknown');
+    await s.service.dispose();
+});
+
+it('waits for an already running cache clear before completing disposal', async () => {
+    const s = setup();
+    await idle(s);
+    let finish!: () => void;
+    vi.mocked(s.repository.clearAll).mockImplementation(
+        () =>
+            new Promise<void>(resolve => {
+                finish = resolve;
+            }),
+    );
+    const clearing = s.service.clear('results');
+    await vi.waitFor(() => expect(s.repository.clearAll).toHaveBeenCalledTimes(1));
+    let disposed = false;
+    const disposal = s.service.dispose().then(() => {
+        disposed = true;
+    });
+    await new Promise<void>(resolve => setImmediate(resolve));
+    expect(disposed).toBe(false);
+    finish();
+    await Promise.all([clearing, disposal]);
+    expect(disposed).toBe(true);
+});
+
 it('persists verified candidates, saves correction without inference and atomically applies once', async () => {
     const s = setup();
     await idle(s);

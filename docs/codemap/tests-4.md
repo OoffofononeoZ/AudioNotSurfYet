@@ -8,6 +8,12 @@
 
 | 文件 | 本地静态引用（最多显示 6 项） |
 | --- | --- |
+| [tests/tools/visualizer-resource-package.test.mjs](../../tests/tools/visualizer-resource-package.test.mjs) | [scripts/visualizer-resource-package.mjs](../../scripts/visualizer-resource-package.mjs) |
+| [tests/tools/visualizer-skill-path.test.mjs](../../tests/tools/visualizer-skill-path.test.mjs) | [scripts/lib/visualizer-skill-path.mjs](../../scripts/lib/visualizer-skill-path.mjs) |
+| [tests/tools/visualizer-video-timeline.test.mjs](../../tests/tools/visualizer-video-timeline.test.mjs) | [tests/support/visualizer-video-timeline.mjs](../../tests/support/visualizer-video-timeline.mjs) |
+| [tests/transcription/auditionHarness.ts](../../tests/transcription/auditionHarness.ts) | [src/audio/audioEngine.ts](../../src/audio/audioEngine.ts)、[src/audio/auditionTypes.ts](../../src/audio/auditionTypes.ts)、[src/processing/stemAuditionSource.ts](../../src/processing/stemAuditionSource.ts)、[src/processing/storage.ts](../../src/processing/storage.ts) |
+| [tests/transcription/candidates.test.ts](../../tests/transcription/candidates.test.ts) | [src/editor/projectCodec.ts](../../src/editor/projectCodec.ts)、[src/transcription/applyCandidates.ts](../../src/transcription/applyCandidates.ts)、[src/transcription/candidateTypes.ts](../../src/transcription/candidateTypes.ts)、[src/transcription/candidates.ts](../../src/transcription/candidates.ts) |
+| [tests/transcription/controller.test.ts](../../tests/transcription/controller.test.ts) | [src/processing/kernel.ts](../../src/processing/kernel.ts)、[src/transcription/candidateTypes.ts](../../src/transcription/candidateTypes.ts)、[src/transcription/controller.ts](../../src/transcription/controller.ts)、[src/transcription/workerProtocol.ts](../../src/transcription/workerProtocol.ts) |
 | [tests/transcription/download-models.mjs](../../tests/transcription/download-models.mjs) | — |
 | [tests/transcription/download-models.ps1](../../tests/transcription/download-models.ps1) | — |
 | [tests/transcription/editor-service.test.ts](../../tests/transcription/editor-service.test.ts) | [src/editor/projectCodec.ts](../../src/editor/projectCodec.ts)、[src/editor/types.ts](../../src/editor/types.ts)、[src/processing/editorProcessingGate.ts](../../src/processing/editorProcessingGate.ts)、[src/processing/editorSeparationService.ts](../../src/processing/editorSeparationService.ts)、[src/processing/modelManifest.ts](../../src/processing/modelManifest.ts)、[src/transcription/candidateTypes.ts](../../src/transcription/candidateTypes.ts)、另 3 项，按需核对源码 |

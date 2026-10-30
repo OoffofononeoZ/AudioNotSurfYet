@@ -12,6 +12,8 @@ import type { DirectoryExportAccess } from './bundleContracts';
 import { BrowserDirectoryExports } from './webDirectoryExports';
 import { DesktopDirectoryExports } from './desktopDirectoryExports';
 import { applicationDisplayPages, browserDisplayPages, type DisplayPageAccess } from './displayPages';
+import type { LifecycleAccess } from './lifecycleContracts';
+import { DesktopLifecycle } from './desktopLifecycle';
 
 export interface PlatformPorts {
     readonly kind: 'web' | 'electron';
@@ -20,6 +22,7 @@ export interface PlatformPorts {
     readonly transfers: FileTransferAccess;
     readonly directoryExports: DirectoryExportAccess;
     readonly displayPages: DisplayPageAccess;
+    readonly lifecycle: LifecycleAccess;
 }
 
 export function createPlatformPorts(bridge?: DesktopBridge): PlatformPorts {
@@ -31,13 +34,15 @@ export function createPlatformPorts(bridge?: DesktopBridge): PlatformPorts {
             transfers: new BrowserFileTransfers(),
             directoryExports: new BrowserDirectoryExports(),
             displayPages: browserDisplayPages,
+            lifecycle: { register: () => () => {} },
         };
     if (
         bridge.platform !== 'electron' ||
         bridge.apiVersion !== 1 ||
         !bridge.files ||
         !bridge.saves ||
-        !bridge.bundles
+        !bridge.bundles ||
+        !bridge.lifecycle
     ) {
         throw Error('桌面宿主与应用文件接口不匹配，请重新构建应用。');
     }
@@ -48,6 +53,7 @@ export function createPlatformPorts(bridge?: DesktopBridge): PlatformPorts {
         transfers: new DesktopFileTransfers(bridge.files, bridge.saves),
         directoryExports: new DesktopDirectoryExports(bridge.bundles),
         displayPages: applicationDisplayPages,
+        lifecycle: new DesktopLifecycle(bridge.lifecycle),
     };
 }
 

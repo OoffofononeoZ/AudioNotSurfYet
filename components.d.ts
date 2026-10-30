@@ -22,6 +22,7 @@ declare module 'vue' {
     AppPlaybackProgress: typeof import('./src/components/controls/AppPlaybackProgress.vue')['default']
     AppSelect: typeof import('./src/components/controls/AppSelect.vue')['default']
     AppSettingsButton: typeof import('./src/components/AppSettingsButton.vue')['default']
+    AppShutdownOverlay: typeof import('./src/components/platform/AppShutdownOverlay.vue')['default']
     AppSidebar: typeof import('./src/components/AppSidebar.vue')['default']
     DotGridBg: typeof import('./src/components/DotGridBg.vue')['default']
     EditorAnalysisOverlay: typeof import('./src/components/EditorAnalysisOverlay.vue')['default']

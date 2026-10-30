@@ -14,7 +14,7 @@ import type { AnalysisWindowInput, AnalysisWindowSeries } from './windowTypes';
 import type { RealtimeAnalysisLease, RealtimeFeatureFrame } from './realtimeTypes';
 import { StemAnalysisRuntime } from './stemAnalysisRuntime';
 import { validateAnalysisInputs, type AnalysisInput } from './sources';
-import type { StemRole } from '../processing/modelManifest';
+import { FT_ROLES, type StemRole } from '../processing/modelManifest';
 import type { EditorSeparationService } from '../processing/editorSeparationService';
 import {
     isFeatureId,
@@ -475,6 +475,12 @@ export class AnalysisCoordinator {
 
     getSnapshot(): AnalysisCoordinatorSnapshot {
         return cloneSnapshot(this.snapshot);
+    }
+    hasActiveTasks(): boolean {
+        const active = (state: AnalysisCoordinatorSnapshot['state']) => state === 'copying' || state === 'analyzing';
+        return (
+            active(this.snapshot.state) || FT_ROLES.some(role => active(this.stems?.getSnapshot(role).state ?? 'idle'))
+        );
     }
 
     subscribe(listener: AnalysisListener): () => void {

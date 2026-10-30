@@ -17,6 +17,8 @@ test('suspension rejects new file operations and drains an existing dialog witho
     const operation = vi.fn(async () => {});
     await expect(tasks.run(operation)).rejects.toMatchObject({ code: 'permission-denied' });
     expect(operation).not.toHaveBeenCalled();
+    await tasks.run(operation, true);
+    expect(operation).toHaveBeenCalledTimes(1);
     let stopped = false;
     const draining = tasks.drain().then(() => {
         stopped = true;

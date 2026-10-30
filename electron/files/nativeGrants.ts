@@ -68,8 +68,9 @@ export class NativeReadGrants {
         this.storageFile = path.resolve(storageFile);
     }
     async flush() {
-        await this.loaded;
-        await this.writes;
+        // Failed selections never publish a reference; the selecting caller owns that error.
+        await this.loaded?.catch(() => {});
+        await this.writes.catch(() => {});
     }
 
     private load() {

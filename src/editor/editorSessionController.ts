@@ -110,6 +110,8 @@ export class EditorSessionController {
     private beforeUnloadRegistered = false;
     private disposed = false;
     private leaveWarningEnabled = true;
+    private leaveWarningWriteFailed = false;
+    private preferenceWrites = new Set<Promise<void>>();
     private hasUnexportedChanges = false;
     private overlayVisibilityPersistFailed = false;
     private overlayVisibilityWriteRevision = 0;
@@ -253,12 +255,46 @@ export class EditorSessionController {
     shouldWarnOnLeave(): boolean {
         return this.leaveWarningEnabled && this.hasUnexportedChanges;
     }
+    hasUnexportedWork(): boolean {
+        return this.hasUnexportedChanges;
+    }
+    cancelPendingOperations(): void {
+        this.cancelFileImport();
+        ++this.tempoRequestRevision;
+        ++this.routeGeneration;
+        if (this.snapshot.tempoEstimateState === 'estimating')
+            this.publish({ ...this.snapshot, tempoEstimateState: 'idle' });
+    }
+    async flushForShutdown(): Promise<boolean> {
+        while (this.preferenceWrites.size) await Promise.allSettled([...this.preferenceWrites]);
+        if (this.leaveWarningWriteFailed) await this.setLeaveWarningEnabled(this.leaveWarningEnabled);
+        if (this.overlayVisibilityPersistFailed && this.snapshot.project)
+            await this.persistOverlayVisibility(this.snapshot.project.track.contentHash, this.snapshot.overlayOpen);
+        if (this.snapshot.persistence === 'not-persisted' && this.snapshot.project)
+            this.queueSave(this.snapshot.project, true);
+        await this.flush();
+        return (
+            this.snapshot.persistence !== 'not-persisted' &&
+            !this.leaveWarningWriteFailed &&
+            !this.overlayVisibilityPersistFailed
+        );
+    }
+    private trackPreference(work: Promise<void>) {
+        this.preferenceWrites.add(work);
+        void work.then(
+            () => this.preferenceWrites.delete(work),
+            () => this.preferenceWrites.delete(work),
+        );
+        return work;
+    }
 
     async setLeaveWarningEnabled(enabled: boolean): Promise<void> {
         this.leaveWarningEnabled = enabled;
         try {
-            await this.repository.setLeaveWarningEnabled(enabled);
+            await this.trackPreference(this.repository.setLeaveWarningEnabled(enabled));
+            if (this.leaveWarningEnabled === enabled) this.leaveWarningWriteFailed = false;
         } catch {
+            this.leaveWarningWriteFailed = true;
             this.publish({
                 ...this.snapshot,
                 persistence: 'not-persisted',
@@ -748,7 +784,7 @@ export class EditorSessionController {
     private async persistOverlayVisibility(contentHash: string, enabled: boolean): Promise<void> {
         const revision = ++this.overlayVisibilityWriteRevision;
         try {
-            await this.repository.setOverlayVisibility(contentHash, enabled);
+            await this.trackPreference(this.repository.setOverlayVisibility(contentHash, enabled));
             if (
                 revision !== this.overlayVisibilityWriteRevision ||
                 this.snapshot.project?.track.contentHash !== contentHash

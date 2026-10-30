@@ -27,8 +27,8 @@ export class NativeIpcTasks {
     current(revision: number) {
         return this.open && this.epoch === revision;
     }
-    run<T>(operation: () => Promise<T>): Promise<T> {
-        if (!this.open) return Promise.reject(new NativeFileError('permission-denied'));
+    run<T>(operation: () => Promise<T>, cleanup = false): Promise<T> {
+        if (!this.open && !cleanup) return Promise.reject(new NativeFileError('permission-denied'));
         const work = operation();
         this.pending.add(work);
         void work.then(

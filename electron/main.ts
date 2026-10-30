@@ -10,6 +10,8 @@ import { NativeIpcTasks } from './files/nativeIpcTasks';
 import { registerBundleIpc } from './files/bundleIpc';
 import { nativeError } from './files/nativeErrors';
 import { loadWindowState, windowPlacement, trackWindowState, WINDOW_MINIMUM } from './windowState';
+import { ShutdownChannel } from './shutdownChannel';
+import { registerShutdown } from './registerShutdown';
 import { resolveNativeRead, type InitiatedFileRequest } from './files/nativeReadRequest';
 import {
     APP_CSP,
@@ -69,6 +71,7 @@ async function createWindow() {
     });
     desktopSession.protocol.handle('app', async request => {
         if (new URL(request.url).pathname.startsWith('/native-files/')) {
+            if (!fileTasks.accepting) return new Response('File unavailable', { status: 403 });
             try {
                 const file = await resolveNativeRead(request as InitiatedFileRequest, grants, ownerOrigin);
                 const response = await net.fetch(pathToFileURL(file).href, { method: request.method });
@@ -126,6 +129,8 @@ async function createWindow() {
         },
     });
     trackWindowState(window, windowStateFile);
+    const shutdownChannel = new ShutdownChannel(() => window, ownerOrigin);
+    registerShutdown(window, shutdownChannel, { tasks: fileTasks, saves, bundles, grants }, desktopSession);
     window.webContents.setWindowOpenHandler(({ url }) => {
         void openExternal(url);
         return { action: 'deny' };
@@ -145,9 +150,11 @@ async function createWindow() {
             .catch(error => console.error('Native directory cleanup failed', nativeError(error).code));
     };
     window.webContents.on('render-process-gone', abortSaves);
+    window.webContents.on('render-process-gone', () => shutdownChannel.invalidate());
     window.webContents.on('render-process-gone', () => grants.clearTransientFiles());
-    window.webContents.on('did-start-navigation', (_event, _url, _sameDocument, isMainFrame) => {
+    window.webContents.on('did-start-navigation', (_event, _url, sameDocument, isMainFrame) => {
         if (isMainFrame) {
+            if (!sameDocument) shutdownChannel.invalidate();
             abortSaves();
             grants.clearTransientFiles();
         }

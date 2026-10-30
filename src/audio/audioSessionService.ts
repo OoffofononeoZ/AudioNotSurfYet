@@ -1021,6 +1021,29 @@ export class AudioSessionService {
         }
     }
 
+    cancelPendingOperations(): void {
+        this.cancelFileSelection();
+        ++this.commandGeneration;
+        ++this.importGeneration;
+        for (const token of this.preparedLocalAudio.keys()) this.discardPreparedLocalAudio(token);
+        this.pause();
+    }
+
+    async flushForShutdown(): Promise<boolean> {
+        await this.workspaceSaveTail;
+        if (
+            ['idle', 'unsupported-schema', 'restore-error'].includes(this.store.persistence.state) &&
+            !this.store.queue.length
+        )
+            return true;
+        const id = this.store.currentTrackId;
+        const runtime = id ? this.runtimeTracks.get(id) : undefined;
+        if (id && runtime?.file && this.getTrack(id)?.trackHash)
+            await this.persistCurrent(id, runtime.file, this.commandGeneration);
+        else await this.persistQueueSafely();
+        return this.store.persistence.state === 'ready';
+    }
+
     async dispose(): Promise<void> {
         if (this.disposed) return;
         this.disposed = true;

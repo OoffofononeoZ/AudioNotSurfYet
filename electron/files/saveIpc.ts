@@ -24,7 +24,7 @@ export function registerSaveIpc(
                 tasks.run(async () => {
                     const owner = requireOwner(event, getWindow(), origin);
                     return operation(owner, ...args);
-                }),
+                }, name === 'abortSave'),
             ),
         );
     }

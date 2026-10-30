@@ -1,11 +1,25 @@
 import { contextBridge, ipcRenderer } from 'electron';
 import type { DesktopBridge } from '../src/platform/fileContracts';
 import { SAVE_CHUNK_BYTES } from '../src/platform/transferContracts';
+import { isCloseRequest } from '../src/platform/lifecycleContracts';
 
 if (process.isMainFrame) {
     const bridge: DesktopBridge = {
         platform: 'electron',
         apiVersion: 1,
+        lifecycle: {
+            onRequest: listener => {
+                const receive = (_event: unknown, request: unknown) => {
+                    if (isCloseRequest(request)) listener(request);
+                };
+                ipcRenderer.on('audiosurf:lifecycle:request', receive);
+                return () => {
+                    ipcRenderer.removeListener('audiosurf:lifecycle:request', receive);
+                };
+            },
+            ready: () => ipcRenderer.invoke('audiosurf:lifecycle:ready'),
+            reply: (id, reply) => ipcRenderer.invoke('audiosurf:lifecycle:reply', id, reply),
+        },
         bundles: {
             beginPreset: (id, name, entries) => ipcRenderer.invoke('audiosurf:bundles:beginPreset', id, name, entries),
             beginWallpaper: entries => ipcRenderer.invoke('audiosurf:bundles:beginWallpaper', entries),

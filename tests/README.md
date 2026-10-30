@@ -26,6 +26,10 @@ Web/Electron 改动先核对[双端阶段和验证要求](../docs/context/deskto
 
 `window-state.test.ts` 检查负坐标多显示器、显示器移除/缩小、偏好缺失/损坏、普通尺寸/最大化持久化，以及最小化/全屏和事件监听释放；使用真实临时文件和窗口事件替身，实际原生恢复另验。
 
+关闭协议由 `shutdown-channel.test.ts`、`host-shutdown.test.ts`、`runtime-shutdown.test.ts` 覆盖窗口/frame/origin、请求重放/超时/失效、确认取消、保存与清理失败重试、单次收尾和候选先落盘顺序。`session-repository-tasks.test.ts` 检查事务排空不吞掉调用方错误；自动标记 service 回归检查候选重试与清缓存等待。
+
+`desktop-shutdown.spec.ts` 通过 `tests/support/shutdown-host.html` 装配真实共享应用，仅替换关闭传输；使用真实 IndexedDB 检查草稿落盘、失败后继续编辑、界面锁定及卸载，也覆盖 FT 下载中的取消。它是 Chrome/Edge 内的运行时证据，不是 Electron 原生关闭、系统对话框或安装证据；测试宿主不进入产品入口或桌面资源清单。
+
 `tests/e2e/desktop-file-controls.spec.ts` 在真实 Chrome/Edge 内挂载桌面控件适配器，使用注入的端口替身检查迟到选择、换源取消及新旧保存所有权；它是 UI 逻辑证据，不是 Electron 或 OS 选择器证据。上传业务回归沿用 osu、Circular 媒体、歌词、预设和 FT 专项。
 
 `visualizer-realtime-dialog.spec.ts` 保留 Web 地址复制与弹窗回归，另在浏览器内注入桌面展示策略，检查创建后只有应用内链接、无地址/复制控件且可打开已保存样式；该项不证明 Electron 协议或打包运行。

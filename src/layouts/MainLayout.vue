@@ -6,11 +6,12 @@
             <router-view />
         </div>
         <MusicBar v-if="!presentation" :progress="0" />
+        <AppShutdownOverlay :busy="shutdownBusy" />
     </div>
 </template>
 
 <script setup lang="ts">
-import { computed, onUnmounted, provide, watch, watchEffect } from 'vue';
+import { computed, getCurrentInstance, onUnmounted, provide, ref, watch, watchEffect } from 'vue';
 import { useRoute } from 'vue-router';
 import { realtimeBrowserKey } from '../visualizer/realtimeBrowserSession';
 import AppSidebar from '../components/AppSidebar.vue';
@@ -23,6 +24,9 @@ import { usePlaybackKeyboard } from '../audio/usePlaybackKeyboard';
 import { AnalysisCoordinator, analysisCoordinatorKey } from '../analysis/analysisCoordinator';
 import { isFeatureId, type FeatureId } from '../analysis/types';
 import { SessionRepository } from '../persistence/sessionRepository';
+import { SessionRepositoryTasks } from '../persistence/sessionRepositoryTasks';
+import { createRuntimeShutdown } from '../platform/runtimeShutdown';
+import AppShutdownOverlay from '../components/platform/AppShutdownOverlay.vue';
 import { useAudioSessionStore } from '../stores/audioSessionStore';
 import { useConfigstore } from '../stores/configStore';
 import { EditorSessionController, editorSessionControllerKey } from '../editor/editorSessionController';
@@ -45,14 +49,15 @@ watchEffect(() => {
     document.documentElement.style.setProperty('--app-sidebar-width', configStore.sidebarCollapsed ? '64px' : '216px');
 });
 const audioEngine = new AudioEngine();
+const shutdownBusy = ref(false);
 const platform = usePlatformPorts();
-const sessionRepository = new SessionRepository();
+const sessionRepository = new SessionRepositoryTasks(new SessionRepository());
 const audioSession = new AudioSessionService(audioSessionStore, {
     engine: audioEngine,
     repository: sessionRepository,
     fileAccess: platform.audioFiles,
 });
-usePlaybackKeyboard(audioSession);
+usePlaybackKeyboard(audioSession, () => !shutdownBusy.value);
 const analysisCoordinator = new AnalysisCoordinator(audioEngine, sessionRepository, audioSessionStore);
 audioSession.setVolume(configStore.volume);
 void audioSession.setPlaybackRate(configStore.playbackRate);
@@ -66,6 +71,7 @@ watch(
     () => {
         const state = audioSessionStore.playback;
         if (
+            !shutdownBusy.value &&
             /^\/(analyzer|editor|visualizer)(\/|$)/.test(layoutRoute.path) &&
             ['paused', 'playing', 'ended'].includes(state.state) &&
             state.trackId
@@ -110,6 +116,48 @@ const visualizerController = new VisualizerSessionController({
     editorFileGateway: new NativeEditorFileGateway(platform.transfers),
 });
 provide(visualizerSessionControllerKey, visualizerController);
+
+let disposal: Promise<void> | null = null;
+function disposeRuntime() {
+    disposal ??= (async () => {
+        const failures: unknown[] = [];
+        for (const release of [
+            () => editorTranscription.dispose(),
+            () => editorSeparation.dispose(),
+            () => visualizerController.dispose(),
+            () => editorController.dispose(),
+            () => analysisCoordinator.dispose(),
+            () => audioSession.dispose(),
+        ])
+            try {
+                await release();
+            } catch (error) {
+                failures.push(error);
+            }
+        await sessionRepository.flush();
+        if (failures.length) throw Error('部分运行时资源未能释放，请重试关闭。');
+    })();
+    return disposal;
+}
+const application = getCurrentInstance()!.appContext.app;
+const detachShutdown = platform.lifecycle.register(
+    createRuntimeShutdown({
+        audio: audioSession,
+        analysis: analysisCoordinator,
+        editor: editorController,
+        visualizer: visualizerController,
+        transcription: editorTranscription,
+        separation: editorSeparation,
+        repository: sessionRepository,
+        session: () => ({ persistence: audioSessionStore.persistence, playback: audioSessionStore.playback }),
+        audioReady,
+        lock: locked => {
+            shutdownBusy.value = locked;
+        },
+        dispose: disposeRuntime,
+        unmount: () => application.unmount(),
+    }),
+);
 
 interface M6DevelopmentBridge {
     setActiveFeatures(ids: string[]): Promise<void>;
@@ -187,6 +235,7 @@ if (import.meta.env.DEV) {
 }
 
 onUnmounted(() => {
+    detachShutdown();
     if (previousSidebarWidth) document.documentElement.style.setProperty('--app-sidebar-width', previousSidebarWidth);
     else document.documentElement.style.removeProperty('--app-sidebar-width');
     if (developmentBridge) {
@@ -196,14 +245,9 @@ onUnmounted(() => {
             }
         ).__AUDIO_NOT_SURF_YET_M6__;
     }
-    void (async () => {
-        await editorTranscription.dispose();
-        await editorSeparation.dispose();
-        await visualizerController.dispose();
-        await editorController.dispose();
-        await analysisCoordinator.dispose();
-        await audioSession.dispose();
-    })();
+    void disposeRuntime().catch(() => {
+        console.error('Application resource cleanup failed');
+    });
 });
 </script>
 

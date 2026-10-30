@@ -17,17 +17,17 @@
 
 | 区域 | 文件数 | 入口 |
 | --- | --- | --- |
-| Electron 桌面宿主 | 15 | [模块地图](codemap/desktop.md) |
-| Web/Electron 平台端口与适配 | 14 | [模块地图](codemap/platform.md) |
+| Electron 桌面宿主 | 18 | [模块地图](codemap/desktop.md) |
+| Web/Electron 平台端口与适配 | 17 | [模块地图](codemap/platform.md) |
 | 音频播放与会话 | 10 | [模块地图](codemap/audio.md) |
 | 特征分析与 Worker | 44 | [模块地图](codemap/analysis.md) |
 | Editor 领域与工程 | 42 | [模块地图](codemap/editor.md) |
 | FT 分离与处理 | 16 | [模块地图](codemap/processing.md) |
 | Visualizer、场景与录制 | 96 | [模块地图](codemap/visualizer.md) |
-| 页面、布局与组件 | 81 | [模块地图](codemap/ui.md) |
-| 应用入口、状态与共享模块 | 31 | [模块地图](codemap/shared.md) |
+| 页面、布局与组件 | 82 | [模块地图](codemap/ui.md) |
+| 应用入口、状态与共享模块 | 32 | [模块地图](codemap/shared.md) |
 | 仓库工具 | 15 | [模块地图](codemap/tooling.md) |
-| 验证 | 364 | [模块地图](codemap/tests.md) |
+| 验证 | 370 | [模块地图](codemap/tests.md) |
 
 ## 规范与资料入口
 

@@ -14,7 +14,7 @@ function isEditing(event: KeyboardEvent): boolean {
         );
 }
 
-export function usePlaybackKeyboard(audio: Pick<AudioSessionService, 'togglePlayback'>): void {
+export function usePlaybackKeyboard(audio: Pick<AudioSessionService, 'togglePlayback'>, enabled = () => true): void {
     let handled = false;
     const consume = (event: KeyboardEvent) => {
         event.preventDefault();
@@ -22,6 +22,11 @@ export function usePlaybackKeyboard(audio: Pick<AudioSessionService, 'togglePlay
     };
     const down = (event: KeyboardEvent) => {
         if (event.code !== 'Space') return;
+        if (!enabled()) {
+            handled = false;
+            consume(event);
+            return;
+        }
         if (handled) {
             consume(event);
             return;

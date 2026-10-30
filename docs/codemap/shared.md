@@ -12,6 +12,7 @@
 | [src/data/analyzerData.ts](../../src/data/analyzerData.ts) | — |
 | [src/main.ts](../../src/main.ts) | [src/App.vue](../../src/App.vue)、[src/platform/platformPorts.ts](../../src/platform/platformPorts.ts)、[src/router/index.ts](../../src/router/index.ts) |
 | [src/persistence/sessionRepository.ts](../../src/persistence/sessionRepository.ts) | [src/analysis/config.ts](../../src/analysis/config.ts)、[src/analysis/types.ts](../../src/analysis/types.ts)、[src/types/session.ts](../../src/types/session.ts) |
+| [src/persistence/sessionRepositoryTasks.ts](../../src/persistence/sessionRepositoryTasks.ts) | [src/persistence/sessionRepository.ts](../../src/persistence/sessionRepository.ts) |
 | [src/router/index.ts](../../src/router/index.ts) | [src/layouts/MainLayout.vue](../../src/layouts/MainLayout.vue)、[src/views/Analyzer.vue](../../src/views/Analyzer.vue)、[src/views/ComingSoon.vue](../../src/views/ComingSoon.vue)、[src/views/Editor.vue](../../src/views/Editor.vue)、[src/views/Home.vue](../../src/views/Home.vue)、[src/views/TestLands.vue](../../src/views/TestLands.vue)、另 2 项，按需核对源码 |
 | [src/stores/audioSessionStore.ts](../../src/stores/audioSessionStore.ts) | [src/analysis/sourceWorkspace.ts](../../src/analysis/sourceWorkspace.ts)、[src/analysis/types.ts](../../src/analysis/types.ts)、[src/types/audio.ts](../../src/types/audio.ts)、[src/types/session.ts](../../src/types/session.ts) |
 | [src/stores/configStore.ts](../../src/stores/configStore.ts) | [src/audio/playbackPolicy.ts](../../src/audio/playbackPolicy.ts) |

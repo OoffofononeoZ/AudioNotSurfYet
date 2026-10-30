@@ -876,6 +876,13 @@ export class VisualizerSessionController {
         this.syncBeforeUnload();
         return success;
     }
+    async cancelPendingOperations() {
+        this.algorithmTask?.abort();
+        ++this.generation;
+        ++this.ioGeneration;
+        ++this.editorIoGeneration;
+        await this.exporter.cancel();
+    }
     private releaseLeases() {
         this.seeds.clear();
         this.unsubscribeAnalysis?.();
