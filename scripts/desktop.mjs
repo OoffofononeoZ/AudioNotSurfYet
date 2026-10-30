@@ -1,4 +1,6 @@
 import fs from 'node:fs/promises';
+import { createReadStream } from 'node:fs';
+import { createHash } from 'node:crypto';
 import path from 'node:path';
 import { builtinModules, createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
@@ -99,7 +101,7 @@ if (command === 'dev') {
     await copyDesktopPublicAssets(root, path.join(appRoot, 'renderer'));
     if (command !== 'build') {
         const { build: packageApp, Platform, Arch } = await import('electron-builder');
-        await packageApp({
+        const packageArtifacts = await packageApp({
             targets: Platform.WINDOWS.createTarget(command === 'dir' ? ['dir'] : ['nsis'], Arch.x64),
             publish: 'never',
             config: {
@@ -107,12 +109,26 @@ if (command === 'dev') {
                 productName: 'AudioNotSurfYet',
                 electronVersion: metadata.devDependencies.electron,
                 electronDist: path.dirname(require('electron')),
-                directories: { app: appRoot, output: path.join(output, 'packages') },
+                directories: {
+                    app: appRoot,
+                    output: path.join(output, 'packages'),
+                    buildResources: path.join(root, 'electron/assets'),
+                },
                 files: ['host/**', 'renderer/**', 'package.json', 'THIRD_PARTY_NOTICES.md', '!node_modules/**'],
                 asar: true,
                 npmRebuild: false,
-                nsis: { oneClick: true, perMachine: false, deleteAppDataOnUninstall: false },
+                win: {
+                    icon: path.join(root, 'electron/assets/icon.svg'),
+                    signExecutable: false,
+                    requestedExecutionLevel: 'asInvoker',
+                },
+                nsis: { oneClick: true, perMachine: false, deleteAppDataOnUninstall: false, runAfterFinish: false },
             },
         });
+        for (const artifact of packageArtifacts.filter(file => file.endsWith('.exe'))) {
+            const checksum = createHash('sha256');
+            for await (const chunk of createReadStream(artifact)) checksum.update(chunk);
+            await fs.writeFile(`${artifact}.sha256`, `${checksum.digest('hex')}  ${path.basename(artifact)}\n`, 'utf8');
+        }
     }
 }

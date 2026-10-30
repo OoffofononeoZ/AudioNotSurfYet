@@ -19,6 +19,8 @@ npm run dev
 
 桌面使用同一 lockfile：`npm run desktop:dev` 启动 Vite 与 Electron；`desktop:build` 生成独立应用目录，`desktop:dir` 生成未封装安装器的 Windows 应用，`desktop:package` 生成本地 NSIS 包，均不发布。产物位于忽略目录 `artifacts/desktop/`，网页 `dev/build/preview` 保留。`desktop:typecheck` 检查宿主，`test:desktop:unit` 检查文件授权/保存及资源边界，`test:desktop:smoke` 在先构建的应用上使用独立 profile 验证能力与重启恢复；后者当前被 main 之前的原生异常阻断，详见桌面专题。
 
+NSIS 产物明确未签名、按用户安装，配置保留用户数据并关闭安装后自动启动；`desktop:package` 同时生成安装器的 `.sha256` 校验文件。产品图标复用现有导航的唱片标记。安装、跨版本升级、卸载保留数据与实际启动仍须分别验证，不能把生成安装器记为可用或发布通过。
+
 `predev` / `prebuild` 会准备已锁定的 processing runtime assets 和壁纸独立运行包；模型与大型本地产物遵守忽略规则。运行前核对对应 [处理契约](docs/architecture/processing/model-artifacts.md)。当前 FT 及 Editor 状态以实际 evidence 为准，不能把启动成功当作质量/性能通过。
 
 Editor 分轨试听与有限乐器自动标记已按 [DEC-075 契约](docs/architecture/processing/editor-auto-marking.md) 接入，使用同一播放transport并显式应用V1标记；新增识别质量仍待人工复核，实测误标与边界见 [证据记录](docs/quality/processing/editor-auto-marking-evidence.md)。固定新增模型测试资产使用 `npm run transcription:models`，实际浏览器与单元验证入口见 [自动标记测试](tests/transcription/README.md)。

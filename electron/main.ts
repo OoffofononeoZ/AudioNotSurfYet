@@ -23,6 +23,7 @@ import {
 } from './appResources';
 
 app.setName('AudioNotSurfYet');
+app.setAppUserModelId('local.audionotsurfyet.desktop');
 const profile = process.env.AUDIOSURF_DESKTOP_TEST_PROFILE;
 if (profile) app.setPath('userData', path.resolve(profile));
 
