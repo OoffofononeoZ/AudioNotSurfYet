@@ -17,6 +17,7 @@
 | Electron 文件/恢复 | `test:desktop:files` 为真实 ASAR IPC/存储/文件操作、对话框选值替身；`test:desktop:dialogs:manual` 为实际打开/保存且需人工操作，原生返回值不替换。只使用独占受控文件；两类结果分开，主进程请求不能模拟受限网页攻击者 |
 | Electron 资源目录 | `test:desktop:resources` 检查独占资源副本的实际算法/封面加载、预设取消/保存、壁纸五文件、目录重启恢复与既有文件 hash；系统目录/确认选值为替身。`test:desktop:packaged` 包含 opaque iframe 内 Worker 动态导入 blob 模块，不能只用普通 postMessage 宣称算法加载通过 |
 | Electron 封装媒体 | `test:desktop:media` 实际 ASAR 四档首次/重复同步片和几何预设输出，取消保存后重试；复用现有媒体 oracle 的 `--files-only` 严格解码/逐帧/同步门槛。结果不能转写为 Chrome/Edge `--all`、长片、模型或原生保存 UI 通过 |
+| Electron 三维/展示 | `test:desktop:scene` 实际 ASAR 现有三维示例的镜头/位置编辑与草稿重启、720p30 真正输出/全解码/逐帧 PTS/动态几何、首页样式重启及模式切换、应用内展示/满视口/全屏/重启/缺失返回。全程拒绝 HTTP(S)，原库只读；系统选值替身不证明原生 UI，一例不替代四档矩阵或深度数值 oracle |
 | Electron 封装长片 | `test:desktop:media:long` 实际 ASAR 的 900 秒/1080p60 原生输入与白闪、真实分块保存和取消清理，复用严格媒体 oracle 检查 54,000 帧及同步。只采样应用自身 metrics，UI 诊断不作为精确帧数证据；不推广为任意复杂场景性能或原生保存 UI 验收 |
 | Electron 模型网络/FT | `test:desktop:model-network` 覆盖真实固定 URL 的 Range、其他路径拒绝和生产算法 iframe/Worker 网络隔离；`test:desktop:ft` 覆盖真实四模型下载/校验/推断、WAV、离线恢复/推断及取消。`--profile-from` 只显式复用已验证冷下载的专属 profile，不能当作新冷下载；仍不证明自动标记/长曲/原生保存 UI |
 | Electron 自动标记 | `test:desktop:transcription -- --profile-from <冷 FT result.json>` 在独立校验副本执行真实四转录模型、五输入、辅助试听、候选应用、离线恢复/重算、取消及第二副本损坏/清理；核对 V2 人工轨/tempo 保留。原 profile 保留，实际候选数量与模型链路不等于识别质量或长曲接受 |

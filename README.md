@@ -2,7 +2,7 @@
 
 Vue 3 / TypeScript / Vite 浏览器音频工作台。项目状态、技术契约和当前验证缺口见 [上下文入口](docs/context/index.md)，任务规则与 6 个项目 skills 见 [AGENTS.md](AGENTS.md)。
 
-现有网页端完整保留；Windows x64 Electron 双端实施 Goal 持续进行，合同、里程碑和实际验证状态见[双端与桌面实施](docs/context/desktop.md)。基础 GPU/编码/存储、开发/ASAR 入口、安装升级及文件保留已验证，主要功能、真实模型与封装媒体仍待验证。
+现有网页端完整保留；Windows x64 Electron 双端实施 Goal 持续进行，合同、里程碑和实际验证状态见[双端与桌面实施](docs/context/desktop.md)。基础能力、真实模型、封装媒体、三维/应用内展示及安装升级保留已验证；其他素材、原生目录/确认 UI 与最终双端收口仍待完成。
 
 文档按当前页面和领域维护：接口从共享运行时及 Analyzer/Editor/Visualizer 页面进入，验证要求集中在领域 validation。普通任务更新相关专题，过程反馈放在交付中；旧阶段产物已清理，历史由 Git 查回，必要证据与未解决缺口继续保留。
 
@@ -20,6 +20,8 @@ npm run dev
 桌面使用同一 lockfile：`npm run desktop:dev` 启动 Vite 与 Electron；`desktop:build` 生成独立应用目录，`desktop:dir` 生成未封装安装器的 Windows 应用，`desktop:package` 生成本地 NSIS 包，均不发布。产物位于忽略目录 `artifacts/desktop/`，网页 `dev/build/preview` 保留。`desktop:typecheck` 检查宿主，`test:desktop:unit` 检查文件授权/保存及资源边界；`test:desktop:smoke` / `test:desktop:packaged` 分别验证应用目录和 ASAR 的基础能力、重启恢复，`test:desktop:dev` 实际运行开发命令并检查隔离与空工作区关闭。
 
 `test:desktop:files` 在实际 ASAR 中检查三种音频播放、工程 JSON 传递、文件授权边界、分块保存/取消与真实重启恢复；只有系统对话框选值使用替身。`test:desktop:dialogs:manual` 则调用真正的 Windows 打开/保存对话框，需要人工点击已预填的受控文件与全新位置，不改现有用户数据。两类证据分别记录，详见[测试说明](tests/README.md)。
+
+`test:desktop:scene` 在实际 ASAR 检查既有三维示例的镜头/位置编辑、草稿重启、真实 WebM、首页实时样式、应用内展示页及全屏/恢复。独立 profile 与输出不改用户工程；外部资源只读，系统文件/目录选值仍为替身，详见[测试说明](tests/README.md)。
 
 NSIS 产物明确未签名、按用户安装，保留用户数据并关闭安装后自动启动；`desktop:package` 同时生成安装器的 `.sha256`。产品图标复用现有唱片标记。`npm run test:desktop:install` 会执行真实安装、临时补丁版本升级、安装版启动和卸载：拒绝覆盖已有安装，先备份用户数据，检查包内容/注册/快捷方式及原文件保留；显式 `--profile-from <成功自动标记 result.json>` 另验证独立副本中的工程/八模型/结果、升级后离线重算及卸载后读取，详见 [tests README](tests/README.md)。结果与私有备份在忽略目录中；本机同实现版本夹具通过不等于未来 schema 迁移或发布通过。
 

@@ -28,6 +28,8 @@ Web/Electron 改动先核对[双端阶段和验证要求](../docs/context/deskto
 
 `npm run test:desktop:resources` 从外部资源库复制经过路径检查的包/源码/封面到独占目录；实际 ASAR 加载全部元素及封面，添加环形频谱，导出预设（取消/保存/刷新）和壁纸五文件，并重启恢复资源目录、逐一核对既有文件 hash。系统目录/确认选值由 `dialog-fixture.mjs` 替换；不证明真实目录选择或 Wallpaper Engine 宿主运行。结果和截图在 `artifacts/desktop/resources/<ID>`；原始外部库只读，只有本次副本接收新预设。
 
+`npm run test:desktop:scene` 使用实际 ASAR 与独立 profile，只读加载现有 shared-camera-demo，操作响应式面板编辑镜头关键帧/元素位置，实际重启核对完整工程。720p30 三秒输出复用媒体 oracle 的 `--files-only` 检查全解码/逐帧 PTS，另检查每帧青/橙立方体及动态帧摘要；不冒充四档矩阵、深度数值 oracle 或任意场景质量保证。随后检查首页样式重启与模式切换、桌面无外部地址/复制的 `/display` 入口、满视口几何、真实全屏/退出、展示重启和缺失样式返回。拒绝所有 HTTP(S)，核对源包/源码 hash；系统选择结果仍为替身。结果和已绘制截图在 `artifacts/desktop/scene/<ID>`，WebM/媒体测量在既有 composition output 目录。
+
 `npm run test:desktop:media` 在实际 ASAR 中导入受控 12 秒同步音频，复用生产 authoring/codec 创建黑底白闪工程；四档各执行首次及同页重复导出，再用 3 秒音频和既有 geometric-0.6 预设各导出一次。页面音量为零，禁止 captureStream/MediaRecorder；首次保存取消后保留 ready 再重试，全部通过真实 IPC 分块保存。外部库只读，系统选值为替身；换歌显式通过本次独占草稿的覆盖提示。此处 cold 表示该档首次输出，不表示新进程冷启动。
 
 12 份文件及 capture 位于 `artifacts/visualizer-composition/output/media-<UUID>-*`，过程结果/截图在 `artifacts/desktop/media/media-<UUID>`。runner 用现有 `verify-visualizer-output.mjs <runId> --files-only` 完整解码并检查逐帧 PTS/帧数、时长/尾差、零页面音量下音轨及同步白闪，末尾短暂显示专属窗口以采集截图后关闭。沿用 100ms/250ms 门槛；该入口只验证本次 Electron 文件，不将现有 Chrome/Edge `--all` 矩阵标记完整，不替代十五分钟长片、实际模型或原生保存 UI 验收。

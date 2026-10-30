@@ -27,6 +27,7 @@
         "test:desktop:dev": "node tests/desktop/dev-smoke.mjs",
         "test:desktop:files": "node tests/desktop/files-smoke.mjs",
         "test:desktop:resources": "node tests/desktop/resources-smoke.mjs",
+        "test:desktop:scene": "node tests/desktop/scene-smoke.mjs",
         "test:desktop:media": "node tests/desktop/media-smoke.mjs",
         "test:desktop:media:long": "node tests/desktop/long-media-smoke.mjs",
         "test:desktop:model-network": "node tests/desktop/model-network-smoke.mjs",
