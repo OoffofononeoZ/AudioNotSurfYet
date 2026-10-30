@@ -36,6 +36,8 @@ Web/Electron 改动先核对[双端阶段和验证要求](../docs/context/deskto
 
 结果、截图及每约两秒的该应用 `getAppMetrics()`/JS heap 采样在 `artifacts/desktop/media-long/<ID>`，WebM/capture/measurement 在 output 目录对应前缀下。responseMs 包含 renderer 和 main 两次往返；工作集合计可能重复共享页，不含 GPU 显存测量。初始输出页未挂载状态页进度条时 progress 为 null，仍采集真实状态和资源数据；取消阶段使用状态页的真实进度。测试不改产品资源/格式、不承诺任意复杂场景性能，原生保存选值为替身，20 分钟是 runner 超时而非产品预算。
 
+`npm run test:desktop:lifecycle` 使用实际 ASAR 与独占 900 秒音频/profile，检查最小化仍播放、重复 EXE 启动恢复/聚焦唯一窗口、拒绝关闭继续编辑、草稿写失败阻止退出及恢复重试、确认后退出/草稿重启、普通尺寸/最大化恢复、未完成原生保存和进行中 WebM 的退出清理。只替换 OS 选择/确认的返回值；真实窗口 close、主进程握手和磁盘清理不替换。按 session 写出 inspect/prepare/resume/dispose、确认和窗口 closed 日志，在进程结束前保存句柄以核对退出码。结果在 `artifacts/desktop/lifecycle/<ID>`；不代表原生确认 UI、显示器移除、FT 推断退出、ready 视频退出或崩溃恢复通过。
+
 `npm run test:desktop:model-network` 在实际 ASAR 的无 Node Worker 中从 8 个固定模型 URL 获取 Range 首块，随后检查其他 Basic Pitch revision/文件路径产生 connect-src violation。通过生产 Visualizer 创建实际算法 iframe，再在其中创建 Worker，检查该固定 URL 仍被子层 CSP 拒绝、不能读取 parent.document、无 Node/桥。只读外部资源库；目录选值为替身。结果在 `artifacts/desktop/model-network/<ID>`；Range 成功不能替代完整 hash、缓存或推断证据，日志去掉 CDN query。
 
 `npm run test:desktop:ft` 默认使用全新 profile 从固定真实地址完整下载四 FT 模型，经产品 hash 校验及 WebGPU EP 完成 6 秒输入，再实际保存四份 float32/44.1kHz/stereo WAV，逐样本检查有限/非全零、长度和 OPFS 清单 hash。重启启用离线模式并拒绝全部 HTTP(S)，检查结果恢复、相同 WAV、试听/暂停/返回原曲，取消重做保留旧结果且 Worker 释放，再完成一次四模型缓存推断。按 createdAt 选当前结果，允许多条历史结果，不能错误断言数据库仅一条。

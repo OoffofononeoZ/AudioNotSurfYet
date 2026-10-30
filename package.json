@@ -32,6 +32,7 @@
         "test:desktop:model-network": "node tests/desktop/model-network-smoke.mjs",
         "test:desktop:ft": "node tests/desktop/ft-smoke.mjs",
         "test:desktop:transcription": "node tests/desktop/transcription-smoke.mjs",
+        "test:desktop:lifecycle": "node tests/desktop/lifecycle-smoke.mjs",
         "test:desktop:dialogs:manual": "node tests/desktop/native-dialog-smoke.mjs",
         "typecheck": "vue-tsc -b",
         "test": "vitest run",

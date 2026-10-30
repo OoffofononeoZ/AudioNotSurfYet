@@ -18,7 +18,7 @@ DEC-109 批准宿主 CSP 的 script-src 增加 blob:，让既有隔离 Worker �
 
 D3 的 `FileTransferAccess` 处理工程、媒体、歌词及文件输出，集中平台控件保留 Web 上传/下载语义；`DirectoryExportAccess` 处理预设和壁纸目录，复用共享格式与依赖校验。桌面 `NativeSaves` 分块确认、同目录临时文件发布，`NativeBundles` 约束精确清单并整体发布新目录；只读库写入另经原生确认。主进程管理路径与清理所有权，renderer 不持有任意路径或 Node 能力。
 
-D5 关闭通过生命周期端口接入 MainLayout 的共享运行时。主进程校验阶段化请求、确认风险并等待原生 IO 排空；renderer 先保存草稿/候选修正，再按服务顺序释放并卸载应用。`SessionRepositoryTasks` 追踪会话事务，保持原 repository 契约；准备失败保留工程并恢复编辑。窗口偏好独立保存在 userData；真实退出、最小化及异常遗留处理状态以[桌面合同](desktop.md)为准。
+D5 关闭通过生命周期端口接入 MainLayout 的共享运行时。主进程校验阶段化请求、确认风险并等待原生 IO 排空；renderer 先保存草稿/候选修正，再按服务顺序释放并卸载应用。`SessionRepositoryTasks` 追踪会话事务，保持原 repository 契约；准备失败保留工程并恢复编辑。窗口偏好独立保存在 userData；创建后重设外框避免本机分数缩放下构造尺寸漂移。ASAR 草稿失败恢复/确认退出、活动 WebM/原生保存清理、最小化播放及窗口/单实例已通过；异常遗留等缺口以[桌面合同](desktop.md)为准。
 
 D6 的 `scripts/lib/desktop-package.mjs` 集中生产与升级夹具的身份、资源白名单、未签名 NSIS 和校验文件配置。安装测试隔离原生可执行副本/安装目录，与构建 staging 分开；仅正常用户目录继承，不改变系统或项目安全设置。已验证安装/跨版本升级/卸载的物理文件保留，工程及模型数据库的实际升级恢复尚待验证。
 

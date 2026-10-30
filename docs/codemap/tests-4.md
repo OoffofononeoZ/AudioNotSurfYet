@@ -8,6 +8,7 @@
 
 | 文件 | 本地静态引用（最多显示 6 项） |
 | --- | --- |
+| [tests/support/stem-analysis.ts](../../tests/support/stem-analysis.ts) | [src/analysis/pcm.ts](../../src/analysis/pcm.ts)、[src/processing/editorSeparationService.ts](../../src/processing/editorSeparationService.ts)、[src/processing/kernel.ts](../../src/processing/kernel.ts) |
 | [tests/support/tolerance.ts](../../tests/support/tolerance.ts) | — |
 | [tests/support/v6-resource-probe.ts](../../tests/support/v6-resource-probe.ts) | — |
 | [tests/support/visualizer-assets.mjs](../../tests/support/visualizer-assets.mjs) | [scripts/lib/visualizer-assets-path.mjs](../../scripts/lib/visualizer-assets-path.mjs) |

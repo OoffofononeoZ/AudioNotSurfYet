@@ -129,6 +129,9 @@ async function createWindow() {
             backgroundThrottling: false,
         },
     });
+    // On Windows at fractional display scaling, constructor bounds can grow by a few DIP.
+    // Reapply the fitted outer bounds before observing changes so restarts do not accumulate drift.
+    window.setBounds(placement.bounds);
     trackWindowState(window, windowStateFile);
     const shutdownChannel = new ShutdownChannel(() => window, ownerOrigin);
     registerShutdown(window, shutdownChannel, { tasks: fileTasks, saves, bundles, grants }, desktopSession);
@@ -176,11 +179,10 @@ async function createWindow() {
     window.on('closed', () => {
         window = null;
     });
-    if (!profile)
-        window.once('ready-to-show', () => {
-            if (placement.maximized) window?.maximize();
-            window?.show();
-        });
+    window.once('ready-to-show', () => {
+        if (placement.maximized) window?.maximize();
+        if (!profile) window?.show();
+    });
     await window.loadURL(devUrl ?? `${APP_ORIGIN}/`);
 }
 

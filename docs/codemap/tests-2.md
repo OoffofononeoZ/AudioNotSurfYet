@@ -8,6 +8,7 @@
 
 | 文件 | 本地静态引用（最多显示 6 项） |
 | --- | --- |
+| [tests/e2e/editor-marker-compensation.spec.ts](../../tests/e2e/editor-marker-compensation.spec.ts) | [src/editor/types.ts](../../src/editor/types.ts)、[tests/support/editor-draft.ts](../../tests/support/editor-draft.ts)、[tests/support/editor-marking.ts](../../tests/support/editor-marking.ts) |
 | [tests/e2e/editor-marker-redesign.spec.ts](../../tests/e2e/editor-marker-redesign.spec.ts) | [tests/support/file-picker.ts](../../tests/support/file-picker.ts) |
 | [tests/e2e/editor-marking-layout.spec.ts](../../tests/e2e/editor-marking-layout.spec.ts) | [tests/support/editor-marking.ts](../../tests/support/editor-marking.ts) |
 | [tests/e2e/editor-marking.spec.ts](../../tests/e2e/editor-marking.spec.ts) | [tests/support/editor-marking.ts](../../tests/support/editor-marking.ts) |
@@ -107,4 +108,3 @@
 | [tests/editor/marker-lane-movement.test.ts](../../tests/editor/marker-lane-movement.test.ts) | [src/editor/beatSnap.ts](../../src/editor/beatSnap.ts)、[src/editor/markerLaneMovement.ts](../../src/editor/markerLaneMovement.ts)、[src/editor/projectCodec.ts](../../src/editor/projectCodec.ts)、[src/editor/types.ts](../../src/editor/types.ts) |
 | [tests/editor/marker-ruler-scrubber.test.ts](../../tests/editor/marker-ruler-scrubber.test.ts) | [src/editor/markerRulerScrubber.ts](../../src/editor/markerRulerScrubber.ts)、[src/types/audio.ts](../../src/types/audio.ts) |
 | [tests/editor/marker-time-view.test.ts](../../tests/editor/marker-time-view.test.ts) | [src/editor/editorDraftRepository.ts](../../src/editor/editorDraftRepository.ts)、[src/editor/markerBlockOperations.ts](../../src/editor/markerBlockOperations.ts)、[src/editor/markerTimeView.ts](../../src/editor/markerTimeView.ts)、[src/editor/pointAnnotations.ts](../../src/editor/pointAnnotations.ts)、[src/editor/projectCodec.ts](../../src/editor/projectCodec.ts) |
-| [tests/editor/marking-window-movement.test.ts](../../tests/editor/marking-window-movement.test.ts) | [src/editor/markerMovement.ts](../../src/editor/markerMovement.ts)、[src/editor/pointAnnotations.ts](../../src/editor/pointAnnotations.ts)、[src/editor/projectCodec.ts](../../src/editor/projectCodec.ts)、[src/editor/rangeAnnotations.ts](../../src/editor/rangeAnnotations.ts)、[src/editor/timeline.ts](../../src/editor/timeline.ts)、[src/editor/types.ts](../../src/editor/types.ts) |

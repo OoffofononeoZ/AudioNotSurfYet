@@ -31,7 +31,7 @@ OPFS `visualizer-export` 下每个 UUID 文件持有独立 Web Lock，生成中�
 
 保存目标通过注入的文件端口处理：Web 保留 `showSaveFilePicker` 与原始 WebM Blob；Electron 从磁盘支持的 File 按最多 1 MiB 分块读取、等待每块 IPC 写入确认，主进程在用户选定目录暂存并完整提交。取消/失败不替换已有输出，检测到目标在保存期间变化时明确失败；此处没有文件总大小上限。编码、OPFS 和 ready 文件重试语义保持。桌面 ASAR 四档短片的实际保存/取消重试及媒体测量已通过；系统保存选值为替身，原生视频保存 UI、退出等待及异常退出遗留清理仍需按[双端阶段](desktop.md)验证。
 
-桌面正常关闭通过生命周期端口：有进行中导出或 ready WebM 先确认；准备阶段取消生成但保留 ready 文件，草稿保存/文件收尾失败不静默丢弃输出。最终释放阶段才丢弃 ready OPFS 文件并释放租约，再销毁窗口。Web 的 beforeunload/pagehide 和原有手动丢弃流程保留；原生关闭仍未实际验证。
+桌面正常关闭通过生命周期端口：有进行中导出或 ready WebM 先确认；准备阶段取消生成但保留 ready 文件，草稿保存/文件收尾失败不静默丢弃输出。最终释放阶段才丢弃 ready OPFS 文件并释放租约，再销毁窗口。Web 的 beforeunload/pagehide 和原有手动丢弃流程保留。实际 ASAR 生命周期专项已验证活动导出关闭、进程正常退出，重启后 OPFS 为空且 Editor 草稿保留；确认结果为替身，ready 文件退出和原生确认 UI 仍待验，身份见[桌面阶段](desktop.md)。
 
 ## 验证与限制
 
