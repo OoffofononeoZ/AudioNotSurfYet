@@ -6,6 +6,7 @@ import { spawn } from 'node:child_process';
 import { build, createServer } from 'vite';
 import { copyDesktopPublicAssets } from './lib/desktop-assets.mjs';
 import { desktopPackageConfig, writePackageChecksums } from './lib/desktop-package.mjs';
+import { createNativeRun, copyNativeTree, cleanupNativeTree } from './lib/desktop-native-runtime.mjs';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
 const require = createRequire(import.meta.url);
@@ -64,30 +65,60 @@ await fs.copyFile(path.join(root, 'THIRD_PARTY_NOTICES.md'), path.join(appRoot, 
 if (command === 'dev') {
     await runNode(path.join(root, 'tests/processing/prepare-assets.mjs'));
     await runNode(path.join(root, 'scripts/build-wallpaper-runtime.mjs'));
+    const native = await createNativeRun('development');
+    const runtime = await copyNativeTree(path.dirname(require('electron')), path.join(native.directory, 'electron'));
     const server = await createServer({
         root,
         mode: 'desktop',
         server: { host: '127.0.0.1', port: 5174, strictPort: true },
     });
-    await server.listen();
-    const env = { ...process.env, AUDIOSURF_DESKTOP_DEV_URL: 'http://127.0.0.1:5174/' };
+    try {
+        await server.listen();
+    } catch (error) {
+        await cleanupNativeTree(runtime);
+        throw error;
+    }
+    const env = {
+        ...process.env,
+        TEMP: native.temp,
+        TMP: native.temp,
+        AUDIOSURF_DESKTOP_DEV_URL: 'http://127.0.0.1:5174/',
+    };
     delete env.ELECTRON_RUN_AS_NODE;
-    const child = spawn(require('electron'), [appRoot], { cwd: root, env, stdio: 'inherit', windowsHide: true });
+    console.log(`Desktop development runtime: ${native.directory}`);
+    const inspectBrowser = process.argv.includes('--inspect-browser');
+    const electronArgs = [
+        ...(inspectBrowser ? ['--remote-debugging-port=0', '--remote-debugging-address=127.0.0.1'] : []),
+        appRoot,
+    ];
+    const child = spawn(path.join(runtime.root, 'electron.exe'), electronArgs, {
+        cwd: root,
+        env,
+        stdio: 'inherit',
+        windowsHide: true,
+    });
     const stop = () => {
         child.kill();
         void server.close();
     };
     process.once('SIGINT', stop);
     process.once('SIGTERM', stop);
-    child.once('exit', async code => {
-        await server.close();
-        process.exitCode = code ?? 1;
-    });
-    child.once('error', async error => {
-        await server.close();
-        console.error(error);
-        process.exitCode = 1;
-    });
+    let finishing;
+    function finish(code, error) {
+        finishing ??= (async () => {
+            process.removeListener('SIGINT', stop);
+            process.removeListener('SIGTERM', stop);
+            await server.close();
+            await cleanupNativeTree(runtime);
+            if (error) console.error(error);
+            process.exitCode = code ?? 1;
+        })().catch(failure => {
+            console.error(failure);
+            process.exitCode = 1;
+        });
+    }
+    child.once('exit', code => finish(code));
+    child.once('error', error => finish(1, error));
 } else {
     await runNode(path.join(root, 'tests/processing/prepare-assets.mjs'));
     await runNode(path.join(root, 'scripts/build-wallpaper-runtime.mjs'));

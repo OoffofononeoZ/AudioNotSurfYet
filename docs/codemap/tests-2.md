@@ -8,6 +8,7 @@
 
 | 文件 | 本地静态引用（最多显示 6 项） |
 | --- | --- |
+| [tests/e2e/m14-analyzer-reorder.spec.ts](../../tests/e2e/m14-analyzer-reorder.spec.ts) | [src/analysis/types.ts](../../src/analysis/types.ts)、[tests/support/analyzer-list.ts](../../tests/support/analyzer-list.ts)、[tests/support/file-picker.ts](../../tests/support/file-picker.ts) |
 | [tests/e2e/m4-playback.spec.ts](../../tests/e2e/m4-playback.spec.ts) | [tests/support/file-picker.ts](../../tests/support/file-picker.ts) |
 | [tests/e2e/m5-recovery.spec.ts](../../tests/e2e/m5-recovery.spec.ts) | [tests/support/file-picker.ts](../../tests/support/file-picker.ts) |
 | [tests/e2e/m6-analysis.spec.ts](../../tests/e2e/m6-analysis.spec.ts) | [tests/support/file-picker.ts](../../tests/support/file-picker.ts) |
@@ -107,4 +108,3 @@
 | [tests/persistence/session-repository-tasks.test.ts](../../tests/persistence/session-repository-tasks.test.ts) | [src/persistence/sessionRepository.ts](../../src/persistence/sessionRepository.ts)、[src/persistence/sessionRepositoryTasks.ts](../../src/persistence/sessionRepositoryTasks.ts) |
 | [tests/persistence/session-repository.test.ts](../../tests/persistence/session-repository.test.ts) | [src/audio/audioSessionService.ts](../../src/audio/audioSessionService.ts)、[src/persistence/sessionRepository.ts](../../src/persistence/sessionRepository.ts)、[src/types/session.ts](../../src/types/session.ts) |
 | [tests/processing/acceptance.ts](../../tests/processing/acceptance.ts) | — |
-| [tests/processing/artifactOracle.ts](../../tests/processing/artifactOracle.ts) | [src/processing/kernel.ts](../../src/processing/kernel.ts)、[src/processing/storage.ts](../../src/processing/storage.ts) |

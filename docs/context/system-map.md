@@ -10,7 +10,7 @@ upstream_docs:
 
 ## System Summary
 
-Web/Electron 双端 Goal 已批准，`electron/` 宿主、独立构建及安全应用协议已接入，渲染端复用网页产物；安装版已首次启动，完整能力仍待验证。原先启动异常已定位为受管项目目录继承 Low Integrity，普通用户目录的同字节安装副本保持 sandbox 并成功启动，不修改权限。平台端口、原生授权及独立存储边界见[双端合同](desktop.md)，按阶段落地，不复制以下共享业务服务。
+Web/Electron 双端 Goal 已批准，`electron/` 宿主、独立构建及安全应用协议已接入，渲染端复用网页产物；开发、应用目录和 ASAR 的基础能力已验证，主要功能与真实模型/封装媒体仍待验证。原先启动异常来自受管项目目录继承 Low Integrity；`desktop-native-runtime.mjs` 为开发/测试创建逐文件校验的普通用户目录副本和原生 TEMP，保留 sandbox，不修改权限，终止后只清理未改动的已拥有执行文件。平台端口、原生授权及独立存储边界见[双端合同](desktop.md)，不复制以下共享业务服务。
 
 D2 已添加主进程只读文件/目录授权、受限 IPC 和文件流端点。`src/platform/` 在应用入口选择双端音频和目录端口，由 MainLayout 与 Visualizer 注入共享服务；Web 原始句柄与桌面 grantId 的运行时引用均留在 Pinia 外。Web V1 存储保留，桌面音频恢复优先核对磁盘 hash，目录 repository 保存原生授权描述。共享资源读取/预览校验不依赖具体句柄方法，真实原生文件操作与恢复仍待验证。
 

@@ -14,7 +14,11 @@ Node24.22.1/npm11.x，依赖版本以lockfile为准；浏览器专项使用真�
 
 Web/Electron 改动先核对[双端阶段和验证要求](../docs/context/desktop.md)。共享行为需要双端适用检查，单端改动说明影响依据；桌面命令随实现增加，浏览器通过不证明 Electron 通过，自动化不能代替原生 OS 许可及安装操作。
 
-桌面已提供 `npm run desktop:typecheck`、`npm run test:desktop:unit`；先运行 `npm run desktop:build`，再运行 `npm run test:desktop:smoke`；先运行 `desktop:dir`，再运行 `test:desktop:packaged` 检查 ASAR 分发。smoke 使用独立持久化 profile、生产网页产物及应用协议，检查隔离、路由、OPFS 重启恢复、WebGPU、ORT 模块和实际 VP9/VP8/Opus 编码；不等于 FT 推断、封装媒体质量、原生 picker 或安装验收。项目目录的 Low Integrity 已定位，但这些直接运行项目 EXE 的入口尚待适配并重测，不能记为通过。工具测试覆盖静态资源白名单，防止复制本地 public/audios、测试音频或额外模型。
+桌面已提供 `npm run desktop:typecheck`、`npm run test:desktop:unit`；先运行 `npm run desktop:build`，再运行 `npm run test:desktop:smoke`；先运行 `desktop:dir`，再运行 `test:desktop:packaged` 检查 ASAR 分发。两种 smoke 使用普通用户目录内逐文件校验的运行副本、独立持久化 profile/TEMP、生产网页产物及应用协议，实际检查隔离、路由、OPFS 重启恢复、硬件 WebGPU、ORT WebGPU 算术图及分别执行的 VP9/VP8/Opus 编码。不是 FT 推断、封装媒体质量或原生 picker 验收；结果、运行身份及生产截图按唯一 ID 写入 `artifacts/desktop/capabilities/`，不相互覆盖。成功后清理执行副本，失败保留以便诊断；profile 保留供对应 run 核查。
+
+`npm run test:desktop:dev` 实际启动 `desktop.mjs dev --inspect-browser`，只为该开发测试打开临时 localhost CDP；普通 `desktop:dev` 不打开此端口。测试使用独立 profile，验证 Vite 页面和路由、Electron 桥与无 Node 全局，经 `window.close()` 正常退出并核对执行副本已清理。它验证开发入口及空工作区关闭；隐藏 profile 窗口不采集开发截图，视觉图来自上述生产能力测试，带任务/修改的退出仍须另验。
+
+`scripts/lib/desktop-native-runtime.mjs` 由开发入口、能力测试及安装复制工具共用，只在普通用户目录创建新副本，不改工作区权限。工具测试核对复制内容、既有目标/junction 拒绝、外来文件或同大小篡改时整份保留，以及仅删除已核实对象；不递归删除运行副本。静态资源工具另覆盖白名单，防止复制本地 public/audios、测试音频或额外模型。
 
 先运行 `desktop:package`，再执行 `npm run test:desktop:install` 进行真实 Windows 每用户安装。它拒绝已有产品安装/快捷方式/运行进程，备份已有用户数据并核对哈希，再从实际 ASAR 生成仅增加补丁版本号的升级夹具，共用生产打包配置，不更改仓库版本。安装器以流式同字节副本在普通用户目录运行，安装路径含空格；同时隔离原生 TEMP，避免受管项目的 Low Integrity 继承。结果、截图和私有备份在 `artifacts/desktop/install-verification/<ID>`；原生副本/独立 profile 在 `%LOCALAPPDATA%/AudioNotSurfYet-GoalSmoke/<ID>`，均不发布。
 

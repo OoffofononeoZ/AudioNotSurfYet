@@ -26,8 +26,8 @@
 | Visualizer、场景与录制 | 96 | [模块地图](codemap/visualizer.md) |
 | 页面、布局与组件 | 82 | [模块地图](codemap/ui.md) |
 | 应用入口、状态与共享模块 | 32 | [模块地图](codemap/shared.md) |
-| 仓库工具 | 16 | [模块地图](codemap/tooling.md) |
-| 验证 | 373 | [模块地图](codemap/tests.md) |
+| 仓库工具 | 17 | [模块地图](codemap/tooling.md) |
+| 验证 | 375 | [模块地图](codemap/tests.md) |
 
 ## 规范与资料入口
 

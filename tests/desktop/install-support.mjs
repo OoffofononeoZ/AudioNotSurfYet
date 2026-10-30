@@ -1,10 +1,9 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
-import { createReadStream, createWriteStream } from 'node:fs';
-import { createHash } from 'node:crypto';
 import path from 'node:path';
 import { spawn } from 'node:child_process';
-import { pipeline } from 'node:stream/promises';
+import { hashFile } from '../../scripts/lib/desktop-native-runtime.mjs';
+export { hashFile, copyVerifiedBytes } from '../../scripts/lib/desktop-native-runtime.mjs';
 
 export const psLiteral = value => `'${value.replaceAll("'", "''")}'`;
 
@@ -84,21 +83,6 @@ $process.ExitCode
     assert(/^\d+$/.test(response), 'Installer process did not return an exit code');
     const code = Number(response);
     assert.equal(code, 0, `${path.basename(file)} failed with ${code}`);
-}
-
-export async function hashFile(file) {
-    const hash = createHash('sha256');
-    for await (const bytes of createReadStream(file)) hash.update(bytes);
-    return hash.digest('hex');
-}
-
-// Create bytes in the destination directory without copying source ACLs/labels.
-// Never relabel the workspace or weaken Electron/Windows security settings.
-export async function copyVerifiedBytes(source, destination) {
-    const expected = await hashFile(source);
-    await pipeline(createReadStream(source), createWriteStream(destination, { flags: 'wx' }));
-    assert.equal(await hashFile(destination), expected, 'Native distribution copy changed');
-    assert.equal(await hashFile(source), expected, 'Source changed while copying');
 }
 
 export function containedPath(root, candidate) {

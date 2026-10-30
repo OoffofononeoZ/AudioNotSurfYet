@@ -33,15 +33,15 @@ Goal 已于 2026-10-29 启动；按下列依赖顺序持续实现，各小目标
 | 阶段 | 交付及验收 | 当前状态 |
 | --- | --- | --- |
 | D0 双端合同/基线 | AGENTS、六个项目 skills、相关文档同步；记录 Web 基线及独立缺口 | 完成：文档/仓库检查、Web 类型与构建通过 |
-| D1 宿主/能力 | 独立开发/打包入口、安全协议/路由/runtime；真实 ORT、WebGPU、OPFS、算法隔离及短片 WebCodecs | 安装版首次启动及三项隔离已验证；Low Integrity 原因已定位，完整能力矩阵待验 |
+| D1 宿主/能力 | 独立开发/打包入口、安全协议/路由/runtime；真实 ORT、WebGPU、OPFS、算法隔离及短片 WebCodecs | 开发、应用目录及 ASAR 已运行；隔离、ORT GPU 算术、硬件 WebGPU、OPFS 重启及 VP9/VP8/Opus 原始编码通过，封装媒体仍待 D4 |
 | D2 端口/恢复 | 原生音频选择、来源引用、队列/资源目录恢复；Web 数据兼容，覆盖缺失/变化/权限/stale | 原生只读授权、音频/队列和资源目录读取恢复已装配；原生运行未验证 |
 | D3 文件交互 | 工程/osu/媒体/歌词、FT WAV、视频、预设/壁纸读写；原生保存/取消/失败/大文件清理 | 文件输入/保存及预设/壁纸目录端口已接入；真实原生操作未验证 |
 | D4 功能对齐 | 打包环境实际验证主要页面、模型、三维/实时/离线输出；Web 邻接回归 | 应用内展示策略已接入，安装版主界面已启动；主要功能对齐未验证 |
-| D5 生命周期 | 退出保护、任务/资源清理、草稿落盘、最小化、窗口位置恢复、单实例 | 关闭握手、窗口状态和原生事务清理已接入；真实行为未验证，崩溃遗留处理待实施 |
+| D5 生命周期 | 退出保护、任务/资源清理、草稿落盘、最小化、窗口位置恢复、单实例 | 已接入；开发空工作区正常关闭通过，带修改/任务、最小化、窗口恢复及单实例待验，崩溃遗留处理待实施 |
 | D6 安装升级 | 产品身份/图标/许可，按用户 NSIS 安装、启动、升级保留数据和卸载保留用户文件 | 实际每用户安装、启动、0.0.0→0.0.1 升级及卸载文件保留通过；工程/模型升级后读取仍待验 |
 | D7 双端收口 | 双端构建/适用回归/产物检查，文档与 skills 一致，安装包及校验信息交付 | 未实现 |
 
-D1 的 GPU/编码/存储验证优先；原先原生异常已定位为项目目录的 Low Integrity 继承，安装版现已启动，下一步适配能力 smoke 的原生执行目录并重测。端口/共享逻辑或首次启动均不能关闭完整能力缺口。不增加静默 fallback；能力不支持时保留明确错误和现有人工路径。
+D1 的 GPU/编码/存储基础验证已通过；原先原生异常来自项目目录 Low Integrity 继承，开发与能力 smoke 已共用普通用户执行副本。真实模型/封装媒体及 D2/D3 原生操作仍须实际验证，基础门槛不证明主要功能对齐。不增加静默 fallback；能力不支持时保留明确错误和现有人工路径。
 
 ## 验证与续作
 
@@ -54,7 +54,7 @@ D1 的 GPU/编码/存储验证优先；原先原生异常已定位为项目目�
 - 只记录当前阶段、必要结果、提交及下一步；不生成阶段三件套或例行正式 readiness。外部输入只阻断依赖项，继续独立工作；未验证/失败不得记为通过，不提前标记 Goal 完成。
 - D0 提交 `14bb696`。D1 锁定 Electron 45.1.0、electron-builder 26.18.1；宿主/网页类型检查、独立桌面构建及未安装应用目录打包、2 项资源边界和 59 项工具测试通过；Chrome 6 项原有冒烟回归通过。新增宿主地图、独立 staging、受限应用协议和只读宿主标识；尚未接原生文件接口。
 - D1 环境：Windows 11 家庭中文版 10.0.22631 x64。运行库镜像下载后由安装器校验；独立下载 ZIP 的 SHA-256 为 `55eaba17abff7b5bba6c3bbc85068967379024fe742fe9c7fdba9118922ccbe2`，与 npm 包内官方 checksum 一致。官方直连首次失败，镜像传输不改变版本/bytes。
-- D1 最初的 `0x80000003` 在开发/打包、最小 main、隔离 userData/TEMP、禁用 GPU 和独立 44.10.0 均复现，Node 模式可用；未替换项目版本。同版符号将 RVA `0x344c64a` 定位到 Chromium `sandbox/policy/sandbox.cc:71` 的 `Sandbox::Initialize`，返回 12（`SBOX_ERROR_CANNOT_CREATE_WINSTATION`）及 LastError 5。现已定位：受管项目根及 EXE 继承 Low Integrity，导致可执行文件降级运行；普通桌面双击同样受影响。并非业务 main 或 SmartScreen 提示已证明的故障，也不据此归因于 GPU。下面普通目录对照及实际安装启动已解开此阻断，GPU/OPFS/编码/模型能力仍未验证；始终保留 sandbox。
+- D1 最初的 `0x80000003` 在开发/打包、最小 main、隔离 userData/TEMP、禁用 GPU 和独立 44.10.0 均复现，Node 模式可用；未替换项目版本。同版符号将 RVA `0x344c64a` 定位到 Chromium `sandbox/policy/sandbox.cc:71` 的 `Sandbox::Initialize`，返回 12（`SBOX_ERROR_CANNOT_CREATE_WINSTATION`）及 LastError 5。现已定位：受管项目根及 EXE 继承 Low Integrity，导致可执行文件降级运行；普通桌面双击同样受影响。并非业务 main 或 SmartScreen 提示已证明的故障，也不据此归因于 GPU。下面普通目录对照、安装及能力测试已解开此阻断；始终保留 sandbox，真实模型和封装媒体仍待验证。
 - 打包资源由明确白名单复制，关闭 Vite 自动 public 复制并排除 node_modules；已发现并修复 public/audios 随包复制问题，源文件保留，重新生成后实际 ASAR 检查不含用户音频、测试音频、模型权重或开发依赖。D6 产品图标与 NSIS 进展见下文。
 - npm audit 当前树报告 15 项（6 high），列名不含 Electron/electron-builder；未自动升级既有 Vue/Vite/Meyda 等依赖。后续按实际适用性审阅，不能视作发布安全通过。
 - D1 宿主基础提交 `5b78df9`。D2 原生只读授权保存在主进程 userData；preload 只公开选音频/资源目录、描述、权限及受限目录读取。读取端点校验 Electron 的 initiatorOrigin，IPC 同时校验窗口、主 frame token 和 origin；路径规范化/realpath 防止越界与 junction 扩权。目录子文件复用目录授权，撤销后不遗留独立子授权。
@@ -93,6 +93,10 @@ D1 的 GPU/编码/存储验证优先；原先原生异常已定位为项目目�
 - 原生目录对照：同字节 NSIS 探针在项目目录以完整性 RID 4096（Low）运行，独立 HKCU 写入及直接 Win32 API 均失败（返回 5）；复制到普通用户目录后 RID 8192（Medium）、写入/读取/自身标记清理成功。流式新副本和普通 `Copy-Item` 均验证，源/目标 SHA-256 相同；只读 ACL 显示项目继承 Low 标签、普通用户目录无此标签。不修改 ACL/标签、系统安全设置或 Electron sandbox。构建仍用项目 TEMP；原生安装/卸载使用普通目录 TEMP，防止临时卸载器也降为 Low。
 - `test:desktop:install` 的真实结果在忽略目录 `artifacts/desktop/install-verification/54b6e587-10e0-4ff6-9cda-227b3a46441c/`。先备份原有 81 文件、4,182,391 bytes；同字节安装器在 `%LOCALAPPDATA%/AudioNotSurfYet-GoalSmoke/<ID>` 实际按用户安装到含空格的独占目录。HKCU 注册、桌面/开始菜单快捷方式、安装 payload hash/版本/NotSigned 通过，安装版显示共享主界面并确认 sandbox/contextIsolation=true、nodeIntegration=false，实际截图已核对。
 - 仅临时 ASAR 夹具版本改为 0.0.1，仓库及交付包保持 0.0.0。真实升级和卸载后原有文件、空目录、专属标记及外部文件逐一核对通过；卸载注册/快捷方式/安装目录已移除，专属用户数据标记随后删除，原始 81 文件保持一致。65 项工具测试、Web/Electron 类型/生产构建及独立打包通过；安装验证只证明物理保留，尚不证明既有工程数据库/真实模型缓存升级后可读。
-- 下一步：在普通用户执行目录适配并重测 D1 smoke，继而真实模型、主要功能、封装 WebM、原生文件/恢复、窗口/退出；D5 异常退出遗留仍待实施。D6 补工程/模型升级后实际读取。完整目标继续，不以首次启动、基础安装或浏览器替身结果关闭能力与质量缺口。
+- 安装基础阶段提交 `c6062ed`。开发/能力测试现通过 `scripts/lib/desktop-native-runtime.mjs` 创建普通用户目录内的独占副本并逐文件校验，隔离原生 TEMP；不改变项目 ACL/标签或产品沙箱。成功结束后核对完整文件集/内容再逐文件清理，变化、junction 或外来文件会使清理拒绝并保留副本。测试 profile/日志按 run 留存；Web 依赖图与产品工程/推理逻辑未改。
+- D1 实测：Windows 11 10.0.22631 x64，Electron 45.1.0/Chromium 156.0.8078.49，硬件适配器为 NVIDIA Lovelace，设备清单含 RTX 4060 Laptop GPU、驱动 32.0.15.9186。应用目录 run `smoke-application-29c8db71-4541-446e-82b4-c1f209d35c9a`、ASAR run `smoke-packaged-dcb94d60-b29c-4133-8424-023f2428543c` 均通过：secure app 协议、主要路由、缺失静态资源 404、Web Locks、OPFS 写入和真实重启读取；iframe/Worker 为 opaque origin 且无 Node/桥，主窗口 sandbox/contextIsolation=true、Node/Worker Node=false。
+- 锁定 ORT 的 WebGPU provider 实际运行项目生成的 float32 加法 ONNX 图，得到 `[3,5,7,9]`；只指定 webgpu，未尝试 CPU。分别编码 VP9/VP8 各 3 帧，PTS 均为 `[0,33333,66667]` μs，Opus 产生 6 块；WebGL2 可创建。生产主界面截图已核对。证据在 `artifacts/desktop/capabilities/<run>/`；这不是 FT/自动标记真实模型、封装视频或质量验收。
+- 开发命令 run `development-check-bbf90b36-d444-4a35-89e2-f4a657623875` 通过：实际启动 `desktop.mjs dev --inspect-browser`，临时 inspector 只监听 localhost；普通开发命令不开放该端口。Vite/Electron 桥、无 Node 全局、Editor 路由及空工作区 `window.close()` 通过，进程退出 0 后执行副本已清理。隐藏 profile 的开发截图曾超时，已关闭当时仍存活的窗口后再测试；开发专项不宣称视觉证据，图像来自生产入口。此改动只影响桌面开发/验证工具，不改变 Web 页面或发布包源代码；本轮双端类型/生产构建和 69 项工具测试通过。
+- 下一步：真实原生文件选择/保存与位置恢复，安装版实际主要功能、真实模型和封装 WebM，带修改/任务的退出与窗口/单实例；D5 异常退出遗留待实施，D6 补工程/模型升级后实际读取。完整目标继续，基础能力与浏览器替身结果不关闭剩余质量缺口。
 
 正式范围、质量/性能和批准仍从[产品范围](../product/scope.md)、[决策登记](decision-registry.md)与[上下文入口](index.md)按需读取。
