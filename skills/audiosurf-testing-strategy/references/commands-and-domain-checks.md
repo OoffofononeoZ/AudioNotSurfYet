@@ -16,6 +16,7 @@
 | Electron 入口/能力 | `test:desktop:dev` 实际执行开发命令；`desktop:build` 后 `test:desktop:smoke`，`desktop:dir` 后 `test:desktop:packaged` 检查生产能力及重启恢复。算术 ORT 图与原始编码块不替代真实 FT/封装视频验证；GPUAdapter 交给 ORT 单一设备所有者，不能预先消费后重复 requestDevice |
 | Electron 文件/恢复 | `test:desktop:files` 为真实 ASAR IPC/存储/文件操作、对话框选值替身；`test:desktop:dialogs:manual` 为实际打开/保存且需人工操作，原生返回值不替换。只使用独占受控文件；两类结果分开，主进程请求不能模拟受限网页攻击者 |
 | Electron 资源目录 | `test:desktop:resources` 检查独占资源副本的实际算法/封面加载、预设取消/保存、壁纸五文件、目录重启恢复与既有文件 hash；系统目录/确认选值为替身。`test:desktop:packaged` 包含 opaque iframe 内 Worker 动态导入 blob 模块，不能只用普通 postMessage 宣称算法加载通过 |
+| Electron 封装媒体 | `test:desktop:media` 实际 ASAR 四档首次/重复同步片和几何预设输出，取消保存后重试；复用现有媒体 oracle 的 `--files-only` 严格解码/逐帧/同步门槛。结果不能转写为 Chrome/Edge `--all`、长片、模型或原生保存 UI 通过 |
 | 播放与会话 | `test:m4:unit` / `test:m4:integration`、`test:e2e:m4` |
 | 句柄与恢复 | `test:m5:unit` / `test:m5:integration`、`test:e2e:m5` |
 | 分析平台 | `test:m6:unit` / `test:m6:worker` / `test:m6:integration` |

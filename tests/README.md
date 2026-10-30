@@ -28,6 +28,10 @@ Web/Electron 改动先核对[双端阶段和验证要求](../docs/context/deskto
 
 `npm run test:desktop:resources` 从外部资源库复制经过路径检查的包/源码/封面到独占目录；实际 ASAR 加载全部元素及封面，添加环形频谱，导出预设（取消/保存/刷新）和壁纸五文件，并重启恢复资源目录、逐一核对既有文件 hash。系统目录/确认选值由 `dialog-fixture.mjs` 替换；不证明真实目录选择或 Wallpaper Engine 宿主运行。结果和截图在 `artifacts/desktop/resources/<ID>`；原始外部库只读，只有本次副本接收新预设。
 
+`npm run test:desktop:media` 在实际 ASAR 中导入受控 12 秒同步音频，复用生产 authoring/codec 创建黑底白闪工程；四档各执行首次及同页重复导出，再用 3 秒音频和既有 geometric-0.6 预设各导出一次。页面音量为零，禁止 captureStream/MediaRecorder；首次保存取消后保留 ready 再重试，全部通过真实 IPC 分块保存。外部库只读，系统选值为替身；换歌显式通过本次独占草稿的覆盖提示。此处 cold 表示该档首次输出，不表示新进程冷启动。
+
+12 份文件及 capture 位于 `artifacts/visualizer-composition/output/media-<UUID>-*`，过程结果/截图在 `artifacts/desktop/media/media-<UUID>`。runner 用现有 `verify-visualizer-output.mjs <runId> --files-only` 完整解码并检查逐帧 PTS/帧数、时长/尾差、零页面音量下音轨及同步白闪，末尾短暂显示专属窗口以采集截图后关闭。沿用 100ms/250ms 门槛；该入口只验证本次 Electron 文件，不将现有 Chrome/Edge `--all` 矩阵标记完整，不替代十五分钟长片、实际模型或原生保存 UI 验收。
+
 先运行 `desktop:package`，再执行 `npm run test:desktop:install` 进行真实 Windows 每用户安装。它拒绝已有产品安装/快捷方式/运行进程，备份已有用户数据并核对哈希，再从实际 ASAR 生成仅增加补丁版本号的升级夹具，共用生产打包配置，不更改仓库版本。安装器以流式同字节副本在普通用户目录运行，安装路径含空格；同时隔离原生 TEMP，避免受管项目的 Low Integrity 继承。结果、截图和私有备份在 `artifacts/desktop/install-verification/<ID>`；原生副本/独立 profile 在 `%LOCALAPPDATA%/AudioNotSurfYet-GoalSmoke/<ID>`，均不发布。
 
 该专项检查 HKCU 注册、两个快捷方式、真实安装 ASAR/EXE 版本及未签名状态、安装版主界面和三项隔离设置；升级/卸载后逐一核对原有文件、空目录及外部文件，最后仅删除自己的数据标记。卸载等待包含其临时子进程；启动失败也继续独立保留验证，但命令最终失败。它证明文件保留，不证明既有工程/模型数据库升级后可用，后者仍需功能专项。`tests/tools/desktop-installer.test.mjs` 覆盖备份/篡改发现、junction 拒绝、路径界限、复制不覆盖、真实子进程退出码及 checksum。

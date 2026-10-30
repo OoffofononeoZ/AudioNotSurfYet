@@ -8,6 +8,8 @@
 
 | 文件 | 本地静态引用（最多显示 6 项） |
 | --- | --- |
+| [tests/e2e/editor-transcription.spec.ts](../../tests/e2e/editor-transcription.spec.ts) | [src/editor/types.ts](../../src/editor/types.ts)、[src/processing/modelManifest.ts](../../src/processing/modelManifest.ts)、[src/transcription/resultRepository.ts](../../src/transcription/resultRepository.ts)、[tests/processing/systemSampler.ts](../../tests/processing/systemSampler.ts)、[tests/support/editor-marking.ts](../../tests/support/editor-marking.ts)、[tests/support/editor-workspaces.ts](../../tests/support/editor-workspaces.ts)、另 1 项，按需核对源码 |
+| [tests/e2e/editor-workspace-controls.spec.ts](../../tests/e2e/editor-workspace-controls.spec.ts) | [tests/support/editor-marking.ts](../../tests/support/editor-marking.ts)、[tests/support/editor-workspaces.ts](../../tests/support/editor-workspaces.ts) |
 | [tests/e2e/m10-analyzer.spec.ts](../../tests/e2e/m10-analyzer.spec.ts) | [tests/support/analyzer-list.ts](../../tests/support/analyzer-list.ts)、[tests/support/file-picker.ts](../../tests/support/file-picker.ts)、[tests/support/m10-structure-fixture.ts](../../tests/support/m10-structure-fixture.ts)、[tests/support/m7-learning-fixture.ts](../../tests/support/m7-learning-fixture.ts) |
 | [tests/e2e/m11-hardening.spec.ts](../../tests/e2e/m11-hardening.spec.ts) | [tests/support/analyzer-list.ts](../../tests/support/analyzer-list.ts)、[tests/support/file-picker.ts](../../tests/support/file-picker.ts) |
 | [tests/e2e/m12-analyzer-masonry.spec.ts](../../tests/e2e/m12-analyzer-masonry.spec.ts) | [src/analysis/types.ts](../../src/analysis/types.ts)、[tests/support/analyzer-list.ts](../../tests/support/analyzer-list.ts) |
@@ -106,5 +108,3 @@
 | [tests/fixtures/fixture-manifest.test.ts](../../tests/fixtures/fixture-manifest.test.ts) | — |
 | [tests/fixtures/generate-fixtures.ts](../../tests/fixtures/generate-fixtures.ts) | [tests/support/audio-fixtures.ts](../../tests/support/audio-fixtures.ts) |
 | [tests/fixtures/visualizer/circular-original-particles.js](../../tests/fixtures/visualizer/circular-original-particles.js) | — |
-| [tests/harness/intentional-failure.test.ts](../../tests/harness/intentional-failure.test.ts) | — |
-| [tests/harness/verify-failure-detection.mjs](../../tests/harness/verify-failure-detection.mjs) | — |
