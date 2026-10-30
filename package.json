@@ -28,6 +28,8 @@
         "test:desktop:files": "node tests/desktop/files-smoke.mjs",
         "test:desktop:resources": "node tests/desktop/resources-smoke.mjs",
         "test:desktop:media": "node tests/desktop/media-smoke.mjs",
+        "test:desktop:model-network": "node tests/desktop/model-network-smoke.mjs",
+        "test:desktop:ft": "node tests/desktop/ft-smoke.mjs",
         "test:desktop:dialogs:manual": "node tests/desktop/native-dialog-smoke.mjs",
         "typecheck": "vue-tsc -b",
         "test": "vitest run",

@@ -76,7 +76,7 @@ export const APP_CSP = [
     "font-src 'self' data:",
     "worker-src 'self' blob:",
     "frame-src 'self' blob: about:",
-    "connect-src 'self' blob: https://huggingface.co https://*.huggingface.co https://*.hf.co",
+    "connect-src 'self' blob: https://huggingface.co https://*.huggingface.co https://*.hf.co https://raw.githubusercontent.com/spotify/basic-pitch/9991303bba609a3b93089d13ec80d1d495083596/basic_pitch/saved_models/icassp_2022/nmp.onnx",
     "object-src 'none'",
     "base-uri 'none'",
     "form-action 'none'",

@@ -14,7 +14,7 @@ Web/Electron 双端 Goal 已批准，`electron/` 宿主、独立构建及安全�
 
 D2 已添加主进程只读文件/目录授权、受限 IPC 和文件流端点。`src/platform/` 在应用入口选择双端音频和目录端口，由 MainLayout 与 Visualizer 注入共享服务；Web 原始句柄与桌面 grantId 的运行时引用均留在 Pinia 外。Web V1 存储保留，桌面音频恢复优先核对磁盘 hash，目录 repository 保存原生授权描述。ASAR 音频/工程保存及重启恢复、源变化/缺失拒绝旧 Blob 已验证，真实 WAV 打开及 Editor 保存也由人工完成；ASAR 资源目录加载/重启、预设和壁纸五文件输出通过，目录原生 UI 等剩余验证见[阶段状态](desktop.md)。共享资源读取/预览校验不依赖具体句柄方法。
 
-DEC-109 批准宿主 CSP 的 script-src 增加 blob:，让既有隔离 Worker 导入资源算法模块；宿主也获得 blob 模块执行能力。子层 opaque origin、nonce/blob 脚本、connect-src none 及无 Node 边界保持。生产 ASAR 专项覆盖动态模块导入和真实资源加载，Web 不依赖此宿主规则。
+DEC-109 批准宿主 CSP 的 script-src 增加 blob:，让既有隔离 Worker 导入资源算法模块；宿主也获得 blob 模块执行能力。DEC-110 另批准 Basic Pitch 固定 GitHub 文件的 connect-src 来源，未放开其他路径。生产 ASAR 已验证 8 个固定地址、其他 revision/文件路径拒绝，以及实际算法 iframe/Worker 仍禁止网络且无 parent/Node/桥权限；Web 不依赖这些宿主规则。
 
 D3 的 `FileTransferAccess` 处理工程、媒体、歌词及文件输出，集中平台控件保留 Web 上传/下载语义；`DirectoryExportAccess` 处理预设和壁纸目录，复用共享格式与依赖校验。桌面 `NativeSaves` 分块确认、同目录临时文件发布，`NativeBundles` 约束精确清单并整体发布新目录；只读库写入另经原生确认。主进程管理路径与清理所有权，renderer 不持有任意路径或 Node 能力。
 
@@ -25,6 +25,8 @@ D6 的 `scripts/lib/desktop-package.mjs` 集中生产与升级夹具的身份、
 当前系统是 Vue 3 单页应用。MainLayout 创建并提供唯一的 `AudioSessionService`、`AnalysisCoordinator`、`EditorSessionController` 与 `VisualizerSessionController`；服务通过 `AudioEngine` 解码、播放本地文件，并通过三个独立 IndexedDB repository 保存 Analyzer session、Editor 单草稿与 Visualizer 单草稿。Analyzer、Editor 与 Visualizer 已通过互斥 consumer lease 复用同一 coordinator；原曲与已验证四轨按来源去重、每来源最多四项，复用同一分析 Worker。File、Blob、handle、PCM、Worker 与音频节点均留在 store 外。MusicBar、Editor 与 Visualizer 读取同一播放快照；Editor 与 Visualizer 普通工作区保留 MusicBar；两个工作区的 tokenized route lease 临时使用 repeat-one，导出传输租约优先停止循环。
 
 DEC-072另由MainLayout提供唯一`EditorSeparationService`，使用同一AudioEngine原始PCM；Editor增加分离工作区和四轨展示/导出。模型与结果索引使用`processing-p1` IndexedDB，原PCM/planar/WAV使用OPFS；最多一个专用分离Worker，播放及analysis所有权不变。
+
+桌面实际四原 FT 模型下载/校验、短输入 WebGPU EP、WAV 分块保存、离线重启/再次推断、试听及取消释放已验证。结果缓存允许多条，按当前源完整身份选择最新有效记录；测试显式复用已验证冷下载的 profile 时保留原 run 身份，不冒称重新冷下载。自动标记模型链和长曲等剩余范围见[桌面阶段](desktop.md)。
 
 Visualizer 当前实现 Project V6、可执行资源包 V2、分组预设及同歌范围转场。用户选择的只读外部 assets 文件夹提供算法/Shader/定义，工程保存完整快照；算法通过无同源权限 iframe 所属 Worker 隔离计算，宿主校验数据后统一绘制。Visualizer 页面拥有独立资源库实例、目录句柄任务和共享预览 URL；独立 IndexedDB 仅记住目录句柄。离页取消任务并释放预览，不接 ZIP、后端或外部 URL。布局及接口见[组合工作区](visualizer-composition.md)、[资源包](../architecture/visualizer/resource-packages-v2.md)与[Project V6](../architecture/visualizer/project-format-v5.md)；外部内容生成 skill 2.7.0 默认自主生成并要求实际展示图，项目不保留副本或内容审批门禁，历史 evidence/readiness 不自动继承。
 

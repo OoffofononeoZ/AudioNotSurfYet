@@ -32,6 +32,12 @@ Web/Electron 改动先核对[双端阶段和验证要求](../docs/context/deskto
 
 12 份文件及 capture 位于 `artifacts/visualizer-composition/output/media-<UUID>-*`，过程结果/截图在 `artifacts/desktop/media/media-<UUID>`。runner 用现有 `verify-visualizer-output.mjs <runId> --files-only` 完整解码并检查逐帧 PTS/帧数、时长/尾差、零页面音量下音轨及同步白闪，末尾短暂显示专属窗口以采集截图后关闭。沿用 100ms/250ms 门槛；该入口只验证本次 Electron 文件，不将现有 Chrome/Edge `--all` 矩阵标记完整，不替代十五分钟长片、实际模型或原生保存 UI 验收。
 
+`npm run test:desktop:model-network` 在实际 ASAR 的无 Node Worker 中从 8 个固定模型 URL 获取 Range 首块，随后检查其他 Basic Pitch revision/文件路径产生 connect-src violation。通过生产 Visualizer 创建实际算法 iframe，再在其中创建 Worker，检查该固定 URL 仍被子层 CSP 拒绝、不能读取 parent.document、无 Node/桥。只读外部资源库；目录选值为替身。结果在 `artifacts/desktop/model-network/<ID>`；Range 成功不能替代完整 hash、缓存或推断证据，日志去掉 CDN query。
+
+`npm run test:desktop:ft` 默认使用全新 profile 从固定真实地址完整下载四 FT 模型，经产品 hash 校验及 WebGPU EP 完成 6 秒输入，再实际保存四份 float32/44.1kHz/stereo WAV，逐样本检查有限/非全零、长度和 OPFS 清单 hash。重启启用离线模式并拒绝全部 HTTP(S)，检查结果恢复、相同 WAV、试听/暂停/返回原曲，取消重做保留旧结果且 Worker 释放，再完成一次四模型缓存推断。按 createdAt 选当前结果，允许多条历史结果，不能错误断言数据库仅一条。
+
+`npm run test:desktop:ft -- --profile-from artifacts/desktop/ft/<ID>/result.json` 显式复用先前已证明冷下载成功的测试 profile；限定结果路径与 native run，重新核对原八份 WAV hash。当前运行全程离线，冷下载证据保留在链接的原 run，不冒称再次下载或隐式 fallback。过程/截图在 `artifacts/desktop/ft/<ID>`，实际 WAV 在对应 native run；保存选值是替身。结果不代表长曲、重新试听接受或完整 P1 clean evidence；测试超时仅是 runner 保护。
+
 先运行 `desktop:package`，再执行 `npm run test:desktop:install` 进行真实 Windows 每用户安装。它拒绝已有产品安装/快捷方式/运行进程，备份已有用户数据并核对哈希，再从实际 ASAR 生成仅增加补丁版本号的升级夹具，共用生产打包配置，不更改仓库版本。安装器以流式同字节副本在普通用户目录运行，安装路径含空格；同时隔离原生 TEMP，避免受管项目的 Low Integrity 继承。结果、截图和私有备份在 `artifacts/desktop/install-verification/<ID>`；原生副本/独立 profile 在 `%LOCALAPPDATA%/AudioNotSurfYet-GoalSmoke/<ID>`，均不发布。
 
 该专项检查 HKCU 注册、两个快捷方式、真实安装 ASAR/EXE 版本及未签名状态、安装版主界面和三项隔离设置；升级/卸载后逐一核对原有文件、空目录及外部文件，最后仅删除自己的数据标记。卸载等待包含其临时子进程；启动失败也继续独立保留验证，但命令最终失败。它证明文件保留，不证明既有工程/模型数据库升级后可用，后者仍需功能专项。`tests/tools/desktop-installer.test.mjs` 覆盖备份/篡改发现、junction 拒绝、路径界限、复制不覆盖、真实子进程退出码及 checksum。

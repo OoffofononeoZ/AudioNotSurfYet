@@ -8,6 +8,9 @@
 
 | 文件 | 本地静态引用（最多显示 6 项） |
 | --- | --- |
+| [tests/fixtures/fixture-manifest.test.ts](../../tests/fixtures/fixture-manifest.test.ts) | — |
+| [tests/fixtures/generate-fixtures.ts](../../tests/fixtures/generate-fixtures.ts) | [tests/support/audio-fixtures.ts](../../tests/support/audio-fixtures.ts) |
+| [tests/fixtures/visualizer/circular-original-particles.js](../../tests/fixtures/visualizer/circular-original-particles.js) | — |
 | [tests/harness/intentional-failure.test.ts](../../tests/harness/intentional-failure.test.ts) | — |
 | [tests/harness/verify-failure-detection.mjs](../../tests/harness/verify-failure-detection.mjs) | — |
 | [tests/persistence/m6-analysis-cache.test.ts](../../tests/persistence/m6-analysis-cache.test.ts) | [src/analysis/compactCodec.ts](../../src/analysis/compactCodec.ts)、[src/analysis/config.ts](../../src/analysis/config.ts)、[src/analysis/types.ts](../../src/analysis/types.ts)、[src/persistence/sessionRepository.ts](../../src/persistence/sessionRepository.ts)、[src/types/session.ts](../../src/types/session.ts) |
@@ -105,6 +108,3 @@
 | [tests/support/v6-resource-probe.ts](../../tests/support/v6-resource-probe.ts) | — |
 | [tests/support/visualizer-assets.mjs](../../tests/support/visualizer-assets.mjs) | [scripts/lib/visualizer-assets-path.mjs](../../scripts/lib/visualizer-assets-path.mjs) |
 | [tests/support/visualizer-audio-timeline.mjs](../../tests/support/visualizer-audio-timeline.mjs) | — |
-| [tests/support/visualizer-media-alignment.mjs](../../tests/support/visualizer-media-alignment.mjs) | — |
-| [tests/support/visualizer-output-sync.ts](../../tests/support/visualizer-output-sync.ts) | — |
-| [tests/support/visualizer-video-timeline.mjs](../../tests/support/visualizer-video-timeline.mjs) | — |
