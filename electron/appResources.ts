@@ -65,10 +65,11 @@ export async function resolveRendererResource(root: string, value: string, metho
 }
 
 // The algorithm srcdoc retains its own nonce CSP and opaque origin. Its trusted
-// inline bootstrap requires inline script permission in the inherited policy.
+// inline bootstrap and worker-created module blobs must also pass this inherited
+// policy. The child keeps its nonce/blob-only scripts and connect-src 'none'.
 export const APP_CSP = [
     "default-src 'self'",
-    "script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'",
+    "script-src 'self' blob: 'unsafe-inline' 'wasm-unsafe-eval'",
     "style-src 'self' 'unsafe-inline'",
     "img-src 'self' blob: data:",
     "media-src 'self' blob:",

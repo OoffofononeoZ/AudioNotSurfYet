@@ -18,7 +18,7 @@
 - `src/platform/` 集中共享端口与双端适配，入口注入实现；组件/领域不导入 Node/Electron API，也不各自探测宿主。
 - `electron/` 承担主进程、preload、原生文件授权及生命周期。主进程与 preload 分别构建，preload 为单文件 CommonJS；Node/Electron 能力不进入网页依赖图。
 - 开发模式连接 Vite，安装版通过固定 `app://audiosurf/` 加载本地网页产物。注册标准、安全、支持 Fetch 的协议；history 页面使用 SPA fallback，缺失静态文件真实报错，正确提供 Worker/WASM/runtime MIME。
-- 保持 `nodeIntegration: false`、`contextIsolation: true`、`sandbox: true`，子框架/Worker 无 Node 集成。IPC 只公开具体功能，校验窗口/frame/来源/参数；算法 iframe/Worker 的现有隔离与 CSP 不放宽。
+- 保持 `nodeIntegration: false`、`contextIsolation: true`、`sandbox: true`，子框架/Worker 无 Node 集成。IPC 只公开具体功能，校验窗口/frame/来源/参数。DEC-109 明确批准宿主 `script-src` 增加 `blob:`，使 Worker 动态导入算法模块通过继承策略；宿主也获得执行 blob 模块的能力。算法 iframe 的 opaque origin、nonce/blob 脚本和 `connect-src 'none'` 保持，其他隔离与权限不变。
 - 音频来源和目录采用平台引用与端口操作；浏览器句柄仅由 Web 实现持有。主进程保存用户明确选择的路径与授权，renderer 使用不透明引用；不伪造浏览器句柄、不把含方法对象跨 IPC 持久化。
 - 大文件流式读取、分块写入并等待背压；失败/取消不覆盖已有有效文件，临时文件按所有者清理。资源库加载只读；显式预设导出仅新增唯一预设目录；壁纸只写入本次新建目录。
 - IndexedDB/OPFS 先复用既有实现，固定 userData/session/origin。原生路径记录由主进程管理；Pinia 不保存 File/handle/PCM/Worker。Web 既有数据库/草稿恢复不破坏，桌面数据独立；两端通过现有工程文件交换，不扫描浏览器 profile。
@@ -34,8 +34,8 @@ Goal 已于 2026-10-29 启动；按下列依赖顺序持续实现，各小目标
 | --- | --- | --- |
 | D0 双端合同/基线 | AGENTS、六个项目 skills、相关文档同步；记录 Web 基线及独立缺口 | 完成：文档/仓库检查、Web 类型与构建通过 |
 | D1 宿主/能力 | 独立开发/打包入口、安全协议/路由/runtime；真实 ORT、WebGPU、OPFS、算法隔离及短片 WebCodecs | 开发、应用目录及 ASAR 已运行；隔离、ORT GPU 算术、硬件 WebGPU、OPFS 重启及 VP9/VP8/Opus 原始编码通过，封装媒体仍待 D4 |
-| D2 端口/恢复 | 原生音频选择、来源引用、队列/资源目录恢复；Web 数据兼容，覆盖缺失/变化/权限/stale | 真实单个 WAV 选择通过；ASAR 三格式播放、队列/草稿重启、变化/缺失拒绝旧 Blob 及权限边界通过，资源目录运行仍待验 |
-| D3 文件交互 | 工程/osu/媒体/歌词、FT WAV、视频、预设/壁纸读写；原生保存/取消/失败/大文件清理 | 真实 Editor JSON 保存通过；ASAR 工程传递、分块写入/取消通过，其他素材及目录/实际媒体输出仍待验 |
+| D2 端口/恢复 | 原生音频选择、来源引用、队列/资源目录恢复；Web 数据兼容，覆盖缺失/变化/权限/stale | 真实单个 WAV 选择通过；ASAR 三格式播放、队列/草稿/资源目录重启、变化/缺失拒绝旧 Blob 及权限边界通过；目录 OS 选择仍待验 |
+| D3 文件交互 | 工程/osu/媒体/歌词、FT WAV、视频、预设/壁纸读写；原生保存/取消/失败/大文件清理 | 真实 Editor JSON 保存通过；ASAR 工程传递、分块写入/取消、预设及壁纸五文件输出通过；其他素材、目录 OS 选择及实际媒体输出仍待验 |
 | D4 功能对齐 | 打包环境实际验证主要页面、模型、三维/实时/离线输出；Web 邻接回归 | 应用内展示策略已接入，安装版主界面已启动；主要功能对齐未验证 |
 | D5 生命周期 | 退出保护、任务/资源清理、草稿落盘、最小化、窗口位置恢复、单实例 | 已接入；开发空工作区正常关闭通过，带修改/任务、最小化、窗口恢复及单实例待验，崩溃遗留处理待实施 |
 | D6 安装升级 | 产品身份/图标/许可，按用户 NSIS 安装、启动、升级保留数据和卸载保留用户文件 | 实际每用户安装、启动、0.0.0→0.0.1 升级及卸载文件保留通过；工程/模型升级后读取仍待验 |
@@ -89,7 +89,7 @@ D1 的 GPU/编码/存储基础验证已通过；原先原生异常来自项目�
 - 关闭阶段单元/集成覆盖 169 项、25 个文件；Chrome/Edge 各 3 项关闭场景、6 项播放快捷键及 4 项普通 Web 相邻回归通过，覆盖真实草稿、保存失败恢复及 FT 下载取消。捕获阶段播放快捷键显式遵守收尾锁，避免退出中重新播放。双端类型、生产构建、格式/文档/仓库检查通过；协议替身和浏览器托管共享应用不等于 Electron 或原生对话框证据。恢复 Goal 后最小 Electron 探针仍在进入 main 前以 `0x80000003` 退出。
 - 关闭阶段提交 `1671c92`。D6 沿用产品名 AudioNotSurfYet、应用 ID `local.audionotsurfyet.desktop` 和仓库版本 0.0.0；主进程设置同一 AppUserModelID。`electron/assets/icon.svg` 复用现有 nav-home 唱片标记，builder 转换并写入 EXE；Windows `signExecutable:false` 明确关闭应用与安装器签名，仍编辑图标和版本资源，不依赖机器证书或签名凭据。
 - 安装器保持 oneClick、perMachine:false、deleteAppDataOnUninstall:false，关闭安装后自动运行；不新增文件关联、协议注册、更新器或发布。`desktop:package` 对最终 EXE 产物生成流式 SHA-256 旁文件。图标工具 Node 下载曾超时，PowerShell 从官方地址下载后与安装版工具的固定 SHA-256 一致再放入预期缓存，未更换版本或跳过校验。
-- D6 包检查：安装器和应用 EXE 的 Authenticode 均为 NotSigned，产品名/版本及实际 EXE 图标已核对；ASAR 共 50 条目、48,334,413 bytes，含宿主/preload/renderer/第三方声明，无 node_modules、用户/测试音频、测试宿主或模型权重。当前重建安装器 129,141,599 bytes，SHA-256 为 `ec0f338456a85b9708736cf844e36266398b54dec5b40c00ab3a7f7bac8dd53d`，自动旁文件与实算一致。0.0.0 是本地实施产物，不是发布；生产和升级夹具共用 `scripts/lib/desktop-package.mjs`。
+- D6 包检查：安装器和应用 EXE 的 Authenticode 均为 NotSigned，产品名/版本及实际 EXE 图标已核对；当前 ASAR 共 50 条目、48,334,419 bytes，含宿主/preload/renderer/第三方声明，无 node_modules、用户/测试音频、测试宿主或模型权重。CSP 修复后重建安装器 129,144,570 bytes，SHA-256 为 `3888c82b243c150165e4752451f2314ae5238dbf07e51308fc9081394e2b4235`，自动旁文件与实算一致。0.0.0 是本地实施产物，不是发布；生产和升级夹具共用 `scripts/lib/desktop-package.mjs`。
 - 原生目录对照：同字节 NSIS 探针在项目目录以完整性 RID 4096（Low）运行，独立 HKCU 写入及直接 Win32 API 均失败（返回 5）；复制到普通用户目录后 RID 8192（Medium）、写入/读取/自身标记清理成功。流式新副本和普通 `Copy-Item` 均验证，源/目标 SHA-256 相同；只读 ACL 显示项目继承 Low 标签、普通用户目录无此标签。不修改 ACL/标签、系统安全设置或 Electron sandbox。构建仍用项目 TEMP；原生安装/卸载使用普通目录 TEMP，防止临时卸载器也降为 Low。
 - `test:desktop:install` 的真实结果在忽略目录 `artifacts/desktop/install-verification/54b6e587-10e0-4ff6-9cda-227b3a46441c/`。先备份原有 81 文件、4,182,391 bytes；同字节安装器在 `%LOCALAPPDATA%/AudioNotSurfYet-GoalSmoke/<ID>` 实际按用户安装到含空格的独占目录。HKCU 注册、桌面/开始菜单快捷方式、安装 payload hash/版本/NotSigned 通过，安装版显示共享主界面并确认 sandbox/contextIsolation=true、nodeIntegration=false，实际截图已核对。
 - 仅临时 ASAR 夹具版本改为 0.0.1，仓库及交付包保持 0.0.0。真实升级和卸载后原有文件、空目录、专属标记及外部文件逐一核对通过；卸载注册/快捷方式/安装目录已移除，专属用户数据标记随后删除，原始 81 文件保持一致。65 项工具测试、Web/Electron 类型/生产构建及独立打包通过；安装验证只证明物理保留，尚不证明既有工程数据库/真实模型缓存升级后可读。
@@ -100,6 +100,9 @@ D1 的 GPU/编码/存储基础验证已通过；原先原生异常来自项目�
 - 能力/开发阶段提交 `261a54f`。文件集成 `test:desktop:files` 的实际 ASAR run `files-8499936a-3331-4c88-ac57-bd8fd35989d1` 通过 13 项检查：三格式逐首播放；未知引用/用途拒绝、已知读取 URL 对实际 null-origin/无 Node 渲染窗口不可读、一次性输入授权释放；Editor JSON 取消/中文路径保存与 Visualizer 完整快照传递；2 MiB+37 bytes 逐块提交及取消保留原目标且无临时文件。系统对话框选值为替身，字节夹具不代表有效 WebM。
 - 同一 ASAR/profile 实际重启恢复队列、Editor 草稿并 paused/0 秒，启动没有重新弹选择器；确认 current Blob 存在后改变源 bytes 或移走源文件，均保持不可播放及 content-changed/file-missing，恢复原 bytes 后可重新加载。全程使用独占文件副本，未改用户源文件；正常路径无 page/console error。结果和项目传递截图在 `artifacts/desktop/files/<run>/`。此阶段仅添加测试/命令与文档，Web、领域实现和工程格式未改，不重复无关产品构建。
 - 真实原生操作 run `manual-files-2879996f-0555-4e3d-a6a7-0d77f29c6d84` 已由 owner 实际点击打开/保存并回复完成；原生函数只预填独占夹具/位置，未替换结果。完成计数各 1、WAV 播放、磁盘 Editor V2/一条点轨道及导出 hash 与源一致均已核对，实际截图已检查，测试进程退出 0。Windows Computer Use 的 native pipe 不可用（os error 2），此项由人工完成；资源目录等尚未得到同类证据。整理后的复跑入口为 `test:desktop:dialogs:manual`，结果在 `artifacts/desktop/manual-files/<run>/`。
-- 下一步：原生资源目录与其他素材/导出、安装版主要功能、真实模型和封装 WebM，带修改/任务的退出与窗口/单实例；D5 异常退出遗留待实施，D6 补工程/模型升级后实际读取。完整目标继续，基础能力与替身结果不关闭剩余质量缺口。
+- 文件与人工阶段提交 `f51bb2f`。资源专项先在旧 ASAR 复现 `Failed to fetch dynamically imported module: blob:null/...`，是宿主 CSP 阻止 Worker 的 blob 模块导入；基础 postMessage 成功不足以覆盖算法链。经 owner 明确批准 DEC-109 后仅宿主 script-src 增加 blob:，子层策略/Node/网络边界未变，已重建 NSIS；Web 不依赖此 Electron 宿主规则。
+- CSP 修复后的实际 ASAR run `smoke-packaged-13cade89-a7bc-41a4-ae60-30d1ed43eebb` 通过原能力检查及新增 Worker 动态导入，得到 moduleValue=7、origin=null、Node/process/桥均 undefined，主窗口 sandbox/contextIsolation=true、Node/Worker Node=false。资源 run `resources-f9347145-d569-4884-9d4a-28fb885336b9` 通过 5 项：28 元素及全部封面实际加载、环形频谱渲染、预设取消/保存/刷新且工程不变、壁纸五文件落盘、重启目录恢复及既有资源 hash 不变；无 page/console error，实际截图已核对。两项证据在各自 capabilities/resources 目录；目录选值和写入确认是替身，尚不证明原生文件夹 UI 或 Wallpaper Engine 实际宿主。
+- 本轮 Web/Electron 类型、Web 生产构建、77 项宿主单元/集成及格式/文档/仓库检查通过；桌面 ASAR/安装器的实际 CSP 与校验旁文件已核对。改动只在 Electron 宿主、测试与文档；网页依赖图、算法子层源码和共享工程格式未改，不宣称重复执行了浏览器业务回归。
+- 下一步：原生目录 UI、其他素材/导出、安装版主要功能、真实模型和封装 WebM，带修改/任务的退出与窗口/单实例；D5 异常退出遗留待实施，D6 补工程/模型升级后实际读取。完整目标继续，基础能力与替身结果不关闭剩余质量缺口。
 
 正式范围、质量/性能和批准仍从[产品范围](../product/scope.md)、[决策登记](decision-registry.md)与[上下文入口](index.md)按需读取。

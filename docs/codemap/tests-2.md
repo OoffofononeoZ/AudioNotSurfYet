@@ -8,6 +8,8 @@
 
 | 文件 | 本地静态引用（最多显示 6 项） |
 | --- | --- |
+| [tests/e2e/m10-analyzer.spec.ts](../../tests/e2e/m10-analyzer.spec.ts) | [tests/support/analyzer-list.ts](../../tests/support/analyzer-list.ts)、[tests/support/file-picker.ts](../../tests/support/file-picker.ts)、[tests/support/m10-structure-fixture.ts](../../tests/support/m10-structure-fixture.ts)、[tests/support/m7-learning-fixture.ts](../../tests/support/m7-learning-fixture.ts) |
+| [tests/e2e/m11-hardening.spec.ts](../../tests/e2e/m11-hardening.spec.ts) | [tests/support/analyzer-list.ts](../../tests/support/analyzer-list.ts)、[tests/support/file-picker.ts](../../tests/support/file-picker.ts) |
 | [tests/e2e/m12-analyzer-masonry.spec.ts](../../tests/e2e/m12-analyzer-masonry.spec.ts) | [src/analysis/types.ts](../../src/analysis/types.ts)、[tests/support/analyzer-list.ts](../../tests/support/analyzer-list.ts) |
 | [tests/e2e/m13-analyzer-fifo.spec.ts](../../tests/e2e/m13-analyzer-fifo.spec.ts) | [src/analysis/types.ts](../../src/analysis/types.ts)、[tests/support/analyzer-list.ts](../../tests/support/analyzer-list.ts)、[tests/support/file-picker.ts](../../tests/support/file-picker.ts) |
 | [tests/e2e/m14-analyzer-reorder.spec.ts](../../tests/e2e/m14-analyzer-reorder.spec.ts) | [src/analysis/types.ts](../../src/analysis/types.ts)、[tests/support/analyzer-list.ts](../../tests/support/analyzer-list.ts)、[tests/support/file-picker.ts](../../tests/support/file-picker.ts) |
@@ -106,5 +108,3 @@
 | [tests/fixtures/visualizer/circular-original-particles.js](../../tests/fixtures/visualizer/circular-original-particles.js) | — |
 | [tests/harness/intentional-failure.test.ts](../../tests/harness/intentional-failure.test.ts) | — |
 | [tests/harness/verify-failure-detection.mjs](../../tests/harness/verify-failure-detection.mjs) | — |
-| [tests/persistence/m6-analysis-cache.test.ts](../../tests/persistence/m6-analysis-cache.test.ts) | [src/analysis/compactCodec.ts](../../src/analysis/compactCodec.ts)、[src/analysis/config.ts](../../src/analysis/config.ts)、[src/analysis/types.ts](../../src/analysis/types.ts)、[src/persistence/sessionRepository.ts](../../src/persistence/sessionRepository.ts)、[src/types/session.ts](../../src/types/session.ts) |
-| [tests/persistence/session-repository-tasks.test.ts](../../tests/persistence/session-repository-tasks.test.ts) | [src/persistence/sessionRepository.ts](../../src/persistence/sessionRepository.ts)、[src/persistence/sessionRepositoryTasks.ts](../../src/persistence/sessionRepositoryTasks.ts) |

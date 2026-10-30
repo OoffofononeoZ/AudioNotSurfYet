@@ -233,15 +233,18 @@ try {
                 }
                 window.addEventListener('message', receive);
                 iframe.srcdoc = `<script>const w=new Worker(URL.createObjectURL(new Blob([
-            "postMessage({node:typeof require,process:typeof process})"
+            "(async()=>{const u=URL.createObjectURL(new Blob(['export const value=7'],{type:'text/javascript'}));try{const module=await import(u);postMessage({node:typeof require,process:typeof process,moduleValue:module.value})}catch(error){postMessage({error:error.message})}finally{URL.revokeObjectURL(u)}})()"
         ],{type:'text/javascript'})));w.onmessage=e=>{parent.postMessage({kind:'desktop-isolation-smoke',...e.data,bridge:typeof audiosurfDesktop},'*');w.terminate();};<\/script>`;
                 document.body.appendChild(iframe);
             }),
     );
+    result.isolated = isolated;
+    assert.equal(isolated.error, undefined);
     assert.equal(isolated.origin, 'null');
     assert.equal(isolated.node, 'undefined');
     assert.equal(isolated.process, 'undefined');
     assert.equal(isolated.bridge, 'undefined');
+    assert.equal(isolated.moduleValue, 7);
     await current.app.close();
     current = undefined;
     current = await launch();

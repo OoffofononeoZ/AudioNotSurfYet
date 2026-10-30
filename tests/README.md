@@ -14,7 +14,7 @@ Node24.22.1/npm11.x，依赖版本以lockfile为准；浏览器专项使用真�
 
 Web/Electron 改动先核对[双端阶段和验证要求](../docs/context/desktop.md)。共享行为需要双端适用检查，单端改动说明影响依据；桌面命令随实现增加，浏览器通过不证明 Electron 通过，自动化不能代替原生 OS 许可及安装操作。
 
-桌面已提供 `npm run desktop:typecheck`、`npm run test:desktop:unit`；先运行 `npm run desktop:build`，再运行 `npm run test:desktop:smoke`；先运行 `desktop:dir`，再运行 `test:desktop:packaged` 检查 ASAR 分发。两种 smoke 使用普通用户目录内逐文件校验的运行副本、独立持久化 profile/TEMP、生产网页产物及应用协议，实际检查隔离、路由、OPFS 重启恢复、硬件 WebGPU、ORT WebGPU 算术图及分别执行的 VP9/VP8/Opus 编码。不是 FT 推断、封装媒体质量或原生 picker 验收；结果、运行身份及生产截图按唯一 ID 写入 `artifacts/desktop/capabilities/`，不相互覆盖。成功后清理执行副本，失败保留以便诊断；profile 保留供对应 run 核查。
+桌面已提供 `npm run desktop:typecheck`、`npm run test:desktop:unit`；先运行 `npm run desktop:build`，再运行 `npm run test:desktop:smoke`；先运行 `desktop:dir`，再运行 `test:desktop:packaged` 检查 ASAR 分发。两种 smoke 使用普通用户目录内逐文件校验的运行副本、独立持久化 profile/TEMP、生产网页产物及应用协议，实际检查隔离、opaque iframe 内 Worker 的 blob 模块动态导入、路由、OPFS 重启恢复、硬件 WebGPU、ORT WebGPU 算术图及分别执行的 VP9/VP8/Opus 编码。不是 FT 推断、封装媒体质量或原生 picker 验收；结果、运行身份及生产截图按唯一 ID 写入 `artifacts/desktop/capabilities/`，不相互覆盖。成功后清理执行副本，失败保留以便诊断；profile 保留供对应 run 核查。
 
 `npm run test:desktop:dev` 实际启动 `desktop.mjs dev --inspect-browser`，只为该开发测试打开临时 localhost CDP；普通 `desktop:dev` 不打开此端口。测试使用独立 profile，验证 Vite 页面和路由、Electron 桥与无 Node 全局，经 `window.close()` 正常退出并核对执行副本已清理。它验证开发入口及空工作区关闭；隐藏 profile 窗口不采集开发截图，视觉图来自上述生产能力测试，带任务/修改的退出仍须另验。
 
@@ -25,6 +25,8 @@ Web/Electron 改动先核对[双端阶段和验证要求](../docs/context/deskto
 `npm run test:desktop:dialogs:manual` 是显式人工专项：真实 Windows 打开/保存函数只增加默认位置及本次文件范围检查，不替换返回值；可见测试窗口请求打开受控 WAV，然后请求导出含一条点轨道的 Editor V2。点击“打开”“保存”后由脚本检查播放、实际工程、源内容 hash、对话框完成计数并保存截图。输入与输出均在唯一 native run 中；结果位于 `artifacts/desktop/manual-files/<ID>`，不以人工口头回复单独判定通过。需要延后时可在该输出目录创建 `defer` 空文件，由控制器终止自己的独立测试应用；这不是产品正常退出验收。
 
 文件自动集成结果在 `artifacts/desktop/files/<ID>`，人工结果和原生能力结果分开。主进程本身有文件权限，不能用它的 `session.fetch` 模拟网页攻击者；读取拒绝需使用实际受限 renderer/iframe。两类 runner 都不进入产品入口，Web 代码、工程格式和既有浏览器存储不变。
+
+`npm run test:desktop:resources` 从外部资源库复制经过路径检查的包/源码/封面到独占目录；实际 ASAR 加载全部元素及封面，添加环形频谱，导出预设（取消/保存/刷新）和壁纸五文件，并重启恢复资源目录、逐一核对既有文件 hash。系统目录/确认选值由 `dialog-fixture.mjs` 替换；不证明真实目录选择或 Wallpaper Engine 宿主运行。结果和截图在 `artifacts/desktop/resources/<ID>`；原始外部库只读，只有本次副本接收新预设。
 
 先运行 `desktop:package`，再执行 `npm run test:desktop:install` 进行真实 Windows 每用户安装。它拒绝已有产品安装/快捷方式/运行进程，备份已有用户数据并核对哈希，再从实际 ASAR 生成仅增加补丁版本号的升级夹具，共用生产打包配置，不更改仓库版本。安装器以流式同字节副本在普通用户目录运行，安装路径含空格；同时隔离原生 TEMP，避免受管项目的 Low Integrity 继承。结果、截图和私有备份在 `artifacts/desktop/install-verification/<ID>`；原生副本/独立 profile 在 `%LOCALAPPDATA%/AudioNotSurfYet-GoalSmoke/<ID>`，均不发布。
 

@@ -8,6 +8,8 @@
 
 | 文件 | 本地静态引用（最多显示 6 项） |
 | --- | --- |
+| [tests/persistence/m6-analysis-cache.test.ts](../../tests/persistence/m6-analysis-cache.test.ts) | [src/analysis/compactCodec.ts](../../src/analysis/compactCodec.ts)、[src/analysis/config.ts](../../src/analysis/config.ts)、[src/analysis/types.ts](../../src/analysis/types.ts)、[src/persistence/sessionRepository.ts](../../src/persistence/sessionRepository.ts)、[src/types/session.ts](../../src/types/session.ts) |
+| [tests/persistence/session-repository-tasks.test.ts](../../tests/persistence/session-repository-tasks.test.ts) | [src/persistence/sessionRepository.ts](../../src/persistence/sessionRepository.ts)、[src/persistence/sessionRepositoryTasks.ts](../../src/persistence/sessionRepositoryTasks.ts) |
 | [tests/persistence/session-repository.test.ts](../../tests/persistence/session-repository.test.ts) | [src/audio/audioSessionService.ts](../../src/audio/audioSessionService.ts)、[src/persistence/sessionRepository.ts](../../src/persistence/sessionRepository.ts)、[src/types/session.ts](../../src/types/session.ts) |
 | [tests/processing/acceptance.ts](../../tests/processing/acceptance.ts) | — |
 | [tests/processing/artifactOracle.ts](../../tests/processing/artifactOracle.ts) | [src/processing/kernel.ts](../../src/processing/kernel.ts)、[src/processing/storage.ts](../../src/processing/storage.ts) |
@@ -106,5 +108,3 @@
 | [tests/support/visualizer-video-timeline.mjs](../../tests/support/visualizer-video-timeline.mjs) | — |
 | [tests/tools/code-size.test.mjs](../../tests/tools/code-size.test.mjs) | [scripts/check-repo.mjs](../../scripts/check-repo.mjs)、[scripts/codemap.mjs](../../scripts/codemap.mjs)、[scripts/install-project-skills.mjs](../../scripts/install-project-skills.mjs)、[scripts/lib/code-size-policy.mjs](../../scripts/lib/code-size-policy.mjs)、[scripts/lib/repository.mjs](../../scripts/lib/repository.mjs)、[tests/tools/fixture.mjs](../../tests/tools/fixture.mjs) |
 | [tests/tools/desktop-assets.test.mjs](../../tests/tools/desktop-assets.test.mjs) | [scripts/lib/desktop-assets.mjs](../../scripts/lib/desktop-assets.mjs)、[tests/tools/fixture.mjs](../../tests/tools/fixture.mjs) |
-| [tests/tools/desktop-installer.test.mjs](../../tests/tools/desktop-installer.test.mjs) | [scripts/lib/desktop-package.mjs](../../scripts/lib/desktop-package.mjs)、[tests/desktop/install-support.mjs](../../tests/desktop/install-support.mjs) |
-| [tests/tools/desktop-native-runtime.test.mjs](../../tests/tools/desktop-native-runtime.test.mjs) | [scripts/lib/desktop-native-runtime.mjs](../../scripts/lib/desktop-native-runtime.mjs) |
