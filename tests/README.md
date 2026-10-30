@@ -40,6 +40,8 @@ Web/Electron 改动先核对[双端阶段和验证要求](../docs/context/deskto
 
 `npm run test:desktop:save-recovery` 在全新独占 ASAR/profile 中通过真实保存 IPC 写入 1MiB 部分文件，核对连接应用的实际 main PID/EXE 和所属进程列表后，以 taskkill 终止该进程树并等待全部已记录进程退出，再实际重启。检查仅清理已登记且未变的临时文件，保留原目标、未登记同名前缀文件、完整发布的输出及外部修改后的残留；后者检查保留提示的调用。Playwright 启动器 PID 可能与实际 main 不同，不能只杀启动器后称主进程崩溃。结果在 `artifacts/desktop/save-recovery/<ID>`；OS 选值/提示响应为替身，不证明真实提示 UI、断电持久性、写到一半的未确认 bytes 或目录事务恢复。
 
+`npm run test:desktop:bundle-recovery` 对同类独占 ASAR/profile 进行真实预设/壁纸目录事务 IPC：写完若干文件并写入下一文件的一半，终止已核对进程树，重启先清理子文件日志再清理目录日志。另检查完整发布五文件目录 hash 保留、外部新增/已完成文件变化使目录保留及提示调用，保留原文件和未登记同前缀目录。结果在 `artifacts/desktop/bundle-recovery/<ID>`；测试内容仅用于事务传输，不代替资源语义或壁纸渲染，OS 选择/确认/提示为替身。两恢复入口共用 `recovery-support.mjs` 的 PID 所有权与终止等待；断电、未确认写入及清理中断边界仍按桌面合同区分。
+
 `npm run test:desktop:model-network` 在实际 ASAR 的无 Node Worker 中从 8 个固定模型 URL 获取 Range 首块，随后检查其他 Basic Pitch revision/文件路径产生 connect-src violation。通过生产 Visualizer 创建实际算法 iframe，再在其中创建 Worker，检查该固定 URL 仍被子层 CSP 拒绝、不能读取 parent.document、无 Node/桥。只读外部资源库；目录选值为替身。结果在 `artifacts/desktop/model-network/<ID>`；Range 成功不能替代完整 hash、缓存或推断证据，日志去掉 CDN query。
 
 `npm run test:desktop:ft` 默认使用全新 profile 从固定真实地址完整下载四 FT 模型，经产品 hash 校验及 WebGPU EP 完成 6 秒输入，再实际保存四份 float32/44.1kHz/stereo WAV，逐样本检查有限/非全零、长度和 OPFS 清单 hash。重启启用离线模式并拒绝全部 HTTP(S)，检查结果恢复、相同 WAV、试听/暂停/返回原曲，取消重做保留旧结果且 Worker 释放，再完成一次四模型缓存推断。按 createdAt 选当前结果，允许多条历史结果，不能错误断言数据库仅一条。

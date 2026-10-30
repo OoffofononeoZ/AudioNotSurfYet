@@ -2,7 +2,6 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { spawnSync } from 'node:child_process';
 import { _electron, expect } from '@playwright/test';
 import {
     createNativeRun,
@@ -10,7 +9,8 @@ import {
     cleanupNativeTree,
     hashFile,
 } from '../../scripts/lib/desktop-native-runtime.mjs';
-import { installDialogFixture, queueSave } from './dialog-fixture.mjs';
+import { queueSave } from './dialog-fixture.mjs';
+import { installRecoveryDialogs, terminateRecoveryApp } from './recovery-support.mjs';
 
 const root = fileURLToPath(new URL('../../', import.meta.url));
 const native = await createNativeRun('save-recovery');
@@ -42,22 +42,7 @@ async function launch() {
         timeout: 30000,
     });
     processHandle = app.process();
-    await installDialogFixture(app);
-    await app.evaluate(({ dialog }) => {
-        globalThis.__recoveryWarnings = [];
-        dialog.showMessageBox = async (_owner, options) => {
-            if (options.title === '有未清理的临时文件') {
-                globalThis.__recoveryWarnings.push({
-                    title: options.title,
-                    message: options.message,
-                    detail: options.detail,
-                });
-                return { response: 0, checkboxChecked: false };
-            }
-            if (options.title !== '退出 AudioNotSurfYet') throw Error(`Unexpected dialog: ${options.title}`);
-            return { response: 1, checkboxChecked: false };
-        };
-    });
+    await installRecoveryDialogs(app);
     page = await app.firstWindow();
     page.on('pageerror', error => errors.push(error.message));
     await page.waitForSelector('#main-layout');
@@ -65,44 +50,12 @@ async function launch() {
 }
 async function stop(hard = true) {
     result.warnings.push(...(await app.evaluate(() => globalThis.__recoveryWarnings)));
-    if (hard) {
-        const owned = await app.evaluate(({ app }) => ({
-            path: process.execPath,
-            pid: process.pid,
-            children: app.getAppMetrics().map(entry => entry.pid),
-        }));
-        assert.equal(owned.path, path.join(runtime.root, 'AudioNotSurfYet.exe'));
-        assert(owned.children.includes(owned.pid), 'Connected main process must belong to its own metrics tree');
-        result.exits.push({
-            hard: true,
-            mainPid: owned.pid,
-            launcherPid: processHandle.pid,
-            ownedPids: owned.children,
-        });
-        const killed = spawnSync('taskkill.exe', ['/PID', String(owned.pid), '/T', '/F'], {
-            windowsHide: true,
-            encoding: 'utf8',
-            timeout: 30000,
-        });
-        assert.equal(killed.status, 0, killed.stdout + killed.stderr);
-        await expect
-            .poll(
-                () =>
-                    owned.children.filter(pid => {
-                        try {
-                            process.kill(pid, 0);
-                            return true;
-                        } catch (error) {
-                            if (error.code === 'ESRCH') return false;
-                            throw error;
-                        }
-                    }),
-                { timeout: 30000 },
-            )
-            .toEqual([]);
-    } else await app.close();
-    await expect.poll(() => processHandle.exitCode ?? processHandle.signalCode, { timeout: 30000 }).not.toBe(null);
-    result.exits.push({ hard, code: processHandle.exitCode, signal: processHandle.signalCode });
+    if (hard) result.exits.push(await terminateRecoveryApp(app, path.join(runtime.root, 'AudioNotSurfYet.exe')));
+    else {
+        await app.close();
+        await expect.poll(() => processHandle.exitCode ?? processHandle.signalCode, { timeout: 30000 }).not.toBe(null);
+        result.exits.push({ hard, code: processHandle.exitCode, signal: processHandle.signalCode });
+    }
     app = undefined;
 }
 async function begin(file, size, bytes) {

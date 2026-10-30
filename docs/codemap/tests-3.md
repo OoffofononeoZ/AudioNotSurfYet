@@ -8,6 +8,9 @@
 
 | 文件 | 本地静态引用（最多显示 6 项） |
 | --- | --- |
+| [tests/editor/lane-operations.test.ts](../../tests/editor/lane-operations.test.ts) | [src/editor/laneOperations.ts](../../src/editor/laneOperations.ts)、[src/editor/pointAnnotations.ts](../../src/editor/pointAnnotations.ts)、[src/editor/projectCodec.ts](../../src/editor/projectCodec.ts) |
+| [tests/editor/marker-grid-offset.test.ts](../../tests/editor/marker-grid-offset.test.ts) | [src/editor/beatSnap.ts](../../src/editor/beatSnap.ts)、[src/editor/markerGridOffset.ts](../../src/editor/markerGridOffset.ts)、[src/editor/projectCodec.ts](../../src/editor/projectCodec.ts) |
+| [tests/editor/marker-lane-movement.test.ts](../../tests/editor/marker-lane-movement.test.ts) | [src/editor/beatSnap.ts](../../src/editor/beatSnap.ts)、[src/editor/markerLaneMovement.ts](../../src/editor/markerLaneMovement.ts)、[src/editor/projectCodec.ts](../../src/editor/projectCodec.ts)、[src/editor/types.ts](../../src/editor/types.ts) |
 | [tests/editor/marker-ruler-scrubber.test.ts](../../tests/editor/marker-ruler-scrubber.test.ts) | [src/editor/markerRulerScrubber.ts](../../src/editor/markerRulerScrubber.ts)、[src/types/audio.ts](../../src/types/audio.ts) |
 | [tests/editor/marker-time-view.test.ts](../../tests/editor/marker-time-view.test.ts) | [src/editor/editorDraftRepository.ts](../../src/editor/editorDraftRepository.ts)、[src/editor/markerBlockOperations.ts](../../src/editor/markerBlockOperations.ts)、[src/editor/markerTimeView.ts](../../src/editor/markerTimeView.ts)、[src/editor/pointAnnotations.ts](../../src/editor/pointAnnotations.ts)、[src/editor/projectCodec.ts](../../src/editor/projectCodec.ts) |
 | [tests/editor/marking-window-movement.test.ts](../../tests/editor/marking-window-movement.test.ts) | [src/editor/markerMovement.ts](../../src/editor/markerMovement.ts)、[src/editor/pointAnnotations.ts](../../src/editor/pointAnnotations.ts)、[src/editor/projectCodec.ts](../../src/editor/projectCodec.ts)、[src/editor/rangeAnnotations.ts](../../src/editor/rangeAnnotations.ts)、[src/editor/timeline.ts](../../src/editor/timeline.ts)、[src/editor/types.ts](../../src/editor/types.ts) |
@@ -105,6 +108,3 @@
 | [tests/support/m8-scalar-fixture.ts](../../tests/support/m8-scalar-fixture.ts) | [tests/support/audio-fixtures.ts](../../tests/support/audio-fixtures.ts) |
 | [tests/support/m9-vector-fixture.ts](../../tests/support/m9-vector-fixture.ts) | [tests/support/audio-fixtures.ts](../../tests/support/audio-fixtures.ts) |
 | [tests/support/meyda-golden.ts](../../tests/support/meyda-golden.ts) | — |
-| [tests/support/osu-fixture.ts](../../tests/support/osu-fixture.ts) | — |
-| [tests/support/project-actions.ts](../../tests/support/project-actions.ts) | — |
-| [tests/support/resource-directory.ts](../../tests/support/resource-directory.ts) | [tests/support/visualizer-assets.mjs](../../tests/support/visualizer-assets.mjs) |

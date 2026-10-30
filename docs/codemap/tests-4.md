@@ -8,6 +8,9 @@
 
 | 文件 | 本地静态引用（最多显示 6 项） |
 | --- | --- |
+| [tests/support/osu-fixture.ts](../../tests/support/osu-fixture.ts) | — |
+| [tests/support/project-actions.ts](../../tests/support/project-actions.ts) | — |
+| [tests/support/resource-directory.ts](../../tests/support/resource-directory.ts) | [tests/support/visualizer-assets.mjs](../../tests/support/visualizer-assets.mjs) |
 | [tests/support/scene3d-fixture.ts](../../tests/support/scene3d-fixture.ts) | [src/visualizer/algorithmTypes.ts](../../src/visualizer/algorithmTypes.ts)、[src/visualizer/compositionCodec.ts](../../src/visualizer/compositionCodec.ts)、[src/visualizer/resourceIdentity.ts](../../src/visualizer/resourceIdentity.ts)、[src/visualizer/resourceTypes.ts](../../src/visualizer/resourceTypes.ts)、[src/visualizer/scene3dTypes.ts](../../src/visualizer/scene3dTypes.ts) |
 | [tests/support/shutdown-host.ts](../../tests/support/shutdown-host.ts) | [src/App.vue](../../src/App.vue)、[src/platform/desktopLifecycle.ts](../../src/platform/desktopLifecycle.ts)、[src/platform/lifecycleContracts.ts](../../src/platform/lifecycleContracts.ts)、[src/platform/platformPorts.ts](../../src/platform/platformPorts.ts)、[src/router/index.ts](../../src/router/index.ts) |
 | [tests/support/stem-analysis.ts](../../tests/support/stem-analysis.ts) | [src/analysis/pcm.ts](../../src/analysis/pcm.ts)、[src/processing/editorSeparationService.ts](../../src/processing/editorSeparationService.ts)、[src/processing/kernel.ts](../../src/processing/kernel.ts) |

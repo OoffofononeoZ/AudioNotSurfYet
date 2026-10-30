@@ -1,4 +1,6 @@
 import { lstat, realpath, unlink, rmdir } from 'node:fs/promises';
+import { createHash } from 'node:crypto';
+import { createReadStream } from 'node:fs';
 import path from 'node:path';
 import type { BundleEntry } from '../../src/platform/bundleContracts';
 import { NativeFileError } from './nativeErrors';
@@ -11,6 +13,17 @@ export interface BundleIdentity {
     size: number;
     mtimeMs: number;
     ctimeMs: number;
+}
+const identityFields = ['dev', 'ino', 'birthtimeMs', 'size', 'mtimeMs', 'ctimeMs'] as const;
+export const plainBundleIdentity = (value: BundleIdentity): BundleIdentity =>
+    Object.fromEntries(identityFields.map(key => [key, value[key]])) as unknown as BundleIdentity;
+export const validBundleIdentity = (value: BundleIdentity) =>
+    !!value &&
+    identityFields.every(key => typeof value[key] === 'number' && Number.isFinite(value[key]) && value[key] >= 0);
+export async function hashBundleFile(file: string) {
+    const value = createHash('sha256');
+    for await (const chunk of createReadStream(file)) value.update(chunk);
+    return value.digest('hex');
 }
 export async function bundleIdentity(file: string) {
     const info = await lstat(file);

@@ -5,6 +5,8 @@ import type { BundleEntry, NativeBundleReference } from '../../src/platform/bund
 import { NativeSaves } from './nativeSaves';
 import { grantId } from './nativeGrants';
 import { NativeFileError, nativeError } from './nativeErrors';
+import type { NativeBundleJournal } from './nativeBundleJournal';
+import type { NativeSaveJournal } from './nativeSaveJournal';
 import {
     absent,
     bundleEntries,
@@ -29,6 +31,7 @@ interface Bundle {
     saveId: string | null;
     saves: NativeSaves;
     files: Map<string, BundleIdentity>;
+    hashes: Map<string, string>;
     cancelled: boolean;
     committed: boolean;
     publishing: boolean;
@@ -40,6 +43,19 @@ export class NativeBundles {
     private starting = new Set<Promise<NativeBundleReference>>();
     private generation = 0;
     private disposed = false;
+    private readonly journal?: NativeBundleJournal;
+    private readonly fileJournal?: NativeSaveJournal;
+    constructor(journal?: NativeBundleJournal, fileJournal?: NativeSaveJournal) {
+        this.journal = journal;
+        this.fileJournal = fileJournal;
+    }
+    private async forget(bundle: Bundle) {
+        try {
+            await this.journal?.forget(bundle.temporary);
+        } catch {
+            console.warn('Native bundle journal record retained for restart verification');
+        }
+    }
     get revision() {
         return this.generation;
     }
@@ -87,8 +103,9 @@ export class NativeBundles {
             entries,
             next: 0,
             saveId: null,
-            saves: new NativeSaves(),
+            saves: new NativeSaves(this.fileJournal),
             files: new Map(),
+            hashes: new Map(),
             cancelled: false,
             committed: false,
             publishing: false,
@@ -102,6 +119,7 @@ export class NativeBundles {
                 await mkdir(source);
                 bundle.sourceIdentity = await bundleIdentity(source);
             }
+            await this.journal?.checkpoint(bundle);
         })();
         bundle.operation = initialization;
         try {
@@ -165,11 +183,14 @@ export class NativeBundles {
     async closeFile(id: string) {
         return this.run(id, async bundle => {
             if (!bundle.saveId) throw new NativeFileError('invalid-request');
+            const sha256 = bundle.saves.contentDigest(bundle.saveId);
             await bundle.saves.commit(bundle.saveId);
             bundle.saveId = null;
             const name = bundle.entries[bundle.next]!.name;
             bundle.files.set(name, await bundleIdentity(path.join(bundle.temporary, name)));
+            bundle.hashes.set(name, sha256);
             ++bundle.next;
+            await this.journal?.checkpoint(bundle);
         });
     }
     async commit(id: string) {
@@ -201,6 +222,7 @@ export class NativeBundles {
             await rename(bundle.temporary, bundle.target);
             bundle.committed = true;
             this.bundles.delete(id);
+            await this.forget(bundle);
         });
     }
     async abort(id: string): Promise<void> {
@@ -214,6 +236,7 @@ export class NativeBundles {
             await bundle.saves.dispose();
             await cleanBundle(bundle.temporary, bundle.identity, bundle.files, bundle.sourceIdentity);
             this.bundles.delete(id);
+            await this.forget(bundle);
         })();
         await bundle.cleanup;
     }

@@ -34,6 +34,7 @@
         "test:desktop:transcription": "node tests/desktop/transcription-smoke.mjs",
         "test:desktop:lifecycle": "node tests/desktop/lifecycle-smoke.mjs",
         "test:desktop:save-recovery": "node tests/desktop/save-recovery-smoke.mjs",
+        "test:desktop:bundle-recovery": "node tests/desktop/bundle-recovery-smoke.mjs",
         "test:desktop:dialogs:manual": "node tests/desktop/native-dialog-smoke.mjs",
         "typecheck": "vue-tsc -b",
         "test": "vitest run",

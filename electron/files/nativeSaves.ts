@@ -133,6 +133,9 @@ export class NativeSaves {
         if (!save || save.cancelled || save.committed) throw new NativeFileError('invalid-request');
         return save;
     }
+    contentDigest(id: string) {
+        return this.get(id).hash.copy().digest('hex');
+    }
     private check(save: Save) {
         if (save.cancelled) throw new NativeFileError('invalid-request');
     }

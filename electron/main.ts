@@ -5,6 +5,7 @@ import { NativeReadGrants } from './files/nativeGrants';
 import { registerFileIpc } from './files/fileIpc';
 import { NativeSaves } from './files/nativeSaves';
 import { NativeSaveJournal } from './files/nativeSaveJournal';
+import { NativeBundleJournal } from './files/nativeBundleJournal';
 import { registerSaveIpc } from './files/saveIpc';
 import { NativeBundles } from './files/nativeBundles';
 import { NativeIpcTasks } from './files/nativeIpcTasks';
@@ -50,13 +51,19 @@ async function openExternal(value: string) {
 async function createWindow() {
     const ownerOrigin = devOrigin ?? APP_ORIGIN;
     const saveJournal = new NativeSaveJournal(path.join(app.getPath('userData'), 'native-save-journal'));
-    const recovery = await saveJournal.recover();
+    const fileRecovery = await saveJournal.recover();
+    const bundleJournal = new NativeBundleJournal(path.join(app.getPath('userData'), 'native-bundle-journal'));
+    const bundleRecovery = await bundleJournal.recover();
+    const recovery = {
+        storeInvalid: fileRecovery.storeInvalid || bundleRecovery.storeInvalid,
+        retained: [...fileRecovery.retained, ...bundleRecovery.retained],
+    };
     const grants = new NativeReadGrants(path.join(app.getPath('userData'), 'native-read-grants.json'));
     const fileTasks = new NativeIpcTasks();
     const unregisterFiles = registerFileIpc(() => window, ownerOrigin, grants, fileTasks);
     const saves = new NativeSaves(saveJournal);
     const unregisterSaves = registerSaveIpc(() => window, ownerOrigin, saves, fileTasks);
-    const bundles = new NativeBundles();
+    const bundles = new NativeBundles(bundleJournal, saveJournal);
     const unregisterBundles = registerBundleIpc(() => window, ownerOrigin, grants, bundles, fileTasks);
     app.once('will-quit', unregisterBundles);
     app.once('will-quit', unregisterSaves);
