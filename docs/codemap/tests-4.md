@@ -8,6 +8,9 @@
 
 | 文件 | 本地静态引用（最多显示 6 项） |
 | --- | --- |
+| [tests/tools/skills.test.mjs](../../tests/tools/skills.test.mjs) | [scripts/install-project-skills.mjs](../../scripts/install-project-skills.mjs)、[scripts/lib/repository.mjs](../../scripts/lib/repository.mjs)、[tests/tools/fixture.mjs](../../tests/tools/fixture.mjs) |
+| [tests/tools/visualizer-executable-package.test.mjs](../../tests/tools/visualizer-executable-package.test.mjs) | [scripts/lib/visualizer-resource-v2.mjs](../../scripts/lib/visualizer-resource-v2.mjs) |
+| [tests/tools/visualizer-media-alignment.test.mjs](../../tests/tools/visualizer-media-alignment.test.mjs) | [tests/support/visualizer-audio-timeline.mjs](../../tests/support/visualizer-audio-timeline.mjs)、[tests/support/visualizer-media-alignment.mjs](../../tests/support/visualizer-media-alignment.mjs) |
 | [tests/tools/visualizer-resource-package.test.mjs](../../tests/tools/visualizer-resource-package.test.mjs) | [scripts/visualizer-resource-package.mjs](../../scripts/visualizer-resource-package.mjs) |
 | [tests/tools/visualizer-skill-path.test.mjs](../../tests/tools/visualizer-skill-path.test.mjs) | [scripts/lib/visualizer-skill-path.mjs](../../scripts/lib/visualizer-skill-path.mjs) |
 | [tests/tools/visualizer-video-timeline.test.mjs](../../tests/tools/visualizer-video-timeline.test.mjs) | [tests/support/visualizer-video-timeline.mjs](../../tests/support/visualizer-video-timeline.mjs) |

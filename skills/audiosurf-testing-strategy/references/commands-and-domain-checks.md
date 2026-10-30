@@ -12,6 +12,7 @@
 | 文档与工具 | `test:docs`、`repo:check`、`test:tools` |
 | 修改的手写代码格式 | `format -- <file...>` / `format:check -- <file...>`，只传本次明确文件，不全仓运行；2000 行硬上限另由 `repo:check` 检查 |
 | 类型与生产构建 | `typecheck`、`build`；构建 prebuild 会准备 processing assets |
+| Electron 安装 | 先 `desktop:package` 再 `test:desktop:install`；实际每用户安装/补丁版本升级/卸载，备份并保留用户数据，拒绝覆盖已有安装。物理文件保留不替代工程/模型升级后读取 |
 | 播放与会话 | `test:m4:unit` / `test:m4:integration`、`test:e2e:m4` |
 | 句柄与恢复 | `test:m5:unit` / `test:m5:integration`、`test:e2e:m5` |
 | 分析平台 | `test:m6:unit` / `test:m6:worker` / `test:m6:integration` |

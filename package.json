@@ -23,6 +23,7 @@
         "test:desktop:unit": "vitest run tests/desktop",
         "test:desktop:smoke": "node tests/desktop/smoke.mjs",
         "test:desktop:packaged": "node tests/desktop/smoke.mjs --packaged",
+        "test:desktop:install": "node tests/desktop/install-smoke.mjs",
         "typecheck": "vue-tsc -b",
         "test": "vitest run",
         "test:unit": "vitest run tests/unit",

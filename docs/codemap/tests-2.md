@@ -8,6 +8,8 @@
 
 | 文件 | 本地静态引用（最多显示 6 项） |
 | --- | --- |
+| [tests/e2e/m4-playback.spec.ts](../../tests/e2e/m4-playback.spec.ts) | [tests/support/file-picker.ts](../../tests/support/file-picker.ts) |
+| [tests/e2e/m5-recovery.spec.ts](../../tests/e2e/m5-recovery.spec.ts) | [tests/support/file-picker.ts](../../tests/support/file-picker.ts) |
 | [tests/e2e/m6-analysis.spec.ts](../../tests/e2e/m6-analysis.spec.ts) | [tests/support/file-picker.ts](../../tests/support/file-picker.ts) |
 | [tests/e2e/m7-analyzer.spec.ts](../../tests/e2e/m7-analyzer.spec.ts) | [tests/support/analyzer-list.ts](../../tests/support/analyzer-list.ts)、[tests/support/file-picker.ts](../../tests/support/file-picker.ts)、[tests/support/m7-learning-fixture.ts](../../tests/support/m7-learning-fixture.ts) |
 | [tests/e2e/m8-analyzer.spec.ts](../../tests/e2e/m8-analyzer.spec.ts) | [tests/support/analyzer-list.ts](../../tests/support/analyzer-list.ts)、[tests/support/file-picker.ts](../../tests/support/file-picker.ts)、[tests/support/m7-learning-fixture.ts](../../tests/support/m7-learning-fixture.ts)、[tests/support/m8-scalar-fixture.ts](../../tests/support/m8-scalar-fixture.ts) |
@@ -106,5 +108,3 @@
 | [tests/persistence/session-repository.test.ts](../../tests/persistence/session-repository.test.ts) | [src/audio/audioSessionService.ts](../../src/audio/audioSessionService.ts)、[src/persistence/sessionRepository.ts](../../src/persistence/sessionRepository.ts)、[src/types/session.ts](../../src/types/session.ts) |
 | [tests/processing/acceptance.ts](../../tests/processing/acceptance.ts) | — |
 | [tests/processing/artifactOracle.ts](../../tests/processing/artifactOracle.ts) | [src/processing/kernel.ts](../../src/processing/kernel.ts)、[src/processing/storage.ts](../../src/processing/storage.ts) |
-| [tests/processing/compat.worker.ts](../../tests/processing/compat.worker.ts) | [src/processing/dsp.ts](../../src/processing/dsp.ts)、[src/processing/modelCache.ts](../../src/processing/modelCache.ts)、[src/processing/modelManifest.ts](../../src/processing/modelManifest.ts)、[src/processing/runtime.ts](../../src/processing/runtime.ts)、[src/processing/sha256.ts](../../src/processing/sha256.ts)、[tests/processing/acceptance.ts](../../tests/processing/acceptance.ts)、另 1 项，按需核对源码 |
-| [tests/processing/download-models.mjs](../../tests/processing/download-models.mjs) | — |

@@ -14,7 +14,11 @@ Node24.22.1/npm11.x，依赖版本以lockfile为准；浏览器专项使用真�
 
 Web/Electron 改动先核对[双端阶段和验证要求](../docs/context/desktop.md)。共享行为需要双端适用检查，单端改动说明影响依据；桌面命令随实现增加，浏览器通过不证明 Electron 通过，自动化不能代替原生 OS 许可及安装操作。
 
-桌面已提供 `npm run desktop:typecheck`、`npm run test:desktop:unit`；先运行 `npm run desktop:build`，再运行 `npm run test:desktop:smoke`；先运行 `desktop:dir`，再运行 `test:desktop:packaged` 检查 ASAR 分发。smoke 使用独立持久化 profile、生产网页产物及应用协议，检查隔离、路由、OPFS 重启恢复、WebGPU、ORT 模块和实际 VP9/VP8/Opus 编码；不等于 FT 推断、封装媒体质量、原生 picker 或安装验收。结果保存在 `artifacts/desktop/`；当前原生启动阻断见桌面专题，不记为通过。工具测试覆盖静态资源白名单，防止复制本地 public/audios、测试音频或额外模型。
+桌面已提供 `npm run desktop:typecheck`、`npm run test:desktop:unit`；先运行 `npm run desktop:build`，再运行 `npm run test:desktop:smoke`；先运行 `desktop:dir`，再运行 `test:desktop:packaged` 检查 ASAR 分发。smoke 使用独立持久化 profile、生产网页产物及应用协议，检查隔离、路由、OPFS 重启恢复、WebGPU、ORT 模块和实际 VP9/VP8/Opus 编码；不等于 FT 推断、封装媒体质量、原生 picker 或安装验收。项目目录的 Low Integrity 已定位，但这些直接运行项目 EXE 的入口尚待适配并重测，不能记为通过。工具测试覆盖静态资源白名单，防止复制本地 public/audios、测试音频或额外模型。
+
+先运行 `desktop:package`，再执行 `npm run test:desktop:install` 进行真实 Windows 每用户安装。它拒绝已有产品安装/快捷方式/运行进程，备份已有用户数据并核对哈希，再从实际 ASAR 生成仅增加补丁版本号的升级夹具，共用生产打包配置，不更改仓库版本。安装器以流式同字节副本在普通用户目录运行，安装路径含空格；同时隔离原生 TEMP，避免受管项目的 Low Integrity 继承。结果、截图和私有备份在 `artifacts/desktop/install-verification/<ID>`；原生副本/独立 profile 在 `%LOCALAPPDATA%/AudioNotSurfYet-GoalSmoke/<ID>`，均不发布。
+
+该专项检查 HKCU 注册、两个快捷方式、真实安装 ASAR/EXE 版本及未签名状态、安装版主界面和三项隔离设置；升级/卸载后逐一核对原有文件、空目录及外部文件，最后仅删除自己的数据标记。卸载等待包含其临时子进程；启动失败也继续独立保留验证，但命令最终失败。它证明文件保留，不证明既有工程/模型数据库升级后可用，后者仍需功能专项。`tests/tools/desktop-installer.test.mjs` 覆盖备份/篡改发现、junction 拒绝、路径界限、复制不覆盖、真实子进程退出码及 checksum。
 
 `test:desktop:unit` 覆盖真实临时文件的原生授权保存/恢复/撤销、一次性工程授权、目录 junction 与路径边界、变更/缺失区分、错误去路径化、保存事务的完整提交/取消/目标变更、分块背压和双端文件端口；模拟 IPC 检查窗口/frame/origin、用途及参数拒绝。模拟 IPC 不证明真实 OS 对话框或原生协议可用，临时文件事务不证明退出/安装通过；这些独立缺口继续保留。
 

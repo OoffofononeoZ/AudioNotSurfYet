@@ -2,7 +2,7 @@
 
 Vue 3 / TypeScript / Vite 浏览器音频工作台。项目状态、技术契约和当前验证缺口见 [上下文入口](docs/context/index.md)，任务规则与 6 个项目 skills 见 [AGENTS.md](AGENTS.md)。
 
-现有网页端完整保留；Windows x64 Electron 双端实施 Goal 已启动，合同、里程碑和实际验证状态见[双端与桌面实施](docs/context/desktop.md)。已接入桌面宿主和独立构建，运行能力验证尚未通过，不代表完整桌面功能可用。
+现有网页端完整保留；Windows x64 Electron 双端实施 Goal 持续进行，合同、里程碑和实际验证状态见[双端与桌面实施](docs/context/desktop.md)。安装版首次启动、跨版本安装和文件保留已验证，完整功能与 GPU/媒体/模型能力仍待验证。
 
 文档按当前页面和领域维护：接口从共享运行时及 Analyzer/Editor/Visualizer 页面进入，验证要求集中在领域 validation。普通任务更新相关专题，过程反馈放在交付中；旧阶段产物已清理，历史由 Git 查回，必要证据与未解决缺口继续保留。
 
@@ -17,9 +17,11 @@ npm ci
 npm run dev
 ```
 
-桌面使用同一 lockfile：`npm run desktop:dev` 启动 Vite 与 Electron；`desktop:build` 生成独立应用目录，`desktop:dir` 生成未封装安装器的 Windows 应用，`desktop:package` 生成本地 NSIS 包，均不发布。产物位于忽略目录 `artifacts/desktop/`，网页 `dev/build/preview` 保留。`desktop:typecheck` 检查宿主，`test:desktop:unit` 检查文件授权/保存及资源边界，`test:desktop:smoke` 在先构建的应用上使用独立 profile 验证能力与重启恢复；后者当前被 main 之前的原生异常阻断，详见桌面专题。
+桌面使用同一 lockfile：`npm run desktop:dev` 启动 Vite 与 Electron；`desktop:build` 生成独立应用目录，`desktop:dir` 生成未封装安装器的 Windows 应用，`desktop:package` 生成本地 NSIS 包，均不发布。产物位于忽略目录 `artifacts/desktop/`，网页 `dev/build/preview` 保留。`desktop:typecheck` 检查宿主，`test:desktop:unit` 检查文件授权/保存及资源边界，`test:desktop:smoke` 检查能力与重启恢复。
 
-NSIS 产物明确未签名、按用户安装，配置保留用户数据并关闭安装后自动启动；`desktop:package` 同时生成安装器的 `.sha256` 校验文件。产品图标复用现有导航的唱片标记。安装、跨版本升级、卸载保留数据与实际启动仍须分别验证，不能把生成安装器记为可用或发布通过。
+NSIS 产物明确未签名、按用户安装，保留用户数据并关闭安装后自动启动；`desktop:package` 同时生成安装器的 `.sha256`。产品图标复用现有唱片标记。`npm run test:desktop:install` 会执行真实安装、临时补丁版本升级、安装版启动和卸载：拒绝覆盖已有安装，先备份用户数据，检查包内容/注册/快捷方式及原文件保留；结果与私有备份在忽略目录中。工程与模型升级后可读性仍需功能验证，安装通过不等于发布通过。
+
+本机受管项目目录继承 Low Integrity，直接运行其中的 Electron/安装器会降为低完整性，造成沙箱初始化或注册失败。请将安装器**复制**到普通用户目录（例如下载文件夹）再运行，核对 `.sha256`；不要移动项目或更改权限。安装测试自动使用 `%LOCALAPPDATA%/AudioNotSurfYet-GoalSmoke/<唯一 ID>` 中的同字节副本及安装目录，不改 ACL/完整性标签或关闭 Electron sandbox。现有直接运行项目 EXE 的能力 smoke 入口尚待适配、重测；详情见桌面专题。
 
 `predev` / `prebuild` 会准备已锁定的 processing runtime assets 和壁纸独立运行包；模型与大型本地产物遵守忽略规则。运行前核对对应 [处理契约](docs/architecture/processing/model-artifacts.md)。当前 FT 及 Editor 状态以实际 evidence 为准，不能把启动成功当作质量/性能通过。
 
