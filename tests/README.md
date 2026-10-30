@@ -38,6 +38,10 @@ Web/Electron 改动先核对[双端阶段和验证要求](../docs/context/deskto
 
 `npm run test:desktop:ft -- --profile-from artifacts/desktop/ft/<ID>/result.json` 显式复用先前已证明冷下载成功的测试 profile；限定结果路径与 native run，重新核对原八份 WAV hash。当前运行全程离线，冷下载证据保留在链接的原 run，不冒称再次下载或隐式 fallback。过程/截图在 `artifacts/desktop/ft/<ID>`，实际 WAV 在对应 native run；保存选值是替身。结果不代表长曲、重新试听接受或完整 P1 clean evidence；测试超时仅是 runner 保护。
 
+`npm run test:desktop:transcription -- --profile-from artifacts/desktop/ft/<ID>/result.json` 使用同一 `processing-support.mjs` 校验冷 FT 来源，再逐文件校验复制到独立 profile，原 FT 数据保留。实际 ASAR 从固定地址下载/校验四个转录模型，完成五输入、辅助 WAV/试听、候选改类/删除恢复及显式应用；应用使用显式 10000ms 点标记分界，核对人工轨和 tempoMap 不变。随后离线重启检查已应用身份、取消及完整缓存重算。
+
+正常结果保留在独立主 profile 供后续升级检查；模型损坏和显式清理仅在其第二份副本进行，验证失败保留旧候选、清理不删工程。结果/截图在 `artifacts/desktop/transcription/<ID>`；保存选值是替身，短输入候选数和链路完成不代表识别质量接受、长曲或正式 readiness。profile 读取 helper 拒绝非测试路径，复制拒绝链接并核对 bytes/hash；它不扫描浏览器用户资料。
+
 先运行 `desktop:package`，再执行 `npm run test:desktop:install` 进行真实 Windows 每用户安装。它拒绝已有产品安装/快捷方式/运行进程，备份已有用户数据并核对哈希，再从实际 ASAR 生成仅增加补丁版本号的升级夹具，共用生产打包配置，不更改仓库版本。安装器以流式同字节副本在普通用户目录运行，安装路径含空格；同时隔离原生 TEMP，避免受管项目的 Low Integrity 继承。结果、截图和私有备份在 `artifacts/desktop/install-verification/<ID>`；原生副本/独立 profile 在 `%LOCALAPPDATA%/AudioNotSurfYet-GoalSmoke/<ID>`，均不发布。
 
 该专项检查 HKCU 注册、两个快捷方式、真实安装 ASAR/EXE 版本及未签名状态、安装版主界面和三项隔离设置；升级/卸载后逐一核对原有文件、空目录及外部文件，最后仅删除自己的数据标记。卸载等待包含其临时子进程；启动失败也继续独立保留验证，但命令最终失败。它证明文件保留，不证明既有工程/模型数据库升级后可用，后者仍需功能专项。`tests/tools/desktop-installer.test.mjs` 覆盖备份/篡改发现、junction 拒绝、路径界限、复制不覆盖、真实子进程退出码及 checksum。

@@ -10,38 +10,18 @@ import {
     copyNativeTree,
     copyVerifiedBytes,
     cleanupNativeTree,
-    hashFile,
 } from '../../scripts/lib/desktop-native-runtime.mjs';
 import { installDialogFixture, queueOpen, queueSave } from './dialog-fixture.mjs';
+import { verifiedFtProfile } from './processing-support.mjs';
 
 const root = fileURLToPath(new URL('../../', import.meta.url));
 const native = await createNativeRun('ft');
 const output = path.join(root, 'artifacts/desktop/ft', path.basename(native.directory));
 await fs.mkdir(output, { recursive: true });
-let profile = native.profile;
-let profileFrom;
 const profileFlag = process.argv.indexOf('--profile-from');
-if (profileFlag !== -1) {
-    profileFrom = await fs.realpath(path.resolve(process.argv[profileFlag + 1]));
-    const resultRoot = await fs.realpath(path.join(root, 'artifacts/desktop/ft'));
-    const relative = path.relative(resultRoot, profileFrom);
-    assert(/^ft-[a-f0-9-]{36}[\\/]result\.json$/.test(relative), 'Only prior FT test results may supply a profile');
-    const previous = JSON.parse(await fs.readFile(profileFrom, 'utf8'));
-    assert.equal(previous.checks.realDownloadFourModelsAndWavs, 'passed');
-    const expected = path.join(
-        await fs.realpath(process.env.LOCALAPPDATA),
-        'AudioNotSurfYet-LocalRuntime',
-        path.dirname(relative),
-    );
-    assert.equal(await fs.realpath(previous.nativeDirectory), expected);
-    assert.equal(previous.exports.length, 4);
-    assert.equal(previous.restoredExports.length, 4);
-    for (const file of [...previous.exports, ...previous.restoredExports]) {
-        assert.equal(path.dirname(await fs.realpath(file.file)), expected);
-        assert.equal(await hashFile(file.file), file.sha256, 'Prior FT WAV changed');
-    }
-    profile = await fs.realpath(path.join(expected, 'profile'));
-}
+const reused = profileFlag === -1 ? null : await verifiedFtProfile(root, process.argv[profileFlag + 1]);
+const profile = reused?.profile ?? native.profile;
+const profileFrom = reused?.sourceResult;
 const fixture = path.join(output, 'fixture.mjs');
 await build({
     entryPoints: [path.join(root, 'tests/desktop/processing-fixture.ts')],

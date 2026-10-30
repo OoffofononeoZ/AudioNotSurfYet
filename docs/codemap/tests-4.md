@@ -8,6 +8,8 @@
 
 | 文件 | 本地静态引用（最多显示 6 项） |
 | --- | --- |
+| [tests/support/visualizer-assets.mjs](../../tests/support/visualizer-assets.mjs) | [scripts/lib/visualizer-assets-path.mjs](../../scripts/lib/visualizer-assets-path.mjs) |
+| [tests/support/visualizer-audio-timeline.mjs](../../tests/support/visualizer-audio-timeline.mjs) | — |
 | [tests/support/visualizer-media-alignment.mjs](../../tests/support/visualizer-media-alignment.mjs) | — |
 | [tests/support/visualizer-output-sync.ts](../../tests/support/visualizer-output-sync.ts) | — |
 | [tests/support/visualizer-video-timeline.mjs](../../tests/support/visualizer-video-timeline.mjs) | — |

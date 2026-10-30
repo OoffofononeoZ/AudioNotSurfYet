@@ -26,7 +26,7 @@ D6 的 `scripts/lib/desktop-package.mjs` 集中生产与升级夹具的身份、
 
 DEC-072另由MainLayout提供唯一`EditorSeparationService`，使用同一AudioEngine原始PCM；Editor增加分离工作区和四轨展示/导出。模型与结果索引使用`processing-p1` IndexedDB，原PCM/planar/WAV使用OPFS；最多一个专用分离Worker，播放及analysis所有权不变。
 
-桌面实际四原 FT 模型下载/校验、短输入 WebGPU EP、WAV 分块保存、离线重启/再次推断、试听及取消释放已验证。结果缓存允许多条，按当前源完整身份选择最新有效记录；测试显式复用已验证冷下载的 profile 时保留原 run 身份，不冒称重新冷下载。自动标记模型链和长曲等剩余范围见[桌面阶段](desktop.md)。
+桌面实际四原 FT 模型下载/校验、短输入 WebGPU EP、WAV 分块保存、离线重启/再次推断、试听及取消释放已验证。结果缓存允许多条，按当前源完整身份选择最新有效记录；测试显式复用已验证冷下载的 profile 时保留原 run 身份，不冒称重新冷下载。自动标记独立校验副本也已通过真实四转录模型/五输入、辅助试听、V2 候选应用、离线恢复/重算与第二副本损坏/清理；本次短输入候选及辅助 WAV 与 Chrome/Edge 一致，不作为识别质量接受。长曲等剩余范围见[桌面阶段](desktop.md)。
 
 Visualizer 当前实现 Project V6、可执行资源包 V2、分组预设及同歌范围转场。用户选择的只读外部 assets 文件夹提供算法/Shader/定义，工程保存完整快照；算法通过无同源权限 iframe 所属 Worker 隔离计算，宿主校验数据后统一绘制。Visualizer 页面拥有独立资源库实例、目录句柄任务和共享预览 URL；独立 IndexedDB 仅记住目录句柄。离页取消任务并释放预览，不接 ZIP、后端或外部 URL。布局及接口见[组合工作区](visualizer-composition.md)、[资源包](../architecture/visualizer/resource-packages-v2.md)与[Project V6](../architecture/visualizer/project-format-v5.md)；外部内容生成 skill 2.7.0 默认自主生成并要求实际展示图，项目不保留副本或内容审批门禁，历史 evidence/readiness 不自动继承。
 

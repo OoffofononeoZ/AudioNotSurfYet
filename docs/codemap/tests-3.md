@@ -8,6 +8,8 @@
 
 | 文件 | 本地静态引用（最多显示 6 项） |
 | --- | --- |
+| [tests/editor/project-v2.test.ts](../../tests/editor/project-v2.test.ts) | [src/editor/editorDraftRepository.ts](../../src/editor/editorDraftRepository.ts)、[src/editor/pointAnnotations.ts](../../src/editor/pointAnnotations.ts)、[src/editor/projectCodec.ts](../../src/editor/projectCodec.ts)、[src/editor/tempoMap.ts](../../src/editor/tempoMap.ts)、[src/visualizer/compositionCodec.ts](../../src/visualizer/compositionCodec.ts)、[tests/visualizer/marker-input-fixture.ts](../../tests/visualizer/marker-input-fixture.ts) |
+| [tests/editor/tap-tempo.test.ts](../../tests/editor/tap-tempo.test.ts) | [src/editor/tapTempo.ts](../../src/editor/tapTempo.ts) |
 | [tests/fixtures/fixture-manifest.test.ts](../../tests/fixtures/fixture-manifest.test.ts) | — |
 | [tests/fixtures/generate-fixtures.ts](../../tests/fixtures/generate-fixtures.ts) | [tests/support/audio-fixtures.ts](../../tests/support/audio-fixtures.ts) |
 | [tests/fixtures/visualizer/circular-original-particles.js](../../tests/fixtures/visualizer/circular-original-particles.js) | — |
@@ -106,5 +108,3 @@
 | [tests/support/stem-analysis.ts](../../tests/support/stem-analysis.ts) | [src/analysis/pcm.ts](../../src/analysis/pcm.ts)、[src/processing/editorSeparationService.ts](../../src/processing/editorSeparationService.ts)、[src/processing/kernel.ts](../../src/processing/kernel.ts) |
 | [tests/support/tolerance.ts](../../tests/support/tolerance.ts) | — |
 | [tests/support/v6-resource-probe.ts](../../tests/support/v6-resource-probe.ts) | — |
-| [tests/support/visualizer-assets.mjs](../../tests/support/visualizer-assets.mjs) | [scripts/lib/visualizer-assets-path.mjs](../../scripts/lib/visualizer-assets-path.mjs) |
-| [tests/support/visualizer-audio-timeline.mjs](../../tests/support/visualizer-audio-timeline.mjs) | — |
