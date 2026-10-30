@@ -12,7 +12,7 @@ upstream_docs:
 
 Web/Electron 双端 Goal 已批准，`electron/` 宿主、独立构建及安全应用协议已接入，渲染端复用网页产物；开发、应用目录和 ASAR 的基础能力已验证，主要功能与真实模型/封装媒体仍待验证。原先启动异常来自受管项目目录继承 Low Integrity；`desktop-native-runtime.mjs` 为开发/测试创建逐文件校验的普通用户目录副本和原生 TEMP，保留 sandbox，不修改权限，终止后只清理未改动的已拥有执行文件。平台端口、原生授权及独立存储边界见[双端合同](desktop.md)，不复制以下共享业务服务。
 
-D2 已添加主进程只读文件/目录授权、受限 IPC 和文件流端点。`src/platform/` 在应用入口选择双端音频和目录端口，由 MainLayout 与 Visualizer 注入共享服务；Web 原始句柄与桌面 grantId 的运行时引用均留在 Pinia 外。Web V1 存储保留，桌面音频恢复优先核对磁盘 hash，目录 repository 保存原生授权描述。共享资源读取/预览校验不依赖具体句柄方法，真实原生文件操作与恢复仍待验证。
+D2 已添加主进程只读文件/目录授权、受限 IPC 和文件流端点。`src/platform/` 在应用入口选择双端音频和目录端口，由 MainLayout 与 Visualizer 注入共享服务；Web 原始句柄与桌面 grantId 的运行时引用均留在 Pinia 外。Web V1 存储保留，桌面音频恢复优先核对磁盘 hash，目录 repository 保存原生授权描述。ASAR 音频/工程保存及重启恢复、源变化/缺失拒绝旧 Blob 已验证，真实 WAV 打开及 Editor 保存也由人工完成；资源目录等剩余验证见[阶段状态](desktop.md)。共享资源读取/预览校验不依赖具体句柄方法。
 
 D3 的 `FileTransferAccess` 处理工程、媒体、歌词及文件输出，集中平台控件保留 Web 上传/下载语义；`DirectoryExportAccess` 处理预设和壁纸目录，复用共享格式与依赖校验。桌面 `NativeSaves` 分块确认、同目录临时文件发布，`NativeBundles` 约束精确清单并整体发布新目录；只读库写入另经原生确认。主进程管理路径与清理所有权，renderer 不持有任意路径或 Node 能力。
 

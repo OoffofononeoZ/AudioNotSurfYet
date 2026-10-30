@@ -14,6 +14,7 @@
 | 类型与生产构建 | `typecheck`、`build`；构建 prebuild 会准备 processing assets |
 | Electron 安装 | 先 `desktop:package` 再 `test:desktop:install`；实际每用户安装/补丁版本升级/卸载，备份并保留用户数据，拒绝覆盖已有安装。物理文件保留不替代工程/模型升级后读取 |
 | Electron 入口/能力 | `test:desktop:dev` 实际执行开发命令；`desktop:build` 后 `test:desktop:smoke`，`desktop:dir` 后 `test:desktop:packaged` 检查生产能力及重启恢复。算术 ORT 图与原始编码块不替代真实 FT/封装视频验证；GPUAdapter 交给 ORT 单一设备所有者，不能预先消费后重复 requestDevice |
+| Electron 文件/恢复 | `test:desktop:files` 为真实 ASAR IPC/存储/文件操作、对话框选值替身；`test:desktop:dialogs:manual` 为实际打开/保存且需人工操作，原生返回值不替换。只使用独占受控文件；两类结果分开，主进程请求不能模拟受限网页攻击者 |
 | 播放与会话 | `test:m4:unit` / `test:m4:integration`、`test:e2e:m4` |
 | 句柄与恢复 | `test:m5:unit` / `test:m5:integration`、`test:e2e:m5` |
 | 分析平台 | `test:m6:unit` / `test:m6:worker` / `test:m6:integration` |

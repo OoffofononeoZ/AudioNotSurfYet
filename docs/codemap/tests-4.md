@@ -8,6 +8,8 @@
 
 | 文件 | 本地静态引用（最多显示 6 项） |
 | --- | --- |
+| [tests/tools/document-size.test.mjs](../../tests/tools/document-size.test.mjs) | [scripts/check-repo.mjs](../../scripts/check-repo.mjs)、[scripts/codemap.mjs](../../scripts/codemap.mjs)、[scripts/install-project-skills.mjs](../../scripts/install-project-skills.mjs)、[scripts/lib/repository.mjs](../../scripts/lib/repository.mjs)、[tests/tools/fixture.mjs](../../tests/tools/fixture.mjs) |
+| [tests/tools/fixture.mjs](../../tests/tools/fixture.mjs) | [scripts/lib/repository.mjs](../../scripts/lib/repository.mjs) |
 | [tests/tools/formatting.test.mjs](../../tests/tools/formatting.test.mjs) | [scripts/lib/repository.mjs](../../scripts/lib/repository.mjs)、[tests/tools/fixture.mjs](../../tests/tools/fixture.mjs) |
 | [tests/tools/repository.test.mjs](../../tests/tools/repository.test.mjs) | [scripts/check-repo.mjs](../../scripts/check-repo.mjs)、[scripts/codemap.mjs](../../scripts/codemap.mjs)、[scripts/install-project-skills.mjs](../../scripts/install-project-skills.mjs)、[scripts/lib/repository.mjs](../../scripts/lib/repository.mjs)、[scripts/lib/source-map.mjs](../../scripts/lib/source-map.mjs)、[tests/tools/fixture.mjs](../../tests/tools/fixture.mjs) |
 | [tests/tools/skills.test.mjs](../../tests/tools/skills.test.mjs) | [scripts/install-project-skills.mjs](../../scripts/install-project-skills.mjs)、[scripts/lib/repository.mjs](../../scripts/lib/repository.mjs)、[tests/tools/fixture.mjs](../../tests/tools/fixture.mjs) |

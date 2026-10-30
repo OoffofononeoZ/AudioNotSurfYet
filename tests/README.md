@@ -20,6 +20,12 @@ Web/Electron 改动先核对[双端阶段和验证要求](../docs/context/deskto
 
 `scripts/lib/desktop-native-runtime.mjs` 由开发入口、能力测试及安装复制工具共用，只在普通用户目录创建新副本，不改工作区权限。工具测试核对复制内容、既有目标/junction 拒绝、外来文件或同大小篡改时整份保留，以及仅删除已核实对象；不递归删除运行副本。静态资源工具另覆盖白名单，防止复制本地 public/audios、测试音频或额外模型。
 
+`npm run test:desktop:files` 使用先构建的 `win-unpacked` ASAR，在独立 profile 和受控文件上执行实际 IPC、协议、读取/解码、IndexedDB 与磁盘写入；系统打开/保存的选值及退出确认使用替身，不能宣称真实对话框通过。覆盖 WAV/MP3/FLAC 逐首播放、有效引用和用途校验、已知读取 URL 对 null-origin 无 Node 窗口不可读、临时授权释放、Editor JSON 取消/保存及 Visualizer 快照传递、2 MiB+37 bytes 分块提交、取消保留既有目标且无临时文件。重启覆盖队列/草稿及 paused/0 秒，无选择器重弹；保有 current Blob 时实际改变/移走来源仍不可回退，恢复原 bytes 后可重新加载。测试只移动/改写自己的音频副本；流式保存的字节夹具不是有效 WebM 或 FT WAV 质量证据。
+
+`npm run test:desktop:dialogs:manual` 是显式人工专项：真实 Windows 打开/保存函数只增加默认位置及本次文件范围检查，不替换返回值；可见测试窗口请求打开受控 WAV，然后请求导出含一条点轨道的 Editor V2。点击“打开”“保存”后由脚本检查播放、实际工程、源内容 hash、对话框完成计数并保存截图。输入与输出均在唯一 native run 中；结果位于 `artifacts/desktop/manual-files/<ID>`，不以人工口头回复单独判定通过。需要延后时可在该输出目录创建 `defer` 空文件，由控制器终止自己的独立测试应用；这不是产品正常退出验收。
+
+文件自动集成结果在 `artifacts/desktop/files/<ID>`，人工结果和原生能力结果分开。主进程本身有文件权限，不能用它的 `session.fetch` 模拟网页攻击者；读取拒绝需使用实际受限 renderer/iframe。两类 runner 都不进入产品入口，Web 代码、工程格式和既有浏览器存储不变。
+
 先运行 `desktop:package`，再执行 `npm run test:desktop:install` 进行真实 Windows 每用户安装。它拒绝已有产品安装/快捷方式/运行进程，备份已有用户数据并核对哈希，再从实际 ASAR 生成仅增加补丁版本号的升级夹具，共用生产打包配置，不更改仓库版本。安装器以流式同字节副本在普通用户目录运行，安装路径含空格；同时隔离原生 TEMP，避免受管项目的 Low Integrity 继承。结果、截图和私有备份在 `artifacts/desktop/install-verification/<ID>`；原生副本/独立 profile 在 `%LOCALAPPDATA%/AudioNotSurfYet-GoalSmoke/<ID>`，均不发布。
 
 该专项检查 HKCU 注册、两个快捷方式、真实安装 ASAR/EXE 版本及未签名状态、安装版主界面和三项隔离设置；升级/卸载后逐一核对原有文件、空目录及外部文件，最后仅删除自己的数据标记。卸载等待包含其临时子进程；启动失败也继续独立保留验证，但命令最终失败。它证明文件保留，不证明既有工程/模型数据库升级后可用，后者仍需功能专项。`tests/tools/desktop-installer.test.mjs` 覆盖备份/篡改发现、junction 拒绝、路径界限、复制不覆盖、真实子进程退出码及 checksum。

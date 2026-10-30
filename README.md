@@ -19,6 +19,8 @@ npm run dev
 
 桌面使用同一 lockfile：`npm run desktop:dev` 启动 Vite 与 Electron；`desktop:build` 生成独立应用目录，`desktop:dir` 生成未封装安装器的 Windows 应用，`desktop:package` 生成本地 NSIS 包，均不发布。产物位于忽略目录 `artifacts/desktop/`，网页 `dev/build/preview` 保留。`desktop:typecheck` 检查宿主，`test:desktop:unit` 检查文件授权/保存及资源边界；`test:desktop:smoke` / `test:desktop:packaged` 分别验证应用目录和 ASAR 的基础能力、重启恢复，`test:desktop:dev` 实际运行开发命令并检查隔离与空工作区关闭。
 
+`test:desktop:files` 在实际 ASAR 中检查三种音频播放、工程 JSON 传递、文件授权边界、分块保存/取消与真实重启恢复；只有系统对话框选值使用替身。`test:desktop:dialogs:manual` 则调用真正的 Windows 打开/保存对话框，需要人工点击已预填的受控文件与全新位置，不改现有用户数据。两类证据分别记录，详见[测试说明](tests/README.md)。
+
 NSIS 产物明确未签名、按用户安装，保留用户数据并关闭安装后自动启动；`desktop:package` 同时生成安装器的 `.sha256`。产品图标复用现有唱片标记。`npm run test:desktop:install` 会执行真实安装、临时补丁版本升级、安装版启动和卸载：拒绝覆盖已有安装，先备份用户数据，检查包内容/注册/快捷方式及原文件保留；结果与私有备份在忽略目录中。工程与模型升级后可读性仍需功能验证，安装通过不等于发布通过。
 
 本机受管项目目录继承 Low Integrity，直接运行其中的 Electron/安装器会降为低完整性，造成沙箱初始化或注册失败。请将安装器**复制**到普通用户目录（例如下载文件夹）再运行，核对 `.sha256`；不要移动项目或更改权限。开发/能力测试自动使用 `%LOCALAPPDATA%/AudioNotSurfYet-LocalRuntime/` 中的独占、逐文件校验副本及独立原生 TEMP，退出后只清理拥有且未改动的执行副本，profile/日志按测试身份保留；能力失败保留副本供诊断。安装测试另用 `%LOCALAPPDATA%/AudioNotSurfYet-GoalSmoke/`。这些流程不改 ACL/完整性标签或关闭 sandbox，详见桌面专题。
