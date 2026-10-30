@@ -26,6 +26,29 @@ export async function verifiedFtProfile(root, resultFile) {
     return { sourceResult, nativeDirectory, profile: await fs.realpath(path.join(nativeDirectory, 'profile')) };
 }
 
+/** Use the normal successful profile, never the separate corruption/clear test copy. */
+export async function verifiedTranscriptionProfile(root, resultFile) {
+    const sourceResult = await fs.realpath(path.resolve(root, resultFile));
+    const resultRoot = await fs.realpath(path.join(root, 'artifacts/desktop/transcription'));
+    const relative = path.relative(resultRoot, sourceResult);
+    assert(
+        /^transcription-[a-f0-9-]{36}[\\/]result\.json$/.test(relative),
+        'Only prior transcription test results may supply a profile',
+    );
+    const previous = JSON.parse(await fs.readFile(sourceResult, 'utf8'));
+    assert.equal(previous.status, 'passed');
+    for (const check of ['realModelsAndFiveRoles', 'correctAndApplyPreservesManualWork', 'offlineFiveRoleInference'])
+        assert.equal(previous.checks[check], 'passed');
+    await verifiedFtProfile(root, previous.profileFrom);
+    const nativeDirectory = path.join(
+        await fs.realpath(process.env.LOCALAPPDATA),
+        'AudioNotSurfYet-LocalRuntime',
+        path.dirname(relative),
+    );
+    assert.equal(await fs.realpath(previous.nativeDirectory), nativeDirectory);
+    return { sourceResult, nativeDirectory, profile: await fs.realpath(path.join(nativeDirectory, 'profile')) };
+}
+
 export async function databaseRows(page, database, version, store, keys = false) {
     return page.evaluate(
         async ({ database, version, store, keys }) => {

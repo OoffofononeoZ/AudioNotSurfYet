@@ -56,7 +56,9 @@ Web/Electron 改动先核对[双端阶段和验证要求](../docs/context/deskto
 
 先运行 `desktop:package`，再执行 `npm run test:desktop:install` 进行真实 Windows 每用户安装。它拒绝已有产品安装/快捷方式/运行进程，备份已有用户数据并核对哈希，再从实际 ASAR 生成仅增加补丁版本号的升级夹具，共用生产打包配置，不更改仓库版本。安装器以流式同字节副本在普通用户目录运行，安装路径含空格；同时隔离原生 TEMP，避免受管项目的 Low Integrity 继承。结果、截图和私有备份在 `artifacts/desktop/install-verification/<ID>`；原生副本/独立 profile 在 `%LOCALAPPDATA%/AudioNotSurfYet-GoalSmoke/<ID>`，均不发布。
 
-该专项检查 HKCU 注册、两个快捷方式、真实安装 ASAR/EXE 版本及未签名状态、安装版主界面和三项隔离设置；升级/卸载后逐一核对原有文件、空目录及外部文件，最后仅删除自己的数据标记。卸载等待包含其临时子进程；启动失败也继续独立保留验证，但命令最终失败。它证明文件保留，不证明既有工程/模型数据库升级后可用，后者仍需功能专项。`tests/tools/desktop-installer.test.mjs` 覆盖备份/篡改发现、junction 拒绝、路径界限、复制不覆盖、真实子进程退出码及 checksum。
+该专项检查 HKCU 注册、两个快捷方式、真实安装 ASAR/EXE 版本及未签名状态、安装版主界面和三项隔离设置；升级/卸载后逐一核对原有文件、空目录及外部文件，最后仅删除自己的数据标记。卸载等待包含其临时子进程；启动失败也继续独立保留验证，但命令最终失败。无 profile 参数时只证明物理文件保留。`tests/tools/desktop-installer.test.mjs` 覆盖备份/篡改发现、junction 拒绝、路径界限、复制不覆盖、真实子进程退出码及 checksum。
+
+`npm run test:desktop:install -- --profile-from <成功自动标记 result.json>` 另在已核对原 FT 来源的独占正常 profile 副本上验证逻辑数据，明确不选损坏/清理副本，不把夹具覆盖到 owner 默认 userData。实际安装 EXE 的两个版本均全程离线并拒绝 HTTP(S)，导出 V2 工程、恢复 FT/自动标记、逐一核对八模型 size/SHA 和全部已记录 OPFS 音频摘要，比较完整领域快照；升级后实际重算 FT 与五输入自动标记，检查未应用候选时工程不变。卸载并恢复默认数据标记后，用升级版同 payload 的校验副本再次读取保留 profile 的新旧结果；两帧绘制及字体就绪后采集截图。过程 JSON/截图在同一 install-verification run，独立 profile 保留在 native run；它验证当前实现加补丁版本号的升级夹具，不承诺未来数据库 schema 迁移或新模型质量。
 
 `test:desktop:unit` 覆盖真实临时文件的原生授权保存/恢复/撤销、一次性工程授权、目录 junction 与路径边界、变更/缺失区分、错误去路径化、保存事务的完整提交/取消/目标变更、分块背压和双端文件端口；模拟 IPC 检查窗口/frame/origin、用途及参数拒绝。模拟 IPC 不证明真实 OS 对话框或原生协议可用，临时文件事务不证明退出/安装通过；这些独立缺口继续保留。
 

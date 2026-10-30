@@ -12,7 +12,7 @@
 | 文档与工具 | `test:docs`、`repo:check`、`test:tools` |
 | 修改的手写代码格式 | `format -- <file...>` / `format:check -- <file...>`，只传本次明确文件，不全仓运行；2000 行硬上限另由 `repo:check` 检查 |
 | 类型与生产构建 | `typecheck`、`build`；构建 prebuild 会准备 processing assets |
-| Electron 安装 | 先 `desktop:package` 再 `test:desktop:install`；实际每用户安装/补丁版本升级/卸载，备份并保留用户数据，拒绝覆盖已有安装。物理文件保留不替代工程/模型升级后读取 |
+| Electron 安装 | 先 `desktop:package` 再 `test:desktop:install`；实际每用户安装/补丁版本升级/卸载，备份并保留用户数据，拒绝覆盖已有安装。显式 `--profile-from <成功自动标记 result.json>` 才在独立正常副本验证八模型/工程/候选/OPFS 快照、升级后离线 FT/五输入重算、卸载后同 payload 校验副本读取新旧结果；无参数只有物理保留证据，不扩展为未来 schema 迁移或质量接受 |
 | Electron 入口/能力 | `test:desktop:dev` 实际执行开发命令；`desktop:build` 后 `test:desktop:smoke`，`desktop:dir` 后 `test:desktop:packaged` 检查生产能力及重启恢复。算术 ORT 图与原始编码块不替代真实 FT/封装视频验证；GPUAdapter 交给 ORT 单一设备所有者，不能预先消费后重复 requestDevice |
 | Electron 文件/恢复 | `test:desktop:files` 为真实 ASAR IPC/存储/文件操作、对话框选值替身；`test:desktop:dialogs:manual` 为实际打开/保存且需人工操作，原生返回值不替换。只使用独占受控文件；两类结果分开，主进程请求不能模拟受限网页攻击者 |
 | Electron 资源目录 | `test:desktop:resources` 检查独占资源副本的实际算法/封面加载、预设取消/保存、壁纸五文件、目录重启恢复与既有文件 hash；系统目录/确认选值为替身。`test:desktop:packaged` 包含 opaque iframe 内 Worker 动态导入 blob 模块，不能只用普通 postMessage 宣称算法加载通过 |

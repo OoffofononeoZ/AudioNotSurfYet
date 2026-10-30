@@ -7,6 +7,9 @@ import { build, Platform, Arch } from 'electron-builder';
 import { extractAll, extractFile } from '@electron/asar';
 import { _electron } from '@playwright/test';
 import { desktopPackageConfig, writePackageChecksums } from '../../scripts/lib/desktop-package.mjs';
+import { copyNativeTree, cleanupNativeTree } from '../../scripts/lib/desktop-native-runtime.mjs';
+import { verifiedTranscriptionProfile } from './processing-support.mjs';
+import { checkInstalledData } from './install-data-check.mjs';
 import {
     containedPath,
     copyVerifiedBytes,
@@ -42,6 +45,11 @@ assert(upgrade.length === 3 && upgrade.every(Number.isSafeInteger), 'Use a plain
 upgrade[2] += 1;
 const upgradeVersion = upgrade.join('.');
 const result = { baseVersion: metadata.version, upgradeVersion, steps: {}, startup: { status: 'not-run' } };
+const profileFlag = process.argv.indexOf('--profile-from');
+const sourceProfile =
+    profileFlag === -1 ? null : await verifiedTranscriptionProfile(root, process.argv[profileFlag + 1]);
+const logicalProfile = sourceProfile ? path.join(nativeRun, 'retained-profile') : null;
+let logicalBaseline;
 let dataExisted;
 let baseline;
 let marked;
@@ -95,6 +103,19 @@ $file = Get-Item -LiteralPath ${psLiteral(executable)}
 }
 
 async function testStartup() {
+    if (logicalProfile) {
+        const checked = await checkInstalledData({
+            executable,
+            profile: logicalProfile,
+            output: run,
+            version: metadata.version,
+            temp: process.env.TEMP,
+        });
+        logicalBaseline = checked.snapshot;
+        result.dataChecks = { base: checked.summary };
+        result.startup = { status: 'passed', security: checked.summary.identity };
+        return;
+    }
     const profile = path.join(nativeRun, 'startup-profile');
     await fs.mkdir(profile);
     const env = { ...process.env, AUDIOSURF_DESKTOP_TEST_PROFILE: profile };
@@ -119,6 +140,11 @@ async function testStartup() {
             };
         });
         assert.deepEqual(security, { sandbox: true, contextIsolation: true, nodeIntegration: false });
+        await app.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].show());
+        await page.evaluate(async () => {
+            await document.fonts.ready;
+            await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+        });
         await page.screenshot({ path: path.join(run, 'installed-startup.png') });
         result.startup = { status: 'passed', security };
     } catch (error) {
@@ -183,6 +209,11 @@ try {
     process.env.TMP = process.env.TEMP;
     await fs.mkdir(process.env.TEMP);
     result.nativeDirectory = nativeRun;
+    if (logicalProfile) {
+        await copyNativeTree(sourceProfile.profile, logicalProfile);
+        result.profileFrom = sourceProfile.sourceResult;
+        result.logicalProfile = logicalProfile;
+    }
 
     verifyNoInstallation(await windowsState());
     dataExisted = await exists(userData);
@@ -217,6 +248,19 @@ try {
     await verifyPayload(upgradeVersion, upgradeHash);
     result.steps.upgrade = { status: 'passed', retained: await retained() };
     await writeResult();
+    if (logicalProfile) {
+        const checked = await checkInstalledData({
+            executable,
+            profile: logicalProfile,
+            output: run,
+            version: upgradeVersion,
+            temp: process.env.TEMP,
+            infer: true,
+            baseline: logicalBaseline,
+        });
+        result.dataChecks.upgrade = checked.summary;
+        await writeResult();
+    }
 } catch (error) {
     result.failure = String(error);
     process.exitCode = 1;
@@ -248,6 +292,31 @@ try {
             if (!dataExisted) await fs.rmdir(userData); // Only succeeds if still empty; never recursively remove user data.
             await verifyRetained(userData, baseline);
             result.markerCleanup = 'passed';
+        }
+        if (
+            logicalProfile &&
+            result.dataChecks?.upgrade?.status === 'passed' &&
+            result.steps.uninstall?.status === 'passed' &&
+            !result.failure
+        ) {
+            const postOutput = path.join(run, 'post-uninstall');
+            await fs.mkdir(postOutput);
+            const retainedRuntime = await copyNativeTree(
+                path.join(fixtureOutput, 'win-unpacked'),
+                path.join(nativeRun, 'post-uninstall-runtime'),
+            );
+            const checked = await checkInstalledData({
+                executable: path.join(retainedRuntime.root, `${product}.exe`),
+                profile: logicalProfile,
+                output: postOutput,
+                version: upgradeVersion,
+                temp: process.env.TEMP,
+            });
+            result.postUninstall = {
+                ...checked.summary,
+                payloadSha256: await hashFile(path.join(retainedRuntime.root, 'resources/app.asar')),
+            };
+            await cleanupNativeTree(retainedRuntime);
         }
     } catch (error) {
         result.cleanupFailure = String(error);
