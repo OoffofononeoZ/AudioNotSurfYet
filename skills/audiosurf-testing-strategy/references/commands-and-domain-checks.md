@@ -21,6 +21,7 @@
 | Electron 模型网络/FT | `test:desktop:model-network` 覆盖真实固定 URL 的 Range、其他路径拒绝和生产算法 iframe/Worker 网络隔离；`test:desktop:ft` 覆盖真实四模型下载/校验/推断、WAV、离线恢复/推断及取消。`--profile-from` 只显式复用已验证冷下载的专属 profile，不能当作新冷下载；仍不证明自动标记/长曲/原生保存 UI |
 | Electron 自动标记 | `test:desktop:transcription -- --profile-from <冷 FT result.json>` 在独立校验副本执行真实四转录模型、五输入、辅助试听、候选应用、离线恢复/重算、取消及第二副本损坏/清理；核对 V2 人工轨/tempo 保留。原 profile 保留，实际候选数量与模型链路不等于识别质量或长曲接受 |
 | Electron 生命周期 | `test:desktop:lifecycle` 实际 ASAR 关闭确认返回值替身、拒绝继续编辑、草稿写失败恢复/重试、退出后草稿、原生部分保存/活动 WebM 清理，以及真实最小化播放/第二实例聚焦/窗口普通及最大化恢复。握手日志与退出码必须核对；不代替原生确认 UI、FT/ready 输出退出及崩溃恢复 |
+| Electron 单文件异常恢复 | `test:desktop:save-recovery` 核对连接应用的实际 main PID/独占 EXE 和进程树后强制终止并重启，检查有据部分文件清理、目标/未登记文件/已发布输出保留、被修改残留保留与提示调用。启动器 PID 不一定是 main；不得按进程名批量结束。写中未确认 bytes、断电及目录事务不由此获得通过 |
 | 播放与会话 | `test:m4:unit` / `test:m4:integration`、`test:e2e:m4` |
 | 句柄与恢复 | `test:m5:unit` / `test:m5:integration`、`test:e2e:m5` |
 | 分析平台 | `test:m6:unit` / `test:m6:worker` / `test:m6:integration` |

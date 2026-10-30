@@ -4,6 +4,7 @@ import { pathToFileURL } from 'node:url';
 import { NativeReadGrants } from './files/nativeGrants';
 import { registerFileIpc } from './files/fileIpc';
 import { NativeSaves } from './files/nativeSaves';
+import { NativeSaveJournal } from './files/nativeSaveJournal';
 import { registerSaveIpc } from './files/saveIpc';
 import { NativeBundles } from './files/nativeBundles';
 import { NativeIpcTasks } from './files/nativeIpcTasks';
@@ -48,10 +49,12 @@ async function openExternal(value: string) {
 
 async function createWindow() {
     const ownerOrigin = devOrigin ?? APP_ORIGIN;
+    const saveJournal = new NativeSaveJournal(path.join(app.getPath('userData'), 'native-save-journal'));
+    const recovery = await saveJournal.recover();
     const grants = new NativeReadGrants(path.join(app.getPath('userData'), 'native-read-grants.json'));
     const fileTasks = new NativeIpcTasks();
     const unregisterFiles = registerFileIpc(() => window, ownerOrigin, grants, fileTasks);
-    const saves = new NativeSaves();
+    const saves = new NativeSaves(saveJournal);
     const unregisterSaves = registerSaveIpc(() => window, ownerOrigin, saves, fileTasks);
     const bundles = new NativeBundles();
     const unregisterBundles = registerBundleIpc(() => window, ownerOrigin, grants, bundles, fileTasks);
@@ -184,6 +187,21 @@ async function createWindow() {
         if (!profile) window?.show();
     });
     await window.loadURL(devUrl ?? `${APP_ORIGIN}/`);
+    if (recovery.storeInvalid || recovery.retained.length)
+        void dialog
+            .showMessageBox(window, {
+                type: 'warning',
+                title: '有未清理的临时文件',
+                message: '部分异常退出记录或临时文件无法确认，已保留。',
+                detail: [
+                    recovery.storeInvalid ? '保存日志有损坏，无法确认归属的文件不会自动删除。' : '',
+                    ...recovery.retained,
+                ]
+                    .filter(Boolean)
+                    .join('\n'),
+                buttons: ['知道了'],
+            })
+            .catch(() => console.warn('Native save recovery warning could not be shown'));
 }
 
 if (!app.requestSingleInstanceLock()) app.quit();

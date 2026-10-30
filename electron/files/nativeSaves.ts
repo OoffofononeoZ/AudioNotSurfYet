@@ -1,9 +1,10 @@
-import { randomUUID } from 'node:crypto';
+import { createHash, randomUUID, type Hash } from 'node:crypto';
 import { lstat, open, realpath, rename, unlink, type FileHandle } from 'node:fs/promises';
 import path from 'node:path';
 import { SAVE_CHUNK_BYTES, type NativeSaveReference } from '../../src/platform/transferContracts';
 import { grantId } from './nativeGrants';
 import { NativeFileError, nativeError } from './nativeErrors';
+import type { NativeSaveJournal } from './nativeSaveJournal';
 
 interface Identity {
     dev: number;
@@ -24,6 +25,7 @@ interface Save {
     handle: FileHandle;
     size: number;
     written: number;
+    hash: Hash;
     cancelled: boolean;
     committed: boolean;
     phase: 'writing' | 'committing' | 'publishing';
@@ -51,6 +53,10 @@ export class NativeSaves {
     private starting = new Set<Promise<NativeSaveReference>>();
     private disposed = false;
     private generation = 0;
+    private readonly journal?: NativeSaveJournal;
+    constructor(journal?: NativeSaveJournal) {
+        this.journal = journal;
+    }
     get revision() {
         return this.generation;
     }
@@ -102,6 +108,7 @@ export class NativeSaves {
             handle,
             size,
             written: 0,
+            hash: createHash('sha256'),
             cancelled: false,
             committed: false,
             phase: 'writing',
@@ -109,9 +116,13 @@ export class NativeSaves {
             cleanup: null,
         };
         this.saves.set(id, save);
-        if (this.disposed || generation !== this.generation) {
+        try {
+            await this.checkpoint(save);
+            if (this.disposed || generation !== this.generation) throw new NativeFileError('invalid-request');
+        } catch (error) {
             await this.abort(id);
-            throw new NativeFileError('invalid-request');
+            await this.forget(save);
+            throw error;
         }
         return { saveId: id, name: path.basename(target) };
     }
@@ -124,6 +135,22 @@ export class NativeSaves {
     }
     private check(save: Save) {
         if (save.cancelled) throw new NativeFileError('invalid-request');
+    }
+    private async checkpoint(save: Save) {
+        await this.journal?.checkpoint(
+            save.temporary,
+            save.parentIdentity,
+            save.temporaryIdentity,
+            save.written,
+            save.hash.copy().digest('hex'),
+        );
+    }
+    private async forget(save: Save) {
+        try {
+            await this.journal?.forget(save.temporary);
+        } catch {
+            console.warn('Native save journal record retained; its missing temporary will be rechecked on restart');
+        }
     }
 
     async write(id: string, input: unknown): Promise<void> {
@@ -148,6 +175,9 @@ export class NativeSaves {
             }
             this.check(save);
             save.written += offset;
+            save.hash.update(chunk);
+            await this.checkpoint(save);
+            this.check(save);
         })();
         save.operation = operation;
         try {
@@ -188,6 +218,7 @@ export class NativeSaves {
             await rename(save.temporary, save.target);
             save.committed = true;
             this.saves.delete(id);
+            await this.forget(save);
         })();
         save.operation = operation;
         try {
@@ -216,6 +247,7 @@ export class NativeSaves {
                     await unlink(save.temporary);
                 }
                 this.saves.delete(id);
+                await this.forget(save);
             } catch {
                 throw new NativeFileError('cleanup-failed');
             }

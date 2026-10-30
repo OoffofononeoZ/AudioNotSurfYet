@@ -20,6 +20,8 @@ D3 的 `FileTransferAccess` 处理工程、媒体、歌词及文件输出，集�
 
 D5 关闭通过生命周期端口接入 MainLayout 的共享运行时。主进程校验阶段化请求、确认风险并等待原生 IO 排空；renderer 先保存草稿/候选修正，再按服务顺序释放并卸载应用。`SessionRepositoryTasks` 追踪会话事务，保持原 repository 契约；准备失败保留工程并恢复编辑。窗口偏好独立保存在 userData；创建后重设外框避免本机分数缩放下构造尺寸漂移。ASAR 草稿失败恢复/确认退出、活动 WebM/原生保存清理、最小化播放及窗口/单实例已通过；异常遗留等缺口以[桌面合同](desktop.md)为准。
 
+`NativeSaveJournal` 仅在主进程记录单文件保存的已确认临时文件与增量摘要，在独立双槽 V1/checksum 日志落盘后才确认写入。重启验证精确路径、父目录/文件身份、stat 和内容后清理；变化或日志损坏保留并原生提示，不扫描目录或删除已发布目标。实际独占进程树终止/重启已验证单文件清理及保护；目录事务和未确认写入范围见[桌面合同](desktop.md)，Web 无此原生路径日志。
+
 D6 的 `scripts/lib/desktop-package.mjs` 集中生产与升级夹具的身份、资源白名单、未签名 NSIS 和校验文件配置。安装测试隔离原生可执行副本/安装目录，与构建 staging 分开；仅正常用户目录继承，不改变系统或项目安全设置。已验证安装/跨版本升级/卸载的物理文件保留，工程及模型数据库的实际升级恢复尚待验证。
 
 当前系统是 Vue 3 单页应用。MainLayout 创建并提供唯一的 `AudioSessionService`、`AnalysisCoordinator`、`EditorSessionController` 与 `VisualizerSessionController`；服务通过 `AudioEngine` 解码、播放本地文件，并通过三个独立 IndexedDB repository 保存 Analyzer session、Editor 单草稿与 Visualizer 单草稿。Analyzer、Editor 与 Visualizer 已通过互斥 consumer lease 复用同一 coordinator；原曲与已验证四轨按来源去重、每来源最多四项，复用同一分析 Worker。File、Blob、handle、PCM、Worker 与音频节点均留在 store 外。MusicBar、Editor 与 Visualizer 读取同一播放快照；Editor 与 Visualizer 普通工作区保留 MusicBar；两个工作区的 tokenized route lease 临时使用 repeat-one，导出传输租约优先停止循环。
