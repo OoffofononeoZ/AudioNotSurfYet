@@ -8,6 +8,7 @@
 
 | 文件 | 本地静态引用（最多显示 6 项） |
 | --- | --- |
+| [tests/editor/keyboard-marker-recording.test.ts](../../tests/editor/keyboard-marker-recording.test.ts) | [src/editor/beatSnap.ts](../../src/editor/beatSnap.ts)、[src/editor/keyboardMarkerRecording.ts](../../src/editor/keyboardMarkerRecording.ts)、[src/editor/pointAnnotations.ts](../../src/editor/pointAnnotations.ts)、[src/editor/projectCodec.ts](../../src/editor/projectCodec.ts)、[src/editor/rangeAnnotations.ts](../../src/editor/rangeAnnotations.ts)、[src/editor/types.ts](../../src/editor/types.ts)、另 1 项，按需核对源码 |
 | [tests/editor/lane-operations.test.ts](../../tests/editor/lane-operations.test.ts) | [src/editor/laneOperations.ts](../../src/editor/laneOperations.ts)、[src/editor/pointAnnotations.ts](../../src/editor/pointAnnotations.ts)、[src/editor/projectCodec.ts](../../src/editor/projectCodec.ts) |
 | [tests/editor/marker-grid-offset.test.ts](../../tests/editor/marker-grid-offset.test.ts) | [src/editor/beatSnap.ts](../../src/editor/beatSnap.ts)、[src/editor/markerGridOffset.ts](../../src/editor/markerGridOffset.ts)、[src/editor/projectCodec.ts](../../src/editor/projectCodec.ts) |
 | [tests/editor/marker-lane-movement.test.ts](../../tests/editor/marker-lane-movement.test.ts) | [src/editor/beatSnap.ts](../../src/editor/beatSnap.ts)、[src/editor/markerLaneMovement.ts](../../src/editor/markerLaneMovement.ts)、[src/editor/projectCodec.ts](../../src/editor/projectCodec.ts)、[src/editor/types.ts](../../src/editor/types.ts) |
@@ -107,4 +108,3 @@
 | [tests/support/m7-learning-fixture.ts](../../tests/support/m7-learning-fixture.ts) | [tests/support/audio-fixtures.ts](../../tests/support/audio-fixtures.ts)、[tests/support/meyda-golden.ts](../../tests/support/meyda-golden.ts) |
 | [tests/support/m8-scalar-fixture.ts](../../tests/support/m8-scalar-fixture.ts) | [tests/support/audio-fixtures.ts](../../tests/support/audio-fixtures.ts) |
 | [tests/support/m9-vector-fixture.ts](../../tests/support/m9-vector-fixture.ts) | [tests/support/audio-fixtures.ts](../../tests/support/audio-fixtures.ts) |
-| [tests/support/meyda-golden.ts](../../tests/support/meyda-golden.ts) | — |

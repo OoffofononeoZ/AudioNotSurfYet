@@ -8,6 +8,7 @@
 
 | 文件 | 本地静态引用（最多显示 6 项） |
 | --- | --- |
+| [tests/support/meyda-golden.ts](../../tests/support/meyda-golden.ts) | — |
 | [tests/support/osu-fixture.ts](../../tests/support/osu-fixture.ts) | — |
 | [tests/support/project-actions.ts](../../tests/support/project-actions.ts) | — |
 | [tests/support/resource-directory.ts](../../tests/support/resource-directory.ts) | [tests/support/visualizer-assets.mjs](../../tests/support/visualizer-assets.mjs) |

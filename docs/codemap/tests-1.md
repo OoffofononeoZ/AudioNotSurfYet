@@ -87,6 +87,7 @@
 | [tests/desktop/save-recovery-smoke.mjs](../../tests/desktop/save-recovery-smoke.mjs) | [scripts/lib/desktop-native-runtime.mjs](../../scripts/lib/desktop-native-runtime.mjs)、[tests/desktop/dialog-fixture.mjs](../../tests/desktop/dialog-fixture.mjs)、[tests/desktop/recovery-support.mjs](../../tests/desktop/recovery-support.mjs) |
 | [tests/desktop/shutdown-channel.test.ts](../../tests/desktop/shutdown-channel.test.ts) | [electron/shutdownChannel.ts](../../electron/shutdownChannel.ts) |
 | [tests/desktop/smoke.mjs](../../tests/desktop/smoke.mjs) | [scripts/lib/desktop-native-runtime.mjs](../../scripts/lib/desktop-native-runtime.mjs) |
+| [tests/desktop/task-shutdown-smoke.mjs](../../tests/desktop/task-shutdown-smoke.mjs) | [scripts/lib/desktop-native-runtime.mjs](../../scripts/lib/desktop-native-runtime.mjs)、[tests/desktop/dialog-fixture.mjs](../../tests/desktop/dialog-fixture.mjs)、[tests/desktop/processing-support.mjs](../../tests/desktop/processing-support.mjs) |
 | [tests/desktop/transcription-smoke.mjs](../../tests/desktop/transcription-smoke.mjs) | [scripts/lib/desktop-native-runtime.mjs](../../scripts/lib/desktop-native-runtime.mjs)、[tests/desktop/dialog-fixture.mjs](../../tests/desktop/dialog-fixture.mjs)、[tests/desktop/processing-support.mjs](../../tests/desktop/processing-support.mjs) |
 | [tests/desktop/window-state.test.ts](../../tests/desktop/window-state.test.ts) | [electron/windowState.ts](../../electron/windowState.ts) |
 | [tests/docs/validate-docs.mjs](../../tests/docs/validate-docs.mjs) | [scripts/check-repo.mjs](../../scripts/check-repo.mjs)、[scripts/lib/repository.mjs](../../scripts/lib/repository.mjs) |
@@ -107,4 +108,3 @@
 | [tests/e2e/e8-editor-usability.spec.ts](../../tests/e2e/e8-editor-usability.spec.ts) | [tests/support/editor-marking.ts](../../tests/support/editor-marking.ts)、[tests/support/file-picker.ts](../../tests/support/file-picker.ts) |
 | [tests/e2e/e9-editor-tempo-lane.spec.ts](../../tests/e2e/e9-editor-tempo-lane.spec.ts) | [tests/support/editor-marking.ts](../../tests/support/editor-marking.ts) |
 | [tests/e2e/editor-analysis-detail.spec.ts](../../tests/e2e/editor-analysis-detail.spec.ts) | [tests/support/editor-marking.ts](../../tests/support/editor-marking.ts) |
-| [tests/e2e/editor-block-delete.spec.ts](../../tests/e2e/editor-block-delete.spec.ts) | [tests/support/editor-marking.ts](../../tests/support/editor-marking.ts) |
