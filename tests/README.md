@@ -32,6 +32,10 @@ Web/Electron 改动先核对[双端阶段和验证要求](../docs/context/deskto
 
 12 份文件及 capture 位于 `artifacts/visualizer-composition/output/media-<UUID>-*`，过程结果/截图在 `artifacts/desktop/media/media-<UUID>`。runner 用现有 `verify-visualizer-output.mjs <runId> --files-only` 完整解码并检查逐帧 PTS/帧数、时长/尾差、零页面音量下音轨及同步白闪，末尾短暂显示专属窗口以采集截图后关闭。沿用 100ms/250ms 门槛；该入口只验证本次 Electron 文件，不将现有 Chrome/Edge `--all` 矩阵标记完整，不替代十五分钟长片、实际模型或原生保存 UI 验收。
 
+`npm run test:desktop:media:long` 实际 ASAR 使用五秒分块构建的 900 秒/48kHz 单声道夹具，在 1080p60 导出原生频谱 wireform 与 0.15/1.5/450/898.5 秒白闪。页面音量为零并禁止实时媒体 API；实际保存后重做并取消，检查离线音频 context 和 OPFS 临时文件释放。生产不开放开发 diagnostics，最终由原媒体 oracle 严格核对 54,000 帧/逐帧 PTS、全解码及音画事件，不用 UI 进度代替媒体证据。
+
+结果、截图及每约两秒的该应用 `getAppMetrics()`/JS heap 采样在 `artifacts/desktop/media-long/<ID>`，WebM/capture/measurement 在 output 目录对应前缀下。responseMs 包含 renderer 和 main 两次往返；工作集合计可能重复共享页，不含 GPU 显存测量。初始输出页未挂载状态页进度条时 progress 为 null，仍采集真实状态和资源数据；取消阶段使用状态页的真实进度。测试不改产品资源/格式、不承诺任意复杂场景性能，原生保存选值为替身，20 分钟是 runner 超时而非产品预算。
+
 `npm run test:desktop:model-network` 在实际 ASAR 的无 Node Worker 中从 8 个固定模型 URL 获取 Range 首块，随后检查其他 Basic Pitch revision/文件路径产生 connect-src violation。通过生产 Visualizer 创建实际算法 iframe，再在其中创建 Worker，检查该固定 URL 仍被子层 CSP 拒绝、不能读取 parent.document、无 Node/桥。只读外部资源库；目录选值为替身。结果在 `artifacts/desktop/model-network/<ID>`；Range 成功不能替代完整 hash、缓存或推断证据，日志去掉 CDN query。
 
 `npm run test:desktop:ft` 默认使用全新 profile 从固定真实地址完整下载四 FT 模型，经产品 hash 校验及 WebGPU EP 完成 6 秒输入，再实际保存四份 float32/44.1kHz/stereo WAV，逐样本检查有限/非全零、长度和 OPFS 清单 hash。重启启用离线模式并拒绝全部 HTTP(S)，检查结果恢复、相同 WAV、试听/暂停/返回原曲，取消重做保留旧结果且 Worker 释放，再完成一次四模型缓存推断。按 createdAt 选当前结果，允许多条历史结果，不能错误断言数据库仅一条。

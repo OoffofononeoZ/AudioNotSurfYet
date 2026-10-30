@@ -35,7 +35,11 @@ OPFS `visualizer-export` 下每个 UUID 文件持有独立 Web Lock，生成中�
 
 ## 验证与限制
 
-桌面当前补充证据：`test:desktop:media` 的实际 ASAR 四档首次/同页重复同步片及几何预设共 12 份 VP9/Opus、4,860 帧，通过完整解码、逐帧 PTS、帧数及既有同步/时长门槛；最大事件差 35.5ms、相对漂移 17ms。完整 run 身份与截图见[桌面实施](desktop.md)，当前只证明封装短矩阵，不继承下面浏览器长片结果，也不替代原生 OS 保存 UI 或模型验证。
+桌面当前补充证据：`test:desktop:media` 的实际 ASAR 四档首次/同页重复同步片及几何预设共 12 份 VP9/Opus、4,860 帧，通过完整解码、逐帧 PTS、帧数及既有同步/时长门槛；最大事件差 35.5ms、相对漂移 17ms。完整 run 身份与截图见[桌面实施](desktop.md)，不继承下面浏览器版本/身份，也不替代原生 OS 保存 UI 或模型验证。
+
+桌面长片专项 `test:desktop:media:long` 的独立 ASAR run `media-long-0d9361df-81aa-46da-81fa-6f3e33624969` 也整体通过：与浏览器长片同种 900 秒受控音源、原生频谱 wireform 与四次白闪，1080p60 VP9/Opus 产物 391,395,858 bytes。`offline-sync-v4 --files-only` 完整解码精确 54,000 帧并检查每帧 PTS，最大帧间隔 17ms、四事件偏差均约 35.5ms、尾差 21ms、容器时长 900.02 秒，测量精度内未见累计漂移。实际编码帧已查看；导出 208.472 秒，再次导出后取消 1223ms，OPFS 临时输出和活动 OfflineAudioContext 均清空。
+
+该桌面 run 每约两秒采样，共 104 次；renderer/main 两次往返合计最大 7ms、JS heap 峰值 150,544,498 bytes，应用自身进程工作集/私有内存合计峰值 1,612,404/1,556,280 KB（[Electron MemoryInfo 单位](https://www.electronjs.org/docs/latest/api/structures/memory-info)）。共享工作集可能重复计数，未采 GPU 显存；采样峰值不是完整峰值或内存/响应保证。生产没有开发 diagnostics，初始输出页的进度未挂载时记录 null，帧数以最终文件为准。原生保存选值仍是替身，20 分钟为 runner 超时；受控原生场景不证明任意复杂工程的性能。
 
 2026-10-17 本机 Chrome `155.0.8059.80`、Edge `155.0.4283.45`：99 项相关单元/集成、22 项工具测试和生产构建通过。覆盖播放检查点、取消/身份变化、渲染目标释放、保存重试、配额失败，以及编码结束和恢复预览期间的 decoded revision 变化；新任务重置进度和上次错误。构建仍报告既有大 chunk 与 Browserslist 数据过期提示。
 
