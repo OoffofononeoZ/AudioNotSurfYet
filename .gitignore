@@ -26,20 +26,9 @@ dist-ssr
 public/audios
 
 # Local test and evaluation artifacts
-artifacts/desktop/
+/artifacts/
 test-results/
 playwright-report/
-artifacts/evals/
-artifacts/browser-profiles/
-artifacts/app-shell/
-artifacts/fixtures/
-artifacts/visualizer-composition/
-artifacts/visualizer-parameter-history/
-artifacts/editor-marking/
-artifacts/osu-build-temp/
-artifacts/stem-analysis/
-artifacts/stem-build-temp/
-artifacts/analysis-performance/
 public/test_audio
 public/wallpaper-runtime/
 public/processing-runtime/
