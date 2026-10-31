@@ -1,12 +1,12 @@
 # 当前决策与授权
 
-核查日期：2026-10-26。本文保存仍有效的决定和必要批准来源；具体行为只在对应专题维护。旧过程和被替代的详细方案可从Git的`0bd2a67:docs/context/decision-registry.md`查回，不再作为当前指令。
+核查日期：2026-10-31。本文保存仍有效的决定和必要批准来源；具体行为只在对应专题维护。旧过程和被替代的详细方案可从Git的`0bd2a67:docs/context/decision-registry.md`查回，不再作为当前指令。
 
 ## 持续边界
 
 - DEC-110 / 2026-10-30：实际 ASAR 的 Worker 证明 Basic Pitch 固定文件被 connect-src 拦截后，owner 回复“允许此固定文件来源并重打包”。仅批准宿主 connect-src 增加 `https://raw.githubusercontent.com/spotify/basic-pitch/9991303bba609a3b93089d13ec80d1d495083596/basic_pitch/saved_models/icassp_2022/nmp.onnx`；宿主及处理 Worker 因而可连接该文件，不放开整个 GitHub origin 或其他路径。算法隔离层 connect-src none、sandbox/contextIsolation/无 Node 不变；模型 revision/hash/许可未改。验证见[桌面实施](desktop.md)。
 - DEC-109 / 2026-10-30：owner 对具体 CSP 问题回复“允许这项修改”，批准 `electron/appResources.ts` 的宿主 `script-src` 增加 `blob:` 并重新打包，以允许既有隔离 Worker 导入算法模块；知悉宿主也因此可执行 blob 模块。仅此宿主规则变更；算法 iframe 的 opaque origin、nonce/blob 脚本、`connect-src 'none'` 及 sandbox/contextIsolation/无 Node 不变，不扩大其他网络或权限边界。验证见[桌面实施](desktop.md)。
-- DEC-108 / 2026-10-29：owner 以“实施上述计划”批准 Web/Electron 双端长期 Goal；新增 Windows x64、本地原生访问与位置恢复、按需模型缓存、退出保护及未签名本地安装升级验证。保留 Web、工程格式及既有隐私/质量边界；不含其他系统、签名、自动更新、托盘或公开发布。覆盖 DEC-003/006 的浏览器单端范围限制，未扩大云端/部署授权；完整合同与里程碑见[桌面实施](desktop.md)。
+- DEC-111 / 2026-10-29：owner 以“实施上述计划”批准 Web/Electron 双端长期 Goal；新增 Windows x64、本地原生访问与位置恢复、按需模型缓存、退出保护及未签名本地安装升级验证。保留 Web、工程格式及既有隐私/质量边界；不含其他系统、签名、自动更新、托盘或公开发布。覆盖 DEC-003/006 的浏览器单端范围限制，未扩大云端/部署授权；完整合同与里程碑见[桌面实施](desktop.md)。原登记为 DEC-108，与 2026-10-28 分析优化决定重号；本次仅修正登记号，授权内容不变。
 - DEC-003/006：中文文档与skill、代码标识保留原文；本地MP3/WAV/FLAC、桌面Chrome/Edge、安全上下文。上传/云端/移动端/非Chromium和生产部署未获得当前授权。
 - DEC-007/018：数值/时钟/反馈门槛、owner 3/3学习边界及项目Flux保持；Meyda上游错误不伪称修复。见[Analyzer验证](../quality/validation.md)。
 - 单engine/clock、序列化store、Worker/cache/stale和原子草稿理由见[共享运行时](../architecture/shared-runtime-contracts.md)及其链接ADR；最新页面规则优先于旧布局/接口。

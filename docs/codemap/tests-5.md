@@ -8,4 +8,5 @@
 
 | 文件 | 本地静态引用（最多显示 6 项） |
 | --- | --- |
+| [tests/worker/window-analysis.test.ts](../../tests/worker/window-analysis.test.ts) | [src/analysis/config.ts](../../src/analysis/config.ts)、[src/analysis/renderGeometry.ts](../../src/analysis/renderGeometry.ts)、[src/analysis/rendererData.ts](../../src/analysis/rendererData.ts)、[src/analysis/types.ts](../../src/analysis/types.ts)、[src/analysis/windowAnalysis.ts](../../src/analysis/windowAnalysis.ts)、[src/analysis/windowTypes.ts](../../src/analysis/windowTypes.ts)、另 1 项，按需核对源码 |
 | [tests/worker/worker-harness.test.ts](../../tests/worker/worker-harness.test.ts) | — |

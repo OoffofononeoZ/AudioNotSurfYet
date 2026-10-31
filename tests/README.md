@@ -50,6 +50,8 @@ Web/Electron 改动先核对[双端阶段和验证要求](../docs/context/deskto
 
 `npm run test:desktop:task-shutdown -- --profile-from <冷 FT result.json>` 校验并复制已有测试 profile，保留原资料；全程离线且拒绝 HTTP(S)。在真实 Worker 已完成一次推断、再次进入分段推断后触发主进程窗口正常关闭，记录 Worker terminate、inspect/prepare/dispose、退出码和重启后的旧结果/任务目录。另生成待保存 WebM，核对拒绝关闭仍保留；受控会话 IDB 写失败时退出恢复且 ready 文件 hash 不变；恢复写入并确认退出后，再重启核对临时输出为空和 Editor 草稿仍在。结果及截图在 `artifacts/desktop/task-shutdown/<ID>`；原生确认响应为替身，短输入任务退出不替代模型/识别质量、完整媒体测量或真实确认 UI。进度心跳会重复，不以第二条 inference 心跳当作完成；正常关闭使用主进程窗口入口，渲染页 window.close 不等同于该握手。
 
+`npm run test:desktop:minimized-tasks -- --profile-from <冷 FT result.json>` 在另一个校验副本上全程离线，实际四模型开始推断后最小化，持续核对窗口仍最小化直至新结果完成，并逐一校验四份新 WAV。另在实际编码开始后最小化，完成 30 秒 1080p60 WebM，再恢复窗口、原生端口保存并复用严格媒体 oracle 全解码/逐帧 PTS/非静音检查。结果、最小化采样和截图在 `artifacts/desktop/minimized-tasks/<ID>`；系统选值为替身，空场景只验证任务持续性，不替代场景质量或四档矩阵。
+
 `npm run test:desktop:save-recovery` 在全新独占 ASAR/profile 中通过真实保存 IPC 写入 1MiB 部分文件，核对连接应用的实际 main PID/EXE 和所属进程列表后，以 taskkill 终止该进程树并等待全部已记录进程退出，再实际重启。检查仅清理已登记且未变的临时文件，保留原目标、未登记同名前缀文件、完整发布的输出及外部修改后的残留；后者检查保留提示的调用。Playwright 启动器 PID 可能与实际 main 不同，不能只杀启动器后称主进程崩溃。结果在 `artifacts/desktop/save-recovery/<ID>`；OS 选值/提示响应为替身，不证明真实提示 UI、断电持久性、写到一半的未确认 bytes 或目录事务恢复。
 
 `npm run test:desktop:bundle-recovery` 对同类独占 ASAR/profile 进行真实预设/壁纸目录事务 IPC：写完若干文件并写入下一文件的一半，终止已核对进程树，重启先清理子文件日志再清理目录日志。另检查完整发布五文件目录 hash 保留、外部新增/已完成文件变化使目录保留及提示调用，保留原文件和未登记同前缀目录。结果在 `artifacts/desktop/bundle-recovery/<ID>`；测试内容仅用于事务传输，不代替资源语义或壁纸渲染，OS 选择/确认/提示为替身。两恢复入口共用 `recovery-support.mjs` 的 PID 所有权与终止等待；断电、未确认写入及清理中断边界仍按桌面合同区分。
