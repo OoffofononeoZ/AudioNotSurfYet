@@ -225,6 +225,73 @@
     background-clip: padding-box;
 }
 
+.app-workspace-hint {
+    box-sizing: border-box;
+    flex: none;
+    align-self: center;
+    width: 100%;
+    max-width: 440px;
+    margin-block: auto;
+    text-align: center;
+    color: var(--ink);
+    font-family: var(--font-sans);
+}
+
+.app-workspace-hint-icon {
+    box-sizing: border-box;
+    display: grid;
+    place-items: center;
+    width: 48px;
+    height: 48px;
+    margin: 0 auto 16px;
+    border: 1px solid var(--hairline-faint);
+    border-radius: 12px;
+    color: var(--accent-soft);
+    background: var(--surface-2);
+}
+
+.app-workspace-hint-icon svg {
+    width: 24px;
+    height: 24px;
+}
+
+.app-workspace-hint-spinner {
+    box-sizing: border-box;
+    width: 24px;
+    height: 24px;
+    border: 2px solid var(--hairline-focus);
+    border-top-color: var(--accent-soft);
+    border-radius: 50%;
+    animation: app-workspace-hint-spin 1.2s linear infinite;
+}
+
+.app-workspace-hint .app-workspace-hint-title {
+    margin: 0;
+    color: var(--ink);
+    font-size: 20px;
+    font-weight: 500;
+    line-height: 28px;
+}
+
+.app-workspace-hint .app-workspace-hint-description {
+    margin: 12px 0 0;
+    color: var(--body);
+    font-size: 13px;
+    line-height: 22px;
+}
+
+@keyframes app-workspace-hint-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .app-workspace-hint-spinner {
+        animation: none;
+    }
+}
+
 .scrollbar-hide {
     &::-webkit-scrollbar {
         display: none;

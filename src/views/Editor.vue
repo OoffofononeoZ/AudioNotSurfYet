@@ -30,14 +30,18 @@
                 'editor-marking-shell': snapshot.state === 'ready' && workspace === 'marking',
             }"
             :data-testid="snapshot.state === 'ready' ? 'editor-ready' : undefined">
-            <section v-if="snapshot.state === 'empty'" class="editor-state" data-testid="editor-empty">
-                <h2>先选择一首歌曲</h2>
-                <p>可以在底部播放器导入或选择歌曲，再从导航栏 Editor 进入。</p>
-            </section>
+            <AppWorkspaceHint
+                v-if="snapshot.state === 'empty'"
+                state="empty"
+                title="先选择一首歌曲"
+                description="可以在底部播放器导入或选择歌曲，再从导航栏 Editor 进入。"
+                data-testid="editor-empty" />
 
-            <section v-else-if="snapshot.state === 'loading'" class="editor-state" aria-live="polite">
-                <h2>正在准备歌曲和草稿…</h2>
-            </section>
+            <AppWorkspaceHint
+                v-else-if="snapshot.state === 'loading'"
+                state="loading"
+                title="正在准备歌曲和草稿…"
+                data-testid="editor-loading" />
 
             <section v-else-if="snapshot.state === 'unavailable'" class="editor-state" data-testid="editor-unavailable">
                 <h2>这首歌曲暂时不能编辑</h2>
@@ -160,6 +164,7 @@ import { useRoute, useRouter } from 'vue-router';
 import { ElMessage } from 'element-plus';
 import { useAudioSessionService } from '../audio/audioSessionService';
 import EditorToolbar from '../components/EditorToolbar.vue';
+import AppWorkspaceHint from '../components/AppWorkspaceHint.vue';
 import AppActionChoiceDialog from '../components/controls/AppActionChoiceDialog.vue';
 import EditorOsuImportDialog from '../components/EditorOsuImportDialog.vue';
 import EditorLeaveGuard from '../components/EditorLeaveGuard.vue';

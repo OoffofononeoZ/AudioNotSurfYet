@@ -458,6 +458,9 @@
     font-weight: 500;
     margin: 0;
 }
+.viz-page-state.viz-hint-state {
+    justify-content: flex-start;
+}
 .viz-page-state p {
     font-size: 13px;
     color: var(--body);

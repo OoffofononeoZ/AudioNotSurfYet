@@ -236,18 +236,29 @@
                     " />
             </aside>
         </section>
-        <section v-else class="viz-page-state app-scrollbar" :data-testid="'visualizer-' + snapshot.state">
+        <section
+            v-else
+            class="viz-page-state app-scrollbar"
+            :class="{ 'viz-hint-state': snapshot.state === 'empty' || snapshot.state === 'loading' }"
+            :data-testid="'visualizer-' + snapshot.state">
             <VisualizerDraftNotice
                 v-if="snapshot.state === 'draft-conflict' || snapshot.state === 'unsupported-draft'"
                 :file-name="snapshot.conflictingDraft?.project.track.fileName"
                 @export="run(() => controller.exportConflictingDraft())"
                 @replace="run(() => controller.overwriteConflictingDraft())"
                 @cancel="router.push('/')" />
-            <template v-else-if="snapshot.state === 'empty'"
-                ><h1>先选择一首歌曲</h1>
-                <p>使用底部播放器导入或选择歌曲。</p></template
-            ><template v-else-if="snapshot.state === 'loading'"><p role="status">正在准备工程…</p></template
-            ><template v-else
+            <AppWorkspaceHint
+                v-else-if="snapshot.state === 'empty'"
+                state="empty"
+                title="先选择一首歌曲"
+                description="使用底部播放器导入或选择歌曲。"
+                heading="h1" />
+            <AppWorkspaceHint
+                v-else-if="snapshot.state === 'loading'"
+                state="loading"
+                title="正在准备工程…"
+                heading="h1" />
+            <template v-else
                 ><h1>歌曲暂时不可用</h1>
                 <p role="alert">{{ snapshot.message }}</p></template
             >
@@ -334,6 +345,7 @@ import { useVisualizerPreview } from '../visualizer/useVisualizerPreview';
 import { useVisualizerFullscreen } from '../visualizer/useVisualizerFullscreen';
 import { formatSecToTime as formatTime } from '../utils/utils';
 import '../visualizer/workspace.css';
+import AppWorkspaceHint from '../components/AppWorkspaceHint.vue';
 import { provideResourceLibrary } from '../visualizer/useResourceLibrary';
 const route = useRoute(),
     router = useRouter(),
