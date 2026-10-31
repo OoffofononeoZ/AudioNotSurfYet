@@ -8,6 +8,7 @@
 
 | 文件 | 本地静态引用（最多显示 6 项） |
 | --- | --- |
+| [tests/e2e/e8-editor-usability.spec.ts](../../tests/e2e/e8-editor-usability.spec.ts) | [tests/support/editor-marking.ts](../../tests/support/editor-marking.ts)、[tests/support/file-picker.ts](../../tests/support/file-picker.ts) |
 | [tests/e2e/e9-editor-tempo-lane.spec.ts](../../tests/e2e/e9-editor-tempo-lane.spec.ts) | [tests/support/editor-marking.ts](../../tests/support/editor-marking.ts) |
 | [tests/e2e/editor-analysis-detail.spec.ts](../../tests/e2e/editor-analysis-detail.spec.ts) | [tests/support/editor-marking.ts](../../tests/support/editor-marking.ts) |
 | [tests/e2e/editor-block-delete.spec.ts](../../tests/e2e/editor-block-delete.spec.ts) | [tests/support/editor-marking.ts](../../tests/support/editor-marking.ts) |
@@ -107,4 +108,3 @@
 | [tests/editor/e7-fullscreen-overlay-unit.test.ts](../../tests/editor/e7-fullscreen-overlay-unit.test.ts) | [src/editor/overlay.ts](../../src/editor/overlay.ts) |
 | [tests/editor/e7-fullscreen-overlay.integration.test.ts](../../tests/editor/e7-fullscreen-overlay.integration.test.ts) | [src/analysis/analysisCoordinator.ts](../../src/analysis/analysisCoordinator.ts)、[src/analysis/types.ts](../../src/analysis/types.ts)、[src/audio/audioSessionService.ts](../../src/audio/audioSessionService.ts)、[src/editor/editorDraftRepository.ts](../../src/editor/editorDraftRepository.ts)、[src/editor/editorSessionController.ts](../../src/editor/editorSessionController.ts)、[src/editor/fileIO.ts](../../src/editor/fileIO.ts)、另 4 项，按需核对源码 |
 | [tests/editor/e8-usability-unit.test.ts](../../tests/editor/e8-usability-unit.test.ts) | [src/editor/routeRecovery.ts](../../src/editor/routeRecovery.ts)、[src/editor/timeline.ts](../../src/editor/timeline.ts)、[src/types/audio.ts](../../src/types/audio.ts) |
-| [tests/editor/e8-usability.integration.test.ts](../../tests/editor/e8-usability.integration.test.ts) | [src/analysis/analysisCoordinator.ts](../../src/analysis/analysisCoordinator.ts)、[src/analysis/types.ts](../../src/analysis/types.ts)、[src/audio/audioSessionService.ts](../../src/audio/audioSessionService.ts)、[src/editor/editorDraftRepository.ts](../../src/editor/editorDraftRepository.ts)、[src/editor/editorSessionController.ts](../../src/editor/editorSessionController.ts)、[src/editor/fileIO.ts](../../src/editor/fileIO.ts)、另 4 项，按需核对源码 |
