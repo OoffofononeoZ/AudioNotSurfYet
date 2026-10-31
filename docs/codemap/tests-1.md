@@ -49,6 +49,7 @@
 | [tests/audio/playback-policy.test.ts](../../tests/audio/playback-policy.test.ts) | [src/audio/playbackPolicy.ts](../../src/audio/playbackPolicy.ts) |
 | [tests/audio/prepared-local-audio.test.ts](../../tests/audio/prepared-local-audio.test.ts) | [src/audio/audioSessionService.ts](../../src/audio/audioSessionService.ts)、[src/persistence/sessionRepository.ts](../../src/persistence/sessionRepository.ts)、[src/stores/audioSessionStore.ts](../../src/stores/audioSessionStore.ts)、[src/types/audio.ts](../../src/types/audio.ts) |
 | [tests/audio/realtime-capture.test.ts](../../tests/audio/realtime-capture.test.ts) | — |
+| [tests/desktop/analyzer-smoke.mjs](../../tests/desktop/analyzer-smoke.mjs) | [scripts/lib/desktop-native-runtime.mjs](../../scripts/lib/desktop-native-runtime.mjs)、[tests/desktop/dialog-fixture.mjs](../../tests/desktop/dialog-fixture.mjs) |
 | [tests/desktop/app-resources.test.ts](../../tests/desktop/app-resources.test.ts) | [electron/appResources.ts](../../electron/appResources.ts) |
 | [tests/desktop/audio-file-ports.test.ts](../../tests/desktop/audio-file-ports.test.ts) | [src/platform/desktopAudioFiles.ts](../../src/platform/desktopAudioFiles.ts)、[src/platform/fileContracts.ts](../../src/platform/fileContracts.ts)、[src/platform/webAudioFiles.ts](../../src/platform/webAudioFiles.ts) |
 | [tests/desktop/bundle-ipc.test.ts](../../tests/desktop/bundle-ipc.test.ts) | [electron/files/bundleIpc.ts](../../electron/files/bundleIpc.ts)、[electron/files/nativeBundles.ts](../../electron/files/nativeBundles.ts)、[electron/files/nativeGrants.ts](../../electron/files/nativeGrants.ts) |
@@ -107,4 +108,3 @@
 | [tests/e2e/e2-editor.spec.ts](../../tests/e2e/e2-editor.spec.ts) | [tests/support/file-picker.ts](../../tests/support/file-picker.ts) |
 | [tests/e2e/e3-editor.spec.ts](../../tests/e2e/e3-editor.spec.ts) | [tests/support/editor-marking.ts](../../tests/support/editor-marking.ts) |
 | [tests/e2e/e4-editor.spec.ts](../../tests/e2e/e4-editor.spec.ts) | [src/analysis/types.ts](../../src/analysis/types.ts)、[tests/support/editor-marking.ts](../../tests/support/editor-marking.ts)、[tests/support/file-picker.ts](../../tests/support/file-picker.ts)、[tests/support/stem-analysis.ts](../../tests/support/stem-analysis.ts) |
-| [tests/e2e/e5-editor.spec.ts](../../tests/e2e/e5-editor.spec.ts) | [tests/support/editor-marking.ts](../../tests/support/editor-marking.ts) |

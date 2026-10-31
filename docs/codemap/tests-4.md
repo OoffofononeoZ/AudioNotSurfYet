@@ -8,6 +8,7 @@
 
 | 文件 | 本地静态引用（最多显示 6 项） |
 | --- | --- |
+| [tests/support/file-picker.ts](../../tests/support/file-picker.ts) | [tests/support/resource-directory.ts](../../tests/support/resource-directory.ts) |
 | [tests/support/lyric-fixture.ts](../../tests/support/lyric-fixture.ts) | [src/processing/sha256.ts](../../src/processing/sha256.ts)、[src/visualizer/algorithmTypes.ts](../../src/visualizer/algorithmTypes.ts)、[src/visualizer/compositionCodec.ts](../../src/visualizer/compositionCodec.ts)、[src/visualizer/elementRegistry.ts](../../src/visualizer/elementRegistry.ts)、[src/visualizer/lyricTypes.ts](../../src/visualizer/lyricTypes.ts)、[src/visualizer/resourceIdentity.ts](../../src/visualizer/resourceIdentity.ts)、另 1 项，按需核对源码 |
 | [tests/support/m10-structure-fixture.ts](../../tests/support/m10-structure-fixture.ts) | [tests/support/audio-fixtures.ts](../../tests/support/audio-fixtures.ts) |
 | [tests/support/m7-learning-fixture.ts](../../tests/support/m7-learning-fixture.ts) | [tests/support/audio-fixtures.ts](../../tests/support/audio-fixtures.ts)、[tests/support/meyda-golden.ts](../../tests/support/meyda-golden.ts) |
@@ -107,4 +108,3 @@
 | [tests/worker/m9-worker.test.ts](../../tests/worker/m9-worker.test.ts) | [src/analysis/compactCodec.ts](../../src/analysis/compactCodec.ts)、[src/analysis/config.ts](../../src/analysis/config.ts)、[src/analysis/types.ts](../../src/analysis/types.ts)、[src/analysis/workerCore.ts](../../src/analysis/workerCore.ts)、[tests/support/audio-fixtures.ts](../../tests/support/audio-fixtures.ts)、[tests/support/m9-vector-fixture.ts](../../tests/support/m9-vector-fixture.ts) |
 | [tests/worker/probe.worker.mjs](../../tests/worker/probe.worker.mjs) | — |
 | [tests/worker/window-analysis.test.ts](../../tests/worker/window-analysis.test.ts) | [src/analysis/config.ts](../../src/analysis/config.ts)、[src/analysis/renderGeometry.ts](../../src/analysis/renderGeometry.ts)、[src/analysis/rendererData.ts](../../src/analysis/rendererData.ts)、[src/analysis/types.ts](../../src/analysis/types.ts)、[src/analysis/windowAnalysis.ts](../../src/analysis/windowAnalysis.ts)、[src/analysis/windowTypes.ts](../../src/analysis/windowTypes.ts)、另 1 项，按需核对源码 |
-| [tests/worker/worker-harness.test.ts](../../tests/worker/worker-harness.test.ts) | — |

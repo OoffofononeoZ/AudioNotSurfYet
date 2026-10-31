@@ -25,6 +25,8 @@ npm run dev
 
 `test:desktop:inputs` 检查实际 ASAR 的 `.osu/.osz`、Editor JSON、PNG/JPEG/WebP、MP4/WebM 与 UTF-8 LRC；覆盖取消/损坏保留、时间轴渲染、内嵌字节与移走素材后重启/JSON 回读和真实视频导出。系统选值为替身，范围与结果见[测试说明](tests/README.md)。
 
+`test:desktop:analyzer` 检查打包版 22 张卡片、三类特征的真实 Worker/精确游标、缩放和重启后的完整缓存摘要；只初始化游标用 PCM 的空特征批次不算显示特征重算。它与网页端专项分别记录，详见[测试说明](tests/README.md)。
+
 `test:desktop:directories:manual` 打开真正的 Windows 资源库/壁纸目录选择、预设写入确认及两次退出确认，需要人工按提示操作。只预填独占测试目录，保留系统返回值；当前结果与剩余人工输入见[桌面阶段](docs/context/desktop.md)。
 
 NSIS 产物明确未签名、按用户安装，保留用户数据并关闭安装后自动启动；`desktop:package` 同时生成安装器的 `.sha256`。产品图标复用现有唱片标记。`npm run test:desktop:install` 会执行真实安装、临时补丁版本升级、安装版启动和卸载：拒绝覆盖已有安装，先备份用户数据，检查包内容/注册/快捷方式及原文件保留；显式 `--profile-from <成功自动标记 result.json>` 另验证独立副本中的工程/八模型/结果、升级后离线重算及卸载后读取，详见 [tests README](tests/README.md)。结果与私有备份在忽略目录中；本机同实现版本夹具通过不等于未来 schema 迁移或发布通过。

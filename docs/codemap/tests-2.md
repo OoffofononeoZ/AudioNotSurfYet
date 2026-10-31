@@ -8,6 +8,7 @@
 
 | 文件 | 本地静态引用（最多显示 6 项） |
 | --- | --- |
+| [tests/e2e/e5-editor.spec.ts](../../tests/e2e/e5-editor.spec.ts) | [tests/support/editor-marking.ts](../../tests/support/editor-marking.ts) |
 | [tests/e2e/e6-editor.spec.ts](../../tests/e2e/e6-editor.spec.ts) | [src/editor/markerTimeView.ts](../../src/editor/markerTimeView.ts)、[src/editor/pointAnnotations.ts](../../src/editor/pointAnnotations.ts)、[src/editor/rangeAnnotations.ts](../../src/editor/rangeAnnotations.ts)、[src/editor/types.ts](../../src/editor/types.ts)、[tests/support/e6-stress-project.ts](../../tests/support/e6-stress-project.ts)、[tests/support/editor-marking.ts](../../tests/support/editor-marking.ts)、另 2 项，按需核对源码 |
 | [tests/e2e/e7-editor-compact.spec.ts](../../tests/e2e/e7-editor-compact.spec.ts) | [src/analysis/types.ts](../../src/analysis/types.ts)、[tests/support/editor-marking.ts](../../tests/support/editor-marking.ts) |
 | [tests/e2e/e8-editor-usability.spec.ts](../../tests/e2e/e8-editor-usability.spec.ts) | [tests/support/editor-marking.ts](../../tests/support/editor-marking.ts)、[tests/support/file-picker.ts](../../tests/support/file-picker.ts) |
@@ -107,4 +108,3 @@
 | [tests/editor/e5-range-annotation.integration.test.ts](../../tests/editor/e5-range-annotation.integration.test.ts) | [src/editor/editorDraftRepository.ts](../../src/editor/editorDraftRepository.ts)、[src/editor/pointAnnotations.ts](../../src/editor/pointAnnotations.ts)、[src/editor/projectCodec.ts](../../src/editor/projectCodec.ts)、[src/editor/rangeAnnotations.ts](../../src/editor/rangeAnnotations.ts)、[src/editor/types.ts](../../src/editor/types.ts) |
 | [tests/editor/e6-hardening-unit.test.ts](../../tests/editor/e6-hardening-unit.test.ts) | [src/editor/pointAnnotations.ts](../../src/editor/pointAnnotations.ts)、[src/editor/projectCodec.ts](../../src/editor/projectCodec.ts)、[src/editor/rangeAnnotations.ts](../../src/editor/rangeAnnotations.ts)、[src/editor/types.ts](../../src/editor/types.ts)、[tests/support/e6-stress-project.ts](../../tests/support/e6-stress-project.ts) |
 | [tests/editor/e6-hardening.integration.test.ts](../../tests/editor/e6-hardening.integration.test.ts) | [src/editor/editorDraftRepository.ts](../../src/editor/editorDraftRepository.ts)、[src/editor/projectCodec.ts](../../src/editor/projectCodec.ts)、[src/editor/types.ts](../../src/editor/types.ts)、[tests/support/e6-stress-project.ts](../../tests/support/e6-stress-project.ts) |
-| [tests/editor/e7-fullscreen-overlay-unit.test.ts](../../tests/editor/e7-fullscreen-overlay-unit.test.ts) | [src/editor/overlay.ts](../../src/editor/overlay.ts) |

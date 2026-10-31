@@ -60,6 +60,7 @@ import { moveMarkerLane } from '../editor/markerLaneMovement';
 const props = defineProps<{ project: EditorProjectV2; setting: Readonly<EditorBeatSnapSetting>; editable: boolean }>();
 const emit = defineEmits<{ opening: []; updateProject: [project: EditorProjectV2]; status: [message: string] }>();
 const dialog = ref<HTMLDialogElement | null>(null),
+    opened = ref(false),
     laneId = ref<string | number>(''),
     cells = ref(1),
     error = ref('');
@@ -73,22 +74,24 @@ const options = computed(() =>
     })),
 );
 // Compare content rather than object identity: persistence notifications can clone an unchanged project.
-const signature = computed(() => JSON.stringify([props.project, props.setting, props.editable]));
+const signature = computed(() => (opened.value ? JSON.stringify([props.project, props.setting, props.editable]) : ''));
 let openedSignature = '';
 function open() {
     if (!props.editable || !hasEvents.value) return;
     laneId.value = props.project.lanes.find(lane => lane.events.length)!.id;
     cells.value = 1;
     error.value = '';
+    opened.value = true;
     openedSignature = signature.value;
     emit('opening');
     dialog.value?.showModal();
 }
 function close() {
+    opened.value = false;
     dialog.value?.close();
 }
 function apply(direction: -1 | 1) {
-    if (!props.editable || signature.value !== openedSignature) {
+    if (!opened.value || !props.editable || signature.value !== openedSignature) {
         close();
         return;
     }
@@ -105,8 +108,8 @@ function apply(direction: -1 | 1) {
         error.value = (e as Error).message;
     }
 }
-watch(signature, () => {
-    if (dialog.value?.open) close();
+watch(signature, value => {
+    if (dialog.value?.open && value !== openedSignature) close();
 });
 onBeforeUnmount(close);
 </script>

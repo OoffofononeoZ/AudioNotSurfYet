@@ -283,6 +283,22 @@ try {
     await surface.click({ position: { x: ((1 - viewStart) / (viewEnd - viewStart)) * bounds.width, y: 24 } });
     await expect.poll(async () => (await editorDraft()).lanes[0].events.length).toBe(1);
     await savedEditor();
+    const initial = await editorDraft();
+    await page.getByTestId('marker-track-operations').click();
+    const operations = page.getByRole('dialog', { name: '轨道操作', exact: true });
+    await expect(operations).toBeVisible();
+    await page.getByTestId('move-track-backward').click();
+    await expect(operations).toBeHidden();
+    await expect
+        .poll(async () => (await editorDraft()).lanes[0].events[0].atSeconds)
+        .toBeGreaterThan(initial.lanes[0].events[0].atSeconds);
+    await savedEditor();
+    assert.equal((await editorDraft()).lanes[0].events[0].id, initial.lanes[0].events[0].id);
+    await page.getByTestId('marker-track-operations').click();
+    await page.getByRole('button', { name: '增大节拍细分', exact: true }).dispatchEvent('click');
+    await expect(operations).toBeHidden();
+    await page.getByRole('button', { name: '减小节拍细分', exact: true }).click();
+    result.checks.editorTrackOperationAndStaleGrid = 'passed';
     const before = await editorDraft();
     assert.equal(before.lanes[0].events.length, 1);
     await openOsu();

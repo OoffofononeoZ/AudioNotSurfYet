@@ -20,6 +20,7 @@
 | Electron 封装媒体 | `test:desktop:media` 实际 ASAR 四档首次/重复同步片和几何预设输出，取消保存后重试；复用现有媒体 oracle 的 `--files-only` 严格解码/逐帧/同步门槛。结果不能转写为 Chrome/Edge `--all`、长片、模型或原生保存 UI 通过 |
 | Electron 三维/展示 | `test:desktop:scene` 实际 ASAR 现有三维示例的镜头/位置编辑与草稿重启、720p30 真正输出/全解码/逐帧 PTS/动态几何、首页样式重启及模式切换、应用内展示/满视口/全屏/重启/缺失返回。全程拒绝 HTTP(S)，原库只读；系统选值替身不证明原生 UI，一例不替代四档矩阵或深度数值 oracle |
 | Electron 素材输入 | `test:desktop:inputs` 实际 ASAR 的 osu/osz、Editor JSON、三图片/两视频格式及 UTF-8 LRC，检查取消/损坏保留、原音频身份/换歌保护、内嵌摘要、seek/循环/淡化、移走素材后重启和 JSON/视频输出。仅导入更新时间戳可变，其余完整内容比较；系统选值替身不证明原生 UI，合成片不扩展为任意 codec 或质量接受 |
+| Electron Analyzer | `test:desktop:analyzer` 实际 ASAR 的 22 卡、三类真实 Worker/精确值、六 Canvas/DPR/共用缩放与缓存载体/二进制摘要重启一致。游标保留 PCM 可使用空特征批次，只断言显示特征不重算；不把短输入三项代表值当全特征 golden，系统选值仍为替身 |
 | Electron 封装长片 | `test:desktop:media:long` 实际 ASAR 的 900 秒/1080p60 原生输入与白闪、真实分块保存和取消清理，复用严格媒体 oracle 检查 54,000 帧及同步。只采样应用自身 metrics，UI 诊断不作为精确帧数证据；不推广为任意复杂场景性能或原生保存 UI 验收 |
 | Electron 模型网络/FT | `test:desktop:model-network` 覆盖真实固定 URL 的 Range、其他路径拒绝和生产算法 iframe/Worker 网络隔离；`test:desktop:ft` 覆盖真实四模型下载/校验/推断、WAV、离线恢复/推断及取消。`--profile-from` 只显式复用已验证冷下载的专属 profile，不能当作新冷下载；仍不证明自动标记/长曲/原生保存 UI |
 | Electron 自动标记 | `test:desktop:transcription -- --profile-from <冷 FT result.json>` 在独立校验副本执行真实四转录模型、五输入、辅助试听、候选应用、离线恢复/重算、取消及第二副本损坏/清理；核对 V2 人工轨/tempo 保留。原 profile 保留，实际候选数量与模型链路不等于识别质量或长曲接受 |

@@ -395,18 +395,26 @@ test('keeps a deterministic 10,000-event project virtualized and responsive', as
     await expect(page.getByTestId('editor-buffer-state')).toHaveText('波形已就绪', {
         timeout: 120_000,
     });
-    await page.getByTestId('editor-overlay-menu-toggle').click();
-    await page.getByTestId('editor-overlay-feature-menu').locator('[data-source="original"]').click();
-    await page.getByTestId('editor-overlay-feature-menu').locator('[data-feature-id="rms"]').click();
+    // The imported fixture already selects RMS; opening its saved selection uses the explicit visibility control.
+    await expect(page.getByTestId('editor-overlay-toggle')).toHaveAttribute('aria-pressed', 'false');
+    await page.getByTestId('editor-overlay-toggle').click();
+    await expect(page.getByTestId('editor-overlay-toggle')).toHaveAttribute('aria-pressed', 'true');
     await expect(page.getByTestId('editor-analysis-overlay-panel')).toHaveAttribute('data-analysis-state', 'ready', {
         timeout: 120_000,
     });
 
     await page.evaluate(() => {
-        const diagnostics = window as typeof window & { __e6LongTasks?: number[] };
+        const diagnostics = window as typeof window & {
+            __e6LongTasks?: number[];
+            __e6LongTaskRows?: Array<{ start: number; duration: number }>;
+        };
         diagnostics.__e6LongTasks = [];
+        diagnostics.__e6LongTaskRows = [];
         const observer = new PerformanceObserver(list => {
             diagnostics.__e6LongTasks?.push(...list.getEntries().map(entry => entry.duration));
+            diagnostics.__e6LongTaskRows?.push(
+                ...list.getEntries().map(entry => ({ start: entry.startTime, duration: entry.duration })),
+            );
         });
         observer.observe({ entryTypes: ['longtask'] });
     });
@@ -487,6 +495,15 @@ test('keeps a deterministic 10,000-event project virtualized and responsive', as
     }
     const longTasks = await page.evaluate(
         () => (window as typeof window & { __e6LongTasks?: number[] }).__e6LongTasks ?? [],
+    );
+    console.log(
+        JSON.stringify({
+            metric: 'e6-long-task-detail',
+            ...(await page.evaluate(() => ({
+                tasks: (window as any).__e6LongTaskRows,
+                feedback: (window as any).__e6Feedback,
+            }))),
+        }),
     );
     expect(longTasks.filter(duration => duration > 50)).toEqual([]);
 

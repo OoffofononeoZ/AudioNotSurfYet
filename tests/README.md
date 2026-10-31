@@ -34,7 +34,9 @@ Web/Electron 改动先核对[双端阶段和验证要求](../docs/context/deskto
 
 `npm run test:desktop:scene` 使用实际 ASAR 与独立 profile，只读加载现有 shared-camera-demo，操作响应式面板编辑镜头关键帧/元素位置，实际重启核对完整工程。720p30 三秒输出复用媒体 oracle 的 `--files-only` 检查全解码/逐帧 PTS，另检查每帧青/橙立方体及动态帧摘要；不冒充四档矩阵、深度数值 oracle 或任意场景质量保证。随后检查首页样式重启与模式切换、桌面无外部地址/复制的 `/display` 入口、满视口几何、真实全屏/退出、展示重启和缺失样式返回。拒绝所有 HTTP(S)，核对源包/源码 hash；系统选择结果仍为替身。结果和已绘制截图在 `artifacts/desktop/scene/<ID>`，WebM/媒体测量在既有 composition output 目录。
 
-`npm run test:desktop:inputs` 实际 ASAR/独立 profile 覆盖 `.osu` 追加与原 tempo/人工标记保留，`.osz` 多难度/损坏音频/原音频 hash 不匹配拒绝/换歌取消与应用、Editor JSON 原生保存及回读/重启。图片 PNG/JPEG/WebP 逐一读取内嵌 bytes/hash 并检查颜色、取消/损坏保留和轮播淡化；VP9 WebM/H.264 MP4 在帧边界之间检查往返 seek/循环；UTF-8 中英文 LRC 检查内嵌摘要、取消与无时间戳拒绝。移走本次媒体/LRC 源文件后，实际重启的完整草稿相同，JSON 回读仅允许既有 updatedAt 更新，其余字段完整比较；前后两份 720p30/四秒 WebM 复用媒体 oracle `--files-only` 全解码/120 帧逐帧 PTS 检查。拒绝 HTTP(S)，所有源/输出只在独占目录，外部资源库只读；系统选择结果替身不证明原生 UI，合成材料不扩大为任意编码或质量保证。结果/工程/截图在 `artifacts/desktop/inputs/<ID>`，视频/测量沿用 composition output。
+`npm run test:desktop:inputs` 实际 ASAR/独立 profile 覆盖轨道操作打开/移动保留事件 ID/网格变化关闭，`.osu` 追加与原 tempo/人工标记保留，`.osz` 多难度/损坏音频/原音频 hash 不匹配拒绝/换歌取消与应用、Editor JSON 原生保存及回读/重启。图片 PNG/JPEG/WebP 逐一读取内嵌 bytes/hash 并检查颜色、取消/损坏保留和轮播淡化；VP9 WebM/H.264 MP4 在帧边界之间检查往返 seek/循环；UTF-8 中英文 LRC 检查内嵌摘要、取消与无时间戳拒绝。移走本次媒体/LRC 源文件后，实际重启的完整草稿相同，JSON 回读仅允许既有 updatedAt 更新，其余字段完整比较；前后两份 720p30/四秒 WebM 复用媒体 oracle `--files-only` 全解码/120 帧逐帧 PTS 检查。拒绝 HTTP(S)，所有源/输出只在独占目录，外部资源库只读；系统选择结果替身不证明原生 UI，合成材料不扩大为任意编码或质量保证。结果/工程/截图在 `artifacts/desktop/inputs/<ID>`，视频/测量沿用 composition output。
+
+`npm run test:desktop:analyzer` 使用实际 ASAR 和受控四秒音频，检查初始 22 张折叠卡、RMS/512-bin 频谱/12 维 Chroma 三项真实 Worker 与非静音时刻的精确值、六 Canvas 的 DPR/缩放，以及完整 IndexedDB 缓存载体/三个 payload 的大小和 SHA-256 重启相同。观测生产 Worker 的原消息，不注入开发模块或改返回值；重启允许 prepare-source/空特征批次为游标保留 PCM，断言不重算任何显示特征。拒绝 HTTP(S)，系统选值为替身，不替代全 22 特征数值 golden 或性能 canonical。结果与截图在 `artifacts/desktop/analyzer/<ID>`。
 
 `npm run test:desktop:media` 在实际 ASAR 中导入受控 12 秒同步音频，复用生产 authoring/codec 创建黑底白闪工程；四档各执行首次及同页重复导出，再用 3 秒音频和既有 geometric-0.6 预设各导出一次。页面音量为零，禁止 captureStream/MediaRecorder；首次保存取消后保留 ready 再重试，全部通过真实 IPC 分块保存。外部库只读，系统选值为替身；换歌显式通过本次独占草稿的覆盖提示。此处 cold 表示该档首次输出，不表示新进程冷启动。
 
