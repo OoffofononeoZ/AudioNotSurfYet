@@ -2,7 +2,7 @@
 
 2026-10-22，owner 明确取消新增元素和预设的强制内容审批：生成请求默认自主完成，开放创意由 agent 定案；明确需求只有关键条件缺失、冲突或无法实现时才进一步询问。正常生成交付必须附至少一张实际展示图。此决定替代 DEC-082 及后续沿用的具体内容合同批准门禁，历史批准事实保留。
 
-当前运行时为 Project V6 与资源包 V2，支持 ABI 1–5 和已有标记输入边界。生成 skill 2.7.0 仅维护于外部 `WheresYourElements/skill/visualizer-content-generator/`，项目不保留副本或发现包装；工具可用 `VISUALIZER_SKILL_DIR` 覆盖位置。外部仓库允许正常 Git 工作流，不自动推送或发布。
+当前运行时为 Project V6 与资源包 V2，支持 ABI 1–5 和已有标记输入边界。生成 skill 2.7.1 仅维护于外部 `WheresYourElements/skill/visualizer-content-generator/`，项目不保留副本或发现包装；工具可用 `VISUALIZER_SKILL_DIR` 覆盖位置。外部仓库允许正常 Git 工作流，不自动推送或发布。
 
 ## 当前模型与适用关系
 
@@ -37,12 +37,12 @@
 
 ## 验证与交付
 
-具体输入、格式与工具见根 [AGENTS](../../../AGENTS.md) 指向的外部 skill。读取外部 skill 和引用文档时也必须显式指定 UTF-8 参数，例如 `Get-Content -Encoding UTF8`、`rg --encoding utf-8`。Skill 自身测试在外部仓库运行，项目命令 `npm run test:skill:visualizer-content-generator` 按需转调。校验器测试证明结构与 CLI 行为，不单独证明工作流、视觉或 runtime 正确。
+具体输入、格式与工具见根 [AGENTS](../../../AGENTS.md) 指向的外部 skill。读取外部 skill 和引用文档时也必须显式指定 UTF-8 参数，例如 `Get-Content -Encoding UTF8`、`rg --encoding utf-8`。Skill 测试、npm 配置及依赖在外部资源仓库根目录维护，skill 内只保留独立生成所需的说明、参考和脚本；不在 skill 内安装 node_modules。项目命令 `npm run test:skill:visualizer-content-generator` 按需转调外部仓库根 scripts/test.mjs。此迁移只涉及开发工具，不改变 Web/Electron 运行时。校验器测试证明结构与 CLI 行为，不单独证明工作流、视觉或 runtime 正确。
 
 内容验证按实际变化选择 V6 往返、资源包校验与隔离执行、分组/引用隔离、共同参数差异、数据映射、确定性、GPU、生命周期和短离线媒体检查；不默认累计历史评审或长曲矩阵。适用阈值保持，未运行/失败如实记录。仅修改 skill 时无需应用构建或产品浏览器回归；资源加载或产品行为变化选择对应验证。完成后按项目交付规则本地提交，不推送、不发布、不产生 readiness 结论。
 
 ## 媒体内容生成
 
-独立 skill 2.7.0 支持 ABI 3 的媒体输入和显式执行模式，以及 ABI 4 的世界空间、共享 camera 和深度；宿主 codec 与外部快照通过 visualizer:skill-codec 同步并只读核对。元素先独立封装验证，再创建精确引用的预设；媒体默认为 none。具体字段见外部 skill 的 media-inputs、scene3d 参考、[宿主媒体契约](../../context/visualizer-media.md)与[三维场景契约](scene3d.md)。
+独立 skill 2.7.1 支持 ABI 3 的媒体输入和显式执行模式，以及 ABI 4 的世界空间、共享 camera 和深度；宿主 codec 与外部快照通过 visualizer:skill-codec 同步并只读核对。元素先独立封装验证，再创建精确引用的预设；媒体默认为 none。具体字段见外部 skill 的 media-inputs、scene3d 参考、[宿主媒体契约](../../context/visualizer-media.md)与[三维场景契约](scene3d.md)。
 
 ABI 5 歌词仅支持歌曲预览与离线视频，宿主负责 LRC 和文字图集，外部元素负责运动与几何；Brief 可声明 lyricInputs，模板仅 unbound。编写前读取外部 lyric-inputs 参考及[宿主歌词合同](../../context/visualizer-lyrics.md)。

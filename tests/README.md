@@ -134,7 +134,7 @@ Web/Electron 改动先核对[双端阶段和验证要求](../docs/context/deskto
 | `npm run test:e6:integration`                           | 10,000 事件 JSON 与 IndexedDB round-trip、重叠工程原子拒绝和 durable draft 保留                                                                                   |
 | `npm run test:docs`                                     | 只读检查 Markdown 内部链接与规模；手写文档 >500 行提示、≥800 行失败，不强制生命周期元数据                                                                         |
 | `npm run test:harness`                                  | 证明 deliberate failure 会非零退出                                                                                                                                |
-| `npm run test:skill:visualizer-content-generator`       | 转调外部 skill 的 Brief V2 与封装测试；生成默认自主执行，正常交付附实际展示图                                                                                     |
+| `npm run test:skill:visualizer-content-generator`       | 转调外部资源仓库根目录的 Brief V2、封装与分发测试；生成默认自主执行，正常交付附实际展示图                                                                                     |
 | `npm run test:e2e`                                      | 稳定 Chrome 的全部当前 E2E                                                                                                                                        |
 | `npm run test:e2e:m3`                                   | M3 应用、Worker、IndexedDB 和三格式 smoke                                                                                                                         |
 | `npm run test:e2e:m4`                                   | M4 播放/队列/错误/资源回归及 60 秒计时                                                                                                                            |
@@ -315,7 +315,7 @@ Web/Electron 改动先核对[双端阶段和验证要求](../docs/context/deskto
 
 `npx playwright test tests/e2e/visualizer-resource-directory.spec.ts tests/e2e/visualizer-resource-preview.spec.ts tests/e2e/visualizer-resources.spec.ts --project=chrome --project=edge --workers=1` 覆盖目录/预览/恢复、损坏刷新与 V5 独立恢复及短离线输出。SVG 专项核对嵌套路径、自动发现、渐变/滤镜/文字的实际像素、外部库元素/预设封面及脚本/外部引用拒绝。测试用真实 OPFS 句柄和 IndexedDB structured clone，picker/许可为替身；它不证明原生 OS 文件夹选择和磁盘授权 UI。原生人工检查需实际选择 assets、拒绝/恢复访问、关闭重开浏览器，并检查外部文件未被应用改写。
 
-内容生成 skill 与专属测试仅在外部 `WheresYourElements/skill/visualizer-content-generator/` 维护。`VISUALIZER_SKILL_DIR` 可覆盖位置；上述 skill 测试及 `visualizer:resources` 命令按需加载外部脚本，缺失时明确报错，不阻断无关测试或普通应用构建。先在外部 skill 目录按其 lockfile 安装测试依赖，项目不保留 skill 副本。
+内容生成 skill 仅在外部 `WheresYourElements/skill/visualizer-content-generator/` 维护；专属测试、测试入口、npm 配置与依赖位于 `WheresYourElements` 仓库根目录，先在那里按 lockfile 执行 `npm ci`。`VISUALIZER_SKILL_DIR` 可覆盖 skill 位置；上述测试命令从该目录向上两级查找仓库根的 `scripts/test.mjs`，独立复制的 skill 不携带测试入口。`visualizer:resources` 仍加载 skill 内的生成脚本。所需入口缺失时明确报错，不阻断无关测试或 Web/Electron 普通构建；项目不保留 skill 副本。
 
 ## Circular Visualizer 媒体专项
 
