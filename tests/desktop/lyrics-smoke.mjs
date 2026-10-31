@@ -12,7 +12,7 @@ import {
     cleanupNativeTree,
     hashFile,
 } from '../../scripts/lib/desktop-native-runtime.mjs';
-import { installDialogFixture, queueOpen, queueSave } from './dialog-fixture.mjs';
+import { installDialogFixture, queueOpen, queueSave, queueConfirmation } from './dialog-fixture.mjs';
 
 const root = fileURLToPath(new URL('../../', import.meta.url)),
     native = await createNativeRun('lyrics');
@@ -77,7 +77,11 @@ try {
         env,
         timeout: 30000,
     });
-    await app.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].setContentSize(1600, 1000));
+    await app.evaluate(({ BrowserWindow }) => {
+        const owner = BrowserWindow.getAllWindows()[0];
+        owner.setContentSize(1600, 1000);
+        owner.show();
+    });
     await installDialogFixture(app);
     page = await app.firstWindow();
     page.on('pageerror', e => errors.push(e.message));
@@ -105,6 +109,23 @@ try {
         await queueOpen(app, [lrc]);
         await section.getByText('选择文件', { exact: true }).click();
         await expect(section.getByRole('button', { name: '清除歌词', exact: true })).toBeVisible();
+        if (type === 'black-hole-lyrics') {
+            await queueConfirmation(app, '读取本机字体', 0);
+            await section.getByRole('button', { name: '读取本机字体', exact: true }).click();
+            const fonts = section.getByRole('combobox', { name: '歌词字体', exact: true });
+            await expect(fonts).toBeVisible({ timeout: 30000 });
+            const count = await fonts.locator('option').count();
+            assert(count > 2);
+            const chosen = await fonts
+                .locator('option')
+                .evaluateAll(
+                    options => (options.find(o => o.textContent === 'Georgia') ?? options.find(o => o.value)).value,
+                );
+            await fonts.selectOption(chosen);
+            await expect(page.getByTestId('visualizer-preview-frame')).toHaveAttribute('data-scene-status', 'ready');
+            result.localFontCount = count - 1;
+            result.selectedPostscriptName = chosen;
+        }
         const project = await snapshot();
         const e = project.elements.at(-1);
         assert.equal(e.lyricBindings.lyrics.leadSeconds, type === 'black-hole-lyrics' ? 0.6 : 2);
@@ -112,6 +133,14 @@ try {
         project.elements = [e];
         project.items = [{ kind: 'element', id: e.id }];
         e.seed = 123;
+        if (type === 'black-hole-lyrics') {
+            assert.equal(e.lyricBindings.lyrics.font.postscriptName, result.selectedPostscriptName);
+            for (const b of e.bindings) {
+                if (b.parameterId === 'shakeEnabled') b.source = { kind: 'constant', value: true };
+                if (b.parameterId === 'glitchIntensity') b.source = { kind: 'constant', value: 5 };
+                if (b.parameterId === 'destroyDurationSeconds') b.source = { kind: 'constant', value: 2 };
+            }
+        }
         e.bindings = e.bindings.map(b =>
             b.parameterId === 'spectrum' ? { ...b, source: { kind: 'constant', value: Array(128).fill(0) } } : b,
         );
@@ -122,6 +151,7 @@ try {
             const restored = await snapshot();
             assert.deepEqual(restored.lyricAssets, project.lyricAssets);
             assert.equal(restored.output.frameRate, fps);
+            assert.deepEqual(restored.elements[0].lyricBindings.lyrics.font, e.lyricBindings.lyrics.font);
             assert.equal(restored.elements.length, 1);
             assert.equal(restored.elements[0].resource.id, type);
             const closeInspector = page.getByRole('button', { name: '关闭元素属性', exact: true });

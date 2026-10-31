@@ -45,12 +45,18 @@
                     :disabled="disabled || busy"
                     @change="value => patch({ offsetSeconds: value })"
             /></label>
+            <VisualizerLyricFont
+                :font="binding.font"
+                :disabled="disabled || busy"
+                :identity="elementId + ':' + definition.id + ':' + projectRevision"
+                @change="font => patch({ font })" />
             <p class="viz-muted">正值延后，负值提前。歌词时间跟随歌曲，不随元素起点平移。</p>
             <button type="button" class="viz-button" :disabled="disabled || busy" @click="clear">清除歌词</button>
         </template>
     </section>
 </template>
 <script setup lang="ts">
+import VisualizerLyricFont from './VisualizerLyricFont.vue';
 import PlatformFileInput from '../platform/PlatformFileInput.vue';
 import { computed, onBeforeUnmount, ref, watch } from 'vue';
 import AppNumberInput from '../controls/AppNumberInput.vue';
@@ -107,6 +113,7 @@ async function select(files: File[]) {
                 leadSeconds: previous.leadSeconds,
                 tailSeconds: previous.tailSeconds,
                 offsetSeconds: previous.offsetSeconds,
+                ...(previous.font ? { font: previous.font } : {}),
             };
         emit('change', { elementId, inputId, ...result });
     } catch (cause) {

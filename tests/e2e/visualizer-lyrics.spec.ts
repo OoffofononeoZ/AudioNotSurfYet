@@ -151,6 +151,7 @@ async function exported(page: Page): Promise<VisualizerProjectV6> {
 async function load(page: Page, p: VisualizerProjectV6) {
     await queuePickerData(page, [{ name: 'lyrics.json', mimeType: 'application/json', text: JSON.stringify(p) }]);
     await page.getByTestId('import-visualizer-project').click();
+    await expect(page.getByTestId('import-visualizer-project')).toHaveAttribute('aria-busy', 'false');
     await expect(page.getByTestId('visualizer-preview-frame')).toHaveAttribute('data-scene-status', 'ready');
 }
 
@@ -187,6 +188,34 @@ for (const type of ['circular-depth-lyrics', 'black-hole-lyrics'])
         });
         await expect(page.getByRole('button', { name: '清除歌词', exact: true })).toBeVisible();
         let bound = await exported(page);
+        if (type === 'black-hole-lyrics') {
+            await page.context().grantPermissions([]);
+            await page.getByRole('button', { name: '读取本机字体', exact: true }).click();
+            await expect(page.locator('[aria-label="歌词字体"] [role="alert"]')).toContainText(/未获准|没有可访问/u);
+            await page.context().grantPermissions(['local-fonts']);
+            await expect(page.getByText('已保存', { exact: true })).toBeVisible();
+            await page.reload();
+            await expect(page.getByTestId('visualizer-ready')).toBeVisible();
+            await page.getByRole('button', { name: '黑洞歌词', exact: true }).click();
+            await expect(page.getByRole('button', { name: '清除歌词', exact: true })).toBeVisible();
+            await page.getByRole('button', { name: '读取本机字体', exact: true }).click();
+            const fonts = page.getByRole('combobox', { name: '歌词字体', exact: true });
+            await expect(fonts).toBeVisible({ timeout: 30000 });
+            expect(await fonts.locator('option').count()).toBeGreaterThan(2);
+            const chosen = await fonts
+                .locator('option')
+                .evaluateAll(options =>
+                    (
+                        options.find(o => o.textContent === 'Georgia') ??
+                        (options.find(o => !!(o as HTMLOptionElement).value) as HTMLOptionElement)
+                    ).getAttribute('value')!,
+                );
+            await fonts.selectOption(chosen);
+            await expect(page.getByTestId('visualizer-preview-frame')).toHaveAttribute('data-scene-status', 'ready');
+            bound = await exported(page);
+            expect((bound.elements[0]!.lyricBindings!.lyrics as any).font.postscriptName).toBe(chosen);
+        }
+        const selectedFont = (bound.elements[0]!.lyricBindings!.lyrics as any).font;
         await page.getByRole('spinbutton', { name: '歌词提前入场', exact: true }).fill('0.7');
         await page.getByRole('spinbutton', { name: '歌词提前入场', exact: true }).press('Enter');
         await file.setInputFiles({
@@ -197,6 +226,7 @@ for (const type of ['circular-depth-lyrics', 'black-hole-lyrics'])
         await expect(page.getByRole('button', { name: '清除歌词', exact: true })).toBeVisible();
         bound = await exported(page);
         expect(bound.elements[0]!.lyricBindings!.lyrics).toMatchObject({ leadSeconds: 0.7 });
+        expect((bound.elements[0]!.lyricBindings!.lyrics as any).font).toEqual(selectedFont);
         expect(bound.lyricAssets).toHaveLength(1);
         await file.setInputFiles({ name: 'bad.lrc', mimeType: 'text/plain', buffer: Buffer.from('untimed') });
         await expect(page.locator('[data-lyric-input=lyrics] [role=alert]')).toContainText('时间戳');
@@ -218,6 +248,12 @@ for (const type of ['circular-depth-lyrics', 'black-hole-lyrics'])
         await page.evaluate(() => (window as any).releaseLyric());
         expect((await exported(page)).lyricAssets).toEqual(bound.lyricAssets);
         const p = bound;
+        if (type === 'black-hole-lyrics')
+            for (const b of p.elements[0]!.bindings) {
+                if (b.parameterId === 'shakeEnabled') b.source = { kind: 'constant', value: true };
+                if (b.parameterId === 'glitchIntensity') b.source = { kind: 'constant', value: 5 };
+                if (b.parameterId === 'destroyDurationSeconds') b.source = { kind: 'constant', value: 2 };
+            }
         p.elements[0]!.seed = 123;
         p.elements[0]!.bindings = p.elements[0]!.bindings.map(b =>
             b.parameterId === 'spectrum' ? { ...b, source: { kind: 'constant', value: Array(128).fill(0.4) } } : b,

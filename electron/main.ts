@@ -1,3 +1,4 @@
+import { registerFontAccess } from './registerFontAccess';
 import { app, BrowserWindow, dialog, net, protocol, session, shell, screen } from 'electron';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
@@ -69,11 +70,23 @@ async function createWindow() {
     app.once('will-quit', unregisterSaves);
     app.once('will-quit', unregisterFiles);
     const desktopSession = session.fromPartition('persist:audiosurf-desktop');
+    let localFontsGranted = false;
     desktopSession.setPermissionRequestHandler((contents, permission, callback, details) => {
         const ownPage = contents === window?.webContents && details.isMainFrame && trustedUrl(details.requestingUrl);
+        if (permission === 'local-fonts') {
+            callback(!!ownPage && localFontsGranted);
+            return;
+        }
         callback(!!ownPage && ['fullscreen', 'clipboard-sanitized-write', 'persistent-storage'].includes(permission));
     });
-    desktopSession.setPermissionCheckHandler((contents, permission, origin) => {
+    desktopSession.setPermissionCheckHandler((contents, permission, origin, details) => {
+        if (permission === 'local-fonts')
+            return !!(
+                localFontsGranted &&
+                contents === window?.webContents &&
+                details.isMainFrame &&
+                trustedUrl(origin)
+            );
         return (
             contents === window?.webContents &&
             trustedUrl(origin) &&
@@ -141,6 +154,14 @@ async function createWindow() {
     });
     // On Windows at fractional display scaling, constructor bounds can grow by a few DIP.
     // Reapply the fitted outer bounds before observing changes so restarts do not accumulate drift.
+    const unregisterFonts = registerFontAccess(
+        () => window,
+        ownerOrigin,
+        allowed => {
+            localFontsGranted = allowed;
+        },
+    );
+    window.once('closed', unregisterFonts);
     window.setBounds(placement.bounds);
     trackWindowState(window, windowStateFile);
     const shutdownChannel = new ShutdownChannel(() => window, ownerOrigin);
@@ -168,7 +189,10 @@ async function createWindow() {
     window.webContents.on('render-process-gone', () => grants.clearTransientFiles());
     window.webContents.on('did-start-navigation', (_event, _url, sameDocument, isMainFrame) => {
         if (isMainFrame) {
-            if (!sameDocument) shutdownChannel.invalidate();
+            if (!sameDocument) {
+                shutdownChannel.invalidate();
+                localFontsGranted = false;
+            }
             abortSaves();
             grants.clearTransientFiles();
         }

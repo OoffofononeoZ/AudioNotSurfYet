@@ -166,3 +166,41 @@ test('grapheme inputs retain whitespace, punctuation and complete emoji, with ex
     expect((await importLyricFile(file, new AbortController().signal, 0.6)).binding.leadSeconds).toBe(0.6);
     expect((await importLyricFile(file, new AbortController().signal)).binding.leadSeconds).toBe(2);
 });
+
+test('font selection survives V6 roundtrip and rejects invalid font identities', () => {
+    const { project, element } = lyricFixture(),
+        asset = lyricAsset();
+    project.lyricAssets = [asset];
+    const font = { family: 'Arial', fullName: 'Arial Bold', postscriptName: 'Arial-BoldMT' };
+    element.lyricBindings = {
+        lyrics: { kind: 'lyrics', assetId: asset.id, leadSeconds: 0.6, tailSeconds: 1.5, offsetSeconds: 0, font },
+    };
+    const p = validateComposition(project);
+    expect(decodeComposition(encodeComposition(p).buffer as ArrayBuffer)).toEqual(p);
+    for (const bad of [
+        { ...font, postscriptName: '' },
+        { ...font, url: 'https://example.invalid/font.ttf' },
+        { ...font, family: 'bad\nname' },
+    ])
+        expect(() =>
+            validateLyricBindings(
+                { lyrics: { ...element.lyricBindings!.lyrics, font: bad } },
+                [{ id: 'lyrics' }],
+                [asset],
+            ),
+        ).toThrow();
+});
+test('lyric retention refers only to declared positive constant parameters', () => {
+    const { algorithm } = lyricFixture();
+    algorithm.contract.lyricInputs = [{ id: 'lyrics', tailSecondsParameter: 'duration' }];
+    algorithm.hash = resourceHash(algorithm);
+    expect(() => validateAlgorithmDefinition(algorithm)).toThrow();
+    algorithm.contract.parameters = [
+        { id: 'duration', valueKind: 'number', allowedSourceKinds: ['constant'], range: { min: 0.05, max: 10 } },
+    ];
+    algorithm.hash = resourceHash(algorithm);
+    expect(validateAlgorithmDefinition(algorithm).contract.lyricInputs![0]!.tailSecondsParameter).toBe('duration');
+    algorithm.contract.parameters = [{ ...algorithm.contract.parameters[0]!, allowedSourceKinds: ['analysis'] }];
+    algorithm.hash = resourceHash(algorithm);
+    expect(() => validateAlgorithmDefinition(algorithm)).toThrow();
+});

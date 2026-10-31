@@ -1,4 +1,5 @@
 import { inject, type InjectionKey } from 'vue';
+import { browserLocalFonts, desktopLocalFonts, type LocalFontAccess } from './localFonts';
 import type { AudioFileAccess, DesktopBridge } from './fileContracts';
 import { BrowserAudioFiles } from './webAudioFiles';
 import { DesktopAudioFiles } from './desktopAudioFiles';
@@ -23,12 +24,14 @@ export interface PlatformPorts {
     readonly directoryExports: DirectoryExportAccess;
     readonly displayPages: DisplayPageAccess;
     readonly lifecycle: LifecycleAccess;
+    readonly fontCatalog: LocalFontAccess;
 }
 
 export function createPlatformPorts(bridge?: DesktopBridge): PlatformPorts {
     if (!bridge)
         return {
             kind: 'web',
+            fontCatalog: browserLocalFonts,
             audioFiles: new BrowserAudioFiles(),
             directoryFiles: new BrowserDirectoryFiles(),
             transfers: new BrowserFileTransfers(),
@@ -42,12 +45,14 @@ export function createPlatformPorts(bridge?: DesktopBridge): PlatformPorts {
         !bridge.files ||
         !bridge.saves ||
         !bridge.bundles ||
-        !bridge.lifecycle
+        !bridge.lifecycle ||
+        !bridge.fonts
     ) {
         throw Error('桌面宿主与应用文件接口不匹配，请重新构建应用。');
     }
     return {
         kind: 'electron',
+        fontCatalog: desktopLocalFonts(bridge.fonts),
         audioFiles: new DesktopAudioFiles(bridge.files),
         directoryFiles: new DesktopDirectoryFiles(bridge.files),
         transfers: new DesktopFileTransfers(bridge.files, bridge.saves),

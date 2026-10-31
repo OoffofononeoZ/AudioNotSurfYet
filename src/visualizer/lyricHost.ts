@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { LyricFonts } from './lyricFonts';
 import { lyricText } from './lyricCodec';
 import { parseLrc, lyricGraphemes } from './lrcParser';
 import { elementDescriptor } from './compositionModel';
@@ -19,6 +20,7 @@ type Atlas = {
     >;
 };
 export class CompositionLyricHost {
+    private fonts = new LyricFonts();
     private atlases = new Map<string, Atlas>();
     private documents = new Map<string, LyricCue[]>();
     private graphemes = new WeakMap<LyricCue, string[]>();
@@ -38,10 +40,27 @@ export class CompositionLyricHost {
             lyricHostDiagnostics.textures--;
         }
     }
-    private build(key: string, words: string[], characters: boolean): Atlas {
+    private build(key: string, words: string[], characters: boolean, font?: string): Atlas {
         const canvases: HTMLCanvasElement[] = [],
             textures: THREE.Texture[] = [],
             tokens: Atlas['tokens'] = new Map();
+        let height = HEIGHT,
+            baseline = 68;
+        if (font) {
+            const measure = document.createElement('canvas').getContext('2d')!;
+            measure.font = font;
+            if (characters) measure.fontKerning = 'none';
+            let ascent = 0,
+                descent = 0;
+            for (const word of words) {
+                const m = measure.measureText(word);
+                ascent = Math.max(ascent, m.actualBoundingBoxAscent);
+                descent = Math.max(descent, m.actualBoundingBoxDescent);
+            }
+            baseline = Math.ceil(ascent) + 8;
+            height = Math.max(HEIGHT, baseline + Math.ceil(descent) + 8);
+            if (height > PAGE) throw Error('字体高度超过歌词图集容量。');
+        }
         let x = 0,
             y = 0,
             page = -1;
@@ -53,7 +72,7 @@ export class CompositionLyricHost {
             page++;
             x = y = 0;
             const context = canvas.getContext('2d')!;
-            context.font = FONT;
+            context.font = font ?? FONT;
             if (characters) context.fontKerning = 'none';
             context.fillStyle = '#ffffff';
             context.textBaseline = 'alphabetic';
@@ -71,15 +90,15 @@ export class CompositionLyricHost {
                 if (width > PAGE) throw Error('单个歌词词组过长，无法生成文字图集。');
                 if (x + width > PAGE) {
                     x = 0;
-                    y += HEIGHT;
+                    y += height;
                 }
-                if (y + HEIGHT > PAGE) context = addPage();
-                context.fillText(word, x + 8 + Math.max(0, metrics.actualBoundingBoxLeft), y + 68);
+                if (y + height > PAGE) context = addPage();
+                context.fillText(word, x + 8 + Math.max(0, metrics.actualBoundingBoxLeft), y + baseline);
                 tokens.set(word, {
                     page,
-                    uv: [x / PAGE, 1 - (y + HEIGHT) / PAGE, (x + width) / PAGE, 1 - y / PAGE],
+                    uv: [x / PAGE, 1 - (y + height) / PAGE, (x + width) / PAGE, 1 - y / PAGE],
                     width,
-                    height: HEIGHT,
+                    height,
                     advance: metrics.width,
                     bearing: 8 + Math.max(0, metrics.actualBoundingBoxLeft),
                 });
@@ -114,13 +133,14 @@ export class CompositionLyricHost {
         if (this.disposed || generation !== this.generation || !isCurrent()) throw new FrameSupersededError();
         const frames = new Map<string, LyricFrame>(),
             used = new Set<string>(),
-            assetIds = new Set<string>();
+            assetIds = new Set<string>(),
+            fontIds = new Set<string>();
         for (const element of elements) {
             const frame: LyricFrame = {};
             for (const [id, binding] of Object.entries(element.lyricBindings ?? {})) {
                 const key = element.id + ':' + id;
-                const characters =
-                    elementDescriptor(project, element).lyricInputs?.find(i => i.id === id)?.granularity === 'grapheme';
+                const definition = elementDescriptor(project, element).lyricInputs?.find(i => i.id === id);
+                const characters = definition?.granularity === 'grapheme';
                 const units = (cue: LyricCue) => {
                     if (!characters) return cue.tokens;
                     let parts = this.graphemes.get(cue);
@@ -149,19 +169,34 @@ export class CompositionLyricHost {
                     cues = parseLrc(lyricText(asset));
                     this.documents.set(asset.id, cues);
                 }
+                let font: string | undefined;
+                if (binding.font) {
+                    fontIds.add(binding.font.postscriptName);
+                    font = await this.fonts.load(binding.font);
+                }
+                if (this.disposed || generation !== this.generation || !isCurrent()) throw new FrameSupersededError();
+                let tailSeconds = binding.tailSeconds;
+                if (definition?.tailSecondsParameter) {
+                    const source = element.bindings.find(
+                        b => b.parameterId === definition.tailSecondsParameter,
+                    )?.source;
+                    if (source?.kind !== 'constant' || typeof source.value !== 'number' || !(source.value > 0))
+                        throw Error('歌词销毁持续参数无效。');
+                    tailSeconds = Math.max(tailSeconds, source.value);
+                }
                 const selected = cues.filter(
                     c =>
                         c.tokens.length &&
                         c.time + binding.offsetSeconds - binding.leadSeconds <= time &&
-                        c.end + binding.offsetSeconds + binding.tailSeconds >= time,
+                        c.end + binding.offsetSeconds + tailSeconds >= time,
                 );
                 const words = [...new Set(selected.flatMap(units))].sort();
-                const signature = JSON.stringify([asset.id, characters, words]);
+                const signature = JSON.stringify([asset.id, characters, binding.font ?? null, words]);
                 let atlas = this.atlases.get(key);
                 if (words.length) {
                     used.add(key);
                     if (atlas?.key !== signature) {
-                        const replacement = this.build(signature, words, characters);
+                        const replacement = this.build(signature, words, characters, font);
                         if (atlas) this.release(atlas);
                         this.atlases.set(key, replacement);
                         atlas = replacement;
@@ -205,10 +240,12 @@ export class CompositionLyricHost {
                 this.atlases.delete(key);
             }
         for (const id of this.documents.keys()) if (!assetIds.has(id)) this.documents.delete(id);
+        this.fonts.retain(fontIds);
         return frames;
     }
     dispose() {
         this.disposed = true;
+        this.fonts.dispose();
         this.generation++;
         for (const atlas of this.atlases.values()) this.release(atlas);
         this.atlases.clear();

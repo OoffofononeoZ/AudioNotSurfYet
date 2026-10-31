@@ -75,6 +75,7 @@ export interface DesktopBridge {
     readonly saves: DesktopSaveBridge;
     readonly bundles: DesktopBundleBridge;
     readonly lifecycle: DesktopLifecycleBridge;
+    readonly fonts: { requestAccess(): Promise<NativeResult<boolean>> };
 }
 
 declare global {

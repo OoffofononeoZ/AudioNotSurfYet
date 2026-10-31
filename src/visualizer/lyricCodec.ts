@@ -9,12 +9,18 @@ export function validateLyricInputs(input: unknown): LyricInputContract[] | unde
     if (!Array.isArray(input) || !input.length) return invalid('歌词输入声明无效。');
     const result = input.map(raw => {
         const v = record(raw, '歌词输入');
-        keys(v, ['id'], ['granularity']);
+        keys(v, ['id'], ['granularity', 'tailSecondsParameter']);
+        const tailSecondsParameter =
+            v.tailSecondsParameter === undefined ? undefined : text(v.tailSecondsParameter, '歌词离场参数');
         if (v.granularity !== undefined && v.granularity !== 'grapheme') invalid('歌词分割模式无效。');
         const id = text(v.id, '歌词输入 ID');
         if (!/^[a-z][a-z0-9-]*$/u.test(id) || ['constructor', 'prototype', '__proto__'].includes(id))
             invalid('歌词输入 ID 无效。');
-        return { id, ...(v.granularity === 'grapheme' ? { granularity: 'grapheme' as const } : {}) };
+        return {
+            id,
+            ...(v.granularity === 'grapheme' ? { granularity: 'grapheme' as const } : {}),
+            ...(tailSecondsParameter === undefined ? {} : { tailSecondsParameter }),
+        };
     });
     if (new Set(result.map(i => i.id)).size !== result.length) invalid('歌词输入重复。');
     return result;
@@ -30,7 +36,8 @@ export function validateLyricDefinitions(
     if (!Array.isArray(input) || input.length !== contract.length) return invalid('歌词输入定义不完整。');
     return input.map((raw, index) => {
         const v = record(raw, '歌词输入定义');
-        keys(v, ['id', 'label'], ['granularity', 'defaultLeadSeconds']);
+        keys(v, ['id', 'label'], ['granularity', 'defaultLeadSeconds', 'tailSecondsParameter']);
+        if (v.tailSecondsParameter !== contract[index]!.tailSecondsParameter) invalid('歌词离场参数必须匹配算法声明。');
         if (v.granularity !== contract[index]!.granularity) invalid('歌词分割模式必须匹配算法声明。');
         const defaultLeadSeconds =
             v.defaultLeadSeconds === undefined ? undefined : finite(v.defaultLeadSeconds, '默认提前入场');
@@ -41,6 +48,9 @@ export function validateLyricDefinitions(
             label: text(v.label, '歌词输入名称'),
             ...(v.granularity === 'grapheme' ? { granularity: 'grapheme' as const } : {}),
             ...(defaultLeadSeconds === undefined ? {} : { defaultLeadSeconds }),
+            ...(contract[index]!.tailSecondsParameter === undefined
+                ? {}
+                : { tailSecondsParameter: contract[index]!.tailSecondsParameter }),
         };
     });
 }
@@ -95,7 +105,19 @@ export function validateLyricBindings(
                 keys(b, ['kind']);
                 return [d.id, { kind: 'unbound' } as LyricBinding];
             }
-            keys(b, ['kind', 'assetId', 'leadSeconds', 'tailSeconds', 'offsetSeconds']);
+            keys(b, ['kind', 'assetId', 'leadSeconds', 'tailSeconds', 'offsetSeconds'], ['font']);
+            let font: import('./lyricTypes').LyricFont | undefined;
+            if (b.font !== undefined) {
+                const f = record(b.font, '歌词字体');
+                keys(f, ['family', 'fullName', 'postscriptName']);
+                font = Object.fromEntries(
+                    ['family', 'fullName', 'postscriptName'].map(key => {
+                        const value = text(f[key], '字体名称');
+                        if (value.length > 256 || /[\x00-\x1f\x7f]/u.test(value)) invalid('字体名称无效。');
+                        return [key, value];
+                    }),
+                ) as unknown as import('./lyricTypes').LyricFont;
+            }
             if (template || b.kind !== 'lyrics' || !assets.some(a => a.id === b.assetId))
                 invalid('歌词素材缺失或绑定无效。');
             const leadSeconds = finite(b.leadSeconds, '入场时长'),
@@ -104,7 +126,14 @@ export function validateLyricBindings(
             if (leadSeconds <= 0 || tailSeconds <= 0) invalid('歌词入场和离场时长必须大于零。');
             return [
                 d.id,
-                { kind: 'lyrics', assetId: String(b.assetId), leadSeconds, tailSeconds, offsetSeconds } as LyricBinding,
+                {
+                    kind: 'lyrics',
+                    assetId: String(b.assetId),
+                    leadSeconds,
+                    tailSeconds,
+                    offsetSeconds,
+                    ...(font ? { font } : {}),
+                } as LyricBinding,
             ];
         }),
     );

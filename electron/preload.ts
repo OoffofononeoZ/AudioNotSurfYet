@@ -7,6 +7,7 @@ if (process.isMainFrame) {
     const bridge: DesktopBridge = {
         platform: 'electron',
         apiVersion: 1,
+        fonts: { requestAccess: () => ipcRenderer.invoke('audiosurf:fonts:requestAccess') },
         lifecycle: {
             onRequest: listener => {
                 const receive = (_event: unknown, request: unknown) => {

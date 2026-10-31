@@ -1,6 +1,7 @@
 export interface LyricInputContract {
     id: string;
     granularity?: 'grapheme';
+    tailSecondsParameter?: string;
 }
 export interface LyricInputDefinition extends LyricInputContract {
     label: string;
@@ -11,6 +12,11 @@ export interface LyricAsset {
     name: string;
     data: string;
 }
+export interface LyricFont {
+    family: string;
+    fullName: string;
+    postscriptName: string;
+}
 export type LyricBinding =
     | { kind: 'unbound' }
     | {
@@ -19,6 +25,7 @@ export type LyricBinding =
           leadSeconds: number;
           tailSeconds: number;
           offsetSeconds: number;
+          font?: LyricFont;
       };
 export type LyricBindings = Record<string, LyricBinding>;
 export interface LyricCue {

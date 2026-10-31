@@ -108,6 +108,19 @@ export function validateAlgorithmContract(input: unknown, apiVersion: 1 | 2 | 3 
         (!lyricInputs || v.kind !== 'visual' || executionModes?.length !== 1 || executionModes[0] !== 'timeline')
     )
         invalid('ABI 5 歌词元素必须声明歌词输入并仅支持歌曲模式。');
+    for (const lyric of lyricInputs ?? []) {
+        if (lyric.tailSecondsParameter === undefined) continue;
+        const p = parameters.find(p => p.id === lyric.tailSecondsParameter);
+        if (
+            !p ||
+            p.valueKind !== 'number' ||
+            p.allowedSourceKinds.length !== 1 ||
+            p.allowedSourceKinds[0] !== 'constant' ||
+            !p.range ||
+            p.range.min <= 0
+        )
+            invalid('歌词离场参数必须引用正数常量参数。');
+    }
     let timingInput: string | undefined;
     if (v.timingInput !== undefined) {
         timingInput = identifier(v.timingInput);
