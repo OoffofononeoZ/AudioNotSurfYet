@@ -25,7 +25,7 @@ test('real lyric resource renders readable glyphs at both anchors and directions
         const { IsolatedAlgorithmRuntime } = await load('isolatedAlgorithmRuntime');
         const p = lyricFixture().project,
             e = createDefinitionElement(pack.elements[0], 10, 0);
-        const asset = lyricAsset('[00:03.125]Hello world\n[00:07.125]你好世界');
+        const asset = lyricAsset('[00:03.125]Readable world\n[00:07.125]你好世界');
         p.resources = { algorithms: pack.algorithms, elements: pack.elements, presets: [] };
         p.elements = [e];
         p.items = [{ kind: 'element', id: e.id }];
@@ -154,89 +154,203 @@ async function load(page: Page, p: VisualizerProjectV6) {
     await expect(page.getByTestId('visualizer-preview-frame')).toHaveAttribute('data-scene-status', 'ready');
 }
 
-test('LRC selection retains errors and rejects stale replacements; snapshots export both directions at 30/60 fps', async ({
+for (const type of ['circular-depth-lyrics', 'black-hole-lyrics'])
+    test(type + ': LRC replacement, snapshots and 30/60 fps exports', async ({ page }, info) => {
+        test.setTimeout(120000);
+        const errors: string[] = [];
+        page.on('pageerror', e => errors.push(e.message));
+        await installFilePickerStub(page, { visualizerAssets: true });
+        await page.goto('/');
+        await chooseFiles(page, [path.resolve('tests/fixtures/audio/visualizer-v5-avsync-v1.wav')]);
+        if ((await page.getByTestId('toggle-playback').getAttribute('aria-label')) === '暂停')
+            await page.getByTestId('toggle-playback').click();
+        await page.getByTestId('header-visualizer-link').click();
+        await expect(page.getByTestId('visualizer-ready')).toBeVisible();
+        await page.getByTestId('add-visualizer-element').click();
+        const card = page.locator(`[data-element-type="${type}"]`);
+        await expect
+            .poll(() =>
+                card.locator('img').evaluate(node => {
+                    const img = node as HTMLImageElement;
+                    return img.complete && img.naturalWidth > 0 && img.src.startsWith('blob:');
+                }),
+            )
+            .toBe(true);
+        await card.click();
+        const before = await exported(page);
+        expect(before.elements[0]!.lyricBindings).toEqual({ lyrics: { kind: 'unbound' } });
+        const file = page.locator('[data-lyric-input=lyrics] input[type=file]');
+        await file.setInputFiles({
+            name: 'synthetic.lrc',
+            mimeType: 'text/plain',
+            buffer: Buffer.from('[00:00.500]Hello world\n[00:01.125]你好世界\n[00:01.800]Again'),
+        });
+        await expect(page.getByRole('button', { name: '清除歌词', exact: true })).toBeVisible();
+        let bound = await exported(page);
+        await page.getByRole('spinbutton', { name: '歌词提前入场', exact: true }).fill('0.7');
+        await page.getByRole('spinbutton', { name: '歌词提前入场', exact: true }).press('Enter');
+        await file.setInputFiles({
+            name: 'replacement.lrc',
+            mimeType: 'text/plain',
+            buffer: Buffer.from('[00:00.500]Hello world\n[00:01.125]你好世界\n[00:01.800]Again'),
+        });
+        await expect(page.getByRole('button', { name: '清除歌词', exact: true })).toBeVisible();
+        bound = await exported(page);
+        expect(bound.elements[0]!.lyricBindings!.lyrics).toMatchObject({ leadSeconds: 0.7 });
+        expect(bound.lyricAssets).toHaveLength(1);
+        await file.setInputFiles({ name: 'bad.lrc', mimeType: 'text/plain', buffer: Buffer.from('untimed') });
+        await expect(page.locator('[data-lyric-input=lyrics] [role=alert]')).toContainText('时间戳');
+        expect((await exported(page)).lyricAssets).toEqual(bound.lyricAssets);
+        await page.evaluate(() => {
+            const original = File.prototype.arrayBuffer;
+            File.prototype.arrayBuffer = async function () {
+                if (this.name === 'slow.lrc')
+                    await new Promise<void>(resolve => {
+                        (window as any).releaseLyric = resolve;
+                    });
+                return original.call(this);
+            };
+        });
+        await file.setInputFiles({ name: 'slow.lrc', mimeType: 'text/plain', buffer: Buffer.from('[00:01]stale') });
+        await expect(page.getByText('正在读取歌词…')).toBeVisible();
+        await page.getByTestId('add-visualizer-element').click();
+        await page.locator('[data-element-type="solid"]').click();
+        await page.evaluate(() => (window as any).releaseLyric());
+        expect((await exported(page)).lyricAssets).toEqual(bound.lyricAssets);
+        const p = bound;
+        p.elements[0]!.seed = 123;
+        p.elements[0]!.bindings = p.elements[0]!.bindings.map(b =>
+            b.parameterId === 'spectrum' ? { ...b, source: { kind: 'constant', value: Array(128).fill(0.4) } } : b,
+        );
+        await mkdir(artifact, { recursive: true });
+        for (const [fps, reverse] of [
+            [30, false],
+            [60, true],
+        ] as const) {
+            p.output.frameRate = fps;
+            const direction = p.elements[0]!.bindings.find(b => b.parameterId === 'reverse');
+            if (direction) direction.source = { kind: 'constant', value: reverse };
+            await load(page, p);
+            await page.getByTestId('visualizer-preview-frame').hover();
+            await page.getByTestId('start-visualizer-export').click();
+            await expect(page.locator('[data-export-status=ready]')).toBeVisible({ timeout: 40000 });
+            await page.getByTestId('save-visualizer-export').click();
+            await expect(page.locator('[data-export-status=idle]')).toBeVisible();
+            const video = (await savedPickerEntries(page)).filter(e => e.name.endsWith('.webm')).at(-1)!;
+            await writeFile(
+                path.join(artifact, `${type}-${info.project.name}-${fps}.webm`),
+                Buffer.from(video.base64, 'base64'),
+            );
+        }
+        await expect(page.getByText('已保存', { exact: true })).toBeVisible();
+        await page.evaluate(async () => {
+            const root = await navigator.storage.getDirectory();
+            await root.removeEntry('visualizer-library-fixture', { recursive: true });
+        });
+        await page.reload();
+        await expect(page.getByTestId('visualizer-ready')).toBeVisible();
+        await expect(page.getByTestId('visualizer-preview-frame')).toHaveAttribute('data-scene-status', 'ready');
+        expect((await exported(page)).lyricAssets).toEqual(bound.lyricAssets);
+        expect(errors).toEqual([]);
+    });
+
+test('black hole uses real grapheme atlases, stable layout, isolated shader rendering and exact expiry', async ({
     page,
 }, info) => {
-    test.setTimeout(120000);
-    const errors: string[] = [];
-    page.on('pageerror', e => errors.push(e.message));
-    await installFilePickerStub(page, { visualizerAssets: true });
     await page.goto('/');
-    await chooseFiles(page, [path.resolve('tests/fixtures/audio/visualizer-v5-avsync-v1.wav')]);
-    if ((await page.getByTestId('toggle-playback').getAttribute('aria-label')) === '暂停')
-        await page.getByTestId('toggle-playback').click();
-    await page.getByTestId('header-visualizer-link').click();
-    await expect(page.getByTestId('visualizer-ready')).toBeVisible();
-    await page.getByTestId('add-visualizer-element').click();
-    const card = page.locator('[data-element-type="circular-depth-lyrics"]');
-    await expect
-        .poll(() =>
-            card.locator('img').evaluate(node => {
-                const img = node as HTMLImageElement;
-                return img.complete && img.naturalWidth > 0 && img.src.startsWith('blob:');
-            }),
-        )
-        .toBe(true);
-    await card.click();
-    const before = await exported(page);
-    expect(before.elements[0]!.lyricBindings).toEqual({ lyrics: { kind: 'unbound' } });
-    const file = page.locator('[data-lyric-input=lyrics] input[type=file]');
-    await file.setInputFiles({
-        name: 'synthetic.lrc',
-        mimeType: 'text/plain',
-        buffer: Buffer.from('[00:00.500]Hello world\n[00:01.125]你好世界\n[00:01.800]Again'),
-    });
-    await expect(page.getByRole('button', { name: '清除歌词', exact: true })).toBeVisible();
-    const bound = await exported(page);
-    expect(bound.lyricAssets).toHaveLength(1);
-    await file.setInputFiles({ name: 'bad.lrc', mimeType: 'text/plain', buffer: Buffer.from('untimed') });
-    await expect(page.locator('[data-lyric-input=lyrics] [role=alert]')).toContainText('时间戳');
-    expect((await exported(page)).lyricAssets).toEqual(bound.lyricAssets);
-    await page.evaluate(() => {
-        const original = File.prototype.arrayBuffer;
-        File.prototype.arrayBuffer = async function () {
-            if (this.name === 'slow.lrc')
-                await new Promise<void>(resolve => {
-                    (window as any).releaseLyric = resolve;
-                });
-            return original.call(this);
+    const result = await page.evaluate(async pack => {
+        const load = (name: string) => import('/src/visualizer/' + name + '.ts');
+        const fixturePath = '/tests/support/lyric-fixture.ts',
+            sceneFixturePath = '/tests/support/scene3d-fixture.ts';
+        const { lyricFixture, lyricAsset } = await import(fixturePath);
+        const { createSceneTestRenderer } = await import(sceneFixturePath);
+        const { createDefinitionElement } = await load('elementRegistry');
+        const { CompositionScene } = await load('compositionScene');
+        const { CompositionLyricHost, lyricHostDiagnostics } = await load('lyricHost');
+        const { encodeComposition, decodeComposition, validateComposition } = await load('compositionCodec');
+        const project = lyricFixture().project,
+            e = createDefinitionElement(pack.elements[0], 10, 0);
+        const text = 'Orbit  e\u0301 👩‍🚀 星河，!',
+            asset = lyricAsset('[00:02]' + text);
+        project.resources = { algorithms: pack.algorithms, elements: pack.elements, presets: [] };
+        project.elements = [e];
+        project.items = [{ kind: 'element', id: e.id }];
+        project.lyricAssets = [asset];
+        e.lyricBindings.lyrics = {
+            kind: 'lyrics',
+            assetId: asset.id,
+            leadSeconds: 0.6,
+            tailSeconds: 1.5,
+            offsetSeconds: 0,
         };
-    });
-    await file.setInputFiles({ name: 'slow.lrc', mimeType: 'text/plain', buffer: Buffer.from('[00:01]stale') });
-    await expect(page.getByText('正在读取歌词…')).toBeVisible();
-    await page.getByTestId('add-visualizer-element').click();
-    await page.locator('[data-element-type="solid"]').click();
-    await page.evaluate(() => (window as any).releaseLyric());
-    expect((await exported(page)).lyricAssets).toEqual(bound.lyricAssets);
-    const p = bound;
-    p.elements[0]!.seed = 123;
-    p.elements[0]!.bindings = p.elements[0]!.bindings.map(b =>
-        b.parameterId === 'spectrum' ? { ...b, source: { kind: 'constant', value: Array(128).fill(0.4) } } : b,
-    );
+        const valid = validateComposition(project);
+        const roundtrip = JSON.stringify(decodeComposition(encodeComposition(valid).buffer)) === JSON.stringify(valid);
+        const host = new CompositionLyricHost(),
+            baseline = lyricHostDiagnostics.textures;
+        const f = (await host.prepare(project, [e], 2, () => true)).get(e.id).lyrics.cues[0];
+        const glyphs = f.tokens.map((t: any) => t.text),
+            lineWidth = f.lineWidth;
+        const sum = f.tokens.reduce((n: number, t: any) => n + t.advance, 0);
+        const offsets = f.tokens.every((t: any) => Number.isFinite(t.offsetX));
+        host.dispose();
+        const canvas = document.createElement('canvas'),
+            renderer = createSceneTestRenderer(canvas);
+        renderer.setSize(1280, 720, false);
+        const values = new Map(
+            e.bindings.map((b: any) => [e.id + ':' + b.parameterId, { state: 'ready', value: b.source.value }]),
+        );
+        const scene = new CompositionScene({ renderer, readProject: () => project, resolveAt: () => values });
+        const images: string[] = [],
+            lit: number[] = [],
+            hashes: string[] = [];
+        try {
+            scene.resize(1280, 720, 1);
+            for (const time of [2, 3, 5.55, 6, 2]) {
+                const input = { elementSeeds: new Map([[e.id, 123]]), timeSeconds: time, values, bindingRevision: 0 };
+                await scene.prepare(input);
+                hashes.push(scene.render(input).hash);
+                const pixels = new Uint8Array(1280 * 720 * 4),
+                    gl = renderer.getContext();
+                gl.readPixels(0, 0, 1280, 720, gl.RGBA, gl.UNSIGNED_BYTE, pixels);
+                let count = 0;
+                for (let i = 0; i < pixels.length; i += 4) if (pixels[i] > 20) count++;
+                lit.push(count);
+                images.push(canvas.toDataURL('image/png'));
+            }
+        } finally {
+            scene.dispose();
+            renderer.dispose();
+            renderer.forceContextLoss();
+        }
+        return {
+            glyphs,
+            lineWidth,
+            sum,
+            offsets,
+            roundtrip,
+            lit,
+            images,
+            released: lyricHostDiagnostics.textures === baseline,
+        };
+    }, resourcePack('elements/black-hole-lyrics'));
+    expect(result.glyphs.join('')).toBe('Orbit  e\u0301 👩‍🚀 星河，!');
+    expect(result.glyphs).toContain('👩‍🚀');
+    expect(result.glyphs).toContain('e\u0301');
+    expect(result.lineWidth).toBeCloseTo(result.sum, 8);
+    expect(result.offsets && result.roundtrip && result.released).toBe(true);
+    expect(result.lit[0]).toBeGreaterThan(100);
+    expect(result.lit[2]).toBeGreaterThan(10);
+    expect(result.lit[3]).toBe(0);
+    expect(result.images[0]).toBe(result.images[1]);
+    expect(result.images[0]).toBe(result.images[4]);
+    expect(result.images[2]).not.toBe(result.images[0]);
     await mkdir(artifact, { recursive: true });
-    for (const [fps, reverse] of [
-        [30, false],
-        [60, true],
-    ] as const) {
-        p.output.frameRate = fps;
-        p.elements[0]!.bindings.find(b => b.parameterId === 'reverse')!.source = { kind: 'constant', value: reverse };
-        await load(page, p);
-        await page.getByTestId('visualizer-preview-frame').hover();
-        await page.getByTestId('start-visualizer-export').click();
-        await expect(page.locator('[data-export-status=ready]')).toBeVisible({ timeout: 40000 });
-        await page.getByTestId('save-visualizer-export').click();
-        await expect(page.locator('[data-export-status=idle]')).toBeVisible();
-        const video = (await savedPickerEntries(page)).filter(e => e.name.endsWith('.webm')).at(-1)!;
-        await writeFile(path.join(artifact, `${info.project.name}-${fps}.webm`), Buffer.from(video.base64, 'base64'));
-    }
-    await expect(page.getByText('已保存', { exact: true })).toBeVisible();
-    await page.evaluate(async () => {
-        const root = await navigator.storage.getDirectory();
-        await root.removeEntry('visualizer-library-fixture', { recursive: true });
-    });
-    await page.reload();
-    await expect(page.getByTestId('visualizer-ready')).toBeVisible();
-    await expect(page.getByTestId('visualizer-preview-frame')).toHaveAttribute('data-scene-status', 'ready');
-    expect((await exported(page)).lyricAssets).toEqual(bound.lyricAssets);
-    expect(errors).toEqual([]);
+    for (const [i, name] of [
+        [0, 'stable'],
+        [2, 'spiral'],
+    ] as const)
+        await writeFile(
+            path.join(artifact, 'black-hole-' + name + '-' + info.project.name + '.png'),
+            Buffer.from(result.images[i].split(',')[1]!, 'base64'),
+        );
 });

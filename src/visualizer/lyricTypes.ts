@@ -1,8 +1,10 @@
 export interface LyricInputContract {
     id: string;
+    granularity?: 'grapheme';
 }
 export interface LyricInputDefinition extends LyricInputContract {
     label: string;
+    defaultLeadSeconds?: number;
 }
 export interface LyricAsset {
     id: string;
@@ -34,11 +36,14 @@ export interface LyricTokenFrame {
     uv: [number, number, number, number];
     width: number;
     height: number;
+    offsetX?: number;
+    advance?: number;
 }
 export interface LyricCueFrame {
     index: number;
     time: number;
     end: number;
+    lineWidth?: number;
     tokens: LyricTokenFrame[];
 }
 export interface LyricFrameInfo {

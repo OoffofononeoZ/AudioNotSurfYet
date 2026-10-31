@@ -1,6 +1,11 @@
 import { expect, test } from 'vitest';
-import { parseLrc, lyricTokens } from '../../src/visualizer/lrcParser';
-import { validateLyricAssets, validateLyricBindings, validateLyricInputs } from '../../src/visualizer/lyricCodec';
+import { parseLrc, lyricTokens, lyricGraphemes } from '../../src/visualizer/lrcParser';
+import {
+    validateLyricAssets,
+    validateLyricBindings,
+    validateLyricInputs,
+    validateLyricDefinitions,
+} from '../../src/visualizer/lyricCodec';
 import { importLyricFile } from '../../src/visualizer/lyricImport';
 import { validateAlgorithmDefinition } from '../../src/visualizer/algorithmCodec';
 import { validateComposition, encodeComposition, decodeComposition } from '../../src/visualizer/compositionCodec';
@@ -146,4 +151,18 @@ test('library presets instantiate declared unbound lyrics and cannot carry a use
     };
     preset.hash = resourceHash(preset);
     expect(() => validateResourceSnapshot(project.resources)).toThrow();
+});
+
+test('grapheme inputs retain whitespace, punctuation and complete emoji, with explicit capability matching', async () => {
+    expect(lyricGraphemes('Hi  你，e\u0301👩‍🚀!')).toEqual(['H', 'i', ' ', ' ', '你', '，', 'e\u0301', '👩‍🚀', '!']);
+    const contract = [{ id: 'lyrics', granularity: 'grapheme' as const }];
+    expect(validateLyricInputs(contract)).toEqual(contract);
+    expect(() => validateLyricInputs([{ id: 'lyrics', granularity: 'word' }])).toThrow();
+    const definition = [{ ...contract[0]!, label: '歌词', defaultLeadSeconds: 0.6 }];
+    expect(validateLyricDefinitions(definition, contract)).toEqual(definition);
+    expect(() => validateLyricDefinitions([{ id: 'lyrics', label: '歌词' }], contract)).toThrow();
+    expect(() => validateLyricDefinitions([{ ...definition[0], defaultLeadSeconds: 0 }], contract)).toThrow();
+    const file = new File(['[00:01]Hi'], 'graphemes.lrc');
+    expect((await importLyricFile(file, new AbortController().signal, 0.6)).binding.leadSeconds).toBe(0.6);
+    expect((await importLyricFile(file, new AbortController().signal)).binding.leadSeconds).toBe(2);
 });

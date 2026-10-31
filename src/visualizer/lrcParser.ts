@@ -1,5 +1,19 @@
 import type { LyricCue } from './lyricTypes';
 
+const graphemeSegmenter = new (
+    Intl as unknown as {
+        Segmenter: new (
+            locale: undefined,
+            options: { granularity: 'grapheme' },
+        ) => { segment(text: string): Iterable<{ segment: string }> };
+    }
+).Segmenter(undefined, { granularity: 'grapheme' });
+
+/** Retains whitespace, punctuation and complete user-perceived characters. */
+export function lyricGraphemes(text: string): string[] {
+    return Array.from(graphemeSegmenter.segment(text), part => part.segment);
+}
+
 /** English words retain punctuation; Han graphemes are individual particles. */
 export function lyricTokens(text: string): string[] {
     const tokens: string[] = [];

@@ -97,9 +97,17 @@ async function select(files: File[]) {
     error.value = '';
     const elementId = props.elementId,
         inputId = props.definition.id;
+    const previous = props.binding;
     try {
-        const result = await importLyricFile(file, task.signal);
+        const result = await importLyricFile(file, task.signal, props.definition.defaultLeadSeconds);
         if (pending !== task || task.signal.aborted || props.elementId !== elementId) return;
+        if (previous.kind === 'lyrics')
+            result.binding = {
+                ...result.binding,
+                leadSeconds: previous.leadSeconds,
+                tailSeconds: previous.tailSeconds,
+                offsetSeconds: previous.offsetSeconds,
+            };
         emit('change', { elementId, inputId, ...result });
     } catch (cause) {
         if (!task.signal.aborted && pending === task) error.value = (cause as Error).message;

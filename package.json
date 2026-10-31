@@ -232,7 +232,8 @@
         "visualizer:resources": "node scripts/visualizer-resource-package.mjs --build",
         "visualizer:resources:check": "node scripts/visualizer-resource-package.mjs --check-build",
         "visualizer:skill-codec": "node scripts/sync-visualizer-skill-codec.mjs",
-        "visualizer:skill-codec:check": "node scripts/sync-visualizer-skill-codec.mjs --check"
+        "visualizer:skill-codec:check": "node scripts/sync-visualizer-skill-codec.mjs --check",
+        "test:desktop:lyrics": "node tests/desktop/lyrics-smoke.mjs"
     },
     "dependencies": {
         "@chenglou/pretext": "^0.0.6",

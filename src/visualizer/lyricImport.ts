@@ -1,7 +1,8 @@
 import { hashBytes } from '../processing/sha256';
 import { validateLyricAssets } from './lyricCodec';
 import type { LyricBinding } from './lyricTypes';
-export async function importLyricFile(file: File, signal: AbortSignal) {
+export async function importLyricFile(file: File, signal: AbortSignal, defaultLeadSeconds = 2) {
+    if (!Number.isFinite(defaultLeadSeconds) || defaultLeadSeconds <= 0) throw Error('默认提前入场必须大于零。');
     signal.throwIfAborted();
     if (file.size > 2 * 1024 * 1024) throw Error('LRC 文件超过 2MiB。');
     const bytes = new Uint8Array(await file.arrayBuffer());
@@ -12,7 +13,7 @@ export async function importLyricFile(file: File, signal: AbortSignal) {
     const binding: LyricBinding = {
         kind: 'lyrics',
         assetId: assets[0]!.id,
-        leadSeconds: 2,
+        leadSeconds: defaultLeadSeconds,
         tailSeconds: 1.5,
         offsetSeconds: 0,
     };

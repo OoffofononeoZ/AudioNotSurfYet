@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { lyricText } from './lyricCodec';
-import { parseLrc } from './lrcParser';
+import { parseLrc, lyricGraphemes } from './lrcParser';
+import { elementDescriptor } from './compositionModel';
 import { FrameSupersededError } from './framePreparation';
 import type { CompositionRenderModel, VisualizerElement } from './compositionTypes';
 import type { LyricCue, LyricFrame, LyricFrameInfo, LyricTokenFrame } from './lyricTypes';
@@ -12,11 +13,15 @@ export const lyricHostDiagnostics = { textures: 0 };
 type Atlas = {
     key: string;
     textures: THREE.Texture[];
-    tokens: Map<string, Omit<LyricTokenFrame, 'index' | 'text' | 'time'>>;
+    tokens: Map<
+        string,
+        Pick<LyricTokenFrame, 'page' | 'uv' | 'width' | 'height'> & { advance: number; bearing: number }
+    >;
 };
 export class CompositionLyricHost {
     private atlases = new Map<string, Atlas>();
     private documents = new Map<string, LyricCue[]>();
+    private graphemes = new WeakMap<LyricCue, string[]>();
     private generation = 0;
     private disposed = false;
     texture(elementId: string, inputId: string, page: number): THREE.Texture {
@@ -33,7 +38,7 @@ export class CompositionLyricHost {
             lyricHostDiagnostics.textures--;
         }
     }
-    private build(key: string, words: string[]): Atlas {
+    private build(key: string, words: string[], characters: boolean): Atlas {
         const canvases: HTMLCanvasElement[] = [],
             textures: THREE.Texture[] = [],
             tokens: Atlas['tokens'] = new Map();
@@ -49,6 +54,7 @@ export class CompositionLyricHost {
             x = y = 0;
             const context = canvas.getContext('2d')!;
             context.font = FONT;
+            if (characters) context.fontKerning = 'none';
             context.fillStyle = '#ffffff';
             context.textBaseline = 'alphabetic';
             return context;
@@ -74,6 +80,8 @@ export class CompositionLyricHost {
                     uv: [x / PAGE, 1 - (y + HEIGHT) / PAGE, (x + width) / PAGE, 1 - y / PAGE],
                     width,
                     height: HEIGHT,
+                    advance: metrics.width,
+                    bearing: 8 + Math.max(0, metrics.actualBoundingBoxLeft),
                 });
                 x += width;
             }
@@ -111,6 +119,17 @@ export class CompositionLyricHost {
             const frame: LyricFrame = {};
             for (const [id, binding] of Object.entries(element.lyricBindings ?? {})) {
                 const key = element.id + ':' + id;
+                const characters =
+                    elementDescriptor(project, element).lyricInputs?.find(i => i.id === id)?.granularity === 'grapheme';
+                const units = (cue: LyricCue) => {
+                    if (!characters) return cue.tokens;
+                    let parts = this.graphemes.get(cue);
+                    if (!parts) {
+                        parts = lyricGraphemes(cue.text);
+                        this.graphemes.set(cue, parts);
+                    }
+                    return parts;
+                };
                 const empty: LyricFrameInfo = {
                     available: false,
                     revision: 'unbound',
@@ -136,13 +155,13 @@ export class CompositionLyricHost {
                         c.time + binding.offsetSeconds - binding.leadSeconds <= time &&
                         c.end + binding.offsetSeconds + binding.tailSeconds >= time,
                 );
-                const words = [...new Set(selected.flatMap(c => c.tokens))].sort();
-                const signature = JSON.stringify([asset.id, words]);
+                const words = [...new Set(selected.flatMap(units))].sort();
+                const signature = JSON.stringify([asset.id, characters, words]);
                 let atlas = this.atlases.get(key);
                 if (words.length) {
                     used.add(key);
                     if (atlas?.key !== signature) {
-                        const replacement = this.build(signature, words);
+                        const replacement = this.build(signature, words, characters);
                         if (atlas) this.release(atlas);
                         this.atlases.set(key, replacement);
                         atlas = replacement;
@@ -153,17 +172,29 @@ export class CompositionLyricHost {
                     revision: JSON.stringify(binding),
                     leadSeconds: binding.leadSeconds,
                     tailSeconds: binding.tailSeconds,
-                    cues: selected.map(c => ({
-                        index: c.index,
-                        time: c.time + binding.offsetSeconds,
-                        end: c.end + binding.offsetSeconds,
-                        tokens: c.tokens.map((text, index) => ({
-                            ...atlas!.tokens.get(text)!,
-                            text,
-                            index,
-                            time: c.time + binding.offsetSeconds + (index * (c.end - c.time)) / c.tokens.length,
-                        })),
-                    })),
+                    cues: selected.map(c => {
+                        const parts = units(c);
+                        let pen = 0;
+                        const tokens = parts.map((text, index) => {
+                            const { advance, bearing, ...sprite } = atlas!.tokens.get(text)!;
+                            const offsetX = pen - bearing;
+                            pen += advance;
+                            return {
+                                ...sprite,
+                                text,
+                                index,
+                                time: c.time + binding.offsetSeconds + (index * (c.end - c.time)) / parts.length,
+                                ...(characters ? { offsetX, advance } : {}),
+                            };
+                        });
+                        return {
+                            index: c.index,
+                            time: c.time + binding.offsetSeconds,
+                            end: c.end + binding.offsetSeconds,
+                            tokens,
+                            ...(characters ? { lineWidth: pen } : {}),
+                        };
+                    }),
                 };
             }
             if (Object.keys(frame).length) frames.set(element.id, frame);

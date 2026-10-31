@@ -9,11 +9,12 @@ export function validateLyricInputs(input: unknown): LyricInputContract[] | unde
     if (!Array.isArray(input) || !input.length) return invalid('歌词输入声明无效。');
     const result = input.map(raw => {
         const v = record(raw, '歌词输入');
-        keys(v, ['id']);
+        keys(v, ['id'], ['granularity']);
+        if (v.granularity !== undefined && v.granularity !== 'grapheme') invalid('歌词分割模式无效。');
         const id = text(v.id, '歌词输入 ID');
         if (!/^[a-z][a-z0-9-]*$/u.test(id) || ['constructor', 'prototype', '__proto__'].includes(id))
             invalid('歌词输入 ID 无效。');
-        return { id };
+        return { id, ...(v.granularity === 'grapheme' ? { granularity: 'grapheme' as const } : {}) };
     });
     if (new Set(result.map(i => i.id)).size !== result.length) invalid('歌词输入重复。');
     return result;
@@ -29,9 +30,18 @@ export function validateLyricDefinitions(
     if (!Array.isArray(input) || input.length !== contract.length) return invalid('歌词输入定义不完整。');
     return input.map((raw, index) => {
         const v = record(raw, '歌词输入定义');
-        keys(v, ['id', 'label']);
+        keys(v, ['id', 'label'], ['granularity', 'defaultLeadSeconds']);
+        if (v.granularity !== contract[index]!.granularity) invalid('歌词分割模式必须匹配算法声明。');
+        const defaultLeadSeconds =
+            v.defaultLeadSeconds === undefined ? undefined : finite(v.defaultLeadSeconds, '默认提前入场');
+        if (defaultLeadSeconds !== undefined && defaultLeadSeconds <= 0) invalid('默认提前入场必须大于零。');
         if (v.id !== contract[index]!.id) invalid('歌词输入超出算法声明。');
-        return { id: String(v.id), label: text(v.label, '歌词输入名称') };
+        return {
+            id: String(v.id),
+            label: text(v.label, '歌词输入名称'),
+            ...(v.granularity === 'grapheme' ? { granularity: 'grapheme' as const } : {}),
+            ...(defaultLeadSeconds === undefined ? {} : { defaultLeadSeconds }),
+        };
     });
 }
 const checked = new WeakSet<object>();

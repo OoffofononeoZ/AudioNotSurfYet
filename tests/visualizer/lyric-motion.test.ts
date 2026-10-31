@@ -34,8 +34,11 @@ function frame(time: number, reverse = false): AlgorithmFrame {
                     index,
                     time: 3.125 + index * 4,
                     end: 7.125 + index * 4,
+                    lineWidth: 1920,
                     tokens: [0, 1, 2].map(i => ({
                         index: i,
+                        offsetX: [0, 160, 1760][i],
+                        advance: i === 1 ? 1600 : 160,
                         text: ['Hello', 'longword', 'again'][i]!,
                         time: 3.125 + index * 4 + (i * 4) / 3,
                         width: i === 1 ? 1600 : 160,
@@ -63,13 +66,13 @@ function rows(packet: DrawPacket) {
     return result;
 }
 
-test.each([false, true])('lyric first tokens reach both exact millisecond anchors, reverse=%s', async reverse => {
+test.each([false, true])('complete lyric lines reach both exact millisecond anchors, reverse=%s', async reverse => {
     const runtime = await createTestAlgorithm(algorithm);
     for (const index of [0, 1]) {
         const time = 3.125 + index * 4,
             f = frame(time, reverse);
         const packet = validateDrawPacket(await runtime.prepareFrame(f, history(time) as any), algorithm);
-        const row = rows(packet).find(r => r[0] === index && r[1] === 0)!;
+        const row = rows(packet).find(r => r[0] === index && r[1] === -1)!;
         expect(row[2]).toBe(index ? 0.75 : 0.25);
         expect(row[3]).toBeGreaterThan(0.24);
         expect(row[3]).toBeLessThan(0.76);
@@ -78,36 +81,32 @@ test.each([false, true])('lyric first tokens reach both exact millisecond anchor
     }
 });
 
-test.each([false, true])(
-    'abrupt bass changes preserve monotonic motion and first-word order, reverse=%s',
-    async reverse => {
-        const runtime = await createTestAlgorithm(algorithm),
-            seen = new Set<string>(),
-            distances = new Map<string, number>();
-        for (let tick = 0; tick <= 1200; tick++) {
-            const time = tick / 120;
-            const packet = validateDrawPacket(
-                await runtime.prepareFrame(frame(time, reverse), history(time) as any),
-                algorithm,
-            );
-            expect(Math.abs(packet.state![1]!)).toBeLessThanOrEqual(0.5);
-            for (const row of rows(packet)) {
-                const [cue, word, x] = row as [number, number, number];
-                const key = cue + ':' + word,
-                    distance = Math.abs(x - 0.5),
-                    previous = distances.get(key);
-                if (previous !== undefined) {
-                    if (reverse) expect(distance).toBeLessThanOrEqual(previous + 1e-10);
-                    else expect(distance).toBeGreaterThanOrEqual(previous - 1e-10);
-                }
-                if (word > 0) expect(seen.has(cue + ':' + (word - 1))).toBe(true);
-                seen.add(key);
-                distances.set(key, distance);
+test.each([false, true])('abrupt bass changes preserve monotonic whole-line motion, reverse=%s', async reverse => {
+    const runtime = await createTestAlgorithm(algorithm),
+        seen = new Set<string>(),
+        distances = new Map<string, number>();
+    for (let tick = 0; tick <= 1200; tick++) {
+        const time = tick / 120;
+        const packet = validateDrawPacket(
+            await runtime.prepareFrame(frame(time, reverse), history(time) as any),
+            algorithm,
+        );
+        expect(Math.abs(packet.state![1]!)).toBeLessThanOrEqual(0.5);
+        for (const row of rows(packet)) {
+            const [cue, word, x] = row as [number, number, number];
+            const key = cue + ':' + word,
+                distance = Math.abs(x - 0.5),
+                previous = distances.get(key);
+            if (previous !== undefined) {
+                if (reverse) expect(distance).toBeLessThanOrEqual(previous + 1e-10);
+                else expect(distance).toBeGreaterThanOrEqual(previous - 1e-10);
             }
+            seen.add(key);
+            distances.set(key, distance);
         }
-        expect(seen.has('0:0') && seen.has('1:0') && seen.has('1:1')).toBe(true);
-    },
-);
+    }
+    expect(seen.has('0:-1') && seen.has('1:-1')).toBe(true);
+});
 
 test('lyric motion survives cadence, seeks, changes and resize; unbound input needs no history', async () => {
     const a = await createTestAlgorithm(algorithm),
