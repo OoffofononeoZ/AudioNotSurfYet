@@ -52,6 +52,7 @@
 | [tests/desktop/analyzer-smoke.mjs](../../tests/desktop/analyzer-smoke.mjs) | [scripts/lib/desktop-native-runtime.mjs](../../scripts/lib/desktop-native-runtime.mjs)、[tests/desktop/dialog-fixture.mjs](../../tests/desktop/dialog-fixture.mjs) |
 | [tests/desktop/app-resources.test.ts](../../tests/desktop/app-resources.test.ts) | [electron/appResources.ts](../../electron/appResources.ts) |
 | [tests/desktop/audio-file-ports.test.ts](../../tests/desktop/audio-file-ports.test.ts) | [src/platform/desktopAudioFiles.ts](../../src/platform/desktopAudioFiles.ts)、[src/platform/fileContracts.ts](../../src/platform/fileContracts.ts)、[src/platform/webAudioFiles.ts](../../src/platform/webAudioFiles.ts) |
+| [tests/desktop/black-hole-smoke.mjs](../../tests/desktop/black-hole-smoke.mjs) | [scripts/lib/desktop-native-runtime.mjs](../../scripts/lib/desktop-native-runtime.mjs)、[tests/desktop/dialog-fixture.mjs](../../tests/desktop/dialog-fixture.mjs)、[tests/support/visualizer-assets.mjs](../../tests/support/visualizer-assets.mjs) |
 | [tests/desktop/bundle-ipc.test.ts](../../tests/desktop/bundle-ipc.test.ts) | [electron/files/bundleIpc.ts](../../electron/files/bundleIpc.ts)、[electron/files/nativeBundles.ts](../../electron/files/nativeBundles.ts)、[electron/files/nativeGrants.ts](../../electron/files/nativeGrants.ts) |
 | [tests/desktop/bundle-recovery-smoke.mjs](../../tests/desktop/bundle-recovery-smoke.mjs) | [scripts/lib/desktop-native-runtime.mjs](../../scripts/lib/desktop-native-runtime.mjs)、[tests/desktop/dialog-fixture.mjs](../../tests/desktop/dialog-fixture.mjs)、[tests/desktop/recovery-support.mjs](../../tests/desktop/recovery-support.mjs) |
 | [tests/desktop/dev-smoke.mjs](../../tests/desktop/dev-smoke.mjs) | [scripts/lib/desktop-native-runtime.mjs](../../scripts/lib/desktop-native-runtime.mjs) |
@@ -104,7 +105,6 @@
 | [tests/e2e/app-shell.spec.ts](../../tests/e2e/app-shell.spec.ts) | [tests/support/file-picker.ts](../../tests/support/file-picker.ts) |
 | [tests/e2e/app-smoke.spec.ts](../../tests/e2e/app-smoke.spec.ts) | [tests/support/file-picker.ts](../../tests/support/file-picker.ts) |
 | [tests/e2e/audition-long.spec.ts](../../tests/e2e/audition-long.spec.ts) | [tests/processing/systemSampler.ts](../../tests/processing/systemSampler.ts)、[tests/transcription/auditionHarness.ts](../../tests/transcription/auditionHarness.ts) |
+| [tests/e2e/black-hole-reference.spec.ts](../../tests/e2e/black-hole-reference.spec.ts) | — |
+| [tests/e2e/black-hole-visualizer.spec.ts](../../tests/e2e/black-hole-visualizer.spec.ts) | [tests/support/file-picker.ts](../../tests/support/file-picker.ts)、[tests/support/project-actions.ts](../../tests/support/project-actions.ts)、[tests/support/visualizer-assets.mjs](../../tests/support/visualizer-assets.mjs) |
 | [tests/e2e/desktop-file-controls.spec.ts](../../tests/e2e/desktop-file-controls.spec.ts) | — |
-| [tests/e2e/desktop-shutdown.spec.ts](../../tests/e2e/desktop-shutdown.spec.ts) | [src/platform/lifecycleContracts.ts](../../src/platform/lifecycleContracts.ts)、[tests/support/editor-workspaces.ts](../../tests/support/editor-workspaces.ts)、[tests/support/file-picker.ts](../../tests/support/file-picker.ts) |
-| [tests/e2e/e1-editor.spec.ts](../../tests/e2e/e1-editor.spec.ts) | [tests/support/file-picker.ts](../../tests/support/file-picker.ts)、[tests/support/project-actions.ts](../../tests/support/project-actions.ts) |
-| [tests/e2e/e10-editor-block-editing.spec.ts](../../tests/e2e/e10-editor-block-editing.spec.ts) | [tests/support/editor-marking.ts](../../tests/support/editor-marking.ts) |

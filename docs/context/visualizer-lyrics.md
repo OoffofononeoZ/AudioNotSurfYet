@@ -45,3 +45,11 @@ LyricBinding的lyrics分支可选font:{family,fullName,postscriptName}，省略�
 仅所选字体标识写入V6工程，不保存字体列表、路径或字节，不分发系统字体。宿主使用local(PostScript名)加载FontFace，加载完成后测量实际字形，按最大升降部调整图集行高/基线，避免裁切。缺失字体明确报错，导出失败，保留输入与旧图集供重新选择；不静默换成默认字体。替换LRC保留字体与lead/tail/offset；字体切换、失效任务、离页释放由宿主负责，算法仍只接收受控文字图集。
 
 两个元素展示图、算法和设计记录只保存在外部资源库，旧工程继续使用内嵌旧快照。共享渲染与歌词准备同时影响Web和Electron；适用验证和原生确认UI替身的限制随任务交付报告。
+
+## 黑洞组合预设
+
+外部资源 black-hole-visualizer-2903479369 v1 复用 Circular Visualizer 的背景、扩散粒子、默认隐藏的纵深粒子和前景图片，以三个独立 ABI3 screen/timeline+realtime 元素 black-hole-core、black-hole-accretion-disk、black-hole-flare 替换 bars/outer/center；这是固定视角立体效果，未扩展世界空间透明渲染。核心静止，盘面与炫光使用现有 WE 完整频谱控制亮度；audioGain 为两者共同处理控件。颜色、位置和尺寸独立编辑，需手动保持中心/核心半径一致。
+
+末项 black-hole-lyrics v2 默认 enabled:false、歌词输入 unbound，不阻止视频导出或实时能力检查；启用后沿用歌曲模式及缺失歌词的导出拒绝。现有按钮会在启动导出时显示配置错误，清除错误后可继续编辑。新预设及三个元素的图片、源码与精确依赖只存在外部资源库，无宿主运行时或工程格式变更。
+
+专项测试：浏览器运行 `npx playwright test tests/e2e/black-hole-visualizer.spec.ts tests/e2e/black-hole-reference.spec.ts --project=chrome --project=edge --workers=1 --output=artifacts/black-hole-visualizer/playwright`，HTML 报告另设 PLAYWRIGHT_HTML_OUTPUT_DIR 到该任务 artifacts；性能比较串行，参考测试只在本机参考目录存在时执行。桌面运行 `node tests/desktop/black-hole-smoke.mjs`，复用现有生产应用的校验执行副本及原生端口，OS 选值使用替身，不代表人工操作原生对话框。截图、测量和视频在 artifacts/black-hole-visualizer/。
