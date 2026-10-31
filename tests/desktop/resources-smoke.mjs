@@ -3,7 +3,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { _electron, expect } from '@playwright/test';
-import { resourceRows } from '../support/visualizer-assets.mjs';
+import { copyResourceLibrary } from './resource-library-fixture.mjs';
 import {
     createNativeRun,
     copyNativeTree,
@@ -22,30 +22,7 @@ const runtime = await copyNativeTree(
     path.join(native.directory, 'runtime'),
 );
 const library = path.join(native.directory, 'assets');
-const originalFiles = [];
-const rows = resourceRows();
-for (const row of rows) {
-    const sourceRoot = await fs.realpath(row.dir);
-    const destination = path.join(library, row.info.kind === 'preset' ? 'presets' : 'elements', row.info.resource.id);
-    const images = (await fs.readdir(row.dir, { withFileTypes: true }))
-        .filter(entry => entry.isFile() && /\.(png|jpe?g|webp|svg)$/i.test(entry.name))
-        .map(entry => entry.name);
-    const files = new Set(['resource-info.json', row.info.packagePath, row.info.sourceEntry, ...images]);
-    if (row.info.previewPath && (await fs.stat(path.join(row.dir, row.info.previewPath)).catch(() => null)))
-        files.add(row.info.previewPath);
-    for (const relative of files) {
-        const source = await fs.realpath(path.join(row.dir, relative));
-        const inside = path.relative(sourceRoot, source);
-        assert(inside && !inside.startsWith('..') && !path.isAbsolute(inside), 'Resource input escaped its package');
-        const target = path.join(destination, relative);
-        assert(!path.relative(destination, target).startsWith('..'), 'Resource destination escaped its package');
-        await fs.mkdir(path.dirname(target), { recursive: true });
-        const sha256 = await copyVerifiedBytes(source, target);
-        originalFiles.push({ path: target, sha256 });
-    }
-}
-const presetRoot = path.join(library, 'presets');
-const originalPresets = new Set(await fs.readdir(presetRoot));
+const { originalFiles, rows, presetRoot, originalPresets } = await copyResourceLibrary(library);
 const wallpaperRoot = path.join(native.directory, 'wallpapers');
 await fs.mkdir(wallpaperRoot);
 const audio = path.join(native.directory, 'visualizer-v5-avsync-v1.wav');
@@ -130,7 +107,13 @@ try {
         .toBe(true);
     result.checks.nativeDirectoryCatalog = 'passed';
     await page.locator('[data-resource-id="radial-spectrum"]').click();
+    const previewCanvas = page.getByTestId('visualizer-preview-canvas');
+    const bindingRevision = await previewCanvas.getAttribute('data-binding-revision');
     await page.getByRole('combobox', { name: '频谱输入分析特征', exact: true }).selectOption('wallpaperEngineSpectrum');
+    await expect.poll(() => previewCanvas.getAttribute('data-binding-revision')).not.toBe(bindingRevision);
+    await expect(page.locator('[data-analysis-status]')).toHaveAttribute('data-analysis-status', 'ready', {
+        timeout: 60000,
+    });
     await expect(page.getByTestId('visualizer-preview-frame')).toHaveAttribute('data-scene-status', 'ready');
     const before = await exported();
     await page.getByTestId('export-visualizer-preset').click();

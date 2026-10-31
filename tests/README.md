@@ -28,6 +28,10 @@ Web/Electron 改动先核对[双端阶段和验证要求](../docs/context/deskto
 
 `npm run test:desktop:resources` 从外部资源库复制经过路径检查的包/源码/封面到独占目录；实际 ASAR 加载全部元素及封面，添加环形频谱，导出预设（取消/保存/刷新）和壁纸五文件，并重启恢复资源目录、逐一核对既有文件 hash。系统目录/确认选值由 `dialog-fixture.mjs` 替换；不证明真实目录选择或 Wallpaper Engine 宿主运行。结果和截图在 `artifacts/desktop/resources/<ID>`；原始外部库只读，只有本次副本接收新预设。
 
+`npm run test:desktop:directories:manual` 共用上述 `resource-library-fixture.mjs` 创建受控副本；只替换最初音频选值，目录及 message box 均调用原始 Electron API 并保留真实返回值。人工依次选择预填 assets、确认“保存”预设、选择预填 wallpapers、第一次退出选“继续工作”、第二次选“退出”。导出前等待频谱分析/画面就绪，关闭前明确修改未导出的 Editor 工程；已保存的 Visualizer 草稿本身不会触发未导出 Editor 提示。`--skip-catalog-dialog` 明确替换首个资源库选择（不能取得该 UI 通过），`--close-only` 仅验收两次原生退出确认，便于已完成步骤后续作，不重做其他操作。`--decline-only` 只验真实“继续工作”，核对窗口可编辑后强制收尾本次测试应用；该清理退出码不充当正常确认退出证据。
+
+非预填目录拒绝，取消/不符步骤记 deferred；`native-dialogs.json` 原子记录正在等待的系统 UI、实际回答、生命周期阶段与窗口关闭，正常流程核对退出码 0、原资源 hash 和五文件输出。结果/ready/准备状态/失败截图在 `artifacts/desktop/manual-directories/<ID>`；可在该次目录写入 `defer` 文件停止等待，窗口已关闭或停止等待会立即结束轮询，执行副本和 profile 保留，不记为通过。缺少人工输入仅阻断相应 UI 证据；部分步骤通过与完整 run 通过分开记录，不替代自动化资源业务专项或实际 Wallpaper Engine 宿主。
+
 `npm run test:desktop:scene` 使用实际 ASAR 与独立 profile，只读加载现有 shared-camera-demo，操作响应式面板编辑镜头关键帧/元素位置，实际重启核对完整工程。720p30 三秒输出复用媒体 oracle 的 `--files-only` 检查全解码/逐帧 PTS，另检查每帧青/橙立方体及动态帧摘要；不冒充四档矩阵、深度数值 oracle 或任意场景质量保证。随后检查首页样式重启与模式切换、桌面无外部地址/复制的 `/display` 入口、满视口几何、真实全屏/退出、展示重启和缺失样式返回。拒绝所有 HTTP(S)，核对源包/源码 hash；系统选择结果仍为替身。结果和已绘制截图在 `artifacts/desktop/scene/<ID>`，WebM/媒体测量在既有 composition output 目录。
 
 `npm run test:desktop:inputs` 实际 ASAR/独立 profile 覆盖 `.osu` 追加与原 tempo/人工标记保留，`.osz` 多难度/损坏音频/原音频 hash 不匹配拒绝/换歌取消与应用、Editor JSON 原生保存及回读/重启。图片 PNG/JPEG/WebP 逐一读取内嵌 bytes/hash 并检查颜色、取消/损坏保留和轮播淡化；VP9 WebM/H.264 MP4 在帧边界之间检查往返 seek/循环；UTF-8 中英文 LRC 检查内嵌摘要、取消与无时间戳拒绝。移走本次媒体/LRC 源文件后，实际重启的完整草稿相同，JSON 回读仅允许既有 updatedAt 更新，其余字段完整比较；前后两份 720p30/四秒 WebM 复用媒体 oracle `--files-only` 全解码/120 帧逐帧 PTS 检查。拒绝 HTTP(S)，所有源/输出只在独占目录，外部资源库只读；系统选择结果替身不证明原生 UI，合成材料不扩大为任意编码或质量保证。结果/工程/截图在 `artifacts/desktop/inputs/<ID>`，视频/测量沿用 composition output。

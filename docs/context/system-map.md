@@ -12,13 +12,13 @@ upstream_docs:
 
 Web/Electron 双端 Goal 已批准，`electron/` 宿主、独立构建及安全应用协议已接入，渲染端复用网页产物；开发、应用目录和 ASAR 基础能力、四档封装短片/几何预设、十五分钟 1080p60 长片、真实 FT/自动标记短输入链，以及三维示例编辑/重启/真实输出、首页和应用内展示/全屏已验证。osu/osz、图片/视频/歌词经原生端口导入及移走素材后的内嵌工程恢复/视频输出通过；原生目录/确认 UI、页面邻接与最终收口等缺口见阶段表。原先启动异常来自受管项目目录继承 Low Integrity；`desktop-native-runtime.mjs` 为开发/测试创建逐文件校验的普通用户目录副本和原生 TEMP，保留 sandbox，不修改权限，终止后只清理未改动的已拥有执行文件。平台端口、原生授权及独立存储边界见[双端合同](desktop.md)，不复制以下共享业务服务。
 
-D2 已添加主进程只读文件/目录授权、受限 IPC 和文件流端点。`src/platform/` 在应用入口选择双端音频和目录端口，由 MainLayout 与 Visualizer 注入共享服务；Web 原始句柄与桌面 grantId 的运行时引用均留在 Pinia 外。Web V1 存储保留，桌面音频恢复优先核对磁盘 hash，目录 repository 保存原生授权描述。ASAR 音频/工程保存及重启恢复、源变化/缺失拒绝旧 Blob 已验证，真实 WAV 打开及 Editor 保存也由人工完成；ASAR 资源目录加载/重启、预设和壁纸五文件输出通过，目录原生 UI 等剩余验证见[阶段状态](desktop.md)。共享资源读取/预览校验不依赖具体句柄方法。
+D2 已添加主进程只读文件/目录授权、受限 IPC 和文件流端点。`src/platform/` 在应用入口选择双端音频和目录端口，由 MainLayout 与 Visualizer 注入共享服务；Web 原始句柄与桌面 grantId 的运行时引用均留在 Pinia 外。Web V1 存储保留，桌面音频恢复优先核对磁盘 hash，目录 repository 保存原生授权描述。ASAR 音频/工程保存及重启恢复、源变化/缺失拒绝旧 Blob 已验证，真实 WAV 打开及 Editor 保存也由人工完成；ASAR 资源目录加载/重启、预设和壁纸五文件输出通过。真实资源库/壁纸目录选择和预设确认已有分段人工证据，失败尝试及最终缺口见[阶段状态](desktop.md)。共享资源读取/预览校验不依赖具体句柄方法。
 
 DEC-109 批准宿主 CSP 的 script-src 增加 blob:，让既有隔离 Worker 导入资源算法模块；宿主也获得 blob 模块执行能力。DEC-110 另批准 Basic Pitch 固定 GitHub 文件的 connect-src 来源，未放开其他路径。生产 ASAR 已验证 8 个固定地址、其他 revision/文件路径拒绝，以及实际算法 iframe/Worker 仍禁止网络且无 parent/Node/桥权限；Web 不依赖这些宿主规则。
 
 D3 的 `FileTransferAccess` 处理工程、媒体、歌词及文件输出，集中平台控件保留 Web 上传/下载语义；`DirectoryExportAccess` 处理预设和壁纸目录，复用共享格式与依赖校验。桌面 `NativeSaves` 分块确认、同目录临时文件发布，`NativeBundles` 约束精确清单并整体发布新目录；只读库写入另经原生确认。主进程管理路径与清理所有权，renderer 不持有任意路径或 Node 能力。
 
-D5 关闭通过生命周期端口接入 MainLayout 的共享运行时。主进程校验阶段化请求、确认风险并等待原生 IO 排空；renderer 先保存草稿/候选修正，再按服务顺序释放并卸载应用。`SessionRepositoryTasks` 追踪会话事务，保持原 repository 契约；准备失败保留工程并恢复编辑。窗口偏好独立保存在 userData；创建后重设外框避免本机分数缩放下构造尺寸漂移。ASAR 草稿失败恢复/确认退出、FT 推断中 Worker 终止、活动/ready WebM 及原生保存清理、最小化播放、窗口/单实例已通过；原生确认 UI 等缺口以[桌面合同](desktop.md)为准。
+D5 关闭通过生命周期端口接入 MainLayout 的共享运行时。主进程校验阶段化请求、确认风险并等待原生 IO 排空；renderer 先保存草稿/候选修正，再按服务顺序释放并卸载应用。`SessionRepositoryTasks` 追踪会话事务，保持原 repository 契约；准备失败保留工程并恢复编辑。窗口偏好独立保存在 userData；创建后重设外框避免本机分数缩放下构造尺寸漂移。ASAR 草稿失败恢复/确认退出、FT 推断中 Worker 终止、活动/ready WebM 及原生保存清理、最小化播放、窗口/单实例已通过；原生“退出”和“继续工作”也分别取得真实回答与阶段/可编辑状态证据。各 run 范围及最终收口见[桌面合同](desktop.md)。
 
 `NativeSaveJournal` 在主进程记录已确认临时文件与增量摘要，`NativeBundleJournal` 记录目录/source 身份及已完成文件清单/hash，共用 `NativeJournalStore` 的双槽 V1/checksum 持久化；单文件载体保持。重启先恢复半写子文件，再核对目录全部已记录内容，清理前持久化标记并逐文件/空目录删除。变化、外部新增或日志损坏保留并原生提示，不扫描选定目录、不递归删除或追踪已发布目标。实际独占进程树终止/重启已验证两类恢复及保护；未确认写入和断电边界见[桌面合同](desktop.md)，Web 无此原生路径日志。
 

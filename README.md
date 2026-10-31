@@ -2,7 +2,7 @@
 
 Vue 3 / TypeScript / Vite 浏览器音频工作台。项目状态、技术契约和当前验证缺口见 [上下文入口](docs/context/index.md)，任务规则与 6 个项目 skills 见 [AGENTS.md](AGENTS.md)。
 
-现有网页端完整保留；Windows x64 Electron 双端实施 Goal 持续进行，合同、里程碑和实际验证状态见[双端与桌面实施](docs/context/desktop.md)。基础能力、真实模型、封装媒体、三维/应用内展示、osu/图片/视频/歌词输入及安装升级保留已验证；原生目录/确认 UI 与最终双端收口仍待完成。
+现有网页端完整保留；Windows x64 Electron 双端实施 Goal 持续进行，合同、里程碑和实际验证状态见[双端与桌面实施](docs/context/desktop.md)。基础能力、真实模型、封装媒体、三维/应用内展示、osu/图片/视频/歌词输入、原生目录/确认 UI 及安装升级保留已有实测；最终双端收口仍在进行。
 
 文档按当前页面和领域维护：接口从共享运行时及 Analyzer/Editor/Visualizer 页面进入，验证要求集中在领域 validation。普通任务更新相关专题，过程反馈放在交付中；旧阶段产物已清理，历史由 Git 查回，必要证据与未解决缺口继续保留。
 
@@ -24,6 +24,8 @@ npm run dev
 `test:desktop:scene` 在实际 ASAR 检查既有三维示例的镜头/位置编辑、草稿重启、真实 WebM、首页实时样式、应用内展示页及全屏/恢复。独立 profile 与输出不改用户工程；外部资源只读，系统文件/目录选值仍为替身，详见[测试说明](tests/README.md)。
 
 `test:desktop:inputs` 检查实际 ASAR 的 `.osu/.osz`、Editor JSON、PNG/JPEG/WebP、MP4/WebM 与 UTF-8 LRC；覆盖取消/损坏保留、时间轴渲染、内嵌字节与移走素材后重启/JSON 回读和真实视频导出。系统选值为替身，范围与结果见[测试说明](tests/README.md)。
+
+`test:desktop:directories:manual` 打开真正的 Windows 资源库/壁纸目录选择、预设写入确认及两次退出确认，需要人工按提示操作。只预填独占测试目录，保留系统返回值；当前结果与剩余人工输入见[桌面阶段](docs/context/desktop.md)。
 
 NSIS 产物明确未签名、按用户安装，保留用户数据并关闭安装后自动启动；`desktop:package` 同时生成安装器的 `.sha256`。产品图标复用现有唱片标记。`npm run test:desktop:install` 会执行真实安装、临时补丁版本升级、安装版启动和卸载：拒绝覆盖已有安装，先备份用户数据，检查包内容/注册/快捷方式及原文件保留；显式 `--profile-from <成功自动标记 result.json>` 另验证独立副本中的工程/八模型/结果、升级后离线重算及卸载后读取，详见 [tests README](tests/README.md)。结果与私有备份在忽略目录中；本机同实现版本夹具通过不等于未来 schema 迁移或发布通过。
 

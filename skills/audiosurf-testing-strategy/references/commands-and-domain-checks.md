@@ -16,6 +16,7 @@
 | Electron 入口/能力 | `test:desktop:dev` 实际执行开发命令；`desktop:build` 后 `test:desktop:smoke`，`desktop:dir` 后 `test:desktop:packaged` 检查生产能力及重启恢复。算术 ORT 图与原始编码块不替代真实 FT/封装视频验证；GPUAdapter 交给 ORT 单一设备所有者，不能预先消费后重复 requestDevice |
 | Electron 文件/恢复 | `test:desktop:files` 为真实 ASAR IPC/存储/文件操作、对话框选值替身；`test:desktop:dialogs:manual` 为实际打开/保存且需人工操作，原生返回值不替换。只使用独占受控文件；两类结果分开，主进程请求不能模拟受限网页攻击者 |
 | Electron 资源目录 | `test:desktop:resources` 检查独占资源副本的实际算法/封面加载、预设取消/保存、壁纸五文件、目录重启恢复与既有文件 hash；系统目录/确认选值为替身。`test:desktop:packaged` 包含 opaque iframe 内 Worker 动态导入 blob 模块，不能只用普通 postMessage 宣称算法加载通过 |
+| Electron 原生目录/确认 UI | `test:desktop:directories:manual` 默认只替换初始音频选值，两个目录选择、预设保存与继续工作/退出保留真实系统 UI/回答。先等分析/画面就绪，退出以未导出的 Editor 修改触发；`--skip-catalog-dialog` 不验证资源库 OS 选择，`--close-only` 只验证退出，`--decline-only` 只验继续工作后自动强制收尾，不能称正常确认退出。限制受控目录并核对阶段/退出码/文件；人工未完成保持待验，取消或 output 中 `defer` 可结束等待，不把 ready/部分通过记为完整 run 通过 |
 | Electron 封装媒体 | `test:desktop:media` 实际 ASAR 四档首次/重复同步片和几何预设输出，取消保存后重试；复用现有媒体 oracle 的 `--files-only` 严格解码/逐帧/同步门槛。结果不能转写为 Chrome/Edge `--all`、长片、模型或原生保存 UI 通过 |
 | Electron 三维/展示 | `test:desktop:scene` 实际 ASAR 现有三维示例的镜头/位置编辑与草稿重启、720p30 真正输出/全解码/逐帧 PTS/动态几何、首页样式重启及模式切换、应用内展示/满视口/全屏/重启/缺失返回。全程拒绝 HTTP(S)，原库只读；系统选值替身不证明原生 UI，一例不替代四档矩阵或深度数值 oracle |
 | Electron 素材输入 | `test:desktop:inputs` 实际 ASAR 的 osu/osz、Editor JSON、三图片/两视频格式及 UTF-8 LRC，检查取消/损坏保留、原音频身份/换歌保护、内嵌摘要、seek/循环/淡化、移走素材后重启和 JSON/视频输出。仅导入更新时间戳可变，其余完整内容比较；系统选值替身不证明原生 UI，合成片不扩展为任意 codec 或质量接受 |

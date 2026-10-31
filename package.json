@@ -39,6 +39,7 @@
         "test:desktop:save-recovery": "node tests/desktop/save-recovery-smoke.mjs",
         "test:desktop:bundle-recovery": "node tests/desktop/bundle-recovery-smoke.mjs",
         "test:desktop:dialogs:manual": "node tests/desktop/native-dialog-smoke.mjs",
+        "test:desktop:directories:manual": "node tests/desktop/native-directory-smoke.mjs",
         "typecheck": "vue-tsc -b",
         "test": "vitest run",
         "test:unit": "vitest run tests/unit",
