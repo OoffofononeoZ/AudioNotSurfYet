@@ -11,7 +11,8 @@ export async function renderBlackHole(packs: any[]) {
         elements: packs.flatMap(p => p.elements),
         presets: [],
     };
-    const elements = project.resources.elements.map((d, i) => createDefinitionElement(d, 10, i));
+    project.track.durationSeconds = 86401;
+    const elements = project.resources.elements.map((d, i) => createDefinitionElement(d, 86401, i));
     project.elements = elements;
     project.items = elements.map(e => ({ kind: 'element' as const, id: e.id }));
     const lyric = elements.find(e => e.resource.id === 'black-hole-lyrics')!;
@@ -43,6 +44,7 @@ export async function renderBlackHole(packs: any[]) {
     const scene = new CompositionScene({ renderer, readProject: () => project, resolveAt: () => values });
     const captures: any[] = [],
         timings: any[] = [];
+    let referencePixels: Uint8Array | undefined, noParticlePixels: Uint8Array | undefined;
     const render = async (time: number) => {
         const input = {
             elementSeeds: new Map(elements.map(e => [e.id, 123456789])),
@@ -81,9 +83,61 @@ export async function renderBlackHole(packs: any[]) {
             sum += l;
             if (l > 45) lit++;
         }
+        let repeatDiff: any;
+        if (name === 'combined') referencePixels = pixels.slice();
+        if (name === 'view-90-no-points') noParticlePixels = pixels.slice();
+        const comparison =
+            name === 'seek-repeat' ? referencePixels : name === 'view-90-density-zero' ? noParticlePixels : undefined;
+        if (comparison) {
+            let maxChannel = 0,
+                changedPixels = 0;
+            for (let i = 0; i < pixels.length; i += 4) {
+                let changed = false;
+                for (let c = 0; c < 3; c++) {
+                    const d = Math.abs(pixels[i + c]! - comparison[i + c]!);
+                    maxChannel = Math.max(maxChannel, d);
+                    changed ||= d > 0;
+                }
+                if (changed) changedPixels++;
+            }
+            repeatDiff = { maxChannel, changedPixels, pixelCount: w * h };
+        }
         const center = (Math.floor(h / 2) * w + Math.floor(w / 2)) * 4;
         const corners = [0, (w - 1) * 4, (h - 1) * w * 4, (w * h - 1) * 4].map(i => Array.from(pixels.slice(i, i + 3)));
+        let radialProfile: number[] | undefined, peaks: number | undefined;
+        if (name.startsWith('top-time-')) {
+            const sums = Array(128).fill(0),
+                counts = Array(128).fill(0),
+                radius = (216 * h) / 1080;
+            for (let yy = 0; yy < h; yy++)
+                for (let xx = 0; xx < w; xx++) {
+                    const dx = xx - w / 2,
+                        dy = yy - h / 2;
+                    if (Math.abs(dy) > Math.abs(dx) * 0.5) continue;
+                    const t = (Math.hypot(dx, dy) / radius - 1.025) / (720 / 216 - 1.025),
+                        bin = Math.floor(t * 128);
+                    if (bin < 0 || bin >= 128) continue;
+                    const k = (yy * w + xx) * 4;
+                    sums[bin] += (pixels[k]! + pixels[k + 1]! + pixels[k + 2]!) / 765;
+                    counts[bin]++;
+                }
+            radialProfile = sums.map((v, i) => v / Math.max(1, counts[i]));
+            const smooth = radialProfile.map(
+                (_, i) => [Math.max(0, i - 1), i, Math.min(127, i + 1)].reduce((v, k) => v + radialProfile![k]!, 0) / 3,
+            );
+            peaks = 0;
+            for (let i = 2; i < 126; i++)
+                if (
+                    smooth[i]! > smooth[i - 1]! &&
+                    smooth[i]! >= smooth[i + 1]! &&
+                    smooth[i]! - Math.min(smooth[i - 2]!, smooth[i + 2]!) > 0.004
+                )
+                    peaks++;
+        }
         captures.push({
+            radialProfile,
+            peaks,
+            repeatDiff,
             corners,
             name,
             image: canvas.toDataURL('image/png'),
@@ -101,6 +155,12 @@ export async function renderBlackHole(packs: any[]) {
         await capture('high', visual, 3, 2);
         await capture('combined', visual);
         await capture('combined-later', visual, 4);
+        if (packs.some(p => p.id === 'black-hole-accretion-disk' && p.version >= 3)) {
+            for (const t of [0, 10, 30, 60, 180, 600, 1800, 3600, 21600, 86400]) {
+                await capture('time-' + t, visual, t);
+                await capture('top-time-' + t, visual, t, 0.25, { inclination: 90 });
+            }
+        }
         if (packs[0].version >= 2) {
             await capture('view-60', visual, 3, 0.25, { inclination: 60 });
             await capture('view-90', visual, 3, 0.25, { inclination: 90 });

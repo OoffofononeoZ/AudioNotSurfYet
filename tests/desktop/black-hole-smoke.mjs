@@ -16,7 +16,7 @@ import { installDialogFixture, queueOpen, queueSave } from './dialog-fixture.mjs
 
 const root = fileURLToPath(new URL('../../', import.meta.url)),
     native = await createNativeRun('black-hole');
-const output = path.join(root, 'artifacts/black-hole-visualizer-v2/desktop', path.basename(native.directory));
+const output = path.join(root, 'artifacts/black-hole-visualizer-v3/desktop', path.basename(native.directory));
 await fs.mkdir(output, { recursive: true });
 const runtime = await copyNativeTree(
     path.join(root, 'artifacts/desktop/packages/win-unpacked'),

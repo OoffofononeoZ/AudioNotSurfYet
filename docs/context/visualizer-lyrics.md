@@ -48,10 +48,10 @@ LyricBinding的lyrics分支可选font:{family,fullName,postscriptName}，省略�
 
 ## 黑洞组合预设
 
-外部 black-hole-visualizer-2903479369 v2 仍保留 Circular Visualizer 的背景、扩散粒子、默认隐藏的纵深粒子和前景图片，以独立 ABI3 screen/timeline+realtime 的核心、吸积盘、炫光替代 bars/outer/center，歌词默认隐藏。默认斜视20度、粉紫高亮白；核心半径216px、盘外半径720px、光晕外半径900px，尺寸按1080p高度缩放。盘面与炫光仰角均支持5–90度；样式独立，修改中心、核心半径、仰角和旋转时需保持一致。
+外部 black-hole-visualizer-2903479369 v3 仍保留 Circular Visualizer 的背景、扩散粒子、默认隐藏的纵深粒子和前景图片，以独立 ABI3 screen/timeline+realtime 的核心、吸积盘、炫光替代 bars/outer/center，歌词默认隐藏。默认斜视20度、粉紫高亮白；核心半径216px、盘外半径720px、光晕外半径900px，尺寸按1080p高度缩放。盘面与炫光仰角均支持5–90度；样式独立，修改中心、核心半径、仰角和旋转时需保持一致。
 
-v2提供连续发光盘面、四层湍流、宽旋流带与两级程序化光点，解析投影/遮挡及弯折近似，不积分测地线或逐粒子重力。光点密度/亮度、旋流、白热颜色和辉光独立可调；径向柔光为主，横向光芒较弱。核心半径最大10000，盘面/光晕外半径最大20000，炫光长度/宽度最大40000/20000。无需宿主运行时、ABI或工程格式变更。旧v1工程继续使用内嵌快照。
+v3吸积盘使用开放对数螺旋亮带及向内流光，四层有界相位只混合亮度，消除随时间增长的径向剪切；默认4096条、最多8192条流光，宽度/长度/密度/亮度可调。底图与流光合并为一个mesh/pass，默认24582、最大49158顶点，缓存元数据但宿主仍逐帧复制上传。核心与炫光保持v2，解析投影/遮挡及弯折近似，不积分测地线或重力。核心半径最大10000，盘面/光晕最大20000，炫光长度/宽度最大40000/20000。无需宿主运行时、ABI或工程格式变更；旧工程保留内嵌快照。
 
 末项black-hole-lyrics v2默认enabled:false、输入unbound，不阻挡视频导出或实时能力检查；启用后沿用歌曲模式及缺失歌词的导出拒绝。现有按钮在启动导出时显示配置错误，清除错误后可继续编辑。音频仍仅WE完整频谱，audioGain只控制盘面与炫光亮度。
 
-专项：浏览器运行 `npx playwright test tests/e2e/black-hole-visualizer.spec.ts tests/e2e/black-hole-reference.spec.ts tests/e2e/black-hole-benchmark.spec.ts --project=chrome --project=edge --workers=1 --output=artifacts/black-hole-visualizer-v2/playwright`，HTML报告另设PLAYWRIGHT_HTML_OUTPUT_DIR到任务artifacts。v1性能基线需任务artifacts中的显式v1快照，缺失时该项跳过；本地参考不存在时参考项跳过，不借用旧结果。性能区分三个组件和完整预设，GPU与提交时间分开记录，不以短时测量承诺FPS。桌面运行 `node tests/desktop/black-hole-smoke.mjs`，复用生产应用校验副本及原生端口，OS选值使用替身，不代表人工对话框验证。截图、视频、测量在artifacts/black-hole-visualizer-v2/。
+专项：浏览器运行 `npx playwright test tests/e2e/black-hole-visualizer.spec.ts tests/e2e/black-hole-benchmark.spec.ts --project=chrome --project=edge --workers=1 --output=artifacts/black-hole-visualizer-v3/playwright`，HTML报告另设PLAYWRIGHT_HTML_OUTPUT_DIR到任务artifacts。v2性能基线需任务artifacts中的显式v2快照，缺失时该项跳过。覆盖0至24小时十个绝对时间GPU采样、seek/重建、双浏览器30/60fps短导出，以及Chrome 60秒连续导出演示；采样不代表连续运行24小时。性能区分组件和完整预设，GPU与提交时间分开记录，不以短时测量承诺FPS。桌面运行 `node tests/desktop/black-hole-smoke.mjs`，复用生产应用校验副本及原生端口，OS选值使用替身，不代表人工对话框验证。截图、视频、测量在artifacts/black-hole-visualizer-v3/。
