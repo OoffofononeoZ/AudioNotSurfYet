@@ -48,8 +48,10 @@ LyricBinding的lyrics分支可选font:{family,fullName,postscriptName}，省略�
 
 ## 黑洞组合预设
 
-外部资源 black-hole-visualizer-2903479369 v1 复用 Circular Visualizer 的背景、扩散粒子、默认隐藏的纵深粒子和前景图片，以三个独立 ABI3 screen/timeline+realtime 元素 black-hole-core、black-hole-accretion-disk、black-hole-flare 替换 bars/outer/center；这是固定视角立体效果，未扩展世界空间透明渲染。核心静止，盘面与炫光使用现有 WE 完整频谱控制亮度；audioGain 为两者共同处理控件。颜色、位置和尺寸独立编辑，需手动保持中心/核心半径一致。
+外部 black-hole-visualizer-2903479369 v2 仍保留 Circular Visualizer 的背景、扩散粒子、默认隐藏的纵深粒子和前景图片，以独立 ABI3 screen/timeline+realtime 的核心、吸积盘、炫光替代 bars/outer/center，歌词默认隐藏。默认斜视20度、粉紫高亮白；核心半径216px、盘外半径720px、光晕外半径900px，尺寸按1080p高度缩放。盘面与炫光仰角均支持5–90度；样式独立，修改中心、核心半径、仰角和旋转时需保持一致。
 
-末项 black-hole-lyrics v2 默认 enabled:false、歌词输入 unbound，不阻止视频导出或实时能力检查；启用后沿用歌曲模式及缺失歌词的导出拒绝。现有按钮会在启动导出时显示配置错误，清除错误后可继续编辑。新预设及三个元素的图片、源码与精确依赖只存在外部资源库，无宿主运行时或工程格式变更。
+v2提供连续发光盘面、四层湍流、宽旋流带与两级程序化光点，解析投影/遮挡及弯折近似，不积分测地线或逐粒子重力。光点密度/亮度、旋流、白热颜色和辉光独立可调；径向柔光为主，横向光芒较弱。核心半径最大10000，盘面/光晕外半径最大20000，炫光长度/宽度最大40000/20000。无需宿主运行时、ABI或工程格式变更。旧v1工程继续使用内嵌快照。
 
-专项测试：浏览器运行 `npx playwright test tests/e2e/black-hole-visualizer.spec.ts tests/e2e/black-hole-reference.spec.ts --project=chrome --project=edge --workers=1 --output=artifacts/black-hole-visualizer/playwright`，HTML 报告另设 PLAYWRIGHT_HTML_OUTPUT_DIR 到该任务 artifacts；性能比较串行，参考测试只在本机参考目录存在时执行。桌面运行 `node tests/desktop/black-hole-smoke.mjs`，复用现有生产应用的校验执行副本及原生端口，OS 选值使用替身，不代表人工操作原生对话框。截图、测量和视频在 artifacts/black-hole-visualizer/。
+末项black-hole-lyrics v2默认enabled:false、输入unbound，不阻挡视频导出或实时能力检查；启用后沿用歌曲模式及缺失歌词的导出拒绝。现有按钮在启动导出时显示配置错误，清除错误后可继续编辑。音频仍仅WE完整频谱，audioGain只控制盘面与炫光亮度。
+
+专项：浏览器运行 `npx playwright test tests/e2e/black-hole-visualizer.spec.ts tests/e2e/black-hole-reference.spec.ts tests/e2e/black-hole-benchmark.spec.ts --project=chrome --project=edge --workers=1 --output=artifacts/black-hole-visualizer-v2/playwright`，HTML报告另设PLAYWRIGHT_HTML_OUTPUT_DIR到任务artifacts。v1性能基线需任务artifacts中的显式v1快照，缺失时该项跳过；本地参考不存在时参考项跳过，不借用旧结果。性能区分三个组件和完整预设，GPU与提交时间分开记录，不以短时测量承诺FPS。桌面运行 `node tests/desktop/black-hole-smoke.mjs`，复用生产应用校验副本及原生端口，OS选值使用替身，不代表人工对话框验证。截图、视频、测量在artifacts/black-hole-visualizer-v2/。

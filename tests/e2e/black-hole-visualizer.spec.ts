@@ -5,7 +5,7 @@ import { expect, test } from '@playwright/test';
 import { mkdir, writeFile } from 'node:fs/promises';
 import { resourcePack } from '../support/visualizer-assets.mjs';
 
-const output = 'artifacts/black-hole-visualizer';
+const output = 'artifacts/black-hole-visualizer-v2';
 test('black hole components compile, layer, react, seek, resize and release in the isolated renderer', async ({
     page,
 }, info) => {
@@ -31,6 +31,14 @@ test('black hole components compile, layer, react, seek, resize and release in t
     expect(by.combined.image).toBe(by['seek-repeat'].image);
     expect(by.combined.image).not.toBe(by['combined-later'].image);
     expect(by['lyrics-display'].image).not.toBe(by.combined.image);
+    expect(by['view-90'].image).not.toBe(by['view-90-no-points'].image);
+    expect(by['view-90-density-zero'].image).toBe(by['view-90-no-points'].image);
+    expect(by['view-90-spiral-zero'].image).not.toBe(by['view-90'].image);
+    expect(by['view-90'].lit).toBeGreaterThan(by.combined.lit);
+    for (const name of ['max-core', 'ultrawide-max-core'])
+        for (const rgb of by[name].corners) expect(Math.max(...rgb)).toBeLessThan(12);
+    for (const name of ['max-halo', 'ultrawide-max-halo'])
+        for (const rgb of by[name].corners) expect(rgb.reduce((a: number, b: number) => a + b, 0)).toBeGreaterThan(20);
     await mkdir(output, { recursive: true });
     for (const c of result.captures)
         await writeFile(
@@ -151,6 +159,18 @@ test('new preset keeps hidden lyrics exportable, enforces missing LRC, roundtrip
         offsetSeconds: 0,
     };
     p.output.frameRate = 60;
+    for (const e of p.elements)
+        for (const b of e.bindings) if (b.parameterId === 'inclination') b.source = { kind: 'constant', value: 90 };
+    const topProject = structuredClone(p);
+    topProject.elements.find((e: any) => e.resource.id === 'black-hole-lyrics').enabled = false;
+    const top = await page.evaluate(async project => {
+        const file = '/tests/support/black-hole-render.ts';
+        return (await import(file)).captureBlackHoleProject(project);
+    }, topProject);
+    await writeFile(
+        output + '/' + info.project.name + '-preset-top.png',
+        Buffer.from(top.image.split(',')[1], 'base64'),
+    );
     await load(p);
     await expect(page.getByTestId('start-visualizer-export')).toBeEnabled();
     const restored = await exported();

@@ -120,6 +120,8 @@ test('reference wallpaper render cost at matching output sizes', async ({ browse
                 gpuMedianMs: gpuSamples[Math.floor(gpuSamples.length / 2)] ?? null,
                 gpuP95Ms: gpuSamples[Math.floor(gpuSamples.length * 0.95)] ?? null,
                 gpuTimer: valid ? 'EXT_disjoint_timer_query_webgl2' : 'unavailable or disjoint',
+                maxMs: sorted.at(-1),
+                gpuMaxMs: gpuSamples.at(-1) ?? null,
                 medianMs: sorted[Math.floor(sorted.length / 2)],
                 p95Ms: sorted[Math.floor(sorted.length * 0.95)],
                 samples: s.samples,
@@ -132,14 +134,14 @@ test('reference wallpaper render cost at matching output sizes', async ({ browse
         expect(result.width).toBe(width);
         expect(result.height).toBe(height);
         expect(errors).toEqual([]);
-        const output = 'artifacts/black-hole-visualizer';
+        const output = 'artifacts/black-hole-visualizer-v2';
         await mkdir(output, { recursive: true });
         await page.screenshot({ path: output + '/' + info.project.name + '-reference-' + height + '.png' });
         results.push(result);
         await page.close();
     }
     await writeFile(
-        'artifacts/black-hole-visualizer/' + info.project.name + '-reference-performance.json',
+        'artifacts/black-hole-visualizer-v2/' + info.project.name + '-reference-performance.json',
         JSON.stringify(results, null, 2),
         'utf8',
     );

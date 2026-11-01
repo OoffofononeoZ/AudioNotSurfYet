@@ -16,7 +16,7 @@ import { installDialogFixture, queueOpen, queueSave } from './dialog-fixture.mjs
 
 const root = fileURLToPath(new URL('../../', import.meta.url)),
     native = await createNativeRun('black-hole');
-const output = path.join(root, 'artifacts/black-hole-visualizer/desktop', path.basename(native.directory));
+const output = path.join(root, 'artifacts/black-hole-visualizer-v2/desktop', path.basename(native.directory));
 await fs.mkdir(output, { recursive: true });
 const runtime = await copyNativeTree(
     path.join(root, 'artifacts/desktop/packages/win-unpacked'),
@@ -139,6 +139,10 @@ try {
             result.missingLyricsBlocked = true;
             result.nativeLrcBound = true;
         }
+        if (fps === 60)
+            for (const e of project.elements)
+                for (const b of e.bindings)
+                    if (b.parameterId === 'inclination') b.source = { kind: 'constant', value: 90 };
         await load(project);
         const restored = await snapshot();
         assert.deepEqual(restored.elements, project.elements);

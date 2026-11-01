@@ -54,9 +54,20 @@ export async function renderBlackHole(packs: any[]) {
         scene.render(input);
         return input;
     };
-    const capture = async (name: string, ids: string[], time = 3, level = 0.25) => {
+    const capture = async (
+        name: string,
+        ids: string[],
+        time = 3,
+        level = 0.25,
+        changes: Record<string, number> = {},
+    ) => {
         reset(level);
         for (const e of elements) e.enabled = ids.includes(e.resource.id);
+        for (const [id, value] of Object.entries(changes))
+            for (const e of elements) {
+                const v = values.get(e.id + ':' + id);
+                if (v) v.value = value;
+            }
         await render(time);
         const gl = renderer.getContext(),
             w = canvas.width,
@@ -71,7 +82,9 @@ export async function renderBlackHole(packs: any[]) {
             if (l > 45) lit++;
         }
         const center = (Math.floor(h / 2) * w + Math.floor(w / 2)) * 4;
+        const corners = [0, (w - 1) * 4, (h - 1) * w * 4, (w * h - 1) * 4].map(i => Array.from(pixels.slice(i, i + 3)));
         captures.push({
+            corners,
             name,
             image: canvas.toDataURL('image/png'),
             sum,
@@ -88,6 +101,17 @@ export async function renderBlackHole(packs: any[]) {
         await capture('high', visual, 3, 2);
         await capture('combined', visual);
         await capture('combined-later', visual, 4);
+        if (packs[0].version >= 2) {
+            await capture('view-60', visual, 3, 0.25, { inclination: 60 });
+            await capture('view-90', visual, 3, 0.25, { inclination: 90 });
+            await capture('view-90-no-points', visual, 3, 0.25, { inclination: 90, particleBrightness: 0 });
+            await capture('view-90-silent', visual, 3, 0, { inclination: 90 });
+            await capture('view-90-density-zero', visual, 3, 0.25, { inclination: 90, particleDensity: 0 });
+            await capture('view-90-spiral-zero', visual, 3, 0.25, { inclination: 90, spiralStrength: 0 });
+            await capture('view-5', visual, 3, 0.25, { inclination: 5 });
+            await capture('max-core', ['black-hole-core'], 3, 0.25, { horizonRadius: 10000 });
+            await capture('max-halo', ['black-hole-flare'], 3, 0.25, { haloRadius: 20000, inclination: 90 });
+        }
         await capture('seek-repeat', visual);
         await capture('lyrics-display', [...visual, lyric.resource.id], 3);
         await capture('lyrics-spiral', [...visual, lyric.resource.id], 5.55);
@@ -137,6 +161,8 @@ export async function renderBlackHole(packs: any[]) {
                 width,
                 height,
                 drawingBuffer: [gl.drawingBufferWidth, gl.drawingBufferHeight],
+                maxMs: samples.at(-1),
+                gpuMaxMs: gpuSamples.at(-1) ?? null,
                 medianMs: samples[10],
                 p95Ms: samples[18],
                 gpuMedianMs: gpuSamples[10] ?? null,
@@ -146,9 +172,19 @@ export async function renderBlackHole(packs: any[]) {
                     'Wall time includes Worker prepare + host composition submission; GPU query covers composition rendering only; neither is display FPS',
             });
         }
+        if (packs[0].version >= 2) await capture('4k-top', visual, 3, 0.25, { inclination: 90 });
         renderer.setSize(720, 1280, false);
         scene.resize(720, 1280, 1);
         await capture('portrait', visual);
+        if (packs[0].version >= 2) {
+            await capture('portrait-top', visual, 3, 0.25, { inclination: 90 });
+            renderer.setSize(3840, 1080, false);
+            scene.resize(3840, 1080, 1);
+            await capture('ultrawide-max-core', ['black-hole-core'], 3, 0.25, { horizonRadius: 10000 });
+            await capture('ultrawide-max-halo', ['black-hole-flare'], 3, 0.25, { haloRadius: 20000, inclination: 90 });
+            reset(0.25);
+            for (const e of elements) e.enabled = e !== lyric;
+        }
     } finally {
         scene.dispose();
         renderer.dispose();

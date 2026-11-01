@@ -105,6 +105,6 @@
 | [tests/e2e/app-shell.spec.ts](../../tests/e2e/app-shell.spec.ts) | [tests/support/file-picker.ts](../../tests/support/file-picker.ts) |
 | [tests/e2e/app-smoke.spec.ts](../../tests/e2e/app-smoke.spec.ts) | [tests/support/file-picker.ts](../../tests/support/file-picker.ts) |
 | [tests/e2e/audition-long.spec.ts](../../tests/e2e/audition-long.spec.ts) | [tests/processing/systemSampler.ts](../../tests/processing/systemSampler.ts)、[tests/transcription/auditionHarness.ts](../../tests/transcription/auditionHarness.ts) |
+| [tests/e2e/black-hole-benchmark.spec.ts](../../tests/e2e/black-hole-benchmark.spec.ts) | [tests/support/visualizer-assets.mjs](../../tests/support/visualizer-assets.mjs) |
 | [tests/e2e/black-hole-reference.spec.ts](../../tests/e2e/black-hole-reference.spec.ts) | — |
 | [tests/e2e/black-hole-visualizer.spec.ts](../../tests/e2e/black-hole-visualizer.spec.ts) | [tests/support/file-picker.ts](../../tests/support/file-picker.ts)、[tests/support/project-actions.ts](../../tests/support/project-actions.ts)、[tests/support/visualizer-assets.mjs](../../tests/support/visualizer-assets.mjs) |
-| [tests/e2e/desktop-file-controls.spec.ts](../../tests/e2e/desktop-file-controls.spec.ts) | — |
