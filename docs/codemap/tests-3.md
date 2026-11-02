@@ -8,6 +8,8 @@
 
 | 文件 | 本地静态引用（最多显示 6 项） |
 | --- | --- |
+| [tests/editor/analysis-window-view.test.ts](../../tests/editor/analysis-window-view.test.ts) | [src/analysis/windowTypes.ts](../../src/analysis/windowTypes.ts)、[src/editor/analysisWindowView.ts](../../src/editor/analysisWindowView.ts) |
+| [tests/editor/beat-snap.test.ts](../../tests/editor/beat-snap.test.ts) | [src/editor/beatSnap.ts](../../src/editor/beatSnap.ts)、[src/editor/editorDraftRepository.ts](../../src/editor/editorDraftRepository.ts)、[src/editor/pointAnnotations.ts](../../src/editor/pointAnnotations.ts)、[src/editor/projectCodec.ts](../../src/editor/projectCodec.ts)、[src/editor/tempoMap.ts](../../src/editor/tempoMap.ts) |
 | [tests/editor/e1-foundation.integration.test.ts](../../tests/editor/e1-foundation.integration.test.ts) | [src/analysis/analysisCoordinator.ts](../../src/analysis/analysisCoordinator.ts)、[src/analysis/types.ts](../../src/analysis/types.ts)、[src/audio/audioSessionService.ts](../../src/audio/audioSessionService.ts)、[src/editor/editorDraftRepository.ts](../../src/editor/editorDraftRepository.ts)、[src/editor/editorSessionController.ts](../../src/editor/editorSessionController.ts)、[src/editor/fileIO.ts](../../src/editor/fileIO.ts)、另 5 项，按需核对源码 |
 | [tests/editor/e1-project-unit.test.ts](../../tests/editor/e1-project-unit.test.ts) | [src/editor/projectCodec.ts](../../src/editor/projectCodec.ts)、[src/editor/types.ts](../../src/editor/types.ts) |
 | [tests/editor/e10-marker-block-unit.test.ts](../../tests/editor/e10-marker-block-unit.test.ts) | [src/editor/markerBlockOperations.ts](../../src/editor/markerBlockOperations.ts)、[src/editor/projectCodec.ts](../../src/editor/projectCodec.ts)、[src/editor/types.ts](../../src/editor/types.ts) |
@@ -106,5 +108,3 @@
 | [tests/scripts/run-v5-eval.mjs](../../tests/scripts/run-v5-eval.mjs) | — |
 | [tests/scripts/run-v6-eval.mjs](../../tests/scripts/run-v6-eval.mjs) | — |
 | [tests/scripts/verify-v5-media.mjs](../../tests/scripts/verify-v5-media.mjs) | — |
-| [tests/scripts/verify-v6-media.mjs](../../tests/scripts/verify-v6-media.mjs) | — |
-| [tests/scripts/verify-visualizer-output.mjs](../../tests/scripts/verify-visualizer-output.mjs) | [tests/support/visualizer-audio-timeline.mjs](../../tests/support/visualizer-audio-timeline.mjs)、[tests/support/visualizer-media-alignment.mjs](../../tests/support/visualizer-media-alignment.mjs)、[tests/support/visualizer-video-timeline.mjs](../../tests/support/visualizer-video-timeline.mjs) |
