@@ -81,6 +81,9 @@
                     aria-labelledby="editor-marking-tab"
                     tabindex="0">
                     <EditorTimeline
+                        v-model:locked="waveformLocked"
+                        :marker-view="markerView"
+                        :navigation-busy="markerNavigationBusy"
                         :plot-width="markerPlotWidth"
                         :active="workspace === 'marking'"
                         :project="snapshot.project"
@@ -88,10 +91,14 @@
                         :analysis="analysisSnapshot"
                         :buffer-series="bufferSeries"
                         :tempo-estimate-state="snapshot.tempoEstimateState"
-                        @update-project="updateProject" />
+                        @update-project="updateProject"
+                        @zoom-marker="zoomMarker"
+                        @navigation-busy="timelineNavigationBusy = $event" />
 
                     <EditorPointWorkspace
                         v-model:compensation-cells="markerCompensationCells"
+                        :time-view="markerView"
+                        :preference-message="markerPreferenceMessage"
                         :active="workspace === 'marking'"
                         :recording-host="keyboardRecordingHost"
                         :project="snapshot.project"
@@ -104,6 +111,8 @@
                         @toggle-overlay="controller.setOverlayOpen($event)"
                         @select-overlay-feature="controller.selectOverlayFeature($event)"
                         @plot-width="markerPlotWidth = $event"
+                        @zoom-marker="zoomMarker"
+                        @navigation-busy="markerNavigationBusy = $event"
                         @retry-overlay="controller.retryOverlayAnalysis()" />
                 </div>
                 <div
@@ -175,6 +184,7 @@ import EditorExperimentNotice from '../components/EditorExperimentNotice.vue';
 import '../editor/controls.css';
 import '../editor/marking.css';
 import { provideEditorGrid } from '../editor/useEditorGrid';
+import { useMarkerTimeView } from '../editor/useMarkerTimeView';
 import { resolveEditorUnavailableRecovery } from '../editor/routeRecovery';
 import { useEditorSessionController } from '../editor/editorSessionController';
 import { useAudioSessionStore } from '../stores/audioSessionStore';
@@ -197,6 +207,9 @@ const controller = useEditorSessionController();
 const keyboardRecordingRevision = ref(0);
 const markerCompensationCells = ref(0);
 const markerPlotWidth = ref(0);
+const waveformLocked = ref(false);
+const markerNavigationBusy = ref(false);
+const timelineNavigationBusy = ref(false);
 const keyboardImportPending = ref(false);
 const osuImportOpen = ref(false);
 const importChoiceOpen = ref(false);
@@ -312,6 +325,24 @@ const historyBack = window.history.state?.back;
 const returnPath = typeof historyBack === 'string' && !historyBack.startsWith('/editor') ? historyBack : '/';
 
 const playback = computed(() => sessionStore.playback);
+const {
+    view: markerView,
+    message: markerPreferenceMessage,
+    zoom: changeMarkerZoom,
+} = useMarkerTimeView(
+    () => snapshot.value.project?.track.contentHash,
+    () => snapshot.value.project?.track.durationSeconds ?? 0,
+    () => playback.value,
+);
+function zoomMarker(delta: number) {
+    if (
+        workspace.value === 'marking' &&
+        snapshot.value.project &&
+        !markerNavigationBusy.value &&
+        !timelineNavigationBusy.value
+    )
+        changeMarkerZoom(delta);
+}
 const unavailableRecovery = computed(() =>
     resolveEditorUnavailableRecovery({
         routeTrackId: routeTrackId(),

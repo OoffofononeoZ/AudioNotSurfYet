@@ -33,6 +33,11 @@
                     :viewport="viewport"
                     :series="displayBufferSeries"
                     :boundary-dragging="Boolean(boundaryDrag)"
+                    :locked="locked"
+                    :navigation-busy="navigationBusy"
+                    @update:locked="changeLock"
+                    @zoom-marker="emit('zoomMarker', $event)"
+                    @dragging="waveformDragging = $event"
                     @update-viewport="updateViewport"
                     @reset-viewport="viewportController.reset"
                     @add-boundary="insertBoundaryAtPreferredTime"
@@ -208,6 +213,7 @@ import {
 } from '../editor/tempoMap';
 import { editorTimeToX, editorXToTime } from '../editor/timeline';
 import type { EditorProjectV2, TempoSegmentV2 } from '../editor/types';
+import type { MarkerTimeView } from '../editor/markerTimeView';
 import type { EditorSessionSnapshot } from '../editor/types';
 
 const props = defineProps<{
@@ -217,10 +223,16 @@ const props = defineProps<{
     analysis: AnalysisCoordinatorSnapshot;
     bufferSeries: AnalysisSeries | null;
     plotWidth: number;
+    locked: boolean;
+    markerView: MarkerTimeView;
+    navigationBusy: boolean;
     tempoEstimateState?: EditorSessionSnapshot['tempoEstimateState'];
 }>();
 
 const emit = defineEmits<{
+    'update:locked': [value: boolean];
+    zoomMarker: [delta: number];
+    navigationBusy: [busy: boolean];
     updateProject: [project: EditorProjectV2, immediate: boolean];
 }>();
 
@@ -242,7 +254,8 @@ const viewportController = useEditorViewport(
     () => props.project,
     (project, immediate) => emit('updateProject', project, immediate),
 );
-const { viewport } = viewportController;
+const viewport = computed(() => (props.locked ? props.markerView : viewportController.viewport.value));
+const waveformDragging = ref(false);
 const { series: displayBufferSeries, pending: bufferDetailPending } = useAnalysisWindow(() => ({
     series: props.bufferSeries,
     generation: props.analysis.generation,
@@ -327,8 +340,12 @@ const formatTime = (seconds: number): string => {
 };
 
 const updateViewport = (next: PersistedTimelineViewport, immediate: boolean) => {
-    viewportController.update(next, immediate);
+    if (!props.locked) viewportController.update(next, immediate);
 };
+function changeLock(value: boolean) {
+    cancelBoundaryDrag();
+    emit('update:locked', value);
+}
 
 const canvasPoint = (event: PointerEvent) => {
     const bounds = tempoStage.value?.getBoundingClientRect();
@@ -463,6 +480,7 @@ const boundaryDrag = shallowRef<{
     pointerId: number;
     element: HTMLElement;
     original: TempoSegmentV2[];
+    projectId: string;
 } | null>(null);
 const beginBoundaryDrag = (event: PointerEvent, id: string) => {
     selectedTempoId.value = id;
@@ -475,6 +493,7 @@ const beginBoundaryDrag = (event: PointerEvent, id: string) => {
         pointerId: event.pointerId,
         element,
         original: props.project.tempoMap.map(cloneTempoSegment),
+        projectId: props.project.projectId,
     };
     element.setPointerCapture(event.pointerId);
 };
@@ -498,7 +517,8 @@ const cancelBoundaryDrag = () => {
     if (!drag) return;
     boundaryDrag.value = null;
     if (drag.element.hasPointerCapture(drag.pointerId)) drag.element.releasePointerCapture(drag.pointerId);
-    emit('updateProject', { ...props.project, tempoMap: drag.original }, true);
+    if (drag.projectId === props.project.projectId)
+        emit('updateProject', { ...props.project, tempoMap: drag.original }, true);
 };
 const cancelBoundaryOnEscape = (event: KeyboardEvent) => {
     if (event.key === 'Escape' && boundaryDrag.value) {
@@ -537,6 +557,12 @@ const onBoundaryKeydown = (event: KeyboardEvent, id: string) => {
         true,
     );
 };
+watch(
+    () => Boolean(waveformDragging.value || boundaryDrag.value),
+    value => emit('navigationBusy', value),
+    { flush: 'sync' },
+);
+watch([() => props.active, () => props.project.projectId, () => props.locked], cancelBoundaryDrag, { flush: 'sync' });
 
 watch(
     () => [props.project.tempoMap, size.width],
@@ -568,6 +594,10 @@ onMounted(() => {
 });
 
 onBeforeUnmount(() => {
+    const drag = boundaryDrag.value;
+    boundaryDrag.value = null;
+    if (drag?.element.hasPointerCapture(drag.pointerId)) drag.element.releasePointerCapture(drag.pointerId);
+    emit('navigationBusy', false);
     window.removeEventListener('blur', cancelBoundaryDrag);
     window.removeEventListener('keydown', cancelBoundaryOnEscape);
 });

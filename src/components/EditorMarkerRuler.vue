@@ -30,97 +30,27 @@
     </div>
 </template>
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, ref, shallowRef, watch } from 'vue';
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import type { MarkerTimeView } from '../editor/markerTimeView';
-import { useAudioSessionService } from '../audio/audioSessionService';
-import { MarkerRulerScrubber } from '../editor/markerRulerScrubber';
+import { useMarkerScrubbing } from '../editor/useMarkerScrubbing';
 const props = defineProps<{ view: MarkerTimeView; active: boolean; trackId: string | null }>();
 const emit = defineEmits<{ dragging: [value: boolean]; plotWidth: [width: number] }>();
 const timeElement = ref<HTMLElement | null>(null);
 let geometryObserver: ResizeObserver | null = null;
-const audio = useAudioSessionService();
-const available = computed(() => props.active && Boolean(props.trackId) && !audio.playbackPolicy.state.exportLocked);
-const dragging = ref(false),
-    pointer = shallowRef<{ id: number; element: HTMLElement } | null>(null);
-const scrubber = new MarkerRulerScrubber({
-    available: () => available.value && props.trackId === audio.getPlaybackSnapshot().trackId,
-    playback: () => audio.getPlaybackSnapshot(),
-    seek: seconds => audio.seek(seconds),
-    requestFrame: callback => requestAnimationFrame(callback),
-    cancelFrame: id => cancelAnimationFrame(id),
-    changed: value => {
-        dragging.value = value;
-        emit('dragging', value);
-    },
+const { available, dragging, down, move, up, cancel, lostCapture } = useMarkerScrubbing({
+    active: () => props.active,
+    trackId: () => props.trackId,
+    span: () => props.view.spanSeconds,
+    changed: value => emit('dragging', value),
 });
-function release() {
-    const held = pointer.value;
-    pointer.value = null;
-    if (held?.element.hasPointerCapture(held.id)) held.element.releasePointerCapture(held.id);
-}
-function down(event: PointerEvent) {
-    if (event.button !== 0 || pointer.value) return;
-    const element = event.currentTarget as HTMLElement;
-    if (!scrubber.begin(event.clientX, props.view.spanSeconds, element.getBoundingClientRect().width)) return;
-    event.preventDefault();
-    element.focus({ preventScroll: true });
-    pointer.value = { id: event.pointerId, element };
-    element.setPointerCapture(event.pointerId);
-}
-function move(event: PointerEvent) {
-    if (event.pointerId === pointer.value?.id) scrubber.move(event.clientX);
-}
-function up(event: PointerEvent) {
-    if (event.button !== 0 || event.pointerId !== pointer.value?.id) return;
-    scrubber.end(event.clientX);
-    release();
-}
-function cancel() {
-    scrubber.cancel();
-    release();
-}
-function lostCapture() {
-    if (pointer.value) cancel();
-}
-function escape(event: KeyboardEvent) {
-    if (event.key === 'Escape' && scrubber.hasGesture) {
-        event.preventDefault();
-        cancel();
-    }
-}
-function visibility() {
-    if (document.hidden) cancel();
-}
-watch(() => [props.active, props.trackId, audio.playbackPolicy.state.exportLocked], cancel, { flush: 'sync' });
-let unsubscribePlayback = () => {},
-    unsubscribeDiscontinuity = () => {};
 onMounted(() => {
     geometryObserver = new ResizeObserver(([entry]) => {
         const width = entry?.contentRect.width ?? 0;
         if (width > 0) emit('plotWidth', width);
     });
     if (timeElement.value) geometryObserver.observe(timeElement.value);
-    window.addEventListener('blur', cancel);
-    window.addEventListener('keydown', escape);
-    document.addEventListener('visibilitychange', visibility);
-    unsubscribePlayback = audio.subscribePlayback(() => {
-        scrubber.reconcile();
-        if (!scrubber.hasGesture) release();
-    });
-    unsubscribeDiscontinuity = audio.subscribePlaybackDiscontinuity(() => {
-        scrubber.discontinuity();
-        if (!scrubber.hasGesture) release();
-    });
 });
-onBeforeUnmount(() => {
-    geometryObserver?.disconnect();
-    cancel();
-    unsubscribePlayback();
-    unsubscribeDiscontinuity();
-    window.removeEventListener('blur', cancel);
-    window.removeEventListener('keydown', escape);
-    document.removeEventListener('visibilitychange', visibility);
-});
+onBeforeUnmount(() => geometryObserver?.disconnect());
 const ticks = computed(() => {
     const view = props.view,
         step = view.spanSeconds > 5 ? 2 : view.spanSeconds > 2 ? 1 : 0.2;

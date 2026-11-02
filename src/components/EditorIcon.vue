@@ -1,10 +1,21 @@
 <template>
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path :d="paths[name]" /></svg>
+    <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.6"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        aria-hidden="true">
+        <path :d="paths[name]" />
+    </svg>
 </template>
 <script setup lang="ts">
 defineProps<{ name: keyof typeof paths }>();
 const paths = {
     plus: 'M12 5v14M5 12h14',
+    lock: 'M6 10h12v11H6zM8 10V6a4 4 0 0 1 8 0v4M12 14v3',
+    unlock: 'M6 10h12v11H6zM8 10V6a4 4 0 0 1 7-2M12 14v3',
     down: 'm6 9 6 6 6-6',
     up: 'm6 15 6-6 6 6',
     locate: 'M12 3v4m0 10v4M3 12h4m10 0h4M12 7a5 5 0 1 0 0 10 5 5 0 0 0 0-10',

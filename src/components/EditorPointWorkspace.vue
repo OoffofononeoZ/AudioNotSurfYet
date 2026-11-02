@@ -121,7 +121,7 @@ import EditorMarkerCompensation from './EditorMarkerCompensation.vue';
 import EditorTrackOperations from './EditorTrackOperations.vue';
 import { useAudioSessionService } from '../audio/audioSessionService';
 import { useEditorGrid } from '../editor/useEditorGrid';
-import { useMarkerTimeView } from '../editor/useMarkerTimeView';
+import type { MarkerTimeView } from '../editor/markerTimeView';
 import { useMarkerEditing } from '../editor/useMarkerEditing';
 import { useKeyboardMarkerRecording } from '../editor/useKeyboardMarkerRecording';
 import type { KeyboardRecordingHost } from '../editor/keyboardMarkerRecording';
@@ -135,6 +135,8 @@ const props = defineProps<{
     active?: boolean;
     recordingHost: KeyboardRecordingHost;
     compensationCells: number;
+    timeView: MarkerTimeView;
+    preferenceMessage: string;
     project: EditorProjectV2;
     playback: PlaybackSnapshot;
     analysis: AnalysisCoordinatorSnapshot;
@@ -144,6 +146,8 @@ const props = defineProps<{
 }>();
 const emit = defineEmits<{
     plotWidth: [width: number];
+    zoomMarker: [delta: number];
+    navigationBusy: [busy: boolean];
     updateProject: [project: EditorProjectV2, immediate: boolean];
     'update:compensationCells': [value: number];
     retryOverlay: [];
@@ -152,15 +156,7 @@ const emit = defineEmits<{
 }>();
 const audioSession = useAudioSessionService();
 const { setting } = useEditorGrid();
-const {
-    view,
-    message: preferenceMessage,
-    zoom,
-} = useMarkerTimeView(
-    () => props.project.track.contentHash,
-    () => props.project.track.durationSeconds,
-    () => props.playback,
-);
+const view = computed(() => props.timeView);
 const editable = computed(() => props.active !== false && view.value.editable);
 const message = ref(''),
     rulerDragging = ref(false),
@@ -212,7 +208,7 @@ function wheel(event: WheelEvent) {
     )
         return;
     event.preventDefault();
-    if (!editing.drag.value && !rulerDragging.value) zoom(event.deltaY);
+    if (!editing.drag.value && !rulerDragging.value) emit('zoomMarker', event.deltaY);
 }
 function navigateMenu(action: string) {
     const time = editing.menu.value?.time;
@@ -233,9 +229,15 @@ function escape(event: KeyboardEvent) {
 watch(editable, () => {
     addMenu.value = false;
 });
+watch(
+    () => Boolean(editing.drag.value || rulerDragging.value),
+    busy => emit('navigationBusy', busy),
+    { flush: 'sync' },
+);
 onMounted(() => window.addEventListener('keydown', escape));
 const unsubscribeDiscontinuity = audioSession.subscribePlaybackDiscontinuity(() => editing.cancel());
 onBeforeUnmount(() => {
+    emit('navigationBusy', false);
     unsubscribeDiscontinuity();
     drawing.dispose();
     window.removeEventListener('keydown', escape);

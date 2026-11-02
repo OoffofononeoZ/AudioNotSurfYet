@@ -5,23 +5,40 @@
         data-testid="editor-timeline"
         :data-view-start="viewport.startSeconds"
         :data-view-end="viewport.endSeconds"
+        :data-locked="locked"
+        :data-dragging="scrubbing.dragging.value"
+        :class="{ 'is-locked': locked, 'is-dragging': scrubbing.dragging.value }"
         tabindex="0"
         role="application"
-        aria-label="歌曲波形；点击跳转，滚轮缩放，右键拖动平移"
+        :aria-label="locked ? '歌曲波形；滚轮联动缩放，左键拖动时间' : '歌曲波形；点击跳转，滚轮缩放，右键拖动平移'"
         @contextmenu.prevent
         @dragstart.prevent
         @wheel="onWheel"
         @pointerdown="onStagePointerDown"
         @pointermove="onStagePointerMove"
         @pointerup="onStagePointerUp"
-        @pointercancel="clearPointer"
-        @lostpointercapture="clearPointer"
+        @pointercancel="cancelGestures"
+        @lostpointercapture="lostCapture"
         @keydown="onStageKeydown">
         <canvas ref="waveformCanvas" class="timeline-canvas" aria-hidden="true" />
         <canvas ref="gridCanvas" class="timeline-canvas grid-canvas" aria-hidden="true" />
         <canvas ref="cursorCanvas" class="timeline-canvas cursor-canvas" aria-hidden="true" />
         <div class="waveform-actions">
             <button
+                type="button"
+                class="waveform-icon"
+                data-testid="lock-editor-timeline"
+                :class="{ active: locked }"
+                :aria-label="locked ? '解除轨道锁定' : '锁定轨道模式'"
+                :title="locked ? '解除轨道锁定' : '锁定轨道模式'"
+                :aria-pressed="locked"
+                @pointerdown.stop
+                @keydown.stop
+                @click.stop="toggleLock">
+                <EditorIcon :name="locked ? 'lock' : 'unlock'" />
+            </button>
+            <button
+                v-if="!locked"
                 type="button"
                 class="waveform-icon"
                 aria-label="查看播放位置"
@@ -66,6 +83,7 @@ import { waveformPeak } from '../analysis/plotPeaks';
 import { plotColumns } from '../analysis/renderGeometry';
 import { useAudioSessionService } from '../audio/audioSessionService';
 import { useEditorGrid } from '../editor/useEditorGrid';
+import { useMarkerScrubbing } from '../editor/useMarkerScrubbing';
 import { divisorColour, divisorHeight } from '../editor/beatSnap';
 import { EDITOR_CONTEXT_PAN_THRESHOLD_PX } from '../editor/editorConfig';
 import {
@@ -86,17 +104,28 @@ const props = defineProps<{
     series: RenderAnalysisSeries | null;
     active?: boolean;
     boundaryDragging: boolean;
+    locked: boolean;
+    navigationBusy: boolean;
 }>();
 const emit = defineEmits<{
     updateViewport: [viewport: PersistedTimelineViewport, immediate: boolean];
     resetViewport: [];
     addBoundary: [];
+    'update:locked': [value: boolean];
+    zoomMarker: [delta: number];
+    dragging: [value: boolean];
     resize: [size: { width: number; height: number; dpr: number }];
 }>();
 const audioSession = useAudioSessionService();
 const { setting: beatSnap, generateTempoGrid } = useEditorGrid();
 const viewport = computed(() => props.viewport);
 const durationSeconds = computed(() => props.project.track.durationSeconds);
+const scrubbing = useMarkerScrubbing({
+    active: () => props.active !== false && props.locked,
+    trackId: () => props.playback.trackId,
+    span: () => viewport.value.endSeconds - viewport.value.startSeconds,
+    changed: value => emit('dragging', value),
+});
 const stage = ref<HTMLDivElement | null>(null);
 const waveformCanvas = ref<HTMLCanvasElement | null>(null);
 const gridCanvas = ref<HTMLCanvasElement | null>(null);
@@ -112,6 +141,11 @@ const revealPlayback = () =>
         true,
     );
 const zoomBy = (factor: number, anchorX = size.width / 2, immediate = true) => {
+    if (props.locked) {
+        if (!props.navigationBusy && !props.boundaryDragging && !scrubbing.dragging.value)
+            emit('zoomMarker', factor > 1 ? -1 : 1);
+        return;
+    }
     updateViewport(
         zoomEditorViewportAtX(
             viewport.value,
@@ -136,8 +170,9 @@ const canvasPoint = (event: PointerEvent | WheelEvent): { x: number; y: number }
 };
 
 const onWheel = (event: WheelEvent) => {
-    if (event.ctrlKey || event.metaKey || pointer.value || props.boundaryDragging) return;
+    if (event.ctrlKey || event.metaKey || !Number.isFinite(event.deltaY) || !event.deltaY) return;
     event.preventDefault();
+    if (pointer.value || props.boundaryDragging || scrubbing.dragging.value) return;
     const { x } = canvasPoint(event);
     zoomBy(event.deltaY < 0 ? 1.12 : 1 / 1.12, x, false);
 };
@@ -156,6 +191,10 @@ const quickMenu = ref<{ x: number; y: number; timeSeconds: number } | null>(null
 const onStagePointerDown = (event: PointerEvent) => {
     if (event.button !== 0 && event.button !== 2) return;
     if ((event.target as HTMLElement).closest('button, input, select')) return;
+    if (props.locked) {
+        scrubbing.down(event);
+        return;
+    }
     quickMenu.value = null;
     const { x } = canvasPoint(event);
     pointer.value = {
@@ -170,6 +209,10 @@ const onStagePointerDown = (event: PointerEvent) => {
 };
 
 const onStagePointerMove = (event: PointerEvent) => {
+    if (props.locked) {
+        scrubbing.move(event);
+        return;
+    }
     const active = pointer.value;
     if (!active || active.id !== event.pointerId || active.button !== 2) return;
     const { x } = canvasPoint(event);
@@ -186,6 +229,10 @@ const onStagePointerMove = (event: PointerEvent) => {
 };
 
 const onStagePointerUp = (event: PointerEvent) => {
+    if (props.locked) {
+        scrubbing.up(event);
+        return;
+    }
     const active = pointer.value;
     if (!active || active.id !== event.pointerId) return;
     const point = canvasPoint(event);
@@ -208,6 +255,19 @@ const clearPointer = () => {
     pointer.value = null;
     if (held && stage.value?.hasPointerCapture(held.id)) stage.value.releasePointerCapture(held.id);
 };
+function cancelGestures() {
+    clearPointer();
+    scrubbing.cancel();
+    quickMenu.value = null;
+}
+function lostCapture() {
+    if (props.locked) scrubbing.lostCapture();
+    else clearPointer();
+}
+function toggleLock() {
+    cancelGestures();
+    emit('update:locked', !props.locked);
+}
 
 const menuSeek = (play: boolean) => {
     const time = quickMenu.value?.timeSeconds;
@@ -244,9 +304,10 @@ const onStageKeydown = (event: KeyboardEvent) => {
         zoomBy(0.5);
     } else if (event.key === '[' || event.key === ']') {
         event.preventDefault();
-        panBy(event.key === '[' ? -0.25 : 0.25);
+        if (!props.locked) panBy(event.key === '[' ? -0.25 : 0.25);
     } else if (event.key === 'ContextMenu' || (event.shiftKey && event.key === 'F10')) {
         event.preventDefault();
+        if (props.locked) return;
         quickMenu.value = {
             x: size.width / 2,
             y: size.height / 2,
@@ -334,8 +395,8 @@ const drawCursor = () => {
     if (time >= viewport.value.startSeconds && time <= viewport.value.endSeconds) {
         const x = editorTimeToX(time, viewport.value, size.width);
         cursor.beginPath();
-        cursor.moveTo(Math.round(x) + 0.5, 0);
-        cursor.lineTo(Math.round(x) + 0.5, size.height);
+        cursor.moveTo(x, 0);
+        cursor.lineTo(x, size.height);
         cursor.strokeStyle = '#fff';
         cursor.lineWidth = 1.5;
         cursor.stroke();
@@ -352,14 +413,10 @@ watch(
     () => props.playback.currentTimeSeconds,
     () => scheduleDraw(false),
 );
-watch(
-    () => [props.active, props.project.track.contentHash],
-    () => {
-        clearPointer();
-        quickMenu.value = null;
-        if (props.active !== false) void nextTick(scheduleDraw);
-    },
-);
+watch([() => props.active, () => props.project.track.contentHash, () => props.locked], () => {
+    cancelGestures();
+    if (props.active !== false) void nextTick(scheduleDraw);
+});
 onMounted(() => {
     resizeObserver = new ResizeObserver(([entry]) => {
         const bounds = entry?.contentRect;
@@ -392,6 +449,16 @@ onBeforeUnmount(() => {
     cursor: crosshair;
     touch-action: none;
     user-select: none;
+}
+.timeline-stage.is-locked {
+    cursor: grab;
+}
+.timeline-stage.is-dragging {
+    cursor: grabbing;
+}
+.waveform-actions button.active {
+    color: var(--accent-soft);
+    background: var(--control-active);
 }
 .timeline-canvas {
     position: absolute;

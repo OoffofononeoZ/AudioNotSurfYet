@@ -10,7 +10,11 @@ import {
     cleanupNativeTree,
 } from '../../scripts/lib/desktop-native-runtime.mjs';
 import { installDialogFixture, queueOpen } from './dialog-fixture.mjs';
-import { verifyTimelineAlignment, verifyIndependentTimeline } from '../support/editor-timeline-scenario.mjs';
+import {
+    verifyTimelineAlignment,
+    verifyIndependentTimeline,
+    verifyTimelineLock,
+} from '../support/editor-timeline-scenario.mjs';
 
 const root = fileURLToPath(new URL('../../', import.meta.url));
 const native = await createNativeRun('editor-timeline');
@@ -75,6 +79,16 @@ try {
     }
     await verifyTimelineAlignment(page, resize, name => page.screenshot({ path: path.join(output, `${name}.png`) }));
     await verifyIndependentTimeline(page);
+    await page.getByTestId('lock-editor-timeline').click();
+    await verifyTimelineAlignment(page, resize, name =>
+        page.screenshot({ path: path.join(output, `locked-${name}.png`) }),
+    );
+    await page.getByTestId('lock-editor-timeline').click();
+    await verifyTimelineLock(page, name => page.screenshot({ path: path.join(output, `${name}.png`) }));
+    await page.getByTestId('lock-editor-timeline').click();
+    await page.reload();
+    await expect(page.getByTestId('editor-ready')).toBeVisible();
+    await expect(page.getByTestId('lock-editor-timeline')).toHaveAttribute('aria-pressed', 'false');
     assert.deepEqual(errors, []);
     result.status = 'passed';
     result.versions = await app.evaluate(() => process.versions);
