@@ -265,6 +265,66 @@ try {
     await expect(page.locator('#music-bar-container')).toHaveAttribute('data-playback-state', 'paused');
     result.checks.zoomAndRestartedCachePayloads = 'passed';
     await screenshot('analyzer-restarted.png');
+    await page.locator('[data-source="original-3d"]').click();
+    await expect(page.locator('[data-feature-id]')).toHaveCount(7);
+    const chart = page.getByTestId('three-d-plot');
+    const threeDFeatures = [
+        'wallpaperEngineSpectrum',
+        'amplitudeSpectrum',
+        'powerSpectrum',
+        'chroma',
+        'loudness',
+        'mfcc',
+        'complexSpectrum',
+    ];
+    for (const id of threeDFeatures) {
+        await page.locator(`.original-list [data-feature-id="${id}"] .toggle-card`).click();
+        await expect(chart).toHaveCount(1);
+        await expect(chart.locator('.three-d-message')).toHaveCount(0, { timeout: 30000 });
+        await expect(chart).toHaveAttribute('aria-busy', 'false', { timeout: 30000 });
+        await expect(page.locator('.pinned-panel [data-feature-id]')).toHaveCount(1);
+        if (id === 'wallpaperEngineSpectrum') await screenshot('analyzer-3d.png');
+    }
+    result.checks.sevenThreeDFeaturesAndSingleSelection = 'passed';
+    const timeZoom = await chart.getAttribute('data-zoom');
+    await chart.getByRole('button', { name: '放大图表', exact: true }).click();
+    await expect(chart).toHaveAttribute('data-camera-zoom', '1.2');
+    assert.equal(await chart.getAttribute('data-zoom'), timeZoom);
+    const stage = chart.locator('.three-d-stage');
+    const stageBox = await stage.boundingBox();
+    const pausedAt = await page.locator('#music-bar-container').getAttribute('data-current-time');
+    await page.mouse.move(stageBox.x + stageBox.width / 2, stageBox.y + stageBox.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(stageBox.x + stageBox.width / 2 + 25, stageBox.y + stageBox.height / 2 + 15, { steps: 4 });
+    await page.mouse.up();
+    assert.equal(await page.locator('#music-bar-container').getAttribute('data-current-time'), pausedAt);
+    await page.mouse.down({ button: 'right' });
+    await page.mouse.move(stageBox.x + stageBox.width / 2 + 60, stageBox.y + stageBox.height / 2 + 30, { steps: 4 });
+    await page.mouse.up({ button: 'right' });
+    await chart.getByRole('button', { name: '相位', exact: true }).click();
+    await chart.getByRole('button', { name: '切换伪2D图表' }).click();
+    await expect(chart).toHaveAttribute('data-view', 'orthographic');
+    await expect(chart).toHaveAttribute('aria-busy', 'false');
+    await chart.getByRole('slider', { name: '选择图表分量' }).focus();
+    await page.keyboard.press('End');
+    await expect(chart.getByRole('slider')).toHaveAttribute('aria-valuenow', '1023');
+    await expect(chart).toHaveAttribute('aria-busy', 'false');
+    await stage.hover({ position: { x: 150, y: 100 } });
+    await page.mouse.wheel(0, -120);
+    await expect.poll(() => chart.getAttribute('data-zoom').then(Number)).toBeGreaterThan(Number(timeZoom));
+    await expect(chart).toHaveAttribute('data-camera-zoom', '1');
+    await screenshot('analyzer-3d-slice.png');
+    result.checks.threeDCameraTimeZoomAndOrthographicSlice = 'passed';
+    await expect(page.locator('#music-bar-container')).toHaveAttribute('data-persistence-state', 'ready');
+    await close();
+    await launch();
+    await page.getByRole('link', { name: 'Analyzer', exact: true }).click();
+    await expect(page.locator('[data-source="original-3d"]')).toHaveAttribute('aria-pressed', 'true');
+    await expect(page.locator('.pinned-panel [data-feature-id]')).toHaveAttribute('data-feature-id', 'complexSpectrum');
+    await expect(page.getByTestId('three-d-plot').locator('.three-d-message')).toHaveCount(0, { timeout: 30000 });
+    await page.locator('[data-source="original"]').click();
+    await ready();
+    result.checks.threeDRestartAndOriginalQueue = 'passed';
     assert.deepEqual(errors, []);
     assert.deepEqual(consoleErrors, []);
     assert.deepEqual(requests, []);

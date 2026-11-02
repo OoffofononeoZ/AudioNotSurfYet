@@ -6,6 +6,7 @@
 
 - `/analyzer` 由 [Analyzer.vue](../../../src/views/Analyzer.vue)装配，持有 analyzer consumer lease；离页释放订阅、lease、Observer 与绘图资源。
 - 单列原列表和 FIFO 置顶区共用特征身份。活动项最多四种且唯一，第五项淘汰最早加入项；显示顺序与队列年龄区分，取消不重置其他项年龄。
+- 原曲（3d图表）为独立展示模式，只支持七项向量/结构特征且最多一项；原有 2D 队列保留，只有当前模式的活动项送入同一 lease。`MeydaCard.chartMode` 缺省为 2d，3D 图表沿用 `seek`/`zoom` 事件；图表持有的 Three.js renderer 与 Visualizer renderer 生命周期独立。
 - 当前集合以 [FEATURE_IDS](../../../src/analysis/types.ts)和 [FeatureRegistry](../../../src/analysis/featureRegistry.ts)为准，包含 wallpaperEngineSpectrum；历史 21 项或 M6–M10 常量不代表当前完整集合。
 - 高度、键盘、拖动取消、详情折叠与图表滚轮见[当前列表](../../context/analyzer-list.md)，Wallpaper 数据含义见[频谱说明](../../context/wallpaper-spectrum.md)。
 

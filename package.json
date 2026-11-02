@@ -105,6 +105,7 @@
         "test:e2e:m14:chrome": "playwright test tests/e2e/m14-analyzer-reorder.spec.ts --project=chrome --workers=1",
         "test:e2e:m14:edge": "node tests/scripts/run-edge.mjs tests/e2e/m14-analyzer-reorder.spec.ts --workers=1",
         "test:e2e:m14": "npm run test:e2e:m14:chrome && npm run test:e2e:m14:edge",
+        "test:e2e:analyzer-3d": "playwright test tests/e2e/analyzer-3d.spec.ts tests/e2e/analyzer-3d-long.spec.ts --project=chrome --project=edge --workers=1",
         "test:e2e:e1": "playwright test tests/e2e/e1-editor.spec.ts --project=chrome",
         "test:e2e:e2": "playwright test tests/e2e/e2-editor.spec.ts --project=chrome",
         "test:e2e:e3": "playwright test tests/e2e/e3-editor.spec.ts --project=chrome",

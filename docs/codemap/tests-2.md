@@ -8,6 +8,9 @@
 
 | 文件 | 本地静态引用（最多显示 6 项） |
 | --- | --- |
+| [tests/e2e/app-smoke.spec.ts](../../tests/e2e/app-smoke.spec.ts) | [tests/support/file-picker.ts](../../tests/support/file-picker.ts) |
+| [tests/e2e/audition-long.spec.ts](../../tests/e2e/audition-long.spec.ts) | [tests/processing/systemSampler.ts](../../tests/processing/systemSampler.ts)、[tests/transcription/auditionHarness.ts](../../tests/transcription/auditionHarness.ts) |
+| [tests/e2e/black-hole-benchmark.spec.ts](../../tests/e2e/black-hole-benchmark.spec.ts) | [tests/support/visualizer-assets.mjs](../../tests/support/visualizer-assets.mjs) |
 | [tests/e2e/black-hole-reference.spec.ts](../../tests/e2e/black-hole-reference.spec.ts) | — |
 | [tests/e2e/black-hole-visualizer.spec.ts](../../tests/e2e/black-hole-visualizer.spec.ts) | [tests/support/file-picker.ts](../../tests/support/file-picker.ts)、[tests/support/project-actions.ts](../../tests/support/project-actions.ts)、[tests/support/visualizer-assets.mjs](../../tests/support/visualizer-assets.mjs) |
 | [tests/e2e/desktop-file-controls.spec.ts](../../tests/e2e/desktop-file-controls.spec.ts) | — |
@@ -105,6 +108,3 @@
 | [tests/editor/analysis-render-geometry.test.ts](../../tests/editor/analysis-render-geometry.test.ts) | [src/analysis/canvasRenderer.ts](../../src/analysis/canvasRenderer.ts)、[src/analysis/featureRegistry.ts](../../src/analysis/featureRegistry.ts)、[src/analysis/plotPeaks.ts](../../src/analysis/plotPeaks.ts)、[src/analysis/renderGeometry.ts](../../src/analysis/renderGeometry.ts)、[src/analysis/rendererData.ts](../../src/analysis/rendererData.ts)、[src/analysis/types.ts](../../src/analysis/types.ts)、另 1 项，按需核对源码 |
 | [tests/editor/analysis-window-view.test.ts](../../tests/editor/analysis-window-view.test.ts) | [src/analysis/windowTypes.ts](../../src/analysis/windowTypes.ts)、[src/editor/analysisWindowView.ts](../../src/editor/analysisWindowView.ts) |
 | [tests/editor/beat-snap.test.ts](../../tests/editor/beat-snap.test.ts) | [src/editor/beatSnap.ts](../../src/editor/beatSnap.ts)、[src/editor/editorDraftRepository.ts](../../src/editor/editorDraftRepository.ts)、[src/editor/pointAnnotations.ts](../../src/editor/pointAnnotations.ts)、[src/editor/projectCodec.ts](../../src/editor/projectCodec.ts)、[src/editor/tempoMap.ts](../../src/editor/tempoMap.ts) |
-| [tests/editor/e1-foundation.integration.test.ts](../../tests/editor/e1-foundation.integration.test.ts) | [src/analysis/analysisCoordinator.ts](../../src/analysis/analysisCoordinator.ts)、[src/analysis/types.ts](../../src/analysis/types.ts)、[src/audio/audioSessionService.ts](../../src/audio/audioSessionService.ts)、[src/editor/editorDraftRepository.ts](../../src/editor/editorDraftRepository.ts)、[src/editor/editorSessionController.ts](../../src/editor/editorSessionController.ts)、[src/editor/fileIO.ts](../../src/editor/fileIO.ts)、另 5 项，按需核对源码 |
-| [tests/editor/e1-project-unit.test.ts](../../tests/editor/e1-project-unit.test.ts) | [src/editor/projectCodec.ts](../../src/editor/projectCodec.ts)、[src/editor/types.ts](../../src/editor/types.ts) |
-| [tests/editor/e10-marker-block-unit.test.ts](../../tests/editor/e10-marker-block-unit.test.ts) | [src/editor/markerBlockOperations.ts](../../src/editor/markerBlockOperations.ts)、[src/editor/projectCodec.ts](../../src/editor/projectCodec.ts)、[src/editor/types.ts](../../src/editor/types.ts) |

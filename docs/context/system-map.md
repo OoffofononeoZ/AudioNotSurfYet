@@ -151,6 +151,8 @@ showOpenFilePicker → FileSystemFileHandle → File
 
 Analyzer 原曲运行态由 `activeFeatureQueue` 管理最多四项 FIFO，顶部倒序显示，原列表按 `FEATURE_IDS` 归位；四轨独立队列与所选来源由会话可选 `analysisSources` 保存，复用时间视口。V1 会话保留原曲 `activeCards`，Analyzer 工作区版本仍为 2，旧工作区及分析缓存清空规则不变。[Wallpaper Engine 风格频谱](wallpaper-spectrum.md)首位注册，立体声 DFT 与完整精度 payload 沿用唯一 Worker，Meyda 数值算法不变。
 
+原曲 3D 以可选 `analysisPresentation` 保存模式与七项中的单项，隐藏的 2D 队列不参与该模式的活动请求。`ThreeDTable` 拥有交互/切片 UI，`threeDData` 只读转换 compact payload，`threeDRenderer` 拥有按需 WebGL/轴 Canvas、相机和几何资源；不进入 Visualizer 的 renderer host，详见[列表契约](analyzer-list.md#原曲-3ddec-113)。
+
 批准原文与替代关系查 [decision registry](decision-registry.md)，canonical 身份、hash 和人工门禁分别查 [Analyzer evidence](../quality/evidence-index.md)、[Editor evidence](../quality/editor/evidence-index.md) 与 [Visualizer evidence](../quality/visualizer/evidence-index.md)。当前里程碑、候选与未解决缺口见 [上下文入口](index.md)；本页维护职责和数据流，历史通过不证明当前代码已获整体 readiness 或上线授权。
 
 ## Browser Processing — Editor FT Integration

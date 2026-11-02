@@ -43,7 +43,7 @@ test('verified stems appear in Analyzer and Cascader, keep independent queues an
     await expect(panel).toHaveAttribute('data-analysis-state', 'ready', { timeout: 30000 });
     await page.goto('/analyzer');
     const sources = page.getByTestId('analyzer-sources');
-    await expect(sources.locator('button')).toHaveCount(5, { timeout: 30000 });
+    await expect(sources.locator('button')).toHaveCount(6, { timeout: 30000 });
     await sources.locator('[data-source="drums"]').click();
     await expect(page.locator('[data-testid^="analyzer-card-"]')).toHaveCount(4);
     await page.getByTestId('analyzer-card-energy').locator('.toggle-card').click();

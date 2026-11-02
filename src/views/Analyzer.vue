@@ -7,15 +7,15 @@
                     v-for="source in sourceOptions"
                     :key="source"
                     type="button"
-                    :aria-pressed="selectedSource === source"
+                    :aria-pressed="selectedView === source"
                     :data-source="source"
                     @click="selectSource(source)">
-                    {{ source === 'original' ? '原曲' : source }}
+                    {{ source === 'original' ? '原曲' : source === 'original-3d' ? '原曲（3d图表）' : source }}
                 </button>
             </nav>
             <div class="analyzer-status" aria-live="polite">
                 <span :data-state="analysis.state">{{ analysisStateLabel }}</span>
-                <span>{{ activeFeatureQueue.length }}/4 项</span>
+                <span>{{ activeFeatureQueue.length }}/{{ isThreeD ? 1 : 4 }} 项</span>
                 <span v-if="sessionStore.persistence.state === 'not-persisted'">当前工作区未持久化</span>
                 <span v-if="analysis.cacheState === 'not-persisted'">当前分析缓存未持久化</span>
                 <button v-if="analysis.error?.recoverable" type="button" @click="retryAnalysis">重试分析</button>
@@ -33,9 +33,11 @@
                         <div ref="pinnedBody" class="feature-list">
                             <MeydaCard
                                 v-for="featureId in pinnedFeatureIds"
-                                :key="featureId"
+                                :key="isThreeD ? '3d-' + featureId + '-' + sessionStore.currentTrackId : featureId"
                                 :data-testid="'analyzer-card-' + featureId"
                                 :feature-id="featureId"
+                                :chart-mode="isThreeD ? '3d' : '2d'"
+                                :panel-height="isThreeD ? height : undefined"
                                 :expanded="true"
                                 :description-expanded="!!descriptionExpanded[featureId]"
                                 :series="seriesFor(featureId)"
@@ -84,6 +86,7 @@
                         :key="featureId"
                         :data-testid="'analyzer-card-' + featureId"
                         :feature-id="featureId"
+                        :chart-mode="isThreeD ? '3d' : '2d'"
                         :expanded="false"
                         :description-expanded="!!descriptionExpanded[featureId]"
                         :series="seriesFor(featureId)"
@@ -118,6 +121,12 @@ import type { PersistedTimelineViewport } from '../types/session';
 import { STEM_FEATURE_IDS, type AnalysisSource } from '../analysis/sources';
 import { FT_ROLES } from '../processing/modelManifest';
 import { useStemAvailability } from '../analysis/useStemAvailability';
+import {
+    THREE_D_FEATURE_IDS,
+    isThreeDFeature,
+    presentationQueue,
+    type AnalyzerPresentation,
+} from '../analysis/threeDFeatures';
 
 const sessionStore = useAudioSessionStore();
 const audioSession = useAudioSessionService();
@@ -131,15 +140,25 @@ let cursorTimer: ReturnType<typeof setTimeout> | null = null;
 let lastCursorRequestAt = 0;
 let initializationPromise: Promise<void> | null = null;
 let workspaceBootstrapped = false;
+let selectionRevision = 0;
 const pendingViewport = ref<PersistedTimelineViewport | null>(null);
 let zoomFrame: number | null = null;
 let zoomTrackId: string | null = null;
 const { available: stemsAvailable, snapshot: separation } = useStemAvailability();
 const selectedSource = computed<AnalysisSource>(() => sessionStore.analysisWorkspace.sources?.selected ?? 'original');
+type AnalyzerView = AnalysisSource | 'original-3d';
+const isThreeD = computed(
+    () => selectedSource.value === 'original' && sessionStore.analysisWorkspace.presentation?.originalMode === '3d',
+);
+const selectedView = computed<AnalyzerView>(() => (isThreeD.value ? 'original-3d' : selectedSource.value));
 const sourceNotice = ref('');
 const stemRole = computed(() => (selectedSource.value === 'original' ? undefined : selectedSource.value));
-const sourceOptions = computed(() => ['original', ...(stemsAvailable.value ? FT_ROLES : [])] as AnalysisSource[]);
-const availableFeatures = computed<readonly FeatureId[]>(() => (stemRole.value ? STEM_FEATURE_IDS : FEATURE_IDS));
+const sourceOptions = computed(
+    () => ['original', 'original-3d', ...(stemsAvailable.value ? FT_ROLES : [])] as AnalyzerView[],
+);
+const availableFeatures = computed<readonly FeatureId[]>(() =>
+    isThreeD.value ? THREE_D_FEATURE_IDS : stemRole.value ? STEM_FEATURE_IDS : FEATURE_IDS,
+);
 const analysis = computed(() => {
     void seriesRevision.value;
     return stemRole.value ? analysisLease.getSourceSnapshot(stemRole.value) : sessionStore.analysis;
@@ -147,7 +166,10 @@ const analysis = computed(() => {
 const activeFeatureQueue = computed<FeatureId[]>(() =>
     (stemRole.value
         ? (sessionStore.analysisWorkspace.sources?.queues[stemRole.value] ?? [])
-        : sessionStore.analysisWorkspace.activeFeatureQueue
+        : presentationQueue(
+              sessionStore.analysisWorkspace.presentation,
+              sessionStore.analysisWorkspace.activeFeatureQueue,
+          )
     ).filter((featureId): featureId is FeatureId => (availableFeatures.value as readonly string[]).includes(featureId)),
 );
 const activeFeatureIds = activeFeatureQueue;
@@ -204,15 +226,24 @@ const seriesFor = (featureId: FeatureId): AnalysisSeries | null => {
 const persistWorkspace = (
     patch: {
         featureQueue?: readonly FeatureId[];
+        presentation?: AnalyzerPresentation;
         nextViewport?: PersistedTimelineViewport | null;
     } = {},
 ) =>
     audioSession.updateAnalysisWorkspace({
         activeFeatureQueue: [
-            ...(stemRole.value
+            ...(stemRole.value || isThreeD.value
                 ? sessionStore.analysisWorkspace.activeFeatureQueue
                 : (patch.featureQueue ?? activeFeatureQueue.value)),
         ],
+        presentation:
+            patch.presentation ??
+            (isThreeD.value && patch.featureQueue !== undefined
+                ? {
+                      originalMode: '3d',
+                      threeDFeatureId: isThreeDFeature(patch.featureQueue[0]) ? patch.featureQueue[0] : null,
+                  }
+                : sessionStore.analysisWorkspace.presentation),
         sources: {
             selected: selectedSource.value,
             queues: {
@@ -225,6 +256,7 @@ const persistWorkspace = (
     });
 
 const applyFeatureQueue = async (featureQueue: FeatureId[]) => {
+    const token = ++selectionRevision;
     const nextQueue = [...featureQueue];
     const persist = persistWorkspace({
         featureQueue: nextQueue,
@@ -237,7 +269,7 @@ const applyFeatureQueue = async (featureQueue: FeatureId[]) => {
     }
     await analysisLease.setActiveInputs(nextQueue.map(featureId => ({ featureId, stemRole: stemRole.value })));
     await persist;
-    requestExactValues(true);
+    if (token === selectionRevision) requestExactValues(true);
 };
 
 // Keep the remaining original list anchored while one row transfers between regions.
@@ -257,7 +289,12 @@ const restoreListAnchor = (anchor: ReturnType<typeof captureListAnchor>) => {
 };
 const toggleCard = (featureId: FeatureId) => {
     const anchor = captureListAnchor(featureId);
-    const transition = toggleActiveFeature(activeFeatureQueue.value, featureId);
+    const transition = isThreeD.value
+        ? {
+              queue: activeFeatureQueue.value.includes(featureId) ? [] : [featureId],
+              expanded: !activeFeatureQueue.value.includes(featureId),
+          }
+        : toggleActiveFeature(activeFeatureQueue.value, featureId);
     void applyFeatureQueue(transition.queue);
     void nextTick(() => {
         restoreListAnchor(anchor);
@@ -303,25 +340,39 @@ const seek = async (seconds: number) => {
 };
 
 const retryAnalysis = async () => {
+    const token = ++selectionRevision;
+    const inputs = activeFeatureIds.value.map(featureId => ({ featureId, stemRole: stemRole.value }));
     await analysisLease.setActiveInputs([]);
-    await analysisLease.setActiveInputs(
-        activeFeatureIds.value.map(featureId => ({ featureId, stemRole: stemRole.value })),
-    );
-    requestExactValues(true);
+    if (token !== selectionRevision) return;
+    await analysisLease.setActiveInputs(inputs);
+    if (token === selectionRevision) requestExactValues(true);
 };
-const selectSource = async (source: AnalysisSource) => {
-    if (source === selectedSource.value || (source !== 'original' && !stemsAvailable.value)) return;
+const selectSource = async (view: AnalyzerView) => {
+    const source: AnalysisSource = view === 'original-3d' ? 'original' : view;
+    if (view === selectedView.value || (source !== 'original' && !stemsAvailable.value)) return;
+    const token = ++selectionRevision;
     sourceNotice.value = '';
     flushZoom();
     for (const id of Object.keys(exactValues) as FeatureId[]) delete exactValues[id];
-    await audioSession.updateAnalysisWorkspace({
+    const persist = audioSession.updateAnalysisWorkspace({
         activeFeatureQueue: [...sessionStore.analysisWorkspace.activeFeatureQueue],
         viewport: sessionStore.analysisWorkspace.viewport,
         sources: { selected: source, queues: { ...sessionStore.analysisWorkspace.sources?.queues } },
+        presentation: {
+            originalMode:
+                view === 'original-3d'
+                    ? '3d'
+                    : view === 'original'
+                      ? '2d'
+                      : (sessionStore.analysisWorkspace.presentation?.originalMode ?? '2d'),
+            threeDFeatureId: sessionStore.analysisWorkspace.presentation?.threeDFeatureId ?? null,
+        },
     });
     await analysisLease.setActiveInputs(
         activeFeatureQueue.value.map(featureId => ({ featureId, stemRole: stemRole.value })),
     );
+    await persist;
+    if (token !== selectionRevision) return;
     if (pinnedScroll.value) pinnedScroll.value.scrollTop = 0;
     if (originalList.value) originalList.value.scrollTop = 0;
     requestExactValues(true);
@@ -341,11 +392,13 @@ const performExactRequests = async () => {
     lastCursorRequestAt = performance.now();
     const generation = analysis.value.generation;
     const source = selectedSource.value;
+    const token = selectionRevision;
     await Promise.all(
         activeFeatureIds.value.map(async featureId => {
             const result = await analysisLease.requestCursorValue(featureId, cursorSeconds.value, stemRole.value);
             if (
                 result &&
+                token === selectionRevision &&
                 analysis.value.generation === generation &&
                 source === selectedSource.value &&
                 activeFeatureIds.value.includes(featureId)
@@ -456,6 +509,7 @@ onMounted(() => {
     });
 });
 onBeforeUnmount(() => {
+    selectionRevision++;
     flushZoom();
     unsubscribeCoordinator?.();
     if (cursorTimer) clearTimeout(cursorTimer);

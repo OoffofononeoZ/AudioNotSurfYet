@@ -160,6 +160,9 @@ D0–D7 已按本机范围完成；下文按阶段保留失败、部分结果及
 
 ## 后续共享修改验证
 
+- 2026-11-02，DEC-113 的 Analyzer 原曲 3D 使用共享 UI/compact payload/会话状态，不增加宿主接口或修改数值算法。Web 构建与 `desktop:dir` 通过；本轮未生成或安装 NSIS。网页构建首次遇到原生 TEMP 访问受限，改用项目内独立 TEMP 后通过，未改系统权限。
+- Chrome/Edge 七项/单选/切片/独立恢复、390/1280/1920、十次 GPU context 释放/丢失重试与 900 秒输入通过；真实 Electron 45.1.0 ASAR run `analyzer-5e4e8b69-fdbb-4230-99bd-4721f5625294` 六组检查通过，含原有缓存/精确值及新七项 3D、相机与时间缩放、正交切片、重启模式与原曲队列恢复。独立 profile、普通用户校验副本及系统选择返回值替身的边界保持；结果/截图在 `artifacts/desktop/analyzer/<ID>`，不能替代原生对话框、任意素材/GPU 或正式 readiness。
+
 - 2026-11-02，DEC-112 的 Visualizer 跨预设移动使用共享命令和 UI，未增加平台分支，V6/V2 格式与宿主权限保持。Web 构建及 `desktop:dir` 通过；本轮重建应用目录，未重新生成 NSIS 安装器。
 - Chrome/Edge 的跨组专项与实际 Electron ASAR 共用按钮/拖放、折叠组、键盘焦点、非法嵌套、草稿刷新/JSON 回读、1024px 布局和整组三维场景往返检查。Electron 45.1.0 的 `composition-movement-307494ca-6982-4f19-a646-c501698143ab` 完整通过，page/console error 为空；独立 profile、正常用户目录校验副本和替身文件选值的边界保持。截图在 `artifacts/desktop/composition-movement/<ID>`，命令见 [tests README](../../tests/README.md)。
 - 三层色块同时核对实际预览与三秒 720p30 WebM 的 90 帧混色，沿用四级通道误差；媒体文件另经既有 `--files-only` 检查，不作为完整档位矩阵或正式质量评审。早期 Electron run 因测试的模拟窗口截图超时保持 failed；最终使用实际窗口尺寸和默认截图并按 PNG/视口比例采样，未改生产渲染或放宽阈值。

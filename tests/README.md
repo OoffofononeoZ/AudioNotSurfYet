@@ -1,5 +1,7 @@
 # 测试与本地产物
 
+Analyzer 3D：`npm run test:e2e:analyzer-3d` 使用真实 Chrome/Edge 检查七项、单选/独立恢复、相机与时间缩放、正交切片、响应式和十次 GPU 释放/重试，以及 900 秒合成音频的缩放取消与反馈。数值适配/会话模型为 `npx vitest run tests/analysis/three-d-data.test.ts tests/analysis/three-d-workspace.test.ts`。图像在忽略的 `test-results/3d-*.png`；Electron 扩展现有 `test:desktop:analyzer`，实际 ASAR 的七项、交互、切片及重启恢复另行检查，不借用浏览器通过结论。
+
 按实际改动选择检查，不把可用命令表作为默认执行清单。当前领域验收集中在[Analyzer](../docs/quality/validation.md)、[Editor](../docs/quality/editor/validation.md)、[Visualizer](../docs/quality/visualizer/validation.md)与[processing](../docs/quality/processing/validation.md)，任务选择见[验证skill](../skills/audiosurf-testing-strategy/SKILL.md)。
 
 读取文档、skill 及其引用文本必须显式指定 UTF-8 参数，例如 `Get-Content -Encoding UTF8`、`rg --encoding utf-8`。文档或 skill 修改需核对读取指示及示例，完整规则见[AGENTS](../AGENTS.md#文档与-skill-读取编码)。
