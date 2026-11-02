@@ -8,6 +8,7 @@
 
 | 文件 | 本地静态引用（最多显示 6 项） |
 | --- | --- |
+| [tests/editor/e10-marker-block.integration.test.ts](../../tests/editor/e10-marker-block.integration.test.ts) | [src/editor/editorDraftRepository.ts](../../src/editor/editorDraftRepository.ts)、[src/editor/markerBlockOperations.ts](../../src/editor/markerBlockOperations.ts)、[src/editor/projectCodec.ts](../../src/editor/projectCodec.ts)、[src/editor/types.ts](../../src/editor/types.ts) |
 | [tests/editor/e2-timeline-tempo-unit.test.ts](../../tests/editor/e2-timeline-tempo-unit.test.ts) | [src/analysis/config.ts](../../src/analysis/config.ts)、[src/analysis/tempoEstimator.ts](../../src/analysis/tempoEstimator.ts)、[src/editor/tempoMap.ts](../../src/editor/tempoMap.ts)、[src/editor/timeline.ts](../../src/editor/timeline.ts)、[src/editor/types.ts](../../src/editor/types.ts)、[tests/support/audio-fixtures.ts](../../tests/support/audio-fixtures.ts)、另 1 项，按需核对源码 |
 | [tests/editor/e2-timeline-tempo.integration.test.ts](../../tests/editor/e2-timeline-tempo.integration.test.ts) | [src/analysis/config.ts](../../src/analysis/config.ts)、[src/analysis/workerCore.ts](../../src/analysis/workerCore.ts)、[src/editor/projectCodec.ts](../../src/editor/projectCodec.ts)、[src/editor/tempoMap.ts](../../src/editor/tempoMap.ts)、[tests/support/audio-fixtures.ts](../../tests/support/audio-fixtures.ts)、[tests/support/e2-tempo-fixture.ts](../../tests/support/e2-tempo-fixture.ts) |
 | [tests/editor/e3-point-annotation-unit.test.ts](../../tests/editor/e3-point-annotation-unit.test.ts) | [src/editor/pointAnnotations.ts](../../src/editor/pointAnnotations.ts)、[src/editor/projectCodec.ts](../../src/editor/projectCodec.ts)、[src/editor/types.ts](../../src/editor/types.ts)、[tests/support/e3-point-fixture.ts](../../tests/support/e3-point-fixture.ts) |
@@ -107,4 +108,3 @@
 | [tests/scripts/verify-wallpaper-host.mjs](../../tests/scripts/verify-wallpaper-host.mjs) | — |
 | [tests/setup-analysis-scheduler.ts](../../tests/setup-analysis-scheduler.ts) | — |
 | [tests/setup-visualizer-resources.ts](../../tests/setup-visualizer-resources.ts) | [src/visualizer/elementRegistry.ts](../../src/visualizer/elementRegistry.ts)、[src/visualizer/resourceCodec.ts](../../src/visualizer/resourceCodec.ts)、[tests/support/visualizer-assets.mjs](../../tests/support/visualizer-assets.mjs) |
-| [tests/support/analyzer-list.ts](../../tests/support/analyzer-list.ts) | [src/analysis/types.ts](../../src/analysis/types.ts) |

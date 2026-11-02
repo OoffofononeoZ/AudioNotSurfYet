@@ -2,6 +2,7 @@ import type { RestoreState, TrackId, TrackRecord } from './audio';
 import type { LocalFileReference } from '../platform/fileContracts';
 import { validateSourceWorkspace, type AnalyzerSourceWorkspace } from '../analysis/sourceWorkspace';
 import { FEATURE_IDS, isFeatureId, type ConfigHash, type FeatureId } from '../analysis/types';
+import { validatePresentation, type AnalyzerPresentation } from '../analysis/threeDFeatures';
 
 export type TrackHash = string;
 export type { ConfigHash, FeatureId };
@@ -34,6 +35,7 @@ export interface TimelineViewport extends PersistedTimelineViewport {
 }
 
 export interface AnalysisWorkspaceSnapshot {
+    presentation?: AnalyzerPresentation;
     sources?: AnalyzerSourceWorkspace;
     initialized: boolean;
     activeFeatureQueue: ActiveFeatureQueue;
@@ -41,6 +43,7 @@ export interface AnalysisWorkspaceSnapshot {
 }
 
 export interface AnalysisWorkspaceUpdate {
+    presentation?: AnalyzerPresentation;
     sources?: AnalyzerSourceWorkspace;
     activeFeatureQueue: ActiveFeatureQueue;
     viewport: PersistedTimelineViewport | null;
@@ -53,6 +56,7 @@ export interface PersistedSessionV1 {
     currentTrackId: TrackId | null;
     analyzerWorkspaceVersion?: 2;
     analysisSources?: AnalyzerSourceWorkspace;
+    analysisPresentation?: AnalyzerPresentation;
     activeCards: ActiveAnalysisCard[];
     analysisConfig: PersistedAnalysisConfig;
     viewport: PersistedTimelineViewport | null;
@@ -133,6 +137,7 @@ export const clonePersistedTimelineViewport = (
 ): PersistedTimelineViewport | null => (viewport ? { ...viewport } : null);
 
 export const assertValidAnalysisWorkspace = (workspace: AnalysisWorkspaceUpdate): void => {
+    if (workspace.presentation !== undefined) validatePresentation(workspace.presentation);
     if (workspace.sources !== undefined) validateSourceWorkspace(workspace.sources);
     if (
         !Array.isArray(workspace.activeFeatureQueue) ||

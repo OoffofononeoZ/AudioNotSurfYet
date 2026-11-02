@@ -4,6 +4,7 @@ import Meyda from 'meyda';
 import { parseBlob } from 'music-metadata';
 import { AudioEngine, AudioTransportError, type AudioPlaybackCheckpoint } from './audioEngine';
 import { cloneSourceWorkspace } from '../analysis/sourceWorkspace';
+import { clonePresentation } from '../analysis/threeDFeatures';
 import {
     InvalidPersistedSessionError,
     SessionRepository,
@@ -266,6 +267,7 @@ export class AudioSessionService {
             {
                 activeFeatureQueue: activeCardsToFeatureQueue(restored.session.activeCards),
                 sources: restored.session.analysisSources,
+                presentation: restored.session.analysisPresentation,
 
                 viewport: restored.session.viewport,
             },
@@ -801,6 +803,7 @@ export class AudioSessionService {
         if (this.disposed) return;
         assertValidAnalysisWorkspace(workspace);
         const snapshot = {
+            presentation: clonePresentation(workspace.presentation ?? this.store.analysisWorkspace.presentation),
             activeFeatureQueue: cloneActiveFeatureQueue(workspace.activeFeatureQueue),
             sources: cloneSourceWorkspace(workspace.sources ?? this.store.analysisWorkspace.sources),
 
@@ -1341,6 +1344,7 @@ export class AudioSessionService {
             currentTrackId: this.store.currentTrackId,
             activeCards: activeFeatureQueueToCards(this.store.analysisWorkspace.activeFeatureQueue),
             analysisSources: cloneSourceWorkspace(this.store.analysisWorkspace.sources),
+            analysisPresentation: clonePresentation(this.store.analysisWorkspace.presentation),
 
             analysisConfig: {
                 ...DEFAULT_PERSISTED_ANALYSIS_CONFIG,

@@ -133,6 +133,7 @@ export const validatePersistedSessionV1 = (value: unknown): PersistedSessionV1 =
         assertValidPersistedActiveCards(value.activeCards as PersistedSessionV1['activeCards']);
         assertValidAnalysisWorkspace({
             sources: value.analysisSources as PersistedSessionV1['analysisSources'],
+            presentation: value.analysisPresentation as PersistedSessionV1['analysisPresentation'],
             activeFeatureQueue: activeCardsToFeatureQueue(value.activeCards as PersistedSessionV1['activeCards']),
             viewport: value.viewport as PersistedSessionV1['viewport'],
         });
@@ -194,6 +195,7 @@ export const validatePersistedSessionV1 = (value: unknown): PersistedSessionV1 =
         currentBlob: value.currentBlob,
         currentAnalysisCache: value.currentAnalysisCache,
         analysisSources: value.analysisSources,
+        analysisPresentation: value.analysisPresentation,
     } as PersistedSessionV1;
 };
 

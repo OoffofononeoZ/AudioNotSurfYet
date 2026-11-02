@@ -126,6 +126,23 @@ beforeEach(() => {
 });
 
 describe('M7 analysis workspace integration', () => {
+    test('persists independent 3D selection and preserves it during viewport-only updates', async () => {
+        const { service, store, repository } = createHarness();
+        const presentation = { originalMode: '3d' as const, threeDFeatureId: 'chroma' as const };
+        await service.updateAnalysisWorkspace({ activeFeatureQueue: ['rms', 'energy'], viewport: null, presentation });
+        presentation.threeDFeatureId = 'mfcc' as 'chroma';
+        await service.updateAnalysisWorkspace({
+            activeFeatureQueue: ['rms', 'energy'],
+            viewport: { startSeconds: 0, endSeconds: 4, zoom: 2 },
+        });
+        expect(store.analysisWorkspace.presentation?.threeDFeatureId).toBe('chroma');
+        expect(repository.saves.at(-1)?.session.analysisPresentation).toEqual({
+            originalMode: '3d',
+            threeDFeatureId: 'chroma',
+        });
+        expect(repository.saves.at(-1)?.session.activeCards.map(card => card.featureId)).toEqual(['rms', 'energy']);
+        await service.dispose();
+    });
     test('updates memory before persistence and stores FIFO cards/viewport', async () => {
         const harness = createHarness();
         const promise = harness.service.updateAnalysisWorkspace({

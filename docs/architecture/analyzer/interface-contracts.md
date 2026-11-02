@@ -12,6 +12,7 @@
 ## 计算与渲染
 
 - activeFeatureQueue 映射为 V1 cards 保存最新 workspace revision；初始化与刷新采用当前 analyzerWorkspaceVersion，不恢复旧 featureOrder API。
+- V1 会话可选 `analysisPresentation` 独立保存原曲 `originalMode`（2d/3d）和七项集合内的 `threeDFeatureId`（或 null）；缺省仍为原有 2D 工作区，原曲四项队列及分轨队列不受该选择覆盖。字段由共享会话 validator、store 与 service 保存/恢复，不增加分析缓存 schema。
 - 标准分析采用 average-mono PCM、frameSize 1024、hopSize 512、hanning、13 MFCC；track/config hash 参与 cache identity。Wallpaper 频谱采用独立定义和单位。
 - cache 逐 feature 部分复用，损坏项按 miss 重算；全命中仍可准备 retained PCM 供 exact cursor，不重复提取已命中特征。
 - 播放快照是 cursor 秒数唯一来源，viewport zoom/pan 不改音频时钟。普通列表折叠项不常驻 Canvas，活动项按需绘制。
