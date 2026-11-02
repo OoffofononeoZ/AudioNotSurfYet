@@ -67,7 +67,7 @@
                     @select="selectElement"
                     @visibility="(id, enabled) => run(() => controller.updateVisibility(id, enabled))"
                     @remove="id => run(() => controller.removeElement(id))"
-                    @reorder="(ids, parentId) => run(() => controller.reorderElements(ids, parentId))" />
+                    @move="request => run(() => controller.moveItem(request))" />
             </aside>
             <section class="viz-preview-column" aria-label="可视化预览">
                 <div class="viz-preview-stage">

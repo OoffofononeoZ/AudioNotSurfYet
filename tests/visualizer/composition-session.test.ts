@@ -81,6 +81,24 @@ function harness(
 beforeEach(() => setActivePinia(createPinia()));
 afterEach(() => vi.restoreAllMocks());
 
+test('cross-preset moves preserve live random seeds and persist atomically; invalid moves leave state intact', async () => {
+    const h = harness();
+    await h.controller.enter('first');
+    const group = h.controller.addPreset('geometric-0.6')!;
+    const id = h.controller.addElement('starfield')!;
+    const seeds = new Map(h.controller.readRenderSeeds());
+    h.controller.moveItem({ id, parentId: group, beforeId: null });
+    for (const [key, seed] of seeds) expect(h.controller.readRenderSeeds().get(key)).toBe(seed);
+    const before = h.controller.getSnapshot();
+    expect(() => h.controller.moveItem({ id, parentId: 'missing', beforeId: null })).toThrow();
+    expect(h.controller.getSnapshot()).toEqual(before);
+    await h.controller.flush();
+    expect(vi.mocked(h.repository.replace).mock.lastCall![0].project).toEqual(h.controller.readProject());
+    const owner = h.controller.readProject()!.items.find(i => i.id === group)!;
+    expect(owner).toMatchObject({ kind: 'preset', children: expect.arrayContaining([id]) });
+    await h.controller.dispose();
+});
+
 test('output edits preserve sync compensation through persistence and reopening', async () => {
     const h = harness();
     await h.controller.enter('first');

@@ -7,10 +7,13 @@
         :data-element-id="kind === 'element' ? id : undefined"
         :data-scene-instance-id="kind === 'scene3d' ? id : undefined"
         :data-preset-instance-id="kind === 'preset' ? id : undefined"
+        :data-composition-id="id"
+        :data-drop-position="dropPosition"
         @pointerdown.capture="pointerDown"
         @dragstart="startDrag"
-        @dragover.prevent
-        @drop.prevent="$emit('drop')"
+        @dragover="$emit('drag-over', $event)"
+        @dragleave="$emit('drag-leave', $event)"
+        @drop="$emit('drop', $event)"
         @dragend="endDrag">
         <button type="button" class="viz-element-select" :aria-pressed="selected" :disabled="locked" @click="select">
             <span class="viz-row-preview" aria-hidden="true">
@@ -46,7 +49,8 @@
                 class="viz-icon-button small"
                 :disabled="locked || first"
                 :aria-label="kind === 'preset' ? '上移预设' : kind === 'scene3d' ? '上移场景' : '上移元素'"
-                title="上移"
+                data-move-direction="-1"
+                :title="upTitle ?? '上移'"
                 @click.stop="$emit('move', -1)">
                 <VisualizerIcon name="up" />
             </button>
@@ -64,7 +68,8 @@
                 class="viz-icon-button small"
                 :disabled="locked || last"
                 :aria-label="kind === 'preset' ? '下移预设' : kind === 'scene3d' ? '下移场景' : '下移元素'"
-                title="下移"
+                data-move-direction="1"
+                :title="downTitle ?? '下移'"
                 @click.stop="$emit('move', 1)">
                 <VisualizerIcon name="down" />
             </button>
@@ -90,6 +95,9 @@ const props = defineProps<{
     last: boolean;
     expanded?: boolean;
     nested?: boolean;
+    upTitle?: string;
+    downTitle?: string;
+    dropPosition?: 'before' | 'inside' | 'after' | 'invalid';
 }>();
 const emit = defineEmits<{
     select: [];
@@ -98,7 +106,9 @@ const emit = defineEmits<{
     move: [offset: number];
     expand: [];
     drag: [];
-    drop: [];
+    'drag-over': [event: DragEvent];
+    'drag-leave': [event: DragEvent];
+    drop: [event: DragEvent];
     dragend: [];
 }>();
 let allowDrag = true,
@@ -144,6 +154,29 @@ onBeforeUnmount(() => {
 </script>
 
 <style scoped>
+.viz-element-row[data-drop-position='before']::after,
+.viz-element-row[data-drop-position='after']::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 2px;
+    z-index: 3;
+    background: var(--accent-soft);
+    pointer-events: none;
+}
+.viz-element-row[data-drop-position='before']::after {
+    top: 0;
+}
+.viz-element-row[data-drop-position='after']::after {
+    bottom: 0;
+}
+.viz-element-row[data-drop-position='inside'] {
+    box-shadow: inset 0 0 0 1px var(--accent-soft);
+}
+.viz-element-row[data-drop-position='invalid'] {
+    cursor: not-allowed;
+}
 .viz-element-row {
     position: relative;
     height: 64px;

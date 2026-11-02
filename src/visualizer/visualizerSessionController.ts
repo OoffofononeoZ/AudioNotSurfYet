@@ -2,6 +2,7 @@ import { updateScene3d as patchScene3d, moveWorldElement } from './scene3dAction
 import { findScene3d, elementScene } from './scene3dModel';
 import type { Scene3dItem } from './scene3dTypes';
 import { validateRuntimeSnapshot } from './validateRuntimeSnapshot';
+import { moveComposition, type CompositionMove } from './compositionMovement';
 import { ElementSeedSession } from './seed';
 import { inject, type InjectionKey } from 'vue';
 import type { AudioSessionService, RoutePlaybackLease } from '../audio/audioSessionService';
@@ -584,6 +585,13 @@ export class VisualizerSessionController {
     }
     reorderElements(ids: string[], parentId?: string) {
         if (this.snapshot.project) this.updateProject(reorderComposition(this.snapshot.project, ids, parentId));
+    }
+    moveItem(request: CompositionMove) {
+        this.assertUnlocked();
+        const p = this.snapshot.project;
+        if (!p) return;
+        const next = moveComposition(p, request);
+        if (next !== p) this.updateProject(next);
     }
     updateOutput(resolution: VisualizerResolution, frameRate: VisualizerFrameRate, audioVideoOffsetMs?: number) {
         const p = this.snapshot.project;

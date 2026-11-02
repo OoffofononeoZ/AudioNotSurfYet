@@ -9,16 +9,21 @@
         :selected="selection === node.id"
         :locked="locked"
         :nested="!!parentId"
-        :first="siblings[0] === node.id"
-        :last="siblings[siblings.length - 1] === node.id"
+        :first="!up"
+        :last="!down"
+        :up-title="compositionMoveTitle(project, up, -1)"
+        :down-title="compositionMoveTitle(project, down, 1)"
+        :drop-position="dropPosition"
         :expanded="expanded"
         @select="$emit('select', node.id)"
         @visibility="$emit('visibility', node.id, $event)"
         @remove="$emit('remove', node.id)"
         @expand="expanded = !expanded"
         @move="move($event)"
-        @drag="$emit('drag', { id: node.id, parentId })"
+        @drag="$emit('drag', node.id)"
         @dragend="$emit('drag', null)"
+        @drag-over="dragOver"
+        @drag-leave="dragLeave"
         @drop="drop" />
     <div
         v-if="node.children.length && expanded"
@@ -29,40 +34,65 @@
             v-for="child in node.children"
             :key="child.id"
             :node="child"
-            :siblings="node.children.map(c => c.id)"
+            :project="project"
             :parent-id="node.id"
             :selection="selection"
             :locked="locked"
             :dragged="dragged"
+            :reveal="reveal"
             @select="$emit('select', $event)"
             @visibility="(id, value) => $emit('visibility', id, value)"
             @remove="$emit('remove', $event)"
-            @reorder="(ids, parent) => $emit('reorder', ids, parent)"
+            @move="$emit('move', $event)"
             @drag="$emit('drag', $event)" />
     </div>
 </template>
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { computed, ref, watch } from 'vue';
 import VisualizerCompositionRow from './VisualizerCompositionRow.vue';
 import { useResourceLibrary } from '../../visualizer/useResourceLibrary';
 import { resourceKey } from '../../visualizer/resourceIdentity';
 import type { CompositionListNode } from '../../visualizer/compositionList';
+import type { VisualizerProjectV6 } from '../../visualizer/compositionTypes';
+import {
+    compositionStepMove,
+    compositionDropMove,
+    compositionMoveTitle,
+    type CompositionMove,
+    type CompositionDropPosition,
+} from '../../visualizer/compositionMovement';
 const props = defineProps<{
     node: CompositionListNode;
-    siblings: string[];
+    project: VisualizerProjectV6;
     parentId?: string;
     selection: string | null;
     locked: boolean;
-    dragged: { id: string; parentId?: string } | null;
+    dragged: string | null;
+    reveal: { id: string | null } | null;
 }>();
 const emit = defineEmits<{
     select: [id: string];
     visibility: [id: string, value: boolean];
     remove: [id: string];
-    reorder: [ids: string[], parentId?: string];
-    drag: [value: { id: string; parentId?: string } | null];
+    move: [request: CompositionMove];
+    drag: [value: string | null];
 }>();
 const expanded = ref(props.node.kind === 'scene3d');
+const up = computed(() => compositionStepMove(props.project, props.node.id, -1));
+const down = computed(() => compositionStepMove(props.project, props.node.id, 1));
+const dropPosition = ref<CompositionDropPosition | 'invalid'>();
+watch(
+    () => props.reveal,
+    value => {
+        if (value?.id === props.node.id) expanded.value = true;
+    },
+);
+watch(
+    () => [props.dragged, props.locked],
+    () => {
+        dropPosition.value = undefined;
+    },
+);
 const { state } = useResourceLibrary();
 const preview = computed(() =>
     props.node.resource
@@ -70,24 +100,42 @@ const preview = computed(() =>
         : undefined,
 );
 function move(offset: number) {
-    const ids = [...props.siblings],
-        from = ids.indexOf(props.node.id),
-        to = from + offset;
-    if (props.locked || to < 0 || to >= ids.length) return;
-    ids.splice(from, 1);
-    ids.splice(to, 0, props.node.id);
-    emit('reorder', ids, props.parentId);
+    const request = offset === -1 ? up.value : down.value;
+    if (!props.locked && request) emit('move', request);
 }
-function drop() {
-    const drag = props.dragged;
-    if (props.locked || !drag || drag.parentId !== props.parentId) return;
-    const ids = [...props.siblings],
-        from = ids.indexOf(drag.id),
-        to = ids.indexOf(props.node.id);
-    if (from < 0 || to < 0) return;
-    ids.splice(from, 1);
-    ids.splice(to, 0, drag.id);
-    emit('reorder', ids, props.parentId);
+function dropRequest(event: DragEvent) {
+    if (props.locked || !props.dragged) return null;
+    const rect = (event.currentTarget as HTMLElement).getBoundingClientRect();
+    const fraction = (event.clientY - rect.top) / rect.height;
+    const position: CompositionDropPosition =
+        props.node.kind === 'preset'
+            ? fraction < 0.25
+                ? 'before'
+                : fraction > 0.75
+                  ? 'after'
+                  : 'inside'
+            : fraction < 0.5
+              ? 'before'
+              : 'after';
+    return { position, request: compositionDropMove(props.project, props.dragged, props.node.id, position) };
+}
+function dragOver(event: DragEvent) {
+    const target = dropRequest(event);
+    dropPosition.value = target?.request ? target.position : props.dragged ? 'invalid' : undefined;
+    if (event.dataTransfer) event.dataTransfer.dropEffect = target?.request ? 'move' : 'none';
+    if (target?.request) event.preventDefault();
+}
+function dragLeave(event: DragEvent) {
+    if (event.relatedTarget instanceof Node && (event.currentTarget as HTMLElement).contains(event.relatedTarget))
+        return;
+    dropPosition.value = undefined;
+}
+function drop(event: DragEvent) {
+    const target = dropRequest(event);
+    event.preventDefault();
+    event.stopPropagation();
+    if (target?.request) emit('move', target.request);
+    dropPosition.value = undefined;
     emit('drag', null);
 }
 </script>
