@@ -4,6 +4,7 @@
             时间 <span>{{ view.spanSeconds.toFixed(2) }} 秒</span>
         </div>
         <div
+            ref="timeElement"
             class="marker-ruler-time"
             :class="{ 'is-dragging': dragging, 'is-disabled': !available }"
             data-testid="marker-ruler-time"
@@ -34,7 +35,9 @@ import type { MarkerTimeView } from '../editor/markerTimeView';
 import { useAudioSessionService } from '../audio/audioSessionService';
 import { MarkerRulerScrubber } from '../editor/markerRulerScrubber';
 const props = defineProps<{ view: MarkerTimeView; active: boolean; trackId: string | null }>();
-const emit = defineEmits<{ dragging: [value: boolean] }>();
+const emit = defineEmits<{ dragging: [value: boolean]; plotWidth: [width: number] }>();
+const timeElement = ref<HTMLElement | null>(null);
+let geometryObserver: ResizeObserver | null = null;
 const audio = useAudioSessionService();
 const available = computed(() => props.active && Boolean(props.trackId) && !audio.playbackPolicy.state.exportLocked);
 const dragging = ref(false),
@@ -92,6 +95,11 @@ watch(() => [props.active, props.trackId, audio.playbackPolicy.state.exportLocke
 let unsubscribePlayback = () => {},
     unsubscribeDiscontinuity = () => {};
 onMounted(() => {
+    geometryObserver = new ResizeObserver(([entry]) => {
+        const width = entry?.contentRect.width ?? 0;
+        if (width > 0) emit('plotWidth', width);
+    });
+    if (timeElement.value) geometryObserver.observe(timeElement.value);
     window.addEventListener('blur', cancel);
     window.addEventListener('keydown', escape);
     document.addEventListener('visibilitychange', visibility);
@@ -105,6 +113,7 @@ onMounted(() => {
     });
 });
 onBeforeUnmount(() => {
+    geometryObserver?.disconnect();
     cancel();
     unsubscribePlayback();
     unsubscribeDiscontinuity();

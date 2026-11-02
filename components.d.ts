@@ -48,6 +48,7 @@ declare module 'vue' {
     EditorTrackChangeDialog: typeof import('./src/components/EditorTrackChangeDialog.vue')['default']
     EditorTrackOperations: typeof import('./src/components/EditorTrackOperations.vue')['default']
     EditorTranscriptionWorkspace: typeof import('./src/components/EditorTranscriptionWorkspace.vue')['default']
+    EditorWaveformTrack: typeof import('./src/components/EditorWaveformTrack.vue')['default']
     ElCascaderPanel: typeof import('element-plus/es')['ElCascaderPanel']
     LightBg: typeof import('./src/components/LightBg.vue')['default']
     MeydaCard: typeof import('./src/components/MeydaCard.vue')['default']

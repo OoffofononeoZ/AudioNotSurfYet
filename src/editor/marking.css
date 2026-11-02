@@ -1,4 +1,17 @@
 /* Shared marking presentation; row and management styles belong to their components. */
-#editor-marking-panel { background:var(--canvas); }
-#editor-marking-panel .tempo-segment[data-selected="true"] { background:rgba(134,237,181,.045); }
-#editor-marking-panel .editor-timing-panel { position:sticky; left:0; }
+#editor-marking-panel {
+    --marker-management-width: 224px;
+    background: var(--canvas);
+}
+@container (max-width:700px) {
+    #editor-marking-panel {
+        --marker-management-width: 160px;
+    }
+}
+#editor-marking-panel .tempo-segment[data-selected='true'] {
+    background: rgba(134, 237, 181, 0.045);
+}
+#editor-marking-panel .editor-timing-panel {
+    position: sticky;
+    left: 0;
+}

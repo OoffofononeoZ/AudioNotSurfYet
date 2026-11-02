@@ -69,6 +69,7 @@
                 :view="view"
                 :active="active !== false"
                 :track-id="playback.trackId"
+                @plot-width="emit('plotWidth', $event)"
                 @dragging="rulerDragging = $event" />
             <div v-if="!project.lanes.length" class="empty-markers">还没有标记轨道，点击“＋轨道”开始。</div>
             <EditorMarkerLane
@@ -142,6 +143,7 @@ const props = defineProps<{
     overlayOpen: boolean;
 }>();
 const emit = defineEmits<{
+    plotWidth: [width: number];
     updateProject: [project: EditorProjectV2, immediate: boolean];
     'update:compensationCells': [value: number];
     retryOverlay: [];
@@ -241,7 +243,6 @@ onBeforeUnmount(() => {
 </script>
 <style scoped>
 .point-workspace {
-    --marker-management-width: 224px;
     display: flex;
     flex: 1;
     flex-direction: column;
@@ -324,10 +325,5 @@ button:disabled {
     text-align: center;
     color: var(--muted);
     font-size: 12px;
-}
-@container (max-width:700px) {
-    .point-workspace {
-        --marker-management-width: 160px;
-    }
 }
 </style>

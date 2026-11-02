@@ -81,6 +81,7 @@
                     aria-labelledby="editor-marking-tab"
                     tabindex="0">
                     <EditorTimeline
+                        :plot-width="markerPlotWidth"
                         :active="workspace === 'marking'"
                         :project="snapshot.project"
                         :playback="playback"
@@ -102,6 +103,7 @@
                         @update-project="updateProject"
                         @toggle-overlay="controller.setOverlayOpen($event)"
                         @select-overlay-feature="controller.selectOverlayFeature($event)"
+                        @plot-width="markerPlotWidth = $event"
                         @retry-overlay="controller.retryOverlayAnalysis()" />
                 </div>
                 <div
@@ -194,6 +196,7 @@ const sessionStore = useAudioSessionStore();
 const controller = useEditorSessionController();
 const keyboardRecordingRevision = ref(0);
 const markerCompensationCells = ref(0);
+const markerPlotWidth = ref(0);
 const keyboardImportPending = ref(false);
 const osuImportOpen = ref(false);
 const importChoiceOpen = ref(false);
