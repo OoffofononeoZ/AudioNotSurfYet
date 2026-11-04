@@ -77,7 +77,10 @@
             </div>
         </section>
         <section>
-            <h3>{{ descriptor.kind === 'transition' ? '转场输入' : '时间范围' }}</h3>
+            <h3 class="flex items-center">
+                {{ descriptor.kind === 'transition' ? '转场输入' : '时间范围'
+                }}<AppTooltip v-if="timingInput?.tooltip" :content="timingInput.tooltip" :label="timingInput.label" />
+            </h3>
             <template v-if="descriptor.kind === 'transition'"
                 ><VisualizerMarkerInput
                     :key="element.id + ':timing'"
@@ -124,7 +127,9 @@
             ></template>
         </section>
         <section v-for="input in independentMarkerInputs" :key="input.id">
-            <h3>{{ input.label }}</h3>
+            <h3 class="flex items-center">
+                {{ input.label }}<AppTooltip v-if="input.tooltip" :content="input.tooltip" :label="input.label" />
+            </h3>
             <VisualizerMarkerInput
                 :key="element.id + ':' + input.id"
                 :project="project"
@@ -181,6 +186,7 @@ import type { LyricAsset, LyricBinding } from '../../visualizer/lyricTypes';
 import type { MediaAsset, MediaBinding } from '../../visualizer/mediaTypes';
 import { computed } from 'vue';
 import AppSelect from '../controls/AppSelect.vue';
+import AppTooltip from '../controls/AppTooltip.vue';
 import AppNumberInput from '../controls/AppNumberInput.vue';
 import VisualizerIcon from './VisualizerIcon.vue';
 import VisualizerMarkerInput from './VisualizerMarkerInput.vue';
@@ -225,6 +231,13 @@ const independentMarkerInputs = computed(
                 input.id !==
                 (props.element ? elementAlgorithm(props.project, props.element).contract.timingInput : undefined),
         ) ?? [],
+);
+const timingInput = computed(() =>
+    descriptor.value?.markerInputs?.find(
+        input =>
+            input.id ===
+            (props.element ? elementAlgorithm(props.project, props.element).contract.timingInput : undefined),
+    ),
 );
 const targetOptions = [
     { value: 'composition', label: '整个画面' },

@@ -8,6 +8,8 @@
 
 | 文件 | 本地静态引用（最多显示 6 项） |
 | --- | --- |
+| [tests/scripts/run-v4-eval.mjs](../../tests/scripts/run-v4-eval.mjs) | — |
+| [tests/scripts/run-v5-eval.mjs](../../tests/scripts/run-v5-eval.mjs) | — |
 | [tests/scripts/run-v6-eval.mjs](../../tests/scripts/run-v6-eval.mjs) | — |
 | [tests/scripts/verify-v5-media.mjs](../../tests/scripts/verify-v5-media.mjs) | — |
 | [tests/scripts/verify-v6-media.mjs](../../tests/scripts/verify-v6-media.mjs) | — |
@@ -45,6 +47,7 @@
 | [tests/support/shutdown-host.ts](../../tests/support/shutdown-host.ts) | [src/App.vue](../../src/App.vue)、[src/platform/desktopLifecycle.ts](../../src/platform/desktopLifecycle.ts)、[src/platform/lifecycleContracts.ts](../../src/platform/lifecycleContracts.ts)、[src/platform/platformPorts.ts](../../src/platform/platformPorts.ts)、[src/router/index.ts](../../src/router/index.ts) |
 | [tests/support/stem-analysis.ts](../../tests/support/stem-analysis.ts) | [src/analysis/pcm.ts](../../src/analysis/pcm.ts)、[src/processing/editorSeparationService.ts](../../src/processing/editorSeparationService.ts)、[src/processing/kernel.ts](../../src/processing/kernel.ts) |
 | [tests/support/tolerance.ts](../../tests/support/tolerance.ts) | — |
+| [tests/support/tooltip-scenario.mjs](../../tests/support/tooltip-scenario.mjs) | [scripts/lib/visualizer-resource-v2.mjs](../../scripts/lib/visualizer-resource-v2.mjs) |
 | [tests/support/v6-resource-probe.ts](../../tests/support/v6-resource-probe.ts) | — |
 | [tests/support/visualizer-assets.mjs](../../tests/support/visualizer-assets.mjs) | [scripts/lib/visualizer-assets-path.mjs](../../scripts/lib/visualizer-assets-path.mjs) |
 | [tests/support/visualizer-audio-timeline.mjs](../../tests/support/visualizer-audio-timeline.mjs) | — |
@@ -105,6 +108,3 @@
 | [tests/visualizer/local-fonts.test.ts](../../tests/visualizer/local-fonts.test.ts) | [src/platform/localFonts.ts](../../src/platform/localFonts.ts) |
 | [tests/visualizer/lyric-motion.test.ts](../../tests/visualizer/lyric-motion.test.ts) | [src/visualizer/algorithmTypes.ts](../../src/visualizer/algorithmTypes.ts)、[src/visualizer/drawPacket.ts](../../src/visualizer/drawPacket.ts)、[tests/support/visualizer-assets.mjs](../../tests/support/visualizer-assets.mjs)、[tests/visualizer/algorithm-runtime-fixture.ts](../../tests/visualizer/algorithm-runtime-fixture.ts) |
 | [tests/visualizer/lyrics.test.ts](../../tests/visualizer/lyrics.test.ts) | [src/visualizer/algorithmCodec.ts](../../src/visualizer/algorithmCodec.ts)、[src/visualizer/compositionCodec.ts](../../src/visualizer/compositionCodec.ts)、[src/visualizer/compositionModel.ts](../../src/visualizer/compositionModel.ts)、[src/visualizer/compositionPresets.ts](../../src/visualizer/compositionPresets.ts)、[src/visualizer/drawPacket.ts](../../src/visualizer/drawPacket.ts)、[src/visualizer/elementRegistry.ts](../../src/visualizer/elementRegistry.ts)、另 8 项，按需核对源码 |
-| [tests/visualizer/marker-input-fixture.ts](../../tests/visualizer/marker-input-fixture.ts) | [src/editor/projectCodec.ts](../../src/editor/projectCodec.ts)、[src/visualizer/algorithmTypes.ts](../../src/visualizer/algorithmTypes.ts)、[src/visualizer/compositionCodec.ts](../../src/visualizer/compositionCodec.ts)、[src/visualizer/elementRegistry.ts](../../src/visualizer/elementRegistry.ts)、[src/visualizer/resourceIdentity.ts](../../src/visualizer/resourceIdentity.ts)、[src/visualizer/resourceTypes.ts](../../src/visualizer/resourceTypes.ts) |
-| [tests/visualizer/media-contract.test.ts](../../tests/visualizer/media-contract.test.ts) | [src/processing/sha256.ts](../../src/processing/sha256.ts)、[src/visualizer/algorithmCodec.ts](../../src/visualizer/algorithmCodec.ts)、[src/visualizer/algorithmTypes.ts](../../src/visualizer/algorithmTypes.ts)、[src/visualizer/compositionCodec.ts](../../src/visualizer/compositionCodec.ts)、[src/visualizer/drawPacket.ts](../../src/visualizer/drawPacket.ts)、[src/visualizer/elementRegistry.ts](../../src/visualizer/elementRegistry.ts)、另 7 项，按需核对源码 |
-| [tests/visualizer/native-input.test.ts](../../tests/visualizer/native-input.test.ts) | [src/visualizer/compositionCodec.ts](../../src/visualizer/compositionCodec.ts)、[src/visualizer/compositionPresets.ts](../../src/visualizer/compositionPresets.ts)、[src/visualizer/compositionResolver.ts](../../src/visualizer/compositionResolver.ts)、[src/visualizer/nativeAudioAnalysis.ts](../../src/visualizer/nativeAudioAnalysis.ts)、[src/visualizer/nativeAudioSource.ts](../../src/visualizer/nativeAudioSource.ts)、[tests/support/visualizer-assets.mjs](../../tests/support/visualizer-assets.mjs)、另 1 项，按需核对源码 |

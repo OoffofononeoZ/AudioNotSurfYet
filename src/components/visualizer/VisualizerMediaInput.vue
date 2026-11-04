@@ -1,6 +1,9 @@
 <template>
     <section class="grid gap-2" :data-media-input="definition.id">
-        <h3>{{ definition.label }}</h3>
+        <h3 class="flex items-center">
+            {{ definition.label
+            }}<AppTooltip v-if="definition.tooltip" :content="definition.tooltip" :label="definition.label" />
+        </h3>
         <label class="viz-field"
             ><span>素材</span
             ><PlatformFileInput
@@ -67,6 +70,7 @@
 import PlatformFileInput from '../platform/PlatformFileInput.vue';
 import { computed, onBeforeUnmount, ref, watch } from 'vue';
 import AppSelect from '../controls/AppSelect.vue';
+import AppTooltip from '../controls/AppTooltip.vue';
 import AppNumberInput from '../controls/AppNumberInput.vue';
 import { importMediaFiles } from '../../visualizer/mediaImport';
 import type { MediaAsset, MediaBinding, MediaInputDefinition } from '../../visualizer/mediaTypes';

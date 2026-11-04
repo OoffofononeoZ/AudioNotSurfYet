@@ -8,6 +8,7 @@
 
 | 文件 | 本地静态引用（最多显示 6 项） |
 | --- | --- |
+| [tests/e2e/analyzer-3d-long.spec.ts](../../tests/e2e/analyzer-3d-long.spec.ts) | [tests/support/file-picker.ts](../../tests/support/file-picker.ts) |
 | [tests/e2e/analyzer-3d.spec.ts](../../tests/e2e/analyzer-3d.spec.ts) | [src/analysis/threeDFeatures.ts](../../src/analysis/threeDFeatures.ts)、[tests/support/file-picker.ts](../../tests/support/file-picker.ts) |
 | [tests/e2e/app-shell.spec.ts](../../tests/e2e/app-shell.spec.ts) | [tests/support/file-picker.ts](../../tests/support/file-picker.ts) |
 | [tests/e2e/app-smoke.spec.ts](../../tests/e2e/app-smoke.spec.ts) | [tests/support/file-picker.ts](../../tests/support/file-picker.ts) |
@@ -107,4 +108,3 @@
 | [tests/e2e/visualizer-scene3d.spec.ts](../../tests/e2e/visualizer-scene3d.spec.ts) | — |
 | [tests/e2e/visualizer-seed.spec.ts](../../tests/e2e/visualizer-seed.spec.ts) | [tests/support/file-picker.ts](../../tests/support/file-picker.ts)、[tests/support/project-actions.ts](../../tests/support/project-actions.ts) |
 | [tests/e2e/visualizer-stem-input.spec.ts](../../tests/e2e/visualizer-stem-input.spec.ts) | [src/visualizer/visualizerSessionController.ts](../../src/visualizer/visualizerSessionController.ts)、[tests/support/editor-marking.ts](../../tests/support/editor-marking.ts)、[tests/support/file-picker.ts](../../tests/support/file-picker.ts)、[tests/support/stem-analysis.ts](../../tests/support/stem-analysis.ts) |
-| [tests/e2e/visualizer-wallpaper.spec.ts](../../tests/e2e/visualizer-wallpaper.spec.ts) | [tests/support/file-picker.ts](../../tests/support/file-picker.ts)、[tests/support/project-actions.ts](../../tests/support/project-actions.ts) |

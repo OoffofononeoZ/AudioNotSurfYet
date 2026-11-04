@@ -1,6 +1,9 @@
 <template>
     <section class="grid gap-2" :data-lyric-input="definition.id">
-        <h3>{{ definition.label }}</h3>
+        <h3 class="flex items-center">
+            {{ definition.label
+            }}<AppTooltip v-if="definition.tooltip" :content="definition.tooltip" :label="definition.label" />
+        </h3>
         <label class="viz-field"
             ><span>LRC 文件</span
             ><PlatformFileInput
@@ -60,6 +63,7 @@ import VisualizerLyricFont from './VisualizerLyricFont.vue';
 import PlatformFileInput from '../platform/PlatformFileInput.vue';
 import { computed, onBeforeUnmount, ref, watch } from 'vue';
 import AppNumberInput from '../controls/AppNumberInput.vue';
+import AppTooltip from '../controls/AppTooltip.vue';
 import { importLyricFile } from '../../visualizer/lyricImport';
 import type { LyricAsset, LyricBinding, LyricInputDefinition } from '../../visualizer/lyricTypes';
 const props = defineProps<{

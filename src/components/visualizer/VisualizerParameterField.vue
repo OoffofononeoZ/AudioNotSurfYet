@@ -1,18 +1,25 @@
 <template>
     <div class="viz-parameter" :data-parameter-id="parameter.id">
-        <label v-if="dynamic" class="viz-field"
-            ><span>{{ parameter.label }}</span
+        <div v-if="dynamic" class="viz-field">
+            <span class="inline-flex items-center"
+                ><label :for="fieldId + '-source'">{{ parameter.label }}</label
+                ><AppTooltip v-if="parameter.tooltip" :content="parameter.tooltip" :label="parameter.label" /></span
             ><AppSelect
+                :id="fieldId + '-source'"
                 :model-value="analysis?.stemRole ?? binding.source.kind"
                 :label="parameter.label + '数据来源'"
                 :options="sourceOptions"
                 :disabled="disabled"
-                @change="sourceChanged"
-        /></label>
-        <label v-if="binding.source.kind === 'constant'" class="viz-field"
-            ><span>{{ dynamic ? '固定值' : parameter.label }}</span>
+                @change="sourceChanged" />
+        </div>
+        <div v-if="binding.source.kind === 'constant'" class="viz-field">
+            <span class="inline-flex items-center"
+                ><label :for="fieldId + '-value'">{{ dynamic ? '固定值' : parameter.label }}</label
+                ><AppTooltip v-if="!dynamic && parameter.tooltip" :content="parameter.tooltip" :label="parameter.label"
+            /></span>
             <AppNumberInput
                 v-if="parameter.valueKind === 'number'"
+                :id="fieldId + '-value'"
                 :model-value="Number(binding.source.value)"
                 :min="parameter.range?.min"
                 :max="parameter.range?.max"
@@ -23,18 +30,25 @@
                 @change="constantNumber" />
             <input
                 v-else-if="parameter.valueKind === 'color'"
+                :id="fieldId + '-value'"
                 type="color"
                 :value="binding.source.value"
                 :aria-label="parameter.label"
                 @input="constantChanged" />
             <input
                 v-else-if="parameter.valueKind === 'boolean'"
+                :id="fieldId + '-value'"
                 type="checkbox"
                 :checked="binding.source.value === true"
                 :aria-label="parameter.label"
                 @change="constantChanged" />
             <span v-else class="viz-muted">静态</span>
-        </label>
+        </div>
+        <div
+            v-if="!dynamic && binding.source.kind !== 'constant' && parameter.tooltip"
+            class="inline-flex items-center">
+            {{ parameter.label }}<AppTooltip :content="parameter.tooltip" :label="parameter.label" />
+        </div>
         <label v-if="native" class="viz-field"
             ><span>特征</span
             ><AppSelect
@@ -126,8 +140,9 @@
     </div>
 </template>
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, useId } from 'vue';
 import AppSelect from '../controls/AppSelect.vue';
+import AppTooltip from '../controls/AppTooltip.vue';
 import AppNumberInput from '../controls/AppNumberInput.vue';
 import { FEATURE_REGISTRY } from '../../analysis/featureRegistry';
 import type { FeatureId } from '../../analysis/types';
@@ -160,6 +175,7 @@ const props = defineProps<{
     affectedElementIds?: string[];
 }>();
 const emit = defineEmits<{ change: [binding: ElementBinding] }>();
+const fieldId = useId();
 const dynamic = computed(() => props.parameter.allowedSourceKinds.includes('analysis'));
 const analysis = computed(() => (props.binding.source.kind === 'analysis' ? props.binding.source : null));
 const native = computed(() => (props.binding.source.kind === 'native' ? props.binding.source : null));

@@ -59,14 +59,18 @@
                         @change="setFrameRate"
                 /></label>
                 <div class="col-span-2 mt-1 min-w-0">
-                    <label class="viz-field"
-                        ><span class="whitespace-nowrap"
-                            >音画同步补偿<small id="viz-sync-offset-hint" class="viz-muted ml-1 text-[10px]"
-                                >（推荐调整范围是0-120ms · 负值表示音频提前，正值表示音频延后）</small
+                    <div class="viz-field">
+                        <span class="inline-flex items-center"
+                            ><label for="viz-sync-offset">音画同步补偿</label
+                            ><AppTooltip label="音画同步补偿" :content="syncOffsetHint" /><span
+                                id="viz-sync-offset-hint"
+                                class="sr-only"
+                                >{{ syncOffsetHint }}</span
                             ></span
                         >
                         <div class="flex items-center gap-2">
                             <AppNumberInput
+                                id="viz-sync-offset"
                                 :model-value="project.output.audioVideoOffsetMs"
                                 label="音画同步补偿"
                                 aria-describedby="viz-sync-offset-hint"
@@ -78,7 +82,7 @@
                                 @change="setAudioVideoOffset" />
                             <span>ms</span>
                         </div>
-                    </label>
+                    </div>
                 </div>
             </fieldset>
             <div v-else-if="tab === 'editor'" class="viz-bottom-editor">
@@ -140,6 +144,7 @@
     </section>
 </template>
 <script setup lang="ts">
+import AppTooltip from '../controls/AppTooltip.vue';
 import { computed, ref, watch } from 'vue';
 import VisualizerIcon from './VisualizerIcon.vue';
 import VisualizerExportProgress from './VisualizerExportProgress.vue';
@@ -150,6 +155,7 @@ import { compositionIssues } from '../../visualizer/compositionModel';
 import { useExportCapabilities } from '../../visualizer/useExportCapabilities';
 import type { CompositionSessionSnapshot, VisualizerProjectV6 } from '../../visualizer/compositionTypes';
 import type { VisualizerResolution, VisualizerFrameRate } from '../../visualizer/types';
+const syncOffsetHint = '推荐调整范围是0-120ms · 负值表示音频提前，正值表示音频延后';
 const props = defineProps<{
     snapshot: CompositionSessionSnapshot;
     project: VisualizerProjectV6;

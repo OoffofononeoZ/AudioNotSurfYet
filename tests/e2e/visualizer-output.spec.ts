@@ -129,10 +129,11 @@ test('sync compensation snaps input, restores V5 drafts and locks during export'
         await page.setViewportSize({ width, height: width === 1024 ? 720 : 1080 });
         await input.scrollIntoViewIfNeeded();
         await expect(input).toBeInViewport();
-        const hintInsidePanel = await page.locator('#viz-sync-offset-hint').evaluate(element => {
+        const help = page.getByRole('button', { name: '音画同步补偿说明', exact: true });
+        const hintInsidePanel = await help.evaluate(element => {
             const hint = element.getBoundingClientRect();
             const panel = element.closest('[role=tabpanel]')!.getBoundingClientRect();
-            const input = element.closest('label')!.querySelector('input')!.getBoundingClientRect();
+            const input = element.closest('.viz-field')!.querySelector('input')!.getBoundingClientRect();
             return (
                 hint.top >= panel.top &&
                 hint.bottom <= panel.bottom &&

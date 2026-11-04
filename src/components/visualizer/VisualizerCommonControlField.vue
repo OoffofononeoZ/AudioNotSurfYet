@@ -9,10 +9,14 @@
             :affected-element-ids="control.targets"
             :disabled="locked"
             @change="changed" />
-        <label v-else class="viz-field"
-            ><span>{{ control.label }}</span>
+        <div v-else class="viz-field">
+            <span class="inline-flex items-center"
+                ><label :for="fieldId">{{ control.label }}</label
+                ><AppTooltip v-if="control.tooltip" :content="control.tooltip" :label="control.label"
+            /></span>
             <input
                 v-if="typeof control.value === 'boolean'"
+                :id="fieldId"
                 type="checkbox"
                 :checked="control.value"
                 :aria-label="control.label"
@@ -20,6 +24,7 @@
                 @change="$emit('change', ($event.target as HTMLInputElement).checked)" />
             <AppNumberInput
                 v-else
+                :id="fieldId"
                 :model-value="Number(control.value)"
                 :label="control.label"
                 :editing-precision="precision"
@@ -27,7 +32,7 @@
                 wheel-enabled
                 :disabled="locked"
                 @change="$emit('change', $event)" />
-        </label>
+        </div>
         <div v-if="differences.length" class="viz-common-differences" role="status">
             <span>已有 {{ differences.length }} 个元素修改此值</span
             ><small>{{ differences.map(e => e.name).join('、') }}</small
@@ -36,8 +41,9 @@
     </section>
 </template>
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, useId } from 'vue';
 import AppNumberInput from '../controls/AppNumberInput.vue';
+import AppTooltip from '../controls/AppTooltip.vue';
 import VisualizerParameterField from './VisualizerParameterField.vue';
 import { changedControlElements } from '../../visualizer/commonControls';
 import { elementDescriptor } from '../../visualizer/compositionModel';
@@ -45,10 +51,12 @@ import type { CommonControl, CommonValue } from '../../visualizer/resourceTypes'
 import type { ElementBinding, VisualizerProjectV6 } from '../../visualizer/compositionTypes';
 const props = defineProps<{ control: CommonControl; project: VisualizerProjectV6; locked: boolean }>();
 const emit = defineEmits<{ change: [value: CommonValue] }>();
+const fieldId = useId();
 const first = computed(() => props.project.elements.find(e => e.id === props.control.targets[0])!);
 const parameter = computed(() => ({
     ...elementDescriptor(props.project, first.value).parameters.find(p => p.id === props.control.parameterId)!,
     label: props.control.label,
+    tooltip: props.control.tooltip,
 }));
 const binding = computed<ElementBinding>(() =>
     props.control.kind === 'binding'
