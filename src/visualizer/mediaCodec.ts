@@ -1,4 +1,5 @@
 import { hashBytes } from '../processing/sha256';
+import { tooltipField } from './attributeMetadata';
 import { finite, invalid, keys, record, text } from './projectValidation';
 import type { MediaAsset, MediaBinding, MediaBindings, MediaInputContract, MediaInputDefinition } from './mediaTypes';
 const identifier = (v: unknown) => {
@@ -37,7 +38,7 @@ export function validateMediaDefinitions(
     if (!Array.isArray(input) || input.length !== contract.length) return invalid('媒体输入定义不完整。');
     return input.map((raw, i) => {
         const v = record(raw, '媒体输入定义');
-        keys(v, ['id', 'kinds', 'multiple', 'label']);
+        keys(v, ['id', 'kinds', 'multiple', 'label'], ['tooltip']);
         const c = contract[i]!;
         const [definition] = validateMediaInputs([{ id: v.id, kinds: v.kinds, multiple: v.multiple }])!;
         if (
@@ -46,7 +47,7 @@ export function validateMediaDefinitions(
             (definition!.multiple && !c.multiple)
         )
             return invalid('媒体输入超出算法能力。');
-        return { ...definition!, label: text(v.label, '媒体输入名称') };
+        return { ...definition!, label: text(v.label, '媒体输入名称'), ...tooltipField(v.tooltip) };
     });
 }
 export function mediaBytes(asset: Pick<MediaAsset, 'data'>): Uint8Array {

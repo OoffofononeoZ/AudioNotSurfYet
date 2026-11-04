@@ -6,7 +6,10 @@ import type { ResourceRef } from './resourceTypes';
 import type { MarkerInputContract, MarkerPage, MarkerQuery } from './editorMarkerTypes';
 import type { CameraFrame } from './scene3dTypes';
 
-export type AlgorithmParameter = Omit<SceneParameterDescriptor, 'label' | 'defaultValue' | 'defaultBinding'>;
+export type AlgorithmParameter = Omit<
+    SceneParameterDescriptor,
+    'label' | 'tooltip' | 'defaultValue' | 'defaultBinding'
+>;
 export interface AlgorithmContract {
     kind: ElementKind;
     parameters: AlgorithmParameter[];

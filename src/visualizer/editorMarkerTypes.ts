@@ -8,6 +8,7 @@ export interface MarkerInputContract {
 }
 export interface MarkerInputDefinition extends MarkerInputContract {
     label: string;
+    tooltip?: string;
 }
 export type MarkerBinding =
     | { kind: 'unbound' }

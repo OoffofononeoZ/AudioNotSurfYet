@@ -12,6 +12,7 @@ export interface MediaInputContract {
 }
 export interface MediaInputDefinition extends MediaInputContract {
     label: string;
+    tooltip?: string;
 }
 export type MediaBinding =
     | { kind: 'none' }

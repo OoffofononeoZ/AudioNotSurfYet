@@ -1,4 +1,8 @@
-import type { VisualizerAnalysisComponent, VisualizerAnalysisProjectionV1, VisualizerParameterBindingV1 } from './types';
+import type {
+    VisualizerAnalysisComponent,
+    VisualizerAnalysisProjectionV1,
+    VisualizerParameterBindingV1,
+} from './types';
 export type SceneParameterValueKind = 'number' | 'boolean' | 'color' | 'vector';
 export type SceneBindingSourceKind = 'constant' | 'analysis' | 'editor-event' | 'native';
 
@@ -13,6 +17,7 @@ export interface SceneNumericRange {
 export interface SceneParameterDescriptor {
     readonly id: string;
     readonly label: string;
+    readonly tooltip?: string;
     readonly valueKind: SceneParameterValueKind;
     readonly defaultValue: number | string | boolean | readonly number[];
     readonly allowedSourceKinds: readonly SceneBindingSourceKind[];

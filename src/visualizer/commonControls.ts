@@ -1,4 +1,5 @@
 import { findResource } from './elementRegistry';
+import { tooltipField } from './attributeMetadata';
 import type { AlgorithmDefinition } from './algorithmTypes';
 import { canonicalJson } from './resourceIdentity';
 import { validateElementBinding } from './elementBindings';
@@ -78,7 +79,7 @@ export function validateCommonControls(
         owned = new Set<string>();
     return input.map(entry => {
         const c = record(entry, '共同参数');
-        keys(c, ['id', 'label', 'kind', 'parameterId', 'targets', 'value'], ['field']);
+        keys(c, ['id', 'label', 'kind', 'parameterId', 'targets', 'value'], ['field', 'tooltip']);
         if (!['value', 'binding', 'transform'].includes(String(c.kind))) return invalid('共同参数类型无效。');
         const id = text(c.id, '共同参数 ID');
         if (ids.has(id)) return invalid('共同参数 ID 重复。');
@@ -99,6 +100,7 @@ export function validateCommonControls(
         const control = {
             id,
             label: text(c.label, '共同参数名称'),
+            ...tooltipField(c.tooltip),
             kind: c.kind,
             parameterId: text(c.parameterId, 'parameterId'),
             targets: [...c.targets],

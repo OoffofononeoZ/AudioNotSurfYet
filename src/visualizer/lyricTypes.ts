@@ -5,6 +5,7 @@ export interface LyricInputContract {
 }
 export interface LyricInputDefinition extends LyricInputContract {
     label: string;
+    tooltip?: string;
     defaultLeadSeconds?: number;
 }
 export interface LyricAsset {

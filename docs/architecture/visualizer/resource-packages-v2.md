@@ -10,6 +10,10 @@ DEC-087 批准 V2 算法包、V5 自包含工程及原生隔离。2026-10-20 的
 - 作者文件独立维护 JS、Shader 和 JSON，封装器把文本内嵌进生成包。输入路径限制在作者目录内，模块禁止外部导入，跨包引用按算法→元素→预设顺序封装。
 - [Project V6](project-format-v5.md)保存元素、预设和算法快照，恢复不依赖商城目录。旧 V4/V1 不迁移；生成 skill 2.7.0 使用 VisualizerContentBriefV2，不兼容旧输入。
 
+### 属性说明元数据
+
+元素 `parameters[]`、`markerInputs[]`、`mediaInputs[]`、`lyricInputs[]` 及预设 `controls[]` 均可声明 `tooltip?: string`。它是属性名称后的纯文本说明，支持换行；省略或仅空白不显示图标，非字符串拒绝。校验保留原文，不 trim、解析 HTML 或补默认字段；说明参与所属元素/预设的 hash，修改按既有版本与精确引用规则封装。算法 contract 不接受此展示字段，V2/V6/算法 ABI 不变。共同控件使用自己的 tooltip，不从子元素推断；工程、草稿及资源快照保留字段，用户画面导出预设仍按既有规则展平为无共同控件的预设。
+
 ## 外部文件夹与封装
 
 默认库为 `C:\Users\Ryan\Desktop\WheresYourElements\assets`。元素放 `elements/<id>/`，预设放 `presets/<id>/`，各包含 `resource-info.json`、`source/`、`resource-package.json` 及封面。格式和加载允许封面缺失；正常生成交付须附至少一张实际展示图并填写 previewPath。完整编写说明见根 AGENTS 指向的外部 skill 的资源格式与 ABI 参考。

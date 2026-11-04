@@ -1,4 +1,5 @@
 import { invalid, keys, record, text } from './projectValidation';
+import { tooltipField } from './attributeMetadata';
 import type { EditorProjectV2 } from '../editor/types';
 import type { MarkerBindings, MarkerInputContract, MarkerInputDefinition } from './editorMarkerTypes';
 
@@ -48,7 +49,7 @@ export function validateMarkerDefinitions(
     if (!Array.isArray(input) || input.length !== contracts.length) return invalid('元素标记输入定义不完整。');
     return contracts.map((contract, index) => {
         const v = record(input[index], '元素标记输入');
-        keys(v, ['id', 'eventKind', 'selectionModes', 'label'], ['categorySelection']);
+        keys(v, ['id', 'eventKind', 'selectionModes', 'label'], ['categorySelection', 'tooltip']);
         const entry = validateMarkerInputs([
             {
                 id: v.id,
@@ -64,7 +65,7 @@ export function validateMarkerDefinitions(
             entry.selectionModes.some(m => !contract.selectionModes.includes(m))
         )
             return invalid('元素标记输入超出算法声明。');
-        return { ...entry, label: text(v.label, '标记输入标签') };
+        return { ...entry, label: text(v.label, '标记输入标签'), ...tooltipField(v.tooltip) };
     });
 }
 export function defaultMarkerBindings(

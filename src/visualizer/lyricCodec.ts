@@ -1,4 +1,5 @@
 import { hashBytes } from '../processing/sha256';
+import { tooltipField } from './attributeMetadata';
 import { mediaBytes } from './mediaCodec';
 import { parseLrc } from './lrcParser';
 import { finite, invalid, keys, record, text } from './projectValidation';
@@ -36,7 +37,7 @@ export function validateLyricDefinitions(
     if (!Array.isArray(input) || input.length !== contract.length) return invalid('歌词输入定义不完整。');
     return input.map((raw, index) => {
         const v = record(raw, '歌词输入定义');
-        keys(v, ['id', 'label'], ['granularity', 'defaultLeadSeconds', 'tailSecondsParameter']);
+        keys(v, ['id', 'label'], ['granularity', 'defaultLeadSeconds', 'tailSecondsParameter', 'tooltip']);
         if (v.tailSecondsParameter !== contract[index]!.tailSecondsParameter) invalid('歌词离场参数必须匹配算法声明。');
         if (v.granularity !== contract[index]!.granularity) invalid('歌词分割模式必须匹配算法声明。');
         const defaultLeadSeconds =
@@ -46,6 +47,7 @@ export function validateLyricDefinitions(
         return {
             id: String(v.id),
             label: text(v.label, '歌词输入名称'),
+            ...tooltipField(v.tooltip),
             ...(v.granularity === 'grapheme' ? { granularity: 'grapheme' as const } : {}),
             ...(defaultLeadSeconds === undefined ? {} : { defaultLeadSeconds }),
             ...(contract[index]!.tailSecondsParameter === undefined

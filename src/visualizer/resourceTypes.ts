@@ -30,6 +30,7 @@ export type CommonValue = number | string | boolean | number[] | Omit<ElementBin
 export interface CommonControl {
     id: string;
     label: string;
+    tooltip?: string;
     kind: 'value' | 'binding' | 'transform';
     parameterId: string;
     field?: keyof VisualizerNumericTransformV1;

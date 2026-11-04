@@ -1,4 +1,5 @@
 import { validateLyricDefinitions, validateLyricBindings } from './lyricCodec';
+import { tooltipField } from './attributeMetadata';
 import { validateMediaDefinitions, validateMediaBindings, validateMediaAssets } from './mediaCodec';
 import { elementSeedField } from './seed';
 import { validateAlgorithmDefinition } from './algorithmCodec';
@@ -67,7 +68,7 @@ function assertDefaultPrecision(value: unknown, parameter: SceneParameterDescrip
 }
 function parameter(
     input: unknown,
-    contract: Omit<SceneParameterDescriptor, 'label' | 'defaultValue' | 'defaultBinding'>,
+    contract: Omit<SceneParameterDescriptor, 'label' | 'tooltip' | 'defaultValue' | 'defaultBinding'>,
 ): SceneParameterDescriptor {
     const v = record(input, '参数定义');
     keys(
@@ -80,10 +81,12 @@ function parameter(
             'allowedAnalysisComponents',
             'allowedAnalysisProjections',
             'defaultBinding',
+            'tooltip',
         ],
     );
     if (v.id !== contract.id || v.valueKind !== contract.valueKind) return invalid('参数与绘制内核不匹配。');
     text(v.label, '参数标签');
+    tooltipField(v.tooltip);
     for (const field of ['allowedSourceKinds', 'allowedAnalysisComponents', 'allowedAnalysisProjections'] as const) {
         const values = v[field],
             allowed = contract[field];
