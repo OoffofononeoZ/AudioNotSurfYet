@@ -1,6 +1,6 @@
 # 测试与本地产物
 
-倍速与变调：`npx playwright test tests/e2e/playback-speed.spec.ts --project=chrome --project=edge --workers=1` 覆盖原曲／FT／辅助试听输出频率、0.1–2×、开关独立持久化、空格操作与三种播放器样式。`npm run desktop:dir` 后运行 `npm run test:desktop:playback-pitch`，在真实 ASAR 中测量受控 440Hz 音频输出并核对刷新恢复；仅原生音频选值为替身，不替代人工听感或原生选择器验证。桌面结果位于 `artifacts/desktop/playback-pitch/<ID>/`。
+倍速与变调：`npx playwright test tests/e2e/playback-speed.spec.ts --project=chrome --project=edge --workers=1` 覆盖原曲／FT／辅助试听输出频率、0.1–2×、开关独立持久化、空格操作与三种播放器样式，并检查 Editor 连续 30 次拖动只使用一个保调处理器、输出无整段静音、恢复 1× 后实际时钟及唯一活动音源。`npm run desktop:dir` 后运行 `npm run test:desktop:playback-pitch`，在真实 ASAR 中测量受控 440Hz 音频输出、刷新恢复及同一拖动回归；仅原生音频选值为替身，不替代人工听感或原生选择器验证。桌面结果位于 `artifacts/desktop/playback-pitch/<ID>/`。
 
 Editor 波形：`npx playwright test tests/e2e/editor-timeline-lock.spec.ts --project=chrome --project=edge --workers=1` 覆盖上下布局、独立视口、锁定联动、取消和页面状态重置；`npm run desktop:dir` 后运行 `npm run test:desktop:editor-timeline`，在当前 ASAR 应用及独立 profile 上复用相同场景。仅原生音频选择结果使用替身，播放、IPC 和布局真实运行。结果位于 `artifacts/editor-timeline/` 和 `artifacts/desktop/editor-timeline/<ID>/`，不证明原生对话框或安装升级通过。
 

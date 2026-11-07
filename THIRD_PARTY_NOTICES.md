@@ -2,7 +2,7 @@
 
 ## Signalsmith Stretch 1.3.2
 
-共享 Web/Electron 播放链使用未修改的 Signalsmith Stretch Web Audio/WASM 发布文件实现变速不变调，运行时随应用本地加载。上游为 [Signalsmith Audio](https://github.com/Signalsmith-Audio/signalsmith-stretch)，采用 MIT 许可；完整版权与许可文本见 [signalsmith-stretch-MIT.txt](public/licenses/signalsmith-stretch-MIT.txt)。离线导出不使用此实时处理节点。
+共享 Web/Electron 播放链使用 Signalsmith Stretch Web Audio/WASM 发布文件实现变速不变调，运行时随应用本地加载。`playbackPitch.ts` 为固定版本的 JS 包装增加 dispose 消息及停止渲染判断，WASM 算法未修改；版本结构不符时明确报错，不静默套用适配。上游为 [Signalsmith Audio](https://github.com/Signalsmith-Audio/signalsmith-stretch)，采用 MIT 许可；完整版权与许可文本见 [signalsmith-stretch-MIT.txt](public/licenses/signalsmith-stretch-MIT.txt)。离线导出不使用此实时处理节点。
 
 ## Electron 45.1.0 与 electron-builder 26.18.1
 

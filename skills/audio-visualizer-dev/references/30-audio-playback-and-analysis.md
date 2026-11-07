@@ -27,7 +27,7 @@ AudioBufferSourceNode / 分轨 Gain → 播放输入 Gain → 可选保调 Audio
 - `load()` 与 session command 都使用 generation；旧读取或旧解码不得覆盖最新歌曲。
 - decode/context/source/unsupported 失败写入 typed snapshot error；状态不得卡在 loading。
 - `dispose()` 停止 source、断开节点并关闭上下文，不立即创建替代上下文。
-- MusicBar“变速时变调”默认关闭，配置与实际模式分别由 config 和 PlaybackSnapshot 保存。Signalsmith Stretch 1.3.2 随包本地加载；保调节点由 engine 创建/取消/释放，进度补偿其延迟，自然结束等待尾音；打开开关或 1× 时直通。FT／辅助试听共用输入和该节点，离线导出不经过此处理。
+- MusicBar“变速时变调”默认关闭，配置与实际模式分别由 config 和 PlaybackSnapshot 保存。Signalsmith Stretch 1.3.2 随包本地加载；播放中的连续定位复用当前保调节点及重叠历史，避免逐次初始化形成静音。暂停、换源、切模式、恢复 1× 或销毁时断开音频并发送 dispose，使 Worklet 返回 false；端口在确认后关闭，失联时按初始化超时上限收尾，不能发送后立即关闭而丢弃消息。进度补偿其延迟，自然结束等待尾音；打开开关或 1× 时直通。FT／辅助试听共用输入和该节点，离线导出不经过此处理。
 
 ## AudioSessionService 与队列
 

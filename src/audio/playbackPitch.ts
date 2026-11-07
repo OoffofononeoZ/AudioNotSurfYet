@@ -1,4 +1,4 @@
-import processorUrl from 'signalsmith-stretch?url';
+import processorSource from 'signalsmith-stretch?raw';
 
 export interface PlaybackPitchCorrection {
     readonly input: AudioNode;
@@ -16,7 +16,19 @@ export type PlaybackPitchFactory = (
 
 const modules = new WeakMap<AudioContext, Promise<void>>();
 
-/** Load the unmodified npm module directly in worklet scope, including its embedded WASM. */
+/** Add an explicit lifetime boundary to the pinned upstream JS wrapper; the WASM DSP stays unchanged. */
+export function withPitchProcessorDisposal(source: string): string {
+    const insert = (marker: string, addition: string) => {
+        if (source.indexOf(marker) < 0 || source.indexOf(marker) !== source.lastIndexOf(marker))
+            throw Error('保调处理器版本不匹配。');
+        source = source.replace(marker, marker + addition);
+    };
+    insert('let remoteMethods = {', '\n dispose: () => { this.audiosurfDisposed = true; },');
+    insert('process(inputList, outputList, parameters) {', '\n if (this.audiosurfDisposed) return false;');
+    return source;
+}
+
+/** Register one managed copy per AudioContext, including its embedded WASM. */
 export const createPlaybackPitchCorrection: PlaybackPitchFactory = async (
     context,
     destination,
@@ -26,7 +38,10 @@ export const createPlaybackPitchCorrection: PlaybackPitchFactory = async (
 ) => {
     let registered = modules.get(context);
     if (!registered) {
-        registered = context.audioWorklet.addModule(processorUrl);
+        const url = URL.createObjectURL(
+            new Blob([withPitchProcessorDisposal(processorSource)], { type: 'text/javascript' }),
+        );
+        registered = context.audioWorklet.addModule(url).finally(() => URL.revokeObjectURL(url));
         modules.set(context, registered);
         void registered.catch(() => modules.delete(context));
     }
@@ -49,9 +64,20 @@ export const createPlaybackPitchCorrection: PlaybackPitchFactory = async (
         clearTimeout(timeout);
         signal.removeEventListener('abort', abort);
         node.onprocessorerror = null;
+        // Keep the port entangled until the processor acknowledges termination.
+        // Closing immediately can discard the queued stop message on the render thread.
+        const disposalId = id++;
+        const close = () => {
+            clearTimeout(closeTimeout);
+            node.port.onmessage = null;
+            node.port.close();
+        };
+        const closeTimeout = setTimeout(close, 10_000);
+        node.port.onmessage = event => {
+            if (event.data[0] === disposalId) close();
+        };
+        node.port.postMessage([disposalId, 'dispose']);
         node.disconnect();
-        node.port.onmessage = null;
-        node.port.close();
         for (const request of pending.values()) request.reject(new DOMException('音高处理已取消。', 'AbortError'));
         pending.clear();
     };

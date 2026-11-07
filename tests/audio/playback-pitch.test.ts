@@ -1,5 +1,5 @@
 import { afterEach, expect, test, vi } from 'vitest';
-import { createPlaybackPitchCorrection } from '../../src/audio/playbackPitch';
+import { createPlaybackPitchCorrection, withPitchProcessorDisposal } from '../../src/audio/playbackPitch';
 
 class Worklet {
     static instances: Worklet[] = [];
@@ -48,12 +48,32 @@ test('shares module registration, configures inverse pitch, and closes owned nod
     expect(node.connect).toHaveBeenCalledWith(h.destination);
     first.dispose();
     first.dispose();
+    await Promise.resolve();
     expect(node.disconnect).toHaveBeenCalledOnce();
     expect(node.port.close).toHaveBeenCalledOnce();
+    expect(node.port.postMessage).toHaveBeenLastCalledWith([2, 'dispose']);
     const second = await h.create(2);
     expect(h.addModule).toHaveBeenCalledOnce();
     expect(Worklet.instances[1]!.port.postMessage).toHaveBeenCalledWith([1, 'start', { active: true, semitones: -12 }]);
     second.dispose();
+});
+
+test('managed processors return false after disposal and reject unexpected upstream wrappers', () => {
+    const source = `class Processor {
+        constructor() { let remoteMethods = {}; this.methods = remoteMethods; }
+        process(inputList, outputList, parameters) { return true; }
+    }
+    return Processor;`;
+    const Processor = new Function(withPitchProcessorDisposal(source))() as new () => {
+        methods: { dispose(): void };
+        process(): boolean;
+    };
+    const processor = new Processor();
+    expect(processor.process()).toBe(true);
+    processor.methods.dispose();
+    expect(processor.process()).toBe(false);
+    expect(() => withPitchProcessorDisposal('')).toThrow('版本不匹配');
+    expect(() => withPitchProcessorDisposal(source + source)).toThrow('版本不匹配');
 });
 
 test('cancels initialization without publishing a runtime error and rejects processor failures', async () => {
@@ -70,8 +90,20 @@ test('cancels initialization without publishing a runtime error and rejects proc
     const initializing = fresh.create();
     await initializing;
     Worklet.instances[0]!.onprocessorerror?.();
+    await Promise.resolve();
     expect(fresh.onError).toHaveBeenCalledOnce();
     expect(Worklet.instances[0]!.port.close).toHaveBeenCalledOnce();
+});
+
+test('keeps the control port open until disposal is acknowledged', async () => {
+    const h = harness();
+    const correction = await h.create();
+    const node = Worklet.instances[0]!;
+    node.port.postMessage.mockImplementationOnce(() => {});
+    correction.dispose();
+    expect(node.port.close).not.toHaveBeenCalled();
+    node.port.onmessage?.({ data: [2, undefined] });
+    expect(node.port.close).toHaveBeenCalledOnce();
 });
 
 test('times out an unresponsive processor and allows failed module registration to be retried', async () => {

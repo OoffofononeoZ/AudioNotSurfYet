@@ -6,10 +6,19 @@ import {
     installPlaybackPitchProbe,
     readPlaybackPitch,
     verifyPlaybackPitchControls,
+    verifyEditorPitchScrubbing,
     writePitchFixture,
 } from '../support/playback-pitch-scenario.mjs';
 
 type PitchTestWindow = Window & { __pitchEngine: import('../../src/audio/audioEngine').AudioEngine };
+
+test('continuous Editor scrubbing reuses pitch processing and returns to one audible 1x source', async ({ page }) => {
+    const fixture = path.resolve('artifacts/fixtures/playback-pitch-440.wav');
+    await writePitchFixture(fixture);
+    await installPlaybackPitchProbe(page);
+    await prepareMarkerEditor(page, fixture);
+    await verifyEditorPitchScrubbing(page);
+});
 
 test('FT and auxiliary output preserve pitch through mode, rate, mute and source changes', async ({ page }) => {
     await writePitchFixture(path.resolve('artifacts/fixtures/playback-pitch-440.wav'));

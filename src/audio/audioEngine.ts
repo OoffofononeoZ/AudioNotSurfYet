@@ -243,7 +243,7 @@ export class AudioEngine {
 
         try {
             if (command !== this.playbackCommandGeneration || !this.playbackRequested) return;
-            if (!this.playbackChangesPitch && this.playbackRate !== 1) {
+            if (!this.playbackChangesPitch && this.playbackRate !== 1 && !this.pitchCorrection) {
                 this.publish({ ...this.getSnapshot(), state: 'buffering', error: undefined });
                 await this.preparePitchCorrection(context);
             }
@@ -309,6 +309,28 @@ export class AudioEngine {
                 currentTimeSeconds: target,
                 state: this.playbackRequested ? 'buffering' : 'paused',
             });
+            return;
+        }
+        // Scrubbing changes the PCM input, not the lifetime of the running pitch processor.
+        // Its continuous overlap history also avoids a fresh silent pre-roll for every pointer move.
+        if (this.pitchCorrection && this.playbackRequested) {
+            const command = ++this.playbackCommandGeneration;
+            try {
+                if (this.audition) {
+                    const audition = this.audition;
+                    audition.pause();
+                    await audition.seek(target);
+                    if (command === this.playbackCommandGeneration && audition === this.audition) await this.play();
+                } else {
+                    this.stopSource(true);
+                    this.playbackOffsetSeconds = target;
+                    this.startSource(this.audioContext!);
+                }
+            } catch (error) {
+                if (command !== this.playbackCommandGeneration) return;
+                this.publishError('source', error, this.snapshot.trackId);
+                throw error;
+            }
             return;
         }
         if (this.audition) {
@@ -834,14 +856,14 @@ export class AudioEngine {
         });
     }
 
-    private stopSource(): void {
+    private stopSource(preservePitch = false): void {
         if (this.tailSource) {
             this.tailSource.onended = null;
             this.tailSource.stop();
             this.tailSource.disconnect();
             this.tailSource = null;
         }
-        this.resetPitchCorrection();
+        if (!preservePitch) this.resetPitchCorrection();
         const source = this.source;
         if (!source) return;
 

@@ -115,6 +115,9 @@ describe('AudioEngine shared audition transport', () => {
         await engine.setAuditionSource(source('pitch-ft'), { play: true });
         context.currentTime = 2.12;
         expect(engine.getSnapshot().currentTimeSeconds).toBeCloseTo(1);
+        for (let i = 0; i < 30; i++) await engine.seek(1);
+        expect(pitch).toHaveBeenCalledOnce();
+        expect(dispose).not.toHaveBeenCalled();
         engine.setAuditionMuted('bass', true);
         await engine.setPlaybackChangesPitch(true);
         expect(engine.getSnapshot()).toMatchObject({
@@ -139,8 +142,8 @@ describe('AudioEngine shared audition transport', () => {
             audition: { kind: 'original' },
         });
         await engine.dispose();
-        expect(pitch).toHaveBeenCalledTimes(5);
-        expect(dispose).toHaveBeenCalledTimes(5);
+        expect(pitch).toHaveBeenCalledTimes(4);
+        expect(dispose).toHaveBeenCalledTimes(4);
     });
     it('keeps the global rate across FT, auxiliary, checkpoint restore and original switches', async () => {
         const { engine, context } = await setup();

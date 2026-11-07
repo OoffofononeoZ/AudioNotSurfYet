@@ -2,12 +2,13 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { _electron } from '@playwright/test';
+import { _electron, expect } from '@playwright/test';
 import { createNativeRun, copyNativeTree, cleanupNativeTree } from '../../scripts/lib/desktop-native-runtime.mjs';
 import { installDialogFixture, queueOpen } from './dialog-fixture.mjs';
 import {
     installPlaybackPitchProbe,
     verifyPlaybackPitchControls,
+    verifyEditorPitchScrubbing,
     writePitchFixture,
 } from '../support/playback-pitch-scenario.mjs';
 
@@ -50,6 +51,10 @@ try {
     result.frequencies = await verifyPlaybackPitchControls(page);
     await page.getByTestId('playback-speed').click();
     await page.screenshot({ path: path.join(output, 'pitch-switch.png') });
+    await page.keyboard.press('Escape');
+    await page.getByTestId('header-editor-link').click();
+    await expect(page.getByTestId('editor-ready')).toBeVisible();
+    result.scrubbing = await verifyEditorPitchScrubbing(page);
     assert.deepEqual(errors, []);
     result.status = 'passed';
     result.versions = await app.evaluate(() => process.versions);

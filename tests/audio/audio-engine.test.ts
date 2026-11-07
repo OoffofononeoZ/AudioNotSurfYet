@@ -137,6 +137,58 @@ class FakeAudioContext {
 const bytes = () => new Uint8Array([1, 2, 3]).buffer;
 
 describe('AudioEngine', () => {
+    test('continuous seeks reuse the running pitch processor and 1x leaves only the latest source active', async () => {
+        const context = new FakeAudioContext();
+        const dispose = vi.fn();
+        const pitch = vi.fn(async () => ({
+            input: new FakeAudioNode() as unknown as AudioNode,
+            latencySeconds: 0.1,
+            dispose,
+        }));
+        const engine = new AudioEngine({
+            audioContextFactory: () => context as unknown as AudioContext,
+            playbackPitchFactory: pitch,
+        });
+        await engine.load({ trackId: 'scrubbing', encodedAudio: bytes() });
+        await engine.setPlaybackRate(0.5);
+        await engine.play();
+        for (let i = 0; i < 40; i++) await engine.seek(2 + i * 0.01);
+        expect(pitch).toHaveBeenCalledOnce();
+        expect(dispose).not.toHaveBeenCalled();
+        expect(context.sources.slice(0, -1).every(source => source.stop.mock.calls.length === 1)).toBe(true);
+        await engine.setPlaybackRate(1);
+        expect(dispose).toHaveBeenCalledOnce();
+        expect(context.sources.at(-1)!.playbackRate.value).toBe(1);
+        const start = engine.getSnapshot().currentTimeSeconds;
+        context.currentTime += 1;
+        expect(engine.getSnapshot().currentTimeSeconds - start).toBeCloseTo(1);
+        await engine.dispose();
+    });
+    test('late pitch initialization cannot undo a seek followed immediately by restoring 1x', async () => {
+        const context = new FakeAudioContext();
+        const pending = deferred<import('../../src/audio/playbackPitch').PlaybackPitchCorrection>();
+        const dispose = vi.fn();
+        const correction = { input: new FakeAudioNode() as unknown as AudioNode, latencySeconds: 0.1, dispose };
+        const pitch = vi.fn().mockReturnValueOnce(pending.promise).mockResolvedValue(correction);
+        const engine = new AudioEngine({
+            audioContextFactory: () => context as unknown as AudioContext,
+            playbackPitchFactory: pitch,
+        });
+        await engine.load({ trackId: 'rate-race', encodedAudio: bytes() });
+        await engine.play();
+        const slowing = engine.setPlaybackRate(0.5);
+        await vi.waitFor(() => expect(pitch).toHaveBeenCalledOnce());
+        const seeking = engine.seek(4);
+        await engine.setPlaybackRate(1);
+        pending.resolve(correction);
+        await Promise.all([slowing, seeking]);
+        expect(engine.getSnapshot()).toMatchObject({ state: 'playing', playbackRate: 1, currentTimeSeconds: 4 });
+        expect(context.sources.at(-1)!.playbackRate.value).toBe(1);
+        expect(context.sources.slice(0, -1).every(source => source.stop.mock.calls.length === 1)).toBe(true);
+        context.currentTime += 1;
+        expect(engine.getSnapshot().currentTimeSeconds).toBe(5);
+        await engine.dispose();
+    });
     test('defaults to preserving pitch, compensates latency, and switches modes without losing the audible position', async () => {
         const context = new FakeAudioContext();
         const dispose = vi.fn();
