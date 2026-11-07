@@ -233,6 +233,7 @@ class RepeatEngine implements AudioEnginePort {
         volume: 1,
 
         playbackRate: 1,
+        playbackChangesPitch: false,
     };
     listeners = new Set<(snapshot: PlaybackSnapshot) => void>();
     seekValues: number[] = [];
@@ -251,6 +252,10 @@ class RepeatEngine implements AudioEnginePort {
     async seek(seconds: number) {
         this.seekValues.push(seconds);
         this.emit({ ...this.snapshot, currentTimeSeconds: seconds });
+    }
+    async setPlaybackChangesPitch(playbackChangesPitch: boolean) {
+        this.snapshot.playbackChangesPitch = playbackChangesPitch;
+        for (const listener of this.listeners) listener(this.getSnapshot());
     }
     async setPlaybackRate(playbackRate: number) {
         this.snapshot.playbackRate = playbackRate;

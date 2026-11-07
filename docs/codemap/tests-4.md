@@ -8,6 +8,8 @@
 
 | 文件 | 本地静态引用（最多显示 6 项） |
 | --- | --- |
+| [tests/scripts/run-v2-eval.mjs](../../tests/scripts/run-v2-eval.mjs) | — |
+| [tests/scripts/run-v3-eval.mjs](../../tests/scripts/run-v3-eval.mjs) | — |
 | [tests/scripts/run-v4-eval.mjs](../../tests/scripts/run-v4-eval.mjs) | — |
 | [tests/scripts/run-v5-eval.mjs](../../tests/scripts/run-v5-eval.mjs) | — |
 | [tests/scripts/run-v6-eval.mjs](../../tests/scripts/run-v6-eval.mjs) | — |
@@ -41,6 +43,7 @@
 | [tests/support/m9-vector-fixture.ts](../../tests/support/m9-vector-fixture.ts) | [tests/support/audio-fixtures.ts](../../tests/support/audio-fixtures.ts) |
 | [tests/support/meyda-golden.ts](../../tests/support/meyda-golden.ts) | — |
 | [tests/support/osu-fixture.ts](../../tests/support/osu-fixture.ts) | — |
+| [tests/support/playback-pitch-scenario.mjs](../../tests/support/playback-pitch-scenario.mjs) | — |
 | [tests/support/project-actions.ts](../../tests/support/project-actions.ts) | — |
 | [tests/support/resource-directory.ts](../../tests/support/resource-directory.ts) | [tests/support/visualizer-assets.mjs](../../tests/support/visualizer-assets.mjs) |
 | [tests/support/scene3d-fixture.ts](../../tests/support/scene3d-fixture.ts) | [src/visualizer/algorithmTypes.ts](../../src/visualizer/algorithmTypes.ts)、[src/visualizer/compositionCodec.ts](../../src/visualizer/compositionCodec.ts)、[src/visualizer/resourceIdentity.ts](../../src/visualizer/resourceIdentity.ts)、[src/visualizer/resourceTypes.ts](../../src/visualizer/resourceTypes.ts)、[src/visualizer/scene3dTypes.ts](../../src/visualizer/scene3dTypes.ts) |
@@ -105,6 +108,3 @@
 | [tests/visualizer/editor-markers.test.ts](../../tests/visualizer/editor-markers.test.ts) | [src/visualizer/algorithmCodec.ts](../../src/visualizer/algorithmCodec.ts)、[src/visualizer/compositionCodec.ts](../../src/visualizer/compositionCodec.ts)、[src/visualizer/compositionModel.ts](../../src/visualizer/compositionModel.ts)、[src/visualizer/editorMarkerReader.ts](../../src/visualizer/editorMarkerReader.ts)、[src/visualizer/editorMarkerTypes.ts](../../src/visualizer/editorMarkerTypes.ts)、[src/visualizer/editorMarkerValidation.ts](../../src/visualizer/editorMarkerValidation.ts)、另 3 项，按需核对源码 |
 | [tests/visualizer/export-session.test.ts](../../tests/visualizer/export-session.test.ts) | [src/audio/audioSessionService.ts](../../src/audio/audioSessionService.ts)、[src/visualizer/compositionCodec.ts](../../src/visualizer/compositionCodec.ts)、[src/visualizer/exportTypes.ts](../../src/visualizer/exportTypes.ts)、[src/visualizer/offlineExport.ts](../../src/visualizer/offlineExport.ts)、[src/visualizer/types.ts](../../src/visualizer/types.ts)、[src/visualizer/visualizerExportSession.ts](../../src/visualizer/visualizerExportSession.ts)、另 1 项，按需核对源码 |
 | [tests/visualizer/geometric-elements.test.ts](../../tests/visualizer/geometric-elements.test.ts) | [src/visualizer/compositionEffects.ts](../../src/visualizer/compositionEffects.ts)、[src/visualizer/compositionPresets.ts](../../src/visualizer/compositionPresets.ts)、[src/visualizer/elementRegistry.ts](../../src/visualizer/elementRegistry.ts)、[src/visualizer/rendererTypes.ts](../../src/visualizer/rendererTypes.ts)、[tests/support/visualizer-assets.mjs](../../tests/support/visualizer-assets.mjs) |
-| [tests/visualizer/local-fonts.test.ts](../../tests/visualizer/local-fonts.test.ts) | [src/platform/localFonts.ts](../../src/platform/localFonts.ts) |
-| [tests/visualizer/lyric-motion.test.ts](../../tests/visualizer/lyric-motion.test.ts) | [src/visualizer/algorithmTypes.ts](../../src/visualizer/algorithmTypes.ts)、[src/visualizer/drawPacket.ts](../../src/visualizer/drawPacket.ts)、[tests/support/visualizer-assets.mjs](../../tests/support/visualizer-assets.mjs)、[tests/visualizer/algorithm-runtime-fixture.ts](../../tests/visualizer/algorithm-runtime-fixture.ts) |
-| [tests/visualizer/lyrics.test.ts](../../tests/visualizer/lyrics.test.ts) | [src/visualizer/algorithmCodec.ts](../../src/visualizer/algorithmCodec.ts)、[src/visualizer/compositionCodec.ts](../../src/visualizer/compositionCodec.ts)、[src/visualizer/compositionModel.ts](../../src/visualizer/compositionModel.ts)、[src/visualizer/compositionPresets.ts](../../src/visualizer/compositionPresets.ts)、[src/visualizer/drawPacket.ts](../../src/visualizer/drawPacket.ts)、[src/visualizer/elementRegistry.ts](../../src/visualizer/elementRegistry.ts)、另 8 项，按需核对源码 |

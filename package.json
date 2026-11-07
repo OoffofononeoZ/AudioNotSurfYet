@@ -31,6 +31,7 @@
         "test:desktop:tooltip": "node tests/desktop/tooltip-smoke.mjs",
         "test:desktop:composition-movement": "node tests/desktop/composition-movement-smoke.mjs",
         "test:desktop:editor-timeline": "node tests/desktop/editor-timeline-smoke.mjs",
+        "test:desktop:playback-pitch": "node tests/desktop/playback-pitch-smoke.mjs",
         "test:desktop:inputs": "node tests/desktop/inputs-smoke.mjs",
         "test:desktop:analyzer": "node tests/desktop/analyzer-smoke.mjs",
         "test:desktop:media": "node tests/desktop/media-smoke.mjs",
@@ -252,6 +253,7 @@
         "onnxruntime-web": "1.30.0",
         "pinia": "^3.0.4",
         "pinia-plugin-persistedstate": "^4.7.1",
+        "signalsmith-stretch": "1.3.2",
         "three": "^0.183.2",
         "vue": "^3.5.25",
         "vue-router": "^4.5.0"

@@ -86,9 +86,12 @@ class FakeBufferSourceNode extends FakeAudioNode {
 
 class FakeAudioContext {
     currentTime = 0;
+    sampleRate = 48000;
     state: AudioContextState = 'suspended';
     destination = new FakeAudioNode() as unknown as AudioDestinationNode;
     gain = new FakeGainNode();
+    input = new FakeGainNode();
+    private gainCount = 0;
     analyser = new FakeAnalyserNode();
     sources: FakeBufferSourceNode[] = [];
     decodeQueue: Array<Deferred<AudioBuffer>> = [];
@@ -101,7 +104,7 @@ class FakeAudioContext {
     });
 
     createGain() {
-        return this.gain as unknown as GainNode;
+        return (this.gainCount++ === 0 ? this.gain : this.input) as unknown as GainNode;
     }
 
     createAnalyser() {
@@ -112,6 +115,10 @@ class FakeAudioContext {
         const source = new FakeBufferSourceNode();
         this.sources.push(source);
         return source as unknown as AudioBufferSourceNode;
+    }
+
+    createBuffer(_channels: number, length: number, sampleRate: number) {
+        return { length, sampleRate, duration: length / sampleRate } as AudioBuffer;
     }
 
     createMediaStreamDestination() {
@@ -130,6 +137,88 @@ class FakeAudioContext {
 const bytes = () => new Uint8Array([1, 2, 3]).buffer;
 
 describe('AudioEngine', () => {
+    test('defaults to preserving pitch, compensates latency, and switches modes without losing the audible position', async () => {
+        const context = new FakeAudioContext();
+        const dispose = vi.fn();
+        const pitch = vi.fn(async () => ({
+            input: new FakeAudioNode() as unknown as AudioNode,
+            latencySeconds: 0.1,
+            dispose,
+        }));
+        const engine = new AudioEngine({
+            audioContextFactory: () => context as unknown as AudioContext,
+            playbackPitchFactory: pitch,
+        });
+        expect(engine.getSnapshot().playbackChangesPitch).toBe(false);
+        await engine.load({ trackId: 'pitch', encodedAudio: bytes() });
+        await engine.setPlaybackRate(0.5);
+        await engine.play();
+        context.currentTime = 0.05;
+        expect(engine.getSnapshot().currentTimeSeconds).toBe(0);
+        context.currentTime = 2.1;
+        expect(engine.getSnapshot().currentTimeSeconds).toBe(1);
+        await engine.setPlaybackChangesPitch(true);
+        expect(dispose).toHaveBeenCalledOnce();
+        expect(engine.getSnapshot()).toMatchObject({
+            state: 'playing',
+            currentTimeSeconds: 1,
+            playbackChangesPitch: true,
+        });
+        context.currentTime = 4.1;
+        expect(engine.getSnapshot().currentTimeSeconds).toBeCloseTo(2);
+        engine.pause();
+        await engine.setPlaybackChangesPitch(false);
+        expect(pitch).toHaveBeenCalledOnce();
+        await engine.seek(8);
+        await engine.play();
+        expect(pitch).toHaveBeenCalledTimes(2);
+        const ended = vi.fn();
+        engine.subscribe(snapshot => {
+            if (snapshot.state === 'ended') ended();
+        });
+        context.currentTime = 8.1;
+        context.sources.at(-1)!.finishNaturally();
+        expect(engine.getSnapshot().state).toBe('playing');
+        context.currentTime = 8.2;
+        context.sources.at(-1)!.finishNaturally();
+        expect(engine.getSnapshot()).toMatchObject({ state: 'ended', currentTimeSeconds: 10 });
+        expect(ended).toHaveBeenCalledOnce();
+        await engine.dispose();
+        expect(dispose).toHaveBeenCalledTimes(2);
+    });
+
+    test('a pause or replacement song wins over delayed pitch initialization and failures remain retryable', async () => {
+        const context = new FakeAudioContext();
+        const pending = deferred<import('../../src/audio/playbackPitch').PlaybackPitchCorrection>();
+        const dispose = vi.fn();
+        const correction = { input: new FakeAudioNode() as unknown as AudioNode, latencySeconds: 0.1, dispose };
+        const pitch = vi
+            .fn()
+            .mockReturnValueOnce(pending.promise)
+            .mockRejectedValueOnce(Error('pitch failed'))
+            .mockResolvedValue(correction);
+        const engine = new AudioEngine({
+            audioContextFactory: () => context as unknown as AudioContext,
+            playbackPitchFactory: pitch,
+        });
+        await engine.load({ trackId: 'old', encodedAudio: bytes() });
+        await engine.setPlaybackRate(2);
+        const playing = engine.play();
+        await vi.waitFor(() => expect(pitch).toHaveBeenCalledOnce());
+        engine.pause();
+        await engine.load({ trackId: 'new', encodedAudio: bytes() });
+        pending.resolve(correction);
+        await playing;
+        expect(dispose).toHaveBeenCalledOnce();
+        expect(engine.getSnapshot()).toMatchObject({ trackId: 'new', state: 'paused' });
+        await expect(engine.play()).rejects.toThrow('pitch failed');
+        expect(engine.getSnapshot()).toMatchObject({ state: 'error', error: { code: 'source' } });
+        await engine.play();
+        expect(engine.getSnapshot().state).toBe('playing');
+        await engine.dispose();
+        expect(context.close).toHaveBeenCalledOnce();
+    });
+
     test('prepares another decoded buffer without replacing playback, then commits or discards it', async () => {
         const context = new FakeAudioContext();
         const engine = new AudioEngine({ audioContextFactory: () => context as unknown as AudioContext });
@@ -176,6 +265,7 @@ describe('AudioEngine', () => {
     test('changes native rate without jumping source time and restores rate with the export checkpoint', async () => {
         const context = new FakeAudioContext();
         const engine = new AudioEngine({ audioContextFactory: () => context as unknown as AudioContext });
+        await engine.setPlaybackChangesPitch(true);
         await engine.setPlaybackRate(2);
         await engine.load({ trackId: 'rate-song', encodedAudio: bytes() });
         await engine.play();

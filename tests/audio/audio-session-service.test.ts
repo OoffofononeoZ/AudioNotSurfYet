@@ -26,6 +26,7 @@ class FakeEngine implements AudioEnginePort {
         durationSeconds: 0,
         volume: 1,
         playbackRate: 1,
+        playbackChangesPitch: false,
     };
     listeners = new Set<(snapshot: PlaybackSnapshot) => void>();
     loadIds: string[] = [];
@@ -44,6 +45,7 @@ class FakeEngine implements AudioEnginePort {
             durationSeconds: 4,
             volume: this.snapshot.volume,
             playbackRate: this.snapshot.playbackRate,
+            playbackChangesPitch: this.snapshot.playbackChangesPitch,
         });
         return 'loaded';
     }
@@ -73,6 +75,10 @@ class FakeEngine implements AudioEnginePort {
         });
     }
 
+    async setPlaybackChangesPitch(playbackChangesPitch: boolean) {
+        this.snapshot.playbackChangesPitch = playbackChangesPitch;
+        for (const listener of this.listeners) listener(this.getSnapshot());
+    }
     async setPlaybackRate(playbackRate: number) {
         this.emit({ ...this.snapshot, playbackRate });
     }
@@ -121,6 +127,7 @@ class FakeEngine implements AudioEnginePort {
             durationSeconds: 0,
             volume: this.snapshot.volume,
             playbackRate: this.snapshot.playbackRate,
+            playbackChangesPitch: this.snapshot.playbackChangesPitch,
         });
     }
 
@@ -236,6 +243,25 @@ beforeEach(() => {
 });
 
 describe('recording playback observations', () => {
+    test('pitch mode invalidates pending transport changes and survives export and queue transitions', async () => {
+        const { service, store } = createHarness();
+        await service.importFiles(inputs(createFile('pitch-a.wav'), createFile('pitch-b.wav')));
+        const discontinuity = vi.fn();
+        service.subscribePlaybackDiscontinuity(discontinuity);
+        await service.setPlaybackChangesPitch(true);
+        expect(store.playback.playbackChangesPitch).toBe(true);
+        const lease = service.acquireExportTransport(store.currentTrackId!);
+        await service.setPlaybackChangesPitch(false);
+        expect(store.playback.playbackChangesPitch).toBe(false);
+        lease.release();
+        await service.setPlaybackChangesPitch(true);
+        await service.playTrack('track-2');
+        expect(store.playback.playbackChangesPitch).toBe(true);
+        await service.clear();
+        expect(store.playback.playbackChangesPitch).toBe(true);
+        expect(discontinuity).toHaveBeenCalled();
+        await service.dispose();
+    });
     test('notifies before rate changes and preserves the latest global rate through export and song changes', async () => {
         const { service, engine, store } = createHarness();
         await service.importFiles(inputs(createFile('rate-a.wav'), createFile('rate-b.wav')));
@@ -278,6 +304,7 @@ describe('recording playback observations', () => {
             state: 'paused',
             currentTimeSeconds: 0,
             playbackRate: 1,
+            playbackChangesPitch: false,
         });
         expect(positions).toEqual([1.06, 2, 2]);
         unsubscribe();
@@ -305,6 +332,7 @@ describe('recording playback observations', () => {
             state: 'paused',
             currentTimeSeconds: 0,
             playbackRate: 1,
+            playbackChangesPitch: false,
         });
         expect(order).toHaveLength(2);
     });

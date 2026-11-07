@@ -92,10 +92,10 @@ function gate() {
     });
     return { promise, resolve };
 }
-async function setup() {
+async function setup(pitchFactory?: import('../../src/audio/playbackPitch').PlaybackPitchFactory) {
     const context = new ContextValue();
     const factory = vi.fn(() => context as unknown as AudioContext);
-    const engine = new AudioEngine({ audioContextFactory: factory });
+    const engine = new AudioEngine({ audioContextFactory: factory, playbackPitchFactory: pitchFactory });
     await engine.load({ trackId: 'song', encodedAudio: new ArrayBuffer(1) });
     return { engine, context, factory };
 }
@@ -103,8 +103,48 @@ beforeEach(() => vi.useFakeTimers());
 afterEach(() => vi.useRealTimers());
 
 describe('AudioEngine shared audition transport', () => {
+    it('preserves pitch and audible source time through stem mute, seek, mode and source changes', async () => {
+        const dispose = vi.fn();
+        const pitch = vi.fn(async () => ({
+            input: new NodeValue() as unknown as AudioNode,
+            latencySeconds: 0.1,
+            dispose,
+        }));
+        const { engine, context } = await setup(pitch);
+        await engine.setPlaybackRate(0.5);
+        await engine.setAuditionSource(source('pitch-ft'), { play: true });
+        context.currentTime = 2.12;
+        expect(engine.getSnapshot().currentTimeSeconds).toBeCloseTo(1);
+        engine.setAuditionMuted('bass', true);
+        await engine.setPlaybackChangesPitch(true);
+        expect(engine.getSnapshot()).toMatchObject({
+            state: 'playing',
+            currentTimeSeconds: 1,
+            playbackChangesPitch: true,
+            audition: { mutedRoles: ['bass'] },
+        });
+        await engine.setPlaybackChangesPitch(false);
+        await engine.seek(4);
+        expect(engine.getSnapshot()).toMatchObject({ state: 'playing', currentTimeSeconds: 4 });
+        engine.pause();
+        const auxiliary = source('pitch-aux');
+        auxiliary.kind = 'auxiliary';
+        await engine.setAuditionSource(auxiliary);
+        await engine.play();
+        await engine.setAuditionSource(null);
+        expect(engine.getSnapshot()).toMatchObject({
+            state: 'playing',
+            currentTimeSeconds: 4,
+            playbackChangesPitch: false,
+            audition: { kind: 'original' },
+        });
+        await engine.dispose();
+        expect(pitch).toHaveBeenCalledTimes(5);
+        expect(dispose).toHaveBeenCalledTimes(5);
+    });
     it('keeps the global rate across FT, auxiliary, checkpoint restore and original switches', async () => {
         const { engine, context } = await setup();
+        await engine.setPlaybackChangesPitch(true);
         await engine.setPlaybackRate(2);
         await engine.play();
         context.currentTime = 1;
@@ -152,7 +192,7 @@ describe('AudioEngine shared audition transport', () => {
         engine.setVolume(0.25);
         engine.setAuditionMuted('bass', true);
         expect(context.gains[0]?.gain.value).toBe(0.25);
-        expect(context.gains[2]?.gain.value).toBe(0);
+        expect(context.gains[3]?.gain.value).toBe(0);
         expect(engine.getDecodedAudioDescriptor()).toEqual(descriptor);
         engine.pause();
         context.currentTime = 20;

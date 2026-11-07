@@ -17,6 +17,7 @@ const createEmptyPlayback = (): PlaybackSnapshot => ({
     durationSeconds: 0,
     volume: 1,
     playbackRate: 1,
+    playbackChangesPitch: false,
 });
 
 interface AudioSessionState {
@@ -81,6 +82,7 @@ export const useAudioSessionStore = defineStore('audio-session', {
                 durationSeconds: this.queue.find(track => track.id === currentTrackId)?.durationSeconds ?? 0,
                 volume,
                 playbackRate: this.playback.playbackRate,
+                playbackChangesPitch: this.playback.playbackChangesPitch,
             };
             this.currentEnergy = 0;
             if (workspace) {
@@ -165,6 +167,7 @@ export const useAudioSessionStore = defineStore('audio-session', {
                 ...createEmptyPlayback(),
                 volume: nextVolume,
                 playbackRate: this.playback.playbackRate,
+                playbackChangesPitch: this.playback.playbackChangesPitch,
             };
             this.currentEnergy = 0;
             this.persistence = {

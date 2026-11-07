@@ -46,6 +46,7 @@ export interface PlaybackSnapshot {
     durationSeconds: number;
     volume: number;
     playbackRate: number;
+    playbackChangesPitch: boolean;
     error?: PlaybackError;
     audition?: {
         kind: 'original' | 'ft' | 'auxiliary';

@@ -19,6 +19,7 @@ test('desktop staging excludes ignored personal media, diagnostics and undeclare
         'icons.svg',
         'vite.svg',
         'licenses/mediabunny-MPL-2.0.txt',
+        'licenses/signalsmith-stretch-MIT.txt',
         'processing-runtime/manifest.json',
         'processing-runtime/THIRD_PARTY_NOTICES.md',
         'processing-runtime/transcription/THIRD_PARTY_NOTICES.md',
@@ -30,6 +31,10 @@ test('desktop staging excludes ignored personal media, diagnostics and undeclare
         write(root, `public/${file}`, 'product asset');
     const destination = path.join(root, 'artifacts/desktop/renderer');
     await copyDesktopPublicAssets(root, destination);
+    assert.equal(
+        await fs.readFile(path.join(destination, 'licenses/signalsmith-stretch-MIT.txt'), 'utf8'),
+        'product asset',
+    );
     assert.equal(await fs.readFile(path.join(destination, 'processing-runtime/ort.test.wasm'), 'utf8'), 'pinned wasm');
     for (const file of ['audios', 'test_audio', 'processing-probe', 'processing-runtime/unlisted.onnx']) {
         await assert.rejects(fs.access(path.join(destination, file)), { code: 'ENOENT' });

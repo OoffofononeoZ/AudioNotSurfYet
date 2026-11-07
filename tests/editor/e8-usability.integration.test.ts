@@ -106,6 +106,7 @@ describe('Editor E8 unavailable recovery integration', () => {
             volume: 1,
 
             playbackRate: 1,
+            playbackChangesPitch: false,
         });
         const repository = new MemoryRepository();
         let canAcquire = false;
@@ -155,6 +156,7 @@ describe('Editor E8 unavailable recovery integration', () => {
             volume: 1,
 
             playbackRate: 1,
+            playbackChangesPitch: false,
         });
         const decision = resolveEditorUnavailableRecovery({
             routeTrackId: routeTrack.id,

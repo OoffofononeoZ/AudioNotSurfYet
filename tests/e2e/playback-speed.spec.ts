@@ -1,5 +1,130 @@
 import { expect, test } from '@playwright/test';
 import { prepareMarkerEditor } from '../support/editor-marking';
+import path from 'node:path';
+import { chooseFiles, installFilePickerStub } from '../support/file-picker';
+import {
+    installPlaybackPitchProbe,
+    readPlaybackPitch,
+    verifyPlaybackPitchControls,
+    writePitchFixture,
+} from '../support/playback-pitch-scenario.mjs';
+
+type PitchTestWindow = Window & { __pitchEngine: import('../../src/audio/audioEngine').AudioEngine };
+
+test('FT and auxiliary output preserve pitch through mode, rate, mute and source changes', async ({ page }) => {
+    await writePitchFixture(path.resolve('artifacts/fixtures/playback-pitch-440.wav'));
+    await page.goto('/');
+    await installPlaybackPitchProbe(page);
+    await page.evaluate(async () => {
+        const moduleUrl = '/src/audio/audioEngine.ts';
+        const { AudioEngine } = await import(moduleUrl);
+        const engine = new AudioEngine();
+        (window as unknown as PitchTestWindow).__pitchEngine = engine;
+        const encodedAudio = await (await fetch('/artifacts/fixtures/playback-pitch-440.wav')).arrayBuffer();
+        await engine.load({ trackId: 'pitch-stems', encodedAudio });
+        await engine.setPlaybackRate(0.5);
+        await engine.setAuditionSource(
+            {
+                kind: 'ft',
+                trackId: 'pitch-stems',
+                resultId: 'pitch-ft',
+                label: 'FT',
+                sampleRate: 48000,
+                frames: 48000 * 30,
+                roles: ['drums', 'bass'],
+                mutedRoles: ['bass'],
+                async read(_role: string, _channel: number, start: number, count: number) {
+                    return Float32Array.from(
+                        { length: count },
+                        (_, i) => Math.sin((2 * Math.PI * 440 * (start + i)) / 48000) * 0.1,
+                    );
+                },
+                async close() {},
+            },
+            { play: true },
+        );
+    });
+    try {
+        await expect.poll(async () => Math.abs((await readPlaybackPitch(page)).frequency - 440)).toBeLessThan(5);
+        await page.evaluate(() => (window as unknown as PitchTestWindow).__pitchEngine.setPlaybackChangesPitch(true));
+        await expect.poll(async () => Math.abs((await readPlaybackPitch(page)).frequency - 220)).toBeLessThan(5);
+        await page.evaluate(async () => {
+            const engine = (window as unknown as PitchTestWindow).__pitchEngine;
+            engine.setAuditionMuted('bass', false);
+            await engine.setPlaybackChangesPitch(false);
+            await engine.setPlaybackRate(2);
+            await engine.seek(3);
+        });
+        await expect.poll(async () => Math.abs((await readPlaybackPitch(page)).frequency - 440)).toBeLessThan(5);
+        await page.evaluate(async () => {
+            const engine = (window as unknown as PitchTestWindow).__pitchEngine;
+            await engine.setAuditionSource({
+                kind: 'auxiliary',
+                trackId: 'pitch-stems',
+                resultId: 'pitch-aux',
+                label: 'Aux',
+                sampleRate: 48000,
+                frames: 48000 * 30,
+                roles: ['piano'],
+                mutedRoles: [],
+                async read(_role, _channel, start, count) {
+                    return Float32Array.from(
+                        { length: count },
+                        (_, i) => Math.sin((2 * Math.PI * 440 * (start + i)) / 48000) * 0.1,
+                    );
+                },
+                async close() {},
+            });
+        });
+        await expect.poll(async () => Math.abs((await readPlaybackPitch(page)).frequency - 440)).toBeLessThan(5);
+        await page.evaluate(() => (window as unknown as PitchTestWindow).__pitchEngine.setPlaybackChangesPitch(true));
+        await expect.poll(async () => Math.abs((await readPlaybackPitch(page)).frequency - 880)).toBeLessThan(5);
+        for (const original of [false, true]) {
+            const ended = await page.evaluate(async original => {
+                const engine = (window as unknown as PitchTestWindow).__pitchEngine;
+                await engine.setPlaybackChangesPitch(false);
+                if (original) await engine.setAuditionSource(null);
+                await engine.seek(29.6);
+                let count = 0;
+                const unsubscribe = engine.subscribe(snapshot => {
+                    if (snapshot.state === 'ended') count++;
+                });
+                try {
+                    await engine.play();
+                    const deadline = performance.now() + 4000;
+                    while (engine.getSnapshot().state !== 'ended' && performance.now() < deadline)
+                        await new Promise(resolve => setTimeout(resolve, 25));
+                    await new Promise(resolve => setTimeout(resolve, 150));
+                    return {
+                        state: engine.getSnapshot().state,
+                        count,
+                        position: engine.getSnapshot().currentTimeSeconds,
+                    };
+                } finally {
+                    unsubscribe();
+                }
+            }, original);
+            expect(ended).toEqual({ state: 'ended', count: 1, position: 30 });
+        }
+    } finally {
+        await page.evaluate(() => (window as unknown as PitchTestWindow).__pitchEngine.dispose());
+    }
+});
+
+test('pitch switch changes real output frequency, preserves playback, and persists independently of rate', async ({
+    page,
+}) => {
+    const fixture = path.resolve('artifacts/fixtures/playback-pitch-440.wav');
+    await writePitchFixture(fixture);
+    await installFilePickerStub(page);
+    await page.goto('/');
+    await installPlaybackPitchProbe(page);
+    const errors: string[] = [];
+    page.on('pageerror', error => errors.push(error.message));
+    await chooseFiles(page, [fixture]);
+    await verifyPlaybackPitchControls(page);
+    expect(errors).toEqual([]);
+});
 
 test('global rate controls keep source time, persist across routes/refresh and fit every MusicBar style', async ({
     page,
@@ -17,14 +142,19 @@ test('global rate controls keep source time, persist across routes/refresh and f
     await expect(bar).toHaveAttribute('data-playback-rate', '2');
     await page.keyboard.press('Escape');
     await page.getByTestId('toggle-playback').click();
-    const measure = async () =>
-        page.evaluate(async () => {
+    const measure = async () => {
+        const position = Number(await bar.getAttribute('data-current-time'));
+        await expect
+            .poll(async () => Number(await bar.getAttribute('data-current-time')))
+            .toBeGreaterThan(position + 0.15);
+        return page.evaluate(async () => {
             const bar = document.getElementById('music-bar-container')!;
             const start = Number(bar.dataset.currentTime),
                 wall = performance.now();
             await new Promise(resolve => setTimeout(resolve, 700));
             return (Number(bar.dataset.currentTime) - start) / ((performance.now() - wall) / 1000);
         });
+    };
     expect(await measure()).toBeGreaterThan(1.8);
     await trigger.click();
     await slider.fill('0.5');
@@ -51,9 +181,14 @@ test('global rate controls keep source time, persist across routes/refresh and f
             expect(bounds!.x + bounds!.width).toBeLessThanOrEqual(width);
             await trigger.click();
             await expect(slider).toBeVisible();
+            const pitch = page.getByRole('switch', { name: '变速时变调' });
+            await expect(pitch).toBeVisible();
             const panel = await page.locator('.speed-panel').boundingBox();
             expect(panel!.x).toBeGreaterThanOrEqual(0);
             expect(panel!.x + panel!.width).toBeLessThanOrEqual(width);
+            const toggle = await pitch.boundingBox();
+            expect(toggle!.x).toBeGreaterThan(panel!.x + panel!.width / 2);
+            expect(toggle!.y).toBeGreaterThan(panel!.y + panel!.height / 2);
             expect(
                 await slider.evaluate(element => {
                     const rect = element.getBoundingClientRect();
@@ -80,6 +215,7 @@ test('native FT and auxiliary nodes follow rate and preserve source position acr
         const moduleUrl = '/src/audio/audioEngine.ts';
         const { AudioEngine } = await import(moduleUrl);
         const engine = new AudioEngine();
+        await engine.setPlaybackChangesPitch(true);
         const encoded = await (await fetch('/artifacts/fixtures/editor-e2-tempo-100-v1.wav')).arrayBuffer();
         await engine.load({ trackId: 'rate-native', encodedAudio: encoded });
         const descriptor = engine.getDecodedAudioDescriptor()!;

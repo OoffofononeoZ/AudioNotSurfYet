@@ -26,13 +26,26 @@
                 :disabled="disabled"
                 @input="changeRate" />
             <div class="speed-limits"><span>0.1×</span><span>2.0×</span></div>
-            <button
-                type="button"
-                data-testid="reset-playback-speed"
-                :disabled="disabled || rate === 1"
-                @click="$emit('change', 1)">
-                恢复 1×
-            </button>
+            <div class="mt-3 flex items-center justify-between gap-2">
+                <button
+                    type="button"
+                    data-testid="reset-playback-speed"
+                    :disabled="disabled || rate === 1"
+                    @click="$emit('change', 1)">
+                    恢复 1×
+                </button>
+                <label class="pitch-option">
+                    <span>变速时变调</span>
+                    <input
+                        type="checkbox"
+                        role="switch"
+                        data-testid="playback-changes-pitch"
+                        :checked="changesPitch"
+                        :disabled="disabled"
+                        @change="$emit('pitch-change', ($event.target as HTMLInputElement).checked)" />
+                    <span class="pitch-switch" aria-hidden="true"></span>
+                </label>
+            </div>
         </div>
     </div>
 </template>
@@ -40,8 +53,8 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted, ref, useId, watch } from 'vue';
 
-const props = defineProps<{ rate: number; disabled: boolean }>();
-const emit = defineEmits<{ change: [rate: number] }>();
+const props = defineProps<{ rate: number; disabled: boolean; changesPitch: boolean }>();
+const emit = defineEmits<{ change: [rate: number]; 'pitch-change': [enabled: boolean] }>();
 const root = ref<HTMLElement | null>(null);
 const open = ref(false);
 const panelId = useId(),
@@ -113,12 +126,12 @@ onUnmounted(() => document.removeEventListener('pointerdown', closeOutside));
     background: var(--surface-menu);
     box-shadow: 0 8px 24px #0006;
 }
-.speed-panel label {
+.speed-panel > label {
     display: flex;
     justify-content: space-between;
     font-size: 13px;
 }
-.speed-panel input {
+.speed-panel input[type='range'] {
     width: 100%;
     margin: 14px 0 0;
     accent-color: var(--accent);
@@ -130,7 +143,6 @@ onUnmounted(() => document.removeEventListener('pointerdown', closeOutside));
     color: var(--mute);
 }
 .speed-panel button {
-    margin-top: 12px;
     padding: 4px 8px;
     border: 1px solid var(--divider);
     border-radius: var(--radius-xs);
@@ -141,6 +153,47 @@ onUnmounted(() => document.removeEventListener('pointerdown', closeOutside));
 .speed-panel button:disabled {
     opacity: 0.4;
     cursor: default;
+}
+.pitch-option {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+    font-size: 11px;
+    cursor: pointer;
+}
+.pitch-option input {
+    position: absolute;
+    right: 0;
+    width: 28px;
+    height: 18px;
+    margin: 0;
+    opacity: 0;
+    cursor: inherit;
+}
+.pitch-switch {
+    width: 28px;
+    height: 16px;
+    padding: 2px;
+    border-radius: 999px;
+    background: var(--divider);
+    pointer-events: none;
+}
+.pitch-switch::after {
+    content: '';
+    display: block;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--ink);
+}
+.pitch-option input:checked + .pitch-switch {
+    background: var(--accent);
+}
+.pitch-option input:checked + .pitch-switch::after {
+    transform: translateX(12px);
+    background: var(--surface-menu);
 }
 @media (max-width: 640px) {
     .speed-trigger {

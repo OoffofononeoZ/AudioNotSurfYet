@@ -2,6 +2,11 @@ import type { DecodedAudioDescriptor, PlaybackError, PlaybackErrorCode, Playback
 import { ChunkedAudition } from './chunkedAudition';
 import type { AuditionSource } from './auditionTypes';
 import { assertPlaybackRate } from './playbackRate';
+import {
+    createPlaybackPitchCorrection,
+    type PlaybackPitchCorrection,
+    type PlaybackPitchFactory,
+} from './playbackPitch';
 import type { PreparedDecodedAudio } from './preparedAudio';
 import { createRealtimeAudioTap, type RealtimeAudioTapOptions, type RealtimeAudioLease } from './realtimeAudioTap';
 
@@ -10,6 +15,7 @@ type SnapshotListener = (snapshot: PlaybackSnapshot) => void;
 
 export interface AudioEngineOptions {
     audioContextFactory?: AudioContextFactory;
+    playbackPitchFactory?: PlaybackPitchFactory;
 }
 
 export interface AudioPlaybackCheckpoint {
@@ -17,6 +23,7 @@ export interface AudioPlaybackCheckpoint {
     readonly state: 'paused' | 'playing' | 'ended';
     readonly currentTimeSeconds: number;
     readonly playbackRate: number;
+    readonly playbackChangesPitch: boolean;
 }
 
 export class AudioTransportError extends Error {
@@ -31,13 +38,14 @@ export class AudioTransportError extends Error {
 
 const clamp = (value: number, minimum: number, maximum: number) => Math.min(maximum, Math.max(minimum, value));
 
-const emptySnapshot = (volume: number, playbackRate: number): PlaybackSnapshot => ({
+const emptySnapshot = (volume: number, playbackRate: number, playbackChangesPitch: boolean): PlaybackSnapshot => ({
     trackId: null,
     state: 'empty',
     currentTimeSeconds: 0,
     durationSeconds: 0,
     volume,
     playbackRate,
+    playbackChangesPitch,
 });
 
 export class AudioEngine {
@@ -68,10 +76,15 @@ export class AudioEngine {
         return owned;
     }
     private readonly audioContextFactory: AudioContextFactory;
+    private readonly playbackPitchFactory: PlaybackPitchFactory;
     private readonly listeners = new Set<SnapshotListener>();
     private audioContext: AudioContext | null = null;
     private gainNode: GainNode | null = null;
     private analyserNode: AnalyserNode | null = null;
+    private playbackInput: GainNode | null = null;
+    private pitchCorrection: PlaybackPitchCorrection | null = null;
+    private pitchAbort: AbortController | null = null;
+    private tailSource: AudioBufferSourceNode | null = null;
     private timeDomainData: Float32Array<ArrayBuffer> | null = null;
     private buffer: AudioBuffer | null = null;
     private source: AudioBufferSourceNode | null = null;
@@ -79,10 +92,11 @@ export class AudioEngine {
     private playbackStartContextTime: number | null = null;
     private volume = 1;
     private playbackRate = 1;
+    private playbackChangesPitch = false;
     private loadGeneration = 0;
     private decodedRevision = 0;
     private readonly preparedAudio = new Map<symbol, AudioBuffer>();
-    private snapshot: PlaybackSnapshot = emptySnapshot(this.volume, this.playbackRate);
+    private snapshot: PlaybackSnapshot = emptySnapshot(this.volume, this.playbackRate, this.playbackChangesPitch);
     private audition: ChunkedAudition | null = null;
     private auditionSource: AuditionSource | null = null;
     private auditionGeneration = 0;
@@ -93,6 +107,7 @@ export class AudioEngine {
 
     constructor(options: AudioEngineOptions = {}) {
         this.audioContextFactory = options.audioContextFactory ?? (() => new AudioContext());
+        this.playbackPitchFactory = options.playbackPitchFactory ?? createPlaybackPitchCorrection;
     }
 
     async prepareEncodedAudio(bytes: ArrayBuffer, signal?: AbortSignal): Promise<PreparedDecodedAudio> {
@@ -227,12 +242,26 @@ export class AudioEngine {
             return;
 
         try {
+            if (command !== this.playbackCommandGeneration || !this.playbackRequested) return;
+            if (!this.playbackChangesPitch && this.playbackRate !== 1) {
+                this.publish({ ...this.getSnapshot(), state: 'buffering', error: undefined });
+                await this.preparePitchCorrection(context);
+            }
+            if (
+                generation !== this.loadGeneration ||
+                command !== this.playbackCommandGeneration ||
+                !this.playbackRequested ||
+                selectedAudition !== this.audition
+            )
+                return;
             if (selectedAudition) {
+                selectedAudition.setOutputLatency(this.pitchCorrection?.latencySeconds ?? 0);
                 await selectedAudition.play();
                 return;
             }
             this.startSource(context);
         } catch (error) {
+            if (generation !== this.loadGeneration || command !== this.playbackCommandGeneration) return;
             this.publishError('source', error, this.snapshot.trackId);
             throw error;
         }
@@ -243,13 +272,17 @@ export class AudioEngine {
         ++this.playbackCommandGeneration;
         if (this.audition) {
             this.audition.pause();
+            this.resetPitchCorrection();
             return;
         }
         if (this.auditionSelectionPending) {
+            this.resetPitchCorrection();
             this.publish({ ...this.getSnapshot(), state: 'paused' });
             return;
         }
         if (!this.source || this.playbackStartContextTime === null || !this.buffer) {
+            this.resetPitchCorrection();
+            if (this.snapshot.state === 'buffering') this.publish({ ...this.getSnapshot(), state: 'paused' });
             return;
         }
 
@@ -279,10 +312,15 @@ export class AudioEngine {
             return;
         }
         if (this.audition) {
+            const resume = this.playbackRequested;
+            this.pause();
+            const command = this.playbackCommandGeneration;
             await this.audition.seek(target);
+            if (resume && command === this.playbackCommandGeneration) await this.play();
             return;
         }
-        const wasPlaying = this.snapshot.state === 'playing';
+        const wasPlaying = this.playbackRequested;
+        this.pause();
         this.stopSource();
         this.playbackOffsetSeconds = target;
 
@@ -321,6 +359,16 @@ export class AudioEngine {
     async setPlaybackRate(rate: number): Promise<void> {
         assertPlaybackRate(rate);
         if (rate === this.playbackRate) return;
+        if (!this.playbackChangesPitch) {
+            const resume = this.playbackRequested;
+            this.pause();
+            const command = this.playbackCommandGeneration;
+            this.playbackRate = rate;
+            if (this.audition) await this.audition.setPlaybackRate(rate);
+            this.publish(this.getSnapshot());
+            if (resume && command === this.playbackCommandGeneration) await this.play();
+            return;
+        }
         const position = this.getCurrentTimeSeconds();
         this.playbackRate = rate;
         if (this.audition) {
@@ -333,12 +381,23 @@ export class AudioEngine {
         this.publish(this.getSnapshot());
     }
 
+    async setPlaybackChangesPitch(enabled: boolean): Promise<void> {
+        if (enabled === this.playbackChangesPitch) return;
+        const resume = this.playbackRequested;
+        this.pause();
+        const command = this.playbackCommandGeneration;
+        this.playbackChangesPitch = enabled;
+        this.publish(this.getSnapshot());
+        if (resume && command === this.playbackCommandGeneration) await this.play();
+    }
+
     getSnapshot(): PlaybackSnapshot {
         const currentTimeSeconds = this.getCurrentTimeSeconds();
         return {
             ...this.snapshot,
             currentTimeSeconds,
             playbackRate: this.playbackRate,
+            playbackChangesPitch: this.playbackChangesPitch,
             audition: this.auditionSource
                 ? {
                       kind: this.auditionSource.kind,
@@ -371,6 +430,7 @@ export class AudioEngine {
             await source.close();
             throw new Error('Audition source does not match the current song.');
         }
+        ++this.playbackCommandGeneration;
         const generation = ++this.auditionGeneration;
         const loadGeneration = this.loadGeneration;
         const position = this.getCurrentTimeSeconds();
@@ -399,12 +459,15 @@ export class AudioEngine {
                 const context = this.ensureGraph();
                 const audition = new ChunkedAudition(
                     context,
-                    this.analyserNode!,
+                    this.playbackInput!,
                     source,
                     snapshot => {
                         if (this.audition !== audition) return;
                         this.playbackOffsetSeconds = snapshot.currentTimeSeconds;
-                        if (snapshot.state === 'ended' || snapshot.state === 'error') this.playbackRequested = false;
+                        if (snapshot.state === 'ended' || snapshot.state === 'error') {
+                            this.playbackRequested = false;
+                            this.resetPitchCorrection();
+                        }
                         this.publish({
                             trackId: source.trackId,
                             state: snapshot.state,
@@ -490,6 +553,7 @@ export class AudioEngine {
             state: snapshot.state === 'buffering' ? 'playing' : (snapshot.state as AudioPlaybackCheckpoint['state']),
             currentTimeSeconds: snapshot.currentTimeSeconds,
             playbackRate: snapshot.playbackRate,
+            playbackChangesPitch: snapshot.playbackChangesPitch,
         };
     }
 
@@ -499,6 +563,7 @@ export class AudioEngine {
         }
         this.pause();
         await this.setPlaybackRate(checkpoint.playbackRate);
+        await this.setPlaybackChangesPitch(checkpoint.playbackChangesPitch);
         if (this.audition) {
             this.pause();
             await this.audition.seek(checkpoint.currentTimeSeconds);
@@ -576,7 +641,7 @@ export class AudioEngine {
         this.buffer = null;
         this.playbackOffsetSeconds = 0;
         this.playbackStartContextTime = null;
-        this.publish(emptySnapshot(this.volume, this.playbackRate));
+        this.publish(emptySnapshot(this.volume, this.playbackRate, this.playbackChangesPitch));
     }
 
     async dispose(): Promise<void> {
@@ -601,6 +666,8 @@ export class AudioEngine {
         }
 
         this.analyserNode?.disconnect();
+        this.playbackInput?.disconnect();
+        this.playbackInput = null;
         this.gainNode?.disconnect();
         this.analyserNode = null;
         this.timeDomainData = null;
@@ -622,7 +689,7 @@ export class AudioEngine {
         } else if (releaseError) {
             this.publishError('audition-read', releaseError, null);
         } else {
-            this.publish(emptySnapshot(this.volume, this.playbackRate));
+            this.publish(emptySnapshot(this.volume, this.playbackRate, this.playbackChangesPitch));
         }
         this.listeners.clear();
         if (closeError || releaseError) throw closeError ?? releaseError;
@@ -636,15 +703,19 @@ export class AudioEngine {
         const context = this.audioContextFactory();
         let gainNode: GainNode | null = null;
         let analyserNode: AnalyserNode | null = null;
+        let playbackInput: GainNode | null = null;
         try {
             gainNode = context.createGain();
             analyserNode = context.createAnalyser();
             analyserNode.fftSize = 1024;
+            playbackInput = context.createGain();
+            playbackInput.connect(analyserNode);
             gainNode.gain.value = this.volume;
             analyserNode.connect(gainNode);
             gainNode.connect(context.destination);
         } catch (error) {
             analyserNode?.disconnect();
+            playbackInput?.disconnect();
             gainNode?.disconnect();
             if (context.state !== 'closed') {
                 void context.close().catch(() => undefined);
@@ -655,7 +726,42 @@ export class AudioEngine {
         this.audioContext = context;
         this.gainNode = gainNode;
         this.analyserNode = analyserNode;
+        this.playbackInput = playbackInput;
         return context;
+    }
+
+    private async preparePitchCorrection(context: AudioContext): Promise<void> {
+        this.resetPitchCorrection();
+        const abort = new AbortController();
+        this.pitchAbort = abort;
+        const correction = await this.playbackPitchFactory(
+            context,
+            this.analyserNode!,
+            this.playbackRate,
+            abort.signal,
+            error => {
+                if (this.pitchAbort === abort) this.publishError('source', error, this.snapshot.trackId);
+            },
+        );
+        if (abort.signal.aborted || this.audioContext !== context) {
+            correction.dispose();
+            abort.signal.throwIfAborted();
+            return;
+        }
+        this.pitchCorrection = correction;
+        this.playbackInput!.disconnect();
+        this.playbackInput!.connect(correction.input);
+    }
+
+    private resetPitchCorrection(): void {
+        this.pitchAbort?.abort();
+        this.pitchAbort = null;
+        if (this.pitchCorrection) {
+            this.playbackInput?.disconnect();
+            this.pitchCorrection.dispose();
+            this.pitchCorrection = null;
+            if (this.analyserNode) this.playbackInput?.connect(this.analyserNode);
+        }
     }
 
     private startSource(context: AudioContext): void {
@@ -663,28 +769,30 @@ export class AudioEngine {
             throw new Error('Audio buffer is not available.');
         }
 
-        this.stopSource();
         const source = context.createBufferSource();
         source.buffer = this.buffer;
         source.playbackRate.value = this.playbackRate;
         const startContextTime = context.currentTime;
         try {
-            source.connect(this.analyserNode);
+            source.connect(this.playbackInput!);
             source.onended = () => {
                 if (this.source !== source || !this.buffer) return;
-                source.onended = null;
-                source.disconnect();
-                this.source = null;
-                this.playbackStartContextTime = null;
-                this.playbackOffsetSeconds = this.buffer.duration;
-                this.playbackRequested = false;
-                this.publish({
-                    trackId: this.snapshot.trackId,
-                    state: 'ended',
-                    currentTimeSeconds: this.buffer.duration,
-                    durationSeconds: this.buffer.duration,
-                    volume: this.volume,
-                });
+                const latency = this.pitchCorrection?.latencySeconds ?? 0;
+                if (latency > 0 && !this.tailSource) {
+                    const tail = context.createBufferSource();
+                    tail.buffer = context.createBuffer(1, 1, context.sampleRate);
+                    this.tailSource = tail;
+                    tail.onended = () => {
+                        tail.onended = null;
+                        tail.disconnect();
+                        if (this.tailSource !== tail) return;
+                        this.tailSource = null;
+                        this.finishSource(source);
+                    };
+                    tail.start(context.currentTime + latency);
+                    return;
+                }
+                this.finishSource(source);
             };
             source.start(startContextTime, this.playbackOffsetSeconds);
         } catch (error) {
@@ -692,13 +800,13 @@ export class AudioEngine {
             try {
                 source.stop();
             } catch {
-                // A source that never started cannot be stopped.
+                /* Source may not have started. */
             }
             source.disconnect();
             throw error;
         }
         this.source = source;
-        this.playbackStartContextTime = startContextTime;
+        this.playbackStartContextTime = startContextTime + (this.pitchCorrection?.latencySeconds ?? 0);
         this.publish({
             trackId: this.snapshot.trackId,
             state: 'playing',
@@ -708,7 +816,32 @@ export class AudioEngine {
         });
     }
 
+    private finishSource(source: AudioBufferSourceNode): void {
+        if (this.source !== source || !this.buffer) return;
+        source.onended = null;
+        source.disconnect();
+        this.source = null;
+        this.resetPitchCorrection();
+        this.playbackStartContextTime = null;
+        this.playbackOffsetSeconds = this.buffer.duration;
+        this.playbackRequested = false;
+        this.publish({
+            trackId: this.snapshot.trackId,
+            state: 'ended',
+            currentTimeSeconds: this.buffer.duration,
+            durationSeconds: this.buffer.duration,
+            volume: this.volume,
+        });
+    }
+
     private stopSource(): void {
+        if (this.tailSource) {
+            this.tailSource.onended = null;
+            this.tailSource.stop();
+            this.tailSource.disconnect();
+            this.tailSource = null;
+        }
+        this.resetPitchCorrection();
         const source = this.source;
         if (!source) return;
 
@@ -732,15 +865,16 @@ export class AudioEngine {
 
         const elapsed =
             (this.audioContext?.currentTime ?? this.playbackStartContextTime) - this.playbackStartContextTime;
-        return clamp(this.playbackOffsetSeconds + elapsed * this.playbackRate, 0, this.buffer.duration);
+        return clamp(this.playbackOffsetSeconds + Math.max(0, elapsed) * this.playbackRate, 0, this.buffer.duration);
     }
 
-    private publish(snapshot: Omit<PlaybackSnapshot, 'playbackRate'>): void {
+    private publish(snapshot: Omit<PlaybackSnapshot, 'playbackRate' | 'playbackChangesPitch'>): void {
         this.snapshot = {
             ...snapshot,
             currentTimeSeconds: clamp(snapshot.currentTimeSeconds, 0, Math.max(0, snapshot.durationSeconds)),
             volume: this.volume,
             playbackRate: this.playbackRate,
+            playbackChangesPitch: this.playbackChangesPitch,
             error: snapshot.error ? { ...snapshot.error } : undefined,
         };
         const next = this.getSnapshot();
@@ -750,6 +884,7 @@ export class AudioEngine {
     }
 
     private publishError(code: PlaybackErrorCode, error: unknown, trackId: string | null): void {
+        const position = this.getCurrentTimeSeconds();
         const playbackError: PlaybackError = {
             code,
             message: error instanceof Error ? error.message : 'Unknown audio playback error.',
@@ -757,6 +892,7 @@ export class AudioEngine {
         this.playbackRequested = false;
         this.audition?.pause();
         this.stopSource();
+        this.playbackOffsetSeconds = position;
         this.publish({
             trackId,
             state: 'error',

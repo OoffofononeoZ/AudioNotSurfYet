@@ -85,6 +85,7 @@ export class EditorSeparationService {
         durationSeconds: 0,
         volume: 1,
         playbackRate: 1,
+        playbackChangesPitch: false,
     };
     private readonly unsubscribePlayback: () => void;
     private pauseRevision = 0;

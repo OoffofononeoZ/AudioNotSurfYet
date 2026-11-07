@@ -8,6 +8,8 @@
 
 | 文件 | 本地静态引用（最多显示 6 项） |
 | --- | --- |
+| [tests/docs/validate-docs.mjs](../../tests/docs/validate-docs.mjs) | [scripts/check-repo.mjs](../../scripts/check-repo.mjs)、[scripts/lib/repository.mjs](../../scripts/lib/repository.mjs) |
+| [tests/e2e/analysis-loading.spec.ts](../../tests/e2e/analysis-loading.spec.ts) | [tests/support/file-picker.ts](../../tests/support/file-picker.ts) |
 | [tests/e2e/analyzer-3d-long.spec.ts](../../tests/e2e/analyzer-3d-long.spec.ts) | [tests/support/file-picker.ts](../../tests/support/file-picker.ts) |
 | [tests/e2e/analyzer-3d.spec.ts](../../tests/e2e/analyzer-3d.spec.ts) | [src/analysis/threeDFeatures.ts](../../src/analysis/threeDFeatures.ts)、[tests/support/file-picker.ts](../../tests/support/file-picker.ts) |
 | [tests/e2e/app-shell.spec.ts](../../tests/e2e/app-shell.spec.ts) | [tests/support/file-picker.ts](../../tests/support/file-picker.ts) |
@@ -66,7 +68,7 @@
 | [tests/e2e/p1-runtime.probe.ts](../../tests/e2e/p1-runtime.probe.ts) | — |
 | [tests/e2e/p1-timing.spec.ts](../../tests/e2e/p1-timing.spec.ts) | [tests/processing/harness.ts](../../tests/processing/harness.ts)、[tests/processing/persistentFixture.ts](../../tests/processing/persistentFixture.ts) |
 | [tests/e2e/playback-keyboard.spec.ts](../../tests/e2e/playback-keyboard.spec.ts) | [tests/support/file-picker.ts](../../tests/support/file-picker.ts)、[tests/support/visualizer-output-sync.ts](../../tests/support/visualizer-output-sync.ts) |
-| [tests/e2e/playback-speed.spec.ts](../../tests/e2e/playback-speed.spec.ts) | [tests/support/editor-marking.ts](../../tests/support/editor-marking.ts) |
+| [tests/e2e/playback-speed.spec.ts](../../tests/e2e/playback-speed.spec.ts) | [src/audio/audioEngine.ts](../../src/audio/audioEngine.ts)、[tests/support/editor-marking.ts](../../tests/support/editor-marking.ts)、[tests/support/file-picker.ts](../../tests/support/file-picker.ts)、[tests/support/playback-pitch-scenario.mjs](../../tests/support/playback-pitch-scenario.mjs) |
 | [tests/e2e/project-action-dialogs.spec.ts](../../tests/e2e/project-action-dialogs.spec.ts) | [tests/support/file-picker.ts](../../tests/support/file-picker.ts) |
 | [tests/e2e/project-file-transfer.spec.ts](../../tests/e2e/project-file-transfer.spec.ts) | [tests/support/file-picker.ts](../../tests/support/file-picker.ts)、[tests/support/project-actions.ts](../../tests/support/project-actions.ts) |
 | [tests/e2e/stem-analysis.spec.ts](../../tests/e2e/stem-analysis.spec.ts) | [tests/support/editor-marking.ts](../../tests/support/editor-marking.ts)、[tests/support/stem-analysis.ts](../../tests/support/stem-analysis.ts) |
@@ -106,5 +108,3 @@
 | [tests/e2e/visualizer-scene3d-editor.spec.ts](../../tests/e2e/visualizer-scene3d-editor.spec.ts) | [src/visualizer/compositionTypes.ts](../../src/visualizer/compositionTypes.ts)、[tests/support/file-picker.ts](../../tests/support/file-picker.ts)、[tests/support/project-actions.ts](../../tests/support/project-actions.ts)、[tests/support/scene3d-fixture.ts](../../tests/support/scene3d-fixture.ts) |
 | [tests/e2e/visualizer-scene3d-output.spec.ts](../../tests/e2e/visualizer-scene3d-output.spec.ts) | [tests/support/file-picker.ts](../../tests/support/file-picker.ts)、[tests/support/project-actions.ts](../../tests/support/project-actions.ts) |
 | [tests/e2e/visualizer-scene3d.spec.ts](../../tests/e2e/visualizer-scene3d.spec.ts) | — |
-| [tests/e2e/visualizer-seed.spec.ts](../../tests/e2e/visualizer-seed.spec.ts) | [tests/support/file-picker.ts](../../tests/support/file-picker.ts)、[tests/support/project-actions.ts](../../tests/support/project-actions.ts) |
-| [tests/e2e/visualizer-stem-input.spec.ts](../../tests/e2e/visualizer-stem-input.spec.ts) | [src/visualizer/visualizerSessionController.ts](../../src/visualizer/visualizerSessionController.ts)、[tests/support/editor-marking.ts](../../tests/support/editor-marking.ts)、[tests/support/file-picker.ts](../../tests/support/file-picker.ts)、[tests/support/stem-analysis.ts](../../tests/support/stem-analysis.ts) |

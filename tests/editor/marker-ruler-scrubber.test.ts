@@ -10,6 +10,7 @@ function harness() {
         durationSeconds: 12,
         volume: 1,
         playbackRate: 1,
+        playbackChangesPitch: false,
     };
     let available = true,
         frameId = 0;

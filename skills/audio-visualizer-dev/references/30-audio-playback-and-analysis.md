@@ -17,7 +17,7 @@
 `src/audio/audioEngine.ts` 的节点链路为：
 
 ```text
-AudioBufferSourceNode → AnalyserNode → GainNode → audioContext.destination
+AudioBufferSourceNode / 分轨 Gain → 播放输入 Gain → 可选保调 AudioWorklet → AnalyserNode → GainNode → audioContext.destination
 ```
 
 - AudioContext、Gain、Analyser 和 AudioBuffer 延迟创建；一次 app session 只有一个实时 AudioContext。
@@ -27,6 +27,7 @@ AudioBufferSourceNode → AnalyserNode → GainNode → audioContext.destination
 - `load()` 与 session command 都使用 generation；旧读取或旧解码不得覆盖最新歌曲。
 - decode/context/source/unsupported 失败写入 typed snapshot error；状态不得卡在 loading。
 - `dispose()` 停止 source、断开节点并关闭上下文，不立即创建替代上下文。
+- MusicBar“变速时变调”默认关闭，配置与实际模式分别由 config 和 PlaybackSnapshot 保存。Signalsmith Stretch 1.3.2 随包本地加载；保调节点由 engine 创建/取消/释放，进度补偿其延迟，自然结束等待尾音；打开开关或 1× 时直通。FT／辅助试听共用输入和该节点，离线导出不经过此处理。
 
 ## AudioSessionService 与队列
 

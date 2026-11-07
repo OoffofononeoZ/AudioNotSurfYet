@@ -1,5 +1,9 @@
 # 第三方声明
 
+## Signalsmith Stretch 1.3.2
+
+共享 Web/Electron 播放链使用未修改的 Signalsmith Stretch Web Audio/WASM 发布文件实现变速不变调，运行时随应用本地加载。上游为 [Signalsmith Audio](https://github.com/Signalsmith-Audio/signalsmith-stretch)，采用 MIT 许可；完整版权与许可文本见 [signalsmith-stretch-MIT.txt](public/licenses/signalsmith-stretch-MIT.txt)。离线导出不使用此实时处理节点。
+
 ## Electron 45.1.0 与 electron-builder 26.18.1
 
 Windows 桌面宿主使用 Electron（MIT），本地构建工具使用 electron-builder（MIT）；网页运行代码不导入两者。桌面运行库保留原分发中的 LICENSE 和 LICENSES.chromium.html 等许可文件；应用包携带本声明及共享 runtime 的许可资源。模型和外部资源库不随安装包分发，其许可仍按各自合同维护。

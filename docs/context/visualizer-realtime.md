@@ -8,7 +8,7 @@ DEC-091：owner 批准预设能力分类、首页实时样式、本站独立展�
 
 AudioEngine 按租约创建静音分析旁路，复用唯一 AudioContext。AudioWorklet 只复制 PCM，最多四组左右各 1024 sample 的缓冲；溢出明确失败。AnalysisCoordinator 互斥复用同一分析 Worker，通过专用 MessagePort 传递 PCM/回收缓冲。实时特征不创建整曲序列、不写分析缓存；Meyda 使用原配置，WE 使用原变换和平滑，输出约 30Hz。
 
-实时输入为因果窗口，倍速会影响音高，数值不承诺与整曲展示序列相同。换歌、seek、输入切换使旧租约和结果失效；暂停、离页和销毁释放节点/端口。native 保持原 byte-frequency / signed-waveform 单位。高频输入留在运行时模块，不写 Pinia。
+实时输入为因果窗口，读取共享播放链经过可选保调处理后的信号；倍速是否影响音高由 MusicBar“变速时变调”开关决定，数值不承诺与整曲展示序列相同。换歌、seek、输入切换使旧租约和结果失效；暂停、离页和销毁释放节点/端口。native 保持原 byte-frequency / signed-waveform 单位。高频输入留在运行时模块，不写 Pinia。
 
 ## 渲染边界
 

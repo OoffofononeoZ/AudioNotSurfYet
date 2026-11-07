@@ -48,6 +48,8 @@ D0–D7 已按本机范围完成；下文按阶段保留失败、部分结果及
 
 ## 验证与续作
 
+- 2026-11-07 MusicBar 变调开关：默认变速不变调，原曲／FT／辅助试听复用共享 engine 和本地 Signalsmith Stretch 1.3.2 Worklet；双端生产构建、136 项相关单元／集成、Chrome/Edge 共 8 项倍速／音高／布局专项及真实 ASAR `test:desktop:playback-pitch` 通过。ASAR 的 440Hz 输入在 0.1×／0.5×／1×／2× 下保持约 440Hz，打开变调分别约 44／220／440／880Hz，刷新偏好恢复且无页面错误。仅原生选择结果为替身，不代表人工听感、原生选择器或新的整体 readiness。
+
 - 2026-11-02 Editor 绘图区与锁定：本次应用目录构建与 `test:desktop:editor-timeline` 真实 ASAR 运行通过，上下左右边界、滚动溢出、独立波形、锁定联动、播放/倍速、取消、解锁恢复、刷新重置及 BPM 分段均已验证；Chrome/Edge 另覆盖 390px、DPR 1/1.5/2。桌面分数缩放暴露的游标偏差已修正，按现有 1 CSS px 标准复核通过。桌面仅替换原生选择结果，窗口采图使用实际显示；不代表原生对话框、安装升级或新整体 readiness。
 
 - 基线：开始工作树/暂存区干净，分支 `codex-design-remake`，既有实现 commit `5c3e014`。Node 24.22.1/npm 11.19.1；本次 Web 类型、文档及仓库检查通过。Web 生产构建通过（沙箱外、项目内 TEMP/TMP，避开上级目录/系统临时目录访问限制）；保留既有大 chunk、Browserslist 提示。产品行为尚未重测。

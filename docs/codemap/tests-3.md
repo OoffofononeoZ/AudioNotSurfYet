@@ -8,6 +8,8 @@
 
 | 文件 | 本地静态引用（最多显示 6 项） |
 | --- | --- |
+| [tests/e2e/visualizer-seed.spec.ts](../../tests/e2e/visualizer-seed.spec.ts) | [tests/support/file-picker.ts](../../tests/support/file-picker.ts)、[tests/support/project-actions.ts](../../tests/support/project-actions.ts) |
+| [tests/e2e/visualizer-stem-input.spec.ts](../../tests/e2e/visualizer-stem-input.spec.ts) | [src/visualizer/visualizerSessionController.ts](../../src/visualizer/visualizerSessionController.ts)、[tests/support/editor-marking.ts](../../tests/support/editor-marking.ts)、[tests/support/file-picker.ts](../../tests/support/file-picker.ts)、[tests/support/stem-analysis.ts](../../tests/support/stem-analysis.ts) |
 | [tests/e2e/visualizer-tooltip.spec.ts](../../tests/e2e/visualizer-tooltip.spec.ts) | [src/visualizer/compositionTypes.ts](../../src/visualizer/compositionTypes.ts)、[tests/support/file-picker.ts](../../tests/support/file-picker.ts)、[tests/support/project-actions.ts](../../tests/support/project-actions.ts)、[tests/support/tooltip-scenario.mjs](../../tests/support/tooltip-scenario.mjs) |
 | [tests/e2e/visualizer-wallpaper.spec.ts](../../tests/e2e/visualizer-wallpaper.spec.ts) | [tests/support/file-picker.ts](../../tests/support/file-picker.ts)、[tests/support/project-actions.ts](../../tests/support/project-actions.ts) |
 | [tests/e2e/wallpaper-spectrum.spec.ts](../../tests/e2e/wallpaper-spectrum.spec.ts) | [tests/support/file-picker.ts](../../tests/support/file-picker.ts) |
@@ -106,5 +108,3 @@
 | [tests/scripts/run-m9-eval.mjs](../../tests/scripts/run-m9-eval.mjs) | — |
 | [tests/scripts/run-p1-eval.mjs](../../tests/scripts/run-p1-eval.mjs) | — |
 | [tests/scripts/run-v1-eval.mjs](../../tests/scripts/run-v1-eval.mjs) | — |
-| [tests/scripts/run-v2-eval.mjs](../../tests/scripts/run-v2-eval.mjs) | — |
-| [tests/scripts/run-v3-eval.mjs](../../tests/scripts/run-v3-eval.mjs) | — |

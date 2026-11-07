@@ -10,7 +10,12 @@
             @click="$emit('mode')">
             <MusicBarIcon :name="mode" />
         </button>
-        <MusicBarPlaybackSpeed :rate="playbackRate" :disabled="false" @change="$emit('speed', $event)" />
+        <MusicBarPlaybackSpeed
+            :rate="playbackRate"
+            :changes-pitch="playbackChangesPitch"
+            :disabled="false"
+            @change="$emit('speed', $event)"
+            @pitch-change="$emit('pitch-change', $event)" />
         <ElTooltip placement="top" popper-class="musicbar-volume-popover">
             <button
                 type="button"
@@ -91,6 +96,7 @@ defineProps<{
     queueOpen: boolean;
     transitioning: boolean;
     playbackRate: number;
+    playbackChangesPitch: boolean;
 }>();
 defineEmits<{
     mode: [];
@@ -101,6 +107,7 @@ defineEmits<{
     import: [];
     appearance: [];
     speed: [rate: number];
+    'pitch-change': [enabled: boolean];
 }>();
 </script>
 

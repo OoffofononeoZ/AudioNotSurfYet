@@ -33,6 +33,7 @@ class RecoveryEngine implements AudioEnginePort {
         volume: 1,
 
         playbackRate: 1,
+        playbackChangesPitch: false,
     };
     listeners = new Set<(snapshot: PlaybackSnapshot) => void>();
     playCount = 0;
@@ -46,6 +47,7 @@ class RecoveryEngine implements AudioEnginePort {
             volume: this.snapshot.volume,
 
             playbackRate: this.snapshot.playbackRate,
+            playbackChangesPitch: this.snapshot.playbackChangesPitch,
         });
         return 'loaded';
     }
@@ -63,6 +65,10 @@ class RecoveryEngine implements AudioEnginePort {
         this.emit({ ...this.snapshot, currentTimeSeconds: seconds });
     }
 
+    async setPlaybackChangesPitch(playbackChangesPitch: boolean) {
+        this.snapshot.playbackChangesPitch = playbackChangesPitch;
+        for (const listener of this.listeners) listener(this.getSnapshot());
+    }
     async setPlaybackRate(playbackRate: number) {
         this.snapshot.playbackRate = playbackRate;
     }
@@ -108,6 +114,7 @@ class RecoveryEngine implements AudioEnginePort {
             volume: this.snapshot.volume,
 
             playbackRate: this.snapshot.playbackRate,
+            playbackChangesPitch: this.snapshot.playbackChangesPitch,
         });
     }
 

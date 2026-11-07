@@ -27,6 +27,7 @@ const recoveryInput = (patch: Partial<EditorUnavailableRecoveryInput> = {}): Edi
         volume: 1,
 
         playbackRate: 1,
+        playbackChangesPitch: false,
     },
     persistenceState: 'ready',
     ...patch,

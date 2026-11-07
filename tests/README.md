@@ -1,5 +1,7 @@
 # 测试与本地产物
 
+倍速与变调：`npx playwright test tests/e2e/playback-speed.spec.ts --project=chrome --project=edge --workers=1` 覆盖原曲／FT／辅助试听输出频率、0.1–2×、开关独立持久化、空格操作与三种播放器样式。`npm run desktop:dir` 后运行 `npm run test:desktop:playback-pitch`，在真实 ASAR 中测量受控 440Hz 音频输出并核对刷新恢复；仅原生音频选值为替身，不替代人工听感或原生选择器验证。桌面结果位于 `artifacts/desktop/playback-pitch/<ID>/`。
+
 Editor 波形：`npx playwright test tests/e2e/editor-timeline-lock.spec.ts --project=chrome --project=edge --workers=1` 覆盖上下布局、独立视口、锁定联动、取消和页面状态重置；`npm run desktop:dir` 后运行 `npm run test:desktop:editor-timeline`，在当前 ASAR 应用及独立 profile 上复用相同场景。仅原生音频选择结果使用替身，播放、IPC 和布局真实运行。结果位于 `artifacts/editor-timeline/` 和 `artifacts/desktop/editor-timeline/<ID>/`，不证明原生对话框或安装升级通过。
 
 Analyzer 3D：`npm run test:e2e:analyzer-3d` 使用真实 Chrome/Edge 检查七项、单选/独立恢复、相机与时间缩放、正交切片、响应式和十次 GPU 释放/重试，以及 900 秒合成音频的缩放取消与反馈。数值适配/会话模型为 `npx vitest run tests/analysis/three-d-data.test.ts tests/analysis/three-d-workspace.test.ts`。图像在忽略的 `test-results/3d-*.png`；Electron 扩展现有 `test:desktop:analyzer`，实际 ASAR 的七项、交互、切片及重启恢复另行检查，不借用浏览器通过结论。

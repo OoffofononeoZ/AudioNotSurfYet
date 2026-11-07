@@ -6,6 +6,7 @@ interface ConfigState {
     homeStyleId: string | null;
     volume: number;
     playbackRate: number;
+    playbackChangesPitch: boolean;
     sidebarCollapsed: boolean;
     playbackMode: PlaybackMode;
     musicBarSettings: {
@@ -19,6 +20,7 @@ export const useConfigstore = defineStore('config', {
         homeStyleId: null,
         volume: 100,
         playbackRate: 1,
+        playbackChangesPitch: false,
         sidebarCollapsed: false,
         playbackMode: 'sequence',
         musicBarSettings: {

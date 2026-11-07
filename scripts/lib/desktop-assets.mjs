@@ -9,6 +9,7 @@ export async function copyDesktopPublicAssets(root, destination) {
         'icons.svg',
         'vite.svg',
         'licenses/mediabunny-MPL-2.0.txt',
+        'licenses/signalsmith-stretch-MIT.txt',
         'processing-runtime/manifest.json',
         'processing-runtime/THIRD_PARTY_NOTICES.md',
         'processing-runtime/transcription/THIRD_PARTY_NOTICES.md',

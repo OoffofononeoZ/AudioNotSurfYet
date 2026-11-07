@@ -9,6 +9,7 @@
         :data-duration="playback.durationSeconds"
         :data-volume="playback.volume"
         :data-playback-rate="playback.playbackRate"
+        :data-playback-changes-pitch="playback.playbackChangesPitch"
         :data-current-track-id="currentTrackId || ''"
         :data-energy="currentEnergy"
         :data-persistence-state="persistence.state">
@@ -126,6 +127,7 @@
                 :export-locked="exportLocked"
                 v-model:volume="volume"
                 :playback-rate="playback.playbackRate"
+                :playback-changes-pitch="playback.playbackChangesPitch"
                 :queue-open="musicListVisible"
                 :transitioning="isStyleTransitioning"
                 @mode="cycleMode"
@@ -134,7 +136,8 @@
                 @queue="toggleMusicList"
                 @import="toggleSelectFile"
                 @appearance="toggleChangeStyle"
-                @speed="setPlaybackRate" />
+                @speed="setPlaybackRate"
+                @pitch-change="setPlaybackChangesPitch" />
         </div>
         <aside class="music-list-container" :inert="exportLocked">
             <MusicList
@@ -359,7 +362,12 @@ const setVolume = (value: number | number[]) => {
 
 const setPlaybackRate = (rate: number) => {
     configStore.playbackRate = rate;
-    void audioSession.setPlaybackRate(rate);
+    void audioSession.setPlaybackRate(rate).catch(() => undefined);
+};
+
+const setPlaybackChangesPitch = (enabled: boolean) => {
+    configStore.playbackChangesPitch = enabled;
+    void audioSession.setPlaybackChangesPitch(enabled).catch(() => undefined);
 };
 
 const handleVolumeKeydown = (event: KeyboardEvent) => {

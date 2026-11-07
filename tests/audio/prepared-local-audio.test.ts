@@ -14,6 +14,7 @@ function harness(hashFile: (file: Blob) => Promise<string> = async () => 'a'.rep
         currentTimeSeconds: 0,
         durationSeconds: 0,
         playbackRate: 1,
+        playbackChangesPitch: false,
         volume: 1,
     };
     let listener = (_: PlaybackSnapshot) => {};
@@ -24,6 +25,7 @@ function harness(hashFile: (file: Blob) => Promise<string> = async () => 'a'.rep
         pause: () => {},
         seek: async () => {},
         setVolume: () => {},
+        setPlaybackChangesPitch: async () => {},
         setPlaybackRate: async () => {},
         setAuditionSource: async () => {},
         setAuditionMuted: () => {},

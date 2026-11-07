@@ -32,6 +32,7 @@ class WorkspaceEngine implements AudioEnginePort {
         volume: 1,
 
         playbackRate: 1,
+        playbackChangesPitch: false,
     };
 
     async load() {
@@ -40,6 +41,9 @@ class WorkspaceEngine implements AudioEnginePort {
     async play() {}
     pause() {}
     async seek() {}
+    async setPlaybackChangesPitch(playbackChangesPitch: boolean) {
+        this.snapshot.playbackChangesPitch = playbackChangesPitch;
+    }
     async setPlaybackRate(playbackRate: number) {
         this.snapshot.playbackRate = playbackRate;
     }

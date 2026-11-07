@@ -29,6 +29,11 @@ export class ChunkedAudition {
     private disposed = false;
     private error: string | undefined;
     private playbackRate: number;
+    private outputLatency = 0;
+
+    setOutputLatency(seconds: number): void {
+        this.outputLatency = seconds;
+    }
     constructor(
         context: AudioContext,
         destination: AudioNode,
@@ -83,7 +88,7 @@ export class ChunkedAudition {
             seconds,
             Math.min(
                 this.scheduledEndFrame / this.source.sampleRate,
-                seconds + (this.context.currentTime - this.anchorTime) * this.playbackRate,
+                seconds + (this.context.currentTime - this.anchorTime - this.outputLatency) * this.playbackRate,
             ),
         );
     }

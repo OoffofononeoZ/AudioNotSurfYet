@@ -36,6 +36,7 @@ class FakeAnalysisEngine {
             volume: 1,
 
             playbackRate: 1,
+            playbackChangesPitch: false,
         };
     }
 

@@ -61,6 +61,7 @@ usePlaybackKeyboard(audioSession, () => !shutdownBusy.value);
 const analysisCoordinator = new AnalysisCoordinator(audioEngine, sessionRepository, audioSessionStore);
 audioSession.setVolume(configStore.volume);
 void audioSession.setPlaybackRate(configStore.playbackRate);
+void audioSession.setPlaybackChangesPitch(configStore.playbackChangesPitch);
 watchEffect(() => audioSession.setPreferredPlaybackMode(configStore.playbackMode));
 provide(audioSessionServiceKey, audioSession);
 const editorProcessingGate = new EditorProcessingGate();
