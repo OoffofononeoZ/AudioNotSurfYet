@@ -17,6 +17,14 @@ npx playwright test tests/e2e/editor-transcription.spec.ts tests/e2e/transcripti
 
 ## 证据语义
 
+### 真实歌曲鼓对照（显式运行）
+
+`tests/e2e/transcription-benchmark.spec.ts` 默认跳过。设置 `TRANSCRIPTION_BENCH_AUDIO` 为 owner 已授权的本机歌曲路径后运行该专项；也可用 `TRANSCRIPTION_BENCH_STEM` 指向已冻结的 FT drums WAV。第一次通过原有四轨分离链生成并保存鼓音轨，后续复用相同文件，不能把原曲与分离鼓轨混作同一输入。
+
+产物在忽略的 `artifacts/evals/transcription-optimization/`，记录源／冻结音轨／源码 hash、UA、逐窗原始 token、特征数组与类别过滤前后输出。短片包含 Black Hole 十个已报告截断位置及普通／密集／边界样例，使用生产 `MonoResampler` 预处理；WASM 基线不要求达到 GPU 性能目标。测试不修改用户音频或工程，不自动把未标注声音计为误检。
+
+诊断新增解析、特征视图 hash、缓存数据完整性专项为 `tests/transcription/diagnostics.test.ts`。诊断导出的新 `analysis-report` 保存用途复用 Web／Electron 文件端口，不扩大文件读取权限。
+
 - `model-probe.worker.ts` 使用真实模型 session：ADT_STR WASM encoder／完整 token prefix decoder，Basic Pitch WASM 和六轨 WebGPU；测试注入仅提供同字节模型文件，不替代推断。
 - 合成鼓包含同时击打；截断用例将解码长度设为四 token，确认返回 `truncated`。合成音符覆盖长音、短音、重复音、和声及跨模型窗口；保存真实输出与已知输入，但不把合成音色当成真实钢琴／吉他质量证据。
 - 音符时钟由原输入窗口绝对起点与 256-sample hop 派生，裁去模型两侧各 15 帧后拼接；不按每窗输出帧数累计时间，不吸附 tempo 网格。边界行为与真实起止误差继续由受控样例复核。

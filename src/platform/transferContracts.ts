@@ -1,6 +1,7 @@
 import type { NativeResult } from './fileContracts';
 
 export const TRANSFER_FORMATS = {
+    'analysis-report': { description: 'AudioNotSurfYet 分析诊断 JSON', accept: { 'application/json': ['.json'] } },
     'editor-project': { description: 'AudioNotSurfYet Editor JSON', accept: { 'application/json': ['.json'] } },
     'visualizer-project': { description: 'AudioNotSurfYet Visualizer JSON', accept: { 'application/json': ['.json'] } },
     video: { description: 'WebM video', accept: { 'video/webm': ['.webm'] } },

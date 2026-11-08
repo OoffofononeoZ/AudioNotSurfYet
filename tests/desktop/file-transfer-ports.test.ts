@@ -45,6 +45,25 @@ function saveBridge(target: string) {
     } satisfies DesktopSaveBridge;
 }
 
+test('saves a diagnostic JSON through both platform ports with the report purpose', async () => {
+    const bytes = new TextEncoder().encode('{"format":"audiosurf-transcription-diagnostics"}');
+    const target = path.join(root, 'diagnostics.json'),
+        bridge = saveBridge(target);
+    const access = new DesktopFileTransfers(fileBridge(), bridge);
+    expect(await access.save('analysis-report', 'diagnostics.json', bytes)).toBe('saved');
+    expect(bridge.beginSave).toHaveBeenCalledWith('analysis-report', 'diagnostics.json', bytes.byteLength);
+    expect(await readFile(target, 'utf8')).toBe(new TextDecoder().decode(bytes));
+    const writable = { write: vi.fn(), close: vi.fn(), abort: vi.fn() };
+    const picker = vi.fn(async (_options: Record<string, unknown>) => ({ createWritable: async () => writable }));
+    vi.stubGlobal('window', { showSaveFilePicker: picker });
+    expect(await new BrowserFileTransfers().save('analysis-report', 'diagnostics.json', bytes)).toBe('saved');
+    expect(picker.mock.calls[0]![0]).toMatchObject({
+        suggestedName: 'diagnostics.json',
+        types: [{ accept: { 'application/json': ['.json'] } }],
+    });
+    expect(writable.close).toHaveBeenCalledOnce();
+});
+
 test('streams a large Blob with acknowledgement backpressure and never reads the whole Blob or sends paths', async () => {
     const target = path.join(root, 'video.webm'),
         bridge = saveBridge(target);

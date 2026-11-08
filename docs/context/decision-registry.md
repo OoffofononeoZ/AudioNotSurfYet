@@ -4,6 +4,8 @@
 
 ## 持续边界
 
+- DEC-116 / 2026-11-08：owner 以 Goal“执行上述计划”批准自动标记完整优化：鼓 WebGPU／显式慢速 WASM、批处理和一次有界局部重试、完整鼓类、主要音色与去重、other 主旋律候选及同曲正反示例检索。保持 FT／六轨辅助分离模型和逻辑、Editor V2、本机处理与现有发布边界；示例等存本机缓存。参考机 Black Hole 已缓存鼓转录目标 10 分钟；质量量化值为优先目标，达不到时允许用配对实测改善与试听材料复核，不自动视为接受。当前阶段见[自动标记](../architecture/processing/editor-auto-marking.md#优化-goal2026-11-08)。
+
 - 2026-11-07：owner 要求 MusicBar 倍速弹窗右下角增加“变速时变调”开关，明确选择默认关闭，并以“Implement the plan.”批准共享原曲／分轨保调链、持久化、Signalsmith Stretch 1.3.2 本地依赖及双端验证方案；不改变离线导出的原曲时间和音高规则。当前行为见[应用外壳](app-shell.md)。
 
 - DEC-110 / 2026-10-30：实际 ASAR 的 Worker 证明 Basic Pitch 固定文件被 connect-src 拦截后，owner 回复“允许此固定文件来源并重打包”。仅批准宿主 connect-src 增加 `https://raw.githubusercontent.com/spotify/basic-pitch/9991303bba609a3b93089d13ec80d1d495083596/basic_pitch/saved_models/icassp_2022/nmp.onnx`；宿主及处理 Worker 因而可连接该文件，不放开整个 GitHub origin 或其他路径。算法隔离层 connect-src none、sandbox/contextIsolation/无 Node 不变；模型 revision/hash/许可未改。验证见[桌面实施](desktop.md)。
