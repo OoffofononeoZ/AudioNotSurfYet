@@ -140,6 +140,21 @@ test('timbre review: real fixed models on controlled positive, mixed and no-targ
                 .filter(candidate => candidate.kind === 'drum')
                 .map(hit => ({ category: hit.drum, startSeconds: hit.startSeconds })),
         ),
+        drumPresets: Object.fromEntries(
+            Object.entries(result.drumReviews).map(([name, review]) => [
+                name,
+                assessEvents(
+                    result.expectedDrums.map(hit => ({ category: hit.drum, startSeconds: hit.startSeconds })),
+                    review.markers.map(marker => {
+                        const raw = result.drums.candidates.find(candidate => candidate.id === marker.rawIds[0])!;
+                        return {
+                            category: raw.kind === 'drum' ? raw.drum : 'invalid',
+                            startSeconds: marker.startSeconds,
+                        };
+                    }),
+                ),
+            ]),
+        ),
         noTargetMarkers: result.noteReviews.conservative!.markers.filter(marker => marker.startSeconds >= 11.4),
         issues,
     };

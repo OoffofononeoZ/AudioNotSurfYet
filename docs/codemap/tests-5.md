@@ -8,6 +8,9 @@
 
 | 文件 | 本地静态引用（最多显示 6 项） |
 | --- | --- |
+| [tests/transcription/vitePlugin.ts](../../tests/transcription/vitePlugin.ts) | — |
+| [tests/unit/audio-fixtures.test.ts](../../tests/unit/audio-fixtures.test.ts) | [tests/support/audio-fixtures.ts](../../tests/support/audio-fixtures.ts) |
+| [tests/unit/indexeddb-harness.test.ts](../../tests/unit/indexeddb-harness.test.ts) | — |
 | [tests/unit/project-file-gateways.test.ts](../../tests/unit/project-file-gateways.test.ts) | [src/editor/fileIO.ts](../../src/editor/fileIO.ts)、[src/editor/projectCodec.ts](../../src/editor/projectCodec.ts)、[src/visualizer/compositionCodec.ts](../../src/visualizer/compositionCodec.ts)、[src/visualizer/fileIO.ts](../../src/visualizer/fileIO.ts) |
 | [tests/unit/tolerance.test.ts](../../tests/unit/tolerance.test.ts) | [tests/support/tolerance.ts](../../tests/support/tolerance.ts) |
 | [tests/visualizer/algorithm-codec.test.ts](../../tests/visualizer/algorithm-codec.test.ts) | [src/visualizer/algorithmCodec.ts](../../src/visualizer/algorithmCodec.ts)、[src/visualizer/resourceIdentity.ts](../../src/visualizer/resourceIdentity.ts) |

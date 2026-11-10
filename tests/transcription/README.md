@@ -51,3 +51,7 @@ npx playwright test tests/e2e/editor-transcription.spec.ts tests/e2e/transcripti
 `transcription-timbre-quality.spec.ts --project=chrome --workers=1` 用同一自编受控样例运行真实固定模型、分来源音符解码、完整鼓类、DSP 和三个筛选档位。设置 `TRANSCRIPTION_QUALITY_BASELINE=<旧 controlled-quality run>` 时先核对输入 hash 和两份辅助 WAV 完整 SHA，再保存声音起音级配对；音色预览不按音高计数，不能把此对照写成音高准确率或真实音乐接受。
 
 仅调整后处理时，另设 `TRANSCRIPTION_REVIEW_INPUT=<本轮 raw-result.json>` 可复用原始候选重算；先在浏览器核对当前分析身份和候选，模型/DSP身份不一致则拒绝复用。新报告保留原始报告 hash 和当前源码 hash。产物在忽略的 `artifacts/evals/editor-transcription/timbre-quality/`，保留初次结果和修正后结果；不要用同样例调参后的数值冒称独立留出验证。
+
+`band-salience.test.ts` 检查强底鼓旁的弱高频鼓声、静音及频段选择，原始全频 RMS 与按频段显著性分开。受控质量报告另列 `drumPresets`，不能只报告未筛选 raw 命中而忽略默认结果。手工归为同一组且同刻/同声学起音的点在派生层合并 rawIds，默认不同自定义声音仍分开；活动拆分仅关联实际贡献的来源。
+
+`TRANSCRIPTION_BASELINE_REPORT=<完成的旧 WASM JSON>` 与 `TRANSCRIPTION_BENCH_STEM` 同时设置后，运行 `transcription-comparison.spec.ts --project=chrome --project=edge --workers=1` 比较完全相同的 14 个窗口起点。核对冻结 WAV hash、逐窗特征及 token 前缀，保存全部新输出/终止/耗时；不再次运行旧长测，不把短窗探针当作整曲应用性能通过。

@@ -59,7 +59,8 @@ function exclusion(candidate: MarkerCandidate, sensitivity: Sensitivity): string
     const evidence = candidate.acoustics;
     if (!evidence) return '缺少声学证据，请重新分析';
     const profile = PROFILES[sensitivity];
-    if (evidence.rms < (sensitivity === 'sensitive' ? 1e-6 : 3e-5)) return '局部声音过弱';
+    if ((candidate.kind === 'drum' ? evidence.bandRms : evidence.rms) < (sensitivity === 'sensitive' ? 1e-6 : 3e-5))
+        return '局部声音过弱';
     if (evidence.salience < profile.salience) return '局部显著性不足';
     if (candidate.kind === 'drum') {
         if (candidate.strength < profile.velocity) return '鼓 velocity 低于当前筛选';
@@ -193,9 +194,22 @@ function principalMarkers(
     const markers: SoundMarker[] = [];
     for (const [groupId, list] of grouped) {
         const group = soundGroup(list[0]!, settings);
+        const byId = new Map(list.map(candidate => [candidate.id, candidate]));
         if (list[0]!.kind === 'drum') {
-            for (const candidate of list)
-                markers.push({
+            const points = new Map<number, Array<{ candidate: MarkerCandidate; marker: SoundMarker }>>();
+            for (const candidate of list) {
+                const time = Math.round(candidate.startSeconds * 1e6),
+                    bucket = points.get(time) ?? [];
+                const same = bucket.find(
+                    entry =>
+                        timbreSimilarity(entry.candidate, candidate) >= 0.995 &&
+                        Math.abs(entry.candidate.acoustics!.onsetSeconds - candidate.acoustics!.onsetSeconds) <= 1e-6,
+                );
+                if (same) {
+                    same.marker.rawIds.push(candidate.id);
+                    continue;
+                }
+                const marker: SoundMarker = {
                     id: `sound-${candidate.id}`,
                     groupId,
                     label: group.label,
@@ -204,7 +218,11 @@ function principalMarkers(
                     endSeconds: candidate.startSeconds,
                     eventKind: 'point',
                     rawIds: [candidate.id],
-                });
+                };
+                markers.push(marker);
+                bucket.push({ candidate, marker });
+                points.set(time, bucket);
+            }
             continue;
         }
         const ranges = list
@@ -229,7 +247,15 @@ function principalMarkers(
         let current: { start: number; end: number; ids: Set<string>; attack: number; anchor: number } | null = null;
         const finish = () => {
             if (!current || current.end <= current.start) return;
-            const rawIds = [...current.ids].sort(),
+            const rawIds = [...current.ids]
+                    .filter(id =>
+                        byId
+                            .get(id)!
+                            .acoustics!.activity.some(
+                                range => range.endSeconds > current!.start && range.startSeconds < current!.end,
+                            ),
+                    )
+                    .sort(),
                 startSeconds = current.start,
                 endSeconds = current.end;
             const eventKind =
@@ -271,7 +297,13 @@ function principalMarkers(
                 current = {
                     start: range.start,
                     end: Math.max(carry, range.end),
-                    ids: new Set([...current.ids, range.candidate.id]),
+                    ids: new Set(
+                        [...current.ids]
+                            .filter(id =>
+                                byId.get(id)!.acoustics!.activity.some(activity => activity.endSeconds > range.start),
+                            )
+                            .concat(range.candidate.id),
+                    ),
                     attack: range.attackTime,
                     anchor: range.attackAnchor,
                 };

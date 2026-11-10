@@ -1,5 +1,16 @@
 import { acousticEvidence, acousticFrameSeconds, ACOUSTIC_CONFIG } from './acousticIndex';
-import type { AcousticIndex, AcousticEvidence } from './acousticIndex';
+import type { AcousticIndex, AcousticEvidence, AcousticBand } from './acousticIndex';
+import type { DrumSoundCategory } from './drumVocabulary';
+
+export function drumAcousticBand(category: DrumSoundCategory): AcousticBand {
+    return category === 'kick' || category === 'tom'
+        ? 'low'
+        : category === 'snare' || category === 'clap'
+          ? 'mid'
+          : category === 'hat' || category === 'crash' || category === 'ride'
+            ? 'high'
+            : 'full';
+}
 
 export interface AcousticActivity {
     startSeconds: number;
@@ -11,17 +22,24 @@ export interface CandidateAcoustics extends AcousticEvidence {
 }
 
 /** Envelope hysteresis is independent of the UI's point/range threshold. */
-export function candidateAcoustics(index: AcousticIndex, start: number, end: number): CandidateAcoustics {
+export function candidateAcoustics(
+    index: AcousticIndex,
+    start: number,
+    end: number,
+    band: AcousticBand = 'full',
+): CandidateAcoustics {
     end = Math.min(index.durationSeconds, end);
-    const evidence = acousticEvidence(index, start, end);
+    const evidence = acousticEvidence(index, start, end, band);
     const { sampleRate, hopSize, frameSize } = ACOUSTIC_CONFIG;
     const at = (seconds: number) =>
         Math.max(0, Math.min(index.frameCount - 1, Math.floor((seconds * sampleRate) / hopSize)));
-    const local = Array.from(
-        index.rms.subarray(at(Math.max(0, start - 2)), at(Math.min(index.durationSeconds, end + 2)) + 1),
-    ).sort((a, b) => a - b);
+    const bandIndex = band === 'full' ? -1 : ['low', 'mid', 'high'].indexOf(band);
+    const levelAt = (frame: number) => (bandIndex < 0 ? index.rms[frame]! : index.bandRms[frame * 3 + bandIndex]!);
+    const low = at(Math.max(0, start - 2)),
+        high = at(Math.min(index.durationSeconds, end + 2));
+    const local = Array.from({ length: high - low + 1 }, (_, frame) => levelAt(low + frame)).sort((a, b) => a - b);
     const localPeak = local[Math.min(local.length - 1, Math.floor(local.length * 0.9))] ?? 0;
-    const salience = Math.min(1, evidence.rms / Math.max(1e-5, localPeak));
+    const salience = Math.min(1, evidence.bandRms / Math.max(1e-5, localPeak));
     const activity: AcousticActivity[] = [];
     const first = Math.max(0, at(start) - 1),
         last = at(end);
@@ -53,7 +71,11 @@ export function candidateAcoustics(index: AcousticIndex, start: number, end: num
 export function validCandidateAcoustics(value: CandidateAcoustics, duration: number): boolean {
     return (
         !!value &&
-        [value.rms, value.localContrast, value.onset, value.onsetSeconds, value.salience].every(Number.isFinite) &&
+        [value.rms, value.bandRms, value.localContrast, value.onset, value.onsetSeconds, value.salience].every(
+            Number.isFinite,
+        ) &&
+        ['full', 'low', 'mid', 'high'].includes(value.band) &&
+        value.bandRms >= 0 &&
         value.rms >= 0 &&
         value.localContrast >= 0 &&
         value.localContrast <= 100 &&

@@ -11,6 +11,8 @@ import type { CandidateAcoustics } from '../../src/transcription/candidateAcoust
 export function evidence(start: number, end: number, rms = 0.5): CandidateAcoustics {
     return {
         rms,
+        band: 'full',
+        bandRms: rms,
         localContrast: 2,
         onset: 0.5,
         onsetSeconds: start,

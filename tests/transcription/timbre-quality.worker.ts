@@ -5,7 +5,7 @@ import { transcribePitch } from '../../src/transcription/pitchModel';
 import { transcribeDrumReader } from '../../src/transcription/drumTranscription';
 import { openTranscriptionRuntime } from '../../src/transcription/modelSession';
 import { buildAcousticIndex } from '../../src/transcription/acousticIndex';
-import { candidateAcoustics } from '../../src/transcription/candidateAcoustics';
+import { candidateAcoustics, drumAcousticBand } from '../../src/transcription/candidateAcoustics';
 import { ANALYSIS_CONFIG_HASH, ROLE_PITCH_OPTIONS } from '../../src/transcription/analysisOptions';
 import { drumConfigurationHash } from '../../src/transcription/drumOptions';
 import { deriveCandidateReview } from '../../src/transcription/candidateReview';
@@ -139,7 +139,12 @@ self.onmessage = () => {
                 endSeconds: hit.startSeconds,
                 deleted: false,
                 source: { resultId: drums.id, inputRole: 'drums', artifactId: 'controlled-drums', model: 'adt-str' },
-                acoustics: candidateAcoustics(acoustic, hit.startSeconds, Math.min(8, hit.startSeconds + 0.12)),
+                acoustics: candidateAcoustics(
+                    acoustic,
+                    hit.startSeconds,
+                    Math.min(8, hit.startSeconds + 0.12),
+                    drumAcousticBand(hit.drum),
+                ),
             });
         validateCandidates(notes);
         validateCandidates(drums);

@@ -15,7 +15,7 @@ import { validateCandidates } from './candidates';
 import type { NoteCandidate, TranscriptionIdentity, TranscriptionResult, TranscriptionRole } from './candidateTypes';
 import type { TranscriptionBundle } from './workerProtocol';
 import { buildAcousticIndex } from './acousticIndex';
-import { candidateAcoustics } from './candidateAcoustics';
+import { candidateAcoustics, drumAcousticBand } from './candidateAcoustics';
 import { ROLE_PITCH_OPTIONS } from './analysisOptions';
 
 export type PipelineProgress = (phase: string, role: string | null, done: number, total: number | null) => void;
@@ -145,6 +145,7 @@ export async function runTranscription(
                         acoustic,
                         hit.startSeconds,
                         Math.min(acoustic.durationSeconds, hit.startSeconds + 0.12),
+                        drumAcousticBand(hit.drum),
                     ),
                 });
             result.completedRoles.push('drums');

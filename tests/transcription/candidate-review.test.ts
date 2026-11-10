@@ -49,6 +49,24 @@ it('preserves fast independent rolls and distinct simultaneous custom sounds', (
     expect(preview.markers).toHaveLength(4);
     expect(preview.groups).toHaveLength(3);
 });
+it('coalesces only an explicitly shared sound group at the same acoustic point and retains raw identities', () => {
+    const a = drumCandidate('a', 1, 41),
+        b = drumCandidate('b', 1, 47),
+        result = reviewResult([a, b]);
+    const settings = defaultReviewSettings();
+    expect(deriveCandidateReview(result, settings, {}).markers).toHaveLength(2);
+    settings.groups['drum:41'] = { label: '同类通鼓', instrument: 'drums' };
+    settings.assignments.b = 'drum:41';
+    const review = deriveCandidateReview(result, settings, {});
+    expect(review.markers).toHaveLength(1);
+    expect(review.markers[0]!.rawIds).toEqual(['a', 'b']);
+    expect(result.candidates).toHaveLength(2);
+    const project = createInitialEditorProject({
+        track: { contentHash: 'a'.repeat(64), fileName: 'test.wav', durationSeconds: 30, sampleRate: 44100 },
+        createId: () => crypto.randomUUID(),
+    });
+    expect(applySoundMarkers(project, result, review).lanes.at(-1)!.events).toHaveLength(1);
+});
 it('folds likely source leakage using acoustic evidence and permits retaining a real ensemble', () => {
     const a = noteCandidate('piano', 1, 2),
         b = noteCandidate('guitar', 1.01, 2, 'guitar');
