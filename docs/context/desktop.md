@@ -178,6 +178,8 @@ D0–D7 已按本机范围完成；下文按阶段保留失败、部分结果及
 
 ## 后续共享修改验证
 
+- 2026-11-11 标记选区暂停判断：共享命令不再把冻结成员的视窗可见性当作暂停条件。15 项 Editor 单元/集成及 Chrome/Edge 共 8 项区间回归通过；`desktop:dir` 后实际 ASAR 的 `editor-timeline-153b1fc6-b40b-49db-96d3-ddb05ac1a549` 通过时间轴原专项及新增的选区完全移出视窗后移动/复制检查，无 page error。仅系统文件选值为替身，未重建或安装 NSIS，不扩展正式 readiness。
+
 - 2026-11-04，DEC-115 的属性 `tooltip` 元数据与帮助组件使用共享资源/工程校验和 UI，覆盖五类属性，未增加宿主接口。字段与资源邻接 17 项单元检查、外部 skill 的 46 项 Vitest/19 项 Node 检查通过；数据提交 `b925c74`，外部 skill 字段说明与 codec 提交 `23c3916`。Chrome/Edge 的 Tooltip、属性控件与同步补偿共 8 项通过，Web 构建和 `desktop:dir` 通过；本轮不重建 NSIS 安装器。
 - 最终实际 Electron 45.1.0 的 `tooltip-87b57b61-df0b-471a-b35c-b118fe9c4005` 完整通过五类说明、草稿刷新/JSON、交互、标签聚焦、跨图标单浮层切换、纯文本、长内容、视窗四角、侧栏滚动、原生 dialog/全屏顶层及三档宽度检查，page/console error 为空。运行时为普通用户目录校验副本，文件选值仍为替身；390px 为本次独立窗口临时放宽最小尺寸后的共享布局检查，不扩大实际桌面最小尺寸合同。截图与结果见 `artifacts/desktop/tooltip/<ID>`，命令及受控几何夹具边界见 [tests README](../../tests/README.md)。
 

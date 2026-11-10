@@ -14,6 +14,8 @@ import { EditorDraftRepository } from '../../src/editor/editorDraftRepository';
 import { createInitialEditorProject } from '../../src/editor/projectCodec';
 import { createPointLane, createPointEvent } from '../../src/editor/pointAnnotations';
 import { selectMarkerBlockByTime } from '../../src/editor/markerBlockOperations';
+import { useMarkerBlocks } from '../../src/editor/useMarkerBlocks';
+import { DEFAULT_BEAT_SNAP } from '../../src/editor/beatSnap';
 
 function project() {
     const value = createInitialEditorProject({
@@ -103,4 +105,45 @@ test('waveform viewport cannot influence marker geometry; marker preferences do 
     expect(await repository.getMarkerSpan('second')).toBeNull();
     expect(await repository.restore()).toBeNull();
     repository.close();
+});
+
+test('frozen offscreen blocks can move, copy and delete while paused without admitting new history', () => {
+    let value = createPointLane(project());
+    const lane = value.lanes[0]!,
+        category = lane.innerClasses[0]!.id;
+    for (const time of [0.5, 1, 20]) value = createPointEvent(value, lane.id, category, time, () => `${time}`).project;
+    let view = createMarkerTimeView(0, 900);
+    const blocks = useMarkerBlocks(
+        () => value,
+        () => view,
+        () => DEFAULT_BEAT_SNAP,
+        next => {
+            value = next;
+        },
+        () => {},
+    );
+    blocks.mode.value = true;
+    blocks.select(lane.id, category, 0.5, 1);
+    expect(blocks.selection.value?.eventIds).toEqual(['0.5', '1']);
+    view = createMarkerTimeView(30, 900, 1);
+    expect(() => blocks.move(0.625, true)).not.toThrow();
+    blocks.key({ ctrlKey: true, key: 'c', preventDefault() {}, stopPropagation() {} } as KeyboardEvent, 800);
+    expect(value.lanes[0]!.events).toHaveLength(5);
+    blocks.remove(blocks.selection.value!);
+    expect(value.lanes[0]!.events.map(event => event.id)).toEqual(['0.5', '1', '20']);
+    expect(() =>
+        assertMarkerBlockEditable(
+            value,
+            { laneId: lane.id, innerClassId: category, startSeconds: 0, endSeconds: 2, eventIds: ['0.5'] },
+            view,
+            -1,
+        ),
+    ).toThrow('目标超出歌曲范围');
+    expect(() =>
+        assertMarkerBlockEditable(
+            value,
+            { laneId: lane.id, innerClassId: category, startSeconds: 0, endSeconds: 2 },
+            createMarkerTimeView(30, 900, 1, true),
+        ),
+    ).toThrow('请暂停');
 });

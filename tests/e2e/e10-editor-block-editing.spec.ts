@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { verifyOffscreenMarkerBlocks } from '../support/editor-timeline-scenario.mjs';
 import {
     addMarkerLane,
     clickMarkerTime,
@@ -7,6 +8,11 @@ import {
     prepareMarkerEditor,
     seekMarkerEditor,
 } from '../support/editor-marking';
+
+test('paused frozen blocks remain editable after leaving the visible window', async ({ page }) => {
+    await prepareMarkerEditor(page);
+    await verifyOffscreenMarkerBlocks(page);
+});
 
 test('left-drag block selection copies only one lane and class, supports expansion and preserves IDs on movement', async ({
     page,

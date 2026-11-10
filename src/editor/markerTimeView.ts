@@ -88,17 +88,16 @@ export function assertMarkerBlockEditable(
     view: MarkerTimeView,
     offset = 0,
 ): void {
+    if (!view.editable) throw new Error('请暂停后再操作标记。');
     const events = collectMarkerBlockEvents(project, selection);
     if (
-        !view.editable ||
-        events.some(
-            event =>
-                !markerEventReachable(view, event) ||
-                ('atSeconds' in event
-                    ? event.atSeconds + offset < 0 || event.atSeconds + offset > view.durationSeconds
-                    : event.startSeconds + offset < 0 || event.endSeconds + offset > view.durationSeconds),
+        !Number.isFinite(offset) ||
+        events.some(event =>
+            'atSeconds' in event
+                ? event.atSeconds + offset < 0 || event.atSeconds + offset > view.durationSeconds
+                : event.startSeconds + offset < 0 || event.endSeconds + offset > view.durationSeconds,
         )
     ) {
-        throw new Error('只能在暂停后操作歌曲范围内的标记。');
+        throw new Error('目标超出歌曲范围，标记保持原位。');
     }
 }

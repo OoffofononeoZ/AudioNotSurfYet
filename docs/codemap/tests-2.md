@@ -23,7 +23,7 @@
 | [tests/e2e/desktop-file-controls.spec.ts](../../tests/e2e/desktop-file-controls.spec.ts) | — |
 | [tests/e2e/desktop-shutdown.spec.ts](../../tests/e2e/desktop-shutdown.spec.ts) | [src/platform/lifecycleContracts.ts](../../src/platform/lifecycleContracts.ts)、[tests/support/editor-workspaces.ts](../../tests/support/editor-workspaces.ts)、[tests/support/file-picker.ts](../../tests/support/file-picker.ts) |
 | [tests/e2e/e1-editor.spec.ts](../../tests/e2e/e1-editor.spec.ts) | [tests/support/file-picker.ts](../../tests/support/file-picker.ts)、[tests/support/project-actions.ts](../../tests/support/project-actions.ts) |
-| [tests/e2e/e10-editor-block-editing.spec.ts](../../tests/e2e/e10-editor-block-editing.spec.ts) | [tests/support/editor-marking.ts](../../tests/support/editor-marking.ts) |
+| [tests/e2e/e10-editor-block-editing.spec.ts](../../tests/e2e/e10-editor-block-editing.spec.ts) | [tests/support/editor-marking.ts](../../tests/support/editor-marking.ts)、[tests/support/editor-timeline-scenario.mjs](../../tests/support/editor-timeline-scenario.mjs) |
 | [tests/e2e/e2-editor.spec.ts](../../tests/e2e/e2-editor.spec.ts) | [tests/support/file-picker.ts](../../tests/support/file-picker.ts) |
 | [tests/e2e/e3-editor.spec.ts](../../tests/e2e/e3-editor.spec.ts) | [tests/support/editor-marking.ts](../../tests/support/editor-marking.ts) |
 | [tests/e2e/e4-editor.spec.ts](../../tests/e2e/e4-editor.spec.ts) | [src/analysis/types.ts](../../src/analysis/types.ts)、[tests/support/editor-marking.ts](../../tests/support/editor-marking.ts)、[tests/support/file-picker.ts](../../tests/support/file-picker.ts)、[tests/support/stem-analysis.ts](../../tests/support/stem-analysis.ts) |

@@ -280,3 +280,34 @@ export async function verifyTimelineLock(page, screenshot) {
     await button.click();
     await expect.poll(() => timelineRange(page)).toEqual(independent);
 }
+export async function verifyOffscreenMarkerBlocks(page) {
+    await page.getByTestId('editor-timeline').focus();
+    await page.keyboard.press('Home');
+    await page.getByTestId('add-marker-lane').click();
+    await page.getByTestId('add-point-lane').click();
+    const surface = page.locator('[data-testid^="marker-surface-"]').last();
+    await surface.scrollIntoViewIfNeeded();
+    const rect = await surface.boundingBox();
+    const start = Number(await surface.getAttribute('data-view-start'));
+    const end = Number(await surface.getAttribute('data-view-end'));
+    const x = time => rect.x + ((time - start) / (end - start)) * rect.width;
+    for (const time of [0.5, 1]) await page.mouse.click(x(time), rect.y + 24);
+    await page.getByTestId('toggle-block-mode').click();
+    await page.mouse.move(x(0.5), rect.y + 8);
+    await page.mouse.down();
+    await page.mouse.move(x(1), rect.y + 8, { steps: 5 });
+    await page.mouse.up();
+    await page.getByTestId('editor-timeline').focus();
+    for (let i = 0; i < 4; i++) await page.keyboard.press('ArrowRight');
+    await expect(surface.locator('.marker-point')).toHaveCount(0);
+    await surface.focus();
+    await page.keyboard.press('Alt+ArrowRight');
+    await page.keyboard.press('Control+c');
+    await expect(page.getByTestId('point-workspace-status')).toContainText('已向后复制 2');
+    await page.getByTestId('editor-timeline').focus();
+    await page.keyboard.press('Home');
+    await expect(surface.locator('.marker-point')).toHaveCount(4);
+    await expect(surface.locator('[data-time-seconds="0.625"]')).toHaveCount(1);
+    await expect(surface.locator('[data-time-seconds="1.125"]')).toHaveCount(1);
+    await page.getByTestId('toggle-block-mode').click();
+}

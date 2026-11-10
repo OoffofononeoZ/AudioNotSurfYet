@@ -14,6 +14,7 @@ import {
     verifyTimelineAlignment,
     verifyIndependentTimeline,
     verifyTimelineLock,
+    verifyOffscreenMarkerBlocks,
 } from '../support/editor-timeline-scenario.mjs';
 
 const root = fileURLToPath(new URL('../../', import.meta.url));
@@ -89,6 +90,7 @@ try {
     await page.reload();
     await expect(page.getByTestId('editor-ready')).toBeVisible();
     await expect(page.getByTestId('lock-editor-timeline')).toHaveAttribute('aria-pressed', 'false');
+    await verifyOffscreenMarkerBlocks(page);
     assert.deepEqual(errors, []);
     result.status = 'passed';
     result.versions = await app.evaluate(() => process.versions);
