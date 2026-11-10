@@ -55,7 +55,9 @@ export class DrumBatchModel {
         try {
             return new DrumBatchModel(sessions);
         } catch (error) {
-            await Promise.allSettled([sessions.encoder.release(), sessions.decoder.release()]);
+            if (sessions.gpuGuard)
+                await sessions.gpuGuard.release([() => sessions.encoder.release(), () => sessions.decoder.release()]);
+            else await Promise.allSettled([sessions.encoder.release(), sessions.decoder.release()]);
             throw error;
         }
     }
@@ -102,7 +104,7 @@ export class DrumBatchModel {
         try {
             progress('drum-encode', 0, batch);
             let at = performance.now();
-            cross = await this.sessions.encoder.run({ logmel: input });
+            cross = await this.run(() => this.sessions.encoder.run({ logmel: input }));
             encodeMs = performance.now() - at;
             checkCancelled(signal);
             for (const name of crossNames)
@@ -121,7 +123,7 @@ export class DrumBatchModel {
                 let outputs: Awaited<ReturnType<ModelSession['run']>> | undefined;
                 try {
                     at = performance.now();
-                    outputs = await this.sessions.decoder.run({ tokens: prefix, ...cross });
+                    outputs = await this.run(() => this.sessions.decoder.run({ tokens: prefix, ...cross }));
                     decodeMs += performance.now() - at;
                     checkCancelled(signal);
                     const logits = outputs.logits;
@@ -149,8 +151,7 @@ export class DrumBatchModel {
                     }
                     if (lengths.every(Boolean)) break;
                 } finally {
-                    prefix.dispose();
-                    if (outputs) Object.values(outputs).forEach(tensor => tensor.dispose());
+                    this.disposeTensors([prefix, ...Object.values(outputs ?? {})]);
                 }
             }
             return inputs.map((request, row) => {
@@ -203,12 +204,30 @@ export class DrumBatchModel {
                 };
             });
         } finally {
-            input.dispose();
-            if (cross) Object.values(cross).forEach(tensor => tensor.dispose());
+            this.disposeTensors([input, ...Object.values(cross ?? {})]);
         }
     }
 
+    private run<T>(operation: () => Promise<T>): Promise<T> {
+        return this.sessions.gpuGuard ? this.sessions.gpuGuard.run(operation) : operation();
+    }
+    private disposeTensors(tensors: Array<{ dispose(): void }>): void {
+        let failure: unknown;
+        for (const tensor of tensors)
+            try {
+                tensor.dispose();
+            } catch (error) {
+                if (!this.sessions.gpuGuard?.hasLost) failure ??= error;
+            }
+        if (failure) throw failure;
+    }
+
     async dispose(): Promise<void> {
-        await Promise.allSettled([this.sessions.encoder.release(), this.sessions.decoder.release()]);
+        if (this.sessions.gpuGuard)
+            await this.sessions.gpuGuard.release([
+                () => this.sessions.encoder.release(),
+                () => this.sessions.decoder.release(),
+            ]);
+        else await Promise.allSettled([this.sessions.encoder.release(), this.sessions.decoder.release()]);
     }
 }

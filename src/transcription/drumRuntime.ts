@@ -6,6 +6,7 @@ import { checkCancelled, ProcessingError } from '../processing/modelManifest';
 import { transcriptionModel } from './modelManifest';
 import { expandQuantizedConstants, CONSTANT_EXPANSION_VERSION } from './onnxConstants';
 import type { TranscriptionProgress, ModelSession } from './modelSession';
+import { DrumGpuGuard } from './drumGpuGuard';
 
 export type DrumBackend = 'webgpu' | 'wasm';
 export const DRUM_RUNTIME_CONFIG = {
@@ -24,6 +25,7 @@ export interface DrumSessions {
     backend: DrumBackend;
     adapter: unknown;
     setupMs: number;
+    gpuGuard?: DrumGpuGuard;
 }
 
 async function drumRuntime(backend: DrumBackend, signal: AbortSignal) {
@@ -58,6 +60,7 @@ export async function createDrumSessions(
 ): Promise<DrumSessions> {
     const started = performance.now();
     const runtime = await drumRuntime(backend, signal);
+    const gpuGuard = backend === 'webgpu' ? new DrumGpuGuard(() => runtime.ort.env.webgpu.device) : undefined;
     const sessions: ModelSession[] = [];
     try {
         for (const id of ['adt-encoder', 'adt-decoder'] as const) {
@@ -79,7 +82,9 @@ export async function createDrumSessions(
                     ? { preferredOutputLocation: 'gpu-buffer' as const }
                     : {}),
             };
-            sessions.push(await runtime.ort.InferenceSession.create(weights, options));
+            const create = () => runtime.ort.InferenceSession.create(weights, options);
+            sessions.push(await (gpuGuard ? gpuGuard.run(create) : create()));
+            gpuGuard?.observe();
             checkCancelled(signal);
         }
         return {
@@ -89,9 +94,11 @@ export async function createDrumSessions(
             backend,
             adapter: runtime.adapter,
             setupMs: performance.now() - started,
+            ...(gpuGuard ? { gpuGuard } : {}),
         };
     } catch (error) {
-        await Promise.allSettled(sessions.map(session => session.release()));
+        if (gpuGuard) await gpuGuard.release(sessions.map(session => () => session.release()));
+        else await Promise.allSettled(sessions.map(session => session.release()));
         checkCancelled(signal);
         if (error instanceof ProcessingError) throw error;
         throw new ProcessingError(

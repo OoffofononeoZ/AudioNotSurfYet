@@ -25,7 +25,7 @@
 - Windows x64 Electron 本地实施 Goal 已完成，网页保留；桌面合同、阶段及各项证据见[双端与桌面实施](desktop.md)。原生启动问题已通过普通用户目录校验副本解决；共享功能、模型/媒体、原生交互、最小化任务及安装升级保留已有本机实测，不代表其他硬件或正式发布通过。
 - 当前Analyzer为单列/FIFO及Wallpaper频谱；Editor使用独立marker视图、数字实时录入、FT和有限自动标记；Visualizer使用V6工程、V2可执行算法资源包与离线WebM。源码与当前页面契约解释实际行为；外部 assets 文件夹提供资源，内容生成 skill 2.7.0 仅在外部维护，使用 BriefV2 和独立封装工具，默认自主生成并要求实际展示图。
 - DEC-074接受当前FT听感/部分串音和长曲耗时，本轮功能已收尾；Chrome历史1011.9541秒超过900秒仍保留。完整P1/P2 clean evidence、Edge普通profile长曲与原生OS操作不由此补齐。
-- 新增识别质量待owner复核。P3逐拍/局部tempo、完整提案/应用和处理数据工程扩展未完成；最新V4-only已替代旧V2迁移计划，自动标记不等于P3。
+- DEC-116 当前鼓/乐器候选改善已获 owner 接受作为可编辑结果，保留[自动标记的已知限制](../architecture/processing/editor-auto-marking.md)，不宣称精确乐器身份或 95% 正确率。P3逐拍/局部tempo、完整提案/应用和处理数据工程扩展未完成；最新V4-only已替代旧V2迁移计划，自动标记不等于P3。
 - Editor整体readiness保持pre-E10/DEC-055 owner-review；DEC-075另行授权新增能力和回归使用本地端口/Chrome/Edge，不重开旧readiness自动化。
 - Visualizer历史候选保留viewport/fullscreen视觉缺口；当前功能验证不证明新整体readiness。PROD-015继续阻断生产上线。
 

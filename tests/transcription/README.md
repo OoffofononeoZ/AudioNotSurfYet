@@ -65,3 +65,22 @@ npx playwright test tests/e2e/editor-transcription.spec.ts tests/e2e/transcripti
 `editor-sound-examples.spec.ts --project=chrome --project=edge --workers=1` 无模型/FT 依赖，用自编 CC0 乐句验证真实 Worker DSP、反例、边界修正、试听、显式/重复应用、刷新及索引复用、取消、已有标记带入和窄屏。产物为本机 `artifacts/evals/editor-transcription/examples/`，受控重复匹配不能替代真实音乐质量。
 
 六输入完整链和 `test:desktop:transcription` 共用 `tests/support/sound-example-flow.mjs`，额外检查原曲/已有 FT other/辅助钢琴三个来源的实际读取、索引与试听、默认未勾选、应用幂等和离线恢复；只复用已生成音轨，不调用新的分离。清理全部候选同时清理示例/索引，已应用工程保留。
+
+## 完整产品与失败复核
+
+`transcription-gpu-failure.spec.ts --project=chrome --project=edge --workers=1` 分别隐藏测试 Worker 的 GPU 入口、在真实解码开始时销毁 ORT 自有 GPUDevice；断言明确失败、无结果、结束释放，不能用模拟抛错替代设备丢失。`drum-gpu-guard.test.ts` 覆盖延迟取得设备、悬挂 run/release、正常清理与已知迟到 GPU map 错误的有限抑制。
+
+整曲测试显式使用本机已授权输入，默认跳过。`TRANSCRIPTION_PRODUCT_AUDIO=<原 MP3>` 后运行 `transcription-product-benchmark.spec.ts --project=chrome --project=edge --workers=1`，固定字节模型预先核 hash 后写入测试缓存，应用仍逐项校验。使用独立持久 profile，通过真实 FT 准备当前结果；FT/下载不计时。计时从点击分析前至保存并派生预览完成，包含缓存/FT 校验、权重展开、session、PCM、推理/重试、DSP、复核与发布。FT WAV 导出及示例检索在计时/内存采样结束后执行。产物在 `artifacts/evals/transcription-optimization/product/`，保留不完整区间与环境/源码身份。需要足够本地空间，大型 fetch 失败不代表模型推断失败。
+
+`EXAMPLE_BENCH_REFERENCE=<冻结手工 V2 工程>` 可在上述整曲测试结束后以实际已有 FT drums 交换第三轨的两个 mid 示例，固定默认 0.82 门限并记录起点/终点误差。另设 `EXAMPLE_BENCH_AUDIO` 后运行 `sound-examples-real-song.spec.ts` 独立核对默认原曲来源；end 单实例不作为留出证据。`EXAMPLE_EXPORT_INDEX=1` 将无 PCM 的 DSP typed arrays 导出供本地诊断；`analyze-example-index.mjs --index <index.json>` 的降低门限/时长探查仅为解释失败，不改变初次检验结论或产品设置。
+
+```powershell
+node --experimental-strip-types tests/transcription/analyze-product-result.mjs --report <产品 report.json> --reference <冻结手工工程> --suffix frozen507
+node tests/desktop/transcription-product-benchmark.mjs --audio <原 MP3> --reference <冻结手工工程> --profile-from <成功正常 transcription result.json>
+```
+
+时间分析使用 Black Hole 的 135 BPM/八分之一拍（55.6ms）一对一关联，前 120 秒估计固定偏移并另报留出段；仅统计手工正例召回，不把其他声音计为误检。手工工程试听后可能变化，应冻结参考并保留 hash/来源，不能混用 507 与后来 506 正例。工具写出复核 V2 工程，保留人工轨和 tempo，不改输入文件。`prepare-listening-review.mjs` 生成局部 WAV/前后工程便于试听；音频不提交仓库。
+
+桌面首次测试复制已核对的普通成功 transcription profile，实际当前 ASAR 在独立原生目录运行、准备整曲 FT、再离线计时。后续可显式改用 `--product-profile-from <成功产品 report.json>`，核对其来源链、原音频/FT WAV 和 ASAR 摘要后复制既有完整 FT；当前产品还会自行验证恢复数据，不伪造分离清单。报告包含源/执行 ASAR hash、是否复用已有 FT 和应用进程内存采样；原生保存选择返回值仍为夹具。与浏览器顺序执行，禁止并发 GPU 任务干扰计时；现有成功运行身份及已知质量限制见[自动标记契约](../../docs/architecture/processing/editor-auto-marking.md)。
+
+桌面整曲 runner 可加 `--gpu-failure-check`：计时/采样和正常结果落盘后启动独立重算，在实际鼓解码阶段只销毁其 Worker 的 ORT GPUDevice，要求显示设备丢失、没有新保存结果、原结果保留、Worker 终止且无 page error。它不重置系统 GPU；Electron 已知 GPU map AbortError 可能先于 `device.lost`，生产保护只对此暂存最多 50ms，未确认丢失仍报告原异常。加 `--gpu-failure-only` 必须复用显式成功产品 profile，仅做失败回归并标明没有性能测量；Worker 控制台另记实际异常类型、先后顺序及默认处理是否已阻止。

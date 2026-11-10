@@ -8,6 +8,10 @@
 
 | 文件 | 本地静态引用（最多显示 6 项） |
 | --- | --- |
+| [tests/e2e/visualizer-presets.spec.ts](../../tests/e2e/visualizer-presets.spec.ts) | [src/visualizer/compositionTypes.ts](../../src/visualizer/compositionTypes.ts)、[tests/support/file-picker.ts](../../tests/support/file-picker.ts)、[tests/support/project-actions.ts](../../tests/support/project-actions.ts)、[tests/support/v6-resource-probe.ts](../../tests/support/v6-resource-probe.ts)、[tests/support/visualizer-output-sync.ts](../../tests/support/visualizer-output-sync.ts) |
+| [tests/e2e/visualizer-realtime-dialog.spec.ts](../../tests/e2e/visualizer-realtime-dialog.spec.ts) | [tests/support/file-picker.ts](../../tests/support/file-picker.ts)、[tests/support/project-actions.ts](../../tests/support/project-actions.ts) |
+| [tests/e2e/visualizer-realtime-production.spec.ts](../../tests/e2e/visualizer-realtime-production.spec.ts) | [tests/support/file-picker.ts](../../tests/support/file-picker.ts)、[tests/support/project-actions.ts](../../tests/support/project-actions.ts) |
+| [tests/e2e/visualizer-realtime.spec.ts](../../tests/e2e/visualizer-realtime.spec.ts) | [tests/support/file-picker.ts](../../tests/support/file-picker.ts)、[tests/support/project-actions.ts](../../tests/support/project-actions.ts) |
 | [tests/e2e/visualizer-resource-directory.spec.ts](../../tests/e2e/visualizer-resource-directory.spec.ts) | [tests/support/file-picker.ts](../../tests/support/file-picker.ts)、[tests/support/resource-directory.ts](../../tests/support/resource-directory.ts)、[tests/support/visualizer-assets.mjs](../../tests/support/visualizer-assets.mjs) |
 | [tests/e2e/visualizer-resource-preview.spec.ts](../../tests/e2e/visualizer-resource-preview.spec.ts) | [tests/support/file-picker.ts](../../tests/support/file-picker.ts)、[tests/support/visualizer-assets.mjs](../../tests/support/visualizer-assets.mjs) |
 | [tests/e2e/visualizer-resources.spec.ts](../../tests/e2e/visualizer-resources.spec.ts) | [src/visualizer/algorithmTypes.ts](../../src/visualizer/algorithmTypes.ts)、[src/visualizer/compositionTypes.ts](../../src/visualizer/compositionTypes.ts)、[src/visualizer/resourceIdentity.ts](../../src/visualizer/resourceIdentity.ts)、[src/visualizer/resourceTypes.ts](../../src/visualizer/resourceTypes.ts)、[tests/support/file-picker.ts](../../tests/support/file-picker.ts)、[tests/support/project-actions.ts](../../tests/support/project-actions.ts) |
@@ -104,7 +108,3 @@
 | [tests/scripts/run-m11-eval.mjs](../../tests/scripts/run-m11-eval.mjs) | — |
 | [tests/scripts/run-m12-eval.mjs](../../tests/scripts/run-m12-eval.mjs) | — |
 | [tests/scripts/run-m13-eval.mjs](../../tests/scripts/run-m13-eval.mjs) | — |
-| [tests/scripts/run-m14-eval.mjs](../../tests/scripts/run-m14-eval.mjs) | — |
-| [tests/scripts/run-m3-eval.mjs](../../tests/scripts/run-m3-eval.mjs) | — |
-| [tests/scripts/run-m4-eval.mjs](../../tests/scripts/run-m4-eval.mjs) | — |
-| [tests/scripts/run-m5-eval.mjs](../../tests/scripts/run-m5-eval.mjs) | — |

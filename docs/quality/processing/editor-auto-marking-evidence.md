@@ -2,6 +2,8 @@
 
 范围与授权见 [DEC-075](../../context/decision-registry.md#dec-075--editor-audition-and-limited-transcription--2026-10-12) 和 [契约](../../architecture/processing/editor-auto-marking.md)。以下为 2026-10-12 工作树 provisional；底层 HEAD 为 `ea2ace1`，新增源码的 SHA-256 保存在每项运行 JSON。没有本轮 clean canonical、readiness 或发布结论。
 
+后续 DEC-116 的实现、整曲测量及 2026-11-10 owner 对当前可编辑结果的接受见[当前自动标记契约](../../architecture/processing/editor-auto-marking.md#优化-goal2026-11-08)。下文保留旧实现当时的输出与未接受结论，不用新结果改写历史报告。
+
 ## 已实际执行
 
 - 固定四项新增模型实际 bytes／SHA-256 全部匹配 manifest，Basic Pitch 另匹配官方 Git blob `c30e5f9438e798604b7177aa26be1fe64482f767`。合计 209572912 bytes；独立公开文件在忽略的 `artifacts/fixtures/transcription-models/`，未提交权重。

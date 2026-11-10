@@ -49,6 +49,39 @@ export async function verifiedTranscriptionProfile(root, resultFile) {
     return { sourceResult, nativeDirectory, profile: await fs.realpath(path.join(nativeDirectory, 'profile')) };
 }
 
+/** A completed real-song run may supply its own immutable cached FT/profile. */
+export async function verifiedProductProfile(root, resultFile) {
+    const sourceResult = await fs.realpath(path.resolve(root, resultFile)),
+        resultRoot = await fs.realpath(path.join(root, 'artifacts/desktop/transcription-product')),
+        relative = path.relative(resultRoot, sourceResult);
+    assert(
+        /^transcription-product-[a-f0-9-]{36}[\\/]report\.json$/.test(relative),
+        'Only an explicit product test run may supply a profile',
+    );
+    const previous = JSON.parse(await fs.readFile(sourceResult, 'utf8'));
+    assert.equal(previous.status, 'passed');
+    await verifiedTranscriptionProfile(root, previous.profileFrom);
+    const nativeDirectory = path.join(
+        await fs.realpath(process.env.LOCALAPPDATA),
+        'AudioNotSurfYet-LocalRuntime',
+        path.dirname(relative),
+    );
+    assert.equal(await fs.realpath(previous.nativeDirectory), nativeDirectory);
+    assert.equal(previous.runtimeSourceAsarHash, previous.runtimeAsarHash);
+    assert.equal(await hashFile(path.join(nativeDirectory, 'input.mp3')), previous.sourceHash);
+    assert.equal(await hashFile(path.join(nativeDirectory, 'ft-drums.wav')), previous.stemHash);
+    const cached = JSON.parse(await fs.readFile(path.join(path.dirname(sourceResult), 'cached-record.json'), 'utf8'));
+    assert.equal(cached.bundle.result.identity.contentHash, previous.sourceHash);
+    assert.deepEqual(cached.bundle.result.completedRoles, ['drums']);
+    return {
+        sourceResult,
+        nativeDirectory,
+        profile: await fs.realpath(path.join(nativeDirectory, 'profile')),
+        sourceHash: previous.sourceHash,
+        trackId: cached.bundle.result.identity.trackId,
+    };
+}
+
 export async function databaseRows(page, database, version, store, keys = false) {
     return page.evaluate(
         async ({ database, version, store, keys }) => {
