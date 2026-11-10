@@ -1,3 +1,4 @@
+import { drumConfigurationHash } from '../../src/transcription/drumOptions';
 import { describe, expect, it } from 'vitest';
 import { createInitialEditorProject, decodeEditorProject, encodeEditorProjectV2 } from '../../src/editor/projectCodec';
 import { applyCandidateResult, resultAlreadyApplied } from '../../src/transcription/applyCandidates';
@@ -17,7 +18,7 @@ import type {
 
 function result(): TranscriptionResult {
     return {
-        version: 1,
+        version: 2,
         id: 'result-1',
         createdAt: '2026-10-12T12:00:00.000Z',
         identity: {
@@ -29,6 +30,8 @@ function result(): TranscriptionResult {
             configHash: 'c'.repeat(64),
             modelManifestHash: 'd'.repeat(64),
             runtimeManifestHash: 'e'.repeat(64),
+            drumBackend: 'webgpu',
+            drumConfigHash: drumConfigurationHash('webgpu'),
             selectedRoles: ['drums', 'bass', 'piano', 'guitar'],
         },
         completedRoles: ['drums', 'bass', 'piano', 'guitar'],

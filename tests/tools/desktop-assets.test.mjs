@@ -25,6 +25,7 @@ test('desktop staging excludes ignored personal media, diagnostics and undeclare
         'processing-runtime/transcription/THIRD_PARTY_NOTICES.md',
         'processing-runtime/transcription/model-artifacts.json',
         'processing-runtime/transcription/licenses/BasicPitch-LICENSE.txt',
+        'processing-runtime/transcription/licenses/ComingUndone-LICENSE.txt',
         'wallpaper-runtime/runtime.js',
         'wallpaper-runtime/THIRD_PARTY_LICENSES.txt',
     ])
@@ -36,6 +37,13 @@ test('desktop staging excludes ignored personal media, diagnostics and undeclare
         'product asset',
     );
     assert.equal(await fs.readFile(path.join(destination, 'processing-runtime/ort.test.wasm'), 'utf8'), 'pinned wasm');
+    assert.equal(
+        await fs.readFile(
+            path.join(destination, 'processing-runtime/transcription/licenses/ComingUndone-LICENSE.txt'),
+            'utf8',
+        ),
+        'product asset',
+    );
     for (const file of ['audios', 'test_audio', 'processing-probe', 'processing-runtime/unlisted.onnx']) {
         await assert.rejects(fs.access(path.join(destination, file)), { code: 'ENOENT' });
     }

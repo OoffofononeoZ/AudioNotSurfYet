@@ -35,6 +35,20 @@
                 </div>
             </div>
             <footer class="task-actions">
+                <label
+                    >鼓推理
+                    <select
+                        :value="state.drumBackend"
+                        :disabled="busy"
+                        aria-label="鼓推理方式"
+                        @change="
+                            service.setDrumBackend(($event.target as HTMLSelectElement).value as 'webgpu' | 'wasm')
+                        ">
+                        <option value="webgpu">WebGPU</option>
+                        <option value="wasm">WASM（慢速）</option>
+                    </select>
+                </label>
+                <span v-if="state.drumBackend === 'wasm'">慢速模式可能耗时较长，不适用 GPU 耗时目标。</span>
                 <span>待下载模型 {{ formatBytes(state.missingModelBytes) }}</span>
                 <button
                     v-if="!busy"
@@ -105,8 +119,10 @@
                 </li>
             </ul>
             <p v-if="result.truncatedDrumSegments.length" class="notice error" data-testid="transcription-truncation">
-                鼓解码达到 token 上限，以下片段未完整完成：{{
-                    result.truncatedDrumSegments.map(t => t.toFixed(3)).join('、')
+                鼓解码以下区间未完整完成，相关候选未应用：{{
+                    result.incompleteDrumRanges
+                        ?.map(range => `${range.startSeconds.toFixed(3)}–${range.endSeconds.toFixed(3)}`)
+                        .join('、') || result.truncatedDrumSegments.map(t => t.toFixed(3)).join('、')
                 }}
                 秒。
             </p>

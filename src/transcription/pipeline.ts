@@ -4,13 +4,12 @@ import { checkCapacity, databaseGet } from '../processing/storage';
 import { checkCancelled, ProcessingError } from '../processing/modelManifest';
 import { createStemAuditionSource } from '../processing/stemAuditionSource';
 import type { PcmReader } from '../processing/dsp';
-import { DrumModel } from './drumModel';
-import { MonoResampler } from './monoResampler';
+import { transcribeDrumReader } from './drumTranscription';
 import { transcribePitch } from './pitchModel';
 import { openTranscriptionRuntime } from './modelSession';
 import { separateAuxiliary } from './auxiliarySeparation';
 import type { AuxiliaryResult } from './auxiliarySeparation';
-import { TRANSCRIPTION_CONFIG, transcriptionModel } from './modelManifest';
+import { transcriptionModel } from './modelManifest';
 import type { TranscriptionModelId } from './modelManifest';
 import { validateCandidates } from './candidates';
 import type { NoteCandidate, TranscriptionIdentity, TranscriptionResult, TranscriptionRole } from './candidateTypes';
@@ -57,7 +56,7 @@ export async function runTranscription(
     checkCancelled(signal);
     const started = performance.now();
     const result: TranscriptionResult = {
-        version: 1,
+        version: 2,
         id: job.jobId,
         createdAt: new Date().toISOString(),
         identity,
@@ -100,64 +99,51 @@ export async function runTranscription(
         artifactId,
         model,
     });
-    if (identity.selectedRoles.includes('drums')) {
+    const runDrums = async () => {
+        if (!identity.selectedRoles.includes('drums')) return;
         const at = performance.now();
-        let model: DrumModel | undefined;
         let lease: Awaited<ReturnType<typeof stemReader>> | undefined;
         try {
             await capacity(['adt-encoder', 'adt-decoder']);
             const stem = ft.stems.find(stem => stem.role === 'drums');
             if (!stem) throw new ProcessingError('result-invalid', 'Missing FT drums.');
             lease = await stemReader(ft.source.directory, stem, identity.trackId, signal);
-            const module = await runtime();
-            model = await DrumModel.create(
-                module.ort,
+            const transcript = await transcribeDrumReader(
+                lease.reader,
+                identity.durationSeconds,
+                identity.drumBackend,
                 signal,
                 (phase, done, total) => progress(phase, 'drums', done, total),
                 modelBase,
             );
-            const config = TRANSCRIPTION_CONFIG.drums,
-                resampler = new MonoResampler(lease.reader.sampleRate, config.sampleRate);
-            const samples = Math.ceil(identity.durationSeconds * config.sampleRate);
-            for (let start = 0; start < samples; start += config.samples) {
-                checkCancelled(signal);
-                progress('drum-preprocess', 'drums', start, samples);
-                const pcm = await resampler.segment(lease.reader, start, config.samples, signal);
-                const decoded = await model.infer(
-                    pcm,
-                    start / config.sampleRate,
-                    identity.durationSeconds,
-                    signal,
-                    (phase, done, total) => progress(phase, 'drums', done, total),
-                );
-                if (decoded.truncated) result.truncatedDrumSegments.push(start / config.sampleRate);
-                result.drumDiagnostics!.push(decoded.diagnostic);
-                for (const hit of decoded.hits)
-                    result.candidates.push({
-                        id: `drums-${result.candidates.length}`,
-                        kind: 'drum',
-                        instrument: 'drums',
-                        drum: hit.drum,
-                        customPitch: hit.customPitch,
-                        startSeconds: hit.startSeconds,
-                        endSeconds: hit.startSeconds,
-                        strength: hit.strength,
-                        deleted: false,
-                        source: source('drums', ft.source.directory, 'adt-str'),
-                    });
-                progress('drum-segments', 'drums', Math.min(start + config.samples, samples), samples);
-            }
+            result.drumDiagnostics = transcript.diagnostics;
+            result.incompleteDrumRanges = transcript.incomplete;
+            result.truncatedDrumSegments = transcript.incomplete.map(range => range.startSeconds);
+            result.drumAdapter = transcript.adapter;
+            result.timings.drumsSetupMs = transcript.setupMs;
+            for (const hit of transcript.hits)
+                result.candidates.push({
+                    id: `drums-${result.candidates.length}`,
+                    kind: 'drum',
+                    instrument: 'drums',
+                    drum: hit.drum,
+                    customPitch: hit.customPitch,
+                    startSeconds: hit.startSeconds,
+                    endSeconds: hit.startSeconds,
+                    strength: hit.strength,
+                    deleted: false,
+                    source: source('drums', ft.source.directory, 'adt-str'),
+                });
             result.completedRoles.push('drums');
         } catch (error) {
             // A failed role never publishes a partial song as a complete role.
             result.candidates = result.candidates.filter(candidate => candidate.source.inputRole !== 'drums');
             failed('drums', error);
         } finally {
-            await model?.dispose();
             await lease?.close();
             result.timings.drumsMs = performance.now() - at;
         }
-    }
+    };
     const pitched = async (
         role: 'bass' | 'vocals' | 'piano' | 'guitar',
         directory: string,
@@ -241,6 +227,9 @@ export async function runTranscription(
                 await pitched(role, auxiliary.directory, stem);
             }
     }
+    // Keep the existing auxiliary separation untouched. It initializes the GPU
+    // first; drum sessions then reuse that adapter without reassigning ORT env.
+    await runDrums();
     checkCancelled(signal);
     result.timings.totalMs = performance.now() - started;
     validateCandidates(result);

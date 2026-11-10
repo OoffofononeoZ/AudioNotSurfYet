@@ -30,7 +30,9 @@ self.onmessage = event => {
                 const chunk = await resampler.segment(reader, Math.round(start * 24000), 61440, signal);
                 const readMs = performance.now() - at;
                 const result = await model.infer(chunk, start, pcm.length / 44100, signal, progress, maxTokens);
-                windows.push({ ...result, readMs, features: Array.from(drumLogMel(chunk)) });
+                const window = { ...result, readMs, features: Array.from(drumLogMel(chunk)) };
+                windows.push(window);
+                self.postMessage({ type: 'window-result', index: windows.length - 1, start, window });
                 self.postMessage({
                     type: 'progress',
                     phase: 'window-complete',

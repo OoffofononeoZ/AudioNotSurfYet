@@ -6,15 +6,17 @@ DEC-116 按 owner 已批准计划推进；以下是本轮实际状态，不将�
 
 | 小目标 | 当前状态 |
 | --- | --- |
-| 诊断与真实歌曲基线 | 已增加逐窗 token／全部词表事件／特征 hash／编码解码耗时及本地 JSON 导出；真实 Black Hole 冻结 FT 与 WASM 短片对照正在运行，尚无质量结论 |
-| 鼓性能与异常处理 | 待实施 WebGPU、批 8、25% 转录窗口重叠、一次有界重试与未完成区间隔离；显式 WASM，不自动切换 |
+| 诊断与真实歌曲基线 | 已冻结相同 FT drums；逐窗 token／全部词表事件／特征 hash／分阶段耗时及本地 JSON 导出已实现。旧 WASM 长测中断且无完整报告，已补逐窗检查点；短窗 CPU/GPU 对照通过，完整旧基线仍待完成 |
+| 鼓性能与异常处理 | 已实现 WebGPU、批 8、25% 转录窗口重叠、一次有界重试与未完成区间隔离；显式 WASM，不自动切换。Chrome/Edge 完整应用回归及当前整曲推理探针、Electron 实际 ASAR 六秒完整链回归通过；桌面整曲性能仍待验证 |
 | 候选质量与主要音色 | 待实施完整鼓类、保守筛选、独立活动区间和重复复核组；默认按音色，音高细节可选 |
 | other／示例检索 | 待实施现有 Basic Pitch 的主旋律候选及同曲正反例检索；不新增模型或服务，设置只存本机缓存 |
 | 双端收口 | 待按 Chrome／Edge／实际 Electron 分别验证；参考机整曲鼓转录目标 10 分钟，质量由实测与 owner 试听复核 |
 
-诊断导出使用共享文件端口，保存 `audiosurf-transcription-diagnostics.json`；包含来源身份、逐窗模型事件和耗时，不包含 PCM 或本地路径。真实输入、特征数组和大型对照报告仅保存在本机忽略目录。当前算法与模型后端仍以下表为准，后续阶段完成后逐项更新。
+诊断导出使用共享文件端口，保存 `audiosurf-transcription-diagnostics.json`；包含来源身份、逐窗模型事件和耗时，不包含 PCM 或本地路径。真实输入、特征数组和大型对照报告仅保存在本机忽略目录。
 
-诊断小目标验证：转录／Web 与 Electron 文件端口及保存 IPC 共 53 项单元通过，Web 与 Electron 类型、显式文件格式、地图／入口、仓库和文档检查通过。Black Hole 原文件 hash 与手工工程一致，现有四轨链已冻结 116668164 bytes 的 drums WAV；旧 WASM 14 窗长测运行中，尚未验证新 GPU、整曲耗时或新识别质量。
+诊断小目标提交 `c50e4a6`，转录／Web 与 Electron 文件端口及保存 IPC 共 53 项单元通过。后续鼓阶段转录单元 57 项及 Web/Electron 类型检查通过。整曲 GPU 初始探针 165.5 秒；2026-11-10 当前配置 Chrome/Edge 为 334.2/341.9 秒，均为 855 条三类候选、173 主窗及 58 重试窗、34 子区间隔离。手工前两轨合并的类别无关时间匹配为 462/507（±55.6ms），未标声音不能计为误检，此数值不证明鼓种正确率或默认结果 precision。探针包含运行时准备、PCM 读取、推理及重试，不包括应用缓存发布，不能单独作为完整十分钟目标验收。
+
+2026-11-10 Chrome 真实尾批与显式新 WASM 批处理、推理中取消释放及缓存 partial 恢复已验证。Electron 本轮 `transcription-44634a08-7a0a-4735-836e-42815e5fe4d0` 通过五输入、辅助试听、诊断端口保存、改类/应用、离线恢复/重算、取消和损坏/清理保护，实际执行 ASAR 与新包 hash 相同。它是短输入技术回归，不证明桌面整曲耗时、听感接受或原生 chooser UI（保存位置由夹具提供）。来源报告在本机 `artifacts/evals/transcription-optimization/` 和 `artifacts/desktop/transcription/`。
 
 本契约依据 owner 提供的「修订版：Editor 分轨试听与有限乐器自动标记」实施。当前复用 DEC-093 的 EditorProjectV2，V1 按既有 codec 迁移；本能力不新增工程字段，不包含 MIDI 导出、P3 节拍追踪、正式 readiness 或发布。当前实现和验证进度须以源码与本项目实际运行记录为准。
 
@@ -22,13 +24,19 @@ DEC-116 按 owner 已批准计划推进；以下是本轮实际状态，不将�
 
 | 输入与能力 | 固定路线 | 边界 |
 | --- | --- | --- |
-| 当前 FT drums → kick / snare / hat | ADT_STR ONNX encoder / decoder，Worker WASM，贪心 token 解码 | 使用自定义鼓词表；其他鼓种不强行归入三类。达到解码上限报告截断。 |
+| 当前 FT drums → kick / snare / hat | ADT_STR ONNX encoder / decoder，默认 Worker WebGPU，显式慢速 WASM | 批 8／尾批实际大小、完整前缀贪心、上限 512；其他鼓类目前保留在原始诊断，完整候选接入待后续。 |
 | 当前 FT bass、vocals → 音符 | 官方 Basic Pitch ONNX，Worker WASM | 保留音高与音符实际起止，不估计混响或 release 拖尾。 |
 | 原曲 PCM → 钢琴、吉他候选 → 音符 | 独立 htdemucs_6s 辅助分析，再逐乐器 Basic Pitch | 只保留钢琴／吉他输出，不同时转写 FT other；乐器身份是待复核候选。 |
 
 FX、Pad、合成器预设区分、复杂 other 与 YourMT3+ 转换／部署留待后续。处理共享于 Web/Electron 的 renderer 和专用 Worker，不要求 Python、本地服务或外部辅助程序。已有四轨 FT 继续使用原固定模型与 WebGPU 配置，六轨辅助结果不能替代四轨试听。
 
 模型、ORT 部署资产、算法配置、输入／输出 tensor、采样率、频谱、分段、词表与时间偏移共同进入可验证的固定身份。生产 URL 使用 immutable revision；下载校验失败明确报错，不增加静默模型或 provider fallback。ADT_STR 权重及改编按已接受的独立 CC BY-SA 4.0 边界保存上游、转换来源、归因与改编信息；应用代码不因模型卡而被宣称已获任何额外许可。
+
+鼓转录使用独立 session 配置：校验下载字节后仅在 WebGPU 内存中展开常量反量化，图优化 `all`，编码中间量驻留 GPU；不改 FT/辅助 session。辅助分析先完成并释放，鼓链复用同一 ORT 模块已初始化的 GPU adapter，避免重复赋值只读属性。仅鼓任务仍可独立初始化。完整前缀保留原模型注意力语义，不加入常规 KV cache。
+
+鼓输入 2.56 秒、25% 上下文重叠，每窗负责中央 1.92 秒；首尾补零、按绝对秒裁切。达到上限或连续四次相同完整事件且时间不前进时，该负责区间拆为两个有更多上下文的子窗，最多一轮；仍失败区间候选不应用，其余区域继续并显示 partial。每步/批次释放张量，进度按 250ms 限流并保留心跳和阶段终止消息。
+
+内部结果/缓存 envelope 为 V2，包含鼓 backend/config hash 与未完成区间；EditorProjectV2 不变。旧内部缓存保留但不恢复，切换 backend 隔离结果；原辅助分离配置身份不改。主要音色、示例及持久化设置仍按上表待实施。
 
 ## 试听 transport
 
@@ -61,7 +69,7 @@ FX、Pad、合成器预设区分、复杂 other 与 YourMT3+ 转换／部署留�
 | 试听连续性 | 双浏览器暂停、seek、原曲／分轨切换、静音、循环、长曲分块连续性及等待／读取失败的时钟语义。 |
 | 任务与资源 | 下载／推断取消、换歌、重新分离、恢复、损坏／quota、迟到消息、离页／清理与资源释放。 |
 | 标记闭环 | 预览、筛选、删除、改类、300ms 逐轨重分类、原子应用、重复应用、人工标记／tempo 保护、V2 编辑／codec 与既有 V1 迁移回归。 |
-| 最终交付 | 可试听短片与真实标记样例供 owner 复核；相关回归、typecheck、build、skills:install、codemap、repo:check、test:docs、git diff --check，工具变化补 test:tools；完成后本地提交一次。 |
+| 最终交付 | 可试听短片与真实标记样例供 owner 复核；相关回归、typecheck、build、skills:install、codemap、repo:check、test:docs、git diff --check，工具变化补 test:tools；按批准计划分阶段本地提交。 |
 
 独立链路失败保留明确证据并继续其余可完成项，对应能力仍记未完成。模型介绍、第三方测试或静态检查不能代替本项目推断／质量证据。新增识别质量未经 owner 确认不得写为接受；已接受 FT 听感和第三首耗时不重复验收。正式 P1、Editor／Visualizer readiness 与 PROD-015 发布阻断保持独立。
 

@@ -1,4 +1,5 @@
 import { hashBytes } from '../processing/sha256';
+import type { IncompleteDrumRange } from './drumTranscription';
 
 export interface RawDrumEvent {
     timeSeconds: number;
@@ -91,6 +92,8 @@ export function transcriptionDiagnosticReport(result: {
     timings: Record<string, number>;
     drumDiagnostics?: DrumWindowDiagnostic[];
     truncatedDrumSegments: number[];
+    incompleteDrumRanges?: IncompleteDrumRange[];
+    drumAdapter?: unknown;
 }) {
     return {
         format: 'audiosurf-transcription-diagnostics',
@@ -100,5 +103,7 @@ export function transcriptionDiagnosticReport(result: {
         timings: result.timings,
         windows: result.drumDiagnostics ?? [],
         incompleteStarts: result.truncatedDrumSegments,
+        incompleteRanges: result.incompleteDrumRanges ?? [],
+        adapter: result.drumAdapter ?? null,
     };
 }

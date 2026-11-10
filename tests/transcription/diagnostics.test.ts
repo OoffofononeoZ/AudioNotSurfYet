@@ -25,10 +25,14 @@ describe('drum diagnostic evidence', () => {
             identity: { contentHash: 'abc' },
             timings: { drumsMs: 30 },
             truncatedDrumSegments: [87.04],
+            incompleteDrumRanges: [{ startSeconds: 87.04, endSeconds: 88, reason: 'limit' }],
+            drumAdapter: { vendor: 'test' },
         });
         expect(report.format).toBe('audiosurf-transcription-diagnostics');
         expect(report.windows).toEqual([]);
         expect(report.incompleteStarts).toEqual([87.04]);
+        expect(report.incompleteRanges).toEqual([{ startSeconds: 87.04, endSeconds: 88, reason: 'limit' }]);
+        expect(report.adapter).toEqual({ vendor: 'test' });
         expect(Object.keys(report)).not.toContain('pcm');
     });
     it('rejects corrupt diagnostic sequences and events', () => {

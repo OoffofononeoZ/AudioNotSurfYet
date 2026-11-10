@@ -3,6 +3,7 @@ import { ProcessingError } from '../processing/modelManifest';
 import { TRANSCRIPTION_CONFIG } from './modelManifest';
 import { TRANSCRIPTION_ROLES } from './candidateTypes';
 import { validDrumDiagnostics } from './drumDiagnostics';
+import { drumConfigurationHash } from './drumOptions';
 import type { MarkerCandidate, NoteInstrument, NoteThresholds, TranscriptionResult } from './candidateTypes';
 
 export function candidateEventKind(candidate: MarkerCandidate, thresholds: NoteThresholds): 'point' | 'range' {
@@ -17,6 +18,23 @@ export function candidateCategory(candidate: MarkerCandidate): string {
     return candidate.kind === 'drum' ? candidate.drum : String(candidate.pitch);
 }
 export function validateCandidates(result: TranscriptionResult): void {
+    if (
+        result?.incompleteDrumRanges !== undefined &&
+        (!Array.isArray(result.incompleteDrumRanges) ||
+            result.incompleteDrumRanges.some(
+                (range, index, all) =>
+                    !range ||
+                    !Number.isFinite(range.startSeconds) ||
+                    !Number.isFinite(range.endSeconds) ||
+                    range.startSeconds < 0 ||
+                    range.endSeconds <= range.startSeconds ||
+                    range.endSeconds > (result.identity?.durationSeconds ?? -1) ||
+                    !['limit', 'repeated-event'].includes(range.reason) ||
+                    (index > 0 && range.startSeconds < all[index - 1]!.endSeconds),
+            ))
+    ) {
+        throw new ProcessingError('result-invalid', '鼓未完成区间无效。');
+    }
     if (result?.drumDiagnostics !== undefined && !validDrumDiagnostics(result.drumDiagnostics)) {
         throw new ProcessingError('result-invalid', '鼓分析诊断数据无效。');
     }
@@ -25,11 +43,13 @@ export function validateCandidates(result: TranscriptionResult): void {
     const text = (value: unknown): value is string => typeof value === 'string' && !!value.trim();
     if (
         !result ||
-        result.version !== 1 ||
+        result.version !== 2 ||
         !text(result.id) ||
         !text(result.createdAt) ||
         !Number.isFinite(Date.parse(result.createdAt)) ||
         !identity ||
+        !['webgpu', 'wasm'].includes(identity.drumBackend) ||
+        identity.drumConfigHash !== drumConfigurationHash(identity.drumBackend) ||
         !text(identity.trackId) ||
         !text(identity.ftResultId) ||
         !Number.isFinite(identity.durationSeconds) ||

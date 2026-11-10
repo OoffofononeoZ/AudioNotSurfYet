@@ -102,7 +102,7 @@ function setup() {
     const bundle = (): TranscriptionBundle => ({
         auxiliary: null,
         result: {
-            version: 1,
+            version: 2,
             id: 'transcription-00000000-0000-0000-0000-000000000000',
             createdAt: new Date().toISOString(),
             identity: lastIdentity,
@@ -136,6 +136,7 @@ function setup() {
         editor,
         project,
         repository,
+        separation,
         controller,
         gate,
         transport,
@@ -149,6 +150,7 @@ function setup() {
             resolve(result);
         },
         fail: () => reject(new ProcessingError('job-cancelled', 'cancelled')),
+        failWith: (error: Error) => reject(error),
         changeSong: () => {
             separationSnapshot = { ...separationSnapshot, trackId: 'next', result: null };
             separationListeners.forEach(fn => fn(separationSnapshot));
@@ -164,6 +166,48 @@ async function start(s: ReturnType<typeof setup>) {
     await vi.waitFor(() => expect(s.controller.start).toHaveBeenCalled());
     return { work };
 }
+it('restores isolated incomplete drum ranges as partial instead of a complete result', async () => {
+    const s = setup();
+    await idle(s);
+    s.service.setRoles(['bass', 'drums']);
+    const { work } = await start(s);
+    s.finish();
+    await work;
+    const bundle = structuredClone(s.service.getSnapshot().bundle!);
+    bundle.result.completedRoles.push('drums');
+    bundle.result.incompleteDrumRanges = [{ startSeconds: 2, endSeconds: 2.96, reason: 'repeated-event' }];
+    bundle.result.truncatedDrumSegments = [2];
+    await s.service.dispose();
+    vi.mocked(s.repository.restore).mockResolvedValueOnce({ bundle, thresholds: {} } as TranscriptionRecord);
+    const restored = new EditorTranscriptionService(s.transport, s.editor, s.separation, s.gate, {
+        controller: s.controller,
+        repository: s.repository,
+    });
+    await vi.waitFor(() => expect(restored.getSnapshot()).toMatchObject({ status: 'partial', restored: true }));
+    expect(restored.getSnapshot().message).toContain('部分鼓区间未完成');
+    await restored.dispose();
+});
+it('defaults to WebGPU and only uses WASM after an explicit user choice', async () => {
+    const s = setup();
+    await idle(s);
+    s.service.setRoles(['drums']);
+    expect(s.service.getSnapshot().drumBackend).toBe('webgpu');
+    const first = await start(s);
+    expect(s.controller.start.mock.calls[0]![1].drumBackend).toBe('webgpu');
+    s.failWith(new ProcessingError('model-incompatible', 'GPU unavailable'));
+    await first.work;
+    expect(s.service.getSnapshot().status).toBe('error');
+    expect(s.service.getSnapshot().drumBackend).toBe('webgpu');
+    expect(s.controller.start).toHaveBeenCalledTimes(1);
+    s.service.setDrumBackend('wasm');
+    const next = s.service.start();
+    await vi.waitFor(() => expect(s.controller.start).toHaveBeenCalledTimes(2));
+    expect(s.controller.start.mock.calls[1]![1].drumBackend).toBe('wasm');
+    s.failWith(new ProcessingError('inference-failed', 'Stop explicit slow-mode test'));
+    await next;
+    expect(s.service.getSnapshot().drumBackend).toBe('wasm');
+    await s.service.dispose();
+});
 it('flushes a failed correction again before shutdown without rerunning inference or discarding candidates', async () => {
     const s = setup();
     await idle(s);

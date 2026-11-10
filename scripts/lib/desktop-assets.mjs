@@ -15,6 +15,7 @@ export async function copyDesktopPublicAssets(root, destination) {
         'processing-runtime/transcription/THIRD_PARTY_NOTICES.md',
         'processing-runtime/transcription/model-artifacts.json',
         'processing-runtime/transcription/licenses/BasicPitch-LICENSE.txt',
+        'processing-runtime/transcription/licenses/ComingUndone-LICENSE.txt',
         'wallpaper-runtime/runtime.js',
         'wallpaper-runtime/THIRD_PARTY_LICENSES.txt',
     ];

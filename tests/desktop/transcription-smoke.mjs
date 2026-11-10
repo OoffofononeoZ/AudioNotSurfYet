@@ -144,6 +144,8 @@ async function infer() {
     const record = await latest();
     assert.deepEqual([...record.bundle.result.completedRoles].sort(), ['bass', 'drums', 'guitar', 'piano', 'vocals']);
     assert.deepEqual(record.bundle.result.failures, []);
+    assert.equal(record.bundle.result.identity.drumBackend, 'webgpu');
+    assert(record.bundle.result.drumDiagnostics.length > 0);
     assert(record.bundle.result.candidates.length > 0);
     assert.deepEqual(
         record.bundle.auxiliary.stems.map(stem => stem.role),
@@ -213,6 +215,22 @@ try {
     );
     const first = await infer();
     await write(path.join(output, 'online-candidates.json'), first);
+    const diagnosticFile = path.join(native.directory, 'transcription-diagnostics.json');
+    await queueSave(app, diagnosticFile);
+    await page.getByRole('button', { name: '导出诊断', exact: true }).click();
+    await expect
+        .poll(() =>
+            fs
+                .stat(diagnosticFile)
+                .then(stat => stat.size)
+                .catch(() => 0),
+        )
+        .toBeGreaterThan(0);
+    const diagnostics = JSON.parse(await fs.readFile(diagnosticFile, 'utf8'));
+    assert.equal(diagnostics.format, 'audiosurf-transcription-diagnostics');
+    assert.equal(diagnostics.resultId, first.bundle.result.id);
+    assert.deepEqual(diagnostics.windows, first.bundle.result.drumDiagnostics);
+    result.checks.nativeDiagnosticSave = 'passed';
     result.auxiliary = await auxiliaryFiles(first);
     const keys = await databaseRows(page, 'processing-p1', 2, 'models', true);
     assert(TRANSCRIPTION_MODELS.every(model => keys.includes(model.sha256)));

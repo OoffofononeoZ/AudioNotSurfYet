@@ -25,6 +25,10 @@ npx playwright test tests/e2e/editor-transcription.spec.ts tests/e2e/transcripti
 
 诊断新增解析、特征视图 hash、缓存数据完整性专项为 `tests/transcription/diagnostics.test.ts`。诊断导出的新 `analysis-report` 保存用途复用 Web／Electron 文件端口，不扩大文件读取权限。
 
+旧 WASM 专项逐窗将特征和原始输出落到唯一 `*-wasm-checkpoints-*` 子目录；运行中断时已完成窗口仍可核对，部分产物不代表整个专项通过。`transcription-batch.spec.ts` 实测 GPU 批/尾批、独立 EOS、相同输入与旧 WASM 对照及截断；`onnx-constants`、`drum-batch`、`drum-windows` 单元覆盖常量展开、有界重试和推理中取消释放。
+
+设置相同 `TRANSCRIPTION_BENCH_STEM` 后运行 `transcription-optimized-benchmark.spec.ts --project=chrome --project=edge --workers=1` 记录整曲 GPU 探针。计时含运行时/模型准备、读取、转录和重试，不含下载/FT，也未覆盖应用缓存发布；完整产品性能仍须单独记录。`node --experimental-strip-types tests/transcription/analyze-benchmark.mjs --report <报告> --reference <手工工程> --source <原音频> --stem <冻结音轨>` 验证歌曲/冻结输入 hash，输出一对一时间匹配、前 120 秒固定偏移校准及留出段。其他未标注声音只列为未复核，不计算识别 precision；该工具不修改输入。
+
 - `model-probe.worker.ts` 使用真实模型 session：ADT_STR WASM encoder／完整 token prefix decoder，Basic Pitch WASM 和六轨 WebGPU；测试注入仅提供同字节模型文件，不替代推断。
 - 合成鼓包含同时击打；截断用例将解码长度设为四 token，确认返回 `truncated`。合成音符覆盖长音、短音、重复音、和声及跨模型窗口；保存真实输出与已知输入，但不把合成音色当成真实钢琴／吉他质量证据。
 - 音符时钟由原输入窗口绝对起点与 256-sample hop 派生，裁去模型两侧各 15 帧后拼接；不按每窗输出帧数累计时间，不吸附 tempo 网格。边界行为与真实起止误差继续由受控样例复核。
@@ -32,7 +36,7 @@ npx playwright test tests/e2e/editor-transcription.spec.ts tests/e2e/transcripti
 - 内存复用现有 sampler：约一秒请求频率、全设备 NVIDIA 显存与所有 Chrome／Edge 进程 working set／private bytes；其他标签页可能影响结果，共享 working set 可能重复计数。报告观察峰值及采样错误，不把它当作模型独占内存或分配上限。
 - 初步三链路报告保存在 `artifacts/evals/editor-transcription/models-chrome-initial/` 和 `models-edge-initial/`。后续实现变化与不同配置通过源码／配置 hash 区分，历史报告不代替当前完整链路。
 
-`editor-transcription.spec.ts`从真实FT结果跑五角色推理、OPFS文件校验、辅助试听、候选修正、显式V1应用与刷新恢复，并覆盖取消、损坏模型缓存和试听后清理。完整链工程样例为验证分类路径将音符分界改为10000ms；不是产品默认值，原候选时间仍完整保存。
+`editor-transcription.spec.ts`从真实FT结果跑五角色推理、OPFS文件校验、辅助试听、候选修正、显式应用与刷新恢复，并覆盖取消、损坏模型缓存和试听后清理。应用继续使用现有 Editor V2。完整链工程样例为验证分类路径将音符分界改为10000ms；不是产品默认值，原候选时间仍完整保存。
 
 `qualityFixtures.ts`自编CC0受控音色包括钢琴/拨弦各自独奏、稀疏混合、无目标区、长音/重复音/分段边界，以及同时击打、快速hat与跨段击打。`quality-probe.worker.ts`执行真实六轨分离→OPFS→逐乐器Basic Pitch及分段ADT_STR。`qualityMetrics.ts`保留全部原始观测，用120ms关联窗统计漏标、多标、分类/音高错误和带符号起止误差；该窗口是报告方法，不是验收阈值。合成素材不证明真实演奏录音质量。
 

@@ -27,6 +27,19 @@ This project's preprocessing and token adapters implement the published tensor,
 spectral and custom vocabulary contracts in TypeScript. No upstream Python runtime,
 training/export tool or conversion service is required by the product.
 
+WebGPU inference reconstructs static `DequantizeLinear` initializers as float32
+constants in memory, after validating the unchanged downloaded bytes. This further
+adaptation is deterministic and versioned as `adt-static-dequant-f32-v1`; it does
+not overwrite the source files or introduce a different trained checkpoint.
+The adapted model remains under CC BY-SA 4.0.
+
+The static-expansion and batched-inference approach references Coming Undone's
+browser implementation at revision `5188633e9fbdf5812c943214385f065b73260f80`:
+https://github.com/swwallowws/coming-undone/tree/5188633e9fbdf5812c943214385f065b73260f80/browser
+Copyright 2026 Bengisu Ozaydin. Code is MIT; retained text is in
+`licenses/ComingUndone-LICENSE.txt`. The local protobuf reader is dependency-free;
+this code notice does not replace the separate ADT_STR model attribution.
+
 ## Basic Pitch — Apache 2.0
 
 Copyright 2022–2024 Spotify AB. Original model and reference inference:

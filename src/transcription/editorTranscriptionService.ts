@@ -15,12 +15,15 @@ import { TRANSCRIPTION_CONFIG_HASH, TRANSCRIPTION_MODEL_HASH, TRANSCRIPTION_MODE
 import { TRANSCRIPTION_ROLES } from './candidateTypes';
 import type { NoteInstrument, NoteThresholds, TranscriptionIdentity, TranscriptionRole } from './candidateTypes';
 import { correctCandidate } from './candidates';
+import { drumConfigurationHash } from './drumOptions';
+import type { DrumBackend } from './drumRuntime';
 import { applyCandidateResult, resultAlreadyApplied } from './applyCandidates';
 import type { TranscriptionBundle, TranscriptionEvent } from './workerProtocol';
 
 export type TranscriptionStatus =
     'idle' | 'restoring' | 'running' | 'cancelling' | 'ready' | 'partial' | 'cancelled' | 'error' | 'clearing';
 export interface EditorTranscriptionSnapshot {
+    drumBackend: DrumBackend;
     trackId: string | null;
     ftResultId: string | null;
     status: TranscriptionStatus;
@@ -66,6 +69,7 @@ export class EditorTranscriptionService {
         status: 'idle',
         bundle: null,
         selectedRoles: [...TRANSCRIPTION_ROLES],
+        drumBackend: 'webgpu',
         thresholds: {},
         progress: null,
         message: null,
@@ -138,6 +142,8 @@ export class EditorTranscriptionService {
             modelManifestHash: TRANSCRIPTION_MODEL_HASH,
             runtimeManifestHash: runtimeHash,
             configHash: TRANSCRIPTION_CONFIG_HASH,
+            drumBackend: this.state.drumBackend,
+            drumConfigHash: drumConfigurationHash(this.state.drumBackend),
             selectedRoles: [...this.state.selectedRoles],
         };
     }
@@ -191,7 +197,13 @@ export class EditorTranscriptionService {
                         bundle: record.bundle,
                         thresholds: record.thresholds,
                         selectedRoles: [...record.bundle.result.identity.selectedRoles],
-                        status: record.bundle.result.failures.length ? 'partial' : 'ready',
+                        status:
+                            record.bundle.result.failures.length || record.bundle.result.incompleteDrumRanges?.length
+                                ? 'partial'
+                                : 'ready',
+                        message: record.bundle.result.incompleteDrumRanges?.length
+                            ? '部分鼓区间未完成，已隔离其中候选；其余候选可检查。'
+                            : null,
                         restored: true,
                         persistence: 'saved',
                     });
@@ -238,6 +250,11 @@ export class EditorTranscriptionService {
             throw new ProcessingError('invalid-request', '无效的分轨选择。');
         this.update({ selectedRoles: TRANSCRIPTION_ROLES.filter(role => roles.includes(role)) });
         void this.modelSummary().catch(() => {});
+    }
+    setDrumBackend(backend: DrumBackend): void {
+        if (busy.has(this.state.status)) return;
+        if (!['webgpu', 'wasm'].includes(backend)) throw new ProcessingError('invalid-request', '无效的鼓推理方式。');
+        this.update({ drumBackend: backend });
     }
     async start(): Promise<void> {
         if (this.disposed || busy.has(this.state.status) || this.operation) return;
@@ -286,11 +303,15 @@ export class EditorTranscriptionService {
                 this.guard(generation, signal);
                 this.update({
                     bundle,
-                    status: bundle.result.failures.length ? 'partial' : 'ready',
+                    status:
+                        bundle.result.failures.length || bundle.result.incompleteDrumRanges?.length
+                            ? 'partial'
+                            : 'ready',
                     persistence: 'saved',
-                    message: bundle.result.failures.length
-                        ? '部分输入未完成；已完成候选可检查，失败项仍需重试。'
-                        : null,
+                    message:
+                        bundle.result.failures.length || bundle.result.incompleteDrumRanges?.length
+                            ? '部分输入未完成；已完成候选可检查，失败项仍需重试。'
+                            : null,
                 });
                 this.refreshApplied();
             } catch (error) {

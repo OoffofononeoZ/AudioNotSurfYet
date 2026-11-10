@@ -26,6 +26,12 @@ const api = {
             };
             worker.onmessage = event => {
                 const message = event.data;
+                if (message.type === 'window-result') {
+                    const checkpoint = (window as unknown as { __saveDrumWindow?: (value: unknown) => Promise<void> })
+                        .__saveDrumWindow;
+                    void checkpoint?.(message);
+                    return;
+                }
                 status.textContent = JSON.stringify(message.type === 'progress' ? message : { type: message.type });
                 if (message.type === 'progress') return;
                 stop();

@@ -37,20 +37,9 @@ test('frozen real-song drums: legacy WASM diagnostic baseline', async ({ page },
             );
         }
     }
-    const starts = [
-        46.08, 70.4, 145.92, 186.88, 87.04, 120.32, 128, 163.84, 192, 199.68, 212.48, 215.04, 245.76, 248.32,
-    ];
-    await page.goto('/tests/transcription/benchmark.html');
-    await page.locator('#stem').setInputFiles(stem);
-    const result = await page.evaluate(
-        starts =>
-            (
-                window as unknown as {
-                    __DrumBenchmark: { run(starts: number[]): Promise<Record<string, unknown>> };
-                }
-            ).__DrumBenchmark.run(starts),
-        starts,
-    );
+    const provenance = JSON.parse(await fs.readFile(`${stem}.json`, 'utf8'));
+    if (sourceHash && sourceHash !== provenance.sourceHash) throw Error('Frozen source identity mismatch.');
+    sourceHash = provenance.sourceHash;
     const sourceFiles = [
         'src/transcription/drumModel.ts',
         'src/transcription/drumFeatures.ts',
@@ -62,6 +51,49 @@ test('frozen real-song drums: legacy WASM diagnostic baseline', async ({ page },
     const sourceHashes = await Promise.all(
         sourceFiles.map(async file => ({ file, sha256: sha(await fs.readFile(file)) })),
     );
+    const starts = [
+        46.08, 70.4, 145.92, 186.88, 87.04, 120.32, 128, 163.84, 192, 199.68, 212.48, 215.04, 245.76, 248.32,
+    ];
+    const checkpointDirectory = path.join(directory, `${info.project.name}-wasm-checkpoints-${Date.now()}`);
+    await fs.mkdir(checkpointDirectory, { recursive: true });
+    const checkpoints: Promise<void>[] = [];
+    await page.exposeFunction('__saveDrumWindow', (message: { index: number; start: number; window: unknown }) => {
+        console.log(`Legacy drum window completed: ${message.start}s`);
+        const write = fs.writeFile(
+            path.join(checkpointDirectory, `${message.index}.json`),
+            JSON.stringify(message),
+            'utf8',
+        );
+        checkpoints.push(write);
+        return write;
+    });
+    await fs.writeFile(
+        path.join(checkpointDirectory, 'identity.json'),
+        JSON.stringify({
+            stemHash: sha(await fs.readFile(stem)),
+            sourceHash,
+            sourceHashes,
+            starts,
+            userAgent: await page.evaluate(() => navigator.userAgent),
+        }),
+        'utf8',
+    );
+    await page.goto('/tests/transcription/benchmark.html');
+    await page.locator('#stem').setInputFiles(stem);
+    const result = await page.evaluate(
+        starts =>
+            (
+                window as unknown as {
+                    __DrumBenchmark: { run(starts: number[]): Promise<Record<string, unknown>> };
+                }
+            ).__DrumBenchmark.run(starts),
+        starts,
+    );
+    await Promise.all(checkpoints);
+    const endingHashes = await Promise.all(
+        sourceFiles.map(async file => ({ file, sha256: sha(await fs.readFile(file)) })),
+    );
+    expect(endingHashes).toEqual(sourceHashes);
     const output = path.join(directory, `${info.project.name}-wasm-baseline-${Date.now()}.json`);
     await fs.writeFile(
         output,

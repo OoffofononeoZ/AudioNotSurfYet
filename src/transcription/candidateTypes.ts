@@ -1,10 +1,14 @@
 import type { DrumWindowDiagnostic } from './drumDiagnostics';
+import type { DrumBackend } from './drumRuntime';
+import type { IncompleteDrumRange } from './drumTranscription';
 export const TRANSCRIPTION_ROLES = ['drums', 'bass', 'vocals', 'piano', 'guitar'] as const;
 export type TranscriptionRole = (typeof TRANSCRIPTION_ROLES)[number];
 export type NoteInstrument = 'bass' | 'vocals' | 'piano' | 'guitar' | 'unknown';
 export type CandidateInstrument = 'drums' | NoteInstrument;
 export type DrumCategory = 'kick' | 'snare' | 'hat';
 export interface TranscriptionIdentity {
+    drumBackend: DrumBackend;
+    drumConfigHash: string;
     trackId: string;
     contentHash: string;
     pcmHash: string;
@@ -42,7 +46,7 @@ export interface NoteCandidate extends CandidateBase {
 }
 export type MarkerCandidate = DrumCandidate | NoteCandidate;
 export interface TranscriptionResult {
-    version: 1;
+    version: 2;
     id: string;
     createdAt: string;
     identity: TranscriptionIdentity;
@@ -50,6 +54,8 @@ export interface TranscriptionResult {
     failures: Array<{ role: TranscriptionRole; code: string; message: string }>;
     truncatedDrumSegments: number[];
     drumDiagnostics?: DrumWindowDiagnostic[];
+    incompleteDrumRanges?: IncompleteDrumRange[];
+    drumAdapter?: unknown;
     candidates: MarkerCandidate[];
     auxiliaryDirectory: string | null;
     timings: Record<string, number>;
