@@ -33,7 +33,7 @@
 | [tests/e2e/e8-editor-usability.spec.ts](../../tests/e2e/e8-editor-usability.spec.ts) | [tests/support/editor-marking.ts](../../tests/support/editor-marking.ts)、[tests/support/file-picker.ts](../../tests/support/file-picker.ts) |
 | [tests/e2e/e9-editor-tempo-lane.spec.ts](../../tests/e2e/e9-editor-tempo-lane.spec.ts) | [tests/support/editor-marking.ts](../../tests/support/editor-marking.ts) |
 | [tests/e2e/editor-analysis-detail.spec.ts](../../tests/e2e/editor-analysis-detail.spec.ts) | [tests/support/editor-marking.ts](../../tests/support/editor-marking.ts) |
-| [tests/e2e/editor-block-delete.spec.ts](../../tests/e2e/editor-block-delete.spec.ts) | [tests/support/editor-marking.ts](../../tests/support/editor-marking.ts) |
+| [tests/e2e/editor-block-delete.spec.ts](../../tests/e2e/editor-block-delete.spec.ts) | [tests/support/editor-marker-interaction-scenario.mjs](../../tests/support/editor-marker-interaction-scenario.mjs)、[tests/support/editor-marking.ts](../../tests/support/editor-marking.ts) |
 | [tests/e2e/editor-continuous-timing.spec.ts](../../tests/e2e/editor-continuous-timing.spec.ts) | [tests/support/editor-marking.ts](../../tests/support/editor-marking.ts) |
 | [tests/e2e/editor-experiments.spec.ts](../../tests/e2e/editor-experiments.spec.ts) | [tests/support/file-picker.ts](../../tests/support/file-picker.ts) |
 | [tests/e2e/editor-frame.spec.ts](../../tests/e2e/editor-frame.spec.ts) | [tests/support/editor-marking.ts](../../tests/support/editor-marking.ts)、[tests/support/editor-workspaces.ts](../../tests/support/editor-workspaces.ts)、[tests/support/file-picker.ts](../../tests/support/file-picker.ts) |

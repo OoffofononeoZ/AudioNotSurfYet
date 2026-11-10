@@ -12,21 +12,24 @@
         tabindex="0"
         role="application"
         :aria-keyshortcuts="shortcut"
-        :aria-label="`${lane.name} 标记区域；${shortcut ? `播放时按 ${shortcut} ${lane.eventKind === 'range' ? '按住录入范围' : '添加点标记'}；` : ''}暂停后可编辑整条轨道，回车创建，右键标记删除`"
+        :aria-label="`${lane.name} 标记区域；${shortcut ? `播放时按 ${shortcut} ${lane.eventKind === 'range' ? '按住录入范围' : '添加点标记'}；` : ''}暂停后可编辑整条轨道，回车创建；右键拖选后再次右键红区删除；${editing.blocks.mode.value ? '右键蓝区取消选中' : '右键短按标记删除'}`"
         @focus="editing.focus(row, surface?.clientWidth ?? 0)"
         @keydown="editing.key($event, row)"
         @pointerdown="editing.down($event, row)"
         @pointermove="editing.move($event, row)"
         @pointerup="editing.up"
         @pointercancel="editing.cancel"
-        @lostpointercapture="editing.cancel"
-        @contextmenu="editing.context($event, row)"
+        @lostpointercapture="editing.lostCapture"
+        @contextmenu="editing.context($event)"
         @dragstart.prevent>
         <canvas ref="canvas" class="marker-grid-canvas" aria-hidden="true" />
         <span
             v-if="block"
             class="marker-block-selection"
-            :class="{ 'is-preview': editing.blocks.preview.value, 'is-deletion': editing.blocks.deletion.value }"
+            :class="{
+                'is-preview': editing.blocks.preview.value,
+                'is-deletion': editing.blocks.deletionDraft.value || editing.blocks.deletion.value,
+            }"
             :style="intervalStyle(block.startSeconds, block.endSeconds)"
             aria-hidden="true" />
         <span
@@ -142,6 +145,7 @@ const currentCandidate = computed(() =>
 );
 const block = computed(() => {
     const selection =
+        props.editing.blocks.deletionDraft.value ??
         props.editing.blocks.deletion.value ??
         props.editing.blocks.preview.value ??
         props.editing.blocks.selection.value;

@@ -16,6 +16,7 @@ import {
     verifyTimelineLock,
     verifyOffscreenMarkerBlocks,
 } from '../support/editor-timeline-scenario.mjs';
+import { verifyMarkerInteractions } from '../support/editor-marker-interaction-scenario.mjs';
 
 const root = fileURLToPath(new URL('../../', import.meta.url));
 const native = await createNativeRun('editor-timeline');
@@ -91,6 +92,7 @@ try {
     await expect(page.getByTestId('editor-ready')).toBeVisible();
     await expect(page.getByTestId('lock-editor-timeline')).toHaveAttribute('aria-pressed', 'false');
     await verifyOffscreenMarkerBlocks(page);
+    await verifyMarkerInteractions(page, name => page.screenshot({ path: path.join(output, `${name}.png`) }));
     assert.deepEqual(errors, []);
     result.status = 'passed';
     result.versions = await app.evaluate(() => process.versions);

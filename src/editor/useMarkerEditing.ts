@@ -11,6 +11,7 @@ import {
 } from './markerTimeView';
 import { useMarkerBlocks } from './useMarkerBlocks';
 import { normalizeEditorSeconds } from './projectCodec';
+import { collectMarkerBlockEvents } from './markerBlockOperations';
 import type { EditorBeatSnapSetting } from './beatSnap';
 import type { EditorProjectV2, PointEventV1, RangeEventV1 } from './types';
 
@@ -39,6 +40,7 @@ interface Drag extends Row {
 }
 interface Preview {
     project: EditorProjectV2 | null;
+    events: MarkerEvent[];
     error: string;
 }
 
@@ -55,13 +57,6 @@ export function useMarkerEditing(
     const selected = shallowRef<string | null>(null),
         drag = shallowRef<Drag | null>(null),
         preview = shallowRef<Preview | null>(null);
-    const menu = shallowRef<{
-        element: HTMLElement;
-        x: number;
-        y: number;
-        time: number;
-        kind: 'point' | 'range';
-    } | null>(null);
     const blocks = useMarkerBlocks(project, view, setting, publish, report);
     const same = (value: Row | null, row: Row) =>
         value?.laneId === row.laneId && value?.innerClassId === row.innerClassId;
@@ -95,19 +90,19 @@ export function useMarkerEditing(
         drag.value = null;
         preview.value = null;
         blocks.preview.value = null;
-        blocks.deletion.value = null;
+        blocks.deletionDraft.value = null;
         if (previous?.element.hasPointerCapture(previous.pointerId))
             previous.element.releasePointerCapture(previous.pointerId);
     }
     function cancel() {
         if (drag.value?.moved) report('已取消拖动，标记保持原位。');
         stop();
+        blocks.deletion.value = null;
     }
     function escape() {
-        const deleting = drag.value?.kind === 'delete';
+        const deleting = drag.value?.kind === 'delete' || Boolean(blocks.deletion.value);
         cancel();
         pending.value = null;
-        menu.value = null;
         if (!deleting) {
             if (blocks.selection.value) blocks.clear();
             else blocks.mode.value = false;
@@ -119,7 +114,6 @@ export function useMarkerEditing(
         candidate.value = null;
         pending.value = null;
         selected.value = null;
-        menu.value = null;
         blocks.clear();
     }
     function at(event: MouseEvent | PointerEvent, element: HTMLElement) {
@@ -172,7 +166,7 @@ export function useMarkerEditing(
         }
     }
     function down(event: PointerEvent, row: Row) {
-        const deleting = event.button === 2 && blocks.mode.value;
+        const deleting = event.button === 2;
         if ((!deleting && event.button !== 0) || !enabled() || drag.value) return;
         const element = event.currentTarget as HTMLElement,
             raw = at(event, element);
@@ -180,14 +174,19 @@ export function useMarkerEditing(
         const target = (event.target as HTMLElement).closest<HTMLElement>('[data-event-id]');
         const value = target?.dataset.eventId ? item(row, target.dataset.eventId) : null;
         event.preventDefault();
-        menu.value = null;
-        (target ?? element).focus({ preventScroll: true });
+        if (deleting) selected.value = null;
+        else blocks.deletion.value = null;
+        (deleting ? element : (target ?? element)).focus({ preventScroll: true });
         const snapped = cell(raw, element.clientWidth);
         if (snapped) candidate.value = { ...row, timeSeconds: snapped.timeSeconds };
         let kind: Drag['kind'] = 'create';
         const selection = blocks.selection.value;
-        if (deleting) kind = 'delete';
-        else if (blocks.mode.value) {
+        if (deleting) {
+            kind = 'delete';
+            const red = blocks.deletion.value;
+            if (!same(red, row) || raw < red!.startSeconds || raw > red!.endSeconds) blocks.deletion.value = null;
+        } else if (blocks.mode.value) {
+            selected.value = null;
             kind =
                 same(selection, row) && raw >= selection!.startSeconds && raw <= selection!.endSeconds
                     ? 'block'
@@ -221,12 +220,37 @@ export function useMarkerEditing(
             // Use the existing nearest-cell algorithm without applying the new-endpoint boundary to a crossing range's start.
             const nearest = markerCellForMove(time, state.element.clientWidth);
             if (!nearest) throw new Error('当前位置没有可用节拍网格。');
+            const offset = nearest.timeSeconds - state.original!;
+            preview.value = {
+                project: null,
+                error: '',
+                events: [
+                    'atSeconds' in value
+                        ? { ...value, atSeconds: nearest.timeSeconds }
+                        : {
+                              ...value,
+                              startSeconds: nearest.timeSeconds,
+                              endSeconds: normalizeEditorSeconds(value.endSeconds + offset),
+                          },
+                ],
+            };
             return moveEditorMarker(project(), state.laneId, value.id, nearest.timeSeconds);
         }
         if (state.kind === 'endpoint' && value && 'endSeconds' in value) {
             const snapped = cell(raw, state.element.clientWidth);
             if (!snapped) throw new Error('当前位置没有可用节拍网格。');
             const start = state.endpoint === 'start' ? snapped.timeSeconds : value.startSeconds;
+            preview.value = {
+                project: null,
+                error: '',
+                events: [
+                    {
+                        ...value,
+                        startSeconds: start,
+                        endSeconds: state.endpoint === 'end' ? snapped.timeSeconds : value.endSeconds,
+                    },
+                ],
+            };
             return updateRangeEvent(
                 project(),
                 state.laneId,
@@ -242,12 +266,34 @@ export function useMarkerEditing(
             if (!selection || !snapped) throw new Error('当前位置没有可用节拍网格。');
             const target = markerCellForMove(selection.startSeconds + raw - state.rawStart, state.element.clientWidth);
             if (!target) throw new Error('当前位置没有可用节拍网格。');
+            const offset = target.timeSeconds - selection.startSeconds;
+            blocks.preview.value = {
+                ...selection,
+                startSeconds: target.timeSeconds,
+                endSeconds: normalizeEditorSeconds(selection.endSeconds + offset),
+            };
+            preview.value = {
+                project: null,
+                error: '',
+                events: collectMarkerBlockEvents(project(), selection).map(event =>
+                    'atSeconds' in event
+                        ? { ...event, atSeconds: normalizeEditorSeconds(event.atSeconds + offset) }
+                        : {
+                              ...event,
+                              startSeconds: normalizeEditorSeconds(event.startSeconds + offset),
+                              endSeconds: normalizeEditorSeconds(event.endSeconds + offset),
+                          },
+                ),
+            };
             return blocks.move(target.timeSeconds, false)?.project ?? null;
         }
         return null;
     }
     function markerCellForMove(time: number, width: number) {
         return pointCellAtTime(time, project(), width, setting());
+    }
+    function currentPreviewEvents() {
+        return preview.value?.events ?? [];
     }
     function move(event: PointerEvent, row: Row) {
         const state = drag.value,
@@ -276,10 +322,16 @@ export function useMarkerEditing(
             return;
         }
         try {
-            preview.value = { project: movedProject(state, raw), error: '' };
-        } catch (error) {
+            preview.value = null;
             blocks.preview.value = null;
-            preview.value = { project: null, error: error instanceof Error ? error.message : '无法移动。' };
+            const moved = movedProject(state, raw);
+            preview.value = { project: moved, events: currentPreviewEvents(), error: '' };
+        } catch (error) {
+            preview.value = {
+                project: null,
+                events: currentPreviewEvents(),
+                error: error instanceof Error ? error.message : '无法移动。',
+            };
         }
     }
     function up(event: PointerEvent) {
@@ -287,13 +339,30 @@ export function useMarkerEditing(
         if (!state || state.pointerId !== event.pointerId || event.button !== (state.kind === 'delete' ? 2 : 0)) return;
         const result = preview.value,
             blockPreview = blocks.preview.value,
-            deletion = blocks.deletion.value;
+            deletion = blocks.deletionDraft.value;
         stop();
         if (!enabled() || fingerprint() !== state.source) return;
         attempt(() => {
-            if (state.kind === 'delete' && state.moved && deletion) {
-                blocks.remove(deletion);
-                if (selected.value && deletion.eventIds?.includes(selected.value)) selected.value = null;
+            if (state.kind === 'delete') {
+                if (state.moved) {
+                    blocks.deletion.value = deletion;
+                    blocks.selection.value = null;
+                    report('再次右键单击红色区间删除标记。');
+                } else {
+                    const red = blocks.deletion.value,
+                        blue = blocks.selection.value;
+                    if (same(red, state) && state.rawStart >= red!.startSeconds && state.rawStart <= red!.endSeconds)
+                        blocks.remove(red!);
+                    else if (
+                        blocks.mode.value &&
+                        same(blue, state) &&
+                        state.rawStart >= blue!.startSeconds &&
+                        state.rawStart <= blue!.endSeconds
+                    ) {
+                        blocks.clear();
+                        report('已取消区间选中。');
+                    } else if (!blocks.mode.value && state.eventId) remove(state, state.eventId);
+                }
             } else if (state.kind === 'create' && !state.moved && same(candidate.value, state))
                 create(state, candidate.value!.timeSeconds, state.element.clientWidth);
             else if (state.moved && result?.error) report(result.error);
@@ -317,25 +386,8 @@ export function useMarkerEditing(
         selected.value = null;
         report('标记已删除。');
     }
-    function context(event: MouseEvent, row: Row) {
+    function context(event: MouseEvent) {
         event.preventDefault();
-        if (blocks.mode.value) return;
-        const element = event.currentTarget as HTMLElement,
-            time = at(event, element);
-        if (time < 0 || time > view().durationSeconds) return;
-        const id = (event.target as HTMLElement).closest<HTMLElement>('[data-event-id]')?.dataset.eventId;
-        if (id) {
-            attempt(() => remove(row, id));
-            return;
-        }
-        const bounds = element.getBoundingClientRect();
-        menu.value = {
-            element,
-            time,
-            x: event.clientX - bounds.left,
-            y: event.clientY - bounds.top,
-            kind: project().lanes.find(lane => lane.id === row.laneId)!.eventKind,
-        };
     }
     function key(event: KeyboardEvent, row: Row) {
         if (event.key === 'Escape') {
@@ -457,14 +509,6 @@ export function useMarkerEditing(
                     candidate.value = { ...row, timeSeconds: next.timeSeconds };
             } else if (event.key === 'ContextMenu' || (event.shiftKey && event.key === 'F10')) {
                 event.preventDefault();
-                if (same(candidate.value, row))
-                    menu.value = {
-                        element,
-                        time: candidate.value!.timeSeconds,
-                        x: element.clientWidth * 0.5,
-                        y: 20,
-                        kind: project().lanes.find(lane => lane.id === row.laneId)!.eventKind,
-                    };
             }
         });
     }
@@ -473,7 +517,6 @@ export function useMarkerEditing(
         () => {
             cancel();
             candidate.value = null;
-            menu.value = null;
         },
     );
     watch(
@@ -487,6 +530,7 @@ export function useMarkerEditing(
         () => [project().lanes, project().tempoMap, setting()],
         () => {
             if (drag.value && drag.value.source !== fingerprint()) cancel();
+            blocks.deletion.value = null;
             if (
                 pending.value &&
                 !project()
@@ -507,25 +551,22 @@ export function useMarkerEditing(
         },
     );
     onMounted(() => window.addEventListener('blur', cancel));
+    const hidden = () => {
+        if (document.hidden) cancel();
+    };
+    onMounted(() => document.addEventListener('visibilitychange', hidden));
     onBeforeUnmount(() => {
         clear();
         window.removeEventListener('blur', cancel);
+        document.removeEventListener('visibilitychange', hidden);
     });
-    const previewEvents = computed(
-        () =>
-            new Map(
-                preview.value?.project?.lanes
-                    .flatMap(lane => lane.events as MarkerEvent[])
-                    .map(event => [event.id, event]) ?? [],
-            ),
-    );
+    const previewEvents = computed(() => new Map(preview.value?.events.map(event => [event.id, event]) ?? []));
     return {
         candidate,
         pending,
         selected,
         drag,
         preview,
-        menu,
         blocks,
         same,
         focus,
@@ -535,6 +576,9 @@ export function useMarkerEditing(
         key,
         context,
         cancel,
+        lostCapture() {
+            if (drag.value) cancel();
+        },
         escape,
         clear,
         cancelPending() {

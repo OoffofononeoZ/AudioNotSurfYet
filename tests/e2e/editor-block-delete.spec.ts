@@ -5,7 +5,55 @@ import {
     markerSurface,
     clickMarkerTime,
     dragMarkerTimes,
+    seekMarkerEditor,
 } from '../support/editor-marking';
+import { verifyMarkerInteractions } from '../support/editor-marker-interaction-scenario.mjs';
+
+test('marker previews, right-button selection and sound-example ownership', async ({ page }, info) => {
+    const errors: string[] = [];
+    page.on('pageerror', error => errors.push(error.message));
+    await prepareMarkerEditor(page);
+    await verifyMarkerInteractions(page, name =>
+        page.screenshot({ path: `artifacts/editor-marking/${info.project.name}-${name}.png` }),
+    );
+    expect(errors).toEqual([]);
+});
+
+test('completed red selections clear on cancellation and changing editor inputs without deleting', async ({ page }) => {
+    await prepareMarkerEditor(page);
+    await addMarkerLane(page, 'point');
+    const surface = markerSurface(page, 'point');
+    for (const time of [0.5, 1]) await clickMarkerTime(surface, time);
+    await page.getByTestId('toggle-block-mode').click();
+    for (const action of ['escape', 'blur', 'hidden', 'seek', 'play', 'grid', 'project', 'workspace']) {
+        await rightDrag(page, surface, 0.4, 1);
+        await page.mouse.up({ button: 'right' });
+        await expect(surface.locator('.is-deletion')).toBeVisible();
+        if (action === 'escape') await page.keyboard.press('Escape');
+        if (action === 'blur') await page.evaluate(() => window.dispatchEvent(new Event('blur')));
+        if (action === 'hidden')
+            await page.evaluate(() => {
+                Object.defineProperty(document, 'hidden', { configurable: true, value: true });
+                document.dispatchEvent(new Event('visibilitychange'));
+                delete (document as unknown as { hidden?: boolean }).hidden;
+            });
+        if (action === 'seek') await seekMarkerEditor(page, 1);
+        if (action === 'play') {
+            await page.getByTestId('toggle-playback').click();
+            await expect(page.locator('#music-bar-container')).toHaveAttribute('data-playback-state', 'playing');
+            await page.getByTestId('toggle-playback').click();
+        }
+        if (action === 'grid') await page.getByRole('button', { name: '减小节拍细分', exact: true }).click();
+        if (action === 'project') await page.locator('[data-testid^="add-inner-class-"]').click();
+        if (action === 'workspace') {
+            await page.getByTestId('editor-separation-tab').click();
+            await page.getByTestId('editor-marking-tab').click();
+        }
+        await expect(surface.locator('.is-deletion')).toHaveCount(0);
+        await seekMarkerEditor(page, 0);
+        await expect(surface.locator('.marker-point')).toHaveCount(2);
+    }
+});
 
 async function rightDrag(page: Page, surface: Locator, from: number, to: number) {
     const rect = (await surface.boundingBox())!,
@@ -17,9 +65,7 @@ async function rightDrag(page: Page, surface: Locator, from: number, to: number)
     await page.mouse.move(x(to), rect.y + 8, { steps: 5 });
 }
 
-test('right drag previews red, preserves markers until release and deletes one class persistently', async ({
-    page,
-}) => {
+test('right drag retains red after release and confirms one class deletion persistently', async ({ page }) => {
     const errors: string[] = [];
     page.on('pageerror', error => errors.push(error.message));
     await prepareMarkerEditor(page);
@@ -41,6 +87,9 @@ test('right drag previews red, preserves markers until release and deletes one c
     await expect(surface.locator('.marker-point')).toHaveCount(3);
     await page.screenshot({ path: 'artifacts/editor-marking/block-delete-preview.png' });
     await page.mouse.up({ button: 'right' });
+    await expect(surface.locator('.marker-point')).toHaveCount(3);
+    await expect(red).toBeVisible();
+    await clickMarkerTime(surface, 0.75, 'right', 8);
     await expect(surface.locator('.marker-point')).toHaveCount(1);
     await expect(surface.locator('.marker-point')).toHaveAttribute('data-time-seconds', '2');
     await expect(other.locator('.marker-point')).toHaveCount(1);
@@ -52,7 +101,7 @@ test('right drag previews red, preserves markers until release and deletes one c
     expect(errors).toEqual([]);
 });
 
-test('right click and cancelled deletion keep the original blue selection; ranges delete whole', async ({ page }) => {
+test('right click clears blue selection; cancelled dragging restores it and ranges delete whole', async ({ page }) => {
     await prepareMarkerEditor(page);
     await addMarkerLane(page, 'range');
     const surface = markerSurface(page, 'range');
@@ -62,6 +111,8 @@ test('right click and cancelled deletion keep the original blue selection; range
     const originalStyle = await surface.locator('.marker-block-selection').getAttribute('style');
     await clickMarkerTime(surface, 1, 'right', 8);
     await expect(surface.locator('.marker-range')).toHaveCount(2);
+    await expect(surface.locator('.marker-block-selection')).toHaveCount(0);
+    await dragMarkerTimes(page, surface, 0.6, 1.2);
     for (const action of ['escape', 'blur', 'pointercancel']) {
         await rightDrag(page, surface, 1, 3.5);
         await expect(surface.locator('.is-deletion')).toBeVisible();
@@ -75,6 +126,8 @@ test('right click and cancelled deletion keep the original blue selection; range
     }
     await rightDrag(page, surface, 1, 1.3);
     await page.mouse.up({ button: 'right' });
+    await expect(surface.locator('.marker-range')).toHaveCount(2);
+    await clickMarkerTime(surface, 1, 'right', 8);
     await expect(surface.locator('.marker-range')).toHaveCount(1);
     await expect(surface.locator('.marker-range')).toHaveAttribute('data-start-seconds', '3');
     await page.getByTestId('toggle-block-mode').click();

@@ -22,7 +22,8 @@ export function useMarkerBlocks(
     const mode = ref(false),
         selection = shallowRef<MarkerBlockSelection | null>(null),
         preview = shallowRef<MarkerBlockSelection | null>(null),
-        deletion = shallowRef<MarkerBlockSelection | null>(null);
+        deletion = shallowRef<MarkerBlockSelection | null>(null),
+        deletionDraft = shallowRef<MarkerBlockSelection | null>(null);
     function selectionAt(laneId: string, innerClassId: string, anchor: number, extent = anchor) {
         return editableMarkerBlock(
             project(),
@@ -36,8 +37,8 @@ export function useMarkerBlocks(
         preview.value = null;
     }
     function selectDeletion(laneId: string, innerClassId: string, anchor: number, extent: number) {
-        deletion.value = null;
-        if (view().editable) deletion.value = selectionAt(laneId, innerClassId, anchor, extent);
+        deletionDraft.value = null;
+        if (view().editable) deletionDraft.value = selectionAt(laneId, innerClassId, anchor, extent);
     }
     function remove(current: MarkerBlockSelection) {
         assertMarkerBlockEditable(project(), current, view());
@@ -105,11 +106,29 @@ export function useMarkerBlocks(
         selection.value = null;
         preview.value = null;
         deletion.value = null;
+        deletionDraft.value = null;
     }
     function toggle() {
         mode.value = !mode.value;
         clear();
-        report(mode.value ? '区间操作：左键框选及移动，右键框选后松开删除；Ctrl/Cmd+C 向后复制。' : '已关闭区间操作。');
+        report(
+            mode.value
+                ? '区间操作：左键框选及移动，右键框选后再次右键红区删除；右键蓝区取消选中；Ctrl/Cmd+C 向后复制。'
+                : '已关闭区间操作。',
+        );
     }
-    return { mode, selection, preview, deletion, select, selectDeletion, remove, move, key, clear, toggle };
+    return {
+        mode,
+        selection,
+        preview,
+        deletion,
+        deletionDraft,
+        select,
+        selectDeletion,
+        remove,
+        move,
+        key,
+        clear,
+        toggle,
+    };
 }

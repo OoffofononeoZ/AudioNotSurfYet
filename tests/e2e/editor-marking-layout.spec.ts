@@ -150,11 +150,7 @@ for (const dpr of [1, 2])
             await page.getByTestId('toggle-editor-timing').click();
             await markerSurface(page, 'point').click({ button: 'right', position: { x: 250, y: 8 } });
             const menu = page.getByTestId('editor-point-menu');
-            await expect(menu).toBeVisible();
-            await expect(menu.getByRole('menuitem', { name: '将此处居中' })).toHaveCount(0);
-            const bounds = (await menu.boundingBox())!;
-            expect(bounds.x).toBeGreaterThanOrEqual(8);
-            expect(bounds.y + bounds.height).toBeLessThanOrEqual(892);
+            await expect(menu).toHaveCount(0);
             await page.keyboard.press('Escape');
             expect(errors).toEqual([]);
         } finally {

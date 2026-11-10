@@ -95,14 +95,6 @@
                 @update-project="applyProject"
                 @status="message = $event" />
         </div>
-        <EditorContextMenu
-            v-if="editing.menu.value"
-            :anchor="editing.menu.value.element"
-            :x="editing.menu.value.x"
-            :y="editing.menu.value.y"
-            :test-id="`editor-${editing.menu.value.kind}-menu`"
-            @action="navigateMenu"
-            @close="editing.menu.value = null" />
         <EditorAnalysisOverlay
             v-if="active !== false"
             :project="project"
@@ -140,6 +132,7 @@ import type { EditorProjectV2, PointEventV1, RangeEventV1 } from '../editor/type
 import type { PlaybackSnapshot } from '../types/audio';
 import type { AnalysisCoordinatorSnapshot, AnalysisCursorValueResult, AnalysisSeries } from '../analysis/types';
 import type { SoundExample } from '../transcription/examples/types';
+import { collectMarkerBlockEvents } from '../editor/markerBlockOperations';
 const props = defineProps<{
     active?: boolean;
     recordingHost: KeyboardRecordingHost;
@@ -198,8 +191,13 @@ const editing = useMarkerEditing(
     value => (message.value = value),
 );
 const exampleSelection = computed<Omit<SoundExample, 'id' | 'polarity'> | null>(() => {
+    if (editing.drag.value?.kind === 'delete' || editing.blocks.deletion.value || editing.blocks.deletionDraft.value)
+        return null;
     const block = editing.blocks.selection.value;
-    if (block) return { kind: 'range', startSeconds: block.startSeconds, endSeconds: block.endSeconds };
+    if (block)
+        return collectMarkerBlockEvents(props.project, block).length
+            ? { kind: 'range', startSeconds: block.startSeconds, endSeconds: block.endSeconds }
+            : null;
     const event = props.project.lanes
         .flatMap(lane => lane.events as (PointEventV1 | RangeEventV1)[])
         .find(event => event.id === editing.selected.value);
@@ -230,16 +228,6 @@ function wheel(event: WheelEvent) {
         return;
     event.preventDefault();
     if (!editing.drag.value && !rulerDragging.value) emit('zoomMarker', event.deltaY);
-}
-function navigateMenu(action: string) {
-    const time = editing.menu.value?.time;
-    editing.menu.value = null;
-    if (time === undefined) return;
-    void audioSession
-        .seek(time)
-        .then(() =>
-            action === 'play' && props.playback.state !== 'playing' ? audioSession.togglePlayback() : undefined,
-        );
 }
 function escape(event: KeyboardEvent) {
     if (!event.defaultPrevented && props.active !== false && event.key === 'Escape') {

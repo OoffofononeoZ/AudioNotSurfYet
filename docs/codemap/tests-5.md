@@ -8,6 +8,7 @@
 
 | 文件 | 本地静态引用（最多显示 6 项） |
 | --- | --- |
+| [tests/transcription/example-search.test.ts](../../tests/transcription/example-search.test.ts) | [src/transcription/acousticIndex.ts](../../src/transcription/acousticIndex.ts)、[src/transcription/examples/matcher.ts](../../src/transcription/examples/matcher.ts)、[src/transcription/examples/types.ts](../../src/transcription/examples/types.ts) |
 | [tests/transcription/example-service.test.ts](../../tests/transcription/example-service.test.ts) | [src/editor/projectCodec.ts](../../src/editor/projectCodec.ts)、[src/editor/types.ts](../../src/editor/types.ts)、[src/processing/editorProcessingGate.ts](../../src/processing/editorProcessingGate.ts)、[src/processing/editorSeparationService.ts](../../src/processing/editorSeparationService.ts)、[src/transcription/examples/repository.ts](../../src/transcription/examples/repository.ts)、[src/transcription/examples/service.ts](../../src/transcription/examples/service.ts)、另 1 项，按需核对源码 |
 | [tests/transcription/exampleFixtures.ts](../../tests/transcription/exampleFixtures.ts) | [src/processing/dsp.ts](../../src/processing/dsp.ts) |
 | [tests/transcription/gpu-failure-probe.worker.ts](../../tests/transcription/gpu-failure-probe.worker.ts) | [src/processing/modelManifest.ts](../../src/processing/modelManifest.ts)、[src/transcription/drumBatchModel.ts](../../src/transcription/drumBatchModel.ts)、[src/transcription/drumRuntime.ts](../../src/transcription/drumRuntime.ts)、[tests/transcription/qualityFixtures.ts](../../tests/transcription/qualityFixtures.ts) |

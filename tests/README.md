@@ -4,6 +4,8 @@
 
 Editor 波形：`npx playwright test tests/e2e/editor-timeline-lock.spec.ts --project=chrome --project=edge --workers=1` 覆盖上下布局、独立视口、锁定联动、取消和页面状态重置；`npm run desktop:dir` 后运行 `npm run test:desktop:editor-timeline`，在当前 ASAR 应用及独立 profile 上复用相同场景。仅原生音频选择结果使用替身，播放、IPC 和布局真实运行。结果位于 `artifacts/editor-timeline/` 和 `artifacts/desktop/editor-timeline/<ID>/`，不证明原生对话框或安装升级通过。
 
+Editor 标记鼠标：`npx playwright test tests/e2e/editor-block-delete.spec.ts tests/e2e/editor-marking.spec.ts tests/e2e/e10-editor-block-editing.spec.ts --project=chrome --project=edge --workers=1` 覆盖冲突位置保留拖动预览、红区二次右键删除、蓝区取消、声音示例按钮选择来源、取消清理和视窗外冻结成员操作。桌面 `test:desktop:editor-timeline` 复用视窗外操作及冲突/红区/按钮场景；取消矩阵和跨分类持久化由上述浏览器专项验证，不互相扩充证据范围。
+
 Analyzer 3D：`npm run test:e2e:analyzer-3d` 使用真实 Chrome/Edge 检查七项、单选/独立恢复、相机与时间缩放、正交切片、响应式和十次 GPU 释放/重试，以及 900 秒合成音频的缩放取消与反馈。数值适配/会话模型为 `npx vitest run tests/analysis/three-d-data.test.ts tests/analysis/three-d-workspace.test.ts`。图像在忽略的 `test-results/3d-*.png`；Electron 扩展现有 `test:desktop:analyzer`，实际 ASAR 的七项、交互、切片及重启恢复另行检查，不借用浏览器通过结论。
 
 按实际改动选择检查，不把可用命令表作为默认执行清单。当前领域验收集中在[Analyzer](../docs/quality/validation.md)、[Editor](../docs/quality/editor/validation.md)、[Visualizer](../docs/quality/visualizer/validation.md)与[processing](../docs/quality/processing/validation.md)，任务选择见[验证skill](../skills/audiosurf-testing-strategy/SKILL.md)。
