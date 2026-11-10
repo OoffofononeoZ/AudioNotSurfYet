@@ -4,6 +4,7 @@ import { removeJob } from '../processing/storage';
 import { TRANSCRIPTION_CONFIG_HASH, TRANSCRIPTION_MODEL_HASH } from './modelManifest';
 import { runTranscription } from './pipeline';
 import { drumConfigurationHash } from './drumOptions';
+import { ANALYSIS_CONFIG_HASH } from './analysisOptions';
 import type { TranscriptionCommand, TranscriptionEvent } from './workerProtocol';
 
 let active: { job: TranscriptionCommand['job']; abort: AbortController } | null = null;
@@ -62,6 +63,7 @@ self.onmessage = (event: MessageEvent<TranscriptionCommand>) => {
                 identity.configHash !== TRANSCRIPTION_CONFIG_HASH ||
                 !['webgpu', 'wasm'].includes(identity.drumBackend) ||
                 identity.drumConfigHash !== drumConfigurationHash(identity.drumBackend) ||
+                identity.analysisConfigHash !== ANALYSIS_CONFIG_HASH ||
                 identity.modelManifestHash !== TRANSCRIPTION_MODEL_HASH ||
                 job.jobId !== job.directory
             )

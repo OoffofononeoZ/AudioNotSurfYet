@@ -1,4 +1,5 @@
 import { drumConfigurationHash } from '../../src/transcription/drumOptions';
+import { ANALYSIS_CONFIG_HASH } from '../../src/transcription/analysisOptions';
 import { afterEach, expect, it, vi } from 'vitest';
 import { TranscriptionController } from '../../src/transcription/controller';
 import type { TranscriptionWorkerPort } from '../../src/transcription/controller';
@@ -20,6 +21,7 @@ const identity: TranscriptionIdentity = {
     configHash: 'e'.repeat(64),
     drumBackend: 'webgpu',
     drumConfigHash: drumConfigurationHash('webgpu'),
+    analysisConfigHash: ANALYSIS_CONFIG_HASH,
     selectedRoles: ['drums'],
 };
 const ft = { source: { hash: identity.pcmHash } } as SeparationResult;

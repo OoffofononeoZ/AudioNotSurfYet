@@ -4,6 +4,10 @@ import { TRANSCRIPTION_CONFIG } from './modelManifest';
 import { TRANSCRIPTION_ROLES } from './candidateTypes';
 import { validDrumDiagnostics } from './drumDiagnostics';
 import { drumConfigurationHash } from './drumOptions';
+import { DRUM_CATEGORIES, drumSoundKey } from './drumVocabulary';
+import type { DrumCategory } from './candidateTypes';
+import { ANALYSIS_CONFIG_HASH } from './analysisOptions';
+import { validCandidateAcoustics } from './candidateAcoustics';
 import type { MarkerCandidate, NoteInstrument, NoteThresholds, TranscriptionResult } from './candidateTypes';
 
 export function candidateEventKind(candidate: MarkerCandidate, thresholds: NoteThresholds): 'point' | 'range' {
@@ -15,7 +19,7 @@ export function candidateEventKind(candidate: MarkerCandidate, thresholds: NoteT
     return duration >= Math.round(threshold * 1000) ? 'range' : 'point';
 }
 export function candidateCategory(candidate: MarkerCandidate): string {
-    return candidate.kind === 'drum' ? candidate.drum : String(candidate.pitch);
+    return candidate.kind === 'drum' ? drumSoundKey(candidate.drum, candidate.customPitch) : String(candidate.pitch);
 }
 export function validateCandidates(result: TranscriptionResult): void {
     if (
@@ -50,6 +54,7 @@ export function validateCandidates(result: TranscriptionResult): void {
         !identity ||
         !['webgpu', 'wasm'].includes(identity.drumBackend) ||
         identity.drumConfigHash !== drumConfigurationHash(identity.drumBackend) ||
+        identity.analysisConfigHash !== ANALYSIS_CONFIG_HASH ||
         !text(identity.trackId) ||
         !text(identity.ftResultId) ||
         !Number.isFinite(identity.durationSeconds) ||
@@ -118,6 +123,11 @@ export function validateCandidates(result: TranscriptionResult): void {
         )
             throw new ProcessingError('result-invalid', '候选时间、强度或来源身份无效。');
         const auxiliaryInput = candidate.source.inputRole === 'piano' || candidate.source.inputRole === 'guitar';
+        if (
+            candidate.acoustics !== undefined &&
+            !validCandidateAcoustics(candidate.acoustics, identity.durationSeconds)
+        )
+            throw new ProcessingError('result-invalid', '候选声学证据无效。');
         if (candidate.source.artifactId !== (auxiliaryInput ? result.auxiliaryDirectory : identity.ftResultId)) {
             throw new ProcessingError('result-invalid', '候选音频文件来源与结果不匹配。');
         }
@@ -127,8 +137,10 @@ export function validateCandidates(result: TranscriptionResult): void {
                 candidate.instrument !== 'drums' ||
                 candidate.source.inputRole !== 'drums' ||
                 candidate.source.model !== 'adt-str' ||
-                !['kick', 'snare', 'hat'].includes(candidate.drum) ||
-                !Number.isInteger(candidate.customPitch)
+                !DRUM_CATEGORIES.includes(candidate.drum) ||
+                !Number.isInteger(candidate.customPitch) ||
+                candidate.customPitch < 0 ||
+                candidate.customPitch > 99
             ) {
                 throw new ProcessingError('result-invalid', '鼓候选类别无效。');
             }
@@ -140,6 +152,10 @@ export function validateCandidates(result: TranscriptionResult): void {
                 !Number.isInteger(candidate.pitch) ||
                 candidate.pitch < 21 ||
                 candidate.pitch > 108 ||
+                (candidate.onsetStrength !== undefined &&
+                    (!Number.isFinite(candidate.onsetStrength) ||
+                        candidate.onsetStrength < 0 ||
+                        candidate.onsetStrength > 1)) ||
                 normalizeEditorSeconds(candidate.endSeconds) <= normalizeEditorSeconds(candidate.startSeconds)
             ) {
                 throw new ProcessingError('result-invalid', '音符候选类别、音高或持续时间无效。');
@@ -167,7 +183,7 @@ export function validateThresholds(thresholds: NoteThresholds): void {
 export function correctCandidate(
     result: TranscriptionResult,
     id: string,
-    patch: { deleted?: boolean; instrument?: NoteInstrument; drum?: 'kick' | 'snare' | 'hat' },
+    patch: { deleted?: boolean; instrument?: NoteInstrument; drum?: DrumCategory },
 ): TranscriptionResult {
     const candidate = result.candidates.find(candidate => candidate.id === id);
     if (!candidate) throw new ProcessingError('invalid-request', '候选已经不存在。');

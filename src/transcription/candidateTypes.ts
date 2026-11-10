@@ -1,14 +1,17 @@
 import type { DrumWindowDiagnostic } from './drumDiagnostics';
 import type { DrumBackend } from './drumRuntime';
 import type { IncompleteDrumRange } from './drumTranscription';
+import type { DrumSoundCategory } from './drumVocabulary';
+import type { CandidateAcoustics } from './candidateAcoustics';
 export const TRANSCRIPTION_ROLES = ['drums', 'bass', 'vocals', 'piano', 'guitar'] as const;
 export type TranscriptionRole = (typeof TRANSCRIPTION_ROLES)[number];
 export type NoteInstrument = 'bass' | 'vocals' | 'piano' | 'guitar' | 'unknown';
 export type CandidateInstrument = 'drums' | NoteInstrument;
-export type DrumCategory = 'kick' | 'snare' | 'hat';
+export type DrumCategory = DrumSoundCategory;
 export interface TranscriptionIdentity {
     drumBackend: DrumBackend;
     drumConfigHash: string;
+    analysisConfigHash: string;
     trackId: string;
     contentHash: string;
     pcmHash: string;
@@ -32,6 +35,7 @@ interface CandidateBase {
     strength: number;
     deleted: boolean;
     source: CandidateSource;
+    acoustics?: CandidateAcoustics;
 }
 export interface DrumCandidate extends CandidateBase {
     kind: 'drum';
@@ -43,6 +47,7 @@ export interface NoteCandidate extends CandidateBase {
     kind: 'note';
     instrument: NoteInstrument;
     pitch: number;
+    onsetStrength?: number;
 }
 export type MarkerCandidate = DrumCandidate | NoteCandidate;
 export interface TranscriptionResult {

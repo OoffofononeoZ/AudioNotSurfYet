@@ -1,5 +1,7 @@
 import { expect, it, vi } from 'vitest';
 import { EditorTranscriptionService } from '../../src/transcription/editorTranscriptionService';
+import { evidence } from './review-fixture';
+import { defaultReviewSettings } from '../../src/transcription/reviewSettings';
 import { EditorProcessingGate } from '../../src/processing/editorProcessingGate';
 import { createInitialEditorProject } from '../../src/editor/projectCodec';
 import { ProcessingError } from '../../src/processing/modelManifest';
@@ -120,6 +122,7 @@ function setup() {
                     startSeconds: 1.13,
                     endSeconds: 1.33,
                     strength: 0.8,
+                    acoustics: evidence(1.13, 1.33),
                     deleted: false,
                     source: {
                         resultId: 'transcription-00000000-0000-0000-0000-000000000000',
@@ -178,7 +181,11 @@ it('restores isolated incomplete drum ranges as partial instead of a complete re
     bundle.result.incompleteDrumRanges = [{ startSeconds: 2, endSeconds: 2.96, reason: 'repeated-event' }];
     bundle.result.truncatedDrumSegments = [2];
     await s.service.dispose();
-    vi.mocked(s.repository.restore).mockResolvedValueOnce({ bundle, thresholds: {} } as TranscriptionRecord);
+    vi.mocked(s.repository.restore).mockResolvedValueOnce({
+        bundle,
+        thresholds: {},
+        review: defaultReviewSettings(),
+    } as TranscriptionRecord);
     const restored = new EditorTranscriptionService(s.transport, s.editor, s.separation, s.gate, {
         controller: s.controller,
         repository: s.repository,
@@ -221,6 +228,27 @@ it('flushes a failed correction again before shutdown without rerunning inferenc
     expect(s.repository.saveEdits).toHaveBeenCalledTimes(2);
     expect(s.controller.start).toHaveBeenCalledTimes(1);
     expect(s.service.getSnapshot().bundle?.result.candidates[0]?.instrument).toBe('unknown');
+    await s.service.dispose();
+});
+it('changes view, filtering and sound groups without inference and persists the review with edits', async () => {
+    const s = setup();
+    await idle(s);
+    const { work } = await start(s);
+    s.finish();
+    await work;
+    const raw = structuredClone(s.service.getSnapshot().bundle!.result.candidates);
+    s.service.setReviewView('notes');
+    s.service.setSensitivity('balanced');
+    s.service.assignSoundGroup('note', null);
+    const group = s.service.getSnapshot().preview!.groups[0]!;
+    s.service.renameSoundGroup(group.id, '醒目的声音');
+    await s.service.flushEdits();
+    const settings = s.service.getSnapshot().review;
+    expect(settings.groups[group.id]!.label).toBe('醒目的声音');
+    expect(settings.assignments.note).toBe(group.id);
+    expect(s.service.getSnapshot().bundle!.result.candidates).toEqual(raw);
+    expect(s.controller.start).toHaveBeenCalledTimes(1);
+    expect(vi.mocked(s.repository.saveEdits).mock.calls.at(-1)![3]).toEqual(settings);
     await s.service.dispose();
 });
 

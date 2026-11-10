@@ -14,6 +14,9 @@ import type { TranscriptionModelId } from './modelManifest';
 import { validateCandidates } from './candidates';
 import type { NoteCandidate, TranscriptionIdentity, TranscriptionResult, TranscriptionRole } from './candidateTypes';
 import type { TranscriptionBundle } from './workerProtocol';
+import { buildAcousticIndex } from './acousticIndex';
+import { candidateAcoustics } from './candidateAcoustics';
+import { ROLE_PITCH_OPTIONS } from './analysisOptions';
 
 export type PipelineProgress = (phase: string, role: string | null, done: number, total: number | null) => void;
 
@@ -121,6 +124,11 @@ export async function runTranscription(
             result.truncatedDrumSegments = transcript.incomplete.map(range => range.startSeconds);
             result.drumAdapter = transcript.adapter;
             result.timings.drumsSetupMs = transcript.setupMs;
+            const acousticStart = performance.now();
+            const acoustic = await buildAcousticIndex(lease.reader, signal, (phase, done, total) =>
+                progress(phase, 'drums', done, total),
+            );
+            result.timings.drumsAcousticMs = performance.now() - acousticStart;
             for (const hit of transcript.hits)
                 result.candidates.push({
                     id: `drums-${result.candidates.length}`,
@@ -133,6 +141,11 @@ export async function runTranscription(
                     strength: hit.strength,
                     deleted: false,
                     source: source('drums', ft.source.directory, 'adt-str'),
+                    acoustics: candidateAcoustics(
+                        acoustic,
+                        hit.startSeconds,
+                        Math.min(acoustic.durationSeconds, hit.startSeconds + 0.12),
+                    ),
                 });
             result.completedRoles.push('drums');
         } catch (error) {
@@ -161,7 +174,13 @@ export async function runTranscription(
                 signal,
                 (phase, done, total) => progress(phase, role, done, total),
                 modelBase,
+                ROLE_PITCH_OPTIONS[role],
             );
+            const acousticStart = performance.now();
+            const acoustic = await buildAcousticIndex(lease.reader, signal, (phase, done, total) =>
+                progress(phase, role, done, total),
+            );
+            result.timings[`${role}AcousticMs`] = performance.now() - acousticStart;
             for (const note of transcript.notes) {
                 const candidate: NoteCandidate = {
                     id: `${role}-${result.candidates.length}`,
@@ -171,8 +190,14 @@ export async function runTranscription(
                     startSeconds: note.startSeconds,
                     endSeconds: Math.min(note.endSeconds, identity.durationSeconds),
                     strength: note.strength,
+                    onsetStrength: note.onsetStrength,
                     deleted: false,
                     source: source(role, directory, 'basic-pitch'),
+                    acoustics: candidateAcoustics(
+                        acoustic,
+                        note.startSeconds,
+                        Math.min(note.endSeconds, acoustic.durationSeconds),
+                    ),
                 };
                 if (candidate.startSeconds < candidate.endSeconds) result.candidates.push(candidate);
             }
@@ -180,6 +205,7 @@ export async function runTranscription(
             result.timings[`${role}InferenceMs`] = transcript.inferenceMs;
             result.timings[`${role}ActivationBytes`] = transcript.activationBytes;
         } catch (error) {
+            result.candidates = result.candidates.filter(candidate => candidate.source.inputRole !== role);
             failed(role, error);
         } finally {
             await lease?.close();

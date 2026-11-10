@@ -5,15 +5,16 @@ import { hashBytes } from '../processing/sha256';
 import { candidateCategory, candidateEventKind, deduplicateCandidates, validateCandidates } from './candidates';
 import { INSTRUMENT_LABELS } from './candidateTypes';
 import type { CandidateInstrument, MarkerCandidate, NoteThresholds, TranscriptionResult } from './candidateTypes';
+import { DRUM_LABELS } from './drumVocabulary';
 
-function prefix(result: TranscriptionResult): string {
+export function resultApplyPrefix(result: TranscriptionResult): string {
     return `automatic-${hashBytes(new TextEncoder().encode(result.id))}-`;
 }
 export function resultAlreadyApplied(project: EditorProjectV2, result: TranscriptionResult): boolean {
-    return project.lanes.some(lane => lane.id.startsWith(prefix(result)));
+    return project.lanes.some(lane => lane.id.startsWith(resultApplyPrefix(result)));
 }
 function categoryLabel(candidate: MarkerCandidate): string {
-    if (candidate.kind === 'drum') return candidate.drum;
+    if (candidate.kind === 'drum') return `${DRUM_LABELS[candidate.drum]} · 声音 ${candidate.customPitch}`;
     const names = ['C', 'C♯', 'D', 'D♯', 'E', 'F', 'F♯', 'G', 'G♯', 'A', 'A♯', 'B'];
     return `${names[candidate.pitch % 12]}${Math.floor(candidate.pitch / 12) - 1} · ${candidate.pitch}`;
 }
@@ -51,7 +52,7 @@ export function applyCandidateResult(
         group.candidates.push(candidate);
         groups.set(key, group);
     }
-    const root = prefix(result);
+    const root = resultApplyPrefix(result);
     const added: EditorLaneV1[] = [];
     for (const [key, group] of groups) {
         const laneId = root + key;

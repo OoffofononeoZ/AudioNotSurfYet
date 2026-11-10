@@ -1,4 +1,5 @@
 import { drumConfigurationHash } from '../../src/transcription/drumOptions';
+import { ANALYSIS_CONFIG_HASH } from '../../src/transcription/analysisOptions';
 import { describe, expect, it } from 'vitest';
 import { createInitialEditorProject, decodeEditorProject, encodeEditorProjectV2 } from '../../src/editor/projectCodec';
 import { applyCandidateResult, resultAlreadyApplied } from '../../src/transcription/applyCandidates';
@@ -32,6 +33,7 @@ function result(): TranscriptionResult {
             runtimeManifestHash: 'e'.repeat(64),
             drumBackend: 'webgpu',
             drumConfigHash: drumConfigurationHash('webgpu'),
+            analysisConfigHash: ANALYSIS_CONFIG_HASH,
             selectedRoles: ['drums', 'bass', 'piano', 'guitar'],
         },
         completedRoles: ['drums', 'bass', 'piano', 'guitar'],
@@ -114,6 +116,28 @@ describe('candidate preview and atomic V1 apply', () => {
             lane = applied.lanes.find(lane => lane.name === '鼓击打（自动）')!;
         expect(lane.events).toHaveLength(2);
         expect(lane.innerClasses).toHaveLength(2);
+    });
+    it('keeps simultaneous custom toms, percussion and unknown sounds distinct through V2 apply', () => {
+        const sounds = [
+            ['tom', 41],
+            ['tom', 47],
+            ['crash', 46],
+            ['percussion', 50],
+            ['percussion', 52],
+            ['unknown', 99],
+        ] as const;
+        const r = result();
+        r.candidates = sounds.map(([category, customPitch]) => ({
+            ...drum(`sound-${customPitch}`, 'kick', 1),
+            drum: category,
+            customPitch,
+        }));
+        r.candidates.push({ ...r.candidates[0]!, id: 'exact-duplicate' });
+        const applied = applyCandidateResult(project(), r, {});
+        const lane = applied.lanes.find(lane => lane.name === '鼓击打（自动）')!;
+        expect(lane.events).toHaveLength(6);
+        expect(lane.innerClasses).toHaveLength(6);
+        expect(decodeEditorProject(encodeEditorProjectV2(applied))).toEqual(applied);
     });
     it('adds unsnapped point/range lanes once, keeps manual data and survives the unchanged V1 codec', () => {
         const p = project(),

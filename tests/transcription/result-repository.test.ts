@@ -1,4 +1,8 @@
 import { drumConfigurationHash } from '../../src/transcription/drumOptions';
+import { ANALYSIS_CONFIG_HASH } from '../../src/transcription/analysisOptions';
+import { defaultReviewSettings } from '../../src/transcription/reviewSettings';
+import { deriveCandidateReview } from '../../src/transcription/candidateReview';
+import { evidence } from './review-fixture';
 import { beforeEach, afterEach, expect, it, vi } from 'vitest';
 import 'fake-indexeddb/auto';
 import { TranscriptionRepository } from '../../src/transcription/resultRepository';
@@ -65,6 +69,7 @@ function fixture(): TranscriptionBundle {
         runtimeManifestHash: runtimeHash,
         drumBackend: 'webgpu' as const,
         drumConfigHash: drumConfigurationHash('webgpu'),
+        analysisConfigHash: ANALYSIS_CONFIG_HASH,
         selectedRoles: ['guitar', 'piano'] as const,
     };
     const stems = (['guitar', 'piano'] as const).map(role => ({
@@ -230,4 +235,36 @@ it('isolates backend identities and leaves legacy analysis records untouched', a
     });
     expect(preserved).toBe(true);
     expect(directories.has(id)).toBe(true);
+});
+it('restores sound assignments, names, sensitivity and duplicate decisions and isolates acoustic config changes', async () => {
+    const bundle = fixture(),
+        repository = new TranscriptionRepository(),
+        settings = defaultReviewSettings();
+    const piano = bundle.result.candidates[0]!;
+    if (piano.kind !== 'note') throw Error('Expected note fixture.');
+    piano.acoustics = evidence(0.2, 0.8);
+    bundle.result.candidates.push({
+        ...piano,
+        id: 'guitar',
+        instrument: 'guitar',
+        source: { ...piano.source, inputRole: 'guitar' },
+    });
+    const duplicate = deriveCandidateReview(bundle.result, settings, {}).duplicateGroups[0]!;
+    const custom = 'custom:11111111-1111-1111-1111-111111111111';
+    settings.groups[custom] = { label: '突出音色', instrument: 'piano' };
+    settings.assignments.note = custom;
+    settings.duplicateSelections[duplicate.id] = ['note'];
+    settings.sensitivity = 'balanced';
+    settings.view = 'notes';
+    await repository.publish(bundle, {}, signal(), 1e9, settings);
+    const restored = await repository.restore(bundle.result.identity, signal());
+    expect(restored?.review).toEqual(settings);
+    expect(deriveCandidateReview(restored!.bundle.result, restored!.review, {}).selectedIds).toEqual(['note']);
+    settings.groups[custom]!.label = '修正名称';
+    await repository.saveEdits(bundle, {}, signal(), settings);
+    expect((await repository.restore(bundle.result.identity, signal()))?.review.groups[custom]!.label).toBe('修正名称');
+    expect(
+        await repository.restore({ ...bundle.result.identity, analysisConfigHash: 'f'.repeat(64) }, signal()),
+    ).toBeNull();
+    expect(await repository.restore(bundle.result.identity, signal())).not.toBeNull();
 });

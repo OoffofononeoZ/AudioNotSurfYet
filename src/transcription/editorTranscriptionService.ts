@@ -16,8 +16,14 @@ import { TRANSCRIPTION_ROLES } from './candidateTypes';
 import type { NoteInstrument, NoteThresholds, TranscriptionIdentity, TranscriptionRole } from './candidateTypes';
 import { correctCandidate } from './candidates';
 import { drumConfigurationHash } from './drumOptions';
+import { ANALYSIS_CONFIG_HASH } from './analysisOptions';
 import type { DrumBackend } from './drumRuntime';
 import { applyCandidateResult, resultAlreadyApplied } from './applyCandidates';
+import { applySoundMarkers } from './applySoundMarkers';
+import { deriveCandidateReview } from './candidateReview';
+import type { CandidateReview } from './candidateReview';
+import { defaultReviewSettings, validateReviewSettings } from './reviewSettings';
+import type { ReviewSettings, Sensitivity } from './reviewSettings';
 import type { TranscriptionBundle, TranscriptionEvent } from './workerProtocol';
 
 export type TranscriptionStatus =
@@ -30,6 +36,8 @@ export interface EditorTranscriptionSnapshot {
     bundle: TranscriptionBundle | null;
     selectedRoles: TranscriptionRole[];
     thresholds: NoteThresholds;
+    review: ReviewSettings;
+    preview: CandidateReview | null;
     progress: Extract<TranscriptionEvent, { type: 'progress' }> | null;
     message: string | null;
     errorCode: string | null;
@@ -71,6 +79,8 @@ export class EditorTranscriptionService {
         selectedRoles: [...TRANSCRIPTION_ROLES],
         drumBackend: 'webgpu',
         thresholds: {},
+        review: defaultReviewSettings(),
+        preview: null,
         progress: null,
         message: null,
         errorCode: null,
@@ -112,6 +122,7 @@ export class EditorTranscriptionService {
             ...this.state,
             selectedRoles: [...this.state.selectedRoles],
             thresholds: { ...this.state.thresholds },
+            review: structuredClone(this.state.review),
         };
     }
     subscribe(listener: (snapshot: EditorTranscriptionSnapshot) => void): () => void {
@@ -121,7 +132,10 @@ export class EditorTranscriptionService {
     }
     private update(patch: Partial<EditorTranscriptionSnapshot>): void {
         if (this.disposed) return;
-        this.state = { ...this.state, ...patch };
+        const next = { ...this.state, ...patch };
+        if ('bundle' in patch || 'review' in patch || 'thresholds' in patch)
+            next.preview = next.bundle ? deriveCandidateReview(next.bundle.result, next.review, next.thresholds) : null;
+        this.state = next;
         for (const listener of this.listeners) listener(this.getSnapshot());
     }
     private guard(generation: number, signal: AbortSignal): void {
@@ -144,6 +158,7 @@ export class EditorTranscriptionService {
             configHash: TRANSCRIPTION_CONFIG_HASH,
             drumBackend: this.state.drumBackend,
             drumConfigHash: drumConfigurationHash(this.state.drumBackend),
+            analysisConfigHash: ANALYSIS_CONFIG_HASH,
             selectedRoles: [...this.state.selectedRoles],
         };
     }
@@ -171,6 +186,7 @@ export class EditorTranscriptionService {
             ftResultId: available ? snapshot.result!.source.directory : null,
             status: available ? 'restoring' : 'idle',
             bundle: null,
+            review: defaultReviewSettings(),
             progress: null,
             message: null,
             errorCode: null,
@@ -196,6 +212,7 @@ export class EditorTranscriptionService {
                     this.update({
                         bundle: record.bundle,
                         thresholds: record.thresholds,
+                        review: record.review,
                         selectedRoles: [...record.bundle.result.identity.selectedRoles],
                         status:
                             record.bundle.result.failures.length || record.bundle.result.incompleteDrumRanges?.length
@@ -294,15 +311,18 @@ export class EditorTranscriptionService {
                         bundle.result.failures.map(failure => `${failure.role}: ${failure.message}`).join('；') ||
                             '所有分析输入均未完成。',
                     );
+                const review: ReviewSettings = { ...this.state.review, assignments: {}, duplicateSelections: {} };
                 await this.repository.publish(
                     bundle,
                     this.state.thresholds,
                     signal,
                     this.separation.getSnapshot().cacheLimit,
+                    review,
                 );
                 this.guard(generation, signal);
                 this.update({
                     bundle,
+                    review,
                     status:
                         bundle.result.failures.length || bundle.result.incompleteDrumRanges?.length
                             ? 'partial'
@@ -360,12 +380,13 @@ export class EditorTranscriptionService {
         if (!bundle) return;
         const generation = this.generation,
             signal = this.io.signal,
-            thresholds = { ...this.state.thresholds };
+            thresholds = { ...this.state.thresholds },
+            review = structuredClone(this.state.review);
         this.update({ persistence: 'saving' });
         this.saving = this.saving.then(async () => {
             if (this.disposed || signal.aborted || generation !== this.generation) return;
             try {
-                await this.repository.saveEdits(bundle, thresholds, signal);
+                await this.repository.saveEdits(bundle, thresholds, signal, review);
                 this.guard(generation, signal);
                 this.update({ persistence: 'saved' });
             } catch (error) {
@@ -386,10 +407,63 @@ export class EditorTranscriptionService {
     }
     correct(id: string, patch: Parameters<typeof correctCandidate>[2]): void {
         if (!this.state.bundle || busy.has(this.state.status)) return;
+        const review = structuredClone(this.state.review);
+        if (patch.instrument !== undefined) delete review.assignments[id];
         this.update({
             bundle: { ...this.state.bundle, result: correctCandidate(this.state.bundle.result, id, patch) },
+            review,
         });
         this.queueSave();
+    }
+    private changeReview(review: ReviewSettings): void {
+        if (!this.state.bundle || busy.has(this.state.status)) return;
+        try {
+            validateReviewSettings(review, this.state.bundle.result);
+            this.update({ review });
+            this.queueSave();
+        } catch (error) {
+            this.update({ message: error instanceof Error ? error.message : '复核设置无效。' });
+        }
+    }
+    setReviewView(view: ReviewSettings['view']): void {
+        this.changeReview({ ...this.state.review, view });
+    }
+    setSensitivity(sensitivity: Sensitivity): void {
+        this.changeReview({ ...this.state.review, sensitivity });
+    }
+    renameSoundGroup(id: string, label: string): void {
+        const group = this.state.preview?.groups.find(group => group.id === id);
+        if (!group) return;
+        this.changeReview({
+            ...this.state.review,
+            groups: { ...this.state.review.groups, [id]: { label: label.trim(), instrument: group.instrument } },
+        });
+    }
+    assignSoundGroup(candidateId: string, target: string | null): void {
+        const candidate = this.state.bundle?.result.candidates.find(candidate => candidate.id === candidateId);
+        if (!candidate) return;
+        const existing = this.state.preview?.groups.find(
+            group => group.id === target && group.instrument === candidate.instrument,
+        );
+        if (target && !existing) return;
+        const id = existing?.id ?? `custom:${crypto.randomUUID()}`;
+        const info = existing ?? {
+            label: `声音组 ${(this.state.preview?.groups.length ?? 0) + 1}`,
+            instrument: candidate.instrument,
+        };
+        this.changeReview({
+            ...this.state.review,
+            groups: { ...this.state.review.groups, [id]: { label: info.label, instrument: info.instrument } },
+            assignments: { ...this.state.review.assignments, [candidateId]: id },
+        });
+    }
+    selectDuplicates(groupId: string, selectedIds: string[] | null): void {
+        const group = this.state.preview?.duplicateGroups.find(group => group.id === groupId);
+        if (!group || selectedIds?.some(id => !group.candidateIds.includes(id))) return;
+        const selections = { ...this.state.review.duplicateSelections };
+        if (selectedIds) selections[groupId] = [...new Set(selectedIds)];
+        else delete selections[groupId];
+        this.changeReview({ ...this.state.review, duplicateSelections: selections });
     }
     apply(): void {
         if (!this.state.bundle || busy.has(this.state.status)) return;
@@ -405,7 +479,21 @@ export class EditorTranscriptionService {
             return;
         }
         try {
-            const next = applyCandidateResult(project, this.state.bundle.result, this.state.thresholds);
+            const preview = this.state.preview!;
+            const selected = new Set(preview.selectedIds);
+            const next =
+                this.state.review.view === 'timbres'
+                    ? applySoundMarkers(project, this.state.bundle.result, preview)
+                    : applyCandidateResult(
+                          project,
+                          {
+                              ...this.state.bundle.result,
+                              candidates: this.state.bundle.result.candidates.filter(candidate =>
+                                  selected.has(candidate.id),
+                              ),
+                          },
+                          this.state.thresholds,
+                      );
             this.editor.updateProject(next, true);
             this.refreshApplied();
             this.update({ message: '候选已一次性添加为新标记轨。人工标记和 tempo 保留。', errorCode: null });

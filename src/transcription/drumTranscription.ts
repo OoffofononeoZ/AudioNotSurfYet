@@ -6,7 +6,7 @@ import type { DrumBackend } from './drumRuntime';
 import { DRUM_RUNTIME_CONFIG } from './drumRuntime';
 import { DRUM_WINDOW_CONFIG, ownsDrumTime, primaryDrumWindows, retryDrumWindows } from './drumWindows';
 import type { DrumWindow } from './drumWindows';
-import type { DrumHit } from './drumTokens';
+import type { FullDrumHit } from './drumVocabulary';
 import type { DrumWindowDiagnostic } from './drumDiagnostics';
 import type { TranscriptionProgress } from './modelSession';
 
@@ -22,7 +22,7 @@ export interface IncompleteDrumRange {
     reason: 'limit' | 'repeated-event';
 }
 export interface DrumTranscription {
-    hits: DrumHit[];
+    hits: FullDrumHit[];
     diagnostics: DrumAttemptDiagnostic[];
     incomplete: IncompleteDrumRange[];
     backend: DrumBackend;
@@ -44,7 +44,7 @@ export async function transcribeDrumReader(
     const started = performance.now();
     const model: Model = await create(backend, signal, progress, modelBase);
     const resampler = new MonoResampler(reader.sampleRate, DRUM_WINDOW_CONFIG.sampleRate);
-    const hits: DrumHit[] = [],
+    const hits: FullDrumHit[] = [],
         diagnostics: DrumAttemptDiagnostic[] = [],
         incomplete: IncompleteDrumRange[] = [];
     try {

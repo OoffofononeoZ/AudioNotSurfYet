@@ -17,5 +17,6 @@ describe('complete ADT custom vocabulary', () => {
         expect(classifyDrumSound(99)).toEqual({ gmPitch: null, category: 'unknown' });
         expect(drumSoundKey('unknown', 98)).not.toBe(drumSoundKey('unknown', 99));
         expect(drumSoundKey('percussion', 50)).not.toBe(drumSoundKey('percussion', 52));
+        expect(drumSoundKey('tom', 41)).not.toBe(drumSoundKey('tom', 47));
     });
 });

@@ -43,3 +43,11 @@ npx playwright test tests/e2e/editor-transcription.spec.ts tests/e2e/transcripti
 `audition-long.spec.ts`验证15分钟源的有界PCM调度，连续播放120秒、远端跳转、模拟读取停顿/错误时的时钟冻结，以及租约释放后的清理；不宣称已连续播放完整900秒。输入为受控transport夹具，不是再次验收已接受的FT听感或处理时间。
 
 完整链、受控质量和长源记录分别保存到`artifacts/evals/editor-transcription/full-chain/`、`controlled-quality/`、`long-audition/`。运行浏览器期间固定相关源码与测试，避免Vite热更新使候选身份和资源生命周期失效。只运行实际受影响的回归；真实钢琴/吉他录音与owner质量结论仍需各自证据。
+
+## 主要音色优化
+
+`candidate-review.test.ts`、`acoustic-index.test.ts` 覆盖原始/派生分离、静音有限值、源帧数校验、有界重采样/跨块/取消、和弦归组、共享声学起音、真实重复起音、不同通鼓/打击声、保守筛选、重复组含糊不选/强推荐/多选，以及 V2 原子应用和跨视图幂等。服务/仓库专项检查设置不触发模型重跑、命名/归属/筛选/复核决策恢复与新 analysisConfigHash 隔离。
+
+`transcription-timbre-quality.spec.ts --project=chrome --workers=1` 用同一自编受控样例运行真实固定模型、分来源音符解码、完整鼓类、DSP 和三个筛选档位。设置 `TRANSCRIPTION_QUALITY_BASELINE=<旧 controlled-quality run>` 时先核对输入 hash 和两份辅助 WAV 完整 SHA，再保存声音起音级配对；音色预览不按音高计数，不能把此对照写成音高准确率或真实音乐接受。
+
+仅调整后处理时，另设 `TRANSCRIPTION_REVIEW_INPUT=<本轮 raw-result.json>` 可复用原始候选重算；先在浏览器核对当前分析身份和候选，模型/DSP身份不一致则拒绝复用。新报告保留原始报告 hash 和当前源码 hash。产物在忽略的 `artifacts/evals/editor-transcription/timbre-quality/`，保留初次结果和修正后结果；不要用同样例调参后的数值冒称独立留出验证。

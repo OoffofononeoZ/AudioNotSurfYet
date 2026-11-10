@@ -2,8 +2,8 @@ import { checkCancelled, ProcessingError } from '../processing/modelManifest';
 import { drumLogMel, DRUM_FRAMES, DRUM_MELS } from './drumFeatures';
 import { drumFeatureHash, rawDrumEvents } from './drumDiagnostics';
 import type { DrumWindowDiagnostic } from './drumDiagnostics';
-import { drumClass } from './drumTokens';
-import type { DrumHit } from './drumTokens';
+import { classifyDrumSound } from './drumVocabulary';
+import type { FullDrumHit } from './drumVocabulary';
 import { createDrumSessions, DRUM_RUNTIME_CONFIG } from './drumRuntime';
 import type { DrumBackend, DrumSessions } from './drumRuntime';
 import type { ModelSession, TranscriptionProgress } from './modelSession';
@@ -14,7 +14,7 @@ export interface DrumBatchInput {
     inputStartSeconds: number;
 }
 export interface DrumBatchOutput {
-    hits: DrumHit[];
+    hits: FullDrumHit[];
     diagnostic: DrumWindowDiagnostic;
 }
 
@@ -156,12 +156,11 @@ export class DrumBatchModel {
             return inputs.map((request, row) => {
                 const tokens = sequences[row]!.slice(0, lengths[row] || maxTokens),
                     events = rawDrumEvents(tokens, request.inputStartSeconds);
-                const unique = new Map<string, DrumHit>();
+                const unique = new Map<string, FullDrumHit>();
                 let ignored = 0;
                 for (const event of events) {
-                    const drum = drumClass(event.customPitch);
+                    const drum = classifyDrumSound(event.customPitch).category;
                     if (
-                        !drum ||
                         event.timeSeconds < 0 ||
                         event.timeSeconds >= durationSeconds ||
                         event.timeSeconds - request.inputStartSeconds >= 2.56
@@ -169,7 +168,7 @@ export class DrumBatchModel {
                         ignored++;
                         continue;
                     }
-                    const key = `${drum}:${Math.round(event.timeSeconds * 1e6)}`,
+                    const key = `${event.customPitch}:${Math.round(event.timeSeconds * 1e6)}`,
                         strength = event.velocity / 127;
                     const previous = unique.get(key);
                     if (!previous || strength > previous.strength)

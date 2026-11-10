@@ -39,6 +39,14 @@ export const DRUM_CATEGORIES = [
     'unknown',
 ] as const;
 export type DrumSoundCategory = (typeof DRUM_CATEGORIES)[number];
+export const DRUM_VOCABULARY_VERSION = 'adt-full-custom-vocabulary-v1';
+export interface FullDrumHit {
+    startSeconds: number;
+    endSeconds: number;
+    drum: DrumSoundCategory;
+    customPitch: number;
+    strength: number;
+}
 export const DRUM_LABELS: Record<DrumSoundCategory, string> = {
     kick: '底鼓',
     snare: '军鼓',
@@ -73,5 +81,7 @@ export function classifyDrumSound(customPitch: number): { category: DrumSoundCat
 }
 
 export function drumSoundKey(category: DrumSoundCategory, customPitch: number): string {
-    return category === 'unknown' || category === 'percussion' ? `${category}:${customPitch}` : category;
+    // Preserve distinct custom sounds even when their family and time coincide.
+    // Acoustic deduplication belongs to the derived review, not token parsing.
+    return `${category}:${customPitch}`;
 }

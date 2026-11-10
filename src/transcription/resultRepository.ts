@@ -6,6 +6,8 @@ import { validateCandidates, validateThresholds } from './candidates';
 import type { NoteThresholds, TranscriptionIdentity } from './candidateTypes';
 import type { TranscriptionBundle } from './workerProtocol';
 import { transcriptionModel } from './modelManifest';
+import { defaultReviewSettings, validateReviewSettings } from './reviewSettings';
+import type { ReviewSettings } from './reviewSettings';
 
 export interface TranscriptionRecord {
     version: 2;
@@ -13,6 +15,7 @@ export interface TranscriptionRecord {
     identityKey: string;
     bundle: TranscriptionBundle;
     thresholds: NoteThresholds;
+    review: ReviewSettings;
     files: Array<{ name: string; bytes: number; sha256: string }>;
     metadataHash: string;
 }
@@ -109,15 +112,26 @@ export interface TranscriptionRepositoryPort {
         thresholds: NoteThresholds,
         signal: AbortSignal,
         cacheLimit: number,
+        review?: ReviewSettings,
     ): Promise<void>;
-    saveEdits(bundle: TranscriptionBundle, thresholds: NoteThresholds, signal: AbortSignal): Promise<void>;
+    saveEdits(
+        bundle: TranscriptionBundle,
+        thresholds: NoteThresholds,
+        signal: AbortSignal,
+        review?: ReviewSettings,
+    ): Promise<void>;
     restore(identity: TranscriptionIdentity, signal: AbortSignal): Promise<TranscriptionRecord | null>;
     discard(id: string): Promise<void>;
     clearForSource(ftResultId: string): Promise<void>;
     clearAll(): Promise<void>;
 }
 export class TranscriptionRepository implements TranscriptionRepositoryPort {
-    async saveEdits(bundle: TranscriptionBundle, thresholds: NoteThresholds, signal: AbortSignal): Promise<void> {
+    async saveEdits(
+        bundle: TranscriptionBundle,
+        thresholds: NoteThresholds,
+        signal: AbortSignal,
+        review?: ReviewSettings,
+    ): Promise<void> {
         validateBundle(bundle);
         validateThresholds(thresholds);
         checkCancelled(signal);
@@ -126,7 +140,9 @@ export class TranscriptionRepository implements TranscriptionRepositoryPort {
         const { metadataHash: expected, ...body } = previous;
         if (expected !== metadataHash(body) || previous.identityKey !== identityKey(bundle.result.identity))
             throw new ProcessingError('result-invalid', '已保存的候选缓存身份损坏。');
-        const nextBody = { ...body, bundle, thresholds };
+        const nextReview = review ?? previous.review;
+        validateReviewSettings(nextReview, bundle.result);
+        const nextBody = { ...body, bundle, thresholds, review: nextReview };
         const next = { ...nextBody, metadataHash: metadataHash(nextBody) };
         const db = await database();
         try {
@@ -154,9 +170,11 @@ export class TranscriptionRepository implements TranscriptionRepositoryPort {
         thresholds: NoteThresholds,
         signal: AbortSignal,
         cacheLimit: number,
+        review: ReviewSettings = defaultReviewSettings(),
     ): Promise<void> {
         validateBundle(bundle);
         validateThresholds(thresholds);
+        validateReviewSettings(review, bundle.result);
         checkCancelled(signal);
         const files: TranscriptionRecord['files'] = [];
         if (bundle.auxiliary) {
@@ -173,6 +191,7 @@ export class TranscriptionRepository implements TranscriptionRepositoryPort {
             identityKey: identityKey(bundle.result.identity),
             bundle,
             thresholds,
+            review,
             files,
         };
         const record = { ...body, metadataHash: metadataHash(body) };
@@ -218,6 +237,7 @@ export class TranscriptionRepository implements TranscriptionRepositoryPort {
         try {
             validateBundle(record.bundle);
             validateThresholds(record.thresholds);
+            validateReviewSettings(record.review, record.bundle.result);
             if (
                 record.version !== 2 ||
                 record.identityKey !== identityKey(record.bundle.result.identity) ||

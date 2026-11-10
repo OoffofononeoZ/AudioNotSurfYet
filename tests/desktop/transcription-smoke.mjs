@@ -244,6 +244,12 @@ try {
     await expect(page.locator('#music-bar-container')).toHaveAttribute('data-audition-source', 'original');
     await expect(page.locator('#music-bar-container')).toHaveAttribute('data-current-time', position);
     result.checks.auxiliaryAudition = 'passed';
+    const groupName = page.getByRole('textbox', { name: /^声音组名称 / }).first();
+    await groupName.fill('验证音色');
+    await groupName.blur();
+    await expect(page.getByTestId('transcription-review-view')).toHaveValue('timbres');
+    await page.getByTestId('transcription-review-view').selectOption('notes');
+    await page.getByTestId('transcription-sensitivity').selectOption('sensitive');
     for (const instrument of ['低音', '人声', '钢琴', '吉他', '未知乐器']) {
         const input = page.getByRole('spinbutton', { name: `${instrument}长短分界毫秒` });
         await input.fill('10000');
@@ -254,6 +260,7 @@ try {
     await page.getByRole('button', { name: '删除候选', exact: true }).first().click();
     await page.getByRole('checkbox', { name: '显示已删除' }).check();
     await page.getByRole('button', { name: '恢复候选', exact: true }).first().click();
+    await page.getByTestId('transcription-review-view').selectOption('timbres');
     await page.getByTestId('transcription-apply').click();
     await expect(page.getByTestId('transcription-apply')).toHaveText('本结果已应用');
     await expect(page.getByTestId('transcription-apply')).toBeDisabled();
@@ -263,12 +270,16 @@ try {
     assert.deepEqual(applied.lanes[0], before.lanes[0]);
     await write(path.join(output, 'applied-project-v2.json'), applied);
     result.checks.correctAndApplyPreservesManualWork = 'passed';
+    const savedReview = (await latest()).review;
     await close();
     await launch(true);
     await workspace('transcription');
     await expect(page.getByTestId('editor-transcription')).toHaveAttribute('data-state', 'ready', { timeout: 60000 });
     await expect(page.getByTestId('transcription-apply')).toBeDisabled();
     assert.equal((await latest()).bundle.result.id, first.bundle.result.id);
+    assert.deepEqual((await latest()).review, savedReview);
+    await expect(page.getByTestId('transcription-review-view')).toHaveValue('timbres');
+    await expect(page.getByTestId('transcription-sensitivity')).toHaveValue('sensitive');
     assert.deepEqual((await exported()).lanes, applied.lanes);
     result.checks.offlineRestorationAndAppliedIdentity = 'passed';
     await page.getByTestId('transcription-start').click();

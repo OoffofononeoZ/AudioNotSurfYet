@@ -8,6 +8,7 @@
 
 | 文件 | 本地静态引用（最多显示 6 项） |
 | --- | --- |
+| [tests/e2e/visualizer-resources.spec.ts](../../tests/e2e/visualizer-resources.spec.ts) | [src/visualizer/algorithmTypes.ts](../../src/visualizer/algorithmTypes.ts)、[src/visualizer/compositionTypes.ts](../../src/visualizer/compositionTypes.ts)、[src/visualizer/resourceIdentity.ts](../../src/visualizer/resourceIdentity.ts)、[src/visualizer/resourceTypes.ts](../../src/visualizer/resourceTypes.ts)、[tests/support/file-picker.ts](../../tests/support/file-picker.ts)、[tests/support/project-actions.ts](../../tests/support/project-actions.ts) |
 | [tests/e2e/visualizer-scene3d-editor.spec.ts](../../tests/e2e/visualizer-scene3d-editor.spec.ts) | [src/visualizer/compositionTypes.ts](../../src/visualizer/compositionTypes.ts)、[tests/support/file-picker.ts](../../tests/support/file-picker.ts)、[tests/support/project-actions.ts](../../tests/support/project-actions.ts)、[tests/support/scene3d-fixture.ts](../../tests/support/scene3d-fixture.ts) |
 | [tests/e2e/visualizer-scene3d-output.spec.ts](../../tests/e2e/visualizer-scene3d-output.spec.ts) | [tests/support/file-picker.ts](../../tests/support/file-picker.ts)、[tests/support/project-actions.ts](../../tests/support/project-actions.ts) |
 | [tests/e2e/visualizer-scene3d.spec.ts](../../tests/e2e/visualizer-scene3d.spec.ts) | — |
@@ -107,4 +108,3 @@
 | [tests/scripts/run-m5-eval.mjs](../../tests/scripts/run-m5-eval.mjs) | — |
 | [tests/scripts/run-m6-eval.mjs](../../tests/scripts/run-m6-eval.mjs) | — |
 | [tests/scripts/run-m7-eval.mjs](../../tests/scripts/run-m7-eval.mjs) | — |
-| [tests/scripts/run-m8-eval.mjs](../../tests/scripts/run-m8-eval.mjs) | — |

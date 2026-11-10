@@ -27,6 +27,7 @@ describe('batched drum sequence lifecycle', () => {
         }
         const cross = Array.from({ length: 4 }, (_, i) => [`cross_k${i}`, `cross_v${i}`]).flat();
         let step = 0;
+        const sequence = [14, 341, 500, 14, 347, 490, 14, 346, 490, 14, 350, 490, 14, 352, 490, 14, 399, 490, 3];
         const sessions = {
             backend: 'webgpu',
             adapter: null,
@@ -49,7 +50,7 @@ describe('batched drum sequence lifecycle', () => {
                 run: vi.fn(async () => {
                     const logits = new Float32Array(2800).fill(-100);
                     logits[3] = 1;
-                    logits[1400 + [14, 336, 500, 3][step++]!] = 1;
+                    logits[1400 + sequence[step++]!] = 1;
                     return { logits: new Tensor('float32', logits, [2, 1400]) };
                 }),
             },
@@ -66,9 +67,13 @@ describe('batched drum sequence lifecycle', () => {
             () => {},
         );
         expect(rows[0]!.diagnostic.tokens).toEqual([2, 3]);
-        expect(rows[1]!.diagnostic.tokens).toEqual([2, 14, 336, 500, 3]);
-        expect(rows[1]!.hits).toHaveLength(1);
-        expect(disposals).toHaveBeenCalledTimes(17); // input + 8 cross + 4 prefixes + 4 logits
+        expect(rows[1]!.diagnostic.tokens).toEqual([2, ...sequence]);
+        expect(rows[1]!.hits).toHaveLength(6);
+        expect(rows[1]!.hits.map(hit => hit.customPitch).sort((a, b) => a - b)).toEqual([41, 46, 47, 50, 52, 99]);
+        expect(rows[1]!.hits.filter(hit => hit.drum === 'tom')).toHaveLength(2);
+        expect(rows[1]!.hits.some(hit => hit.drum === 'crash')).toBe(true);
+        expect(rows[1]!.hits.some(hit => hit.drum === 'unknown')).toBe(true);
+        expect(disposals).toHaveBeenCalledTimes(47); // input + 8 cross + 19 prefixes + 19 logits
         const run = sessions.decoder.run;
         sessions.decoder.run = async feeds => {
             const outputs = await run(feeds);
@@ -86,7 +91,7 @@ describe('batched drum sequence lifecycle', () => {
                 () => {},
             ),
         ).rejects.toMatchObject({ code: 'job-cancelled' });
-        expect(disposals).toHaveBeenCalledTimes(28); // also releases the in-flight batch's input/cross/prefix/logits
+        expect(disposals).toHaveBeenCalledTimes(58); // also releases the in-flight batch's input/cross/prefix/logits
         await model.dispose();
         expect(release).toHaveBeenCalledTimes(2);
     });

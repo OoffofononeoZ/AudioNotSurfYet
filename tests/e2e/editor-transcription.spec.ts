@@ -197,6 +197,10 @@ test('Editor real FT → five-role candidates → auxiliary audition → atomic 
     await page.getByRole('button', { name: '返回原曲', exact: true }).filter({ visible: true }).click();
     await expect.poll(async () => (await playback(page)).audition?.kind).toBe('original');
     expect((await playback(page)).currentTimeSeconds).toBeCloseTo(position, 3);
+    await expect(page.getByTestId('transcription-review-view')).toHaveValue('timbres');
+    expect(record.bundle.result.candidates.every(candidate => candidate.acoustics)).toBe(true);
+    await page.getByTestId('transcription-review-view').selectOption('notes');
+    await page.getByTestId('transcription-sensitivity').selectOption('sensitive');
     for (const instrument of ['低音', '人声', '钢琴', '吉他', '未知乐器']) {
         const input = page.getByRole('spinbutton', { name: `${instrument}长短分界毫秒` });
         await input.fill('10000');
