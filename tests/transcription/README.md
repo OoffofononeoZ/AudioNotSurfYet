@@ -57,3 +57,11 @@ npx playwright test tests/e2e/editor-transcription.spec.ts tests/e2e/transcripti
 `band-salience.test.ts` 检查强底鼓旁的弱高频鼓声、静音及频段选择，原始全频 RMS 与按频段显著性分开。受控质量报告另列 `drumPresets`，不能只报告未筛选 raw 命中而忽略默认结果。手工归为同一组且同刻/同声学起音的点在派生层合并 rawIds，默认不同自定义声音仍分开；活动拆分仅关联实际贡献的来源。
 
 `TRANSCRIPTION_BASELINE_REPORT=<完成的旧 WASM JSON>` 与 `TRANSCRIPTION_BENCH_STEM` 同时设置后，运行 `transcription-comparison.spec.ts --project=chrome --project=edge --workers=1` 比较完全相同的 14 个窗口起点。核对冻结 WAV hash、逐窗特征及 token 前缀，保存全部新输出/终止/耗时；不再次运行旧长测，不把短窗探针当作整曲应用性能通过。
+
+## 同曲声音示例
+
+`example-search`、`example-cache-apply`、`example-controller`、`example-service` 单元覆盖变音量起音/快速重复、范围时序与受限 DTW、多正例/反例、静音/来源拒绝、typed 索引校验/配额、原子与稳定来源应用、跨歌取消及解码修订后恢复。索引缓存不保存 PCM；模型输入和分离逻辑不变。
+
+`editor-sound-examples.spec.ts --project=chrome --project=edge --workers=1` 无模型/FT 依赖，用自编 CC0 乐句验证真实 Worker DSP、反例、边界修正、试听、显式/重复应用、刷新及索引复用、取消、已有标记带入和窄屏。产物为本机 `artifacts/evals/editor-transcription/examples/`，受控重复匹配不能替代真实音乐质量。
+
+六输入完整链和 `test:desktop:transcription` 共用 `tests/support/sound-example-flow.mjs`，额外检查原曲/已有 FT other/辅助钢琴三个来源的实际读取、索引与试听、默认未勾选、应用幂等和离线恢复；只复用已生成音轨，不调用新的分离。清理全部候选同时清理示例/索引，已应用工程保留。

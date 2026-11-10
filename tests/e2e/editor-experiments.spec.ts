@@ -2,10 +2,14 @@ import { expect, test } from '@playwright/test';
 import path from 'node:path';
 import { chooseFiles, installFilePickerStub } from '../support/file-picker';
 
-test('experimental workspaces confirm separately, cancel with focus and reset on a new page session', async ({ page }, info) => {
+test('experimental workspaces confirm separately, cancel with focus and reset on a new page session', async ({
+    page,
+}, info) => {
     const issues: string[] = [];
     page.on('pageerror', error => issues.push(error.message));
-    page.on('console', message => { if (['error', 'warning', 'warn'].includes(message.type())) issues.push(message.text()); });
+    page.on('console', message => {
+        if (['error', 'warning', 'warn'].includes(message.type())) issues.push(message.text());
+    });
     await installFilePickerStub(page);
     await page.goto('/');
     await chooseFiles(page, [path.resolve('tests/fixtures/audio/format-master.wav')]);
@@ -42,8 +46,8 @@ test('experimental workspaces confirm separately, cancel with focus and reset on
     await page.getByTestId('editor-transcription-continue').click();
     await expect(page.locator('#editor-transcription-panel')).toBeFocused();
     await expect(page.getByTestId('transcription-start')).toBeDisabled();
-    await expect(page.getByRole('group', { name: '自动标记分析输入' }).getByRole('checkbox')).toHaveCount(5);
-    await page.getByRole('button', { name: '清理辅助音频与候选缓存', exact: true }).click();
+    await expect(page.getByRole('group', { name: '自动标记分析输入' }).getByRole('checkbox')).toHaveCount(6);
+    await page.getByRole('button', { name: '清理辅助音频、候选与示例缓存', exact: true }).click();
     const confirmation = page.getByRole('group', { name: '确认清理自动标记缓存' });
     await expect(confirmation).toBeVisible();
     await confirmation.getByRole('button', { name: '取消', exact: true }).click();

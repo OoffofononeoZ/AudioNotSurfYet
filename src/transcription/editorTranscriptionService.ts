@@ -25,6 +25,8 @@ import type { CandidateReview } from './candidateReview';
 import { defaultReviewSettings, validateReviewSettings } from './reviewSettings';
 import type { ReviewSettings, Sensitivity } from './reviewSettings';
 import type { TranscriptionBundle, TranscriptionEvent } from './workerProtocol';
+import type { DecodedAudioCopyPort } from '../analysis/pcm';
+import { EditorExampleService } from './examples/service';
 
 export type TranscriptionStatus =
     'idle' | 'restoring' | 'running' | 'cancelling' | 'ready' | 'partial' | 'cancelled' | 'error' | 'clearing';
@@ -51,6 +53,7 @@ type ControllerPort = Pick<TranscriptionController, 'start' | 'cancel'>;
 const busy = new Set<TranscriptionStatus>(['restoring', 'running', 'cancelling', 'clearing']);
 const runtimeHash = hashBytes(new TextEncoder().encode(JSON.stringify(runtimeManifest)));
 export class EditorTranscriptionService {
+    readonly examples: EditorExampleService | null;
     private readonly transport: AuditionTransportPort;
     private readonly editor: EditorPort;
     private readonly separation: EditorSeparationService;
@@ -94,7 +97,13 @@ export class EditorTranscriptionService {
         editor: EditorPort,
         separation: EditorSeparationService,
         gate: EditorProcessingGate,
-        options: { controller?: ControllerPort; repository?: TranscriptionRepositoryPort; modelBase?: string } = {},
+        options: {
+            controller?: ControllerPort;
+            repository?: TranscriptionRepositoryPort;
+            modelBase?: string;
+            decodedSource?: DecodedAudioCopyPort;
+            seek?: (seconds: number) => Promise<void>;
+        } = {},
     ) {
         this.transport = transport;
         this.editor = editor;
@@ -103,6 +112,23 @@ export class EditorTranscriptionService {
         this.controller = options.controller ?? new TranscriptionController();
         this.repository = options.repository ?? new TranscriptionRepository();
         this.modelBase = options.modelBase;
+        this.examples =
+            options.decodedSource && options.seek
+                ? new EditorExampleService({
+                      decoded: options.decodedSource,
+                      seek: options.seek,
+                      transport,
+                      editor,
+                      separation,
+                      gate,
+                      getBundle: () => this.state.bundle,
+                      verifyAuxiliary: async (bundle, signal) => {
+                          const record = await this.repository.restore(bundle.result.identity, signal);
+                          if (!record?.bundle.auxiliary || record.bundle.result.id !== bundle.result.id)
+                              throw new ProcessingError('source-identity-mismatch', '已有辅助音轨未通过完整性校验。');
+                      },
+                  })
+                : null;
         this.cleanup.push(separation.registerSourceConsumer(() => this.suspend()));
         this.cleanup.push(
             transport.subscribePlayback(snapshot => {
@@ -136,6 +162,7 @@ export class EditorTranscriptionService {
         if ('bundle' in patch || 'review' in patch || 'thresholds' in patch)
             next.preview = next.bundle ? deriveCandidateReview(next.bundle.result, next.review, next.thresholds) : null;
         this.state = next;
+        if ('bundle' in patch) this.examples?.refreshSources();
         for (const listener of this.listeners) listener(this.getSnapshot());
     }
     private guard(generation: number, signal: AbortSignal): void {
@@ -275,6 +302,10 @@ export class EditorTranscriptionService {
     }
     async start(): Promise<void> {
         if (this.disposed || busy.has(this.state.status) || this.operation) return;
+        if (this.examples?.isBusy) {
+            this.update({ message: '请先完成或取消声音示例检索。' });
+            return;
+        }
         const identity = this.identity();
         if (!identity || !identity.selectedRoles.length) {
             this.update({ message: '先完成当前歌曲的 FT 分离，并选择至少一条分析输入。' });
@@ -373,7 +404,8 @@ export class EditorTranscriptionService {
         await this.saving;
         if (this.state.persistence === 'not-persisted') this.queueSave();
         await this.saving;
-        return this.state.persistence !== 'not-persisted';
+        const examplesSaved = (await this.examples?.flushEdits()) ?? true;
+        return this.state.persistence !== 'not-persisted' && examplesSaved;
     }
     private queueSave(): void {
         const bundle = this.state.bundle;
@@ -552,6 +584,7 @@ export class EditorTranscriptionService {
         ++this.auditionRevision;
         this.io.abort();
         this.controller.cancel();
+        await this.examples?.suspend();
         await this.transport.setAuditionSource(null);
         await this.operation;
         await this.clearing;
@@ -575,11 +608,16 @@ export class EditorTranscriptionService {
         this.update({ status: 'clearing', message: null });
         const work = (async () => {
             try {
-                if (kind === 'results') await this.repository.clearAll();
-                else for (const model of TRANSCRIPTION_MODELS) await databaseDelete('models', model.sha256);
+                if (kind === 'results') {
+                    await this.repository.clearAll();
+                    await this.examples?.clearAll();
+                } else for (const model of TRANSCRIPTION_MODELS) await databaseDelete('models', model.sha256);
                 this.update({
                     status: 'idle',
-                    message: kind === 'results' ? '辅助音频与候选缓存已清理；工程标记保留。' : '新增模型缓存已清理。',
+                    message:
+                        kind === 'results'
+                            ? '辅助音频、候选和声音示例缓存已清理；工程标记保留。'
+                            : '新增模型缓存已清理。',
                 });
                 await this.modelSummary();
             } catch (error) {
@@ -598,6 +636,7 @@ export class EditorTranscriptionService {
         if (this.disposed) return;
         this.disposed = true;
         this.cleanup.forEach(cleanup => cleanup());
+        await this.examples?.dispose();
         await this.suspend();
         this.listeners.clear();
     }

@@ -44,6 +44,7 @@ declare module 'vue' {
     EditorOsuImportDialog: typeof import('./src/components/EditorOsuImportDialog.vue')['default']
     EditorPointWorkspace: typeof import('./src/components/EditorPointWorkspace.vue')['default']
     EditorSeparationWorkspace: typeof import('./src/components/EditorSeparationWorkspace.vue')['default']
+    EditorSoundExamples: typeof import('./src/components/EditorSoundExamples.vue')['default']
     EditorTimeline: typeof import('./src/components/EditorTimeline.vue')['default']
     EditorTimingPanel: typeof import('./src/components/EditorTimingPanel.vue')['default']
     EditorToolbar: typeof import('./src/components/EditorToolbar.vue')['default']

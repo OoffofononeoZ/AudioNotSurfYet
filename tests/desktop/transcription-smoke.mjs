@@ -7,6 +7,7 @@ import { _electron, expect } from '@playwright/test';
 import { createNativeRun, copyNativeTree, cleanupNativeTree } from '../../scripts/lib/desktop-native-runtime.mjs';
 import { verifiedFtProfile, databaseRows } from './processing-support.mjs';
 import { installDialogFixture, queueSave } from './dialog-fixture.mjs';
+import { exerciseStoredSoundExamples, storedExampleProfiles } from '../support/sound-example-flow.mjs';
 
 const root = fileURLToPath(new URL('../../', import.meta.url));
 const flag = process.argv.indexOf('--profile-from');
@@ -278,6 +279,10 @@ try {
     await page.getByTestId('transcription-apply').click();
     await expect(page.getByTestId('transcription-apply')).toHaveText('本结果已应用');
     await expect(page.getByTestId('transcription-apply')).toBeDisabled();
+    result.exampleFlow = await exerciseStoredSoundExamples(page, async () =>
+        (await exported()).lanes.reduce((sum, lane) => sum + lane.events.length, 0),
+    );
+    result.checks.exampleOriginalFtAuxiliaryAndAtomicApply = 'passed';
     const applied = await exported();
     assert(applied.lanes.length > before.lanes.length);
     assert.deepEqual(applied.tempoMap, before.tempoMap);
@@ -295,6 +300,7 @@ try {
     await expect(page.getByTestId('transcription-review-view')).toHaveValue('timbres');
     await expect(page.getByTestId('transcription-sensitivity')).toHaveValue('sensitive');
     assert.deepEqual((await exported()).lanes, applied.lanes);
+    assert.equal((await storedExampleProfiles(page)).length, 3);
     result.checks.offlineRestorationAndAppliedIdentity = 'passed';
     await page.getByTestId('transcription-start').click();
     await expect(page.getByTestId('editor-transcription')).toHaveAttribute('data-state', 'running');
@@ -349,7 +355,7 @@ try {
     assert.equal((await latest()).bundle.result.id, second.bundle.result.id);
     await page.getByTestId('transcription-listen-guitar').click();
     await expect(page.locator('#music-bar-container')).toHaveAttribute('data-audition-source', 'auxiliary');
-    await page.getByRole('button', { name: '清理辅助音频与候选缓存', exact: true }).click();
+    await page.getByRole('button', { name: '清理辅助音频、候选与示例缓存', exact: true }).click();
     await page.getByTestId('transcription-confirm-clear').click();
     await expect(page.getByTestId('editor-transcription')).toHaveAttribute('data-state', 'idle', { timeout: 30000 });
     assert.deepEqual(await rows(), []);

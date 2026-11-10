@@ -97,6 +97,7 @@ const editorTranscription = new EditorTranscriptionService(
     editorController,
     editorSeparation,
     editorProcessingGate,
+    { decodedSource: audioEngine, seek: seconds => audioSession.seek(seconds) },
 );
 provide(editorTranscriptionServiceKey, editorTranscription);
 const audioReady = audioSession

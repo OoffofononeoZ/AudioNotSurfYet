@@ -108,6 +108,7 @@
                         :overlay-exact-value="overlayExactValue"
                         :overlay-open="snapshot.overlayOpen"
                         @update-project="updateProject"
+                        @sound-example="useSoundExample"
                         @toggle-overlay="controller.setOverlayOpen($event)"
                         @select-overlay-feature="controller.selectOverlayFeature($event)"
                         @plot-width="markerPlotWidth = $event"
@@ -198,12 +199,19 @@ import { useEditorSeparationService } from '../processing/editorSeparationServic
 import type { AnalysisCursorValueResult, FeatureId } from '../analysis/types';
 import type { EditorProjectV2 } from '../editor/types';
 import type { KeyboardRecordingHost } from '../editor/keyboardMarkerRecording';
+import { useEditorTranscriptionService } from '../transcription/editorTranscriptionService';
+import type { SoundExample } from '../transcription/examples/types';
 
 const route = useRoute();
 const router = useRouter();
 const audioSession = useAudioSessionService();
 const sessionStore = useAudioSessionStore();
 const controller = useEditorSessionController();
+const transcription = useEditorTranscriptionService();
+function useSoundExample(selection: Omit<SoundExample, 'id' | 'polarity'>) {
+    transcription.examples?.setSelection(selection);
+    workspace.value = 'transcription';
+}
 const keyboardRecordingRevision = ref(0);
 const markerCompensationCells = ref(0);
 const markerPlotWidth = ref(0);

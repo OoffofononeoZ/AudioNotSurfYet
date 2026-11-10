@@ -25,6 +25,14 @@
                 @click="toggleBlock">
                 区间操作
             </button>
+            <button
+                v-if="exampleSelection"
+                type="button"
+                data-testid="marker-use-sound-example"
+                :disabled="!editable"
+                @click="emit('soundExample', exampleSelection!)">
+                用作声音示例
+            </button>
             <EditorMarkerCompensation
                 :model-value="compensationCells"
                 :active="active !== false"
@@ -128,9 +136,10 @@ import type { KeyboardRecordingHost } from '../editor/keyboardMarkerRecording';
 import { createMarkerDrawing } from '../editor/markerDrawing';
 import { createPointLane } from '../editor/pointAnnotations';
 import { createRangeLane } from '../editor/rangeAnnotations';
-import type { EditorProjectV2 } from '../editor/types';
+import type { EditorProjectV2, PointEventV1, RangeEventV1 } from '../editor/types';
 import type { PlaybackSnapshot } from '../types/audio';
 import type { AnalysisCoordinatorSnapshot, AnalysisCursorValueResult, AnalysisSeries } from '../analysis/types';
+import type { SoundExample } from '../transcription/examples/types';
 const props = defineProps<{
     active?: boolean;
     recordingHost: KeyboardRecordingHost;
@@ -153,6 +162,7 @@ const emit = defineEmits<{
     retryOverlay: [];
     toggleOverlay: [enabled: boolean];
     selectOverlayFeature: [input: import('../analysis/sources').AnalysisInput];
+    soundExample: [selection: Omit<SoundExample, 'id' | 'polarity'>];
 }>();
 const audioSession = useAudioSessionService();
 const { setting } = useEditorGrid();
@@ -187,6 +197,17 @@ const editing = useMarkerEditing(
     applyProject,
     value => (message.value = value),
 );
+const exampleSelection = computed<Omit<SoundExample, 'id' | 'polarity'> | null>(() => {
+    const block = editing.blocks.selection.value;
+    if (block) return { kind: 'range', startSeconds: block.startSeconds, endSeconds: block.endSeconds };
+    const event = props.project.lanes
+        .flatMap(lane => lane.events as (PointEventV1 | RangeEventV1)[])
+        .find(event => event.id === editing.selected.value);
+    if (!event) return null;
+    return 'atSeconds' in event
+        ? { kind: 'point', startSeconds: event.atSeconds, endSeconds: event.atSeconds, markerId: event.id }
+        : { kind: 'range', startSeconds: event.startSeconds, endSeconds: event.endSeconds, markerId: event.id };
+});
 function addLane(kind: string) {
     if (editable.value) applyProject((kind === 'range' ? createRangeLane : createPointLane)(props.project));
 }

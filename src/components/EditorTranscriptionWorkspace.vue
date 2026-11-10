@@ -56,7 +56,7 @@
                     type="button"
                     class="primary"
                     data-testid="transcription-start"
-                    :disabled="!state.ftResultId || !state.selectedRoles.length"
+                    :disabled="exampleBusy || !state.ftResultId || !state.selectedRoles.length"
                     @click="service.start()">
                     <EditorIcon name="plus" />{{ result ? '重新分析' : '生成候选' }}
                 </button>
@@ -94,6 +94,13 @@
             {{ state.message }}
         </p>
 
+        <EditorSoundExamples
+            v-if="service.examples"
+            :service="service.examples"
+            :playback="playback"
+            :duration="duration"
+            :model-busy="busy" />
+
         <EditorTranscriptionReview
             v-if="state.bundle && state.preview"
             :state="state"
@@ -115,13 +122,14 @@
                     <h3>缓存</h3>
                     <p>工程标记保留；缓存不自动驱逐。</p>
                 </div>
-                <button type="button" :disabled="busy" @click="pendingClear = 'results'">清理辅助音频与候选缓存</button
+                <button type="button" :disabled="busy || exampleBusy" @click="pendingClear = 'results'">
+                    清理辅助音频、候选与示例缓存</button
                 ><button type="button" :disabled="busy" @click="pendingClear = 'models'">清理新增模型缓存</button>
             </div>
             <div v-if="pendingClear" class="cache-confirm" role="group" aria-label="确认清理自动标记缓存">
                 <span>{{
                     pendingClear === 'results'
-                        ? '删除全部自动标记候选与辅助音频？'
+                        ? '删除全部自动标记候选、辅助音频、声音示例与索引？'
                         : '删除新增模型缓存？下次分析需重新下载。'
                 }}</span
                 ><button type="button" :disabled="busy" data-testid="transcription-confirm-clear" @click="confirmClear">
@@ -140,6 +148,7 @@ import type { TranscriptionRole } from '../transcription/candidateTypes';
 import { clockTime, formatBytes } from '../processing/presentation';
 import EditorIcon from './EditorIcon.vue';
 import EditorTranscriptionReview from './EditorTranscriptionReview.vue';
+import EditorSoundExamples from './EditorSoundExamples.vue';
 defineProps<{ playback: PlaybackSnapshot; duration: number; active: boolean }>();
 const emit = defineEmits<{ seek: [seconds: number] }>();
 const service = useEditorTranscriptionService(),
@@ -150,6 +159,13 @@ onBeforeUnmount(
     }),
 );
 const result = computed(() => state.value.bundle?.result ?? null);
+const exampleBusy = ref(service.examples?.isBusy ?? false);
+if (service.examples)
+    onBeforeUnmount(
+        service.examples.subscribe(snapshot => {
+            exampleBusy.value = ['restoring', 'searching'].includes(snapshot.status);
+        }),
+    );
 const busy = computed(() => ['restoring', 'running', 'cancelling', 'clearing'].includes(state.value.status));
 const pendingClear = ref<'results' | 'models' | null>(null);
 const phaseLabel = computed(() =>

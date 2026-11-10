@@ -13,6 +13,7 @@ const TRANSCRIPTION_MODELS = (
 import type { TranscriptionRecord } from '../../src/transcription/resultRepository';
 import type { EditorProjectV2 } from '../../src/editor/types';
 import { startSystemSampler } from '../processing/systemSampler';
+import { exerciseStoredSoundExamples, storedExampleProfiles } from '../support/sound-example-flow.mjs';
 
 async function records(page: Page): Promise<TranscriptionRecord[]> {
     return page.evaluate(async () => {
@@ -229,6 +230,10 @@ test('Editor real FT → six-role candidates → auxiliary audition → atomic a
     ).toHaveText('本结果已应用');
     await expect(page.getByTestId('transcription-apply')).toBeDisabled();
     await expect.poll(async () => (await project(page)).lanes.length).toBeGreaterThan(before.lanes.length);
+    const exampleFlow = await exerciseStoredSoundExamples(page, async () =>
+        (await project(page)).lanes.reduce((sum: number, lane: { events: unknown[] }) => sum + lane.events.length, 0),
+    );
+    await fs.writeFile(path.join(directory, 'examples.json'), JSON.stringify(exampleFlow, null, 2), 'utf8');
     const after = await project(page);
     expect(after.tempoMap).toEqual(before.tempoMap);
     expect(after.lanes[0]).toEqual(before.lanes[0]);
@@ -244,6 +249,7 @@ test('Editor real FT → six-role candidates → auxiliary audition → atomic a
     await expect(page.getByTestId('editor-transcription')).toHaveAttribute('data-state', 'ready', { timeout: 30000 });
     await expect(page.getByTestId('transcription-apply')).toBeDisabled();
     expect((await project(page)).lanes).toEqual(after.lanes);
+    expect(await storedExampleProfiles(page)).toHaveLength(3);
     await page.getByTestId('transcription-start').click();
     await expect(page.getByTestId('editor-transcription')).toHaveAttribute('data-state', 'running');
     await page.getByTestId('transcription-cancel').click();
@@ -267,10 +273,11 @@ test('Editor real FT → six-role candidates → auxiliary audition → atomic a
     expect((await records(page))[0]!.bundle.result.id).toBe(record.bundle.result.id);
     await page.getByTestId('transcription-listen-guitar').click();
     await expect.poll(async () => (await playback(page)).audition?.kind).toBe('auxiliary');
-    await page.getByRole('button', { name: '清理辅助音频与候选缓存', exact: true }).click();
+    await page.getByRole('button', { name: '清理辅助音频、候选与示例缓存', exact: true }).click();
     await page.getByTestId('transcription-confirm-clear').click();
     await expect(page.getByTestId('editor-transcription')).toHaveAttribute('data-state', 'idle', { timeout: 30000 });
     expect(await records(page)).toEqual([]);
+    expect(await storedExampleProfiles(page)).toEqual([]);
     await expect.poll(async () => (await playback(page)).audition?.kind).toBe('original');
     expect((await project(page)).lanes).toEqual(after.lanes);
     await fs.writeFile(
