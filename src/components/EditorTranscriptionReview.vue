@@ -168,6 +168,7 @@
                             <th>原始时间（秒）</th>
                             <th>类别 / 音高</th>
                             <th>乐器修正</th>
+                            <th>音乐角色</th>
                             <th>声音组</th>
                             <th>标记</th>
                             <th>模型 / 声学证据</th>
@@ -223,6 +224,32 @@
                                         {{ INSTRUMENT_LABELS[instrument] }}
                                     </option></select
                                 ><span v-else>鼓</span>
+                            </td>
+                            <td>
+                                <select
+                                    v-if="candidate.kind === 'note'"
+                                    :value="candidate.musicalRole ?? ''"
+                                    :disabled="busy"
+                                    aria-label="修正候选音乐角色"
+                                    @change="
+                                        service.correct(candidate.id, {
+                                            musicalRole: (($event.target as HTMLSelectElement).value || null) as
+                                                'lead' | 'other' | null,
+                                        })
+                                    ">
+                                    <option value="">
+                                        {{
+                                            candidate.inferredRole
+                                                ? `自动：${candidate.inferredRole === 'lead' ? '主旋律候选' : '其他声部'}`
+                                                : '未指定'
+                                        }}
+                                    </option>
+                                    <option value="lead">主旋律候选</option>
+                                    <option value="other">其他声部</option></select
+                                ><small v-if="candidate.kind === 'note' && candidate.roleEvidence"
+                                    >路径覆盖 {{ candidate.roleEvidence.coverage.toFixed(2) }} · 判别余量
+                                    {{ candidate.roleEvidence.margin.toFixed(2) }}</small
+                                >
                             </td>
                             <td>
                                 <select
@@ -311,7 +338,7 @@ const service = useEditorTranscriptionService(),
 const result = computed(() => props.state.bundle?.result ?? null),
     preview = computed(() => props.state.preview);
 const busy = computed(() => ['restoring', 'running', 'cancelling', 'clearing'].includes(props.state.status));
-const noteInstruments: NoteInstrument[] = ['bass', 'vocals', 'piano', 'guitar', 'unknown'],
+const noteInstruments: NoteInstrument[] = ['bass', 'vocals', 'piano', 'guitar', 'other', 'unknown'],
     instruments: CandidateInstrument[] = ['drums', ...noteInstruments];
 const instrumentFilter = ref<CandidateInstrument | 'all'>('all'),
     drumFilter = ref<DrumCategory | 'all'>('all'),

@@ -17,6 +17,7 @@ import type { TranscriptionBundle } from './workerProtocol';
 import { buildAcousticIndex } from './acousticIndex';
 import { candidateAcoustics, drumAcousticBand } from './candidateAcoustics';
 import { ROLE_PITCH_OPTIONS } from './analysisOptions';
+import { selectLeadPath } from './leadPath';
 
 export type PipelineProgress = (phase: string, role: string | null, done: number, total: number | null) => void;
 
@@ -159,7 +160,7 @@ export async function runTranscription(
         }
     };
     const pitched = async (
-        role: 'bass' | 'vocals' | 'piano' | 'guitar',
+        role: 'bass' | 'vocals' | 'piano' | 'guitar' | 'other',
         directory: string,
         stem: { role: string; frames: number; sampleRate: number; left: string; right: string },
     ) => {
@@ -202,6 +203,23 @@ export async function runTranscription(
                 };
                 if (candidate.startSeconds < candidate.endSeconds) result.candidates.push(candidate);
             }
+            if (role === 'other') {
+                const candidates = result.candidates.filter(
+                    (candidate): candidate is NoteCandidate =>
+                        candidate.kind === 'note' && candidate.source.inputRole === 'other',
+                );
+                const pathStart = performance.now();
+                const path = await selectLeadPath(candidates, identity.durationSeconds, signal, (done, total) =>
+                    progress('lead-path', role, done, total),
+                );
+                const selected = new Set(path.leadIds);
+                for (const candidate of candidates) {
+                    candidate.inferredRole = selected.has(candidate.id) ? 'lead' : 'other';
+                    candidate.roleEvidence = path.evidence[candidate.id];
+                }
+                result.timings.otherLeadMs = performance.now() - pathStart;
+                result.timings.otherLeadPrunedFrames = path.prunedFrames;
+            }
             result.completedRoles.push(role);
             result.timings[`${role}InferenceMs`] = transcript.inferenceMs;
             result.timings[`${role}ActivationBytes`] = transcript.activationBytes;
@@ -213,7 +231,7 @@ export async function runTranscription(
             result.timings[`${role}Ms`] = performance.now() - at;
         }
     };
-    for (const role of ['bass', 'vocals'] as const) {
+    for (const role of ['bass', 'vocals', 'other'] as const) {
         if (!identity.selectedRoles.includes(role)) continue;
         checkCancelled(signal);
         const stem = ft.stems.find(stem => stem.role === role);

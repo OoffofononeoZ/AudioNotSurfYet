@@ -9,7 +9,7 @@ DEC-116 按 owner 已批准计划推进；以下是本轮实际状态，不将�
 | 诊断与真实歌曲基线 | 已冻结相同 FT drums；逐窗 token／全部词表事件／特征 hash／分阶段耗时及本地 JSON 导出已实现。补逐窗检查点后，旧 WASM 14 窗完整基线通过，约 3263 秒；相同起点新 GPU 直接对照仍待补 |
 | 鼓性能与异常处理 | 已实现 WebGPU、批 8、25% 转录窗口重叠、一次有界重试与未完成区间隔离；显式 WASM，不自动切换。Chrome/Edge 完整应用回归及当前整曲推理探针、Electron 实际 ASAR 六秒完整链回归通过；桌面整曲性能仍待验证 |
 | 候选质量与主要音色 | 已实现完整鼓类、声学证据/保守筛选、活动区间、音色分组与重复复核；默认主要音色，可看音符细节。Chrome/Edge 完整流程和 Electron 默认音色应用/设置恢复通过；筛选质量仍在改进，尚未接受 |
-| other／示例检索 | 待实施现有 Basic Pitch 的主旋律候选及同曲正反例检索；不新增模型或服务，设置只存本机缓存 |
+| other／示例检索 | 已接现有 FT other → Basic Pitch 和保留静音/含糊状态的主旋律候选；同曲正反例检索待实施。不新增模型或服务，设置只存本机缓存 |
 | 双端收口 | 待按 Chrome／Edge／实际 Electron 分别验证；参考机整曲鼓转录目标 10 分钟，质量由实测与 owner 试听复核 |
 
 诊断导出使用共享文件端口，保存 `audiosurf-transcription-diagnostics.json`；包含来源身份、逐窗模型事件和耗时，不包含 PCM 或本地路径。真实输入、特征数组和大型对照报告仅保存在本机忽略目录。
@@ -25,10 +25,10 @@ DEC-116 按 owner 已批准计划推进；以下是本轮实际状态，不将�
 | 输入与能力 | 固定路线 | 边界 |
 | --- | --- | --- |
 | 当前 FT drums → 完整鼓候选 | ADT_STR ONNX encoder / decoder，默认 Worker WebGPU，显式慢速 WASM | 批 8／尾批实际大小、完整前缀贪心、上限 512；自定义词表映射 kick/snare/hat/tom/crash/ride/clap/percussion/unknown，不同 customPitch 保留独立声音身份。 |
-| 当前 FT bass、vocals → 音符 | 官方 Basic Pitch ONNX，Worker WASM | 保留音高与音符实际起止，不估计混响或 release 拖尾。 |
-| 原曲 PCM → 钢琴、吉他候选 → 音符 | 独立 htdemucs_6s 辅助分析，再逐乐器 Basic Pitch | 只保留钢琴／吉他输出，不同时转写 FT other；乐器身份是待复核候选。 |
+| 当前 FT bass、vocals、other → 音符 | 官方 Basic Pitch ONNX，Worker WASM | 保留音高与音符实际起止；other 另生成主旋律角色候选，不估计混响或 release 拖尾。 |
+| 原曲 PCM → 钢琴、吉他候选 → 音符 | 独立 htdemucs_6s 辅助分析，再逐乐器 Basic Pitch | 只保留钢琴／吉他输出；乐器身份是待复核候选，和 FT other 的疑似串音进入跨来源复核。 |
 
-FX、Pad、合成器预设区分、复杂 other 与 YourMT3+ 转换／部署留待后续。处理共享于 Web/Electron 的 renderer 和专用 Worker，不要求 Python、本地服务或外部辅助程序。已有四轨 FT 继续使用原固定模型与 WebGPU 配置，六轨辅助结果不能替代四轨试听。
+FX、Pad 和合成器预设身份区分，以及 YourMT3+ 转换／部署留待后续。处理共享于 Web/Electron 的 renderer 和专用 Worker，不要求 Python、本地服务或外部辅助程序。已有四轨 FT 继续使用原固定模型与 WebGPU 配置，六轨辅助结果不能替代四轨试听。
 
 模型、ORT 部署资产、算法配置、输入／输出 tensor、采样率、频谱、分段、词表与时间偏移共同进入可验证的固定身份。生产 URL 使用 immutable revision；下载校验失败明确报错，不增加静默模型或 provider fallback。ADT_STR 权重及改编按已接受的独立 CC BY-SA 4.0 边界保存上游、转换来源、归因与改编信息；应用代码不因模型卡而被宣称已获任何额外许可。
 
@@ -39,6 +39,10 @@ FX、Pad、合成器预设区分、复杂 other 与 YourMT3+ 转换／部署留�
 内部结果/缓存 envelope 为 V2，包含鼓 backend/config hash、独立 analysisConfigHash、未完成区间和可选声学证据；EditorProjectV2 不变。旧内部缓存保留但不恢复，切换 backend/词表/音符或声学配置隔离结果；原辅助分离 configHash 及来源身份不改。主要音色与音符视图、灵敏度、组名/归属和重复选择由独立 ReviewSettings 保存到本机候选缓存，改变设置只重算派生预览，不改原始候选或重跑模型。
 
 ## 主要音色与复核
+
+- FT other 用已有 Basic Pitch 参数生成原始音符，再以 20ms 帧、最多 12 个音符和独立静音状态求连续角色路径，结合模型激活、局部显著性、chroma 音高支持与换音代价。路径覆盖及相对判别余量足够才标为主旋律候选，含糊和弦保留 other；二者共享原始事件，不重复进入默认组。用户可改音乐角色并恢复自动判断，原始路径证据保留。角色不表示合成器/音色预设身份，证据值不是准确率。
+
+2026-11-10 六输入完整链 Chrome/Edge（`chrome-1794292976410`、`edge-1794293131206`）及实际 ASAR `transcription-c3b2d3f5-c449-424d-909a-eb77ed11ad16` 通过原有推理/试听/应用/恢复/离线重算/取消/损坏保护；other 在短样例实际产出 20 条带路径证据候选，因相近证据保留 other。主旋律选择另有旋律/和声/静音专项，当前 78 项转录单元通过；此处只证明实现行为，不表示主旋律听感质量接受。
 
 - 每条已完成音轨用已有 Meyda/MonoResampler 建立有界 DSP 索引（22050Hz、1024 帧、512 hop、每块 128 帧），保留候选的 RMS、局部显著性、谱变化起音、MFCC/chroma 和独立开启/关闭门限产生的活动区间。索引按 Worker 所有权释放，不驻留所有音轨 PCM；这些数值与模型激活、鼓 velocity 分开，均不是准确率。
 - 音符原始解码按 bass/vocals/piano/guitar 配置门限、最短帧数、结束间隙和相邻音高抑制；首尾帧、短重复音、相邻和弦音高及跨窗连续时间独立验证。参数见 `analysisOptions.ts`，不改分离模型。

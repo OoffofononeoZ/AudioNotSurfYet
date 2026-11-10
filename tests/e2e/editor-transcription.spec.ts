@@ -52,7 +52,7 @@ async function playback(page: Page) {
     });
 }
 
-test('Editor real FT → five-role candidates → auxiliary audition → atomic apply → restored cache', async ({
+test('Editor real FT → six-role candidates → auxiliary audition → atomic apply → restored cache', async ({
     page,
 }, info) => {
     test.setTimeout(900000);
@@ -148,7 +148,15 @@ test('Editor real FT → five-role candidates → auxiliary audition → atomic 
     expect(status, (await page.getByTestId('transcription-message').allTextContents()).join(' ')).toBe('ready');
     const record = (await records(page))[0]!;
     expect(record).toBeTruthy();
-    expect(record.bundle.result.completedRoles.sort()).toEqual(['bass', 'drums', 'guitar', 'piano', 'vocals']);
+    expect(record.bundle.result.completedRoles.sort()).toEqual(['bass', 'drums', 'guitar', 'other', 'piano', 'vocals']);
+    expect(
+        record.bundle.result.candidates.filter(candidate => candidate.source.inputRole === 'other').length,
+    ).toBeGreaterThan(0);
+    expect(
+        record.bundle.result.candidates
+            .filter(candidate => candidate.source.inputRole === 'other')
+            .every(candidate => candidate.kind === 'note' && candidate.inferredRole && candidate.roleEvidence),
+    ).toBe(true);
     expect(record.bundle.result.failures).toEqual([]);
     expect(record.bundle.result.candidates.length).toBeGreaterThan(0);
     expect(record.bundle.auxiliary?.stems.map(stem => stem.role)).toEqual(['guitar', 'piano']);
@@ -201,7 +209,7 @@ test('Editor real FT → five-role candidates → auxiliary audition → atomic 
     expect(record.bundle.result.candidates.every(candidate => candidate.acoustics)).toBe(true);
     await page.getByTestId('transcription-review-view').selectOption('notes');
     await page.getByTestId('transcription-sensitivity').selectOption('sensitive');
-    for (const instrument of ['低音', '人声', '钢琴', '吉他', '未知乐器']) {
+    for (const instrument of ['低音', '人声', '钢琴', '吉他', '其他音色', '未知乐器']) {
         const input = page.getByRole('spinbutton', { name: `${instrument}长短分界毫秒` });
         await input.fill('10000');
         await input.blur();
@@ -244,7 +252,7 @@ test('Editor real FT → five-role candidates → auxiliary audition → atomic 
     });
     await expect(page.getByTestId('transcription-apply')).toBeDisabled();
     expect((await records(page))[0]!.bundle.result.id).toBe(record.bundle.result.id);
-    for (const instrument of ['低音', '人声', '钢琴', '吉他'])
+    for (const instrument of ['低音', '人声', '钢琴', '吉他', '其他音色'])
         await page.getByRole('checkbox', { name: new RegExp(`^${instrument} Basic Pitch`) }).uncheck();
     const encoderHash = '71f89f6aba1dd74bf2792a9b19f89b4a8ec438362e6429d9578ffd9ea2e5320f';
     await page.evaluate(async hash => {

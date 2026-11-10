@@ -1,5 +1,6 @@
 import { hashBytes } from '../processing/sha256';
 import { ACOUSTIC_CONFIG_HASH } from './acousticIndex';
+import { LEAD_PATH_CONFIG } from './leadPath';
 
 export interface PitchDecodeOptions {
     onsetThreshold: number;
@@ -20,9 +21,10 @@ export const ROLE_PITCH_OPTIONS = {
 export const ANALYSIS_CONFIG_HASH = hashBytes(
     new TextEncoder().encode(
         JSON.stringify({
-            version: 'timbre-evidence-v1',
+            version: 'timbre-evidence-with-lead-v2',
             acoustic: ACOUSTIC_CONFIG_HASH,
             notes: ROLE_PITCH_OPTIONS,
+            lead: LEAD_PATH_CONFIG,
         }),
     ),
 );

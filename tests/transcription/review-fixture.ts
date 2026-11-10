@@ -7,6 +7,7 @@ import type {
     TranscriptionResult,
 } from '../../src/transcription/candidateTypes';
 import type { CandidateAcoustics } from '../../src/transcription/candidateAcoustics';
+import { TRANSCRIPTION_ROLES } from '../../src/transcription/candidateTypes';
 
 export function evidence(start: number, end: number, rms = 0.5): CandidateAcoustics {
     return {
@@ -81,9 +82,9 @@ export function reviewResult(candidates: TranscriptionResult['candidates']): Tra
             drumBackend: 'webgpu',
             drumConfigHash: drumConfigurationHash('webgpu'),
             analysisConfigHash: ANALYSIS_CONFIG_HASH,
-            selectedRoles: ['drums', 'bass', 'vocals', 'piano', 'guitar'],
+            selectedRoles: [...TRANSCRIPTION_ROLES],
         },
-        completedRoles: ['drums', 'bass', 'vocals', 'piano', 'guitar'],
+        completedRoles: [...TRANSCRIPTION_ROLES],
         failures: [],
         truncatedDrumSegments: [],
         candidates,

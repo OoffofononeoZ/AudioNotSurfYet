@@ -142,7 +142,21 @@ async function infer() {
         .poll(() => page.workers().filter(worker => worker.url().includes('transcription.worker')).length)
         .toBe(0);
     const record = await latest();
-    assert.deepEqual([...record.bundle.result.completedRoles].sort(), ['bass', 'drums', 'guitar', 'piano', 'vocals']);
+    assert.deepEqual([...record.bundle.result.completedRoles].sort(), [
+        'bass',
+        'drums',
+        'guitar',
+        'other',
+        'piano',
+        'vocals',
+    ]);
+    assert(
+        record.bundle.result.candidates
+            .filter(candidate => candidate.source.inputRole === 'other')
+            .every(candidate => candidate.kind === 'note' && candidate.inferredRole && candidate.roleEvidence),
+    );
+    assert(record.bundle.result.candidates.some(candidate => candidate.source.inputRole === 'other'));
+    result.checks.otherSourceAndRoleMetadata = 'passed';
     assert.deepEqual(record.bundle.result.failures, []);
     assert.equal(record.bundle.result.identity.drumBackend, 'webgpu');
     assert(record.bundle.result.drumDiagnostics.length > 0);
@@ -250,7 +264,7 @@ try {
     await expect(page.getByTestId('transcription-review-view')).toHaveValue('timbres');
     await page.getByTestId('transcription-review-view').selectOption('notes');
     await page.getByTestId('transcription-sensitivity').selectOption('sensitive');
-    for (const instrument of ['低音', '人声', '钢琴', '吉他', '未知乐器']) {
+    for (const instrument of ['低音', '人声', '钢琴', '吉他', '其他音色', '未知乐器']) {
         const input = page.getByRole('spinbutton', { name: `${instrument}长短分界毫秒` });
         await input.fill('10000');
         await input.blur();
@@ -307,7 +321,7 @@ try {
     await launch(true);
     await workspace('transcription');
     await expect(page.getByTestId('editor-transcription')).toHaveAttribute('data-state', 'ready', { timeout: 60000 });
-    for (const instrument of ['低音', '人声', '钢琴', '吉他'])
+    for (const instrument of ['低音', '人声', '钢琴', '吉他', '其他音色'])
         await page.getByRole('checkbox', { name: new RegExp(`^${instrument} Basic Pitch`) }).uncheck();
     await page.evaluate(
         async hash => {

@@ -36,7 +36,7 @@ npx playwright test tests/e2e/editor-transcription.spec.ts tests/e2e/transcripti
 - 内存复用现有 sampler：约一秒请求频率、全设备 NVIDIA 显存与所有 Chrome／Edge 进程 working set／private bytes；其他标签页可能影响结果，共享 working set 可能重复计数。报告观察峰值及采样错误，不把它当作模型独占内存或分配上限。
 - 初步三链路报告保存在 `artifacts/evals/editor-transcription/models-chrome-initial/` 和 `models-edge-initial/`。后续实现变化与不同配置通过源码／配置 hash 区分，历史报告不代替当前完整链路。
 
-`editor-transcription.spec.ts`从真实FT结果跑五角色推理、OPFS文件校验、辅助试听、候选修正、显式应用与刷新恢复，并覆盖取消、损坏模型缓存和试听后清理。应用继续使用现有 Editor V2。完整链工程样例为验证分类路径将音符分界改为10000ms；不是产品默认值，原候选时间仍完整保存。
+`editor-transcription.spec.ts`从真实FT结果跑六输入推理（含 other）、OPFS文件校验、辅助试听、候选修正、显式应用与刷新恢复，并覆盖取消、损坏模型缓存和试听后清理。应用继续使用现有 Editor V2。完整链工程样例为验证分类路径将音符分界改为10000ms；不是产品默认值，原候选时间仍完整保存。
 
 `qualityFixtures.ts`自编CC0受控音色包括钢琴/拨弦各自独奏、稀疏混合、无目标区、长音/重复音/分段边界，以及同时击打、快速hat与跨段击打。`quality-probe.worker.ts`执行真实六轨分离→OPFS→逐乐器Basic Pitch及分段ADT_STR。`qualityMetrics.ts`保留全部原始观测，用120ms关联窗统计漏标、多标、分类/音高错误和带符号起止误差；该窗口是报告方法，不是验收阈值。合成素材不证明真实演奏录音质量。
 
@@ -45,6 +45,8 @@ npx playwright test tests/e2e/editor-transcription.spec.ts tests/e2e/transcripti
 完整链、受控质量和长源记录分别保存到`artifacts/evals/editor-transcription/full-chain/`、`controlled-quality/`、`long-audition/`。运行浏览器期间固定相关源码与测试，避免Vite热更新使候选身份和资源生命周期失效。只运行实际受影响的回归；真实钢琴/吉他录音与owner质量结论仍需各自证据。
 
 ## 主要音色优化
+
+`lead-path.test.ts` 覆盖旋律与弱和声、静音间隔、等强和弦不强选、重复起音、零能量、路径裁剪及取消；`candidate-review.test.ts` 验证角色默认互斥、手工覆盖和恢复自动判断时保留原始证据。六输入完整链验证 other 实际产出和角色元数据；不能用含糊样例没有 lead 或单元结果宣称真实音乐主旋律质量通过。
 
 `candidate-review.test.ts`、`acoustic-index.test.ts` 覆盖原始/派生分离、静音有限值、源帧数校验、有界重采样/跨块/取消、和弦归组、共享声学起音、真实重复起音、不同通鼓/打击声、保守筛选、重复组含糊不选/强推荐/多选，以及 V2 原子应用和跨视图幂等。服务/仓库专项检查设置不触发模型重跑、命名/归属/筛选/复核决策恢复与新 analysisConfigHash 隔离。
 

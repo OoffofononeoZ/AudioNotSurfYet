@@ -3,6 +3,7 @@ import { deriveCandidateReview } from '../../src/transcription/candidateReview';
 import { defaultReviewSettings } from '../../src/transcription/reviewSettings';
 import { applySoundMarkers } from '../../src/transcription/applySoundMarkers';
 import { applyCandidateResult } from '../../src/transcription/applyCandidates';
+import { correctCandidate } from '../../src/transcription/candidates';
 import { createInitialEditorProject, encodeEditorProjectV2, decodeEditorProject } from '../../src/editor/projectCodec';
 import { drumCandidate, noteCandidate, reviewResult } from './review-fixture';
 
@@ -16,6 +17,28 @@ it('recomputes conservative versus sensitive review without changing raw model e
     settings.sensitivity = 'sensitive';
     expect(deriveCandidateReview(result, settings, {}).selectedIds).toEqual(['weak', 'strong']);
     expect(JSON.stringify(result)).toBe(before);
+});
+it('assigns each other-source event to only one default role group and preserves inferred role under manual correction', () => {
+    const a = noteCandidate('lead', 1, 2, 'other'),
+        b = noteCandidate('rest', 3, 4, 'other');
+    a.inferredRole = 'lead';
+    b.inferredRole = 'other';
+    a.roleEvidence = { coverage: 1, reliableFraction: 1, margin: 0.2 };
+    const result = reviewResult([a, b]),
+        settings = defaultReviewSettings();
+    const review = deriveCandidateReview(result, settings, {});
+    expect(review.groups.map(group => group.id)).toEqual(['role:lead:other', 'note:other']);
+    expect(review.markers.flatMap(marker => marker.rawIds)).toEqual(['lead', 'rest']);
+    const corrected = correctCandidate(result, 'lead', { musicalRole: 'other' });
+    expect(corrected.candidates[0]).toMatchObject({
+        inferredRole: 'lead',
+        musicalRole: 'other',
+        roleEvidence: a.roleEvidence,
+    });
+    expect(deriveCandidateReview(corrected, settings, {}).groups.map(group => group.id)).toEqual(['note:other']);
+    expect(
+        deriveCandidateReview(correctCandidate(corrected, 'lead', { musicalRole: null }), settings, {}).groups,
+    ).toHaveLength(2);
 });
 it('groups a chord into one timbre range and splits a repeated independent attack', () => {
     const result = reviewResult([

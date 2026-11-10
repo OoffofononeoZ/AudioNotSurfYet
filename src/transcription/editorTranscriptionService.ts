@@ -408,7 +408,7 @@ export class EditorTranscriptionService {
     correct(id: string, patch: Parameters<typeof correctCandidate>[2]): void {
         if (!this.state.bundle || busy.has(this.state.status)) return;
         const review = structuredClone(this.state.review);
-        if (patch.instrument !== undefined) delete review.assignments[id];
+        if (patch.instrument !== undefined || patch.musicalRole !== undefined) delete review.assignments[id];
         this.update({
             bundle: { ...this.state.bundle, result: correctCandidate(this.state.bundle.result, id, patch) },
             review,

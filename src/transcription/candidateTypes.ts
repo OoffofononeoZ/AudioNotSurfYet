@@ -3,9 +3,10 @@ import type { DrumBackend } from './drumRuntime';
 import type { IncompleteDrumRange } from './drumTranscription';
 import type { DrumSoundCategory } from './drumVocabulary';
 import type { CandidateAcoustics } from './candidateAcoustics';
-export const TRANSCRIPTION_ROLES = ['drums', 'bass', 'vocals', 'piano', 'guitar'] as const;
+import type { LeadEvidence } from './leadPath';
+export const TRANSCRIPTION_ROLES = ['drums', 'bass', 'vocals', 'piano', 'guitar', 'other'] as const;
 export type TranscriptionRole = (typeof TRANSCRIPTION_ROLES)[number];
-export type NoteInstrument = 'bass' | 'vocals' | 'piano' | 'guitar' | 'unknown';
+export type NoteInstrument = 'bass' | 'vocals' | 'piano' | 'guitar' | 'other' | 'unknown';
 export type CandidateInstrument = 'drums' | NoteInstrument;
 export type DrumCategory = DrumSoundCategory;
 export interface TranscriptionIdentity {
@@ -48,6 +49,9 @@ export interface NoteCandidate extends CandidateBase {
     instrument: NoteInstrument;
     pitch: number;
     onsetStrength?: number;
+    inferredRole?: 'lead' | 'other';
+    musicalRole?: 'lead' | 'other';
+    roleEvidence?: LeadEvidence;
 }
 export type MarkerCandidate = DrumCandidate | NoteCandidate;
 export interface TranscriptionResult {
@@ -72,5 +76,6 @@ export const INSTRUMENT_LABELS: Record<CandidateInstrument, string> = {
     vocals: '人声',
     piano: '钢琴',
     guitar: '吉他',
+    other: '其他音色',
     unknown: '未知乐器',
 };

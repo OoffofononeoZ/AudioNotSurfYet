@@ -27,6 +27,15 @@ export function defaultReviewSettings(): ReviewSettings {
     };
 }
 export function defaultSoundGroup(candidate: MarkerCandidate): SoundGroupInfo & { id: string } {
+    if (candidate.kind === 'note' && (candidate.musicalRole ?? candidate.inferredRole) === 'lead')
+        return {
+            id: `role:lead:${candidate.instrument}`,
+            instrument: candidate.instrument,
+            label:
+                candidate.instrument === 'other'
+                    ? '主旋律候选'
+                    : `${INSTRUMENT_LABELS[candidate.instrument]} · 主旋律候选`,
+        };
     return candidate.kind === 'drum'
         ? {
               id: `drum:${candidate.customPitch}`,
@@ -50,7 +59,8 @@ export function validateReviewSettings(settings: ReviewSettings, result: Transcr
     const record = (value: unknown): value is Record<string, unknown> =>
         !!value && typeof value === 'object' && !Array.isArray(value);
     const ids = new Set(result.candidates.map(candidate => candidate.id));
-    const groupId = /^(drum:\d{1,2}|note:(bass|vocals|piano|guitar|unknown|other|lead)|custom:[a-f0-9-]{36})$/;
+    const groupId =
+        /^(drum:\d{1,2}|note:(bass|vocals|piano|guitar|unknown|other)|role:lead:(bass|vocals|piano|guitar|unknown|other)|custom:[a-f0-9-]{36})$/;
     if (
         !settings ||
         settings.version !== 1 ||

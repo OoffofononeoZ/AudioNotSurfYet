@@ -28,7 +28,8 @@
                             ><strong>{{ INSTRUMENT_LABELS[role] }}</strong
                             ><small
                                 >{{ role === 'drums' ? 'ADT_STR' : 'Basic Pitch'
-                                }}{{ role === 'piano' || role === 'guitar' ? ' · 辅助分离' : ' · FT' }}</small
+                                }}{{ role === 'piano' || role === 'guitar' ? ' · 辅助分离' : ' · FT'
+                                }}{{ role === 'other' ? ' · 主旋律候选' : '' }}</small
                             ></span
                         >
                     </label>
@@ -170,6 +171,7 @@ const phaseLabel = computed(() =>
                   'drum-windows': '鼓片段完成',
                   'drum-retry-windows': '重试局部鼓区间',
                   'acoustic-index': '分析局部声音与起音',
+                  'lead-path': '整理主旋律候选',
                   'pitch-preprocess': '准备音符片段',
                   'pitch-inference': '识别音符',
                   'pitch-decode': '整理音符候选',

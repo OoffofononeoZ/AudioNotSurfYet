@@ -8,6 +8,7 @@
 
 | 文件 | 本地静态引用（最多显示 6 项） |
 | --- | --- |
+| [tests/transcription/timbre-quality.worker.ts](../../tests/transcription/timbre-quality.worker.ts) | [src/processing/sha256.ts](../../src/processing/sha256.ts)、[src/processing/stemAuditionSource.ts](../../src/processing/stemAuditionSource.ts)、[src/processing/storage.ts](../../src/processing/storage.ts)、[src/transcription/acousticIndex.ts](../../src/transcription/acousticIndex.ts)、[src/transcription/analysisOptions.ts](../../src/transcription/analysisOptions.ts)、[src/transcription/auxiliarySeparation.ts](../../src/transcription/auxiliarySeparation.ts)、另 11 项，按需核对源码 |
 | [tests/transcription/vitePlugin.ts](../../tests/transcription/vitePlugin.ts) | — |
 | [tests/unit/audio-fixtures.test.ts](../../tests/unit/audio-fixtures.test.ts) | [tests/support/audio-fixtures.ts](../../tests/support/audio-fixtures.ts) |
 | [tests/unit/indexeddb-harness.test.ts](../../tests/unit/indexeddb-harness.test.ts) | — |

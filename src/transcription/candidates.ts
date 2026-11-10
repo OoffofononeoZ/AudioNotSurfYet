@@ -146,12 +146,22 @@ export function validateCandidates(result: TranscriptionResult): void {
             }
         } else if (candidate.kind === 'note') {
             if (
-                !['bass', 'vocals', 'piano', 'guitar', 'unknown'].includes(candidate.instrument) ||
+                !['bass', 'vocals', 'piano', 'guitar', 'other', 'unknown'].includes(candidate.instrument) ||
                 candidate.source.inputRole === 'drums' ||
                 candidate.source.model !== 'basic-pitch' ||
                 !Number.isInteger(candidate.pitch) ||
                 candidate.pitch < 21 ||
                 candidate.pitch > 108 ||
+                (candidate.inferredRole !== undefined &&
+                    (!['lead', 'other'].includes(candidate.inferredRole) || candidate.source.inputRole !== 'other')) ||
+                (candidate.musicalRole !== undefined && !['lead', 'other'].includes(candidate.musicalRole)) ||
+                (candidate.roleEvidence !== undefined &&
+                    (!candidate.inferredRole ||
+                        ![
+                            candidate.roleEvidence.coverage,
+                            candidate.roleEvidence.reliableFraction,
+                            candidate.roleEvidence.margin,
+                        ].every(value => Number.isFinite(value) && value >= 0 && value <= 1))) ||
                 (candidate.onsetStrength !== undefined &&
                     (!Number.isFinite(candidate.onsetStrength) ||
                         candidate.onsetStrength < 0 ||
@@ -171,7 +181,7 @@ export function validateThresholds(thresholds: NoteThresholds): void {
         Array.isArray(thresholds) ||
         Object.entries(thresholds).some(
             ([instrument, value]) =>
-                !['bass', 'vocals', 'piano', 'guitar', 'unknown'].includes(instrument) ||
+                !['bass', 'vocals', 'piano', 'guitar', 'other', 'unknown'].includes(instrument) ||
                 !Number.isFinite(value) ||
                 value < 0,
         )
@@ -183,21 +193,30 @@ export function validateThresholds(thresholds: NoteThresholds): void {
 export function correctCandidate(
     result: TranscriptionResult,
     id: string,
-    patch: { deleted?: boolean; instrument?: NoteInstrument; drum?: DrumCategory },
+    patch: {
+        deleted?: boolean;
+        instrument?: NoteInstrument;
+        drum?: DrumCategory;
+        musicalRole?: 'lead' | 'other' | null;
+    },
 ): TranscriptionResult {
     const candidate = result.candidates.find(candidate => candidate.id === id);
     if (!candidate) throw new ProcessingError('invalid-request', '候选已经不存在。');
     if (
         (patch.instrument !== undefined && candidate.kind !== 'note') ||
+        (patch.musicalRole !== undefined && candidate.kind !== 'note') ||
         (patch.drum !== undefined && candidate.kind !== 'drum')
     ) {
         throw new ProcessingError('invalid-request', '此候选不支持该类修正。');
     }
     const next = {
         ...result,
-        candidates: result.candidates.map(candidate =>
-            candidate.id === id ? ({ ...candidate, ...patch } as MarkerCandidate) : candidate,
-        ),
+        candidates: result.candidates.map(candidate => {
+            if (candidate.id !== id) return candidate;
+            const corrected = { ...candidate, ...patch } as MarkerCandidate;
+            if (corrected.kind === 'note' && patch.musicalRole === null) delete corrected.musicalRole;
+            return corrected;
+        }),
     };
     validateCandidates(next);
     return next;
