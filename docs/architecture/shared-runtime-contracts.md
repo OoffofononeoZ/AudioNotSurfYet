@@ -31,7 +31,7 @@
 - Analyzer、Editor、Visualizer 的 consumer lease 互斥，新 consumer 使旧 lease 失效；旧 token 不改变当前工作区。
 - 保持单个分析 Worker；无活动特征不创建任务。每个来源最多四种唯一特征，native 输入不计入额度。原曲和 drums/bass/other/vocals 以来源与特征共同标识；四轨只允许 energy、amplitudeSpectrum、buffer、wallpaperEngineSpectrum。分轨通过同一 Worker 串行计算，有界读取已校验的 OPFS PCM，精确游标与窗口也按来源隔离。
 - 消息、cache、series 和 exact cursor 匹配歌曲 hash、config hash、generation/request identity；取消与迟到消息不回填新工作区。
-- Editor lease 提供可取消的 `requestWindowSeries`，从 Worker 保留的 PCM 返回带真实起始时间的运行时窗口序列；类型见 [windowTypes](../../src/analysis/windowTypes.ts)。它与持久化 `AnalysisSeries` 区分，不进入分析缓存编码；窗口任务分批让出执行，精确游标优先。视图拥有单窗口缓存及缩放防抖，详见 [标记工作区](../context/editor-marking.md#图表细节与时间对齐dec-094)。
+- Editor 与 Analyzer 的当前 lease 提供可取消的 `requestWindowSeries`，从 Worker 保留的 PCM 返回带真实起始时间的运行时窗口序列；类型见 [windowTypes](../../src/analysis/windowTypes.ts)。它与持久化 `AnalysisSeries` 区分，不进入分析缓存编码；窗口任务分批让出执行，精确游标优先。共享 AnalysisWindowView 拥有单窗口缓存及缩放防抖，详见 [标记工作区](../context/editor-marking.md#图表细节与时间对齐dec-094)。
 - 取消用于节省资源，完整身份检查才是正确性边界；不能假定取消一定先于结果抵达。
 - 原曲 PCM 的准备/确认与特征任务分离，按 track/hash、decoded revision 和 config 标识单一 Worker 来源。同歌切页及活动特征变化复用该来源，旧 lease/job 仍立即失效；换歌、解码版本变化、清空、实时模式及销毁释放。Wallpaper 缺失项按需传递临时 stereo PCM，计算后不保留额外立体声副本。
 - DEC-108：来源 pcmState 与单项 readyFeatureIds 独立于整组 state。混合任务先发布 buffer，窗口/精确值可在其他特征计算中读取已就绪项；Worker 在后台优先级任务中让出，使入站消息能被处理。可见窗口优先于全曲和 BPM，切片边界处理一次更高优先任务后恢复原任务。BPM 请求按来源、请求与 Editor lease 隔离，同歌特征 generation 变化可继续，离页/换源/取消无效；排队时用有效分析进度刷新等待看门狗，实际计算沿用既有超时。

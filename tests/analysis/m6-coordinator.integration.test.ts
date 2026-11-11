@@ -19,6 +19,7 @@ import type {
 import { useAudioSessionStore } from '../../src/stores/audioSessionStore';
 import type { DecodedAudioDescriptor, PlaybackSnapshot } from '../../src/types/audio';
 import { createSine, SAMPLE_RATE } from '../support/audio-fixtures';
+import { extractWindowSeries } from '../../src/analysis/windowAnalysis';
 
 class FakeAnalysisEngine {
     readonly listeners = new Set<(snapshot: PlaybackSnapshot) => void>();
@@ -233,6 +234,36 @@ beforeEach(() => {
 });
 
 describe('AnalysisCoordinator integration', () => {
+    test('allows native windows through the current Analyzer lease and cancels it on release', async () => {
+        const harness = setup();
+        const lease = harness.coordinator.acquireConsumer('analyzer');
+        await lease.setActiveFeatures(['rms']);
+        await vi.waitFor(() => expect(harness.coordinator.getSnapshot().state).toBe('ready'));
+        const post = harness.worker.postMessage.bind(harness.worker);
+        harness.worker.postMessage = request => {
+            if (request.kind === 'window-series') {
+                void extractWindowSeries(harness.worker.retained!, request, { yieldControl: async () => {} }).then(
+                    series => {
+                        harness.worker.onmessage?.(
+                            new MessageEvent<AnalysisWorkerResponse>('message', {
+                                data: { ...request, kind: 'window-series-result', series },
+                            }),
+                        );
+                    },
+                );
+            } else post(request);
+        };
+        const input = { featureId: 'rms' as const, startSeconds: 0, endSeconds: 0.05, waveformBucketSamples: 1 };
+        const detail = await lease.requestWindowSeries(input);
+        expect(detail?.sampleStepSeconds).toBeCloseTo(512 / SAMPLE_RATE);
+        expect(detail!.sampleStepSeconds).toBeLessThan(lease.getSeries('rms')!.sampleStepSeconds);
+        expect(await lease.requestWindowSeries({ ...input, featureId: 'energy' })).toBeNull();
+        const pending = lease.requestWindowSeries(input);
+        lease.release();
+        expect(await pending).toBeNull();
+        expect(await lease.requestWindowSeries(input)).toBeNull();
+        await harness.coordinator.dispose();
+    });
     test('keeps a restored current cache while its matching audio is decoded after refresh', async () => {
         const first = setup();
         await first.coordinator.setActiveFeatures(['rms']);

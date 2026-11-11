@@ -24,6 +24,48 @@ const viewport = { startSeconds: 0, endSeconds: 2, zoom: 1 };
 const options = { view: 'magnitude' as const, selected: null, cancelled: () => false, yieldControl: async () => {} };
 
 describe('3D display adapters', () => {
+    it('keeps both song boundaries while allocating finer columns to a zoomed interval', async () => {
+        const values = new Uint16Array(10000);
+        values[9999] = 200;
+        const data = series({ kind: 'category-u16', width: 1, values, offset: -5, scale: 0.1 }, 'mfcc', 10000);
+        const grid = (await buildThreeDGrid(data, { startSeconds: 4000, endSeconds: 4010, zoom: 1000 }, options))!;
+        expect(grid.times[0]).toBe(0);
+        expect(grid.times.at(-1)).toBe(10000);
+        expect(grid.times.length).toBeLessThanOrEqual(512);
+        expect(grid.times.filter(t => t >= 4000 && t < 4010).length).toBe(10);
+        expect(grid.max).toBe(15);
+        expect(grid.maximums.at(-1)).toBe(15);
+        expect(Array.from(grid.times).every((t, i) => !i || t >= grid.times[i - 1]!)).toBe(true);
+    });
+    it('uses matching native detail only inside the visible interval and closes the final time cell', async () => {
+        const data = series(
+            { kind: 'category-u16', width: 1, values: new Uint16Array(100).fill(1), offset: 0, scale: 1 },
+            'mfcc',
+            100,
+        );
+        const detail = {
+            ...data,
+            startTimeSeconds: 40,
+            endTimeSeconds: 41,
+            sampleStepSeconds: 0.01,
+            sampleCount: 100,
+            payload: {
+                kind: 'category-u16' as const,
+                width: 1,
+                values: new Uint16Array(100).fill(9),
+                offset: 0,
+                scale: 1,
+            },
+        };
+        const viewport = { startSeconds: 40, endSeconds: 41, zoom: 100 };
+        const grid = (await buildThreeDGrid(data, viewport, { ...options, detail, durationSeconds: 99.75 }))!;
+        expect(grid.times.at(-1)).toBe(99.75);
+        const index = grid.times.findIndex(t => t === 40.5);
+        expect(index).toBeGreaterThan(0);
+        expect(grid.values[index]).toBe(9);
+        const stale = (await buildThreeDGrid(data, viewport, { ...options, detail: { ...detail, trackHash: 'old' } }))!;
+        expect(stale.max).toBe(1);
+    });
     it('preserves stereo ordering and values beyond one', () => {
         const values = new Float32Array(256);
         values[0] = 1.5;

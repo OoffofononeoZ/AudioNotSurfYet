@@ -1,5 +1,5 @@
-import type { AnalysisSeries } from '../analysis/types';
-import type { AnalysisWindowInput, AnalysisWindowSeries } from '../analysis/windowTypes';
+import type { AnalysisSeries } from './types';
+import type { AnalysisWindowInput, AnalysisWindowSeries } from './windowTypes';
 
 export const ANALYSIS_ZOOM_SETTLE_MS = 150;
 export interface AnalysisWindowViewInput {
@@ -36,7 +36,7 @@ export function waveformBucketSamples(input: AnalysisWindowViewInput): number {
 }
 
 /** One visible-window cache, one running request, and the newest pending view per instance. */
-export class EditorAnalysisWindowView {
+export class AnalysisWindowView {
     private current: AnalysisWindowViewInput | null = null;
     private cache: AnalysisWindowSeries | null = null;
     private abort: AbortController | null = null;

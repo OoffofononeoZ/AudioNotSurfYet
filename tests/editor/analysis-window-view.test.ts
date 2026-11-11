@@ -1,9 +1,9 @@
 import { afterEach, expect, test, vi } from 'vitest';
 import {
-    EditorAnalysisWindowView,
+    AnalysisWindowView,
     waveformBucketSamples,
     type AnalysisWindowViewInput,
-} from '../../src/editor/analysisWindowView';
+} from '../../src/analysis/analysisWindowView';
 import type { AnalysisWindowInput, AnalysisWindowSeries } from '../../src/analysis/windowTypes';
 
 function context(): AnalysisWindowViewInput {
@@ -42,7 +42,7 @@ test('continuous zoom waits for 150ms of quiet and only requests the last resolu
     vi.useFakeTimers();
     const request = vi.fn(async (input: AnalysisWindowInput) => result(input));
     const changed = vi.fn(),
-        view = new EditorAnalysisWindowView(request, changed),
+        view = new AnalysisWindowView(request, changed),
         input = context();
     view.update(input);
     for (let i = 1; i <= 5; i++) {
@@ -66,7 +66,7 @@ test('playback reuses coverage, prefetches at the edge, and a source change reje
         resolve: (value: AnalysisWindowSeries | null) => void;
     }> = [];
     const changed = vi.fn();
-    const view = new EditorAnalysisWindowView(
+    const view = new AnalysisWindowView(
         (input, signal) => new Promise(resolve => pending.push({ input, signal, resolve })),
         changed,
     );
@@ -96,8 +96,8 @@ test('two views remain independent and disposal clears timers and in-flight sign
         signals.push(signal);
         return new Promise<AnalysisWindowSeries | null>(() => {});
     });
-    const first = new EditorAnalysisWindowView(request, () => {}),
-        second = new EditorAnalysisWindowView(request, () => {});
+    const first = new AnalysisWindowView(request, () => {}),
+        second = new AnalysisWindowView(request, () => {});
     first.update(context());
     second.update(context());
     first.dispose();

@@ -39,6 +39,60 @@ const viewport = async (page: Page) => ({
     end: Number(await plot(page).getAttribute('data-end')),
 });
 
+test('retains the entire song and seeks outside the time window after panning', async ({ page }, info) => {
+    const errors = await setup(page);
+    await expand(page, 'amplitudeSpectrum');
+    await ready(page);
+    const chart = plot(page),
+        stage = chart.locator('.three-d-stage');
+    const duration = Number(await chart.getAttribute('data-end'));
+    await chart.getByRole('button', { name: '切换伪2D图表' }).click();
+    await expect(chart).toHaveAttribute('data-view', 'orthographic');
+    const box = (await stage.boundingBox())!;
+    for (let i = 0; i < 18; i++)
+        await stage.dispatchEvent('wheel', {
+            deltaY: -120,
+            clientX: box.x + box.width * 0.25,
+            clientY: box.y + box.height / 2,
+            bubbles: true,
+            cancelable: true,
+        });
+    await expect.poll(async () => Number(await chart.getAttribute('data-columns'))).toBeGreaterThan(0);
+    await page.waitForTimeout(400);
+    await ready(page);
+    await expect.poll(async () => Number(await chart.getAttribute('data-detail-step'))).toBeLessThan(0.02);
+    const saved = await viewport(page);
+    await stage.dispatchEvent('pointerdown', {
+        pointerId: 1,
+        button: 0,
+        clientX: box.x + box.width / 2,
+        clientY: box.y + box.height / 2,
+    });
+    await stage.dispatchEvent('pointermove', {
+        pointerId: 1,
+        buttons: 1,
+        clientX: box.x - box.width,
+        clientY: box.y + box.height / 2,
+    });
+    await stage.dispatchEvent('pointerup', {
+        pointerId: 1,
+        button: 0,
+        clientX: box.x - box.width,
+        clientY: box.y + box.height / 2,
+    });
+    await expect.poll(async () => Number(await chart.getAttribute('data-visible-start'))).toBeGreaterThan(saved.end);
+    await ready(page);
+    expect(Number(await chart.getAttribute('data-grid-start'))).toBe(0);
+    expect(Number(await chart.getAttribute('data-grid-end'))).toBeCloseTo(duration, 5);
+    expect(Number(await chart.getAttribute('data-columns'))).toBeLessThanOrEqual(512);
+    await stage.click({ position: { x: box.width / 2, y: box.height / 2 } });
+    await expect
+        .poll(async () => Number(await page.locator('#music-bar-container').getAttribute('data-current-time')))
+        .toBeGreaterThan(saved.end);
+    await chart.screenshot({ path: `test-results/3d-full-song-pan-${info.project.name}.png` });
+    expect(errors).toEqual([]);
+});
+
 test('renders all seven features and replaces the sole active input', async ({ page }, info) => {
     test.setTimeout(150000);
     const errors = await setup(page);

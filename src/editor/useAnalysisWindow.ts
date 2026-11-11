@@ -1,13 +1,13 @@
 import { computed, onBeforeUnmount, shallowRef, ref, watch } from 'vue';
 import { useEditorSessionController } from './editorSessionController';
-import { EditorAnalysisWindowView, windowCovers, type AnalysisWindowViewInput } from './analysisWindowView';
+import { AnalysisWindowView, windowCovers, type AnalysisWindowViewInput } from '../analysis/analysisWindowView';
 import type { AnalysisWindowSeries, RenderAnalysisSeries } from '../analysis/windowTypes';
 
 export function useAnalysisWindow(input: () => AnalysisWindowViewInput) {
     const controller = useEditorSessionController();
     const detail = shallowRef<AnalysisWindowSeries | null>(null),
         pending = ref(false);
-    const view = new EditorAnalysisWindowView(
+    const view = new AnalysisWindowView(
         (request, signal) => controller.requestAnalysisWindow(request, signal),
         (series, busy) => {
             detail.value = series;

@@ -36,3 +36,8 @@ export interface AnalysisWindowResult {
     featureId: FeatureId;
     series: AnalysisWindowSeries | null;
 }
+
+export type AnalysisWindowRequester = (
+    input: AnalysisWindowInput,
+    signal?: AbortSignal,
+) => Promise<AnalysisWindowSeries | null>;

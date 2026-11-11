@@ -325,6 +325,39 @@ try {
     await page.locator('[data-source="original"]').click();
     await ready();
     result.checks.threeDRestartAndOriginalQueue = 'passed';
+    await page.locator('[data-source="original-3d"]').click();
+    await page.locator('.original-list [data-feature-id="amplitudeSpectrum"] .toggle-card').click();
+    const fullSong = page.getByTestId('three-d-plot');
+    await expect.poll(() => fullSong.getAttribute('data-grid-end').then(Number)).toBeGreaterThan(0);
+    const songEnd = Number(await fullSong.getAttribute('data-grid-end'));
+    await fullSong.getByRole('button', { name: '切换伪2D图表' }).click();
+    const fullStage = fullSong.locator('.three-d-stage'),
+        fullBox = await fullStage.boundingBox();
+    for (let i = 0; i < 18; i++)
+        await fullStage.dispatchEvent('wheel', {
+            deltaY: -120,
+            clientX: fullBox.x + fullBox.width * 0.25,
+            clientY: fullBox.y + fullBox.height / 2,
+            bubbles: true,
+            cancelable: true,
+        });
+    await expect.poll(() => fullSong.getAttribute('data-detail-step').then(Number)).toBeLessThan(0.02);
+    const windowEnd = Number(await fullSong.getAttribute('data-end'));
+    await page.mouse.move(fullBox.x + fullBox.width / 2, fullBox.y + fullBox.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(fullBox.x - fullBox.width, fullBox.y + fullBox.height / 2, { steps: 5 });
+    await page.mouse.up();
+    await expect.poll(() => fullSong.getAttribute('data-visible-start').then(Number)).toBeGreaterThan(windowEnd);
+    await expect(fullSong).toHaveAttribute('aria-busy', 'false');
+    assert.equal(Number(await fullSong.getAttribute('data-grid-start')), 0);
+    assert.equal(Number(await fullSong.getAttribute('data-grid-end')), songEnd);
+    assert(Number(await fullSong.getAttribute('data-columns')) <= 512);
+    await fullStage.click({ position: { x: fullBox.width / 2, y: fullBox.height / 2 } });
+    await expect
+        .poll(() => page.locator('#music-bar-container').getAttribute('data-current-time').then(Number))
+        .toBeGreaterThan(windowEnd);
+    await screenshot('analyzer-full-song-pan.png');
+    result.checks.fullSongPanAndNativeDetail = 'passed';
     assert.deepEqual(errors, []);
     assert.deepEqual(consoleErrors, []);
     assert.deepEqual(requests, []);

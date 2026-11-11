@@ -3,7 +3,7 @@ import { componentPosition, type ThreeDGrid } from '../../analysis/threeDData';
 import type { PersistedTimelineViewport } from '../../types/session';
 import { createBudgetYield } from '../../analysis/taskScheduler';
 
-const WIDTH = 10;
+import { projectedTimeRange, threeDTimeX, THREE_D_TIME_WIDTH as WIDTH } from '../../analysis/threeDProjection';
 const HEIGHT = 4;
 const color = new THREE.Color();
 const point = new THREE.Vector3();
@@ -28,10 +28,6 @@ export class ThreeDRenderer {
     private readonly cursor = new THREE.Group();
     private readonly perspective = new THREE.PerspectiveCamera(38, 1, 0.1, 100);
     private readonly orthographic = new THREE.OrthographicCamera(-7, 7, 4, -4, 0.1, 100);
-    private readonly planes = [
-        new THREE.Plane(new THREE.Vector3(1, 0, 0), 5),
-        new THREE.Plane(new THREE.Vector3(-1, 0, 0), 5),
-    ];
     private camera: THREE.PerspectiveCamera | THREE.OrthographicCamera = this.perspective;
     private grid: ThreeDGrid | null = null;
     private viewport: PersistedTimelineViewport = { startSeconds: 0, endSeconds: 1, zoom: 1 };
@@ -56,7 +52,6 @@ export class ThreeDRenderer {
         this.onError = onError;
         this.renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
         this.renderer.setClearColor(0x020704, 0);
-        this.renderer.localClippingEnabled = true;
         this.scene.add(this.root);
         this.root.add(this.axes, this.data, this.cursor);
         this.root.rotation.set(-0.48, 0.58, -0.06);
@@ -107,6 +102,7 @@ export class ThreeDRenderer {
             this.data.scale.x = scale;
             this.data.position.x = 5 * scale + (WIDTH * (old.startSeconds - viewport.startSeconds)) / span - 5;
         }
+        this.drawAxes();
         this.updateCursor();
         this.invalidate();
     }
@@ -189,7 +185,6 @@ export class ThreeDRenderer {
             const material = new THREE.MeshBasicMaterial({
                 vertexColors: true,
                 side: THREE.DoubleSide,
-                clippingPlanes: this.planes,
             });
             next.add(new THREE.Mesh(geometry, material));
         }
@@ -202,7 +197,6 @@ export class ThreeDRenderer {
                     color: 0x9affc1,
                     transparent: true,
                     opacity: grid.slice ? 0.95 : 0.3,
-                    clippingPlanes: this.planes,
                 }),
             ),
         );
@@ -291,9 +285,10 @@ export class ThreeDRenderer {
                 dy = b.y - a.y;
             ratio = ((x - a.x) * dx + (y - a.y) * dy) / Math.max(1, dx * dx + dy * dy);
         }
-        return (
-            this.viewport.startSeconds +
-            THREE.MathUtils.clamp(ratio, 0, 1) * (this.viewport.endSeconds - this.viewport.startSeconds)
+        return THREE.MathUtils.clamp(
+            this.viewport.startSeconds + ratio * (this.viewport.endSeconds - this.viewport.startSeconds),
+            0,
+            this.grid?.durationSeconds ?? this.viewport.endSeconds,
         );
     }
 
@@ -308,7 +303,7 @@ export class ThreeDRenderer {
     private updateCursor() {
         const ratio =
             (this.cursorSeconds - this.viewport.startSeconds) / (this.viewport.endSeconds - this.viewport.startSeconds);
-        this.cursor.visible = ratio >= 0 && ratio <= 1 && !!this.grid;
+        this.cursor.visible = !!this.grid && this.cursorSeconds >= 0 && this.cursorSeconds <= this.grid.durationSeconds;
         if (!this.cursor.visible) return;
         const x = -5 + WIDTH * ratio;
         const z = this.slice ? 0 : 2.65;
@@ -337,23 +332,25 @@ export class ThreeDRenderer {
         const grid: number[] = [],
             strong: number[] = [];
         const z = this.slice ? 0 : 2.65;
+        const left = this.timeX(0),
+            right = this.timeX(this.grid?.durationSeconds ?? this.viewport.endSeconds);
         for (let i = 0; i <= 10; i++) {
-            const x = -5 + i;
+            const x = left + ((right - left) * i) / 10;
             if (this.slice) grid.push(x, -2, 0, x, 2, 0);
             else grid.push(x, -2, -2.65, x, -2, z);
         }
         for (let i = 0; i <= 4; i++) {
             const y = -2 + i;
-            grid.push(-5, y, z, 5, y, z);
-            if (!this.slice) grid.push(-5, y, -2.65, -5, y, z);
+            grid.push(left, y, z, right, y, z);
+            if (!this.slice) grid.push(left, y, -2.65, left, y, z);
         }
         if (!this.slice)
             for (let i = 0; i <= 8; i++) {
                 const depth = -2.6 + i * 0.65;
-                grid.push(-5, -2, depth, 5, -2, depth);
+                grid.push(left, -2, depth, right, -2, depth);
             }
-        strong.push(-5, -2, z, 5, -2, z, -5, -2, z, -5, 2, z);
-        if (!this.slice) strong.push(-5, -2, -2.65, -5, -2, z);
+        strong.push(left, -2, z, right, -2, z, left, -2, z, left, 2, z);
+        if (!this.slice) strong.push(left, -2, -2.65, left, -2, z);
         for (const [vertices, opacity] of [
             [grid, 0.14],
             [strong, 0.6],
@@ -370,8 +367,8 @@ export class ThreeDRenderer {
         if (this.grid && this.grid.min < 0 && this.grid.max > 0) {
             const y = -2 + (HEIGHT * -this.grid.min) / (this.grid.max - this.grid.min);
             const geometry = new THREE.BufferGeometry().setFromPoints([
-                new THREE.Vector3(-5, y, z),
-                new THREE.Vector3(5, y, z),
+                new THREE.Vector3(left, y, z),
+                new THREE.Vector3(right, y, z),
             ]);
             this.axes.add(
                 new THREE.Line(
@@ -382,9 +379,24 @@ export class ThreeDRenderer {
         }
     }
 
+    private timeX(seconds: number) {
+        return threeDTimeX(seconds, this.viewport);
+    }
+
+    visibleTimeRange(duration: number) {
+        this.updateFarPlane(duration);
+        return projectedTimeRange(this.camera, this.root, this.viewport, duration, this.slice);
+    }
+
+    private updateFarPlane(duration: number) {
+        const extent = Math.max(Math.abs(this.timeX(0)), Math.abs(this.timeX(duration)));
+        this.camera.far = Math.max(100, extent + this.root.position.length() + this.camera.position.length() + 10);
+        this.camera.updateProjectionMatrix();
+    }
+
     private project(x: number, y: number, z: number) {
         point.set(x, y, z).applyMatrix4(this.root.matrixWorld).project(this.camera);
-        return { x: ((point.x + 1) * this.width) / 2, y: ((1 - point.y) * this.height) / 2 };
+        return { x: ((point.x + 1) * this.width) / 2, y: ((1 - point.y) * this.height) / 2, z: point.z };
     }
 
     private drawLabels() {
@@ -405,36 +417,38 @@ export class ThreeDRenderer {
             offset = 16,
         ) => {
             const p = this.project(x, y, depth);
+            if (p.z < -1 || p.z > 1 || p.x < -80 || p.x > this.width + 80 || p.y < -40 || p.y > this.height + 40)
+                return;
             ctx.textAlign = align;
             ctx.fillText(text, p.x, p.y + offset);
         };
+        const visible = this.visibleTimeRange(this.grid?.durationSeconds ?? this.viewport.endSeconds);
+        const axisX = this.timeX(0);
         for (let i = 0; i <= 4; i++) {
-            const time = this.viewport.startSeconds + ((this.viewport.endSeconds - this.viewport.startSeconds) * i) / 4;
-            label(`${time.toFixed(time < 10 ? 2 : 1)}s`, -5 + i * 2.5, -2, z);
+            const time = visible ? visible.startSeconds + ((visible.endSeconds - visible.startSeconds) * i) / 4 : 0;
+            if (visible) label(`${time.toFixed(time < 10 ? 2 : 1)}s`, this.timeX(time), -2, z);
             if (this.grid) {
                 const value = this.grid.min + ((this.grid.max - this.grid.min) * i) / 4;
                 const text = Math.abs(value) >= 1000 ? value.toExponential(1) : Number(value.toPrecision(3)).toString();
-                const p = this.project(-5, -2 + i, z);
-                ctx.textAlign = 'right';
-                ctx.fillText(text, p.x - 10, p.y);
+                label(text, axisX, -2 + i, z, 'right', 0);
             }
         }
-        label('时间', 5, -2, z, 'left', 34);
-        label(this.grid?.phase ? '相位 / rad' : '数值', -5, 2, z, 'left', -18);
+        label('时间', this.timeX(this.grid?.durationSeconds ?? this.viewport.endSeconds), -2, z, 'left', 34);
+        label(this.grid?.phase ? '相位 / rad' : '数值', axisX, 2, z, 'left', -18);
         if (!this.slice && this.grid) {
-            label(this.axisLabel, -5, -2, -2.65, 'left', -16);
+            label(this.axisLabel, axisX, -2, -2.65, 'left', -16);
             for (const tick of this.axisTicks) {
                 if (tick.index === this.grid.componentCount - 1) continue;
                 label(
                     tick.label,
-                    -5,
+                    axisX,
                     -2,
                     componentPosition(tick.index, this.grid.componentCount, this.loudness),
                     'right',
                     0,
                 );
             }
-            if (this.loudness) label('总响度', 5, -2, 2.6, 'left', -12);
+            if (this.loudness) label('总响度', this.timeX(this.grid.durationSeconds), -2, 2.6, 'left', -12);
         }
         if (this.slice) {
             ctx.textAlign = 'left';
@@ -453,8 +467,7 @@ export class ThreeDRenderer {
                 this.frame = null;
                 this.root.updateMatrixWorld(true);
                 this.camera.updateMatrixWorld(true);
-                this.planes[0]!.set(new THREE.Vector3(1, 0, 0), 5).applyMatrix4(this.root.matrixWorld);
-                this.planes[1]!.set(new THREE.Vector3(-1, 0, 0), 5).applyMatrix4(this.root.matrixWorld);
+                this.updateFarPlane(this.grid?.durationSeconds ?? this.viewport.endSeconds);
                 this.data.visible = !!this.grid && this.grid.slice === this.slice;
                 try {
                     this.renderer.render(this.scene, this.camera);

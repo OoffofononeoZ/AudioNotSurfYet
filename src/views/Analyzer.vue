@@ -47,6 +47,8 @@
                                 :sample-rate="analysis.sampleRate"
                                 :exact-value="exactValues[featureId] ?? null"
                                 :analysis-state="analysis.state"
+                                :analysis-generation="analysis.generation"
+                                :request-window="requestWindow"
                                 @toggle="toggleCard(featureId)"
                                 @toggle-description="toggleDescription(featureId)"
                                 @seek="seek"
@@ -96,6 +98,8 @@
                         :sample-rate="analysis.sampleRate"
                         :exact-value="exactValues[featureId] ?? null"
                         :analysis-state="analysis.state"
+                        :analysis-generation="analysis.generation"
+                        :request-window="requestWindow"
                         @toggle="toggleCard(featureId)"
                         @toggle-description="toggleDescription(featureId)"
                         @seek="seek"
@@ -132,6 +136,8 @@ const sessionStore = useAudioSessionStore();
 const audioSession = useAudioSessionService();
 const analysisCoordinator = useAnalysisCoordinator();
 const analysisLease = analysisCoordinator.acquireConsumer('analyzer');
+const requestWindow: import('../analysis/windowTypes').AnalysisWindowRequester = (input, signal) =>
+    analysisLease.requestWindowSeries(input, signal);
 const seriesRevision = ref(0);
 const exactValues = reactive<Partial<Record<FeatureId, AnalysisCursorValueResult>>>({});
 const CURSOR_REQUEST_INTERVAL_MS = 40;

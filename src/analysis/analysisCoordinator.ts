@@ -404,7 +404,7 @@ export class AnalysisCoordinator {
             );
         if (
             this.disposed ||
-            this.activeConsumer?.consumer !== 'editor' ||
+            !['editor', 'analyzer'].includes(this.activeConsumer?.consumer ?? '') ||
             !this.worker ||
             !this.activeJob ||
             !this.pcmSource.ready ||

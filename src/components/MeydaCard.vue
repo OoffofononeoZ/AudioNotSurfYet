@@ -36,6 +36,8 @@
                 :panel-height="panelHeight"
                 :exact-value="exactValue"
                 :analysis-state="analysisState"
+                :analysis-generation="analysisGeneration"
+                :request-window="requestWindow"
                 @seek="$emit('seek', $event)"
                 @zoom="(factor, anchor) => $emit('zoom', factor, anchor)" />
             <AnalyzerPlot
@@ -82,6 +84,8 @@ const props = defineProps<{
     sampleRate: number | null;
     exactValue: AnalysisCursorValueResult | null;
     analysisState: AnalysisCoordinatorState;
+    analysisGeneration?: number;
+    requestWindow?: import('../analysis/windowTypes').AnalysisWindowRequester;
 }>();
 defineEmits<{
     toggle: [];

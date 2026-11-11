@@ -8,7 +8,6 @@
 
 | 文件 | 本地静态引用（最多显示 6 项） |
 | --- | --- |
-| [src/editor/analysisWindowView.ts](../../src/editor/analysisWindowView.ts) | [src/analysis/types.ts](../../src/analysis/types.ts)、[src/analysis/windowTypes.ts](../../src/analysis/windowTypes.ts)、[src/processing/modelManifest.ts](../../src/processing/modelManifest.ts) |
 | [src/editor/beatSnap.ts](../../src/editor/beatSnap.ts) | — |
 | [src/editor/contextMenuOwnership.ts](../../src/editor/contextMenuOwnership.ts) | — |
 | [src/editor/editorConfig.ts](../../src/editor/editorConfig.ts) | — |
@@ -41,7 +40,7 @@
 | [src/editor/timeline.ts](../../src/editor/timeline.ts) | [src/analysis/timelineViewport.ts](../../src/analysis/timelineViewport.ts)、[src/types/session.ts](../../src/types/session.ts) |
 | [src/editor/trackChangeApproval.ts](../../src/editor/trackChangeApproval.ts) | [src/editor/types.ts](../../src/editor/types.ts) |
 | [src/editor/types.ts](../../src/editor/types.ts) | [src/analysis/types.ts](../../src/analysis/types.ts)、[src/processing/modelManifest.ts](../../src/processing/modelManifest.ts)、[src/types/session.ts](../../src/types/session.ts) |
-| [src/editor/useAnalysisWindow.ts](../../src/editor/useAnalysisWindow.ts) | [src/analysis/windowTypes.ts](../../src/analysis/windowTypes.ts)、[src/editor/analysisWindowView.ts](../../src/editor/analysisWindowView.ts)、[src/editor/editorSessionController.ts](../../src/editor/editorSessionController.ts) |
+| [src/editor/useAnalysisWindow.ts](../../src/editor/useAnalysisWindow.ts) | [src/analysis/analysisWindowView.ts](../../src/analysis/analysisWindowView.ts)、[src/analysis/windowTypes.ts](../../src/analysis/windowTypes.ts)、[src/editor/editorSessionController.ts](../../src/editor/editorSessionController.ts) |
 | [src/editor/useEditorGrid.ts](../../src/editor/useEditorGrid.ts) | [src/editor/beatSnap.ts](../../src/editor/beatSnap.ts)、[src/editor/editorDraftRepository.ts](../../src/editor/editorDraftRepository.ts)、[src/editor/pointAnnotations.ts](../../src/editor/pointAnnotations.ts)、[src/editor/rangeAnnotations.ts](../../src/editor/rangeAnnotations.ts)、[src/editor/tempoMap.ts](../../src/editor/tempoMap.ts)、[src/editor/types.ts](../../src/editor/types.ts)、另 1 项，按需核对源码 |
 | [src/editor/useEditorTrackNavigation.ts](../../src/editor/useEditorTrackNavigation.ts) | [src/audio/audioSessionService.ts](../../src/audio/audioSessionService.ts)、[src/editor/editorSessionController.ts](../../src/editor/editorSessionController.ts)、[src/editor/osu/osuTypes.ts](../../src/editor/osu/osuTypes.ts)、[src/editor/types.ts](../../src/editor/types.ts)、[src/processing/editorSeparationService.ts](../../src/processing/editorSeparationService.ts) |
 | [src/editor/useEditorViewport.ts](../../src/editor/useEditorViewport.ts) | [src/editor/timeline.ts](../../src/editor/timeline.ts)、[src/editor/types.ts](../../src/editor/types.ts)、[src/types/session.ts](../../src/types/session.ts) |

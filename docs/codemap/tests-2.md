@@ -8,6 +8,7 @@
 
 | 文件 | 本地静态引用（最多显示 6 项） |
 | --- | --- |
+| [tests/desktop/transcription-smoke.mjs](../../tests/desktop/transcription-smoke.mjs) | [scripts/lib/desktop-native-runtime.mjs](../../scripts/lib/desktop-native-runtime.mjs)、[tests/desktop/dialog-fixture.mjs](../../tests/desktop/dialog-fixture.mjs)、[tests/desktop/processing-support.mjs](../../tests/desktop/processing-support.mjs)、[tests/support/sound-example-flow.mjs](../../tests/support/sound-example-flow.mjs) |
 | [tests/desktop/window-state.test.ts](../../tests/desktop/window-state.test.ts) | [electron/windowState.ts](../../electron/windowState.ts) |
 | [tests/docs/validate-docs.mjs](../../tests/docs/validate-docs.mjs) | [scripts/check-repo.mjs](../../scripts/check-repo.mjs)、[scripts/lib/repository.mjs](../../scripts/lib/repository.mjs) |
 | [tests/e2e/analysis-loading.spec.ts](../../tests/e2e/analysis-loading.spec.ts) | [tests/support/file-picker.ts](../../tests/support/file-picker.ts) |
@@ -107,4 +108,3 @@
 | [tests/e2e/visualizer-parameter-history.spec.ts](../../tests/e2e/visualizer-parameter-history.spec.ts) | [src/visualizer/compositionTypes.ts](../../src/visualizer/compositionTypes.ts)、[tests/support/file-picker.ts](../../tests/support/file-picker.ts)、[tests/support/project-actions.ts](../../tests/support/project-actions.ts) |
 | [tests/e2e/visualizer-pixels.spec.ts](../../tests/e2e/visualizer-pixels.spec.ts) | [tests/support/file-picker.ts](../../tests/support/file-picker.ts) |
 | [tests/e2e/visualizer-point-lines.spec.ts](../../tests/e2e/visualizer-point-lines.spec.ts) | [src/editor/projectCodec.ts](../../src/editor/projectCodec.ts)、[src/visualizer/compositionTypes.ts](../../src/visualizer/compositionTypes.ts)、[src/visualizer/elementRegistry.ts](../../src/visualizer/elementRegistry.ts)、[tests/support/file-picker.ts](../../tests/support/file-picker.ts)、[tests/support/project-actions.ts](../../tests/support/project-actions.ts)、[tests/support/visualizer-assets.mjs](../../tests/support/visualizer-assets.mjs) |
-| [tests/e2e/visualizer-preset-export.spec.ts](../../tests/e2e/visualizer-preset-export.spec.ts) | [src/visualizer/compositionTypes.ts](../../src/visualizer/compositionTypes.ts)、[src/visualizer/elementRegistry.ts](../../src/visualizer/elementRegistry.ts)、[tests/setup-visualizer-resources.ts](../../tests/setup-visualizer-resources.ts)、[tests/support/file-picker.ts](../../tests/support/file-picker.ts)、[tests/support/project-actions.ts](../../tests/support/project-actions.ts) |

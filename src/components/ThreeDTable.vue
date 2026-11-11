@@ -137,6 +137,7 @@ import {
     exactComponent,
     type ComplexView,
 } from '../analysis/threeDData';
+import { AnalysisWindowView } from '../analysis/analysisWindowView';
 import { ThreeDRenderer } from './analyzer/threeDRenderer';
 import type { AnalysisSeries, FeatureId, AnalysisCoordinatorState, AnalysisCursorValueResult } from '../analysis/types';
 import type { PersistedTimelineViewport } from '../types/session';
@@ -151,6 +152,8 @@ const props = defineProps<{
     exactValue: AnalysisCursorValueResult | null;
     analysisState: AnalysisCoordinatorState;
     panelHeight?: number;
+    analysisGeneration?: number;
+    requestWindow?: import('../analysis/windowTypes').AnalysisWindowRequester;
 }>();
 const emit = defineEmits<{ seek: [seconds: number]; zoom: [factor: number, anchorSeconds: number] }>();
 const definition = computed(() => FEATURE_REGISTRY[props.featureId]);
@@ -186,6 +189,26 @@ const tickLabel = (index: number) =>
           : props.featureId === 'loudness' && index === 24
             ? '总计'
             : String(index);
+let detail: import('../analysis/windowTypes').AnalysisWindowSeries | null = null;
+let settleTimer: ReturnType<typeof setTimeout> | null = null;
+const windowView = new AnalysisWindowView(
+    (input, signal) => props.requestWindow?.(input, signal) ?? Promise.resolve(null),
+    series => {
+        if (detail !== series) {
+            detail = series;
+            if (!disposed && renderer) void rebuild();
+        }
+    },
+);
+const scheduleDetail = () => {
+    revision++;
+    if (settleTimer) clearTimeout(settleTimer);
+    if (disposed) return;
+    settleTimer = setTimeout(() => {
+        settleTimer = null;
+        void rebuild();
+    }, 150);
+};
 let renderer: ThreeDRenderer | null = null,
     observer: ResizeObserver | null = null;
 let revision = 0,
@@ -208,7 +231,10 @@ const resize = () => {
         chartHeight.value = Math.max(220, Math.min(560, props.panelHeight - container.value.offsetTop - 40));
     }
     const rect = stage.value?.getBoundingClientRect();
-    if (rect?.width && rect.height) renderer?.resize(rect.width, rect.height, window.devicePixelRatio || 1);
+    if (rect?.width && rect.height) {
+        renderer?.resize(rect.width, rect.height, window.devicePixelRatio || 1);
+        scheduleDetail();
+    }
 };
 const updateCursor = () =>
     renderer?.setCursor(
@@ -237,7 +263,25 @@ const rebuild = async () => {
     building.value = true;
     const cancelled = () => disposed || token !== revision || renderer !== current;
     try {
+        const visible = current.visibleTimeRange(props.durationSeconds);
+        if (container.value) {
+            container.value.dataset.visibleStart = String(visible?.startSeconds ?? '');
+            container.value.dataset.visibleEnd = String(visible?.endSeconds ?? '');
+        }
+        windowView.update({
+            series,
+            generation: props.analysisGeneration ?? 0,
+            startSeconds: visible?.startSeconds ?? 0,
+            endSeconds: visible?.endSeconds ?? 0,
+            durationSeconds: props.durationSeconds,
+            sampleRate: props.sampleRate ?? 0,
+            pixels: Math.min(512, stage.value?.clientWidth ?? 512),
+            enabled: !!visible && !!props.requestWindow && props.analysisState === 'ready',
+        });
         const grid = await buildThreeDGrid(series, props.viewport, {
+            durationSeconds: props.durationSeconds,
+            visible,
+            detail,
             view: complexView.value,
             selected: slice.value ? selected.value : null,
             cancelled,
@@ -265,7 +309,15 @@ const rebuild = async () => {
                 axisTicks,
             );
         } else current.clear();
-        if (!cancelled()) updateCursor();
+        if (!cancelled()) {
+            if (grid && container.value) {
+                container.value.dataset.gridStart = String(grid.times[0]);
+                container.value.dataset.gridEnd = String(grid.times[grid.times.length - 1]);
+                container.value.dataset.columns = String(grid.times.length);
+                container.value.dataset.detailStep = String(detail?.sampleStepSeconds ?? series.sampleStepSeconds);
+            }
+            updateCursor();
+        }
     } catch (error) {
         if (!cancelled()) fail(error instanceof Error ? error.message : '3D 图表绘制失败。');
     } finally {
@@ -310,6 +362,7 @@ const toggleSlice = () => {
 const zoomCamera = (factor: number) => {
     cameraZoom.value = Math.max(0.5, Math.min(3, cameraZoom.value * factor));
     renderer?.zoom(factor);
+    scheduleDetail();
 };
 const selectIndex = (value: number) => {
     if (Number.isFinite(value)) selected.value = Math.max(0, Math.min(count.value - 1, Math.round(value)));
@@ -373,6 +426,7 @@ const movePointer = (event: PointerEvent) => {
     if (pointer.moved) {
         if (pointer.button === 0) renderer?.pan(event.clientX - pointer.x, event.clientY - pointer.y);
         else renderer?.rotate(event.clientX - pointer.x, event.clientY - pointer.y);
+        scheduleDetail();
     }
     pointer.x = event.clientX;
     pointer.y = event.clientY;
@@ -427,6 +481,8 @@ const blur = () => {
 watch(
     () => [
         props.series,
+        props.analysisGeneration,
+        props.analysisState,
         props.viewport.startSeconds,
         props.viewport.endSeconds,
         slice.value,
@@ -435,7 +491,7 @@ watch(
     ],
     () => {
         renderer?.setViewport(props.viewport);
-        void rebuild();
+        scheduleDetail();
     },
 );
 watch(() => [props.cursorSeconds, props.exactValue, selectedLabel.value], updateCursor);
@@ -454,6 +510,8 @@ onMounted(() => {
 onBeforeUnmount(() => {
     disposed = true;
     revision++;
+    if (settleTimer) clearTimeout(settleTimer);
+    windowView.dispose();
     blur();
     observer?.disconnect();
     renderer?.dispose();
