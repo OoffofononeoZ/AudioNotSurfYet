@@ -37,7 +37,7 @@
 | [src/editor/routeRecovery.ts](../../src/editor/routeRecovery.ts) | [src/types/audio.ts](../../src/types/audio.ts) |
 | [src/editor/tapTempo.ts](../../src/editor/tapTempo.ts) | — |
 | [src/editor/tempoMap.ts](../../src/editor/tempoMap.ts) | [src/editor/beatSnap.ts](../../src/editor/beatSnap.ts)、[src/editor/editorConfig.ts](../../src/editor/editorConfig.ts)、[src/editor/projectCodec.ts](../../src/editor/projectCodec.ts)、[src/editor/types.ts](../../src/editor/types.ts)、[src/types/session.ts](../../src/types/session.ts) |
-| [src/editor/timeline.ts](../../src/editor/timeline.ts) | [src/analysis/timelineViewport.ts](../../src/analysis/timelineViewport.ts)、[src/types/session.ts](../../src/types/session.ts) |
+| [src/editor/timeline.ts](../../src/editor/timeline.ts) | [src/analysis/timelineViewport.ts](../../src/analysis/timelineViewport.ts)、[src/analysis/waveformCanvas.ts](../../src/analysis/waveformCanvas.ts)、[src/types/session.ts](../../src/types/session.ts) |
 | [src/editor/trackChangeApproval.ts](../../src/editor/trackChangeApproval.ts) | [src/editor/types.ts](../../src/editor/types.ts) |
 | [src/editor/types.ts](../../src/editor/types.ts) | [src/analysis/types.ts](../../src/analysis/types.ts)、[src/processing/modelManifest.ts](../../src/processing/modelManifest.ts)、[src/types/session.ts](../../src/types/session.ts) |
 | [src/editor/useAnalysisWindow.ts](../../src/editor/useAnalysisWindow.ts) | [src/analysis/analysisWindowView.ts](../../src/analysis/analysisWindowView.ts)、[src/analysis/windowTypes.ts](../../src/analysis/windowTypes.ts)、[src/editor/editorSessionController.ts](../../src/editor/editorSessionController.ts) |

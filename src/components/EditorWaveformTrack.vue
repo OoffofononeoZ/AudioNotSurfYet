@@ -79,6 +79,7 @@ import type { EditorProjectV2 } from '../editor/types';
 import type { PlaybackSnapshot } from '../types/audio';
 import type { PersistedTimelineViewport } from '../types/session';
 import type { RenderAnalysisSeries } from '../analysis/windowTypes';
+import { drawWaveformColumns } from '../analysis/waveformCanvas';
 import { waveformPeak } from '../analysis/plotPeaks';
 import { plotColumns } from '../analysis/renderGeometry';
 import { useAudioSessionService } from '../audio/audioSessionService';
@@ -88,7 +89,6 @@ import { divisorColour, divisorHeight } from '../editor/beatSnap';
 import { EDITOR_CONTEXT_PAN_THRESHOLD_PX } from '../editor/editorConfig';
 import {
     centerEditorViewport,
-    editorWaveformVerticalGeometry,
     editorTimeToX,
     editorXToTime,
     panEditorViewportByPixels,
@@ -354,22 +354,10 @@ const drawStatic = () => {
     const series = props.series;
     if (series?.payload.kind === 'waveform-envelope') {
         const columns = plotColumns(series, viewport.value, size.width, size.dpr, durationSeconds.value);
-        const { centerY, amplitude } = editorWaveformVerticalGeometry(size.height);
-        waveform.beginPath();
-        for (const column of columns) {
-            const x = (column.left + column.right) / 2;
-            const value = waveformPeak(series.payload, column.startIndex, column.endIndex);
-            waveform.moveTo(x, centerY - value.max * amplitude);
-            waveform.lineTo(x, centerY - value.min * amplitude);
-        }
-        waveform.strokeStyle = '#65ffa9';
-        waveform.globalAlpha = 0.9;
-        waveform.lineWidth = Math.max(
-            1 / size.dpr,
-            (size.width * series.sampleStepSeconds) / (viewport.value.endSeconds - viewport.value.startSeconds),
+        const payload = series.payload;
+        drawWaveformColumns(waveform, columns, size.height, size.dpr, column =>
+            waveformPeak(payload, column.startIndex, column.endIndex),
         );
-        waveform.stroke();
-        waveform.globalAlpha = 1;
     }
     grid.clearRect(0, 0, size.width, size.height);
     for (const line of generateTempoGrid(props.project.tempoMap, durationSeconds.value, viewport.value, size.width)) {

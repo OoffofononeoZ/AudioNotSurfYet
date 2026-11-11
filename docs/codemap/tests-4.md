@@ -8,6 +8,8 @@
 
 | 文件 | 本地静态引用（最多显示 6 项） |
 | --- | --- |
+| [tests/scripts/run-m11-eval.mjs](../../tests/scripts/run-m11-eval.mjs) | — |
+| [tests/scripts/run-m12-eval.mjs](../../tests/scripts/run-m12-eval.mjs) | — |
 | [tests/scripts/run-m13-eval.mjs](../../tests/scripts/run-m13-eval.mjs) | — |
 | [tests/scripts/run-m14-eval.mjs](../../tests/scripts/run-m14-eval.mjs) | — |
 | [tests/scripts/run-m3-eval.mjs](../../tests/scripts/run-m3-eval.mjs) | — |
@@ -71,6 +73,7 @@
 | [tests/support/visualizer-media-alignment.mjs](../../tests/support/visualizer-media-alignment.mjs) | — |
 | [tests/support/visualizer-output-sync.ts](../../tests/support/visualizer-output-sync.ts) | — |
 | [tests/support/visualizer-video-timeline.mjs](../../tests/support/visualizer-video-timeline.mjs) | — |
+| [tests/support/waveform-pixels.mjs](../../tests/support/waveform-pixels.mjs) | — |
 | [tests/tools/code-size.test.mjs](../../tests/tools/code-size.test.mjs) | [scripts/check-repo.mjs](../../scripts/check-repo.mjs)、[scripts/codemap.mjs](../../scripts/codemap.mjs)、[scripts/install-project-skills.mjs](../../scripts/install-project-skills.mjs)、[scripts/lib/code-size-policy.mjs](../../scripts/lib/code-size-policy.mjs)、[scripts/lib/repository.mjs](../../scripts/lib/repository.mjs)、[tests/tools/fixture.mjs](../../tests/tools/fixture.mjs) |
 | [tests/tools/desktop-assets.test.mjs](../../tests/tools/desktop-assets.test.mjs) | [scripts/lib/desktop-assets.mjs](../../scripts/lib/desktop-assets.mjs)、[tests/tools/fixture.mjs](../../tests/tools/fixture.mjs) |
 | [tests/tools/desktop-installer.test.mjs](../../tests/tools/desktop-installer.test.mjs) | [scripts/lib/desktop-package.mjs](../../scripts/lib/desktop-package.mjs)、[tests/desktop/install-support.mjs](../../tests/desktop/install-support.mjs) |
@@ -105,6 +108,3 @@
 | [tests/transcription/drum-comparison.worker.ts](../../tests/transcription/drum-comparison.worker.ts) | [src/transcription/drumBatchModel.ts](../../src/transcription/drumBatchModel.ts)、[src/transcription/drumOptions.ts](../../src/transcription/drumOptions.ts)、[src/transcription/monoResampler.ts](../../src/transcription/monoResampler.ts) |
 | [tests/transcription/drum-gpu-guard.test.ts](../../tests/transcription/drum-gpu-guard.test.ts) | [src/transcription/drumGpuGuard.ts](../../src/transcription/drumGpuGuard.ts) |
 | [tests/transcription/drum-vocabulary.test.ts](../../tests/transcription/drum-vocabulary.test.ts) | [src/transcription/drumVocabulary.ts](../../src/transcription/drumVocabulary.ts) |
-| [tests/transcription/drum-windows.test.ts](../../tests/transcription/drum-windows.test.ts) | [src/transcription/drumBatchModel.ts](../../src/transcription/drumBatchModel.ts)、[src/transcription/drumTranscription.ts](../../src/transcription/drumTranscription.ts)、[src/transcription/drumWindows.ts](../../src/transcription/drumWindows.ts) |
-| [tests/transcription/editor-service.test.ts](../../tests/transcription/editor-service.test.ts) | [src/editor/projectCodec.ts](../../src/editor/projectCodec.ts)、[src/editor/types.ts](../../src/editor/types.ts)、[src/processing/editorProcessingGate.ts](../../src/processing/editorProcessingGate.ts)、[src/processing/editorSeparationService.ts](../../src/processing/editorSeparationService.ts)、[src/processing/modelManifest.ts](../../src/processing/modelManifest.ts)、[src/transcription/candidateTypes.ts](../../src/transcription/candidateTypes.ts)、另 5 项，按需核对源码 |
-| [tests/transcription/example-cache-apply.test.ts](../../tests/transcription/example-cache-apply.test.ts) | [src/editor/projectCodec.ts](../../src/editor/projectCodec.ts)、[src/transcription/acousticIndex.ts](../../src/transcription/acousticIndex.ts)、[src/transcription/examples/applyMatches.ts](../../src/transcription/examples/applyMatches.ts)、[src/transcription/examples/repository.ts](../../src/transcription/examples/repository.ts)、[src/transcription/examples/types.ts](../../src/transcription/examples/types.ts) |

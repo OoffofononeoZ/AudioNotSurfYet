@@ -303,6 +303,8 @@ Web/Electron 改动先核对[双端阶段和验证要求](../docs/context/deskto
 
 ## Editor 图表细节专项
 
+DEC-116 波形：`npx vitest run tests/analysis/waveform-renderer.test.ts tests/editor/analysis-render-geometry.test.ts` 覆盖标量镜像/正负方向、峰值、静音、单样本、buffer 包络与真实时间单元。`npx playwright test tests/e2e/analysis-waveform-style.spec.ts --project=chrome --project=edge --workers=1` 检查全部 15 项、390/1280/1920 和共享叠加图；像素镜像测量先扣除渐变背景，避免把抗锯齿覆盖差异当作几何错误。`test:desktop:analyzer` 与 `test:desktop:editor-timeline` 补实际 ASAR 的 RMS/有符号/buffer 展示，截图留在各自 run。
+
 `npx vitest run tests/worker/window-analysis.test.ts tests/analysis/window-requests.test.ts tests/editor/analysis-window-view.test.ts tests/editor/analysis-render-geometry.test.ts` 覆盖真实帧／PCM 峰值、时间坐标、防抖、预取及 stale／取消。
 
 先运行 `npm run fixtures:e2:golden`，再运行 `npx playwright test tests/e2e/editor-analysis-detail.spec.ts --project=chrome --project=edge --workers=1`，检查图像内容的 15% 对齐、两处波形细化、连续缩放请求合并、播放预取、原生精度限制、高 DPR／响应式、迟到结果和刷新恢复。相邻图表类型与几何回归分别见 `e4-editor.spec.ts`、`editor-marker-redesign.spec.ts`；不据此重开历史 readiness。

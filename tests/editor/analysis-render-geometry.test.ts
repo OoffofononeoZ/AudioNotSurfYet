@@ -178,6 +178,7 @@ test.each([
                 (_, name: string) =>
                 (...args: number[]) => {
                     calls.push({ name, args });
+                    if (name === 'createLinearGradient') return { addColorStop() {} };
                 },
         },
     ) as CanvasRenderingContext2D;

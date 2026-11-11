@@ -2,6 +2,7 @@ import { cursorSampleIndex, scalarPlotDomain, signedVectorMaximum, vectorAt, vis
 import { timeToCanvasX } from './timelineViewport';
 import { plotColumns, plotTimeX, sampleTime } from './renderGeometry';
 import { payloadMaximum, waveformPeak } from './plotPeaks';
+import { drawWaveformBackdrop, drawWaveformColumns } from './waveformCanvas';
 import { drawWindowRaster } from './windowRaster';
 import { drawWallpaperHeatmap, drawWallpaperCursor } from './wallpaperCanvas';
 import type { AnalysisCursorValueResult, FeatureDefinition } from './types';
@@ -80,28 +81,29 @@ const drawScalar = (request: EditorRenderRequest, context: CanvasRenderingContex
         throw new Error('标量数据形态与 renderer 不匹配。');
     }
     const { width, height } = size(request);
-    const range = visibleSampleRange(series, request.viewport);
-    const values = series.payload.values.subarray(range.startIndex, range.endIndex);
-    const domain = scalarPlotDomain(values, request.feature.range);
-    const toY = (value: number) => height - 6 - ((value - domain.min) / (domain.max - domain.min)) * (height - 12);
-    if (request.feature.range.signed) {
-        context.strokeStyle = 'rgba(248, 255, 135, 0.45)';
-        context.beginPath();
-        context.moveTo(0, toY(0) + 0.5);
-        context.lineTo(width, toY(0) + 0.5);
-        context.stroke();
-    }
-    context.strokeStyle = '#7dffb3';
-    context.lineWidth = 2;
-    context.beginPath();
-    values.forEach((value, localIndex) => {
-        const sampleIndex = range.startIndex + localIndex;
-        const x = plotTimeX(sampleTime(series, sampleIndex), request.viewport, width);
-        const y = toY(value);
-        if (localIndex === 0) context.moveTo(x, y);
-        else context.lineTo(x, y);
-    });
-    context.stroke();
+    const columns = plotColumns(series, request.viewport, width, request.devicePixelRatio, request.durationSeconds);
+    const values = series.payload.values;
+    let maximum = request.feature.range.max ?? 0;
+    if (request.feature.range.max === undefined)
+        for (const column of columns)
+            for (let i = column.startIndex; i < column.endIndex; i++) maximum = Math.max(maximum, Math.abs(values[i]!));
+    maximum = Math.max(maximum, 1e-6);
+    drawWaveformColumns(
+        context,
+        columns,
+        height,
+        request.devicePixelRatio,
+        column => {
+            let low = 0,
+                high = 0;
+            for (let i = column.startIndex; i < column.endIndex; i++) {
+                low = Math.min(low, values[i]!);
+                high = Math.max(high, values[i]!);
+            }
+            return request.feature.range.signed ? { min: low, max: high } : { min: -high, max: high };
+        },
+        maximum,
+    );
 };
 
 const heatColor = (value: number, maximum: number): string => {
@@ -165,24 +167,11 @@ const drawWaveform = (request: EditorRenderRequest, context: CanvasRenderingCont
         throw new Error('波形数据形态与 renderer 不匹配。');
     }
     const { width, height } = size(request);
+    const payload = series.payload;
     const columns = plotColumns(series, request.viewport, width, request.devicePixelRatio, request.durationSeconds);
-    const toY = (value: number) => height / 2 - value * (height / 2 - 7);
-    context.strokeStyle = 'rgba(248, 255, 135, 0.45)';
-    context.beginPath();
-    context.moveTo(0, Math.round(height / 2) + 0.5);
-    context.lineTo(width, Math.round(height / 2) + 0.5);
-    context.stroke();
-    context.strokeStyle = '#7dffb3';
-    context.lineWidth = 1.5;
-    for (const column of columns) {
-        const envelope = waveformPeak(series.payload, column.startIndex, column.endIndex);
-        const x = (column.left + column.right) / 2;
-        context.lineWidth = column.right - column.left;
-        context.beginPath();
-        context.moveTo(x, toY(envelope.max));
-        context.lineTo(x, toY(envelope.min));
-        context.stroke();
-    }
+    drawWaveformColumns(context, columns, height, request.devicePixelRatio, column =>
+        waveformPeak(payload, column.startIndex, column.endIndex),
+    );
 };
 
 const drawLoudness = (request: EditorRenderRequest, context: CanvasRenderingContext2D) => {
@@ -411,29 +400,6 @@ const drawLoudnessCursor = (
     });
 };
 
-const drawBufferCursor = (
-    context: CanvasRenderingContext2D,
-    width: number,
-    height: number,
-    values: readonly number[],
-) => {
-    const top = Math.floor(height * 0.7);
-    const bottom = height - 4;
-    const baseline = (top + bottom) / 2;
-    const amplitude = (bottom - top) / 2 - 2;
-    context.fillStyle = 'rgba(2, 8, 5, 0.86)';
-    context.fillRect(0, top, width, bottom - top + 1);
-    context.strokeStyle = '#7dffb3';
-    context.beginPath();
-    values.forEach((value, index) => {
-        const x = (index / Math.max(1, values.length - 1)) * width;
-        const y = baseline - Math.max(-1, Math.min(1, value)) * amplitude;
-        if (index === 0) context.moveTo(x, y);
-        else context.lineTo(x, y);
-    });
-    context.stroke();
-};
-
 const drawMfccCursor = (
     context: CanvasRenderingContext2D,
     width: number,
@@ -460,7 +426,9 @@ const drawMfccCursor = (
 export const analysisCanvasRenderer: EditorRendererAdapter = {
     drawStatic(request, context) {
         const { width, height } = size(request);
-        drawGrid(context, width, height);
+        if (request.feature.outputShape === 'scalar' || request.feature.outputShape === 'waveform')
+            drawWaveformBackdrop(context, width, height);
+        else drawGrid(context, width, height);
         if (!request.series) return;
         const left = Math.max(0, plotTimeX(0, request.viewport, width));
         const right = Math.min(width, plotTimeX(request.durationSeconds ?? Infinity, request.viewport, width));
@@ -503,7 +471,7 @@ export const analysisCanvasRenderer: EditorRendererAdapter = {
         context.moveTo(x + 0.5, 0);
         context.lineTo(x + 0.5, height);
         context.stroke();
-        if (request.feature.outputShape === 'scalar') return;
+        if (request.feature.outputShape === 'scalar' || request.feature.outputShape === 'waveform') return;
         if (request.feature.id === 'wallpaperEngineSpectrum') {
             drawWallpaperCursor(request, cursorSeconds, exactValue, context);
             return;
@@ -515,10 +483,6 @@ export const analysisCanvasRenderer: EditorRendererAdapter = {
         if (request.feature.id === 'complexSpectrum') return;
         const values = cursorVector(request, cursorSeconds, exactValue);
         if (values.length === 0) return;
-        if (request.feature.id === 'buffer') {
-            drawBufferCursor(context, width, height, values);
-            return;
-        }
         if (request.feature.id === 'mfcc') {
             drawMfccCursor(context, width, height, values);
             return;

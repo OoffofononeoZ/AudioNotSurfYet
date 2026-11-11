@@ -10,6 +10,7 @@ import {
     cleanupNativeTree,
 } from '../../scripts/lib/desktop-native-runtime.mjs';
 import { installDialogFixture, queueOpen } from './dialog-fixture.mjs';
+import { verifyWaveformPixels } from '../support/waveform-pixels.mjs';
 
 const root = fileURLToPath(new URL('../../', import.meta.url));
 const native = await createNativeRun('analyzer');
@@ -358,6 +359,30 @@ try {
         .toBeGreaterThan(windowEnd);
     await screenshot('analyzer-full-song-pan.png');
     result.checks.fullSongPanAndNativeDetail = 'passed';
+    await page.locator('[data-source="original"]').click();
+    for (const id of ['rms', 'spectralSlope', 'buffer']) {
+        const expand = page.locator(`.original-list [data-feature-id="${id}"] .toggle-card`);
+        if (await expand.count()) await expand.click();
+        const selector = `.pinned-panel [data-feature-id="${id}"] .plot`;
+        await expect(page.locator(`${selector} .plot-message`)).toHaveCount(0, { timeout: 30000 });
+        await page.locator(selector).scrollIntoViewIfNeeded();
+        const plotBox = await page.locator(selector).boundingBox();
+        // The preceding 3D test leaves the shared window inside the fixture's opening silence.
+        for (let i = 0; i < 40; i++)
+            await page.locator(selector).dispatchEvent('wheel', {
+                deltaY: 120,
+                clientX: plotBox.x + plotBox.width / 2,
+                bubbles: true,
+                cancelable: true,
+            });
+        await expect(page.locator(selector)).toHaveAttribute('data-zoom', '1');
+        await expect(async () => {
+            await verifyWaveformPixels(page, `${selector} canvas`, id === 'rms');
+        }).toPass({ timeout: 10000 });
+        assert.equal(await page.locator(selector).evaluate(element => getComputedStyle(element).borderRadius), '0px');
+        await screenshot(`waveform-${id}.png`);
+    }
+    result.checks.sharedScalarAndBufferWaveforms = 'passed';
     assert.deepEqual(errors, []);
     assert.deepEqual(consoleErrors, []);
     assert.deepEqual(requests, []);

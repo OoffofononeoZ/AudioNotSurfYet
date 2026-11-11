@@ -2,7 +2,10 @@
     <div
         ref="plotElement"
         class="plot"
-        :class="{ 'plot-structured': isStructuredFeature }"
+        :class="{
+            'plot-structured': isStructuredFeature,
+            '!border-0 !rounded-none': definition.outputShape === 'scalar' || definition.outputShape === 'waveform',
+        }"
         :data-zoom="viewport.zoom"
         :data-start="viewport.startSeconds"
         :data-end="viewport.endSeconds"

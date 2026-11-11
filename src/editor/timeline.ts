@@ -1,44 +1,28 @@
-import {
-    canvasXToTime,
-    clamp,
-    timeToCanvasX,
-} from '../analysis/timelineViewport';
+import { canvasXToTime, clamp, timeToCanvasX } from '../analysis/timelineViewport';
 import type { PersistedTimelineViewport } from '../types/session';
 
-export const EDITOR_WAVEFORM_VERTICAL_PADDING_PX = 6;
-
-export interface EditorWaveformVerticalGeometry {
-    centerY: number;
-    amplitude: number;
-    padding: number;
-}
-
-export const editorWaveformVerticalGeometry = (
-    height: number,
-): EditorWaveformVerticalGeometry => {
-    const safeHeight = Number.isFinite(height) ? Math.max(0, height) : 0;
-    return {
-        centerY: safeHeight / 2,
-        amplitude: Math.max(
-            0,
-            (safeHeight - EDITOR_WAVEFORM_VERTICAL_PADDING_PX * 2) / 2,
-        ),
-        padding: EDITOR_WAVEFORM_VERTICAL_PADDING_PX,
-    };
-};
-
 export {
-    canvasXToTime as editorXToTime,
-    timeToCanvasX as editorTimeToX,
-};
+    WAVEFORM_VERTICAL_PADDING_PX as EDITOR_WAVEFORM_VERTICAL_PADDING_PX,
+    waveformVerticalGeometry as editorWaveformVerticalGeometry,
+    type WaveformVerticalGeometry as EditorWaveformVerticalGeometry,
+} from '../analysis/waveformCanvas';
+
+export { canvasXToTime as editorXToTime, timeToCanvasX as editorTimeToX };
 
 /** Waveform viewport only; marker tracks use MarkerTimeView. */
-export function normalizeEditorViewport(viewport: PersistedTimelineViewport | null, durationSeconds: number): PersistedTimelineViewport {
+export function normalizeEditorViewport(
+    viewport: PersistedTimelineViewport | null,
+    durationSeconds: number,
+): PersistedTimelineViewport {
     const duration = Math.max(0, Number.isFinite(durationSeconds) ? durationSeconds : 0);
     if (!duration) return { startSeconds: 0, endSeconds: 1, zoom: 1 };
     const zoom = Math.max(1, Number.isFinite(viewport?.zoom) ? viewport!.zoom : 1);
     const span = clamp(duration / zoom, Math.min(duration, 1e-6), duration);
-    const startSeconds = clamp(Number.isFinite(viewport?.startSeconds) ? viewport!.startSeconds : 0, 0, duration - span);
+    const startSeconds = clamp(
+        Number.isFinite(viewport?.startSeconds) ? viewport!.startSeconds : 0,
+        0,
+        duration - span,
+    );
     return { startSeconds, endSeconds: startSeconds + span, zoom: duration / span };
 }
 
@@ -52,8 +36,12 @@ export const zoomEditorViewportAtX = (
 ): PersistedTimelineViewport => {
     const current = normalizeEditorViewport(viewport, durationSeconds);
     if (durationSeconds <= 0) return current;
-    const span = clamp(durationSeconds / Math.max(1, nextZoom), Math.min(durationSeconds, minimumSpan), durationSeconds);
-    const ratio = width > 0 ? clamp(pointerX / width, 0, 1) : .5;
+    const span = clamp(
+        durationSeconds / Math.max(1, nextZoom),
+        Math.min(durationSeconds, minimumSpan),
+        durationSeconds,
+    );
+    const ratio = width > 0 ? clamp(pointerX / width, 0, 1) : 0.5;
     const anchor = canvasXToTime(pointerX, current, width);
     const startSeconds = clamp(anchor - span * ratio, 0, durationSeconds - span);
     return { startSeconds, endSeconds: startSeconds + span, zoom: durationSeconds / span };
@@ -70,12 +58,8 @@ export const panEditorViewportByPixels = (
         return normalized;
     }
     const span = normalized.endSeconds - normalized.startSeconds;
-    const shift = -deltaPixels / width * span;
-    const startSeconds = clamp(
-        normalized.startSeconds + shift,
-        0,
-        Math.max(0, durationSeconds - span),
-    );
+    const shift = (-deltaPixels / width) * span;
+    const startSeconds = clamp(normalized.startSeconds + shift, 0, Math.max(0, durationSeconds - span));
     return {
         ...normalized,
         startSeconds,
@@ -89,11 +73,7 @@ export const panEditorViewportByRatio = (
 ): PersistedTimelineViewport => {
     const normalized = normalizeEditorViewport(viewport, durationSeconds);
     const span = normalized.endSeconds - normalized.startSeconds;
-    const startSeconds = clamp(
-        normalized.startSeconds + span * ratio,
-        0,
-        Math.max(0, durationSeconds - span),
-    );
+    const startSeconds = clamp(normalized.startSeconds + span * ratio, 0, Math.max(0, durationSeconds - span));
     return {
         ...normalized,
         startSeconds,
@@ -108,11 +88,7 @@ export const centerEditorViewport = (
 ): PersistedTimelineViewport => {
     const normalized = normalizeEditorViewport(viewport, durationSeconds);
     const span = normalized.endSeconds - normalized.startSeconds;
-    const startSeconds = clamp(
-        centerSeconds - span / 2,
-        0,
-        Math.max(0, durationSeconds - span),
-    );
+    const startSeconds = clamp(centerSeconds - span / 2, 0, Math.max(0, durationSeconds - span));
     return {
         ...normalized,
         startSeconds,

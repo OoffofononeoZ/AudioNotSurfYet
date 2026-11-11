@@ -17,6 +17,7 @@ import {
     verifyOffscreenMarkerBlocks,
 } from '../support/editor-timeline-scenario.mjs';
 import { verifyMarkerInteractions } from '../support/editor-marker-interaction-scenario.mjs';
+import { verifyWaveformPixels } from '../support/waveform-pixels.mjs';
 
 const root = fileURLToPath(new URL('../../', import.meta.url));
 const native = await createNativeRun('editor-timeline');
@@ -93,6 +94,24 @@ try {
     await expect(page.getByTestId('lock-editor-timeline')).toHaveAttribute('aria-pressed', 'false');
     await verifyOffscreenMarkerBlocks(page);
     await verifyMarkerInteractions(page, name => page.screenshot({ path: path.join(output, `${name}.png`) }));
+    await resize(1280, 1000);
+    await page.getByTestId('editor-timeline').press('Home');
+    for (const id of ['rms', 'spectralSlope', 'buffer']) {
+        await page.getByTestId('editor-overlay-menu-toggle').click();
+        await page.getByTestId('editor-overlay-feature-menu').locator('[data-source="original"]').click();
+        await page.getByTestId('editor-overlay-feature-menu').locator(`[data-feature-id="${id}"]`).click();
+        await expect(page.getByTestId('editor-analysis-overlay-panel')).toHaveAttribute('data-analysis-state', 'ready');
+        await expect(async () => {
+            await verifyWaveformPixels(
+                page,
+                'canvas.overlay-canvas.static',
+                id === 'rms',
+                '[data-testid="editor-analysis-overlay-panel"]',
+            );
+        }).toPass({ timeout: 10000 });
+        await page.screenshot({ path: path.join(output, `waveform-overlay-${id}.png`) });
+    }
+    result.waveformOverlay = 'passed';
     assert.deepEqual(errors, []);
     result.status = 'passed';
     result.versions = await app.evaluate(() => process.versions);
